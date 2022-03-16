@@ -4,7 +4,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata>
 		<id>Jakar.Extensions.Xamarin.Forms</id>
-		<version>5.1.0.23-beta</version>
+		<version>5.1.0</version>
 		<title>Base library for all others in Xamarin.Forms, and extensions to help with Xamarin.Forms development.</title>
 		<authors>Tyler Stegmaier</authors>
 		<owners>Jakar510/Jakar</owners>
@@ -48,7 +48,7 @@
 				            version="13.0.1" />
 
 				<dependency id="Jakar.Extensions"
-				            version="5.1.0.26-beta" />
+				            version="5.1.0" />
 
 				<dependency id="Acr.UserDialogs"
 				            version="7.2.0.534" />
@@ -84,7 +84,7 @@
 				            version="13.0.1" />
 
 				<dependency id="Jakar.Extensions"
-				            version="5.1.0.26-beta" />
+				            version="5.1.0" />
 
 				<dependency id="Acr.UserDialogs"
 				            version="7.2.0.534" />
@@ -120,7 +120,7 @@
 				            version="13.0.1" />
 
 				<dependency id="Jakar.Extensions"
-				            version="5.1.0.26-beta" />
+				            version="5.1.0" />
 
 				<dependency id="Acr.UserDialogs"
 				            version="7.2.0.534" />
@@ -162,7 +162,7 @@
 				            version="13.0.1" />
 
 				<dependency id="Jakar.Extensions"
-				            version="5.1.0.26-beta" />
+				            version="5.1.0" />
 
 				<dependency id="Acr.UserDialogs"
 				            version="7.2.0.534" />

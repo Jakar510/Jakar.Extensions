@@ -28,7 +28,7 @@
 		            branch="master" />
 		<dependencies>
 			<group targetFramework="net6.0">
-				<dependency id="Jakar.Extensions" version="5.1.0.26-beta" />
+				<dependency id="Jakar.Extensions" version="5.1.0" />
 				<dependency id="BlazorComponentUtilities" version="1.8.0" />
 				<dependency id="BlazorPro.BlazorSize" version="6.1.1" />
 				<dependency id="PanoramicData.Blazor" version="2.0.56" />

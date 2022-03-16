@@ -9,7 +9,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nuget", "nuget", "{07C27764
 	ProjectSection(SolutionItems) = preProject
 		nuget\Jakar.Extensions.Blazor.nuspec = nuget\Jakar.Extensions.Blazor.nuspec
 		nuget\Jakar.Extensions.nuspec = nuget\Jakar.Extensions.nuspec
-		nuget\Jakar.Extensions.Servers.nuspec = nuget\Jakar.Extensions.Servers.nuspec
 		nuget\Jakar.Extensions.Xamarin.Forms.nuspec = nuget\Jakar.Extensions.Xamarin.Forms.nuspec
 		nuget\Jakar.Xml.nuspec = nuget\Jakar.Xml.nuspec
 		nuget\LICENSE.txt = nuget\LICENSE.txt
@@ -81,14 +80,6 @@ Global
 		{3DDF2DFF-288A-428B-A741-FCA0AE1CBC1A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3DDF2DFF-288A-428B-A741-FCA0AE1CBC1A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3DDF2DFF-288A-428B-A741-FCA0AE1CBC1A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D1C284ED-620A-44A0-852B-641F5432BA72}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D1C284ED-620A-44A0-852B-641F5432BA72}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D1C284ED-620A-44A0-852B-641F5432BA72}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D1C284ED-620A-44A0-852B-641F5432BA72}.Release|Any CPU.Build.0 = Release|Any CPU
-		{66B7CD2D-965C-4EA2-89F9-F29EA9426BC9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{66B7CD2D-965C-4EA2-89F9-F29EA9426BC9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{66B7CD2D-965C-4EA2-89F9-F29EA9426BC9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{66B7CD2D-965C-4EA2-89F9-F29EA9426BC9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
