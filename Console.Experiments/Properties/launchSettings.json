@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Jakar.Extensions.Experiments": {
+      "commandName": "Project",
+      "workingDirectory": "D:\\WorkSpace\\Public\\Jakar.Extensions\\Cache"
+    }
+  }
+}

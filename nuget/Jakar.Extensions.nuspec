@@ -1,0 +1,57 @@
+<?xml version="1.0"
+      encoding="utf-8"?>
+
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+	<metadata>
+		<id>Jakar.Extensions</id>
+		<version>5.1.0.26-beta</version>
+		<title>Extension Library</title>
+		<authors>Tyler Stegmaier</authors>
+		<owners>Jakar510/Jakar</owners>
+		<projectUrl>https://github.com/Jakar510/Jakar.Extensions</projectUrl>
+		<iconUrl>https://github.com/Jakar510/Jakar.Extensions/blob/master/images/icon.png</iconUrl>
+		<license type="file">LICENSE.txt</license>
+		<requireLicenseAcceptance>true</requireLicenseAcceptance>
+		<copyright>Copyright (c) 2021</copyright>
+		<icon>icon.png</icon>
+		<description>
+			Extensions to aid in development.
+		</description>
+		<releaseNotes>
+			Jakar.Extensions 5.1.0
+			Move to JetBrains.Annotations;
+		</releaseNotes>
+		<tags>Api Extension Linq Http Files Files Strings Types Languages Collections Ini</tags>
+		<language>en-US</language>
+		<repository type="Github"
+		            url="https://github.com/Jakar510/Jakar.Extensions"
+		            branch="master" />
+		<dependencies>
+			<group targetFramework="netstandard2.1">
+				<dependency id="Dapper.Contrib" version="2.0.78" />
+				<dependency id="JetBrains.Annotations" version="2021.3.0" />
+				<dependency id="Newtonsoft.Json" version="13.0.1" />
+				<dependency id="Nito.Collections.Deque" version="1.1.1" />
+				<dependency id="System.Threading.Tasks.Dataflow" version="6.0.0" />
+				<dependency id="System.Text.Encodings.Web" version="6.0.0" />
+				<dependency id="System.Collections.Immutable" version="6.0.0" />
+				<dependency id="System.ComponentModel.Annotations" version="5.0.0" />
+			</group>
+		</dependencies>
+	</metadata>
+
+	<files>
+		<file src="..\LICENSE.txt"
+		      target="" />
+
+		<file src="..\images\icon.png" />
+
+		<!-- .net standard 2.1 -->
+		<file src="../Jakar.Extensions/bin/Release/netstandard2.1/Jakar.Extensions.dll"
+		      target="lib/netstandard2.1" />
+		<file src="../Jakar.Extensions/bin/Release/netstandard2.1/Jakar.Extensions.xml"
+		      target="netstandard2.1" />
+		<file src="../Jakar.Extensions/bin/Release/netstandard2.1/Jakar.Extensions.pdb"
+		      target="lib/netstandard2.1" />
+	</files>
+</package>

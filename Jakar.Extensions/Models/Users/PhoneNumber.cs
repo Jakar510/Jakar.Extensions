@@ -1,0 +1,104 @@
+﻿// unset
+
+
+namespace Jakar.Extensions.Models.Users;
+
+
+public interface IPhoneNumber : IDataBaseID, IEquatable<IPhoneNumber>
+{
+    bool   IsPrimary { get; set; }
+    bool   IsFax     { get; set; }
+    bool   IsValid   { get; set; }
+    string Number    { get; set; }
+}
+
+
+
+[Serializable]
+public class PhoneNumber : BaseNotifyPropertyModel, IPhoneNumber
+{
+    /// <summary>
+    /// <see href="https://www.twilio.com/blog/validating-phone-numbers-effectively-with-c-and-the-net-frameworks"/>
+    /// <see href="https://countrycode.org/"/>
+    /// </summary>
+    public const string PATTERN = @"^([0-9]{1-3}))?[-. ]?\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$";
+
+    public static Regex validator = new(PATTERN, RegexOptions.Compiled, TimeSpan.FromMilliseconds(200));
+
+
+    private bool    _isPrimary;
+    private bool    _isFax;
+    private bool    _isValid;
+    private string? _number;
+
+
+    public bool IsPrimary
+    {
+        get => _isPrimary;
+        set => SetProperty(ref _isPrimary, value);
+    }
+
+
+    public bool IsFax
+    {
+        get => _isFax;
+        set => SetProperty(ref _isFax, value);
+    }
+
+
+    public bool IsValid
+    {
+        get => _isValid;
+        set => SetProperty(ref _isValid, value);
+    }
+
+
+    public string Number
+    {
+        get => _number ?? string.Empty;
+        set
+        {
+            SetProperty(ref _number, value);
+            IsValid = validator.IsMatch(value);
+        }
+    }
+
+
+    public PhoneNumber() { }
+
+    public PhoneNumber( string number, bool isPrimary, bool isFax )
+    {
+        Number    = number;
+        IsPrimary = isPrimary;
+        IsFax     = isFax;
+    }
+
+
+    public override string ToString() => Number;
+
+    public override bool Equals( object? obj )
+    {
+        if ( obj is null ) { return false; }
+
+        if ( ReferenceEquals(this, obj) ) { return true; }
+
+        if ( obj.GetType() != GetType() ) { return false; }
+
+        return Equals((PhoneNumber)obj);
+    }
+
+
+    public bool Equals( IPhoneNumber? other )
+    {
+        if ( ReferenceEquals(null, other) ) { return false; }
+
+        if ( ReferenceEquals(this, other) ) { return true; }
+
+        return Number == other.Number;
+    }
+
+    public override int GetHashCode() => HashCode.Combine(ID, IsPrimary, IsFax, Number);
+
+    public static bool operator ==( PhoneNumber? left, PhoneNumber? right ) => Equals(left, right);
+    public static bool operator !=( PhoneNumber? left, PhoneNumber? right ) => !Equals(left, right);
+}
