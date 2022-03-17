@@ -167,8 +167,7 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
             }
         }
         catch ( FormatException ) { }
-        catch ( ArgumentNullException ) { }
-        catch ( ArgumentOutOfRangeException ) { }
+        catch ( ArgumentException ) { }
 
         version = default;
         return false;
@@ -189,10 +188,20 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
         if ( string.IsNullOrWhiteSpace(value) ) { throw new ArgumentNullException(nameof(value)); }
 
         // if ( int.TryParse(value.Trim(), out int n) ) { return new AppVersion(n); }
+        try
+        {
+            var source = new List<string>(value.Split(SEPARATOR));
+            var result = new List<int>(source.Count);
 
-        IReadOnlyList<int> items = value.Split(SEPARATOR).Select(int.Parse).ToList();
+            foreach ( string item in source )
+            {
+                if ( int.TryParse(item, out int n) ) { result.Add(n); }
+                else { throw new FormatException($"Cannot convert '{item}' to an int."); }
+            }
 
-        return new AppVersion(items);
+            return new AppVersion(result);
+        }
+        catch ( Exception e ) { throw new ArgumentException($"Cannot convert '{value}' into {nameof(AppVersion)}", nameof(value), e); }
     }
 
 
