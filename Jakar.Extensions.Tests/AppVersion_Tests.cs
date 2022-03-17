@@ -21,8 +21,18 @@ public class AppVersion_Tests : Assert
 
 
     [Test]
+    [TestCase("1")]
+    [TestCase("1.0")]
+    [TestCase("1.2.3")]
+    [TestCase("1.2.3.4")]
+    [TestCase("1.2.3.4.5")]
+    [TestCase("1.2.3.4.5.6")]
+    [TestCase("0.7.0.25")]
+    public void Parse_Tests( string s ) => AppVersion.Parse(s);
+
+    [Test]
     [TestCase("", false)]
-    [TestCase("1", false)]
+    [TestCase("1", true)]
     [TestCase("1.0", true)]
     [TestCase("1.2.3", true)]
     [TestCase("1.2.3.4", true)]
@@ -31,15 +41,13 @@ public class AppVersion_Tests : Assert
     [TestCase("1.2.3.4.5.6.7", false)]
     [TestCase("1.0.0.0.0.0.0", false)]
     [TestCase("1.0.0...0.0.0", false)]
+    [TestCase("0.7.0.25", true)]
     public void TryParse_Tests( string s, bool shouldWork )
     {
-        if ( shouldWork )
+        if ( AppVersion.TryParse(s, out AppVersion? version) )
         {
-            if ( AppVersion.TryParse(s, out AppVersion? version) )
-            {
-                NotNull(version);
-                return;
-            }
+            NotNull(version);
+            return;
         }
 
         False(shouldWork);
@@ -47,7 +55,7 @@ public class AppVersion_Tests : Assert
 
     [Test]
     [TestCase("", false)]
-    [TestCase("1", false)]
+    [TestCase("1", true)]
     [TestCase("1.0", true)]
     [TestCase("1.2.3", true)]
     [TestCase("1.2.3.4", true)]
@@ -57,13 +65,10 @@ public class AppVersion_Tests : Assert
     [TestCase("1.0.0...0.0.0", false)]
     public void ToString_Tests( string s, bool shouldWork )
     {
-        if ( shouldWork )
+        if ( AppVersion.TryParse(s, out AppVersion? version) )
         {
-            if ( AppVersion.TryParse(s, out AppVersion? version) )
-            {
-                AreEqual(s, version.ToString());
-                return;
-            }
+            AreEqual(s, version.ToString());
+            return;
         }
 
         False(shouldWork);
@@ -71,7 +76,7 @@ public class AppVersion_Tests : Assert
 
     [Test]
     [TestCase("", null)]
-    [TestCase("1", null)]
+    [TestCase("1", AppVersion.Format.Singular)]
     [TestCase("1.2", AppVersion.Format.Minimal)]
     [TestCase("1.2.3", AppVersion.Format.Typical)]
     [TestCase("1.2.3.4", AppVersion.Format.Detailed)]

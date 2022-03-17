@@ -1,15 +1,19 @@
-﻿namespace Jakar.Extensions.Models;
+﻿using Jakar.Extensions.Attributes;
+
+
+namespace Jakar.Extensions.Models;
 
 
 /// <summary>
 /// See <see cref="Format"/>  for formatting details.
 /// </summary>
 [Serializable]
-[JsonObject]
-[JsonConverter(typeof(AppVersionConverter))]
+[JsonConverter(typeof(AppVersionConverter))] // AppVersionNullableConverter
 [SuppressMessage("ReSharper", "IntroduceOptionalParameters.Global")]
 [SuppressMessage("ReSharper", "ParameterTypeCanBeEnumerable.Local")]
-public readonly struct AppVersion : IComparable, IComparable<AppVersion>, IComparable<AppVersion?>, IEquatable<AppVersion?>, IEquatable<AppVersion>, IReadOnlyCollection<int>
+[SuppressMessage("ReSharper", "InconsistentNaming")]
+[SuppressMessage("ReSharper", "RedundantDefaultMemberInitializer")]
+public readonly struct AppVersion : IComparable, IComparable<AppVersion>, IComparable<AppVersion?>, IEquatable<AppVersion?>, IEquatable<AppVersion>, IReadOnlyCollection<int>, ICloneable
 {
     public enum Format
     {
@@ -46,42 +50,20 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
 
 
 
-    public int  Major         { get; init; }
-    public int? Minor         { get; init; }
-    public int? Maintenance   { get; init; }
-    public int? MajorRevision { get; init; }
-    public int? MinorRevision { get; init; }
-    public int? Build         { get; init; }
+    public readonly int  Major;
+    public readonly int? Minor         = default;
+    public readonly int? Maintenance   = default;
+    public readonly int? MajorRevision = default;
+    public readonly int? MinorRevision = default;
+    public readonly int? Build         = default;
 
 
     public AppVersion() : this(0) { }
-
-    public AppVersion( Version version )
-    {
-        Major         = version.Major;
-        Minor         = version.Minor;
-        Maintenance   = version.Revision;
-        Build         = version.Build;
-        MinorRevision = version.MinorRevision;
-        MajorRevision = version.MajorRevision;
-    }
-
     public AppVersion( int major ) : this(major, null) { }
     public AppVersion( int major, int? minor ) : this(major, minor, null) { }
     public AppVersion( int major, int? minor, int? build ) : this(major, minor, null, build) { }
-
-    public AppVersion( int major, int? minor, int? maintenance, int? build ) : this(major,
-                                                                                    minor,
-                                                                                    maintenance,
-                                                                                    null,
-                                                                                    build) { }
-
-    public AppVersion( int major, int? minor, int? maintenance, int? majorRevision, int? build ) : this(major,
-                                                                                                        minor,
-                                                                                                        maintenance,
-                                                                                                        majorRevision,
-                                                                                                        null,
-                                                                                                        build) { }
+    public AppVersion( int major, int? minor, int? maintenance, int? build ) : this(major, minor, maintenance, null, build) { }
+    public AppVersion( int major, int? minor, int? maintenance, int? majorRevision, int? build ) : this(major, minor, maintenance, majorRevision, null, build) { }
 
     public AppVersion( int major, int? minor, int? maintenance, int? majorRevision, int? minorRevision, int? build )
     {
@@ -93,45 +75,48 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
         MinorRevision = minorRevision;
     }
 
-    public AppVersion( Span<int>         items ) : this((IReadOnlyList<int>)items.ToArray()) { }
-    public AppVersion( ReadOnlySpan<int> items ) : this((IReadOnlyList<int>)items.ToArray()) { }
+    public AppVersion( Version version )
+    {
+        Major         = version.Major;
+        Minor         = version.Minor;
+        Maintenance   = version.Revision;
+        Build         = version.Build;
+        MinorRevision = version.MinorRevision;
+        MajorRevision = version.MajorRevision;
+    }
+
+    public AppVersion( in Span<int>         items ) : this(items.ToArray()) { }
+    public AppVersion( in ReadOnlySpan<int> items ) : this(items.ToArray()) { }
 
     public AppVersion( IReadOnlyList<int> items )
     {
         if ( items is null ) { throw new ArgumentNullException(nameof(items)); }
 
-        Minor         = default;
-        Maintenance   = default;
-        Build         = default;
-        MajorRevision = default;
-        MinorRevision = default;
-
-
-        switch ( items.Count )
+        switch ( (Format)items.Count )
         {
-            case (int)Format.Singular:
+            case Format.Singular:
                 Major = items[0];
                 return;
 
-            case (int)Format.Minimal:
+            case Format.Minimal:
                 Major = items[0];
                 Minor = items[1];
                 return;
 
-            case (int)Format.Typical:
+            case Format.Typical:
                 Major = items[0];
                 Minor = items[1];
                 Build = items[2];
                 return;
 
-            case (int)Format.Detailed:
+            case Format.Detailed:
                 Major       = items[0];
                 Minor       = items[1];
                 Maintenance = items[2];
                 Build       = items[3];
                 return;
 
-            case (int)Format.DetailedRevisions:
+            case Format.DetailedRevisions:
                 Major         = items[0];
                 Minor         = items[1];
                 Maintenance   = items[2];
@@ -139,7 +124,7 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
                 Build         = items[4];
                 return;
 
-            case (int)Format.Complete:
+            case Format.Complete:
                 Major         = items[0];
                 Minor         = items[1];
                 Maintenance   = items[2];
@@ -149,7 +134,7 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
                 return;
 
             default:
-                throw new ArgumentOutOfRangeException(nameof(items), @"value doesn't contain the correct amount of items.");
+                throw new ArgumentOutOfRangeException(nameof(items), items.Count, @"value doesn't contain the correct amount of items.");
         }
     }
 
@@ -171,7 +156,7 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
     /// <br/>
     /// <see langword="false"/> otherwise.
     /// </returns>
-    public static bool TryParse( string? value, [NotNullWhen(true)] out AppVersion? version )
+    public static bool TryParse( in string? value, [NotNullWhen(true)] out AppVersion? version )
     {
         try
         {
@@ -199,13 +184,12 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
     /// <exception cref="OverflowException"></exception>
     /// <exception cref="ArgumentOutOfRangeException"></exception>
     /// <returns><see cref="AppVersion"/></returns>
-    public static AppVersion Parse( string value )
+    public static AppVersion Parse( in string value )
     {
         if ( string.IsNullOrWhiteSpace(value) ) { throw new ArgumentNullException(nameof(value)); }
 
-        if ( !value.Contains(SEPARATOR) ) { throw new FormatException($"value \"{value}\" doesn't contain any periods."); }
+        // if ( int.TryParse(value.Trim(), out int n) ) { return new AppVersion(n); }
 
-        // StringSplitOptions.RemoveEmptyEntries
         IReadOnlyList<int> items = value.Split(SEPARATOR).Select(int.Parse).ToList();
 
         return new AppVersion(items);
@@ -223,6 +207,9 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
 
         return s.TrimEnd(SEPARATOR);
     }
+
+    public object  Clone()     => Parse(ToString());
+    public Version ToVersion() => Version.Parse(ToString());
 
 
     public IReadOnlyList<int> ToList() => new List<int>(this);
@@ -244,7 +231,7 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
 
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-    [JsonIgnore] public int Count => this.Count();
+    [DataBaseIgnore] [JsonIgnore] public int Count => this.Count();
 
 
     public Format GetFormat() => (Format)Count;
@@ -419,10 +406,6 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
     /// <exception cref="ArgumentException">If something goes wrong, and the <paramref name="other"/> is not comparable.</exception>
     public bool FuzzyEquals( AppVersion other )
     {
-        ToString().WriteToConsole();
-        other.ToString().WriteToConsole();
-
-
         bool result = Major.Equals(other.Major) &&
                       Nullable.Compare(other.Minor, Minor) == 0 &&
                       Nullable.Compare(other.Maintenance, Maintenance) >= 0 &&
