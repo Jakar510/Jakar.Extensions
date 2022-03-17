@@ -3,7 +3,7 @@ using Jakar.Extensions.Http;
 using NUnit.Framework;
 
 
-namespace Jakar.Extensions.Tests;
+namespace Jakar.Extensions.Tests.Http;
 
 
 [TestFixture]

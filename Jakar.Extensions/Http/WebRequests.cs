@@ -5,7 +5,7 @@ using System.Net.Http.Headers;
 namespace Jakar.Extensions.Http;
 
 
-public static class WebRequestExtensions
+public static class WebRequests
 {
     /// <summary>
     /// <seealso href="https://stackoverflow.com/questions/19211972/getresponseasync-does-not-accept-cancellationtoken"/>
@@ -154,8 +154,10 @@ public static class WebRequestExtensions
 
     public static void SetHeaders( this HttpWebRequest request, MultipartFormDataContent data ) => request.SetHeaders(data.Headers);
 
-    public static void SetHeaders( this HttpWebRequest request, HttpContentHeaders headers )
+    public static void SetHeaders( this HttpWebRequest request, HttpContentHeaders? headers )
     {
+        if ( headers is null ) { return; }
+
         foreach ( ( string key, IEnumerable<string> items ) in headers )
         {
             if ( Enum.TryParse(key, true, out HttpRequestHeader httpRequestHeader) ) { request.SetHeader(httpRequestHeader, items); }
@@ -164,8 +166,10 @@ public static class WebRequestExtensions
     }
 
 
-    public static void SetHeaders( this HttpWebRequest request, HeaderCollection headers )
+    public static void SetHeaders( this HttpWebRequest request, HeaderCollection? headers )
     {
+        if ( headers is null ) { return; }
+
         foreach ( ( string key, object value ) in headers )
         {
             if ( Enum.TryParse(key, true, out HttpRequestHeader header) ) { request.SetHeader(header, value); }

@@ -1,10 +1,8 @@
-using System.Threading.Tasks;
-using Jakar.Extensions.FileSystemExtensions;
 using Jakar.Extensions.Http;
 using NUnit.Framework;
 
 
-namespace Jakar.Extensions.Tests;
+namespace Jakar.Extensions.Tests.Http;
 
 
 [TestFixture]

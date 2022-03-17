@@ -54,7 +54,7 @@ public class IniConfig_Tests : Assert
         s.WriteToConsole();
         IniConfig? results = IniConfig.FromString(s);
 
-        results?.ToString().WriteToConsole();
+        results?.WriteToConsole();
         NotNull(results);
         AreEqual(results, ini);
         AreEqual(results?[nameof(project)], project);

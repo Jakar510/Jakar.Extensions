@@ -9,15 +9,30 @@ public static class Pings
     /// <param name="url"></param>
     /// <param name="timeout">Defaults to 2.5 seconds</param>
     /// <param name="headers">Defaults to <see cref="MimeType.UrlEncodedContent"/></param>
+    /// <param name="encoding"></param>
     /// <param name="token"></param>
     /// <returns></returns>
-    public static async Task<bool> Ping( this Uri url, int timeout = 2500, HeaderCollection? headers = null, CancellationToken token = default )
+    public static async Task<bool> Ping( this Uri url, int timeout = 2500, HeaderCollection? headers = null, Encoding? encoding = null, CancellationToken token = default )
     {
         try
         {
-            string reply = await url.TryGet(timeout, token, headers).ConfigureAwait(false);
+            encoding ??= Encoding.Default;
+            headers  ??= new HeaderCollection(MimeTypeNames.Application.URL_ENCODED_CONTENT, encoding);
 
-            return !string.IsNullOrWhiteSpace(reply);
+            try
+            {
+                using WebResponse response = await url.Get(token, headers, timeout).ConfigureAwait(false);
+
+                string? reply = await response.AsString(encoding).ConfigureAwait(false);
+                return !string.IsNullOrWhiteSpace(reply);
+            }
+            catch ( WebException we )
+            {
+                Exception? e = we.ConvertException(token);
+                if ( e is not null ) { throw e; }
+
+                throw;
+            }
         }
         catch ( ConnectFailureException ) { return false; }
         catch ( TimeoutException ) { return false; }
@@ -38,13 +53,23 @@ public static class Pings
     {
         try
         {
-            string reply = await url.TryPost(payload,
-                                             timeout,
-                                             headers,
-                                             encoding,
-                                             token).ConfigureAwait(false);
+            encoding ??= Encoding.Default;
+            headers  ??= new HeaderCollection(MimeTypeNames.Text.PLAIN, encoding);
 
-            return !string.IsNullOrWhiteSpace(reply);
+            try
+            {
+                using WebResponse response = await url.Post(encoding.GetBytes(payload).AsMemory(), headers, token, timeout).ConfigureAwait(false);
+
+                string? reply = await response.AsString(encoding).ConfigureAwait(false);
+                return !string.IsNullOrWhiteSpace(reply);
+            }
+            catch ( WebException we )
+            {
+                Exception? e = we.ConvertException(token);
+                if ( e is not null ) { throw e; }
+
+                throw;
+            }
         }
         catch ( ConnectFailureException ) { return false; }
         catch ( TimeoutException ) { return false; }
