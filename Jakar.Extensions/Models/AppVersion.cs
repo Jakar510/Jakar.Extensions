@@ -50,12 +50,14 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
 
 
 
-    public readonly int  Major;
-    public readonly int? Minor         = default;
-    public readonly int? Maintenance   = default;
-    public readonly int? MajorRevision = default;
-    public readonly int? MinorRevision = default;
-    public readonly int? Build         = default;
+    private readonly int    _count  = default;
+    private readonly Format _format = default;
+    public readonly  int    Major;
+    public readonly  int?   Minor         = default;
+    public readonly  int?   Maintenance   = default;
+    public readonly  int?   MajorRevision = default;
+    public readonly  int?   MinorRevision = default;
+    public readonly  int?   Build         = default;
 
 
     public AppVersion() : this(0) { }
@@ -73,6 +75,8 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
         Build         = build;
         MajorRevision = majorRevision;
         MinorRevision = minorRevision;
+        _format       = GetFormat(Minor, Maintenance, MajorRevision, MinorRevision, Build);
+        _count        = _format.ToInt();
     }
 
     public AppVersion( Version version )
@@ -83,6 +87,8 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
         Build         = version.Build;
         MinorRevision = version.MinorRevision;
         MajorRevision = version.MajorRevision;
+        _format       = GetFormat(Minor, Maintenance, MajorRevision, MinorRevision, Build);
+        _count        = _format.ToInt();
     }
 
     public AppVersion( in Span<int>         items ) : this(items.ToArray()) { }
@@ -92,7 +98,10 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
     {
         if ( items is null ) { throw new ArgumentNullException(nameof(items)); }
 
-        switch ( (Format)items.Count )
+        _count  = items.Count;
+        _format = (Format)_count;
+
+        switch ( _format )
         {
             case Format.Singular:
                 Major = items[0];
@@ -205,6 +214,22 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
     }
 
 
+    private static Format GetFormat( in int? minor, in int? maintenance, in int? majorRevision, in int? minorRevision, in int? build )
+    {
+        if ( minor.HasValue && maintenance.HasValue && majorRevision.HasValue && minorRevision.HasValue && build.HasValue ) { return Format.Complete; }
+
+        if ( minor.HasValue && maintenance.HasValue && majorRevision.HasValue && build.HasValue ) { return Format.DetailedRevisions; }
+
+        if ( minor.HasValue && maintenance.HasValue && build.HasValue ) { return Format.Detailed; }
+
+        if ( minor.HasValue && build.HasValue ) { return Format.Typical; }
+
+        if ( minor.HasValue ) { return Format.Minimal; }
+
+        return Format.Singular;
+    }
+
+
     // ---------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -240,10 +265,9 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
 
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-    [DataBaseIgnore] [JsonIgnore] public int Count => this.Count();
+    int IReadOnlyCollection<int>.Count => _count;
 
-
-    public Format GetFormat() => (Format)Count;
+    public Format GetFormat() => _format;
 
 
     public static bool operator ==( in AppVersion left, in AppVersion right )
