@@ -3,7 +3,7 @@
 
 public static class TempFile
 {
-    public interface ITempFile
+    public interface ITempFile : IDisposable
     {
         internal bool IsTemporary { get; set; }
     }

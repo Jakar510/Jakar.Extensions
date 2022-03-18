@@ -30,25 +30,6 @@ public static class Deletes
         return await req.GetResponseAsync(token).ConfigureAwait(false);
     }
 
-    public static async Task<WebResponse> Delete( this Uri url, MultipartFormDataContent payload, CancellationToken token, int? timeout = default )
-    {
-        HttpWebRequest req = WebRequest.CreateHttp(url);
-        if ( timeout.HasValue ) { req.Timeout = timeout.Value; }
-
-        req.Method = "DELETE";
-
-        req.SetHeaders(payload);
-
-        await using ( Stream stream = await req.GetRequestStreamAsync().ConfigureAwait(false) )
-        {
-            await payload.CopyToAsync(stream).ConfigureAwait(false); // Push it out there
-        }
-
-
-        return await req.GetResponseAsync(token).ConfigureAwait(false);
-    }
-
-
     public static async Task<string> TryDelete( this Uri          url,
                                                 string            payload,
                                                 HeaderCollection? headers  = default,
@@ -70,33 +51,16 @@ public static class Deletes
                                                           Func<WebResponse, Encoding, Task<TResult>> handler,
                                                           string                                     payload,
                                                           MimeType                                   contentType,
-                                                          HeaderCollection?                          headers  = default,
-                                                          Encoding?                                  encoding = default,
-                                                          CancellationToken                          token    = default ) => await url.TryDelete(handler,
-                                                                                                                                                 payload,
-                                                                                                                                                 contentType.ToContentType(),
-                                                                                                                                                 headers,
-                                                                                                                                                 encoding,
-                                                                                                                                                 token).ConfigureAwait(false);
+                                                          Encoding                                   encoding,
+                                                          CancellationToken                          token = default ) => await url.TryDelete(handler, payload, contentType.ToContentType(), encoding, token).ConfigureAwait(false);
 
 
     public static async Task<TResult> TryDelete<TResult>( this Uri                                   url,
                                                           Func<WebResponse, Encoding, Task<TResult>> handler,
                                                           string                                     payload,
                                                           string                                     contentType,
-                                                          HeaderCollection?                          headers  = default,
-                                                          Encoding?                                  encoding = default,
-                                                          CancellationToken                          token    = default )
-    {
-        encoding ??= Encoding.Default;
-        headers  ??= new HeaderCollection(contentType, encoding);
-
-        return await url.TryDelete(handler,
-                                   encoding.GetBytes(payload).AsMemory(),
-                                   headers,
-                                   encoding,
-                                   token).ConfigureAwait(false);
-    }
+                                                          Encoding                                   encoding,
+                                                          CancellationToken                          token = default ) => await url.TryDelete(handler, payload, new HeaderCollection(contentType, encoding), encoding, token).ConfigureAwait(false);
 
 
     public static async Task<TResult> TryDelete<TResult>( this Uri                                   url,
@@ -144,31 +108,96 @@ public static class Deletes
         }
     }
 
-    public static async Task<TResult> TryDelete<TResult, TPayload>( this Uri                                   url,
-                                                                    Func<WebResponse, Encoding, Task<TResult>> handler,
-                                                                    Func<TPayload, ReadOnlyMemory<byte>>       serializer,
-                                                                    TPayload                                   payload,
-                                                                    HeaderCollection                           headers,
-                                                                    Encoding                                   encoding,
-                                                                    CancellationToken                          token = default ) => await url.TryDelete(handler,
-                                                                                                                                                        serializer(payload),
-                                                                                                                                                        headers,
-                                                                                                                                                        encoding,
-                                                                                                                                                        token).ConfigureAwait(false);
+
+    // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+    public static async Task<TResult> TryDelete<TResult>( this Uri                                            url,
+                                                          Func<WebResponse, CancellationToken, Task<TResult>> handler,
+                                                          string                                              payload,
+                                                          HeaderCollection                                    headers,
+                                                          Encoding                                            encoding,
+                                                          CancellationToken                                   token = default ) => await url.TryDelete(handler, encoding.GetBytes(payload).AsMemory(), headers, token);
+
+
+    public static async Task<TResult> TryDelete<TResult>( this Uri                                            url,
+                                                          Func<WebResponse, CancellationToken, Task<TResult>> handler,
+                                                          ReadOnlyMemory<byte>                                payload,
+                                                          HeaderCollection                                    headers,
+                                                          CancellationToken                                   token = default )
+    {
+        try
+        {
+            using WebResponse response = await url.Delete(payload, headers, token).ConfigureAwait(false);
+
+            return await handler(response, token).ConfigureAwait(false);
+        }
+        catch ( WebException we )
+        {
+            Exception? e = we.ConvertException(token);
+            if ( e is not null ) { throw e; }
+
+            throw;
+        }
+    }
+
+
+    // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+    public static async Task<WebResponse> Delete( this Uri url, MultipartFormDataContent payload, HeaderCollection? headers, CancellationToken token, int? timeout = default )
+    {
+        HttpWebRequest req = WebRequest.CreateHttp(url);
+        if ( timeout.HasValue ) { req.Timeout = timeout.Value; }
+
+        req.Method = "DELETE";
+
+        req.SetHeaders(payload);
+        req.SetHeaders(headers);
+
+        await using ( Stream stream = await req.GetRequestStreamAsync().ConfigureAwait(false) )
+        {
+            await payload.CopyToAsync(stream).ConfigureAwait(false); // Push it out there
+        }
+
+
+        return await req.GetResponseAsync(token).ConfigureAwait(false);
+    }
 
 
     public static async Task<TResult> TryDelete<TResult>( this Uri                                   url,
                                                           Func<WebResponse, Encoding, Task<TResult>> handler,
                                                           MultipartFormDataContent                   payload,
                                                           Encoding                                   encoding,
-                                                          CancellationToken                          token = default )
+                                                          HeaderCollection?                          headers = default,
+                                                          CancellationToken                          token   = default )
     {
         try
         {
-            using WebResponse response = await url.Delete(payload,
-                                                          token).ConfigureAwait(false);
+            using WebResponse response = await url.Delete(payload, headers, token).ConfigureAwait(false);
 
             return await handler(response, encoding).ConfigureAwait(false);
+        }
+        catch ( WebException we )
+        {
+            Exception? e = we.ConvertException(token);
+            if ( e is not null ) { throw e; }
+
+            throw;
+        }
+    }
+
+    public static async Task<TResult> TryDelete<TResult>( this Uri                         url,
+                                                          Func<WebResponse, Task<TResult>> handler,
+                                                          MultipartFormDataContent         payload,
+                                                          HeaderCollection?                headers = default,
+                                                          CancellationToken                token   = default )
+    {
+        try
+        {
+            using WebResponse response = await url.Delete(payload, headers, token).ConfigureAwait(false);
+
+            return await handler(response).ConfigureAwait(false);
         }
         catch ( WebException we )
         {

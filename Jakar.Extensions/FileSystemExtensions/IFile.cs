@@ -5,7 +5,7 @@ using System.Web;
 namespace Jakar.Extensions.FileSystemExtensions;
 
 
-public interface ILocalFile<TFile, out TDirectory> : IDisposable, IAsyncDisposable, TempFile.ITempFile, IEquatable<TFile>, IComparable<TFile> where TFile : ILocalFile<TFile, TDirectory>
+public interface ILocalFile<TFile, out TDirectory> : TempFile.ITempFile, IEquatable<TFile>, IComparable<TFile> where TFile : ILocalFile<TFile, TDirectory>
                                                                                                                                               where TDirectory : ILocalDirectory<TFile, TDirectory>
 {
     public FileInfo    Info          { get; }
@@ -36,7 +36,7 @@ public interface ILocalFile<TFile, out TDirectory> : IDisposable, IAsyncDisposab
     public void Decrypt();
 
     /// <summary>
-    /// Changes the extensions of the file.
+    /// Changes the extension of the file.
     /// </summary>
     /// <param name="ext"></param>
     /// <returns>
@@ -48,7 +48,7 @@ public interface ILocalFile<TFile, out TDirectory> : IDisposable, IAsyncDisposab
     public TFile ChangeExtension( MimeType ext );
 
     /// <summary>
-    /// Changes the extensions of the file.
+    /// Changes the extension of the file.
     /// </summary>
     /// <param name="ext"></param>
     /// <returns>

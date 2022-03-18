@@ -6,7 +6,7 @@ namespace Jakar.Extensions.FileSystemExtensions;
 
 
 [Serializable]
-public class LocalDirectory : ILocalDirectory<LocalFile, LocalDirectory>
+public class LocalDirectory : ILocalDirectory<LocalFile, LocalDirectory>, IAsyncDisposable
 {
     protected DirectoryInfo? _info;
 
@@ -129,8 +129,6 @@ public class LocalDirectory : ILocalDirectory<LocalFile, LocalDirectory>
     public string Combine( params string[] paths ) => Info.Combine(paths);
 
 
-#region Implementation of IDisposable
-
     public void Dispose()
     {
         Dispose(this.IsTempFile());
@@ -139,8 +137,6 @@ public class LocalDirectory : ILocalDirectory<LocalFile, LocalDirectory>
 
     protected virtual void Dispose( bool remove )
     {
-        if ( string.IsNullOrWhiteSpace(FullPath) ) { return; }
-
         if ( remove && Exists ) { Delete(true); }
     }
 
@@ -151,10 +147,6 @@ public class LocalDirectory : ILocalDirectory<LocalFile, LocalDirectory>
         await DeleteAllRecursivelyAsync();
     }
 
-#endregion
-
-
-#region Implementation of ITempFile
 
     private bool _isTemporary;
 
@@ -164,10 +156,6 @@ public class LocalDirectory : ILocalDirectory<LocalFile, LocalDirectory>
         set => _isTemporary = value;
     }
 
-#endregion
-
-
-#region Implementation of IEquatable<LocalFile>
 
     public override bool Equals( object obj )
     {
@@ -176,7 +164,7 @@ public class LocalDirectory : ILocalDirectory<LocalFile, LocalDirectory>
         return false;
     }
 
-    public override int GetHashCode() => HashCode.Combine(FullPath, ( (TempFile.ITempFile)this ).IsTemporary);
+    public override int GetHashCode() => HashCode.Combine(FullPath, this.IsTempFile());
 
 
     public bool Equals( LocalDirectory? other )
@@ -189,8 +177,6 @@ public class LocalDirectory : ILocalDirectory<LocalFile, LocalDirectory>
 
         return ( (TempFile.ITempFile)this ).IsTemporary == ( (TempFile.ITempFile)other ).IsTemporary && FullPath == other.FullPath;
     }
-
-#endregion
 
 
 #region Deletes

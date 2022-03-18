@@ -11,18 +11,17 @@ public class HeaderCollection : Dictionary<string, object>
     public HeaderCollection( string contentType, Encoding encoding )
     {
         Add(HttpRequestHeader.ContentType, contentType);
-        Add(HttpRequestHeader.ContentEncoding, encoding.HeaderName);
+        Add(HttpRequestHeader.ContentEncoding, encoding.EncodingName);
+        Add(encoding.HeaderName, encoding.WebName);
     }
 
 
-    public HeaderCollection Add( HttpRequestHeader header, object value )
-    {
-        Add(header.ToString(), value);
-        return this;
-    }
+    public HeaderCollection Add( HttpRequestHeader header, object value ) => Add(header.ToString(), value);
 
     public new HeaderCollection Add( string header, object value )
     {
+        if ( string.IsNullOrWhiteSpace(header) ) { throw new ArgumentNullException(nameof(header)); }
+
         base.Add(header, value);
         return this;
     }
@@ -47,10 +46,5 @@ public class HeaderCollection : Dictionary<string, object>
         return this;
     }
 
-    public HeaderCollection Add( KeyValuePair<string, object> pair )
-    {
-        ( string? key, object value ) = pair;
-        Add(key, value);
-        return this;
-    }
+    public HeaderCollection Add( KeyValuePair<string, object> pair ) => Add(pair.Key, pair.Value);
 }

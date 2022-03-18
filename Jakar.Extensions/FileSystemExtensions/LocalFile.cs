@@ -479,11 +479,9 @@ public class LocalFile : ILocalFile<LocalFile, LocalDirectory>
 #endregion
 
 
-#region Implementation of IEquatable<LocalFile>
-
     public override bool Equals( object other ) => other is LocalFile file && Equals(file);
 
-    public override int GetHashCode() => HashCode.Combine(FullPath, ( (TempFile.ITempFile)this ).IsTemporary);
+    public override int GetHashCode() => HashCode.Combine(FullPath, this.IsTempFile());
 
 
     public bool Equals( LocalFile? other )
@@ -501,10 +499,6 @@ public class LocalFile : ILocalFile<LocalFile, LocalDirectory>
 
     public static bool operator !=( LocalFile left, LocalFile? right ) => !( left == right );
 
-#endregion
-
-
-#region Implementation of ITempFile
 
     private bool _isTemporary;
 
@@ -514,10 +508,6 @@ public class LocalFile : ILocalFile<LocalFile, LocalDirectory>
         set => _isTemporary = value;
     }
 
-#endregion
-
-
-#region Implementation of IDisposable
 
     public void Dispose()
     {
@@ -527,21 +517,9 @@ public class LocalFile : ILocalFile<LocalFile, LocalDirectory>
 
     protected virtual void Dispose( bool remove )
     {
-        if ( string.IsNullOrWhiteSpace(FullPath) ) { return; }
-
         if ( remove && Exists ) { Delete(); }
     }
-
-    public async ValueTask DisposeAsync()
-    {
-        Dispose();
-        await Task.CompletedTask;
-    }
-
-#endregion
-
-
-#region Relational members
+    
 
     public int CompareTo( LocalFile? other )
     {
@@ -554,8 +532,6 @@ public class LocalFile : ILocalFile<LocalFile, LocalDirectory>
 
         return string.Compare(FullPath, other.FullPath, StringComparison.Ordinal);
     }
-
-#endregion
 
 
 

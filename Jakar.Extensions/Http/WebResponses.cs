@@ -11,8 +11,6 @@ public static class WebResponses
     }
 
 
-    public static async Task<Stream?> AsStream( this WebResponse resp ) => await Task.FromResult(resp.GetResponseStream());
-    
     public static async Task<TResult> AsJson<TResult>( this WebResponse resp, Encoding encoding )
     {
         string reply = await resp.AsString(encoding);
@@ -30,20 +28,36 @@ public static class WebResponses
     }
 
 
-    public static async Task<byte[]> AsBytes( this WebResponse resp )
+    public static async Task<byte[]> AsBytes( this WebResponse resp, CancellationToken token )
     {
-        await using Stream? stream = resp.GetResponseStream();
-        if ( stream is null ) { throw new NullReferenceException(nameof(stream)); }
-
-        await using var sr = new MemoryStream();
-        await stream.CopyToAsync(sr).ConfigureAwait(false);
+        await using MemoryStream sr = await resp.AsStream(token).ConfigureAwait(false);
 
         return sr.ToArray();
     }
 
-    public static async Task<ReadOnlyMemory<byte>> AsReadyOnlyBytes( this WebResponse resp )
+    public static async Task<LocalFile> AsFile( this WebResponse resp, CancellationToken token )
     {
-        byte[] bytes = await resp.AsBytes().ConfigureAwait(false);
+        await using FileStream   stream = LocalFile.CreateTempFileAndOpen(out LocalFile file);
+        await using MemoryStream sr     = await resp.AsStream(token).ConfigureAwait(false);
+        await sr.CopyToAsync(stream, token);
+
+        return file;
+    }
+
+    public static async Task<MemoryStream> AsStream( this WebResponse resp, CancellationToken token )
+    {
+        await using Stream? stream = resp.GetResponseStream();
+        if ( stream is null ) { throw new NullReferenceException(nameof(stream)); }
+
+        var sr = new MemoryStream();
+        await stream.CopyToAsync(sr, token).ConfigureAwait(false);
+
+        return sr;
+    }
+
+    public static async Task<ReadOnlyMemory<byte>> AsMemory( this WebResponse resp, CancellationToken token )
+    {
+        byte[] bytes = await resp.AsBytes(token).ConfigureAwait(false);
         return bytes.AsMemory();
     }
 }

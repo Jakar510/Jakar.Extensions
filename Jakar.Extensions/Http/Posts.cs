@@ -29,24 +29,6 @@ public static class Posts
         return await req.GetResponseAsync(token).ConfigureAwait(false);
     }
 
-    public static async Task<WebResponse> Post( this Uri url, MultipartFormDataContent payload, HeaderCollection? headers, CancellationToken token, int? timeout = default )
-    {
-        HttpWebRequest req = WebRequest.CreateHttp(url);
-        if ( timeout.HasValue ) { req.Timeout = timeout.Value; }
-
-        req.Method = "POST";
-        req.SetHeaders(payload);
-        req.SetHeaders(headers);
-
-        await using ( Stream stream = await req.GetRequestStreamAsync().ConfigureAwait(false) )
-        {
-            await payload.CopyToAsync(stream).ConfigureAwait(false); // Push it out there
-        }
-
-
-        return await req.GetResponseAsync(token).ConfigureAwait(false);
-    }
-
 
     public static async Task<string> TryPost( this Uri          url,
                                               string            payload,
@@ -148,14 +130,59 @@ public static class Posts
     }
 
 
-    public static async Task<TResult> TryPost<TResult, TPayload>( this Uri                                   url,
-                                                                  Func<WebResponse, Encoding, Task<TResult>> handler,
-                                                                  Func<TPayload, ReadOnlyMemory<byte>>       serializer,
-                                                                  TPayload                                   payload,
-                                                                  HeaderCollection                           headers,
-                                                                  Encoding                                   encoding,
-                                                                  CancellationToken                          token = default ) => await url.TryPost(handler, serializer(payload), headers, encoding, token).ConfigureAwait(false);
+    // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+
+    public static async Task<TResult> TryPost<TResult>( this Uri                                            url,
+                                                        Func<WebResponse, CancellationToken, Task<TResult>> handler,
+                                                        string                                              payload,
+                                                        HeaderCollection                                    headers,
+                                                        Encoding                                            encoding,
+                                                        CancellationToken                                   token = default ) => await url.TryPost(handler, encoding.GetBytes(payload).AsMemory(), headers, token).ConfigureAwait(false);
+
+
+    public static async Task<TResult> TryPost<TResult>( this Uri                                            url,
+                                                        Func<WebResponse, CancellationToken, Task<TResult>> handler,
+                                                        ReadOnlyMemory<byte>                                payload,
+                                                        HeaderCollection                                    headers,
+                                                        CancellationToken                                   token = default )
+    {
+        try
+        {
+            using WebResponse response = await url.Post(payload, headers, token).ConfigureAwait(false);
+
+            return await handler(response, token).ConfigureAwait(false);
+        }
+        catch ( WebException we )
+        {
+            Exception? e = we.ConvertException(token);
+            if ( e is not null ) { throw e; }
+
+            throw;
+        }
+    }
+
+
+    // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+    public static async Task<WebResponse> Post( this Uri url, MultipartFormDataContent payload, HeaderCollection? headers, CancellationToken token, int? timeout = default )
+    {
+        HttpWebRequest req = WebRequest.CreateHttp(url);
+        if ( timeout.HasValue ) { req.Timeout = timeout.Value; }
+
+        req.Method = "POST";
+        req.SetHeaders(payload);
+        req.SetHeaders(headers);
+
+        await using ( Stream stream = await req.GetRequestStreamAsync().ConfigureAwait(false) )
+        {
+            await payload.CopyToAsync(stream).ConfigureAwait(false); // Push it out there
+        }
+
+
+        return await req.GetResponseAsync(token).ConfigureAwait(false);
+    }
 
     public static async Task<TResult> TryPost<TResult>( this Uri                                   url,
                                                         Func<WebResponse, Encoding, Task<TResult>> handler,
@@ -169,6 +196,27 @@ public static class Posts
             using WebResponse response = await url.Post(payload, headers, token).ConfigureAwait(false);
 
             return await handler(response, encoding).ConfigureAwait(false);
+        }
+        catch ( WebException we )
+        {
+            Exception? e = we.ConvertException(token);
+            if ( e is not null ) { throw e; }
+
+            throw;
+        }
+    }
+
+    public static async Task<TResult> TryPost<TResult>( this Uri                         url,
+                                                        Func<WebResponse, Task<TResult>> handler,
+                                                        MultipartFormDataContent         payload,
+                                                        HeaderCollection?                headers = default,
+                                                        CancellationToken                token   = default )
+    {
+        try
+        {
+            using WebResponse response = await url.Post(payload, headers, token).ConfigureAwait(false);
+
+            return await handler(response).ConfigureAwait(false);
         }
         catch ( WebException we )
         {

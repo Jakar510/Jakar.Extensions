@@ -30,7 +30,7 @@ public class PreferenceFile : IniConfig, IDisposable, IAsyncDisposable
     }
 
 
-    protected               void Save()      => Task.Run(SaveAsync);
+    protected               Task Save()      => Task.Run(SaveAsync);
     protected virtual async Task SaveAsync() => await WriteToFile(Path).ConfigureAwait(false);
 
 
@@ -44,18 +44,14 @@ public class PreferenceFile : IniConfig, IDisposable, IAsyncDisposable
     {
         if ( !disposing ) { return; }
 
-        Save();
-        _file?.Dispose();
-        _file = null;
+        Task.Run(async () => await DisposeAsync()).Wait();
     }
 
     public virtual async ValueTask DisposeAsync()
     {
         await SaveAsync().ConfigureAwait(false);
 
-        if ( _file is null ) { return; }
-
-        await _file.DisposeAsync().ConfigureAwait(false);
+        _file?.Dispose();
         _file = null;
     }
 }
