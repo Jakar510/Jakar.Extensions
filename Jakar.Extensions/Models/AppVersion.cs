@@ -50,7 +50,7 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
     public enum Option
     {
         Stable,
-        ReleaseCandidate,
+        RC,
         Alpha,
         Beta,
     }
@@ -68,12 +68,12 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
     private const   StringComparison COMPARISON = StringComparison.OrdinalIgnoreCase;
 
 
-    public AppVersion() : this(0, Option.Stable) { }
-    public AppVersion( int major, Option type ) : this(major, null, type) { }
-    public AppVersion( int major, int?   minor, Option type ) : this(major, minor, null, type) { }
-    public AppVersion( int major, int?   minor, int?   build,       Option type ) : this(major, minor, null, build, type) { }
-    public AppVersion( int major, int?   minor, int?   maintenance, int?   build,         Option type ) : this(major, minor, maintenance, null, build, type) { }
-    public AppVersion( int major, int?   minor, int?   maintenance, int?   majorRevision, int?   build, Option type ) : this(major, minor, maintenance, majorRevision, null, build, type) { }
+    public AppVersion() : this(0, null, null, null, null, null, Option.Stable) { }
+    public AppVersion( int major, Option type ) : this(major, null, null, null, null, null, type) { }
+    public AppVersion( int major, int    minor, Option type ) : this(major, minor, null, null, null, null, type) { }
+    public AppVersion( int major, int    minor, int    build,       Option type ) : this(major, minor, null, null, null, build, type) { }
+    public AppVersion( int major, int    minor, int    maintenance, int    build,         Option type ) : this(major, minor, maintenance, null, null, build, type) { }
+    public AppVersion( int major, int    minor, int    maintenance, int    majorRevision, int    build, Option type ) : this(major, minor, maintenance, majorRevision, null, build, type) { }
 
     public AppVersion( int major, int? minor, int? maintenance, int? majorRevision, int? minorRevision, int? build, Option type )
     {
@@ -87,7 +87,7 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
         Type          = type;
     }
 
-    public AppVersion( Version version )
+    public AppVersion( in Version version )
     {
         Major         = version.Major;
         Minor         = version.Minor;
@@ -198,54 +198,7 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
     /// <exception cref="OverflowException"></exception>
     /// <exception cref="ArgumentOutOfRangeException"></exception>
     /// <returns><see cref="AppVersion"/></returns>
-    public static AppVersion Parse( in string value )
-    {
-        if ( string.IsNullOrWhiteSpace(value) ) { throw new ArgumentNullException(nameof(value)); }
-
-        // if ( int.TryParse(value.Trim(), out int n) ) { return new AppVersion(n); }
-        try
-        {
-            Option options = Split(value, out List<string> source);
-            var    result  = new List<int>(source.Count);
-
-            foreach ( string item in source )
-            {
-                if ( int.TryParse(item, out int n) ) { result.Add(n); }
-                else { throw new FormatException($"Cannot convert '{item}' to an int."); }
-            }
-
-            return new AppVersion(result, options);
-        }
-        catch ( Exception e ) { throw new ArgumentException($"Cannot convert '{value}' into {nameof(AppVersion)}", nameof(value), e); }
-    }
-
-    private static Option? Trim( ref string value, in string candidate, in Option option )
-    {
-        if ( value.EndsWith(candidate, COMPARISON) )
-        {
-            value = value.Remove(value.IndexOf(candidate, COMPARISON));
-            return option;
-        }
-
-        return default;
-    }
-
-    private static Option Split( in string value, out List<string> source )
-    {
-        string temp = value;
-
-        Option options = Trim(ref temp, "-rc", Option.ReleaseCandidate)
-                      ?? Trim(ref temp, "rc", Option.ReleaseCandidate)
-                      ?? Trim(ref temp, "-alpha", Option.Alpha)
-                      ?? Trim(ref temp, "alpha", Option.Alpha)
-                      ?? Trim(ref temp, "-beta", Option.Beta)
-                      ?? Trim(ref temp, "beta", Option.Beta)
-                      ?? Option.Stable;
-
-        source = new List<string>(temp.Split(SEPARATOR));
-        return options;
-    }
-
+    public static AppVersion Parse( in string value ) => Parse(value.AsSpan());
 
     /// <summary>
     /// 
@@ -283,7 +236,8 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
     /// <exception cref="OverflowException"></exception>
     /// <exception cref="ArgumentOutOfRangeException"></exception>
     /// <returns><see cref="AppVersion"/></returns>
-    public static AppVersion Parse( ReadOnlySpan<char> value )
+    public static AppVersion Parse( ReadOnlySpan<char> value ) => Parse(value, value);
+    private static AppVersion Parse( ReadOnlySpan<char> value, in ReadOnlySpan<char> original )
     {
         if ( value.IsEmpty ) { throw new ArgumentNullException(nameof(value)); }
 
@@ -296,36 +250,54 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
             if ( value.EndsWith("-rc", COMPARISON) )
             {
                 value   = value[..value.IndexOf("-rc", COMPARISON)];
-                options = Option.ReleaseCandidate;
+                options = Option.RC;
             }
             else if ( value.EndsWith("rc", COMPARISON) )
             {
                 value   = value[..value.IndexOf("rc", COMPARISON)];
-                options = Option.ReleaseCandidate;
-            }
-            else if ( value.EndsWith("-alpha", COMPARISON) )
-            {
-                value   = value[..value.IndexOf("-alpha", COMPARISON)];
-                options = Option.Alpha;
-            }
-            else if ( value.EndsWith("alpha", COMPARISON) )
-            {
-                value   = value[..value.IndexOf("alpha", COMPARISON)];
-                options = Option.Alpha;
+                options = Option.RC;
             }
             else if ( value.EndsWith("-beta", COMPARISON) )
             {
                 value   = value[..value.IndexOf("-beta", COMPARISON)];
                 options = Option.Beta;
             }
+            else if ( value.EndsWith("-alpha", COMPARISON) )
+            {
+                value   = value[..value.IndexOf("-alpha", COMPARISON)];
+                options = Option.Alpha;
+            }
             else if ( value.EndsWith("beta", COMPARISON) )
             {
                 value   = value[..value.IndexOf("beta", COMPARISON)];
                 options = Option.Beta;
             }
+            else if ( value.EndsWith("alpha", COMPARISON) )
+            {
+                value   = value[..value.IndexOf("alpha", COMPARISON)];
+                options = Option.Alpha;
+            }
+            else if ( value.EndsWith("-b", COMPARISON) )
+            {
+                value   = value[..value.IndexOf("-b", COMPARISON)];
+                options = Option.Beta;
+            }
+            else if ( value.EndsWith("b", COMPARISON) )
+            {
+                value   = value[..value.IndexOf("b", COMPARISON)];
+                options = Option.Beta;
+            }
+            else if ( value.EndsWith("-a", COMPARISON) )
+            {
+                value   = value[..value.IndexOf("-a", COMPARISON)];
+                options = Option.Alpha;
+            }
+            else if ( value.EndsWith("a", COMPARISON) )
+            {
+                value   = value[..value.IndexOf("a", COMPARISON)];
+                options = Option.Alpha;
+            }
             else { options = Option.Stable; }
-
-            value.ToString().WriteToConsole();
 
             var result = new List<int>();
 
@@ -337,7 +309,7 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
 
             return new AppVersion(result, options);
         }
-        catch ( Exception e ) { throw new ArgumentException($"Cannot convert '{value.ToString()}' into {nameof(AppVersion)}", nameof(value), e); }
+        catch ( Exception e ) { throw new ArgumentException($"Cannot convert '{original.ToString()}' into {nameof(AppVersion)}", nameof(value), e); }
     }
 
 
@@ -368,11 +340,11 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
 
         string addOn = Type switch
                        {
-                           Option.ReleaseCandidate => "-rc",
-                           Option.Alpha            => "-alpha",
-                           Option.Beta             => "-beta",
-                           Option.Stable           => string.Empty,
-                           _                       => throw new OutOfRangeException(nameof(Type), Type)
+                           Option.RC     => "-rc",
+                           Option.Alpha  => "-alpha",
+                           Option.Beta   => "-beta",
+                           Option.Stable => string.Empty,
+                           _             => throw new OutOfRangeException(nameof(Type), Type)
                        };
 
         return s + addOn;
