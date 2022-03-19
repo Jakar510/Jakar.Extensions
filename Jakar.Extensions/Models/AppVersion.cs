@@ -1,7 +1,4 @@
-﻿using Jakar.Extensions.Attributes;
-
-
-namespace Jakar.Extensions.Models;
+﻿namespace Jakar.Extensions.Models;
 
 
 /// <summary>
@@ -50,24 +47,35 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
 
 
 
-    private readonly int    _count  = default;
-    private readonly Format _format = default;
-    public readonly  int    Major;
-    public readonly  int?   Minor         = default;
-    public readonly  int?   Maintenance   = default;
-    public readonly  int?   MajorRevision = default;
-    public readonly  int?   MinorRevision = default;
-    public readonly  int?   Build         = default;
+    public enum Option
+    {
+        Stable,
+        ReleaseCandidate,
+        Alpha,
+        Beta,
+    }
 
 
-    public AppVersion() : this(0) { }
-    public AppVersion( int major ) : this(major, null) { }
-    public AppVersion( int major, int? minor ) : this(major, minor, null) { }
-    public AppVersion( int major, int? minor, int? build ) : this(major, minor, null, build) { }
-    public AppVersion( int major, int? minor, int? maintenance, int? build ) : this(major, minor, maintenance, null, build) { }
-    public AppVersion( int major, int? minor, int? maintenance, int? majorRevision, int? build ) : this(major, minor, maintenance, majorRevision, null, build) { }
 
-    public AppVersion( int major, int? minor, int? maintenance, int? majorRevision, int? minorRevision, int? build )
+    public readonly Format           Scheme;
+    public readonly int              Major;
+    public readonly int?             Minor         = default;
+    public readonly int?             Maintenance   = default;
+    public readonly int?             MajorRevision = default;
+    public readonly int?             MinorRevision = default;
+    public readonly int?             Build         = default;
+    public readonly Option           Type;
+    private const   StringComparison COMPARISON = StringComparison.OrdinalIgnoreCase;
+
+
+    public AppVersion() : this(0, Option.Stable) { }
+    public AppVersion( int major, Option type ) : this(major, null, type) { }
+    public AppVersion( int major, int?   minor, Option type ) : this(major, minor, null, type) { }
+    public AppVersion( int major, int?   minor, int?   build,       Option type ) : this(major, minor, null, build, type) { }
+    public AppVersion( int major, int?   minor, int?   maintenance, int?   build,         Option type ) : this(major, minor, maintenance, null, build, type) { }
+    public AppVersion( int major, int?   minor, int?   maintenance, int?   majorRevision, int?   build, Option type ) : this(major, minor, maintenance, majorRevision, null, build, type) { }
+
+    public AppVersion( int major, int? minor, int? maintenance, int? majorRevision, int? minorRevision, int? build, Option type )
     {
         Major         = major;
         Minor         = minor;
@@ -75,8 +83,8 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
         Build         = build;
         MajorRevision = majorRevision;
         MinorRevision = minorRevision;
-        _format       = GetFormat(Minor, Maintenance, MajorRevision, MinorRevision, Build);
-        _count        = _format.ToInt();
+        Scheme        = GetFormat(Minor, Maintenance, MajorRevision, MinorRevision, Build);
+        Type          = type;
     }
 
     public AppVersion( Version version )
@@ -87,21 +95,21 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
         Build         = version.Build;
         MinorRevision = version.MinorRevision;
         MajorRevision = version.MajorRevision;
-        _format       = GetFormat(Minor, Maintenance, MajorRevision, MinorRevision, Build);
-        _count        = _format.ToInt();
+        Scheme        = GetFormat(Minor, Maintenance, MajorRevision, MinorRevision, Build);
+        Type          = Option.Stable;
     }
 
-    public AppVersion( in Span<int>         items ) : this(items.ToArray()) { }
-    public AppVersion( in ReadOnlySpan<int> items ) : this(items.ToArray()) { }
+    public AppVersion( in Span<int>         items, Option options ) : this(items.ToArray(), options) { }
+    public AppVersion( in ReadOnlySpan<int> items, Option options ) : this(items.ToArray(), options) { }
 
-    public AppVersion( IReadOnlyList<int> items )
+    public AppVersion( IReadOnlyList<int> items, Option options )
     {
         if ( items is null ) { throw new ArgumentNullException(nameof(items)); }
 
-        _count  = items.Count;
-        _format = (Format)_count;
+        Scheme = (Format)items.Count;
+        Type   = options;
 
-        switch ( _format )
+        switch ( Scheme )
         {
             case Format.Singular:
                 Major = items[0];
@@ -149,10 +157,9 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
 
 
     public static implicit operator AppVersion( string            value ) => Parse(value);
-    public static implicit operator AppVersion( Span<int>         value ) => new(value);
-    public static implicit operator AppVersion( ReadOnlySpan<int> value ) => new(value);
+    public static implicit operator AppVersion( Span<int>         value ) => new(value, Option.Stable);
+    public static implicit operator AppVersion( ReadOnlySpan<int> value ) => new(value, Option.Stable);
     public static implicit operator AppVersion( Version           value ) => new(value);
-    public static implicit operator AppVersion( List<int>         value ) => new(value);
 
 
     /// <summary>
@@ -161,7 +168,7 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
     /// <param name="value"></param>
     /// <param name="version"></param>
     /// <returns>
-    /// <see langword="true"/> if <see cref="Parse"/> as successful.
+    /// <see langword="true"/> if <see cref="Parse(string)"/> as successful.
     /// <br/>
     /// <see langword="false"/> otherwise.
     /// </returns>
@@ -182,7 +189,6 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
         return false;
     }
 
-
     /// <summary>
     /// 
     /// </summary>
@@ -199,8 +205,8 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
         // if ( int.TryParse(value.Trim(), out int n) ) { return new AppVersion(n); }
         try
         {
-            var source = new List<string>(value.Split(SEPARATOR));
-            var result = new List<int>(source.Count);
+            Option options = Split(value, out List<string> source);
+            var    result  = new List<int>(source.Count);
 
             foreach ( string item in source )
             {
@@ -208,9 +214,130 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
                 else { throw new FormatException($"Cannot convert '{item}' to an int."); }
             }
 
-            return new AppVersion(result);
+            return new AppVersion(result, options);
         }
         catch ( Exception e ) { throw new ArgumentException($"Cannot convert '{value}' into {nameof(AppVersion)}", nameof(value), e); }
+    }
+
+    private static Option? Trim( ref string value, in string candidate, in Option option )
+    {
+        if ( value.EndsWith(candidate, COMPARISON) )
+        {
+            value = value.Remove(value.IndexOf(candidate, COMPARISON));
+            return option;
+        }
+
+        return default;
+    }
+
+    private static Option Split( in string value, out List<string> source )
+    {
+        string temp = value;
+
+        Option options = Trim(ref temp, "-rc", Option.ReleaseCandidate)
+                      ?? Trim(ref temp, "rc", Option.ReleaseCandidate)
+                      ?? Trim(ref temp, "-alpha", Option.Alpha)
+                      ?? Trim(ref temp, "alpha", Option.Alpha)
+                      ?? Trim(ref temp, "-beta", Option.Beta)
+                      ?? Trim(ref temp, "beta", Option.Beta)
+                      ?? Option.Stable;
+
+        source = new List<string>(temp.Split(SEPARATOR));
+        return options;
+    }
+
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="value"></param>
+    /// <param name="version"></param>
+    /// <returns>
+    /// <see langword="true"/> if <see cref="Parse(ReadOnlySpan&lt;char&gt;)"/> as successful.
+    /// <br/>
+    /// <see langword="false"/> otherwise.
+    /// </returns>
+    public static bool TryParse( in ReadOnlySpan<char> value, [NotNullWhen(true)] out AppVersion? version )
+    {
+        try
+        {
+            if ( !value.IsEmpty )
+            {
+                version = Parse(value);
+                return true;
+            }
+        }
+        catch ( FormatException ) { }
+        catch ( ArgumentException ) { }
+
+        version = default;
+        return false;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="value"></param>
+    /// <exception cref="FormatException"></exception>
+    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="OverflowException"></exception>
+    /// <exception cref="ArgumentOutOfRangeException"></exception>
+    /// <returns><see cref="AppVersion"/></returns>
+    public static AppVersion Parse( ReadOnlySpan<char> value )
+    {
+        if ( value.IsEmpty ) { throw new ArgumentNullException(nameof(value)); }
+
+        value.ToString().WriteToConsole();
+
+        try
+        {
+            Option options;
+
+            if ( value.EndsWith("-rc", COMPARISON) )
+            {
+                value   = value[..value.IndexOf("-rc", COMPARISON)];
+                options = Option.ReleaseCandidate;
+            }
+            else if ( value.EndsWith("rc", COMPARISON) )
+            {
+                value   = value[..value.IndexOf("rc", COMPARISON)];
+                options = Option.ReleaseCandidate;
+            }
+            else if ( value.EndsWith("-alpha", COMPARISON) )
+            {
+                value   = value[..value.IndexOf("-alpha", COMPARISON)];
+                options = Option.Alpha;
+            }
+            else if ( value.EndsWith("alpha", COMPARISON) )
+            {
+                value   = value[..value.IndexOf("alpha", COMPARISON)];
+                options = Option.Alpha;
+            }
+            else if ( value.EndsWith("-beta", COMPARISON) )
+            {
+                value   = value[..value.IndexOf("-beta", COMPARISON)];
+                options = Option.Beta;
+            }
+            else if ( value.EndsWith("beta", COMPARISON) )
+            {
+                value   = value[..value.IndexOf("beta", COMPARISON)];
+                options = Option.Beta;
+            }
+            else { options = Option.Stable; }
+
+            value.ToString().WriteToConsole();
+
+            var result = new List<int>();
+
+            foreach ( ( ReadOnlySpan<char> item, _ ) in value.SplitOn(SEPARATOR) )
+            {
+                if ( int.TryParse(item, NumberStyles.Any, CultureInfo.CurrentCulture, out int n) ) { result.Add(n); }
+                else { throw new FormatException($"Cannot convert '{item.ToString()}' to an int."); }
+            }
+
+            return new AppVersion(result, options);
+        }
+        catch ( Exception e ) { throw new ArgumentException($"Cannot convert '{value.ToString()}' into {nameof(AppVersion)}", nameof(value), e); }
     }
 
 
@@ -237,9 +364,18 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
 
     public override string ToString()
     {
-        string s = this.Aggregate(string.Empty, ( current, item ) => current + $"{item}{SEPARATOR}");
+        string s = this.Aggregate(string.Empty, ( current, item ) => current + $"{item}{SEPARATOR}").TrimEnd(SEPARATOR);
 
-        return s.TrimEnd(SEPARATOR);
+        string addOn = Type switch
+                       {
+                           Option.ReleaseCandidate => "-rc",
+                           Option.Alpha            => "-alpha",
+                           Option.Beta             => "-beta",
+                           Option.Stable           => string.Empty,
+                           _                       => throw new OutOfRangeException(nameof(Type), Type)
+                       };
+
+        return s + addOn;
     }
 
     public object  Clone()     => Parse(ToString());
@@ -265,54 +401,18 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
 
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-    int IReadOnlyCollection<int>.Count => _count;
-
-    public Format GetFormat() => _format;
+    int IReadOnlyCollection<int>.Count => Scheme.ToInt();
 
 
-    public static bool operator ==( in AppVersion left, in AppVersion right )
-    {
-        if ( left.GetFormat() != right.GetFormat() ) { return false; }
+    public static bool operator ==( in AppVersion left, in AppVersion right ) => EqualityComparer.Instance.Equals(left, right);
+    public static bool operator !=( in AppVersion left, in AppVersion right ) => !EqualityComparer.Instance.Equals(left, right);
+    public static bool operator >( in  AppVersion left, in AppVersion right ) => RelationalComparer.Instance.Compare(left, right) > 0;
+    public static bool operator >=( in AppVersion left, in AppVersion right ) => RelationalComparer.Instance.Compare(left, right) >= 0;
+    public static bool operator <( in  AppVersion left, in AppVersion right ) => RelationalComparer.Instance.Compare(left, right) < 0;
+    public static bool operator <=( in AppVersion left, in AppVersion right ) => RelationalComparer.Instance.Compare(left, right) <= 0;
 
-        return left.Equals(right);
-    }
-
-    public static bool operator !=( in AppVersion left, in AppVersion right )
-    {
-        if ( left.GetFormat() != right.GetFormat() ) { return false; }
-
-        return !left.Equals(right);
-    }
-
-
-    public static bool operator >( in AppVersion left, in AppVersion right )
-    {
-        if ( left.GetFormat() != right.GetFormat() ) { return false; }
-
-        return left.CompareTo(right) > 0;
-    }
-
-    public static bool operator >=( in AppVersion left, in AppVersion right )
-    {
-        if ( left.GetFormat() != right.GetFormat() ) { return false; }
-
-        return left.CompareTo(right) >= 0;
-    }
-
-
-    public static bool operator <( in AppVersion left, in AppVersion right )
-    {
-        if ( left.GetFormat() != right.GetFormat() ) { return false; }
-
-        return left.CompareTo(right) < 0;
-    }
-
-    public static bool operator <=( in AppVersion left, in AppVersion right )
-    {
-        if ( left.GetFormat() != right.GetFormat() ) { return false; }
-
-        return left.CompareTo(right) <= 0;
-    }
+    [DoesNotReturn]
+    private void RaiseFormatError( in AppVersion other ) => throw new FormatException($"expected {nameof(other)}.{nameof(Scheme)} is '{other.Scheme}' and got '{Scheme}'");
 
 
     /// <summary>
@@ -363,6 +463,8 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
 
     public int CompareTo( AppVersion other )
     {
+        if ( Scheme != other.Scheme ) { RaiseFormatError(other); }
+
         int majorComparison = Major.CompareTo(other.Major);
         if ( majorComparison != 0 ) { return majorComparison; }
 
@@ -439,6 +541,8 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
     /// <exception cref="ArgumentException">If something goes wrong, and the <paramref name="other"/> is not comparable.</exception>
     public bool FuzzyEquals( AppVersion other )
     {
+        if ( Scheme != other.Scheme ) { RaiseFormatError(other); }
+
         bool result = Major.Equals(other.Major) &&
                       Nullable.Compare(other.Minor, Minor) == 0 &&
                       Nullable.Compare(other.Maintenance, Maintenance) >= 0 &&
@@ -457,17 +561,22 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
         return Equals(other.Value);
     }
 
-    public bool Equals( AppVersion other ) => Major == other.Major &&
-                                              Nullable.Equals(Minor, other.Minor) &&
-                                              Nullable.Equals(Maintenance, other.Maintenance) &&
-                                              Nullable.Equals(MajorRevision, other.MajorRevision) &&
-                                              Nullable.Equals(MinorRevision, other.MinorRevision) &&
-                                              Nullable.Equals(Build, other.Build);
+    public bool Equals( AppVersion other )
+    {
+        if ( Scheme != other.Scheme ) { RaiseFormatError(other); }
+
+        return Major == other.Major &&
+               Nullable.Equals(Minor, other.Minor) &&
+               Nullable.Equals(Maintenance, other.Maintenance) &&
+               Nullable.Equals(MajorRevision, other.MajorRevision) &&
+               Nullable.Equals(MinorRevision, other.MinorRevision) &&
+               Nullable.Equals(Build, other.Build);
+    }
 
 
     public override bool Equals( object obj ) => obj is AppVersion version && Equals(version);
 
-    public override int GetHashCode() => HashCode.Combine(Major, Minor, Maintenance, MajorRevision, MinorRevision, Build);
+    public override int GetHashCode() => HashCode.Combine(Scheme, Major, Minor, Maintenance, MajorRevision, MinorRevision, Build);
 
 
     // ---------------------------------------------------------------------------------------------------------------------------------
@@ -480,7 +589,8 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
 
 
         public int Compare( AppVersion? left, AppVersion? right ) => Nullable.Compare(left, right);
-        public int Compare( AppVersion  left, AppVersion  right ) => left.CompareTo(right);
+
+        public int Compare( AppVersion left, AppVersion right ) => left.CompareTo(right);
 
 
         public int Compare( object x, object y )
@@ -495,8 +605,11 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
 
 
 
-    public sealed class EqualityComparer : IEqualityComparer<AppVersion>, IEqualityComparer<AppVersion?>, IEqualityComparer
+    public sealed class EqualityComparer : IEqualityComparer<AppVersion?>, IEqualityComparer<AppVersion>, IEqualityComparer
     {
+        public static EqualityComparer Instance { get; } = new();
+
+
         public bool Equals( AppVersion? left, AppVersion? right ) => Nullable.Equals(left, right);
         public bool Equals( AppVersion  left, AppVersion  right ) => left.Equals(right);
 
@@ -519,8 +632,11 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
 
 
 
-    public sealed class FuzzyEqualityComparer : IEqualityComparer<AppVersion>, IEqualityComparer<AppVersion?>, IEqualityComparer
+    public sealed class FuzzyEqualityComparer : IEqualityComparer<AppVersion?>, IEqualityComparer<AppVersion>, IEqualityComparer
     {
+        public static FuzzyEqualityComparer Instance { get; } = new();
+
+
         public bool Equals( AppVersion? left, AppVersion? right )
         {
             if ( left.HasValue && right.HasValue ) { left.Value.FuzzyEquals(right.Value); }

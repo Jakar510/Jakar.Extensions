@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using Jakar.Extensions.General;
 using Jakar.Extensions.Models;
 using NUnit.Framework;
@@ -14,12 +15,6 @@ namespace Jakar.Extensions.Tests;
 // ReSharper disable once InconsistentNaming
 public class AppVersion_Tests : Assert
 {
-    /// <summary>
-    /// 21.10.3
-    /// </summary>
-    private static readonly AppVersion _version = new(21, 10, 3);
-
-
     [Test]
     [TestCase("1")]
     [TestCase("1.0")]
@@ -27,8 +22,12 @@ public class AppVersion_Tests : Assert
     [TestCase("1.2.3.4")]
     [TestCase("1.2.3.4.5")]
     [TestCase("1.2.3.4.5.6")]
+    [TestCase("1.1-rc")]
+    [TestCase("1.1-alpha")]
+    [TestCase("1.1-beta")]
     [TestCase("0.7.0.25")]
-    public void Parse_Tests( string s ) => AppVersion.Parse(s);
+    public void Parse( string s ) => AppVersion.Parse(s);
+
 
     [Test]
     [TestCase("", false)]
@@ -41,8 +40,12 @@ public class AppVersion_Tests : Assert
     [TestCase("1.2.3.4.5.6.7", false)]
     [TestCase("1.0.0.0.0.0.0", false)]
     [TestCase("1.0.0...0.0.0", false)]
+    [TestCase("1.1-rc", true)]
+    [TestCase("1.1-alpha", true)]
+    [TestCase("1.1-beta", true)]
+    [TestCase("1.a1", false)]
     [TestCase("0.7.0.25", true)]
-    public void TryParse_Tests( string s, bool shouldWork )
+    public void TryParse( string s, bool shouldWork )
     {
         if ( AppVersion.TryParse(s, out AppVersion? version) )
         {
@@ -53,6 +56,7 @@ public class AppVersion_Tests : Assert
         False(shouldWork);
     }
 
+
     [Test]
     [TestCase("", false)]
     [TestCase("1", true)]
@@ -61,9 +65,59 @@ public class AppVersion_Tests : Assert
     [TestCase("1.2.3.4", true)]
     [TestCase("1.2.3.4.5", true)]
     [TestCase("1.2.3.4.5.6", true)]
+    [TestCase("1.2.3.4.5.6.7", false)]
     [TestCase("1.0.0.0.0.0.0", false)]
     [TestCase("1.0.0...0.0.0", false)]
-    public void ToString_Tests( string s, bool shouldWork )
+    [TestCase("1.1-rc", true)]
+    [TestCase("1.1-alpha", true)]
+    [TestCase("1.1-beta", true)]
+    [TestCase("0.7.0.25", true)]
+    public void TryParse_Span( string s, bool shouldWork ) => TryParse_Span(s.AsSpan(), shouldWork);
+
+    private static void TryParse_Span( in ReadOnlySpan<char> s, bool shouldWork )
+    {
+        if ( AppVersion.TryParse(s, out AppVersion? version) )
+        {
+            NotNull(version);
+            return;
+        }
+
+        False(shouldWork);
+    }
+
+
+    [Test]
+    [TestCase("1.1rc", AppVersion.Option.ReleaseCandidate)]
+    [TestCase("1.1-rc", AppVersion.Option.ReleaseCandidate)]
+    [TestCase("1.1alpha", AppVersion.Option.Alpha)]
+    [TestCase("1.1-alpha", AppVersion.Option.Alpha)]
+    [TestCase("1.1beta", AppVersion.Option.Beta)]
+    [TestCase("1.1-beta", AppVersion.Option.Beta)]
+    [TestCase("0.7", AppVersion.Option.Stable)]
+    [TestCase("0.7.0", AppVersion.Option.Stable)]
+    [TestCase("0.7.0.25", AppVersion.Option.Stable)]
+    public void Check_Options( string s, AppVersion.Option options ) => Check_Options(s.AsSpan(), options);
+
+    private static void Check_Options( in ReadOnlySpan<char> s, AppVersion.Option options )
+    {
+        AppVersion version = AppVersion.Parse(s);
+        AreEqual(options, version.Type);
+    }
+
+
+    [Test]
+    [TestCase("1", true)]
+    [TestCase("1.0", true)]
+    [TestCase("1.0-rc", true)]
+    [TestCase("1.0-alpha", true)]
+    [TestCase("1.0-beta", true)]
+    [TestCase("1.2.3", true)]
+    [TestCase("1.2.3.4", true)]
+    [TestCase("1.2.3.4.5", true)]
+    [TestCase("1.2.3.4.5.6", true)]
+    [TestCase("1.0.0.0.0.0.0", false)]
+    [TestCase("1.0.0...0.0.0", false)]
+    public void ToString( string s, bool shouldWork )
     {
         if ( AppVersion.TryParse(s, out AppVersion? version) )
         {
@@ -74,8 +128,8 @@ public class AppVersion_Tests : Assert
         False(shouldWork);
     }
 
+
     [Test]
-    [TestCase("", null)]
     [TestCase("1", AppVersion.Format.Singular)]
     [TestCase("1.2", AppVersion.Format.Minimal)]
     [TestCase("1.2.3", AppVersion.Format.Typical)]
@@ -85,7 +139,7 @@ public class AppVersion_Tests : Assert
     [TestCase("1.2.3.4.5.6.7", null)]
     [TestCase("1.2.3..4.5.6", null)]
     [TestCase("1.2.3..4.5.6.7", null)]
-    public void Format_Tests( string s, AppVersion.Format? expectedFormat )
+    public void Format( string s, AppVersion.Format? expectedFormat )
     {
         if ( AppVersion.TryParse(s, out AppVersion? version) )
         {
@@ -94,7 +148,7 @@ public class AppVersion_Tests : Assert
             if ( expectedFormat is null ) { throw new NullReferenceException(s); }
 
             AppVersion.Format format = expectedFormat.Value;
-            AreEqual(format, version.Value.GetFormat());
+            AreEqual(format, version.Value.Scheme);
 
             return;
         }
@@ -104,25 +158,24 @@ public class AppVersion_Tests : Assert
 
 
     [Test]
-    [TestCase("", false)]
-    [TestCase("21", false)]
-    [TestCase("21.10", false)]
-    [TestCase("20.12.1", false)]
-    [TestCase("20.6.1", false)]
-    [TestCase("21.10.2", false)]
-    [TestCase("21.10.3", true)]
-    [TestCase("21.10.4", true)]
-    [TestCase("21.11.3", true)]
-    [TestCase("21.12.1", true)]
-    [TestCase("22.10.3", true)]
-    [TestCase("22.12.1", true)]
-    public void Compare_Test_GreaterEqual( string s, in bool expected )
+    [TestCase("20.12.1", "21.10.3", false)]
+    [TestCase("20.6.1", "21.10.3", false)]
+    [TestCase("21.10.2", "21.10.3", false)]
+    [TestCase("21.10.3", "21.10.3", true)]
+    [TestCase("21.10.4", "21.10.3", true)]
+    [TestCase("21.11.3", "21.10.3", true)]
+    [TestCase("21.12.1", "21.10.3", true)]
+    [TestCase("22.10.3", "21.10.3", true)]
+    [TestCase("22.12.1", "21.10.3", true)]
+    public void Compare_Test_GreaterEqual( string s, in string other, in bool expected ) => Compare_Test_GreaterEqual(s, AppVersion.Parse(other), expected);
+
+    private static void Compare_Test_GreaterEqual( string s, in AppVersion other, in bool expected )
     {
         if ( AppVersion.TryParse(s, out AppVersion? version) )
         {
             NotNull(version);
 
-            AreEqual(expected, version >= _version);
+            AreEqual(expected, version >= other);
 
             return;
         }
@@ -132,25 +185,24 @@ public class AppVersion_Tests : Assert
 
 
     [Test]
-    [TestCase("", false)]
-    [TestCase("21", false)]
-    [TestCase("21.10", false)]
-    [TestCase("20.6.1", false)]
-    [TestCase("20.12.1", false)]
-    [TestCase("21.10.2", false)]
-    [TestCase("21.10.3", false)]
-    [TestCase("21.10.4", true)]
-    [TestCase("21.11.3", true)]
-    [TestCase("21.12.1", true)]
-    [TestCase("22.10.3", true)]
-    [TestCase("22.12.1", true)]
-    public void Compare_Test_Greater( string s, in bool expected )
+    [TestCase("20.6.1", "21.10.3", false)]
+    [TestCase("20.12.1", "21.10.3", false)]
+    [TestCase("21.10.2", "21.10.3", false)]
+    [TestCase("21.10.3", "21.10.3", false)]
+    [TestCase("21.10.4", "21.10.3", true)]
+    [TestCase("21.11.3", "21.10.3", true)]
+    [TestCase("21.12.1", "21.10.3", true)]
+    [TestCase("22.10.3", "21.10.3", true)]
+    [TestCase("22.12.1", "21.10.3", true)]
+    public void Compare_Test_Greater( string s, in string other, in bool expected ) => Compare_Test_Greater(s, AppVersion.Parse(other), expected);
+
+    private static void Compare_Test_Greater( string s, in AppVersion other, in bool expected )
     {
         if ( AppVersion.TryParse(s, out AppVersion? version) )
         {
             NotNull(version);
 
-            AreEqual(expected, version > _version);
+            AreEqual(expected, version > other);
 
             return;
         }
@@ -160,25 +212,24 @@ public class AppVersion_Tests : Assert
 
 
     [Test]
-    [TestCase("", false)]
-    [TestCase("21", false)]
-    [TestCase("21.10", false)]
-    [TestCase("20.6.1", true)]
-    [TestCase("20.12.1", true)]
-    [TestCase("21.10.2", true)]
-    [TestCase("21.10.3", false)]
-    [TestCase("21.10.4", false)]
-    [TestCase("21.11.3", false)]
-    [TestCase("21.12.1", false)]
-    [TestCase("22.10.3", false)]
-    [TestCase("22.12.1", false)]
-    public void Compare_Test_Less( string s, in bool expected )
+    [TestCase("20.6.1", "21.10.3", true)]
+    [TestCase("20.12.1", "21.10.3", true)]
+    [TestCase("21.10.2", "21.10.3", true)]
+    [TestCase("21.10.3", "21.10.3", false)]
+    [TestCase("21.10.4", "21.10.3", false)]
+    [TestCase("21.11.3", "21.10.3", false)]
+    [TestCase("21.12.1", "21.10.3", false)]
+    [TestCase("22.10.3", "21.10.3", false)]
+    [TestCase("22.12.1", "21.10.3", false)]
+    public void Compare_Test_Less( string s, in string other, in bool expected ) => Compare_Test_Less(s, AppVersion.Parse(other), expected);
+
+    private static void Compare_Test_Less( string s, in AppVersion other, in bool expected )
     {
         if ( AppVersion.TryParse(s, out AppVersion? version) )
         {
             NotNull(version);
 
-            AreEqual(expected, version < _version);
+            AreEqual(expected, version < other);
 
             return;
         }
@@ -188,26 +239,24 @@ public class AppVersion_Tests : Assert
 
 
     [Test]
-    [TestCase("", false)]
-    [TestCase("21", false)]
-    [TestCase("21.10", false)]
-    [TestCase("20.6.1", true)]
-    [TestCase("20.12.1", true)]
-    [TestCase("21.10.2", true)]
-    [TestCase("21.10.3", true)]
-    [TestCase("21.10.4", false)]
-    [TestCase("21.11.3", false)]
-    [TestCase("21.12.1", false)]
-    [TestCase("22.10.3", false)]
-    [TestCase("22.12.1", false)]
-    public void Compare_Test_LessEqual( string s, in bool expected )
+    [TestCase("20.6.1", "21.10.3", true)]
+    [TestCase("20.12.1", "21.10.3", true)]
+    [TestCase("21.10.2", "21.10.3", true)]
+    [TestCase("21.10.3", "21.10.3", true)]
+    [TestCase("21.10.4", "21.10.3", false)]
+    [TestCase("21.11.3", "21.10.3", false)]
+    [TestCase("21.12.1", "21.10.3", false)]
+    [TestCase("22.10.3", "21.10.3", false)]
+    [TestCase("22.12.1", "21.10.3", false)]
+    public void Compare_Test_LessEqual( string s, in string other, in bool expected ) => Compare_Test_LessEqual(s, AppVersion.Parse(other), expected);
+
+    private static void Compare_Test_LessEqual( string s, AppVersion other, bool expected )
     {
         if ( AppVersion.TryParse(s, out AppVersion? version) )
         {
             NotNull(version);
 
-            AreEqual(expected, version <= _version);
-
+            AreEqual(expected, version <= other);
             return;
         }
 
@@ -216,10 +265,16 @@ public class AppVersion_Tests : Assert
 
 
     [Test]
-    [TestCase("21.10.3", "", false)]
-    [TestCase("21.10.3", default, false)]
-    [TestCase("21.10.3", "21", false)]
-    [TestCase("21.10.3", "21.10", false)]
+    [TestCase("21", "21.10.3")]
+    [TestCase("21.10", "21.10.3")]
+    [TestCase("21.10.0.0", "21.10.3")]
+    [TestCase("21.10.0.0", "21.10.3.0.0.0")]
+    public void Compare_Test_FormatErrors( in string left, in string right ) => Compare_Test_FormatErrors(AppVersion.Parse(left), AppVersion.Parse(right));
+
+    private static void Compare_Test_FormatErrors( AppVersion left, AppVersion right ) => Throws<FormatException>(() => _ = left <= right);
+
+
+    [Test]
     [TestCase("21.10.3", "20.6.1", false)]
     [TestCase("21.10.3", "20.12.1", false)]
     [TestCase("21.10.3", "21.10.02", false)]
@@ -255,19 +310,7 @@ public class AppVersion_Tests : Assert
     [TestCase("21.10.3.5.1", "21.12.1.5.1", false)]
     [TestCase("21.10.3.5.1", "22.10.3.5.1", false)]
     [TestCase("21.10.3.5.1", "22.12.1.5.1", false)]
-    public void FuzzyEquals_Test( string source, string? s, in bool expected ) => FuzzyEquals_Test(AppVersion.Parse(source), s, expected);
+    public void FuzzyEquals_Test( in string left, in string right, in bool expected ) => FuzzyEquals_Test(AppVersion.Parse(left), AppVersion.Parse(right), expected);
 
-    private static void FuzzyEquals_Test( AppVersion source, string? s, in bool expected )
-    {
-        if ( AppVersion.TryParse(s, out AppVersion? version) )
-        {
-            NotNull(version);
-
-            AreEqual(expected, source.FuzzyEquals(version));
-
-            return;
-        }
-
-        False(expected);
-    }
+    private static void FuzzyEquals_Test( in AppVersion left, in AppVersion right, in bool expected ) => AreEqual(expected, left.FuzzyEquals(right));
 }

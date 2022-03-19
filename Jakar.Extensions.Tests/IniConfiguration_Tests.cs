@@ -31,7 +31,8 @@ public class IniConfig_Tests : Assert
                                    3,
                                    4,
                                    5,
-                                   6));
+                                   6,
+                                   AppVersion.Option.Stable));
 
         var server = new IniConfig.Section
                      {
