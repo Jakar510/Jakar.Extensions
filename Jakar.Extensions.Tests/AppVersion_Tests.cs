@@ -1,8 +1,4 @@
 using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using Jakar.Extensions.General;
 using Jakar.Extensions.Models;
 using NUnit.Framework;
 
@@ -16,68 +12,50 @@ namespace Jakar.Extensions.Tests;
 public class AppVersion_Tests : Assert
 {
     [Test]
-    [TestCase(1, 0, 0, 0, 0, 0, AppVersion.Option.Stable, "1.0.0.0.0.0")]
-    [TestCase(1, 0, 0, 0, 0, 0, AppVersion.Option.Alpha, "1.0.0.0.0.0-alpha")]
-    [TestCase(1, 0, 0, 0, 0, 0, AppVersion.Option.Beta, "1.0.0.0.0.0-beta")]
-    [TestCase(1, 0, 0, 0, 0, 0, AppVersion.Option.RC, "1.0.0.0.0.0-rc")]
-    public void Construct_Complete( int major, int? minor, int? maintenance, int? majorRevision, int? minorRevision, int? build, AppVersion.Option type, in string expected )
+    [TestCase(1, 0, 0, 0, 0, 0, "1.0.0.0.0.0")]
+    public void Construct_Complete( int major, int? minor, int? maintenance, int? majorRevision, int? minorRevision, int? build, in string expected )
     {
-        var version = new AppVersion(major, minor, maintenance, majorRevision, minorRevision, build, type);
+        var version = new AppVersion(major, minor, maintenance, majorRevision, minorRevision, build);
         AreEqual(expected, version.ToString());
     }
 
     [Test]
-    [TestCase(1, 0, 0, 0, 0, AppVersion.Option.Stable, "1.0.0.0.0")]
-    [TestCase(1, 0, 0, 0, 0, AppVersion.Option.Alpha, "1.0.0.0.0-alpha")]
-    [TestCase(1, 0, 0, 0, 0, AppVersion.Option.Beta, "1.0.0.0.0-beta")]
-    [TestCase(1, 0, 0, 0, 0, AppVersion.Option.RC, "1.0.0.0.0-rc")]
-    public void Construct_DetailedRevisions( int major, int minor, int maintenance, int majorRevision, int build, AppVersion.Option type, in string expected )
+    [TestCase(1, 0, 0, 0, 0, "1.0.0.0.0")]
+    public void Construct_DetailedRevisions( int major, int minor, int maintenance, int majorRevision, int build, in string expected )
     {
-        var version = new AppVersion(major, minor, maintenance, majorRevision, build, type);
+        var version = new AppVersion(major, minor, maintenance, majorRevision, build);
         AreEqual(expected, version.ToString());
     }
 
     [Test]
-    [TestCase(1, 0, 0, 0, AppVersion.Option.Stable, "1.0.0.0")]
-    [TestCase(1, 0, 0, 0, AppVersion.Option.Alpha, "1.0.0.0-alpha")]
-    [TestCase(1, 0, 0, 0, AppVersion.Option.Beta, "1.0.0.0-beta")]
-    [TestCase(1, 0, 0, 0, AppVersion.Option.RC, "1.0.0.0-rc")]
-    public void Construct_Detailed( int major, int minor, int maintenance, int build, AppVersion.Option type, in string expected )
+    [TestCase(1, 0, 0, 0, "1.0.0.0")]
+    public void Construct_Detailed( int major, int minor, int maintenance, int build, in string expected )
     {
-        var version = new AppVersion(major, minor, maintenance, build, type);
+        var version = new AppVersion(major, minor, maintenance, build);
         AreEqual(expected, version.ToString());
     }
 
     [Test]
-    [TestCase(1, 0, 0, AppVersion.Option.Stable, "1.0.0")]
-    [TestCase(1, 0, 0, AppVersion.Option.Alpha, "1.0.0-alpha")]
-    [TestCase(1, 0, 0, AppVersion.Option.Beta, "1.0.0-beta")]
-    [TestCase(1, 0, 0, AppVersion.Option.RC, "1.0.0-rc")]
-    public void Construct_Typical( int major, int minor, int build, AppVersion.Option type, in string expected )
+    [TestCase(1, 0, 0, "1.0.0")]
+    public void Construct_Typical( int major, int minor, int build, in string expected )
     {
-        var version = new AppVersion(major, minor, build, type);
+        var version = new AppVersion(major, minor, build);
         AreEqual(expected, version.ToString());
     }
 
     [Test]
-    [TestCase(1, 0, AppVersion.Option.Stable, "1.0")]
-    [TestCase(1, 0, AppVersion.Option.Alpha, "1.0-alpha")]
-    [TestCase(1, 0, AppVersion.Option.Beta, "1.0-beta")]
-    [TestCase(1, 0, AppVersion.Option.RC, "1.0-rc")]
-    public void Construct_Minimal( int major, int minor, AppVersion.Option type, in string expected )
+    [TestCase(1, 0, "1.0")]
+    public void Construct_Minimal( int major, int minor, in string expected )
     {
-        var version = new AppVersion(major, minor, type);
+        var version = new AppVersion(major, minor);
         AreEqual(expected, version.ToString());
     }
 
     [Test]
-    [TestCase(1, AppVersion.Option.Stable, "1")]
-    [TestCase(1, AppVersion.Option.Alpha, "1-alpha")]
-    [TestCase(1, AppVersion.Option.Beta, "1-beta")]
-    [TestCase(1, AppVersion.Option.RC, "1-rc")]
-    public void Construct_Singular( int major, AppVersion.Option type, in string expected )
+    [TestCase(1, "1")]
+    public void Construct_Singular( int major, in string expected )
     {
-        var version = new AppVersion(major, type);
+        var version = new AppVersion(major);
         AreEqual(expected, version.ToString());
     }
 
@@ -89,13 +67,6 @@ public class AppVersion_Tests : Assert
     [TestCase("1.2.3.4")]
     [TestCase("1.2.3.4.5")]
     [TestCase("1.2.3.4.5.6")]
-    [TestCase("1.1-rc")]
-    [TestCase("1.1-a")]
-    [TestCase("1.1-alpha")]
-    [TestCase("1.1alpha")]
-    [TestCase("1.1-beta")]
-    [TestCase("1.1beta")]
-    [TestCase("1.1-b")]
     [TestCase("0.7.0.25")]
     [TestCase("0.7.0.25")]
     public void Parse( string s ) { AppVersion.Parse(s); }
@@ -112,12 +83,6 @@ public class AppVersion_Tests : Assert
     [TestCase("1.2.3.4.5.6.7", false)]
     [TestCase("1.0.0.0.0.0.0", false)]
     [TestCase("1.0.0...0.0.0", false)]
-    [TestCase("1.1-rc", true)]
-    [TestCase("1.1-a", true)]
-    [TestCase("1.1-alpha", true)]
-    [TestCase("1.1alpha", true)]
-    [TestCase("1.1-beta", true)]
-    [TestCase("1.1beta", true)]
     [TestCase("1.a1", false)]
     [TestCase("0.7.0.25", true)]
     public void TryParse( string s, bool shouldWork )
@@ -143,9 +108,6 @@ public class AppVersion_Tests : Assert
     [TestCase("1.2.3.4.5.6.7", false)]
     [TestCase("1.0.0.0.0.0.0", false)]
     [TestCase("1.0.0...0.0.0", false)]
-    [TestCase("1.1-rc", true)]
-    [TestCase("1.1-alpha", true)]
-    [TestCase("1.1-beta", true)]
     [TestCase("0.7.0.25", true)]
     public void TryParse_Span( string s, bool shouldWork ) { TryParse_Span(s.AsSpan(), shouldWork); }
 
@@ -161,31 +123,28 @@ public class AppVersion_Tests : Assert
     }
 
 
-    [Test]
-    [TestCase("1.1rc", AppVersion.Option.RC)]
-    [TestCase("1.1-rc", AppVersion.Option.RC)]
-    [TestCase("1.1alpha", AppVersion.Option.Alpha)]
-    [TestCase("1.1-alpha", AppVersion.Option.Alpha)]
-    [TestCase("1.1beta", AppVersion.Option.Beta)]
-    [TestCase("1.1-beta", AppVersion.Option.Beta)]
-    [TestCase("0.7", AppVersion.Option.Stable)]
-    [TestCase("0.7.0", AppVersion.Option.Stable)]
-    [TestCase("0.7.0.25", AppVersion.Option.Stable)]
-    public void Check_Options( string s, AppVersion.Option options ) { Check_Options(s.AsSpan(), options); }
-
-    private static void Check_Options( in ReadOnlySpan<char> s, AppVersion.Option options )
-    {
-        AppVersion version = AppVersion.Parse(s);
-        AreEqual(options, version.Type);
-    }
+    // [Test]
+    // [TestCase("1.1rc", AppVersion.Option.RC)]
+    // [TestCase("1.1-rc", AppVersion.Option.RC)]
+    // [TestCase("1.1alpha", AppVersion.Option.Alpha)]
+    // [TestCase("1.1-alpha", AppVersion.Option.Alpha)]
+    // [TestCase("1.1beta", AppVersion.Option.Beta)]
+    // [TestCase("1.1-beta", AppVersion.Option.Beta)]
+    // [TestCase("0.7", AppVersion.Option.Stable)]
+    // [TestCase("0.7.0", AppVersion.Option.Stable)]
+    // [TestCase("0.7.0.25", AppVersion.Option.Stable)]
+    // public void Check_Options( string s, AppVersion.Option options ) { Check_Options(s.AsSpan(), options); }
+    //
+    // private static void Check_Options( in ReadOnlySpan<char> s, AppVersion.Option options )
+    // {
+    //     AppVersion version = AppVersion.Parse(s);
+    //     AreEqual(options, version.Type);
+    // }
 
 
     [Test]
     [TestCase("1", true)]
     [TestCase("1.0", true)]
-    [TestCase("1.0-rc", true)]
-    [TestCase("1.0-alpha", true)]
-    [TestCase("1.0-beta", true)]
     [TestCase("1.2.3", true)]
     [TestCase("1.2.3.4", true)]
     [TestCase("1.2.3.4.5", true)]
