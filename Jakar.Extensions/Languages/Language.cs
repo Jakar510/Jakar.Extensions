@@ -2,79 +2,95 @@
 
 
 [Serializable]
-[SuppressMessage("ReSharper", "StringLiteralTypo")]
-public class Language : IDataBaseID, IComparable<Language>, IEquatable<Language>, ICloneable
+public readonly struct Language : IDataBaseID, IComparable<Language>, IEquatable<Language>, IComparable<Language?>, IEquatable<Language?>, IComparable
 {
-    public              string            DisplayName { get; init; }
-    public              string            ShortName   { get; init; }
-    public              SupportedLanguage Version     { get; init; }
-    public virtual      long              ID          { get; init; }
-    [JsonIgnore] public CultureInfo       Info        => new(ShortName);
+    public       string            DisplayName { get; init; } = string.Empty;
+    public       string            ShortName   { get; init; } = string.Empty;
+    public       SupportedLanguage Version     { get; init; } = SupportedLanguage.English;
+    [Key] public long              ID          { get; init; } = SupportedLanguage.English.ToLong();
 
 
-    public Language() : this(string.Empty, string.Empty, SupportedLanguage.English) { }
-    public Language( string name, string shortName, SupportedLanguage language ) : this(name, shortName, language, language.ToLong()) { }
-
-    public Language( string name, string shortName, SupportedLanguage language, long id )
+    public Language() { }
+    public Language( SupportedLanguage language ) : this(language.GetName(), language.GetShortName(), language) { }
+    public Language( string name, string shortName, SupportedLanguage language )
     {
         DisplayName = name;
         ShortName   = shortName;
         Version     = language;
-        ID          = id;
+        ID          = language.ToLong();
     }
 
-    public object Clone() => new Language(DisplayName, ShortName, Version, ID);
+
+    public static implicit operator Language( SupportedLanguage language ) => new(language);
 
 
-#region Implementation of IComparable<in Language>
-
-    /// <summary>
-    /// Returns 0 if equal, -1 if not.
-    /// </summary>
-    /// <param name="other"></param>
-    /// <returns></returns>
-    public int CompareTo( Language other ) => Equals(other)
-                                                  ? 0
-                                                  : -1;
-
-#endregion
+    public CultureInfo ToCultureInfo() => new(ShortName);
 
 
-#region Implementation of IEquatable<Language>
+    public bool Equals( Language? other )
+    {
+        if ( other is null ) { return false; }
 
+        return Equals(other.Value);
+    }
     public bool Equals( Language other ) => DisplayName == other.DisplayName &&
                                             ShortName == other.ShortName &&
                                             Version == other.Version &&
                                             ID == other.ID;
+    public override bool Equals( object? obj ) => obj is Language language && Equals(language);
+    public override int  GetHashCode()         => HashCode.Combine(DisplayName, ShortName, Version, ID);
 
 
-    public override bool Equals( object obj )
+    public int CompareTo( Language? other )
     {
-        if ( obj is Language language ) { return Equals(language); }
+        if ( other is null ) { return -1; }
 
-        return false;
+        return CompareTo(other.Value);
+    }
+    public int CompareTo( Language other )
+    {
+        int displayNameComparison = string.Compare(DisplayName, other.DisplayName, StringComparison.Ordinal);
+        if ( displayNameComparison != 0 ) { return displayNameComparison; }
+
+        int shortNameComparison = string.Compare(ShortName, other.ShortName, StringComparison.Ordinal);
+        if ( shortNameComparison != 0 ) { return shortNameComparison; }
+
+        int versionComparison = Version.CompareTo(other.Version);
+        if ( versionComparison != 0 ) { return versionComparison; }
+
+        return ID.CompareTo(other.ID);
+    }
+    public int CompareTo( object? obj )
+    {
+        if ( ReferenceEquals(null, obj) ) return 1;
+        if ( ReferenceEquals(this, obj) ) return 0;
+
+        return obj is Language other
+                   ? CompareTo(other)
+                   : throw new ArgumentException($"Object must be of type {nameof(Language)}");
     }
 
 
-    public override int GetHashCode() => HashCode.Combine(DisplayName, ShortName, (int)Version, ID);
+    public static bool operator <( Language?  left, Language? right ) => RelationalComparer.Instance.Compare(left, right) < 0;
+    public static bool operator >( Language?  left, Language? right ) => RelationalComparer.Instance.Compare(left, right) > 0;
+    public static bool operator <=( Language? left, Language? right ) => RelationalComparer.Instance.Compare(left, right) <= 0;
+    public static bool operator >=( Language? left, Language? right ) => RelationalComparer.Instance.Compare(left, right) >= 0;
 
-#endregion
 
-
-    public static Language Arabic     => new("عربى - Arabic", "ar", SupportedLanguage.Arabic);
-    public static Language Chinese    => new("中文 - Chinese (simplified)", "zh-Hans", SupportedLanguage.Chinese);
-    public static Language Czech      => new("čeština - Czech", "cs", SupportedLanguage.Czech);
-    public static Language Dutch      => new("Nederlands - Dutch", "nl", SupportedLanguage.Dutch);
-    public static Language English    => new("English", "en", SupportedLanguage.English);
-    public static Language French     => new("Français - French", "fr", SupportedLanguage.French);
-    public static Language German     => new("Deutsche - German", "de", SupportedLanguage.German);
-    public static Language Japanese   => new("日本語 - Japanese", "ja", SupportedLanguage.Japanese);
-    public static Language Korean     => new("한국어 - Korean", "ko", SupportedLanguage.Korean);
-    public static Language Polish     => new("Polskie - Polish", "pl", SupportedLanguage.Polish);
-    public static Language Portuguese => new("Português - Portuguese", "pt", SupportedLanguage.Portuguese);
-    public static Language Spanish    => new("Español - Spanish", "es", SupportedLanguage.Spanish);
-    public static Language Swedish    => new("svenska - Swedish", "sv", SupportedLanguage.Swedish);
-    public static Language Thai       => new("ไทย - Thai", "th", SupportedLanguage.Thai);
+    public static Language Arabic     { get; } = new(SupportedLanguage.Arabic);
+    public static Language Chinese    { get; } = new(SupportedLanguage.Chinese);
+    public static Language Czech      { get; } = new(SupportedLanguage.Czech);
+    public static Language Dutch      { get; } = new(SupportedLanguage.Dutch);
+    public static Language English    { get; } = new(SupportedLanguage.English);
+    public static Language French     { get; } = new(SupportedLanguage.French);
+    public static Language German     { get; } = new(SupportedLanguage.German);
+    public static Language Japanese   { get; } = new(SupportedLanguage.Japanese);
+    public static Language Korean     { get; } = new(SupportedLanguage.Korean);
+    public static Language Polish     { get; } = new(SupportedLanguage.Polish);
+    public static Language Portuguese { get; } = new(SupportedLanguage.Portuguese);
+    public static Language Spanish    { get; } = new(SupportedLanguage.Spanish);
+    public static Language Swedish    { get; } = new(SupportedLanguage.Swedish);
+    public static Language Thai       { get; } = new(SupportedLanguage.Thai);
 
 
     public static Items All => Items.Default();
@@ -118,5 +134,54 @@ public class Language : IDataBaseID, IComparable<Language>, IEquatable<Language>
                                              Swedish,
                                              Thai
                                          };
+    }
+
+
+
+    private sealed class RelationalComparer : IComparer<Language?>, IComparer<Language>, IComparer
+    {
+        public static RelationalComparer Instance { get; } = new();
+
+
+        public int Compare( Language? left, Language? right ) => Nullable.Compare(left, right);
+
+        public int Compare( Language left, Language right ) => left.CompareTo(right);
+
+
+        public int Compare( object x, object y )
+        {
+            if ( x is not Language left ) { throw new ExpectedValueTypeException(nameof(x), x, typeof(Language)); }
+
+            if ( y is not Language right ) { throw new ExpectedValueTypeException(nameof(y), y, typeof(Language)); }
+
+            return left.CompareTo(right);
+        }
+    }
+
+
+
+    public sealed class EqualityComparer : IEqualityComparer<Language?>, IEqualityComparer<Language>, IEqualityComparer
+    {
+        public static EqualityComparer Instance { get; } = new();
+
+
+        public bool Equals( Language? left, Language? right ) => Nullable.Equals(left, right);
+        public bool Equals( Language  left, Language  right ) => left.Equals(right);
+
+
+        public int GetHashCode( Language  obj ) => obj.GetHashCode();
+        public int GetHashCode( Language? obj ) => obj.GetHashCode();
+
+
+        bool IEqualityComparer.Equals( object x, object y )
+        {
+            if ( x is not Language left ) { throw new ExpectedValueTypeException(nameof(x), x, typeof(Language)); }
+
+            if ( y is not Language right ) { throw new ExpectedValueTypeException(nameof(y), y, typeof(Language)); }
+
+            return left.Equals(right);
+        }
+
+        int IEqualityComparer.GetHashCode( object obj ) => obj.GetHashCode();
     }
 }

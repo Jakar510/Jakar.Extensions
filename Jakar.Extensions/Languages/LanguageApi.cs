@@ -1,34 +1,43 @@
 ﻿namespace Jakar.Extensions.Languages;
 
 
-public abstract class LanguageApi
+public class LanguageApi : BaseNotifyPropertyModel
 {
-    // ReSharper disable once ReturnTypeCanBeEnumerable.Global
+    private CultureInfo?      _currentCultureInfo;
+    private Language          _selectedLanguage;
+    private string            _selectedLanguageName;
+    private SupportedLanguage _currentLangVersion;
+
+
     public ObservableCollection<Language> Languages { get; } = Language.Collection.Default();
 
 
-    public abstract SupportedLanguage CurrentLangVersion   { get; set; }
-    public abstract string            SelectedLanguageName { get; set; }
-
-
-    private Language? _selectedLanguage;
-
-    public Language SelectedLanguage
+    public virtual SupportedLanguage CurrentLangVersion
     {
-        get => _selectedLanguage ?? throw new NullReferenceException(nameof(_selectedLanguage));
-        set
-        {
-            _selectedLanguage = value;
-            if ( _selectedLanguage is null ) return;
-
-            CultureInfo          = _selectedLanguage.Info;
-            CurrentLangVersion   = _selectedLanguage.Version;
-            SelectedLanguageName = _selectedLanguage.DisplayName;
-        }
+        get => _currentLangVersion;
+        set => SetProperty(ref _currentLangVersion, value);
     }
 
 
-    private CultureInfo? _currentCultureInfo;
+    public virtual string SelectedLanguageName
+    {
+        get => _selectedLanguageName;
+        set => SetProperty(ref _selectedLanguageName, value);
+    }
+
+
+    public Language SelectedLanguage
+    {
+        get => _selectedLanguage; // ?? throw new NullReferenceException(nameof(_selectedLanguage));
+        set
+        {
+            _selectedLanguage    = value;
+            CultureInfo          = value.ToCultureInfo();
+            CurrentLangVersion   = value.Version;
+            SelectedLanguageName = value.DisplayName;
+        }
+    }
+
 
     public virtual CultureInfo CultureInfo
     {
@@ -42,9 +51,10 @@ public abstract class LanguageApi
     }
 
 
-    protected LanguageApi()
+    public LanguageApi() : this(CultureInfo.CurrentUICulture) { }
+    public LanguageApi( in CultureInfo culture )
     {
-        string id = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
+        string id = culture.TwoLetterISOLanguageName;
 
         // ReSharper disable once VirtualMemberCallInConstructor
         CultureInfo = new CultureInfo(id);
