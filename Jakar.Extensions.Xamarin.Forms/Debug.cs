@@ -107,7 +107,7 @@ public class Debug<TDeviceID, TViewPage>
     {
         if ( _fileSystemApi is null ) { throw new NullReferenceException(nameof(_fileSystemApi)); }
 
-        await using var file = new LocalFile(_fileSystemApi.AppStateFileName);
+        using var file = new LocalFile(_fileSystemApi.AppStateFileName);
         await file.WriteToFileAsync(payload.ToPrettyJson()).ConfigureAwait(false);
     }
 
@@ -115,7 +115,7 @@ public class Debug<TDeviceID, TViewPage>
     {
         if ( _fileSystemApi is null ) { throw new NullReferenceException(nameof(_fileSystemApi)); }
 
-        await using var file = new LocalFile(_fileSystemApi.FeedBackFileName);
+        using var file = new LocalFile(_fileSystemApi.FeedBackFileName);
         await file.WriteToFileAsync(payload.ToPrettyJson()).ConfigureAwait(false);
     }
 

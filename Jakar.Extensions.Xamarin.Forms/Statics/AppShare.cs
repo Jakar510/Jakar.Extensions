@@ -13,7 +13,7 @@ namespace Jakar.Extensions.Xamarin.Forms.Statics;
 
 public static class AppShare
 {
-    // TODO: add MimType extensions and overloads for ShareFile
+    // TODO: add MimeType extensions and overloads for ShareFile
 
     private static ShareTextRequest GetTextRequest( string title, string text, string uri ) =>
         new(text, title)
@@ -152,7 +152,7 @@ public static class AppShare
     public static async Task<string> WriteScreenShot( this FileSystemApi api, ReadOnlyMemory<byte> screenShot )
     {
         string          path = api.ScreenShot;
-        await using var file = new LocalFile(path);
+        using var file = new LocalFile(path);
         await file.WriteToFileAsync(screenShot);
 
         return path;
