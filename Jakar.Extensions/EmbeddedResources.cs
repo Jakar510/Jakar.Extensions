@@ -90,9 +90,10 @@ public class EmbeddedResources<T>
     }
 
 
-    public async Task SaveToFile( string fileName, LocalFile file )
+    public async Task SaveToFile( string fileName, LocalDirectory directory, CancellationToken token ) => await SaveToFile(fileName, directory.Combine(fileName), token).ConfigureAwait(false);
+    public async Task SaveToFile( string fileName, LocalFile file, CancellationToken token )
     {
         Stream stream = GetResourceStream(fileName);
-        await file.WriteToFileAsync(stream);
+        await file.WriteAsync(stream, token);
     }
 }

@@ -153,7 +153,7 @@ public static class AppShare
     {
         string          path = api.ScreenShot;
         using var file = new LocalFile(path);
-        await file.WriteToFileAsync(screenShot);
+        await file.WriteAsync(screenShot);
 
         return path;
     }

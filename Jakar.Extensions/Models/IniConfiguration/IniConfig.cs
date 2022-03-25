@@ -11,7 +11,7 @@ public partial class IniConfig : ConcurrentDictionary<string, IniConfig.Section>
     public IniConfig( IEnumerable<KeyValuePair<string, Section>> collection, IEqualityComparer<string> comparer ) : base(collection, comparer) { }
 
 
-    public Task WriteToFile( LocalFile file ) => file.WriteToFileAsync(ToString());
+    public Task WriteToFile( LocalFile file ) => file.WriteAsync(ToString());
 
 
     public override string ToString()
@@ -44,7 +44,7 @@ public partial class IniConfig : ConcurrentDictionary<string, IniConfig.Section>
 
     public static async Task<IniConfig?> ReadFromFile( LocalFile file )
     {
-        string content = await file.ReadFromFileAsync();
+        string content = await file.ReadAsStringAsync();
         return FromString(content);
     }
 

@@ -23,14 +23,16 @@ public class LocalFile : ILocalFile<LocalFile, LocalDirectory>
     }
 
 
-    public string   FullPath      { get; init; }
-    public string   Name          => Info.Name;
-    public string   Extension     => Info.Extension;
-    public bool     Exists        => Info.Exists;
-    public string?  DirectoryName => Info.DirectoryName;
-    public MimeType Mime          => Extension.FromExtension();
-    public string   ContentType   => Mime.ToContentType();
-    public string?  Root          => Directory.GetDirectoryRoot(FullPath);
+    public           string   FullPath      { get; init; }
+    public           string   Name          => Info.Name;
+    public           string   Extension     => Info.Extension;
+    public           bool     Exists        => Info.Exists;
+    public           string?  DirectoryName => Info.DirectoryName;
+    public           MimeType Mime          => Extension.FromExtension();
+    public           string   ContentType   => Mime.ToContentType();
+    public           string?  Root          => Directory.GetDirectoryRoot(FullPath);
+    private readonly Encoding _encoding;
+
 
     [JsonIgnore]
     public LocalDirectory? Parent
@@ -46,17 +48,19 @@ public class LocalFile : ILocalFile<LocalFile, LocalDirectory>
 
 
     public LocalFile() => FullPath = string.Empty;
-    public LocalFile( Uri                path ) : this(FromUri(path)) { }
-    public LocalFile( ReadOnlySpan<char> path ) : this(path.ToString()) { }
-    public LocalFile( FileInfo           path ) : this(path.FullName) { }
-    public LocalFile( string             path, params string[] args ) : this(path.Combine(args)) { }
-    public LocalFile( DirectoryInfo      path, string          fileName ) : this(path.Combine(fileName)) { }
-    public LocalFile( string             path, string          fileName ) : this(new DirectoryInfo(path), fileName) { }
+    public LocalFile( Uri                path, Encoding?       encoding = default ) : this(FromUri(path), encoding) { }
+    public LocalFile( ReadOnlySpan<char> path, Encoding?       encoding = default ) : this(path.ToString(), encoding) { }
+    public LocalFile( FileInfo           path, Encoding?       encoding = default ) : this(path.FullName, encoding) { }
+    public LocalFile( string             path, params string[] args ) : this(path, Encoding.Default, args) { }
+    public LocalFile( string             path, Encoding?       encoding, params string[] args ) : this(path.Combine(args), encoding) { }
+    public LocalFile( DirectoryInfo      path, string          fileName, Encoding?       encoding = default ) : this(path.Combine(fileName), encoding) { }
+    public LocalFile( string             path, string          fileName, Encoding?       encoding = default ) : this(new DirectoryInfo(path), fileName, encoding) { }
 
-    public LocalFile( string path )
+    public LocalFile( string path, Encoding? encoding = default )
     {
         this.SetNormal();
-        FullPath = Path.GetFullPath(path);
+        FullPath  = Path.GetFullPath(path);
+        _encoding = encoding ?? Encoding.Default;
     }
 
     public static implicit operator LocalFile( string             info ) => new(info);
@@ -161,10 +165,10 @@ public class LocalFile : ILocalFile<LocalFile, LocalDirectory>
     }
 
 
-    public async Task Clone( LocalFile newFile )
+    public async Task Clone( LocalFile newFile, CancellationToken token )
     {
         FileStream stream = OpenRead();
-        await newFile.WriteToFileAsync(stream);
+        await newFile.WriteAsync(stream, token);
     }
 
     public void Move( string    path ) { Info.MoveTo(path); }
@@ -188,73 +192,64 @@ public class LocalFile : ILocalFile<LocalFile, LocalDirectory>
     }
 
 
-#region Openers
+    // ---------------------------------------------------------------------------------------------------------------------------------------------------
+
 
     public FileStream Create() => Info.Create();
 
-    public FileStream Open( FileMode   mode,
-                            FileAccess access,
-                            FileShare  share,
-                            int        bufferSize = 4096,
-                            bool       useAsync   = true )
+    public FileStream Open( FileMode mode, FileAccess access, FileShare share, int bufferSize = 4096, bool useAsync = true )
     {
         if ( string.IsNullOrWhiteSpace(FullPath) ) { throw new NullReferenceException(nameof(FullPath)); }
 
-
-        return new FileStream(FullPath,
-                              mode,
-                              access,
-                              share,
-                              bufferSize,
-                              useAsync);
+        return new FileStream(FullPath, mode, access, share, bufferSize, useAsync);
     }
 
 
-    public FileStream OpenRead( int bufferSize = 4096, bool useAsync = true ) => Open(FileMode.Open,
-                                                                                      FileAccess.Read,
-                                                                                      FileShare.Read,
-                                                                                      bufferSize,
-                                                                                      useAsync);
+    public FileStream OpenRead( int       bufferSize = 4096, bool useAsync   = true )                       => Open(FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize, useAsync);
+    public FileStream OpenWrite( FileMode mode,              int  bufferSize = 4096, bool useAsync = true ) => Open(mode, FileAccess.Write, FileShare.None, bufferSize, useAsync);
 
 
-    public FileStream OpenWrite( FileMode mode, int bufferSize = 4096, bool useAsync = true ) => Open(mode,
-                                                                                                      FileAccess.Write,
-                                                                                                      FileShare.None,
-                                                                                                      bufferSize,
-                                                                                                      useAsync);
-
-#endregion
+    // ---------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-#region Read
-
-    public async Task<T> ReadFromFileAsync<T>( Encoding? encoding = default ) where T : class
+    public string ReadAsString()
     {
-        string content = await ReadFromFileAsync(encoding);
-
-        return content.FromJson<T>();
+        using var stream = new StreamReader(OpenRead(), _encoding);
+        return stream.ReadToEnd();
     }
-
-    public async Task<string> ReadFromFileAsync( Encoding? encoding = default )
+    public async Task<string> ReadAsStringAsync()
     {
-        using var stream = new StreamReader(OpenRead(), encoding ?? Encoding.Default);
+        using var stream = new StreamReader(OpenRead(), _encoding);
         return await stream.ReadToEndAsync();
     }
 
-    public string ReadFromFile( Encoding? encoding = default )
+    public T Read<T>()
     {
-        using var stream = new StreamReader(OpenRead(), encoding ?? Encoding.Default);
+        string content = ReadAsString();
+        return content.FromJson<T>();
+    }
+    public async Task<T> ReadAsync<T>()
+    {
+        string content = await ReadAsStringAsync();
+        return content.FromJson<T>();
+    }
+
+
+    public ReadOnlySpan<char> ReadAsSpan()
+    {
+        using var stream = new StreamReader(OpenRead(), _encoding);
         return stream.ReadToEnd();
     }
 
-    public ReadOnlySpan<char> ReadFromFileAsSpan( Encoding? encoding = default )
+
+    public byte[] ReadAsBytes()
     {
-        using var stream = new StreamReader(OpenRead(), encoding ?? Encoding.Default);
-        return stream.ReadToEnd();
+        using FileStream file   = OpenRead();
+        using var        stream = new MemoryStream();
+        file.CopyTo(stream);
+        return stream.ToArray();
     }
-
-
-    public async Task<byte[]> RawReadFromFileAsBytesAsync( CancellationToken token = default )
+    public async Task<byte[]> ReadAsBytesAsync( CancellationToken token )
     {
         await using FileStream file   = OpenRead();
         await using var        stream = new MemoryStream();
@@ -262,79 +257,61 @@ public class LocalFile : ILocalFile<LocalFile, LocalDirectory>
         return stream.ToArray();
     }
 
-    public async Task<ReadOnlyMemory<byte>> RawReadFromFileAsync( CancellationToken token = default )
+
+    public ReadOnlyMemory<byte> ReadAsMemory()
     {
-        ReadOnlyMemory<byte> results = await RawReadFromFileAsBytesAsync(token);
+        ReadOnlyMemory<byte> results = ReadAsBytes();
+        return results;
+    }
+    public async Task<ReadOnlyMemory<byte>> ReadAsMemoryAsync( CancellationToken token )
+    {
+        ReadOnlyMemory<byte> results = await ReadAsBytesAsync(token);
         return results;
     }
 
-    public byte[] RawReadFromFileAsBytes()
+
+    public async Task<MemoryStream> ReadAsStreamAsync( CancellationToken token )
     {
-        using FileStream file   = OpenRead();
-        using var        stream = new MemoryStream();
-        file.CopyTo(stream);
-        return stream.ToArray();
+        await using FileStream file   = OpenRead();
+        var                    stream = new MemoryStream();
+        await file.CopyToAsync(stream, token);
+        return stream;
     }
 
-    public ReadOnlyMemory<byte> RawReadFromFile()
-    {
-        ReadOnlyMemory<byte> results = RawReadFromFileAsBytes();
-        return results;
-    }
 
-#endregion
+    // ---------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-#region Write
-
-    public       void WriteToFile( StringBuilder      payload, Encoding? encoding = default, FileMode mode = FileMode.Create ) => WriteToFile(payload.ToString(), encoding, mode);
-    public async Task WriteToFileAsync( StringBuilder payload, Encoding? encoding = default, FileMode mode = FileMode.Create ) => await WriteToFileAsync(payload.ToString(), encoding, mode);
+    public       void Write( StringBuilder      payload ) => Write(payload.ToString());
+    public async Task WriteAsync( StringBuilder payload ) => await WriteAsync(payload.ToString());
 
 
-    public void WriteToFile( string payload, Encoding? encoding = default, FileMode mode = FileMode.Create )
+    public void Write( string payload )
     {
         if ( string.IsNullOrWhiteSpace(payload) ) { throw new ArgumentNullException(nameof(payload)); }
 
         using FileStream stream = Create();
-        using var        writer = new StreamWriter(stream, encoding ?? Encoding.Default);
+        using var        writer = new StreamWriter(stream, _encoding);
         writer.Write(payload);
     }
-
-    public async Task WriteToFileAsync( string payload, Encoding? encoding = default, FileMode mode = FileMode.Create )
+    public async Task WriteAsync( string payload )
     {
         if ( string.IsNullOrWhiteSpace(payload) ) { throw new ArgumentNullException(nameof(payload)); }
 
         await using FileStream stream = Create();
-        await using var        writer = new StreamWriter(stream, encoding ?? Encoding.Default);
+        await using var        writer = new StreamWriter(stream, _encoding);
         await writer.WriteAsync(payload);
     }
 
 
-    public void WriteToFile( ReadOnlySpan<byte> payload )
-    {
-        if ( payload.Length == 0 ) { throw new ArgumentException(@"payload.Length == 0", nameof(payload)); }
-
-        using FileStream stream = Create();
-        stream.Write(payload);
-    }
-
-    public async Task WriteToFileAsync( ReadOnlyMemory<char> payload, Encoding? encoding = default, FileMode mode = FileMode.Create )
-    {
-        await using FileStream stream = Create();
-        await using var        writer = new StreamWriter(stream, encoding ?? Encoding.Default);
-        await writer.WriteAsync(payload);
-    }
-
-
-    public void WriteToFile( byte[] payload )
+    public void Write( byte[] payload )
     {
         if ( payload.Length == 0 ) { throw new ArgumentException(@"payload.Length == 0", nameof(payload)); }
 
         using FileStream stream = Create();
         stream.Write(payload, 0, payload.Length);
     }
-
-    public async Task WriteToFileAsync( byte[] payload, CancellationToken token = default )
+    public async Task WriteAsync( byte[] payload, CancellationToken token )
     {
         if ( payload.Length == 0 ) { throw new ArgumentException(@"payload.Length == 0", nameof(payload)); }
 
@@ -343,7 +320,14 @@ public class LocalFile : ILocalFile<LocalFile, LocalDirectory>
     }
 
 
-    public async Task WriteToFileAsync( ReadOnlyMemory<byte> payload, CancellationToken token = default )
+    public void Write( ReadOnlySpan<byte> payload )
+    {
+        if ( payload.Length == 0 ) { throw new ArgumentException(@"payload.Length == 0", nameof(payload)); }
+
+        using FileStream stream = Create();
+        stream.Write(payload);
+    }
+    public async Task WriteAsync( ReadOnlyMemory<byte> payload, CancellationToken token )
     {
         if ( payload.Length == 0 ) { throw new ArgumentException(@"payload.Length == 0", nameof(payload)); }
 
@@ -352,30 +336,45 @@ public class LocalFile : ILocalFile<LocalFile, LocalDirectory>
     }
 
 
-    public void WriteToFile( Stream payload )
+    public void Write( ReadOnlySpan<char> payload )
+    {
+        if ( payload.Length == 0 ) { throw new ArgumentException(@"payload.Length == 0", nameof(payload)); }
+
+        using FileStream stream = Create();
+        using var        writer = new StreamWriter(stream, _encoding);
+        writer.Write(payload);
+    }
+    public async Task WriteAsync( ReadOnlyMemory<char> payload, CancellationToken token )
+    {
+        await using FileStream stream = Create();
+        await using var        writer = new StreamWriter(stream, _encoding);
+        await writer.WriteAsync(payload, token);
+    }
+
+
+    public void Write( Stream payload )
     {
         if ( payload is null ) { throw new ArgumentNullException(nameof(payload)); }
 
         using var memory = new MemoryStream();
         payload.CopyTo(memory);
         ReadOnlySpan<byte> data = memory.ToArray();
-        WriteToFile(data);
+        Write(data);
     }
 
-    public async Task WriteToFileAsync( Stream payload, CancellationToken token = default )
+    public async Task WriteAsync( Stream payload, CancellationToken token )
     {
         if ( payload is null ) { throw new ArgumentNullException(nameof(payload)); }
 
         await using var memory = new MemoryStream();
         await payload.CopyToAsync(memory, token);
         ReadOnlyMemory<byte> data = memory.ToArray();
-        await WriteToFileAsync(data, token);
+        await WriteAsync(data, token);
     }
 
-#endregion
 
+    // ---------------------------------------------------------------------------------------------------------------------------------------------------
 
-#region Statics
 
     /// <summary>
     /// Write the <paramref name="payload"/> to the file.
@@ -387,10 +386,10 @@ public class LocalFile : ILocalFile<LocalFile, LocalDirectory>
     /// <exception cref="WebException"></exception>
     /// <exception cref="NotSupportedException"></exception>
     /// <returns></returns>
-    public static async Task<LocalFile> SaveFileAsync( string path, Stream payload, CancellationToken token = default )
+    public static async Task<LocalFile> SaveToFileAsync( string path, Stream payload, CancellationToken token )
     {
         var file = new LocalFile(path);
-        await file.WriteToFileAsync(payload, token);
+        await file.WriteAsync(payload, token);
         return file;
     }
 
@@ -405,10 +404,10 @@ public class LocalFile : ILocalFile<LocalFile, LocalDirectory>
     /// <exception cref="WebException"></exception>
     /// <exception cref="NotSupportedException"></exception>
     /// <returns><see cref="LocalFile"/></returns>
-    public static async Task<LocalFile> SaveFileAsync( string path, ReadOnlyMemory<byte> payload, CancellationToken token = default )
+    public static async Task<LocalFile> SaveToFileAsync( string path, ReadOnlyMemory<byte> payload, CancellationToken token )
     {
         var file = new LocalFile(path);
-        await file.WriteToFileAsync(payload, token);
+        await file.WriteAsync(payload, token);
         return file;
     }
 
@@ -422,7 +421,7 @@ public class LocalFile : ILocalFile<LocalFile, LocalDirectory>
     /// <exception cref="WebException"></exception>
     /// <exception cref="NotSupportedException"></exception>
     /// <returns></returns>
-    public static LocalFile SaveFile( string path, string uri ) => SaveFile(path, new Uri(uri));
+    public static LocalFile SaveToFile( string path, string uri ) => SaveToFile(path, new Uri(uri));
 
 
     /// <summary>
@@ -434,7 +433,7 @@ public class LocalFile : ILocalFile<LocalFile, LocalDirectory>
     /// <exception cref="WebException"></exception>
     /// <exception cref="NotSupportedException"></exception>
     /// <returns></returns>
-    public static LocalFile SaveFile( string path, Uri uri )
+    public static LocalFile SaveToFile( string path, Uri uri )
     {
         if ( uri.IsFile ) { return new LocalFile(uri); }
 
@@ -454,7 +453,7 @@ public class LocalFile : ILocalFile<LocalFile, LocalDirectory>
     /// <exception cref="WebException"></exception>
     /// <exception cref="NotSupportedException"></exception>
     /// <returns></returns>
-    public static Task<LocalFile> SaveFileAsync( string path, string uri ) => SaveFileAsync(path, new Uri(uri));
+    public static Task<LocalFile> SaveToFileAsync( string path, string uri ) => SaveToFileAsync(path, new Uri(uri));
 
 
     /// <summary>
@@ -466,7 +465,7 @@ public class LocalFile : ILocalFile<LocalFile, LocalDirectory>
     /// <exception cref="WebException"></exception>
     /// <exception cref="NotSupportedException"></exception>
     /// <returns></returns>
-    public static async Task<LocalFile> SaveFileAsync( string path, Uri uri )
+    public static async Task<LocalFile> SaveToFileAsync( string path, Uri uri )
     {
         if ( uri.IsFile ) { return new LocalFile(uri); }
 
@@ -476,7 +475,8 @@ public class LocalFile : ILocalFile<LocalFile, LocalDirectory>
         return file;
     }
 
-#endregion
+
+    // ---------------------------------------------------------------------------------------------------------------------------------------------------
 
 
     public override bool Equals( object other ) => other is LocalFile file && Equals(file);
@@ -519,7 +519,7 @@ public class LocalFile : ILocalFile<LocalFile, LocalDirectory>
     {
         if ( remove && Exists ) { Delete(); }
     }
-    
+
 
     public int CompareTo( LocalFile? other )
     {
@@ -534,6 +534,9 @@ public class LocalFile : ILocalFile<LocalFile, LocalDirectory>
     }
 
 
+    // ---------------------------------------------------------------------------------------------------------------------------------------------------
+
+
 
     [Serializable]
     public class Collection : ObservableCollection<LocalFile>
@@ -541,6 +544,55 @@ public class LocalFile : ILocalFile<LocalFile, LocalDirectory>
         public Collection() : base() { }
         public Collection( IEnumerable<LocalFile> items ) : base(items) { }
         public Collection( LocalDirectory         directory ) : this(directory.GetFiles()) { }
+    }
+
+
+
+    [Serializable]
+    public class Watcher : Collection, IDisposable
+    {
+        public event ErrorEventHandler?         Error;
+        private readonly LocalDirectory.Watcher _watcher;
+
+
+        public Watcher( LocalDirectory.Watcher watcher ) : base(watcher.Directory)
+        {
+            _watcher         =  watcher;
+            _watcher.Created += OnCreated;
+            _watcher.Changed += OnChanged;
+            _watcher.Deleted += OnDeleted;
+            _watcher.Renamed += OnRenamed;
+            _watcher.Error   += OnError;
+
+            _watcher.EnableRaisingEvents = true;
+        }
+
+
+        private void OnRenamed( object sender, RenamedEventArgs e )
+        {
+            LocalFile? file = this.FirstOrDefault(x => x.FullPath == e.OldFullPath);
+            if ( file is not null ) { Remove(file); }
+
+            Add(e.FullPath);
+        }
+        private void OnDeleted( object sender, FileSystemEventArgs e ) => Remove(e.FullPath);
+        private void OnChanged( object sender, FileSystemEventArgs e ) => OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Replace, new LocalFile(e.FullPath)));
+        private void OnCreated( object sender, FileSystemEventArgs e ) => Add(e.FullPath);
+        private void OnError( object   sender, ErrorEventArgs      e ) => Error?.Invoke(sender, e);
+
+
+        public void Dispose()
+        {
+            _watcher.EnableRaisingEvents = false;
+
+            _watcher.Created -= OnCreated;
+            _watcher.Changed -= OnChanged;
+            _watcher.Deleted -= OnDeleted;
+            _watcher.Renamed -= OnRenamed;
+            _watcher.Error   -= OnError;
+
+            _watcher.Dispose();
+        }
     }
 
 

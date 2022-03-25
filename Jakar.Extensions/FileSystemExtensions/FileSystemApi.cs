@@ -34,28 +34,14 @@ public abstract class BaseFileSystemApi : IFilePaths
         ZipCache();
     }
 
-    public void ZipCache() => ZipCache(_CacheDirectory);
-
-    public void ZipCache( LocalDirectory path ) => ZipFile.CreateFromDirectory(path.FullPath,
-                                                                               ZipFileName,
-                                                                               CompressionLevel.Optimal,
-                                                                               true,
-                                                                               Encoding.UTF8);
-
-    public void ZipCache( string path ) => ZipFile.CreateFromDirectory(path,
-                                                                       ZipFileName,
-                                                                       CompressionLevel.Optimal,
-                                                                       true,
-                                                                       Encoding.UTF8);
+    public void ZipCache( CompressionLevel level                        = CompressionLevel.Optimal ) => ZipCache(_CacheDirectory, level);
+    public void ZipCache( LocalDirectory   path, CompressionLevel level = CompressionLevel.Optimal ) => ZipFile.CreateFromDirectory(path.FullPath, ZipFileName, level, true, Encoding.UTF8);
+    public void ZipCache( string           path, CompressionLevel level = CompressionLevel.Optimal ) => ZipFile.CreateFromDirectory(path, ZipFileName, level, true, Encoding.UTF8);
 
 
-    public async Task<LocalFile?> SaveFileAsync( string filename, Uri uri ) => await LocalFile.SaveFileAsync(GetCacheDataPath(filename), uri).ConfigureAwait(false);
-
-    public async Task<LocalFile?> SaveFileAsync( string filename, Stream stream ) => await LocalFile.SaveFileAsync(GetCacheDataPath(filename), stream).ConfigureAwait(false);
-
-    public async Task<LocalFile?> SaveFileAsync( string filename, byte[] payload ) => await LocalFile.SaveFileAsync(GetCacheDataPath(filename), payload).ConfigureAwait(false);
-
-    public LocalFile SaveFile( string filename, string link ) => LocalFile.SaveFile(filename, new Uri(link));
-
-    public LocalFile SaveFile( string filename, Uri link ) => LocalFile.SaveFile(GetCacheDataPath(filename), link);
+    public async Task<LocalFile?> SaveFileAsync( string filename, Uri    uri )                              => await LocalFile.SaveToFileAsync(GetCacheDataPath(filename), uri).ConfigureAwait(false);
+    public async Task<LocalFile?> SaveFileAsync( string filename, Stream stream,  CancellationToken token ) => await LocalFile.SaveToFileAsync(GetCacheDataPath(filename), stream, token).ConfigureAwait(false);
+    public async Task<LocalFile?> SaveFileAsync( string filename, byte[] payload, CancellationToken token ) => await LocalFile.SaveToFileAsync(GetCacheDataPath(filename), payload, token).ConfigureAwait(false);
+    public       LocalFile        SaveFile( string      filename, string link ) => LocalFile.SaveToFile(filename, new Uri(link));
+    public       LocalFile        SaveFile( string      filename, Uri    link ) => LocalFile.SaveToFile(GetCacheDataPath(filename), link);
 }

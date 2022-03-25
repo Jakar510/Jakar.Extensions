@@ -179,7 +179,8 @@ public class LocalDirectory : ILocalDirectory<LocalFile, LocalDirectory>, IAsync
     }
 
 
-#region Deletes
+    // ---------------------------------------------------------------------------------------------------------------------------------------------------
+
 
     /// <summary>
     /// Deletes this directory if it is empty.
@@ -338,42 +339,51 @@ public class LocalDirectory : ILocalDirectory<LocalFile, LocalDirectory>, IAsync
         return Task.WhenAll(tasks);
     }
 
-#endregion
+
+    // ---------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-#region sub Files
-
-    public IEnumerable<LocalFile> GetFiles()                                                              => Info.EnumerateFiles().Select(ConvertFile);
-    public IEnumerable<LocalFile> GetFiles( string searchPattern )                                        => Info.EnumerateFiles(searchPattern).Select(ConvertFile);
-    public IEnumerable<LocalFile> GetFiles( string searchPattern, SearchOption       searchOption )       => Info.EnumerateFiles(searchPattern, searchOption).Select(ConvertFile);
-    public IEnumerable<LocalFile> GetFiles( string searchPattern, EnumerationOptions enumerationOptions ) => Info.EnumerateFiles(searchPattern, enumerationOptions).Select(ConvertFile);
-
-
-    private static LocalFile ConvertFile( FileInfo file ) => file;
-
-#endregion
+    public         IEnumerable<LocalFile> GetFiles()                                                                   => Info.EnumerateFiles().Select(ConvertFile);
+    public         IEnumerable<LocalFile> GetFiles( string      searchPattern )                                        => Info.EnumerateFiles(searchPattern).Select(ConvertFile);
+    public         IEnumerable<LocalFile> GetFiles( string      searchPattern, SearchOption       searchOption )       => Info.EnumerateFiles(searchPattern, searchOption).Select(ConvertFile);
+    public         IEnumerable<LocalFile> GetFiles( string      searchPattern, EnumerationOptions enumerationOptions ) => Info.EnumerateFiles(searchPattern, enumerationOptions).Select(ConvertFile);
+    private static LocalFile              ConvertFile( FileInfo file ) => file;
 
 
-#region Sub Folders
-
-    public IEnumerable<LocalDirectory> GetSubFolders()                                                              => Info.EnumerateDirectories().Select(ConvertDirectory);
-    public IEnumerable<LocalDirectory> GetSubFolders( string searchPattern )                                        => Info.EnumerateDirectories(searchPattern).Select(ConvertDirectory);
-    public IEnumerable<LocalDirectory> GetSubFolders( string searchPattern, SearchOption       searchOption )       => Info.EnumerateDirectories(searchPattern, searchOption).Select(ConvertDirectory);
-    public IEnumerable<LocalDirectory> GetSubFolders( string searchPattern, EnumerationOptions enumerationOptions ) => Info.EnumerateDirectories(searchPattern, enumerationOptions).Select(ConvertDirectory);
+    // ---------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-    private static LocalDirectory ConvertDirectory( DirectoryInfo file ) => file;
+    public         IEnumerable<LocalDirectory> GetSubFolders()                                                                        => Info.EnumerateDirectories().Select(ConvertDirectory);
+    public         IEnumerable<LocalDirectory> GetSubFolders( string           searchPattern )                                        => Info.EnumerateDirectories(searchPattern).Select(ConvertDirectory);
+    public         IEnumerable<LocalDirectory> GetSubFolders( string           searchPattern, SearchOption       searchOption )       => Info.EnumerateDirectories(searchPattern, searchOption).Select(ConvertDirectory);
+    public         IEnumerable<LocalDirectory> GetSubFolders( string           searchPattern, EnumerationOptions enumerationOptions ) => Info.EnumerateDirectories(searchPattern, enumerationOptions).Select(ConvertDirectory);
+    private static LocalDirectory              ConvertDirectory( DirectoryInfo file ) => file;
 
-#endregion
+
+    // ---------------------------------------------------------------------------------------------------------------------------------------------------
 
 
 
+    [SuppressMessage("ReSharper", "IntroduceOptionalParameters.Global")]
     public class Watcher : FileSystemWatcher
     {
-        public Watcher() : base() { }
+        public LocalDirectory Directory { get; }
 
-        public Watcher( LocalDirectory directory, string searchFilter = "*", NotifyFilters? filters = default ) : base(directory.FullPath, searchFilter)
-            => NotifyFilter = filters ?? NotifyFilters.Size | NotifyFilters.FileName | NotifyFilters.CreationTime | NotifyFilters.LastWrite;
+
+        /// <summary>
+        /// Uses the <see cref="LocalDirectory.CurrentDirectory"/>
+        /// </summary>
+        public Watcher() : this(CurrentDirectory) { }
+        public Watcher( LocalDirectory directory ) : this(directory, "*") { }
+        public Watcher( LocalDirectory directory, string searchFilter ) : this(directory, searchFilter, NotifyFilters.Size | NotifyFilters.FileName | NotifyFilters.CreationTime | NotifyFilters.LastWrite) { }
+        public Watcher( LocalDirectory directory, string searchFilter, NotifyFilters filters ) : base(directory.FullPath, searchFilter)
+        {
+            Directory    = directory;
+            NotifyFilter = filters;
+        }
+
+
+        public static implicit operator Watcher( LocalDirectory directory ) => new(directory);
     }
 
 

@@ -5,9 +5,6 @@ using Microsoft.AppCenter.Crashes;
 using Xamarin.Essentials;
 
 
-
-
-
 namespace Jakar.Extensions.Xamarin.Forms;
 
 
@@ -108,7 +105,7 @@ public class Debug<TDeviceID, TViewPage>
         if ( _fileSystemApi is null ) { throw new NullReferenceException(nameof(_fileSystemApi)); }
 
         using var file = new LocalFile(_fileSystemApi.AppStateFileName);
-        await file.WriteToFileAsync(payload.ToPrettyJson()).ConfigureAwait(false);
+        await file.WriteAsync(payload.ToPrettyJson()).ConfigureAwait(false);
     }
 
     protected async Task Save( Dictionary<string, object?> payload )
@@ -116,7 +113,7 @@ public class Debug<TDeviceID, TViewPage>
         if ( _fileSystemApi is null ) { throw new NullReferenceException(nameof(_fileSystemApi)); }
 
         using var file = new LocalFile(_fileSystemApi.FeedBackFileName);
-        await file.WriteToFileAsync(payload.ToPrettyJson()).ConfigureAwait(false);
+        await file.WriteAsync(payload.ToPrettyJson()).ConfigureAwait(false);
     }
 
     public async Task SaveFeedBackAppState( Dictionary<string, string?> feedback, string key = "feedback" )
@@ -179,21 +176,19 @@ public class Debug<TDeviceID, TViewPage>
                                   Dictionary<string, string?>? eventDetails,
                                   ExceptionDetails?            exceptionDetails,
                                   string?                      incomingText,
-                                  string?                      outgoingText
-    ) => await TrackError(ex,
-                          eventDetails,
-                          exceptionDetails,
-                          incomingText,
-                          outgoingText,
-                          null).ConfigureAwait(false);
+                                  string?                      outgoingText ) => await TrackError(ex,
+                                                                                                  eventDetails,
+                                                                                                  exceptionDetails,
+                                                                                                  incomingText,
+                                                                                                  outgoingText,
+                                                                                                  null).ConfigureAwait(false);
 
     public async Task TrackError( Exception                    ex,
                                   Dictionary<string, string?>? eventDetails,
                                   ExceptionDetails?            exceptionDetails,
                                   string?                      incomingText,
                                   string?                      outgoingText,
-                                  ReadOnlyMemory<byte>?        screenShot
-    )
+                                  ReadOnlyMemory<byte>?        screenShot )
     {
         ThrowIfNotEnabled();
 
