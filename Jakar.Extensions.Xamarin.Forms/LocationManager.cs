@@ -80,7 +80,7 @@ public class LocationManager
     {
         var manager = new LocationManager();
 
-        if ( await manager.Update() ) { return manager.Location; }
+        if ( await manager.Update().ConfigureAwait(false) ) { return manager.Location; }
 
         return null;
     }

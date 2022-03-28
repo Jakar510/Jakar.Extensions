@@ -2,9 +2,6 @@
 using Jakar.Extensions.Xamarin.Forms.Statics;
 
 
-
-
-
 namespace Jakar.Extensions.Xamarin.Forms;
 
 
@@ -42,33 +39,10 @@ public abstract class Prompts<TDeviceID, TViewPage> : IUserDialogs
     public abstract Task HandleExceptionAsync<TFeedBackPage>( Exception e, Page page, CancellationToken token ) where TFeedBackPage : Page, new();
 
 
-    public async Task SendFeedBack<TFeedBackPage>( string?           title,
-                                                   string?           message,
-                                                   Page              page,
-                                                   Exception         e,
-                                                   FileSystemApi     api,
-                                                   CancellationToken token = default
-    ) where TFeedBackPage : Page, new()
-    {
-        await SendFeedBack<TFeedBackPage>(title,
-                                          message,
-                                          Yes,
-                                          No,
-                                          page,
-                                          e,
-                                          api,
-                                          token).ConfigureAwait(false);
-    }
+    public async Task SendFeedBack<TFeedBackPage>( string? title, string? message, Page page, Exception e, FileSystemApi api, CancellationToken token = default ) where TFeedBackPage : Page, new() =>
+        await SendFeedBack<TFeedBackPage>(title, message, Yes, No, page, e, api, token).ConfigureAwait(false);
 
-    public async Task SendFeedBack<TFeedBackPage>( string?           title,
-                                                   string?           message,
-                                                   string?           yes,
-                                                   string?           no,
-                                                   Page              page,
-                                                   Exception         e,
-                                                   FileSystemApi     api,
-                                                   CancellationToken token = default
-    ) where TFeedBackPage : Page, new()
+    public async Task SendFeedBack<TFeedBackPage>( string? title, string? message, string? yes, string? no, Page page, Exception e, FileSystemApi api, CancellationToken token = default ) where TFeedBackPage : Page, new()
     {
         if ( page is null ) throw new ArgumentNullException(nameof(page));
         if ( e is null ) throw new ArgumentNullException(nameof(e));
@@ -188,12 +162,11 @@ public abstract class Prompts<TDeviceID, TViewPage> : IUserDialogs
                                           string?            cancel,
                                           string?            destructive,
                                           CancellationToken? cancelToken = null,
-                                          params string[]    buttons
-    ) => _Dialogs.ActionSheetAsync(title,
-                                   cancel,
-                                   destructive,
-                                   cancelToken,
-                                   buttons);
+                                          params string[]    buttons ) => _Dialogs.ActionSheetAsync(title,
+                                                                                                    cancel,
+                                                                                                    destructive,
+                                                                                                    cancelToken,
+                                                                                                    buttons);
 
 #endregion
 
@@ -213,12 +186,11 @@ public abstract class Prompts<TDeviceID, TViewPage> : IUserDialogs
                                     string?            message,
                                     string?            yes,
                                     string?            no,
-                                    CancellationToken? cancelToken
-    ) => _Dialogs.ConfirmAsync(message,
-                               title,
-                               yes,
-                               no,
-                               cancelToken);
+                                    CancellationToken? cancelToken ) => _Dialogs.ConfirmAsync(message,
+                                                                                              title,
+                                                                                              yes,
+                                                                                              no,
+                                                                                              cancelToken);
 
 #endregion
 
@@ -255,14 +227,13 @@ public abstract class Prompts<TDeviceID, TViewPage> : IUserDialogs
                                            string?            cancelText  = null,
                                            string?            placeholder = "",
                                            InputType          inputType   = InputType.Default,
-                                           CancellationToken? cancelToken = null
-    ) => _Dialogs.PromptAsync(message,
-                              title,
-                              okText,
-                              cancelText,
-                              placeholder,
-                              inputType,
-                              cancelToken);
+                                           CancellationToken? cancelToken = null ) => _Dialogs.PromptAsync(message,
+                                                                                                           title,
+                                                                                                           okText,
+                                                                                                           cancelText,
+                                                                                                           placeholder,
+                                                                                                           inputType,
+                                                                                                           cancelToken);
 
     public Task<PromptResult> PromptAsync( PromptConfig? config, CancellationToken? cancelToken = null ) => _Dialogs.PromptAsync(config, cancelToken);
 
@@ -290,23 +261,21 @@ public abstract class Prompts<TDeviceID, TViewPage> : IUserDialogs
                                     Action?   onCancel   = null,
                                     string?   cancelText = null,
                                     bool      show       = true,
-                                    MaskType? maskType   = null
-    ) => _Dialogs.Loading(title,
-                          onCancel,
-                          cancelText,
-                          show,
-                          maskType);
+                                    MaskType? maskType   = null ) => _Dialogs.Loading(title,
+                                                                                      onCancel,
+                                                                                      cancelText,
+                                                                                      show,
+                                                                                      maskType);
 
     public IProgressDialog Progress( string?   title      = null,
                                      Action?   onCancel   = null,
                                      string?   cancelText = null,
                                      bool      show       = true,
-                                     MaskType? maskType   = null
-    ) => _Dialogs.Progress(title,
-                           onCancel,
-                           cancelText,
-                           show,
-                           maskType);
+                                     MaskType? maskType   = null ) => _Dialogs.Progress(title,
+                                                                                        onCancel,
+                                                                                        cancelText,
+                                                                                        show,
+                                                                                        maskType);
 
 #endregion
 

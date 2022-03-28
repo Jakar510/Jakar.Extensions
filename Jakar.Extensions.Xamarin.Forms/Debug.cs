@@ -150,45 +150,27 @@ public class Debug<TDeviceID, TViewPage>
         e.Details(out Dictionary<string, string?> eventDetails);
         await TrackError(e, eventDetails, e.FullDetails()).ConfigureAwait(false);
     }
-
     public async Task TrackError( Exception e, ReadOnlyMemory<byte> screenShot )
     {
         e.Details(out Dictionary<string, string?> dict);
         await TrackError(e, dict, new ExceptionDetails(e), screenShot).ConfigureAwait(false);
     }
-
     public async Task TrackError( Exception ex, Dictionary<string, string?>? eventDetails ) => await TrackError(ex, eventDetails, exceptionDetails: null).ConfigureAwait(false);
-
     public async Task TrackError( Exception ex, Dictionary<string, string?>? eventDetails, ExceptionDetails? exceptionDetails ) => await TrackError(ex,
                                                                                                                                                     eventDetails,
                                                                                                                                                     exceptionDetails,
                                                                                                                                                     null,
                                                                                                                                                     null).ConfigureAwait(false);
-
     public async Task TrackError( Exception ex, Dictionary<string, string?>? eventDetails, ExceptionDetails? exceptionDetails, ReadOnlyMemory<byte> screenShot ) => await TrackError(ex,
                                                                                                                                                                                      eventDetails,
                                                                                                                                                                                      exceptionDetails,
                                                                                                                                                                                      null,
                                                                                                                                                                                      null,
                                                                                                                                                                                      screenShot).ConfigureAwait(false);
+    public async Task TrackError( Exception ex, Dictionary<string, string?>? eventDetails, ExceptionDetails? exceptionDetails, string? incomingText, string? outgoingText ) =>
+        await TrackError(ex, eventDetails, exceptionDetails, incomingText, outgoingText, null).ConfigureAwait(false);
 
-    public async Task TrackError( Exception                    ex,
-                                  Dictionary<string, string?>? eventDetails,
-                                  ExceptionDetails?            exceptionDetails,
-                                  string?                      incomingText,
-                                  string?                      outgoingText ) => await TrackError(ex,
-                                                                                                  eventDetails,
-                                                                                                  exceptionDetails,
-                                                                                                  incomingText,
-                                                                                                  outgoingText,
-                                                                                                  null).ConfigureAwait(false);
-
-    public async Task TrackError( Exception                    ex,
-                                  Dictionary<string, string?>? eventDetails,
-                                  ExceptionDetails?            exceptionDetails,
-                                  string?                      incomingText,
-                                  string?                      outgoingText,
-                                  ReadOnlyMemory<byte>?        screenShot )
+    public async Task TrackError( Exception ex, Dictionary<string, string?>? eventDetails, ExceptionDetails? exceptionDetails, string? incomingText, string? outgoingText, ReadOnlyMemory<byte>? screenShot )
     {
         ThrowIfNotEnabled();
 
@@ -247,7 +229,7 @@ public class Debug<TDeviceID, TViewPage>
 
 #region Track Events
 
-    public void TrackEvent( [CallerMemberName] string source = "" )
+    public void TrackEvent( [CallerMemberName] string? source = default )
     {
         ThrowIfNotEnabled();
 
@@ -256,7 +238,7 @@ public class Debug<TDeviceID, TViewPage>
         TrackEvent(AppState(), source);
     }
 
-    protected void TrackEvent( Dictionary<string, string> eventDetails, [CallerMemberName] string source = "" )
+    protected void TrackEvent( Dictionary<string, string> eventDetails, [CallerMemberName] string? source = default )
     {
         ThrowIfNotEnabled();
 

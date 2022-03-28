@@ -33,7 +33,7 @@ public static class UserPreferences
         }
     }
 
-    public static void SetPassword( this string key, string value ) => MainThread.InvokeOnMainThreadAsync(async () => await SetPasswordAsync(key, value).ConfigureAwait(false)).Wait();
+    public static void SetPassword( this string key, string value ) => MainThread.InvokeOnMainThreadAsync(async () => await SetPasswordAsync(key, value)).Wait();
 
-    public static async Task SetPasswordAsync( this string key, string value ) { await SecureStorage.SetAsync(key, value).ConfigureAwait(false); }
+    public static async Task SetPasswordAsync( this string key, string value ) => await SecureStorage.SetAsync(key, value).ConfigureAwait(false);
 }
