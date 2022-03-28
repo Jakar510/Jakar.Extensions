@@ -8,7 +8,7 @@ namespace Jakar.Extensions.FileSystemExtensions;
 
 
 [Serializable]
-public class LocalFile : ILocalFile<LocalFile, LocalDirectory>
+public class LocalFile : TempFile.ITempFile, IEquatable<LocalFile>, IComparable<LocalFile>, LocalFile.IReadHandler, LocalFile.IAsyncReadHandler, IComparable
 {
     protected FileInfo? _info;
 
@@ -68,9 +68,31 @@ public class LocalFile : ILocalFile<LocalFile, LocalDirectory>
     public static implicit operator LocalFile( Uri                info ) => new(info);
     public static implicit operator LocalFile( ReadOnlySpan<char> info ) => new(info);
 
+    public sealed override string ToString() => FullPath;
 
+
+    /// <summary>
+    /// Changes the extension of the file.
+    /// </summary>
+    /// <param name="ext"></param>
+    /// <returns>
+    /// The modified path information.
+    /// On Windows, if ext is null or empty, the path information is unchanged.
+    /// If the extension is null, the returned path is with the extension removed.
+    /// If the path has no extension, and the extension is not null, the returned string contains the extension appended to the end of the path. 
+    /// </returns>
     public LocalFile ChangeExtension( MimeType ext ) => ChangeExtension(ext.ToExtension());
 
+    /// <summary>
+    /// Changes the extension of the file.
+    /// </summary>
+    /// <param name="ext"></param>
+    /// <returns>
+    /// The modified path information.
+    /// On Windows, if ext is null or empty, the path information is unchanged.
+    /// If the extension is null, the returned path is with the extension removed.
+    /// If the path has no extension, and the extension is not null, the returned string contains the extension appended to the end of the path. 
+    /// </returns>
     public LocalFile ChangeExtension( string? ext ) => Path.ChangeExtension(FullPath, ext);
 
 
@@ -134,13 +156,26 @@ public class LocalFile : ILocalFile<LocalFile, LocalDirectory>
     }
 
 
-    public void Delete() => new FileInfo(FullPath).Delete();
+    /// <summary>
+    /// Permanently deletes a file.
+    /// </summary>
+    public void Delete() => Info.Delete();
 
-
+    /// <summary>
+    /// Encrypts the file so that only the account used to encrypt the file can decrypt it.
+    /// </summary>
     public void Encrypt() => File.Encrypt(FullPath);
+    /// <summary>
+    /// Decrypts a file that was encrypted by the current account using the <see cref="File.Encrypt(string)"/> method.
+    /// </summary>
     public void Decrypt() => File.Decrypt(FullPath);
 
 
+    /// <summary>
+    /// Creates an <see cref="UriKind.Absolute"/> based on the detected <see cref="Mime"/>
+    /// </summary>
+    /// <param name="mime">To override the detected <see cref="Mime"/>, provide a non-null value</param>
+    /// <returns></returns>
     public Uri ToUri( MimeType? mime = null )
     {
         if ( string.IsNullOrWhiteSpace(FullPath) ) { throw new NullReferenceException(nameof(FullPath)); }
@@ -153,6 +188,13 @@ public class LocalFile : ILocalFile<LocalFile, LocalDirectory>
         return new Uri($"{type.ToUriScheme()}://{path}", UriKind.Absolute);
     }
 
+    /// <summary>
+    /// Creates a <see cref="Uri"/> using provided prefix, and <see cref="HttpUtility.UrlEncode(string)"/> to encode the <see cref="FullPath"/>.
+    /// </summary>
+    /// <param name="baseUri"></param>
+    /// <param name="prefix">The key to attach the <see cref="FullPath"/> to. Defaults to "?path="</param>
+    /// <param name="mime">To override the detected <see cref="Mime"/>, provide a non-null value</param>
+    /// <returns></returns>
     public Uri ToUri( Uri baseUri, in string prefix = "?path=", MimeType? mime = null )
     {
         if ( string.IsNullOrWhiteSpace(FullPath) ) { throw new NullReferenceException(nameof(FullPath)); }
@@ -165,20 +207,54 @@ public class LocalFile : ILocalFile<LocalFile, LocalDirectory>
     }
 
 
+    /// <summary>
+    /// Copies this file to the <paramref name="newFile"/>
+    /// </summary>
+    /// <param name="newFile"></param>
+    /// <param name="token"></param>
+    /// <returns></returns>
     public async Task Clone( LocalFile newFile, CancellationToken token )
     {
         FileStream stream = OpenRead();
         await newFile.WriteAsync(stream, token);
     }
 
-    public void Move( string    path ) { Info.MoveTo(path); }
+    /// <summary>
+    /// Moves this file to the new <paramref name="path"/>
+    /// </summary>
+    /// <param name="path"></param>
+    public void Move( string path ) { Info.MoveTo(path); }
+    /// <summary>
+    /// Moves this file to the new <paramref name="file"/> location
+    /// </summary>
+    /// <param name="file"></param>
     public void Move( LocalFile file ) { Info.MoveTo(file.FullPath); }
 
 
-    public string Hash_MD5()    => Hash(MD5.Create());
-    public string Hash_SHA1()   => Hash(SHA1.Create());
+    /// <summary>
+    /// Calculates a file hash using <see cref="MD5"/>
+    /// </summary>
+    /// <returns><see cref="string"/></returns>
+    public string Hash_MD5() => Hash(MD5.Create());
+    /// <summary>
+    /// Calculates a file hash using <see cref="SHA1"/>
+    /// </summary>
+    /// <returns><see cref="string"/></returns>
+    public string Hash_SHA1() => Hash(SHA1.Create());
+    /// <summary>
+    /// Calculates a file hash using <see cref="SHA256"/>
+    /// </summary>
+    /// <returns><see cref="string"/></returns>
     public string Hash_SHA256() => Hash(SHA256.Create());
+    /// <summary>
+    /// Calculates a file hash using <see cref="SHA384"/>
+    /// </summary>
+    /// <returns><see cref="string"/></returns>
     public string Hash_SHA384() => Hash(SHA384.Create());
+    /// <summary>
+    /// Calculates a file hash using <see cref="SHA512"/>
+    /// </summary>
+    /// <returns><see cref="string"/></returns>
     public string Hash_SHA512() => Hash(SHA512.Create());
 
     protected string Hash( HashAlgorithm hasher )
@@ -197,6 +273,26 @@ public class LocalFile : ILocalFile<LocalFile, LocalDirectory>
 
     public FileStream Create() => Info.Create();
 
+    /// <summary>
+    /// <para><seealso href="https://stackoverflow.com/a/11541330/9530917"/></para>
+    /// </summary>
+    /// <param name="mode"></param>
+    /// <param name="access"></param>
+    /// <param name="share"></param>
+    /// <param name="bufferSize"></param>
+    /// <param name="useAsync"></param>
+    /// <exception cref="FileNotFoundException"></exception>
+    /// <exception cref="ArgumentException"></exception>
+    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="NullReferenceException"></exception>
+    /// <exception cref="NotSupportedException"></exception>
+    /// <exception cref="ArgumentOutOfRangeException"></exception>
+    /// <exception cref="IOException"></exception>
+    /// <exception cref="SecurityException"></exception>
+    /// <exception cref="DirectoryNotFoundException"></exception>
+    /// <exception cref="UnauthorizedAccessException"></exception>
+    /// <exception cref="PathTooLongException"></exception>
+    /// <returns><see cref="FileStream"/></returns>
     public FileStream Open( FileMode mode, FileAccess access, FileShare share, int bufferSize = 4096, bool useAsync = true )
     {
         if ( string.IsNullOrWhiteSpace(FullPath) ) { throw new NullReferenceException(nameof(FullPath)); }
@@ -205,87 +301,434 @@ public class LocalFile : ILocalFile<LocalFile, LocalDirectory>
     }
 
 
-    public FileStream OpenRead( int       bufferSize = 4096, bool useAsync   = true )                       => Open(FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize, useAsync);
-    public FileStream OpenWrite( FileMode mode,              int  bufferSize = 4096, bool useAsync = true ) => Open(mode, FileAccess.Write, FileShare.None, bufferSize, useAsync);
+    /// <summary>
+    /// Opens file for read only actions. If it doesn't exist, <see cref="FileNotFoundException"/> will be raised.
+    /// </summary>
+    /// <param name="bufferSize"></param>
+    /// <param name="useAsync"></param>
+    /// <exception cref="FileNotFoundException"></exception>
+    /// <exception cref="ArgumentException"></exception>
+    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="NotSupportedException"></exception>
+    /// <exception cref="NullReferenceException"></exception>
+    /// <exception cref="ArgumentOutOfRangeException"></exception>
+    /// <exception cref="IOException"></exception>
+    /// <exception cref="SecurityException"></exception>
+    /// <exception cref="DirectoryNotFoundException"></exception>
+    /// <exception cref="UnauthorizedAccessException"></exception>
+    /// <exception cref="PathTooLongException"></exception>
+    /// <returns><see cref="FileStream"/></returns>
+    public FileStream OpenRead( int bufferSize = 4096, bool useAsync = true ) => Open(FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize, useAsync);
+    /// <summary>
+    /// Opens file for write only actions. If it doesn't exist, file will be created.
+    /// </summary>
+    /// <param name="mode"></param>
+    /// <param name="bufferSize"></param>
+    /// <param name="useAsync"></param>
+    /// <exception cref="FileNotFoundException"></exception>
+    /// <exception cref="ArgumentException"></exception>
+    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="NotSupportedException"></exception>
+    /// <exception cref="NullReferenceException"></exception>
+    /// <exception cref="ArgumentOutOfRangeException"></exception>
+    /// <exception cref="IOException"></exception>
+    /// <exception cref="SecurityException"></exception>
+    /// <exception cref="DirectoryNotFoundException"></exception>
+    /// <exception cref="UnauthorizedAccessException"></exception>
+    /// <exception cref="PathTooLongException"></exception>
+    /// <returns><see cref="FileStream"/></returns>
+    public FileStream OpenWrite( FileMode mode, int bufferSize = 4096, bool useAsync = true ) => Open(mode, FileAccess.Write, FileShare.None, bufferSize, useAsync);
+
+
+    // ---------------------------------------------------------------------------------------------------------------------------------------------------
+
+    // /// <summary>
+    // /// Reads the contents of the file as a <see cref="string"/>.
+    // /// </summary>
+    // /// <exception cref="NullReferenceException">if FullPath is null or empty</exception>
+    // /// <exception cref="FileNotFoundException">if file is not found</exception>	'
+    // /// <returns><see cref="string"/></returns>
+    // public string ReadAsString()
+    // {
+    //     using var stream = new StreamReader(OpenRead(), _encoding);
+    //     return stream.ReadToEnd();
+    // }
+    //
+    // /// <summary>
+    // /// Reads the contents of the file as a <see cref="string"/>, asynchronously.
+    // /// </summary>
+    // /// <exception cref="NullReferenceException">if FullPath is null or empty</exception>
+    // /// <exception cref="FileNotFoundException">if file is not found</exception>
+    // /// <returns><see cref="string"/></returns>
+    // public async Task<string> ReadAsStringAsync()
+    // {
+    //     using var stream = new StreamReader(OpenRead(), _encoding);
+    //     return await stream.ReadToEndAsync();
+    // }
+    //
+    //
+    // /// <summary>
+    // /// Reads the contents of the file as a <see cref="string"/>.
+    // /// </summary>
+    // /// <exception cref="NullReferenceException">if FullPath is null or empty</exception>
+    // /// <exception cref="FileNotFoundException">if file is not found</exception>
+    // /// <returns><see cref="string"/></returns>
+    // public T Read<T>()
+    // {
+    //     string content = ReadAsString();
+    //     return content.FromJson<T>();
+    //
+    //     /// <summary>
+    //     /// Reads the contents of the file as a <see cref="string"/>, then calls <see cref="JsonExtensions.FromJson{TResult}(string)"/> on it, asynchronously.
+    //     /// </summary>
+    //     /// <typeparam name="T"></typeparam>
+    //     /// <exception cref="NullReferenceException">if FullPath is null or empty</exception>
+    //     /// <exception cref="FileNotFoundException">if file is not found</exception>
+    //     /// <exception cref="JsonReaderException">if an error in deserialization occurs</exception>
+    //     /// <returns><typeparamref name="T"/></returns>
+    // }
+    // /// <summary>
+    // /// Reads the contents of the file as a <see cref="string"/>, then calls <see cref="JsonExtensions.FromJson{TResult}(string)"/> on it, asynchronously.
+    // /// </summary>
+    // /// <typeparam name="T"></typeparam>
+    // /// <exception cref="NullReferenceException">if FullPath is null or empty</exception>
+    // /// <exception cref="FileNotFoundException">if file is not found</exception>
+    // /// <exception cref="JsonReaderException">if an error in deserialization occurs</exception>
+    // /// <returns><typeparamref name="T"/></returns>
+    // public async Task<T> ReadAsync<T>()
+    // {
+    //     string content = await ReadAsStringAsync();
+    //     return content.FromJson<T>();
+    // }
+    //
+    //
+    // /// <summary>
+    // /// Reads the contents of the file as a <see cref="ReadOnlySpan{byte}"/>.
+    // /// </summary>
+    // /// <exception cref="NullReferenceException">if FullPath is null or empty</exception>
+    // /// <exception cref="FileNotFoundException">if file is not found</exception>
+    // /// <returns><see cref="ReadOnlySpan{byte}"/></returns>
+    // public ReadOnlySpan<char> ReadAsSpan()
+    // {
+    //     using var stream = new StreamReader(OpenRead(), _encoding);
+    //     return stream.ReadToEnd();
+    // }
+    //
+    //
+    // /// <summary>
+    // /// Reads the contents of the file as a byte array.
+    // /// </summary>
+    // /// <exception cref="NullReferenceException">if FullPath is null or empty</exception>
+    // /// <exception cref="FileNotFoundException">if file is not found</exception>
+    // /// <returns><see cref="byte[]"/></returns>
+    // public byte[] ReadAsBytes()
+    // {
+    //     using FileStream file   = OpenRead();
+    //     using var        stream = new MemoryStream();
+    //     file.CopyTo(stream);
+    //     return stream.ToArray();
+    // }
+    // /// <summary>
+    // /// Reads the contents of the file as a byte array.
+    // /// </summary>
+    // /// <exception cref="NullReferenceException">if FullPath is null or empty</exception>
+    // /// <exception cref="FileNotFoundException">if file is not found</exception>
+    // /// <returns><see cref="byte[]"/></returns>
+    // public async Task<byte[]> ReadAsBytesAsync( CancellationToken token )
+    // {
+    //     await using FileStream file   = OpenRead();
+    //     await using var        stream = new MemoryStream();
+    //     await file.CopyToAsync(stream, token);
+    //     return stream.ToArray();
+    // }
+    //
+    //
+    // /// <summary>
+    // /// Reads the contents of the file as a <see cref="ReadOnlyMemory{byte}"/>.
+    // /// </summary>
+    // /// <exception cref="NullReferenceException">if FullPath is null or empty</exception>
+    // /// <exception cref="FileNotFoundException">if file is not found</exception>
+    // /// <returns><see cref="ReadOnlyMemory{byte}"/></returns>
+    // public ReadOnlyMemory<byte> ReadAsMemory()
+    // {
+    //     ReadOnlyMemory<byte> results = ReadAsBytes();
+    //     return results;
+    // }
+    // /// <summary>
+    // /// Reads the contents of the file as a <see cref="ReadOnlyMemory{byte}"/>, asynchronously.
+    // /// </summary>
+    // /// <param name="token"></param>
+    // /// <exception cref="NullReferenceException">if FullPath is null or empty</exception>
+    // /// <exception cref="FileNotFoundException">if file is not found</exception>
+    // /// <returns><see cref="ReadOnlyMemory{byte}"/></returns>
+    // public async Task<ReadOnlyMemory<byte>> ReadAsMemoryAsync( CancellationToken token )
+    // {
+    //     ReadOnlyMemory<byte> results = await ReadAsBytesAsync(token);
+    //     return results;
+    // }
+    // public async Task<MemoryStream> ReadAsStreamAsync( CancellationToken token )
+    // {
+    //     await using FileStream file   = OpenRead();
+    //     var                    stream = new MemoryStream();
+    //     await file.CopyToAsync(stream, token).ConfigureAwait(false);
+    //     return stream;
+    // }
 
 
     // ---------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-    public string ReadAsString()
+    public IReadHandler Read() => this;
+
+
+
+    public interface IReadHandler
+    {
+        /// <summary>
+        /// Reads the contents of the file as a <see cref="ReadOnlySpan{byte}"/>.
+        /// </summary>
+        /// <exception cref="NullReferenceException">if FullPath is null or empty</exception>
+        /// <exception cref="FileNotFoundException">if file is not found</exception>
+        /// <returns><see cref="ReadOnlySpan{byte}"/></returns>
+        ReadOnlySpan<char> AsSpan();
+        /// <summary>
+        /// Reads the contents of the file as a <see cref="string"/>.
+        /// </summary>
+        /// <exception cref="NullReferenceException">if FullPath is null or empty</exception>
+        /// <exception cref="FileNotFoundException">if file is not found</exception>	'
+        /// <returns><see cref="string"/></returns>
+        string AsString();
+        /// <summary>
+        /// Reads the contents of the file as a <see cref="string"/>.
+        /// </summary>
+        /// <exception cref="NullReferenceException">if FullPath is null or empty</exception>
+        /// <exception cref="FileNotFoundException">if file is not found</exception>
+        /// <returns><see cref="string"/></returns>
+        T AsJson<T>();
+        /// <summary>
+        /// Reads the contents of the file as a byte array.
+        /// </summary>
+        /// <exception cref="NullReferenceException">if FullPath is null or empty</exception>
+        /// <exception cref="FileNotFoundException">if file is not found</exception>
+        /// <returns><see cref="byte[]"/></returns>
+        byte[] AsBytes();
+        /// <summary>
+        /// Reads the contents of the file as a <see cref="ReadOnlyMemory{byte}"/>.
+        /// </summary>
+        /// <exception cref="NullReferenceException">if FullPath is null or empty</exception>
+        /// <exception cref="FileNotFoundException">if file is not found</exception>
+        /// <returns><see cref="ReadOnlyMemory{byte}"/></returns>
+        ReadOnlyMemory<byte> AsMemory();
+    }
+
+
+
+    /// <summary>
+    /// Reads the contents of the file as a <see cref="string"/>.
+    /// </summary>
+    /// <exception cref="NullReferenceException">if FullPath is null or empty</exception>
+    /// <exception cref="FileNotFoundException">if file is not found</exception>
+    /// <returns><see cref="string"/></returns>
+    T IReadHandler.AsJson<T>()
+    {
+        using var stream  = new StreamReader(OpenRead(), _encoding);
+        string    content = stream.ReadToEnd();
+        return content.FromJson<T>();
+
+        /// <summary>
+        /// Reads the contents of the file as a <see cref="string"/>, then calls <see cref="JsonExtensions.FromJson{TResult}(string)"/> on it, asynchronously.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <exception cref="NullReferenceException">if FullPath is null or empty</exception>
+        /// <exception cref="FileNotFoundException">if file is not found</exception>
+        /// <exception cref="JsonReaderException">if an error in deserialization occurs</exception>
+        /// <returns><typeparamref name="T"/></returns>
+    }
+
+    /// <summary>
+    /// Reads the contents of the file as a <see cref="string"/>.
+    /// </summary>
+    /// <exception cref="NullReferenceException">if FullPath is null or empty</exception>
+    /// <exception cref="FileNotFoundException">if file is not found</exception>	'
+    /// <returns><see cref="string"/></returns>
+    string IReadHandler.AsString()
     {
         using var stream = new StreamReader(OpenRead(), _encoding);
         return stream.ReadToEnd();
     }
-    public async Task<string> ReadAsStringAsync()
-    {
-        using var stream = new StreamReader(OpenRead(), _encoding);
-        return await stream.ReadToEndAsync();
-    }
-
-    public T Read<T>()
-    {
-        string content = ReadAsString();
-        return content.FromJson<T>();
-    }
-    public async Task<T> ReadAsync<T>()
-    {
-        string content = await ReadAsStringAsync();
-        return content.FromJson<T>();
-    }
 
 
-    public ReadOnlySpan<char> ReadAsSpan()
+    /// <summary>
+    /// Reads the contents of the file as a <see cref="ReadOnlySpan{byte}"/>.
+    /// </summary>
+    /// <exception cref="NullReferenceException">if FullPath is null or empty</exception>
+    /// <exception cref="FileNotFoundException">if file is not found</exception>
+    /// <returns><see cref="ReadOnlySpan{byte}"/></returns>
+    ReadOnlySpan<char> IReadHandler.AsSpan()
     {
-        using var stream = new StreamReader(OpenRead(), _encoding);
-        return stream.ReadToEnd();
+        using var          stream = new StreamReader(OpenRead(), _encoding);
+        ReadOnlySpan<char> result = stream.ReadToEnd();
+        return result;
     }
 
 
-    public byte[] ReadAsBytes()
+    /// <summary>
+    /// Reads the contents of the file as a byte array.
+    /// </summary>
+    /// <exception cref="NullReferenceException">if FullPath is null or empty</exception>
+    /// <exception cref="FileNotFoundException">if file is not found</exception>
+    /// <returns><see cref="byte[]"/></returns>
+    byte[] IReadHandler.AsBytes()
     {
         using FileStream file   = OpenRead();
         using var        stream = new MemoryStream();
         file.CopyTo(stream);
         return stream.ToArray();
     }
-    public async Task<byte[]> ReadAsBytesAsync( CancellationToken token )
-    {
-        await using FileStream file   = OpenRead();
-        await using var        stream = new MemoryStream();
-        await file.CopyToAsync(stream, token);
-        return stream.ToArray();
-    }
 
 
-    public ReadOnlyMemory<byte> ReadAsMemory()
+    /// <summary>
+    /// Reads the contents of the file as a <see cref="ReadOnlyMemory{byte}"/>.
+    /// </summary>
+    /// <exception cref="NullReferenceException">if FullPath is null or empty</exception>
+    /// <exception cref="FileNotFoundException">if file is not found</exception>
+    /// <returns><see cref="ReadOnlyMemory{byte}"/></returns>
+    ReadOnlyMemory<byte> IReadHandler.AsMemory()
     {
-        ReadOnlyMemory<byte> results = ReadAsBytes();
+        using FileStream file   = OpenRead();
+        using var        stream = new MemoryStream();
+        file.CopyTo(stream);
+        ReadOnlyMemory<byte> results = stream.ToArray();
         return results;
-    }
-    public async Task<ReadOnlyMemory<byte>> ReadAsMemoryAsync( CancellationToken token )
-    {
-        ReadOnlyMemory<byte> results = await ReadAsBytesAsync(token);
-        return results;
-    }
-
-
-    public async Task<MemoryStream> ReadAsStreamAsync( CancellationToken token )
-    {
-        await using FileStream file   = OpenRead();
-        var                    stream = new MemoryStream();
-        await file.CopyToAsync(stream, token);
-        return stream;
     }
 
 
     // ---------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-    public       void Write( StringBuilder      payload ) => Write(payload.ToString());
-    public async Task WriteAsync( StringBuilder payload ) => await WriteAsync(payload.ToString());
+    public IAsyncReadHandler ReadAsync() => this;
 
 
+
+    public interface IAsyncReadHandler
+    {
+        /// <summary>
+        /// Reads the contents of the file as a <see cref="string"/>, then calls <see cref="JsonExtensions.FromJson{TResult}(string)"/> on it, asynchronously.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <exception cref="NullReferenceException">if FullPath is null or empty</exception>
+        /// <exception cref="FileNotFoundException">if file is not found</exception>
+        /// <exception cref="JsonReaderException">if an error in deserialization occurs</exception>
+        /// <returns><typeparamref name="T"/></returns>
+        Task<T> AsJson<T>();
+
+        /// <summary>
+        /// Reads the contents of the file as a <see cref="string"/>, asynchronously.
+        /// </summary>
+        /// <exception cref="NullReferenceException">if FullPath is null or empty</exception>
+        /// <exception cref="FileNotFoundException">if file is not found</exception>
+        /// <returns><see cref="string"/></returns>
+        Task<string> AsString();
+
+        /// <summary>
+        /// Reads the contents of the file as a byte array.
+        /// </summary>
+        /// <exception cref="NullReferenceException">if FullPath is null or empty</exception>
+        /// <exception cref="FileNotFoundException">if file is not found</exception>
+        /// <returns><see cref="byte[]"/></returns>
+        Task<byte[]> AsBytes( CancellationToken token );
+
+        /// <summary>
+        /// Reads the contents of the file as a <see cref="ReadOnlyMemory{byte}"/>, asynchronously.
+        /// </summary>
+        /// <param name="token"></param>
+        /// <exception cref="NullReferenceException">if FullPath is null or empty</exception>
+        /// <exception cref="FileNotFoundException">if file is not found</exception>
+        /// <returns><see cref="ReadOnlyMemory{byte}"/></returns>
+        Task<ReadOnlyMemory<byte>> AsMemory( CancellationToken token );
+
+
+        Task<MemoryStream> AsStream( CancellationToken token );
+    }
+
+
+
+    async Task<string> IAsyncReadHandler.AsString()
+    {
+        using var stream = new StreamReader(OpenRead(), _encoding);
+        return await stream.ReadToEndAsync().ConfigureAwait(false);
+    }
+
+
+    async Task<T> IAsyncReadHandler.AsJson<T>()
+    {
+        using var stream  = new StreamReader(OpenRead(), _encoding);
+        string    content = await stream.ReadToEndAsync().ConfigureAwait(false);
+        return content.FromJson<T>();
+    }
+
+
+    async Task<byte[]> IAsyncReadHandler.AsBytes( CancellationToken token )
+    {
+        await using FileStream file   = OpenRead();
+        await using var        stream = new MemoryStream();
+        await file.CopyToAsync(stream, token).ConfigureAwait(false);
+        return stream.ToArray();
+    }
+
+
+    async Task<ReadOnlyMemory<byte>> IAsyncReadHandler.AsMemory( CancellationToken token )
+    {
+        await using FileStream file   = OpenRead();
+        await using var        stream = new MemoryStream();
+        await file.CopyToAsync(stream, token).ConfigureAwait(false);
+        ReadOnlyMemory<byte> results = stream.ToArray();
+        return results;
+    }
+
+
+    async Task<MemoryStream> IAsyncReadHandler.AsStream( CancellationToken token )
+    {
+        await using FileStream file   = OpenRead();
+        var                    stream = new MemoryStream();
+        await file.CopyToAsync(stream, token).ConfigureAwait(false);
+        return stream;
+    }
+
+
+    // ---------------------------------------------------------------------------------------------------------------------------------------------------
+
+    /// <summary>
+    /// Write the <paramref name="payload"/> to the file.
+    /// </summary>
+    /// <param name="payload">the data being written to the file</param>
+    /// <exception cref="NullReferenceException"></exception>
+    /// <exception cref="ArgumentException"></exception>
+    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="FileNotFoundException"></exception>
+    /// <returns><see cref="Task"/></returns>
+    public void Write( StringBuilder payload ) => Write(payload.ToString());
+    /// <summary>
+    /// Write the <paramref name="payload"/> to the file.
+    /// </summary>
+    /// <param name="payload">the data being written to the file</param>
+    /// <exception cref="NullReferenceException"></exception>
+    /// <exception cref="ArgumentException"></exception>
+    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="FileNotFoundException"></exception>
+    /// <returns><see cref="Task"/></returns>
+    public async Task WriteAsync( StringBuilder payload ) => await WriteAsync(payload.ToString()).ConfigureAwait(false);
+
+
+    /// <summary>
+    /// Write the <paramref name="payload"/> to the file.
+    /// </summary>
+    /// <param name="payload">the data being written to the file</param>
+    /// <exception cref="NullReferenceException"></exception>
+    /// <exception cref="ArgumentException"></exception>
+    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="FileNotFoundException"></exception>
+    /// <returns><see cref="Task"/></returns>
     public void Write( string payload )
     {
         if ( string.IsNullOrWhiteSpace(payload) ) { throw new ArgumentNullException(nameof(payload)); }
@@ -294,16 +737,33 @@ public class LocalFile : ILocalFile<LocalFile, LocalDirectory>
         using var        writer = new StreamWriter(stream, _encoding);
         writer.Write(payload);
     }
+    /// <summary>
+    /// Write the <paramref name="payload"/> to the file.
+    /// </summary>
+    /// <param name="payload">the data being written to the file</param>
+    /// <exception cref="NullReferenceException"></exception>
+    /// <exception cref="ArgumentException"></exception>
+    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="FileNotFoundException"></exception>
+    /// <returns><see cref="Task"/></returns>
     public async Task WriteAsync( string payload )
     {
         if ( string.IsNullOrWhiteSpace(payload) ) { throw new ArgumentNullException(nameof(payload)); }
 
         await using FileStream stream = Create();
         await using var        writer = new StreamWriter(stream, _encoding);
-        await writer.WriteAsync(payload);
+        await writer.WriteAsync(payload).ConfigureAwait(false);
     }
 
 
+    /// <summary>
+    /// Write the <paramref name="payload"/> to the file.
+    /// </summary>
+    /// <param name="payload">the data being written to the file</param>
+    /// <exception cref="NullReferenceException"></exception>
+    /// <exception cref="ArgumentException"></exception>
+    /// <exception cref="FileNotFoundException"></exception>
+    /// <returns><see cref="Task"/></returns>
     public void Write( byte[] payload )
     {
         if ( payload.Length == 0 ) { throw new ArgumentException(@"payload.Length == 0", nameof(payload)); }
@@ -311,15 +771,51 @@ public class LocalFile : ILocalFile<LocalFile, LocalDirectory>
         using FileStream stream = Create();
         stream.Write(payload, 0, payload.Length);
     }
+    /// <summary>
+    /// Write the <paramref name="payload"/> to the file.
+    /// </summary>
+    /// <param name="payload">the data being written to the file</param>
+    /// <param name="token"></param>
+    /// <exception cref="NullReferenceException"></exception>
+    /// <exception cref="ArgumentException"></exception>
+    /// <exception cref="FileNotFoundException"></exception>
+    /// <returns><see cref="Task"/></returns>
     public async Task WriteAsync( byte[] payload, CancellationToken token )
     {
         if ( payload.Length == 0 ) { throw new ArgumentException(@"payload.Length == 0", nameof(payload)); }
 
         await using FileStream stream = Create();
-        await stream.WriteAsync(payload, token);
+        await stream.WriteAsync(payload, token).ConfigureAwait(false);
     }
 
 
+    /// <summary>
+    /// Write the <paramref name="payload"/> to the file.
+    /// </summary>
+    /// <param name="payload">the data being written to the file</param>
+    /// <exception cref="NullReferenceException"></exception>
+    /// <exception cref="ArgumentException"></exception>
+    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="FileNotFoundException"></exception>
+    /// <returns><see cref="Task"/></returns>
+    public void Write( Span<byte> payload )
+    {
+        if ( payload.Length == 0 ) { throw new ArgumentException(@"payload.Length == 0", nameof(payload)); }
+
+        using FileStream stream = Create();
+        stream.Write(payload);
+    }
+
+
+    /// <summary>
+    /// Write the <paramref name="payload"/> to the file.
+    /// </summary>
+    /// <param name="payload">the data being written to the file</param>
+    /// <exception cref="NullReferenceException"></exception>
+    /// <exception cref="ArgumentException"></exception>
+    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="FileNotFoundException"></exception>
+    /// <returns><see cref="Task"/></returns>
     public void Write( ReadOnlySpan<byte> payload )
     {
         if ( payload.Length == 0 ) { throw new ArgumentException(@"payload.Length == 0", nameof(payload)); }
@@ -327,16 +823,46 @@ public class LocalFile : ILocalFile<LocalFile, LocalDirectory>
         using FileStream stream = Create();
         stream.Write(payload);
     }
+
+
+    /// <summary>
+    /// Write the <paramref name="payload"/> to the file.
+    /// </summary>
+    /// <param name="payload">the data being written to the file</param>
+    /// <exception cref="NullReferenceException"></exception>
+    /// <exception cref="ArgumentException"></exception>
+    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="FileNotFoundException"></exception>
+    /// <returns><see cref="Task"/></returns>
+    public void Write( ReadOnlyMemory<byte> payload ) => Write(payload.ToArray());
+    /// <summary>
+    /// Write the <paramref name="payload"/> to the file.
+    /// </summary>
+    /// <param name="payload">the data being written to the file</param>
+    /// <param name="token"></param>
+    /// <exception cref="NullReferenceException"></exception>
+    /// <exception cref="ArgumentException"></exception>
+    /// <exception cref="FileNotFoundException"></exception>
+    /// <returns><see cref="Task"/></returns>
     public async Task WriteAsync( ReadOnlyMemory<byte> payload, CancellationToken token )
     {
         if ( payload.Length == 0 ) { throw new ArgumentException(@"payload.Length == 0", nameof(payload)); }
 
         await using FileStream stream = Create();
-        await stream.WriteAsync(payload, token);
+        await stream.WriteAsync(payload, token).ConfigureAwait(false);
     }
 
 
-    public void Write( ReadOnlySpan<char> payload )
+    /// <summary>
+    /// Write the <paramref name="payload"/> to the file.
+    /// </summary>
+    /// <param name="payload">the data being written to the file</param>
+    /// <exception cref="NullReferenceException"></exception>
+    /// <exception cref="ArgumentException"></exception>
+    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="FileNotFoundException"></exception>
+    /// <returns><see cref="Task"/></returns>
+    public void Write( ReadOnlyMemory<char> payload )
     {
         if ( payload.Length == 0 ) { throw new ArgumentException(@"payload.Length == 0", nameof(payload)); }
 
@@ -344,14 +870,32 @@ public class LocalFile : ILocalFile<LocalFile, LocalDirectory>
         using var        writer = new StreamWriter(stream, _encoding);
         writer.Write(payload);
     }
+    /// <summary>
+    /// Write the <paramref name="payload"/> to the file.
+    /// </summary>
+    /// <param name="payload">the data being written to the file</param>
+    /// <param name="token"></param>
+    /// <exception cref="NullReferenceException"></exception>
+    /// <exception cref="ArgumentException"></exception>
+    /// <exception cref="FileNotFoundException"></exception>
+    /// <returns><see cref="Task"/></returns>
     public async Task WriteAsync( ReadOnlyMemory<char> payload, CancellationToken token )
     {
         await using FileStream stream = Create();
         await using var        writer = new StreamWriter(stream, _encoding);
-        await writer.WriteAsync(payload, token);
+        await writer.WriteAsync(payload, token).ConfigureAwait(false);
     }
 
 
+    /// <summary>
+    /// Write the <paramref name="payload"/> to the file.
+    /// </summary>
+    /// <param name="payload">the data being written to the file</param>
+    /// <exception cref="NullReferenceException"></exception>
+    /// <exception cref="ArgumentException"></exception>
+    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="FileNotFoundException"></exception>
+    /// <returns><see cref="Task"/></returns>
     public void Write( Stream payload )
     {
         if ( payload is null ) { throw new ArgumentNullException(nameof(payload)); }
@@ -361,7 +905,16 @@ public class LocalFile : ILocalFile<LocalFile, LocalDirectory>
         ReadOnlySpan<byte> data = memory.ToArray();
         Write(data);
     }
-
+    /// <summary>
+    /// Write the <paramref name="payload"/> to the file.
+    /// </summary>
+    /// <param name="payload">the data being written to the file</param>
+    /// <param name="token"></param>
+    /// <exception cref="NullReferenceException"></exception>
+    /// <exception cref="ArgumentException"></exception>
+    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="FileNotFoundException"></exception>
+    /// <returns><see cref="Task"/></returns>
     public async Task WriteAsync( Stream payload, CancellationToken token )
     {
         if ( payload is null ) { throw new ArgumentNullException(nameof(payload)); }
@@ -369,7 +922,42 @@ public class LocalFile : ILocalFile<LocalFile, LocalDirectory>
         await using var memory = new MemoryStream();
         await payload.CopyToAsync(memory, token);
         ReadOnlyMemory<byte> data = memory.ToArray();
-        await WriteAsync(data, token);
+        await WriteAsync(data, token).ConfigureAwait(false);
+    }
+
+
+    /// <summary>
+    /// Write the <paramref name="uri"/> to the file.
+    /// </summary>
+    /// <param name="uri">the data being written to the file</param>
+    /// <exception cref="NullReferenceException"></exception>
+    /// <exception cref="ArgumentException"></exception>
+    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="FileNotFoundException"></exception>
+    /// <returns><see cref="Task"/></returns>
+    public void Write( Uri uri )
+    {
+        if ( uri is null ) { throw new ArgumentNullException(nameof(uri)); }
+
+        using var client = new WebClient();
+        client.DownloadFile(uri, FullPath);
+    }
+    /// <summary>
+    /// Write the <paramref name="uri"/> to the file.
+    /// </summary>
+    /// <param name="uri">the data being written to the file</param>
+    /// <param name="token"></param>
+    /// <exception cref="NullReferenceException"></exception>
+    /// <exception cref="ArgumentException"></exception>
+    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="FileNotFoundException"></exception>
+    /// <returns><see cref="Task"/></returns>
+    public async Task WriteAsync( Uri uri, CancellationToken token )
+    {
+        if ( uri is null ) { throw new ArgumentNullException(nameof(uri)); }
+
+        using var client = new WebClient();
+        await client.DownloadFileTaskAsync(uri, FullPath).ConfigureAwait(false);
     }
 
 
@@ -389,7 +977,7 @@ public class LocalFile : ILocalFile<LocalFile, LocalDirectory>
     public static async Task<LocalFile> SaveToFileAsync( string path, Stream payload, CancellationToken token )
     {
         var file = new LocalFile(path);
-        await file.WriteAsync(payload, token);
+        await file.WriteAsync(payload, token).ConfigureAwait(false);
         return file;
     }
 
@@ -407,7 +995,7 @@ public class LocalFile : ILocalFile<LocalFile, LocalDirectory>
     public static async Task<LocalFile> SaveToFileAsync( string path, ReadOnlyMemory<byte> payload, CancellationToken token )
     {
         var file = new LocalFile(path);
-        await file.WriteAsync(payload, token);
+        await file.WriteAsync(payload, token).ConfigureAwait(false);
         return file;
     }
 
@@ -438,7 +1026,6 @@ public class LocalFile : ILocalFile<LocalFile, LocalDirectory>
         if ( uri.IsFile ) { return new LocalFile(uri); }
 
         using var client = new WebClient();
-
         client.DownloadFile(uri, path);
         return new LocalFile(path);
     }
@@ -453,7 +1040,7 @@ public class LocalFile : ILocalFile<LocalFile, LocalDirectory>
     /// <exception cref="WebException"></exception>
     /// <exception cref="NotSupportedException"></exception>
     /// <returns></returns>
-    public static Task<LocalFile> SaveToFileAsync( string path, string uri ) => SaveToFileAsync(path, new Uri(uri));
+    public static async Task<LocalFile> SaveToFileAsync( string path, string uri ) => await SaveToFileAsync(path, new Uri(uri)).ConfigureAwait(false);
 
 
     /// <summary>
@@ -471,7 +1058,7 @@ public class LocalFile : ILocalFile<LocalFile, LocalDirectory>
 
         var       file   = new LocalFile(path);
         using var client = new WebClient();
-        await client.DownloadFileTaskAsync(uri, file.FullPath);
+        await client.DownloadFileTaskAsync(uri, file.FullPath).ConfigureAwait(false);
         return file;
     }
 
@@ -479,7 +1066,77 @@ public class LocalFile : ILocalFile<LocalFile, LocalDirectory>
     // ---------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-    public override bool Equals( object other ) => other is LocalFile file && Equals(file);
+
+    private sealed class EqualityComparer : IEqualityComparer<LocalFile>
+    {
+        public static EqualityComparer Instance { get; } = new();
+
+
+        public bool Equals( LocalFile? x, LocalFile? y )
+        {
+            if ( x is null ) { return false; }
+
+            if ( y is null ) { return false; }
+
+            if ( ReferenceEquals(x, y) ) { return true; }
+
+            return x.Equals(y);
+        }
+
+        public int GetHashCode( LocalFile obj ) => obj.GetHashCode();
+    }
+
+
+
+    private sealed class RelationalComparer : IComparer<LocalFile>
+    {
+        public static RelationalComparer Instance { get; } = new();
+
+
+        public int Compare( LocalFile? left, LocalFile? right )
+        {
+            if ( left is null ) { return 1; }
+
+            if ( right is null ) { return -1; }
+
+            if ( ReferenceEquals(left, right) ) { return 0; }
+
+            return left.CompareTo(right);
+        }
+    }
+
+
+
+    public static bool operator ==( LocalFile? left, LocalFile? right ) => EqualityComparer.Instance.Equals(left, right);
+    public static bool operator !=( LocalFile? left, LocalFile? right ) => !EqualityComparer.Instance.Equals(left, right);
+    public static bool operator <( LocalFile?  left, LocalFile? right ) => RelationalComparer.Instance.Compare(left, right) < 0;
+    public static bool operator >( LocalFile?  left, LocalFile? right ) => RelationalComparer.Instance.Compare(left, right) > 0;
+    public static bool operator <=( LocalFile? left, LocalFile? right ) => RelationalComparer.Instance.Compare(left, right) <= 0;
+    public static bool operator >=( LocalFile? left, LocalFile? right ) => RelationalComparer.Instance.Compare(left, right) >= 0;
+
+
+    public int CompareTo( object? obj )
+    {
+        if ( obj is null ) { return 1; }
+
+        if ( ReferenceEquals(this, obj) ) { return 0; }
+
+
+        return obj is LocalFile other
+                   ? CompareTo(other)
+                   : throw new ExpectedValueTypeException(nameof(obj), obj, typeof(LocalFile));
+    }
+    public int CompareTo( LocalFile? other )
+    {
+        if ( ReferenceEquals(this, other) ) { return 0; }
+
+        if ( ReferenceEquals(null, other) ) { return 1; }
+
+        return string.Compare(FullPath, other.FullPath, StringComparison.Ordinal);
+    }
+
+
+    public override bool Equals( object? other ) => other is LocalFile file && Equals(file);
 
     public override int GetHashCode() => HashCode.Combine(FullPath, this.IsTempFile());
 
@@ -490,14 +1147,9 @@ public class LocalFile : ILocalFile<LocalFile, LocalDirectory>
 
         if ( ReferenceEquals(this, other) ) { return true; }
 
-
-        return ( (TempFile.ITempFile)this ).IsTemporary == ( (TempFile.ITempFile)other ).IsTemporary && FullPath == other.FullPath;
+        return this.IsTempFile() == other.IsTempFile() &&
+               FullPath == other.FullPath;
     }
-
-
-    public static bool operator ==( LocalFile left, LocalFile? right ) => left.Equals(right);
-
-    public static bool operator !=( LocalFile left, LocalFile? right ) => !( left == right );
 
 
     private bool _isTemporary;
@@ -518,19 +1170,6 @@ public class LocalFile : ILocalFile<LocalFile, LocalDirectory>
     protected virtual void Dispose( bool remove )
     {
         if ( remove && Exists ) { Delete(); }
-    }
-
-
-    public int CompareTo( LocalFile? other )
-    {
-        if ( ReferenceEquals(this, other) ) { return 0; }
-
-        if ( ReferenceEquals(null, other) ) { return 1; }
-
-        int isTemporaryComparison = _isTemporary.CompareTo(other._isTemporary);
-        if ( isTemporaryComparison != 0 ) { return isTemporaryComparison; }
-
-        return string.Compare(FullPath, other.FullPath, StringComparison.Ordinal);
     }
 
 

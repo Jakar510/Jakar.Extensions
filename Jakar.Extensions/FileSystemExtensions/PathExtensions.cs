@@ -59,7 +59,7 @@ public static class PathExtensions
     public static Task<LocalFile> ZipAsync( this LocalFile zipFilePath, IEnumerable<string> files, CancellationToken  token ) => zipFilePath.ZipAsync(files.Select(item => new LocalFile(item)), token);
     public static Task<LocalFile> ZipAsync( this LocalFile zipFilePath, CancellationToken   token, params LocalFile[] files ) => zipFilePath.ZipAsync(files, token);
 
-    public static async Task<LocalFile> ZipAsync( this LocalFile zipFilePath, IEnumerable<LocalFile> items , CancellationToken token)
+    public static async Task<LocalFile> ZipAsync( this LocalFile zipFilePath, IEnumerable<LocalFile> items, CancellationToken token )
     {
         if ( items is null ) throw new ArgumentNullException(nameof(items));
 
@@ -71,7 +71,7 @@ public static class PathExtensions
             ZipArchiveEntry    entry  = archive.CreateEntry(file.FullPath);
             await using Stream stream = entry.Open();
 
-            ReadOnlyMemory<byte> data = await file.ReadAsMemoryAsync(token);
+            ReadOnlyMemory<byte> data = await file.ReadAsync().AsMemory(token);
             await stream.WriteAsync(data, CancellationToken.None);
         }
 

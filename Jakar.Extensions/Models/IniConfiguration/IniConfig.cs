@@ -44,7 +44,7 @@ public partial class IniConfig : ConcurrentDictionary<string, IniConfig.Section>
 
     public static async Task<IniConfig?> ReadFromFile( LocalFile file )
     {
-        string content = await file.ReadAsStringAsync();
+        string content = await file.ReadAsync().AsString();
         return FromString(content);
     }
 

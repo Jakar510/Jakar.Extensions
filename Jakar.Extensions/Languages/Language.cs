@@ -62,12 +62,11 @@ public readonly struct Language : IDataBaseID, IComparable<Language>, IEquatable
     }
     public int CompareTo( object? obj )
     {
-        if ( ReferenceEquals(null, obj) ) return 1;
-        if ( ReferenceEquals(this, obj) ) return 0;
+        if ( obj is null ) { return 1; }
 
         return obj is Language other
                    ? CompareTo(other)
-                   : throw new ArgumentException($"Object must be of type {nameof(Language)}");
+                   : throw new ExpectedValueTypeException(nameof(obj), obj, typeof(Language));
     }
 
 

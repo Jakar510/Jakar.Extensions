@@ -6,7 +6,7 @@ namespace Jakar.Extensions.FileSystemExtensions;
 
 
 [Serializable]
-public class LocalDirectory : ILocalDirectory<LocalFile, LocalDirectory>, IAsyncDisposable
+public class LocalDirectory : TempFile.ITempFile, IEquatable<LocalDirectory>, IAsyncDisposable, IDisposable
 {
     protected DirectoryInfo? _info;
 
@@ -77,6 +77,8 @@ public class LocalDirectory : ILocalDirectory<LocalFile, LocalDirectory>, IAsync
     public static implicit operator LocalDirectory( DirectoryInfo      info ) => new(info);
     public static implicit operator LocalDirectory( ReadOnlySpan<char> info ) => new(info);
 
+    public sealed override string ToString() => FullPath;
+
 
     /// <summary>
     /// Uses the <paramref name="path"/> and creates the tree structure based on <paramref name="subFolders"/>
@@ -106,28 +108,172 @@ public class LocalDirectory : ILocalDirectory<LocalFile, LocalDirectory>, IAsync
 
 
     /// <summary>
+    /// Uses the <see cref="Encoding.Default"/> encoding to used for the file names
+    /// </summary>
+    /// <param name="output">file path to write the zip to</param>
+    /// <param name="compression">Defaults to <see cref="CompressionLevel.Optimal"/></param>
+    public void Zip( in LocalFile output, in CompressionLevel compression = CompressionLevel.Optimal ) => Zip(output, Encoding.Default, compression);
+    /// <summary>
     /// 
     /// </summary>
     /// <param name="output">file path to write the zip to</param>
     /// <param name="compression">Defaults to <see cref="CompressionLevel.Optimal"/></param>
-    /// <param name="encoding">Defaults to <see cref="Encoding.Default"/></param>
-    public void Zip( in LocalFile output, in CompressionLevel compression = CompressionLevel.Optimal, in Encoding? encoding = null )
-        => ZipFile.CreateFromDirectory(FullPath,
-                                       output.FullPath,
-                                       compression,
-                                       true,
-                                       encoding ?? Encoding.Default);
-
-    public override string ToString() => FullPath;
+    /// <param name="encoding">The encoding used for the file names</param>
+    public void Zip( in LocalFile output, in Encoding encoding, in CompressionLevel compression = CompressionLevel.Optimal )
+        => ZipFile.CreateFromDirectory(FullPath, output.FullPath, compression, true, encoding);
 
 
+    /// <summary>
+    /// Gets the <see cref="LocalDirectory"/> object of the directory in this <see cref="LocalDirectory"/>
+    /// </summary>
+    /// <param name="paths"></param>
+    /// <exception cref="ArgumentException"></exception>
+    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="DirectoryNotFoundException"></exception>
+    /// <exception cref="IOException"></exception>
+    /// <exception cref="PathTooLongException"></exception>
+    /// <exception cref="SecurityException"></exception>
+    /// <exception cref="NotSupportedException"></exception>
+    /// <returns><see cref="LocalDirectory"/></returns>
     public LocalDirectory CreateSubDirectory( params string[] paths ) => Info.CreateSubdirectory(FullPath.Combine(paths));
 
+    /// <summary>
+    /// Gets the <see cref="LocalFile"/> object of the file in this <see cref="LocalDirectory"/>
+    /// </summary>
+    /// <param name="path"></param>
+    /// <exception cref="ArgumentException"></exception>
+    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="DirectoryNotFoundException"></exception>
+    /// <exception cref="IOException"></exception>
+    /// <exception cref="PathTooLongException"></exception>
+    /// <exception cref="SecurityException"></exception>
+    /// <exception cref="NotSupportedException"></exception>
+    /// <returns><see cref="LocalFile"/></returns>
     public LocalFile Join( string path ) => Info.Combine(path);
 
-    public string Combine( string          path )  => Info.Combine(path);
-    public string Combine( params string[] paths ) => Info.Combine(paths);
+    /// <summary>
+    /// Gets the path of the directory or file in this <see cref="LocalDirectory"/>
+    /// </summary>
+    /// <param name="subPaths"></param>
+    /// <exception cref="ArgumentException"></exception>
+    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="DirectoryNotFoundException"></exception>
+    /// <exception cref="IOException"></exception>
+    /// <exception cref="PathTooLongException"></exception>
+    /// <exception cref="SecurityException"></exception>
+    /// <exception cref="NotSupportedException"></exception>
+    /// <returns><see cref="string"/></returns>
+    public string Combine( string subPaths ) => Info.Combine(subPaths);
 
+    /// <summary>
+    /// Gets the path of the directory or file in this <see cref="LocalDirectory"/>
+    /// </summary>
+    /// <param name="subPaths"></param>
+    /// <exception cref="ArgumentException"></exception>
+    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="DirectoryNotFoundException"></exception>
+    /// <exception cref="IOException"></exception>
+    /// <exception cref="PathTooLongException"></exception>
+    /// <exception cref="SecurityException"></exception>
+    /// <exception cref="NotSupportedException"></exception>
+    /// <returns><see cref="string"/></returns>
+    public string Combine( params string[] subPaths ) => Info.Combine(subPaths);
+
+
+    // ---------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+    private sealed class EqualityComparer : IEqualityComparer<LocalDirectory>
+    {
+        public static EqualityComparer Instance { get; } = new();
+
+
+        public bool Equals( LocalDirectory? x, LocalDirectory? y )
+        {
+            if ( x is null ) { return false; }
+
+            if ( y is null ) { return false; }
+
+            if ( ReferenceEquals(x, y) ) { return true; }
+
+            return x.Equals(y);
+        }
+
+        public int GetHashCode( LocalDirectory obj ) => obj.GetHashCode();
+    }
+
+
+
+    private sealed class RelationalComparer : IComparer<LocalDirectory>
+    {
+        public static RelationalComparer Instance { get; } = new();
+
+
+        public int Compare( LocalDirectory? left, LocalDirectory? right )
+        {
+            if ( left is null ) { return 1; }
+
+            if ( right is null ) { return -1; }
+
+            if ( ReferenceEquals(left, right) ) { return 0; }
+
+            return left.CompareTo(right);
+        }
+    }
+
+
+
+    public static bool operator ==( LocalDirectory? left, LocalDirectory? right ) => EqualityComparer.Instance.Equals(left, right);
+    public static bool operator !=( LocalDirectory? left, LocalDirectory? right ) => !EqualityComparer.Instance.Equals(left, right);
+    public static bool operator <( LocalDirectory?  left, LocalDirectory? right ) => RelationalComparer.Instance.Compare(left, right) < 0;
+    public static bool operator >( LocalDirectory?  left, LocalDirectory? right ) => RelationalComparer.Instance.Compare(left, right) > 0;
+    public static bool operator <=( LocalDirectory? left, LocalDirectory? right ) => RelationalComparer.Instance.Compare(left, right) <= 0;
+    public static bool operator >=( LocalDirectory? left, LocalDirectory? right ) => RelationalComparer.Instance.Compare(left, right) >= 0;
+
+
+    public int CompareTo( object? obj )
+    {
+        if ( obj is null ) { return 1; }
+
+        if ( ReferenceEquals(this, obj) ) { return 0; }
+
+        return obj is LocalDirectory other
+                   ? CompareTo(other)
+                   : throw new ExpectedValueTypeException(nameof(obj), obj, typeof(LocalDirectory));
+    }
+    public int CompareTo( LocalDirectory? other )
+    {
+        if ( ReferenceEquals(this, other) ) { return 0; }
+
+        if ( ReferenceEquals(null, other) ) { return 1; }
+
+        return string.Compare(FullPath, other.FullPath, StringComparison.Ordinal);
+    }
+
+
+    public override bool Equals( object? other ) => other is LocalDirectory file && Equals(file);
+
+    public bool Equals( LocalDirectory? other )
+    {
+        if ( other is null ) { return false; }
+
+        if ( ReferenceEquals(this, other) ) { return true; }
+
+        return this.IsTempFile() == other.IsTempFile() &&
+               FullPath == other.FullPath;
+    }
+
+    public override int GetHashCode() => HashCode.Combine(FullPath, this.IsTempFile());
+
+
+    private bool _isTemporary;
+
+    bool TempFile.ITempFile.IsTemporary
+    {
+        get => _isTemporary;
+        set => _isTemporary = value;
+    }
 
     public void Dispose()
     {
@@ -145,37 +291,6 @@ public class LocalDirectory : ILocalDirectory<LocalFile, LocalDirectory>, IAsync
         if ( !this.IsTempFile() ) { return; }
 
         await DeleteAllRecursivelyAsync();
-    }
-
-
-    private bool _isTemporary;
-
-    bool TempFile.ITempFile.IsTemporary
-    {
-        get => _isTemporary;
-        set => _isTemporary = value;
-    }
-
-
-    public override bool Equals( object obj )
-    {
-        if ( obj is LocalDirectory file ) { return Equals(file); }
-
-        return false;
-    }
-
-    public override int GetHashCode() => HashCode.Combine(FullPath, this.IsTempFile());
-
-
-    public bool Equals( LocalDirectory? other )
-    {
-        if ( ReferenceEquals(this, other) ) { return true; }
-
-        if ( other is null ) { return false; }
-
-        if ( GetType() != other.GetType() ) { return false; }
-
-        return ( (TempFile.ITempFile)this ).IsTemporary == ( (TempFile.ITempFile)other ).IsTemporary && FullPath == other.FullPath;
     }
 
 
