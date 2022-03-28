@@ -4,5 +4,5 @@
 [Serializable]
 public record BaseRecord : IDataBaseID
 {
-    [Key] public long ID { get; init; }
+    [Key] public virtual long ID { get; init; }
 }

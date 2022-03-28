@@ -9,15 +9,15 @@ public abstract record BaseModelRecord<T> : BaseCollectionsRecord<T>, IDataBaseI
     public abstract int CompareTo( T? other );
 
 
-    public int CompareTo( object? obj )
+    public int CompareTo( object? other )
     {
-        if ( ReferenceEquals(null, obj) ) { return 1; }
+        if ( other is null ) { return 1; }
 
-        if ( ReferenceEquals(this, obj) ) { return 0; }
+        if ( ReferenceEquals(this, other) ) { return 0; }
 
-        return obj is T other
-                   ? CompareTo(other)
-                   : throw new ArgumentException($"Object must be of type {nameof(BaseModelRecord<T>)}");
+        return other is T value
+                   ? CompareTo(value)
+                   : throw new ExpectedValueTypeException(nameof(other), other, typeof(T));
     }
 
 
