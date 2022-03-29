@@ -4,7 +4,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata>
 		<id>Jakar.Extensions</id>
-		<version>5.5.0</version>
+		<version>5.6.0</version>
 		<title>Extension Library</title>
 		<authors>Tyler Stegmaier</authors>
 		<owners>Jakar510/Jakar</owners>
@@ -18,9 +18,8 @@
 			Extensions to aid in development.
 		</description>
 		<releaseNotes>
-			Jakar.Extensions 5.5.0
-			Reworked String.Validate.
-			Made ID from Models.Base.Classes.BaseClass nad Models.Base.Records.BaseRecord virtual
+			Jakar.Extensions 5.6.0
+			Reworked ConcurrentObservableCollection
 		</releaseNotes>
 		<tags>Api Extension Linq Http Files Files Strings Types Languages Collections Ini</tags>
 		<language>en-US</language>

@@ -60,9 +60,9 @@ public static class EnumerableExtensions
 
 #region Python style Enumerate for collection
 
-    public static IEnumerable<(int index, object? item)> Enumerate( this IEnumerable enumerable )
+    public static IEnumerable<(int index, object? item)> Enumerate( this IEnumerable enumerable, int start = 0 )
     {
-        var index = 0;
+        int index = start;
 
         foreach ( object? item in enumerable )
         {
@@ -71,9 +71,9 @@ public static class EnumerableExtensions
         }
     }
 
-    public static IEnumerable<(int index, TItem item)> Enumerate<TItem>( this IEnumerable<TItem> enumerable )
+    public static IEnumerable<(int index, TItem item)> Enumerate<TItem>( this IEnumerable<TItem> enumerable, int start = 0 )
     {
-        var index = 0;
+        int index = start;
 
         foreach ( TItem item in enumerable )
         {
@@ -82,9 +82,9 @@ public static class EnumerableExtensions
         }
     }
 
-    public static IEnumerable<(int index, object key, object value)> Enumerate( this IDictionary enumerable )
+    public static IEnumerable<(int index, object key, object value)> Enumerate( this IDictionary enumerable, int start = 0 )
     {
-        var index = 0;
+        int index = start;
 
         foreach ( DictionaryEntry pair in enumerable )
         {
@@ -93,9 +93,9 @@ public static class EnumerableExtensions
         }
     }
 
-    public static IEnumerable<(int index, KeyValuePair<TKey, TValue> pair)> EnumeratePairs<TKey, TValue>( this IDictionary<TKey, TValue> enumerable )
+    public static IEnumerable<(int index, KeyValuePair<TKey, TValue> pair)> EnumeratePairs<TKey, TValue>( this IDictionary<TKey, TValue> enumerable, int start = 0 )
     {
-        var index = 0;
+        int index = start;
 
         foreach ( KeyValuePair<TKey, TValue> pair in enumerable )
         {
@@ -104,9 +104,9 @@ public static class EnumerableExtensions
         }
     }
 
-    public static IEnumerable<(int index, TKey key, TValue value)> Enumerate<TKey, TValue>( this IDictionary<TKey, TValue> enumerable )
+    public static IEnumerable<(int index, TKey key, TValue value)> Enumerate<TKey, TValue>( this IDictionary<TKey, TValue> enumerable, int start = 0 )
     {
-        var index = 0;
+        int index = start;
 
         foreach ( ( TKey key, TValue value ) in enumerable )
         {
