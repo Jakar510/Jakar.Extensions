@@ -4,7 +4,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata>
 		<id>Jakar.Extensions</id>
-		<version>5.6.0</version>
+		<version>5.7.0</version>
 		<title>Extension Library</title>
 		<authors>Tyler Stegmaier</authors>
 		<owners>Jakar510/Jakar</owners>
@@ -18,8 +18,11 @@
 			Extensions to aid in development.
 		</description>
 		<releaseNotes>
-			Jakar.Extensions 5.6.0
-			Reworked ConcurrentObservableCollection
+			Jakar.Extensions 5.7.0
+			Reworked and renamed BaseNotifyPropertyModel to ObservableClass and BaseNotifyPropertyModelRecord to ObservableRecord
+			Changed names to be more consistent with C# as a whole for Strings.Numbers (To when allocating memory, As when not). 
+			Added Strings.Spans
+			Removed some redundant classes and code
 		</releaseNotes>
 		<tags>Api Extension Linq Http Files Files Strings Types Languages Collections Ini</tags>
 		<language>en-US</language>

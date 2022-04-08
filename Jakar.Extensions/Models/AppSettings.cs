@@ -21,8 +21,8 @@ public interface IAppSettings<out TVersion> : IAppSettings
 
 public interface IAppSettings<out TDeviceID, TViewPage, out TVersion> : IAppSettings<TVersion>
 {
-    public TDeviceID DeviceID        { get; }
-    public TViewPage CurrentViewPage { get; set; }
+    public TDeviceID  DeviceID        { get; }
+    public TViewPage? CurrentViewPage { get; set; }
 }
 
 
@@ -31,14 +31,67 @@ public interface IAppSettings<out TDeviceID, TViewPage> : IAppSettings<TDeviceID
 
 
 
-public class AppSettings : IAppSettings<Guid, object?, AppVersion>
+public class AppSettings<TViewPage> : ObservableClass, IAppSettings<Guid, TViewPage, AppVersion>
 {
-    public         Guid       DeviceID          { get; set; }
-    public         bool       SendCrashes       { get; set; }
-    public         string?    ScreenShotAddress { get; set; }
-    public virtual object?    CurrentViewPage   { get; set; }
-    public         string     AppName           { get; set; }
-    public         string     DeviceVersion     { get; set; }
-    public         bool       CrashDataPending  { get; set; }
-    public         AppVersion AppVersion        { get; set; }
+    private Guid       _deviceID;
+    private bool       _sendCrashes;
+    private string?    _screenShotAddress;
+    private TViewPage? _currentViewPage;
+    private string     _appName       = string.Empty;
+    private string     _deviceVersion = string.Empty;
+    private AppVersion _appVersion;
+    private bool       _crashDataPending;
+
+
+    public Guid DeviceID
+    {
+        get => _deviceID;
+        set => SetProperty(ref _deviceID, value);
+    }
+
+    public bool SendCrashes
+    {
+        get => _sendCrashes;
+        set => SetProperty(ref _sendCrashes, value);
+    }
+
+    public string? ScreenShotAddress
+    {
+        get => _screenShotAddress;
+        set => SetProperty(ref _screenShotAddress, value);
+    }
+
+    public virtual TViewPage? CurrentViewPage
+    {
+        get => _currentViewPage;
+        set => SetProperty(ref _currentViewPage, value);
+    }
+
+    public string AppName
+    {
+        get => _appName;
+        set => SetProperty(ref _appName, value);
+    }
+
+    public string DeviceVersion
+    {
+        get => _deviceVersion;
+        set => SetProperty(ref _deviceVersion, value);
+    }
+
+    public bool CrashDataPending
+    {
+        get => _crashDataPending;
+        set => SetProperty(ref _crashDataPending, value);
+    }
+
+    public AppVersion AppVersion
+    {
+        get => _appVersion;
+        set => SetProperty(ref _appVersion, value);
+    }
 }
+
+
+
+public class AppSettings : AppSettings<object> { }

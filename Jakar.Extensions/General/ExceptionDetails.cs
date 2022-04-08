@@ -3,9 +3,9 @@
 
 public class ExceptionDetails
 {
-    public string                       Str             { get; init; }
-    public string                       Message         { get; init; }
-    public string                       Type            { get; init; }
+    public string                       Str             { get; init; } = string.Empty;
+    public string                       Message         { get; init; } = string.Empty;
+    public string                       Type            { get; init; } = string.Empty;
     public string?                      HelpLink        { get; init; }
     public string?                      Source          { get; init; }
     public int                          HResult         { get; init; }
@@ -45,8 +45,8 @@ public class ExceptionDetails
 public class MethodDetails
 {
     public string?                 DeclaringType       { get; init; }
-    public string                  Name                { get; init; }
-    public string                  Signature           { get; init; }
+    public string                  Name                { get; init; } = string.Empty;
+    public string                  Signature           { get; init; } = string.Empty;
     public MethodAttributes        Attributes          { get; init; }
     public bool                    IsSpecialName       { get; init; }
     public bool                    IsStatic            { get; init; }
@@ -92,7 +92,7 @@ public class MethodDetails
 
 public class ParameterDetails
 {
-    public string  Name            { get; init; }
+    public string  Name            { get; init; } = string.Empty;
     public int     Position        { get; init; }
     public bool    IsIn            { get; init; }
     public bool    IsOut           { get; init; }

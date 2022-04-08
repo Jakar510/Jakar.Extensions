@@ -18,7 +18,7 @@ public interface IPhoneNumber : IDataBaseID, IEquatable<IPhoneNumber>
 /// You may also use one of <see cref="Validate.Re.PhoneNumbers"/> Regex objects to validate phone numbers, use the default <see cref="pattern"/>, or provide your own as the validation <see cref="Regex"/>
 /// </summary>
 [Serializable]
-public class PhoneNumber : BaseNotifyPropertyModel, IPhoneNumber
+public class PhoneNumber : ObservableClass, IPhoneNumber
 {
     /// <summary>
     /// <see href="https://www.twilio.com/blog/validating-phone-numbers-effectively-with-c-and-the-net-frameworks"/>

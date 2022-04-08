@@ -10,7 +10,7 @@
 [SuppressMessage("ReSharper", "ParameterTypeCanBeEnumerable.Local")]
 [SuppressMessage("ReSharper", "InconsistentNaming")]
 [SuppressMessage("ReSharper", "RedundantDefaultMemberInitializer")]
-public readonly struct AppVersion : IComparable, IComparable<AppVersion>, IComparable<AppVersion?>, IEquatable<AppVersion?>, IEquatable<AppVersion>, IReadOnlyCollection<int>, ICloneable
+public readonly struct AppVersion : IComparable, IComparable<AppVersion>, IComparable<AppVersion?>, IFuzzyEquals<AppVersion?>, IFuzzyEquals<AppVersion>, IReadOnlyCollection<int>, ICloneable
 {
     public enum Format
     {
@@ -322,16 +322,66 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
 
     public override string ToString()
     {
-        string s = this.Aggregate(string.Empty, ( current, item ) => current + $"{item}{SEPARATOR}").TrimEnd(SEPARATOR);
-
-        return s;
+        var sb = new StringBuilder();
+        sb.AppendJoin(SEPARATOR, this);
+        return sb.ToString();
     }
 
-    public object  Clone()     => Parse(ToString());
-    public Version ToVersion() => Version.Parse(ToString());
+
+    public ReadOnlySpan<char> AsSpan() => AsSpan(CultureInfo.CurrentCulture);
+    public ReadOnlySpan<char> AsSpan( in CultureInfo culture )
+    {
+        Span<char> buffer = stackalloc char[150];
+
+        if ( TryFormat(buffer, out int size, default, culture) )
+        {
+            var result = new char[size];
+            buffer[..size].CopyTo(result);
+            return result;
+        }
+
+        throw new InvalidOperationException("Conversion failed");
+    }
+
+    public bool TryFormat( Span<char> destination, out int size, ReadOnlySpan<char> format = default, IFormatProvider? provider = default )
+    {
+        size = 0;
+
+        Span<char> numberBuffer = stackalloc char[20];
+
+        foreach ( int value in this )
+        {
+            if ( value.TryFormat(numberBuffer, out int charsWritten, format, provider) )
+            {
+                for ( var i = 0; i < charsWritten; i++ ) { destination[i + size] = numberBuffer[i]; }
+
+                size                += charsWritten;
+                destination[size++] =  SEPARATOR;
+            }
+            else { throw new InvalidOperationException("Conversion failed"); }
+        }
+
+        size--;
+        return true;
+    }
 
 
-    public IReadOnlyList<int> ToList() => new List<int>(this);
+    object ICloneable.Clone() => Clone();
+    public AppVersion Clone() => Parse(AsSpan());
+
+
+    /// <summary>
+    /// If the <see cref="Scheme"/> is any of [ <see cref="Format.Singular"/>, <see cref="Format.DetailedRevisions"/>, <see cref="Format.Complete"/> ], will throw <see cref="InvalidOperationException"/>
+    /// </summary>
+    /// <returns></returns>
+    /// <exception cref="InvalidOperationException"></exception>
+    public Version ToVersion()
+    {
+        if ( Scheme is Format.Singular or Format.DetailedRevisions or Format.Complete ) { throw new InvalidOperationException("Conversion is not possible"); }
+
+        return Version.Parse(AsSpan());
+    }
+
 
     public IEnumerator<int> GetEnumerator()
     {
@@ -350,26 +400,31 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
 
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-    int IReadOnlyCollection<int>.Count => Scheme.ToInt();
+    int IReadOnlyCollection<int>.Count => Scheme.AsInt();
 
 
-    public static bool operator ==( in AppVersion left, in AppVersion right ) => EqualityComparer.Instance.Equals(left, right);
-    public static bool operator !=( in AppVersion left, in AppVersion right ) => !EqualityComparer.Instance.Equals(left, right);
-    public static bool operator >( in  AppVersion left, in AppVersion right ) => RelationalComparer.Instance.Compare(left, right) > 0;
-    public static bool operator >=( in AppVersion left, in AppVersion right ) => RelationalComparer.Instance.Compare(left, right) >= 0;
-    public static bool operator <( in  AppVersion left, in AppVersion right ) => RelationalComparer.Instance.Compare(left, right) < 0;
-    public static bool operator <=( in AppVersion left, in AppVersion right ) => RelationalComparer.Instance.Compare(left, right) <= 0;
+    public static bool operator ==( in AppVersion left, in AppVersion right ) => Equalizer.Instance.Equals(left, right);
+    public static bool operator !=( in AppVersion left, in AppVersion right ) => !Equalizer.Instance.Equals(left, right);
+    public static bool operator >( in  AppVersion left, in AppVersion right ) => Sorter.Instance.Compare(left, right) > 0;
+    public static bool operator >=( in AppVersion left, in AppVersion right ) => Sorter.Instance.Compare(left, right) >= 0;
+    public static bool operator <( in  AppVersion left, in AppVersion right ) => Sorter.Instance.Compare(left, right) < 0;
+    public static bool operator <=( in AppVersion left, in AppVersion right ) => Sorter.Instance.Compare(left, right) <= 0;
 
 
-    public static bool operator ==( in AppVersion? left, in AppVersion? right ) => EqualityComparer.Instance.Equals(left, right);
-    public static bool operator !=( in AppVersion? left, in AppVersion? right ) => !EqualityComparer.Instance.Equals(left, right);
-    public static bool operator >( in  AppVersion? left, in AppVersion? right ) => RelationalComparer.Instance.Compare(left, right) > 0;
-    public static bool operator >=( in AppVersion? left, in AppVersion? right ) => RelationalComparer.Instance.Compare(left, right) >= 0;
-    public static bool operator <( in  AppVersion? left, in AppVersion? right ) => RelationalComparer.Instance.Compare(left, right) < 0;
-    public static bool operator <=( in AppVersion? left, in AppVersion? right ) => RelationalComparer.Instance.Compare(left, right) <= 0;
+    public static bool operator ==( in AppVersion? left, in AppVersion? right ) => Equalizer.Instance.Equals(left, right);
+    public static bool operator !=( in AppVersion? left, in AppVersion? right ) => !Equalizer.Instance.Equals(left, right);
+    public static bool operator >( in  AppVersion? left, in AppVersion? right ) => Sorter.Instance.Compare(left, right) > 0;
+    public static bool operator >=( in AppVersion? left, in AppVersion? right ) => Sorter.Instance.Compare(left, right) >= 0;
+    public static bool operator <( in  AppVersion? left, in AppVersion? right ) => Sorter.Instance.Compare(left, right) < 0;
+    public static bool operator <=( in AppVersion? left, in AppVersion? right ) => Sorter.Instance.Compare(left, right) <= 0;
 
 
-    private FormatException GetFormatError( in AppVersion other ) => new($"{nameof(other)}.{nameof(Scheme)} is '{other.Scheme}' and expected '{Scheme}'");
+    private void AssertFormat( in AppVersion other )
+    {
+        if ( Scheme == other.Scheme ) { return; }
+
+        throw new FormatException($"{nameof(other)}.{nameof(Scheme)} is '{other.Scheme}' and expected '{Scheme}'");
+    }
 
 
     /// <summary>
@@ -420,7 +475,7 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
 
     public int CompareTo( AppVersion other )
     {
-        if ( Scheme != other.Scheme ) { throw GetFormatError(other); }
+        AssertFormat(other);
 
         int majorComparison = Major.CompareTo(other.Major);
         if ( majorComparison != 0 ) { return majorComparison; }
@@ -498,7 +553,7 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
     /// <exception cref="ArgumentException">If something goes wrong, and the <paramref name="other"/> is not comparable.</exception>
     public bool FuzzyEquals( AppVersion other )
     {
-        if ( Scheme != other.Scheme ) { throw GetFormatError(other); }
+        AssertFormat(other);
 
         bool result = Major.Equals(other.Major) &&
                       Nullable.Compare(other.Minor, Minor) == 0 &&
@@ -520,7 +575,7 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
 
     public bool Equals( AppVersion other )
     {
-        if ( Scheme != other.Scheme ) { throw GetFormatError(other); }
+        AssertFormat(other);
 
         return Major == other.Major &&
                Nullable.Equals(Minor, other.Minor) &&
@@ -540,85 +595,13 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
 
 
 
-    private sealed class RelationalComparer : IComparer<AppVersion?>, IComparer<AppVersion>, IComparer
-    {
-        public static RelationalComparer Instance { get; } = new();
-
-
-        public int Compare( AppVersion? left, AppVersion? right ) => Nullable.Compare(left, right);
-
-        public int Compare( AppVersion left, AppVersion right ) => left.CompareTo(right);
-
-
-        public int Compare( object x, object y )
-        {
-            if ( x is not AppVersion left ) { throw new ExpectedValueTypeException(nameof(x), x, typeof(AppVersion)); }
-
-            if ( y is not AppVersion right ) { throw new ExpectedValueTypeException(nameof(y), y, typeof(AppVersion)); }
-
-            return left.CompareTo(right);
-        }
-    }
+    public sealed class Equalizer : ValueEqualizer<AppVersion> { }
 
 
 
-    public sealed class EqualityComparer : IEqualityComparer<AppVersion?>, IEqualityComparer<AppVersion>, IEqualityComparer
-    {
-        public static EqualityComparer Instance { get; } = new();
-
-
-        public bool Equals( AppVersion? left, AppVersion? right ) => Nullable.Equals(left, right);
-        public bool Equals( AppVersion  left, AppVersion  right ) => left.Equals(right);
-
-
-        public int GetHashCode( AppVersion  obj ) => obj.GetHashCode();
-        public int GetHashCode( AppVersion? obj ) => obj.GetHashCode();
-
-
-        bool IEqualityComparer.Equals( object x, object y )
-        {
-            if ( x is not AppVersion left ) { throw new ExpectedValueTypeException(nameof(x), x, typeof(AppVersion)); }
-
-            if ( y is not AppVersion right ) { throw new ExpectedValueTypeException(nameof(y), y, typeof(AppVersion)); }
-
-            return left.Equals(right);
-        }
-
-        int IEqualityComparer.GetHashCode( object obj ) => obj.GetHashCode();
-    }
+    public sealed class Sorter : ValueSorter<AppVersion> { }
 
 
 
-    public sealed class FuzzyEqualityComparer : IEqualityComparer<AppVersion?>, IEqualityComparer<AppVersion>, IEqualityComparer
-    {
-        public static FuzzyEqualityComparer Instance { get; } = new();
-
-
-        public bool Equals( AppVersion? left, AppVersion? right )
-        {
-            if ( left.HasValue && right.HasValue ) { left.Value.FuzzyEquals(right.Value); }
-
-            if ( left is null && right is null ) { return true; }
-
-            return false;
-        }
-
-        public bool Equals( AppVersion left, AppVersion right ) => left.FuzzyEquals(right);
-
-
-        public int GetHashCode( AppVersion  obj ) => obj.GetHashCode();
-        public int GetHashCode( AppVersion? obj ) => obj.GetHashCode();
-
-
-        bool IEqualityComparer.Equals( object x, object y )
-        {
-            if ( x is not AppVersion left ) { throw new ExpectedValueTypeException(nameof(x), x, typeof(AppVersion)); }
-
-            if ( y is not AppVersion right ) { throw new ExpectedValueTypeException(nameof(y), y, typeof(AppVersion)); }
-
-            return left.Equals(right);
-        }
-
-        int IEqualityComparer.GetHashCode( object obj ) => obj.GetHashCode();
-    }
+    public sealed class FuzzyEqualityComparer : ValueFuzzyEqualizer<AppVersion> { }
 }

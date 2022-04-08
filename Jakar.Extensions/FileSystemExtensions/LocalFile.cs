@@ -23,15 +23,15 @@ public class LocalFile : TempFile.ITempFile, IEquatable<LocalFile>, IComparable<
     }
 
 
-    public           string   FullPath      { get; init; }
-    public           string   Name          => Info.Name;
-    public           string   Extension     => Info.Extension;
-    public           bool     Exists        => Info.Exists;
-    public           string?  DirectoryName => Info.DirectoryName;
-    public           MimeType Mime          => Extension.FromExtension();
-    public           string   ContentType   => Mime.ToContentType();
-    public           string?  Root          => Directory.GetDirectoryRoot(FullPath);
-    private readonly Encoding _encoding;
+    public string   FullPath      { get; init; }
+    public string   Name          => Info.Name;
+    public string   Extension     => Info.Extension;
+    public bool     Exists        => Info.Exists;
+    public string?  DirectoryName => Info.DirectoryName;
+    public MimeType Mime          => Extension.FromExtension();
+    public string   ContentType   => Mime.ToContentType();
+    public string?  Root          => Directory.GetDirectoryRoot(FullPath);
+    public Encoding FileEncoding  { get; init; } = Encoding.Default;
 
 
     [JsonIgnore]
@@ -48,25 +48,27 @@ public class LocalFile : TempFile.ITempFile, IEquatable<LocalFile>, IComparable<
 
 
     public LocalFile() => FullPath = string.Empty;
-    public LocalFile( Uri                path, Encoding?       encoding = default ) : this(FromUri(path), encoding) { }
-    public LocalFile( ReadOnlySpan<char> path, Encoding?       encoding = default ) : this(path.ToString(), encoding) { }
-    public LocalFile( FileInfo           path, Encoding?       encoding = default ) : this(path.FullName, encoding) { }
+    public LocalFile( Uri                path ) : this(FromUri(path)) { }
+    public LocalFile( ReadOnlySpan<char> path ) : this(path.ToString()) { }
+    public LocalFile( FileInfo           path ) : this(path.FullName) { }
     public LocalFile( string             path, params string[] args ) : this(path, Encoding.Default, args) { }
     public LocalFile( string             path, Encoding?       encoding, params string[] args ) : this(path.Combine(args), encoding) { }
-    public LocalFile( DirectoryInfo      path, string          fileName, Encoding?       encoding = default ) : this(path.Combine(fileName), encoding) { }
-    public LocalFile( string             path, string          fileName, Encoding?       encoding = default ) : this(new DirectoryInfo(path), fileName, encoding) { }
+    public LocalFile( DirectoryInfo      path, string          fileName ) : this(path.Combine(fileName)) { }
+    public LocalFile( string             path, string          fileName ) : this(new DirectoryInfo(path), fileName) { }
 
     public LocalFile( string path, Encoding? encoding = default )
     {
         this.SetNormal();
-        FullPath  = Path.GetFullPath(path);
-        _encoding = encoding ?? Encoding.Default;
+        FullPath     = Path.GetFullPath(path);
+        FileEncoding = encoding ?? Encoding.Default;
     }
+
 
     public static implicit operator LocalFile( string             info ) => new(info);
     public static implicit operator LocalFile( FileInfo           info ) => new(info);
     public static implicit operator LocalFile( Uri                info ) => new(info);
     public static implicit operator LocalFile( ReadOnlySpan<char> info ) => new(info);
+
 
     public sealed override string ToString() => FullPath;
 
@@ -160,6 +162,7 @@ public class LocalFile : TempFile.ITempFile, IEquatable<LocalFile>, IComparable<
     /// Permanently deletes a file.
     /// </summary>
     public void Delete() => Info.Delete();
+
 
     /// <summary>
     /// Encrypts the file so that only the account used to encrypt the file can decrypt it.
@@ -531,18 +534,9 @@ public class LocalFile : TempFile.ITempFile, IEquatable<LocalFile>, IComparable<
     /// <returns><see cref="string"/></returns>
     T IReadHandler.AsJson<T>()
     {
-        using var stream  = new StreamReader(OpenRead(), _encoding);
+        using var stream  = new StreamReader(OpenRead(), FileEncoding);
         string    content = stream.ReadToEnd();
         return content.FromJson<T>();
-
-        /// <summary>
-        /// Reads the contents of the file as a <see cref="string"/>, then calls <see cref="JsonExtensions.FromJson{TResult}(string)"/> on it, asynchronously.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <exception cref="NullReferenceException">if FullPath is null or empty</exception>
-        /// <exception cref="FileNotFoundException">if file is not found</exception>
-        /// <exception cref="JsonReaderException">if an error in deserialization occurs</exception>
-        /// <returns><typeparamref name="T"/></returns>
     }
 
     /// <summary>
@@ -553,7 +547,7 @@ public class LocalFile : TempFile.ITempFile, IEquatable<LocalFile>, IComparable<
     /// <returns><see cref="string"/></returns>
     string IReadHandler.AsString()
     {
-        using var stream = new StreamReader(OpenRead(), _encoding);
+        using var stream = new StreamReader(OpenRead(), FileEncoding);
         return stream.ReadToEnd();
     }
 
@@ -566,7 +560,7 @@ public class LocalFile : TempFile.ITempFile, IEquatable<LocalFile>, IComparable<
     /// <returns><see cref="ReadOnlySpan{byte}"/></returns>
     ReadOnlySpan<char> IReadHandler.AsSpan()
     {
-        using var          stream = new StreamReader(OpenRead(), _encoding);
+        using var          stream = new StreamReader(OpenRead(), FileEncoding);
         ReadOnlySpan<char> result = stream.ReadToEnd();
         return result;
     }
@@ -655,14 +649,14 @@ public class LocalFile : TempFile.ITempFile, IEquatable<LocalFile>, IComparable<
 
     async Task<string> IAsyncReadHandler.AsString()
     {
-        using var stream = new StreamReader(OpenRead(), _encoding);
+        using var stream = new StreamReader(OpenRead(), FileEncoding);
         return await stream.ReadToEndAsync().ConfigureAwait(false);
     }
 
 
     async Task<T> IAsyncReadHandler.AsJson<T>()
     {
-        using var stream  = new StreamReader(OpenRead(), _encoding);
+        using var stream  = new StreamReader(OpenRead(), FileEncoding);
         string    content = await stream.ReadToEndAsync().ConfigureAwait(false);
         return content.FromJson<T>();
     }
@@ -734,7 +728,7 @@ public class LocalFile : TempFile.ITempFile, IEquatable<LocalFile>, IComparable<
         if ( string.IsNullOrWhiteSpace(payload) ) { throw new ArgumentNullException(nameof(payload)); }
 
         using FileStream stream = Create();
-        using var        writer = new StreamWriter(stream, _encoding);
+        using var        writer = new StreamWriter(stream, FileEncoding);
         writer.Write(payload);
     }
     /// <summary>
@@ -751,7 +745,7 @@ public class LocalFile : TempFile.ITempFile, IEquatable<LocalFile>, IComparable<
         if ( string.IsNullOrWhiteSpace(payload) ) { throw new ArgumentNullException(nameof(payload)); }
 
         await using FileStream stream = Create();
-        await using var        writer = new StreamWriter(stream, _encoding);
+        await using var        writer = new StreamWriter(stream, FileEncoding);
         await writer.WriteAsync(payload).ConfigureAwait(false);
     }
 
@@ -867,7 +861,7 @@ public class LocalFile : TempFile.ITempFile, IEquatable<LocalFile>, IComparable<
         if ( payload.Length == 0 ) { throw new ArgumentException(@"payload.Length == 0", nameof(payload)); }
 
         using FileStream stream = Create();
-        using var        writer = new StreamWriter(stream, _encoding);
+        using var        writer = new StreamWriter(stream, FileEncoding);
         writer.Write(payload);
     }
     /// <summary>
@@ -882,7 +876,7 @@ public class LocalFile : TempFile.ITempFile, IEquatable<LocalFile>, IComparable<
     public async Task WriteAsync( ReadOnlyMemory<char> payload, CancellationToken token )
     {
         await using FileStream stream = Create();
-        await using var        writer = new StreamWriter(stream, _encoding);
+        await using var        writer = new StreamWriter(stream, FileEncoding);
         await writer.WriteAsync(payload, token).ConfigureAwait(false);
     }
 
@@ -1066,53 +1060,12 @@ public class LocalFile : TempFile.ITempFile, IEquatable<LocalFile>, IComparable<
     // ---------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-
-    private sealed class EqualityComparer : IEqualityComparer<LocalFile>
-    {
-        public static EqualityComparer Instance { get; } = new();
-
-
-        public bool Equals( LocalFile? x, LocalFile? y )
-        {
-            if ( x is null ) { return false; }
-
-            if ( y is null ) { return false; }
-
-            if ( ReferenceEquals(x, y) ) { return true; }
-
-            return x.Equals(y);
-        }
-
-        public int GetHashCode( LocalFile obj ) => obj.GetHashCode();
-    }
-
-
-
-    private sealed class RelationalComparer : IComparer<LocalFile>
-    {
-        public static RelationalComparer Instance { get; } = new();
-
-
-        public int Compare( LocalFile? left, LocalFile? right )
-        {
-            if ( left is null ) { return 1; }
-
-            if ( right is null ) { return -1; }
-
-            if ( ReferenceEquals(left, right) ) { return 0; }
-
-            return left.CompareTo(right);
-        }
-    }
-
-
-
-    public static bool operator ==( LocalFile? left, LocalFile? right ) => EqualityComparer.Instance.Equals(left, right);
-    public static bool operator !=( LocalFile? left, LocalFile? right ) => !EqualityComparer.Instance.Equals(left, right);
-    public static bool operator <( LocalFile?  left, LocalFile? right ) => RelationalComparer.Instance.Compare(left, right) < 0;
-    public static bool operator >( LocalFile?  left, LocalFile? right ) => RelationalComparer.Instance.Compare(left, right) > 0;
-    public static bool operator <=( LocalFile? left, LocalFile? right ) => RelationalComparer.Instance.Compare(left, right) <= 0;
-    public static bool operator >=( LocalFile? left, LocalFile? right ) => RelationalComparer.Instance.Compare(left, right) >= 0;
+    public static bool operator ==( LocalFile? left, LocalFile? right ) => Equalizer.Instance.Equals(left, right);
+    public static bool operator !=( LocalFile? left, LocalFile? right ) => !Equalizer.Instance.Equals(left, right);
+    public static bool operator <( LocalFile?  left, LocalFile? right ) => Sorter.Instance.Compare(left, right) < 0;
+    public static bool operator >( LocalFile?  left, LocalFile? right ) => Sorter.Instance.Compare(left, right) > 0;
+    public static bool operator <=( LocalFile? left, LocalFile? right ) => Sorter.Instance.Compare(left, right) <= 0;
+    public static bool operator >=( LocalFile? left, LocalFile? right ) => Sorter.Instance.Compare(left, right) >= 0;
 
 
     public int CompareTo( object? obj )
@@ -1174,6 +1127,14 @@ public class LocalFile : TempFile.ITempFile, IEquatable<LocalFile>, IComparable<
 
 
     // ---------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+    public sealed class Equalizer : Equalizer<LocalFile> { }
+
+
+
+    public sealed class Sorter : Sorter<LocalFile> { }
 
 
 

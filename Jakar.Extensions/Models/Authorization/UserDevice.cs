@@ -3,36 +3,36 @@
 
 public interface IUserDevice : IEquatable<IUserDevice>, IDataBaseID
 {
-    public DateTime TimeStamp    { get; init; }
-    public Guid     DeviceID     { get; init; }
-    public string   Model        { get; init; }
-    public string   Manufacturer { get; init; }
-    public string   DeviceName   { get; init; }
-    string          OsVersion    { get; init; }
+    public DateTime TimeStamp    { get; }
+    public Guid     DeviceID     { get; }
+    public string   Model        { get; }
+    public string   Manufacturer { get; }
+    public string   DeviceName   { get; }
+    string          OsVersion    { get; }
 
 
     /// <summary>
     /// Last known <see cref="IPAddress"/>
     /// </summary>
-    public string? Ip { get; set; }
+    public string? Ip { get; }
 
 
     /// <summary>
     /// <see cref="DevicePlatform"/>
     /// </summary>
-    public string Platform { get; init; }
+    public string Platform { get; }
 
 
     /// <summary>
     /// <see cref="DeviceIdiom"/>
     /// </summary>
-    public string Idiom { get; init; }
+    public string Idiom { get; }
 
 
     /// <summary>
     /// <see cref="DeviceType"/>
     /// </summary>
-    public int DeviceTypeID { get; init; }
+    public int DeviceTypeID { get; }
 }
 
 
@@ -42,37 +42,28 @@ public interface IUserDevice : IEquatable<IUserDevice>, IDataBaseID
 /// </summary>
 [Serializable]
 [Table("UserDevices")]
-public class UserDevice : IUserDevice
+public class UserDevice : BaseClass, IUserDevice
 {
-    [JsonProperty(nameof(ID))] [Key]     public long     ID           { get; init; }
-    [JsonProperty(nameof(TimeStamp))]    public DateTime TimeStamp    { get; init; }
-    [JsonProperty(nameof(DeviceID))]     public Guid     DeviceID     { get; init; }
-    [JsonProperty(nameof(Ip))]           public string?  Ip           { get; set; }
-    [JsonProperty(nameof(Model))]        public string   Model        { get; init; } = string.Empty;
-    [JsonProperty(nameof(Manufacturer))] public string   Manufacturer { get; init; } = string.Empty;
-    [JsonProperty(nameof(DeviceName))]   public string   DeviceName   { get; init; } = string.Empty;
-    [JsonProperty(nameof(DeviceTypeID))] public int      DeviceTypeID { get; init; }
-    [JsonProperty(nameof(Idiom))]        public string   Idiom        { get; init; } = string.Empty;
-    [JsonProperty(nameof(Platform))]     public string   Platform     { get; init; } = string.Empty;
-    [JsonProperty(nameof(OsVersion))]    public string   OsVersion    { get; init; } = string.Empty;
+    public DateTime TimeStamp    { get; init; }
+    public Guid     DeviceID     { get; init; }
+    public string   Model        { get; init; } = string.Empty;
+    public string   Manufacturer { get; init; } = string.Empty;
+    public string   DeviceName   { get; init; } = string.Empty;
+    public int      DeviceTypeID { get; init; }
+    public string   Idiom        { get; init; } = string.Empty;
+    public string   Platform     { get; init; } = string.Empty;
+    public string   OsVersion    { get; init; } = string.Empty;
+    public string?  Ip           { get; init; }
 
 
     public UserDevice() { }
 
-    public UserDevice( string         model,
-                       string         manufacturer,
-                       string         deviceName,
-                       DeviceType     deviceType,
-                       DeviceIdiom    idiom,
-                       DevicePlatform platform,
-                       AppVersion     osVersion,
-                       Guid?          deviceID,
-                       long           id = default )
+    public UserDevice( string model, string manufacturer, string deviceName, DeviceType deviceType, DeviceIdiom idiom, DevicePlatform platform, AppVersion osVersion, Guid? deviceID, long id = default )
     {
         Model        = model;
         Manufacturer = manufacturer;
         DeviceName   = deviceName;
-        DeviceTypeID = deviceType.ToInt();
+        DeviceTypeID = deviceType.AsInt();
         Idiom        = idiom.ToString();
         Platform     = platform.ToString();
         OsVersion    = osVersion.ToString();
@@ -96,14 +87,8 @@ public class UserDevice : IUserDevice
     }
 
 
-    public static UserDevice Create( Guid? deviceID ) => new(DeviceInfo.Model,
-                                                             DeviceInfo.Manufacturer,
-                                                             DeviceInfo.Name,
-                                                             DeviceInfo.DeviceType,
-                                                             DeviceInfo.Idiom,
-                                                             DeviceInfo.Platform,
-                                                             DeviceInfo.Version,
-                                                             deviceID);
+    public static UserDevice Create( Guid? deviceID ) => new(DeviceInfo.Model, DeviceInfo.Manufacturer, DeviceInfo.Name, DeviceInfo.DeviceType, DeviceInfo.Idiom, DeviceInfo.Platform, DeviceInfo.Version, deviceID);
+
 
     public override bool Equals( object? obj )
     {

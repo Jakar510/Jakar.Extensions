@@ -15,7 +15,7 @@ public interface IUserAddress
 
 
 [Serializable]
-public abstract class BaseUserAddress<T> : BaseModel<T>, IUserAddress where T : BaseUserAddress<T>
+public abstract class BaseUserAddress<T> : BaseCollections<T>, IUserAddress where T : BaseUserAddress<T>
 {
     private string _line1      = string.Empty;
     private string _line2      = string.Empty;

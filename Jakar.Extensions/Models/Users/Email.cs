@@ -12,7 +12,7 @@ public interface IEmail : IDataBaseID, IEquatable<IEmail>
 
 [Serializable]
 [JsonObject]
-public class Email : BaseNotifyPropertyModel, IEmail
+public class Email : ObservableClass, IEmail
 {
     /// <summary>
     /// <see href="https://www.tutorialspoint.com/how-to-validate-an-email-address-in-chash"/>

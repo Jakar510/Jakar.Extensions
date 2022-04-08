@@ -38,9 +38,9 @@ public class MultiQueue<T> : IMultiQueue<T>
     public MultiQueue( IEnumerable<T> items ) => _queue = new ConcurrentQueue<T>(items);
 
 
-    public bool Contains( T obj ) => _queue.Contains(obj);
+    public bool Contains( T item ) => _queue.Contains(item);
     public void Clear()           => _queue.Clear();
-    public void Add( T file )     => _queue.Enqueue(file);
+    public void Add( T item )     => _queue.Enqueue(item);
 
     public bool Remove( [NotNullWhen(true)] out T? item )
     {

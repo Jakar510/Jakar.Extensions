@@ -1,11 +1,11 @@
 ﻿namespace Jakar.Extensions.Languages;
 
 
-public class LanguageApi : BaseNotifyPropertyModel
+public class LanguageApi : ObservableClass
 {
     private CultureInfo?      _currentCultureInfo;
     private Language          _selectedLanguage;
-    private string            _selectedLanguageName;
+    private string            _selectedLanguageName = string.Empty;
     private SupportedLanguage _currentLangVersion;
 
 

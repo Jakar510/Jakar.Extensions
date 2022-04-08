@@ -7,7 +7,7 @@ public readonly struct Language : IDataBaseID, IComparable<Language>, IEquatable
     public       string            DisplayName { get; init; } = string.Empty;
     public       string            ShortName   { get; init; } = string.Empty;
     public       SupportedLanguage Version     { get; init; } = SupportedLanguage.English;
-    [Key] public long              ID          { get; init; } = SupportedLanguage.English.ToLong();
+    [Key] public long              ID          { get; init; } = SupportedLanguage.English.AsLong();
 
 
     public Language() { }
@@ -17,7 +17,7 @@ public readonly struct Language : IDataBaseID, IComparable<Language>, IEquatable
         DisplayName = name;
         ShortName   = shortName;
         Version     = language;
-        ID          = language.ToLong();
+        ID          = language.AsLong();
     }
 
 
@@ -70,10 +70,10 @@ public readonly struct Language : IDataBaseID, IComparable<Language>, IEquatable
     }
 
 
-    public static bool operator <( Language?  left, Language? right ) => RelationalComparer.Instance.Compare(left, right) < 0;
-    public static bool operator >( Language?  left, Language? right ) => RelationalComparer.Instance.Compare(left, right) > 0;
-    public static bool operator <=( Language? left, Language? right ) => RelationalComparer.Instance.Compare(left, right) <= 0;
-    public static bool operator >=( Language? left, Language? right ) => RelationalComparer.Instance.Compare(left, right) >= 0;
+    public static bool operator <( Language?  left, Language? right ) => Sorter.Instance.Compare(left, right) < 0;
+    public static bool operator >( Language?  left, Language? right ) => Sorter.Instance.Compare(left, right) > 0;
+    public static bool operator <=( Language? left, Language? right ) => Sorter.Instance.Compare(left, right) <= 0;
+    public static bool operator >=( Language? left, Language? right ) => Sorter.Instance.Compare(left, right) >= 0;
 
 
     public static Language Arabic     { get; } = new(SupportedLanguage.Arabic);
@@ -137,50 +137,9 @@ public readonly struct Language : IDataBaseID, IComparable<Language>, IEquatable
 
 
 
-    private sealed class RelationalComparer : IComparer<Language?>, IComparer<Language>, IComparer
-    {
-        public static RelationalComparer Instance { get; } = new();
-
-
-        public int Compare( Language? left, Language? right ) => Nullable.Compare(left, right);
-
-        public int Compare( Language left, Language right ) => left.CompareTo(right);
-
-
-        public int Compare( object x, object y )
-        {
-            if ( x is not Language left ) { throw new ExpectedValueTypeException(nameof(x), x, typeof(Language)); }
-
-            if ( y is not Language right ) { throw new ExpectedValueTypeException(nameof(y), y, typeof(Language)); }
-
-            return left.CompareTo(right);
-        }
-    }
+    public sealed class Equalizer : ValueEqualizer<Language> { }
 
 
 
-    public sealed class EqualityComparer : IEqualityComparer<Language?>, IEqualityComparer<Language>, IEqualityComparer
-    {
-        public static EqualityComparer Instance { get; } = new();
-
-
-        public bool Equals( Language? left, Language? right ) => Nullable.Equals(left, right);
-        public bool Equals( Language  left, Language  right ) => left.Equals(right);
-
-
-        public int GetHashCode( Language  obj ) => obj.GetHashCode();
-        public int GetHashCode( Language? obj ) => obj.GetHashCode();
-
-
-        bool IEqualityComparer.Equals( object x, object y )
-        {
-            if ( x is not Language left ) { throw new ExpectedValueTypeException(nameof(x), x, typeof(Language)); }
-
-            if ( y is not Language right ) { throw new ExpectedValueTypeException(nameof(y), y, typeof(Language)); }
-
-            return left.Equals(right);
-        }
-
-        int IEqualityComparer.GetHashCode( object obj ) => obj.GetHashCode();
-    }
+    public sealed class Sorter : ValueSorter<Language> { }
 }

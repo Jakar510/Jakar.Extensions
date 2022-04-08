@@ -25,7 +25,7 @@ public interface IUserModel : IUserRecord
 
 
 [Serializable]
-public abstract class BaseUserModel<T> : BaseModel<T>, IUserModel where T : BaseUserModel<T>
+public abstract class BaseUserModel<T> : BaseCollections<T>, IUserModel where T : BaseUserModel<T>
 {
     private string            _userName    = string.Empty;
     private string            _userID      = string.Empty;
