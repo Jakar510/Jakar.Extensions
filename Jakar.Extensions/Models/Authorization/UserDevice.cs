@@ -42,8 +42,11 @@ public interface IUserDevice : IEquatable<IUserDevice>, IDataBaseID
 /// </summary>
 [Serializable]
 [Table("UserDevices")]
-public class UserDevice : BaseClass, IUserDevice
+public class UserDevice : ObservableClass, IUserDevice
 {
+    private string? _ip;
+
+
     public DateTime TimeStamp    { get; init; }
     public Guid     DeviceID     { get; init; }
     public string   Model        { get; init; } = string.Empty;
@@ -53,7 +56,12 @@ public class UserDevice : BaseClass, IUserDevice
     public string   Idiom        { get; init; } = string.Empty;
     public string   Platform     { get; init; } = string.Empty;
     public string   OsVersion    { get; init; } = string.Empty;
-    public string?  Ip           { get; init; }
+
+    public string? Ip
+    {
+        get => _ip;
+        set => SetProperty(ref _ip, value);
+    }
 
 
     public UserDevice() { }
@@ -105,15 +113,8 @@ public class UserDevice : BaseClass, IUserDevice
 
         if ( ReferenceEquals(this, other) ) { return true; }
 
-        return TimeStamp.Equals(other.TimeStamp) &&
-               Ip == other.Ip &&
-               Model == other.Model &&
-               Manufacturer == other.Manufacturer &&
-               DeviceName == other.DeviceName &&
-               DeviceTypeID == other.DeviceTypeID &&
-               Idiom == other.Idiom &&
-               Platform == other.Platform &&
-               OsVersion == other.OsVersion;
+        return TimeStamp.Equals(other.TimeStamp) && Ip == other.Ip && Model == other.Model && Manufacturer == other.Manufacturer && DeviceName == other.DeviceName && DeviceTypeID == other.DeviceTypeID && Idiom == other.Idiom &&
+               Platform == other.Platform && OsVersion == other.OsVersion;
     }
 
     public override int GetHashCode()
