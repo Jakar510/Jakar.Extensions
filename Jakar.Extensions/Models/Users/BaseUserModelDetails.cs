@@ -40,10 +40,9 @@ public abstract class BaseUserModelDetails<T, TAddress> : BaseUserModel<T, TAddr
 
 
     protected BaseUserModelDetails() { }
-    protected BaseUserModelDetails( IUserModel<TAddress>        model, long id ) : base(model, id) { }
-    protected BaseUserModelDetails( IUserModelDetails<TAddress> model, long id ) : this(model, id, model.Addresses, model.PhoneNumbers, model.Emails) { }
-
-    protected BaseUserModelDetails( IUserModel<TAddress> model, long id, IEnumerable<TAddress>? addresses, IEnumerable<PhoneNumber>? numbers, IEnumerable<Email>? emails ) : base(model, id)
+    protected BaseUserModelDetails( IUserModel<TAddress>        model ) : base(model) { }
+    protected BaseUserModelDetails( IUserModelDetails<TAddress> model ) : this(model, model.Addresses, model.PhoneNumbers, model.Emails) { }
+    protected BaseUserModelDetails( IUserModel<TAddress> model, IEnumerable<TAddress>? addresses, IEnumerable<PhoneNumber>? numbers, IEnumerable<Email>? emails ) : base(model)
     {
         Addresses = addresses is not null
                         ? new ObservableCollection<TAddress>(addresses)

@@ -1,10 +1,10 @@
 <?xml version="1.0"
-      encoding="utf-8"?>
+	  encoding="utf-8"?>
 
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata>
 		<id>Jakar.Extensions</id>
-		<version>5.7.1</version>
+		<version>5.8.0</version>
 		<title>Extension Library</title>
 		<authors>Tyler Stegmaier</authors>
 		<owners>Jakar510/Jakar</owners>
@@ -18,42 +18,61 @@
 			Extensions to aid in development.
 		</description>
 		<releaseNotes>
-			Jakar.Extensions 5.7.1
-			small bug fix
+			Jakar.Extensions 5.8.0
+			Removed ID from BaseClass and BaseRecord, moved to ObservableClass and ObservableRecord respectively however
+			many bug fixes
 		</releaseNotes>
 		<tags>Api Extension Linq Http Files Files Strings Types Languages Collections Ini</tags>
 		<language>en-US</language>
 		<repository type="Github"
-		            url="https://github.com/Jakar510/Jakar.Extensions"
-		            branch="master" />
+					url="https://github.com/Jakar510/Jakar.Extensions"
+					branch="master" />
 		<dependencies>
 			<group targetFramework="netstandard2.1">
-				<dependency id="Dapper.Contrib" version="2.0.78" />
-				<dependency id="JetBrains.Annotations" version="2021.3.0" />
-				<dependency id="Newtonsoft.Json" version="13.0.1" />
-				<dependency id="Nito.Collections.Deque" version="1.1.1" />
-				<dependency id="System.Collections.Immutable" version="6.0.0" />
-				<dependency id="System.ComponentModel.Annotations" version="5.0.0" />
-				<dependency id="System.Text.Encodings.Web" version="6.0.0" />
-				<dependency id="System.Text.Encoding.CodePages" version="6.0.0" />
-				<dependency id="System.Threading.Tasks.Dataflow" version="6.0.0" />
-				<dependency id="Xamarin.Essentials" version="1.7.1" />
+				<dependency id="CommunityToolkit.Diagnostics"
+							version="7.1.2" />
+				<dependency id="Dapper.Contrib"
+							version="2.0.78" />
+				<dependency id="JetBrains.Annotations"
+							version="2021.3.0" />
+				<dependency id="Newtonsoft.Json"
+							version="13.0.1" />
+				<dependency id="Nito.Collections.Deque"
+							version="1.1.1" />
+				<dependency id="System.Collections.Immutable"
+							version="6.0.0" />
+				<dependency id="System.ComponentModel.Annotations"
+							version="5.0.0" />
+				<dependency id="System.Text.Encodings.Web"
+							version="6.0.0" />
+				<dependency id="System.Text.Encoding.CodePages"
+							version="6.0.0" />
+				<dependency id="System.Text.Json"
+							version="6.0.2" />
+				<dependency id="System.Threading.Tasks.Dataflow"
+							version="6.0.0" />
+				<dependency id="Xamarin.Essentials"
+							version="1.7.2" />
+				<dependency id="OneOf"
+							version="3.0.216" />
+				<dependency id="ValueOf"
+							version="2.0.31" />
 			</group>
 		</dependencies>
 	</metadata>
 
 	<files>
 		<file src="..\LICENSE.txt"
-		      target="" />
+			  target="" />
 
 		<file src="..\images\icon.png" />
 
 		<!-- .net standard 2.1 -->
 		<file src="../Jakar.Extensions/bin/Release/netstandard2.1/Jakar.Extensions.dll"
-		      target="lib/netstandard2.1" />
+			  target="lib/netstandard2.1" />
 		<file src="../Jakar.Extensions/bin/Release/netstandard2.1/Jakar.Extensions.xml"
-		      target="netstandard2.1" />
+			  target="netstandard2.1" />
 		<file src="../Jakar.Extensions/bin/Release/netstandard2.1/Jakar.Extensions.pdb"
-		      target="lib/netstandard2.1" />
+			  target="lib/netstandard2.1" />
 	</files>
 </package>

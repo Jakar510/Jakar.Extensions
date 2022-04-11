@@ -1,6 +1,7 @@
 ﻿namespace Jakar.Extensions.Languages;
 
 
+[Serializable]
 public class LanguageApi : ObservableClass
 {
     private CultureInfo?      _currentCultureInfo;

@@ -15,25 +15,26 @@ public interface IPhoneNumber : IDataBaseID, IEquatable<IPhoneNumber>
 
 
 /// <summary>
-/// You may also use one of <see cref="Validate.Re.PhoneNumbers"/> Regex objects to validate phone numbers, use the default <see cref="pattern"/>, or provide your own as the validation <see cref="Regex"/>
+/// You may also use one of <see cref="Validate.Re.PhoneNumbers"/> Regex objects to validate phone numbers, use the default <see cref="validator"/>, or provide your own as the validation <see cref="Regex"/>
 /// </summary>
 [Serializable]
 public class PhoneNumber : ObservableClass, IPhoneNumber
 {
     /// <summary>
-    /// <see href="https://www.twilio.com/blog/validating-phone-numbers-effectively-with-c-and-the-net-frameworks"/>
-    /// <see href="https://countrycode.org/"/>
+    /// <para><see href="https://www.twilio.com/blog/validating-phone-numbers-effectively-with-c-and-the-net-frameworks"/></para>
+    /// <para><see href="https://countrycode.org/"/></para>
     /// </summary>
-    public static readonly Regex pattern = new(@"^([0-9]{1-3})?[-. ]?\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$", RegexOptions.Compiled | RegexOptions.Singleline);
+    public static readonly Regex validator = new(@"^([0-9]{1-3})?[-. ]?\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$", RegexOptions.Compiled | RegexOptions.Singleline);
 
 
-    private readonly Regex? _validator;
+    private readonly Regex?  _validator;
+    private          bool    _isPrimary;
+    private          bool    _isFax;
+    private          bool    _isValid;
+    private          string? _number;
 
-    private bool    _isPrimary;
-    private bool    _isFax;
-    private bool    _isValid;
-    private string? _number;
 
+    [Key] public long ID { get; init; }
 
     public bool IsPrimary
     {
@@ -68,16 +69,16 @@ public class PhoneNumber : ObservableClass, IPhoneNumber
 
 
     /// <summary>
-    /// Uses the default <see cref="pattern"/> as the validation <see cref="Regex"/>
+    /// Uses the default <see cref="validator"/> as the validation <see cref="Regex"/>
     /// <para>Subclass this class to override the default validator.</para>
     /// </summary>
-    public PhoneNumber() : this(pattern) { }
+    public PhoneNumber() : this(validator) { }
     /// <summary>
-    /// You may also use one of <see cref="Validate.Re.PhoneNumbers"/> Regex objects, use the default <see cref="pattern"/>, or provide your own as the <paramref name="validator"/> <see cref="Regex"/>
+    /// You may also use one of <see cref="Validate.Re.PhoneNumbers"/> Regex objects, use the default <see cref="validator"/>, or provide your own as the <paramref name="validator"/> <see cref="Regex"/>
     /// </summary>
     public PhoneNumber( Regex validator ) => _validator = validator;
     /// <summary>
-    /// Uses the default <see cref="pattern"/> as the validation <see cref="Regex"/>
+    /// Uses the default <see cref="validator"/> as the validation <see cref="Regex"/>
     /// </summary>
     public PhoneNumber( string number, bool isPrimary, bool isFax ) : this()
     {
@@ -86,7 +87,7 @@ public class PhoneNumber : ObservableClass, IPhoneNumber
         IsFax     = isFax;
     }
     /// <summary>
-    /// You may also use one of <see cref="Validate.Re.PhoneNumbers"/> Regex objects, use the default <see cref="pattern"/>, or provide your own as the <paramref name="validator"/> <see cref="Regex"/>
+    /// You may also use one of <see cref="Validate.Re.PhoneNumbers"/> Regex objects, use the default <see cref="validator"/>, or provide your own as the <paramref name="validator"/> <see cref="Regex"/>
     /// </summary>
     public PhoneNumber( Regex validator, string number, bool isPrimary, bool isFax ) : this(validator)
     {

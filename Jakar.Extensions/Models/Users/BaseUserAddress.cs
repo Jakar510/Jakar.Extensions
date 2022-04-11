@@ -120,20 +120,10 @@ public abstract class BaseUserAddress<T> : BaseCollections<T>, IUserAddress wher
 
         if ( ReferenceEquals(this, other) ) { return true; }
 
-        return _line1 == other.Line1 &&
-               _line2 == other.Line2 &&
-               _city == other._city &&
-               _state == other._state &&
-               _country == other._country &&
-               _postalCode == other._postalCode;
+        return _line1 == other.Line1 && _line2 == other.Line2 && _city == other._city && _state == other._state && _country == other._country && _postalCode == other._postalCode;
     }
 
-    public override int GetHashCode() => HashCode.Combine(_line1,
-                                                          _line2,
-                                                          _city,
-                                                          _state,
-                                                          _country,
-                                                          _postalCode);
+    public override int GetHashCode() => HashCode.Combine(_line1, _line2, _city, _state, _country, _postalCode);
 
     public override int CompareTo( T? other )
     {

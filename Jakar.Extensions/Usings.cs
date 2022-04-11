@@ -53,3 +53,5 @@ global using Nito.Collections;
 global using KeyAttribute = Dapper.Contrib.Extensions.KeyAttribute;
 global using JetBrains.Annotations;
 global using Xamarin.Essentials;
+global using ValueOf;
+global using CommunityToolkit.Diagnostics;

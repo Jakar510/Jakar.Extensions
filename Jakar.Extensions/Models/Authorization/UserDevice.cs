@@ -41,21 +41,21 @@ public interface IUserDevice : IEquatable<IUserDevice>, IDataBaseID
 /// Debug and/or identify info for IT
 /// </summary>
 [Serializable]
-[Table("UserDevices")]
 public class UserDevice : ObservableClass, IUserDevice
 {
     private string? _ip;
 
 
-    public DateTime TimeStamp    { get; init; }
-    public Guid     DeviceID     { get; init; }
-    public string   Model        { get; init; } = string.Empty;
-    public string   Manufacturer { get; init; } = string.Empty;
-    public string   DeviceName   { get; init; } = string.Empty;
-    public int      DeviceTypeID { get; init; }
-    public string   Idiom        { get; init; } = string.Empty;
-    public string   Platform     { get; init; } = string.Empty;
-    public string   OsVersion    { get; init; } = string.Empty;
+    [Key] public long     ID           { get; init; }
+    public       DateTime TimeStamp    { get; init; }
+    public       Guid     DeviceID     { get; init; }
+    public       string   Model        { get; init; } = string.Empty;
+    public       string   Manufacturer { get; init; } = string.Empty;
+    public       string   DeviceName   { get; init; } = string.Empty;
+    public       int      DeviceTypeID { get; init; }
+    public       string   Idiom        { get; init; } = string.Empty;
+    public       string   Platform     { get; init; } = string.Empty;
+    public       string   OsVersion    { get; init; } = string.Empty;
 
     public string? Ip
     {

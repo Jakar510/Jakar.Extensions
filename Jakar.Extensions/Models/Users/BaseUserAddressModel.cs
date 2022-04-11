@@ -29,8 +29,7 @@ public abstract class BaseUserModel<T, TAddress> : BaseUserModel<T>, IUserModel<
 
 
     protected BaseUserModel() { }
-
-    protected BaseUserModel( IUserModel<TAddress> model, long id ) : base(model, id) => AddressDetail = model.AddressDetail;
+    protected BaseUserModel( IUserModel<TAddress> model ) : base(model) => AddressDetail = model.AddressDetail;
 
 
     public virtual void SetValue( TAddress address ) => AddressDetail = address;

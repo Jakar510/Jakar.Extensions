@@ -11,20 +11,39 @@ public interface IEmail : IDataBaseID, IEquatable<IEmail>
 
 
 [Serializable]
-[JsonObject]
-public class Email : ObservableClass, IEmail
+public class ValidEmail : ValueOf<string, ValidEmail>
 {
     /// <summary>
     /// <see href="https://www.tutorialspoint.com/how-to-validate-an-email-address-in-chash"/>
     /// </summary>
-    public const string PATTERN = @"^([a-zA-Z0-9_\-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([a-zA-Z0-9\-]+\.)+))([azA-Z]{2,4}|[0-9]{1,3})(\]?)$";
+    public static Regex validator = new(@"^([a-zA-Z0-9_\-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([a-zA-Z0-9\-]+\.)+))([azA-Z]{2,4}|[0-9]{1,3})(\]?)$", RegexOptions.Compiled, TimeSpan.FromMilliseconds(200));
 
-    public static Regex validator = new(PATTERN, RegexOptions.Compiled, TimeSpan.FromMilliseconds(200));
+    public ValidEmail() { }
+    public ValidEmail( string value ) => Value = value;
+
+    public static implicit operator ValidEmail( string value ) => new(value);
 
 
-    private bool   _isPrimary;
-    private bool   _isValid;
-    private string _address = string.Empty;
+    protected override bool TryValidate() => validator.IsMatch(Value);
+    protected override void Validate()
+    {
+        if ( !TryValidate() ) { throw new FormatException($"Provided value is in the wrong format: '{Value}'"); }
+    }
+
+
+    public override string ToString() => Value;
+}
+
+
+
+[Serializable]
+[JsonObject]
+public class Email : ObservableClass, IEmail
+{
+    private      bool   _isPrimary;
+    private      bool   _isValid;
+    private      string _address = string.Empty;
+    [Key] public long   ID { get; init; }
 
 
     public bool IsPrimary
@@ -47,7 +66,7 @@ public class Email : ObservableClass, IEmail
         set
         {
             SetProperty(ref _address, value);
-            IsValid = validator.IsMatch(Address);
+            IsValid = ValidEmail.validator.IsMatch(Address);
         }
     }
 
@@ -62,6 +81,7 @@ public class Email : ObservableClass, IEmail
 
 
     public override string ToString() => Address;
+    public virtual ValidEmail ToValidEmail() => Address;
 
 
     public override bool Equals( object? obj )

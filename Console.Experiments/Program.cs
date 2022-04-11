@@ -11,24 +11,12 @@ using Jakar.Extensions.Strings;
 namespace Console.Experiments;
 
 
-public record Item : BaseRecord<Item> { }
-
-
-
-public record Customer : BaseRecord<Customer> { }
-
-
-
 public static class Program
 {
     public static void Main( string[] args )
     {
         "Hello World!".WriteToConsole();
 
-        var item = new Item()
-                   {
-                       ID = 1
-                   };
 
         // try { First(); }
         // catch ( Exception e )

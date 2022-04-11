@@ -2,7 +2,7 @@
 
 
 [Serializable]
-public abstract record BaseCollectionsRecord<T> : ObservableRecord, IDataBaseID, IEquatable<T>, IComparable<T>, IComparable where T : BaseCollectionsRecord<T> 
+public abstract record BaseCollectionsRecord<T> : ObservableRecord, IEquatable<T>, IComparable<T>, IComparable where T : BaseCollectionsRecord<T> 
 {
     public abstract bool Equals( T? other );
 

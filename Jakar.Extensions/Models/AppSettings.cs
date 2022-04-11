@@ -31,6 +31,7 @@ public interface IAppSettings<out TDeviceID, TViewPage> : IAppSettings<TDeviceID
 
 
 
+[Serializable]
 public class AppSettings<TViewPage> : ObservableClass, IAppSettings<Guid, TViewPage, AppVersion>
 {
     private Guid       _deviceID;

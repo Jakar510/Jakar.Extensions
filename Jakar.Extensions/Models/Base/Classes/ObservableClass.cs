@@ -1,21 +1,40 @@
 ﻿using System.Windows.Input;
 
 
+
 namespace Jakar.Extensions.Models.Base.Classes;
 
 
-public abstract class ObservableClass : BaseClass, INotifyPropertyChanged, INotifyPropertyChanging
+[Serializable]
+public abstract class ObservableClass : BaseClass, INotifyPropertyChanged, INotifyPropertyChanging // IDataBaseID
 {
-    public static readonly DateTime sqlMinDate = DateTime.Parse("1/1/1753 12:00:00 AM", CultureInfo.InvariantCulture);
-
-
+    public static readonly DateTime            sqlMinDate = DateTime.Parse("1/1/1753 12:00:00 AM", CultureInfo.InvariantCulture);
     public event PropertyChangedEventHandler?  PropertyChanged;
     public event PropertyChangingEventHandler? PropertyChanging;
 
 
-    [NotifyPropertyChangedInvocator]
-    protected void OnPropertyChanged( [CallerMemberName] string? propertyName = default ) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName ?? string.Empty));
-    protected void OnPropertyChanging( [CallerMemberName] string? propertyName = default ) => PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(propertyName ?? string.Empty));
+    // private long                               _id;
+    //
+    //
+    // [Key]
+    // public virtual long ID
+    // {
+    //     get => _id;
+    //     init => _id = value;
+    // }
+    //
+    //
+    // protected void SetID( ObservableClass record )
+    // {
+    //     Type type = GetType();
+    //     if ( type != record.GetType() ) { throw new ExpectedValueTypeException(nameof(record), record, type); }
+    //
+    //     SetProperty(ref _id, record.ID, nameof(ID));
+    // }
+
+
+    [NotifyPropertyChangedInvocator] protected void OnPropertyChanged( [CallerMemberName] string? propertyName = default ) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName ?? string.Empty));
+    protected void OnPropertyChanging( [CallerMemberName]                                 string? propertyName = default ) => PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(propertyName ?? string.Empty));
 
 
     /// <summary>

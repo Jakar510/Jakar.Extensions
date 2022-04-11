@@ -44,6 +44,9 @@ public abstract class BaseUserModel<T> : BaseCollections<T>, IUserModel where T 
     private SupportedLanguage _preferredLanguage;
 
 
+    [Key] public long ID { get; init; }
+
+
     [Required]
     public string UserID
     {
@@ -158,9 +161,8 @@ public abstract class BaseUserModel<T> : BaseCollections<T>, IUserModel where T 
 
     protected BaseUserModel() { }
 
-    protected BaseUserModel( IUserModel model, long id )
+    protected BaseUserModel( IUserModel model )
     {
-        ID                = id;
         UserID            = model.UserID;
         UserName          = model.UserName;
         Address           = model.Address;
@@ -177,7 +179,7 @@ public abstract class BaseUserModel<T> : BaseCollections<T>, IUserModel where T 
     }
 
 
-    public string FullName()    => $"{FirstName} {LastName}";
+    public string FullName() => $"{FirstName} {LastName}";
     public string Description() => $"{Department}, {Title} at {Company}";
 
 
@@ -194,21 +196,8 @@ public abstract class BaseUserModel<T> : BaseCollections<T>, IUserModel where T 
 
         if ( ReferenceEquals(this, other) ) { return true; }
 
-        return _userName == other._userName &&
-               _department == other._department &&
-               _title == other._title &&
-               _firstName == other._firstName &&
-               _lastName == other._lastName &&
-               _address == other._address &&
-               _phoneNumber == other._phoneNumber &&
-               _email == other._email &&
-               _ext == other._ext &&
-               _pager == other._pager &&
-               _fax == other._fax &&
-               _website == other._website &&
-               _preferredLanguage == other._preferredLanguage &&
-               ID == other.ID &&
-               UserID == other.UserID;
+        return _userName == other._userName && _department == other._department && _title == other._title && _firstName == other._firstName && _lastName == other._lastName && _address == other._address && _phoneNumber == other._phoneNumber &&
+               _email == other._email && _ext == other._ext && _pager == other._pager && _fax == other._fax && _website == other._website && _preferredLanguage == other._preferredLanguage && UserID == other.UserID;
     }
 
     public override int GetHashCode()
@@ -226,8 +215,7 @@ public abstract class BaseUserModel<T> : BaseCollections<T>, IUserModel where T 
         hashCode.Add(_pager);
         hashCode.Add(_fax);
         hashCode.Add(_website);
-        hashCode.Add((int)_preferredLanguage);
-        hashCode.Add(ID);
+        hashCode.Add(_preferredLanguage);
         hashCode.Add(UserID);
         return hashCode.ToHashCode();
     }
@@ -275,12 +263,9 @@ public abstract class BaseUserModel<T> : BaseCollections<T>, IUserModel where T 
         int websiteComparison = string.Compare(_website, other._website, StringComparison.Ordinal);
         if ( websiteComparison != 0 ) { return websiteComparison; }
 
-        int preferredLanguageComparison = _preferredLanguage.CompareTo(other._preferredLanguage);
-        if ( preferredLanguageComparison != 0 ) { return preferredLanguageComparison; }
+        int user = string.Compare(UserID, other.UserID, StringComparison.Ordinal);
+        if ( user != 0 ) { return user; }
 
-        int idComparison = ID.CompareTo(other.ID);
-        if ( idComparison != 0 ) { return idComparison; }
-
-        return string.Compare(UserID, other.UserID, StringComparison.Ordinal);
+        return _preferredLanguage.CompareTo(other._preferredLanguage);
     }
 }
