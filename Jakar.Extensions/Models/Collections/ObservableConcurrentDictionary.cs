@@ -1,9 +1,12 @@
-﻿namespace Jakar.Extensions.Models.Collections;
+﻿// Jakar.Extensions :: Jakar.Extensions
+// 04/10/2022  6:24 PM
+
+namespace Jakar.Extensions.Models.Collections;
 
 
-public class ObservableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IReadOnlyDictionary<TKey, TValue>, INotifyCollectionChanged, INotifyPropertyChanged
+public class ObservableConcurrentDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IReadOnlyDictionary<TKey, TValue>, INotifyCollectionChanged, INotifyPropertyChanged
 {
-    protected Dictionary<TKey, TValue> _Dictionary { get; }
+    protected ConcurrentDictionary<TKey, TValue> _Dictionary { get; }
 
     public event NotifyCollectionChangedEventHandler? CollectionChanged;
     public event PropertyChangedEventHandler?         PropertyChanged;
@@ -35,33 +38,33 @@ public class ObservableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IRe
     }
 
 
-    public ObservableDictionary() => _Dictionary = new Dictionary<TKey, TValue>();
-    public ObservableDictionary( IDictionary<TKey, TValue>               dictionary ) => _Dictionary = new Dictionary<TKey, TValue>(dictionary);
-    public ObservableDictionary( IDictionary<TKey, TValue>               dictionary, IEqualityComparer<TKey> comparer ) => _Dictionary = new Dictionary<TKey, TValue>(dictionary, comparer);
-    public ObservableDictionary( IEnumerable<KeyValuePair<TKey, TValue>> collection ) => _Dictionary = new Dictionary<TKey, TValue>(collection);
-    public ObservableDictionary( IEnumerable<KeyValuePair<TKey, TValue>> collection, IEqualityComparer<TKey> comparer ) => _Dictionary = new Dictionary<TKey, TValue>(collection, comparer);
-    public ObservableDictionary( IEqualityComparer<TKey>                 comparer ) => _Dictionary = new Dictionary<TKey, TValue>(comparer);
-    public ObservableDictionary( int                                     capacity ) => _Dictionary = new Dictionary<TKey, TValue>(capacity);
-    public ObservableDictionary( int                                     capacity, IEqualityComparer<TKey> comparer ) => _Dictionary = new Dictionary<TKey, TValue>(capacity, comparer);
+    public ObservableConcurrentDictionary() => _Dictionary = new ConcurrentDictionary<TKey, TValue>();
+    public ObservableConcurrentDictionary( IDictionary<TKey, TValue>               dictionary ) => _Dictionary = new ConcurrentDictionary<TKey, TValue>(dictionary);
+    public ObservableConcurrentDictionary( IDictionary<TKey, TValue>               dictionary, IEqualityComparer<TKey> comparer ) => _Dictionary = new ConcurrentDictionary<TKey, TValue>(dictionary, comparer);
+    public ObservableConcurrentDictionary( IEnumerable<KeyValuePair<TKey, TValue>> collection ) => _Dictionary = new ConcurrentDictionary<TKey, TValue>(collection);
+    public ObservableConcurrentDictionary( IEnumerable<KeyValuePair<TKey, TValue>> collection, IEqualityComparer<TKey> comparer ) => _Dictionary = new ConcurrentDictionary<TKey, TValue>(collection, comparer);
+    public ObservableConcurrentDictionary( IEqualityComparer<TKey>                 comparer ) => _Dictionary = new ConcurrentDictionary<TKey, TValue>(comparer);
 
 
     public bool TryGetValue( TKey key, out TValue value ) => _Dictionary.TryGetValue(key, out value);
 
     public bool ContainsKey( TKey key ) => _Dictionary.ContainsKey(key);
 
-    public bool ContainsValue( TValue value ) => _Dictionary.ContainsValue(value);
+    public bool ContainsValue( TValue value ) => _Dictionary.Values.Contains(value);
 
     public bool Contains( KeyValuePair<TKey, TValue> item ) => ContainsKey(item.Key) && ContainsValue(item.Value);
 
 
     public void Add( KeyValuePair<TKey, TValue> item ) => Add(item.Key, item.Value);
-
-    public void Add( TKey key, TValue value )
+    public void Add( TKey                       key, TValue value ) => TryAdd(key, value);
+    public bool TryAdd( TKey key, TValue value )
     {
-        _Dictionary.Add(key, value);
+        if ( !_Dictionary.TryAdd(key, value) ) { return false; }
+
         var pair = new KeyValuePair<TKey, TValue>(key, value);
         OnCollectionChanged(NotifyCollectionChangedAction.Add, pair);
         OnCountPropertyChanged();
+        return true;
     }
 
 
@@ -71,8 +74,8 @@ public class ObservableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IRe
     {
         if ( !_Dictionary.ContainsKey(key) ) { return false; }
 
-        TValue value = _Dictionary[key];
-        _Dictionary.Remove(key);
+        if ( !_Dictionary.TryRemove(key, out TValue value) ) { return false; }
+
         var pair = new KeyValuePair<TKey, TValue>(key, value);
         OnCollectionChanged(NotifyCollectionChangedAction.Remove, pair);
         OnCountPropertyChanged();
@@ -86,7 +89,7 @@ public class ObservableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IRe
         OnCountPropertyChanged();
     }
 
-    
+
     public void CopyTo( KeyValuePair<TKey, TValue>[] array, int startIndex )
     {
         foreach ( ( int index, KeyValuePair<TKey, TValue> pair ) in this.EnumeratePairs() )

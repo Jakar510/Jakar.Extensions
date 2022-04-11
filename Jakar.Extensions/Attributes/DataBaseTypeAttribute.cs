@@ -1,7 +1,7 @@
 ﻿namespace Jakar.Extensions.Attributes;
 
 
-[AttributeUsage(AttributeTargets.Property | AttributeTargets.Class)]
+[AttributeUsage(AttributeTargets.Property | AttributeTargets.Class | AttributeTargets.Struct)]
 public sealed class DataBaseTypeAttribute : Attribute
 {
     public DbType Type { get; init; }

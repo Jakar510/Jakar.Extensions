@@ -1,5 +1,6 @@
 ﻿using System;
 using Jakar.Extensions.General;
+using Jakar.Extensions.Models.Base.Records;
 using Jakar.Extensions.Strings;
 
 
@@ -10,29 +11,43 @@ using Jakar.Extensions.Strings;
 namespace Console.Experiments;
 
 
+public record Item : BaseRecord<Item> { }
+
+
+
+public record Customer : BaseRecord<Customer> { }
+
+
+
 public static class Program
 {
     public static void Main( string[] args )
     {
         "Hello World!".WriteToConsole();
 
-        try { First(); }
-        catch ( Exception e )
-        {
-            e.ToString().WriteToConsole();
+        var item = new Item()
+                   {
+                       ID = 1
+                   };
 
-            var details = new ExceptionDetails(e);
-            details.ToPrettyJson().WriteToConsole();
-        }
+        // try { First(); }
+        // catch ( Exception e )
+        // {
+        //     e.ToString().WriteToConsole();
+        //
+        //     var details = new ExceptionDetails(e);
+        //     details.ToPrettyJson().WriteToConsole();
+        // }
+
 
         "Bye".WriteToConsole();
     }
 
 
-    public static  void First()  => Second();
+    public static void First() => Second();
     private static void Second() => Third();
-    private static void Third()  => Last();
-    private static void Last()   => throw new NotImplementedException("", new NullReferenceException(nameof(Program)));
+    private static void Third() => Last();
+    private static void Last() => throw new NotImplementedException("", new NullReferenceException(nameof(Program)));
 
 
     // public static async Task TestXml()

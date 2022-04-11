@@ -352,12 +352,12 @@ public class ConcurrentObservableCollection<T> : IList<T>, IList, IReadOnlyColle
     }
 
 
-    void ICollection.CopyTo( Array    array, int index ) => _Items.CopyTo(array, index);
-    void IList.      Remove( object   value )               => _Items.Remove(value);
-    int IList.       Add( object      value )               => _Items.Add(value);
-    bool IList.      Contains( object value )               => _Items.Contains(value);
-    int IList.       IndexOf( object  value )               => _Items.IndexOf(value);
-    void IList.      Insert( int      index, object value ) => _Items.Insert(index, value);
+    void ICollection.CopyTo( Array array, int index ) => _Items.CopyTo(array, index);
+    void IList.Remove( object      value ) => _Items.Remove(value);
+    int IList.Add( object          value ) => _Items.Add(value);
+    bool IList.Contains( object    value ) => _Items.Contains(value);
+    int IList.IndexOf( object      value ) => _Items.IndexOf(value);
+    void IList.Insert( int         index, object value ) => _Items.Insert(index, value);
 
     object IList.this[ int index ]
 
@@ -405,14 +405,14 @@ public class ConcurrentObservableCollection<T> : IList<T>, IList, IReadOnlyColle
         OnChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, index));
         OnPropertyChanged(nameof(Count));
     }
-    protected void Replaced( in T old,  in T   @new )                   => OnChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Replace, @new, old));
-    protected void Replaced( in T old,  in T   @new,  in int index )    => OnChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Replace, @new, old, index));
+    protected void Replaced( in T old,  in T   @new ) => OnChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Replace,                @new, old));
+    protected void Replaced( in T old,  in T   @new,  in int index ) => OnChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Replace, @new, old,   index));
     protected void Move( in     T item, in int index, in int oldIndex ) => OnChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Move, item, index, oldIndex));
     protected void Reset()
     {
         OnChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
         OnPropertyChanged(nameof(Count));
     }
-    protected void OnChanged( NotifyCollectionChangedEventArgs   e )                => CollectionChanged?.Invoke(this, e);
+    protected void OnChanged( NotifyCollectionChangedEventArgs   e ) => CollectionChanged?.Invoke(this, e);
     protected void OnPropertyChanged( [CallerMemberName] string? caller = default ) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(caller));
 }
