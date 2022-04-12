@@ -5,8 +5,6 @@ using Xamarin.Essentials;
 
 
 
-
-
 namespace Jakar.Extensions.Xamarin.Forms.Statics;
 
 
@@ -77,8 +75,8 @@ public static class NetworkManager
 
     public static void ThrowIfNotConnected()
     {
-        if ( IsConnected ) return;
+        if ( IsConnected ) { return; }
 
-        throw new SocketException(SocketError.NetworkDown.ToInt());
+        throw new SocketException(SocketError.NetworkDown.AsInt());
     }
 }

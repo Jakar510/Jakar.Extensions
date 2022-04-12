@@ -4,7 +4,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata>
 		<id>Jakar.Extensions.Xamarin.Forms</id>
-		<version>5.7.0</version>
+		<version>5.8.0</version>
 		<title>Base library for all others in Xamarin.Forms, and extensions to help with Xamarin.Forms development.</title>
 		<authors>Tyler Stegmaier</authors>
 		<owners>Jakar510/Jakar</owners>
@@ -18,8 +18,8 @@
 			Base Library for all Xamarin.Forms mobile apps.
 		</description>
 		<releaseNotes>
-			Jakar.Extensions.Xamarin.Forms 5.7.0
-			Support Jakar.Extensions 5.7.0
+			Jakar.Extensions.Xamarin.Forms 5.8.0
+			Support Jakar.Extensions 5.8.0
 		</releaseNotes>
 		<tags>Xamarin.Forms Xamarin Jakar Jakar.Extensions Api Extensions</tags>
 		<language>en-US</language>
@@ -33,7 +33,7 @@
 				<dependency id="Xamarin.Forms.Visual.Material"
 				            version="5.0.0.2291" />
 				<dependency id="Xamarin.Essentials"
-				            version="1.7.1" />
+							version="1.7.2" />
 				<dependency id="NETStandard.Library"
 				            version="2.0.3" />
 
@@ -48,7 +48,7 @@
 				            version="13.0.1" />
 
 				<dependency id="Jakar.Extensions"
-				            version="5.7.0" />
+				            version="5.8.0" />
 
 				<dependency id="Acr.UserDialogs"
 				            version="7.2.0.562" />
@@ -69,7 +69,7 @@
 				<dependency id="Xamarin.Forms.Visual.Material"
 				            version="5.0.0.2291" />
 				<dependency id="Xamarin.Essentials"
-				            version="1.7.1" />
+							version="1.7.2" />
 				<dependency id="NETStandard.Library"
 				            version="2.0.3" />
 
@@ -84,7 +84,7 @@
 				            version="13.0.1" />
 
 				<dependency id="Jakar.Extensions"
-				            version="5.7.0" />
+							version="5.8.0" />
 
 				<dependency id="Acr.UserDialogs"
 				            version="7.2.0.562" />
@@ -105,7 +105,7 @@
 				<dependency id="Xamarin.Forms.Visual.Material"
 				            version="5.0.0.2291" />
 				<dependency id="Xamarin.Essentials"
-				            version="1.7.1" />
+							version="1.7.2" />
 				<dependency id="NETStandard.Library"
 				            version="2.0.3" />
 
@@ -120,7 +120,7 @@
 				            version="13.0.1" />
 
 				<dependency id="Jakar.Extensions"
-				            version="5.7.0" />
+							version="5.8.0" />
 
 				<dependency id="Acr.UserDialogs"
 				            version="7.2.0.562" />
@@ -147,7 +147,7 @@
 				<dependency id="Xamarin.Forms.Visual.Material"
 				            version="5.0.0.2291" />
 				<dependency id="Xamarin.Essentials"
-				            version="1.7.1" />
+				            version="1.7.2" />
 				<dependency id="NETStandard.Library"
 				            version="2.0.3" />
 
@@ -162,7 +162,7 @@
 				            version="13.0.1" />
 
 				<dependency id="Jakar.Extensions"
-				            version="5.7.0" />
+							version="5.8.0" />
 
 				<dependency id="Acr.UserDialogs"
 				            version="7.2.0.562" />

@@ -163,6 +163,7 @@ public abstract class BaseUserModel<T> : BaseCollections<T>, IUserModel where T 
 
     protected BaseUserModel( IUserModel model )
     {
+        ID                = model.ID;
         UserID            = model.UserID;
         UserName          = model.UserName;
         Address           = model.Address;

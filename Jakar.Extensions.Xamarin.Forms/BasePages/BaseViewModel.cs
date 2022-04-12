@@ -4,12 +4,10 @@ using Xamarin.Essentials;
 
 
 
-
-
 namespace Jakar.Extensions.Xamarin.Forms.BasePages;
 
 
-public abstract class BaseViewModel : BaseNotifyPropertyModel
+public abstract class BaseViewModel : ObservableClass
 {
     private bool _isBusy;
 
@@ -96,8 +94,8 @@ public abstract class BaseViewModel<TPage, TItem> : BaseViewModel<TPage> where T
     protected BaseViewModel( TPage source ) : base(source) { LoadItemsCommand = new Command(async () => await ExecuteLoadItemsCommand().ConfigureAwait(false)); }
 
 
-    public             void LoadItems()      => LoadItemsCommand.Execute(null);
-    public async       Task LoadItemsAsync() => await MainThread.InvokeOnMainThreadAsync(ExecuteLoadItemsCommand).ConfigureAwait(false);
+    public void LoadItems() => LoadItemsCommand.Execute(null);
+    public async Task LoadItemsAsync() => await MainThread.InvokeOnMainThreadAsync(ExecuteLoadItemsCommand).ConfigureAwait(false);
     protected abstract Task ExecuteLoadItemsCommand();
 }
 
