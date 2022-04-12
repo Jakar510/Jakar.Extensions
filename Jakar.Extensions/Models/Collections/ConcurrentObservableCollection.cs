@@ -7,10 +7,9 @@ namespace Jakar.Extensions.Models.Collections;
 /// </summary>
 /// <typeparam name="T"></typeparam>
 [Serializable]
-public class ConcurrentObservableCollection<T> : IList<T>, IList, IReadOnlyCollection<T>, INotifyCollectionChanged, INotifyPropertyChanged
+public class ConcurrentObservableCollection<T> : ObservableClass, IList<T>, IList, IReadOnlyCollection<T>, ICollectionAlerts
 {
     public event NotifyCollectionChangedEventHandler? CollectionChanged;
-    public event PropertyChangedEventHandler?         PropertyChanged;
 
 
     protected readonly List<T>      _items;
@@ -448,42 +447,43 @@ public class ConcurrentObservableCollection<T> : IList<T>, IList, IReadOnlyColle
 
     protected void Added( in List<T> items )
     {
-        OnChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, items));
-        OnPropertyChanged(nameof(Count));
+        this.SendAdded(items);
+        OnCountChanged();
     }
     protected void Added( in T item )
     {
-        OnChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, item));
-        OnPropertyChanged(nameof(Count));
+        this.SendAdded(item);
+        OnCountChanged();
     }
     protected void Added( in T item, in int index )
     {
-        OnChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, item, index));
-        OnPropertyChanged(nameof(Count));
+        this.SendAdded(item, index);
+        OnCountChanged();
     }
     protected void Removed( in T item )
     {
-        OnChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, item));
-        OnPropertyChanged(nameof(Count));
+        this.SendRemoved(item);
+        OnCountChanged();
     }
     protected void Removed( in T item, in int index )
     {
-        OnChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, item, index));
-        OnPropertyChanged(nameof(Count));
+        this.SendRemoved(item, index);
+        OnCountChanged();
     }
     protected void Removed( in int index )
     {
-        OnChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, index));
-        OnPropertyChanged(nameof(Count));
+        this.SendRemoved(index);
+        OnCountChanged();
     }
-    protected void Replaced( in T old,  in T   @new ) => OnChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Replace,                @new, old));
-    protected void Replaced( in T old,  in T   @new,  in int index ) => OnChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Replace, @new, old,   index));
-    protected void Move( in     T item, in int index, in int oldIndex ) => OnChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Move, item, index, oldIndex));
+    protected void Replaced( in T old,  in T   @new ) => this.SendReplaced(@new,                old);
+    protected void Replaced( in T old,  in T   @new,  in int index ) => this.SendReplaced(@new, old, index);
+    protected void Move( in     T item, in int index, in int oldIndex ) => this.SendMove(item, index, oldIndex);
     protected void Reset()
     {
-        OnChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
-        OnPropertyChanged(nameof(Count));
+        this.SendReset();
+        OnCountChanged();
     }
-    protected void OnChanged( NotifyCollectionChangedEventArgs   e ) => CollectionChanged?.Invoke(this, e);
-    protected void OnPropertyChanged( [CallerMemberName] string? caller = default ) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(caller));
+    protected void OnChanged( NotifyCollectionChangedEventArgs             e ) => CollectionChanged?.Invoke(this, e);
+    void ICollectionAlerts.SendOnChanged( NotifyCollectionChangedEventArgs e ) => OnChanged(e);
+    protected void OnCountChanged() => OnPropertyChanged(new PropertyChangedEventArgs(nameof(Count)));
 }

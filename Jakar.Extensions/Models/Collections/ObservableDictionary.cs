@@ -1,10 +1,9 @@
 ﻿namespace Jakar.Extensions.Models.Collections;
 
 
-public class ObservableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IReadOnlyDictionary<TKey, TValue>, INotifyCollectionChanged, INotifyPropertyChanged
+public class ObservableDictionary<TKey, TValue> : ObservableClass, IDictionary<TKey, TValue>, IReadOnlyDictionary<TKey, TValue>, ICollectionAlerts
 {
     public event NotifyCollectionChangedEventHandler? CollectionChanged;
-    public event PropertyChangedEventHandler?         PropertyChanged;
 
 
     protected readonly Dictionary<TKey, TValue>           _dictionary;
@@ -20,14 +19,16 @@ public class ObservableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IRe
         get => _dictionary[key];
         set
         {
-            TValue? old = ContainsKey(key)
+            bool exists = ContainsKey(key);
+
+            TValue? old = exists
                               ? _dictionary[key]
                               : default;
 
             _dictionary[key] = value;
 
-            OnCollectionChanged(NotifyCollectionChangedAction.Replace, key, old, value);
-            OnCountChanged();
+            if ( exists ) { Replaced(key, old, value); }
+            else { Added(key, value); }
         }
     }
 
@@ -58,7 +59,7 @@ public class ObservableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IRe
     {
         _dictionary.Add(key, value);
         var pair = new KeyValuePair<TKey, TValue>(key, value);
-        OnCollectionChanged(NotifyCollectionChangedAction.Add, pair);
+        Added(pair);
         OnCountChanged();
     }
 
@@ -72,7 +73,7 @@ public class ObservableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IRe
         TValue value = _dictionary[key];
         _dictionary.Remove(key);
         var pair = new KeyValuePair<TKey, TValue>(key, value);
-        OnCollectionChanged(NotifyCollectionChangedAction.Remove, pair);
+        Removed(pair);
         OnCountChanged();
         return true;
     }
@@ -80,8 +81,7 @@ public class ObservableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IRe
     public void Clear()
     {
         _dictionary.Clear();
-        OnCollectionReset();
-        OnCountChanged();
+        Reset();
     }
 
 
@@ -95,27 +95,29 @@ public class ObservableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IRe
         }
     }
 
+
     protected virtual void OnCollectionChanged( NotifyCollectionChangedEventArgs e ) => CollectionChanged?.Invoke(this, e);
+    protected void Removed( KeyValuePair<TKey, TValue> item )
+    {
+        OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, item));
+        OnCountChanged();
+    }
+    protected void Added( TKey key, TValue item ) => Added(new KeyValuePair<TKey, TValue>(key, item));
+    protected void Added( KeyValuePair<TKey, TValue> item )
+    {
+        OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, item));
+        OnCountChanged();
+    }
 
-    protected void OnCollectionChanged( NotifyCollectionChangedAction action, KeyValuePair<TKey, TValue> item ) =>
-        OnCollectionChanged(new NotifyCollectionChangedEventArgs(action,
-                                                                 new List<KeyValuePair<TKey, TValue>>()
-                                                                 {
-                                                                     item
-                                                                 }));
-
-    protected void OnCollectionChanged( NotifyCollectionChangedAction action, TKey key, TValue? oldItem, TValue? newItem ) =>
-        OnCollectionChanged(action, new KeyValuePair<TKey, TValue?>(key, oldItem), new KeyValuePair<TKey, TValue?>(key, newItem));
-
-    protected void OnCollectionChanged( NotifyCollectionChangedAction action, KeyValuePair<TKey, TValue?> oldItem, KeyValuePair<TKey, TValue?> newItem ) =>
-        OnCollectionChanged(new NotifyCollectionChangedEventArgs(action, newItem, oldItem));
-
-    protected void OnCollectionReset() => OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
-
-
+    protected void Replaced( TKey key, TValue? oldItem, TValue? newItem ) => OnCollectionChanged(NotifyCollectionChangedAction.Replace, new KeyValuePair<TKey, TValue?>(key, oldItem), new KeyValuePair<TKey, TValue?>(key, newItem));
+    protected void OnCollectionChanged( NotifyCollectionChangedAction action, KeyValuePair<TKey, TValue?> oldItem, KeyValuePair<TKey, TValue?> newItem ) => OnCollectionChanged(new NotifyCollectionChangedEventArgs(action, newItem, oldItem));
+    protected void Reset()
+    {
+        OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+        OnCountChanged();
+    }
+    void ICollectionAlerts.SendOnChanged( NotifyCollectionChangedEventArgs e ) => OnCollectionChanged(e);
     protected void OnCountChanged() => OnPropertyChanged(new PropertyChangedEventArgs(nameof(Count)));
-    protected virtual void OnPropertyChanged( [CallerMemberName] string property = "" ) => OnPropertyChanged(new PropertyChangedEventArgs(property));
-    protected virtual void OnPropertyChanged( PropertyChangedEventArgs  e ) => PropertyChanged?.Invoke(this, e);
 
 
     public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator() => _dictionary.GetEnumerator();

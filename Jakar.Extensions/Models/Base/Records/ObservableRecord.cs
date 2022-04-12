@@ -7,10 +7,14 @@ namespace Jakar.Extensions.Models.Base.Records;
 
 public record ObservableRecord : BaseRecord, IDataBaseID, INotifyPropertyChanged, INotifyPropertyChanging
 {
-    public static readonly DateTime            sqlMinDate = DateTime.Parse("1/1/1753 12:00:00 AM", CultureInfo.InvariantCulture);
+    public static readonly DateTime sqlMinDate = DateTime.Parse("1/1/1753 12:00:00 AM", CultureInfo.InvariantCulture);
+
+
     public event PropertyChangedEventHandler?  PropertyChanged;
     public event PropertyChangingEventHandler? PropertyChanging;
-    private long                               _id;
+
+
+    private long _id;
 
 
     [Key]
@@ -30,8 +34,10 @@ public record ObservableRecord : BaseRecord, IDataBaseID, INotifyPropertyChanged
     }
 
 
-    [NotifyPropertyChangedInvocator] protected void OnPropertyChanged( [CallerMemberName] string? propertyName = default ) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName ?? string.Empty));
-    protected void OnPropertyChanging( [CallerMemberName]                                 string? propertyName = default ) => PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(propertyName ?? string.Empty));
+    [NotifyPropertyChangedInvocator] protected virtual void OnPropertyChanged( [CallerMemberName] string? property = default ) => OnPropertyChanged(new PropertyChangedEventArgs(property ?? string.Empty));
+    [NotifyPropertyChangedInvocator] protected virtual void OnPropertyChanged( PropertyChangedEventArgs   e ) => PropertyChanged?.Invoke(this, e);
+    protected virtual void OnPropertyChanging( [CallerMemberName] string?                                 property = default ) => OnPropertyChanging(new PropertyChangingEventArgs(property ?? string.Empty));
+    protected virtual void OnPropertyChanging( PropertyChangingEventArgs                                  e ) => PropertyChanging?.Invoke(this, e);
 
 
     /// <summary>
@@ -44,7 +50,6 @@ public record ObservableRecord : BaseRecord, IDataBaseID, INotifyPropertyChanged
     /// <returns>
     /// <para>Returns <see langword="false"/> if the values are equal, and therefore the <paramref name="backingStore"/> was not changed, otherwise <see langword="true"/></para>
     /// </returns>
-    [NotifyPropertyChangedInvocator]
     protected virtual bool SetPropertyWithoutNotify<T>( ref T backingStore, T value ) => SetPropertyWithoutNotify(ref backingStore, value, EqualityComparer<T>.Default);
 
     /// <summary>
@@ -58,7 +63,6 @@ public record ObservableRecord : BaseRecord, IDataBaseID, INotifyPropertyChanged
     /// <returns>
     /// <para>Returns <see langword="false"/> if the values are equal, and therefore the <paramref name="backingStore"/> was not changed, otherwise <see langword="true"/></para>
     /// </returns>
-    [NotifyPropertyChangedInvocator]
     protected virtual bool SetPropertyWithoutNotify<T>( ref T backingStore, T value, IEqualityComparer<T> comparer )
     {
         if ( comparer.Equals(backingStore, value) ) { return false; }
@@ -80,7 +84,6 @@ public record ObservableRecord : BaseRecord, IDataBaseID, INotifyPropertyChanged
     /// <returns>
     /// <para>Returns <see langword="false"/> if the values are equal, and therefore the <paramref name="backingStore"/> was not changed, otherwise <see langword="true"/></para>
     /// </returns>
-    [NotifyPropertyChangedInvocator]
     protected virtual bool SetProperty<T>( ref T backingStore, T value, IEqualityComparer<T> comparer, [CallerMemberName] string? propertyName = default )
     {
         if ( comparer.Equals(backingStore, value) ) { return false; }
@@ -104,14 +107,12 @@ public record ObservableRecord : BaseRecord, IDataBaseID, INotifyPropertyChanged
     /// <returns>
     /// <para>Returns <see langword="false"/> if the values are equal, and therefore the <paramref name="backingStore"/> was not changed, otherwise <see langword="true"/></para>
     /// </returns>
-    [NotifyPropertyChangedInvocator]
     protected virtual bool SetProperty<T>( ref T backingStore, T value, [CallerMemberName] string? propertyName = default ) => SetProperty(ref backingStore, value, EqualityComparer<T>.Default, propertyName);
 
 
     /// <summary>
     /// "onChanged" only called if the backingStore value has changed.
     /// </summary>
-    [NotifyPropertyChangedInvocator]
     protected virtual void SetProperty<T>( ref T backingStore, T value, ICommand onChanged, [CallerMemberName] string? propertyName = default )
     {
         if ( !SetProperty(ref backingStore, value, propertyName) ) { return; }
@@ -123,7 +124,6 @@ public record ObservableRecord : BaseRecord, IDataBaseID, INotifyPropertyChanged
     /// <summary>
     /// "onChanged" only called if the backingStore value has changed.
     /// </summary>
-    [NotifyPropertyChangedInvocator]
     protected virtual void SetProperty<T>( ref T backingStore, T value, IEqualityComparer<T> comparer, ICommand onChanged, [CallerMemberName] string? propertyName = default )
     {
         if ( !SetProperty(ref backingStore, value, comparer, propertyName) ) { return; }
@@ -135,7 +135,6 @@ public record ObservableRecord : BaseRecord, IDataBaseID, INotifyPropertyChanged
     /// <summary>
     /// "onChanged" only called if the backingStore value has changed.
     /// </summary>
-    [NotifyPropertyChangedInvocator]
     protected virtual void SetProperty<T>( ref T backingStore, T value, Action onChanged, [CallerMemberName] string? propertyName = default )
     {
         if ( !SetProperty(ref backingStore, value, propertyName) ) { return; }
@@ -147,7 +146,6 @@ public record ObservableRecord : BaseRecord, IDataBaseID, INotifyPropertyChanged
     /// <summary>
     /// "onChanged" only called if the backingStore value has changed.
     /// </summary>
-    [NotifyPropertyChangedInvocator]
     protected virtual void SetProperty<T>( ref T backingStore, T value, IEqualityComparer<T> comparer, Action onChanged, [CallerMemberName] string? propertyName = default )
     {
         if ( !SetProperty(ref backingStore, value, comparer, propertyName) ) { return; }
@@ -159,7 +157,6 @@ public record ObservableRecord : BaseRecord, IDataBaseID, INotifyPropertyChanged
     /// <summary>
     /// "onChanged" only called if the backingStore value has changed.
     /// </summary>
-    [NotifyPropertyChangedInvocator]
     protected virtual void SetProperty<T>( ref T backingStore, T value, Action<T> onChanged, [CallerMemberName] string? propertyName = default )
     {
         if ( !SetProperty(ref backingStore, value, propertyName) ) { return; }
@@ -171,7 +168,6 @@ public record ObservableRecord : BaseRecord, IDataBaseID, INotifyPropertyChanged
     /// <summary>
     /// "onChanged" only called if the backingStore value has changed.
     /// </summary>
-    [NotifyPropertyChangedInvocator]
     protected virtual void SetProperty<T>( ref T backingStore, T value, IEqualityComparer<T> comparer, Action<T> onChanged, [CallerMemberName] string? propertyName = default )
     {
         if ( !SetProperty(ref backingStore, value, comparer, propertyName) ) { return; }
@@ -183,7 +179,6 @@ public record ObservableRecord : BaseRecord, IDataBaseID, INotifyPropertyChanged
     /// <summary>
     /// "onChanged" only called if the backingStore value has changed.
     /// </summary>
-    [NotifyPropertyChangedInvocator]
     protected virtual Task SetProperty<T>( ref T backingStore, T value, Func<Task> onChanged, [CallerMemberName] string? propertyName = default )
     {
         if ( !SetProperty(ref backingStore, value, propertyName) ) { return Task.CompletedTask; }
@@ -195,7 +190,6 @@ public record ObservableRecord : BaseRecord, IDataBaseID, INotifyPropertyChanged
     /// <summary>
     /// "onChanged" only called if the backingStore value has changed.
     /// </summary>
-    [NotifyPropertyChangedInvocator]
     protected virtual Task SetProperty<T>( ref T backingStore, T value, IEqualityComparer<T> comparer, Func<Task> onChanged, [CallerMemberName] string? propertyName = default )
     {
         if ( !SetProperty(ref backingStore, value, comparer, propertyName) ) { return Task.CompletedTask; }
@@ -207,7 +201,6 @@ public record ObservableRecord : BaseRecord, IDataBaseID, INotifyPropertyChanged
     /// <summary>
     /// "onChanged" only called if the backingStore value has changed.
     /// </summary>
-    [NotifyPropertyChangedInvocator]
     protected virtual Task SetProperty<T>( ref T backingStore, T value, Func<T, Task> onChanged, [CallerMemberName] string? propertyName = default )
     {
         if ( !SetProperty(ref backingStore, value, propertyName) ) { return Task.CompletedTask; }
@@ -219,7 +212,6 @@ public record ObservableRecord : BaseRecord, IDataBaseID, INotifyPropertyChanged
     /// <summary>
     /// "onChanged" only called if the backingStore value has changed.
     /// </summary>
-    [NotifyPropertyChangedInvocator]
     protected virtual Task SetProperty<T>( ref T backingStore, T value, IEqualityComparer<T> comparer, Func<T, Task> onChanged, [CallerMemberName] string? propertyName = default )
     {
         if ( !SetProperty(ref backingStore, value, comparer, propertyName) ) { return Task.CompletedTask; }
@@ -228,28 +220,56 @@ public record ObservableRecord : BaseRecord, IDataBaseID, INotifyPropertyChanged
     }
 
 
-    [NotifyPropertyChangedInvocator]
+    protected virtual bool SetProperty( ref DateTime backingStore, DateTime value, in DateTime minDate, [CallerMemberName] string? caller = default )
+    {
+        value = value < minDate
+                    ? minDate
+                    : value;
+
+        return SetProperty(ref backingStore, value, ValueEqualizer<DateTime>.Instance, caller);
+    }
     protected virtual bool SetProperty( ref DateTime? backingStore, DateTime? value, in DateTime minDate, [CallerMemberName] string? caller = default )
     {
         value = value < minDate
                     ? null
                     : value;
 
-        return SetProperty(ref backingStore, value, caller);
+        return SetProperty(ref backingStore, value, ValueEqualizer<DateTime>.Instance, caller);
     }
 
 
-    [NotifyPropertyChangedInvocator]
+    protected virtual bool SetProperty( ref DateTimeOffset backingStore, DateTimeOffset value, in DateTimeOffset minDate, [CallerMemberName] string? caller = default )
+    {
+        value = value < minDate
+                    ? minDate
+                    : value;
+
+        return SetProperty(ref backingStore, value, ValueEqualizer<DateTimeOffset>.Instance, caller);
+    }
     protected virtual bool SetProperty( ref DateTimeOffset? backingStore, DateTimeOffset? value, in DateTimeOffset minDate, [CallerMemberName] string? caller = default )
     {
         value = value < minDate
                     ? null
                     : value;
 
-        return SetProperty(ref backingStore, value, caller);
+        return SetProperty(ref backingStore, value, ValueEqualizer<DateTimeOffset>.Instance, caller);
     }
 
 
-    protected virtual bool SetProperty( ref DateTime?       backingStore, DateTime?       value, [CallerMemberName] string? caller = default ) => SetProperty(ref backingStore, value, sqlMinDate, caller);
-    protected virtual bool SetProperty( ref DateTimeOffset? backingStore, DateTimeOffset? value, [CallerMemberName] string? caller = default ) => SetProperty(ref backingStore, value, sqlMinDate, caller);
+    protected virtual bool SetProperty( ref TimeSpan backingStore, TimeSpan value, in TimeSpan minValue, [CallerMemberName] string? caller = default )
+    {
+        value = value < minValue
+                    ? minValue
+                    : value;
+
+        return SetProperty(ref backingStore, value, ValueEqualizer<TimeSpan>.Instance, caller);
+    }
+    protected virtual bool SetProperty( ref TimeSpan? backingStore, TimeSpan? value, in TimeSpan? minValue, [CallerMemberName] string? caller = default )
+    {
+        value = value < minValue
+                    ? null
+                    : value;
+
+        return SetProperty(ref backingStore, value, ValueEqualizer<TimeSpan>.Instance, caller);
+    }
 }
