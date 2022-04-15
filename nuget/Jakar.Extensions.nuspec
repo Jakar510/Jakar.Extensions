@@ -4,7 +4,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata>
 		<id>Jakar.Extensions</id>
-		<version>5.8.1</version>
+		<version>5.9.0</version>
 		<title>Extension Library</title>
 		<authors>Tyler Stegmaier</authors>
 		<owners>Jakar510/Jakar</owners>
@@ -18,8 +18,8 @@
 			Extensions to aid in development.
 		</description>
 		<releaseNotes>
-			Jakar.Extensions 5.8.1
-			bug fixes
+			Jakar.Extensions 5.9.0
+			Added Span Extensions
 		</releaseNotes>
 		<tags>Api Extension Linq Http Files Files Strings Types Languages Collections Ini</tags>
 		<language>en-US</language>

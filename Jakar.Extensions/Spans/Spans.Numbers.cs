@@ -1,7 +1,7 @@
-﻿namespace Jakar.Extensions.Strings;
+﻿namespace Jakar.Extensions.Spans;
 
 
-public static class Spans
+public static partial class Spans
 {
     public static short As( this ReadOnlySpan<char> value, in short defaultValue ) => short.TryParse(value, out short result)
                                                                                           ? result
