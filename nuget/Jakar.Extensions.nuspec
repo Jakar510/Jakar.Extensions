@@ -20,6 +20,7 @@
 		<releaseNotes>
 			Jakar.Extensions 5.9.0
 			Added Span Extensions
+			Observable collection bug fixes
 		</releaseNotes>
 		<tags>Api Extension Linq Http Files Files Strings Types Languages Collections Ini</tags>
 		<language>en-US</language>
