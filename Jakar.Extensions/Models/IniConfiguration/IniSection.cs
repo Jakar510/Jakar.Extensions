@@ -5,8 +5,6 @@ public partial class IniConfig
 {
     public class Section : ConcurrentDictionary<string, string>
     {
-    #region ctor
-
         public Section() : this(StringComparer.OrdinalIgnoreCase) { }
         public Section( IEqualityComparer<string>                 comparer ) : base(comparer) { }
         public Section( IDictionary<string, string>               dictionary ) : this(dictionary, StringComparer.OrdinalIgnoreCase) { }
@@ -14,11 +12,23 @@ public partial class IniConfig
         public Section( IEnumerable<KeyValuePair<string, string>> collection ) : this(collection, StringComparer.OrdinalIgnoreCase) { }
         public Section( IEnumerable<KeyValuePair<string, string>> collection, IEqualityComparer<string> comparer ) : base(collection, comparer) { }
 
-    #endregion
 
 
-    #region Gets
+        #region Gets
 
+        public bool ValueAs( in string key, [NotNullWhen(true)] out IEnumerable<string>? value, in char separator = ',' )
+        {
+            string s = this[key];
+
+            if ( s.Contains(separator) )
+            {
+                value = s.Split(separator);
+                return true;
+            }
+
+            value = default;
+            return false;
+        }
         public bool ValueAs( in string key, [NotNullWhen(true)] out IEnumerable<string>? value, in string separator = "," )
         {
             string s = this[key];
@@ -135,43 +145,40 @@ public partial class IniConfig
             return Version.TryParse(s, out value);
         }
 
-    #endregion
+        #endregion
 
 
-    #region Adds
+
+        #region Adds
 
         public void Add( in string key, in IEnumerable<string> values, string separator = "," ) => this[key] = string.Join(separator, values);
 
-        public void Add( in string key, in double     value ) { this[key] = value.ToString(CultureInfo.InvariantCulture); }
-        public void Add( in string key, in float      value ) { this[key] = value.ToString(CultureInfo.InvariantCulture); }
-        public void Add( in string key, in long       value ) { this[key] = value.ToString(CultureInfo.InvariantCulture); }
-        public void Add( in string key, in ulong      value ) { this[key] = value.ToString(CultureInfo.InvariantCulture); }
-        public void Add( in string key, in int        value ) { this[key] = value.ToString(CultureInfo.InvariantCulture); }
-        public void Add( in string key, in uint       value ) { this[key] = value.ToString(CultureInfo.InvariantCulture); }
-        public void Add( in string key, in short      value ) { this[key] = value.ToString(CultureInfo.InvariantCulture); }
-        public void Add( in string key, in ushort     value ) { this[key] = value.ToString(CultureInfo.InvariantCulture); }
-        public void Add( in string key, in IPAddress  value ) { this[key] = value.ToString(); }
-        public void Add( in string key, in Guid       value ) { this[key] = value.ToString(); }
-        public void Add( in string key, in bool       value ) { this[key] = value.ToString(); }
-        public void Add( in string key, in AppVersion value ) { this[key] = value.ToString(); }
-        public void Add( in string key, in Version    value ) { this[key] = value.ToString(); }
-        public void Add( in string key, in string     value ) { this[key] = value; }
+        public void Add( in string key, in double     value ) => this[key] = value.ToString(CultureInfo.InvariantCulture);
+        public void Add( in string key, in float      value ) => this[key] = value.ToString(CultureInfo.InvariantCulture);
+        public void Add( in string key, in long       value ) => this[key] = value.ToString(CultureInfo.InvariantCulture);
+        public void Add( in string key, in ulong      value ) => this[key] = value.ToString(CultureInfo.InvariantCulture);
+        public void Add( in string key, in int        value ) => this[key] = value.ToString(CultureInfo.InvariantCulture);
+        public void Add( in string key, in uint       value ) => this[key] = value.ToString(CultureInfo.InvariantCulture);
+        public void Add( in string key, in short      value ) => this[key] = value.ToString(CultureInfo.InvariantCulture);
+        public void Add( in string key, in ushort     value ) => this[key] = value.ToString(CultureInfo.InvariantCulture);
+        public void Add( in string key, in IPAddress  value ) => this[key] = value.ToString();
+        public void Add( in string key, in Guid       value ) => this[key] = value.ToString();
+        public void Add( in string key, in bool       value ) => this[key] = value.ToString();
+        public void Add( in string key, in AppVersion value ) => this[key] = value.ToString();
+        public void Add( in string key, in Version    value ) => this[key] = value.ToString();
+        public void Add( in string key, in string     value ) => this[key] = value;
 
 
-        public void Add( in string key, in TimeSpan value, string? format = default, CultureInfo? culture = default )
-        {
+        public void Add( in string key, in TimeSpan value, string? format = default, CultureInfo? culture = default ) =>
             this[key] = format is null
                             ? value.ToString()
                             : value.ToString(format, culture ?? CultureInfo.InvariantCulture);
-        }
 
-        public void Add( in string key, in DateTime value, string? format = default, CultureInfo? culture = default )
-        {
+        public void Add( in string key, in DateTime value, string? format = default, CultureInfo? culture = default ) =>
             this[key] = format is null
                             ? value.ToString(culture ?? CultureInfo.InvariantCulture)
                             : value.ToString(format, culture ?? CultureInfo.InvariantCulture);
-        }
 
-    #endregion
+        #endregion
     }
 }

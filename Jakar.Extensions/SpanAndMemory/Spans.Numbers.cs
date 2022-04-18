@@ -1,4 +1,4 @@
-﻿namespace Jakar.Extensions.Spans;
+﻿namespace Jakar.Extensions.SpanAndMemory;
 
 
 public static partial class Spans

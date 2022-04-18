@@ -188,9 +188,6 @@ public abstract class BaseUserModel<T> : BaseCollections<T>, IUserModel where T 
     public virtual void SetValue( Email       email ) => Email = email.ToString();
 
 
-    public override bool Equals( object? obj ) => ReferenceEquals(this, obj) || obj is T other && Equals(other);
-
-
     public override bool Equals( T? other )
     {
         if ( other is null ) { return false; }
@@ -200,28 +197,6 @@ public abstract class BaseUserModel<T> : BaseCollections<T>, IUserModel where T 
         return _userName == other._userName && _department == other._department && _title == other._title && _firstName == other._firstName && _lastName == other._lastName && _address == other._address && _phoneNumber == other._phoneNumber &&
                _email == other._email && _ext == other._ext && _pager == other._pager && _fax == other._fax && _website == other._website && _preferredLanguage == other._preferredLanguage && UserID == other.UserID;
     }
-
-    public override int GetHashCode()
-    {
-        var hashCode = new HashCode();
-        hashCode.Add(_userName);
-        hashCode.Add(_department);
-        hashCode.Add(_title);
-        hashCode.Add(_firstName);
-        hashCode.Add(_lastName);
-        hashCode.Add(_address);
-        hashCode.Add(_phoneNumber);
-        hashCode.Add(_email);
-        hashCode.Add(_ext);
-        hashCode.Add(_pager);
-        hashCode.Add(_fax);
-        hashCode.Add(_website);
-        hashCode.Add(_preferredLanguage);
-        hashCode.Add(UserID);
-        return hashCode.ToHashCode();
-    }
-
-
     public override int CompareTo( T? other )
     {
         if ( ReferenceEquals(this, other) ) { return 0; }
@@ -268,5 +243,24 @@ public abstract class BaseUserModel<T> : BaseCollections<T>, IUserModel where T 
         if ( user != 0 ) { return user; }
 
         return _preferredLanguage.CompareTo(other._preferredLanguage);
+    }
+    public override int GetHashCode()
+    {
+        var hashCode = new HashCode();
+        hashCode.Add(_userName);
+        hashCode.Add(_department);
+        hashCode.Add(_title);
+        hashCode.Add(_firstName);
+        hashCode.Add(_lastName);
+        hashCode.Add(_address);
+        hashCode.Add(_phoneNumber);
+        hashCode.Add(_email);
+        hashCode.Add(_ext);
+        hashCode.Add(_pager);
+        hashCode.Add(_fax);
+        hashCode.Add(_website);
+        hashCode.Add(_preferredLanguage);
+        hashCode.Add(UserID);
+        return hashCode.ToHashCode();
     }
 }

@@ -1,7 +1,7 @@
 ﻿namespace Jakar.Extensions.Models.IniConfiguration;
 
 
-public class PreferenceFile : IniConfig, IDisposable, IAsyncDisposable
+public class PreferenceFile : IniConfig, IDisposable, IAsyncDisposable // TODO: Add watcher to update if file changes
 {
     private readonly object     _lock = new();
     private          LocalFile? _file;
@@ -15,22 +15,24 @@ public class PreferenceFile : IniConfig, IDisposable, IAsyncDisposable
     public PreferenceFile( IEnumerable<KeyValuePair<string, Section>> collection, IEqualityComparer<string> comparer ) : base(collection, comparer) { }
 
 
-    public         LocalFile Path       => _file ??= LocalDirectory.CurrentDirectory.Join(FileName());
-    public virtual string    FileName() => _fileName ??= $"{GetType().Name}.json";
+    public LocalFile Path => _file ??= LocalDirectory.CurrentDirectory.Join(FileName());
+    public virtual string FileName() => _fileName ??= $"{GetType().Name}.json";
 
 
-    protected void Load() => Task.Run(LoadAsync);
+    protected Task Load() => Task.Run(LoadAsync);
 
+
+    [SuppressMessage("ReSharper", "UseDeconstruction", Justification = "Support NetFramework")]
     protected virtual async Task LoadAsync()
     {
         IniConfig? cfg = await ReadFromFile(Path).ConfigureAwait(false);
         if ( cfg is null ) { return; }
 
-        foreach ( ( string? key, Section? section ) in cfg ) { Add(key, section); }
+        foreach ( KeyValuePair<string, Section> pair in cfg ) { Add(pair); }
     }
 
 
-    protected               Task Save()      => Task.Run(SaveAsync);
+    protected Task Save() => Task.Run(SaveAsync);
     protected virtual async Task SaveAsync() => await WriteToFile(Path).ConfigureAwait(false);
 
 

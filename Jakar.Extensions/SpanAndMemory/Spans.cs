@@ -2,21 +2,48 @@
 
 
 
-namespace Jakar.Extensions.Spans;
+namespace Jakar.Extensions.SpanAndMemory;
 
 
 [SuppressMessage("ReSharper", "OutParameterValueIsAlwaysDiscarded.Global")]
 public static partial class Spans
 {
-    public static Span<T> AsSpan<T>( this   ReadOnlySpan<T> span ) => span.AsSpan(span.Length);
-    public static Span<T> AsSpan<T>( this   ReadOnlySpan<T> span, in int length ) => MemoryMarshal.CreateSpan(ref MemoryMarshal.GetReference(span), length);
-    public static Memory<T> AsSpan<T>( this T[]             span ) => MemoryMarshal.CreateFromPinnedArray(span, 0, span.Length);
+    public static bool IsNullOrWhiteSpace( in Span<char> span )
+    {
+        if ( span.IsEmpty ) { return true; }
+
+        foreach ( char t in span )
+        {
+            if ( !char.IsWhiteSpace(t) ) { return false; }
+        }
+
+        return true;
+    }
+    public static bool IsNullOrWhiteSpace( in ReadOnlySpan<char> span )
+    {
+        if ( span.IsEmpty ) { return true; }
+
+        foreach ( char t in span )
+        {
+            if ( !char.IsWhiteSpace(t) ) { return false; }
+        }
+
+        return true;
+    }
+
+
+    public static Span<T> AsSpan<T>( this ReadOnlySpan<T> span ) => span.AsSpan(span.Length);
+    public static Span<T> AsSpan<T>( this ReadOnlySpan<T> span, in int length )
+    {
+        Guard.IsInRangeFor(length, span, nameof(span));
+        return MemoryMarshal.CreateSpan(ref MemoryMarshal.GetReference(span), length);
+    }
+    public static Memory<T> AsSpan<T>( this T[] span ) => MemoryMarshal.CreateFromPinnedArray(span, 0, span.Length);
 
 
     public static int LastIndexOf( this ReadOnlySpan<char> value, in char c, in int endIndex )
     {
         Guard.IsInRangeFor(endIndex, value, nameof(value));
-
         return value[..endIndex].LastIndexOf(c);
     }
 
@@ -85,6 +112,7 @@ public static partial class Spans
     public static bool Contains( this ReadOnlySpan<char> span, ReadOnlySpan<char> value ) => span.Contains(value, StringComparison.Ordinal);
 
 
+#if NETSTANDARD2_1 || NETFRAMEWORK
     /// <summary>
     /// <see cref="MemoryExtensions"/> doesn't have Contains in .Net Standard 2.1. but does in .Net 6.0.
     /// <para>Will be removed in a future version.</para>
@@ -93,7 +121,21 @@ public static partial class Spans
     /// <param name="span"></param>
     /// <param name="value"></param>
     /// <returns></returns>
-    private static bool Contains<T>( this ReadOnlySpan<T> span, T value ) where T : IEquatable<T>
+    public static bool Contains<T>( this Span<T> span, T value ) where T : IEquatable<T>
+    {
+        ReadOnlySpan<T> temp = span;
+        return temp.Contains(value);
+    }
+
+    /// <summary>
+    /// <see cref="MemoryExtensions"/> doesn't have Contains in .Net Standard 2.1. but does in .Net 6.0.
+    /// <para>Will be removed in a future version.</para>
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="span"></param>
+    /// <param name="value"></param>
+    /// <returns></returns>
+    public static bool Contains<T>( this ReadOnlySpan<T> span, T value ) where T : IEquatable<T>
     {
         foreach ( T item in span )
         {
@@ -103,6 +145,7 @@ public static partial class Spans
         return false;
     }
 
+#endif
 
     public static bool Contains<T>( this ReadOnlySpan<T> span, ReadOnlySpan<T> value ) where T : IEquatable<T>
     {
@@ -209,6 +252,7 @@ public static partial class Spans
         int start = value.IndexOf(oldValue);
 
         int end = start + oldValue.Length;
+
 
         Guard.IsInRangeFor(start, value, nameof(value));
         Join(value[..start], newValue, defaultValue, ref buffer, out int first);

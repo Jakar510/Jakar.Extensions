@@ -35,8 +35,6 @@ public abstract class BaseUserModel<T, TAddress> : BaseUserModel<T>, IUserModel<
     public virtual void SetValue( TAddress address ) => AddressDetail = address;
 
 
-    public override bool Equals( object? obj ) => ReferenceEquals(this, obj) || obj is T other && Equals(other);
-
     public override int GetHashCode()
     {
         var hashCode = new HashCode();

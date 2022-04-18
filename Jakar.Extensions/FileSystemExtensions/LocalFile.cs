@@ -4,23 +4,16 @@ using System.Security;
 using System.Web;
 
 
+
 namespace Jakar.Extensions.FileSystemExtensions;
 
 
 [Serializable]
-public class LocalFile : TempFile.ITempFile, IEquatable<LocalFile>, IComparable<LocalFile>, LocalFile.IReadHandler, LocalFile.IAsyncReadHandler, IComparable
+public class LocalFile : BaseCollections<LocalFile>, TempFile.ITempFile, IEquatable<LocalFile>, IComparable<LocalFile>, LocalFile.IReadHandler, LocalFile.IAsyncReadHandler, IComparable
 {
     protected FileInfo? _info;
 
-    [JsonIgnore]
-    public FileInfo Info
-    {
-        get
-        {
-            _info ??= new FileInfo(FullPath);
-            return _info;
-        }
-    }
+    [JsonIgnore] public FileInfo Info => _info ??= new FileInfo(FullPath);
 
 
     public string   FullPath      { get; init; }
@@ -226,12 +219,12 @@ public class LocalFile : TempFile.ITempFile, IEquatable<LocalFile>, IComparable<
     /// Moves this file to the new <paramref name="path"/>
     /// </summary>
     /// <param name="path"></param>
-    public void Move( string path ) { Info.MoveTo(path); }
+    public void Move( string path ) => Info.MoveTo(path);
     /// <summary>
     /// Moves this file to the new <paramref name="file"/> location
     /// </summary>
     /// <param name="file"></param>
-    public void Move( LocalFile file ) { Info.MoveTo(file.FullPath); }
+    public void Move( LocalFile file ) => Info.MoveTo(file.FullPath);
 
 
     /// <summary>
@@ -1068,18 +1061,7 @@ public class LocalFile : TempFile.ITempFile, IEquatable<LocalFile>, IComparable<
     public static bool operator >=( LocalFile? left, LocalFile? right ) => Sorter.Instance.Compare(left, right) >= 0;
 
 
-    public int CompareTo( object? obj )
-    {
-        if ( obj is null ) { return 1; }
-
-        if ( ReferenceEquals(this, obj) ) { return 0; }
-
-
-        return obj is LocalFile other
-                   ? CompareTo(other)
-                   : throw new ExpectedValueTypeException(nameof(obj), obj, typeof(LocalFile));
-    }
-    public int CompareTo( LocalFile? other )
+    public override int CompareTo( LocalFile? other )
     {
         if ( ReferenceEquals(this, other) ) { return 0; }
 
@@ -1087,22 +1069,15 @@ public class LocalFile : TempFile.ITempFile, IEquatable<LocalFile>, IComparable<
 
         return string.Compare(FullPath, other.FullPath, StringComparison.Ordinal);
     }
-
-
-    public override bool Equals( object? other ) => other is LocalFile file && Equals(file);
-
-    public override int GetHashCode() => HashCode.Combine(FullPath, this.IsTempFile());
-
-
-    public bool Equals( LocalFile? other )
+    public override bool Equals( LocalFile? other )
     {
         if ( other is null ) { return false; }
 
         if ( ReferenceEquals(this, other) ) { return true; }
 
-        return this.IsTempFile() == other.IsTempFile() &&
-               FullPath == other.FullPath;
+        return this.IsTempFile() == other.IsTempFile() && FullPath == other.FullPath;
     }
+    public override int GetHashCode() => HashCode.Combine(FullPath, this.IsTempFile());
 
 
     private bool _isTemporary;
@@ -1119,7 +1094,6 @@ public class LocalFile : TempFile.ITempFile, IEquatable<LocalFile>, IComparable<
         Dispose(this.IsTempFile());
         GC.SuppressFinalize(this);
     }
-
     protected virtual void Dispose( bool remove )
     {
         if ( remove && Exists ) { Delete(); }
@@ -1130,41 +1104,25 @@ public class LocalFile : TempFile.ITempFile, IEquatable<LocalFile>, IComparable<
 
 
 
-    public sealed class Equalizer : Equalizer<LocalFile> { }
-
-
-
-    public sealed class Sorter : Sorter<LocalFile> { }
-
-
-
+    /// <summary>
+    /// A collection of files that are in the <see cref="LocalDirectory"/>
+    /// </summary>
     [Serializable]
-    public class Collection : ObservableCollection<LocalFile>
-    {
-        public Collection() : base() { }
-        public Collection( IEnumerable<LocalFile> items ) : base(items) { }
-        public Collection( LocalDirectory         directory ) : this(directory.GetFiles()) { }
-    }
-
-
-
-    [Serializable]
-    public class Watcher : Collection, IDisposable
+    public class Watcher : ConcurrentCollection, IDisposable
     {
         public event ErrorEventHandler?         Error;
         private readonly LocalDirectory.Watcher _watcher;
 
 
-        public Watcher( LocalDirectory.Watcher watcher ) : base(watcher.Directory)
+        public Watcher( LocalDirectory.Watcher watcher ) : base(watcher.Directory.GetFiles())
         {
-            _watcher         =  watcher;
-            _watcher.Created += OnCreated;
-            _watcher.Changed += OnChanged;
-            _watcher.Deleted += OnDeleted;
-            _watcher.Renamed += OnRenamed;
-            _watcher.Error   += OnError;
-
-            _watcher.EnableRaisingEvents = true;
+            _watcher                     =  watcher;
+            _watcher.Created             += OnCreated;
+            _watcher.Changed             += OnChanged;
+            _watcher.Deleted             += OnDeleted;
+            _watcher.Renamed             += OnRenamed;
+            _watcher.Error               += OnError;
+            _watcher.EnableRaisingEvents =  true;
         }
 
 
@@ -1176,7 +1134,11 @@ public class LocalFile : TempFile.ITempFile, IEquatable<LocalFile>, IComparable<
             Add(e.FullPath);
         }
         private void OnDeleted( object sender, FileSystemEventArgs e ) => Remove(e.FullPath);
-        private void OnChanged( object sender, FileSystemEventArgs e ) => OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Replace, new LocalFile(e.FullPath)));
+        private void OnChanged( object sender, FileSystemEventArgs e )
+        {
+            var file = new LocalFile(e.FullPath);
+            Replaced(file, file);
+        }
         private void OnCreated( object sender, FileSystemEventArgs e ) => Add(e.FullPath);
         private void OnError( object   sender, ErrorEventArgs      e ) => Error?.Invoke(sender, e);
 
@@ -1193,27 +1155,5 @@ public class LocalFile : TempFile.ITempFile, IEquatable<LocalFile>, IComparable<
 
             _watcher.Dispose();
         }
-    }
-
-
-
-    [Serializable]
-    public class Items : List<LocalFile>
-    {
-        public Items() : base() { }
-        public Items( int                    capacity ) : base(capacity) { }
-        public Items( IEnumerable<LocalFile> items ) : base(items) { }
-        public Items( LocalDirectory         directory ) : this(directory.GetFiles()) { }
-    }
-
-
-
-    [Serializable]
-    public class Set : HashSet<LocalFile>
-    {
-        public Set() : base() { }
-        public Set( int                    capacity ) : base(capacity) { }
-        public Set( IEnumerable<LocalFile> items ) : base(items) { }
-        public Set( LocalDirectory         directory ) : this(directory.GetFiles()) { }
     }
 }

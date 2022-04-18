@@ -2,6 +2,7 @@
 
 
 [Serializable]
+[SuppressMessage("ReSharper", "BaseObjectGetHashCodeCallInGetHashCode")]
 public abstract class BaseCollections<T> : ObservableClass, IEquatable<T>, IComparable<T>, IComparable where T : BaseCollections<T>
 {
     public abstract bool Equals( T? other );
@@ -19,6 +20,8 @@ public abstract class BaseCollections<T> : ObservableClass, IEquatable<T>, IComp
                    ? CompareTo(value)
                    : throw new ExpectedValueTypeException(nameof(other), other, typeof(T));
     }
+    public sealed override bool Equals( object? other ) => ReferenceEquals(this, other) || other is T file && Equals(file);
+    public override int GetHashCode() => base.GetHashCode();
 
 
 
@@ -78,49 +81,9 @@ public abstract class BaseCollections<T> : ObservableClass, IEquatable<T>, IComp
 
 
 
-    public sealed class Sorter : IComparer<T>, IComparer
-    {
-        public static Sorter Instance { get; } = new();
-        private Sorter() { }
-
-
-        public int Compare( object? x, object? y )
-        {
-            if ( x is not T left ) { throw new ExpectedValueTypeException(nameof(x), x, typeof(T)); }
-
-            if ( y is not T right ) { throw new ExpectedValueTypeException(nameof(y), y, typeof(T)); }
-
-
-            return Compare(left, right);
-        }
-        public int Compare( T? x, T? y )
-        {
-            if ( ReferenceEquals(x, y) ) { return 0; }
-
-            if ( y is null ) { return 1; }
-
-            if ( x is null ) { return -1; }
-
-            return x.CompareTo(y);
-        }
-    }
+    public sealed class Sorter : Sorter<T> { }
 
 
 
-    public sealed class Equalizer : IEqualityComparer<T>
-    {
-        public static Equalizer Instance { get; } = new();
-        private Equalizer() { }
-
-
-        public bool Equals( T? left, T? right )
-        {
-            if ( left is null && right is null ) { return true; }
-
-            if ( left is null || right is null ) { return false; }
-
-            return left.Equals(right);
-        }
-        public int GetHashCode( T value ) => value.GetHashCode();
-    }
+    public sealed class Equalizer : Equalizer<T> { }
 }

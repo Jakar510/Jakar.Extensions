@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 
 
 
-namespace Jakar.Extensions.Spans;
+namespace Jakar.Extensions.SpanAndMemory;
 
 
 public static class GuidExtensions

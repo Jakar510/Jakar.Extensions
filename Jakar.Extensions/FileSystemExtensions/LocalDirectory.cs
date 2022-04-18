@@ -2,11 +2,12 @@
 using System.Security;
 
 
+
 namespace Jakar.Extensions.FileSystemExtensions;
 
 
 [Serializable]
-public class LocalDirectory : TempFile.ITempFile, IEquatable<LocalDirectory>, IAsyncDisposable, IDisposable
+public class LocalDirectory : BaseCollections<LocalDirectory>, TempFile.ITempFile, IEquatable<LocalDirectory>, IAsyncDisposable
 {
     protected DirectoryInfo? _info;
 
@@ -119,8 +120,7 @@ public class LocalDirectory : TempFile.ITempFile, IEquatable<LocalDirectory>, IA
     /// <param name="output">file path to write the zip to</param>
     /// <param name="compression">Defaults to <see cref="CompressionLevel.Optimal"/></param>
     /// <param name="encoding">The encoding used for the file names</param>
-    public void Zip( in LocalFile output, in Encoding encoding, in CompressionLevel compression = CompressionLevel.Optimal )
-        => ZipFile.CreateFromDirectory(FullPath, output.FullPath, compression, true, encoding);
+    public void Zip( in LocalFile output, in Encoding encoding, in CompressionLevel compression = CompressionLevel.Optimal ) => ZipFile.CreateFromDirectory(FullPath, output.FullPath, compression, true, encoding);
 
 
     /// <summary>
@@ -232,17 +232,7 @@ public class LocalDirectory : TempFile.ITempFile, IEquatable<LocalDirectory>, IA
     public static bool operator >=( LocalDirectory? left, LocalDirectory? right ) => RelationalComparer.Instance.Compare(left, right) >= 0;
 
 
-    public int CompareTo( object? obj )
-    {
-        if ( obj is null ) { return 1; }
-
-        if ( ReferenceEquals(this, obj) ) { return 0; }
-
-        return obj is LocalDirectory other
-                   ? CompareTo(other)
-                   : throw new ExpectedValueTypeException(nameof(obj), obj, typeof(LocalDirectory));
-    }
-    public int CompareTo( LocalDirectory? other )
+    public override int CompareTo( LocalDirectory? other )
     {
         if ( ReferenceEquals(this, other) ) { return 0; }
 
@@ -250,20 +240,14 @@ public class LocalDirectory : TempFile.ITempFile, IEquatable<LocalDirectory>, IA
 
         return string.Compare(FullPath, other.FullPath, StringComparison.Ordinal);
     }
-
-
-    public override bool Equals( object? other ) => other is LocalDirectory file && Equals(file);
-
-    public bool Equals( LocalDirectory? other )
+    public override bool Equals( LocalDirectory? other )
     {
         if ( other is null ) { return false; }
 
         if ( ReferenceEquals(this, other) ) { return true; }
 
-        return this.IsTempFile() == other.IsTempFile() &&
-               FullPath == other.FullPath;
+        return this.IsTempFile() == other.IsTempFile() && FullPath == other.FullPath;
     }
-
     public override int GetHashCode() => HashCode.Combine(FullPath, this.IsTempFile());
 
 
@@ -280,12 +264,10 @@ public class LocalDirectory : TempFile.ITempFile, IEquatable<LocalDirectory>, IA
         Dispose(this.IsTempFile());
         GC.SuppressFinalize(this);
     }
-
     protected virtual void Dispose( bool remove )
     {
         if ( remove && Exists ) { Delete(true); }
     }
-
     public async ValueTask DisposeAsync()
     {
         if ( !this.IsTempFile() ) { return; }
@@ -458,21 +440,21 @@ public class LocalDirectory : TempFile.ITempFile, IEquatable<LocalDirectory>, IA
     // ---------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-    public         IEnumerable<LocalFile> GetFiles()                                                                   => Info.EnumerateFiles().Select(ConvertFile);
-    public         IEnumerable<LocalFile> GetFiles( string      searchPattern )                                        => Info.EnumerateFiles(searchPattern).Select(ConvertFile);
-    public         IEnumerable<LocalFile> GetFiles( string      searchPattern, SearchOption       searchOption )       => Info.EnumerateFiles(searchPattern, searchOption).Select(ConvertFile);
-    public         IEnumerable<LocalFile> GetFiles( string      searchPattern, EnumerationOptions enumerationOptions ) => Info.EnumerateFiles(searchPattern, enumerationOptions).Select(ConvertFile);
-    private static LocalFile              ConvertFile( FileInfo file ) => file;
+    public IEnumerable<LocalFile> GetFiles() => Info.EnumerateFiles().Select(ConvertFile);
+    public IEnumerable<LocalFile> GetFiles( string searchPattern ) => Info.EnumerateFiles(searchPattern).Select(ConvertFile);
+    public IEnumerable<LocalFile> GetFiles( string searchPattern, SearchOption       searchOption ) => Info.EnumerateFiles(searchPattern,       searchOption).Select(ConvertFile);
+    public IEnumerable<LocalFile> GetFiles( string searchPattern, EnumerationOptions enumerationOptions ) => Info.EnumerateFiles(searchPattern, enumerationOptions).Select(ConvertFile);
+    private static LocalFile ConvertFile( FileInfo file ) => file;
 
 
     // ---------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-    public         IEnumerable<LocalDirectory> GetSubFolders()                                                                        => Info.EnumerateDirectories().Select(ConvertDirectory);
-    public         IEnumerable<LocalDirectory> GetSubFolders( string           searchPattern )                                        => Info.EnumerateDirectories(searchPattern).Select(ConvertDirectory);
-    public         IEnumerable<LocalDirectory> GetSubFolders( string           searchPattern, SearchOption       searchOption )       => Info.EnumerateDirectories(searchPattern, searchOption).Select(ConvertDirectory);
-    public         IEnumerable<LocalDirectory> GetSubFolders( string           searchPattern, EnumerationOptions enumerationOptions ) => Info.EnumerateDirectories(searchPattern, enumerationOptions).Select(ConvertDirectory);
-    private static LocalDirectory              ConvertDirectory( DirectoryInfo file ) => file;
+    public IEnumerable<LocalDirectory> GetSubFolders() => Info.EnumerateDirectories().Select(ConvertDirectory);
+    public IEnumerable<LocalDirectory> GetSubFolders( string      searchPattern ) => Info.EnumerateDirectories(searchPattern).Select(ConvertDirectory);
+    public IEnumerable<LocalDirectory> GetSubFolders( string      searchPattern, SearchOption       searchOption ) => Info.EnumerateDirectories(searchPattern,       searchOption).Select(ConvertDirectory);
+    public IEnumerable<LocalDirectory> GetSubFolders( string      searchPattern, EnumerationOptions enumerationOptions ) => Info.EnumerateDirectories(searchPattern, enumerationOptions).Select(ConvertDirectory);
+    private static LocalDirectory ConvertDirectory( DirectoryInfo file ) => file;
 
 
     // ---------------------------------------------------------------------------------------------------------------------------------------------------
@@ -482,11 +464,11 @@ public class LocalDirectory : TempFile.ITempFile, IEquatable<LocalDirectory>, IA
     [SuppressMessage("ReSharper", "IntroduceOptionalParameters.Global")]
     public class Watcher : FileSystemWatcher
     {
-        public LocalDirectory Directory { get; }
+        public LocalDirectory Directory { get; init; }
 
 
         /// <summary>
-        /// Uses the <see cref="LocalDirectory.CurrentDirectory"/>
+        /// Uses the <see cref="CurrentDirectory"/>
         /// </summary>
         public Watcher() : this(CurrentDirectory) { }
         public Watcher( LocalDirectory directory ) : this(directory, "*") { }
@@ -496,40 +478,18 @@ public class LocalDirectory : TempFile.ITempFile, IEquatable<LocalDirectory>, IA
             Directory    = directory;
             NotifyFilter = filters;
         }
-
-
-        public static implicit operator Watcher( LocalDirectory directory ) => new(directory);
     }
 
 
 
-    [Serializable]
-    public class Collection : ObservableCollection<LocalDirectory>
-    {
-        public Collection() : base() { }
-        public Collection( IEnumerable<LocalDirectory> items ) : base(items) { }
-        public Collection( LocalDirectory              directory ) : this(directory.GetSubFolders()) { }
-    }
-
-
-
-    [Serializable]
-    public class Items : List<LocalDirectory>
-    {
-        public Items() : base() { }
-        public Items( int                         capacity ) : base(capacity) { }
-        public Items( IEnumerable<LocalDirectory> items ) : base(items) { }
-        public Items( LocalDirectory              directory ) : this(directory.GetSubFolders()) { }
-    }
-
-
-
-    [Serializable]
-    public class Set : HashSet<LocalDirectory>
-    {
-        public Set() : base() { }
-        public Set( int                         capacity ) : base(capacity) { }
-        public Set( IEnumerable<LocalDirectory> items ) : base(items) { }
-        public Set( LocalDirectory              directory ) : this(directory.GetSubFolders()) { }
-    }
+    public static implicit operator Collection( LocalDirectory                     directory ) => new(directory.GetSubFolders());
+    public static implicit operator ConcurrentCollection( LocalDirectory           directory ) => new(directory.GetSubFolders());
+    public static implicit operator Items( LocalDirectory                          directory ) => new(directory.GetSubFolders());
+    public static implicit operator Set( LocalDirectory                            directory ) => new(directory.GetSubFolders());
+    public static implicit operator Watcher( LocalDirectory                        directory ) => new(directory);
+    public static implicit operator LocalFile.Collection( LocalDirectory           directory ) => new(directory.GetFiles());
+    public static implicit operator LocalFile.ConcurrentCollection( LocalDirectory directory ) => new(directory.GetFiles());
+    public static implicit operator LocalFile.Items( LocalDirectory                directory ) => new(directory.GetFiles());
+    public static implicit operator LocalFile.Set( LocalDirectory                  directory ) => new(directory.GetFiles());
+    public static implicit operator LocalFile.Watcher( LocalDirectory              directory ) => new(new Watcher(directory));
 }
