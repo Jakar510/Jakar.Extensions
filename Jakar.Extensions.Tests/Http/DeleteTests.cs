@@ -16,7 +16,7 @@ namespace Jakar.Extensions.Tests.Http;
 [SuppressMessage("ReSharper", "SuggestVarOrType_SimpleTypes")]
 [SuppressMessage("ReSharper", "SuggestVarOrType_BuiltInTypes")]
 [SuppressMessage("ReSharper", "SuggestVarOrType_Elsewhere")]
-public class DeleteTests : UrlTests
+public class DeleteTests : UrlTestsCore
 {
     [Test]
     [TestCase("https://reqbin.com/echo/delete/json")]

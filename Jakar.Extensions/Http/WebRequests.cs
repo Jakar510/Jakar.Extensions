@@ -6,6 +6,59 @@ using System.Net.Http.Headers;
 namespace Jakar.Extensions.Http;
 
 
+internal sealed class RequestInfo
+{
+    public string         Method                  { get; set; }
+    public Uri?           URL                     { get; init; }
+    public string         ErrorMessage            { get; init; }
+    public HttpStatusCode StatusCode              { get; init; }
+    public string         StatusDescription       { get; init; }
+    public string         ContentType             { get; init; }
+    public string         ContentEncoding         { get; init; }
+    public string         Server                  { get; init; }
+    public bool           IsMutuallyAuthenticated { get; init; }
+
+    public RequestInfo( in HttpWebResponse response, in string errorMessage )
+    {
+        ErrorMessage            = errorMessage;
+        StatusCode              = response.StatusCode;
+        URL                     = response.ResponseUri;
+        Method                  = response.Method;
+        StatusDescription       = response.StatusDescription;
+        ContentType             = response.ContentType;
+        ContentEncoding         = response.ContentEncoding;
+        IsMutuallyAuthenticated = response.IsMutuallyAuthenticated;
+        Server                  = response.Server;
+    }
+
+    public static async Task<RequestInfo> Create( WebException e )
+    {
+        using var response = (HttpWebResponse)e.Response;
+        return await Create(response);
+    }
+    public static async Task<RequestInfo> Create( HttpWebResponse webResponse )
+    {
+        await using Stream? stream = webResponse.GetResponseStream();
+
+        string msg;
+
+        if ( stream is not null )
+        {
+            using var reader = new StreamReader(stream);
+
+            string? errorMessage = await reader.ReadToEndAsync();
+            msg = $"Error Message: {errorMessage}";
+        }
+        else { msg = "UNKNOWN"; }
+
+        return new RequestInfo(webResponse, msg);
+    }
+
+    public override string ToString() => this.ToPrettyJson();
+}
+
+
+
 public static class WebRequests
 {
     /// <summary>
@@ -27,39 +80,20 @@ public static class WebRequests
             try { return await request.GetResponseAsync().ConfigureAwait(false); }
             catch ( WebException ex )
             {
-                // WebException is thrown when request.Abort() is called, but there may be many other reasons, propagate the WebException to the caller correctly
-                if ( token.IsCancellationRequested )
+                if ( token.IsCancellationRequested ) // WebException is thrown when request.Abort() is called, but there may be many other reasons, propagate the WebException to the caller correctly
                 {
-                    // the WebException will be available as Exception.InnerException
-                    throw new OperationCanceledException(ex.Message, ex, token);
+                    throw new OperationCanceledException(ex.Message, ex, token); // the WebException will be available as Exception.InnerException
                 }
 
                 if ( Debugger.IsAttached )
                 {
-                    using var webResponse = (HttpWebResponse)ex.Response;
-                    var       code        = $"Error code: {webResponse.StatusCode}";
-                    code.WriteToDebug();
-                    code.WriteToConsole();
-
-                    await using Stream? stream = webResponse.GetResponseStream();
-
-                    string msg;
-
-                    if ( stream is not null )
-                    {
-                        using var reader = new StreamReader(stream);
-
-                        string? errorMessage = await reader.ReadToEndAsync();
-                        msg = $"Error Message: {errorMessage}";
-                    }
-                    else { msg = "NO Error Message"; }
-
-                    msg.WriteToDebug();
-                    msg.WriteToConsole();
+                    var details = await RequestInfo.Create(ex);
+                    details.WriteToConsole();
+                    details.WriteToDebug();
                 }
 
-                // cancellation hasn't been requested, rethrow the original WebException
-                throw;
+
+                throw; // cancellation hasn't been requested, rethrow the original WebException
             }
         }
     }
