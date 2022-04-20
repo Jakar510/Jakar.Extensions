@@ -55,7 +55,10 @@ public static class InstanceCreator<T1, TInstance>
         };
 
         ConstructorInfo? constructor = typeof(TInstance).GetConstructor(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, Type.DefaultBinder, argsTypes, null);
-        if ( constructor is null ) throw InstanceCreator.CreateException(argsTypes);
+        if ( constructor is null )
+        {
+            throw InstanceCreator.CreateException(argsTypes);
+        }
 
         ParameterExpression[] args = argsTypes.Select(Expression.Parameter).ToArray();
 
@@ -79,7 +82,10 @@ public static class InstanceCreator<T1, T2, TInstance>
         };
 
         ConstructorInfo? constructor = typeof(TInstance).GetConstructor(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, Type.DefaultBinder, argsTypes, null);
-        if ( constructor is null ) throw InstanceCreator.CreateException(argsTypes);
+        if ( constructor is null )
+        {
+            throw InstanceCreator.CreateException(argsTypes);
+        }
 
         ParameterExpression[] args = argsTypes.Select(Expression.Parameter).ToArray();
 
@@ -104,7 +110,10 @@ public static class InstanceCreator<T1, T2, T3, TInstance>
         };
 
         ConstructorInfo? constructor = typeof(TInstance).GetConstructor(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, Type.DefaultBinder, argsTypes, null);
-        if ( constructor is null ) throw InstanceCreator.CreateException(argsTypes);
+        if ( constructor is null )
+        {
+            throw InstanceCreator.CreateException(argsTypes);
+        }
 
         ParameterExpression[] args = argsTypes.Select(Expression.Parameter).ToArray();
 

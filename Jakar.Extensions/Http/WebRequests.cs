@@ -2,6 +2,7 @@
 using System.Net.Http.Headers;
 
 
+
 namespace Jakar.Extensions.Http;
 
 
@@ -18,7 +19,7 @@ public static class WebRequests
     {
         // 
 
-        if ( request is null ) throw new ArgumentNullException(nameof(request));
+        if ( request is null ) { throw new ArgumentNullException(nameof(request)); }
 
         await using ( token.Register(request.Abort, useSynchronizationContext) )
         {
@@ -32,6 +33,30 @@ public static class WebRequests
                     throw new OperationCanceledException(ex.Message, ex, token);
                 }
 
+                if ( Debugger.IsAttached )
+                {
+                    using var webResponse = (HttpWebResponse)ex.Response;
+                    var       code        = $"Error code: {webResponse.StatusCode}";
+                    code.WriteToDebug();
+                    code.WriteToConsole();
+
+                    await using Stream? stream = webResponse.GetResponseStream();
+
+                    string msg;
+
+                    if ( stream is not null )
+                    {
+                        using var reader = new StreamReader(stream);
+
+                        string? errorMessage = await reader.ReadToEndAsync();
+                        msg = $"Error Message: {errorMessage}";
+                    }
+                    else { msg = "NO Error Message"; }
+
+                    msg.WriteToDebug();
+                    msg.WriteToConsole();
+                }
+
                 // cancellation hasn't been requested, rethrow the original WebException
                 throw;
             }
@@ -41,36 +66,38 @@ public static class WebRequests
 
     public static Exception? ConvertException( this WebException we, CancellationToken token )
     {
-        return we.Status switch
-               {
-                   WebExceptionStatus.ConnectFailure             => new ConnectFailureException(we.Message, we, token),
-                   WebExceptionStatus.ConnectionClosed           => new ConnectionClosedException(we.Message, we, token),
-                   WebExceptionStatus.KeepAliveFailure           => new KeepAliveFailureException(we.Message, we, token),
-                   WebExceptionStatus.MessageLengthLimitExceeded => new MessageLengthLimitExceededException(we.Message, we, token),
-                   WebExceptionStatus.NameResolutionFailure      => new NameResolutionException(we.Message, we, token),
-                   WebExceptionStatus.Pending                    => new PendingWebException(we, token),
-                   WebExceptionStatus.PipelineFailure            => new PipelineFailureException(we, token),
-                   WebExceptionStatus.ProtocolError              => new ProtocolErrorException(we.Message, we, token),
-                   WebExceptionStatus.ReceiveFailure             => new ReceiveFailureException(we.Message, we, token),
-                   WebExceptionStatus.RequestCanceled            => new RequestAbortedException(we.Message, we, token),
-                   WebExceptionStatus.SecureChannelFailure       => new SecureChannelFailureException(we.Message, we, token),
-                   WebExceptionStatus.SendFailure                => new SendFailureException(we.Message, we, token),
-                   WebExceptionStatus.ServerProtocolViolation    => new ServerProtocolViolationException(we.Message, we, token),
-                   WebExceptionStatus.Timeout                    => new TimeoutException(we.Message, we),
-                   WebExceptionStatus.TrustFailure               => new TrustFailureException(we.Message, we, token),
-                   WebExceptionStatus.UnknownError => we.Message.Contains(ActivelyRefusedConnectionException.REFUSED, StringComparison.OrdinalIgnoreCase)
-                                                          ? new ActivelyRefusedConnectionException(we.Message, we, token)
-                                                          : new UnknownWebErrorException(we.Message, we, token),
+        Exception? exception = we.Status switch
+                               {
+                                   WebExceptionStatus.ConnectFailure             => new ConnectFailureException(we.Message, we, token),
+                                   WebExceptionStatus.ConnectionClosed           => new ConnectionClosedException(we.Message, we, token),
+                                   WebExceptionStatus.KeepAliveFailure           => new KeepAliveFailureException(we.Message, we, token),
+                                   WebExceptionStatus.MessageLengthLimitExceeded => new MessageLengthLimitExceededException(we.Message, we, token),
+                                   WebExceptionStatus.NameResolutionFailure      => new NameResolutionException(we.Message, we, token),
+                                   WebExceptionStatus.Pending                    => new PendingWebException(we, token),
+                                   WebExceptionStatus.PipelineFailure            => new PipelineFailureException(we, token),
+                                   WebExceptionStatus.ProtocolError              => new ProtocolErrorException(we.Message, we, token),
+                                   WebExceptionStatus.ReceiveFailure             => new ReceiveFailureException(we.Message, we, token),
+                                   WebExceptionStatus.RequestCanceled            => new RequestAbortedException(we.Message, we, token),
+                                   WebExceptionStatus.SecureChannelFailure       => new SecureChannelFailureException(we.Message, we, token),
+                                   WebExceptionStatus.SendFailure                => new SendFailureException(we.Message, we, token),
+                                   WebExceptionStatus.ServerProtocolViolation    => new ServerProtocolViolationException(we.Message, we, token),
+                                   WebExceptionStatus.Timeout                    => new TimeoutException(we.Message, we),
+                                   WebExceptionStatus.TrustFailure               => new TrustFailureException(we.Message, we, token),
+                                   WebExceptionStatus.UnknownError => we.Message.Contains(ActivelyRefusedConnectionException.REFUSED, StringComparison.OrdinalIgnoreCase)
+                                                                          ? new ActivelyRefusedConnectionException(we.Message, we, token)
+                                                                          : new UnknownWebErrorException(we.Message, we, token),
 
 
-                   // WebExceptionStatus.CacheEntryNotFound => new ,
-                   // WebExceptionStatus.ProxyNameResolutionFailure => new ,
-                   // WebExceptionStatus.RequestProhibitedByCachePolicy => new ,
-                   // WebExceptionStatus.RequestProhibitedByProxy => new ,
+                                   // WebExceptionStatus.CacheEntryNotFound => new ,
+                                   // WebExceptionStatus.ProxyNameResolutionFailure => new ,
+                                   // WebExceptionStatus.RequestProhibitedByCachePolicy => new ,
+                                   // WebExceptionStatus.RequestProhibitedByProxy => new ,
 
-                   WebExceptionStatus.Success => null,
-                   _                          => null
-               };
+                                   WebExceptionStatus.Success => null,
+                                   _                          => null
+                               };
+
+        return exception;
     }
 
 
@@ -161,7 +188,7 @@ public static class WebRequests
         foreach ( ( string key, IEnumerable<string> items ) in headers )
         {
             if ( Enum.TryParse(key, true, out HttpRequestHeader httpRequestHeader) ) { request.SetHeader(httpRequestHeader, items); }
-            else { request.SetHeader(key, items); }
+            else { request.SetHeader(key,                                                                                   items); }
         }
     }
 
@@ -173,7 +200,7 @@ public static class WebRequests
         foreach ( ( string key, object value ) in headers )
         {
             if ( Enum.TryParse(key, true, out HttpRequestHeader header) ) { request.SetHeader(header, value); }
-            else { request.SetHeader(key, value); }
+            else { request.SetHeader(key,                                                             value); }
         }
     }
 
@@ -226,8 +253,7 @@ public static class WebRequests
 
                         break;
 
-                    default:
-                        throw new HeaderException(key, value, typeof(Cookie), typeof(IEnumerable<Cookie>));
+                    default: throw new HeaderException(key, value, typeof(Cookie), typeof(IEnumerable<Cookie>));
                 }
 
                 break;
@@ -270,7 +296,7 @@ public static class WebRequests
 
             default:
                 if ( value is string s ) { request.Headers.Add(key, s); }
-                else { request.Headers.Add(key, value.ToJson()); }
+                else { request.Headers.Add(key,                     value.ToJson()); }
 
                 return;
         }
@@ -318,7 +344,7 @@ public static class WebRequests
 
             default:
                 if ( value is string s ) { request.Headers.Add(key, s); }
-                else { request.Headers.Add(key, value.ToJson()); }
+                else { request.Headers.Add(key,                     value.ToJson()); }
 
                 break;
         }

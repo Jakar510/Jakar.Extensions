@@ -5,8 +5,15 @@ public static partial class TypeExtensions
 {
     public static bool IsEqualType( this Type value, Type other )
     {
-        if ( value is null ) throw new NullReferenceException(nameof(value));
-        if ( other is null ) throw new NullReferenceException(nameof(other));
+        if ( value is null )
+        {
+            throw new NullReferenceException(nameof(value));
+        }
+
+        if ( other is null )
+        {
+            throw new NullReferenceException(nameof(other));
+        }
 
         return value == other;
     }

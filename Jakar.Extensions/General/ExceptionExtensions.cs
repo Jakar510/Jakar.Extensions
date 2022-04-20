@@ -92,7 +92,10 @@ public static class ExceptionExtensions
     [Obsolete($"Use {nameof(ExceptionDetails)} instead")]
     public static Dictionary<string, object?> FullDetails( this Exception e, bool includeFullMethodInfo = false )
     {
-        if ( e is null ) throw new ArgumentNullException(nameof(e));
+        if ( e is null )
+        {
+            throw new ArgumentNullException(nameof(e));
+        }
 
         e.Details(out Dictionary<string, object?> dict, includeFullMethodInfo);
 

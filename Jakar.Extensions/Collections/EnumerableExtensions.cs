@@ -122,7 +122,10 @@ public static class EnumerableExtensions
 
     public static IEnumerator<TValue> Random<TValue>( this IReadOnlyIndexable<TValue> items, Random? rand = default )
     {
-        if ( items is null ) throw new ArgumentNullException(nameof(items));
+        if ( items is null )
+        {
+            throw new ArgumentNullException(nameof(items));
+        }
 
         rand ??= new Random();
 
@@ -131,7 +134,10 @@ public static class EnumerableExtensions
 
     public static IEnumerator<TValue> Random<TValue>( this IIndexable<TValue> items, Random? rand = default )
     {
-        if ( items is null ) throw new ArgumentNullException(nameof(items));
+        if ( items is null )
+        {
+            throw new ArgumentNullException(nameof(items));
+        }
 
         rand ??= new Random();
 
@@ -140,7 +146,10 @@ public static class EnumerableExtensions
 
     public static IEnumerator<TValue> Random<TValue>( this IList<TValue> items, Random? rand = default )
     {
-        if ( items is null ) throw new ArgumentNullException(nameof(items));
+        if ( items is null )
+        {
+            throw new ArgumentNullException(nameof(items));
+        }
 
         rand ??= new Random();
 
@@ -149,7 +158,10 @@ public static class EnumerableExtensions
 
     public static IEnumerator<TValue> Random<TValue>( this IReadOnlyList<TValue> items, Random? rand = default )
     {
-        if ( items is null ) throw new ArgumentNullException(nameof(items));
+        if ( items is null )
+        {
+            throw new ArgumentNullException(nameof(items));
+        }
 
         rand ??= new Random();
 
@@ -159,7 +171,10 @@ public static class EnumerableExtensions
 
     public static IEnumerator<TKey> RandomKeys<TKey, TValue>( this IDictionary<TKey, TValue> dict, Random? rand = default )
     {
-        if ( dict is null ) throw new ArgumentNullException(nameof(dict));
+        if ( dict is null )
+        {
+            throw new ArgumentNullException(nameof(dict));
+        }
 
         rand ??= new Random();
 
@@ -170,7 +185,10 @@ public static class EnumerableExtensions
 
     public static IEnumerator<TValue> RandomValues<TKey, TValue>( this IDictionary<TKey, TValue> dict, Random? rand = default )
     {
-        if ( dict is null ) throw new ArgumentNullException(nameof(dict));
+        if ( dict is null )
+        {
+            throw new ArgumentNullException(nameof(dict));
+        }
 
         rand ??= new Random();
 

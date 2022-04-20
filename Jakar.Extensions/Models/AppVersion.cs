@@ -10,7 +10,7 @@
 [SuppressMessage("ReSharper", "ParameterTypeCanBeEnumerable.Local")]
 [SuppressMessage("ReSharper", "InconsistentNaming")]
 [SuppressMessage("ReSharper", "RedundantDefaultMemberInitializer")]
-public readonly struct AppVersion : IComparable, IComparable<AppVersion>, IComparable<AppVersion?>, IFuzzyEquals<AppVersion?>, IFuzzyEquals<AppVersion>, IReadOnlyCollection<int>, ICloneable
+public readonly struct AppVersion : IComparable, IComparable<AppVersion>, IComparable<AppVersion?>, IFuzzyEquals<AppVersion?>, IFuzzyEquals<AppVersion>, IReadOnlyCollection<int>, ICloneable //TODO: ISpanFormattable
 {
     public enum Format
     {
@@ -136,8 +136,7 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
                 Build         = items[5];
                 return;
 
-            default:
-                throw new ArgumentOutOfRangeException(nameof(items), items.Count, @"value doesn't contain the correct amount of items.");
+            default: throw new ArgumentOutOfRangeException(nameof(items), items.Count, @"value doesn't contain the correct amount of items.");
         }
     }
 
@@ -555,12 +554,8 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
     {
         AssertFormat(other);
 
-        bool result = Major.Equals(other.Major) &&
-                      Nullable.Compare(other.Minor, Minor) == 0 &&
-                      Nullable.Compare(other.Maintenance, Maintenance) >= 0 &&
-                      Nullable.Compare(other.MajorRevision, MajorRevision) >= 0 &&
-                      Nullable.Compare(other.MinorRevision, MinorRevision) >= 0 &&
-                      Nullable.Compare(other.Build, Build) >= 0;
+        bool result = Major.Equals(other.Major) && Nullable.Compare(other.Minor, Minor) == 0 && Nullable.Compare(other.Maintenance,   Maintenance) >= 0 && Nullable.Compare(other.MajorRevision, MajorRevision) >= 0 &&
+                      Nullable.Compare(other.MinorRevision,                      MinorRevision) >= 0 && Nullable.Compare(other.Build, Build) >= 0;
 
         return result;
     }
@@ -577,12 +572,8 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
     {
         AssertFormat(other);
 
-        return Major == other.Major &&
-               Nullable.Equals(Minor, other.Minor) &&
-               Nullable.Equals(Maintenance, other.Maintenance) &&
-               Nullable.Equals(MajorRevision, other.MajorRevision) &&
-               Nullable.Equals(MinorRevision, other.MinorRevision) &&
-               Nullable.Equals(Build, other.Build);
+        return Major == other.Major && Nullable.Equals(Minor, other.Minor) && Nullable.Equals(Maintenance, other.Maintenance) && Nullable.Equals(MajorRevision, other.MajorRevision) && Nullable.Equals(MinorRevision, other.MinorRevision) &&
+               Nullable.Equals(Build,                         other.Build);
     }
 
 

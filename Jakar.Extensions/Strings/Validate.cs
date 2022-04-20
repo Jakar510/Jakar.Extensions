@@ -1,6 +1,7 @@
 ﻿using System.Net.Mail;
 
 
+
 namespace Jakar.Extensions.Strings;
 
 
@@ -9,7 +10,14 @@ namespace Jakar.Extensions.Strings;
 /// </summary>
 public static partial class Validate
 {
-    public static string Demo { get; set; } = "DEMO";
+    private static volatile string _demo = "DEMO";
+
+    public static string SetDemo( string value )
+    {
+        if ( value is null ) { throw new ArgumentNullException(nameof(value)); }
+
+        return Interlocked.Exchange(ref _demo, value);
+    }
 
 
     public static string FormatNumber( this float value, int            maxDecimals              = 4 ) => value.FormatNumber(CultureInfo.CurrentCulture, maxDecimals);
@@ -88,19 +96,19 @@ public static partial class Validate
     public static bool IsDemo( this string value ) => value.IsDemo(CultureInfo.CurrentCulture);
     public static bool IsDemo( this string value, in CultureInfo info )
     {
-        if ( string.IsNullOrWhiteSpace(value) ) return false;
+        if ( string.IsNullOrWhiteSpace(value) ) { return false; }
 
-        return value == Demo || value.ToLower(info) == "demo";
+        return value == _demo || value.ToLower(info) == "demo";
     }
     public static bool IsDemo( this ReadOnlySpan<char> value ) => value.IsDemo(CultureInfo.CurrentCulture);
     public static bool IsDemo( this ReadOnlySpan<char> value, in CultureInfo info )
     {
-        if ( value.IsEmpty ) return false;
+        if ( value.IsEmpty ) { return false; }
 
         var temp = new Span<char>();
         value.ToLower(temp, info);
         ReadOnlySpan<char> defaultDemo = "demo";
-        ReadOnlySpan<char> globalDemo  = Demo;
+        ReadOnlySpan<char> globalDemo  = _demo;
 
         return temp == defaultDemo || value == globalDemo;
     }

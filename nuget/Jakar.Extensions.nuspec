@@ -22,6 +22,9 @@
 			Added more Span extensions
 			Reworked LocalFile and LocalDirectory a bit
 			Reworked IniConfig and PreferenceFile
+			WebRequests.GetResponseAsync  now tries to get the error message sent from server.
+			Reworked ValidValueOf
+			Fix xml documentation.
 			Moving to DotNet 6.0 going forward once MAUI is released.
 		</releaseNotes>
 		<tags>Api Extension Linq Http Files Files Strings Types Languages Collections Ini</tags>

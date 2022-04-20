@@ -61,7 +61,10 @@ public static class PathExtensions
 
     public static async Task<LocalFile> ZipAsync( this LocalFile zipFilePath, IEnumerable<LocalFile> items, CancellationToken token )
     {
-        if ( items is null ) throw new ArgumentNullException(nameof(items));
+        if ( items is null )
+        {
+            throw new ArgumentNullException(nameof(items));
+        }
 
         await using FileStream zipToOpen = File.Create(zipFilePath.FullPath);
         using var              archive   = new ZipArchive(zipToOpen, ZipArchiveMode.Update);

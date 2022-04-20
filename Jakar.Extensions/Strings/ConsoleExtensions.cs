@@ -107,15 +107,19 @@ public static class ConsoleExtensions
     public static string GetCount<T>( this ICollection<T> self, char   c = '-',             int     length = 80 ) => $"{c.Wrapper(length)}   {self.GetType().Name}.Count: => {self.Count}";
 
 
-    public static void WriteToConsole( this StringBuilder self ) => self.ToString().WriteToConsole();
-
+    public static void WriteToConsole( this ReadOnlySpan<char> self )
+    {
+        Console.WriteLine();
+        Console.WriteLine(self.ToString());
+        Console.WriteLine();
+    }
     public static void WriteToConsole( this string self )
     {
         Console.WriteLine();
         Console.WriteLine(self);
         Console.WriteLine();
     }
-
+    public static void WriteToConsole( this StringBuilder self ) => self.ToString().WriteToConsole();
     public static void WriteToConsole( this object self )
     {
         Console.WriteLine();
@@ -123,17 +127,14 @@ public static class ConsoleExtensions
         Console.WriteLine();
     }
 
-    public static void WriteToConsole( this ReadOnlySpan<char> self )
-    {
-        Console.WriteLine();
-        Console.WriteLine(self.ToString());
-        Console.WriteLine();
-    }
-
 
     [Conditional("DEBUG")]
-    public static void WriteToDebug( this StringBuilder self ) => self.ToString().WriteToDebug();
-
+    public static void WriteToDebug( this ReadOnlySpan<char> self )
+    {
+        Debug.WriteLine(string.Empty);
+        Debug.WriteLine(self.ToString());
+        Debug.WriteLine(string.Empty);
+    }
     [Conditional("DEBUG")]
     public static void WriteToDebug( this string self )
     {
@@ -141,20 +142,12 @@ public static class ConsoleExtensions
         Debug.WriteLine(self);
         Debug.WriteLine(string.Empty);
     }
-
+    [Conditional("DEBUG")] public static void WriteToDebug( this StringBuilder self ) => self.ToString().WriteToDebug();
     [Conditional("DEBUG")]
     public static void WriteToDebug( this object self )
     {
         Debug.WriteLine(string.Empty);
         Debug.WriteLine(self);
-        Debug.WriteLine(string.Empty);
-    }
-
-    [Conditional("DEBUG")]
-    public static void WriteToDebug( this ReadOnlySpan<char> self )
-    {
-        Debug.WriteLine(string.Empty);
-        Debug.WriteLine(self.ToString());
         Debug.WriteLine(string.Empty);
     }
 }

@@ -42,7 +42,7 @@ public record ObservableRecord : BaseRecord, IDataBaseID, INotifyPropertyChanged
 
     /// <summary>
     /// <para>Checks the values with <see cref="EqualityComparer{T}.Default"/>.</para>
-    /// Then calls <see cref="OnPropertyChanging"/>, sets the value, then calls <see cref="OnPropertyChanged"/>
+    /// Then calls <see cref="OnPropertyChanging(string)"/>, sets the value, then calls <see cref="OnPropertyChanged(string)"/>
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="backingStore"></param>
@@ -54,7 +54,7 @@ public record ObservableRecord : BaseRecord, IDataBaseID, INotifyPropertyChanged
 
     /// <summary>
     /// <para>Checks the values with <paramref name="comparer"/>.</para>
-    /// Then calls <see cref="OnPropertyChanging"/>, sets the value, then calls <see cref="OnPropertyChanged"/>
+    /// Then calls <see cref="OnPropertyChanging(string)"/>, sets the value, then calls <see cref="OnPropertyChanged(string)"/>
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="backingStore"></param>
@@ -74,7 +74,7 @@ public record ObservableRecord : BaseRecord, IDataBaseID, INotifyPropertyChanged
 
     /// <summary>
     /// <para>Checks the values with <paramref name="comparer"/>.</para>
-    /// Then calls <see cref="OnPropertyChanging"/>, sets the value, then calls <see cref="OnPropertyChanged"/>
+    /// Then calls <see cref="OnPropertyChanging(string)"/>, sets the value, then calls <see cref="OnPropertyChanged(string)"/>
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="backingStore"></param>
@@ -98,7 +98,7 @@ public record ObservableRecord : BaseRecord, IDataBaseID, INotifyPropertyChanged
 
     /// <summary>
     /// <para>Checks the values with <see cref="EqualityComparer{T}.Default"/>.</para>
-    /// Then calls <see cref="OnPropertyChanging"/>, sets the value, then calls <see cref="OnPropertyChanged"/>
+    /// Then calls <see cref="OnPropertyChanging(string)"/>, sets the value, then calls <see cref="OnPropertyChanged(string)"/>
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="backingStore"></param>
