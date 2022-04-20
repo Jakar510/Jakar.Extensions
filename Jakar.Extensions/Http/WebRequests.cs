@@ -10,6 +10,7 @@ public static class WebRequests
 {
     /// <summary>
     /// <seealso href="https://stackoverflow.com/questions/19211972/getresponseasync-does-not-accept-cancellationtoken"/>
+    /// <seealso href="https://github.com/palburtus/HttpClient.net/blob/master/Aaks.Restclient/HttpRestClient.cs"/>
     /// </summary>
     /// <param name="request"></param>
     /// <param name="token"></param>
