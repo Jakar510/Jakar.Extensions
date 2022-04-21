@@ -29,7 +29,7 @@ public ref struct SpanSplitEnumerator<T> where T : IEquatable<T>
 
     public SpanSplitEnumerator<T> GetEnumerator() => this;
 
-    public void Reset() { _span = _originalString; }
+    public void Reset() => _span = _originalString;
 
     public bool MoveNext()
     {

@@ -14,7 +14,7 @@ public static class DictionaryExtensions
     }
 
 
-    public static void AddDefault<TKey, TValue>( this IDictionary<TKey, TValue?> dict, TKey key ) { dict.Add(key, default); }
+    public static void AddDefault<TKey, TValue>( this IDictionary<TKey, TValue?> dict, TKey key ) => dict.Add(key, default);
 
     public static void AddDefault<TKey, TValue>( this IDictionary<TKey, TValue?> dict, IEnumerable<TKey> keys )
     {

@@ -204,15 +204,13 @@ public static class WebRequests
     // }
 
 
-    public static void SetContentType( this WebRequest request, object value )
-    {
+    public static void SetContentType( this WebRequest request, object value ) =>
         request.ContentType = value switch
                               {
                                   IEnumerable<string> items => items.First(),
                                   string item               => item,
                                   _                         => throw new HeaderException(HttpRequestHeader.ContentType, value, typeof(string), typeof(IEnumerable<string>))
                               };
-    }
 
     public static void SetHeaders( this HttpWebRequest request, MultipartFormDataContent data ) => request.SetHeaders(data.Headers);
 

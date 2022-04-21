@@ -42,8 +42,8 @@ public static class Xmlizer
     internal static readonly ConcurrentDictionary<Type, Func<string, object>> parsers = new();
 
 
-    static Xmlizer()
-    {
+    static Xmlizer() =>
+
         // register System built-ins
         Register(typeof(bool?),
                  typeof(byte?),
@@ -79,13 +79,10 @@ public static class Xmlizer
                  typeof(decimal),
                  typeof(TimeSpan));
 
-        // Register(typeof(IPAddress),
-        // typeof(DnsEndPoint),
-        // typeof(SocketAddress));
-    }
-
-
-    public static void Register( Assembly assembly ) { Register(assembly.GetTypes()); }
+    // Register(typeof(IPAddress),
+    // typeof(DnsEndPoint),
+    // typeof(SocketAddress));
+    public static void Register( Assembly assembly ) => Register(assembly.GetTypes());
 
     public static void Register<T>() => Register(typeof(T));
 

@@ -27,25 +27,21 @@ public static class TextAlignmentExtensions
         return result;
     }
 
-    public static GravityFlags ToGravityFlags( this TextAlignment forms )
-    {
-        return forms switch
-               {
-                   TextAlignment.Start  => GravityFlags.Left | GravityFlags.CenterVertical,
-                   TextAlignment.Center => GravityFlags.CenterHorizontal | GravityFlags.CenterVertical,
-                   TextAlignment.End    => GravityFlags.Right | GravityFlags.CenterVertical,
-                   _                    => GravityFlags.Center | GravityFlags.CenterHorizontal
-               };
-    }
+    public static GravityFlags ToGravityFlags( this TextAlignment forms ) =>
+        forms switch
+        {
+            TextAlignment.Start  => GravityFlags.Left | GravityFlags.CenterVertical,
+            TextAlignment.Center => GravityFlags.CenterHorizontal | GravityFlags.CenterVertical,
+            TextAlignment.End    => GravityFlags.Right | GravityFlags.CenterVertical,
+            _                    => GravityFlags.Center | GravityFlags.CenterHorizontal
+        };
 
-    public static ATextAlignment ToAndroidTextAlignment( this TextAlignment forms )
-    {
-        return forms switch
-               {
-                   TextAlignment.Start  => ATextAlignment.ViewStart,
-                   TextAlignment.Center => ATextAlignment.Center,
-                   TextAlignment.End    => ATextAlignment.ViewEnd,
-                   _                    => ATextAlignment.Gravity
-               };
-    }
+    public static ATextAlignment ToAndroidTextAlignment( this TextAlignment forms ) =>
+        forms switch
+        {
+            TextAlignment.Start  => ATextAlignment.ViewStart,
+            TextAlignment.Center => ATextAlignment.Center,
+            TextAlignment.End    => ATextAlignment.ViewEnd,
+            _                    => ATextAlignment.Gravity
+        };
 }

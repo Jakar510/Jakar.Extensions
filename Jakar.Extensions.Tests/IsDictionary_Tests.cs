@@ -25,7 +25,7 @@ public class IsDictionary_Tests : Assert
     [TestCase(typeof(ObservableDictionary<string, string>), true)]
     [TestCase(typeof(List<string>), false)]
     [TestCase(typeof(List<Guid>), false)]
-    public void IsDictionary_Test( Type objType, bool expected ) { AreEqual(objType.IsDictionary(), expected); }
+    public void IsDictionary_Test( Type objType, bool expected ) => AreEqual(objType.IsDictionary(), expected);
 
 
     [Test]

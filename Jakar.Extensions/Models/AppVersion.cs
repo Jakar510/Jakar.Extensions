@@ -441,15 +441,13 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
     /// <br/>
     /// </returns>
     /// <exception cref="ArgumentException">If something goes wrong, and the <paramref name="other"/> is not comparable.</exception>
-    public int CompareTo( object? other )
-    {
-        return other switch
-               {
-                   Version version    => CompareTo(version),
-                   AppVersion version => CompareTo(version),
-                   _                  => throw new ExpectedValueTypeException(nameof(other), other, typeof(Version), typeof(AppVersion))
-               };
-    }
+    public int CompareTo( object? other ) =>
+        other switch
+        {
+            Version version    => CompareTo(version),
+            AppVersion version => CompareTo(version),
+            _                  => throw new ExpectedValueTypeException(nameof(other), other, typeof(Version), typeof(AppVersion))
+        };
 
 
     /// <summary>

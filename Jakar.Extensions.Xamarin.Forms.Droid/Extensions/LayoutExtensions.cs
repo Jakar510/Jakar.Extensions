@@ -110,8 +110,7 @@ public static class AndroidLayoutExtensions
                             int                       leftMargin   = 10,
                             int                       rightMargin  = 10,
                             [CallerMemberName] string caller       = ""
-    )
-    {
+    ) =>
         stack.Add(view,
                   row,
                   column,
@@ -126,7 +125,6 @@ public static class AndroidLayoutExtensions
                   rightMargin,
                   caller
                  );
-    }
 
     public static void Add( this AGridLayout          stack,
                             AView                     view,
@@ -142,13 +140,12 @@ public static class AndroidLayoutExtensions
                             int                       leftMargin   = 10,
                             int                       rightMargin  = 10,
                             [CallerMemberName] string caller       = ""
-    )
-    {
+    ) =>
         stack.Add(view,
                   row,
                   column,
                   AGridLayout.InvokeSpec(column, columnPos),
-                  AGridLayout.InvokeSpec(row, rowPos),
+                  AGridLayout.InvokeSpec(row,    rowPos),
                   width,
                   height,
                   gravity,
@@ -158,7 +155,6 @@ public static class AndroidLayoutExtensions
                   rightMargin,
                   caller
                  );
-    }
 
     public static void Add( this AGridLayout          stack,
                             AView                     view,

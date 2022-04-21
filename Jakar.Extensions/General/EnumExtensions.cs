@@ -1,9 +1,11 @@
 ﻿namespace Jakar.Extensions.General;
 
 
-public static class EnumExtensions
+[SuppressMessage("ReSharper", "PartialTypeWithSinglePart")]
+public static partial class Enums
 {
-    public static TValue GetEnumValue<TValue, TEnum>( this TEnum value ) where TEnum : Enum { return GetEnumNamedValues<TEnum, TValue>().First(pair => pair.Key == value.ToString()).Value; }
+    public static TValue GetEnumValue<TValue, TEnum>( this TEnum  value ) where TEnum : Enum => GetEnumNamedValues<TEnum, TValue>().First(pair => pair.Key == value.ToString()).Value;
+    public static bool ToEnum<TResult>( this               string input, out TResult result, bool ignoreCase = true ) where TResult : struct => Enum.TryParse(input, ignoreCase, out result);
 
 
     /// <summary>
@@ -12,7 +14,7 @@ public static class EnumExtensions
     /// <typeparam name="TEnum"></typeparam>
     /// <typeparam name="TValue"></typeparam>
     /// <returns></returns>
-    public static Dictionary<string, TValue> GetEnumNamedValues<TEnum, TValue>() where TEnum : Enum
+    public static IReadOnlyDictionary<string, TValue> GetEnumNamedValues<TEnum, TValue>() where TEnum : Enum
     {
         IEnumerable<TValue> values = Enum.GetValues(typeof(TEnum)).Cast<TValue>();
 
@@ -21,7 +23,4 @@ public static class EnumExtensions
 
         return values.ToDictionary(KeySelector, ElementSelector);
     }
-
-
-    public static bool ToEnum<TResult>( this string input, out TResult result, bool ignoreCase = true ) where TResult : struct => Enum.TryParse(input, ignoreCase, out result);
 }

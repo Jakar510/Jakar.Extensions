@@ -16,24 +16,22 @@ public class ObjectToNullableBoolConverter : TypeConverter, IValueConverter, IEx
                                                                                                         typeof(double),
                                                                                                         typeof(string));
 
-    public static bool? Convert( object? value )
-    {
-        return value switch
-               {
-                   null     => null,
-                   bool b   => b,
-                   int n    => n != 0,
-                   uint n   => n != 0,
-                   long n   => n != 0,
-                   ulong n  => n != 0,
-                   float n  => n != 0,
-                   double n => n != 0,
-                   string s => bool.TryParse(s, out bool result)
-                                   ? result
-                                   : !string.IsNullOrWhiteSpace(s),
-                   _ => true
-               };
-    }
+    public static bool? Convert( object? value ) =>
+        value switch
+        {
+            null     => null,
+            bool b   => b,
+            int n    => n != 0,
+            uint n   => n != 0,
+            long n   => n != 0,
+            ulong n  => n != 0,
+            float n  => n != 0,
+            double n => n != 0,
+            string s => bool.TryParse(s, out bool result)
+                            ? result
+                            : !string.IsNullOrWhiteSpace(s),
+            _ => true
+        };
 
     protected virtual bool? InternalConvert( object? value ) => Convert(value);
 

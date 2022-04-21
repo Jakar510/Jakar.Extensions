@@ -191,13 +191,11 @@ public class CurrentLocation : ICurrentLocation, IDataBaseIgnore
                                             double        longitudeStart,
                                             double        latitudeEnd,
                                             double        longitudeEnd,
-                                            DistanceUnits units )
-    {
-        return units switch
-               {
-                   DistanceUnits.Kilometers => UnitConverters.CoordinatesToKilometers(latitudeStart, longitudeStart, latitudeEnd, longitudeEnd),
-                   DistanceUnits.Miles      => UnitConverters.CoordinatesToMiles(latitudeStart, longitudeStart, latitudeEnd, longitudeEnd),
-                   _                        => throw new ArgumentOutOfRangeException(nameof(units))
-               };
-    }
+                                            DistanceUnits units ) =>
+        units switch
+        {
+            DistanceUnits.Kilometers => UnitConverters.CoordinatesToKilometers(latitudeStart, longitudeStart, latitudeEnd, longitudeEnd),
+            DistanceUnits.Miles      => UnitConverters.CoordinatesToMiles(latitudeStart, longitudeStart, latitudeEnd, longitudeEnd),
+            _                        => throw new ArgumentOutOfRangeException(nameof(units))
+        };
 }

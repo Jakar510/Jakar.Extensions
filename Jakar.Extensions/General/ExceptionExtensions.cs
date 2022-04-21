@@ -31,8 +31,7 @@ public static class ExceptionExtensions
     public static string?        MethodClass( this     Exception e ) => e.TargetSite?.MethodClass();
 
 
-    public static void Details( this Exception e, out Dictionary<string, string?> dict )
-    {
+    public static void Details( this Exception e, out Dictionary<string, string?> dict ) =>
         dict = new Dictionary<string, string?>
                {
                    [nameof(Type)]               = e.GetType().FullName,
@@ -43,7 +42,6 @@ public static class ExceptionExtensions
                    [nameof(MethodSignature)]    = e.MethodSignature(),
                    [nameof(e.ToString)]         = e.ToString()
                };
-    }
 
     public static void Details( this Exception e, out Dictionary<string, object?> dict, bool includeFullMethodInfo = false )
     {
