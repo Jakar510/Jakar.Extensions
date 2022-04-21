@@ -2,30 +2,36 @@
 // 04/21/2022  11:48 AM
 
 using Jakar.Extensions.Enumerations;
+using Jakar.Extensions.SpanAndMemory;
 
 
 
 namespace Jakar.Extensions.Http;
 
 
-public class ResponseData
+public sealed class ResponseData
 {
-    public string? Method                  { get; set; }
-    public Uri?    URL                     { get; init; }
-    public JToken? ErrorMessage            { get; init; }
-    public Status  StatusCode              { get; init; }
-    public string? StatusDescription       { get; init; }
-    public string? ContentEncoding         { get; init; }
-    public string? Server                  { get; init; }
-    public string  ContentType             { get; init; }
-    public bool    IsMutuallyAuthenticated { get; init; }
+    public const string  ERROR_MESSAGE = "Error Message: ";
+    public       string? Method                  { get; set; }
+    public       Uri?    URL                     { get; init; }
+    public       JToken? ErrorMessage            { get; init; }
+    public       Status  StatusCode              { get; init; }
+    public       string? StatusDescription       { get; init; }
+    public       string? ContentEncoding         { get; init; }
+    public       string? Server                  { get; init; }
+    public       string? ContentType             { get; init; }
+    public       bool    IsMutuallyAuthenticated { get; init; }
 
 
-    public ResponseData( in HttpWebResponse response, in string? errorMessage )
+    private ResponseData( ReadOnlySpan<char> error )
     {
-        try { ErrorMessage = errorMessage?.FromJson(); }
-        catch ( Exception ) { ErrorMessage = errorMessage; }
+        if ( error.StartsWith(ERROR_MESSAGE, StringComparison.OrdinalIgnoreCase) ) { error = error[ERROR_MESSAGE.Length..]; }
 
+        try { ErrorMessage = error.FromJson(); }
+        catch ( Exception ) { ErrorMessage = error.ToString(); }
+    }
+    public ResponseData( in HttpWebResponse response, in string? error ) : this(error)
+    {
         StatusCode              = response.StatusCode.ToStatus();
         URL                     = response.ResponseUri;
         Method                  = response.Method;
@@ -35,11 +41,8 @@ public class ResponseData
         IsMutuallyAuthenticated = response.IsMutuallyAuthenticated;
         Server                  = response.Server;
     }
-    public ResponseData( in WebResponse response, in string? errorMessage )
+    public ResponseData( in WebResponse response, in string? error ) : this(error)
     {
-        try { ErrorMessage = errorMessage?.FromJson(); }
-        catch ( Exception ) { ErrorMessage = errorMessage; }
-
         URL                     = response.ResponseUri;
         ContentType             = response.ContentType;
         IsMutuallyAuthenticated = response.IsMutuallyAuthenticated;

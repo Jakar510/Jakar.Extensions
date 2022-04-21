@@ -24,13 +24,15 @@ public static class JsonExtensions
     public static string ToJson( this object item, Formatting             formatting, params JsonConverter[] converters ) => JsonConvert.SerializeObject(item, formatting, converters);
 
 
-    public static TResult FromJson<TResult>( this string json ) => JsonConvert.DeserializeObject<TResult>(json) ?? throw new NullReferenceException(nameof(JsonConvert.DeserializeObject));
-    public static TResult FromJson<TResult>( this string json, JsonSerializerSettings? settings ) => JsonConvert.DeserializeObject<TResult>(json,   settings) ?? throw new NullReferenceException(nameof(JsonConvert.DeserializeObject));
-    public static TResult FromJson<TResult>( this string json, params JsonConverter[]  converters ) => JsonConvert.DeserializeObject<TResult>(json, converters) ?? throw new NullReferenceException(nameof(JsonConvert.DeserializeObject));
+    public static TResult FromJson<TResult>( this ReadOnlySpan<char> json ) => json.ToString().FromJson<TResult>(); // TODO: 
+    public static TResult FromJson<TResult>( this string             json ) => JsonConvert.DeserializeObject<TResult>(json) ?? throw new NullReferenceException(nameof(JsonConvert.DeserializeObject));
+    public static TResult FromJson<TResult>( this string             json, JsonSerializerSettings? settings ) => JsonConvert.DeserializeObject<TResult>(json,   settings) ?? throw new NullReferenceException(nameof(JsonConvert.DeserializeObject));
+    public static TResult FromJson<TResult>( this string             json, params JsonConverter[]  converters ) => JsonConvert.DeserializeObject<TResult>(json, converters) ?? throw new NullReferenceException(nameof(JsonConvert.DeserializeObject));
 
 
-    public static JToken FromJson( this string json ) => JToken.Parse(json) ?? throw new NullReferenceException(nameof(JToken.Parse));
-    public static JToken FromJson( this string json, JsonLoadSettings settings ) => JToken.Parse(json, settings) ?? throw new NullReferenceException(nameof(JToken.Parse));
+    public static JToken FromJson( this ReadOnlySpan<char> json ) => JToken.Parse(json.ToString()) ?? throw new NullReferenceException(nameof(JToken.Parse)); // TODO: 
+    public static JToken FromJson( this string             json ) => JToken.Parse(json) ?? throw new NullReferenceException(nameof(JToken.Parse));
+    public static JToken FromJson( this string             json, JsonLoadSettings settings ) => JToken.Parse(json, settings) ?? throw new NullReferenceException(nameof(JToken.Parse));
 
 
     public static JToken FromJson( this object json ) => JToken.FromObject(json) ?? throw new NullReferenceException(nameof(JToken.Parse));
