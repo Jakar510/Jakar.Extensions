@@ -17,62 +17,13 @@ public interface IUserAddress
 [Serializable]
 public abstract class BaseUserAddress<T> : BaseCollections<T>, IUserAddress where T : BaseUserAddress<T>
 {
+    private string _city    = string.Empty;
+    private string _country = string.Empty;
+    private bool   _isPrimary;
     private string _line1      = string.Empty;
     private string _line2      = string.Empty;
-    private string _city       = string.Empty;
-    private string _state      = string.Empty;
-    private string _country    = string.Empty;
     private string _postalCode = string.Empty;
-    private bool   _isPrimary;
-
-
-    public string Line1
-    {
-        get => _line1;
-        set => SetProperty(ref _line1, value);
-    }
-
-
-    public string Line2
-    {
-        get => _line2;
-        set => SetProperty(ref _line2, value);
-    }
-
-
-    public string City
-    {
-        get => _city;
-        set => SetProperty(ref _city, value);
-    }
-
-
-    public string State
-    {
-        get => _state;
-        set => SetProperty(ref _state, value);
-    }
-
-
-    public string Country
-    {
-        get => _country;
-        set => SetProperty(ref _country, value);
-    }
-
-
-    public string PostalCode
-    {
-        get => _postalCode;
-        set => SetProperty(ref _postalCode, value);
-    }
-
-
-    public bool IsPrimary
-    {
-        get => _isPrimary;
-        set => SetProperty(ref _isPrimary, value);
-    }
+    private string _state      = string.Empty;
 
 
     protected BaseUserAddress() { }
@@ -153,5 +104,54 @@ public abstract class BaseUserAddress<T> : BaseCollections<T>, IUserAddress wher
 
 
         return string.CompareOrdinal(_postalCode, other._postalCode);
+    }
+
+
+    public string Line1
+    {
+        get => _line1;
+        set => SetProperty(ref _line1, value);
+    }
+
+
+    public string Line2
+    {
+        get => _line2;
+        set => SetProperty(ref _line2, value);
+    }
+
+
+    public string City
+    {
+        get => _city;
+        set => SetProperty(ref _city, value);
+    }
+
+
+    public string State
+    {
+        get => _state;
+        set => SetProperty(ref _state, value);
+    }
+
+
+    public string Country
+    {
+        get => _country;
+        set => SetProperty(ref _country, value);
+    }
+
+
+    public string PostalCode
+    {
+        get => _postalCode;
+        set => SetProperty(ref _postalCode, value);
+    }
+
+
+    public bool IsPrimary
+    {
+        get => _isPrimary;
+        set => SetProperty(ref _isPrimary, value);
     }
 }

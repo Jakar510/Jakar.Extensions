@@ -3,7 +3,7 @@
 
 public class MultiDict<TKey> : Dictionary<TKey, object?>
 {
-#region ctor
+    #region ctor
 
     public MultiDict() : this(0) { }
     public MultiDict( IEqualityComparer<TKey>?                 comparer ) : base(0, comparer) { }
@@ -12,10 +12,11 @@ public class MultiDict<TKey> : Dictionary<TKey, object?>
     public MultiDict( IEnumerable<KeyValuePair<TKey, object?>> collection, IEqualityComparer<TKey>? comparer = null ) : base(collection, comparer) { }
     protected MultiDict( SerializationInfo                     info,       StreamingContext         context ) : base(info, context) { }
 
-#endregion
+    #endregion
 
 
-#region Gets
+
+    #region Gets
 
     public bool ValueAs( in TKey key, out double    value ) => ValueAs<double>(key, out value);
     public bool ValueAs( in TKey key, out double?   value ) => ValueAs<double?>(key, out value);
@@ -70,40 +71,41 @@ public class MultiDict<TKey> : Dictionary<TKey, object?>
         return ExpectedValueTypeException<TKey>.Verify<T>(this[key], key);
     }
 
-#endregion
+    #endregion
 
 
-#region Adds
+
+    #region Adds
 
     public void Add<T>( in TKey key, in T value ) => this[key] = value;
 
-    public void Add( in TKey key, in double     value ) { this[key] = value; }
-    public void Add( in TKey key, in double?    value ) { this[key] = value; }
-    public void Add( in TKey key, in float      value ) { this[key] = value; }
-    public void Add( in TKey key, in float?     value ) { this[key] = value; }
-    public void Add( in TKey key, in long       value ) { this[key] = value; }
-    public void Add( in TKey key, in long?      value ) { this[key] = value; }
-    public void Add( in TKey key, in ulong      value ) { this[key] = value; }
-    public void Add( in TKey key, in ulong?     value ) { this[key] = value; }
-    public void Add( in TKey key, in int        value ) { this[key] = value; }
-    public void Add( in TKey key, in uint?      value ) { this[key] = value; }
-    public void Add( in TKey key, in short      value ) { this[key] = value; }
-    public void Add( in TKey key, in short?     value ) { this[key] = value; }
-    public void Add( in TKey key, in ushort     value ) { this[key] = value; }
-    public void Add( in TKey key, in ushort?    value ) { this[key] = value; }
-    public void Add( in TKey key, in Guid       value ) { this[key] = value; }
-    public void Add( in TKey key, in Guid?      value ) { this[key] = value; }
-    public void Add( in TKey key, in DateTime   value ) { this[key] = value; }
-    public void Add( in TKey key, in DateTime?  value ) { this[key] = value; }
-    public void Add( in TKey key, in TimeSpan   value ) { this[key] = value; }
-    public void Add( in TKey key, in TimeSpan?  value ) { this[key] = value; }
-    public void Add( in TKey key, in bool       value ) { this[key] = value; }
-    public void Add( in TKey key, in bool?      value ) { this[key] = value; }
-    public void Add( in TKey key, in IPAddress  value ) { this[key] = value; }
-    public void Add( in TKey key, in AppVersion value ) { this[key] = value; }
-    public void Add( in TKey key, in Version    value ) { this[key] = value; }
+    public void Add( in TKey key, in double     value ) => this[key] = value;
+    public void Add( in TKey key, in double?    value ) => this[key] = value;
+    public void Add( in TKey key, in float      value ) => this[key] = value;
+    public void Add( in TKey key, in float?     value ) => this[key] = value;
+    public void Add( in TKey key, in long       value ) => this[key] = value;
+    public void Add( in TKey key, in long?      value ) => this[key] = value;
+    public void Add( in TKey key, in ulong      value ) => this[key] = value;
+    public void Add( in TKey key, in ulong?     value ) => this[key] = value;
+    public void Add( in TKey key, in int        value ) => this[key] = value;
+    public void Add( in TKey key, in uint?      value ) => this[key] = value;
+    public void Add( in TKey key, in short      value ) => this[key] = value;
+    public void Add( in TKey key, in short?     value ) => this[key] = value;
+    public void Add( in TKey key, in ushort     value ) => this[key] = value;
+    public void Add( in TKey key, in ushort?    value ) => this[key] = value;
+    public void Add( in TKey key, in Guid       value ) => this[key] = value;
+    public void Add( in TKey key, in Guid?      value ) => this[key] = value;
+    public void Add( in TKey key, in DateTime   value ) => this[key] = value;
+    public void Add( in TKey key, in DateTime?  value ) => this[key] = value;
+    public void Add( in TKey key, in TimeSpan   value ) => this[key] = value;
+    public void Add( in TKey key, in TimeSpan?  value ) => this[key] = value;
+    public void Add( in TKey key, in bool       value ) => this[key] = value;
+    public void Add( in TKey key, in bool?      value ) => this[key] = value;
+    public void Add( in TKey key, in IPAddress  value ) => this[key] = value;
+    public void Add( in TKey key, in AppVersion value ) => this[key] = value;
+    public void Add( in TKey key, in Version    value ) => this[key] = value;
 
-#endregion
+    #endregion
 }
 
 

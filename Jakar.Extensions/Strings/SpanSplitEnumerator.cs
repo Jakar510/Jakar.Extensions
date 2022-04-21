@@ -2,13 +2,15 @@
 
 
 /// <summary>
-/// <see cref="SpanSplitEnumerator{T}"/> is a struct so there is no allocation here.
-/// <para>
-/// Must be a ref struct as it contains a <see cref="ReadOnlySpan{T}"/>
-/// </para>
-/// <para>
-/// <see href="https://www.meziantou.net/split-a-string-into-lines-without-allocation.htm"/>
-/// </para>
+///     <see cref = "SpanSplitEnumerator{T}" />
+///     is a struct so there is no allocation here.
+///     <para>
+///         Must be a ref struct as it contains a
+///         <see cref = "ReadOnlySpan{T}" />
+///     </para>
+///     <para>
+///         <see href = "https://www.meziantou.net/split-a-string-into-lines-without-allocation.htm" />
+///     </para>
 /// </summary>
 public ref struct SpanSplitEnumerator<T> where T : IEquatable<T>
 {
@@ -29,7 +31,7 @@ public ref struct SpanSplitEnumerator<T> where T : IEquatable<T>
 
     public SpanSplitEnumerator<T> GetEnumerator() => this;
 
-    public void Reset() { _span = _originalString; }
+    public void Reset() => _span = _originalString;
 
     public bool MoveNext()
     {

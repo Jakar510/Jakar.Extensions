@@ -5,15 +5,9 @@ public static partial class TypeExtensions
 {
     public static bool IsEqualType( this Type value, Type other )
     {
-        if ( value is null )
-        {
-            throw new NullReferenceException(nameof(value));
-        }
+        if ( value is null ) { throw new NullReferenceException(nameof(value)); }
 
-        if ( other is null )
-        {
-            throw new NullReferenceException(nameof(other));
-        }
+        if ( other is null ) { throw new NullReferenceException(nameof(other)); }
 
         return value == other;
     }
@@ -39,7 +33,7 @@ public static partial class TypeExtensions
     // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-    public static bool IsInitOnly( this PropertyInfo propertyInfo ) => propertyInfo.IsInitOnly<System.Runtime.CompilerServices.IsExternalInit>();
+    public static bool IsInitOnly( this PropertyInfo propertyInfo ) => propertyInfo.IsInitOnly<IsExternalInit>();
 
     public static bool IsInitOnly<TIsExternalInit>( this PropertyInfo propertyInfo )
     {

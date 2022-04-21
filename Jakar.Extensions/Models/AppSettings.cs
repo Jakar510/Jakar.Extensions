@@ -34,14 +34,14 @@ public interface IAppSettings<out TDeviceID, TViewPage> : IAppSettings<TDeviceID
 [Serializable]
 public class AppSettings<TViewPage> : ObservableClass, IAppSettings<Guid, TViewPage, AppVersion>
 {
-    private Guid       _deviceID;
-    private bool       _sendCrashes;
-    private string?    _screenShotAddress;
-    private TViewPage? _currentViewPage;
-    private string     _appName       = string.Empty;
-    private string     _deviceVersion = string.Empty;
+    private string     _appName = string.Empty;
     private AppVersion _appVersion;
     private bool       _crashDataPending;
+    private TViewPage? _currentViewPage;
+    private Guid       _deviceID;
+    private string     _deviceVersion = string.Empty;
+    private string?    _screenShotAddress;
+    private bool       _sendCrashes;
 
 
     public Guid DeviceID

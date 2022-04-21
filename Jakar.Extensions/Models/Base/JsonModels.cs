@@ -3,16 +3,9 @@
 
 public static class JsonModels
 {
-    public interface IJsonModel
-    {
-        [JsonExtensionData] public IDictionary<string, JToken?>? AdditionalData { get; set; }
-    }
-
-
-
-    public static IDictionary<string, JToken?>  GetData( this           IJsonModel model )                                     => model.GetAdditionalData() ?? new Dictionary<string, JToken?>();
-    public static IDictionary<string, JToken?>? GetAdditionalData( this IJsonModel model )                                     => model.AdditionalData;
-    public static void                          SetAdditionalData( this IJsonModel model, IDictionary<string, JToken?>? data ) => model.AdditionalData = data;
+    public static IDictionary<string, JToken?> GetData( this            IJsonModel model ) => model.GetAdditionalData() ?? new Dictionary<string, JToken?>();
+    public static IDictionary<string, JToken?>? GetAdditionalData( this IJsonModel model ) => model.AdditionalData;
+    public static void SetAdditionalData( this                          IJsonModel model, IDictionary<string, JToken?>? data ) => model.AdditionalData = data;
 
 
     public static void Add( this IJsonModel self, string key, bool           item ) => self.Add(key, JToken.FromObject(item));
@@ -60,14 +53,6 @@ public static class JsonModels
     }
 
     public static JToken? Get( this IJsonModel self, string key ) => self.AdditionalData?[key];
-
-
-
-    public interface IJsonStringModel
-    {
-        public string? AdditionalData { get; set; }
-    }
-
 
 
     public static IDictionary<string, JToken?> GetData( this IJsonStringModel model ) => model.GetAdditionalData() ?? new Dictionary<string, JToken?>();
@@ -130,4 +115,18 @@ public static class JsonModels
     }
 
     public static JToken? Get( this IJsonStringModel self, string key ) => self.GetAdditionalData()?[key];
+
+
+
+    public interface IJsonModel
+    {
+        [JsonExtensionData] public IDictionary<string, JToken?>? AdditionalData { get; set; }
+    }
+
+
+
+    public interface IJsonStringModel
+    {
+        public string? AdditionalData { get; set; }
+    }
 }

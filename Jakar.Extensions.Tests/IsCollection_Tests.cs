@@ -25,7 +25,7 @@ public class IsCollection_Tests : Assert
     [TestCase(typeof(List<string>), true)]
     [TestCase(typeof(List<List<string>>), true)]
     [TestCase(typeof(List<Guid>), true)]
-    public void IsCollection_Test( Type objType, bool expected ) { AreEqual(objType.IsCollection(), expected); }
+    public void IsCollection_Test( Type objType, bool expected ) => AreEqual(objType.IsCollection(), expected);
 
 
     [Test]

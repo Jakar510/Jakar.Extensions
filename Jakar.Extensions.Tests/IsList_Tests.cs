@@ -25,7 +25,7 @@ public class IsList_Tests : Assert
     [TestCase(typeof(List<string>), true)]
     [TestCase(typeof(List<List<string>>), true)]
     [TestCase(typeof(List<Guid>), true)]
-    public void IsList_Test( Type objType, bool expected ) { AreEqual(objType.IsList(), expected); }
+    public void IsList_Test( Type objType, bool expected ) => AreEqual(objType.IsList(), expected);
 
 
     [Test]

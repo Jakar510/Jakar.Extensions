@@ -14,7 +14,7 @@ public interface IEmail : IDataBaseID, IEquatable<IEmail>
 public class ValidEmail : ValueOf<string, ValidEmail>
 {
     /// <summary>
-    /// <see href="https://www.tutorialspoint.com/how-to-validate-an-email-address-in-chash"/>
+    ///     <see href = "https://www.tutorialspoint.com/how-to-validate-an-email-address-in-chash" />
     /// </summary>
     public static Regex validator = new(@"^([a-zA-Z0-9_\-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([a-zA-Z0-9\-]+\.)+))([azA-Z]{2,4}|[0-9]{1,3})(\]?)$", RegexOptions.Compiled, TimeSpan.FromMilliseconds(200));
 
@@ -40,10 +40,40 @@ public class ValidEmail : ValueOf<string, ValidEmail>
 [JsonObject]
 public class Email : ObservableClass, IEmail
 {
-    private      bool   _isPrimary;
-    private      bool   _isValid;
-    private      string _address = string.Empty;
-    [Key] public long   ID { get; init; }
+    private string _address = string.Empty;
+    private bool   _isPrimary;
+    private bool   _isValid;
+
+
+    public Email() { }
+
+    public Email( string address, bool isPrimary )
+    {
+        Address   = address;
+        IsPrimary = isPrimary;
+    }
+
+
+    public override string ToString() => Address;
+    public virtual ValidEmail ToValidEmail() => Address;
+
+
+    public override bool Equals( object? obj )
+    {
+        if ( obj is null ) { return false; }
+
+        if ( ReferenceEquals(this, obj) ) { return true; }
+
+        if ( obj.GetType() != GetType() ) { return false; }
+
+        return Equals((Email)obj);
+    }
+
+    public override int GetHashCode() => HashCode.Combine(ID, IsPrimary, Address);
+
+    public static bool operator ==( Email? left, Email? right ) => Equals(left, right);
+    public static bool operator !=( Email? left, Email? right ) => !Equals(left, right);
+    [Key] public long ID { get; init; }
 
 
     public bool IsPrimary
@@ -71,31 +101,6 @@ public class Email : ObservableClass, IEmail
     }
 
 
-    public Email() { }
-
-    public Email( string address, bool isPrimary )
-    {
-        Address   = address;
-        IsPrimary = isPrimary;
-    }
-
-
-    public override string ToString() => Address;
-    public virtual ValidEmail ToValidEmail() => Address;
-
-
-    public override bool Equals( object? obj )
-    {
-        if ( obj is null ) { return false; }
-
-        if ( ReferenceEquals(this, obj) ) { return true; }
-
-        if ( obj.GetType() != GetType() ) { return false; }
-
-        return Equals((Email)obj);
-    }
-
-
     public bool Equals( IEmail? other )
     {
         if ( ReferenceEquals(null, other) ) { return false; }
@@ -104,9 +109,4 @@ public class Email : ObservableClass, IEmail
 
         return ID == other.ID && Address == other.Address;
     }
-
-    public override int GetHashCode() => HashCode.Combine(ID, IsPrimary, Address);
-
-    public static bool operator ==( Email? left, Email? right ) => Equals(left, right);
-    public static bool operator !=( Email? left, Email? right ) => !Equals(left, right);
 }

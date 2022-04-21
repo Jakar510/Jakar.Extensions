@@ -13,25 +13,23 @@ namespace Jakar.Extensions.Xamarin.Forms.Statics;
 
 public static class AppPermissions
 {
-    public static async Task<T?> Handle<T>( PermissionStatus status, Func<Task<T>>? denial, Func<Task<T>>? granted, Func<Task<T>>? unknown )
-    {
-        return status switch
-               {
-                   //Query permission
-                   PermissionStatus.Granted when granted is null => default,
-                   PermissionStatus.Granted                      => await granted().ConfigureAwait(false),
+    public static async Task<T?> Handle<T>( PermissionStatus status, Func<Task<T>>? denial, Func<Task<T>>? granted, Func<Task<T>>? unknown ) =>
+        status switch
+        {
+            //Query permission
+            PermissionStatus.Granted when granted is null => default,
+            PermissionStatus.Granted                      => await granted().ConfigureAwait(false),
 
-                   //Permission denied
-                   PermissionStatus.Denied when denial is null => default,
-                   PermissionStatus.Denied                     => await denial().ConfigureAwait(false),
+            //Permission denied
+            PermissionStatus.Denied when denial is null => default,
+            PermissionStatus.Denied                     => await denial().ConfigureAwait(false),
 
-                   //Permission denied
-                   PermissionStatus.Unknown when unknown is null => default,
-                   PermissionStatus.Unknown                      => await unknown().ConfigureAwait(false),
+            //Permission denied
+            PermissionStatus.Unknown when unknown is null => default,
+            PermissionStatus.Unknown                      => await unknown().ConfigureAwait(false),
 
-                   _ => default
-               };
-    }
+            _ => default
+        };
 
     public static async Task Handle( PermissionStatus status, Func<Task>? denial, Func<Task>? granted, Func<Task>? unknown )
     {
@@ -71,27 +69,25 @@ public static class AppPermissions
         }
     }
 
-    public static T? Handle<T>( PermissionStatus status, Func<T>? denial, Func<T>? granted, Func<T>? unknown )
-    {
-        return status switch
-               {
-                   //Query permission
-                   PermissionStatus.Granted when granted is null => default,
-                   PermissionStatus.Granted                      => granted(),
+    public static T? Handle<T>( PermissionStatus status, Func<T>? denial, Func<T>? granted, Func<T>? unknown ) =>
+        status switch
+        {
+            //Query permission
+            PermissionStatus.Granted when granted is null => default,
+            PermissionStatus.Granted                      => granted(),
 
-                   //Permission denied
-                   PermissionStatus.Unknown when unknown is null => default,
-                   PermissionStatus.Unknown                      => unknown(),
+            //Permission denied
+            PermissionStatus.Unknown when unknown is null => default,
+            PermissionStatus.Unknown                      => unknown(),
 
-                   // Notify user permission was denied
-                   PermissionStatus.Denied when denial is null => default,
-                   PermissionStatus.Denied                     => denial(),
+            // Notify user permission was denied
+            PermissionStatus.Denied when denial is null => default,
+            PermissionStatus.Denied                     => denial(),
 
-                   PermissionStatus.Disabled   => default,
-                   PermissionStatus.Restricted => default,
-                   _                           => throw new ArgumentOutOfRangeException(nameof(status), status, null)
-               };
-    }
+            PermissionStatus.Disabled   => default,
+            PermissionStatus.Restricted => default,
+            _                           => throw new ArgumentOutOfRangeException(nameof(status), status, null)
+        };
 
     public static void Handle( PermissionStatus status, Action? denial, Action? granted, Action? unknown )
     {

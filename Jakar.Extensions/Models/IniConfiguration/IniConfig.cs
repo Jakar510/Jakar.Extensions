@@ -7,6 +7,11 @@ namespace Jakar.Extensions.Models.IniConfiguration;
 
 public partial class IniConfig : ConcurrentDictionary<string, IniConfig.Section>
 {
+    public new Section this[ string sectionName ]
+    {
+        get => GetOrAdd(sectionName);
+        set => base[sectionName] = value;
+    }
     public IniConfig() : this(StringComparer.OrdinalIgnoreCase) { }
     public IniConfig( IEqualityComparer<string>                  comparer ) : base(comparer) { }
     public IniConfig( IDictionary<string, Section>               dictionary ) : this(dictionary, StringComparer.OrdinalIgnoreCase) { }
@@ -163,18 +168,17 @@ public partial class IniConfig : ConcurrentDictionary<string, IniConfig.Section>
     }
 
 
-    public new Section this[ string sectionName ]
-    {
-        get => GetOrAdd(sectionName);
-        set => base[sectionName] = value;
-    }
-
-
     /// <summary>
-    /// Gets the <see cref="Section"/> with the <paramref name="sectionName"/>. If it doesn't exist, it is created, then returned.
+    ///     Gets the
+    ///     <see cref = "Section" />
+    ///     with the
+    ///     <paramref name = "sectionName" />
+    ///     . If it doesn't exist, it is created, then returned.
     /// </summary>
-    /// <param name="sectionName">Section Name</param>
-    /// <returns><see cref="Section"/></returns>
+    /// <param name = "sectionName" > Section Name </param>
+    /// <returns>
+    ///     <see cref = "Section" />
+    /// </returns>
     public Section GetOrAdd( in string sectionName )
     {
         if ( !ContainsKey(sectionName) ) { Add(sectionName); }
@@ -183,12 +187,18 @@ public partial class IniConfig : ConcurrentDictionary<string, IniConfig.Section>
     }
 
     /// <summary>
-    /// Gets the <see cref="Section"/> with the <paramref name="sectionName"/>, using the <paramref name="comparison"/> rules.
+    ///     Gets the
+    ///     <see cref = "Section" />
+    ///     with the
+    ///     <paramref name = "sectionName" />
+    ///     , using the
+    ///     <paramref name = "comparison" />
+    ///     rules.
     /// </summary>
-    /// <param name="sectionName"></param>
-    /// <param name="comparison"></param>
-    /// <returns></returns>
-    /// <exception cref="KeyNotFoundException"></exception>
+    /// <param name = "sectionName" > </param>
+    /// <param name = "comparison" > </param>
+    /// <returns> </returns>
+    /// <exception cref = "KeyNotFoundException" > </exception>
     private Section Get( in string sectionName, in StringComparison comparison )
     {
         foreach ( string key in Keys )

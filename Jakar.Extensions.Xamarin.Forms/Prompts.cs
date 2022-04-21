@@ -251,7 +251,7 @@ public abstract class Prompts<TDeviceID, TViewPage> : IUserDialogs
 
 #region Loading
 
-    public void ShowLoading( string? title = null, MaskType? maskType = null ) { _Dialogs.ShowLoading(title, maskType); }
+    public void ShowLoading( string? title = null, MaskType? maskType = null ) => _Dialogs.ShowLoading(title, maskType);
     public void HideLoading() => _Dialogs.HideLoading();
 
 

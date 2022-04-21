@@ -7,15 +7,15 @@ public class PreferenceFile : IniConfig, IDisposable, IAsyncDisposable // TODO: 
     private          LocalFile? _file;
     protected        string?    _fileName;
 
+
+    public LocalFile Path => _file ??= LocalDirectory.CurrentDirectory.Join(FileName());
+
     public PreferenceFile() : this(StringComparer.OrdinalIgnoreCase) => Load();
     public PreferenceFile( IEqualityComparer<string>                  comparer ) : base(comparer) => Load();
     public PreferenceFile( IDictionary<string, Section>               dictionary ) : base(dictionary) { }
     public PreferenceFile( IDictionary<string, Section>               dictionary, IEqualityComparer<string> comparer ) : base(dictionary, comparer) { }
     public PreferenceFile( IEnumerable<KeyValuePair<string, Section>> collection ) : base(collection) { }
     public PreferenceFile( IEnumerable<KeyValuePair<string, Section>> collection, IEqualityComparer<string> comparer ) : base(collection, comparer) { }
-
-
-    public LocalFile Path => _file ??= LocalDirectory.CurrentDirectory.Join(FileName());
     public virtual string FileName() => _fileName ??= $"{GetType().Name}.json";
 
 
@@ -35,13 +35,6 @@ public class PreferenceFile : IniConfig, IDisposable, IAsyncDisposable // TODO: 
     protected Task Save() => Task.Run(SaveAsync);
     protected virtual async Task SaveAsync() => await WriteToFile(Path).ConfigureAwait(false);
 
-
-    public void Dispose()
-    {
-        Dispose(true);
-        GC.SuppressFinalize(this);
-    }
-
     public virtual void Dispose( bool disposing )
     {
         if ( !disposing ) { return; }
@@ -55,5 +48,12 @@ public class PreferenceFile : IniConfig, IDisposable, IAsyncDisposable // TODO: 
 
         _file?.Dispose();
         _file = null;
+    }
+
+
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
     }
 }

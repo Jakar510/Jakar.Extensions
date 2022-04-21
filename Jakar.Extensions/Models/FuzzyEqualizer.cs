@@ -13,6 +13,18 @@ public class ValueFuzzyEqualizer<T> : IEqualityComparer<T?>, IEqualityComparer<T
     public static ValueFuzzyEqualizer<T> Instance { get; } = new();
 
 
+    bool IEqualityComparer.Equals( object x, object y )
+    {
+        if ( x is not T left ) { throw new ExpectedValueTypeException(nameof(x), x, typeof(T)); }
+
+        if ( y is not T right ) { throw new ExpectedValueTypeException(nameof(y), y, typeof(T)); }
+
+        return left.Equals(right);
+    }
+
+    int IEqualityComparer.GetHashCode( object obj ) => obj.GetHashCode();
+
+
     public bool Equals( T? left, T? right )
     {
         if ( left.HasValue && right.HasValue ) { left.Value.FuzzyEquals(right.Value); }
@@ -21,12 +33,19 @@ public class ValueFuzzyEqualizer<T> : IEqualityComparer<T?>, IEqualityComparer<T
 
         return false;
     }
+    public int GetHashCode( T? obj ) => obj.GetHashCode();
 
     public bool Equals( T left, T right ) => left.FuzzyEquals(right);
 
 
-    public int GetHashCode( T  obj ) => obj.GetHashCode();
-    public int GetHashCode( T? obj ) => obj.GetHashCode();
+    public int GetHashCode( T obj ) => obj.GetHashCode();
+}
+
+
+
+public class FuzzyEqualizer<T> : IEqualityComparer<T>, IEqualityComparer where T : class, IFuzzyEquals<T>
+{
+    public static FuzzyEqualizer<T> Instance { get; } = new();
 
 
     bool IEqualityComparer.Equals( object x, object y )
@@ -39,13 +58,6 @@ public class ValueFuzzyEqualizer<T> : IEqualityComparer<T?>, IEqualityComparer<T
     }
 
     int IEqualityComparer.GetHashCode( object obj ) => obj.GetHashCode();
-}
-
-
-
-public class FuzzyEqualizer<T> : IEqualityComparer<T>, IEqualityComparer where T : class, IFuzzyEquals<T>
-{
-    public static FuzzyEqualizer<T> Instance { get; } = new();
 
 
     public bool Equals( T? left, T? right )
@@ -59,16 +71,4 @@ public class FuzzyEqualizer<T> : IEqualityComparer<T>, IEqualityComparer where T
 
 
     public int GetHashCode( T obj ) => obj.GetHashCode();
-
-
-    bool IEqualityComparer.Equals( object x, object y )
-    {
-        if ( x is not T left ) { throw new ExpectedValueTypeException(nameof(x), x, typeof(T)); }
-
-        if ( y is not T right ) { throw new ExpectedValueTypeException(nameof(y), y, typeof(T)); }
-
-        return left.Equals(right);
-    }
-
-    int IEqualityComparer.GetHashCode( object obj ) => obj.GetHashCode();
 }

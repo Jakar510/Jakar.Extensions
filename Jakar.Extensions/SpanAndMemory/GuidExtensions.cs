@@ -21,10 +21,10 @@ public static class GuidExtensions
 
 
     /// <summary>
-    /// <see href="https://www.youtube.com/watch?v=B2yOjLyEZk0">Writing C# without allocating ANY memory</see>
+    ///     <see href = "https://www.youtube.com/watch?v=B2yOjLyEZk0" > Writing C# without allocating ANY memory </see>
     /// </summary>
-    /// <param name="value"></param>
-    /// <returns></returns>
+    /// <param name = "value" > </param>
+    /// <returns> </returns>
     public static string AsBase64( this Guid value )
     {
         Span<byte> base64Bytes = stackalloc byte[24];
@@ -49,10 +49,10 @@ public static class GuidExtensions
 
 
     /// <summary>
-    /// <see href="https://www.youtube.com/watch?v=B2yOjLyEZk0">Writing C# without allocating ANY memory</see>
+    ///     <see href = "https://www.youtube.com/watch?v=B2yOjLyEZk0" > Writing C# without allocating ANY memory </see>
     /// </summary>
-    /// <param name="value"></param>
-    /// <returns></returns>
+    /// <param name = "value" > </param>
+    /// <returns> </returns>
     public static Guid? AsGuid( this ReadOnlySpan<char> value )
     {
         Span<char> base64Chars = stackalloc char[24];

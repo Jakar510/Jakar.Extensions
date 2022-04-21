@@ -2,13 +2,8 @@
 
 
 [Serializable]
-public abstract record BaseCollectionsRecord<T> : ObservableRecord, IEquatable<T>, IComparable<T>, IComparable where T : BaseCollectionsRecord<T> 
+public abstract record BaseCollectionsRecord<T> : ObservableRecord, IEquatable<T>, IComparable<T>, IComparable where T : BaseCollectionsRecord<T>
 {
-    public abstract bool Equals( T? other );
-
-    public abstract int CompareTo( T? other );
-
-
     public int CompareTo( object? other )
     {
         if ( other is null ) { return 1; }
@@ -19,6 +14,9 @@ public abstract record BaseCollectionsRecord<T> : ObservableRecord, IEquatable<T
                    ? CompareTo(value)
                    : throw new ExpectedValueTypeException(nameof(other), other, typeof(T));
     }
+
+    public abstract int CompareTo( T? other );
+    public abstract bool Equals( T?   other );
 
 
 

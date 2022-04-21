@@ -6,74 +6,23 @@ using System.Net.Http.Headers;
 namespace Jakar.Extensions.Http;
 
 
-internal sealed class RequestInfo
-{
-    public string         Method                  { get; set; }
-    public Uri?           URL                     { get; init; }
-    public string         ErrorMessage            { get; init; }
-    public HttpStatusCode StatusCode              { get; init; }
-    public string         StatusDescription       { get; init; }
-    public string         ContentType             { get; init; }
-    public string         ContentEncoding         { get; init; }
-    public string         Server                  { get; init; }
-    public bool           IsMutuallyAuthenticated { get; init; }
-
-    public RequestInfo( in HttpWebResponse response, in string errorMessage )
-    {
-        ErrorMessage            = errorMessage;
-        StatusCode              = response.StatusCode;
-        URL                     = response.ResponseUri;
-        Method                  = response.Method;
-        StatusDescription       = response.StatusDescription;
-        ContentType             = response.ContentType;
-        ContentEncoding         = response.ContentEncoding;
-        IsMutuallyAuthenticated = response.IsMutuallyAuthenticated;
-        Server                  = response.Server;
-    }
-
-    public static async Task<RequestInfo> Create( WebException e )
-    {
-        using var response = (HttpWebResponse)e.Response;
-        return await Create(response);
-    }
-    public static async Task<RequestInfo> Create( HttpWebResponse webResponse )
-    {
-        await using Stream? stream = webResponse.GetResponseStream();
-
-        string msg;
-
-        if ( stream is not null )
-        {
-            using var reader = new StreamReader(stream);
-
-            string? errorMessage = await reader.ReadToEndAsync();
-            msg = $"Error Message: {errorMessage}";
-        }
-        else { msg = "UNKNOWN"; }
-
-        return new RequestInfo(webResponse, msg);
-    }
-
-    public override string ToString() => this.ToPrettyJson();
-}
-
-
-
 public static class WebRequests
 {
     /// <summary>
-    /// <seealso href="https://stackoverflow.com/questions/19211972/getresponseasync-does-not-accept-cancellationtoken"/>
-    /// <seealso href="https://github.com/palburtus/HttpClient.net/blob/master/Aaks.Restclient/HttpRestClient.cs"/>
+    ///     <seealso href = "https://stackoverflow.com/questions/19211972/getresponseasync-does-not-accept-cancellationtoken" />
+    ///     <seealso href = "https://github.com/palburtus/HttpClient.net/blob/master/Aaks.Restclient/HttpRestClient.cs" />
     /// </summary>
-    /// <param name="request"></param>
-    /// <param name="token"></param>
-    /// <param name="useSynchronizationContext"></param>
-    /// <returns></returns>
+    /// <param name = "request" > </param>
+    /// <param name = "token" > </param>
+    /// <param name = "useSynchronizationContext" > </param>
+    /// <returns> </returns>
+    /// <exception cref = "WebException" > </exception>
+    /// <exception cref = "ArgumentNullException" > </exception>
+    /// <exception cref = "OperationCanceledException" > </exception>
     public static async Task<WebResponse> GetResponseAsync( this WebRequest request, CancellationToken token, bool useSynchronizationContext = true )
     {
-        // 
-
         if ( request is null ) { throw new ArgumentNullException(nameof(request)); }
+
 
         await using ( token.Register(request.Abort, useSynchronizationContext) )
         {
@@ -85,15 +34,14 @@ public static class WebRequests
                     throw new OperationCanceledException(ex.Message, ex, token); // the WebException will be available as Exception.InnerException
                 }
 
-                if ( Debugger.IsAttached )
-                {
-                    var details = await RequestInfo.Create(ex);
-                    details.WriteToConsole();
-                    details.WriteToDebug();
-                }
+                // cancellation hasn't been requested, rethrow the original WebException
+                if ( !Debugger.IsAttached ) { throw; }
 
 
-                throw; // cancellation hasn't been requested, rethrow the original WebException
+                ResponseData details = await ResponseData.Create(ex).ConfigureAwait(false);
+                details.WriteToConsole();
+                details.WriteToDebug();
+                throw;
             }
         }
     }
@@ -204,15 +152,13 @@ public static class WebRequests
     // }
 
 
-    public static void SetContentType( this WebRequest request, object value )
-    {
+    public static void SetContentType( this WebRequest request, object value ) =>
         request.ContentType = value switch
                               {
                                   IEnumerable<string> items => items.First(),
                                   string item               => item,
                                   _                         => throw new HeaderException(HttpRequestHeader.ContentType, value, typeof(string), typeof(IEnumerable<string>))
                               };
-    }
 
     public static void SetHeaders( this HttpWebRequest request, MultipartFormDataContent data ) => request.SetHeaders(data.Headers);
 

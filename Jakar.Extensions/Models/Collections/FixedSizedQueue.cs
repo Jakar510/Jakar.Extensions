@@ -2,9 +2,9 @@
 
 
 /// <summary>
-/// <seealso href="https://stackoverflow.com/a/5852926/9530917"/>
+///     <seealso href = "https://stackoverflow.com/a/5852926/9530917" />
 /// </summary>
-/// <typeparam name="T"></typeparam>
+/// <typeparam name = "T" > </typeparam>
 public class FixedSizedQueue<T>
 {
     protected readonly object   _lock = new();

@@ -6,7 +6,7 @@ namespace Jakar.Extensions.Models.Collections;
 
 public interface ICollectionAlerts : INotifyCollectionChanged, INotifyPropertyChanged, INotifyPropertyChanging
 {
-    internal void SendOnChanged( NotifyCollectionChangedEventArgs     e );
+    internal void SendOnChanged( NotifyCollectionChangedEventArgs e );
 }
 
 

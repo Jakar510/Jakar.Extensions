@@ -3,13 +3,6 @@
 
 public static class TempFile
 {
-    public interface ITempFile : IDisposable
-    {
-        internal bool IsTemporary { get; set; }
-    }
-
-
-
     public static TItem SetTemporary<TItem>( this TItem file ) where TItem : ITempFile
     {
         file.IsTemporary = true;
@@ -23,4 +16,11 @@ public static class TempFile
     }
 
     public static bool IsTempFile( this ITempFile file ) => file.IsTemporary;
+
+
+
+    public interface ITempFile : IDisposable
+    {
+        internal bool IsTemporary { get; set; }
+    }
 }

@@ -6,7 +6,7 @@ namespace Jakar.Extensions.Strings;
 
 
 /// <summary>
-/// Validator Extensions
+///     Validator Extensions
 /// </summary>
 public static partial class Validate
 {

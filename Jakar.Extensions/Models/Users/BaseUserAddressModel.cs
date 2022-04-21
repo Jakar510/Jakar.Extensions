@@ -15,19 +15,6 @@ public abstract class BaseUserModel<T, TAddress> : BaseUserModel<T>, IUserModel<
     private TAddress? _addressDetail;
 
 
-    public TAddress? AddressDetail
-    {
-        get => _addressDetail;
-        set
-        {
-            SetProperty(ref _addressDetail, value);
-            if ( value is null ) { return; }
-
-            Address = value.ToString();
-        }
-    }
-
-
     protected BaseUserModel() { }
     protected BaseUserModel( IUserModel<TAddress> model ) : base(model) => AddressDetail = model.AddressDetail;
 
@@ -41,5 +28,18 @@ public abstract class BaseUserModel<T, TAddress> : BaseUserModel<T>, IUserModel<
         hashCode.Add(base.GetHashCode());
         hashCode.Add(AddressDetail);
         return hashCode.ToHashCode();
+    }
+
+
+    public TAddress? AddressDetail
+    {
+        get => _addressDetail;
+        set
+        {
+            SetProperty(ref _addressDetail, value);
+            if ( value is null ) { return; }
+
+            Address = value.ToString();
+        }
     }
 }
