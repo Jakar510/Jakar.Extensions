@@ -112,7 +112,6 @@ public static partial class Spans
     public static bool Contains( this ReadOnlySpan<char> span, ReadOnlySpan<char> value ) => span.Contains(value, StringComparison.Ordinal);
 
 
-#if NETSTANDARD2_1 || NETFRAMEWORK
     /// <summary>
     /// <see cref="MemoryExtensions"/> doesn't have Contains in .Net Standard 2.1. but does in .Net 6.0.
     /// <para>Will be removed in a future version.</para>
@@ -121,7 +120,7 @@ public static partial class Spans
     /// <param name="span"></param>
     /// <param name="value"></param>
     /// <returns></returns>
-    public static bool Contains<T>( this Span<T> span, T value ) where T : IEquatable<T>
+    public static bool Contains<T>( in Span<T> span, T value ) where T : IEquatable<T>
     {
         ReadOnlySpan<T> temp = span;
         return temp.Contains(value);
@@ -135,7 +134,7 @@ public static partial class Spans
     /// <param name="span"></param>
     /// <param name="value"></param>
     /// <returns></returns>
-    public static bool Contains<T>( this ReadOnlySpan<T> span, T value ) where T : IEquatable<T>
+    public static bool Contains<T>( in ReadOnlySpan<T> span, T value ) where T : IEquatable<T>
     {
         foreach ( T item in span )
         {
@@ -144,8 +143,6 @@ public static partial class Spans
 
         return false;
     }
-
-#endif
 
     public static bool Contains<T>( this ReadOnlySpan<T> span, ReadOnlySpan<T> value ) where T : IEquatable<T>
     {
@@ -163,7 +160,7 @@ public static partial class Spans
         var result = true;
 
         // ReSharper disable once LoopCanBeConvertedToQuery
-        foreach ( T c in values ) { result &= span.Contains(c); }
+        foreach ( T c in values ) { result &&= span.Contains(c); }
 
         return result;
     }
