@@ -120,20 +120,6 @@ public static partial class Spans
     /// <param name="span"></param>
     /// <param name="value"></param>
     /// <returns></returns>
-    public static bool Contains<T>( in Span<T> span, T value ) where T : IEquatable<T>
-    {
-        ReadOnlySpan<T> temp = span;
-        return temp.Contains(value);
-    }
-
-    /// <summary>
-    /// <see cref="MemoryExtensions"/> doesn't have Contains in .Net Standard 2.1. but does in .Net 6.0.
-    /// <para>Will be removed in a future version.</para>
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="span"></param>
-    /// <param name="value"></param>
-    /// <returns></returns>
     public static bool Contains<T>( in ReadOnlySpan<T> span, T value ) where T : IEquatable<T>
     {
         foreach ( T item in span )
@@ -160,7 +146,7 @@ public static partial class Spans
         var result = true;
 
         // ReSharper disable once LoopCanBeConvertedToQuery
-        foreach ( T c in values ) { result &&= span.Contains(c); }
+        foreach ( T c in values ) { result &= Contains(span, c); }
 
         return result;
     }
@@ -169,7 +155,7 @@ public static partial class Spans
         // ReSharper disable once LoopCanBeConvertedToQuery
         foreach ( T c in values )
         {
-            if ( span.Contains(c) ) { return false; }
+            if ( Contains(span, c) ) { return false; }
         }
 
         return true;
@@ -179,7 +165,7 @@ public static partial class Spans
         // ReSharper disable once LoopCanBeConvertedToQuery
         foreach ( T c in values )
         {
-            if ( span.Contains(c) ) { return true; }
+            if ( Contains(span, c) ) { return true; }
         }
 
         return false;
