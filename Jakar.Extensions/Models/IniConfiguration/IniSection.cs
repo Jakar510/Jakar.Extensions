@@ -16,7 +16,7 @@ public partial class IniConfig
 
         #region Gets
 
-        public bool ValueAs( in string key, [NotNullWhen(true)] out IEnumerable<string>? value, in char separator = ',' )
+        public bool ValueAs( in string key, [NotNullWhen(true)] out IEnumerable<string>? value, in char separator )
         {
             string s = this[key];
 
@@ -29,7 +29,7 @@ public partial class IniConfig
             value = default;
             return false;
         }
-        public bool ValueAs( in string key, [NotNullWhen(true)] out IEnumerable<string>? value, in string separator = "," )
+        public bool ValueAs( in string key, [NotNullWhen(true)] out IEnumerable<string>? value, in string separator )
         {
             string s = this[key];
 

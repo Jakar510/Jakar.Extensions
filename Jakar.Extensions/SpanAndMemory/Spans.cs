@@ -49,7 +49,7 @@ public static partial class Spans
 
 
     /// <summary>
-    ///     Allocates a string
+    /// Allocates a string
     /// </summary>
     public static ReadOnlySpan<T> Slice<T>( this ReadOnlySpan<T> value, in T startValue, in T endValue, in bool includeEnds ) where T : IEquatable<T>
     {
@@ -111,6 +111,25 @@ public static partial class Spans
     }
     public static bool Contains( this ReadOnlySpan<char> span, ReadOnlySpan<char> value ) => span.Contains(value, StringComparison.Ordinal);
 
+
+    /// <summary>
+    /// <see cref="MemoryExtensions"/> doesn't have Contains in .Net Standard 2.1. but does in .Net 6.0.
+    /// <para>Will be removed in a future version.</para>
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="span"></param>
+    /// <param name="value"></param>
+    /// <returns></returns>
+    public static bool Contains<T>( in ReadOnlySpan<T> span, T value ) where T : IEquatable<T>
+    {
+        foreach ( T item in span )
+        {
+            if ( item.Equals(value) ) { return true; }
+        }
+
+        return false;
+    }
+
     public static bool Contains<T>( this ReadOnlySpan<T> span, ReadOnlySpan<T> value ) where T : IEquatable<T>
     {
         for ( var i = 0; i < span.Length || i + value.Length < span.Length; i++ )
@@ -127,7 +146,7 @@ public static partial class Spans
         var result = true;
 
         // ReSharper disable once LoopCanBeConvertedToQuery
-        foreach ( T c in values ) { result &= span.Contains(c); }
+        foreach ( T c in values ) { result &= Contains(span, c); }
 
         return result;
     }
@@ -136,7 +155,7 @@ public static partial class Spans
         // ReSharper disable once LoopCanBeConvertedToQuery
         foreach ( T c in values )
         {
-            if ( span.Contains(c) ) { return false; }
+            if ( Contains(span, c) ) { return false; }
         }
 
         return true;
@@ -146,7 +165,7 @@ public static partial class Spans
         // ReSharper disable once LoopCanBeConvertedToQuery
         foreach ( T c in values )
         {
-            if ( span.Contains(c) ) { return true; }
+            if ( Contains(span, c) ) { return true; }
         }
 
         return false;
@@ -182,7 +201,7 @@ public static partial class Spans
 
 
     /// <summary>
-    ///     Allocates a string
+    /// Allocates a string
     /// </summary>
     public static ReadOnlySpan<char> Replace( this ReadOnlySpan<char> value, in ReadOnlySpan<char> oldValue, in ReadOnlySpan<char> newValue, in char defaultValue = '\0' )
     {
@@ -192,7 +211,7 @@ public static partial class Spans
     }
 
     /// <summary>
-    ///     Allocates a string
+    /// Allocates a string
     /// </summary>
     public static ReadOnlySpan<char> Replace( this ReadOnlySpan<char> value, in ReadOnlySpan<char> oldValue, in ReadOnlySpan<char> newValue, in char startValue, in char endValue, in char defaultValue = '\0' )
     {
@@ -256,7 +275,7 @@ public static partial class Spans
 
 
     /// <summary>
-    ///     Allocates a string
+    /// Allocates a string
     /// </summary>
     public static ReadOnlySpan<char> Join( this ReadOnlySpan<char> value, in ReadOnlySpan<char> other )
     {
@@ -288,7 +307,7 @@ public static partial class Spans
 
 
     /// <summary>
-    ///     Allocates a string
+    /// Allocates a string
     /// </summary>
     public static ReadOnlySpan<char> RemoveAll( this ReadOnlySpan<char> value, in char c )
     {
@@ -337,42 +356,4 @@ public static partial class Spans
             buffer[i - offset] = value[i];
         }
     }
-
-
-#if NETSTANDARD2_1 || NETFRAMEWORK
-    /// <summary>
-    ///     <see cref = "MemoryExtensions" />
-    ///     doesn't have Contains in .Net Standard 2.1. but does in .Net 6.0.
-    ///     <para> Will be removed in a future version. </para>
-    /// </summary>
-    /// <typeparam name = "T" > </typeparam>
-    /// <param name = "span" > </param>
-    /// <param name = "value" > </param>
-    /// <returns> </returns>
-    public static bool Contains<T>( this Span<T> span, T value ) where T : IEquatable<T>
-    {
-        ReadOnlySpan<T> temp = span;
-        return temp.Contains(value);
-    }
-
-    /// <summary>
-    ///     <see cref = "MemoryExtensions" />
-    ///     doesn't have Contains in .Net Standard 2.1. but does in .Net 6.0.
-    ///     <para> Will be removed in a future version. </para>
-    /// </summary>
-    /// <typeparam name = "T" > </typeparam>
-    /// <param name = "span" > </param>
-    /// <param name = "value" > </param>
-    /// <returns> </returns>
-    public static bool Contains<T>( this ReadOnlySpan<T> span, T value ) where T : IEquatable<T>
-    {
-        foreach ( T item in span )
-        {
-            if ( item.Equals(value) ) { return true; }
-        }
-
-        return false;
-    }
-
-#endif
 }
