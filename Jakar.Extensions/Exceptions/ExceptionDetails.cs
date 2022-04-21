@@ -116,5 +116,5 @@ public class ParameterDetails
 
 
     public static List<ParameterDetails> Create( MethodBase                 method ) => Create(method.GetParameters());
-    public static List<ParameterDetails> Create( IEnumerable<ParameterInfo> items )  => new(items.Select(x => new ParameterDetails(x)));
+    public static List<ParameterDetails> Create( IEnumerable<ParameterInfo> items ) => new(items.Select(x => new ParameterDetails(x)));
 }

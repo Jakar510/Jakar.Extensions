@@ -1,13 +1,20 @@
 ﻿using System.Net.Http;
 
 
+
 namespace Jakar.Extensions.Http;
 
 
 /// <summary>
-/// <para><seealso href="https://www.hanselman.com/blog/HTTPPOSTsAndHTTPGETsWithWebClientAndCAndFakingADeleteBack.aspx"/></para>
-/// <para><seealso href="https://docs.microsoft.com/en-us/dotnet/standard/threading/cancellation-in-managed-threads"/></para>
-/// <para><seealso href="https://www.w3.org/Protocols/rfc1341/7_2_Multipart.html"/></para>
+///     <para>
+///         <seealso href = "https://www.hanselman.com/blog/HTTPPOSTsAndHTTPGETsWithWebClientAndCAndFakingADeleteBack.aspx" />
+///     </para>
+///     <para>
+///         <seealso href = "https://docs.microsoft.com/en-us/dotnet/standard/threading/cancellation-in-managed-threads" />
+///     </para>
+///     <para>
+///         <seealso href = "https://www.w3.org/Protocols/rfc1341/7_2_Multipart.html" />
+///     </para>
 /// </summary>
 public static class Deletes
 {
@@ -30,45 +37,24 @@ public static class Deletes
         return await req.GetResponseAsync(token).ConfigureAwait(false);
     }
 
-    public static async Task<string> TryDelete( this Uri          url,
-                                                string            payload,
-                                                HeaderCollection? headers  = default,
-                                                Encoding?         encoding = default,
-                                                CancellationToken token    = default )
+    public static async Task<string> TryDelete( this Uri url, string payload, HeaderCollection? headers = default, Encoding? encoding = default, CancellationToken token = default )
     {
         encoding ??= Encoding.Default;
         headers  ??= new HeaderCollection(MimeType.PlainText, encoding);
 
-        return await url.TryDelete(WebResponses.AsString,
-                                   encoding.GetBytes(payload).AsMemory(),
-                                   headers,
-                                   encoding,
-                                   token).ConfigureAwait(false);
+        return await url.TryDelete(WebResponses.AsString, encoding.GetBytes(payload).AsMemory(), headers, encoding, token).ConfigureAwait(false);
     }
 
 
-    public static async Task<TResult> TryDelete<TResult>( this Uri                                   url,
-                                                          Func<WebResponse, Encoding, Task<TResult>> handler,
-                                                          string                                     payload,
-                                                          MimeType                                   contentType,
-                                                          Encoding                                   encoding,
-                                                          CancellationToken                          token = default ) => await url.TryDelete(handler, payload, contentType.ToContentType(), encoding, token).ConfigureAwait(false);
+    public static async Task<TResult> TryDelete<TResult>( this Uri url, Func<WebResponse, Encoding, Task<TResult>> handler, string payload, MimeType contentType, Encoding encoding, CancellationToken token = default ) =>
+        await url.TryDelete(handler, payload, contentType.ToContentType(), encoding, token).ConfigureAwait(false);
 
 
-    public static async Task<TResult> TryDelete<TResult>( this Uri                                   url,
-                                                          Func<WebResponse, Encoding, Task<TResult>> handler,
-                                                          string                                     payload,
-                                                          string                                     contentType,
-                                                          Encoding                                   encoding,
-                                                          CancellationToken                          token = default ) => await url.TryDelete(handler, payload, new HeaderCollection(contentType, encoding), encoding, token).ConfigureAwait(false);
+    public static async Task<TResult> TryDelete<TResult>( this Uri url, Func<WebResponse, Encoding, Task<TResult>> handler, string payload, string contentType, Encoding encoding, CancellationToken token = default ) =>
+        await url.TryDelete(handler, payload, new HeaderCollection(contentType, encoding), encoding, token).ConfigureAwait(false);
 
 
-    public static async Task<TResult> TryDelete<TResult>( this Uri                                   url,
-                                                          Func<WebResponse, Encoding, Task<TResult>> handler,
-                                                          string                                     payload,
-                                                          HeaderCollection                           headers,
-                                                          Encoding                                   encoding,
-                                                          CancellationToken                          token = default )
+    public static async Task<TResult> TryDelete<TResult>( this Uri url, Func<WebResponse, Encoding, Task<TResult>> handler, string payload, HeaderCollection headers, Encoding encoding, CancellationToken token = default )
     {
         try
         {
@@ -86,12 +72,7 @@ public static class Deletes
     }
 
 
-    public static async Task<TResult> TryDelete<TResult>( this Uri                                   url,
-                                                          Func<WebResponse, Encoding, Task<TResult>> handler,
-                                                          ReadOnlyMemory<byte>                       payload,
-                                                          HeaderCollection                           headers,
-                                                          Encoding                                   encoding,
-                                                          CancellationToken                          token = default )
+    public static async Task<TResult> TryDelete<TResult>( this Uri url, Func<WebResponse, Encoding, Task<TResult>> handler, ReadOnlyMemory<byte> payload, HeaderCollection headers, Encoding encoding, CancellationToken token = default )
     {
         try
         {
@@ -112,19 +93,11 @@ public static class Deletes
     // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-    public static async Task<TResult> TryDelete<TResult>( this Uri                                            url,
-                                                          Func<WebResponse, CancellationToken, Task<TResult>> handler,
-                                                          string                                              payload,
-                                                          HeaderCollection                                    headers,
-                                                          Encoding                                            encoding,
-                                                          CancellationToken                                   token = default ) => await url.TryDelete(handler, encoding.GetBytes(payload).AsMemory(), headers, token);
+    public static async Task<TResult> TryDelete<TResult>( this Uri url, Func<WebResponse, CancellationToken, Task<TResult>> handler, string payload, HeaderCollection headers, Encoding encoding, CancellationToken token = default ) =>
+        await url.TryDelete(handler, encoding.GetBytes(payload).AsMemory(), headers, token);
 
 
-    public static async Task<TResult> TryDelete<TResult>( this Uri                                            url,
-                                                          Func<WebResponse, CancellationToken, Task<TResult>> handler,
-                                                          ReadOnlyMemory<byte>                                payload,
-                                                          HeaderCollection                                    headers,
-                                                          CancellationToken                                   token = default )
+    public static async Task<TResult> TryDelete<TResult>( this Uri url, Func<WebResponse, CancellationToken, Task<TResult>> handler, ReadOnlyMemory<byte> payload, HeaderCollection headers, CancellationToken token = default )
     {
         try
         {
@@ -165,12 +138,7 @@ public static class Deletes
     }
 
 
-    public static async Task<TResult> TryDelete<TResult>( this Uri                                   url,
-                                                          Func<WebResponse, Encoding, Task<TResult>> handler,
-                                                          MultipartFormDataContent                   payload,
-                                                          Encoding                                   encoding,
-                                                          HeaderCollection?                          headers = default,
-                                                          CancellationToken                          token   = default )
+    public static async Task<TResult> TryDelete<TResult>( this Uri url, Func<WebResponse, Encoding, Task<TResult>> handler, MultipartFormDataContent payload, Encoding encoding, HeaderCollection? headers = default, CancellationToken token = default )
     {
         try
         {
@@ -187,11 +155,7 @@ public static class Deletes
         }
     }
 
-    public static async Task<TResult> TryDelete<TResult>( this Uri                         url,
-                                                          Func<WebResponse, Task<TResult>> handler,
-                                                          MultipartFormDataContent         payload,
-                                                          HeaderCollection?                headers = default,
-                                                          CancellationToken                token   = default )
+    public static async Task<TResult> TryDelete<TResult>( this Uri url, Func<WebResponse, Task<TResult>> handler, MultipartFormDataContent payload, HeaderCollection? headers = default, CancellationToken token = default )
     {
         try
         {

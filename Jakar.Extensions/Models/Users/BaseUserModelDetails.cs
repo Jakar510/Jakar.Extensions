@@ -15,28 +15,8 @@ public abstract class BaseUserModelDetails<T, TAddress> : BaseUserModel<T, TAddr
                                                                                                                   where TAddress : BaseUserAddress<TAddress>
 {
     private ObservableCollection<TAddress>?    _addresses;
-    private ObservableCollection<PhoneNumber>? _phoneNumbers;
     private ObservableCollection<Email>?       _emails;
-
-    public ObservableCollection<TAddress>? Addresses
-    {
-        get => _addresses;
-        set => SetProperty(ref _addresses, value);
-    }
-
-
-    public ObservableCollection<PhoneNumber>? PhoneNumbers
-    {
-        get => _phoneNumbers;
-        set => SetProperty(ref _phoneNumbers, value);
-    }
-
-
-    public ObservableCollection<Email>? Emails
-    {
-        get => _emails;
-        set => SetProperty(ref _emails, value);
-    }
+    private ObservableCollection<PhoneNumber>? _phoneNumbers;
 
 
     protected BaseUserModelDetails() { }
@@ -128,5 +108,25 @@ public abstract class BaseUserModelDetails<T, TAddress> : BaseUserModel<T, TAddr
     {
         email.IsPrimary = true;
         Add(email);
+    }
+
+    public ObservableCollection<TAddress>? Addresses
+    {
+        get => _addresses;
+        set => SetProperty(ref _addresses, value);
+    }
+
+
+    public ObservableCollection<PhoneNumber>? PhoneNumbers
+    {
+        get => _phoneNumbers;
+        set => SetProperty(ref _phoneNumbers, value);
+    }
+
+
+    public ObservableCollection<Email>? Emails
+    {
+        get => _emails;
+        set => SetProperty(ref _emails, value);
     }
 }

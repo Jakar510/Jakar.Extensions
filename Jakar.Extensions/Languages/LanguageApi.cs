@@ -5,9 +5,9 @@
 public class LanguageApi : ObservableClass
 {
     private CultureInfo?      _currentCultureInfo;
+    private SupportedLanguage _currentLangVersion;
     private Language          _selectedLanguage;
     private string            _selectedLanguageName = string.Empty;
-    private SupportedLanguage _currentLangVersion;
 
 
     public ObservableCollection<Language> Languages { get; } = Language.Collection.Default();

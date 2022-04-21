@@ -1,13 +1,20 @@
 ﻿using System.Net.Http;
 
 
+
 namespace Jakar.Extensions.Http;
 
 
 /// <summary>
-/// <para><seealso href="https://www.hanselman.com/blog/HTTPPOSTsAndHTTPGETsWithWebClientAndCAndFakingAPostBack.aspx"/></para>
-/// <para><seealso href="https://docs.microsoft.com/en-us/dotnet/standard/threading/cancellation-in-managed-threads"/></para>
-/// <para><seealso href="https://www.w3.org/Protocols/rfc1341/7_2_Multipart.html"/></para>
+///     <para>
+///         <seealso href = "https://www.hanselman.com/blog/HTTPPOSTsAndHTTPGETsWithWebClientAndCAndFakingAPostBack.aspx" />
+///     </para>
+///     <para>
+///         <seealso href = "https://docs.microsoft.com/en-us/dotnet/standard/threading/cancellation-in-managed-threads" />
+///     </para>
+///     <para>
+///         <seealso href = "https://www.w3.org/Protocols/rfc1341/7_2_Multipart.html" />
+///     </para>
 /// </summary>
 public static class Posts
 {
@@ -30,20 +37,12 @@ public static class Posts
     }
 
 
-    public static async Task<string> TryPost( this Uri          url,
-                                              string            payload,
-                                              HeaderCollection? headers  = default,
-                                              Encoding?         encoding = default,
-                                              CancellationToken token    = default )
+    public static async Task<string> TryPost( this Uri url, string payload, HeaderCollection? headers = default, Encoding? encoding = default, CancellationToken token = default )
     {
         encoding ??= Encoding.Default;
         headers  ??= new HeaderCollection(MimeType.PlainText, encoding);
 
-        return await url.TryPost(WebResponses.AsString,
-                                 encoding.GetBytes(payload).AsMemory(),
-                                 headers,
-                                 encoding,
-                                 token).ConfigureAwait(false);
+        return await url.TryPost(WebResponses.AsString, encoding.GetBytes(payload).AsMemory(), headers, encoding, token).ConfigureAwait(false);
     }
 
 
@@ -53,12 +52,8 @@ public static class Posts
                                                         MimeType                                   contentType,
                                                         HeaderCollection?                          headers  = default,
                                                         Encoding?                                  encoding = default,
-                                                        CancellationToken                          token    = default ) => await url.TryPost(handler,
-                                                                                                                                             payload,
-                                                                                                                                             contentType.ToContentType(),
-                                                                                                                                             headers,
-                                                                                                                                             encoding,
-                                                                                                                                             token).ConfigureAwait(false);
+                                                        CancellationToken                          token    = default
+    ) => await url.TryPost(handler, payload, contentType.ToContentType(), headers, encoding, token).ConfigureAwait(false);
 
 
     public static async Task<TResult> TryPost<TResult>( this Uri                                   url,
@@ -67,25 +62,17 @@ public static class Posts
                                                         string                                     contentType,
                                                         HeaderCollection?                          headers  = default,
                                                         Encoding?                                  encoding = default,
-                                                        CancellationToken                          token    = default )
+                                                        CancellationToken                          token    = default
+    )
     {
         encoding ??= Encoding.Default;
         headers  ??= new HeaderCollection(contentType, encoding);
 
-        return await url.TryPost(handler,
-                                 encoding.GetBytes(payload).AsMemory(),
-                                 headers,
-                                 encoding,
-                                 token).ConfigureAwait(false);
+        return await url.TryPost(handler, encoding.GetBytes(payload).AsMemory(), headers, encoding, token).ConfigureAwait(false);
     }
 
 
-    public static async Task<TResult> TryPost<TResult>( this Uri                                   url,
-                                                        Func<WebResponse, Encoding, Task<TResult>> handler,
-                                                        ReadOnlyMemory<byte>                       payload,
-                                                        HeaderCollection                           headers,
-                                                        Encoding                                   encoding,
-                                                        CancellationToken                          token = default )
+    public static async Task<TResult> TryPost<TResult>( this Uri url, Func<WebResponse, Encoding, Task<TResult>> handler, ReadOnlyMemory<byte> payload, HeaderCollection headers, Encoding encoding, CancellationToken token = default )
     {
         try
         {
@@ -103,20 +90,13 @@ public static class Posts
     }
 
 
-    public static async Task<TResult> TryPost<TResult>( this Uri                                   url,
-                                                        Func<WebResponse, Encoding, Task<TResult>> handler,
-                                                        string                                     payload,
-                                                        HeaderCollection                           headers,
-                                                        Encoding?                                  encoding = default,
-                                                        CancellationToken                          token    = default )
+    public static async Task<TResult> TryPost<TResult>( this Uri url, Func<WebResponse, Encoding, Task<TResult>> handler, string payload, HeaderCollection headers, Encoding? encoding = default, CancellationToken token = default )
     {
         encoding ??= Encoding.Default;
 
         try
         {
-            using WebResponse response = await url.Post(encoding.GetBytes(payload).AsMemory(),
-                                                        headers,
-                                                        token).ConfigureAwait(false);
+            using WebResponse response = await url.Post(encoding.GetBytes(payload).AsMemory(), headers, token).ConfigureAwait(false);
 
             return await handler(response, encoding).ConfigureAwait(false);
         }
@@ -133,19 +113,11 @@ public static class Posts
     // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-    public static async Task<TResult> TryPost<TResult>( this Uri                                            url,
-                                                        Func<WebResponse, CancellationToken, Task<TResult>> handler,
-                                                        string                                              payload,
-                                                        HeaderCollection                                    headers,
-                                                        Encoding                                            encoding,
-                                                        CancellationToken                                   token = default ) => await url.TryPost(handler, encoding.GetBytes(payload).AsMemory(), headers, token).ConfigureAwait(false);
+    public static async Task<TResult> TryPost<TResult>( this Uri url, Func<WebResponse, CancellationToken, Task<TResult>> handler, string payload, HeaderCollection headers, Encoding encoding, CancellationToken token = default ) =>
+        await url.TryPost(handler, encoding.GetBytes(payload).AsMemory(), headers, token).ConfigureAwait(false);
 
 
-    public static async Task<TResult> TryPost<TResult>( this Uri                                            url,
-                                                        Func<WebResponse, CancellationToken, Task<TResult>> handler,
-                                                        ReadOnlyMemory<byte>                                payload,
-                                                        HeaderCollection                                    headers,
-                                                        CancellationToken                                   token = default )
+    public static async Task<TResult> TryPost<TResult>( this Uri url, Func<WebResponse, CancellationToken, Task<TResult>> handler, ReadOnlyMemory<byte> payload, HeaderCollection headers, CancellationToken token = default )
     {
         try
         {
@@ -184,12 +156,7 @@ public static class Posts
         return await req.GetResponseAsync(token).ConfigureAwait(false);
     }
 
-    public static async Task<TResult> TryPost<TResult>( this Uri                                   url,
-                                                        Func<WebResponse, Encoding, Task<TResult>> handler,
-                                                        MultipartFormDataContent                   payload,
-                                                        Encoding                                   encoding,
-                                                        HeaderCollection?                          headers = default,
-                                                        CancellationToken                          token   = default )
+    public static async Task<TResult> TryPost<TResult>( this Uri url, Func<WebResponse, Encoding, Task<TResult>> handler, MultipartFormDataContent payload, Encoding encoding, HeaderCollection? headers = default, CancellationToken token = default )
     {
         try
         {
@@ -206,11 +173,7 @@ public static class Posts
         }
     }
 
-    public static async Task<TResult> TryPost<TResult>( this Uri                         url,
-                                                        Func<WebResponse, Task<TResult>> handler,
-                                                        MultipartFormDataContent         payload,
-                                                        HeaderCollection?                headers = default,
-                                                        CancellationToken                token   = default )
+    public static async Task<TResult> TryPost<TResult>( this Uri url, Func<WebResponse, Task<TResult>> handler, MultipartFormDataContent payload, HeaderCollection? headers = default, CancellationToken token = default )
     {
         try
         {

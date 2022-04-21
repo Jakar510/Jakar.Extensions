@@ -17,10 +17,10 @@ public class ExpectedValueTypeException<TKey> : Exception // Jakar.Api.Exception
     public ExpectedValueTypeException( Exception inner, TKey key, Type? value, params Type[] expected ) : base(GetMessage(value, expected, key), inner) => Update(value, expected, key);
 
 
-    public ExpectedValueTypeException( object?   value, params Type[] expected ) : this(value?.GetType(), expected) => Update(value?.GetType(), expected);
-    public ExpectedValueTypeException( Type?     value, params Type[] expected ) : base(GetMessage(value, expected)) => Update(value, expected);
+    public ExpectedValueTypeException( object?   value, params Type[] expected ) : this(value?.GetType(), expected) => Update(value?.GetType(),                             expected);
+    public ExpectedValueTypeException( Type?     value, params Type[] expected ) : base(GetMessage(value, expected)) => Update(value,                                       expected);
     public ExpectedValueTypeException( Exception inner, object?       value, params Type[] expected ) : this(inner, value?.GetType(), expected) => Update(value?.GetType(), expected);
-    public ExpectedValueTypeException( Exception inner, Type?         value, params Type[] expected ) : base(GetMessage(value, expected), inner) => Update(value, expected);
+    public ExpectedValueTypeException( Exception inner, Type?         value, params Type[] expected ) : base(GetMessage(value, expected), inner) => Update(value,           expected);
 
 
     protected void Update( Type? value, Type[] expected, TKey? key = default )
@@ -36,7 +36,7 @@ public class ExpectedValueTypeException<TKey> : Exception // Jakar.Api.Exception
 
 
     protected static IEnumerable<string> GetTypeNames( params Type[] expected ) => expected.Select(item => item.FullName);
-    protected static string              GetTypes( params     Type[] expected ) => GetTypeNames(expected).ToPrettyJson();
+    protected static string GetTypes( params                  Type[] expected ) => GetTypeNames(expected).ToPrettyJson();
 
 
     protected static string GetMessage( Type? actual, Type[] expected, TKey? key = default )

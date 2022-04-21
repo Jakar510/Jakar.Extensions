@@ -10,9 +10,9 @@ public class HeaderCollection : Dictionary<string, object>
 
     public HeaderCollection( string contentType, Encoding encoding )
     {
-        Add(HttpRequestHeader.ContentType, contentType);
+        Add(HttpRequestHeader.ContentType,     contentType);
         Add(HttpRequestHeader.ContentEncoding, encoding.EncodingName);
-        Add(encoding.HeaderName, encoding.WebName);
+        Add(encoding.HeaderName,               encoding.WebName);
     }
 
 

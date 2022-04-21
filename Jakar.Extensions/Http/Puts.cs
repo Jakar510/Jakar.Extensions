@@ -1,13 +1,20 @@
 ﻿using System.Net.Http;
 
 
+
 namespace Jakar.Extensions.Http;
 
 
 /// <summary>
-/// <para><seealso href="https://www.hanselman.com/blog/HTTPPOSTsAndHTTPGETsWithWebClientAndCAndFakingAPutBack.aspx"/></para>
-/// <para><seealso href="https://docs.microsoft.com/en-us/dotnet/standard/threading/cancellation-in-managed-threads"/></para>
-/// <para><seealso href="https://www.w3.org/Protocols/rfc1341/7_2_Multipart.html"/></para>
+///     <para>
+///         <seealso href = "https://www.hanselman.com/blog/HTTPPOSTsAndHTTPGETsWithWebClientAndCAndFakingAPutBack.aspx" />
+///     </para>
+///     <para>
+///         <seealso href = "https://docs.microsoft.com/en-us/dotnet/standard/threading/cancellation-in-managed-threads" />
+///     </para>
+///     <para>
+///         <seealso href = "https://www.w3.org/Protocols/rfc1341/7_2_Multipart.html" />
+///     </para>
 /// </summary>
 public static class Puts
 {
@@ -30,70 +37,36 @@ public static class Puts
         return await req.GetResponseAsync(token).ConfigureAwait(false);
     }
 
-    public static async Task<string> TryPut( this Uri          url,
-                                             string            payload,
-                                             Encoding?         encoding = default,
-                                             CancellationToken token    = default )
+    public static async Task<string> TryPut( this Uri url, string payload, Encoding? encoding = default, CancellationToken token = default )
     {
         encoding ??= Encoding.Default;
         var headers = new HeaderCollection(MimeType.PlainText, encoding);
 
-        return await url.TryPut(WebResponses.AsString,
-                                encoding.GetBytes(payload).AsMemory(),
-                                headers,
-                                encoding,
-                                token).ConfigureAwait(false);
+        return await url.TryPut(WebResponses.AsString, encoding.GetBytes(payload).AsMemory(), headers, encoding, token).ConfigureAwait(false);
     }
 
 
-    public static async Task<TResult> TryPut<TResult>( this Uri                                   url,
-                                                       Func<WebResponse, Encoding, Task<TResult>> handler,
-                                                       string                                     payload,
-                                                       MimeType                                   contentType,
-                                                       Encoding?                                  encoding = default,
-                                                       CancellationToken                          token    = default ) => await url.TryPut(handler, payload, contentType.ToContentType(), encoding, token).ConfigureAwait(false);
+    public static async Task<TResult> TryPut<TResult>( this Uri url, Func<WebResponse, Encoding, Task<TResult>> handler, string payload, MimeType contentType, Encoding? encoding = default, CancellationToken token = default ) =>
+        await url.TryPut(handler, payload, contentType.ToContentType(), encoding, token).ConfigureAwait(false);
 
 
-    public static async Task<TResult> TryPut<TResult>( this Uri                                   url,
-                                                       Func<WebResponse, Encoding, Task<TResult>> handler,
-                                                       string                                     payload,
-                                                       string                                     contentType,
-                                                       Encoding?                                  encoding = default,
-                                                       CancellationToken                          token    = default )
+    public static async Task<TResult> TryPut<TResult>( this Uri url, Func<WebResponse, Encoding, Task<TResult>> handler, string payload, string contentType, Encoding? encoding = default, CancellationToken token = default )
     {
         encoding ??= Encoding.Default;
         var headers = new HeaderCollection(contentType, encoding);
 
-        return await url.TryPut(handler,
-                                encoding.GetBytes(payload).AsMemory(),
-                                headers,
-                                encoding,
-                                token).ConfigureAwait(false);
+        return await url.TryPut(handler, encoding.GetBytes(payload).AsMemory(), headers, encoding, token).ConfigureAwait(false);
     }
 
-    public static async Task<TResult> TryPut<TResult>( this Uri                                   url,
-                                                       Func<WebResponse, Encoding, Task<TResult>> handler,
-                                                       string                                     payload,
-                                                       HeaderCollection                           headers,
-                                                       Encoding?                                  encoding,
-                                                       CancellationToken                          token = default )
+    public static async Task<TResult> TryPut<TResult>( this Uri url, Func<WebResponse, Encoding, Task<TResult>> handler, string payload, HeaderCollection headers, Encoding? encoding, CancellationToken token = default )
     {
         encoding ??= Encoding.Default;
 
-        return await url.TryPut(handler,
-                                encoding.GetBytes(payload).AsMemory(),
-                                headers,
-                                encoding,
-                                token).ConfigureAwait(false);
+        return await url.TryPut(handler, encoding.GetBytes(payload).AsMemory(), headers, encoding, token).ConfigureAwait(false);
     }
 
 
-    public static async Task<TResult> TryPut<TResult>( this Uri                                   url,
-                                                       Func<WebResponse, Encoding, Task<TResult>> handler,
-                                                       ReadOnlyMemory<byte>                       payload,
-                                                       HeaderCollection                           headers,
-                                                       Encoding                                   encoding,
-                                                       CancellationToken                          token = default )
+    public static async Task<TResult> TryPut<TResult>( this Uri url, Func<WebResponse, Encoding, Task<TResult>> handler, ReadOnlyMemory<byte> payload, HeaderCollection headers, Encoding encoding, CancellationToken token = default )
     {
         try
         {
@@ -114,19 +87,11 @@ public static class Puts
     // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-    public static async Task<TResult> TryPut<TResult>( this Uri                                            url,
-                                                       Func<WebResponse, CancellationToken, Task<TResult>> handler,
-                                                       string                                              payload,
-                                                       HeaderCollection                                    headers,
-                                                       Encoding                                            encoding,
-                                                       CancellationToken                                   token = default ) => await url.TryPut(handler, encoding.GetBytes(payload).AsMemory(), headers, token).ConfigureAwait(false);
+    public static async Task<TResult> TryPut<TResult>( this Uri url, Func<WebResponse, CancellationToken, Task<TResult>> handler, string payload, HeaderCollection headers, Encoding encoding, CancellationToken token = default ) =>
+        await url.TryPut(handler, encoding.GetBytes(payload).AsMemory(), headers, token).ConfigureAwait(false);
 
 
-    public static async Task<TResult> TryPut<TResult>( this Uri                                            url,
-                                                       Func<WebResponse, CancellationToken, Task<TResult>> handler,
-                                                       ReadOnlyMemory<byte>                                payload,
-                                                       HeaderCollection                                    headers,
-                                                       CancellationToken                                   token = default )
+    public static async Task<TResult> TryPut<TResult>( this Uri url, Func<WebResponse, CancellationToken, Task<TResult>> handler, ReadOnlyMemory<byte> payload, HeaderCollection headers, CancellationToken token = default )
     {
         try
         {
@@ -167,12 +132,7 @@ public static class Puts
     }
 
 
-    public static async Task<TResult> TryPut<TResult>( this Uri                                   url,
-                                                       Func<WebResponse, Encoding, Task<TResult>> handler,
-                                                       MultipartFormDataContent                   payload,
-                                                       Encoding                                   encoding,
-                                                       HeaderCollection?                          headers = default,
-                                                       CancellationToken                          token   = default )
+    public static async Task<TResult> TryPut<TResult>( this Uri url, Func<WebResponse, Encoding, Task<TResult>> handler, MultipartFormDataContent payload, Encoding encoding, HeaderCollection? headers = default, CancellationToken token = default )
     {
         try
         {
@@ -188,11 +148,7 @@ public static class Puts
         }
     }
 
-    public static async Task<TResult> TryPut<TResult>( this Uri                         url,
-                                                       Func<WebResponse, Task<TResult>> handler,
-                                                       MultipartFormDataContent         payload,
-                                                       HeaderCollection?                headers = default,
-                                                       CancellationToken                token   = default )
+    public static async Task<TResult> TryPut<TResult>( this Uri url, Func<WebResponse, Task<TResult>> handler, MultipartFormDataContent payload, HeaderCollection? headers = default, CancellationToken token = default )
     {
         try
         {

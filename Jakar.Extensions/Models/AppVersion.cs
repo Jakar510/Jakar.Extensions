@@ -2,7 +2,9 @@
 
 
 /// <summary>
-/// See <see cref="Format"/>  for formatting details.
+///     See
+///     <see cref = "Format" />
+///     for formatting details.
 /// </summary>
 [Serializable]
 [JsonConverter(typeof(AppVersionConverter))] // AppVersionNullableConverter
@@ -15,32 +17,32 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
     public enum Format
     {
         /// <summary>
-        /// Major
+        ///     Major
         /// </summary>
         Singular = 1,
 
         /// <summary>
-        /// Major.Minor
+        ///     Major.Minor
         /// </summary>
         Minimal = 2,
 
         /// <summary>
-        /// Major.Minor.Build
+        ///     Major.Minor.Build
         /// </summary>
         Typical,
 
         /// <summary>
-        /// Major.Minor.Maintenance.Build
+        ///     Major.Minor.Maintenance.Build
         /// </summary>
         Detailed,
 
         /// <summary>
-        /// Major.Minor.Maintenance.MajorRevision.Build
+        ///     Major.Minor.Maintenance.MajorRevision.Build
         /// </summary>
         DetailedRevisions,
 
         /// <summary>
-        /// Major.Minor.Maintenance.MajorRevision.MinorRevision.Build
+        ///     Major.Minor.Maintenance.MajorRevision.MinorRevision.Build
         /// </summary>
         Complete
     }
@@ -150,12 +152,16 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
     /// <summary>
     /// 
     /// </summary>
-    /// <param name="value"></param>
-    /// <param name="version"></param>
+    /// <param name = "value" > </param>
+    /// <param name = "version" > </param>
     /// <returns>
-    /// <see langword="true"/> if <see cref="Parse(string)"/> as successful.
-    /// <br/>
-    /// <see langword="false"/> otherwise.
+    ///     <see langword = "true" />
+    ///     if
+    ///     <see cref = "Parse(string)" />
+    ///     as successful.
+    ///     <br />
+    ///     <see langword = "false" />
+    ///     otherwise.
     /// </returns>
     public static bool TryParse( in string? value, [NotNullWhen(true)] out AppVersion? version )
     {
@@ -177,23 +183,29 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
     /// <summary>
     /// 
     /// </summary>
-    /// <param name="value"></param>
-    /// <exception cref="FormatException"></exception>
-    /// <exception cref="ArgumentNullException"></exception>
-    /// <exception cref="OverflowException"></exception>
-    /// <exception cref="ArgumentOutOfRangeException"></exception>
-    /// <returns><see cref="AppVersion"/></returns>
+    /// <param name = "value" > </param>
+    /// <exception cref = "FormatException" > </exception>
+    /// <exception cref = "ArgumentNullException" > </exception>
+    /// <exception cref = "OverflowException" > </exception>
+    /// <exception cref = "ArgumentOutOfRangeException" > </exception>
+    /// <returns>
+    ///     <see cref = "AppVersion" />
+    /// </returns>
     public static AppVersion Parse( string value ) => Parse(value.AsSpan());
 
     /// <summary>
     /// 
     /// </summary>
-    /// <param name="value"></param>
-    /// <param name="version"></param>
+    /// <param name = "value" > </param>
+    /// <param name = "version" > </param>
     /// <returns>
-    /// <see langword="true"/> if <see cref="Parse(ReadOnlySpan&lt;char&gt;)"/> as successful.
-    /// <br/>
-    /// <see langword="false"/> otherwise.
+    ///     <see langword = "true" />
+    ///     if
+    ///     <see cref = "Parse(ReadOnlySpan&lt;char&gt;)" />
+    ///     as successful.
+    ///     <br />
+    ///     <see langword = "false" />
+    ///     otherwise.
     /// </returns>
     public static bool TryParse( in ReadOnlySpan<char> value, [NotNullWhen(true)] out AppVersion? version )
     {
@@ -215,12 +227,14 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
     /// <summary>
     /// 
     /// </summary>
-    /// <param name="value"></param>
-    /// <exception cref="FormatException"></exception>
-    /// <exception cref="ArgumentNullException"></exception>
-    /// <exception cref="OverflowException"></exception>
-    /// <exception cref="ArgumentOutOfRangeException"></exception>
-    /// <returns><see cref="AppVersion"/></returns>
+    /// <param name = "value" > </param>
+    /// <exception cref = "FormatException" > </exception>
+    /// <exception cref = "ArgumentNullException" > </exception>
+    /// <exception cref = "OverflowException" > </exception>
+    /// <exception cref = "ArgumentOutOfRangeException" > </exception>
+    /// <returns>
+    ///     <see cref = "AppVersion" />
+    /// </returns>
     public static AppVersion Parse( ReadOnlySpan<char> value ) => Parse(value, value);
     private static AppVersion Parse( ReadOnlySpan<char> value, in ReadOnlySpan<char> original )
     {
@@ -370,10 +384,19 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
 
 
     /// <summary>
-    /// If the <see cref="Scheme"/> is any of [ <see cref="Format.Singular"/>, <see cref="Format.DetailedRevisions"/>, <see cref="Format.Complete"/> ], will throw <see cref="InvalidOperationException"/>
+    ///     If the
+    ///     <see cref = "Scheme" />
+    ///     is any of [
+    ///     <see cref = "Format.Singular" />
+    ///     ,
+    ///     <see cref = "Format.DetailedRevisions" />
+    ///     ,
+    ///     <see cref = "Format.Complete" />
+    ///     ], will throw
+    ///     <see cref = "InvalidOperationException" />
     /// </summary>
-    /// <returns></returns>
-    /// <exception cref="InvalidOperationException"></exception>
+    /// <returns> </returns>
+    /// <exception cref = "InvalidOperationException" > </exception>
     public Version ToVersion()
     {
         if ( Scheme is Format.Singular or Format.DetailedRevisions or Format.Complete ) { throw new InvalidOperationException("Conversion is not possible"); }
@@ -427,20 +450,40 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
 
 
     /// <summary>
-    /// Compares two <see cref="AppVersion"/> instances
+    ///     Compares two
+    ///     <see cref = "AppVersion" />
+    ///     instances
     /// </summary>
-    /// <param name="other"></param>
+    /// <param name = "other" > </param>
     /// <returns>
-    /// <see langword="0"/> if the <paramref name="other"/> is equivalent.
-    /// <br/>
-    /// <see langword="-1"/>  if the <paramref name="other"/> is smaller.
-    /// <br/>
-    /// <see langword="1"/>  if the <paramref name="other"/> is greater.
-    /// <br/>
-    /// <see langword="-2"/>  if the <paramref name="other"/> is not an instance of <see cref="AppVersion"/>.
-    /// <br/>
+    ///     <see langword = "0" />
+    ///     if the
+    ///     <paramref name = "other" />
+    ///     is equivalent.
+    ///     <br />
+    ///     <see langword = "-1" />
+    ///     if the
+    ///     <paramref name = "other" />
+    ///     is smaller.
+    ///     <br />
+    ///     <see langword = "1" />
+    ///     if the
+    ///     <paramref name = "other" />
+    ///     is greater.
+    ///     <br />
+    ///     <see langword = "-2" />
+    ///     if the
+    ///     <paramref name = "other" />
+    ///     is not an instance of
+    ///     <see cref = "AppVersion" />
+    ///     .
+    ///     <br />
     /// </returns>
-    /// <exception cref="ArgumentException">If something goes wrong, and the <paramref name="other"/> is not comparable.</exception>
+    /// <exception cref = "ArgumentException" >
+    ///     If something goes wrong, and the
+    ///     <paramref name = "other" />
+    ///     is not comparable.
+    /// </exception>
     public int CompareTo( object? other ) =>
         other switch
         {
@@ -451,18 +494,33 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
 
 
     /// <summary>
-    /// Compares two <see cref="AppVersion"/> instances
+    ///     Compares two
+    ///     <see cref = "AppVersion" />
+    ///     instances
     /// </summary>
-    /// <param name="other"></param>
+    /// <param name = "other" > </param>
     /// <returns>
-    /// <see langword="0"/> if the <paramref name="other"/> is equivalent.
-    /// <br/>
-    /// <see langword="-1"/>  if the <paramref name="other"/> is smaller.
-    /// <br/>
-    /// <see langword="1"/>  if the <paramref name="other"/> is greater.
-    /// <br/>
+    ///     <see langword = "0" />
+    ///     if the
+    ///     <paramref name = "other" />
+    ///     is equivalent.
+    ///     <br />
+    ///     <see langword = "-1" />
+    ///     if the
+    ///     <paramref name = "other" />
+    ///     is smaller.
+    ///     <br />
+    ///     <see langword = "1" />
+    ///     if the
+    ///     <paramref name = "other" />
+    ///     is greater.
+    ///     <br />
     /// </returns>
-    /// <exception cref="ArgumentException">If something goes wrong, and the <paramref name="other"/> is not comparable.</exception>
+    /// <exception cref = "ArgumentException" >
+    ///     If something goes wrong, and the
+    ///     <paramref name = "other" />
+    ///     is not comparable.
+    /// </exception>
     public int CompareTo( AppVersion? other )
     {
         if ( other is null ) { return -1; }
@@ -494,29 +552,62 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
 
 
     /// <summary>
-    /// Compares two <see cref="AppVersion"/> instances for relative equality.
+    ///     Compares two
+    ///     <see cref = "AppVersion" />
+    ///     instances for relative equality.
     /// </summary>
-    /// <param name="other"></param>
+    /// <param name = "other" > </param>
     /// <returns>
-    /// <para>
-    ///  returns <see langword="true"/> if all of the following is true: 
-    /// <list type="number">
-    /// <item> If <see cref="Major"/> and <see cref="Minor"/> match </item><br/>
-    /// <item>
-    /// All other fields that are not <see langword="null"/> and are equal to or greater than <br/>
-    /// <list type="bullet">
-    /// <item><see cref="Maintenance"/></item><br/>
-    /// <item><see cref="MajorRevision"/></item><br/>
-    /// <item><see cref="MinorRevision"/></item><br/>
-    /// <item><see cref="Build"/></item><br/>
-    /// </list>
-    /// </item>
-    /// <br/>
-    /// </list>
-    /// </para>
-    /// <para> otherwise <see langword="false"/> </para>
+    ///     <para>
+    ///         returns
+    ///         <see langword = "true" />
+    ///         if all of the following is true:
+    ///         <list type = "number" >
+    ///             <item>
+    ///                 If
+    ///                 <see cref = "Major" />
+    ///                 and
+    ///                 <see cref = "Minor" />
+    ///                 match
+    ///             </item>
+    ///             <br />
+    ///             <item>
+    ///                 All other fields that are not
+    ///                 <see langword = "null" />
+    ///                 and are equal to or greater than
+    ///                 <br />
+    ///                 <list type = "bullet" >
+    ///                     <item>
+    ///                         <see cref = "Maintenance" />
+    ///                     </item>
+    ///                     <br />
+    ///                     <item>
+    ///                         <see cref = "MajorRevision" />
+    ///                     </item>
+    ///                     <br />
+    ///                     <item>
+    ///                         <see cref = "MinorRevision" />
+    ///                     </item>
+    ///                     <br />
+    ///                     <item>
+    ///                         <see cref = "Build" />
+    ///                     </item>
+    ///                     <br />
+    ///                 </list>
+    ///             </item>
+    ///             <br />
+    ///         </list>
+    ///     </para>
+    ///     <para>
+    ///         otherwise
+    ///         <see langword = "false" />
+    ///     </para>
     /// </returns>
-    /// <exception cref="ArgumentException">If something goes wrong, and the <paramref name="other"/> is not comparable.</exception>
+    /// <exception cref = "ArgumentException" >
+    ///     If something goes wrong, and the
+    ///     <paramref name = "other" />
+    ///     is not comparable.
+    /// </exception>
     public bool FuzzyEquals( AppVersion? other )
     {
         if ( other is null ) { return false; }
@@ -525,29 +616,62 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
     }
 
     /// <summary>
-    /// Compares two <see cref="AppVersion"/> instances for relative equality.
+    ///     Compares two
+    ///     <see cref = "AppVersion" />
+    ///     instances for relative equality.
     /// </summary>
-    /// <param name="other"></param>
+    /// <param name = "other" > </param>
     /// <returns>
-    /// <para>
-    ///  returns <see langword="true"/> if all of the following is true: 
-    /// <list type="number">
-    /// <item> If <see cref="Major"/> and <see cref="Minor"/> match </item><br/>
-    /// <item>
-    /// All other fields that are not <see langword="null"/> and are equal to or greater than <br/>
-    /// <list type="bullet">
-    /// <item><see cref="Maintenance"/></item><br/>
-    /// <item><see cref="MajorRevision"/></item><br/>
-    /// <item><see cref="MinorRevision"/></item><br/>
-    /// <item><see cref="Build"/></item><br/>
-    /// </list>
-    /// </item>
-    /// <br/>
-    /// </list>
-    /// </para>
-    /// <para> otherwise <see langword="false"/> </para>
+    ///     <para>
+    ///         returns
+    ///         <see langword = "true" />
+    ///         if all of the following is true:
+    ///         <list type = "number" >
+    ///             <item>
+    ///                 If
+    ///                 <see cref = "Major" />
+    ///                 and
+    ///                 <see cref = "Minor" />
+    ///                 match
+    ///             </item>
+    ///             <br />
+    ///             <item>
+    ///                 All other fields that are not
+    ///                 <see langword = "null" />
+    ///                 and are equal to or greater than
+    ///                 <br />
+    ///                 <list type = "bullet" >
+    ///                     <item>
+    ///                         <see cref = "Maintenance" />
+    ///                     </item>
+    ///                     <br />
+    ///                     <item>
+    ///                         <see cref = "MajorRevision" />
+    ///                     </item>
+    ///                     <br />
+    ///                     <item>
+    ///                         <see cref = "MinorRevision" />
+    ///                     </item>
+    ///                     <br />
+    ///                     <item>
+    ///                         <see cref = "Build" />
+    ///                     </item>
+    ///                     <br />
+    ///                 </list>
+    ///             </item>
+    ///             <br />
+    ///         </list>
+    ///     </para>
+    ///     <para>
+    ///         otherwise
+    ///         <see langword = "false" />
+    ///     </para>
     /// </returns>
-    /// <exception cref="ArgumentException">If something goes wrong, and the <paramref name="other"/> is not comparable.</exception>
+    /// <exception cref = "ArgumentException" >
+    ///     If something goes wrong, and the
+    ///     <paramref name = "other" />
+    ///     is not comparable.
+    /// </exception>
     public bool FuzzyEquals( AppVersion other )
     {
         AssertFormat(other);

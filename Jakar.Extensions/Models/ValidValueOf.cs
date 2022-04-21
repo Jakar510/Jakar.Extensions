@@ -9,10 +9,11 @@ namespace Jakar.Extensions.Models;
 
 
 /// <summary>
-/// Inspired by <see cref="ValueOf{TValue,TThis}"/>
+///     Inspired by
+///     <see cref = "ValueOf{TValue,TThis}" />
 /// </summary>
-/// <typeparam name="TValue"></typeparam>
-/// <typeparam name="TThis"></typeparam>
+/// <typeparam name = "TValue" > </typeparam>
+/// <typeparam name = "TThis" > </typeparam>
 public abstract class ValidValueOf<TValue, TThis> : IComparable<ValidValueOf<TValue, TThis>>, IEquatable<ValidValueOf<TValue, TThis>>, IComparable where TThis : ValidValueOf<TValue, TThis>, new()
                                                                                                                                                    where TValue : IComparable<TValue>, IEquatable<TValue>
 {
@@ -55,23 +56,16 @@ public abstract class ValidValueOf<TValue, TThis> : IComparable<ValidValueOf<TVa
     /// <summary>
     /// 
     /// </summary>
-    /// <returns><see langword="true"/> if <see cref="Value"/> is valid, otherwise <see langword="false"/></returns>
+    /// <returns>
+    ///     <see langword = "true" />
+    ///     if
+    ///     <see cref = "Value" />
+    ///     is valid, otherwise
+    ///     <see langword = "false" />
+    /// </returns>
     protected abstract bool IsValid();
 
     public override string? ToString() => Value?.ToString();
-
-
-    public int CompareTo( ValidValueOf<TValue, TThis> other ) => Compare(Value, other.Value);
-    public int CompareTo( object? other )
-    {
-        if ( other is null ) { return 1; }
-
-        if ( ReferenceEquals(this, other) ) { return 0; }
-
-        return other is ValidValueOf<TValue, TThis> value
-                   ? CompareTo(value)
-                   : throw new ExpectedValueTypeException(nameof(other), other, typeof(ValidValueOf<TValue, TThis>));
-    }
     public override bool Equals( object? other )
     {
         if ( other is null ) { return false; }
@@ -80,7 +74,6 @@ public abstract class ValidValueOf<TValue, TThis> : IComparable<ValidValueOf<TVa
 
         return other is ValidValueOf<TValue, TThis> value && Equals(value);
     }
-    public virtual bool Equals( ValidValueOf<TValue, TThis> other ) => Equals(Value, other.Value);
     public override int GetHashCode() => Value?.GetHashCode() ?? 0;
 
     private static int Compare( TValue? left, TValue? right )
@@ -114,4 +107,18 @@ public abstract class ValidValueOf<TValue, TThis> : IComparable<ValidValueOf<TVa
     public static bool operator >( ValidValueOf<TValue, TThis>  left, ValidValueOf<TValue, TThis> right ) => Compare(left.Value, right.Value) > 0;
     public static bool operator <=( ValidValueOf<TValue, TThis> left, ValidValueOf<TValue, TThis> right ) => Compare(left.Value, right.Value) <= 0;
     public static bool operator >=( ValidValueOf<TValue, TThis> left, ValidValueOf<TValue, TThis> right ) => Compare(left.Value, right.Value) >= 0;
+    public int CompareTo( object? other )
+    {
+        if ( other is null ) { return 1; }
+
+        if ( ReferenceEquals(this, other) ) { return 0; }
+
+        return other is ValidValueOf<TValue, TThis> value
+                   ? CompareTo(value)
+                   : throw new ExpectedValueTypeException(nameof(other), other, typeof(ValidValueOf<TValue, TThis>));
+    }
+
+
+    public int CompareTo( ValidValueOf<TValue, TThis>       other ) => Compare(Value, other.Value);
+    public virtual bool Equals( ValidValueOf<TValue, TThis> other ) => Equals(Value, other.Value);
 }

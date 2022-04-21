@@ -12,8 +12,10 @@ public static partial class Validate
 
 
         /// <summary>
-        /// General Email Regex (RFC 5322 Official Standard)
-        /// <para><see href="https://emailregex.com/"/></para>
+        ///     General Email Regex (RFC 5322 Official Standard)
+        ///     <para>
+        ///         <see href = "https://emailregex.com/" />
+        ///     </para>
         /// </summary>
         public static Regex Email =>
             _email ??=
@@ -24,18 +26,18 @@ public static partial class Validate
 
         /// <summary>
         /// 
-        /// <para><see href="https://urlregex.com/"/></para>
+        ///     <para>
+        ///         <see href = "https://urlregex.com/" />
+        ///     </para>
         /// </summary>
-        public static Regex Url => _url ??= new Regex(@"^(ht|f)tp(s?)\:\/\/[0-9a-zA-Z]([-.\w]*[0-9a-zA-Z])*(:(0-9)*)*(\/?)([a-zA-Z0-9\-\.\?\,\'\/\\\+&%\$#_]*)?$",
-                                                      RegexOptions.Compiled,
-                                                      _timeout);
+        public static Regex Url => _url ??= new Regex(@"^(ht|f)tp(s?)\:\/\/[0-9a-zA-Z]([-.\w]*[0-9a-zA-Z])*(:(0-9)*)*(\/?)([a-zA-Z0-9\-\.\?\,\'\/\\\+&%\$#_]*)?$", RegexOptions.Compiled, _timeout);
 
         /// <summary>
-        /// <para><see href="https://ipregex.com/"/></para>
+        ///     <para>
+        ///         <see href = "https://ipregex.com/" />
+        ///     </para>
         /// </summary>
-        public static Regex Ip => _ip ??= new Regex(@"^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]).){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$",
-                                                    RegexOptions.Compiled,
-                                                    _timeout);
+        public static Regex Ip => _ip ??= new Regex(@"^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]).){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$", RegexOptions.Compiled, _timeout);
 
 
 
@@ -58,7 +60,9 @@ public static partial class Validate
 
 
             /// <summary>
-            /// <para><see href="https://phoneregex.com/"/></para>
+            ///     <para>
+            ///         <see href = "https://phoneregex.com/" />
+            ///     </para>
             /// </summary>
             public static Regex Generic => _generic ??= new Regex(@"\+(9[976]\d|8[987530]\d|6[987]\d|5[90]\d|42\d|3[875]\d|2[98654321]\d|9[8543210]|8[6421]|6[6543210]|5[87654321]|4[987654310]|3[9643210]|2[70]|7|1)\d{1,14}$",
                                                                   RegexOptions.Compiled,
@@ -66,14 +70,16 @@ public static partial class Validate
 
 
             /// <summary>
-            /// <para><see href="https://phoneregex.com/"/></para>
+            ///     <para>
+            ///         <see href = "https://phoneregex.com/" />
+            ///     </para>
             /// </summary>
-            public static Regex UnitedSatesOrCanada1 => _usCanada1 ??= new Regex(@"1?\W*([2-9][0-8][0-9])\W*([2-9][0-9]{2})\W*([0-9]{4})(\se?x?t?(\d*))?",
-                                                                                 RegexOptions.Compiled,
-                                                                                 _timeout);
+            public static Regex UnitedSatesOrCanada1 => _usCanada1 ??= new Regex(@"1?\W*([2-9][0-8][0-9])\W*([2-9][0-9]{2})\W*([0-9]{4})(\se?x?t?(\d*))?", RegexOptions.Compiled, _timeout);
 
             /// <summary>
-            /// <para><see href="https://phoneregex.com/"/></para>
+            ///     <para>
+            ///         <see href = "https://phoneregex.com/" />
+            ///     </para>
             /// </summary>
             public static Regex UnitedSatesOrCanada2 =>
                 _usCanada2 ??=
@@ -84,7 +90,9 @@ public static partial class Validate
 
 
             /// <summary>
-            /// <para><see href="https://phoneregex.com/"/></para>
+            ///     <para>
+            ///         <see href = "https://phoneregex.com/" />
+            ///     </para>
             /// </summary>
             public static Regex UnitedKingdom =>
                 _uk ??=
@@ -95,72 +103,72 @@ public static partial class Validate
 
 
             /// <summary>
-            /// <para><see href="https://phoneregex.com/"/></para>
+            ///     <para>
+            ///         <see href = "https://phoneregex.com/" />
+            ///     </para>
             /// </summary>
-            public static Regex Germany => _germany ??= new Regex(@"/^([\+][0-9]{1,3}[ \.\-])?([\(]{1}[0-9]{1,6}[\)])?([0-9 \.\-\/]{3,20})((x|ext|extension)[ ]?[0-9]{1,4})?$/",
-                                                                  RegexOptions.Compiled,
-                                                                  _timeout);
+            public static Regex Germany => _germany ??= new Regex(@"/^([\+][0-9]{1,3}[ \.\-])?([\(]{1}[0-9]{1,6}[\)])?([0-9 \.\-\/]{3,20})((x|ext|extension)[ ]?[0-9]{1,4})?$/", RegexOptions.Compiled, _timeout);
 
 
             /// <summary>
-            /// <para><see href="https://phoneregex.com/"/></para>
+            ///     <para>
+            ///         <see href = "https://phoneregex.com/" />
+            ///     </para>
             /// </summary>
-            public static Regex China1 => _china1 ??= new Regex(@"^(13[0-9]|14[57]|15[012356789]|17[0678]|18[0-9])[0-9]{8}$",
-                                                                RegexOptions.Compiled,
-                                                                _timeout);
+            public static Regex China1 => _china1 ??= new Regex(@"^(13[0-9]|14[57]|15[012356789]|17[0678]|18[0-9])[0-9]{8}$", RegexOptions.Compiled, _timeout);
 
             /// <summary>
-            /// <para><see href="https://phoneregex.com/"/></para>
+            ///     <para>
+            ///         <see href = "https://phoneregex.com/" />
+            ///     </para>
             /// </summary>
-            public static Regex China2 => _china2 ??= new Regex(@"1[34578][012356789]\d{8}|134[012345678]\d{7}",
-                                                                RegexOptions.Compiled,
-                                                                _timeout);
-
-
-            /// <summary>
-            /// <para><see href="https://phoneregex.com/"/></para>
-            /// </summary>
-            public static Regex Russia => _russia ??= new Regex(@"^((\+7|7|8)+([0-9]){10})$",
-                                                                RegexOptions.Compiled,
-                                                                _timeout);
+            public static Regex China2 => _china2 ??= new Regex(@"1[34578][012356789]\d{8}|134[012345678]\d{7}", RegexOptions.Compiled, _timeout);
 
 
             /// <summary>
-            /// <para><see href="https://phoneregex.com/"/></para>
+            ///     <para>
+            ///         <see href = "https://phoneregex.com/" />
+            ///     </para>
             /// </summary>
-            public static Regex Japan => _japan ??= new Regex(@"^(?:\d{10}|\d{3}-\d{3}-\d{4}|\d{2}-\d{4}-\d{4}|\d{3}-\d{4}-\d{4})$",
-                                                              RegexOptions.Compiled,
-                                                              _timeout);
+            public static Regex Russia => _russia ??= new Regex(@"^((\+7|7|8)+([0-9]){10})$", RegexOptions.Compiled, _timeout);
 
 
             /// <summary>
-            /// <para><see href="https://phoneregex.com/"/></para>
+            ///     <para>
+            ///         <see href = "https://phoneregex.com/" />
+            ///     </para>
             /// </summary>
-            public static Regex IndiaOld => _indiaOld ??= new Regex(@"((\+*)(0*|(0 )*|(0-)*|(91 )*)(\d{12}+|\d{10}+))|\d{5}([- ]*)\d{6}",
-                                                                    RegexOptions.Compiled,
-                                                                    _timeout);
-
-            /// <summary>
-            /// <para><see href="https://phoneregex.com/"/></para>
-            /// </summary>
-            public static Regex IndiaNew => _indiaNew ??= new Regex(@"((\+*)((0[ -]+)*|(91 )*)(\d{12}+|\d{10}+))|\d{5}([- ]*)\d{6}",
-                                                                    RegexOptions.Compiled,
-                                                                    _timeout);
+            public static Regex Japan => _japan ??= new Regex(@"^(?:\d{10}|\d{3}-\d{3}-\d{4}|\d{2}-\d{4}-\d{4}|\d{3}-\d{4}-\d{4})$", RegexOptions.Compiled, _timeout);
 
 
             /// <summary>
-            /// <para><see href="https://phoneregex.com/"/></para>
+            ///     <para>
+            ///         <see href = "https://phoneregex.com/" />
+            ///     </para>
             /// </summary>
-            public static Regex Indonesia => _indonesia ??= new Regex(@"\(?(?:\+62|62|0)(?:\d{2,3})?\)?[ .-]?\d{2,4}[ .-]?\d{2,4}[ .-]?\d{2,4}",
-                                                                      RegexOptions.Compiled,
-                                                                      _timeout);
+            public static Regex IndiaOld => _indiaOld ??= new Regex(@"((\+*)(0*|(0 )*|(0-)*|(91 )*)(\d{12}+|\d{10}+))|\d{5}([- ]*)\d{6}", RegexOptions.Compiled, _timeout);
 
             /// <summary>
-            /// <para><see href="https://phoneregex.com/"/></para>
+            ///     <para>
+            ///         <see href = "https://phoneregex.com/" />
+            ///     </para>
             /// </summary>
-            public static Regex Brazil => _brazil ??= new Regex(@"(^|\()?\s*(\d{2})\s*(\s|\))*(9?\d{4})(\s|-)?(\d{4})($|\n)",
-                                                                RegexOptions.Compiled,
-                                                                _timeout);
+            public static Regex IndiaNew => _indiaNew ??= new Regex(@"((\+*)((0[ -]+)*|(91 )*)(\d{12}+|\d{10}+))|\d{5}([- ]*)\d{6}", RegexOptions.Compiled, _timeout);
+
+
+            /// <summary>
+            ///     <para>
+            ///         <see href = "https://phoneregex.com/" />
+            ///     </para>
+            /// </summary>
+            public static Regex Indonesia => _indonesia ??= new Regex(@"\(?(?:\+62|62|0)(?:\d{2,3})?\)?[ .-]?\d{2,4}[ .-]?\d{2,4}[ .-]?\d{2,4}", RegexOptions.Compiled, _timeout);
+
+            /// <summary>
+            ///     <para>
+            ///         <see href = "https://phoneregex.com/" />
+            ///     </para>
+            /// </summary>
+            public static Regex Brazil => _brazil ??= new Regex(@"(^|\()?\s*(\d{2})\s*(\s|\))*(9?\d{4})(\s|-)?(\d{4})($|\n)", RegexOptions.Compiled, _timeout);
         }
     }
 }

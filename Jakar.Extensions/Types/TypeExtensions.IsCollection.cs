@@ -4,10 +4,9 @@
 public static partial class TypeExtensions
 {
     public static bool IsCollection( this PropertyInfo propertyInfo ) => propertyInfo.PropertyType.IsCollection();
-    public static bool IsCollection( this Type         type )         => type.HasInterface<ICollection>() || type.HasInterface(typeof(ICollection<>));
+    public static bool IsCollection( this Type         type ) => type.HasInterface<ICollection>() || type.HasInterface(typeof(ICollection<>));
 
-    public static bool IsCollection( this PropertyInfo propertyInfo, [NotNullWhen(true)] out Type? itemType, [NotNullWhen(true)] out bool? isBuiltInType )
-        => propertyInfo.PropertyType.IsCollection(out itemType, out isBuiltInType);
+    public static bool IsCollection( this PropertyInfo propertyInfo, [NotNullWhen(true)] out Type? itemType, [NotNullWhen(true)] out bool? isBuiltInType ) => propertyInfo.PropertyType.IsCollection(out itemType, out isBuiltInType);
 
     public static bool IsCollection( this Type classType, [NotNullWhen(true)] out Type? itemType, [NotNullWhen(true)] out bool? isBuiltInType )
     {

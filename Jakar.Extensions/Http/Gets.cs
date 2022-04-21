@@ -4,13 +4,13 @@
 public static class Gets
 {
     /// <summary>
-    /// <seealso href="https://www.hanselman.com/blog/HTTPPOSTsAndHTTPGETsWithWebClientAndCAndFakingAPostBack.aspx"/>
+    ///     <seealso href = "https://www.hanselman.com/blog/HTTPPOSTsAndHTTPGETsWithWebClientAndCAndFakingAPostBack.aspx" />
     /// </summary>
-    /// <param name="url"></param>
-    /// <param name="token"></param>
-    /// <param name="headers"></param>
-    /// <param name="timeout"></param>
-    /// <returns></returns>
+    /// <param name = "url" > </param>
+    /// <param name = "token" > </param>
+    /// <param name = "headers" > </param>
+    /// <param name = "timeout" > </param>
+    /// <returns> </returns>
     public static async Task<WebResponse> Get( this Uri url, CancellationToken token, HeaderCollection? headers = null, int? timeout = default )
     {
         HttpWebRequest req = WebRequest.CreateHttp(url);

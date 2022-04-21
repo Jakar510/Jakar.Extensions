@@ -3,7 +3,7 @@
 
 public class MultiDict<TKey> : Dictionary<TKey, object?>
 {
-#region ctor
+    #region ctor
 
     public MultiDict() : this(0) { }
     public MultiDict( IEqualityComparer<TKey>?                 comparer ) : base(0, comparer) { }
@@ -12,10 +12,11 @@ public class MultiDict<TKey> : Dictionary<TKey, object?>
     public MultiDict( IEnumerable<KeyValuePair<TKey, object?>> collection, IEqualityComparer<TKey>? comparer = null ) : base(collection, comparer) { }
     protected MultiDict( SerializationInfo                     info,       StreamingContext         context ) : base(info, context) { }
 
-#endregion
+    #endregion
 
 
-#region Gets
+
+    #region Gets
 
     public bool ValueAs( in TKey key, out double    value ) => ValueAs<double>(key, out value);
     public bool ValueAs( in TKey key, out double?   value ) => ValueAs<double?>(key, out value);
@@ -70,10 +71,11 @@ public class MultiDict<TKey> : Dictionary<TKey, object?>
         return ExpectedValueTypeException<TKey>.Verify<T>(this[key], key);
     }
 
-#endregion
+    #endregion
 
 
-#region Adds
+
+    #region Adds
 
     public void Add<T>( in TKey key, in T value ) => this[key] = value;
 

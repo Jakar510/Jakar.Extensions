@@ -25,10 +25,10 @@ public static class ExceptionExtensions
     }
 
 
-    public static MethodDetails? MethodInfo( this      Exception e ) => e.TargetSite?.MethodInfo();
-    public static string?        MethodName( this      Exception e ) => e.TargetSite?.MethodName();
-    public static string?        MethodSignature( this Exception e ) => e.TargetSite?.MethodSignature();
-    public static string?        MethodClass( this     Exception e ) => e.TargetSite?.MethodClass();
+    public static MethodDetails? MethodInfo( this Exception e ) => e.TargetSite?.MethodInfo();
+    public static string? MethodName( this        Exception e ) => e.TargetSite?.MethodName();
+    public static string? MethodSignature( this   Exception e ) => e.TargetSite?.MethodSignature();
+    public static string? MethodClass( this       Exception e ) => e.TargetSite?.MethodClass();
 
 
     public static void Details( this Exception e, out Dictionary<string, string?> dict ) =>
@@ -53,7 +53,7 @@ public static class ExceptionExtensions
                    [nameof(Exception.Source)]     = e.Source,
                    [nameof(Exception.Message)]    = e.Message,
                    [nameof(Exception.Data)]       = e.GetData(),
-                   [nameof(Exception.StackTrace)] = e.StackTrace?.SplitAndTrimLines(),
+                   [nameof(Exception.StackTrace)] = e.StackTrace?.SplitAndTrimLines()
                };
 
 
@@ -90,10 +90,7 @@ public static class ExceptionExtensions
     [Obsolete($"Use {nameof(ExceptionDetails)} instead")]
     public static Dictionary<string, object?> FullDetails( this Exception e, bool includeFullMethodInfo = false )
     {
-        if ( e is null )
-        {
-            throw new ArgumentNullException(nameof(e));
-        }
+        if ( e is null ) { throw new ArgumentNullException(nameof(e)); }
 
         e.Details(out Dictionary<string, object?> dict, includeFullMethodInfo);
 

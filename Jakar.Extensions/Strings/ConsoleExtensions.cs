@@ -3,10 +3,10 @@
 
 public static class ConsoleExtensions
 {
-    public static bool   CanDebug => Debugger.IsAttached;
     private const string INFORMATION = nameof(INFORMATION);
     private const string WARNING     = nameof(WARNING);
     private const string ERROR       = nameof(ERROR);
+    public static bool   CanDebug => Debugger.IsAttached;
 
     public static StringBuilder WrapException( this Exception self, in char c = '-', in int padding = 40 )
     {
@@ -82,20 +82,28 @@ public static class ConsoleExtensions
 
 
     /// <summary>
-    /// Creates a new string of <paramref name="length"/> size filled with <paramref name="c"/> character
+    ///     Creates a new string of
+    ///     <paramref name = "length" />
+    ///     size filled with
+    ///     <paramref name = "c" />
+    ///     character
     /// </summary>
-    /// <param name="c"></param>
-    /// <param name="length"></param>
-    /// <returns></returns>
+    /// <param name = "c" > </param>
+    /// <param name = "length" > </param>
+    /// <returns> </returns>
     public static string Wrapper( this char c, int length ) => new(c, length);
 
     /// <summary>
-    /// Wraps a string in <paramref name="c"></paramref> repeated <paramref name="padding"></paramref> times.
+    ///     Wraps a string in
+    ///     <paramref name = "c" > </paramref>
+    ///     repeated
+    ///     <paramref name = "padding" > </paramref>
+    ///     times.
     /// </summary>
-    /// <param name="self"></param>
-    /// <param name="c"></param>
-    /// <param name="padding"></param>
-    /// <returns></returns>
+    /// <param name = "self" > </param>
+    /// <param name = "c" > </param>
+    /// <param name = "padding" > </param>
+    /// <returns> </returns>
     public static string Wrapper( this string self, in char c, in int padding ) => self.PadLeft(padding, c).PadRight(padding, c);
 
 

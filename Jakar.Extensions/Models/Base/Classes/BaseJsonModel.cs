@@ -12,8 +12,6 @@ public class BaseJsonModel : ObservableClass, JsonModels.IJsonModel
 [Serializable]
 public abstract class BaseJsonModel<TClass> : BaseCollections<TClass>, JsonModels.IJsonModel where TClass : BaseJsonModel<TClass>
 {
-    [JsonExtensionData] public IDictionary<string, JToken?>? AdditionalData { get; set; }
-
-
     public static TClass FromJson( string json ) => json.FromJson<TClass>();
+    [JsonExtensionData] public IDictionary<string, JToken?>? AdditionalData { get; set; }
 }

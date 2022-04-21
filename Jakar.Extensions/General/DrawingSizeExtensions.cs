@@ -1,4 +1,8 @@
-﻿namespace Jakar.Extensions.General;
+﻿using Jakar.Extensions.Enumerations;
+
+
+
+namespace Jakar.Extensions.General;
 
 
 public static class DrawingSizeExtensions

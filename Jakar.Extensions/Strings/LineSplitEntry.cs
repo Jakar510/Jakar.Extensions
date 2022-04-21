@@ -2,9 +2,9 @@
 
 
 /// <summary>
-/// <para>
-/// <see href="https://www.meziantou.net/split-a-string-into-lines-without-allocation.htm"/>
-/// </para>
+///     <para>
+///         <see href = "https://www.meziantou.net/split-a-string-into-lines-without-allocation.htm" />
+///     </para>
 /// </summary>
 public readonly ref struct LineSplitEntry<T> where T : IEquatable<T>
 {

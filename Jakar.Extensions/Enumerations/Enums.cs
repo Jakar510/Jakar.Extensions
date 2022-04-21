@@ -1,4 +1,4 @@
-﻿namespace Jakar.Extensions.General;
+﻿namespace Jakar.Extensions.Enumerations;
 
 
 [SuppressMessage("ReSharper", "PartialTypeWithSinglePart")]
@@ -9,17 +9,19 @@ public static partial class Enums
 
 
     /// <summary>
-    /// Inspired by <seealso href="https://stackoverflow.com/a/8086788/9530917"/>
+    ///     Inspired by
+    ///     <seealso href = "https://stackoverflow.com/a/8086788/9530917" />
     /// </summary>
-    /// <typeparam name="TEnum"></typeparam>
-    /// <typeparam name="TValue"></typeparam>
-    /// <returns></returns>
+    /// <typeparam name = "TEnum" > </typeparam>
+    /// <typeparam name = "TValue" > </typeparam>
+    /// <returns> </returns>
     public static IReadOnlyDictionary<string, TValue> GetEnumNamedValues<TEnum, TValue>() where TEnum : Enum
     {
         IEnumerable<TValue> values = Enum.GetValues(typeof(TEnum)).Cast<TValue>();
 
-        static string KeySelector( TValue     item ) => Enum.GetName(typeof(TEnum), item ?? throw new ArgumentNullException(nameof(item))) ?? throw new NullReferenceException(nameof(item));
-        static TValue ElementSelector( TValue item ) => item;
+        static string KeySelector( TValue item ) { return Enum.GetName(typeof(TEnum), item ?? throw new ArgumentNullException(nameof(item))) ?? throw new NullReferenceException(nameof(item)); }
+
+        static TValue ElementSelector( TValue item ) { return item; }
 
         return values.ToDictionary(KeySelector, ElementSelector);
     }

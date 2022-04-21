@@ -12,25 +12,26 @@ public interface IUserDevice : IEquatable<IUserDevice>, IDataBaseID
 
 
     /// <summary>
-    /// Last known <see cref="IPAddress"/>
+    ///     Last known
+    ///     <see cref = "IPAddress" />
     /// </summary>
     public string? Ip { get; }
 
 
     /// <summary>
-    /// <see cref="DevicePlatform"/>
+    ///     <see cref = "DevicePlatform" />
     /// </summary>
     public string Platform { get; }
 
 
     /// <summary>
-    /// <see cref="DeviceIdiom"/>
+    ///     <see cref = "DeviceIdiom" />
     /// </summary>
     public string Idiom { get; }
 
 
     /// <summary>
-    /// <see cref="DeviceType"/>
+    ///     <see cref = "DeviceType" />
     /// </summary>
     public int DeviceTypeID { get; }
 }
@@ -38,30 +39,12 @@ public interface IUserDevice : IEquatable<IUserDevice>, IDataBaseID
 
 
 /// <summary>
-/// Debug and/or identify info for IT
+///     Debug and/or identify info for IT
 /// </summary>
 [Serializable]
 public class UserDevice : ObservableClass, IUserDevice
 {
     private string? _ip;
-
-
-    [Key] public long     ID           { get; init; }
-    public       DateTime TimeStamp    { get; init; }
-    public       Guid     DeviceID     { get; init; }
-    public       string   Model        { get; init; } = string.Empty;
-    public       string   Manufacturer { get; init; } = string.Empty;
-    public       string   DeviceName   { get; init; } = string.Empty;
-    public       int      DeviceTypeID { get; init; }
-    public       string   Idiom        { get; init; } = string.Empty;
-    public       string   Platform     { get; init; } = string.Empty;
-    public       string   OsVersion    { get; init; } = string.Empty;
-
-    public string? Ip
-    {
-        get => _ip;
-        set => SetProperty(ref _ip, value);
-    }
 
 
     public UserDevice() { }
@@ -107,16 +90,6 @@ public class UserDevice : ObservableClass, IUserDevice
         return obj is IUserDevice device && Equals(device);
     }
 
-    public bool Equals( IUserDevice? other )
-    {
-        if ( other is null ) { return false; }
-
-        if ( ReferenceEquals(this, other) ) { return true; }
-
-        return TimeStamp.Equals(other.TimeStamp) && Ip == other.Ip && Model == other.Model && Manufacturer == other.Manufacturer && DeviceName == other.DeviceName && DeviceTypeID == other.DeviceTypeID && Idiom == other.Idiom &&
-               Platform == other.Platform && OsVersion == other.OsVersion;
-    }
-
     public override int GetHashCode()
     {
         var hashCode = new HashCode();
@@ -135,4 +108,32 @@ public class UserDevice : ObservableClass, IUserDevice
     public static bool operator ==( UserDevice? left, UserDevice? right ) => Equals(left, right);
 
     public static bool operator !=( UserDevice? left, UserDevice? right ) => !Equals(left, right);
+
+
+    [Key] public long     ID           { get; init; }
+    public       DateTime TimeStamp    { get; init; }
+    public       Guid     DeviceID     { get; init; }
+    public       string   Model        { get; init; } = string.Empty;
+    public       string   Manufacturer { get; init; } = string.Empty;
+    public       string   DeviceName   { get; init; } = string.Empty;
+    public       int      DeviceTypeID { get; init; }
+    public       string   Idiom        { get; init; } = string.Empty;
+    public       string   Platform     { get; init; } = string.Empty;
+    public       string   OsVersion    { get; init; } = string.Empty;
+
+    public string? Ip
+    {
+        get => _ip;
+        set => SetProperty(ref _ip, value);
+    }
+
+    public bool Equals( IUserDevice? other )
+    {
+        if ( other is null ) { return false; }
+
+        if ( ReferenceEquals(this, other) ) { return true; }
+
+        return TimeStamp.Equals(other.TimeStamp) && Ip == other.Ip && Model == other.Model && Manufacturer == other.Manufacturer && DeviceName == other.DeviceName && DeviceTypeID == other.DeviceTypeID && Idiom == other.Idiom &&
+               Platform == other.Platform && OsVersion == other.OsVersion;
+    }
 }

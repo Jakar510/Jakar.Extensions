@@ -8,9 +8,7 @@ namespace Jakar.Extensions.Models.Base.Classes;
 [Serializable]
 public abstract class ObservableClass : BaseClass, INotifyPropertyChanged, INotifyPropertyChanging // IDataBaseID
 {
-    public static readonly DateTime            sqlMinDate = DateTime.Parse("1/1/1753 12:00:00 AM", CultureInfo.InvariantCulture);
-    public event PropertyChangedEventHandler?  PropertyChanged;
-    public event PropertyChangingEventHandler? PropertyChanging;
+    public static readonly DateTime sqlMinDate = DateTime.Parse("1/1/1753 12:00:00 AM", CultureInfo.InvariantCulture);
 
 
     [NotifyPropertyChangedInvocator] protected virtual void OnPropertyChanged( [CallerMemberName] string? property = default ) => OnPropertyChanged(new PropertyChangedEventArgs(property ?? string.Empty));
@@ -21,27 +19,55 @@ public abstract class ObservableClass : BaseClass, INotifyPropertyChanged, INoti
 
 
     /// <summary>
-    /// <para>Checks the values with <see cref="EqualityComparer{T}.Default"/>.</para>
-    /// Then calls <see cref="OnPropertyChanging(string)"/>, sets the value, then calls <see cref="OnPropertyChanged(string)"/>
+    ///     <para>
+    ///         Checks the values with
+    ///         <see cref = "EqualityComparer{T}.Default" />
+    ///         .
+    ///     </para>
+    ///     Then calls
+    ///     <see cref = "OnPropertyChanging(string)" />
+    ///     , sets the value, then calls
+    ///     <see cref = "OnPropertyChanged(string)" />
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="backingStore"></param>
-    /// <param name="value"></param>
+    /// <typeparam name = "T" > </typeparam>
+    /// <param name = "backingStore" > </param>
+    /// <param name = "value" > </param>
     /// <returns>
-    /// <para>Returns <see langword="false"/> if the values are equal, and therefore the <paramref name="backingStore"/> was not changed, otherwise <see langword="true"/></para>
+    ///     <para>
+    ///         Returns
+    ///         <see langword = "false" />
+    ///         if the values are equal, and therefore the
+    ///         <paramref name = "backingStore" />
+    ///         was not changed, otherwise
+    ///         <see langword = "true" />
+    ///     </para>
     /// </returns>
     protected virtual bool SetPropertyWithoutNotify<T>( ref T backingStore, T value ) => SetPropertyWithoutNotify(ref backingStore, value, EqualityComparer<T>.Default);
 
     /// <summary>
-    /// <para>Checks the values with <paramref name="comparer"/>.</para>
-    /// Then calls <see cref="OnPropertyChanging(string)"/>, sets the value, then calls <see cref="OnPropertyChanged(string)"/>
+    ///     <para>
+    ///         Checks the values with
+    ///         <paramref name = "comparer" />
+    ///         .
+    ///     </para>
+    ///     Then calls
+    ///     <see cref = "OnPropertyChanging(string)" />
+    ///     , sets the value, then calls
+    ///     <see cref = "OnPropertyChanged(string)" />
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="backingStore"></param>
-    /// <param name="value"></param>
-    /// <param name="comparer"></param>
+    /// <typeparam name = "T" > </typeparam>
+    /// <param name = "backingStore" > </param>
+    /// <param name = "value" > </param>
+    /// <param name = "comparer" > </param>
     /// <returns>
-    /// <para>Returns <see langword="false"/> if the values are equal, and therefore the <paramref name="backingStore"/> was not changed, otherwise <see langword="true"/></para>
+    ///     <para>
+    ///         Returns
+    ///         <see langword = "false" />
+    ///         if the values are equal, and therefore the
+    ///         <paramref name = "backingStore" />
+    ///         was not changed, otherwise
+    ///         <see langword = "true" />
+    ///     </para>
     /// </returns>
     protected virtual bool SetPropertyWithoutNotify<T>( ref T backingStore, T value, IEqualityComparer<T> comparer )
     {
@@ -53,16 +79,30 @@ public abstract class ObservableClass : BaseClass, INotifyPropertyChanged, INoti
 
 
     /// <summary>
-    /// <para>Checks the values with <paramref name="comparer"/>.</para>
-    /// Then calls <see cref="OnPropertyChanging(string)"/>, sets the value, then calls <see cref="OnPropertyChanged(string)"/>
+    ///     <para>
+    ///         Checks the values with
+    ///         <paramref name = "comparer" />
+    ///         .
+    ///     </para>
+    ///     Then calls
+    ///     <see cref = "OnPropertyChanging(string)" />
+    ///     , sets the value, then calls
+    ///     <see cref = "OnPropertyChanged(string)" />
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="backingStore"></param>
-    /// <param name="value"></param>
-    /// <param name="comparer"></param>
-    /// <param name="propertyName"></param>
+    /// <typeparam name = "T" > </typeparam>
+    /// <param name = "backingStore" > </param>
+    /// <param name = "value" > </param>
+    /// <param name = "comparer" > </param>
+    /// <param name = "propertyName" > </param>
     /// <returns>
-    /// <para>Returns <see langword="false"/> if the values are equal, and therefore the <paramref name="backingStore"/> was not changed, otherwise <see langword="true"/></para>
+    ///     <para>
+    ///         Returns
+    ///         <see langword = "false" />
+    ///         if the values are equal, and therefore the
+    ///         <paramref name = "backingStore" />
+    ///         was not changed, otherwise
+    ///         <see langword = "true" />
+    ///     </para>
     /// </returns>
     protected virtual bool SetProperty<T>( ref T backingStore, T value, IEqualityComparer<T> comparer, [CallerMemberName] string? propertyName = default )
     {
@@ -77,21 +117,35 @@ public abstract class ObservableClass : BaseClass, INotifyPropertyChanged, INoti
 
 
     /// <summary>
-    /// <para>Checks the values with <see cref="EqualityComparer{T}.Default"/>.</para>
-    /// Then calls <see cref="OnPropertyChanging(string)"/>, sets the value, then calls <see cref="OnPropertyChanged(string)"/>
+    ///     <para>
+    ///         Checks the values with
+    ///         <see cref = "EqualityComparer{T}.Default" />
+    ///         .
+    ///     </para>
+    ///     Then calls
+    ///     <see cref = "OnPropertyChanging(string)" />
+    ///     , sets the value, then calls
+    ///     <see cref = "OnPropertyChanged(string)" />
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="backingStore"></param>
-    /// <param name="value"></param>
-    /// <param name="propertyName"></param>
+    /// <typeparam name = "T" > </typeparam>
+    /// <param name = "backingStore" > </param>
+    /// <param name = "value" > </param>
+    /// <param name = "propertyName" > </param>
     /// <returns>
-    /// <para>Returns <see langword="false"/> if the values are equal, and therefore the <paramref name="backingStore"/> was not changed, otherwise <see langword="true"/></para>
+    ///     <para>
+    ///         Returns
+    ///         <see langword = "false" />
+    ///         if the values are equal, and therefore the
+    ///         <paramref name = "backingStore" />
+    ///         was not changed, otherwise
+    ///         <see langword = "true" />
+    ///     </para>
     /// </returns>
     protected virtual bool SetProperty<T>( ref T backingStore, T value, [CallerMemberName] string? propertyName = default ) => SetProperty(ref backingStore, value, EqualityComparer<T>.Default, propertyName);
 
 
     /// <summary>
-    /// "onChanged" only called if the backingStore value has changed.
+    ///     "onChanged" only called if the backingStore value has changed.
     /// </summary>
     protected virtual void SetProperty<T>( ref T backingStore, T value, ICommand onChanged, [CallerMemberName] string? propertyName = default )
     {
@@ -102,7 +156,7 @@ public abstract class ObservableClass : BaseClass, INotifyPropertyChanged, INoti
 
 
     /// <summary>
-    /// "onChanged" only called if the backingStore value has changed.
+    ///     "onChanged" only called if the backingStore value has changed.
     /// </summary>
     protected virtual void SetProperty<T>( ref T backingStore, T value, IEqualityComparer<T> comparer, ICommand onChanged, [CallerMemberName] string? propertyName = default )
     {
@@ -113,7 +167,7 @@ public abstract class ObservableClass : BaseClass, INotifyPropertyChanged, INoti
 
 
     /// <summary>
-    /// "onChanged" only called if the backingStore value has changed.
+    ///     "onChanged" only called if the backingStore value has changed.
     /// </summary>
     protected virtual void SetProperty<T>( ref T backingStore, T value, Action onChanged, [CallerMemberName] string? propertyName = default )
     {
@@ -124,7 +178,7 @@ public abstract class ObservableClass : BaseClass, INotifyPropertyChanged, INoti
 
 
     /// <summary>
-    /// "onChanged" only called if the backingStore value has changed.
+    ///     "onChanged" only called if the backingStore value has changed.
     /// </summary>
     protected virtual void SetProperty<T>( ref T backingStore, T value, IEqualityComparer<T> comparer, Action onChanged, [CallerMemberName] string? propertyName = default )
     {
@@ -135,7 +189,7 @@ public abstract class ObservableClass : BaseClass, INotifyPropertyChanged, INoti
 
 
     /// <summary>
-    /// "onChanged" only called if the backingStore value has changed.
+    ///     "onChanged" only called if the backingStore value has changed.
     /// </summary>
     protected virtual void SetProperty<T>( ref T backingStore, T value, Action<T> onChanged, [CallerMemberName] string? propertyName = default )
     {
@@ -146,7 +200,7 @@ public abstract class ObservableClass : BaseClass, INotifyPropertyChanged, INoti
 
 
     /// <summary>
-    /// "onChanged" only called if the backingStore value has changed.
+    ///     "onChanged" only called if the backingStore value has changed.
     /// </summary>
     protected virtual void SetProperty<T>( ref T backingStore, T value, IEqualityComparer<T> comparer, Action<T> onChanged, [CallerMemberName] string? propertyName = default )
     {
@@ -157,7 +211,7 @@ public abstract class ObservableClass : BaseClass, INotifyPropertyChanged, INoti
 
 
     /// <summary>
-    /// "onChanged" only called if the backingStore value has changed.
+    ///     "onChanged" only called if the backingStore value has changed.
     /// </summary>
     protected virtual Task SetProperty<T>( ref T backingStore, T value, Func<Task> onChanged, [CallerMemberName] string? propertyName = default )
     {
@@ -168,7 +222,7 @@ public abstract class ObservableClass : BaseClass, INotifyPropertyChanged, INoti
 
 
     /// <summary>
-    /// "onChanged" only called if the backingStore value has changed.
+    ///     "onChanged" only called if the backingStore value has changed.
     /// </summary>
     protected virtual Task SetProperty<T>( ref T backingStore, T value, IEqualityComparer<T> comparer, Func<Task> onChanged, [CallerMemberName] string? propertyName = default )
     {
@@ -179,7 +233,7 @@ public abstract class ObservableClass : BaseClass, INotifyPropertyChanged, INoti
 
 
     /// <summary>
-    /// "onChanged" only called if the backingStore value has changed.
+    ///     "onChanged" only called if the backingStore value has changed.
     /// </summary>
     protected virtual Task SetProperty<T>( ref T backingStore, T value, Func<T, Task> onChanged, [CallerMemberName] string? propertyName = default )
     {
@@ -190,7 +244,7 @@ public abstract class ObservableClass : BaseClass, INotifyPropertyChanged, INoti
 
 
     /// <summary>
-    /// "onChanged" only called if the backingStore value has changed.
+    ///     "onChanged" only called if the backingStore value has changed.
     /// </summary>
     protected virtual Task SetProperty<T>( ref T backingStore, T value, IEqualityComparer<T> comparer, Func<T, Task> onChanged, [CallerMemberName] string? propertyName = default )
     {
@@ -252,4 +306,6 @@ public abstract class ObservableClass : BaseClass, INotifyPropertyChanged, INoti
 
         return SetProperty(ref backingStore, value, ValueEqualizer<TimeSpan>.Instance, caller);
     }
+    public event PropertyChangedEventHandler?  PropertyChanged;
+    public event PropertyChangingEventHandler? PropertyChanging;
 }

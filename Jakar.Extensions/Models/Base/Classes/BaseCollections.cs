@@ -5,9 +5,8 @@
 [SuppressMessage("ReSharper", "BaseObjectGetHashCodeCallInGetHashCode")]
 public abstract class BaseCollections<T> : ObservableClass, IEquatable<T>, IComparable<T>, IComparable where T : BaseCollections<T>
 {
-    public abstract bool Equals( T? other );
-
-    public abstract int CompareTo( T? other );
+    public sealed override bool Equals( object? other ) => ReferenceEquals(this, other) || ( other is T file && Equals(file) );
+    public override int GetHashCode() => base.GetHashCode();
 
 
     public int CompareTo( object? other )
@@ -20,8 +19,9 @@ public abstract class BaseCollections<T> : ObservableClass, IEquatable<T>, IComp
                    ? CompareTo(value)
                    : throw new ExpectedValueTypeException(nameof(other), other, typeof(T));
     }
-    public sealed override bool Equals( object? other ) => ReferenceEquals(this, other) || other is T file && Equals(file);
-    public override int GetHashCode() => base.GetHashCode();
+
+    public abstract int CompareTo( T? other );
+    public abstract bool Equals( T?   other );
 
 
 

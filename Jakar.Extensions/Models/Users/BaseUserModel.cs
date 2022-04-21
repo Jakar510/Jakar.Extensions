@@ -27,54 +27,21 @@ public interface IUserModel : IUserRecord
 [Serializable]
 public abstract class BaseUserModel<T> : BaseCollections<T>, IUserModel where T : BaseUserModel<T>
 {
-    private string            _userName    = string.Empty;
-    private string            _userID      = string.Empty;
-    private string            _department  = string.Empty;
-    private string            _title       = string.Empty;
-    private string            _company     = string.Empty;
-    private string            _firstName   = string.Empty;
-    private string            _lastName    = string.Empty;
     private string            _address     = string.Empty;
-    private string            _phoneNumber = string.Empty;
+    private string            _company     = string.Empty;
+    private string            _department  = string.Empty;
     private string            _email       = string.Empty;
     private string            _ext         = string.Empty;
-    private string            _pager       = string.Empty;
     private string            _fax         = string.Empty;
-    private string            _website     = string.Empty;
+    private string            _firstName   = string.Empty;
+    private string            _lastName    = string.Empty;
+    private string            _pager       = string.Empty;
+    private string            _phoneNumber = string.Empty;
     private SupportedLanguage _preferredLanguage;
-
-
-    [Key] public long ID { get; init; }
-
-
-    [Required]
-    public string UserID
-    {
-        get => _userID;
-        set => SetProperty(ref _userID, value);
-    }
-
-
-    [Required]
-    public string UserName
-    {
-        get => _userName;
-        set => SetProperty(ref _userName, value);
-    }
-
-
-    public string Department
-    {
-        get => _department;
-        set => SetProperty(ref _department, value);
-    }
-
-
-    public string Title
-    {
-        get => _title;
-        set => SetProperty(ref _title, value);
-    }
+    private string            _title    = string.Empty;
+    private string            _userID   = string.Empty;
+    private string            _userName = string.Empty;
+    private string            _website  = string.Empty;
 
 
     public string Company
@@ -84,78 +51,10 @@ public abstract class BaseUserModel<T> : BaseCollections<T>, IUserModel where T 
     }
 
 
-    [Required]
-    public string FirstName
-    {
-        get => _firstName;
-        set => SetProperty(ref _firstName, value);
-    }
-
-
-    [Required]
-    public string LastName
-    {
-        get => _lastName;
-        set => SetProperty(ref _lastName, value);
-    }
-
-
-    [Required]
-    public string Address
-    {
-        get => _address;
-        set => SetProperty(ref _address, value);
-    }
-
-
-    [Required]
-    public string Email
-    {
-        get => _email;
-        set => SetProperty(ref _email, value);
-    }
-
-
-    [Required]
-    public string PhoneNumber
-    {
-        get => _phoneNumber;
-        set => SetProperty(ref _phoneNumber, value);
-    }
-
-
-    public string Ext
-    {
-        get => _ext;
-        set => SetProperty(ref _ext, value);
-    }
-
-
-    public string Pager
-    {
-        get => _pager;
-        set => SetProperty(ref _pager, value);
-    }
-
-
-    public string Fax
-    {
-        get => _fax;
-        set => SetProperty(ref _fax, value);
-    }
-
-
     public string Website
     {
         get => _website;
         set => SetProperty(ref _website, value);
-    }
-
-
-    public SupportedLanguage PreferredLanguage
-    {
-        get => _preferredLanguage;
-        set => SetProperty(ref _preferredLanguage, value);
     }
 
 
@@ -262,5 +161,106 @@ public abstract class BaseUserModel<T> : BaseCollections<T>, IUserModel where T 
         hashCode.Add(_preferredLanguage);
         hashCode.Add(UserID);
         return hashCode.ToHashCode();
+    }
+
+
+    [Key] public long ID { get; init; }
+
+
+    [Required]
+    public string UserID
+    {
+        get => _userID;
+        set => SetProperty(ref _userID, value);
+    }
+
+
+    [Required]
+    public string UserName
+    {
+        get => _userName;
+        set => SetProperty(ref _userName, value);
+    }
+
+
+    public string Department
+    {
+        get => _department;
+        set => SetProperty(ref _department, value);
+    }
+
+
+    public string Title
+    {
+        get => _title;
+        set => SetProperty(ref _title, value);
+    }
+
+
+    [Required]
+    public string FirstName
+    {
+        get => _firstName;
+        set => SetProperty(ref _firstName, value);
+    }
+
+
+    [Required]
+    public string LastName
+    {
+        get => _lastName;
+        set => SetProperty(ref _lastName, value);
+    }
+
+
+    [Required]
+    public string Address
+    {
+        get => _address;
+        set => SetProperty(ref _address, value);
+    }
+
+
+    [Required]
+    public string Email
+    {
+        get => _email;
+        set => SetProperty(ref _email, value);
+    }
+
+
+    [Required]
+    public string PhoneNumber
+    {
+        get => _phoneNumber;
+        set => SetProperty(ref _phoneNumber, value);
+    }
+
+
+    public string Ext
+    {
+        get => _ext;
+        set => SetProperty(ref _ext, value);
+    }
+
+
+    public string Pager
+    {
+        get => _pager;
+        set => SetProperty(ref _pager, value);
+    }
+
+
+    public string Fax
+    {
+        get => _fax;
+        set => SetProperty(ref _fax, value);
+    }
+
+
+    public SupportedLanguage PreferredLanguage
+    {
+        get => _preferredLanguage;
+        set => SetProperty(ref _preferredLanguage, value);
     }
 }

@@ -4,7 +4,7 @@
 public class CredentialsException : Exception
 {
     public CredentialsException() { }
-    public CredentialsException( string? user, string? password ) : base(CreateMessage(user, password)) { }
+    public CredentialsException( string? user, string? password ) : base(CreateMessage(user,                   password)) { }
     public CredentialsException( string? user, string? password, Exception? inner ) : base(CreateMessage(user, password), inner) { }
 
 

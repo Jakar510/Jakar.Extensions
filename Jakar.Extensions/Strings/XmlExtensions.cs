@@ -1,6 +1,7 @@
 ﻿using System.Xml;
 
 
+
 namespace Jakar.Extensions.Strings;
 
 
@@ -23,19 +24,6 @@ public static class XmlNames
 [SuppressMessage("ReSharper", "ParameterTypeCanBeEnumerable.Global")]
 public static class XmlExtensions
 {
-#region Mapping
-
-    public static string SetMappedIDs<T>( this IEnumerable<IEnumerable<T>> items ) where T : IDataBaseID => items.Consolidate().SetMappedIDs();
-    public static string SetMappedIDs<T>( this IEnumerable<T>              items ) where T : IDataBaseID => items.Select(item => item.ID).SetMappedIDs<T>();
-
-    public static string SetMappedIDs<T>( this IEnumerable<long> listOfIds ) =>
-        listOfIds.ToList().ToXml(new Dictionary<string, string> { [XmlNames.TARGET_TABLE_NAME] = typeof(T).GetTableName() });
-
-    public static List<long> GetMappedIDs( this string xml, out IDictionary<string, string>? attributes ) => xml.ToRawXml().ToLongList(out attributes);
-
-#endregion
-
-
     private static string PrettyXml( this XmlDocument document )
     {
         var settings = new XmlWriterSettings
@@ -47,46 +35,85 @@ public static class XmlExtensions
                            IndentChars         = new string(' ', 4)
                        };
 
-        var       builder = new StringBuilder();
-        XmlWriter writer  = XmlWriter.Create(builder, settings);
+        var builder = new StringBuilder();
+        var writer  = XmlWriter.Create(builder, settings);
         document.Save(writer);
         return builder.ToString();
     }
 
 
-#region serialize
+    [Obsolete("Will be removed in a future version, and moved to a dedicated nuget")]
+    public static string ToXml( this JObject item )
+    {
+        XmlDocument? node = JsonConvert.DeserializeXmlNode(item.ToJson(), nameof(item), true, true);
 
-#region lists
+        string? result = node?.PrettyXml();
+        return result ?? throw new InvalidOperationException();
+    }
 
     [Obsolete("Will be removed in a future version, and moved to a dedicated nuget")]
-    public static string ToXml( this List<Guid?> item, in IDictionary<string, string>? attributes = default ) => item.Serialize(attributes);
+    public static string ToXml( this IEnumerable<JObject> item )
+    {
+        XmlDocument? node = JsonConvert.DeserializeXmlNode(item.ToJson(), nameof(item), true, true);
 
-    [Obsolete("Will be removed in a future version, and moved to a dedicated nuget")]
-    public static string ToXml( this List<Guid> item, in IDictionary<string, string>? attributes = default ) => item.Serialize(attributes);
+        string? result = node?.PrettyXml();
+        return result ?? throw new InvalidOperationException();
+    }
 
-    [Obsolete("Will be removed in a future version, and moved to a dedicated nuget")]
-    public static string ToXml( this List<bool> item, in IDictionary<string, string>? attributes = default ) => item.Serialize(attributes);
+    public static TResult? DeserializeXml<TResult>( this string xml )
+    {
+        if ( string.IsNullOrWhiteSpace(xml) ) { return default; }
 
-    [Obsolete("Will be removed in a future version, and moved to a dedicated nuget")]
-    public static string ToXml( this List<string> item, in IDictionary<string, string>? attributes = default ) => item.Serialize(attributes);
+        var doc = new XmlDocument();
+        doc.LoadXml(xml);
 
-    [Obsolete("Will be removed in a future version, and moved to a dedicated nuget")]
-    public static string ToXml( this List<double> item, in IDictionary<string, string>? attributes = default ) => item.Serialize(attributes);
+        string json = JsonConvert.SerializeXmlNode(doc);
+        return json.FromJson<TResult>();
+    }
 
-    [Obsolete("Will be removed in a future version, and moved to a dedicated nuget")]
-    public static string ToXml( this List<double?> item, in IDictionary<string, string>? attributes = default ) => item.Serialize(attributes);
 
-    [Obsolete("Will be removed in a future version, and moved to a dedicated nuget")]
-    public static string ToXml( this List<long> item, in IDictionary<string, string>? attributes = default ) => item.Serialize(attributes);
 
-    [Obsolete("Will be removed in a future version, and moved to a dedicated nuget")]
-    public static string ToXml( this List<long?> item, in IDictionary<string, string>? attributes = default ) => item.Serialize(attributes);
+    #region Mapping
 
-    [Obsolete("Will be removed in a future version, and moved to a dedicated nuget")]
-    public static string ToXml( this List<int> item, in IDictionary<string, string>? attributes = default ) => item.Serialize(attributes);
+    public static string SetMappedIDs<T>( this IEnumerable<IEnumerable<T>> items ) where T : IDataBaseID => items.Consolidate().SetMappedIDs();
+    public static string SetMappedIDs<T>( this IEnumerable<T>              items ) where T : IDataBaseID => items.Select(item => item.ID).SetMappedIDs<T>();
 
-    [Obsolete("Will be removed in a future version, and moved to a dedicated nuget")]
-    public static string ToXml( this List<int?> item, in IDictionary<string, string>? attributes = default ) => item.Serialize(attributes);
+    public static string SetMappedIDs<T>( this IEnumerable<long> listOfIds ) =>
+        listOfIds.ToList()
+                 .ToXml(new Dictionary<string, string>
+                        {
+                            [XmlNames.TARGET_TABLE_NAME] = typeof(T).GetTableName()
+                        });
+
+    public static List<long> GetMappedIDs( this string xml, out IDictionary<string, string>? attributes ) => xml.ToRawXml().ToLongList(out attributes);
+
+    #endregion
+
+
+
+    #region serialize
+
+    #region lists
+
+    [Obsolete("Will be removed in a future version, and moved to a dedicated nuget")] public static string ToXml( this List<Guid?> item, in IDictionary<string, string>? attributes = default ) => item.Serialize(attributes);
+
+    [Obsolete("Will be removed in a future version, and moved to a dedicated nuget")] public static string ToXml( this List<Guid> item, in IDictionary<string, string>? attributes = default ) => item.Serialize(attributes);
+
+    [Obsolete("Will be removed in a future version, and moved to a dedicated nuget")] public static string ToXml( this List<bool> item, in IDictionary<string, string>? attributes = default ) => item.Serialize(attributes);
+
+    [Obsolete("Will be removed in a future version, and moved to a dedicated nuget")] public static string ToXml( this List<string> item, in IDictionary<string, string>? attributes = default ) => item.Serialize(attributes);
+
+    [Obsolete("Will be removed in a future version, and moved to a dedicated nuget")] public static string ToXml( this List<double> item, in IDictionary<string, string>? attributes = default ) => item.Serialize(attributes);
+
+    [Obsolete("Will be removed in a future version, and moved to a dedicated nuget")] public static string ToXml( this List<double?> item, in IDictionary<string, string>? attributes = default ) => item.Serialize(attributes);
+
+    [Obsolete("Will be removed in a future version, and moved to a dedicated nuget")] public static string ToXml( this List<long> item, in IDictionary<string, string>? attributes = default ) => item.Serialize(attributes);
+
+    [Obsolete("Will be removed in a future version, and moved to a dedicated nuget")] public static string ToXml( this List<long?> item, in IDictionary<string, string>? attributes = default ) => item.Serialize(attributes);
+
+    [Obsolete("Will be removed in a future version, and moved to a dedicated nuget")] public static string ToXml( this List<int> item, in IDictionary<string, string>? attributes = default ) => item.Serialize(attributes);
+
+    [Obsolete("Will be removed in a future version, and moved to a dedicated nuget")] public static string ToXml( this List<int?> item, in IDictionary<string, string>? attributes = default ) => item.Serialize(attributes);
 
     private static string Serialize<TValue>( this IEnumerable<TValue> item, in IDictionary<string, string>? attributes )
     {
@@ -121,43 +148,33 @@ public static class XmlExtensions
         return document.PrettyXml();
     }
 
-#endregion
+    #endregion
 
 
-#region dictionary
 
-    [Obsolete("Will be removed in a future version, and moved to a dedicated nuget")]
-    public static string ToXml( this Dictionary<string, Guid> item, in IDictionary<string, string>? attributes = default ) => item.Serialize(attributes);
+    #region dictionary
 
-    [Obsolete("Will be removed in a future version, and moved to a dedicated nuget")]
-    public static string ToXml( this Dictionary<string, Guid?> item, in IDictionary<string, string>? attributes = default ) => item.Serialize(attributes);
+    [Obsolete("Will be removed in a future version, and moved to a dedicated nuget")] public static string ToXml( this Dictionary<string, Guid> item, in IDictionary<string, string>? attributes = default ) => item.Serialize(attributes);
 
-    [Obsolete("Will be removed in a future version, and moved to a dedicated nuget")]
-    public static string ToXml( this Dictionary<string, string?> item, in IDictionary<string, string>? attributes = default ) => item.Serialize(attributes);
+    [Obsolete("Will be removed in a future version, and moved to a dedicated nuget")] public static string ToXml( this Dictionary<string, Guid?> item, in IDictionary<string, string>? attributes = default ) => item.Serialize(attributes);
 
-    [Obsolete("Will be removed in a future version, and moved to a dedicated nuget")]
-    public static string ToXml( this Dictionary<string, double?> item, in IDictionary<string, string>? attributes = default ) => item.Serialize(attributes);
+    [Obsolete("Will be removed in a future version, and moved to a dedicated nuget")] public static string ToXml( this Dictionary<string, string?> item, in IDictionary<string, string>? attributes = default ) => item.Serialize(attributes);
 
-    [Obsolete("Will be removed in a future version, and moved to a dedicated nuget")]
-    public static string ToXml( this Dictionary<string, double> item, in IDictionary<string, string>? attributes = default ) => item.Serialize(attributes);
+    [Obsolete("Will be removed in a future version, and moved to a dedicated nuget")] public static string ToXml( this Dictionary<string, double?> item, in IDictionary<string, string>? attributes = default ) => item.Serialize(attributes);
 
-    [Obsolete("Will be removed in a future version, and moved to a dedicated nuget")]
-    public static string ToXml( this Dictionary<string, long?> item, in IDictionary<string, string>? attributes = default ) => item.Serialize(attributes);
+    [Obsolete("Will be removed in a future version, and moved to a dedicated nuget")] public static string ToXml( this Dictionary<string, double> item, in IDictionary<string, string>? attributes = default ) => item.Serialize(attributes);
 
-    [Obsolete("Will be removed in a future version, and moved to a dedicated nuget")]
-    public static string ToXml( this Dictionary<string, long> item, in IDictionary<string, string>? attributes = default ) => item.Serialize(attributes);
+    [Obsolete("Will be removed in a future version, and moved to a dedicated nuget")] public static string ToXml( this Dictionary<string, long?> item, in IDictionary<string, string>? attributes = default ) => item.Serialize(attributes);
 
-    [Obsolete("Will be removed in a future version, and moved to a dedicated nuget")]
-    public static string ToXml( this Dictionary<string, int?> item, in IDictionary<string, string>? attributes = default ) => item.Serialize(attributes);
+    [Obsolete("Will be removed in a future version, and moved to a dedicated nuget")] public static string ToXml( this Dictionary<string, long> item, in IDictionary<string, string>? attributes = default ) => item.Serialize(attributes);
 
-    [Obsolete("Will be removed in a future version, and moved to a dedicated nuget")]
-    public static string ToXml( this Dictionary<string, int> item, in IDictionary<string, string>? attributes = default ) => item.Serialize(attributes);
+    [Obsolete("Will be removed in a future version, and moved to a dedicated nuget")] public static string ToXml( this Dictionary<string, int?> item, in IDictionary<string, string>? attributes = default ) => item.Serialize(attributes);
 
-    [Obsolete("Will be removed in a future version, and moved to a dedicated nuget")]
-    public static string ToXml( this Dictionary<string, bool?> item, in IDictionary<string, string>? attributes = default ) => item.Serialize(attributes);
+    [Obsolete("Will be removed in a future version, and moved to a dedicated nuget")] public static string ToXml( this Dictionary<string, int> item, in IDictionary<string, string>? attributes = default ) => item.Serialize(attributes);
 
-    [Obsolete("Will be removed in a future version, and moved to a dedicated nuget")]
-    public static string ToXml( this Dictionary<string, bool> item, in IDictionary<string, string>? attributes = default ) => item.Serialize(attributes);
+    [Obsolete("Will be removed in a future version, and moved to a dedicated nuget")] public static string ToXml( this Dictionary<string, bool?> item, in IDictionary<string, string>? attributes = default ) => item.Serialize(attributes);
+
+    [Obsolete("Will be removed in a future version, and moved to a dedicated nuget")] public static string ToXml( this Dictionary<string, bool> item, in IDictionary<string, string>? attributes = default ) => item.Serialize(attributes);
 
     private static string Serialize<TValue>( this IDictionary<string, TValue> item, in IDictionary<string, string>? attributes )
     {
@@ -179,8 +196,8 @@ public static class XmlExtensions
 
         foreach ( KeyValuePair<string, TValue> pair in item )
         {
-            XmlNode element = document.CreateNode(XmlNodeType.Element, XmlNames.PAIR, null);
-            XmlNode key     = document.CreateNode(XmlNodeType.Element, XmlNames.KEY, null);
+            XmlNode element = document.CreateNode(XmlNodeType.Element, XmlNames.PAIR,  null);
+            XmlNode key     = document.CreateNode(XmlNodeType.Element, XmlNames.KEY,   null);
             XmlNode value   = document.CreateNode(XmlNodeType.Element, XmlNames.VALUE, null);
 
             XmlNode? keyId   = element.AppendChild(key);
@@ -200,14 +217,15 @@ public static class XmlExtensions
         return document.PrettyXml();
     }
 
-#endregion
+    #endregion
 
-#endregion
+    #endregion
 
 
-#region deserialize
 
-#region dictionary
+    #region deserialize
+
+    #region dictionary
 
     [Obsolete("Will be removed in a future version, and moved to a dedicated nuget")]
     public static Dictionary<string, string> ToStringDictionary( this XmlDocument document, out IDictionary<string, string>? attributes )
@@ -240,8 +258,8 @@ public static class XmlExtensions
 
             if ( node.Name != XmlNames.PAIR ) { throw new SerializationException(nameof(node.Name)); }
 
-            string key   = "";
-            string value = "";
+            var key   = "";
+            var value = "";
 
             for ( var c = 0; c < node.ChildNodes.Count; c++ )
             {
@@ -299,8 +317,8 @@ public static class XmlExtensions
 
             if ( node.Name != XmlNames.PAIR ) { throw new SerializationException(nameof(node.Name)); }
 
-            string key   = "";
-            Guid   value = default;
+            var  key   = "";
+            Guid value = default;
 
             for ( var c = 0; c < node.ChildNodes.Count; c++ )
             {
@@ -358,8 +376,8 @@ public static class XmlExtensions
 
             if ( node.Name != XmlNames.PAIR ) { throw new SerializationException(nameof(node.Name)); }
 
-            string key   = "";
-            Guid?  value = default;
+            var   key   = "";
+            Guid? value = default;
 
             for ( var c = 0; c < node.ChildNodes.Count; c++ )
             {
@@ -417,8 +435,8 @@ public static class XmlExtensions
 
             if ( node.Name != XmlNames.PAIR ) { throw new SerializationException(nameof(node.Name)); }
 
-            string key   = "";
-            bool   value = default;
+            var  key   = "";
+            bool value = default;
 
             for ( var c = 0; c < node.ChildNodes.Count; c++ )
             {
@@ -476,8 +494,8 @@ public static class XmlExtensions
 
             if ( node.Name != XmlNames.PAIR ) { throw new SerializationException(nameof(node.Name)); }
 
-            string key   = "";
-            bool?  value = default;
+            var   key   = "";
+            bool? value = default;
 
             for ( var c = 0; c < node.ChildNodes.Count; c++ )
             {
@@ -535,7 +553,7 @@ public static class XmlExtensions
 
             if ( node.Name != XmlNames.PAIR ) { throw new SerializationException(nameof(node.Name)); }
 
-            string key   = "";
+            var    key   = "";
             double value = default;
 
             for ( var c = 0; c < node.ChildNodes.Count; c++ )
@@ -594,7 +612,7 @@ public static class XmlExtensions
 
             if ( node.Name != XmlNames.PAIR ) { throw new SerializationException(nameof(node.Name)); }
 
-            string  key   = "";
+            var     key   = "";
             double? value = default;
 
             for ( var c = 0; c < node.ChildNodes.Count; c++ )
@@ -638,8 +656,8 @@ public static class XmlExtensions
 
             if ( node.Name != XmlNames.PAIR ) { throw new SerializationException(nameof(node.Name)); }
 
-            string key   = "";
-            long   value = default;
+            var  key   = "";
+            long value = default;
 
             for ( var c = 0; c < node.ChildNodes.Count; c++ )
             {
@@ -697,8 +715,8 @@ public static class XmlExtensions
 
             if ( node.Name != XmlNames.PAIR ) { throw new SerializationException(nameof(node.Name)); }
 
-            string key   = "";
-            long?  value = default;
+            var   key   = "";
+            long? value = default;
 
             for ( var c = 0; c < node.ChildNodes.Count; c++ )
             {
@@ -756,8 +774,8 @@ public static class XmlExtensions
 
             if ( node.Name != XmlNames.PAIR ) { throw new SerializationException(nameof(node.Name)); }
 
-            string key   = "";
-            int    value = default;
+            var key   = "";
+            int value = default;
 
             for ( var c = 0; c < node.ChildNodes.Count; c++ )
             {
@@ -815,8 +833,8 @@ public static class XmlExtensions
 
             if ( node.Name != XmlNames.PAIR ) { throw new SerializationException(nameof(node.Name)); }
 
-            string key   = "";
-            int    value = default;
+            var key   = "";
+            int value = default;
 
             for ( var c = 0; c < node.ChildNodes.Count; c++ )
             {
@@ -843,10 +861,11 @@ public static class XmlExtensions
         return results;
     }
 
-#endregion
+    #endregion
 
 
-#region lists
+
+    #region lists
 
     [Obsolete("Will be removed in a future version, and moved to a dedicated nuget")]
     public static List<string> ToStringList( this XmlDocument document, out IDictionary<string, string>? attributes )
@@ -1168,7 +1187,8 @@ public static class XmlExtensions
         return results;
     }
 
-#endregion
+    #endregion
+
 
 
     [Obsolete("Will be removed in a future version, and moved to a dedicated nuget")]
@@ -1180,35 +1200,5 @@ public static class XmlExtensions
         return document;
     }
 
-#endregion
-
-
-    [Obsolete("Will be removed in a future version, and moved to a dedicated nuget")]
-    public static string ToXml( this JObject item )
-    {
-        XmlDocument? node = JsonConvert.DeserializeXmlNode(item.ToJson(), nameof(item), true, true);
-
-        string? result = node?.PrettyXml();
-        return result ?? throw new InvalidOperationException();
-    }
-
-    [Obsolete("Will be removed in a future version, and moved to a dedicated nuget")]
-    public static string ToXml( this IEnumerable<JObject> item )
-    {
-        XmlDocument? node = JsonConvert.DeserializeXmlNode(item.ToJson(), nameof(item), true, true);
-
-        string? result = node?.PrettyXml();
-        return result ?? throw new InvalidOperationException();
-    }
-
-    public static TResult? DeserializeXml<TResult>( this string xml )
-    {
-        if ( string.IsNullOrWhiteSpace(xml) ) { return default; }
-
-        var doc = new XmlDocument();
-        doc.LoadXml(xml);
-
-        string json = JsonConvert.SerializeXmlNode(doc);
-        return json.FromJson<TResult>();
-    }
+    #endregion
 }
