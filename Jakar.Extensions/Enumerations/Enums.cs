@@ -19,9 +19,9 @@ public static partial class Enums
     {
         IEnumerable<TValue> values = Enum.GetValues(typeof(TEnum)).Cast<TValue>();
 
-        static string KeySelector( TValue item ) { return Enum.GetName(typeof(TEnum), item ?? throw new ArgumentNullException(nameof(item))) ?? throw new NullReferenceException(nameof(item)); }
+        static string KeySelector( TValue item ) => Enum.GetName(typeof(TEnum), item ?? throw new ArgumentNullException(nameof(item))) ?? throw new NullReferenceException(nameof(item));
 
-        static TValue ElementSelector( TValue item ) { return item; }
+        static TValue ElementSelector( TValue item ) => item;
 
         return values.ToDictionary(KeySelector, ElementSelector);
     }
