@@ -2,6 +2,7 @@
 // 04/21/2022  6:20 PM
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using Jakar.Extensions.SpanAndMemory;
 using Jakar.Extensions.Strings;
@@ -16,20 +17,30 @@ public readonly ref struct XNode
 {
     private readonly ReadOnlySpan<char> _xml;
     public readonly  ReadOnlySpan<char> Name;
-    public readonly  ReadOnlySpan<char> Type;
     private readonly ReadOnlySpan<char> _attributes;
+    private readonly ReadOnlySpan<char> _content;
 
 
     public XNode( in ReadOnlySpan<char> xml )
     {
-        Validate(xml, out ReadOnlySpan<char> name, out ReadOnlySpan<char> attributes, out ReadOnlySpan<char> type);
         _xml = xml;
-
-        Name        = name;
-        _attributes = attributes;
-        Type        = type;
+        Validate(_xml, out ReadOnlySpan<char> start, out ReadOnlySpan<char> end, out Name, out _attributes);
+        _content = _xml.Slice(start.Length, _xml.Length - end.Length);
     }
-    private static void Validate( in ReadOnlySpan<char> xml, out ReadOnlySpan<char> name, out ReadOnlySpan<char> attributes, out ReadOnlySpan<char> type )
+
+
+    public ReadOnlySpan<char> XMLS()
+    {
+        if ( _attributes.Contains(Constants.XMLS_TAG) )
+        {
+            int                typeStart = _attributes.IndexOf(Constants.XMLS_TAG) + Constants.XMLS_TAG.Length;
+            ReadOnlySpan<char> temp      = _attributes[typeStart..];
+            return temp[..temp.IndexOf('"')];
+        }
+
+        return default;
+    }
+    private static void Validate( in ReadOnlySpan<char> xml, out ReadOnlySpan<char> start, out ReadOnlySpan<char> end, out ReadOnlySpan<char> name, out ReadOnlySpan<char> attributes )
     {
         if ( xml.IsEmpty ) { throw new ArgumentNullException(nameof(xml)); }
 
@@ -41,19 +52,13 @@ public readonly ref struct XNode
         if ( nameEndIndex < 0 ) { throw new FormatException($"Cannot start with {Constants.OPEN_START}"); }
 
 
-        name       = xml[1..nameEndIndex];
-        attributes = xml[nameEndIndex..xml.IndexOf(Constants.CLOSE_START)].Trim();
-
-        if ( attributes.Contains(Constants.XMLS_TAG) )
-        {
-            int                start = attributes.IndexOf(Constants.XMLS_TAG) + Constants.XMLS_TAG.Length;
-            ReadOnlySpan<char> temp  = attributes[start..];
-            type = temp[..temp.IndexOf('"')];
-        }
-        else { type = default; }
+        name = xml[1..nameEndIndex].Trim();
+        int close = xml.IndexOf(Constants.CLOSE_END);
+        start      = xml[..( close + 1 )].Trim();
+        attributes = xml[nameEndIndex..close].Trim();
 
 
-        ReadOnlySpan<char> end = xml[( xml.Length - nameEndIndex - 3 )..];
+        end = xml[( xml.Length - nameEndIndex - Constants.CLOSE_START.Length - 1 )..];
 
         if ( !end.EndsWith(Constants.CLOSE_END) ) { throw new FormatException($"Cannot start with {Constants.OPEN_START}"); }
 
@@ -62,6 +67,26 @@ public readonly ref struct XNode
 
     public AttributeEnumerator GetAttributes() => new(_attributes);
     public NodeEnumerator GetChildren() => new(_xml);
+
+
+    public IReadOnlyDictionary<string, string> ToAttributeCollection()
+    {
+        var attributes = new Dictionary<string, string>();
+
+        foreach ( XAttribute attribute in GetAttributes() )
+        {
+            KeyValuePair<string, string> pair = attribute.ToPair();
+            attributes.Add(pair.Key, pair.Value);
+        }
+
+        // for ( var i = 0; i < node.Attributes.Count; i++ )
+        // {
+        //     XmlAttribute attribute = node.Attributes[i];
+        //     attributes[attribute.Name] = attribute.InnerText;
+        // }
+
+        return attributes;
+    }
 
 
 

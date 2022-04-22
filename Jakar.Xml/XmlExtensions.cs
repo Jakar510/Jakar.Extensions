@@ -16,24 +16,21 @@ using Newtonsoft.Json.Linq;
 
 
 
-
-
 namespace Jakar.Xml;
 
 
 [SuppressMessage("ReSharper", "ParameterTypeCanBeEnumerable.Global")]
 public static class XmlExtensions
 {
-#region Mapping
-
     public static string SetMappedIDs<T>( this IEnumerable<IEnumerable<T>> items ) where T : IDataBaseID => items.Consolidate().SetMappedIDs();
     public static string SetMappedIDs<T>( this IEnumerable<T>              items ) where T : IDataBaseID => items.Select(item => item.ID).SetMappedIDs<T>();
 
-    public static string SetMappedIDs<T>( this IEnumerable<long> listOfIds ) => listOfIds.ToXml(new Dictionary<string, string> { [Constants.TABLE] = typeof(T).GetTableName() });
+    public static string SetMappedIDs<T>( this IEnumerable<long> listOfIds ) => listOfIds.ToXml(new Dictionary<string, string>
+                                                                                                {
+                                                                                                    [Constants.GROUP] = typeof(T).GetTableName()
+                                                                                                });
 
     public static ICollection<long> GetMappedIDs( this string xml, out IDictionary<string, string>? attributes ) => xml.FromXml<List<long>>(out attributes);
-
-#endregion
 
 
     public static string PrettyXml( this XmlDocument document, XmlWriterSettings? settings = default )
@@ -47,8 +44,8 @@ public static class XmlExtensions
                          IndentChars         = new string(' ', 4)
                      };
 
-        var       builder = new StringBuilder();
-        XmlWriter writer  = XmlWriter.Create(builder, settings);
+        var builder = new StringBuilder();
+        var writer  = XmlWriter.Create(builder, settings);
         document.Save(writer);
         return builder.ToString();
     }
@@ -60,8 +57,8 @@ public static class XmlExtensions
     // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-    public static string GetNameSpaceUri( this Type type, PropertyInfo info )      => type.GetNameSpaceUri(info.Name);
-    public static string GetNameSpaceUri( this Type type, FieldInfo    info )      => type.GetNameSpaceUri(info.Name);
+    public static string GetNameSpaceUri( this Type type, PropertyInfo info ) => type.GetNameSpaceUri(info.Name);
+    public static string GetNameSpaceUri( this Type type, FieldInfo    info ) => type.GetNameSpaceUri(info.Name);
     public static string GetNameSpaceUri( this Type type, string       nameSpace ) => type.GetTypeName() + Constants.Dividers.NS + nameSpace;
 
 
@@ -73,14 +70,14 @@ public static class XmlExtensions
 
     public static IDictionary ToDictionary( this XmlNode root, out IDictionary<string, string>? attributes )
     {
-        if ( root.Name != Constants.Generics.DICTIONARY ) { throw new FormatException(nameof(root.Name)); }
+        if ( root.Name != Constants.DICTIONARY ) { throw new FormatException(nameof(root.Name)); }
 
         // attributes = root.GetAttributes();
         attributes = null;
         if ( attributes is null ) { throw new NullReferenceException(nameof(attributes)); }
 
-        Type keyType   = Xmlizer.nameToType[attributes[Constants.Types.KEYS]];
-        Type valueType = Xmlizer.nameToType[attributes[Constants.Types.VALUES]];
+        Type keyType   = Xmlizer.nameToType[attributes[Constants.KEY]];
+        Type valueType = Xmlizer.nameToType[attributes[Constants.VALUE]];
 
         Type        target  = typeof(Dictionary<,>).MakeGenericType(keyType, valueType);
         IDictionary results = (IDictionary)Activator.CreateInstance(target);
@@ -90,9 +87,9 @@ public static class XmlExtensions
             XmlNode? node = root.ChildNodes[i];
             if ( node?.Name is null ) { continue; }
 
-            if ( node.Name != Constants.Generics.KEY_VALUE_PAIR ) { throw new SerializationException(nameof(node.Name)); }
+            if ( node.Name != Constants.KEY_VALUE_PAIR ) { throw new SerializationException(nameof(node.Name)); }
 
-            string  key   = "";
+            var     key   = string.Empty;
             object? value = default;
 
             for ( var c = 0; c < node.ChildNodes.Count; c++ )
@@ -102,11 +99,11 @@ public static class XmlExtensions
 
                 switch ( child.Name )
                 {
-                    case Constants.Generics.KEY:
+                    case Constants.KEY:
                         key = child.InnerText;
                         break;
 
-                    case Constants.Generics.VALUE:
+                    case Constants.VALUE:
                         value = child.InnerText.ConvertTo(valueType);
                         break;
                 }

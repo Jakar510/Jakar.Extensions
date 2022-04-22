@@ -32,7 +32,7 @@ public static class NodeNames
     public static void RegisterNodeName( Type type, string? nodeName = default )
     {
         ReadOnlySpan<char> name = nodeName ?? ( type.IsArray
-                                                    ? Constants.Generics.GROUP
+                                                    ? Constants.GROUP
                                                     : type.Name );
 
 
@@ -91,7 +91,7 @@ public static class NodeNames
                                         : type.Name ).AsSpan();
 
 
-        if ( type.IsArray ) { return Constants.Generics.GROUP; }
+        if ( type.IsArray ) { return Constants.GROUP; }
 
         nodeName = name.GetXmlName();
         RegisterNodeName(type, nodeName);

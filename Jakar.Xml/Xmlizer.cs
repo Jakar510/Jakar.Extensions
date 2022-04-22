@@ -132,34 +132,13 @@ public sealed class Xmlizer<T>
     }
 
 
-
-    #region Attributes
-
-    private IDictionary<string, string> GetAttributes( XmlNode node )
-    {
-        if ( node.Attributes is null ) { throw new NullReferenceException(nameof(node.Attributes)); }
-
-        var attributes = new Dictionary<string, string>();
-
-        for ( var i = 0; i < node.Attributes.Count; i++ )
-        {
-            XmlAttribute attribute = node.Attributes[i];
-            attributes[attribute.Name] = attribute.InnerText;
-        }
-
-        return attributes;
-    }
-
-
-    private void SetAttributes( XmlNode node, in IDictionary<string, string>? attributes, in string? nameSpace = default )
+    private void SetAttributes( in XmlNode node, in IDictionary<string, string>? attributes, in string? nameSpace = default )
     {
         if ( attributes is null ) { return; }
 
         foreach ( ( string key, string value ) in attributes ) { AddAttribute(node, key, value, nameSpace); }
     }
-
-
-    private void AddAttribute( XmlNode node, in string key, in string value, in string? nameSpace = default )
+    private void AddAttribute( in XmlNode node, in string key, in string value, in string? nameSpace = default )
     {
         if ( node.Attributes is null ) { throw new NullReferenceException(nameof(node.Attributes)); }
 
@@ -167,9 +146,7 @@ public sealed class Xmlizer<T>
         attributeItem.InnerText = value;
         node.Attributes.Append(attributeItem);
     }
-
-
-    private void UpdateAttributes( XmlNode node, in Type type )
+    private void UpdateAttributes( in XmlNode node, in Type type )
     {
         if ( node.Attributes is null ) { throw new NullReferenceException(nameof(node.Attributes)); }
 
@@ -179,30 +156,25 @@ public sealed class Xmlizer<T>
         {
             if ( type.IsKeyValuePair(out Type? keyPairType, out Type? valuePairType) )
             {
-                AddAttribute(node, Constants.Types.KEYS,   keyPairType.GetTypeName(true));
-                AddAttribute(node, Constants.Types.VALUES, valuePairType.GetTypeName(true));
+                AddAttribute(node, Constants.KEY,   keyPairType.GetTypeName(true));
+                AddAttribute(node, Constants.VALUE, valuePairType.GetTypeName(true));
             }
 
             if ( type.IsDictionary(out Type? keyType, out Type? valueType) )
             {
-                AddAttribute(node, Constants.Types.KEYS,   keyType.GetTypeName(true));
-                AddAttribute(node, Constants.Types.VALUES, valueType.GetTypeName(true));
+                AddAttribute(node, Constants.KEY,   keyType.GetTypeName(true));
+                AddAttribute(node, Constants.VALUE, valueType.GetTypeName(true));
             }
 
             else if ( type.IsCollection(out Type? itemType) )
             {
-                AddAttribute(node, Constants.TYPE,       type.GetTypeName(true));
-                AddAttribute(node, Constants.Types.ITEM, itemType.GetTypeName(true));
+                AddAttribute(node, Constants.TYPE, type.GetTypeName(true));
+                AddAttribute(node, Constants.ITEM, itemType.GetTypeName(true));
             }
         }
         else { AddAttribute(node, Constants.TYPE, type.GetTypeName(true)); }
     }
 
-    #endregion
-
-
-
-    #region ToXml
 
     /// <summary>
     /// 
@@ -221,32 +193,26 @@ public sealed class Xmlizer<T>
 
         return _document.PrettyXml();
     }
-
-
     private XmlNode WrapNode( in XmlNode parent, in string name )
     {
         XmlNode child = _document.CreateNode(XmlNodeType.Element, name, null);
         parent.AppendChild(child);
         return child;
     }
-
-
     private void AddNode( XmlNode parent, in DictionaryEntry pair )
     {
-        XmlNode child = WrapNode(parent, Constants.Generics.KEY_VALUE_PAIR);
+        XmlNode child = WrapNode(parent, Constants.KEY_VALUE_PAIR);
 
-        AddNode(WrapNode(child, Constants.Generics.KEY), pair.Key, pair.Key.GetType(), null);
+        AddNode(WrapNode(child, Constants.KEY), pair.Key, pair.Key.GetType(), null);
 
-        AddNode(WrapNode(child, Constants.Generics.VALUE), pair.Value, pair.Value.GetType(), null);
+        AddNode(WrapNode(child, Constants.VALUE), pair.Value, pair.Value?.GetType(), null);
     }
-
-
-    private void AddNode( in XmlNode? parent, object? value, in Type type, in string? nameSpace )
+    private void AddNode( in XmlNode? parent, object? value, in Type? type, in string? nameSpace )
     {
-        XmlNode child = _document.CreateElement(type.GetNodeName());
+        XmlNode child = _document.CreateElement(type?.GetNodeName() ?? Constants.NULL);
 
         UpdateAttributes(child, type);
-        if ( nameSpace is not null ) { AddAttribute(child, Constants.NAME_SPACE, nameSpace); }
+        if ( nameSpace is not null ) { AddAttribute(child, Constants.XMLS, nameSpace); }
 
         parent?.AppendChild(child);
 
@@ -294,7 +260,7 @@ public sealed class Xmlizer<T>
 
             if ( pi.Count > 0 )
             {
-                XmlNode properties = _document.CreateElement(Constants.Classes.PROPERTY_INFO);
+                XmlNode properties = _document.CreateElement(Constants.PROPERTIES);
                 AddAttribute(properties, Constants.TYPE, type.GetTypeName(true));
                 child.AppendChild(properties);
 
@@ -311,7 +277,7 @@ public sealed class Xmlizer<T>
 
             if ( fi.Count > 0 )
             {
-                XmlNode fields = _document.CreateElement(Constants.Classes.FIELD_INFO);
+                XmlNode fields = _document.CreateElement(Constants.FIELDS);
                 AddAttribute(fields, Constants.TYPE, type.GetTypeName(true));
                 child.AppendChild(fields);
 
@@ -325,11 +291,6 @@ public sealed class Xmlizer<T>
         }
     }
 
-    #endregion
-
-
-
-    #region FromXml
 
     /// <summary>
     /// 
@@ -350,42 +311,20 @@ public sealed class Xmlizer<T>
         attributes = null;
         return result;
     }
-
-    private void Update( ref object obj, XNode node )
+    private void Update( ref object obj, in XNode node )
     {
-        switch ( node.Name )
+        if ( node.Name.SequenceEqual(Constants.GROUP) ) { PopulateList(ref obj, node); }
+        else if ( node.Name.SequenceEqual(Constants.DICTIONARY) ) { PopulateDictionary(ref obj, node); }
+        else if ( node.Name.SequenceEqual(Constants.GROUP) ) { PopulateArray(ref obj, node); }
+        else
         {
-            case Constants.Generics.GROUP:
+            if ( _objectType.IsClass ) { }
+            else if ( _objectType.IsValueType )
             {
-                PopulateList(ref obj, node);
-                break;
-            }
-
-            case Constants.Generics.DICTIONARY:
-            {
-                PopulateDictionary(ref obj, node);
-                break;
-            }
-
-            case Constants.Generics.GROUP:
-            {
-                PopulateArray(ref obj, node);
-                break;
-            }
-
-            default:
-            {
-                if ( _objectType.IsClass ) { }
-                else if ( _objectType.IsValueType )
-                {
-                    if ( _objectType.IsNullableType() ) { }
-                }
-
-                break;
+                if ( _objectType.IsNullableType() ) { }
             }
         }
     }
-
     private void PopulateArray( ref object obj, XmlNode parent )
     {
         if ( obj is not IList array ) { throw new ExpectedValueTypeException(nameof(obj), obj, typeof(IList)); }
@@ -400,8 +339,7 @@ public sealed class Xmlizer<T>
             array.Add(node.InnerText.ConvertTo(TValue));
         }
     }
-
-    private void PopulateList( ref object obj, XmlNode parent )
+    private void PopulateList( ref object obj, in XNode parent )
     {
         if ( obj is not IList list ) { throw new ExpectedValueTypeException(nameof(obj), obj, typeof(IList)); }
 
@@ -415,15 +353,14 @@ public sealed class Xmlizer<T>
             list.Add(node.InnerText.ConvertTo(TValue));
         }
     }
-
-    private void PopulateDictionary( ref object obj, XmlNode parent )
+    private void PopulateDictionary( ref object obj, in XNode parent )
     {
         if ( obj is not IDictionary dict ) { throw new ExpectedValueTypeException(nameof(obj), obj, typeof(IDictionary)); }
 
         if ( _attributes is null ) { throw new NullReferenceException(nameof(_attributes)); }
 
-        Type keyType   = Xmlizer.nameToType[_attributes[Constants.Types.KEYS]];
-        Type valueType = Xmlizer.nameToType[_attributes[Constants.Types.VALUES]];
+        Type keyType   = Xmlizer.nameToType[_attributes[Constants.KEY]];
+        Type valueType = Xmlizer.nameToType[_attributes[Constants.VALUE]];
 
 
         for ( var i = 0; i < parent.ChildNodes.Count; i++ )
@@ -431,7 +368,7 @@ public sealed class Xmlizer<T>
             XmlNode? node = parent.ChildNodes[i];
             if ( node?.Name is null ) { continue; }
 
-            if ( node.Name != Constants.Generics.KEY_VALUE_PAIR ) { throw new FormatException(nameof(node.Name)); }
+            if ( node.Name != Constants.KEY_VALUE_PAIR ) { throw new FormatException(nameof(node.Name)); }
 
 
             object? key   = default;
@@ -444,14 +381,14 @@ public sealed class Xmlizer<T>
 
                 switch ( child.Name )
                 {
-                    case Constants.Generics.KEY:
+                    case Constants.KEY:
                         if ( keyType.IsGenericType && keyType.HasInterface<IConvertible>() ) { key = child.InnerText.ConvertTo(keyType); }
 
                         else { key = child.InnerText; }
 
                         break;
 
-                    case Constants.Generics.VALUE:
+                    case Constants.VALUE:
                         if ( valueType.IsGenericType && valueType.HasInterface<IConvertible>() ) { value = child.InnerText.ConvertTo(valueType); }
 
                         break;
@@ -471,6 +408,4 @@ public sealed class Xmlizer<T>
             }
         }
     }
-
-    #endregion
 }

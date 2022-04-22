@@ -7,7 +7,7 @@ using System.Collections.Generic;
 namespace Jakar.Xml;
 
 
-internal static class Constants
+public static class Constants
 {
     public const char   SPACE          = ' ';
     public const char   OPEN_START     = '<';
@@ -25,6 +25,8 @@ internal static class Constants
     public const string TYPE           = nameof(Type);
     public const string XMLS           = "xmls";    // Name Space
     public const string XMLS_TAG       = "xmls=\""; // Name Space Tag
+    public const string FIELDS         = "Fields";
+    public const string PROPERTIES     = "Properties";
 
 
 

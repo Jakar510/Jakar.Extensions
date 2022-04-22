@@ -2,6 +2,7 @@
 // 04/21/2022  7:23 PM
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using Jakar.Extensions.SpanAndMemory;
 
@@ -17,6 +18,7 @@ public readonly ref struct XAttribute
     public readonly  ReadOnlySpan<char> Key;
     public readonly  ReadOnlySpan<char> Value;
     public readonly  bool               IsNameSpace;
+
 
     public XAttribute( ReadOnlySpan<char> span )
     {
@@ -34,4 +36,6 @@ public readonly ref struct XAttribute
         Value       = span;
         IsNameSpace = Key.Contains(Constants.XMLS, StringComparison.OrdinalIgnoreCase);
     }
+
+    public KeyValuePair<string, string> ToPair() => new(Key.ToString(), Value.ToString());
 }
