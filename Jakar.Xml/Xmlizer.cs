@@ -5,11 +5,8 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Xml;
 using Jakar.Extensions.Exceptions.General;
-using Jakar.Extensions.General;
 using Jakar.Extensions.Strings;
 using Jakar.Extensions.Types;
-
-
 
 
 
@@ -102,8 +99,8 @@ public static class Xmlizer
         NodeNames.RegisterNodeName(type, nodeName);
     }
 
-    public static T      FromXml<T>( this string xml, out IDictionary<string, string>? attributes )           => Xmlizer<T>.Deserialize(xml, out attributes);
-    public static string ToXml<T>( this   T      obj, in  IDictionary<string, string>? attributes = default ) => Xmlizer<T>.Serialize(obj, attributes);
+    public static T FromXml<T>( this    string xml, out IDictionary<string, string>? attributes ) => Xmlizer<T>.Deserialize(xml, out attributes);
+    public static string ToXml<T>( this T      obj, in  IDictionary<string, string>? attributes = default ) => Xmlizer<T>.Serialize(obj, attributes);
 }
 
 
@@ -135,7 +132,8 @@ public sealed class Xmlizer<T>
     }
 
 
-#region Attributes
+
+    #region Attributes
 
     private IDictionary<string, string> GetAttributes( XmlNode node )
     {
@@ -181,29 +179,30 @@ public sealed class Xmlizer<T>
         {
             if ( type.IsKeyValuePair(out Type? keyPairType, out Type? valuePairType) )
             {
-                AddAttribute(node, Constants.Types.KEYS, keyPairType.GetTypeName(true));
+                AddAttribute(node, Constants.Types.KEYS,   keyPairType.GetTypeName(true));
                 AddAttribute(node, Constants.Types.VALUES, valuePairType.GetTypeName(true));
             }
 
             if ( type.IsDictionary(out Type? keyType, out Type? valueType) )
             {
-                AddAttribute(node, Constants.Types.KEYS, keyType.GetTypeName(true));
+                AddAttribute(node, Constants.Types.KEYS,   keyType.GetTypeName(true));
                 AddAttribute(node, Constants.Types.VALUES, valueType.GetTypeName(true));
             }
 
             else if ( type.IsCollection(out Type? itemType) )
             {
-                AddAttribute(node, Constants.TYPE, type.GetTypeName(true));
+                AddAttribute(node, Constants.TYPE,       type.GetTypeName(true));
                 AddAttribute(node, Constants.Types.ITEM, itemType.GetTypeName(true));
             }
         }
         else { AddAttribute(node, Constants.TYPE, type.GetTypeName(true)); }
     }
 
-#endregion
+    #endregion
 
 
-#region ToXml
+
+    #region ToXml
 
     /// <summary>
     /// 
@@ -236,15 +235,9 @@ public sealed class Xmlizer<T>
     {
         XmlNode child = WrapNode(parent, Constants.Generics.KEY_VALUE_PAIR);
 
-        AddNode(WrapNode(child, Constants.Generics.KEY),
-                pair.Key,
-                pair.Key.GetType(),
-                null);
+        AddNode(WrapNode(child, Constants.Generics.KEY), pair.Key, pair.Key.GetType(), null);
 
-        AddNode(WrapNode(child, Constants.Generics.VALUE),
-                pair.Value,
-                pair.Value.GetType(),
-                null);
+        AddNode(WrapNode(child, Constants.Generics.VALUE), pair.Value, pair.Value.GetType(), null);
     }
 
 
@@ -332,10 +325,11 @@ public sealed class Xmlizer<T>
         }
     }
 
-#endregion
+    #endregion
 
 
-#region FromXml
+
+    #region FromXml
 
     /// <summary>
     /// 
@@ -357,11 +351,11 @@ public sealed class Xmlizer<T>
         return result;
     }
 
-    private void Update( ref object obj, XmlNode node )
+    private void Update( ref object obj, XNode node )
     {
         switch ( node.Name )
         {
-            case Constants.Generics.LIST:
+            case Constants.Generics.GROUP:
             {
                 PopulateList(ref obj, node);
                 break;
@@ -373,7 +367,7 @@ public sealed class Xmlizer<T>
                 break;
             }
 
-            case Constants.Generics.ARRAY:
+            case Constants.Generics.GROUP:
             {
                 PopulateArray(ref obj, node);
                 break;
@@ -478,5 +472,5 @@ public sealed class Xmlizer<T>
         }
     }
 
-#endregion
+    #endregion
 }

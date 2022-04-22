@@ -1,9 +1,10 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>netstandard2.1</TargetFramework>
+		<TargetFramework>net6.0</TargetFramework>
 		<LangVersion>latest</LangVersion>
 		<Nullable>enable</Nullable>
+		<NoWarn>$(NoWarn);1591</NoWarn>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
 		<RepositoryUrl>https://github.com/Jakar510/Jakar.Extensions</RepositoryUrl>
@@ -31,18 +32,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Jakar.Extensions" Version="5.8.0" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <None Include="..\images\icon.png">
-	    <Pack>True</Pack>
-	    <PackagePath></PackagePath>
-	  </None>
-	  <None Include="..\LICENSE.txt">
-	    <Pack>True</Pack>
-	    <PackagePath></PackagePath>
-	  </None>
+		<PackageReference Include="Jakar.Extensions" Version="6.0.0.3-beta" />
+		<PackageReference Include="Sigil" Version="5.0.0" />
 	</ItemGroup>
 
 </Project>

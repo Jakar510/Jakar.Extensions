@@ -20,6 +20,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B8AA3696-1782-42CF-8B29-1A4AAE184F9A}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
+		images\icon.png = images\icon.png
+		LICENSE.txt = LICENSE.txt
 		README.md = README.md
 	EndProjectSection
 EndProject
@@ -38,6 +40,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jakar.Extensions.Xamarin.Forms.iOS", "Jakar.Extensions.Xamarin.Forms.iOS\Jakar.Extensions.Xamarin.Forms.iOS.csproj", "{F77BD70A-AC4A-4C6F-ABD1-2835CC23A4DD}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jakar.Extensions.Blazor", "Jakar.Extensions.Blazor\Jakar.Extensions.Blazor.csproj", "{3DDF2DFF-288A-428B-A741-FCA0AE1CBC1A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jakar.Json", "Jakar.Json\Jakar.Json.csproj", "{3B31051E-0CB8-4808-BB84-26F89B0536AE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -80,6 +84,10 @@ Global
 		{3DDF2DFF-288A-428B-A741-FCA0AE1CBC1A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3DDF2DFF-288A-428B-A741-FCA0AE1CBC1A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3DDF2DFF-288A-428B-A741-FCA0AE1CBC1A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3B31051E-0CB8-4808-BB84-26F89B0536AE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3B31051E-0CB8-4808-BB84-26F89B0536AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3B31051E-0CB8-4808-BB84-26F89B0536AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3B31051E-0CB8-4808-BB84-26F89B0536AE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
