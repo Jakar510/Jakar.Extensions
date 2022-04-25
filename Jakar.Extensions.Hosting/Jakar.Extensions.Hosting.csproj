@@ -1,0 +1,92 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<LangVersion>latest</LangVersion>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Jakar.Extensions"
+						  Version="6.0.0.5-beta" />
+		<PackageReference Include="Portable.BouncyCastle"
+						  Version="1.9.0" />
+		<PackageReference Include="Hardware.Info"
+						  Version="10.0.0" />
+		<PackageReference Include="Nito.AsyncEx"
+						  Version="5.1.2" />
+		<PackageReference Include="Microsoft.CSharp"
+						  Version="4.7.0" />
+		<PackageReference Include="Microsoft.CodeAnalysis.CSharp"
+						  Version="4.1.0" />
+		<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions"
+						  Version="6.0.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.Certificate"
+						  Version="6.0.4" />
+		<PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore"
+						  Version="6.0.4" />
+		<PackageReference Include="Microsoft.AspNetCore.Diagnostics.HealthChecks"
+						  Version="2.2.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson"
+						  Version="6.0.4" />
+		<PackageReference Include="Microsoft.AspNetCore.Server.IIS"
+						  Version="2.2.6" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer"
+						  Version="6.0.4" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect"
+						  Version="6.0.4" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Web"
+						  Version="6.0.4" />
+		<PackageReference Include="Microsoft.AspNetCore.Identity"
+						  Version="2.2.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Identity.UI"
+						  Version="6.0.4" />
+		<PackageReference Include="Microsoft.CodeAnalysis.CSharp"
+						  Version="4.1.0" />
+		<PackageReference Include="Microsoft.Extensions.Caching.Memory"
+						  Version="6.0.1" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Binder"
+						  Version="6.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks"
+						  Version="6.0.4" />
+		<PackageReference Include="Microsoft.Extensions.Hosting"
+						  Version="6.0.1" />
+		<PackageReference Include="Microsoft.Extensions.Hosting.Systemd"
+						  Version="6.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices"
+						  Version="6.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Logging"
+						  Version="6.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions"
+						  Version="6.0.1" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Configuration"
+						  Version="6.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Console"
+						  Version="6.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Debug"
+						  Version="6.0.0" />
+		<PackageReference Include="Newtonsoft.Json"
+						  Version="13.0.1" />
+		<PackageReference Include="Serilog"
+						  Version="2.10.0" />
+		<PackageReference Include="Serilog.AspNetCore"
+						  Version="5.0.0" />
+		<PackageReference Include="Serilog.Extensions.Logging"
+						  Version="3.1.0" />
+		<PackageReference Include="Serilog.Settings.Configuration"
+						  Version="3.3.0" />
+		<PackageReference Include="Serilog.Sinks.EventLog"
+						  Version="3.1.0" />
+		<PackageReference Include="Serilog.Sinks.File"
+						  Version="5.0.0" />
+		<PackageReference Include="Swashbuckle.AspNetCore"
+						  Version="6.3.0" />
+		<PackageReference Include="Swashbuckle.AspNetCore.Annotations"
+						  Version="6.3.0" />
+		<PackageReference Include="Swashbuckle.AspNetCore.Newtonsoft"
+						  Version="6.3.0" />
+		<PackageReference Include="System.Text.Encoding.CodePages"
+						  Version="6.0.0" />
+	</ItemGroup>
+</Project>
