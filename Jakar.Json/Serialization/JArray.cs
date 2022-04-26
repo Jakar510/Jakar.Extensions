@@ -2,154 +2,113 @@
 // 04/26/2022  9:56 AM
 
 using System.Globalization;
-using System.Text;
 
 
 
 namespace Jakar.Json.Serialization;
 
 
-public readonly ref struct JArray
+public ref struct JArray
 {
-    private readonly JContext      _context;
-    private readonly StringBuilder _sb;
+    private JWriter _writer;
 
 
-    public JArray( in JContext context, in StringBuilder sb )
+    public JArray( ref JWriter writer )
     {
-        _context = context;
-        _sb      = sb;
-        _sb.Append('[');
+        _writer = writer;
+        _writer.StartBlock('[');
     }
 
 
     public JArray Add( in char value )
     {
-        _sb.Append(value);
-        _sb.Append(',');
-        return this;
-    }
-    public JArray Add( in char? value )
-    {
-        _sb.Append(value);
-        _sb.Append(',');
+        _writer.Indent().Append(value).Next();
         return this;
     }
     public JArray Add( in short value )
     {
-        _sb.Append(value);
-        _sb.Append(',');
-        return this;
-    }
-    public JArray Add( in short? value )
-    {
-        _sb.Append(value);
-        _sb.Append(',');
+        _writer.Indent().Append(value).Next();
         return this;
     }
     public JArray Add( in ushort value )
     {
-        _sb.Append(value);
-        _sb.Append(',');
-        return this;
-    }
-    public JArray Add( in ushort? value )
-    {
-        _sb.Append(value);
-        _sb.Append(',');
+        _writer.Indent().Append(value).Next();
         return this;
     }
     public JArray Add( in int value )
     {
-        _sb.Append(value);
-        _sb.Append(',');
-        return this;
-    }
-    public JArray Add( in int? value )
-    {
-        _sb.Append(value);
-        _sb.Append(',');
+        _writer.Indent().Append(value).Next();
         return this;
     }
     public JArray Add( in uint value )
     {
-        _sb.Append(value);
-        _sb.Append(',');
-        return this;
-    }
-    public JArray Add( in uint? value )
-    {
-        _sb.Append(value);
-        _sb.Append(',');
+        _writer.Indent().Append(value).Next();
         return this;
     }
     public JArray Add( in long value )
     {
-        _sb.Append(value);
-        _sb.Append(',');
-        return this;
-    }
-    public JArray Add( in long? value )
-    {
-        _sb.Append(value);
-        _sb.Append(',');
+        _writer.Indent().Append(value).Next();
         return this;
     }
     public JArray Add( in ulong value )
     {
-        _sb.Append(value);
-        _sb.Append(',');
-        return this;
-    }
-    public JArray Add( in ulong? value )
-    {
-        _sb.Append(value);
-        _sb.Append(',');
+        _writer.Indent().Append(value).Next();
         return this;
     }
     public JArray Add( in float value )
     {
-        _sb.Append(value);
-        _sb.Append(',');
-        return this;
-    }
-    public JArray Add( in float? value )
-    {
-        _sb.Append(value);
-        _sb.Append(',');
+        _writer.Indent().Append(value).Next();
         return this;
     }
     public JArray Add( in double value )
     {
-        _sb.Append(value);
-        _sb.Append(',');
-        return this;
-    }
-    public JArray Add( in double? value )
-    {
-        _sb.Append(value);
-        _sb.Append(',');
+        _writer.Indent().Append(value).Next();
         return this;
     }
     public JArray Add( in decimal value )
     {
-        _sb.Append(value);
-        _sb.Append(',');
+        _writer.Indent().Append(value).Next();
         return this;
     }
-    public JArray Add( in decimal? value )
-    {
-        _sb.Append(value);
-        _sb.Append(',');
-        return this;
-    }
+
+
+    public JArray Add( in char? value ) => value.HasValue
+                                               ? Add(value.Value)
+                                               : Add();
+    public JArray Add( in short? value ) => value.HasValue
+                                                ? Add(value.Value)
+                                                : Add();
+    public JArray Add( in ushort? value ) => value.HasValue
+                                                 ? Add(value.Value)
+                                                 : Add();
+    public JArray Add( in int? value ) => value.HasValue
+                                              ? Add(value.Value)
+                                              : Add();
+    public JArray Add( in uint? value ) => value.HasValue
+                                               ? Add(value.Value)
+                                               : Add();
+    public JArray Add( in long? value ) => value.HasValue
+                                               ? Add(value.Value)
+                                               : Add();
+    public JArray Add( in ulong? value ) => value.HasValue
+                                                ? Add(value.Value)
+                                                : Add();
+    public JArray Add( in float? value ) => value.HasValue
+                                                ? Add(value.Value)
+                                                : Add();
+    public JArray Add( in double? value ) => value.HasValue
+                                                 ? Add(value.Value)
+                                                 : Add();
+    public JArray Add( in decimal? value ) => value.HasValue
+                                                  ? Add(value.Value)
+                                                  : Add();
+
+
     public JArray Add( in string value ) => Add(value.AsSpan());
+    public JArray Add() => Add("null");
     public JArray Add( in ReadOnlySpan<char> value )
     {
-        _sb.Append('"');
-        _sb.Append(value);
-        _sb.Append('"');
-        _sb.Append(',');
+        _writer.Append('"').Append(value).Append('"').Next();
         return this;
     }
 
@@ -159,12 +118,7 @@ public readonly ref struct JArray
     public JArray Add<T>( in T value, in ReadOnlySpan<char> format, in CultureInfo culture ) where T : struct, ISpanFormattable => Add(value, format,  culture, 650);
     public JArray Add<T>( in T value, in ReadOnlySpan<char> format, in CultureInfo culture, in int bufferSize ) where T : struct, ISpanFormattable
     {
-        Span<char> buffer = stackalloc char[bufferSize];
-
-        if ( !value.TryFormat(buffer, out int charsWritten, format, culture) ) { throw new InvalidOperationException($"Can't format value: '{value}'"); }
-
-        _sb.Append(buffer[..charsWritten]);
-        _sb.Append(',');
+        _writer.Append(value, format, culture, bufferSize).Next();
         return this;
     }
 
@@ -174,29 +128,24 @@ public readonly ref struct JArray
     public JArray Add<T>( in T? value, in ReadOnlySpan<char> format, in CultureInfo culture ) where T : struct, ISpanFormattable => Add(value, format,  culture, 650);
     public JArray Add<T>( in T? value, in ReadOnlySpan<char> format, in CultureInfo culture, in int bufferSize ) where T : struct, ISpanFormattable
     {
-        if ( value.HasValue )
-        {
-            Span<char> buffer = stackalloc char[bufferSize];
-
-            if ( !value.Value.TryFormat(buffer, out int charsWritten, format, culture) ) { throw new InvalidOperationException($"Can't format value: '{value}'"); }
-
-            _sb.Append(buffer[..charsWritten]);
-        }
-        else { _sb.Append("null"); }
-
-        _sb.Append(',');
+        _writer.Append(value, format, culture, bufferSize).Next();
         return this;
     }
 
 
-    public JArray AddArray() => new(_context, _sb);
-    public JObject AddObject() => new(_context, _sb);
-
-
-    private void NewLine() => _sb.Append('\n');
-    public void Dispose()
+    public JArray AddArray()
     {
-        _sb.Append(']');
-        _sb.Append(',');
+        if ( _writer.shouldIndent ) { _writer.Increase(); }
+
+        return new JArray(ref _writer);
     }
+    public JObject AddObject()
+    {
+        if ( _writer.shouldIndent ) { _writer.Increase(); }
+
+        return new JObject(ref _writer);
+    }
+
+
+    public void Dispose() => _writer.FinishBlock(']');
 }

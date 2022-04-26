@@ -1,12 +1,4 @@
-﻿// Jakar.Extensions :: Jakar.Xml
-// 04/21/2022  6:20 PM
-
-using System.Diagnostics.CodeAnalysis;
-using Jakar.Extensions.SpanAndMemory;
-
-
-
-namespace Jakar.Json.Deserialization;
+﻿namespace Jakar.Json.Deserialization;
 
 
 [SuppressMessage("ReSharper", "InconsistentNaming")]

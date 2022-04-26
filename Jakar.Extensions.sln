@@ -43,7 +43,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jakar.Extensions.Blazor", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jakar.Json", "Jakar.Json\Jakar.Json.csproj", "{3B31051E-0CB8-4808-BB84-26F89B0536AE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jakar.Extensions.Hosting", "Jakar.Extensions.Hosting\Jakar.Extensions.Hosting.csproj", "{1CD654C7-F469-413C-812E-D9E3BBC35A10}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jakar.Extensions.Hosting", "Jakar.Extensions.Hosting\Jakar.Extensions.Hosting.csproj", "{1CD654C7-F469-413C-812E-D9E3BBC35A10}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jakar.Json.Generator", "Jakar.Json.Generator\Jakar.Json.Generator.csproj", "{A00B7430-2F61-447B-AC84-E156CD4E9349}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -94,6 +96,10 @@ Global
 		{1CD654C7-F469-413C-812E-D9E3BBC35A10}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1CD654C7-F469-413C-812E-D9E3BBC35A10}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1CD654C7-F469-413C-812E-D9E3BBC35A10}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A00B7430-2F61-447B-AC84-E156CD4E9349}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A00B7430-2F61-447B-AC84-E156CD4E9349}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A00B7430-2F61-447B-AC84-E156CD4E9349}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A00B7430-2F61-447B-AC84-E156CD4E9349}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

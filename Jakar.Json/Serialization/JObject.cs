@@ -1,324 +1,203 @@
 ﻿// Jakar.Extensions :: Jakar.Xml
 // 04/26/2022  9:59 AM
 
-using System.Collections;
 using System.Globalization;
-using System.Text;
 
 
 
 namespace Jakar.Json.Serialization;
 
 
-public readonly ref struct JObject
+public ref struct JObject
 {
-    private readonly JContext      _context;
-    private readonly StringBuilder _sb;
+    private JWriter _writer;
 
 
-    public JObject( in JContext context, in StringBuilder sb )
+    public JObject( ref JWriter writer )
     {
-        _context = context;
-        _sb      = sb;
-        _sb.Append('{');
+        _writer = writer;
+        _writer.StartBlock('{');
     }
 
 
-    /// <summary>
-    /// Adds "null" value
-    /// </summary>
-    public JObject Add( in ReadOnlySpan<char> key )
+    public JObject Null( in ReadOnlySpan<char> key )
     {
-        _sb.Append(key);
-        _sb.Append('=');
-        _sb.Append("null");
-        _sb.Append(',');
+        _writer.Indent().Append(key).Append('=').Null().Next();
         return this;
     }
+
+
     public JObject Add( in ReadOnlySpan<char> key, in char value )
     {
-        _sb.Append(key);
-        _sb.Append('=');
-        _sb.Append(value);
-        _sb.Append(',');
-        return this;
-    }
-    public JObject Add( in ReadOnlySpan<char> key, in char? value )
-    {
-        _sb.Append(key);
-        _sb.Append('=');
-        _sb.Append(value);
-        _sb.Append(',');
+        _writer.Indent().Append(key).Append('=').Append(value).Next();
         return this;
     }
     public JObject Add( in ReadOnlySpan<char> key, in short value )
     {
-        _sb.Append(key);
-        _sb.Append('=');
-        _sb.Append(value);
-        _sb.Append(',');
-        return this;
-    }
-    public JObject Add( in ReadOnlySpan<char> key, in short? value )
-    {
-        _sb.Append(key);
-        _sb.Append('=');
-        _sb.Append(value);
-        _sb.Append(',');
+        _writer.Indent().Append(key).Append('=').Append(value).Next();
         return this;
     }
     public JObject Add( in ReadOnlySpan<char> key, in ushort value )
     {
-        _sb.Append(key);
-        _sb.Append('=');
-        _sb.Append(value);
-        _sb.Append(',');
-        return this;
-    }
-    public JObject Add( in ReadOnlySpan<char> key, in ushort? value )
-    {
-        _sb.Append(key);
-        _sb.Append('=');
-        _sb.Append(value);
-        _sb.Append(',');
+        _writer.Indent().Append(key).Append('=').Append(value).Next();
         return this;
     }
     public JObject Add( in ReadOnlySpan<char> key, in int value )
     {
-        _sb.Append(key);
-        _sb.Append('=');
-        _sb.Append(value);
-        _sb.Append(',');
-        return this;
-    }
-    public JObject Add( in ReadOnlySpan<char> key, in int? value )
-    {
-        _sb.Append(key);
-        _sb.Append('=');
-        _sb.Append(value);
-        _sb.Append(',');
+        _writer.Indent().Append(key).Append('=').Append(value).Next();
         return this;
     }
     public JObject Add( in ReadOnlySpan<char> key, in uint value )
     {
-        _sb.Append(key);
-        _sb.Append('=');
-        _sb.Append(value);
-        _sb.Append(',');
-        return this;
-    }
-    public JObject Add( in ReadOnlySpan<char> key, in uint? value )
-    {
-        _sb.Append(key);
-        _sb.Append('=');
-        _sb.Append(value);
-        _sb.Append(',');
-        return this;
-    }
-    public JObject Add( in ReadOnlySpan<char> key, in long? value )
-    {
-        _sb.Append(key);
-        _sb.Append('=');
-        _sb.Append(value);
-        _sb.Append(',');
+        _writer.Indent().Append(key).Append('=').Append(value).Next();
         return this;
     }
     public JObject Add( in ReadOnlySpan<char> key, in long value )
     {
-        _sb.Append(key);
-        _sb.Append('=');
-        _sb.Append(value);
-        _sb.Append(',');
+        _writer.Indent().Append(key).Append('=').Append(value).Next();
         return this;
     }
     public JObject Add( in ReadOnlySpan<char> key, in ulong value )
     {
-        _sb.Append(key);
-        _sb.Append('=');
-        _sb.Append(value);
-        _sb.Append(',');
-        return this;
-    }
-    public JObject Add( in ReadOnlySpan<char> key, in ulong? value )
-    {
-        _sb.Append(key);
-        _sb.Append('=');
-        _sb.Append(value);
-        _sb.Append(',');
-        return this;
-    }
-    public JObject Add( in ReadOnlySpan<char> key, in float? value )
-    {
-        _sb.Append(key);
-        _sb.Append('=');
-        _sb.Append(value);
-        _sb.Append(',');
+        _writer.Indent().Append(key).Append('=').Append(value).Next();
         return this;
     }
     public JObject Add( in ReadOnlySpan<char> key, in float value )
     {
-        _sb.Append(key);
-        _sb.Append('=');
-        _sb.Append(value);
-        _sb.Append(',');
+        _writer.Indent().Append(key).Append('=').Append(value).Next();
         return this;
     }
     public JObject Add( in ReadOnlySpan<char> key, in double value )
     {
-        _sb.Append(key);
-        _sb.Append('=');
-        _sb.Append(value);
-        _sb.Append(',');
-        return this;
-    }
-    public JObject Add( in ReadOnlySpan<char> key, in double? value )
-    {
-        _sb.Append(key);
-        _sb.Append('=');
-        _sb.Append(value);
-        _sb.Append(',');
+        _writer.Indent().Append(key).Append('=').Append(value).Next();
         return this;
     }
     public JObject Add( in ReadOnlySpan<char> key, in decimal value )
     {
-        _sb.Append(key);
-        _sb.Append('=');
-        _sb.Append(value);
-        _sb.Append(',');
+        _writer.Indent().Append(key).Append('=').Append(value).Next();
         return this;
     }
-    public JObject Add( in ReadOnlySpan<char> key, in decimal? value )
-    {
-        _sb.Append(key);
-        _sb.Append('=');
-        _sb.Append(value);
-        _sb.Append(',');
-        return this;
-    }
+
+
+    public JObject Add( in ReadOnlySpan<char> key, in char? value ) => value.HasValue
+                                                                           ? Add(key, value.Value)
+                                                                           : Null(key);
+    public JObject Add( in ReadOnlySpan<char> key, in short? value ) => value.HasValue
+                                                                            ? Add(key, value.Value)
+                                                                            : Null(key);
+    public JObject Add( in ReadOnlySpan<char> key, in ushort? value ) => value.HasValue
+                                                                             ? Add(key, value.Value)
+                                                                             : Null(key);
+    public JObject Add( in ReadOnlySpan<char> key, in int? value ) => value.HasValue
+                                                                          ? Add(key, value.Value)
+                                                                          : Null(key);
+    public JObject Add( in ReadOnlySpan<char> key, in uint? value ) => value.HasValue
+                                                                           ? Add(key, value.Value)
+                                                                           : Null(key);
+    public JObject Add( in ReadOnlySpan<char> key, in long? value ) => value.HasValue
+                                                                           ? Add(key, value.Value)
+                                                                           : Null(key);
+    public JObject Add( in ReadOnlySpan<char> key, in ulong? value ) => value.HasValue
+                                                                            ? Add(key, value.Value)
+                                                                            : Null(key);
+    public JObject Add( in ReadOnlySpan<char> key, in float? value ) => value.HasValue
+                                                                            ? Add(key, value.Value)
+                                                                            : Null(key);
+    public JObject Add( in ReadOnlySpan<char> key, in double? value ) => value.HasValue
+                                                                             ? Add(key, value.Value)
+                                                                             : Null(key);
+    public JObject Add( in ReadOnlySpan<char> key, in decimal? value ) => value.HasValue
+                                                                              ? Add(key, value.Value)
+                                                                              : Null(key);
+
+
     public JObject Add( in ReadOnlySpan<char> key, in string value ) => Add(key, value.AsSpan());
     public JObject Add( in ReadOnlySpan<char> key, in ReadOnlySpan<char> value )
     {
-        _sb.Append(key);
-        _sb.Append('=');
-        _sb.Append('"');
-        _sb.Append(value);
-        _sb.Append('"');
-        _sb.Append(',');
+        _writer.Append(key).Append('=').Append('"').Append(value).Append('"').Next();
         return this;
     }
-    public JObject Add( in ReadOnlySpan<char> key, in object? value )
+
+
+    public JObject Add( in ReadOnlySpan<char> key, in ISpanFormattable value, in int bufferSize ) => Add(key,                         value, bufferSize, CultureInfo.CurrentCulture);
+    public JObject Add( in ReadOnlySpan<char> key, in ISpanFormattable value, in int bufferSize, in CultureInfo culture ) => Add(key, value, bufferSize, default, culture);
+    public JObject Add( in ReadOnlySpan<char> key, in ISpanFormattable value, in int bufferSize, in ReadOnlySpan<char> format, in CultureInfo culture )
     {
-        _sb.Append(key);
-        _sb.Append('=');
-        _sb.Append(value);
-        _sb.Append(',');
+        _writer.Indent().Append(key).Append('=').Append('"').Append(value, format, culture, bufferSize).Append('"').Next();
         return this;
     }
 
 
-    public JObject Add<T>( in ReadOnlySpan<char> key, in T value ) where T : ISpanFormattable => Add(key,                                                       value, CultureInfo.CurrentCulture);
-    public JObject Add<T>( in ReadOnlySpan<char> key, in T value, in CultureInfo        culture ) where T : ISpanFormattable => Add(key,                        value, default, culture);
-    public JObject Add<T>( in ReadOnlySpan<char> key, in T value, in ReadOnlySpan<char> format, in CultureInfo culture ) where T : ISpanFormattable => Add(key, value, format,  culture, 1000);
-    public JObject Add<T>( in ReadOnlySpan<char> key, in T value, in ReadOnlySpan<char> format, in CultureInfo culture, in int bufferSize ) where T : ISpanFormattable
+    public JObject Add<T>( in ReadOnlySpan<char> key, in T? value, in int bufferSize ) where T : struct, ISpanFormattable => Add(key,                         value, bufferSize, CultureInfo.CurrentCulture);
+    public JObject Add<T>( in ReadOnlySpan<char> key, in T? value, in int bufferSize, in CultureInfo culture ) where T : struct, ISpanFormattable => Add(key, value, bufferSize, default, culture);
+    public JObject Add<T>( in ReadOnlySpan<char> key, in T? value, in int bufferSize, in ReadOnlySpan<char> format, in CultureInfo culture ) where T : struct, ISpanFormattable
     {
-        _sb.Append(key);
-        _sb.Append('=');
-        _sb.Append('"');
-        Span<char> buffer = stackalloc char[bufferSize];
-
-        if ( !value.TryFormat(buffer, out int charsWritten, format, culture) ) { throw new InvalidOperationException($"Can't format value: '{value}'"); }
-
-        _sb.Append(buffer[..charsWritten]);
-        _sb.Append('"');
-        _sb.Append(',');
+        _writer.Indent().Append(key).Append('=').Append('"').Append(value, format, culture, bufferSize).Append('"').Next();
         return this;
     }
 
 
-    public JObject Add<T>( in ReadOnlySpan<char> key, in T? value ) where T : struct, ISpanFormattable => Add(key,                                                       value, CultureInfo.CurrentCulture);
-    public JObject Add<T>( in ReadOnlySpan<char> key, in T? value, in CultureInfo        culture ) where T : struct, ISpanFormattable => Add(key,                        value, default, culture);
-    public JObject Add<T>( in ReadOnlySpan<char> key, in T? value, in ReadOnlySpan<char> format, in CultureInfo culture ) where T : struct, ISpanFormattable => Add(key, value, format,  culture, 650);
-    public JObject Add<T>( in ReadOnlySpan<char> key, in T? value, in ReadOnlySpan<char> format, in CultureInfo culture, in int bufferSize ) where T : struct, ISpanFormattable
-    {
-        _sb.Append(key);
-        _sb.Append('=');
-
-        if ( value.HasValue )
-        {
-            _sb.Append('"');
-            Span<char> buffer = stackalloc char[bufferSize];
-
-            if ( !value.Value.TryFormat(buffer, out int charsWritten, format, culture) ) { throw new InvalidOperationException($"Can't format value: '{value}'"); }
-
-            _sb.Append(buffer[..charsWritten]);
-            _sb.Append('"');
-        }
-        else { _sb.Append("null"); }
-
-        _sb.Append(',');
-        return this;
-    }
+    public JObject Add( in KeyValuePair<string, string>  pair ) => Add(pair.Key, pair.Value);
+    public JObject Add( in KeyValuePair<string, char>    pair ) => Add(pair.Key, pair.Value);
+    public JObject Add( in KeyValuePair<string, short>   pair ) => Add(pair.Key, pair.Value);
+    public JObject Add( in KeyValuePair<string, ushort>  pair ) => Add(pair.Key, pair.Value);
+    public JObject Add( in KeyValuePair<string, int>     pair ) => Add(pair.Key, pair.Value);
+    public JObject Add( in KeyValuePair<string, uint>    pair ) => Add(pair.Key, pair.Value);
+    public JObject Add( in KeyValuePair<string, long>    pair ) => Add(pair.Key, pair.Value);
+    public JObject Add( in KeyValuePair<string, ulong>   pair ) => Add(pair.Key, pair.Value);
+    public JObject Add( in KeyValuePair<string, float>   pair ) => Add(pair.Key, pair.Value);
+    public JObject Add( in KeyValuePair<string, double>  pair ) => Add(pair.Key, pair.Value);
+    public JObject Add( in KeyValuePair<string, decimal> pair ) => Add(pair.Key, pair.Value);
 
 
-    public JObject Add( in KeyValuePair<string, string>           pair ) => Add(pair.Key, pair.Value);
-    public JObject Add( in KeyValuePair<string, char>             pair ) => Add(pair.Key, pair.Value);
-    public JObject Add( in KeyValuePair<string, short>            pair ) => Add(pair.Key, pair.Value);
-    public JObject Add( in KeyValuePair<string, ushort>           pair ) => Add(pair.Key, pair.Value);
-    public JObject Add( in KeyValuePair<string, int>              pair ) => Add(pair.Key, pair.Value);
-    public JObject Add( in KeyValuePair<string, uint>             pair ) => Add(pair.Key, pair.Value);
-    public JObject Add( in KeyValuePair<string, long>             pair ) => Add(pair.Key, pair.Value);
-    public JObject Add( in KeyValuePair<string, ulong>            pair ) => Add(pair.Key, pair.Value);
-    public JObject Add( in KeyValuePair<string, float>            pair ) => Add(pair.Key, pair.Value);
-    public JObject Add( in KeyValuePair<string, double>           pair ) => Add(pair.Key, pair.Value);
-    public JObject Add( in KeyValuePair<string, decimal>          pair ) => Add(pair.Key, pair.Value);
-    public JObject Add( in KeyValuePair<string, ISpanFormattable> pair ) => Add(pair.Key, pair.Value);
-    public JObject Add( in DictionaryEntry pair )
+    public JObject Add( in KeyValuePair<string, DateOnly>         pair ) => Add(pair.Key,                           pair.Value, 100);
+    public JObject Add( in KeyValuePair<string, TimeOnly>         pair ) => Add(pair.Key,                           pair.Value, 100);
+    public JObject Add( in KeyValuePair<string, TimeSpan>         pair ) => Add(pair.Key,                           pair.Value, 100);
+    public JObject Add( in KeyValuePair<string, DateTimeOffset>   pair ) => Add(pair.Key,                           pair.Value, 100);
+    public JObject Add( in KeyValuePair<string, DateTime>         pair ) => Add(pair.Key,                           pair.Value, 100);
+    public JObject Add( in KeyValuePair<string, ISpanFormattable> pair, in int bufferSize = 1000 ) => Add(pair.Key, pair.Value, bufferSize);
+
+
+    public JObject Add( in DictionaryEntry pair, in int bufferSize = 1000 )
     {
         ReadOnlySpan<char> k = pair.Key.ToString();
 
         return pair.Value switch
                {
-                   null               => Add(k),
+                   null               => Null(k),
                    string v           => Add(k, v),
                    char v             => Add(k, v),
-                   short v            => Add(k, v),
-                   ushort v           => Add(k, v),
-                   int v              => Add(k, v),
-                   uint v             => Add(k, v),
-                   long v             => Add(k, v),
-                   ulong v            => Add(k, v),
-                   float v            => Add(k, v),
-                   double v           => Add(k, v),
-                   decimal v          => Add(k, v),
-                   DateOnly v         => Add(k, v),
-                   TimeOnly v         => Add(k, v),
-                   TimeSpan v         => Add(k, v),
-                   DateTimeOffset v   => Add(k, v),
-                   DateTime v         => Add(k, v),
-                   ISpanFormattable v => Add(k, v),
-                   _                  => Add(k, pair.Value)
+                   short v            => Add(k, v, 10),
+                   ushort v           => Add(k, v, 10),
+                   int v              => Add(k, v, 20),
+                   uint v             => Add(k, v, 20),
+                   long v             => Add(k, v, 30),
+                   ulong v            => Add(k, v, 30),
+                   float v            => Add(k, v, 3100),
+                   double v           => Add(k, v, 6100),
+                   decimal v          => Add(k, v, 2100),
+                   DateOnly v         => Add(k, v, 100),
+                   TimeOnly v         => Add(k, v, 100),
+                   TimeSpan v         => Add(k, v, 100),
+                   DateTimeOffset v   => Add(k, v, 100),
+                   DateTime v         => Add(k, v, 100),
+                   ISpanFormattable v => Add(k, v, bufferSize),
+                   _                  => Add(k, pair.Value.ToString() ?? "null")
                };
     }
 
 
     public JArray AddArray( in ReadOnlySpan<char> key )
     {
-        _sb.Append(key);
-        _sb.Append('=');
-        return new JArray(_context, _sb);
+        _writer.Indent().Append(key).Append('=');
+        return new JArray(ref _writer);
     }
     public JObject AddObject( in ReadOnlySpan<char> key )
     {
-        _sb.Append(key);
-        _sb.Append('=');
-        return new JObject(_context, _sb);
+        _writer.Indent().Append(key).Append('=');
+        return new JObject(ref _writer);
     }
 
 
-    private void NewLine() => _sb.Append('\n');
-    public void Dispose()
-    {
-        _sb.Append('}');
-        _sb.Append(',');
-    }
+    public void Dispose() => _writer.FinishBlock('}');
 }
