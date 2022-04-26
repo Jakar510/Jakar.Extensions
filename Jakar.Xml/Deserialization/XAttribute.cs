@@ -12,7 +12,7 @@ namespace Jakar.Xml.Deserialization;
 
 
 [SuppressMessage("ReSharper", "InconsistentNaming")]
-public readonly ref struct XAttribute
+public readonly ref struct JAttribute
 {
     private readonly ReadOnlySpan<char> _span;
     public readonly  ReadOnlySpan<char> Key;
@@ -20,15 +20,15 @@ public readonly ref struct XAttribute
     public readonly  bool               IsNameSpace;
 
 
-    public XAttribute( in ReadOnlySpan<char> span )
+    public JAttribute( in ReadOnlySpan<char> span )
     {
-        if ( span.StartsWith(Constants.OPEN_START) ) { throw new FormatException($"Cannot start with {Constants.OPEN_START}"); }
+        if ( span.StartsWith('<') ) { throw new FormatException($"Cannot start with {'<'}"); }
 
-        if ( span.Contains(Constants.OPEN_END) ) { throw new FormatException($"Cannot start with {Constants.OPEN_START}"); }
+        if ( span.Contains('>') ) { throw new FormatException($"Cannot start with {'<'}"); }
 
-        if ( span.EndsWith(Constants.CLOSE_START) ) { throw new FormatException($"Cannot start with {Constants.OPEN_START}"); }
+        if ( span.EndsWith("</") ) { throw new FormatException($"Cannot start with {'<'}"); }
 
-        if ( span.EndsWith(Constants.CLOSE_END) ) { throw new FormatException($"Cannot start with {Constants.OPEN_START}"); }
+        if ( span.EndsWith('>') ) { throw new FormatException($"Cannot start with {'<'}"); }
 
 
         _span       = span;

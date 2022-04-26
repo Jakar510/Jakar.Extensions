@@ -45,36 +45,36 @@ public readonly ref struct XNode
     {
         if ( xml.IsEmpty ) { throw new ArgumentNullException(nameof(xml)); }
 
-        if ( !xml.StartsWith(Constants.OPEN_START) ) { throw new FormatException($"Cannot start with {Constants.OPEN_START}"); }
+        if ( !xml.StartsWith('<') ) { throw new FormatException($"Cannot start with {'<'}"); }
 
-        if ( !xml.Contains(Constants.CLOSE_START) ) { throw new FormatException($"Cannot start with {Constants.OPEN_START}"); }
+        if ( !xml.Contains("</") ) { throw new FormatException($"Cannot start with {'<'}"); }
 
-        int nameEndIndex = xml.IndexOf(Constants.SPACE);
-        if ( nameEndIndex < 0 ) { throw new FormatException($"Cannot start with {Constants.OPEN_START}"); }
+        int nameEndIndex = xml.IndexOf(' ');
+        if ( nameEndIndex < 0 ) { throw new FormatException($"Cannot start with {'<'}"); }
 
 
         name = xml[1..nameEndIndex].Trim();
-        int close = xml.IndexOf(Constants.CLOSE_END);
+        int close = xml.IndexOf('>');
         start      = xml[..( close + 1 )].Trim();
         attributes = xml[nameEndIndex..close].Trim();
 
 
-        end = xml[( xml.Length - nameEndIndex - Constants.CLOSE_START.Length - 1 )..];
+        end = xml[( xml.Length - nameEndIndex - "</".Length - 1 )..];
 
-        if ( !end.EndsWith(Constants.CLOSE_END) ) { throw new FormatException($"Cannot start with {Constants.OPEN_START}"); }
+        if ( !end.EndsWith('>') ) { throw new FormatException($"Cannot start with {'<'}"); }
 
-        if ( !end.Contains(Constants.OPEN_END) ) { throw new FormatException($"Cannot start with {Constants.OPEN_START}"); }
+        if ( !end.Contains('>') ) { throw new FormatException($"Cannot start with {'<'}"); }
     }
     private static bool Validate( in ReadOnlySpan<char> xml, out int openEnd, out int endStart, out int endEnd )
     {
         if ( xml.IsEmpty ) { throw new ArgumentNullException(nameof(xml)); }
 
-        if ( !xml.StartsWith(Constants.OPEN_START) ) { throw new FormatException($"Cannot start with {Constants.OPEN_START}"); }
+        if ( !xml.StartsWith('<') ) { throw new FormatException($"Cannot start with {'<'}"); }
 
-        if ( !xml.Contains(Constants.CLOSE_START) ) { throw new FormatException($"Cannot start with {Constants.OPEN_START}"); }
+        if ( !xml.Contains("</") ) { throw new FormatException($"Cannot start with {'<'}"); }
 
-        openEnd = xml.IndexOf(Constants.CLOSE_END);
-        if ( openEnd < 0 ) { throw new FormatException($"Cannot start with {Constants.OPEN_START}"); }
+        openEnd = xml.IndexOf('>');
+        if ( openEnd < 0 ) { throw new FormatException($"Cannot start with {'<'}"); }
         
         ReadOnlySpan<char> temp = xml[( openEnd + 1 )..].Trim();
 
@@ -90,7 +90,7 @@ public readonly ref struct XNode
     {
         var attributes = new Dictionary<string, string>();
 
-        foreach ( XAttribute attribute in GetAttributes() )
+        foreach ( JAttribute attribute in GetAttributes() )
         {
             KeyValuePair<string, string> pair = attribute.ToPair();
             attributes.Add(pair.Key, pair.Value);
@@ -105,20 +105,20 @@ public readonly ref struct XNode
     {
         private readonly ReadOnlySpan<char> _xml;
         private          ReadOnlySpan<char> _span;
-        public           XAttribute         Current { get; private set; } = default;
+        public           JAttribute         Current { get; private set; } = default;
 
 
         public AttributeEnumerator( in ReadOnlySpan<char> span )
         {
             if ( span.IsEmpty ) { throw new ArgumentNullException(nameof(span)); }
 
-            if ( span.Contains(Constants.OPEN_START) ) { throw new FormatException($"Cannot start with {Constants.OPEN_START}"); }
+            if ( span.Contains('<') ) { throw new FormatException($"Cannot start with {'<'}"); }
 
-            if ( span.Contains(Constants.OPEN_END) ) { throw new FormatException($"Cannot start with {Constants.OPEN_START}"); }
+            if ( span.Contains('>') ) { throw new FormatException($"Cannot start with {'<'}"); }
 
-            if ( span.Contains(Constants.CLOSE_START) ) { throw new FormatException($"Cannot start with {Constants.OPEN_START}"); }
+            if ( span.Contains("</") ) { throw new FormatException($"Cannot start with {'<'}"); }
 
-            if ( span.Contains(Constants.CLOSE_END) ) { throw new FormatException($"Cannot start with {Constants.OPEN_START}"); }
+            if ( span.Contains('>') ) { throw new FormatException($"Cannot start with {'<'}"); }
 
             _xml = _span = span;
         }
@@ -135,11 +135,11 @@ public readonly ref struct XNode
                 return false;
             }
 
-            int                start = _span.IndexOf(Constants.SPACE);
+            int                start = _span.IndexOf(' ');
             ReadOnlySpan<char> temp  = _span[start..];
-            temp = temp[..temp.IndexOf(Constants.SPACE)];
+            temp = temp[..temp.IndexOf(' ')];
 
-            Current = new XAttribute(temp);
+            Current = new JAttribute(temp);
             return true;
         }
         public void Dispose() { }

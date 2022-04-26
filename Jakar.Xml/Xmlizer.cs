@@ -14,6 +14,10 @@ using Jakar.Xml.Deserialization;
 namespace Jakar.Xml;
 
 
+public interface IXmlizer { }
+
+
+
 public static class Xmlizer
 {
     /// <summary>
@@ -110,7 +114,7 @@ public static class Xmlizer
 /// <summary>
 /// A PREDICTABLE (de)serializer for any given object.
 /// <para>
-///	Primary goals are to be easily human readable, predictable and consistent.
+///	Primary goals are to be PERFORMANT, easily human readable, predictable and consistent.
 /// </para>
 /// </summary>
 /// <typeparam name="T"></typeparam>
@@ -148,9 +152,17 @@ public sealed class Xmlizer<T>
         attributeItem.InnerText = value;
         node.Attributes.Append(attributeItem);
     }
-    private void UpdateAttributes( in XmlNode node, in Type type )
+    private void UpdateAttributes( in XmlNode node, in Type? type )
     {
         if ( node.Attributes is null ) { throw new NullReferenceException(nameof(node.Attributes)); }
+
+        if ( type is null )
+        {
+            return;
+
+            // throw new ArgumentNullException(nameof(type));
+        }
+
 
         if ( type.IsAnyBuiltInType() ) { return; }
 
@@ -214,7 +226,7 @@ public sealed class Xmlizer<T>
         XmlNode child = _document.CreateElement(type?.GetNodeName() ?? Constants.NULL);
 
         UpdateAttributes(child, type);
-        if ( nameSpace is not null ) { AddAttribute(child, Constants.XMLS, nameSpace); }
+        if ( nameSpace is not null ) { AddAttribute(child, Constants.XMLS_TAG, nameSpace); }
 
         parent?.AppendChild(child);
 

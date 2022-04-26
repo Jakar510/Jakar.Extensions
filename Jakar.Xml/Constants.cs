@@ -9,12 +9,6 @@ namespace Jakar.Xml;
 
 public static class Constants
 {
-    public const char   SPACE          = ' ';
-    public const char   OPEN_START     = '<';
-    public const char   OPEN_END       = '>';
-    public const string CLOSE_START    = "</";
-    public const char   CLOSE_END      = '>';
-    public const char   EQUALS         = '=';
     public const string ITEM           = "Item";
     public const string GROUP          = "Group";
     public const string DICTIONARY     = "Dictionary";
