@@ -53,6 +53,13 @@ public static class GuidExtensions
     /// </summary>
     /// <param name = "value" > </param>
     /// <returns> </returns>
+    public static Guid? AsGuid( this string value ) => value.AsSpan().AsGuid();
+
+    /// <summary>
+    ///     <see href = "https://www.youtube.com/watch?v=B2yOjLyEZk0" > Writing C# without allocating ANY memory </see>
+    /// </summary>
+    /// <param name = "value" > </param>
+    /// <returns> </returns>
     public static Guid? AsGuid( this ReadOnlySpan<char> value )
     {
         Span<char> base64Chars = stackalloc char[24];

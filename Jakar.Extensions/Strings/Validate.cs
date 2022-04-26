@@ -63,7 +63,7 @@ public static partial class Validate
 
     public static Uri? ParseWebAddress( this string value ) => Uri.TryCreate(value, UriKind.Absolute, out Uri uriResult)
                                                                    ? uriResult
-                                                                   : null;
+                                                                   : default;
 
 
     public static bool IsEmailAddress( this string value ) => ValidateEmail(value) && IsValidEmail(value);

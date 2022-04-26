@@ -9,7 +9,7 @@ namespace Jakar.Extensions.FileSystemExtensions;
 
 
 [Serializable]
-public class LocalFile : BaseCollections<LocalFile>, TempFile.ITempFile, IEquatable<LocalFile>, IComparable<LocalFile>, LocalFile.IReadHandler, LocalFile.IAsyncReadHandler, IComparable
+public class LocalFile : BaseCollections<LocalFile>, TempFile.ITempFile, LocalFile.IReadHandler, LocalFile.IAsyncReadHandler
 {
     protected FileInfo? _info;
 

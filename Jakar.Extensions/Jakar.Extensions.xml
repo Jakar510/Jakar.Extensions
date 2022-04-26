@@ -1,0 +1,2961 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Jakar.Extensions</name>
+    </assembly>
+    <members>
+        <member name="M:Jakar.Extensions.Enumerations.Enums.GetEnumNamedValues``2">
+            <summary>
+                Inspired by
+                <seealso href = "https://stackoverflow.com/a/8086788/9530917" />
+            </summary>
+            <typeparam name = "TEnum" > </typeparam>
+            <typeparam name = "TValue" > </typeparam>
+            <returns> </returns>
+        </member>
+        <member name="T:Jakar.Extensions.Exceptions.Networking.ActivelyRefusedConnectionException">
+            <summary>
+                A web exception of unknown type occurred.
+            </summary>
+        </member>
+        <member name="T:Jakar.Extensions.Exceptions.Networking.ConnectFailureException">
+            <summary>
+                The remote service point could not be contacted at the transport level.
+            </summary>
+        </member>
+        <member name="T:Jakar.Extensions.Exceptions.Networking.ConnectionClosedException">
+            <summary>
+                The connection was prematurely closed.
+            </summary>
+        </member>
+        <member name="T:Jakar.Extensions.Exceptions.Networking.KeepAliveFailureException">
+            <summary>
+                The connection for a request that specifies the Keep-alive header was closed unexpectedly.
+            </summary>
+        </member>
+        <member name="T:Jakar.Extensions.Exceptions.Networking.MessageLengthLimitExceededException">
+            <summary>
+                A complete response was not received from the remote server.
+            </summary>
+        </member>
+        <member name="T:Jakar.Extensions.Exceptions.Networking.NameResolutionException">
+            <summary>
+                The name resolver service could not resolve the host name.
+            </summary>
+        </member>
+        <member name="T:Jakar.Extensions.Exceptions.Networking.PendingWebException">
+            <summary>
+                The remote service point could not be contacted at the transport level.
+            </summary>
+        </member>
+        <member name="T:Jakar.Extensions.Exceptions.Networking.PipelineFailureException">
+            <summary>
+                The remote service point could not be contacted at the transport level.
+            </summary>
+        </member>
+        <member name="T:Jakar.Extensions.Exceptions.Networking.ProtocolErrorException">
+            <summary>
+                A response was received from server but was indicated a protocol-level error.
+            </summary>
+        </member>
+        <member name="T:Jakar.Extensions.Exceptions.Networking.ReceiveFailureException">
+            <summary>
+                The request was canceled, the System.Net.WebRequest.Abort method was called,
+                or an unclassifiable error occurred. This is the default value for System.Net.WebException.Status.
+            </summary>
+        </member>
+        <member name="T:Jakar.Extensions.Exceptions.Networking.SecureChannelFailureException">
+            <summary>
+                An error occurred while establishing a connection using SSL.
+            </summary>
+        </member>
+        <member name="T:Jakar.Extensions.Exceptions.Networking.SendFailureException">
+            <summary>
+                A complete response was not received from the remote server.
+            </summary>
+        </member>
+        <member name="T:Jakar.Extensions.Exceptions.Networking.ServerProtocolViolationException">
+            <summary>
+                The response was not a valid HTTP response.
+            </summary>
+        </member>
+        <member name="T:Jakar.Extensions.Exceptions.Networking.TrustFailureException">
+            <summary>
+                A Server certificate could not be verified.
+            </summary>
+        </member>
+        <member name="T:Jakar.Extensions.Exceptions.Networking.UnknownWebErrorException">
+            <summary>
+                A web exception of unknown type occurred.
+            </summary>
+        </member>
+        <member name="P:Jakar.Extensions.FileSystemExtensions.LocalDirectory.CurrentDirectory">
+            <summary>
+                Gets or sets the application's fully qualified path of the current working directory.
+            </summary>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalDirectory.Create(Jakar.Extensions.FileSystemExtensions.LocalDirectory,System.String[])">
+            <summary>
+                Uses the
+                <paramref name = "path" />
+                and creates the tree structure based on
+                <paramref name = "subFolders" />
+            </summary>
+            <param name = "path" > </param>
+            <param name = "subFolders" > </param>
+            <returns>
+                <see cref = "T:Jakar.Extensions.FileSystemExtensions.LocalDirectory" />
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalDirectory.Create(System.String[])">
+            <summary>
+                Uses the
+                <see cref = "P:Jakar.Extensions.FileSystemExtensions.LocalDirectory.CurrentDirectory" />
+                and creates the tree structure based on
+                <paramref name = "subFolders" />
+            </summary>
+            <param name = "subFolders" > </param>
+            <returns>
+                <see cref = "T:Jakar.Extensions.FileSystemExtensions.LocalDirectory" />
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalDirectory.CreateTemp(System.String[])">
+            <summary>
+                Uses
+                <see cref = "M:System.IO.Path.GetTempPath" />
+                and creates the tree structure based on
+                <paramref name = "subFolders" />
+            </summary>
+            <param name = "subFolders" > </param>
+            <returns>
+                <see cref = "T:Jakar.Extensions.FileSystemExtensions.LocalDirectory" />
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalDirectory.Zip(Jakar.Extensions.FileSystemExtensions.LocalFile@,System.IO.Compression.CompressionLevel@)">
+            <summary>
+                Uses the
+                <see cref = "P:System.Text.Encoding.Default" />
+                encoding to used for the file names
+            </summary>
+            <param name = "output" > file path to write the zip to </param>
+            <param name = "compression" >
+                Defaults to
+                <see cref = "F:System.IO.Compression.CompressionLevel.Optimal" />
+            </param>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalDirectory.Zip(Jakar.Extensions.FileSystemExtensions.LocalFile@,System.Text.Encoding@,System.IO.Compression.CompressionLevel@)">
+            <summary>
+            
+            </summary>
+            <param name = "output" > file path to write the zip to </param>
+            <param name = "compression" >
+                Defaults to
+                <see cref = "F:System.IO.Compression.CompressionLevel.Optimal" />
+            </param>
+            <param name = "encoding" > The encoding used for the file names </param>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalDirectory.CreateSubDirectory(System.String[])">
+            <summary>
+                Gets the
+                <see cref = "T:Jakar.Extensions.FileSystemExtensions.LocalDirectory" />
+                object of the directory in this
+                <see cref = "T:Jakar.Extensions.FileSystemExtensions.LocalDirectory" />
+            </summary>
+            <param name = "paths" > </param>
+            <exception cref = "T:System.ArgumentException" > </exception>
+            <exception cref = "T:System.ArgumentNullException" > </exception>
+            <exception cref = "T:System.IO.DirectoryNotFoundException" > </exception>
+            <exception cref = "T:System.IO.IOException" > </exception>
+            <exception cref = "T:System.IO.PathTooLongException" > </exception>
+            <exception cref = "T:System.Security.SecurityException" > </exception>
+            <exception cref = "T:System.NotSupportedException" > </exception>
+            <returns>
+                <see cref = "T:Jakar.Extensions.FileSystemExtensions.LocalDirectory" />
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalDirectory.Join(System.String)">
+            <summary>
+                Gets the
+                <see cref = "T:Jakar.Extensions.FileSystemExtensions.LocalFile" />
+                object of the file in this
+                <see cref = "T:Jakar.Extensions.FileSystemExtensions.LocalDirectory" />
+            </summary>
+            <param name = "path" > </param>
+            <exception cref = "T:System.ArgumentException" > </exception>
+            <exception cref = "T:System.ArgumentNullException" > </exception>
+            <exception cref = "T:System.IO.DirectoryNotFoundException" > </exception>
+            <exception cref = "T:System.IO.IOException" > </exception>
+            <exception cref = "T:System.IO.PathTooLongException" > </exception>
+            <exception cref = "T:System.Security.SecurityException" > </exception>
+            <exception cref = "T:System.NotSupportedException" > </exception>
+            <returns>
+                <see cref = "T:Jakar.Extensions.FileSystemExtensions.LocalFile" />
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalDirectory.Combine(System.String)">
+            <summary>
+                Gets the path of the directory or file in this
+                <see cref = "T:Jakar.Extensions.FileSystemExtensions.LocalDirectory" />
+            </summary>
+            <param name = "subPaths" > </param>
+            <exception cref = "T:System.ArgumentException" > </exception>
+            <exception cref = "T:System.ArgumentNullException" > </exception>
+            <exception cref = "T:System.IO.DirectoryNotFoundException" > </exception>
+            <exception cref = "T:System.IO.IOException" > </exception>
+            <exception cref = "T:System.IO.PathTooLongException" > </exception>
+            <exception cref = "T:System.Security.SecurityException" > </exception>
+            <exception cref = "T:System.NotSupportedException" > </exception>
+            <returns>
+                <see cref = "T:System.String" />
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalDirectory.Combine(System.String[])">
+            <summary>
+                Gets the path of the directory or file in this
+                <see cref = "T:Jakar.Extensions.FileSystemExtensions.LocalDirectory" />
+            </summary>
+            <param name = "subPaths" > </param>
+            <exception cref = "T:System.ArgumentException" > </exception>
+            <exception cref = "T:System.ArgumentNullException" > </exception>
+            <exception cref = "T:System.IO.DirectoryNotFoundException" > </exception>
+            <exception cref = "T:System.IO.IOException" > </exception>
+            <exception cref = "T:System.IO.PathTooLongException" > </exception>
+            <exception cref = "T:System.Security.SecurityException" > </exception>
+            <exception cref = "T:System.NotSupportedException" > </exception>
+            <returns>
+                <see cref = "T:System.String" />
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalDirectory.Delete">
+            <summary>
+                Deletes this directory if it is empty.
+            </summary>
+            <exception cref = "T:System.UnauthorizedAccessException" > </exception>
+            <exception cref = "T:System.IO.DirectoryNotFoundException" > </exception>
+            <exception cref = "T:System.IO.IOException" > </exception>
+            <exception cref = "T:System.Security.SecurityException" > </exception>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalDirectory.Delete(System.Boolean)">
+            <summary>
+                Deletes sub-directories and files. This occurs on another thread in Windows, and is not blocking.
+            </summary>
+            <param name = "recursive" > </param>
+            <exception cref = "T:System.UnauthorizedAccessException" > </exception>
+            <exception cref = "T:System.IO.DirectoryNotFoundException" > </exception>
+            <exception cref = "T:System.IO.IOException" > </exception>
+            <exception cref = "T:System.Security.SecurityException" > </exception>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalDirectory.DeleteAllRecursively">
+            <summary>
+                Deletes sub-directories and files.
+            </summary>
+            <exception cref = "T:System.UnauthorizedAccessException" > </exception>
+            <exception cref = "T:System.IO.DirectoryNotFoundException" > </exception>
+            <exception cref = "T:System.IO.FileNotFoundException" > </exception>
+            <exception cref = "T:System.IO.IOException" > </exception>
+            <exception cref = "T:System.Security.SecurityException" > </exception>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalDirectory.DeleteAllRecursivelyAsync">
+            <summary>
+                Asynchronously deletes sub-directories and files.
+            </summary>
+            <exception cref = "T:System.UnauthorizedAccessException" > </exception>
+            <exception cref = "T:System.IO.DirectoryNotFoundException" > </exception>
+            <exception cref = "T:System.IO.FileNotFoundException" > </exception>
+            <exception cref = "T:System.IO.IOException" > </exception>
+            <exception cref = "T:System.Security.SecurityException" > </exception>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalDirectory.DeleteFiles">
+            <summary>
+                Deletes sub-directories.
+            </summary>
+            <exception cref = "T:System.UnauthorizedAccessException" > </exception>
+            <exception cref = "T:System.IO.DirectoryNotFoundException" > </exception>
+            <exception cref = "T:System.IO.FileNotFoundException" > </exception>
+            <exception cref = "T:System.IO.IOException" > </exception>
+            <exception cref = "T:System.Security.SecurityException" > </exception>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalDirectory.DeleteFilesAsync">
+            <summary>
+                Asynchronously deletes files.
+            </summary>
+            <exception cref = "T:System.UnauthorizedAccessException" > </exception>
+            <exception cref = "T:System.IO.DirectoryNotFoundException" > </exception>
+            <exception cref = "T:System.IO.FileNotFoundException" > </exception>
+            <exception cref = "T:System.IO.IOException" > </exception>
+            <exception cref = "T:System.Security.SecurityException" > </exception>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalDirectory.DeleteSubFolders">
+            <summary>
+                Deletes sub-directories.
+            </summary>
+            <exception cref = "T:System.UnauthorizedAccessException" > </exception>
+            <exception cref = "T:System.IO.DirectoryNotFoundException" > </exception>
+            <exception cref = "T:System.IO.FileNotFoundException" > </exception>
+            <exception cref = "T:System.IO.IOException" > </exception>
+            <exception cref = "T:System.Security.SecurityException" > </exception>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalDirectory.DeleteSubFoldersAsync">
+            <summary>
+                Asynchronously deletes sub-directories.
+            </summary>
+            <exception cref = "T:System.UnauthorizedAccessException" > </exception>
+            <exception cref = "T:System.IO.DirectoryNotFoundException" > </exception>
+            <exception cref = "T:System.IO.FileNotFoundException" > </exception>
+            <exception cref = "T:System.IO.IOException" > </exception>
+            <exception cref = "T:System.Security.SecurityException" > </exception>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalDirectory.Watcher.#ctor">
+            <summary>
+                Uses the
+                <see cref = "P:Jakar.Extensions.FileSystemExtensions.LocalDirectory.CurrentDirectory" />
+            </summary>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalFile.ChangeExtension(Jakar.Extensions.Http.MimeType)">
+            <summary>
+                Changes the extension of the file.
+            </summary>
+            <param name = "ext" > </param>
+            <returns>
+                The modified path information.
+                On Windows, if ext is null or empty, the path information is unchanged.
+                If the extension is null, the returned path is with the extension removed.
+                If the path has no extension, and the extension is not null, the returned string contains the extension appended to the end of the path.
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalFile.ChangeExtension(System.String)">
+            <summary>
+                Changes the extension of the file.
+            </summary>
+            <param name = "ext" > </param>
+            <returns>
+                The modified path information.
+                On Windows, if ext is null or empty, the path information is unchanged.
+                If the extension is null, the returned path is with the extension removed.
+                If the path has no extension, and the extension is not null, the returned string contains the extension appended to the end of the path.
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalFile.FromUri(System.Uri)">
+            <summary>
+            
+            </summary>
+            <param name = "uri" > </param>
+            <exception cref = "T:System.ArgumentNullException" > </exception>
+            <exception cref = "T:System.Security.SecurityException" > </exception>
+            <exception cref = "T:System.ArgumentException" > </exception>
+            <exception cref = "T:System.UnauthorizedAccessException" > </exception>
+            <exception cref = "T:System.IO.PathTooLongException" > </exception>
+            <exception cref = "T:System.NotSupportedException" > </exception>
+            <returns> </returns>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalFile.CreateTempFileAndOpen(Jakar.Extensions.FileSystemExtensions.LocalFile@)">
+            <summary>
+            
+            </summary>
+            <param name = "file" > </param>
+            <exception cref = "T:System.NullReferenceException" > </exception>
+            <exception cref = "T:System.ArgumentException" > </exception>
+            <exception cref = "T:System.ArgumentNullException" > </exception>
+            <exception cref = "T:System.IO.FileNotFoundException" > </exception>
+            <exception cref = "T:System.IO.PathTooLongException" > </exception>
+            <exception cref = "T:System.IO.DirectoryNotFoundException" > </exception>
+            <exception cref = "T:System.IO.IOException" > </exception>
+            <exception cref = "T:System.NotSupportedException" > </exception>
+            <returns> </returns>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalFile.CreateAndOpen(System.String,Jakar.Extensions.FileSystemExtensions.LocalFile@)">
+            <summary>
+            
+            </summary>
+            <param name = "path" > </param>
+            <param name = "file" > </param>
+            <exception cref = "T:System.NullReferenceException" > </exception>
+            <exception cref = "T:System.ArgumentException" > </exception>
+            <exception cref = "T:System.ArgumentNullException" > </exception>
+            <exception cref = "T:System.IO.FileNotFoundException" > </exception>
+            <exception cref = "T:System.IO.PathTooLongException" > </exception>
+            <exception cref = "T:System.IO.DirectoryNotFoundException" > </exception>
+            <exception cref = "T:System.IO.IOException" > </exception>
+            <exception cref = "T:System.NotSupportedException" > </exception>
+            <returns> </returns>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalFile.Delete">
+            <summary>
+                Permanently deletes a file.
+            </summary>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalFile.Encrypt">
+            <summary>
+                Encrypts the file so that only the account used to encrypt the file can decrypt it.
+            </summary>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalFile.Decrypt">
+            <summary>
+                Decrypts a file that was encrypted by the current account using the
+                <see cref = "M:System.IO.File.Encrypt(System.String)" />
+                method.
+            </summary>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalFile.ToUri(System.Nullable{Jakar.Extensions.Http.MimeType})">
+            <summary>
+                Creates an
+                <see cref = "F:System.UriKind.Absolute" />
+                based on the detected
+                <see cref = "P:Jakar.Extensions.FileSystemExtensions.LocalFile.Mime" />
+            </summary>
+            <param name = "mime" >
+                To override the detected
+                <see cref = "P:Jakar.Extensions.FileSystemExtensions.LocalFile.Mime" />
+                , provide a non-null value
+            </param>
+            <returns> </returns>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalFile.ToUri(System.Uri,System.String@,System.Nullable{Jakar.Extensions.Http.MimeType})">
+            <summary>
+                Creates a
+                <see cref = "T:System.Uri" />
+                using provided prefix, and
+                <see cref = "M:System.Web.HttpUtility.UrlEncode(System.String)" />
+                to encode the
+                <see cref = "P:Jakar.Extensions.FileSystemExtensions.LocalFile.FullPath" />
+                .
+            </summary>
+            <param name = "baseUri" > </param>
+            <param name = "prefix" >
+                The key to attach the
+                <see cref = "P:Jakar.Extensions.FileSystemExtensions.LocalFile.FullPath" />
+                to. Defaults to "?path="
+            </param>
+            <param name = "mime" >
+                To override the detected
+                <see cref = "P:Jakar.Extensions.FileSystemExtensions.LocalFile.Mime" />
+                , provide a non-null value
+            </param>
+            <returns> </returns>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalFile.Clone(Jakar.Extensions.FileSystemExtensions.LocalFile,System.Threading.CancellationToken)">
+            <summary>
+                Copies this file to the
+                <paramref name = "newFile" />
+            </summary>
+            <param name = "newFile" > </param>
+            <param name = "token" > </param>
+            <returns> </returns>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalFile.Move(System.String)">
+            <summary>
+                Moves this file to the new
+                <paramref name = "path" />
+            </summary>
+            <param name = "path" > </param>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalFile.Move(Jakar.Extensions.FileSystemExtensions.LocalFile)">
+            <summary>
+                Moves this file to the new
+                <paramref name = "file" />
+                location
+            </summary>
+            <param name = "file" > </param>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalFile.Hash_MD5">
+            <summary>
+                Calculates a file hash using
+                <see cref = "T:System.Security.Cryptography.MD5" />
+            </summary>
+            <returns>
+                <see cref = "T:System.String" />
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalFile.Hash_SHA1">
+            <summary>
+                Calculates a file hash using
+                <see cref = "T:System.Security.Cryptography.SHA1" />
+            </summary>
+            <returns>
+                <see cref = "T:System.String" />
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalFile.Hash_SHA256">
+            <summary>
+                Calculates a file hash using
+                <see cref = "T:System.Security.Cryptography.SHA256" />
+            </summary>
+            <returns>
+                <see cref = "T:System.String" />
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalFile.Hash_SHA384">
+            <summary>
+                Calculates a file hash using
+                <see cref = "T:System.Security.Cryptography.SHA384" />
+            </summary>
+            <returns>
+                <see cref = "T:System.String" />
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalFile.Hash_SHA512">
+            <summary>
+                Calculates a file hash using
+                <see cref = "T:System.Security.Cryptography.SHA512" />
+            </summary>
+            <returns>
+                <see cref = "T:System.String" />
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalFile.Open(System.IO.FileMode,System.IO.FileAccess,System.IO.FileShare,System.Int32,System.Boolean)">
+            <summary>
+                <para>
+                    <seealso href = "https://stackoverflow.com/a/11541330/9530917" />
+                </para>
+            </summary>
+            <param name = "mode" > </param>
+            <param name = "access" > </param>
+            <param name = "share" > </param>
+            <param name = "bufferSize" > </param>
+            <param name = "useAsync" > </param>
+            <exception cref = "T:System.IO.FileNotFoundException" > </exception>
+            <exception cref = "T:System.ArgumentException" > </exception>
+            <exception cref = "T:System.ArgumentNullException" > </exception>
+            <exception cref = "T:System.NullReferenceException" > </exception>
+            <exception cref = "T:System.NotSupportedException" > </exception>
+            <exception cref = "T:System.ArgumentOutOfRangeException" > </exception>
+            <exception cref = "T:System.IO.IOException" > </exception>
+            <exception cref = "T:System.Security.SecurityException" > </exception>
+            <exception cref = "T:System.IO.DirectoryNotFoundException" > </exception>
+            <exception cref = "T:System.UnauthorizedAccessException" > </exception>
+            <exception cref = "T:System.IO.PathTooLongException" > </exception>
+            <returns>
+                <see cref = "T:System.IO.FileStream" />
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalFile.OpenRead(System.Int32,System.Boolean)">
+            <summary>
+                Opens file for read only actions. If it doesn't exist,
+                <see cref = "T:System.IO.FileNotFoundException" />
+                will be raised.
+            </summary>
+            <param name = "bufferSize" > </param>
+            <param name = "useAsync" > </param>
+            <exception cref = "T:System.IO.FileNotFoundException" > </exception>
+            <exception cref = "T:System.ArgumentException" > </exception>
+            <exception cref = "T:System.ArgumentNullException" > </exception>
+            <exception cref = "T:System.NotSupportedException" > </exception>
+            <exception cref = "T:System.NullReferenceException" > </exception>
+            <exception cref = "T:System.ArgumentOutOfRangeException" > </exception>
+            <exception cref = "T:System.IO.IOException" > </exception>
+            <exception cref = "T:System.Security.SecurityException" > </exception>
+            <exception cref = "T:System.IO.DirectoryNotFoundException" > </exception>
+            <exception cref = "T:System.UnauthorizedAccessException" > </exception>
+            <exception cref = "T:System.IO.PathTooLongException" > </exception>
+            <returns>
+                <see cref = "T:System.IO.FileStream" />
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalFile.OpenWrite(System.IO.FileMode,System.Int32,System.Boolean)">
+            <summary>
+                Opens file for write only actions. If it doesn't exist, file will be created.
+            </summary>
+            <param name = "mode" > </param>
+            <param name = "bufferSize" > </param>
+            <param name = "useAsync" > </param>
+            <exception cref = "T:System.IO.FileNotFoundException" > </exception>
+            <exception cref = "T:System.ArgumentException" > </exception>
+            <exception cref = "T:System.ArgumentNullException" > </exception>
+            <exception cref = "T:System.NotSupportedException" > </exception>
+            <exception cref = "T:System.NullReferenceException" > </exception>
+            <exception cref = "T:System.ArgumentOutOfRangeException" > </exception>
+            <exception cref = "T:System.IO.IOException" > </exception>
+            <exception cref = "T:System.Security.SecurityException" > </exception>
+            <exception cref = "T:System.IO.DirectoryNotFoundException" > </exception>
+            <exception cref = "T:System.UnauthorizedAccessException" > </exception>
+            <exception cref = "T:System.IO.PathTooLongException" > </exception>
+            <returns>
+                <see cref = "T:System.IO.FileStream" />
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalFile.Write(System.Text.StringBuilder)">
+            <summary>
+                Write the
+                <paramref name = "payload" />
+                to the file.
+            </summary>
+            <param name = "payload" > the data being written to the file </param>
+            <exception cref = "T:System.NullReferenceException" > </exception>
+            <exception cref = "T:System.ArgumentException" > </exception>
+            <exception cref = "T:System.ArgumentNullException" > </exception>
+            <exception cref = "T:System.IO.FileNotFoundException" > </exception>
+            <returns>
+                <see cref = "T:System.Threading.Tasks.Task" />
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalFile.WriteAsync(System.Text.StringBuilder)">
+            <summary>
+                Write the
+                <paramref name = "payload" />
+                to the file.
+            </summary>
+            <param name = "payload" > the data being written to the file </param>
+            <exception cref = "T:System.NullReferenceException" > </exception>
+            <exception cref = "T:System.ArgumentException" > </exception>
+            <exception cref = "T:System.ArgumentNullException" > </exception>
+            <exception cref = "T:System.IO.FileNotFoundException" > </exception>
+            <returns>
+                <see cref = "T:System.Threading.Tasks.Task" />
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalFile.Write(System.String)">
+            <summary>
+                Write the
+                <paramref name = "payload" />
+                to the file.
+            </summary>
+            <param name = "payload" > the data being written to the file </param>
+            <exception cref = "T:System.NullReferenceException" > </exception>
+            <exception cref = "T:System.ArgumentException" > </exception>
+            <exception cref = "T:System.ArgumentNullException" > </exception>
+            <exception cref = "T:System.IO.FileNotFoundException" > </exception>
+            <returns>
+                <see cref = "T:System.Threading.Tasks.Task" />
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalFile.WriteAsync(System.String)">
+            <summary>
+                Write the
+                <paramref name = "payload" />
+                to the file.
+            </summary>
+            <param name = "payload" > the data being written to the file </param>
+            <exception cref = "T:System.NullReferenceException" > </exception>
+            <exception cref = "T:System.ArgumentException" > </exception>
+            <exception cref = "T:System.ArgumentNullException" > </exception>
+            <exception cref = "T:System.IO.FileNotFoundException" > </exception>
+            <returns>
+                <see cref = "T:System.Threading.Tasks.Task" />
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalFile.Write(System.Byte[])">
+            <summary>
+                Write the
+                <paramref name = "payload" />
+                to the file.
+            </summary>
+            <param name = "payload" > the data being written to the file </param>
+            <exception cref = "T:System.NullReferenceException" > </exception>
+            <exception cref = "T:System.ArgumentException" > </exception>
+            <exception cref = "T:System.IO.FileNotFoundException" > </exception>
+            <returns>
+                <see cref = "T:System.Threading.Tasks.Task" />
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalFile.WriteAsync(System.Byte[],System.Threading.CancellationToken)">
+            <summary>
+                Write the
+                <paramref name = "payload" />
+                to the file.
+            </summary>
+            <param name = "payload" > the data being written to the file </param>
+            <param name = "token" > </param>
+            <exception cref = "T:System.NullReferenceException" > </exception>
+            <exception cref = "T:System.ArgumentException" > </exception>
+            <exception cref = "T:System.IO.FileNotFoundException" > </exception>
+            <returns>
+                <see cref = "T:System.Threading.Tasks.Task" />
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalFile.Write(System.Span{System.Byte})">
+            <summary>
+                Write the
+                <paramref name = "payload" />
+                to the file.
+            </summary>
+            <param name = "payload" > the data being written to the file </param>
+            <exception cref = "T:System.NullReferenceException" > </exception>
+            <exception cref = "T:System.ArgumentException" > </exception>
+            <exception cref = "T:System.ArgumentNullException" > </exception>
+            <exception cref = "T:System.IO.FileNotFoundException" > </exception>
+            <returns>
+                <see cref = "T:System.Threading.Tasks.Task" />
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalFile.Write(System.ReadOnlySpan{System.Byte})">
+            <summary>
+                Write the
+                <paramref name = "payload" />
+                to the file.
+            </summary>
+            <param name = "payload" > the data being written to the file </param>
+            <exception cref = "T:System.NullReferenceException" > </exception>
+            <exception cref = "T:System.ArgumentException" > </exception>
+            <exception cref = "T:System.ArgumentNullException" > </exception>
+            <exception cref = "T:System.IO.FileNotFoundException" > </exception>
+            <returns>
+                <see cref = "T:System.Threading.Tasks.Task" />
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalFile.Write(System.ReadOnlyMemory{System.Byte})">
+            <summary>
+                Write the
+                <paramref name = "payload" />
+                to the file.
+            </summary>
+            <param name = "payload" > the data being written to the file </param>
+            <exception cref = "T:System.NullReferenceException" > </exception>
+            <exception cref = "T:System.ArgumentException" > </exception>
+            <exception cref = "T:System.ArgumentNullException" > </exception>
+            <exception cref = "T:System.IO.FileNotFoundException" > </exception>
+            <returns>
+                <see cref = "T:System.Threading.Tasks.Task" />
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalFile.WriteAsync(System.ReadOnlyMemory{System.Byte},System.Threading.CancellationToken)">
+            <summary>
+                Write the
+                <paramref name = "payload" />
+                to the file.
+            </summary>
+            <param name = "payload" > the data being written to the file </param>
+            <param name = "token" > </param>
+            <exception cref = "T:System.NullReferenceException" > </exception>
+            <exception cref = "T:System.ArgumentException" > </exception>
+            <exception cref = "T:System.IO.FileNotFoundException" > </exception>
+            <returns>
+                <see cref = "T:System.Threading.Tasks.Task" />
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalFile.Write(System.ReadOnlyMemory{System.Char})">
+            <summary>
+                Write the
+                <paramref name = "payload" />
+                to the file.
+            </summary>
+            <param name = "payload" > the data being written to the file </param>
+            <exception cref = "T:System.NullReferenceException" > </exception>
+            <exception cref = "T:System.ArgumentException" > </exception>
+            <exception cref = "T:System.ArgumentNullException" > </exception>
+            <exception cref = "T:System.IO.FileNotFoundException" > </exception>
+            <returns>
+                <see cref = "T:System.Threading.Tasks.Task" />
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalFile.WriteAsync(System.ReadOnlyMemory{System.Char},System.Threading.CancellationToken)">
+            <summary>
+                Write the
+                <paramref name = "payload" />
+                to the file.
+            </summary>
+            <param name = "payload" > the data being written to the file </param>
+            <param name = "token" > </param>
+            <exception cref = "T:System.NullReferenceException" > </exception>
+            <exception cref = "T:System.ArgumentException" > </exception>
+            <exception cref = "T:System.IO.FileNotFoundException" > </exception>
+            <returns>
+                <see cref = "T:System.Threading.Tasks.Task" />
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalFile.Write(System.IO.Stream)">
+            <summary>
+                Write the
+                <paramref name = "payload" />
+                to the file.
+            </summary>
+            <param name = "payload" > the data being written to the file </param>
+            <exception cref = "T:System.NullReferenceException" > </exception>
+            <exception cref = "T:System.ArgumentException" > </exception>
+            <exception cref = "T:System.ArgumentNullException" > </exception>
+            <exception cref = "T:System.IO.FileNotFoundException" > </exception>
+            <returns>
+                <see cref = "T:System.Threading.Tasks.Task" />
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalFile.WriteAsync(System.IO.Stream,System.Threading.CancellationToken)">
+            <summary>
+                Write the
+                <paramref name = "payload" />
+                to the file.
+            </summary>
+            <param name = "payload" > the data being written to the file </param>
+            <param name = "token" > </param>
+            <exception cref = "T:System.NullReferenceException" > </exception>
+            <exception cref = "T:System.ArgumentException" > </exception>
+            <exception cref = "T:System.ArgumentNullException" > </exception>
+            <exception cref = "T:System.IO.FileNotFoundException" > </exception>
+            <returns>
+                <see cref = "T:System.Threading.Tasks.Task" />
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalFile.Write(System.Uri)">
+            <summary>
+                Write the
+                <paramref name = "uri" />
+                to the file.
+            </summary>
+            <param name = "uri" > the data being written to the file </param>
+            <exception cref = "T:System.NullReferenceException" > </exception>
+            <exception cref = "T:System.ArgumentException" > </exception>
+            <exception cref = "T:System.ArgumentNullException" > </exception>
+            <exception cref = "T:System.IO.FileNotFoundException" > </exception>
+            <returns>
+                <see cref = "T:System.Threading.Tasks.Task" />
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalFile.WriteAsync(System.Uri,System.Threading.CancellationToken)">
+            <summary>
+                Write the
+                <paramref name = "uri" />
+                to the file.
+            </summary>
+            <param name = "uri" > the data being written to the file </param>
+            <param name = "token" > </param>
+            <exception cref = "T:System.NullReferenceException" > </exception>
+            <exception cref = "T:System.ArgumentException" > </exception>
+            <exception cref = "T:System.ArgumentNullException" > </exception>
+            <exception cref = "T:System.IO.FileNotFoundException" > </exception>
+            <returns>
+                <see cref = "T:System.Threading.Tasks.Task" />
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalFile.SaveToFileAsync(System.String,System.IO.Stream,System.Threading.CancellationToken)">
+            <summary>
+                Write the
+                <paramref name = "payload" />
+                to the file.
+            </summary>
+            <param name = "payload" > the data being written to the file </param>
+            <param name = "path" > </param>
+            <param name = "token" > </param>
+            <exception cref = "T:System.ArgumentNullException" > </exception>
+            <exception cref = "T:System.Net.WebException" > </exception>
+            <exception cref = "T:System.NotSupportedException" > </exception>
+            <returns> </returns>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalFile.SaveToFileAsync(System.String,System.ReadOnlyMemory{System.Byte},System.Threading.CancellationToken)">
+            <summary>
+                Write the
+                <paramref name = "payload" />
+                to the file.
+            </summary>
+            <param name = "payload" > the data being written to the file </param>
+            <param name = "path" > </param>
+            <param name = "token" > </param>
+            <exception cref = "T:System.ArgumentNullException" > </exception>
+            <exception cref = "T:System.Net.WebException" > </exception>
+            <exception cref = "T:System.NotSupportedException" > </exception>
+            <returns>
+                <see cref = "T:Jakar.Extensions.FileSystemExtensions.LocalFile" />
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalFile.SaveToFile(System.String,System.String)">
+            <summary>
+                Downloads the content of the web url to the specified file.
+            </summary>
+            <param name = "path" > file path / location </param>
+            <param name = "uri" > the link to download </param>
+            <exception cref = "T:System.ArgumentNullException" > </exception>
+            <exception cref = "T:System.Net.WebException" > </exception>
+            <exception cref = "T:System.NotSupportedException" > </exception>
+            <returns> </returns>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalFile.SaveToFile(System.String,System.Uri)">
+            <summary>
+                Downloads the content of the web url to the specified file.
+            </summary>
+            <param name = "path" > file path / location </param>
+            <param name = "uri" > the link to download </param>
+            <exception cref = "T:System.ArgumentNullException" > </exception>
+            <exception cref = "T:System.Net.WebException" > </exception>
+            <exception cref = "T:System.NotSupportedException" > </exception>
+            <returns> </returns>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalFile.SaveToFileAsync(System.String,System.String)">
+            <summary>
+                Downloads the content of the web url to the specified file, asynchronously.
+            </summary>
+            <param name = "path" > file path / location </param>
+            <param name = "uri" > the link to download </param>
+            <exception cref = "T:System.ArgumentNullException" > </exception>
+            <exception cref = "T:System.Net.WebException" > </exception>
+            <exception cref = "T:System.NotSupportedException" > </exception>
+            <returns> </returns>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalFile.SaveToFileAsync(System.String,System.Uri)">
+            <summary>
+                Downloads the content of the web url to the specified file, asynchronously.
+            </summary>
+            <param name = "path" > file path / location </param>
+            <param name = "uri" > the link to download </param>
+            <exception cref = "T:System.ArgumentNullException" > </exception>
+            <exception cref = "T:System.Net.WebException" > </exception>
+            <exception cref = "T:System.NotSupportedException" > </exception>
+            <returns> </returns>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalFile.Jakar#Extensions#FileSystemExtensions#LocalFile#IReadHandler#AsJson``1">
+            <summary>
+                Reads the contents of the file as a
+                <see cref = "T:System.String" />
+                .
+            </summary>
+            <exception cref = "T:System.NullReferenceException" > if FullPath is null or empty </exception>
+            <exception cref = "T:System.IO.FileNotFoundException" > if file is not found </exception>
+            <returns>
+                <see cref = "T:System.String" />
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalFile.Jakar#Extensions#FileSystemExtensions#LocalFile#IReadHandler#AsString">
+            <summary>
+                Reads the contents of the file as a
+                <see cref = "T:System.String" />
+                .
+            </summary>
+            <exception cref = "T:System.NullReferenceException" > if FullPath is null or empty </exception>
+            <exception cref = "T:System.IO.FileNotFoundException" > if file is not found </exception>
+            '
+            <returns>
+                <see cref = "T:System.String" />
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalFile.Jakar#Extensions#FileSystemExtensions#LocalFile#IReadHandler#AsSpan">
+            <summary>
+                Reads the contents of the file as a
+                <see cref = "!:ReadOnlySpan&lt;byte&gt;" />
+                .
+            </summary>
+            <exception cref = "T:System.NullReferenceException" > if FullPath is null or empty </exception>
+            <exception cref = "T:System.IO.FileNotFoundException" > if file is not found </exception>
+            <returns>
+                <see cref = "!:ReadOnlySpan&lt;byte&gt;" />
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalFile.Jakar#Extensions#FileSystemExtensions#LocalFile#IReadHandler#AsBytes">
+            <summary>
+                Reads the contents of the file as a byte array.
+            </summary>
+            <exception cref = "T:System.NullReferenceException" > if FullPath is null or empty </exception>
+            <exception cref = "T:System.IO.FileNotFoundException" > if file is not found </exception>
+            <returns>
+                <see cref = "!:byte[]" />
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalFile.Jakar#Extensions#FileSystemExtensions#LocalFile#IReadHandler#AsMemory">
+            <summary>
+                Reads the contents of the file as a
+                <see cref = "!:ReadOnlyMemory&lt;byte&gt;" />
+                .
+            </summary>
+            <exception cref = "T:System.NullReferenceException" > if FullPath is null or empty </exception>
+            <exception cref = "T:System.IO.FileNotFoundException" > if file is not found </exception>
+            <returns>
+                <see cref = "!:ReadOnlyMemory&lt;byte&gt;" />
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalFile.IReadHandler.AsSpan">
+            <summary>
+                Reads the contents of the file as a
+                <see cref = "!:ReadOnlySpan&lt;byte&gt;" />
+                .
+            </summary>
+            <exception cref = "T:System.NullReferenceException" > if FullPath is null or empty </exception>
+            <exception cref = "T:System.IO.FileNotFoundException" > if file is not found </exception>
+            <returns>
+                <see cref = "!:ReadOnlySpan&lt;byte&gt;" />
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalFile.IReadHandler.AsString">
+            <summary>
+                Reads the contents of the file as a
+                <see cref = "T:System.String" />
+                .
+            </summary>
+            <exception cref = "T:System.NullReferenceException" > if FullPath is null or empty </exception>
+            <exception cref = "T:System.IO.FileNotFoundException" > if file is not found </exception>
+            '
+            <returns>
+                <see cref = "T:System.String" />
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalFile.IReadHandler.AsJson``1">
+            <summary>
+                Reads the contents of the file as a
+                <see cref = "T:System.String" />
+                .
+            </summary>
+            <exception cref = "T:System.NullReferenceException" > if FullPath is null or empty </exception>
+            <exception cref = "T:System.IO.FileNotFoundException" > if file is not found </exception>
+            <returns>
+                <see cref = "T:System.String" />
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalFile.IReadHandler.AsBytes">
+            <summary>
+                Reads the contents of the file as a byte array.
+            </summary>
+            <exception cref = "T:System.NullReferenceException" > if FullPath is null or empty </exception>
+            <exception cref = "T:System.IO.FileNotFoundException" > if file is not found </exception>
+            <returns>
+                <see cref = "!:byte[]" />
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalFile.IReadHandler.AsMemory">
+            <summary>
+                Reads the contents of the file as a
+                <see cref = "!:ReadOnlyMemory&lt;byte&gt;" />
+                .
+            </summary>
+            <exception cref = "T:System.NullReferenceException" > if FullPath is null or empty </exception>
+            <exception cref = "T:System.IO.FileNotFoundException" > if file is not found </exception>
+            <returns>
+                <see cref = "!:ReadOnlyMemory&lt;byte&gt;" />
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalFile.IAsyncReadHandler.AsJson``1">
+            <summary>
+                Reads the contents of the file as a
+                <see cref = "T:System.String" />
+                , then calls
+                <see cref = "M:Jakar.Extensions.Strings.JsonExtensions.FromJson``1(System.String)" />
+                on it, asynchronously.
+            </summary>
+            <typeparam name = "T" > </typeparam>
+            <exception cref = "T:System.NullReferenceException" > if FullPath is null or empty </exception>
+            <exception cref = "T:System.IO.FileNotFoundException" > if file is not found </exception>
+            <exception cref = "T:Newtonsoft.Json.JsonReaderException" > if an error in deserialization occurs </exception>
+            <returns>
+                <typeparamref name = "T" />
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalFile.IAsyncReadHandler.AsString">
+            <summary>
+                Reads the contents of the file as a
+                <see cref = "T:System.String" />
+                , asynchronously.
+            </summary>
+            <exception cref = "T:System.NullReferenceException" > if FullPath is null or empty </exception>
+            <exception cref = "T:System.IO.FileNotFoundException" > if file is not found </exception>
+            <returns>
+                <see cref = "T:System.String" />
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalFile.IAsyncReadHandler.AsBytes(System.Threading.CancellationToken)">
+            <summary>
+                Reads the contents of the file as a byte array.
+            </summary>
+            <exception cref = "T:System.NullReferenceException" > if FullPath is null or empty </exception>
+            <exception cref = "T:System.IO.FileNotFoundException" > if file is not found </exception>
+            <returns>
+                <see cref = "!:byte[]" />
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalFile.IAsyncReadHandler.AsMemory(System.Threading.CancellationToken)">
+            <summary>
+                Reads the contents of the file as a
+                <see cref = "!:ReadOnlyMemory&lt;byte&gt;" />
+                , asynchronously.
+            </summary>
+            <param name = "token" > </param>
+            <exception cref = "T:System.NullReferenceException" > if FullPath is null or empty </exception>
+            <exception cref = "T:System.IO.FileNotFoundException" > if file is not found </exception>
+            <returns>
+                <see cref = "!:ReadOnlyMemory&lt;byte&gt;" />
+            </returns>
+        </member>
+        <member name="T:Jakar.Extensions.FileSystemExtensions.LocalFile.Watcher">
+            <summary>
+                A collection of files that are in the
+                <see cref = "T:Jakar.Extensions.FileSystemExtensions.LocalDirectory" />
+            </summary>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.PathExtensions.GetFileName(System.String)">
+            <summary>
+                extension method for
+                <see cref = "M:System.IO.Path.GetFileName(System.String)" />
+            </summary>
+            <param name = "path" > </param>
+            <returns> </returns>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.PathExtensions.GetFileNameWithoutExtension(System.String)">
+            <summary>
+                extension method for
+                <see cref = "M:System.IO.Path.GetFileNameWithoutExtension(System.String)" />
+            </summary>
+            <param name = "path" > </param>
+            <returns> </returns>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.PathExtensions.GetExtension(System.String)">
+            <summary>
+                extension method for
+                <see cref = "M:System.IO.Path.GetExtension(System.String)" />
+            </summary>
+            <param name = "path" > </param>
+            <returns> </returns>
+        </member>
+        <member name="M:Jakar.Extensions.General.TaskExtensions.ForEachParallelAsync``1(System.Collections.Generic.IEnumerable{``0},System.Func{``0,System.Threading.Tasks.Task},System.Nullable{System.Int32},System.Boolean)">
+            <summary>
+                <seealso href = "https://gist.github.com/scattered-code/1a4a01c3f3a24ebce293a6e7b4451254" />
+                <para>
+                    Also a debugging improvement:
+                    <see href = "https://youtu.be/gW19LaAYczI?t=497" />
+                </para>
+            </summary>
+            <typeparam name = "T" > </typeparam>
+            <param name = "source" > </param>
+            <param name = "degreeOfParallelism" > </param>
+            <param name = "body" > </param>
+            <param name = "continueOnCapturedContext" > </param>
+            <returns>
+                <see cref = "T:System.Threading.Tasks.Task" />
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.General.TaskExtensions.ForEachParallelAsync``1(System.Collections.Generic.IAsyncEnumerable{``0},System.Func{``0,System.Threading.Tasks.Task},System.Nullable{System.Int32},System.Threading.Tasks.TaskScheduler)">
+            <summary>
+                <seealso href = "https://gist.github.com/scattered-code/b834bbc355a9ee710e3147321d6f985a" />
+            </summary>
+            <typeparam name = "T" > </typeparam>
+            <param name = "source" > </param>
+            <param name = "action" > </param>
+            <param name = "maxDegreeOfParallelism" > </param>
+            <param name = "scheduler" > </param>
+            <returns>
+                <see cref = "T:System.Threading.Tasks.Task" />
+            </returns>
+        </member>
+        <member name="T:Jakar.Extensions.Http.Deletes">
+            <summary>
+                <para>
+                    <seealso href = "https://www.hanselman.com/blog/HTTPPOSTsAndHTTPGETsWithWebClientAndCAndFakingADeleteBack.aspx" />
+                </para>
+                <para>
+                    <seealso href = "https://docs.microsoft.com/en-us/dotnet/standard/threading/cancellation-in-managed-threads" />
+                </para>
+                <para>
+                    <seealso href = "https://www.w3.org/Protocols/rfc1341/7_2_Multipart.html" />
+                </para>
+            </summary>
+        </member>
+        <member name="M:Jakar.Extensions.Http.Gets.Get(System.Uri,System.Threading.CancellationToken,Jakar.Extensions.Http.HeaderCollection,System.Nullable{System.Int32})">
+            <summary>
+                <seealso href = "https://www.hanselman.com/blog/HTTPPOSTsAndHTTPGETsWithWebClientAndCAndFakingAPostBack.aspx" />
+            </summary>
+            <param name = "url" > </param>
+            <param name = "token" > </param>
+            <param name = "headers" > </param>
+            <param name = "timeout" > </param>
+            <returns> </returns>
+        </member>
+        <member name="M:Jakar.Extensions.Http.MimeTypeExtensions.ToUriScheme(Jakar.Extensions.Http.MimeType)">
+            <summary>
+                <seealso href = "https://docs.microsoft.com/en-us/office/client-developer/office-uri-schemes" />
+            </summary>
+            <param name = "mime" > </param>
+            <returns>
+                <see cref = "T:System.String" />
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.Http.MimeTypeExtensions.ToFileName(Jakar.Extensions.Http.MimeType,System.String)">
+            <summary>
+                Uses the provided
+                <paramref name = "fileName" />
+                and adds the extension based on provided
+                <see cref = "T:Jakar.Extensions.Http.MimeType" />
+                .
+            </summary>
+            <param name = "mime" > </param>
+            <param name = "fileName" > </param>
+            <returns>
+                <see cref = "T:System.String" />
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.Http.MimeTypeExtensions.ToExtension(Jakar.Extensions.Http.MimeType,System.Boolean)">
+            <summary>
+                Gets the extension of the provided
+                <see cref = "T:Jakar.Extensions.Http.MimeType" />
+                .
+            </summary>
+            <param name = "mime" > </param>
+            <param name = "includePeriod" > </param>
+            <returns>
+                <see cref = "T:System.String" />
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.Http.MimeTypeExtensions.FromExtension(System.String)">
+            <summary>
+                Gets the
+                <see cref = "T:Jakar.Extensions.Http.MimeType" />
+                of the provided extension
+                <see cref = "T:System.String" />
+                .
+            </summary>
+            <param name = "mime" > </param>
+            <returns>
+                <see cref = "T:Jakar.Extensions.Http.MimeType" />
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.Http.MimeTypeExtensions.ToMimeType(System.String)">
+            <summary>
+                Converts the provided ContentType
+                <see cref = "T:System.String" />
+                to it's associated
+                <see cref = "T:Jakar.Extensions.Http.MimeType" />
+                via
+                <seealso cref = "T:Jakar.Extensions.Http.MimeTypeNames" />
+            </summary>
+            <param name = "mime" > </param>
+            <returns>
+                <see cref = "T:Jakar.Extensions.Http.MimeType" />
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.Http.MimeTypeExtensions.ToContentType(Jakar.Extensions.Http.MimeType)">
+            <summary>
+                Converts the provided
+                <see cref = "T:Jakar.Extensions.Http.MimeType" />
+                to it's associated ContentType via
+                <seealso cref = "T:Jakar.Extensions.Http.MimeTypeNames" />
+            </summary>
+            <param name = "mime" > </param>
+            <returns>
+                <see cref = "T:System.String" />
+            </returns>
+        </member>
+        <member name="T:Jakar.Extensions.Http.MimeTypeNames">
+            <summary>
+                <para>
+                    <seealso href = "https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Common_types" />
+                </para>
+                <para>
+                    <seealso href = "https://www.freeformatter.com/mime-types-list.html" />
+                </para>
+            </summary>
+        </member>
+        <member name="M:Jakar.Extensions.Http.Pings.Ping(System.Uri,System.Int32,Jakar.Extensions.Http.HeaderCollection,System.Text.Encoding,System.Threading.CancellationToken)">
+            <summary>
+                Sends a GET ping to target Uri
+            </summary>
+            <param name = "url" > </param>
+            <param name = "timeout" > Defaults to 2.5 seconds </param>
+            <param name = "headers" >
+                Defaults to
+                <see cref = "F:Jakar.Extensions.Http.MimeType.UrlEncodedContent" />
+            </param>
+            <param name = "encoding" > </param>
+            <param name = "token" > </param>
+            <returns> </returns>
+        </member>
+        <member name="M:Jakar.Extensions.Http.Pings.Ping(System.Uri,System.String,System.Int32,Jakar.Extensions.Http.HeaderCollection,System.Text.Encoding,System.Threading.CancellationToken)">
+            <summary>
+                Sends a POST ping to target Uri
+            </summary>
+            <param name = "url" > </param>
+            <param name = "payload" > The data being sent </param>
+            <param name = "timeout" > Defaults to 2.5 seconds </param>
+            <param name = "headers" >
+                Defaults to
+                <see cref = "F:Jakar.Extensions.Http.MimeType.PlainText" />
+            </param>
+            <param name = "token" > </param>
+            <param name = "encoding" > </param>
+            <returns> </returns>
+        </member>
+        <member name="T:Jakar.Extensions.Http.Posts">
+            <summary>
+                <para>
+                    <seealso href = "https://www.hanselman.com/blog/HTTPPOSTsAndHTTPGETsWithWebClientAndCAndFakingAPostBack.aspx" />
+                </para>
+                <para>
+                    <seealso href = "https://docs.microsoft.com/en-us/dotnet/standard/threading/cancellation-in-managed-threads" />
+                </para>
+                <para>
+                    <seealso href = "https://www.w3.org/Protocols/rfc1341/7_2_Multipart.html" />
+                </para>
+            </summary>
+        </member>
+        <member name="T:Jakar.Extensions.Http.Puts">
+            <summary>
+                <para>
+                    <seealso href = "https://www.hanselman.com/blog/HTTPPOSTsAndHTTPGETsWithWebClientAndCAndFakingAPutBack.aspx" />
+                </para>
+                <para>
+                    <seealso href = "https://docs.microsoft.com/en-us/dotnet/standard/threading/cancellation-in-managed-threads" />
+                </para>
+                <para>
+                    <seealso href = "https://www.w3.org/Protocols/rfc1341/7_2_Multipart.html" />
+                </para>
+            </summary>
+        </member>
+        <member name="T:Jakar.Extensions.Http.Status">
+            <summary>
+                <para>
+                    <see href = "https://developer.mozilla.org/en-US/docs/Web/HTTP/Status" />
+                </para>
+                <para>
+                    <see href = "https://stackoverflow.com/a/46361806/9530917" />
+                </para>
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.Continue">
+            <summary>
+                This interim response indicates that everything so far is OK and that the client should continue the request, or ignore the response if the request is already finished.
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.SwitchingProtocols">
+            <summary>
+                This code is sent in response to an Upgrade request header from the client, and indicates the protocol the server is switching to.
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.Processing">
+            <summary>
+                This code indicates that the server has received and is processing the request, but no response is available yet.
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.EarlyHints">
+            <summary>
+                This status code is primarily intended to be used with the Link header, letting the user agent start preloading resources while the server prepares a response.
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.Ok">
+            <summary>
+                The request has succeeded. The meaning of the success depends on the HTTP method:
+                GET: The resource has been fetched and is transmitted in the message body.
+                HEAD: The entity headers are in the message body.
+                PUT or POST: The resource describing the result of the action is transmitted in the message body.
+                TRACE: The message body contains the request message as received by the server.
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.Created">
+            <summary>
+                The request has succeeded and a new resource has been created as a result. This is typically the response sent after POST requests, or some PUT requests.
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.Accepted">
+            <summary>
+                The request has been received but not yet acted upon.
+                It is noncommittal, since there is no way in HTTP to later send an asynchronous response indicating the outcome of the request.
+                It is intended for cases where another process or server handles the request, or for batch processing.
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.NonAuthoritativeInformation">
+            <summary>
+                This response code means the returned meta-information is not exactly the same as is available from the origin server, but is collected from a local or a third-party copy.
+                This is mostly used for mirrors or backups of another resource.
+                Except for that specific case, the "200 OK" response is preferred to this status.
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.NoContent">
+            <summary>
+                There is no content to send for this request, but the headers may be useful.
+                The user-agent may update its cached headers for this resource with the new ones.
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.ResetContent">
+            <summary>
+                Tells the user-agent to reset the document which sent this request.
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.PartialContent">
+            <summary>
+                This response code is used when the Range header is sent from the client to request only part of a resource.
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.MultiStatus">
+            <summary>
+                Conveys information about multiple resources, for situations where multiple status codes might be appropriate.
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.AlreadyReported">
+            <summary>
+                Used inside a dav:propstat response element to avoid repeatedly enumerating the internal members of multiple bindings to the same collection.
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.ImUsed">
+            <summary>
+                The server has fulfilled a GET request for the resource, and the response is a representation of the result of one or more instance-manipulations applied to the current instance.
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.Ambiguous">
+            <summary>
+                The request has more than one possible response.
+                The user-agent or user should choose one of them.
+                (There is no standardized way of choosing one of the responses, but HTML links to the possibilities are recommended so the user can pick.)
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.MultipleChoices">
+            <summary>
+                The request has more than one possible response.
+                The user-agent or user should choose one of them.
+                (There is no standardized way of choosing one of the responses, but HTML links to the possibilities are recommended so the user can pick.)
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.Moved">
+            <summary>
+                The URL of the requested resource has been changed permanently. The new URL is given in the response.
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.MovedPermanently">
+            <summary>
+                The URL of the requested resource has been changed permanently. The new URL is given in the response.
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.Found">
+            <summary>
+                This response code means that the URI of requested resource has been changed temporarily.
+                Further changes in the URI might be made in the future.
+                Therefore, this same URI should be used by the client in future requests.
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.Redirect">
+            <summary>
+                The server sent this response to direct the client to get the requested resource at another URI with a GET request.
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.RedirectMethod">
+            <summary>
+                This is used for caching purposes.
+                It tells the client that the response has not been modified, so the client can continue to use the same cached version of the response.
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.SeeOther">
+            <summary>
+                This is used for caching purposes.
+                It tells the client that the response has not been modified, so the client can continue to use the same cached version of the response.
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.NotModified">
+            <summary>
+                This is used for caching purposes.
+                It tells the client that the response has not been modified, so the client can continue to use the same cached version of the response.
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.UseProxy">
+            <summary>
+                Defined in a previous version of the HTTP specification to indicate that a requested response must be accessed by a proxy.
+                It has been deprecated due to security concerns regarding in-band configuration of a proxy.
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.Unused">
+            <summary>
+                This response code is no longer used; it is just reserved.
+                It was used in a previous version of the HTTP/1.1 specification.
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.RedirectKeepVerb">
+            <summary>
+                The server sends this response to direct the client to get the requested resource at another URI with same method that was used in the prior request.
+                This has the same semantics as the 302 Found HTTP response code, with the exception that the user agent must not change the HTTP method used: If a POST was used in the first request, a POST must
+                be used in the second request.
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.TemporaryRedirect">
+            <summary>
+                The server sends this response to direct the client to get the requested resource at another URI with same method that was used in the prior request.
+                This has the same semantics as the 302 Found HTTP response code, with the exception that the user agent must not change the HTTP method used: If a POST was used in the first request, a POST must
+                be used in the second request.
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.PermanentRedirect">
+            <summary>
+                This means that the resource is now permanently located at another URI, specified by the Location: HTTP Response header.
+                This has the same semantics as the 301 Moved Permanently HTTP response code, with the exception that the user agent must not change the HTTP method used: If a POST was used in the first request,
+                a POST must be used in the second request.
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.BadRequest">
+            <summary>
+                The server could not understand the request due to invalid syntax.
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.Unauthorized">
+            <summary>
+                Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated".
+                That is, the client must authenticate itself to get the requested response.
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.PaymentRequired">
+            <summary>
+                This response code is reserved for future use.
+                The initial aim for creating this code was using it for digital payment systems, however this status code is used very rarely and no standard convention exists.
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.Forbidden">
+            <summary>
+                The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource.
+                Unlike 401, the client's identity is known to the server.
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.NotFound">
+            <summary>
+                The server can not find the requested resource.
+                In the browser, this means the URL is not recognized.
+                In an API, this can also mean that the endpoint is valid but the resource itself does not exist.
+                Servers may also send this response instead of 403 to hide the existence of a resource from an unauthorized client.
+                This response code is probably the most famous one due to its frequent occurrence on the web.
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.MethodNotAllowed">
+            <summary>
+                The request method is known by the server but has been disabled and cannot be used.
+                For example, an API may forbid DELETE-ing a resource.
+                The two mandatory methods, GET and HEAD, must never be disabled and should not return this error code.
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.NotAcceptable">
+            <summary>
+                This response is sent when the web server, after performing server-driven content negotiation, doesn't find any content that conforms to the criteria given by the user agent.
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.ProxyAuthenticationRequired">
+            <summary>
+                This is similar to 401 but authentication is needed to be done by a proxy.
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.RequestTimeout">
+            <summary>
+                This response is sent on an idle connection by some servers, even without any previous request by the client.
+                It means that the server would like to shut down this unused connection.
+                This response is used much more since some browsers, like Chrome, Firefox 27+, or IE9, use HTTP pre-connection mechanisms to speed up surfing.
+                Also note that some servers merely shut down the connection without sending this message.
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.Conflict">
+            <summary>
+                This response is sent when a request conflicts with the current state of the server.
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.Gone">
+            <summary>
+                This response is sent when the requested content has been permanently deleted from server, with no forwarding address.
+                Clients are expected to remove their caches and links to the resource.
+                The HTTP specification intends this status code to be used for "limited-time, promotional services".
+                APIs should not feel compelled to indicate resources that have been deleted with this status code.
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.LengthRequired">
+            <summary>
+                Server rejected the request because the Content-Length header field is not defined and the server requires it.
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.PreconditionFailed">
+            <summary>
+                The client has indicated preconditions in its headers which the server does not meet.
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.RequestEntityTooLarge">
+            <summary>
+                Request entity is larger than limits defined by server; the server might close the connection or return an Retry-After header field.
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.RequestUriTooLong">
+            <summary>
+                The URI requested by the client is longer than the server is willing to interpret.
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.UnsupportedMediaType">
+            <summary>
+                The media format of the requested data is not supported by the server, so the server is rejecting the request.
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.RequestedRangeNotSatisfiable">
+            <summary>
+                The range specified by the Range header field in the request can't be fulfilled; it's possible that the range is outside the size of the target URI's data.
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.ExpectationFailed">
+            <summary>
+                This response code means the expectation indicated by the Expect request header field can't be met by the server.
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.Teapot">
+            <summary>
+                The server refuses the attempt to brew coffee with a teapot.
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.MisdirectedRequest">
+            <summary>
+                The request was directed at a server that is not able to produce a response.
+                This can be sent by a server that is not configured to produce responses for the combination of scheme and authority that are included in the request URI.
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.UnprocessableEntity">
+            <summary>
+                The request was well-formed but was unable to be followed due to semantic errors.
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.Locked">
+            <summary>
+                The resource that is being accessed is locked.
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.FailedDependency">
+            <summary>
+                The request failed due to failure of a previous request.
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.TooEarly">
+            <summary>
+                Indicates that the server is unwilling to risk processing a request that might be replayed.
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.UpgradeRequired">
+            <summary>
+                The server refuses to perform the request using the current protocol but might be willing to do so after the client upgrades to a different protocol.
+                The server sends an Upgrade header in a 426 response to indicate the required protocol(s).
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.PreconditionRequired">
+            <summary>
+                The origin server requires the request to be conditional.
+                This response is intended to prevent the 'lost update' problem, where a client GETs a resource's state, modifies it, and PUTs it back to the server, when meanwhile a third party has modified the
+                state on the server, leading to a conflict.
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.TooManyRequests">
+            <summary>
+                The user has sent too many requests in a given amount of time ("rate limiting").
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.Disabled">
+            <summary>
+                The resource that is being accessed is Disabled.
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.RequestHeaderFieldsTooLarge">
+            <summary>
+                The server is unwilling to process the request because its header fields are too large.
+                The request may be resubmitted after reducing the size of the request header fields.
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.AlreadyExists">
+            <summary>
+                Item Already Exists. Duplication not allowed.
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.NoResponse">
+            <summary>
+                Used to indicate that the server has returned no information to the client and closed the connection.
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.UnavailableForLegalReasons">
+            <summary>
+                The user-agent requested a resource that cannot legally be provided, such as a web page censored by a government.
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.ClientClosedRequest">
+            <summary>
+                Used when the client has closed the request before the server could send a response.
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.InternalServerError">
+            <summary>
+                The server has encountered a situation it doesn't know how to handle.
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.NotImplemented">
+            <summary>
+                The request method is not supported by the server and cannot be handled.
+                The only methods that servers are required to support (and therefore that must not return this code) are GET and HEAD.
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.BadGateway">
+            <summary>
+                This error response means that the server, while working as a gateway to get a response needed to handle the request, got an invalid response.
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.ServiceUnavailable">
+            <summary>
+                The server is not ready to handle the request.
+                Common causes are a server that is down for maintenance or that is overloaded.
+                Note that together with this response, a user-friendly page explaining the problem should be sent.
+                This response should be used for temporary conditions and the Retry-After: HTTP header should, if possible, contain the estimated time before the recovery of the service.
+                The webmaster must also take care about the caching-related headers that are sent along with this response, as these temporary condition responses should usually not be cached.
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.GatewayTimeout">
+            <summary>
+                This error response is given when the server is acting as a gateway and cannot get a response in time.
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.HttpVersionNotSupported">
+            <summary>
+                The HTTP version used in the request is not supported by the server.
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.VariantAlsoNegotiates">
+            <summary>
+                The server has an internal configuration error: the chosen variant resource is configured to engage in transparent content negotiation itself, and is therefore not a proper end point in the
+                negotiation process.
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.InsufficientStorage">
+            <summary>
+                The method could not be performed on the resource because the server is unable to store the representation needed to successfully complete the request.
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.LoopDetected">
+            <summary>
+                The server detected an infinite loop while processing the request.
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.NotExtended">
+            <summary>
+                Further extensions to the request are required for the server to fulfill it.
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Http.Status.NetworkAuthenticationRequired">
+            <summary>
+                The 511 status code indicates that the client needs to authenticate to gain network access.
+            </summary>
+        </member>
+        <member name="M:Jakar.Extensions.Http.WebRequests.GetResponseAsync(System.Net.WebRequest,System.Threading.CancellationToken,System.Boolean)">
+            <summary>
+                <seealso href = "https://stackoverflow.com/questions/19211972/getresponseasync-does-not-accept-cancellationtoken" />
+                <seealso href = "https://github.com/palburtus/HttpClient.net/blob/master/Aaks.Restclient/HttpRestClient.cs" />
+            </summary>
+            <param name = "request" > </param>
+            <param name = "token" > </param>
+            <param name = "useSynchronizationContext" > </param>
+            <returns> </returns>
+            <exception cref = "T:System.Net.WebException" > </exception>
+            <exception cref = "T:System.ArgumentNullException" > </exception>
+            <exception cref = "T:System.OperationCanceledException" > </exception>
+        </member>
+        <member name="T:Jakar.Extensions.Models.AppVersion">
+            <summary>
+                See
+                <see cref = "T:Jakar.Extensions.Models.AppVersion.Format" />
+                for formatting details.
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Models.AppVersion.Format.Singular">
+            <summary>
+                Major
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Models.AppVersion.Format.Minimal">
+            <summary>
+                Major.Minor
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Models.AppVersion.Format.Typical">
+            <summary>
+                Major.Minor.Build
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Models.AppVersion.Format.Detailed">
+            <summary>
+                Major.Minor.Maintenance.Build
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Models.AppVersion.Format.DetailedRevisions">
+            <summary>
+                Major.Minor.Maintenance.MajorRevision.Build
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Models.AppVersion.Format.Complete">
+            <summary>
+                Major.Minor.Maintenance.MajorRevision.MinorRevision.Build
+            </summary>
+        </member>
+        <member name="M:Jakar.Extensions.Models.AppVersion.TryParse(System.String@,System.Nullable{Jakar.Extensions.Models.AppVersion}@)">
+            <summary>
+            
+            </summary>
+            <param name = "value" > </param>
+            <param name = "version" > </param>
+            <returns>
+                <see langword = "true" />
+                if
+                <see cref = "M:Jakar.Extensions.Models.AppVersion.Parse(System.String)" />
+                as successful.
+                <br />
+                <see langword = "false" />
+                otherwise.
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.Models.AppVersion.Parse(System.String)">
+            <summary>
+            
+            </summary>
+            <param name = "value" > </param>
+            <exception cref = "T:System.FormatException" > </exception>
+            <exception cref = "T:System.ArgumentNullException" > </exception>
+            <exception cref = "T:System.OverflowException" > </exception>
+            <exception cref = "T:System.ArgumentOutOfRangeException" > </exception>
+            <returns>
+                <see cref = "T:Jakar.Extensions.Models.AppVersion" />
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.Models.AppVersion.TryParse(System.ReadOnlySpan{System.Char}@,System.Nullable{Jakar.Extensions.Models.AppVersion}@)">
+            <summary>
+            
+            </summary>
+            <param name = "value" > </param>
+            <param name = "version" > </param>
+            <returns>
+                <see langword = "true" />
+                if
+                <see cref = "M:Jakar.Extensions.Models.AppVersion.Parse(System.ReadOnlySpan{System.Char})" />
+                as successful.
+                <br />
+                <see langword = "false" />
+                otherwise.
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.Models.AppVersion.Parse(System.ReadOnlySpan{System.Char})">
+            <summary>
+            
+            </summary>
+            <param name = "value" > </param>
+            <exception cref = "T:System.FormatException" > </exception>
+            <exception cref = "T:System.ArgumentNullException" > </exception>
+            <exception cref = "T:System.OverflowException" > </exception>
+            <exception cref = "T:System.ArgumentOutOfRangeException" > </exception>
+            <returns>
+                <see cref = "T:Jakar.Extensions.Models.AppVersion" />
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.Models.AppVersion.ToVersion">
+            <summary>
+                If the
+                <see cref = "F:Jakar.Extensions.Models.AppVersion.Scheme" />
+                is any of [
+                <see cref = "F:Jakar.Extensions.Models.AppVersion.Format.Singular" />
+                ,
+                <see cref = "F:Jakar.Extensions.Models.AppVersion.Format.DetailedRevisions" />
+                ,
+                <see cref = "F:Jakar.Extensions.Models.AppVersion.Format.Complete" />
+                ], will throw
+                <see cref = "T:System.InvalidOperationException" />
+            </summary>
+            <returns> </returns>
+            <exception cref = "T:System.InvalidOperationException" > </exception>
+        </member>
+        <member name="M:Jakar.Extensions.Models.AppVersion.CompareTo(System.Object)">
+            <summary>
+                Compares two
+                <see cref = "T:Jakar.Extensions.Models.AppVersion" />
+                instances
+            </summary>
+            <param name = "other" > </param>
+            <returns>
+                <see langword = "0" />
+                if the
+                <paramref name = "other" />
+                is equivalent.
+                <br />
+                <see langword = "-1" />
+                if the
+                <paramref name = "other" />
+                is smaller.
+                <br />
+                <see langword = "1" />
+                if the
+                <paramref name = "other" />
+                is greater.
+                <br />
+                <see langword = "-2" />
+                if the
+                <paramref name = "other" />
+                is not an instance of
+                <see cref = "T:Jakar.Extensions.Models.AppVersion" />
+                .
+                <br />
+            </returns>
+            <exception cref = "T:System.ArgumentException" >
+                If something goes wrong, and the
+                <paramref name = "other" />
+                is not comparable.
+            </exception>
+        </member>
+        <member name="M:Jakar.Extensions.Models.AppVersion.CompareTo(System.Nullable{Jakar.Extensions.Models.AppVersion})">
+            <summary>
+                Compares two
+                <see cref = "T:Jakar.Extensions.Models.AppVersion" />
+                instances
+            </summary>
+            <param name = "other" > </param>
+            <returns>
+                <see langword = "0" />
+                if the
+                <paramref name = "other" />
+                is equivalent.
+                <br />
+                <see langword = "-1" />
+                if the
+                <paramref name = "other" />
+                is smaller.
+                <br />
+                <see langword = "1" />
+                if the
+                <paramref name = "other" />
+                is greater.
+                <br />
+            </returns>
+            <exception cref = "T:System.ArgumentException" >
+                If something goes wrong, and the
+                <paramref name = "other" />
+                is not comparable.
+            </exception>
+        </member>
+        <member name="M:Jakar.Extensions.Models.AppVersion.FuzzyEquals(System.Nullable{Jakar.Extensions.Models.AppVersion})">
+            <summary>
+                Compares two
+                <see cref = "T:Jakar.Extensions.Models.AppVersion" />
+                instances for relative equality.
+            </summary>
+            <param name = "other" > </param>
+            <returns>
+                <para>
+                    returns
+                    <see langword = "true" />
+                    if all of the following is true:
+                    <list type = "number" >
+                        <item>
+                            If
+                            <see cref = "F:Jakar.Extensions.Models.AppVersion.Major" />
+                            and
+                            <see cref = "F:Jakar.Extensions.Models.AppVersion.Minor" />
+                            match
+                        </item>
+                        <br />
+                        <item>
+                            All other fields that are not
+                            <see langword = "null" />
+                            and are equal to or greater than
+                            <br />
+                            <list type = "bullet" >
+                                <item>
+                                    <see cref = "F:Jakar.Extensions.Models.AppVersion.Maintenance" />
+                                </item>
+                                <br />
+                                <item>
+                                    <see cref = "F:Jakar.Extensions.Models.AppVersion.MajorRevision" />
+                                </item>
+                                <br />
+                                <item>
+                                    <see cref = "F:Jakar.Extensions.Models.AppVersion.MinorRevision" />
+                                </item>
+                                <br />
+                                <item>
+                                    <see cref = "F:Jakar.Extensions.Models.AppVersion.Build" />
+                                </item>
+                                <br />
+                            </list>
+                        </item>
+                        <br />
+                    </list>
+                </para>
+                <para>
+                    otherwise
+                    <see langword = "false" />
+                </para>
+            </returns>
+            <exception cref = "T:System.ArgumentException" >
+                If something goes wrong, and the
+                <paramref name = "other" />
+                is not comparable.
+            </exception>
+        </member>
+        <member name="M:Jakar.Extensions.Models.AppVersion.FuzzyEquals(Jakar.Extensions.Models.AppVersion)">
+            <summary>
+                Compares two
+                <see cref = "T:Jakar.Extensions.Models.AppVersion" />
+                instances for relative equality.
+            </summary>
+            <param name = "other" > </param>
+            <returns>
+                <para>
+                    returns
+                    <see langword = "true" />
+                    if all of the following is true:
+                    <list type = "number" >
+                        <item>
+                            If
+                            <see cref = "F:Jakar.Extensions.Models.AppVersion.Major" />
+                            and
+                            <see cref = "F:Jakar.Extensions.Models.AppVersion.Minor" />
+                            match
+                        </item>
+                        <br />
+                        <item>
+                            All other fields that are not
+                            <see langword = "null" />
+                            and are equal to or greater than
+                            <br />
+                            <list type = "bullet" >
+                                <item>
+                                    <see cref = "F:Jakar.Extensions.Models.AppVersion.Maintenance" />
+                                </item>
+                                <br />
+                                <item>
+                                    <see cref = "F:Jakar.Extensions.Models.AppVersion.MajorRevision" />
+                                </item>
+                                <br />
+                                <item>
+                                    <see cref = "F:Jakar.Extensions.Models.AppVersion.MinorRevision" />
+                                </item>
+                                <br />
+                                <item>
+                                    <see cref = "F:Jakar.Extensions.Models.AppVersion.Build" />
+                                </item>
+                                <br />
+                            </list>
+                        </item>
+                        <br />
+                    </list>
+                </para>
+                <para>
+                    otherwise
+                    <see langword = "false" />
+                </para>
+            </returns>
+            <exception cref = "T:System.ArgumentException" >
+                If something goes wrong, and the
+                <paramref name = "other" />
+                is not comparable.
+            </exception>
+        </member>
+        <member name="M:Jakar.Extensions.Models.Authorization.CurrentLocation.CalculateDistance(Jakar.Extensions.Models.Authorization.ICurrentLocation,Xamarin.Essentials.DistanceUnits)">
+            <summary>
+                Check distance from starting to this location.
+            </summary>
+            <param name = "locationStart" > </param>
+            <param name = "units" > </param>
+            <returns>
+                Distance as a
+                <see cref = "T:System.Double" />
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.Models.Authorization.CurrentLocation.CalculateDistance(System.Double,System.Double,Xamarin.Essentials.DistanceUnits)">
+            <summary>
+                Check distance from starting to this location.
+            </summary>
+            <param name = "latitudeStart" > </param>
+            <param name = "longitudeStart" > </param>
+            <param name = "units" > </param>
+            <returns>
+                Distance as a
+                <see cref = "T:System.Double" />
+            </returns>
+        </member>
+        <member name="P:Jakar.Extensions.Models.Authorization.IUserDevice.Ip">
+            <summary>
+                Last known
+                <see cref = "T:System.Net.IPAddress" />
+            </summary>
+        </member>
+        <member name="P:Jakar.Extensions.Models.Authorization.IUserDevice.Platform">
+            <summary>
+                <see cref = "T:Xamarin.Essentials.DevicePlatform" />
+            </summary>
+        </member>
+        <member name="P:Jakar.Extensions.Models.Authorization.IUserDevice.Idiom">
+            <summary>
+                <see cref = "T:Xamarin.Essentials.DeviceIdiom" />
+            </summary>
+        </member>
+        <member name="P:Jakar.Extensions.Models.Authorization.IUserDevice.DeviceTypeID">
+            <summary>
+                <see cref = "T:Xamarin.Essentials.DeviceType" />
+            </summary>
+        </member>
+        <member name="T:Jakar.Extensions.Models.Authorization.UserDevice">
+            <summary>
+                Debug and/or identify info for IT
+            </summary>
+        </member>
+        <member name="M:Jakar.Extensions.Models.Base.Classes.ObservableClass.SetPropertyWithoutNotify``1(``0@,``0)">
+            <summary>
+                <para>
+                    Checks the values with
+                    <see cref = "P:System.Collections.Generic.EqualityComparer`1.Default" />
+                    .
+                </para>
+                Then calls
+                <see cref = "M:Jakar.Extensions.Models.Base.Classes.ObservableClass.OnPropertyChanging(System.String)" />
+                , sets the value, then calls
+                <see cref = "M:Jakar.Extensions.Models.Base.Classes.ObservableClass.OnPropertyChanged(System.String)" />
+            </summary>
+            <typeparam name = "T" > </typeparam>
+            <param name = "backingStore" > </param>
+            <param name = "value" > </param>
+            <returns>
+                <para>
+                    Returns
+                    <see langword = "false" />
+                    if the values are equal, and therefore the
+                    <paramref name = "backingStore" />
+                    was not changed, otherwise
+                    <see langword = "true" />
+                </para>
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.Models.Base.Classes.ObservableClass.SetPropertyWithoutNotify``1(``0@,``0,System.Collections.Generic.IEqualityComparer{``0})">
+            <summary>
+                <para>
+                    Checks the values with
+                    <paramref name = "comparer" />
+                    .
+                </para>
+                Then calls
+                <see cref = "M:Jakar.Extensions.Models.Base.Classes.ObservableClass.OnPropertyChanging(System.String)" />
+                , sets the value, then calls
+                <see cref = "M:Jakar.Extensions.Models.Base.Classes.ObservableClass.OnPropertyChanged(System.String)" />
+            </summary>
+            <typeparam name = "T" > </typeparam>
+            <param name = "backingStore" > </param>
+            <param name = "value" > </param>
+            <param name = "comparer" > </param>
+            <returns>
+                <para>
+                    Returns
+                    <see langword = "false" />
+                    if the values are equal, and therefore the
+                    <paramref name = "backingStore" />
+                    was not changed, otherwise
+                    <see langword = "true" />
+                </para>
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.Models.Base.Classes.ObservableClass.SetProperty``1(``0@,``0,System.Collections.Generic.IEqualityComparer{``0},System.String)">
+            <summary>
+                <para>
+                    Checks the values with
+                    <paramref name = "comparer" />
+                    .
+                </para>
+                Then calls
+                <see cref = "M:Jakar.Extensions.Models.Base.Classes.ObservableClass.OnPropertyChanging(System.String)" />
+                , sets the value, then calls
+                <see cref = "M:Jakar.Extensions.Models.Base.Classes.ObservableClass.OnPropertyChanged(System.String)" />
+            </summary>
+            <typeparam name = "T" > </typeparam>
+            <param name = "backingStore" > </param>
+            <param name = "value" > </param>
+            <param name = "comparer" > </param>
+            <param name = "propertyName" > </param>
+            <returns>
+                <para>
+                    Returns
+                    <see langword = "false" />
+                    if the values are equal, and therefore the
+                    <paramref name = "backingStore" />
+                    was not changed, otherwise
+                    <see langword = "true" />
+                </para>
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.Models.Base.Classes.ObservableClass.SetProperty``1(``0@,``0,System.String)">
+            <summary>
+                <para>
+                    Checks the values with
+                    <see cref = "P:System.Collections.Generic.EqualityComparer`1.Default" />
+                    .
+                </para>
+                Then calls
+                <see cref = "M:Jakar.Extensions.Models.Base.Classes.ObservableClass.OnPropertyChanging(System.String)" />
+                , sets the value, then calls
+                <see cref = "M:Jakar.Extensions.Models.Base.Classes.ObservableClass.OnPropertyChanged(System.String)" />
+            </summary>
+            <typeparam name = "T" > </typeparam>
+            <param name = "backingStore" > </param>
+            <param name = "value" > </param>
+            <param name = "propertyName" > </param>
+            <returns>
+                <para>
+                    Returns
+                    <see langword = "false" />
+                    if the values are equal, and therefore the
+                    <paramref name = "backingStore" />
+                    was not changed, otherwise
+                    <see langword = "true" />
+                </para>
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.Models.Base.Classes.ObservableClass.SetProperty``1(``0@,``0,System.Windows.Input.ICommand,System.String)">
+            <summary>
+                "onChanged" only called if the backingStore value has changed.
+            </summary>
+        </member>
+        <member name="M:Jakar.Extensions.Models.Base.Classes.ObservableClass.SetProperty``1(``0@,``0,System.Collections.Generic.IEqualityComparer{``0},System.Windows.Input.ICommand,System.String)">
+            <summary>
+                "onChanged" only called if the backingStore value has changed.
+            </summary>
+        </member>
+        <member name="M:Jakar.Extensions.Models.Base.Classes.ObservableClass.SetProperty``1(``0@,``0,System.Action,System.String)">
+            <summary>
+                "onChanged" only called if the backingStore value has changed.
+            </summary>
+        </member>
+        <member name="M:Jakar.Extensions.Models.Base.Classes.ObservableClass.SetProperty``1(``0@,``0,System.Collections.Generic.IEqualityComparer{``0},System.Action,System.String)">
+            <summary>
+                "onChanged" only called if the backingStore value has changed.
+            </summary>
+        </member>
+        <member name="M:Jakar.Extensions.Models.Base.Classes.ObservableClass.SetProperty``1(``0@,``0,System.Action{``0},System.String)">
+            <summary>
+                "onChanged" only called if the backingStore value has changed.
+            </summary>
+        </member>
+        <member name="M:Jakar.Extensions.Models.Base.Classes.ObservableClass.SetProperty``1(``0@,``0,System.Collections.Generic.IEqualityComparer{``0},System.Action{``0},System.String)">
+            <summary>
+                "onChanged" only called if the backingStore value has changed.
+            </summary>
+        </member>
+        <member name="M:Jakar.Extensions.Models.Base.Classes.ObservableClass.SetProperty``1(``0@,``0,System.Func{System.Threading.Tasks.Task},System.String)">
+            <summary>
+                "onChanged" only called if the backingStore value has changed.
+            </summary>
+        </member>
+        <member name="M:Jakar.Extensions.Models.Base.Classes.ObservableClass.SetProperty``1(``0@,``0,System.Collections.Generic.IEqualityComparer{``0},System.Func{System.Threading.Tasks.Task},System.String)">
+            <summary>
+                "onChanged" only called if the backingStore value has changed.
+            </summary>
+        </member>
+        <member name="M:Jakar.Extensions.Models.Base.Classes.ObservableClass.SetProperty``1(``0@,``0,System.Func{``0,System.Threading.Tasks.Task},System.String)">
+            <summary>
+                "onChanged" only called if the backingStore value has changed.
+            </summary>
+        </member>
+        <member name="M:Jakar.Extensions.Models.Base.Classes.ObservableClass.SetProperty``1(``0@,``0,System.Collections.Generic.IEqualityComparer{``0},System.Func{``0,System.Threading.Tasks.Task},System.String)">
+            <summary>
+                "onChanged" only called if the backingStore value has changed.
+            </summary>
+        </member>
+        <member name="M:Jakar.Extensions.Models.Base.Records.ObservableRecord.SetPropertyWithoutNotify``1(``0@,``0)">
+            <summary>
+                <para>
+                    Checks the values with
+                    <see cref = "P:System.Collections.Generic.EqualityComparer`1.Default" />
+                    .
+                </para>
+                Then calls
+                <see cref = "M:Jakar.Extensions.Models.Base.Records.ObservableRecord.OnPropertyChanging(System.String)" />
+                , sets the value, then calls
+                <see cref = "M:Jakar.Extensions.Models.Base.Records.ObservableRecord.OnPropertyChanged(System.String)" />
+            </summary>
+            <typeparam name = "T" > </typeparam>
+            <param name = "backingStore" > </param>
+            <param name = "value" > </param>
+            <returns>
+                <para>
+                    Returns
+                    <see langword = "false" />
+                    if the values are equal, and therefore the
+                    <paramref name = "backingStore" />
+                    was not changed, otherwise
+                    <see langword = "true" />
+                </para>
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.Models.Base.Records.ObservableRecord.SetPropertyWithoutNotify``1(``0@,``0,System.Collections.Generic.IEqualityComparer{``0})">
+            <summary>
+                <para>
+                    Checks the values with
+                    <paramref name = "comparer" />
+                    .
+                </para>
+                Then calls
+                <see cref = "M:Jakar.Extensions.Models.Base.Records.ObservableRecord.OnPropertyChanging(System.String)" />
+                , sets the value, then calls
+                <see cref = "M:Jakar.Extensions.Models.Base.Records.ObservableRecord.OnPropertyChanged(System.String)" />
+            </summary>
+            <typeparam name = "T" > </typeparam>
+            <param name = "backingStore" > </param>
+            <param name = "value" > </param>
+            <param name = "comparer" > </param>
+            <returns>
+                <para>
+                    Returns
+                    <see langword = "false" />
+                    if the values are equal, and therefore the
+                    <paramref name = "backingStore" />
+                    was not changed, otherwise
+                    <see langword = "true" />
+                </para>
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.Models.Base.Records.ObservableRecord.SetProperty``1(``0@,``0,System.Collections.Generic.IEqualityComparer{``0},System.String)">
+            <summary>
+                <para>
+                    Checks the values with
+                    <paramref name = "comparer" />
+                    .
+                </para>
+                Then calls
+                <see cref = "M:Jakar.Extensions.Models.Base.Records.ObservableRecord.OnPropertyChanging(System.String)" />
+                , sets the value, then calls
+                <see cref = "M:Jakar.Extensions.Models.Base.Records.ObservableRecord.OnPropertyChanged(System.String)" />
+            </summary>
+            <typeparam name = "T" > </typeparam>
+            <param name = "backingStore" > </param>
+            <param name = "value" > </param>
+            <param name = "comparer" > </param>
+            <param name = "propertyName" > </param>
+            <returns>
+                <para>
+                    Returns
+                    <see langword = "false" />
+                    if the values are equal, and therefore the
+                    <paramref name = "backingStore" />
+                    was not changed, otherwise
+                    <see langword = "true" />
+                </para>
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.Models.Base.Records.ObservableRecord.SetProperty``1(``0@,``0,System.String)">
+            <summary>
+                <para>
+                    Checks the values with
+                    <see cref = "P:System.Collections.Generic.EqualityComparer`1.Default" />
+                    .
+                </para>
+                Then calls
+                <see cref = "M:Jakar.Extensions.Models.Base.Records.ObservableRecord.OnPropertyChanging(System.String)" />
+                , sets the value, then calls
+                <see cref = "M:Jakar.Extensions.Models.Base.Records.ObservableRecord.OnPropertyChanged(System.String)" />
+            </summary>
+            <typeparam name = "T" > </typeparam>
+            <param name = "backingStore" > </param>
+            <param name = "value" > </param>
+            <param name = "propertyName" > </param>
+            <returns>
+                <para>
+                    Returns
+                    <see langword = "false" />
+                    if the values are equal, and therefore the
+                    <paramref name = "backingStore" />
+                    was not changed, otherwise
+                    <see langword = "true" />
+                </para>
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.Models.Base.Records.ObservableRecord.SetProperty``1(``0@,``0,System.Windows.Input.ICommand,System.String)">
+            <summary>
+                "onChanged" only called if the backingStore value has changed.
+            </summary>
+        </member>
+        <member name="M:Jakar.Extensions.Models.Base.Records.ObservableRecord.SetProperty``1(``0@,``0,System.Collections.Generic.IEqualityComparer{``0},System.Windows.Input.ICommand,System.String)">
+            <summary>
+                "onChanged" only called if the backingStore value has changed.
+            </summary>
+        </member>
+        <member name="M:Jakar.Extensions.Models.Base.Records.ObservableRecord.SetProperty``1(``0@,``0,System.Action,System.String)">
+            <summary>
+                "onChanged" only called if the backingStore value has changed.
+            </summary>
+        </member>
+        <member name="M:Jakar.Extensions.Models.Base.Records.ObservableRecord.SetProperty``1(``0@,``0,System.Collections.Generic.IEqualityComparer{``0},System.Action,System.String)">
+            <summary>
+                "onChanged" only called if the backingStore value has changed.
+            </summary>
+        </member>
+        <member name="M:Jakar.Extensions.Models.Base.Records.ObservableRecord.SetProperty``1(``0@,``0,System.Action{``0},System.String)">
+            <summary>
+                "onChanged" only called if the backingStore value has changed.
+            </summary>
+        </member>
+        <member name="M:Jakar.Extensions.Models.Base.Records.ObservableRecord.SetProperty``1(``0@,``0,System.Collections.Generic.IEqualityComparer{``0},System.Action{``0},System.String)">
+            <summary>
+                "onChanged" only called if the backingStore value has changed.
+            </summary>
+        </member>
+        <member name="M:Jakar.Extensions.Models.Base.Records.ObservableRecord.SetProperty``1(``0@,``0,System.Func{System.Threading.Tasks.Task},System.String)">
+            <summary>
+                "onChanged" only called if the backingStore value has changed.
+            </summary>
+        </member>
+        <member name="M:Jakar.Extensions.Models.Base.Records.ObservableRecord.SetProperty``1(``0@,``0,System.Collections.Generic.IEqualityComparer{``0},System.Func{System.Threading.Tasks.Task},System.String)">
+            <summary>
+                "onChanged" only called if the backingStore value has changed.
+            </summary>
+        </member>
+        <member name="M:Jakar.Extensions.Models.Base.Records.ObservableRecord.SetProperty``1(``0@,``0,System.Func{``0,System.Threading.Tasks.Task},System.String)">
+            <summary>
+                "onChanged" only called if the backingStore value has changed.
+            </summary>
+        </member>
+        <member name="M:Jakar.Extensions.Models.Base.Records.ObservableRecord.SetProperty``1(``0@,``0,System.Collections.Generic.IEqualityComparer{``0},System.Func{``0,System.Threading.Tasks.Task},System.String)">
+            <summary>
+                "onChanged" only called if the backingStore value has changed.
+            </summary>
+        </member>
+        <member name="T:Jakar.Extensions.Models.Collections.ConcurrentObservableCollection`1">
+            <summary>
+                <para>
+                    <see href = "https://stackoverflow.com/a/54733415/9530917" > This type of CollectionView does not support changes to its SourceCollection from a thread different from the Dispatcher thread </see>
+                </para>
+                <para>
+                    <see href = "https://stackoverflow.com/a/14602121/9530917" > How do I update an ObservableCollection via a worker thread? </see>
+                </para>
+            </summary>
+            <typeparam name = "T" > </typeparam>
+        </member>
+        <member name="T:Jakar.Extensions.Models.Collections.FixedSizedDeque`1">
+            <summary>
+                <seealso href = "https://stackoverflow.com/a/5852926/9530917" />
+            </summary>
+            <typeparam name = "T" > </typeparam>
+        </member>
+        <member name="T:Jakar.Extensions.Models.Collections.FixedSizedQueue`1">
+            <summary>
+                <seealso href = "https://stackoverflow.com/a/5852926/9530917" />
+            </summary>
+            <typeparam name = "T" > </typeparam>
+        </member>
+        <member name="T:Jakar.Extensions.Models.Collections.MultiDeque`1">
+            <summary>
+                <seealso href = "https://stackoverflow.com/a/5852926/9530917" />
+            </summary>
+            <typeparam name = "T" > </typeparam>
+        </member>
+        <member name="T:Jakar.Extensions.Models.Collections.MultiQueue`1">
+            <summary>
+                <seealso href = "https://stackoverflow.com/a/5852926/9530917" />
+            </summary>
+            <typeparam name = "T" > </typeparam>
+        </member>
+        <member name="M:Jakar.Extensions.Models.Collections.ObservableConcurrentDictionary`2.#ctor(System.Int32,System.Int32)">
+            <summary>
+                Initializes a new instance of the
+                <see cref = "T:System.Collections.Concurrent.ConcurrentDictionary`2" />
+                class that is empty, has the specified concurrency level, has the specified initial capacity, and uses the specified
+                <see cref = "T:System.Collections.Generic.IEqualityComparer{TKey}" />
+                .
+            </summary>
+            <param name = "concurrencyLevel" >
+                The estimated number of threads that will update the
+                <see cref = "T:System.Collections.Concurrent.ConcurrentDictionary`2" />
+                concurrently.
+            </param>
+            <param name = "capacity" >
+                The initial number of elements that the
+                <see cref = "T:System.Collections.Concurrent.ConcurrentDictionary`2" />
+                can contain.
+            </param>
+            <exception cref = "T:System.ArgumentOutOfRangeException" >
+                <paramref name = "concurrencyLevel" />
+                is less than 1. -or-
+                <paramref name = "capacity" />
+                is less than 0.
+            </exception>
+        </member>
+        <member name="M:Jakar.Extensions.Models.Collections.ObservableConcurrentDictionary`2.#ctor(System.Int32,System.Int32,System.Collections.Generic.IEqualityComparer{`0})">
+            <summary>
+                Initializes a new instance of the
+                <see cref = "T:System.Collections.Concurrent.ConcurrentDictionary`2" />
+                class that is empty, has the specified concurrency level, has the specified initial capacity, and uses the specified
+                <see cref = "T:System.Collections.Generic.IEqualityComparer{TKey}" />
+                .
+            </summary>
+            <param name = "concurrencyLevel" >
+                The estimated number of threads that will update the
+                <see cref = "T:System.Collections.Concurrent.ConcurrentDictionary`2" />
+                concurrently.
+            </param>
+            <param name = "capacity" >
+                The initial number of elements that the
+                <see cref = "T:System.Collections.Concurrent.ConcurrentDictionary`2" />
+                can contain.
+            </param>
+            <param name = "comparer" >
+                The
+                <see cref = "T:System.Collections.Generic.IEqualityComparer{TKey}" />
+                implementation to use when comparing keys.
+            </param>
+            <exception cref = "T:System.ArgumentOutOfRangeException" >
+                <paramref name = "concurrencyLevel" />
+                is less than 1. -or-
+                <paramref name = "capacity" />
+                is less than 0.
+            </exception>
+        </member>
+        <member name="M:Jakar.Extensions.Models.IniConfiguration.IniConfig.GetOrAdd(System.String@)">
+            <summary>
+                Gets the
+                <see cref = "T:Jakar.Extensions.Models.IniConfiguration.IniConfig.Section" />
+                with the
+                <paramref name = "sectionName" />
+                . If it doesn't exist, it is created, then returned.
+            </summary>
+            <param name = "sectionName" > Section Name </param>
+            <returns>
+                <see cref = "T:Jakar.Extensions.Models.IniConfiguration.IniConfig.Section" />
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.Models.IniConfiguration.IniConfig.Get(System.String@,System.StringComparison@)">
+            <summary>
+                Gets the
+                <see cref = "T:Jakar.Extensions.Models.IniConfiguration.IniConfig.Section" />
+                with the
+                <paramref name = "sectionName" />
+                , using the
+                <paramref name = "comparison" />
+                rules.
+            </summary>
+            <param name = "sectionName" > </param>
+            <param name = "comparison" > </param>
+            <returns> </returns>
+            <exception cref = "T:System.Collections.Generic.KeyNotFoundException" > </exception>
+        </member>
+        <member name="T:Jakar.Extensions.Models.Synchronized`1">
+            <summary>
+                <seealso href = "https://www.codeproject.com/Articles/33559/Handy-wrapper-class-for-thread-safe-property-acces" />
+            </summary>
+            <typeparam name = "TStruct" > The value type. </typeparam>
+        </member>
+        <member name="F:Jakar.Extensions.Models.Users.ValidEmail.validator">
+            <summary>
+                <see href = "https://www.tutorialspoint.com/how-to-validate-an-email-address-in-chash" />
+            </summary>
+        </member>
+        <member name="T:Jakar.Extensions.Models.Users.PhoneNumber">
+            <summary>
+                You may also use one of
+                <see cref = "T:Jakar.Extensions.Strings.Validate.Re.PhoneNumbers" />
+                Regex objects to validate phone numbers, use the default
+                <see cref = "F:Jakar.Extensions.Models.Users.PhoneNumber.validator" />
+                , or provide your own as the validation
+                <see cref = "T:System.Text.RegularExpressions.Regex" />
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.Models.Users.PhoneNumber.validator">
+            <summary>
+                <para>
+                    <see href = "https://www.twilio.com/blog/validating-phone-numbers-effectively-with-c-and-the-net-frameworks" />
+                </para>
+                <para>
+                    <see href = "https://countrycode.org/" />
+                </para>
+            </summary>
+        </member>
+        <member name="M:Jakar.Extensions.Models.Users.PhoneNumber.#ctor">
+            <summary>
+                Uses the default
+                <see cref = "F:Jakar.Extensions.Models.Users.PhoneNumber.validator" />
+                as the validation
+                <see cref = "T:System.Text.RegularExpressions.Regex" />
+                <para> Subclass this class to override the default validator. </para>
+            </summary>
+        </member>
+        <member name="M:Jakar.Extensions.Models.Users.PhoneNumber.#ctor(System.Text.RegularExpressions.Regex)">
+            <summary>
+                You may also use one of
+                <see cref = "T:Jakar.Extensions.Strings.Validate.Re.PhoneNumbers" />
+                Regex objects, use the default
+                <see cref = "F:Jakar.Extensions.Models.Users.PhoneNumber.validator" />
+                , or provide your own as the
+                <paramref name = "validator" />
+                <see cref = "T:System.Text.RegularExpressions.Regex" />
+            </summary>
+        </member>
+        <member name="M:Jakar.Extensions.Models.Users.PhoneNumber.#ctor(System.String,System.Boolean,System.Boolean)">
+            <summary>
+                Uses the default
+                <see cref = "F:Jakar.Extensions.Models.Users.PhoneNumber.validator" />
+                as the validation
+                <see cref = "T:System.Text.RegularExpressions.Regex" />
+            </summary>
+        </member>
+        <member name="M:Jakar.Extensions.Models.Users.PhoneNumber.#ctor(System.Text.RegularExpressions.Regex,System.String,System.Boolean,System.Boolean)">
+            <summary>
+                You may also use one of
+                <see cref = "T:Jakar.Extensions.Strings.Validate.Re.PhoneNumbers" />
+                Regex objects, use the default
+                <see cref = "F:Jakar.Extensions.Models.Users.PhoneNumber.validator" />
+                , or provide your own as the
+                <paramref name = "validator" />
+                <see cref = "T:System.Text.RegularExpressions.Regex" />
+            </summary>
+        </member>
+        <member name="T:Jakar.Extensions.Models.ValidValueOf`2">
+            <summary>
+                Inspired by
+                <see cref = "T:ValueOf.ValueOf`2" />
+            </summary>
+            <typeparam name = "TValue" > </typeparam>
+            <typeparam name = "TThis" > </typeparam>
+        </member>
+        <member name="M:Jakar.Extensions.Models.ValidValueOf`2.IsValid">
+            <summary>
+            
+            </summary>
+            <returns>
+                <see langword = "true" />
+                if
+                <see cref = "P:Jakar.Extensions.Models.ValidValueOf`2.Value" />
+                is valid, otherwise
+                <see langword = "false" />
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.SpanAndMemory.GuidExtensions.AsBase64(System.Guid)">
+            <summary>
+                <see href = "https://www.youtube.com/watch?v=B2yOjLyEZk0" > Writing C# without allocating ANY memory </see>
+            </summary>
+            <param name = "value" > </param>
+            <returns> </returns>
+        </member>
+        <member name="M:Jakar.Extensions.SpanAndMemory.GuidExtensions.AsGuid(System.String)">
+            <summary>
+                <see href = "https://www.youtube.com/watch?v=B2yOjLyEZk0" > Writing C# without allocating ANY memory </see>
+            </summary>
+            <param name = "value" > </param>
+            <returns> </returns>
+        </member>
+        <member name="M:Jakar.Extensions.SpanAndMemory.GuidExtensions.AsGuid(System.ReadOnlySpan{System.Char})">
+            <summary>
+                <see href = "https://www.youtube.com/watch?v=B2yOjLyEZk0" > Writing C# without allocating ANY memory </see>
+            </summary>
+            <param name = "value" > </param>
+            <returns> </returns>
+        </member>
+        <member name="M:Jakar.Extensions.SpanAndMemory.Spans.Slice``1(System.ReadOnlySpan{``0},``0@,``0@,System.Boolean@)">
+            <summary>
+            Allocates a string
+            </summary>
+        </member>
+        <member name="M:Jakar.Extensions.SpanAndMemory.Spans.Contains``1(System.ReadOnlySpan{``0}@,``0)">
+            <summary>
+            <see cref="T:System.MemoryExtensions"/> doesn't have Contains in .Net Standard 2.1. but does in .Net 6.0.
+            <para>Will be removed in a future version.</para>
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="span"></param>
+            <param name="value"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Jakar.Extensions.SpanAndMemory.Spans.Replace(System.ReadOnlySpan{System.Char},System.ReadOnlySpan{System.Char}@,System.ReadOnlySpan{System.Char}@,System.Char@)">
+            <summary>
+            Allocates a string
+            </summary>
+        </member>
+        <member name="M:Jakar.Extensions.SpanAndMemory.Spans.Replace(System.ReadOnlySpan{System.Char},System.ReadOnlySpan{System.Char}@,System.ReadOnlySpan{System.Char}@,System.Char@,System.Char@,System.Char@)">
+            <summary>
+            Allocates a string
+            </summary>
+        </member>
+        <member name="M:Jakar.Extensions.SpanAndMemory.Spans.Join(System.ReadOnlySpan{System.Char},System.ReadOnlySpan{System.Char}@)">
+            <summary>
+            Allocates a string
+            </summary>
+        </member>
+        <member name="M:Jakar.Extensions.SpanAndMemory.Spans.RemoveAll(System.ReadOnlySpan{System.Char},System.Char@)">
+            <summary>
+            Allocates a string
+            </summary>
+        </member>
+        <member name="M:Jakar.Extensions.Strings.ConsoleExtensions.Wrapper(System.Char,System.Int32)">
+            <summary>
+                Creates a new string of
+                <paramref name = "length" />
+                size filled with
+                <paramref name = "c" />
+                character
+            </summary>
+            <param name = "c" > </param>
+            <param name = "length" > </param>
+            <returns> </returns>
+        </member>
+        <member name="M:Jakar.Extensions.Strings.ConsoleExtensions.Wrapper(System.String,System.Char@,System.Int32@)">
+            <summary>
+                Wraps a string in
+                <paramref name = "c" > </paramref>
+                repeated
+                <paramref name = "padding" > </paramref>
+                times.
+            </summary>
+            <param name = "self" > </param>
+            <param name = "c" > </param>
+            <param name = "padding" > </param>
+            <returns> </returns>
+        </member>
+        <member name="T:Jakar.Extensions.Strings.LineSplitEntry`1">
+            <summary>
+                <para>
+                    <see href = "https://www.meziantou.net/split-a-string-into-lines-without-allocation.htm" />
+                </para>
+            </summary>
+        </member>
+        <member name="T:Jakar.Extensions.Strings.SpanSplitEnumerator`1">
+            <summary>
+                <see cref = "T:Jakar.Extensions.Strings.SpanSplitEnumerator`1" />
+                is a struct so there is no allocation here.
+                <para>
+                    Must be a ref struct as it contains a
+                    <see cref = "T:System.ReadOnlySpan`1" />
+                </para>
+                <para>
+                    <see href = "https://www.meziantou.net/split-a-string-into-lines-without-allocation.htm" />
+                </para>
+            </summary>
+        </member>
+        <member name="M:Jakar.Extensions.Strings.StringExtensions.Repeat(System.Char,System.Int32)">
+            <summary>
+                <seealso href = "https://stackoverflow.com/a/48832421/9530917" />
+            </summary>
+            <param name = "c" > </param>
+            <param name = "count" > </param>
+            <returns>
+                <see cref = "T:System.String" />
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.Strings.StringExtensions.Repeat(System.String,System.Int32)">
+            <summary>
+                <seealso href = "https://stackoverflow.com/a/720915/9530917" />
+            </summary>
+            <param name = "value" > </param>
+            <param name = "count" > </param>
+            <returns>
+                <see cref = "T:System.String" />
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.Strings.StringExtensions.IsBalanced(System.String,System.Collections.Generic.IDictionary{System.Char,System.Char})">
+            <summary>
+                <seealso href = "https://www.codeproject.com/Tips/1175562/Check-for-Balanced-Parenthesis-in-a-String" />
+                <para>
+                    <paramref name = "bracketPairs" />
+                    defaults to matching:
+                    <br />
+                    <list type = "bullet" >
+                        <item>
+                            <term> ( ) </term>
+                            <description> Parenthesis </description>
+                        </item>
+            
+                        <item>
+                            <term> [ ] </term>
+                            <description> Square Brackets </description>
+                        </item>
+            
+                        <item>
+                            <term> { } </term>
+                            <description> Curly Braces </description>
+                        </item>
+            
+                    </list>
+                </para>
+                <para>
+                    Provide your own
+                    <c> IDictionary{char, char} </c>
+                    to
+                    <paramref name = "bracketPairs" />
+                    to customize the mapping.
+                </para>
+            </summary>
+            <returns>
+                <see langword = "true" />
+                if balanced; otherwise
+                <see langword = "false" />
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.Strings.StringExtensions.ToSnakeCase(System.String)">
+            <summary>
+                copied from
+                <seealso href = "https://stackoverflow.com/a/67332992/9530917" />
+            </summary>
+            <param name = "text" > </param>
+            <returns> </returns>
+        </member>
+        <member name="M:Jakar.Extensions.Strings.StringExtensions.SplitOn(System.String,System.Char)">
+            <summary>
+                <para>
+                    <see href = "https://www.meziantou.net/split-a-string-into-lines-without-allocation.htm" />
+                </para>
+            </summary>
+            <param name = "str" > </param>
+            <param name = "separator" >
+                the
+                <see cref = "T:System.Char" />
+                to split on
+            </param>
+            <returns>
+                <see cref = "T:Jakar.Extensions.Strings.SpanSplitEnumerator`1" />
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.Strings.StringExtensions.SplitOn(System.String)">
+            <summary>
+                <para>
+                    <see href = "https://www.meziantou.net/split-a-string-into-lines-without-allocation.htm" />
+                </para>
+                Default chars
+                <see cref = "T:System.Char" />
+                to '\n' and '\r'
+            </summary>
+            <param name = "str" > </param>
+            <returns>
+                <see cref = "T:Jakar.Extensions.Strings.SpanSplitEnumerator`1" />
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.Strings.StringExtensions.SplitOn``1(System.ReadOnlySpan{``0},``0)">
+            <summary>
+                <para>
+                    <see href = "https://www.meziantou.net/split-a-string-into-lines-without-allocation.htm" />
+                </para>
+            </summary>
+            <param name = "span" > </param>
+            <param name = "separator" >
+                the
+                <see cref = "T:System.Char" />
+                to split on
+            </param>
+            <returns>
+                <see cref = "T:Jakar.Extensions.Strings.SpanSplitEnumerator`1" />
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.Strings.StringExtensions.SplitOn(System.ReadOnlySpan{System.Char})">
+            <summary>
+                <para>
+                    <see href = "https://www.meziantou.net/split-a-string-into-lines-without-allocation.htm" />
+                </para>
+                Default chars
+                <see cref = "T:System.Char" />
+                to '\n' and '\r'
+            </summary>
+            <param name = "span" > </param>
+            <returns>
+                <see cref = "T:Jakar.Extensions.Strings.SpanSplitEnumerator`1" />
+            </returns>
+        </member>
+        <member name="T:Jakar.Extensions.Strings.Validate">
+            <summary>
+                Validator Extensions
+            </summary>
+        </member>
+        <member name="P:Jakar.Extensions.Strings.Validate.Re.Email">
+            <summary>
+                General Email Regex (RFC 5322 Official Standard)
+                <para>
+                    <see href = "https://emailregex.com/" />
+                </para>
+            </summary>
+        </member>
+        <member name="P:Jakar.Extensions.Strings.Validate.Re.Url">
+            <summary>
+            
+                <para>
+                    <see href = "https://urlregex.com/" />
+                </para>
+            </summary>
+        </member>
+        <member name="P:Jakar.Extensions.Strings.Validate.Re.Ip">
+            <summary>
+                <para>
+                    <see href = "https://ipregex.com/" />
+                </para>
+            </summary>
+        </member>
+        <member name="P:Jakar.Extensions.Strings.Validate.Re.PhoneNumbers.Generic">
+            <summary>
+                <para>
+                    <see href = "https://phoneregex.com/" />
+                </para>
+            </summary>
+        </member>
+        <member name="P:Jakar.Extensions.Strings.Validate.Re.PhoneNumbers.UnitedSatesOrCanada1">
+            <summary>
+                <para>
+                    <see href = "https://phoneregex.com/" />
+                </para>
+            </summary>
+        </member>
+        <member name="P:Jakar.Extensions.Strings.Validate.Re.PhoneNumbers.UnitedSatesOrCanada2">
+            <summary>
+                <para>
+                    <see href = "https://phoneregex.com/" />
+                </para>
+            </summary>
+        </member>
+        <member name="P:Jakar.Extensions.Strings.Validate.Re.PhoneNumbers.UnitedKingdom">
+            <summary>
+                <para>
+                    <see href = "https://phoneregex.com/" />
+                </para>
+            </summary>
+        </member>
+        <member name="P:Jakar.Extensions.Strings.Validate.Re.PhoneNumbers.Germany">
+            <summary>
+                <para>
+                    <see href = "https://phoneregex.com/" />
+                </para>
+            </summary>
+        </member>
+        <member name="P:Jakar.Extensions.Strings.Validate.Re.PhoneNumbers.China1">
+            <summary>
+                <para>
+                    <see href = "https://phoneregex.com/" />
+                </para>
+            </summary>
+        </member>
+        <member name="P:Jakar.Extensions.Strings.Validate.Re.PhoneNumbers.China2">
+            <summary>
+                <para>
+                    <see href = "https://phoneregex.com/" />
+                </para>
+            </summary>
+        </member>
+        <member name="P:Jakar.Extensions.Strings.Validate.Re.PhoneNumbers.Russia">
+            <summary>
+                <para>
+                    <see href = "https://phoneregex.com/" />
+                </para>
+            </summary>
+        </member>
+        <member name="P:Jakar.Extensions.Strings.Validate.Re.PhoneNumbers.Japan">
+            <summary>
+                <para>
+                    <see href = "https://phoneregex.com/" />
+                </para>
+            </summary>
+        </member>
+        <member name="P:Jakar.Extensions.Strings.Validate.Re.PhoneNumbers.IndiaOld">
+            <summary>
+                <para>
+                    <see href = "https://phoneregex.com/" />
+                </para>
+            </summary>
+        </member>
+        <member name="P:Jakar.Extensions.Strings.Validate.Re.PhoneNumbers.IndiaNew">
+            <summary>
+                <para>
+                    <see href = "https://phoneregex.com/" />
+                </para>
+            </summary>
+        </member>
+        <member name="P:Jakar.Extensions.Strings.Validate.Re.PhoneNumbers.Indonesia">
+            <summary>
+                <para>
+                    <see href = "https://phoneregex.com/" />
+                </para>
+            </summary>
+        </member>
+        <member name="P:Jakar.Extensions.Strings.Validate.Re.PhoneNumbers.Brazil">
+            <summary>
+                <para>
+                    <see href = "https://phoneregex.com/" />
+                </para>
+            </summary>
+        </member>
+        <member name="M:Jakar.Extensions.Types.TypeNameComparer.Compare(System.Type,System.Type)">
+            <summary>
+                <para>
+                    Comparing by
+                    <see cref = "P:System.Type.AssemblyQualifiedName" />
+                    would give the same result,
+                    but it performs a hidden concatenation (and therefore string allocation)
+                    of
+                    <see cref = "P:System.Type.FullName" />
+                    and
+                    <see cref = "P:System.Type.Assembly" />
+                    with its
+                    <see cref = "P:System.Reflection.Assembly.FullName" />
+                    .
+                </para>
+                We can avoid this overhead by comparing the two properties separately.
+            </summary>
+            <param name = "x" > </param>
+            <param name = "y" > </param>
+            <returns> </returns>
+        </member>
+        <member name="T:System.Runtime.CompilerServices.IsExternalInit">
+            <summary>
+                Reserved to be used by the compiler for tracking metadata.
+                This class should not be used by developers in source code.
+            </summary>
+        </member>
+    </members>
+</doc>

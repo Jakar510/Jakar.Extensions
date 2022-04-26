@@ -8,7 +8,7 @@ using Jakar.Extensions.SpanAndMemory;
 
 
 
-namespace Jakar.Xml;
+namespace Jakar.Xml.Deserialization;
 
 
 [SuppressMessage("ReSharper", "InconsistentNaming")]
@@ -20,7 +20,7 @@ public readonly ref struct XAttribute
     public readonly  bool               IsNameSpace;
 
 
-    public XAttribute( ReadOnlySpan<char> span )
+    public XAttribute( in ReadOnlySpan<char> span )
     {
         if ( span.StartsWith(Constants.OPEN_START) ) { throw new FormatException($"Cannot start with {Constants.OPEN_START}"); }
 

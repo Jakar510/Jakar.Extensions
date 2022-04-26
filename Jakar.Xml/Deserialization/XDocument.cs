@@ -5,7 +5,7 @@ using System;
 
 
 
-namespace Jakar.Xml;
+namespace Jakar.Xml.Deserialization;
 
 
 public ref struct XDocument

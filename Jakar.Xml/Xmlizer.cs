@@ -7,6 +7,7 @@ using System.Xml;
 using Jakar.Extensions.Exceptions.General;
 using Jakar.Extensions.Strings;
 using Jakar.Extensions.Types;
+using Jakar.Xml.Deserialization;
 
 
 
@@ -39,42 +40,43 @@ public static class Xmlizer
     internal static readonly ConcurrentDictionary<Type, Func<string, object>> parsers = new();
 
 
-    static Xmlizer() =>
+    /// <summary>
+    /// register System built-ins
+    /// </summary>
+    static Xmlizer() => Register(typeof(bool?),
+                                 typeof(byte?),
+                                 typeof(sbyte?),
+                                 typeof(Guid?),
+                                 typeof(char?),
+                                 typeof(DateTime?),
+                                 typeof(int?),
+                                 typeof(uint?),
+                                 typeof(short?),
+                                 typeof(ushort?),
+                                 typeof(long?),
+                                 typeof(ulong?),
+                                 typeof(float?),
+                                 typeof(double?),
+                                 typeof(decimal?),
+                                 typeof(TimeSpan?),
+                                 typeof(bool),
+                                 typeof(byte),
+                                 typeof(sbyte),
+                                 typeof(Guid),
+                                 typeof(char),
+                                 typeof(string),
+                                 typeof(DateTime),
+                                 typeof(int),
+                                 typeof(uint),
+                                 typeof(short),
+                                 typeof(ushort),
+                                 typeof(long),
+                                 typeof(ulong),
+                                 typeof(float),
+                                 typeof(double),
+                                 typeof(decimal),
+                                 typeof(TimeSpan));
 
-        // register System built-ins
-        Register(typeof(bool?),
-                 typeof(byte?),
-                 typeof(sbyte?),
-                 typeof(Guid?),
-                 typeof(char?),
-                 typeof(DateTime?),
-                 typeof(int?),
-                 typeof(uint?),
-                 typeof(short?),
-                 typeof(ushort?),
-                 typeof(long?),
-                 typeof(ulong?),
-                 typeof(float?),
-                 typeof(double?),
-                 typeof(decimal?),
-                 typeof(TimeSpan?),
-                 typeof(bool),
-                 typeof(byte),
-                 typeof(sbyte),
-                 typeof(Guid),
-                 typeof(char),
-                 typeof(string),
-                 typeof(DateTime),
-                 typeof(int),
-                 typeof(uint),
-                 typeof(short),
-                 typeof(ushort),
-                 typeof(long),
-                 typeof(ulong),
-                 typeof(float),
-                 typeof(double),
-                 typeof(decimal),
-                 typeof(TimeSpan));
 
     // Register(typeof(IPAddress),
     // typeof(DnsEndPoint),

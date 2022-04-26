@@ -1,4 +1,4 @@
-﻿namespace Jakar.Extensions.General;
+﻿namespace Jakar.Extensions.Exceptions;
 
 
 public class ExceptionDetails
