@@ -15,75 +15,63 @@ namespace Jakar.Xml.Deserialization;
 [SuppressMessage("ReSharper", "InconsistentNaming")]
 public readonly ref struct XNode
 {
-    public readonly  ReadOnlySpan<char> Name;
-    private readonly ReadOnlySpan<char> _attributes;
-    private readonly ReadOnlySpan<char> _content;
-    public           bool               HasAttributes => _attributes.Length > 0;
+    private readonly ReadOnlySpan<char> _xml;
+    public           bool               HasAttributes => !Attributes.IsEmpty;
+    public           ReadOnlySpan<char> Name          => _xml[1.._xml.IndexOf('>')].Trim();
+    public           ReadOnlySpan<char> Attributes    => _xml[( Name.Length + 1 ).._xml.IndexOf('>')].Trim();
+    public           ReadOnlySpan<char> StartTag      => _xml[..( _xml.IndexOf('>') + 1 )].Trim();
 
+    public ReadOnlySpan<char> EndTag
+    {
+        get
+        {
+            ReadOnlySpan<char> name   = Name;
+            Span<char>         buffer = stackalloc char[name.Length + 3];
+            buffer[0] = '<';
+            buffer[1] = '/';
+            for ( var i = 0; i < name.Length; i++ ) { buffer[i + 2] = name[i]; }
+
+            buffer[^1] = '>';
+            return default;
+        }
+    }
 
     public ReadOnlySpan<char> XMLS
     {
         get
         {
-            if ( !_attributes.Contains(Constants.XMLS_TAG) ) { return default; }
+            ReadOnlySpan<char> attributes = Attributes;
+            if ( !attributes.Contains(Constants.XMLS_TAG) ) { return default; }
 
-            int                typeStart = _attributes.IndexOf(Constants.XMLS_TAG) + Constants.XMLS_TAG.Length;
-            ReadOnlySpan<char> temp      = _attributes[typeStart..];
+            int                typeStart = attributes.IndexOf(Constants.XMLS_TAG) + Constants.XMLS_TAG.Length;
+            ReadOnlySpan<char> temp      = attributes[typeStart..];
             return temp[..temp.IndexOf('"')];
         }
     }
 
+    public ReadOnlySpan<char> Content => _xml.Slice(StartTag.Length, _xml.Length - EndTag.Length);
+
 
     public XNode( in ReadOnlySpan<char> xml )
     {
-        Validate(xml, out ReadOnlySpan<char> start, out ReadOnlySpan<char> end, out Name, out _attributes);
-        _content = xml.Slice(start.Length, xml.Length - end.Length);
-    }
-
-
-    private static void Validate( in ReadOnlySpan<char> xml, out ReadOnlySpan<char> start, out ReadOnlySpan<char> end, out ReadOnlySpan<char> name, out ReadOnlySpan<char> attributes )
-    {
         if ( xml.IsEmpty ) { throw new ArgumentNullException(nameof(xml)); }
 
-        if ( !xml.StartsWith('<') ) { throw new FormatException($"Cannot start with {'<'}"); }
+        if ( !xml.StartsWith('<') ) { throw new FormatException("Must start with '<'"); }
 
-        if ( !xml.Contains("</") ) { throw new FormatException($"Cannot start with {'<'}"); }
-
-        int nameEndIndex = xml.IndexOf(' ');
-        if ( nameEndIndex < 0 ) { throw new FormatException($"Cannot start with {'<'}"); }
+        if ( !xml.Contains('>') ) { throw new FormatException("Must contain '<'"); }
 
 
-        name = xml[1..nameEndIndex].Trim();
-        int close = xml.IndexOf('>');
-        start      = xml[..( close + 1 )].Trim();
-        attributes = xml[nameEndIndex..close].Trim();
+        if ( !xml.Contains("</") ) { throw new FormatException("Must contain '</'"); }
+
+        if ( !xml.EndsWith('>') ) { throw new FormatException("Must End with '>'"); }
 
 
-        end = xml[( xml.Length - nameEndIndex - "</".Length - 1 )..];
-
-        if ( !end.EndsWith('>') ) { throw new FormatException($"Cannot start with {'<'}"); }
-
-        if ( !end.Contains('>') ) { throw new FormatException($"Cannot start with {'<'}"); }
-    }
-    private static bool Validate( in ReadOnlySpan<char> xml, out int openEnd, out int endStart, out int endEnd )
-    {
-        if ( xml.IsEmpty ) { throw new ArgumentNullException(nameof(xml)); }
-
-        if ( !xml.StartsWith('<') ) { throw new FormatException($"Cannot start with {'<'}"); }
-
-        if ( !xml.Contains("</") ) { throw new FormatException($"Cannot start with {'<'}"); }
-
-        openEnd = xml.IndexOf('>');
-        if ( openEnd < 0 ) { throw new FormatException($"Cannot start with {'<'}"); }
-        
-        ReadOnlySpan<char> temp = xml[( openEnd + 1 )..].Trim();
-
-
-        
+        _xml = xml;
     }
 
-    public AttributeEnumerator GetAttributes() => new(_attributes);
-    public NodeEnumerator GetChildren() => new(_content);
+
+    public AttributeEnumerator GetAttributes() => new(Attributes);
+    public NodeEnumerator GetChildren() => new(Content);
 
 
     public IReadOnlyDictionary<string, string> ToAttributeCollection()

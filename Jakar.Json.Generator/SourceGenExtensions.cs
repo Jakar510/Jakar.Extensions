@@ -20,5 +20,5 @@ public static class SourceGenExtensions
 
         return record.Modifiers.Any(m => m.IsKind(SyntaxKind.RecordStructDeclaration));
     }
-    private static bool IsSyntaxTarget( this SyntaxNode syntax ) => syntax is RecordDeclarationSyntax r && r.() && r.IsPublic() && r.IsRecordStruct();
+    public static bool IsSyntaxTarget( this SyntaxNode syntax ) => syntax is RecordDeclarationSyntax r && r.IsPartial() && r.IsPublic() && r.IsRecordStruct();
 }

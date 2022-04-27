@@ -2,6 +2,8 @@
 // 04/26/2022  9:59 AM
 
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text;
@@ -12,256 +14,198 @@ namespace Jakar.Xml.Serialization;
 
 
 [SuppressMessage("ReSharper", "PossiblyImpureMethodCallOnReadonlyVariable")]
-public readonly ref struct XObject
+public ref struct XObject
 {
     private readonly ReadOnlySpan<char> _name;
-    private readonly XContext           _context;
-    private readonly StringBuilder      _sb;
+    private          XWriter            _writer;
 
 
-    public XObject( in ReadOnlySpan<char> name, in XContext context, in StringBuilder sb )
+    public XObject( in ReadOnlySpan<char> key, ref XWriter context )
     {
-        _name    = name;
-        _context = context;
-        _sb      = sb;
-        _sb.Append('<');
-        _sb.Append(_name);
-        _sb.Append('>');
+        _name   = key;
+        _writer = context;
     }
-    private void AddBlock( in ReadOnlySpan<char> name, in ReadOnlySpan<char> value )
-    {
-        _sb.Append('<');
-        _sb.Append(name);
-        _sb.Append('>');
-        _sb.Append(value);
-        _sb.Append("</");
-        _sb.Append(name);
-        _sb.Append('>');
 
-        if ( _context.Indent(_sb) ) { NewLine(); }
+    public XObject Init()
+    {
+        _writer.StartBlock(_name);
+        return this;
+    }
+    public XObject Init( in XAttributeBuilder builder )
+    {
+        _writer.StartBlock(_name, builder);
+        return this;
     }
 
 
+    public XObject Null( in ReadOnlySpan<char> key )
+    {
+        _writer.Indent(key).Append(XWriter.NULL).Next(key);
+        return this;
+    }
     public XObject Add( in ReadOnlySpan<char> key, in char value )
     {
-        _sb.Append(key);
-        _sb.Append('=');
-        _sb.Append(value);
-        _sb.Append(',');
+        _writer.Indent(key).Append(value).Next(key);
         return this;
     }
-    public XObject Add( in ReadOnlySpan<char> key, in char? value )
+    public XObject Add( in ReadOnlySpan<char> key, in short value )
     {
-        _sb.Append(key);
-        _sb.Append('=');
-        _sb.Append(value);
-        _sb.Append(',');
+        _writer.Indent(key).Append(value).Next(key);
         return this;
     }
-    public XObject Add( in ReadOnlySpan<char> key, in short value, in ReadOnlySpan<char> format = default, in CultureInfo? culture = default )
+    public XObject Add( in ReadOnlySpan<char> key, in ushort value )
     {
-        _sb.Append(key);
-        _sb.Append('=');
-        _sb.Append(value);
-        _sb.Append(',');
+        _writer.Indent(key).Append(value).Next(key);
         return this;
     }
-    public XObject Add( in ReadOnlySpan<char> key, in short? value, in ReadOnlySpan<char> format = default, in CultureInfo? culture = default )
+    public XObject Add( in ReadOnlySpan<char> key, in int value )
     {
-        _sb.Append(key);
-        _sb.Append('=');
-        _sb.Append(value);
-        _sb.Append(',');
+        _writer.Indent(key).Append(value).Next(key);
         return this;
     }
-    public XObject Add( in ReadOnlySpan<char> key, in ushort value, in ReadOnlySpan<char> format = default, in CultureInfo? culture = default )
+    public XObject Add( in ReadOnlySpan<char> key, in uint value )
     {
-        _sb.Append(key);
-        _sb.Append('=');
-        _sb.Append(value);
-        _sb.Append(',');
+        _writer.Indent(key).Append(value).Next(key);
         return this;
     }
-    public XObject Add( in ReadOnlySpan<char> key, in ushort? value, in ReadOnlySpan<char> format = default, in CultureInfo? culture = default )
+    public XObject Add( in ReadOnlySpan<char> key, in long value )
     {
-        _sb.Append(key);
-        _sb.Append('=');
-        _sb.Append(value);
-        _sb.Append(',');
+        _writer.Indent(key).Append(value).Next(key);
         return this;
     }
-    public XObject Add( in ReadOnlySpan<char> key, in int value, in ReadOnlySpan<char> format = default, in CultureInfo? culture = default )
+    public XObject Add( in ReadOnlySpan<char> key, in ulong value )
     {
-        _sb.Append(key);
-        _sb.Append('=');
-        _sb.Append(value);
-        _sb.Append(',');
+        _writer.Indent(key).Append(value).Next(key);
         return this;
     }
-    public XObject Add( in ReadOnlySpan<char> key, in int? value, in ReadOnlySpan<char> format = default, in CultureInfo? culture = default )
+    public XObject Add( in ReadOnlySpan<char> key, in float value )
     {
-        _sb.Append(key);
-        _sb.Append('=');
-        _sb.Append(value);
-        _sb.Append(',');
+        _writer.Indent(key).Append(value).Next(key);
         return this;
     }
-    public XObject Add( in ReadOnlySpan<char> key, in uint value, in ReadOnlySpan<char> format = default, in CultureInfo? culture = default )
+    public XObject Add( in ReadOnlySpan<char> key, in double value )
     {
-        _sb.Append(key);
-        _sb.Append('=');
-        _sb.Append(value);
-        _sb.Append(',');
+        _writer.Indent(key).Append(value).Next(key);
         return this;
     }
-    public XObject Add( in ReadOnlySpan<char> key, in uint? value, in ReadOnlySpan<char> format = default, in CultureInfo? culture = default )
+    public XObject Add( in ReadOnlySpan<char> key, in decimal value )
     {
-        _sb.Append(key);
-        _sb.Append('=');
-        _sb.Append(value);
-        _sb.Append(',');
+        _writer.Indent(key).Append(value).Next(key);
         return this;
     }
-    public XObject Add( in ReadOnlySpan<char> key, in long? value, in ReadOnlySpan<char> format = default, in CultureInfo? culture = default )
-    {
-        _sb.Append(key);
-        _sb.Append('=');
-        _sb.Append(value);
-        _sb.Append(',');
-        return this;
-    }
-    public XObject Add( in ReadOnlySpan<char> key, in long value, in ReadOnlySpan<char> format = default, in CultureInfo? culture = default )
-    {
-        _sb.Append(key);
-        _sb.Append('=');
-        _sb.Append(value);
-        _sb.Append(',');
-        return this;
-    }
-    public XObject Add( in ReadOnlySpan<char> key, in ulong value, in ReadOnlySpan<char> format = default, in CultureInfo? culture = default )
-    {
-        _sb.Append(key);
-        _sb.Append('=');
-        _sb.Append(value);
-        _sb.Append(',');
-        return this;
-    }
-    public XObject Add( in ReadOnlySpan<char> key, in ulong? value, in ReadOnlySpan<char> format = default, in CultureInfo? culture = default )
-    {
-        _sb.Append(key);
-        _sb.Append('=');
-        _sb.Append(value);
-        _sb.Append(',');
-        return this;
-    }
-    public XObject Add( in ReadOnlySpan<char> key, in float? value, in ReadOnlySpan<char> format = default, in CultureInfo? culture = default )
-    {
-        _sb.Append(key);
-        _sb.Append('=');
-        _sb.Append(value);
-        _sb.Append(',');
-        return this;
-    }
-    public XObject Add( in ReadOnlySpan<char> key, in float value, in ReadOnlySpan<char> format = default, in CultureInfo? culture = default )
-    {
-        _sb.Append(key);
-        _sb.Append('=');
-        _sb.Append(value);
-        _sb.Append(',');
-        return this;
-    }
-    public XObject Add( in ReadOnlySpan<char> key, in double value, in ReadOnlySpan<char> format = default, in CultureInfo? culture = default )
-    {
-        _sb.Append(key);
-        _sb.Append('=');
-        _sb.Append(value);
-        _sb.Append(',');
-        return this;
-    }
-    public XObject Add( in ReadOnlySpan<char> key, in double? value, in ReadOnlySpan<char> format = default, in CultureInfo? culture = default )
-    {
-        _sb.Append(key);
-        _sb.Append('=');
-        _sb.Append(value);
-        _sb.Append(',');
-        return this;
-    }
-    public XObject Add( in ReadOnlySpan<char> key, in decimal value, in ReadOnlySpan<char> format = default, in CultureInfo? culture = default )
-    {
-        _sb.Append(key);
-        _sb.Append('=');
-        _sb.Append(value);
-        _sb.Append(',');
-        return this;
-    }
-    public XObject Add( in ReadOnlySpan<char> key, in decimal? value, in ReadOnlySpan<char> format = default, in CultureInfo? culture = default )
-    {
-        _sb.Append(key);
-        _sb.Append('=');
-        _sb.Append(value);
-        _sb.Append(',');
-        return this;
-    }
+
+
+    public XObject Add( in ReadOnlySpan<char> key, in char? value ) => value.HasValue
+                                                                           ? Add(key, value.Value)
+                                                                           : Null(key);
+    public XObject Add( in ReadOnlySpan<char> key, in short? value ) => value.HasValue
+                                                                            ? Add(key, value.Value)
+                                                                            : Null(key);
+    public XObject Add( in ReadOnlySpan<char> key, in ushort? value ) => value.HasValue
+                                                                             ? Add(key, value.Value)
+                                                                             : Null(key);
+    public XObject Add( in ReadOnlySpan<char> key, in int? value ) => value.HasValue
+                                                                          ? Add(key, value.Value)
+                                                                          : Null(key);
+    public XObject Add( in ReadOnlySpan<char> key, in uint? value ) => value.HasValue
+                                                                           ? Add(key, value.Value)
+                                                                           : Null(key);
+    public XObject Add( in ReadOnlySpan<char> key, in long? value ) => value.HasValue
+                                                                           ? Add(key, value.Value)
+                                                                           : Null(key);
+    public XObject Add( in ReadOnlySpan<char> key, in ulong? value ) => value.HasValue
+                                                                            ? Add(key, value.Value)
+                                                                            : Null(key);
+    public XObject Add( in ReadOnlySpan<char> key, in float? value ) => value.HasValue
+                                                                            ? Add(key, value.Value)
+                                                                            : Null(key);
+    public XObject Add( in ReadOnlySpan<char> key, in double? value ) => value.HasValue
+                                                                             ? Add(key, value.Value)
+                                                                             : Null(key);
+    public XObject Add( in ReadOnlySpan<char> key, in decimal? value ) => value.HasValue
+                                                                              ? Add(key, value.Value)
+                                                                              : Null(key);
+
+
     public XObject Add( in ReadOnlySpan<char> key, in string value ) => Add(key, value.AsSpan());
     public XObject Add( in ReadOnlySpan<char> key, in ReadOnlySpan<char> value )
     {
-        AddBlock(key, value);
+        _writer.Indent(key).Append(value).Next(key);
         return this;
     }
 
 
-    public XObject Add<T>( in ReadOnlySpan<char> key, in T value ) where T : struct, ISpanFormattable => Add(key,                                                       value, CultureInfo.CurrentCulture);
-    public XObject Add<T>( in ReadOnlySpan<char> key, in T value, in CultureInfo        culture ) where T : struct, ISpanFormattable => Add(key,                        value, default, culture);
-    public XObject Add<T>( in ReadOnlySpan<char> key, in T value, in ReadOnlySpan<char> format, in CultureInfo culture ) where T : struct, ISpanFormattable => Add(key, value, format,  culture, 1000);
-    public XObject Add<T>( in ReadOnlySpan<char> key, in T value, in ReadOnlySpan<char> format, in CultureInfo culture, in int bufferSize ) where T : struct, ISpanFormattable
+    public XObject Add( in ReadOnlySpan<char> key, in ISpanFormattable value, in int bufferSize ) => Add(key,                         value, bufferSize, CultureInfo.CurrentCulture);
+    public XObject Add( in ReadOnlySpan<char> key, in ISpanFormattable value, in int bufferSize, in CultureInfo culture ) => Add(key, value, bufferSize, default, culture);
+    public XObject Add( in ReadOnlySpan<char> key, in ISpanFormattable value, in int bufferSize, in ReadOnlySpan<char> format, in CultureInfo culture )
     {
-        Span<char> buffer = stackalloc char[bufferSize];
-
-        if ( !value.TryFormat(buffer, out int charsWritten, format, culture) ) { throw new InvalidOperationException($"Can't format value: '{value}'"); }
-
-        AddBlock(key, buffer[..charsWritten]);
+        _writer.Indent(key).Append(value, format, culture, bufferSize).Next(key);
         return this;
     }
 
 
-    public XObject Add<T>( in ReadOnlySpan<char> key, in T? value ) where T : struct, ISpanFormattable => Add(key,                                                       value, CultureInfo.CurrentCulture);
-    public XObject Add<T>( in ReadOnlySpan<char> key, in T? value, in CultureInfo        culture ) where T : struct, ISpanFormattable => Add(key,                        value, default, culture);
-    public XObject Add<T>( in ReadOnlySpan<char> key, in T? value, in ReadOnlySpan<char> format, in CultureInfo culture ) where T : struct, ISpanFormattable => Add(key, value, format,  culture, 650);
-    public XObject Add<T>( in ReadOnlySpan<char> key, in T? value, in ReadOnlySpan<char> format, in CultureInfo culture, in int bufferSize ) where T : struct, ISpanFormattable
+    public XObject Add<T>( in ReadOnlySpan<char> key, in T? value, in int bufferSize ) where T : struct, ISpanFormattable => Add(key,                         value, bufferSize, CultureInfo.CurrentCulture);
+    public XObject Add<T>( in ReadOnlySpan<char> key, in T? value, in int bufferSize, in CultureInfo culture ) where T : struct, ISpanFormattable => Add(key, value, bufferSize, default, culture);
+    public XObject Add<T>( in ReadOnlySpan<char> key, in T? value, in int bufferSize, in ReadOnlySpan<char> format, in CultureInfo culture ) where T : struct, ISpanFormattable
     {
-        if ( value.HasValue )
-        {
-            Span<char> buffer = stackalloc char[bufferSize];
-
-            if ( !value.Value.TryFormat(buffer, out int charsWritten, format, culture) ) { throw new InvalidOperationException($"Can't format value: '{value}'"); }
-
-            AddBlock(key, buffer[..charsWritten]);
-        }
-        else { AddBlock(key, default); }
-
+        _writer.Indent(key).Append(value, format, culture, bufferSize).Next(key);
         return this;
     }
 
 
-    public XArray AddArray( in ReadOnlySpan<char> key )
+    public XObject Add( in KeyValuePair<string, string>  pair ) => Add(pair.Key, pair.Value);
+    public XObject Add( in KeyValuePair<string, char>    pair ) => Add(pair.Key, pair.Value);
+    public XObject Add( in KeyValuePair<string, short>   pair ) => Add(pair.Key, pair.Value);
+    public XObject Add( in KeyValuePair<string, ushort>  pair ) => Add(pair.Key, pair.Value);
+    public XObject Add( in KeyValuePair<string, int>     pair ) => Add(pair.Key, pair.Value);
+    public XObject Add( in KeyValuePair<string, uint>    pair ) => Add(pair.Key, pair.Value);
+    public XObject Add( in KeyValuePair<string, long>    pair ) => Add(pair.Key, pair.Value);
+    public XObject Add( in KeyValuePair<string, ulong>   pair ) => Add(pair.Key, pair.Value);
+    public XObject Add( in KeyValuePair<string, float>   pair ) => Add(pair.Key, pair.Value);
+    public XObject Add( in KeyValuePair<string, double>  pair ) => Add(pair.Key, pair.Value);
+    public XObject Add( in KeyValuePair<string, decimal> pair ) => Add(pair.Key, pair.Value);
+
+
+    public XObject Add( in KeyValuePair<string, DateOnly>         pair ) => Add(pair.Key,                           pair.Value, 100);
+    public XObject Add( in KeyValuePair<string, TimeOnly>         pair ) => Add(pair.Key,                           pair.Value, 100);
+    public XObject Add( in KeyValuePair<string, TimeSpan>         pair ) => Add(pair.Key,                           pair.Value, 100);
+    public XObject Add( in KeyValuePair<string, DateTimeOffset>   pair ) => Add(pair.Key,                           pair.Value, 100);
+    public XObject Add( in KeyValuePair<string, DateTime>         pair ) => Add(pair.Key,                           pair.Value, 100);
+    public XObject Add( in KeyValuePair<string, ISpanFormattable> pair, in int bufferSize = 1000 ) => Add(pair.Key, pair.Value, bufferSize);
+
+
+    public XObject Add( in DictionaryEntry pair, in int bufferSize = 1000 )
     {
-        _sb.Append(key);
-        _sb.Append('=');
-        return new XArray(_context, _sb);
-    }
-    public XObject AddObject( in ReadOnlySpan<char> key )
-    {
-        _sb.Append(key);
-        _sb.Append('=');
-        return new XObject(_context, _sb);
+        ReadOnlySpan<char> k = pair.Key.ToString();
+
+        return pair.Value switch
+               {
+                   null               => Null(k),
+                   string v           => Add(k, v),
+                   char v             => Add(k, v),
+                   short v            => Add(k, v, 10),
+                   ushort v           => Add(k, v, 10),
+                   int v              => Add(k, v, 20),
+                   uint v             => Add(k, v, 20),
+                   long v             => Add(k, v, 30),
+                   ulong v            => Add(k, v, 30),
+                   float v            => Add(k, v, 350),
+                   double v           => Add(k, v, 650),
+                   decimal v          => Add(k, v, 200),
+                   DateOnly v         => Add(k, v, 100),
+                   TimeOnly v         => Add(k, v, 100),
+                   TimeSpan v         => Add(k, v, 100),
+                   DateTimeOffset v   => Add(k, v, 100),
+                   DateTime v         => Add(k, v, 100),
+                   ISpanFormattable v => Add(k, v, bufferSize),
+                   _                  => Add(k, pair.Value.ToString() ?? XWriter.NULL)
+               };
     }
 
 
-    private void NewLine() => _sb.Append('\n');
-    public void Dispose()
-    {
-        _sb.Append("</");
-        _sb.Append(_name);
-        _sb.Append('>');
-    }
+    public XArray AddArray( in   ReadOnlySpan<char> key ) => new(key, ref _writer);
+    public XObject AddObject( in ReadOnlySpan<char> key ) => new(key, ref _writer);
+
+
+    public void Dispose() => _writer.FinishBlock(_name);
 }

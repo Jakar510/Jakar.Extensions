@@ -11,7 +11,7 @@ public ref struct JWriter
     public const      string        NULL = "null";
     private readonly  StringBuilder _sb  = new();
     internal readonly bool          shouldIndent;
-    internal          int           indentLevel = default;
+    private           int           _indentLevel = 0;
 
 
     public JWriter() : this(Formatting.None) { }
@@ -70,7 +70,7 @@ public ref struct JWriter
         if ( shouldIndent )
         {
             _sb.Append('\n');
-            Increase();
+            _indentLevel += 1;
         }
     }
     public void FinishBlock( in char end )
@@ -80,25 +80,17 @@ public ref struct JWriter
         if ( shouldIndent )
         {
             _sb.Append('\n');
-            Decrease();
+            _indentLevel -= 1;
         }
     }
 
-    public void Increase()
-    {
-        if ( shouldIndent ) { indentLevel += 1; }
-    }
-    public void Decrease()
-    {
-        if ( shouldIndent ) { indentLevel -= 1; }
-    }
 
     public JWriter Indent()
     {
         if ( shouldIndent )
         {
             // throw new InvalidOperationException($"{nameof(Indent)} should not be used in this context"); 
-            _sb.Append('\t', indentLevel);
+            _sb.Append('\t', _indentLevel);
         }
 
         return this;

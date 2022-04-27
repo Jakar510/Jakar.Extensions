@@ -18,13 +18,13 @@ namespace Jakar.Json;
 /// </summary>
 public static class Jsonizer
 {
-    public static T FromJson<T>( this string json ) where T : IJsonizer, new()
-    {
-        var       value    = new T();
-        using var document = new JReader(json);
-        value.Deserialize(document);
-        return value;
-    }
+    // public static T FromJson<T>( this string json ) where T : IJsonizer, new()
+    // {
+    //     var       value    = new T();
+    //     using var document = new JReader(json);
+    //     value.Deserialize(document);
+    //     return value;
+    // }
 
 
     public static string ToJson( this IJsonizer value, Formatting formatting = Formatting.Indented ) => ToJson(value, new JWriter(formatting));

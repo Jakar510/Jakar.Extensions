@@ -123,7 +123,7 @@ public static class XmlExtensions
 
         XmlNode? root = document.ChildNodes[0];
 
-        if ( root?.Name != Constants.Generics.ITEM ) { throw new SerializationException(nameof(root.Name)); }
+        if ( root?.Name != Constants.ITEM ) { throw new SerializationException(nameof(root.Name)); }
 
         // attributes = root.GetAttributes();
         attributes = null;

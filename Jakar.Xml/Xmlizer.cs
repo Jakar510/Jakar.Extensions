@@ -8,13 +8,18 @@ using Jakar.Extensions.Exceptions.General;
 using Jakar.Extensions.Strings;
 using Jakar.Extensions.Types;
 using Jakar.Xml.Deserialization;
+using Jakar.Xml.Serialization;
 
 
 
 namespace Jakar.Xml;
 
 
-public interface IXmlizer { }
+public interface IXmlizer
+{
+    void Serialize( in XObject node );
+    ReadOnlySpan<char> Name { get; set; }
+}
 
 
 

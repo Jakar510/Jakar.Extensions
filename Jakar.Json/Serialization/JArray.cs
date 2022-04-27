@@ -105,7 +105,7 @@ public ref struct JArray
 
 
     public JArray Add( in string value ) => Add(value.AsSpan());
-    public JArray Add() => Add("null");
+    public JArray Add() => Add(JWriter.NULL);
     public JArray Add( in ReadOnlySpan<char> value )
     {
         _writer.Append('"').Append(value).Append('"').Next();
@@ -133,18 +133,8 @@ public ref struct JArray
     }
 
 
-    public JArray AddArray()
-    {
-        if ( _writer.shouldIndent ) { _writer.Increase(); }
-
-        return new JArray(ref _writer);
-    }
-    public JObject AddObject()
-    {
-        if ( _writer.shouldIndent ) { _writer.Increase(); }
-
-        return new JObject(ref _writer);
-    }
+    public JArray AddArray() => new(ref _writer);
+    public JObject AddObject() => new(ref _writer);
 
 
     public void Dispose() => _writer.FinishBlock(']');
