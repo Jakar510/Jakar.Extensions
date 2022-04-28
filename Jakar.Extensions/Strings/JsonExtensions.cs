@@ -1,8 +1,11 @@
 ﻿namespace Jakar.Extensions.Strings;
 
 
-public static class JsonExtensions
+public static class JsonNet
 {
+    public static JsonSerializerSettings Settings { get; set; } = new(); // TODO: optimize?
+
+
     public static string ToJson( this JToken json, params JsonConverter[] converters ) => json.ToJson(Formatting.Indented, converters);
     public static string ToJson( this JToken json, Formatting             formatting, params JsonConverter[] converters ) => json.ToString(formatting, converters);
 

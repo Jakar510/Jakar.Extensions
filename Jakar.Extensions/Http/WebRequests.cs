@@ -39,7 +39,6 @@ public static class WebRequests
 
 
                 ResponseData details = await ResponseData.Create(ex).ConfigureAwait(false);
-                details.WriteToConsole();
                 details.WriteToDebug();
                 throw;
             }

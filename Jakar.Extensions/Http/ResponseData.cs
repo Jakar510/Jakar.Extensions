@@ -11,16 +11,19 @@ namespace Jakar.Extensions.Http;
 
 public sealed class ResponseData
 {
-    public const string  ERROR_MESSAGE = "Error Message: ";
-    public       string? Method                  { get; set; }
-    public       Uri?    URL                     { get; init; }
-    public       JToken? ErrorMessage            { get; init; }
-    public       Status  StatusCode              { get; init; }
-    public       string? StatusDescription       { get; init; }
-    public       string? ContentEncoding         { get; init; }
-    public       string? Server                  { get; init; }
-    public       string? ContentType             { get; init; }
-    public       bool    IsMutuallyAuthenticated { get; init; }
+    private static readonly ResponseData _none         = new("NO RESPONSE");
+    public const            string       ERROR_MESSAGE = "Error Message: ";
+
+
+    public string? Method                  { get; set; }
+    public Uri?    URL                     { get; init; }
+    public JToken? ErrorMessage            { get; init; }
+    public Status? StatusCode              { get; init; }
+    public string? StatusDescription       { get; init; }
+    public string? ContentEncoding         { get; init; }
+    public string? Server                  { get; init; }
+    public string? ContentType             { get; init; }
+    public bool?   IsMutuallyAuthenticated { get; init; }
 
 
     private ResponseData( ReadOnlySpan<char> error )
@@ -52,6 +55,8 @@ public sealed class ResponseData
 
     public static async Task<ResponseData> Create( WebException e )
     {
+        if ( e.Response is null ) { return _none; }
+
         if ( e.Response is not HttpWebResponse response ) { return await Create(e.Response); }
 
         using ( response ) { return await Create(response); }

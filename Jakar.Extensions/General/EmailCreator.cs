@@ -9,7 +9,7 @@ namespace Jakar.Extensions.General;
 /// <summary>
 /// <see href="http://www.mimekit.net/docs/html/Creating-Messages.htm"/>
 /// </summary>
-public class EmailBuilder : EmailBuilder.IToSenderSyntax, EmailBuilder.IWithAttachmentsSyntax, EmailBuilder.IBodySyntax, EmailBuilder.ICreatorSyntax, EmailBuilder.ISubjectSyntax
+public sealed class EmailBuilder : EmailBuilder.IToSenderSyntax, EmailBuilder.IWithAttachmentsSyntax, EmailBuilder.IBodySyntax, EmailBuilder.ICreatorSyntax, EmailBuilder.ISubjectSyntax
 {
     public interface IFromSyntax
     {
