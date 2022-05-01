@@ -16,6 +16,8 @@ public ref struct XDocument
     private          long               _endIndex   = default;
     public           XNode              Current { get; private set; } = default;
 
+
+    public XDocument() : this(default) { }
     public XDocument( in ReadOnlySpan<char> xml )
     {
         if ( xml.IsEmpty ) { throw new ArgumentNullException(nameof(xml)); }

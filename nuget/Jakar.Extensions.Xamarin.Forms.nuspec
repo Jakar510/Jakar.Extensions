@@ -4,7 +4,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata>
 		<id>Jakar.Extensions.Xamarin.Forms</id>
-		<version>5.8.0</version>
+		<version>6.0.0</version>
 		<title>Base library for all others in Xamarin.Forms, and extensions to help with Xamarin.Forms development.</title>
 		<authors>Tyler Stegmaier</authors>
 		<owners>Jakar510/Jakar</owners>
@@ -18,8 +18,8 @@
 			Base Library for all Xamarin.Forms mobile apps.
 		</description>
 		<releaseNotes>
-			Jakar.Extensions.Xamarin.Forms 5.8.0
-			Support Jakar.Extensions 5.8.0
+			Jakar.Extensions.Xamarin.Forms 6.0.0
+			Support Jakar.Extensions 6.0.0
 		</releaseNotes>
 		<tags>Xamarin.Forms Xamarin Jakar Jakar.Extensions Api Extensions</tags>
 		<language>en-US</language>
@@ -38,17 +38,17 @@
 				            version="2.0.3" />
 
 				<dependency id="Microsoft.AppCenter"
-				            version="4.5.0" />
+							version="4.5.1" />
 				<dependency id="Microsoft.AppCenter.Analytics"
-				            version="4.5.0" />
+							version="4.5.1" />
 				<dependency id="Microsoft.AppCenter.Crashes"
-				            version="4.5.0" />
+							version="4.5.1" />
 
 				<dependency id="Newtonsoft.Json"
 				            version="13.0.1" />
 
 				<dependency id="Jakar.Extensions"
-				            version="5.8.0" />
+				            version="6.0.0" />
 
 				<dependency id="Acr.UserDialogs"
 				            version="7.2.0.562" />
@@ -74,17 +74,17 @@
 				            version="2.0.3" />
 
 				<dependency id="Microsoft.AppCenter"
-				            version="4.5.0" />
+							version="4.5.1" />
 				<dependency id="Microsoft.AppCenter.Analytics"
-				            version="4.5.0" />
+							version="4.5.1" />
 				<dependency id="Microsoft.AppCenter.Crashes"
-				            version="4.5.0" />
+							version="4.5.1" />
 
 				<dependency id="Newtonsoft.Json"
 				            version="13.0.1" />
 
 				<dependency id="Jakar.Extensions"
-							version="5.8.0" />
+							version="6.0.0" />
 
 				<dependency id="Acr.UserDialogs"
 				            version="7.2.0.562" />
@@ -110,17 +110,17 @@
 				            version="2.0.3" />
 
 				<dependency id="Microsoft.AppCenter"
-				            version="4.5.0" />
+							version="4.5.1" />
 				<dependency id="Microsoft.AppCenter.Analytics"
-				            version="4.5.0" />
+							version="4.5.1" />
 				<dependency id="Microsoft.AppCenter.Crashes"
-				            version="4.5.0" />
+							version="4.5.1" />
 
 				<dependency id="Newtonsoft.Json"
 				            version="13.0.1" />
 
 				<dependency id="Jakar.Extensions"
-							version="5.8.0" />
+							version="6.0.0" />
 
 				<dependency id="Acr.UserDialogs"
 				            version="7.2.0.562" />
@@ -152,17 +152,17 @@
 				            version="2.0.3" />
 
 				<dependency id="Microsoft.AppCenter"
-				            version="4.5.0" />
+				            version="4.5.1" />
 				<dependency id="Microsoft.AppCenter.Analytics"
-				            version="4.5.0" />
+				            version="4.5.1" />
 				<dependency id="Microsoft.AppCenter.Crashes"
-				            version="4.5.0" />
+				            version="4.5.1" />
 
 				<dependency id="Newtonsoft.Json"
 				            version="13.0.1" />
 
 				<dependency id="Jakar.Extensions"
-							version="5.8.0" />
+							version="6.0.0" />
 
 				<dependency id="Acr.UserDialogs"
 				            version="7.2.0.562" />
