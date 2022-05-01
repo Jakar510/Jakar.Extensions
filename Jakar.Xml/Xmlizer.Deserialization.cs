@@ -19,12 +19,10 @@ public static partial class Xmlizer
         Type type   = typeof(T);
         var  writer = new XWriter();
 
-        AddNode(null, obj, type, type.GetTypeName(true));
-
         return writer.ToString();
     }
-    
-    
+
+
     // private void Update( ref object obj, in XNode node )
     // {
     //     if ( node.Name.SequenceEqual(Constants.GROUP) ) { PopulateList(ref obj, node); }

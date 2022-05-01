@@ -9,6 +9,10 @@ using Jakar.Extensions;
 namespace Jakar.Json;
 
 
+public sealed class JsonizerAttribute : Attribute { }
+
+
+
 /// <summary>
 /// A PREDICTABLE (de)serializer for any given object.
 /// <para>

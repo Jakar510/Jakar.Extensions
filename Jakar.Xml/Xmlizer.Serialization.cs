@@ -12,14 +12,16 @@ namespace Jakar.Xml;
 
 public static partial class Xmlizer
 {
-    public static T Deserialize<T>( string xml, out IDictionary<string, string>? attributes )
+    public static T Deserialize<T>( string xml, out IDictionary<string, string>? attributes ) where T : new()
     {
+        // Activator.CreateInstance<T>() ?? throw new NullReferenceException(nameof(Activator.CreateInstance));
+
         var document = new XDocument(xml);
-        T   result   = Activator.CreateInstance<T>() ?? throw new NullReferenceException(nameof(Activator.CreateInstance));
+        var result   = new T();
 
         object obj  = result;
         Type   type = typeof(T);
-        Update(ref obj, document.ChildNodes[0]);
+
 
         attributes = null;
         return result;

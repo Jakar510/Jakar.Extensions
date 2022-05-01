@@ -21,4 +21,6 @@ public static class SourceGenExtensions
         return record.Modifiers.Any(m => m.IsKind(SyntaxKind.RecordStructDeclaration));
     }
     public static bool IsSyntaxTarget( this SyntaxNode syntax ) => syntax is RecordDeclarationSyntax r && r.IsPartial() && r.IsPublic() && r.IsRecordStruct();
+
+    public static void Finalize( this GeneratorExecutionContext context, in IMethodSymbol method, in string source ) => context.AddSource($"{method.ContainingType.Name}.g.cs", source);
 }
