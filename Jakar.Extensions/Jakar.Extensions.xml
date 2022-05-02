@@ -1011,7 +1011,7 @@
                 Reads the contents of the file as a
                 <see cref = "T:System.String" />
                 , then calls
-                <see cref = "M:Jakar.Extensions.Strings.JsonExtensions.FromJson``1(System.String)" />
+                <see cref = "!:JsonExtensions.FromJson&lt;TResult&gt;(string)" />
                 on it, asynchronously.
             </summary>
             <typeparam name = "T" > </typeparam>
@@ -1086,6 +1086,11 @@
             </summary>
             <param name = "path" > </param>
             <returns> </returns>
+        </member>
+        <member name="T:Jakar.Extensions.General.EmailBuilder">
+            <summary>
+            <see href="http://www.mimekit.net/docs/html/Creating-Messages.htm"/>
+            </summary>
         </member>
         <member name="M:Jakar.Extensions.General.TaskExtensions.ForEachParallelAsync``1(System.Collections.Generic.IEnumerable{``0},System.Func{``0,System.Threading.Tasks.Task},System.Nullable{System.Int32},System.Boolean)">
             <summary>

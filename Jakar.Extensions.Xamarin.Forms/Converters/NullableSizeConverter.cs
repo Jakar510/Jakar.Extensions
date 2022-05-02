@@ -1,11 +1,5 @@
 ﻿// unset
 
-using Xamarin.Forms.Xaml;
-
-
-
-
-
 namespace Jakar.Extensions.Xamarin.Forms.Converters;
 
 

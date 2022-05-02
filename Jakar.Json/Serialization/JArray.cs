@@ -2,6 +2,7 @@
 // 04/26/2022  9:56 AM
 
 using System.Globalization;
+using Jakar.Extensions.Collections;
 
 
 
@@ -10,64 +11,83 @@ namespace Jakar.Json.Serialization;
 
 public ref struct JArray
 {
-    private JWriter _writer;
+    public const char START = '[';
+    public const char END   = ']';
+
+    private readonly bool    _shouldIndent;
+    internal         JWriter writer;
 
 
-    public JArray( ref JWriter writer )
+    public JArray( ref JWriter writer, in bool shouldIndent )
     {
-        _writer = writer;
-        _writer.StartBlock('[');
+        this.writer   = writer;
+        _shouldIndent = shouldIndent;
+    }
+    public JArray Empty()
+    {
+        writer.Append(START).Append(' ').Append(END).FinishBlock();
+        return this;
+    }
+    public JArray Begin()
+    {
+        writer.StartBlock(START, _shouldIndent);
+        return this;
+    }
+    public JArray Complete()
+    {
+        writer.FinishBlock(END);
+        return this;
     }
 
 
     public JArray Add( in char value )
     {
-        _writer.Indent().Append(value).Next();
+        writer.Indent().Append(value).Next();
         return this;
     }
     public JArray Add( in short value )
     {
-        _writer.Indent().Append(value).Next();
+        writer.Indent().Append(value).Next();
         return this;
     }
     public JArray Add( in ushort value )
     {
-        _writer.Indent().Append(value).Next();
+        writer.Indent().Append(value).Next();
         return this;
     }
     public JArray Add( in int value )
     {
-        _writer.Indent().Append(value).Next();
+        writer.Indent().Append(value).Next();
         return this;
     }
     public JArray Add( in uint value )
     {
-        _writer.Indent().Append(value).Next();
+        writer.Indent().Append(value).Next();
         return this;
     }
     public JArray Add( in long value )
     {
-        _writer.Indent().Append(value).Next();
+        writer.Indent().Append(value).Next();
         return this;
     }
     public JArray Add( in ulong value )
     {
-        _writer.Indent().Append(value).Next();
+        writer.Indent().Append(value).Next();
         return this;
     }
     public JArray Add( in float value )
     {
-        _writer.Indent().Append(value).Next();
+        writer.Indent().Append(value).Next();
         return this;
     }
     public JArray Add( in double value )
     {
-        _writer.Indent().Append(value).Next();
+        writer.Indent().Append(value).Next();
         return this;
     }
     public JArray Add( in decimal value )
     {
-        _writer.Indent().Append(value).Next();
+        writer.Indent().Append(value).Next();
         return this;
     }
 
@@ -108,7 +128,7 @@ public ref struct JArray
     public JArray Add() => Add(JWriter.NULL);
     public JArray Add( in ReadOnlySpan<char> value )
     {
-        _writer.Append('"').Append(value).Append('"').Next();
+        writer.Append('"').Append(value).Append('"').Next();
         return this;
     }
 
@@ -118,7 +138,7 @@ public ref struct JArray
     public JArray Add<T>( in T value, in ReadOnlySpan<char> format, in CultureInfo culture ) where T : struct, ISpanFormattable => Add(value, format,  culture, 650);
     public JArray Add<T>( in T value, in ReadOnlySpan<char> format, in CultureInfo culture, in int bufferSize ) where T : struct, ISpanFormattable
     {
-        _writer.Append(value, format, culture, bufferSize).Next();
+        writer.Append(value, format, culture, bufferSize).Next();
         return this;
     }
 
@@ -128,14 +148,36 @@ public ref struct JArray
     public JArray Add<T>( in T? value, in ReadOnlySpan<char> format, in CultureInfo culture ) where T : struct, ISpanFormattable => Add(value, format,  culture, 650);
     public JArray Add<T>( in T? value, in ReadOnlySpan<char> format, in CultureInfo culture, in int bufferSize ) where T : struct, ISpanFormattable
     {
-        _writer.Append(value, format, culture, bufferSize).Next();
+        writer.Append(value, format, culture, bufferSize).Next();
         return this;
     }
 
 
-    public JArray AddArray() => new(ref _writer);
-    public JObject AddObject() => new(ref _writer);
+    public JArray AddArray() => new(ref writer, true);
+    public JObject AddObject() => new(ref writer, true);
 
 
-    public void Dispose() => _writer.FinishBlock(']');
+    public JArray AddObjects( in IEnumerable<IJsonizer>? value )
+    {
+        if ( value is null ) { return Empty(); }
+
+        return AddObjects(new List<IJsonizer>(value));
+    }
+    public JArray AddObjects( in ICollection<IJsonizer> collection )
+    {
+        if ( collection.Count == 0 ) { return Empty(); }
+
+
+        Begin();
+
+        foreach ( ( int index, IJsonizer item ) in collection.Enumerate() )
+        {
+            JObject node = AddObject();
+            item.Serialize(ref node);
+
+            if ( index < collection.Count ) { node.writer.Next(); }
+        }
+
+        return Complete();
+    }
 }

@@ -3,11 +3,21 @@
 
 public interface IJsonizer
 {
-    internal string ToJson( in    JWriter writer );
-    internal string Serialize( in JObject context );
-    internal string Serialize( in JArray  context );
+    protected internal string ToJson( in JWriter writer );
+    public void Serialize( ref            JObject parent );
+}
 
 
-    internal string Deserialize( in JReader writer );
-    internal string Deserialize( in JNode   context );
+
+public interface IArrayWriter : IJsonizer
+{
+    public void Serialize( in JArray parent );
+}
+
+
+
+public interface IDeJsonizer : IJsonizer
+{
+    protected internal void Deserialize( in JReader writer );
+    public void Deserialize( in             JNode   parent );
 }

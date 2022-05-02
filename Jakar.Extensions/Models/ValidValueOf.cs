@@ -14,6 +14,7 @@ namespace Jakar.Extensions.Models;
 /// </summary>
 /// <typeparam name = "TValue" > </typeparam>
 /// <typeparam name = "TThis" > </typeparam>
+[SuppressMessage("ReSharper", "ConditionalAccessQualifierIsNonNullableAccordingToAPIContract")]
 public abstract class ValidValueOf<TValue, TThis> : IComparable<ValidValueOf<TValue, TThis>>, IEquatable<ValidValueOf<TValue, TThis>>, IComparable where TThis : ValidValueOf<TValue, TThis>, new()
                                                                                                                                                    where TValue : IComparable<TValue>, IEquatable<TValue>
 {

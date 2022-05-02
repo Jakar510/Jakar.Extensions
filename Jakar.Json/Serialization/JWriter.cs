@@ -1,4 +1,7 @@
 ﻿using System.Globalization;
+using CommunityToolkit.Diagnostics;
+using Jakar.Extensions.Collections;
+using Jakar.Extensions.Exceptions.General;
 
 
 
@@ -8,97 +11,69 @@ namespace Jakar.Json.Serialization;
 [SuppressMessage("ReSharper", "PossiblyImpureMethodCallOnReadonlyVariable")]
 public ref struct JWriter
 {
-    public const      string        NULL = "null";
-    private readonly  StringBuilder _sb  = new();
-    internal readonly bool          shouldIndent;
-    private           int           _indentLevel = 0;
+    public const string NULL = "null";
+
+
+    private readonly StringBuilder _sb = new();
+    private readonly bool          _shouldIndent;
+    private          int           _indentLevel = 0;
 
 
     public JWriter() : this(Formatting.None) { }
-    public JWriter( Formatting formatting ) => shouldIndent = formatting is Formatting.None;
+    public JWriter( Formatting formatting ) => _shouldIndent = formatting is Formatting.Indented;
 
 
-    public JArray AddArray() => new(ref this);
-    public JObject AddObject() => new(ref this);
-    public JWriter Add( in JObject parent, in ReadOnlySpan<char> key, in IEnumerable<IJsonizer> enumerable )
+    [Pure] public JArray AddArray() => new(ref this, false);
+    [Pure] public JObject AddObject() => new(ref this, false);
+
+
+    public JWriter StartBlock( in char start, in bool shouldIndent )
     {
-        using JArray node = parent.AddArray(key);
-        return Add(node, enumerable);
-    }
-    public JWriter Add( in JArray parent, in IEnumerable<IJsonizer> enumerable )
-    {
-        foreach ( IJsonizer item in enumerable )
-        {
-            using ( JObject node = parent.AddObject() ) { item.Serialize(node); }
+        Indent(shouldIndent).Append(start);
 
-            Next();
-        }
-
-        return this;
-    }
-    public JWriter Add( in JObject parent, in ReadOnlySpan<char> key, in IDictionary dictionary )
-    {
-        using JObject node = parent.AddObject(key);
-
-        foreach ( DictionaryEntry pair in dictionary )
-        {
-            node.Add(pair);
-            Next();
-        }
-
-        return this;
-    }
-    public JWriter Add( in JObject parent, in ReadOnlySpan<char> key, in IDictionary<string, IJsonizer> dictionary )
-    {
-        using JObject node = parent.AddObject(key);
-
-        foreach ( ( string? k, IJsonizer? value ) in dictionary )
-        {
-            using ( JObject item = node.AddObject(k) ) { value.Serialize(item); }
-
-            Next();
-        }
-
-        return this;
-    }
-
-
-    public void StartBlock( in char start )
-    {
-        _sb.Append(start);
-
-        if ( shouldIndent )
+        if ( _shouldIndent )
         {
             _sb.Append('\n');
             _indentLevel += 1;
         }
-    }
-    public void FinishBlock( in char end )
-    {
-        _sb.Append(end);
-
-        if ( shouldIndent )
-        {
-            _sb.Append('\n');
-            _indentLevel -= 1;
-        }
-    }
-
-
-    public JWriter Indent()
-    {
-        if ( shouldIndent )
-        {
-            // throw new InvalidOperationException($"{nameof(Indent)} should not be used in this context"); 
-            _sb.Append('\t', _indentLevel);
-        }
 
         return this;
     }
+
+
+    public JWriter FinishBlock( in char end ) => FinishBlock().NewLine().Indent().Append(end);
+    public JWriter FinishBlock()
+    {
+        if ( _shouldIndent ) { _indentLevel -= 1; }
+
+        return this;
+    }
+
+
+    public JWriter NewLine()
+    {
+        if ( _shouldIndent ) { _sb.Append('\n'); }
+
+        return this;
+    }
+
+
+    public JWriter Indent() => Indent(_shouldIndent);
+    public JWriter Indent( in bool shouldIndent )
+    {
+        if ( _indentLevel < 0 ) { throw new InvalidOperationException($"{nameof(_indentLevel)} is negative"); }
+
+        if ( shouldIndent ) { _sb.Append(' ', _indentLevel * 4); }
+        else { _sb.Append(' '); }
+
+        return this;
+    }
+
+
     public JWriter Next()
     {
         _sb.Append(',');
-        if ( shouldIndent ) { _sb.Append('\n'); }
+        if ( _shouldIndent ) { NewLine(); }
 
         return this;
     }

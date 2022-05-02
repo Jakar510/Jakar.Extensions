@@ -7,9 +7,7 @@ using LocalAuthentication;
 using UIKit;
 
 
-
-
-
+#nullable enable
 namespace Jakar.Extensions.Xamarin.Forms.iOS.Services;
 
 
@@ -64,6 +62,7 @@ public class LocalAuthHelper : Biometrics.IAuthHelperForIOS
             context.EvaluatePolicy(LAPolicy.DeviceOwnerAuthentication, "Please Authenticate To Proceed", replyHandler);
         }
 
+        // ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
         authError?.Dispose();
     }
 
@@ -88,6 +87,7 @@ public class LocalAuthHelper : Biometrics.IAuthHelperForIOS
             context.EvaluatePolicy(LAPolicy.DeviceOwnerAuthentication, "Please Authenticate To Proceed", replyHandler);
         }
 
+        // ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
         authError?.Dispose();
     }
 

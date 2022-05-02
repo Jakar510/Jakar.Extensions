@@ -3,7 +3,17 @@
 
 public static class JsonNet
 {
-    public static JsonSerializerSettings Settings { get; set; } = new(); // TODO: optimize?
+    public static  JsonSerializer         Serializer { get; set; } = new();
+    private static JsonSerializerSettings _settings = new();
+    public static JsonSerializerSettings Settings
+    {
+        get => _settings;
+        set
+        {
+            _settings  = value;
+            Serializer = JsonSerializer.Create(value);
+        }
+    }
 
 
     public static string ToJson( this JToken json, params JsonConverter[] converters ) => json.ToJson(Formatting.Indented, converters);

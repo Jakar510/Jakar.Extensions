@@ -1,4 +1,8 @@
-﻿namespace Jakar.Extensions.Http;
+﻿using Org.BouncyCastle.Bcpg;
+
+
+
+namespace Jakar.Extensions.Http;
 
 
 public static class WebResponses
@@ -11,12 +15,16 @@ public static class WebResponses
     }
 
 
-    public static async Task<TResult> AsJson<TResult>( this WebResponse resp, Encoding encoding )
+    public static async Task<TResult> AsJson<TResult>( this WebResponse resp, Encoding encoding ) => await resp.AsJson<TResult>(encoding, JsonNet.Serializer);
+    public static async Task<TResult> AsJson<TResult>( this WebResponse resp, Encoding encoding, JsonSerializer serializer )
     {
-        string reply = await resp.AsString(encoding);
+        await using Stream s      = resp.GetResponseStream() ?? throw new NullReferenceException(nameof(WebResponse.GetResponseStream));
+        using var          sr     = new StreamReader(s, encoding);
+        using JsonReader   reader = new JsonTextReader(sr);
 
-        return reply.FromJson<TResult>();
+        return serializer.Deserialize<TResult>(reader) ?? throw new NullReferenceException(nameof(JsonConvert.DeserializeObject));
     }
+
 
     public static async Task<string> AsString( this WebResponse resp, Encoding encoding )
     {

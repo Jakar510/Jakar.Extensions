@@ -1,10 +1,4 @@
-﻿using Xamarin.Forms.Xaml;
-
-
-
-
-
-namespace Jakar.Extensions.Xamarin.Forms.MarkupExtensions;
+﻿namespace Jakar.Extensions.Xamarin.Forms.MarkupExtensions;
 
 
 [ContentProperty(nameof(Source))]

@@ -20,6 +20,7 @@ public static class Posts
 {
     public static async Task<WebResponse> Post( this Uri url, ReadOnlyMemory<byte> payload, HeaderCollection headers, CancellationToken token, int? timeout = default )
     {
+        // var client = new HttpClient();
         HttpWebRequest req = WebRequest.CreateHttp(url);
         if ( timeout.HasValue ) { req.Timeout = timeout.Value; }
 

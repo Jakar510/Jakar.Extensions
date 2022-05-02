@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Threading.Tasks;
@@ -10,6 +9,9 @@ using Jakar.Extensions.General;
 using Jakar.Extensions.Models.Base.Records;
 using Jakar.Extensions.Models.Collections;
 using Jakar.Extensions.Strings;
+using Jakar.Json;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 
 // using Jakar.Xml;
@@ -20,17 +22,18 @@ using Jakar.Extensions.Strings;
 namespace Console.Experiments;
 
 
-
-
-
-
 public static class Program
 {
     public static void Main( string[] args )
     {
         "Hello World!".WriteToConsole();
 
+
+        BenchmarkRunner.Run<JsonizerBenchmarks>();
+
         // BenchmarkRunner.Run<GuidBenchmarks>();
+
+        // TestJson();
 
 
         "Bye".WriteToConsole();
@@ -45,10 +48,26 @@ public static class Program
     //     var details = new ExceptionDetails(e);
     //     details.ToPrettyJson().WriteToConsole();
     // }
-    public static void First() => Second();
-    private static void Second() => Third();
-    private static void Third() => Last();
-    private static void Last() => throw new NotImplementedException("", new NullReferenceException(nameof(Program)));
+    // public static void First() => Second();
+    // private static void Second() => Third();
+    // private static void Third() => Last();
+    // private static void Last() => throw new NotImplementedException("", new NullReferenceException(nameof(Program)));
+
+    private static void TestJson()
+    {
+        var first  = new Test("First",  new Test("1.1"), new Test("1.2"));
+        var second = new Test("Second", new Test("2.1"));
+        var test   = new Test("Root",   first, second);
+
+
+        test.ToJson().WriteToConsole();
+        string temp = test.ToJson();
+        temp.WriteToConsole();
+
+        "---TEST---".WriteToConsole();
+        JToken json = temp.FromJson();
+        json.ToJson(Formatting.Indented).WriteToConsole();
+    }
 
 
 //     public static void TestXml()
