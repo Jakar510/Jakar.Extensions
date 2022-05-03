@@ -73,6 +73,8 @@ public sealed class HttpRequestBuilder : HttpRequestBuilder.IResponses
         _handler.AllowAutoRedirect        = value > 0;
         return this;
     }
+
+
     public HttpRequestBuilder WithCredentials( ICredentials value, bool preAuthenticate = true )
     {
         _handler.Credentials     = value;
