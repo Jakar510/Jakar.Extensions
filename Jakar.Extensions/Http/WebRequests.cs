@@ -160,7 +160,6 @@ public static class WebRequests
                               };
 
     public static void SetHeaders( this HttpWebRequest request, MultipartFormDataContent data ) => request.SetHeaders(data.Headers);
-
     public static void SetHeaders( this HttpWebRequest request, HttpContentHeaders? headers )
     {
         if ( headers is null ) { return; }
@@ -325,6 +324,61 @@ public static class WebRequests
             default:
                 if ( value is string s ) { request.Headers.Add(key, s); }
                 else { request.Headers.Add(key,                     value.ToJson()); }
+
+                break;
+        }
+    }
+
+
+    public static void SetHeader( this HttpContent content, string key, object value )
+    {
+        switch ( key )
+        {
+            case "Content-Type":
+                content.Headers.ContentType = value switch
+                                              {
+                                                  MediaTypeHeaderValue v => v,
+                                                  string v               => new MediaTypeHeaderValue(v),
+                                                  _                      => throw new HeaderException(HttpRequestHeader.ContentType, value, typeof(MediaTypeHeaderValue), typeof(string))
+                                              };
+
+                break;
+
+            case "Content-Length":
+                if ( value is long contentLength ) { content.Headers.ContentLength = contentLength; }
+                else { throw new HeaderException(HttpRequestHeader.ContentLength, value, typeof(long)); }
+
+                break;
+
+            case "Keep-Alive":
+                if ( value is bool keepAlive ) { content.Headers.Add(key, keepAlive.ToString()); }
+                else { throw new HeaderException(HttpRequestHeader.KeepAlive, value, typeof(bool)); }
+
+                break;
+
+            // case "Max-Forwards":
+            //     if ( value is int redirects ) { headers.MaximumAutomaticRedirections = redirects; }
+            //     else { throw new HeaderException(HttpRequestHeader.MaxForwards, value, typeof(int)); }
+            //
+            //     break;
+            //
+            // case "Proxy-Authorization":
+            //     if ( value is IWebProxy proxy ) { content.Proxy = proxy; }
+            //     else { throw new HeaderException(HttpRequestHeader.ProxyAuthorization, value, typeof(IWebProxy)); }
+            //
+            //     break;
+            //
+            // case "User-Agent":
+            //     content.Headers.UserAgent = value.ToString();
+            //     break;
+            //
+            // case "Transfer-Encoding":
+            //     content.Headers.TransferEncoding = value.ToString();
+            //     break;
+
+            default:
+                if ( value is string s ) { content.Headers.Add(key, s); }
+                else { content.Headers.Add(key,                     value.ToJson()); }
 
                 break;
         }

@@ -1,4 +1,9 @@
-﻿namespace Jakar.Extensions.Http;
+﻿using System.Net.Http;
+using System.Net.Http.Headers;
+
+
+
+namespace Jakar.Extensions.Http;
 
 
 public class HeaderCollection : Dictionary<string, object>
@@ -47,4 +52,39 @@ public class HeaderCollection : Dictionary<string, object>
     }
 
     public HeaderCollection Add( KeyValuePair<string, object> pair ) => Add(pair.Key, pair.Value);
+
+
+    public void Merge( in HttpRequestMessage request ) => Merge(request.Headers);
+    public void Merge( in HttpHeaders headers )
+    {
+        foreach ( ( string? key, object? value ) in this )
+        {
+            switch ( value )
+            {
+                case string s:
+                    headers.Add(key, s);
+                    break;
+
+                case IEnumerable<string> items:
+                    headers.Add(key, items);
+                    break;
+            }
+        }
+    }
+    public void Merge( in HttpContentHeaders headers )
+    {
+        foreach ( ( string? key, object? value ) in this )
+        {
+            switch ( value )
+            {
+                case string s:
+                    headers.Add(key, s);
+                    break;
+
+                case IEnumerable<string> items:
+                    headers.Add(key, items);
+                    break;
+            }
+        }
+    }
 }

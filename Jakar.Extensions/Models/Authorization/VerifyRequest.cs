@@ -1,4 +1,8 @@
-﻿namespace Jakar.Extensions.Models.Authorization;
+﻿using System.Security;
+
+
+
+namespace Jakar.Extensions.Models.Authorization;
 
 
 public interface ILoginRequest : IEquatable<ILoginRequest>
@@ -10,28 +14,8 @@ public interface ILoginRequest : IEquatable<ILoginRequest>
 
 
 [Serializable]
-public class VerifyRequest : ILoginRequest
+public class VerifyRequest : ILoginRequest, ICredentials
 {
-    [JsonConstructor] public VerifyRequest() { }
-
-    public VerifyRequest( string? userName, string? userPassword )
-    {
-        UserLogin    = userName ?? throw new ArgumentNullException(nameof(userName));
-        UserPassword = userPassword ?? throw new ArgumentNullException(nameof(userPassword));
-    }
-
-
-    public override bool Equals( object? obj ) => obj is ILoginRequest request && Equals(request);
-
-
-    public override int GetHashCode() => HashCode.Combine(UserLogin, UserPassword);
-
-
-    public static bool operator ==( VerifyRequest? left, VerifyRequest? right ) => Equals(left, right);
-
-
-    public static bool operator !=( VerifyRequest? left, VerifyRequest? right ) => !Equals(left, right);
-
     [Required(ErrorMessage = "Email address is required.")]
     [JsonProperty(nameof(UserLogin), Required = Required.Always)]
     public string UserLogin { get; init; } = string.Empty;
@@ -42,6 +26,14 @@ public class VerifyRequest : ILoginRequest
     public string UserPassword { get; init; } = string.Empty;
 
 
+    [JsonConstructor] public VerifyRequest() { }
+    public VerifyRequest( string? userName, string? userPassword )
+    {
+        UserLogin    = userName ?? throw new ArgumentNullException(nameof(userName));
+        UserPassword = userPassword ?? throw new ArgumentNullException(nameof(userPassword));
+    }
+
+
     public virtual bool Equals( ILoginRequest? other )
     {
         if ( other is null ) { return false; }
@@ -50,4 +42,13 @@ public class VerifyRequest : ILoginRequest
 
         return UserLogin == other.UserLogin && UserPassword == other.UserPassword;
     }
+    public override bool Equals( object? obj ) => obj is ILoginRequest request && Equals(request);
+    public override int GetHashCode() => HashCode.Combine(UserLogin, UserPassword);
+
+
+    public NetworkCredential GetCredential( Uri uri, string authType ) => new(UserLogin, UserPassword.ToSecureString());
+
+
+    public static bool operator ==( VerifyRequest? left, VerifyRequest? right ) => Equals(left, right);
+    public static bool operator !=( VerifyRequest? left, VerifyRequest? right ) => !Equals(left, right);
 }

@@ -3,7 +3,8 @@
 
 public static class JsonNet
 {
-    public static  JsonSerializer         Serializer { get; set; } = new();
+    public static  JsonLoadSettings       LoadSettings { get; set; } = new();
+    public static  JsonSerializer         Serializer   { get; set; } = new();
     private static JsonSerializerSettings _settings = new();
     public static JsonSerializerSettings Settings
     {

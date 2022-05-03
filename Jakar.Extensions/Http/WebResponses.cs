@@ -15,6 +15,17 @@ public static class WebResponses
     }
 
 
+    public static async Task<JToken> AsJson( this WebResponse resp, Encoding encoding ) => await resp.AsJson(encoding,                          JsonNet.LoadSettings, CancellationToken.None);
+    public static async Task<JToken> AsJson( this WebResponse resp, Encoding encoding, CancellationToken token ) => await resp.AsJson(encoding, JsonNet.LoadSettings, token);
+    public static async Task<JToken> AsJson( this WebResponse resp, Encoding encoding, JsonLoadSettings settings, CancellationToken token )
+    {
+        await using Stream s      = resp.GetResponseStream() ?? throw new NullReferenceException(nameof(WebResponse.GetResponseStream));
+        using var          sr     = new StreamReader(s, encoding);
+        using JsonReader   reader = new JsonTextReader(sr);
+        return await JToken.ReadFromAsync(reader, settings, token);
+    }
+
+
     public static async Task<TResult> AsJson<TResult>( this WebResponse resp, Encoding encoding ) => await resp.AsJson<TResult>(encoding, JsonNet.Serializer);
     public static async Task<TResult> AsJson<TResult>( this WebResponse resp, Encoding encoding, JsonSerializer serializer )
     {

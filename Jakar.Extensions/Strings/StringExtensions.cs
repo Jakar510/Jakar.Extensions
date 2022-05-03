@@ -1,8 +1,21 @@
-﻿namespace Jakar.Extensions.Strings;
+﻿using System.Security;
+
+
+
+namespace Jakar.Extensions.Strings;
 
 
 public static class StringExtensions
 {
+    public static SecureString ToSecureString( this string value )
+    {
+        unsafe
+        {
+            fixed ( char* psz = value ) { return new SecureString(psz, value.Length); }
+        }
+    }
+
+
     public static byte[] ToByteArray( this string s, Encoding? encoding = default ) => ( encoding ?? Encoding.Default ).GetBytes(s);
 
     public static Memory<byte> ToMemory( this string s, Encoding? encoding = default ) => s.ToByteArray(encoding ?? Encoding.Default).AsMemory();

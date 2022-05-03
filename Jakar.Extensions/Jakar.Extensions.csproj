@@ -24,6 +24,7 @@
 		<PackageLicenseFile>D:\WorkSpace\Public\Jakar.Extensions\LICENSE.txt</PackageLicenseFile>
 		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 	</PropertyGroup>
 
 	<ItemGroup>
