@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<RootNamespace>Jakar.SqlBuilder</RootNamespace>
+		<AssemblyName>Jakar.SqlBuilder</AssemblyName>
+		<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+		<GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+		<Description>Easy Sql Building</Description>
+		<RepositoryType>Github</RepositoryType>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+		<DefineConstants>DEBUG;TRACE</DefineConstants>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Dapper.Contrib" Version="2.0.78" />
+		<PackageReference Include="Jakar.Extensions" Version="6.0.0.6-beta" />
+	</ItemGroup>
+
+</Project>

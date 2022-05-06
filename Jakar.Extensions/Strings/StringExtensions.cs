@@ -111,7 +111,7 @@ public static class StringExtensions
     ///     if balanced; otherwise
     ///     <see langword = "false" />
     /// </returns>
-    public static bool IsBalanced( this string input, IDictionary<char, char>? bracketPairs = default )
+    public static bool IsBalanced( this string input, IReadOnlyDictionary<char, char>? bracketPairs = default ) // TODO: ReadOnlySpan<char>
     {
         bracketPairs ??= new Dictionary<char, char>
                          {
