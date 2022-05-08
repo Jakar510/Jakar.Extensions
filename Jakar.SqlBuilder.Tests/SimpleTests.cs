@@ -1,12 +1,13 @@
 using NUnit.Framework;
 
 
-namespace EasySqlBuilder.Tests
+
+namespace Jakar.SqlBuilder.Tests;
+
+
+[TestFixture]
+public class SimpleTests : Assert
 {
-	[TestFixture]
-	public class SimpleTests : Assert
-	{
-		[Test]
-		public void Select() { Pass(); }
-	}
+    [Test]
+    public void Select() { Pass(); }
 }

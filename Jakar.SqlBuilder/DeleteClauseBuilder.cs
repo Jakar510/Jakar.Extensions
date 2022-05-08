@@ -1,84 +1,84 @@
 ﻿using Jakar.Extensions.General;
-using Jakar.SqlBuilder.Interfaces;
 
 
-namespace Jakar.SqlBuilder
+
+namespace Jakar.SqlBuilder;
+
+
+public class DeleteClauseBuilder : BaseClauseBuilder, IDeleteSyntax
 {
-	public class DeleteClauseBuilder : BaseClauseBuilder, IDeleteSyntax
-	{
-		public DeleteClauseBuilder( EasySqlBuilder builder ) : base(builder) { }
+    public DeleteClauseBuilder( EasySqlBuilder builder ) : base(builder) { }
 
 
-	#region Implementation of IFromSyntax<out IDeleteChain>
+    #region Implementation of IFromSyntax<out IDeleteChain>
 
-		IDeleteChain IFromSyntax<IDeleteChain>.From( string tableName, string? alias )
-		{
-			if ( string.IsNullOrWhiteSpace(alias) ) { _builder.Add(KeyWords.FROM, tableName); }
+    IDeleteChain IFromSyntax<IDeleteChain>.From( string tableName, string? alias )
+    {
+        if ( string.IsNullOrWhiteSpace(alias) ) { _builder.Add(KeyWords.FROM, tableName); }
 
-			else { _builder.Add(KeyWords.FROM, tableName, KeyWords.AS, alias); }
+        else { _builder.Add(KeyWords.FROM, tableName, KeyWords.AS, alias); }
 
-			_builder.NewLine();
+        _builder.NewLine();
 
-			return this;
-		}
+        return this;
+    }
 
-		IDeleteChain IFromSyntax<IDeleteChain>.From<T>( T obj, string? alias )
-		{
-			if ( string.IsNullOrWhiteSpace(alias) ) { _builder.Add(KeyWords.FROM, typeof(T).GetTableName()); }
+    IDeleteChain IFromSyntax<IDeleteChain>.From<T>( T obj, string? alias )
+    {
+        if ( string.IsNullOrWhiteSpace(alias) ) { _builder.Add(KeyWords.FROM, typeof(T).GetTableName()); }
 
-			else { _builder.Add(KeyWords.FROM, typeof(T).GetName(), KeyWords.AS, alias); }
+        else { _builder.Add(KeyWords.FROM, typeof(T).GetName(), KeyWords.AS, alias); }
 
-			_builder.NewLine();
+        _builder.NewLine();
 
-			return this;
-		}
+        return this;
+    }
 
-		IDeleteChain IFromSyntax<IDeleteChain>.From<T>( string? alias )
-		{
-			if ( string.IsNullOrWhiteSpace(alias) ) { _builder.Add(KeyWords.FROM, typeof(T).GetTableName()); }
+    IDeleteChain IFromSyntax<IDeleteChain>.From<T>( string? alias )
+    {
+        if ( string.IsNullOrWhiteSpace(alias) ) { _builder.Add(KeyWords.FROM, typeof(T).GetTableName()); }
 
-			else { _builder.Add(KeyWords.FROM, typeof(T).GetName(), KeyWords.AS, alias); }
+        else { _builder.Add(KeyWords.FROM, typeof(T).GetName(), KeyWords.AS, alias); }
 
-			_builder.NewLine();
+        _builder.NewLine();
 
-			return this;
-		}
+        return this;
+    }
 
-	#endregion
-
-
-	#region Implementation of IDeleteChain
-
-		IWhere IDeleteChain.Where()
-		{
-			_builder.Add(KeyWords.WHERE);
-			_builder.Begin();
-			return _builder.Where();
-		}
-
-		ISqlBuilderRoot IChainEnd<ISqlBuilderRoot>.Done()
-		{
-			_builder.VerifyParentheses();
-			return _builder;
-		}
-
-	#endregion
+    #endregion
 
 
-	#region Implementation of IDelete
+    #region Implementation of IDeleteChain
 
-		IDeleteChain IDelete.All()
-		{
-			_builder.Add(KeyWords.DELETE);
-			return this;
-		}
+    IWhere IDeleteChain.Where()
+    {
+        _builder.Add(KeyWords.WHERE);
+        _builder.Begin();
+        return _builder.Where();
+    }
 
-		ISqlBuilderRoot IDelete.Column( string columnName )
-		{
-			_builder.Add(KeyWords.DELETE, columnName);
-			return _builder;
-		}
+    ISqlBuilderRoot IChainEnd<ISqlBuilderRoot>.Done()
+    {
+        _builder.VerifyParentheses();
+        return _builder;
+    }
 
-	#endregion
-	}
+    #endregion
+
+
+    #region Implementation of IDelete
+
+    IDeleteChain IDelete.All()
+    {
+        _builder.Add(KeyWords.DELETE);
+        return this;
+    }
+
+    ISqlBuilderRoot IDelete.Column( string columnName )
+    {
+        _builder.Add(KeyWords.DELETE, columnName);
+        return _builder;
+    }
+
+    #endregion
 }

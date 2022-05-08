@@ -1,11 +1,11 @@
-﻿namespace Jakar.SqlBuilder.Interfaces
+﻿namespace Jakar.SqlBuilder.Interfaces;
+
+
+public interface IChainEnd<out TNext>
 {
-	public interface IChainEnd<out TNext>
-	{
-		/// <summary>
-		/// Ends chain and goes to <typeparamref name="TNext"/>.
-		/// </summary>
-		/// <returns><typeparamref name="TNext"/></returns>
-		public TNext Done();
-	}
+    /// <summary>
+    /// Ends chain and goes to <typeparamref name="TNext"/>.
+    /// </summary>
+    /// <returns><typeparamref name="TNext"/></returns>
+    public TNext Done();
 }

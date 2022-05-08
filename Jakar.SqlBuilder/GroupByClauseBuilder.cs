@@ -1,92 +1,89 @@
-﻿using Jakar.SqlBuilder.Interfaces;
+﻿namespace Jakar.SqlBuilder;
 
 
-namespace Jakar.SqlBuilder
+public class GroupByClauseBuilder : BaseClauseBuilder, IGroupBySyntax
 {
-	public class GroupByClauseBuilder : BaseClauseBuilder, IGroupBySyntax
-	{
-		public GroupByClauseBuilder( EasySqlBuilder builder ) : base(builder) { }
+    public GroupByClauseBuilder( EasySqlBuilder builder ) : base(builder) { }
 
 
-	#region Implementation of IGroupBy
+    #region Implementation of IGroupBy
 
-		ISqlBuilderRoot IGroupBy.By( string separator, params string[] columnNames )
-		{
-			_builder.Add(KeyWords.GROUP, KeyWords.BY, string.Join(separator, columnNames));
-			return _builder;
-		}
+    ISqlBuilderRoot IGroupBy.By( string separator, params string[] columnNames )
+    {
+        _builder.Add(KeyWords.GROUP, KeyWords.BY, string.Join(separator, columnNames));
+        return _builder;
+    }
 
-		IGroupByChain IGroupBy.Chain()
-		{
-			_builder.Add(KeyWords.GROUP, KeyWords.BY);
-			return this;
-		}
+    IGroupByChain IGroupBy.Chain()
+    {
+        _builder.Add(KeyWords.GROUP, KeyWords.BY);
+        return this;
+    }
 
-		IGroupByChain IGroupBy.Chain( string columnName )
-		{
-			_builder.Add(KeyWords.GROUP, KeyWords.BY, columnName);
-			return this;
-		}
+    IGroupByChain IGroupBy.Chain( string columnName )
+    {
+        _builder.Add(KeyWords.GROUP, KeyWords.BY, columnName);
+        return this;
+    }
 
-	#endregion
-
-
-	#region Implementation of IChainEnd<out ISqlBuilderRoot>
-
-		ISqlBuilderRoot IChainEnd<ISqlBuilderRoot>.Done()
-		{
-			_builder.VerifyParentheses();
-			_builder.NewLine();
-			return _builder;
-		}
-
-	#endregion
+    #endregion
 
 
-	#region Implementation of INextChain<out IGroupBy>
+    #region Implementation of IChainEnd<out ISqlBuilderRoot>
 
-		IGroupBy INextChain<IGroupBy>.Next()
-		{
-			_builder.VerifyParentheses();
-			_builder.NewLine();
-			return this;
-		}
+    ISqlBuilderRoot IChainEnd<ISqlBuilderRoot>.Done()
+    {
+        _builder.VerifyParentheses();
+        _builder.NewLine();
+        return _builder;
+    }
 
-	#endregion
+    #endregion
 
 
-	#region Implementation of ISorters<out IGroupByChain>
+    #region Implementation of INextChain<out IGroupBy>
 
-		IGroupByChain ISorters<IGroupByChain>.Ascending()
-		{
-			_builder.Add(KeyWords.ASC);
-			return this;
-		}
+    IGroupBy INextChain<IGroupBy>.Next()
+    {
+        _builder.VerifyParentheses();
+        _builder.NewLine();
+        return this;
+    }
 
-		IGroupByChain ISorters<IGroupByChain>.Ascending( string columnName )
-		{
-			_builder.Add(columnName, KeyWords.ASC);
-			return this;
-		}
+    #endregion
 
-		IGroupByChain ISorters<IGroupByChain>.Descending()
-		{
-			_builder.Add(KeyWords.DESC);
-			return this;
-		}
 
-		IGroupByChain ISorters<IGroupByChain>.Descending( string columnName )
-		{
-			_builder.Add(columnName, KeyWords.DESC);
-			return this;
-		}
+    #region Implementation of ISorters<out IGroupByChain>
 
-		IGroupByChain IGroupByChain.And( string columnName )
-		{
-			_builder.Add(columnName + ',');
-			return this;
-		}
+    IGroupByChain ISorters<IGroupByChain>.Ascending()
+    {
+        _builder.Add(KeyWords.ASC);
+        return this;
+    }
 
-	#endregion
-	}
+    IGroupByChain ISorters<IGroupByChain>.Ascending( string columnName )
+    {
+        _builder.Add(columnName, KeyWords.ASC);
+        return this;
+    }
+
+    IGroupByChain ISorters<IGroupByChain>.Descending()
+    {
+        _builder.Add(KeyWords.DESC);
+        return this;
+    }
+
+    IGroupByChain ISorters<IGroupByChain>.Descending( string columnName )
+    {
+        _builder.Add(columnName, KeyWords.DESC);
+        return this;
+    }
+
+    IGroupByChain IGroupByChain.And( string columnName )
+    {
+        _builder.Add(columnName + ',');
+        return this;
+    }
+
+    #endregion
 }
