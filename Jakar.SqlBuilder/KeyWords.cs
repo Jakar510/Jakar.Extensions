@@ -1,7 +1,4 @@
-﻿using Jakar.Extensions.General;
-
-
-namespace Jakar.SqlBuilder;
+﻿namespace Jakar.SqlBuilder;
 
 
 public static class KeyWords

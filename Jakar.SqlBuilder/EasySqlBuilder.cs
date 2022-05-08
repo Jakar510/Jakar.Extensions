@@ -1,68 +1,67 @@
 ﻿namespace Jakar.SqlBuilder;
 
 
-public sealed class EasySqlBuilder : ISqlBuilderRoot
+public struct EasySqlBuilder
 {
-    private StringBuilder? _cache;
-    private bool           _needToClose;
+    private readonly StringBuilder _sb;
+    private          bool          _needToClose = false;
 
-    internal StringBuilder Cache  => _cache ?? throw new ObjectDisposedException($"{nameof(EasySqlBuilder)} can only be used once per instance.", new NullReferenceException(nameof(_cache)));
-    public   string        Result => ToString();
+    public string Result => ToString();
 
 
     public EasySqlBuilder() : this(1024) { }
-    public EasySqlBuilder( int capacity ) => _cache = new StringBuilder(capacity);
+    public EasySqlBuilder( int capacity ) => _sb = new StringBuilder(capacity);
 
 
-    internal void AddRange<T>( char separator, IEnumerable<string> names ) where T : class => AddRange(separator, names.Select(KeyWords.GetName<T>));
-
+    internal EasySqlBuilder AddRange<T>( char separator, IEnumerable<string> names ) => AddRange(separator, names.Select(KeyWords.GetName<T>));
     internal EasySqlBuilder AddRange( char separator, IEnumerable<string> names )
     {
-        Cache.AppendJoin(separator, names);
+        _sb.AppendJoin(separator, names);
 
         return Space();
     }
-
-    internal void AddRange<T>( string separator, IEnumerable<string> names ) where T : class => AddRange(separator, names.Select(KeyWords.GetName<T>));
-
+    internal EasySqlBuilder AddRange<T>( string separator, IEnumerable<string> names ) => AddRange(separator, names.Select(KeyWords.GetName<T>));
     internal EasySqlBuilder AddRange( string separator, IEnumerable<string> names )
     {
-        Cache.AppendJoin(separator, names);
+        _sb.AppendJoin(separator, names);
         return Space();
     }
 
-
-    internal EasySqlBuilder Add( params string[] names ) => AddRange(' ', names);
 
     internal EasySqlBuilder Add( char c )
     {
-        Cache.Append(c);
+        _sb.Append(c);
         return this;
     }
+    internal EasySqlBuilder Add( string value )
+    {
+        _sb.Append(value);
+        return this;
+    }
+    internal EasySqlBuilder Add( params string[] names ) => AddRange(' ', names);
 
 
     internal EasySqlBuilder NewLine()
     {
-        Cache.AppendLine();
+        _sb.AppendLine();
         return this;
     }
 
 
     internal EasySqlBuilder AggregateFunction( char func = '*' )
     {
-        Cache.Append(func);
+        _sb.Append(func);
         return Space();
     }
-
     internal EasySqlBuilder AggregateFunction( string func, string? columnName = default )
     {
-        Cache.Append(func);
-        Cache.Append('(');
+        _sb.Append(func);
+        Begin();
 
-        if ( columnName is null ) { Cache.Append('*'); }
-        else { Cache.Append(columnName); }
+        if ( columnName is null ) { _sb.Append('*'); }
+        else { _sb.Append(columnName); }
 
-        Cache.Append(')');
+        End();
 
         return Space();
     }
@@ -78,14 +77,11 @@ public sealed class EasySqlBuilder : ISqlBuilderRoot
         _needToClose = true;
         return Add('(');
     }
-
     internal EasySqlBuilder End()
     {
         _needToClose = false;
         return Add(')');
     }
-
-
     internal EasySqlBuilder VerifyParentheses()
     {
         if ( _needToClose ) { End(); }
@@ -93,10 +89,11 @@ public sealed class EasySqlBuilder : ISqlBuilderRoot
         return this;
     }
 
+
     public override string ToString()
     {
         VerifyParentheses();
-        var result = Cache.Append(';').ToString();
+        var result = _sb.Append(';').ToString();
 
 
         // int start = result.LastIndexOf('(');
@@ -114,27 +111,26 @@ public sealed class EasySqlBuilder : ISqlBuilderRoot
     }
 
 
-    public ISelector Select() => new SelectClauseBuilder(this);
+    public SelectClauseBuilder Select() => new(this);
 
-    public ISelector Union()
+    public SelectClauseBuilder Union()
     {
         Add("UNION");
         return new SelectClauseBuilder(this);
     }
 
-    public ISelector UnionAll()
+    public SelectClauseBuilder UnionAll()
     {
         Add("UNION ALL");
         return new SelectClauseBuilder(this);
     }
 
-    public IWhere Where() => new WhereClauseBuilder(this);
-    public IOrderBy Order() => new OrderByClauseBuilder(this);
-    public IGroupBy Group() => new GroupByClauseBuilder(this);
-    public IInsertInto Insert() => new InsertClauseBuilder(this);
-    public IUpdate Update() => new UpdateClauseBuilder(this);
-    public IDelete Delete() => new DeleteClauseBuilder(this);
-    public IJoin Join() => new JoinClauseBuilder(this);
-
-    
+    public WhereClauseBuilder<EasySqlBuilder> Where() => new(in this, ref  this);
+    internal WhereClauseBuilder<TNext> Where<TNext>(in TNext next ) => new(in next, ref  this);
+    public OrderByClauseBuilder Order() => new(ref this);
+    public GroupByClauseBuilder Group() => new(ref this);
+    public InsertClauseBuilder Insert() => new(ref this);
+    public UpdateClauseBuilder Update() => new(ref this);
+    public DeleteClauseBuilder Delete() => new(ref this);
+    public JoinClauseBuilder Join() => new(ref this);
 }
