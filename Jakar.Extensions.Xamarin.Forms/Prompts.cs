@@ -2,6 +2,7 @@
 using Jakar.Extensions.Xamarin.Forms.Statics;
 
 
+
 namespace Jakar.Extensions.Xamarin.Forms;
 
 
@@ -49,11 +50,7 @@ public abstract class Prompts<TDeviceID, TViewPage> : IUserDialogs
 
         await _Debug.HandleExceptionAsync(e).ConfigureAwait(false);
 
-        if ( await ConfirmAsync(title,
-                                message,
-                                yes,
-                                no,
-                                token).ConfigureAwait(false) )
+        if ( await ConfirmAsync(title, message, yes, no, token).ConfigureAwait(false) )
         {
             _Services.ScreenShotAddress = await api.GetScreenShot().ConfigureAwait(false);
 
@@ -129,21 +126,23 @@ public abstract class Prompts<TDeviceID, TViewPage> : IUserDialogs
     }
 
 
-#region IUserDialogs
 
-#region Toasts
+    #region IUserDialogs
+
+    #region Toasts
 
     public IDisposable Toast( string?      title, TimeSpan? dismissTimer = null ) => _Dialogs.Toast(title, dismissTimer);
     public IDisposable Toast( ToastConfig? cfg ) => _Dialogs.Toast(cfg);
 
-#endregion
+    #endregion
 
 
-#region Alerts
 
-    protected void        Alert( string?      title, string? message )             => _Dialogs.Alert(message, title, Ok);
-    public    IDisposable Alert( string?      title, string? message, string? ok ) => _Dialogs.Alert(message, title, ok);
-    public    IDisposable Alert( AlertConfig? config ) => _Dialogs.Alert(config);
+    #region Alerts
+
+    protected void Alert( string?          title, string? message ) => _Dialogs.Alert(message,             title, Ok);
+    public IDisposable Alert( string?      title, string? message, string? ok ) => _Dialogs.Alert(message, title, ok);
+    public IDisposable Alert( AlertConfig? config ) => _Dialogs.Alert(config);
 
 
     public Task AlertAsync( string? title, string? message, CancellationToken? cancelToken                            = default ) => AlertAsync(message, title, Ok, cancelToken);
@@ -151,105 +150,81 @@ public abstract class Prompts<TDeviceID, TViewPage> : IUserDialogs
 
     public Task AlertAsync( AlertConfig? config, CancellationToken? cancelToken = default ) => _Dialogs.AlertAsync(config, cancelToken);
 
-#endregion
+    #endregion
 
 
-#region ActionSheets
+
+    #region ActionSheets
 
     public IDisposable ActionSheet( ActionSheetConfig? config ) => _Dialogs.ActionSheet(config);
 
-    public Task<string> ActionSheetAsync( string?            title,
-                                          string?            cancel,
-                                          string?            destructive,
-                                          CancellationToken? cancelToken = null,
-                                          params string[]    buttons ) => _Dialogs.ActionSheetAsync(title,
-                                                                                                    cancel,
-                                                                                                    destructive,
-                                                                                                    cancelToken,
-                                                                                                    buttons);
+    public Task<string> ActionSheetAsync( string? title, string? cancel, string? destructive, CancellationToken? cancelToken = null, params string[] buttons ) => _Dialogs.ActionSheetAsync(title, cancel, destructive, cancelToken, buttons);
 
-#endregion
+    #endregion
 
 
-#region Confirm
 
-    public IDisposable Confirm( ConfirmConfig?      config )                                        => _Dialogs.Confirm(config);
-    public Task<bool>  ConfirmAsync( ConfirmConfig? config, CancellationToken? cancelToken = null ) => _Dialogs.ConfirmAsync(config, cancelToken);
+    #region Confirm
 
-    public async Task<bool> ConfirmAsync( string? title, string? message, CancellationToken? cancelToken ) => await ConfirmAsync(message,
-                                                                                                                                 title,
-                                                                                                                                 Yes,
-                                                                                                                                 No,
-                                                                                                                                 cancelToken).ConfigureAwait(false);
+    public IDisposable Confirm( ConfirmConfig?     config ) => _Dialogs.Confirm(config);
+    public Task<bool> ConfirmAsync( ConfirmConfig? config, CancellationToken? cancelToken = null ) => _Dialogs.ConfirmAsync(config, cancelToken);
 
-    public Task<bool> ConfirmAsync( string?            title,
-                                    string?            message,
-                                    string?            yes,
-                                    string?            no,
-                                    CancellationToken? cancelToken ) => _Dialogs.ConfirmAsync(message,
-                                                                                              title,
-                                                                                              yes,
-                                                                                              no,
-                                                                                              cancelToken);
+    public async Task<bool> ConfirmAsync( string? title, string? message, CancellationToken? cancelToken ) => await ConfirmAsync(message, title, Yes, No, cancelToken).ConfigureAwait(false);
 
-#endregion
+    public Task<bool> ConfirmAsync( string? title, string? message, string? yes, string? no, CancellationToken? cancelToken ) => _Dialogs.ConfirmAsync(message, title, yes, no, cancelToken);
+
+    #endregion
 
 
-#region Dates
 
-    public IDisposable            DatePrompt( DatePromptConfig?      config )                                        => _Dialogs.DatePrompt(config);
+    #region Dates
+
+    public IDisposable DatePrompt( DatePromptConfig?                 config ) => _Dialogs.DatePrompt(config);
     public Task<DatePromptResult> DatePromptAsync( DatePromptConfig? config, CancellationToken? cancelToken = null ) => _Dialogs.DatePromptAsync(config, cancelToken);
 
     public Task<DatePromptResult> DatePromptAsync( string? title = null, DateTime? selectedDate = null, CancellationToken? cancelToken = null ) =>
         _Dialogs.DatePromptAsync(title, selectedDate, cancelToken);
 
-#endregion
+    #endregion
 
 
-#region Times
 
-    public IDisposable            TimePrompt( TimePromptConfig?      config )                                        => _Dialogs.TimePrompt(config);
+    #region Times
+
+    public IDisposable TimePrompt( TimePromptConfig?                 config ) => _Dialogs.TimePrompt(config);
     public Task<TimePromptResult> TimePromptAsync( TimePromptConfig? config, CancellationToken? cancelToken = null ) => _Dialogs.TimePromptAsync(config, cancelToken);
 
     public Task<TimePromptResult> TimePromptAsync( string? title = null, TimeSpan? selectedTime = null, CancellationToken? cancelToken = null ) =>
         _Dialogs.TimePromptAsync(title, selectedTime, cancelToken);
 
-#endregion
+    #endregion
 
 
-#region GenericPrompts
+
+    #region GenericPrompts
 
     public IDisposable Prompt( PromptConfig? config ) => _Dialogs.Prompt(config);
 
-    public Task<PromptResult> PromptAsync( string?            message,
-                                           string?            title       = null,
-                                           string?            okText      = null,
-                                           string?            cancelText  = null,
-                                           string?            placeholder = "",
-                                           InputType          inputType   = InputType.Default,
-                                           CancellationToken? cancelToken = null ) => _Dialogs.PromptAsync(message,
-                                                                                                           title,
-                                                                                                           okText,
-                                                                                                           cancelText,
-                                                                                                           placeholder,
-                                                                                                           inputType,
-                                                                                                           cancelToken);
+    public Task<PromptResult> PromptAsync( string? message, string? title = null, string? okText = null, string? cancelText = null, string? placeholder = "", InputType inputType = InputType.Default, CancellationToken? cancelToken = null ) =>
+        _Dialogs.PromptAsync(message, title, okText, cancelText, placeholder, inputType, cancelToken);
 
     public Task<PromptResult> PromptAsync( PromptConfig? config, CancellationToken? cancelToken = null ) => _Dialogs.PromptAsync(config, cancelToken);
 
-#endregion
+    #endregion
 
 
-#region Login
 
-    public IDisposable       Login( LoginConfig?      config )                                                                                     => _Dialogs.Login(config);
+    #region Login
+
+    public IDisposable Login( LoginConfig?            config ) => _Dialogs.Login(config);
     public Task<LoginResult> LoginAsync( string?      title = null, string?            message     = null, CancellationToken? cancelToken = null ) => _Dialogs.LoginAsync(title, message, cancelToken);
     public Task<LoginResult> LoginAsync( LoginConfig? config,       CancellationToken? cancelToken = null ) => _Dialogs.LoginAsync(config, cancelToken);
 
-#endregion
+    #endregion
 
 
-#region Loading
+
+    #region Loading
 
     public void ShowLoading( string? title = null, MaskType? maskType = null ) => _Dialogs.ShowLoading(title, maskType);
     public void HideLoading() => _Dialogs.HideLoading();
@@ -257,27 +232,11 @@ public abstract class Prompts<TDeviceID, TViewPage> : IUserDialogs
 
     public IProgressDialog Progress( ProgressDialogConfig? config ) => _Dialogs.Progress(config);
 
-    public IProgressDialog Loading( string?   title      = null,
-                                    Action?   onCancel   = null,
-                                    string?   cancelText = null,
-                                    bool      show       = true,
-                                    MaskType? maskType   = null ) => _Dialogs.Loading(title,
-                                                                                      onCancel,
-                                                                                      cancelText,
-                                                                                      show,
-                                                                                      maskType);
+    public IProgressDialog Loading( string? title = null, Action? onCancel = null, string? cancelText = null, bool show = true, MaskType? maskType = null ) => _Dialogs.Loading(title, onCancel, cancelText, show, maskType);
 
-    public IProgressDialog Progress( string?   title      = null,
-                                     Action?   onCancel   = null,
-                                     string?   cancelText = null,
-                                     bool      show       = true,
-                                     MaskType? maskType   = null ) => _Dialogs.Progress(title,
-                                                                                        onCancel,
-                                                                                        cancelText,
-                                                                                        show,
-                                                                                        maskType);
+    public IProgressDialog Progress( string? title = null, Action? onCancel = null, string? cancelText = null, bool show = true, MaskType? maskType = null ) => _Dialogs.Progress(title, onCancel, cancelText, show, maskType);
 
-#endregion
+    #endregion
 
-#endregion
+    #endregion
 }

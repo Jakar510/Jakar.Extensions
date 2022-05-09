@@ -19,15 +19,15 @@ public interface IAppSettings<out TVersion> : IAppSettings
 
 
 
-public interface IAppSettings<out TDeviceID, TViewPage, out TVersion> : IAppSettings<TVersion>
+public interface IAppSettings<TDeviceID, TViewPage, out TVersion> : IAppSettings<TVersion>
 {
-    public TDeviceID  DeviceID        { get; }
+    public TDeviceID  DeviceID        { get; set; }
     public TViewPage? CurrentViewPage { get; set; }
 }
 
 
 
-public interface IAppSettings<out TDeviceID, TViewPage> : IAppSettings<TDeviceID, TViewPage, Version> { }
+public interface IAppSettings<TDeviceID, TViewPage> : IAppSettings<TDeviceID, TViewPage, Version> { }
 
 
 

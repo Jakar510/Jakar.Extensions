@@ -1,6 +1,7 @@
 ﻿using Jakar.Extensions.Xamarin.Forms.ResourceManager;
 
 
+
 namespace Jakar.Extensions.Xamarin.Forms;
 
 
@@ -37,13 +38,13 @@ public abstract class ApiServices<TDebug, TPrompts, TAppSettings, TFileSystem, T
 
 
 
-public abstract class ApiServices<TDebug, TPrompts, TAppSettings, TFileSystem, TLanguage, TResourceManager, TDeviceID, TViewPage> :
-    ApiServices<TDebug, TPrompts, TAppSettings, TFileSystem, TLanguage, TDeviceID, TViewPage> where TDebug : Debug<TDeviceID, TViewPage>, new()
-                                                                                              where TPrompts : Prompts<TDeviceID, TViewPage>, new()
-                                                                                              where TAppSettings : IAppSettings<TDeviceID, TViewPage>, new()
-                                                                                              where TFileSystem : BaseFileSystemApi, new()
-                                                                                              where TLanguage : LanguageApi, new()
-                                                                                              where TResourceManager : BaseResourceDictionaryManager, new()
+public abstract class ApiServices<TDebug, TPrompts, TAppSettings, TFileSystem, TLanguage, TResourceManager, TDeviceID, TViewPage> : ApiServices<TDebug, TPrompts, TAppSettings, TFileSystem, TLanguage, TDeviceID, TViewPage>
+    where TDebug : Debug<TDeviceID, TViewPage>, new()
+    where TPrompts : Prompts<TDeviceID, TViewPage>, new()
+    where TAppSettings : IAppSettings<TDeviceID, TViewPage>, new()
+    where TFileSystem : BaseFileSystemApi, new()
+    where TLanguage : LanguageApi, new()
+    where TResourceManager : BaseResourceDictionaryManager, new()
 {
     public TResourceManager Resources { get; } = new();
 

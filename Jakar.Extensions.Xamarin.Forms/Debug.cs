@@ -5,19 +5,21 @@ using Microsoft.AppCenter.Crashes;
 using Xamarin.Essentials;
 
 
+
 namespace Jakar.Extensions.Xamarin.Forms;
 
 
 public class Debug<TDeviceID, TViewPage>
 {
-    public virtual bool  CanDebug      => Debugger.IsAttached;
-    public virtual bool  UseDebugLogin => CanDebug;
-    public         Guid? InstallId     { get; protected set; }
+    private        BaseFileSystemApi?                  _fileSystemApi;
+    private        IAppSettings<TDeviceID, TViewPage>? _services;
+    public virtual bool                                CanDebug         => Debugger.IsAttached;
+    public virtual bool                                UseDebugLogin    => CanDebug;
+    public         Guid                                InstallID        { get; protected set; }
+    protected      bool                                _ApiEnabled      { get; private set; }
+    public         bool                                CrashDataPending { get; set; }
+    public         bool                                SendCrashes      { get; set; }
 
-    protected bool _ApiEnabled { get; private set; }
-
-    private BaseFileSystemApi?                  _fileSystemApi;
-    private IAppSettings<TDeviceID, TViewPage>? _services;
 
     protected IAppSettings<TDeviceID, TViewPage> _Services
     {
@@ -26,7 +28,8 @@ public class Debug<TDeviceID, TViewPage>
     }
 
 
-#region Init
+
+    #region Init
 
     public Task Init( BaseFileSystemApi api, IAppSettings<TDeviceID, TViewPage> services, string app_center_id, params Type[] appCenterServices ) => Task.Run(async () => await InitAsync(api, services, app_center_id, appCenterServices));
 
@@ -41,6 +44,8 @@ public class Debug<TDeviceID, TViewPage>
     {
         _ApiEnabled = true;
 
+        if ( Debugger.IsAttached ) { SendCrashes = true; }
+
         VersionTracking.Track();
 
         AppCenter.Start($"ios={app_center_id};android={app_center_id}", services);
@@ -49,11 +54,10 @@ public class Debug<TDeviceID, TViewPage>
                                  ? LogLevel.Verbose
                                  : LogLevel.Error; //AppCenter.LogLevel = LogLevel.Debug;
 
-        InstallId =   await AppCenter.GetInstallIdAsync().ConfigureAwait(false);
-        InstallId ??= Guid.NewGuid();
+        InstallID = await AppCenter.GetInstallIdAsync().ConfigureAwait(false) ?? Guid.NewGuid();
+        AppCenter.SetUserId(InstallID.ToString());
 
-        AppCenter.SetUserId(InstallId.ToString());
-
+        _services.DeviceID         = InstallID;
         _Services.CrashDataPending = await Crashes.HasCrashedInLastSessionAsync().ConfigureAwait(false);
     }
 
@@ -69,7 +73,8 @@ public class Debug<TDeviceID, TViewPage>
         throw new ApiDisabledException($"Must call {nameof(Init)} first.");
     }
 
-#endregion
+    #endregion
+
 
 
     /// <summary>
@@ -98,7 +103,8 @@ public class Debug<TDeviceID, TViewPage>
     }
 
 
-#region AppStates
+
+    #region AppStates
 
     protected async Task Save( ExceptionDetails payload )
     {
@@ -140,10 +146,11 @@ public class Debug<TDeviceID, TViewPage>
                                                                    [nameof(LanguageApi.SelectedLanguage)]                       = CultureInfo.CurrentCulture.DisplayName
                                                                };
 
-#endregion
+    #endregion
 
 
-#region Track Exceptions
+
+    #region Track Exceptions
 
     public async Task TrackError( Exception e )
     {
@@ -155,18 +162,10 @@ public class Debug<TDeviceID, TViewPage>
         e.Details(out Dictionary<string, string?> dict);
         await TrackError(e, dict, new ExceptionDetails(e), screenShot).ConfigureAwait(false);
     }
-    public async Task TrackError( Exception ex, Dictionary<string, string?>? eventDetails ) => await TrackError(ex, eventDetails, exceptionDetails: null).ConfigureAwait(false);
-    public async Task TrackError( Exception ex, Dictionary<string, string?>? eventDetails, ExceptionDetails? exceptionDetails ) => await TrackError(ex,
-                                                                                                                                                    eventDetails,
-                                                                                                                                                    exceptionDetails,
-                                                                                                                                                    null,
-                                                                                                                                                    null).ConfigureAwait(false);
-    public async Task TrackError( Exception ex, Dictionary<string, string?>? eventDetails, ExceptionDetails? exceptionDetails, ReadOnlyMemory<byte> screenShot ) => await TrackError(ex,
-                                                                                                                                                                                     eventDetails,
-                                                                                                                                                                                     exceptionDetails,
-                                                                                                                                                                                     null,
-                                                                                                                                                                                     null,
-                                                                                                                                                                                     screenShot).ConfigureAwait(false);
+    public async Task TrackError( Exception ex, Dictionary<string, string?>? eventDetails ) => await TrackError(ex,                                     eventDetails, exceptionDetails: null).ConfigureAwait(false);
+    public async Task TrackError( Exception ex, Dictionary<string, string?>? eventDetails, ExceptionDetails? exceptionDetails ) => await TrackError(ex, eventDetails, exceptionDetails, null, null).ConfigureAwait(false);
+    public async Task TrackError( Exception ex, Dictionary<string, string?>? eventDetails, ExceptionDetails? exceptionDetails, ReadOnlyMemory<byte> screenShot ) =>
+        await TrackError(ex, eventDetails, exceptionDetails, null, null, screenShot).ConfigureAwait(false);
     public async Task TrackError( Exception ex, Dictionary<string, string?>? eventDetails, ExceptionDetails? exceptionDetails, string? incomingText, string? outgoingText ) =>
         await TrackError(ex, eventDetails, exceptionDetails, incomingText, outgoingText, null).ConfigureAwait(false);
 
@@ -224,10 +223,11 @@ public class Debug<TDeviceID, TViewPage>
         Crashes.TrackError(ex, eventDetails, attachments);
     }
 
-#endregion
+    #endregion
 
 
-#region Track Events
+
+    #region Track Events
 
     public void TrackEvent( [CallerMemberName] string? source = default )
     {
@@ -247,5 +247,5 @@ public class Debug<TDeviceID, TViewPage>
         Analytics.TrackEvent(source, eventDetails);
     }
 
-#endregion
+    #endregion
 }
