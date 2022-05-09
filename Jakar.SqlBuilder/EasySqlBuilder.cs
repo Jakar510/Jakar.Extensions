@@ -28,16 +28,17 @@ public struct EasySqlBuilder
     }
 
 
+    internal EasySqlBuilder Append( string value )
+    {
+        _sb.Append(value);
+        return this;
+    }
     internal EasySqlBuilder Add( char c )
     {
         _sb.Append(c);
         return this;
     }
-    internal EasySqlBuilder Add( string value )
-    {
-        _sb.Append(value);
-        return this;
-    }
+    internal EasySqlBuilder Add( string          value ) => Space().Append(value).Space();
     internal EasySqlBuilder Add( params string[] names ) => AddRange(' ', names);
 
 
@@ -111,26 +112,39 @@ public struct EasySqlBuilder
     }
 
 
-    public SelectClauseBuilder Select() => new(this);
+    public SelectClauseBuilder<EasySqlBuilder> Select() => new(this, ref this);
 
-    public SelectClauseBuilder Union()
+    public SelectClauseBuilder<EasySqlBuilder> Union()
     {
         Add("UNION");
-        return new SelectClauseBuilder(this);
+        return new SelectClauseBuilder<EasySqlBuilder>(this, ref this);
     }
 
-    public SelectClauseBuilder UnionAll()
+    public SelectClauseBuilder<EasySqlBuilder> UnionAll()
     {
         Add("UNION ALL");
-        return new SelectClauseBuilder(this);
+        return new SelectClauseBuilder<EasySqlBuilder>(this, ref this);
     }
 
-    public WhereClauseBuilder<EasySqlBuilder> Where() => new(in this, ref  this);
-    internal WhereClauseBuilder<TNext> Where<TNext>(in TNext next ) => new(in next, ref  this);
+
+    public WhereClauseBuilder<EasySqlBuilder> Where() => new(in this, ref this);
+    internal WhereClauseBuilder<TNext> Where<TNext>( in TNext next ) => new(in next, ref this);
+
+
     public OrderByClauseBuilder Order() => new(ref this);
+
+
     public GroupByClauseBuilder Group() => new(ref this);
+
+
     public InsertClauseBuilder Insert() => new(ref this);
+
+
     public UpdateClauseBuilder Update() => new(ref this);
+
+
     public DeleteClauseBuilder Delete() => new(ref this);
+
+
     public JoinClauseBuilder Join() => new(ref this);
 }

@@ -1,10 +1,17 @@
 ﻿namespace Jakar.SqlBuilder;
 
 
-public struct SelectClauseBuilder
+public struct SelectClauseBuilder<TNext>
 {
-    private EasySqlBuilder _builder;
-    public SelectClauseBuilder( EasySqlBuilder builder ) => _builder = builder;
+    private readonly TNext          _next;
+    private          EasySqlBuilder _builder;
+    public SelectClauseBuilder( in TNext next, ref EasySqlBuilder builder )
+    {
+        _next    = next;
+        _builder = builder;
+    }
+
+    public TNext Done() => _next;
 
 
     public EasySqlBuilder From( string tableName, string? alias )
@@ -35,43 +42,73 @@ public struct SelectClauseBuilder
     }
 
 
-    public SelectClauseBuilder Next( string columnName )
+    public AggregateFunctionsBuilder<SelectClauseBuilder<TNext>> WithFunction() => new(this, ref _builder);
+
+
+    /// <summary>
+    /// Adds <param name="columnName"></param> to SELECT set
+    /// </summary>
+    /// <returns><see cref="SelectClauseBuilder"/></returns>
+    public SelectClauseBuilder<TNext> Next( string columnName )
     {
         _builder.Add(columnName);
         return this;
     }
-    public SelectClauseBuilder Next<T>( string columnName )
+    /// <summary>
+    /// <para>
+    /// Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="DapperTableExtensions.GetTableName(Type)"/>
+    /// </para>
+    /// Adds table_name.<param name="columnName"></param> to SELECT set
+    /// </summary>
+    /// <example>SELECT Orders.OrderID, Customers.CustomerName, Orders.OrderDate</example>
+    /// <returns><see cref="SelectClauseBuilder"/></returns>
+    public SelectClauseBuilder<TNext> Next<T>( string columnName )
     {
         _builder.Add(columnName.GetName<T>());
         return this;
     }
-    public SelectClauseBuilder Next( params string[] columnNames ) => Next(',', columnNames);
-    public SelectClauseBuilder Next( char separator, params string[] columnNames )
+    /// <summary>
+    /// <para>
+    /// Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="DapperTableExtensions.GetTableName(Type)"/>
+    /// </para>
+    /// Adds table_name.<param name="columnNames"></param> to SELECT set
+    /// </summary>
+    /// <example>SELECT Orders.OrderID, Customers.CustomerName, Orders.OrderDate</example>
+    /// <returns><see cref="SelectClauseBuilder"/></returns>
+    public SelectClauseBuilder<TNext> Next( params string[] columnNames )
     {
-        _builder.Begin().AddRange(separator, columnNames).End();
+        _builder.Begin().AddRange(',', columnNames).End();
         return this;
     }
 
 
-    public SelectClauseBuilder Next<T>( params string[] columnNames ) => Next<T>(',', columnNames);
-    public SelectClauseBuilder Next<T>( char separator, params string[] columnNames )
+    public SelectClauseBuilder<TNext> Next<T>( params string[] columnNames )
     {
-        _builder.Begin().AddRange<T>(separator, columnNames).End();
+        _builder.Begin().AddRange<T>(',', columnNames).End();
         return this;
     }
 
 
-    public SelectClauseBuilder NextAs( string alias, params string[] columnNames ) => NextAs(alias, ',', columnNames);
-    public SelectClauseBuilder NextAs( string alias, char separator, params string[] columnNames )
+    /// <summary>
+    /// Adds <param name="columnNames"></param> to SELECT set and setting it to the <param name="alias"></param> variable
+    /// </summary>
+    /// <returns><see cref="SelectClauseBuilder"/></returns>
+    public SelectClauseBuilder<TNext> NextAs( string alias, params string[] columnNames )
     {
-        _builder.Begin().AddRange(separator, columnNames).End().Add(KeyWords.AS, alias);
+        _builder.Begin().AddRange(',', columnNames).End().Add(KeyWords.AS, alias);
         return this;
     }
 
-    public SelectClauseBuilder NextAs<T>( string alias, params string[] columnNames ) => NextAs<T>(alias, ',', columnNames);
-    public SelectClauseBuilder NextAs<T>( string alias, char separator, params string[] columnNames )
+    /// <summary>
+    /// <para>
+    /// Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="DapperTableExtensions.GetTableName(Type)"/>
+    /// </para>
+    /// Adds table_name.columnName to SELECT set and setting it to the <param name="alias"></param> variable
+    /// </summary>
+    /// <returns><see cref="SelectClauseBuilder"/></returns>
+    public SelectClauseBuilder<TNext> NextAs<T>( string alias, params string[] columnNames )
     {
-        _builder.Begin().AddRange<T>(separator, columnNames).End().Add(KeyWords.AS, alias);
+        _builder.Begin().AddRange<T>(',', columnNames).End().Add(KeyWords.AS, alias);
         return this;
     }
 }

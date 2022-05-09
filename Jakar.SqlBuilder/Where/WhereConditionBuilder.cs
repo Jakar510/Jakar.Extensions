@@ -6,9 +6,9 @@ namespace Jakar.SqlBuilder;
 
 public struct WhereConditionBuilder<TNext>
 {
-    private readonly TNext                      _next;
-    private          EasySqlBuilder             _builder;
-    private readonly Dictionary<string, string> _cache = new();
+    private readonly TNext          _next;
+    private          EasySqlBuilder _builder;
+    private readonly List<string>   _cache = new();
 
     public WhereConditionBuilder( in TNext next, ref EasySqlBuilder builder )
     {
@@ -19,14 +19,20 @@ public struct WhereConditionBuilder<TNext>
 
     public TNext Done()
     {
-        foreach ( ( string? columnName, string value ) in _cache ) { _builder.Add(columnName, "=", value + ','); }
+        _builder.AddRange(',', _cache);
 
         _builder.VerifyParentheses().NewLine();
         return _next;
     }
-    public WhereConditionBuilder<TNext> With<T>( string columnName, T obj )
+
+    public WhereConditionBuilder<TNext> With( string columnName, string? value )
     {
-        _cache[columnName] = obj?.ToString() ?? KeyWords.NULL;
+        _cache.Add($"{columnName}={value ?? KeyWords.NULL}");
+        return this;
+    }
+    public WhereConditionBuilder<TNext> With<T>( string columnName, T value ) where T : struct
+    {
+        _cache.Add($"{columnName}={value}");
         return this;
     }
 }

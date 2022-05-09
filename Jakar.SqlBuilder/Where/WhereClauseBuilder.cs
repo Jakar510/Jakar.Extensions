@@ -5,23 +5,14 @@ public struct WhereClauseBuilder<TNext>
 {
     private readonly TNext          _next;
     private          EasySqlBuilder _builder;
+
+
     public WhereClauseBuilder( in TNext next, ref EasySqlBuilder builder )
     {
         _next    = next;
         _builder = builder;
     }
 
-
-    public TNext Filter<T>( string columnName, T _ )
-    {
-        _builder.Add(KeyWords.FILTER);
-        return _next;
-    }
-    public TNext Filter( string condition )
-    {
-        _builder.Add(KeyWords.FILTER).Space().Add(condition);
-        return _next;
-    }
 
     public TNext Exists()
     {
@@ -30,24 +21,37 @@ public struct WhereClauseBuilder<TNext>
     }
 
 
-    public WhereChainBuilder<TNext> Chain( string condition )
-    {
-        _builder.Add(KeyWords.EXISTS, condition);
-        return new WhereChainBuilder<TNext>(this, ref _builder);
-    }
-    public WhereChainBuilder<TNext> Chain<T>( string columnName, T _ ) => Chain<T>(columnName);
-    public WhereChainBuilder<TNext> Chain<T>( string columnName )
-    {
-        _builder.Add(KeyWords.EXISTS, columnName.GetName<T>());
-        return new WhereChainBuilder<TNext>(this, ref _builder);
-    }
+    // public WhereChainBuilder<TNext> Chain( string condition )
+    // {
+    //     _builder.Add(KeyWords.EXISTS, condition);
+    //     return new WhereChainBuilder<TNext>(this, ref _builder);
+    // }
+    // public WhereChainBuilder<TNext> Chain<T>( string columnName, T _ ) => Chain<T>(columnName);
+    // public WhereChainBuilder<TNext> Chain<T>( string columnName )
+    // {
+    //     _builder.Add(KeyWords.EXISTS, columnName.GetName<T>());
+    //     return new WhereChainBuilder<TNext>(this, ref _builder);
+    // }
 
 
-    public WhereChainBuilder<TNext> Between( string columnName )
+    public WhereClauseBuilder<TNext> Between( string columnName )
     {
         _builder.Add(KeyWords.BETWEEN, columnName);
-        return new WhereChainBuilder<TNext>(this, ref _builder);
+        return this;
     }
+
+
+    public WhereClauseBuilder<TNext> And()
+    {
+        _builder.Add(KeyWords.AND);
+        return this;
+    }
+    public WhereClauseBuilder<TNext> Or()
+    {
+        _builder.Add(KeyWords.OR);
+        return this;
+    }
+
 
     public WhereClauseBuilder<TNext> IsNull( string columnName )
     {
@@ -59,6 +63,7 @@ public struct WhereClauseBuilder<TNext>
         _builder.Add(KeyWords.IS, KeyWords.NOT, KeyWords.NULL, columnName);
         return this;
     }
+
 
     public WhereClauseBuilder<TNext> Like( string pattern )
     {
@@ -72,31 +77,20 @@ public struct WhereClauseBuilder<TNext>
         _builder.Add(columnName, KeyWords.IN);
         return new WhereInChainBuilder<TNext>(this, ref _builder);
     }
-    public TNext In( string columnName, params string[] conditions )
-    {
-        _builder.Add(columnName, KeyWords.IN).Begin().AddRange(',', conditions).End();
-        return _next;
-    }
-
-    public TNext NotIn( string columnName )
+    public WhereInChainBuilder<TNext> NotIn( string columnName )
     {
         _builder.Add(columnName, KeyWords.NOT, KeyWords.IN).Begin();
-        return _next;
-    }
-    public TNext NotIn( string columnName, params string[] conditions )
-    {
-        _builder.Add(columnName, KeyWords.NOT, KeyWords.IN).Begin().AddRange(',', conditions).End();
-        return _next;
+        return new WhereInChainBuilder<TNext>(this, ref _builder);
     }
 
 
-    public WhereConditionBuilder<WhereClauseBuilder<TNext>> Select() => new(in this, ref _builder);
-    public AggregateFunctionsBuilder<WhereClauseBuilder<TNext>> WithFunction() => new(in this, ref _builder);
+    public SelectClauseBuilder<WhereClauseBuilder<TNext>> Select() => new(this, ref _builder);
+    public AggregateFunctionsBuilder<WhereClauseBuilder<TNext>> WithFunction() => new(this, ref _builder);
 
 
-    public WhereClauseBuilder<TNext> Next()
+    public TNext Done()
     {
-        _builder.Comma();
-        return this;
+        _builder.VerifyParentheses();
+        return _next;
     }
 }

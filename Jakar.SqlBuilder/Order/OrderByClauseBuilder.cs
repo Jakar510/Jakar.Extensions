@@ -7,13 +7,26 @@ public struct OrderByClauseBuilder
     public OrderByClauseBuilder( ref EasySqlBuilder builder ) => _builder = builder;
 
 
+    /// <summary>
+    /// Simple ORDER BY <paramref name="columnNames"/> delimited by <paramref name="separator"/>
+    /// </summary>
+    /// <returns><see cref="EasySqlBuilder"/></returns>
     public EasySqlBuilder By( string separator, params string[] columnNames ) => _builder.Begin().Add(KeyWords.ORDER, KeyWords.BY).AddRange(separator, columnNames).End();
 
+
+    /// <summary>
+    /// Starts an ORDER BY chain
+    /// </summary>
+    /// <returns><see cref="OrderByClauseChainBuilder"/></returns>
     public OrderByClauseChainBuilder Chain()
     {
         _builder.Add(KeyWords.ORDER, KeyWords.BY).Begin();
         return new OrderByClauseChainBuilder(this, ref _builder);
     }
+    /// <summary>
+    /// Starts an ORDER BY chain starting with <paramref name="columnName"/>
+    /// </summary>
+    /// <returns><see cref="OrderByClauseChainBuilder"/></returns>
     public OrderByClauseChainBuilder Chain( string columnName )
     {
         _builder.Add(KeyWords.ORDER, KeyWords.BY).Begin().Add(columnName);
@@ -33,30 +46,17 @@ public struct OrderByClauseBuilder
     }
 
 
-    public OrderByClauseBuilder Ascending()
-    {
-        _builder.Add(KeyWords.ASC).Add(',');
-        return this;
-    }
-    public OrderByClauseBuilder Ascending( string columnName )
-    {
-        _builder.Add(columnName, KeyWords.ASC).Add(',');
-        return this;
-    }
+    public SortersBuilder<OrderByClauseBuilder> SortBy() => new(this, ref _builder);
 
 
-    public OrderByClauseBuilder Descending()
-    {
-        _builder.Add(KeyWords.DESC).Add(',');
-        return this;
-    }
-    public OrderByClauseBuilder Descending( string columnName )
-    {
-        _builder.Add(columnName, KeyWords.DESC).Add(',');
-        return this;
-    }
-
-
+    /// <summary>
+    /// continues previous clause and adds <paramref name="columnName"/>
+    /// </summary>
+    /// <example>
+    /// SELECT * FROM Customers
+    /// ORDER BY Country, CustomerName;
+    /// </example>
+    /// <returns><see cref="OrderByClauseBuilder"/></returns>
     public OrderByClauseBuilder By( string columnName )
     {
         _builder.Begin().Add(KeyWords.ORDER, KeyWords.BY).Space().Add(columnName);

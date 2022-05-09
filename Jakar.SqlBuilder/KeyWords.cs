@@ -40,7 +40,6 @@ public static class KeyWords
     public const string VALUES             = nameof(VALUES);
     public const string GROUP              = nameof(GROUP);
     public const string EXISTS             = nameof(EXISTS);
-    public const string FILTER             = nameof(FILTER);
     public const string GREATER            = ">";
     public const string LESS_THAN          = "<";
     public const string GREATER_OR_EQUAL   = ">=";

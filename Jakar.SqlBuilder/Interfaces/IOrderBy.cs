@@ -9,6 +9,7 @@ public interface IOrderBy
     /// <returns><see cref="ISqlBuilderRoot"/></returns>
     public ISqlBuilderRoot By( string separator, params string[] columnNames );
 
+
     /// <summary>
     /// Starts an ORDER BY chain
     /// </summary>

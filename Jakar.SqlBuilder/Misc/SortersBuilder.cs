@@ -40,6 +40,7 @@ public struct SortersBuilder<TNext>
         return _next;
     }
 
+
     /// <summary>
     /// Ends with a DESC and returns to <typeparamref name="TNext"/>
     /// </summary>
