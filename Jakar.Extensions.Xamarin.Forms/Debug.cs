@@ -9,72 +9,85 @@ using Xamarin.Essentials;
 namespace Jakar.Extensions.Xamarin.Forms;
 
 
-public class Debug<TDeviceID, TViewPage>
+public class Debug<TViewPage> : ObservableClass where TViewPage : struct, Enum
 {
-    private        BaseFileSystemApi?                  _fileSystemApi;
-    private        IAppSettings<TDeviceID, TViewPage>? _services;
-    public virtual bool                                CanDebug         => Debugger.IsAttached;
-    public virtual bool                                UseDebugLogin    => CanDebug;
-    public         Guid                                InstallID        { get; protected set; }
-    protected      bool                                _ApiEnabled      { get; private set; }
-    public         bool                                CrashDataPending { get; set; }
-    public         bool                                SendCrashes      { get; set; }
+    private readonly BaseFileSystemApi? _fileSystemApi;
+    private          bool               _sendCrashes;
+    private          TViewPage          _currentViewPage;
+    private          Guid               _installID;
+    private readonly Synchronized<bool> _apiEnabled = new(false);
 
 
-    protected IAppSettings<TDeviceID, TViewPage> _Services
+    protected readonly string _appName;
+    public virtual     bool   CanDebug      => Debugger.IsAttached;
+    public virtual     bool   UseDebugLogin => CanDebug;
+
+
+    public Guid InstallID
     {
-        get => _services ?? throw new ApiDisabledException($"Must call {nameof(Init)} first.", new NullReferenceException(nameof(_services)));
-        private set => _services = value;
+        get => _installID;
+        protected set => SetProperty(ref _installID, value);
+    }
+    public bool ApiEnabled
+    {
+        get => _apiEnabled;
+        private set
+        {
+            _apiEnabled.Value = value;
+            OnPropertyChanged();
+        }
     }
 
 
+    public bool SendCrashes
+    {
+        get => _sendCrashes;
+        set => SetProperty(ref _sendCrashes, value);
+    }
+    public TViewPage CurrentViewPage
+    {
+        get => _currentViewPage;
+        set => SetProperty(ref _currentViewPage, value);
+    }
 
-    #region Init
 
-    public Task Init( BaseFileSystemApi api, IAppSettings<TDeviceID, TViewPage> services, string app_center_id, params Type[] appCenterServices ) => Task.Run(async () => await InitAsync(api, services, app_center_id, appCenterServices));
-
-    public async Task InitAsync( BaseFileSystemApi api, IAppSettings<TDeviceID, TViewPage> services, string app_center_id, params Type[] appCenterServices )
+    public Debug( BaseFileSystemApi api, string appName )
     {
         _fileSystemApi = api;
-        _Services      = services;
-        await StartAppCenterAsync(app_center_id, appCenterServices).ConfigureAwait(false);
+        _appName       = appName;
     }
 
-    public virtual async Task StartAppCenterAsync( string app_center_id, params Type[] services )
-    {
-        _ApiEnabled = true;
 
+    public async Task InitAsync( IAppSettings settings, string app_center_id, params Type[] appCenterServices )
+    {
         if ( Debugger.IsAttached ) { SendCrashes = true; }
 
         VersionTracking.Track();
-
-        AppCenter.Start($"ios={app_center_id};android={app_center_id}", services);
+        AppCenter.Start($"ios={app_center_id};android={app_center_id}", appCenterServices);
 
         AppCenter.LogLevel = CanDebug
                                  ? LogLevel.Verbose
                                  : LogLevel.Error; //AppCenter.LogLevel = LogLevel.Debug;
 
+
         InstallID = await AppCenter.GetInstallIdAsync().ConfigureAwait(false) ?? Guid.NewGuid();
         AppCenter.SetUserId(InstallID.ToString());
-
-        _services.DeviceID         = InstallID;
-        _Services.CrashDataPending = await Crashes.HasCrashedInLastSessionAsync().ConfigureAwait(false);
+        settings.DeviceID         = InstallID;
+        settings.CrashDataPending = await Crashes.HasCrashedInLastSessionAsync().ConfigureAwait(false);
+        ApiEnabled                = true;
     }
 
 
     protected void ThrowIfNotEnabled()
     {
-        if ( _ApiEnabled ) { return; }
+        if ( ApiEnabled ) { return; }
 
-        if ( _services is null ) { throw new ApiDisabledException($"Must call {nameof(Init)} first.", new NullReferenceException(nameof(_services))); }
+        // if ( _services is null ) { throw new ApiDisabledException($"Must call {nameof(InitAsync)} first.", new NullReferenceException(nameof(_services))); }
 
-        if ( _fileSystemApi is null ) { throw new ApiDisabledException($"Must call {nameof(Init)} first.", new NullReferenceException(nameof(_fileSystemApi))); }
+        if ( _fileSystemApi is null ) { throw new ApiDisabledException($"Must call {nameof(InitAsync)} first.", new NullReferenceException(nameof(_fileSystemApi))); }
 
-        throw new ApiDisabledException($"Must call {nameof(Init)} first.");
+        throw new ApiDisabledException($"Must call {nameof(InitAsync)} first.");
     }
-
-    #endregion
-
 
 
     /// <summary>
@@ -95,7 +108,7 @@ public class Debug<TDeviceID, TViewPage>
     {
         ThrowIfNotEnabled();
 
-        if ( !_Services.SendCrashes ) { return; }
+        if ( !SendCrashes ) { return; }
 
         ReadOnlyMemory<byte> screenShot = await AppShare.TakeScreenShot().ConfigureAwait(false);
 
@@ -138,12 +151,12 @@ public class Debug<TDeviceID, TViewPage>
 
     protected virtual Dictionary<string, string> AppState() => new()
                                                                {
-                                                                   [nameof(IAppSettings<TDeviceID, TViewPage>.CurrentViewPage)] = _Services.CurrentViewPage?.ToString() ?? throw new NullReferenceException(nameof(_Services.CurrentViewPage)),
-                                                                   [nameof(IAppSettings<TDeviceID, TViewPage>.AppName)]         = _Services.AppName ?? throw new NullReferenceException(nameof(_Services.AppName)),
-                                                                   [nameof(DateTime)]                                           = DateTime.UtcNow.ToString(CultureInfo.InvariantCulture),
-                                                                   [nameof(AppDeviceInfo.DeviceId)]                             = AppDeviceInfo.DeviceId,
-                                                                   [nameof(AppDeviceInfo.VersionNumber)]                        = AppDeviceInfo.VersionNumber,
-                                                                   [nameof(LanguageApi.SelectedLanguage)]                       = CultureInfo.CurrentCulture.DisplayName
+                                                                   [nameof(CurrentViewPage)]              = CurrentViewPage.ToString(),
+                                                                   [nameof(_appName)]                     = _appName ?? throw new NullReferenceException(nameof(_appName)),
+                                                                   [nameof(DateTime)]                     = DateTime.UtcNow.ToString(CultureInfo.InvariantCulture),
+                                                                   [nameof(AppDeviceInfo.DeviceId)]       = AppDeviceInfo.DeviceId,
+                                                                   [nameof(AppDeviceInfo.VersionNumber)]  = AppDeviceInfo.VersionNumber,
+                                                                   [nameof(LanguageApi.SelectedLanguage)] = CultureInfo.CurrentCulture.DisplayName
                                                                };
 
     #endregion
@@ -173,9 +186,9 @@ public class Debug<TDeviceID, TViewPage>
     {
         ThrowIfNotEnabled();
 
-        if ( !_Services.SendCrashes ) { return; }
+        if ( !SendCrashes ) { return; }
 
-        if ( exceptionDetails is not null ) await Save(exceptionDetails).ConfigureAwait(false);
+        if ( exceptionDetails is not null ) { await Save(exceptionDetails).ConfigureAwait(false); }
 
         var attachments = new List<ErrorAttachmentLog>(5);
 
@@ -216,9 +229,9 @@ public class Debug<TDeviceID, TViewPage>
     {
         ThrowIfNotEnabled();
 
-        if ( !_Services.SendCrashes ) { return; }
+        if ( !SendCrashes ) { return; }
 
-        if ( ex is null ) throw new ArgumentNullException(nameof(ex));
+        if ( ex is null ) { throw new ArgumentNullException(nameof(ex)); }
 
         Crashes.TrackError(ex, eventDetails, attachments);
     }
@@ -233,7 +246,7 @@ public class Debug<TDeviceID, TViewPage>
     {
         ThrowIfNotEnabled();
 
-        if ( !_Services.SendCrashes ) { return; }
+        if ( !SendCrashes ) { return; }
 
         TrackEvent(AppState(), source);
     }
@@ -242,7 +255,7 @@ public class Debug<TDeviceID, TViewPage>
     {
         ThrowIfNotEnabled();
 
-        if ( !_Services.SendCrashes ) { return; }
+        if ( !SendCrashes ) { return; }
 
         Analytics.TrackEvent(source, eventDetails);
     }

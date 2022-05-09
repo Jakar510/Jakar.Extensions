@@ -6,7 +6,7 @@ using Jakar.Extensions.Xamarin.Forms.Statics;
 namespace Jakar.Extensions.Xamarin.Forms;
 
 
-public abstract class Prompts<TDeviceID, TViewPage> : IUserDialogs
+public abstract class Prompts<TViewPage> : IUserDialogs where TViewPage : struct, Enum
 {
     private IAppSettings? _services;
 
@@ -16,9 +16,9 @@ public abstract class Prompts<TDeviceID, TViewPage> : IUserDialogs
         private set => _services = value;
     }
 
-    private Debug<TDeviceID, TViewPage>? _debug;
+    private Debug<TViewPage>? _debug;
 
-    protected Debug<TDeviceID, TViewPage> _Debug
+    protected Debug<TViewPage> _Debug
     {
         get => _debug ?? throw new ApiDisabledException($"Must call {nameof(Init)} first.", new NullReferenceException(nameof(_services)));
         private set => _debug = value;
@@ -32,8 +32,8 @@ public abstract class Prompts<TDeviceID, TViewPage> : IUserDialogs
 
     private IUserDialogs _Dialogs { get; } = UserDialogs.Instance;
 
-    public void Init( IAppSettings                services ) => _Services = services;
-    public void Init( Debug<TDeviceID, TViewPage> services ) => _Debug = services;
+    public void Init( IAppSettings     services ) => _Services = services;
+    public void Init( Debug<TViewPage> services ) => _Debug = services;
 
 
     public abstract Task HandleExceptionAsync( Exception                e, Page page, CancellationToken token );

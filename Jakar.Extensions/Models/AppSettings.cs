@@ -3,36 +3,26 @@
 
 public interface IAppSettings
 {
-    public string  AppName           { get; }
-    public string  DeviceVersion     { get; }
-    public bool    SendCrashes       { get; set; }
-    public string? ScreenShotAddress { get; set; }
-    public bool    CrashDataPending  { get; set; }
+    public string     AppName           { get; }
+    public string     DeviceVersion     { get; }
+    public bool       SendCrashes       { get; set; }
+    public string?    ScreenShotAddress { get; set; }
+    public bool       CrashDataPending  { get; set; }
+    public AppVersion AppVersion        { get; }
+    public Guid       DeviceID          { get; set; }
 }
 
 
 
-public interface IAppSettings<out TVersion> : IAppSettings
+public interface IAppSettings<TViewPage> : IAppSettings
 {
-    public TVersion AppVersion { get; }
-}
-
-
-
-public interface IAppSettings<TDeviceID, TViewPage, out TVersion> : IAppSettings<TVersion>
-{
-    public TDeviceID  DeviceID        { get; set; }
     public TViewPage? CurrentViewPage { get; set; }
 }
 
 
 
-public interface IAppSettings<TDeviceID, TViewPage> : IAppSettings<TDeviceID, TViewPage, Version> { }
-
-
-
 [Serializable]
-public class AppSettings<TViewPage> : ObservableClass, IAppSettings<Guid, TViewPage, AppVersion>
+public class AppSettings<TViewPage> : ObservableClass, IAppSettings<TViewPage>
 {
     private string     _appName = string.Empty;
     private AppVersion _appVersion;
