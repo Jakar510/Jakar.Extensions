@@ -15,7 +15,7 @@ public static class AppStoreVersion
     public static async Task OpenAppInStore() => await CrossLatestVersion.Current.OpenAppInStore().ConfigureAwait(false);
 
 
-    public static async Task<bool> VerifyAppStoreVersion<TViewPage>( this Prompts<TViewPage> prompts, string newVersionAvailable, string newVersionUpdateNowOrLater, CancellationToken token = default ) where TViewPage : struct, Enum
+    public static async Task<bool> VerifyAppStoreVersion<TViewPage>( this Prompts prompts, string newVersionAvailable, string newVersionUpdateNowOrLater, CancellationToken token = default ) where TViewPage : struct, Enum
     {
         bool isLatest = await IsLatest().ConfigureAwait(false);
         if ( isLatest ) { return false; }
@@ -27,7 +27,7 @@ public static class AppStoreVersion
         return true;
     }
 
-    public static async Task<bool> VerifyAppStoreVersion<TViewPage>( this Prompts<TViewPage> prompts, string newVersionAvailable, string newVersionUpdateNowOrLater, string yes, string no, CancellationToken token = default )
+    public static async Task<bool> VerifyAppStoreVersion<TViewPage>( this Prompts prompts, string newVersionAvailable, string newVersionUpdateNowOrLater, string yes, string no, CancellationToken token = default )
         where TViewPage : struct, Enum
     {
         bool isLatest = await IsLatest().ConfigureAwait(false);

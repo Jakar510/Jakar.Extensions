@@ -22,6 +22,7 @@
 			Added MailKit Email Builder
 			Updated Enum extensions
 			Added more Span extensions
+			Reworked AppSettings
 			Reworked LocalFile and LocalDirectory a bit
 			Reworked IniConfig and PreferenceFile
 			WebRequests.GetResponseAsync now tries to get the error details, including anything sent sent from server in the body.

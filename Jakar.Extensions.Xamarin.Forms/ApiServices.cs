@@ -5,20 +5,20 @@
 namespace Jakar.Extensions.Xamarin.Forms;
 
 
-public abstract class ApiServices<TDebug, TPrompts, TAppSettings, TFileSystem, TViewPage> where TDebug : Debug<TViewPage>, new()
-                                                                                          where TPrompts : Prompts<TViewPage>, new()
+public abstract class ApiServices<TDebug, TPrompts, TAppSettings, TFileSystem, TViewPage> where TDebug : Debug, new()
+                                                                                          where TPrompts : Prompts, new()
                                                                                           where TAppSettings : AppSettings<TViewPage>, new()
                                                                                           where TFileSystem : BaseFileSystemApi, new()
                                                                                           where TViewPage : struct, Enum
 {
-    public TDebug              Debug      { get; } = new();
-    public TPrompts            Prompts    { get; } = new();
-    public TAppSettings        Settings   { get; } = new();
-    public LanguageApi         Language   { get; } = new();
-    public TFileSystem         FileSystem { get; } = new();
-    public LocationManager     Location   { get; } = new();
-    public BarometerReader     Barometer  { get; } = new();
-    public Commands<TViewPage> Loading    { get; }
+    public TDebug          Debug      { get; } = new();
+    public TPrompts        Prompts    { get; } = new();
+    public TAppSettings    Settings   { get; } = new();
+    public LanguageApi     Language   { get; } = new();
+    public TFileSystem     FileSystem { get; } = new();
+    public LocationManager Location   { get; } = new();
+    public BarometerReader Barometer  { get; } = new();
+    public Commands        Loading    { get; }
 
 
     /// <summary>
@@ -32,27 +32,27 @@ public abstract class ApiServices<TDebug, TPrompts, TAppSettings, TFileSystem, T
         Prompts.Init(Settings);
         Debug.InitAsync(Settings, app_center_id, appCenterServices).CallSynchronously();
 
-        Loading = new Commands<TViewPage>(Prompts);
+        Loading = new Commands(Prompts);
     }
 }
 
 
 
-public abstract class ApiServices<TDebug, TPrompts, TAppSettings, TFileSystem, TLanguage, TViewPage> where TDebug : Debug<TViewPage>, new()
-                                                                                                     where TPrompts : Prompts<TViewPage>, new()
+public abstract class ApiServices<TDebug, TPrompts, TAppSettings, TFileSystem, TLanguage, TViewPage> where TDebug : Debug, new()
+                                                                                                     where TPrompts : Prompts, new()
                                                                                                      where TAppSettings : AppSettings<TViewPage>, new()
                                                                                                      where TFileSystem : BaseFileSystemApi, new()
                                                                                                      where TLanguage : LanguageApi, new()
                                                                                                      where TViewPage : struct, Enum
 {
-    public TDebug              Debug      { get; } = new();
-    public TPrompts            Prompts    { get; } = new();
-    public TAppSettings        Settings   { get; } = new();
-    public TLanguage           Language   { get; } = new();
-    public TFileSystem         FileSystem { get; } = new();
-    public LocationManager     Location   { get; } = new();
-    public BarometerReader     Barometer  { get; } = new();
-    public Commands<TViewPage> Loading    { get; }
+    public TDebug          Debug      { get; } = new();
+    public TPrompts        Prompts    { get; } = new();
+    public TAppSettings    Settings   { get; } = new();
+    public TLanguage       Language   { get; } = new();
+    public TFileSystem     FileSystem { get; } = new();
+    public LocationManager Location   { get; } = new();
+    public BarometerReader Barometer  { get; } = new();
+    public Commands        Loading    { get; }
 
 
     /// <summary>
@@ -66,14 +66,14 @@ public abstract class ApiServices<TDebug, TPrompts, TAppSettings, TFileSystem, T
         Prompts.Init(Settings);
         Debug.InitAsync(Settings, app_center_id, appCenterServices).CallSynchronously();
 
-        Loading = new Commands<TViewPage>(Prompts);
+        Loading = new Commands(Prompts);
     }
 }
 
 
 
-public abstract class ApiServices<TDebug, TPrompts, TAppSettings, TFileSystem, TLanguage, TResourceManager, TViewPage> : ApiServices<TDebug, TPrompts, TAppSettings, TFileSystem, TLanguage, TViewPage> where TDebug : Debug<TViewPage>, new()
-                                                                                                                                                                                                        where TPrompts : Prompts<TViewPage>, new()
+public abstract class ApiServices<TDebug, TPrompts, TAppSettings, TFileSystem, TLanguage, TResourceManager, TViewPage> : ApiServices<TDebug, TPrompts, TAppSettings, TFileSystem, TLanguage, TViewPage> where TDebug : Debug, new()
+                                                                                                                                                                                                        where TPrompts : Prompts, new()
                                                                                                                                                                                                         where TAppSettings : AppSettings<TViewPage>, new()
                                                                                                                                                                                                         where TFileSystem : BaseFileSystemApi, new()
                                                                                                                                                                                                         where TLanguage : LanguageApi, new()

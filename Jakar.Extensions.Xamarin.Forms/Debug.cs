@@ -9,11 +9,10 @@ using Xamarin.Essentials;
 namespace Jakar.Extensions.Xamarin.Forms;
 
 
-public class Debug<TViewPage> : ObservableClass where TViewPage : struct, Enum
+public class Debug : ObservableClass
 {
     private readonly BaseFileSystemApi? _fileSystemApi;
     private          bool               _sendCrashes;
-    private          TViewPage          _currentViewPage;
     private          Guid               _installID;
     private readonly Synchronized<bool> _apiEnabled = new(false);
 
@@ -28,6 +27,7 @@ public class Debug<TViewPage> : ObservableClass where TViewPage : struct, Enum
         get => _installID;
         protected set => SetProperty(ref _installID, value);
     }
+
     public bool ApiEnabled
     {
         get => _apiEnabled;
@@ -37,17 +37,11 @@ public class Debug<TViewPage> : ObservableClass where TViewPage : struct, Enum
             OnPropertyChanged();
         }
     }
-
-
+    
     public bool SendCrashes
     {
         get => _sendCrashes;
         set => SetProperty(ref _sendCrashes, value);
-    }
-    public TViewPage CurrentViewPage
-    {
-        get => _currentViewPage;
-        set => SetProperty(ref _currentViewPage, value);
     }
 
 
@@ -151,7 +145,6 @@ public class Debug<TViewPage> : ObservableClass where TViewPage : struct, Enum
 
     protected virtual Dictionary<string, string> AppState() => new()
                                                                {
-                                                                   [nameof(CurrentViewPage)]              = CurrentViewPage.ToString(),
                                                                    [nameof(_appName)]                     = _appName ?? throw new NullReferenceException(nameof(_appName)),
                                                                    [nameof(DateTime)]                     = DateTime.UtcNow.ToString(CultureInfo.InvariantCulture),
                                                                    [nameof(AppDeviceInfo.DeviceId)]       = AppDeviceInfo.DeviceId,
