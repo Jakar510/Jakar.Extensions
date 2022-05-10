@@ -12,7 +12,7 @@ namespace Jakar.Extensions.Xamarin.Forms;
 public class Debug : ObservableClass
 {
     private readonly BaseFileSystemApi? _fileSystemApi;
-    private          bool               _sendCrashes;
+    private readonly IAppSettings       _settings;
     private          Guid               _installID;
     private readonly Synchronized<bool> _apiEnabled = new(false);
 
@@ -20,6 +20,7 @@ public class Debug : ObservableClass
     protected readonly string _appName;
     public virtual     bool   CanDebug      => Debugger.IsAttached;
     public virtual     bool   UseDebugLogin => CanDebug;
+    public             bool   SendCrashes   => _settings.SendCrashes;
 
 
     public Guid InstallID
@@ -31,31 +32,24 @@ public class Debug : ObservableClass
     public bool ApiEnabled
     {
         get => _apiEnabled;
-        private set
+        protected internal set
         {
             _apiEnabled.Value = value;
             OnPropertyChanged();
         }
     }
-    
-    public bool SendCrashes
-    {
-        get => _sendCrashes;
-        set => SetProperty(ref _sendCrashes, value);
-    }
 
 
-    public Debug( BaseFileSystemApi api, string appName )
+    public Debug( BaseFileSystemApi api, IAppSettings settings, string appName )
     {
         _fileSystemApi = api;
+        _settings      = settings;
         _appName       = appName;
     }
 
 
-    public async Task InitAsync( IAppSettings settings, string app_center_id, params Type[] appCenterServices )
+    public async Task InitAsync( string app_center_id, params Type[] appCenterServices )
     {
-        if ( Debugger.IsAttached ) { SendCrashes = true; }
-
         VersionTracking.Track();
         AppCenter.Start($"ios={app_center_id};android={app_center_id}", appCenterServices);
 
@@ -64,11 +58,18 @@ public class Debug : ObservableClass
                                  : LogLevel.Error; //AppCenter.LogLevel = LogLevel.Debug;
 
 
-        InstallID = await AppCenter.GetInstallIdAsync().ConfigureAwait(false) ?? Guid.NewGuid();
-        AppCenter.SetUserId(InstallID.ToString());
-        settings.DeviceID         = InstallID;
-        settings.CrashDataPending = await Crashes.HasCrashedInLastSessionAsync().ConfigureAwait(false);
-        ApiEnabled                = true;
+        Guid? id = await AppCenter.GetInstallIdAsync().ConfigureAwait(false);
+
+        if ( id is null )
+        {
+            id = Guid.NewGuid();
+            AppCenter.SetUserId(id.ToString());
+        }
+
+        InstallID                  = id.Value;
+        _settings.DeviceID         = InstallID;
+        _settings.CrashDataPending = await Crashes.HasCrashedInLastSessionAsync().ConfigureAwait(false);
+        ApiEnabled                 = true;
     }
 
 

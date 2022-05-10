@@ -31,7 +31,7 @@ public abstract class ApiServices<TDebug, TPrompts, TAppSettings, TFileSystem, T
         FileSystem = fileSystem;
         Loading    = new Commands(Prompts);
         Debug      = debug;
-        Debug.InitAsync(Settings, app_center_id, appCenterServices).CallSynchronously();
+        Debug.InitAsync(app_center_id, appCenterServices).CallSynchronously();
     }
 }
 
@@ -65,7 +65,7 @@ public abstract class ApiServices<TDebug, TPrompts, TAppSettings, TFileSystem, T
         FileSystem = fileSystem;
         Loading    = new Commands(Prompts);
         Debug      = debug;
-        Debug.InitAsync(Settings, app_center_id, appCenterServices).CallSynchronously();
+        Debug.InitAsync(app_center_id, appCenterServices).CallSynchronously();
     }
 }
 
