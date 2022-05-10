@@ -1,6 +1,6 @@
 {
   "profiles": {
-    "Jakar.Extensions.Experiments": {
+    "Console.Experiments": {
       "commandName": "Project"
     }
   }

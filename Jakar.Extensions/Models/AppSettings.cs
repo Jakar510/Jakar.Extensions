@@ -82,7 +82,3 @@ public class AppSettings<TViewPage> : ObservableClass, IAppSettings<TViewPage>
         set => SetProperty(ref _appVersion, value);
     }
 }
-
-
-
-public class AppSettings : AppSettings<object> { }

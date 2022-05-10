@@ -2624,22 +2624,22 @@
             <param name="value"></param>
             <returns></returns>
         </member>
-        <member name="M:Jakar.Extensions.SpanAndMemory.Spans.Replace(System.ReadOnlySpan{System.Char},System.ReadOnlySpan{System.Char}@,System.ReadOnlySpan{System.Char}@,System.Char@)">
+        <member name="M:Jakar.Extensions.SpanAndMemory.Spans.Replace``1(System.ReadOnlySpan{``0},System.ReadOnlySpan{``0}@,System.ReadOnlySpan{``0}@)">
             <summary>
             Allocates a string
             </summary>
         </member>
-        <member name="M:Jakar.Extensions.SpanAndMemory.Spans.Replace(System.ReadOnlySpan{System.Char},System.ReadOnlySpan{System.Char}@,System.ReadOnlySpan{System.Char}@,System.Char@,System.Char@,System.Char@)">
+        <member name="M:Jakar.Extensions.SpanAndMemory.Spans.Replace``1(System.ReadOnlySpan{``0},System.ReadOnlySpan{``0}@,System.ReadOnlySpan{``0}@,``0@,``0@)">
             <summary>
             Allocates a string
             </summary>
         </member>
-        <member name="M:Jakar.Extensions.SpanAndMemory.Spans.Join(System.ReadOnlySpan{System.Char},System.ReadOnlySpan{System.Char}@)">
+        <member name="M:Jakar.Extensions.SpanAndMemory.Spans.Join``1(System.ReadOnlySpan{``0},System.ReadOnlySpan{``0}@)">
             <summary>
             Allocates a string
             </summary>
         </member>
-        <member name="M:Jakar.Extensions.SpanAndMemory.Spans.RemoveAll(System.ReadOnlySpan{System.Char},System.Char@)">
+        <member name="M:Jakar.Extensions.SpanAndMemory.Spans.RemoveAll``1(System.ReadOnlySpan{``0},``0@)">
             <summary>
             Allocates a string
             </summary>
@@ -2709,7 +2709,7 @@
                 <see cref = "T:System.String" />
             </returns>
         </member>
-        <member name="M:Jakar.Extensions.Strings.StringExtensions.IsBalanced(System.String,System.Collections.Generic.IDictionary{System.Char,System.Char})">
+        <member name="M:Jakar.Extensions.Strings.StringExtensions.IsBalanced(System.String,System.Collections.Generic.IReadOnlyDictionary{System.Char,System.Char})">
             <summary>
                 <seealso href = "https://www.codeproject.com/Tips/1175562/Check-for-Balanced-Parenthesis-in-a-String" />
                 <para>

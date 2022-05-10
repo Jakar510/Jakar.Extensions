@@ -1,4 +1,5 @@
-﻿using BenchmarkDotNet.Running;
+﻿using System;
+using BenchmarkDotNet.Running;
 using Jakar.Extensions.Strings;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -19,9 +20,8 @@ public static class Program
         "Hello World!".WriteToConsole();
 
 
-        BenchmarkRunner.Run<JsonizerBenchmarks>();
-
-        // BenchmarkRunner.Run<GuidBenchmarks>();
+        // BenchmarkRunner.Run<JsonizerBenchmarks>();
+        BenchmarkRunner.Run<SpansBenchmarks>();
 
         // TestJson();
 
