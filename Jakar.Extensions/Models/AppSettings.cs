@@ -81,12 +81,11 @@ public class AppSettings : ObservableClass, IAppSettings
 
 
     public AppSettings() { }
-    public AppSettings( string appName, AppVersion version, string deviceVersion, Guid deviceID )
+    public AppSettings( string appName, AppVersion version, string deviceVersion )
     {
         AppName       = appName;
         AppVersion    = version;
         DeviceVersion = deviceVersion;
-        DeviceID      = deviceID;
     }
 }
 
@@ -105,5 +104,5 @@ public class AppSettings<TViewPage> : AppSettings, IAppSettings<TViewPage>
 
 
     public AppSettings() { }
-    public AppSettings( string appName, AppVersion version, string deviceVersion, Guid deviceID ) : base(appName, version, deviceVersion, deviceID) { }
+    public AppSettings( string appName, AppVersion version, string deviceVersion ) : base(appName, version, deviceVersion) { }
 }
