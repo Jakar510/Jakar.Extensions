@@ -5,89 +5,93 @@
 namespace Jakar.Extensions.Xamarin.Forms;
 
 
-public abstract class ApiServices<TDebug, TPrompts, TAppSettings, TFileSystem, TViewPage> where TDebug : Debug, new()
-                                                                                          where TPrompts : Prompts, new()
-                                                                                          where TAppSettings : AppSettings<TViewPage>, new()
-                                                                                          where TFileSystem : BaseFileSystemApi, new()
+public abstract class ApiServices<TDebug, TPrompts, TAppSettings, TFileSystem, TViewPage> where TDebug : Debug
+                                                                                          where TPrompts : Prompts
+                                                                                          where TAppSettings : AppSettings<TViewPage>
+                                                                                          where TFileSystem : BaseFileSystemApi
                                                                                           where TViewPage : struct, Enum
 {
-    public TDebug          Debug      { get; } = new();
-    public TPrompts        Prompts    { get; } = new();
-    public TAppSettings    Settings   { get; } = new();
-    public LanguageApi     Language   { get; } = new();
-    public TFileSystem     FileSystem { get; } = new();
-    public LocationManager Location   { get; } = new();
-    public BarometerReader Barometer  { get; } = new();
-    public Commands        Loading    { get; }
+    public TDebug          Debug      { get; init; }
+    public TPrompts        Prompts    { get; init; }
+    public TAppSettings    Settings   { get; init; }
+    public TFileSystem     FileSystem { get; init; }
+    public LanguageApi     Language   { get; init; } = new();
+    public LocationManager Location   { get; init; } = new();
+    public BarometerReader Barometer  { get; init; } = new();
+    public Commands        Loading    { get; init; }
 
 
     /// <summary>
     /// appCenterServices: pass in the types you want to initialize, for example:  typeof(Microsoft.AppCenter.Analytics.Analytics), typeof(Microsoft.AppCenter.Crashes.Crashes)
     /// </summary>
-    /// <param name="app_center_id"></param>
-    /// <param name="appCenterServices"></param>
-    protected ApiServices( in string app_center_id, params Type[] appCenterServices )
+    protected ApiServices( TAppSettings settings, TPrompts prompts, TFileSystem fileSystem, TDebug debug, in string app_center_id, params Type[] appCenterServices )
     {
-        Prompts.Init(Debug);
-        Prompts.Init(Settings);
+        Settings   = settings;
+        Prompts    = prompts;
+        FileSystem = fileSystem;
+        Loading    = new Commands(Prompts);
+        Debug      = debug;
         Debug.InitAsync(Settings, app_center_id, appCenterServices).CallSynchronously();
-
-        Loading = new Commands(Prompts);
     }
 }
 
 
 
-public abstract class ApiServices<TDebug, TPrompts, TAppSettings, TFileSystem, TLanguage, TViewPage> where TDebug : Debug, new()
-                                                                                                     where TPrompts : Prompts, new()
-                                                                                                     where TAppSettings : AppSettings<TViewPage>, new()
-                                                                                                     where TFileSystem : BaseFileSystemApi, new()
-                                                                                                     where TLanguage : LanguageApi, new()
+public abstract class ApiServices<TDebug, TPrompts, TAppSettings, TFileSystem, TLanguage, TViewPage> where TDebug : Debug
+                                                                                                     where TPrompts : Prompts
+                                                                                                     where TAppSettings : AppSettings<TViewPage>
+                                                                                                     where TFileSystem : BaseFileSystemApi
+                                                                                                     where TLanguage : LanguageApi
                                                                                                      where TViewPage : struct, Enum
 {
-    public TDebug          Debug      { get; } = new();
-    public TPrompts        Prompts    { get; } = new();
-    public TAppSettings    Settings   { get; } = new();
-    public TLanguage       Language   { get; } = new();
-    public TFileSystem     FileSystem { get; } = new();
-    public LocationManager Location   { get; } = new();
-    public BarometerReader Barometer  { get; } = new();
-    public Commands        Loading    { get; }
+    public TDebug          Debug      { get; init; }
+    public TPrompts        Prompts    { get; init; }
+    public TAppSettings    Settings   { get; init; }
+    public TLanguage       Language   { get; init; }
+    public TFileSystem     FileSystem { get; init; }
+    public LocationManager Location   { get; init; } = new();
+    public BarometerReader Barometer  { get; init; } = new();
+    public Commands        Loading    { get; init; }
 
 
     /// <summary>
     /// appCenterServices: pass in the types you want to initialize, for example:  typeof(Microsoft.AppCenter.Analytics.Analytics), typeof(Microsoft.AppCenter.Crashes.Crashes)
     /// </summary>
-    /// <param name="app_center_id"></param>
-    /// <param name="appCenterServices"></param>
-    protected ApiServices( in string app_center_id, params Type[] appCenterServices )
+    protected ApiServices( TAppSettings settings, TPrompts prompts, TLanguage language, TFileSystem fileSystem, TDebug debug, in string app_center_id, params Type[] appCenterServices )
     {
-        Prompts.Init(Debug);
-        Prompts.Init(Settings);
+        Settings   = settings;
+        Prompts    = prompts;
+        Language   = language;
+        FileSystem = fileSystem;
+        Loading    = new Commands(Prompts);
+        Debug      = debug;
         Debug.InitAsync(Settings, app_center_id, appCenterServices).CallSynchronously();
-
-        Loading = new Commands(Prompts);
     }
 }
 
 
 
-public abstract class ApiServices<TDebug, TPrompts, TAppSettings, TFileSystem, TLanguage, TResourceManager, TViewPage> : ApiServices<TDebug, TPrompts, TAppSettings, TFileSystem, TLanguage, TViewPage> where TDebug : Debug, new()
-                                                                                                                                                                                                        where TPrompts : Prompts, new()
-                                                                                                                                                                                                        where TAppSettings : AppSettings<TViewPage>, new()
-                                                                                                                                                                                                        where TFileSystem : BaseFileSystemApi, new()
-                                                                                                                                                                                                        where TLanguage : LanguageApi, new()
+public abstract class ApiServices<TDebug, TPrompts, TAppSettings, TFileSystem, TLanguage, TResourceManager, TViewPage> : ApiServices<TDebug, TPrompts, TAppSettings, TFileSystem, TLanguage, TViewPage> where TDebug : Debug
+                                                                                                                                                                                                        where TPrompts : Prompts
+                                                                                                                                                                                                        where TAppSettings : AppSettings<TViewPage>
+                                                                                                                                                                                                        where TFileSystem : BaseFileSystemApi
+                                                                                                                                                                                                        where TLanguage : LanguageApi
                                                                                                                                                                                                         where TResourceManager :
-                                                                                                                                                                                                        BaseResourceDictionaryManager, new()
+                                                                                                                                                                                                        BaseResourceDictionaryManager
                                                                                                                                                                                                         where TViewPage : struct, Enum
 {
-    public TResourceManager Resources { get; } = new();
+    public TResourceManager Resources { get; init; }
 
 
     /// <summary>
     /// appCenterServices: pass in the types you want to initialize, for example:  typeof(Microsoft.AppCenter.Analytics.Analytics), typeof(Microsoft.AppCenter.Crashes.Crashes)
     /// </summary>
-    /// <param name="app_center_id"></param>
-    /// <param name="appCenterServices"></param>
-    protected ApiServices( in string app_center_id, params Type[] appCenterServices ) : base(app_center_id, appCenterServices) { }
+    protected ApiServices( TAppSettings settings, TPrompts prompts, TLanguage language, TFileSystem fileSystem, TDebug debug, TResourceManager resources, in string app_center_id, params Type[] appCenterServices ) : base(settings,
+                                                                                                                                                                                                                            prompts,
+                                                                                                                                                                                                                            language,
+                                                                                                                                                                                                                            fileSystem,
+                                                                                                                                                                                                                            debug,
+                                                                                                                                                                                                                            app_center_id,
+                                                                                                                                                                                                                            appCenterServices) =>
+        Resources = resources;
 }

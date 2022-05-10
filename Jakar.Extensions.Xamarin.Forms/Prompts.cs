@@ -8,21 +8,9 @@ namespace Jakar.Extensions.Xamarin.Forms;
 
 public abstract class Prompts : IUserDialogs
 {
-    private IAppSettings? _services;
+    protected readonly IAppSettings _services;
+    protected readonly Debug        _debug;
 
-    protected IAppSettings _Services
-    {
-        get => _services ?? throw new ApiDisabledException($"Must call {nameof(Init)} first.", new NullReferenceException(nameof(_services)));
-        private set => _services = value;
-    }
-
-    private Debug? _debug;
-
-    protected Debug _Debug
-    {
-        get => _debug ?? throw new ApiDisabledException($"Must call {nameof(Init)} first.", new NullReferenceException(nameof(_services)));
-        private set => _debug = value;
-    }
 
     protected internal abstract string Cancel { get; }
     protected internal abstract string Ok     { get; }
@@ -32,8 +20,12 @@ public abstract class Prompts : IUserDialogs
 
     private IUserDialogs _Dialogs { get; } = UserDialogs.Instance;
 
-    public void Init( IAppSettings     services ) => _Services = services;
-    public void Init( Debug services ) => _Debug = services;
+
+    protected Prompts( IAppSettings services, Debug debug )
+    {
+        _services = services;
+        _debug    = debug;
+    }
 
 
     public abstract Task HandleExceptionAsync( Exception                e, Page page, CancellationToken token );
@@ -45,18 +37,19 @@ public abstract class Prompts : IUserDialogs
 
     public async Task SendFeedBack<TFeedBackPage>( string? title, string? message, string? yes, string? no, Page page, Exception e, FileSystemApi api, CancellationToken token = default ) where TFeedBackPage : Page, new()
     {
-        if ( page is null ) throw new ArgumentNullException(nameof(page));
-        if ( e is null ) throw new ArgumentNullException(nameof(e));
+        if ( page is null ) { throw new ArgumentNullException(nameof(page)); }
 
-        await _Debug.HandleExceptionAsync(e).ConfigureAwait(false);
+        if ( e is null ) { throw new ArgumentNullException(nameof(e)); }
+
+        await _debug.HandleExceptionAsync(e).ConfigureAwait(false);
 
         if ( await ConfirmAsync(title, message, yes, no, token).ConfigureAwait(false) )
         {
-            _Services.ScreenShotAddress = await api.GetScreenShot().ConfigureAwait(false);
+            _services.ScreenShotAddress = await api.GetScreenShot().ConfigureAwait(false);
 
             await page.Navigation.PushAsync(new TFeedBackPage()).ConfigureAwait(false);
         }
-        else { _Services.ScreenShotAddress = null; }
+        else { _services.ScreenShotAddress = null; }
     }
 
 
@@ -96,7 +89,7 @@ public abstract class Prompts : IUserDialogs
 
 
             default:
-                await _Debug.HandleExceptionAsync(e).ConfigureAwait(false);
+                await _debug.HandleExceptionAsync(e).ConfigureAwait(false);
                 return;
         }
     }
@@ -112,7 +105,7 @@ public abstract class Prompts : IUserDialogs
 
     public void DebugMessage( Exception e, [CallerMemberName] string caller = "" )
     {
-        if ( !_Debug.CanDebug ) { return; }
+        if ( !_debug.CanDebug ) { return; }
 
         if ( !string.IsNullOrWhiteSpace(caller) ) { caller = $"DEBUG: {caller}"; }
 

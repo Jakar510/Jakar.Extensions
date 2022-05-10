@@ -4,7 +4,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata>
 		<id>Jakar.Extensions.Xamarin.Forms</id>
-		<version>6.0.0.7-beta</version>
+		<version>6.0.0.8-beta</version>
 		<title>Base library for all others in Xamarin.Forms, and extensions to help with Xamarin.Forms development.</title>
 		<authors>Tyler Stegmaier</authors>
 		<owners>Jakar510/Jakar</owners>
