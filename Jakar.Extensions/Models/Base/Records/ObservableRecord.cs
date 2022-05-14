@@ -8,9 +8,22 @@ namespace Jakar.Extensions.Models.Base.Records;
 public record ObservableRecord : BaseRecord, IDataBaseID, INotifyPropertyChanged, INotifyPropertyChanging
 {
     public static readonly DateTime sqlMinDate = DateTime.Parse("1/1/1753 12:00:00 AM", CultureInfo.InvariantCulture);
+    
 
+    public event PropertyChangedEventHandler?  PropertyChanged;
+    public event PropertyChangingEventHandler? PropertyChanging;
 
     private long _id;
+    
+    [Key]
+    public virtual long ID
+    {
+        get => _id;
+        init => _id = value;
+    }
+
+
+    public ObservableRecord() { }
 
 
     protected void SetID( ObservableRecord record )
@@ -316,16 +329,4 @@ public record ObservableRecord : BaseRecord, IDataBaseID, INotifyPropertyChanged
 
         return SetProperty(ref backingStore, value, ValueEqualizer<TimeSpan>.Instance, caller);
     }
-
-
-    [Key]
-    public virtual long ID
-    {
-        get => _id;
-        init => _id = value;
-    }
-
-
-    public event PropertyChangedEventHandler?  PropertyChanged;
-    public event PropertyChangingEventHandler? PropertyChanging;
 }

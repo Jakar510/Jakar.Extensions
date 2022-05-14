@@ -308,7 +308,7 @@ public class ConcurrentObservableCollection<T> : ObservableClass, IList<T>, ILis
     }
     protected void Replaced( in T old,  in T   @new ) => this.SendReplaced(@new,                old);
     protected void Replaced( in T old,  in T   @new,  in int index ) => this.SendReplaced(@new, old, index);
-    protected void Move( in     T item, in int index, in int oldIndex ) => this.SendMove(item, index, oldIndex);
+    protected void Moved( in     T item, in int index, in int oldIndex ) => this.SendMoved(item, index, oldIndex);
     protected void Reset()
     {
         this.SendReset();

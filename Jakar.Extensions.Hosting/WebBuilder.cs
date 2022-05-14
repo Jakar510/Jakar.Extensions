@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 
 
@@ -73,6 +74,18 @@ public static class WebBuilder
     public static WebApplicationBuilder AddScoped<T>( this WebApplicationBuilder builder, Func<IServiceProvider, T> factory ) where T : class
     {
         builder.Services.AddScoped(factory);
+        return builder;
+    }
+
+
+    public static WebApplicationBuilder AddHostedService<THostedService>( this WebApplicationBuilder builder ) where THostedService : class, IHostedService
+    {
+        builder.Services.AddHostedService<THostedService>();
+        return builder;
+    }
+    public static WebApplicationBuilder AddHostedService<THostedService>( this WebApplicationBuilder builder, Func<IServiceProvider, THostedService> func ) where THostedService : class, IHostedService
+    {
+        builder.Services.AddHostedService(func);
         return builder;
     }
 

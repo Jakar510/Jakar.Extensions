@@ -4,9 +4,9 @@
 namespace Jakar.Extensions.Models.Collections;
 
 
-public interface ICollectionAlerts : INotifyCollectionChanged, INotifyPropertyChanged, INotifyPropertyChanging
+public interface ICollectionAlerts : INotifyCollectionChanged, INotifyPropertyChanging, INotifyPropertyChanged
 {
-    internal void SendOnChanged( NotifyCollectionChangedEventArgs e );
+   protected internal void SendOnChanged( NotifyCollectionChangedEventArgs e );
 }
 
 
@@ -22,6 +22,6 @@ public static class Alerts
     public static void SendRemoved( this     ICollectionAlerts alerts, in int index ) => alerts.OnChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, index));
     public static void SendReplaced<T>( this ICollectionAlerts alerts, in T old, in T @new ) => alerts.OnChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Replace, @new, old));
     public static void SendReplaced<T>( this ICollectionAlerts alerts, in T old, in T @new, in int index ) => alerts.OnChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Replace, @new, old, index));
-    public static void SendMove<T>( this     ICollectionAlerts alerts, in T item, in int index, in int oldIndex ) => alerts.OnChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Move, item, index, oldIndex));
+    public static void SendMoved<T>( this     ICollectionAlerts alerts, in T item, in int index, in int oldIndex ) => alerts.OnChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Move, item, index, oldIndex));
     public static void SendReset( this       ICollectionAlerts alerts ) => alerts.OnChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
 }

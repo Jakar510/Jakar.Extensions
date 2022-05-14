@@ -44,6 +44,9 @@ public abstract class BaseUserModel<T> : BaseCollections<T>, IUserModel where T 
     private string            _website  = string.Empty;
 
 
+    [Key] public long ID { get; init; }
+
+
     public string Company
     {
         get => _company;
@@ -56,10 +59,108 @@ public abstract class BaseUserModel<T> : BaseCollections<T>, IUserModel where T 
         get => _website;
         set => SetProperty(ref _website, value);
     }
+    
+
+    [Required]
+    public string UserID
+    {
+        get => _userID;
+        set => SetProperty(ref _userID, value);
+    }
+
+
+    [Required]
+    public string UserName
+    {
+        get => _userName;
+        set => SetProperty(ref _userName, value);
+    }
+
+
+    public string Department
+    {
+        get => _department;
+        set => SetProperty(ref _department, value);
+    }
+
+
+    public string Title
+    {
+        get => _title;
+        set => SetProperty(ref _title, value);
+    }
+
+
+    [Required]
+    public string FirstName
+    {
+        get => _firstName;
+        set => SetProperty(ref _firstName, value);
+    }
+
+
+    [Required]
+    public string LastName
+    {
+        get => _lastName;
+        set => SetProperty(ref _lastName, value);
+    }
+
+
+    [Required]
+    public string Address
+    {
+        get => _address;
+        set => SetProperty(ref _address, value);
+    }
+
+
+    [Required]
+    public string Email
+    {
+        get => _email;
+        set => SetProperty(ref _email, value);
+    }
+
+
+    [Required]
+    public string PhoneNumber
+    {
+        get => _phoneNumber;
+        set => SetProperty(ref _phoneNumber, value);
+    }
+
+
+    public string Ext
+    {
+        get => _ext;
+        set => SetProperty(ref _ext, value);
+    }
+
+
+    public string Pager
+    {
+        get => _pager;
+        set => SetProperty(ref _pager, value);
+    }
+
+
+    public string Fax
+    {
+        get => _fax;
+        set => SetProperty(ref _fax, value);
+    }
+
+
+    public SupportedLanguage PreferredLanguage
+    {
+        get => _preferredLanguage;
+        set => SetProperty(ref _preferredLanguage, value);
+    }
+
 
 
     protected BaseUserModel() { }
-
     protected BaseUserModel( IUserModel model )
     {
         ID                = model.ID;
@@ -163,104 +264,4 @@ public abstract class BaseUserModel<T> : BaseCollections<T>, IUserModel where T 
         return hashCode.ToHashCode();
     }
 
-
-    [Key] public long ID { get; init; }
-
-
-    [Required]
-    public string UserID
-    {
-        get => _userID;
-        set => SetProperty(ref _userID, value);
-    }
-
-
-    [Required]
-    public string UserName
-    {
-        get => _userName;
-        set => SetProperty(ref _userName, value);
-    }
-
-
-    public string Department
-    {
-        get => _department;
-        set => SetProperty(ref _department, value);
-    }
-
-
-    public string Title
-    {
-        get => _title;
-        set => SetProperty(ref _title, value);
-    }
-
-
-    [Required]
-    public string FirstName
-    {
-        get => _firstName;
-        set => SetProperty(ref _firstName, value);
-    }
-
-
-    [Required]
-    public string LastName
-    {
-        get => _lastName;
-        set => SetProperty(ref _lastName, value);
-    }
-
-
-    [Required]
-    public string Address
-    {
-        get => _address;
-        set => SetProperty(ref _address, value);
-    }
-
-
-    [Required]
-    public string Email
-    {
-        get => _email;
-        set => SetProperty(ref _email, value);
-    }
-
-
-    [Required]
-    public string PhoneNumber
-    {
-        get => _phoneNumber;
-        set => SetProperty(ref _phoneNumber, value);
-    }
-
-
-    public string Ext
-    {
-        get => _ext;
-        set => SetProperty(ref _ext, value);
-    }
-
-
-    public string Pager
-    {
-        get => _pager;
-        set => SetProperty(ref _pager, value);
-    }
-
-
-    public string Fax
-    {
-        get => _fax;
-        set => SetProperty(ref _fax, value);
-    }
-
-
-    public SupportedLanguage PreferredLanguage
-    {
-        get => _preferredLanguage;
-        set => SetProperty(ref _preferredLanguage, value);
-    }
 }

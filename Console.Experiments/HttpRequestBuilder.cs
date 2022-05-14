@@ -141,7 +141,7 @@ public sealed class HttpRequestBuilder : HttpRequestBuilder.IResponses
     {
         if ( _headers is null ) { return content; }
 
-        foreach ( ( string? key, object v ) in _headers ) { _headers.Add(key, v.ToString() ?? string.Empty); }
+        foreach ( ( string? key, object v ) in _headers ) { content.Headers.Add(key, v.ToString()); }
 
         return content;
     }
@@ -394,8 +394,8 @@ public sealed class HttpRequestBuilder : HttpRequestBuilder.IResponses
 
 
 
-    public async Task<JToken> AsJson() => await AsJson(JsonNet.LoadSettings);
-    public async Task<JToken> AsJson( JsonLoadSettings settings )
+    async Task<JToken> IResponses.AsJson() => await ( (IResponses)this ).AsJson(JsonNet.LoadSettings);
+    async Task<JToken> IResponses.AsJson( JsonLoadSettings settings )
     {
         ArgumentNullException.ThrowIfNull(_request);
         using HttpResponseMessage reply = await _request;
@@ -408,8 +408,8 @@ public sealed class HttpRequestBuilder : HttpRequestBuilder.IResponses
     }
 
 
-    public async Task<TResult> AsJson<TResult>() => await AsJson<TResult>(JsonNet.Serializer);
-    public async Task<TResult> AsJson<TResult>( JsonSerializer serializer )
+    async Task<TResult> IResponses.AsJson<TResult>() => await ( (IResponses)this ).AsJson<TResult>(JsonNet.Serializer);
+    async Task<TResult> IResponses.AsJson<TResult>( JsonSerializer serializer )
     {
         ArgumentNullException.ThrowIfNull(_request);
         using HttpResponseMessage reply = await _request;
@@ -423,7 +423,7 @@ public sealed class HttpRequestBuilder : HttpRequestBuilder.IResponses
     }
 
 
-    public async Task<string> AsString()
+    async Task<string> IResponses.AsString()
     {
         ArgumentNullException.ThrowIfNull(_request);
         using HttpResponseMessage reply = await _request;
@@ -433,7 +433,7 @@ public sealed class HttpRequestBuilder : HttpRequestBuilder.IResponses
     }
 
 
-    public async Task<byte[]> AsBytes()
+    async Task<byte[]> IResponses.AsBytes()
     {
         ArgumentNullException.ThrowIfNull(_request);
         using HttpResponseMessage reply = await _request;
@@ -441,7 +441,7 @@ public sealed class HttpRequestBuilder : HttpRequestBuilder.IResponses
         using HttpContent content = reply.Content;
         return await content.ReadAsByteArrayAsync(_token);
     }
-    public async Task<ReadOnlyMemory<byte>> AsMemory()
+    async Task<ReadOnlyMemory<byte>> IResponses.AsMemory()
     {
         ArgumentNullException.ThrowIfNull(_request);
         using HttpResponseMessage reply = await _request;
@@ -453,7 +453,7 @@ public sealed class HttpRequestBuilder : HttpRequestBuilder.IResponses
     }
 
 
-    public async Task<LocalFile> AsFile()
+    async Task<LocalFile> IResponses.AsFile()
     {
         ArgumentNullException.ThrowIfNull(_request);
         using HttpResponseMessage reply = await _request;
@@ -467,7 +467,7 @@ public sealed class HttpRequestBuilder : HttpRequestBuilder.IResponses
     }
 
 
-    public async Task<MemoryStream> AsStream()
+    async Task<MemoryStream> IResponses.AsStream()
     {
         ArgumentNullException.ThrowIfNull(_request);
         using HttpResponseMessage reply = await _request;
