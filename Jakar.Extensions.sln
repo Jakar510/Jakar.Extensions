@@ -51,6 +51,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jakar.SqlBuilder", "Jakar.S
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jakar.SqlBuilder.Tests", "Jakar.SqlBuilder.Tests\Jakar.SqlBuilder.Tests.csproj", "{5CF698E7-185A-4AA2-AB78-99175B690C1C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jakar.Extensions.Wpf", "Jakar.Extensions.Wpf\Jakar.Extensions.Wpf.csproj", "{D3419869-47AD-45A3-8E6B-EEB292F3B26B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -112,6 +114,10 @@ Global
 		{5CF698E7-185A-4AA2-AB78-99175B690C1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5CF698E7-185A-4AA2-AB78-99175B690C1C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5CF698E7-185A-4AA2-AB78-99175B690C1C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D3419869-47AD-45A3-8E6B-EEB292F3B26B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D3419869-47AD-45A3-8E6B-EEB292F3B26B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D3419869-47AD-45A3-8E6B-EEB292F3B26B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D3419869-47AD-45A3-8E6B-EEB292F3B26B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

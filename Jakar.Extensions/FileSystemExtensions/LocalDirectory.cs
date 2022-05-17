@@ -25,10 +25,10 @@ public class LocalDirectory : BaseCollections<LocalDirectory>, TempFile.ITempFil
     }
 
 
-    public string  FullPath { get; init; }
-    public bool    Exists   => Info.Exists;
-    public string  Name     => Info.Name;
-    public string? Root     => Directory.GetDirectoryRoot(FullPath);
+    public string FullPath { get; init; }
+    public bool   Exists   => Info.Exists;
+    public string Name     => Info.Name;
+    public string Root     => Directory.GetDirectoryRoot(FullPath);
 
     public DateTime CreationTimeUtc
     {

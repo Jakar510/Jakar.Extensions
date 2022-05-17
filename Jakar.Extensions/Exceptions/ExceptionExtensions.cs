@@ -3,6 +3,39 @@
 
 public static class ExceptionExtensions
 {
+    public static string CallStack( Exception e ) => CallStack(new StackTrace(e));
+    public static string CallStack() => CallStack(new StackTrace());
+    public static string CallStack( StackTrace trace ) => string.Join("->", Frames(trace));
+    public static IEnumerable<string> Frames( StackTrace trace )
+    {
+        foreach ( StackFrame frame in trace.GetFrames() )
+        {
+            MethodBase method    = frame.GetMethod() ?? throw new NullReferenceException(nameof(frame.GetMethod));
+            string     className = method.MethodClass() ?? throw new NullReferenceException(nameof(Jakar.Extensions.Types.TypeExtensions.MethodClass));
+
+
+            switch ( method.Name )
+            {
+                case nameof(CallStack) when className == nameof(ExceptionExtensions):
+                case nameof(Frames) when className == nameof(ExceptionExtensions):
+                case nameof(Frame) when className == nameof(ExceptionExtensions):
+                    continue;
+
+                default:
+                    yield return $"{className}::{method.Name}";
+                    break;
+            }
+        }
+    }
+    public static string Frame( StackFrame frame )
+    {
+        MethodBase method    = frame.GetMethod() ?? throw new NullReferenceException(nameof(frame.GetMethod));
+        string     className = method.MethodClass() ?? throw new NullReferenceException(nameof(Jakar.Extensions.Types.TypeExtensions.MethodClass));
+
+        return $"{className}::{method.Name}";
+    }
+
+
     public static Dictionary<string, object?> GetProperties( this Exception e )
     {
         var dictionary = new Dictionary<string, object?>();

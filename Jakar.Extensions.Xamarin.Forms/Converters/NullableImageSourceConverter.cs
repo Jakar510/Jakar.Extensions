@@ -15,7 +15,7 @@ public class NullableImageSourceConverter : TypeConverter, IValueConverter, IExt
                                                         ? null
                                                         : (ImageSource)_converter.ConvertFromInvariantString(value);
 
-    public override string? ConvertToInvariantString( object? _ ) => throw new NotImplementedException();
+    public override string ConvertToInvariantString( object? _ ) => throw new NotImplementedException();
 
 
     public object? Convert( object?     value, Type targetType, object parameter, CultureInfo culture ) => Convert(value?.ToString());

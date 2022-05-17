@@ -26,7 +26,7 @@ public class LocalFile : BaseCollections<LocalFile>, TempFile.ITempFile, LocalFi
     public string?  DirectoryName => Info.DirectoryName;
     public MimeType Mime          => Extension.FromExtension();
     public string   ContentType   => Mime.ToContentType();
-    public string?  Root          => Directory.GetDirectoryRoot(FullPath);
+    public string   Root          => Directory.GetDirectoryRoot(FullPath);
     public Encoding FileEncoding  { get; init; } = Encoding.Default;
 
 

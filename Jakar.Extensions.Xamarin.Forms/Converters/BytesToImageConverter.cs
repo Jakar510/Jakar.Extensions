@@ -32,11 +32,12 @@ public class BytesToImageConverter : TypeConverter, IValueConverter, IExtendedTy
                                                                                                             ? Convert(value)
                                                                                                             : null;
 
-    public object? ConvertBack( object? value, Type targetType, object? parameter, CultureInfo culture ) => throw new NotImplementedException();
+    public object ConvertBack( object? value, Type targetType, object? parameter, CultureInfo culture ) => throw new NotImplementedException();
 
 
     public override  bool CanConvertFrom( Type? value ) => value != null && CheckTypes(value);
     protected static bool CheckTypes( Type      value ) => typeof(byte[]) == value || typeof(Memory<byte>) == value || typeof(ReadOnlyMemory<byte>) == value;
+
 
     // <converters:BytesToImageConverter x:Key="BytesToImage" />
     // <Image Source="{Binding Image, Converter={StaticResource BytesToImage}}" Aspect="AspectFill" />
