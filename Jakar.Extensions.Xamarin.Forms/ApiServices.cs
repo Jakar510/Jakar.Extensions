@@ -24,14 +24,14 @@ public abstract class ApiServices<TDebug, TPrompts, TAppSettings, TFileSystem, T
     /// <summary>
     /// appCenterServices: pass in the types you want to initialize, for example:  typeof(Microsoft.AppCenter.Analytics.Analytics), typeof(Microsoft.AppCenter.Crashes.Crashes)
     /// </summary>
-    protected ApiServices( TAppSettings settings, TPrompts prompts, TFileSystem fileSystem, TDebug debug, in string app_center_id, params Type[] appCenterServices )
+    protected ApiServices( TAppSettings settings, TPrompts prompts, TFileSystem fileSystem, TDebug debug, string app_center_id, params Type[] appCenterServices )
     {
         Settings   = settings ?? throw new ArgumentNullException(nameof(settings));
         Prompts    = prompts ?? throw new ArgumentNullException(nameof(prompts));
         FileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
         Debug      = debug ?? throw new ArgumentNullException(nameof(debug));
         Loading    = new Commands(Prompts);
-        Debug.InitAsync(app_center_id, appCenterServices).CallSynchronously();
+        Task.Run(() => Debug.InitAsync(app_center_id, appCenterServices)).Wait();
     }
 }
 
