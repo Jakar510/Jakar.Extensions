@@ -8,3 +8,8 @@ public interface IValidator
 {
     public bool IsValid { get; }
 }
+
+
+
+
+public interface INotifyValidator : IValidator, INotifyPropertyChanged { }

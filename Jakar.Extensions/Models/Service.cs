@@ -48,9 +48,9 @@ public abstract class Service : ObservableClass, IDisposable, IAsyncDisposable, 
     // public abstract void Register( in WebApplicationBuilder builder );
 
 
-    public static Task Delay( in double   days,    in CancellationToken token ) => Delay(TimeSpan.FromDays(days),       token);
-    public static Task Delay( in float    minutes, in CancellationToken token ) => Delay(TimeSpan.FromMinutes(minutes), token);
-    public static Task Delay( in long     seconds, in CancellationToken token ) => Delay(TimeSpan.FromSeconds(seconds), token);
-    public static Task Delay( in int      ms,      in CancellationToken token ) => Delay(TimeSpan.FromMilliseconds(ms), token);
-    public static Task Delay( in TimeSpan delay,   in CancellationToken token ) => Task.Delay(delay, token);
+    public static Task Delay( in double   days,    in CancellationToken token ) => days.Delay(token);
+    public static Task Delay( in float    minutes, in CancellationToken token ) => minutes.Delay(token);
+    public static Task Delay( in long     seconds, in CancellationToken token ) => seconds.Delay(token);
+    public static Task Delay( in int      ms,      in CancellationToken token ) => ms.Delay(token);
+    public static Task Delay( in TimeSpan delay,   in CancellationToken token ) => delay.Delay(token);
 }

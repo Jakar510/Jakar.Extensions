@@ -30,7 +30,7 @@ public class AppSettings : ObservableClass, IAppSettings
     private Guid       _deviceID;
     private string     _deviceVersion = string.Empty;
     private string?    _screenShotAddress;
-    private bool       _sendCrashes = Preferences.Get(nameof(SendCrashes), true) || Debugger.IsAttached;
+    private bool       _sendCrashes = Get_SendCrashes();
 
 
     public Guid DeviceID
@@ -39,13 +39,13 @@ public class AppSettings : ObservableClass, IAppSettings
         set => SetProperty(ref _deviceID, value);
     }
 
-    public bool SendCrashes
+    public virtual bool SendCrashes
     {
         get => _sendCrashes;
         set
         {
             SetProperty(ref _sendCrashes, value);
-            Preferences.Set(nameof(SendCrashes), value);
+            Set_SendCrashes(value);
         }
     }
 
@@ -81,11 +81,32 @@ public class AppSettings : ObservableClass, IAppSettings
 
 
     public AppSettings() { }
-    public AppSettings( string appName, AppVersion version, string deviceVersion )
+    public AppSettings( string appName, in AppVersion version, string deviceVersion )
     {
         AppName       = appName;
         AppVersion    = version;
         DeviceVersion = deviceVersion;
+    }
+    public AppSettings( string appName, in AppVersion version, string deviceVersion, bool sendCrashes )
+    {
+        SendCrashes   = sendCrashes;
+        AppName       = appName;
+        AppVersion    = version;
+        DeviceVersion = deviceVersion;
+    }
+
+
+    protected static void Set_SendCrashes( bool value )
+    {
+        try { Preferences.Set(nameof(SendCrashes), value); }
+        catch ( NotImplementedInReferenceAssemblyException ) { }
+        catch ( FeatureNotSupportedException ) { }
+    }
+    protected static bool Get_SendCrashes()
+    {
+        try { return Preferences.Get(nameof(SendCrashes), true); }
+        catch ( NotImplementedInReferenceAssemblyException ) { return Debugger.IsAttached; }
+        catch ( FeatureNotSupportedException ) { return Debugger.IsAttached; }
     }
 }
 
@@ -104,5 +125,6 @@ public class AppSettings<TViewPage> : AppSettings, IAppSettings<TViewPage>
 
 
     public AppSettings() { }
-    public AppSettings( string appName, AppVersion version, string deviceVersion ) : base(appName, version, deviceVersion) { }
+    public AppSettings( string appName, in AppVersion version, string deviceVersion ) : base(appName, version, deviceVersion) { }
+    public AppSettings( string appName, in AppVersion version, string deviceVersion, bool sendCrashes ) : base(appName, version, deviceVersion, sendCrashes) { }
 }

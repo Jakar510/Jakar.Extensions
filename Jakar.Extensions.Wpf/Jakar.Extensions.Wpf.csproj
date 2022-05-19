@@ -1,12 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<ImplicitUsings>enable</ImplicitUsings>
 		<TargetFramework>net6.0-windows</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<LangVersion>latest</LangVersion>
 		<NoWarn>$(NoWarn);CA1416</NoWarn>
-		<OutputType>WinExe</OutputType>
+		<OutputType>library</OutputType>
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 		<SupportedOSPlatform>windows</SupportedOSPlatform>
 		<UseWPF>true</UseWPF>

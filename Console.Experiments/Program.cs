@@ -1,5 +1,5 @@
 ﻿using System;
-using BenchmarkDotNet.Running;
+using Jakar.Extensions.Models;
 using Jakar.Extensions.Strings;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -13,20 +13,40 @@ using Newtonsoft.Json.Linq;
 namespace Console.Experiments;
 
 
+public enum Page
+{
+    Home,
+    Master,
+    Detail
+}
+
+
+
 public static class Program
 {
     public static void Main( string[] args )
     {
-        "Hello World!".WriteToConsole();
+        try
+        {
+            "Hello World!".WriteToConsole();
 
 
-        // BenchmarkRunner.Run<JsonizerBenchmarks>();
-        BenchmarkRunner.Run<SpansBenchmarks>();
+            // BenchmarkRunner.Run<JsonizerBenchmarks>();
+            // BenchmarkRunner.Run<SpansBenchmarks>();
 
-        // TestJson();
+            // TestJson();
+
+            var settings = new AppSettings<Page>("test", new AppVersion(1, 2, 3), "1.0", false);
+            settings.ToPrettyJson().WriteToConsole();
 
 
-        "Bye".WriteToConsole();
+            "Bye".WriteToConsole();
+        }
+        catch ( Exception e )
+        {
+            e.WriteToConsole();
+            throw;
+        }
     }
 
 

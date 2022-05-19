@@ -26,11 +26,11 @@ public abstract class ApiServices<TDebug, TPrompts, TAppSettings, TFileSystem, T
     /// </summary>
     protected ApiServices( TAppSettings settings, TPrompts prompts, TFileSystem fileSystem, TDebug debug, in string app_center_id, params Type[] appCenterServices )
     {
-        Settings   = settings;
-        Prompts    = prompts;
-        FileSystem = fileSystem;
+        Settings   = settings ?? throw new ArgumentNullException(nameof(settings));
+        Prompts    = prompts ?? throw new ArgumentNullException(nameof(prompts));
+        FileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
+        Debug      = debug ?? throw new ArgumentNullException(nameof(debug));
         Loading    = new Commands(Prompts);
-        Debug      = debug;
         Debug.InitAsync(app_center_id, appCenterServices).CallSynchronously();
     }
 }
@@ -57,15 +57,15 @@ public abstract class ApiServices<TDebug, TPrompts, TAppSettings, TFileSystem, T
     /// <summary>
     /// appCenterServices: pass in the types you want to initialize, for example:  typeof(Microsoft.AppCenter.Analytics.Analytics), typeof(Microsoft.AppCenter.Crashes.Crashes)
     /// </summary>
-    protected ApiServices( TAppSettings settings, TPrompts prompts, TLanguage language, TFileSystem fileSystem, TDebug debug, in string app_center_id, params Type[] appCenterServices )
+    protected ApiServices( TAppSettings settings, TPrompts prompts, TLanguage language, TFileSystem fileSystem, TDebug debug, string app_center_id, params Type[] appCenterServices )
     {
-        Settings   = settings;
-        Prompts    = prompts;
-        Language   = language;
-        FileSystem = fileSystem;
+        Settings   = settings ?? throw new ArgumentNullException(nameof(settings));
+        Prompts    = prompts ?? throw new ArgumentNullException(nameof(prompts));
+        Language   = language ?? throw new ArgumentNullException(nameof(language));
+        FileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
+        Debug      = debug ?? throw new ArgumentNullException(nameof(debug));
         Loading    = new Commands(Prompts);
-        Debug      = debug;
-        Debug.InitAsync(app_center_id, appCenterServices).CallSynchronously();
+        Task.Run(() => Debug.InitAsync(app_center_id, appCenterServices)).Wait();
     }
 }
 
@@ -86,12 +86,6 @@ public abstract class ApiServices<TDebug, TPrompts, TAppSettings, TFileSystem, T
     /// <summary>
     /// appCenterServices: pass in the types you want to initialize, for example:  typeof(Microsoft.AppCenter.Analytics.Analytics), typeof(Microsoft.AppCenter.Crashes.Crashes)
     /// </summary>
-    protected ApiServices( TAppSettings settings, TPrompts prompts, TLanguage language, TFileSystem fileSystem, TDebug debug, TResourceManager resources, in string app_center_id, params Type[] appCenterServices ) : base(settings,
-                                                                                                                                                                                                                            prompts,
-                                                                                                                                                                                                                            language,
-                                                                                                                                                                                                                            fileSystem,
-                                                                                                                                                                                                                            debug,
-                                                                                                                                                                                                                            app_center_id,
-                                                                                                                                                                                                                            appCenterServices) =>
-        Resources = resources;
+    protected ApiServices( TAppSettings settings, TPrompts prompts, TLanguage language, TFileSystem fileSystem, TDebug debug, TResourceManager resources, in string app_center_id, params Type[] appCenterServices ) :
+        base(settings, prompts, language, fileSystem, debug, app_center_id, appCenterServices) => Resources = resources ?? throw new ArgumentNullException(nameof(resources));
 }

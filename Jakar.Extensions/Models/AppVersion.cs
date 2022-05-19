@@ -443,7 +443,7 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
 
     private void AssertFormat( in AppVersion other )
     {
-        if ( Scheme == other.Scheme ) { return; }
+        if ( Scheme == 0 || Scheme == other.Scheme ) { return; }
 
         throw new FormatException($"{nameof(other)}.{nameof(Scheme)} is '{other.Scheme}' and expected '{Scheme}'");
     }

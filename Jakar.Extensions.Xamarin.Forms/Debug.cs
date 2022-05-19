@@ -50,26 +50,34 @@ public class Debug : ObservableClass
 
     public async Task InitAsync( string app_center_id, params Type[] appCenterServices )
     {
-        VersionTracking.Track();
-        AppCenter.Start($"ios={app_center_id};android={app_center_id}", appCenterServices);
-
-        AppCenter.LogLevel = CanDebug
-                                 ? LogLevel.Verbose
-                                 : LogLevel.Error; //AppCenter.LogLevel = LogLevel.Debug;
-
-
-        Guid? id = await AppCenter.GetInstallIdAsync().ConfigureAwait(false);
-
-        if ( id is null )
+        try
         {
-            id = Guid.NewGuid();
-            AppCenter.SetUserId(id.ToString());
-        }
+            VersionTracking.Track();
+            AppCenter.Start($"ios={app_center_id};android={app_center_id}", appCenterServices);
 
-        InstallID                  = id.Value;
-        _settings.DeviceID         = InstallID;
-        _settings.CrashDataPending = await Crashes.HasCrashedInLastSessionAsync().ConfigureAwait(false);
-        ApiEnabled                 = true;
+            AppCenter.LogLevel = CanDebug
+                                     ? LogLevel.Verbose
+                                     : LogLevel.Error; //AppCenter.LogLevel = LogLevel.Debug;
+
+
+            Guid? id = await AppCenter.GetInstallIdAsync().ConfigureAwait(false);
+
+            if ( id is null )
+            {
+                id = Guid.NewGuid();
+                AppCenter.SetUserId(id.ToString());
+            }
+
+            InstallID                  = id.Value;
+            _settings.DeviceID         = InstallID;
+            _settings.CrashDataPending = await Crashes.HasCrashedInLastSessionAsync().ConfigureAwait(false);
+            ApiEnabled                 = true;
+        }
+        catch ( Exception e )
+        {
+            e.WriteToDebug();
+            throw;
+        }
     }
 
 

@@ -4,7 +4,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata>
 		<id>Jakar.Extensions</id>
-		<version>6.0.0.13-beta</version>
+		<version>6.0.0.14-beta</version>
 		<title>Extension Library</title>
 		<authors>Tyler Stegmaier</authors>
 		<owners>Jakar510/Jakar</owners>
@@ -20,6 +20,7 @@
 		<releaseNotes>
 			Jakar.Extensions 6.0.0
 			Added MailKit Email Builder
+			Added Models.Service
 			Updated Enum extensions
 			Added more Span extensions
 			Reworked AppSettings

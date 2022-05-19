@@ -5,8 +5,24 @@
 namespace Jakar.Extensions.General;
 
 
-public static class TaskExtensions
+public static class Tasks
 {
+    /// <summary> Creates a cancellable delay from the given <paramref name="days"/> </summary>
+    public static Task Delay( this double days, in CancellationToken token ) => TimeSpan.FromDays(days).Delay(token);
+
+    /// <summary> Creates a cancellable delay from the given <paramref name="minutes"/> </summary>
+    public static Task Delay( this float minutes, in CancellationToken token ) => TimeSpan.FromMinutes(minutes).Delay(token);
+
+    /// <summary> Creates a cancellable delay from the given <paramref name="seconds"/> </summary>
+    public static Task Delay( this long seconds, in CancellationToken token ) => TimeSpan.FromSeconds(seconds).Delay(token);
+
+    /// <summary> Creates a cancellable delay from the given <paramref name="ms"/> </summary>
+    public static Task Delay( this int ms, in CancellationToken token ) => TimeSpan.FromMilliseconds(ms).Delay(token);
+
+    /// <summary> Creates a cancellable delay from the given <paramref name="delay"/> </summary>
+    public static Task Delay( this TimeSpan delay, in CancellationToken token ) => Task.Delay(delay, token);
+
+
     public static void CallSynchronously( this Task         task ) => task.ConfigureAwait(false).GetAwaiter().GetResult();
     public static T CallSynchronously<T>( this Task<T>      task ) => task.ConfigureAwait(false).GetAwaiter().GetResult();
     public static void CallSynchronously( this ValueTask    task ) => task.ConfigureAwait(false).GetAwaiter().GetResult();
