@@ -10,16 +10,17 @@ public abstract class Service : ObservableClass, IDisposable, IAsyncDisposable, 
     public           string             ClassName => ClassType.Name;
     public           string             FullName  { get; }
     public           Type               ClassType { get; }
-    public abstract  bool               IsValid   { get; }
+    public virtual   bool               IsValid   => IsAlive;
 
 
-    public bool IsAlive
+    public virtual bool IsAlive
     {
         get => _isAlive.Value;
-        set
+        protected set
         {
             _isAlive.Value = value;
             OnPropertyChanged();
+            OnPropertyChanged(nameof(IsValid));
         }
     }
 

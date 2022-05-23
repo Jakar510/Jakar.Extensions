@@ -17,7 +17,10 @@
 
 	<ItemGroup>
 		<PackageReference Include="Dapper.Contrib" Version="2.0.78" />
-		<PackageReference Include="Jakar.Extensions" Version="6.0.0.7-beta" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\Jakar.Extensions\Jakar.Extensions.csproj" />
 	</ItemGroup>
 
 </Project>

@@ -51,4 +51,15 @@ public static class JsonNet
 
     public static JToken FromJson( this object json ) => JToken.FromObject(json) ?? throw new NullReferenceException(nameof(JToken.Parse));
     public static JToken FromJson( this object json, JsonSerializer serializer ) => JToken.FromObject(json, serializer) ?? throw new NullReferenceException(nameof(JToken.Parse));
+
+    // TODO: SaveDebug
+    // [Conditional("DEBUG")]
+    // public static void SaveDebug<T>( this T item, [CallerMemberName] string? caller = default, [CallerArgumentExpression("item")] string? variableName = default ) where T : notnull
+    // {
+    //     Task.Run(async () =>
+    //              {
+    //                  LocalFile file = LocalDirectory.Create("DEBUG").Join($"{caller}__{variableName}.json");
+    //                  await file.WriteAsync(item.ToPrettyJson());
+    //              });
+    // }
 }

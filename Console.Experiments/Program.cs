@@ -1,6 +1,6 @@
 ﻿using System;
-using Jakar.Extensions.Models;
 using Jakar.Extensions.Strings;
+using Jakar.SqlBuilder;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -33,11 +33,9 @@ public static class Program
 
             // BenchmarkRunner.Run<JsonizerBenchmarks>();
             // BenchmarkRunner.Run<SpansBenchmarks>();
-
             // TestJson();
+            Test_Sql();
 
-            var settings = new AppSettings<Page>("test", new AppVersion(1, 2, 3), "1.0", false);
-            settings.ToPrettyJson().WriteToConsole();
 
 
             "Bye".WriteToConsole();
@@ -47,6 +45,13 @@ public static class Program
             e.WriteToConsole();
             throw;
         }
+    }
+
+
+    private static void Test_Sql()
+    {
+        // "SELECT * FROM Users"
+        // var sql = new EasySqlBuilder().Select().All().From("Users").Result;
     }
 
 
