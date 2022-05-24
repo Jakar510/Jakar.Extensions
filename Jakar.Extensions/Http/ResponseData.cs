@@ -53,17 +53,18 @@ public sealed class ResponseData
     public override string ToString() => this.ToPrettyJson();
 
 
+    // public static async Task<ResponseData> Create( WebResponse e )
     public static async Task<ResponseData> Create( WebException e )
     {
         if ( e.Response is null ) { return _none; }
 
-        if ( e.Response is not HttpWebResponse response ) { return await Create(e.Response); }
-
-        using ( response ) { return await Create(response); }
+        return e.Response is HttpWebResponse response
+                   ? await Create(response)
+                   : await Create(e.Response);
     }
-    public static async Task<ResponseData> Create( HttpWebResponse webResponse )
+    public static async Task<ResponseData> Create( HttpWebResponse response )
     {
-        await using Stream? stream = webResponse.GetResponseStream();
+        await using Stream? stream = response.GetResponseStream();
 
         string msg;
 
@@ -76,11 +77,11 @@ public sealed class ResponseData
         }
         else { msg = "UNKNOWN"; }
 
-        return new ResponseData(webResponse, msg);
+        return new ResponseData(response, msg);
     }
-    public static async Task<ResponseData> Create( WebResponse webResponse )
+    public static async Task<ResponseData> Create( WebResponse response )
     {
-        await using Stream? stream = webResponse.GetResponseStream();
+        await using Stream? stream = response.GetResponseStream();
 
         string msg;
 
@@ -93,7 +94,7 @@ public sealed class ResponseData
         }
         else { msg = "UNKNOWN"; }
 
-        return new ResponseData(webResponse, msg);
+        return new ResponseData(response, msg);
     }
 }
 

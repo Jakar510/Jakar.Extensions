@@ -1,4 +1,9 @@
 ﻿using System;
+using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
+using Jakar.Extensions.Http;
+using Jakar.Extensions.Models;
 using Jakar.Extensions.Strings;
 using Jakar.SqlBuilder;
 using Newtonsoft.Json;
@@ -24,7 +29,7 @@ public enum Page
 
 public static class Program
 {
-    public static void Main( string[] args )
+    public static async Task Main( string[] args )
     {
         try
         {
@@ -36,7 +41,7 @@ public static class Program
             // TestJson();
             Test_Sql();
 
-
+            await Test_HttpBuilder();
 
             "Bye".WriteToConsole();
         }
@@ -47,7 +52,18 @@ public static class Program
         }
     }
 
+    public static async Task Test_HttpBuilder( CancellationToken token = default )
+    {
+        var builder = HttpRequestBuilder.Create(new Uri("http://google.com"), token);
 
+        var result = await builder.Get().AsString();
+        result.WriteToConsole();
+        string.Empty.WriteToConsole();
+        string.Empty.WriteToConsole();
+
+        result = await builder.Get().AsString();
+        result.WriteToConsole();
+    }
     private static void Test_Sql()
     {
         // "SELECT * FROM Users"
