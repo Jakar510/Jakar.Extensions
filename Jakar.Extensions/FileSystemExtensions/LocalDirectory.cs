@@ -25,10 +25,12 @@ public class LocalDirectory : BaseCollections<LocalDirectory>, TempFile.ITempFil
     }
 
 
-    public string FullPath { get; init; }
-    public bool   Exists   => Info.Exists;
-    public string Name     => Info.Name;
-    public string Root     => Directory.GetDirectoryRoot(FullPath);
+    public              string         FullPath { get; init; }
+    public              bool           Exists   => Info.Exists;
+    public              string         Name     => Info.Name;
+    public              string         Root     => Directory.GetDirectoryRoot(FullPath);
+    [JsonIgnore] public LocalDirectory Parent   => Info.Parent;
+
 
     public DateTime CreationTimeUtc
     {
@@ -46,18 +48,6 @@ public class LocalDirectory : BaseCollections<LocalDirectory>, TempFile.ITempFil
     {
         get => Directory.GetLastWriteTimeUtc(FullPath);
         set => Directory.SetLastWriteTimeUtc(FullPath, value);
-    }
-
-    [JsonIgnore]
-    public LocalDirectory? Parent
-    {
-        get
-        {
-            DirectoryInfo? parent = Directory.GetParent(FullPath);
-            if ( parent is null ) { return null; }
-
-            return new LocalDirectory(parent);
-        }
     }
 
 
