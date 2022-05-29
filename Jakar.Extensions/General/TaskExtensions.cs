@@ -7,6 +7,19 @@ namespace Jakar.Extensions.General;
 
 public static class Tasks
 {
+    /// <summary> Creates a <see cref="TimeSpan"/> from the given <paramref name="days"/> </summary>
+    public static TimeSpan AsTimeSpan( this double days ) => TimeSpan.FromDays(days);
+
+    /// <summary> Creates a <see cref="TimeSpan"/> from the given <paramref name="minutes"/> </summary>
+    public static TimeSpan AsTimeSpan( this float minutes ) => TimeSpan.FromMinutes(minutes);
+
+    /// <summary> Creates a <see cref="TimeSpan"/> from the given <paramref name="seconds"/> </summary>
+    public static TimeSpan AsTimeSpan( this long seconds ) => TimeSpan.FromSeconds(seconds);
+
+    /// <summary> Creates a <see cref="TimeSpan"/> from the given <paramref name="ms"/> </summary>
+    public static TimeSpan AsTimeSpan( this int ms ) => TimeSpan.FromMilliseconds(ms);
+
+
     /// <summary> Creates a cancellable delay from the given <paramref name="days"/> </summary>
     public static Task Delay( this double days, in CancellationToken token ) => TimeSpan.FromDays(days).Delay(token);
 
