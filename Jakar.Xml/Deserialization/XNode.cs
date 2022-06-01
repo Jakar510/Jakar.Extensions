@@ -117,11 +117,12 @@ public readonly ref struct XNode
 
         public bool MoveNext()
         {
-            if ( Spans.IsNullOrWhiteSpace(_span) )
+            if ( _span.IsNullOrWhiteSpace() )
             {
                 Current = default;
                 return false;
             }
+
 
             int                start = _span.IndexOf(' ');
             ReadOnlySpan<char> temp  = _span[start..];

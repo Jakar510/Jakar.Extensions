@@ -9,25 +9,32 @@ using Jakar.Extensions.SpanAndMemory;
 namespace Jakar.Extensions.Http;
 
 
-public sealed class ResponseData
+public class ResponseData
 {
     private static readonly ResponseData _none         = new("NO RESPONSE");
     public const            string       ERROR_MESSAGE = "Error Message: ";
+    public const            string       UNKNOWN_ERROR = "Unknown Error";
 
 
-    public string? Method                  { get; set; }
-    public Uri?    URL                     { get; init; }
-    public JToken? ErrorMessage            { get; init; }
-    public Status? StatusCode              { get; init; }
-    public string? StatusDescription       { get; init; }
-    public string? ContentEncoding         { get; init; }
-    public string? Server                  { get; init; }
-    public string? ContentType             { get; init; }
-    public bool?   IsMutuallyAuthenticated { get; init; }
+    public string? Method            { get; set; }
+    public Uri?    URL               { get; init; }
+    public JToken? ErrorMessage      { get; init; }
+    public Status? StatusCode        { get; init; }
+    public string? StatusDescription { get; init; }
+    public string? ContentEncoding   { get; init; }
+    public string? Server            { get; init; }
+    public string? ContentType       { get; init; }
 
 
     private ResponseData( ReadOnlySpan<char> error )
     {
+        if ( error.IsNullOrWhiteSpace() )
+        {
+            ErrorMessage = UNKNOWN_ERROR;
+            return;
+        }
+
+
         if ( error.StartsWith(ERROR_MESSAGE, StringComparison.OrdinalIgnoreCase) ) { error = error[ERROR_MESSAGE.Length..]; }
 
         try { ErrorMessage = error.FromJson(); }
@@ -35,20 +42,18 @@ public sealed class ResponseData
     }
     public ResponseData( in HttpWebResponse response, in string? error ) : this(error)
     {
-        StatusCode              = response.StatusCode.ToStatus();
-        URL                     = response.ResponseUri;
-        Method                  = response.Method;
-        StatusDescription       = response.StatusDescription;
-        ContentType             = response.ContentType;
-        ContentEncoding         = response.ContentEncoding;
-        IsMutuallyAuthenticated = response.IsMutuallyAuthenticated;
-        Server                  = response.Server;
+        StatusCode        = response.StatusCode.ToStatus();
+        URL               = response.ResponseUri;
+        Method            = response.Method;
+        StatusDescription = response.StatusDescription;
+        ContentType       = response.ContentType;
+        ContentEncoding   = response.ContentEncoding;
+        Server            = response.Server;
     }
     public ResponseData( in WebResponse response, in string? error ) : this(error)
     {
-        URL                     = response.ResponseUri;
-        ContentType             = response.ContentType;
-        IsMutuallyAuthenticated = response.IsMutuallyAuthenticated;
+        URL         = response.ResponseUri;
+        ContentType = response.ContentType;
     }
     public override string ToString() => this.ToPrettyJson();
 
@@ -100,7 +105,7 @@ public sealed class ResponseData
 
 
 
-// public class ResponseData<T> : ResponseData
+// public sealed class ResponseData<T> : ResponseData
 // {
 //     public T Payload { get; init; }
 //

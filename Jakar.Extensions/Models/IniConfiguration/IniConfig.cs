@@ -125,7 +125,7 @@ public partial class IniConfig : ConcurrentDictionary<string, IniConfig.Section>
             ReadOnlySpan<char> line = rawLine.Value.Trim();
 
             // Ignore blank lines
-            if ( Spans.IsNullOrWhiteSpace(line) ) { continue; }
+            if ( line.IsNullOrWhiteSpace() ) { continue; }
 
             switch ( line[0] )
             {
@@ -138,7 +138,7 @@ public partial class IniConfig : ConcurrentDictionary<string, IniConfig.Section>
                 // [Section:header]
                 case '[' when line[^1] == ']':
                     ReadOnlySpan<char> sectionSpan = line.Slice(1, line.Length - 2).Trim(); // remove the brackets and whitespace
-                    if ( Spans.IsNullOrWhiteSpace(sectionSpan) ) { throw new FormatException("section title cannot be empty or whitespace."); }
+                    if ( sectionSpan.IsNullOrWhiteSpace() ) { throw new FormatException("section title cannot be empty or whitespace."); }
 
                     section       = sectionSpan.ToString();
                     data[section] = new Section();

@@ -8,7 +8,7 @@ namespace Jakar.Extensions.SpanAndMemory;
 [SuppressMessage("ReSharper", "OutParameterValueIsAlwaysDiscarded.Global")]
 public static partial class Spans
 {
-    public static bool IsNullOrWhiteSpace( in Span<char> span )
+    public static bool IsNullOrWhiteSpace( this Span<char> span )
     {
         if ( span.IsEmpty ) { return true; }
 
@@ -19,7 +19,7 @@ public static partial class Spans
 
         return true;
     }
-    public static bool IsNullOrWhiteSpace( in ReadOnlySpan<char> span )
+    public static bool IsNullOrWhiteSpace( this ReadOnlySpan<char> span )
     {
         if ( span.IsEmpty ) { return true; }
 
