@@ -104,12 +104,14 @@ public static class ExceptionExtensions
         // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
         foreach ( DictionaryEntry pair in e.Data )
         {
-            if ( pair.Key is null ) { continue; }
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+            // ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
+            var key = pair.Key?.ToString();
+            if ( key is null ) { continue; }
 
-
-            data[pair.Key.ToString()] = pair.Value is null
-                                            ? null
-                                            : JToken.FromObject(pair.Value);
+            data[key] = pair.Value is null
+                            ? null
+                            : JToken.FromObject(pair.Value);
         }
 
         return data;
@@ -121,7 +123,7 @@ public static class ExceptionExtensions
 
 
     [Obsolete($"Use {nameof(ExceptionDetails)} instead")]
-    public static Dictionary<string, object?> FullDetails( this Exception e, bool includeFullMethodInfo = false )
+    public static Dictionary<string, object?> FullDetails( this Exception e, bool includeFullMethodInfo )
     {
         if ( e is null ) { throw new ArgumentNullException(nameof(e)); }
 
@@ -131,6 +133,7 @@ public static class ExceptionExtensions
 
         return dict;
     }
+
 
     private static Dictionary<string, object?>? GetInnerExceptions( this Exception e, bool includeFullMethodInfo )
     {

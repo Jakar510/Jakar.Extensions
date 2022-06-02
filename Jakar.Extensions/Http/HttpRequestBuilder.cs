@@ -1,28 +1,15 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 05/03/2022  9:01 AM
 
-using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.IO;
-using System.Net;
+
+namespace Jakar.Extensions.Http;
+
+
+#if NET6_0
 using System.Net.Http;
 using System.Net.Security;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using Jakar.Extensions.FileSystemExtensions;
-using Jakar.Extensions.Models.Base.Classes;
-using Jakar.Extensions.Models.Base.Records;
-using Jakar.Extensions.Strings;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using Jakar.Extensions.Enumerations;
 
-
-
-// ReSharper disable once CheckNamespace
-namespace Jakar.Extensions.Http;
 
 
 public sealed class HttpRequestBuilder
@@ -407,6 +394,30 @@ public sealed class HttpRequestBuilder
         }
 
 
+        private async Task<ResponseData<TResult>> Create<T, TResult>( HttpResponseMessage reply, T arg, Func<HttpResponseMessage, T, Task<TResult>> func )
+        {
+            try
+            {
+                TResult result = await func(reply, arg);
+                return new ResponseData<TResult>(reply, result);
+            }
+            catch ( WebException e ) { return await ResponseData<TResult>.Create(reply, e); }
+        }
+        private async Task<ResponseData<TResult>> Create<TResult>( HttpResponseMessage reply, Func<HttpResponseMessage, Task<TResult>> func )
+        {
+            try
+            {
+                TResult result = await func(reply);
+                return new ResponseData<TResult>(reply, result);
+            }
+            catch ( Exception e )
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+        }
+
+
         public async Task<TResult> AsJson<TResult>() => await AsJson<TResult>(JsonNet.Serializer);
         public async Task<TResult> AsJson<TResult>( JsonSerializer serializer )
         {
@@ -474,3 +485,49 @@ public sealed class HttpRequestBuilder
         }
     }
 }
+
+
+
+public readonly struct ResponseData<T>
+{
+    public const string ERROR_MESSAGE = "Error Message: ";
+    public const string UNKNOWN_ERROR = "Unknown Error";
+
+
+    public T?      Payload           { get; init; } = default;
+    public string? Method            { get; init; } = default;
+    public Uri?    URL               { get; init; } = default;
+    public JToken? ErrorMessage      { get; init; } = default;
+    public Status? StatusCode        { get; init; } = default;
+    public string? StatusDescription { get; init; } = default;
+    public string? ContentEncoding   { get; init; } = default;
+    public string? Server            { get; init; } = default;
+    public string? ContentType       { get; init; } = default;
+
+
+    public ResponseData( HttpResponseMessage response, in string error ) : this(response, error, default) { }
+    public ResponseData( HttpResponseMessage response, in T      payload ) : this(response, default, payload) { }
+    public ResponseData( HttpResponseMessage response, in string? error, in T? payload )
+    {
+        ErrorMessage      = ResponseData.ParseError(error);
+        Payload           = payload;
+        StatusCode        = response.StatusCode.ToStatus();
+        StatusDescription = response.ReasonPhrase ?? response.StatusCode.ToString();
+        URL               = response.RequestMessage?.RequestUri;
+        Method            = response.RequestMessage?.Method.Method;
+        ContentType       = response.RequestMessage?.Content?.Headers.ContentType?.MediaType;
+        ContentEncoding   = response.RequestMessage?.Content?.Headers.ContentEncoding.ToJson();
+        Server            = response.RequestMessage?.Headers.From;
+    }
+    internal static ResponseData<T> None( HttpResponseMessage response ) => new(response, "NO RESPONSE");
+
+
+    public override string ToString() => this.ToPrettyJson();
+
+
+    public static async Task<ResponseData<T>> Create( HttpResponseMessage reply, WebException e ) { return default; }
+}
+
+
+
+#endif

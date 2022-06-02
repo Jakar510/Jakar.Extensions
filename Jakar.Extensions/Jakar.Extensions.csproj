@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>netstandard2.1</TargetFramework>
+		<TargetFrameworks>netstandard2.1;net6.0</TargetFrameworks>
 		<LangVersion>latest</LangVersion>
 		<Nullable>enable</Nullable>
 		<NoWarn>$(NoWarn);1591</NoWarn>
@@ -48,7 +48,7 @@
 		<DefineConstants>DEBUG;TRACE</DefineConstants>
 	</PropertyGroup>
 
-	<ItemGroup>
+	<ItemGroup Condition=" $(TargetFramework.StartsWith('net'))">
 		<PackageReference Include="CommunityToolkit.Diagnostics" Version="7.1.2" />
 		<PackageReference Include="Dapper.Contrib" Version="2.0.78" />
 		<PackageReference Include="JetBrains.Annotations" Version="2022.1.0" />
