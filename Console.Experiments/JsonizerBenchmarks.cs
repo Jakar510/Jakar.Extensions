@@ -9,6 +9,7 @@ using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Order;
 using Jakar.Extensions.Strings;
+using Newtonsoft.Json;
 
 
 
@@ -65,7 +66,7 @@ public class JsonizerBenchmarks
     {
         _random = RandomNumberGenerator.Create();
         _source = GetObjects();
-        _json   = _source.ToPrettyJson();
+        _json = _source.ToJson(Formatting.Indented);
     }
 
 
@@ -105,7 +106,7 @@ public class JsonizerBenchmarks
 
 
     [Benchmark] public Test JsonNet_FromJson() => _json.FromJson<Test>();
-    [Benchmark] public string JsonNet_ToJson() => _source.ToPrettyJson();
+    [Benchmark] public string JsonNet_ToJson() => _source.ToJson(Formatting.Indented);
     [Benchmark] public string Jsonizer_ToJson() => _source.ToJson();
 
 

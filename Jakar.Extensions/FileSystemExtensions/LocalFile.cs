@@ -308,6 +308,16 @@ public class LocalFile : BaseCollections<LocalFile>, TempFile.ITempFile, LocalFi
         }
     }
 
+#if NET6_0
+    public async Task<string> HashAsync()
+    {
+        using var              md5    = SHA256.Create();
+        await using FileStream stream = OpenRead();
+        byte[]                 hash   = await md5.ComputeHashAsync(stream);
+
+        return BitConverter.ToString(hash);
+    }
+#endif
 
     // ---------------------------------------------------------------------------------------------------------------------------------------------------
 

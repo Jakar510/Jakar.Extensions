@@ -75,8 +75,8 @@ public static class WebRequests
                                    // WebExceptionStatus.RequestProhibitedByCachePolicy => new ,
                                    // WebExceptionStatus.RequestProhibitedByProxy => new ,
 
-                                   WebExceptionStatus.Success => null,
-                                   _                          => null
+                                   WebExceptionStatus.Success => default,
+                                   _                          => default
                                };
 
         return exception;

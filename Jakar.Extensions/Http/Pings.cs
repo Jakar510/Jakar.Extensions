@@ -1,6 +1,9 @@
 ﻿namespace Jakar.Extensions.Http;
 
 
+#if NET6_0
+[Obsolete]
+#endif
 public static class Pings
 {
     /// <summary>

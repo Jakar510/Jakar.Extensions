@@ -2,27 +2,32 @@
 // 05/03/2022  9:01 AM
 
 
+#nullable enable
+using System.Net.Http.Headers;
+
+
+
 namespace Jakar.Extensions.Http;
 
 
 #if NET6_0
 using System.Net.Http;
 using System.Net.Security;
-using Jakar.Extensions.Enumerations;
+using Enumerations;
 
 
 
-public sealed class HttpRequestBuilder
+public readonly struct HttpRequestBuilder
 {
     private readonly Encoding           _encoding;
     private readonly Uri                _url;
     private readonly CancellationToken  _token;
     private readonly SocketsHttpHandler _handler = new();
-    private          HeaderCollection?  _headers;
+    public readonly  HeaderCollection   headers  = new();
     private          HttpClient         _Client => new(_handler);
 
 
-    private HttpRequestBuilder( Uri url, Encoding encoding, in CancellationToken token )
+    public HttpRequestBuilder( Uri url, Encoding encoding, in CancellationToken token )
     {
         _url      = url;
         _encoding = encoding;
@@ -32,9 +37,19 @@ public sealed class HttpRequestBuilder
     public static HttpRequestBuilder Create( Uri url, Encoding             encoding, in CancellationToken token = default ) => new(url, encoding, token);
 
 
-    public HttpRequestBuilder With_Headers( HeaderCollection value )
+    public HttpRequestBuilder With_Headers( HttpContentHeaders collection )
     {
-        _headers = value;
+        headers.Merge(collection);
+        return this;
+    }
+    public HttpRequestBuilder With_Headers( HttpHeaders collection )
+    {
+        headers.Merge(collection);
+        return this;
+    }
+    public HttpRequestBuilder With_Headers( HeaderCollection collection )
+    {
+        headers.Merge(collection);
         return this;
     }
 
@@ -126,12 +141,15 @@ public sealed class HttpRequestBuilder
 
     private HttpContent Update( in HttpContent content )
     {
-        if ( _headers is null ) { return content; }
+        if ( headers is null ) { return content; }
 
-        foreach ( ( string? key, object v ) in _headers ) { content.Headers.Add(key, v.ToString()); }
+        foreach ( ( string key, object v ) in headers ) { content.Headers.Add(key, v.ToString()); }
 
         return content;
     }
+
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] private Handler CreateHandler( Task<HttpResponseMessage> task ) => new(task, _encoding, _token);
 
 
     public Handler Post( byte[] value )
@@ -139,54 +157,54 @@ public sealed class HttpRequestBuilder
         var content = new ByteArrayContent(value);
 
         Task<HttpResponseMessage> task = _Client.PostAsync(_url, Update(content), _token);
-        return new Handler(task, _encoding, _token);
+        return CreateHandler(task);
     }
     public Handler Post( ReadOnlyMemory<byte> value )
     {
         var content = new ReadOnlyMemoryContent(value);
 
         Task<HttpResponseMessage> task = _Client.PostAsync(_url, Update(content), _token);
-        return new Handler(task, _encoding, _token);
+        return CreateHandler(task);
     }
     public Handler Post( IDictionary<string, string> value )
     {
         var content = new FormUrlEncodedContent(value);
 
         Task<HttpResponseMessage> task = _Client.PostAsync(_url, Update(content), _token);
-        return new Handler(task, _encoding, _token);
+        return CreateHandler(task);
     }
     public Handler Post( Stream value )
     {
         var content = new StreamContent(value);
 
         Task<HttpResponseMessage> task = _Client.PostAsync(_url, content, _token);
-        return new Handler(task, _encoding, _token);
+        return CreateHandler(task);
     }
     public Handler Post( MultipartFormDataContent content )
     {
         Task<HttpResponseMessage> task = _Client.PostAsync(_url, Update(content), _token);
-        return new Handler(task, _encoding, _token);
+        return CreateHandler(task);
     }
     public Handler Post( string value )
     {
         var content = new StringContent(value.ToPrettyJson(), _encoding);
 
         Task<HttpResponseMessage> task = _Client.PostAsync(_url, Update(content), _token);
-        return new Handler(task, _encoding, _token);
+        return CreateHandler(task);
     }
     public Handler Post( BaseClass value )
     {
         var content = new JsonContent(value.ToPrettyJson(), _encoding);
 
         Task<HttpResponseMessage> task = _Client.PostAsync(_url, Update(content), _token);
-        return new Handler(task, _encoding, _token);
+        return CreateHandler(task);
     }
     public Handler Post( BaseRecord value )
     {
         var content = new JsonContent(value.ToPrettyJson(), _encoding);
 
         Task<HttpResponseMessage> task = _Client.PostAsync(_url, Update(content), _token);
-        return new Handler(task, _encoding, _token);
+        return CreateHandler(task);
     }
 
 
@@ -195,53 +213,53 @@ public sealed class HttpRequestBuilder
         var content = new ByteArrayContent(value);
 
         Task<HttpResponseMessage> task = _Client.PutAsync(_url, Update(content), _token);
-        return new Handler(task, _encoding, _token);
+        return CreateHandler(task);
     }
     public Handler Put( ReadOnlyMemory<byte> value )
     {
         var content = new ReadOnlyMemoryContent(value);
 
         Task<HttpResponseMessage> task = _Client.PutAsync(_url, Update(content), _token);
-        return new Handler(task, _encoding, _token);
+        return CreateHandler(task);
     }
     public Handler Put( IDictionary<string, string> value )
     {
         var content = new FormUrlEncodedContent(value);
 
         Task<HttpResponseMessage> task = _Client.PutAsync(_url, Update(content), _token);
-        return new Handler(task, _encoding, _token);
+        return CreateHandler(task);
     }
     public Handler Put( Stream value )
     {
         var                       content = new StreamContent(value);
         Task<HttpResponseMessage> task    = _Client.PutAsync(_url, Update(content), _token);
-        return new Handler(task, _encoding, _token);
+        return CreateHandler(task);
     }
     public Handler Put( MultipartFormDataContent content )
     {
         Task<HttpResponseMessage> task = _Client.PutAsync(_url, Update(content), _token);
-        return new Handler(task, _encoding, _token);
+        return CreateHandler(task);
     }
     public Handler Put( string value )
     {
         var content = new StringContent(value.ToPrettyJson(), _encoding);
 
         Task<HttpResponseMessage> task = _Client.PutAsync(_url, Update(content), _token);
-        return new Handler(task, _encoding, _token);
+        return CreateHandler(task);
     }
     public Handler Put( BaseClass value )
     {
         var content = new JsonContent(value.ToPrettyJson(), _encoding);
 
         Task<HttpResponseMessage> task = _Client.PutAsync(_url, Update(content), _token);
-        return new Handler(task, _encoding, _token);
+        return CreateHandler(task);
     }
     public Handler Put( BaseRecord value )
     {
         var content = new JsonContent(value.ToPrettyJson(), _encoding);
 
         Task<HttpResponseMessage> task = _Client.PutAsync(_url, Update(content), _token);
-        return new Handler(task, _encoding, _token);
+        return CreateHandler(task);
     }
 
 
@@ -256,7 +274,7 @@ public sealed class HttpRequestBuilder
                       };
 
         Task<HttpResponseMessage> task = _Client.SendAsync(request, _token);
-        return new Handler(task, _encoding, _token);
+        return CreateHandler(task);
     }
     public Handler Delete( ReadOnlyMemory<byte> value )
     {
@@ -269,7 +287,7 @@ public sealed class HttpRequestBuilder
                       };
 
         Task<HttpResponseMessage> task = _Client.SendAsync(request, _token);
-        return new Handler(task, _encoding, _token);
+        return CreateHandler(task);
     }
     public Handler Delete( IDictionary<string, string> value )
     {
@@ -282,7 +300,7 @@ public sealed class HttpRequestBuilder
                       };
 
         Task<HttpResponseMessage> task = _Client.SendAsync(request, _token);
-        return new Handler(task, _encoding, _token);
+        return CreateHandler(task);
     }
     public Handler Delete( Stream value )
     {
@@ -295,7 +313,7 @@ public sealed class HttpRequestBuilder
                       };
 
         Task<HttpResponseMessage> task = _Client.SendAsync(request, _token);
-        return new Handler(task, _encoding, _token);
+        return CreateHandler(task);
     }
     public Handler Delete( MultipartFormDataContent content )
     {
@@ -305,7 +323,7 @@ public sealed class HttpRequestBuilder
                       };
 
         Task<HttpResponseMessage> task = _Client.SendAsync(request, _token);
-        return new Handler(task, _encoding, _token);
+        return CreateHandler(task);
     }
     public Handler Delete( string value )
     {
@@ -318,7 +336,7 @@ public sealed class HttpRequestBuilder
                       };
 
         Task<HttpResponseMessage> task = _Client.SendAsync(request, _token);
-        return new Handler(task, _encoding, _token);
+        return CreateHandler(task);
     }
     public Handler Delete( BaseClass value )
     {
@@ -331,7 +349,7 @@ public sealed class HttpRequestBuilder
                       };
 
         Task<HttpResponseMessage> task = _Client.SendAsync(request, _token);
-        return new Handler(task, _encoding, _token);
+        return CreateHandler(task);
     }
     public Handler Delete( BaseRecord value )
     {
@@ -344,12 +362,115 @@ public sealed class HttpRequestBuilder
                       };
 
         Task<HttpResponseMessage> task = _Client.SendAsync(request, _token);
-        return new Handler(task, _encoding, _token);
+        return CreateHandler(task);
     }
     public Handler Delete()
     {
         Task<HttpResponseMessage> task = _Client.DeleteAsync(_url, _token);
-        return new Handler(task, _encoding, _token);
+        return CreateHandler(task);
+    }
+
+
+    public Handler Patch( byte[] value )
+    {
+        var content = new ByteArrayContent(value);
+
+
+        var request = new HttpRequestMessage(HttpMethod.Patch, _url)
+                      {
+                          Content = Update(content)
+                      };
+
+        Task<HttpResponseMessage> task = _Client.SendAsync(request, _token);
+        return CreateHandler(task);
+    }
+    public Handler Patch( ReadOnlyMemory<byte> value )
+    {
+        var content = new ReadOnlyMemoryContent(value);
+
+
+        var request = new HttpRequestMessage(HttpMethod.Patch, _url)
+                      {
+                          Content = Update(content)
+                      };
+
+        Task<HttpResponseMessage> task = _Client.SendAsync(request, _token);
+        return CreateHandler(task);
+    }
+    public Handler Patch( IDictionary<string, string> value )
+    {
+        var content = new FormUrlEncodedContent(value);
+
+
+        var request = new HttpRequestMessage(HttpMethod.Patch, _url)
+                      {
+                          Content = content
+                      };
+
+        Task<HttpResponseMessage> task = _Client.SendAsync(request, _token);
+        return CreateHandler(task);
+    }
+    public Handler Patch( Stream value )
+    {
+        var content = new StreamContent(value);
+
+
+        var request = new HttpRequestMessage(HttpMethod.Patch, _url)
+                      {
+                          Content = Update(content)
+                      };
+
+        Task<HttpResponseMessage> task = _Client.SendAsync(request, _token);
+        return CreateHandler(task);
+    }
+    public Handler Patch( MultipartFormDataContent content )
+    {
+        var request = new HttpRequestMessage(HttpMethod.Patch, _url)
+                      {
+                          Content = Update(content)
+                      };
+
+        Task<HttpResponseMessage> task = _Client.SendAsync(request, _token);
+        return CreateHandler(task);
+    }
+    public Handler Patch( string value )
+    {
+        var content = new StringContent(value.ToPrettyJson(), _encoding);
+
+
+        var request = new HttpRequestMessage(HttpMethod.Patch, _url)
+                      {
+                          Content = Update(content)
+                      };
+
+        Task<HttpResponseMessage> task = _Client.SendAsync(request, _token);
+        return CreateHandler(task);
+    }
+    public Handler Patch( BaseClass value )
+    {
+        var content = new JsonContent(value.ToPrettyJson(), _encoding);
+
+
+        var request = new HttpRequestMessage(HttpMethod.Patch, _url)
+                      {
+                          Content = Update(content)
+                      };
+
+        Task<HttpResponseMessage> task = _Client.SendAsync(request, _token);
+        return CreateHandler(task);
+    }
+    public Handler Patch( BaseRecord value )
+    {
+        var content = new JsonContent(value.ToPrettyJson(), _encoding);
+
+
+        var request = new HttpRequestMessage(HttpMethod.Patch, _url)
+                      {
+                          Content = Update(content)
+                      };
+
+        Task<HttpResponseMessage> task = _Client.SendAsync(request, _token);
+        return CreateHandler(task);
     }
 
 
@@ -357,7 +478,7 @@ public sealed class HttpRequestBuilder
     {
         var                       request = new HttpRequestMessage(HttpMethod.Get, _url);
         Task<HttpResponseMessage> task    = _Client.SendAsync(request, _token);
-        return new Handler(task, _encoding, _token);
+        return CreateHandler(task);
     }
 
 
@@ -365,167 +486,103 @@ public sealed class HttpRequestBuilder
     [SuppressMessage("ReSharper", "UnusedMemberInSuper.Global")]
     public readonly struct Handler
     {
-        private readonly Task<HttpResponseMessage> _request;
-        private readonly Encoding                  _encoding;
-        private readonly CancellationToken         _token;
+        private readonly  Task<HttpResponseMessage> _request;
+        internal readonly Encoding                  encoding;
+        internal readonly CancellationToken         token;
 
 
         public Handler( Task<HttpResponseMessage> request, Encoding encoding, in CancellationToken token )
         {
-            _request  = request;
-            _encoding = encoding;
-            _token    = token;
+            this._request = request;
+            this.encoding = encoding;
+            this.token    = token;
         }
 
 
         public TaskAwaiter<HttpResponseMessage> GetAwaiter() => _request.GetAwaiter();
 
 
-        public async Task<JToken> AsJson() => await AsJson(JsonNet.LoadSettings);
-        public async Task<JToken> AsJson( JsonLoadSettings settings )
+        public Task<ResponseData<JToken>> AsJson() => AsJson(JsonNet.LoadSettings);
+        public async Task<ResponseData<JToken>> AsJson( JsonLoadSettings settings ) => await ResponseData<JToken>.Create(this, settings, AsJson);
+        public async Task<JToken> AsJson( HttpResponseMessage response, JsonLoadSettings settings )
         {
-            using HttpResponseMessage reply = await _request;
-            reply.EnsureSuccessStatusCode();
-            using HttpContent  content = reply.Content;
-            await using Stream s       = await content.ReadAsStreamAsync(_token);
-            using var          sr      = new StreamReader(s, _encoding);
+            response.EnsureSuccessStatusCode();
+            using HttpContent  content = response.Content;
+            await using Stream s       = await content.ReadAsStreamAsync(token);
+            using var          sr      = new StreamReader(s, encoding);
             using JsonReader   reader  = new JsonTextReader(sr);
-            return await JToken.ReadFromAsync(reader, settings, _token);
+            return await JToken.ReadFromAsync(reader, settings, token);
         }
 
 
-        private async Task<ResponseData<TResult>> Create<T, TResult>( HttpResponseMessage reply, T arg, Func<HttpResponseMessage, T, Task<TResult>> func )
+        public Task<ResponseData<TResult>> AsJson<TResult>() => AsJson<TResult>(JsonNet.Serializer);
+        public async Task<ResponseData<TResult>> AsJson<TResult>( JsonSerializer serializer ) => await ResponseData<TResult>.Create(this, serializer, AsJson<TResult>);
+        public async Task<TResult> AsJson<TResult>( HttpResponseMessage response, JsonSerializer serializer )
         {
-            try
-            {
-                TResult result = await func(reply, arg);
-                return new ResponseData<TResult>(reply, result);
-            }
-            catch ( WebException e ) { return await ResponseData<TResult>.Create(reply, e); }
-        }
-        private async Task<ResponseData<TResult>> Create<TResult>( HttpResponseMessage reply, Func<HttpResponseMessage, Task<TResult>> func )
-        {
-            try
-            {
-                TResult result = await func(reply);
-                return new ResponseData<TResult>(reply, result);
-            }
-            catch ( Exception e )
-            {
-                Console.WriteLine(e);
-                throw;
-            }
-        }
-
-
-        public async Task<TResult> AsJson<TResult>() => await AsJson<TResult>(JsonNet.Serializer);
-        public async Task<TResult> AsJson<TResult>( JsonSerializer serializer )
-        {
-            using HttpResponseMessage reply = await _request;
-            reply.EnsureSuccessStatusCode();
-            using HttpContent  content = reply.Content;
-            await using Stream s       = await content.ReadAsStreamAsync(_token);
-            using var          sr      = new StreamReader(s, _encoding);
+            response.EnsureSuccessStatusCode();
+            using HttpContent  content = response.Content;
+            await using Stream s       = await content.ReadAsStreamAsync(token);
+            using var          sr      = new StreamReader(s, encoding);
             using JsonReader   reader  = new JsonTextReader(sr);
 
             return serializer.Deserialize<TResult>(reader) ?? throw new NullReferenceException(nameof(JsonConvert.DeserializeObject));
         }
 
 
-        public async Task<string> AsString()
+        public async Task<ResponseData<string>> AsString() => await ResponseData<string>.Create(this, AsString);
+        public async Task<string> AsString( HttpResponseMessage response )
         {
-            using HttpResponseMessage reply = await _request;
-            reply.EnsureSuccessStatusCode();
-            using HttpContent content = reply.Content;
-            return await content.ReadAsStringAsync(_token);
+            response.EnsureSuccessStatusCode();
+            using HttpContent content = response.Content;
+            return await content.ReadAsStringAsync(token);
         }
 
 
-        public async Task<byte[]> AsBytes()
+        public async Task<ResponseData<byte[]>> AsBytes() => await ResponseData<byte[]>.Create(this, AsBytes);
+        public async Task<byte[]> AsBytes( HttpResponseMessage response )
         {
-            using HttpResponseMessage reply = await _request;
-            reply.EnsureSuccessStatusCode();
-            using HttpContent content = reply.Content;
-            return await content.ReadAsByteArrayAsync(_token);
+            response.EnsureSuccessStatusCode();
+            using HttpContent content = response.Content;
+            return await content.ReadAsByteArrayAsync(token);
         }
-        public async Task<ReadOnlyMemory<byte>> AsMemory()
+
+
+        public async Task<ResponseData<ReadOnlyMemory<byte>>> AsMemory() => await ResponseData<ReadOnlyMemory<byte>>.Create(this, AsMemory);
+        public async Task<ReadOnlyMemory<byte>> AsMemory( HttpResponseMessage response )
         {
-            using HttpResponseMessage reply = await _request;
-            reply.EnsureSuccessStatusCode();
-            using HttpContent content = reply.Content;
-            byte[]            bytes   = await content.ReadAsByteArrayAsync(_token);
+            response.EnsureSuccessStatusCode();
+            using HttpContent content = response.Content;
+            byte[]            bytes   = await content.ReadAsByteArrayAsync(token);
 
             return bytes;
         }
 
 
-        public async Task<LocalFile> AsFile()
+        public async Task<ResponseData<LocalFile>> AsFile() => await ResponseData<LocalFile>.Create(this, AsFile);
+        public async Task<LocalFile> AsFile( HttpResponseMessage response )
         {
-            using HttpResponseMessage reply = await _request;
-            reply.EnsureSuccessStatusCode();
-            using HttpContent      content = reply.Content;
+            response.EnsureSuccessStatusCode();
+            using HttpContent      content = response.Content;
             await using FileStream stream  = LocalFile.CreateTempFileAndOpen(out LocalFile file);
-            await using Stream     sr      = await content.ReadAsStreamAsync(_token);
-            await sr.CopyToAsync(stream, _token);
+            await using Stream     sr      = await content.ReadAsStreamAsync(token);
+            await sr.CopyToAsync(stream, token);
 
             return file;
         }
 
 
-        public async Task<MemoryStream> AsStream()
+        public async Task<ResponseData<MemoryStream>> AsStream() => await ResponseData<MemoryStream>.Create(this, AsStream);
+        public async Task<MemoryStream> AsStream( HttpResponseMessage response )
         {
-            using HttpResponseMessage reply = await _request;
-            reply.EnsureSuccessStatusCode();
-            using HttpContent  content = reply.Content;
-            await using Stream stream  = await content.ReadAsStreamAsync(_token);
-            var                sr      = new MemoryStream();
+            response.EnsureSuccessStatusCode();
+            using HttpContent  content = response.Content;
+            await using Stream stream  = await content.ReadAsStreamAsync(token);
+            var                result  = new MemoryStream();
 
-            await stream.CopyToAsync(sr, _token);
-            return sr;
+            await stream.CopyToAsync(result, token);
+            return result;
         }
     }
-}
-
-
-
-public readonly struct ResponseData<T>
-{
-    public const string ERROR_MESSAGE = "Error Message: ";
-    public const string UNKNOWN_ERROR = "Unknown Error";
-
-
-    public T?      Payload           { get; init; } = default;
-    public string? Method            { get; init; } = default;
-    public Uri?    URL               { get; init; } = default;
-    public JToken? ErrorMessage      { get; init; } = default;
-    public Status? StatusCode        { get; init; } = default;
-    public string? StatusDescription { get; init; } = default;
-    public string? ContentEncoding   { get; init; } = default;
-    public string? Server            { get; init; } = default;
-    public string? ContentType       { get; init; } = default;
-
-
-    public ResponseData( HttpResponseMessage response, in string error ) : this(response, error, default) { }
-    public ResponseData( HttpResponseMessage response, in T      payload ) : this(response, default, payload) { }
-    public ResponseData( HttpResponseMessage response, in string? error, in T? payload )
-    {
-        ErrorMessage      = ResponseData.ParseError(error);
-        Payload           = payload;
-        StatusCode        = response.StatusCode.ToStatus();
-        StatusDescription = response.ReasonPhrase ?? response.StatusCode.ToString();
-        URL               = response.RequestMessage?.RequestUri;
-        Method            = response.RequestMessage?.Method.Method;
-        ContentType       = response.RequestMessage?.Content?.Headers.ContentType?.MediaType;
-        ContentEncoding   = response.RequestMessage?.Content?.Headers.ContentEncoding.ToJson();
-        Server            = response.RequestMessage?.Headers.From;
-    }
-    internal static ResponseData<T> None( HttpResponseMessage response ) => new(response, "NO RESPONSE");
-
-
-    public override string ToString() => this.ToPrettyJson();
-
-
-    public static async Task<ResponseData<T>> Create( HttpResponseMessage reply, WebException e ) { return default; }
 }
 
 

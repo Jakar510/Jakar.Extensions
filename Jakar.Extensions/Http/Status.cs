@@ -11,6 +11,10 @@
 /// </summary>
 public enum Status
 {
+    NotSet = 0,
+
+
+
     #region Information responses
 
     /// <summary>

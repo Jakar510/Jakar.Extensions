@@ -45,7 +45,7 @@ public class IpAddressManager : INetworkManager
 
     // public string? GetIPAddress()
     // {
-    // 	string ipAddress = "";
+    // 	string ipAddress = string.Empty;
     //
     // 	foreach ( var netInterface in NetworkInterface.GetAllNetworkInterfaces() )
     // 	{

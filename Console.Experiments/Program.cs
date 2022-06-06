@@ -54,15 +54,20 @@ public static class Program
 
     public static async Task Test_HttpBuilder( CancellationToken token = default )
     {
-        var builder = HttpRequestBuilder.Create(new Uri("http://google.com"), token);
+        var target  = new Uri("https://www.toptal.com/developers/postbin/");
+        var host    = new Uri("https://httpbin.org/");
+        var content = new AppVersion(1, 2, 3).ToString();
 
-        var result = await builder.Get().AsString();
-        result.WriteToConsole();
-        string.Empty.WriteToConsole();
-        string.Empty.WriteToConsole();
 
-        result = await builder.Get().AsString();
-        result.WriteToConsole();
+        ( await HttpRequestBuilder.Create(new Uri(host, "/bearer"),     token).Get().AsJson() ).WriteToConsole();
+        ( await HttpRequestBuilder.Create(new Uri(host, "/put"),        token).Put(content).AsJson() ).WriteToConsole();
+        ( await HttpRequestBuilder.Create(new Uri(host, "/post"),       token).Post(content).AsJson() ).WriteToConsole();
+        ( await HttpRequestBuilder.Create(new Uri(host, "/get"),        token).Get().AsJson() ).WriteToConsole();
+        ( await HttpRequestBuilder.Create(new Uri(host, "/delete"),     token).Delete().AsJson() ).WriteToConsole();
+        ( await HttpRequestBuilder.Create(new Uri(host, "/patch"),      token).Patch(content).AsJson() ).WriteToConsole();
+        ( await HttpRequestBuilder.Create(new Uri(host, "/headers"),    token).Get().AsJson() ).WriteToConsole();
+        ( await HttpRequestBuilder.Create(new Uri(host, "/ip"),         token).Get().AsJson() ).WriteToConsole();
+        ( await HttpRequestBuilder.Create(new Uri(host, "/user-agent"), token).Get().AsJson() ).WriteToConsole();
     }
     private static void Test_Sql()
     {

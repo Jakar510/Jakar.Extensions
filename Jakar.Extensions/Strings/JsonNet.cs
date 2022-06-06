@@ -31,11 +31,11 @@ public static class JsonNet
 
 
     public static string ToJson( this object item ) => JsonConvert.SerializeObject(item);
-    public static string ToJson( this object item, Formatting             formatting ) => JsonConvert.SerializeObject(item, formatting);
+    public static string ToJson( this object item, in Formatting          formatting ) => JsonConvert.SerializeObject(item, formatting);
     public static string ToJson( this object item, JsonSerializerSettings settings ) => item.ToJson(Formatting.Indented, settings);
-    public static string ToJson( this object item, Formatting             formatting, JsonSerializerSettings settings ) => JsonConvert.SerializeObject(item, formatting, settings);
+    public static string ToJson( this object item, in     Formatting      formatting, JsonSerializerSettings settings ) => JsonConvert.SerializeObject(item, formatting, settings);
     public static string ToJson( this object item, params JsonConverter[] converters ) => item.ToJson(Formatting.Indented, converters);
-    public static string ToJson( this object item, Formatting             formatting, params JsonConverter[] converters ) => JsonConvert.SerializeObject(item, formatting, converters);
+    public static string ToJson( this object item, in     Formatting      formatting, params JsonConverter[] converters ) => JsonConvert.SerializeObject(item, formatting, converters);
 
 
     public static TResult FromJson<TResult>( this ReadOnlySpan<char> json ) => json.ToString().FromJson<TResult>(); // TODO: 

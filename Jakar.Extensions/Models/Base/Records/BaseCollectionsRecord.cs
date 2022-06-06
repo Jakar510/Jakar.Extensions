@@ -19,6 +19,13 @@ public abstract record BaseCollectionsRecord<T> : ObservableRecord, IEquatable<T
     public abstract bool Equals( T?   other );
 
 
+    public string ToJson() => JsonNet.ToJson(this);
+    public string ToPrettyJson() => this.ToJson(Formatting.Indented);
+
+
+    public static T? FromJson( [NotNullIfNotNull("json")] string? json ) => json?.FromJson<T>();
+
+
 
     [Serializable]
     public class Collection : ObservableCollection<T>

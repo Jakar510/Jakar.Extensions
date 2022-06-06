@@ -2,7 +2,7 @@
 using System.Net.Http.Headers;
 
 
-
+#nullable enable
 namespace Jakar.Extensions.Http;
 
 
@@ -22,7 +22,6 @@ public class HeaderCollection : Dictionary<string, object>
 
 
     public HeaderCollection Add( HttpRequestHeader header, object value ) => Add(header.ToString(), value);
-
     public new HeaderCollection Add( string header, object value )
     {
         if ( string.IsNullOrWhiteSpace(header) ) { throw new ArgumentNullException(nameof(header)); }
@@ -30,50 +29,37 @@ public class HeaderCollection : Dictionary<string, object>
         base.Add(header, value);
         return this;
     }
-
     public HeaderCollection Add( IDictionary<string, object> headers )
     {
-        headers.ForEach(base.Add);
+        foreach ( ( string key, object value ) in headers ) { Add(key, value); }
+
         return this;
     }
-
     public HeaderCollection Add( IDictionary<HttpRequestHeader, object> headers )
     {
         foreach ( KeyValuePair<HttpRequestHeader, object> pair in headers ) { Add(pair); }
 
         return this;
     }
-
     public HeaderCollection Add( KeyValuePair<HttpRequestHeader, object> pair )
     {
         ( HttpRequestHeader key, object value ) = pair;
         Add(key, value);
         return this;
     }
-
     public HeaderCollection Add( KeyValuePair<string, object> pair ) => Add(pair.Key, pair.Value);
 
 
-    public void Merge( in HttpRequestMessage request ) => Merge(request.Headers);
-    public void Merge( in HttpHeaders headers )
+    public HeaderCollection Merge( HeaderCollection headers )
     {
-        foreach ( ( string? key, object? value ) in this )
-        {
-            switch ( value )
-            {
-                case string s:
-                    headers.Add(key, s);
-                    break;
+        foreach ( ( string key, object value ) in headers ) { this[key] = value; }
 
-                case IEnumerable<string> items:
-                    headers.Add(key, items);
-                    break;
-            }
-        }
+        return this;
     }
-    public void Merge( in HttpContentHeaders headers )
+    public HeaderCollection Merge( HttpRequestMessage request ) => Merge(request.Headers);
+    public HeaderCollection Merge( HttpHeaders headers )
     {
-        foreach ( ( string? key, object? value ) in this )
+        foreach ( ( string key, object value ) in this )
         {
             switch ( value )
             {
@@ -86,5 +72,25 @@ public class HeaderCollection : Dictionary<string, object>
                     break;
             }
         }
+
+        return this;
+    }
+    public HeaderCollection Merge( HttpContentHeaders headers )
+    {
+        foreach ( ( string key, object value ) in this )
+        {
+            switch ( value )
+            {
+                case string s:
+                    headers.Add(key, s);
+                    break;
+
+                case IEnumerable<string> items:
+                    headers.Add(key, items);
+                    break;
+            }
+        }
+
+        return this;
     }
 }

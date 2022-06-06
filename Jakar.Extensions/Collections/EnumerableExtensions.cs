@@ -80,7 +80,7 @@ public static class EnumerableExtensions
         }
     }
 
-    public static IEnumerable<(int index, object key, object value)> Enumerate( this IDictionary enumerable, int start = 0 )
+    public static IEnumerable<(int index, object key, object? value)> Enumerate( this IDictionary enumerable, int start = 0 )
     {
         int index = start;
 
@@ -119,59 +119,53 @@ public static class EnumerableExtensions
 
     #region Random Items in collection
 
-    public static IEnumerator<TValue> Random<TValue>( this IReadOnlyIndexable<TValue> items, Random? rand = default )
+    public static IEnumerator<TValue> Random<TValue>( this IReadOnlyIndexable<TValue> items, Random rand )
     {
         if ( items is null ) { throw new ArgumentNullException(nameof(items)); }
 
-        rand ??= new Random();
 
         while ( true ) { yield return items[rand.Next(items.Count)]; }
     }
 
-    public static IEnumerator<TValue> Random<TValue>( this IIndexable<TValue> items, Random? rand = default )
+    public static IEnumerator<TValue> Random<TValue>( this IIndexable<TValue> items, Random rand )
     {
         if ( items is null ) { throw new ArgumentNullException(nameof(items)); }
 
-        rand ??= new Random();
 
         while ( true ) { yield return items[rand.Next(items.Count)]; }
     }
 
-    public static IEnumerator<TValue> Random<TValue>( this IList<TValue> items, Random? rand = default )
+    public static IEnumerator<TValue> Random<TValue>( this IList<TValue> items, Random rand )
     {
         if ( items is null ) { throw new ArgumentNullException(nameof(items)); }
 
-        rand ??= new Random();
 
         while ( true ) { yield return items[rand.Next(items.Count)]; }
     }
 
-    public static IEnumerator<TValue> Random<TValue>( this IReadOnlyList<TValue> items, Random? rand = default )
+    public static IEnumerator<TValue> Random<TValue>( this IReadOnlyList<TValue> items, Random rand )
     {
         if ( items is null ) { throw new ArgumentNullException(nameof(items)); }
 
-        rand ??= new Random();
 
         while ( true ) { yield return items[rand.Next(items.Count)]; }
     }
 
 
-    public static IEnumerator<TKey> RandomKeys<TKey, TValue>( this IDictionary<TKey, TValue> dict, Random? rand = default )
+    public static IEnumerator<TKey> RandomKeys<TKey, TValue>( this IDictionary<TKey, TValue> dict, Random rand )
     {
         if ( dict is null ) { throw new ArgumentNullException(nameof(dict)); }
 
-        rand ??= new Random();
 
         List<TKey> items = dict.Keys.ToList();
 
         while ( true ) { yield return items[rand.Next(items.Count)]; }
     }
 
-    public static IEnumerator<TValue> RandomValues<TKey, TValue>( this IDictionary<TKey, TValue> dict, Random? rand = default )
+    public static IEnumerator<TValue> RandomValues<TKey, TValue>( this IDictionary<TKey, TValue> dict, Random rand )
     {
         if ( dict is null ) { throw new ArgumentNullException(nameof(dict)); }
 
-        rand ??= new Random();
 
         List<TValue> items = dict.Values.ToList();
 

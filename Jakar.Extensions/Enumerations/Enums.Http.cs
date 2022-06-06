@@ -94,8 +94,4 @@ public static partial class Enums
                                                                               HttpRequestHeader.Warning            => nameof(HttpRequestHeader.Warning),
                                                                               _                                    => throw new ArgumentOutOfRangeException(nameof(header), header, null)
                                                                           };
-
-
-    public static Status ToStatus( this         HttpStatusCode code ) => (Status)(int)code;
-    public static HttpStatusCode ToStatus( this Status         code ) => (HttpStatusCode)(int)code;
 }
