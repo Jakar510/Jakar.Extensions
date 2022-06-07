@@ -1,4 +1,5 @@
-﻿namespace Jakar.Extensions.FileSystemExtensions;
+﻿#nullable enable
+namespace Jakar.Extensions.FileSystemExtensions;
 
 
 public static class TempFile

@@ -1,4 +1,5 @@
-﻿namespace Jakar.Extensions.Exceptions.General;
+﻿#nullable enable
+namespace Jakar.Extensions.Exceptions.General;
 
 
 public class ExpectedValueTypeException<TKey> : Exception // Jakar.Api.Exceptions.Networking.HeaderException

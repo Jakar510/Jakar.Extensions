@@ -1,6 +1,7 @@
 ﻿// unset
 
 
+#nullable enable
 namespace Jakar.Extensions.Http;
 
 
@@ -19,6 +20,7 @@ public static class MimeTypeNames
         public const string PLAIN                  = "text/plain";
         public const string HTML                   = "text/html";
         public const string XML                    = "text/xml";
+        public const string XAML                   = "text/xaml";
         public const string RICH_TEXT              = "text/richtext"; // rtf
         public const string CASCADING_STYLE_SHEETS = "text/css";
         public const string COMMA_SEPARATED_VALUES = "text/csv";

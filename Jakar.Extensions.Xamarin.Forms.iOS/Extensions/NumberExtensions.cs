@@ -8,6 +8,7 @@ using Jakar.Extensions.Strings;
 
 
 
+#nullable enable
 namespace Jakar.Extensions.Xamarin.Forms.iOS.Extensions;
 
 

@@ -2,6 +2,7 @@
 // 01/25/2022  12:40 PM
 
 
+#nullable enable
 namespace Jakar.Extensions.Wpf;
 
 

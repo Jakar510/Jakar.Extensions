@@ -4,6 +4,7 @@
 
 
 
+#nullable enable
 namespace Jakar.Extensions.Xamarin.Forms.Extensions;
 
 

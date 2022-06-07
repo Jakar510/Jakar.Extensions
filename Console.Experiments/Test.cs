@@ -10,6 +10,7 @@ using Newtonsoft.Json;
 
 
 
+#nullable enable
 namespace Console.Experiments;
 
 

@@ -4,6 +4,7 @@ using Xamarin.CommunityToolkit.ObjectModel;
 
 
 
+#nullable enable
 namespace Jakar.Extensions.Xamarin.Forms;
 
 

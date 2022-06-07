@@ -1,5 +1,6 @@
 ﻿// ReSharper disable once CheckNamespace
 
+#nullable enable
 namespace Jakar.Extensions.Collections;
 
 

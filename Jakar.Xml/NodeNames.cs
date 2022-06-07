@@ -7,6 +7,7 @@ using System.Reflection;
 
 
 
+#nullable enable
 namespace Jakar.Xml;
 
 

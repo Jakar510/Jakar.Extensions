@@ -1,4 +1,5 @@
-﻿namespace Jakar.Extensions.Models.Users;
+﻿#nullable enable
+namespace Jakar.Extensions.Models.Users;
 
 
 public interface IUserModel<TAddress> : IUserModel where TAddress : IUserAddress

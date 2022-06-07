@@ -1,4 +1,5 @@
-﻿namespace Jakar.Extensions.Interfaces;
+﻿#nullable enable
+namespace Jakar.Extensions.Interfaces;
 
 
 public interface IUniqueID<TId>

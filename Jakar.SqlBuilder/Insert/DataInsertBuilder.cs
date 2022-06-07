@@ -1,6 +1,7 @@
 ﻿// Jakar.Extensions :: Jakar.SqlBuilder
 // 05/08/2022  3:22 PM
 
+#nullable enable
 namespace Jakar.SqlBuilder;
 
 

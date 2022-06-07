@@ -1,6 +1,7 @@
 ﻿
 
 
+#nullable enable
 namespace Jakar.Extensions.Xamarin.Forms.iOS.Enumerations;
 
 

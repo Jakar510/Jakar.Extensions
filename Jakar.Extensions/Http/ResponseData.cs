@@ -2,10 +2,12 @@
 // 04/21/2022  11:48 AM
 
 using System.Net.Http;
+using System.Net.Http.Headers;
 using Jakar.Extensions.Enumerations;
 using Jakar.Extensions.SpanAndMemory;
 
 
+#nullable enable
 #nullable enable
 namespace Jakar.Extensions.Http;
 
@@ -134,6 +136,10 @@ public readonly struct ResponseData<T>
     public ResponseData( HttpResponseMessage response, in T         payload ) : this(response, payload, default) { }
     public ResponseData( HttpResponseMessage response, in T? payload, Exception? exception, in string? error = default )
     {
+        HttpRequestHeaders? requestHeaders = response.RequestMessage?.Headers;
+        HttpContentHeaders? contentHeaders = response.RequestMessage?.Content?.Headers;
+
+
         ErrorMessage      = ResponseData.ParseError(error ?? exception?.Message);
         Payload           = payload;
         Exception         = exception;
@@ -141,13 +147,14 @@ public readonly struct ResponseData<T>
         StatusDescription = response.ReasonPhrase ?? StatusCode.FastToString();
         URL               = response.RequestMessage?.RequestUri;
         Method            = response.RequestMessage?.Method.Method;
-        ContentType       = response.RequestMessage?.Content?.Headers.ContentType?.MediaType;
-        ContentEncoding   = response.RequestMessage?.Content?.Headers.ContentEncoding.ToJson();
-        Server            = response.RequestMessage?.Headers.From;
+        ContentType       = contentHeaders?.ContentType?.MediaType;
+        ContentEncoding   = contentHeaders?.ContentEncoding.ToJson();
+        Server            = requestHeaders?.From;
     }
 
 
     internal static ResponseData<T> None( HttpResponseMessage response ) => new(response, "NO RESPONSE");
+    internal static ResponseData<T> None( HttpResponseMessage response, Exception e ) => new(response, e, "NO RESPONSE");
 
 
     public override string ToString() => this.ToJson(Formatting.Indented);
@@ -155,45 +162,75 @@ public readonly struct ResponseData<T>
 
     public static async Task<ResponseData<T>> Create<TArg>( HttpRequestBuilder.Handler handler, TArg arg, Func<HttpResponseMessage, TArg, Task<T>> func )
     {
-        using HttpResponseMessage response = await handler;
-
-        try
+        using ( handler )
         {
-            T result = await func(response, arg);
-            return new ResponseData<T>(response, result);
+            using HttpResponseMessage response = await handler;
+
+            try
+            {
+                if ( !response.IsSuccessStatusCode ) { return await Create(handler, response); }
+
+                T result = await func(response, arg);
+                return new ResponseData<T>(response, result);
+            }
+            catch ( HttpRequestException e ) { return await Create(handler, response, e); }
         }
-        catch ( HttpRequestException e ) { return await Create(handler, response, e); }
     }
     public static async Task<ResponseData<T>> Create( HttpRequestBuilder.Handler handler, Func<HttpResponseMessage, Task<T>> func )
     {
-        using HttpResponseMessage response = await handler;
-
-        try
+        using ( handler )
         {
-            T result = await func(response);
-            return new ResponseData<T>(response, result);
+            using HttpResponseMessage response = await handler;
+
+            try
+            {
+                if ( !response.IsSuccessStatusCode ) { return await Create(handler, response); }
+
+                T result = await func(response);
+                return new ResponseData<T>(response, result);
+            }
+            catch ( HttpRequestException e ) { return await Create(handler, response, e); }
         }
-        catch ( HttpRequestException e ) { return await Create(handler, response, e); }
     }
-    private static async Task<ResponseData<T>> Create( HttpRequestBuilder.Handler handler, HttpResponseMessage response, HttpRequestException e )
+    private static async Task<ResponseData<T>> Create( HttpRequestBuilder.Handler handler, HttpResponseMessage response )
     {
         await using Stream? stream = await response.Content.ReadAsStreamAsync(handler.token);
 
-        string msg;
+        string error;
 
         // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
-        if ( stream is not null )
+        if ( stream is null ) { error = UNKNOWN_ERROR; }
+        else
         {
             using var reader       = new StreamReader(stream);
-            string?   errorMessage = await reader.ReadToEndAsync();
+            string    errorMessage = await reader.ReadToEndAsync();
 
             if ( string.IsNullOrWhiteSpace(errorMessage) ) { return None(response); }
 
-            msg = $"{ERROR_MESSAGE}{errorMessage}";
+            error = $"{ERROR_MESSAGE}{errorMessage}";
         }
-        else { msg = UNKNOWN_ERROR; }
 
-        return new ResponseData<T>(response, e, msg);
+        return new ResponseData<T>(response, error);
+    }
+    private static async Task<ResponseData<T>> Create( HttpRequestBuilder.Handler handler, HttpResponseMessage response, Exception e )
+    {
+        await using Stream? stream = await response.Content.ReadAsStreamAsync(handler.token);
+
+        string error;
+
+        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+        if ( stream is null ) { error = UNKNOWN_ERROR; }
+        else
+        {
+            using var reader       = new StreamReader(stream);
+            string    errorMessage = await reader.ReadToEndAsync();
+
+            if ( string.IsNullOrWhiteSpace(errorMessage) ) { return None(response, e); }
+
+            error = $"{ERROR_MESSAGE}{errorMessage}";
+        }
+
+        return new ResponseData<T>(response, e, error);
     }
 }
 

@@ -1,4 +1,5 @@
-﻿namespace Jakar.Extensions.General;
+﻿#nullable enable
+namespace Jakar.Extensions.General;
 
 
 public static class DapperTableExtensions

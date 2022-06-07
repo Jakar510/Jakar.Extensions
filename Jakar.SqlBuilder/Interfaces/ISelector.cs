@@ -2,6 +2,7 @@
 
 
 
+#nullable enable
 namespace Jakar.SqlBuilder.Interfaces;
 
 

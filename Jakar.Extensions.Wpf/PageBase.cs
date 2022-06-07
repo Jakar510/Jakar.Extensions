@@ -5,6 +5,7 @@ using Jakar.Extensions.Models;
 
 
 
+#nullable enable
 namespace Jakar.Extensions.Wpf;
 
 

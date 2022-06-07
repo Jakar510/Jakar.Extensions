@@ -9,6 +9,7 @@ using Jakar.Extensions.Strings;
 
 
 
+#nullable enable
 namespace Jakar.Xml.Deserialization;
 
 

@@ -1,6 +1,7 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 04/10/2022  6:24 PM
 
+#nullable enable
 namespace Jakar.Extensions.Models.Collections;
 
 

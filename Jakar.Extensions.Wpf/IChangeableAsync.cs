@@ -1,4 +1,5 @@
-﻿namespace Jakar.Extensions.Wpf;
+﻿#nullable enable
+namespace Jakar.Extensions.Wpf;
 
 
 public interface IChangeableAsync

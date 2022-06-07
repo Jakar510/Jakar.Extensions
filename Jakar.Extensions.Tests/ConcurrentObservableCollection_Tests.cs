@@ -2,6 +2,7 @@ using Jakar.Extensions.Models.Collections;
 using NUnit.Framework;
 
 
+#nullable enable
 namespace Jakar.Extensions.Tests;
 
 

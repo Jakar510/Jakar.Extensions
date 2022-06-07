@@ -16,6 +16,7 @@ using Newtonsoft.Json.Linq;
 
 
 
+#nullable enable
 namespace Jakar.Xml;
 
 

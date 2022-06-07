@@ -14,6 +14,7 @@ using Xamarin.Forms;
 [assembly: Dependency(typeof(IpAddressManager))]
 
 
+#nullable enable
 namespace Jakar.Extensions.Xamarin.Forms.iOS.Services;
 
 

@@ -8,6 +8,7 @@ using Microsoft.Extensions.Hosting;
 
 
 
+#nullable enable
 namespace Jakar.Extensions.Hosting;
 
 

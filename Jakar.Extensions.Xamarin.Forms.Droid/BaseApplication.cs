@@ -8,6 +8,7 @@ using Platform = Xamarin.Essentials.Platform;
 
 
 
+#nullable enable
 namespace Jakar.Extensions.Xamarin.Forms.Droid;
 
 

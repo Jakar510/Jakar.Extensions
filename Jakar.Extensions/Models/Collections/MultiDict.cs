@@ -1,4 +1,5 @@
-﻿namespace Jakar.Extensions.Models.Collections;
+﻿#nullable enable
+namespace Jakar.Extensions.Models.Collections;
 
 
 public class MultiDict<TKey> : Dictionary<TKey, object?>

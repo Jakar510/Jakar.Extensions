@@ -7,6 +7,7 @@ using Jakar.Xml.Serialization;
 
 
 
+#nullable enable
 namespace Jakar.Xml;
 
 

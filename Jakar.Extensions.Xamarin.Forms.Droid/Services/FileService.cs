@@ -14,6 +14,7 @@ using Xamarin.Forms;
 [assembly: Dependency(typeof(FileService))]
 
 
+#nullable enable
 namespace Jakar.Extensions.Xamarin.Forms.Droid.Services;
 
 

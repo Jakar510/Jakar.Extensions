@@ -10,6 +10,7 @@ using Xamarin.Forms.Platform.iOS;
 
 
 
+#nullable enable
 namespace Jakar.Extensions.Xamarin.Forms.iOS.Extensions;
 
 

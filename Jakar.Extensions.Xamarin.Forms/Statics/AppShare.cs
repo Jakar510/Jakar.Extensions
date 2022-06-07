@@ -6,6 +6,7 @@ using Xamarin.Essentials;
 using Location = Xamarin.Essentials.Location;
 
 
+#nullable enable
 namespace Jakar.Extensions.Xamarin.Forms.Statics;
 
 

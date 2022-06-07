@@ -10,6 +10,7 @@ using Jakar.Extensions.Xamarin.Forms.iOS.Services;
 [assembly: Xamarin.Forms.Dependency(typeof(BaseUrlIos))]
 
 
+#nullable enable
 namespace Jakar.Extensions.Xamarin.Forms.iOS.Services;
 
 

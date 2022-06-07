@@ -1,4 +1,5 @@
-﻿namespace Jakar.Extensions.Xamarin.Forms.MarkupExtensions;
+﻿#nullable enable
+namespace Jakar.Extensions.Xamarin.Forms.MarkupExtensions;
 
 
 [ContentProperty(nameof(Source))]

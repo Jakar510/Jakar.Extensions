@@ -1,4 +1,5 @@
-﻿namespace Jakar.Extensions.Models;
+﻿#nullable enable
+namespace Jakar.Extensions.Models;
 
 
 public class ValueSorter<T> : IComparer<T?>, IComparer<T>, IComparer where T : struct, IComparable<T>

@@ -1,4 +1,5 @@
-﻿namespace Jakar.Extensions.Languages;
+﻿#nullable enable
+namespace Jakar.Extensions.Languages;
 
 
 [Serializable]

@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 
 
 
+#nullable enable
 namespace Jakar.Extensions.SpanAndMemory;
 
 

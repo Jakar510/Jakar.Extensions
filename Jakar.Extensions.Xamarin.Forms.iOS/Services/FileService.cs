@@ -17,6 +17,7 @@ using FileSystem = Xamarin.Essentials.FileSystem;
 [assembly: Dependency(typeof(FileService))]
 
 
+#nullable enable
 namespace Jakar.Extensions.Xamarin.Forms.iOS.Services;
 
 

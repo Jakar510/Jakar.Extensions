@@ -1,4 +1,5 @@
-﻿namespace Jakar.Extensions.Models;
+﻿#nullable enable
+namespace Jakar.Extensions.Models;
 
 
 public interface IAppSettings

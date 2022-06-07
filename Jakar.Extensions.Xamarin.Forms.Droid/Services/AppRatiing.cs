@@ -12,6 +12,7 @@ using AUri = Android.Net.Uri;
 [assembly: Xamarin.Forms.Dependency(typeof(AppRating))]
 
 
+#nullable enable
 namespace Jakar.Extensions.Xamarin.Forms.Droid.Services;
 
 

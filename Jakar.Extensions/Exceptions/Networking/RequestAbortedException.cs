@@ -1,4 +1,5 @@
-﻿namespace Jakar.Extensions.Exceptions.Networking;
+﻿#nullable enable
+namespace Jakar.Extensions.Exceptions.Networking;
 
 
 public sealed class RequestAbortedException : WebException

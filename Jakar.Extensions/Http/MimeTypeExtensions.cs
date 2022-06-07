@@ -1,4 +1,5 @@
-﻿namespace Jakar.Extensions.Http;
+﻿#nullable enable
+namespace Jakar.Extensions.Http;
 
 
 public static class MimeTypeExtensions
@@ -65,269 +66,272 @@ public static class MimeTypeExtensions
     /// </returns>
     public static string ToExtension( this MimeType mime, bool includePeriod = false )
     {
-        string result = mime switch
-                        {
-                            MimeType.Text      => "text",
-                            MimeType.PlainText => "txt",
-                            MimeType.Html      => "html",
-                            MimeType.Xml       => "xml",
-                            MimeType.RichText  => "rt",
-                            MimeType.Css       => "css",
-                            MimeType.Csv       => "csv",
-                            MimeType.Calendar  => "ics",
-                            MimeType.Ini       => "ini",
-                            MimeType.Config    => "conf",
-                            MimeType.Cfg       => "cfg",
-                            MimeType.Base64    => "b64",
+        ReadOnlySpan<char> result = mime switch
+                                    {
+                                        MimeType.Text      => "text",
+                                        MimeType.PlainText => "txt",
+                                        MimeType.Html      => "html",
+                                        MimeType.Xml       => "xml",
+                                        MimeType.Xaml      => "xaml",
+                                        MimeType.RichText  => "rt",
+                                        MimeType.Css       => "css",
+                                        MimeType.Csv       => "csv",
+                                        MimeType.Calendar  => "ics",
+                                        MimeType.Ini       => "ini",
+                                        MimeType.Config    => "conf",
+                                        MimeType.Cfg       => "cfg",
+                                        MimeType.Base64    => "b64",
 
-                            MimeType.UrlEncodedContent => "url",
-                            MimeType.Soap              => "soap",
-                            MimeType.Stream            => "stream",
-                            MimeType.Binary            => "bin",
-                            MimeType.Rtf               => "rtf",
-                            MimeType.Pdf               => "pdf",
-                            MimeType.Json              => "json",
-                            MimeType.XmlApp            => "xmla",
-                            MimeType.Xul               => "xul",
-                            MimeType.JavaScript        => "js",
-                            MimeType.Vbs               => "vbs",
-                            MimeType.Sds               => "sds",
-                            MimeType.Tds               => "tds",
-                            MimeType.Coa               => "coa",
-                            MimeType.Licenses          => "licenses",
-                            MimeType.Dll               => "dll",
+                                        MimeType.UrlEncodedContent => "url",
+                                        MimeType.Soap              => "soap",
+                                        MimeType.Stream            => "stream",
+                                        MimeType.Binary            => "bin",
+                                        MimeType.Rtf               => "rtf",
+                                        MimeType.Pdf               => "pdf",
+                                        MimeType.Json              => "json",
+                                        MimeType.XmlApp            => "xmla",
+                                        MimeType.Xul               => "xul",
+                                        MimeType.JavaScript        => "js",
+                                        MimeType.Vbs               => "vbs",
+                                        MimeType.Sds               => "sds",
+                                        MimeType.Tds               => "tds",
+                                        MimeType.Coa               => "coa",
+                                        MimeType.Licenses          => "licenses",
+                                        MimeType.Dll               => "dll",
 
-                            MimeType.Zip      => "zip",
-                            MimeType.SevenZip => "7z",
-                            MimeType.Bzip     => "bz",
-                            MimeType.Bzip2    => "bz2",
-                            MimeType.Gzip     => "gz",
-                            MimeType.Tar      => "tar.gz",
+                                        MimeType.Zip      => "zip",
+                                        MimeType.SevenZip => "7z",
+                                        MimeType.Bzip     => "bz",
+                                        MimeType.Bzip2    => "bz2",
+                                        MimeType.Gzip     => "gz",
+                                        MimeType.Tar      => "tar.gz",
 
-                            MimeType.Doc  => "doc",
-                            MimeType.Docx => "docx",
-                            MimeType.Xls  => "xls",
-                            MimeType.Xlsx => "xlsx",
-                            MimeType.Ppt  => "ppt",
-                            MimeType.Pptx => "pptx",
+                                        MimeType.Doc  => "doc",
+                                        MimeType.Docx => "docx",
+                                        MimeType.Xls  => "xls",
+                                        MimeType.Xlsx => "xlsx",
+                                        MimeType.Ppt  => "ppt",
+                                        MimeType.Pptx => "pptx",
 
-                            MimeType.ThreeGppAudio  => "3gppa",
-                            MimeType.ThreeGpp2Audio => "3gpp2a",
-                            MimeType.Aac            => "aac",
-                            MimeType.MpegAudio      => "mpega",
-                            MimeType.Mp3            => "mp3",
-                            MimeType.Weba           => "weba",
-                            MimeType.Wav            => "wav",
+                                        MimeType.ThreeGppAudio  => "3gppa",
+                                        MimeType.ThreeGpp2Audio => "3gpp2a",
+                                        MimeType.Aac            => "aac",
+                                        MimeType.MpegAudio      => "mpega",
+                                        MimeType.Mp3            => "mp3",
+                                        MimeType.Weba           => "weba",
+                                        MimeType.Wav            => "wav",
 
-                            MimeType.ThreeGppVideo  => "3gpp",
-                            MimeType.ThreeGpp2Video => "3gpp2",
-                            MimeType.Mp4            => "mp4",
-                            MimeType.MpegVideo      => "mpeg",
-                            MimeType.Mpeg4          => "mpeg4",
-                            MimeType.Webm           => "webm",
-                            MimeType.H264           => "h264",
-                            MimeType.Avi            => "avi",
-                            MimeType.Mov            => "mov",
-                            MimeType.Mpg            => "mpg",
-                            MimeType.Ogg            => "ogg",
-                            MimeType.Mkv            => "mkv",
+                                        MimeType.ThreeGppVideo  => "3gpp",
+                                        MimeType.ThreeGpp2Video => "3gpp2",
+                                        MimeType.Mp4            => "mp4",
+                                        MimeType.MpegVideo      => "mpeg",
+                                        MimeType.Mpeg4          => "mpeg4",
+                                        MimeType.Webm           => "webm",
+                                        MimeType.H264           => "h264",
+                                        MimeType.Avi            => "avi",
+                                        MimeType.Mov            => "mov",
+                                        MimeType.Mpg            => "mpg",
+                                        MimeType.Ogg            => "ogg",
+                                        MimeType.Mkv            => "mkv",
 
-                            MimeType.Gif  => "gif",
-                            MimeType.Tiff => "tif",
-                            MimeType.Png  => "png",
-                            MimeType.Jpeg => "jpeg",
-                            MimeType.Jpg  => "jpg",
-                            MimeType.Bmp  => "bmp",
-                            MimeType.Webp => "webp",
-                            MimeType.Icon => "ico",
-                            MimeType.Svg  => "svg",
+                                        MimeType.Gif  => "gif",
+                                        MimeType.Tiff => "tif",
+                                        MimeType.Png  => "png",
+                                        MimeType.Jpeg => "jpeg",
+                                        MimeType.Jpg  => "jpg",
+                                        MimeType.Bmp  => "bmp",
+                                        MimeType.Webp => "webp",
+                                        MimeType.Icon => "ico",
+                                        MimeType.Svg  => "svg",
 
-                            MimeType.TrueType => "ttf",
-                            MimeType.OpenType => "otf",
-                            MimeType.FormData => "fd",
+                                        MimeType.TrueType => "ttf",
+                                        MimeType.OpenType => "otf",
+                                        MimeType.FormData => "fd",
 
 
-                            MimeType.Unknown => throw new ArgumentOutOfRangeException(nameof(mime)),
-                            MimeType.NotSet  => throw new ArgumentOutOfRangeException(nameof(mime)),
-                            _                => throw new ArgumentOutOfRangeException(nameof(mime))
-                        };
+                                        MimeType.Unknown => "dat",
+                                        MimeType.NotSet  => throw new ArgumentOutOfRangeException(nameof(mime)),
+                                        _                => throw new ArgumentOutOfRangeException(nameof(mime))
+                                    };
 
-        if ( includePeriod ) { result = $".{includePeriod}"; }
 
-        return result;
+        if ( !includePeriod ) { return result.ToString(); }
+
+        Span<char> span = stackalloc char[result.Length + 1];
+        span[0] = '.';
+        result.CopyTo(span[1..]);
+        return span.ToString();
     }
 
+
     /// <summary>
-    ///     Gets the
-    ///     <see cref = "MimeType" />
-    ///     of the provided extension
-    ///     <see cref = "string" />
-    ///     .
+    ///     Gets the <see cref = "MimeType" /> of the provided extension <see cref = "string" />.
     /// </summary>
     /// <param name = "mime" > </param>
     /// <returns>
     ///     <see cref = "MimeType" />
     /// </returns>
-    public static MimeType FromExtension( this string mime ) =>
-        mime.ToLower() switch
-        {
-            "text"  => MimeType.Text,
-            ".text" => MimeType.Text,
-            "txt"   => MimeType.PlainText,
-            ".txt"  => MimeType.PlainText,
-            "html"  => MimeType.Html,
-            ".html" => MimeType.Html,
-            "htm"   => MimeType.Html,
-            ".htm"  => MimeType.Html,
-            "xml"   => MimeType.Xml,
-            ".xml"  => MimeType.Xml,
-            "rt"    => MimeType.RichText,
-            ".rt"   => MimeType.RichText,
-            "css"   => MimeType.Css,
-            ".css"  => MimeType.Css,
-            "csv"   => MimeType.Csv,
-            ".csv"  => MimeType.Csv,
-            "ics"   => MimeType.Calendar,
-            ".ics"  => MimeType.Calendar,
-            "ini"   => MimeType.Ini,
-            ".ini"  => MimeType.Ini,
-            "cfg"   => MimeType.Cfg,
-            ".cfg"  => MimeType.Cfg,
-            "conf"  => MimeType.Config,
-            ".conf" => MimeType.Config,
-            "b64"   => MimeType.Base64,
-            ".b64"  => MimeType.Base64,
+    public static MimeType FromExtension( this string mime ) => mime.AsSpan().FromExtension();
+    /// <summary>
+    ///     Gets the <see cref = "MimeType" /> of the provided extension <see cref = "string" />.
+    /// </summary>
+    /// <param name = "mime" > </param>
+    /// <returns>
+    ///     <see cref = "MimeType" />
+    /// </returns>
+    public static MimeType FromExtension( this ReadOnlySpan<char> mime )
+    {
+        Span<char> span = stackalloc char[mime.Length];
+        mime.ToLowerInvariant(span);
 
-            "soap"      => MimeType.Soap,
-            ".soap"     => MimeType.Soap,
-            "stream"    => MimeType.Stream,
-            ".stream"   => MimeType.Stream,
-            "bin"       => MimeType.Binary,
-            ".bin"      => MimeType.Binary,
-            "pdf"       => MimeType.Pdf,
-            ".pdf"      => MimeType.Pdf,
-            "rtf"       => MimeType.Rtf,
-            ".rtf"      => MimeType.Rtf,
-            "json"      => MimeType.Json,
-            ".json"     => MimeType.Json,
-            "xul"       => MimeType.Xul,
-            ".xul"      => MimeType.Xul,
-            "js"        => MimeType.JavaScript,
-            ".js"       => MimeType.JavaScript,
-            "vbs"       => MimeType.Vbs,
-            ".vbs"      => MimeType.Vbs,
-            "sds"       => MimeType.Sds,
-            ".sds"      => MimeType.Sds,
-            "tds"       => MimeType.Tds,
-            ".tds"      => MimeType.Tds,
-            "coa"       => MimeType.Coa,
-            ".coa"      => MimeType.Coa,
-            "xmla"      => MimeType.XmlApp,
-            ".xmla"     => MimeType.XmlApp,
-            "url"       => MimeType.UrlEncodedContent,
-            ".url"      => MimeType.UrlEncodedContent,
-            "license"   => MimeType.Licenses,
-            ".license"  => MimeType.Licenses,
-            "licenses"  => MimeType.Licenses,
-            ".licenses" => MimeType.Licenses,
-            "dll"       => MimeType.Dll,
-            ".dll"      => MimeType.Dll,
+        if ( span.SequenceEqual("text") || span.SequenceEqual(".text") ) { return MimeType.Text; }
 
-            "zip"     => MimeType.Zip,
-            ".zip"    => MimeType.Zip,
-            "7z"      => MimeType.SevenZip,
-            ".7z"     => MimeType.SevenZip,
-            "bz"      => MimeType.Bzip,
-            ".bz"     => MimeType.Bzip,
-            "bz2"     => MimeType.Bzip2,
-            ".bz2"    => MimeType.Bzip2,
-            "gz"      => MimeType.Gzip,
-            ".gz"     => MimeType.Gzip,
-            "tar.gz"  => MimeType.Tar,
-            ".tar.gz" => MimeType.Tar,
+        if ( span.SequenceEqual("txt") || span.SequenceEqual(".txt") ) { return MimeType.PlainText; }
 
-            "doc"   => MimeType.Doc,
-            ".doc"  => MimeType.Doc,
-            "docx"  => MimeType.Docx,
-            ".docx" => MimeType.Docx,
-            "xls"   => MimeType.Xls,
-            ".xls"  => MimeType.Xls,
-            "xlsx"  => MimeType.Xlsx,
-            ".xlsx" => MimeType.Xlsx,
-            "ppt"   => MimeType.Ppt,
-            ".ppt"  => MimeType.Ppt,
-            "pptx"  => MimeType.Pptx,
-            ".pptx" => MimeType.Pptx,
+        if ( span.SequenceEqual("html") || span.SequenceEqual(".html") || span.SequenceEqual("htm") || span.SequenceEqual(".htm") ) { return MimeType.Html; }
 
-            "3gppa"   => MimeType.ThreeGppAudio,
-            ".3gppa"  => MimeType.ThreeGppAudio,
-            "3gpp2a"  => MimeType.ThreeGpp2Audio,
-            ".3gpp2a" => MimeType.ThreeGpp2Audio,
-            "aac"     => MimeType.Aac,
-            ".aac"    => MimeType.Aac,
+        if ( span.SequenceEqual("xml") || span.SequenceEqual(".xml") ) { return MimeType.Xml; }
 
-            "mpega"  => MimeType.MpegAudio,
-            ".mpega" => MimeType.MpegAudio,
-            "mp3"    => MimeType.Mp3,
-            ".mp3"   => MimeType.Mp3,
-            "weba"   => MimeType.Weba,
-            ".weba"  => MimeType.Weba,
-            "wav"    => MimeType.Wav,
-            ".wav"   => MimeType.Wav,
+        if ( span.SequenceEqual("xaml") || span.SequenceEqual(".xaml") ) { return MimeType.Xaml; }
 
-            "3gpp"   => MimeType.ThreeGppVideo,
-            ".3gpp"  => MimeType.ThreeGppVideo,
-            "3gpp2"  => MimeType.ThreeGpp2Video,
-            ".3gpp2" => MimeType.ThreeGpp2Video,
-            "mp4"    => MimeType.Mp4,
-            ".mp4"   => MimeType.Mp4,
-            "mpeg"   => MimeType.MpegVideo,
-            ".mpeg"  => MimeType.MpegVideo,
-            "mpeg4"  => MimeType.Mpeg4,
-            ".mpeg4" => MimeType.Mpeg4,
-            "webm"   => MimeType.Webm,
-            ".webm"  => MimeType.Webm,
-            "h264"   => MimeType.H264,
-            ".h264"  => MimeType.H264,
-            "avi"    => MimeType.Avi,
-            ".avi"   => MimeType.Avi,
-            "mov"    => MimeType.Mov,
-            ".mov"   => MimeType.Mov,
-            "mpg"    => MimeType.Mpg,
-            ".mpg"   => MimeType.Mpg,
-            "ogg"    => MimeType.Ogg,
-            ".ogg"   => MimeType.Ogg,
-            "mkv"    => MimeType.Mkv,
-            ".mkv"   => MimeType.Mkv,
+        if ( span.SequenceEqual("rt") || span.SequenceEqual(".rt") ) { return MimeType.RichText; }
 
-            "gif"   => MimeType.Gif,
-            ".gif"  => MimeType.Gif,
-            "tif"   => MimeType.Tiff,
-            ".tif"  => MimeType.Tiff,
-            "png"   => MimeType.Png,
-            ".png"  => MimeType.Png,
-            "jpeg"  => MimeType.Jpeg,
-            ".jpeg" => MimeType.Jpeg,
-            "jpg"   => MimeType.Jpg,
-            ".jpg"  => MimeType.Jpg,
-            "bmp"   => MimeType.Bmp,
-            ".bmp"  => MimeType.Bmp,
-            "webp"  => MimeType.Webp,
-            ".webp" => MimeType.Webp,
-            "ico"   => MimeType.Icon,
-            ".ico"  => MimeType.Icon,
-            "svg"   => MimeType.Svg,
-            ".svg"  => MimeType.Svg,
+        if ( span.SequenceEqual("css") || span.SequenceEqual(".css") ) { return MimeType.Css; }
 
-            "ttf"  => MimeType.TrueType,
-            ".ttf" => MimeType.TrueType,
-            "otf"  => MimeType.OpenType,
-            ".otf" => MimeType.OpenType,
-            "fd"   => MimeType.FormData,
-            ".fd"  => MimeType.FormData,
+        if ( span.SequenceEqual("csv") || span.SequenceEqual(".csv") ) { return MimeType.Csv; }
 
-            _ => MimeType.Unknown
-        };
+        if ( span.SequenceEqual("ics") || span.SequenceEqual(".ics") ) { return MimeType.Calendar; }
+
+        if ( span.SequenceEqual("ini") || span.SequenceEqual(".ini") ) { return MimeType.Ini; }
+
+        if ( span.SequenceEqual("cfg") || span.SequenceEqual(".cfg") ) { return MimeType.Cfg; }
+
+        if ( span.SequenceEqual("conf") || span.SequenceEqual(".conf") ) { return MimeType.Config; }
+
+        if ( span.SequenceEqual("b64") || span.SequenceEqual(".b64") ) { return MimeType.Base64; }
+
+        if ( span.SequenceEqual("soap") || span.SequenceEqual(".soap") ) { return MimeType.Soap; }
+
+        if ( span.SequenceEqual("stream") || span.SequenceEqual(".stream") ) { return MimeType.Stream; }
+
+        if ( span.SequenceEqual("bin") || span.SequenceEqual(".bin") ) { return MimeType.Binary; }
+
+        if ( span.SequenceEqual("pdf") || span.SequenceEqual(".pdf") ) { return MimeType.Pdf; }
+
+        if ( span.SequenceEqual("rtf") || span.SequenceEqual(".rtf") ) { return MimeType.Rtf; }
+
+        if ( span.SequenceEqual("json") || span.SequenceEqual(".json") ) { return MimeType.Json; }
+
+        if ( span.SequenceEqual("xul") || span.SequenceEqual(".xul") ) { return MimeType.Xul; }
+
+        if ( span.SequenceEqual("js") || span.SequenceEqual(".js") ) { return MimeType.JavaScript; }
+
+        if ( span.SequenceEqual("vbs") || span.SequenceEqual(".vbs") ) { return MimeType.Vbs; }
+
+        if ( span.SequenceEqual("sds") || span.SequenceEqual(".sds") ) { return MimeType.Sds; }
+
+        if ( span.SequenceEqual("tds") || span.SequenceEqual(".tds") ) { return MimeType.Tds; }
+
+        if ( span.SequenceEqual("coa") || span.SequenceEqual(".coa") ) { return MimeType.Coa; }
+
+        if ( span.SequenceEqual("xmla") || span.SequenceEqual(".xmla") ) { return MimeType.XmlApp; }
+
+        if ( span.SequenceEqual("url") || span.SequenceEqual(".url") ) { return MimeType.UrlEncodedContent; }
+
+        if ( span.SequenceEqual("license") || span.SequenceEqual(".license") || span.SequenceEqual("licenses") || span.SequenceEqual(".licenses") ) { return MimeType.Licenses; }
+
+        if ( span.SequenceEqual("dll") || span.SequenceEqual(".dll") ) { return MimeType.Dll; }
+
+        if ( span.SequenceEqual("zip") || span.SequenceEqual(".zip") ) { return MimeType.Zip; }
+
+        if ( span.SequenceEqual("7z") || span.SequenceEqual(".7z") ) { return MimeType.SevenZip; }
+
+        if ( span.SequenceEqual("bz") || span.SequenceEqual(".bz") ) { return MimeType.Bzip; }
+
+        if ( span.SequenceEqual("bz2") || span.SequenceEqual(".bz2") ) { return MimeType.Bzip2; }
+
+        if ( span.SequenceEqual("gz") || span.SequenceEqual(".gz") ) { return MimeType.Gzip; }
+
+        if ( span.SequenceEqual("tar.gz") || span.SequenceEqual(".tar.gz") ) { return MimeType.Tar; }
+
+        if ( span.SequenceEqual("doc") || span.SequenceEqual(".doc") ) { return MimeType.Doc; }
+
+        if ( span.SequenceEqual("docx") || span.SequenceEqual(".docx") ) { return MimeType.Docx; }
+
+        if ( span.SequenceEqual("xls") || span.SequenceEqual(".xls") ) { return MimeType.Xls; }
+
+        if ( span.SequenceEqual("xlsx") || span.SequenceEqual(".xlsx") ) { return MimeType.Xlsx; }
+
+        if ( span.SequenceEqual("ppt") || span.SequenceEqual(".ppt") ) { return MimeType.Ppt; }
+
+        if ( span.SequenceEqual("pptx") || span.SequenceEqual(".pptx") ) { return MimeType.Pptx; }
+
+        if ( span.SequenceEqual("3gppa") || span.SequenceEqual(".3gppa") ) { return MimeType.ThreeGppAudio; }
+
+        if ( span.SequenceEqual("3gpp2a") || span.SequenceEqual(".3gpp2a") ) { return MimeType.ThreeGpp2Audio; }
+
+        if ( span.SequenceEqual("aac") || span.SequenceEqual(".aac") ) { return MimeType.Aac; }
+
+        if ( span.SequenceEqual("mpega") || span.SequenceEqual(".mpega") ) { return MimeType.MpegAudio; }
+
+        if ( span.SequenceEqual("mp3") || span.SequenceEqual(".mp3") ) { return MimeType.Mp3; }
+
+        if ( span.SequenceEqual("weba") || span.SequenceEqual(".weba") ) { return MimeType.Weba; }
+
+        if ( span.SequenceEqual("wav") || span.SequenceEqual(".wav") ) { return MimeType.Wav; }
+
+        if ( span.SequenceEqual("3gpp") || span.SequenceEqual(".3gpp") ) { return MimeType.ThreeGppVideo; }
+
+        if ( span.SequenceEqual("3gpp2") || span.SequenceEqual(".3gpp2") ) { return MimeType.ThreeGpp2Video; }
+
+        if ( span.SequenceEqual("mp4") || span.SequenceEqual(".mp4") ) { return MimeType.Mp4; }
+
+        if ( span.SequenceEqual("mpeg") || span.SequenceEqual(".mpeg") ) { return MimeType.MpegVideo; }
+
+        if ( span.SequenceEqual("mpeg4") || span.SequenceEqual(".mpeg4") ) { return MimeType.Mpeg4; }
+
+        if ( span.SequenceEqual("webm") || span.SequenceEqual(".webm") ) { return MimeType.Webm; }
+
+        if ( span.SequenceEqual("h264") || span.SequenceEqual(".h264") ) { return MimeType.H264; }
+
+        if ( span.SequenceEqual("avi") || span.SequenceEqual(".avi") ) { return MimeType.Avi; }
+
+        if ( span.SequenceEqual("mov") || span.SequenceEqual(".mov") ) { return MimeType.Mov; }
+
+        if ( span.SequenceEqual("mpg") || span.SequenceEqual(".mpg") ) { return MimeType.Mpg; }
+
+        if ( span.SequenceEqual("ogg") || span.SequenceEqual(".ogg") ) { return MimeType.Ogg; }
+
+        if ( span.SequenceEqual("mkv") || span.SequenceEqual(".mkv") ) { return MimeType.Mkv; }
+
+        if ( span.SequenceEqual("gif") || span.SequenceEqual(".gif") ) { return MimeType.Gif; }
+
+        if ( span.SequenceEqual("tif") || span.SequenceEqual(".tif") ) { return MimeType.Tiff; }
+
+        if ( span.SequenceEqual("png") || span.SequenceEqual(".png") ) { return MimeType.Png; }
+
+        if ( span.SequenceEqual("jpeg") || span.SequenceEqual(".jpeg") ) { return MimeType.Jpeg; }
+
+        if ( span.SequenceEqual("jpg") || span.SequenceEqual(".jpg") ) { return MimeType.Jpg; }
+
+        if ( span.SequenceEqual("bmp") || span.SequenceEqual(".bmp") ) { return MimeType.Bmp; }
+
+        if ( span.SequenceEqual("webp") || span.SequenceEqual(".webp") ) { return MimeType.Webp; }
+
+        if ( span.SequenceEqual("ico") || span.SequenceEqual(".ico") ) { return MimeType.Icon; }
+
+        if ( span.SequenceEqual("svg") || span.SequenceEqual(".svg") ) { return MimeType.Svg; }
+
+        if ( span.SequenceEqual("ttf") || span.SequenceEqual(".ttf") ) { return MimeType.TrueType; }
+
+        if ( span.SequenceEqual("otf") || span.SequenceEqual(".otf") ) { return MimeType.OpenType; }
+
+        if ( span.SequenceEqual("fd") || span.SequenceEqual(".fd") ) { return MimeType.FormData; }
+
+        if ( span.SequenceEqual("dat") || span.SequenceEqual(".dat") ) { return MimeType.Unknown; }
+
+        return MimeType.NotSet;
+    }
 
 
     /// <summary>
@@ -350,6 +354,7 @@ public static class MimeTypeExtensions
             MimeTypeNames.Text.PLAIN                  => MimeType.PlainText,
             MimeTypeNames.Text.HTML                   => MimeType.Html,
             MimeTypeNames.Text.XML                    => MimeType.Xml,
+            MimeTypeNames.Text.XAML                   => MimeType.Xaml,
             MimeTypeNames.Text.RICH_TEXT              => MimeType.RichText,
             MimeTypeNames.Text.CALENDAR               => MimeType.Calendar,
             MimeTypeNames.Text.CASCADING_STYLE_SHEETS => MimeType.Css,
@@ -445,6 +450,7 @@ public static class MimeTypeExtensions
             MimeType.PlainText => MimeTypeNames.Text.PLAIN,
             MimeType.Html      => MimeTypeNames.Text.HTML,
             MimeType.Xml       => MimeTypeNames.Text.XML,
+            MimeType.Xaml      => MimeTypeNames.Text.XAML,
             MimeType.RichText  => MimeTypeNames.Text.RICH_TEXT,
             MimeType.Css       => MimeTypeNames.Text.CASCADING_STYLE_SHEETS,
             MimeType.Csv       => MimeTypeNames.Text.COMMA_SEPARATED_VALUES,
@@ -456,6 +462,7 @@ public static class MimeTypeExtensions
             MimeType.UrlEncodedContent => MimeTypeNames.Application.URL_ENCODED_CONTENT,
             MimeType.Soap              => MimeTypeNames.Application.SOAP,
             MimeType.Stream            => MimeTypeNames.Application.BINARY,
+            MimeType.Unknown           => MimeTypeNames.Application.BINARY,
             MimeType.Binary            => MimeTypeNames.Application.BINARY,
             MimeType.Base64            => MimeTypeNames.Application.BASE64,
             MimeType.Rtf               => MimeTypeNames.Application.RTF,
@@ -520,8 +527,7 @@ public static class MimeTypeExtensions
             MimeType.OpenType => MimeTypeNames.Font.OPEN_TYPE,
             MimeType.FormData => MimeTypeNames.MultiPart.FORM_DATA,
 
-            MimeType.NotSet  => throw new ArgumentOutOfRangeException(nameof(mime), mime, null),
-            MimeType.Unknown => throw new ArgumentOutOfRangeException(nameof(mime), mime, null),
-            _                => throw new ArgumentOutOfRangeException(nameof(mime), mime, null)
+            MimeType.NotSet => throw new ArgumentOutOfRangeException(nameof(mime), mime, null),
+            _               => throw new ArgumentOutOfRangeException(nameof(mime), mime, null)
         };
 }

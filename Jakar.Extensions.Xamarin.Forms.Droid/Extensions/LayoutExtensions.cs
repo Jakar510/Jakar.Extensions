@@ -13,6 +13,7 @@ using AObject = Java.Lang.Object;
 
 
 
+#nullable enable
 namespace Jakar.Extensions.Xamarin.Forms.Droid.Extensions;
 
 

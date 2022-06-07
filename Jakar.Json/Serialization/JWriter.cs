@@ -5,6 +5,7 @@ using Jakar.Extensions.Exceptions.General;
 
 
 
+#nullable enable
 namespace Jakar.Json.Serialization;
 
 

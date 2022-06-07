@@ -10,6 +10,7 @@ using Microsoft.CodeAnalysis.Text;
 
 
 
+#nullable enable
 namespace Jakar.Json.Generator;
 
 
@@ -69,6 +70,7 @@ public class JsonizerGenerator : ISourceGenerator
 
         // begin building the generated source
         var source = new StringBuilder($@"
+#nullable enable
 namespace {namespaceName}
 {{
     public partial class {classSymbol.Name} 

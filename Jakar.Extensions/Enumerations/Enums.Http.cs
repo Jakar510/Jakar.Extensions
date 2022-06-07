@@ -1,4 +1,5 @@
-﻿namespace Jakar.Extensions.Enumerations;
+﻿#nullable enable
+namespace Jakar.Extensions.Enumerations;
 
 
 public static partial class Enums

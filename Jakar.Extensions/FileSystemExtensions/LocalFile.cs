@@ -1,10 +1,11 @@
 ﻿// unset
 
+using System.Runtime.InteropServices;
 using System.Security;
 using System.Web;
 
 
-
+#nullable enable
 namespace Jakar.Extensions.FileSystemExtensions;
 
 
@@ -25,9 +26,21 @@ public class LocalFile : BaseCollections<LocalFile>, TempFile.ITempFile, LocalFi
     public bool     Exists        => Info.Exists;
     public string?  DirectoryName => Info.DirectoryName;
     public MimeType Mime          => Extension.FromExtension();
-    public string   ContentType   => Mime.ToContentType();
-    public string   Root          => Directory.GetDirectoryRoot(FullPath);
-    public Encoding FileEncoding  { get; init; } = Encoding.Default;
+    public string ContentType
+    {
+        get
+        {
+            try { return Mime.ToContentType(); }
+            catch ( ArgumentOutOfRangeException )
+            {
+                FullPath.WriteToConsole();
+                FullPath.WriteToDebug();
+                throw;
+            }
+        }
+    }
+    public string   Root         => Directory.GetDirectoryRoot(FullPath);
+    public Encoding FileEncoding { get; init; } = Encoding.Default;
 
 
     [JsonIgnore]
@@ -116,7 +129,6 @@ public class LocalFile : BaseCollections<LocalFile>, TempFile.ITempFile, LocalFi
     /// <summary>
     /// 
     /// </summary>
-    /// <param name = "file" > </param>
     /// <exception cref = "NullReferenceException" > </exception>
     /// <exception cref = "ArgumentException" > </exception>
     /// <exception cref = "ArgumentNullException" > </exception>
@@ -132,6 +144,33 @@ public class LocalFile : BaseCollections<LocalFile>, TempFile.ITempFile, LocalFi
         file.SetTemporary();
         return stream;
     }
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <exception cref = "NullReferenceException" > </exception>
+    /// <exception cref = "ArgumentException" > </exception>
+    /// <exception cref = "ArgumentNullException" > </exception>
+    /// <exception cref = "FileNotFoundException" > </exception>
+    /// <exception cref = "PathTooLongException" > </exception>
+    /// <exception cref = "DirectoryNotFoundException" > </exception>
+    /// <exception cref = "IOException" > </exception>
+    /// <exception cref = "NotSupportedException" > </exception>
+    /// <returns> </returns>
+    public static FileStream CreateTempFileAndOpen( MimeType type, out LocalFile file )
+    {
+        ReadOnlySpan<char> ext  = type.ToExtension(true);
+        ReadOnlySpan<char> name = Path.GetRandomFileName();
+        name = name[..name.IndexOf('.')];
+        Span<char> span = stackalloc char[name.Length + ext.Length];
+        name.CopyTo(span);
+        ext.CopyTo(span[name.Length..]);
+
+        string     path   = Path.Combine(Path.GetTempPath(), span.ToString());
+        FileStream stream = CreateAndOpen(path, out file);
+        file.SetTemporary();
+        return stream;
+    }
+
 
     /// <summary>
     /// 
@@ -163,13 +202,23 @@ public class LocalFile : BaseCollections<LocalFile>, TempFile.ITempFile, LocalFi
     /// <summary>
     ///     Encrypts the file so that only the account used to encrypt the file can decrypt it.
     /// </summary>
-    public void Encrypt() => File.Encrypt(FullPath);
+    public void Encrypt()
+    {
+        if ( !RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ) { throw new InvalidOperationException(); }
+
+        File.Encrypt(FullPath);
+    }
     /// <summary>
     ///     Decrypts a file that was encrypted by the current account using the
     ///     <see cref = "File.Encrypt(string)" />
     ///     method.
     /// </summary>
-    public void Decrypt() => File.Decrypt(FullPath);
+    public void Decrypt()
+    {
+        if ( !RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ) { throw new InvalidOperationException(); }
+
+        File.Decrypt(FullPath);
+    }
 
 
     /// <summary>

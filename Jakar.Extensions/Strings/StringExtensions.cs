@@ -2,6 +2,7 @@
 
 
 
+#nullable enable
 namespace Jakar.Extensions.Strings;
 
 
@@ -64,6 +65,20 @@ public static class StringExtensions
     ///     <see cref = "string" />
     /// </returns>
     public static string Repeat( this string value, int count ) => new StringBuilder(value.Length * count).Insert(0, value, count).ToString();
+    
+
+    /// <summary>
+    ///     Wraps a string in
+    ///     <paramref name = "c" > </paramref>
+    ///     repeated
+    ///     <paramref name = "padding" > </paramref>
+    ///     times.
+    /// </summary>
+    /// <param name = "self" > </param>
+    /// <param name = "c" > </param>
+    /// <param name = "padding" > </param>
+    /// <returns> </returns>
+    public static string Wrapper( this string self, in char c, in int padding ) => self.PadLeft(padding, c).PadRight(padding, c);
 
 
     public static IEnumerable<string> SplitLines( this string text, char   separator = '\n' ) => text.Split(separator);

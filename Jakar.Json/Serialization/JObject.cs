@@ -7,6 +7,7 @@ using Jakar.Extensions.Collections;
 
 
 
+#nullable enable
 namespace Jakar.Json.Serialization;
 
 

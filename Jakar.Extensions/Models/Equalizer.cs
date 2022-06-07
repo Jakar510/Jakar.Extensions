@@ -1,4 +1,5 @@
-﻿namespace Jakar.Extensions.Models;
+﻿#nullable enable
+namespace Jakar.Extensions.Models;
 
 
 public class ValueEqualizer<T> : IEqualityComparer<T?>, IEqualityComparer<T>, IEqualityComparer where T : struct, IComparable<T>

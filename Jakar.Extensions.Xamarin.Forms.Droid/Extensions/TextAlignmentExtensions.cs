@@ -7,6 +7,7 @@ using TextAlignment = Xamarin.Forms.TextAlignment;
 
 
 
+#nullable enable
 namespace Jakar.Extensions.Xamarin.Forms.Droid.Extensions;
 
 

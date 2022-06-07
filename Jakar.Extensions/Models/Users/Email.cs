@@ -1,4 +1,5 @@
-﻿namespace Jakar.Extensions.Models.Users;
+﻿#nullable enable
+namespace Jakar.Extensions.Models.Users;
 
 
 public interface IEmail : IDataBaseID, IEquatable<IEmail>

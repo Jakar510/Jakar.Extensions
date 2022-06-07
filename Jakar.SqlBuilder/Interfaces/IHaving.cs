@@ -1,4 +1,5 @@
-﻿namespace Jakar.SqlBuilder.Interfaces;
+﻿#nullable enable
+namespace Jakar.SqlBuilder.Interfaces;
 
 
 public interface IHaving : IAggregateFunctions<IHaving>, IComparators<IHaving>, IChainEnd<ISqlBuilderRoot>

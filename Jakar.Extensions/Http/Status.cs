@@ -1,4 +1,5 @@
-﻿namespace Jakar.Extensions.Http;
+﻿#nullable enable
+namespace Jakar.Extensions.Http;
 
 
 /// <summary>

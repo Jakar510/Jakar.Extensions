@@ -10,6 +10,7 @@ using JetBrains.Annotations;
 
 
 
+#nullable enable
 namespace Console.Experiments;
 
 

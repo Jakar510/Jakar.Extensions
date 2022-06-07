@@ -5,6 +5,7 @@ using System;
 
 
 
+#nullable enable
 namespace Jakar.Xml.Deserialization;
 
 

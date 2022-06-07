@@ -1,3 +1,4 @@
+#nullable enable
 namespace Jakar.Extensions.Models.Collections;
 
 

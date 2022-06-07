@@ -8,6 +8,7 @@ using UIKit;
 
 
 #nullable enable
+#nullable enable
 namespace Jakar.Extensions.Xamarin.Forms.iOS.Services;
 
 

@@ -3,6 +3,7 @@ using Newtonsoft.Json.Linq;
 
 
 
+#nullable enable
 namespace Jakar.Json.Deserialization;
 
 

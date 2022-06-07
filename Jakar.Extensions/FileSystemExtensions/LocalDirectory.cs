@@ -3,6 +3,7 @@ using System.Security;
 
 
 
+#nullable enable
 namespace Jakar.Extensions.FileSystemExtensions;
 
 

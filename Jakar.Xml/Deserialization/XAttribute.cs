@@ -8,6 +8,7 @@ using Jakar.Extensions.SpanAndMemory;
 
 
 
+#nullable enable
 namespace Jakar.Xml.Deserialization;
 
 

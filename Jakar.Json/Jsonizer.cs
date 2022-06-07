@@ -6,6 +6,7 @@ using Jakar.Extensions;
 
 
 
+#nullable enable
 namespace Jakar.Json;
 
 

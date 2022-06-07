@@ -7,6 +7,7 @@ using UIKit;
 
 
 
+#nullable enable
 namespace Jakar.Extensions.Xamarin.Forms.iOS.Extensions.Layout;
 
 

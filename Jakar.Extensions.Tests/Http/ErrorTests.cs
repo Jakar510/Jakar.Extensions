@@ -15,6 +15,7 @@ using NUnit.Framework;
 
 
 
+#nullable enable
 namespace Jakar.Extensions.Tests.Http;
 
 

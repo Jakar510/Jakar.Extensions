@@ -7,6 +7,7 @@ using JObject = Jakar.Json.Serialization.JObject;
 
 
 
+#nullable enable
 namespace Jakar.Json.Deserialization;
 
 

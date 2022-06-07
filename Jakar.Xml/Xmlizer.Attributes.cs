@@ -1,6 +1,7 @@
 ﻿// Jakar.Extensions :: Jakar.Xml
 // 04/28/2022  1:16 PM
 
+#nullable enable
 namespace Jakar.Xml;
 
 

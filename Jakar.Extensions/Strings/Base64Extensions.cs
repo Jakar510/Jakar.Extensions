@@ -1,4 +1,5 @@
-﻿namespace Jakar.Extensions.Strings;
+﻿#nullable enable
+namespace Jakar.Extensions.Strings;
 
 
 public static class Base64Extensions

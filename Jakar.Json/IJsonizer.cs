@@ -1,4 +1,5 @@
-﻿namespace Jakar.Json;
+﻿#nullable enable
+namespace Jakar.Json;
 
 
 public interface IJsonizer

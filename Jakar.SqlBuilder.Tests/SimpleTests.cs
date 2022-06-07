@@ -2,6 +2,7 @@ using NUnit.Framework;
 
 
 
+#nullable enable
 namespace Jakar.SqlBuilder.Tests;
 
 

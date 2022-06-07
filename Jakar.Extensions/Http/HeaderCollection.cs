@@ -3,21 +3,46 @@ using System.Net.Http.Headers;
 
 
 #nullable enable
+#nullable enable
 namespace Jakar.Extensions.Http;
 
 
 public class HeaderCollection : Dictionary<string, object>
 {
-    public HeaderCollection() { }
-    public HeaderCollection( MimeType contentType ) : this(contentType.ToContentType()) { }
-    public HeaderCollection( string   contentType ) => Add(HttpRequestHeader.ContentType, contentType);
-    public HeaderCollection( MimeType contentType, Encoding encoding ) : this(contentType.ToContentType(), encoding) { }
-
-    public HeaderCollection( string contentType, Encoding encoding )
+    public string? ContentType
     {
-        Add(HttpRequestHeader.ContentType,     contentType);
-        Add(HttpRequestHeader.ContentEncoding, encoding.EncodingName);
-        Add(encoding.HeaderName,               encoding.WebName);
+        get => TryGetValue(nameof(HttpRequestHeader.ContentType), out object? value)
+                   ? value.ToString()
+                   : default;
+        set => this[nameof(HttpRequestHeader.ContentType)] = value ?? string.Empty;
+    }
+    public string? ContentEncoding
+    {
+        get => TryGetValue(nameof(HttpRequestHeader.ContentEncoding), out object? value)
+                   ? value.ToString()
+                   : default;
+        set => this[nameof(HttpRequestHeader.ContentEncoding)] = value ?? string.Empty;
+    }
+
+
+    public Encoding Encoding
+    {
+        set
+        {
+            ContentEncoding        = value.EncodingName;
+            this[value.HeaderName] = value.WebName;
+        }
+    }
+
+
+    public HeaderCollection() : base() { }
+    public HeaderCollection( MimeType contentType ) : this(contentType.ToContentType()) { }
+    public HeaderCollection( string   contentType ) : this() => ContentType = contentType;
+    public HeaderCollection( MimeType contentType, Encoding encoding ) : this(contentType.ToContentType(), encoding) { }
+    public HeaderCollection( string contentType, Encoding encoding ) : this()
+    {
+        ContentType = contentType;
+        Encoding    = encoding;
     }
 
 

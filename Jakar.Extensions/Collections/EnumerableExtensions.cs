@@ -1,4 +1,5 @@
-﻿namespace Jakar.Extensions.Collections;
+﻿#nullable enable
+namespace Jakar.Extensions.Collections;
 
 
 public static class EnumerableExtensions

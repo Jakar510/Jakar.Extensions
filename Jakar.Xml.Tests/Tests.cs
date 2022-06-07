@@ -1,6 +1,7 @@
 using NUnit.Framework;
 
 
+#nullable enable
 namespace Jakar.Xml.Tests
 {
     [TestFixture]

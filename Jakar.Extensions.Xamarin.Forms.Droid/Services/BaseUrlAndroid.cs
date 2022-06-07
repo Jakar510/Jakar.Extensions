@@ -8,6 +8,7 @@ using Jakar.Extensions.Xamarin.Forms.Interfaces;
 [assembly: Xamarin.Forms.Dependency(typeof(BaseUrlAndroid))]
 
 
+#nullable enable
 namespace Jakar.Extensions.Xamarin.Forms.Droid.Services;
 
 

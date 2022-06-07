@@ -10,7 +10,7 @@ using JetBrains.Annotations;
 using Newtonsoft.Json.Linq;
 
 
-
+#nullable enable
 namespace Jakar.Xml.Serialization;
 
 
@@ -18,7 +18,7 @@ namespace Jakar.Xml.Serialization;
 public ref struct XWriter
 {
     public const      string        NULL = "null";
-    private readonly  StringBuilder _sb  = new();
+    private readonly  StringBuilder _sb  = new(); // TODO: System.Text.ValueStringBuilder
     internal readonly bool          shouldIndent;
     internal          int           indentLevel = default;
 

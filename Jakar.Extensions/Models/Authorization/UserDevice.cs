@@ -1,4 +1,5 @@
-﻿namespace Jakar.Extensions.Models.Authorization;
+﻿#nullable enable
+namespace Jakar.Extensions.Models.Authorization;
 
 
 public interface IUserDevice : IEquatable<IUserDevice>, IDataBaseID

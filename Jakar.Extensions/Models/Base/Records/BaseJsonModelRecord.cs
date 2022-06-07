@@ -1,4 +1,5 @@
-﻿namespace Jakar.Extensions.Models.Base.Records;
+﻿#nullable enable
+namespace Jakar.Extensions.Models.Base.Records;
 
 
 [Serializable]

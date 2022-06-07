@@ -1,4 +1,5 @@
-﻿namespace Jakar.Extensions.Exceptions;
+﻿#nullable enable
+namespace Jakar.Extensions.Exceptions;
 
 
 public class ExceptionDetails

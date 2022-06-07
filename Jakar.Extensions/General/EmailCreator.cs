@@ -3,6 +3,7 @@ using MimeKit;
 
 
 
+#nullable enable
 namespace Jakar.Extensions.General;
 
 

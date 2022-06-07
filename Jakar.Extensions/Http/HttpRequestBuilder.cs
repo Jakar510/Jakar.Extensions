@@ -2,56 +2,35 @@
 // 05/03/2022  9:01 AM
 
 
-#nullable enable
 using System.Net.Http.Headers;
+using System.Net.Http;
+using System.Net.Security;
 
 
-
+#nullable enable
 namespace Jakar.Extensions.Http;
 
 
 #if NET6_0
-using System.Net.Http;
-using System.Net.Security;
-using Enumerations;
 
 
 
-public readonly struct HttpRequestBuilder
+public sealed class HttpRequestBuilder
 {
+    private readonly Uri                _host;
     private readonly Encoding           _encoding;
-    private readonly Uri                _url;
-    private readonly CancellationToken  _token;
     private readonly SocketsHttpHandler _handler = new();
-    public readonly  HeaderCollection   headers  = new();
     private          HttpClient         _Client => new(_handler);
 
 
-    public HttpRequestBuilder( Uri url, Encoding encoding, in CancellationToken token )
+    public HttpRequestBuilder( Uri host ) : this(host, Encoding.Default) { }
+    public HttpRequestBuilder( Uri host, Encoding encoding )
     {
-        _url      = url;
+        _host     = host;
         _encoding = encoding;
-        _token    = token;
     }
-    public static HttpRequestBuilder Create( Uri url, in CancellationToken token                                = default ) => new(url, Encoding.Default, token);
-    public static HttpRequestBuilder Create( Uri url, Encoding             encoding, in CancellationToken token = default ) => new(url, encoding, token);
-
-
-    public HttpRequestBuilder With_Headers( HttpContentHeaders collection )
-    {
-        headers.Merge(collection);
-        return this;
-    }
-    public HttpRequestBuilder With_Headers( HttpHeaders collection )
-    {
-        headers.Merge(collection);
-        return this;
-    }
-    public HttpRequestBuilder With_Headers( HeaderCollection collection )
-    {
-        headers.Merge(collection);
-        return this;
-    }
+    public static HttpRequestBuilder Create( Uri host ) => new(host);
+    public static HttpRequestBuilder Create( Uri host, Encoding encoding ) => new(host, encoding);
 
 
     public HttpRequestBuilder With_Proxy( IWebProxy value )
@@ -139,367 +118,107 @@ public readonly struct HttpRequestBuilder
     }
 
 
-    private HttpContent Update( in HttpContent content )
-    {
-        if ( headers is null ) { return content; }
-
-        foreach ( ( string key, object v ) in headers ) { content.Headers.Add(key, v.ToString()); }
-
-        return content;
-    }
-
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] private Handler CreateHandler( Task<HttpResponseMessage> task ) => new(task, _encoding, _token);
-
-
-    public Handler Post( byte[] value )
-    {
-        var content = new ByteArrayContent(value);
-
-        Task<HttpResponseMessage> task = _Client.PostAsync(_url, Update(content), _token);
-        return CreateHandler(task);
-    }
-    public Handler Post( ReadOnlyMemory<byte> value )
-    {
-        var content = new ReadOnlyMemoryContent(value);
-
-        Task<HttpResponseMessage> task = _Client.PostAsync(_url, Update(content), _token);
-        return CreateHandler(task);
-    }
-    public Handler Post( IDictionary<string, string> value )
-    {
-        var content = new FormUrlEncodedContent(value);
-
-        Task<HttpResponseMessage> task = _Client.PostAsync(_url, Update(content), _token);
-        return CreateHandler(task);
-    }
-    public Handler Post( Stream value )
-    {
-        var content = new StreamContent(value);
-
-        Task<HttpResponseMessage> task = _Client.PostAsync(_url, content, _token);
-        return CreateHandler(task);
-    }
-    public Handler Post( MultipartFormDataContent content )
-    {
-        Task<HttpResponseMessage> task = _Client.PostAsync(_url, Update(content), _token);
-        return CreateHandler(task);
-    }
-    public Handler Post( string value )
-    {
-        var content = new StringContent(value.ToPrettyJson(), _encoding);
-
-        Task<HttpResponseMessage> task = _Client.PostAsync(_url, Update(content), _token);
-        return CreateHandler(task);
-    }
-    public Handler Post( BaseClass value )
-    {
-        var content = new JsonContent(value.ToPrettyJson(), _encoding);
-
-        Task<HttpResponseMessage> task = _Client.PostAsync(_url, Update(content), _token);
-        return CreateHandler(task);
-    }
-    public Handler Post( BaseRecord value )
-    {
-        var content = new JsonContent(value.ToPrettyJson(), _encoding);
-
-        Task<HttpResponseMessage> task = _Client.PostAsync(_url, Update(content), _token);
-        return CreateHandler(task);
-    }
-
-
-    public Handler Put( byte[] value )
-    {
-        var content = new ByteArrayContent(value);
-
-        Task<HttpResponseMessage> task = _Client.PutAsync(_url, Update(content), _token);
-        return CreateHandler(task);
-    }
-    public Handler Put( ReadOnlyMemory<byte> value )
-    {
-        var content = new ReadOnlyMemoryContent(value);
-
-        Task<HttpResponseMessage> task = _Client.PutAsync(_url, Update(content), _token);
-        return CreateHandler(task);
-    }
-    public Handler Put( IDictionary<string, string> value )
-    {
-        var content = new FormUrlEncodedContent(value);
-
-        Task<HttpResponseMessage> task = _Client.PutAsync(_url, Update(content), _token);
-        return CreateHandler(task);
-    }
-    public Handler Put( Stream value )
-    {
-        var                       content = new StreamContent(value);
-        Task<HttpResponseMessage> task    = _Client.PutAsync(_url, Update(content), _token);
-        return CreateHandler(task);
-    }
-    public Handler Put( MultipartFormDataContent content )
-    {
-        Task<HttpResponseMessage> task = _Client.PutAsync(_url, Update(content), _token);
-        return CreateHandler(task);
-    }
-    public Handler Put( string value )
-    {
-        var content = new StringContent(value.ToPrettyJson(), _encoding);
-
-        Task<HttpResponseMessage> task = _Client.PutAsync(_url, Update(content), _token);
-        return CreateHandler(task);
-    }
-    public Handler Put( BaseClass value )
-    {
-        var content = new JsonContent(value.ToPrettyJson(), _encoding);
-
-        Task<HttpResponseMessage> task = _Client.PutAsync(_url, Update(content), _token);
-        return CreateHandler(task);
-    }
-    public Handler Put( BaseRecord value )
-    {
-        var content = new JsonContent(value.ToPrettyJson(), _encoding);
-
-        Task<HttpResponseMessage> task = _Client.PutAsync(_url, Update(content), _token);
-        return CreateHandler(task);
-    }
-
-
-    public Handler Delete( byte[] value )
-    {
-        var content = new ByteArrayContent(value);
-
-
-        var request = new HttpRequestMessage(HttpMethod.Delete, _url)
-                      {
-                          Content = Update(content)
-                      };
-
-        Task<HttpResponseMessage> task = _Client.SendAsync(request, _token);
-        return CreateHandler(task);
-    }
-    public Handler Delete( ReadOnlyMemory<byte> value )
-    {
-        var content = new ReadOnlyMemoryContent(value);
-
-
-        var request = new HttpRequestMessage(HttpMethod.Delete, _url)
-                      {
-                          Content = Update(content)
-                      };
-
-        Task<HttpResponseMessage> task = _Client.SendAsync(request, _token);
-        return CreateHandler(task);
-    }
-    public Handler Delete( IDictionary<string, string> value )
-    {
-        var content = new FormUrlEncodedContent(value);
-
-
-        var request = new HttpRequestMessage(HttpMethod.Delete, _url)
-                      {
-                          Content = content
-                      };
-
-        Task<HttpResponseMessage> task = _Client.SendAsync(request, _token);
-        return CreateHandler(task);
-    }
-    public Handler Delete( Stream value )
-    {
-        var content = new StreamContent(value);
-
-
-        var request = new HttpRequestMessage(HttpMethod.Delete, _url)
-                      {
-                          Content = Update(content)
-                      };
-
-        Task<HttpResponseMessage> task = _Client.SendAsync(request, _token);
-        return CreateHandler(task);
-    }
-    public Handler Delete( MultipartFormDataContent content )
-    {
-        var request = new HttpRequestMessage(HttpMethod.Delete, _url)
-                      {
-                          Content = Update(content)
-                      };
-
-        Task<HttpResponseMessage> task = _Client.SendAsync(request, _token);
-        return CreateHandler(task);
-    }
-    public Handler Delete( string value )
-    {
-        var content = new StringContent(value.ToPrettyJson(), _encoding);
-
-
-        var request = new HttpRequestMessage(HttpMethod.Delete, _url)
-                      {
-                          Content = Update(content)
-                      };
-
-        Task<HttpResponseMessage> task = _Client.SendAsync(request, _token);
-        return CreateHandler(task);
-    }
-    public Handler Delete( BaseClass value )
-    {
-        var content = new JsonContent(value.ToPrettyJson(), _encoding);
-
-
-        var request = new HttpRequestMessage(HttpMethod.Delete, _url)
-                      {
-                          Content = Update(content)
-                      };
-
-        Task<HttpResponseMessage> task = _Client.SendAsync(request, _token);
-        return CreateHandler(task);
-    }
-    public Handler Delete( BaseRecord value )
-    {
-        var content = new JsonContent(value.ToPrettyJson(), _encoding);
-
-
-        var request = new HttpRequestMessage(HttpMethod.Delete, _url)
-                      {
-                          Content = Update(content)
-                      };
-
-        Task<HttpResponseMessage> task = _Client.SendAsync(request, _token);
-        return CreateHandler(task);
-    }
-    public Handler Delete()
-    {
-        Task<HttpResponseMessage> task = _Client.DeleteAsync(_url, _token);
-        return CreateHandler(task);
-    }
-
-
-    public Handler Patch( byte[] value )
-    {
-        var content = new ByteArrayContent(value);
-
-
-        var request = new HttpRequestMessage(HttpMethod.Patch, _url)
-                      {
-                          Content = Update(content)
-                      };
-
-        Task<HttpResponseMessage> task = _Client.SendAsync(request, _token);
-        return CreateHandler(task);
-    }
-    public Handler Patch( ReadOnlyMemory<byte> value )
-    {
-        var content = new ReadOnlyMemoryContent(value);
-
-
-        var request = new HttpRequestMessage(HttpMethod.Patch, _url)
-                      {
-                          Content = Update(content)
-                      };
-
-        Task<HttpResponseMessage> task = _Client.SendAsync(request, _token);
-        return CreateHandler(task);
-    }
-    public Handler Patch( IDictionary<string, string> value )
-    {
-        var content = new FormUrlEncodedContent(value);
-
-
-        var request = new HttpRequestMessage(HttpMethod.Patch, _url)
-                      {
-                          Content = content
-                      };
-
-        Task<HttpResponseMessage> task = _Client.SendAsync(request, _token);
-        return CreateHandler(task);
-    }
-    public Handler Patch( Stream value )
-    {
-        var content = new StreamContent(value);
-
-
-        var request = new HttpRequestMessage(HttpMethod.Patch, _url)
-                      {
-                          Content = Update(content)
-                      };
-
-        Task<HttpResponseMessage> task = _Client.SendAsync(request, _token);
-        return CreateHandler(task);
-    }
-    public Handler Patch( MultipartFormDataContent content )
-    {
-        var request = new HttpRequestMessage(HttpMethod.Patch, _url)
-                      {
-                          Content = Update(content)
-                      };
-
-        Task<HttpResponseMessage> task = _Client.SendAsync(request, _token);
-        return CreateHandler(task);
-    }
-    public Handler Patch( string value )
-    {
-        var content = new StringContent(value.ToPrettyJson(), _encoding);
-
-
-        var request = new HttpRequestMessage(HttpMethod.Patch, _url)
-                      {
-                          Content = Update(content)
-                      };
-
-        Task<HttpResponseMessage> task = _Client.SendAsync(request, _token);
-        return CreateHandler(task);
-    }
-    public Handler Patch( BaseClass value )
-    {
-        var content = new JsonContent(value.ToPrettyJson(), _encoding);
-
-
-        var request = new HttpRequestMessage(HttpMethod.Patch, _url)
-                      {
-                          Content = Update(content)
-                      };
-
-        Task<HttpResponseMessage> task = _Client.SendAsync(request, _token);
-        return CreateHandler(task);
-    }
-    public Handler Patch( BaseRecord value )
-    {
-        var content = new JsonContent(value.ToPrettyJson(), _encoding);
-
-
-        var request = new HttpRequestMessage(HttpMethod.Patch, _url)
-                      {
-                          Content = Update(content)
-                      };
-
-        Task<HttpResponseMessage> task = _Client.SendAsync(request, _token);
-        return CreateHandler(task);
-    }
-
-
-    public Handler Get()
-    {
-        var                       request = new HttpRequestMessage(HttpMethod.Get, _url);
-        Task<HttpResponseMessage> task    = _Client.SendAsync(request, _token);
-        return CreateHandler(task);
-    }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] private Handler CreateHandler( Uri url, HttpMethod method, in CancellationToken token ) => CreateHandler(new HttpRequestMessage(method, url), token);
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private Handler CreateHandler( Uri url, HttpMethod method, HttpContent value, in CancellationToken token ) => CreateHandler(new HttpRequestMessage(method, url)
+                                                                                                                                {
+                                                                                                                                    Content = value
+                                                                                                                                },
+                                                                                                                                token);
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] private Handler CreateHandler( HttpRequestMessage request, in CancellationToken token ) => new(_Client, request, _encoding, token);
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] private Uri CreateUrl( string                     path ) => new(_host, path);
+
+
+    public Handler Post( Uri    url,  HttpContent                 value,   in CancellationToken token ) => CreateHandler(url, HttpMethod.Post, value, token);
+    public Handler Post( string path, HttpContent                 value,   in CancellationToken token ) => Post(CreateUrl(path), value,                                              token);
+    public Handler Post( string path, byte[]                      value,   in CancellationToken token ) => Post(path,            new ByteArrayContent(value),                        token);
+    public Handler Post( string path, ReadOnlyMemory<byte>        value,   in CancellationToken token ) => Post(path,            new ReadOnlyMemoryContent(value),                   token);
+    public Handler Post( string path, IDictionary<string, string> value,   in CancellationToken token ) => Post(path,            new FormUrlEncodedContent(value),                   token);
+    public Handler Post( string path, Stream                      value,   in CancellationToken token ) => Post(path,            new StreamContent(value),                           token);
+    public Handler Post( string path, MultipartContent            content, in CancellationToken token ) => Post(path,            (HttpContent)content,                               token);
+    public Handler Post( string path, string                      value,   in CancellationToken token ) => Post(path,            new StringContent(value.ToPrettyJson(), _encoding), token);
+    public Handler Post( string path, BaseClass                   value,   in CancellationToken token ) => Post(path,            new JsonContent(value.ToPrettyJson(), _encoding),   token);
+    public Handler Post( string path, BaseRecord                  value,   in CancellationToken token ) => Post(path,            new JsonContent(value.ToPrettyJson(), _encoding),   token);
+
+
+    public Handler Put( Uri    url,  HttpContent                 value,   in CancellationToken token ) => CreateHandler(url, HttpMethod.Put, value, token);
+    public Handler Put( string path, HttpContent                 value,   in CancellationToken token ) => Put(CreateUrl(path), value,                                              token);
+    public Handler Put( string path, byte[]                      value,   in CancellationToken token ) => Put(path,            new ByteArrayContent(value),                        token);
+    public Handler Put( string path, ReadOnlyMemory<byte>        value,   in CancellationToken token ) => Put(path,            new ReadOnlyMemoryContent(value),                   token);
+    public Handler Put( string path, IDictionary<string, string> value,   in CancellationToken token ) => Put(path,            new FormUrlEncodedContent(value),                   token);
+    public Handler Put( string path, Stream                      value,   in CancellationToken token ) => Put(path,            new StreamContent(value),                           token);
+    public Handler Put( string path, MultipartContent            content, in CancellationToken token ) => Put(path,            (HttpContent)content,                               token);
+    public Handler Put( string path, string                      value,   in CancellationToken token ) => Put(path,            new StringContent(value.ToPrettyJson(), _encoding), token);
+    public Handler Put( string path, BaseClass                   value,   in CancellationToken token ) => Put(path,            new JsonContent(value.ToPrettyJson(), _encoding),   token);
+    public Handler Put( string path, BaseRecord                  value,   in CancellationToken token ) => Put(path,            new JsonContent(value.ToPrettyJson(), _encoding),   token);
+
+
+    public Handler Delete( Uri    url,  in CancellationToken        token ) => CreateHandler(url, HttpMethod.Delete, token);
+    public Handler Delete( string path, in CancellationToken        token ) => Delete(CreateUrl(path),                               token);
+    public Handler Delete( string path, HttpContent                 value,   in CancellationToken token ) => Delete(CreateUrl(path), value,                                              token);
+    public Handler Delete( string path, byte[]                      value,   in CancellationToken token ) => Delete(path,            new ByteArrayContent(value),                        token);
+    public Handler Delete( string path, ReadOnlyMemory<byte>        value,   in CancellationToken token ) => Delete(path,            new ReadOnlyMemoryContent(value),                   token);
+    public Handler Delete( string path, IDictionary<string, string> value,   in CancellationToken token ) => Delete(path,            new FormUrlEncodedContent(value),                   token);
+    public Handler Delete( string path, Stream                      value,   in CancellationToken token ) => Delete(path,            new StreamContent(value),                           token);
+    public Handler Delete( string path, MultipartContent            content, in CancellationToken token ) => Delete(path,            (HttpContent)content,                               token);
+    public Handler Delete( string path, string                      value,   in CancellationToken token ) => Delete(path,            new StringContent(value.ToPrettyJson(), _encoding), token);
+    public Handler Delete( string path, BaseClass                   value,   in CancellationToken token ) => Delete(path,            new JsonContent(value.ToPrettyJson(), _encoding),   token);
+    public Handler Delete( string path, BaseRecord                  value,   in CancellationToken token ) => Delete(path,            new JsonContent(value.ToPrettyJson(), _encoding),   token);
+    public Handler Delete( Uri    url,  HttpContent                 value,   in CancellationToken token ) => CreateHandler(url, HttpMethod.Delete, value, token);
+
+
+    public Handler Patch( Uri    url,  HttpContent                 value,   in CancellationToken token ) => CreateHandler(url, HttpMethod.Patch, value, token);
+    public Handler Patch( string path, HttpContent                 value,   in CancellationToken token ) => Patch(CreateUrl(path), value,                                              token);
+    public Handler Patch( string path, byte[]                      value,   in CancellationToken token ) => Patch(path,            new ByteArrayContent(value),                        token);
+    public Handler Patch( string path, ReadOnlyMemory<byte>        value,   in CancellationToken token ) => Patch(path,            new ReadOnlyMemoryContent(value),                   token);
+    public Handler Patch( string path, IDictionary<string, string> value,   in CancellationToken token ) => Patch(path,            new FormUrlEncodedContent(value),                   token);
+    public Handler Patch( string path, Stream                      value,   in CancellationToken token ) => Patch(path,            new StreamContent(value),                           token);
+    public Handler Patch( string path, MultipartContent            content, in CancellationToken token ) => Patch(path,            (HttpContent)content,                               token);
+    public Handler Patch( string path, string                      value,   in CancellationToken token ) => Patch(path,            new StringContent(value.ToPrettyJson(), _encoding), token);
+    public Handler Patch( string path, BaseClass                   value,   in CancellationToken token ) => Patch(path,            new JsonContent(value.ToPrettyJson(), _encoding),   token);
+    public Handler Patch( string path, BaseRecord                  value,   in CancellationToken token ) => Patch(path,            new JsonContent(value.ToPrettyJson(), _encoding),   token);
+
+
+    public Handler Get( Uri    url,  CancellationToken token ) => CreateHandler(url, HttpMethod.Get, token);
+    public Handler Get( string path, CancellationToken token ) => Get(CreateUrl(path), token);
 
 
 
     [SuppressMessage("ReSharper", "UnusedMemberInSuper.Global")]
-    public readonly struct Handler
+    public readonly struct Handler : IDisposable
     {
-        private readonly  Task<HttpResponseMessage> _request;
-        internal readonly Encoding                  encoding;
-        internal readonly CancellationToken         token;
+        private readonly  HttpClient         _client;
+        private readonly  HttpRequestMessage _request;
+        internal readonly Encoding           encoding;
+        internal readonly CancellationToken  token;
 
 
-        public Handler( Task<HttpResponseMessage> request, Encoding encoding, in CancellationToken token )
+        public string              Method         => _request.Method.Method;
+        public HttpRequestOptions  Options        => _request.Options;
+        public HttpRequestHeaders  Headers        => _request.Headers;
+        public HttpContentHeaders? ContentHeaders => _request.Content?.Headers;
+        public AppVersion Version
         {
-            this._request = request;
+            get => _request.Version;
+            set => _request.Version = value.ToVersion();
+        }
+        public HttpVersionPolicy VersionPolicy
+        {
+            get => _request.VersionPolicy;
+            set => _request.VersionPolicy = value;
+        }
+
+
+        public Handler( HttpClient client, HttpRequestMessage request, Encoding encoding, in CancellationToken token )
+        {
+            _client       = client;
+            _request      = request;
             this.encoding = encoding;
             this.token    = token;
         }
 
 
-        public TaskAwaiter<HttpResponseMessage> GetAwaiter() => _request.GetAwaiter();
+        public TaskAwaiter<HttpResponseMessage> GetAwaiter() => _client.SendAsync(_request, token).GetAwaiter();
 
 
         public Task<ResponseData<JToken>> AsJson() => AsJson(JsonNet.LoadSettings);
@@ -516,7 +235,7 @@ public readonly struct HttpRequestBuilder
 
 
         public Task<ResponseData<TResult>> AsJson<TResult>() => AsJson<TResult>(JsonNet.Serializer);
-        public async Task<ResponseData<TResult>> AsJson<TResult>( JsonSerializer serializer ) => await ResponseData<TResult>.Create(this, serializer, AsJson<TResult>);
+        public Task<ResponseData<TResult>> AsJson<TResult>( JsonSerializer serializer ) => ResponseData<TResult>.Create(this, serializer, AsJson<TResult>);
         public async Task<TResult> AsJson<TResult>( HttpResponseMessage response, JsonSerializer serializer )
         {
             response.EnsureSuccessStatusCode();
@@ -529,7 +248,7 @@ public readonly struct HttpRequestBuilder
         }
 
 
-        public async Task<ResponseData<string>> AsString() => await ResponseData<string>.Create(this, AsString);
+        public Task<ResponseData<string>> AsString() => ResponseData<string>.Create(this, AsString);
         public async Task<string> AsString( HttpResponseMessage response )
         {
             response.EnsureSuccessStatusCode();
@@ -538,7 +257,7 @@ public readonly struct HttpRequestBuilder
         }
 
 
-        public async Task<ResponseData<byte[]>> AsBytes() => await ResponseData<byte[]>.Create(this, AsBytes);
+        public Task<ResponseData<byte[]>> AsBytes() => ResponseData<byte[]>.Create(this, AsBytes);
         public async Task<byte[]> AsBytes( HttpResponseMessage response )
         {
             response.EnsureSuccessStatusCode();
@@ -547,7 +266,7 @@ public readonly struct HttpRequestBuilder
         }
 
 
-        public async Task<ResponseData<ReadOnlyMemory<byte>>> AsMemory() => await ResponseData<ReadOnlyMemory<byte>>.Create(this, AsMemory);
+        public Task<ResponseData<ReadOnlyMemory<byte>>> AsMemory() => ResponseData<ReadOnlyMemory<byte>>.Create(this, AsMemory);
         public async Task<ReadOnlyMemory<byte>> AsMemory( HttpResponseMessage response )
         {
             response.EnsureSuccessStatusCode();
@@ -558,7 +277,7 @@ public readonly struct HttpRequestBuilder
         }
 
 
-        public async Task<ResponseData<LocalFile>> AsFile() => await ResponseData<LocalFile>.Create(this, AsFile);
+        public Task<ResponseData<LocalFile>> AsFile() => ResponseData<LocalFile>.Create(this, AsFile);
         public async Task<LocalFile> AsFile( HttpResponseMessage response )
         {
             response.EnsureSuccessStatusCode();
@@ -569,9 +288,20 @@ public readonly struct HttpRequestBuilder
 
             return file;
         }
+        public Task<ResponseData<LocalFile>> AsFile( MimeType type ) => ResponseData<LocalFile>.Create(this, type, AsFile);
+        public async Task<LocalFile> AsFile( HttpResponseMessage response, MimeType type )
+        {
+            response.EnsureSuccessStatusCode();
+            using HttpContent      content = response.Content;
+            await using FileStream stream  = LocalFile.CreateTempFileAndOpen(type, out LocalFile file);
+            await using Stream     sr      = await content.ReadAsStreamAsync(token);
+            await sr.CopyToAsync(stream, token);
+
+            return file;
+        }
 
 
-        public async Task<ResponseData<MemoryStream>> AsStream() => await ResponseData<MemoryStream>.Create(this, AsStream);
+        public Task<ResponseData<MemoryStream>> AsStream() => ResponseData<MemoryStream>.Create(this, AsStream);
         public async Task<MemoryStream> AsStream( HttpResponseMessage response )
         {
             response.EnsureSuccessStatusCode();
@@ -581,6 +311,13 @@ public readonly struct HttpRequestBuilder
 
             await stream.CopyToAsync(result, token);
             return result;
+        }
+
+
+        public void Dispose()
+        {
+            _request.Dispose();
+            _request.Dispose();
         }
     }
 }

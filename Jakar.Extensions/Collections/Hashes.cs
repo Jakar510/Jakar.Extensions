@@ -3,6 +3,7 @@
 
 
 #if NET6_0
+#nullable enable
 namespace Jakar.Extensions.Collections;
 
 

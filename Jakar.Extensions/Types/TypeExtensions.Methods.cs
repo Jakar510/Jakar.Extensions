@@ -1,4 +1,5 @@
-﻿namespace Jakar.Extensions.Types;
+﻿#nullable enable
+namespace Jakar.Extensions.Types;
 
 
 public static partial class TypeExtensions

@@ -1,6 +1,7 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 06/06/2022  3:43 PM
 
+#nullable enable
 namespace Jakar.Extensions.Http;
 
 

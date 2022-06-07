@@ -1,4 +1,5 @@
-﻿namespace Jakar.SqlBuilder;
+﻿#nullable enable
+namespace Jakar.SqlBuilder;
 
 
 public struct JoinChainBuilderLeft

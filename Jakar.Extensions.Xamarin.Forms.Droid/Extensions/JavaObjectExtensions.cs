@@ -7,6 +7,7 @@ using Android.Runtime;
 
 
 
+#nullable enable
 namespace Jakar.Extensions.Xamarin.Forms.Droid.Extensions;
 
 

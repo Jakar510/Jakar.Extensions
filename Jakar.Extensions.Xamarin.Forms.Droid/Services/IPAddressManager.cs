@@ -12,6 +12,7 @@ using Xamarin.Forms;
 [assembly: Dependency(typeof(IPAddressManager))]
 
 
+#nullable enable
 namespace Jakar.Extensions.Xamarin.Forms.Droid.Services;
 
 

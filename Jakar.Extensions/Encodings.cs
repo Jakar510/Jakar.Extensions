@@ -1,4 +1,5 @@
-﻿namespace Jakar.Extensions;
+﻿#nullable enable
+namespace Jakar.Extensions;
 
 
 public static class Encodings

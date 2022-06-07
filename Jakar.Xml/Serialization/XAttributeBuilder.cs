@@ -7,6 +7,7 @@ using System.Text;
 
 
 
+#nullable enable
 namespace Jakar.Xml.Serialization;
 
 

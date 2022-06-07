@@ -14,7 +14,7 @@ using Newtonsoft.Json.Linq;
 // using Jakar.Xml.Deserialization;
 
 
-
+#nullable enable
 namespace Console.Experiments;
 
 
@@ -57,17 +57,20 @@ public static class Program
         var target  = new Uri("https://www.toptal.com/developers/postbin/");
         var host    = new Uri("https://httpbin.org/");
         var content = new AppVersion(1, 2, 3).ToString();
+        var builder = HttpRequestBuilder.Create(host);
 
 
-        ( await HttpRequestBuilder.Create(new Uri(host, "/bearer"),     token).Get().AsJson() ).WriteToConsole();
-        ( await HttpRequestBuilder.Create(new Uri(host, "/put"),        token).Put(content).AsJson() ).WriteToConsole();
-        ( await HttpRequestBuilder.Create(new Uri(host, "/post"),       token).Post(content).AsJson() ).WriteToConsole();
-        ( await HttpRequestBuilder.Create(new Uri(host, "/get"),        token).Get().AsJson() ).WriteToConsole();
-        ( await HttpRequestBuilder.Create(new Uri(host, "/delete"),     token).Delete().AsJson() ).WriteToConsole();
-        ( await HttpRequestBuilder.Create(new Uri(host, "/patch"),      token).Patch(content).AsJson() ).WriteToConsole();
-        ( await HttpRequestBuilder.Create(new Uri(host, "/headers"),    token).Get().AsJson() ).WriteToConsole();
-        ( await HttpRequestBuilder.Create(new Uri(host, "/ip"),         token).Get().AsJson() ).WriteToConsole();
-        ( await HttpRequestBuilder.Create(new Uri(host, "/user-agent"), token).Get().AsJson() ).WriteToConsole();
+        ( await builder.Get("/bearer", token).AsJson() ).WriteToConsole();
+        ( await builder.Put("/put", content, token).AsJson() ).WriteToConsole();
+        ( await builder.Post("/post", content, token).AsJson() ).WriteToConsole();
+        ( await builder.Get("/get", token).AsJson() ).WriteToConsole();
+        ( await builder.Delete("/delete", token).AsJson() ).WriteToConsole();
+        ( await builder.Patch("/patch", content, token).AsJson() ).WriteToConsole();
+        ( await builder.Get("/headers",    token).AsJson() ).WriteToConsole();
+        ( await builder.Get("/ip",         token).AsJson() ).WriteToConsole();
+        ( await builder.Get("/user-agent", token).AsJson() ).WriteToConsole();
+        ( await builder.Get("/cookies",    token).AsJson() ).WriteToConsole();
+        ( await builder.Get("/image/png",  token).AsFile(MimeType.Png) ).WriteToConsole();
     }
     private static void Test_Sql()
     {

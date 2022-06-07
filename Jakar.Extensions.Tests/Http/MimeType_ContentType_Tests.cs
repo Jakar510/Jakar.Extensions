@@ -2,6 +2,7 @@ using Jakar.Extensions.Http;
 using NUnit.Framework;
 
 
+#nullable enable
 namespace Jakar.Extensions.Tests.Http;
 
 

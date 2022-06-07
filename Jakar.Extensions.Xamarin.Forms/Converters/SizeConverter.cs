@@ -1,4 +1,5 @@
-﻿namespace Jakar.Extensions.Xamarin.Forms.Converters;
+﻿#nullable enable
+namespace Jakar.Extensions.Xamarin.Forms.Converters;
 
 
 [global::Xamarin.Forms.Internals.Preserve(true, false)]

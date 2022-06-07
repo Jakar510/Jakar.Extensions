@@ -7,6 +7,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 
 
+#nullable enable
 namespace Jakar.Json.Generator;
 
 

@@ -5,6 +5,7 @@ using System.Windows.Controls.Primitives;
 
 
 
+#nullable enable
 namespace Jakar.Extensions.Wpf;
 
 
