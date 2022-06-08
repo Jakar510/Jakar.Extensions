@@ -92,7 +92,7 @@
       <Version>7.2.0.564</Version>
     </PackageReference>
     <PackageReference Include="Jakar.Extensions">
-      <Version>6.0.0.18-beta</Version>
+      <Version>6.0.0.19-beta</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.AppCenter">
       <Version>4.5.1</Version>
@@ -128,7 +128,7 @@
       <Version>2.0.2</Version>
     </PackageReference>
     <PackageReference Include="Xamarin.Essentials">
-      <Version>1.7.2</Version>
+      <Version>1.7.3</Version>
     </PackageReference>
     <PackageReference Include="Xamarin.Forms">
       <Version>5.0.0.2291</Version>

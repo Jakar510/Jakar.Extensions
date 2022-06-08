@@ -1,11 +1,14 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 06/07/2022  3:42 PM
 
-#if NETSTANDARD2_1
 
 // ReSharper disable once CheckNamespace
 
 namespace System;
+
+
+#if !NET6_0
+
 
 
 /// <summary>Provides functionality to format the string representation of an object into a span.</summary>
@@ -18,8 +21,7 @@ public interface ISpanFormattable : IFormattable
     /// <param name="provider">An optional object that supplies culture-specific formatting information for <paramref name="destination"/>.</param>
     /// <returns><see langword="true"/> if the formatting was successful; otherwise, <see langword="false"/>.</returns>
     /// <remarks>
-    /// An implementation of this interface should produce the same string of characters as an implementation of <see cref="IFormattable.ToString(string?, IFormatProvider?)"/>
-    /// on the same type.
+    /// An implementation of this interface should produce the same string of characters as an implementation of <see cref="IFormattable.ToString(string?, IFormatProvider?)"/> on the same type.
     /// TryFormat should return false only if there is not enough space in the destination buffer. Any other failures should throw an exception.
     /// </remarks>
     bool TryFormat( Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider );
