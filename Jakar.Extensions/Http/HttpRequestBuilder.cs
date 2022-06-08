@@ -15,7 +15,7 @@ namespace Jakar.Extensions.Http;
 
 
 
-public sealed class HttpRequestBuilder
+public class HttpRequestBuilder
 {
     private readonly Uri                _host;
     private readonly Encoding           _encoding;
@@ -33,13 +33,13 @@ public sealed class HttpRequestBuilder
     public static HttpRequestBuilder Create( Uri host, Encoding encoding ) => new(host, encoding);
 
 
-    public HttpRequestBuilder With_Proxy( IWebProxy value )
+    public virtual HttpRequestBuilder With_Proxy( IWebProxy value )
     {
         _handler.Proxy    = value;
         _handler.UseProxy = true;
         return this;
     }
-    public HttpRequestBuilder With_Proxy( IWebProxy value, ICredentials credentials )
+    public virtual HttpRequestBuilder With_Proxy( IWebProxy value, ICredentials credentials )
     {
         _handler.Proxy                   = value;
         _handler.UseProxy                = true;
@@ -48,7 +48,7 @@ public sealed class HttpRequestBuilder
     }
 
 
-    public HttpRequestBuilder With_MaxRedirects( int value )
+    public virtual HttpRequestBuilder With_MaxRedirects( int value )
     {
         _handler.MaxAutomaticRedirections = value;
         _handler.AllowAutoRedirect        = value > 0;
@@ -56,7 +56,7 @@ public sealed class HttpRequestBuilder
     }
 
 
-    public HttpRequestBuilder With_Credentials( ICredentials value, bool preAuthenticate = true )
+    public virtual HttpRequestBuilder With_Credentials( ICredentials value, bool preAuthenticate = true )
     {
         _handler.Credentials     = value;
         _handler.PreAuthenticate = preAuthenticate;
@@ -64,13 +64,13 @@ public sealed class HttpRequestBuilder
     }
 
 
-    public HttpRequestBuilder With_Cookie( Uri url, Cookie value )
+    public virtual HttpRequestBuilder With_Cookie( Uri url, Cookie value )
     {
         _handler.CookieContainer.Add(url, value);
         _handler.UseCookies = true;
         return this;
     }
-    public HttpRequestBuilder With_Cookies( params Cookie[] value )
+    public virtual HttpRequestBuilder With_Cookie( params Cookie[] value )
     {
         CookieContainer container = _handler.CookieContainer;
         foreach ( Cookie cookie in value ) { container.Add(cookie); }
@@ -78,7 +78,7 @@ public sealed class HttpRequestBuilder
         _handler.UseCookies = true;
         return this;
     }
-    public HttpRequestBuilder With_Cookies( CookieContainer value )
+    public virtual HttpRequestBuilder With_Cookie( CookieContainer value )
     {
         _handler.CookieContainer = value;
         _handler.UseCookies      = true;
@@ -86,30 +86,30 @@ public sealed class HttpRequestBuilder
     }
 
 
-    public HttpRequestBuilder With_Timeout( int    minutes ) => With_Timeout(TimeSpan.FromMinutes(minutes));
-    public HttpRequestBuilder With_Timeout( float  seconds ) => With_Timeout(TimeSpan.FromSeconds(seconds));
-    public HttpRequestBuilder With_Timeout( double milliseconds ) => With_Timeout(TimeSpan.FromMilliseconds(milliseconds));
-    public HttpRequestBuilder With_Timeout( in TimeSpan value )
+    public virtual HttpRequestBuilder With_Timeout( int    minutes ) => With_Timeout(TimeSpan.FromMinutes(minutes));
+    public virtual HttpRequestBuilder With_Timeout( float  seconds ) => With_Timeout(TimeSpan.FromSeconds(seconds));
+    public virtual HttpRequestBuilder With_Timeout( double milliseconds ) => With_Timeout(TimeSpan.FromMilliseconds(milliseconds));
+    public virtual HttpRequestBuilder With_Timeout( in TimeSpan value )
     {
         _handler.ConnectTimeout = value;
         return this;
     }
 
 
-    public HttpRequestBuilder With_SSL( SslClientAuthenticationOptions value )
+    public virtual HttpRequestBuilder With_SSL( SslClientAuthenticationOptions value )
     {
         _handler.SslOptions = value;
         return this;
     }
 
 
-    public HttpRequestBuilder With_KeepAlive( int pingDelayMinutes, int pingTimeoutMinutes, HttpKeepAlivePingPolicy policy = HttpKeepAlivePingPolicy.WithActiveRequests ) =>
+    public virtual HttpRequestBuilder With_KeepAlive( int pingDelayMinutes, int pingTimeoutMinutes, HttpKeepAlivePingPolicy policy = HttpKeepAlivePingPolicy.WithActiveRequests ) =>
         With_KeepAlive(TimeSpan.FromMinutes(pingDelayMinutes), TimeSpan.FromMinutes(pingTimeoutMinutes), policy);
-    public HttpRequestBuilder With_KeepAlive( float pingDelaySeconds, float pingTimeoutSeconds, HttpKeepAlivePingPolicy policy = HttpKeepAlivePingPolicy.WithActiveRequests ) =>
+    public virtual HttpRequestBuilder With_KeepAlive( float pingDelaySeconds, float pingTimeoutSeconds, HttpKeepAlivePingPolicy policy = HttpKeepAlivePingPolicy.WithActiveRequests ) =>
         With_KeepAlive(TimeSpan.FromSeconds(pingDelaySeconds), TimeSpan.FromSeconds(pingTimeoutSeconds), policy);
-    public HttpRequestBuilder With_KeepAlive( double pingDelayMilliseconds, double pingTimeoutMilliseconds, HttpKeepAlivePingPolicy policy = HttpKeepAlivePingPolicy.WithActiveRequests ) =>
+    public virtual HttpRequestBuilder With_KeepAlive( double pingDelayMilliseconds, double pingTimeoutMilliseconds, HttpKeepAlivePingPolicy policy = HttpKeepAlivePingPolicy.WithActiveRequests ) =>
         With_KeepAlive(TimeSpan.FromMilliseconds(pingDelayMilliseconds), TimeSpan.FromMilliseconds(pingTimeoutMilliseconds), policy);
-    public HttpRequestBuilder With_KeepAlive( in TimeSpan pingDelay, in TimeSpan pingTimeout, HttpKeepAlivePingPolicy policy = HttpKeepAlivePingPolicy.WithActiveRequests )
+    public virtual HttpRequestBuilder With_KeepAlive( in TimeSpan pingDelay, in TimeSpan pingTimeout, HttpKeepAlivePingPolicy policy = HttpKeepAlivePingPolicy.WithActiveRequests )
     {
         _handler.KeepAlivePingDelay   = pingDelay;
         _handler.KeepAlivePingTimeout = pingTimeout;
@@ -118,15 +118,15 @@ public sealed class HttpRequestBuilder
     }
 
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] private Handler CreateHandler( Uri url, HttpMethod method, in CancellationToken token ) => CreateHandler(new HttpRequestMessage(method, url), token);
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] protected virtual Handler CreateHandler( Uri url, HttpMethod method, in CancellationToken token ) => CreateHandler(new HttpRequestMessage(method, url), token);
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private Handler CreateHandler( Uri url, HttpMethod method, HttpContent value, in CancellationToken token ) => CreateHandler(new HttpRequestMessage(method, url)
-                                                                                                                                {
-                                                                                                                                    Content = value
-                                                                                                                                },
-                                                                                                                                token);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] private Handler CreateHandler( HttpRequestMessage request, in CancellationToken token ) => new(_Client, request, _encoding, token);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] private Uri CreateUrl( string                     path ) => new(_host, path);
+    protected virtual Handler CreateHandler( Uri url, HttpMethod method, HttpContent value, in CancellationToken token ) => CreateHandler(new HttpRequestMessage(method, url)
+                                                                                                                                          {
+                                                                                                                                              Content = value
+                                                                                                                                          },
+                                                                                                                                          token);
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] protected virtual Handler CreateHandler( HttpRequestMessage request, in CancellationToken token ) => new(_Client, request, _encoding, token);
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] protected virtual Uri CreateUrl( string                     path ) => new(_host, path);
 
 
     public Handler Post( Uri    url,  HttpContent                 value,   in CancellationToken token ) => CreateHandler(url, HttpMethod.Post, value, token);
@@ -285,6 +285,27 @@ public sealed class HttpRequestBuilder
             await using FileStream stream  = LocalFile.CreateTempFileAndOpen(out LocalFile file);
             await using Stream     sr      = await content.ReadAsStreamAsync(token);
             await sr.CopyToAsync(stream, token);
+
+            return file;
+        }
+        public Task<ResponseData<LocalFile>> AsFile( string path ) => ResponseData<LocalFile>.Create(this, path, AsFile);
+        public async Task<LocalFile> AsFile( HttpResponseMessage response, string path )
+        {
+            response.EnsureSuccessStatusCode();
+            using HttpContent  content = response.Content;
+            var                file    = new LocalFile(path);
+            await using Stream stream  = await content.ReadAsStreamAsync(token);
+            await file.WriteAsync(stream, token);
+
+            return file;
+        }
+        public Task<ResponseData<LocalFile>> AsFile( LocalFile file ) => ResponseData<LocalFile>.Create(this, file, AsFile);
+        public async Task<LocalFile> AsFile( HttpResponseMessage response, LocalFile file )
+        {
+            response.EnsureSuccessStatusCode();
+            using HttpContent  content = response.Content;
+            await using Stream stream  = await content.ReadAsStreamAsync(token);
+            await file.WriteAsync(stream, token);
 
             return file;
         }

@@ -122,6 +122,7 @@ public ref struct ValueStringBuilder
     }
 
 
+    public ValueStringBuilder() : this(16) { }
     public ValueStringBuilder( in Span<char> initialBuffer )
     {
         _arrayToReturnToPool = null;

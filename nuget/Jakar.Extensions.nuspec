@@ -22,6 +22,7 @@
 			multi-targets NetStandard2.1 and Net6.0
 			Added MailKit Email Builder
 			Added Models.Service
+			Added HttpRequestBuilder for .Net 6.0
 			Updated Enum extensions
 			Added more Span extensions
 			Reworked AppSettings

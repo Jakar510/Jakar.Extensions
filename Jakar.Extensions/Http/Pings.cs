@@ -3,7 +3,7 @@ namespace Jakar.Extensions.Http;
 
 
 #if NET6_0
-[Obsolete]
+[Obsolete($"Use {nameof(HttpRequestBuilder)} instead")]
 #endif
 public static class Pings
 {

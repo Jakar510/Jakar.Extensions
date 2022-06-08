@@ -18,7 +18,7 @@ namespace Jakar.Extensions.Http;
 ///     </para>
 /// </summary>
 #if NET6_0
-[Obsolete]
+[Obsolete($"Use {nameof(HttpRequestBuilder)} instead")]
 #endif
 public static class Puts
 {
