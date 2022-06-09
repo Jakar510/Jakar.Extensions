@@ -8,6 +8,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nuget", "nuget", "{07C27764-F156-4896-B028-6FD19BB2E82E}"
 	ProjectSection(SolutionItems) = preProject
 		nuget\Jakar.Extensions.Blazor.nuspec = nuget\Jakar.Extensions.Blazor.nuspec
+		nuget\Jakar.Extensions.Hosting.nuspec = nuget\Jakar.Extensions.Hosting.nuspec
 		nuget\Jakar.Extensions.nuspec = nuget\Jakar.Extensions.nuspec
 		nuget\Jakar.Extensions.Xamarin.Forms.nuspec = nuget\Jakar.Extensions.Xamarin.Forms.nuspec
 		nuget\Jakar.Xml.nuspec = nuget\Jakar.Xml.nuspec
@@ -52,6 +53,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jakar.SqlBuilder.Tests", "Jakar.SqlBuilder.Tests\Jakar.SqlBuilder.Tests.csproj", "{5CF698E7-185A-4AA2-AB78-99175B690C1C}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jakar.Extensions.Wpf", "Jakar.Extensions.Wpf\Jakar.Extensions.Wpf.csproj", "{D3419869-47AD-45A3-8E6B-EEB292F3B26B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jakar.Extensions.AppCenter", "Jakar.Extensions.AppCenter\Jakar.Extensions.AppCenter.csproj", "{D25E8D3D-67BC-481C-8642-1A52A09C71CF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -118,6 +121,10 @@ Global
 		{D3419869-47AD-45A3-8E6B-EEB292F3B26B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D3419869-47AD-45A3-8E6B-EEB292F3B26B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D3419869-47AD-45A3-8E6B-EEB292F3B26B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D25E8D3D-67BC-481C-8642-1A52A09C71CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D25E8D3D-67BC-481C-8642-1A52A09C71CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D25E8D3D-67BC-481C-8642-1A52A09C71CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D25E8D3D-67BC-481C-8642-1A52A09C71CF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

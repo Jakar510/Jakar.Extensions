@@ -2,7 +2,7 @@
 namespace Jakar.Extensions.Models.Collections;
 
 
-public class ObservableDictionary<TKey, TValue> : ObservableClass, IDictionary<TKey, TValue>, IReadOnlyDictionary<TKey, TValue>, ICollectionAlerts
+public class ObservableDictionary<TKey, TValue> : ObservableClass, IDictionary<TKey, TValue>, IReadOnlyDictionary<TKey, TValue>, ICollectionAlerts where TKey : notnull
 {
     protected readonly Dictionary<TKey, TValue> _dictionary;
 

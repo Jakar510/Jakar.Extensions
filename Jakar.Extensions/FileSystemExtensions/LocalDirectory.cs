@@ -2,7 +2,6 @@
 using System.Security;
 
 
-
 #nullable enable
 namespace Jakar.Extensions.FileSystemExtensions;
 
@@ -26,11 +25,11 @@ public class LocalDirectory : BaseCollections<LocalDirectory>, TempFile.ITempFil
     }
 
 
-    public              string         FullPath { get; init; }
-    public              bool           Exists   => Info.Exists;
-    public              string         Name     => Info.Name;
-    public              string         Root     => Directory.GetDirectoryRoot(FullPath);
-    [JsonIgnore] public LocalDirectory Parent   => Info.Parent;
+    public              string          FullPath { get; init; }
+    public              bool            Exists   => Info.Exists;
+    public              string          Name     => Info.Name;
+    public              string          Root     => Directory.GetDirectoryRoot(FullPath);
+    [JsonIgnore] public LocalDirectory? Parent   => GetParent();
 
 
     public DateTime CreationTimeUtc
@@ -73,6 +72,14 @@ public class LocalDirectory : BaseCollections<LocalDirectory>, TempFile.ITempFil
     public static implicit operator LocalDirectory( ReadOnlySpan<char> info ) => new(info);
 
     public sealed override string ToString() => FullPath;
+    protected virtual LocalDirectory? GetParent()
+    {
+        DirectoryInfo? info = Info.Parent;
+
+        return info is null
+                   ? default(LocalDirectory)
+                   : info;
+    }
 
 
     /// <summary>

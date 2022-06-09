@@ -5,7 +5,7 @@
 namespace Jakar.Extensions.Models.Collections;
 
 
-public class ObservableConcurrentDictionary<TKey, TValue> : ObservableClass, IDictionary<TKey, TValue>, IReadOnlyDictionary<TKey, TValue>, ICollectionAlerts
+public class ObservableConcurrentDictionary<TKey, TValue> : ObservableClass, IDictionary<TKey, TValue>, IReadOnlyDictionary<TKey, TValue>, ICollectionAlerts where TKey : notnull
 {
     protected readonly ConcurrentDictionary<TKey, TValue> _dictionary;
 

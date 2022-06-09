@@ -1,33 +1,37 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
-    <Nullable>enable</Nullable>
-	  <GenerateDocumentationFile>True</GenerateDocumentationFile>
-	  <Version>4.3.0</Version>
-	  <PackageId>Jakar.Extensions.Blazor</PackageId>
-	  <Company>Tyler Stegmaier</Company>
-	  <Authors>Tyler Stegmaier</Authors>
-	  <PackageProjectUrl>https://github.com/Jakar510/Jakar.Extensions</PackageProjectUrl>
-	  <Copyright>https://raw.githubusercontent.com/Jakar510/Jakar.Extensions/master/LICENSE.txt</Copyright>
-	  <PackageTags>Jakar Api Extensions Web Host Database Server</PackageTags>
-	  <RepositoryType>git</RepositoryType>
-	  <RepositoryUrl>https://github.com/Jakar510/Jakar.Extensions</RepositoryUrl>
-	  <PackageReadmeFile>README.md</PackageReadmeFile>
-	  <PackageIcon>icon.png</PackageIcon>
-	  <PackageReleaseNotes>
-		  Jakar.Extensions.Blazor 4.3.0
-		  Initial Release
-	  </PackageReleaseNotes>
-	  <Description>Extensions to aid in development.</Description>
-	  <NoWarn>$(NoWarn);1591</NoWarn>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+		<Version>6.0.0.1-beta</Version>
+		<PackageId>Jakar.Extensions.Blazor</PackageId>
+		<Company>Tyler Stegmaier</Company>
+		<Authors>Tyler Stegmaier</Authors>
+		<PackageProjectUrl>https://github.com/Jakar510/Jakar.Extensions</PackageProjectUrl>
+		<Copyright>https://raw.githubusercontent.com/Jakar510/Jakar.Extensions/master/LICENSE.txt</Copyright>
+		<PackageTags>Jakar Api Extensions Web Host Database Server</PackageTags>
+		<RepositoryType>git</RepositoryType>
+		<RepositoryUrl>https://github.com/Jakar510/Jakar.Extensions</RepositoryUrl>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<PackageIcon>icon.png</PackageIcon>
+		<PackageReleaseNotes>
+			Jakar.Extensions.Blazor 6.0.0
+			Initial Release
+		</PackageReleaseNotes>
+		<Description>Extensions to aid in development.</Description>
+		<NoWarn>$(NoWarn);1591</NoWarn>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Jakar.Extensions" Version="6.0.0.19-beta" />
-    <PackageReference Include="BlazorComponentUtilities" Version="1.8.0" />
-    <PackageReference Include="BlazorPro.BlazorSize" Version="6.1.2" />
-    <PackageReference Include="PanoramicData.Blazor" Version="2.1.23" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Jakar.Extensions"
+						  Version="6.0.0.23-beta" />
+		<PackageReference Include="BlazorComponentUtilities"
+						  Version="1.8.0" />
+		<PackageReference Include="BlazorPro.BlazorSize"
+						  Version="6.1.2" />
+		<PackageReference Include="PanoramicData.Blazor"
+						  Version="2.1.23" />
+	</ItemGroup>
 
 </Project>

@@ -1,10 +1,10 @@
 <?xml version="1.0"
-      encoding="utf-8"?>
+	  encoding="utf-8"?>
 
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata>
 		<id>Jakar.Extensions.Blazor</id>
-		<version>5.4.0.1-beta</version>
+		<version>6.0.0.1-beta</version>
 		<title>Extension Library</title>
 		<authors>Tyler Stegmaier</authors>
 		<owners>Jakar510/Jakar</owners>
@@ -24,30 +24,34 @@
 		<tags>Jakar Api Extensions</tags>
 		<language>en-US</language>
 		<repository type="Github"
-		            url="https://github.com/Jakar510/Jakar.Extensions"
-		            branch="master" />
+					url="https://github.com/Jakar510/Jakar.Extensions"
+					branch="master" />
 		<dependencies>
 			<group targetFramework="net6.0">
-				<dependency id="Jakar.Extensions" version="5.4.0" />
-				<dependency id="BlazorComponentUtilities" version="1.8.0" />
-				<dependency id="BlazorPro.BlazorSize" version="6.1.1" />
-				<dependency id="PanoramicData.Blazor" version="2.0.56" />
+				<dependency id="Jakar.Extensions"
+							version="6.0.0.23-beta" />
+				<dependency id="BlazorComponentUtilities"
+							version="1.8.0" />
+				<dependency id="BlazorPro.BlazorSize"
+							version="6.1.2" />
+				<dependency id="PanoramicData.Blazor"
+							version="2.1.23" />
 			</group>
 		</dependencies>
 	</metadata>
 
 	<files>
 		<file src="..\LICENSE.txt"
-		      target="" />
+			  target="" />
 
 		<file src="..\images\icon.png" />
 
 		<!-- .net standard 2.1 -->
 		<file src="../Jakar.Extensions.Blazor/bin/Release/net6.0/Jakar.Extensions.Blazor.dll"
-		      target="lib/net6.0" />
+			  target="lib/net6.0" />
 		<file src="../Jakar.Extensions.Blazor/bin/Release/net6.0/Jakar.Extensions.Blazor.xml"
-		      target="net6.0" />
+			  target="net6.0" />
 		<file src="../Jakar.Extensions.Blazor/bin/Release/net6.0/Jakar.Extensions.Blazor.pdb"
-		      target="lib/net6.0" />
+			  target="lib/net6.0" />
 	</files>
 </package>

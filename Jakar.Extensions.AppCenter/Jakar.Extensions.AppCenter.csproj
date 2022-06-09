@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Jakar.Extensions" Version="6.0.0.23-beta" />
+		<PackageReference Include="Microsoft.AppCenter" Version="4.5.1" />
+		<PackageReference Include="Microsoft.AppCenter.Analytics" Version="4.5.1" />
+		<PackageReference Include="Microsoft.AppCenter.Crashes" Version="4.5.1" />
+	</ItemGroup>
+
+</Project>

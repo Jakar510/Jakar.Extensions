@@ -1,16 +1,16 @@
-﻿using System.Net.Mail;
+﻿#nullable enable
+using System.Net.Mail;
 using MimeKit;
 
 
 
-#nullable enable
-namespace Jakar.Extensions.General;
+namespace Jakar.Extensions.Hosting;
 
 
 /// <summary>
 /// <see href="http://www.mimekit.net/docs/html/Creating-Messages.htm"/>
 /// </summary>
-public sealed class EmailBuilder : EmailBuilder.IToSenderSyntax, EmailBuilder.IWithAttachmentsSyntax, EmailBuilder.IBodySyntax, EmailBuilder.ICreatorSyntax, EmailBuilder.ISubjectSyntax
+public struct EmailBuilder : EmailBuilder.IToSenderSyntax, EmailBuilder.IWithAttachmentsSyntax, EmailBuilder.IBodySyntax, EmailBuilder.ICreatorSyntax, EmailBuilder.ISubjectSyntax
 {
     public interface IFromSyntax
     {
@@ -21,14 +21,18 @@ public sealed class EmailBuilder : EmailBuilder.IToSenderSyntax, EmailBuilder.IW
 
     public interface IToSenderSyntax
     {
-        public IWithAttachmentsSyntax To( params MailboxAddress[] recipients );
+        public IWithAttachmentsSyntax To( MailboxAddress              recipient );
+        public IWithAttachmentsSyntax To( IEnumerable<MailboxAddress> recipients );
+        public IWithAttachmentsSyntax To( params MailboxAddress[]     recipients );
     }
 
 
 
     public interface IWithAttachmentsSyntax
     {
-        public ISubjectSyntax WithAttachments( params Attachment[] attachments );
+        public ISubjectSyntax WithAttachments( Attachment              attachment );
+        public ISubjectSyntax WithAttachments( IEnumerable<Attachment> attachments );
+        public ISubjectSyntax WithAttachments( params Attachment[]     attachments );
     }
 
 
@@ -54,11 +58,11 @@ public sealed class EmailBuilder : EmailBuilder.IToSenderSyntax, EmailBuilder.IW
 
 
 
-    private readonly MailboxAddress[] _senders;
-    private          MailboxAddress[] _recipients;
-    private          Attachment[]     _attachments;
-    private          string           _subject = string.Empty;
-    private          string           _body    = string.Empty;
+    private readonly MailboxAddress[]     _senders;
+    private readonly List<MailboxAddress> _recipients  = new();
+    private readonly List<Attachment>     _attachments = new();
+    private          string               _subject     = string.Empty;
+    private          string               _body        = string.Empty;
 
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
@@ -68,17 +72,40 @@ public sealed class EmailBuilder : EmailBuilder.IToSenderSyntax, EmailBuilder.IW
 
     public static IToSenderSyntax From( params MailboxAddress[] senders ) => new EmailBuilder(senders);
 
+
+    public IWithAttachmentsSyntax To( MailboxAddress recipient )
+    {
+        _recipients.Add(recipient);
+        return this;
+    }
+    public IWithAttachmentsSyntax To( IEnumerable<MailboxAddress> recipients )
+    {
+        _recipients.AddRange(recipients);
+        return this;
+    }
     public IWithAttachmentsSyntax To( params MailboxAddress[] recipients )
     {
-        _recipients = recipients;
+        _recipients.AddRange(recipients);
         return this;
     }
 
-    public ISubjectSyntax WithAttachments( params Attachment[] attachments )
+
+    public ISubjectSyntax WithAttachments( Attachment attachment )
     {
-        _attachments = attachments;
+        _attachments.Add(attachment);
         return this;
     }
+    public ISubjectSyntax WithAttachments( IEnumerable<Attachment> attachments )
+    {
+        _attachments.AddRange(attachments);
+        return this;
+    }
+    public ISubjectSyntax WithAttachments( params Attachment[] attachments )
+    {
+        _attachments.AddRange(attachments);
+        return this;
+    }
+
 
     public IBodySyntax WithSubject( string subject )
     {
@@ -86,11 +113,13 @@ public sealed class EmailBuilder : EmailBuilder.IToSenderSyntax, EmailBuilder.IW
         return this;
     }
 
+
     public ICreatorSyntax WithBody( string body )
     {
         _body = body;
         return this;
     }
+
 
     public async Task<MimeMessage> Create()
     {

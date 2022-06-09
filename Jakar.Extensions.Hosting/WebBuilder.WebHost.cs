@@ -1,96 +1,15 @@
-﻿using System.Globalization;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
+﻿// Jakar.Extensions :: Jakar.Extensions.Hosting
+// 06/09/2022  1:19 PM
+
 using Microsoft.AspNetCore.Hosting.Server;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 
 
 
-#nullable enable
 namespace Jakar.Extensions.Hosting;
 
 
-/// <summary>
-/// <para><see cref="https://stackoverflow.com/a/61726193/9530917">AddTransient, AddScoped and AddSingleton Services Differences</see></para>
-/// </summary>
-public static class WebBuilder
+public static partial class WebBuilder
 {
-    /// <summary>
-    /// Singleton objects are the same for every object and every request. Are memory efficient as they are created once reused everywhere.
-    /// </summary>
-    public static WebApplicationBuilder AddSingleton<T>( this WebApplicationBuilder builder, T instance ) where T : class
-    {
-        builder.Services.AddSingleton(instance);
-        return builder;
-    }
-    /// <summary>
-    /// Singleton objects are the same for every object and every request. Are memory efficient as they are created once reused everywhere.
-    /// </summary>
-    public static WebApplicationBuilder AddSingleton<T>( this WebApplicationBuilder builder ) where T : class
-    {
-        builder.Services.AddSingleton<T>();
-        return builder;
-    }
-    /// <summary>
-    /// Singleton objects are the same for every object and every request. Are memory efficient as they are created once reused everywhere.
-    /// </summary>
-    public static WebApplicationBuilder AddSingleton<T>( this WebApplicationBuilder builder, Func<IServiceProvider, T> factory ) where T : class
-    {
-        builder.Services.AddSingleton(factory);
-        return builder;
-    }
-
-
-    /// <summary>
-    /// since they are created every time they will use more memory & Resources and can have the negative impact on performance. use this for the lightweight service with little or no state.
-    /// </summary>
-    public static WebApplicationBuilder AddTransient<T>( this WebApplicationBuilder builder ) where T : class
-    {
-        builder.Services.AddScoped<T>();
-        return builder;
-    }
-    /// <summary>
-    /// since they are created every time they will use more memory & Resources and can have the negative impact on performance. use this for the lightweight service with little or no state.
-    /// </summary>
-    public static WebApplicationBuilder AddTransient<T>( this WebApplicationBuilder builder, Func<IServiceProvider, T> factory ) where T : class
-    {
-        builder.Services.AddScoped(factory);
-        return builder;
-    }
-
-
-    /// <summary>
-    /// better option when you want to maintain state within a request.
-    /// </summary>
-    public static WebApplicationBuilder AddScoped<T>( this WebApplicationBuilder builder ) where T : class
-    {
-        builder.Services.AddScoped<T>();
-        return builder;
-    }
-    /// <summary>
-    /// better option when you want to maintain state within a request.
-    /// </summary>
-    public static WebApplicationBuilder AddScoped<T>( this WebApplicationBuilder builder, Func<IServiceProvider, T> factory ) where T : class
-    {
-        builder.Services.AddScoped(factory);
-        return builder;
-    }
-
-
-    public static WebApplicationBuilder AddHostedService<THostedService>( this WebApplicationBuilder builder ) where THostedService : class, IHostedService
-    {
-        builder.Services.AddHostedService<THostedService>();
-        return builder;
-    }
-    public static WebApplicationBuilder AddHostedService<THostedService>( this WebApplicationBuilder builder, Func<IServiceProvider, THostedService> func ) where THostedService : class, IHostedService
-    {
-        builder.Services.AddHostedService(func);
-        return builder;
-    }
-
-
     /// <summary>
     /// Use the given configuration settings on the web host.
     /// </summary>
@@ -130,17 +49,14 @@ public static class WebBuilder
     /// <returns>The <see cref="WebApplicationBuilder"/>.</returns>
     public static WebApplicationBuilder UseServer( this WebApplicationBuilder builder, IServer server )
     {
-        if ( server == null ) { throw new ArgumentNullException(nameof(server)); }
+        if ( server is null ) { throw new ArgumentNullException(nameof(server)); }
 
-        builder.WebHost.ConfigureServices(services =>
-                                          {
-                                              // It would be nicer if this was transient but we need to pass in the
-                                              // factory instance directly
-                                              services.AddSingleton(server);
-                                          });
+        // It would be nicer if this was transient but we need to pass in the factory instance directly
+        builder.WebHost.ConfigureServices(services => services.AddSingleton(server));
 
         return builder;
     }
+
 
     /// <summary>
     /// Specify the environment to be used by the web host.
@@ -156,6 +72,7 @@ public static class WebBuilder
         return builder;
     }
 
+
     /// <summary>
     /// Specify the content root directory to be used by the web host.
     /// </summary>
@@ -169,6 +86,7 @@ public static class WebBuilder
         builder.WebHost.UseSetting(WebHostDefaults.ContentRootKey, contentRoot);
         return builder;
     }
+
 
     /// <summary>
     /// Specify the webroot directory to be used by the web host.
@@ -184,6 +102,7 @@ public static class WebBuilder
         return builder;
     }
 
+
     /// <summary>
     /// Specify the urls the web host will listen on.
     /// </summary>
@@ -197,6 +116,7 @@ public static class WebBuilder
         builder.WebHost.UseSetting(WebHostDefaults.ServerUrlsKey, string.Join(';', urls));
         return builder;
     }
+
 
     /// <summary>
     /// Indicate whether the host should listen on the URLs configured on the <see cref="WebApplicationBuilder"/>
@@ -215,6 +135,7 @@ public static class WebBuilder
         return builder;
     }
 
+
     /// <summary>
     /// Specify if startup status messages should be suppressed.
     /// </summary>
@@ -230,6 +151,7 @@ public static class WebBuilder
 
         return builder;
     }
+
 
     /// <summary>
     /// Specify the amount of time to wait for the web host to shutdown.

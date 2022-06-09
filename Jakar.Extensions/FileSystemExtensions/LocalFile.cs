@@ -882,12 +882,8 @@ public class LocalFile : BaseCollections<LocalFile>, TempFile.ITempFile, LocalFi
         await WriteAsync(data, token).ConfigureAwait(false);
     }
 
-
-    /// <summary>
-    ///     Write the
-    ///     <paramref name = "uri" />
-    ///     to the file.
-    /// </summary>
+    
+    /// <summary> Write the <paramref name = "uri" /> to the file. </summary>
     /// <param name = "uri" > the data being written to the file </param>
     /// <exception cref = "NullReferenceException" > </exception>
     /// <exception cref = "ArgumentException" > </exception>
@@ -903,11 +899,7 @@ public class LocalFile : BaseCollections<LocalFile>, TempFile.ITempFile, LocalFi
         using var client = new WebClient();
         client.DownloadFile(uri, FullPath);
     }
-    /// <summary>
-    ///     Write the
-    ///     <paramref name = "uri" />
-    ///     to the file.
-    /// </summary>
+    /// <summary> Write the <paramref name = "uri" /> to the file. </summary>
     /// <param name = "uri" > the data being written to the file </param>
     /// <param name = "token" > </param>
     /// <exception cref = "NullReferenceException" > </exception>

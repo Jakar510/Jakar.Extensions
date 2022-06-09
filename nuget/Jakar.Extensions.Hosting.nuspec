@@ -1,0 +1,118 @@
+<?xml version="1.0"
+	  encoding="utf-8"?>
+
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+	<metadata>
+		<id>Jakar.Extensions.Hosting</id>
+		<version>6.0.0.1-beta</version>
+		<title>Extension Library</title>
+		<authors>Tyler Stegmaier</authors>
+		<owners>Jakar510/Jakar</owners>
+		<projectUrl>https://github.com/Jakar510/Jakar.Extensions</projectUrl>
+		<iconUrl>https://github.com/Jakar510/Jakar.Extensions/blob/master/images/icon.png</iconUrl>
+		<license type="file">LICENSE.txt</license>
+		<requireLicenseAcceptance>true</requireLicenseAcceptance>
+		<copyright>Copyright (c) 2021</copyright>
+		<icon>icon.png</icon>
+		<description>
+			Extensions to aid in development.
+		</description>
+		<releaseNotes>
+			Jakar.Extensions.Hosting 6.0.0
+			Initial Release
+		</releaseNotes>
+		<tags>Server WebBuilder Http</tags>
+		<language>en-US</language>
+		<repository type="Github"
+					url="https://github.com/Jakar510/Jakar.Extensions"
+					branch="master" />
+		<dependencies>
+			<group targetFramework="net6.0">
+				<dependency id="Jakar.Extensions"
+							version="6.0.0.23-beta" />
+				<dependency id="Hardware.Info"
+							version="10.0.1" />
+				<dependency id="Microsoft.CSharp"
+							version="4.7.0" />
+				<dependency id="Microsoft.Extensions.Options.ConfigurationExtensions"
+							version="6.0.0" />
+				<dependency id="Microsoft.AspNetCore.Authentication.Certificate"
+							version="6.0.5" />
+				<dependency id="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore"
+							version="6.0.5" />
+				<dependency id="Microsoft.AspNetCore.Diagnostics.HealthChecks"
+							version="2.2.0" />
+				<dependency id="Microsoft.AspNetCore.Mvc.NewtonsoftJson"
+							version="6.0.5" />
+				<dependency id="Microsoft.AspNetCore.Server.IIS"
+							version="2.2.6" />
+				<dependency id="Microsoft.AspNetCore.Authentication.JwtBearer"
+							version="6.0.5" />
+				<dependency id="Microsoft.AspNetCore.Authentication.OpenIdConnect"
+							version="6.0.5" />
+				<dependency id="Microsoft.AspNetCore.Components.Web"
+							version="6.0.5" />
+				<dependency id="Microsoft.AspNetCore.Identity"
+							version="2.2.0" />
+				<dependency id="Microsoft.AspNetCore.Identity.UI"
+							version="6.0.5" />
+				<dependency id="Microsoft.CodeAnalysis.CSharp"
+							version="4.2.0" />
+				<dependency id="Microsoft.Extensions.Caching.Memory"
+							version="6.0.1" />
+				<dependency id="Microsoft.Extensions.Configuration.Binder"
+							version="6.0.0" />
+				<dependency id="Microsoft.Extensions.Diagnostics.HealthChecks"
+							version="6.0.5" />
+				<dependency id="Microsoft.Extensions.Hosting"
+							version="6.0.1" />
+				<dependency id="Microsoft.Extensions.Hosting.Systemd"
+							version="6.0.0" />
+				<dependency id="Microsoft.Extensions.Hosting.WindowsServices"
+							version="6.0.0" />
+				<dependency id="Microsoft.Extensions.Logging"
+							version="6.0.0" />
+				<dependency id="Microsoft.Extensions.Logging.EventLog"
+							version="6.0.0" />
+				<dependency id="Microsoft.Extensions.Logging.EventSource"
+							version="6.0.0" />
+				<dependency id="Microsoft.Extensions.Logging.Abstractions"
+							version="6.0.1" />
+				<dependency id="Microsoft.Extensions.Logging.Configuration"
+							version="6.0.0" />
+				<dependency id="Microsoft.Extensions.Logging.Console"
+							version="6.0.0" />
+				<dependency id="Microsoft.Extensions.Logging.Debug"
+							version="6.0.0" />
+				<dependency id="Newtonsoft.Json"
+							version="13.0.1" />
+				<dependency id="Portable.BouncyCastle"
+							version="1.9.0" />
+				<dependency id="Swashbuckle.AspNetCore"
+							version="6.3.1" />
+				<dependency id="Swashbuckle.AspNetCore.Annotations"
+							version="6.3.1" />
+				<dependency id="Swashbuckle.AspNetCore.Newtonsoft"
+							version="6.3.1" />
+				<dependency id="System.Text.Encoding.CodePages"
+							version="6.0.0" />
+
+			</group>
+		</dependencies>
+	</metadata>
+
+	<files>
+		<file src="..\LICENSE.txt"
+			  target="" />
+
+		<file src="..\images\icon.png" />
+
+		<!-- .net standard 2.1 -->
+		<file src="../Jakar.Extensions.Hosting/bin/Release/net6.0/Jakar.Extensions.Hosting.dll"
+			  target="lib/net6.0" />
+		<file src="../Jakar.Extensions.Hosting/bin/Release/net6.0/Jakar.Extensions.Hosting.xml"
+			  target="net6.0" />
+		<file src="../Jakar.Extensions.Hosting/bin/Release/net6.0/Jakar.Extensions.Hosting.pdb"
+			  target="lib/net6.0" />
+	</files>
+</package>

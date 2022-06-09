@@ -6,7 +6,7 @@ public class ExceptionDetails
 {
     public string                       Str             { get; init; } = string.Empty;
     public string                       Message         { get; init; } = string.Empty;
-    public string                       Type            { get; init; } = string.Empty;
+    public string?                      Type            { get; init; }
     public string?                      HelpLink        { get; init; }
     public string?                      Source          { get; init; }
     public int                          HResult         { get; init; }
@@ -93,7 +93,7 @@ public class MethodDetails
 
 public class ParameterDetails
 {
-    public string  Name            { get; init; } = string.Empty;
+    public string? Name            { get; init; }
     public int     Position        { get; init; }
     public bool    IsIn            { get; init; }
     public bool    IsOut           { get; init; }
@@ -103,7 +103,6 @@ public class ParameterDetails
 
 
     public ParameterDetails() { }
-
     public ParameterDetails( ParameterInfo parameter )
     {
         Name            = parameter.Name;
