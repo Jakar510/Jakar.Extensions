@@ -35,7 +35,6 @@ public static class Program
         {
             "Hello World!".WriteToConsole();
 
-
             // BenchmarkRunner.Run<JsonizerBenchmarks>();
             // BenchmarkRunner.Run<SpansBenchmarks>();
             // TestJson();

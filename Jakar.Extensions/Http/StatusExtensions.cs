@@ -5,14 +5,14 @@
 namespace Jakar.Extensions.Http;
 
 
-public static class StatusExtensions
+public static partial class StatusExtensions
 {
     public static Status ToStatus( this         HttpStatusCode code ) => (Status)(int)code;
     public static HttpStatusCode ToStatus( this Status         code ) => (HttpStatusCode)(int)code;
 
 
-    public static string FastToString( this HttpStatusCode status ) => status.ToStatus().FastToString();
-    public static string FastToString( this Status status ) => status switch
+    public static string ToStringFast( this HttpStatusCode status ) => status.ToStatus().ToStringFast();
+    public static string ToStringFast( this Status status ) => status switch
                                                                {
                                                                    Status.Continue                      => nameof(Status.Continue),
                                                                    Status.SwitchingProtocols            => nameof(Status.SwitchingProtocols),

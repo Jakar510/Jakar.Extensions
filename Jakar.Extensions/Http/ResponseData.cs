@@ -144,7 +144,7 @@ public readonly struct ResponseData<T>
         Payload           = payload;
         Exception         = exception;
         StatusCode        = response.StatusCode.ToStatus();
-        StatusDescription = response.ReasonPhrase ?? StatusCode.FastToString();
+        StatusDescription = response.ReasonPhrase ?? StatusCode.ToStringFast();
         URL               = response.RequestMessage?.RequestUri;
         Method            = response.RequestMessage?.Method.Method;
         ContentType       = contentHeaders?.ContentType?.MediaType;
