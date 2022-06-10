@@ -10,9 +10,6 @@ using AView = Android.Views.View;
 using AObject = Java.Lang.Object;
 
 
-
-
-
 #nullable enable
 namespace Jakar.Extensions.Xamarin.Forms.Droid.Extensions;
 
@@ -124,8 +121,7 @@ public static class AndroidLayoutExtensions
                   topMargin,
                   leftMargin,
                   rightMargin,
-                  caller
-                 );
+                  caller);
 
     public static void Add( this AGridLayout          stack,
                             AView                     view,
@@ -154,8 +150,7 @@ public static class AndroidLayoutExtensions
                   topMargin,
                   leftMargin,
                   rightMargin,
-                  caller
-                 );
+                  caller);
 
     public static void Add( this AGridLayout          stack,
                             AView                     view,
@@ -173,8 +168,7 @@ public static class AndroidLayoutExtensions
                             [CallerMemberName] string caller       = ""
     )
     {
-        if ( stack is null )
-            throw new NullReferenceException(nameof(stack));
+        if ( stack is null ) { throw new NullReferenceException(nameof(stack)); }
 
         Run(() =>
             {
@@ -191,51 +185,38 @@ public static class AndroidLayoutExtensions
                                          };
 
                 {
-                    if ( gravity != null )
-                        layoutParams.SetGravity((GravityFlags)gravity);
+                    if ( gravity != null ) { layoutParams.SetGravity((GravityFlags)gravity); }
 
                     stack.AddView(view, layoutParams);
                 }
             },
-            caller
-           );
+            caller);
     }
 
     // -----------------------------------------------------------------------------------------------------------------------------------------------------
 
-    public static void Add( this LinearLayout         stack,
-                            AView                     view,
-                            Layout                    width,
-                            Layout                    height,
-                            GravityFlags?             gravity = null,
-                            [CallerMemberName] string caller  = ""
-    )
+    public static void Add( this LinearLayout stack, AView view, Layout width, Layout height, GravityFlags? gravity = null, [CallerMemberName] string caller = "" )
     {
-        if ( stack is null ) throw new NullReferenceException(nameof(stack));
+        if ( stack is null ) { throw new NullReferenceException(nameof(stack)); }
 
         Run(() =>
             {
                 using var layoutParams = new LinearLayout.LayoutParams(LayoutMapper[width], LayoutMapper[height]);
 
                 {
-                    if ( gravity != null ) layoutParams.Gravity = (GravityFlags)gravity;
+                    if ( gravity != null ) { layoutParams.Gravity = (GravityFlags)gravity; }
+
                     stack.AddView(view, layoutParams);
                 }
             },
-            caller
-           );
+            caller);
     }
 
     // -----------------------------------------------------------------------------------------------------------------------------------------------------
 
-    public static void Add( this RelativeLayout       stack,
-                            AView                     view,
-                            Layout                    width  = Layout.Wrap,
-                            Layout                    height = Layout.Wrap,
-                            [CallerMemberName] string caller = ""
-    )
+    public static void Add( this RelativeLayout stack, AView view, Layout width = Layout.Wrap, Layout height = Layout.Wrap, [CallerMemberName] string? caller = default )
     {
-        if ( stack is null ) throw new NullReferenceException(nameof(stack));
+        if ( stack is null ) { throw new NullReferenceException(nameof(stack)); }
 
         Run(() =>
             {
@@ -245,19 +226,13 @@ public static class AndroidLayoutExtensions
                     stack.AddView(view, layoutParams);
                 }
             },
-            caller
-           );
+            caller);
     }
 
     // -----------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-    public static AView CreateContentView( this AContext             context,
-                                           ViewGroup?                root,
-                                           int                       id,
-                                           bool                      attach = true,
-                                           [CallerMemberName] string caller = ""
-    )
+    public static AView CreateContentView( this AContext context, ViewGroup? root, int id, bool attach = true, [CallerMemberName] string? caller = default )
     {
         AObject? temp     = context.GetSystemService(AContext.LayoutInflaterService);
         var      inflater = (LayoutInflater)( temp ?? throw new NullReferenceException(nameof(AContext.LayoutInflaterService)) );

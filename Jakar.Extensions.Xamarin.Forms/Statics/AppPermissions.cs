@@ -5,9 +5,6 @@ using System.Windows.Input;
 using Xamarin.Essentials;
 
 
-
-
-
 #nullable enable
 namespace Jakar.Extensions.Xamarin.Forms.Statics;
 
@@ -37,36 +34,30 @@ public static class AppPermissions
         switch ( status )
         {
             //Query permission
-            case PermissionStatus.Granted when granted is null:
-                return;
+            case PermissionStatus.Granted when granted is null: return;
 
             case PermissionStatus.Granted:
                 await granted().ConfigureAwait(false);
                 break;
 
             //Permission denied
-            case PermissionStatus.Unknown when unknown is null:
-                return;
+            case PermissionStatus.Unknown when unknown is null: return;
 
             case PermissionStatus.Unknown:
                 await unknown().ConfigureAwait(false);
                 break;
 
             case PermissionStatus.Denied: // Notify user permission was denied
-                if ( denial is null )
-                    return;
+                if ( denial is null ) { return; }
 
                 await denial().ConfigureAwait(false);
                 break;
 
-            case PermissionStatus.Disabled:
-                break;
+            case PermissionStatus.Disabled: break;
 
-            case PermissionStatus.Restricted:
-                break;
+            case PermissionStatus.Restricted: break;
 
-            default:
-                throw new ArgumentOutOfRangeException(nameof(status), status, null);
+            default: throw new ArgumentOutOfRangeException(nameof(status), status, null);
         }
     }
 
@@ -95,36 +86,30 @@ public static class AppPermissions
         switch ( status )
         {
             //Query permission
-            case PermissionStatus.Granted when granted is null:
-                return;
+            case PermissionStatus.Granted when granted is null: return;
 
             case PermissionStatus.Granted:
                 granted();
                 return;
 
             //Permission denied
-            case PermissionStatus.Unknown when unknown is null:
-                return;
+            case PermissionStatus.Unknown when unknown is null: return;
 
             case PermissionStatus.Unknown:
                 unknown();
                 return;
 
-            case PermissionStatus.Denied when denial is null:
-                return;
+            case PermissionStatus.Denied when denial is null: return;
 
             case PermissionStatus.Denied:
                 denial();
                 return;
 
-            case PermissionStatus.Disabled:
-                break;
+            case PermissionStatus.Disabled: break;
 
-            case PermissionStatus.Restricted:
-                break;
+            case PermissionStatus.Restricted: break;
 
-            default:
-                throw new ArgumentOutOfRangeException(nameof(status), status, null);
+            default: throw new ArgumentOutOfRangeException(nameof(status), status, null);
         }
     }
 
@@ -133,85 +118,65 @@ public static class AppPermissions
         switch ( status )
         {
             //Query permission
-            case PermissionStatus.Granted when granted is null:
-                return;
+            case PermissionStatus.Granted when granted is null: return;
 
             case PermissionStatus.Granted:
                 granted.Execute(null);
                 return;
 
             //Permission denied
-            case PermissionStatus.Unknown when unknown is null:
-                return;
+            case PermissionStatus.Unknown when unknown is null: return;
 
             case PermissionStatus.Unknown:
                 unknown.Execute(null);
                 return;
 
-            case PermissionStatus.Denied when denial is null:
-                return;
+            case PermissionStatus.Denied when denial is null: return;
 
             case PermissionStatus.Denied:
                 denial.Execute(null);
                 return;
 
-            case PermissionStatus.Disabled:
-                break;
+            case PermissionStatus.Disabled: break;
 
-            case PermissionStatus.Restricted:
-                break;
+            case PermissionStatus.Restricted: break;
 
-            default:
-                throw new ArgumentOutOfRangeException(nameof(status), status, null);
+            default: throw new ArgumentOutOfRangeException(nameof(status), status, null);
         }
     }
 
-    public static void Handle<T>( PermissionStatus status,
-                                  Command<T>?      denial,
-                                  Command<T>?      granted,
-                                  Command<T>?      unknown,
-                                  T                obj
-    )
+    public static void Handle<T>( PermissionStatus status, Command<T>? denial, Command<T>? granted, Command<T>? unknown, T obj )
     {
         switch ( status )
         {
             //Query permission
-            case PermissionStatus.Granted when granted is null:
-                return;
+            case PermissionStatus.Granted when granted is null: return;
 
             case PermissionStatus.Granted:
-                if ( granted.CanExecute(obj) )
-                    granted.Execute(obj);
+                if ( granted.CanExecute(obj) ) { granted.Execute(obj); }
 
                 return;
 
             //Permission denied
-            case PermissionStatus.Unknown when unknown is null:
-                return;
+            case PermissionStatus.Unknown when unknown is null: return;
 
             case PermissionStatus.Unknown:
-                if ( unknown.CanExecute(obj) )
-                    unknown.Execute(obj);
+                if ( unknown.CanExecute(obj) ) { unknown.Execute(obj); }
 
                 return;
 
-            case PermissionStatus.Denied when denial is null:
-                return;
+            case PermissionStatus.Denied when denial is null: return;
 
             case PermissionStatus.Denied:
-                if ( denial.CanExecute(obj) )
-                    denial.Execute(obj);
+                if ( denial.CanExecute(obj) ) { denial.Execute(obj); }
 
                 return;
 
-            case PermissionStatus.Disabled:
-                break;
+            case PermissionStatus.Disabled: break;
 
-            case PermissionStatus.Restricted:
-                break;
+            case PermissionStatus.Restricted: break;
 
-            default:
-                throw new ArgumentOutOfRangeException(nameof(status), status, null);
+            default: throw new ArgumentOutOfRangeException(nameof(status), status, null);
         }
     }
 
@@ -225,23 +190,23 @@ public static class AppPermissions
         return status;
     }
 
-    public static async Task<PermissionStatus> CameraPermission()            => await CheckAndRequestPermissionAsync(new global::Xamarin.Essentials.Permissions.Camera()).ConfigureAwait(false);
-    public static async Task<PermissionStatus> StorageReadPermission()       => await CheckAndRequestPermissionAsync(new global::Xamarin.Essentials.Permissions.StorageRead()).ConfigureAwait(false);
-    public static async Task<PermissionStatus> StorageWritePermission()      => await CheckAndRequestPermissionAsync(new global::Xamarin.Essentials.Permissions.StorageWrite()).ConfigureAwait(false);
-    public static async Task<PermissionStatus> MediaLibraryPermission()      => await CheckAndRequestPermissionAsync(new global::Xamarin.Essentials.Permissions.Media()).ConfigureAwait(false);
-    public static async Task<PermissionStatus> SensorsPermission()           => await CheckAndRequestPermissionAsync(new global::Xamarin.Essentials.Permissions.Sensors()).ConfigureAwait(false);
+    public static async Task<PermissionStatus> CameraPermission() => await CheckAndRequestPermissionAsync(new global::Xamarin.Essentials.Permissions.Camera()).ConfigureAwait(false);
+    public static async Task<PermissionStatus> StorageReadPermission() => await CheckAndRequestPermissionAsync(new global::Xamarin.Essentials.Permissions.StorageRead()).ConfigureAwait(false);
+    public static async Task<PermissionStatus> StorageWritePermission() => await CheckAndRequestPermissionAsync(new global::Xamarin.Essentials.Permissions.StorageWrite()).ConfigureAwait(false);
+    public static async Task<PermissionStatus> MediaLibraryPermission() => await CheckAndRequestPermissionAsync(new global::Xamarin.Essentials.Permissions.Media()).ConfigureAwait(false);
+    public static async Task<PermissionStatus> SensorsPermission() => await CheckAndRequestPermissionAsync(new global::Xamarin.Essentials.Permissions.Sensors()).ConfigureAwait(false);
     public static async Task<PermissionStatus> LocationWhenInUsePermission() => await CheckAndRequestPermissionAsync(new global::Xamarin.Essentials.Permissions.LocationWhenInUse()).ConfigureAwait(false);
-    public static async Task<PermissionStatus> LocationAlwaysPermission()    => await CheckAndRequestPermissionAsync(new global::Xamarin.Essentials.Permissions.LocationAlways()).ConfigureAwait(false);
-    public static async Task<PermissionStatus> PhotosPermission()            => await CheckAndRequestPermissionAsync(new global::Xamarin.Essentials.Permissions.Photos()).ConfigureAwait(false);
-    public static async Task<PermissionStatus> CalendarReadPermission()      => await CheckAndRequestPermissionAsync(new global::Xamarin.Essentials.Permissions.CalendarRead()).ConfigureAwait(false);
-    public static async Task<PermissionStatus> CalendarWritePermission()     => await CheckAndRequestPermissionAsync(new global::Xamarin.Essentials.Permissions.CalendarWrite()).ConfigureAwait(false);
-    public static async Task<PermissionStatus> RemindersPermission()         => await CheckAndRequestPermissionAsync(new global::Xamarin.Essentials.Permissions.Reminders()).ConfigureAwait(false);
-    public static async Task<PermissionStatus> SmsPermission()               => await CheckAndRequestPermissionAsync(new global::Xamarin.Essentials.Permissions.Sms()).ConfigureAwait(false);
-    public static async Task<PermissionStatus> ContactsReadPermission()      => await CheckAndRequestPermissionAsync(new global::Xamarin.Essentials.Permissions.ContactsRead()).ConfigureAwait(false);
-    public static async Task<PermissionStatus> ContactsWritePermission()     => await CheckAndRequestPermissionAsync(new global::Xamarin.Essentials.Permissions.ContactsWrite()).ConfigureAwait(false);
-    public static async Task<PermissionStatus> MicrophonePermission()        => await CheckAndRequestPermissionAsync(new global::Xamarin.Essentials.Permissions.Microphone()).ConfigureAwait(false);
-    public static async Task<PermissionStatus> PhonePermission()             => await CheckAndRequestPermissionAsync(new global::Xamarin.Essentials.Permissions.Phone()).ConfigureAwait(false);
-    public static async Task<PermissionStatus> SpeechPermission()            => await CheckAndRequestPermissionAsync(new global::Xamarin.Essentials.Permissions.Speech()).ConfigureAwait(false);
+    public static async Task<PermissionStatus> LocationAlwaysPermission() => await CheckAndRequestPermissionAsync(new global::Xamarin.Essentials.Permissions.LocationAlways()).ConfigureAwait(false);
+    public static async Task<PermissionStatus> PhotosPermission() => await CheckAndRequestPermissionAsync(new global::Xamarin.Essentials.Permissions.Photos()).ConfigureAwait(false);
+    public static async Task<PermissionStatus> CalendarReadPermission() => await CheckAndRequestPermissionAsync(new global::Xamarin.Essentials.Permissions.CalendarRead()).ConfigureAwait(false);
+    public static async Task<PermissionStatus> CalendarWritePermission() => await CheckAndRequestPermissionAsync(new global::Xamarin.Essentials.Permissions.CalendarWrite()).ConfigureAwait(false);
+    public static async Task<PermissionStatus> RemindersPermission() => await CheckAndRequestPermissionAsync(new global::Xamarin.Essentials.Permissions.Reminders()).ConfigureAwait(false);
+    public static async Task<PermissionStatus> SmsPermission() => await CheckAndRequestPermissionAsync(new global::Xamarin.Essentials.Permissions.Sms()).ConfigureAwait(false);
+    public static async Task<PermissionStatus> ContactsReadPermission() => await CheckAndRequestPermissionAsync(new global::Xamarin.Essentials.Permissions.ContactsRead()).ConfigureAwait(false);
+    public static async Task<PermissionStatus> ContactsWritePermission() => await CheckAndRequestPermissionAsync(new global::Xamarin.Essentials.Permissions.ContactsWrite()).ConfigureAwait(false);
+    public static async Task<PermissionStatus> MicrophonePermission() => await CheckAndRequestPermissionAsync(new global::Xamarin.Essentials.Permissions.Microphone()).ConfigureAwait(false);
+    public static async Task<PermissionStatus> PhonePermission() => await CheckAndRequestPermissionAsync(new global::Xamarin.Essentials.Permissions.Phone()).ConfigureAwait(false);
+    public static async Task<PermissionStatus> SpeechPermission() => await CheckAndRequestPermissionAsync(new global::Xamarin.Essentials.Permissions.Speech()).ConfigureAwait(false);
 
     /*
 

@@ -1,9 +1,6 @@
 ﻿using Xamarin.Essentials;
 
 
-
-
-
 #nullable enable
 namespace Jakar.Extensions.Xamarin.Forms;
 
@@ -44,7 +41,7 @@ public class OrientationService
 
     public void OnSizeAllocated( in double width, in double height )
     {
-        if ( Equals(_Width, width) && Equals(_Height, height) ) return;
+        if ( Equals(_Width, width) && Equals(_Height, height) ) { return; }
 
         double oldWidth = _Width;
         _Width  = width;
@@ -53,22 +50,24 @@ public class OrientationService
         Orientation = GetOrientation(_Width, _Height);
 
         // ignore if the previous height was size unallocated OR Has the device been rotated
-        if ( Equals(_Width, oldWidth) ) return;
-        if ( Orientation == DisplayOrientation.Unknown ) return;
+        if ( Equals(_Width, oldWidth) ) { return; }
+
+        if ( Orientation == DisplayOrientation.Unknown ) { return; }
+
         OnOrientationChanged?.Invoke(this, new RotationEventArgs(Orientation));
     }
 
 
     public static DisplayOrientation GetOrientation( ContentPage page )
     {
-        if ( page is null ) throw new ArgumentNullException(nameof(page));
+        if ( page is null ) { throw new ArgumentNullException(nameof(page)); }
 
         return GetOrientation(page.Width, page.Height);
     }
 
     public static DisplayOrientation GetOrientation( in double width, in double height )
     {
-        if ( Equals(width, SIZE_NOT_ALLOCATED) || Equals(height, SIZE_NOT_ALLOCATED) ) return DisplayOrientation.Unknown;
+        if ( Equals(width, SIZE_NOT_ALLOCATED) || Equals(height, SIZE_NOT_ALLOCATED) ) { return DisplayOrientation.Unknown; }
 
         return ( width < height )
                    ? DisplayOrientation.Portrait

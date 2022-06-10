@@ -1,6 +1,7 @@
-﻿using System.ComponentModel;
+﻿using System.Buffers;
+using System.ComponentModel;
+using Jakar.Extensions.Collections;
 using Microsoft.Toolkit.HighPerformance.Enumerables;
-
 
 #if NET6_0
 
@@ -32,16 +33,18 @@ public ref struct MContext
     public static MContext FromObject<T>( T context ) where T : notnull
     {
         PropertyInfo[] properties = context.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public);
-        var            mapping    = new PairDict(properties.Length);
-
-        foreach ( PropertyInfo property in properties )
+        Pair[]         mapping    = ArrayPool<Pair>.Shared.Rent(properties.Length);
+        
+        foreach ( SpanEnumerable<PropertyInfo>.Item pair in properties.Enumerate() )
         {
-            object? value = property.GetMethod?.Invoke(context, default);
-            mapping[property.Name] = value;
+            string  key   = pair.Value.Name;
+            object? value = pair.Value.GetMethod?.Invoke(context, default);
+            mapping[pair.Index] = new Pair(key, value);
         }
 
 
-        return new MContext(context, mapping);
+        try { return new MContext(context, new PairDict(mapping)); }
+        finally { ArrayPool<Pair>.Shared.Return(mapping); }
     }
 
     public long AsLong( in ReadOnlySpan<char> key ) { throw new NotImplementedException(); }

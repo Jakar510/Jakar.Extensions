@@ -104,7 +104,7 @@ public abstract class Prompts : IUserDialogs
     protected abstract bool InternalHandleException( Exception e );
 
 
-    public void DebugMessage( Exception e, [CallerMemberName] string caller = "" )
+    public void DebugMessage( Exception e, [CallerMemberName] string? caller = default )
     {
         if ( !_debug.CanDebug ) { return; }
 

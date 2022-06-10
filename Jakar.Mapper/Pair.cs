@@ -22,7 +22,6 @@ public readonly struct Pair
     public Pair( KeyValuePair<string, object?> pair ) : this(pair.Key, pair.Value) { }
     public Pair( in ReadOnlySpan<char>         key, object? value ) : this(key.AsMemory(), value) { }
     public Pair( in ReadOnlyMemory<char> key, object? value )
-
     {
         _key   = key;
         _value = value;
