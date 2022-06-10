@@ -17,12 +17,12 @@ namespace Console.Experiments;
 
 /*
  
-|             Method |           Mean |         Error |        StdDev | Rank |   Gen 0 |  Gen 1 |  Gen 2 | Allocated |
-|------------------- |---------------:|--------------:|--------------:|-----:|--------:|-------:|-------:|----------:|
-|            GetName |       3.630 ns |     0.0366 ns |     0.0343 ns |    1 |       - |      - |      - |         - |
-|           GetValue |      32.182 ns |     0.3599 ns |     0.3366 ns |    2 |       - |      - |      - |         - |
-| GetValueReflection |      86.913 ns |     1.7248 ns |     1.7712 ns |    3 |       - |      - |      - |         - |
-|         GetContext | 153,028.868 ns | 2,932.6377 ns | 2,880.2423 ns |    4 | 10.9863 | 5.3711 | 0.2441 |  93,000 B |
+|             Method |       Mean |     Error |    StdDev | Rank | Allocated |
+|------------------- |-----------:|----------:|----------:|-----:|----------:|
+|            GetName |  0.1999 ns | 0.0546 ns | 0.0510 ns |    1 |         - |
+|         GetContext | 29.6088 ns | 0.5710 ns | 0.7623 ns |    2 |         - |
+| GetValueReflection | 48.2611 ns | 1.0202 ns | 1.5271 ns |    3 |         - |
+|           GetValue | 49.5775 ns | 0.4678 ns | 0.4147 ns |    4 |         - |
 
 */
 
