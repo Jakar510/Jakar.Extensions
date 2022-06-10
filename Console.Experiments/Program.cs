@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using BenchmarkDotNet.Running;
 using Jakar.Extensions.Http;
 using Jakar.Extensions.Models;
 using Jakar.Extensions.Strings;
+using Jakar.Mapper;
 using Jakar.SqlBuilder;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -27,13 +30,47 @@ public enum Page
 
 
 
+[Serializable]
+public class Node
+{
+    public string      Name     { get; set; } = string.Empty;
+    public List<Node>? Children { get; init; }
+
+    public Node() { }
+    public Node( string name ) => Name = name;
+    public Node( string name, params Node[] children ) : this(name) => Children = new List<Node>(children);
+
+
+    public static Node Demo()
+    {
+        var root = new Node
+                   {
+                       Name = nameof(Demo),
+                       Children = new List<Node>
+                                  {
+                                      new("A", new Node("A.1"), new Node("A.2")),
+                                      new("B", new Node("B.1"), new Node("B.2")),
+                                      new("C", new Node("C.1"), new Node("C.2")),
+                                      new("D", new Node("D.1"), new Node("D.2")),
+                                  }
+                   };
+
+
+        return root;
+    }
+}
+
+
+
 public static class Program
 {
-    public static async Task Main( string[] args )
+    public static void Main( string[] args )
     {
         try
         {
             "Hello World!".WriteToConsole();
+
+            BenchmarkRunner.Run<MapperBenchmarks>();
 
             // BenchmarkRunner.Run<JsonizerBenchmarks>();
             // BenchmarkRunner.Run<SpansBenchmarks>();
@@ -42,14 +79,19 @@ public static class Program
 
             // await Test_HttpBuilder();
 
+            // Node     nodes   = Node.Demo();
+            // MContext context = MContext.FromObject(nodes);
+            // context.GetValue(nameof(Node.Name), nodes)?.WriteToConsole();
+
             "Bye".WriteToConsole();
         }
         catch ( Exception e )
         {
             e.WriteToConsole();
-            throw;
+            e.WriteToDebug();
         }
     }
+
 
     public static async Task Test_HttpBuilder( CancellationToken token = default )
     {
@@ -71,6 +113,8 @@ public static class Program
         ( await builder.Get("/cookies",    token).AsJson() ).WriteToConsole();
         ( await builder.Get("/image/png",  token).AsFile(MimeType.Png) ).WriteToConsole();
     }
+
+
     private static void Test_Sql()
     {
         // "SELECT * FROM Users"

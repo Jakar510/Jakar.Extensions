@@ -34,13 +34,23 @@ public static partial class Spans
     }
 
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Span<T> AsSpan<T>( this ReadOnlySpan<T> span ) => span.AsSpan(span.Length);
+    [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Span<T> AsSpan<T>( this ReadOnlySpan<T> span ) => span.AsSpan(span.Length);
+    [Pure]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Span<T> AsSpan<T>( this ReadOnlySpan<T> span, in int length )
     {
         Guard.IsLessThanOrEqualTo(length, span.Length, nameof(length));
         return MemoryMarshal.CreateSpan(ref MemoryMarshal.GetReference(span), length);
     }
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Memory<T> AsSpan<T>( this T[] span ) => MemoryMarshal.CreateFromPinnedArray(span, 0, span.Length);
+    [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] public static ReadOnlySpan<T> AsSpan<T>( this Span<T> span ) => span.AsSpan(span.Length);
+    [Pure]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static ReadOnlySpan<T> AsSpan<T>( this Span<T> span, in int length )
+    {
+        Guard.IsLessThanOrEqualTo(length, span.Length, nameof(length));
+        return MemoryMarshal.CreateReadOnlySpan(ref span.GetPinnableReference(), length);
+    }
+    [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Memory<T> AsSpan<T>( this T[] span ) => MemoryMarshal.CreateFromPinnedArray(span, 0, span.Length);
 
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

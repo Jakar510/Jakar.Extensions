@@ -352,7 +352,20 @@
             <summary>
             
             </summary>
-            <param name = "file" > </param>
+            <exception cref = "T:System.NullReferenceException" > </exception>
+            <exception cref = "T:System.ArgumentException" > </exception>
+            <exception cref = "T:System.ArgumentNullException" > </exception>
+            <exception cref = "T:System.IO.FileNotFoundException" > </exception>
+            <exception cref = "T:System.IO.PathTooLongException" > </exception>
+            <exception cref = "T:System.IO.DirectoryNotFoundException" > </exception>
+            <exception cref = "T:System.IO.IOException" > </exception>
+            <exception cref = "T:System.NotSupportedException" > </exception>
+            <returns> </returns>
+        </member>
+        <member name="M:Jakar.Extensions.FileSystemExtensions.LocalFile.CreateTempFileAndOpen(Jakar.Extensions.Http.MimeType,Jakar.Extensions.FileSystemExtensions.LocalFile@)">
+            <summary>
+            
+            </summary>
             <exception cref = "T:System.NullReferenceException" > </exception>
             <exception cref = "T:System.ArgumentException" > </exception>
             <exception cref = "T:System.ArgumentNullException" > </exception>
@@ -784,11 +797,7 @@
             </returns>
         </member>
         <member name="M:Jakar.Extensions.FileSystemExtensions.LocalFile.Write(System.Uri)">
-            <summary>
-                Write the
-                <paramref name = "uri" />
-                to the file.
-            </summary>
+            <summary> Write the <paramref name = "uri" /> to the file. </summary>
             <param name = "uri" > the data being written to the file </param>
             <exception cref = "T:System.NullReferenceException" > </exception>
             <exception cref = "T:System.ArgumentException" > </exception>
@@ -799,11 +808,7 @@
             </returns>
         </member>
         <member name="M:Jakar.Extensions.FileSystemExtensions.LocalFile.WriteAsync(System.Uri,System.Threading.CancellationToken)">
-            <summary>
-                Write the
-                <paramref name = "uri" />
-                to the file.
-            </summary>
+            <summary> Write the <paramref name = "uri" /> to the file. </summary>
             <param name = "uri" > the data being written to the file </param>
             <param name = "token" > </param>
             <exception cref = "T:System.NullReferenceException" > </exception>
@@ -1087,12 +1092,34 @@
             <param name = "path" > </param>
             <returns> </returns>
         </member>
-        <member name="T:Jakar.Extensions.General.EmailBuilder">
-            <summary>
-            <see href="http://www.mimekit.net/docs/html/Creating-Messages.htm"/>
-            </summary>
+        <member name="M:Jakar.Extensions.General.Tasks.AsTimeSpan(System.Double)">
+            <summary> Creates a <see cref="T:System.TimeSpan"/> from the given <paramref name="days"/> </summary>
         </member>
-        <member name="M:Jakar.Extensions.General.TaskExtensions.ForEachParallelAsync``1(System.Collections.Generic.IEnumerable{``0},System.Func{``0,System.Threading.Tasks.Task},System.Nullable{System.Int32},System.Boolean)">
+        <member name="M:Jakar.Extensions.General.Tasks.AsTimeSpan(System.Single)">
+            <summary> Creates a <see cref="T:System.TimeSpan"/> from the given <paramref name="minutes"/> </summary>
+        </member>
+        <member name="M:Jakar.Extensions.General.Tasks.AsTimeSpan(System.Int64)">
+            <summary> Creates a <see cref="T:System.TimeSpan"/> from the given <paramref name="seconds"/> </summary>
+        </member>
+        <member name="M:Jakar.Extensions.General.Tasks.AsTimeSpan(System.Int32)">
+            <summary> Creates a <see cref="T:System.TimeSpan"/> from the given <paramref name="ms"/> </summary>
+        </member>
+        <member name="M:Jakar.Extensions.General.Tasks.Delay(System.Double,System.Threading.CancellationToken@)">
+            <summary> Creates a cancellable delay from the given <paramref name="days"/> </summary>
+        </member>
+        <member name="M:Jakar.Extensions.General.Tasks.Delay(System.Single,System.Threading.CancellationToken@)">
+            <summary> Creates a cancellable delay from the given <paramref name="minutes"/> </summary>
+        </member>
+        <member name="M:Jakar.Extensions.General.Tasks.Delay(System.Int64,System.Threading.CancellationToken@)">
+            <summary> Creates a cancellable delay from the given <paramref name="seconds"/> </summary>
+        </member>
+        <member name="M:Jakar.Extensions.General.Tasks.Delay(System.Int32,System.Threading.CancellationToken@)">
+            <summary> Creates a cancellable delay from the given <paramref name="ms"/> </summary>
+        </member>
+        <member name="M:Jakar.Extensions.General.Tasks.Delay(System.TimeSpan,System.Threading.CancellationToken@)">
+            <summary> Creates a cancellable delay from the given <paramref name="delay"/> </summary>
+        </member>
+        <member name="M:Jakar.Extensions.General.Tasks.ForEachParallelAsync``1(System.Collections.Generic.IEnumerable{``0},System.Func{``0,System.Threading.Tasks.Task},System.Nullable{System.Int32},System.Boolean)">
             <summary>
                 <seealso href = "https://gist.github.com/scattered-code/1a4a01c3f3a24ebce293a6e7b4451254" />
                 <para>
@@ -1109,7 +1136,7 @@
                 <see cref = "T:System.Threading.Tasks.Task" />
             </returns>
         </member>
-        <member name="M:Jakar.Extensions.General.TaskExtensions.ForEachParallelAsync``1(System.Collections.Generic.IAsyncEnumerable{``0},System.Func{``0,System.Threading.Tasks.Task},System.Nullable{System.Int32},System.Threading.Tasks.TaskScheduler)">
+        <member name="M:Jakar.Extensions.General.Tasks.ForEachParallelAsync``1(System.Collections.Generic.IAsyncEnumerable{``0},System.Func{``0,System.Threading.Tasks.Task},System.Nullable{System.Int32},System.Threading.Tasks.TaskScheduler)">
             <summary>
                 <seealso href = "https://gist.github.com/scattered-code/b834bbc355a9ee710e3147321d6f985a" />
             </summary>
@@ -1182,11 +1209,16 @@
         </member>
         <member name="M:Jakar.Extensions.Http.MimeTypeExtensions.FromExtension(System.String)">
             <summary>
-                Gets the
+                Gets the <see cref = "T:Jakar.Extensions.Http.MimeType" /> of the provided extension <see cref = "T:System.String" />.
+            </summary>
+            <param name = "mime" > </param>
+            <returns>
                 <see cref = "T:Jakar.Extensions.Http.MimeType" />
-                of the provided extension
-                <see cref = "T:System.String" />
-                .
+            </returns>
+        </member>
+        <member name="M:Jakar.Extensions.Http.MimeTypeExtensions.FromExtension(System.ReadOnlySpan{System.Char})">
+            <summary>
+                Gets the <see cref = "T:Jakar.Extensions.Http.MimeType" /> of the provided extension <see cref = "T:System.String" />.
             </summary>
             <param name = "mime" > </param>
             <returns>
@@ -2609,12 +2641,71 @@
             <param name = "value" > </param>
             <returns> </returns>
         </member>
-        <member name="M:Jakar.Extensions.SpanAndMemory.Spans.Slice``1(System.ReadOnlySpan{``0},``0@,``0@,System.Boolean@)">
+        <member name="T:Jakar.Extensions.SpanAndMemory.ParamsArray">
+            <summary> <para>Based on System.ParamsArray</para> </summary>
+        </member>
+        <member name="T:Jakar.Extensions.SpanAndMemory.SpanEnumerator`1">
             <summary>
-            Allocates a string
+            A <see langword="ref"/> <see langword="struct"/> that enumerates the items in a given <see cref="T:System.Span`1"/> instance.
+            </summary>
+            <typeparam name="T">The type of items to enumerate.</typeparam>
+        </member>
+        <member name="P:Jakar.Extensions.SpanAndMemory.SpanEnumerator`1.Current">
+            <summary>
+            Gets the duck-typed <see cref="P:System.Collections.Generic.IEnumerator`1.Current"/> property.
             </summary>
         </member>
-        <member name="M:Jakar.Extensions.SpanAndMemory.Spans.Contains``1(System.ReadOnlySpan{``0}@,``0)">
+        <member name="M:Jakar.Extensions.SpanAndMemory.SpanEnumerator`1.#ctor(System.ReadOnlySpan{`0}@)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Jakar.Extensions.SpanAndMemory.SpanEnumerator`1"/> struct.
+            </summary>
+            <param name="span">The source <see cref="T:System.Span`1"/> instance.</param>
+        </member>
+        <member name="M:Jakar.Extensions.SpanAndMemory.SpanEnumerator`1.GetEnumerator">
+            <summary>
+            Implements the duck-typed <see cref="M:System.Collections.Generic.IEnumerable`1.GetEnumerator"/> method.
+            </summary>
+            <returns>An <see cref="T:Jakar.Extensions.SpanAndMemory.SpanEnumerator`1"/> instance targeting the current <see cref="T:System.Span`1"/> value.</returns>
+        </member>
+        <member name="M:Jakar.Extensions.SpanAndMemory.SpanEnumerator`1.MoveNext">
+            <summary>
+            Implements the duck-typed <see cref="M:System.Collections.IEnumerator.MoveNext"/> method.
+            </summary>
+            <returns><see langword="true"/> whether a new element is available, <see langword="false"/> otherwise</returns>
+        </member>
+        <member name="T:Jakar.Extensions.SpanAndMemory.SpanEnumerator`1.Item">
+            <summary>
+            An item from a source <see cref="T:System.Span`1"/> instance.
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.SpanAndMemory.SpanEnumerator`1.Item._span">
+            <summary>
+            The source <see cref="T:System.Span`1"/> instance.
+            </summary>
+        </member>
+        <member name="F:Jakar.Extensions.SpanAndMemory.SpanEnumerator`1.Item._index">
+            <summary>
+            The current index within <see cref="F:Jakar.Extensions.SpanAndMemory.SpanEnumerator`1.Item._span"/>.
+            </summary>
+        </member>
+        <member name="P:Jakar.Extensions.SpanAndMemory.SpanEnumerator`1.Item.Value">
+            <summary>
+            Gets the reference to the current value.
+            </summary>
+        </member>
+        <member name="P:Jakar.Extensions.SpanAndMemory.SpanEnumerator`1.Item.Index">
+            <summary>
+            Gets the current index.
+            </summary>
+        </member>
+        <member name="M:Jakar.Extensions.SpanAndMemory.SpanEnumerator`1.Item.#ctor(System.ReadOnlySpan{`0}@,System.Int32)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Jakar.Extensions.SpanAndMemory.SpanEnumerator`1.Item"/> struct.
+            </summary>
+            <param name="span">The source <see cref="T:System.Span`1"/> instance.</param>
+            <param name="index">The current index within <paramref name="span"/>.</param>
+        </member>
+        <member name="M:Jakar.Extensions.SpanAndMemory.Spans.Contains``1(System.ReadOnlySpan{``0}@,``0@)">
             <summary>
             <see cref="T:System.MemoryExtensions"/> doesn't have Contains in .Net Standard 2.1. but does in .Net 6.0.
             <para>Will be removed in a future version.</para>
@@ -2624,50 +2715,36 @@
             <param name="value"></param>
             <returns></returns>
         </member>
-        <member name="M:Jakar.Extensions.SpanAndMemory.Spans.Replace``1(System.ReadOnlySpan{``0},System.ReadOnlySpan{``0}@,System.ReadOnlySpan{``0}@)">
+        <member name="T:Jakar.Extensions.SpanAndMemory.ValueStringBuilder">
+            <summary><para>Based on System.Text.ValueStringBuilder</para></summary>
+        </member>
+        <member name="M:Jakar.Extensions.SpanAndMemory.ValueStringBuilder.Grow(System.Int32)">
             <summary>
-            Allocates a string
+            Resize the internal buffer either by doubling current buffer size or
+            by adding <paramref name="additionalCapacityBeyondPos"/> to
+            <see cref="F:Jakar.Extensions.SpanAndMemory.ValueStringBuilder._pos"/> whichever is greater.
+            </summary>
+            <param name="additionalCapacityBeyondPos">
+            Number of chars requested beyond current position.
+            </param>
+        </member>
+        <member name="M:Jakar.Extensions.SpanAndMemory.ValueStringBuilder.GetPinnableReference">
+            <summary>
+            Get a pinnable reference to the builder.
+            Does not ensure there is a null char after <see cref="P:Jakar.Extensions.SpanAndMemory.ValueStringBuilder.Length"/>.
+            This overload is pattern matched in the C# 7.3+ compiler so you can omit the explicit method call, and write eg "fixed (char* c = builder)"
             </summary>
         </member>
-        <member name="M:Jakar.Extensions.SpanAndMemory.Spans.Replace``1(System.ReadOnlySpan{``0},System.ReadOnlySpan{``0}@,System.ReadOnlySpan{``0}@,``0@,``0@)">
-            <summary>
-            Allocates a string
-            </summary>
+        <member name="M:Jakar.Extensions.SpanAndMemory.ValueStringBuilder.GetPinnableReference(System.Boolean)">
+            <summary> Get a pinnable reference to the builder. </summary>
+            <param name="terminate">Ensures that the builder has a null char after <see cref="P:Jakar.Extensions.SpanAndMemory.ValueStringBuilder.Length"/></param>
         </member>
-        <member name="M:Jakar.Extensions.SpanAndMemory.Spans.Join``1(System.ReadOnlySpan{``0},System.ReadOnlySpan{``0}@)">
-            <summary>
-            Allocates a string
-            </summary>
+        <member name="P:Jakar.Extensions.SpanAndMemory.ValueStringBuilder.RawChars">
+            <summary>Returns the underlying storage of the builder.</summary>
         </member>
-        <member name="M:Jakar.Extensions.SpanAndMemory.Spans.RemoveAll``1(System.ReadOnlySpan{``0},``0@)">
-            <summary>
-            Allocates a string
-            </summary>
-        </member>
-        <member name="M:Jakar.Extensions.Strings.ConsoleExtensions.Wrapper(System.Char,System.Int32)">
-            <summary>
-                Creates a new string of
-                <paramref name = "length" />
-                size filled with
-                <paramref name = "c" />
-                character
-            </summary>
-            <param name = "c" > </param>
-            <param name = "length" > </param>
-            <returns> </returns>
-        </member>
-        <member name="M:Jakar.Extensions.Strings.ConsoleExtensions.Wrapper(System.String,System.Char@,System.Int32@)">
-            <summary>
-                Wraps a string in
-                <paramref name = "c" > </paramref>
-                repeated
-                <paramref name = "padding" > </paramref>
-                times.
-            </summary>
-            <param name = "self" > </param>
-            <param name = "c" > </param>
-            <param name = "padding" > </param>
-            <returns> </returns>
+        <member name="M:Jakar.Extensions.SpanAndMemory.ValueStringBuilder.AsSpan(System.Boolean)">
+            <summary> Returns a span around the contents of the builder. </summary>
+            <param name="terminate">Ensures that the builder has a null char after <see cref="P:Jakar.Extensions.SpanAndMemory.ValueStringBuilder.Length"/></param>
         </member>
         <member name="T:Jakar.Extensions.Strings.LineSplitEntry`1">
             <summary>
@@ -2708,6 +2785,19 @@
             <returns>
                 <see cref = "T:System.String" />
             </returns>
+        </member>
+        <member name="M:Jakar.Extensions.Strings.StringExtensions.Wrapper(System.String,System.Char@,System.Int32@)">
+            <summary>
+                Wraps a string in
+                <paramref name = "c" > </paramref>
+                repeated
+                <paramref name = "padding" > </paramref>
+                times.
+            </summary>
+            <param name = "self" > </param>
+            <param name = "c" > </param>
+            <param name = "padding" > </param>
+            <returns> </returns>
         </member>
         <member name="M:Jakar.Extensions.Strings.StringExtensions.IsBalanced(System.String,System.Collections.Generic.IReadOnlyDictionary{System.Char,System.Char})">
             <summary>
@@ -2937,20 +3027,11 @@
         </member>
         <member name="M:Jakar.Extensions.Types.TypeNameComparer.Compare(System.Type,System.Type)">
             <summary>
-                <para>
-                    Comparing by
-                    <see cref = "P:System.Type.AssemblyQualifiedName" />
-                    would give the same result,
-                    but it performs a hidden concatenation (and therefore string allocation)
-                    of
-                    <see cref = "P:System.Type.FullName" />
-                    and
-                    <see cref = "P:System.Type.Assembly" />
-                    with its
-                    <see cref = "P:System.Reflection.Assembly.FullName" />
-                    .
-                </para>
-                We can avoid this overhead by comparing the two properties separately.
+            <para>
+            Comparing by <see cref = "P:System.Type.AssemblyQualifiedName" /> would give the same result,
+            but it performs a hidden concatenation (and therefore string allocation) of <see cref = "P:System.Type.FullName" /> and <see cref = "P:System.Type.Assembly" /> with its <see cref = "P:System.Reflection.Assembly.FullName" />.
+            </para>
+            We can avoid this overhead by comparing the two properties separately.
             </summary>
             <param name = "x" > </param>
             <param name = "y" > </param>

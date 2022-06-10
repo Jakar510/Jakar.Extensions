@@ -3,6 +3,7 @@
 
 
 #nullable enable
+using System.Runtime.InteropServices;
 using Microsoft.Toolkit.HighPerformance.Buffers;
 
 
@@ -108,11 +109,11 @@ namespace Jakar.Mapper;
 /// <exception cref="OutOfRangeException"></exception>
 /// <exception cref="FormatException"></exception>
 /// <exception cref="InvalidOperationException"></exception>
-public ref struct StringMapper
+public ref struct StringMapper<T> where T : notnull
 {
     // ReSharper disable once NotAccessedField.Local
     private readonly        ReadOnlySpan<char> _originalString;
-    private readonly        JToken             _context;
+    private readonly        MContext<T>        _context;
     private readonly        MConfig            _config;
     private                 Span<char>         _buffer;
     private                 ReadOnlySpan<char> _result;  // the result buffer
@@ -120,11 +121,11 @@ public ref struct StringMapper
     private static readonly StringPool         _stringPool = new();
 
 
-    private StringMapper( ReadOnlySpan<char> span, in JToken context, in MConfig config )
+    private StringMapper( ReadOnlySpan<char> span, in MContext<T> context, in MConfig config )
     {
         _originalString = span;
         _result         = span;
-        _context        = context ?? throw new ArgumentNullException(nameof(context));
+        _context        = context;
         _config         = config;
         _buffer         = span.AsSpan();
         _builder        = new ValueStringBuilder(span.Length);
@@ -133,23 +134,23 @@ public ref struct StringMapper
     // public void Reset() => _buffer = _originalString.AsSpan();
 
 
-    public static string? Parse<T>( in ReadOnlySpan<char> input, in T context ) => Parse(input, context, MConfig.Default);
-    public static string? Parse<T>( in ReadOnlySpan<char> input, in T context, in MConfig culture )
+    public static string? Parse( in ReadOnlySpan<char> input, in T context ) => Parse(input, context, MConfig.Default);
+    public static string? Parse( in ReadOnlySpan<char> input, in T context, in MConfig culture )
     {
         if ( context is null ) { throw new ArgumentNullException(nameof(context)); }
 
         if ( input.IsEmpty ) { return default; }
 
-        return Parse(input, JToken.FromObject(context), culture);
+        return Parse(input, MContext.GetContext(context), culture);
     }
 
 
-    public static string? Parse( in ReadOnlySpan<char> input, in JToken context ) => Parse(input, context, MConfig.Default);
-    public static string? Parse( in ReadOnlySpan<char> input, in JToken context, in MConfig culture )
+    public static string? Parse( in ReadOnlySpan<char> input, in MContext<T> context ) => Parse(input, context, MConfig.Default);
+    public static string? Parse( in ReadOnlySpan<char> input, in MContext<T> context, in MConfig culture )
     {
         if ( input.IsEmpty ) { return default; }
 
-        var mapper = new StringMapper(input, context, culture);
+        var mapper = new StringMapper<T>(input, context, culture);
         return mapper.ToString();
     }
 
@@ -211,36 +212,32 @@ public ref struct StringMapper
         if ( offset is 0 ) { throw new OutOfRangeException($"'{value}' failed to parse the {nameof(offset)}"); }
 
 
-        var     stringKey = key.ToString();
-        JToken? item      = _context[stringKey];
+        if ( _context.TryGetValue(key, out object? x) )
+        {
+            ReadOnlySpan<char> result = x switch
+                                        {
+                                            null                => defaultValue,
+                                            string item         => Convert(item,                                       defaultValue),
+                                            Uri item            => Convert(item,                                       defaultValue, format),
+                                            bool item           => Convert(item,                                       defaultValue, format),
+                                            Guid item           => Convert(item,                                       defaultValue, format),
+                                            JToken item         => Convert(item,                                       defaultValue, format, offset, options),
+                                            int item            => Convert(HandleOptions(item, (int)offset,  options), defaultValue, format),
+                                            long item           => Convert(HandleOptions(item, (long)offset, options), defaultValue, format),
+                                            float item          => Convert(HandleOptions(item, offset,       options), defaultValue, format),
+                                            double item         => Convert(HandleOptions(item, offset,       options), defaultValue, format),
+                                            DateTime item       => Convert(HandleOptions(item, offset,       options), defaultValue, format),
+                                            DateTimeOffset item => Convert(HandleOptions(item, offset,       options), defaultValue, format),
+                                            TimeSpan item       => Convert(HandleOptions(item, offset,       options), defaultValue, format),
+                                            _                   => throw new OutOfRangeException(nameof(x), x),
+                                        };
 
-        ReadOnlySpan<char> result = item?.Type switch
-                                    {
-                                        null                   => defaultValue,
-                                        JTokenType.Null        => defaultValue,
-                                        JTokenType.Bytes       => throw new NotImplementedException(),
-                                        JTokenType.None        => throw new NotImplementedException(),
-                                        JTokenType.Undefined   => throw new NotImplementedException(),
-                                        JTokenType.Constructor => throw new NotImplementedException(),
-                                        JTokenType.Property    => throw new NotImplementedException(),
-                                        JTokenType.Comment     => throw new NotImplementedException(),
-                                        JTokenType.Raw         => throw new NotImplementedException(),
-                                        JTokenType.Object      => throw new NotImplementedException(),
-                                        JTokenType.Array       => throw new NotImplementedException(),
-                                        JTokenType.Integer     => Convert(GetNumber(item, (long)offset, options), defaultValue, format),
-                                        JTokenType.Float       => Convert(GetNumber(item, offset,       options), defaultValue, format),
-                                        JTokenType.Uri         => Convert(GetUri(item),                           defaultValue, format),
-                                        JTokenType.String      => Convert(GetString(item),                        defaultValue),
-                                        JTokenType.Boolean     => Convert(GetBool(item),                          defaultValue, format),
-                                        JTokenType.Date        => Convert(GetDateTime(item, offset, options),     defaultValue, format),
-                                        JTokenType.Guid        => Convert(GetGuid(item),                          defaultValue, format),
-                                        JTokenType.TimeSpan    => Convert(GetTimeSpan(item, offset, options),     defaultValue, format),
-                                        _                      => throw new OutOfRangeException(nameof(item.Type), item.Type),
-                                    };
+            return result;
+        }
 
-        return result;
+        throw new KeyNotFoundException(key.ToString());
     }
-    private ReadOnlySpan<char> Convert<T>( in T? value, in ReadOnlySpan<char> defaultValue, in ReadOnlySpan<char> format )
+    private ReadOnlySpan<char> Convert<TValue>( in TValue? value, in ReadOnlySpan<char> defaultValue, in ReadOnlySpan<char> format )
     {
         ReadOnlySpan<char> result = value switch
                                     {
@@ -255,19 +252,14 @@ public ref struct StringMapper
     }
 
 
-    private static ReadOnlySpan<char> Convert( in object? value, in ReadOnlySpan<char> defaultValue )
-    {
-        ReadOnlySpan<char> buffer = value?.ToString() ?? defaultValue;
-        return new string(buffer);
-    }
     private ReadOnlySpan<char> Convert( in ISpanFormattable value, in ReadOnlySpan<char> defaultValue, in ReadOnlySpan<char> format )
     {
         Span<char> buffer = stackalloc char[1000];
-        if ( !value.TryFormat(buffer, out int _, format, _config.culture) ) { throw new InvalidOperationException($"{value} format failed"); }
+        if ( !value.TryFormat(buffer, out int charsWritten, format, _config.culture) ) { throw new InvalidOperationException($"{value} format failed"); }
 
         if ( buffer.IsEmpty ) { return defaultValue; }
 
-        return new string(buffer);
+        return MemoryMarshal.CreateReadOnlySpan(ref MemoryMarshal.GetReference(buffer), charsWritten);
     }
     private ReadOnlySpan<char> Convert( in IFormattable value, in ReadOnlySpan<char> format ) => value.ToString(format.ToString(), _config.culture);
     private ReadOnlySpan<char> Convert( in IConvertible value ) => value.ToString(_config.culture);
@@ -440,15 +432,21 @@ public ref struct StringMapper
     }
 
 
-    private static double HandleOptions( in double x, in double offset, in MapperOptions? options )
+    private static ReadOnlySpan<char> Convert( in string? value, in ReadOnlySpan<char> defaultValue ) => string.IsNullOrWhiteSpace(value)
+                                                                                                             ? defaultValue
+                                                                                                             : value;
+    private static ReadOnlySpan<char> Convert( in object? value, in ReadOnlySpan<char> defaultValue ) => value?.ToString() ?? defaultValue;
+
+
+    private static int HandleOptions( in int x, in int offset, in MapperOptions? options )
     {
-        double result = options switch
-                        {
-                            null                  => x,
-                            MapperOptions.Greater => x + Math.Abs(offset),
-                            MapperOptions.Less    => x - Math.Abs(offset),
-                            _                     => throw new OutOfRangeException(nameof(options), options)
-                        };
+        int result = options switch
+                     {
+                         null                  => x,
+                         MapperOptions.Greater => x + Math.Abs(offset),
+                         MapperOptions.Less    => x - Math.Abs(offset),
+                         _                     => throw new OutOfRangeException(nameof(options), options)
+                     };
 
         return result;
     }
@@ -461,6 +459,18 @@ public ref struct StringMapper
                           MapperOptions.Less    => x - Math.Abs(offset),
                           _                     => throw new OutOfRangeException(nameof(options), options)
                       };
+
+        return result;
+    }
+    private static double HandleOptions( in double x, in double offset, in MapperOptions? options )
+    {
+        double result = options switch
+                        {
+                            null                  => x,
+                            MapperOptions.Greater => x + Math.Abs(offset),
+                            MapperOptions.Less    => x - Math.Abs(offset),
+                            _                     => throw new OutOfRangeException(nameof(options), options)
+                        };
 
         return result;
     }
@@ -508,6 +518,34 @@ public ref struct StringMapper
     }
 
 
+    private ReadOnlySpan<char> Convert( in JToken? item, in ReadOnlySpan<char> defaultValue, in ReadOnlySpan<char> format, in double offset, in MapperOptions? options )
+    {
+        ReadOnlySpan<char> result = item?.Type switch
+                                    {
+                                        null                   => defaultValue,
+                                        JTokenType.Null        => defaultValue,
+                                        JTokenType.Bytes       => throw new NotImplementedException(),
+                                        JTokenType.None        => throw new NotImplementedException(),
+                                        JTokenType.Undefined   => throw new NotImplementedException(),
+                                        JTokenType.Constructor => throw new NotImplementedException(),
+                                        JTokenType.Property    => throw new NotImplementedException(),
+                                        JTokenType.Comment     => throw new NotImplementedException(),
+                                        JTokenType.Raw         => throw new NotImplementedException(),
+                                        JTokenType.Object      => throw new NotImplementedException(),
+                                        JTokenType.Array       => throw new NotImplementedException(),
+                                        JTokenType.Integer     => Convert(GetNumber(item, (long)offset, options), defaultValue, format),
+                                        JTokenType.Float       => Convert(GetNumber(item, offset,       options), defaultValue, format),
+                                        JTokenType.Uri         => Convert(GetUri(item),                           defaultValue, format),
+                                        JTokenType.String      => Convert(GetString(item),                        defaultValue),
+                                        JTokenType.Boolean     => Convert(GetBool(item),                          defaultValue, format),
+                                        JTokenType.Date        => Convert(GetDateTime(item, offset, options),     defaultValue, format),
+                                        JTokenType.Guid        => Convert(GetGuid(item),                          defaultValue, format),
+                                        JTokenType.TimeSpan    => Convert(GetTimeSpan(item, offset, options),     defaultValue, format),
+                                        _                      => throw new OutOfRangeException(nameof(item.Type), item.Type),
+                                    };
+
+        return result;
+    }
     private static string? GetString( in JToken token ) => token.ToObject<string>();
     private static Uri? GetUri( in       JToken token ) => token.ToObject<Uri>();
     private static bool GetBool( in      JToken token ) => token.ToObject<bool>();
