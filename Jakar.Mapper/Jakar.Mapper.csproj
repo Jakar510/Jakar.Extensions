@@ -8,8 +8,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Jakar.Extensions" Version="6.0.0.23-beta" />
     <PackageReference Include="Microsoft.Toolkit.HighPerformance" Version="7.1.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Jakar.Extensions\Jakar.Extensions.csproj" />
   </ItemGroup>
 
 </Project>

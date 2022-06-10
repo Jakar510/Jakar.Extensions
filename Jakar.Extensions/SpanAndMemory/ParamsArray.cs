@@ -6,7 +6,7 @@ namespace Jakar.Extensions.SpanAndMemory;
 
 
 /// <summary> <para>Based on System.ParamsArray</para> </summary>
-public readonly struct ParamsArray
+public readonly ref struct ParamsArray
 {
     // Sentinel fixed-length arrays eliminate the need for a "count" field keeping this
     // struct down to just 4 fields. These are only used for their "Length" property,
@@ -21,7 +21,7 @@ public readonly struct ParamsArray
 
     // After construction, the first three elements of this array will never be accessed
     // because the indexer will retrieve those values from arg0, arg1, and arg2.
-    private readonly object?[] _args;
+    private readonly ReadOnlySpan<object?> _args;
 
     public int Length => _args.Length;
 
@@ -57,7 +57,7 @@ public readonly struct ParamsArray
         // Always assign this.args to make use of its "Length" property
         _args = _threeArgArray;
     }
-    public ParamsArray( params object?[] args )
+    public ParamsArray( in ReadOnlySpan<object?> args )
     {
         int len = args.Length;
 
@@ -75,6 +75,8 @@ public readonly struct ParamsArray
 
         _args = args;
     }
+    public static ParamsArray Create( params object?[] args ) => new(args);
+
 
     private object? GetAtSlow( int index ) => index switch
                                               {

@@ -38,9 +38,9 @@ public static class Program
             // BenchmarkRunner.Run<JsonizerBenchmarks>();
             // BenchmarkRunner.Run<SpansBenchmarks>();
             // TestJson();
-            Test_Sql();
+            // Test_Sql();
 
-            await Test_HttpBuilder();
+            // await Test_HttpBuilder();
 
             "Bye".WriteToConsole();
         }

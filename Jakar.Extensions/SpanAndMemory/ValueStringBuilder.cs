@@ -22,7 +22,7 @@ public ref struct ValueStringBuilder
 
     public int Length
     {
-        get => _pos;
+        readonly get => _pos;
         set
         {
             Debug.Assert(value >= 0,             "Value must be zero or greater");
@@ -31,7 +31,7 @@ public ref struct ValueStringBuilder
         }
     }
 
-    public int Capacity => _chars.Length;
+    public readonly int Capacity => _chars.Length;
 
     public ref char this[ int index ]
     {
@@ -43,17 +43,17 @@ public ref struct ValueStringBuilder
     }
 
 
-    public ValueStringBuilder() : this(16) { }
-    public ValueStringBuilder( in Span<char> initialBuffer )
-    {
-        _arrayToReturnToPool = null;
-        _chars               = initialBuffer;
-        _pos                 = 0;
-    }
+    public ValueStringBuilder() : this(64) { }
     public ValueStringBuilder( int initialCapacity )
     {
         _arrayToReturnToPool = ArrayPool<char>.Shared.Rent(initialCapacity);
         _chars               = _arrayToReturnToPool;
+        _pos                 = 0;
+    }
+    public ValueStringBuilder( in Span<char> initialBuffer )
+    {
+        _arrayToReturnToPool = null;
+        _chars               = initialBuffer;
         _pos                 = 0;
     }
 
@@ -103,15 +103,12 @@ public ref struct ValueStringBuilder
 
     /// <summary>
     /// Get a pinnable reference to the builder.
-    /// Does not ensure there is a null char after <see cref="Length"/>
-    /// This overload is pattern matched in the C# 7.3+ compiler so you can omit
-    /// the explicit method call, and write eg "fixed (char* c = builder)"
+    /// Does not ensure there is a null char after <see cref="Length"/>.
+    /// This overload is pattern matched in the C# 7.3+ compiler so you can omit the explicit method call, and write eg "fixed (char* c = builder)"
     /// </summary>
-    public ref char GetPinnableReference() => ref MemoryMarshal.GetReference(_chars);
+    public ref char GetPinnableReference() => ref _chars.GetPinnableReference();
 
-    /// <summary>
-    /// Get a pinnable reference to the builder.
-    /// </summary>
+    /// <summary> Get a pinnable reference to the builder. </summary>
     /// <param name="terminate">Ensures that the builder has a null char after <see cref="Length"/></param>
     public ref char GetPinnableReference( bool terminate )
     {
@@ -121,8 +118,9 @@ public ref struct ValueStringBuilder
             _chars[Length] = '\0';
         }
 
-        return ref MemoryMarshal.GetReference(_chars);
+        return ref GetPinnableReference();
     }
+
 
     public override string ToString()
     {
@@ -135,10 +133,10 @@ public ref struct ValueStringBuilder
     /// <summary>Returns the underlying storage of the builder.</summary>
     public Span<char> RawChars => _chars;
 
-    /// <summary>
-    /// Returns a span around the contents of the builder.
-    /// </summary>
+
+    /// <summary> Returns a span around the contents of the builder. </summary>
     /// <param name="terminate">Ensures that the builder has a null char after <see cref="Length"/></param>
+    [Pure]
     public ReadOnlySpan<char> AsSpan( bool terminate )
     {
         if ( !terminate ) { return _chars[.._pos]; }
@@ -148,9 +146,10 @@ public ref struct ValueStringBuilder
         return _chars[.._pos];
     }
 
-    public ReadOnlySpan<char> AsSpan() => _chars[.._pos];
-    public ReadOnlySpan<char> AsSpan( int start ) => _chars.Slice(start,             _pos - start);
-    public ReadOnlySpan<char> AsSpan( int start, int length ) => _chars.Slice(start, length);
+    [Pure] public readonly ReadOnlySpan<char> AsSpan() => _chars[.._pos];
+    [Pure] public readonly ReadOnlySpan<char> AsSpan( int start ) => _chars.Slice(start,             _pos - start);
+    [Pure] public readonly ReadOnlySpan<char> AsSpan( int start, int length ) => _chars.Slice(start, length);
+
 
     public bool TryCopyTo( in Span<char> destination, out int charsWritten )
     {
@@ -253,16 +252,17 @@ public ref struct ValueStringBuilder
         _pos += count;
     }
 
-    public unsafe void Append( char* value, int length )
-    {
-        int pos = _pos;
-        if ( pos > _chars.Length - length ) { Grow(length); }
 
-        Span<char> dst = _chars.Slice(_pos, length);
-        for ( var i = 0; i < dst.Length; i++ ) { dst[i] = *value++; }
-
-        _pos += length;
-    }
+    // public unsafe void Append( char* value, int length )
+    // {
+    //     int pos = _pos;
+    //     if ( pos > _chars.Length - length ) { Grow(length); }
+    //
+    //     Span<char> dst = _chars.Slice(_pos, length);
+    //     for ( var i = 0; i < dst.Length; i++ ) { dst[i] = *value++; }
+    //
+    //     _pos += length;
+    // }
 
     public void Append( in ReadOnlySpan<char> value )
     {

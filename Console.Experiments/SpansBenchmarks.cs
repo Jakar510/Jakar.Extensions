@@ -2,12 +2,12 @@
 // 05/10/2022  10:26 AM
 
 using System;
+using System.Runtime.InteropServices;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Order;
 using Jakar.Extensions.SpanAndMemory;
 using JetBrains.Annotations;
-
 
 
 #nullable enable
@@ -33,9 +33,38 @@ public class SpansBenchmarks
 
     [Benchmark] public ReadOnlySpan<char> AsSpan() => ( (ReadOnlySpan<char>)Value ).AsSpan();
     [Benchmark] public ReadOnlySpan<char> RemoveAll_Single() => Spans.RemoveAll(Value, '1');
-    [Benchmark] public ReadOnlySpan<char> RemoveAll_Params() => Spans.RemoveAll(Value, '1', '3', 'F', 'A');
-    [Benchmark] public bool ContainsAny() => Spans.ContainsAny(Value, '1', '3', 'F', 'A');
-    [Benchmark] public bool ContainsNone() => Spans.ContainsNone(Value, '1', '3', 'F', 'A');
+    [Benchmark]
+    public ReadOnlySpan<char> RemoveAll_Params()
+    {
+        Span<char> span   = Value.AsSpan().AsSpan();
+        Span<char> buffer = stackalloc char[4];
+        buffer[0] = '1';
+        buffer[1] = '3';
+        buffer[2] = 'F';
+        buffer[3] = 'A';
+        Span<char> result = span.RemoveAll(buffer);
+        return MemoryMarshal.CreateReadOnlySpan(ref result.GetPinnableReference(), result.Length);
+    }
+    [Benchmark]
+    public bool ContainsAny()
+    {
+        Span<char> buffer = stackalloc char[4];
+        buffer[0] = '1';
+        buffer[1] = '3';
+        buffer[2] = 'F';
+        buffer[3] = 'A';
+        return Spans.ContainsAny(Value, buffer);
+    }
+    [Benchmark]
+    public bool ContainsNone()
+    {
+        Span<char> buffer = stackalloc char[4];
+        buffer[0] = '1';
+        buffer[1] = '3';
+        buffer[2] = 'F';
+        buffer[3] = 'A';
+        return Spans.ContainsNone(Value, buffer);
+    }
     [Benchmark] public bool StartsWith() => Spans.StartsWith(Value, '1');
     [Benchmark] public bool EndsWith() => Spans.EndsWith(Value, '1');
     [Benchmark] public bool Contains_span() => Spans.Contains(Value,  '2');

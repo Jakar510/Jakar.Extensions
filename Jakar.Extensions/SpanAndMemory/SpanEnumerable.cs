@@ -13,18 +13,11 @@ namespace Jakar.Extensions.SpanAndMemory;
 /// </summary>
 /// <typeparam name="T">The type of items to enumerate.</typeparam>
 [EditorBrowsable(EditorBrowsableState.Never)]
-public ref struct SpanEnumerable<T>
+public ref struct SpanEnumerator<T>
 {
-    /// <summary>
-    /// The source <see cref="Span{T}"/> instance.
-    /// </summary>
-    private readonly Span<T> _span;
+    private readonly ReadOnlySpan<T> _span;
+    private          int             _index;
 
-    /// <summary>
-    /// The current index within <see cref="_span"/>.
-    /// </summary>
-    private int _index;
-    
     /// <summary>
     /// Gets the duck-typed <see cref="IEnumerator{T}.Current"/> property.
     /// </summary>
@@ -33,25 +26,26 @@ public ref struct SpanEnumerable<T>
         [MethodImpl(MethodImplOptions.AggressiveInlining)] get => new(_span, _index);
     }
 
+
     /// <summary>
-    /// Initializes a new instance of the <see cref="SpanEnumerable{T}"/> struct.
+    /// Initializes a new instance of the <see cref="SpanEnumerator{T}"/> struct.
     /// </summary>
     /// <param name="span">The source <see cref="Span{T}"/> instance.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public SpanEnumerable( in Span<T> span )
+    public SpanEnumerator( in ReadOnlySpan<T> span )
     {
         _span  = span;
         _index = -1;
     }
-    
+
 
     /// <summary>
     /// Implements the duck-typed <see cref="IEnumerable{T}.GetEnumerator"/> method.
     /// </summary>
-    /// <returns>An <see cref="SpanEnumerable{T}"/> instance targeting the current <see cref="Span{T}"/> value.</returns>
+    /// <returns>An <see cref="SpanEnumerator{T}"/> instance targeting the current <see cref="Span{T}"/> value.</returns>
     [Pure]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public readonly SpanEnumerable<T> GetEnumerator() => this;
+    public readonly SpanEnumerator<T> GetEnumerator() => this;
 
     /// <summary>
     /// Implements the duck-typed <see cref="System.Collections.IEnumerator.MoveNext"/> method.
@@ -59,6 +53,7 @@ public ref struct SpanEnumerable<T>
     /// <returns><see langword="true"/> whether a new element is available, <see langword="false"/> otherwise</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool MoveNext() => ++_index < _span.Length;
+
 
 
     /// <summary>
@@ -70,7 +65,7 @@ public ref struct SpanEnumerable<T>
         /// <summary>
         /// The source <see cref="Span{T}"/> instance.
         /// </summary>
-        private readonly Span<T> _span;
+        private readonly ReadOnlySpan<T> _span;
 
         /// <summary>
         /// The current index within <see cref="_span"/>.
@@ -114,7 +109,7 @@ public ref struct SpanEnumerable<T>
         /// <param name="span">The source <see cref="Span{T}"/> instance.</param>
         /// <param name="index">The current index within <paramref name="span"/>.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Item( in Span<T> span, int index )
+        public Item( in ReadOnlySpan<T> span, int index )
         {
             _span  = span;
             _index = index;

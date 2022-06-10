@@ -34,7 +34,7 @@ public readonly ref struct JNode
         {
             _span = _span.Trim();
 
-            if ( Spans.IsNullOrWhiteSpace(_span) )
+            if ( _span.IsNullOrWhiteSpace() )
             {
                 Current = default;
                 return false;

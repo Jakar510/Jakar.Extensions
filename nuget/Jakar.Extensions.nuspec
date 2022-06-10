@@ -4,7 +4,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata>
 		<id>Jakar.Extensions</id>
-		<version>6.0.0.23-beta</version>
+		<version>6.0.0.24-beta</version>
 		<title>Extension Library</title>
 		<authors>Tyler Stegmaier</authors>
 		<owners>Jakar510/Jakar</owners>
@@ -24,14 +24,14 @@
 			Added Models.Service
 			Added HttpRequestBuilder for .Net 6.0
 			Updated Enum extensions
-			Added more Span extensions
+			Added lots more Span Extensions
 			Reworked AppSettings
 			Reworked LocalFile and LocalDirectory a bit
 			Reworked IniConfig and PreferenceFile
 			WebRequests.GetResponseAsync now tries to get the error details, including anything sent sent from server in the body.
 			Reworked ValidValueOf
 			Fix xml documentation.
-			Moving to DotNet 6.0 going forward once MAUI is released.
+			Moving to .Net6 only going forward once MAUI is released.
 		</releaseNotes>
 		<tags>Api Extension Linq Http Files Files Strings Types Languages Collections Ini</tags>
 		<language>en-US</language>

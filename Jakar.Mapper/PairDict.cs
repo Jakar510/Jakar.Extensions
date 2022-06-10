@@ -39,7 +39,6 @@ public readonly ref struct PairDict
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal PairDict( ReadOnlySpan<Pair> source ) : this(source.Length)
-
     {
         foreach ( ReadOnlySpanEnumerable<Pair>.Item pair in source.Enumerate() ) { _array[pair.Index] = pair.Value; }
     }

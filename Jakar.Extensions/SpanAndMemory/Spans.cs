@@ -8,6 +8,7 @@ namespace Jakar.Extensions.SpanAndMemory;
 [SuppressMessage("ReSharper", "OutParameterValueIsAlwaysDiscarded.Global")]
 public static partial class Spans
 {
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool IsNullOrWhiteSpace( this Span<char> span )
     {
         if ( span.IsEmpty ) { return true; }
@@ -19,6 +20,7 @@ public static partial class Spans
 
         return true;
     }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool IsNullOrWhiteSpace( this ReadOnlySpan<char> span )
     {
         if ( span.IsEmpty ) { return true; }
@@ -32,15 +34,16 @@ public static partial class Spans
     }
 
 
-    public static Span<T> AsSpan<T>( this ReadOnlySpan<T> span ) => span.AsSpan(span.Length);
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Span<T> AsSpan<T>( this ReadOnlySpan<T> span ) => span.AsSpan(span.Length);
     public static Span<T> AsSpan<T>( this ReadOnlySpan<T> span, in int length )
     {
         Guard.IsLessThanOrEqualTo(length, span.Length, nameof(length));
         return MemoryMarshal.CreateSpan(ref MemoryMarshal.GetReference(span), length);
     }
-    public static Memory<T> AsSpan<T>( this T[] span ) => MemoryMarshal.CreateFromPinnedArray(span, 0, span.Length);
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Memory<T> AsSpan<T>( this T[] span ) => MemoryMarshal.CreateFromPinnedArray(span, 0, span.Length);
 
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int LastIndexOf<T>( this ReadOnlySpan<T> value, in T c, in int endIndex ) where T : unmanaged, IEquatable<T>
     {
         Guard.IsInRangeFor(endIndex, value, nameof(value));
@@ -48,245 +51,23 @@ public static partial class Spans
     }
 
 
-    /// <summary>
-    /// Allocates a string
-    /// </summary>
-    public static ReadOnlySpan<T> Slice<T>( this ReadOnlySpan<T> value, in T startValue, in T endValue, in bool includeEnds ) where T : unmanaged, IEquatable<T>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static Span<T> Join<T>( this Span<T> value, in Span<T> other ) where T : unmanaged, IEquatable<T>
     {
-        int start = value.IndexOf(startValue);
-        int end   = value.IndexOf(endValue);
-
-        if ( start < 0 && end < 0 ) { return value; }
-
-        start += includeEnds
-                     ? 0
-                     : 1;
-
-        end += includeEnds
-                   ? 1
-                   : 0;
-
-        int length = end - start;
-
-        if ( start + length >= value.Length ) { return value[start..]; }
-
-        Guard.IsInRangeFor(start, value, nameof(value));
-        Guard.IsInRangeFor(end,   value, nameof(value));
-        return value.Slice(start, length);
+        int     size   = value.Length + other.Length;
+        Span<T> buffer = stackalloc T[size];
+        Join(value, other, ref buffer, out int charWritten);
+        return MemoryMarshal.CreateSpan(ref buffer.GetPinnableReference(), charWritten);
     }
-    public static void Slice<T>( in ReadOnlySpan<T> value, in T startValue, in T endValue, in bool includeEnds, ref Span<T> buffer, out int charWritten ) where T : unmanaged, IEquatable<T>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static Span<T> Join<T>( this Span<T> value, in ReadOnlySpan<T> other ) where T : unmanaged, IEquatable<T>
     {
-        int start = value.IndexOf(startValue);
-        int end   = value.IndexOf(endValue);
-
-        if ( start > 0 && end > 0 )
-        {
-            start += includeEnds
-                         ? 0
-                         : 1;
-
-            end += includeEnds
-                       ? 1
-                       : 0;
-
-            ReadOnlySpan<T> result = start + end - start >= value.Length
-                                         ? value[start..]
-                                         : value.Slice(start, end);
-
-            result.CopyTo(buffer);
-            charWritten = result.Length;
-            return;
-        }
-
-        value.CopyTo(buffer);
-        charWritten = value.Length;
+        int     size   = value.Length + other.Length;
+        Span<T> buffer = stackalloc T[size];
+        Join(value, other, ref buffer, out int charWritten);
+        return MemoryMarshal.CreateSpan(ref buffer.GetPinnableReference(), charWritten);
     }
-
-
-    public static bool Contains( this Span<char> span, ReadOnlySpan<char> value ) => span.Contains(value, StringComparison.Ordinal);
-    public static bool Contains( this Span<char> span, ReadOnlySpan<char> value, StringComparison comparison )
-    {
-        ReadOnlySpan<char> temp = span;
-        return temp.Contains(value, comparison);
-    }
-    public static bool Contains( this ReadOnlySpan<char> span, ReadOnlySpan<char> value ) => span.Contains(value, StringComparison.Ordinal);
-
-
-    /// <summary>
-    /// <see cref="MemoryExtensions"/> doesn't have Contains in .Net Standard 2.1. but does in .Net 6.0.
-    /// <para>Will be removed in a future version.</para>
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="span"></param>
-    /// <param name="value"></param>
-    /// <returns></returns>
-    public static bool Contains<T>( in ReadOnlySpan<T> span, T value ) where T : unmanaged, IEquatable<T>
-    {
-        foreach ( T item in span )
-        {
-            if ( item.Equals(value) ) { return true; }
-        }
-
-        return false;
-    }
-    public static bool Contains<T>( this ReadOnlySpan<T> span, ReadOnlySpan<T> value ) where T : unmanaged, IEquatable<T>
-    {
-        for ( var i = 0; i < span.Length || i + value.Length < span.Length; i++ )
-        {
-            if ( span.Slice(i, value.Length).SequenceEqual(value) ) { return true; }
-        }
-
-        return false;
-    }
-
-
-    public static bool ContainsAll<T>( this ReadOnlySpan<T> span, params T[] values ) where T : unmanaged, IEquatable<T>
-    {
-        ReadOnlySpan<T> temp = values;
-        return span.ContainsAll(temp);
-    }
-    public static bool ContainsAll<T>( this ReadOnlySpan<T> span, in ReadOnlySpan<T> values ) where T : unmanaged, IEquatable<T>
-    {
-        var result = true;
-
-
-        foreach ( T c in values ) { result &= Contains(span, c); }
-
-        return result;
-    }
-    public static bool ContainsNone<T>( this ReadOnlySpan<T> span, params T[] values ) where T : unmanaged, IEquatable<T>
-    {
-        ReadOnlySpan<T> temp = values;
-        return span.ContainsNone(temp);
-    }
-    public static bool ContainsNone<T>( this ReadOnlySpan<T> span, in ReadOnlySpan<T> values ) where T : unmanaged, IEquatable<T>
-    {
-        foreach ( T c in values )
-        {
-            if ( Contains(span, c) ) { return false; }
-        }
-
-        return true;
-    }
-    public static bool ContainsAny<T>( this ReadOnlySpan<T> span, params T[] values ) where T : unmanaged, IEquatable<T>
-    {
-        ReadOnlySpan<T> temp = values;
-        return span.ContainsAny(temp);
-    }
-    public static bool ContainsAny<T>( this ReadOnlySpan<T> span, in ReadOnlySpan<T> values ) where T : unmanaged, IEquatable<T>
-    {
-        foreach ( T c in values )
-        {
-            if ( Contains(span, c) ) { return true; }
-        }
-
-        return false;
-    }
-
-
-    public static bool StartsWith<T>( this Span<T> span, in T value ) where T : unmanaged, IEquatable<T>
-    {
-        if ( span.IsEmpty ) { return false; }
-
-        return span[0].Equals(value);
-    }
-    public static bool StartsWith<T>( this ReadOnlySpan<T> span, in T value ) where T : unmanaged, IEquatable<T>
-    {
-        if ( span.IsEmpty ) { return false; }
-
-        return span[0].Equals(value);
-    }
-
-
-    public static bool EndsWith<T>( this Span<T> span, in T value ) where T : unmanaged, IEquatable<T>
-    {
-        if ( span.IsEmpty ) { return false; }
-
-        return span[^1].Equals(value);
-    }
-    public static bool EndsWith<T>( this ReadOnlySpan<T> span, in T value ) where T : unmanaged, IEquatable<T>
-    {
-        if ( span.IsEmpty ) { return false; }
-
-        return span[^1].Equals(value);
-    }
-
-
-    /// <summary>
-    /// Allocates a string
-    /// </summary>
-    public static ReadOnlySpan<T> Replace<T>( this ReadOnlySpan<T> value, in ReadOnlySpan<T> oldValue, in ReadOnlySpan<T> newValue ) where T : unmanaged, IEquatable<T>
-    {
-        Span<T> buffer = stackalloc T[value.Length + newValue.Length];
-        Replace(value, oldValue, newValue, ref buffer, out int charWritten);
-        return MemoryMarshal.CreateReadOnlySpan(ref buffer.GetPinnableReference(), charWritten);
-    }
-    public static void Replace<T>( in ReadOnlySpan<T> value, in ReadOnlySpan<T> oldValue, in ReadOnlySpan<T> newValue, ref Span<T> buffer, out int charWritten ) where T : unmanaged, IEquatable<T>
-    {
-        Guard.IsInRangeFor(value.Length + newValue.Length - 1, buffer, nameof(buffer));
-
-        if ( !value.Contains(oldValue) )
-        {
-            value.CopyTo(buffer);
-            charWritten = value.Length;
-            return;
-        }
-
-        int start = value.IndexOf(oldValue);
-
-        int end = start + oldValue.Length;
-
-
-        Guard.IsInRangeFor(start, value, nameof(value));
-        Join(value[..start], newValue, ref buffer, out int first);
-        ReadOnlySpan<T> temp = buffer[..first];
-
-        Guard.IsInRangeFor(end, value, nameof(value));
-        Join(temp, value[end..], ref buffer, out int second);
-        charWritten = first + second;
-    }
-
-
-    /// <summary>
-    /// Allocates a string
-    /// </summary>
-    public static ReadOnlySpan<T> Replace<T>( this ReadOnlySpan<T> value, in ReadOnlySpan<T> oldValue, in ReadOnlySpan<T> newValue, in T startValue, in T endValue ) where T : unmanaged, IEquatable<T>
-    {
-        Span<T> buffer = stackalloc T[value.Length + newValue.Length];
-        Replace(value, oldValue, newValue, startValue, endValue, ref buffer, out int charWritten);
-        return MemoryMarshal.CreateReadOnlySpan(ref buffer.GetPinnableReference(), charWritten);
-    }
-    public static void Replace<T>( in ReadOnlySpan<T> value, in ReadOnlySpan<T> oldValue, in ReadOnlySpan<T> newValue, in T startValue, in T endValue, ref Span<T> buffer, out int charWritten ) where T : unmanaged, IEquatable<T>
-    {
-        Guard.IsInRangeFor(value.Length + newValue.Length - 1, buffer, nameof(buffer));
-
-        if ( !value.Contains(oldValue) )
-        {
-            value.CopyTo(buffer);
-            charWritten = value.Length;
-            return;
-        }
-
-        int start = value.IndexOf(oldValue);
-
-        int end = start + oldValue.Length;
-
-        if ( !oldValue.StartsWith(startValue) && start > 0 ) { start--; }
-
-        if ( !oldValue.EndsWith(endValue) ) { end++; }
-
-        Guard.IsInRangeFor(start, value, nameof(value));
-        Join(value[..start], newValue, ref buffer, out int first);
-
-        Guard.IsInRangeFor(end, value, nameof(value));
-        Join(buffer[..first], value[end..], ref buffer, out int second);
-        charWritten = first + second;
-    }
-
-
-    /// <summary>
-    /// Allocates a string
-    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static ReadOnlySpan<T> Join<T>( this ReadOnlySpan<T> value, in ReadOnlySpan<T> other ) where T : unmanaged, IEquatable<T>
     {
         int     size   = value.Length + other.Length;
@@ -294,6 +75,7 @@ public static partial class Spans
         Join(value, other, ref buffer, out int charWritten);
         return MemoryMarshal.CreateReadOnlySpan(ref buffer.GetPinnableReference(), charWritten);
     }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void Join<T>( in ReadOnlySpan<T> first, in ReadOnlySpan<T> last, ref Span<T> buffer, out int charWritten ) where T : unmanaged, IEquatable<T>
     {
         charWritten = first.Length + last.Length;
@@ -305,12 +87,14 @@ public static partial class Spans
     }
 
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void CopyTo<T>( this ReadOnlySpan<T> value, ref Span<T> buffer ) where T : unmanaged, IEquatable<T>
     {
         Guard.IsInRangeFor(value.Length - 1, buffer, nameof(buffer));
 
         for ( var i = 0; i < value.Length; i++ ) { buffer[i] = value[i]; }
     }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void CopyTo<T>( this ReadOnlySpan<T> value, ref Span<T> buffer, in T defaultValue ) where T : unmanaged, IEquatable<T>
     {
         Guard.IsInRangeFor(value.Length - 1, buffer, nameof(buffer));
@@ -318,64 +102,5 @@ public static partial class Spans
         for ( var i = 0; i < value.Length; i++ ) { buffer[i] = value[i]; }
 
         for ( int i = value.Length; i < buffer.Length; i++ ) { buffer[i] = defaultValue; }
-    }
-
-
-    /// <summary>
-    /// Allocates a string
-    /// </summary>
-    public static ReadOnlySpan<T> RemoveAll<T>( this ReadOnlySpan<T> value, in T c ) where T : unmanaged, IEquatable<T>
-    {
-        Span<T> buffer = stackalloc T[value.Length];
-        RemoveAll(value, c, ref buffer, out int charWritten);
-        return MemoryMarshal.CreateReadOnlySpan(ref buffer.GetPinnableReference(), charWritten);
-    }
-    public static ReadOnlySpan<T> RemoveAll<T>( this ReadOnlySpan<T> value, params T[] removed ) where T : unmanaged, IEquatable<T>
-    {
-        Span<T> buffer = stackalloc T[value.Length];
-        RemoveAll(value, ref buffer, out int charWritten, removed);
-        return MemoryMarshal.CreateReadOnlySpan(ref buffer.GetPinnableReference(), charWritten);
-    }
-    public static void RemoveAll<T>( in ReadOnlySpan<T> value, in T c, ref Span<T> buffer, out int charWritten ) where T : unmanaged, IEquatable<T>
-    {
-        Guard.IsInRangeFor(value.Length - 1, buffer, nameof(buffer));
-        var offset = 0;
-
-        for ( var i = 0; i < value.Length; i++ )
-        {
-            if ( value[i].Equals(c) )
-            {
-                offset++;
-                continue;
-            }
-
-            buffer[i - offset] = value[i];
-        }
-
-        charWritten = value.Length - offset;
-    }
-    public static void RemoveAll<T>( in ReadOnlySpan<T> value, ref Span<T> buffer, out int charWritten, params T[] removed ) where T : unmanaged, IEquatable<T>
-    {
-        Guard.IsInRangeFor(value.Length - 1, buffer, nameof(buffer));
-        var offset = 0;
-
-        for ( var i = 0; i < value.Length; i++ )
-        {
-            var skip = false;
-
-            foreach ( T item in removed )
-            {
-                if ( !value[i].Equals(item) ) { continue; }
-
-                offset++;
-                skip = true;
-            }
-
-            if ( skip ) { continue; }
-
-            buffer[i - offset] = value[i];
-        }
-
-        charWritten = value.Length - offset;
     }
 }

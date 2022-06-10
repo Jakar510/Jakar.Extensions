@@ -4,6 +4,7 @@
 
 #nullable enable
 using System.Globalization;
+using System.Runtime.InteropServices;
 
 
 
@@ -50,6 +51,17 @@ public readonly ref struct MConfig
         this.closeOffsetDelimiter  = closeOffsetDelimiter;
         this.startTermDelimiter    = startTermDelimiter;
         this.endTermDelimiter      = endTermDelimiter;
+    }
+
+
+    [Pure]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal ReadOnlySpan<char> RemovedOffsets()
+    {
+        Span<char> buffer = stackalloc char[2];
+        buffer[0] = positiveOffsetChar;
+        buffer[1] = negativeOffsetChar;
+        return MemoryMarshal.CreateReadOnlySpan(ref buffer.GetPinnableReference(), 2);
     }
 }
 

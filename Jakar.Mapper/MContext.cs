@@ -1,7 +1,7 @@
 ﻿using System.Buffers;
-using System.ComponentModel;
 using Jakar.Extensions.Collections;
 using Microsoft.Toolkit.HighPerformance.Enumerables;
+
 
 #if NET6_0
 
@@ -34,7 +34,7 @@ public ref struct MContext
     {
         PropertyInfo[] properties = context.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public);
         Pair[]         mapping    = ArrayPool<Pair>.Shared.Rent(properties.Length);
-        
+
         foreach ( SpanEnumerable<PropertyInfo>.Item pair in properties.Enumerate() )
         {
             string  key   = pair.Value.Name;

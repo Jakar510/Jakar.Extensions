@@ -3,6 +3,10 @@
 
 
 #nullable enable
+using Microsoft.Toolkit.HighPerformance.Buffers;
+
+
+
 namespace Jakar.Mapper;
 
 
@@ -107,12 +111,13 @@ namespace Jakar.Mapper;
 public ref struct StringMapper
 {
     // ReSharper disable once NotAccessedField.Local
-    private readonly ReadOnlySpan<char> _originalString;
-    private readonly JToken             _context;
-    private readonly MConfig            _config;
-    private          Span<char>         _buffer;
-    private          ReadOnlySpan<char> _result;  // the result buffer
-    private readonly ValueStringBuilder _builder; // TODO: implement this
+    private readonly        ReadOnlySpan<char> _originalString;
+    private readonly        JToken             _context;
+    private readonly        MConfig            _config;
+    private                 Span<char>         _buffer;
+    private                 ReadOnlySpan<char> _result;  // the result buffer
+    private readonly        ValueStringBuilder _builder; // TODO: implement this
+    private static readonly StringPool         _stringPool = new();
 
 
     private StringMapper( ReadOnlySpan<char> span, in JToken context, in MConfig config )
@@ -407,11 +412,8 @@ public ref struct StringMapper
         }
 
         Span<char> buffer = stackalloc char[value.Length * 2];
-        Spans.RemoveAll(value, ref buffer, out int charWritten, _config.positiveOffsetChar, _config.negativeOffsetChar);
-
-        offset = double.TryParse(buffer[..charWritten], out double n)
-                     ? n
-                     : 1;
+        Spans.RemoveAll(value, ref buffer, out int charWritten, _config.RemovedOffsets());
+        offset = Spans.As(buffer[..charWritten], 1d);
 
         // bool end = value.Contains(_config.closeOffsetDelimiter);
         //
