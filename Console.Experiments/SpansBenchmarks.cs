@@ -70,7 +70,7 @@ public class SpansBenchmarks
     }
     [Benchmark] public bool StartsWith() => Spans.StartsWith(Value, '1');
     [Benchmark] public bool EndsWith() => Spans.EndsWith(Value, '1');
-    [Benchmark] public bool Contains_span() => Spans.Contains(Value,  '2');
+    [Benchmark] public bool Contains_span() => Value.Contains('2');
     [Benchmark] public bool Contains_value() => Spans.Contains(Value, NEW_VALUE);
     [Benchmark] public bool IsNullOrWhiteSpace() => Spans.IsNullOrWhiteSpace(Value);
     [Benchmark] public ReadOnlySpan<char> Replace() => Spans.Replace<char>(Value, OLD, NEW_VALUE);

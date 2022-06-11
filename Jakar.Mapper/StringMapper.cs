@@ -3,6 +3,7 @@
 
 
 #nullable enable
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using Microsoft.Toolkit.HighPerformance.Buffers;
 
@@ -12,6 +13,14 @@ namespace Jakar.Mapper;
 
 
 #if NET6_0
+
+
+
+public static class StringMapper
+{
+    public static string? MapParse<T>( [NotNullIfNotNull("pattern")] this string? pattern, in T context ) where T : notnull => StringMapper<T>.Parse(pattern,                    context);
+    public static string? MapParse<T>( [NotNullIfNotNull("pattern")] this string? pattern, in T context, in MConfig config ) where T : notnull => StringMapper<T>.Parse(pattern, context, config);
+}
 
 
 
@@ -112,26 +121,30 @@ namespace Jakar.Mapper;
 public ref struct StringMapper<T> where T : notnull
 {
     // ReSharper disable once NotAccessedField.Local
-    private readonly        ReadOnlySpan<char> _originalString;
-    private readonly        MContext<T>        _context;
-    private readonly        MConfig            _config;
-    private                 Span<char>         _buffer;
-    private                 ReadOnlySpan<char> _result;  // the result buffer
-    private readonly        ValueStringBuilder _builder; // TODO: implement this
-    private static readonly StringPool         _stringPool = new();
+    private readonly MContext<T>        _context;
+    private readonly MConfig            _config;
+    private          Span<char>         _buffer;
+    private          ReadOnlySpan<char> _result; // the result buffer
+
+    // private readonly        ValueStringBuilder _builder; // TODO: implement this
+    // private static readonly StringPool         _stringPool = new();
 
 
-    private StringMapper( ReadOnlySpan<char> span, in MContext<T> context, in MConfig config )
+    private StringMapper( in ReadOnlySpan<char> span, in MContext<T> context, in MConfig config )
     {
-        _originalString = span;
-        _result         = span;
-        _context        = context;
-        _config         = config;
-        _buffer         = span.AsSpan();
-        _builder        = new ValueStringBuilder(span.Length);
-    }
+        Span<char> buffer = stackalloc char[span.Length + 2];
+        buffer[0] = ' ';
+        for ( var i = 0; i < span.Length; i++ ) { buffer[i + 1] = span[i]; }
 
-    // public void Reset() => _buffer = _originalString.AsSpan();
+        buffer[^1] = ' ';
+        ReadOnlySpan<char> originalString = MemoryMarshal.CreateReadOnlySpan(ref buffer.GetPinnableReference(), buffer.Length);
+        _result  = originalString;
+        _context = context;
+        _config  = config;
+        _buffer  = span.AsSpan();
+
+        // _builder = new ValueStringBuilder(Math.Max(originalString.Length * 5, 64));
+    }
 
 
     public static string? Parse( in ReadOnlySpan<char> input, in T context ) => Parse(input, context, MConfig.Default);
@@ -143,10 +156,7 @@ public ref struct StringMapper<T> where T : notnull
 
         return Parse(input, MContext.GetContext(context), culture);
     }
-
-
-    public static string? Parse( in ReadOnlySpan<char> input, in MContext<T> context ) => Parse(input, context, MConfig.Default);
-    public static string? Parse( in ReadOnlySpan<char> input, in MContext<T> context, in MConfig culture )
+    private static string? Parse( in ReadOnlySpan<char> input, in MContext<T> context, in MConfig culture )
     {
         if ( input.IsEmpty ) { return default; }
 
@@ -164,7 +174,7 @@ public ref struct StringMapper<T> where T : notnull
         // if ( !span.IsBalanced() ) { throw new FormatException($@"String is not balanced! ""{span}"""); }
 
 
-        while ( !span.IsEmpty && Spans.Contains(span, _config.startTermDelimiter) && Spans.Contains(span, _config.endTermDelimiter) )
+        while ( !span.IsEmpty && span.Contains(_config.startTermDelimiter) && span.Contains(_config.endTermDelimiter) )
         {
             // _buffer.Print();
 
@@ -203,7 +213,7 @@ public ref struct StringMapper<T> where T : notnull
 
     private ReadOnlySpan<char> Convert( in ReadOnlySpan<char> value )
     {
-        if ( Spans.Contains(value, _config.startTermDelimiter) || Spans.Contains(value, _config.endTermDelimiter) ) { throw new FormatException($"'{value}' cannot contain either {_config.startTermDelimiter} or {_config.endTermDelimiter}"); }
+        if ( value.Contains(_config.startTermDelimiter) || value.Contains(_config.endTermDelimiter) ) { throw new FormatException($"'{value}' cannot contain either {_config.startTermDelimiter} or {_config.endTermDelimiter}"); }
 
 
         ParseTerm(value, out ReadOnlySpan<char> key, out ReadOnlySpan<char> format, out ReadOnlySpan<char> defaultValue, out double offset, out MapperOptions? options);
@@ -212,30 +222,27 @@ public ref struct StringMapper<T> where T : notnull
         if ( offset is 0 ) { throw new OutOfRangeException($"'{value}' failed to parse the {nameof(offset)}"); }
 
 
-        if ( _context.TryGetValue(key, out object? x) )
-        {
-            ReadOnlySpan<char> result = x switch
-                                        {
-                                            null                => defaultValue,
-                                            string item         => Convert(item,                                       defaultValue),
-                                            Uri item            => Convert(item,                                       defaultValue, format),
-                                            bool item           => Convert(item,                                       defaultValue, format),
-                                            Guid item           => Convert(item,                                       defaultValue, format),
-                                            JToken item         => Convert(item,                                       defaultValue, format, offset, options),
-                                            int item            => Convert(HandleOptions(item, (int)offset,  options), defaultValue, format),
-                                            long item           => Convert(HandleOptions(item, (long)offset, options), defaultValue, format),
-                                            float item          => Convert(HandleOptions(item, offset,       options), defaultValue, format),
-                                            double item         => Convert(HandleOptions(item, offset,       options), defaultValue, format),
-                                            DateTime item       => Convert(HandleOptions(item, offset,       options), defaultValue, format),
-                                            DateTimeOffset item => Convert(HandleOptions(item, offset,       options), defaultValue, format),
-                                            TimeSpan item       => Convert(HandleOptions(item, offset,       options), defaultValue, format),
-                                            _                   => throw new OutOfRangeException(nameof(x), x),
-                                        };
+        if ( !_context.TryGetValue(key, out object? x) ) { throw new KeyNotFoundException(key.ToString()); }
 
-            return result;
-        }
+        ReadOnlySpan<char> result = x switch
+                                    {
+                                        null                => defaultValue,
+                                        string item         => Convert(item,                                       defaultValue),
+                                        Uri item            => Convert(item,                                       defaultValue, format),
+                                        bool item           => Convert(item,                                       defaultValue, format),
+                                        Guid item           => Convert(item,                                       defaultValue, format),
+                                        JToken item         => Convert(item,                                       defaultValue, format, offset, options),
+                                        int item            => Convert(HandleOptions(item, (int)offset,  options), defaultValue, format),
+                                        long item           => Convert(HandleOptions(item, (long)offset, options), defaultValue, format),
+                                        float item          => Convert(HandleOptions(item, offset,       options), defaultValue, format),
+                                        double item         => Convert(HandleOptions(item, offset,       options), defaultValue, format),
+                                        DateTime item       => Convert(HandleOptions(item, offset,       options), defaultValue, format),
+                                        DateTimeOffset item => Convert(HandleOptions(item, offset,       options), defaultValue, format),
+                                        TimeSpan item       => Convert(HandleOptions(item, offset,       options), defaultValue, format),
+                                        _                   => throw new OutOfRangeException(nameof(x), x),
+                                    };
 
-        throw new KeyNotFoundException(key.ToString());
+        return result;
     }
     private ReadOnlySpan<char> Convert<TValue>( in TValue? value, in ReadOnlySpan<char> defaultValue, in ReadOnlySpan<char> format )
     {
@@ -281,7 +288,7 @@ public ref struct StringMapper<T> where T : notnull
     {
         ReadOnlySpan<char> span = value;
 
-        if ( Spans.Contains(span, _config.formatDelimiter) && Spans.Contains(span, _config.defaultValueDelimiter) ) // has both format and defaultValue
+        if ( span.Contains(_config.formatDelimiter) && span.Contains(_config.defaultValueDelimiter) ) // has both format and defaultValue
         {
             int pipeIndex  = span.IndexOf(_config.formatDelimiter);
             int colonIndex = span.IndexOf(_config.defaultValueDelimiter);
@@ -289,7 +296,7 @@ public ref struct StringMapper<T> where T : notnull
             format = span.Slice(pipeIndex + 1, colonIndex - pipeIndex - 1);
             span   = span[( colonIndex + 1 )..];
 
-            if ( Spans.Contains(span, _config.openOffsetDelimiter) )
+            if ( span.Contains(_config.openOffsetDelimiter) )
             {
                 int start = span.IndexOf(_config.openOffsetDelimiter);
                 defaultValue = span[..start];
@@ -304,14 +311,14 @@ public ref struct StringMapper<T> where T : notnull
             }
         }
 
-        else if ( Spans.Contains(span, _config.formatDelimiter) ) // has only format
+        else if ( span.Contains(_config.formatDelimiter) ) // has only format
         {
             int pipeIndex = span.IndexOf(_config.formatDelimiter);
             key          = span[..pipeIndex];
             span         = span[( pipeIndex + 1 )..];
             defaultValue = default;
 
-            if ( Spans.Contains(span, _config.openOffsetDelimiter) )
+            if ( span.Contains(_config.openOffsetDelimiter) )
             {
                 int start = span.IndexOf(_config.openOffsetDelimiter);
                 format = span[..start];
@@ -326,14 +333,14 @@ public ref struct StringMapper<T> where T : notnull
             }
         }
 
-        else if ( Spans.Contains(span, _config.defaultValueDelimiter) ) // has only defaultValue
+        else if ( span.Contains(_config.defaultValueDelimiter) ) // has only defaultValue
         {
             int colonIndex = span.IndexOf(_config.defaultValueDelimiter);
             key    = span[..colonIndex];
             span   = span[( colonIndex + 1 )..];
             format = default;
 
-            if ( Spans.Contains(span, _config.openOffsetDelimiter) )
+            if ( span.Contains(_config.openOffsetDelimiter) )
             {
                 int start = span.IndexOf(_config.openOffsetDelimiter);
                 defaultValue = span[..start];
@@ -348,7 +355,7 @@ public ref struct StringMapper<T> where T : notnull
             }
         }
 
-        else if ( Spans.Contains(span, _config.openOffsetDelimiter) ) // has only offset info
+        else if ( span.Contains(_config.openOffsetDelimiter) ) // has only offset info
         {
             int colonIndex = span.IndexOf(_config.openOffsetDelimiter);
             key          = span[..colonIndex];
@@ -369,15 +376,12 @@ public ref struct StringMapper<T> where T : notnull
     }
     private void ParseOffsetOptions( in ReadOnlySpan<char> value, out double offset, out MapperOptions? options )
     {
-        if ( Spans.Contains(value, _config.openOffsetDelimiter) || Spans.Contains(value, _config.closeOffsetDelimiter) )
-        {
-            throw new FormatException($"'{value}' cannot contain either '{_config.openOffsetDelimiter}' or '{_config.closeOffsetDelimiter}'");
-        }
+        if ( value.Contains(_config.openOffsetDelimiter) || value.Contains(_config.closeOffsetDelimiter) ) { throw new FormatException($"'{value}' cannot contain either '{_config.openOffsetDelimiter}' or '{_config.closeOffsetDelimiter}'"); }
 
 
-        bool minus = Spans.Contains(value, _config.negativeOffsetChar);
+        bool minus = value.Contains(_config.negativeOffsetChar);
 
-        switch ( Spans.Contains(value, _config.positiveOffsetChar) )
+        switch ( value.Contains(_config.positiveOffsetChar) )
         {
             case false when !minus: { throw new FormatException($"'{value}' must contain either {_config.negativeOffsetChar} or {_config.positiveOffsetChar}"); }
 

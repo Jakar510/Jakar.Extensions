@@ -120,16 +120,16 @@ public static partial class Spans
     }
 
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    // [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static ReadOnlySpan<T> Replace<T>( this ReadOnlySpan<T> value, in ReadOnlySpan<T> oldValue, in ReadOnlySpan<T> newValue, in T startValue, in T endValue ) where T : unmanaged, IEquatable<T>
     {
-        Span<T> buffer = stackalloc T[value.Length + newValue.Length];
+        Span<T> buffer = stackalloc T[value.Length + newValue.Length + 1];
         Replace(value, oldValue, newValue, startValue, endValue, ref buffer, out int charWritten);
         return MemoryMarshal.CreateReadOnlySpan(ref buffer.GetPinnableReference(), charWritten);
     }
 
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    // [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void Replace<T>( in ReadOnlySpan<T> value, in ReadOnlySpan<T> oldValue, in ReadOnlySpan<T> newValue, in T startValue, in T endValue, ref Span<T> buffer, out int charWritten ) where T : unmanaged, IEquatable<T>
     {
         Guard.IsInRangeFor(value.Length + newValue.Length - 1, buffer, nameof(buffer));

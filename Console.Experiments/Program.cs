@@ -70,18 +70,17 @@ public static class Program
         {
             "Hello World!".WriteToConsole();
 
-            BenchmarkRunner.Run<MapperBenchmarks>();
-
+            // BenchmarkRunner.Run<MapperBenchmarks>();
             // BenchmarkRunner.Run<JsonizerBenchmarks>();
             // BenchmarkRunner.Run<SpansBenchmarks>();
+
             // TestJson();
+
             // Test_Sql();
 
             // await Test_HttpBuilder();
 
-            // Node     nodes   = Node.Demo();
-            // MContext context = MContext.FromObject(nodes);
-            // context.GetValue(nameof(Node.Name), nodes)?.WriteToConsole();
+            Test_StringMapper();
 
             "Bye".WriteToConsole();
         }
@@ -90,6 +89,14 @@ public static class Program
             e.WriteToConsole();
             e.WriteToDebug();
         }
+    }
+
+
+    public static void Test_StringMapper()
+    {
+        Node    nodes  = Node.Demo();
+        string? result = "[Name]".MapParse(nodes);
+        result?.WriteToConsole();
     }
 
 
