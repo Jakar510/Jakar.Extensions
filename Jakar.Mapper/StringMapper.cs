@@ -6,6 +6,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using Microsoft.Toolkit.HighPerformance.Buffers;
+using Microsoft.Toolkit.HighPerformance.Enumerables;
 
 
 
