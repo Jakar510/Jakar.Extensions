@@ -124,10 +124,10 @@ public ref struct StringMapper<T> where T : notnull
     // ReSharper disable once NotAccessedField.Local
     private readonly MContext<T>        _context;
     private readonly MConfig            _config;
-    private          Span<char>         _buffer;
-    private          ReadOnlySpan<char> _result; // the result buffer
+    private readonly ReadOnlySpan<char> _originalString;
+    private          Buffer<char>       _buffer;
+    private          ValueStringBuilder _builder;
 
-    // private readonly        ValueStringBuilder _builder; // TODO: implement this
     // private static readonly StringPool         _stringPool = new();
 
 
@@ -137,16 +137,18 @@ public ref struct StringMapper<T> where T : notnull
         buffer[0] = ' ';
         for ( var i = 0; i < span.Length; i++ ) { buffer[i + 1] = span[i]; }
 
-        buffer[^1] = ' ';
-        ReadOnlySpan<char> originalString = MemoryMarshal.CreateReadOnlySpan(ref buffer.GetPinnableReference(), buffer.Length);
-        _result  = originalString;
-        _context = context;
-        _config  = config;
-        _buffer  = span.AsSpan();
-
-        // _builder = new ValueStringBuilder(Math.Max(originalString.Length * 5, 64));
+        buffer[^1]      = ' ';
+        _originalString = MemoryMarshal.CreateReadOnlySpan(ref buffer.GetPinnableReference(), buffer.Length);
+        _context        = context;
+        _config         = config;
+        _buffer         = new Buffer<char>(_originalString);
+        _builder        = new ValueStringBuilder(Math.Max(_originalString.Length * 5, 64));
     }
-
+    public void Reset()
+    {
+        _builder.Reset();
+        _buffer.Init(_originalString);
+    }
 
     public static string? Parse( in ReadOnlySpan<char> input, in T context ) => Parse(input, context, MConfig.Default);
     public static string? Parse( in ReadOnlySpan<char> input, in T context, in MConfig culture )
@@ -168,9 +170,10 @@ public ref struct StringMapper<T> where T : notnull
 
     public override string ToString()
     {
+        Reset();
         if ( _buffer.IsNullOrWhiteSpace() ) { return string.Empty; }
 
-        ReadOnlySpan<char> span = _buffer;
+        ReadOnlySpan<char> span = _buffer.Next;
 
         // if ( !span.IsBalanced() ) { throw new FormatException($@"String is not balanced! ""{span}"""); }
 
@@ -185,21 +188,19 @@ public ref struct StringMapper<T> where T : notnull
             if ( start < 0 ) { throw new FormatException($"Matching '{_config.startTermDelimiter}' not found for value: '{span}'"); }
 
 
-            int                length   = end - start;
-            ReadOnlySpan<char> original = span.Slice(start,     length + 1);
-            ReadOnlySpan<char> term     = span.Slice(start + 1, length - 1);
-            ReadOnlySpan<char> result   = Convert(term);
-            _result = _result.Replace(original, result, _config.startTermDelimiter, _config.endTermDelimiter);
+            ReadOnlySpan<char> begin = span[..start];
+            _builder.Append(begin);
 
-            // ReadOnlySpan<char> first = span[..start];
-            // ReadOnlySpan<char> last  = span[( end + 1 )..];
-            // Spans.Join(first, last, '\0', ref _buffer, out _);
 
-            span[( end + 1 )..].CopyTo(ref _buffer, '\0');
-            span = _buffer;
+            ReadOnlySpan<char> result = Convert(span.Slice(start + 1, end - start - 1));
+            _builder.Append(result);
+
+
+            _buffer.Index += end;
+            span          =  _buffer.Next;
         }
 
-        return _result.ToString();
+        return _builder.ToString();
     }
 
 

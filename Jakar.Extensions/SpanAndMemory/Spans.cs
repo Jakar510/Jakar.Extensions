@@ -32,6 +32,30 @@ public static partial class Spans
 
         return true;
     }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool IsNullOrWhiteSpace( this Buffer<char> span )
+    {
+        if ( span.IsEmpty ) { return true; }
+
+        foreach ( char t in span )
+        {
+            if ( !char.IsWhiteSpace(t) ) { return false; }
+        }
+
+        return true;
+    }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool IsNullOrWhiteSpace( this ValueStringBuilder span )
+    {
+        if ( span.IsEmpty ) { return true; }
+
+        foreach ( char t in span )
+        {
+            if ( !char.IsWhiteSpace(t) ) { return false; }
+        }
+
+        return true;
+    }
 
 
     [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Span<T> AsSpan<T>( this ReadOnlySpan<T> span ) => span.AsSpan(span.Length);
@@ -54,7 +78,13 @@ public static partial class Spans
 
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int LastIndexOf<T>( this ReadOnlySpan<T> value, in T c, in int endIndex ) where T : unmanaged, IEquatable<T>
+    public static int LastIndexOf<T>( this Span<T> value, in T c, in int endIndex ) where T : IEquatable<T>
+    {
+        Guard.IsInRangeFor(endIndex, value, nameof(value));
+        return value[..endIndex].LastIndexOf(c);
+    }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int LastIndexOf<T>( this ReadOnlySpan<T> value, in T c, in int endIndex ) where T : IEquatable<T>
     {
         Guard.IsInRangeFor(endIndex, value, nameof(value));
         return value[..endIndex].LastIndexOf(c);
@@ -62,11 +92,11 @@ public static partial class Spans
 
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Span<T> Join<T>( this Span<T> value, in Span<T> other ) where T : unmanaged, IEquatable<T>
+    public static Span<T> Join<T>( this Span<T> value, in Span<T> other ) where T :unmanaged, IEquatable<T>
     {
         int     size   = value.Length + other.Length;
         Span<T> buffer = stackalloc T[size];
-        Join(value, other, ref buffer, out int charWritten);
+        Join(value, other, in buffer, out int charWritten);
         return MemoryMarshal.CreateSpan(ref buffer.GetPinnableReference(), charWritten);
     }
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -74,7 +104,7 @@ public static partial class Spans
     {
         int     size   = value.Length + other.Length;
         Span<T> buffer = stackalloc T[size];
-        Join(value, other, ref buffer, out int charWritten);
+        Join(value, other, in buffer, out int charWritten);
         return MemoryMarshal.CreateSpan(ref buffer.GetPinnableReference(), charWritten);
     }
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -82,11 +112,11 @@ public static partial class Spans
     {
         int     size   = value.Length + other.Length;
         Span<T> buffer = stackalloc T[size];
-        Join(value, other, ref buffer, out int charWritten);
+        Join(value, other, in buffer, out int charWritten);
         return MemoryMarshal.CreateReadOnlySpan(ref buffer.GetPinnableReference(), charWritten);
     }
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void Join<T>( in ReadOnlySpan<T> first, in ReadOnlySpan<T> last, ref Span<T> buffer, out int charWritten ) where T : unmanaged, IEquatable<T>
+    public static void Join<T>( in ReadOnlySpan<T> first, in ReadOnlySpan<T> last, in Span<T> buffer, out int charWritten ) where T : IEquatable<T>
     {
         charWritten = first.Length + last.Length;
         Guard.IsInRangeFor(charWritten - 1, buffer, nameof(buffer));
@@ -98,14 +128,14 @@ public static partial class Spans
 
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void CopyTo<T>( this ReadOnlySpan<T> value, ref Span<T> buffer ) where T : unmanaged, IEquatable<T>
+    public static void CopyTo<T>( this ReadOnlySpan<T> value, in Span<T> buffer ) where T : IEquatable<T>
     {
         Guard.IsInRangeFor(value.Length - 1, buffer, nameof(buffer));
 
         for ( var i = 0; i < value.Length; i++ ) { buffer[i] = value[i]; }
     }
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void CopyTo<T>( this ReadOnlySpan<T> value, ref Span<T> buffer, in T defaultValue ) where T : unmanaged, IEquatable<T>
+    public static void CopyTo<T>( this ReadOnlySpan<T> value, in Span<T> buffer, in T defaultValue ) where T : IEquatable<T>
     {
         Guard.IsInRangeFor(value.Length - 1, buffer, nameof(buffer));
 
