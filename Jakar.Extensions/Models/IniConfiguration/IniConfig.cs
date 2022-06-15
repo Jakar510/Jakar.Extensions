@@ -1,7 +1,6 @@
 ﻿using Jakar.Extensions.SpanAndMemory;
 
 
-
 #nullable enable
 namespace Jakar.Extensions.Models.IniConfiguration;
 
@@ -54,10 +53,19 @@ public partial class IniConfig : ConcurrentDictionary<string, IniConfig.Section>
     }
 
 
-    public static async Task<IniConfig?> ReadFromFile( LocalFile file )
+    public static Task<IniConfig?> ReadFromFileAsync( LocalFile file ) => ReadFromFileAsync<IniConfig>(file);
+    public static IniConfig? ReadFromFile( LocalFile            file ) => ReadFromFile<IniConfig>(file);
+
+
+    public static T? ReadFromFile<T>( LocalFile file ) where T : IniConfig, new()
+    {
+        ReadOnlySpan<char> content = file.Read().AsSpan();
+        return From<T>(content);
+    }
+    public static async Task<T?> ReadFromFileAsync<T>( LocalFile file ) where T : IniConfig, new()
     {
         string content = await file.ReadAsync().AsString();
-        return From(content);
+        return From<T>(content);
     }
 
 
@@ -111,13 +119,13 @@ public partial class IniConfig : ConcurrentDictionary<string, IniConfig.Section>
     //     return data;
     // }
 
-    public static IniConfig? From( in string content ) => From(content.AsSpan());
+    public static T? From<T>( in string content ) where T : IniConfig, new() => From<T>(content.AsSpan());
 
-    public static IniConfig? From( in ReadOnlySpan<char> content )
+    public static T? From<T>( in ReadOnlySpan<char> content ) where T : IniConfig, new()
     {
-        if ( content.IsEmpty ) { return null; }
+        if ( content.IsEmpty ) { return default; }
 
-        var data = new IniConfig();
+        var data = new T();
 
         var section = string.Empty;
 

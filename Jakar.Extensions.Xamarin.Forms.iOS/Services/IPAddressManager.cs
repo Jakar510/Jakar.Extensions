@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Net.NetworkInformation;
-using System.Net.Sockets;
 using Foundation;
 using Jakar.Extensions.Exceptions.General;
 using Jakar.Extensions.Xamarin.Forms.Interfaces;
