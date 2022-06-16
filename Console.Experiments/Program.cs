@@ -1,14 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using BenchmarkDotNet.Running;
 using Jakar.Extensions.Http;
 using Jakar.Extensions.Models;
 using Jakar.Extensions.Strings;
-using Jakar.Mapper;
-using Jakar.SqlBuilder;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -80,8 +76,6 @@ public static class Program
 
             // await Test_HttpBuilder();
 
-            Test_StringMapper();
-
             "Bye".WriteToConsole();
         }
         catch ( Exception e )
@@ -89,14 +83,6 @@ public static class Program
             e.WriteToConsole();
             e.WriteToDebug();
         }
-    }
-
-
-    public static void Test_StringMapper()
-    {
-        Node    nodes  = Node.Demo();
-        string? result = "[Name]".MapParse(nodes);
-        result?.WriteToConsole();
     }
 
 

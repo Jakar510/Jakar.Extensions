@@ -8,7 +8,6 @@ using Jakar.Extensions.Strings;
 using NUnit.Framework;
 
 
-
 #nullable enable
 namespace Jakar.Extensions.Tests;
 
@@ -57,7 +56,7 @@ public class IniConfig_Tests : Assert
 
         var actual = ini.ToString();
         $"-- {nameof(actual)} --\n{actual}".WriteToConsole();
-        IniConfig? results = IniConfig.From(actual);
+        IniConfig? results = IniConfig.From<IniConfig>(actual);
 
         $"-- {nameof(results)} --\n{results}".WriteToConsole();
         NotNull(results);
