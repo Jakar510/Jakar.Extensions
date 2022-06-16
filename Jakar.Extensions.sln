@@ -56,8 +56,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jakar.Extensions.Wpf", "Jak
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jakar.Extensions.AppCenter", "Jakar.Extensions.AppCenter\Jakar.Extensions.AppCenter.csproj", "{D25E8D3D-67BC-481C-8642-1A52A09C71CF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jakar.Mapper", "Jakar.Mapper\Jakar.Mapper.csproj", "{3F93ECA6-BFBE-4967-8C3B-974BF1DC91C1}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
