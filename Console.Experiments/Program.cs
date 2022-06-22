@@ -26,37 +26,6 @@ public enum Page
 
 
 
-[Serializable]
-public class Node
-{
-    public string      Name     { get; set; } = string.Empty;
-    public List<Node>? Children { get; init; }
-
-    public Node() { }
-    public Node( string name ) => Name = name;
-    public Node( string name, params Node[] children ) : this(name) => Children = new List<Node>(children);
-
-
-    public static Node Demo()
-    {
-        var root = new Node
-                   {
-                       Name = nameof(Demo),
-                       Children = new List<Node>
-                                  {
-                                      new("A", new Node("A.1"), new Node("A.2")),
-                                      new("B", new Node("B.1"), new Node("B.2")),
-                                      new("C", new Node("C.1"), new Node("C.2")),
-                                      new("D", new Node("D.1"), new Node("D.2")),
-                                  }
-                   };
-
-
-        return root;
-    }
-}
-
-
 
 public static class Program
 {

@@ -47,7 +47,7 @@ public class MultiQueue<T> : IMultiQueue<T>
     {
         bool result = _queue.TryDequeue(out item);
 
-        return result && item is null;
+        return result && item is not null;
     }
 
 
