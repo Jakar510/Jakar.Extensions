@@ -92,7 +92,6 @@ public abstract class BaseUserModel<T> : BaseCollections<T>, IUserModel where T 
     }
 
 
-    [Required]
     public string FirstName
     {
         get => _firstName;
@@ -100,7 +99,6 @@ public abstract class BaseUserModel<T> : BaseCollections<T>, IUserModel where T 
     }
 
 
-    [Required]
     public string LastName
     {
         get => _lastName;
@@ -108,7 +106,6 @@ public abstract class BaseUserModel<T> : BaseCollections<T>, IUserModel where T 
     }
 
 
-    [Required]
     public string Address
     {
         get => _address;
@@ -116,7 +113,6 @@ public abstract class BaseUserModel<T> : BaseCollections<T>, IUserModel where T 
     }
 
 
-    [Required]
     public string Email
     {
         get => _email;
@@ -124,7 +120,6 @@ public abstract class BaseUserModel<T> : BaseCollections<T>, IUserModel where T 
     }
 
 
-    [Required]
     public string PhoneNumber
     {
         get => _phoneNumber;
