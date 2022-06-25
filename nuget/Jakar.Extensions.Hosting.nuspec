@@ -29,7 +29,7 @@
 		<dependencies>
 			<group targetFramework="net6.0">
 				<dependency id="Jakar.Extensions"
-							version="6.0.0.25-beta" />
+							version="6.0.0.28-beta" />
 				<dependency id="Hardware.Info"
 							version="10.0.1" />
 				<dependency id="MailKit"

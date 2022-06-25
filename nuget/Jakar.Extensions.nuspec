@@ -4,7 +4,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata>
 		<id>Jakar.Extensions</id>
-		<version>6.0.0.27-beta</version>
+		<version>6.0.0.29-beta</version>
 		<title>Extension Library</title>
 		<authors>Tyler Stegmaier</authors>
 		<owners>Jakar510/Jakar</owners>
@@ -19,6 +19,7 @@
 		</description>
 		<releaseNotes>
 			Jakar.Extensions 6.0.0
+			Removed Models.Users
 			multi-targets NetStandard2.1 and Net6.0
 			Added MailKit Email Builder
 			Added Models.Service

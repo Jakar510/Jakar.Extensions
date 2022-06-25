@@ -46,7 +46,6 @@ global using Jakar.Extensions.Models;
 global using Jakar.Extensions.Models.Authorization;
 global using Jakar.Extensions.Models.Collections;
 global using Jakar.Extensions.Models.IniConfiguration;
-global using Jakar.Extensions.Models.Users;
 global using Jakar.Extensions.Models.Base;
 global using Jakar.Extensions.Models.Base.Classes;
 global using Jakar.Extensions.Models.Base.Records;
