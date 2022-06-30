@@ -1,6 +1,4 @@
 ﻿using Acr.UserDialogs;
-using Jakar.Extensions.Xamarin.Forms.Statics;
-
 
 
 #nullable enable

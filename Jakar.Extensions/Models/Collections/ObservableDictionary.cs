@@ -1,5 +1,5 @@
 ﻿#nullable enable
-namespace Jakar.Extensions.Models.Collections;
+namespace Jakar.Extensions;
 
 
 public class ObservableDictionary<TKey, TValue> : ObservableClass, IDictionary<TKey, TValue>, IReadOnlyDictionary<TKey, TValue>, ICollectionAlerts where TKey : notnull

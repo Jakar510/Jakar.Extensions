@@ -1,9 +1,9 @@
-﻿using System.Xml;
+﻿#nullable enable
+using System.Xml;
 
 
 
-#nullable enable
-namespace Jakar.Extensions.Strings;
+namespace Jakar.Extensions;
 
 
 [Obsolete("Will be removed in a future version, and moved to a dedicated nuget")]

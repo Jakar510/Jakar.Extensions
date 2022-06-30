@@ -1,5 +1,4 @@
-﻿using Jakar.Extensions.Xamarin.Forms.Statics;
-using Microsoft.AppCenter;
+﻿using Microsoft.AppCenter;
 using Microsoft.AppCenter.Analytics;
 using Microsoft.AppCenter.Crashes;
 using Xamarin.Essentials;

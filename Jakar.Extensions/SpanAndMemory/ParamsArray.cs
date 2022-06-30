@@ -2,7 +2,7 @@
 // 06/09/2022  3:00 PM
 
 #nullable enable
-namespace Jakar.Extensions.SpanAndMemory;
+namespace Jakar.Extensions;
 
 
 /// <summary> <para>Based on System.ParamsArray</para> </summary>

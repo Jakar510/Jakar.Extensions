@@ -1,5 +1,5 @@
 ﻿#nullable enable
-namespace Jakar.Extensions.Exceptions.General;
+namespace Jakar.Extensions;
 
 
 public class OutOfRangeException : ArgumentOutOfRangeException

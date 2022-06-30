@@ -1,5 +1,5 @@
 ﻿#nullable enable
-namespace Jakar.Extensions.Xamarin.Forms.Interfaces;
+namespace Jakar.Extensions.Xamarin.Forms;
 
 
 /// <summary>

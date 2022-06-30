@@ -2,7 +2,7 @@
 
 
 
-namespace Jakar.Extensions.Http;
+namespace Jakar.Extensions;
 
 
 /// <summary>

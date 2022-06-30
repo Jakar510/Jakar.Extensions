@@ -1,5 +1,5 @@
 ﻿#nullable enable
-namespace Jakar.Extensions.Exceptions.Networking;
+namespace Jakar.Extensions;
 
 
 public class EmptyServerResponseException : Exception

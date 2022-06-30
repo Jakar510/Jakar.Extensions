@@ -1,5 +1,5 @@
 ﻿#nullable enable
-namespace Jakar.Extensions.Types;
+namespace Jakar.Extensions;
 
 
 public sealed class TypeNameComparer : IComparer<Type>

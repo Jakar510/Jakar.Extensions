@@ -1,9 +1,5 @@
-﻿using System.Security;
-
-
-
-#nullable enable
-namespace Jakar.Extensions.Models.Authorization;
+﻿#nullable enable
+namespace Jakar.Extensions;
 
 
 public interface ILoginRequest : IEquatable<ILoginRequest>

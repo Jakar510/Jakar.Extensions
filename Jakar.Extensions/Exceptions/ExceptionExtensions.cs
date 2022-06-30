@@ -1,5 +1,5 @@
 ﻿#nullable enable
-namespace Jakar.Extensions.Exceptions;
+namespace Jakar.Extensions;
 
 
 public static class ExceptionExtensions
@@ -12,7 +12,7 @@ public static class ExceptionExtensions
         foreach ( StackFrame frame in trace.GetFrames() )
         {
             MethodBase method    = frame.GetMethod() ?? throw new NullReferenceException(nameof(frame.GetMethod));
-            string     className = method.MethodClass() ?? throw new NullReferenceException(nameof(Jakar.Extensions.Types.TypeExtensions.MethodClass));
+            string     className = method.MethodClass() ?? throw new NullReferenceException(nameof(TypeExtensions.MethodClass));
 
 
             switch ( method.Name )
@@ -31,7 +31,7 @@ public static class ExceptionExtensions
     public static string Frame( StackFrame frame )
     {
         MethodBase method    = frame.GetMethod() ?? throw new NullReferenceException(nameof(frame.GetMethod));
-        string     className = method.MethodClass() ?? throw new NullReferenceException(nameof(Jakar.Extensions.Types.TypeExtensions.MethodClass));
+        string     className = method.MethodClass() ?? throw new NullReferenceException(nameof(TypeExtensions.MethodClass));
 
         return $"{className}::{method.Name}";
     }

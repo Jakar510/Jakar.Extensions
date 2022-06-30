@@ -1,7 +1,8 @@
-﻿using Jakar.Extensions.General;
+﻿#nullable enable
+using Jakar.Extensions;
 
 
-#nullable enable
+
 namespace Jakar.SqlBuilder.Interfaces;
 
 
@@ -34,7 +35,7 @@ public interface IAggregateFunctions<out TNext>
 
     /// <summary>
     /// <para>
-    /// Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="DapperTableExtensions.GetTableName(Type)"/>
+    /// Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="DapperTableExtensions.GetTableName(System.Type)"/>
     /// </para>
     /// Return the maximum value of values in table_name.<paramref name="columnName"/>
     /// </summary>

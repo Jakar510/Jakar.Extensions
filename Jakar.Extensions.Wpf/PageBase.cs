@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions.Wpf
 // 05/17/2022  4:13 PM
 
-using Jakar.Extensions.Models;
-
-
-
 #nullable enable
 namespace Jakar.Extensions.Wpf;
 

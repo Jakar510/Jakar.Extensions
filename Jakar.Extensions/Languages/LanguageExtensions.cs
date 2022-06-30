@@ -1,5 +1,5 @@
 ﻿#nullable enable
-namespace Jakar.Extensions.Languages;
+namespace Jakar.Extensions;
 
 
 [SuppressMessage("ReSharper", "StringLiteralTypo")]

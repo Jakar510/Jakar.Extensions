@@ -2,7 +2,7 @@
 
 
 #nullable enable
-namespace Jakar.Extensions.Xamarin.Forms.ResourceManager;
+namespace Jakar.Extensions.Xamarin.Forms;
 
 
 public abstract class BaseResourceDictionaryManager

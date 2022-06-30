@@ -1,7 +1,7 @@
 ﻿
 
 #nullable enable
-namespace Jakar.Extensions.Attributes;
+namespace Jakar.Extensions;
 
 
 [AttributeUsage(AttributeTargets.Property | AttributeTargets.Class)] public sealed class DataBaseIgnoreAttribute : Attribute { }

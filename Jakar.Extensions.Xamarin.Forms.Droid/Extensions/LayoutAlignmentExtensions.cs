@@ -1,12 +1,10 @@
-﻿using Android.Views;
+﻿#nullable enable
+using Android.Views;
 using Xamarin.Forms;
 
 
 
-
-
-#nullable enable
-namespace Jakar.Extensions.Xamarin.Forms.Droid.Extensions;
+namespace Jakar.Extensions.Xamarin.Forms.Droid;
 
 
 [global::Android.Runtime.Preserve(AllMembers = true)]

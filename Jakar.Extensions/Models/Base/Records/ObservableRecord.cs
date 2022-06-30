@@ -1,9 +1,9 @@
-﻿using System.Windows.Input;
+﻿#nullable enable
+using System.Windows.Input;
 
 
 
-#nullable enable
-namespace Jakar.Extensions.Models.Base.Records;
+namespace Jakar.Extensions;
 
 
 public record ObservableRecord : BaseRecord, IDataBaseID, INotifyPropertyChanged, INotifyPropertyChanging

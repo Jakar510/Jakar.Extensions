@@ -1,9 +1,9 @@
-﻿using Xamarin.Essentials;
+﻿#nullable enable
+using Xamarin.Essentials;
 
 
 
-#nullable enable
-namespace Jakar.Extensions.Xamarin.Forms.Statics;
+namespace Jakar.Extensions.Xamarin.Forms;
 
 
 public static class UserPreferences

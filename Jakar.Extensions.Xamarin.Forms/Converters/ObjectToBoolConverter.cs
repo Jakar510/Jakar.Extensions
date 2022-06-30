@@ -2,7 +2,7 @@
 
 
 #nullable enable
-namespace Jakar.Extensions.Xamarin.Forms.Converters;
+namespace Jakar.Extensions.Xamarin.Forms;
 
 
 [TypeConverter(typeof(bool))]

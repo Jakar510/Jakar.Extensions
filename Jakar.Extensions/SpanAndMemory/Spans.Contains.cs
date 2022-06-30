@@ -1,7 +1,7 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 06/10/2022  10:17 AM
 
-namespace Jakar.Extensions.SpanAndMemory;
+namespace Jakar.Extensions;
 
 
 public static partial class Spans

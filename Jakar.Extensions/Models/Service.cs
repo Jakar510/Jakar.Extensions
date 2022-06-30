@@ -2,7 +2,7 @@
 // 05/17/2022  4:16 PM
 
 #nullable enable
-namespace Jakar.Extensions.Models;
+namespace Jakar.Extensions;
 
 
 public abstract class Service : ObservableClass, IDisposable, IAsyncDisposable, IValidator

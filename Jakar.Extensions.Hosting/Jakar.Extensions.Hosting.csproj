@@ -10,7 +10,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Jakar.Extensions" Version="6.0.0.29-beta" />
+		<PackageReference Include="Jakar.Extensions" Version="6.0.0.30-beta" />
 		<PackageReference Include="Hardware.Info" Version="10.0.1" />
 		<PackageReference Include="MailKit" Version="3.3.0" />
 		<PackageReference Include="Microsoft.CSharp" Version="4.7.0" />

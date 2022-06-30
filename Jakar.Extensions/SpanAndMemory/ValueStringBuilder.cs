@@ -1,15 +1,10 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 06/07/2022  3:25 PM
 
-using System.Buffers;
-using System.Runtime.InteropServices;
-
-
 #nullable enable
 
 
-
-namespace Jakar.Extensions.SpanAndMemory;
+namespace Jakar.Extensions;
 
 
 /// <summary><para>Based on System.Text.ValueStringBuilder</para></summary>

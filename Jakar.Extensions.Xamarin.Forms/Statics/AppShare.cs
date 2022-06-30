@@ -1,5 +1,4 @@
-﻿using Jakar.Extensions.Xamarin.Forms.Extensions;
-using Plugin.Media;
+﻿using Plugin.Media;
 using Plugin.Media.Abstractions;
 using Plugin.Screenshot;
 using Xamarin.Essentials;
@@ -7,7 +6,7 @@ using Location = Xamarin.Essentials.Location;
 
 
 #nullable enable
-namespace Jakar.Extensions.Xamarin.Forms.Statics;
+namespace Jakar.Extensions.Xamarin.Forms;
 
 
 public static class AppShare

@@ -3,7 +3,7 @@ namespace Jakar.Extensions.Hosting;
 
 
 /// <summary>
-/// <para><see cref="https://stackoverflow.com/a/61726193/9530917">AddTransient, AddScoped and AddSingleton Services Differences</see></para>
+/// <para><see href="https://stackoverflow.com/a/61726193/9530917">AddTransient, AddScoped and AddSingleton Services Differences</see></para>
 /// </summary>
 public static partial class WebBuilder
 {
@@ -34,7 +34,7 @@ public static partial class WebBuilder
 
 
     /// <summary>
-    /// since they are created every time they will use more memory & Resources and can have the negative impact on performance. use this for the lightweight service with little or no state.
+    /// since they are created every time they will use more memory and Resources and can have the negative impact on performance. use this for the lightweight service with little or no state.
     /// </summary>
     public static WebApplicationBuilder AddTransient<T>( this WebApplicationBuilder builder ) where T : class
     {
@@ -42,7 +42,7 @@ public static partial class WebBuilder
         return builder;
     }
     /// <summary>
-    /// since they are created every time they will use more memory & Resources and can have the negative impact on performance. use this for the lightweight service with little or no state.
+    /// since they are created every time they will use more memory and Resources and can have the negative impact on performance. use this for the lightweight service with little or no state.
     /// </summary>
     public static WebApplicationBuilder AddTransient<T>( this WebApplicationBuilder builder, Func<IServiceProvider, T> factory ) where T : class
     {

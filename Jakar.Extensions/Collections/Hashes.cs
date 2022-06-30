@@ -4,7 +4,7 @@
 
 #if NET6_0
 #nullable enable
-namespace Jakar.Extensions.Collections;
+namespace Jakar.Extensions;
 
 
 public static class Hashes

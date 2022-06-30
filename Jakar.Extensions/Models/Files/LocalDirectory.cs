@@ -1,9 +1,10 @@
-﻿using System.IO.Compression;
+﻿#nullable enable
+using System.IO.Compression;
 using System.Security;
 
 
-#nullable enable
-namespace Jakar.Extensions.FileSystemExtensions;
+
+namespace Jakar.Extensions;
 
 
 [Serializable]

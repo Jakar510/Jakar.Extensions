@@ -1,10 +1,11 @@
-﻿using System.Net.Http;
+﻿#nullable enable
+#nullable enable
+using System.Net.Http;
 using System.Net.Http.Headers;
 
 
-#nullable enable
-#nullable enable
-namespace Jakar.Extensions.Http;
+
+namespace Jakar.Extensions;
 
 
 public class HeaderCollection : Dictionary<string, object>

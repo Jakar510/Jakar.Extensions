@@ -2,7 +2,7 @@
 // 04/10/2022  6:24 PM
 
 #nullable enable
-namespace Jakar.Extensions.Models.Collections;
+namespace Jakar.Extensions;
 
 
 public class ObservableConcurrentDictionary<TKey, TValue> : ObservableClass, IDictionary<TKey, TValue>, IReadOnlyDictionary<TKey, TValue>, ICollectionAlerts where TKey : notnull

@@ -10,5 +10,4 @@ global using System.Windows.Media;
 global using System.Windows.Media.Imaging;
 global using System.Windows.Threading;
 global using System.Windows.Controls;
-global using Jakar.Extensions.FileSystemExtensions;
-global using Jakar.Extensions.Models.Collections;
+global using Jakar.Extensions;

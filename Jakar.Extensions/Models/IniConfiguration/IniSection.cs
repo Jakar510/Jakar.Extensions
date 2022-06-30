@@ -1,5 +1,5 @@
 ﻿#nullable enable
-namespace Jakar.Extensions.Models.IniConfiguration;
+namespace Jakar.Extensions;
 
 
 public partial class IniConfig

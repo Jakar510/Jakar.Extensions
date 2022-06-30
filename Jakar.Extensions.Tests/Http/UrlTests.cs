@@ -3,9 +3,6 @@ using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Jakar.Extensions.Http;
-using Jakar.Extensions.Models;
-using Jakar.Extensions.Strings;
 using NUnit.Framework;
 
 

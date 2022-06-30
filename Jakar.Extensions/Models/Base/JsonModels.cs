@@ -1,5 +1,5 @@
 ﻿#nullable enable
-namespace Jakar.Extensions.Models.Base;
+namespace Jakar.Extensions;
 
 
 public static class JsonModels

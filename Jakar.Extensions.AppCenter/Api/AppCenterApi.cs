@@ -1,4 +1,4 @@
-﻿namespace Jakar.Extensions.AppCenter.Api;
+﻿namespace Jakar.Extensions.AppCenter;
 
 
 public sealed class AppCenterApi : IDisposable

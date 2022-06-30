@@ -1,15 +1,15 @@
-﻿using System;
+﻿#nullable enable
+#nullable enable
+using System;
 using System.Globalization;
 using System.Threading.Tasks;
 using Foundation;
-using Jakar.Extensions.Xamarin.Forms.Statics;
 using LocalAuthentication;
 using UIKit;
 
 
-#nullable enable
-#nullable enable
-namespace Jakar.Extensions.Xamarin.Forms.iOS.Services;
+
+namespace Jakar.Extensions.Xamarin.Forms.iOS;
 
 
 public class LocalAuthHelper : Biometrics.IAuthHelperForIOS

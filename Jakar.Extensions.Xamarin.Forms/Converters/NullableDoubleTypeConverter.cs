@@ -1,7 +1,7 @@
 ﻿// unset
 
 #nullable enable
-namespace Jakar.Extensions.Xamarin.Forms.Converters;
+namespace Jakar.Extensions.Xamarin.Forms;
 
 
 [global::Xamarin.Forms.Internals.Preserve(true, false)]

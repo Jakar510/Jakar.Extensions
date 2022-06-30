@@ -1,12 +1,10 @@
-﻿using UIKit;
+﻿#nullable enable
+using UIKit;
 using Xamarin.Forms;
 
 
 
-
-
-#nullable enable
-namespace Jakar.Extensions.Xamarin.Forms.iOS.Extensions;
+namespace Jakar.Extensions.Xamarin.Forms.iOS;
 
 
 [Foundation.Preserve(AllMembers = true)]

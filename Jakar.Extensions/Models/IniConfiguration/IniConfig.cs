@@ -1,8 +1,5 @@
-﻿using Jakar.Extensions.SpanAndMemory;
-
-
-#nullable enable
-namespace Jakar.Extensions.Models.IniConfiguration;
+﻿#nullable enable
+namespace Jakar.Extensions;
 
 
 public partial class IniConfig : ConcurrentDictionary<string, IniConfig.Section>

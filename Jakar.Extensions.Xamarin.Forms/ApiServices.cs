@@ -1,8 +1,4 @@
-﻿using Jakar.Extensions.Xamarin.Forms.ResourceManager;
-
-
-
-#nullable enable
+﻿#nullable enable
 namespace Jakar.Extensions.Xamarin.Forms;
 
 

@@ -4,8 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Foundation;
-using Jakar.Extensions.Interfaces;
-using Jakar.Extensions.Xamarin.Forms.iOS.Services;
+using Jakar.Extensions.Xamarin.Forms.iOS;
 using UIKit;
 using Xamarin.Forms;
 using FileSystem = Xamarin.Essentials.FileSystem;
@@ -18,7 +17,7 @@ using FileSystem = Xamarin.Essentials.FileSystem;
 
 
 #nullable enable
-namespace Jakar.Extensions.Xamarin.Forms.iOS.Services;
+namespace Jakar.Extensions.Xamarin.Forms.iOS;
 
 
 public class FileService : IFileService

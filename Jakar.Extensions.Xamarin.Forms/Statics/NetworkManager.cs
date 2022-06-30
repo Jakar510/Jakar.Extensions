@@ -1,12 +1,11 @@
-﻿using System.Net.NetworkInformation;
+﻿#nullable enable
+using System.Net.NetworkInformation;
 using System.Net.Sockets;
-using Jakar.Extensions.Xamarin.Forms.Interfaces;
 using Xamarin.Essentials;
 
 
 
-#nullable enable
-namespace Jakar.Extensions.Xamarin.Forms.Statics;
+namespace Jakar.Extensions.Xamarin.Forms;
 
 
 public static class NetworkManager

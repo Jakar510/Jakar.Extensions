@@ -2,7 +2,7 @@
 
 
 #nullable enable
-namespace Jakar.Extensions.Xamarin.Forms.iOS.Enumerations;
+namespace Jakar.Extensions.Xamarin.Forms.iOS;
 
 
 public enum LayoutPriority // iOS only

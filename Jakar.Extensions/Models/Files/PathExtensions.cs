@@ -1,9 +1,9 @@
-﻿using System.IO.Compression;
+﻿#nullable enable
+using System.IO.Compression;
 
 
 
-#nullable enable
-namespace Jakar.Extensions.FileSystemExtensions;
+namespace Jakar.Extensions;
 
 
 public static class PathExtensions

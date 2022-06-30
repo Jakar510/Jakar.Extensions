@@ -1,5 +1,5 @@
 ﻿#nullable enable
-namespace Jakar.Extensions.Models.Base.Classes;
+namespace Jakar.Extensions;
 
 
 [Serializable] public class BaseClass { }

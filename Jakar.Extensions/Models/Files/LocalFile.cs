@@ -1,12 +1,13 @@
 ﻿// unset
 
+#nullable enable
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Web;
 
 
-#nullable enable
-namespace Jakar.Extensions.FileSystemExtensions;
+
+namespace Jakar.Extensions;
 
 
 [Serializable]

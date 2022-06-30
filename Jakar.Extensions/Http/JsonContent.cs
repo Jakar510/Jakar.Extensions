@@ -1,9 +1,9 @@
-﻿using System.Net.Http;
+﻿#nullable enable
+using System.Net.Http;
 
 
 
-#nullable enable
-namespace Jakar.Extensions.Http;
+namespace Jakar.Extensions;
 
 
 public class JsonContent : StringContent

@@ -6,6 +6,4 @@ global using System.Collections.Generic;
 global using System.Linq;
 global using System.Reflection;
 global using System.Text;
-global using Jakar.Extensions.General;
-global using Jakar.Extensions.Strings;
 global using Jakar.SqlBuilder.Interfaces;

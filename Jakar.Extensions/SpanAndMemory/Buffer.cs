@@ -5,7 +5,7 @@ using System.Buffers;
 
 
 
-namespace Jakar.Extensions.SpanAndMemory;
+namespace Jakar.Extensions;
 
 
 public ref struct Buffer<T> where T : struct, IEquatable<T>

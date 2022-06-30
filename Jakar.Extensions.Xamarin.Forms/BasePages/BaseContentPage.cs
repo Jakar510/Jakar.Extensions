@@ -2,7 +2,7 @@
 
 
 #nullable enable
-namespace Jakar.Extensions.Xamarin.Forms.BasePages;
+namespace Jakar.Extensions.Xamarin.Forms;
 
 
 public abstract class BaseContentPage : OrientationContentPage

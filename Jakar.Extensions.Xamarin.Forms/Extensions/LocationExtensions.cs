@@ -1,11 +1,9 @@
-﻿using Xamarin.Essentials;
+﻿#nullable enable
+using Xamarin.Essentials;
 
 
 
-
-
-#nullable enable
-namespace Jakar.Extensions.Xamarin.Forms.Extensions;
+namespace Jakar.Extensions.Xamarin.Forms;
 
 
 public static class LocationExtensions

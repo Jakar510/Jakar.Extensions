@@ -1,13 +1,13 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 04/15/2022  5:45 PM
 
+#nullable enable
 using System.Buffers.Text;
 using System.Runtime.InteropServices;
 
 
 
-#nullable enable
-namespace Jakar.Extensions.SpanAndMemory;
+namespace Jakar.Extensions;
 
 
 public static class GuidExtensions

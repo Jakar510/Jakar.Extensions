@@ -3,8 +3,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Jakar.Extensions.Http;
-using Jakar.Extensions.Strings;
 using NUnit.Framework;
 
 

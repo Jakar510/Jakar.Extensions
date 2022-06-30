@@ -1,5 +1,13 @@
 ﻿#nullable enable
+
+/* Unmerged change from project 'Jakar.Extensions (netstandard2.1)'
+Before:
 namespace Jakar.Extensions.Strings;
+After:
+namespace Jakar.Extensions.Extensions;
+using Jakar.Extensions.Strings;
+*/
+namespace Jakar.Extensions;
 
 
 public static class ConsoleExtensions
@@ -8,13 +16,15 @@ public static class ConsoleExtensions
     private const string WARNING     = nameof(WARNING);
     private const string ERROR       = nameof(ERROR);
     public static bool   CanDebug => Debugger.IsAttached;
+    public static string Header   { get; set; } = '='.Repeat(100);
 
-    public static StringBuilder WrapException( this Exception self, in char c = '-', in int padding = 40 )
+
+    public static StringBuilder WrapException<T>( this T self, in char c = '-', in int padding = 40 ) where T : Exception
     {
         var builder = new StringBuilder();
         builder.AppendLine(" Exception Start ".Wrapper(c, padding));
         builder.AppendLine();
-        builder.AppendLine(self.GetType().FullName);
+        builder.AppendLine(typeof(T).FullName);
         builder.AppendLine();
         builder.AppendLine();
 
@@ -27,14 +37,14 @@ public static class ConsoleExtensions
         return builder;
     }
 
-    public static StringBuilder WrapJson( this object self, char c = '-', int length = 80 )
+    public static StringBuilder WrapJson<T>( this T self, char c = '-', int length = 80 ) where T : notnull
     {
         string wrapper = c.Repeat(length);
 
         var builder = new StringBuilder();
         builder.AppendLine();
         builder.AppendLine(wrapper);
-        builder.AppendLine(self.GetType().FullName);
+        builder.AppendLine(typeof(T).FullName);
         builder.AppendLine();
         builder.AppendLine();
         builder.AppendLine(self.ToPrettyJson());
@@ -82,47 +92,51 @@ public static class ConsoleExtensions
     }
 
 
-    public static string GetMessage( this  string         self, string start = INFORMATION, in char c      = '-', in int padding = 40 ) => $"{start.Wrapper(c, padding)}  {self}";
-    public static string GetWarning( this  string         self, string start = WARNING,     in char c      = '-', in int padding = 40 ) => $"{start.Wrapper(c, padding)}  {self}";
-    public static string GetError( this    string         self, string start = ERROR,       in char c      = '-', in int padding = 40 ) => $"{start.Wrapper(c, padding)}  {self}";
+    public static string GetMessage( this string self, string start = INFORMATION, in char c = '-', in int padding = 40 ) => $"{start.Wrapper(c, padding)}  {self}";
+    public static string GetWarning( this string self, string start = WARNING,     in char c = '-', in int padding = 40 ) => $"{start.Wrapper(c, padding)}  {self}";
+    public static string GetError( this   string self, string start = ERROR,       in char c = '-', in int padding = 40 ) => $"{start.Wrapper(c, padding)}  {self}";
+
+/* Unmerged change from project 'Jakar.Extensions (netstandard2.1)'
+Before:
     public static string GetCount( this    string         self, int    count,               char    c      = '-', int    length  = 80 ) => $"{c.Repeat(length)}   {self}.Count: => {count}";
-    public static string GetCount( this    ICollection    self, char   c = '-',             int     length = 80 ) => $"{c.Repeat(length)}   {self.GetType().Name}.Count: => {self.Count}";
-    public static string GetCount<T>( this ICollection<T> self, char   c = '-',             int     length = 80 ) => $"{c.Repeat(length)}   {self.GetType().Name}.Count: => {self.Count}";
+After:
+    public static string GetCount(this string         self, int    count,               char    c      = '-', int    length  = 80 ) => $"{c.Repeat(length)}   {self}.Count: => {count}";
+*/
+    public static string GetCount( this    string         self, int  count,   char c      = '-', int length = 80 ) => $"{c.Repeat(length)}   {self}.Count: => {count}";
+    public static string GetCount( this    ICollection    self, char c = '-', int  length = 80 ) => $"{c.Repeat(length)}   {self.GetType().Name}.Count: => {self.Count}";
+    public static string GetCount<T>( this ICollection<T> self, char c = '-', int  length = 80 ) => $"{c.Repeat(length)}   {self.GetType().Name}.Count: => {self.Count}";
 
 
-    public static string Header { get; set; } = '='.Repeat(100);
+    public static void Print( this ReadOnlySpan<char> self ) => Console.WriteLine(self.ToString());
+    public static void Print( this string             self ) => Console.WriteLine(self);
+    public static void Print( this StringBuilder      self ) => self.ToString().WriteToConsole();
+    public static void Print( this object             self ) => Console.WriteLine(self);
 
 
-#if NETSTANDARD2_1
-    public static void WriteToConsole( this ReadOnlySpan<char> self, [CallerMemberName] string? caller = default )
+    public static void WriteToConsole( this ReadOnlySpan<char> self )
     {
-        Console.WriteLine(Header);
-        Console.WriteLine(caller);
         Console.WriteLine();
         Console.WriteLine(self.ToString());
         Console.WriteLine();
     }
-    public static void WriteToConsole( this string self, [CallerMemberName] string? caller = default )
+    public static void WriteToConsole( this string self )
     {
-        Console.WriteLine(Header);
-        Console.WriteLine(caller);
         Console.WriteLine();
         Console.WriteLine(self);
         Console.WriteLine();
     }
-    public static void WriteToConsole( this StringBuilder self, [CallerMemberName] string? caller = default ) => self.ToString().WriteToConsole(caller);
-    public static void WriteToConsole( this object self, [CallerMemberName] string? caller = default )
+    public static void WriteToConsole( this StringBuilder self ) => self.ToString().WriteToConsole();
+    public static void WriteToConsole( this object self )
     {
-        Console.WriteLine(Header);
-        Console.WriteLine(caller);
         Console.WriteLine();
         Console.WriteLine(self);
         Console.WriteLine();
     }
 
 
+#if NETSTANDARD2_1
     [Conditional("DEBUG")]
-    public static void WriteToDebug( this ReadOnlySpan<char> self, [CallerMemberName] string? caller = default )
+    public static void WriteToDebug(this ReadOnlySpan<char> self, [CallerMemberName] string? caller = default)
     {
         Debug.WriteLine(Header);
         Debug.WriteLine(caller);
@@ -131,7 +145,7 @@ public static class ConsoleExtensions
         Debug.WriteLine(string.Empty);
     }
     [Conditional("DEBUG")]
-    public static void WriteToDebug( this string self, [CallerMemberName] string? caller = default )
+    public static void WriteToDebug(this string self, [CallerMemberName] string? caller = default)
     {
         Debug.WriteLine(Header);
         Debug.WriteLine(caller);
@@ -139,9 +153,9 @@ public static class ConsoleExtensions
         Debug.WriteLine(self);
         Debug.WriteLine(string.Empty);
     }
-    [Conditional("DEBUG")] public static void WriteToDebug( this StringBuilder self, [CallerMemberName] string? caller = default ) => self.ToString().WriteToDebug(caller);
+    [Conditional("DEBUG")] public static void WriteToDebug(this StringBuilder self, [CallerMemberName] string? caller = default) => self.ToString().WriteToDebug(caller);
     [Conditional("DEBUG")]
-    public static void WriteToDebug( this object self, [CallerMemberName] string? caller = default )
+    public static void WriteToDebug(this object self, [CallerMemberName] string? caller = default)
     {
         Debug.WriteLine(Header);
         Debug.WriteLine(caller);
@@ -151,31 +165,6 @@ public static class ConsoleExtensions
     }
 
 #else
-    public static void WriteToConsole( this ReadOnlySpan<char> self, [CallerArgumentExpression("self")] string? variable = default, [CallerMemberName] string? caller = default )
-    {
-        Console.WriteLine(Header);
-        Console.WriteLine($"{caller}.{variable}");
-        Console.WriteLine();
-        Console.WriteLine(self.ToString());
-        Console.WriteLine();
-    }
-    public static void WriteToConsole( this string self, [CallerArgumentExpression("self")] string? variable = default, [CallerMemberName] string? caller = default )
-    {
-        Console.WriteLine(Header);
-        Console.WriteLine($"{caller}.{variable}");
-        Console.WriteLine();
-        Console.WriteLine(self);
-        Console.WriteLine();
-    }
-    public static void WriteToConsole( this StringBuilder self, [CallerArgumentExpression("self")] string? variable = default, [CallerMemberName] string? caller = default ) => self.ToString().WriteToConsole(variable, caller);
-    public static void WriteToConsole( this object self, [CallerArgumentExpression("self")] string? variable = default, [CallerMemberName] string? caller = default )
-    {
-        Console.WriteLine(Header);
-        Console.WriteLine($"{caller}.{variable}");
-        Console.WriteLine();
-        Console.WriteLine(self);
-        Console.WriteLine();
-    }
 
 
     [Conditional("DEBUG")]

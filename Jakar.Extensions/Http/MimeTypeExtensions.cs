@@ -1,5 +1,5 @@
 ﻿#nullable enable
-namespace Jakar.Extensions.Http;
+namespace Jakar.Extensions;
 
 
 public static class MimeTypeExtensions

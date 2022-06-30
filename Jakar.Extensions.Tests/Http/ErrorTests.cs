@@ -7,10 +7,6 @@ using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Jakar.Extensions.Exceptions.Networking;
-using Jakar.Extensions.Http;
-using Jakar.Extensions.Models;
-using Jakar.Extensions.Strings;
 using NUnit.Framework;
 
 

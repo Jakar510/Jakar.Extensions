@@ -2,13 +2,14 @@
 // 05/03/2022  9:01 AM
 
 
-using System.Net.Http.Headers;
+#nullable enable
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Net.Security;
 
 
-#nullable enable
-namespace Jakar.Extensions.Http;
+
+namespace Jakar.Extensions;
 
 
 #if NET6_0

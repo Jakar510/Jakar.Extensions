@@ -1,7 +1,8 @@
-﻿using Jakar.Extensions.General;
+﻿#nullable enable
+using Jakar.Extensions;
 
 
-#nullable enable
+
 namespace Jakar.SqlBuilder.Interfaces;
 
 

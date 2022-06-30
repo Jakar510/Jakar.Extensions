@@ -1,9 +1,9 @@
-﻿using System.Net.Mail;
+﻿#nullable enable
+using System.Net.Mail;
 
 
 
-#nullable enable
-namespace Jakar.Extensions.Strings;
+namespace Jakar.Extensions;
 
 
 /// <summary>

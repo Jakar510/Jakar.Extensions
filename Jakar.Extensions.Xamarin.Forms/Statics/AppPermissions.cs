@@ -1,12 +1,13 @@
 ﻿//using Plugin.Permissions;
 //using Plugin.Permissions.Abstractions;
 
+#nullable enable
 using System.Windows.Input;
 using Xamarin.Essentials;
 
 
-#nullable enable
-namespace Jakar.Extensions.Xamarin.Forms.Statics;
+
+namespace Jakar.Extensions.Xamarin.Forms;
 
 
 public static class AppPermissions

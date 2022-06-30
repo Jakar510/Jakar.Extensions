@@ -1,19 +1,15 @@
 ﻿using System;
 using Foundation;
-using Jakar.Extensions.Exceptions.General;
-using Jakar.Extensions.Xamarin.Forms.Interfaces;
-using Jakar.Extensions.Xamarin.Forms.iOS.Services;
+using Jakar.Extensions.Xamarin.Forms.iOS;
 using UIKit;
 using Xamarin.Forms;
-
-
 
 
 [assembly: Dependency(typeof(IpAddressManager))]
 
 
 #nullable enable
-namespace Jakar.Extensions.Xamarin.Forms.iOS.Services;
+namespace Jakar.Extensions.Xamarin.Forms.iOS;
 
 
 public class IpAddressManager : INetworkManager

@@ -1,6 +1,4 @@
 using System;
-using Jakar.Extensions.Models;
-using Jakar.Extensions.Strings;
 using NUnit.Framework;
 
 

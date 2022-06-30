@@ -1,11 +1,10 @@
-﻿using System.Windows.Input;
-using Jakar.Extensions.Xamarin.Forms.Statics;
+﻿#nullable enable
+using System.Windows.Input;
 using Xamarin.Essentials;
 
 
 
-#nullable enable
-namespace Jakar.Extensions.Xamarin.Forms.BasePages;
+namespace Jakar.Extensions.Xamarin.Forms;
 
 
 public abstract class BaseViewModel : ObservableClass

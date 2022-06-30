@@ -4,7 +4,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata>
 		<id>Jakar.Extensions</id>
-		<version>6.0.0.29-beta</version>
+		<version>6.0.0.30-beta</version>
 		<title>Extension Library</title>
 		<authors>Tyler Stegmaier</authors>
 		<owners>Jakar510/Jakar</owners>
@@ -19,6 +19,7 @@
 		</description>
 		<releaseNotes>
 			Jakar.Extensions 6.0.0
+			Major namespace changes
 			Removed Models.Users
 			multi-targets NetStandard2.1 and Net6.0
 			Added MailKit Email Builder
@@ -66,7 +67,7 @@
 				<dependency id="Xamarin.Essentials"
 							version="1.7.2" />
 				<dependency id="OneOf"
-							version="3.0.216" />
+							version="3.0.223" />
 				<dependency id="ValueOf"
 							version="2.0.31" />
 				<!-- 

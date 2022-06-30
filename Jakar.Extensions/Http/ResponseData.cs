@@ -1,15 +1,14 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 04/21/2022  11:48 AM
 
+#nullable enable
+#nullable enable
 using System.Net.Http;
 using System.Net.Http.Headers;
-using Jakar.Extensions.Enumerations;
-using Jakar.Extensions.SpanAndMemory;
 
 
-#nullable enable
-#nullable enable
-namespace Jakar.Extensions.Http;
+
+namespace Jakar.Extensions;
 
 
 public readonly struct ResponseData

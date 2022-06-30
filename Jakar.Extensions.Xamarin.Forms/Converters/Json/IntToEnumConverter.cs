@@ -4,7 +4,7 @@
 
 
 #nullable enable
-namespace Jakar.Extensions.Xamarin.Forms.Converters.Json;
+namespace Jakar.Extensions.Xamarin.Forms;
 
 
 public class IntToEnumConverter<TEnum> : JsonConverter where TEnum : Enum

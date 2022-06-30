@@ -2,7 +2,7 @@
 
 
 #nullable enable
-namespace Jakar.Extensions.Interfaces;
+namespace Jakar.Extensions;
 
 
 public interface IFileService

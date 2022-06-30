@@ -84,7 +84,7 @@
 		<PackageReference Include="JetBrains.Annotations" Version="2022.1.0" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
 		<PackageReference Include="Nito.Collections.Deque" Version="1.1.1" />
-		<PackageReference Include="OneOf" Version="3.0.216" />
+		<PackageReference Include="OneOf" Version="3.0.223" />
 		<PackageReference Include="System.Collections.Immutable" Version="6.0.0" />
 		<PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
 		<PackageReference Include="System.Text.Encoding.CodePages" Version="6.0.0" />

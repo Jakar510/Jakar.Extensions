@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Order;
-using Jakar.Extensions.SpanAndMemory;
+using Jakar.Extensions;
 using JetBrains.Annotations;
 
 

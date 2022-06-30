@@ -3,8 +3,7 @@ using System.IO;
 using System.Net;
 using System.Threading.Tasks;
 using Android.Provider;
-using Jakar.Extensions.Interfaces;
-using Jakar.Extensions.Xamarin.Forms.Droid.Services;
+using Jakar.Extensions.Xamarin.Forms.Droid;
 using Xamarin.Forms;
 
 
@@ -12,7 +11,7 @@ using Xamarin.Forms;
 
 
 #nullable enable
-namespace Jakar.Extensions.Xamarin.Forms.Droid.Services;
+namespace Jakar.Extensions.Xamarin.Forms.Droid;
 
 
 public class FileService : IFileService

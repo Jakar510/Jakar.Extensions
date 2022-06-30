@@ -6,7 +6,7 @@
 
 
 #nullable enable
-namespace Jakar.Extensions.Models;
+namespace Jakar.Extensions;
 
 
 /// <summary>

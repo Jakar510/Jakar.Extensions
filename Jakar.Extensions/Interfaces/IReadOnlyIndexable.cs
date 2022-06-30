@@ -1,5 +1,5 @@
 ﻿#nullable enable
-namespace Jakar.Extensions.Interfaces;
+namespace Jakar.Extensions;
 
 
 public interface IReadOnlyIndexable<T> : ICollection<T>

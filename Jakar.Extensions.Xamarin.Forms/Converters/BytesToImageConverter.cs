@@ -2,7 +2,7 @@
 
 
 #nullable enable
-namespace Jakar.Extensions.Xamarin.Forms.Converters;
+namespace Jakar.Extensions.Xamarin.Forms;
 
 
 public class BytesToImageConverter : TypeConverter, IValueConverter, IExtendedTypeConverter

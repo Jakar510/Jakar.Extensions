@@ -1,5 +1,5 @@
 ﻿#nullable enable
-namespace Jakar.Extensions.Converters;
+namespace Jakar.Extensions;
 
 
 public class VersionConverter : JsonConverter<Version>

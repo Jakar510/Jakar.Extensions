@@ -1,5 +1,6 @@
 ﻿// unset
 
+#nullable enable
 using System;
 using CoreGraphics;
 using UIKit;
@@ -8,10 +9,7 @@ using Xamarin.Forms.Platform.iOS;
 
 
 
-
-
-#nullable enable
-namespace Jakar.Extensions.Xamarin.Forms.iOS.Extensions;
+namespace Jakar.Extensions.Xamarin.Forms.iOS;
 
 
 public static class DrawingExtensions

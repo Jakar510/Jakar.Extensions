@@ -1,8 +1,8 @@
-﻿using Jakar.Extensions.General;
+﻿#nullable enable
+using Jakar.Extensions;
 
 
 
-#nullable enable
 namespace Jakar.SqlBuilder.Interfaces;
 
 
@@ -16,7 +16,7 @@ public interface ISelector : IFromSyntax<ISqlBuilderRoot>, IAggregateFunctions<I
 
     /// <summary>
     /// <para>
-    /// Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="DapperTableExtensions.GetTableName(Type)"/>
+    /// Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="DapperTableExtensions.GetTableName(System.Type)"/>
     /// </para>
     /// Adds table_name.<param name="columnName"></param> to SELECT set
     /// </summary>

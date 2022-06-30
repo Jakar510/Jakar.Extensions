@@ -1,14 +1,14 @@
-﻿using System.Linq.Expressions;
+﻿#nullable enable
+using System.Linq.Expressions;
 
 
 
-#nullable enable
 namespace Jakar.Extensions;
 
 
 internal static class InstanceCreator
 {
-    public static NullReferenceException CreateException( params Type[] args ) => new($"constructor not found. Requested arg types: {args}");
+    public static NullReferenceException CreateException(params Type[] args) => new($"constructor not found. Requested arg types: {args}");
 }
 
 
@@ -19,11 +19,11 @@ public static class InstanceCreator<TItem>
 
 
     public static TItem Create() => (TItem)Activator.CreateInstance(_Type);
-    public static TItem Create( params object[] args ) => (TItem)Activator.CreateInstance(_Type,                                                                                            args);
-    public static TItem Create( bool            nonPublic ) => (TItem)Activator.CreateInstance(_Type,                                                                                       nonPublic);
-    public static TItem Create( object[]        args,        object[] activationAttributes ) => (TItem)Activator.CreateInstance(_Type,                                                      args,        activationAttributes);
-    public static TItem Create( BindingFlags    bindingAttr, Binder   binder, object[] args, CultureInfo culture ) => (TItem)Activator.CreateInstance(_Type,                                bindingAttr, binder, args, culture);
-    public static TItem Create( BindingFlags    bindingAttr, Binder   binder, object[] args, CultureInfo culture, object[] activationAttributes ) => (TItem)Activator.CreateInstance(_Type, bindingAttr, binder, args, culture, activationAttributes);
+    public static TItem Create(params object[] args) => (TItem)Activator.CreateInstance(_Type, args);
+    public static TItem Create(bool nonPublic) => (TItem)Activator.CreateInstance(_Type, nonPublic);
+    public static TItem Create(object[] args, object[] activationAttributes) => (TItem)Activator.CreateInstance(_Type, args, activationAttributes);
+    public static TItem Create(BindingFlags bindingAttr, Binder binder, object[] args, CultureInfo culture) => (TItem)Activator.CreateInstance(_Type, bindingAttr, binder, args, culture);
+    public static TItem Create(BindingFlags bindingAttr, Binder binder, object[] args, CultureInfo culture, object[] activationAttributes) => (TItem)Activator.CreateInstance(_Type, bindingAttr, binder, args, culture, activationAttributes);
 }
 
 
@@ -40,7 +40,8 @@ public static class InstanceCreator<T1, TInstance>
         };
 
         ConstructorInfo? constructor = typeof(TInstance).GetConstructor(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, Type.DefaultBinder, argsTypes, null);
-        if ( constructor is null ) { throw InstanceCreator.CreateException(argsTypes); }
+        if (constructor is null)
+        { throw InstanceCreator.CreateException(argsTypes); }
 
         ParameterExpression[] args = argsTypes.Select(Expression.Parameter).ToArray();
 
@@ -64,7 +65,8 @@ public static class InstanceCreator<T1, T2, TInstance>
         };
 
         ConstructorInfo? constructor = typeof(TInstance).GetConstructor(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, Type.DefaultBinder, argsTypes, null);
-        if ( constructor is null ) { throw InstanceCreator.CreateException(argsTypes); }
+        if (constructor is null)
+        { throw InstanceCreator.CreateException(argsTypes); }
 
         ParameterExpression[] args = argsTypes.Select(Expression.Parameter).ToArray();
 
@@ -89,7 +91,8 @@ public static class InstanceCreator<T1, T2, T3, TInstance>
         };
 
         ConstructorInfo? constructor = typeof(TInstance).GetConstructor(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, Type.DefaultBinder, argsTypes, null);
-        if ( constructor is null ) { throw InstanceCreator.CreateException(argsTypes); }
+        if (constructor is null)
+        { throw InstanceCreator.CreateException(argsTypes); }
 
         ParameterExpression[] args = argsTypes.Select(Expression.Parameter).ToArray();
 
@@ -115,7 +118,8 @@ public static class InstanceCreator<T1, T2, T3, T4, TInstance>
         };
 
         ConstructorInfo? constructor = typeof(TInstance).GetConstructor(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, Type.DefaultBinder, argsTypes, null);
-        if ( constructor is null ) { throw InstanceCreator.CreateException(argsTypes); }
+        if (constructor is null)
+        { throw InstanceCreator.CreateException(argsTypes); }
 
         ParameterExpression[] args = argsTypes.Select(Expression.Parameter).ToArray();
 
@@ -141,7 +145,8 @@ public static class InstanceCreator<T1, T2, T3, T4, T5, TInstance>
         };
 
         ConstructorInfo? constructor = typeof(TInstance).GetConstructor(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, Type.DefaultBinder, argsTypes, null);
-        if ( constructor is null ) { throw InstanceCreator.CreateException(argsTypes); }
+        if (constructor is null)
+        { throw InstanceCreator.CreateException(argsTypes); }
 
         ParameterExpression[] args = argsTypes.Select(Expression.Parameter).ToArray();
 
@@ -167,7 +172,8 @@ public static class InstanceCreator<T1, T2, T3, T4, T5, T6, TInstance>
         };
 
         ConstructorInfo? constructor = typeof(TInstance).GetConstructor(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, Type.DefaultBinder, argsTypes, null);
-        if ( constructor is null ) { throw InstanceCreator.CreateException(argsTypes); }
+        if (constructor is null)
+        { throw InstanceCreator.CreateException(argsTypes); }
 
         ParameterExpression[] args = argsTypes.Select(Expression.Parameter).ToArray();
 
@@ -193,7 +199,8 @@ public static class InstanceCreator<T1, T2, T3, T4, T5, T6, T7, TInstance>
         };
 
         ConstructorInfo? constructor = typeof(TInstance).GetConstructor(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, Type.DefaultBinder, argsTypes, null);
-        if ( constructor is null ) { throw InstanceCreator.CreateException(argsTypes); }
+        if (constructor is null)
+        { throw InstanceCreator.CreateException(argsTypes); }
 
         ParameterExpression[] args = argsTypes.Select(Expression.Parameter).ToArray();
 

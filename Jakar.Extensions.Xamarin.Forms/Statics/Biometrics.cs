@@ -2,7 +2,7 @@
 
 
 #nullable enable
-namespace Jakar.Extensions.Xamarin.Forms.Statics;
+namespace Jakar.Extensions.Xamarin.Forms;
 
 
 public class Biometrics

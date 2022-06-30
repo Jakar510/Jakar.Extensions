@@ -1,5 +1,5 @@
 ﻿#nullable enable
-namespace Jakar.Extensions.Models.Collections;
+namespace Jakar.Extensions;
 
 
 /// <summary>

@@ -1,9 +1,9 @@
-﻿using Plugin.LatestVersion;
+﻿#nullable enable
+using Plugin.LatestVersion;
 
 
 
-#nullable enable
-namespace Jakar.Extensions.Xamarin.Forms.Statics;
+namespace Jakar.Extensions.Xamarin.Forms;
 
 
 public static class AppStoreVersion

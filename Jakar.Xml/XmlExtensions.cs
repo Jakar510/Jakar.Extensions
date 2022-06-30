@@ -7,10 +7,7 @@ using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Xml;
-using Jakar.Extensions.Collections;
-using Jakar.Extensions.General;
-using Jakar.Extensions.Interfaces;
-using Jakar.Extensions.Strings;
+using Jakar.Extensions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 

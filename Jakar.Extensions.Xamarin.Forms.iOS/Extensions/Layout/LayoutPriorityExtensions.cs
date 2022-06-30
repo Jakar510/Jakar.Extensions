@@ -1,15 +1,10 @@
-﻿using System;
-using Jakar.Extensions.General;
-using Jakar.Extensions.Strings;
-using Jakar.Extensions.Xamarin.Forms.iOS.Enumerations;
+﻿#nullable enable
+using System;
 using UIKit;
 
 
 
-
-
-#nullable enable
-namespace Jakar.Extensions.Xamarin.Forms.iOS.Extensions.Layout;
+namespace Jakar.Extensions.Xamarin.Forms.iOS.Layout;
 
 
 public static class LayoutPriorityExtensions

@@ -1,5 +1,5 @@
 ﻿#nullable enable
-namespace Jakar.Extensions.Collections;
+namespace Jakar.Extensions;
 
 
 public static class DictionaryExtensions

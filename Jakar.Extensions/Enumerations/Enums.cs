@@ -1,5 +1,5 @@
 ﻿#nullable enable
-namespace Jakar.Extensions.Enumerations;
+namespace Jakar.Extensions;
 
 
 [SuppressMessage("ReSharper", "PartialTypeWithSinglePart")]

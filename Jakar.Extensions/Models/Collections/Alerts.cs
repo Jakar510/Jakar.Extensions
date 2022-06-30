@@ -2,7 +2,7 @@
 // 04/12/2022  1:54 PM
 
 #nullable enable
-namespace Jakar.Extensions.Models.Collections;
+namespace Jakar.Extensions;
 
 
 public interface ICollectionAlerts : INotifyCollectionChanged, INotifyPropertyChanging, INotifyPropertyChanged

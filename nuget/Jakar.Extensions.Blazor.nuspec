@@ -4,7 +4,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata>
 		<id>Jakar.Extensions.Blazor</id>
-		<version>6.0.0.2-beta</version>
+		<version>6.0.0.3-beta</version>
 		<title>Extension Library</title>
 		<authors>Tyler Stegmaier</authors>
 		<owners>Jakar510/Jakar</owners>
@@ -29,7 +29,7 @@
 		<dependencies>
 			<group targetFramework="net6.0">
 				<dependency id="Jakar.Extensions"
-							version="6.0.0.28-beta" />
+							version="6.0.0.30-beta" />
 				<dependency id="BlazorComponentUtilities"
 							version="1.8.0" />
 				<dependency id="BlazorPro.BlazorSize"

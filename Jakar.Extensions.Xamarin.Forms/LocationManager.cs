@@ -1,5 +1,4 @@
-﻿using Jakar.Extensions.Xamarin.Forms.Statics;
-using Xamarin.Essentials;
+﻿using Xamarin.Essentials;
 
 
 

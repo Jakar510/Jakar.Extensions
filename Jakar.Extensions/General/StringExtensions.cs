@@ -1,9 +1,9 @@
-﻿using System.Security;
+﻿#nullable enable
+using System.Security;
 
 
 
-#nullable enable
-namespace Jakar.Extensions.Strings;
+namespace Jakar.Extensions;
 
 
 public static class StringExtensions

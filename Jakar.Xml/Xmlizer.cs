@@ -4,9 +4,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Xml;
-using Jakar.Extensions.Exceptions.General;
-using Jakar.Extensions.Strings;
-using Jakar.Extensions.Types;
+using Jakar.Extensions;
 using Jakar.Xml.Deserialization;
 using Jakar.Xml.Serialization;
 

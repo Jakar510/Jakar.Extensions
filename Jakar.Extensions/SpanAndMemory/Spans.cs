@@ -1,8 +1,9 @@
-﻿using System.Runtime.InteropServices;
+﻿#nullable enable
+using System.Runtime.InteropServices;
 
 
-#nullable enable
-namespace Jakar.Extensions.SpanAndMemory;
+
+namespace Jakar.Extensions;
 
 
 [SuppressMessage("ReSharper", "OutParameterValueIsAlwaysDiscarded.Global")]

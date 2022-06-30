@@ -1,7 +1,8 @@
-﻿using Jakar.Extensions.General;
+﻿#nullable enable
+using Jakar.Extensions;
 
 
-#nullable enable
+
 namespace Jakar.SqlBuilder.Interfaces;
 
 
@@ -18,7 +19,7 @@ public interface IInsertInto
 
     /// <summary>
     /// <para>
-    /// Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="DapperTableExtensions.GetTableName(Type)"/>
+    /// Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="DapperTableExtensions.GetTableName(System.Type)"/>
     /// </para>
     /// Starts a <see cref="IDataInsert"/> chain.
     /// </summary>

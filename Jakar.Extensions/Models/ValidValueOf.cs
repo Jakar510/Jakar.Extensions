@@ -1,12 +1,12 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 04/11/2022  9:54 AM
 
+#nullable enable
 using System.Linq.Expressions;
 
 
 
-#nullable enable
-namespace Jakar.Extensions.Models;
+namespace Jakar.Extensions;
 
 
 /// <summary>

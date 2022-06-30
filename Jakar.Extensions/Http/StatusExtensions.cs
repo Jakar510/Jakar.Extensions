@@ -2,7 +2,7 @@
 // 06/06/2022  3:43 PM
 
 #nullable enable
-namespace Jakar.Extensions.Http;
+namespace Jakar.Extensions;
 
 
 public static partial class StatusExtensions

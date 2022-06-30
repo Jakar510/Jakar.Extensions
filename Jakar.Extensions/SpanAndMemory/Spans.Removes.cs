@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 
 
 
-namespace Jakar.Extensions.SpanAndMemory;
+namespace Jakar.Extensions;
 
 
 public static partial class Spans
