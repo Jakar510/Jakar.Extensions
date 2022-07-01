@@ -2,11 +2,6 @@
 //using Plugin.Permissions.Abstractions;
 
 #nullable enable
-using System.Windows.Input;
-using Xamarin.Essentials;
-
-
-
 namespace Jakar.Extensions.Xamarin.Forms;
 
 

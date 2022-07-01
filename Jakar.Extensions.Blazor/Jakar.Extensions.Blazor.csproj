@@ -24,7 +24,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Jakar.Extensions" Version="6.0.0.31-beta" />
+		<PackageReference Include="Jakar.Extensions" Version="6.0.0.33-beta" />
 		<PackageReference Include="BlazorComponentUtilities" Version="1.8.0" />
 		<PackageReference Include="BlazorPro.BlazorSize" Version="6.1.2" />
 		<PackageReference Include="PanoramicData.Blazor" Version="2.1.24" />

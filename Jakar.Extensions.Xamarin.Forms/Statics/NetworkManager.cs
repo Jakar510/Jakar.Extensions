@@ -1,7 +1,6 @@
 ﻿#nullable enable
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
-using Xamarin.Essentials;
 
 
 

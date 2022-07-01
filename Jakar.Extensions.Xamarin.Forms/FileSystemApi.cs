@@ -1,9 +1,4 @@
-﻿using Xamarin.Essentials;
-
-
-
-
-#nullable enable
+﻿#nullable enable
 namespace Jakar.Extensions.Xamarin.Forms;
 
 

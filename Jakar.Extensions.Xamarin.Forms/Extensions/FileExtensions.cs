@@ -2,7 +2,6 @@
 
 #nullable enable
 using Plugin.Media.Abstractions;
-using Xamarin.Essentials;
 
 
 

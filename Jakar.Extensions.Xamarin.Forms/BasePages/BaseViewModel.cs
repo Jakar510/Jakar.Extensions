@@ -1,32 +1,5 @@
 ﻿#nullable enable
-using System.Windows.Input;
-using Xamarin.Essentials;
-
-
-
 namespace Jakar.Extensions.Xamarin.Forms;
-
-
-public abstract class BaseViewModel : ObservableClass
-{
-    private bool _isBusy;
-
-    public bool IsBusy
-    {
-        get => _isBusy;
-        set => SetProperty(ref _isBusy, value);
-    }
-
-
-    private string? _title = string.Empty;
-
-    public string? Title
-    {
-        get => _title;
-        set => SetProperty(ref _title, value);
-    }
-}
-
 
 
 public abstract class BaseViewModel<TPage> : BaseViewModel where TPage : Page
@@ -86,7 +59,7 @@ public abstract class BaseViewModel<TPage, TItem> : BaseViewModel<TPage> where T
         }
     }
 
-    protected BaseViewModel() => LoadItemsCommand                              = new Command(async () => await ExecuteLoadItemsCommand().ConfigureAwait(false));
+    protected BaseViewModel() => LoadItemsCommand = new Command(async () => await ExecuteLoadItemsCommand().ConfigureAwait(false));
     protected BaseViewModel( TPage source ) : base(source) => LoadItemsCommand = new Command(async () => await ExecuteLoadItemsCommand().ConfigureAwait(false));
 
 
