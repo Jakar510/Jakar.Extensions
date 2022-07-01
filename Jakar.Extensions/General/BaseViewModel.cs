@@ -29,5 +29,15 @@ public abstract class BaseViewModel : ObservableClass
         set => SetProperty(ref _title, value);
     }
 
+
     protected BaseViewModel() { }
+    protected BaseViewModel( string title ) => Title = title;
+
+
+    public virtual void OnAppearing() { }
+    public virtual Task OnAppearingAsync() => Task.CompletedTask;
+
+
+    public virtual void OnDisappearing() { }
+    public virtual Task OnDisappearingAsync() => Task.CompletedTask;
 }
