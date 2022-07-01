@@ -1,12 +1,4 @@
 ﻿#nullable enable
-
-/* Unmerged change from project 'Jakar.Extensions (netstandard2.1)'
-Before:
-namespace Jakar.Extensions.Strings;
-After:
-namespace Jakar.Extensions.Extensions;
-using Jakar.Extensions.Strings;
-*/
 namespace Jakar.Extensions;
 
 
@@ -37,7 +29,7 @@ public static class ConsoleExtensions
         return builder;
     }
 
-    public static StringBuilder WrapJson<T>( this T self, char c = '-', int length = 80 ) where T : notnull
+    public static StringBuilder PrintJson<T>( this T self, char c = '-', int length = 80 ) where T : notnull
     {
         string wrapper = c.Repeat(length);
 
@@ -55,46 +47,11 @@ public static class ConsoleExtensions
         return builder;
     }
 
-    public static StringBuilder WrapJson( this IEnumerable self, char c = '-', int length = 80 )
-    {
-        string wrapper = c.Repeat(length);
-
-        var builder = new StringBuilder();
-        builder.AppendLine();
-        builder.AppendLine(wrapper);
-        builder.AppendLine(self.GetType().FullName);
-        builder.AppendLine();
-        builder.AppendLine();
-        builder.AppendLine(self.ToPrettyJson());
-        builder.AppendLine();
-        builder.AppendLine();
-        builder.AppendLine(wrapper);
-        builder.AppendLine();
-        return builder;
-    }
-
-    public static StringBuilder WrapJson<T>( this IEnumerable<T> self, char c = '-', int length = 80 )
-    {
-        string wrapper = c.Repeat(length);
-
-        var builder = new StringBuilder();
-        builder.AppendLine();
-        builder.AppendLine(wrapper);
-        builder.AppendLine(self.GetType().FullName);
-        builder.AppendLine();
-        builder.AppendLine();
-        builder.AppendLine(self.ToPrettyJson());
-        builder.AppendLine();
-        builder.AppendLine();
-        builder.AppendLine(wrapper);
-        builder.AppendLine();
-        return builder;
-    }
-
 
     public static string GetMessage( this string self, string start = INFORMATION, in char c = '-', in int padding = 40 ) => $"{start.Wrapper(c, padding)}  {self}";
     public static string GetWarning( this string self, string start = WARNING,     in char c = '-', in int padding = 40 ) => $"{start.Wrapper(c, padding)}  {self}";
     public static string GetError( this   string self, string start = ERROR,       in char c = '-', in int padding = 40 ) => $"{start.Wrapper(c, padding)}  {self}";
+
 
 /* Unmerged change from project 'Jakar.Extensions (netstandard2.1)'
 Before:
@@ -107,12 +64,28 @@ After:
     public static string GetCount<T>( this ICollection<T> self, char c = '-', int  length = 80 ) => $"{c.Repeat(length)}   {self.GetType().Name}.Count: => {self.Count}";
 
 
-    public static void Print( this ReadOnlySpan<char> self ) => Console.WriteLine(self.ToString());
-    public static void Print( this string             self ) => Console.WriteLine(self);
-    public static void Print( this StringBuilder      self ) => self.ToString().WriteToConsole();
-    public static void Print( this object             self ) => Console.WriteLine(self);
+    public static void Print( this Span<char>         self ) => Console.Write(self.ToString());
+    public static void Print( this ReadOnlySpan<char> self ) => Console.Write(self.ToString());
+    public static void Print( this string             self ) => Console.Write(self);
+    public static void Print( this ValueStringBuilder self ) => self.ToString().Print();
+    public static void Print( this StringBuilder      self ) => self.ToString().Print();
+    public static void Print( this object             self ) => Console.Write(self);
 
 
+    public static void PrintLine( this Span<char>         self ) => Console.WriteLine(self.ToString());
+    public static void PrintLine( this ReadOnlySpan<char> self ) => Console.WriteLine(self.ToString());
+    public static void PrintLine( this string             self ) => Console.WriteLine(self);
+    public static void PrintLine( this ValueStringBuilder self ) => self.ToString().PrintLine();
+    public static void PrintLine( this StringBuilder      self ) => self.ToString().PrintLine();
+    public static void PrintLine( this object             self ) => Console.WriteLine(self);
+
+
+    public static void WriteToConsole( this Span<char> self )
+    {
+        Console.WriteLine();
+        Console.WriteLine(self.ToString());
+        Console.WriteLine();
+    }
     public static void WriteToConsole( this ReadOnlySpan<char> self )
     {
         Console.WriteLine();
@@ -125,7 +98,8 @@ After:
         Console.WriteLine(self);
         Console.WriteLine();
     }
-    public static void WriteToConsole( this StringBuilder self ) => self.ToString().WriteToConsole();
+    public static void WriteToConsole( this ValueStringBuilder self ) => self.ToString().WriteToConsole();
+    public static void WriteToConsole( this StringBuilder      self ) => self.ToString().WriteToConsole();
     public static void WriteToConsole( this object self )
     {
         Console.WriteLine();
