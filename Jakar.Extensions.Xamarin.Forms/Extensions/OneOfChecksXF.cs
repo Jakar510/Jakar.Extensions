@@ -1,10 +1,8 @@
-﻿// ReSharper disable once CheckNamespace
-
-#nullable enable
-namespace Jakar.Extensions.Collections;
+﻿#nullable enable
+namespace Jakar.Extensions.Xamarin.Forms;
 
 
-public static partial class OneOfChecks
+public static class OneOfChecksXF
 {
     public static bool IsOneOf( this PropertyChangedEventArgs e, params BindableProperty[] properties ) => e.IsOneOf(properties.Select(property => property.PropertyName));
 

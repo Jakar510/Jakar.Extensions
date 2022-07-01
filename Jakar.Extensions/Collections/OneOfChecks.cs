@@ -2,8 +2,7 @@
 namespace Jakar.Extensions;
 
 
-// ReSharper disable once PartialTypeWithSinglePart
-public static partial class OneOfChecks
+public static class OneOfChecks
 {
     public static bool IsOneOf<TValue>( this TValue value, params TValue[] items )
     {
