@@ -1,11 +1,15 @@
-﻿namespace Jakar.AppLogger;
+﻿using System.Net.Http.Headers;
+
+
+
+namespace Jakar.AppLogger;
 
 
 /// <summary>
 /// <para><see href="https://stackoverflow.com/a/67048259/9530917">How to protect strings without SecureString?</see></para>
 /// <para><see href="https://stackoverflow.com/a/69327347/9530917">How to convert SecureString to System.String?</see></para>
 /// </summary>
-public sealed class AppLoggerApi : Service
+public sealed class AppLoggerApi : Service, ILogger
 {
     public static readonly string EmptyGuid                     = Guid.Empty.ToString();
     public const           string DEFAULT_OUTPUT_TEMPLATE       = "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}";
@@ -49,4 +53,25 @@ public sealed class AppLoggerApi : Service
     }
 
     private async Task Handle( Log log, CancellationToken token ) { }
+
+
+    public void Log<TState>( LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter )
+    {
+        var log = new ManagedErrorLog(Config, exception, eventId, formatter(state, exception), logLevel);
+    }
+    public bool IsEnabled( LogLevel               logLevel ) => logLevel >= Config.LogLevel;
+    public IDisposable BeginScope<TState>( TState state ) => new Scope(Config);
+
+
+
+    public readonly struct Scope : IDisposable
+    {
+        private readonly IAppLoggerConfig _config;
+        public Scope( IAppLoggerConfig config )
+        {
+            _config           = config;
+            _config.SessionID = Guid.NewGuid();
+        }
+        public void Dispose() => _config.SessionID = default;
+    }
 }

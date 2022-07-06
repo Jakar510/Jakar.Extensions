@@ -6,8 +6,9 @@ namespace Jakar.AppLogger;
 
 public class Log
 {
-    public DateTime Timestamp { get; init; }
-    public Device Device { get; init; } = new();
+    public Guid           ID                 { get; init; } = Guid.Empty;
+    public DateTime       Timestamp          { get; init; } = DateTime.UtcNow;
+    public DateTimeOffset AppLaunchTimestamp { get; init; }
 
 
     /// <summary>
@@ -19,33 +20,16 @@ public class Log
 
 
     /// <summary> Gets or sets optional string used for associating logs with users. </summary>
-    public string? UserId { get; init; }
+    public string? UserID { get; init; }
 
 
     public Log() { }
-
-    /// <summary>Initializes a new instance of the Log class.</summary>
-    /// <param name = "device" > </param>
-    /// <param name="timestamp">Log timestamp, example:
-    /// '2017-03-13T18:05:42Z'.
-    /// </param>
-    /// <param name="sessionID">When tracking an analytics session, logs can be
-    /// part of the session by specifying this identifier.
-    /// This attribute is optional, a missing value means the session
-    /// tracking is disabled (like when using only error reporting
-    /// feature).
-    /// Concrete types like StartSessionLog or PageLog are always part of a
-    /// session and always include this identifier.
-    /// </param>
-    /// <param name="userId">optional string used for associating logs with
-    /// users.
-    /// </param>
-    public Log(Device device, DateTime timestamp, Guid? sessionID = default, string? userId = default)
+    public Log( IAppLoggerConfig config, Guid? id = default )
     {
-        Timestamp = timestamp;
-        SessionID = sessionID;
-        UserId = userId;
-        Device = device;
+        AppLaunchTimestamp = config.AppLaunchTimestamp;
+        UserID             = config.UserID;
+        SessionID          = config.SessionID;
+        ID                 = id ?? Guid.NewGuid();
     }
 
 

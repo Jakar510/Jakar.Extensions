@@ -24,6 +24,8 @@ public class AppLoggerProvider : Service
     public Task StartAsync( CancellationToken token ) => _api.StartAsync(token);
     public Task StopAsync( CancellationToken  token ) => _api.StopAsync(token);
 
+    
+
 
     public static void Test()
     {
