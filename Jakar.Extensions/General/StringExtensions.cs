@@ -1,4 +1,5 @@
 ﻿#nullable enable
+using System.Runtime.InteropServices;
 using System.Security;
 
 
@@ -8,12 +9,26 @@ namespace Jakar.Extensions;
 
 public static class StringExtensions
 {
-    public static SecureString ToSecureString( this string value )
+    public static unsafe SecureString ToSecureString( this string value, bool makeReadonly = true )
     {
-        unsafe
+        fixed ( char* token = value )
         {
-            fixed ( char* psz = value ) { return new SecureString(psz, value.Length); }
+            var secure = new SecureString(token, value.Length);
+            if ( makeReadonly ) { secure.MakeReadOnly(); }
+
+            return secure;
         }
+    }
+    public static string GetStringValue( this SecureString value )
+    {
+        IntPtr valuePtr = IntPtr.Zero;
+
+        try
+        {
+            valuePtr = Marshal.SecureStringToBSTR(value);
+            return Marshal.PtrToStringBSTR(valuePtr);
+        }
+        finally { Marshal.ZeroFreeBSTR(valuePtr); }
     }
 
 
@@ -65,7 +80,7 @@ public static class StringExtensions
     ///     <see cref = "string" />
     /// </returns>
     public static string Repeat( this string value, int count ) => new StringBuilder(value.Length * count).Insert(0, value, count).ToString();
-    
+
 
     /// <summary>
     ///     Wraps a string in

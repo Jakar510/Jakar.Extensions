@@ -54,7 +54,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jakar.SqlBuilder.Tests", "J
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jakar.Extensions.Wpf", "Jakar.Extensions.Wpf\Jakar.Extensions.Wpf.csproj", "{D3419869-47AD-45A3-8E6B-EEB292F3B26B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jakar.Extensions.AppCenter", "Jakar.Extensions.AppCenter\Jakar.Extensions.AppCenter.csproj", "{D25E8D3D-67BC-481C-8642-1A52A09C71CF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jakar.AppLogger", "Jakar.AppLogger\Jakar.AppLogger.csproj", "{D25E8D3D-67BC-481C-8642-1A52A09C71CF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -125,10 +125,6 @@ Global
 		{D25E8D3D-67BC-481C-8642-1A52A09C71CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D25E8D3D-67BC-481C-8642-1A52A09C71CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D25E8D3D-67BC-481C-8642-1A52A09C71CF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{3F93ECA6-BFBE-4967-8C3B-974BF1DC91C1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3F93ECA6-BFBE-4967-8C3B-974BF1DC91C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3F93ECA6-BFBE-4967-8C3B-974BF1DC91C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3F93ECA6-BFBE-4967-8C3B-974BF1DC91C1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
