@@ -1,6 +1,10 @@
 ﻿// Jakar.Extensions :: Jakar.AppLogger
 // 07/06/2022  1:34 PM
 
+using System.Globalization;
+
+
+
 namespace Jakar.AppLogger;
 
 
@@ -9,12 +13,18 @@ public sealed class AppLoggerIni : IAppLoggerConfig
     public const string CONFIG_FILE_NAME = "AppCenter.ini";
 
 
-    private          LocalFile?        _file;
-    private readonly IniConfig         _config = new();
-    private          Guid              _installID;
-    private          Guid?             _sessionID;
-    private          string            _appName = string.Empty;
-    internal         IniConfig.Section Section => _config[nameof(AppLogger)];
+    private          LocalFile? _file;
+    private readonly IniConfig  _config = new();
+    private          Guid       _installID;
+    private          Guid?      _sessionID;
+    private          LogLevel   _logLevel;
+    private          DateTime   _appLaunchTimestamp;
+    private          string?    _userID;
+
+    private  string            _appName = string.Empty;
+    internal IniConfig.Section Section => _config[nameof(AppLogger)];
+
+    public Device Device { get; set; }
 
 
     public string AppName
@@ -27,6 +37,36 @@ public sealed class AppLoggerIni : IAppLoggerConfig
         }
     }
 
+    public LogLevel LogLevel
+    {
+        get => _logLevel;
+        set
+        {
+            _logLevel                 = value;
+            Section[nameof(LogLevel)] = value.ToString();
+        }
+    }
+
+
+    public DateTime AppLaunchTimestamp
+    {
+        get => _appLaunchTimestamp;
+        set
+        {
+            _appLaunchTimestamp                 = value;
+            Section[nameof(AppLaunchTimestamp)] = value.ToUniversalTime().ToString(CultureInfo.InvariantCulture);
+        }
+    }
+
+    public string? UserID
+    {
+        get => _userID;
+        set
+        {
+            _userID                 = value;
+            Section[nameof(UserID)] = value ?? string.Empty;
+        }
+    }
 
     public Guid InstallID
     {
@@ -38,7 +78,6 @@ public sealed class AppLoggerIni : IAppLoggerConfig
         }
     }
 
-
     public Guid? SessionID
     {
         get => _sessionID;
@@ -49,7 +88,6 @@ public sealed class AppLoggerIni : IAppLoggerConfig
         }
     }
 
-
     internal LocalFile Path
     {
         get => _file ??= LocalDirectory.CurrentDirectory.Join(CONFIG_FILE_NAME);
@@ -58,7 +96,11 @@ public sealed class AppLoggerIni : IAppLoggerConfig
 
 
     internal AppLoggerIni( LocalDirectory directory ) : this(directory.Join(CONFIG_FILE_NAME)) { }
-    internal AppLoggerIni( LocalFile      file ) => Path = file;
+    internal AppLoggerIni( LocalFile file )
+    {
+        Path   = file;
+        Device = new Device();
+    }
 
 
     public static AppLoggerIni Create( LocalDirectory directory ) => Create(directory.Join(CONFIG_FILE_NAME));
