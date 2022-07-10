@@ -31,7 +31,7 @@ public sealed class AppLoggerApi : Service, ILogger
     public override async ValueTask DisposeAsync()
     {
         Dispose(true);
-        await ValueTask.CompletedTask;
+        await Task.CompletedTask;
     }
 
 

@@ -46,8 +46,7 @@ public sealed class AppLoggerIni : IAppLoggerConfig
             Section[nameof(LogLevel)] = value.ToString();
         }
     }
-
-
+    
     public DateTime AppLaunchTimestamp
     {
         get => _appLaunchTimestamp;

@@ -9,6 +9,14 @@
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 	</PropertyGroup>
 
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+	  <LangVersion>10.0</LangVersion>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+	  <LangVersion>10.0</LangVersion>
+	</PropertyGroup>
+
 	<ItemGroup>
 		<PackageReference Include="Jakar.Extensions" Version="6.0.0.34-beta" />
 		<PackageReference Include="Hardware.Info" Version="10.0.1" />

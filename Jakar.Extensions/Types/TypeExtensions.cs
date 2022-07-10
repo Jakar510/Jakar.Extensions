@@ -23,7 +23,7 @@ public static partial class TypeExtensions
     // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-    public static object Construct( this Type target, params Type[] args )
+    public static object? Construct( this Type target, params Type[] args )
     {
         Type type = target.MakeGenericType(args);
 
@@ -34,15 +34,15 @@ public static partial class TypeExtensions
     // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-    public static bool IsInitOnly( this PropertyInfo propertyInfo ) => propertyInfo.IsInitOnly<IsExternalInit>();
+    public static bool IsInitOnly( this PropertyInfo propertyInfo ) => propertyInfo.IsInitOnly(typeof(IsExternalInit));
 
-    public static bool IsInitOnly<TIsExternalInit>( this PropertyInfo propertyInfo )
+    public static bool IsInitOnly( this PropertyInfo propertyInfo, Type isExternalInit )
     {
-        MethodInfo setMethod = propertyInfo.SetMethod;
+        MethodInfo? setMethod = propertyInfo.SetMethod;
         if ( setMethod is null ) { return false; }
 
         if ( setMethod.ReturnParameter is null ) { throw new NullReferenceException(nameof(setMethod.ReturnParameter)); }
 
-        return setMethod.ReturnParameter.GetRequiredCustomModifiers().Contains(typeof(TIsExternalInit));
+        return setMethod.ReturnParameter.GetRequiredCustomModifiers().Contains(isExternalInit);
     }
 }

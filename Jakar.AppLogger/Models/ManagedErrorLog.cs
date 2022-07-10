@@ -1,12 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions.AppCenter
 // 07/06/2022  9:02 AM
 
-using Microsoft.AppCenter.Crashes.Ingestion.Models;
-using Microsoft.AppCenter.Ingestion.Models;
-using Newtonsoft.Json;
-using Exception = System.Exception;
-
-
 
 namespace Jakar.AppLogger;
 
