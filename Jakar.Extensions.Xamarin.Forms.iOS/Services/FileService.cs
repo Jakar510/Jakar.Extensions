@@ -10,9 +10,6 @@ using Xamarin.Forms;
 using FileSystem = Xamarin.Essentials.FileSystem;
 
 
-
-
-
 [assembly: Dependency(typeof(FileService))]
 
 
@@ -23,6 +20,15 @@ namespace Jakar.Extensions.Xamarin.Forms.iOS;
 public class FileService : IFileService
 {
     public static string GetCacheDataPath( string fileName ) => Path.Combine(FileSystem.CacheDirectory, fileName);
+
+    public async Task<FileInfo> DownloadFile( Uri link, string fileName )
+    {
+        using var client = new WebClient();
+        string    path   = GetCacheDataPath(fileName);
+        await client.DownloadFileTaskAsync(link, path);
+        return new FileInfo(path);
+    }
+
 
     //public Task<FileInfo> DownloadFile( Uri link, string fileName )
     //{
@@ -45,14 +51,6 @@ public class FileService : IFileService
 
     //	return Task.FromResult(new FileInfo(path));
     //}
-
-    public async Task<FileInfo> DownloadFile( Uri link, string fileName )
-    {
-        using var client = new WebClient();
-        string    path   = GetCacheDataPath(fileName);
-        await client.DownloadFileTaskAsync(link, path);
-        return new FileInfo(path);
-    }
 }
 
 

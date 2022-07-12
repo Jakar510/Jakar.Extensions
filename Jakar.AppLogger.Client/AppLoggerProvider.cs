@@ -1,6 +1,6 @@
 ﻿// using Jakar.Extensions.AppCenter.Api;
 
-namespace Jakar.AppLogger;
+namespace Jakar.AppLogger.Client;
 
 
 public class AppLoggerProvider : Service

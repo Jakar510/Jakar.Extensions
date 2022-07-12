@@ -42,28 +42,29 @@ public enum GridSpec
 [global::Android.Runtime.Preserve(AllMembers = true)]
 public static class AndroidLayoutExtensions
 {
-    private static readonly Dictionary<Layout, int> LayoutMapper = new()
-                                                                   {
-                                                                       { Layout.Match, ViewGroup.LayoutParams.MatchParent },
-                                                                       { Layout.Wrap, ViewGroup.LayoutParams.WrapContent },
-                                                                   };
+    private static readonly IReadOnlyDictionary<Layout, int> _layoutMapper = new Dictionary<Layout, int>
+                                                                             {
+                                                                                 { Layout.Match, ViewGroup.LayoutParams.MatchParent },
+                                                                                 { Layout.Wrap, ViewGroup.LayoutParams.WrapContent },
+                                                                             };
 
 
-    private static readonly Dictionary<GridSpec, AGridLayout.Alignment?> SpecMapper = new()
-                                                                                      {
-                                                                                          { GridSpec.BaselineAlignment, AGridLayout.BaselineAlighment },
-                                                                                          { GridSpec.BottomAlignment, AGridLayout.BottomAlighment },
-                                                                                          { GridSpec.Center, AGridLayout.Center },
-                                                                                          { GridSpec.End, AGridLayout.End },
-                                                                                          { GridSpec.Fill, AGridLayout.Fill },
-                                                                                          { GridSpec.LeftAlignment, AGridLayout.LeftAlighment },
-                                                                                          { GridSpec.RightAlignment, AGridLayout.RightAlighment },
-                                                                                          { GridSpec.Start, AGridLayout.Start },
-                                                                                          { GridSpec.TopAlignment, AGridLayout.TopAlighment },
-                                                                                      };
+    private static readonly IReadOnlyDictionary<GridSpec, AGridLayout.Alignment?> _specMapper = new Dictionary<GridSpec, GridLayout.Alignment?>
+                                                                                                {
+                                                                                                    { GridSpec.BaselineAlignment, AGridLayout.BaselineAlighment },
+                                                                                                    { GridSpec.BottomAlignment, AGridLayout.BottomAlighment },
+                                                                                                    { GridSpec.Center, AGridLayout.Center },
+                                                                                                    { GridSpec.End, AGridLayout.End },
+                                                                                                    { GridSpec.Fill, AGridLayout.Fill },
+                                                                                                    { GridSpec.LeftAlignment, AGridLayout.LeftAlighment },
+                                                                                                    { GridSpec.RightAlignment, AGridLayout.RightAlighment },
+                                                                                                    { GridSpec.Start, AGridLayout.Start },
+                                                                                                    { GridSpec.TopAlignment, AGridLayout.TopAlighment },
+                                                                                                };
 
 
-    private static void Run( Action action, string caller )
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static void Run( Action action, string? caller )
     {
         try { action(); }
         catch ( Exception )
@@ -75,10 +76,11 @@ public static class AndroidLayoutExtensions
         }
     }
 
+
     // -----------------------------------------------------------------------------------------------------------------------------------------------------
 
     public static AGridLayout.Spec GetSpec( GridSpec spec, float weight ) =>
-        AGridLayout.InvokeSpec(AGridLayout.Undefined, SpecMapper[spec], weight) ?? throw new NullReferenceException(nameof(AGridLayout.InvokeSpec));
+        AGridLayout.InvokeSpec(AGridLayout.Undefined, _specMapper[spec], weight) ?? throw new NullReferenceException(nameof(AGridLayout.InvokeSpec));
 
     public static void SetSpec( this AView view, GridSpec spec, float weight )
     {
@@ -94,26 +96,26 @@ public static class AndroidLayoutExtensions
         // throw new ArgumentException("view's LayoutParameters is not Android.Widget.GridLayout.LayoutParams", nameof(view));
     }
 
-    public static void Add( this AGridLayout          stack,
-                            AView                     view,
-                            int                       row,
-                            int                       column,
-                            GridSpec                  columnPos,
-                            GridSpec                  rowPos,
-                            Layout                    width        = Layout.Wrap,
-                            Layout                    height       = Layout.Wrap,
-                            GravityFlags?             gravity      = null,
-                            int                       bottomMargin = 4,
-                            int                       topMargin    = 4,
-                            int                       leftMargin   = 10,
-                            int                       rightMargin  = 10,
-                            [CallerMemberName] string caller       = ""
+    public static void Add( this AGridLayout           stack,
+                            AView                      view,
+                            int                        row,
+                            int                        column,
+                            GridSpec                   columnPos,
+                            GridSpec                   rowPos,
+                            Layout                     width        = Layout.Wrap,
+                            Layout                     height       = Layout.Wrap,
+                            GravityFlags?              gravity      = null,
+                            int                        bottomMargin = 4,
+                            int                        topMargin    = 4,
+                            int                        leftMargin   = 10,
+                            int                        rightMargin  = 10,
+                            [CallerMemberName] string? caller       = default
     ) =>
         stack.Add(view,
                   row,
                   column,
-                  SpecMapper[columnPos],
-                  SpecMapper[rowPos],
+                  _specMapper[columnPos],
+                  _specMapper[rowPos],
                   width,
                   height,
                   gravity,
@@ -123,20 +125,20 @@ public static class AndroidLayoutExtensions
                   rightMargin,
                   caller);
 
-    public static void Add( this AGridLayout          stack,
-                            AView                     view,
-                            int                       row,
-                            int                       column,
-                            AGridLayout.Alignment?    columnPos,
-                            AGridLayout.Alignment?    rowPos,
-                            Layout                    width        = Layout.Wrap,
-                            Layout                    height       = Layout.Wrap,
-                            GravityFlags?             gravity      = null,
-                            int                       bottomMargin = 4,
-                            int                       topMargin    = 4,
-                            int                       leftMargin   = 10,
-                            int                       rightMargin  = 10,
-                            [CallerMemberName] string caller       = ""
+    public static void Add( this AGridLayout           stack,
+                            AView                      view,
+                            int                        row,
+                            int                        column,
+                            AGridLayout.Alignment?     columnPos,
+                            AGridLayout.Alignment?     rowPos,
+                            Layout                     width        = Layout.Wrap,
+                            Layout                     height       = Layout.Wrap,
+                            GravityFlags?              gravity      = null,
+                            int                        bottomMargin = 4,
+                            int                        topMargin    = 4,
+                            int                        leftMargin   = 10,
+                            int                        rightMargin  = 10,
+                            [CallerMemberName] string? caller       = default
     ) =>
         stack.Add(view,
                   row,
@@ -152,20 +154,20 @@ public static class AndroidLayoutExtensions
                   rightMargin,
                   caller);
 
-    public static void Add( this AGridLayout          stack,
-                            AView                     view,
-                            int                       row,
-                            int                       column,
-                            AGridLayout.Spec?         columnPos,
-                            AGridLayout.Spec?         rowPos,
-                            Layout                    width        = Layout.Wrap,
-                            Layout                    height       = Layout.Wrap,
-                            GravityFlags?             gravity      = null,
-                            int                       bottomMargin = 4,
-                            int                       topMargin    = 4,
-                            int                       leftMargin   = 10,
-                            int                       rightMargin  = 10,
-                            [CallerMemberName] string caller       = ""
+    public static void Add( this AGridLayout           stack,
+                            AView                      view,
+                            int                        row,
+                            int                        column,
+                            AGridLayout.Spec?          columnPos,
+                            AGridLayout.Spec?          rowPos,
+                            Layout                     width        = Layout.Wrap,
+                            Layout                     height       = Layout.Wrap,
+                            GravityFlags?              gravity      = null,
+                            int                        bottomMargin = 4,
+                            int                        topMargin    = 4,
+                            int                        leftMargin   = 10,
+                            int                        rightMargin  = 10,
+                            [CallerMemberName] string? caller       = default
     )
     {
         if ( stack is null ) { throw new NullReferenceException(nameof(stack)); }
@@ -176,8 +178,8 @@ public static class AndroidLayoutExtensions
                                          {
                                              ColumnSpec   = columnPos,
                                              RowSpec      = rowPos,
-                                             Width        = LayoutMapper[width],
-                                             Height       = LayoutMapper[height],
+                                             Width        = _layoutMapper[width],
+                                             Height       = _layoutMapper[height],
                                              BottomMargin = bottomMargin,
                                              TopMargin    = topMargin,
                                              LeftMargin   = leftMargin,
@@ -195,13 +197,13 @@ public static class AndroidLayoutExtensions
 
     // -----------------------------------------------------------------------------------------------------------------------------------------------------
 
-    public static void Add( this LinearLayout stack, AView view, Layout width, Layout height, GravityFlags? gravity = null, [CallerMemberName] string caller = "" )
+    public static void Add( this LinearLayout stack, AView view, Layout width, Layout height, GravityFlags? gravity = null, [CallerMemberName] string? caller = default )
     {
         if ( stack is null ) { throw new NullReferenceException(nameof(stack)); }
 
         Run(() =>
             {
-                using var layoutParams = new LinearLayout.LayoutParams(LayoutMapper[width], LayoutMapper[height]);
+                using var layoutParams = new LinearLayout.LayoutParams(_layoutMapper[width], _layoutMapper[height]);
 
                 {
                     if ( gravity != null ) { layoutParams.Gravity = (GravityFlags)gravity; }
@@ -220,7 +222,7 @@ public static class AndroidLayoutExtensions
 
         Run(() =>
             {
-                using var layoutParams = new RelativeLayout.LayoutParams(LayoutMapper[width], LayoutMapper[height]);
+                using var layoutParams = new RelativeLayout.LayoutParams(_layoutMapper[width], _layoutMapper[height]);
 
                 {
                     stack.AddView(view, layoutParams);

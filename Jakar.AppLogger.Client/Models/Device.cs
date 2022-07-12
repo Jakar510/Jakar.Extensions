@@ -4,7 +4,7 @@ using System.Reflection;
 
 
 
-namespace Jakar.AppLogger;
+namespace Jakar.AppLogger.Client;
 
 
 /// <summary>Device class to help retrieve device information.</summary>

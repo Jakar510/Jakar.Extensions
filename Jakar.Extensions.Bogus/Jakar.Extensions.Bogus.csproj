@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Jakar.Extensions" Version="6.0.0.35-beta" />
+	<PackageReference Include="Bogus" Version="34.0.2" />
+	<PackageReference Include="CountryData.Bogus" Version="3.75.0" />
+	<PackageReference Include="NaughtyStrings.Bogus" Version="2.4.1" />
+  </ItemGroup>
+
+</Project>

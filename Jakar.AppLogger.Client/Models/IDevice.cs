@@ -1,7 +1,7 @@
 ﻿// Jakar.Extensions :: Jakar.AppLogger
 // 07/10/2022  9:00 AM
 
-namespace Jakar.AppLogger;
+namespace Jakar.AppLogger.Client;
 
 
 public interface IDevice

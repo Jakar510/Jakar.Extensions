@@ -4,7 +4,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata>
 		<id>Jakar.Extensions.Xamarin.Forms</id>
-		<version>6.0.0.19-beta</version>
+		<version>6.0.0.20-beta</version>
 		<title>Base library for all others in Xamarin.Forms, and extensions to help with Xamarin.Forms development.</title>
 		<authors>Tyler Stegmaier</authors>
 		<owners>Jakar510/Jakar</owners>
@@ -33,9 +33,9 @@
 				<dependency id="Xamarin.Forms.Visual.Material"
 				            version="5.0.0.2291" />
 				<dependency id="Xamarin.CommunityToolkit"
-				            version="2.0.2" />
+				            version="2.0.4" />
 				<dependency id="Xamarin.CommunityToolkit.Markup"
-				            version="2.0.2" />
+				            version="2.0.4" />
 				<dependency id="Xamarin.Essentials"
 							version="1.7.3" />
 				<dependency id="NETStandard.Library"
@@ -52,7 +52,7 @@
 				            version="13.0.1" />
 
 				<dependency id="Jakar.Extensions"
-				            version="6.0.0.33-beta" />
+				            version="6.0.0.35-beta" />
 
 				<dependency id="Acr.UserDialogs"
 				            version="7.2.0.562" />
@@ -73,9 +73,9 @@
 				<dependency id="Xamarin.Forms.Visual.Material"
 				            version="5.0.0.2291" />
 				<dependency id="Xamarin.CommunityToolkit"
-							version="2.0.2" />
+							version="2.0.4" />
 				<dependency id="Xamarin.CommunityToolkit.Markup"
-							version="2.0.2" />
+							version="2.0.4" />
 				<dependency id="Xamarin.Essentials"
 							version="1.7.3" />
 				<dependency id="NETStandard.Library"
@@ -92,7 +92,7 @@
 				            version="13.0.1" />
 
 				<dependency id="Jakar.Extensions"
-							version="6.0.0.33-beta" />
+							version="6.0.0.35-beta" />
 
 				<dependency id="Acr.UserDialogs"
 				            version="7.2.0.562" />
@@ -113,9 +113,9 @@
 				<dependency id="Xamarin.Forms.Visual.Material"
 				            version="5.0.0.2291" />
 				<dependency id="Xamarin.CommunityToolkit"
-							version="2.0.2" />
+							version="2.0.4" />
 				<dependency id="Xamarin.CommunityToolkit.Markup"
-							version="2.0.2" />
+							version="2.0.4" />
 				<dependency id="Xamarin.Essentials"
 							version="1.7.3" />
 				<dependency id="NETStandard.Library"
@@ -132,7 +132,7 @@
 				            version="13.0.1" />
 
 				<dependency id="Jakar.Extensions"
-							version="6.0.0.33-beta" />
+							version="6.0.0.35-beta" />
 
 				<dependency id="Acr.UserDialogs"
 				            version="7.2.0.562" />
@@ -159,9 +159,9 @@
 				<dependency id="Xamarin.Forms.Visual.Material"
 				            version="5.0.0.2291" />
 				<dependency id="Xamarin.CommunityToolkit"
-							version="2.0.2" />
+							version="2.0.4" />
 				<dependency id="Xamarin.CommunityToolkit.Markup"
-							version="2.0.2" />
+							version="2.0.4" />
 				<dependency id="Xamarin.Essentials"
 							version="1.7.3" />
 				<dependency id="NETStandard.Library"
@@ -178,7 +178,7 @@
 				            version="13.0.1" />
 
 				<dependency id="Jakar.Extensions"
-							version="6.0.0.33-beta" />
+							version="6.0.0.35-beta" />
 
 				<dependency id="Acr.UserDialogs"
 				            version="7.2.0.562" />

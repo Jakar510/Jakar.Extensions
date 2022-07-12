@@ -1,7 +1,7 @@
 ﻿// Jakar.Extensions :: Jakar.AppLogger
 // 07/06/2022  2:18 PM
 
-namespace Jakar.AppLogger;
+namespace Jakar.AppLogger.Client;
 
 
 public class AppLoggerException : AggregateException

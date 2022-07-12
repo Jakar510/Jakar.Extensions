@@ -1,7 +1,7 @@
 ﻿// Jakar.Extensions :: Jakar.AppLogger
 // 07/06/2022  4:01 PM
 
-namespace Jakar.AppLogger;
+namespace Jakar.AppLogger.Client;
 
 
 public interface IThreadInfo

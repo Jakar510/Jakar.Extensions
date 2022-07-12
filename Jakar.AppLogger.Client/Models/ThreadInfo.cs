@@ -2,11 +2,10 @@
 // 07/06/2022  3:14 PM
 
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 
 
 
-namespace Jakar.AppLogger;
+namespace Jakar.AppLogger.Client;
 
 
 public class ThreadInfo : IThreadInfo

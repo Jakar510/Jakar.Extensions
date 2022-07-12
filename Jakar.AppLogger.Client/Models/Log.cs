@@ -1,7 +1,7 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions.AppCenter
 // 07/06/2022  8:55 AM
 
-namespace Jakar.AppLogger;
+namespace Jakar.AppLogger.Client;
 
 
 public class Log

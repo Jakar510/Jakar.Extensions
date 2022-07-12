@@ -1,8 +1,4 @@
-﻿using System.Net.Http.Headers;
-
-
-
-namespace Jakar.AppLogger;
+﻿namespace Jakar.AppLogger.Client;
 
 
 /// <summary>

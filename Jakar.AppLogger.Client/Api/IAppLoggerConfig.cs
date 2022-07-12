@@ -1,4 +1,4 @@
-﻿namespace Jakar.AppLogger;
+﻿namespace Jakar.AppLogger.Client;
 
 
 public interface IAppLoggerConfig

@@ -6,7 +6,7 @@ using Microsoft.AppCenter.Crashes;
 
 
 
-namespace Jakar.AppLogger;
+namespace Jakar.AppLogger.Client;
 
 
 [SuppressMessage("ReSharper", "InconsistentNaming")]

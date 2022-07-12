@@ -2,7 +2,7 @@
 // 07/06/2022  9:02 AM
 
 
-namespace Jakar.AppLogger;
+namespace Jakar.AppLogger.Client;
 
 
 public class ManagedErrorLog : Log, IDataBaseIDGuid
