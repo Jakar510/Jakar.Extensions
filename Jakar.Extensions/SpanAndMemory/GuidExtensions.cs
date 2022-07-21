@@ -26,12 +26,14 @@ public static class GuidExtensions
     /// </summary>
     /// <param name = "value" > </param>
     /// <returns> </returns>
-    public static string AsBase64( this Guid value )
+    public static string ToBase64( this Guid value )
     {
         Span<byte> base64Bytes = stackalloc byte[24];
         Span<char> result      = stackalloc char[22];
 
-        value.As(out ReadOnlySpan<byte> idBytes);
+        Span<byte> idBytes = stackalloc byte[16];
+        if ( !value.As(idBytes) ) { throw new InvalidOperationException(); }
+
         Base64.EncodeToUtf8(idBytes, base64Bytes, out _, out _);
 
 
@@ -113,9 +115,9 @@ public static class GuidExtensions
 
     public static bool As( this Guid value, out Memory<byte> result )
     {
-        var span = new Span<byte>();
+        Span<byte> span = stackalloc byte[16];
 
-        if ( value.As(ref span) )
+        if ( value.As(span) )
         {
             result = span.AsMemory();
             return true;
@@ -126,9 +128,9 @@ public static class GuidExtensions
     }
     public static bool As( this Guid value, out ReadOnlyMemory<byte> result )
     {
-        var span = new Span<byte>();
+        Span<byte> span = stackalloc byte[16];
 
-        if ( value.As(ref span) )
+        if ( value.As(span) )
         {
             result = span.AsMemory();
             return true;
@@ -138,19 +140,5 @@ public static class GuidExtensions
         return false;
     }
 
-
-    public static bool As( this Guid value, ref Span<byte> result ) => MemoryMarshal.TryWrite(result, ref value);
-    public static bool As( this Guid value, out ReadOnlySpan<byte> result )
-    {
-        var span = new Span<byte>();
-
-        if ( value.As(ref span) )
-        {
-            result = span;
-            return true;
-        }
-
-        result = default;
-        return false;
-    }
+    public static bool As( this Guid value, in Span<byte> result ) => value.TryWriteBytes(result);
 }

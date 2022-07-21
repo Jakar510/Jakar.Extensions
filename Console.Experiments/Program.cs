@@ -24,7 +24,6 @@ public enum Page
 
 
 
-
 public static class Program
 {
     public static void Main( string[] args )
@@ -42,6 +41,17 @@ public static class Program
             // Test_Sql();
 
             // await Test_HttpBuilder();
+
+            var id = Guid.NewGuid();
+            id.WriteToConsole();
+
+            var b64 = id.ToBase64();
+            b64.WriteToConsole();
+
+            var result = b64.AsGuid();
+            result?.WriteToConsole();
+            id.ToString().Length.WriteToConsole();
+            ( result == id ).WriteToConsole();
 
             "Bye".WriteToConsole();
         }
