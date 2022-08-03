@@ -3,16 +3,13 @@
 #nullable enable
 
 
+#if NETSTANDARD
 using System.ComponentModel;
 
 
 
 // ReSharper disable once CheckNamespace
 namespace System.Runtime.CompilerServices;
-
-
-#if NETSTANDARD
-
 
 
 /// <summary>

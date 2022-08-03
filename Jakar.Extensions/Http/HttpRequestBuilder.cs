@@ -18,20 +18,26 @@ namespace Jakar.Extensions;
 
 public class HttpRequestBuilder
 {
-    private readonly Uri                _host;
+    private readonly IHostInfo?         _hostInfo;
+    private readonly Uri?               _host;
     private readonly Encoding           _encoding;
     private readonly SocketsHttpHandler _handler = new();
     private          HttpClient         _Client => new(_handler);
+    private          Uri                _Host   => _hostInfo?.HostInfo ?? _host ?? throw new ArgumentNullException(nameof(_Host));
 
 
-    public HttpRequestBuilder( Uri host ) : this(host, Encoding.Default) { }
-    public HttpRequestBuilder( Uri host, Encoding encoding )
-    {
-        _host     = host;
-        _encoding = encoding;
-    }
-    public static HttpRequestBuilder Create( Uri host ) => new(host);
-    public static HttpRequestBuilder Create( Uri host, Encoding encoding ) => new(host, encoding);
+    public HttpRequestBuilder( Encoding  encoding ) => _encoding = encoding;
+    public HttpRequestBuilder( IHostInfo host ) : this(host, Encoding.Default) { }
+    public HttpRequestBuilder( IHostInfo host, Encoding encoding ) : this(encoding) => _hostInfo = host;
+    public HttpRequestBuilder( Uri       host ) : this(host, Encoding.Default) { }
+    public HttpRequestBuilder( Uri       host, Encoding encoding ) : this(encoding) => _host = host;
+
+
+    public static HttpRequestBuilder Create() => new(Encoding.Default);
+    public static HttpRequestBuilder Create( Uri       host ) => new(host);
+    public static HttpRequestBuilder Create( Uri       host, Encoding encoding ) => new(host, encoding);
+    public static HttpRequestBuilder Create( IHostInfo host ) => new(host);
+    public static HttpRequestBuilder Create( IHostInfo host, Encoding encoding ) => new(host, encoding);
 
 
     public virtual HttpRequestBuilder With_Proxy( IWebProxy value )
@@ -127,7 +133,8 @@ public class HttpRequestBuilder
                                                                                                                                           },
                                                                                                                                           token);
     [MethodImpl(MethodImplOptions.AggressiveInlining)] protected virtual Handler CreateHandler( HttpRequestMessage request, in CancellationToken token ) => new(_Client, request, _encoding, token);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] protected virtual Uri CreateUrl( string                     path ) => new(_host, path);
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] protected virtual Uri CreateUrl( string                     path ) => new(_Host, path);
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] protected virtual Uri CreateUrl( Uri                        path ) => new(_Host, path);
 
 
     public Handler Post( Uri    url,  HttpContent                 value,   in CancellationToken token ) => CreateHandler(url, HttpMethod.Post, value, token);
