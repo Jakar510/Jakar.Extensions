@@ -3,10 +3,6 @@
 #nullable enable
 
 
-#if NETSTANDARD
-using System.ComponentModel;
-
-
 
 // ReSharper disable once CheckNamespace
 namespace System.Runtime.CompilerServices;
@@ -18,5 +14,3 @@ namespace System.Runtime.CompilerServices;
 /// </summary>
 [EditorBrowsable(EditorBrowsableState.Never)]
 internal class IsExternalInit { }
-
-#endif
