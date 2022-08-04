@@ -2,9 +2,9 @@
 namespace Jakar.Extensions;
 
 
-public interface IUniqueID<out TId>
+public interface IUniqueID<TId>
 {
-    public TId ID { get; }
+    public TId ID { get; init; }
 }
 
 
