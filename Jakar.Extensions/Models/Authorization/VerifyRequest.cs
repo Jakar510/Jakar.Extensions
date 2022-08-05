@@ -11,7 +11,7 @@ public interface ILoginRequest : IEquatable<ILoginRequest>
 
 
 [Serializable]
-public class VerifyRequest : ILoginRequest, ICredentials
+public class VerifyRequest : BaseClass, ILoginRequest, ICredentials
 {
     [Required(ErrorMessage = "Email address is required.")]
     [JsonProperty(nameof(UserLogin), Required = Required.Always)]

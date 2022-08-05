@@ -63,7 +63,13 @@ public class HttpRequestBuilder
     }
 
 
-    public virtual HttpRequestBuilder With_Credentials( ICredentials value, bool preAuthenticate = true )
+    public virtual HttpRequestBuilder With_Credentials( ICredentials? value )
+    {
+        _handler.Credentials     = value;
+        _handler.PreAuthenticate = value is not null;
+        return this;
+    }
+    public virtual HttpRequestBuilder With_Credentials( ICredentials? value, bool preAuthenticate )
     {
         _handler.Credentials     = value;
         _handler.PreAuthenticate = preAuthenticate;
