@@ -54,8 +54,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jakar.SqlBuilder.Tests", "J
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jakar.Extensions.Wpf", "Jakar.Extensions.Wpf\Jakar.Extensions.Wpf.csproj", "{D3419869-47AD-45A3-8E6B-EEB292F3B26B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jakar.AppLogger.Client", "Jakar.AppLogger.Client\Jakar.AppLogger.Client.csproj", "{D25E8D3D-67BC-481C-8642-1A52A09C71CF}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jakar.Extensions.Bogus", "Jakar.Extensions.Bogus\Jakar.Extensions.Bogus.csproj", "{2A67C324-7873-409E-859B-F02D7C718D65}"
 EndProject
 Global
