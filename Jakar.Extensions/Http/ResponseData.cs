@@ -108,10 +108,6 @@ public readonly struct ResponseData
 
 
 
-#if NET6_0
-
-
-
 public readonly struct ResponseData<T>
 {
     public const string ERROR_MESSAGE = "Error Message: ";
@@ -193,7 +189,11 @@ public readonly struct ResponseData<T>
     }
     private static async Task<ResponseData<T>> Create( HttpRequestBuilder.Handler handler, HttpResponseMessage response )
     {
+    #if NET6_0
         await using Stream? stream = await response.Content.ReadAsStreamAsync(handler.token);
+    #else
+        await using Stream? stream = await response.Content.ReadAsStreamAsync();
+    #endif
 
         string error;
 
@@ -213,7 +213,11 @@ public readonly struct ResponseData<T>
     }
     private static async Task<ResponseData<T>> Create( HttpRequestBuilder.Handler handler, HttpResponseMessage response, Exception e )
     {
+    #if NET6_0
         await using Stream? stream = await response.Content.ReadAsStreamAsync(handler.token);
+    #else
+        await using Stream? stream = await response.Content.ReadAsStreamAsync();
+    #endif
 
         string error;
 
@@ -232,7 +236,3 @@ public readonly struct ResponseData<T>
         return new ResponseData<T>(response, e, error);
     }
 }
-
-
-
-#endif

@@ -6,24 +6,30 @@
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Security;
+using System.Security.Authentication;
 
 
 
 namespace Jakar.Extensions;
 
 
-#if NET6_0
-
-
-
 public class HttpRequestBuilder
 {
-    private readonly IHostInfo?         _hostInfo;
-    private readonly Uri?               _host;
-    private readonly Encoding           _encoding;
+    private readonly IHostInfo? _hostInfo;
+    private readonly Uri?       _host;
+    private readonly Encoding   _encoding;
+
+
+#if NETSTANDARD2_1
+    private readonly HttpClientHandler _handler = new();
+#elif NET6_0
     private readonly SocketsHttpHandler _handler = new();
-    private          HttpClient         _Client => new(_handler);
-    private          Uri                _Host   => _hostInfo?.HostInfo ?? _host ?? throw new ArgumentNullException(nameof(_Host));
+#endif
+
+
+    private HttpClient   _Client => new(_handler);
+    private Uri          _Host   => _hostInfo?.HostInfo ?? _host ?? throw new ArgumentNullException(nameof(_Host));
+    public  HttpHeaders? Headers { get; set; }
 
 
     public HttpRequestBuilder( Encoding  encoding ) => _encoding = encoding;
@@ -99,6 +105,7 @@ public class HttpRequestBuilder
     }
 
 
+#if NET6_0
     public virtual HttpRequestBuilder With_Timeout( int    minutes ) => With_Timeout(TimeSpan.FromMinutes(minutes));
     public virtual HttpRequestBuilder With_Timeout( float  seconds ) => With_Timeout(TimeSpan.FromSeconds(seconds));
     public virtual HttpRequestBuilder With_Timeout( double milliseconds ) => With_Timeout(TimeSpan.FromMilliseconds(milliseconds));
@@ -107,15 +114,24 @@ public class HttpRequestBuilder
         _handler.ConnectTimeout = value;
         return this;
     }
+#endif
 
-
+#if NET6_0
     public virtual HttpRequestBuilder With_SSL( SslClientAuthenticationOptions value )
     {
         _handler.SslOptions = value;
         return this;
     }
 
+#else
+    public virtual HttpRequestBuilder With_SSL( SslProtocols value )
+    {
+        _handler.SslProtocols = value;
+        return this;
+    }
+#endif
 
+#if NET6_0
     public virtual HttpRequestBuilder With_KeepAlive( int pingDelayMinutes, int pingTimeoutMinutes, HttpKeepAlivePingPolicy policy = HttpKeepAlivePingPolicy.WithActiveRequests ) =>
         With_KeepAlive(TimeSpan.FromMinutes(pingDelayMinutes), TimeSpan.FromMinutes(pingTimeoutMinutes), policy);
     public virtual HttpRequestBuilder With_KeepAlive( float pingDelaySeconds, float pingTimeoutSeconds, HttpKeepAlivePingPolicy policy = HttpKeepAlivePingPolicy.WithActiveRequests ) =>
@@ -124,11 +140,12 @@ public class HttpRequestBuilder
         With_KeepAlive(TimeSpan.FromMilliseconds(pingDelayMilliseconds), TimeSpan.FromMilliseconds(pingTimeoutMilliseconds), policy);
     public virtual HttpRequestBuilder With_KeepAlive( in TimeSpan pingDelay, in TimeSpan pingTimeout, HttpKeepAlivePingPolicy policy = HttpKeepAlivePingPolicy.WithActiveRequests )
     {
-        _handler.KeepAlivePingDelay   = pingDelay;
+        _handler.KeepAlivePingDelay = pingDelay;
         _handler.KeepAlivePingTimeout = pingTimeout;
-        _handler.KeepAlivePingPolicy  = policy;
+        _handler.KeepAlivePingPolicy = policy;
         return this;
     }
+#endif
 
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)] protected virtual Handler CreateHandler( Uri url, HttpMethod method, in CancellationToken token ) => CreateHandler(new HttpRequestMessage(method, url), token);
@@ -138,7 +155,7 @@ public class HttpRequestBuilder
                                                                                                                                               Content = value
                                                                                                                                           },
                                                                                                                                           token);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] protected virtual Handler CreateHandler( HttpRequestMessage request, in CancellationToken token ) => new(_Client, request, _encoding, token);
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] protected virtual Handler CreateHandler( HttpRequestMessage request, in CancellationToken token ) => new(this, request, token);
     [MethodImpl(MethodImplOptions.AggressiveInlining)] protected virtual Uri CreateUrl( string                     path ) => new(_Host, path);
     [MethodImpl(MethodImplOptions.AggressiveInlining)] protected virtual Uri CreateUrl( Uri                        path ) => new(_Host, path);
 
@@ -152,7 +169,9 @@ public class HttpRequestBuilder
     public Handler Post( string path, MultipartContent            content, in CancellationToken token ) => Post(path,            (HttpContent)content,                               token);
     public Handler Post( string path, string                      value,   in CancellationToken token ) => Post(path,            new StringContent(value.ToPrettyJson(), _encoding), token);
     public Handler Post( string path, BaseClass                   value,   in CancellationToken token ) => Post(path,            new JsonContent(value.ToPrettyJson(), _encoding),   token);
+    public Handler Post( string path, IEnumerable<BaseClass>      value,   in CancellationToken token ) => Post(path,            new JsonContent(value.ToPrettyJson(), _encoding),   token);
     public Handler Post( string path, BaseRecord                  value,   in CancellationToken token ) => Post(path,            new JsonContent(value.ToPrettyJson(), _encoding),   token);
+    public Handler Post( string path, IEnumerable<BaseRecord>     value,   in CancellationToken token ) => Post(path,            new JsonContent(value.ToPrettyJson(), _encoding),   token);
 
 
     public Handler Put( Uri    url,  HttpContent                 value,   in CancellationToken token ) => CreateHandler(url, HttpMethod.Put, value, token);
@@ -164,7 +183,9 @@ public class HttpRequestBuilder
     public Handler Put( string path, MultipartContent            content, in CancellationToken token ) => Put(path,            (HttpContent)content,                               token);
     public Handler Put( string path, string                      value,   in CancellationToken token ) => Put(path,            new StringContent(value.ToPrettyJson(), _encoding), token);
     public Handler Put( string path, BaseClass                   value,   in CancellationToken token ) => Put(path,            new JsonContent(value.ToPrettyJson(), _encoding),   token);
+    public Handler Put( string path, IEnumerable<BaseClass>      value,   in CancellationToken token ) => Put(path,            new JsonContent(value.ToPrettyJson(), _encoding),   token);
     public Handler Put( string path, BaseRecord                  value,   in CancellationToken token ) => Put(path,            new JsonContent(value.ToPrettyJson(), _encoding),   token);
+    public Handler Put( string path, IEnumerable<BaseRecord>     value,   in CancellationToken token ) => Put(path,            new JsonContent(value.ToPrettyJson(), _encoding),   token);
 
 
     public Handler Delete( Uri    url,  in CancellationToken        token ) => CreateHandler(url, HttpMethod.Delete, token);
@@ -177,7 +198,9 @@ public class HttpRequestBuilder
     public Handler Delete( string path, MultipartContent            content, in CancellationToken token ) => Delete(path,            (HttpContent)content,                               token);
     public Handler Delete( string path, string                      value,   in CancellationToken token ) => Delete(path,            new StringContent(value.ToPrettyJson(), _encoding), token);
     public Handler Delete( string path, BaseClass                   value,   in CancellationToken token ) => Delete(path,            new JsonContent(value.ToPrettyJson(), _encoding),   token);
+    public Handler Delete( string path, IEnumerable<BaseClass>      value,   in CancellationToken token ) => Delete(path,            new JsonContent(value.ToPrettyJson(), _encoding),   token);
     public Handler Delete( string path, BaseRecord                  value,   in CancellationToken token ) => Delete(path,            new JsonContent(value.ToPrettyJson(), _encoding),   token);
+    public Handler Delete( string path, IEnumerable<BaseRecord>     value,   in CancellationToken token ) => Delete(path,            new JsonContent(value.ToPrettyJson(), _encoding),   token);
     public Handler Delete( Uri    url,  HttpContent                 value,   in CancellationToken token ) => CreateHandler(url, HttpMethod.Delete, value, token);
 
 
@@ -190,7 +213,9 @@ public class HttpRequestBuilder
     public Handler Patch( string path, MultipartContent            content, in CancellationToken token ) => Patch(path,            (HttpContent)content,                               token);
     public Handler Patch( string path, string                      value,   in CancellationToken token ) => Patch(path,            new StringContent(value.ToPrettyJson(), _encoding), token);
     public Handler Patch( string path, BaseClass                   value,   in CancellationToken token ) => Patch(path,            new JsonContent(value.ToPrettyJson(), _encoding),   token);
+    public Handler Patch( string path, IEnumerable<BaseClass>      value,   in CancellationToken token ) => Patch(path,            new JsonContent(value.ToPrettyJson(), _encoding),   token);
     public Handler Patch( string path, BaseRecord                  value,   in CancellationToken token ) => Patch(path,            new JsonContent(value.ToPrettyJson(), _encoding),   token);
+    public Handler Patch( string path, IEnumerable<BaseRecord>     value,   in CancellationToken token ) => Patch(path,            new JsonContent(value.ToPrettyJson(), _encoding),   token);
 
 
     public Handler Get( Uri    url,  CancellationToken token ) => CreateHandler(url, HttpMethod.Get, token);
@@ -199,6 +224,7 @@ public class HttpRequestBuilder
 
 
     [SuppressMessage("ReSharper", "UnusedMemberInSuper.Global")]
+    [SuppressMessage("ReSharper", "MemberCanBeMadeStatic.Global")]
     public readonly struct Handler : IDisposable
     {
         private readonly  HttpClient         _client;
@@ -208,7 +234,6 @@ public class HttpRequestBuilder
 
 
         public string              Method         => _request.Method.Method;
-        public HttpRequestOptions  Options        => _request.Options;
         public HttpRequestHeaders  Headers        => _request.Headers;
         public HttpContentHeaders? ContentHeaders => _request.Content?.Headers;
         public AppVersion Version
@@ -216,19 +241,26 @@ public class HttpRequestBuilder
             get => _request.Version;
             set => _request.Version = value.ToVersion();
         }
+    #if NET6_0
         public HttpVersionPolicy VersionPolicy
         {
             get => _request.VersionPolicy;
             set => _request.VersionPolicy = value;
         }
+        public HttpRequestOptions Options => _request.Options;
+    #endif
 
 
-        public Handler( HttpClient client, HttpRequestMessage request, Encoding encoding, in CancellationToken token )
+        public Handler( HttpRequestBuilder builder, HttpRequestMessage request, in CancellationToken token )
         {
-            _client       = client;
-            _request      = request;
-            this.encoding = encoding;
-            this.token    = token;
+            _request   = request;
+            _client    = builder._Client;
+            encoding   = builder._encoding;
+            this.token = token;
+            
+            if ( builder.Headers is null ) { return; }
+
+            foreach ( ( string? key, IEnumerable<string>? value ) in builder.Headers ) { Headers.Add(key, value); }
         }
 
 
@@ -240,10 +272,14 @@ public class HttpRequestBuilder
         public async Task<JToken> AsJson( HttpResponseMessage response, JsonLoadSettings settings )
         {
             response.EnsureSuccessStatusCode();
-            using HttpContent  content = response.Content;
-            await using Stream s       = await content.ReadAsStreamAsync(token);
-            using var          sr      = new StreamReader(s, encoding);
-            using JsonReader   reader  = new JsonTextReader(sr);
+            using HttpContent content = response.Content;
+        #if NET6_0
+            await using Stream stream = await content.ReadAsStreamAsync(token);
+        #else
+            await using Stream stream = await content.ReadAsStreamAsync();
+        #endif
+            using var        sr     = new StreamReader(stream, encoding);
+            using JsonReader reader = new JsonTextReader(sr);
             return await JToken.ReadFromAsync(reader, settings, token);
         }
 
@@ -253,10 +289,14 @@ public class HttpRequestBuilder
         public async Task<TResult> AsJson<TResult>( HttpResponseMessage response, JsonSerializer serializer )
         {
             response.EnsureSuccessStatusCode();
-            using HttpContent  content = response.Content;
-            await using Stream s       = await content.ReadAsStreamAsync(token);
-            using var          sr      = new StreamReader(s, encoding);
-            using JsonReader   reader  = new JsonTextReader(sr);
+            using HttpContent content = response.Content;
+        #if NET6_0
+            await using Stream stream = await content.ReadAsStreamAsync(token);
+        #else
+            await using Stream stream = await content.ReadAsStreamAsync();
+        #endif
+            using var        sr     = new StreamReader(stream, encoding);
+            using JsonReader reader = new JsonTextReader(sr);
 
             return serializer.Deserialize<TResult>(reader) ?? throw new NullReferenceException(nameof(JsonConvert.DeserializeObject));
         }
@@ -267,7 +307,11 @@ public class HttpRequestBuilder
         {
             response.EnsureSuccessStatusCode();
             using HttpContent content = response.Content;
+        #if NET6_0
             return await content.ReadAsStringAsync(token);
+        #else
+            return await content.ReadAsStringAsync();
+        #endif
         }
 
 
@@ -276,7 +320,11 @@ public class HttpRequestBuilder
         {
             response.EnsureSuccessStatusCode();
             using HttpContent content = response.Content;
+        #if NET6_0
             return await content.ReadAsByteArrayAsync(token);
+        #else
+            return await content.ReadAsByteArrayAsync();
+        #endif
         }
 
 
@@ -285,7 +333,12 @@ public class HttpRequestBuilder
         {
             response.EnsureSuccessStatusCode();
             using HttpContent content = response.Content;
-            byte[]            bytes   = await content.ReadAsByteArrayAsync(token);
+
+        #if NET6_0
+            byte[] bytes = await content.ReadAsByteArrayAsync(token);
+        #else
+            byte[] bytes = await content.ReadAsByteArrayAsync();
+        #endif
 
             return bytes;
         }
@@ -297,8 +350,7 @@ public class HttpRequestBuilder
             response.EnsureSuccessStatusCode();
             using HttpContent      content = response.Content;
             await using FileStream stream  = LocalFile.CreateTempFileAndOpen(out LocalFile file);
-            await using Stream     sr      = await content.ReadAsStreamAsync(token);
-            await sr.CopyToAsync(stream, token);
+            await stream.CopyToAsync(stream, token);
 
             return file;
         }
@@ -306,9 +358,13 @@ public class HttpRequestBuilder
         public async Task<LocalFile> AsFile( HttpResponseMessage response, string path )
         {
             response.EnsureSuccessStatusCode();
-            using HttpContent  content = response.Content;
-            var                file    = new LocalFile(path);
-            await using Stream stream  = await content.ReadAsStreamAsync(token);
+            using HttpContent content = response.Content;
+            var               file    = new LocalFile(path);
+        #if NET6_0
+            await using Stream stream = await content.ReadAsStreamAsync(token);
+        #else
+            await using Stream stream = await content.ReadAsStreamAsync();
+        #endif
             await file.WriteAsync(stream, token);
 
             return file;
@@ -317,8 +373,12 @@ public class HttpRequestBuilder
         public async Task<LocalFile> AsFile( HttpResponseMessage response, LocalFile file )
         {
             response.EnsureSuccessStatusCode();
-            using HttpContent  content = response.Content;
-            await using Stream stream  = await content.ReadAsStreamAsync(token);
+            using HttpContent content = response.Content;
+        #if NET6_0
+            await using Stream stream = await content.ReadAsStreamAsync(token);
+        #else
+            await using Stream stream = await content.ReadAsStreamAsync();
+        #endif
             await file.WriteAsync(stream, token);
 
             return file;
@@ -329,8 +389,7 @@ public class HttpRequestBuilder
             response.EnsureSuccessStatusCode();
             using HttpContent      content = response.Content;
             await using FileStream stream  = LocalFile.CreateTempFileAndOpen(type, out LocalFile file);
-            await using Stream     sr      = await content.ReadAsStreamAsync(token);
-            await sr.CopyToAsync(stream, token);
+            await stream.CopyToAsync(stream, token);
 
             return file;
         }
@@ -340,9 +399,13 @@ public class HttpRequestBuilder
         public async Task<MemoryStream> AsStream( HttpResponseMessage response )
         {
             response.EnsureSuccessStatusCode();
-            using HttpContent  content = response.Content;
-            await using Stream stream  = await content.ReadAsStreamAsync(token);
-            var                result  = new MemoryStream();
+            using HttpContent content = response.Content;
+        #if NET6_0
+            await using Stream stream = await content.ReadAsStreamAsync(token);
+        #else
+            await using Stream stream = await content.ReadAsStreamAsync();
+        #endif
+            var result = new MemoryStream();
 
             await stream.CopyToAsync(result, token);
             return result;
@@ -356,7 +419,3 @@ public class HttpRequestBuilder
         }
     }
 }
-
-
-
-#endif
