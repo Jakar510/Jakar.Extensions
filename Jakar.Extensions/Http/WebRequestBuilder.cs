@@ -13,7 +13,9 @@ using System.Security.Cryptography.X509Certificates;
 
 namespace Jakar.Extensions;
 
-
+/// <summary>
+/// <para><see href="https://www.stevejgordon.co.uk/httpclient-connection-pooling-in-dotnet-core"/></para>
+/// </summary>
 public class WebRequestBuilder
 {
     protected Encoding         _encoding = Encoding.Default;
