@@ -26,7 +26,7 @@ public enum Page
 
 public static class Program
 {
-    public static void Main( string[] args )
+    public static async Task Main( string[] args )
     {
         try
         {
@@ -40,18 +40,19 @@ public static class Program
 
             // Test_Sql();
 
-            // await Test_HttpBuilder();
+            await Test_HttpBuilder();
 
-            var id = Guid.NewGuid();
-            id.WriteToConsole();
 
-            var b64 = id.ToBase64();
-            b64.WriteToConsole();
-
-            var result = b64.AsGuid();
-            result?.WriteToConsole();
-            id.ToString().Length.WriteToConsole();
-            ( result == id ).WriteToConsole();
+            // var id = Guid.NewGuid();
+            // id.WriteToConsole();
+            //
+            // var b64 = id.ToBase64();
+            // b64.WriteToConsole();
+            //
+            // var result = b64.AsGuid();
+            // result?.WriteToConsole();
+            // id.ToString().Length.WriteToConsole();
+            // ( result == id ).WriteToConsole();
 
             "Bye".WriteToConsole();
         }
@@ -65,10 +66,10 @@ public static class Program
 
     public static async Task Test_HttpBuilder( CancellationToken token = default )
     {
-        var target  = new Uri("https://www.toptal.com/developers/postbin/");
-        var host    = new Uri("https://httpbin.org/");
-        var content = new AppVersion(1, 2, 3).ToString();
-        var builder = HttpRequestBuilder.Create(host);
+        var               target  = new Uri("https://www.toptal.com/developers/postbin/");
+        var               host    = new Uri("https://httpbin.org/");
+        var               content = new AppVersion(1, 2, 3).ToString();
+        WebRequestBuilder builder = WebRequestBuilder.Create(host).With_Host(host).With_Timeout(1);
 
 
         ( await builder.Get("/bearer", token).AsJson() ).WriteToConsole();

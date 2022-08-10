@@ -18,7 +18,7 @@ namespace Jakar.Extensions;
 ///     </para>
 /// </summary>
 #if NET6_0
-[Obsolete($"Use {nameof(HttpRequestBuilder)} instead")]
+[Obsolete($"Use {nameof(WebRequestBuilder)} instead")]
 #endif
 public static class Deletes
 {

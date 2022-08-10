@@ -50,7 +50,7 @@ public class LocalFile : BaseCollections<LocalFile>, TempFile.ITempFile, LocalFi
         get
         {
             DirectoryInfo? parent = Directory.GetParent(FullPath);
-            if ( parent is null ) { return null; }
+            if ( parent is null ) { return default; }
 
             return new LocalDirectory(parent);
         }
