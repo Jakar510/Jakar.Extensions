@@ -13,26 +13,27 @@ using System.Security.Cryptography.X509Certificates;
 
 namespace Jakar.Extensions;
 
+
 /// <summary>
 /// <para><see href="https://www.stevejgordon.co.uk/httpclient-connection-pooling-in-dotnet-core"/></para>
 /// </summary>
 public class WebRequestBuilder
 {
-    protected Encoding         _encoding = Encoding.Default;
-    protected IHostInfo?       _hostInfo;
-    protected Uri?             _host;
-    protected bool?            _useProxy;
-    protected IWebProxy?       _proxy;
-    protected bool?            _allowAutoRedirect;
-    protected int?             _maxAutomaticRedirections;
-    protected ICredentials?    _defaultProxyCredentials;
-    protected ICredentials?    _credentials;
-    protected bool?            _preAuthenticate;
-    protected bool?            _useCookies;
-    protected CookieContainer? _cookieContainer;
-    protected int?             _maxResponseHeadersLength;
-    protected int?             _maxConnectionsPerServer;
-
+    protected Encoding                   _encoding = Encoding.Default;
+    protected IHostInfo?                 _hostInfo;
+    protected Uri?                       _host;
+    protected bool?                      _useProxy;
+    protected IWebProxy?                 _proxy;
+    protected bool?                      _allowAutoRedirect;
+    protected int?                       _maxAutomaticRedirections;
+    protected ICredentials?              _defaultProxyCredentials;
+    protected ICredentials?              _credentials;
+    protected bool?                      _preAuthenticate;
+    protected bool?                      _useCookies;
+    protected CookieContainer?           _cookieContainer;
+    protected int?                       _maxResponseHeadersLength;
+    protected int?                       _maxConnectionsPerServer;
+    protected AuthenticationHeaderValue? _authenticationHeader;
 
 #if NETSTANDARD2_1
     protected SslProtocols?              _sslProtocols;
@@ -92,7 +93,12 @@ public class WebRequestBuilder
     }
 
 
-    protected virtual HttpClient GetClient() => new(GetHandler());
+    protected virtual HttpClient GetClient()
+    {
+        var client = new HttpClient(GetHandler());
+        client.DefaultRequestHeaders.Authorization = _authenticationHeader;
+        return client;
+    }
     protected virtual HttpMessageHandler GetHandler()
     {
     #if NETSTANDARD2_1
@@ -161,7 +167,6 @@ public class WebRequestBuilder
 
         if ( _cookieContainer is not null ) { handler.CookieContainer = _cookieContainer; }
 
-
         return handler;
     }
 
@@ -214,6 +219,11 @@ public class WebRequestBuilder
     }
 
 
+    public virtual WebRequestBuilder With_Credentials( AuthenticationHeaderValue? value )
+    {
+        _authenticationHeader = value;
+        return this;
+    }
     public virtual WebRequestBuilder With_Credentials( ICredentials? value )
     {
         _credentials     = value;
@@ -460,9 +470,10 @@ public class WebRequestBuilder
         internal readonly CancellationToken  token;
 
 
-        public string              Method         => _request.Method.Method;
-        public HttpRequestHeaders  Headers        => _request.Headers;
-        public HttpContentHeaders? ContentHeaders => _request.Content?.Headers;
+        public HttpRequestHeaders  DefaultRequestHeaders => _client.DefaultRequestHeaders;
+        public string              Method                => _request.Method.Method;
+        public HttpRequestHeaders  Headers               => _request.Headers;
+        public HttpContentHeaders? ContentHeaders        => _request.Content?.Headers;
         public AppVersion Version
         {
             get => _request.Version;
