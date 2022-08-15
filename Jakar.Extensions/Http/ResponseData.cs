@@ -2,9 +2,6 @@
 // 04/21/2022  11:48 AM
 
 #nullable enable
-#nullable enable
-using System.Net.Http;
-using System.Net.Http.Headers;
 
 
 
@@ -105,5 +102,3 @@ public readonly struct ResponseData
         return new ResponseData(response, msg);
     }
 }
-
-

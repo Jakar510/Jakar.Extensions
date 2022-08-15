@@ -15,20 +15,22 @@
 		<PackageTags>Api Extension Linq Http Files Files Strings Types Languages Collections Ini</PackageTags>
 		<RepositoryType>git</RepositoryType>
 		<RepositoryUrl>https://github.com/Jakar510/Jakar.Extensions</RepositoryUrl>
-		<PackageReleaseNotes>Jakar.Extensions 6.0.0
-   multi-targets NetStandard2.1 and Net6.0
-   Added MailKit Email Builder
-   Added Models.Service
-   Added HttpRequestBuilder for .Net 6.0
-   Updated Enum extensions
-   Added more Span extensions
-   Reworked AppSettings
-   Reworked LocalFile and LocalDirectory a bit
-   Reworked IniConfig and PreferenceFile
-   WebRequests.GetResponseAsync now tries to get the error details, including anything sent sent from server in the body.
-   Reworked ValidValueOf
-   Fix xml documentation.
-   Moving to DotNet 6.0 going forward once MAUI is released.</PackageReleaseNotes>
+		<PackageReleaseNotes>
+			Jakar.Extensions 6.0.0
+			multi-targets NetStandard2.1 and Net6.0
+			Added MailKit Email Builder
+			Added Models.Service
+			Added HttpRequestBuilder for .Net 6.0
+			Updated Enum extensions
+			Added more Span extensions
+			Reworked AppSettings
+			Reworked LocalFile and LocalDirectory a bit
+			Reworked IniConfig and PreferenceFile
+			WebRequests.GetResponseAsync now tries to get the error details, including anything sent sent from server in the body.
+			Reworked ValidValueOf
+			Fix xml documentation.
+			Moving to DotNet 6.0 going forward once MAUI is released.
+		</PackageReleaseNotes>
 		<Description>Extensions to aid in development.</Description>
 		<EnableNETAnalyzers>true</EnableNETAnalyzers>
 		<NeutralLanguage>en</NeutralLanguage>
@@ -40,7 +42,7 @@
 		<PackageLicenseFile>W:\WorkSpace\Public\Jakar.Extensions\LICENSE.txt</PackageLicenseFile>
 	</PropertyGroup>
 
-	
+
 	<ItemGroup>
 		<None Include="..\images\icon.png">
 			<Pack>True</Pack>
@@ -63,27 +65,31 @@
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net6.0|AnyCPU'">
-	  <DebugType>portable</DebugType>
-	  <LangVersion>10.0</LangVersion>
+		<DebugType>portable</DebugType>
+		<LangVersion>10.0</LangVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net6.0|AnyCPU'">
-	  <DebugType>portable</DebugType>
-	  <LangVersion>10.0</LangVersion>
+		<DebugType>portable</DebugType>
+		<LangVersion>10.0</LangVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard2.1|AnyCPU'">
-	  <DebugType>portable</DebugType>
-	  <LangVersion>10.0</LangVersion>
+		<DebugType>portable</DebugType>
+		<LangVersion>10.0</LangVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|netstandard2.1|AnyCPU'">
-	  <DebugType>portable</DebugType>
-	  <LangVersion>10.0</LangVersion>
+		<DebugType>portable</DebugType>
+		<LangVersion>10.0</LangVersion>
 	</PropertyGroup>
 
+	<ItemGroup Condition="$(TargetFramework.StartsWith('net6'))">
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
+	</ItemGroup>
+
 	<ItemGroup Condition="$(TargetFramework.StartsWith('net'))">
-		<PackageReference Include="CommunityToolkit.Diagnostics" Version="7.1.2" />
+		<PackageReference Include="CommunityToolkit.Diagnostics" Version="8.0.0" />
 		<PackageReference Include="Dapper.Contrib" Version="2.0.78" />
 		<PackageReference Include="JetBrains.Annotations" Version="2022.1.0" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
@@ -107,7 +113,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="Properties\PublishProfiles\" />
+		<Folder Include="Properties\PublishProfiles\" />
 	</ItemGroup>
 
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
