@@ -4,7 +4,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata>
 		<id>Jakar.Extensions.Blazor</id>
-		<version>6.0.0.4-beta</version>
+		<version>6.0.0.5-beta</version>
 		<title>Extension Library</title>
 		<authors>Tyler Stegmaier</authors>
 		<owners>Jakar510/Jakar</owners>
@@ -28,14 +28,17 @@
 					branch="master" />
 		<dependencies>
 			<group targetFramework="net6.0">
-				<dependency id="Jakar.Extensions"
-							version="6.0.0.35-beta" />
-				<dependency id="BlazorComponentUtilities"
-							version="1.8.0" />
-				<dependency id="BlazorPro.BlazorSize"
-							version="6.1.2" />
-				<dependency id="PanoramicData.Blazor"
-							version="2.1.35" />
+				<dependency id="Blazored.LocalStorage" version="4.2.0" />
+				<dependency id="Blazored.Modal" version="6.0.1" />
+				<dependency id="Blazored.SessionStorage" version="2.2.0" />
+				<dependency id="Blazored.TextEditor" version="1.0.8" />
+				<dependency id="Blazored.Toast" version="3.2.2" />
+				<dependency id="Blazored.Video" version="1.0.0" />
+				<dependency id="Jakar.Extensions" version="6.0.0.44-beta" />
+				<dependency id="BlazorComponentUtilities" version="1.8.0" />
+				<dependency id="BlazorPro.BlazorSize" version="6.1.2" />
+				<dependency id="Jakar.Extensions.Hosting" version="6.0.0.7-beta" />
+				<dependency id="PanoramicData.Blazor" version="2.1.39" />
 			</group>
 		</dependencies>
 	</metadata>

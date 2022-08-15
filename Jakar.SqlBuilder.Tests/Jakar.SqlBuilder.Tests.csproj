@@ -10,7 +10,7 @@
 
   <ItemGroup>
     <PackageReference Include="Dapper.Contrib" Version="2.0.78" />
-    <PackageReference Include="Jakar.Extensions" Version="6.0.0.35-beta" />
+    <PackageReference Include="Jakar.Extensions" Version="6.0.0.44-beta" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.2.0" />
     <PackageReference Include="NUnit" Version="3.13.3" />
     <PackageReference Include="NUnit3TestAdapter" Version="4.2.1" />

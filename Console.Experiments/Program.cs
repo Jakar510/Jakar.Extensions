@@ -66,10 +66,10 @@ public static class Program
 
     public static async Task Test_HttpBuilder( CancellationToken token = default )
     {
-        var               target  = new Uri("https://www.toptal.com/developers/postbin/");
-        var               host    = new Uri("https://httpbin.org/");
-        var               content = new AppVersion(1, 2, 3).ToString();
-        WebRequestBuilder builder = WebRequestBuilder.Create(host).With_Host(host).With_Timeout(1);
+        var          target  = new Uri("https://www.toptal.com/developers/postbin/");
+        var          host    = new Uri("https://httpbin.org/");
+        var          content = new AppVersion(1, 2, 3).ToString();
+        WebRequester builder = WebRequestBuilder.Create(host).With_Host(host).With_Timeout(1).Build();
 
 
         ( await builder.Get("/bearer", token).AsJson() ).WriteToConsole();
