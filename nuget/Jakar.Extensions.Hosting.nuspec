@@ -108,7 +108,6 @@
 
 		<file src="..\images\icon.png" />
 
-		<!-- .net standard 2.1 -->
 		<file src="../Jakar.Extensions.Hosting/bin/Release/net6.0/Jakar.Extensions.Hosting.dll"
 			  target="lib/net6.0" />
 		<file src="../Jakar.Extensions.Hosting/bin/Release/net6.0/Jakar.Extensions.Hosting.xml"

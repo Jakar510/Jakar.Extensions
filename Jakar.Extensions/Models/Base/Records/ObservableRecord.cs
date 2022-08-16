@@ -6,34 +6,18 @@ using System.Windows.Input;
 namespace Jakar.Extensions;
 
 
-public record ObservableRecord : BaseRecord, IDataBaseID, INotifyPropertyChanged, INotifyPropertyChanging
+[SuppressMessage("ReSharper", "VirtualMemberNeverOverridden.Global")]
+public record ObservableRecord : BaseRecord, INotifyPropertyChanged, INotifyPropertyChanging
 {
+    // ReSharper disable once InconsistentNaming
     public static readonly DateTime sqlMinDate = DateTime.Parse("1/1/1753 12:00:00 AM", CultureInfo.InvariantCulture);
-    
+
 
     public event PropertyChangedEventHandler?  PropertyChanged;
     public event PropertyChangingEventHandler? PropertyChanging;
 
-    private long _id;
-    
-    [Key]
-    public virtual long ID
-    {
-        get => _id;
-        init => _id = value;
-    }
-
 
     public ObservableRecord() { }
-
-
-    protected void SetID( ObservableRecord record )
-    {
-        Type type = GetType();
-        if ( type != record.GetType() ) { throw new ExpectedValueTypeException(nameof(record), record, type); }
-
-        SetProperty(ref _id, record.ID, nameof(ID));
-    }
 
 
     [NotifyPropertyChangedInvocator] protected virtual void OnPropertyChanged( [CallerMemberName] string? property = default ) => OnPropertyChanged(new PropertyChangedEventArgs(property ?? string.Empty));
@@ -330,4 +314,56 @@ public record ObservableRecord : BaseRecord, IDataBaseID, INotifyPropertyChanged
 
         return SetProperty(ref backingStore, value, ValueEqualizer<TimeSpan>.Instance, caller);
     }
+}
+
+
+
+public abstract record ObservableRecord<T> : ObservableRecord, IEquatable<T>, IComparable<T>, IComparable where T : ObservableRecord<T>
+{
+    protected ObservableRecord() { }
+
+
+    public int CompareTo( object? other )
+    {
+        if ( other is null ) { return 1; }
+
+        if ( ReferenceEquals(this, other) ) { return 0; }
+
+        return other is T value
+                   ? CompareTo(value)
+                   : throw new ExpectedValueTypeException(nameof(other), other, typeof(T));
+    }
+    public abstract int CompareTo( T? other );
+    public abstract bool Equals( T?   other );
+
+
+    public string ToJson() => JsonNet.ToJson(this);
+    public string ToPrettyJson() => this.ToJson(Formatting.Indented);
+
+
+    public static T? FromJson( [NotNullIfNotNull("json")] string? json ) => json?.FromJson<T>();
+}
+
+
+
+public abstract record ObservableRecord<T, TID> : ObservableRecord<T>, IUniqueID<TID> where T : ObservableRecord<T, TID>
+                                                                                      where TID : IComparable<TID>, IEquatable<TID>
+{
+    private TID _id = default!;
+
+
+    [Key]
+    public virtual TID ID
+    {
+        get => _id;
+        init => _id = value;
+    }
+
+
+    protected ObservableRecord() : base() { }
+    protected ObservableRecord( TID id ) => ID = id;
+
+
+    protected bool SetID( T   record ) => SetID(record.ID);
+    protected bool SetID( TID id ) => SetProperty(ref _id, id, nameof(ID));
 }

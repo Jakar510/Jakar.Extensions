@@ -5,8 +5,9 @@ namespace Jakar.Database;
 
 
 [Serializable]
-public abstract record BaseTableRecord<TClass> : BaseCollectionsRecord<TClass> where TClass : BaseTableRecord<TClass>
+public abstract record BaseTableRecord<TClass, TID> : BaseCollectionsRecord<TClass, TID> where TClass : BaseTableRecord<TClass, TID>
+                                                                                         where TID : IComparable<TID>, IEquatable<TID>
 {
-    protected BaseTableRecord() { }
-    protected BaseTableRecord( long id ) => ID = id;
+    protected BaseTableRecord() : base() { }
+    protected BaseTableRecord( TID id ) : base(id) { }
 }

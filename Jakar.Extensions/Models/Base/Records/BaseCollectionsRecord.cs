@@ -3,28 +3,11 @@ namespace Jakar.Extensions;
 
 
 [Serializable]
-public abstract record BaseCollectionsRecord<T> : ObservableRecord, IEquatable<T>, IComparable<T>, IComparable where T : BaseCollectionsRecord<T>
+public abstract record BaseCollectionsRecord<T, TID> : ObservableRecord<T, TID> where T : BaseCollectionsRecord<T, TID>
+                                                                                where TID : IComparable<TID>, IEquatable<TID>
 {
-    public int CompareTo( object? other )
-    {
-        if ( other is null ) { return 1; }
-
-        if ( ReferenceEquals(this, other) ) { return 0; }
-
-        return other is T value
-                   ? CompareTo(value)
-                   : throw new ExpectedValueTypeException(nameof(other), other, typeof(T));
-    }
-
-    public abstract int CompareTo( T? other );
-    public abstract bool Equals( T?   other );
-
-
-    public string ToJson() => JsonNet.ToJson(this);
-    public string ToPrettyJson() => this.ToJson(Formatting.Indented);
-
-
-    public static T? FromJson( [NotNullIfNotNull("json")] string? json ) => json?.FromJson<T>();
+    protected BaseCollectionsRecord() : base() { }
+    protected BaseCollectionsRecord( TID id ) : base(id) { }
 
 
 
@@ -129,4 +112,13 @@ public abstract record BaseCollectionsRecord<T> : ObservableRecord, IEquatable<T
         }
         public int GetHashCode( T value ) => value.GetHashCode();
     }
+}
+
+
+
+[Serializable]
+public abstract record BaseCollectionsRecord<T> : BaseCollectionsRecord<T, long> where T : BaseCollectionsRecord<T, long>
+{
+    protected BaseCollectionsRecord() : base() { }
+    protected BaseCollectionsRecord( long id ) : base(id) { }
 }

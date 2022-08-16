@@ -1,24 +1,45 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 08/14/2022  8:39 PM
 
+using System.Reflection;
+using Dapper.Contrib.Extensions;
+
+
+
 namespace Jakar.Database;
 
 
-public abstract class Database : ObservableClass, IAsyncDisposable
+public abstract class Database<TID> : ObservableClass, IAsyncDisposable where TID : IComparable<TID>, IEquatable<TID>
 {
+    protected readonly HashSet<IAsyncDisposable> _disposables = new();
+
     protected Database() : base() { }
-    public virtual ValueTask DisposeAsync() => default;
+    public virtual async ValueTask DisposeAsync()
+    {
+        foreach ( IAsyncDisposable disposable in _disposables ) { await disposable.DisposeAsync(); }
+
+        _disposables.Clear();
+    }
 
 
-    protected abstract TTable CreateTable<TTable, TRecord>() where TTable : DbTable<TRecord>
-                                                             where TRecord : BaseTableRecord<TRecord>;
+    public static string GetTableName<TRecord>() where TRecord : class => GetTableName(typeof(TRecord));
+    public static string GetTableName( in Type type ) => type.GetCustomAttribute<TableAttribute>()?.Name ?? type.Name;
+
+
+    protected TValue AddDisposable<TValue>( TValue value ) where TValue : IAsyncDisposable
+    {
+        _disposables.Add(value);
+        return value;
+    }
+    protected abstract TTable CreateTable<TTable, TRecord>() where TTable : IDbTable<TRecord, TID>
+                                                             where TRecord : BaseTableRecord<TRecord, TID>;
 
 
     public abstract DbConnection Connect();
     public abstract Task<DbConnection> ConnectAsync( CancellationToken token );
 
 
-    protected async Task<TResult> Call<TResult>( Func<DbConnection, DbTransaction, CancellationToken, Task<TResult>> func, CancellationToken token )
+    public async Task<TResult> Call<TResult>( Func<DbConnection, DbTransaction, CancellationToken, Task<TResult>> func, CancellationToken token )
     {
         await using DbConnection  conn        = await ConnectAsync(token);
         await using DbTransaction transaction = await conn.BeginTransactionAsync(IsolationLevel.ReadCommitted, token);
@@ -35,7 +56,7 @@ public abstract class Database : ObservableClass, IAsyncDisposable
             throw;
         }
     }
-    protected async Task<TResult> Call<TArg1, TResult>( Func<DbConnection, DbTransaction, TArg1, CancellationToken, Task<TResult>> func, TArg1 arg1, CancellationToken token )
+    public async Task<TResult> Call<TArg1, TResult>( Func<DbConnection, DbTransaction, TArg1, CancellationToken, Task<TResult>> func, TArg1 arg1, CancellationToken token )
     {
         await using DbConnection  conn        = await ConnectAsync(token);
         await using DbTransaction transaction = await conn.BeginTransactionAsync(IsolationLevel.ReadCommitted, token);
@@ -52,7 +73,7 @@ public abstract class Database : ObservableClass, IAsyncDisposable
             throw;
         }
     }
-    protected async Task<TResult> Call<TArg1, TArg2, TResult>( Func<DbConnection, DbTransaction, TArg1, TArg2, CancellationToken, Task<TResult>> func, TArg1 arg1, TArg2 arg2, CancellationToken token )
+    public async Task<TResult> Call<TArg1, TArg2, TResult>( Func<DbConnection, DbTransaction, TArg1, TArg2, CancellationToken, Task<TResult>> func, TArg1 arg1, TArg2 arg2, CancellationToken token )
     {
         await using DbConnection  conn        = await ConnectAsync(token);
         await using DbTransaction transaction = await conn.BeginTransactionAsync(IsolationLevel.ReadCommitted, token);
@@ -69,7 +90,7 @@ public abstract class Database : ObservableClass, IAsyncDisposable
             throw;
         }
     }
-    protected async Task<TResult> Call<TArg1, TArg2, TArg3, TResult>( Func<DbConnection, DbTransaction, TArg1, TArg2, TArg3, CancellationToken, Task<TResult>> func, TArg1 arg1, TArg2 arg2, TArg3 arg3, CancellationToken token )
+    public async Task<TResult> Call<TArg1, TArg2, TArg3, TResult>( Func<DbConnection, DbTransaction, TArg1, TArg2, TArg3, CancellationToken, Task<TResult>> func, TArg1 arg1, TArg2 arg2, TArg3 arg3, CancellationToken token )
     {
         await using DbConnection  conn        = await ConnectAsync(token);
         await using DbTransaction transaction = await conn.BeginTransactionAsync(IsolationLevel.ReadCommitted, token);
@@ -86,13 +107,7 @@ public abstract class Database : ObservableClass, IAsyncDisposable
             throw;
         }
     }
-    protected async Task<TResult> Call<TArg1, TArg2, TArg3, TArg4, TResult>( Func<DbConnection, DbTransaction, TArg1, TArg2, TArg3, TArg4, CancellationToken, Task<TResult>> func,
-                                                                             TArg1                                                                                           arg1,
-                                                                             TArg2                                                                                           arg2,
-                                                                             TArg3                                                                                           arg3,
-                                                                             TArg4                                                                                           arg4,
-                                                                             CancellationToken                                                                               token
-    )
+    public async Task<TResult> Call<TArg1, TArg2, TArg3, TArg4, TResult>( Func<DbConnection, DbTransaction, TArg1, TArg2, TArg3, TArg4, CancellationToken, Task<TResult>> func, TArg1 arg1, TArg2 arg2, TArg3 arg3, TArg4 arg4, CancellationToken token )
     {
         await using DbConnection  conn        = await ConnectAsync(token);
         await using DbTransaction transaction = await conn.BeginTransactionAsync(IsolationLevel.ReadCommitted, token);
@@ -109,13 +124,13 @@ public abstract class Database : ObservableClass, IAsyncDisposable
             throw;
         }
     }
-    protected async Task<TResult> Call<TArg1, TArg2, TArg3, TArg4, TArg5, TResult>( Func<DbConnection, DbTransaction, TArg1, TArg2, TArg3, TArg4, TArg5, CancellationToken, Task<TResult>> func,
-                                                                                    TArg1                                                                                                  arg1,
-                                                                                    TArg2                                                                                                  arg2,
-                                                                                    TArg3                                                                                                  arg3,
-                                                                                    TArg4                                                                                                  arg4,
-                                                                                    TArg5                                                                                                  arg5,
-                                                                                    CancellationToken                                                                                      token
+    public async Task<TResult> Call<TArg1, TArg2, TArg3, TArg4, TArg5, TResult>( Func<DbConnection, DbTransaction, TArg1, TArg2, TArg3, TArg4, TArg5, CancellationToken, Task<TResult>> func,
+                                                                                 TArg1                                                                                                  arg1,
+                                                                                 TArg2                                                                                                  arg2,
+                                                                                 TArg3                                                                                                  arg3,
+                                                                                 TArg4                                                                                                  arg4,
+                                                                                 TArg5                                                                                                  arg5,
+                                                                                 CancellationToken                                                                                      token
     )
     {
         await using DbConnection  conn        = await ConnectAsync(token);
@@ -133,14 +148,14 @@ public abstract class Database : ObservableClass, IAsyncDisposable
             throw;
         }
     }
-    protected async Task<TResult> Call<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TResult>( Func<DbConnection, DbTransaction, TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, CancellationToken, Task<TResult>> func,
-                                                                                           TArg1                                                                                                         arg1,
-                                                                                           TArg2                                                                                                         arg2,
-                                                                                           TArg3                                                                                                         arg3,
-                                                                                           TArg4                                                                                                         arg4,
-                                                                                           TArg5                                                                                                         arg5,
-                                                                                           TArg6                                                                                                         arg6,
-                                                                                           CancellationToken                                                                                             token
+    public async Task<TResult> Call<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TResult>( Func<DbConnection, DbTransaction, TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, CancellationToken, Task<TResult>> func,
+                                                                                        TArg1                                                                                                         arg1,
+                                                                                        TArg2                                                                                                         arg2,
+                                                                                        TArg3                                                                                                         arg3,
+                                                                                        TArg4                                                                                                         arg4,
+                                                                                        TArg5                                                                                                         arg5,
+                                                                                        TArg6                                                                                                         arg6,
+                                                                                        CancellationToken                                                                                             token
     )
     {
         await using DbConnection  conn        = await ConnectAsync(token);
@@ -158,15 +173,15 @@ public abstract class Database : ObservableClass, IAsyncDisposable
             throw;
         }
     }
-    protected async Task<TResult> Call<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TResult>( Func<DbConnection, DbTransaction, TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, CancellationToken, Task<TResult>> func,
-                                                                                                  TArg1                                                                                                                arg1,
-                                                                                                  TArg2                                                                                                                arg2,
-                                                                                                  TArg3                                                                                                                arg3,
-                                                                                                  TArg4                                                                                                                arg4,
-                                                                                                  TArg5                                                                                                                arg5,
-                                                                                                  TArg6                                                                                                                arg6,
-                                                                                                  TArg7                                                                                                                arg7,
-                                                                                                  CancellationToken                                                                                                    token
+    public async Task<TResult> Call<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TResult>( Func<DbConnection, DbTransaction, TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, CancellationToken, Task<TResult>> func,
+                                                                                               TArg1                                                                                                                arg1,
+                                                                                               TArg2                                                                                                                arg2,
+                                                                                               TArg3                                                                                                                arg3,
+                                                                                               TArg4                                                                                                                arg4,
+                                                                                               TArg5                                                                                                                arg5,
+                                                                                               TArg6                                                                                                                arg6,
+                                                                                               TArg7                                                                                                                arg7,
+                                                                                               CancellationToken                                                                                                    token
     )
     {
         await using DbConnection  conn        = await ConnectAsync(token);
@@ -184,16 +199,16 @@ public abstract class Database : ObservableClass, IAsyncDisposable
             throw;
         }
     }
-    protected async Task<TResult> Call<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TResult>( Func<DbConnection, DbTransaction, TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, CancellationToken, Task<TResult>> func,
-                                                                                                         TArg1                                                                                                                       arg1,
-                                                                                                         TArg2                                                                                                                       arg2,
-                                                                                                         TArg3                                                                                                                       arg3,
-                                                                                                         TArg4                                                                                                                       arg4,
-                                                                                                         TArg5                                                                                                                       arg5,
-                                                                                                         TArg6                                                                                                                       arg6,
-                                                                                                         TArg7                                                                                                                       arg7,
-                                                                                                         TArg8                                                                                                                       arg8,
-                                                                                                         CancellationToken                                                                                                           token
+    public async Task<TResult> Call<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TResult>( Func<DbConnection, DbTransaction, TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, CancellationToken, Task<TResult>> func,
+                                                                                                      TArg1                                                                                                                       arg1,
+                                                                                                      TArg2                                                                                                                       arg2,
+                                                                                                      TArg3                                                                                                                       arg3,
+                                                                                                      TArg4                                                                                                                       arg4,
+                                                                                                      TArg5                                                                                                                       arg5,
+                                                                                                      TArg6                                                                                                                       arg6,
+                                                                                                      TArg7                                                                                                                       arg7,
+                                                                                                      TArg8                                                                                                                       arg8,
+                                                                                                      CancellationToken                                                                                                           token
     )
     {
         await using DbConnection  conn        = await ConnectAsync(token);
@@ -226,7 +241,8 @@ public abstract class Database : ObservableClass, IAsyncDisposable
 
 
 
-public abstract class Database<TDatabase> : Database, IEquatable<TDatabase>, IComparable<TDatabase>, ICloneable where TDatabase : Database<TDatabase>
+public abstract class Database<TDatabase, TID> : Database<TID>, IEquatable<TDatabase>, IComparable<TDatabase>, ICloneable where TDatabase : Database<TDatabase, TID>
+                                                                                                                          where TID : IComparable<TID>, IEquatable<TID>
 {
     protected Database() : base() { }
 
