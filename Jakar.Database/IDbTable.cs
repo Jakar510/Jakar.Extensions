@@ -4,6 +4,9 @@
 using System.Diagnostics.CodeAnalysis;
 
 
+#pragma warning disable CS8424
+
+
 
 namespace Jakar.Database;
 
@@ -72,40 +75,36 @@ public interface IDbTable<TRecord, in TID> : IAsyncDisposable where TRecord : Ba
 
     public Task<TResult> Call<TResult>( StringBuilder sb,         DynamicParameters? parameters,  Func<SqlMapper.GridReader, CancellationToken, Task<TResult>> func, CancellationToken token );
     public Task<TResult> Call<TResult>( DbConnection  connection, DbTransaction?     transaction, StringBuilder sb, DynamicParameters? parameters, Func<SqlMapper.GridReader, CancellationToken, Task<TResult>> func, CancellationToken token );
-
-
-    public Task<TResult> Call<TResult>( StringBuilder sb,         DynamicParameters? parameters,  Func<DataTable, CancellationToken, Task<TResult>> func, CancellationToken token );
-    public Task<TResult> Call<TResult>( DbConnection  connection, DbTransaction?     transaction, StringBuilder sb, DynamicParameters? parameters, Func<DataTable, CancellationToken, Task<TResult>> func, CancellationToken token );
-
+    
 
     public Task<TResult> Call<TResult>( StringBuilder sb,         DynamicParameters? parameters,  Func<DbDataReader, CancellationToken, Task<TResult>> func, CancellationToken token );
     public Task<TResult> Call<TResult>( DbConnection  connection, DbTransaction?     transaction, StringBuilder sb, DynamicParameters? parameters, Func<DbDataReader, CancellationToken, Task<TResult>> func, CancellationToken token );
 
 
-    public Task<IAsyncEnumerable<TRecord>> Where( StringBuilder sb,         DynamicParameters? parameters,  CancellationToken token );
-    public Task<IAsyncEnumerable<TRecord>> Where( DbConnection  connection, DbTransaction?     transaction, StringBuilder     sb, DynamicParameters? parameters, CancellationToken token );
+    public IAsyncEnumerable<TRecord> Where( StringBuilder sb,         DynamicParameters? parameters, [EnumeratorCancellation] CancellationToken token );
+    public IAsyncEnumerable<TRecord> Where( DbConnection  connection, DbTransaction?     transaction, StringBuilder     sb, DynamicParameters? parameters, [EnumeratorCancellation] CancellationToken token );
 
 
     public Task<TRecord> Get( TID                                     id,         CancellationToken token );
-    public Task<IAsyncEnumerable<TRecord>> Get( IEnumerable<TID>      ids,        CancellationToken token );
-    public Task<IAsyncEnumerable<TRecord>> Get( IAsyncEnumerable<TID> ids,        CancellationToken token );
+    public IAsyncEnumerable<TRecord> Get( IEnumerable<TID>      ids, [EnumeratorCancellation] CancellationToken token );
+    public IAsyncEnumerable<TRecord> Get( IAsyncEnumerable<TID> ids, [EnumeratorCancellation] CancellationToken token );
     public Task<TRecord> Get( DbConnection                             connection, DbTransaction?    transaction, TID                   id,  CancellationToken token );
-    public Task<IAsyncEnumerable<TRecord>> Get( DbConnection           connection, DbTransaction?    transaction, IEnumerable<TID>      ids, CancellationToken token );
-    public Task<IAsyncEnumerable<TRecord>> Get( DbConnection           connection, DbTransaction?    transaction, IAsyncEnumerable<TID> ids, CancellationToken token );
+    public IAsyncEnumerable<TRecord> Get( DbConnection           connection, DbTransaction?    transaction, IEnumerable<TID>      ids, [EnumeratorCancellation] CancellationToken token );
+    public IAsyncEnumerable<TRecord> Get( DbConnection           connection, DbTransaction?    transaction, IAsyncEnumerable<TID> ids, [EnumeratorCancellation] CancellationToken token );
 
 
     public Task<TRecord> Insert( TRecord                                     record,     CancellationToken token );
-    public Task<IAsyncEnumerable<TRecord>> Insert( IEnumerable<TRecord>      records,    CancellationToken token );
-    public Task<IAsyncEnumerable<TRecord>> Insert( IAsyncEnumerable<TRecord> records,    CancellationToken token );
+    public IAsyncEnumerable<TRecord> Insert( IEnumerable<TRecord>      records, [EnumeratorCancellation] CancellationToken token );
+    public IAsyncEnumerable<TRecord> Insert( IAsyncEnumerable<TRecord> records, [EnumeratorCancellation] CancellationToken token );
     public Task<TRecord> Insert( DbConnection                                connection, DbTransaction     transaction, TRecord                   record,  CancellationToken token );
-    public Task<IAsyncEnumerable<TRecord>> Insert( DbConnection              connection, DbTransaction     transaction, IEnumerable<TRecord>      records, CancellationToken token );
-    public Task<IAsyncEnumerable<TRecord>> Insert( DbConnection              connection, DbTransaction     transaction, IAsyncEnumerable<TRecord> records, CancellationToken token );
+    public IAsyncEnumerable<TRecord> Insert( DbConnection              connection, DbTransaction     transaction, IEnumerable<TRecord>      records, [EnumeratorCancellation] CancellationToken token );
+    public IAsyncEnumerable<TRecord> Insert( DbConnection              connection, DbTransaction     transaction, IAsyncEnumerable<TRecord> records, [EnumeratorCancellation] CancellationToken token );
 
 
     public Task<TRecord> Update( TRecord                                     record,     CancellationToken token );
-    public Task<IAsyncEnumerable<TRecord>> Update( IEnumerable<TRecord>      records,    CancellationToken token );
-    public Task<IAsyncEnumerable<TRecord>> Update( IAsyncEnumerable<TRecord> records,    CancellationToken token );
+    public IAsyncEnumerable<TRecord> Update( IEnumerable<TRecord>      records, [EnumeratorCancellation] CancellationToken token );
+    public IAsyncEnumerable<TRecord> Update( IAsyncEnumerable<TRecord> records, [EnumeratorCancellation] CancellationToken token );
     public Task<TRecord> Update( DbConnection                                connection, DbTransaction     transaction, TRecord                   record,  CancellationToken token );
-    public Task<IAsyncEnumerable<TRecord>> Update( DbConnection              connection, DbTransaction     transaction, IEnumerable<TRecord>      records, CancellationToken token );
-    public Task<IAsyncEnumerable<TRecord>> Update( DbConnection              connection, DbTransaction     transaction, IAsyncEnumerable<TRecord> records, CancellationToken token );
+    public IAsyncEnumerable<TRecord> Update( DbConnection              connection, DbTransaction     transaction, IEnumerable<TRecord>      records, [EnumeratorCancellation] CancellationToken token );
+    public IAsyncEnumerable<TRecord> Update( DbConnection              connection, DbTransaction     transaction, IAsyncEnumerable<TRecord> records, [EnumeratorCancellation] CancellationToken token );
 }

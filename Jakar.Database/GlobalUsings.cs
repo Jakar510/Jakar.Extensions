@@ -3,6 +3,8 @@
 
 global using System.Data;
 global using System.Data.Common;
+global using System.Reflection;
+global using System.Runtime.CompilerServices;
 global using System.Text;
 global using Dapper;
 global using Jakar.Extensions;

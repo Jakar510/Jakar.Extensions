@@ -10,4 +10,9 @@ public abstract record BaseTableRecord<TClass, TID> : BaseCollectionsRecord<TCla
 {
     protected BaseTableRecord() : base() { }
     protected BaseTableRecord( TID id ) : base(id) { }
+
+    public TClass NewID( in TID id ) => (TClass)( this with
+                                                  {
+                                                      ID = id
+                                                  } );
 }
