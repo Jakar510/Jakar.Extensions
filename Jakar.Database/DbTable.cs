@@ -1,15 +1,19 @@
 ﻿namespace Jakar.Database;
 
 
-public record DbTable<TRecord, TID> : BaseRecord, IDbTable<TRecord, TID> where TRecord : BaseTableRecord<TRecord, TID>
-                                                                         where TID : IComparable<TID>, IEquatable<TID>
+public class DbTable<TRecord, TID> : ObservableClass, IDbTable<TRecord, TID> where TRecord : BaseTableRecord<TRecord, TID>
+                                                                             where TID : IComparable<TID>, IEquatable<TID>
 {
-    private readonly Database<TID> _database;
-    public virtual   string        TableName { get; } = Database<TID>.GetTableName<TRecord>();
+    private readonly IConnectableDb _database;
+    public virtual   string         TableName { get; } = DbExtensions.GetTableName<TRecord>();
 
 
-    public DbTable( Database<TID> database ) => _database = database;
+    public DbTable( IConnectableDb database ) => _database = database;
     public virtual ValueTask DisposeAsync() => default;
+
+
+    public DbConnection Connect() => _database.Connect();
+    public Task<DbConnection> ConnectAsync( CancellationToken token ) => _database.ConnectAsync(token);
 
 
     public async Task<string> ServerVersion( CancellationToken token )
@@ -17,7 +21,6 @@ public record DbTable<TRecord, TID> : BaseRecord, IDbTable<TRecord, TID> where T
         await using DbConnection connection = await ConnectAsync(token);
         return connection.ServerVersion;
     }
-    public Task<DbConnection> ConnectAsync( CancellationToken token ) => _database.ConnectAsync(token);
 
 
     public async Task<DataTable> Schema( DbConnection connection, CancellationToken token ) => await connection.GetSchemaAsync(token);
@@ -65,7 +68,7 @@ public record DbTable<TRecord, TID> : BaseRecord, IDbTable<TRecord, TID> where T
     }
 
 
-    public async Task<long> Count( CancellationToken token ) => await _database.Call(Count, token);
+    public async Task<long> Count( CancellationToken token ) => await this.Call(Count, token);
     public async Task<long> Count( DbConnection connection, DbTransaction? transaction, CancellationToken token )
     {
         string sql = $"SELECT COUNT({nameof(IUniqueID<TID>.ID)}) FROM {TableName}";
@@ -75,7 +78,7 @@ public record DbTable<TRecord, TID> : BaseRecord, IDbTable<TRecord, TID> where T
     }
 
 
-    public async Task<TRecord> First( CancellationToken token ) => await _database.Call(First, token);
+    public async Task<TRecord> First( CancellationToken token ) => await this.Call(First, token);
     public async Task<TRecord> First( DbConnection connection, DbTransaction? transaction, CancellationToken token )
     {
         string sql = $"SELECT * FROM {TableName} ORDER BY {nameof(IUniqueID<TID>.ID)} ASC LIMIT 1";
@@ -85,7 +88,7 @@ public record DbTable<TRecord, TID> : BaseRecord, IDbTable<TRecord, TID> where T
     }
 
 
-    public async Task<TRecord?> FirstOrDefault( CancellationToken token ) => await _database.Call(FirstOrDefault, token);
+    public async Task<TRecord?> FirstOrDefault( CancellationToken token ) => await this.Call(FirstOrDefault, token);
     public async Task<TRecord?> FirstOrDefault( DbConnection connection, DbTransaction? transaction, CancellationToken token )
     {
         string sql = $"SELECT * FROM {TableName} ORDER BY {nameof(IUniqueID<TID>.ID)} ASC LIMIT 1";
@@ -95,7 +98,7 @@ public record DbTable<TRecord, TID> : BaseRecord, IDbTable<TRecord, TID> where T
     }
 
 
-    public async Task<TRecord> Last( CancellationToken token ) => await _database.Call(Last, token);
+    public async Task<TRecord> Last( CancellationToken token ) => await this.Call(Last, token);
     public async Task<TRecord> Last( DbConnection connection, DbTransaction? transaction, CancellationToken token )
     {
         string sql = $"SELECT * FROM {TableName} ORDER BY {nameof(IUniqueID<TID>.ID)} DESC";
@@ -105,7 +108,7 @@ public record DbTable<TRecord, TID> : BaseRecord, IDbTable<TRecord, TID> where T
     }
 
 
-    public async Task<TRecord?> LastOrDefault( CancellationToken token ) => await _database.Call(LastOrDefault, token);
+    public async Task<TRecord?> LastOrDefault( CancellationToken token ) => await this.Call(LastOrDefault, token);
     public async Task<TRecord?> LastOrDefault( DbConnection connection, DbTransaction? transaction, CancellationToken token )
     {
         token.ThrowIfCancellationRequested();
@@ -115,7 +118,7 @@ public record DbTable<TRecord, TID> : BaseRecord, IDbTable<TRecord, TID> where T
     }
 
 
-    public async Task<TRecord?> Single( TID id, CancellationToken token ) => await _database.Call(Single, id, token);
+    public async Task<TRecord?> Single( TID id, CancellationToken token ) => await this.Call(Single, id, token);
     public async Task<TRecord?> Single( DbConnection connection, DbTransaction? transaction, TID id, CancellationToken token )
     {
         var parameters = new DynamicParameters();
@@ -129,7 +132,7 @@ public record DbTable<TRecord, TID> : BaseRecord, IDbTable<TRecord, TID> where T
     }
 
 
-    public async Task<TRecord?> Single( StringBuilder sb, DynamicParameters? parameters, CancellationToken token ) => await _database.Call(Single, sb, parameters, token);
+    public async Task<TRecord?> Single( StringBuilder sb, DynamicParameters? parameters, CancellationToken token ) => await this.Call(Single, sb, parameters, token);
     public async Task<TRecord?> Single( DbConnection connection, DbTransaction? transaction, StringBuilder sb, DynamicParameters? parameters, CancellationToken token )
     {
         token.ThrowIfCancellationRequested();
@@ -138,7 +141,7 @@ public record DbTable<TRecord, TID> : BaseRecord, IDbTable<TRecord, TID> where T
     }
 
 
-    public async Task<TRecord?> SingleOrDefault( TID id, CancellationToken token ) => await _database.Call(SingleOrDefault, id, token);
+    public async Task<TRecord?> SingleOrDefault( TID id, CancellationToken token ) => await this.Call(SingleOrDefault, id, token);
     public async Task<TRecord?> SingleOrDefault( DbConnection connection, DbTransaction? transaction, TID id, CancellationToken token )
     {
         var parameters = new DynamicParameters();
@@ -152,7 +155,7 @@ public record DbTable<TRecord, TID> : BaseRecord, IDbTable<TRecord, TID> where T
     }
 
 
-    public async Task<TRecord?> SingleOrDefault( StringBuilder sb, DynamicParameters? parameters, CancellationToken token ) => await _database.Call(SingleOrDefault, sb, parameters, token);
+    public async Task<TRecord?> SingleOrDefault( StringBuilder sb, DynamicParameters? parameters, CancellationToken token ) => await this.Call(SingleOrDefault, sb, parameters, token);
     public async Task<TRecord?> SingleOrDefault( DbConnection connection, DbTransaction? transaction, StringBuilder sb, DynamicParameters? parameters, CancellationToken token )
     {
         token.ThrowIfCancellationRequested();
@@ -161,7 +164,7 @@ public record DbTable<TRecord, TID> : BaseRecord, IDbTable<TRecord, TID> where T
     }
 
 
-    public async Task<List<TRecord>> All( CancellationToken token ) => await _database.Call(All, token);
+    public async Task<List<TRecord>> All( CancellationToken token ) => await this.Call(All, token);
     public async Task<List<TRecord>> All( DbConnection connection, DbTransaction? transaction, CancellationToken token )
     {
         string sql = $"SELECT * FROM {TableName}";
@@ -172,7 +175,7 @@ public record DbTable<TRecord, TID> : BaseRecord, IDbTable<TRecord, TID> where T
     }
 
 
-    public async Task<TResult> Call<TResult>( StringBuilder sb, DynamicParameters? parameters, Func<SqlMapper.GridReader, CancellationToken, Task<TResult>> func, CancellationToken token ) => await _database.Call(Call, sb, parameters, func, token);
+    public async Task<TResult> Call<TResult>( StringBuilder sb, DynamicParameters? parameters, Func<SqlMapper.GridReader, CancellationToken, Task<TResult>> func, CancellationToken token ) => await this.Call(Call, sb, parameters, func, token);
     public async Task<TResult> Call<TResult>( DbConnection connection, DbTransaction? transaction, StringBuilder sb, DynamicParameters? parameters, Func<SqlMapper.GridReader, CancellationToken, Task<TResult>> func, CancellationToken token )
     {
         token.ThrowIfCancellationRequested();
@@ -181,7 +184,7 @@ public record DbTable<TRecord, TID> : BaseRecord, IDbTable<TRecord, TID> where T
     }
 
 
-    public async Task<TResult> Call<TResult>( StringBuilder sb, DynamicParameters? parameters, Func<DbDataReader, CancellationToken, Task<TResult>> func, CancellationToken token ) => await _database.Call(Call, sb, parameters, func, token);
+    public async Task<TResult> Call<TResult>( StringBuilder sb, DynamicParameters? parameters, Func<DbDataReader, CancellationToken, Task<TResult>> func, CancellationToken token ) => await this.Call(Call, sb, parameters, func, token);
     public async Task<TResult> Call<TResult>( DbConnection connection, DbTransaction? transaction, StringBuilder sb, DynamicParameters? parameters, Func<DbDataReader, CancellationToken, Task<TResult>> func, CancellationToken token )
     {
         token.ThrowIfCancellationRequested();
@@ -192,7 +195,7 @@ public record DbTable<TRecord, TID> : BaseRecord, IDbTable<TRecord, TID> where T
 
     public async IAsyncEnumerable<TRecord> Where( StringBuilder sb, DynamicParameters? parameters, [EnumeratorCancellation] CancellationToken token )
     {
-        await foreach ( TRecord record in _database.Call(Where, sb, parameters, token) ) { yield return record; }
+        await foreach ( TRecord record in this.Call(Where, sb, parameters, token) ) { yield return record; }
     }
     public async IAsyncEnumerable<TRecord> Where( DbConnection connection, DbTransaction? transaction, StringBuilder sb, DynamicParameters? parameters, [EnumeratorCancellation] CancellationToken token )
     {
@@ -203,14 +206,14 @@ public record DbTable<TRecord, TID> : BaseRecord, IDbTable<TRecord, TID> where T
     }
 
 
-    public async Task<TRecord> Get( TID id, CancellationToken token ) => await _database.Call(Get, id, token);
+    public async Task<TRecord> Get( TID id, CancellationToken token ) => await this.Call(Get, id, token);
     public async IAsyncEnumerable<TRecord> Get( IEnumerable<TID> ids, [EnumeratorCancellation] CancellationToken token )
     {
-        await foreach ( TRecord record in _database.Call(Get, ids, token) ) { yield return record; }
+        await foreach ( TRecord record in this.Call(Get, ids, token) ) { yield return record; }
     }
     public async IAsyncEnumerable<TRecord> Get( IAsyncEnumerable<TID> ids, [EnumeratorCancellation] CancellationToken token )
     {
-        await foreach ( TRecord record in _database.Call(Get, ids, token) ) { yield return record; }
+        await foreach ( TRecord record in this.Call(Get, ids, token) ) { yield return record; }
     }
     public async Task<TRecord> Get( DbConnection connection, DbTransaction? transaction, TID id, CancellationToken token )
     {
@@ -246,18 +249,20 @@ public record DbTable<TRecord, TID> : BaseRecord, IDbTable<TRecord, TID> where T
     }
 
 
-    public async Task<TRecord> Insert( TRecord record, CancellationToken token ) => await _database.Call(Insert, record, token);
+    public async Task<TRecord> Insert( TRecord record, CancellationToken token ) => await this.Call(Insert, record, token);
     public async IAsyncEnumerable<TRecord> Insert( IEnumerable<TRecord> records, [EnumeratorCancellation] CancellationToken token )
     {
-        await foreach ( TRecord record in _database.Call(Insert, records, token) ) { yield return record; }
+        await foreach ( TRecord record in this.Call(Insert, records, token) ) { yield return record; }
     }
     public async IAsyncEnumerable<TRecord> Insert( IAsyncEnumerable<TRecord> records, [EnumeratorCancellation] CancellationToken token )
     {
-        await foreach ( TRecord record in _database.Call(Insert, records, token) ) { yield return record; }
+        await foreach ( TRecord record in this.Call(Insert, records, token) ) { yield return record; }
     }
     public async Task<TRecord> Insert( DbConnection connection, DbTransaction transaction, TRecord record, CancellationToken token )
     {
-        List<Descriptor> descriptors = TypePropertiesCache.Current[typeof(TRecord)].Where(x => !x.IsKey).ToList();
+        List<Descriptor> descriptors = TypePropertiesCache.Current[typeof(TRecord)]
+                                                          .Where(x => !x.IsKey)
+                                                          .ToList();
 
 
         var sbColumnList = new StringBuilder();
@@ -286,10 +291,30 @@ public record DbTable<TRecord, TID> : BaseRecord, IDbTable<TRecord, TID> where T
     }
 
 
-    public async Task<TRecord> Update( TRecord                         record,     CancellationToken                          token ) => await _database.Call(Update, record, token);
-    public IAsyncEnumerable<TRecord> Update( IEnumerable<TRecord>      records,    [EnumeratorCancellation] CancellationToken token ) => _database.Call(Update, records, token);
-    public IAsyncEnumerable<TRecord> Update( IAsyncEnumerable<TRecord> records,    [EnumeratorCancellation] CancellationToken token ) => _database.Call(Update, records, token);
-    public async Task<TRecord> Update( DbConnection                    connection, DbTransaction                              transaction, TRecord                   record,  CancellationToken                          token ) => null;
-    public async IAsyncEnumerable<TRecord> Update( DbConnection        connection, DbTransaction                              transaction, IEnumerable<TRecord>      records, [EnumeratorCancellation] CancellationToken token ) => null;
-    public async IAsyncEnumerable<TRecord> Update( DbConnection        connection, DbTransaction                              transaction, IAsyncEnumerable<TRecord> records, [EnumeratorCancellation] CancellationToken token ) => null;
+    public async Task Update( TRecord                   record,  CancellationToken token ) => await this.Call(Update, record,  token);
+    public async Task Update( IEnumerable<TRecord>      records, CancellationToken token ) => await this.Call(Update, records, token);
+    public async Task Update( IAsyncEnumerable<TRecord> records, CancellationToken token ) => await this.Call(Update, records, token);
+    public async Task Update( DbConnection connection, DbTransaction transaction, TRecord record, CancellationToken token )
+    {
+        var sb = new StringBuilder();
+
+        sb.AppendJoin(',',
+                      TypePropertiesCache.Current[typeof(TRecord)]
+                                         .Where(x => !x.IsKey)
+                                         .Select(x => x.UpdateName));
+
+        string cmd        = $"UPDATE {TableName} SET {sb} where {nameof(IUniqueID<TID>.ID)} = @{nameof(IUniqueID<TID>.ID)};";
+        var    parameters = new DynamicParameters(record);
+
+        token.ThrowIfCancellationRequested();
+        await connection.ExecuteScalarAsync(cmd, parameters, transaction);
+    }
+    public async Task Update( DbConnection connection, DbTransaction transaction, IEnumerable<TRecord> records, CancellationToken token )
+    {
+        foreach ( TRecord record in records ) { await Update(connection, transaction, record, token); }
+    }
+    public async Task Update( DbConnection connection, DbTransaction transaction, IAsyncEnumerable<TRecord> records, CancellationToken token )
+    {
+        await foreach ( TRecord record in records.WithCancellation(token) ) { await Update(connection, transaction, record, token); }
+    }
 }
