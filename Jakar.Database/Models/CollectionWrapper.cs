@@ -10,21 +10,17 @@ namespace Jakar.Database;
 
 [Serializable]
 [DataBaseType(DbType.String)]
-[SuppressMessage("ReSharper", "NotAccessedField.Global")]
-public class CollectionWrapper<TValue, TOwner, TID> : ObservableClass, ICollectionWrapper<TValue, TID> where TValue : IUniqueID<TID>
-                                                                                                       where TOwner : BaseTableRecord<TOwner, TID>
-                                                                                                       where TID : IComparable<TID>, IEquatable<TID>
+public class CollectionWrapper<TValue, TOwner, TID> : CollectionAlerts<TValue>, ICollectionWrapper<TValue, TID> where TValue : IUniqueID<TID>
+                                                                                                                where TOwner : BaseTableRecord<TOwner, TID>
+                                                                                                                where TID : IComparable<TID>, IEquatable<TID>
 {
-    protected readonly TOwner                     _record;
-    private            IDCollection<TValue, TID>? _items;
-    private            string?                    _json;
+    private IDCollection<TValue, TID>? _items;
+    private string?                    _json;
 
 
-    public event NotifyCollectionChangedEventHandler? CollectionChanged;
-
-    public int  Count      => _items?.Count ?? 0;
-    public bool IsEmpty    => Count == 0;
-    public bool IsNotEmpty => Count > 0;
+    public sealed override int  Count      => _items?.Count ?? 0;
+    public                 bool IsEmpty    => Count == 0;
+    public                 bool IsNotEmpty => Count > 0;
 
 
     internal IDCollection<TValue, TID> Items
@@ -63,17 +59,13 @@ public class CollectionWrapper<TValue, TOwner, TID> : ObservableClass, ICollecti
     }
 
 
-    public CollectionWrapper( TOwner record ) : this(record, new IDCollection<TValue, TID>()) { }
+    public CollectionWrapper() : this(new IDCollection<TValue, TID>()) { }
+    public CollectionWrapper( string?                       json ) : this(IDCollection<TValue, TID>.Create(json)) { }
+    public CollectionWrapper( params TValue[]?              value ) : this(IDCollection<TValue, TID>.Create(value)) { }
+    public CollectionWrapper( ICollection<TValue>?          collection ) : this(IDCollection<TValue, TID>.Create(collection)) { }
+    protected CollectionWrapper( IDCollection<TValue, TID>? collection ) => Items = collection ?? new IDCollection<TValue, TID>();
 
-    // public CollectionWrapper( TOwner record, ReadOnlySpan<char>   span ) : this(record, IDCollection<TValue, TID>.Create(span)) { }
-    public CollectionWrapper( TOwner record, string?              json ) : this(record, IDCollection<TValue, TID>.Create(json)) { }
-    public CollectionWrapper( TOwner record, params TValue[]?     value ) : this(record, IDCollection<TValue, TID>.Create(value)) { }
-    public CollectionWrapper( TOwner record, ICollection<TValue>? collection ) : this(record, IDCollection<TValue, TID>.Create(collection)) { }
-    protected CollectionWrapper( TOwner record, IDCollection<TValue, TID>? collection )
-    {
-        _record = record;
-        Items   = collection ?? new IDCollection<TValue, TID>();
-    }
+    // public CollectionWrapper(  ReadOnlySpan<char>   span ) : this( IDCollection<TValue, TID>.Create(span)) { }
     public virtual void Dispose()
     {
         Items = null!;
@@ -81,21 +73,21 @@ public class CollectionWrapper<TValue, TOwner, TID> : ObservableClass, ICollecti
     }
 
 
-    public static CollectionWrapper<TValue, TOwner, TID> Create( TOwner record, ICollection<TValue>? value )
+    public static CollectionWrapper<TValue, TOwner, TID> Create( ICollection<TValue>? value )
     {
-        if ( value is null ) { return new CollectionWrapper<TValue, TOwner, TID>(record); }
+        if ( value is null ) { return new CollectionWrapper<TValue, TOwner, TID>(); }
 
-        var collection = new CollectionWrapper<TValue, TOwner, TID>(record, value);
+        var collection = new CollectionWrapper<TValue, TOwner, TID>(value);
 
         return collection;
     }
-    public static CollectionWrapper<TValue, TOwner, TID> Create( TOwner record, string? jsonOrCsv )
+    public static CollectionWrapper<TValue, TOwner, TID> Create( string? jsonOrCsv )
     {
-        if ( string.IsNullOrWhiteSpace(jsonOrCsv) ) { return new CollectionWrapper<TValue, TOwner, TID>(record); }
+        if ( string.IsNullOrWhiteSpace(jsonOrCsv) ) { return new CollectionWrapper<TValue, TOwner, TID>(); }
 
         jsonOrCsv = jsonOrCsv.Replace("\"", string.Empty);
 
-        return new CollectionWrapper<TValue, TOwner, TID>(record, IDCollection<TValue, TID>.Create(jsonOrCsv));
+        return new CollectionWrapper<TValue, TOwner, TID>(IDCollection<TValue, TID>.Create(jsonOrCsv));
     }
 
 
@@ -112,7 +104,7 @@ public class CollectionWrapper<TValue, TOwner, TID> : ObservableClass, ICollecti
     private void Items_OnCollectionChanged( object? sender, NotifyCollectionChangedEventArgs e )
     {
         SetProperty(ref _json, Items.ToJson(), nameof(Json));
-        CollectionChanged?.Invoke(this, e);
+        OnChanged(e);
     }
     private void Items_OnPropertyChanged( object?  sender, PropertyChangedEventArgs  e ) => OnPropertyChanged(e.PropertyName);
     private void Items_OnPropertyChanging( object? sender, PropertyChangingEventArgs e ) => OnPropertyChanging(e.PropertyName);
@@ -138,8 +130,6 @@ public class CollectionWrapper<TValue, TOwner, TID> : ObservableClass, ICollecti
         return ToString();
     }
 
-
-    void ICollectionAlerts.SendOnChanged( NotifyCollectionChangedEventArgs e ) => CollectionChanged?.Invoke(this, e);
 
     TypeCode IConvertible.GetTypeCode() => TypeCode.String;
 

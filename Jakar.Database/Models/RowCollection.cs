@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Diagnostics.Metrics;
 
 
 
@@ -6,13 +7,20 @@ namespace Jakar.Database;
 
 
 [Serializable]
-public class RowCollection<TRecord> : ObservableCollection<TRecord> where TRecord : BaseRecord, IUniqueID<long>
+public sealed class RecordCollection<TRecord, TID> : ObservableCollection<TRecord>, IDisposable where TRecord : BaseRecord, IUniqueID<TID>
+                                                                                                where TID : IComparable<TID>, IEquatable<TID>
 {
-    public RowCollection() : base() { }
-    public RowCollection( params TRecord[]     items ) : base(items) { }
-    public RowCollection( IEnumerable<TRecord> items ) : base(items) { }
+    private Counter<TID> _counter;
+
+    
+    public RecordCollection( Counter<TID> counter ) : base() => _counter = counter;
+    public RecordCollection( Counter<TID> counter, params TRecord[]     items ) : this(counter) => Add(items);
+    public RecordCollection( Counter<TID> counter, IEnumerable<TRecord> items ) : this(counter) => Add(items);
+    public void Dispose() => _counter.Dispose();
 
 
+    public void Add( params TRecord[]     items ) => items.ForEach(Add);
+    public void Add( IEnumerable<TRecord> items ) => items.ForEach(Add);
     public new void Add( TRecord item )
     {
         if ( item.IsValidRowID() )
@@ -21,9 +29,11 @@ public class RowCollection<TRecord> : ObservableCollection<TRecord> where TRecor
             return;
         }
 
+        _counter.MoveNext();
+
         base.Add(item with
                  {
-                     ID = Count
+                     ID = _counter.Current
                  });
     }
 }

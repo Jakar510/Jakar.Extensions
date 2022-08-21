@@ -12,7 +12,7 @@ namespace Jakar.Extensions;
 /// </summary>
 /// <typeparam name = "T" > </typeparam>
 [Serializable]
-public class ConcurrentObservableCollection<T> : ObservableClass, IList<T>, IList, IReadOnlyCollection<T>, ICollectionAlerts
+public class ConcurrentObservableCollection<T> : CollectionAlerts<T>, IList<T>, IList, IReadOnlyCollection<T>
 {
     protected readonly IComparer<T> _comparer;
 
@@ -20,6 +20,82 @@ public class ConcurrentObservableCollection<T> : ObservableClass, IList<T>, ILis
     protected readonly List<T> _items;
     protected readonly object  _lock = new();
     public             object  Lock => _lock;
+
+
+    public sealed override int Count
+    {
+        get
+        {
+            lock ( _lock ) { return _items.Count; }
+        }
+    }
+    bool ICollection<T>.IsReadOnly
+    {
+        get
+        {
+            lock ( _lock ) { return ( (IList)_items ).IsReadOnly; }
+        }
+    }
+
+    public T this[ int index ]
+    {
+        get
+        {
+            lock ( _lock ) { return _items[index]; }
+        }
+        set
+        {
+            lock ( _lock )
+            {
+                T old = _items[index];
+                _items[index] = value;
+                Replaced(old, value, index);
+            }
+        }
+    }
+
+
+    object? IList.this[ int index ]
+
+    {
+        get
+        {
+            lock ( _lock ) { return ( (IList)_items )[index]; }
+        }
+        set
+        {
+            lock ( _lock ) { ( (IList)_items )[index] = value; }
+        }
+    }
+
+    bool ICollection.IsSynchronized
+    {
+        get
+        {
+            lock ( _lock ) { return ( (IList)_items ).IsSynchronized; }
+        }
+    }
+    object ICollection.SyncRoot
+    {
+        get
+        {
+            lock ( _lock ) { return ( (IList)_items ).SyncRoot; }
+        }
+    }
+    bool IList.IsFixedSize
+    {
+        get
+        {
+            lock ( _lock ) { return ( (IList)_items ).IsFixedSize; }
+        }
+    }
+    bool IList.IsReadOnly
+    {
+        get
+        {
+            lock ( _lock ) { return ( (IList)_items ).IsReadOnly; }
+        }
+    }
 
 
     public ConcurrentObservableCollection() : this(new List<T>()) { }
@@ -42,6 +118,7 @@ public class ConcurrentObservableCollection<T> : ObservableClass, IList<T>, ILis
     public static implicit operator ConcurrentObservableCollection<T>( ObservableCollection<T> items ) => new(items);
     public static implicit operator ConcurrentObservableCollection<T>( Collection<T>           items ) => new(items);
     public static implicit operator ConcurrentObservableCollection<T>( T[]                     items ) => new(items);
+
 
     public virtual void Add( params T[] items )
     {
@@ -277,133 +354,29 @@ public class ConcurrentObservableCollection<T> : ObservableClass, IList<T>, ILis
     }
 
 
-    protected void Added( in List<T> items )
-    {
-        this.SendAdded(items);
-        OnCountChanged();
-    }
-    protected void Added( in T item )
-    {
-        this.SendAdded(item);
-        OnCountChanged();
-    }
-    protected void Added( in T item, in int index )
-    {
-        this.SendAdded(item, index);
-        OnCountChanged();
-    }
-    protected void Removed( in T item )
-    {
-        this.SendRemoved(item);
-        OnCountChanged();
-    }
-    protected void Removed( in T item, in int index )
-    {
-        this.SendRemoved(item, index);
-        OnCountChanged();
-    }
-    protected void Removed( in int index )
-    {
-        this.SendRemoved(index);
-        OnCountChanged();
-    }
-    protected void Replaced( in T old,  in T   @new ) => this.SendReplaced(@new,                old);
-    protected void Replaced( in T old,  in T   @new,  in int index ) => this.SendReplaced(@new, old, index);
-    protected void Moved( in     T item, in int index, in int oldIndex ) => this.SendMoved(item, index, oldIndex);
-    protected void Reset()
-    {
-        this.SendReset();
-        OnCountChanged();
-    }
-    protected void OnChanged( NotifyCollectionChangedEventArgs e ) => CollectionChanged?.Invoke(this, e);
-    protected void OnCountChanged() => OnPropertyChanged(new PropertyChangedEventArgs(nameof(Count)));
-    public event NotifyCollectionChangedEventHandler? CollectionChanged;
-    void ICollectionAlerts.SendOnChanged( NotifyCollectionChangedEventArgs e ) => OnChanged(e);
-
-
-    bool ICollection.IsSynchronized
-    {
-        get
-        {
-            lock ( _lock ) { return ( (IList)_items ).IsSynchronized; }
-        }
-    }
-    object ICollection.SyncRoot
-    {
-        get
-        {
-            lock ( _lock ) { return ( (IList)_items ).SyncRoot; }
-        }
-    }
-    bool IList.IsFixedSize
-    {
-        get
-        {
-            lock ( _lock ) { return ( (IList)_items ).IsFixedSize; }
-        }
-    }
-    bool IList.IsReadOnly
-    {
-        get
-        {
-            lock ( _lock ) { return ( (IList)_items ).IsReadOnly; }
-        }
-    }
-
-
     void ICollection.CopyTo( Array array, int start )
     {
         lock ( _lock ) { ( (IList)_items ).CopyTo(array, start); }
     }
-    void IList.Remove( object value )
+    void IList.Remove( object? value )
     {
         lock ( _lock ) { ( (IList)_items ).Remove(value); }
     }
-    int IList.Add( object value )
+    int IList.Add( object? value )
     {
         lock ( _lock ) { return ( (IList)_items ).Add(value); }
     }
-    bool IList.Contains( object value )
+    bool IList.Contains( object? value )
     {
         lock ( _lock ) { return ( (IList)_items ).Contains(value); }
     }
-    int IList.IndexOf( object value )
+    int IList.IndexOf( object? value )
     {
         lock ( _lock ) { return ( (IList)_items ).IndexOf(value); }
     }
-    void IList.Insert( int index, object value )
+    void IList.Insert( int index, object? value )
     {
         lock ( _lock ) { ( (IList)_items ).Insert(index, value); }
-    }
-
-
-    object IList.this[ int index ]
-
-    {
-        get
-        {
-            lock ( _lock ) { return ( (IList)_items )[index]; }
-        }
-        set
-        {
-            lock ( _lock ) { ( (IList)_items )[index] = value; }
-        }
-    }
-
-
-    public int Count
-    {
-        get
-        {
-            lock ( _lock ) { return _items.Count; }
-        }
-    }
-    bool ICollection<T>.IsReadOnly
-    {
-        get
-        {
-            lock ( _lock ) { return ( (IList)_items ).IsReadOnly; }
-        }
     }
 
 
@@ -459,22 +432,6 @@ public class ConcurrentObservableCollection<T> : ObservableClass, IList<T>, ILis
     }
 
 
-    public T this[ int index ]
-    {
-        get
-        {
-            lock ( _lock ) { return _items[index]; }
-        }
-        set
-        {
-            lock ( _lock )
-            {
-                T old = _items[index];
-                _items[index] = value;
-                Replaced(old, value, index);
-            }
-        }
-    }
     public void CopyTo( T[] array, int start )
     {
         lock ( _lock ) { _items.CopyTo(array, start); }
@@ -489,6 +446,5 @@ public class ConcurrentObservableCollection<T> : ObservableClass, IList<T>, ILis
     {
         lock ( _lock ) { return _items.GetEnumerator(); }
     }
-
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }

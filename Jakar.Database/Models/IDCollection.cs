@@ -7,14 +7,14 @@ namespace Jakar.Database;
 
 [Serializable]
 [DataBaseType(DbType.String)]
-public sealed class IDCollection<T, TID> : IReadOnlyCollection<TID>, ICollectionAlerts, ISpanFormattable where T : IUniqueID<TID>
-                                                                                                         where TID : IComparable<TID>, IEquatable<TID>
+public sealed class IDCollection<T, TID> : CollectionAlerts<TID>, IReadOnlyCollection<TID>, ISpanFormattable where T : IUniqueID<TID>
+                                                                                                             where TID : IComparable<TID>, IEquatable<TID>
 {
     public const     char         SEPARATOR = ',';
     private readonly HashSet<TID> _items;
 
 
-    public int Count => _items.Count;
+    public override int Count => _items.Count;
 
 
     public IDCollection() : this(EqualityComparer<TID>.Default) { }
@@ -24,6 +24,65 @@ public sealed class IDCollection<T, TID> : IReadOnlyCollection<TID>, ICollection
     public IDCollection( IEnumerable<T>          collection ) : this(new HashSet<TID>(collection.Select(x => x.ID))) { }
     internal IDCollection( HashSet<TID>          set ) => _items = set;
 
+
+    /// <summary> </summary>
+    /// <typeparamref name = "T" />
+    /// <param name = "items" > </param>
+    /// <returns>
+    /// Returns a IDCollection if <paramref name = "items" /> is not null. 
+    /// <para> Otherwise returns <see langword = "null" /> </para>
+    /// </returns>
+    public static IDCollection<T, TID>? Create( [NotNullIfNotNull("items")] ICollection<T>? items )
+    {
+        if ( items is null ) { return null; }
+
+        var collection = new IDCollection<T, TID>(items.Count);
+
+        foreach ( T value in items ) { collection.Add(value); }
+
+        return collection;
+    }
+    public static IDCollection<T, TID>? Create( [NotNullIfNotNull("jsonOrCsv")] string? jsonOrCsv )
+    {
+        if ( string.IsNullOrWhiteSpace(jsonOrCsv) ) { return null; }
+
+        var items = jsonOrCsv.Replace("\"", string.Empty)
+                             .FromJson<List<TID>>();
+
+        var collection = new IDCollection<T, TID>(items.Count)
+                         {
+                             items
+                         };
+
+
+        return collection;
+    }
+
+    // public static IDCollection<T, TID> Create( in ReadOnlySpan<char> span )
+    // {
+    //     if ( span.IsEmpty ) { return new IDCollection<T, TID>(); }
+    //
+    //     if ( !span.Contains(SEPARATOR) ) { throw new ArgumentException($"{nameof(span)} doesn't contain a '{SEPARATOR}'"); }
+    //
+    //     ReadOnlySpan<char> value = span.Trim()
+    //                                    .TrimStart('[')
+    //                                    .TrimEnd(']');
+    //
+    //     var collection = new IDCollection<T, TID>();
+    //
+    //     foreach ( ReadOnlySpan<char> section in value.SplitOn(SEPARATOR) ) { collection.Add(long.Parse(section)); }
+    //
+    //     return collection;
+    // }
+
+
+    public void Init( string? json )
+    {
+        Clear();
+        if ( string.IsNullOrWhiteSpace(json) ) { return; }
+
+        foreach ( TID n in json.FromJson<List<TID>>() ) { Add(n); }
+    }
 
     private void Add( IEnumerable<TID>? value )
     {
@@ -62,76 +121,7 @@ public sealed class IDCollection<T, TID> : IReadOnlyCollection<TID>, ICollection
     public bool Contains( T    value ) => Contains(value.ID);
 
 
-    /// <summary>
-    /// </summary>
-    /// <typeparamref name = "T" />
-    /// <param name = "items" > </param>
-    /// <returns>
-    ///     Returns a IDCollection if
-    ///     <paramref name = "items" />
-    ///     is not null.
-    ///     <para>
-    ///         Otherwise returns
-    ///         <see langword = "null" />
-    ///     </para>
-    /// </returns>
-    public static IDCollection<T, TID>? Create( [NotNullIfNotNull("items")] ICollection<T>? items )
-    {
-        if ( items is null ) { return null; }
-
-        var collection = new IDCollection<T, TID>(items.Count);
-
-        foreach ( T value in items ) { collection.Add(value); }
-
-        return collection;
-    }
-    public static IDCollection<T, TID>? Create( [NotNullIfNotNull("jsonOrCsv")] string? jsonOrCsv )
-    {
-        if ( string.IsNullOrWhiteSpace(jsonOrCsv) ) { return null; }
-
-        var items = jsonOrCsv.Replace("\"", string.Empty)
-                             .FromJson<List<TID>>();
-
-        var collection = new IDCollection<T, TID>(items.Count)
-                         {
-                             items
-                         };
-
-
-        return collection;
-    }
-    // public static IDCollection<T, TID> Create( in ReadOnlySpan<char> span )
-    // {
-    //     if ( span.IsEmpty ) { return new IDCollection<T, TID>(); }
-    //
-    //     if ( !span.Contains(SEPARATOR) ) { throw new ArgumentException($"{nameof(span)} doesn't contain a '{SEPARATOR}'"); }
-    //
-    //     ReadOnlySpan<char> value = span.Trim()
-    //                                    .TrimStart('[')
-    //                                    .TrimEnd(']');
-    //
-    //     var collection = new IDCollection<T, TID>();
-    //
-    //     foreach ( ReadOnlySpan<char> section in value.SplitOn(SEPARATOR) ) { collection.Add(long.Parse(section)); }
-    //
-    //     return collection;
-    // }
-
-
-    public void Init( string? json )
-    {
-        Clear();
-        if ( string.IsNullOrWhiteSpace(json) ) { return; }
-
-        foreach ( TID n in json.FromJson<List<TID>>() ) { Add(n); }
-    }
-    private void OnChanged( NotifyCollectionChangedEventArgs    e ) => CollectionChanged?.Invoke(this, e);
-    private void OnPropertyChanged( [CallerMemberName]  string? propertyName = default ) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-    private void OnPropertyChanging( [CallerMemberName] string? propertyName = default ) => PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(propertyName));
-
-
     // public static implicit operator IDCollection<T, TID>( ReadOnlySpan<char> span ) => Create(span);
-
     public static implicit operator IDCollection<T, TID>?( string? jsonOrCsv ) => Create(jsonOrCsv);
     private bool Remove( TID id )
     {
@@ -166,7 +156,6 @@ public sealed class IDCollection<T, TID> : IReadOnlyCollection<TID>, ICollection
     }
 
 
-    void ICollectionAlerts.SendOnChanged( NotifyCollectionChangedEventArgs e ) => CollectionChanged?.Invoke(this, e);
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
 
@@ -178,9 +167,6 @@ public sealed class IDCollection<T, TID> : IReadOnlyCollection<TID>, ICollection
     }
 
 
-    public event NotifyCollectionChangedEventHandler? CollectionChanged;
-    public event PropertyChangedEventHandler?         PropertyChanged;
-    public event PropertyChangingEventHandler?        PropertyChanging;
     public bool TryFormat( Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider )
     {
         ReadOnlySpan<char> result = ToString(format, provider);

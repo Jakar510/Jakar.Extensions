@@ -5,9 +5,34 @@
 namespace Jakar.Extensions;
 
 
-public class ObservableConcurrentDictionary<TKey, TValue> : ObservableClass, IDictionary<TKey, TValue>, IReadOnlyDictionary<TKey, TValue>, ICollectionAlerts where TKey : notnull
+public class ObservableConcurrentDictionary<TKey, TValue> : CollectionAlerts<KeyValuePair<TKey, TValue?>>, IDictionary<TKey, TValue>, IReadOnlyDictionary<TKey, TValue> where TKey : notnull
 {
     protected readonly ConcurrentDictionary<TKey, TValue> _dictionary;
+
+
+    public                 ICollection<TKey>   Keys       => _dictionary.Keys;
+    public                 ICollection<TValue> Values     => _dictionary.Values;
+    public sealed override int                 Count      => _dictionary.Count;
+    public                 bool                IsReadOnly => ( (IDictionary)_dictionary ).IsReadOnly;
+
+
+    public TValue this[ TKey key ]
+    {
+        get => _dictionary[key];
+        set
+        {
+            bool exists = ContainsKey(key);
+
+            TValue? old = exists
+                              ? _dictionary[key]
+                              : default;
+
+            _dictionary[key] = value;
+
+            if ( exists ) { Replaced(new KeyValuePair<TKey, TValue?>(key, old), new KeyValuePair<TKey, TValue?>(key, value)); }
+            else { Added(new KeyValuePair<TKey, TValue?>(key,             value)); }
+        }
+    }
 
 
     public ObservableConcurrentDictionary() : this(new ConcurrentDictionary<TKey, TValue>()) { }
@@ -89,60 +114,15 @@ public class ObservableConcurrentDictionary<TKey, TValue> : ObservableClass, IDi
     {
         if ( !_dictionary.TryAdd(key, value) ) { return false; }
 
-        var pair = new KeyValuePair<TKey, TValue>(key, value);
-        Added(pair);
-        OnCountChanged();
+        Added(new KeyValuePair<TKey, TValue?>(key, value));
         return true;
     }
 
-    protected virtual void OnCollectionChanged( NotifyCollectionChangedEventArgs e ) => CollectionChanged?.Invoke(this, e);
-    protected void Removed( KeyValuePair<TKey, TValue> item )
-    {
-        OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, item));
-        OnCountChanged();
-    }
-    protected void Added( TKey key, TValue item ) => Added(new KeyValuePair<TKey, TValue>(key, item));
-    protected void Added( KeyValuePair<TKey, TValue> item )
-    {
-        OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, item));
-        OnCountChanged();
-    }
 
-    protected void Replaced( TKey key, TValue? oldItem, TValue? newItem ) => OnCollectionChanged(NotifyCollectionChangedAction.Replace, new KeyValuePair<TKey, TValue?>(key, oldItem), new KeyValuePair<TKey, TValue?>(key, newItem));
-    protected void OnCollectionChanged( NotifyCollectionChangedAction action, KeyValuePair<TKey, TValue?> oldItem, KeyValuePair<TKey, TValue?> newItem ) => OnCollectionChanged(new NotifyCollectionChangedEventArgs(action, newItem, oldItem));
-    protected void Reset()
-    {
-        OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
-        OnCountChanged();
-    }
-    protected void OnCountChanged() => OnPropertyChanged(new PropertyChangedEventArgs(nameof(Count)));
-    public event NotifyCollectionChangedEventHandler? CollectionChanged;
-    void ICollectionAlerts.SendOnChanged( NotifyCollectionChangedEventArgs e ) => OnCollectionChanged(e);
-    public ICollection<TKey>   Keys       => _dictionary.Keys;
-    public ICollection<TValue> Values     => _dictionary.Values;
-    public int                 Count      => _dictionary.Count;
-    public bool                IsReadOnly => ( (IDictionary)_dictionary ).IsReadOnly;
+#pragma warning disable CS8767
+    public bool TryGetValue( TKey key, out TValue? value ) => _dictionary.TryGetValue(key, out value);
+#pragma warning restore CS8767
 
-    public TValue this[ TKey key ]
-    {
-        get => _dictionary[key];
-        set
-        {
-            bool exists = ContainsKey(key);
-
-            TValue? old = exists
-                              ? _dictionary[key]
-                              : default;
-
-            _dictionary[key] = value;
-
-            if ( exists ) { Replaced(key, old, value); }
-            else { Added(key, value); }
-        }
-    }
-
-
-    public bool TryGetValue( TKey key, out TValue value ) => _dictionary.TryGetValue(key, out value);
 
     public bool ContainsKey( TKey key ) => _dictionary.ContainsKey(key);
 
@@ -157,10 +137,9 @@ public class ObservableConcurrentDictionary<TKey, TValue> : ObservableClass, IDi
     {
         if ( !_dictionary.ContainsKey(key) ) { return false; }
 
-        if ( !_dictionary.TryRemove(key, out TValue value) ) { return false; }
+        if ( !_dictionary.TryRemove(key, out TValue? value) ) { return false; }
 
-        var pair = new KeyValuePair<TKey, TValue>(key, value);
-        Removed(pair);
+        Removed(new KeyValuePair<TKey, TValue?>(key, value));
         OnCountChanged();
         return true;
     }

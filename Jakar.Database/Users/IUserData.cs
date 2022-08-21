@@ -1,7 +1,7 @@
 ﻿namespace Jakar.Database;
 
 
-public interface IUserData
+public interface IUserData :  JsonModels.IJsonModel
 {
     public string?           FirstName              { get; }
     public string?           LastName               { get; }
@@ -26,5 +26,5 @@ public interface IUserData
     public SupportedLanguage PreferredLanguage      { get; }
 
 
-    public void Update(IUserData model);
+    public void Update( IUserData model );
 }

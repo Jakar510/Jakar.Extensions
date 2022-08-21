@@ -5,16 +5,24 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Jakar.Database;
 
-
+/// <summary>
+/// <para><see cref="IGuid"/></para>
+/// <para><see cref="IUserData"/></para>
+/// <para><see cref="IUserControl{TRecord}"/></para>
+/// <para><see cref="IUserSubscription{TID}"/></para>
+/// <para><see cref="IRefreshToken"/></para>
+/// </summary>
+/// <typeparam name="TRecord"></typeparam>
+/// <typeparam name="TID"></typeparam>
 [SuppressMessage("ReSharper", "UnusedType.Global")]
-public interface IUserRecord<TRecord, TID> : JsonModels.IJsonStringModel, IComparable<TRecord>, IEquatable<TRecord>, IUserData, IUserControl<TRecord>, IRefreshToken, IUserSubscription<TID>
-    where TRecord : BaseTableRecord<TRecord, TID>, IUserRecord<TRecord, TID>
-    where TID : IComparable<TID>, IEquatable<TID>
+public interface IUserRecord<TRecord, TID> : IComparable<TRecord>, IEquatable<TRecord>, JsonModels.IJsonStringModel where TRecord : BaseTableRecord<TRecord, TID>, IUserRecord<TRecord, TID>
+                                                                                                                    where TID : IComparable<TID>, IEquatable<TID>
 {
     public string?        UserName     { get; }
     public string?        PasswordHash { get; }
     public DateTimeOffset DateCreated  { get; }
     public TID?           CreatedBy    { get; }
+
 
     /// <summary> A unique User ID for which user to contact </summary>
     public TID? EscalateTo { get; }
@@ -28,7 +36,7 @@ public interface IUserRecord<TRecord, TID> : JsonModels.IJsonStringModel, ICompa
     /// <para><see href = "https://stackoverflow.com/questions/10520048/calculate-md5-checksum-for-a-file" /></para>
     /// <see cref="PasswordHasher{TRecord}"/> 
     /// </summary>
-    public void UpdatePassword(string password);
+    public void UpdatePassword( string password );
 
 
     /// <summary>
@@ -36,9 +44,9 @@ public interface IUserRecord<TRecord, TID> : JsonModels.IJsonStringModel, ICompa
     /// <para><see href = "https://stackoverflow.com/questions/10520048/calculate-md5-checksum-for-a-file" /></para>
     /// <see cref="PasswordHasher{TRecord}"/> 
     /// </summary>
-    public PasswordVerificationResult VerifyPassword(string password);
+    public PasswordVerificationResult VerifyPassword( string password );
 
 
-    public Task<TRecord?> GetBoss(DbConnection           connection, DbTransaction? transaction, DbTable<TRecord, TID> table, CancellationToken token);
-    public Task<TRecord?> GetUserWhoCreated(DbConnection connection, DbTransaction? transaction, DbTable<TRecord, TID> db,    CancellationToken token);
+    public Task<TRecord?> GetBoss( DbConnection           connection, DbTransaction? transaction, DbTable<TRecord, TID> table, CancellationToken token );
+    public Task<TRecord?> GetUserWhoCreated( DbConnection connection, DbTransaction? transaction, DbTable<TRecord, TID> db,    CancellationToken token );
 }
