@@ -46,7 +46,8 @@ public class WebHandler : IDisposable
     public virtual void Dispose() => _request.Dispose();
 
 
-    public TaskAwaiter<HttpResponseMessage> GetAwaiter() => _client.SendAsync(_request, Token).GetAwaiter();
+    public TaskAwaiter<HttpResponseMessage> GetAwaiter() => _client.SendAsync(_request, Token)
+                                                                   .GetAwaiter();
 
 
     public virtual Task<WebResponse<JToken>> AsJson() => AsJson(JsonNet.LoadSettings);
@@ -92,7 +93,7 @@ public class WebHandler : IDisposable
     #if NET6_0
         return await content.ReadAsStringAsync(Token);
     #else
-            return await content.ReadAsStringAsync();
+        return await content.ReadAsStringAsync();
     #endif
     }
 

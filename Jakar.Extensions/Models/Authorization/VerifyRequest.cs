@@ -2,16 +2,8 @@
 namespace Jakar.Extensions;
 
 
-public interface ILoginRequest : IEquatable<ILoginRequest>
-{
-    public string UserLogin    { get; }
-    public string UserPassword { get; }
-}
-
-
-
 [Serializable]
-public class VerifyRequest : BaseClass, ILoginRequest, ICredentials
+public class VerifyRequest : BaseClass, ILoginRequest, ICredentials, IEquatable<VerifyRequest>
 {
     [Required(ErrorMessage = "Email address is required.")]
     [JsonProperty(nameof(UserLogin), Required = Required.Always)]
@@ -23,7 +15,10 @@ public class VerifyRequest : BaseClass, ILoginRequest, ICredentials
     public string UserPassword { get; init; } = string.Empty;
 
 
-    [JsonConstructor] public VerifyRequest() { }
+    public virtual bool IsValid => !string.IsNullOrWhiteSpace(UserLogin) && !string.IsNullOrWhiteSpace(UserPassword);
+
+
+    public VerifyRequest() { }
     public VerifyRequest( string? userName, string? userPassword )
     {
         UserLogin    = userName ?? throw new ArgumentNullException(nameof(userName));
@@ -31,7 +26,7 @@ public class VerifyRequest : BaseClass, ILoginRequest, ICredentials
     }
 
 
-    public virtual bool Equals( ILoginRequest? other )
+    public virtual bool Equals( VerifyRequest? other )
     {
         if ( other is null ) { return false; }
 
@@ -39,11 +34,11 @@ public class VerifyRequest : BaseClass, ILoginRequest, ICredentials
 
         return UserLogin == other.UserLogin && UserPassword == other.UserPassword;
     }
-    public override bool Equals( object? obj ) => obj is ILoginRequest request && Equals(request);
+    public override bool Equals( object? obj ) => obj is VerifyRequest request && Equals(request);
     public override int GetHashCode() => HashCode.Combine(UserLogin, UserPassword);
 
 
-    public NetworkCredential GetCredential( Uri uri, string authType ) => new(UserLogin, UserPassword.ToSecureString());
+    public virtual NetworkCredential GetCredential( Uri uri, string authType ) => new(UserLogin, UserPassword.ToSecureString());
 
 
     public static bool operator ==( VerifyRequest? left, VerifyRequest? right ) => Equals(left, right);

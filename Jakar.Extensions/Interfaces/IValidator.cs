@@ -12,5 +12,4 @@ public interface IValidator
 
 
 
-
 public interface INotifyValidator : IValidator, INotifyPropertyChanged { }

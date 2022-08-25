@@ -36,7 +36,7 @@ public class GuidBenchmarks
 
     [Benchmark] public Guid StringParse() => Guid.Parse(GUID);
     [Benchmark] public Guid? SpanParse() => _b64.AsGuid();
-    [Benchmark] [CanBeNull] public new string ToString() => _guid.ToString();
+    [Benchmark] public new string? ToString() => _guid.ToString();
     [Benchmark] public string AsBase64() => _guid.ToBase64();
 
 
