@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="Jakar.Extensions" Version="6.0.0.46-beta" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="6.0.8" />
     <PackageReference Include="Sigil" Version="5.0.0" />
   </ItemGroup>

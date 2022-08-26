@@ -1,10 +1,16 @@
 ﻿namespace Jakar.Database;
 
 
+/// <summary>
+/// <see cref="UserLoginInfo"/>
+/// </summary>
 public interface IUserSecurity
 {
-    public DateTimeOffset? TokenExpiration    { get; }
-    public bool            IsTwoFactorEnabled { get; }
+    public DateTimeOffset? TokenExpiration     { get; }
+    public bool            IsTwoFactorEnabled  { get; }
+    public string?         LoginProvider       { get; }
+    public string?         ProviderKey         { get; }
+    public string?         ProviderDisplayName { get; }
 
 
     /// <summary> A random value that must change whenever a users credentials change (password changed, login removed) </summary>
@@ -16,5 +22,5 @@ public interface IUserSecurity
 
 
     public void ClearRefreshToken();
-    public void SetRefreshToken(string token, DateTimeOffset date);
+    public void SetRefreshToken( string token, DateTimeOffset date );
 }

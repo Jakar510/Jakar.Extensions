@@ -1,9 +1,9 @@
 ﻿using System.Security.Claims;
-using Microsoft.AspNetCore.Identity;
 
 
 
 namespace Jakar.Database;
+
 
 /// <summary>
 /// <para><see cref="IUserID"/></para>
@@ -15,18 +15,19 @@ namespace Jakar.Database;
 /// <typeparam name="TRecord"></typeparam>
 /// <typeparam name="TID"></typeparam>
 [SuppressMessage("ReSharper", "UnusedType.Global")]
-public interface IUserRecord<TRecord, TID> : IComparable<TRecord>, IEquatable<TRecord>, JsonModels.IJsonStringModel where TRecord : BaseTableRecord<TRecord, TID>, IUserRecord<TRecord, TID>
-                                                                                                                    where TID : IComparable<TID>, IEquatable<TID>
+// ReSharper disable once PossibleInterfaceMemberAmbiguity
+public interface IUserRecord<TRecord, TID> : IComparable<TRecord>, IEquatable<TRecord>, JsonModels.IJsonStringModel, IRefreshToken, IUserControl<TRecord>, IUserID, IUserData, IUserSecurity, IUserSubscription<TID>
+    where TRecord : BaseTableRecord<TRecord, TID>, IUserRecord<TRecord, TID>
+    where TID : IComparable<TID>, IEquatable<TID>
 {
     public string?        UserName     { get; }
     public string?        PasswordHash { get; }
     public DateTimeOffset DateCreated  { get; }
     public TID?           CreatedBy    { get; }
 
-
+    
     /// <summary> A unique User ID for which user to contact </summary>
     public TID? EscalateTo { get; }
-
 
     public List<Claim> GetUserClaims();
 
@@ -37,8 +38,6 @@ public interface IUserRecord<TRecord, TID> : IComparable<TRecord>, IEquatable<TR
     /// <see cref="PasswordHasher{TRecord}"/> 
     /// </summary>
     public void UpdatePassword( string password );
-
-
     /// <summary>
     /// <para><see href = "https://stackoverflow.com/a/63733365/9530917" /></para>
     /// <para><see href = "https://stackoverflow.com/questions/10520048/calculate-md5-checksum-for-a-file" /></para>
