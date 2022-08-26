@@ -9,8 +9,8 @@ namespace Jakar.Database;
 
 
 [SuppressMessage("ReSharper", "UnusedMemberInSuper.Global")]
-public interface IDbTable<TRecord, in TID> : IConnectableDb, IAsyncDisposable where TRecord : BaseTableRecord<TRecord, TID>
-                                                                              where TID : IComparable<TID>, IEquatable<TID>
+public interface IDbTable<TRecord, TID> : IConnectableDb, IAsyncDisposable where TRecord : BaseTableRecord<TRecord, TID>
+                                                                           where TID : IComparable<TID>, IEquatable<TID>
 {
     public string TableName { get; }
 
@@ -53,32 +53,48 @@ public interface IDbTable<TRecord, in TID> : IConnectableDb, IAsyncDisposable wh
     public Task<TRecord?> LastOrDefault( DbConnection      connection, DbTransaction? transaction, CancellationToken token );
 
 
-    public Task<TRecord?> Single( TID           id,         CancellationToken  token );
-    public Task<TRecord?> Single( DbConnection  connection, DbTransaction?     transaction, TID               id, CancellationToken token );
-    public Task<TRecord?> Single( StringBuilder sb,         DynamicParameters? parameters,  CancellationToken token );
-    public Task<TRecord?> Single( DbConnection  connection, DbTransaction?     transaction, StringBuilder     sb, DynamicParameters? parameters, CancellationToken token );
+    public Task<TRecord?> Single( TID          id,         CancellationToken  token );
+    public Task<TRecord?> Single( DbConnection connection, DbTransaction?     transaction, TID               id, CancellationToken token );
+    public Task<TRecord?> Single( string       sql,        DynamicParameters? parameters,  CancellationToken token );
+    public Task<TRecord?> Single( DbConnection connection, DbTransaction?     transaction, string            sql, DynamicParameters? parameters, CancellationToken token );
 
 
-    public Task<TRecord?> SingleOrDefault( TID           id,         CancellationToken  token );
-    public Task<TRecord?> SingleOrDefault( DbConnection  connection, DbTransaction?     transaction, TID               id, CancellationToken token );
-    public Task<TRecord?> SingleOrDefault( StringBuilder sb,         DynamicParameters? parameters,  CancellationToken token );
-    public Task<TRecord?> SingleOrDefault( DbConnection  connection, DbTransaction?     transaction, StringBuilder     sb, DynamicParameters? parameters, CancellationToken token );
+    public Task<TRecord?> SingleOrDefault( TID          id,         CancellationToken  token );
+    public Task<TRecord?> SingleOrDefault( DbConnection connection, DbTransaction?     transaction, TID               id, CancellationToken token );
+    public Task<TRecord?> SingleOrDefault( string       sql,        DynamicParameters? parameters,  CancellationToken token );
+    public Task<TRecord?> SingleOrDefault( DbConnection connection, DbTransaction?     transaction, string            sql, DynamicParameters? parameters, CancellationToken token );
 
 
     public Task<List<TRecord>> All( CancellationToken token );
     public Task<List<TRecord>> All( DbConnection      connection, DbTransaction? transaction, CancellationToken token );
 
 
-    public Task<TResult> Call<TResult>( StringBuilder sb,         DynamicParameters? parameters,  Func<SqlMapper.GridReader, CancellationToken, Task<TResult>> func, CancellationToken token );
-    public Task<TResult> Call<TResult>( DbConnection  connection, DbTransaction?     transaction, StringBuilder sb, DynamicParameters? parameters, Func<SqlMapper.GridReader, CancellationToken, Task<TResult>> func, CancellationToken token );
+    public Task<TResult> Call<TResult>( string       sql,        DynamicParameters? parameters,  Func<SqlMapper.GridReader, CancellationToken, Task<TResult>> func, CancellationToken token );
+    public Task<TResult> Call<TResult>( DbConnection connection, DbTransaction?     transaction, string sql, DynamicParameters? parameters, Func<SqlMapper.GridReader, CancellationToken, Task<TResult>> func, CancellationToken token );
 
 
-    public Task<TResult> Call<TResult>( StringBuilder sb,         DynamicParameters? parameters,  Func<DbDataReader, CancellationToken, Task<TResult>> func, CancellationToken token );
-    public Task<TResult> Call<TResult>( DbConnection  connection, DbTransaction?     transaction, StringBuilder sb, DynamicParameters? parameters, Func<DbDataReader, CancellationToken, Task<TResult>> func, CancellationToken token );
+    public Task<TResult> Call<TResult>( string       sql,        DynamicParameters? parameters,  Func<DbDataReader, CancellationToken, Task<TResult>> func, CancellationToken token );
+    public Task<TResult> Call<TResult>( DbConnection connection, DbTransaction?     transaction, string sql, DynamicParameters? parameters, Func<DbDataReader, CancellationToken, Task<TResult>> func, CancellationToken token );
 
 
-    public IAsyncEnumerable<TRecord> Where( StringBuilder sb,         DynamicParameters? parameters,  [EnumeratorCancellation] CancellationToken token );
-    public IAsyncEnumerable<TRecord> Where( DbConnection  connection, DbTransaction?     transaction, StringBuilder                              sb, DynamicParameters? parameters, [EnumeratorCancellation] CancellationToken token );
+    public IAsyncEnumerable<TRecord> Where( DynamicParameters parameters, [EnumeratorCancellation] CancellationToken token );
+    public IAsyncEnumerable<TRecord> Where( DbConnection      connection, DbTransaction?                             transaction, DynamicParameters parameters, [EnumeratorCancellation] CancellationToken token );
+
+
+    public IAsyncEnumerable<TRecord> Where( string       sql,        DynamicParameters? parameters,  [EnumeratorCancellation] CancellationToken token );
+    public IAsyncEnumerable<TRecord> Where( DbConnection connection, DbTransaction?     transaction, string                                     sql, DynamicParameters? parameters, [EnumeratorCancellation] CancellationToken token );
+
+
+    public IAsyncEnumerable<TRecord> Where<TValue>( string       columnName, TValue?        value,       [EnumeratorCancellation] CancellationToken token );
+    public IAsyncEnumerable<TRecord> Where<TValue>( DbConnection connection, DbTransaction? transaction, string                                     columnName, TValue? value, [EnumeratorCancellation] CancellationToken token );
+
+
+    public Task<TID> GetID<TValue>( string       sql,        DynamicParameters? parameters,  CancellationToken token );
+    public Task<TID> GetID<TValue>( DbConnection connection, DbTransaction?     transaction, string            sql, DynamicParameters? parameters, CancellationToken token );
+
+
+    public Task<TID> GetID<TValue>( string       columnName, TValue?        value,       CancellationToken token );
+    public Task<TID> GetID<TValue>( DbConnection connection, DbTransaction? transaction, string            columnName, TValue? value, CancellationToken token );
 
 
     public Task<TRecord> Get( TID                               id,         CancellationToken                          token );

@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Identity;
 namespace Jakar.Database;
 
 /// <summary>
-/// <para><see cref="IGuid"/></para>
+/// <para><see cref="IUserID"/></para>
 /// <para><see cref="IUserData"/></para>
 /// <para><see cref="IUserControl{TRecord}"/></para>
 /// <para><see cref="IUserSubscription{TID}"/></para>

@@ -12,6 +12,9 @@ namespace Jakar.Extensions;
 [SuppressMessage("ReSharper", "ClassWithVirtualMembersNeverInherited.Global")]
 public class WebHandler : IDisposable
 {
+    public const string FILE_NAME = "FileName";
+
+
     private readonly   HttpClient         _client;
     private readonly   HttpRequestMessage _request;
     protected internal CancellationToken  Token    { get; }
@@ -59,7 +62,7 @@ public class WebHandler : IDisposable
     #if NET6_0
         await using Stream stream = await content.ReadAsStreamAsync(Token);
     #else
-            await using Stream stream = await content.ReadAsStreamAsync();
+        await using Stream stream = await content.ReadAsStreamAsync();
     #endif
         using var        sr     = new StreamReader(stream, Encoding);
         using JsonReader reader = new JsonTextReader(sr);
@@ -76,7 +79,7 @@ public class WebHandler : IDisposable
     #if NET6_0
         await using Stream stream = await content.ReadAsStreamAsync(Token);
     #else
-            await using Stream stream = await content.ReadAsStreamAsync();
+        await using Stream stream = await content.ReadAsStreamAsync();
     #endif
         using var        sr     = new StreamReader(stream, Encoding);
         using JsonReader reader = new JsonTextReader(sr);
@@ -88,86 +91,79 @@ public class WebHandler : IDisposable
     public virtual Task<WebResponse<string>> AsString() => WebResponse<string>.Create(this, AsString);
     public virtual async Task<string> AsString( HttpResponseMessage response )
     {
-        response.EnsureSuccessStatusCode();
-        using HttpContent content = response.Content;
-    #if NET6_0
-        return await content.ReadAsStringAsync(Token);
-    #else
-        return await content.ReadAsStringAsync();
-    #endif
+        using MemoryStream stream = await AsStream(response);
+        var                reader = new StreamReader(stream, Encoding);
+        return await reader.ReadToEndAsync();
     }
 
 
     public virtual Task<WebResponse<byte[]>> AsBytes() => WebResponse<byte[]>.Create(this, AsBytes);
     public virtual async Task<byte[]> AsBytes( HttpResponseMessage response )
     {
-        response.EnsureSuccessStatusCode();
-        using HttpContent content = response.Content;
-    #if NET6_0
-        return await content.ReadAsByteArrayAsync(Token);
-    #else
-            return await content.ReadAsByteArrayAsync();
-    #endif
+        using MemoryStream stream = await AsStream(response);
+        return stream.ToArray();
     }
 
 
     public virtual Task<WebResponse<ReadOnlyMemory<byte>>> AsMemory() => WebResponse<ReadOnlyMemory<byte>>.Create(this, AsMemory);
-    public virtual async Task<ReadOnlyMemory<byte>> AsMemory( HttpResponseMessage response )
-    {
-        response.EnsureSuccessStatusCode();
-        using HttpContent content = response.Content;
-
-    #if NET6_0
-        byte[] bytes = await content.ReadAsByteArrayAsync(Token);
-    #else
-            byte[] bytes = await content.ReadAsByteArrayAsync();
-    #endif
-
-        return bytes;
-    }
+    public virtual async Task<ReadOnlyMemory<byte>> AsMemory( HttpResponseMessage response ) => await AsBytes(response);
 
 
     public virtual Task<WebResponse<LocalFile>> AsFile() => WebResponse<LocalFile>.Create(this, AsFile);
     public virtual async Task<LocalFile> AsFile( HttpResponseMessage response )
     {
-        response.EnsureSuccessStatusCode();
-        using HttpContent      content = response.Content;
-        await using FileStream stream  = LocalFile.CreateTempFileAndOpen(out LocalFile file);
-        await stream.CopyToAsync(stream, Token);
+        await using MemoryStream stream = await AsStream(response);
+        await using FileStream   fs     = LocalFile.CreateTempFileAndOpen(out LocalFile file);
+        await stream.CopyToAsync(fs, Token);
 
         return file;
     }
 
 
-    public virtual Task<WebResponse<LocalFile>> AsFile( string relativePath ) => WebResponse<LocalFile>.Create(this, relativePath, AsFile);
-    public virtual async Task<LocalFile> AsFile( HttpResponseMessage response, string relativePath )
+    public virtual Task<WebResponse<LocalFile>> AsFile( string fileNameHeader ) => WebResponse<LocalFile>.Create(this, fileNameHeader, AsFile);
+    public virtual async Task<LocalFile> AsFile( HttpResponseMessage response, string fileNameHeader )
     {
-        response.EnsureSuccessStatusCode();
-        using HttpContent content = response.Content;
-        var               file    = new LocalFile(relativePath);
-    #if NET6_0
-        await using Stream stream = await content.ReadAsStreamAsync(Token);
-    #else
-            await using Stream stream = await content.ReadAsStreamAsync();
-    #endif
-        await file.WriteAsync(stream, Token);
+        if ( response.Headers.Contains(fileNameHeader) )
+        {
+            var mimeType = response.Headers.GetValues(fileNameHeader)
+                                   .First()
+                                   .ToMimeType();
+
+            return await AsFile(response, mimeType);
+        }
+
+
+        if ( response.Content.Headers.Contains(fileNameHeader) )
+        {
+            var mimeType = response.Content.Headers.GetValues(fileNameHeader)
+                                   .First()
+                                   .ToMimeType();
+
+            return await AsFile(response, mimeType);
+        }
+
+
+        await using MemoryStream stream = await AsStream(response);
+        await using FileStream   fs     = LocalFile.CreateTempFileAndOpen(out LocalFile file);
+        await stream.CopyToAsync(fs, Token);
 
         return file;
+    }
+
+
+    public virtual Task<WebResponse<LocalFile>> AsFile( FileInfo path ) => WebResponse<LocalFile>.Create(this, path, AsFile);
+    public virtual async Task<LocalFile> AsFile( HttpResponseMessage response, FileInfo path )
+    {
+        var file = new LocalFile(path);
+        return await AsFile(response, file);
     }
 
 
     public virtual Task<WebResponse<LocalFile>> AsFile( LocalFile file ) => WebResponse<LocalFile>.Create(this, file, AsFile);
     public virtual async Task<LocalFile> AsFile( HttpResponseMessage response, LocalFile file )
     {
-        response.EnsureSuccessStatusCode();
-        using HttpContent content = response.Content;
-    #if NET6_0
-        await using Stream stream = await content.ReadAsStreamAsync(Token);
-    #else
-            await using Stream stream = await content.ReadAsStreamAsync();
-    #endif
+        await using MemoryStream stream = await AsStream(response);
         await file.WriteAsync(stream, Token);
-
         return file;
     }
 
@@ -175,11 +171,9 @@ public class WebHandler : IDisposable
     public virtual Task<WebResponse<LocalFile>> AsFile( MimeType type ) => WebResponse<LocalFile>.Create(this, type, AsFile);
     public virtual async Task<LocalFile> AsFile( HttpResponseMessage response, MimeType type )
     {
-        response.EnsureSuccessStatusCode();
-        using HttpContent      content = response.Content;
-        await using FileStream stream  = LocalFile.CreateTempFileAndOpen(type, out LocalFile file);
-        await stream.CopyToAsync(stream, Token);
-
+        await using MemoryStream stream = await AsStream(response);
+        await using FileStream   fs     = LocalFile.CreateTempFileAndOpen(type, out LocalFile file);
+        await stream.CopyToAsync(fs, Token);
         return file;
     }
 
@@ -189,14 +183,14 @@ public class WebHandler : IDisposable
     {
         response.EnsureSuccessStatusCode();
         using HttpContent content = response.Content;
-    #if NET6_0
-        await using Stream stream = await content.ReadAsStreamAsync(Token);
-    #else
-            await using Stream stream = await content.ReadAsStreamAsync();
-    #endif
-        var result = new MemoryStream();
+        var               result  = new MemoryStream();
 
-        await stream.CopyToAsync(result, Token);
+    #if NET6_0
+        await content.CopyToAsync(result, Token);
+    #else
+        await content.CopyToAsync(result);
+    #endif
+
         return result;
     }
 }

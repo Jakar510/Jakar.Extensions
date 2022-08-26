@@ -6,6 +6,6 @@ namespace Jakar.Database;
 
 public interface IRefreshToken
 {
-    public string? RefreshToken { get; }
+    public string?         RefreshToken           { get; }
     public DateTimeOffset? RefreshTokenExpiryTime { get; }
 }

@@ -132,11 +132,11 @@ public class DbTable<TRecord, TID> : ObservableClass, IDbTable<TRecord, TID> whe
     }
 
 
-    public async Task<TRecord?> Single( StringBuilder sb, DynamicParameters? parameters, CancellationToken token ) => await this.Call(Single, sb, parameters, token);
-    public async Task<TRecord?> Single( DbConnection connection, DbTransaction? transaction, StringBuilder sb, DynamicParameters? parameters, CancellationToken token )
+    public async Task<TRecord?> Single( string sql, DynamicParameters? parameters, CancellationToken token ) => await this.Call(Single, sql, parameters, token);
+    public async Task<TRecord?> Single( DbConnection connection, DbTransaction? transaction, string sql, DynamicParameters? parameters, CancellationToken token )
     {
         token.ThrowIfCancellationRequested();
-        IEnumerable<TRecord> items = await connection.QueryAsync<TRecord>(sb.ToString(), parameters, transaction);
+        IEnumerable<TRecord> items = await connection.QueryAsync<TRecord>(sql, parameters, transaction);
         return items.Single();
     }
 
@@ -155,11 +155,11 @@ public class DbTable<TRecord, TID> : ObservableClass, IDbTable<TRecord, TID> whe
     }
 
 
-    public async Task<TRecord?> SingleOrDefault( StringBuilder sb, DynamicParameters? parameters, CancellationToken token ) => await this.Call(SingleOrDefault, sb, parameters, token);
-    public async Task<TRecord?> SingleOrDefault( DbConnection connection, DbTransaction? transaction, StringBuilder sb, DynamicParameters? parameters, CancellationToken token )
+    public async Task<TRecord?> SingleOrDefault( string sql, DynamicParameters? parameters, CancellationToken token ) => await this.Call(SingleOrDefault, sql, parameters, token);
+    public async Task<TRecord?> SingleOrDefault( DbConnection connection, DbTransaction? transaction, string sql, DynamicParameters? parameters, CancellationToken token )
     {
         token.ThrowIfCancellationRequested();
-        IEnumerable<TRecord> items = await connection.QueryAsync<TRecord>(sb.ToString(), parameters, transaction);
+        IEnumerable<TRecord> items = await connection.QueryAsync<TRecord>(sql, parameters, transaction);
         return items.SingleOrDefault();
     }
 
@@ -175,34 +175,84 @@ public class DbTable<TRecord, TID> : ObservableClass, IDbTable<TRecord, TID> whe
     }
 
 
-    public async Task<TResult> Call<TResult>( StringBuilder sb, DynamicParameters? parameters, Func<SqlMapper.GridReader, CancellationToken, Task<TResult>> func, CancellationToken token ) => await this.Call(Call, sb, parameters, func, token);
-    public async Task<TResult> Call<TResult>( DbConnection connection, DbTransaction? transaction, StringBuilder sb, DynamicParameters? parameters, Func<SqlMapper.GridReader, CancellationToken, Task<TResult>> func, CancellationToken token )
+    public async Task<TResult> Call<TResult>( string sql, DynamicParameters? parameters, Func<SqlMapper.GridReader, CancellationToken, Task<TResult>> func, CancellationToken token ) => await this.Call(Call, sql, parameters, func, token);
+    public async Task<TResult> Call<TResult>( DbConnection connection, DbTransaction? transaction, string sql, DynamicParameters? parameters, Func<SqlMapper.GridReader, CancellationToken, Task<TResult>> func, CancellationToken token )
     {
         token.ThrowIfCancellationRequested();
-        using SqlMapper.GridReader reader = await connection.QueryMultipleAsync(sb.ToString(), parameters, transaction);
+        using SqlMapper.GridReader reader = await connection.QueryMultipleAsync(sql, parameters, transaction);
         return await func(reader, token);
     }
 
 
-    public async Task<TResult> Call<TResult>( StringBuilder sb, DynamicParameters? parameters, Func<DbDataReader, CancellationToken, Task<TResult>> func, CancellationToken token ) => await this.Call(Call, sb, parameters, func, token);
-    public async Task<TResult> Call<TResult>( DbConnection connection, DbTransaction? transaction, StringBuilder sb, DynamicParameters? parameters, Func<DbDataReader, CancellationToken, Task<TResult>> func, CancellationToken token )
+    public async Task<TResult> Call<TResult>( string sql, DynamicParameters? parameters, Func<DbDataReader, CancellationToken, Task<TResult>> func, CancellationToken token ) => await this.Call(Call, sql, parameters, func, token);
+    public async Task<TResult> Call<TResult>( DbConnection connection, DbTransaction? transaction, string sql, DynamicParameters? parameters, Func<DbDataReader, CancellationToken, Task<TResult>> func, CancellationToken token )
     {
         token.ThrowIfCancellationRequested();
-        await using DbDataReader reader = await connection.ExecuteReaderAsync(sb.ToString(), parameters, transaction);
+        await using DbDataReader reader = await connection.ExecuteReaderAsync(sql, parameters, transaction);
         return await func(reader, token);
     }
 
 
-    public async IAsyncEnumerable<TRecord> Where( StringBuilder sb, DynamicParameters? parameters, [EnumeratorCancellation] CancellationToken token )
+    public async IAsyncEnumerable<TRecord> Where( DynamicParameters parameters, [EnumeratorCancellation] CancellationToken token )
     {
-        await foreach ( TRecord record in this.Call(Where, sb, parameters, token) ) { yield return record; }
+        await foreach ( TRecord record in this.Call(Where, parameters, token) ) { yield return record; }
     }
-    public async IAsyncEnumerable<TRecord> Where( DbConnection connection, DbTransaction? transaction, StringBuilder sb, DynamicParameters? parameters, [EnumeratorCancellation] CancellationToken token )
+    public async IAsyncEnumerable<TRecord> Where( DbConnection connection, DbTransaction? transaction, DynamicParameters parameters, [EnumeratorCancellation] CancellationToken token )
+    {
+        var sql = new StringBuilder($"SELECT * FROM {TableName} WHERE ").AppendJoin(',', parameters.ParameterNames.Select(x => $" @{x}"))
+                                                                        .ToString();
+
+        IEnumerable<TRecord> records = await connection.QueryAsync<TRecord>(sql, parameters, transaction);
+
+        foreach ( TRecord record in records ) { yield return record; }
+    }
+
+
+    public async IAsyncEnumerable<TRecord> Where( string sql, DynamicParameters? parameters, [EnumeratorCancellation] CancellationToken token )
+    {
+        await foreach ( TRecord record in this.Call(Where, sql, parameters, token) ) { yield return record; }
+    }
+    public async IAsyncEnumerable<TRecord> Where( DbConnection connection, DbTransaction? transaction, string sql, DynamicParameters? parameters, [EnumeratorCancellation] CancellationToken token )
     {
         token.ThrowIfCancellationRequested();
-        IEnumerable<TRecord> items = await connection.QueryAsync<TRecord>(sb.ToString(), parameters, transaction);
+        IEnumerable<TRecord> items = await connection.QueryAsync<TRecord>(sql, parameters, transaction);
 
         foreach ( TRecord record in items ) { yield return record; }
+    }
+
+
+    public async IAsyncEnumerable<TRecord> Where<TValue>( string columnName, TValue? value, [EnumeratorCancellation] CancellationToken token )
+    {
+        await foreach ( TRecord record in this.Call(Where, columnName, value, token) ) { yield return record; }
+    }
+    public async IAsyncEnumerable<TRecord> Where<TValue>( DbConnection connection, DbTransaction? transaction, string columnName, TValue? value, [EnumeratorCancellation] CancellationToken token )
+    {
+        string sql        = $"SELECT * FROM {TableName} WHERE {columnName} = @{nameof(value)}";
+        var    parameters = new DynamicParameters();
+        parameters.Add(nameof(value), value);
+
+        IEnumerable<TRecord> records = await connection.QueryAsync<TRecord>(sql, parameters, transaction);
+
+        foreach ( TRecord record in records ) { yield return record; }
+    }
+
+
+    public async Task<TID> GetID<TValue>( string sql, DynamicParameters? parameters, CancellationToken token ) => await this.Call(GetID, sql, parameters, token);
+    public async Task<TID> GetID<TValue>( DbConnection connection, DbTransaction? transaction, string sql, DynamicParameters? parameters, CancellationToken token )
+    {
+        token.ThrowIfCancellationRequested();
+        return await connection.QuerySingleAsync<TID>(sql, parameters, transaction);
+    }
+
+
+    public async Task<TID> GetID<TValue>( string columnName, TValue? value, CancellationToken token ) => await this.Call(GetID, columnName, value, token);
+    public async Task<TID> GetID<TValue>( DbConnection connection, DbTransaction? transaction, string columnName, TValue? value, CancellationToken token )
+    {
+        string sql        = $"SELECT {nameof(IUniqueID<TID>.ID)} FROM {TableName} WHERE {columnName} = @{nameof(value)}";
+        var    parameters = new DynamicParameters();
+        parameters.Add(nameof(value), value);
+
+        return await connection.QuerySingleAsync<TID>(sql, parameters, transaction);
     }
 
 
@@ -296,14 +346,14 @@ public class DbTable<TRecord, TID> : ObservableClass, IDbTable<TRecord, TID> whe
     public async Task Update( IAsyncEnumerable<TRecord> records, CancellationToken token ) => await this.Call(Update, records, token);
     public async Task Update( DbConnection connection, DbTransaction transaction, TRecord record, CancellationToken token )
     {
-        var sb = new StringBuilder();
+        var sql = new StringBuilder();
 
-        sb.AppendJoin(',',
-                      TypePropertiesCache.Current[typeof(TRecord)]
-                                         .Where(x => !x.IsKey)
-                                         .Select(x => x.UpdateName));
+        sql.AppendJoin(',',
+                       TypePropertiesCache.Current[typeof(TRecord)]
+                                          .Where(x => !x.IsKey)
+                                          .Select(x => x.UpdateName));
 
-        string cmd        = $"UPDATE {TableName} SET {sb} where {nameof(IUniqueID<TID>.ID)} = @{nameof(IUniqueID<TID>.ID)};";
+        string cmd        = $"UPDATE {TableName} SET {sql} where {nameof(IUniqueID<TID>.ID)} = @{nameof(IUniqueID<TID>.ID)};";
         var    parameters = new DynamicParameters(record);
 
         token.ThrowIfCancellationRequested();
