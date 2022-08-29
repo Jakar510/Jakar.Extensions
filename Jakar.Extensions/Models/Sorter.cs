@@ -7,7 +7,7 @@ public class ValueSorter<T> : IComparer<T?>, IComparer<T>, IComparer where T : s
     public static ValueSorter<T> Instance { get; } = new();
 
 
-    public int Compare( object x, object y )
+    public int Compare( object? x, object? y )
     {
         if ( x is not T left ) { throw new ExpectedValueTypeException(nameof(x), x, typeof(T)); }
 

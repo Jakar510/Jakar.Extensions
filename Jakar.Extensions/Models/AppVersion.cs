@@ -700,7 +700,7 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
     }
 
 
-    public override bool Equals( object obj ) => obj is AppVersion version && Equals(version);
+    public override bool Equals( object? obj ) => obj is AppVersion version && Equals(version);
 
     public override int GetHashCode() => HashCode.Combine(Scheme, Major, Minor, Maintenance, MajorRevision, MinorRevision, Build);
 

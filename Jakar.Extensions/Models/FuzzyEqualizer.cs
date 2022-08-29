@@ -14,7 +14,7 @@ public class ValueFuzzyEqualizer<T> : IEqualityComparer<T?>, IEqualityComparer<T
     public static ValueFuzzyEqualizer<T> Instance { get; } = new();
 
 
-    bool IEqualityComparer.Equals( object x, object y )
+    bool IEqualityComparer.Equals( object? x, object? y )
     {
         if ( x is not T left ) { throw new ExpectedValueTypeException(nameof(x), x, typeof(T)); }
 
@@ -49,7 +49,7 @@ public class FuzzyEqualizer<T> : IEqualityComparer<T>, IEqualityComparer where T
     public static FuzzyEqualizer<T> Instance { get; } = new();
 
 
-    bool IEqualityComparer.Equals( object x, object y )
+    bool IEqualityComparer.Equals( object? x, object? y )
     {
         if ( x is not T left ) { throw new ExpectedValueTypeException(nameof(x), x, typeof(T)); }
 

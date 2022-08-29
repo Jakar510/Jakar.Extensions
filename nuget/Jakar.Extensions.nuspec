@@ -4,7 +4,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata>
 		<id>Jakar.Extensions</id>
-		<version>6.0.0.46-beta</version>
+		<version>6.0.0.47-beta</version>
 		<title>Extension Library</title>
 		<authors>Tyler Stegmaier</authors>
 		<owners>Jakar510/Jakar</owners>
@@ -43,7 +43,7 @@
 		<dependencies>
 			<group targetFramework="netstandard2.1">
 				<dependency id="CommunityToolkit.Diagnostics"
-							version="7.1.2" />
+							version="8.0.0" />
 				<dependency id="Dapper.Contrib"
 							version="2.0.78" />
 				<dependency id="JetBrains.Annotations"
@@ -61,11 +61,9 @@
 				<dependency id="System.Text.Encoding.CodePages"
 							version="6.0.0" />
 				<dependency id="System.Text.Json"
-							version="6.0.3" />
+							version="6.0.5" />
 				<dependency id="System.Threading.Tasks.Dataflow"
 							version="6.0.0" />
-				<dependency id="Xamarin.Essentials"
-							version="1.7.2" />
 				<dependency id="OneOf"
 							version="3.0.223" />
 				<dependency id="ValueOf"

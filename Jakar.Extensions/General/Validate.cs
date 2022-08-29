@@ -33,14 +33,15 @@ public static partial class Validate
     public static string FormatNumber( this decimal value, in CultureInfo info, in int maxDecimals = 4 ) => Regex.Replace(string.Format(info, $"{{0:n{maxDecimals}}}", value), $"[{info.NumberFormat.NumberDecimalSeparator}]?0+$", string.Empty);
 
 
-    public static bool IsIPv4( this string value ) => value.AsSpan().IsIPv4();
+    public static bool IsIPv4( this string value ) => value.AsSpan()
+                                                           .IsIPv4();
     public static bool IsIPv4( this ReadOnlySpan<char> value )
     {
         value = value.Trim();
         if ( value.IsEmpty ) { return false; }
 
 
-        foreach ( ( ReadOnlySpan<char> line, ReadOnlySpan<char> separator ) in value.SplitOn('.') )
+        foreach ( ( ReadOnlySpan<char> line, ReadOnlySpan<char> _ ) in value.SplitOn('.') )
         {
             if ( !line.IsInteger() ) { return false; }
         }
@@ -48,10 +49,11 @@ public static partial class Validate
         return ParseIPv4(value) != null;
     }
 
-    public static IPAddress? ParseIPv4( this string? value ) => value?.AsSpan().ParseIPv4();
-    public static IPAddress? ParseIPv4( this ReadOnlySpan<char> value ) => IPAddress.TryParse(value, out IPAddress address)
+    public static IPAddress? ParseIPv4( this string? value ) => value?.AsSpan()
+                                                                      .ParseIPv4();
+    public static IPAddress? ParseIPv4( this ReadOnlySpan<char> value ) => IPAddress.TryParse(value, out IPAddress? address)
                                                                                ? address
-                                                                               : null;
+                                                                               : default;
 
 
     public static bool IsWebAddress( this string value )
@@ -62,7 +64,7 @@ public static partial class Validate
         return uriResult != null && ( uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps );
     }
 
-    public static Uri? ParseWebAddress( this string value ) => Uri.TryCreate(value, UriKind.Absolute, out Uri uriResult)
+    public static Uri? ParseWebAddress( this string value ) => Uri.TryCreate(value, UriKind.Absolute, out Uri? uriResult)
                                                                    ? uriResult
                                                                    : default;
 

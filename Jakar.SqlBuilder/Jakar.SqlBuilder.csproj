@@ -9,6 +9,7 @@
 		<Description>Easy Sql Building</Description>
 		<RepositoryType>Github</RepositoryType>
 		<Nullable>enable</Nullable>
+		<LangVersion>latest</LangVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

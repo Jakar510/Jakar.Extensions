@@ -19,7 +19,12 @@ namespace Jakar.Extensions;
 public abstract class ValidValueOf<TValue, TThis> : IComparable<ValidValueOf<TValue, TThis>>, IEquatable<ValidValueOf<TValue, TThis>>, IComparable where TThis : ValidValueOf<TValue, TThis>, new()
                                                                                                                                                    where TValue : IComparable<TValue>, IEquatable<TValue>
 {
-    protected static readonly Func<TThis> _factory = (Func<TThis>)Expression.Lambda(typeof(Func<TThis>), Expression.New(typeof(TThis).GetTypeInfo().DeclaredConstructors.First<ConstructorInfo>(), Array.Empty<Expression>())).Compile();
+    protected static readonly Func<TThis> _factory = (Func<TThis>)Expression.Lambda(typeof(Func<TThis>),
+                                                                                    Expression.New(typeof(TThis).GetTypeInfo()
+                                                                                                                .DeclaredConstructors.First(x => x.GetParameters()
+                                                                                                                                                  .IsEmpty()),
+                                                                                                   Array.Empty<Expression>()))
+                                                                            .Compile();
 
 
     public TValue Value { get; protected set; }
@@ -37,7 +42,7 @@ public abstract class ValidValueOf<TValue, TThis> : IComparable<ValidValueOf<TVa
 
     public static bool TryCreate( TValue item, [NotNullWhen(true)] out TThis? thisValue )
     {
-        TThis? self = _factory();
+        TThis self = _factory();
         self.Value = item;
 
         thisValue = self.IsValid()
@@ -76,6 +81,8 @@ public abstract class ValidValueOf<TValue, TThis> : IComparable<ValidValueOf<TVa
 
         return other is ValidValueOf<TValue, TThis> value && Equals(value);
     }
+
+    // ReSharper disable once NonReadonlyMemberInGetHashCode
     public override int GetHashCode() => Value?.GetHashCode() ?? 0;
 
     private static int Compare( TValue? left, TValue? right )
@@ -103,12 +110,6 @@ public abstract class ValidValueOf<TValue, TThis> : IComparable<ValidValueOf<TVa
     }
 
 
-    public static bool operator ==( ValidValueOf<TValue, TThis> left, ValidValueOf<TValue, TThis> right ) => Equals(left, right);
-    public static bool operator !=( ValidValueOf<TValue, TThis> left, ValidValueOf<TValue, TThis> right ) => !Equals(left, right);
-    public static bool operator <( ValidValueOf<TValue, TThis>  left, ValidValueOf<TValue, TThis> right ) => Compare(left.Value, right.Value) < 0;
-    public static bool operator >( ValidValueOf<TValue, TThis>  left, ValidValueOf<TValue, TThis> right ) => Compare(left.Value, right.Value) > 0;
-    public static bool operator <=( ValidValueOf<TValue, TThis> left, ValidValueOf<TValue, TThis> right ) => Compare(left.Value, right.Value) <= 0;
-    public static bool operator >=( ValidValueOf<TValue, TThis> left, ValidValueOf<TValue, TThis> right ) => Compare(left.Value, right.Value) >= 0;
     public int CompareTo( object? other )
     {
         if ( other is null ) { return 1; }
@@ -121,6 +122,24 @@ public abstract class ValidValueOf<TValue, TThis> : IComparable<ValidValueOf<TVa
     }
 
 
-    public int CompareTo( ValidValueOf<TValue, TThis>       other ) => Compare(Value, other.Value);
-    public virtual bool Equals( ValidValueOf<TValue, TThis> other ) => Equals(Value, other.Value);
+    public int CompareTo( ValidValueOf<TValue, TThis>? other )
+    {
+        if ( other is null ) { return 1; }
+
+        return Compare(Value, other.Value);
+    }
+    public virtual bool Equals( ValidValueOf<TValue, TThis>? other )
+    {
+        if ( other is null ) { return false; }
+
+        return Equals(Value, other.Value);
+    }
+
+
+    public static bool operator ==( ValidValueOf<TValue, TThis> left, ValidValueOf<TValue, TThis> right ) => Equals(left, right);
+    public static bool operator !=( ValidValueOf<TValue, TThis> left, ValidValueOf<TValue, TThis> right ) => !Equals(left, right);
+    public static bool operator <( ValidValueOf<TValue, TThis>  left, ValidValueOf<TValue, TThis> right ) => Compare(left.Value, right.Value) < 0;
+    public static bool operator >( ValidValueOf<TValue, TThis>  left, ValidValueOf<TValue, TThis> right ) => Compare(left.Value, right.Value) > 0;
+    public static bool operator <=( ValidValueOf<TValue, TThis> left, ValidValueOf<TValue, TThis> right ) => Compare(left.Value, right.Value) <= 0;
+    public static bool operator >=( ValidValueOf<TValue, TThis> left, ValidValueOf<TValue, TThis> right ) => Compare(left.Value, right.Value) >= 0;
 }

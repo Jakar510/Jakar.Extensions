@@ -1,4 +1,8 @@
 ﻿#nullable enable
+using System.Globalization;
+
+
+
 namespace Jakar.Extensions;
 
 
@@ -23,7 +27,7 @@ public interface IAppSettings<TViewPage> : IAppSettings
 
 
 [Serializable]
-public class AppSettings : ObservableClass, IAppSettings
+public class AppSettings : BaseHostViewModel, IAppSettings
 {
     private string     _appName = string.Empty;
     private AppVersion _appVersion;
@@ -31,7 +35,7 @@ public class AppSettings : ObservableClass, IAppSettings
     private Guid       _deviceID;
     private string     _deviceVersion = string.Empty;
     private string?    _screenShotAddress;
-    private bool       _sendCrashes = Get_SendCrashes();
+    private bool?      _sendCrashes;
 
 
     public Guid DeviceID
@@ -42,7 +46,7 @@ public class AppSettings : ObservableClass, IAppSettings
 
     public virtual bool SendCrashes
     {
-        get => _sendCrashes;
+        get => _sendCrashes ??= Get_SendCrashes();
         set
         {
             SetProperty(ref _sendCrashes, value);
@@ -81,14 +85,9 @@ public class AppSettings : ObservableClass, IAppSettings
     }
 
 
-    public AppSettings() { }
-    public AppSettings( string appName, in AppVersion version, string deviceVersion )
-    {
-        AppName       = appName;
-        AppVersion    = version;
-        DeviceVersion = deviceVersion;
-    }
-    public AppSettings( string appName, in AppVersion version, string deviceVersion, bool sendCrashes )
+    public AppSettings( string appName, in AppVersion version, string deviceVersion, Uri  hostInfo ) : this(appName, version, deviceVersion, true, hostInfo) { }
+    public AppSettings( string appName, in AppVersion version, string deviceVersion, bool sendCrashes, Uri hostInfo ) : this(appName, version, deviceVersion, sendCrashes, hostInfo, hostInfo) { }
+    public AppSettings( string appName, in AppVersion version, string deviceVersion, bool sendCrashes, Uri hostInfo, Uri defaultHostInfo ) : base(hostInfo, defaultHostInfo)
     {
         SendCrashes   = sendCrashes;
         AppName       = appName;
@@ -97,18 +96,8 @@ public class AppSettings : ObservableClass, IAppSettings
     }
 
 
-    protected static void Set_SendCrashes( bool value )
-    {
-        try { Preferences.Set(nameof(SendCrashes), value); }
-        catch ( NotImplementedInReferenceAssemblyException ) { }
-        catch ( FeatureNotSupportedException ) { }
-    }
-    protected static bool Get_SendCrashes()
-    {
-        try { return Preferences.Get(nameof(SendCrashes), true); }
-        catch ( NotImplementedInReferenceAssemblyException ) { return Debugger.IsAttached; }
-        catch ( FeatureNotSupportedException ) { return Debugger.IsAttached; }
-    }
+    protected virtual void Set_SendCrashes( bool value ) { }
+    protected virtual bool Get_SendCrashes() => true;
 }
 
 
@@ -125,7 +114,7 @@ public class AppSettings<TViewPage> : AppSettings, IAppSettings<TViewPage>
     }
 
 
-    public AppSettings() { }
-    public AppSettings( string appName, in AppVersion version, string deviceVersion ) : base(appName, version, deviceVersion) { }
-    public AppSettings( string appName, in AppVersion version, string deviceVersion, bool sendCrashes ) : base(appName, version, deviceVersion, sendCrashes) { }
+    public AppSettings( string appName, in AppVersion version, string deviceVersion, Uri  hostInfo ) : base(appName, version, deviceVersion, hostInfo) { }
+    public AppSettings( string appName, in AppVersion version, string deviceVersion, bool sendCrashes, Uri    hostInfo ) : base(appName, version, deviceVersion, sendCrashes, hostInfo) { }
+    public AppSettings( string appName, in AppVersion version, string deviceVersion, bool sendCrashes, Uri    hostInfo, Uri defaultHostInfo ) : base(appName, version, deviceVersion, sendCrashes, hostInfo, defaultHostInfo) { }
 }

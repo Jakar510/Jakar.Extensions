@@ -27,7 +27,11 @@ public static class WebRequests
 
         await using ( token.Register(request.Abort, useSynchronizationContext) )
         {
-            try { return await request.GetResponseAsync().ConfigureAwait(false); }
+            try
+            {
+                return await request.GetResponseAsync()
+                                    .ConfigureAwait(false);
+            }
             catch ( WebException ex )
             {
                 if ( token.IsCancellationRequested ) // WebException is thrown when request.Abort() is called, but there may be many other reasons, propagate the WebException to the caller correctly
@@ -39,7 +43,9 @@ public static class WebRequests
                 if ( !Debugger.IsAttached ) { throw; }
 
 
-                ResponseData details = await ResponseData.Create(ex).ConfigureAwait(false);
+                ResponseData details = await ResponseData.Create(ex)
+                                                         .ConfigureAwait(false);
+
                 details.WriteToDebug();
                 throw;
             }
@@ -222,6 +228,8 @@ public static class WebRequests
                 break;
 
             case HttpRequestHeader.Cookie:
+                request.CookieContainer ??= new CookieContainer();
+
                 switch ( value )
                 {
                     case Cookie cookie:

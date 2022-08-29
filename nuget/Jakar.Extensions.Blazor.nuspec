@@ -4,7 +4,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata>
 		<id>Jakar.Extensions.Blazor</id>
-		<version>6.0.0.5-beta</version>
+		<version>6.0.0.6-beta</version>
 		<title>Extension Library</title>
 		<authors>Tyler Stegmaier</authors>
 		<owners>Jakar510/Jakar</owners>
@@ -34,10 +34,10 @@
 				<dependency id="Blazored.TextEditor" version="1.0.8" />
 				<dependency id="Blazored.Toast" version="3.2.2" />
 				<dependency id="Blazored.Video" version="1.0.0" />
-				<dependency id="Jakar.Extensions" version="6.0.0.44-beta" />
+				<dependency id="Jakar.Extensions" version="6.0.0.47-beta" />
 				<dependency id="BlazorComponentUtilities" version="1.8.0" />
 				<dependency id="BlazorPro.BlazorSize" version="6.1.2" />
-				<dependency id="Jakar.Extensions.Hosting" version="6.0.0.7-beta" />
+				<dependency id="Jakar.Extensions.Hosting" version="6.0.0.8-beta" />
 				<dependency id="PanoramicData.Blazor" version="2.1.39" />
 			</group>
 		</dependencies>

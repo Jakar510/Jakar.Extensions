@@ -29,9 +29,6 @@ public abstract class BaseCollections<T> : ObservableClass, IEquatable<T>, IComp
     public string ToPrettyJson() => this.ToJson(Formatting.Indented);
 
 
-    public static T? FromJson( [NotNullIfNotNull("json")] string? json ) => json?.FromJson<T>();
-
-
 
     [Serializable]
     public class Collection : ObservableCollection<T>

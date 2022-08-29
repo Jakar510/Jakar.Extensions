@@ -627,7 +627,8 @@ public class LocalFile : BaseCollections<LocalFile>, TempFile.ITempFile, LocalFi
     /// <returns>
     ///     <see cref = "Task" />
     /// </returns>
-    public async Task WriteAsync( StringBuilder payload ) => await WriteAsync(payload.ToString()).ConfigureAwait(false);
+    public async Task WriteAsync( StringBuilder payload ) => await WriteAsync(payload.ToString())
+                                                                .ConfigureAwait(false);
 
 
     /// <summary>
@@ -670,7 +671,9 @@ public class LocalFile : BaseCollections<LocalFile>, TempFile.ITempFile, LocalFi
 
         await using FileStream stream = Create();
         await using var        writer = new StreamWriter(stream, FileEncoding);
-        await writer.WriteAsync(payload).ConfigureAwait(false);
+
+        await writer.WriteAsync(payload)
+                    .ConfigureAwait(false);
     }
 
 
@@ -711,7 +714,9 @@ public class LocalFile : BaseCollections<LocalFile>, TempFile.ITempFile, LocalFi
         if ( payload.Length == 0 ) { throw new ArgumentException(@"payload.Length == 0", nameof(payload)); }
 
         await using FileStream stream = Create();
-        await stream.WriteAsync(payload, token).ConfigureAwait(false);
+
+        await stream.WriteAsync(payload, token)
+                    .ConfigureAwait(false);
     }
 
 
@@ -791,7 +796,9 @@ public class LocalFile : BaseCollections<LocalFile>, TempFile.ITempFile, LocalFi
         if ( payload.Length == 0 ) { throw new ArgumentException(@"payload.Length == 0", nameof(payload)); }
 
         await using FileStream stream = Create();
-        await stream.WriteAsync(payload, token).ConfigureAwait(false);
+
+        await stream.WriteAsync(payload, token)
+                    .ConfigureAwait(false);
     }
 
 
@@ -833,7 +840,9 @@ public class LocalFile : BaseCollections<LocalFile>, TempFile.ITempFile, LocalFi
     {
         await using FileStream stream = Create();
         await using var        writer = new StreamWriter(stream, FileEncoding);
-        await writer.WriteAsync(payload, token).ConfigureAwait(false);
+
+        await writer.WriteAsync(payload, token)
+                    .ConfigureAwait(false);
     }
 
 
@@ -880,42 +889,9 @@ public class LocalFile : BaseCollections<LocalFile>, TempFile.ITempFile, LocalFi
         await using var memory = new MemoryStream();
         await payload.CopyToAsync(memory, token);
         ReadOnlyMemory<byte> data = memory.ToArray();
-        await WriteAsync(data, token).ConfigureAwait(false);
-    }
 
-    
-    /// <summary> Write the <paramref name = "uri" /> to the file. </summary>
-    /// <param name = "uri" > the data being written to the file </param>
-    /// <exception cref = "NullReferenceException" > </exception>
-    /// <exception cref = "ArgumentException" > </exception>
-    /// <exception cref = "ArgumentNullException" > </exception>
-    /// <exception cref = "FileNotFoundException" > </exception>
-    /// <returns>
-    ///     <see cref = "Task" />
-    /// </returns>
-    public void Write( Uri uri )
-    {
-        if ( uri is null ) { throw new ArgumentNullException(nameof(uri)); }
-
-        using var client = new WebClient();
-        client.DownloadFile(uri, FullPath);
-    }
-    /// <summary> Write the <paramref name = "uri" /> to the file. </summary>
-    /// <param name = "uri" > the data being written to the file </param>
-    /// <param name = "token" > </param>
-    /// <exception cref = "NullReferenceException" > </exception>
-    /// <exception cref = "ArgumentException" > </exception>
-    /// <exception cref = "ArgumentNullException" > </exception>
-    /// <exception cref = "FileNotFoundException" > </exception>
-    /// <returns>
-    ///     <see cref = "Task" />
-    /// </returns>
-    public async Task WriteAsync( Uri uri, CancellationToken token )
-    {
-        if ( uri is null ) { throw new ArgumentNullException(nameof(uri)); }
-
-        using var client = new WebClient();
-        await client.DownloadFileTaskAsync(uri, FullPath).ConfigureAwait(false);
+        await WriteAsync(data, token)
+           .ConfigureAwait(false);
     }
 
 
@@ -937,7 +913,10 @@ public class LocalFile : BaseCollections<LocalFile>, TempFile.ITempFile, LocalFi
     public static async Task<LocalFile> SaveToFileAsync( string path, Stream payload, CancellationToken token )
     {
         var file = new LocalFile(path);
-        await file.WriteAsync(payload, token).ConfigureAwait(false);
+
+        await file.WriteAsync(payload, token)
+                  .ConfigureAwait(false);
+
         return file;
     }
 
@@ -959,70 +938,10 @@ public class LocalFile : BaseCollections<LocalFile>, TempFile.ITempFile, LocalFi
     public static async Task<LocalFile> SaveToFileAsync( string path, ReadOnlyMemory<byte> payload, CancellationToken token )
     {
         var file = new LocalFile(path);
-        await file.WriteAsync(payload, token).ConfigureAwait(false);
-        return file;
-    }
 
+        await file.WriteAsync(payload, token)
+                  .ConfigureAwait(false);
 
-    /// <summary>
-    ///     Downloads the content of the web url to the specified file.
-    /// </summary>
-    /// <param name = "path" > file path / location </param>
-    /// <param name = "uri" > the link to download </param>
-    /// <exception cref = "ArgumentNullException" > </exception>
-    /// <exception cref = "WebException" > </exception>
-    /// <exception cref = "NotSupportedException" > </exception>
-    /// <returns> </returns>
-    public static LocalFile SaveToFile( string path, string uri ) => SaveToFile(path, new Uri(uri));
-
-
-    /// <summary>
-    ///     Downloads the content of the web url to the specified file.
-    /// </summary>
-    /// <param name = "path" > file path / location </param>
-    /// <param name = "uri" > the link to download </param>
-    /// <exception cref = "ArgumentNullException" > </exception>
-    /// <exception cref = "WebException" > </exception>
-    /// <exception cref = "NotSupportedException" > </exception>
-    /// <returns> </returns>
-    public static LocalFile SaveToFile( string path, Uri uri )
-    {
-        if ( uri.IsFile ) { return new LocalFile(uri); }
-
-        using var client = new WebClient();
-        client.DownloadFile(uri, path);
-        return new LocalFile(path);
-    }
-
-
-    /// <summary>
-    ///     Downloads the content of the web url to the specified file, asynchronously.
-    /// </summary>
-    /// <param name = "path" > file path / location </param>
-    /// <param name = "uri" > the link to download </param>
-    /// <exception cref = "ArgumentNullException" > </exception>
-    /// <exception cref = "WebException" > </exception>
-    /// <exception cref = "NotSupportedException" > </exception>
-    /// <returns> </returns>
-    public static async Task<LocalFile> SaveToFileAsync( string path, string uri ) => await SaveToFileAsync(path, new Uri(uri)).ConfigureAwait(false);
-
-
-    /// <summary>
-    ///     Downloads the content of the web url to the specified file, asynchronously.
-    /// </summary>
-    /// <param name = "path" > file path / location </param>
-    /// <param name = "uri" > the link to download </param>
-    /// <exception cref = "ArgumentNullException" > </exception>
-    /// <exception cref = "WebException" > </exception>
-    /// <exception cref = "NotSupportedException" > </exception>
-    /// <returns> </returns>
-    public static async Task<LocalFile> SaveToFileAsync( string path, Uri uri )
-    {
-        if ( uri.IsFile ) { return new LocalFile(uri); }
-
-        var       file   = new LocalFile(path);
-        using var client = new WebClient();
-        await client.DownloadFileTaskAsync(uri, file.FullPath).ConfigureAwait(false);
         return file;
     }
 
@@ -1046,14 +965,19 @@ public class LocalFile : BaseCollections<LocalFile>, TempFile.ITempFile, LocalFi
     async Task<string> IAsyncReadHandler.AsString()
     {
         using var stream = new StreamReader(OpenRead(), FileEncoding);
-        return await stream.ReadToEndAsync().ConfigureAwait(false);
+
+        return await stream.ReadToEndAsync()
+                           .ConfigureAwait(false);
     }
 
 
     async Task<T> IAsyncReadHandler.AsJson<T>()
     {
-        using var stream  = new StreamReader(OpenRead(), FileEncoding);
-        string    content = await stream.ReadToEndAsync().ConfigureAwait(false);
+        using var stream = new StreamReader(OpenRead(), FileEncoding);
+
+        string content = await stream.ReadToEndAsync()
+                                     .ConfigureAwait(false);
+
         return content.FromJson<T>();
     }
 
@@ -1062,7 +986,10 @@ public class LocalFile : BaseCollections<LocalFile>, TempFile.ITempFile, LocalFi
     {
         await using FileStream file   = OpenRead();
         await using var        stream = new MemoryStream();
-        await file.CopyToAsync(stream, token).ConfigureAwait(false);
+
+        await file.CopyToAsync(stream, token)
+                  .ConfigureAwait(false);
+
         return stream.ToArray();
     }
 
@@ -1071,7 +998,10 @@ public class LocalFile : BaseCollections<LocalFile>, TempFile.ITempFile, LocalFi
     {
         await using FileStream file   = OpenRead();
         await using var        stream = new MemoryStream();
-        await file.CopyToAsync(stream, token).ConfigureAwait(false);
+
+        await file.CopyToAsync(stream, token)
+                  .ConfigureAwait(false);
+
         ReadOnlyMemory<byte> results = stream.ToArray();
         return results;
     }
@@ -1081,7 +1011,10 @@ public class LocalFile : BaseCollections<LocalFile>, TempFile.ITempFile, LocalFi
     {
         await using FileStream file   = OpenRead();
         var                    stream = new MemoryStream();
-        await file.CopyToAsync(stream, token).ConfigureAwait(false);
+
+        await file.CopyToAsync(stream, token)
+                  .ConfigureAwait(false);
+
         return stream;
     }
 

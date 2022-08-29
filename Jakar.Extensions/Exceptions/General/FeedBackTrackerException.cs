@@ -18,7 +18,7 @@ public class FeedBackTrackerException : Exception
         {
             case IDictionary dict:
             {
-                foreach ( DictionaryEntry pair in dict ) { Data[pair.Key.ToString()] = pair.Value?.ToString(); }
+                foreach ( DictionaryEntry pair in dict ) { Data[pair.Key.ToString() ?? throw new NullReferenceException(nameof(pair.Key))] = pair.Value?.ToString(); }
 
                 break;
             }

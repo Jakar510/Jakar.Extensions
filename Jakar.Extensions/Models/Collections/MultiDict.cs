@@ -2,7 +2,7 @@
 namespace Jakar.Extensions;
 
 
-public class MultiDict<TKey> : Dictionary<TKey, object?>
+public class MultiDict<TKey> : Dictionary<TKey, object?> where TKey : notnull
 {
     #region ctor
 

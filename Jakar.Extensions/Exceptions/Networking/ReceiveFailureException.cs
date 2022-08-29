@@ -14,9 +14,9 @@ public sealed class ReceiveFailureException : WebException
     public ReceiveFailureException( string       message, Exception         inner ) : base(message, inner) { }
     public ReceiveFailureException( WebException source,  CancellationToken token ) : this(source.Message, source, token) { }
     public ReceiveFailureException( string       message, WebException      source, CancellationToken  token ) : this(message, source ?? throw new NullReferenceException(nameof(source)), source.Status, source.Response, token) { }
-    public ReceiveFailureException( string       message, Exception         inner,  WebExceptionStatus status, WebResponse response ) : base(message, inner, status, response) { }
+    public ReceiveFailureException( string       message, Exception         inner,  WebExceptionStatus status, WebResponse? response ) : base(message, inner, status, response) { }
 
-    public ReceiveFailureException( string message, Exception inner, WebExceptionStatus status, WebResponse response, CancellationToken token ) : base(message, inner, status, response)
+    public ReceiveFailureException( string message, Exception inner, WebExceptionStatus status, WebResponse? response, CancellationToken token ) : base(message, inner, status, response)
     {
         Token         = token;
         Data["token"] = Token.ToString();
