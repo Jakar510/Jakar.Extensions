@@ -426,7 +426,7 @@ public partial class WebBuilder
     /// <typeparamref name="TClient"/> as the service type.
     /// </para>
     /// <para>
-    /// Use <see cref="Options.Options.DefaultName"/> as the name to configure the default client.
+    /// Use <see cref="Options.DefaultName"/> as the name to configure the default client.
     /// </para>
     /// </remarks>
     public static IHttpClientBuilder AddHttpClient<TClient, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TImplementation>(

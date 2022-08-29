@@ -18,7 +18,6 @@ public interface IUserDevice<TID> : IEquatable<IUserDevice<TID>>, IUniqueID<TID>
     /// </summary>
     public string? Ip { get; }
 
-
     /// <summary>
     ///     <see cref = "DevicePlatform" />
     /// </summary>
