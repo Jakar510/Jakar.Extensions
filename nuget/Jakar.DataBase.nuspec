@@ -3,7 +3,7 @@
 
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata>
-		<id>Jakar.Extensions.Maui</id>
+		<id>Jakar.DataBase</id>
 		<version>6.0.0.2-beta</version>
 		<title>Extension Library</title>
 		<authors>Tyler Stegmaier</authors>
@@ -18,7 +18,8 @@
 			Extensions to aid in development.
 		</description>
 		<releaseNotes>
-			Jakar.Extensions.Maui 6.0.0
+			Jakar.DataBase 6.0.0
+			Initial Release
 		</releaseNotes>
 		<tags>Jakar Api Extensions</tags>
 		<language>en-US</language>
@@ -29,6 +30,8 @@
 			<group targetFramework="net6.0">
 				<dependency id="Jakar.Extensions"
 							version="6.0.0.48-beta" />
+				<dependency id="Jakar.Extensions.Hosting"
+							version="6.0.0.8-beta" />
 			</group>
 		</dependencies>
 	</metadata>
@@ -39,12 +42,12 @@
 
 		<file src="..\images\icon.png" />
 
-		<!-- .net standard 2.1 -->
-		<file src="../Jakar.Extensions.Maui/bin/Release/net6.0/Jakar.Extensions.Maui.dll"
+		<!-- .net6.0 -->
+		<file src="../Jakar.DataBase/bin/Release/net6.0/Jakar.DataBase.dll"
 			  target="lib/net6.0" />
-		<file src="../Jakar.Extensions.Maui/bin/Release/net6.0/Jakar.Extensions.Maui.xml"
+		<file src="../Jakar.DataBase/bin/Release/net6.0/Jakar.DataBase.xml"
 			  target="net6.0" />
-		<file src="../Jakar.Extensions.Maui/bin/Release/net6.0/Jakar.Extensions.Maui.pdb"
+		<file src="../Jakar.DataBase/bin/Release/net6.0/Jakar.DataBase.pdb"
 			  target="lib/net6.0" />
 	</files>
 </package>

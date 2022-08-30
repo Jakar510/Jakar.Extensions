@@ -1,12 +1,16 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 08/14/2022  8:39 PM
 
+using System.Collections.Concurrent;
+
+
+
 namespace Jakar.Database;
 
 
 public abstract class Database<TID> : ObservableClass, IConnectableDb, IAsyncDisposable where TID : IComparable<TID>, IEquatable<TID>
 {
-    protected readonly HashSet<IAsyncDisposable> _disposables = new();
+    protected readonly ConcurrentBag<IAsyncDisposable> _disposables = new();
 
 
     protected Database() : base() { }
@@ -23,8 +27,6 @@ public abstract class Database<TID> : ObservableClass, IConnectableDb, IAsyncDis
         _disposables.Add(value);
         return value;
     }
-    protected abstract TTable CreateTable<TTable, TRecord>() where TTable : IDbTable<TRecord, TID>
-                                                             where TRecord : BaseTableRecord<TRecord, TID>;
 
 
     protected abstract DbConnection CreateConnection();

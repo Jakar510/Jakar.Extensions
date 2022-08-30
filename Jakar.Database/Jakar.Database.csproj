@@ -1,17 +1,23 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <LangVersion>latest</LangVersion>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<LangVersion>latest</LangVersion>
+		<Nullable>enable</Nullable>
+		<NoWarn>$(NoWarn);1591</NoWarn>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Jakar.Extensions" Version="6.0.0.47-beta" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.2.0" />
-    <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="6.0.8" />
-    <PackageReference Include="Sigil" Version="5.0.0" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Jakar.Extensions"
+						  Version="6.0.0.48-beta" />
+		<PackageReference Include="Microsoft.AspNetCore.Identity"
+						  Version="2.2.0" />
+		<PackageReference Include="Microsoft.Extensions.Identity.Core"
+						  Version="6.0.8" />
+		<PackageReference Include="Sigil"
+						  Version="5.0.0" />
+	</ItemGroup>
 
 </Project>

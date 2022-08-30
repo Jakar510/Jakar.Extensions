@@ -7,6 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jakar.Extensions", "Jakar.E
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nuget", "nuget", "{07C27764-F156-4896-B028-6FD19BB2E82E}"
 	ProjectSection(SolutionItems) = preProject
+		nuget\Jakar.DataBase.nuspec = nuget\Jakar.DataBase.nuspec
 		nuget\Jakar.Extensions.Blazor.nuspec = nuget\Jakar.Extensions.Blazor.nuspec
 		nuget\Jakar.Extensions.Hosting.nuspec = nuget\Jakar.Extensions.Hosting.nuspec
 		nuget\Jakar.Extensions.Maui.nuspec = nuget\Jakar.Extensions.Maui.nuspec
@@ -59,7 +60,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jakar.Extensions.Bogus", "J
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jakar.Database", "Jakar.Database\Jakar.Database.csproj", "{C68DF03A-AE24-4553-AA66-072728191784}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jakar.Extensions.Maui", "Jakar.Extensions.Maui\Jakar.Extensions.Maui.csproj", "{EC6EB452-F878-48A1-B2B5-3EFF18048FA8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jakar.Extensions.Maui", "Jakar.Extensions.Maui\Jakar.Extensions.Maui.csproj", "{EC6EB452-F878-48A1-B2B5-3EFF18048FA8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
