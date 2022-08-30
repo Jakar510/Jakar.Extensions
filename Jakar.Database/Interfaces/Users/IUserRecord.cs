@@ -15,6 +15,7 @@ namespace Jakar.Database;
 /// <typeparam name="TRecord"></typeparam>
 /// <typeparam name="TID"></typeparam>
 [SuppressMessage("ReSharper", "UnusedType.Global")]
+
 // ReSharper disable once PossibleInterfaceMemberAmbiguity
 public interface IUserRecord<TRecord, TID> : IComparable<TRecord>, IEquatable<TRecord>, JsonModels.IJsonStringModel, IRefreshToken, IUserControl<TRecord>, IUserID, IUserData, IUserSecurity, IUserSubscription<TID>
     where TRecord : BaseTableRecord<TRecord, TID>, IUserRecord<TRecord, TID>
@@ -25,9 +26,10 @@ public interface IUserRecord<TRecord, TID> : IComparable<TRecord>, IEquatable<TR
     public DateTimeOffset DateCreated  { get; }
     public TID?           CreatedBy    { get; }
 
-    
+
     /// <summary> A unique User ID for which user to contact </summary>
     public TID? EscalateTo { get; }
+
 
     public List<Claim> GetUserClaims();
 

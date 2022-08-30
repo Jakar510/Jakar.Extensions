@@ -3,27 +3,25 @@
 
 public interface IUserData : JsonModels.IJsonModel
 {
-    public string            FirstName              { get; }
-    public string            LastName               { get; }
-    public string?           FullName               { get; }
-    public string?           Address                { get; }
-    public string?           Line1                  { get; }
-    public string?           Line2                  { get; }
-    public string?           City                   { get; }
-    public string?           State                  { get; }
-    public string?           Country                { get; }
-    public string?           PostalCode             { get; }
-    public string?           Description            { get; }
-    public string?           Website                { get; }
-    public string?           Email                  { get; }
-    public string?           PhoneNumber            { get; }
-    public string?           Ext                    { get; }
-    public string?           Title                  { get; }
-    public string?           Department             { get; }
-    public string?           Company                { get; }
-    public bool              IsEmailConfirmed       { get; }
-    public bool              IsPhoneNumberConfirmed { get; }
-    public SupportedLanguage PreferredLanguage      { get; }
+    public string            FirstName         { get; set; }
+    public string            LastName          { get; set; }
+    public string?           FullName          { get; set; }
+    public string?           Address           { get; set; }
+    public string?           Line1             { get; set; }
+    public string?           Line2             { get; set; }
+    public string?           City              { get; set; }
+    public string?           State             { get; set; }
+    public string?           Country           { get; set; }
+    public string?           PostalCode        { get; set; }
+    public string?           Description       { get; set; }
+    public string?           Website           { get; set; }
+    public string?           Email             { get; set; }
+    public string?           PhoneNumber       { get; set; }
+    public string?           Ext               { get; set; }
+    public string?           Title             { get; set; }
+    public string?           Department        { get; set; }
+    public string?           Company           { get; set; }
+    public SupportedLanguage PreferredLanguage { get; set; }
 
 
     public void Update( IUserData model );

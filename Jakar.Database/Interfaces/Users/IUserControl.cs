@@ -16,6 +16,7 @@ public interface IUserControl<out TRecord> where TRecord : IUserControl<TRecord>
     public TRecord MarkBadLogin();
     public TRecord SetActive();
     public TRecord Unlock();
+    public TRecord Lock();
 
 
     /// <summary> Disable the user, with current rights. </summary>

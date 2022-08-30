@@ -6,11 +6,13 @@
 /// </summary>
 public interface IUserSecurity
 {
-    public DateTimeOffset? TokenExpiration     { get; }
-    public bool            IsTwoFactorEnabled  { get; }
-    public string?         LoginProvider       { get; }
-    public string?         ProviderKey         { get; }
-    public string?         ProviderDisplayName { get; }
+    public DateTimeOffset? TokenExpiration        { get; }
+    public bool            IsTwoFactorEnabled     { get; }
+    public bool            IsEmailConfirmed       { get; }
+    public bool            IsPhoneNumberConfirmed { get; }
+    public string?         LoginProvider          { get; }
+    public string?         ProviderKey            { get; }
+    public string?         ProviderDisplayName    { get; }
 
 
     /// <summary> A random value that must change whenever a users credentials change (password changed, login removed) </summary>
