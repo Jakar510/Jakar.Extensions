@@ -66,23 +66,57 @@ public static class Program
 
     public static async Task Test_HttpBuilder( CancellationToken token = default )
     {
-        var          target  = new Uri("https://www.toptal.com/developers/postbin/");
-        var          host    = new Uri("https://httpbin.org/");
-        var          content = new AppVersion(1, 2, 3).ToString();
-        WebRequester builder = WebRequestBuilder.Create(host).With_Host(host).With_Timeout(1).Build();
+        // var target  = new Uri("https://www.toptal.com/developers/postbin/");
+        var host    = new Uri("https://httpbin.org/");
+        var content = new AppVersion(1, 2, 3).ToString();
+
+        WebRequester builder = WebRequestBuilder.Create(host)
+                                                .With_Timeout(10)
+                                                .Build();
 
 
-        ( await builder.Get("/bearer", token).AsJson() ).WriteToConsole();
-        ( await builder.Put("/put", content, token).AsJson() ).WriteToConsole();
-        ( await builder.Post("/post", content, token).AsJson() ).WriteToConsole();
-        ( await builder.Get("/get", token).AsJson() ).WriteToConsole();
-        ( await builder.Delete("/delete", token).AsJson() ).WriteToConsole();
-        ( await builder.Patch("/patch", content, token).AsJson() ).WriteToConsole();
-        ( await builder.Get("/headers",    token).AsJson() ).WriteToConsole();
-        ( await builder.Get("/ip",         token).AsJson() ).WriteToConsole();
-        ( await builder.Get("/user-agent", token).AsJson() ).WriteToConsole();
-        ( await builder.Get("/cookies",    token).AsJson() ).WriteToConsole();
-        ( await builder.Get("/image/png",  token).AsFile(MimeType.Png) ).WriteToConsole();
+        ( await builder.Get("/bearer", token)
+                       .AsJson() ).WriteToConsole();
+
+        ( await builder.Put("/put", content, token)
+                       .AsJson() ).WriteToConsole();
+
+        ( await builder.Post("/post", content, token)
+                       .AsJson() ).WriteToConsole();
+
+        ( await builder.Get("/get", token)
+                       .AsJson() ).WriteToConsole();
+
+        ( await builder.Delete("/delete", token)
+                       .AsJson() ).WriteToConsole();
+
+        ( await builder.Patch("/patch", content, token)
+                       .AsJson() ).WriteToConsole();
+
+        ( await builder.Get("/headers", token)
+                       .AsJson() ).WriteToConsole();
+
+        ( await builder.Get("/ip", token)
+                       .AsJson() ).WriteToConsole();
+
+        ( await builder.Get("/user-agent", token)
+                       .AsJson() ).WriteToConsole();
+
+        ( await builder.Get("/cookies", token)
+                       .AsJson() ).WriteToConsole();
+
+        WebResponse<LocalFile> response = await builder.Get("/image/png", token)
+                                                       .AsFile(MimeType.Png);
+
+        using ( response.Payload ) { response.WriteToConsole(); }
+
+
+        ( await builder.Get("/cookies", token)
+                       .AsString() ).WriteToConsole();
+
+
+        ( await builder.Post("/anything", content, token)
+                       .AsJson() ).WriteToConsole();
     }
 
 
@@ -113,13 +147,17 @@ public static class Program
         var test   = new Test("Root",   first, second);
 
 
-        test.ToJson().WriteToConsole();
+        test.ToJson()
+            .WriteToConsole();
+
         string temp = test.ToJson();
         temp.WriteToConsole();
 
         "---TEST---".WriteToConsole();
         JToken json = temp.FromJson();
-        json.ToJson(Formatting.Indented).WriteToConsole();
+
+        json.ToJson(Formatting.Indented)
+            .WriteToConsole();
     }
 
 

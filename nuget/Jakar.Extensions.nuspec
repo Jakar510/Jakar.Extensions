@@ -4,7 +4,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata>
 		<id>Jakar.Extensions</id>
-		<version>6.0.0.49-beta</version>
+		<version>6.0.0.50-beta</version>
 		<title>Extension Library</title>
 		<authors>Tyler Stegmaier</authors>
 		<owners>Jakar510/Jakar</owners>
@@ -21,18 +21,18 @@
 			Jakar.Extensions 6.0.0
 			Major namespace changes
 			Removed Models.Users
-			multi-targets NetStandard2.1 and Net6.0
 			Added MailKit Email Builder
 			Added Models.Service
-			Added HttpRequestBuilder for .Net 6.0
+			Added WebRequestBuilder
+			WebRequests.GetResponseAsync now tries to get the error details, including anything sent sent from server in the body.
 			Updated Enum extensions
 			Added lots more Span Extensions
 			Reworked AppSettings
 			Reworked LocalFile and LocalDirectory a bit
 			Reworked IniConfig and PreferenceFile
-			WebRequests.GetResponseAsync now tries to get the error details, including anything sent sent from server in the body.
 			Reworked ValidValueOf
 			Fix xml documentation.
+			Multi-targets NetStandard2.1 and Net6.0
 			Moving to .Net6 only going forward once MAUI is released.
 		</releaseNotes>
 		<tags>Api Extension Linq Http Files Files Strings Types Languages Collections Ini</tags>

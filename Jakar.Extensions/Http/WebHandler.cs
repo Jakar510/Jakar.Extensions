@@ -57,15 +57,9 @@ public class WebHandler : IDisposable
     public virtual async Task<WebResponse<JToken>> AsJson( JsonLoadSettings settings ) => await WebResponse<JToken>.Create(this, settings, AsJson);
     public virtual async Task<JToken> AsJson( HttpResponseMessage response, JsonLoadSettings settings )
     {
-        response.EnsureSuccessStatusCode();
-        using HttpContent content = response.Content;
-    #if NET6_0
-        await using Stream stream = await content.ReadAsStreamAsync(Token);
-    #else
-        await using Stream stream = await content.ReadAsStreamAsync();
-    #endif
-        using var        sr     = new StreamReader(stream, Encoding);
-        using JsonReader reader = new JsonTextReader(sr);
+        await using MemoryStream stream = await AsStream(response);
+        using var                sr     = new StreamReader(stream, Encoding);
+        using JsonReader         reader = new JsonTextReader(sr);
         return await JToken.ReadFromAsync(reader, settings, Token);
     }
 
@@ -74,15 +68,9 @@ public class WebHandler : IDisposable
     public virtual Task<WebResponse<TResult>> AsJson<TResult>( JsonSerializer serializer ) => WebResponse<TResult>.Create(this, serializer, AsJson<TResult>);
     public virtual async Task<TResult> AsJson<TResult>( HttpResponseMessage response, JsonSerializer serializer )
     {
-        response.EnsureSuccessStatusCode();
-        using HttpContent content = response.Content;
-    #if NET6_0
-        await using Stream stream = await content.ReadAsStreamAsync(Token);
-    #else
-        await using Stream stream = await content.ReadAsStreamAsync();
-    #endif
-        using var        sr     = new StreamReader(stream, Encoding);
-        using JsonReader reader = new JsonTextReader(sr);
+        await using MemoryStream stream = await AsStream(response);
+        using var                sr     = new StreamReader(stream, Encoding);
+        using JsonReader         reader = new JsonTextReader(sr);
 
         return serializer.Deserialize<TResult>(reader) ?? throw new NullReferenceException(nameof(JsonConvert.DeserializeObject));
     }
@@ -91,16 +79,21 @@ public class WebHandler : IDisposable
     public virtual Task<WebResponse<string>> AsString() => WebResponse<string>.Create(this, AsString);
     public virtual async Task<string> AsString( HttpResponseMessage response )
     {
-        using MemoryStream stream = await AsStream(response);
-        var                reader = new StreamReader(stream, Encoding);
-        return await reader.ReadToEndAsync();
+        response.EnsureSuccessStatusCode();
+        using HttpContent content = response.Content;
+
+    #if NETSTANDARD2_1
+        return await content.ReadAsStringAsync();
+    #else
+        return await content.ReadAsStringAsync(Token);
+    #endif
     }
 
 
     public virtual Task<WebResponse<byte[]>> AsBytes() => WebResponse<byte[]>.Create(this, AsBytes);
     public virtual async Task<byte[]> AsBytes( HttpResponseMessage response )
     {
-        using MemoryStream stream = await AsStream(response);
+        await using MemoryStream stream = await AsStream(response);
         return stream.ToArray();
     }
 
@@ -143,8 +136,8 @@ public class WebHandler : IDisposable
         }
 
 
-        await using MemoryStream stream = await AsStream(response);
-        await using FileStream   fs     = LocalFile.CreateTempFileAndOpen(out LocalFile file);
+        await using Stream     stream = await AsStream(response);
+        await using FileStream fs     = LocalFile.CreateTempFileAndOpen(out LocalFile file);
         await stream.CopyToAsync(fs, Token);
 
         return file;
@@ -183,14 +176,17 @@ public class WebHandler : IDisposable
     {
         response.EnsureSuccessStatusCode();
         using HttpContent content = response.Content;
-        var               result  = new MemoryStream();
 
-    #if NET6_0
-        await content.CopyToAsync(result, Token);
+    #if NETSTANDARD2_1
+        await using Stream stream = await content.ReadAsStreamAsync();
     #else
-        await content.CopyToAsync(result);
+        await using Stream stream = await content.ReadAsStreamAsync(Token);
     #endif
 
-        return result;
+        var buffer = new MemoryStream((int)stream.Length);
+        await stream.CopyToAsync(buffer, Token);
+        
+        buffer.Seek(0, SeekOrigin.Begin);
+        return buffer;
     }
 }
