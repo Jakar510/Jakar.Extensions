@@ -29,16 +29,16 @@ public interface IAppSettings<TViewPage> : IAppSettings
 [Serializable]
 public class AppSettings : BaseHostViewModel, IAppSettings
 {
-    private string     _appName = string.Empty;
+    private string     _appName       = string.Empty;
+    private string     _deviceVersion = string.Empty;
+    private string?    _screenShotAddress;
     private AppVersion _appVersion;
     private bool       _crashDataPending;
     private Guid       _deviceID;
-    private string     _deviceVersion = string.Empty;
-    private string?    _screenShotAddress;
     private bool?      _sendCrashes;
 
 
-    public Guid DeviceID
+    public virtual Guid DeviceID
     {
         get => _deviceID;
         set => SetProperty(ref _deviceID, value);
@@ -54,31 +54,31 @@ public class AppSettings : BaseHostViewModel, IAppSettings
         }
     }
 
-    public string? ScreenShotAddress
+    public virtual string? ScreenShotAddress
     {
         get => _screenShotAddress;
         set => SetProperty(ref _screenShotAddress, value);
     }
 
-    public string AppName
+    public virtual string AppName
     {
         get => _appName;
         set => SetProperty(ref _appName, value);
     }
 
-    public string DeviceVersion
+    public virtual string DeviceVersion
     {
         get => _deviceVersion;
         set => SetProperty(ref _deviceVersion, value);
     }
 
-    public bool CrashDataPending
+    public virtual bool CrashDataPending
     {
         get => _crashDataPending;
         set => SetProperty(ref _crashDataPending, value);
     }
 
-    public AppVersion AppVersion
+    public virtual AppVersion AppVersion
     {
         get => _appVersion;
         set => SetProperty(ref _appVersion, value);
@@ -115,6 +115,6 @@ public class AppSettings<TViewPage> : AppSettings, IAppSettings<TViewPage>
 
 
     public AppSettings( string appName, in AppVersion version, string deviceVersion, Uri  hostInfo ) : base(appName, version, deviceVersion, hostInfo) { }
-    public AppSettings( string appName, in AppVersion version, string deviceVersion, bool sendCrashes, Uri    hostInfo ) : base(appName, version, deviceVersion, sendCrashes, hostInfo) { }
-    public AppSettings( string appName, in AppVersion version, string deviceVersion, bool sendCrashes, Uri    hostInfo, Uri defaultHostInfo ) : base(appName, version, deviceVersion, sendCrashes, hostInfo, defaultHostInfo) { }
+    public AppSettings( string appName, in AppVersion version, string deviceVersion, bool sendCrashes, Uri hostInfo ) : base(appName, version, deviceVersion, sendCrashes, hostInfo) { }
+    public AppSettings( string appName, in AppVersion version, string deviceVersion, bool sendCrashes, Uri hostInfo, Uri defaultHostInfo ) : base(appName, version, deviceVersion, sendCrashes, hostInfo, defaultHostInfo) { }
 }

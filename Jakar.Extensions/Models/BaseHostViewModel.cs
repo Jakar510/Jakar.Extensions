@@ -12,7 +12,7 @@ public abstract class BaseHostViewModel : BaseViewModel, IHostInfo
     private            bool    _isValidHost;
 
 
-    public string? Host
+    public virtual string? Host
     {
         get => _host;
         set
@@ -22,7 +22,7 @@ public abstract class BaseHostViewModel : BaseViewModel, IHostInfo
             OnPropertyChanged(nameof(HostInfo));
         }
     }
-    public Uri HostInfo
+    public virtual Uri HostInfo
     {
         get => _hostInfo ?? _defaultHostInfo;
         set
@@ -31,7 +31,7 @@ public abstract class BaseHostViewModel : BaseViewModel, IHostInfo
             Host = value.ToString();
         }
     }
-    public bool IsValidHost
+    public virtual bool IsValidHost
     {
         get => _isValidHost;
         set => SetProperty(ref _isValidHost, value);

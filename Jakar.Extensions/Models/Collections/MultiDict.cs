@@ -67,7 +67,7 @@ public class MultiDict<TKey> : Dictionary<TKey, object?> where TKey : notnull
 
     public T ValueAs<T>( in TKey key )
     {
-        if ( !ContainsKey(key) ) { throw new KeyNotFoundException(key?.ToString()); }
+        if ( !ContainsKey(key) ) { throw new KeyNotFoundException(key.ToString()); }
 
         return ExpectedValueTypeException<TKey>.Verify<T>(this[key], key);
     }
