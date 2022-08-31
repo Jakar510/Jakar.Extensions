@@ -12,7 +12,7 @@ namespace Jakar.Extensions;
 /// </summary>
 /// <typeparam name = "T" > </typeparam>
 [Serializable]
-public class ConcurrentObservableCollection<T> : CollectionAlerts<T>, IList<T>, IList, IReadOnlyCollection<T>
+public class ConcurrentObservableCollection<T> : CollectionAlerts<T>, IList<T>, IReadOnlyList<T>, IList
 {
     protected readonly IComparer<T> _comparer;
 
