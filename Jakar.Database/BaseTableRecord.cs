@@ -15,4 +15,6 @@ public abstract record BaseTableRecord<TClass, TID> : BaseCollectionsRecord<TCla
                                                   {
                                                       ID = id
                                                   } );
+
+    protected virtual void VerifyAccess() { }
 }

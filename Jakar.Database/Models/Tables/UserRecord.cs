@@ -12,56 +12,286 @@ namespace Jakar.Database;
 public abstract record UserRecord<TRecord, TID> : BaseTableRecord<TRecord, TID>, IUserRecord<TRecord, TID> where TRecord : UserRecord<TRecord, TID>
                                                                                                            where TID : IComparable<TID>, IEquatable<TID>
 {
-    protected static readonly PasswordHasher<TRecord> _hasher = new();
+    protected static readonly PasswordHasher<TRecord> _hasher    = new();
+    private                   string                  _userName  = string.Empty;
+    private                   string                  _firstName = string.Empty;
+    private                   string                  _lastName  = string.Empty;
+    private                   string?                 _fullName;
+    private                   string?                 _description;
+    private                   string?                 _address;
+    private                   string?                 _line1;
+    private                   string?                 _line2;
+    private                   string?                 _city;
+    private                   string?                 _state;
+    private                   string?                 _country;
+    private                   string?                 _postalCode;
+    private                   string?                 _website;
+    private                   string?                 _email;
+    private                   string?                 _phoneNumber;
+    private                   string?                 _ext;
+    private                   string?                 _title;
+    private                   string?                 _department;
+    private                   string?                 _company;
+    private                   SupportedLanguage       _preferredLanguage;
+    private                   Guid?                   _sessionID;
+    private                   DateTimeOffset?         _subscriptionExpires;
+    private                   TID?                    _subscriptionID;
+    private                   DateTimeOffset          _dateCreated;
+    private                   TID                     _createdBy  = default!;
+    private                   TID                     _escalateTo = default!;
+    private                   bool                    _isActive;
+    private                   bool                    _isDisabled;
+    private                   bool                    _isLocked;
+    private                   int?                    _badLogins;
+    private                   DateTimeOffset?         _lastActive;
+    private                   DateTimeOffset?         _lastBadAttempt;
+    private                   DateTimeOffset?         _lockDate;
+    private                   string?                 _refreshToken;
+    private                   DateTimeOffset?         _refreshTokenExpiryTime;
+    private                   DateTimeOffset?         _tokenExpiration;
+    private                   bool                    _isEmailConfirmed;
+    private                   bool                    _isPhoneNumberConfirmed;
+    private                   bool                    _isTwoFactorEnabled;
+    private                   string?                 _loginProvider;
+    private                   string?                 _providerKey;
+    private                   string?                 _providerDisplayName;
+    private                   string?                 _securityStamp;
+    private                   string?                 _concurrencyStamp;
+    private                   string?                 _additionalData;
+    private                   string?                 _passwordHash;
 
 
-    public Guid              UserID                 { get; init; } = default!;
-    public string            UserName               { get; set; }  = string.Empty;
-    public string            FirstName              { get; set; }  = string.Empty;
-    public string            LastName               { get; set; }  = string.Empty;
-    public string?           FullName               { get; set; }
-    public string?           Description            { get; set; }
-    public Guid?             SessionID              { get; set; }
-    public string?           Address                { get; set; }
-    public string?           Line1                  { get; set; }
-    public string?           Line2                  { get; set; }
-    public string?           City                   { get; set; }
-    public string?           State                  { get; set; }
-    public string?           Country                { get; set; }
-    public string?           PostalCode             { get; set; }
-    public string?           Website                { get; set; }
-    public string?           Email                  { get; set; }
-    public string?           PhoneNumber            { get; set; }
-    public string?           Ext                    { get; set; }
-    public string?           Title                  { get; set; }
-    public string?           Department             { get; set; }
-    public string?           Company                { get; set; }
-    public SupportedLanguage PreferredLanguage      { get; set; }
-    public DateTimeOffset?   SubscriptionExpires    { get; set; }
-    public TID?              SubscriptionID         { get; set; }
-    public DateTimeOffset    DateCreated            { get; set; }
-    public TID               CreatedBy              { get; set; } = default!;
-    public TID               EscalateTo             { get; set; } = default!;
-    public bool              IsActive               { get; set; }
-    public bool              IsDisabled             { get; set; }
-    public bool              IsLocked               { get; set; }
-    public int?              BadLogins              { get; set; }
-    public DateTimeOffset?   LastActive             { get; set; }
-    public DateTimeOffset?   LastBadAttempt         { get; set; }
-    public DateTimeOffset?   LockDate               { get; set; }
-    public string?           RefreshToken           { get; set; }
-    public DateTimeOffset?   RefreshTokenExpiryTime { get; set; }
-    public DateTimeOffset?   TokenExpiration        { get; set; }
-    public bool              IsEmailConfirmed       { get; set; }
-    public bool              IsPhoneNumberConfirmed { get; set; }
-    public bool              IsTwoFactorEnabled     { get; set; }
-    public string?           LoginProvider          { get; set; }
-    public string?           ProviderKey            { get; set; }
-    public string?           ProviderDisplayName    { get; set; }
-    public string?           SecurityStamp          { get; set; }
-    public string?           ConcurrencyStamp       { get; set; }
-    public string?           AdditionalData         { get; set; }
-    public string?           PasswordHash           { get; set; }
+    public Guid UserID { get; init; } = default!;
+    public string UserName
+    {
+        get => _userName;
+        set => SetProperty(ref _userName, value);
+    }
+    public string FirstName
+    {
+        get => _firstName;
+        set => SetProperty(ref _firstName, value);
+    }
+    public string LastName
+    {
+        get => _lastName;
+        set => SetProperty(ref _lastName, value);
+    }
+    public string? FullName
+    {
+        get => _fullName;
+        set => SetProperty(ref _fullName, value);
+    }
+    public string? Description
+    {
+        get => _description;
+        set => SetProperty(ref _description, value);
+    }
+    public Guid? SessionID
+    {
+        get => _sessionID;
+        set => SetProperty(ref _sessionID, value);
+    }
+    public string? Address
+    {
+        get => _address;
+        set => SetProperty(ref _address, value);
+    }
+    public string? Line1
+    {
+        get => _line1;
+        set => SetProperty(ref _line1, value);
+    }
+    public string? Line2
+    {
+        get => _line2;
+        set => SetProperty(ref _line2, value);
+    }
+    public string? City
+    {
+        get => _city;
+        set => SetProperty(ref _city, value);
+    }
+    public string? State
+    {
+        get => _state;
+        set => SetProperty(ref _state, value);
+    }
+    public string? Country
+    {
+        get => _country;
+        set => SetProperty(ref _country, value);
+    }
+    public string? PostalCode
+    {
+        get => _postalCode;
+        set => SetProperty(ref _postalCode, value);
+    }
+    public string? Website
+    {
+        get => _website;
+        set => SetProperty(ref _website, value);
+    }
+    public string? Email
+    {
+        get => _email;
+        set => SetProperty(ref _email, value);
+    }
+    public string? PhoneNumber
+    {
+        get => _phoneNumber;
+        set => SetProperty(ref _phoneNumber, value);
+    }
+    public string? Ext
+    {
+        get => _ext;
+        set => SetProperty(ref _ext, value);
+    }
+    public string? Title
+    {
+        get => _title;
+        set => SetProperty(ref _title, value);
+    }
+    public string? Department
+    {
+        get => _department;
+        set => SetProperty(ref _department, value);
+    }
+    public string? Company
+    {
+        get => _company;
+        set => SetProperty(ref _company, value);
+    }
+    public SupportedLanguage PreferredLanguage
+    {
+        get => _preferredLanguage;
+        set => SetProperty(ref _preferredLanguage, value);
+    }
+    public DateTimeOffset? SubscriptionExpires
+    {
+        get => _subscriptionExpires;
+        set => SetProperty(ref _subscriptionExpires, value);
+    }
+    public TID? SubscriptionID
+    {
+        get => _subscriptionID;
+        set => SetProperty(ref _subscriptionID, value);
+    }
+    public DateTimeOffset DateCreated
+    {
+        get => _dateCreated;
+        set => SetProperty(ref _dateCreated, value);
+    }
+    public TID CreatedBy
+    {
+        get => _createdBy;
+        set => SetProperty(ref _createdBy, value);
+    }
+    public TID EscalateTo
+    {
+        get => _escalateTo;
+        set => SetProperty(ref _escalateTo, value);
+    }
+    public bool IsActive
+    {
+        get => _isActive;
+        set => SetProperty(ref _isActive, value);
+    }
+    public bool IsDisabled
+    {
+        get => _isDisabled;
+        set => SetProperty(ref _isDisabled, value);
+    }
+    public bool IsLocked
+    {
+        get => _isLocked;
+        set => SetProperty(ref _isLocked, value);
+    }
+    public int? BadLogins
+    {
+        get => _badLogins;
+        set => SetProperty(ref _badLogins, value);
+    }
+    public DateTimeOffset? LastActive
+    {
+        get => _lastActive;
+        set => SetProperty(ref _lastActive, value);
+    }
+    public DateTimeOffset? LastBadAttempt
+    {
+        get => _lastBadAttempt;
+        set => SetProperty(ref _lastBadAttempt, value);
+    }
+    public DateTimeOffset? LockDate
+    {
+        get => _lockDate;
+        set => SetProperty(ref _lockDate, value);
+    }
+    public string? RefreshToken
+    {
+        get => _refreshToken;
+        set => SetProperty(ref _refreshToken, value);
+    }
+    public DateTimeOffset? RefreshTokenExpiryTime
+    {
+        get => _refreshTokenExpiryTime;
+        set => SetProperty(ref _refreshTokenExpiryTime, value);
+    }
+    public DateTimeOffset? TokenExpiration
+    {
+        get => _tokenExpiration;
+        set => SetProperty(ref _tokenExpiration, value);
+    }
+    public bool IsEmailConfirmed
+    {
+        get => _isEmailConfirmed;
+        set => SetProperty(ref _isEmailConfirmed, value);
+    }
+    public bool IsPhoneNumberConfirmed
+    {
+        get => _isPhoneNumberConfirmed;
+        set => SetProperty(ref _isPhoneNumberConfirmed, value);
+    }
+    public bool IsTwoFactorEnabled
+    {
+        get => _isTwoFactorEnabled;
+        set => SetProperty(ref _isTwoFactorEnabled, value);
+    }
+    public string? LoginProvider
+    {
+        get => _loginProvider;
+        set => SetProperty(ref _loginProvider, value);
+    }
+    public string? ProviderKey
+    {
+        get => _providerKey;
+        set => SetProperty(ref _providerKey, value);
+    }
+    public string? ProviderDisplayName
+    {
+        get => _providerDisplayName;
+        set => SetProperty(ref _providerDisplayName, value);
+    }
+    public string? SecurityStamp
+    {
+        get => _securityStamp;
+        set => SetProperty(ref _securityStamp, value);
+    }
+    public string? ConcurrencyStamp
+    {
+        get => _concurrencyStamp;
+        set => SetProperty(ref _concurrencyStamp, value);
+    }
+    public string? AdditionalData
+    {
+        get => _additionalData;
+        set => SetProperty(ref _additionalData, value);
+    }
+    public string? PasswordHash
+    {
+        get => _passwordHash;
+        set => SetProperty(ref _passwordHash, value);
+    }
 
 
     IDictionary<string, JToken?>? JsonModels.IJsonModel.AdditionalData
@@ -99,12 +329,11 @@ public abstract record UserRecord<TRecord, TID> : BaseTableRecord<TRecord, TID>,
                         ? caller.ID
                         : default!;
     }
-    protected virtual void VerifyContextManager() { }
 
 
     public void UpdatePassword( string password )
     {
-        VerifyContextManager();
+        VerifyAccess();
         PasswordHash = _hasher.HashPassword((TRecord)this, password);
     }
     public PasswordVerificationResult VerifyPassword( string password ) => _hasher.VerifyHashedPassword((TRecord)this, PasswordHash, password);
@@ -112,7 +341,7 @@ public abstract record UserRecord<TRecord, TID> : BaseTableRecord<TRecord, TID>,
 
     public TRecord MarkBadLogin()
     {
-        VerifyContextManager();
+        VerifyAccess();
         LastBadAttempt = DateTimeOffset.Now;
         BadLogins      = 0;
         IsDisabled     = BadLogins > 5;
@@ -123,33 +352,33 @@ public abstract record UserRecord<TRecord, TID> : BaseTableRecord<TRecord, TID>,
     }
     public TRecord SetActive()
     {
-        VerifyContextManager();
+        VerifyAccess();
         LastActive = DateTimeOffset.Now;
         return (TRecord)this;
     }
     public TRecord Disable()
     {
-        VerifyContextManager();
+        VerifyAccess();
         IsDisabled = true;
         return Lock();
     }
     public TRecord Lock()
     {
-        VerifyContextManager();
+        VerifyAccess();
         IsDisabled = true;
         LockDate   = DateTimeOffset.Now;
         return (TRecord)this;
     }
     public TRecord Enable()
     {
-        VerifyContextManager();
+        VerifyAccess();
         LockDate = default;
         IsActive = true;
         return Unlock();
     }
     public TRecord Unlock()
     {
-        VerifyContextManager();
+        VerifyAccess();
         BadLogins      = 0;
         IsDisabled     = BadLogins > 5;
         LastBadAttempt = default;
@@ -160,13 +389,13 @@ public abstract record UserRecord<TRecord, TID> : BaseTableRecord<TRecord, TID>,
 
     public void ClearRefreshToken()
     {
-        VerifyContextManager();
+        VerifyAccess();
         RefreshToken           = default;
         RefreshTokenExpiryTime = default;
     }
     public void SetRefreshToken( string token, DateTimeOffset date )
     {
-        VerifyContextManager();
+        VerifyAccess();
         RefreshToken           = token;
         RefreshTokenExpiryTime = date;
     }
@@ -174,8 +403,18 @@ public abstract record UserRecord<TRecord, TID> : BaseTableRecord<TRecord, TID>,
 
     public List<Claim> GetUserClaims() => new()
                                           {
-                                              new Claim(nameof(UserID),   UserID.ToString()),
-                                              new Claim(nameof(UserName), UserName),
+                                              new Claim(ClaimTypes.Sid,             UserID.ToString()),
+                                              new Claim(ClaimTypes.Dsa,             UserID.ToString()),
+                                              new Claim(ClaimTypes.NameIdentifier,  UserName),
+                                              new Claim(ClaimTypes.Name,            FullName ?? string.Empty),
+                                              new Claim(ClaimTypes.Country,         Country ?? string.Empty),
+                                              new Claim(ClaimTypes.MobilePhone,     PhoneNumber ?? string.Empty),
+                                              new Claim(ClaimTypes.Email,           Email ?? string.Empty),
+                                              new Claim(ClaimTypes.PostalCode,      PostalCode ?? string.Empty),
+                                              new Claim(ClaimTypes.StateOrProvince, State ?? string.Empty),
+                                              new Claim(ClaimTypes.StreetAddress,   Line1 ?? string.Empty),
+                                              new Claim(ClaimTypes.Webpage,         Website ?? string.Empty),
+                                              new Claim(ClaimTypes.Expiration,      SubscriptionExpires?.ToString() ?? string.Empty),
                                           };
 
 
@@ -189,7 +428,7 @@ public abstract record UserRecord<TRecord, TID> : BaseTableRecord<TRecord, TID>,
 
     public void Update( IUserData value )
     {
-        VerifyContextManager();
+        VerifyAccess();
         FirstName         = value.FirstName;
         LastName          = value.LastName;
         FullName          = value.FullName;
