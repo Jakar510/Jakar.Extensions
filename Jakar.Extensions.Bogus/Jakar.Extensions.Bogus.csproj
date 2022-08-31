@@ -8,9 +8,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Jakar.Extensions" Version="6.0.0.48-beta" />
+    <PackageReference Include="Jakar.Extensions" Version="6.0.0.51-beta" />
 	<PackageReference Include="Bogus" Version="34.0.2" />
-	<PackageReference Include="CountryData.Bogus" Version="3.75.0" />
+	<PackageReference Include="CountryData.Bogus" Version="3.77.0" />
 	<PackageReference Include="NaughtyStrings.Bogus" Version="2.4.1" />
   </ItemGroup>
 

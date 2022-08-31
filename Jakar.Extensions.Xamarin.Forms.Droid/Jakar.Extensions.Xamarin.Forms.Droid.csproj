@@ -92,16 +92,16 @@
       <Version>7.2.0.564</Version>
     </PackageReference>
     <PackageReference Include="Jakar.Extensions">
-      <Version>6.0.0.48-beta</Version>
+      <Version>6.0.0.51-beta</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.AppCenter">
-      <Version>4.5.1</Version>
+      <Version>4.5.3</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.AppCenter.Analytics">
-      <Version>4.5.1</Version>
+      <Version>4.5.3</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.AppCenter.Crashes">
-      <Version>4.5.1</Version>
+      <Version>4.5.3</Version>
     </PackageReference>
     <PackageReference Include="NETStandard.Library">
       <Version>2.0.3</Version>
