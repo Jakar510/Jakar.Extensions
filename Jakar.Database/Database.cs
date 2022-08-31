@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 08/14/2022  8:39 PM
 
-using System.Collections.Concurrent;
-
-
-
 namespace Jakar.Database;
 
 
@@ -13,6 +9,18 @@ public abstract class Database<TID> : ObservableClass, IConnectableDb, IAsyncDis
     protected readonly ConcurrentBag<IAsyncDisposable> _disposables = new();
 
 
+    static Database()
+    {
+        EnumSqlHandler<SupportedLanguage>.Register();
+        EnumSqlHandler<MimeType>.Register();
+        EnumSqlHandler<Status>.Register();
+        EnumSqlHandler<AppVersion.Format>.Register();
+        DateTimeOffsetHandler.Register();
+        DateTimeHandler.Register();
+        DateOnlyHandler.Register();
+        TimeOnlyHandler.Register();
+        AppVersionHandler.Register();
+    }
     protected Database() : base() { }
     public virtual async ValueTask DisposeAsync()
     {
