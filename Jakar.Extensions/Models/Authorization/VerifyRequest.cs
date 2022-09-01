@@ -47,7 +47,7 @@ public class VerifyRequest : BaseClass, ILoginRequest, ICredentials, IEquatable<
 
 
 
-public class VerifyRequest<T> : ICredentials, IValidator, IEquatable<VerifyRequest<T>> where T : notnull
+public class VerifyRequest<T> : BaseClass, ICredentials, IValidator, IEquatable<VerifyRequest<T>> where T : notnull
 {
     public VerifyRequest Request { get; init; } = new();
     public T             Data    { get; init; } = default!;
@@ -87,7 +87,7 @@ public class VerifyRequest<T> : ICredentials, IValidator, IEquatable<VerifyReque
     }
     public override int GetHashCode() => HashCode.Combine(Request, Data);
 
-    
+
     public static bool operator ==( VerifyRequest<T>? left, VerifyRequest<T>? right ) => Equals(left, right);
     public static bool operator !=( VerifyRequest<T>? left, VerifyRequest<T>? right ) => !Equals(left, right);
 }
