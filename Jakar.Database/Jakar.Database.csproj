@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<TargetFramework>net6.0</TargetFramework>
@@ -10,10 +10,10 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Jakar.Extensions" Version="6.0.0.51-beta" />
-		<PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.2.0" />
-		<PackageReference Include="Microsoft.Extensions.Identity.Core" Version="6.0.8" />
-		<PackageReference Include="Sigil" Version="5.0.0" />
+		<PackageReference Include="Jakar.Extensions"
+						  Version="6.0.0.51-beta" />
+		<PackageReference Include="Jakar.Extensions.Hosting"
+						  Version="6.0.0.8-beta" />
 	</ItemGroup>
 
 </Project>
