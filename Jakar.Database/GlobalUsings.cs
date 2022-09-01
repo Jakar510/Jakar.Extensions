@@ -14,3 +14,4 @@ global using System.Text;
 global using Dapper;
 global using Jakar.Extensions;
 global using Microsoft.AspNetCore.Identity;
+global using Sigil;

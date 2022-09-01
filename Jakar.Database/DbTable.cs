@@ -1,7 +1,7 @@
 ﻿namespace Jakar.Database;
 
 
-public abstract class DbTable<TRecord, TID> : ObservableClass, IDbTable<TRecord, TID> where TRecord : BaseTableRecord<TRecord, TID>
+public abstract partial class DbTable<TRecord, TID> : ObservableClass, IDbTable<TRecord, TID> where TRecord : BaseTableRecord<TRecord, TID>
                                                                                       where TID : IComparable<TID>, IEquatable<TID>
 {
     private readonly IConnectableDb _database;
