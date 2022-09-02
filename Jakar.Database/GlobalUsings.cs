@@ -1,6 +1,7 @@
 // Jakar.Extensions :: Jakar.Database
 // 08/14/2022  10:46 PM
 
+global using System.Collections;
 global using System.Collections.Concurrent;
 global using System.Collections.Specialized;
 global using System.ComponentModel;
@@ -14,4 +15,7 @@ global using System.Text;
 global using Dapper;
 global using Jakar.Extensions;
 global using Microsoft.AspNetCore.Identity;
+global using Microsoft.Extensions.Hosting;
+global using Microsoft.Extensions.Logging;
+global using Microsoft.Extensions.Options;
 global using Sigil;

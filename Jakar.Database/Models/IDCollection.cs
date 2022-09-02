@@ -1,8 +1,4 @@
-﻿using System.Collections;
-
-
-
-namespace Jakar.Database;
+﻿namespace Jakar.Database;
 
 
 [Serializable]

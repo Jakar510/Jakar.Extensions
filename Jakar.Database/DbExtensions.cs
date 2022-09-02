@@ -7,11 +7,13 @@ namespace Jakar.Database;
 
 public static class DbExtensions
 {
-    public static bool IsValidRowID<TID>( this IUniqueID<TID>    unique ) where TID : IComparable<TID>, IEquatable<TID> => !unique.ID.Equals(default);
-    public static bool IsValidRowID( this      IUniqueID<Guid>   unique ) => unique.ID != Guid.Empty;
-    public static bool IsValidRowID( this      IUniqueID<long>   unique ) => unique.ID > 0;
-    public static bool IsValidRowID( this      IUniqueID<int>    unique ) => unique.ID > 0;
-    public static bool IsValidRowID( this      IUniqueID<string> unique ) => !string.IsNullOrWhiteSpace(unique.ID);
+    public static bool IsValidRowID<TID>( this IUniqueID<TID>    value ) where TID : IComparable<TID>, IEquatable<TID> => !value.ID.Equals(default);
+    public static bool IsValidRowID( this      IUniqueID<Guid>   value ) => value.ID.IsValidRowID();
+    public static bool IsValidRowID( this      Guid              value ) => value != Guid.Empty;
+    public static bool IsValidRowID( this      Guid?             value ) => value.HasValue && value.Value != Guid.Empty;
+    public static bool IsValidRowID( this      IUniqueID<long>   value ) => value.ID > 0;
+    public static bool IsValidRowID( this      IUniqueID<int>    value ) => value.ID > 0;
+    public static bool IsValidRowID( this      IUniqueID<string> value ) => !string.IsNullOrWhiteSpace(value.ID);
 
 
     public static string GetTableName<TRecord>() where TRecord : class => GetTableName(typeof(TRecord));
@@ -20,7 +22,7 @@ public static class DbExtensions
                                                                          ?.Name ?? type.Name;
 
 
-    public static async Task Call( this IConnectableDb db, Func<DbConnection, DbTransaction, CancellationToken, Task> func, CancellationToken token )
+    public static async Task Call( this IConnectableDb db, Func<DbConnection, DbTransaction, CancellationToken, Task> func, CancellationToken token = default )
     {
         await using DbConnection  conn        = await db.ConnectAsync(token);
         await using DbTransaction transaction = await conn.BeginTransactionAsync(IsolationLevel.ReadCommitted, token);
@@ -36,7 +38,7 @@ public static class DbExtensions
             throw;
         }
     }
-    public static async Task Call<TArg1>( this IConnectableDb db, Func<DbConnection, DbTransaction, TArg1, CancellationToken, Task> func, TArg1 arg1, CancellationToken token )
+    public static async Task Call<TArg1>( this IConnectableDb db, Func<DbConnection, DbTransaction, TArg1, CancellationToken, Task> func, TArg1 arg1, CancellationToken token = default )
     {
         await using DbConnection  conn        = await db.ConnectAsync(token);
         await using DbTransaction transaction = await conn.BeginTransactionAsync(IsolationLevel.ReadCommitted, token);
@@ -52,7 +54,7 @@ public static class DbExtensions
             throw;
         }
     }
-    public static async Task Call<TArg1, TArg2>( this IConnectableDb db, Func<DbConnection, DbTransaction, TArg1, TArg2, CancellationToken, Task> func, TArg1 arg1, TArg2 arg2, CancellationToken token )
+    public static async Task Call<TArg1, TArg2>( this IConnectableDb db, Func<DbConnection, DbTransaction, TArg1, TArg2, CancellationToken, Task> func, TArg1 arg1, TArg2 arg2, CancellationToken token = default )
     {
         await using DbConnection  conn        = await db.ConnectAsync(token);
         await using DbTransaction transaction = await conn.BeginTransactionAsync(IsolationLevel.ReadCommitted, token);
@@ -68,7 +70,7 @@ public static class DbExtensions
             throw;
         }
     }
-    public static async Task Call<TArg1, TArg2, TArg3>( this IConnectableDb db, Func<DbConnection, DbTransaction, TArg1, TArg2, TArg3, CancellationToken, Task> func, TArg1 arg1, TArg2 arg2, TArg3 arg3, CancellationToken token )
+    public static async Task Call<TArg1, TArg2, TArg3>( this IConnectableDb db, Func<DbConnection, DbTransaction, TArg1, TArg2, TArg3, CancellationToken, Task> func, TArg1 arg1, TArg2 arg2, TArg3 arg3, CancellationToken token = default )
     {
         await using DbConnection  conn        = await db.ConnectAsync(token);
         await using DbTransaction transaction = await conn.BeginTransactionAsync(IsolationLevel.ReadCommitted, token);
@@ -222,7 +224,7 @@ public static class DbExtensions
     }
 
 
-    public static async Task<TResult> Call<TResult>( this IConnectableDb db, Func<DbConnection, DbTransaction, CancellationToken, Task<TResult>> func, CancellationToken token )
+    public static async Task<TResult> Call<TResult>( this IConnectableDb db, Func<DbConnection, DbTransaction, CancellationToken, Task<TResult>> func, CancellationToken token = default )
     {
         await using DbConnection  conn        = await db.ConnectAsync(token);
         await using DbTransaction transaction = await conn.BeginTransactionAsync(IsolationLevel.ReadCommitted, token);
@@ -239,7 +241,7 @@ public static class DbExtensions
             throw;
         }
     }
-    public static async Task<TResult> Call<TArg1, TResult>( this IConnectableDb db, Func<DbConnection, DbTransaction, TArg1, CancellationToken, Task<TResult>> func, TArg1 arg1, CancellationToken token )
+    public static async Task<TResult> Call<TArg1, TResult>( this IConnectableDb db, Func<DbConnection, DbTransaction, TArg1, CancellationToken, Task<TResult>> func, TArg1 arg1, CancellationToken token = default )
     {
         await using DbConnection  conn        = await db.ConnectAsync(token);
         await using DbTransaction transaction = await conn.BeginTransactionAsync(IsolationLevel.ReadCommitted, token);
@@ -256,7 +258,7 @@ public static class DbExtensions
             throw;
         }
     }
-    public static async Task<TResult> Call<TArg1, TArg2, TResult>( this IConnectableDb db, Func<DbConnection, DbTransaction, TArg1, TArg2, CancellationToken, Task<TResult>> func, TArg1 arg1, TArg2 arg2, CancellationToken token )
+    public static async Task<TResult> Call<TArg1, TArg2, TResult>( this IConnectableDb db, Func<DbConnection, DbTransaction, TArg1, TArg2, CancellationToken, Task<TResult>> func, TArg1 arg1, TArg2 arg2, CancellationToken token = default )
     {
         await using DbConnection  conn        = await db.ConnectAsync(token);
         await using DbTransaction transaction = await conn.BeginTransactionAsync(IsolationLevel.ReadCommitted, token);
@@ -439,7 +441,7 @@ public static class DbExtensions
     }
 
 
-    public static async IAsyncEnumerable<TResult> Call<TResult>( this IConnectableDb db, Func<DbConnection, DbTransaction, CancellationToken, IAsyncEnumerable<TResult>> func, [EnumeratorCancellation] CancellationToken token )
+    public static async IAsyncEnumerable<TResult> Call<TResult>( this IConnectableDb db, Func<DbConnection, DbTransaction, CancellationToken, IAsyncEnumerable<TResult>> func, [EnumeratorCancellation] CancellationToken token = default )
     {
         await using DbConnection  conn        = await db.ConnectAsync(token);
         await using DbTransaction transaction = await conn.BeginTransactionAsync(IsolationLevel.ReadCommitted, token);

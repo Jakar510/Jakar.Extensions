@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 08/21/2022  9:25 AM
 
-using System.Collections;
-
-
-
 namespace Jakar.Database;
 
 
