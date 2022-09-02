@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using Microsoft.Extensions.Logging;
 
 
 
@@ -7,162 +8,77 @@ namespace Jakar.Database;
 
 public abstract partial class DbTable<TRecord, TID>
 {
-    public class Cache : IAsyncEnumerator<TRecord>, IReadOnlyCollection<TRecord>
+    public sealed class Cache : IAsyncEnumerator<TRecord>, IReadOnlyCollection<TRecord>
     {
-        protected readonly DbTable<TRecord, TID> _table;
-        protected readonly HashSet<TID>          _changed = new();
-        protected readonly Mapping               _records = new();
-        protected readonly SortedList            _hashes  = new();
+        private readonly DbTable<TRecord, TID> _table;
+        private readonly ILogger<Cache>        _logger;
+        private readonly Mapping<TRecord, TID> _records = new();
+        private readonly TimeSpan              _refreshTime;
 
 
-        // protected readonly SortedList _keys   = new();
+        // private readonly SortedList _keys   = new();
 
 
-        public TRecord Current    => _records[_hashes.Current];
-        public int     Count      => _hashes.Count;
+        public TRecord Current    => _records.Current;
+        public int     Count      => _records.Count;
         public bool    IsReadOnly => false;
 
 
         public TRecord this[ TID index ]
         {
-            get
-            {
-                TRecord record = _records[index];
-                _hashes[record.ID] = record.GetHashCode();
-                return record;
-            }
-            set
-            {
-                if ( _hashes[value.ID] != value.GetHashCode() ) { _changed.Add(value.ID); }
-
-                _records[index] = value;
-            }
+            get => _records[index];
+            set => _records[index] = value;
         }
 
 
-        public Cache( DbTable<TRecord, TID> table )
+        public Cache( DbTable<TRecord, TID> table, ILogger<Cache> logger ) : this(table, logger, TimeSpan.FromSeconds(15)) { }
+        public Cache( DbTable<TRecord, TID> table, ILogger<Cache> logger, TimeSpan refreshTime )
         {
-            _table                     =  table;
-            _records.CollectionChanged += RecordsOnCollectionChanged;
-        }
-        private void RecordsOnCollectionChanged( object? sender, NotifyCollectionChangedEventArgs e )
-        {
-            switch ( e.Action )
-            {
-                case NotifyCollectionChangedAction.Add: { return; }
+            _table  = table;
+            _logger = logger;
 
-                case NotifyCollectionChangedAction.Remove: { return; }
-
-                case NotifyCollectionChangedAction.Reset:
-                {
-                    // Changed(_records.Keys);
-                    return;
-                }
-
-                case NotifyCollectionChangedAction.Replace:
-                {
-                    switch ( e.NewItems )
-                    {
-                        case IEnumerable<TID> ids:
-                        {
-                            Changed(ids);
-                            return;
-                        }
-
-                        case IEnumerable<TRecord> records:
-                        {
-                            Changed(records.Select(x => x.ID));
-                            return;
-                        }
-
-                        case IEnumerable<KeyValuePair<TID, TRecord>> pairs:
-                        {
-                            Changed(pairs.Select(x => x.Key));
-                            return;
-                        }
-                    }
-
-                    throw new InvalidOperationException(nameof(NotifyCollectionChangedAction.Replace));
-                }
-
-                case NotifyCollectionChangedAction.Move:
-                {
-                    switch ( e.NewItems )
-                    {
-                        case IEnumerable<TID> ids:
-                        {
-                            Changed(ids);
-                            return;
-                        }
-
-                        case IEnumerable<TRecord> records:
-                        {
-                            Changed(records.Select(x => x.ID));
-                            return;
-                        }
-
-                        case IEnumerable<KeyValuePair<TID, TRecord>> pairs:
-                        {
-                            Changed(pairs.Select(x => x.Key));
-                            return;
-                        }
-                    }
-
-                    throw new InvalidOperationException(nameof(NotifyCollectionChangedAction.Move));
-                }
-
-
-                default: throw new ArgumentOutOfRangeException();
-            }
+            _refreshTime = refreshTime;
         }
         public async ValueTask DisposeAsync()
         {
             await SaveAllToDB();
-            _records.CollectionChanged -= RecordsOnCollectionChanged;
-            _records.Clear();
-            _changed.Clear();
-            _hashes.Dispose();
+            _records.Dispose();
         }
 
 
         public async ValueTask<bool> MoveNextAsync()
         {
-            if ( _changed.Contains(_hashes.Current) ) { AddOrUpdate(await _table.Get(_hashes.Current, CancellationToken.None)); }
+            await Refresh();
 
-            return _hashes.MoveNext();
+
+            return _records.MoveNext();
         }
 
 
-        protected async Task SaveAllToDB( CancellationToken token = default ) => await _table.Update(_records.Values, token);
-        protected async Task SaveChangedToDB( CancellationToken token = default )
+        private async Task SaveAllToDB( CancellationToken token = default ) => await _table.Update(_records.Values, token);
+
+
+        private async Task Refresh( CancellationToken token = default )
         {
-            if ( !_changed.Any() ) { return; }
+            using var timer = new PeriodicTimer(_refreshTime);
 
-            IEnumerable<TRecord> records = _records.Where(x => _changed.Contains(x.Key))
-                                                   .Select(x => x.Value);
-
-            await _table.Update(records, token);
-            _changed.Clear();
+            while ( !token.IsCancellationRequested )
+            {
+                try
+                {
+                    await timer.WaitForNextTickAsync(token);
+                    await _table.Call(Refresh, token);
+                }
+                catch ( Exception e ) { _logger.LogCritical(e, nameof(Refresh)); }
+            }
         }
-
-
-        protected async Task RefreshFromDB( CancellationToken token = default )
+        private async Task Refresh( DbConnection connection, DbTransaction transaction, CancellationToken token = default )
         {
-            List<TRecord> records = await _table.All(token);
+            await _records.Refresh(connection, transaction, _table, token);
 
+            List<TRecord> records = await _table.All(connection, transaction, token);
             _records.Clear();
-            foreach ( TRecord record in records ) { AddOrUpdate(record); }
-        }
-        protected void AddOrUpdate( TRecord record )
-        {
-            if ( _records.ContainsKey(record.ID) ) { _records[record.ID] = record; }
-            else { _records.Add(record.ID, record); }
-
-            _hashes.Add(record);
-        }
-        protected void Changed( IEnumerable<TID> ids )
-        {
-            foreach ( TID id in ids ) { _changed.Add(id); }
+            foreach ( TRecord record in records ) { _records.AddOrUpdate(record); }
         }
 
 
@@ -173,33 +89,5 @@ public abstract partial class DbTable<TRecord, TID>
 
         IEnumerator<TRecord> IEnumerable<TRecord>.GetEnumerator() => _records.Values.GetEnumerator();
         public IEnumerator GetEnumerator() => _records.GetEnumerator();
-    }
-
-
-
-    public sealed class Mapping : ObservableConcurrentDictionary<TID, TRecord> { }
-
-
-
-    public class SortedList : SortedList<TID, int>, IEnumerator<TID>
-    {
-        private int        _index;
-        public  TID        Current => Keys[_index];
-        object IEnumerator.Current => Current;
-
-
-        public SortedList() : base(Comparer<TID>.Default) { }
-
-
-        public bool MoveNext() => ++_index < Count;
-        public void Reset() => _index = 0;
-        public void Dispose() => Clear();
-
-
-        public void Add( IEnumerable<TRecord> records )
-        {
-            foreach ( TRecord record in records ) { Add(record); }
-        }
-        public void Add( TRecord record ) => this[record.ID] = record.GetHashCode();
     }
 }
