@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 09/02/2022  3:43 PM
 
-using Microsoft.Extensions.Caching.Memory;
-
-
-
 namespace Jakar.Database;
 
 
@@ -66,7 +62,7 @@ public class CacheEntry<TRecord, TID> : ObservableClass, IEquatable<TRecord>, IC
                    ? CompareTo(entry)
                    : throw new ArgumentException($"Object must be of type {nameof(CacheEntry<TRecord, TID>)}");
     }
-    public override bool Equals( object? obj ) => ReferenceEquals(this, obj) || ( obj is CacheEntry<TRecord, TID> other && Equals(other) );
+    public override bool Equals( object? obj ) => ReferenceEquals(this, obj) || obj is CacheEntry<TRecord, TID> other && Equals(other);
     public override int GetHashCode() => Value.GetHashCode();
 
 

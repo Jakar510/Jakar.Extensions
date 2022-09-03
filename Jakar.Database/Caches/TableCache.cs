@@ -4,19 +4,6 @@
 namespace Jakar.Database;
 
 
-public class TableCacheOptions : IOptions<TableCacheOptions>
-{
-    TableCacheOptions IOptions<TableCacheOptions>.Value => this;
-
-    public TimeSpan       RefreshTime { get; init; } = TimeSpan.FromSeconds(10);
-    public ILoggerFactory Factory     { get; init; }
-
-
-    public TableCacheOptions( ILoggerFactory factory ) => Factory = factory;
-}
-
-
-
 public sealed class TableCache<TRecord, TID> : Service, IHostedService, IReadOnlyCollection<TRecord>, IAsyncEnumerator<TRecord?> where TRecord : BaseTableRecord<TRecord, TID>
                                                                                                                                  where TID : IComparable<TID>, IEquatable<TID>
 {
