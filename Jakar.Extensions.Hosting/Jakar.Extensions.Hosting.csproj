@@ -18,7 +18,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Jakar.Extensions" Version="6.0.0.51-beta" />
+		<PackageReference Include="Jakar.Extensions" Version="6.0.0.53-beta" />
 		<PackageReference Include="Hardware.Info" Version="10.0.1" />
 		<PackageReference Include="MailKit" Version="3.3.0" />
 		<PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
@@ -31,10 +31,8 @@
 		<PackageReference Include="Microsoft.AspNetCore.Server.IIS" Version="2.2.6" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.8" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="6.0.8" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="6.0.8" />
 		<PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.2.0" />
 		<PackageReference Include="Microsoft.Extensions.Identity.Core" Version="6.0.8" />
-		<PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="6.0.8" />
 		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="6.0.1" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="6.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="6.0.8" />

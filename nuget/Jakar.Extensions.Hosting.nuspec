@@ -4,7 +4,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata>
 		<id>Jakar.Extensions.Hosting</id>
-		<version>6.0.0.8-beta</version>
+		<version>6.0.0.9-beta</version>
 		<title>Extension Library</title>
 		<authors>Tyler Stegmaier</authors>
 		<owners>Jakar510/Jakar</owners>
@@ -28,7 +28,7 @@
 		<dependencies>
 			<group targetFramework="net6.0">
 				<dependency id="Jakar.Extensions"
-							version="6.0.0.48-beta" />
+							version="6.0.0.53-beta" />
 				<dependency id="Hardware.Info"
 							version="10.0.1" />
 				<dependency id="MailKit"
@@ -53,12 +53,8 @@
 							version="6.0.8" />
 				<dependency id="Microsoft.AspNetCore.Authentication.OpenIdConnect"
 							version="6.0.8" />
-				<dependency id="Microsoft.AspNetCore.Components.Web"
-							version="6.0.8" />
 				<dependency id="Microsoft.AspNetCore.Identity"
 							version="2.2.0" />
-				<dependency id="Microsoft.AspNetCore.Identity.UI"
-							version="6.0.8" />
 				<dependency id="Microsoft.Extensions.Caching.Memory"
 							version="6.0.1" />
 				<dependency id="Microsoft.Extensions.Configuration.Binder"

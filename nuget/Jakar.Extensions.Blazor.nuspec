@@ -39,10 +39,8 @@
 							version="3.2.2" />
 				<dependency id="Blazored.Video"
 							version="1.0.0" />
-				<dependency id="Jakar.Extensions"
-							version="6.0.0.48-beta" />
 				<dependency id="Jakar.Extensions.Hosting"
-							version="6.0.0.8-beta" />
+							version="6.0.0.9-beta" />
 				<dependency id="BlazorComponentUtilities"
 							version="1.8.0" />
 				<dependency id="BlazorPro.BlazorSize"
