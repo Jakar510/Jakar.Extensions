@@ -15,12 +15,7 @@ public static partial class WebBuilder
     /// <param name="builder">The <see cref="WebApplicationBuilder"/> to add the service to.</param>
     /// <returns>A reference to this instance after the operation has completed.</returns>
     /// <seealso cref="ServiceLifetime.Transient"/>
-    public static WebApplicationBuilder AddTransient<TService>( this WebApplicationBuilder builder ) where TService : class
-    {
-        if ( builder == null ) { throw new ArgumentNullException(nameof(builder)); }
-
-        return builder.AddTransient(typeof(TService));
-    }
+    public static WebApplicationBuilder AddTransient<TService>( this WebApplicationBuilder builder ) where TService : class => builder.AddTransient(typeof(TService));
 
     /// <summary>
     /// Adds a transient service of the type specified in <typeparamref name="TService"/> with a
@@ -32,14 +27,7 @@ public static partial class WebBuilder
     /// <param name="implementationFactory">The factory that creates the service.</param>
     /// <returns>A reference to this instance after the operation has completed.</returns>
     /// <seealso cref="ServiceLifetime.Transient"/>
-    public static WebApplicationBuilder AddTransient<TService>( this WebApplicationBuilder builder, Func<IServiceProvider, TService> implementationFactory ) where TService : class
-    {
-        if ( builder == null ) { throw new ArgumentNullException(nameof(builder)); }
-
-        if ( implementationFactory == null ) { throw new ArgumentNullException(nameof(implementationFactory)); }
-
-        return builder.AddTransient(typeof(TService), implementationFactory);
-    }
+    public static WebApplicationBuilder AddTransient<TService>( this WebApplicationBuilder builder, Func<IServiceProvider, TService> implementationFactory ) where TService : class => builder.AddTransient(typeof(TService), implementationFactory);
 
     /// <summary>
     /// Adds a transient service of the type specified in <typeparamref name="TService"/> with an
@@ -52,12 +40,8 @@ public static partial class WebBuilder
     /// <returns>A reference to this instance after the operation has completed.</returns>
     /// <seealso cref="ServiceLifetime.Transient"/>
     public static WebApplicationBuilder AddTransient<TService, TImplementation>( this WebApplicationBuilder builder ) where TService : class
-                                                                                                                       where TImplementation : class, TService
-    {
-        if ( builder == null ) { throw new ArgumentNullException(nameof(builder)); }
-
-        return builder.AddTransient(typeof(TService), typeof(TImplementation));
-    }
+                                                                                                                      where TImplementation : class, TService =>
+        builder.AddTransient(typeof(TService), typeof(TImplementation));
 
     /// <summary>
     /// Adds a transient service of the type specified in <typeparamref name="TService"/> with an
@@ -72,14 +56,8 @@ public static partial class WebBuilder
     /// <returns>A reference to this instance after the operation has completed.</returns>
     /// <seealso cref="ServiceLifetime.Transient"/>
     public static WebApplicationBuilder AddTransient<TService, TImplementation>( this WebApplicationBuilder builder, Func<IServiceProvider, TImplementation> implementationFactory ) where TService : class
-                                                                                                                                                                                      where TImplementation : class, TService
-    {
-        if ( builder == null ) { throw new ArgumentNullException(nameof(builder)); }
-
-        if ( implementationFactory == null ) { throw new ArgumentNullException(nameof(implementationFactory)); }
-
-        return builder.AddTransient(typeof(TService), implementationFactory);
-    }
+                                                                                                                                                                                     where TImplementation : class, TService =>
+        builder.AddTransient(typeof(TService), implementationFactory);
 
     /// <summary>
     /// Adds a transient service of the type specified in <paramref name="serviceType"/> to the
@@ -89,14 +67,7 @@ public static partial class WebBuilder
     /// <param name="serviceType">The type of the service to register and the implementation to use.</param>
     /// <returns>A reference to this instance after the operation has completed.</returns>
     /// <seealso cref="ServiceLifetime.Transient"/>
-    public static WebApplicationBuilder AddTransient( this WebApplicationBuilder builder, Type serviceType )
-    {
-        if ( builder == null ) { throw new ArgumentNullException(nameof(builder)); }
-
-        if ( serviceType == null ) { throw new ArgumentNullException(nameof(serviceType)); }
-
-        return builder.AddTransient(serviceType, serviceType);
-    }
+    public static WebApplicationBuilder AddTransient( this WebApplicationBuilder builder, Type serviceType ) => builder.AddTransient(serviceType, serviceType);
 
     /// <summary>
     /// Adds a transient service of the type specified in <paramref name="serviceType"/> with an
@@ -108,16 +79,7 @@ public static partial class WebBuilder
     /// <param name="implementationType">The implementation type of the service.</param>
     /// <returns>A reference to this instance after the operation has completed.</returns>
     /// <seealso cref="ServiceLifetime.Transient"/>
-    public static WebApplicationBuilder AddTransient( this WebApplicationBuilder builder, Type serviceType, Type implementationType )
-    {
-        if ( builder == null ) { throw new ArgumentNullException(nameof(builder)); }
-
-        if ( serviceType == null ) { throw new ArgumentNullException(nameof(serviceType)); }
-
-        if ( implementationType == null ) { throw new ArgumentNullException(nameof(implementationType)); }
-
-        return Add(builder, serviceType, implementationType, ServiceLifetime.Transient);
-    }
+    public static WebApplicationBuilder AddTransient( this WebApplicationBuilder builder, Type serviceType, Type implementationType ) => Add(builder, serviceType, implementationType, ServiceLifetime.Transient);
 
     /// <summary>
     /// Adds a transient service of the type specified in <paramref name="serviceType"/> with a
@@ -129,16 +91,7 @@ public static partial class WebBuilder
     /// <param name="implementationFactory">The factory that creates the service.</param>
     /// <returns>A reference to this instance after the operation has completed.</returns>
     /// <seealso cref="ServiceLifetime.Transient"/>
-    public static WebApplicationBuilder AddTransient( this WebApplicationBuilder builder, Type serviceType, Func<IServiceProvider, object> implementationFactory )
-    {
-        if ( builder == null ) { throw new ArgumentNullException(nameof(builder)); }
-
-        if ( serviceType == null ) { throw new ArgumentNullException(nameof(serviceType)); }
-
-        if ( implementationFactory == null ) { throw new ArgumentNullException(nameof(implementationFactory)); }
-
-        return Add(builder, serviceType, implementationFactory, ServiceLifetime.Transient);
-    }
+    public static WebApplicationBuilder AddTransient( this WebApplicationBuilder builder, Type serviceType, Func<IServiceProvider, object> implementationFactory ) => Add(builder, serviceType, implementationFactory, ServiceLifetime.Transient);
 
 
     /// <summary>
@@ -149,12 +102,7 @@ public static partial class WebBuilder
     /// <param name="builder">The <see cref="WebApplicationBuilder"/> to add the service to.</param>
     /// <returns>A reference to this instance after the operation has completed.</returns>
     /// <seealso cref="ServiceLifetime.Scoped"/>
-    public static WebApplicationBuilder AddScoped<TService>( this WebApplicationBuilder builder ) where TService : class
-    {
-        if ( builder == null ) { throw new ArgumentNullException(nameof(builder)); }
-
-        return builder.AddScoped(typeof(TService));
-    }
+    public static WebApplicationBuilder AddScoped<TService>( this WebApplicationBuilder builder ) where TService : class => builder.AddScoped(typeof(TService));
 
     /// <summary>
     /// Adds a scoped service of the type specified in <typeparamref name="TService"/> with a
@@ -166,14 +114,7 @@ public static partial class WebBuilder
     /// <param name="implementationFactory">The factory that creates the service.</param>
     /// <returns>A reference to this instance after the operation has completed.</returns>
     /// <seealso cref="ServiceLifetime.Scoped"/>
-    public static WebApplicationBuilder AddScoped<TService>( this WebApplicationBuilder builder, Func<IServiceProvider, TService> implementationFactory ) where TService : class
-    {
-        if ( builder == null ) { throw new ArgumentNullException(nameof(builder)); }
-
-        if ( implementationFactory == null ) { throw new ArgumentNullException(nameof(implementationFactory)); }
-
-        return builder.AddScoped(typeof(TService), implementationFactory);
-    }
+    public static WebApplicationBuilder AddScoped<TService>( this WebApplicationBuilder builder, Func<IServiceProvider, TService> implementationFactory ) where TService : class => builder.AddScoped(typeof(TService), implementationFactory);
 
     /// <summary>
     /// Adds a scoped service of the type specified in <paramref name="serviceType"/> with a
@@ -185,16 +126,7 @@ public static partial class WebBuilder
     /// <param name="implementationFactory">The factory that creates the service.</param>
     /// <returns>A reference to this instance after the operation has completed.</returns>
     /// <seealso cref="ServiceLifetime.Scoped"/>
-    public static WebApplicationBuilder AddScoped( this WebApplicationBuilder builder, Type serviceType, Func<IServiceProvider, object> implementationFactory )
-    {
-        if ( builder == null ) { throw new ArgumentNullException(nameof(builder)); }
-
-        if ( serviceType == null ) { throw new ArgumentNullException(nameof(serviceType)); }
-
-        if ( implementationFactory == null ) { throw new ArgumentNullException(nameof(implementationFactory)); }
-
-        return Add(builder, serviceType, implementationFactory, ServiceLifetime.Scoped);
-    }
+    public static WebApplicationBuilder AddScoped( this WebApplicationBuilder builder, Type serviceType, Func<IServiceProvider, object> implementationFactory ) => Add(builder, serviceType, implementationFactory, ServiceLifetime.Scoped);
     /// <summary>
     /// Adds a scoped service of the type specified in <typeparamref name="TService"/> with an
     /// implementation type specified in <typeparamref name="TImplementation" /> using the
@@ -208,14 +140,8 @@ public static partial class WebBuilder
     /// <returns>A reference to this instance after the operation has completed.</returns>
     /// <seealso cref="ServiceLifetime.Scoped"/>
     public static WebApplicationBuilder AddScoped<TService, TImplementation>( this WebApplicationBuilder builder, Func<IServiceProvider, TImplementation> implementationFactory ) where TService : class
-                                                                                                                                                                                   where TImplementation : class, TService
-    {
-        if ( builder == null ) { throw new ArgumentNullException(nameof(builder)); }
-
-        if ( implementationFactory == null ) { throw new ArgumentNullException(nameof(implementationFactory)); }
-
-        return builder.AddScoped(typeof(TService), implementationFactory);
-    }
+                                                                                                                                                                                  where TImplementation : class, TService =>
+        builder.AddScoped(typeof(TService), implementationFactory);
 
     /// <summary>
     /// Adds a scoped service of the type specified in <typeparamref name="TService"/> with an
@@ -228,12 +154,8 @@ public static partial class WebBuilder
     /// <returns>A reference to this instance after the operation has completed.</returns>
     /// <seealso cref="ServiceLifetime.Scoped"/>
     public static WebApplicationBuilder AddScoped<TService, TImplementation>( this WebApplicationBuilder builder ) where TService : class
-                                                                                                                    where TImplementation : class, TService
-    {
-        if ( builder == null ) { throw new ArgumentNullException(nameof(builder)); }
-
-        return builder.AddScoped(typeof(TService), typeof(TImplementation));
-    }
+                                                                                                                   where TImplementation : class, TService =>
+        builder.AddScoped(typeof(TService), typeof(TImplementation));
 
     /// <summary>
     /// Adds a scoped service of the type specified in <paramref name="serviceType"/> with an
@@ -245,16 +167,7 @@ public static partial class WebBuilder
     /// <param name="implementationType">The implementation type of the service.</param>
     /// <returns>A reference to this instance after the operation has completed.</returns>
     /// <seealso cref="ServiceLifetime.Scoped"/>
-    public static WebApplicationBuilder AddScoped( this WebApplicationBuilder builder, Type serviceType, Type implementationType )
-    {
-        if ( builder == null ) { throw new ArgumentNullException(nameof(builder)); }
-
-        if ( serviceType == null ) { throw new ArgumentNullException(nameof(serviceType)); }
-
-        if ( implementationType == null ) { throw new ArgumentNullException(nameof(implementationType)); }
-
-        return Add(builder, serviceType, implementationType, ServiceLifetime.Scoped);
-    }
+    public static WebApplicationBuilder AddScoped( this WebApplicationBuilder builder, Type serviceType, Type implementationType ) => Add(builder, serviceType, implementationType, ServiceLifetime.Scoped);
 
     /// <summary>
     /// Adds a scoped service of the type specified in <paramref name="serviceType"/> to the
@@ -264,17 +177,9 @@ public static partial class WebBuilder
     /// <param name="serviceType">The type of the service to register and the implementation to use.</param>
     /// <returns>A reference to this instance after the operation has completed.</returns>
     /// <seealso cref="ServiceLifetime.Scoped"/>
-    public static WebApplicationBuilder AddScoped( this WebApplicationBuilder builder, Type serviceType )
-    {
-        if ( builder == null ) { throw new ArgumentNullException(nameof(builder)); }
-
-        if ( serviceType == null ) { throw new ArgumentNullException(nameof(serviceType)); }
-
-        return builder.AddScoped(serviceType, serviceType);
-    }
+    public static WebApplicationBuilder AddScoped( this WebApplicationBuilder builder, Type serviceType ) => builder.AddScoped(serviceType, serviceType);
 
 
-    
     /// <summary>
     /// Adds a singleton service of the type specified in <typeparamref name="TService"/> with an
     /// implementation type specified in <typeparamref name="TImplementation"/> to the
@@ -286,13 +191,8 @@ public static partial class WebBuilder
     /// <returns>A reference to this instance after the operation has completed.</returns>
     /// <seealso cref="ServiceLifetime.Singleton"/>
     public static WebApplicationBuilder AddSingleton<TService, TImplementation>( this WebApplicationBuilder builder ) where TService : class
-                                                                                                                       where TImplementation : class, TService
-    {
-        if ( builder == null ) { throw new ArgumentNullException(nameof(builder)); }
+                                                                                                                      where TImplementation : class, TService => builder.AddSingleton(typeof(TService), typeof(TImplementation));
 
-        return builder.AddSingleton(typeof(TService), typeof(TImplementation));
-    }
-    
     /// <summary>
     /// Adds a singleton service of the type specified in <typeparamref name="TService"/> to the
     /// specified <see cref="WebApplicationBuilder"/>.
@@ -301,12 +201,7 @@ public static partial class WebBuilder
     /// <param name="builder">The <see cref="WebApplicationBuilder"/> to add the service to.</param>
     /// <returns>A reference to this instance after the operation has completed.</returns>
     /// <seealso cref="ServiceLifetime.Singleton"/>
-    public static WebApplicationBuilder AddSingleton<TService>( this WebApplicationBuilder builder ) where TService : class
-    {
-        if ( builder == null ) { throw new ArgumentNullException(nameof(builder)); }
-
-        return builder.AddSingleton(typeof(TService));
-    }
+    public static WebApplicationBuilder AddSingleton<TService>( this WebApplicationBuilder builder ) where TService : class => builder.AddSingleton(typeof(TService));
 
     /// <summary>
     /// Adds a singleton service of the type specified in <typeparamref name="TService" /> with an
@@ -317,14 +212,7 @@ public static partial class WebBuilder
     /// <param name="implementationInstance">The instance of the service.</param>
     /// <returns>A reference to this instance after the operation has completed.</returns>
     /// <seealso cref="ServiceLifetime.Singleton"/>
-    public static WebApplicationBuilder AddSingleton<TService>( this WebApplicationBuilder builder, TService implementationInstance ) where TService : class
-    {
-        if ( builder == null ) { throw new ArgumentNullException(nameof(builder)); }
-
-        if ( implementationInstance == null ) { throw new ArgumentNullException(nameof(implementationInstance)); }
-
-        return builder.AddSingleton(typeof(TService), implementationInstance);
-    }
+    public static WebApplicationBuilder AddSingleton<TService>( this WebApplicationBuilder builder, TService implementationInstance ) where TService : class => builder.AddSingleton(typeof(TService), implementationInstance);
 
     /// <summary>
     /// Adds a singleton service of the type specified in <typeparamref name="TService"/> with a
@@ -336,14 +224,7 @@ public static partial class WebBuilder
     /// <param name="implementationFactory">The factory that creates the service.</param>
     /// <returns>A reference to this instance after the operation has completed.</returns>
     /// <seealso cref="ServiceLifetime.Singleton"/>
-    public static WebApplicationBuilder AddSingleton<TService>( this WebApplicationBuilder builder, Func<IServiceProvider, TService> implementationFactory ) where TService : class
-    {
-        if ( builder == null ) { throw new ArgumentNullException(nameof(builder)); }
-
-        if ( implementationFactory == null ) { throw new ArgumentNullException(nameof(implementationFactory)); }
-
-        return builder.AddSingleton(typeof(TService), implementationFactory);
-    }
+    public static WebApplicationBuilder AddSingleton<TService>( this WebApplicationBuilder builder, Func<IServiceProvider, TService> implementationFactory ) where TService : class => builder.AddSingleton(typeof(TService), implementationFactory);
 
     /// <summary>
     /// Adds a singleton service of the type specified in <typeparamref name="TService"/> with an
@@ -358,15 +239,9 @@ public static partial class WebBuilder
     /// <returns>A reference to this instance after the operation has completed.</returns>
     /// <seealso cref="ServiceLifetime.Singleton"/>
     public static WebApplicationBuilder AddSingleton<TService, TImplementation>( this WebApplicationBuilder builder, Func<IServiceProvider, TImplementation> implementationFactory ) where TService : class
-                                                                                                                                                                                      where TImplementation : class, TService
-    {
-        if ( builder == null ) { throw new ArgumentNullException(nameof(builder)); }
+                                                                                                                                                                                     where TImplementation : class, TService =>
+        builder.AddSingleton(typeof(TService), implementationFactory);
 
-        if ( implementationFactory == null ) { throw new ArgumentNullException(nameof(implementationFactory)); }
-
-        return builder.AddSingleton(typeof(TService), implementationFactory);
-    }
-    
     /// <summary>
     /// Adds a singleton service of the type specified in <paramref name="serviceType"/> to the
     /// specified <see cref="WebApplicationBuilder"/>.
@@ -375,14 +250,7 @@ public static partial class WebBuilder
     /// <param name="serviceType">The type of the service to register and the implementation to use.</param>
     /// <returns>A reference to this instance after the operation has completed.</returns>
     /// <seealso cref="ServiceLifetime.Singleton"/>
-    public static WebApplicationBuilder AddSingleton( this WebApplicationBuilder builder, Type serviceType )
-    {
-        if ( builder == null ) { throw new ArgumentNullException(nameof(builder)); }
-
-        if ( serviceType == null ) { throw new ArgumentNullException(nameof(serviceType)); }
-
-        return builder.AddSingleton(serviceType, serviceType);
-    }
+    public static WebApplicationBuilder AddSingleton( this WebApplicationBuilder builder, Type serviceType ) => builder.AddSingleton(serviceType, serviceType);
 
     /// <summary>
     /// Adds a singleton service of the type specified in <paramref name="serviceType"/> with an
@@ -396,18 +264,12 @@ public static partial class WebBuilder
     /// <seealso cref="ServiceLifetime.Singleton"/>
     public static WebApplicationBuilder AddSingleton( this WebApplicationBuilder builder, Type serviceType, object implementationInstance )
     {
-        if ( builder == null ) { throw new ArgumentNullException(nameof(builder)); }
-
-        if ( serviceType == null ) { throw new ArgumentNullException(nameof(serviceType)); }
-
-        if ( implementationInstance == null ) { throw new ArgumentNullException(nameof(implementationInstance)); }
-
         var serviceDescriptor = new ServiceDescriptor(serviceType, implementationInstance);
         builder.Services.Add(serviceDescriptor);
         return builder;
     }
 
-    
+
     /// <summary>
     /// Adds a singleton service of the type specified in <paramref name="serviceType"/> with an
     /// implementation of the type specified in <paramref name="implementationType"/> to the
@@ -418,16 +280,7 @@ public static partial class WebBuilder
     /// <param name="implementationType">The implementation type of the service.</param>
     /// <returns>A reference to this instance after the operation has completed.</returns>
     /// <seealso cref="ServiceLifetime.Singleton"/>
-    public static WebApplicationBuilder AddSingleton( this WebApplicationBuilder builder, Type serviceType, Type implementationType )
-    {
-        if ( builder == null ) { throw new ArgumentNullException(nameof(builder)); }
-
-        if ( serviceType == null ) { throw new ArgumentNullException(nameof(serviceType)); }
-
-        if ( implementationType == null ) { throw new ArgumentNullException(nameof(implementationType)); }
-
-        return Add(builder, serviceType, implementationType, ServiceLifetime.Singleton);
-    }
+    public static WebApplicationBuilder AddSingleton( this WebApplicationBuilder builder, Type serviceType, Type implementationType ) => Add(builder, serviceType, implementationType, ServiceLifetime.Singleton);
 
     /// <summary>
     /// Adds a singleton service of the type specified in <paramref name="serviceType"/> with a
@@ -439,16 +292,7 @@ public static partial class WebBuilder
     /// <param name="implementationFactory">The factory that creates the service.</param>
     /// <returns>A reference to this instance after the operation has completed.</returns>
     /// <seealso cref="ServiceLifetime.Singleton"/>
-    public static WebApplicationBuilder AddSingleton( this WebApplicationBuilder builder, Type serviceType, Func<IServiceProvider, object> implementationFactory )
-    {
-        if ( builder == null ) { throw new ArgumentNullException(nameof(builder)); }
-
-        if ( serviceType == null ) { throw new ArgumentNullException(nameof(serviceType)); }
-
-        if ( implementationFactory == null ) { throw new ArgumentNullException(nameof(implementationFactory)); }
-
-        return Add(builder, serviceType, implementationFactory, ServiceLifetime.Singleton);
-    }
+    public static WebApplicationBuilder AddSingleton( this WebApplicationBuilder builder, Type serviceType, Func<IServiceProvider, object> implementationFactory ) => Add(builder, serviceType, implementationFactory, ServiceLifetime.Singleton);
 
 
     private static WebApplicationBuilder Add( WebApplicationBuilder collection, Type serviceType, Type implementationType, in ServiceLifetime lifetime )
@@ -474,6 +318,22 @@ public static partial class WebBuilder
     public static WebApplicationBuilder AddHostedService<THostedService>( this WebApplicationBuilder builder, Func<IServiceProvider, THostedService> func ) where THostedService : class, IHostedService
     {
         builder.AddSingleton<THostedService>();
+        builder.Services.AddHostedService(func);
+        return builder;
+    }
+
+
+    public static WebApplicationBuilder AddHostedService<TService, THostedService>( this WebApplicationBuilder builder ) where TService : class
+                                                                                                                         where THostedService : class, TService, IHostedService
+    {
+        builder.AddSingleton<TService, THostedService>();
+        builder.Services.AddHostedService<THostedService>();
+        return builder;
+    }
+    public static WebApplicationBuilder AddHostedService<TService, THostedService>( this WebApplicationBuilder builder, Func<IServiceProvider, THostedService> func ) where TService : class
+                                                                                                                                                                      where THostedService : class, TService, IHostedService
+    {
+        builder.AddSingleton<TService, THostedService>();
         builder.Services.AddHostedService(func);
         return builder;
     }

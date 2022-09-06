@@ -1,20 +1,40 @@
 ﻿#nullable enable
+using Newtonsoft.Json.Linq;
+using System;
+
+
+
 namespace Jakar.Extensions;
 
 
 public static class OneOfChecks
 {
-    public static bool IsOneOf<TValue>( this TValue value, params TValue[] items )
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool IsOneOf<TValue>( this TValue value, ReadOnlySpan<TValue> items ) where TValue : notnull
     {
-        if ( value is null ) { return false; }
+        foreach ( TValue span in items )
+        {
+            if ( value.Equals(span) ) { return true; }
+        }
 
-        return items.Any(other => value.Equals(other));
+        return false;
     }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool IsOneOf( this PropertyChangedEventArgs e, IEnumerable<string> properties )
+    {
+        // ReSharper disable once LoopCanBeConvertedToQuery
+        foreach ( string property in properties )
+        {
+            if ( e.IsEqual(property) ) { return true; }
+        }
+
+        return false;
+    }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool IsOneOf<TValue>( this TValue value, params TValue[] items ) => value is not null && items.Any(other => value.Equals(other));
 
 
-    public static bool IsOneOf( this PropertyChangedEventArgs e, IEnumerable<string> properties ) => e.IsOneOf(properties.ToArray());
-    public static bool IsOneOf( this PropertyChangedEventArgs e, params string[]     properties ) => IsOneOf(e.PropertyName, properties);
-
-
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool IsOneOf( this PropertyChangedEventArgs e, params string[] properties ) => e.PropertyName?.IsOneOf(properties) ?? false;
     [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool IsEqual( this PropertyChangedEventArgs e, string property ) => string.Equals(e.PropertyName, property, StringComparison.Ordinal);
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool IsEqual( this PropertyChangedEventArgs e, string property1, string property2 ) => e.IsEqual(property1) || e.IsEqual(property2);
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool IsEqual( this PropertyChangedEventArgs e, string property1, string property2, string property3 ) => e.IsEqual(property1) || e.IsEqual(property2) || e.IsEqual(property3);
 }

@@ -8,6 +8,24 @@ namespace Jakar.Extensions;
 /// <summary> <para><see cref="Enumerable"/></para> </summary>
 public static class AsyncLinq
 {
+    public static async IAsyncEnumerable<TItem> WhereNotNull<TItem>( this IAsyncEnumerable<TItem?> items, [EnumeratorCancellation] CancellationToken token = default  )
+    {
+        // ReSharper disable once LoopCanBeConvertedToQuery
+        await foreach ( TItem? element in items.WithCancellation(token) )
+        {
+            if ( element is not null ) { yield return element; }
+        }
+    }
+    public static async Task ForEachAsync<TItem>( this IAsyncEnumerable<TItem> list, Func<TItem, Task> action, bool continueOnCapturedContext = true, [EnumeratorCancellation] CancellationToken token = default  )
+    {
+        await foreach ( TItem item in list.WithCancellation(token) )
+        {
+            await action(item)
+               .ConfigureAwait(continueOnCapturedContext);
+        }
+    }
+
+
     public static async Task<List<TElement>> ToList<TElement>( this IAsyncEnumerable<TElement> enumerable, CancellationToken token = default )
     {
         var list = new List<TElement>();
@@ -404,7 +422,11 @@ public static class AsyncLinq
             if ( set.Add(keySelector(element)) ) { yield return element; }
         }
     }
-    public static async IAsyncEnumerable<TElement> DistinctBy<TElement, TKey>( this IAsyncEnumerable<TElement> source, Func<TElement, Task<TKey>> keySelector, IEqualityComparer<TKey> comparer, [EnumeratorCancellation] CancellationToken token = default )
+    public static async IAsyncEnumerable<TElement> DistinctBy<TElement, TKey>( this IAsyncEnumerable<TElement>            source,
+                                                                               Func<TElement, Task<TKey>>                 keySelector,
+                                                                               IEqualityComparer<TKey>                    comparer,
+                                                                               [EnumeratorCancellation] CancellationToken token = default
+    )
     {
         var set = new HashSet<TKey>(comparer);
 
