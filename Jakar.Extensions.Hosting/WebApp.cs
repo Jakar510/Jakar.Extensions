@@ -65,38 +65,7 @@ public static class WebApp
         }
     }
 
-
-    public static WebApplicationBuilder UseUrls( this WebApplicationBuilder builder, params string[] urls )
-    {
-        builder.WebHost.UseUrls(urls);
-
-        // internal IFeatureCollection ServerFeatures => _host.Services.GetRequiredService<IServer>().Features;
-
-
-        builder.AddSingleton(( IServiceProvider provider ) =>
-                             {
-                                 var addresses = provider.GetService<IServerAddressesFeature>();
-
-                                 if ( addresses is not null )
-                                 {
-                                     foreach ( string url in urls ) { addresses.Addresses.Add(url); }
-
-                                     return addresses;
-                                 }
-
-
-                                 addresses = new ServerAddressesFeature()
-                                             {
-                                                 PreferHostingUrls = true
-                                             };
-
-                                 foreach ( string url in urls ) { addresses.Addresses.Add(url); }
-
-                                 return addresses;
-                             });
-
-        return builder;
-    }
+    
     public static WebApplication UseUrls( this WebApplication app, params string[] urls )
     {
         foreach ( string url in urls ) { app.Urls.Add(url); }
