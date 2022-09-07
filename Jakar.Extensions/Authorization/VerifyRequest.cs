@@ -1,5 +1,5 @@
 ﻿#nullable enable
-namespace Jakar.Extensions.Authorization;
+namespace Jakar.Extensions;
 
 
 [Serializable]
