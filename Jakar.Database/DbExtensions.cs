@@ -16,10 +16,11 @@ public static class DbExtensions
     public static bool IsValidRowID( this      IUniqueID<string> value ) => !string.IsNullOrWhiteSpace(value.ID);
 
 
-    public static string GetTableName<TRecord>() where TRecord : class => GetTableName(typeof(TRecord));
-    public static string GetTableName( in Type type ) => type.GetCustomAttribute<Dapper.Contrib.Extensions.TableAttribute>()
-                                                            ?.Name ?? type.GetCustomAttribute<System.ComponentModel.DataAnnotations.Schema.TableAttribute>()
-                                                                         ?.Name ?? type.Name;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static string GetTableName<TRecord>() where TRecord : class => GetTableName(typeof(TRecord));
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static string GetTableName( this Type type ) => type.GetCustomAttribute<Dapper.Contrib.Extensions.TableAttribute>()
+                                                              ?.Name ?? type.GetCustomAttribute<System.ComponentModel.DataAnnotations.Schema.TableAttribute>()
+                                                                           ?.Name ?? type.Name;
 
 
     public static async Task Call( this IConnectableDb db, Func<DbConnection, DbTransaction, CancellationToken, Task> func, CancellationToken token = default )

@@ -8,34 +8,34 @@ namespace Jakar.Extensions;
 /// <typeparam name = "T" > </typeparam>
 public class FixedSizedDeque<T>
 {
-    protected readonly object   _lock = new();
+    protected readonly object _lock = new();
     protected readonly Deque<T> _q;
 
     public int Limit { get; init; }
 
-    public FixedSizedDeque( int limit )
+    public FixedSizedDeque(int limit)
     {
         Limit = limit;
-        _q    = new Deque<T>(limit);
+        _q = new Deque<T>(limit);
     }
 
 
-    public bool Contains( T obj )
+    public bool Contains(T obj)
     {
-        lock ( _lock ) { return _q.Contains(obj); }
+        lock (_lock) { return _q.Contains(obj); }
     }
 
     public T Dequeue()
     {
-        lock ( _lock ) { return _q.RemoveFromFront(); }
+        lock (_lock) { return _q.RemoveFromFront(); }
     }
 
-    public void Enqueue( T obj )
+    public void Enqueue(T obj)
     {
-        lock ( _lock )
+        lock (_lock)
         {
             _q.AddToFront(obj);
-            while ( _q.Count > Limit ) { _q.RemoveFromBack(); }
+            while (_q.Count > Limit) { _q.RemoveFromBack(); }
         }
     }
 }

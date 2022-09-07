@@ -7,7 +7,6 @@ using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Order;
 using Jakar.Extensions;
-using JetBrains.Annotations;
 
 
 #nullable enable

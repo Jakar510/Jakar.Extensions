@@ -1,5 +1,5 @@
 ﻿#nullable enable
-namespace Jakar.Extensions;
+namespace Jakar.Extensions.IniConfiguration;
 
 
 public partial class IniConfig : ConcurrentDictionary<string, IniConfig.Section>

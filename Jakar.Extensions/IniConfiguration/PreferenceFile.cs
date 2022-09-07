@@ -1,5 +1,5 @@
 ﻿#nullable enable
-namespace Jakar.Extensions;
+namespace Jakar.Extensions.IniConfiguration;
 
 
 public class PreferenceFile : IniConfig, IDisposable, IAsyncDisposable // TODO: Add watcher to update if file changes

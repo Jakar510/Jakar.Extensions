@@ -4,6 +4,7 @@
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Web;
+#pragma warning disable CS8424
 
 
 
@@ -965,7 +966,8 @@ public class LocalFile : BaseCollections<LocalFile>, TempFile.ITempFile, LocalFi
 
     async Task<string> IAsyncReadHandler.AsString()
     {
-        using var stream = new StreamReader(OpenRead(), FileEncoding);
+        await using FileStream file   = OpenRead();
+        using var              stream = new StreamReader(file, FileEncoding);
 
         return await stream.ReadToEndAsync()
                            .ConfigureAwait(false);
@@ -1017,6 +1019,15 @@ public class LocalFile : BaseCollections<LocalFile>, TempFile.ITempFile, LocalFi
                   .ConfigureAwait(false);
 
         return stream;
+    }
+
+
+    async IAsyncEnumerable<string?> IAsyncReadHandler.AsLines( [EnumeratorCancellation] CancellationToken token )
+    {
+        await using FileStream file   = OpenRead();
+        using var              stream = new StreamReader(file, FileEncoding);
+
+        while ( !token.IsCancellationRequested && !stream.EndOfStream ) { yield return await stream.ReadLineAsync(); }
     }
 
 
@@ -1257,6 +1268,9 @@ public class LocalFile : BaseCollections<LocalFile>, TempFile.ITempFile, LocalFi
 
 
         Task<MemoryStream> AsStream( CancellationToken token );
+
+
+        IAsyncEnumerable<string?> AsLines( [EnumeratorCancellation] CancellationToken token );
     }
 
 

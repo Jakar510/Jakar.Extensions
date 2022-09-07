@@ -4,6 +4,7 @@
 namespace Jakar.Extensions;
 
 
+/// <summary> <para><see href="https://devblogs.microsoft.com/dotnet/performance_improvements_in_net_7/#vectorization"/></para> </summary>
 public static partial class Spans
 {
     [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool Contains( this Span<char>         span, in ReadOnlySpan<char> value ) => MemoryExtensions.Contains(span, value, StringComparison.Ordinal);
@@ -12,30 +13,28 @@ public static partial class Spans
 
     public static bool Contains<T>( this Span<T> span, in T value ) where T : struct, IEquatable<T>
     {
-    #if NET6_0
-        return MemoryExtensions.Contains(span, value);
-    #else
+    #if NETSTANDARD2_1
         foreach ( T item in span )
         {
             if ( item.Equals(value) ) { return true; }
         }
-
         return false;
+    #else
+        return MemoryExtensions.Contains(span, value);
     #endif
     }
     public static bool Contains<T>( this ReadOnlySpan<T> span, in T value ) where T : struct, IEquatable<T>
     {
-    #if NET6_0
-        return MemoryExtensions.Contains(span, value);
-    #else
+    #if NETSTANDARD2_1
         foreach ( T item in span )
         {
             if ( item.Equals(value) ) { return true; }
         }
 
         return false;
+    #else
+        return MemoryExtensions.Contains(span, value);
     #endif
-
     }
     public static bool Contains<T>( this Span<T> span, in ReadOnlySpan<T> value ) where T : struct, IEquatable<T>
     {
@@ -165,13 +164,15 @@ public static partial class Spans
     {
         if ( span.IsEmpty ) { return false; }
 
-        return span[0].Equals(value);
+        return span[0]
+           .Equals(value);
     }
     public static bool StartsWith<T>( this ReadOnlySpan<T> span, in T value ) where T : struct, IEquatable<T>
     {
         if ( span.IsEmpty ) { return false; }
 
-        return span[0].Equals(value);
+        return span[0]
+           .Equals(value);
     }
 
 
@@ -179,12 +180,14 @@ public static partial class Spans
     {
         if ( span.IsEmpty ) { return false; }
 
-        return span[^1].Equals(value);
+        return span[^1]
+           .Equals(value);
     }
     public static bool EndsWith<T>( this ReadOnlySpan<T> span, in T value ) where T : struct, IEquatable<T>
     {
         if ( span.IsEmpty ) { return false; }
 
-        return span[^1].Equals(value);
+        return span[^1]
+           .Equals(value);
     }
 }

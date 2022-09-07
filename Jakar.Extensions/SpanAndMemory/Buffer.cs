@@ -152,7 +152,8 @@ public ref struct Buffer<T> where T : struct, IEquatable<T>
     }
 
 
-    public override string ToString() => AsSpan().ToString();
+    public override string ToString() => AsSpan()
+       .ToString();
 
 
     [Pure] public readonly ReadOnlySpan<T> AsSpan() => _span[..Index];
@@ -178,7 +179,8 @@ public ref struct Buffer<T> where T : struct, IEquatable<T>
 
     public bool TryCopyTo( in Span<T> destination, out int charsWritten )
     {
-        if ( _span[..Index].TryCopyTo(destination) )
+        if ( _span[..Index]
+           .TryCopyTo(destination) )
         {
             charsWritten = Index;
             return true;
@@ -193,8 +195,13 @@ public ref struct Buffer<T> where T : struct, IEquatable<T>
         if ( Index > _span.Length - count ) { Grow(count); }
 
         int remaining = Index - index;
-        _span.Slice(index, remaining).CopyTo(_span[( index + count )..]);
-        _span.Slice(index, count).Fill(value);
+
+        _span.Slice(index, remaining)
+             .CopyTo(_span[( index + count )..]);
+
+        _span.Slice(index, count)
+             .Fill(value);
+
         Index += count;
     }
     public void Insert( int index, ReadOnlySpan<T> s )
@@ -204,8 +211,13 @@ public ref struct Buffer<T> where T : struct, IEquatable<T>
         if ( Index > _span.Length - count ) { Grow(count); }
 
         int remaining = Index - index;
-        _span.Slice(index, remaining).CopyTo(_span[( index + count )..]);
-        s.AsSpan().CopyTo(_span[index..]);
+
+        _span.Slice(index, remaining)
+             .CopyTo(_span[( index + count )..]);
+
+        s.AsSpan()
+         .CopyTo(_span[index..]);
+
         Index += count;
     }
 

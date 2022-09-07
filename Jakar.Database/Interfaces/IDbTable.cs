@@ -93,11 +93,11 @@ public interface IDbTable<TRecord, TID> : IConnectableDb, IAsyncDisposable where
     public Task<TID> GetID<TValue>( DbConnection connection, DbTransaction?     transaction, string            sql, DynamicParameters? parameters, CancellationToken token = default );
 
 
-    public Task<TID> GetID<TValue>( string       columnName, TValue        value,       CancellationToken token                                              = default );
+    public Task<TID> GetID<TValue>( string       columnName, TValue         value,       CancellationToken token                                             = default );
     public Task<TID> GetID<TValue>( DbConnection connection, DbTransaction? transaction, string            columnName, TValue value, CancellationToken token = default );
 
 
-    public Task<TRecord?> Get<TValue>( string       columnName, TValue        value,       CancellationToken token                                              = default );
+    public Task<TRecord?> Get<TValue>( string       columnName, TValue         value,       CancellationToken token                                             = default );
     public Task<TRecord?> Get<TValue>( DbConnection connection, DbTransaction? transaction, string            columnName, TValue value, CancellationToken token = default );
 
 

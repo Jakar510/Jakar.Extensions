@@ -5,7 +5,8 @@ public abstract class DbTable<TRecord, TID> : ObservableClass, IDbTable<TRecord,
                                                                                       where TID : IComparable<TID>, IEquatable<TID>
 {
     private readonly IConnectableDb _database;
-    public virtual   string         TableName { get; } = DbExtensions.GetTableName<TRecord>();
+    public static    string         TableName { get; } = typeof(TRecord).GetTableName();
+    string IDbTable<TRecord, TID>.  TableName => TableName;
 
 
     protected DbTable( IConnectableDb database ) => _database = database;
