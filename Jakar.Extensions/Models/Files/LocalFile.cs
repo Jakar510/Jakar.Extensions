@@ -25,6 +25,7 @@ public class LocalFile : BaseCollections<LocalFile>, TempFile.ITempFile, LocalFi
     public string   Name          => Info.Name;
     public string   Extension     => Info.Extension;
     public bool     Exists        => Info.Exists;
+    public bool     DoesNotExist  => !Exists;
     public string?  DirectoryName => Info.DirectoryName;
     public MimeType Mime          => Extension.FromExtension();
     public string ContentType
