@@ -1,10 +1,6 @@
 ﻿namespace Jakar.Database.Migrations;
 
 
-public sealed class DbMigrationAttribute : Attribute { }
-
-
-
 public sealed class Migrator
 {
     private readonly Type[] _tables;
