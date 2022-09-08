@@ -15,6 +15,8 @@ public static class LinqExtensions
             if ( element is not null ) { yield return element; }
         }
     }
+    
+    
     public static IEnumerable<TElement> ConsolidateUnique<TElement>( this IEnumerable<IEnumerable<TElement>> items )
     {
         var results = new HashSet<TElement>();
@@ -27,7 +29,6 @@ public static class LinqExtensions
 
         return results;
     }
-
     public static IEnumerable<TElement> Consolidate<TElement>( this IEnumerable<IEnumerable<TElement>> items )
     {
         var results = new List<TElement>();

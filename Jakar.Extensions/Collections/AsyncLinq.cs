@@ -1,6 +1,9 @@
 ﻿#pragma warning disable CS8424
 
 
+using OneOf.Types;
+
+
 
 namespace Jakar.Extensions;
 
@@ -8,7 +11,7 @@ namespace Jakar.Extensions;
 /// <summary> <para><see cref="Enumerable"/></para> </summary>
 public static class AsyncLinq
 {
-    public static async IAsyncEnumerable<TItem> WhereNotNull<TItem>( this IAsyncEnumerable<TItem?> items, [EnumeratorCancellation] CancellationToken token = default  )
+    public static async IAsyncEnumerable<TItem> WhereNotNull<TItem>( this IAsyncEnumerable<TItem?> items, [EnumeratorCancellation] CancellationToken token = default )
     {
         // ReSharper disable once LoopCanBeConvertedToQuery
         await foreach ( TItem? element in items.WithCancellation(token) )
@@ -16,7 +19,7 @@ public static class AsyncLinq
             if ( element is not null ) { yield return element; }
         }
     }
-    public static async Task ForEachAsync<TItem>( this IAsyncEnumerable<TItem> list, Func<TItem, Task> action, bool continueOnCapturedContext = true, [EnumeratorCancellation] CancellationToken token = default  )
+    public static async Task ForEachAsync<TItem>( this IAsyncEnumerable<TItem> list, Func<TItem, Task> action, bool continueOnCapturedContext = true, [EnumeratorCancellation] CancellationToken token = default )
     {
         await foreach ( TItem item in list.WithCancellation(token) )
         {
@@ -54,6 +57,22 @@ public static class AsyncLinq
         await foreach ( TElement element in enumerable.WithCancellation(token) ) { list.Add(element); }
 
         return list;
+    }
+
+
+    public static async IAsyncEnumerable<TElement> ConsolidateUnique<TElement>( this IAsyncEnumerable<IAsyncEnumerable<TElement>> items, [EnumeratorCancellation] CancellationToken token = default )
+    {
+        var results = new HashSet<TElement>();
+        await foreach ( TElement element in items.Consolidate(token) ) { results.Add(element); }
+        
+        foreach ( TElement element in results ) { yield return element; }
+    }
+    public static async IAsyncEnumerable<TElement> Consolidate<TElement>( this IAsyncEnumerable<IAsyncEnumerable<TElement>> source, [EnumeratorCancellation] CancellationToken token = default )
+    {
+        await foreach ( IAsyncEnumerable<TElement> element in source.WithCancellation(token) )
+        {
+            await foreach ( TElement item in element.WithCancellation(token) ) { yield return item; }
+        }
     }
 
 
