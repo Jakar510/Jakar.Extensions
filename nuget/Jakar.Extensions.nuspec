@@ -4,7 +4,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata>
 		<id>Jakar.Extensions</id>
-		<version>6.0.0.54-beta</version>
+		<version>6.0.0.55-beta</version>
 		<title>Extension Library</title>
 		<authors>Tyler Stegmaier</authors>
 		<owners>Jakar510/Jakar</owners>
@@ -23,7 +23,7 @@
 			Removed Models.Users
 			Added MailKit Email Builder
 			Added Models.Service
-			Added WebRequestBuilder
+			Added WebRequestBuilder, WebRequester
 			WebRequests.GetResponseAsync now tries to get the error details, including anything sent sent from server in the body.
 			Updated Enum extensions
 			Added lots more Span Extensions
@@ -42,6 +42,8 @@
 					branch="master" />
 		<dependencies>
 			<group targetFramework="netstandard2.1">
+				<dependency id="Microsoft.CodeAnalysis.CSharp"
+							version="4.3.0" />
 				<dependency id="CommunityToolkit.Diagnostics"
 							version="8.0.0" />
 				<dependency id="Dapper.Contrib"
