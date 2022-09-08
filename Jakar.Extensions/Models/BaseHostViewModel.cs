@@ -4,7 +4,15 @@
 namespace Jakar.Extensions;
 
 
-public abstract class BaseHostViewModel : BaseViewModel, IHostInfo
+public interface IHostViewModel : IHostInfo
+{
+    public string? Host        { get; set; }
+    public bool    IsValidHost { get; set; }
+}
+
+
+
+public abstract class BaseHostViewModel : BaseViewModel, IHostViewModel
 {
     protected readonly Uri     _defaultHostInfo;
     private            string? _host;
