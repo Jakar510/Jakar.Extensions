@@ -67,17 +67,21 @@ After:
     public static void Print( this Span<char>         self ) => Console.Write(self.ToString());
     public static void Print( this ReadOnlySpan<char> self ) => Console.Write(self.ToString());
     public static void Print( this string             self ) => Console.Write(self);
-    public static void Print( this ValueStringBuilder self ) => self.ToString().Print();
-    public static void Print( this StringBuilder      self ) => self.ToString().Print();
-    public static void Print( this object             self ) => Console.Write(self);
+    public static void Print( this ValueStringBuilder self ) => self.ToString()
+                                                                    .Print();
+    public static void Print( this StringBuilder self ) => self.ToString()
+                                                               .Print();
+    public static void Print( this object self ) => Console.Write(self);
 
 
     public static void PrintLine( this Span<char>         self ) => Console.WriteLine(self.ToString());
     public static void PrintLine( this ReadOnlySpan<char> self ) => Console.WriteLine(self.ToString());
     public static void PrintLine( this string             self ) => Console.WriteLine(self);
-    public static void PrintLine( this ValueStringBuilder self ) => self.ToString().PrintLine();
-    public static void PrintLine( this StringBuilder      self ) => self.ToString().PrintLine();
-    public static void PrintLine( this object             self ) => Console.WriteLine(self);
+    public static void PrintLine( this ValueStringBuilder self ) => self.ToString()
+                                                                        .PrintLine();
+    public static void PrintLine( this StringBuilder self ) => self.ToString()
+                                                                   .PrintLine();
+    public static void PrintLine( this object self ) => Console.WriteLine(self);
 
 
     public static void WriteToConsole( this Span<char> self )
@@ -98,8 +102,10 @@ After:
         Console.WriteLine(self);
         Console.WriteLine();
     }
-    public static void WriteToConsole( this ValueStringBuilder self ) => self.ToString().WriteToConsole();
-    public static void WriteToConsole( this StringBuilder      self ) => self.ToString().WriteToConsole();
+    public static void WriteToConsole( this ValueStringBuilder self ) => self.ToString()
+                                                                             .WriteToConsole();
+    public static void WriteToConsole( this StringBuilder self ) => self.ToString()
+                                                                        .WriteToConsole();
     public static void WriteToConsole( this object self )
     {
         Console.WriteLine();
@@ -110,37 +116,55 @@ After:
 
 #if NETSTANDARD2_1
     [Conditional("DEBUG")]
-    public static void WriteToDebug(this ReadOnlySpan<char> self, [CallerMemberName] string? caller = default)
+    public static void WriteToDebug( this ReadOnlySpan<char> self, [CallerMemberName] string? caller = default )
     {
         Debug.WriteLine(Header);
         Debug.WriteLine(caller);
         Debug.WriteLine(string.Empty);
         Debug.WriteLine(self.ToString());
         Debug.WriteLine(string.Empty);
+
+        Console.WriteLine(Header);
+        Debug.WriteLine(caller);
+        Console.WriteLine(string.Empty);
+        Console.WriteLine(self.ToString());
+        Console.WriteLine(string.Empty);
     }
     [Conditional("DEBUG")]
-    public static void WriteToDebug(this string self, [CallerMemberName] string? caller = default)
+    public static void WriteToDebug( this string self, [CallerMemberName] string? caller = default )
     {
         Debug.WriteLine(Header);
         Debug.WriteLine(caller);
         Debug.WriteLine(string.Empty);
         Debug.WriteLine(self);
         Debug.WriteLine(string.Empty);
+
+        Console.WriteLine(Header);
+        Debug.WriteLine(caller);
+        Console.WriteLine(string.Empty);
+        Console.WriteLine(self);
+        Console.WriteLine(string.Empty);
     }
-    [Conditional("DEBUG")] public static void WriteToDebug(this StringBuilder self, [CallerMemberName] string? caller = default) => self.ToString().WriteToDebug(caller);
     [Conditional("DEBUG")]
-    public static void WriteToDebug(this object self, [CallerMemberName] string? caller = default)
+    public static void WriteToDebug( this StringBuilder self, [CallerMemberName] string? caller = default ) => self.ToString()
+                                                                                                                   .WriteToDebug(caller);
+    [Conditional("DEBUG")]
+    public static void WriteToDebug( this object self, [CallerMemberName] string? caller = default )
     {
         Debug.WriteLine(Header);
         Debug.WriteLine(caller);
         Debug.WriteLine(string.Empty);
         Debug.WriteLine(self);
         Debug.WriteLine(string.Empty);
+
+        Console.WriteLine(Header);
+        Debug.WriteLine(caller);
+        Console.WriteLine(string.Empty);
+        Console.WriteLine(self);
+        Console.WriteLine(string.Empty);
     }
 
 #else
-
-
     [Conditional("DEBUG")]
     public static void WriteToDebug( this ReadOnlySpan<char> self, [CallerArgumentExpression("self")] string? variable = default, [CallerMemberName] string? caller = default )
     {
@@ -149,6 +173,12 @@ After:
         Debug.WriteLine(string.Empty);
         Debug.WriteLine(self.ToString());
         Debug.WriteLine(string.Empty);
+
+        Console.WriteLine(Header);
+        Console.WriteLine($"{caller}.{variable}");
+        Console.WriteLine(string.Empty);
+        Console.WriteLine(self.ToString());
+        Console.WriteLine(string.Empty);
     }
     [Conditional("DEBUG")]
     public static void WriteToDebug( this string self, [CallerArgumentExpression("self")] string? variable = default, [CallerMemberName] string? caller = default )
@@ -158,8 +188,16 @@ After:
         Debug.WriteLine(string.Empty);
         Debug.WriteLine(self);
         Debug.WriteLine(string.Empty);
+
+        Console.WriteLine(Header);
+        Console.WriteLine($"{caller}.{variable}");
+        Console.WriteLine(string.Empty);
+        Console.WriteLine(self);
+        Console.WriteLine(string.Empty);
     }
-    [Conditional("DEBUG")] public static void WriteToDebug( this StringBuilder self, [CallerArgumentExpression("self")] string? variable = default, [CallerMemberName] string? caller = default ) => self.ToString().WriteToDebug(variable);
+    [Conditional("DEBUG")]
+    public static void WriteToDebug( this StringBuilder self, [CallerArgumentExpression("self")] string? variable = default, [CallerMemberName] string? caller = default ) => self.ToString()
+                                                                                                                                                                                  .WriteToDebug(variable, caller);
     [Conditional("DEBUG")]
     public static void WriteToDebug( this object self, [CallerArgumentExpression("self")] string? variable = default, [CallerMemberName] string? caller = default )
     {
@@ -168,6 +206,12 @@ After:
         Debug.WriteLine(string.Empty);
         Debug.WriteLine(self);
         Debug.WriteLine(string.Empty);
+
+        Console.WriteLine(Header);
+        Console.WriteLine($"{caller}.{variable}");
+        Console.WriteLine(string.Empty);
+        Console.WriteLine(self);
+        Console.WriteLine(string.Empty);
     }
 
 #endif
