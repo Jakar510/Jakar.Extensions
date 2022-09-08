@@ -349,7 +349,7 @@ public abstract record ObservableRecord<T> : ObservableRecord, IEquatable<T>, IC
 public abstract record ObservableRecord<T, TID> : ObservableRecord<T>, IUniqueID<TID> where T : ObservableRecord<T, TID>
                                                                                       where TID : struct, IComparable<TID>, IEquatable<TID>
 {
-    private TID _id = default!;
+    private TID _id;
 
 
     [Key]

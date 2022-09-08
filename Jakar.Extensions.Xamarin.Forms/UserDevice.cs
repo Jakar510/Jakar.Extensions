@@ -48,7 +48,7 @@ public class UserDevice<TID> : ObservableClass, IUserDevice<TID> where TID : str
     private string? _ip;
 
 
-    [Key] public TID      ID           { get; init; } = default!;
+    [Key] public TID      ID           { get; init; }
     public       DateTime TimeStamp    { get; init; }
     public       Guid     DeviceID     { get; init; }
     public       string   Model        { get; init; } = string.Empty;

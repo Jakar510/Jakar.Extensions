@@ -25,7 +25,7 @@ public interface ICurrentLocation<TID> : IUniqueID<TID>, IEquatable<ICurrentLoca
 [Serializable]
 public class CurrentLocation<TID> : ICurrentLocation<TID>, IDataBaseIgnore where TID : struct, IComparable<TID>, IEquatable<TID>
 {
-    [Key] public TID                     ID                      { get; init; } = default!;
+    [Key] public TID                     ID                      { get; init; }
     public       Guid                    InstanceID              { get; init; } = Guid.Empty;
     public       DateTimeOffset          Timestamp               { get; init; }
     public       double                  Latitude                { get; init; }
