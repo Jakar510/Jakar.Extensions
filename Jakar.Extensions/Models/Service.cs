@@ -40,19 +40,36 @@ public abstract class Service : ObservableClass, IDisposable, IAsyncDisposable, 
     }
 
 
-    // StackTraceHidden
-    [DoesNotReturn] protected virtual void ThrowDisabled( [CallerMemberName] string? caller                                   = default ) => throw new InvalidOperationException($"{ClassName}.{caller}");
-    [DoesNotReturn] protected virtual void ThrowDisabled( Exception                  inner, [CallerMemberName] string? caller = default ) => throw new InvalidOperationException($"{ClassName}.{caller}", inner);
-    [DoesNotReturn] protected void ThrowDisposed( [CallerMemberName] string?         caller                                   = default ) => throw new ObjectDisposedException($"{ClassName}.{caller}");
-    [DoesNotReturn] protected void ThrowDisposed( Exception                          inner, [CallerMemberName] string? caller = default ) => throw new ObjectDisposedException($"{ClassName}.{caller}", inner);
-
-
     // public abstract void Register( in WebApplicationBuilder builder );
 
+#if !NETSTANDARD2_1
+    [StackTraceHidden]
+#endif
+    [DoesNotReturn] protected virtual void ThrowDisabled( [CallerMemberName] string? caller = default ) => throw new InvalidOperationException($"{ClassName}.{caller}");
 
-    public static Task Delay( in double   days,    in CancellationToken token ) => days.Delay(token);
-    public static Task Delay( in float    minutes, in CancellationToken token ) => minutes.Delay(token);
-    public static Task Delay( in long     seconds, in CancellationToken token ) => seconds.Delay(token);
-    public static Task Delay( in int      ms,      in CancellationToken token ) => ms.Delay(token);
-    public static Task Delay( in TimeSpan delay,   in CancellationToken token ) => delay.Delay(token);
+#if !NETSTANDARD2_1
+    [StackTraceHidden]
+#endif
+    [DoesNotReturn] protected virtual void ThrowDisabled( Exception inner, [CallerMemberName] string? caller = default ) => throw new InvalidOperationException($"{ClassName}.{caller}", inner);
+
+#if !NETSTANDARD2_1
+    [StackTraceHidden]
+#endif
+    [DoesNotReturn] protected void ThrowDisposed( [CallerMemberName] string? caller = default ) => throw new ObjectDisposedException($"{ClassName}.{caller}");
+
+#if !NETSTANDARD2_1
+    [StackTraceHidden]
+#endif
+    [DoesNotReturn] protected void ThrowDisposed( Exception inner, [CallerMemberName] string? caller = default ) => throw new ObjectDisposedException($"{ClassName}.{caller}", inner);
+
+
+    public static Task Delay( in double days, in CancellationToken token ) => TimeSpan.FromDays(days)
+                                                                                      .Delay(token);
+    public static Task Delay( in float minutes, in CancellationToken token ) => TimeSpan.FromMinutes(minutes)
+                                                                                        .Delay(token);
+    public static Task Delay( in long seconds, in CancellationToken token ) => TimeSpan.FromSeconds(seconds)
+                                                                                       .Delay(token);
+    public static Task Delay( in int ms, in CancellationToken token ) => TimeSpan.FromMilliseconds(ms)
+                                                                                 .Delay(token);
+    public static Task Delay( in TimeSpan delay, in CancellationToken token ) => delay.Delay(token);
 }
