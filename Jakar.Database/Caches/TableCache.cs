@@ -5,7 +5,7 @@ namespace Jakar.Database;
 
 
 public sealed class TableCache<TRecord, TID> : Service, IHostedService, IReadOnlyCollection<TRecord>, IAsyncEnumerator<TRecord?> where TRecord : BaseTableRecord<TRecord, TID>
-                                                                                                                                 where TID : IComparable<TID>, IEquatable<TID>
+                                                                                                                                 where TID : struct, IComparable<TID>, IEquatable<TID>
 {
     public sealed class CacheEntry : CacheEntry<TRecord, TID>
     {

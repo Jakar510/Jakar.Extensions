@@ -7,7 +7,7 @@ namespace Jakar.Database;
 
 [Serializable]
 public sealed class RecordCollection<TRecord, TID> : ObservableCollection<TRecord>, IDisposable where TRecord : BaseRecord, IUniqueID<TID>
-                                                                                                where TID : IComparable<TID>, IEquatable<TID>
+                                                                                                where TID : struct, IComparable<TID>, IEquatable<TID>
 {
     private Counter<TID> _counter;
 
@@ -22,7 +22,7 @@ public sealed class RecordCollection<TRecord, TID> : ObservableCollection<TRecor
     public void Add( IEnumerable<TRecord> items ) => items.ForEach(Add);
     public new void Add( TRecord item )
     {
-        if ( item.IsValidRowID() )
+        if ( item.IsValidID() )
         {
             base.Add(item);
             return;

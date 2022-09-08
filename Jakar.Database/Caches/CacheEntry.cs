@@ -5,7 +5,7 @@ namespace Jakar.Database;
 
 
 public class CacheEntry<TRecord, TID> : ObservableClass, IEquatable<TRecord>, IComparable<TRecord>, IEquatable<CacheEntry<TRecord, TID>>, IComparable<CacheEntry<TRecord, TID>>, IComparable where TRecord : BaseTableRecord<TRecord, TID>
-                                                                                                                                                                                             where TID : IComparable<TID>, IEquatable<TID>
+                                                                                                                                                                                             where TID : struct, IComparable<TID>, IEquatable<TID>
 {
     private TRecord?       _value;
     private int            _hash;

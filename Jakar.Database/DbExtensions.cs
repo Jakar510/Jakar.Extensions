@@ -7,13 +7,12 @@ namespace Jakar.Database;
 
 public static class DbExtensions
 {
-    public static bool IsValidRowID<TID>( this IUniqueID<TID>    value ) where TID : IComparable<TID>, IEquatable<TID> => !value.ID.Equals(default);
-    public static bool IsValidRowID( this      IUniqueID<Guid>   value ) => value.ID.IsValidRowID();
-    public static bool IsValidRowID( this      Guid              value ) => value != Guid.Empty;
-    public static bool IsValidRowID( this      Guid?             value ) => value.HasValue && value.Value != Guid.Empty;
-    public static bool IsValidRowID( this      IUniqueID<long>   value ) => value.ID > 0;
-    public static bool IsValidRowID( this      IUniqueID<int>    value ) => value.ID > 0;
-    public static bool IsValidRowID( this      IUniqueID<string> value ) => !string.IsNullOrWhiteSpace(value.ID);
+    public static bool IsValidID<TID>( this IUniqueID<TID>    value ) where TID : struct, IComparable<TID>, IEquatable<TID> => !value.ID.Equals(default);
+    public static bool IsValidID( this      IUniqueID<Guid>   value ) => value.ID.IsValidID();
+    public static bool IsValidID( this      Guid              value ) => value != Guid.Empty;
+    public static bool IsValidID( this      Guid?             value ) => value.HasValue && value.Value != Guid.Empty;
+    public static bool IsValidID( this      IUniqueID<long>   value ) => value.ID > 0;
+    public static bool IsValidID( this      IUniqueID<int>    value ) => value.ID > 0;
 
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)] public static string GetTableName<TRecord>() where TRecord : class => GetTableName(typeof(TRecord));

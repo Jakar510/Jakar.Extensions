@@ -5,7 +5,7 @@ namespace Jakar.Database;
 
 
 [Serializable]
-public sealed class Counter<TID> : IEnumerator<TID> where TID : IComparable<TID>, IEquatable<TID>
+public sealed class Counter<TID> : IEnumerator<TID> where TID : struct, IComparable<TID>, IEquatable<TID>
 {
     private readonly Func<TID?, TID> _adder;
     private          TID?            _current;

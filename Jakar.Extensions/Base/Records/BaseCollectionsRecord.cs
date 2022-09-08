@@ -4,7 +4,7 @@ namespace Jakar.Extensions;
 
 [Serializable]
 public abstract record BaseCollectionsRecord<T, TID> : ObservableRecord<T, TID> where T : BaseCollectionsRecord<T, TID>
-                                                                                where TID : IComparable<TID>, IEquatable<TID>
+                                                                                where TID : struct, IComparable<TID>, IEquatable<TID>
 {
     protected BaseCollectionsRecord() : base() { }
     protected BaseCollectionsRecord( TID id ) : base(id) { }

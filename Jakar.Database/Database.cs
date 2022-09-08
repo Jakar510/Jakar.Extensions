@@ -4,7 +4,7 @@
 namespace Jakar.Database;
 
 
-public abstract class Database<TID> : ObservableClass, IConnectableDb, IAsyncDisposable where TID : IComparable<TID>, IEquatable<TID>
+public abstract class Database<TID> : ObservableClass, IConnectableDb, IAsyncDisposable where TID : struct, IComparable<TID>, IEquatable<TID>
 {
     protected readonly ConcurrentBag<IAsyncDisposable> _disposables = new();
 
@@ -56,7 +56,7 @@ public abstract class Database<TID> : ObservableClass, IConnectableDb, IAsyncDis
 
 [SuppressMessage("ReSharper", "UnusedType.Global")]
 public abstract class Database<TDatabase, TID> : Database<TID>, IEquatable<TDatabase>, ICloneable where TDatabase : Database<TDatabase, TID>
-                                                                                                  where TID : IComparable<TID>, IEquatable<TID>
+                                                                                                  where TID : struct, IComparable<TID>, IEquatable<TID>
 {
     protected Database() : base() { }
 

@@ -19,7 +19,7 @@ namespace Jakar.Database;
 // ReSharper disable once PossibleInterfaceMemberAmbiguity
 public interface IUserRecord<TRecord, TID> : IComparable<TRecord>, IEquatable<TRecord>, JsonModels.IJsonStringModel, IRefreshToken, IUserControl<TRecord>, IUserID, IUserData, IUserSecurity, IUserSubscription<TID>
     where TRecord : BaseTableRecord<TRecord, TID>, IUserRecord<TRecord, TID>
-    where TID : IComparable<TID>, IEquatable<TID>
+    where TID : struct, IComparable<TID>, IEquatable<TID>
 {
     public string?        UserName     { get; }
     public string?        PasswordHash { get; }

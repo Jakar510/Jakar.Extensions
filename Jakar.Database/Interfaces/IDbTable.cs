@@ -10,7 +10,7 @@ namespace Jakar.Database;
 
 [SuppressMessage("ReSharper", "UnusedMemberInSuper.Global")]
 public interface IDbTable<TRecord, TID> : IConnectableDb, IAsyncDisposable where TRecord : BaseTableRecord<TRecord, TID>
-                                                                           where TID : IComparable<TID>, IEquatable<TID>
+                                                                           where TID : struct, IComparable<TID>, IEquatable<TID>
 {
     public string TableName { get; }
 

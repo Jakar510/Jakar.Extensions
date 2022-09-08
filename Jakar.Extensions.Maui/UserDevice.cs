@@ -2,7 +2,7 @@
 namespace Jakar.Extensions.Maui;
 
 
-public interface IUserDevice<TID> : IEquatable<IUserDevice<TID>>, IUniqueID<TID> where TID : IComparable<TID>, IEquatable<TID>
+public interface IUserDevice<TID> : IEquatable<IUserDevice<TID>>, IUniqueID<TID> where TID : struct, IComparable<TID>, IEquatable<TID>
 {
     public DateTime TimeStamp    { get; }
     public Guid     DeviceID     { get; }
@@ -42,7 +42,7 @@ public interface IUserDevice<TID> : IEquatable<IUserDevice<TID>>, IUniqueID<TID>
 ///     Debug and/or identify info for IT
 /// </summary>
 [Serializable]
-public class UserDevice<TID> : ObservableClass, IUserDevice<TID> where TID : IComparable<TID>, IEquatable<TID>
+public class UserDevice<TID> : ObservableClass, IUserDevice<TID> where TID : struct, IComparable<TID>, IEquatable<TID>
 {
     private string? _ip;
 

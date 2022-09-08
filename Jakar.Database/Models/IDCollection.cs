@@ -4,7 +4,7 @@
 [Serializable]
 [DataBaseType(DbType.String)]
 public sealed class IDCollection<T, TID> : CollectionAlerts<TID>, IReadOnlyCollection<TID>, ISpanFormattable where T : IUniqueID<TID>
-                                                                                                             where TID : IComparable<TID>, IEquatable<TID>
+                                                                                                             where TID : struct, IComparable<TID>, IEquatable<TID>
 {
     public const     char         SEPARATOR = ',';
     private readonly HashSet<TID> _items;

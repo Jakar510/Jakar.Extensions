@@ -1,8 +1,12 @@
-﻿namespace Jakar.Database;
+﻿using static System.Net.WebRequestMethods;
+
+
+
+namespace Jakar.Database;
 
 
 public abstract class DbTable<TRecord, TID> : ObservableClass, IDbTable<TRecord, TID> where TRecord : BaseTableRecord<TRecord, TID>
-                                                                                      where TID : IComparable<TID>, IEquatable<TID>
+                                                                                      where TID : struct, IComparable<TID>, IEquatable<TID>
 {
     private readonly IConnectableDb _database;
     public static    string         TableName { get; } = typeof(TRecord).GetTableName();
@@ -378,5 +382,127 @@ public abstract class DbTable<TRecord, TID> : ObservableClass, IDbTable<TRecord,
     public virtual async Task Update( DbConnection connection, DbTransaction? transaction, IAsyncEnumerable<TRecord> records, CancellationToken token = default )
     {
         await foreach ( TRecord record in records.WithCancellation(token) ) { await Update(connection, transaction, record, token); }
+    }
+
+
+    // ReSharper disable once InconsistentNaming
+    public IDGenerator     IDs     => new(this);
+    public RecordGenerator Records => new(this);
+
+
+    private static string? _defaultID;
+
+    public static string DefaultID => _defaultID ??= typeof(TID) == typeof(Guid)
+                                                         ? $"'{Guid.Empty}'"
+                                                         : default(TID).ToString() ?? throw new InvalidOperationException();
+
+
+
+    /// <summary> <see href="https://stackoverflow.com/a/15992856/9530917"/> </summary>
+    public struct RecordGenerator : IAsyncEnumerator<TRecord?>
+    {
+        private readonly DbTable<TRecord, TID> _table;
+        private          TRecord?              _current = default;
+        private          TID                   _id      = default!;
+
+
+        public TRecord Current
+        {
+            get => _current ?? throw new NullReferenceException(nameof(_current));
+            set
+            {
+                _current = value;
+                _id      = value.ID;
+            }
+        }
+
+
+        public RecordGenerator( DbTable<TRecord, TID> table ) => _table = table;
+        public ValueTask DisposeAsync()
+        {
+            _id      = default;
+            _current = default;
+            return ValueTask.CompletedTask;
+        }
+
+
+        private DynamicParameters GetParameters()
+        {
+            var parameters = new DynamicParameters();
+            parameters.Add(nameof(IUniqueID<TID>.ID), _id);
+            return parameters;
+        }
+        public void Reset()
+        {
+            _id      = default;
+            _current = default;
+        }
+        public async ValueTask<bool> MoveNextAsync( CancellationToken token = default )
+        {
+            await using DbConnection connection = await _table.ConnectAsync(token);
+            return await MoveNextAsync(connection, default, token);
+        }
+        public async ValueTask<bool> MoveNextAsync( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
+        {
+            _current = default!;
+            token.ThrowIfCancellationRequested();
+
+            var record =
+                await
+                    connection.ExecuteScalarAsync<TRecord>(@$"select * from {TableName} where ( id = IFNULL((select min({nameof(IUniqueID<TID>.ID)}) from {TableName} where {nameof(IUniqueID<TID>.ID)} > @{nameof(IUniqueID<TID>.ID)}), {DefaultID}) )",
+                                                           GetParameters(),
+                                                           transaction);
+
+            if ( record is null ) { return false; }
+
+            Current = record;
+            return true;
+        }
+        ValueTask<bool> IAsyncEnumerator<TRecord?>.MoveNextAsync() => MoveNextAsync();
+    }
+
+
+
+    /// <summary> <see href="https://stackoverflow.com/a/15992856/9530917"/> </summary>
+    public struct IDGenerator : IAsyncEnumerator<TID>
+    {
+        private readonly DbTable<TRecord, TID> _table;
+        public           TID                   Current { get; set; } = default;
+
+
+        public IDGenerator( DbTable<TRecord, TID> table ) => _table = table;
+        public ValueTask DisposeAsync()
+        {
+            Current = default;
+            return ValueTask.CompletedTask;
+        }
+
+
+        private DynamicParameters GetParameters()
+        {
+            var parameters = new DynamicParameters();
+            parameters.Add(nameof(IUniqueID<TID>.ID), Current);
+            return parameters;
+        }
+        public void Reset() => Current = default;
+        public async ValueTask<bool> MoveNextAsync( CancellationToken token = default )
+        {
+            await using DbConnection connection = await _table.ConnectAsync(token);
+            return await MoveNextAsync(connection, default, token);
+        }
+        public async ValueTask<bool> MoveNextAsync( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
+        {
+            Current = default;
+            token.ThrowIfCancellationRequested();
+
+            Current =
+                await
+                    connection.ExecuteScalarAsync<TID>(@$"select {nameof(IUniqueID<TID>.ID)} from {TableName} where ( id = IFNULL((select min({nameof(IUniqueID<TID>.ID)}) from {TableName} where {nameof(IUniqueID<TID>.ID)} > @{nameof(IUniqueID<TID>.ID)}), {DefaultID}) )",
+                                                       GetParameters(),
+                                                       transaction);
+
+            return !Current.Equals(default);
+        }
+        ValueTask<bool> IAsyncEnumerator<TID>.MoveNextAsync() => MoveNextAsync();
     }
 }

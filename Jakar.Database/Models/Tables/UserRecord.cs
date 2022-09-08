@@ -10,7 +10,7 @@ namespace Jakar.Database;
 
 
 public abstract record UserRecord<TRecord, TID> : BaseTableRecord<TRecord, TID>, IUserRecord<TRecord, TID> where TRecord : UserRecord<TRecord, TID>
-                                                                                                           where TID : IComparable<TID>, IEquatable<TID>
+                                                                                                           where TID : struct, IComparable<TID>, IEquatable<TID>
 {
     protected static readonly PasswordHasher<TRecord> _hasher    = new();
     private                   string                  _userName  = string.Empty;
@@ -37,8 +37,8 @@ public abstract record UserRecord<TRecord, TID> : BaseTableRecord<TRecord, TID>,
     private                   DateTimeOffset?         _subscriptionExpires;
     private                   TID?                    _subscriptionID;
     private                   DateTimeOffset          _dateCreated;
-    private                   TID                     _createdBy  = default!;
-    private                   TID                     _escalateTo = default!;
+    private                   TID?                    _createdBy;
+    private                   TID?                    _escalateTo;
     private                   bool                    _isActive;
     private                   bool                    _isDisabled;
     private                   bool                    _isLocked;
@@ -182,12 +182,12 @@ public abstract record UserRecord<TRecord, TID> : BaseTableRecord<TRecord, TID>,
         get => _dateCreated;
         set => SetProperty(ref _dateCreated, value);
     }
-    public TID CreatedBy
+    public TID? CreatedBy
     {
         get => _createdBy;
         set => SetProperty(ref _createdBy, value);
     }
-    public TID EscalateTo
+    public TID? EscalateTo
     {
         get => _escalateTo;
         set => SetProperty(ref _escalateTo, value);
@@ -418,12 +418,12 @@ public abstract record UserRecord<TRecord, TID> : BaseTableRecord<TRecord, TID>,
                                           };
 
 
-    public async Task<TRecord?> GetBoss( DbConnection connection, DbTransaction? transaction, DbTable<TRecord, TID> table, CancellationToken token ) => EscalateTo.Equals(default)
-                                                                                                                                                            ? default
-                                                                                                                                                            : await table.Get(connection, transaction, EscalateTo, token);
-    public async Task<TRecord?> GetUserWhoCreated( DbConnection connection, DbTransaction? transaction, DbTable<TRecord, TID> table, CancellationToken token ) => CreatedBy.Equals(default)
-                                                                                                                                                                      ? default
-                                                                                                                                                                      : await table.Get(connection, transaction, CreatedBy, token);
+    public async Task<TRecord?> GetBoss( DbConnection connection, DbTransaction? transaction, DbTable<TRecord, TID> table, CancellationToken token ) => EscalateTo.HasValue
+                                                                                                                                                            ? await table.Get(connection, transaction, EscalateTo.Value, token)
+                                                                                                                                                            : default;
+    public async Task<TRecord?> GetUserWhoCreated( DbConnection connection, DbTransaction? transaction, DbTable<TRecord, TID> table, CancellationToken token ) => CreatedBy.HasValue
+                                                                                                                                                                      ? await table.Get(connection, transaction, CreatedBy.Value, token)
+                                                                                                                                                                      : default;
 
 
     public void Update( IUserData value )
@@ -453,9 +453,10 @@ public abstract record UserRecord<TRecord, TID> : BaseTableRecord<TRecord, TID>,
 
     public override int CompareTo( TRecord? other )
     {
+        if ( other is null ) { return 1; }
+
         if ( ReferenceEquals(this, other) ) { return 0; }
 
-        if ( ReferenceEquals(null, other) ) { return 1; }
 
         int userNameComparison = string.Compare(UserName, other.UserName, StringComparison.Ordinal);
         if ( userNameComparison != 0 ) { return userNameComparison; }

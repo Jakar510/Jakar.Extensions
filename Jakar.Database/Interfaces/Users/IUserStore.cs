@@ -14,4 +14,4 @@ public interface IUserStore<TUserRecord, TID> : IUserLoginStore<TUserRecord>,
                                                 IUserAuthenticatorKeyStore<TUserRecord>,
                                                 IUserTwoFactorRecoveryCodeStore<TUserRecord>,
                                                 IUserPhoneNumberStore<TUserRecord> where TUserRecord : BaseTableRecord<TUserRecord, TID>, IUserRecord<TUserRecord, TID>
-                                                                                   where TID : IComparable<TID>, IEquatable<TID> { }
+                                                                                   where TID : struct, IComparable<TID>, IEquatable<TID> { }
