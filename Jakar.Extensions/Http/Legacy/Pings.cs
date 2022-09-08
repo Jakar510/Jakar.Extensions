@@ -19,12 +19,12 @@ public static class Pings
     /// <param name = "encoding" > </param>
     /// <param name = "token" > </param>
     /// <returns> </returns>
-    public static async Task<bool> Ping( this Uri url, int timeout = 2500, HeaderCollection? headers = null, Encoding? encoding = null, CancellationToken token = default )
+    public static async Task<bool> Ping(this Uri url, int timeout = 2500, HeaderCollection? headers = null, Encoding? encoding = null, CancellationToken token = default)
     {
         try
         {
             encoding ??= Encoding.Default;
-            headers  ??= new HeaderCollection(MimeTypeNames.Application.URL_ENCODED_CONTENT, encoding);
+            headers ??= new HeaderCollection(MimeTypeNames.Application.URL_ENCODED_CONTENT, encoding);
 
             try
             {
@@ -33,16 +33,16 @@ public static class Pings
                 string? reply = await response.AsString(encoding).ConfigureAwait(false);
                 return !string.IsNullOrWhiteSpace(reply);
             }
-            catch ( WebException we )
+            catch (WebException we)
             {
                 Exception? e = we.ConvertException(token);
-                if ( e is not null ) { throw e; }
+                if (e is not null) { throw e; }
 
                 throw;
             }
         }
-        catch ( ConnectFailureException ) { return false; }
-        catch ( TimeoutException ) { return false; }
+        catch (ConnectFailureException) { return false; }
+        catch (TimeoutException) { return false; }
     }
 
 
@@ -59,12 +59,12 @@ public static class Pings
     /// <param name = "token" > </param>
     /// <param name = "encoding" > </param>
     /// <returns> </returns>
-    public static async Task<bool> Ping( this Uri url, string payload, int timeout = 2500, HeaderCollection? headers = null, Encoding? encoding = null, CancellationToken token = default )
+    public static async Task<bool> Ping(this Uri url, string payload, int timeout = 2500, HeaderCollection? headers = null, Encoding? encoding = null, CancellationToken token = default)
     {
         try
         {
             encoding ??= Encoding.Default;
-            headers  ??= new HeaderCollection(MimeTypeNames.Text.PLAIN, encoding);
+            headers ??= new HeaderCollection(MimeTypeNames.Text.PLAIN, encoding);
 
             try
             {
@@ -73,15 +73,15 @@ public static class Pings
                 string? reply = await response.AsString(encoding).ConfigureAwait(false);
                 return !string.IsNullOrWhiteSpace(reply);
             }
-            catch ( WebException we )
+            catch (WebException we)
             {
                 Exception? e = we.ConvertException(token);
-                if ( e is not null ) { throw e; }
+                if (e is not null) { throw e; }
 
                 throw;
             }
         }
-        catch ( ConnectFailureException ) { return false; }
-        catch ( TimeoutException ) { return false; }
+        catch (ConnectFailureException) { return false; }
+        catch (TimeoutException) { return false; }
     }
 }
