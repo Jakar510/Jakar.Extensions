@@ -42,6 +42,21 @@
 		<PackageLicenseFile>W:\WorkSpace\Public\Jakar.Extensions\LICENSE.txt</PackageLicenseFile>
 	</PropertyGroup>
 
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard2.1|AnyCPU'">
+		<DefineConstants>$(DefineConstants);__WINDOWS__;__LINUX__;__IOS__;__ANDROID__;__MACOS__</DefineConstants>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|netstandard2.1|AnyCPU'">
+		<DefineConstants>$(DefineConstants);__WINDOWS__;__LINUX__;__IOS__;__ANDROID__;__MACOS__</DefineConstants>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net6.0|AnyCPU'">
+		<DefineConstants>$(DefineConstants);__WINDOWS__;__LINUX__;__IOS__;__ANDROID__;__MACOS__</DefineConstants>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net6.0|AnyCPU'">
+		<DefineConstants>$(DefineConstants);__WINDOWS__;__LINUX__;__IOS__;__ANDROID__;__MACOS__</DefineConstants>
+	</PropertyGroup>
 
 	<ItemGroup>
 		<None Include="..\images\icon.png">

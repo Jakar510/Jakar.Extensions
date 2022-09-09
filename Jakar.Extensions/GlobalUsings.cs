@@ -29,6 +29,8 @@ global using Dapper.Contrib.Extensions;
 global using Newtonsoft.Json;
 global using Newtonsoft.Json.Linq;
 global using System.Drawing;
+global using System.IO.Compression;
+global using System.Security;
 global using Nito.Collections;
 global using KeyAttribute = Dapper.Contrib.Extensions.KeyAttribute;
 global using JetBrains.Annotations;

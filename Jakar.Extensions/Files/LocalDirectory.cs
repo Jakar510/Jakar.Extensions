@@ -1,9 +1,4 @@
 ﻿#nullable enable
-using System.IO.Compression;
-using System.Security;
-
-
-
 namespace Jakar.Extensions;
 
 
@@ -72,6 +67,7 @@ public class LocalDirectory : BaseCollections<LocalDirectory>, TempFile.ITempFil
     // public static implicit operator LocalDirectory( string             path ) => new(path);
     public static implicit operator LocalDirectory( DirectoryInfo      info ) => new(info);
     public static implicit operator LocalDirectory( ReadOnlySpan<char> info ) => new(info);
+    public static implicit operator LocalDirectory( string             info ) => new(info);
 
     public sealed override string ToString() => FullPath;
     protected virtual LocalDirectory? GetParent()
@@ -125,6 +121,20 @@ public class LocalDirectory : BaseCollections<LocalDirectory>, TempFile.ITempFil
                                       .Combine(subFolders));
 
         return d.SetTemporary();
+    }
+    
+    public static LocalDirectory AppData( string subPath )
+    {
+    #if __WINDOWS__
+        subPath = Environment.ExpandEnvironmentVariables($"%APPDATA%/{subPath}");
+    #elif __MACOS__
+        subPath = $"~/Library/{subPath}";
+    #elif __LINUX__
+        subPath = Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), subPath);
+    #endif
+
+        string path = Environment.ExpandEnvironmentVariables(subPath);
+        return path;
     }
 
 
