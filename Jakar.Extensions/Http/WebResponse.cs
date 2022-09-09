@@ -86,7 +86,7 @@ public readonly struct WebResponse<T>
             catch ( HttpRequestException e ) { return await Create(handler, response, e); }
         }
     }
-    private static async Task<WebResponse<T>> Create( WebHandler handler, HttpResponseMessage response )
+    public  static async Task<WebResponse<T>> Create( WebHandler handler, HttpResponseMessage response )
     {
     #if NETSTANDARD2_1
         await using Stream? stream = await response.Content.ReadAsStreamAsync();
@@ -110,7 +110,7 @@ public readonly struct WebResponse<T>
 
         return new WebResponse<T>(response, error);
     }
-    private static async Task<WebResponse<T>> Create( WebHandler handler, HttpResponseMessage response, Exception e )
+    public static async Task<WebResponse<T>> Create( WebHandler handler, HttpResponseMessage response, Exception e )
     {
     #if NETSTANDARD2_1
         await using Stream? stream = await response.Content.ReadAsStreamAsync();

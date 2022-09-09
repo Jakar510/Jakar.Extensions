@@ -76,6 +76,24 @@ public class WebHandler : IDisposable
     }
 
 
+    public virtual async Task NoResponse()
+    {
+        using ( this )
+        {
+            using HttpResponseMessage response = await this;
+            response.EnsureSuccessStatusCode();
+        }
+    }
+
+
+    public virtual Task<WebResponse<bool>> AsBool() => WebResponse<bool>.Create(this, AsBool);
+    public virtual async Task<bool> AsBool( HttpResponseMessage response )
+    {
+        string content = await AsString(response);
+        return bool.TryParse(content, out bool result) && result;
+    }
+
+
     public virtual Task<WebResponse<string>> AsString() => WebResponse<string>.Create(this, AsString);
     public virtual async Task<string> AsString( HttpResponseMessage response )
     {
@@ -185,7 +203,7 @@ public class WebHandler : IDisposable
 
         var buffer = new MemoryStream((int)stream.Length);
         await stream.CopyToAsync(buffer, Token);
-        
+
         buffer.Seek(0, SeekOrigin.Begin);
         return buffer;
     }
