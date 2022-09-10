@@ -1,4 +1,8 @@
 ﻿#nullable enable
+using Microsoft.Extensions.DependencyInjection;
+
+
+
 namespace Jakar.Extensions.Hosting;
 
 
@@ -309,12 +313,16 @@ public static partial class WebBuilder
     }
 
 
-    public static WebApplicationBuilder AddHostedService<THostedService>( this WebApplicationBuilder builder ) where THostedService : class, IHostedService
+    public static WebApplicationBuilder AddHostedService<THostedService>( this WebApplicationBuilder builder, THostedService service ) where THostedService : class, IHostedService
     {
-        builder.AddSingleton<THostedService>();
-        builder.Services.AddHostedService<THostedService>();
+        builder.AddSingleton(service);
+        builder.Services.AddHostedService(provider => service);
         return builder;
     }
+
+
+    public static WebApplicationBuilder AddHostedService<THostedService>( this WebApplicationBuilder builder ) where THostedService : class, IHostedService =>
+        builder.AddHostedService(provider => provider.GetRequiredService<THostedService>());
     public static WebApplicationBuilder AddHostedService<THostedService>( this WebApplicationBuilder builder, Func<IServiceProvider, THostedService> func ) where THostedService : class, IHostedService
     {
         builder.AddSingleton<THostedService>();
@@ -323,15 +331,11 @@ public static partial class WebBuilder
     }
 
 
-    public static WebApplicationBuilder AddHostedService<TService, THostedService>( this WebApplicationBuilder builder ) where TService : class
-                                                                                                                         where THostedService : class, TService, IHostedService
-    {
-        builder.AddSingleton<TService, THostedService>();
-        builder.Services.AddHostedService<THostedService>();
-        return builder;
-    }
-    public static WebApplicationBuilder AddHostedService<TService, THostedService>( this WebApplicationBuilder builder, Func<IServiceProvider, THostedService> func ) where TService : class
-                                                                                                                                                                      where THostedService : class, TService, IHostedService
+    public static WebApplicationBuilder AddHostedService<TService, THostedService>( this WebApplicationBuilder builder ) where TService : class, IHostedService
+                                                                                                                         where THostedService : class, TService =>
+        builder.AddHostedService<TService, THostedService>(provider => provider.GetRequiredService<TService>());
+    public static WebApplicationBuilder AddHostedService<TService, THostedService>( this WebApplicationBuilder builder, Func<IServiceProvider, TService> func ) where TService : class, IHostedService
+                                                                                                                                                                where THostedService : class, TService
     {
         builder.AddSingleton<TService, THostedService>();
         builder.Services.AddHostedService(func);
