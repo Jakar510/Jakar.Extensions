@@ -7,6 +7,7 @@
 namespace Jakar.Extensions;
 
 
+[Obsolete($"Use {nameof(WebRequestBuilder)} instead")]
 public readonly struct ResponseData
 {
     private static readonly ResponseData _none = new("NO RESPONSE");

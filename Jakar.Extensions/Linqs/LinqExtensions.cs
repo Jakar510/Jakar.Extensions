@@ -15,8 +15,8 @@ public static class LinqExtensions
             if ( element is not null ) { yield return element; }
         }
     }
-    
-    
+
+
     public static IEnumerable<TElement> ConsolidateUnique<TElement>( this IEnumerable<IEnumerable<TElement>> items )
     {
         var results = new HashSet<TElement>();
@@ -50,9 +50,9 @@ public static class LinqExtensions
     {
         foreach ( TElement item in list ) { action(item); }
     }
-
     public static void ForEachParallel<TElement>( this IEnumerable<TElement> list, Action<TElement> action ) => list.AsParallel()
                                                                                                                     .ForAll(action);
+
 
     public static async Task ForEachAsync<TElement>( this IEnumerable<TElement> list, Func<TElement, Task> action, bool continueOnCapturedContext = true )
     {
@@ -62,7 +62,7 @@ public static class LinqExtensions
                .ConfigureAwait(continueOnCapturedContext);
         }
     }
-    public static async Task ForEachAsync<TElement>( this IEnumerable<TElement> list, Func<TElement, ValueTask> action, bool continueOnCapturedContext = true )
+    public static async ValueTask ForEachAsync<TElement>( this IEnumerable<TElement> list, Func<TElement, ValueTask> action, bool continueOnCapturedContext = true )
     {
         foreach ( TElement item in list )
         {
@@ -83,29 +83,27 @@ public static class LinqExtensions
     {
         foreach ( TElement element in value ) { list.AddOrUpdate(element); }
     }
-    public static async Task AddOrUpdate<TElement>( this IList<TElement> list, IAsyncEnumerable<TElement> value, CancellationToken token = default )
+    public static async ValueTask AddOrUpdate<TElement>( this IList<TElement> list, IAsyncEnumerable<TElement> value, CancellationToken token = default )
     {
         await foreach ( TElement element in value.WithCancellation(token) ) { list.AddOrUpdate(element); }
     }
 
-    public static void TryAdd<TElement>( this IList<TElement> list, TElement value )
+
+    public static void TryAdd<TElement>( this ICollection<TElement> list, TElement value )
     {
         if ( list.Contains(value) ) { return; }
 
         list.Add(value);
     }
-    public static void TryAdd<TElement>( this IList<TElement> list, IEnumerable<TElement> value )
+    public static void TryAdd<TElement>( this ICollection<TElement> list, IEnumerable<TElement> value )
     {
         foreach ( TElement element in value ) { list.TryAdd(element); }
     }
-    public static async Task TryAdd<TElement>( this IList<TElement> list, IAsyncEnumerable<TElement> value, CancellationToken token = default )
+    public static async ValueTask TryAdd<TElement>( this ICollection<TElement> list, IAsyncEnumerable<TElement> value, CancellationToken token = default )
     {
         await foreach ( TElement element in value.WithCancellation(token) ) { list.TryAdd(element); }
     }
 
-
-
-    #region Python style Enumerate for collection
 
     public static IEnumerable<(int index, object? item)> Enumerate( this IEnumerable element, int start = 0 )
     {
@@ -117,7 +115,6 @@ public static class LinqExtensions
             index++;
         }
     }
-
     public static IEnumerable<(int index, TElement item)> Enumerate<TElement>( this IEnumerable<TElement> element, int start = 0 )
     {
         int index = start;
@@ -139,7 +136,6 @@ public static class LinqExtensions
             index++;
         }
     }
-
     public static IEnumerable<(int index, KeyValuePair<TKey, TValue> pair)> EnumeratePairs<TKey, TValue>( this IDictionary<TKey, TValue> element, int start = 0 )
     {
         int index = start;
@@ -162,11 +158,6 @@ public static class LinqExtensions
         }
     }
 
-    #endregion
-
-
-
-    #region Random Items in collection
 
     public static IEnumerator<TValue> Random<TValue>( this IReadOnlyIndexable<TValue> items, Random rand, CancellationToken token = default )
     {
@@ -174,14 +165,12 @@ public static class LinqExtensions
 
         while ( !token.IsCancellationRequested ) { yield return items[rand.Next(items.Count)]; }
     }
-
     public static IEnumerator<TValue> Random<TValue>( this IIndexable<TValue> items, Random rand, CancellationToken token = default )
     {
         if ( items is null ) { throw new ArgumentNullException(nameof(items)); }
 
         while ( !token.IsCancellationRequested ) { yield return items[rand.Next(items.Count)]; }
     }
-
     public static IEnumerator<TValue> Random<TValue>( this IReadOnlyList<TValue> items, Random rand, CancellationToken token = default )
     {
         if ( items is null ) { throw new ArgumentNullException(nameof(items)); }
@@ -202,7 +191,6 @@ public static class LinqExtensions
             yield return items[rand.Next(items.Count)];
         }
     }
-
     public static IEnumerator<TValue> RandomValues<TKey, TValue>( this IDictionary<TKey, TValue> dict, Random rand, CancellationToken token = default )
     {
         if ( dict is null ) { throw new ArgumentNullException(nameof(dict)); }
@@ -215,6 +203,4 @@ public static class LinqExtensions
             yield return items[rand.Next(items.Count)];
         }
     }
-
-    #endregion
 }

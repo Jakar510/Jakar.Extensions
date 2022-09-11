@@ -18,6 +18,7 @@ public ref struct Buffer<T> where T : struct, IEquatable<T>
     public          int     Index    { get; set; }
     public          Span<T> Next     => _span[Index..];
 
+
     /// <summary>Returns the underlying storage of the builder.</summary>
     public Span<T> RawChars => _span;
 

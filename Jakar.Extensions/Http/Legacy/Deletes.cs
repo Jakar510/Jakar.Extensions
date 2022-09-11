@@ -17,9 +17,7 @@ namespace Jakar.Extensions;
 ///         <seealso href = "https://www.w3.org/Protocols/rfc1341/7_2_Multipart.html" />
 ///     </para>
 /// </summary>
-#if !NETSTANDARD2_1
 [Obsolete($"Use {nameof(WebRequestBuilder)} instead")]
-#endif
 public static class Deletes
 {
     public static async Task<WebResponse> Delete(this Uri url, ReadOnlyMemory<byte> payload, HeaderCollection headers, CancellationToken token, int? timeout = default)

@@ -2,9 +2,7 @@
 namespace Jakar.Extensions;
 
 
-#if !NETSTANDARD2_1
 [Obsolete($"Use {nameof(WebRequestBuilder)} instead")]
-#endif
 public static class Gets
 {
     /// <summary>

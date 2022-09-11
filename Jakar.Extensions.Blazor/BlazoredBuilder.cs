@@ -6,6 +6,7 @@ namespace Jakar.Extensions.Blazor;
 
 
 [SuppressMessage("ReSharper", "UnusedType.Global")]
+[SuppressMessage("ReSharper", "UnusedMethodReturnValue.Global")]
 public static class BlazoredBuilder
 {
     public static WebApplicationBuilder AddBlazored( this WebApplicationBuilder builder )
