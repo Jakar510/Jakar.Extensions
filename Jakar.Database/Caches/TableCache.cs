@@ -19,12 +19,14 @@ public sealed class TableCache<TRecord, TID> : Service, IHostedService, IReadOnl
     private readonly TimeSpan                              _refreshTime;
     private readonly IDbTable<TRecord, TID>                _table;
     private readonly KeyGenerator<TID, CacheEntry>         _generator;
-    private readonly ConcurrentDictionary<TID, CacheEntry> _records = new();
+    private readonly ConcurrentDictionary<TID, CacheEntry> _records    = new();
+    private readonly TimeSpan                              _expireTime = TimeSpan.FromMinutes(1);
 
 
     public bool                 HasChanged     => _records.Values.Any(x => x.HasChanged);
     public IEnumerable<TID>     Changed        => from entry in _records.Values where entry.HasChanged select entry.ID;
     public IEnumerable<TRecord> RecordsChanged => from entry in _records.Values where entry.HasChanged select entry.Value;
+    public IEnumerable<TRecord> RecordsExpired => from entry in _records.Values where entry.HasExpired(_expireTime) select entry.Value;
 
 
     public TRecord? this[ TID key ] => TryGetValue(key, out TRecord? value)
@@ -82,7 +84,7 @@ public sealed class TableCache<TRecord, TID> : Service, IHostedService, IReadOnl
         }
     }
     public async Task StopAsync( CancellationToken token ) => await _table.Update(RecordsChanged, token);
-    private async Task Refresh( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
+    private async ValueTask Refresh( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
         if ( HasChanged )
         {
@@ -97,7 +99,7 @@ public sealed class TableCache<TRecord, TID> : Service, IHostedService, IReadOnl
     }
 
 
-    public async Task AddOrUpdate( IAsyncEnumerable<TRecord?> records, CancellationToken token = default )
+    public async ValueTask AddOrUpdate( IAsyncEnumerable<TRecord?> records, CancellationToken token = default )
     {
         await foreach ( TRecord? record in records.WithCancellation(token) )
         {
@@ -127,7 +129,19 @@ public sealed class TableCache<TRecord, TID> : Service, IHostedService, IReadOnl
 
 
     public bool TryRemove( TRecord pair ) => _records.TryRemove(pair.ID, out _);
-    public bool TryRemove( TID     key ) => _records.TryRemove(key,      out _);
+    public bool TryRemove( TRecord pair, [NotNullWhen(true)] out TRecord? value ) => TryRemove(pair.ID, out value);
+    public bool TryRemove( TID     key ) => _records.TryRemove(key, out _);
+    public bool TryRemove( TID key, [NotNullWhen(true)] out TRecord? value )
+    {
+        if ( _records.TryRemove(key, out CacheEntry? entry) )
+        {
+            value = entry.Value;
+            return true;
+        }
+
+        value = default;
+        return false;
+    }
 
 
     public bool TryGetValue( TID key, [NotNullWhen(true)] out TRecord? value )

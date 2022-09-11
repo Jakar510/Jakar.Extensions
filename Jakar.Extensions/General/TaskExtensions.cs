@@ -26,8 +26,11 @@ public static class Tasks
                                                                           .GetResult();
 
 
-    public static void WaitSynchronously( this Task task, CancellationToken token = default ) => task.Wait(token);
-
+    public static bool WaitSynchronously( this Task task, CancellationToken token = default )
+    {
+        task.Wait(token);
+        return task.IsCompletedSuccessfully;
+    }
     public static T WaitSynchronously<T>( this Task<T> task, CancellationToken token = default )
     {
         task.Wait(token);
@@ -35,23 +38,35 @@ public static class Tasks
     }
 
 
-    public static async Task WhenAny( this IEnumerable<Task> tasks ) => await Task.WhenAny(tasks)
-                                                                                  .ConfigureAwait(false);
-    public static async Task<Task<TResult>> WhenAny<TResult>( this IEnumerable<Task<TResult>> tasks ) => await Task.WhenAny(tasks)
-                                                                                                                   .ConfigureAwait(false);
-    public static async Task WhenAll( this IEnumerable<Task> tasks ) => await Task.WhenAll(tasks)
-                                                                                  .ConfigureAwait(false);
-    public static async Task<TResult[]> WhenAll<TResult>( this IEnumerable<Task<TResult>> tasks ) => await Task.WhenAll(tasks)
-                                                                                                               .ConfigureAwait(false);
-    public static void WaitAll( this IEnumerable<Task> tasks, CancellationToken token = default ) => Task.WaitAll(tasks.ToArray(), token);
-    public static int WaitAny( this  IEnumerable<Task> tasks, CancellationToken token = default ) => Task.WaitAny(tasks.ToArray(), token);
+    public static bool WaitSynchronously( this ValueTask task )
+    {
+        task.GetAwaiter()
+            .GetResult();
+
+        return task.IsCompletedSuccessfully;
+    }
+    public static T WaitSynchronously<T>( this ValueTask<T> task )
+    {
+        task.GetAwaiter()
+            .GetResult();
+
+        return task.Result;
+    }
 
 
-    public static async Task FromCanceled( this                    CancellationToken token ) => await Task.FromCanceled(token);
-    public static async Task<TResult> FromCanceled<TResult>( this  CancellationToken token ) => await Task.FromCanceled<TResult>(token);
-    public static async Task FromException( this                   Exception         e ) => await Task.FromException(e);
-    public static async Task<TResult> FromException<TResult>( this Exception         e ) => await Task.FromException<TResult>(e);
-    public static async Task<TResult> FromResult<TResult>( this    TResult           result ) => await Task.FromResult(result);
+    public static Task WhenAny( this                         IEnumerable<Task>          tasks ) => Task.WhenAny(tasks);
+    public static Task<Task<TResult>> WhenAny<TResult>( this IEnumerable<Task<TResult>> tasks ) => Task.WhenAny(tasks);
+    public static Task WhenAll( this                         IEnumerable<Task>          tasks ) => Task.WhenAll(tasks);
+    public static Task<TResult[]> WhenAll<TResult>( this     IEnumerable<Task<TResult>> tasks ) => Task.WhenAll(tasks);
+    public static void WaitAll( this                         IEnumerable<Task>          tasks, CancellationToken token = default ) => Task.WaitAll(tasks.ToArray(), token);
+    public static int WaitAny( this                          IEnumerable<Task>          tasks, CancellationToken token = default ) => Task.WaitAny(tasks.ToArray(), token);
+
+
+    public static async Task TaskFromCanceled( this                    CancellationToken token ) => await Task.FromCanceled(token);
+    public static async Task<TResult> TaskFromCanceled<TResult>( this  CancellationToken token ) => await Task.FromCanceled<TResult>(token);
+    public static async Task TaskFromException( this                   Exception         e ) => await Task.FromException(e);
+    public static async Task<TResult> TaskFromException<TResult>( this Exception         e ) => await Task.FromException<TResult>(e);
+    public static async Task<TResult> TaskFromResult<TResult>( this    TResult           result ) => await Task.FromResult(result);
 
 
     public static async Task ForEachParallelAsync( this IEnumerable<Task> source, int? degreeOfParallelism = default, bool continueOnCapturedContext = true )
@@ -85,20 +100,8 @@ public static class Tasks
     }
 
     /// <summary>
-    ///     <seealso href = "https://gist.github.com/scattered-code/1a4a01c3f3a24ebce293a6e7b4451254" />
-    ///     <para>
-    ///         Also a debugging improvement:
-    ///         <see href = "https://youtu.be/gW19LaAYczI?t=497" />
-    ///     </para>
-    /// </summary>
-    /// <typeparam name = "T" > </typeparam>
-    /// <param name = "source" > </param>
-    /// <param name = "degreeOfParallelism" > </param>
-    /// <param name = "body" > </param>
-    /// <param name = "continueOnCapturedContext" > </param>
-    /// <returns>
-    ///     <see cref = "Task" />
-    /// </returns>
+    /// <seealso href = "https://gist.github.com/scattered-code/1a4a01c3f3a24ebce293a6e7b4451254" />
+    /// <para> Also a debugging improvement: <see href = "https://youtu.be/gW19LaAYczI?t=497" /> </para> </summary>
     public static async Task ForEachParallelAsync<T>( this IEnumerable<T> source, Func<T, Task> body, int? degreeOfParallelism = default, bool continueOnCapturedContext = true )
     {
         async Task AwaitPartition( IEnumerator<T> partition )
@@ -127,8 +130,63 @@ public static class Tasks
             throw tasks.Exception;
         }
     }
+    public static async Task ForEachParallelAsync<T>( this IEnumerable<T> source, Func<T, ValueTask> body, int? degreeOfParallelism = default, bool continueOnCapturedContext = true )
+    {
+        async Task AwaitPartition( IEnumerator<T> partition )
+        {
+            using ( partition )
+            {
+                while ( partition.MoveNext() )
+                {
+                    await body(partition.Current)
+                       .ConfigureAwait(continueOnCapturedContext);
+                }
+            }
+        }
 
+
+        Task tasks = Task.WhenAll(Partitioner.Create(source)
+                                             .GetPartitions(degreeOfParallelism ?? Environment.ProcessorCount)
+                                             .AsParallel()
+                                             .Select(AwaitPartition));
+
+        try { await tasks; }
+        catch ( Exception e )
+        {
+            if ( tasks.Exception is null ) { throw new NullReferenceException("Unknown error has occurred. Task.Exception is null.", e); }
+
+            throw tasks.Exception;
+        }
+    }
     public static async Task ForEachParallelAsync<T>( this IEnumerable<T> source, Func<T, CancellationToken, Task> body, CancellationToken token, int? degreeOfParallelism = default, bool continueOnCapturedContext = true )
+    {
+        async Task AwaitPartition( IEnumerator<T> partition )
+        {
+            using ( partition )
+            {
+                while ( partition.MoveNext() )
+                {
+                    await body(partition.Current, token)
+                       .ConfigureAwait(continueOnCapturedContext);
+                }
+            }
+        }
+
+
+        Task tasks = Task.WhenAll(Partitioner.Create(source)
+                                             .GetPartitions(degreeOfParallelism ?? Environment.ProcessorCount)
+                                             .AsParallel()
+                                             .Select(AwaitPartition));
+
+        try { await tasks; }
+        catch ( Exception e )
+        {
+            if ( tasks.Exception is null ) { throw new NullReferenceException("Unknown error has occurred. Task.Exception is null.", e); }
+
+            throw tasks.Exception;
+        }
+    }
+    public static async Task ForEachParallelAsync<T>( this IEnumerable<T> source, Func<T, CancellationToken, ValueTask> body, CancellationToken token, int? degreeOfParallelism = default, bool continueOnCapturedContext = true )
     {
         async Task AwaitPartition( IEnumerator<T> partition )
         {
@@ -158,17 +216,7 @@ public static class Tasks
     }
 
 
-    /// <summary>
-    ///     <seealso href = "https://gist.github.com/scattered-code/b834bbc355a9ee710e3147321d6f985a" />
-    /// </summary>
-    /// <typeparam name = "T" > </typeparam>
-    /// <param name = "source" > </param>
-    /// <param name = "action" > </param>
-    /// <param name = "maxDegreeOfParallelism" > </param>
-    /// <param name = "scheduler" > </param>
-    /// <returns>
-    ///     <see cref = "Task" />
-    /// </returns>
+    /// <summary> <seealso href = "https://gist.github.com/scattered-code/b834bbc355a9ee710e3147321d6f985a" /> </summary>
     public static async Task ForEachParallelAsync<T>( this IAsyncEnumerable<T> source, Func<T, Task> action, int? maxDegreeOfParallelism = default, TaskScheduler? scheduler = null )
     {
         var options = new ExecutionDataflowBlockOptions
@@ -185,7 +233,6 @@ public static class Tasks
         block.Complete();
         await block.Completion;
     }
-
     public static async Task ForEachParallelAsync<T>( this IAsyncEnumerable<T> source, Func<T, Task> action, CancellationToken token, int? maxDegreeOfParallelism = default, TaskScheduler? scheduler = null )
     {
         var options = new ExecutionDataflowBlockOptions
@@ -202,7 +249,6 @@ public static class Tasks
         block.Complete();
         await block.Completion;
     }
-
     public static async Task ForEachParallelAsync<T>( this IAsyncEnumerable<T> source, Func<T, CancellationToken, Task> action, CancellationToken token, int? maxDegreeOfParallelism = default, TaskScheduler? scheduler = null )
     {
         var options = new ExecutionDataflowBlockOptions
@@ -212,7 +258,25 @@ public static class Tasks
 
         if ( scheduler is not null ) { options.TaskScheduler = scheduler; }
 
-        async Task AwaitItem( T item ) { await action(item, token); }
+        async Task AwaitItem( T item ) => await action(item, token);
+
+        var block = new ActionBlock<T>(AwaitItem, options);
+
+        await foreach ( T item in source.WithCancellation(token) ) { block.Post(item); }
+
+        block.Complete();
+        await block.Completion;
+    }
+    public static async Task ForEachParallelAsync<T>( this IAsyncEnumerable<T> source, Func<T, CancellationToken, ValueTask> action, CancellationToken token, int? maxDegreeOfParallelism = default, TaskScheduler? scheduler = null )
+    {
+        var options = new ExecutionDataflowBlockOptions
+                      {
+                          MaxDegreeOfParallelism = maxDegreeOfParallelism ?? DataflowBlockOptions.Unbounded
+                      };
+
+        if ( scheduler is not null ) { options.TaskScheduler = scheduler; }
+
+        async Task AwaitItem( T item ) => await action(item, token);
 
         var block = new ActionBlock<T>(AwaitItem, options);
 
@@ -261,6 +325,36 @@ public static class Tasks
     }
 
     public static async Task<IReadOnlyCollection<T>> WhenAllParallelAsync<T>( IAsyncEnumerable<T> source, Func<T, CancellationToken, Task<T>> action, CancellationToken token, int? maxDegreeOfParallelism = default, TaskScheduler? scheduler = null )
+    {
+        var results = new ConcurrentBag<T>();
+
+        var options = new ExecutionDataflowBlockOptions
+                      {
+                          MaxDegreeOfParallelism = maxDegreeOfParallelism ?? DataflowBlockOptions.Unbounded
+                      };
+
+        if ( scheduler is not null ) { options.TaskScheduler = scheduler; }
+
+        async Task AwaitItem( T item )
+        {
+            T result = await action(item, token);
+            results.Add(result);
+        }
+
+        var block = new ActionBlock<T>(AwaitItem, options);
+
+        await foreach ( T item in source.WithCancellation(token) ) { block.Post(item); }
+
+        block.Complete();
+        await block.Completion;
+        return results;
+    }
+    public static async Task<IReadOnlyCollection<T>> WhenAllParallelAsync<T>( IAsyncEnumerable<T>                      source,
+                                                                              Func<T, CancellationToken, ValueTask<T>> action,
+                                                                              CancellationToken                        token,
+                                                                              int?                                     maxDegreeOfParallelism = default,
+                                                                              TaskScheduler?                           scheduler              = null
+    )
     {
         var results = new ConcurrentBag<T>();
 

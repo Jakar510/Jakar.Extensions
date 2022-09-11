@@ -131,6 +131,10 @@
 		<Folder Include="Properties\PublishProfiles\" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <PackageReference Include="System.Linq.Async.Queryable" Version="6.0.1" />
+	</ItemGroup>
+
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
 		<Exec Command="xcopy &quot;$(TargetDir)..&quot; &quot;$(SolutionDir)Builds&quot; /Y /I" />
 	</Target>

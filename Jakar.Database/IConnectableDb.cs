@@ -7,5 +7,5 @@ namespace Jakar.Database;
 public interface IConnectableDb
 {
     public DbConnection Connect();
-    public Task<DbConnection> ConnectAsync( CancellationToken token );
+    public ValueTask<DbConnection> ConnectAsync( CancellationToken token );
 }

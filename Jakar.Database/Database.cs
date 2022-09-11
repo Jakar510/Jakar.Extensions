@@ -44,7 +44,7 @@ public abstract class Database<TID> : ObservableClass, IConnectableDb, IAsyncDis
         connection.Open();
         return connection;
     }
-    public async Task<DbConnection> ConnectAsync( CancellationToken token )
+    public async ValueTask<DbConnection> ConnectAsync( CancellationToken token )
     {
         DbConnection connection = CreateConnection();
         await connection.OpenAsync(token);

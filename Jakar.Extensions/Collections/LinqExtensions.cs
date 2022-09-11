@@ -62,6 +62,14 @@ public static class LinqExtensions
                .ConfigureAwait(continueOnCapturedContext);
         }
     }
+    public static async Task ForEachAsync<TElement>( this IEnumerable<TElement> list, Func<TElement, ValueTask> action, bool continueOnCapturedContext = true )
+    {
+        foreach ( TElement item in list )
+        {
+            await action(item)
+               .ConfigureAwait(continueOnCapturedContext);
+        }
+    }
 
 
     public static void AddOrUpdate<TElement>( this IList<TElement> list, TElement value )

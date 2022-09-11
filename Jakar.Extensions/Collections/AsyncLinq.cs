@@ -1,27 +1,37 @@
 ﻿#pragma warning disable CS8424
 
 
-using OneOf.Types;
-
-
 
 namespace Jakar.Extensions;
 
 
-/// <summary> <para><see cref="Enumerable"/></para> </summary>
+/// <summary>
+/// <para><see cref="Enumerable"/></para>
+/// <para><see cref="AsyncEnumerable"/></para>
+/// </summary>
 public static class AsyncLinq
 {
-    public static async IAsyncEnumerable<TItem> WhereNotNull<TItem>( this IAsyncEnumerable<TItem?> items, [EnumeratorCancellation] CancellationToken token = default )
+    public static async IAsyncEnumerable<TElement> WhereNotNull<TElement>( this IAsyncEnumerable<TElement?> source, [EnumeratorCancellation] CancellationToken token = default )
     {
         // ReSharper disable once LoopCanBeConvertedToQuery
-        await foreach ( TItem? element in items.WithCancellation(token) )
+        await foreach ( TElement? element in source.WithCancellation(token) )
         {
             if ( element is not null ) { yield return element; }
         }
     }
-    public static async Task ForEachAsync<TItem>( this IAsyncEnumerable<TItem> list, Func<TItem, Task> action, bool continueOnCapturedContext = true, [EnumeratorCancellation] CancellationToken token = default )
+
+
+    public static async ValueTask ForEachAsync<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, Task> action, bool continueOnCapturedContext = true, [EnumeratorCancellation] CancellationToken token = default )
     {
-        await foreach ( TItem item in list.WithCancellation(token) )
+        await foreach ( TElement item in source.WithCancellation(token) )
+        {
+            await action(item)
+               .ConfigureAwait(continueOnCapturedContext);
+        }
+    }
+    public static async ValueTask ForEachAsync<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, ValueTask> action, bool continueOnCapturedContext = true, [EnumeratorCancellation] CancellationToken token = default )
+    {
+        await foreach ( TElement item in source.WithCancellation(token) )
         {
             await action(item)
                .ConfigureAwait(continueOnCapturedContext);
@@ -29,32 +39,25 @@ public static class AsyncLinq
     }
 
 
-    public static async Task<List<TElement>> ToList<TElement>( this IAsyncEnumerable<TElement> enumerable, CancellationToken token = default )
+    public static async ValueTask<List<TElement>> ToList<TElement>( this IAsyncEnumerable<TElement> source, CancellationToken token = default )
     {
         var list = new List<TElement>();
-        await foreach ( TElement element in enumerable.WithCancellation(token) ) { list.Add(element); }
+        await foreach ( TElement element in source.WithCancellation(token) ) { list.Add(element); }
 
         return list;
     }
-    public static Task<HashSet<TElement>> ToHashSet<TElement>( this IAsyncEnumerable<TElement> enumerable, CancellationToken token = default ) => enumerable.ToHashSet(EqualityComparer<TElement>.Default, token);
-    public static async Task<HashSet<TElement>> ToHashSet<TElement>( this IAsyncEnumerable<TElement> enumerable, IEqualityComparer<TElement> comparer, CancellationToken token = default )
+    public static ValueTask<HashSet<TElement>> ToHashSet<TElement>( this IAsyncEnumerable<TElement> source, CancellationToken token = default ) => source.ToHashSet(EqualityComparer<TElement>.Default, token);
+    public static async ValueTask<HashSet<TElement>> ToHashSet<TElement>( this IAsyncEnumerable<TElement> source, IEqualityComparer<TElement> comparer, CancellationToken token = default )
     {
         var list = new HashSet<TElement>(comparer);
-        await foreach ( TElement element in enumerable.WithCancellation(token) ) { list.Add(element); }
+        await foreach ( TElement element in source.WithCancellation(token) ) { list.Add(element); }
 
         return list;
     }
-    public static async Task<ObservableCollection<TElement>> ToObservableCollection<TElement>( this IAsyncEnumerable<TElement> enumerable, CancellationToken token = default )
+    public static async ValueTask<ObservableCollection<TElement>> ToObservableCollection<TElement>( this IAsyncEnumerable<TElement> source, CancellationToken token = default )
     {
         var list = new ObservableCollection<TElement>();
-        await foreach ( TElement element in enumerable.WithCancellation(token) ) { list.Add(element); }
-
-        return list;
-    }
-    public static async Task<IEnumerable<TElement>> ToEnumerable<TElement>( this IAsyncEnumerable<TElement> enumerable, CancellationToken token = default )
-    {
-        var list = new List<TElement>();
-        await foreach ( TElement element in enumerable.WithCancellation(token) ) { list.Add(element); }
+        await foreach ( TElement element in source.WithCancellation(token) ) { list.Add(element); }
 
         return list;
     }
@@ -64,7 +67,7 @@ public static class AsyncLinq
     {
         var results = new HashSet<TElement>();
         await foreach ( TElement element in items.Consolidate(token) ) { results.Add(element); }
-        
+
         foreach ( TElement element in results ) { yield return element; }
     }
     public static async IAsyncEnumerable<TElement> Consolidate<TElement>( this IAsyncEnumerable<IAsyncEnumerable<TElement>> source, [EnumeratorCancellation] CancellationToken token = default )
@@ -89,13 +92,13 @@ public static class AsyncLinq
     }
 
 
-    public static async Task<bool> Any<TElement>( this IAsyncEnumerable<TElement> source, CancellationToken token = default )
+    public static async ValueTask<bool> Any<TElement>( this IAsyncEnumerable<TElement> source, CancellationToken token = default )
     {
         await foreach ( TElement _ in source.WithCancellation(token) ) { return true; }
 
         throw new InvalidOperationException($"No records in {nameof(source)}");
     }
-    public static async Task<bool> Any<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, bool> selector, CancellationToken token = default )
+    public static async ValueTask<bool> Any<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, bool> selector, CancellationToken token = default )
     {
         await foreach ( TElement element in source.WithCancellation(token) )
         {
@@ -104,7 +107,7 @@ public static class AsyncLinq
 
         throw new InvalidOperationException($"No records in {nameof(source)}");
     }
-    public static async Task<bool> Any<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, Task<bool>> selector, CancellationToken token = default )
+    public static async ValueTask<bool> Any<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, ValueTask<bool>> selector, CancellationToken token = default )
     {
         await foreach ( TElement element in source.WithCancellation(token) )
         {
@@ -115,7 +118,7 @@ public static class AsyncLinq
     }
 
 
-    public static async Task<bool> All<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, bool> selector, CancellationToken token = default )
+    public static async ValueTask<bool> All<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, bool> selector, CancellationToken token = default )
     {
         await foreach ( TElement element in source.WithCancellation(token) )
         {
@@ -124,7 +127,7 @@ public static class AsyncLinq
 
         return true;
     }
-    public static async Task<bool> All<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, Task<bool>> selector, CancellationToken token = default )
+    public static async ValueTask<bool> All<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, ValueTask<bool>> selector, CancellationToken token = default )
     {
         await foreach ( TElement element in source.WithCancellation(token) )
         {
@@ -135,13 +138,13 @@ public static class AsyncLinq
     }
 
 
-    public static async Task<TElement> First<TElement>( this IAsyncEnumerable<TElement> source, CancellationToken token = default )
+    public static async ValueTask<TElement> First<TElement>( this IAsyncEnumerable<TElement> source, CancellationToken token = default )
     {
         await foreach ( TElement element in source.WithCancellation(token) ) { return element; }
 
         throw new InvalidOperationException($"No records in {nameof(source)}");
     }
-    public static async Task<TElement> First<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, bool> selector, CancellationToken token = default )
+    public static async ValueTask<TElement> First<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, bool> selector, CancellationToken token = default )
     {
         await foreach ( TElement element in source.WithCancellation(token) )
         {
@@ -150,7 +153,7 @@ public static class AsyncLinq
 
         throw new InvalidOperationException($"No records in {nameof(source)}");
     }
-    public static async Task<TElement> First<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, Task<bool>> selector, CancellationToken token = default )
+    public static async ValueTask<TElement> First<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, ValueTask<bool>> selector, CancellationToken token = default )
     {
         await foreach ( TElement element in source.WithCancellation(token) )
         {
@@ -161,13 +164,13 @@ public static class AsyncLinq
     }
 
 
-    public static async Task<TElement?> FirstOrDefault<TElement>( this IAsyncEnumerable<TElement> source, CancellationToken token = default )
+    public static async ValueTask<TElement?> FirstOrDefault<TElement>( this IAsyncEnumerable<TElement> source, CancellationToken token = default )
     {
         await foreach ( TElement element in source.WithCancellation(token) ) { return element; }
 
         return default;
     }
-    public static async Task<TElement?> FirstOrDefault<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, bool> selector, CancellationToken token = default )
+    public static async ValueTask<TElement?> FirstOrDefault<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, bool> selector, CancellationToken token = default )
     {
         await foreach ( TElement element in source.WithCancellation(token) )
         {
@@ -176,7 +179,7 @@ public static class AsyncLinq
 
         return default;
     }
-    public static async Task<TElement?> FirstOrDefault<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, Task<bool>> selector, CancellationToken token = default )
+    public static async ValueTask<TElement?> FirstOrDefault<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, ValueTask<bool>> selector, CancellationToken token = default )
     {
         await foreach ( TElement element in source.WithCancellation(token) )
         {
@@ -187,7 +190,7 @@ public static class AsyncLinq
     }
 
 
-    public static async Task<TElement> Single<TElement>( this IAsyncEnumerable<TElement> source, CancellationToken token = default )
+    public static async ValueTask<TElement> Single<TElement>( this IAsyncEnumerable<TElement> source, CancellationToken token = default )
     {
         TElement? result = default;
 
@@ -200,7 +203,7 @@ public static class AsyncLinq
 
         throw new InvalidOperationException($"No records in {nameof(source)}");
     }
-    public static async Task<TElement> Single<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, bool> selector, CancellationToken token = default )
+    public static async ValueTask<TElement> Single<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, bool> selector, CancellationToken token = default )
     {
         TElement? result = default;
 
@@ -213,7 +216,7 @@ public static class AsyncLinq
 
         throw new InvalidOperationException($"No records in {nameof(source)}");
     }
-    public static async Task<TElement> Single<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, Task<bool>> selector, CancellationToken token = default )
+    public static async ValueTask<TElement> Single<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, ValueTask<bool>> selector, CancellationToken token = default )
     {
         TElement? result = default;
 
@@ -228,7 +231,7 @@ public static class AsyncLinq
     }
 
 
-    public static async Task<TElement?> SingleOrDefault<TElement>( this IAsyncEnumerable<TElement> source, CancellationToken token = default )
+    public static async ValueTask<TElement?> SingleOrDefault<TElement>( this IAsyncEnumerable<TElement> source, CancellationToken token = default )
     {
         TElement? result = default;
 
@@ -241,7 +244,7 @@ public static class AsyncLinq
 
         return default;
     }
-    public static async Task<TElement?> SingleOrDefault<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, bool> selector, CancellationToken token = default )
+    public static async ValueTask<TElement?> SingleOrDefault<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, bool> selector, CancellationToken token = default )
     {
         TElement? result = default;
 
@@ -254,7 +257,7 @@ public static class AsyncLinq
 
         return default;
     }
-    public static async Task<TElement?> SingleOrDefault<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, Task<bool>> selector, CancellationToken token = default )
+    public static async ValueTask<TElement?> SingleOrDefault<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, ValueTask<bool>> selector, CancellationToken token = default )
     {
         TElement? result = default;
 
@@ -269,17 +272,17 @@ public static class AsyncLinq
     }
 
 
-    public static async Task<TElement> Last<TElement>( this IAsyncEnumerable<TElement> source, CancellationToken token = default )
+    public static async ValueTask<TElement> Last<TElement>( this IAsyncEnumerable<TElement> source, CancellationToken token = default )
     {
         List<TElement> list = await source.ToList(token);
         return list.Last();
     }
-    public static async Task<TElement> Last<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, bool> selector, CancellationToken token = default )
+    public static async ValueTask<TElement> Last<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, bool> selector, CancellationToken token = default )
     {
         List<TElement> list = await source.ToList(token);
         return list.Last(selector);
     }
-    public static async Task<TElement> Last<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, Task<bool>> selector, CancellationToken token = default )
+    public static async ValueTask<TElement> Last<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, ValueTask<bool>> selector, CancellationToken token = default )
     {
         List<TElement> list = await source.ToList(token);
 
@@ -292,17 +295,17 @@ public static class AsyncLinq
     }
 
 
-    public static async Task<TElement?> LastOrDefault<TElement>( this IAsyncEnumerable<TElement> source, CancellationToken token = default )
+    public static async ValueTask<TElement?> LastOrDefault<TElement>( this IAsyncEnumerable<TElement> source, CancellationToken token = default )
     {
         List<TElement> list = await source.ToList(token);
         return list.LastOrDefault();
     }
-    public static async Task<TElement?> LastOrDefault<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, bool> selector, CancellationToken token = default )
+    public static async ValueTask<TElement?> LastOrDefault<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, bool> selector, CancellationToken token = default )
     {
         List<TElement> list = await source.ToList(token);
         return list.LastOrDefault(selector);
     }
-    public static async Task<TElement?> LastOrDefault<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, Task<bool>> selector, CancellationToken token = default )
+    public static async ValueTask<TElement?> LastOrDefault<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, ValueTask<bool>> selector, CancellationToken token = default )
     {
         List<TElement> list = await source.ToList(token);
 
@@ -315,36 +318,36 @@ public static class AsyncLinq
     }
 
 
-    public static async IAsyncEnumerable<TElement> Where<TElement>( this IAsyncEnumerable<TElement> enumerable, Func<TElement, bool> predicate, [EnumeratorCancellation] CancellationToken token = default )
+    public static async IAsyncEnumerable<TElement> Where<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, bool> predicate, [EnumeratorCancellation] CancellationToken token = default )
     {
-        await foreach ( TElement element in enumerable.WithCancellation(token) )
+        await foreach ( TElement element in source.WithCancellation(token) )
         {
             if ( predicate(element) ) { yield return element; }
         }
     }
-    public static async IAsyncEnumerable<TElement> Where<TElement>( this IAsyncEnumerable<TElement> enumerable, Func<TElement, Task<bool>> predicate, [EnumeratorCancellation] CancellationToken token = default )
+    public static async IAsyncEnumerable<TElement> Where<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, ValueTask<bool>> predicate, [EnumeratorCancellation] CancellationToken token = default )
     {
-        await foreach ( TElement element in enumerable.WithCancellation(token) )
+        await foreach ( TElement element in source.WithCancellation(token) )
         {
             if ( await predicate(element) ) { yield return element; }
         }
     }
-    public static async IAsyncEnumerable<TElement> Where<TElement>( this IAsyncEnumerable<TElement> enumerable, Func<TElement, int, bool> predicate, [EnumeratorCancellation] CancellationToken token = default )
+    public static async IAsyncEnumerable<TElement> Where<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, int, bool> predicate, [EnumeratorCancellation] CancellationToken token = default )
     {
         int index = -1;
 
-        await foreach ( TElement element in enumerable.WithCancellation(token) )
+        await foreach ( TElement element in source.WithCancellation(token) )
         {
             checked { index++; }
 
             if ( predicate(element, index) ) { yield return element; }
         }
     }
-    public static async IAsyncEnumerable<TElement> Where<TElement>( this IAsyncEnumerable<TElement> enumerable, Func<TElement, int, Task<bool>> predicate, [EnumeratorCancellation] CancellationToken token = default )
+    public static async IAsyncEnumerable<TElement> Where<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, int, ValueTask<bool>> predicate, [EnumeratorCancellation] CancellationToken token = default )
     {
         int index = -1;
 
-        await foreach ( TElement element in enumerable.WithCancellation(token) )
+        await foreach ( TElement element in source.WithCancellation(token) )
         {
             checked { index++; }
 
@@ -353,21 +356,21 @@ public static class AsyncLinq
     }
 
 
-    public static async IAsyncEnumerable<TResult> Select<TElement, TResult>( this IAsyncEnumerable<TElement> enumerable, Func<TElement, TResult> selector, [EnumeratorCancellation] CancellationToken token = default )
+    public static async IAsyncEnumerable<TResult> Select<TElement, TResult>( this IAsyncEnumerable<TElement> source, Func<TElement, TResult> selector, [EnumeratorCancellation] CancellationToken token = default )
     {
-        await foreach ( TElement element in enumerable.WithCancellation(token) ) { yield return selector(element); }
+        await foreach ( TElement element in source.WithCancellation(token) ) { yield return selector(element); }
     }
-    public static async IAsyncEnumerable<TResult> Select<TElement, TResult>( this IAsyncEnumerable<TElement> enumerable, Func<TElement, Task<TResult>> selector, [EnumeratorCancellation] CancellationToken token = default )
+    public static async IAsyncEnumerable<TResult> Select<TElement, TResult>( this IAsyncEnumerable<TElement> source, Func<TElement, ValueTask<TResult>> selector, [EnumeratorCancellation] CancellationToken token = default )
     {
-        await foreach ( TElement element in enumerable.WithCancellation(token) ) { yield return await selector(element); }
+        await foreach ( TElement element in source.WithCancellation(token) ) { yield return await selector(element); }
     }
-    public static async IAsyncEnumerable<TResult> Select<TElement, TResult>( this IAsyncEnumerable<TElement> enumerable, Func<TElement, int, TResult> selector, [EnumeratorCancellation] CancellationToken token = default )
+    public static async IAsyncEnumerable<TResult> Select<TElement, TResult>( this IAsyncEnumerable<TElement> source, Func<TElement, int, TResult> selector, [EnumeratorCancellation] CancellationToken token = default )
     {
-        await foreach ( ( int index, TElement? value ) in enumerable.Enumerate(token) ) { yield return selector(value, index); }
+        await foreach ( ( int index, TElement? value ) in source.Enumerate(token) ) { yield return selector(value, index); }
     }
-    public static async IAsyncEnumerable<TResult> Select<TElement, TResult>( this IAsyncEnumerable<TElement> enumerable, Func<TElement, int, Task<TResult>> selector, [EnumeratorCancellation] CancellationToken token = default )
+    public static async IAsyncEnumerable<TResult> Select<TElement, TResult>( this IAsyncEnumerable<TElement> source, Func<TElement, int, ValueTask<TResult>> selector, [EnumeratorCancellation] CancellationToken token = default )
     {
-        await foreach ( ( int index, TElement? value ) in enumerable.Enumerate(token) ) { yield return await selector(value, index); }
+        await foreach ( ( int index, TElement? value ) in source.Enumerate(token) ) { yield return await selector(value, index); }
     }
 
 
@@ -385,7 +388,7 @@ public static class AsyncLinq
             if ( predicate(element) ) { yield return element; }
         }
     }
-    public static async IAsyncEnumerable<TElement> SkipWhile<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, Task<bool>> predicate, [EnumeratorCancellation] CancellationToken token = default )
+    public static async IAsyncEnumerable<TElement> SkipWhile<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, ValueTask<bool>> predicate, [EnumeratorCancellation] CancellationToken token = default )
     {
         await foreach ( TElement element in source.WithCancellation(token) )
         {
@@ -399,7 +402,7 @@ public static class AsyncLinq
             if ( predicate(value, index) ) { yield return value; }
         }
     }
-    public static async IAsyncEnumerable<TElement> SkipWhile<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, int, Task<bool>> predicate, [EnumeratorCancellation] CancellationToken token = default )
+    public static async IAsyncEnumerable<TElement> SkipWhile<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, int, ValueTask<bool>> predicate, [EnumeratorCancellation] CancellationToken token = default )
     {
         await foreach ( ( int index, TElement? value ) in source.Enumerate(token) )
         {
@@ -410,9 +413,11 @@ public static class AsyncLinq
     {
         List<TElement> list = await source.ToList(token);
 
-        foreach ( ( int index, TElement? element ) in list.Enumerate() )
+        for ( var index = 0; index < list.Count; index++ )
         {
-            if ( index < count ) { yield return element; }
+            if ( index >= count ) { yield break; }
+
+            yield return list[index];
         }
     }
 
@@ -430,7 +435,7 @@ public static class AsyncLinq
     }
     public static IAsyncEnumerable<TElement> DistinctBy<TElement, TKey>( this IAsyncEnumerable<TElement> source, Func<TElement, TKey> keySelector, [EnumeratorCancellation] CancellationToken token = default ) =>
         source.DistinctBy(keySelector, EqualityComparer<TKey>.Default, token);
-    public static IAsyncEnumerable<TElement> DistinctBy<TElement, TKey>( this IAsyncEnumerable<TElement> source, Func<TElement, Task<TKey>> keySelector, [EnumeratorCancellation] CancellationToken token = default ) =>
+    public static IAsyncEnumerable<TElement> DistinctBy<TElement, TKey>( this IAsyncEnumerable<TElement> source, Func<TElement, ValueTask<TKey>> keySelector, [EnumeratorCancellation] CancellationToken token = default ) =>
         source.DistinctBy(keySelector, EqualityComparer<TKey>.Default, token);
     public static async IAsyncEnumerable<TElement> DistinctBy<TElement, TKey>( this IAsyncEnumerable<TElement> source, Func<TElement, TKey> keySelector, IEqualityComparer<TKey> comparer, [EnumeratorCancellation] CancellationToken token = default )
     {
@@ -442,7 +447,7 @@ public static class AsyncLinq
         }
     }
     public static async IAsyncEnumerable<TElement> DistinctBy<TElement, TKey>( this IAsyncEnumerable<TElement>            source,
-                                                                               Func<TElement, Task<TKey>>                 keySelector,
+                                                                               Func<TElement, ValueTask<TKey>>            keySelector,
                                                                                IEqualityComparer<TKey>                    comparer,
                                                                                [EnumeratorCancellation] CancellationToken token = default
     )
