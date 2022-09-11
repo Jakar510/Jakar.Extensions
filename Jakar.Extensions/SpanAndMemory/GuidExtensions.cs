@@ -31,9 +31,9 @@ public static class GuidExtensions
         Span<char> result      = stackalloc char[22];
 
         Span<byte> idBytes = stackalloc byte[16];
-        if ( !value.As(idBytes) ) { throw new InvalidOperationException(); }
+        if ( !value.TryWriteBytes(idBytes) ) { throw new InvalidOperationException(); }
 
-        Base64.EncodeToUtf8(idBytes, base64Bytes, out _, out _);
+        System.Buffers.Text.Base64.EncodeToUtf8(idBytes, base64Bytes, out _, out _);
 
 
         for ( var i = 0; i < 22; i++ )
@@ -55,7 +55,8 @@ public static class GuidExtensions
     /// </summary>
     /// <param name = "value" > </param>
     /// <returns> </returns>
-    public static Guid? AsGuid( this string value ) => value.AsSpan().AsGuid();
+    public static Guid? AsGuid( this string value ) => value.AsSpan()
+                                                            .AsGuid();
 
     /// <summary>
     ///     <see href = "https://www.youtube.com/watch?v=B2yOjLyEZk0" > Writing C# without allocating ANY memory </see>
@@ -64,6 +65,8 @@ public static class GuidExtensions
     /// <returns> </returns>
     public static Guid? AsGuid( this ReadOnlySpan<char> value )
     {
+        if ( Guid.TryParse(value, out Guid result) ) { return result; }
+
         Span<char> base64Chars = stackalloc char[24];
 
         for ( var i = 0; i < 22; i++ )
@@ -89,34 +92,23 @@ public static class GuidExtensions
 
     public static bool TryAsGuid( this Span<char> value, [NotNullWhen(true)] out Guid? result )
     {
-        if ( Guid.TryParse(value, out Guid guid) )
-        {
-            result = guid;
-            return true;
-        }
-
         result = AsGuid(value);
         return result.HasValue;
     }
     public static bool TryAsGuid( this ReadOnlySpan<char> value, [NotNullWhen(true)] out Guid? result )
     {
-        if ( Guid.TryParse(value, out Guid guid) )
-        {
-            result = guid;
-            return true;
-        }
-
         result = AsGuid(value);
         return result.HasValue;
     }
-    public static bool TryAsGuid( this string value, [NotNullWhen(true)] out Guid? result ) => value.AsSpan().TryAsGuid(out result);
+    public static bool TryAsGuid( this string value, [NotNullWhen(true)] out Guid? result ) => value.AsSpan()
+                                                                                                    .TryAsGuid(out result);
 
 
-    public static bool As( this Guid value, out Memory<byte> result )
+    public static bool TryWriteBytes( this Guid value, out Memory<byte> result )
     {
         Span<byte> span = stackalloc byte[16];
 
-        if ( value.As(span) )
+        if ( value.TryWriteBytes(span) )
         {
             result = span.AsMemory();
             return true;
@@ -125,11 +117,11 @@ public static class GuidExtensions
         result = default;
         return false;
     }
-    public static bool As( this Guid value, out ReadOnlyMemory<byte> result )
+    public static bool TryWriteBytes( this Guid value, out ReadOnlyMemory<byte> result )
     {
         Span<byte> span = stackalloc byte[16];
 
-        if ( value.As(span) )
+        if ( value.TryWriteBytes(span) )
         {
             result = span.AsMemory();
             return true;
@@ -138,6 +130,4 @@ public static class GuidExtensions
         result = default;
         return false;
     }
-
-    public static bool As( this Guid value, in Span<byte> result ) => value.TryWriteBytes(result);
 }

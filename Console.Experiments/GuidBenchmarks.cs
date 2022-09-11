@@ -39,7 +39,7 @@ public class GuidBenchmarks
 
 
     [Benchmark]
-    public Memory<byte>? AsMemory() => _guid.As(out Memory<byte> memory)
+    public Memory<byte>? AsMemory() => _guid.TryWriteBytes(out Memory<byte> memory)
                                            ? memory
                                            : default;
 }

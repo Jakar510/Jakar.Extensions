@@ -4,7 +4,7 @@
 namespace Jakar.Extensions;
 
 
-public static class UniqueID
+public static class UniqueIDs
 {
     [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool IsValidID( this short            id ) => id > 0;
     [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool IsValidID( this short?           id ) => id is > 0;

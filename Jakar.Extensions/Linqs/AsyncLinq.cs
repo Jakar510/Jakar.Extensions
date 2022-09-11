@@ -21,7 +21,7 @@ public static partial class AsyncLinq
     }
 
 
-    public static async ValueTask ForEachAsync<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, Task> action, bool continueOnCapturedContext = true, [EnumeratorCancellation] CancellationToken token = default )
+    public static async Task ForEachAsync<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, Task> action, bool continueOnCapturedContext = true, [EnumeratorCancellation] CancellationToken token = default )
     {
         await foreach ( TElement item in source.WithCancellation(token) )
         {
