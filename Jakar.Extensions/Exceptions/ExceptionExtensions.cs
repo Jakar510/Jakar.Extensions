@@ -48,7 +48,8 @@ public static class ExceptionExtensions
 
     public static void GetProperties( this Exception e, ref Dictionary<string, object?> dictionary )
     {
-        foreach ( PropertyInfo info in e.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public) )
+        foreach ( PropertyInfo info in e.GetType()
+                                        .GetProperties(BindingFlags.Instance | BindingFlags.Public) )
         {
             string key = info.Name;
 
@@ -65,23 +66,23 @@ public static class ExceptionExtensions
     public static string? MethodClass( this       Exception e ) => e.TargetSite?.MethodClass();
 
 
-    public static void Details( this Exception e, out Dictionary<string, string?> dict ) =>
-        dict = new Dictionary<string, string?>
-               {
-                   [nameof(Type)]               = e.GetType().FullName,
-                   [nameof(e.Source)]           = e.Source,
-                   [nameof(e.Message)]          = e.Message,
-                   [nameof(e.StackTrace)]       = e.StackTrace,
-                   [nameof(Exception.HelpLink)] = e.HelpLink,
-                   [nameof(MethodSignature)]    = e.MethodSignature(),
-                   [nameof(e.ToString)]         = e.ToString()
-               };
-
-    public static void Details( this Exception e, out Dictionary<string, object?> dict, bool includeFullMethodInfo = false )
+    public static void Details( this Exception e, out Dictionary<string, string?> dict ) => dict = new Dictionary<string, string?>
+                                                                                                   {
+                                                                                                       [nameof(Type)] = e.GetType()
+                                                                                                                         .FullName,
+                                                                                                       [nameof(e.Source)]           = e.Source,
+                                                                                                       [nameof(e.Message)]          = e.Message,
+                                                                                                       [nameof(e.StackTrace)]       = e.StackTrace,
+                                                                                                       [nameof(Exception.HelpLink)] = e.HelpLink,
+                                                                                                       [nameof(MethodSignature)]    = e.MethodSignature(),
+                                                                                                       [nameof(e.ToString)]         = e.ToString()
+                                                                                                   };
+    public static void Details( this Exception e, out Dictionary<string, object?> dict, bool includeFullMethodInfo )
     {
         dict = new Dictionary<string, object?>
                {
-                   [nameof(Type)]                 = e.GetType().FullName,
+                   [nameof(Type)] = e.GetType()
+                                     .FullName,
                    [nameof(Exception.HResult)]    = e.HResult,
                    [nameof(Exception.HelpLink)]   = e.HelpLink,
                    [nameof(Exception.Source)]     = e.Source,

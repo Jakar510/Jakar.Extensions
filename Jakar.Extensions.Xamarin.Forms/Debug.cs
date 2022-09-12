@@ -28,7 +28,6 @@ public class Debug : ObservableClass
         get => _installID;
         protected set => SetProperty(ref _installID, value);
     }
-
     public bool ApiEnabled
     {
         get => _apiEnabled;
@@ -95,20 +94,9 @@ public class Debug : ObservableClass
     }
 
 
-    /// <summary>
-    /// </summary>
-    /// <param name="e"></param>
-    /// <returns><see cref="Task"/> from a <see cref="Task.Run(Action)"/> call</returns>
-    public Task HandleException( Exception e ) => HandleException(e, default);
-
-    /// <summary>
-    /// </summary>
-    /// <param name="e"></param>
-    /// <param name="token"></param>
-    /// <returns><see cref="Task"/> from a <see cref="Task.Run(Action)"/> call</returns>
-    public Task HandleException( Exception e, CancellationToken token ) => Task.Run(async () => await HandleExceptionAsync(e), token);
-
-
+    public void HandleException( Exception e ) => HandleException(e, default);
+    public void HandleException( Exception e, CancellationToken token ) => Task.Run(async () => await HandleExceptionAsync(e), token)
+                                                                               .Wait(token);
     public async Task HandleExceptionAsync( Exception e )
     {
         if ( !Settings.EnableApi ) { return; }
@@ -119,6 +107,7 @@ public class Debug : ObservableClass
                                               ? await AppShare.TakeScreenShot()
                                                               .ConfigureAwait(false)
                                               : default;
+
 
         await TrackError(e, screenShot)
            .ConfigureAwait(false);
@@ -138,8 +127,6 @@ public class Debug : ObservableClass
         await _feedBackFile.WriteAsync(result.ToPrettyJson())
                            .ConfigureAwait(false);
     }
-
-
     protected virtual Dictionary<string, string> AppState() => new()
                                                                {
                                                                    [nameof(_appName)]                     = _appName ?? throw new NullReferenceException(nameof(_appName)),
@@ -194,26 +181,26 @@ public class Debug : ObservableClass
         {
             if ( exceptionDetails is not null )
             {
-                ErrorAttachmentLog? state = ErrorAttachmentLog.AttachmentWithText(exceptionDetails.ToPrettyJson(), _fileSystemApi!.AppStateFileName);
+                ErrorAttachmentLog? state = ErrorAttachmentLog.AttachmentWithText(exceptionDetails.ToPrettyJson(), _fileSystemApi.AppStateFileName);
                 attachments.Add(state);
             }
 
             if ( eventDetails is not null )
             {
-                ErrorAttachmentLog? debug = ErrorAttachmentLog.AttachmentWithText(eventDetails.ToPrettyJson(), _fileSystemApi!.DebugFileName);
+                ErrorAttachmentLog? debug = ErrorAttachmentLog.AttachmentWithText(eventDetails.ToPrettyJson(), _fileSystemApi.DebugFileName);
                 attachments.Add(debug);
             }
 
 
             if ( !string.IsNullOrWhiteSpace(incomingText) )
             {
-                ErrorAttachmentLog incoming = ErrorAttachmentLog.AttachmentWithText(incomingText.ToPrettyJson(), _fileSystemApi!.IncomingFileName);
+                ErrorAttachmentLog incoming = ErrorAttachmentLog.AttachmentWithText(incomingText.ToPrettyJson(), _fileSystemApi.IncomingFileName);
                 attachments.Add(incoming);
             }
 
             if ( !string.IsNullOrWhiteSpace(outgoingText) )
             {
-                ErrorAttachmentLog outgoing = ErrorAttachmentLog.AttachmentWithText(outgoingText.ToPrettyJson(), _fileSystemApi!.OutgoingFileName);
+                ErrorAttachmentLog outgoing = ErrorAttachmentLog.AttachmentWithText(outgoingText.ToPrettyJson(), _fileSystemApi.OutgoingFileName);
                 attachments.Add(outgoing);
             }
         }
@@ -226,8 +213,6 @@ public class Debug : ObservableClass
 
         TrackError(ex, eventDetails, attachments.ToArray());
     }
-
-
     public void TrackError( Exception ex, Dictionary<string, string?>? eventDetails, params ErrorAttachmentLog[] attachments )
     {
         ThrowIfNotEnabled();
@@ -247,7 +232,6 @@ public class Debug : ObservableClass
 
         TrackEvent(AppState(), source);
     }
-
     protected void TrackEvent( Dictionary<string, string> eventDetails, [CallerMemberName] string? source = default )
     {
         ThrowIfNotEnabled();
