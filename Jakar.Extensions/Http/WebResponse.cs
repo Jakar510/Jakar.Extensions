@@ -11,6 +11,7 @@ namespace Jakar.Extensions;
 
 public readonly struct WebResponse<T>
 {
+    public const string ERROR_MESSAGE = "Error Message: ";
     public const string UNKNOWN_ERROR = "Unknown Error";
 
 
@@ -35,7 +36,7 @@ public readonly struct WebResponse<T>
         HttpContentHeaders? contentHeaders = response.RequestMessage?.Content?.Headers;
 
 
-        ErrorMessage      = ResponseData.ParseError(error ?? exception?.Message);
+        ErrorMessage      = ParseError(error ?? exception?.Message);
         Payload           = payload;
         Exception         = exception;
         StatusCode        = response.StatusCode.ToStatus();
@@ -47,11 +48,33 @@ public readonly struct WebResponse<T>
         Server            = requestHeaders?.From;
     }
 
+
+    /// <summary> Gets the payload if available; otherwise throws.</summary>
+    /// <exception cref="EmptyServerResponseException"></exception>
+    public T GetPayload()
+    {
+        if ( Payload is not null ) { return Payload; }
+
+        if ( Exception is not null ) { throw new EmptyServerResponseException(ErrorMessage?.ToString() ?? nameof(Payload), Exception); }
+
+        throw new EmptyServerResponseException(ErrorMessage?.ToString() ?? nameof(Payload));
+    }
+
+
     public override string ToString() => this.ToJson(Formatting.Indented);
 
 
     internal static WebResponse<T> None( HttpResponseMessage response ) => new(response, "NO RESPONSE");
     internal static WebResponse<T> None( HttpResponseMessage response, Exception e ) => new(response, e, "NO RESPONSE");
+    public static JToken? ParseError( ReadOnlySpan<char> error )
+    {
+        if ( error.IsNullOrWhiteSpace() ) { return default; }
+
+        if ( error.StartsWith(ERROR_MESSAGE, StringComparison.OrdinalIgnoreCase) ) { error = error[ERROR_MESSAGE.Length..]; }
+
+        try { return error.FromJson(); }
+        catch ( Exception ) { return error.ToString(); }
+    }
 
 
     public static async Task<WebResponse<T>> Create( WebHandler handler, Func<HttpResponseMessage, Task<T>> func )
