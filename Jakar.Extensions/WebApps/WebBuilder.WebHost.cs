@@ -2,7 +2,7 @@
 // 06/09/2022  1:19 PM
 
 
-namespace Jakar.Extensions.WebApps;
+namespace Jakar.Extensions;
 
 
 #nullable enable

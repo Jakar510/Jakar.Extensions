@@ -1,4 +1,4 @@
-﻿namespace Jakar.Extensions.WebApps;
+﻿namespace Jakar.Extensions;
 
 
 #nullable enable
