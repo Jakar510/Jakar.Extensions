@@ -64,11 +64,16 @@ public class WebRequestBuilder
 
 
     public static WebRequestBuilder Create() => new();
-    public static WebRequestBuilder Create( Encoding  value ) => Create().With_Encoding(value);
-    public static WebRequestBuilder Create( Uri       value ) => Create().With_Host(value);
-    public static WebRequestBuilder Create( Uri       value, Encoding encoding ) => Create(encoding).With_Host(value);
-    public static WebRequestBuilder Create( IHostInfo value ) => Create().With_Host(value);
-    public static WebRequestBuilder Create( IHostInfo value, Encoding encoding ) => Create(encoding).With_Host(value);
+    public static WebRequestBuilder Create( Encoding value ) => Create()
+       .With_Encoding(value);
+    public static WebRequestBuilder Create( Uri value ) => Create()
+       .With_Host(value);
+    public static WebRequestBuilder Create( Uri value, Encoding encoding ) => Create(encoding)
+       .With_Host(value);
+    public static WebRequestBuilder Create( IHostInfo value ) => Create()
+       .With_Host(value);
+    public static WebRequestBuilder Create( IHostInfo value, Encoding encoding ) => Create(encoding)
+       .With_Host(value);
 
 
     public virtual void Reset()

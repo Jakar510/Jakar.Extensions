@@ -9,7 +9,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nuget", "nuget", "{07C27764
 	ProjectSection(SolutionItems) = preProject
 		nuget\Jakar.DataBase.nuspec = nuget\Jakar.DataBase.nuspec
 		nuget\Jakar.Extensions.Blazor.nuspec = nuget\Jakar.Extensions.Blazor.nuspec
-		nuget\Jakar.Extensions.Hosting.nuspec = nuget\Jakar.Extensions.Hosting.nuspec
 		nuget\Jakar.Extensions.Maui.nuspec = nuget\Jakar.Extensions.Maui.nuspec
 		nuget\Jakar.Extensions.nuspec = nuget\Jakar.Extensions.nuspec
 		nuget\Jakar.Extensions.Xamarin.Forms.nuspec = nuget\Jakar.Extensions.Xamarin.Forms.nuspec
@@ -45,8 +44,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jakar.Extensions.Blazor", "Jakar.Extensions.Blazor\Jakar.Extensions.Blazor.csproj", "{3DDF2DFF-288A-428B-A741-FCA0AE1CBC1A}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jakar.Json", "Jakar.Json\Jakar.Json.csproj", "{3B31051E-0CB8-4808-BB84-26F89B0536AE}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jakar.Extensions.Hosting", "Jakar.Extensions.Hosting\Jakar.Extensions.Hosting.csproj", "{1CD654C7-F469-413C-812E-D9E3BBC35A10}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jakar.Json.Generator", "Jakar.Json.Generator\Jakar.Json.Generator.csproj", "{A00B7430-2F61-447B-AC84-E156CD4E9349}"
 EndProject
@@ -107,10 +104,6 @@ Global
 		{3B31051E-0CB8-4808-BB84-26F89B0536AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3B31051E-0CB8-4808-BB84-26F89B0536AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3B31051E-0CB8-4808-BB84-26F89B0536AE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1CD654C7-F469-413C-812E-D9E3BBC35A10}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1CD654C7-F469-413C-812E-D9E3BBC35A10}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1CD654C7-F469-413C-812E-D9E3BBC35A10}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1CD654C7-F469-413C-812E-D9E3BBC35A10}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A00B7430-2F61-447B-AC84-E156CD4E9349}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A00B7430-2F61-447B-AC84-E156CD4E9349}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A00B7430-2F61-447B-AC84-E156CD4E9349}.Release|Any CPU.ActiveCfg = Release|Any CPU

@@ -156,7 +156,7 @@ public static partial class AsyncLinq
     }
     public static async ValueTask<float?> Min<TSource>( this IAsyncEnumerable<TSource> source, Func<TSource, float?> selector, CancellationToken token = default )
     {
-        var  value = double.MaxValue;
+        var value = double.MaxValue;
 
         await foreach ( TSource element in source.WithCancellation(token) )
         {

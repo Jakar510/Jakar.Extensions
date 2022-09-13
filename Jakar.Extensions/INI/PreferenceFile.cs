@@ -26,11 +26,13 @@ public class PreferenceFile : IniConfig, IDisposable, IAsyncDisposable // TODO: 
     {
         if ( !disposing ) { return; }
 
-        Task.Run(async () => await DisposeAsync()).Wait();
+        Task.Run(async () => await DisposeAsync())
+            .Wait();
     }
     public virtual async ValueTask DisposeAsync()
     {
-        await SaveAsync().ConfigureAwait(false);
+        await SaveAsync()
+           .ConfigureAwait(false);
 
         _file?.Dispose();
         _file = null;
@@ -44,15 +46,19 @@ public class PreferenceFile : IniConfig, IDisposable, IAsyncDisposable // TODO: 
 
     public static PreferenceFile Create( LocalFile file )
     {
-        ReadOnlySpan<char> content = file.Read().AsSpan();
-        PreferenceFile     ini     = From<PreferenceFile>(content) ?? new PreferenceFile();
+        ReadOnlySpan<char> content = file.Read()
+                                         .AsSpan();
+
+        PreferenceFile ini = From<PreferenceFile>(content) ?? new PreferenceFile();
         ini.Path = file;
         return ini;
     }
     public static async Task<PreferenceFile> CreateAsync( LocalFile file )
     {
-        string         content = await file.ReadAsync().AsString();
-        PreferenceFile ini     = From<PreferenceFile>(content) ?? new PreferenceFile();
+        string content = await file.ReadAsync()
+                                   .AsString();
+
+        PreferenceFile ini = From<PreferenceFile>(content) ?? new PreferenceFile();
         ini.Path = file;
         return ini;
     }
@@ -63,7 +69,9 @@ public class PreferenceFile : IniConfig, IDisposable, IAsyncDisposable // TODO: 
 
     protected virtual async Task LoadAsync()
     {
-        IniConfig? cfg = await ReadFromFileAsync(Path).ConfigureAwait(false);
+        IniConfig? cfg = await ReadFromFileAsync(Path)
+                            .ConfigureAwait(false);
+
         if ( cfg is null ) { return; }
 
         foreach ( KeyValuePair<string, Section> pair in cfg ) { Add(pair); }
@@ -71,5 +79,6 @@ public class PreferenceFile : IniConfig, IDisposable, IAsyncDisposable // TODO: 
 
 
     protected Task Save() => Task.Run(SaveAsync);
-    protected virtual async Task SaveAsync() => await WriteToFile(Path).ConfigureAwait(false);
+    protected virtual async Task SaveAsync() => await WriteToFile(Path)
+                                                   .ConfigureAwait(false);
 }

@@ -56,12 +56,16 @@ public partial class IniConfig : ConcurrentDictionary<string, IniConfig.Section>
 
     public static T? ReadFromFile<T>( LocalFile file ) where T : IniConfig, new()
     {
-        ReadOnlySpan<char> content = file.Read().AsSpan();
+        ReadOnlySpan<char> content = file.Read()
+                                         .AsSpan();
+
         return From<T>(content);
     }
     public static async Task<T?> ReadFromFileAsync<T>( LocalFile file ) where T : IniConfig, new()
     {
-        string content = await file.ReadAsync().AsString();
+        string content = await file.ReadAsync()
+                                   .AsString();
+
         return From<T>(content);
     }
 
@@ -143,7 +147,9 @@ public partial class IniConfig : ConcurrentDictionary<string, IniConfig.Section>
 
                 // [Section:header]
                 case '[' when line[^1] == ']':
-                    ReadOnlySpan<char> sectionSpan = line.Slice(1, line.Length - 2).Trim(); // remove the brackets and whitespace
+                    ReadOnlySpan<char> sectionSpan = line.Slice(1, line.Length - 2)
+                                                         .Trim(); // remove the brackets and whitespace
+
                     if ( sectionSpan.IsNullOrWhiteSpace() ) { throw new FormatException("section title cannot be empty or whitespace."); }
 
                     section       = sectionSpan.ToString();
@@ -157,15 +163,20 @@ public partial class IniConfig : ConcurrentDictionary<string, IniConfig.Section>
             if ( separator < 0 ) { throw new FormatException($@"Line doesn't contain an equals sign. ""{line.ToString()}"" "); }
 
 
-            ReadOnlySpan<char> keySpan   = line[..separator].Trim();
-            ReadOnlySpan<char> valueSpan = line[( separator + 1 )..].Trim();
+            ReadOnlySpan<char> keySpan = line[..separator]
+               .Trim();
+
+            ReadOnlySpan<char> valueSpan = line[( separator + 1 )..]
+               .Trim();
 
             // Remove quotes
             if ( valueSpan.Length > 1 && valueSpan[0] == '"' && valueSpan[^1] == '"' ) { valueSpan = valueSpan.Slice(1, valueSpan.Length - 2); }
 
             var key   = keySpan.ToString();
             var value = valueSpan.ToString();
-            if ( data[section].ContainsKey(key) ) { throw new FormatException(@$"Duplicate key ""{key}"" in ""{section}"""); }
+
+            if ( data[section]
+               .ContainsKey(key) ) { throw new FormatException(@$"Duplicate key ""{key}"" in ""{section}"""); }
 
             data[section][key] = value;
         }

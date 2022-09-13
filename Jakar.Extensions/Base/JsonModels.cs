@@ -87,7 +87,8 @@ public static class JsonModels
     }
 
 
-    public static bool Contains( this IJsonStringModel self, string key ) => self.GetAdditionalData()?.ContainsKey(key) ?? false;
+    public static bool Contains( this IJsonStringModel self, string key ) => self.GetAdditionalData()
+                                                                                ?.ContainsKey(key) ?? false;
 
     public static bool Remove( this IJsonStringModel self, string key )
     {

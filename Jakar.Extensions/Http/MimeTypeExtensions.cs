@@ -171,7 +171,8 @@ public static class MimeTypeExtensions
     /// <returns>
     ///     <see cref = "MimeType" />
     /// </returns>
-    public static MimeType FromExtension( this string mime ) => mime.AsSpan().FromExtension();
+    public static MimeType FromExtension( this string mime ) => mime.AsSpan()
+                                                                    .FromExtension();
     /// <summary>
     ///     Gets the <see cref = "MimeType" /> of the provided extension <see cref = "string" />.
     /// </summary>

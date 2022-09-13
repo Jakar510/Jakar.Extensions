@@ -11,7 +11,8 @@ public static class StatusExtensions
     public static HttpStatusCode ToStatus( this Status         code ) => (HttpStatusCode)(int)code;
 
 
-    public static string ToStringFast( this HttpStatusCode status ) => status.ToStatus().ToStringFast();
+    public static string ToStringFast( this HttpStatusCode status ) => status.ToStatus()
+                                                                             .ToStringFast();
     public static string ToStringFast( this Status status ) => status switch
                                                                {
                                                                    Status.Continue                      => nameof(Status.Continue),

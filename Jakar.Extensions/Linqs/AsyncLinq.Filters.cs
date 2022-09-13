@@ -131,7 +131,7 @@ public static partial class AsyncLinq
     {
         await foreach ( ( int index, TElement? value ) in source.Enumerate(token) ) { yield return await selector(value, index); }
     }
-    public static async IAsyncEnumerable<TElement> Skip<TElement>( this IAsyncEnumerable<TElement> source, int count , [EnumeratorCancellation] CancellationToken token = default)
+    public static async IAsyncEnumerable<TElement> Skip<TElement>( this IAsyncEnumerable<TElement> source, int count, [EnumeratorCancellation] CancellationToken token = default )
     {
         await foreach ( ( int index, TElement? value ) in source.Enumerate(token) )
         {

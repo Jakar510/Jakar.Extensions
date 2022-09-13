@@ -21,12 +21,18 @@ public class ExceptionDetails
 
     public ExceptionDetails( Exception e, bool includeMethodInfo = false )
     {
-        Message         = e.Message;
-        HResult         = e.HResult;
-        Type            = e.GetType().FullName;
-        HelpLink        = e.HelpLink;
-        Source          = e.Source;
-        StackTrace      = e.StackTrace?.SplitAndTrimLines().ToList();
+        Message = e.Message;
+        HResult = e.HResult;
+
+        Type = e.GetType()
+                .FullName;
+
+        HelpLink = e.HelpLink;
+        Source   = e.Source;
+
+        StackTrace = e.StackTrace?.SplitAndTrimLines()
+                      .ToList();
+
         MethodSignature = $"{e.MethodClass()}::{e.MethodSignature()}";
         Data            = e.GetData();
         Str             = e.ToString();

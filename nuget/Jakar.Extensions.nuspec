@@ -4,7 +4,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata>
 		<id>Jakar.Extensions</id>
-		<version>6.0.0.57-beta</version>
+		<version>6.0.0.58-beta</version>
 		<title>Extension Library</title>
 		<authors>Tyler Stegmaier</authors>
 		<owners>Jakar510/Jakar</owners>
@@ -19,20 +19,21 @@
 		</description>
 		<releaseNotes>
 			Jakar.Extensions 6.0.0
-			Major namespace changes
-			Removed Models.Users
-			Added MailKit Email Builder
-			Added Models.Service
-			Added WebRequestBuilder, WebRequester
+			Major namespace changes.
+			Removed Models.Users.
+			Added MailKit Email Builder.
+			Added Models.Service.
+			Added WebRequestBuilder, WebRequester.
 			WebRequests.GetResponseAsync now tries to get the error details, including anything sent sent from server in the body.
-			Updated Enum extensions
-			Added lots more Span Extensions
-			Reworked AppSettings
-			Reworked LocalFile and LocalDirectory a bit
-			Reworked IniConfig and PreferenceFile
-			Reworked ValidValueOf
+			Updated Enum extensions.
+			Added lots more Span Extensions.
+			Reworked AppSettings.
+			Reworked LocalFile and LocalDirectory a bit.
+			Reworked IniConfig and PreferenceFile.
+			Reworked ValidValueOf.
 			Fix xml documentation.
-			Multi-targets NetStandard2.1 and Net6.0
+			Multi-targets NetStandard2.1 and Net6.0.
+			Merged Jakar.Extensions.Hosting.
 			Moving to .Net6 only going forward once MAUI is released.
 		</releaseNotes>
 		<tags>Api Extension Linq Http Files Files Strings Types Languages Collections Ini</tags>
@@ -42,14 +43,18 @@
 					branch="master" />
 		<dependencies>
 			<group targetFramework="netstandard2.1">
-				<dependency id="Microsoft.CodeAnalysis.CSharp"
-							version="4.3.0" />
 				<dependency id="CommunityToolkit.Diagnostics"
 							version="8.0.0" />
+				<dependency id="Dapper"
+							version="2.0.78" />
 				<dependency id="Dapper.Contrib"
 							version="2.0.78" />
 				<dependency id="JetBrains.Annotations"
 							version="2022.1.0" />
+				<dependency id="Microsoft.CodeAnalysis.CSharp"
+							version="4.3.0" />
+				<dependency id="Microsoft.CSharp"
+							version="4.7.0" />
 				<dependency id="Newtonsoft.Json"
 							version="13.0.1" />
 				<dependency id="Nito.Collections.Deque"
@@ -58,22 +63,115 @@
 							version="6.0.0" />
 				<dependency id="System.ComponentModel.Annotations"
 							version="5.0.0" />
-				<dependency id="System.Text.Encodings.Web"
-							version="6.0.0" />
 				<dependency id="System.Text.Encoding.CodePages"
 							version="6.0.0" />
+				<dependency id="System.Text.Encodings.Web"
+							version="6.0.0" />
 				<dependency id="System.Text.Json"
-							version="6.0.5" />
+							version="6.0.6" />
+				<dependency id="System.Threading.Tasks"
+							version="4.3.0" />
 				<dependency id="System.Threading.Tasks.Dataflow"
 							version="6.0.0" />
+				<dependency id="System.Threading.Tasks.Extensions"
+							version="4.5.4" />
+				<dependency id="System.Threading.Tasks.Parallel"
+							version="4.3.0" />
 				<dependency id="OneOf"
 							version="3.0.223" />
 				<dependency id="ValueOf"
 							version="2.0.31" />
-				<!-- 
-				<dependency id="MailKit" 
-							version="3.2.0" />
-				-->
+				<dependency id="MailKit"
+							version="3.4.1" />
+				<dependency id="Sigil"
+							version="5.0.0" />
+				<dependency id="System.Text.Encoding.CodePages"
+							version="6.0.0" />
+				<dependency id="Microsoft.Extensions.Hosting"
+							version="6.0.1" />
+			</group>
+
+			<group targetFramework="net6.0">
+				<dependency id="CommunityToolkit.Diagnostics"
+							version="8.0.0" />
+				<dependency id="Dapper"
+							version="2.0.78" />
+				<dependency id="Dapper.Contrib"
+							version="2.0.78" />
+				<dependency id="JetBrains.Annotations"
+							version="2022.1.0" />
+				<dependency id="Microsoft.CodeAnalysis.CSharp"
+							version="4.3.0" />
+				<dependency id="Microsoft.CSharp"
+							version="4.7.0" />
+				<dependency id="Newtonsoft.Json"
+							version="13.0.1" />
+				<dependency id="Nito.Collections.Deque"
+							version="1.1.1" />
+				<dependency id="System.Collections.Immutable"
+							version="6.0.0" />
+				<dependency id="System.ComponentModel.Annotations"
+							version="5.0.0" />
+				<dependency id="System.Text.Encoding.CodePages"
+							version="6.0.0" />
+				<dependency id="System.Text.Encodings.Web"
+							version="6.0.0" />
+				<dependency id="System.Text.Json"
+							version="6.0.6" />
+				<dependency id="System.Threading.Tasks"
+							version="4.3.0" />
+				<dependency id="System.Threading.Tasks.Dataflow"
+							version="6.0.0" />
+				<dependency id="System.Threading.Tasks.Extensions"
+							version="4.5.4" />
+				<dependency id="System.Threading.Tasks.Parallel"
+							version="4.3.0" />
+				<dependency id="OneOf"
+							version="3.0.223" />
+				<dependency id="ValueOf"
+							version="2.0.31" />
+				<dependency id="MailKit"
+							version="3.4.1" />
+				<dependency id="Sigil"
+							version="5.0.0" />
+				<dependency id="System.Text.Encoding.CodePages"
+							version="6.0.0" />
+				<dependency id="Microsoft.Extensions.Hosting"
+							version="6.0.1" />
+				<dependency id="Hardware.Info"
+							version="10.0.1" />
+				<dependency id="Swashbuckle.AspNetCore"
+							version="6.4.0" />
+				<dependency id="Swashbuckle.AspNetCore.Annotations"
+							version="6.4.0" />
+				<dependency id="Swashbuckle.AspNetCore.Newtonsoft"
+							version="6.4.0" />
+				<dependency id="Microsoft.Extensions.Options.DataAnnotations"
+							version="6.0.0" />
+				<dependency id="Microsoft.Extensions.Options.ConfigurationExtensions"
+							version="6.0.0" />
+				<dependency id="Microsoft.AspNetCore.Authentication.Certificate"
+							version="6.0.9" />
+				<dependency id="Microsoft.AspNetCore.Authentication.Google"
+							version="6.0.9" />
+				<dependency id="Microsoft.AspNetCore.Authentication.OAuth"
+							version="2.2.0" />
+				<dependency id="Microsoft.AspNetCore.Authentication.Cookies"
+							version="2.2.0" />
+				<dependency id="Microsoft.AspNetCore.Authentication.MicrosoftAccount"
+							version="6.0.9" />
+				<dependency id="Microsoft.AspNetCore.Authentication.JwtBearer"
+							version="6.0.9" />
+				<dependency id="Microsoft.AspNetCore.Authentication.OpenIdConnect"
+							version="6.0.9" />
+				<dependency id="Microsoft.AspNetCore.Diagnostics.HealthChecks"
+							version="2.2.0" />
+				<dependency id="Microsoft.Extensions.Diagnostics.HealthChecks"
+							version="6.0.9" />
+				<dependency id="Microsoft.Extensions.Hosting.Systemd"
+							version="6.0.0" />
+				<dependency id="Microsoft.Extensions.Hosting.WindowsServices"
+							version="6.0.0" />
 			</group>
 		</dependencies>
 	</metadata>

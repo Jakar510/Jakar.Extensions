@@ -43,6 +43,7 @@ public static partial class TypeExtensions
 
         if ( setMethod.ReturnParameter is null ) { throw new NullReferenceException(nameof(setMethod.ReturnParameter)); }
 
-        return setMethod.ReturnParameter.GetRequiredCustomModifiers().Contains(isExternalInit);
+        return setMethod.ReturnParameter.GetRequiredCustomModifiers()
+                        .Contains(isExternalInit);
     }
 }

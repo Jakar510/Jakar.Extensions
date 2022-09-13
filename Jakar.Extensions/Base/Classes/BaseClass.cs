@@ -3,5 +3,3 @@ namespace Jakar.Extensions;
 
 
 [Serializable] public class BaseClass { }
-
-

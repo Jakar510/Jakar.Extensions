@@ -23,8 +23,10 @@ public static class PathExtensions
     public static IList<string> FilePaths( this               DirectoryInfo root ) => Directory.GetFiles(root.FullName);
     public static IEnumerable<FileInfo> Files( this           DirectoryInfo root ) => root.EnumerateFiles();
     public static IEnumerable<DirectoryInfo> SubFolders( this DirectoryInfo root ) => root.EnumerateDirectories();
-    public static IList<string> SubFolderNames( this          DirectoryInfo root ) => root.SubFolders().Select(item => item.Name).ToList();
-    public static IList<string> Directories( this             DirectoryInfo root ) => Directory.GetDirectories(root.FullName);
+    public static IList<string> SubFolderNames( this DirectoryInfo root ) => root.SubFolders()
+                                                                                 .Select(item => item.Name)
+                                                                                 .ToList();
+    public static IList<string> Directories( this DirectoryInfo root ) => Directory.GetDirectories(root.FullName);
 
 
     /// <summary>
@@ -72,7 +74,9 @@ public static class PathExtensions
             ZipArchiveEntry    entry  = archive.CreateEntry(file.FullPath);
             await using Stream stream = entry.Open();
 
-            ReadOnlyMemory<byte> data = await file.ReadAsync().AsMemory(token);
+            ReadOnlyMemory<byte> data = await file.ReadAsync()
+                                                  .AsMemory(token);
+
             await stream.WriteAsync(data, CancellationToken.None);
         }
 

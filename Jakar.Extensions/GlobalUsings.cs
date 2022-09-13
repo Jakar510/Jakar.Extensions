@@ -1,4 +1,5 @@
 ﻿global using System;
+global using System.Buffers;
 global using System.IO;
 global using System.Text;
 global using System.Text.Encodings.Web;
@@ -24,6 +25,7 @@ global using System.Diagnostics.CodeAnalysis;
 global using System.Threading;
 global using System.Threading.Tasks;
 global using System.ComponentModel.DataAnnotations;
+global using System.Diagnostics.Contracts;
 global using Dapper;
 global using Dapper.Contrib.Extensions;
 global using Newtonsoft.Json;
@@ -32,7 +34,29 @@ global using System.Drawing;
 global using System.IO.Compression;
 global using System.Security;
 global using Nito.Collections;
-global using KeyAttribute = Dapper.Contrib.Extensions.KeyAttribute;
 global using JetBrains.Annotations;
 global using ValueOf;
 global using CommunityToolkit.Diagnostics;
+global using Newtonsoft.Json.Serialization;
+global using PureAttribute = JetBrains.Annotations.PureAttribute;
+global using KeyAttribute = Dapper.Contrib.Extensions.KeyAttribute;
+global using Microsoft.Extensions.Hosting;
+global using Microsoft.Extensions.Logging;
+
+
+#if NET6_0
+global using System.Net.Http;
+global using Microsoft.Extensions.Http;
+global using Microsoft.Extensions.Options;
+global using Microsoft.Extensions.Logging.Console;
+global using Microsoft.Extensions.Logging.Debug;
+global using Microsoft.Extensions.Logging.EventLog;
+global using Microsoft.AspNetCore.Hosting;
+global using Microsoft.AspNetCore.Builder;
+global using Microsoft.AspNetCore.Hosting.Server;
+global using Microsoft.Extensions.Configuration;
+global using Microsoft.Extensions.DependencyInjection;
+global using Microsoft.AspNetCore.Components.Server;
+global using Microsoft.AspNetCore.Mvc;
+global using Microsoft.AspNetCore.Mvc.RazorPages;
+#endif

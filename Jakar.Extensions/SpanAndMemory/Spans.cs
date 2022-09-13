@@ -82,18 +82,22 @@ public static partial class Spans
     public static int LastIndexOf<T>( this Span<T> value, in T c, in int endIndex ) where T : IEquatable<T>
     {
         Guard.IsInRangeFor(endIndex, value, nameof(value));
-        return value[..endIndex].LastIndexOf(c);
+
+        return value[..endIndex]
+           .LastIndexOf(c);
     }
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int LastIndexOf<T>( this ReadOnlySpan<T> value, in T c, in int endIndex ) where T : IEquatable<T>
     {
         Guard.IsInRangeFor(endIndex, value, nameof(value));
-        return value[..endIndex].LastIndexOf(c);
+
+        return value[..endIndex]
+           .LastIndexOf(c);
     }
 
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Span<T> Join<T>( this Span<T> value, in Span<T> other ) where T :unmanaged, IEquatable<T>
+    public static Span<T> Join<T>( this Span<T> value, in Span<T> other ) where T : unmanaged, IEquatable<T>
     {
         int     size   = value.Length + other.Length;
         Span<T> buffer = stackalloc T[size];

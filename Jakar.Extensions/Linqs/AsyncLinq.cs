@@ -7,7 +7,7 @@ namespace Jakar.Extensions;
 
 /// <summary>
 /// <para><see cref="Enumerable"/></para>
-/// <para><see cref="AsyncEnumerable"/></para>
+/// <para>AsyncEnumerable</para>
 /// </summary>
 public static partial class AsyncLinq
 {

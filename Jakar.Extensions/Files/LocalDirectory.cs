@@ -122,7 +122,7 @@ public class LocalDirectory : BaseCollections<LocalDirectory>, TempFile.ITempFil
 
         return d.SetTemporary();
     }
-    
+
     public static LocalDirectory AppData( string subPath )
     {
     #if __WINDOWS__

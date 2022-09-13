@@ -37,7 +37,8 @@ public class ExpectedValueTypeException<TKey> : Exception // Jakar.Api.Exception
 
 
     protected static IEnumerable<string?> GetTypeNames( params Type[] expected ) => expected.Select(item => item.FullName);
-    protected static string GetTypes( params                   Type[] expected ) => GetTypeNames(expected).ToPrettyJson();
+    protected static string GetTypes( params Type[] expected ) => GetTypeNames(expected)
+       .ToPrettyJson();
 
 
     protected static string GetMessage( Type? actual, Type[] expected, TKey? key = default )
@@ -52,7 +53,8 @@ public class ExpectedValueTypeException<TKey> : Exception // Jakar.Api.Exception
         builder.AppendLine("It can be any of the following types: ");
         builder.AppendLine(GetTypes(expected));
 
-        return builder.ToString().Replace("\r\n", "\n");
+        return builder.ToString()
+                      .Replace("\r\n", "\n");
     }
 
 

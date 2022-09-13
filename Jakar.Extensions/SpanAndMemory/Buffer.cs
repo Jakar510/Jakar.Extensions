@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 06/12/2022  10:15 AM
 
-using System.Buffers;
-
-
-
 namespace Jakar.Extensions;
 
 
@@ -157,8 +153,8 @@ public ref struct Buffer<T> where T : struct, IEquatable<T>
        .ToString();
 
 
-    [Pure] public readonly ReadOnlySpan<T> AsSpan() => _span[..Index];
-    [Pure]
+    [PureAttribute] public readonly ReadOnlySpan<T> AsSpan() => _span[..Index];
+    [PureAttribute]
     public ReadOnlySpan<T> AsSpan( in T? terminate )
     {
         if ( !terminate.HasValue ) { return _span[..Index]; }
@@ -167,10 +163,10 @@ public ref struct Buffer<T> where T : struct, IEquatable<T>
         _span[Index + 1] = terminate.Value;
         return _span[..Index];
     }
-    [Pure] public readonly ReadOnlySpan<T> Slice( int start ) => _span.Slice(start,             Index - start);
-    [Pure] public readonly ReadOnlySpan<T> Slice( int start, int length ) => _span.Slice(start, length);
-    public int IndexOf( in     T                      value ) => Next.IndexOf(value);
-    public int LastIndexOf( in T                      value, int end ) => Next.LastIndexOf(value, end);
+    [PureAttribute] public readonly ReadOnlySpan<T> Slice( int start ) => _span.Slice(start,             Index - start);
+    [PureAttribute] public readonly ReadOnlySpan<T> Slice( int start, int length ) => _span.Slice(start, length);
+    public int IndexOf( in     T                               value ) => Next.IndexOf(value);
+    public int LastIndexOf( in T                               value, int end ) => Next.LastIndexOf(value, end);
 
 
     public bool Contains( T                  value ) => _span.Contains(value);

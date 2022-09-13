@@ -12,8 +12,6 @@ nuget.exe pack Jakar.Extensions.Maui.nuspec || goto :error
 
 nuget.exe pack Jakar.Extensions.Xamarin.Forms.nuspec || goto :error
 
-nuget.exe pack Jakar.Extensions.Hosting.nuspec || goto :error
-
 nuget.exe pack Jakar.Extensions.Blazor.nuspec || goto :error
 
 nuget.exe pack Jakar.DataBase.nuspec || goto :error

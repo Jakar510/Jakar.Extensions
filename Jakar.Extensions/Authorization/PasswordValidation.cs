@@ -1,6 +1,7 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 09/07/2022  3:56 PM
 
+
 namespace Jakar.Extensions;
 
 

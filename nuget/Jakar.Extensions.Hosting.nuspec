@@ -4,7 +4,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata>
 		<id>Jakar.Extensions.Hosting</id>
-		<version>6.0.0.13-beta</version>
+		<verison>6.0.0.13-beta</verison>
 		<title>Extension Library</title>
 		<authors>Tyler Stegmaier</authors>
 		<owners>Jakar510/Jakar</owners>
@@ -28,69 +28,51 @@
 		<dependencies>
 			<group targetFramework="net6.0">
 				<dependency id="Jakar.Extensions"
-							version="6.0.0.57-beta" />
+							verison="6.0.0.57-beta" />
 				<dependency id="Hardware.Info"
-							version="10.0.1" />
-				<dependency id="MailKit"
-							version="3.4.0" />
-				<dependency id="Microsoft.CSharp"
-							version="4.7.0" />
-				<dependency id="Microsoft.Extensions.Options.ConfigurationExtensions"
-							version="6.0.0" />
-				<dependency id="Microsoft.AspNetCore.Authentication.Certificate"
-							version="6.0.8" />
-				<dependency id="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore"
-							version="6.0.8" />
-				<dependency id="Microsoft.AspNetCore.Diagnostics.HealthChecks"
-							version="2.2.0" />
-				<dependency id="Microsoft.AspNetCore.Mvc.NewtonsoftJson"
-							version="6.0.8" />
-				<dependency id="Microsoft.AspNetCore.Server.IIS"
-							version="2.2.6" />
-				<dependency id="Microsoft.AspNetCore.Authentication.JwtBearer"
-							version="6.0.8" />
-				<dependency id="Microsoft.AspNetCore.Authentication.OpenIdConnect"
-							version="6.0.8" />
-				<dependency id="Microsoft.AspNetCore.Identity"
-							version="2.2.0" />
-				<dependency id="Microsoft.Extensions.Caching.Memory"
-							version="6.0.1" />
-				<dependency id="Microsoft.Extensions.Configuration.Binder"
-							version="6.0.0" />
-				<dependency id="Microsoft.Extensions.Diagnostics.HealthChecks"
-							version="6.0.8" />
-				<dependency id="Microsoft.Extensions.Hosting"
-							version="6.0.1" />
-				<dependency id="Microsoft.Extensions.Hosting.Systemd"
-							version="6.0.0" />
-				<dependency id="Microsoft.Extensions.Hosting.WindowsServices"
-							version="6.0.0" />
-				<dependency id="Microsoft.Extensions.Logging"
-							version="6.0.0" />
-				<dependency id="Microsoft.Extensions.Logging.EventLog"
-							version="6.0.0" />
-				<dependency id="Microsoft.Extensions.Logging.EventSource"
-							version="6.0.0" />
-				<dependency id="Microsoft.Extensions.Logging.Abstractions"
-							version="6.0.1" />
-				<dependency id="Microsoft.Extensions.Logging.Configuration"
-							version="6.0.0" />
-				<dependency id="Microsoft.Extensions.Logging.Console"
-							version="6.0.0" />
-				<dependency id="Microsoft.Extensions.Logging.Debug"
-							version="6.0.0" />
-				<dependency id="Newtonsoft.Json"
-							version="13.0.1" />
-				<dependency id="Portable.BouncyCastle"
-							version="1.9.0" />
+							verison="10.0.1" />
 				<dependency id="Swashbuckle.AspNetCore"
-							version="6.4.0" />
+							verison="6.4.0" />
 				<dependency id="Swashbuckle.AspNetCore.Annotations"
-							version="6.4.0" />
+							verison="6.4.0" />
 				<dependency id="Swashbuckle.AspNetCore.Newtonsoft"
-							version="6.4.0" />
+							verison="6.4.0" />
+				<dependency id="MailKit"
+							verison="3.4.1" />
+				<dependency id="Microsoft.CSharp"
+							verison="4.7.0" />
+				<dependency id="Microsoft.Extensions.Options.DataAnnotations"
+							verison="6.0.0" />
+				<dependency id="Microsoft.Extensions.Options.ConfigurationExtensions"
+							verison="6.0.0" />
+				<dependency id="Microsoft.AspNetCore.Authentication.Certificate"
+							verison="6.0.9" />
+				<dependency id="Microsoft.AspNetCore.Authentication.Google"
+							verison="6.0.9" />
+				<dependency id="Microsoft.AspNetCore.Authentication.OAuth"
+							verison="2.2.0" />
+				<dependency id="Microsoft.AspNetCore.Authentication.Cookies"
+							verison="2.2.0" />
+				<dependency id="Microsoft.AspNetCore.Authentication.MicrosoftAccount"
+							verison="6.0.9" />
+				<dependency id="Microsoft.AspNetCore.Authentication.JwtBearer"
+							verison="6.0.9" />
+				<dependency id="Microsoft.AspNetCore.Authentication.OpenIdConnect"
+							verison="6.0.9" />
+				<dependency id="Microsoft.AspNetCore.Diagnostics.HealthChecks"
+							verison="2.2.0" />
+				<dependency id="Microsoft.Extensions.Diagnostics.HealthChecks"
+							verison="6.0.9" />
+				<dependency id="Microsoft.Extensions.Hosting"
+							verison="6.0.1" />
+				<dependency id="Microsoft.Extensions.Hosting.Systemd"
+							verison="6.0.0" />
+				<dependency id="Microsoft.Extensions.Hosting.WindowsServices"
+							verison="6.0.0" />
+				<dependency id="Sigil"
+							verison="5.0.0" />
 				<dependency id="System.Text.Encoding.CodePages"
-							version="6.0.0" />
+							verison="6.0.0" />
 			</group>
 		</dependencies>
 	</metadata>
