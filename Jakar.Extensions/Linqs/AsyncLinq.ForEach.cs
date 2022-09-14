@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks.Dataflow;
+﻿using Sigil;
+using System.Threading.Tasks.Dataflow;
 
 
 
@@ -15,21 +16,13 @@ public static partial class AsyncLinq
                                                                                                                     .ForAll(action);
 
 
-    public static async Task ForEachAsync<TElement>( this IEnumerable<TElement> list, Func<TElement, Task> action, bool continueOnCapturedContext = true )
+    public static async Task ForEachAsync<TElement>( this IEnumerable<TElement> list, Func<TElement, Task> action )
     {
-        foreach ( TElement item in list )
-        {
-            await action(item)
-               .ConfigureAwait(continueOnCapturedContext);
-        }
+        foreach ( TElement item in list ) { await action(item); }
     }
-    public static async ValueTask ForEachAsync<TElement>( this IEnumerable<TElement> list, Func<TElement, ValueTask> action, bool continueOnCapturedContext = true )
+    public static async ValueTask ForEachAsync<TElement>( this IEnumerable<TElement> list, Func<TElement, ValueTask> action )
     {
-        foreach ( TElement item in list )
-        {
-            await action(item)
-               .ConfigureAwait(continueOnCapturedContext);
-        }
+        foreach ( TElement item in list ) { await action(item); }
     }
 
 
@@ -37,190 +30,123 @@ public static partial class AsyncLinq
     {
         foreach ( ( TKey key, TElement value ) in dict ) { action(key, value); }
     }
-
-
-    public static async Task ForEachAsync<TKey, TElement>( this IDictionary<TKey, TElement> dict, Func<TKey, TElement, Task> action, bool continueOnCapturedContext = true )
+    public static void ForEach<TKey, TElement>( this IDictionary<TKey, TElement> dict, Action<TKey> action )
     {
-        foreach ( ( TKey key, TElement value ) in dict )
-        {
-            await action(key, value)
-               .ConfigureAwait(continueOnCapturedContext);
-        }
+        foreach ( TKey key in dict.Keys ) { action(key); }
     }
-    public static async ValueTask ForEachAsync<TKey, TElement>( this IDictionary<TKey, TElement> dict, Func<TKey, TElement, ValueTask> action, bool continueOnCapturedContext = true )
+    public static void ForEach<TKey, TElement>( this IDictionary<TKey, TElement> dict, Action<TElement> action )
     {
-        foreach ( ( TKey key, TElement value ) in dict )
-        {
-            await action(key, value)
-               .ConfigureAwait(continueOnCapturedContext);
-        }
+        foreach ( TElement value in dict.Values ) { action(value); }
     }
 
 
-    public static async Task ForEachAsync<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, Task> action, bool continueOnCapturedContext = true, CancellationToken token = default )
+    public static async Task ForEachAsync<TKey, TElement>( this IDictionary<TKey, TElement> dict, Func<TKey, TElement, Task> action )
     {
-        await foreach ( TElement item in source.WithCancellation(token) )
-        {
-            await action(item)
-               .ConfigureAwait(continueOnCapturedContext);
-        }
+        foreach ( ( TKey key, TElement value ) in dict ) { await action(key, value); }
     }
-    public static async ValueTask ForEachAsync<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, ValueTask> action, bool continueOnCapturedContext = true, CancellationToken token = default )
+    public static async ValueTask ForEachAsync<TKey, TElement>( this IDictionary<TKey, TElement> dict, Func<TKey, TElement, ValueTask> action )
     {
-        await foreach ( TElement item in source.WithCancellation(token) )
-        {
-            await action(item)
-               .ConfigureAwait(continueOnCapturedContext);
-        }
+        foreach ( ( TKey key, TElement value ) in dict ) { await action(key, value); }
     }
 
 
-    public static async Task ForEachParallelAsync( this IEnumerable<Task> source, int? degreeOfParallelism = default, bool continueOnCapturedContext = true )
+    public static async Task ForEachAsync<TKey, TElement>( this IDictionary<TKey, TElement> dict, Func<TElement, Task> action )
     {
-        async Task AwaitPartition( IEnumerator<Task> partition )
+        foreach ( TElement value in dict.Values ) { await action(value); }
+    }
+    public static async ValueTask ForEachAsync<TKey, TElement>( this IDictionary<TKey, TElement> dict, Func<TElement, ValueTask> action )
+    {
+        foreach ( TElement value in dict.Values ) { await action(value); }
+    }
+
+
+    public static async Task ForEachAsync<TKey, TElement>( this IDictionary<TKey, TElement> dict, Func<TKey, Task> action )
+    {
+        foreach ( TKey key in dict.Keys ) { await action(key); }
+    }
+    public static async ValueTask ForEachAsync<TKey, TElement>( this IDictionary<TKey, TElement> dict, Func<TKey, ValueTask> action )
+    {
+        foreach ( TKey key in dict.Keys ) { await action(key); }
+    }
+
+
+    public static async Task ForEachAsync<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, Task> action, CancellationToken token = default )
+    {
+        await foreach ( TElement item in source.WithCancellation(token) ) { await action(item); }
+    }
+    public static async ValueTask ForEachAsync<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, ValueTask> action, CancellationToken token = default )
+    {
+        await foreach ( TElement item in source.WithCancellation(token) ) { await action(item); }
+    }
+
+
+    public static async Task ForEachParallelAsync<TElement>( this IEnumerable<TElement> source, Func<TElement, Task> body, int? maxDegreeOfParallelism = default )
+    {
+        async Task AwaitPartition( IEnumerator<TElement> partition )
         {
             using ( partition )
             {
-                while ( partition.MoveNext() )
-                {
-                    if ( partition.Current is null ) { throw new NullReferenceException(nameof(partition.Current)); }
-
-                    await partition.Current.ConfigureAwait(continueOnCapturedContext);
-                }
+                while ( partition.MoveNext() ) { await body(partition.Current); }
             }
         }
 
 
-        Task tasks = Task.WhenAll(Partitioner.Create(source)
-                                             .GetPartitions(degreeOfParallelism ?? Environment.ProcessorCount)
-                                             .AsParallel()
-                                             .Select(AwaitPartition));
-
-        try { await tasks; }
-        catch ( Exception e )
-        {
-            if ( tasks.Exception is null ) { throw new NullReferenceException("Unknown error has occurred. Task.Exception is null.", e); }
-
-            throw tasks.Exception;
-        }
+        await Task.WhenAll(Partitioner.Create(source)
+                                      .GetPartitions(maxDegreeOfParallelism ?? Environment.ProcessorCount)
+                                      .AsParallel()
+                                      .Select(AwaitPartition));
     }
-
-
-    public static async Task ForEachParallelAsync<T>( this IEnumerable<T> source, Func<T, Task> body, int? degreeOfParallelism = default, bool continueOnCapturedContext = true )
+    public static async Task ForEachParallelAsync<TElement>( this IEnumerable<TElement> source, Func<TElement, ValueTask> body, int? maxDegreeOfParallelism = default )
     {
-        async Task AwaitPartition( IEnumerator<T> partition )
+        async Task AwaitPartition( IEnumerator<TElement> partition )
         {
             using ( partition )
             {
-                while ( partition.MoveNext() )
-                {
-                    await body(partition.Current)
-                       .ConfigureAwait(continueOnCapturedContext);
-                }
+                while ( partition.MoveNext() ) { await body(partition.Current); }
             }
         }
 
 
-        Task tasks = Task.WhenAll(Partitioner.Create(source)
-                                             .GetPartitions(degreeOfParallelism ?? Environment.ProcessorCount)
-                                             .AsParallel()
-                                             .Select(AwaitPartition));
-
-        try { await tasks; }
-        catch ( Exception e )
-        {
-            if ( tasks.Exception is null ) { throw new NullReferenceException("Unknown error has occurred. Task.Exception is null.", e); }
-
-            throw tasks.Exception;
-        }
+        await Task.WhenAll(Partitioner.Create(source)
+                                      .GetPartitions(maxDegreeOfParallelism ?? Environment.ProcessorCount)
+                                      .AsParallel()
+                                      .Select(AwaitPartition));
     }
-    public static async Task ForEachParallelAsync<T>( this IEnumerable<T> source, Func<T, ValueTask> body, int? degreeOfParallelism = default, bool continueOnCapturedContext = true )
+    public static async Task ForEachParallelAsync<TElement>( this IEnumerable<TElement> source, Func<TElement, CancellationToken, Task> body, CancellationToken token, int? maxDegreeOfParallelism = default )
     {
-        async Task AwaitPartition( IEnumerator<T> partition )
+        async Task AwaitPartition( IEnumerator<TElement> partition )
         {
             using ( partition )
             {
-                while ( partition.MoveNext() )
-                {
-                    await body(partition.Current)
-                       .ConfigureAwait(continueOnCapturedContext);
-                }
+                while ( partition.MoveNext() ) { await body(partition.Current, token); }
             }
         }
 
 
-        Task tasks = Task.WhenAll(Partitioner.Create(source)
-                                             .GetPartitions(degreeOfParallelism ?? Environment.ProcessorCount)
-                                             .AsParallel()
-                                             .Select(AwaitPartition));
-
-        try { await tasks; }
-        catch ( Exception e )
-        {
-            if ( tasks.Exception is null ) { throw new NullReferenceException("Unknown error has occurred. Task.Exception is null.", e); }
-
-            throw tasks.Exception;
-        }
+        await Task.WhenAll(Partitioner.Create(source)
+                                      .GetPartitions(maxDegreeOfParallelism ?? Environment.ProcessorCount)
+                                      .AsParallel()
+                                      .Select(AwaitPartition));
     }
-    public static async Task ForEachParallelAsync<T>( this IEnumerable<T> source, Func<T, CancellationToken, Task> body, CancellationToken token, int? degreeOfParallelism = default, bool continueOnCapturedContext = true )
+    public static async Task ForEachParallelAsync<TElement>( this IEnumerable<TElement> source, Func<TElement, CancellationToken, ValueTask> body, CancellationToken token, int? maxDegreeOfParallelism = default )
     {
-        async Task AwaitPartition( IEnumerator<T> partition )
+        async Task AwaitPartition( IEnumerator<TElement> partition )
         {
             using ( partition )
             {
-                while ( partition.MoveNext() )
-                {
-                    await body(partition.Current, token)
-                       .ConfigureAwait(continueOnCapturedContext);
-                }
+                while ( partition.MoveNext() ) { await body(partition.Current, token); }
             }
         }
 
 
-        Task tasks = Task.WhenAll(Partitioner.Create(source)
-                                             .GetPartitions(degreeOfParallelism ?? Environment.ProcessorCount)
-                                             .AsParallel()
-                                             .Select(AwaitPartition));
-
-        try { await tasks; }
-        catch ( Exception e )
-        {
-            if ( tasks.Exception is null ) { throw new NullReferenceException("Unknown error has occurred. Task.Exception is null.", e); }
-
-            throw tasks.Exception;
-        }
-    }
-    public static async Task ForEachParallelAsync<T>( this IEnumerable<T> source, Func<T, CancellationToken, ValueTask> body, CancellationToken token, int? degreeOfParallelism = default, bool continueOnCapturedContext = true )
-    {
-        async Task AwaitPartition( IEnumerator<T> partition )
-        {
-            using ( partition )
-            {
-                while ( partition.MoveNext() )
-                {
-                    await body(partition.Current, token)
-                       .ConfigureAwait(continueOnCapturedContext);
-                }
-            }
-        }
-
-
-        Task tasks = Task.WhenAll(Partitioner.Create(source)
-                                             .GetPartitions(degreeOfParallelism ?? Environment.ProcessorCount)
-                                             .AsParallel()
-                                             .Select(AwaitPartition));
-
-        try { await tasks; }
-        catch ( Exception e )
-        {
-            if ( tasks.Exception is null ) { throw new NullReferenceException("Unknown error has occurred. Task.Exception is null.", e); }
-
-            throw tasks.Exception;
-        }
+        await Task.WhenAll(Partitioner.Create(source)
+                                      .GetPartitions(maxDegreeOfParallelism ?? Environment.ProcessorCount)
+                                      .AsParallel()
+                                      .Select(AwaitPartition));
     }
 
 
-    public static async Task ForEachParallelAsync<T>( this IAsyncEnumerable<T> source, Func<T, Task> action, int? maxDegreeOfParallelism = default, TaskScheduler? scheduler = null )
+    public static async Task ForEachParallelAsync<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, Task> action, CancellationToken token = default, int? maxDegreeOfParallelism = default, TaskScheduler? scheduler = default )
     {
         var options = new ExecutionDataflowBlockOptions
                       {
@@ -229,14 +155,14 @@ public static partial class AsyncLinq
 
         if ( scheduler is not null ) { options.TaskScheduler = scheduler; }
 
-        var block = new ActionBlock<T>(action, options);
+        var block = new ActionBlock<TElement>(action, options);
 
-        await foreach ( T item in source ) { block.Post(item); }
+        await foreach ( TElement item in source.WithCancellation(token) ) { block.Post(item); }
 
         block.Complete();
         await block.Completion;
     }
-    public static async Task ForEachParallelAsync<T>( this IAsyncEnumerable<T> source, Func<T, Task> action, CancellationToken token, int? maxDegreeOfParallelism = default, TaskScheduler? scheduler = null )
+    public static async Task ForEachParallelAsync<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, CancellationToken, Task> action, CancellationToken token, int? maxDegreeOfParallelism = default, TaskScheduler? scheduler = default )
     {
         var options = new ExecutionDataflowBlockOptions
                       {
@@ -245,14 +171,21 @@ public static partial class AsyncLinq
 
         if ( scheduler is not null ) { options.TaskScheduler = scheduler; }
 
-        var block = new ActionBlock<T>(action, options);
+        async Task AwaitItem( TElement item ) => await action(item, token);
 
-        await foreach ( T item in source.WithCancellation(token) ) { block.Post(item); }
+        var block = new ActionBlock<TElement>(AwaitItem, options);
+
+        await foreach ( TElement item in source.WithCancellation(token) ) { block.Post(item); }
 
         block.Complete();
         await block.Completion;
     }
-    public static async Task ForEachParallelAsync<T>( this IAsyncEnumerable<T> source, Func<T, CancellationToken, Task> action, CancellationToken token, int? maxDegreeOfParallelism = default, TaskScheduler? scheduler = null )
+    public static async Task ForEachParallelAsync<TElement>( this IAsyncEnumerable<TElement>              source,
+                                                             Func<TElement, CancellationToken, ValueTask> action,
+                                                             CancellationToken                            token,
+                                                             int?                                         maxDegreeOfParallelism = default,
+                                                             TaskScheduler?                               scheduler              = default
+    )
     {
         var options = new ExecutionDataflowBlockOptions
                       {
@@ -261,16 +194,34 @@ public static partial class AsyncLinq
 
         if ( scheduler is not null ) { options.TaskScheduler = scheduler; }
 
-        async Task AwaitItem( T item ) => await action(item, token);
+        async Task AwaitItem( TElement item ) => await action(item, token);
 
-        var block = new ActionBlock<T>(AwaitItem, options);
+        var block = new ActionBlock<TElement>(AwaitItem, options);
 
-        await foreach ( T item in source.WithCancellation(token) ) { block.Post(item); }
+        await foreach ( TElement item in source.WithCancellation(token) ) { block.Post(item); }
 
         block.Complete();
         await block.Completion;
     }
-    public static async Task ForEachParallelAsync<T>( this IAsyncEnumerable<T> source, Func<T, CancellationToken, ValueTask> action, CancellationToken token, int? maxDegreeOfParallelism = default, TaskScheduler? scheduler = null )
+
+
+    public static async Task ForEachParallelAsync( this IEnumerable<Task> source, int? maxDegreeOfParallelism = default )
+    {
+        static async Task AwaitPartition( IEnumerator<Task> partition )
+        {
+            using ( partition )
+            {
+                while ( partition.MoveNext() ) { await partition.Current; }
+            }
+        }
+
+
+        await Task.WhenAll(Partitioner.Create(source)
+                                      .GetPartitions(maxDegreeOfParallelism ?? Environment.ProcessorCount)
+                                      .AsParallel()
+                                      .Select(AwaitPartition));
+    }
+    public static async Task ForEachParallelAsync( this IAsyncEnumerable<Task> source, CancellationToken token = default, int? maxDegreeOfParallelism = default, TaskScheduler? scheduler = default )
     {
         var options = new ExecutionDataflowBlockOptions
                       {
@@ -279,30 +230,26 @@ public static partial class AsyncLinq
 
         if ( scheduler is not null ) { options.TaskScheduler = scheduler; }
 
-        async Task AwaitItem( T item ) => await action(item, token);
 
-        var block = new ActionBlock<T>(AwaitItem, options);
-
-        await foreach ( T item in source.WithCancellation(token) ) { block.Post(item); }
+        var block = new ActionBlock<Task>(x => x, options);
+        await foreach ( Task item in source.WithCancellation(token) ) { block.Post(item); }
 
         block.Complete();
         await block.Completion;
     }
 
 
-    public static async Task<IReadOnlyCollection<T>> WhenAllParallelAsync<T>( this IEnumerable<Task<T>> source, int? degreeOfParallelism = default, bool continueOnCapturedContext = true )
+    public static async Task<IReadOnlyCollection<TElement>> WhenAllParallelAsync<TElement>( this IEnumerable<Task<TElement>> source, int? maxDegreeOfParallelism = default )
     {
-        var results = new ConcurrentBag<T>();
+        var results = new ConcurrentBag<TElement>();
 
-        async Task AwaitPartition( IEnumerator<Task<T>> partition )
+        async Task AwaitPartition( IEnumerator<Task<TElement>> partition )
         {
             using ( partition )
             {
                 while ( partition.MoveNext() )
                 {
-                    if ( partition.Current is null ) { throw new NullReferenceException(nameof(partition.Current)); }
-
-                    T item = await partition.Current.ConfigureAwait(continueOnCapturedContext);
+                    TElement item = await partition.Current;
                     results.Add(item);
                 }
             }
@@ -310,26 +257,22 @@ public static partial class AsyncLinq
 
 
         Task tasks = Task.WhenAll(Partitioner.Create(source)
-                                             .GetPartitions(degreeOfParallelism ?? Environment.ProcessorCount)
+                                             .GetPartitions(maxDegreeOfParallelism ?? Environment.ProcessorCount)
                                              .AsParallel()
                                              .Select(AwaitPartition));
 
-        try
-        {
-            await tasks;
-            return results;
-        }
-        catch ( Exception e )
-        {
-            if ( tasks.Exception is null ) { throw new NullReferenceException("Unknown error has occurred. Task.Exception is null.", e); }
-
-            throw tasks.Exception;
-        }
+        await tasks;
+        return results;
     }
-
-    public static async Task<IReadOnlyCollection<T>> WhenAllParallelAsync<T>( IAsyncEnumerable<T> source, Func<T, CancellationToken, Task<T>> action, CancellationToken token, int? maxDegreeOfParallelism = default, TaskScheduler? scheduler = null )
+    public static async Task<IReadOnlyCollection<TElement>> WhenAllParallelAsync<TElement>( this IAsyncEnumerable<Task<TElement>> source, CancellationToken token = default, int? maxDegreeOfParallelism = default, TaskScheduler? scheduler = default )
     {
-        var results = new ConcurrentBag<T>();
+        var results = new ConcurrentBag<TElement>();
+
+        async Task AwaitTask( Task<TElement> task )
+        {
+            Debug.Assert(results != null, nameof(results) + " != null");
+            results.Add(await task);
+        }
 
         var options = new ExecutionDataflowBlockOptions
                       {
@@ -338,28 +281,23 @@ public static partial class AsyncLinq
 
         if ( scheduler is not null ) { options.TaskScheduler = scheduler; }
 
-        async Task AwaitItem( T item )
-        {
-            T result = await action(item, token);
-            results.Add(result);
-        }
-
-        var block = new ActionBlock<T>(AwaitItem, options);
-
-        await foreach ( T item in source.WithCancellation(token) ) { block.Post(item); }
+        var block = new ActionBlock<Task<TElement>>(AwaitTask, options);
+        await foreach ( Task<TElement> item in source.WithCancellation(token) ) { block.Post(item); }
 
         block.Complete();
         await block.Completion;
         return results;
     }
-    public static async Task<IReadOnlyCollection<T>> WhenAllParallelAsync<T>( IAsyncEnumerable<T>                      source,
-                                                                              Func<T, CancellationToken, ValueTask<T>> action,
-                                                                              CancellationToken                        token,
-                                                                              int?                                     maxDegreeOfParallelism = default,
-                                                                              TaskScheduler?                           scheduler              = null
+
+
+    public static async Task<IReadOnlyCollection<TElement>> WhenAllParallelAsync<TElement>( IAsyncEnumerable<TElement>                        source,
+                                                                                            Func<TElement, CancellationToken, Task<TElement>> action,
+                                                                                            CancellationToken                                 token,
+                                                                                            int?                                              maxDegreeOfParallelism = default,
+                                                                                            TaskScheduler?                                    scheduler              = default
     )
     {
-        var results = new ConcurrentBag<T>();
+        var results = new ConcurrentBag<TElement>();
 
         var options = new ExecutionDataflowBlockOptions
                       {
@@ -368,15 +306,45 @@ public static partial class AsyncLinq
 
         if ( scheduler is not null ) { options.TaskScheduler = scheduler; }
 
-        async Task AwaitItem( T item )
+        async Task AwaitItem( TElement item )
         {
-            T result = await action(item, token);
+            TElement result = await action(item, token);
             results.Add(result);
         }
 
-        var block = new ActionBlock<T>(AwaitItem, options);
+        var block = new ActionBlock<TElement>(AwaitItem, options);
 
-        await foreach ( T item in source.WithCancellation(token) ) { block.Post(item); }
+        await foreach ( TElement item in source.WithCancellation(token) ) { block.Post(item); }
+
+        block.Complete();
+        await block.Completion;
+        return results;
+    }
+    public static async Task<IReadOnlyCollection<TElement>> WhenAllParallelAsync<TElement>( IAsyncEnumerable<TElement>                             source,
+                                                                                            Func<TElement, CancellationToken, ValueTask<TElement>> action,
+                                                                                            CancellationToken                                      token,
+                                                                                            int?                                                   maxDegreeOfParallelism = default,
+                                                                                            TaskScheduler?                                         scheduler              = default
+    )
+    {
+        var results = new ConcurrentBag<TElement>();
+
+        var options = new ExecutionDataflowBlockOptions
+                      {
+                          MaxDegreeOfParallelism = maxDegreeOfParallelism ?? DataflowBlockOptions.Unbounded
+                      };
+
+        if ( scheduler is not null ) { options.TaskScheduler = scheduler; }
+
+        async Task AwaitItem( TElement item )
+        {
+            TElement result = await action(item, token);
+            results.Add(result);
+        }
+
+        var block = new ActionBlock<TElement>(AwaitItem, options);
+
+        await foreach ( TElement item in source.WithCancellation(token) ) { block.Post(item); }
 
         block.Complete();
         await block.Completion;
