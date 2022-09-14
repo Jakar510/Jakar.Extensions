@@ -248,7 +248,7 @@ public ref struct JObject
 
         node.Begin();
 
-        foreach ( ( int index, string? k, IJsonizer? jsonizer ) in value.Enumerate() )
+        foreach ( ( int index, string? k, IJsonizer? jsonizer ) in value.Enumerate(0) )
         {
             JObject item = node.AddObject(k);
             jsonizer.Serialize(ref item);
@@ -273,7 +273,7 @@ public ref struct JObject
 
         node.Begin();
 
-        foreach ( ( int index, ( string? k, IJsonizer? jsonizer ) ) in value.Enumerate() )
+        foreach ( ( int index, ( string? k, IJsonizer? jsonizer ) ) in value.Enumerate(0) )
         {
             JObject item = node.AddObject(k);
             jsonizer.Serialize(ref item);

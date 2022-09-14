@@ -42,21 +42,17 @@ public class ObservableDictionary<TKey, TValue> : CollectionAlerts<KeyValuePair<
     public ObservableDictionary( int                                     capacity ) : this(new Dictionary<TKey, TValue>(capacity)) { }
     public ObservableDictionary( int                                     capacity, IEqualityComparer<TKey> comparer ) : this(new Dictionary<TKey, TValue>(capacity, comparer)) { }
 
-    public bool ContainsValue( TValue value ) => _dictionary.ContainsValue(value);
+
+    public bool TryGetValue( TKey key, [NotNullWhen(true)] out TValue? value ) => _dictionary.TryGetValue(key, out value) && value is not null;
 
 
-#pragma warning disable CS8767
-    public bool TryGetValue( TKey key, out TValue? value ) => _dictionary.TryGetValue(key, out value);
-#pragma warning restore CS8767
-
-    public bool ContainsKey( TKey key ) => _dictionary.ContainsKey(key);
-
+    public bool ContainsValue( TValue                value ) => _dictionary.ContainsValue(value);
+    public bool ContainsKey( TKey                    key ) => _dictionary.ContainsKey(key);
     public bool Contains( KeyValuePair<TKey, TValue> item ) => ContainsKey(item.Key) && ContainsValue(item.Value);
 
 
-    public void Add( KeyValuePair<TKey, TValue> item ) => Add(item.Key, item.Value);
-
-    public void Add( TKey key, TValue value )
+    public virtual void Add( KeyValuePair<TKey, TValue> item ) => Add(item.Key, item.Value);
+    public virtual void Add( TKey key, TValue value )
     {
         if ( !_dictionary.TryAdd(key, value) ) { return; }
 
@@ -65,7 +61,6 @@ public class ObservableDictionary<TKey, TValue> : CollectionAlerts<KeyValuePair<
 
 
     public bool Remove( KeyValuePair<TKey, TValue> item ) => Remove(item.Key);
-
     public bool Remove( TKey key )
     {
         if ( !_dictionary.ContainsKey(key) ) { return false; }
@@ -76,6 +71,7 @@ public class ObservableDictionary<TKey, TValue> : CollectionAlerts<KeyValuePair<
         return true;
     }
 
+
     public void Clear()
     {
         _dictionary.Clear();
@@ -85,7 +81,7 @@ public class ObservableDictionary<TKey, TValue> : CollectionAlerts<KeyValuePair<
 
     public void CopyTo( KeyValuePair<TKey, TValue>[] array, int startIndex )
     {
-        foreach ( ( int index, KeyValuePair<TKey, TValue> pair ) in this.EnumeratePairs() )
+        foreach ( ( int index, KeyValuePair<TKey, TValue> pair ) in this.EnumeratePairs(0) )
         {
             if ( index < startIndex ) { continue; }
 

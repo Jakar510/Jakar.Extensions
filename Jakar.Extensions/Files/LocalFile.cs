@@ -1,16 +1,14 @@
 ﻿// unset
 
-#nullable enable
 using System.Runtime.InteropServices;
 using System.Web;
 using ErrorEventArgs = System.IO.ErrorEventArgs;
 
 
-#pragma warning disable CS8424
-
-
 
 namespace Jakar.Extensions;
+#nullable enable
+
 
 
 [Serializable]
@@ -1029,7 +1027,7 @@ public class LocalFile : BaseCollections<LocalFile>, TempFile.ITempFile, LocalFi
         await using FileStream file   = OpenRead();
         using var              stream = new StreamReader(file, FileEncoding);
 
-        while ( !token.IsCancellationRequested && !stream.EndOfStream ) { yield return await stream.ReadLineAsync(); }
+        while ( token.ShouldContinue() && !stream.EndOfStream ) { yield return await stream.ReadLineAsync(); }
     }
 
 
@@ -1221,7 +1219,7 @@ public class LocalFile : BaseCollections<LocalFile>, TempFile.ITempFile, LocalFi
         ///     Reads the contents of the file as a
         ///     <see cref = "string" />
         ///     , then calls
-        ///     <see cref = "JsonExtensions.FromJson{TResult}(string)" />
+        ///     <see cref = "JsonExtensions.FromJson(string)" />
         ///     on it, asynchronously.
         /// </summary>
         /// <typeparam name = "T" > </typeparam>

@@ -73,7 +73,7 @@ public sealed class TableCache<TRecord, TID> : Service, IHostedService, IReadOnl
     {
         using var timer = new PeriodicTimer(_refreshTime);
 
-        while ( !token.IsCancellationRequested )
+        while ( token.ShouldContinue())
         {
             try
             {

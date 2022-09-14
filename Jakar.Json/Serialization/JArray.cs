@@ -170,7 +170,7 @@ public ref struct JArray
 
         Begin();
 
-        foreach ( ( int index, IJsonizer item ) in collection.Enumerate() )
+        foreach ( ( int index, IJsonizer item ) in collection.Enumerate(0) )
         {
             JObject node = AddObject();
             item.Serialize(ref node);

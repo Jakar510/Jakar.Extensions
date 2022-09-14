@@ -25,7 +25,7 @@ public class FeedBackTrackerException : Exception
 
             case IList list:
             {
-                foreach ( ( int index, object? item ) in list.Enumerate() ) { Data[index.ToString()] = item?.ToString(); }
+                foreach ( ( int index, object? item ) in list.Enumerate(0) ) { Data[index.ToString()] = item?.ToString(); }
 
                 break;
             }

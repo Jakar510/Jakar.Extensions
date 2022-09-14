@@ -154,7 +154,7 @@ public class ObservableConcurrentDictionary<TKey, TValue> : CollectionAlerts<Key
 
     public void CopyTo( KeyValuePair<TKey, TValue>[] array, int startIndex )
     {
-        foreach ( ( int index, KeyValuePair<TKey, TValue> pair ) in this.EnumeratePairs() )
+        foreach ( ( int index, KeyValuePair<TKey, TValue> pair ) in this.EnumeratePairs(0) )
         {
             if ( index < startIndex ) { continue; }
 
