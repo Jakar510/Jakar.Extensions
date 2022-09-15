@@ -36,4 +36,11 @@ public static partial class AsyncLinq
 
         return list;
     }
+
+
+    public static AsyncEnumerator<TElement> AsAsyncEnumerable<TElement>( this IEnumerable<TElement> source, CancellationToken token = default ) => source is IReadOnlyList<TElement> list
+                                                                                                                                                       ? list.AsAsyncEnumerable(token)
+                                                                                                                                                       : source.ToArray()
+                                                                                                                                                               .AsAsyncEnumerable(token);
+    public static AsyncEnumerator<TElement> AsAsyncEnumerable<TElement>( this IReadOnlyList<TElement> source, CancellationToken token = default ) => new(source, token);
 }

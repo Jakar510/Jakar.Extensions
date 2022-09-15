@@ -30,6 +30,8 @@ public static partial class AsyncLinq
 
         throw new InvalidOperationException($"No records in {nameof(source)}");
     }
+
+
     public static async ValueTask<TElement?> FirstOrDefault<TElement>( this IAsyncEnumerable<TElement> source, CancellationToken token = default )
     {
         await foreach ( TElement element in source.WithCancellation(token) ) { return element; }
@@ -54,6 +56,8 @@ public static partial class AsyncLinq
 
         return default;
     }
+
+
     public static async ValueTask<TElement> Single<TElement>( this IAsyncEnumerable<TElement> source, CancellationToken token = default )
     {
         TElement? result = default;
@@ -93,6 +97,8 @@ public static partial class AsyncLinq
 
         throw new InvalidOperationException($"No records in {nameof(source)}");
     }
+
+
     public static async ValueTask<TElement?> SingleOrDefault<TElement>( this IAsyncEnumerable<TElement> source, CancellationToken token = default )
     {
         TElement? result = default;
@@ -132,6 +138,8 @@ public static partial class AsyncLinq
 
         return default;
     }
+
+
     public static async ValueTask<TElement> Last<TElement>( this IAsyncEnumerable<TElement> source, CancellationToken token = default )
     {
         List<TElement> list = await source.ToList(token);
@@ -153,6 +161,8 @@ public static partial class AsyncLinq
 
         throw new InvalidOperationException($"No records in {nameof(source)}");
     }
+
+
     public static async ValueTask<TElement?> LastOrDefault<TElement>( this IAsyncEnumerable<TElement> source, CancellationToken token = default )
     {
         List<TElement> list = await source.ToList(token);

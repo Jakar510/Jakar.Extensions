@@ -1,8 +1,4 @@
 ﻿#nullable enable
-using System.Threading.Tasks.Dataflow;
-
-
-
 namespace Jakar.Extensions;
 
 
@@ -62,9 +58,26 @@ public static class Tasks
     public static int WaitAny( this                          IEnumerable<Task>          tasks, CancellationToken token = default ) => Task.WaitAny(tasks.ToArray(), token);
 
 
-    public static async Task TaskFromCanceled( this                    CancellationToken token ) => await Task.FromCanceled(token);
-    public static async Task<TResult> TaskFromCanceled<TResult>( this  CancellationToken token ) => await Task.FromCanceled<TResult>(token);
-    public static async Task TaskFromException( this                   Exception         e ) => await Task.FromException(e);
-    public static async Task<TResult> TaskFromException<TResult>( this Exception         e ) => await Task.FromException<TResult>(e);
-    public static async Task<TResult> TaskFromResult<TResult>( this    TResult           result ) => await Task.FromResult(result);
+    public static Task TaskFromCanceled( this                    CancellationToken token ) => Task.FromCanceled(token);
+    public static Task<TResult> TaskFromCanceled<TResult>( this  CancellationToken token ) => Task.FromCanceled<TResult>(token);
+    public static Task TaskFromException( this                   Exception         e ) => Task.FromException(e);
+    public static Task<TResult> TaskFromException<TResult>( this Exception         e ) => Task.FromException<TResult>(e);
+    public static Task<TResult> TaskFromResult<TResult>( this    TResult           result ) => Task.FromResult(result);
+
+
+#if NETSTANDARD2_1
+    public static ValueTask ValueTaskFromCanceled( this                    CancellationToken token ) => new(token.TaskFromCanceled());
+    public static ValueTask<TResult> ValueTaskFromCanceled<TResult>( this  CancellationToken token ) => new(token.TaskFromCanceled<TResult>());
+    public static ValueTask ValueTaskFromException( this                   Exception         e ) => new(e.TaskFromException());
+    public static ValueTask<TResult> ValueTaskFromException<TResult>( this Exception         e ) => new(e.TaskFromException<TResult>());
+    public static ValueTask<TResult> ValueTaskFromResult<TResult>( this    TResult           result ) => new(result);
+
+#else
+    public static ValueTask ValueTaskFromCanceled( this                    CancellationToken token ) => ValueTask.FromCanceled(token);
+    public static ValueTask<TResult> ValueTaskFromCanceled<TResult>( this  CancellationToken token ) => ValueTask.FromCanceled<TResult>(token);
+    public static ValueTask ValueTaskFromException( this                   Exception         e ) => ValueTask.FromException(e);
+    public static ValueTask<TResult> ValueTaskFromException<TResult>( this Exception         e ) => ValueTask.FromException<TResult>(e);
+    public static ValueTask<TResult> ValueTaskFromResult<TResult>( this    TResult           result ) => ValueTask.FromResult(result);
+
+#endif
 }

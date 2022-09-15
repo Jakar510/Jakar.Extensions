@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 06/09/2022  11:05 PM
 
-using System.Runtime.InteropServices;
-
-
-
 namespace Jakar.Extensions;
 
 

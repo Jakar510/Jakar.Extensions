@@ -1,6 +1,6 @@
 {
   "profiles": {
-    "Console.Experiments": {
+    "Jakar.Extensions": {
       "commandName": "Project",
       "hotReloadEnabled": false
     }

@@ -1,7 +1,8 @@
 ﻿using System;
+using System.Diagnostics;
+using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
-using Jakar.Extensions;
+using BenchmarkDotNet.Running;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -25,21 +26,27 @@ public enum Page
 
 public static class Program
 {
+    public static IReadOnlyList<long> List { get; } = AsyncLinq.Range(0L, 10000)
+                                                               .ToArray();
+
     public static async Task Main( string[] args )
     {
         try
         {
+            await ValueTask.CompletedTask;
+
             "Hello World!".WriteToConsole();
 
             // BenchmarkRunner.Run<MapperBenchmarks>();
             // BenchmarkRunner.Run<JsonizerBenchmarks>();
             // BenchmarkRunner.Run<SpansBenchmarks>();
+            // BenchmarkRunner.Run<AsyncLinqBenchmarks>();
 
             // TestJson();
 
             // Test_Sql();
 
-            await Test_HttpBuilder();
+            // await Test_HttpBuilder();
 
 
             // var id = Guid.NewGuid();
@@ -53,13 +60,80 @@ public static class Program
             // id.ToString().Length.WriteToConsole();
             // ( result == id ).WriteToConsole();
 
-            "Bye".WriteToConsole();
+
+            await Test_AsyncLinq(List);
         }
-        catch ( Exception e )
+        catch ( Exception e ) { e.WriteToDebug(); }
+        finally { "Bye".WriteToConsole(); }
+    }
+
+
+    public static async Task Test_AsyncLinq( IReadOnlyList<long> source, CancellationToken token = default )
+    {
+        await using AsyncEnumerator<long> data = source.AsAsyncEnumerable(token);
+
+        using ( StopWatch.Start() )
         {
-            e.WriteToConsole();
-            e.WriteToDebug();
+            ( await data.Where(x => x > 0)
+                        .Where(x => x % 5 == 0)
+                        .ToList(token) ).Count.WriteToConsole();
         }
+
+
+        using ( StopWatch.Start() )
+        {
+            ( await data.Where(x => x > 0)
+                        .Where(x => x % 5 == 0)
+                        .ToList(token) ).Count.WriteToConsole();
+        }
+
+
+        using ( StopWatch.Start() )
+        {
+            ( await data.Where(x => x > 0)
+                        .Where(x => x % 5 == 0)
+                        .ToList(token) ).Count.WriteToConsole();
+        }
+
+
+        using ( StopWatch.Start() )
+        {
+            ( await data.Where(x => x > 0)
+                        .Where(x => x % 10 == 0)
+                        .ToList(token) ).Count.WriteToConsole();
+        }
+
+
+        using ( StopWatch.Start() )
+        {
+            ( await data.Where(x => x > 0)
+                        .Where(x => x % 10 == 0)
+                        .ToList(token) ).Count.WriteToConsole();
+        }
+
+
+        // using ( StopWatch.Start() )
+        // {
+        //     ( await data.Where(x => x > 0)
+        //                 .Where(x => x % 50 == 0)
+        //                 .ToList(token) ).Count.WriteToConsole();
+        // }
+        //
+        //
+        // using ( StopWatch.Start() )
+        // {
+        //     ( await data.Where(x => x > 0)
+        //                 .Where(x => x % 69 == 0)
+        //                 .ToList(token) ).Count.WriteToConsole();
+        // }
+        //
+        //
+        // using ( StopWatch.Start() )
+        // {
+        //     ( await data.Where(x => x > 0)
+        //                 .Where(x => x % 420 == 0)
+        //                 .ToList(token) ).Count.WriteToConsole();
+        // }
     }
 
 

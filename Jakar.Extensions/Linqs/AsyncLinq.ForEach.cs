@@ -1,28 +1,38 @@
-﻿using Sigil;
-using System.Threading.Tasks.Dataflow;
-
-
-
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
 
 
 public static partial class AsyncLinq
 {
-    public static void ForEach<TElement>( this IEnumerable<TElement> list, Action<TElement> action )
+    /// <summary>
+    /// If <paramref name="source"/> is an <see cref="List{TElement}"/>, items should not be added or removed while the calling.
+    /// </summary>
+    /// <typeparam name="TElement"></typeparam>
+    public static void ForEach<TElement>( this IEnumerable<TElement> source, Action<TElement> action )
     {
-        foreach ( TElement item in list ) { action(item); }
+    #if NET6_0_OR_GREATER
+
+        if ( source is List<TElement> list )
+        {
+            foreach ( TElement x in CollectionsMarshal.AsSpan(list) ) { action(x); }
+
+            return;
+        }
+
+    #endif
+
+        foreach ( TElement item in source ) { action(item); }
     }
-    public static void ForEachParallel<TElement>( this IEnumerable<TElement> list, Action<TElement> action ) => list.AsParallel()
-                                                                                                                    .ForAll(action);
+    public static void ForEachParallel<TElement>( this IEnumerable<TElement> source, Action<TElement> action ) => source.AsParallel()
+                                                                                                                        .ForAll(action);
 
 
-    public static async Task ForEachAsync<TElement>( this IEnumerable<TElement> list, Func<TElement, Task> action )
+    public static async Task ForEachAsync<TElement>( this IEnumerable<TElement> source, Func<TElement, Task> action )
     {
-        foreach ( TElement item in list ) { await action(item); }
+        foreach ( TElement item in source ) { await action(item); }
     }
-    public static async ValueTask ForEachAsync<TElement>( this IEnumerable<TElement> list, Func<TElement, ValueTask> action )
+    public static async ValueTask ForEachAsync<TElement>( this IEnumerable<TElement> source, Func<TElement, ValueTask> action )
     {
-        foreach ( TElement item in list ) { await action(item); }
+        foreach ( TElement item in source ) { await action(item); }
     }
 
 
