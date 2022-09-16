@@ -126,11 +126,36 @@ public ref struct ValueStringBuilder
     public void Insert( int index, string s ) => _chars.Insert(index, s);
 
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public void Append( char                  c ) => _chars.Append(c);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public void Append( string                s ) => _chars.Append(s);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public void Append( char                  c, int count ) => _chars.Append(c, count);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public void Append( in ReadOnlySpan<char> value ) => _chars.Append(value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public Span<char> AppendSpan( int         length ) => _chars.AppendSpan(length);
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public ValueStringBuilder Append( char c )
+    {
+        _chars.Append(c);
+        return this;
+    }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public ValueStringBuilder Append( string s )
+    {
+        _chars.Append(s);
+        return this;
+    }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public ValueStringBuilder Append( char c, int count )
+    {
+        _chars.Append(c, count);
+        return this;
+    }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public ValueStringBuilder Append( in ReadOnlySpan<char> value )
+    {
+        _chars.Append(value);
+        return this;
+    }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public ValueStringBuilder AppendSpan( int length )
+    {
+        _chars.AppendSpan(length);
+        return this;
+    }
 
 
     // public unsafe void Append( char* value, int length )
@@ -145,43 +170,47 @@ public ref struct ValueStringBuilder
     // }
 
 
-    public void AppendFormat( string? format, object? arg0 ) => AppendFormatHelper(null,                             format, new ParamsArray(arg0));
-    public void AppendFormat( string? format, object? arg0, object? arg1 ) => AppendFormatHelper(null,               format, new ParamsArray(arg0, arg1));
-    public void AppendFormat( string? format, object? arg0, object? arg1, object? arg2 ) => AppendFormatHelper(null, format, new ParamsArray(arg0, arg1, arg2));
-    public void AppendFormat( string? format, params object?[] args )
+    public ValueStringBuilder AppendFormat( in ReadOnlySpan<char> format, object? arg0 ) => AppendFormatHelper(null,                             format, new ParamsArray(arg0));
+    public ValueStringBuilder AppendFormat( in ReadOnlySpan<char> format, object? arg0, object? arg1 ) => AppendFormatHelper(null,               format, new ParamsArray(arg0, arg1));
+    public ValueStringBuilder AppendFormat( in ReadOnlySpan<char> format, object? arg0, object? arg1, object? arg2 ) => AppendFormatHelper(null, format, new ParamsArray(arg0, arg1, arg2));
+    public ValueStringBuilder AppendFormat( in ReadOnlySpan<char> format, params object?[] args )
     {
         if ( args == null )
         {
             // To preserve the original exception behavior, throw an exception about format if both
             // args and format are null. The actual null check for format is in AppendFormatHelper.
-            string paramName = format is null
+            string paramName = format.IsEmpty
                                    ? nameof(format)
                                    : nameof(args);
 
             throw new ArgumentNullException(paramName);
         }
 
-        AppendFormatHelper(null, format, new ParamsArray(args));
+        return AppendFormatHelper(null, format, new ParamsArray(args));
     }
 
 
-    public void AppendFormat( IFormatProvider? provider, string? format, object? arg0 ) => AppendFormatHelper(provider,                             format, new ParamsArray(arg0));
-    public void AppendFormat( IFormatProvider? provider, string? format, object? arg0, object? arg1 ) => AppendFormatHelper(provider,               format, new ParamsArray(arg0, arg1));
-    public void AppendFormat( IFormatProvider? provider, string? format, object? arg0, object? arg1, object? arg2 ) => AppendFormatHelper(provider, format, new ParamsArray(arg0, arg1, arg2));
-    public void AppendFormat( IFormatProvider? provider, string? format, params object?[] args )
+    public ValueStringBuilder AppendFormat( IFormatProvider? provider, in ReadOnlySpan<char> format, object? arg0 ) => AppendFormatHelper(provider,                             format, new ParamsArray(arg0));
+    public ValueStringBuilder AppendFormat( IFormatProvider? provider, in ReadOnlySpan<char> format, object? arg0, object? arg1 ) => AppendFormatHelper(provider,               format, new ParamsArray(arg0, arg1));
+    public ValueStringBuilder AppendFormat( IFormatProvider? provider, in ReadOnlySpan<char> format, object? arg0, object? arg1, object? arg2 ) => AppendFormatHelper(provider, format, new ParamsArray(arg0, arg1, arg2));
+    public ValueStringBuilder AppendFormat( IFormatProvider? provider, in ReadOnlySpan<char> format, params object?[] args )
     {
-        if ( args == null )
+        ReadOnlySpan<object?> span = args;
+        return AppendFormat(provider, format, span);
+    }
+    public ValueStringBuilder AppendFormat( IFormatProvider? provider, in ReadOnlySpan<char> format, in ReadOnlySpan<object?> args )
+    {
+        if ( args.IsEmpty )
         {
-            // To preserve the original exception behavior, throw an exception about format if both
-            // args and format are null. The actual null check for format is in AppendFormatHelper.
-            string paramName = format is null
+            // To preserve the original exception behavior, throw an exception about format if both args and format are null. The actual null check for format is in AppendFormatHelper.
+            string paramName = format.IsEmpty
                                    ? nameof(format)
                                    : nameof(args);
 
             throw new ArgumentNullException(paramName);
         }
 
-        AppendFormatHelper(provider, format, new ParamsArray(args));
+        return AppendFormatHelper(provider, format, new ParamsArray(args));
     }
 
 
@@ -196,13 +225,13 @@ public ref struct ValueStringBuilder
 
     // Copied from StringBuilder, can't be done via generic extension
     // as ValueStringBuilder is a ref struct and cannot be used in a generic.
-    internal void AppendFormatHelper( IFormatProvider? provider, string? format, ParamsArray args )
+    internal ValueStringBuilder AppendFormatHelper( IFormatProvider? provider, in ReadOnlySpan<char> format, in ParamsArray args )
     {
         // Undocumented exclusive limits on the range for Argument Hole Index and Argument Hole Alignment.
         const int IndexLimit = 1000000; // Note:            0 <= ArgIndex < IndexLimit
         const int WidthLimit = 1000000; // Note:  -WidthLimit <  ArgAlign < WidthLimit
 
-        if ( format == null ) { throw new ArgumentNullException(nameof(format)); }
+        if ( format.IsEmpty ) { throw new ArgumentNullException(nameof(format)); }
 
         var pos = 0;
         int len = format.Length;
@@ -376,7 +405,7 @@ public ref struct ValueStringBuilder
                     pos++;
                 }
 
-                if ( pos > startPos ) { itemFormatSpan = format.AsSpan(startPos, pos - startPos); }
+                if ( pos > startPos ) { itemFormatSpan = format.Slice(startPos, pos - startPos); }
             }
             else if ( ch != '}' )
             {
@@ -435,6 +464,8 @@ public ref struct ValueStringBuilder
 
             // Continue to parse other characters.
         }
+
+        return this;
     }
 
 

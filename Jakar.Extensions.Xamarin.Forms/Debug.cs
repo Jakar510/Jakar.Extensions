@@ -18,11 +18,23 @@ public class Debug : ObservableClass
     protected readonly string         _appName;
     private readonly   LocalFile      _appStateFile;
     private readonly   LocalFile      _feedBackFile;
-    public virtual     bool           CanDebug      => Debugger.IsAttached;
-    public virtual     bool           UseDebugLogin => CanDebug;
-    public             IDebugSettings Settings      { get; set; } = new DebugSettings();
+    private            DebugSettings  _debugSettings = new();
+    public virtual     bool           CanDebug       => Debugger.IsAttached;
+    public virtual     bool           UseDebugLogin  => CanDebug;
+    protected          IDebugSettings _DebugSettings => Settings;
 
 
+    public DebugSettings Settings
+    {
+        get
+        {
+            lock ( this ) { return _debugSettings; }
+        }
+        set
+        {
+            lock ( this ) { SetProperty(ref _debugSettings, value); }
+        }
+    }
     public Guid InstallID
     {
         get => _installID;
@@ -99,11 +111,11 @@ public class Debug : ObservableClass
                                                                                .Wait(token);
     public async Task HandleExceptionAsync( Exception e )
     {
-        if ( !Settings.EnableApi ) { return; }
+        if ( !_DebugSettings.EnableApi ) { return; }
 
         ThrowIfNotEnabled();
 
-        ReadOnlyMemory<byte> screenShot = Settings.TakeScreenshotOnError
+        ReadOnlyMemory<byte> screenShot = _DebugSettings.TakeScreenshotOnError
                                               ? await AppShare.TakeScreenShot()
                                                               .ConfigureAwait(false)
                                               : default;
@@ -139,7 +151,7 @@ public class Debug : ObservableClass
 
     public async Task TrackError( Exception e )
     {
-        if ( Settings.IncludeAppStateOnError )
+        if ( _DebugSettings.IncludeAppStateOnError )
         {
             e.Details(out Dictionary<string, string?> eventDetails);
 
@@ -167,7 +179,7 @@ public class Debug : ObservableClass
     public async Task TrackError( Exception ex, Dictionary<string, string?>? eventDetails, ExceptionDetails? exceptionDetails, string? incomingText, string? outgoingText, ReadOnlyMemory<byte> screenShot )
     {
         ThrowIfNotEnabled();
-        if ( !Settings.EnableCrashes ) { return; }
+        if ( !_DebugSettings.EnableCrashes ) { return; }
 
         if ( exceptionDetails is not null )
         {
@@ -177,7 +189,7 @@ public class Debug : ObservableClass
 
         var attachments = new List<ErrorAttachmentLog>(5);
 
-        if ( Settings.IncludeAppStateOnError )
+        if ( _DebugSettings.IncludeAppStateOnError )
         {
             if ( exceptionDetails is not null )
             {
@@ -205,7 +217,7 @@ public class Debug : ObservableClass
             }
         }
 
-        if ( Settings.TakeScreenshotOnError && !screenShot.IsEmpty )
+        if ( _DebugSettings.TakeScreenshotOnError && !screenShot.IsEmpty )
         {
             ErrorAttachmentLog? screenShotAttachment = ErrorAttachmentLog.AttachmentWithBinary(screenShot.ToArray(), "ScreenShot.jpeg", "image/jpeg");
             attachments.Add(screenShotAttachment);
@@ -216,7 +228,7 @@ public class Debug : ObservableClass
     public void TrackError( Exception ex, Dictionary<string, string?>? eventDetails, params ErrorAttachmentLog[] attachments )
     {
         ThrowIfNotEnabled();
-        if ( !Settings.EnableCrashes ) { return; }
+        if ( !_DebugSettings.EnableCrashes ) { return; }
 
         if ( ex is null ) { throw new ArgumentNullException(nameof(ex)); }
 
@@ -228,7 +240,7 @@ public class Debug : ObservableClass
     {
         ThrowIfNotEnabled();
 
-        if ( !Settings.EnableAnalytics ) { return; }
+        if ( !_DebugSettings.EnableAnalytics ) { return; }
 
         TrackEvent(AppState(), source);
     }
@@ -236,7 +248,7 @@ public class Debug : ObservableClass
     {
         ThrowIfNotEnabled();
 
-        if ( !Settings.EnableAnalytics ) { return; }
+        if ( !_DebugSettings.EnableAnalytics ) { return; }
 
         Analytics.TrackEvent(source, eventDetails);
     }

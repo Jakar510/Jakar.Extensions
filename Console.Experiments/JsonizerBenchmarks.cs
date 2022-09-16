@@ -1,10 +1,7 @@
 ﻿// Jakar.Extensions :: Console.Experiments
 // 05/02/2022  4:11 PM
 
-using System;
 using System.Security.Cryptography;
-using Newtonsoft.Json;
-
 
 
 #nullable enable

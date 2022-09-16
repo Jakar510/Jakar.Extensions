@@ -1,299 +1,40 @@
-﻿using System;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading;
-using BenchmarkDotNet.Running;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-
-
-// using Jakar.Xml;
-// using Jakar.Xml.Deserialization;
-
-
-#nullable enable
-namespace Console.Experiments;
-
-
-public enum Page
+﻿try
 {
-    Home,
-    Master,
-    Detail
-}
+    "Hello World!".WriteToConsole();
+
+    ValueStringBuilder builder = new ValueStringBuilder(64).Append("this is a test")
+                                                           .Append('!')
+                                                           .Append('!')
+                                                           .Append('!');
+
+    builder.ToString()
+           .WriteToDebug();
+
+    // BenchmarkRunner.Run<MapperBenchmarks>();
+    // BenchmarkRunner.Run<JsonizerBenchmarks>();
+    // BenchmarkRunner.Run<SpansBenchmarks>();
+    // BenchmarkRunner.Run<AsyncLinqBenchmarks>();
+
+    // TestJson();
+
+    // Test_Sql();
+
+    // await Test_HttpBuilder();
 
 
-
-public static class Program
-{
-    public static IReadOnlyList<long> List { get; } = AsyncLinq.Range(0L, 10000)
-                                                               .ToArray();
-
-    public static async Task Main( string[] args )
-    {
-        try
-        {
-            await ValueTask.CompletedTask;
-
-            "Hello World!".WriteToConsole();
-
-            // BenchmarkRunner.Run<MapperBenchmarks>();
-            // BenchmarkRunner.Run<JsonizerBenchmarks>();
-            // BenchmarkRunner.Run<SpansBenchmarks>();
-            // BenchmarkRunner.Run<AsyncLinqBenchmarks>();
-
-            // TestJson();
-
-            // Test_Sql();
-
-            // await Test_HttpBuilder();
-
-
-            // var id = Guid.NewGuid();
-            // id.WriteToConsole();
-            //
-            // var b64 = id.ToBase64();
-            // b64.WriteToConsole();
-            //
-            // var result = b64.AsGuid();
-            // result?.WriteToConsole();
-            // id.ToString().Length.WriteToConsole();
-            // ( result == id ).WriteToConsole();
-
-
-            await Test_AsyncLinq(List);
-        }
-        catch ( Exception e ) { e.WriteToDebug(); }
-        finally { "Bye".WriteToConsole(); }
-    }
-
-
-    public static async Task Test_AsyncLinq( IReadOnlyList<long> source, CancellationToken token = default )
-    {
-        await using AsyncEnumerator<long> data = source.AsAsyncEnumerable(token);
-
-        using ( StopWatch.Start() )
-        {
-            ( await data.Where(x => x > 0)
-                        .Where(x => x % 5 == 0)
-                        .ToList(token) ).Count.WriteToConsole();
-        }
-
-
-        using ( StopWatch.Start() )
-        {
-            ( await data.Where(x => x > 0)
-                        .Where(x => x % 5 == 0)
-                        .ToList(token) ).Count.WriteToConsole();
-        }
-
-
-        using ( StopWatch.Start() )
-        {
-            ( await data.Where(x => x > 0)
-                        .Where(x => x % 5 == 0)
-                        .ToList(token) ).Count.WriteToConsole();
-        }
-
-
-        using ( StopWatch.Start() )
-        {
-            ( await data.Where(x => x > 0)
-                        .Where(x => x % 10 == 0)
-                        .ToList(token) ).Count.WriteToConsole();
-        }
-
-
-        using ( StopWatch.Start() )
-        {
-            ( await data.Where(x => x > 0)
-                        .Where(x => x % 10 == 0)
-                        .ToList(token) ).Count.WriteToConsole();
-        }
-
-
-        // using ( StopWatch.Start() )
-        // {
-        //     ( await data.Where(x => x > 0)
-        //                 .Where(x => x % 50 == 0)
-        //                 .ToList(token) ).Count.WriteToConsole();
-        // }
-        //
-        //
-        // using ( StopWatch.Start() )
-        // {
-        //     ( await data.Where(x => x > 0)
-        //                 .Where(x => x % 69 == 0)
-        //                 .ToList(token) ).Count.WriteToConsole();
-        // }
-        //
-        //
-        // using ( StopWatch.Start() )
-        // {
-        //     ( await data.Where(x => x > 0)
-        //                 .Where(x => x % 420 == 0)
-        //                 .ToList(token) ).Count.WriteToConsole();
-        // }
-    }
-
-
-    public static async Task Test_HttpBuilder( CancellationToken token = default )
-    {
-        // var target  = new Uri("https://www.toptal.com/developers/postbin/");
-        var host    = new Uri("https://httpbin.org/");
-        var content = new AppVersion(1, 2, 3).ToString();
-
-        WebRequester builder = WebRequestBuilder.Create(host)
-                                                .With_Timeout(10)
-                                                .Build();
-
-
-        ( await builder.Get("/bearer", token)
-                       .AsJson() ).WriteToConsole();
-
-        ( await builder.Put("/put", content, token)
-                       .AsJson() ).WriteToConsole();
-
-        ( await builder.Post("/post", content, token)
-                       .AsJson() ).WriteToConsole();
-
-        ( await builder.Get("/get", token)
-                       .AsJson() ).WriteToConsole();
-
-        ( await builder.Delete("/delete", token)
-                       .AsJson() ).WriteToConsole();
-
-        ( await builder.Patch("/patch", content, token)
-                       .AsJson() ).WriteToConsole();
-
-        ( await builder.Get("/headers", token)
-                       .AsJson() ).WriteToConsole();
-
-        ( await builder.Get("/ip", token)
-                       .AsJson() ).WriteToConsole();
-
-        ( await builder.Get("/user-agent", token)
-                       .AsJson() ).WriteToConsole();
-
-        ( await builder.Get("/cookies", token)
-                       .AsJson() ).WriteToConsole();
-
-        WebResponse<LocalFile> response = await builder.Get("/image/png", token)
-                                                       .AsFile(MimeType.Png);
-
-        using ( response.Payload ) { response.WriteToConsole(); }
-
-
-        ( await builder.Get("/cookies", token)
-                       .AsString() ).WriteToConsole();
-
-
-        ( await builder.Post("/anything", content, token)
-                       .AsJson() ).WriteToConsole();
-    }
-
-
-    private static void Test_Sql()
-    {
-        // "SELECT * FROM Users"
-        // var sql = new EasySqlBuilder().Select().All().From("Users").Result;
-    }
-
-
-    // try { First(); }
-    // catch ( Exception e )
-    // {
-    //     e.ToString().WriteToConsole();
+    // var id = Guid.NewGuid();
+    // id.WriteToConsole();
     //
-    //     var details = new ExceptionDetails(e);
-    //     details.ToPrettyJson().WriteToConsole();
-    // }
-    // public static void First() => Second();
-    // private static void Second() => Third();
-    // private static void Third() => Last();
-    // private static void Last() => throw new NotImplementedException("", new NullReferenceException(nameof(Program)));
-
-    private static void TestJson()
-    {
-        var first  = new Test("First",  new Test("1.1"), new Test("1.2"));
-        var second = new Test("Second", new Test("2.1"));
-        var test   = new Test("Root",   first, second);
+    // var b64 = id.ToBase64();
+    // b64.WriteToConsole();
+    //
+    // var result = b64.AsGuid();
+    // result?.WriteToConsole();
+    // id.ToString().Length.WriteToConsole();
+    // ( result == id ).WriteToConsole();
 
 
-        test.ToJson()
-            .WriteToConsole();
-
-        string temp = test.ToJson();
-        temp.WriteToConsole();
-
-        "---TEST---".WriteToConsole();
-        JToken json = temp.FromJson();
-
-        json.ToJson(Formatting.Indented)
-            .WriteToConsole();
-    }
-
-
-//     public static void TestXml()
-//     {
-//         var document = new XDocument(@"
-// <Group xmls=""System.Collections.Generic.List"">
-// <Item>Test String</Item>
-// </Group>");
-//
-//         foreach ( XNode node in document ) { }
-//
-//
-//         // var d = new Dictionary<string, object>()
-//         //         {
-//         //             ["IDs"] = new List<double> { 1, 2, 3 },
-//         //             [nameof(User)] = new User()
-//         //                              {
-//         //                                  Address = new List<Address>()
-//         //                                            {
-//         //                                                new()
-//         //                                                {
-//         //                                                    City  = "Plano",
-//         //                                                    State = "Texas"
-//         //                                                }
-//         //                                            },
-//         //                                  UserName   = "User",
-//         //                                  IsActive   = true,
-//         //                                  IsLoggedIn = true,
-//         //                                  FirstName  = "First",
-//         //                                  LastName   = "Last"
-//         //                              },
-//         //             ["Token"] = Guid.NewGuid(),
-//         //             ["Data"] = new Dictionary<string, object>()
-//         //                        {
-//         //                            ["Test"] = "Success",
-//         //                            ["Date"] = DateTime.Now
-//         //                        },
-//         //         };
-//         //
-//         //
-//         // var l = new List<object>()
-//         //         {
-//         //             d,
-//         //             1,
-//         //             1d,
-//         //             "hi",
-//         //             new MultiDict(),
-//         //             new[] { "1", "2", "3" },
-//         //             TimeSpan.MinValue,
-//         //             TimeSpan.MaxValue,
-//         //             DateTime.MinValue,
-//         //             DateTime.MaxValue,
-//         //             (uint)0
-//         //         };
-//         //
-//         // System.Console.WriteLine();
-//         //
-//         // string s = l.ToXml();
-//         //
-//         // s.WriteToConsole();
-//         //
-//         // var file = new LocalFile("Output.xml");
-//         // await file.WriteToFileAsync(s);
-//     }
+    // await Tests.Test_AsyncLinq(Tests.List);
 }
+catch ( Exception e ) { e.WriteToDebug(); }
+finally { "Bye".WriteToConsole(); }
