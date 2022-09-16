@@ -1,11 +1,11 @@
 ﻿// Jakar.Extensions :: Jakar.Database
-// 08/21/2022  9:25 AM
+// 09/15/2022  8:27 PM
 
 namespace Jakar.Database;
 
 
 [Serializable]
-public sealed class Counter<TID> : IEnumerator<TID> where TID : struct, IComparable<TID>, IEquatable<TID>
+public sealed class CounterAsync<TID> : IAsyncEnumerator<TID> where TID : struct, IComparable<TID>, IEquatable<TID>
 {
     private readonly Func<TID?, TID> _adder;
     private          TID?            _current;
@@ -16,17 +16,20 @@ public sealed class Counter<TID> : IEnumerator<TID> where TID : struct, ICompara
         get => _current ?? throw new InvalidOperationException(nameof(_current));
         private set => _current = value;
     }
-    object IEnumerator.Current => Current;
 
 
-    public Counter( Func<TID?, TID> adder ) => _adder = adder;
-    public void Dispose() => _current = default;
+    public CounterAsync( Func<TID?, TID> adder ) => _adder = adder;
+    public ValueTask DisposeAsync()
+    {
+        _current = default;
+        return ValueTask.CompletedTask;
+    }
 
 
-    public bool MoveNext()
+    public ValueTask<bool> MoveNextAsync()
     {
         Current = _adder(_current);
-        return true;
+        return true.ValueTaskFromResult();
     }
     public void Reset() => _current = default;
 }
