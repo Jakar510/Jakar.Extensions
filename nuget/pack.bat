@@ -8,8 +8,6 @@ del *.nupkg
 
 nuget.exe pack Jakar.Extensions.nuspec || goto :error
 
-nuget.exe pack Jakar.Extensions.Maui.nuspec || goto :error
-
 nuget.exe pack Jakar.Extensions.Xamarin.Forms.nuspec || goto :error
 
 nuget.exe pack Jakar.Extensions.Blazor.nuspec || goto :error

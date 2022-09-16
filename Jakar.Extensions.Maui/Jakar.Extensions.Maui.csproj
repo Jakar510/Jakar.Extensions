@@ -27,4 +27,8 @@
 	<ItemGroup>
 		<PackageReference Include="Jakar.Extensions" Version="6.0.0.63-beta" />
 	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Converters\" />
+	</ItemGroup>
 </Project>

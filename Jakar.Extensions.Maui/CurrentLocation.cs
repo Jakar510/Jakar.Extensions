@@ -147,13 +147,15 @@ public class CurrentLocation<TID> : ICurrentLocation<TID>, IDataBaseIgnore where
     public static double CalculateDistance( ICurrentLocation<TID> locationStart, ICurrentLocation<TID> locationEnd, DistanceUnits units ) =>
         CalculateDistance(locationStart.Latitude, locationStart.Longitude, locationEnd.Latitude, locationEnd.Longitude, units);
 
-    public static double CalculateDistance( double latitudeStart, double longitudeStart, double latitudeEnd, double longitudeEnd, DistanceUnits units ) =>
-        units switch
-        {
-            DistanceUnits.Kilometers => UnitConverters.CoordinatesToKilometers(latitudeStart, longitudeStart, latitudeEnd, longitudeEnd),
-            DistanceUnits.Miles      => UnitConverters.CoordinatesToMiles(latitudeStart, longitudeStart, latitudeEnd, longitudeEnd),
-            _                        => throw new ArgumentOutOfRangeException(nameof(units))
-        };
+    public static double CalculateDistance( double latitudeStart, double longitudeStart, double latitudeEnd, double longitudeEnd, DistanceUnits units )
+    {
+        return units switch
+               {
+                   DistanceUnits.Kilometers => UnitConverters.CoordinatesToKilometers(latitudeStart, longitudeStart, latitudeEnd, longitudeEnd),
+                   DistanceUnits.Miles      => UnitConverters.CoordinatesToMiles(latitudeStart, longitudeStart, latitudeEnd, longitudeEnd),
+                   _                        => throw new ArgumentOutOfRangeException(nameof(units))
+               };
+    }
 
 
     public bool Equals( ICurrentLocation<TID>? other )
@@ -184,3 +186,5 @@ public class CurrentLocation<TID> : ICurrentLocation<TID>, IDataBaseIgnore where
         return hashCode.ToHashCode();
     }
 }
+
+
