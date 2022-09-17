@@ -15,7 +15,7 @@ public abstract class DbTable<TRecord, TID> : ObservableClass, IDbTable<TRecord,
     // ReSharper disable once InconsistentNaming
     public        IDGenerator       IDs       => new(this);
     public        RecordGenerator   Records   => new(this);
-    public static string            TableName { get; } = typeof(TRecord).GetTableName();
+    public static string            TableName => BaseTableRecord<TRecord, TID>.TableName;
     string IDbTable<TRecord, TID>.  TableName => TableName;
     private readonly IConnectableDb _database;
 
@@ -83,7 +83,7 @@ public abstract class DbTable<TRecord, TID> : ObservableClass, IDbTable<TRecord,
     public virtual async ValueTask<long> Count( CancellationToken token = default ) => await this.Call(Count, token);
     public virtual async ValueTask<long> Count( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
-        string sql = $"SELECT COUNT({nameof(IUniqueID<TID>.ID)}) FROM {TableName}";
+        var sql = $"SELECT COUNT({nameof(IUniqueID<TID>.ID)}) FROM {TableName}";
 
         token.ThrowIfCancellationRequested();
         return await connection.QueryFirstOrDefaultAsync<long>(sql, default, transaction);
@@ -113,7 +113,7 @@ public abstract class DbTable<TRecord, TID> : ObservableClass, IDbTable<TRecord,
     public virtual async ValueTask<TRecord> Last( CancellationToken token = default ) => await this.Call(Last, token);
     public virtual async ValueTask<TRecord> Last( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
-        string sql = $"SELECT * FROM {TableName} ORDER BY {nameof(IUniqueID<TID>.ID)} DESC";
+        string sql = $"SELECT * FROM {TableName} ORDER BY {nameof(IUniqueID<TID>.ID)} DESC LIMIT 1";
 
         token.ThrowIfCancellationRequested();
         return await connection.QueryFirstAsync<TRecord>(sql, default, transaction);
@@ -124,7 +124,7 @@ public abstract class DbTable<TRecord, TID> : ObservableClass, IDbTable<TRecord,
     public virtual async ValueTask<TRecord?> LastOrDefault( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
         token.ThrowIfCancellationRequested();
-        string sql = $"SELECT * FROM {TableName} ORDER BY {nameof(IUniqueID<TID>.ID)} DESC";
+        string sql = $"SELECT * FROM {TableName} ORDER BY {nameof(IUniqueID<TID>.ID)} DESC LIMIT 1";
 
         return await connection.QueryFirstOrDefaultAsync<TRecord>(sql, default, transaction);
     }
@@ -139,8 +139,7 @@ public abstract class DbTable<TRecord, TID> : ObservableClass, IDbTable<TRecord,
         string sql = $"SELECT * FROM {TableName} where {nameof(IUniqueID<TID>.ID)} = @{nameof(IUniqueID<TID>.ID)}";
 
         token.ThrowIfCancellationRequested();
-        IEnumerable<TRecord> items = await connection.QueryAsync<TRecord>(sql, parameters, transaction);
-        return items.Single();
+        return await connection.QuerySingleAsync<TRecord>(sql, parameters, transaction);
     }
 
 
@@ -148,8 +147,7 @@ public abstract class DbTable<TRecord, TID> : ObservableClass, IDbTable<TRecord,
     public virtual async ValueTask<TRecord?> Single( DbConnection connection, DbTransaction? transaction, string sql, DynamicParameters? parameters, CancellationToken token = default )
     {
         token.ThrowIfCancellationRequested();
-        IEnumerable<TRecord> items = await connection.QueryAsync<TRecord>(sql, parameters, transaction);
-        return items.Single();
+        return await connection.QuerySingleAsync<TRecord>(sql, parameters, transaction);
     }
 
 
@@ -162,8 +160,7 @@ public abstract class DbTable<TRecord, TID> : ObservableClass, IDbTable<TRecord,
         string sql = $"SELECT * FROM {TableName} where {nameof(IUniqueID<TID>.ID)} = @{nameof(IUniqueID<TID>.ID)}";
 
         token.ThrowIfCancellationRequested();
-        IEnumerable<TRecord> items = await connection.QueryAsync<TRecord>(sql, parameters, transaction);
-        return items.SingleOrDefault();
+        return await connection.QuerySingleOrDefaultAsync<TRecord>(sql, parameters, transaction);
     }
 
 
@@ -171,18 +168,19 @@ public abstract class DbTable<TRecord, TID> : ObservableClass, IDbTable<TRecord,
     public virtual async ValueTask<TRecord?> SingleOrDefault( DbConnection connection, DbTransaction? transaction, string sql, DynamicParameters? parameters, CancellationToken token = default )
     {
         token.ThrowIfCancellationRequested();
-        IEnumerable<TRecord> items = await connection.QueryAsync<TRecord>(sql, parameters, transaction);
-        return items.SingleOrDefault();
+        return await connection.QuerySingleOrDefaultAsync<TRecord>(sql, parameters, transaction);
     }
 
 
     public virtual async ValueTask<List<TRecord>> All( CancellationToken token = default ) => await this.Call(All, token);
     public virtual async ValueTask<List<TRecord>> All( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
-        string sql = $"SELECT * FROM {TableName}";
+        var sql = $"SELECT * FROM {TableName}";
 
         token.ThrowIfCancellationRequested();
         IEnumerable<TRecord> items = await connection.QueryAsync<TRecord>(sql, default, transaction);
+        if ( items is List<TRecord> list ) { return list; }
+
         return items.ToList();
     }
 
@@ -219,18 +217,19 @@ public abstract class DbTable<TRecord, TID> : ObservableClass, IDbTable<TRecord,
     }
 
 
-    public virtual async IAsyncEnumerable<TRecord> Where( DynamicParameters parameters, [EnumeratorCancellation] CancellationToken token = default )
+    public virtual async IAsyncEnumerable<TRecord> Where( bool matchAll, DynamicParameters parameters, [EnumeratorCancellation] CancellationToken token = default )
     {
-        await foreach ( TRecord record in this.Call(Where, parameters, token) ) { yield return record; }
+        await foreach ( TRecord record in this.Call(Where, matchAll, parameters, token) ) { yield return record; }
     }
-    public virtual async IAsyncEnumerable<TRecord> Where( DbConnection connection, DbTransaction? transaction, DynamicParameters parameters, [EnumeratorCancellation] CancellationToken token = default )
+    public virtual IAsyncEnumerable<TRecord> Where( DbConnection connection, DbTransaction? transaction, bool matchAll, DynamicParameters parameters, CancellationToken token = default )
     {
-        var sql = new StringBuilder($"SELECT * FROM {TableName} WHERE ").AppendJoin(',', parameters.ParameterNames.Select(x => $" @{x}"))
+        var sql = new StringBuilder($"SELECT * FROM {TableName} WHERE ").AppendJoin(matchAll
+                                                                                        ? "AND"
+                                                                                        : "OR",
+                                                                                    parameters.ParameterNames.Select(x => $"{x} = @{x}"))
                                                                         .ToString();
 
-        IEnumerable<TRecord> records = await connection.QueryAsync<TRecord>(sql, parameters, transaction);
-
-        foreach ( TRecord record in records ) { yield return record; }
+        return Where(connection, transaction, sql, parameters, token);
     }
 
 
@@ -241,9 +240,15 @@ public abstract class DbTable<TRecord, TID> : ObservableClass, IDbTable<TRecord,
     public virtual async IAsyncEnumerable<TRecord> Where( DbConnection connection, DbTransaction? transaction, string sql, DynamicParameters? parameters, [EnumeratorCancellation] CancellationToken token = default )
     {
         token.ThrowIfCancellationRequested();
-        IEnumerable<TRecord> items = await connection.QueryAsync<TRecord>(sql, parameters, transaction);
+        using SqlMapper.GridReader reader = await connection.QueryMultipleAsync(sql, parameters, transaction);
+        IEnumerable<TRecord>       items  = await reader.ReadAsync<TRecord>(false);
 
-        foreach ( TRecord record in items ) { yield return record; }
+        foreach ( TRecord record in items )
+        {
+            if ( token.IsCancellationRequested ) { yield break; }
+
+            yield return record;
+        }
     }
 
 
@@ -257,9 +262,15 @@ public abstract class DbTable<TRecord, TID> : ObservableClass, IDbTable<TRecord,
         var    parameters = new DynamicParameters();
         parameters.Add(nameof(value), value);
 
-        IEnumerable<TRecord> records = await connection.QueryAsync<TRecord>(sql, parameters, transaction);
+        using SqlMapper.GridReader reader = await connection.QueryMultipleAsync(sql, parameters, transaction);
+        IEnumerable<TRecord>       items  = await reader.ReadAsync<TRecord>(false);
 
-        foreach ( TRecord record in records ) { yield return record; }
+        foreach ( TRecord record in items )
+        {
+            if ( token.IsCancellationRequested ) { yield break; }
+
+            yield return record;
+        }
     }
 
 
@@ -316,9 +327,15 @@ public abstract class DbTable<TRecord, TID> : ObservableClass, IDbTable<TRecord,
         string sql = $"SELECT * FROM {TableName} where {nameof(IUniqueID<TID>.ID)} in {sb}";
 
         token.ThrowIfCancellationRequested();
-        IEnumerable<TRecord?> items = await connection.QueryAsync<TRecord>(sql, default, transaction);
+        using SqlMapper.GridReader reader = await connection.QueryMultipleAsync(sql, default, transaction);
+        IEnumerable<TRecord>       items  = await reader.ReadAsync<TRecord>(false);
 
-        foreach ( TRecord? record in items ) { yield return record; }
+        foreach ( TRecord record in items )
+        {
+            if ( token.IsCancellationRequested ) { yield break; }
+
+            yield return record;
+        }
     }
     public virtual async IAsyncEnumerable<TRecord?> Get( DbConnection connection, DbTransaction? transaction, IAsyncEnumerable<TID> ids, [EnumeratorCancellation] CancellationToken token = default )
     {

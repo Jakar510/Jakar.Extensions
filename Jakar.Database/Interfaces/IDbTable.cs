@@ -69,16 +69,16 @@ public interface IDbTable<TRecord, TID> : IConnectableDb, IAsyncDisposable where
     public ValueTask<List<TRecord>> All( DbConnection      connection, DbTransaction? transaction, CancellationToken token = default );
 
 
-    public ValueTask<TResult> Call<TResult>( string       sql,        DynamicParameters? parameters,  Func<SqlMapper.GridReader, CancellationToken, ValueTask<TResult>> func, CancellationToken token = default );
-    public ValueTask<TResult> Call<TResult>( DbConnection connection, DbTransaction?     transaction, string sql, DynamicParameters? parameters, Func<SqlMapper.GridReader, CancellationToken, ValueTask<TResult>> func, CancellationToken token = default );
+    public ValueTask<TResult> Call<TResult>( string       sql,        DynamicParameters? parameters, Func<SqlMapper.GridReader, CancellationToken, ValueTask<TResult>> func, CancellationToken token = default );
+    public ValueTask<TResult> Call<TResult>( DbConnection connection, DbTransaction? transaction, string sql, DynamicParameters? parameters, Func<SqlMapper.GridReader, CancellationToken, ValueTask<TResult>> func, CancellationToken token = default );
 
 
     public ValueTask<TResult> Call<TResult>( string       sql,        DynamicParameters? parameters,  Func<DbDataReader, CancellationToken, ValueTask<TResult>> func, CancellationToken token = default );
     public ValueTask<TResult> Call<TResult>( DbConnection connection, DbTransaction?     transaction, string sql, DynamicParameters? parameters, Func<DbDataReader, CancellationToken, ValueTask<TResult>> func, CancellationToken token = default );
 
 
-    public IAsyncEnumerable<TRecord> Where( DynamicParameters parameters, [EnumeratorCancellation] CancellationToken token                                                                                       = default );
-    public IAsyncEnumerable<TRecord> Where( DbConnection      connection, DbTransaction?                             transaction, DynamicParameters parameters, [EnumeratorCancellation] CancellationToken token = default );
+    public IAsyncEnumerable<TRecord> Where(bool matchAll, DynamicParameters parameters, [EnumeratorCancellation] CancellationToken token                                                                                                      = default );
+    public IAsyncEnumerable<TRecord> Where( DbConnection      connection, DbTransaction?                             transaction, bool matchAll, DynamicParameters parameters, [EnumeratorCancellation] CancellationToken token = default );
 
 
     public IAsyncEnumerable<TRecord> Where( string       sql,        DynamicParameters? parameters,  [EnumeratorCancellation] CancellationToken token                                                                                = default );
@@ -101,18 +101,18 @@ public interface IDbTable<TRecord, TID> : IConnectableDb, IAsyncDisposable where
     public ValueTask<TRecord?> Get<TValue>( DbConnection connection, DbTransaction? transaction, string            columnName, TValue value, CancellationToken token = default );
 
 
-    public ValueTask<TRecord?> Get( TID                               id,         CancellationToken                          token );
+    public ValueTask<TRecord?> Get( TID                          id,         CancellationToken                          token );
     public IAsyncEnumerable<TRecord?> Get( IEnumerable<TID>      ids,        [EnumeratorCancellation] CancellationToken token = default );
     public IAsyncEnumerable<TRecord?> Get( IAsyncEnumerable<TID> ids,        [EnumeratorCancellation] CancellationToken token = default );
-    public ValueTask<TRecord?> Get( DbConnection                      connection, DbTransaction?                             transaction, TID                   id,  CancellationToken                          token );
+    public ValueTask<TRecord?> Get( DbConnection                 connection, DbTransaction?                             transaction, TID                   id,  CancellationToken                          token );
     public IAsyncEnumerable<TRecord?> Get( DbConnection          connection, DbTransaction?                             transaction, IEnumerable<TID>      ids, [EnumeratorCancellation] CancellationToken token = default );
     public IAsyncEnumerable<TRecord?> Get( DbConnection          connection, DbTransaction?                             transaction, IAsyncEnumerable<TID> ids, [EnumeratorCancellation] CancellationToken token = default );
 
 
-    public ValueTask<TRecord> Insert( TRecord                               record,     CancellationToken                          token );
+    public ValueTask<TRecord> Insert( TRecord                          record,     CancellationToken                          token );
     public IAsyncEnumerable<TRecord> Insert( IEnumerable<TRecord>      records,    [EnumeratorCancellation] CancellationToken token = default );
     public IAsyncEnumerable<TRecord> Insert( IAsyncEnumerable<TRecord> records,    [EnumeratorCancellation] CancellationToken token = default );
-    public ValueTask<TRecord> Insert( DbConnection                          connection, DbTransaction                              transaction, TRecord                   record,  CancellationToken                          token );
+    public ValueTask<TRecord> Insert( DbConnection                     connection, DbTransaction                              transaction, TRecord                   record,  CancellationToken                          token );
     public IAsyncEnumerable<TRecord> Insert( DbConnection              connection, DbTransaction                              transaction, IEnumerable<TRecord>      records, [EnumeratorCancellation] CancellationToken token = default );
     public IAsyncEnumerable<TRecord> Insert( DbConnection              connection, DbTransaction                              transaction, IAsyncEnumerable<TRecord> records, [EnumeratorCancellation] CancellationToken token = default );
 
