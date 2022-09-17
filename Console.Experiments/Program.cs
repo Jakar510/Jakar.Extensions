@@ -1,14 +1,21 @@
-﻿try
+﻿using System.Globalization;
+
+
+try
 {
     "Hello World!".WriteToConsole();
 
-    ValueStringBuilder builder = new ValueStringBuilder(64).Append("this is a test")
-                                                           .Append('!')
-                                                           .Append('!')
-                                                           .Append('!');
+    var builder = new ValueStringBuilder(64);
+
+    builder = builder.Append("this is a test");
+    builder = builder.Append('!');
+    builder = builder.Append('!');
+    builder = builder.Append(' ');
+    builder = builder.AppendSpanFormattable(DateTime.Now, "yyyy hh:ss");
 
     builder.ToString()
            .WriteToDebug();
+
 
     // BenchmarkRunner.Run<MapperBenchmarks>();
     // BenchmarkRunner.Run<JsonizerBenchmarks>();

@@ -4,41 +4,35 @@
 namespace Jakar.Extensions;
 
 
-public ref struct Buffer<T> where T : struct, IEquatable<T>
+public ref struct Buffer<T> where T : unmanaged, IEquatable<T>
 {
     private T[]?    _arrayToReturnToPool;
     private Span<T> _span;
 
-    public          bool    IsEmpty  => _span.Length == 0;
+    public          bool    IsEmpty  => Length == 0;
     public readonly int     Capacity => _span.Length;
     public          int     Index    { get; set; }
     public          Span<T> Next     => _span[Index..];
 
 
-    /// <summary>Returns the underlying storage of the builder.</summary>
+    /// <summary> Returns the underlying storage of the builder. </summary>
     public Span<T> RawChars => _span;
+
+    public Span<T> this[ Range range ] => _span[range];
+    public ref T this[ int index ]
+    {
+        get
+        {
+            Debug.Assert(index < Length);
+            return ref _span[index];
+        }
+    }
 
 
     public int Length
     {
         readonly get => Index;
-        set
-        {
-            Debug.Assert(value >= 0,            "Value must be zero or greater");
-            Debug.Assert(value <= _span.Length, $"Value must be less than '{_span.Length}'");
-            Index = value;
-        }
-    }
-
-    public Span<T> this[ Range range ] => _span[range];
-
-    public ref T this[ int index ]
-    {
-        get
-        {
-            Debug.Assert(index < Index);
-            return ref _span[index];
-        }
+        set => Index = Math.Max(Math.Min(Capacity, value), 0);
     }
 
 
@@ -55,12 +49,8 @@ public ref struct Buffer<T> where T : struct, IEquatable<T>
         _span                = initialBuffer;
         Index                = 0;
     }
-    public Buffer( in ReadOnlySpan<T> initialBuffer )
-    {
-        _arrayToReturnToPool = null;
-        _span                = initialBuffer.AsSpan();
-        Index                = 0;
-    }
+
+
     public void Dispose()
     {
         T[]? toReturn = _arrayToReturnToPool;
@@ -106,7 +96,7 @@ public ref struct Buffer<T> where T : struct, IEquatable<T>
     /// <param name="additionalCapacityBeyondPos">
     /// Number of chars requested beyond current position.
     /// </param>
-    private void Grow( int additionalCapacityBeyondPos )
+    private void Grow( in int additionalCapacityBeyondPos )
     {
         Debug.Assert(additionalCapacityBeyondPos > 0);
         Debug.Assert(Index > _span.Length - additionalCapacityBeyondPos, "Grow called incorrectly, no resize is needed.");
@@ -114,6 +104,7 @@ public ref struct Buffer<T> where T : struct, IEquatable<T>
         T[] poolArray = ArrayPool<T>.Shared.Rent(Math.Max(Index + additionalCapacityBeyondPos, _span.Length * 2));
 
         _span.CopyTo(poolArray);
+
         T[]? toReturn                = _arrayToReturnToPool;
         _span = _arrayToReturnToPool = poolArray;
         if ( toReturn is not null ) { ArrayPool<T>.Shared.Return(toReturn); }
@@ -153,8 +144,8 @@ public ref struct Buffer<T> where T : struct, IEquatable<T>
        .ToString();
 
 
-    [PureAttribute] public readonly ReadOnlySpan<T> AsSpan() => _span[..Index];
-    [PureAttribute]
+    [Pure] public readonly ReadOnlySpan<T> AsSpan() => _span[..Index];
+    [Pure]
     public ReadOnlySpan<T> AsSpan( in T? terminate )
     {
         if ( !terminate.HasValue ) { return _span[..Index]; }
@@ -163,13 +154,13 @@ public ref struct Buffer<T> where T : struct, IEquatable<T>
         _span[Index + 1] = terminate.Value;
         return _span[..Index];
     }
-    [PureAttribute] public readonly ReadOnlySpan<T> Slice( int start ) => _span.Slice(start,             Index - start);
-    [PureAttribute] public readonly ReadOnlySpan<T> Slice( int start, int length ) => _span.Slice(start, length);
-    public int IndexOf( in     T                               value ) => Next.IndexOf(value);
-    public int LastIndexOf( in T                               value, int end ) => Next.LastIndexOf(value, end);
+    [Pure] public readonly ReadOnlySpan<T> Slice( int start ) => _span.Slice(start,             Index - start);
+    [Pure] public readonly ReadOnlySpan<T> Slice( int start, int length ) => _span.Slice(start, length);
+    public int IndexOf( in     T                      value ) => Next.IndexOf(value);
+    public int LastIndexOf( in T                      value, int end ) => Next.LastIndexOf(value, end);
 
 
-    public bool Contains( T                  value ) => _span.Contains(value);
+    public bool Contains( in T               value ) => _span.Contains(value);
     public bool Contains( in Span<T>         value ) => _span.Contains(value);
     public bool Contains( in ReadOnlySpan<T> value ) => _span.Contains(value);
 
@@ -187,7 +178,8 @@ public ref struct Buffer<T> where T : struct, IEquatable<T>
         return false;
     }
 
-    public void Insert( int index, T value, int count )
+
+    public Buffer<T> Insert( int index, T value, int count )
     {
         if ( Index > _span.Length - count ) { Grow(count); }
 
@@ -200,8 +192,9 @@ public ref struct Buffer<T> where T : struct, IEquatable<T>
              .Fill(value);
 
         Index += count;
+        return this;
     }
-    public void Insert( int index, ReadOnlySpan<T> s )
+    public Buffer<T> Insert( int index, in ReadOnlySpan<T> s )
     {
         int count = s.Length;
 
@@ -216,86 +209,76 @@ public ref struct Buffer<T> where T : struct, IEquatable<T>
          .CopyTo(_span[index..]);
 
         Index += count;
+        return this;
     }
 
 
-    public void Append( T c )
+    public Buffer<T> Append( in T value )
     {
         int pos = Index;
 
         if ( (uint)pos < (uint)_span.Length )
         {
-            _span[pos] = c;
+            _span[pos] = value;
             Index      = pos + 1;
         }
-        else { GrowAndAppend(c); }
+        else { GrowAndAppend(value); }
+
+        return this;
     }
-    public void Append( ReadOnlySpan<T> s )
+    public Buffer<T> Append( in ReadOnlySpan<T> span )
     {
         int pos = Index;
 
-        switch ( s.Length )
+        switch ( span.Length )
         {
             // very common case, e.g. appending strings from NumberFormatInfo like separators, percent symbols, etc.
-            case 1 when (uint)pos < (uint)_span.Length:
+            case 1 when pos < Capacity:
             {
-                _span[pos] =  s[0];
+                _span[pos] =  span[0];
                 Index      += 1;
-                return;
+                return this;
             }
 
             // very common case, e.g. appending strings from NumberFormatInfo like separators, percent symbols, etc.
-            case 2 when (uint)pos < (uint)_span.Length:
+            case 2 when pos < Capacity:
             {
-                _span[pos] =  s[0];
-                Index      += 1;
-                _span[pos] =  s[1];
-                Index      += 1;
-                return;
+                _span[pos] =  span[0];
+                _span[pos] =  span[1];
+                Index      += 2;
+                return this;
             }
 
-            default:
-            {
-                AppendSlow(s);
-                return;
-            }
+            default: { return AppendSlow(span); }
         }
     }
 
-    private void AppendSlow( ReadOnlySpan<T> s )
+    private Buffer<T> AppendSlow( in ReadOnlySpan<T> span )
     {
         int pos = Index;
-        if ( pos > _span.Length - s.Length ) { Grow(s.Length); }
+        if ( pos > Capacity - span.Length ) { Grow(span.Length); }
 
-        s.CopyTo(_span[pos..]);
-        Index += s.Length;
+        span.CopyTo(_span[pos..]);
+        Index += span.Length;
+        return this;
     }
 
-    public void Append( T c, int count )
+    public Buffer<T> Append( T c, int count )
     {
-        if ( Index > _span.Length - count ) { Grow(count); }
+        if ( Index > Capacity - count ) { Grow(count); }
 
         Span<T> dst = _span.Slice(Index, count);
         for ( var i = 0; i < dst.Length; i++ ) { dst[i] = c; }
 
         Index += count;
-    }
-
-
-    public void Append( in ReadOnlySpan<T> value )
-    {
-        int pos = Index;
-        if ( pos > _span.Length - value.Length ) { Grow(value.Length); }
-
-        value.CopyTo(_span[Index..]);
-        Index += value.Length;
+        return this;
     }
 
 
     public Span<T> AppendSpan( int length )
     {
         int origPos = Index;
-        if ( origPos > _span.Length - length ) { Grow(length); }
+        if ( origPos > Capacity - length ) { Grow(length); }
 
         Index = origPos + length;
         return _span.Slice(origPos, length);

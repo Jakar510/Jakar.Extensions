@@ -31,12 +31,7 @@ public ref struct ValueStringBuilder
     public int Length
     {
         readonly get => _chars.Length;
-        set
-        {
-            Debug.Assert(value >= 0,             "Value must be zero or greater");
-            Debug.Assert(value <= _chars.Length, $"Value must be less than '{_chars.Length}'");
-            _chars.Length = value;
-        }
+        set => _chars.Length = value;
     }
 
 
@@ -132,28 +127,28 @@ public ref struct ValueStringBuilder
         _chars.Append(c);
         return this;
     }
+
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ValueStringBuilder Append( string s )
     {
         _chars.Append(s);
         return this;
     }
+
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ValueStringBuilder Append( char c, int count )
     {
         _chars.Append(c, count);
         return this;
     }
+
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ValueStringBuilder Append( in ReadOnlySpan<char> value )
     {
         _chars.Append(value);
-        return this;
-    }
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public ValueStringBuilder AppendSpan( int length )
-    {
-        _chars.AppendSpan(length);
         return this;
     }
 
@@ -215,10 +210,13 @@ public ref struct ValueStringBuilder
 
 
 #if NET6_0
-    public void AppendSpanFormattable<T>( T value, string? format, IFormatProvider? provider ) where T : ISpanFormattable
+    public ValueStringBuilder AppendSpanFormattable<T>( T value, string? format ) where T : ISpanFormattable => AppendSpanFormattable(value, format, CultureInfo.InvariantCulture);
+    public ValueStringBuilder AppendSpanFormattable<T>( T value, string? format, IFormatProvider? provider ) where T : ISpanFormattable
     {
         if ( value.TryFormat(_chars.Next, out int charsWritten, format, provider) ) { _chars.Index += charsWritten; }
         else { Append(value.ToString(format, provider)); }
+
+        return this;
     }
 
 #endif
