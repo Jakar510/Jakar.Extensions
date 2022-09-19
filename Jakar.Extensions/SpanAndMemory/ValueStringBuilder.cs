@@ -16,7 +16,6 @@ public ref struct ValueStringBuilder
 
     public          bool               IsEmpty  => _chars.Length == 0;
     public readonly int                Capacity => _chars.Capacity;
-    public readonly Span<char>         RawChars => _chars.RawSpan;
     public readonly Span<char>         Next     => _chars.Next;
     public readonly ReadOnlySpan<char> Span     => _chars.Span;
     public readonly Span<char> this[ in Range range ] => _chars[range];
@@ -25,16 +24,20 @@ public ref struct ValueStringBuilder
 
     public int Length
     {
-        readonly get => _chars.Length;
-        set => _chars.Length = value;
+        readonly get => _chars.Index;
+        set => _chars.Index = value;
     }
 
 
     public ValueStringBuilder() : this(64) { }
-    public ValueStringBuilder( int                   initialCapacity ) : this(new Buffer<char>(initialCapacity, false)) { }
-    public ValueStringBuilder( in ReadOnlySpan<char> span ) : this(span, false) { }
-    public ValueStringBuilder( in ReadOnlySpan<char> span, in bool isReadOnly ) : this(Buffer<char>.Create(span, isReadOnly)) { }
-    public ValueStringBuilder( in Buffer<char>       buffer ) => _chars = buffer;
+    public ValueStringBuilder( int initialCapacity ) => _chars = new Buffer<char>(initialCapacity, false);
+
+
+    // public ValueStringBuilder( in ReadOnlySpan<char> span ) : this(span, false) { }
+    // public ValueStringBuilder( in ReadOnlySpan<char> span, in bool isReadOnly ) : this(Buffer<char>.Create(span, isReadOnly)) { }
+    // public ValueStringBuilder( in Buffer<char>       buffer ) => _chars = buffer;
+
+
     public void Dispose() => _chars.Dispose();
     public readonly Enumerator GetEnumerator() => new(this);
 
@@ -498,15 +501,14 @@ public ref struct ValueStringBuilder
 
     public ref struct Enumerator
     {
-        private readonly ValueStringBuilder _builder;
-        private          int                _index = 0;
-        public readonly  char               Current => _builder[_index];
+        private             Buffer<char>.Enumerator _builder;
+        public readonly ref char                    Current => ref _builder.Current;
 
 
-        internal Enumerator( in ValueStringBuilder buffer ) => _builder = buffer;
+        internal Enumerator( in ValueStringBuilder buffer ) => _builder = buffer._chars.GetEnumerator();
 
 
-        public void Reset() => _index = 0;
-        public bool MoveNext() => ++_index < _builder.Length;
+        public void Reset() => _builder.Reset();
+        public bool MoveNext() => _builder.MoveNext();
     }
 }

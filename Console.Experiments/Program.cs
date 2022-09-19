@@ -42,7 +42,8 @@
     //               .Length.WriteToDebug();
 
 
-    var builder = new ValueStringBuilder("ARG? ");
+    var builder = new ValueStringBuilder();
+    builder = builder.Append("ARG? ");
     builder = builder.Append("this is a test");
     builder = builder.Append("!!");
     builder = builder.Append('?');
@@ -52,8 +53,8 @@
     builder = builder.AppendSpanFormattable(DateTime.Now, "dd/mm/yyyy hh:ss");
     builder = builder.Replace(0, 'T');
 
-    builder = builder.Insert(0, "Yes ");
-    builder = builder.Insert(4, ' ', 5);
+    builder = builder.Insert(builder.Span.IndexOf('t'), "Yes ");
+    builder = builder.Insert(4,                         ' ', 5);
     builder = builder.Replace(0, "No! ");
     builder = builder.Replace(4, '~', 4);
 
