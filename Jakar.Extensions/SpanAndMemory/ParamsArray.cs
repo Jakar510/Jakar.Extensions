@@ -19,22 +19,25 @@ public readonly ref struct ParamsArray
     private readonly object? _arg1;
     private readonly object? _arg2;
 
-    // After construction, the first three elements of this array will never be accessed
-    // because the indexer will retrieve those values from arg0, arg1, and arg2.
+    // After construction, the first three elements of this array will never be accessed because the indexer will retrieve those values from arg0, arg1, and arg2.
     private readonly ReadOnlySpan<object?> _args;
 
     public int Length => _args.Length;
 
-    public object? this[ int index ] => index == 0
-                                            ? _arg0
-                                            : GetAtSlow(index);
+    public object? this[ int index ] => index switch
+                                        {
+                                            0 => _arg0,
+                                            1 => _arg1,
+                                            2 => _arg2,
+                                            _ => _args[index]
+                                        };
 
 
     public ParamsArray( object? arg0 )
     {
         _arg0 = arg0;
-        _arg1 = null;
-        _arg2 = null;
+        _arg1 = default;
+        _arg2 = default;
 
         // Always assign this.args to make use of its "Length" property
         _args = _oneArgArray;
@@ -43,7 +46,7 @@ public readonly ref struct ParamsArray
     {
         _arg0 = arg0;
         _arg1 = arg1;
-        _arg2 = null;
+        _arg2 = default;
 
         // Always assign this.args to make use of its "Length" property
         _args = _twoArgArray;
@@ -63,26 +66,31 @@ public readonly ref struct ParamsArray
 
         _arg0 = len > 0
                     ? args[0]
-                    : null;
+                    : default;
 
         _arg1 = len > 1
                     ? args[1]
-                    : null;
+                    : default;
 
         _arg2 = len > 2
                     ? args[2]
-                    : null;
+                    : default;
 
         _args = args;
     }
-    public static ParamsArray Create( params object?[] args ) => new(args);
 
 
-    private object? GetAtSlow( int index ) => index switch
-                                              {
-                                                  1 => _arg1,
-                                                  _ => index == 2
-                                                           ? _arg2
-                                                           : _args[index]
-                                              };
+    public static ParamsArray Create( params object?[] args )
+    {
+        ReadOnlySpan<object?> span = args;
+        return new ParamsArray(span);
+    }
+
+#if NET6_0_OR_GREATER
+    public static ParamsArray Create( List<object?> args )
+    {
+        ReadOnlySpan<object?> span = CollectionsMarshal.AsSpan(args);
+        return new ParamsArray(span);
+    }
+#endif
 }

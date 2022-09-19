@@ -14,19 +14,14 @@ public ref struct ValueStringBuilder
     private Buffer<char> _chars;
 
 
-    public          bool       IsEmpty  => _chars.Length == 0;
-    public readonly int        Capacity => _chars.Capacity;
-    public          Span<char> RawChars => _chars.RawChars;
+    public          bool               IsEmpty  => _chars.Length == 0;
+    public readonly int                Capacity => _chars.Capacity;
+    public readonly Span<char>         RawChars => _chars.RawSpan;
+    public readonly Span<char>         Next     => _chars.Next;
+    public readonly ReadOnlySpan<char> Span     => _chars.Span;
+    public readonly Span<char> this[ in Range range ] => _chars[range];
+    public ref char this[ int                 index ] => ref _chars[index];
 
-    public Span<char> this[ Range range ] => _chars[range];
-    public ref char this[ int index ]
-    {
-        get
-        {
-            Debug.Assert(index < Length);
-            return ref _chars[index];
-        }
-    }
 
     public int Length
     {
@@ -36,32 +31,15 @@ public ref struct ValueStringBuilder
 
 
     public ValueStringBuilder() : this(64) { }
-    public ValueStringBuilder( int                   initialCapacity ) : this(new Buffer<char>(initialCapacity)) { }
-    public ValueStringBuilder( in ReadOnlySpan<char> initialBuffer ) : this(new Buffer<char>(initialBuffer)) { }
+    public ValueStringBuilder( int                   initialCapacity ) : this(new Buffer<char>(initialCapacity, false)) { }
+    public ValueStringBuilder( in ReadOnlySpan<char> span ) : this(span, false) { }
+    public ValueStringBuilder( in ReadOnlySpan<char> span, in bool isReadOnly ) : this(Buffer<char>.Create(span, isReadOnly)) { }
     public ValueStringBuilder( in Buffer<char>       buffer ) => _chars = buffer;
     public void Dispose() => _chars.Dispose();
-    public void Reset() => _chars.Reset('\0');
     public readonly Enumerator GetEnumerator() => new(this);
 
 
-
-    public ref struct Enumerator
-    {
-        private readonly ValueStringBuilder _builder;
-        private          int                _index = 0;
-        public readonly  char               Current => _builder[_index];
-
-
-        internal Enumerator( in ValueStringBuilder buffer ) => _builder = buffer;
-
-
-        public void Reset() => _index = 0;
-        public bool MoveNext() => ++_index < _builder.Length;
-    }
-
-
-
-    public void EnsureCapacity( int capacity ) => _chars.EnsureCapacity(capacity);
+    public void EnsureCapacity( in int capacity ) => _chars.EnsureCapacity(capacity);
 
 
     /// <summary>
@@ -75,11 +53,20 @@ public ref struct ValueStringBuilder
     /// <param name="terminate">Ensures that the builder has a null char after <see cref="Length"/></param>
     public ref char GetPinnableReference( bool terminate )
     {
-        if ( terminate )
-        {
-            EnsureCapacity(Length + 1);
-            _chars[Length] = '\0';
-        }
+        if ( !terminate ) { return ref GetPinnableReference(); }
+
+        EnsureCapacity(Length + 1);
+        _chars[++Length] = '\0';
+
+        return ref GetPinnableReference(terminate);
+    }
+
+    /// <summary> Get a pinnable reference to the builder. </summary>
+    /// <param name="terminate">Ensures that the builder has a null char after <see cref="Length"/></param>
+    public ref char GetPinnableReference( in char terminate )
+    {
+        EnsureCapacity(Length + 1);
+        _chars[++Length] = terminate;
 
         return ref GetPinnableReference();
     }
@@ -87,9 +74,10 @@ public ref struct ValueStringBuilder
 
     public override string ToString()
     {
-        var s = _chars.ToString();
+        var result = Span.ToString();
+
         Dispose();
-        return s;
+        return result;
     }
 
 
@@ -100,9 +88,9 @@ public ref struct ValueStringBuilder
     public ReadOnlySpan<char> AsSpan( bool terminate ) => _chars.AsSpan(terminate
                                                                             ? '\0'
                                                                             : default);
-    [Pure] public readonly ReadOnlySpan<char> AsSpan() => _chars.AsSpan();
     [Pure] public readonly ReadOnlySpan<char> Slice( int start ) => _chars[start..];
     [Pure] public readonly ReadOnlySpan<char> Slice( int start, int length ) => _chars.Slice(start, length);
+    public void Reset() => _chars.Reset('\0');
 
 
     public bool TryCopyTo( in Span<char> destination, out int charsWritten )
@@ -232,31 +220,51 @@ public ref struct ValueStringBuilder
 
 
 #if NET6_0
-    public ValueStringBuilder AppendSpanFormattable<T>( T value, string? format ) where T : ISpanFormattable => AppendSpanFormattable(value, format, CultureInfo.InvariantCulture);
-    public ValueStringBuilder AppendSpanFormattable<T>( T value, string? format, IFormatProvider? provider ) where T : ISpanFormattable
+    public ValueStringBuilder AppendSpanFormattable<T>( in T value, in ReadOnlySpan<char> format, IFormatProvider? provider = default ) where T : ISpanFormattable
     {
-        if ( value.TryFormat(_chars.Next, out int charsWritten, format, provider) ) { _chars.Index += charsWritten; }
-        else { Append(value.ToString(format, provider)); }
+        if ( typeof(T) == typeof(DateTime) ) { EnsureCapacity(Math.Max(format.Length,            25)); }
+        else if ( typeof(T) == typeof(DateTimeOffset) ) { EnsureCapacity(Math.Max(format.Length, 35)); }
+        else if ( typeof(T) == typeof(short) ) { EnsureCapacity(10); }
+        else if ( typeof(T) == typeof(ushort) ) { EnsureCapacity(10); }
+        else if ( typeof(T) == typeof(int) ) { EnsureCapacity(15); }
+        else if ( typeof(T) == typeof(uint) ) { EnsureCapacity(15); }
+        else if ( typeof(T) == typeof(long) ) { EnsureCapacity(30); }
+        else if ( typeof(T) == typeof(ulong) ) { EnsureCapacity(30); }
+        else if ( typeof(T) == typeof(float) ) { EnsureCapacity(40); }
+        else if ( typeof(T) == typeof(double) ) { EnsureCapacity(75); }
+        else if ( typeof(T) == typeof(decimal) ) { EnsureCapacity(100); }
+        else { EnsureCapacity(500); } // Last resort guess...?
 
+        if ( value.TryFormat(Next, out int charsWritten, format, provider) ) { _chars.Index += charsWritten; }
+
+        Debug.Assert(charsWritten > 0, $"No value added to {nameof(_chars)}");
         return this;
     }
 
 #endif
 
-    // Copied from StringBuilder, can't be done via generic extension
-    // as ValueStringBuilder is a ref struct and cannot be used in a generic.
+
+    /// <summary>
+    /// Copied from StringBuilder, can't be done via generic extension as ValueStringBuilder is a ref struct and cannot be used in a generic.
+    /// </summary>
+    /// <param name="provider"></param>
+    /// <param name="format"></param>
+    /// <param name="args"></param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="FormatException"></exception>
     internal ValueStringBuilder AppendFormatHelper( IFormatProvider? provider, in ReadOnlySpan<char> format, in ParamsArray args )
     {
         // Undocumented exclusive limits on the range for Argument Hole Index and Argument Hole Alignment.
-        const int IndexLimit = 1000000; // Note:            0 <= ArgIndex < IndexLimit
-        const int WidthLimit = 1000000; // Note:  -WidthLimit <  ArgAlign < WidthLimit
+        const int INDEX_LIMIT = 1000000; // Note:            0 <= ArgIndex < IndexLimit
+        const int WIDTH_LIMIT = 1000000; // Note:  -WidthLimit <  ArgAlign < WidthLimit
 
         if ( format.IsEmpty ) { throw new ArgumentNullException(nameof(format)); }
 
         var pos = 0;
         int len = format.Length;
         var ch  = '\0';
-        var cf  = (ICustomFormatter?)provider?.GetFormat(typeof(ICustomFormatter));
+        var cf  = provider?.GetFormat(typeof(ICustomFormatter)) as ICustomFormatter;
 
         while ( true )
         {
@@ -316,15 +324,10 @@ public ref struct ValueStringBuilder
             do
             {
                 index = index * 10 + ch - '0';
-                pos++;
+                if ( ++pos == len ) { ThrowFormatError(); } // If reached end of text then error (Unexpected end of text)
 
-                // If reached end of text then error (Unexpected end of text)
-                if ( pos == len ) { ThrowFormatError(); }
-
-                ch = format[pos];
-
-                // so long as character is digit and value of the index is less than 1000000 ( index limit )
-            } while ( ch is >= '0' and <= '9' && index < IndexLimit );
+                ch = format[pos]; // so long as character is digit and value of the index is less than 1000000 ( index limit )
+            } while ( ch is >= '0' and <= '9' && index < INDEX_LIMIT );
 
             // If value of index is not within the range of the arguments passed in then error (Index out of range)
             if ( index >= args.Length ) { throw new FormatException("Format Index Out Of Range"); }
@@ -382,7 +385,7 @@ public ref struct ValueStringBuilder
                     ch = format[pos];
 
                     // So long a current character is a digit and the value of width is less than 100000 ( width limit )
-                } while ( ch is >= '0' and <= '9' && width < WidthLimit );
+                } while ( ch is >= '0' and <= '9' && width < WIDTH_LIMIT );
 
                 // end of parsing Argument Alignment
             }
@@ -450,7 +453,7 @@ public ref struct ValueStringBuilder
             #if NET6_0
 
                 // If arg is ISpanFormattable and the beginning doesn't need padding, try formatting it into the remaining current chunk.
-                if ( arg is ISpanFormattable spanFormattableArg && ( leftJustify || width == 0 ) && spanFormattableArg.TryFormat(_chars.Next, out int charsWritten, itemFormatSpan, provider) )
+                if ( arg is ISpanFormattable spanFormattableArg && ( leftJustify || width == 0 ) && spanFormattableArg.TryFormat(Next, out int charsWritten, itemFormatSpan, provider) )
                 {
                     _chars.Index += charsWritten;
 
@@ -490,4 +493,20 @@ public ref struct ValueStringBuilder
 
 
     [DoesNotReturn] private static void ThrowFormatError() => throw new FormatException("Invalid Format String");
+
+
+
+    public ref struct Enumerator
+    {
+        private readonly ValueStringBuilder _builder;
+        private          int                _index = 0;
+        public readonly  char               Current => _builder[_index];
+
+
+        internal Enumerator( in ValueStringBuilder buffer ) => _builder = buffer;
+
+
+        public void Reset() => _index = 0;
+        public bool MoveNext() => ++_index < _builder.Length;
+    }
 }

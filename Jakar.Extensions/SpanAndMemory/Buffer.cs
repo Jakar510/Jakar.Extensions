@@ -9,16 +9,16 @@ public ref struct Buffer<T> where T : unmanaged, IEquatable<T>
     private T[]?    _arrayToReturnToPool = default;
     private Span<T> _span                = default;
 
-    public          bool    IsEmpty  => Length == 0;
-    public readonly int     Capacity => _span.Length;
-    public          int     Index    { get; set; } = 0;
-    public          Span<T> Next     => _span[Index..];
+    public          bool            IsEmpty    => Length == 0;
+    public readonly int             Capacity   => _span.Length;
+    internal        int             Index      { get; set; } = 0;
+    public          bool            IsReadOnly { get; init; }
+    public readonly Span<T>         Next       => _span[Index..];
+    public readonly ReadOnlySpan<T> Span       => _span[..Index];
+    public readonly Span<T>         RawSpan    => _span;
 
 
-    /// <summary> Returns the underlying storage of the builder. </summary>
-    public Span<T> RawChars => _span;
-
-    public Span<T> this[ Range range ] => _span[range];
+    public readonly Span<T> this[ in Range range ] => _span[range];
     public ref T this[ int index ]
     {
         get
@@ -36,9 +36,12 @@ public ref struct Buffer<T> where T : unmanaged, IEquatable<T>
     }
 
 
-    public Buffer() : this(64) { }
-    public Buffer( int                initialCapacity ) => _span = _arrayToReturnToPool = ArrayPool<T>.Shared.Rent(initialCapacity);
-    public Buffer( in ReadOnlySpan<T> buffer ) : this(buffer.Length * 2) => Append(buffer);
+    public Buffer() : this(64, false) { }
+    public Buffer( int initialCapacity, in bool isReadOnly )
+    {
+        _span      = _arrayToReturnToPool = ArrayPool<T>.Shared.Rent(initialCapacity);
+        IsReadOnly = isReadOnly;
+    }
     public void Dispose()
     {
         T[]? toReturn = _arrayToReturnToPool;
@@ -65,19 +68,36 @@ public ref struct Buffer<T> where T : unmanaged, IEquatable<T>
 
 
 
-    public Buffer<T> Reset( in T value )
+    private void ThrowIfReadOnly()
     {
-        Index = 0;
-        _span.Fill(value);
-        return this;
+        if ( IsReadOnly ) { throw new InvalidOperationException($"{nameof(Buffer<T>)} is read only"); }
     }
-    public Buffer<T> Init( in ReadOnlySpan<T> value )
+    private static int GetLength( in ReadOnlySpan<T> span, in bool isReadOnly ) => span.Length * ( isReadOnly
+                                                                                                       ? 1
+                                                                                                       : 2 );
+
+
+    [Pure] public static Buffer<T> Create( in ReadOnlySpan<T> span, in bool isReadOnly ) => new Buffer<T>().Init(span, isReadOnly);
+    [Pure]
+    public Buffer<T> Init( in ReadOnlySpan<T> span, in bool isReadOnly )
     {
         if ( _arrayToReturnToPool is not null ) { ArrayPool<T>.Shared.Return(_arrayToReturnToPool); }
 
         Index = 0;
-        _span = _arrayToReturnToPool = ArrayPool<T>.Shared.Rent(value.Length * 2);
-        value.CopyTo(_span);
+
+        _span = _arrayToReturnToPool = ArrayPool<T>.Shared.Rent(GetLength(span, isReadOnly));
+
+        span.CopyTo(_span);
+
+        return this with
+               {
+                   IsReadOnly = isReadOnly
+               };
+    }
+    public Buffer<T> Reset( in T value )
+    {
+        Index = 0;
+        _span.Fill(value);
         return this;
     }
 
@@ -92,25 +112,25 @@ public ref struct Buffer<T> where T : unmanaged, IEquatable<T>
     /// </param>
     private void Grow( in int additionalCapacityBeyondPos )
     {
+        ThrowIfReadOnly();
         Debug.Assert(additionalCapacityBeyondPos > 0);
-        Debug.Assert(Index > _span.Length - additionalCapacityBeyondPos, "Grow called incorrectly, no resize is needed.");
+        Debug.Assert(Index + additionalCapacityBeyondPos >= Capacity, "Grow called incorrectly, no resize is needed.");
 
-        T[] poolArray = ArrayPool<T>.Shared.Rent(Math.Max(Index + additionalCapacityBeyondPos, _span.Length * 2));
-
+        T[] poolArray = ArrayPool<T>.Shared.Rent(Math.Max(Index + additionalCapacityBeyondPos, Capacity * 2));
         _span.CopyTo(poolArray);
 
         T[]? toReturn                = _arrayToReturnToPool;
         _span = _arrayToReturnToPool = poolArray;
         if ( toReturn is not null ) { ArrayPool<T>.Shared.Return(toReturn); }
     }
-    private void GrowAndAppend( T c )
+    private void GrowAndAppend( in T c )
     {
         Grow(1);
         Append(c);
     }
-    public void EnsureCapacity( int capacity )
+    public void EnsureCapacity( in int capacity )
     {
-        if ( capacity > _span.Length ) { Grow(capacity - Index); }
+        if ( Index + capacity > Capacity ) { Grow(capacity); }
     }
 
 
@@ -121,32 +141,27 @@ public ref struct Buffer<T> where T : unmanaged, IEquatable<T>
     /// </summary>
     public ref T GetPinnableReference() => ref _span.GetPinnableReference();
 
-    /// <summary> Get a pinnable reference to the builder. </summary>
-    /// <param name="terminate">Ensures that the builder has a null T after <see cref="Length"/></param>
-    public ref T GetPinnableReference( in T? terminate )
+    /// <summary> Get a pinnable reference to the builder. Ensures that the builder has a <paramref name="terminate"/> value after <see cref="Length"/> </summary>
+    /// <param name="terminate"></param>
+    public ref T GetPinnableReference( in T terminate )
     {
-        if ( !terminate.HasValue ) { return ref GetPinnableReference(); }
-
-        EnsureCapacity(Index + 1);
-        _span[Index + 1] = terminate.Value;
+        EnsureCapacity(Length + 1);
+        _span[++Length] = terminate;
 
         return ref GetPinnableReference();
     }
 
 
-    public override string ToString() => AsSpan()
-       .ToString();
+    public override string ToString() => $"{nameof(Buffer<T>)} ( {nameof(Capacity)}: {Capacity}, {nameof(Index)}: {Index}, {nameof(IsReadOnly)}: {IsReadOnly} )";
 
-
-    [Pure] public readonly ReadOnlySpan<T> AsSpan() => _span[..Index];
     [Pure]
     public ReadOnlySpan<T> AsSpan( in T? terminate )
     {
         if ( terminate is null ) { return _span[..Index]; }
 
-        EnsureCapacity(Index + 1);
-        _span[Index + 1] = terminate.Value;
-        return _span[..Index];
+        EnsureCapacity(++Index);
+        _span[Index] = terminate.Value;
+        return Span;
     }
     [Pure] public readonly ReadOnlySpan<T> Slice( int start ) => _span.Slice(start,             Index - start);
     [Pure] public readonly ReadOnlySpan<T> Slice( int start, int length ) => _span.Slice(start, length);
@@ -176,6 +191,7 @@ public ref struct Buffer<T> where T : unmanaged, IEquatable<T>
     public Buffer<T> Replace( in int index, in T value ) => Replace(index, value, 1);
     public Buffer<T> Replace( in int index, in T value, in int count )
     {
+        ThrowIfReadOnly();
         if ( Index + count > _span.Length ) { Grow(count); }
 
         _span.Slice(index, count)
@@ -185,6 +201,7 @@ public ref struct Buffer<T> where T : unmanaged, IEquatable<T>
     }
     public Buffer<T> Replace( in int index, in ReadOnlySpan<T> span )
     {
+        ThrowIfReadOnly();
         if ( Index + span.Length > _span.Length ) { Grow(span.Length); }
 
         span.CopyTo(_span.Slice(index, span.Length));
@@ -195,6 +212,7 @@ public ref struct Buffer<T> where T : unmanaged, IEquatable<T>
     public Buffer<T> Insert( in int index, in T value ) => Insert(index, value, 1);
     public Buffer<T> Insert( in int index, in T value, in int count )
     {
+        ThrowIfReadOnly();
         if ( Index + count > _span.Length ) { Grow(count); }
 
         int remaining = Index - index;
@@ -210,6 +228,7 @@ public ref struct Buffer<T> where T : unmanaged, IEquatable<T>
     }
     public Buffer<T> Insert( in int index, in ReadOnlySpan<T> span )
     {
+        ThrowIfReadOnly();
         if ( Index + span.Length > _span.Length ) { Grow(span.Length); }
 
         int remaining = Index - index;
@@ -226,6 +245,7 @@ public ref struct Buffer<T> where T : unmanaged, IEquatable<T>
 
     public Buffer<T> Append( in T value )
     {
+        ThrowIfReadOnly();
         int pos = Index;
 
         if ( (uint)pos < (uint)_span.Length )
@@ -239,6 +259,8 @@ public ref struct Buffer<T> where T : unmanaged, IEquatable<T>
     }
     public Buffer<T> Append( in ReadOnlySpan<T> span )
     {
+        ThrowIfReadOnly();
+
         switch ( span.Length )
         {
             // very common case, e.g. appending strings from NumberFormatInfo like separators, percent symbols, etc.
@@ -255,21 +277,21 @@ public ref struct Buffer<T> where T : unmanaged, IEquatable<T>
                 return this;
             }
 
-            default: { return AppendSlow(span); }
+            default:
+            {
+                if ( Index + span.Length >= Capacity ) { Grow(span.Length); }
+
+                span.CopyTo(_span[Index..]);
+                Index += span.Length;
+                return this;
+            }
         }
     }
 
-    private Buffer<T> AppendSlow( in ReadOnlySpan<T> span )
-    {
-        if ( Index + span.Length >= Capacity ) { Grow(span.Length); }
-
-        span.CopyTo(_span[Index..]);
-        Index += span.Length;
-        return this;
-    }
 
     public Buffer<T> Append( in T c, in int count )
     {
+        ThrowIfReadOnly();
         if ( Index + count >= Capacity ) { Grow(count); }
 
         for ( int i = Index; i < Index + count; i++ ) { _span[i] = c; }

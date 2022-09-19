@@ -2,8 +2,47 @@
 {
     "Hello World!".WriteToConsole();
 
-    var builder = new ValueStringBuilder(64);
+    // byte.MaxValue.ToString()
+    //     .Length.WriteToDebug();
+    //
+    // sbyte.MaxValue.ToString()
+    //      .Length.WriteToDebug();
+    //
+    // short.MaxValue.ToString()
+    //      .Length.WriteToDebug();
+    //
+    // ushort.MaxValue.ToString()
+    //       .Length.WriteToDebug();
+    //
+    // int.MaxValue.ToString()
+    //    .Length.WriteToDebug();
+    //
+    // uint.MaxValue.ToString()
+    //     .Length.WriteToDebug();
+    //
+    // long.MaxValue.ToString()
+    //     .Length.WriteToDebug();
+    //
+    // ulong.MaxValue.ToString()
+    //      .Length.WriteToDebug();
+    //
+    // float.MaxValue.ToString()
+    //      .Length.WriteToDebug();
+    //
+    // double.MaxValue.ToString()
+    //       .Length.WriteToDebug();
+    //
+    // decimal.MaxValue.ToString()
+    //        .Length.WriteToDebug();
+    //
+    // DateTime.Now.ToString()
+    //         .Length.WriteToDebug();
+    //
+    // DateTimeOffset.Now.ToString()
+    //               .Length.WriteToDebug();
 
+
+    var builder = new ValueStringBuilder("ARG? ");
     builder = builder.Append("this is a test");
     builder = builder.Append("!!");
     builder = builder.Append('?');
@@ -18,8 +57,8 @@
     builder = builder.Replace(0, "No! ");
     builder = builder.Replace(4, '~', 4);
 
-    builder.ToString()
-           .WriteToDebug();
+
+    builder.WriteToConsole();
 
 
     // BenchmarkRunner.Run<MapperBenchmarks>();
