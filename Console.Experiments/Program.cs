@@ -1,17 +1,22 @@
-﻿using System.Globalization;
-
-
-try
+﻿try
 {
     "Hello World!".WriteToConsole();
 
     var builder = new ValueStringBuilder(64);
 
     builder = builder.Append("this is a test");
-    builder = builder.Append('!');
-    builder = builder.Append('!');
+    builder = builder.Append("!!");
+    builder = builder.Append('?');
     builder = builder.Append(' ');
-    builder = builder.AppendSpanFormattable(DateTime.Now, "yyyy hh:ss");
+    builder = builder.Append('.', 5);
+    builder = builder.Append(' ');
+    builder = builder.AppendSpanFormattable(DateTime.Now, "dd/mm/yyyy hh:ss");
+    builder = builder.Replace(0, 'T');
+
+    builder = builder.Insert(0, "Yes ");
+    builder = builder.Insert(4, ' ', 5);
+    builder = builder.Replace(0, "No! ");
+    builder = builder.Replace(4, '~', 4);
 
     builder.ToString()
            .WriteToDebug();

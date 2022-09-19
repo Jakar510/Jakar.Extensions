@@ -36,8 +36,9 @@ public ref struct ValueStringBuilder
 
 
     public ValueStringBuilder() : this(64) { }
-    public ValueStringBuilder( int           initialCapacity ) => _chars = new Buffer<char>(initialCapacity);
-    public ValueStringBuilder( in Span<char> initialBuffer ) => _chars = new Buffer<char>(initialBuffer);
+    public ValueStringBuilder( int                   initialCapacity ) : this(new Buffer<char>(initialCapacity)) { }
+    public ValueStringBuilder( in ReadOnlySpan<char> initialBuffer ) : this(new Buffer<char>(initialBuffer)) { }
+    public ValueStringBuilder( in Buffer<char>       buffer ) => _chars = buffer;
     public void Dispose() => _chars.Dispose();
     public void Reset() => _chars.Reset('\0');
     public readonly Enumerator GetEnumerator() => new(this);
@@ -117,35 +118,56 @@ public ref struct ValueStringBuilder
     }
 
 
-    public void Insert( int index, char   value, int count ) => _chars.Insert(index, value, count);
-    public void Insert( int index, string s ) => _chars.Insert(index, s);
+    public ValueStringBuilder Replace( in int index, in char value )
+    {
+        _chars.Replace(index, value);
+        return this;
+    }
+    public ValueStringBuilder Replace( in int index, in char value, in int count )
+    {
+        _chars.Replace(index, value, count);
+        return this;
+    }
+    public ValueStringBuilder Replace( in int index, in ReadOnlySpan<char> value )
+    {
+        _chars.Replace(index, value);
+        return this;
+    }
 
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public ValueStringBuilder Append( char c )
+    public ValueStringBuilder Insert( in int index, in char value )
+    {
+        _chars.Insert(index, value);
+        return this;
+    }
+    public ValueStringBuilder Insert( in int index, in char value, in int count )
+    {
+        _chars.Insert(index, value, count);
+        return this;
+    }
+    public ValueStringBuilder Insert( in int index, in ReadOnlySpan<char> value )
+    {
+        _chars.Insert(index, value);
+        return this;
+    }
+
+
+    public ValueStringBuilder Append( in char c )
     {
         _chars.Append(c);
         return this;
     }
-
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public ValueStringBuilder Append( string s )
+    public ValueStringBuilder Append( IEnumerable<string> values )
     {
-        _chars.Append(s);
+        foreach ( string value in values ) { _chars.Append(value); }
+
         return this;
     }
-
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public ValueStringBuilder Append( char c, int count )
+    public ValueStringBuilder Append( in char c, in int count )
     {
         _chars.Append(c, count);
         return this;
     }
-
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ValueStringBuilder Append( in ReadOnlySpan<char> value )
     {
         _chars.Append(value);
