@@ -4,7 +4,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata>
 		<id>Jakar.Extensions</id>
-		<version>6.0.0.68-beta</version>
+		<version>6.0.0.69-beta</version>
 		<title>Extension Library</title>
 		<authors>Tyler Stegmaier</authors>
 		<owners>Jakar510/Jakar</owners>
@@ -21,7 +21,6 @@
 			Jakar.Extensions 6.0.0
 			Major namespace changes.
 			Removed Models.Users.
-			Added MailKit Email Builder.
 			Added Models.Service.
 			Added WebRequestBuilder, WebRequester.
 			WebRequests.GetResponseAsync now tries to get the error details, including anything sent sent from server in the body.
@@ -46,7 +45,7 @@
 				<dependency id="CommunityToolkit.Diagnostics"
 							version="8.0.0" />
 				<dependency id="Dapper"
-							version="2.0.78" />
+							version="2.0.123" />
 				<dependency id="Dapper.Contrib"
 							version="2.0.78" />
 				<dependency id="JetBrains.Annotations"
@@ -59,6 +58,8 @@
 							version="13.0.1" />
 				<dependency id="Nito.Collections.Deque"
 							version="1.1.1" />
+				<dependency id="Portable.BouncyCastle"
+							version="1.9.0" />
 				<dependency id="System.Collections.Immutable"
 							version="6.0.0" />
 				<dependency id="System.ComponentModel.Annotations"
@@ -81,8 +82,6 @@
 							version="3.0.223" />
 				<dependency id="ValueOf"
 							version="2.0.31" />
-				<dependency id="MailKit"
-							version="3.4.1" />
 				<dependency id="Sigil"
 							version="5.0.0" />
 				<dependency id="System.Text.Encoding.CodePages"
@@ -108,6 +107,8 @@
 							version="13.0.1" />
 				<dependency id="Nito.Collections.Deque"
 							version="1.1.1" />
+				<dependency id="Portable.BouncyCastle"
+							version="1.9.0" />
 				<dependency id="System.Collections.Immutable"
 							version="6.0.0" />
 				<dependency id="System.ComponentModel.Annotations"
@@ -130,8 +131,6 @@
 							version="3.0.223" />
 				<dependency id="ValueOf"
 							version="2.0.31" />
-				<dependency id="MailKit"
-							version="3.4.1" />
 				<dependency id="Sigil"
 							version="5.0.0" />
 				<dependency id="System.Text.Encoding.CodePages"
