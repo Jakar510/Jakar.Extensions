@@ -1,12 +1,12 @@
-﻿namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions.Hosting;
 
 
 #nullable enable
 #if NET6_0
 public static partial class WebBuilder
 {
-    public static WebApplicationBuilder AddDefaultLogging<T>( this WebApplicationBuilder builder ) where T : IAppName => builder.AddDefaultLogging<T>(builder.Environment.EnvironmentName == Environments.Development);
-    public static WebApplicationBuilder AddDefaultLogging<T>( this WebApplicationBuilder builder, bool isDevEnvironment ) where T : IAppName => builder.AddDefaultLogging(isDevEnvironment, typeof(T).Name);
+    public static WebApplicationBuilder AddDefaultLogging<T>( this WebApplicationBuilder builder ) where T : class => builder.AddDefaultLogging<T>(builder.Environment.EnvironmentName == Environments.Development);
+    public static WebApplicationBuilder AddDefaultLogging<T>( this WebApplicationBuilder builder, bool isDevEnvironment ) where T : class => builder.AddDefaultLogging(isDevEnvironment, typeof(T).Name);
     public static WebApplicationBuilder AddDefaultLogging( this WebApplicationBuilder builder, bool isDevEnvironment, string name )
     {
         builder.Logging.ClearProviders();

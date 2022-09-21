@@ -9,6 +9,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nuget", "nuget", "{07C27764
 	ProjectSection(SolutionItems) = preProject
 		nuget\Jakar.DataBase.nuspec = nuget\Jakar.DataBase.nuspec
 		nuget\Jakar.Extensions.Blazor.nuspec = nuget\Jakar.Extensions.Blazor.nuspec
+		nuget\Jakar.Extensions.Hosting.nuspec = nuget\Jakar.Extensions.Hosting.nuspec
 		nuget\Jakar.Extensions.nuspec = nuget\Jakar.Extensions.nuspec
 		nuget\Jakar.Extensions.Xamarin.Forms.nuspec = nuget\Jakar.Extensions.Xamarin.Forms.nuspec
 		nuget\Jakar.Xml.nuspec = nuget\Jakar.Xml.nuspec
@@ -55,6 +56,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jakar.Extensions.Bogus", "Jakar.Extensions.Bogus\Jakar.Extensions.Bogus.csproj", "{2A67C324-7873-409E-859B-F02D7C718D65}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jakar.Database", "Jakar.Database\Jakar.Database.csproj", "{C68DF03A-AE24-4553-AA66-072728191784}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jakar.Extensions.Hosting", "Jakar.Extensions.Hosting\Jakar.Extensions.Hosting.csproj", "{D5FCD265-907F-4B6D-932D-3F72C3D42485}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -125,6 +128,10 @@ Global
 		{C68DF03A-AE24-4553-AA66-072728191784}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C68DF03A-AE24-4553-AA66-072728191784}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C68DF03A-AE24-4553-AA66-072728191784}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D5FCD265-907F-4B6D-932D-3F72C3D42485}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D5FCD265-907F-4B6D-932D-3F72C3D42485}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D5FCD265-907F-4B6D-932D-3F72C3D42485}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D5FCD265-907F-4B6D-932D-3F72C3D42485}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

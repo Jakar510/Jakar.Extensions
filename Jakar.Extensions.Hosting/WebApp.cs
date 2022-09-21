@@ -1,4 +1,4 @@
-﻿namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions.Hosting;
 
 
 #nullable enable
@@ -25,12 +25,12 @@ public static class WebApp
     }
 
 
-    public static bool CheckArgs<TEnum>( this string[] args, in AppVersion version, string message, params string[] enumTriggers ) where TEnum : struct, Enum
+    public static bool CheckArgs<TEnum>( this string[] args, in string version, string message, params string[] enumTriggers ) where TEnum : struct, Enum
     {
         if ( args.Any(enumTriggers.Contains) )
         {
-            message.WriteToConsole();
-            foreach ( string name in Enum.GetNames<TEnum>() ) { name.WriteToConsole(); }
+            Console.WriteLine(message);
+            foreach ( string name in Enum.GetNames<TEnum>() ) { Console.WriteLine(name); }
 
             return true;
         }
@@ -38,8 +38,7 @@ public static class WebApp
 
         if ( args.Any(x => x is "--version" or "-V") )
         {
-            version.ToString()
-                   .WriteToConsole();
+            Console.WriteLine(version);
 
             return true;
         }

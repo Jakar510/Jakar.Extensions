@@ -26,8 +26,6 @@ global using System.Threading;
 global using System.Threading.Tasks;
 global using System.ComponentModel.DataAnnotations;
 global using System.Diagnostics.Contracts;
-global using Dapper;
-global using Dapper.Contrib.Extensions;
 global using Newtonsoft.Json;
 global using Newtonsoft.Json.Linq;
 global using System.Drawing;
@@ -35,19 +33,9 @@ global using System.IO.Compression;
 global using System.Runtime.InteropServices;
 global using System.Security;
 global using System.Threading.Tasks.Dataflow;
-global using Nito.Collections;
-global using JetBrains.Annotations;
-global using ValueOf;
-global using CommunityToolkit.Diagnostics;
 global using Newtonsoft.Json.Serialization;
-global using PureAttribute = JetBrains.Annotations.PureAttribute;
-global using KeyAttribute = Dapper.Contrib.Extensions.KeyAttribute;
-// global using Microsoft.Extensions.Hosting;
-// global using Microsoft.Extensions.Logging;
-
-
-/*
-#if NET6_0
+global using Microsoft.Extensions.Hosting;
+global using Microsoft.Extensions.Logging;
 global using System.Net.Http;
 global using Microsoft.Extensions.Http;
 global using Microsoft.Extensions.Options;
@@ -62,5 +50,3 @@ global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.AspNetCore.Components.Server;
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.AspNetCore.Mvc.RazorPages;
-#endif
-*/

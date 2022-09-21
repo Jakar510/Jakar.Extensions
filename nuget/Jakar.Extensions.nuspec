@@ -86,15 +86,19 @@
 							version="5.0.0" />
 				<dependency id="System.Text.Encoding.CodePages"
 							version="6.0.0" />
-				<dependency id="Microsoft.Extensions.Hosting"
-							version="6.0.1" />
+				<dependency id="Microsoft.Extensions.DependencyInjection"
+							version="6.0.0" />
+				<dependency id="Microsoft.Extensions.Hosting.Abstractions"
+							version="6.0.0" />
+				<dependency id="Microsoft.Extensions.Logging.Abstractions"
+							version="6.0.2" />
 			</group>
 
 			<group targetFramework="net6.0">
 				<dependency id="CommunityToolkit.Diagnostics"
 							version="8.0.0" />
 				<dependency id="Dapper"
-							version="2.0.78" />
+							version="2.0.123" />
 				<dependency id="Dapper.Contrib"
 							version="2.0.78" />
 				<dependency id="JetBrains.Annotations"
@@ -135,42 +139,12 @@
 							version="5.0.0" />
 				<dependency id="System.Text.Encoding.CodePages"
 							version="6.0.0" />
-				<dependency id="Microsoft.Extensions.Hosting"
-							version="6.0.1" />
-				<dependency id="Hardware.Info"
-							version="10.0.1" />
-				<dependency id="Swashbuckle.AspNetCore"
-							version="6.4.0" />
-				<dependency id="Swashbuckle.AspNetCore.Annotations"
-							version="6.4.0" />
-				<dependency id="Swashbuckle.AspNetCore.Newtonsoft"
-							version="6.4.0" />
-				<dependency id="Microsoft.Extensions.Options.DataAnnotations"
+				<dependency id="Microsoft.Extensions.DependencyInjection"
 							version="6.0.0" />
-				<dependency id="Microsoft.Extensions.Options.ConfigurationExtensions"
+				<dependency id="Microsoft.Extensions.Hosting.Abstractions"
 							version="6.0.0" />
-				<dependency id="Microsoft.AspNetCore.Authentication.Certificate"
-							version="6.0.9" />
-				<dependency id="Microsoft.AspNetCore.Authentication.Google"
-							version="6.0.9" />
-				<dependency id="Microsoft.AspNetCore.Authentication.OAuth"
-							version="2.2.0" />
-				<dependency id="Microsoft.AspNetCore.Authentication.Cookies"
-							version="2.2.0" />
-				<dependency id="Microsoft.AspNetCore.Authentication.MicrosoftAccount"
-							version="6.0.9" />
-				<dependency id="Microsoft.AspNetCore.Authentication.JwtBearer"
-							version="6.0.9" />
-				<dependency id="Microsoft.AspNetCore.Authentication.OpenIdConnect"
-							version="6.0.9" />
-				<dependency id="Microsoft.AspNetCore.Diagnostics.HealthChecks"
-							version="2.2.0" />
-				<dependency id="Microsoft.Extensions.Diagnostics.HealthChecks"
-							version="6.0.9" />
-				<dependency id="Microsoft.Extensions.Hosting.Systemd"
-							version="6.0.0" />
-				<dependency id="Microsoft.Extensions.Hosting.WindowsServices"
-							version="6.0.0" />
+				<dependency id="Microsoft.Extensions.Logging.Abstractions"
+							version="6.0.2" />
 			</group>
 		</dependencies>
 	</metadata>
