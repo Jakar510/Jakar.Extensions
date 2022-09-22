@@ -2,7 +2,7 @@
 namespace Jakar.Extensions;
 
 
-public class NoGraphDataException : Exception
+public class NoGraphDataException : DataException
 {
     public NoGraphDataException() { }
     public NoGraphDataException( string message ) : base(message) { }

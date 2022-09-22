@@ -190,4 +190,52 @@ public static partial class Spans
         return span[^1]
            .Equals(value);
     }
+
+
+    // TODO: prep for DotNet 7
+    // https://devblogs.microsoft.com/dotnet/performance_improvements_in_net_7/#:~:text=also%20add%20a-,Vector256,-%3CT%3E
+    // public static bool Contains<TValue>( this ReadOnlySpan<TValue> span, TValue value ) where TValue : struct
+    // {
+    //     if ( Vector.IsHardwareAccelerated && span.Length >= Vector<TValue>.Count )
+    //     {
+    //         ref TValue current = ref MemoryMarshal.GetReference(span);
+    //
+    //         if ( Vector256.IsHardwareAccelerated && span.Length >= Vector256<TValue>.Count )
+    //         {
+    //             Vector256<TValue> target = Vector256.Create(value);
+    //             ref TValue        endMinusOneVector = ref Unsafe.Add(ref current, span.Length - Vector256<TValue>.Count);
+    //
+    //             do
+    //             {
+    //                 if ( Vector.EqualsAny(target, Vector256.LoadUnsafe(ref current)) ) { return true; }
+    //
+    //                 current = ref Unsafe.Add(ref current, Vector256<TValue>.Count);
+    //             } while ( Unsafe.IsAddressLessThan(ref current, ref endMinusOneVector) );
+    //
+    //             if ( Vector256.EqualsAny(target, Vector256.LoadUnsafe(ref endMinusOneVector)) ) { return true; }
+    //         }
+    //         else
+    //         {
+    //             Vector128<TValue> target            = new Vector<TValue>(value).AsVector128();
+    //             ref TValue        endMinusOneVector = ref Unsafe.Add(ref current, span.Length - Vector128<TValue>.Count);
+    //
+    //             do
+    //             {
+    //                 if ( Vector128.EqualsAny(target, Vector128.LoadUnsafe(ref current)) ) { return true; }
+    //
+    //                 current = ref Unsafe.Add(ref current, Vector128<TValue>.Count);
+    //             } while ( Unsafe.IsAddressLessThan(ref current, ref endMinusOneVector) );
+    //
+    //             if ( Vector128.EqualsAny(target, Vector128.LoadUnsafe(ref endMinusOneVector)) ) { return true; }
+    //         }
+    //     }
+    //
+    //
+    //     foreach ( TValue item in span )
+    //     {
+    //         if ( value.Equals(item) ) { return true; }
+    //     }
+    //
+    //     return false;
+    // }
 }

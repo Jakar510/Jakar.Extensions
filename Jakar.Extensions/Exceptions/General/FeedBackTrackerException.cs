@@ -1,16 +1,16 @@
-﻿#nullable enable
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
+#nullable enable
 
 
 public class FeedBackTrackerException : Exception
 {
-    //var e = new FeedBackTrackerException(JsonConvert.SerializeObject(dict));
     public FeedBackTrackerException() { }
     public FeedBackTrackerException( string message ) : base(message) { }
     public FeedBackTrackerException( string message, Exception inner ) : base(message, inner) { }
 
     public FeedBackTrackerException( object dict ) : this(dict.ToPrettyJson()) { }
     public FeedBackTrackerException( object dict, Exception inner ) : this(dict.ToPrettyJson(), inner) { }
+
 
     protected void Update( object value )
     {
