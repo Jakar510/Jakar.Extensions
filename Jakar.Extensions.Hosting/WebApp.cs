@@ -1,8 +1,5 @@
 ﻿namespace Jakar.Extensions.Hosting;
-
-
 #nullable enable
-#if NET6_0
 
 
 
@@ -79,7 +76,3 @@ public static class WebApp
         return app;
     }
 }
-
-
-
-#endif
