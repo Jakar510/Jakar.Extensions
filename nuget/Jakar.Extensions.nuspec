@@ -4,7 +4,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata>
 		<id>Jakar.Extensions</id>
-		<version>5.8.2</version>
+		<version>6.0.2</version>
 		<title>Extension Library</title>
 		<authors>Tyler Stegmaier</authors>
 		<owners>Jakar510/Jakar</owners>
@@ -18,8 +18,22 @@
 			Extensions to aid in development.
 		</description>
 		<releaseNotes>
-			Jakar.Extensions 5.8.2
-			bug fixes
+			Jakar.Extensions 6.0.0
+			Major namespace changes.
+			Removed Models.Users.
+			Added Models.Service.
+			Added WebRequestBuilder, WebRequester.
+			WebRequests.GetResponseAsync now tries to get the error details, including anything sent sent from server in the body.
+			Updated Enum extensions.
+			Added lots more Span Extensions.
+			Reworked AppSettings.
+			Reworked LocalFile and LocalDirectory a bit.
+			Reworked IniConfig and PreferenceFile.
+			Reworked ValidValueOf.
+			Fix xml documentation.
+			Multi-targets NetStandard2.1 and Net6.0.
+			Merged Jakar.Extensions.Hosting.
+			Moving to .Net6 only going forward once MAUI is released.
 		</releaseNotes>
 		<tags>Api Extension Linq Http Files Files Strings Types Languages Collections Ini</tags>
 		<language>en-US</language>
@@ -29,33 +43,108 @@
 		<dependencies>
 			<group targetFramework="netstandard2.1">
 				<dependency id="CommunityToolkit.Diagnostics"
-							version="7.1.2" />
+							version="8.0.0" />
+				<dependency id="Dapper"
+							version="2.0.123" />
 				<dependency id="Dapper.Contrib"
 							version="2.0.78" />
 				<dependency id="JetBrains.Annotations"
-							version="2021.3.0" />
+							version="2022.1.0" />
+				<dependency id="Microsoft.CodeAnalysis.CSharp"
+							version="4.3.0" />
+				<dependency id="Microsoft.CSharp"
+							version="4.7.0" />
 				<dependency id="Newtonsoft.Json"
 							version="13.0.1" />
 				<dependency id="Nito.Collections.Deque"
 							version="1.1.1" />
+				<dependency id="Portable.BouncyCastle"
+							version="1.9.0" />
 				<dependency id="System.Collections.Immutable"
 							version="6.0.0" />
 				<dependency id="System.ComponentModel.Annotations"
 							version="5.0.0" />
-				<dependency id="System.Text.Encodings.Web"
-							version="6.0.0" />
 				<dependency id="System.Text.Encoding.CodePages"
 							version="6.0.0" />
+				<dependency id="System.Text.Encodings.Web"
+							version="6.0.0" />
 				<dependency id="System.Text.Json"
-							version="6.0.2" />
+							version="6.0.6" />
+				<dependency id="System.Threading.Tasks"
+							version="4.3.0" />
 				<dependency id="System.Threading.Tasks.Dataflow"
 							version="6.0.0" />
-				<dependency id="Xamarin.Essentials"
-							version="1.7.2" />
+				<dependency id="System.Threading.Tasks.Extensions"
+							version="4.5.4" />
+				<dependency id="System.Threading.Tasks.Parallel"
+							version="4.3.0" />
 				<dependency id="OneOf"
-							version="3.0.216" />
+							version="3.0.223" />
 				<dependency id="ValueOf"
 							version="2.0.31" />
+				<dependency id="Sigil"
+							version="5.0.0" />
+				<dependency id="System.Text.Encoding.CodePages"
+							version="6.0.0" />
+				<dependency id="Microsoft.Extensions.DependencyInjection"
+							version="6.0.0" />
+				<dependency id="Microsoft.Extensions.Hosting.Abstractions"
+							version="6.0.0" />
+				<dependency id="Microsoft.Extensions.Logging.Abstractions"
+							version="6.0.2" />
+			</group>
+
+			<group targetFramework="net6.0">
+				<dependency id="CommunityToolkit.Diagnostics"
+							version="8.0.0" />
+				<dependency id="Dapper"
+							version="2.0.123" />
+				<dependency id="Dapper.Contrib"
+							version="2.0.78" />
+				<dependency id="JetBrains.Annotations"
+							version="2022.1.0" />
+				<dependency id="Microsoft.CodeAnalysis.CSharp"
+							version="4.3.0" />
+				<dependency id="Microsoft.CSharp"
+							version="4.7.0" />
+				<dependency id="Newtonsoft.Json"
+							version="13.0.1" />
+				<dependency id="Nito.Collections.Deque"
+							version="1.1.1" />
+				<dependency id="Portable.BouncyCastle"
+							version="1.9.0" />
+				<dependency id="System.Collections.Immutable"
+							version="6.0.0" />
+				<dependency id="System.ComponentModel.Annotations"
+							version="5.0.0" />
+				<dependency id="System.Text.Encoding.CodePages"
+							version="6.0.0" />
+				<dependency id="System.Text.Encodings.Web"
+							version="6.0.0" />
+				<dependency id="System.Text.Json"
+							version="6.0.6" />
+				<dependency id="System.Threading.Tasks"
+							version="4.3.0" />
+				<dependency id="System.Threading.Tasks.Dataflow"
+							version="6.0.0" />
+				<dependency id="System.Threading.Tasks.Extensions"
+							version="4.5.4" />
+				<dependency id="System.Threading.Tasks.Parallel"
+							version="4.3.0" />
+				<dependency id="OneOf"
+							version="3.0.223" />
+				<dependency id="ValueOf"
+							version="2.0.31" />
+				<dependency id="Sigil"
+							version="5.0.0" />
+				<dependency id="System.Text.Encoding.CodePages"
+							version="6.0.0" />
+				<dependency id="Microsoft.Extensions.DependencyInjection"
+							version="6.0.0" />
+				<dependency id="Microsoft.Extensions.Hosting.Abstractions"
+							version="6.0.0" />
+				<dependency id="Microsoft.Extensions.Logging.Abstractions"
+							version="6.0.2" />
 			</group>
 		</dependencies>
 	</metadata>
@@ -73,5 +162,13 @@
 			  target="netstandard2.1" />
 		<file src="../Jakar.Extensions/bin/Release/netstandard2.1/Jakar.Extensions.pdb"
 			  target="lib/netstandard2.1" />
+
+		<!-- .net 6.0 -->
+		<file src="../Jakar.Extensions/bin/Release/net6.0/Jakar.Extensions.dll"
+			  target="lib/net6.0" />
+		<file src="../Jakar.Extensions/bin/Release/net6.0/Jakar.Extensions.xml"
+			  target="net6.0" />
+		<file src="../Jakar.Extensions/bin/Release/net6.0/Jakar.Extensions.pdb"
+			  target="lib/net6.0" />
 	</files>
 </package>

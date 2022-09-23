@@ -1,8 +1,8 @@
 using System;
-using Jakar.Extensions.Http;
 using NUnit.Framework;
 
 
+#nullable enable
 namespace Jakar.Extensions.Tests.Http;
 
 
@@ -14,7 +14,7 @@ public class MimeType_Extension_Tests : Assert
     [Test]
     public void Test_FromExtension( [Values] MimeType mime )
     {
-        if ( mime is MimeType.Unknown or MimeType.NotSet )
+        if ( mime is MimeType.NotSet )
         {
             Throws<ArgumentOutOfRangeException>(() => AreEqual(mime.ToExtension().FromExtension(), mime));
             return;

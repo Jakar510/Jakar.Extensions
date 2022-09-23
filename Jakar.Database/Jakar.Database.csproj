@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<LangVersion>latest</LangVersion>
+		<Nullable>enable</Nullable>
+		<NoWarn>$(NoWarn);1591</NoWarn>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Jakar.Extensions" Version="6.0.1" />
+		<PackageReference Include="Jakar.Extensions.Hosting" Version="6.0.0" />
+		<PackageReference Include="Sigil" Version="5.0.0" />
+	</ItemGroup>
+
+</Project>

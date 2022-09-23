@@ -1,13 +1,12 @@
-﻿namespace Jakar.Extensions.Types;
+﻿#nullable enable
+namespace Jakar.Extensions;
 
 
 public static partial class TypeExtensions
 {
     public static bool IsGenericType( this Type propertyType ) => propertyType.IsGenericType(typeof(JObject), typeof(JToken));
 
-    public static bool IsGenericType( this Type propertyType, params Type[] types ) => propertyType.IsAnyBuiltInType() ||
-                                                                                       propertyType.IsGenericType ||
-                                                                                       propertyType.IsOneOfType(types);
+    public static bool IsGenericType( this Type propertyType, params Type[] types ) => propertyType.IsAnyBuiltInType() || propertyType.IsGenericType || propertyType.IsOneOfType(types);
 
     public static bool IsAnyBuiltInType( this Type type ) => type.IsBuiltInType() || type.IsBuiltInNullableType();
 

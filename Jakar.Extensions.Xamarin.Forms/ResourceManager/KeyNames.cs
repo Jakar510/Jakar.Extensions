@@ -1,7 +1,8 @@
 ﻿
 
 
-namespace Jakar.Extensions.Xamarin.Forms.ResourceManager;
+#nullable enable
+namespace Jakar.Extensions.Xamarin.Forms;
 
 
 [SuppressMessage("ReSharper", "MemberHidesStaticFromOuterClass")]

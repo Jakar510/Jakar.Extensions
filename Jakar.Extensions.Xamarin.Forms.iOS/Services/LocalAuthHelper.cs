@@ -1,16 +1,15 @@
-﻿using System;
+﻿#nullable enable
+#nullable enable
+using System;
 using System.Globalization;
 using System.Threading.Tasks;
 using Foundation;
-using Jakar.Extensions.Xamarin.Forms.Statics;
 using LocalAuthentication;
 using UIKit;
 
 
 
-
-
-namespace Jakar.Extensions.Xamarin.Forms.iOS.Services;
+namespace Jakar.Extensions.Xamarin.Forms.iOS;
 
 
 public class LocalAuthHelper : Biometrics.IAuthHelperForIOS
@@ -64,6 +63,7 @@ public class LocalAuthHelper : Biometrics.IAuthHelperForIOS
             context.EvaluatePolicy(LAPolicy.DeviceOwnerAuthentication, "Please Authenticate To Proceed", replyHandler);
         }
 
+        // ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
         authError?.Dispose();
     }
 
@@ -88,6 +88,7 @@ public class LocalAuthHelper : Biometrics.IAuthHelperForIOS
             context.EvaluatePolicy(LAPolicy.DeviceOwnerAuthentication, "Please Authenticate To Proceed", replyHandler);
         }
 
+        // ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
         authError?.Dispose();
     }
 

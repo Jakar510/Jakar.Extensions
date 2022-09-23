@@ -1,7 +1,8 @@
 ﻿
 
 
-namespace Jakar.Extensions.Xamarin.Forms.ResourceManager;
+#nullable enable
+namespace Jakar.Extensions.Xamarin.Forms;
 
 
 public abstract class BaseResourceDictionaryManager
@@ -52,7 +53,7 @@ public abstract class ResourceDictionaryManager<TKey, TThemedKey> : BaseResource
         Add(OSAppTheme.Dark, key, style);
     }
 
-    public void Add<TValue>( in OSAppTheme theme, in TThemedKey key, TValue value ) { _ResourcesCurrent.Add(GetKey(theme, key), value); }
+    public void Add<TValue>( in OSAppTheme theme, in TThemedKey key, TValue value ) => _ResourcesCurrent.Add(GetKey(theme, key), value);
 
     public void Add<TValue>( in TKey key, TValue value )
     {
@@ -103,7 +104,7 @@ public abstract class ResourceDictionaryManager<TKey, TThemedKey> : BaseResource
     /// <param name="bindable"></param>
     /// <param name="property"></param>
     /// <param name="key"></param>
-    public void BindAppTheme<TValue>( in BindableObject bindable, in BindableProperty property, in TThemedKey key ) { bindable.SetOnAppTheme(property, Get<TValue>(OSAppTheme.Light, key), Get<TValue>(OSAppTheme.Dark, key)); }
+    public void BindAppTheme<TValue>( in BindableObject bindable, in BindableProperty property, in TThemedKey key ) => bindable.SetOnAppTheme(property, Get<TValue>(OSAppTheme.Light, key), Get<TValue>(OSAppTheme.Dark, key));
 }
 
 
@@ -143,7 +144,7 @@ public abstract class ResourceDictionaryManager : BaseResourceDictionaryManager
         Add(OSAppTheme.Dark, key, style);
     }
 
-    public void Add<TThemedKey, TValue>( in OSAppTheme theme, in TThemedKey key, TValue value ) where TThemedKey : Enum { _ResourcesCurrent.Add(GetKey(theme, key), value); }
+    public void Add<TThemedKey, TValue>( in OSAppTheme theme, in TThemedKey key, TValue value ) where TThemedKey : Enum => _ResourcesCurrent.Add(GetKey(theme, key), value);
 
     public void Add<TKey, TValue>( in TKey key, TValue value ) where TKey : Enum
     {
@@ -196,8 +197,5 @@ public abstract class ResourceDictionaryManager : BaseResourceDictionaryManager
     /// <param name="bindable"></param>
     /// <param name="property"></param>
     /// <param name="key"></param>
-    public void BindAppTheme<TValue, TThemedKey>( in BindableObject bindable, in BindableProperty property, in TThemedKey key ) where TThemedKey : Enum
-    {
-        bindable.SetOnAppTheme(property, Get<TThemedKey, TValue>(OSAppTheme.Light, key), Get<TThemedKey, TValue>(OSAppTheme.Dark, key));
-    }
+    public void BindAppTheme<TValue, TThemedKey>( in BindableObject bindable, in BindableProperty property, in TThemedKey key ) where TThemedKey : Enum => bindable.SetOnAppTheme(property, Get<TThemedKey, TValue>(OSAppTheme.Light, key), Get<TThemedKey, TValue>(OSAppTheme.Dark, key));
 }

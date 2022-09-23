@@ -1,42 +1,52 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 04/11/2022  9:54 AM
 
+#nullable enable
 using System.Linq.Expressions;
 
 
 
-namespace Jakar.Extensions.Models;
+namespace Jakar.Extensions;
 
 
 /// <summary>
-/// Inspired by <see cref="ValueOf{TValue,TThis}"/>
+///     Inspired by
+///     <see cref = "ValueOf{TValue,TThis}" />
 /// </summary>
-/// <typeparam name="TValue"></typeparam>
-/// <typeparam name="TThis"></typeparam>
+/// <typeparam name = "TValue" > </typeparam>
+/// <typeparam name = "TThis" > </typeparam>
+[SuppressMessage("ReSharper", "ConditionalAccessQualifierIsNonNullableAccordingToAPIContract")]
 public abstract class ValidValueOf<TValue, TThis> : IComparable<ValidValueOf<TValue, TThis>>, IEquatable<ValidValueOf<TValue, TThis>>, IComparable where TThis : ValidValueOf<TValue, TThis>, new()
                                                                                                                                                    where TValue : IComparable<TValue>, IEquatable<TValue>
 {
-    protected static readonly Func<TThis> _factory = (Func<TThis>)Expression.Lambda(typeof(Func<TThis>), Expression.New(typeof(TThis).GetTypeInfo().DeclaredConstructors.First<ConstructorInfo>(), Array.Empty<Expression>())).Compile();
+    protected static readonly Func<TThis> _factory = (Func<TThis>)Expression.Lambda(typeof(Func<TThis>),
+                                                                                    Expression.New(typeof(TThis).GetTypeInfo()
+                                                                                                                .DeclaredConstructors.First(x => x.GetParameters()
+                                                                                                                                                  .IsEmpty()),
+                                                                                                   Array.Empty<Expression>()))
+                                                                            .Compile();
 
 
     public TValue Value { get; protected set; }
 
+    protected ValidValueOf() => Value = default!;
 
-    public static TThis From( TValue item )
+
+    public static TThis Create( TValue item )
     {
-        TThis @this = _factory();
-        @this.Value = item;
-        @this.Validate();
-        return @this;
+        TThis self = _factory();
+        self.Value = item;
+        self.Validate();
+        return self;
     }
 
-    public static bool TryFrom( TValue item, out TThis? thisValue )
+    public static bool TryCreate( TValue item, [NotNullWhen(true)] out TThis? thisValue )
     {
-        TThis? @this = _factory();
-        @this.Value = item;
+        TThis self = _factory();
+        self.Value = item;
 
-        thisValue = @this.TryValidate()
-                        ? @this
+        thisValue = self.IsValid()
+                        ? self
                         : default;
 
         return thisValue is not null;
@@ -47,18 +57,22 @@ public abstract class ValidValueOf<TValue, TThis> : IComparable<ValidValueOf<TVa
 
     protected void Validate()
     {
-        if ( !TryValidate() ) { ThrowError(); }
+        if ( !IsValid() ) { ThrowError(); }
     }
 
     /// <summary>
     /// 
     /// </summary>
-    /// <returns><see langword="true"/> if <see cref="Value"/> is valid, otherwise <see langword="false"/></returns>
-    protected abstract bool TryValidate();
+    /// <returns>
+    ///     <see langword = "true" />
+    ///     if
+    ///     <see cref = "Value" />
+    ///     is valid, otherwise
+    ///     <see langword = "false" />
+    /// </returns>
+    protected abstract bool IsValid();
 
-
-    public virtual bool Equals( ValidValueOf<TValue, TThis> other ) => Value.Equals(other.Value);
-
+    public override string? ToString() => Value?.ToString();
     public override bool Equals( object? other )
     {
         if ( other is null ) { return false; }
@@ -68,10 +82,34 @@ public abstract class ValidValueOf<TValue, TThis> : IComparable<ValidValueOf<TVa
         return other is ValidValueOf<TValue, TThis> value && Equals(value);
     }
 
-    public override int GetHashCode() => Value.GetHashCode();
+    // ReSharper disable once NonReadonlyMemberInGetHashCode
+    public override int GetHashCode() => Value?.GetHashCode() ?? 0;
+
+    private static int Compare( TValue? left, TValue? right )
+    {
+        if ( left is null ) { return 1; }
+
+        if ( right is null ) { return -1; }
+
+        if ( ReferenceEquals(left, right) ) { return 0; }
+
+        return left.CompareTo(right);
+    }
+    private static bool Equals( TValue? left, TValue? right )
+    {
+        // ReSharper disable once ConvertIfStatementToSwitchStatement
+        if ( left is null && right is null ) { return true; }
+
+        if ( left is null ) { return false; }
+
+        if ( right is null ) { return false; }
+
+        if ( ReferenceEquals(left, right) ) { return true; }
+
+        return left.Equals(right);
+    }
 
 
-    public int CompareTo( ValidValueOf<TValue, TThis> other ) => Comparer<TValue>.Default.Compare(Value, other.Value);
     public int CompareTo( object? other )
     {
         if ( other is null ) { return 1; }
@@ -84,21 +122,24 @@ public abstract class ValidValueOf<TValue, TThis> : IComparable<ValidValueOf<TVa
     }
 
 
-    public static bool operator ==( ValidValueOf<TValue, TThis>  left, ValidValueOf<TValue, TThis>  right ) => Equalizer.Instance.Equals(left, right);
-    public static bool operator !=( ValidValueOf<TValue, TThis>  left, ValidValueOf<TValue, TThis>  right ) => !Equalizer.Instance.Equals(left, right);
-    public static bool operator <( ValidValueOf<TValue, TThis>?  left, ValidValueOf<TValue, TThis>? right ) => Sorter.Instance.Compare(left, right) < 0;
-    public static bool operator >( ValidValueOf<TValue, TThis>?  left, ValidValueOf<TValue, TThis>? right ) => Sorter.Instance.Compare(left, right) > 0;
-    public static bool operator <=( ValidValueOf<TValue, TThis>? left, ValidValueOf<TValue, TThis>? right ) => Sorter.Instance.Compare(left, right) <= 0;
-    public static bool operator >=( ValidValueOf<TValue, TThis>? left, ValidValueOf<TValue, TThis>? right ) => Sorter.Instance.Compare(left, right) >= 0;
+    public int CompareTo( ValidValueOf<TValue, TThis>? other )
+    {
+        if ( other is null ) { return 1; }
+
+        return Compare(Value, other.Value);
+    }
+    public virtual bool Equals( ValidValueOf<TValue, TThis>? other )
+    {
+        if ( other is null ) { return false; }
+
+        return Equals(Value, other.Value);
+    }
 
 
-    public override string ToString() => Value.ToString();
-
-
-
-    public class Sorter : Sorter<ValidValueOf<TValue, TThis>> { }
-
-
-
-    public class Equalizer : Equalizer<ValidValueOf<TValue, TThis>> { }
+    public static bool operator ==( ValidValueOf<TValue, TThis> left, ValidValueOf<TValue, TThis> right ) => Equals(left, right);
+    public static bool operator !=( ValidValueOf<TValue, TThis> left, ValidValueOf<TValue, TThis> right ) => !Equals(left, right);
+    public static bool operator <( ValidValueOf<TValue, TThis>  left, ValidValueOf<TValue, TThis> right ) => Compare(left.Value, right.Value) < 0;
+    public static bool operator >( ValidValueOf<TValue, TThis>  left, ValidValueOf<TValue, TThis> right ) => Compare(left.Value, right.Value) > 0;
+    public static bool operator <=( ValidValueOf<TValue, TThis> left, ValidValueOf<TValue, TThis> right ) => Compare(left.Value, right.Value) <= 0;
+    public static bool operator >=( ValidValueOf<TValue, TThis> left, ValidValueOf<TValue, TThis> right ) => Compare(left.Value, right.Value) >= 0;
 }

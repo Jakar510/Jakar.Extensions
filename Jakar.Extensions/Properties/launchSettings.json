@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Jakar.Extensions": {
+      "commandName": "Project",
+      "hotReloadEnabled": false
+    }
+  }
+}

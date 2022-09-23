@@ -1,95 +1,92 @@
-﻿using System;
-using Jakar.Extensions.General;
-using Jakar.Extensions.Models.Base.Records;
-using Jakar.Extensions.Strings;
-
-
-// using Jakar.Xml;
-
-
-
-namespace Console.Experiments;
-
-
-public static class Program
+﻿try
 {
-    public static void Main( string[] args )
-    {
-        "Hello World!".WriteToConsole();
+    "Hello World!".WriteToConsole();
 
-
-        // try { First(); }
-        // catch ( Exception e )
-        // {
-        //     e.ToString().WriteToConsole();
-        //
-        //     var details = new ExceptionDetails(e);
-        //     details.ToPrettyJson().WriteToConsole();
-        // }
-
-
-        "Bye".WriteToConsole();
-    }
-
-
-    public static void First() => Second();
-    private static void Second() => Third();
-    private static void Third() => Last();
-    private static void Last() => throw new NotImplementedException("", new NullReferenceException(nameof(Program)));
-
-
-    // public static async Task TestXml()
-    // {
-    //     var d = new Dictionary<string, object>()
-    //             {
-    //                 ["IDs"] = new List<double> { 1, 2, 3 },
-    //                 [nameof(User)] = new User()
-    //                                  {
-    //                                      Address = new List<Address>()
-    //                                                {
-    //                                                    new()
-    //                                                    {
-    //                                                        City  = "Plano",
-    //                                                        State = "Texas"
-    //                                                    }
-    //                                                },
-    //                                      UserName   = "User",
-    //                                      IsActive   = true,
-    //                                      IsLoggedIn = true,
-    //                                      FirstName  = "First",
-    //                                      LastName   = "Last"
-    //                                  },
-    //                 ["Token"] = Guid.NewGuid(),
-    //                 ["Data"] = new Dictionary<string, object>()
-    //                            {
-    //                                ["Test"] = "Success",
-    //                                ["Date"] = DateTime.Now
-    //                            },
-    //             };
+    // byte.MaxValue.ToString()
+    //     .Length.WriteToDebug();
     //
+    // sbyte.MaxValue.ToString()
+    //      .Length.WriteToDebug();
     //
-    //     var l = new List<object>()
-    //             {
-    //                 d,
-    //                 1,
-    //                 1d,
-    //                 "hi",
-    //                 new MultiDict(),
-    //                 new[] { "1", "2", "3" },
-    //                 TimeSpan.MinValue,
-    //                 TimeSpan.MaxValue,
-    //                 DateTime.MinValue,
-    //                 DateTime.MaxValue,
-    //                 (uint)0
-    //             };
+    // short.MaxValue.ToString()
+    //      .Length.WriteToDebug();
     //
-    //     System.Console.WriteLine();
+    // ushort.MaxValue.ToString()
+    //       .Length.WriteToDebug();
     //
-    //     string s = l.ToXml();
+    // int.MaxValue.ToString()
+    //    .Length.WriteToDebug();
     //
-    //     s.WriteToConsole();
+    // uint.MaxValue.ToString()
+    //     .Length.WriteToDebug();
     //
-    //     var file = new LocalFile("Output.xml");
-    //     await file.WriteToFileAsync(s);
-    // }
+    // long.MaxValue.ToString()
+    //     .Length.WriteToDebug();
+    //
+    // ulong.MaxValue.ToString()
+    //      .Length.WriteToDebug();
+    //
+    // float.MaxValue.ToString()
+    //      .Length.WriteToDebug();
+    //
+    // double.MaxValue.ToString()
+    //       .Length.WriteToDebug();
+    //
+    // decimal.MaxValue.ToString()
+    //        .Length.WriteToDebug();
+    //
+    // DateTime.Now.ToString()
+    //         .Length.WriteToDebug();
+    //
+    // DateTimeOffset.Now.ToString()
+    //               .Length.WriteToDebug();
+
+
+    var builder = new ValueStringBuilder();
+    builder = builder.Append("ARG? ");
+    builder = builder.Append("this is a test");
+    builder = builder.Append("!!");
+    builder = builder.Append('?');
+    builder = builder.Append(' ');
+    builder = builder.Append('.', 5);
+    builder = builder.Append(' ');
+    builder = builder.AppendSpanFormattable(DateTime.Now, "dd/mm/yyyy hh:ss");
+    builder = builder.Replace(0, 'T');
+
+    builder = builder.Insert(builder.Span.IndexOf('t'), "Yes ");
+    builder = builder.Insert(4,                         ' ', 5);
+    builder = builder.Replace(0, "No! ");
+    builder = builder.Replace(4, '~', 4);
+
+
+    builder.WriteToConsole();
+
+
+    // BenchmarkRunner.Run<MapperBenchmarks>();
+    // BenchmarkRunner.Run<JsonizerBenchmarks>();
+    // BenchmarkRunner.Run<SpansBenchmarks>();
+    // BenchmarkRunner.Run<AsyncLinqBenchmarks>();
+
+    // TestJson();
+
+    // Test_Sql();
+
+    // await Test_HttpBuilder();
+
+
+    // var id = Guid.NewGuid();
+    // id.WriteToConsole();
+    //
+    // var b64 = id.ToBase64();
+    // b64.WriteToConsole();
+    //
+    // var result = b64.AsGuid();
+    // result?.WriteToConsole();
+    // id.ToString().Length.WriteToConsole();
+    // ( result == id ).WriteToConsole();
+
+
+    // await Tests.Test_AsyncLinq(Tests.List);
 }
+catch ( Exception e ) { e.WriteToDebug(); }
+finally { "Bye".WriteToConsole(); }

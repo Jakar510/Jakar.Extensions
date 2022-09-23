@@ -1,7 +1,8 @@
 ﻿
 
 
-namespace Jakar.Extensions.Xamarin.Forms.Extensions;
+#nullable enable
+namespace Jakar.Extensions.Xamarin.Forms;
 
 
 public static class ColorExtensions

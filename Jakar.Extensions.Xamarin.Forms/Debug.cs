@@ -1,120 +1,130 @@
-﻿using Jakar.Extensions.Xamarin.Forms.Statics;
-using Microsoft.AppCenter;
+﻿using Microsoft.AppCenter;
 using Microsoft.AppCenter.Analytics;
 using Microsoft.AppCenter.Crashes;
-using Xamarin.Essentials;
 
 
+#nullable enable
 namespace Jakar.Extensions.Xamarin.Forms;
 
 
-public class Debug<TDeviceID, TViewPage>
+public class Debug : ObservableClass
 {
-    public virtual bool  CanDebug      => Debugger.IsAttached;
-    public virtual bool  UseDebugLogin => CanDebug;
-    public         Guid? InstallId     { get; protected set; }
+    private readonly BaseFileSystemApi  _fileSystemApi;
+    private readonly IAppSettings       _settings;
+    private          Guid               _installID;
+    private readonly Synchronized<bool> _apiEnabled = new(false);
 
-    protected bool _ApiEnabled { get; private set; }
 
-    private BaseFileSystemApi?                  _fileSystemApi;
-    private IAppSettings<TDeviceID, TViewPage>? _services;
+    protected readonly string         _appName;
+    private readonly   LocalFile      _appStateFile;
+    private readonly   LocalFile      _feedBackFile;
+    private            DebugSettings  _debugSettings = new();
+    public virtual     bool           CanDebug       => Debugger.IsAttached;
+    public virtual     bool           UseDebugLogin  => CanDebug;
+    protected          IDebugSettings _DebugSettings => Settings;
 
-    protected IAppSettings<TDeviceID, TViewPage> _Services
+
+    public DebugSettings Settings
     {
-        get => _services ?? throw new ApiDisabledException($"Must call {nameof(Init)} first.", new NullReferenceException(nameof(_services)));
-        private set => _services = value;
+        get
+        {
+            lock ( this ) { return _debugSettings; }
+        }
+        set
+        {
+            lock ( this ) { SetProperty(ref _debugSettings, value); }
+        }
+    }
+    public Guid InstallID
+    {
+        get => _installID;
+        protected set => SetProperty(ref _installID, value);
+    }
+    public bool ApiEnabled
+    {
+        get => _apiEnabled;
+        set
+        {
+            _apiEnabled.Value = value;
+            OnPropertyChanged();
+        }
     }
 
 
-#region Init
-
-    public Task Init( BaseFileSystemApi api, IAppSettings<TDeviceID, TViewPage> services, string app_center_id, params Type[] appCenterServices ) => Task.Run(async () => await InitAsync(api, services, app_center_id, appCenterServices));
-
-    public async Task InitAsync( BaseFileSystemApi api, IAppSettings<TDeviceID, TViewPage> services, string app_center_id, params Type[] appCenterServices )
+    public Debug( BaseFileSystemApi api, IAppSettings settings, string appName )
     {
         _fileSystemApi = api;
-        _Services      = services;
-        await StartAppCenterAsync(app_center_id, appCenterServices).ConfigureAwait(false);
+        _settings      = settings;
+        _appName       = appName;
+        _appStateFile  = new LocalFile(_fileSystemApi.AppStateFileName);
+        _feedBackFile  = new LocalFile(_fileSystemApi.FeedBackFileName);
     }
 
-    public virtual async Task StartAppCenterAsync( string app_center_id, params Type[] services )
+
+    public async Task InitAsync( string app_center_id, params Type[] appCenterServices )
     {
-        _ApiEnabled = true;
+        try
+        {
+            VersionTracking.Track();
+            AppCenter.Start($"ios={app_center_id};android={app_center_id}", appCenterServices);
 
-        VersionTracking.Track();
+            AppCenter.LogLevel = CanDebug
+                                     ? LogLevel.Verbose
+                                     : LogLevel.Error; //AppCenter.LogLevel = LogLevel.Debug;
 
-        AppCenter.Start($"ios={app_center_id};android={app_center_id}", services);
 
-        AppCenter.LogLevel = CanDebug
-                                 ? LogLevel.Verbose
-                                 : LogLevel.Error; //AppCenter.LogLevel = LogLevel.Debug;
+            Guid? id = await AppCenter.GetInstallIdAsync()
+                                      .ConfigureAwait(false);
 
-        InstallId =   await AppCenter.GetInstallIdAsync().ConfigureAwait(false);
-        InstallId ??= Guid.NewGuid();
+            if ( id is null )
+            {
+                id = Guid.NewGuid();
+                AppCenter.SetUserId(id.ToString());
+            }
 
-        AppCenter.SetUserId(InstallId.ToString());
-
-        _Services.CrashDataPending = await Crashes.HasCrashedInLastSessionAsync().ConfigureAwait(false);
+            InstallID          = id.Value;
+            _settings.DeviceID = InstallID;
+            ApiEnabled         = true;
+        }
+        catch ( Exception e )
+        {
+            e.WriteToDebug();
+            throw;
+        }
     }
 
 
     protected void ThrowIfNotEnabled()
     {
-        if ( _ApiEnabled ) { return; }
+        if ( ApiEnabled ) { return; }
 
-        if ( _services is null ) { throw new ApiDisabledException($"Must call {nameof(Init)} first.", new NullReferenceException(nameof(_services))); }
+        // if ( _services is null ) { throw new ApiDisabledException($"Must call {nameof(InitAsync)} first.", new NullReferenceException(nameof(_services))); }
 
-        if ( _fileSystemApi is null ) { throw new ApiDisabledException($"Must call {nameof(Init)} first.", new NullReferenceException(nameof(_fileSystemApi))); }
+        if ( _fileSystemApi is null ) { throw new ApiDisabledException($"Must call {nameof(InitAsync)} first.", new NullReferenceException(nameof(_fileSystemApi))); }
 
-        throw new ApiDisabledException($"Must call {nameof(Init)} first.");
+        throw new ApiDisabledException($"Must call {nameof(InitAsync)} first.");
     }
 
-#endregion
 
-
-    /// <summary>
-    /// </summary>
-    /// <param name="e"></param>
-    /// <returns><see cref="Task"/> from a <see cref="Task.Run(Action)"/> call</returns>
-    public Task HandleException( Exception e ) => HandleException(e, CancellationToken.None);
-
-    /// <summary>
-    /// </summary>
-    /// <param name="e"></param>
-    /// <param name="token"></param>
-    /// <returns><see cref="Task"/> from a <see cref="Task.Run(Action)"/> call</returns>
-    public Task HandleException( Exception e, CancellationToken token ) => Task.Run(async () => await HandleExceptionAsync(e).ConfigureAwait(false), token);
-
-
+    public void HandleException( Exception e ) => HandleException(e, default);
+    public void HandleException( Exception e, CancellationToken token ) => Task.Run(async () => await HandleExceptionAsync(e), token)
+                                                                               .Wait(token);
     public async Task HandleExceptionAsync( Exception e )
     {
+        if ( !_DebugSettings.EnableApi ) { return; }
+
         ThrowIfNotEnabled();
 
-        if ( !_Services.SendCrashes ) { return; }
+        ReadOnlyMemory<byte> screenShot = _DebugSettings.TakeScreenshotOnError
+                                              ? await AppShare.TakeScreenShot()
+                                                              .ConfigureAwait(false)
+                                              : default;
 
-        ReadOnlyMemory<byte> screenShot = await AppShare.TakeScreenShot().ConfigureAwait(false);
 
-        await TrackError(e, screenShot).ConfigureAwait(false);
+        await TrackError(e, screenShot)
+           .ConfigureAwait(false);
     }
 
-
-#region AppStates
-
-    protected async Task Save( ExceptionDetails payload )
-    {
-        if ( _fileSystemApi is null ) { throw new NullReferenceException(nameof(_fileSystemApi)); }
-
-        using var file = new LocalFile(_fileSystemApi.AppStateFileName);
-        await file.WriteAsync(payload.ToPrettyJson()).ConfigureAwait(false);
-    }
-
-    protected async Task Save( Dictionary<string, object?> payload )
-    {
-        if ( _fileSystemApi is null ) { throw new NullReferenceException(nameof(_fileSystemApi)); }
-
-        using var file = new LocalFile(_fileSystemApi.FeedBackFileName);
-        await file.WriteAsync(payload.ToPrettyJson()).ConfigureAwait(false);
-    }
 
     public async Task SaveFeedBackAppState( Dictionary<string, string?> feedback, string key = "feedback" )
     {
@@ -126,126 +136,120 @@ public class Debug<TDeviceID, TViewPage>
                          [key]              = feedback
                      };
 
-        await Save(result).ConfigureAwait(false);
+        await _feedBackFile.WriteAsync(result.ToPrettyJson())
+                           .ConfigureAwait(false);
     }
-
-
     protected virtual Dictionary<string, string> AppState() => new()
                                                                {
-                                                                   [nameof(IAppSettings<TDeviceID, TViewPage>.CurrentViewPage)] = _Services.CurrentViewPage?.ToString() ?? throw new NullReferenceException(nameof(_Services.CurrentViewPage)),
-                                                                   [nameof(IAppSettings<TDeviceID, TViewPage>.AppName)]         = _Services.AppName ?? throw new NullReferenceException(nameof(_Services.AppName)),
-                                                                   [nameof(DateTime)]                                           = DateTime.UtcNow.ToString(CultureInfo.InvariantCulture),
-                                                                   [nameof(AppDeviceInfo.DeviceId)]                             = AppDeviceInfo.DeviceId,
-                                                                   [nameof(AppDeviceInfo.VersionNumber)]                        = AppDeviceInfo.VersionNumber,
-                                                                   [nameof(LanguageApi.SelectedLanguage)]                       = CultureInfo.CurrentCulture.DisplayName
+                                                                   [nameof(_appName)]                     = _appName ?? throw new NullReferenceException(nameof(_appName)),
+                                                                   [nameof(DateTime)]                     = DateTime.UtcNow.ToString(CultureInfo.InvariantCulture),
+                                                                   [nameof(AppDeviceInfo.DeviceId)]       = AppDeviceInfo.DeviceId,
+                                                                   [nameof(AppDeviceInfo.VersionNumber)]  = AppDeviceInfo.VersionNumber,
+                                                                   [nameof(LanguageApi.SelectedLanguage)] = CultureInfo.CurrentCulture.DisplayName
                                                                };
 
-#endregion
-
-
-#region Track Exceptions
 
     public async Task TrackError( Exception e )
     {
-        e.Details(out Dictionary<string, string?> eventDetails);
-        await TrackError(e, eventDetails, e.FullDetails()).ConfigureAwait(false);
+        if ( _DebugSettings.IncludeAppStateOnError )
+        {
+            e.Details(out Dictionary<string, string?> eventDetails);
+
+            await TrackError(e, eventDetails, e.FullDetails())
+               .ConfigureAwait(false);
+        }
+        else
+        {
+            await TrackError(e, default, e.FullDetails())
+               .ConfigureAwait(false);
+        }
     }
     public async Task TrackError( Exception e, ReadOnlyMemory<byte> screenShot )
     {
         e.Details(out Dictionary<string, string?> dict);
-        await TrackError(e, dict, new ExceptionDetails(e), screenShot).ConfigureAwait(false);
-    }
-    public async Task TrackError( Exception ex, Dictionary<string, string?>? eventDetails ) => await TrackError(ex, eventDetails, exceptionDetails: null).ConfigureAwait(false);
-    public async Task TrackError( Exception ex, Dictionary<string, string?>? eventDetails, ExceptionDetails? exceptionDetails ) => await TrackError(ex,
-                                                                                                                                                    eventDetails,
-                                                                                                                                                    exceptionDetails,
-                                                                                                                                                    null,
-                                                                                                                                                    null).ConfigureAwait(false);
-    public async Task TrackError( Exception ex, Dictionary<string, string?>? eventDetails, ExceptionDetails? exceptionDetails, ReadOnlyMemory<byte> screenShot ) => await TrackError(ex,
-                                                                                                                                                                                     eventDetails,
-                                                                                                                                                                                     exceptionDetails,
-                                                                                                                                                                                     null,
-                                                                                                                                                                                     null,
-                                                                                                                                                                                     screenShot).ConfigureAwait(false);
-    public async Task TrackError( Exception ex, Dictionary<string, string?>? eventDetails, ExceptionDetails? exceptionDetails, string? incomingText, string? outgoingText ) =>
-        await TrackError(ex, eventDetails, exceptionDetails, incomingText, outgoingText, null).ConfigureAwait(false);
 
-    public async Task TrackError( Exception ex, Dictionary<string, string?>? eventDetails, ExceptionDetails? exceptionDetails, string? incomingText, string? outgoingText, ReadOnlyMemory<byte>? screenShot )
+        await TrackError(e, dict, new ExceptionDetails(e), screenShot)
+           .ConfigureAwait(false);
+    }
+    public Task TrackError( Exception ex, Dictionary<string, string?>? eventDetails ) => TrackError(ex,                                                                      eventDetails, exceptionDetails: default);
+    public Task TrackError( Exception ex, Dictionary<string, string?>? eventDetails, ExceptionDetails? exceptionDetails ) => TrackError(ex,                                  eventDetails, exceptionDetails, default, default);
+    public Task TrackError( Exception ex, Dictionary<string, string?>? eventDetails, ExceptionDetails? exceptionDetails, ReadOnlyMemory<byte> screenShot ) => TrackError(ex, eventDetails, exceptionDetails, default, default, screenShot);
+    public Task TrackError( Exception ex, Dictionary<string, string?>? eventDetails, ExceptionDetails? exceptionDetails, string? incomingText, string? outgoingText ) =>
+        TrackError(ex, eventDetails, exceptionDetails, incomingText, outgoingText, default);
+    public async Task TrackError( Exception ex, Dictionary<string, string?>? eventDetails, ExceptionDetails? exceptionDetails, string? incomingText, string? outgoingText, ReadOnlyMemory<byte> screenShot )
     {
         ThrowIfNotEnabled();
-
-        if ( !_Services.SendCrashes ) { return; }
-
-        if ( exceptionDetails is not null ) await Save(exceptionDetails).ConfigureAwait(false);
-
-        var attachments = new List<ErrorAttachmentLog>(5);
+        if ( !_DebugSettings.EnableCrashes ) { return; }
 
         if ( exceptionDetails is not null )
         {
-            ErrorAttachmentLog? state = ErrorAttachmentLog.AttachmentWithText(exceptionDetails.ToPrettyJson(), _fileSystemApi!.AppStateFileName);
-            attachments.Add(state);
+            await _appStateFile.WriteAsync(exceptionDetails.ToPrettyJson())
+                               .ConfigureAwait(false);
         }
 
-        if ( eventDetails is not null )
+        var attachments = new List<ErrorAttachmentLog>(5);
+
+        if ( _DebugSettings.IncludeAppStateOnError )
         {
-            ErrorAttachmentLog? debug = ErrorAttachmentLog.AttachmentWithText(eventDetails.ToPrettyJson(), _fileSystemApi!.DebugFileName);
-            attachments.Add(debug);
+            if ( exceptionDetails is not null )
+            {
+                ErrorAttachmentLog? state = ErrorAttachmentLog.AttachmentWithText(exceptionDetails.ToPrettyJson(), _fileSystemApi.AppStateFileName);
+                attachments.Add(state);
+            }
+
+            if ( eventDetails is not null )
+            {
+                ErrorAttachmentLog? debug = ErrorAttachmentLog.AttachmentWithText(eventDetails.ToPrettyJson(), _fileSystemApi.DebugFileName);
+                attachments.Add(debug);
+            }
+
+
+            if ( !string.IsNullOrWhiteSpace(incomingText) )
+            {
+                ErrorAttachmentLog incoming = ErrorAttachmentLog.AttachmentWithText(incomingText.ToPrettyJson(), _fileSystemApi.IncomingFileName);
+                attachments.Add(incoming);
+            }
+
+            if ( !string.IsNullOrWhiteSpace(outgoingText) )
+            {
+                ErrorAttachmentLog outgoing = ErrorAttachmentLog.AttachmentWithText(outgoingText.ToPrettyJson(), _fileSystemApi.OutgoingFileName);
+                attachments.Add(outgoing);
+            }
         }
 
-        if ( screenShot is not null )
+        if ( _DebugSettings.TakeScreenshotOnError && !screenShot.IsEmpty )
         {
-            ErrorAttachmentLog? screenShotAttachment = ErrorAttachmentLog.AttachmentWithBinary(( (ReadOnlyMemory<byte>)screenShot ).ToArray(), "ScreenShot.jpeg", "image/jpeg");
+            ErrorAttachmentLog? screenShotAttachment = ErrorAttachmentLog.AttachmentWithBinary(screenShot.ToArray(), "ScreenShot.jpeg", "image/jpeg");
             attachments.Add(screenShotAttachment);
-        }
-
-        if ( !string.IsNullOrWhiteSpace(incomingText) )
-        {
-            ErrorAttachmentLog incoming = ErrorAttachmentLog.AttachmentWithText(incomingText.ToPrettyJson(), _fileSystemApi!.IncomingFileName);
-            attachments.Add(incoming);
-        }
-
-        if ( !string.IsNullOrWhiteSpace(outgoingText) )
-        {
-            ErrorAttachmentLog outgoing = ErrorAttachmentLog.AttachmentWithText(outgoingText.ToPrettyJson(), _fileSystemApi!.OutgoingFileName);
-            attachments.Add(outgoing);
         }
 
         TrackError(ex, eventDetails, attachments.ToArray());
     }
-
     public void TrackError( Exception ex, Dictionary<string, string?>? eventDetails, params ErrorAttachmentLog[] attachments )
     {
         ThrowIfNotEnabled();
+        if ( !_DebugSettings.EnableCrashes ) { return; }
 
-        if ( !_Services.SendCrashes ) { return; }
-
-        if ( ex is null ) throw new ArgumentNullException(nameof(ex));
+        if ( ex is null ) { throw new ArgumentNullException(nameof(ex)); }
 
         Crashes.TrackError(ex, eventDetails, attachments);
     }
 
-#endregion
-
-
-#region Track Events
 
     public void TrackEvent( [CallerMemberName] string? source = default )
     {
         ThrowIfNotEnabled();
 
-        if ( !_Services.SendCrashes ) { return; }
+        if ( !_DebugSettings.EnableAnalytics ) { return; }
 
         TrackEvent(AppState(), source);
     }
-
     protected void TrackEvent( Dictionary<string, string> eventDetails, [CallerMemberName] string? source = default )
     {
         ThrowIfNotEnabled();
 
-        if ( !_Services.SendCrashes ) { return; }
+        if ( !_DebugSettings.EnableAnalytics ) { return; }
 
         Analytics.TrackEvent(source, eventDetails);
     }
-
-#endregion
 }

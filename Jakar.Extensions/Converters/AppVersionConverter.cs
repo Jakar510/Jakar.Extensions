@@ -1,4 +1,5 @@
-﻿namespace Jakar.Extensions.Converters;
+﻿#nullable enable
+namespace Jakar.Extensions;
 
 
 public class AppVersionConverter : JsonConverter<AppVersion>
@@ -35,11 +36,11 @@ public class AppVersionNullableConverter : JsonConverter<AppVersion?>
     public override bool CanWrite => true;
 
 
-    public override void WriteJson( JsonWriter writer, AppVersion? value, JsonSerializer serializer )
+    public override void WriteJson( JsonWriter writer, AppVersion? version, JsonSerializer serializer )
     {
-        if ( value is null ) { return; }
+        if ( version is null ) { return; }
 
-        JToken item = JToken.FromObject(value.ToString());
+        JToken item = JToken.FromObject(version.Value.ToString());
         item.WriteTo(writer);
     }
 

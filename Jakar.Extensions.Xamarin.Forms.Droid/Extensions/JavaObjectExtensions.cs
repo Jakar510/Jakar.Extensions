@@ -1,13 +1,12 @@
 ﻿// unset
 
+#nullable enable
 using System;
 using Android.Runtime;
 
 
 
-
-
-namespace Jakar.Extensions.Xamarin.Forms.Droid.Extensions;
+namespace Jakar.Extensions.Xamarin.Forms.Droid;
 
 
 public static class JavaObjectExtensions

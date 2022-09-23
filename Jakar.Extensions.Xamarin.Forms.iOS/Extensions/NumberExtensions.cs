@@ -1,14 +1,13 @@
 ﻿// unset
 
 
+#nullable enable
 using System;
 using System.Diagnostics.CodeAnalysis;
-using Jakar.Extensions.General;
-using Jakar.Extensions.Strings;
 
 
 
-namespace Jakar.Extensions.Xamarin.Forms.iOS.Extensions;
+namespace Jakar.Extensions.Xamarin.Forms.iOS;
 
 
 [Foundation.Preserve(AllMembers = true)]

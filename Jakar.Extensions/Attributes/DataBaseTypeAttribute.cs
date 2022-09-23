@@ -1,4 +1,5 @@
-﻿namespace Jakar.Extensions.Attributes;
+﻿#nullable enable
+namespace Jakar.Extensions;
 
 
 [AttributeUsage(AttributeTargets.Property | AttributeTargets.Class | AttributeTargets.Struct)]

@@ -3,11 +3,10 @@ using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Jakar.Extensions.Http;
-using Jakar.Extensions.Strings;
 using NUnit.Framework;
 
 
+#nullable enable
 namespace Jakar.Extensions.Tests.Http;
 
 
@@ -15,7 +14,7 @@ namespace Jakar.Extensions.Tests.Http;
 [SuppressMessage("ReSharper", "SuggestVarOrType_SimpleTypes")]
 [SuppressMessage("ReSharper", "SuggestVarOrType_BuiltInTypes")]
 [SuppressMessage("ReSharper", "SuggestVarOrType_Elsewhere")]
-public class GetTests : UrlTests
+public class GetTests : UrlTestsCore
 {
     [Test]
     [TestCase("http://google.com")]

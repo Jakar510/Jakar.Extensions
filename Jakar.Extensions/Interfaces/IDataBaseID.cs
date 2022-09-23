@@ -1,14 +1,11 @@
-﻿namespace Jakar.Extensions.Interfaces;
+﻿#nullable enable
+namespace Jakar.Extensions;
 
 
-public interface IUniqueID<TId>
+public interface IUniqueID<TID> where TID : struct, IComparable<TID>, IEquatable<TID>
 {
-    public TId ID { get; init; }
+    public TID ID { get; init; }
 }
-
-
-
-public interface IDataBaseIDString : IUniqueID<string> { }
 
 
 

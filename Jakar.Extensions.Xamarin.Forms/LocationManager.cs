@@ -1,10 +1,4 @@
-﻿using Jakar.Extensions.Xamarin.Forms.Statics;
-using Xamarin.Essentials;
-
-
-
-
-
+﻿#nullable enable
 namespace Jakar.Extensions.Xamarin.Forms;
 
 

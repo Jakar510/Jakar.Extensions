@@ -1,7 +1,8 @@
-﻿namespace Jakar.Extensions.Exceptions.General;
+﻿#nullable enable
+namespace Jakar.Extensions;
 
 
-public class IncompleteDataException : Exception
+public class IncompleteDataException : DataException
 {
     public IncompleteDataException() { }
     public IncompleteDataException( string message ) : base(message) { }

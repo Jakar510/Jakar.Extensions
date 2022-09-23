@@ -1,5 +1,6 @@
 ﻿
-namespace Jakar.Extensions.Xamarin.Forms.Interfaces;
+#nullable enable
+namespace Jakar.Extensions.Xamarin.Forms;
 
 
 public interface IAppRating

@@ -1,13 +1,12 @@
-﻿using System;
+﻿#nullable enable
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UIKit;
 
 
 
-
-
-namespace Jakar.Extensions.Xamarin.Forms.iOS.Extensions.Layout;
+namespace Jakar.Extensions.Xamarin.Forms.iOS.Layout;
 
 
 public static class LayoutExtensions

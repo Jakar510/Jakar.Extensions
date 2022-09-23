@@ -1,24 +1,20 @@
 ﻿// unset
 
-using Xamarin.Forms.Xaml;
-
-
-
-
-
-namespace Jakar.Extensions.Xamarin.Forms.Converters;
+#nullable enable
+namespace Jakar.Extensions.Xamarin.Forms;
 
 
 [global::Xamarin.Forms.Internals.Preserve(true, false)]
 [TypeConversion(typeof(Size?))]
 public class NullableSizeConverter : TypeConverter, IValueConverter, IExtendedTypeConverter
 {
-    public override bool    CanConvertFrom( Type?               sourceType ) => sourceType is null || sourceType == typeof(string);
-    public override object? ConvertFromInvariantString( string? value )      => Convert(value);
+    public override bool CanConvertFrom( Type?                  sourceType ) => sourceType is null || sourceType == typeof(string);
+    public override object? ConvertFromInvariantString( string? value ) => Convert(value);
 
     public static Size? Convert( string? value )
     {
-        if ( string.IsNullOrWhiteSpace(value) ) return null;
+        if ( string.IsNullOrWhiteSpace(value) ) { return null; }
+
         string[] items = value.Split(',');
 
         switch ( items.Length )
@@ -27,8 +23,7 @@ public class NullableSizeConverter : TypeConverter, IValueConverter, IExtendedTy
                 double w = double.Parse(items[0]);
                 return new Size(w, w);
 
-            case 2:
-                return new Size(double.Parse(items[0]), double.Parse(items[1]));
+            case 2: return new Size(double.Parse(items[0]), double.Parse(items[1]));
         }
 
         throw new InvalidOperationException($"Cannot convert \"{value}\" into {typeof(Size)}");

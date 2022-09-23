@@ -1,9 +1,8 @@
 using System;
-using Jakar.Extensions.Models;
-using Jakar.Extensions.Strings;
 using NUnit.Framework;
 
 
+#nullable enable
 namespace Jakar.Extensions.Tests;
 
 
@@ -167,7 +166,7 @@ public class AppVersion_Tests : Assert
     [TestCase("1.0.0.0.0.0.0", false)]
     [TestCase("1.0.0...0.0.0", false)]
     [TestCase("0.7.0.25")]
-    public void TryParse_Span( string s, bool shouldWork = true ) { TryParse_Span(s.AsSpan(), shouldWork); }
+    public void TryParse_Span( string s, bool shouldWork = true ) => TryParse_Span(s.AsSpan(), shouldWork);
 
     private static void TryParse_Span( in ReadOnlySpan<char> s, bool shouldWork )
     {
@@ -259,7 +258,7 @@ public class AppVersion_Tests : Assert
     [TestCase("21.12.1", "21.10.3")]
     [TestCase("22.10.3", "21.10.3")]
     [TestCase("22.12.1", "21.10.3")]
-    public void Compare_Test_GreaterEqual( string s, in string other, in bool expected = true ) { Compare_Test_GreaterEqual(s, AppVersion.Parse(other), expected); }
+    public void Compare_Test_GreaterEqual( string s, in string other, in bool expected = true ) => Compare_Test_GreaterEqual(s, AppVersion.Parse(other), expected);
 
     private static void Compare_Test_GreaterEqual( string s, in AppVersion other, in bool expected )
     {
@@ -286,7 +285,7 @@ public class AppVersion_Tests : Assert
     [TestCase("21.12.1", "21.10.3")]
     [TestCase("22.10.3", "21.10.3")]
     [TestCase("22.12.1", "21.10.3")]
-    public void Compare_Test_Greater( string s, in string other, in bool expected = true ) { Compare_Test_Greater(s, AppVersion.Parse(other), expected); }
+    public void Compare_Test_Greater( string s, in string other, in bool expected = true ) => Compare_Test_Greater(s, AppVersion.Parse(other), expected);
 
     private static void Compare_Test_Greater( string s, in AppVersion other, in bool expected )
     {
@@ -313,7 +312,7 @@ public class AppVersion_Tests : Assert
     [TestCase("21.12.1", "21.10.3", false)]
     [TestCase("22.10.3", "21.10.3", false)]
     [TestCase("22.12.1", "21.10.3", false)]
-    public void Compare_Test_Less( string s, in string other, in bool expected = true ) { Compare_Test_Less(s, AppVersion.Parse(other), expected); }
+    public void Compare_Test_Less( string s, in string other, in bool expected = true ) => Compare_Test_Less(s, AppVersion.Parse(other), expected);
 
     private static void Compare_Test_Less( string s, in AppVersion other, in bool expected )
     {
@@ -340,7 +339,7 @@ public class AppVersion_Tests : Assert
     [TestCase("21.12.1", "21.10.3", false)]
     [TestCase("22.10.3", "21.10.3", false)]
     [TestCase("22.12.1", "21.10.3", false)]
-    public void Compare_Test_LessEqual( string s, in string other, in bool expected = true ) { Compare_Test_LessEqual(s, AppVersion.Parse(other), expected); }
+    public void Compare_Test_LessEqual( string s, in string other, in bool expected = true ) => Compare_Test_LessEqual(s, AppVersion.Parse(other), expected);
 
     private static void Compare_Test_LessEqual( string s, AppVersion other, bool expected )
     {
@@ -361,9 +360,9 @@ public class AppVersion_Tests : Assert
     [TestCase("21.10", "21.10.3")]
     [TestCase("21.10.0.0", "21.10.3")]
     [TestCase("21.10.0.0", "21.10.3.0.0.0")]
-    public void Compare_Test_FormatErrors( in string left, in string right ) { Compare_Test_FormatErrors(AppVersion.Parse(left), AppVersion.Parse(right)); }
+    public void Compare_Test_FormatErrors( in string left, in string right ) => Compare_Test_FormatErrors(AppVersion.Parse(left), AppVersion.Parse(right));
 
-    private static void Compare_Test_FormatErrors( AppVersion left, AppVersion right ) { Throws<FormatException>(() => _ = left <= right); }
+    private static void Compare_Test_FormatErrors( AppVersion left, AppVersion right ) => Throws<FormatException>(() => _ = left <= right);
 
 
     [Test]
@@ -402,7 +401,7 @@ public class AppVersion_Tests : Assert
     [TestCase("21.10.3.5.1", "21.12.1.5.1", false)]
     [TestCase("21.10.3.5.1", "22.10.3.5.1", false)]
     [TestCase("21.10.3.5.1", "22.12.1.5.1", false)]
-    public void FuzzyEquals_Test( in string left, in string right, in bool expected = true ) { FuzzyEquals_Test(AppVersion.Parse(left), AppVersion.Parse(right), expected); }
+    public void FuzzyEquals_Test( in string left, in string right, in bool expected = true ) => FuzzyEquals_Test(AppVersion.Parse(left), AppVersion.Parse(right), expected);
 
-    private static void FuzzyEquals_Test( in AppVersion left, in AppVersion right, in bool expected ) { AreEqual(expected, left.FuzzyEquals(right)); }
+    private static void FuzzyEquals_Test( in AppVersion left, in AppVersion right, in bool expected ) => AreEqual(expected, left.FuzzyEquals(right));
 }

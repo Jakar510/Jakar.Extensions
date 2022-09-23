@@ -1,9 +1,10 @@
-﻿namespace Jakar.Extensions.Converters;
+﻿#nullable enable
+namespace Jakar.Extensions;
 
 
 public class VersionConverter : JsonConverter<Version>
 {
-    public override void WriteJson( JsonWriter writer, Version? value, JsonSerializer serializer ) { writer.WriteValue(value?.ToString()); }
+    public override void WriteJson( JsonWriter writer, Version? value, JsonSerializer serializer ) => writer.WriteValue(value?.ToString());
 
     public override Version? ReadJson( JsonReader reader, Type objectType, Version? existingValue, bool hasExistingValue, JsonSerializer serializer )
     {

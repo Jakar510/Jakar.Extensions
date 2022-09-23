@@ -1,8 +1,8 @@
 {
   "profiles": {
-    "Jakar.Extensions.Experiments": {
+    "Console.Experiments": {
       "commandName": "Project",
-      "workingDirectory": "D:\\WorkSpace\\Public\\Jakar.Extensions\\Cache"
+      "hotReloadEnabled": false
     }
   }
 }

@@ -1,7 +1,5 @@
-﻿
-
-
-namespace Jakar.Extensions.Xamarin.Forms.Extensions;
+﻿#nullable enable
+namespace Jakar.Extensions.Xamarin.Forms;
 
 
 public static class ShellExtensions
@@ -13,13 +11,13 @@ public static class ShellExtensions
         await shell.GoToAsync(types.GetPath(root, parameters)).ConfigureAwait(false);
 
 
-    public static string GetPath( bool        root, params Type[] types )                                                => types.Parameterize(root);
+    public static string GetPath( bool        root, params Type[] types ) => types.Parameterize(root);
     public static string GetPath( this object type, bool          root, IDictionary<string, object>? parameters = null ) => type.GetType().GetPath(root, parameters);
     public static string GetPath( this Type   type, bool          root, IDictionary<string, object>? parameters = null ) => type.Name.GetPath(root, parameters);
 
     public static string GetPath( this string type, bool root, IDictionary<string, object>? parameters = null )
     {
-        if ( parameters is null ) return type;
+        if ( parameters is null ) { return type; }
 
         string result = type + parameters.Parameterize();
 

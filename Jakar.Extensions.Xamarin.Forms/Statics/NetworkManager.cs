@@ -1,16 +1,18 @@
-﻿using System.Net.NetworkInformation;
+﻿#nullable enable
+using System.Net.NetworkInformation;
 using System.Net.Sockets;
-using Jakar.Extensions.Xamarin.Forms.Interfaces;
-using Xamarin.Essentials;
 
 
 
-namespace Jakar.Extensions.Xamarin.Forms.Statics;
+namespace Jakar.Extensions.Xamarin.Forms;
 
 
 public static class NetworkManager
 {
     private static readonly INetworkManager _manager = DependencyService.Resolve<INetworkManager>();
+    public static           bool            IsConnected     => Connectivity.NetworkAccess == NetworkAccess.Internet;
+    public static           bool            IsWiFiConnected => IsConnected && Connectivity.ConnectionProfiles.Any(p => p == ConnectionProfile.WiFi || p == ConnectionProfile.Ethernet);
+
 
     public static string? GetIdentifier()
     {
@@ -38,39 +40,42 @@ public static class NetworkManager
 
     public static string? GetIpAddress() => GetIpAddress(AddressFamily.InterNetwork, AddressFamily.InterNetworkV6);
 
+    
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool CheckIpAddress( this IPAddress? address, params AddressFamily[] families )
     {
         if ( address is null ) { return false; }
 
-        if ( address.ToString().StartsWith("169.254", StringComparison.OrdinalIgnoreCase) ) { return false; }
+        Span<char> span = stackalloc char[50];
+
+        if ( address.TryFormat(span, out int charsWritten) )
+        {
+            span = span[..charsWritten];
+            if ( span.StartsWith("169.254") ) { return false; }
+
+            if ( span.StartsWith("127.") ) { return false; }
+        }
 
         return address.AddressFamily.IsOneOf(families);
     }
 
-    public static string? GetIpAddress( params AddressFamily[] families )
+    public static string? GetIpAddress( params AddressFamily[] families ) => GetIpAddresses(families).FirstOrDefault()?.ToString();
+    public static IEnumerable<IPAddress> GetIpAddresses( params AddressFamily[] families )
     {
-        IPAddress? address = Dns.GetHostAddresses(Dns.GetHostName()).FirstOrDefault(x => x.CheckIpAddress(families));
+        IEnumerable<IPAddress>? result = default;
 
-        if ( address is not null ) { return address.ToString(); }
+        try { result = Dns.GetHostAddresses(Dns.GetHostName()).Where(x => x.CheckIpAddress(families)); }
+        catch ( SocketException ) { }
 
 
-        // ReSharper disable once LoopCanBeConvertedToQuery
-        foreach ( NetworkInterface netInterface in NetworkInterface.GetAllNetworkInterfaces() )
-        {
-            if ( netInterface.NetworkInterfaceType != NetworkInterfaceType.Wireless80211 && netInterface.NetworkInterfaceType != NetworkInterfaceType.Ethernet ) { continue; }
+        result ??= from netInterface in NetworkInterface.GetAllNetworkInterfaces()
+                   where netInterface.NetworkInterfaceType is NetworkInterfaceType.Wireless80211 or NetworkInterfaceType.Ethernet
+                   from addressInfo in netInterface.GetIPProperties().UnicastAddresses
+                   where addressInfo.Address.CheckIpAddress(families)
+                   select addressInfo.Address;
 
-            foreach ( UnicastIPAddressInformation addressInfo in netInterface.GetIPProperties().UnicastAddresses )
-            {
-                if ( addressInfo.Address.CheckIpAddress(families) ) { return addressInfo.Address.ToString(); }
-            }
-        }
-
-        return default;
+        foreach ( IPAddress value in result ) { yield return value; }
     }
-
-
-    public static bool IsConnected     => Connectivity.NetworkAccess == NetworkAccess.Internet;
-    public static bool IsWiFiConnected => IsConnected && Connectivity.ConnectionProfiles.Any(p => p == ConnectionProfile.WiFi || p == ConnectionProfile.Ethernet);
 
 
     public static void ThrowIfNotConnected()

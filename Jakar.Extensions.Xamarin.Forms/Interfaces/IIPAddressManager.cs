@@ -1,7 +1,5 @@
-﻿
-
-
-namespace Jakar.Extensions.Xamarin.Forms.Interfaces;
+﻿#nullable enable
+namespace Jakar.Extensions.Xamarin.Forms;
 
 
 /// <summary>
@@ -40,7 +38,7 @@ namespace Jakar.Extensions.Xamarin.Forms.Interfaces;
 public interface INetworkManager
 {
     public string? GetIdentifier();
-    public void    OpenWifiSettings();
+    public void OpenWifiSettings();
 
     // public string? GetIPAddress();
 

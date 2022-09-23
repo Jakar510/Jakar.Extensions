@@ -1,4 +1,5 @@
-﻿namespace Jakar.Extensions.Exceptions.General;
+﻿#nullable enable
+namespace Jakar.Extensions;
 
 
 public class AttachmentMissingException : Exception

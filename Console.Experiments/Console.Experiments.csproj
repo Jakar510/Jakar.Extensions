@@ -4,24 +4,31 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net6.0</TargetFramework>
     <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <Optimize>false</Optimize>
+    <Optimize>True</Optimize>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <DocumentationFile></DocumentationFile>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <Optimize>True</Optimize>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="BenchmarkDotNet" Version="0.13.1" />
+    <PackageReference Include="BenchmarkDotNet" Version="0.13.2" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Jakar.Extensions\Jakar.Extensions.csproj" />
+    <ProjectReference Include="..\Jakar.Json\Jakar.Json.csproj" />
+    <ProjectReference Include="..\Jakar.SqlBuilder\Jakar.SqlBuilder.csproj" />
+    <ProjectReference Include="..\Jakar.Xml\Jakar.Xml.csproj" />
   </ItemGroup>
 
 </Project>

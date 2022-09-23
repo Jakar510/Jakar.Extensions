@@ -2,11 +2,10 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using Jakar.Extensions.General;
-using Jakar.Extensions.Types;
 using NUnit.Framework;
 
 
+#nullable enable
 namespace Jakar.Extensions.Tests;
 
 
@@ -25,7 +24,7 @@ public class IsList_Tests : Assert
     [TestCase(typeof(List<string>), true)]
     [TestCase(typeof(List<List<string>>), true)]
     [TestCase(typeof(List<Guid>), true)]
-    public void IsList_Test( Type objType, bool expected ) { AreEqual(objType.IsList(), expected); }
+    public void IsList_Test( Type objType, bool expected ) => AreEqual(objType.IsList(), expected);
 
 
     [Test]

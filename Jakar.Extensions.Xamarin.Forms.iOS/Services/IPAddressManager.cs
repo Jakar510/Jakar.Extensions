@@ -1,20 +1,15 @@
 ﻿using System;
-using System.Net.NetworkInformation;
-using System.Net.Sockets;
 using Foundation;
-using Jakar.Extensions.Exceptions.General;
-using Jakar.Extensions.Xamarin.Forms.Interfaces;
-using Jakar.Extensions.Xamarin.Forms.iOS.Services;
+using Jakar.Extensions.Xamarin.Forms.iOS;
 using UIKit;
 using Xamarin.Forms;
-
-
 
 
 [assembly: Dependency(typeof(IpAddressManager))]
 
 
-namespace Jakar.Extensions.Xamarin.Forms.iOS.Services;
+#nullable enable
+namespace Jakar.Extensions.Xamarin.Forms.iOS;
 
 
 public class IpAddressManager : INetworkManager
@@ -45,7 +40,7 @@ public class IpAddressManager : INetworkManager
 
     // public string? GetIPAddress()
     // {
-    // 	string ipAddress = "";
+    // 	string ipAddress = string.Empty;
     //
     // 	foreach ( var netInterface in NetworkInterface.GetAllNetworkInterfaces() )
     // 	{

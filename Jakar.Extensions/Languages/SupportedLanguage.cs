@@ -1,4 +1,5 @@
-﻿namespace Jakar.Extensions.Languages;
+﻿#nullable enable
+namespace Jakar.Extensions;
 
 
 public enum SupportedLanguage
@@ -16,5 +17,5 @@ public enum SupportedLanguage
     Portuguese,
     Dutch,
     Korean,
-    Arabic,
+    Arabic
 }

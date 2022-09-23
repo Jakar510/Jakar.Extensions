@@ -1,13 +1,13 @@
-﻿namespace Jakar.Extensions.Types;
+﻿#nullable enable
+namespace Jakar.Extensions;
 
 
 public static partial class TypeExtensions
 {
     public static bool IsSet( this PropertyInfo propertyInfo ) => propertyInfo.PropertyType.IsSet();
-    public static bool IsSet( this Type         type )         => type.HasInterface(typeof(ISet<>));
+    public static bool IsSet( this Type         type ) => type.HasInterface(typeof(ISet<>));
 
-    public static bool IsSet( this PropertyInfo propertyInfo, [NotNullWhen(true)] out Type? itemType, [NotNullWhen(true)] out bool? isBuiltInType )
-        => propertyInfo.PropertyType.IsCollection(out itemType, out isBuiltInType);
+    public static bool IsSet( this PropertyInfo propertyInfo, [NotNullWhen(true)] out Type? itemType, [NotNullWhen(true)] out bool? isBuiltInType ) => propertyInfo.PropertyType.IsCollection(out itemType, out isBuiltInType);
 
     public static bool IsSet( this Type classType, [NotNullWhen(true)] out Type? itemType, [NotNullWhen(true)] out bool? isBuiltInType )
     {

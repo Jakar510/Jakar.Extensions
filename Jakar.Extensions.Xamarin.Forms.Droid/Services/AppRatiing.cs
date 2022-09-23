@@ -1,9 +1,7 @@
 ﻿using System;
 using Android.Content;
 using Android.Content.PM;
-using Jakar.Extensions.Xamarin.Forms.Droid.Services;
-using Jakar.Extensions.Xamarin.Forms.Interfaces;
-using Jakar.Extensions.Xamarin.Forms.Statics;
+using Jakar.Extensions.Xamarin.Forms.Droid;
 using AUri = Android.Net.Uri;
 
 
@@ -12,7 +10,8 @@ using AUri = Android.Net.Uri;
 [assembly: Xamarin.Forms.Dependency(typeof(AppRating))]
 
 
-namespace Jakar.Extensions.Xamarin.Forms.Droid.Services;
+#nullable enable
+namespace Jakar.Extensions.Xamarin.Forms.Droid;
 
 
 public class AppRating : IAppRating

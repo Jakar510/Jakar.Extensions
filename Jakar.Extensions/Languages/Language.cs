@@ -1,4 +1,5 @@
-﻿namespace Jakar.Extensions.Languages;
+﻿#nullable enable
+namespace Jakar.Extensions;
 
 
 [Serializable]
@@ -33,12 +34,9 @@ public readonly struct Language : IDataBaseID, IComparable<Language>, IEquatable
 
         return Equals(other.Value);
     }
-    public bool Equals( Language other ) => DisplayName == other.DisplayName &&
-                                            ShortName == other.ShortName &&
-                                            Version == other.Version &&
-                                            ID == other.ID;
+    public bool Equals( Language         other ) => DisplayName == other.DisplayName && ShortName == other.ShortName && Version == other.Version && ID == other.ID;
     public override bool Equals( object? obj ) => obj is Language language && Equals(language);
-    public override int  GetHashCode()         => HashCode.Combine(DisplayName, ShortName, Version, ID);
+    public override int GetHashCode() => HashCode.Combine(DisplayName, ShortName, Version, ID);
 
 
     public int CompareTo( Language? other )

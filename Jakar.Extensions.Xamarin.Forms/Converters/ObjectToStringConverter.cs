@@ -1,7 +1,8 @@
 ﻿
 
 
-namespace Jakar.Extensions.Xamarin.Forms.Converters;
+#nullable enable
+namespace Jakar.Extensions.Xamarin.Forms;
 
 
 [TypeConverter(typeof(string))]

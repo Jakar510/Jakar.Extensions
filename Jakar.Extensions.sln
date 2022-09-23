@@ -7,7 +7,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jakar.Extensions", "Jakar.E
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nuget", "nuget", "{07C27764-F156-4896-B028-6FD19BB2E82E}"
 	ProjectSection(SolutionItems) = preProject
+		nuget\Jakar.DataBase.nuspec = nuget\Jakar.DataBase.nuspec
 		nuget\Jakar.Extensions.Blazor.nuspec = nuget\Jakar.Extensions.Blazor.nuspec
+		nuget\Jakar.Extensions.Hosting.nuspec = nuget\Jakar.Extensions.Hosting.nuspec
 		nuget\Jakar.Extensions.nuspec = nuget\Jakar.Extensions.nuspec
 		nuget\Jakar.Extensions.Xamarin.Forms.nuspec = nuget\Jakar.Extensions.Xamarin.Forms.nuspec
 		nuget\Jakar.Xml.nuspec = nuget\Jakar.Xml.nuspec
@@ -20,6 +22,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B8AA3696-1782-42CF-8B29-1A4AAE184F9A}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
+		images\icon.png = images\icon.png
+		LICENSE.txt = LICENSE.txt
 		README.md = README.md
 	EndProjectSection
 EndProject
@@ -38,6 +42,22 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jakar.Extensions.Xamarin.Forms.iOS", "Jakar.Extensions.Xamarin.Forms.iOS\Jakar.Extensions.Xamarin.Forms.iOS.csproj", "{F77BD70A-AC4A-4C6F-ABD1-2835CC23A4DD}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jakar.Extensions.Blazor", "Jakar.Extensions.Blazor\Jakar.Extensions.Blazor.csproj", "{3DDF2DFF-288A-428B-A741-FCA0AE1CBC1A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jakar.Json", "Jakar.Json\Jakar.Json.csproj", "{3B31051E-0CB8-4808-BB84-26F89B0536AE}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jakar.Json.Generator", "Jakar.Json.Generator\Jakar.Json.Generator.csproj", "{A00B7430-2F61-447B-AC84-E156CD4E9349}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jakar.SqlBuilder", "Jakar.SqlBuilder\Jakar.SqlBuilder.csproj", "{07DD012F-B22B-40CF-965F-6E11DAB8E25D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jakar.SqlBuilder.Tests", "Jakar.SqlBuilder.Tests\Jakar.SqlBuilder.Tests.csproj", "{5CF698E7-185A-4AA2-AB78-99175B690C1C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jakar.Extensions.Wpf", "Jakar.Extensions.Wpf\Jakar.Extensions.Wpf.csproj", "{D3419869-47AD-45A3-8E6B-EEB292F3B26B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jakar.Extensions.Bogus", "Jakar.Extensions.Bogus\Jakar.Extensions.Bogus.csproj", "{2A67C324-7873-409E-859B-F02D7C718D65}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jakar.Database", "Jakar.Database\Jakar.Database.csproj", "{C68DF03A-AE24-4553-AA66-072728191784}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jakar.Extensions.Hosting", "Jakar.Extensions.Hosting\Jakar.Extensions.Hosting.csproj", "{D5FCD265-907F-4B6D-932D-3F72C3D42485}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -80,6 +100,38 @@ Global
 		{3DDF2DFF-288A-428B-A741-FCA0AE1CBC1A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3DDF2DFF-288A-428B-A741-FCA0AE1CBC1A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3DDF2DFF-288A-428B-A741-FCA0AE1CBC1A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3B31051E-0CB8-4808-BB84-26F89B0536AE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3B31051E-0CB8-4808-BB84-26F89B0536AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3B31051E-0CB8-4808-BB84-26F89B0536AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3B31051E-0CB8-4808-BB84-26F89B0536AE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A00B7430-2F61-447B-AC84-E156CD4E9349}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A00B7430-2F61-447B-AC84-E156CD4E9349}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A00B7430-2F61-447B-AC84-E156CD4E9349}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A00B7430-2F61-447B-AC84-E156CD4E9349}.Release|Any CPU.Build.0 = Release|Any CPU
+		{07DD012F-B22B-40CF-965F-6E11DAB8E25D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{07DD012F-B22B-40CF-965F-6E11DAB8E25D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{07DD012F-B22B-40CF-965F-6E11DAB8E25D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{07DD012F-B22B-40CF-965F-6E11DAB8E25D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5CF698E7-185A-4AA2-AB78-99175B690C1C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5CF698E7-185A-4AA2-AB78-99175B690C1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5CF698E7-185A-4AA2-AB78-99175B690C1C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5CF698E7-185A-4AA2-AB78-99175B690C1C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D3419869-47AD-45A3-8E6B-EEB292F3B26B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D3419869-47AD-45A3-8E6B-EEB292F3B26B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D3419869-47AD-45A3-8E6B-EEB292F3B26B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D3419869-47AD-45A3-8E6B-EEB292F3B26B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2A67C324-7873-409E-859B-F02D7C718D65}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2A67C324-7873-409E-859B-F02D7C718D65}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2A67C324-7873-409E-859B-F02D7C718D65}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2A67C324-7873-409E-859B-F02D7C718D65}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C68DF03A-AE24-4553-AA66-072728191784}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C68DF03A-AE24-4553-AA66-072728191784}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C68DF03A-AE24-4553-AA66-072728191784}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C68DF03A-AE24-4553-AA66-072728191784}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D5FCD265-907F-4B6D-932D-3F72C3D42485}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D5FCD265-907F-4B6D-932D-3F72C3D42485}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D5FCD265-907F-4B6D-932D-3F72C3D42485}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D5FCD265-907F-4B6D-932D-3F72C3D42485}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

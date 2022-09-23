@@ -1,14 +1,12 @@
 ﻿using System;
-using Jakar.Extensions.Xamarin.Forms.Droid.Services;
-using Jakar.Extensions.Xamarin.Forms.Interfaces;
-
-
+using Jakar.Extensions.Xamarin.Forms.Droid;
 
 
 [assembly: Xamarin.Forms.Dependency(typeof(BaseUrlAndroid))]
 
 
-namespace Jakar.Extensions.Xamarin.Forms.Droid.Services;
+#nullable enable
+namespace Jakar.Extensions.Xamarin.Forms.Droid;
 
 
 [global::Android.Runtime.Preserve(AllMembers = true)]

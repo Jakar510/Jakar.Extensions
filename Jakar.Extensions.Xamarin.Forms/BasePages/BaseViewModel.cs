@@ -1,32 +1,5 @@
-﻿using System.Windows.Input;
-using Jakar.Extensions.Xamarin.Forms.Statics;
-using Xamarin.Essentials;
-
-
-
-namespace Jakar.Extensions.Xamarin.Forms.BasePages;
-
-
-public abstract class BaseViewModel : ObservableClass
-{
-    private bool _isBusy;
-
-    public bool IsBusy
-    {
-        get => _isBusy;
-        set => SetProperty(ref _isBusy, value);
-    }
-
-
-    private string? _title = string.Empty;
-
-    public string? Title
-    {
-        get => _title;
-        set => SetProperty(ref _title, value);
-    }
-}
-
+﻿#nullable enable
+namespace Jakar.Extensions.Xamarin.Forms;
 
 
 public abstract class BaseViewModel<TPage> : BaseViewModel where TPage : Page
@@ -44,17 +17,13 @@ public abstract class BaseViewModel<TPage> : BaseViewModel where TPage : Page
     protected          TPage?       _SourcePage  { get; set; }
 
 
-    protected BaseViewModel()
-    {
-        LaunchWebsiteCommand = new Command<string>(async ( address ) => await LaunchWebsite(address).ConfigureAwait(false));
+    protected BaseViewModel() => LaunchWebsiteCommand = new Command<string>(async ( address ) => await LaunchWebsite(address).ConfigureAwait(false));
 
-        // GoHomeCommand = new Command(async () => await _SourcePage.Navigation.PopToRootAsync(true).ConfigureAwait(false));
-    }
-
-    protected BaseViewModel( TPage source ) : this() { SetPage(source); }
+    // GoHomeCommand = new Command(async () => await _SourcePage.Navigation.PopToRootAsync(true).ConfigureAwait(false));
+    protected BaseViewModel( TPage source ) : this() => SetPage(source);
 
 
-    public void SetPage( TPage source ) { _SourcePage = source ?? throw new ArgumentNullException(nameof(source)); }
+    public void SetPage( TPage source ) => _SourcePage = source ?? throw new ArgumentNullException(nameof(source));
 
     protected abstract Task StartFeedBack();
     protected abstract Task LaunchWebsite( object? address = null );
@@ -90,8 +59,8 @@ public abstract class BaseViewModel<TPage, TItem> : BaseViewModel<TPage> where T
         }
     }
 
-    protected BaseViewModel() { LoadItemsCommand                              = new Command(async () => await ExecuteLoadItemsCommand().ConfigureAwait(false)); }
-    protected BaseViewModel( TPage source ) : base(source) { LoadItemsCommand = new Command(async () => await ExecuteLoadItemsCommand().ConfigureAwait(false)); }
+    protected BaseViewModel() => LoadItemsCommand = new Command(async () => await ExecuteLoadItemsCommand().ConfigureAwait(false));
+    protected BaseViewModel( TPage source ) : base(source) => LoadItemsCommand = new Command(async () => await ExecuteLoadItemsCommand().ConfigureAwait(false));
 
 
     public void LoadItems() => LoadItemsCommand.Execute(null);

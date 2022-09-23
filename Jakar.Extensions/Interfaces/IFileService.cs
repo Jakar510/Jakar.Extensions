@@ -1,7 +1,8 @@
 ﻿// unset
 
 
-namespace Jakar.Extensions.Interfaces;
+#nullable enable
+namespace Jakar.Extensions;
 
 
 public interface IFileService

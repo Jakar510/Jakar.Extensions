@@ -1,14 +1,12 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
-using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Jakar.Extensions.Http;
-using Jakar.Extensions.Strings;
 using NUnit.Framework;
 
 
+#nullable enable
 namespace Jakar.Extensions.Tests.Http;
 
 
@@ -16,7 +14,7 @@ namespace Jakar.Extensions.Tests.Http;
 [SuppressMessage("ReSharper", "SuggestVarOrType_SimpleTypes")]
 [SuppressMessage("ReSharper", "SuggestVarOrType_BuiltInTypes")]
 [SuppressMessage("ReSharper", "SuggestVarOrType_Elsewhere")]
-public class DeleteTests : UrlTests
+public class DeleteTests : UrlTestsCore
 {
     [Test]
     [TestCase("https://reqbin.com/echo/delete/json")]

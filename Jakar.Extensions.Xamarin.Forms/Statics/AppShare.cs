@@ -1,12 +1,11 @@
-﻿using Jakar.Extensions.Xamarin.Forms.Extensions;
-using Plugin.Media;
+﻿using Plugin.Media;
 using Plugin.Media.Abstractions;
 using Plugin.Screenshot;
-using Xamarin.Essentials;
 using Location = Xamarin.Essentials.Location;
 
 
-namespace Jakar.Extensions.Xamarin.Forms.Statics;
+#nullable enable
+namespace Jakar.Extensions.Xamarin.Forms;
 
 
 public static class AppShare
@@ -19,20 +18,19 @@ public static class AppShare
             Uri = uri,
         };
 
-    private static IFileService _FileService { get; } = DependencyService.Get<IFileService>();
+    public static IFileService FileService { get; } = DependencyService.Get<IFileService>();
 
     public static async Task ShareRequest( this string title, string text, Uri    uri ) => await ShareRequest(title, text, uri.ToString()).ConfigureAwait(false);
     public static async Task ShareRequest( this string title, string text, string uri ) => await Share.RequestAsync(GetTextRequest(title, text, uri)).ConfigureAwait(false);
 
 
-    public static async Task ShareFile( this Uri       uri,      string shareTitle )              => await ShareFile(uri.ToString(), shareTitle).ConfigureAwait(false);
-    public static async Task ShareFile( this FileInfo  info,     string shareTitle )              => await ShareFile(info.FullName, shareTitle).ConfigureAwait(false);
-    public static async Task ShareFile( string         filePath, string shareTitle )              => await ShareFile(new ShareFile(filePath), shareTitle).ConfigureAwait(false);
+    public static async Task ShareFile( this Uri       uri,      string shareTitle ) => await ShareFile(uri.ToString(),              shareTitle).ConfigureAwait(false);
+    public static async Task ShareFile( this FileInfo  info,     string shareTitle ) => await ShareFile(info.FullName,               shareTitle).ConfigureAwait(false);
+    public static async Task ShareFile( string         filePath, string shareTitle ) => await ShareFile(new ShareFile(filePath),     shareTitle).ConfigureAwait(false);
     public static async Task ShareFile( this Uri       uri,      string shareTitle, string mime ) => await ShareFile(uri.ToString(), shareTitle, mime).ConfigureAwait(false);
-    public static async Task ShareFile( this FileInfo  info,     string shareTitle, string mime ) => await ShareFile(info.FullName, shareTitle, mime).ConfigureAwait(false);
+    public static async Task ShareFile( this FileInfo  info,     string shareTitle, string mime ) => await ShareFile(info.FullName,  shareTitle, mime).ConfigureAwait(false);
     public static async Task ShareFile( this LocalFile file,     string shareTitle, string mime ) => await new ShareFile(file.Name, mime).ShareFile(shareTitle).ConfigureAwait(false);
-    public static async Task ShareFile( this string    filePath, string shareTitle, string mime ) => await new ShareFile(filePath, mime).ShareFile(shareTitle).ConfigureAwait(false);
-
+    public static async Task ShareFile( this string    filePath, string shareTitle, string mime ) => await new ShareFile(filePath,  mime).ShareFile(shareTitle).ConfigureAwait(false);
     public static async Task ShareFile( this ShareFile shareFile, string shareTitle )
     {
         var request = new ShareFileRequest(shareTitle, shareFile);
@@ -40,11 +38,10 @@ public static class AppShare
     }
 
 
-    public static async Task<LocalFile?> OpenOfficeDoc( this Uri link, string shareTitle, MimeType mime, IAppSettings settings ) => await link.OpenOfficeDoc(shareTitle, mime, settings.AppName).ConfigureAwait(false);
-
-    public static async Task<LocalFile?> OpenOfficeDoc( this Uri link, string shareTitle, MimeType mime, string name )
+    public static async Task<LocalFile> OpenOfficeDoc( this Uri link, string shareTitle, MimeType mime, IAppSettings settings ) => await link.OpenOfficeDoc(shareTitle, mime, settings.AppName).ConfigureAwait(false);
+    public static async Task<LocalFile> OpenOfficeDoc( this Uri link, string shareTitle, MimeType mime, string name )
     {
-        LocalFile info = await _FileService.DownloadFile(link, mime.ToFileName(name)).ConfigureAwait(false);
+        LocalFile info = await FileService.DownloadFile(link, mime.ToFileName(name)).ConfigureAwait(false);
 
         var url = info.ToUri(mime);
 
@@ -55,7 +52,6 @@ public static class AppShare
     }
 
     public static async Task<bool> Open( this string url ) => await Open(new Uri(url)).ConfigureAwait(false);
-
     public static async Task<bool> Open( this Uri url )
     {
         if ( await Launcher.CanOpenAsync(url).ConfigureAwait(false) ) { return await Launcher.TryOpenAsync(url).ConfigureAwait(false); }
@@ -66,8 +62,7 @@ public static class AppShare
     public static async Task OpenBrowser( this Uri uri, BrowserLaunchMode launchMode = BrowserLaunchMode.SystemPreferred ) => await Browser.OpenAsync(uri, launchMode);
 
 
-    public static void SetupCrossMedia( this Page page, string title, string message, string ok )
-        => MainThread.BeginInvokeOnMainThread(async () => await page.SetupCrossMediaAsync(title, message, ok).ConfigureAwait(false));
+    public static void SetupCrossMedia( this Page page, string title, string message, string ok ) => MainThread.BeginInvokeOnMainThread(async () => await page.SetupCrossMediaAsync(title, message, ok).ConfigureAwait(false));
 
     public static async Task SetupCrossMediaAsync( this Page page, string title, string message, string ok )
     {
@@ -176,10 +171,10 @@ public static class AppShare
     // }
 
 
-    public static ImageSource    GetImageSource( this MediaFile file )          => ImageSource.FromStream(file.GetStream);
-    public static UriImageSource GetImageSource( this string    url )           => GetImageSource(new Uri(url), 5);
+    public static ImageSource GetImageSource( this    MediaFile file ) => ImageSource.FromStream(file.GetStream);
+    public static UriImageSource GetImageSource( this string    url ) => GetImageSource(new Uri(url),           5);
     public static UriImageSource GetImageSource( this string    url, int days ) => GetImageSource(new Uri(url), days);
-    public static UriImageSource GetImageSource( this Uri       url, int days ) => GetImageSource(url, new TimeSpan(days, 0, 0, 0));
+    public static UriImageSource GetImageSource( this Uri       url, int days ) => GetImageSource(url,          new TimeSpan(days, 0, 0, 0));
 
     public static UriImageSource GetImageSource( this Uri url, TimeSpan time ) => new()
                                                                                   {

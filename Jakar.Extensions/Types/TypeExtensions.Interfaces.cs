@@ -1,4 +1,5 @@
-﻿namespace Jakar.Extensions.Types;
+﻿#nullable enable
+namespace Jakar.Extensions;
 
 
 public static partial class TypeExtensions
@@ -11,6 +12,6 @@ public static partial class TypeExtensions
         Type[] interfaces = type.GetInterfaces();
         if ( interfaces.Contains(interfaceType) ) { return true; }
 
-        return interfaces.Any(t => t == interfaceType || t.IsGenericType && t.GetGenericTypeDefinition() == interfaceType);
+        return interfaces.Any(t => t == interfaceType || ( t.IsGenericType && t.GetGenericTypeDefinition() == interfaceType ));
     }
 }

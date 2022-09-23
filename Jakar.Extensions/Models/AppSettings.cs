@@ -1,66 +1,83 @@
-﻿namespace Jakar.Extensions.Models;
+﻿#nullable enable
+namespace Jakar.Extensions;
 
 
-public interface IAppSettings
+public interface IAppSettings : IHostViewModel
 {
-    public string  AppName           { get; }
-    public string  DeviceVersion     { get; }
-    public bool    SendCrashes       { get; set; }
-    public string? ScreenShotAddress { get; set; }
-    public bool    CrashDataPending  { get; set; }
+    public string     AppName           { get; }
+    public string     DeviceVersion     { get; }
+    public AppVersion AppVersion        { get; }
+    public Guid       DeviceID          { get; set; }
+    public string?    ScreenShotAddress { get; set; }
 }
 
 
 
-public interface IAppSettings<out TVersion> : IAppSettings
+public interface IAppSettings<TViewPage> : IAppSettings
 {
-    public TVersion AppVersion { get; }
-}
-
-
-
-public interface IAppSettings<out TDeviceID, TViewPage, out TVersion> : IAppSettings<TVersion>
-{
-    public TDeviceID  DeviceID        { get; }
     public TViewPage? CurrentViewPage { get; set; }
 }
 
 
 
-public interface IAppSettings<out TDeviceID, TViewPage> : IAppSettings<TDeviceID, TViewPage, Version> { }
-
-
-
 [Serializable]
-public class AppSettings<TViewPage> : ObservableClass, IAppSettings<Guid, TViewPage, AppVersion>
+public class AppSettings : BaseHostViewModel, IAppSettings
 {
-    private Guid       _deviceID;
-    private bool       _sendCrashes;
-    private string?    _screenShotAddress;
-    private TViewPage? _currentViewPage;
     private string     _appName       = string.Empty;
     private string     _deviceVersion = string.Empty;
+    private string?    _screenShotAddress;
     private AppVersion _appVersion;
-    private bool       _crashDataPending;
+    private Guid       _deviceID;
 
 
-    public Guid DeviceID
+    public virtual Guid DeviceID
     {
         get => _deviceID;
         set => SetProperty(ref _deviceID, value);
     }
 
-    public bool SendCrashes
-    {
-        get => _sendCrashes;
-        set => SetProperty(ref _sendCrashes, value);
-    }
 
-    public string? ScreenShotAddress
+    public virtual string? ScreenShotAddress
     {
         get => _screenShotAddress;
         set => SetProperty(ref _screenShotAddress, value);
     }
+
+    public virtual string AppName
+    {
+        get => _appName;
+        set => SetProperty(ref _appName, value);
+    }
+
+    public virtual string DeviceVersion
+    {
+        get => _deviceVersion;
+        set => SetProperty(ref _deviceVersion, value);
+    }
+
+    public virtual AppVersion AppVersion
+    {
+        get => _appVersion;
+        set => SetProperty(ref _appVersion, value);
+    }
+
+
+    public AppSettings( string appName, in AppVersion version, string deviceVersion, Uri  hostInfo ) : this(appName, version, deviceVersion, true, hostInfo) { }
+    public AppSettings( string appName, in AppVersion version, string deviceVersion, bool sendCrashes, Uri hostInfo ) : this(appName, version, deviceVersion, sendCrashes, hostInfo, hostInfo) { }
+    public AppSettings( string appName, in AppVersion version, string deviceVersion, bool sendCrashes, Uri hostInfo, Uri defaultHostInfo ) : base(hostInfo, defaultHostInfo)
+    {
+        AppName       = appName;
+        AppVersion    = version;
+        DeviceVersion = deviceVersion;
+    }
+}
+
+
+
+[Serializable]
+public class AppSettings<TViewPage> : AppSettings, IAppSettings<TViewPage>
+{
+    private TViewPage? _currentViewPage;
 
     public virtual TViewPage? CurrentViewPage
     {
@@ -68,31 +85,8 @@ public class AppSettings<TViewPage> : ObservableClass, IAppSettings<Guid, TViewP
         set => SetProperty(ref _currentViewPage, value);
     }
 
-    public string AppName
-    {
-        get => _appName;
-        set => SetProperty(ref _appName, value);
-    }
 
-    public string DeviceVersion
-    {
-        get => _deviceVersion;
-        set => SetProperty(ref _deviceVersion, value);
-    }
-
-    public bool CrashDataPending
-    {
-        get => _crashDataPending;
-        set => SetProperty(ref _crashDataPending, value);
-    }
-
-    public AppVersion AppVersion
-    {
-        get => _appVersion;
-        set => SetProperty(ref _appVersion, value);
-    }
+    public AppSettings( string appName, in AppVersion version, string deviceVersion, Uri  hostInfo ) : base(appName, version, deviceVersion, hostInfo) { }
+    public AppSettings( string appName, in AppVersion version, string deviceVersion, bool sendCrashes, Uri hostInfo ) : base(appName, version, deviceVersion, sendCrashes, hostInfo) { }
+    public AppSettings( string appName, in AppVersion version, string deviceVersion, bool sendCrashes, Uri hostInfo, Uri defaultHostInfo ) : base(appName, version, deviceVersion, sendCrashes, hostInfo, defaultHostInfo) { }
 }
-
-
-
-public class AppSettings : AppSettings<object> { }

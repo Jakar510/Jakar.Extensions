@@ -1,22 +1,18 @@
-﻿using Xamarin.Forms.Xaml;
-
-
-
-
-
-namespace Jakar.Extensions.Xamarin.Forms.Converters;
+﻿#nullable enable
+namespace Jakar.Extensions.Xamarin.Forms;
 
 
 [global::Xamarin.Forms.Internals.Preserve(true, false)]
 [TypeConversion(typeof(TextAlignment?))]
 public class NullableTextAlignmentConverter : TextAlignmentConverter
 {
-    public override bool    CanConvertFrom( Type?               sourceType ) => sourceType is null || sourceType == typeof(string);
-    public override object? ConvertFromInvariantString( string? value )      => Convert(value);
+    public override bool CanConvertFrom( Type?                  sourceType ) => sourceType is null || sourceType == typeof(string);
+    public override object? ConvertFromInvariantString( string? value ) => Convert(value);
 
     public TextAlignment? Convert( string? value )
     {
-        if ( string.IsNullOrWhiteSpace(value) ) return null;
+        if ( string.IsNullOrWhiteSpace(value) ) { return null; }
+
         return (TextAlignment)base.ConvertFromInvariantString(value);
     }
 

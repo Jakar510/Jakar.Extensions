@@ -1,18 +1,15 @@
 ﻿using System;
 using Android.Content;
 using Android.Provider;
-using Jakar.Extensions.Exceptions.General;
-using Jakar.Extensions.Xamarin.Forms.Droid.Services;
-using Jakar.Extensions.Xamarin.Forms.Interfaces;
+using Jakar.Extensions.Xamarin.Forms.Droid;
 using Xamarin.Forms;
-
-
 
 
 [assembly: Dependency(typeof(IPAddressManager))]
 
 
-namespace Jakar.Extensions.Xamarin.Forms.Droid.Services;
+#nullable enable
+namespace Jakar.Extensions.Xamarin.Forms.Droid;
 
 
 [global::Android.Runtime.Preserve(AllMembers = true)]

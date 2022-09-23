@@ -1,13 +1,10 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using Jakar.Extensions.General;
-using Jakar.Extensions.Models;
-using Jakar.Extensions.Models.Collections;
-using Jakar.Extensions.Types;
 using NUnit.Framework;
 
 
+#nullable enable
 namespace Jakar.Extensions.Tests;
 
 
@@ -25,7 +22,7 @@ public class IsDictionary_Tests : Assert
     [TestCase(typeof(ObservableDictionary<string, string>), true)]
     [TestCase(typeof(List<string>), false)]
     [TestCase(typeof(List<Guid>), false)]
-    public void IsDictionary_Test( Type objType, bool expected ) { AreEqual(objType.IsDictionary(), expected); }
+    public void IsDictionary_Test( Type objType, bool expected ) => AreEqual(objType.IsDictionary(), expected);
 
 
     [Test]

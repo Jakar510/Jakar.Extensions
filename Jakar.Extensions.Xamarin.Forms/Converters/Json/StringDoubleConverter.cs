@@ -1,7 +1,8 @@
 ﻿
 
 
-namespace Jakar.Extensions.Xamarin.Forms.Converters.Json;
+#nullable enable
+namespace Jakar.Extensions.Xamarin.Forms;
 
 
 [TypeConverter(typeof(double))]

@@ -1,7 +1,7 @@
-using Jakar.Extensions.Http;
 using NUnit.Framework;
 
 
+#nullable enable
 namespace Jakar.Extensions.Tests.Http;
 
 
@@ -23,7 +23,7 @@ public class MimeType_ContentType_Tests : Assert
     [TestCase(MimeTypeNames.Text.XML, MimeType.Xml)]
     [TestCase(MimeTypeNames.Text.HTML, MimeType.Html)]
     [TestCase(MimeTypeNames.Text.PLAIN, MimeType.PlainText)]
-    public void Test_ToMimeType_Text( string s, MimeType mime ) { Test_ToMimeType(s, mime); }
+    public void Test_ToMimeType_Text( string s, MimeType mime ) => Test_ToMimeType(s, mime);
 
     [Test]
     [TestCase(MimeTypeNames.Application.URL_ENCODED_CONTENT, MimeType.UrlEncodedContent)]
@@ -38,7 +38,7 @@ public class MimeType_ContentType_Tests : Assert
     [TestCase(MimeTypeNames.Application.JAVA_SCRIPT, MimeType.JavaScript)]
     [TestCase(MimeTypeNames.Application.VBS, MimeType.Vbs)]
     [TestCase(MimeTypeNames.Application.LICENSES, MimeType.Licenses)]
-    public void Test_ToMimeType_Applications( string s, MimeType mime ) { Test_ToMimeType(s, mime); }
+    public void Test_ToMimeType_Applications( string s, MimeType mime ) => Test_ToMimeType(s, mime);
 
     [Test]
     [TestCase(MimeTypeNames.Application.Archive.ZIP, MimeType.Zip)]
@@ -47,7 +47,7 @@ public class MimeType_ContentType_Tests : Assert
     [TestCase(MimeTypeNames.Application.Archive.B_ZIP_2, MimeType.Bzip2)]
     [TestCase(MimeTypeNames.Application.Archive.GZIP, MimeType.Gzip)]
     [TestCase(MimeTypeNames.Application.Archive.TAR, MimeType.Tar)]
-    public void Test_ToMimeType_Archives( string s, MimeType mime ) { Test_ToMimeType(s, mime); }
+    public void Test_ToMimeType_Archives( string s, MimeType mime ) => Test_ToMimeType(s, mime);
 
     [Test]
     [TestCase(MimeTypeNames.Application.MsOffice.DOC, MimeType.Doc)]
@@ -56,7 +56,7 @@ public class MimeType_ContentType_Tests : Assert
     [TestCase(MimeTypeNames.Application.MsOffice.XLSX, MimeType.Xlsx)]
     [TestCase(MimeTypeNames.Application.MsOffice.PPT, MimeType.Ppt)]
     [TestCase(MimeTypeNames.Application.MsOffice.PPTX, MimeType.Pptx)]
-    public void Test_ToMimeType_Office( string s, MimeType mime ) { Test_ToMimeType(s, mime); }
+    public void Test_ToMimeType_Office( string s, MimeType mime ) => Test_ToMimeType(s, mime);
 
     [Test]
     [TestCase(MimeTypeNames.Audio.THREE_GPP2_AUDIO, MimeType.ThreeGpp2Audio)]
@@ -66,7 +66,7 @@ public class MimeType_ContentType_Tests : Assert
     [TestCase(MimeTypeNames.Audio.MP3, MimeType.Mp3)]
     [TestCase(MimeTypeNames.Audio.WEBA, MimeType.Weba)]
     [TestCase(MimeTypeNames.Audio.WAVE, MimeType.Wav)]
-    public void Test_ToMimeType_Audio( string s, MimeType mime ) { Test_ToMimeType(s, mime); }
+    public void Test_ToMimeType_Audio( string s, MimeType mime ) => Test_ToMimeType(s, mime);
 
     [Test]
     [TestCase(MimeTypeNames.Video.THREE_GPP2_VIDEO, MimeType.ThreeGpp2Video)]
@@ -81,7 +81,7 @@ public class MimeType_ContentType_Tests : Assert
     [TestCase(MimeTypeNames.Video.MPG, MimeType.Mpg)]
     [TestCase(MimeTypeNames.Video.OGG, MimeType.Ogg)]
     [TestCase(MimeTypeNames.Video.MKV, MimeType.Mkv)]
-    public void Test_ToMimeType_Videos( string s, MimeType mime ) { Test_ToMimeType(s, mime); }
+    public void Test_ToMimeType_Videos( string s, MimeType mime ) => Test_ToMimeType(s, mime);
 
     [Test]
     [TestCase(MimeTypeNames.Image.GIF, MimeType.Gif)]
@@ -93,17 +93,17 @@ public class MimeType_ContentType_Tests : Assert
     [TestCase(MimeTypeNames.Image.WEBP, MimeType.Webp)]
     [TestCase(MimeTypeNames.Image.ICON, MimeType.Icon)]
     [TestCase(MimeTypeNames.Image.SVG, MimeType.Svg)]
-    public void Test_ToMimeType_Images( string s, MimeType mime ) { Test_ToMimeType(s, mime); }
+    public void Test_ToMimeType_Images( string s, MimeType mime ) => Test_ToMimeType(s, mime);
 
 
     [TestCase(MimeTypeNames.Font.TRUE_TYPE, MimeType.TrueType)]
     [TestCase(MimeTypeNames.Font.OPEN_TYPE, MimeType.OpenType)]
     [TestCase(MimeTypeNames.MultiPart.FORM_DATA, MimeType.FormData)]
-    public void Test_ToMimeType_Fonts( string s, MimeType mime ) { Test_ToMimeType(s, mime); }
+    public void Test_ToMimeType_Fonts( string s, MimeType mime ) => Test_ToMimeType(s, mime);
 
-    private static void Test_ToMimeType( string s, MimeType mime ) { AreEqual(s.ToMimeType(), mime); }
+    private static void Test_ToMimeType( string s, MimeType mime ) => AreEqual(s.ToMimeType(), mime);
 
-#endregion
+    #endregion
 
 
 #region Test_ToContentType
@@ -119,7 +119,7 @@ public class MimeType_ContentType_Tests : Assert
     [TestCase(MimeTypeNames.Text.XML, MimeType.Xml)]
     [TestCase(MimeTypeNames.Text.HTML, MimeType.Html)]
     [TestCase(MimeTypeNames.Text.PLAIN, MimeType.PlainText)]
-    public void Test_ToContentType_Text( string s, MimeType mime ) { Test_ToContentType(s, mime); }
+    public void Test_ToContentType_Text( string s, MimeType mime ) => Test_ToContentType(s, mime);
 
     [Test]
     [TestCase(MimeTypeNames.Application.URL_ENCODED_CONTENT, MimeType.UrlEncodedContent)]
@@ -134,7 +134,7 @@ public class MimeType_ContentType_Tests : Assert
     [TestCase(MimeTypeNames.Application.JAVA_SCRIPT, MimeType.JavaScript)]
     [TestCase(MimeTypeNames.Application.VBS, MimeType.Vbs)]
     [TestCase(MimeTypeNames.Application.LICENSES, MimeType.Licenses)]
-    public void Test_ToContentType_Applications( string s, MimeType mime ) { Test_ToContentType(s, mime); }
+    public void Test_ToContentType_Applications( string s, MimeType mime ) => Test_ToContentType(s, mime);
 
     [Test]
     [TestCase(MimeTypeNames.Application.Archive.ZIP, MimeType.Zip)]
@@ -143,7 +143,7 @@ public class MimeType_ContentType_Tests : Assert
     [TestCase(MimeTypeNames.Application.Archive.B_ZIP_2, MimeType.Bzip2)]
     [TestCase(MimeTypeNames.Application.Archive.GZIP, MimeType.Gzip)]
     [TestCase(MimeTypeNames.Application.Archive.TAR, MimeType.Tar)]
-    public void Test_ToContentType_Archives( string s, MimeType mime ) { Test_ToContentType(s, mime); }
+    public void Test_ToContentType_Archives( string s, MimeType mime ) => Test_ToContentType(s, mime);
 
     [Test]
     [TestCase(MimeTypeNames.Application.MsOffice.DOC, MimeType.Doc)]
@@ -152,7 +152,7 @@ public class MimeType_ContentType_Tests : Assert
     [TestCase(MimeTypeNames.Application.MsOffice.XLSX, MimeType.Xlsx)]
     [TestCase(MimeTypeNames.Application.MsOffice.PPT, MimeType.Ppt)]
     [TestCase(MimeTypeNames.Application.MsOffice.PPTX, MimeType.Pptx)]
-    public void Test_ToContentType_Office( string s, MimeType mime ) { Test_ToContentType(s, mime); }
+    public void Test_ToContentType_Office( string s, MimeType mime ) => Test_ToContentType(s, mime);
 
     [Test]
     [TestCase(MimeTypeNames.Audio.THREE_GPP2_AUDIO, MimeType.ThreeGpp2Audio)]
@@ -162,7 +162,7 @@ public class MimeType_ContentType_Tests : Assert
     [TestCase(MimeTypeNames.Audio.MP3, MimeType.Mp3)]
     [TestCase(MimeTypeNames.Audio.WEBA, MimeType.Weba)]
     [TestCase(MimeTypeNames.Audio.WAVE, MimeType.Wav)]
-    public void Test_ToContentType_Audio( string s, MimeType mime ) { Test_ToContentType(s, mime); }
+    public void Test_ToContentType_Audio( string s, MimeType mime ) => Test_ToContentType(s, mime);
 
     [Test]
     [TestCase(MimeTypeNames.Video.THREE_GPP2_VIDEO, MimeType.ThreeGpp2Video)]
@@ -177,7 +177,7 @@ public class MimeType_ContentType_Tests : Assert
     [TestCase(MimeTypeNames.Video.MPG, MimeType.Mpg)]
     [TestCase(MimeTypeNames.Video.OGG, MimeType.Ogg)]
     [TestCase(MimeTypeNames.Video.MKV, MimeType.Mkv)]
-    public void Test_ToContentType_Video( string s, MimeType mime ) { Test_ToContentType(s, mime); }
+    public void Test_ToContentType_Video( string s, MimeType mime ) => Test_ToContentType(s, mime);
 
     [Test]
     [TestCase(MimeTypeNames.Image.GIF, MimeType.Gif)]
@@ -189,18 +189,18 @@ public class MimeType_ContentType_Tests : Assert
     [TestCase(MimeTypeNames.Image.WEBP, MimeType.Webp)]
     [TestCase(MimeTypeNames.Image.ICON, MimeType.Icon)]
     [TestCase(MimeTypeNames.Image.SVG, MimeType.Svg)]
-    public void Test_ToContentType_Images( string s, MimeType mime ) { Test_ToContentType(s, mime); }
+    public void Test_ToContentType_Images( string s, MimeType mime ) => Test_ToContentType(s, mime);
 
 
     [Test]
     [TestCase(MimeTypeNames.Font.TRUE_TYPE, MimeType.TrueType)]
     [TestCase(MimeTypeNames.Font.OPEN_TYPE, MimeType.OpenType)]
     [TestCase(MimeTypeNames.MultiPart.FORM_DATA, MimeType.FormData)]
-    public void Test_ToContentType_Fonts( string s, MimeType mime ) { Test_ToContentType(s, mime); }
+    public void Test_ToContentType_Fonts( string s, MimeType mime ) => Test_ToContentType(s, mime);
 
-    private static void Test_ToContentType( string s, MimeType mime ) { AreEqual(s, mime.ToContentType()); }
+    private static void Test_ToContentType( string s, MimeType mime ) => AreEqual(s, mime.ToContentType());
 
-#endregion
+    #endregion
 
 
 #region Test_ContentType
@@ -285,7 +285,7 @@ public class MimeType_ContentType_Tests : Assert
     [TestCase(MimeTypeNames.Font.TRUE_TYPE)]
     [TestCase(MimeTypeNames.Font.OPEN_TYPE)]
     [TestCase(MimeTypeNames.MultiPart.FORM_DATA)]
-    public void Test_ContentType( string s ) { AreEqual(s.ToMimeType().ToContentType(), s); }
+    public void Test_ContentType( string s ) => AreEqual(s.ToMimeType().ToContentType(), s);
 
-#endregion
+    #endregion
 }

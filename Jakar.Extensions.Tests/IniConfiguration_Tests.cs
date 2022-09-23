@@ -1,11 +1,10 @@
 using System;
 using System.Net;
-using Jakar.Extensions.Models;
-using Jakar.Extensions.Models.IniConfiguration;
-using Jakar.Extensions.Strings;
+using System.Text;
 using NUnit.Framework;
 
 
+#nullable enable
 namespace Jakar.Extensions.Tests;
 
 
@@ -14,6 +13,9 @@ namespace Jakar.Extensions.Tests;
 // ReSharper disable once InconsistentNaming
 public class IniConfig_Tests : Assert
 {
+    private static readonly Random _random = new();
+
+
     [Test]
     public void Test()
     {
@@ -23,15 +25,9 @@ public class IniConfig_Tests : Assert
                       };
 
         project.Add(nameof(DateTime), DateTime.Now);
-        project.Add(nameof(Guid), Guid.NewGuid());
+        project.Add(nameof(Guid),     Guid.NewGuid());
 
-        project.Add(nameof(AppVersion),
-                    new AppVersion(1,
-                                   2,
-                                   3,
-                                   4,
-                                   5,
-                                   6));
+        project.Add(nameof(AppVersion), new AppVersion(1, 2, 3, 4, 5, 6));
 
         var server = new IniConfig.Section
                      {
@@ -39,7 +35,11 @@ public class IniConfig_Tests : Assert
                      };
 
         server.Add("Port", 5000);
-        server.Add(nameof(IPAddress), IPAddress.Broadcast);
+
+
+        var sb = new StringBuilder();
+        sb.AppendJoin('.', _random.Next(255), _random.Next(255), _random.Next(255), _random.Next(255));
+        server.Add(nameof(IPAddress), sb.ToString());
 
         var ini = new IniConfig
                   {
@@ -47,16 +47,16 @@ public class IniConfig_Tests : Assert
                       [nameof(server)]  = server
                   };
 
-        ini[nameof(Random)].Add(nameof(Random.Next), new Random().Next());
-        ini[nameof(IniConfig_Tests)].Add(nameof(Random.Next), new Random().Next());
+        ini[nameof(Random)].Add(nameof(Random.Next), _random.Next());
+        ini[nameof(IniConfig_Tests)].Add(nameof(Random.Next), _random.Next());
 
-        var s = ini.ToString();
-        s.WriteToConsole();
-        IniConfig? results = IniConfig.FromString(s);
+        var actual = ini.ToString();
+        $"-- {nameof(actual)} --\n{actual}".WriteToConsole();
+        IniConfig? results = IniConfig.From<IniConfig>(actual);
 
-        results?.WriteToConsole();
+        $"-- {nameof(results)} --\n{results}".WriteToConsole();
         NotNull(results);
-        AreEqual(results, ini);
+        AreEqual(results,                   ini);
         AreEqual(results?[nameof(project)], project);
     }
 }

@@ -1,7 +1,8 @@
 ﻿// unset
 
 
-namespace Jakar.Extensions.Http;
+#nullable enable
+namespace Jakar.Extensions;
 
 
 public enum MimeType
@@ -14,6 +15,7 @@ public enum MimeType
     PlainText,
     Html,
     Xml,
+    Xaml,
     RichText,
     Css,
     Csv,
@@ -98,5 +100,5 @@ public enum MimeType
 
     // misc
     Licenses,
-    Dll,
+    Dll
 }
