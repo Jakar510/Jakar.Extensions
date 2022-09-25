@@ -9,58 +9,58 @@ using Newtonsoft.Json.Linq;
 namespace Jakar.Database;
 
 
-public abstract record UserRecord<TRecord> : BaseTableRecord<TRecord>, IUserRecord<TRecord> where TRecord : UserRecord<TRecord>
+public sealed record UserRecord : BaseTableRecord<UserRecord>, IUserRecord<UserRecord>
 {
-    protected static readonly PasswordHasher<TRecord> _hasher    = new();
-    private                   string                  _userName  = string.Empty;
-    private                   string                  _firstName = string.Empty;
-    private                   string                  _lastName  = string.Empty;
-    private                   string?                 _fullName;
-    private                   string?                 _description;
-    private                   string?                 _address;
-    private                   string?                 _line1;
-    private                   string?                 _line2;
-    private                   string?                 _city;
-    private                   string?                 _state;
-    private                   string?                 _country;
-    private                   string?                 _postalCode;
-    private                   string?                 _website;
-    private                   string?                 _email;
-    private                   string?                 _phoneNumber;
-    private                   string?                 _ext;
-    private                   string?                 _title;
-    private                   string?                 _department;
-    private                   string?                 _company;
-    private                   SupportedLanguage       _preferredLanguage;
-    private                   Guid?                   _sessionID;
-    private                   DateTimeOffset?         _subscriptionExpires;
-    private                   long?                   _subscriptionID;
-    private                   DateTimeOffset          _dateCreated;
-    private                   long?                   _createdBy;
-    private                   long?                   _escalateTo;
-    private                   bool                    _isActive;
-    private                   bool                    _isDisabled;
-    private                   bool                    _isLocked;
-    private                   int?                    _badLogins;
-    private                   DateTimeOffset?         _lastActive;
-    private                   DateTimeOffset?         _lastBadAttempt;
-    private                   DateTimeOffset?         _lockDate;
-    private                   string?                 _refreshToken;
-    private                   DateTimeOffset?         _refreshTokenExpiryTime;
-    private                   DateTimeOffset?         _tokenExpiration;
-    private                   bool                    _isEmailConfirmed;
-    private                   bool                    _isPhoneNumberConfirmed;
-    private                   bool                    _isTwoFactorEnabled;
-    private                   string?                 _loginProvider;
-    private                   string?                 _providerKey;
-    private                   string?                 _providerDisplayName;
-    private                   string?                 _securityStamp;
-    private                   string?                 _concurrencyStamp;
-    private                   string?                 _additionalData;
-    private                   string?                 _passwordHash;
+    private static readonly PasswordHasher<UserRecord> _hasher = new();
 
 
-    public Guid UserID { get; init; } = default!;
+    private string            _userName  = string.Empty;
+    private string            _firstName = string.Empty;
+    private string            _lastName  = string.Empty;
+    private string?           _fullName;
+    private string?           _description;
+    private string?           _address;
+    private string?           _line1;
+    private string?           _line2;
+    private string?           _city;
+    private string?           _state;
+    private string?           _country;
+    private string?           _postalCode;
+    private string?           _website;
+    private string?           _email;
+    private string?           _phoneNumber;
+    private string?           _ext;
+    private string?           _title;
+    private string?           _department;
+    private string?           _company;
+    private SupportedLanguage _preferredLanguage;
+    private Guid?             _sessionID;
+    private DateTimeOffset?   _subscriptionExpires;
+    private long?             _subscriptionID;
+    private long?             _escalateTo;
+    private bool              _isActive;
+    private bool              _isDisabled;
+    private bool              _isLocked;
+    private int?              _badLogins;
+    private DateTimeOffset?   _lastActive;
+    private DateTimeOffset?   _lastBadAttempt;
+    private DateTimeOffset?   _lockDate;
+    private string?           _refreshToken;
+    private DateTimeOffset?   _refreshTokenExpiryTime;
+    private DateTimeOffset?   _tokenExpiration;
+    private bool              _isEmailConfirmed;
+    private bool              _isPhoneNumberConfirmed;
+    private bool              _isTwoFactorEnabled;
+    private string?           _loginProvider;
+    private string?           _providerKey;
+    private string?           _providerDisplayName;
+    private string?           _securityStamp;
+    private string?           _concurrencyStamp;
+    private string?           _additionalData;
+    private string?           _passwordHash;
+    private long?             _rights;
+
+
     public string UserName
     {
         get => _userName;
@@ -176,16 +176,6 @@ public abstract record UserRecord<TRecord> : BaseTableRecord<TRecord>, IUserReco
         get => _subscriptionID;
         set => SetProperty(ref _subscriptionID, value);
     }
-    public DateTimeOffset DateCreated
-    {
-        get => _dateCreated;
-        set => SetProperty(ref _dateCreated, value);
-    }
-    public long? CreatedBy
-    {
-        get => _createdBy;
-        set => SetProperty(ref _createdBy, value);
-    }
     public long? EscalateTo
     {
         get => _escalateTo;
@@ -291,6 +281,11 @@ public abstract record UserRecord<TRecord> : BaseTableRecord<TRecord>, IUserReco
         get => _passwordHash;
         set => SetProperty(ref _passwordHash, value);
     }
+    public long? Rights
+    {
+        get => _rights;
+        set => SetProperty(ref _rights, value);
+    }
 
 
     IDictionary<string, JToken?>? JsonModels.IJsonModel.AdditionalData
@@ -298,10 +293,11 @@ public abstract record UserRecord<TRecord> : BaseTableRecord<TRecord>, IUserReco
         get => AdditionalData?.FromJson<Dictionary<string, JToken?>>();
         set => AdditionalData = value?.ToJson();
     }
+    long? IUserRecord<UserRecord>.CreatedBy => CreatedBy;
 
 
-    protected UserRecord() { }
-    protected UserRecord( IUserData value, TRecord? caller )
+    public UserRecord() { }
+    public UserRecord( IUserData value, long? rights = default )
     {
         FirstName         = value.FirstName;
         LastName          = value.LastName;
@@ -322,23 +318,51 @@ public abstract record UserRecord<TRecord> : BaseTableRecord<TRecord>, IUserReco
         Department        = value.Department;
         Company           = value.Company;
         PreferredLanguage = value.PreferredLanguage;
-        DateCreated       = DateTimeOffset.Now;
-
-        CreatedBy = caller is not null
-                        ? caller.ID
-                        : default!;
+        Rights            = rights;
+        UserID            = Guid.NewGuid();
     }
+    public UserRecord( IUserData value, UserRecord caller, long? rights = default ) : base(caller)
+    {
+        FirstName         = value.FirstName;
+        LastName          = value.LastName;
+        FullName          = value.FullName;
+        Address           = value.Address;
+        Line1             = value.Line1;
+        Line2             = value.Line2;
+        City              = value.City;
+        State             = value.State;
+        Country           = value.Country;
+        PostalCode        = value.PostalCode;
+        Description       = value.Description;
+        Website           = value.Website;
+        Email             = value.Email;
+        PhoneNumber       = value.PhoneNumber;
+        Ext               = value.Ext;
+        Title             = value.Title;
+        Department        = value.Department;
+        Company           = value.Company;
+        PreferredLanguage = value.PreferredLanguage;
+        Rights            = rights;
+        UserID            = Guid.NewGuid();
+    }
+    public static UserRecord Create<TRights>( IUserData value, TRights    rights ) where TRights : struct, Enum => new(value, rights.AsLong());
+    public static UserRecord Create<TRights>( IUserData value, UserRecord caller, TRights rights ) where TRights : struct, Enum => new(value, caller, rights.AsLong());
+
+
+    public bool HasRight<TRights>( TRights    right ) where TRights : struct, Enum => Rights.HasValue && ( Rights.Value & right.AsLong() ) > 0;
+    public void AddRight<TRights>( TRights    right ) where TRights : struct, Enum => Rights = ( Rights ?? 0 ) | right.AsLong();
+    public void RemoveRight<TRights>( TRights right ) where TRights : struct, Enum => Rights = ( Rights ?? 0 ) & right.AsLong();
 
 
     public void UpdatePassword( string password )
     {
         VerifyAccess();
-        PasswordHash = _hasher.HashPassword((TRecord)this, password);
+        PasswordHash = _hasher.HashPassword(this, password);
     }
-    public PasswordVerificationResult VerifyPassword( string password ) => _hasher.VerifyHashedPassword((TRecord)this, PasswordHash, password);
+    public PasswordVerificationResult VerifyPassword( string password ) => _hasher.VerifyHashedPassword(this, PasswordHash, password);
 
 
-    public TRecord MarkBadLogin()
+    public UserRecord MarkBadLogin()
     {
         VerifyAccess();
         LastBadAttempt = DateTimeOffset.Now;
@@ -349,40 +373,40 @@ public abstract record UserRecord<TRecord> : BaseTableRecord<TRecord>, IUserReco
                    ? Lock()
                    : Unlock();
     }
-    public TRecord SetActive()
+    public UserRecord SetActive()
     {
         VerifyAccess();
         LastActive = DateTimeOffset.Now;
-        return (TRecord)this;
+        return this;
     }
-    public TRecord Disable()
+    public UserRecord Disable()
     {
         VerifyAccess();
         IsDisabled = true;
         return Lock();
     }
-    public TRecord Lock()
+    public UserRecord Lock()
     {
         VerifyAccess();
         IsDisabled = true;
         LockDate   = DateTimeOffset.Now;
-        return (TRecord)this;
+        return this;
     }
-    public TRecord Enable()
+    public UserRecord Enable()
     {
         VerifyAccess();
         LockDate = default;
         IsActive = true;
         return Unlock();
     }
-    public TRecord Unlock()
+    public UserRecord Unlock()
     {
         VerifyAccess();
         BadLogins      = 0;
         IsDisabled     = BadLogins > 5;
         LastBadAttempt = default;
         LockDate       = default;
-        return (TRecord)this;
+        return this;
     }
 
 
@@ -417,12 +441,9 @@ public abstract record UserRecord<TRecord> : BaseTableRecord<TRecord>, IUserReco
                                           };
 
 
-    public async Task<TRecord?> GetBoss( DbConnection connection, DbTransaction? transaction, DbTable<TRecord> table, CancellationToken token ) => EscalateTo.HasValue
-                                                                                                                                                       ? await table.Get(connection, transaction, EscalateTo.Value, token)
-                                                                                                                                                       : default;
-    public async Task<TRecord?> GetUserWhoCreated( DbConnection connection, DbTransaction? transaction, DbTable<TRecord> table, CancellationToken token ) => CreatedBy.HasValue
-                                                                                                                                                                 ? await table.Get(connection, transaction, CreatedBy.Value, token)
-                                                                                                                                                                 : default;
+    public async Task<UserRecord?> GetBoss( DbConnection connection, DbTransaction? transaction, DbTable<UserRecord> table, CancellationToken token ) => EscalateTo.HasValue
+                                                                                                                                                             ? await table.Get(connection, transaction, EscalateTo.Value, token)
+                                                                                                                                                             : default;
 
 
     public void Update( IUserData value )
@@ -450,7 +471,7 @@ public abstract record UserRecord<TRecord> : BaseTableRecord<TRecord>, IUserReco
     }
 
 
-    public override int CompareTo( TRecord? other )
+    public override int CompareTo( UserRecord? other )
     {
         if ( other is null ) { return 1; }
 
@@ -516,7 +537,7 @@ public abstract record UserRecord<TRecord> : BaseTableRecord<TRecord>, IUserReco
 
         return string.Compare(Company, other.Company, StringComparison.Ordinal);
     }
-    public override bool Equals( TRecord? other )
+    public override bool Equals( UserRecord? other )
     {
         if ( other is null ) { return false; }
 
