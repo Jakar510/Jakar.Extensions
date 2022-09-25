@@ -90,6 +90,34 @@ public abstract class DbTable<TRecord, TID> : ObservableClass, IDbTable<TRecord,
     }
 
 
+    public virtual async ValueTask<TRecord> Random( CancellationToken token = default ) => await this.Call(Random, token);
+    public virtual async ValueTask<TRecord> Random( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
+    {
+        string sql = $"SELECT * FROM {TableName} WHERE {nameof(IUniqueID<TID>.ID)} >= RAND() * ( SELECT MAX ({nameof(IUniqueID<TID>.ID)}) FROM table ) ORDER BY {nameof(IUniqueID<TID>.ID)} LIMIT 1";
+
+        token.ThrowIfCancellationRequested();
+        return await connection.QueryFirstAsync<TRecord>(sql, default, transaction);
+    }
+
+
+    public virtual IAsyncEnumerable<TRecord> Random( long count, CancellationToken token = default ) => this.Call(Random, count, token);
+    public virtual async IAsyncEnumerable<TRecord> Random( DbConnection connection, DbTransaction? transaction, long count, [EnumeratorCancellation] CancellationToken token = default )
+    {
+        string sql = $"SELECT * FROM {TableName} WHERE {nameof(IUniqueID<TID>.ID)} >= RAND() * ( SELECT MAX ({nameof(IUniqueID<TID>.ID)}) FROM table ) ORDER BY {nameof(IUniqueID<TID>.ID)} LIMIT {count}";
+
+        token.ThrowIfCancellationRequested();
+        using SqlMapper.GridReader reader = await connection.QueryMultipleAsync(sql, default, transaction);
+        IEnumerable<TRecord>       items  = await reader.ReadAsync<TRecord>(false);
+
+        foreach ( TRecord record in items )
+        {
+            if ( token.IsCancellationRequested ) { yield break; }
+
+            yield return record;
+        }
+    }
+
+
     public virtual async ValueTask<TRecord> First( CancellationToken token = default ) => await this.Call(First, token);
     public virtual async ValueTask<TRecord> First( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
