@@ -4,7 +4,7 @@
 namespace Jakar.Database;
 
 
-public sealed class CacheEntry<TRecord> : ObservableClass, IEquatable<TRecord>, IComparable<TRecord>, IEquatable<CacheEntry<TRecord>>, IComparable<CacheEntry<TRecord>>, IComparable where TRecord : BaseTableRecord<TRecord>
+public sealed class CacheEntry<TRecord> : ObservableClass, IEquatable<TRecord>, IComparable<TRecord>, IEquatable<CacheEntry<TRecord>>, IComparable<CacheEntry<TRecord>>, IComparable where TRecord : TableRecord<TRecord>
 
 {
     private TRecord?       _value;

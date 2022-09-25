@@ -4,7 +4,7 @@
 namespace Jakar.Database;
 
 
-public sealed class TableCache<TRecord> : Service, IHostedService, IReadOnlyCollection<TRecord>, IAsyncEnumerator<TRecord?> where TRecord : BaseTableRecord<TRecord>
+public sealed class TableCache<TRecord> : Service, IHostedService, IReadOnlyCollection<TRecord>, IAsyncEnumerator<TRecord?> where TRecord : TableRecord<TRecord>
 {
     private readonly ILogger                                         _logger;
     private readonly TimeSpan                                        _refreshTime;

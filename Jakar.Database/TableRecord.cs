@@ -5,7 +5,7 @@ namespace Jakar.Database;
 
 
 [Serializable]
-public abstract record BaseTableRecord<TRecord> : BaseCollectionsRecord<TRecord, long> where TRecord : BaseTableRecord<TRecord>
+public abstract record TableRecord<TRecord> : BaseCollectionsRecord<TRecord, long> where TRecord : TableRecord<TRecord>
 {
     public static string TableName { get; } = typeof(TRecord).GetTableName();
 
@@ -23,14 +23,14 @@ public abstract record BaseTableRecord<TRecord> : BaseCollectionsRecord<TRecord,
     }
 
 
-    protected BaseTableRecord() { }
-    protected BaseTableRecord( UserRecord user )
+    protected TableRecord() { }
+    protected TableRecord( UserRecord user )
     {
         UserID      = user.UserID;
         CreatedBy   = user.ID;
         DateCreated = DateTimeOffset.Now;
     }
-    protected BaseTableRecord( long id ) : base(id) { }
+    protected TableRecord( long id ) : base(id) { }
 
 
     public TRecord NewID( in long id ) => (TRecord)( this with

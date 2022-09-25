@@ -1,13 +1,13 @@
 ﻿namespace Jakar.Database;
 
 
-public abstract class DbTable<TRecord> : ObservableClass, IDbTable<TRecord> where TRecord : BaseTableRecord<TRecord>
+public abstract class DbTable<TRecord> : ObservableClass, IDbTable<TRecord> where TRecord : TableRecord<TRecord>
 
 {
     // ReSharper disable once InconsistentNaming
     public        IDGenerator       IDs       => new(this);
     public        RecordGenerator   Records   => new(this);
-    public static string            TableName => BaseTableRecord<TRecord>.TableName;
+    public static string            TableName => TableRecord<TRecord>.TableName;
     string IDbTable<TRecord>.       TableName => TableName;
     private readonly IConnectableDb _database;
 

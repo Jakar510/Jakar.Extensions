@@ -9,7 +9,7 @@ namespace Jakar.Database;
 
 
 [SuppressMessage("ReSharper", "UnusedMemberInSuper.Global")]
-public interface IDbTable<TRecord> : IConnectableDb, IAsyncDisposable where TRecord : BaseTableRecord<TRecord>
+public interface IDbTable<TRecord> : IConnectableDb, IAsyncDisposable where TRecord : TableRecord<TRecord>
 {
     public string TableName { get; }
 

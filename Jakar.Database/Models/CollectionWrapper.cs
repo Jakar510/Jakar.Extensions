@@ -7,7 +7,7 @@ namespace Jakar.Database;
 [Serializable]
 [DataBaseType(DbType.String)]
 public class CollectionWrapper<TValue, TOwner> : CollectionAlerts<TValue>, ICollectionWrapper<TValue> where TValue : IUniqueID<long>
-                                                                                                      where TOwner : BaseTableRecord<TOwner>
+                                                                                                      where TOwner : TableRecord<TOwner>
 {
     private IDCollection<TValue>? _items;
     private string?               _json;

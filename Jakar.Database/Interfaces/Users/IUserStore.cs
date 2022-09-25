@@ -13,4 +13,4 @@ public interface IUserStore<TUserRecord> : IUserLoginStore<TUserRecord>,
                                                 IUserLockoutStore<TUserRecord>,
                                                 IUserAuthenticatorKeyStore<TUserRecord>,
                                                 IUserTwoFactorRecoveryCodeStore<TUserRecord>,
-                                                IUserPhoneNumberStore<TUserRecord> where TUserRecord : BaseTableRecord<TUserRecord>, IUserRecord<TUserRecord> { }
+                                                IUserPhoneNumberStore<TUserRecord> where TUserRecord : TableRecord<TUserRecord>, IUserRecord<TUserRecord> { }

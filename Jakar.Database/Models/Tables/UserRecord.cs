@@ -9,7 +9,7 @@ using Newtonsoft.Json.Linq;
 namespace Jakar.Database;
 
 
-public sealed record UserRecord : BaseTableRecord<UserRecord>, IUserRecord<UserRecord>
+public sealed record UserRecord : TableRecord<UserRecord>, IUserRecord<UserRecord>
 {
     private static readonly PasswordHasher<UserRecord> _hasher = new();
 
@@ -352,6 +352,10 @@ public sealed record UserRecord : BaseTableRecord<UserRecord>, IUserRecord<UserR
     public bool HasRight<TRights>( TRights    right ) where TRights : struct, Enum => Rights.HasValue && ( Rights.Value & right.AsLong() ) > 0;
     public void AddRight<TRights>( TRights    right ) where TRights : struct, Enum => Rights = ( Rights ?? 0 ) | right.AsLong();
     public void RemoveRight<TRights>( TRights right ) where TRights : struct, Enum => Rights = ( Rights ?? 0 ) & right.AsLong();
+
+
+    public bool Owns<TRecord>( TRecord       record ) where TRecord : TableRecord<TRecord> => record.CreatedBy == ID;
+    public bool DoesNotOwn<TRecord>( TRecord record ) where TRecord : TableRecord<TRecord> => record.CreatedBy != ID;
 
 
     public void UpdatePassword( string password )
