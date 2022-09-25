@@ -4,48 +4,39 @@
 namespace Jakar.Database;
 
 
-public sealed class TableCache<TRecord, TID> : Service, IHostedService, IReadOnlyCollection<TRecord>, IAsyncEnumerator<TRecord?> where TRecord : BaseTableRecord<TRecord, TID>
-                                                                                                                                 where TID : struct, IComparable<TID>, IEquatable<TID>
+public sealed class TableCache<TRecord> : Service, IHostedService, IReadOnlyCollection<TRecord>, IAsyncEnumerator<TRecord?> where TRecord : BaseTableRecord<TRecord>
 {
-    public sealed class CacheEntry : CacheEntry<TRecord, TID>
-    {
-        public CacheEntry( TRecord                          value ) : base(value) { }
-        public static implicit operator CacheEntry( TRecord value ) => new(value);
-    }
-
-
-
-    private readonly ILogger                               _logger;
-    private readonly TimeSpan                              _refreshTime;
-    private readonly IDbTable<TRecord, TID>                _table;
-    private readonly KeyGenerator<TID, CacheEntry>         _generator;
-    private readonly ConcurrentDictionary<TID, CacheEntry> _records    = new();
-    private readonly TimeSpan                              _expireTime = TimeSpan.FromMinutes(1);
+    private readonly ILogger                                         _logger;
+    private readonly TimeSpan                                        _refreshTime;
+    private readonly IDbTable<TRecord>                               _table;
+    private readonly KeyGenerator<CacheEntry<TRecord>>               _generator;
+    private readonly ConcurrentDictionary<long, CacheEntry<TRecord>> _records    = new();
+    private readonly TimeSpan                                        _expireTime = TimeSpan.FromMinutes(1);
 
 
     public bool                 HasChanged     => _records.Values.Any(x => x.HasChanged);
-    public IEnumerable<TID>     Changed        => from entry in _records.Values where entry.HasChanged select entry.ID;
+    public IEnumerable<long>    Changed        => from entry in _records.Values where entry.HasChanged select entry.ID;
     public IEnumerable<TRecord> RecordsChanged => from entry in _records.Values where entry.HasChanged select entry.Value;
     public IEnumerable<TRecord> RecordsExpired => from entry in _records.Values where entry.HasExpired(_expireTime) select entry.Value;
 
 
-    public TRecord? this[ TID key ] => TryGetValue(key, out TRecord? value)
-                                           ? value
-                                           : default;
-    public IEnumerable<TID>     Keys    => _records.Keys;
+    public TRecord? this[ long key ] => TryGetValue(key, out TRecord? value)
+                                            ? value
+                                            : default;
+    public IEnumerable<long>    Keys    => _records.Keys;
     public IEnumerable<TRecord> Records => _records.Values.Select(x => x.Value);
     public TRecord?             Current => this[_generator.Current];
     public int                  Count   => _records.Count;
 
 
-    public TableCache( IDbTable<TRecord, TID> table, IOptions<TableCacheOptions> options ) : this(table, options.Value) { }
-    public TableCache( IDbTable<TRecord, TID> table, TableCacheOptions           options ) : this(table, options.Factory, options.RefreshTime) { }
-    public TableCache( IDbTable<TRecord, TID> table, ILoggerFactory factory, TimeSpan refreshTime ) : base()
+    public TableCache( IDbTable<TRecord> table, IOptions<TableCacheOptions> options ) : this(table, options.Value) { }
+    public TableCache( IDbTable<TRecord> table, TableCacheOptions           options ) : this(table, options.Factory, options.RefreshTime) { }
+    public TableCache( IDbTable<TRecord> table, ILoggerFactory factory, TimeSpan refreshTime ) : base()
     {
         _table       = table;
         _refreshTime = refreshTime;
         _logger      = factory.CreateLogger(GetType());
-        _generator   = new KeyGenerator<TID, CacheEntry>(_records);
+        _generator   = new KeyGenerator<CacheEntry<TRecord>>(_records);
     }
     protected override void Dispose( bool disposing )
     {
@@ -73,7 +64,7 @@ public sealed class TableCache<TRecord, TID> : Service, IHostedService, IReadOnl
     {
         using var timer = new PeriodicTimer(_refreshTime);
 
-        while ( token.ShouldContinue())
+        while ( token.ShouldContinue() )
         {
             try
             {
@@ -124,16 +115,16 @@ public sealed class TableCache<TRecord, TID> : Service, IHostedService, IReadOnl
 
 
     public void Clear() => _records.Clear();
-    public bool Contains( TID     key ) => _records.Values.Any(x => x.ID.Equals(key));
+    public bool Contains( long    key ) => _records.Values.Any(x => x.ID.Equals(key));
     public bool Contains( TRecord key ) => _records.Values.Any(x => x.Equals(key));
 
 
     public bool TryRemove( TRecord pair ) => _records.TryRemove(pair.ID, out _);
     public bool TryRemove( TRecord pair, [NotNullWhen(true)] out TRecord? value ) => TryRemove(pair.ID, out value);
-    public bool TryRemove( TID     key ) => _records.TryRemove(key, out _);
-    public bool TryRemove( TID key, [NotNullWhen(true)] out TRecord? value )
+    public bool TryRemove( long    key ) => _records.TryRemove(key, out _);
+    public bool TryRemove( long key, [NotNullWhen(true)] out TRecord? value )
     {
-        if ( _records.TryRemove(key, out CacheEntry? entry) )
+        if ( _records.TryRemove(key, out CacheEntry<TRecord>? entry) )
         {
             value = entry.Value;
             return true;
@@ -144,9 +135,9 @@ public sealed class TableCache<TRecord, TID> : Service, IHostedService, IReadOnl
     }
 
 
-    public bool TryGetValue( TID key, [NotNullWhen(true)] out TRecord? value )
+    public bool TryGetValue( long key, [NotNullWhen(true)] out TRecord? value )
     {
-        if ( _records.TryGetValue(key, out CacheEntry? entry) )
+        if ( _records.TryGetValue(key, out CacheEntry<TRecord>? entry) )
         {
             value = entry.Value;
             return true;

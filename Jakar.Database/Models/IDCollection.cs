@@ -3,22 +3,21 @@
 
 [Serializable]
 [DataBaseType(DbType.String)]
-public sealed class IDCollection<T, TID> : CollectionAlerts<TID>, IReadOnlyCollection<TID>, ISpanFormattable where T : IUniqueID<TID>
-                                                                                                             where TID : struct, IComparable<TID>, IEquatable<TID>
+public sealed class IDCollection<T> : CollectionAlerts<long>, IReadOnlyCollection<long>, ISpanFormattable where T : IUniqueID<long>
 {
-    public const     char         SEPARATOR = ',';
-    private readonly HashSet<TID> _items;
+    public const     char          SEPARATOR = ',';
+    private readonly HashSet<long> _items;
 
 
     public override int Count => _items.Count;
 
 
-    public IDCollection() : this(EqualityComparer<TID>.Default) { }
-    public IDCollection( IEqualityComparer<TID>? comparer ) : this(new HashSet<TID>(comparer)) { }
-    public IDCollection( int                     capacity ) : this(new HashSet<TID>(capacity)) { }
-    public IDCollection( int                     capacity, IEqualityComparer<TID>? comparer ) : this(new HashSet<TID>(capacity, comparer)) { }
-    public IDCollection( IEnumerable<T>          collection ) : this(new HashSet<TID>(collection.Select(x => x.ID))) { }
-    internal IDCollection( HashSet<TID>          set ) => _items = set;
+    public IDCollection() : this(EqualityComparer<long>.Default) { }
+    public IDCollection( IEqualityComparer<long>? comparer ) : this(new HashSet<long>(comparer)) { }
+    public IDCollection( int                      capacity ) : this(new HashSet<long>(capacity)) { }
+    public IDCollection( int                      capacity, IEqualityComparer<long>? comparer ) : this(new HashSet<long>(capacity, comparer)) { }
+    public IDCollection( IEnumerable<T>           collection ) : this(new HashSet<long>(collection.Select(x => x.ID))) { }
+    internal IDCollection( HashSet<long>          set ) => _items = set;
 
 
     /// <summary> </summary>
@@ -28,24 +27,24 @@ public sealed class IDCollection<T, TID> : CollectionAlerts<TID>, IReadOnlyColle
     /// Returns a IDCollection if <paramref name = "items" /> is not null. 
     /// <para> Otherwise returns <see langword = "null" /> </para>
     /// </returns>
-    public static IDCollection<T, TID>? Create( [NotNullIfNotNull("items")] ICollection<T>? items )
+    public static IDCollection<T>? Create( [NotNullIfNotNull("items")] ICollection<T>? items )
     {
         if ( items is null ) { return null; }
 
-        var collection = new IDCollection<T, TID>(items.Count);
+        var collection = new IDCollection<T>(items.Count);
 
         foreach ( T value in items ) { collection.Add(value); }
 
         return collection;
     }
-    public static IDCollection<T, TID>? Create( [NotNullIfNotNull("jsonOrCsv")] string? jsonOrCsv )
+    public static IDCollection<T>? Create( [NotNullIfNotNull("jsonOrCsv")] string? jsonOrCsv )
     {
         if ( string.IsNullOrWhiteSpace(jsonOrCsv) ) { return null; }
 
         var items = jsonOrCsv.Replace("\"", string.Empty)
-                             .FromJson<List<TID>>();
+                             .FromJson<List<long>>();
 
-        var collection = new IDCollection<T, TID>(items.Count)
+        var collection = new IDCollection<T>(items.Count)
                          {
                              items
                          };
@@ -54,9 +53,9 @@ public sealed class IDCollection<T, TID> : CollectionAlerts<TID>, IReadOnlyColle
         return collection;
     }
 
-    // public static IDCollection<T, TID> Create( in ReadOnlySpan<char> span )
+    // public static IDCollection<T, long> Create( in ReadOnlySpan<char> span )
     // {
-    //     if ( span.IsEmpty ) { return new IDCollection<T, TID>(); }
+    //     if ( span.IsEmpty ) { return new IDCollection<T, long>(); }
     //
     //     if ( !span.Contains(SEPARATOR) ) { throw new ArgumentException($"{nameof(span)} doesn't contain a '{SEPARATOR}'"); }
     //
@@ -64,7 +63,7 @@ public sealed class IDCollection<T, TID> : CollectionAlerts<TID>, IReadOnlyColle
     //                                    .TrimStart('[')
     //                                    .TrimEnd(']');
     //
-    //     var collection = new IDCollection<T, TID>();
+    //     var collection = new IDCollection<T, long>();
     //
     //     foreach ( ReadOnlySpan<char> section in value.SplitOn(SEPARATOR) ) { collection.Add(long.Parse(section)); }
     //
@@ -77,16 +76,16 @@ public sealed class IDCollection<T, TID> : CollectionAlerts<TID>, IReadOnlyColle
         Clear();
         if ( string.IsNullOrWhiteSpace(json) ) { return; }
 
-        foreach ( TID n in json.FromJson<List<TID>>() ) { Add(n); }
+        foreach ( long n in json.FromJson<List<long>>() ) { Add(n); }
     }
 
-    private void Add( IEnumerable<TID>? value )
+    internal void Add( IEnumerable<long>? value )
     {
         if ( value is null ) { return; }
 
-        foreach ( TID id in value ) { Add(id); }
+        foreach ( long id in value ) { Add(id); }
     }
-    private bool Add( TID id )
+    internal  bool Add( long id )
     {
         OnPropertyChanging(nameof(Count));
         bool result = _items.Add(id);
@@ -98,13 +97,13 @@ public sealed class IDCollection<T, TID> : CollectionAlerts<TID>, IReadOnlyColle
 
     public void Add( IEnumerable<T>? value ) => Add(value?.Select(x => x.ID));
     public bool Add( T               value ) => Add(value.ID);
-    public void Add( IDCollection<T, TID>? value )
+    public void Add( IDCollection<T>? value )
     {
         if ( value is null ) { return; }
 
-        foreach ( TID id in value ) { Add(id); }
+        foreach ( long id in value ) { Add(id); }
     }
-    private void Added( TID id ) => OnChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, id));
+    private void Added( long id ) => OnChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, id));
 
 
     public void Clear()
@@ -113,13 +112,13 @@ public sealed class IDCollection<T, TID> : CollectionAlerts<TID>, IReadOnlyColle
         Cleared();
     }
     private void Cleared() => OnChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
-    private bool Contains( TID id ) => _items.Contains(id);
-    public bool Contains( T    value ) => Contains(value.ID);
+    private bool Contains( long id ) => _items.Contains(id);
+    public bool Contains( T     value ) => Contains(value.ID);
 
 
-    // public static implicit operator IDCollection<T, TID>( ReadOnlySpan<char> span ) => Create(span);
-    public static implicit operator IDCollection<T, TID>?( string? jsonOrCsv ) => Create(jsonOrCsv);
-    private bool Remove( TID id )
+    // public static implicit operator IDCollection<T, long>( ReadOnlySpan<char> span ) => Create(span);
+    public static implicit operator IDCollection<T>?( string? jsonOrCsv ) => Create(jsonOrCsv);
+    private bool Remove( long id )
     {
         OnPropertyChanging(nameof(Count));
         bool result = _items.Remove(id);
@@ -127,8 +126,8 @@ public sealed class IDCollection<T, TID> : CollectionAlerts<TID>, IReadOnlyColle
         OnPropertyChanged(nameof(Count));
         return result;
     }
-    public bool Remove( T     value ) => Remove(value.ID);
-    private void Removed( TID id ) => OnChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, id));
+    public bool Remove( T      value ) => Remove(value.ID);
+    private void Removed( long id ) => OnChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, id));
     public string ToCsv() => $"\"{string.Join(SEPARATOR, this)}\"";
 
 
@@ -155,7 +154,7 @@ public sealed class IDCollection<T, TID> : CollectionAlerts<TID>, IReadOnlyColle
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
 
-    public IEnumerator<TID> GetEnumerator() => _items.GetEnumerator();
+    public IEnumerator<long> GetEnumerator() => _items.GetEnumerator();
     public string ToString( string? format, IFormatProvider? formatProvider )
     {
         ReadOnlySpan<char> span = format;

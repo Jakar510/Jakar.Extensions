@@ -4,7 +4,7 @@
 namespace Jakar.Database;
 
 
-public interface IUserStore<TUserRecord, TID> : IUserLoginStore<TUserRecord>,
+public interface IUserStore<TUserRecord> : IUserLoginStore<TUserRecord>,
                                                 IUserClaimStore<TUserRecord>,
                                                 IUserPasswordStore<TUserRecord>,
                                                 IUserSecurityStampStore<TUserRecord>,
@@ -13,5 +13,4 @@ public interface IUserStore<TUserRecord, TID> : IUserLoginStore<TUserRecord>,
                                                 IUserLockoutStore<TUserRecord>,
                                                 IUserAuthenticatorKeyStore<TUserRecord>,
                                                 IUserTwoFactorRecoveryCodeStore<TUserRecord>,
-                                                IUserPhoneNumberStore<TUserRecord> where TUserRecord : BaseTableRecord<TUserRecord, TID>, IUserRecord<TUserRecord, TID>
-                                                                                   where TID : struct, IComparable<TID>, IEquatable<TID> { }
+                                                IUserPhoneNumberStore<TUserRecord> where TUserRecord : BaseTableRecord<TUserRecord>, IUserRecord<TUserRecord> { }

@@ -5,19 +5,19 @@ namespace Jakar.Database;
 
 
 [SuppressMessage("ReSharper", "MemberCanBePrivate.Local")]
-public class KeyGenerator<TKey, TValue> : IEnumerator<TKey> where TKey : IComparable<TKey>, IEquatable<TKey>
+public sealed class KeyGenerator<TValue> : IEnumerator<long>
 {
-    private readonly IReadOnlyDictionary<TKey, TValue> _dictionary;
-    private readonly IComparer<TKey>                   _comparer;
-    private readonly List<TKey>                        _keys  = new();
+    private readonly IReadOnlyDictionary<long, TValue> _dictionary;
+    private readonly IComparer<long>                   _comparer;
+    private readonly List<long>                        _keys  = new();
     private          int                               _index = -1;
-    public           TKey                              Current => _keys[_index];
+    public           long                              Current => _keys[_index];
     object IEnumerator.                                Current => Current;
     public int                                         Count   => _keys.Count;
 
 
-    public KeyGenerator( IReadOnlyDictionary<TKey, TValue> dictionary ) : this(dictionary, Comparer<TKey>.Default) { }
-    public KeyGenerator( IReadOnlyDictionary<TKey, TValue> dictionary, IComparer<TKey> comparer )
+    public KeyGenerator( IReadOnlyDictionary<long, TValue> dictionary ) : this(dictionary, Comparer<long>.Default) { }
+    public KeyGenerator( IReadOnlyDictionary<long, TValue> dictionary, IComparer<long> comparer )
     {
         _dictionary = dictionary;
         _comparer   = comparer;

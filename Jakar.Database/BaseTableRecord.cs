@@ -5,17 +5,16 @@ namespace Jakar.Database;
 
 
 [Serializable]
-public abstract record BaseTableRecord<TRecord, TID> : BaseCollectionsRecord<TRecord, TID> where TRecord : BaseTableRecord<TRecord, TID>
-                                                                                           where TID : struct, IComparable<TID>, IEquatable<TID>
+public abstract record BaseTableRecord<TRecord> : BaseCollectionsRecord<TRecord, long> where TRecord : BaseTableRecord<TRecord>
 {
     public static string TableName { get; } = typeof(TRecord).GetTableName();
 
 
     protected BaseTableRecord() : base() { }
-    protected BaseTableRecord( TID id ) : base(id) { }
+    protected BaseTableRecord( long id ) : base(id) { }
 
 
-    public TRecord NewID( in TID id ) => (TRecord)( this with
+    public TRecord NewID( in long id ) => (TRecord)( this with
                                                     {
                                                         ID = id
                                                     } );

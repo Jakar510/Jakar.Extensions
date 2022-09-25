@@ -9,8 +9,7 @@ using Newtonsoft.Json.Linq;
 namespace Jakar.Database;
 
 
-public abstract record UserRecord<TRecord, TID> : BaseTableRecord<TRecord, TID>, IUserRecord<TRecord, TID> where TRecord : UserRecord<TRecord, TID>
-                                                                                                           where TID : struct, IComparable<TID>, IEquatable<TID>
+public abstract record UserRecord<TRecord> : BaseTableRecord<TRecord>, IUserRecord<TRecord> where TRecord : UserRecord<TRecord>
 {
     protected static readonly PasswordHasher<TRecord> _hasher    = new();
     private                   string                  _userName  = string.Empty;
@@ -35,10 +34,10 @@ public abstract record UserRecord<TRecord, TID> : BaseTableRecord<TRecord, TID>,
     private                   SupportedLanguage       _preferredLanguage;
     private                   Guid?                   _sessionID;
     private                   DateTimeOffset?         _subscriptionExpires;
-    private                   TID?                    _subscriptionID;
+    private                   long?                   _subscriptionID;
     private                   DateTimeOffset          _dateCreated;
-    private                   TID?                    _createdBy;
-    private                   TID?                    _escalateTo;
+    private                   long?                   _createdBy;
+    private                   long?                   _escalateTo;
     private                   bool                    _isActive;
     private                   bool                    _isDisabled;
     private                   bool                    _isLocked;
@@ -172,7 +171,7 @@ public abstract record UserRecord<TRecord, TID> : BaseTableRecord<TRecord, TID>,
         get => _subscriptionExpires;
         set => SetProperty(ref _subscriptionExpires, value);
     }
-    public TID? SubscriptionID
+    public long? SubscriptionID
     {
         get => _subscriptionID;
         set => SetProperty(ref _subscriptionID, value);
@@ -182,12 +181,12 @@ public abstract record UserRecord<TRecord, TID> : BaseTableRecord<TRecord, TID>,
         get => _dateCreated;
         set => SetProperty(ref _dateCreated, value);
     }
-    public TID? CreatedBy
+    public long? CreatedBy
     {
         get => _createdBy;
         set => SetProperty(ref _createdBy, value);
     }
-    public TID? EscalateTo
+    public long? EscalateTo
     {
         get => _escalateTo;
         set => SetProperty(ref _escalateTo, value);
@@ -418,12 +417,12 @@ public abstract record UserRecord<TRecord, TID> : BaseTableRecord<TRecord, TID>,
                                           };
 
 
-    public async Task<TRecord?> GetBoss( DbConnection connection, DbTransaction? transaction, DbTable<TRecord, TID> table, CancellationToken token ) => EscalateTo.HasValue
-                                                                                                                                                            ? await table.Get(connection, transaction, EscalateTo.Value, token)
-                                                                                                                                                            : default;
-    public async Task<TRecord?> GetUserWhoCreated( DbConnection connection, DbTransaction? transaction, DbTable<TRecord, TID> table, CancellationToken token ) => CreatedBy.HasValue
-                                                                                                                                                                      ? await table.Get(connection, transaction, CreatedBy.Value, token)
-                                                                                                                                                                      : default;
+    public async Task<TRecord?> GetBoss( DbConnection connection, DbTransaction? transaction, DbTable<TRecord> table, CancellationToken token ) => EscalateTo.HasValue
+                                                                                                                                                       ? await table.Get(connection, transaction, EscalateTo.Value, token)
+                                                                                                                                                       : default;
+    public async Task<TRecord?> GetUserWhoCreated( DbConnection connection, DbTransaction? transaction, DbTable<TRecord> table, CancellationToken token ) => CreatedBy.HasValue
+                                                                                                                                                                 ? await table.Get(connection, transaction, CreatedBy.Value, token)
+                                                                                                                                                                 : default;
 
 
     public void Update( IUserData value )

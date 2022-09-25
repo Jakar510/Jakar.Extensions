@@ -1,8 +1,8 @@
 ﻿namespace Jakar.Database;
 
 
-public interface IUserSubscription<TID> where TID : struct, IComparable<TID>, IEquatable<TID>
+public interface IUserSubscription
 {
     public DateTimeOffset? SubscriptionExpires { get; }
-    public TID?             SubscriptionID      { get; }
+    public long?           SubscriptionID      { get; }
 }

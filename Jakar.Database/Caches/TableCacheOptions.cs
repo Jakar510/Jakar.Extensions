@@ -1,16 +1,12 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 09/02/2022  7:26 PM
 
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
-
-
-
 namespace Jakar.Database;
 
 
 [SuppressMessage("ReSharper", "UnusedMethodReturnValue.Global")]
-public class TableCacheOptions : IOptions<TableCacheOptions>
+[SuppressMessage("ReSharper", "ConvertToPrimaryConstructor")]
+public sealed record TableCacheOptions : IOptions<TableCacheOptions>
 {
     TableCacheOptions IOptions<TableCacheOptions>.Value => this;
 
