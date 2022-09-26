@@ -28,9 +28,9 @@
 		<dependencies>
 			<group targetFramework="net6.0">
 				<dependency id="Jakar.Extensions"
-							version="6.0.0" />
+							version="6.0.2" />
 				<dependency id="Jakar.Extensions.Hosting"
-							version="6.0.0" />
+							version="6.0.2" />
 			</group>
 		</dependencies>
 	</metadata>

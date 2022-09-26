@@ -1,7 +1,7 @@
-﻿[*.cs]
+[*.cs]
 
 # CS1584: XML comment has syntactically incorrect cref attribute
-dotnet_diagnostic.CS1584.severity = silent
+dotnet_diagnostic.cs1584.severity = silent
 csharp_indent_labels = one_less_than_current
 csharp_using_directive_placement = outside_namespace:silent
 csharp_prefer_simple_using_statement = true:suggestion
@@ -24,19 +24,29 @@ csharp_style_prefer_range_operator = true:suggestion
 csharp_style_implicit_object_creation_when_type_is_apparent = true:suggestion
 
 # CS0660: Type defines operator == or operator != but does not override Object.Equals(object o)
-dotnet_diagnostic.CS0660.severity = none
+dotnet_diagnostic.cs0660.severity = none
 
 # IDE0079: Remove unnecessary suppression
-dotnet_diagnostic.IDE0079.severity = none
+dotnet_diagnostic.ide0079.severity = none
 
 # CA1822: Mark members as static
-dotnet_diagnostic.CA1822.severity = none
+dotnet_diagnostic.ca1822.severity = none
 
 # CS4014: Because this call is not awaited, execution of the current method continues before the call is completed
-dotnet_diagnostic.CS4014.severity = error
+dotnet_diagnostic.cs4014.severity = error
 
 # IDE0002: Simplify Member Access
-dotnet_diagnostic.IDE0002.severity = none
+dotnet_diagnostic.ide0002.severity = none
+
+# ReSharper properties
+resharper_linebreak_before_singleline_elements = false
+resharper_spaces_around_eq_in_attribute = false
+resharper_wrap_text = false
+resharper_xmldoc_spaces_around_eq_in_pi_attribute = false
+resharper_xmldoc_space_after_last_attribute = false
+resharper_xmldoc_space_after_last_pi_attribute = false
+resharper_xmldoc_space_before_self_closing = false
+resharper_xmldoc_wrap_around_elements = false
 
 [*.{cs,vb}]
 dotnet_style_operator_placement_when_wrapping = beginning_of_line
@@ -60,4 +70,4 @@ dotnet_style_prefer_simplified_interpolation = true:suggestion
 dotnet_style_namespace_match_folder = true:suggestion
 
 # IDE0048: Add parentheses for clarity
-dotnet_diagnostic.IDE0048.severity = none
+dotnet_diagnostic.ide0048.severity = none
