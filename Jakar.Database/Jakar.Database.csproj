@@ -11,7 +11,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="Jakar.Extensions" Version="6.0.2" />
-		<PackageReference Include="Jakar.Extensions.Hosting" Version="6.0.1" />
+		<PackageReference Include="Jakar.Extensions.Hosting" Version="6.0.2" />
 		<PackageReference Include="Sigil" Version="5.0.0" />
 	</ItemGroup>
 

@@ -4,7 +4,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata>
 		<id>Jakar.Extensions.Blazor</id>
-		<version>6.0.0.9-beta</version>
+		<version>6.0.0.10-beta</version>
 		<title>Extension Library</title>
 		<authors>Tyler Stegmaier</authors>
 		<owners>Jakar510/Jakar</owners>
@@ -61,7 +61,7 @@
 
 		<file src="..\images\icon.png" />
 
-		<!-- .net standard 2.1 -->
+		<!-- .net 6.0 -->
 		<file src="../Jakar.Extensions.Blazor/bin/Release/net6.0/Jakar.Extensions.Blazor.dll"
 			  target="lib/net6.0" />
 		<file src="../Jakar.Extensions.Blazor/bin/Release/net6.0/Jakar.Extensions.Blazor.xml"
