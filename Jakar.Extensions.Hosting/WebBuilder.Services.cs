@@ -1,4 +1,8 @@
-﻿namespace Jakar.Extensions.Hosting;
+﻿using Microsoft.Extensions.DependencyInjection.Extensions;
+
+
+
+namespace Jakar.Extensions.Hosting;
 
 
 #nullable enable
@@ -305,7 +309,7 @@ public static partial class WebBuilder
     private static WebApplicationBuilder Add( WebApplicationBuilder collection, Type serviceType, Func<IServiceProvider, object> implementationFactory, in ServiceLifetime lifetime )
     {
         var descriptor = new ServiceDescriptor(serviceType, implementationFactory, lifetime);
-        collection.Services.Add(descriptor);
+        collection.Services.TryAddEnumerable(descriptor);
         return collection;
     }
 

@@ -10,27 +10,34 @@ public static class ControllerBaseExtensions
     public const string ERROR   = nameof(ERROR);
 
 
-    public static void AddError( this ControllerBase controller, string          error ) => controller.ModelState.AddError(error);
-    public static void AddError( this ControllerBase controller, string          key, string error ) => controller.ModelState.AddError(key, error);
-    public static void AddError( this ControllerBase controller, params string[] errors ) => controller.ModelState.AddError(errors);
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void AddError( this      ControllerBase controller, string              error ) => controller.ModelState.AddError(error);
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void AddError( this      ControllerBase controller, string              key, string error ) => controller.ModelState.AddError(key, error);
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void AddError( this      ControllerBase controller, params string[]     errors ) => controller.ModelState.AddError(errors);
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void AddError( this      ControllerBase controller, IEnumerable<string> errors ) => controller.ModelState.AddError(errors);
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void AddModelError( this ControllerBase controller, Exception           e ) => controller.ModelState.AddError(e);
 
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void AddError( this ModelStateDictionary controller, Exception e )
     {
         controller.AddError(e.Message);
         foreach ( DictionaryEntry pair in e.Data ) { controller.AddError($"{pair.Key}: {pair.Value}"); }
     }
-    public static void AddError( this ModelStateDictionary state, string error ) => state.AddModelError(ERROR,               error);
-    public static void AddError( this ModelStateDictionary state, string key, string error ) => state.AddModelError(DETAILS, $"{key} : {error}");
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void AddError( this ModelStateDictionary state, string error ) => state.AddModelError(ERROR, error);
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void AddError( this ModelStateDictionary state, string key,  string error ) => state.AddError(DETAILS, key, error);
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void AddError( this ModelStateDictionary state, string type, string key, string error ) => state.AddModelError(type, $"{key} : {error}");
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void AddError( this ModelStateDictionary state, params string[] errors )
     {
         if ( errors.Length == 0 ) { return; }
 
         foreach ( string error in errors ) { state.AddError(error); }
     }
-
-
-    public static void AddModelError( this ControllerBase controller, Exception e ) => controller.ModelState.AddError(e);
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void AddError( this ModelStateDictionary state, IEnumerable<string> errors )
+    {
+        foreach ( string error in errors ) { state.AddError(error); }
+    }
 
 
     public static ActionResult ClientClosed( this ControllerBase _ ) => new StatusCodeResult(Status.ClientClosedRequest.AsInt());
