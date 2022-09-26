@@ -4,7 +4,7 @@
 namespace Jakar.Extensions.Blazor;
 
 
-public abstract class Widget : ComponentBase, IModelState
+public abstract class Widget<TServices> : ComponentBase, IModelState where TServices : AppServices
 {
     private IModalReference? _popup;
 
@@ -20,7 +20,7 @@ public abstract class Widget : ComponentBase, IModelState
     }
 
 
-    [Inject] public AppServices Services { get; set; } = default!;
+    [Inject] public TServices Services { get; set; } = default!;
 
 
     [CascadingParameter(Name = nameof(ModelStateDictionary))] public ModelStateDictionary ModelState { get; set; } = new();
@@ -35,3 +35,7 @@ public abstract class Widget : ComponentBase, IModelState
 
     public Task StateHasChangedAsync() => InvokeAsync(StateHasChanged);
 }
+
+
+
+public abstract class Widget : Widget<AppServices> { }

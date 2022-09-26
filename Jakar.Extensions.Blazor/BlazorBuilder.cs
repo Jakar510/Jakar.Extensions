@@ -1,42 +1,63 @@
 ﻿namespace Jakar.Extensions.Blazor;
 
 
+/// <summary>
+/// <para><see href="https://blazor.radzen.com/get-started"/></para>
+/// <para><see href="https://github.com/Blazored/Modal"/></para>
+/// <para><see href="https://github.com/Blazored/Toast"/></para>
+/// <para><see href="https://github.com/Blazored/LocalStorage"/></para>
+/// <para><see href="https://github.com/Blazored/SessionStorage"/></para>
+/// </summary>
 [SuppressMessage("ReSharper", "UnusedType.Global")]
 [SuppressMessage("ReSharper", "UnusedMethodReturnValue.Global")]
 public static class BlazorBuilder
 {
-    /// <summary>
-    /// <para><see href="https://blazor.radzen.com/get-started"/></para>
-    /// </summary>
     public static WebApplicationBuilder AddAppServices( this WebApplicationBuilder builder ) =>
         builder.AddAuthenticationCore()
                .AddBlazored()
                .AddRadzen()
                .AddSingleton<AppServices>();
-    /// <summary>
-    /// <para><see href="https://blazor.radzen.com/get-started"/></para>
-    /// </summary>
     public static WebApplicationBuilder AddAppServices( this WebApplicationBuilder builder, Action<LocalStorageOptions> configureLocal ) =>
         builder.AddAuthenticationCore()
                .AddBlazored(configureLocal)
                .AddRadzen()
                .AddSingleton<AppServices>();
-    /// <summary>
-    /// <para><see href="https://blazor.radzen.com/get-started"/></para>
-    /// </summary>
     public static WebApplicationBuilder AddAppServices( this WebApplicationBuilder builder, Action<SessionStorageOptions> configureSession ) =>
         builder.AddAuthenticationCore()
                .AddBlazored(configureSession)
                .AddRadzen()
                .AddSingleton<AppServices>();
-    /// <summary>
-    /// <para><see href="https://blazor.radzen.com/get-started"/></para>
-    /// </summary>
     public static WebApplicationBuilder AddAppServices( this WebApplicationBuilder builder, Action<LocalStorageOptions> configureLocal, Action<SessionStorageOptions> configureSession ) =>
         builder.AddAuthenticationCore()
                .AddBlazored(configureLocal, configureSession)
                .AddRadzen()
                .AddSingleton<AppServices>();
+
+
+    public static WebApplicationBuilder AddAppServices<TServices>( this WebApplicationBuilder builder ) where TServices : AppServices =>
+        builder.AddAuthenticationCore()
+               .AddBlazored()
+               .AddRadzen()
+               .AddSingleton<TServices>()
+               .AddSingleton<AppServices>(provider => provider.GetRequiredService<TServices>());
+    public static WebApplicationBuilder AddAppServices<TServices>( this WebApplicationBuilder builder, Action<LocalStorageOptions> configureLocal ) where TServices : AppServices =>
+        builder.AddAuthenticationCore()
+               .AddBlazored(configureLocal)
+               .AddRadzen()
+               .AddSingleton<TServices>()
+               .AddSingleton<AppServices>(provider => provider.GetRequiredService<TServices>());
+    public static WebApplicationBuilder AddAppServices<TServices>( this WebApplicationBuilder builder, Action<SessionStorageOptions> configureSession ) where TServices : AppServices =>
+        builder.AddAuthenticationCore()
+               .AddBlazored(configureSession)
+               .AddRadzen()
+               .AddSingleton<TServices>()
+               .AddSingleton<AppServices>(provider => provider.GetRequiredService<TServices>());
+    public static WebApplicationBuilder AddAppServices<TServices>( this WebApplicationBuilder builder, Action<LocalStorageOptions> configureLocal, Action<SessionStorageOptions> configureSession ) where TServices : AppServices =>
+        builder.AddAuthenticationCore()
+               .AddBlazored(configureLocal, configureSession)
+               .AddRadzen()
+               .AddSingleton<TServices>()
+               .AddSingleton<AppServices>(provider => provider.GetRequiredService<TServices>());
 
 
     /// <summary>

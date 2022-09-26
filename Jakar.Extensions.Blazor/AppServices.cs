@@ -4,7 +4,7 @@
 namespace Jakar.Extensions.Blazor;
 
 
-public sealed class AppServices : BaseViewModel, ILocalStorageService, IAuthenticationService, IToastService, IModalService
+public class AppServices : BaseViewModel, ILocalStorageService, IAuthenticationService, IToastService, IModalService
 {
     private readonly IAuthenticationService _authenticationService;
     private readonly ILocalStorageService   _localStorage;
