@@ -308,9 +308,9 @@ public static partial class WebBuilder
     }
     private static WebApplicationBuilder Add( WebApplicationBuilder builder, Type serviceType, Func<IServiceProvider, object> implementationFactory, in ServiceLifetime lifetime )
     {
-        var  descriptor = new ServiceDescriptor(serviceType, implementationFactory, lifetime);
-        bool added      = builder.TryAdd(descriptor);
-        Debug.Assert(added, $"Service has already been added: '{serviceType.FullName}'");
+        var descriptor = new ServiceDescriptor(serviceType, implementationFactory, lifetime);
+        if ( !builder.TryAdd(descriptor) ) { throw new InvalidOperationException($"Service has already been added: '{serviceType.FullName}'"); }
+
         return builder;
     }
     private static bool TryAdd( this WebApplicationBuilder builder, ServiceDescriptor descriptor )
