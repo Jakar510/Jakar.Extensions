@@ -16,22 +16,22 @@ public static class BlazorBuilder
         builder.AddAuthenticationCore()
                .AddBlazored()
                .AddRadzen()
-               .AddSingleton<AppServices>();
+               .AddScoped<AppServices>();
     public static WebApplicationBuilder AddAppServices( this WebApplicationBuilder builder, Action<LocalStorageOptions> configureLocal ) =>
         builder.AddAuthenticationCore()
                .AddBlazored(configureLocal)
                .AddRadzen()
-               .AddSingleton<AppServices>();
+               .AddScoped<AppServices>();
     public static WebApplicationBuilder AddAppServices( this WebApplicationBuilder builder, Action<SessionStorageOptions> configureSession ) =>
         builder.AddAuthenticationCore()
                .AddBlazored(configureSession)
                .AddRadzen()
-               .AddSingleton<AppServices>();
+               .AddScoped<AppServices>();
     public static WebApplicationBuilder AddAppServices( this WebApplicationBuilder builder, Action<LocalStorageOptions> configureLocal, Action<SessionStorageOptions> configureSession ) =>
         builder.AddAuthenticationCore()
                .AddBlazored(configureLocal, configureSession)
                .AddRadzen()
-               .AddSingleton<AppServices>();
+               .AddScoped<AppServices>();
 
 
     public static WebApplicationBuilder AddAppServices<TServices>( this WebApplicationBuilder builder ) where TServices : AppServices =>
@@ -39,25 +39,25 @@ public static class BlazorBuilder
                .AddBlazored()
                .AddRadzen()
                .AddSingleton<TServices>()
-               .AddSingleton<AppServices>(provider => provider.GetRequiredService<TServices>());
+               .AddScoped<AppServices>(provider => provider.GetRequiredService<TServices>());
     public static WebApplicationBuilder AddAppServices<TServices>( this WebApplicationBuilder builder, Action<LocalStorageOptions> configureLocal ) where TServices : AppServices =>
         builder.AddAuthenticationCore()
                .AddBlazored(configureLocal)
                .AddRadzen()
                .AddSingleton<TServices>()
-               .AddSingleton<AppServices>(provider => provider.GetRequiredService<TServices>());
+               .AddScoped<AppServices>(provider => provider.GetRequiredService<TServices>());
     public static WebApplicationBuilder AddAppServices<TServices>( this WebApplicationBuilder builder, Action<SessionStorageOptions> configureSession ) where TServices : AppServices =>
         builder.AddAuthenticationCore()
                .AddBlazored(configureSession)
                .AddRadzen()
                .AddSingleton<TServices>()
-               .AddSingleton<AppServices>(provider => provider.GetRequiredService<TServices>());
+               .AddScoped<AppServices>(provider => provider.GetRequiredService<TServices>());
     public static WebApplicationBuilder AddAppServices<TServices>( this WebApplicationBuilder builder, Action<LocalStorageOptions> configureLocal, Action<SessionStorageOptions> configureSession ) where TServices : AppServices =>
         builder.AddAuthenticationCore()
                .AddBlazored(configureLocal, configureSession)
                .AddRadzen()
                .AddSingleton<TServices>()
-               .AddSingleton<AppServices>(provider => provider.GetRequiredService<TServices>());
+               .AddScoped<AppServices>(provider => provider.GetRequiredService<TServices>());
 
 
     /// <summary>
