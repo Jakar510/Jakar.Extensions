@@ -306,11 +306,22 @@ public static partial class WebBuilder
         collection.Services.Add(descriptor);
         return collection;
     }
-    private static WebApplicationBuilder Add( WebApplicationBuilder collection, Type serviceType, Func<IServiceProvider, object> implementationFactory, in ServiceLifetime lifetime )
+    private static WebApplicationBuilder Add( WebApplicationBuilder builder, Type serviceType, Func<IServiceProvider, object> implementationFactory, in ServiceLifetime lifetime )
     {
-        var descriptor = new ServiceDescriptor(serviceType, implementationFactory, lifetime);
-        collection.Services.TryAddEnumerable(descriptor);
-        return collection;
+        var  descriptor = new ServiceDescriptor(serviceType, implementationFactory, lifetime);
+        bool added      = builder.TryAdd(descriptor);
+        Debug.Assert(added, $"Service has already been added: '{serviceType.FullName}'");
+        return builder;
+    }
+    private static bool TryAdd( this WebApplicationBuilder builder, ServiceDescriptor descriptor )
+    {
+        if ( builder.Services.All(x => x.ServiceType != descriptor.ServiceType) )
+        {
+            builder.Services.Add(descriptor);
+            return true;
+        }
+
+        return false;
     }
 
 
