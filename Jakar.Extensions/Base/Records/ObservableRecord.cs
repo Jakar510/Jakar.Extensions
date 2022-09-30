@@ -1,16 +1,14 @@
 ﻿#nullable enable
-using System.Windows.Input;
-
-
-
 namespace Jakar.Extensions;
 
 
 [SuppressMessage("ReSharper", "VirtualMemberNeverOverridden.Global")]
 public record ObservableRecord : BaseRecord, INotifyPropertyChanged, INotifyPropertyChanging
 {
-    // ReSharper disable once InconsistentNaming
-    public static readonly DateTime sqlMinDate = DateTime.Parse("1/1/1753 12:00:00 AM", CultureInfo.InvariantCulture);
+    public static readonly DateTime SQLMinDate = DateTime.Parse("1/1/1753 12:00:00 AM", CultureInfo.InvariantCulture);
+#if NET6_0_OR_GREATER
+    public static DateOnly SQLMinDateOnly { get; } = new(SQLMinDate.Date.Year, SQLMinDate.Date.Month, SQLMinDate.Date.Day);
+#endif
 
 
     public event PropertyChangedEventHandler?  PropertyChanged;
@@ -80,7 +78,7 @@ public record ObservableRecord : BaseRecord, INotifyPropertyChanged, INotifyProp
     protected virtual bool SetPropertyWithoutNotify<T>( ref T backingStore, T value, IEqualityComparer<T> comparer )
     {
         if ( comparer.Equals(backingStore, value) ) { return false; }
-
+        
         backingStore = value;
         return true;
     }
@@ -262,63 +260,112 @@ public record ObservableRecord : BaseRecord, INotifyPropertyChanged, INotifyProp
     }
 
 
-    protected virtual bool SetProperty( ref DateTime backingStore, DateTime value, in DateTime minDate, [CallerMemberName] string? caller = default )
+    protected virtual bool SetProperty( ref DateTime backingStore, DateTime value, [CallerMemberName] string? propertyName = default ) => SetProperty(ref backingStore, value, SQLMinDate, propertyName);
+    protected virtual bool SetProperty( ref DateTime backingStore, DateTime value, in DateTime minDate, [CallerMemberName] string? propertyName = default )
     {
         value = value < minDate
                     ? minDate
                     : value;
 
-        return SetProperty(ref backingStore, value, ValueEqualizer<DateTime>.Instance, caller);
+        return SetProperty(ref backingStore, value, ValueEqualizer<DateTime>.Instance, propertyName);
     }
-    protected virtual bool SetProperty( ref DateTime? backingStore, DateTime? value, in DateTime minDate, [CallerMemberName] string? caller = default )
+    protected virtual bool SetProperty( ref DateTime? backingStore, DateTime? value, [CallerMemberName] string? propertyName = default ) => SetProperty(ref backingStore, value, SQLMinDate, propertyName);
+    protected virtual bool SetProperty( ref DateTime? backingStore, DateTime? value, in DateTime minDate, [CallerMemberName] string? propertyName = default )
     {
-        value = value < minDate
+        value = value is null || value < minDate
                     ? null
-                    : value;
+                    : value.Value;
 
-        return SetProperty(ref backingStore, value, ValueEqualizer<DateTime>.Instance, caller);
+        if ( value.HasValue ) { value = DateTime.SpecifyKind(value.Value, DateTimeKind.Utc); }
+
+        return SetProperty(ref backingStore, value, propertyName);
     }
 
 
-    protected virtual bool SetProperty( ref DateTimeOffset backingStore, DateTimeOffset value, in DateTimeOffset minDate, [CallerMemberName] string? caller = default )
+    protected virtual bool SetProperty( ref DateTimeOffset  backingStore, DateTimeOffset  value, [CallerMemberName] string? propertyName = default ) => SetProperty(ref backingStore, value, SQLMinDate, propertyName);
+    protected virtual bool SetProperty( ref DateTimeOffset? backingStore, DateTimeOffset? value, [CallerMemberName] string? propertyName = default ) => SetProperty(ref backingStore, value, SQLMinDate, propertyName);
+    protected virtual bool SetProperty( ref DateTimeOffset backingStore, DateTimeOffset value, in DateTimeOffset minDate, [CallerMemberName] string? propertyName = default )
     {
         value = value < minDate
                     ? minDate
                     : value;
 
-        return SetProperty(ref backingStore, value, ValueEqualizer<DateTimeOffset>.Instance, caller);
+        return SetProperty(ref backingStore, value, ValueEqualizer<DateTimeOffset>.Instance, propertyName);
     }
-    protected virtual bool SetProperty( ref DateTimeOffset? backingStore, DateTimeOffset? value, in DateTimeOffset minDate, [CallerMemberName] string? caller = default )
+    protected virtual bool SetProperty( ref DateTimeOffset? backingStore, DateTimeOffset? value, in DateTimeOffset minDate, [CallerMemberName] string? propertyName = default )
     {
         value = value < minDate
                     ? null
                     : value;
 
-        return SetProperty(ref backingStore, value, ValueEqualizer<DateTimeOffset>.Instance, caller);
+        return SetProperty(ref backingStore, value, ValueEqualizer<DateTimeOffset>.Instance, propertyName);
     }
 
 
-    protected virtual bool SetProperty( ref TimeSpan backingStore, TimeSpan value, in TimeSpan minValue, [CallerMemberName] string? caller = default )
+    protected virtual bool SetProperty( ref TimeSpan backingStore, TimeSpan value, in TimeSpan minValue, [CallerMemberName] string? propertyName = default )
     {
         value = value < minValue
                     ? minValue
                     : value;
 
-        return SetProperty(ref backingStore, value, ValueEqualizer<TimeSpan>.Instance, caller);
+        return SetProperty(ref backingStore, value, ValueEqualizer<TimeSpan>.Instance, propertyName);
     }
-    protected virtual bool SetProperty( ref TimeSpan? backingStore, TimeSpan? value, in TimeSpan? minValue, [CallerMemberName] string? caller = default )
+    protected virtual bool SetProperty( ref TimeSpan? backingStore, TimeSpan? value, in TimeSpan? minValue, [CallerMemberName] string? propertyName = default )
     {
         value = value < minValue
                     ? null
                     : value;
 
-        return SetProperty(ref backingStore, value, ValueEqualizer<TimeSpan>.Instance, caller);
+
+        return SetProperty(ref backingStore, value, ValueEqualizer<TimeSpan>.Instance, propertyName);
     }
+
+
+#if NET6_0_OR_GREATER
+    protected virtual bool SetProperty( ref TimeOnly backingStore, TimeOnly value, in TimeOnly minDate, [CallerMemberName] string? propertyName = default )
+    {
+        value = value < minDate
+                    ? minDate
+                    : value;
+
+
+        return SetProperty(ref backingStore, value, EqualityComparer<TimeOnly>.Default, propertyName);
+    }
+    protected virtual bool SetProperty( ref TimeOnly? backingStore, TimeOnly? value, in TimeOnly minDate, [CallerMemberName] string? propertyName = default )
+    {
+        value = value < minDate
+                    ? minDate
+                    : value;
+
+        return SetProperty(ref backingStore, value, ValueEqualizer<TimeOnly>.Instance, propertyName);
+    }
+
+
+    protected virtual bool SetProperty( ref DateOnly backingStore, DateOnly value, [CallerMemberName] string? propertyName = default ) => SetProperty(ref backingStore, value, SQLMinDateOnly, propertyName);
+    protected virtual bool SetProperty( ref DateOnly backingStore, DateOnly value, in DateOnly minDate, [CallerMemberName] string? propertyName = default )
+    {
+        value = value < minDate
+                    ? minDate
+                    : value;
+
+
+        return SetProperty(ref backingStore, value, EqualityComparer<DateOnly>.Default, propertyName);
+    }
+    protected virtual bool SetProperty( ref DateOnly? backingStore, DateOnly? value, [CallerMemberName] string? propertyName = default ) => SetProperty(ref backingStore, value, SQLMinDateOnly, propertyName);
+    protected virtual bool SetProperty( ref DateOnly? backingStore, DateOnly? value, in DateOnly minDate, [CallerMemberName] string? propertyName = default )
+    {
+        value = value < minDate
+                    ? minDate
+                    : value;
+
+        return SetProperty(ref backingStore, value, ValueEqualizer<DateOnly>.Instance, propertyName);
+    }
+#endif
 }
 
 
 
-public abstract record ObservableRecord<T> : ObservableRecord, IEquatable<T>, IComparable<T>, IComparable where T : ObservableRecord<T>
+public abstract record ObservableRecord<TRecord> : ObservableRecord, IEquatable<TRecord>, IComparable<TRecord>, IComparable where TRecord : ObservableRecord<TRecord>
 {
     protected ObservableRecord() { }
 
@@ -329,25 +376,25 @@ public abstract record ObservableRecord<T> : ObservableRecord, IEquatable<T>, IC
 
         if ( ReferenceEquals(this, other) ) { return 0; }
 
-        return other is T value
+        return other is TRecord value
                    ? CompareTo(value)
-                   : throw new ExpectedValueTypeException(nameof(other), other, typeof(T));
+                   : throw new ExpectedValueTypeException(nameof(other), other, typeof(TRecord));
     }
-    public abstract int CompareTo( T? other );
-    public abstract bool Equals( T?   other );
+    public abstract int CompareTo( TRecord? other );
+    public abstract bool Equals( TRecord?   other );
 
 
     public string ToJson() => JsonNet.ToJson(this);
     public string ToPrettyJson() => this.ToJson(Formatting.Indented);
 
 
-    public static T? FromJson( [NotNullIfNotNull("json")] string? json ) => json?.FromJson<T>();
+    public static TRecord? FromJson( [NotNullIfNotNull("json")] string? json ) => json?.FromJson<TRecord>();
 }
 
 
 
-public abstract record ObservableRecord<T, TID> : ObservableRecord<T>, IUniqueID<TID> where T : ObservableRecord<T, TID>
-                                                                                      where TID : struct, IComparable<TID>, IEquatable<TID>
+public abstract record ObservableRecord<TRecord, TID> : ObservableRecord<TRecord>, IUniqueID<TID> where TRecord : ObservableRecord<TRecord, TID>
+                                                                                                  where TID : struct, IComparable<TID>, IEquatable<TID>
 {
     private TID _id;
 
@@ -364,6 +411,6 @@ public abstract record ObservableRecord<T, TID> : ObservableRecord<T>, IUniqueID
     protected ObservableRecord( TID id ) => ID = id;
 
 
-    protected bool SetID( T   record ) => SetID(record.ID);
-    protected bool SetID( TID id ) => SetProperty(ref _id, id, nameof(ID));
+    protected bool SetID( TRecord record ) => SetID(record.ID);
+    protected bool SetID( TID     id ) => SetProperty(ref _id, id, nameof(ID));
 }

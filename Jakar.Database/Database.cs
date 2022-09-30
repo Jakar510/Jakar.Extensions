@@ -4,9 +4,12 @@
 namespace Jakar.Database;
 
 
-public abstract class Database<TID> : ObservableClass, IConnectableDb, IAsyncDisposable where TID : struct, IComparable<TID>, IEquatable<TID>
+public abstract class Database : ObservableClass, IConnectableDb, IAsyncDisposable
 {
     protected readonly ConcurrentBag<IAsyncDisposable> _disposables = new();
+
+
+    public DbTable<UserRecord> Users { get; }
 
 
     static Database()
@@ -21,7 +24,7 @@ public abstract class Database<TID> : ObservableClass, IConnectableDb, IAsyncDis
         TimeOnlyHandler.Register();
         AppVersionHandler.Register();
     }
-    protected Database() : base() { }
+    protected Database() : base() => Users = Create<UserRecord>();
     public virtual async ValueTask DisposeAsync()
     {
         foreach ( IAsyncDisposable disposable in _disposables ) { await disposable.DisposeAsync(); }
@@ -30,6 +33,7 @@ public abstract class Database<TID> : ObservableClass, IConnectableDb, IAsyncDis
     }
 
 
+    protected DbTable<TRecord> Create<TRecord>() where TRecord : TableRecord<TRecord> => AddDisposable(new DbTable<TRecord>(this));
     protected TValue AddDisposable<TValue>( TValue value ) where TValue : IAsyncDisposable
     {
         _disposables.Add(value);
@@ -50,18 +54,4 @@ public abstract class Database<TID> : ObservableClass, IConnectableDb, IAsyncDis
         await connection.OpenAsync(token);
         return connection;
     }
-}
-
-
-
-[SuppressMessage("ReSharper", "UnusedType.Global")]
-public abstract class Database<TDatabase, TID> : Database<TID>, IEquatable<TDatabase>, ICloneable where TDatabase : Database<TDatabase, TID>
-                                                                                                  where TID : struct, IComparable<TID>, IEquatable<TID>
-{
-    protected Database() : base() { }
-
-
-    public abstract bool Equals( TDatabase? other );
-    public abstract TDatabase Clone();
-    object ICloneable.Clone() => Clone();
 }

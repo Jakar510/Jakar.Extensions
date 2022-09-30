@@ -9,7 +9,7 @@ namespace Jakar.Database;
 
 
 [SuppressMessage("ReSharper", "UnusedMemberInSuper.Global")]
-public interface IDbTable<TRecord> : IConnectableDb, IAsyncDisposable where TRecord : TableRecord<TRecord>
+public interface IDbTable<TRecord> : IConnectableDb<TRecord>, IAsyncDisposable where TRecord : TableRecord<TRecord>
 {
     public string TableName { get; }
 
@@ -36,30 +36,30 @@ public interface IDbTable<TRecord> : IConnectableDb, IAsyncDisposable where TRec
     public ValueTask<long> Count( DbConnection      connection, DbTransaction? transaction, CancellationToken token = default );
 
 
-    public ValueTask<TRecord> First( CancellationToken token                                                           = default );
-    public ValueTask<TRecord> First( DbConnection      connection, DbTransaction? transaction, CancellationToken token = default );
+    public ValueTask<TRecord?> First( CancellationToken token                                                           = default );
+    public ValueTask<TRecord?> First( DbConnection      connection, DbTransaction? transaction, CancellationToken token = default );
 
 
     public ValueTask<TRecord?> FirstOrDefault( CancellationToken token                                                           = default );
     public ValueTask<TRecord?> FirstOrDefault( DbConnection      connection, DbTransaction? transaction, CancellationToken token = default );
 
 
-    public ValueTask<TRecord> Last( CancellationToken token                                                           = default );
-    public ValueTask<TRecord> Last( DbConnection      connection, DbTransaction? transaction, CancellationToken token = default );
+    public ValueTask<TRecord?> Last( CancellationToken token                                                           = default );
+    public ValueTask<TRecord?> Last( DbConnection      connection, DbTransaction? transaction, CancellationToken token = default );
 
 
     public ValueTask<TRecord?> LastOrDefault( CancellationToken token                                                           = default );
     public ValueTask<TRecord?> LastOrDefault( DbConnection      connection, DbTransaction? transaction, CancellationToken token = default );
 
 
-    public ValueTask<TRecord?> Single( long          id,         CancellationToken  token );
-    public ValueTask<TRecord?> Single( DbConnection connection, DbTransaction?     transaction, long               id, CancellationToken token = default );
+    public ValueTask<TRecord?> Single( long         id,         CancellationToken  token );
+    public ValueTask<TRecord?> Single( DbConnection connection, DbTransaction?     transaction, long              id, CancellationToken token = default );
     public ValueTask<TRecord?> Single( string       sql,        DynamicParameters? parameters,  CancellationToken token                                                       = default );
     public ValueTask<TRecord?> Single( DbConnection connection, DbTransaction?     transaction, string            sql, DynamicParameters? parameters, CancellationToken token = default );
 
 
-    public ValueTask<TRecord?> SingleOrDefault( long          id,         CancellationToken  token );
-    public ValueTask<TRecord?> SingleOrDefault( DbConnection connection, DbTransaction?     transaction, long               id, CancellationToken token = default );
+    public ValueTask<TRecord?> SingleOrDefault( long         id,         CancellationToken  token );
+    public ValueTask<TRecord?> SingleOrDefault( DbConnection connection, DbTransaction?     transaction, long              id, CancellationToken token = default );
     public ValueTask<TRecord?> SingleOrDefault( string       sql,        DynamicParameters? parameters,  CancellationToken token                                                       = default );
     public ValueTask<TRecord?> SingleOrDefault( DbConnection connection, DbTransaction?     transaction, string            sql, DynamicParameters? parameters, CancellationToken token = default );
 
@@ -69,15 +69,15 @@ public interface IDbTable<TRecord> : IConnectableDb, IAsyncDisposable where TRec
 
 
     public ValueTask<TResult> Call<TResult>( string       sql,        DynamicParameters? parameters, Func<SqlMapper.GridReader, CancellationToken, ValueTask<TResult>> func, CancellationToken token = default );
-    public ValueTask<TResult> Call<TResult>( DbConnection connection, DbTransaction? transaction, string sql, DynamicParameters? parameters, Func<SqlMapper.GridReader, CancellationToken, ValueTask<TResult>> func, CancellationToken token = default );
+    public ValueTask<TResult> Call<TResult>( DbConnection connection, DbTransaction transaction, string sql, DynamicParameters? parameters, Func<SqlMapper.GridReader, CancellationToken, ValueTask<TResult>> func, CancellationToken token = default );
 
 
     public ValueTask<TResult> Call<TResult>( string       sql,        DynamicParameters? parameters,  Func<DbDataReader, CancellationToken, ValueTask<TResult>> func, CancellationToken token = default );
-    public ValueTask<TResult> Call<TResult>( DbConnection connection, DbTransaction?     transaction, string sql, DynamicParameters? parameters, Func<DbDataReader, CancellationToken, ValueTask<TResult>> func, CancellationToken token = default );
+    public ValueTask<TResult> Call<TResult>( DbConnection connection, DbTransaction      transaction, string sql, DynamicParameters? parameters, Func<DbDataReader, CancellationToken, ValueTask<TResult>> func, CancellationToken token = default );
 
 
-    public IAsyncEnumerable<TRecord> Where(bool matchAll, DynamicParameters parameters, [EnumeratorCancellation] CancellationToken token                                                                                                      = default );
-    public IAsyncEnumerable<TRecord> Where( DbConnection      connection, DbTransaction?                             transaction, bool matchAll, DynamicParameters parameters, [EnumeratorCancellation] CancellationToken token = default );
+    public IAsyncEnumerable<TRecord> Where( bool         matchAll,   DynamicParameters parameters,  [EnumeratorCancellation] CancellationToken token                                                                                    = default );
+    public IAsyncEnumerable<TRecord> Where( DbConnection connection, DbTransaction?    transaction, bool                                       matchAll, DynamicParameters parameters, [EnumeratorCancellation] CancellationToken token = default );
 
 
     public IAsyncEnumerable<TRecord> Where( string       sql,        DynamicParameters? parameters,  [EnumeratorCancellation] CancellationToken token                                                                                = default );
@@ -103,9 +103,9 @@ public interface IDbTable<TRecord> : IConnectableDb, IAsyncDisposable where TRec
     public ValueTask<TRecord?> Get( long                          id,         CancellationToken                          token );
     public IAsyncEnumerable<TRecord?> Get( IEnumerable<long>      ids,        [EnumeratorCancellation] CancellationToken token = default );
     public IAsyncEnumerable<TRecord?> Get( IAsyncEnumerable<long> ids,        [EnumeratorCancellation] CancellationToken token = default );
-    public ValueTask<TRecord?> Get( DbConnection                 connection, DbTransaction?                             transaction, long                   id,  CancellationToken                          token );
-    public IAsyncEnumerable<TRecord?> Get( DbConnection          connection, DbTransaction?                             transaction, IEnumerable<long>      ids, [EnumeratorCancellation] CancellationToken token = default );
-    public IAsyncEnumerable<TRecord?> Get( DbConnection          connection, DbTransaction?                             transaction, IAsyncEnumerable<long> ids, [EnumeratorCancellation] CancellationToken token = default );
+    public ValueTask<TRecord?> Get( DbConnection                  connection, DbTransaction?                             transaction, long                   id,  CancellationToken                          token );
+    public IAsyncEnumerable<TRecord?> Get( DbConnection           connection, DbTransaction?                             transaction, IEnumerable<long>      ids, [EnumeratorCancellation] CancellationToken token = default );
+    public IAsyncEnumerable<TRecord?> Get( DbConnection           connection, DbTransaction?                             transaction, IAsyncEnumerable<long> ids, [EnumeratorCancellation] CancellationToken token = default );
 
 
     public ValueTask<TRecord> Insert( TRecord                          record,     CancellationToken                          token );

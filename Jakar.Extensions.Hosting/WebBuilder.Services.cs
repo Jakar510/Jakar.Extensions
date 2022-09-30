@@ -1,8 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection.Extensions;
-
-
-
-namespace Jakar.Extensions.Hosting;
+﻿namespace Jakar.Extensions.Hosting;
 
 
 #nullable enable
@@ -10,6 +6,7 @@ namespace Jakar.Extensions.Hosting;
 /// <summary>
 /// <para><see href="https://stackoverflow.com/a/61726193/9530917">AddTransient, AddScoped and AddSingleton Services Differences</see></para>
 /// </summary>
+[SuppressMessage("ReSharper", "UnusedMethodReturnValue.Global")]
 public static partial class WebBuilder
 {
     /// <summary>
@@ -84,7 +81,7 @@ public static partial class WebBuilder
     /// <param name="implementationType">The implementation type of the service.</param>
     /// <returns>A reference to this instance after the operation has completed.</returns>
     /// <seealso cref="ServiceLifetime.Transient"/>
-    public static WebApplicationBuilder AddTransient( this WebApplicationBuilder builder, Type serviceType, Type implementationType ) => Add(builder, serviceType, implementationType, ServiceLifetime.Transient);
+    public static WebApplicationBuilder AddTransient( this WebApplicationBuilder builder, Type serviceType, Type implementationType ) => TryAdd(builder, serviceType, implementationType, ServiceLifetime.Transient);
 
     /// <summary>
     /// Adds a transient service of the type specified in <paramref name="serviceType"/> with a
@@ -96,7 +93,7 @@ public static partial class WebBuilder
     /// <param name="implementationFactory">The factory that creates the service.</param>
     /// <returns>A reference to this instance after the operation has completed.</returns>
     /// <seealso cref="ServiceLifetime.Transient"/>
-    public static WebApplicationBuilder AddTransient( this WebApplicationBuilder builder, Type serviceType, Func<IServiceProvider, object> implementationFactory ) => Add(builder, serviceType, implementationFactory, ServiceLifetime.Transient);
+    public static WebApplicationBuilder AddTransient( this WebApplicationBuilder builder, Type serviceType, Func<IServiceProvider, object> implementationFactory ) => TryAdd(builder, serviceType, implementationFactory, ServiceLifetime.Transient);
 
 
     /// <summary>
@@ -131,7 +128,7 @@ public static partial class WebBuilder
     /// <param name="implementationFactory">The factory that creates the service.</param>
     /// <returns>A reference to this instance after the operation has completed.</returns>
     /// <seealso cref="ServiceLifetime.Scoped"/>
-    public static WebApplicationBuilder AddScoped( this WebApplicationBuilder builder, Type serviceType, Func<IServiceProvider, object> implementationFactory ) => Add(builder, serviceType, implementationFactory, ServiceLifetime.Scoped);
+    public static WebApplicationBuilder AddScoped( this WebApplicationBuilder builder, Type serviceType, Func<IServiceProvider, object> implementationFactory ) => TryAdd(builder, serviceType, implementationFactory, ServiceLifetime.Scoped);
     /// <summary>
     /// Adds a scoped service of the type specified in <typeparamref name="TService"/> with an
     /// implementation type specified in <typeparamref name="TImplementation" /> using the
@@ -172,7 +169,7 @@ public static partial class WebBuilder
     /// <param name="implementationType">The implementation type of the service.</param>
     /// <returns>A reference to this instance after the operation has completed.</returns>
     /// <seealso cref="ServiceLifetime.Scoped"/>
-    public static WebApplicationBuilder AddScoped( this WebApplicationBuilder builder, Type serviceType, Type implementationType ) => Add(builder, serviceType, implementationType, ServiceLifetime.Scoped);
+    public static WebApplicationBuilder AddScoped( this WebApplicationBuilder builder, Type serviceType, Type implementationType ) => TryAdd(builder, serviceType, implementationType, ServiceLifetime.Scoped);
 
     /// <summary>
     /// Adds a scoped service of the type specified in <paramref name="serviceType"/> to the
@@ -285,7 +282,7 @@ public static partial class WebBuilder
     /// <param name="implementationType">The implementation type of the service.</param>
     /// <returns>A reference to this instance after the operation has completed.</returns>
     /// <seealso cref="ServiceLifetime.Singleton"/>
-    public static WebApplicationBuilder AddSingleton( this WebApplicationBuilder builder, Type serviceType, Type implementationType ) => Add(builder, serviceType, implementationType, ServiceLifetime.Singleton);
+    public static WebApplicationBuilder AddSingleton( this WebApplicationBuilder builder, Type serviceType, Type implementationType ) => TryAdd(builder, serviceType, implementationType, ServiceLifetime.Singleton);
 
     /// <summary>
     /// Adds a singleton service of the type specified in <paramref name="serviceType"/> with a
@@ -297,32 +294,33 @@ public static partial class WebBuilder
     /// <param name="implementationFactory">The factory that creates the service.</param>
     /// <returns>A reference to this instance after the operation has completed.</returns>
     /// <seealso cref="ServiceLifetime.Singleton"/>
-    public static WebApplicationBuilder AddSingleton( this WebApplicationBuilder builder, Type serviceType, Func<IServiceProvider, object> implementationFactory ) => Add(builder, serviceType, implementationFactory, ServiceLifetime.Singleton);
+    public static WebApplicationBuilder AddSingleton( this WebApplicationBuilder builder, Type serviceType, Func<IServiceProvider, object> implementationFactory ) => TryAdd(builder, serviceType, implementationFactory, ServiceLifetime.Singleton);
 
 
-    private static WebApplicationBuilder Add( WebApplicationBuilder collection, Type serviceType, Type implementationType, in ServiceLifetime lifetime )
+    public static WebApplicationBuilder TryAdd( WebApplicationBuilder builder, Type serviceType, Type implementationType, in ServiceLifetime lifetime )
     {
+        if ( builder.Contains(serviceType) ) { return builder; }
+
         var descriptor = new ServiceDescriptor(serviceType, implementationType, lifetime);
-        collection.Services.Add(descriptor);
-        return collection;
-    }
-    private static WebApplicationBuilder Add( WebApplicationBuilder builder, Type serviceType, Func<IServiceProvider, object> implementationFactory, in ServiceLifetime lifetime )
-    {
-        var descriptor = new ServiceDescriptor(serviceType, implementationFactory, lifetime);
-        if ( !builder.TryAdd(descriptor) ) { throw new InvalidOperationException($"Service has already been added: '{serviceType.FullName}'"); }
-
+        builder.Services.Add(descriptor);
         return builder;
     }
-    private static bool TryAdd( this WebApplicationBuilder builder, ServiceDescriptor descriptor )
+    public static WebApplicationBuilder TryAdd( WebApplicationBuilder builder, Type serviceType, Func<IServiceProvider, object> implementationFactory, in ServiceLifetime lifetime )
     {
-        if ( builder.Services.All(x => x.ServiceType != descriptor.ServiceType) )
-        {
-            builder.Services.Add(descriptor);
-            return true;
-        }
+        if ( builder.Contains(serviceType) ) { return builder; }
 
-        return false;
+        var descriptor = new ServiceDescriptor(serviceType, implementationFactory, lifetime);
+        builder.Services.Add(descriptor);
+        return builder;
     }
+    public static bool TryAdd( this WebApplicationBuilder builder, ServiceDescriptor descriptor )
+    {
+        if ( builder.Contains(descriptor.ServiceType) ) { return false; }
+
+        builder.Services.Add(descriptor);
+        return true;
+    }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool Contains( this WebApplicationBuilder builder, Type serviceType ) => builder.Services.Any(x => x.ServiceType == serviceType);
 
 
     public static WebApplicationBuilder AddHostedService<THostedService>( this WebApplicationBuilder builder, THostedService service ) where THostedService : class, IHostedService

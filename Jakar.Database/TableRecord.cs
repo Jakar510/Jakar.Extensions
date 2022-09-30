@@ -10,16 +10,22 @@ public abstract record TableRecord<TRecord> : BaseCollectionsRecord<TRecord, lon
     public static string TableName { get; } = typeof(TRecord).GetTableName();
 
 
-    private long _createdBy;
+    private long            _createdBy;
+    private DateTimeOffset? _lastModified;
 
-
-    public Guid           UserID      { get; init; }
-    public DateTimeOffset DateCreated { get; init; }
-
+    public Guid UserID { get; init; }
     public long CreatedBy
     {
         get => _createdBy;
         set => SetProperty(ref _createdBy, value);
+    }
+
+
+    public DateTimeOffset DateCreated { get; init; }
+    public DateTimeOffset? LastModified
+    {
+        get => _lastModified;
+        set => SetProperty(ref _lastModified, value);
     }
 
 

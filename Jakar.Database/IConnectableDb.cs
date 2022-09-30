@@ -9,3 +9,7 @@ public interface IConnectableDb
     public DbConnection Connect();
     public ValueTask<DbConnection> ConnectAsync( CancellationToken token );
 }
+
+
+
+public interface IConnectableDb<TRecord> : IConnectableDb where TRecord : TableRecord<TRecord> { }

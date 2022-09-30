@@ -35,6 +35,7 @@ global using System.IO.Compression;
 global using System.Runtime.InteropServices;
 global using System.Security;
 global using System.Threading.Tasks.Dataflow;
+global using System.Windows.Input;
 global using Nito.Collections;
 global using JetBrains.Annotations;
 global using ValueOf;
