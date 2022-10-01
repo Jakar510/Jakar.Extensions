@@ -5,7 +5,7 @@ namespace Jakar.Extensions;
 public static class Tasks
 {
     /// <summary> Creates a cancellable delay from the given <paramref name="delay"/> </summary>
-    public static Task Delay( this TimeSpan delay, in CancellationToken token ) => Task.Delay(delay, token);
+    public static Task Delay( this TimeSpan delay, in CancellationToken token = default ) => Task.Delay(delay, token);
 
 
     public static void CallSynchronously( this Task task ) => task.ConfigureAwait(false)

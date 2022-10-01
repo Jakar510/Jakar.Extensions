@@ -1,7 +1,7 @@
 ﻿namespace Jakar.Database;
 
 
-public interface IUserControl<out TRecord> where TRecord : IUserControl<TRecord>
+public interface IUserControl
 {
     public bool            IsActive       { get; }
     public bool            IsDisabled     { get; }
@@ -13,16 +13,16 @@ public interface IUserControl<out TRecord> where TRecord : IUserControl<TRecord>
     public DateTimeOffset? LockDate       { get; }
 
 
-    public TRecord MarkBadLogin();
-    public TRecord SetActive();
-    public TRecord Unlock();
-    public TRecord Lock();
+    public UserRecord MarkBadLogin();
+    public UserRecord SetActive();
+    public UserRecord Unlock();
+    public UserRecord Lock();
 
 
     /// <summary> Disable the user, with current rights. </summary>
-    public TRecord Disable();
+    public UserRecord Disable();
 
 
     /// <summary> Enable the user, with current rights. </summary>
-    public TRecord Enable();
+    public UserRecord Enable();
 }

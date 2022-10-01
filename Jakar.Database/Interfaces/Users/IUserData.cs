@@ -1,6 +1,13 @@
 ﻿namespace Jakar.Database;
 
 
+public interface IUserDataRecord : IUserData 
+{
+    public new UserRecord Update( IUserData model );
+}
+
+
+
 public interface IUserData : JsonModels.IJsonModel
 {
     public string            FirstName         { get; set; }

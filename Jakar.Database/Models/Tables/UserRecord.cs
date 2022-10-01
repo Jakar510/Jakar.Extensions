@@ -1,6 +1,7 @@
 ﻿// ToothFairyDispatch :: ToothFairyDispatch.Cloud
 // 08/29/2022  9:55 PM
 
+using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 using Newtonsoft.Json.Linq;
 
@@ -61,30 +62,35 @@ public sealed record UserRecord : TableRecord<UserRecord>, IUserRecord<UserRecor
     private long?             _rights;
 
 
+    [MaxLength(256)]
     public string UserName
     {
         get => _userName;
         set => SetProperty(ref _userName, value);
     }
 
+    [MaxLength(256)]
     public string FirstName
     {
         get => _firstName;
         set => SetProperty(ref _firstName, value);
     }
 
+    [MaxLength(256)]
     public string LastName
     {
         get => _lastName;
         set => SetProperty(ref _lastName, value);
     }
 
+    [MaxLength(512)]
     public string? FullName
     {
         get => _fullName;
         set => SetProperty(ref _fullName, value);
     }
 
+    [MaxLength(256)]
     public string? Description
     {
         get => _description;
@@ -97,114 +103,128 @@ public sealed record UserRecord : TableRecord<UserRecord>, IUserRecord<UserRecor
         set => SetProperty(ref _sessionID, value);
     }
 
+    [MaxLength(4096)]
     public string? Address
     {
         get => _address;
         set => SetProperty(ref _address, value);
     }
-    
+
+    [MaxLength(512)]
     public string? Line1
     {
         get => _line1;
         set => SetProperty(ref _line1, value);
     }
-    
+
+    [MaxLength(256)]
     public string? Line2
     {
         get => _line2;
         set => SetProperty(ref _line2, value);
     }
-    
+
+    [MaxLength(256)]
     public string? City
     {
         get => _city;
         set => SetProperty(ref _city, value);
     }
-    
+
+    [MaxLength(256)]
     public string? State
     {
         get => _state;
         set => SetProperty(ref _state, value);
     }
-    
+
+    [MaxLength(256)]
     public string? Country
     {
         get => _country;
         set => SetProperty(ref _country, value);
     }
-    
+
+    [MaxLength(256)]
     public string? PostalCode
     {
         get => _postalCode;
         set => SetProperty(ref _postalCode, value);
     }
-    
+
+    [MaxLength(4096)]
     public string? Website
     {
         get => _website;
         set => SetProperty(ref _website, value);
     }
-    
+
+    [MaxLength(1024)]
     public string? Email
     {
         get => _email;
         set => SetProperty(ref _email, value);
     }
-    
+
+    [MaxLength(256)]
     public string? PhoneNumber
     {
         get => _phoneNumber;
         set => SetProperty(ref _phoneNumber, value);
     }
-    
+
+    [MaxLength(256)]
     public string? Ext
     {
         get => _ext;
         set => SetProperty(ref _ext, value);
     }
-    
+
+    [MaxLength(256)]
     public string? Title
     {
         get => _title;
         set => SetProperty(ref _title, value);
     }
-    
+
+    [MaxLength(256)]
     public string? Department
     {
         get => _department;
         set => SetProperty(ref _department, value);
     }
-    
+
+    [MaxLength(256)]
     public string? Company
     {
         get => _company;
         set => SetProperty(ref _company, value);
     }
-    
+
     public SupportedLanguage PreferredLanguage
     {
         get => _preferredLanguage;
         set => SetProperty(ref _preferredLanguage, value);
     }
-    
+
     public DateTimeOffset? SubscriptionExpires
     {
         get => _subscriptionExpires;
         set => SetProperty(ref _subscriptionExpires, value);
     }
-    
+
     public long? SubscriptionID
     {
         get => _subscriptionID;
         set => SetProperty(ref _subscriptionID, value);
     }
-    
+
     public long? EscalateTo
     {
         get => _escalateTo;
         set => SetProperty(ref _escalateTo, value);
     }
-    
+
     public bool IsActive
     {
         get => _isActive;
@@ -247,6 +267,7 @@ public sealed record UserRecord : TableRecord<UserRecord>, IUserRecord<UserRecor
         set => SetProperty(ref _lockDate, value);
     }
 
+    [MaxLength(int.MaxValue)]
     public string? RefreshToken
     {
         get => _refreshToken;
@@ -283,42 +304,49 @@ public sealed record UserRecord : TableRecord<UserRecord>, IUserRecord<UserRecor
         set => SetProperty(ref _isTwoFactorEnabled, value);
     }
 
+    [MaxLength(int.MaxValue)]
     public string? LoginProvider
     {
         get => _loginProvider;
         set => SetProperty(ref _loginProvider, value);
     }
 
+    [MaxLength(int.MaxValue)]
     public string? ProviderKey
     {
         get => _providerKey;
         set => SetProperty(ref _providerKey, value);
     }
 
+    [MaxLength(int.MaxValue)]
     public string? ProviderDisplayName
     {
         get => _providerDisplayName;
         set => SetProperty(ref _providerDisplayName, value);
     }
 
+    [MaxLength(int.MaxValue)]
     public string? SecurityStamp
     {
         get => _securityStamp;
         set => SetProperty(ref _securityStamp, value);
     }
 
+    [MaxLength(int.MaxValue)]
     public string? ConcurrencyStamp
     {
         get => _concurrencyStamp;
         set => SetProperty(ref _concurrencyStamp, value);
     }
 
+    [MaxLength(int.MaxValue)]
     public string? AdditionalData
     {
         get => _additionalData;
         set => SetProperty(ref _additionalData, value);
     }
 
+    [MaxLength(int.MaxValue)]
     public string? PasswordHash
     {
         get => _passwordHash;
@@ -402,10 +430,11 @@ public sealed record UserRecord : TableRecord<UserRecord>, IUserRecord<UserRecor
     public bool DoesNotOwn<TRecord>( TRecord record ) where TRecord : TableRecord<TRecord> => record.CreatedBy != ID;
 
 
-    public void UpdatePassword( string password )
+    public UserRecord UpdatePassword( string password )
     {
         VerifyAccess();
         PasswordHash = _hasher.HashPassword(this, password);
+        return this;
     }
     public PasswordVerificationResult VerifyPassword( string password ) => _hasher.VerifyHashedPassword(this, PasswordHash, password);
 
@@ -458,17 +487,19 @@ public sealed record UserRecord : TableRecord<UserRecord>, IUserRecord<UserRecor
     }
 
 
-    public void ClearRefreshToken()
+    public UserRecord ClearRefreshToken()
     {
         VerifyAccess();
         RefreshToken           = default;
         RefreshTokenExpiryTime = default;
+        return this;
     }
-    public void SetRefreshToken( string token, DateTimeOffset date )
+    public UserRecord SetRefreshToken( string token, DateTimeOffset date )
     {
         VerifyAccess();
         RefreshToken           = token;
         RefreshTokenExpiryTime = date;
+        return this;
     }
 
 
@@ -478,12 +509,11 @@ public sealed record UserRecord : TableRecord<UserRecord>, IUserRecord<UserRecor
                                               new Claim(ClaimTypes.Dsa,             UserID.ToString()),
                                               new Claim(ClaimTypes.NameIdentifier,  UserName),
                                               new Claim(ClaimTypes.Name,            FullName ?? string.Empty),
-                                              new Claim(ClaimTypes.Country,         Country ?? string.Empty),
                                               new Claim(ClaimTypes.MobilePhone,     PhoneNumber ?? string.Empty),
                                               new Claim(ClaimTypes.Email,           Email ?? string.Empty),
+                                              new Claim(ClaimTypes.StreetAddress,   Address ?? string.Empty),
+                                              new Claim(ClaimTypes.Country,         Country ?? string.Empty),
                                               new Claim(ClaimTypes.PostalCode,      PostalCode ?? string.Empty),
-                                              new Claim(ClaimTypes.StateOrProvince, State ?? string.Empty),
-                                              new Claim(ClaimTypes.StreetAddress,   Line1 ?? string.Empty),
                                               new Claim(ClaimTypes.Webpage,         Website ?? string.Empty),
                                               new Claim(ClaimTypes.Expiration,      SubscriptionExpires?.ToString() ?? string.Empty),
                                           };
@@ -494,7 +524,13 @@ public sealed record UserRecord : TableRecord<UserRecord>, IUserRecord<UserRecor
                                                                                                                                                              : default;
 
 
-    public void Update( IUserData value )
+    public UserRecord Update( IUserData value )
+    {
+        IUserData data = this;
+        data.Update(value);
+        return this;
+    }
+    void IUserData.Update( IUserData value )
     {
         VerifyAccess();
         FirstName         = value.FirstName;

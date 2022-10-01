@@ -57,3 +57,10 @@ public abstract class BaseMigration : Migration
     protected IInsertDataSyntax StartInsert( Type   type ) => Insert.IntoTable(type.GetTableName());
     protected IInsertDataSyntax StartInsert( string tableName ) => Insert.IntoTable(tableName);
 }
+
+
+
+public abstract class BaseMigration<TRecord> : BaseMigration where TRecord : TableRecord<TRecord>
+{
+    public static string TableName { get; } = typeof(TRecord).GetTableName();
+}

@@ -23,6 +23,6 @@ public interface IUserSecurity
     public string? ConcurrencyStamp { get; }
 
 
-    public void ClearRefreshToken();
-    public void SetRefreshToken( string token, DateTimeOffset date );
+    public UserRecord ClearRefreshToken();
+    public UserRecord SetRefreshToken( string token, DateTimeOffset date );
 }
