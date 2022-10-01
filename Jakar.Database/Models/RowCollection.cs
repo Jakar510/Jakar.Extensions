@@ -2,16 +2,11 @@
 
 
 [Serializable]
-public sealed class RecordCollection<TRecord, TID> : ObservableCollection<TRecord>, IDisposable where TRecord : BaseRecord, IUniqueID<TID>
-                                                                                                where TID : struct, IComparable<TID>, IEquatable<TID>
+public sealed class RecordCollection<TRecord> : ObservableCollection<TRecord> where TRecord : BaseRecord, IUniqueID<long>
 {
-    private Counter<TID> _counter;
-
-    
-    public RecordCollection( Counter<TID> counter ) : base() => _counter = counter;
-    public RecordCollection( Counter<TID> counter, params TRecord[]     items ) : this(counter) => Add(items);
-    public RecordCollection( Counter<TID> counter, IEnumerable<TRecord> items ) : this(counter) => Add(items);
-    public void Dispose() => _counter.Dispose();
+    public RecordCollection() : base() { }
+    public RecordCollection( params TRecord[]     items ) : this() => Add(items);
+    public RecordCollection( IEnumerable<TRecord> items ) : this() => Add(items);
 
 
     public void Add( params TRecord[]     items ) => items.ForEach(Add);
@@ -24,11 +19,9 @@ public sealed class RecordCollection<TRecord, TID> : ObservableCollection<TRecor
             return;
         }
 
-        _counter.MoveNext();
-
         base.Add(item with
                  {
-                     ID = _counter.Current
+                     ID = Count
                  });
     }
 }

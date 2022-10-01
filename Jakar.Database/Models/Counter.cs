@@ -5,28 +5,19 @@ namespace Jakar.Database;
 
 
 [Serializable]
-public sealed class Counter<TID> : IEnumerator<TID> where TID : struct, IComparable<TID>, IEquatable<TID>
+public sealed class Counter : IEnumerator<long>
 {
-    private readonly Func<TID?, TID> _adder;
-    private          TID?            _current;
+    public static Counter Instance { get; } = new();
 
 
-    public TID Current
-    {
-        get => _current ?? throw new InvalidOperationException(nameof(_current));
-        private set => _current = value;
-    }
+    public long        Current { get; private set; }
     object IEnumerator.Current => Current;
 
 
-    public Counter( Func<TID?, TID> adder ) => _adder = adder;
-    public void Dispose() => _current = default;
+    public Counter() { }
+    public void Dispose() => Current = default;
 
 
-    public bool MoveNext()
-    {
-        Current = _adder(_current);
-        return true;
-    }
-    public void Reset() => _current = default;
+    public bool MoveNext() => ( ++Current ).IsValidID();
+    public void Reset() => Current = default;
 }

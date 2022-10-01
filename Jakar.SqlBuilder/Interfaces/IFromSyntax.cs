@@ -17,7 +17,7 @@ public interface IFromSyntax<out TNext>
     /// <summary>
     /// <para>
     /// <para>
-    /// Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="DapperTableExtensions.GetTableName(object)"/>
+    /// Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="DapperTableExtensions.GetTableName{T}"/>
     /// </para>
     /// </para>
     /// </summary>
@@ -27,7 +27,7 @@ public interface IFromSyntax<out TNext>
 
     /// <summary>
     /// <para>
-    /// Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="DapperTableExtensions.GetTableName(Type)"/>
+    /// Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="DapperTableExtensions.GetTableName{T}"/>
     /// </para>
     /// </summary>
     /// <typeparam name="T">The type being passed</typeparam>

@@ -6,13 +6,6 @@ namespace Jakar.Database;
 
 public static partial class DbExtensions
 {
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static string GetTableName<TRecord>() where TRecord : class => typeof(TRecord).GetTableName();
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static string GetTableName( this Type type ) => type.GetCustomAttribute<Dapper.Contrib.Extensions.TableAttribute>()
-                                                              ?.Name ?? type.GetCustomAttribute<System.ComponentModel.DataAnnotations.Schema.TableAttribute>()
-                                                                           ?.Name ?? type.Name;
-
-
     public static async ValueTask TryCall( this IConnectableDb db, Func<DbConnection, DbTransaction, CancellationToken, ValueTask> func, CancellationToken token = default )
     {
         await using DbConnection  conn        = await db.ConnectAsync(token);

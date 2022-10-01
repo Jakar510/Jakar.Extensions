@@ -27,7 +27,7 @@ public interface IJoinChain : IChainEnd<ISqlBuilderRoot>
 {
     /// <summary>
     /// <para>
-    /// Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="DapperTableExtensions.GetTableName(System.Type)"/>
+    /// Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="DapperTableExtensions.GetTableName{T}"/>
     /// </para>
     /// 
     /// </summary>
@@ -38,7 +38,7 @@ public interface IJoinChain : IChainEnd<ISqlBuilderRoot>
 
     /// <summary>
     /// <para>
-    /// Uses the <paramref name="obj"/> to get the table_name using <see cref="DapperTableExtensions.GetTableName(object)"/>
+    /// Uses the <paramref name="obj"/> to get the table_name using <see cref="DapperTableExtensions.GetTableName{T}"/>
     /// </para>
     /// 
     /// </summary>
@@ -67,7 +67,7 @@ public interface IJoinChainRight
 {
     /// <summary>
     /// <para>
-    /// Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="DapperTableExtensions.GetTableName(Type)"/>
+    /// Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="DapperTableExtensions.GetTableName{T}"/>
     /// </para>
     /// 
     /// </summary>
@@ -78,7 +78,7 @@ public interface IJoinChainRight
 
     /// <summary>
     /// <para>
-    /// Uses the <paramref name="obj"/> to get the table_name using <see cref="DapperTableExtensions.GetTableName(object)"/>
+    /// Uses the <paramref name="obj"/> to get the table_name using <see cref="DapperTableExtensions.GetTableName{T}"/>
     /// </para>
     /// 
     /// </summary>

@@ -66,221 +66,265 @@ public sealed record UserRecord : TableRecord<UserRecord>, IUserRecord<UserRecor
         get => _userName;
         set => SetProperty(ref _userName, value);
     }
+
     public string FirstName
     {
         get => _firstName;
         set => SetProperty(ref _firstName, value);
     }
+
     public string LastName
     {
         get => _lastName;
         set => SetProperty(ref _lastName, value);
     }
+
     public string? FullName
     {
         get => _fullName;
         set => SetProperty(ref _fullName, value);
     }
+
     public string? Description
     {
         get => _description;
         set => SetProperty(ref _description, value);
     }
+
     public Guid? SessionID
     {
         get => _sessionID;
         set => SetProperty(ref _sessionID, value);
     }
+
     public string? Address
     {
         get => _address;
         set => SetProperty(ref _address, value);
     }
+    
     public string? Line1
     {
         get => _line1;
         set => SetProperty(ref _line1, value);
     }
+    
     public string? Line2
     {
         get => _line2;
         set => SetProperty(ref _line2, value);
     }
+    
     public string? City
     {
         get => _city;
         set => SetProperty(ref _city, value);
     }
+    
     public string? State
     {
         get => _state;
         set => SetProperty(ref _state, value);
     }
+    
     public string? Country
     {
         get => _country;
         set => SetProperty(ref _country, value);
     }
+    
     public string? PostalCode
     {
         get => _postalCode;
         set => SetProperty(ref _postalCode, value);
     }
+    
     public string? Website
     {
         get => _website;
         set => SetProperty(ref _website, value);
     }
+    
     public string? Email
     {
         get => _email;
         set => SetProperty(ref _email, value);
     }
+    
     public string? PhoneNumber
     {
         get => _phoneNumber;
         set => SetProperty(ref _phoneNumber, value);
     }
+    
     public string? Ext
     {
         get => _ext;
         set => SetProperty(ref _ext, value);
     }
+    
     public string? Title
     {
         get => _title;
         set => SetProperty(ref _title, value);
     }
+    
     public string? Department
     {
         get => _department;
         set => SetProperty(ref _department, value);
     }
+    
     public string? Company
     {
         get => _company;
         set => SetProperty(ref _company, value);
     }
+    
     public SupportedLanguage PreferredLanguage
     {
         get => _preferredLanguage;
         set => SetProperty(ref _preferredLanguage, value);
     }
+    
     public DateTimeOffset? SubscriptionExpires
     {
         get => _subscriptionExpires;
         set => SetProperty(ref _subscriptionExpires, value);
     }
+    
     public long? SubscriptionID
     {
         get => _subscriptionID;
         set => SetProperty(ref _subscriptionID, value);
     }
+    
     public long? EscalateTo
     {
         get => _escalateTo;
         set => SetProperty(ref _escalateTo, value);
     }
+    
     public bool IsActive
     {
         get => _isActive;
         set => SetProperty(ref _isActive, value);
     }
+
     public bool IsDisabled
     {
         get => _isDisabled;
         set => SetProperty(ref _isDisabled, value);
     }
+
     public bool IsLocked
     {
         get => _isLocked;
         set => SetProperty(ref _isLocked, value);
     }
+
     public int? BadLogins
     {
         get => _badLogins;
         set => SetProperty(ref _badLogins, value);
     }
+
     public DateTimeOffset? LastActive
     {
         get => _lastActive;
         set => SetProperty(ref _lastActive, value);
     }
+
     public DateTimeOffset? LastBadAttempt
     {
         get => _lastBadAttempt;
         set => SetProperty(ref _lastBadAttempt, value);
     }
+
     public DateTimeOffset? LockDate
     {
         get => _lockDate;
         set => SetProperty(ref _lockDate, value);
     }
+
     public string? RefreshToken
     {
         get => _refreshToken;
         set => SetProperty(ref _refreshToken, value);
     }
+
     public DateTimeOffset? RefreshTokenExpiryTime
     {
         get => _refreshTokenExpiryTime;
         set => SetProperty(ref _refreshTokenExpiryTime, value);
     }
+
     public DateTimeOffset? TokenExpiration
     {
         get => _tokenExpiration;
         set => SetProperty(ref _tokenExpiration, value);
     }
+
     public bool IsEmailConfirmed
     {
         get => _isEmailConfirmed;
         set => SetProperty(ref _isEmailConfirmed, value);
     }
+
     public bool IsPhoneNumberConfirmed
     {
         get => _isPhoneNumberConfirmed;
         set => SetProperty(ref _isPhoneNumberConfirmed, value);
     }
+
     public bool IsTwoFactorEnabled
     {
         get => _isTwoFactorEnabled;
         set => SetProperty(ref _isTwoFactorEnabled, value);
     }
+
     public string? LoginProvider
     {
         get => _loginProvider;
         set => SetProperty(ref _loginProvider, value);
     }
+
     public string? ProviderKey
     {
         get => _providerKey;
         set => SetProperty(ref _providerKey, value);
     }
+
     public string? ProviderDisplayName
     {
         get => _providerDisplayName;
         set => SetProperty(ref _providerDisplayName, value);
     }
+
     public string? SecurityStamp
     {
         get => _securityStamp;
         set => SetProperty(ref _securityStamp, value);
     }
+
     public string? ConcurrencyStamp
     {
         get => _concurrencyStamp;
         set => SetProperty(ref _concurrencyStamp, value);
     }
+
     public string? AdditionalData
     {
         get => _additionalData;
         set => SetProperty(ref _additionalData, value);
     }
+
     public string? PasswordHash
     {
         get => _passwordHash;
         set => SetProperty(ref _passwordHash, value);
     }
+
     public long? Rights
     {
         get => _rights;

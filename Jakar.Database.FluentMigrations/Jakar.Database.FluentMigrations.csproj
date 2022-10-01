@@ -10,9 +10,13 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Jakar.Extensions" Version="6.0.4" />
-		<PackageReference Include="Jakar.Extensions.Hosting" Version="6.0.6" />
-		<PackageReference Include="Sigil" Version="5.0.0" />
+		<PackageReference Include="FluentMigrator"
+						  Version="3.3.2" />
+		<PackageReference Include="FluentMigrator.Runner"
+						  Version="3.3.2" />
+		<PackageReference Include="Jakar.Extensions"
+						  Version="6.0.4" />
+		<PackageReference Include="Jakar.Database"
+						  Version="6.0.0.17-beta" />
 	</ItemGroup>
-
 </Project>

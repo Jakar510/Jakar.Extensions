@@ -31,7 +31,7 @@ public struct SelectClauseBuilder<TNext>
     {
         if ( obj is null ) { throw new NullReferenceException(nameof(obj)); }
 
-        if ( string.IsNullOrWhiteSpace(alias) ) { _builder.Add(KeyWords.FROM, obj.GetTableName()); }
+        if ( string.IsNullOrWhiteSpace(alias) ) { _builder.Add(KeyWords.FROM, obj.GetTableName()); } // TODO: Bug...?
 
         else { _builder.Add(KeyWords.FROM, obj.GetName(), KeyWords.AS, alias); }
 
