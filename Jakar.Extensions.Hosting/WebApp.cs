@@ -1,5 +1,4 @@
 ﻿namespace Jakar.Extensions.Hosting;
-#nullable enable
 
 
 

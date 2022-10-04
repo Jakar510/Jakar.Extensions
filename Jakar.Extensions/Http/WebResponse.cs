@@ -15,15 +15,15 @@ public readonly struct WebResponse<T>
     public const string UNKNOWN_ERROR = "Unknown Error";
 
 
-    public              T?         Payload           { get; init; } = default;
     public              string?    Method            { get; init; } = default;
     public              Uri?       URL               { get; init; } = default;
-    public              JToken?    ErrorMessage      { get; init; } = default;
     public              Status     StatusCode        { get; init; } = Status.NotSet;
     public              string?    StatusDescription { get; init; } = default;
     public              string?    ContentEncoding   { get; init; } = default;
     public              string?    Server            { get; init; } = default;
     public              string?    ContentType       { get; init; } = default;
+    public              T?         Payload           { get; init; } = default;
+    public              JToken?    ErrorMessage      { get; init; } = default;
     [JsonIgnore] public Exception? Exception         { get; init; } = default;
 
 
@@ -50,14 +50,13 @@ public readonly struct WebResponse<T>
 
 
     /// <summary> Gets the payload if available; otherwise throws.</summary>
-    /// <exception cref="EmptyServerResponseException"></exception>
+    /// <exception cref="HttpRequestException"></exception>
     public T GetPayload()
     {
         if ( Payload is not null ) { return Payload; }
 
-        if ( Exception is not null ) { throw new EmptyServerResponseException(ErrorMessage?.ToString() ?? nameof(Payload), Exception); }
-
-        throw new EmptyServerResponseException(ErrorMessage?.ToString() ?? nameof(Payload));
+        // throw new HttpRequestException(ErrorMessage?.ToString(Formatting.Indented) ?? nameof(Payload), Exception);
+        throw new HttpRequestException(this.ToPrettyJson(), Exception);
     }
 
 

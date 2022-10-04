@@ -1,8 +1,6 @@
 ﻿namespace Jakar.Extensions.Hosting;
 
 
-#nullable enable
-#if NET6_0
 public static partial class WebBuilder
 {
     /// <summary>
@@ -21,4 +19,3 @@ public static partial class WebBuilder
                        .AddNewtonsoftJson(options => options.SerializerSettings.ContractResolver = new DefaultContractResolver());
     }
 }
-#endif

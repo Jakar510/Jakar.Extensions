@@ -1,24 +1,19 @@
 ﻿namespace Jakar.Extensions.Hosting;
 
 
-#nullable enable
-#if NET6_0
 public static partial class WebBuilder
 {
-    public static WebApplicationBuilder AddDefaultLogging<T>( this WebApplicationBuilder builder ) where T : class => builder.AddDefaultLogging<T>(builder.Environment.EnvironmentName == Environments.Development);
-    public static WebApplicationBuilder AddDefaultLogging<T>( this WebApplicationBuilder builder, bool isDevEnvironment ) where T : class => builder.AddDefaultLogging(isDevEnvironment, typeof(T).Name);
-    public static WebApplicationBuilder AddDefaultLogging( this WebApplicationBuilder builder, bool isDevEnvironment, string name )
+    public static ILoggingBuilder AddDefaultLogging<T>( this WebApplicationBuilder builder ) where T : class => builder.AddDefaultLogging<T>(builder.Environment.EnvironmentName == Environments.Development);
+    public static ILoggingBuilder AddDefaultLogging<T>( this WebApplicationBuilder builder, bool isDevEnvironment ) where T : class => builder.AddDefaultLogging<T>(isDevEnvironment
+                                                                                                                                                                        ? LogLevel.Trace
+                                                                                                                                                                        : LogLevel.Information);
+    public static ILoggingBuilder AddDefaultLogging<T>( this WebApplicationBuilder builder, in LogLevel minimumLevel ) where T : class => builder.AddDefaultLogging(minimumLevel, typeof(T).Name);
+
+
+    public static ILoggingBuilder AddDefaultLogging( this WebApplicationBuilder builder, in LogLevel minimumLevel, in string name )
     {
         builder.Logging.ClearProviders();
-
-    #if DEBUG
-        builder.Logging.SetMinimumLevel(LogLevel.Trace);
-    #else
-        builder.Logging.SetMinimumLevel(isDevEnvironment
-                                            ? LogLevel.Debug
-                                            : LogLevel.Information);
-    #endif
-
+        builder.Logging.SetMinimumLevel(minimumLevel);
         builder.Logging.AddProvider(new DebugLoggerProvider());
 
         builder.Logging.AddSimpleConsole(options =>
@@ -41,8 +36,10 @@ public static partial class WebBuilder
         }
         else { builder.Logging.AddSystemdConsole(options => options.UseUtcTimestamp = true); }
 
-        return builder;
+
+        return builder.Logging;
     }
+
 
     public static string GetMachineName()
     {
@@ -50,4 +47,3 @@ public static partial class WebBuilder
         catch ( InvalidOperationException ) { return Dns.GetHostName(); }
     }
 }
-#endif

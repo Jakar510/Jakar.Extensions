@@ -36,7 +36,7 @@ public abstract record TableRecord<TRecord> : BaseCollectionsRecord<TRecord, lon
         CreatedBy   = user.ID;
         DateCreated = DateTimeOffset.Now;
     }
-    protected TableRecord( long id ) : base(id) { }
+    protected TableRecord( long id ) : base(id) => DateCreated = DateTimeOffset.Now;
 
 
     public TRecord NewID( in long id ) => (TRecord)( this with

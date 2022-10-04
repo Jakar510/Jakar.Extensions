@@ -1,8 +1,6 @@
 ﻿namespace Jakar.Extensions.Hosting;
 
 
-#nullable enable
-#if NET6_0
 public partial class WebBuilder
 {
     public static IServerSideBlazorBuilder AddServerSideBlazor( this WebApplicationBuilder builder, Action<CircuitOptions>? configure = null ) => builder.Services.AddServerSideBlazor(configure);
@@ -178,4 +176,3 @@ public partial class WebBuilder
     /// </remarks>
     public static IMvcBuilder AddRazorPages( this WebApplicationBuilder builder, Action<RazorPagesOptions>? configure ) => builder.Services.AddRazorPages(configure);
 }
-#endif

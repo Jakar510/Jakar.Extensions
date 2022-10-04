@@ -1,8 +1,6 @@
 ﻿namespace Jakar.Extensions.Hosting;
 
 
-#nullable enable
-#if NET6_0
 /// <summary>
 /// <para><see href="https://stackoverflow.com/a/61726193/9530917">AddTransient, AddScoped and AddSingleton Services Differences</see></para>
 /// </summary>
@@ -352,4 +350,3 @@ public static partial class WebBuilder
         return builder;
     }
 }
-#endif

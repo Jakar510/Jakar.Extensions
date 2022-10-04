@@ -1,8 +1,6 @@
 ﻿namespace Jakar.Extensions.Hosting;
 
 
-#nullable enable
-#if NET6_0
 /// <summary>
 /// Extension methods to configure an <see cref="WebApplicationBuilder"/> for <see cref="IHttpClientFactory"/>.
 /// </summary>
@@ -554,4 +552,3 @@ public partial class WebBuilder
                                                                                                                                                                                              where TImplementation : class, TClient =>
         builder.Services.AddHttpClient<TClient, TImplementation>(name, factory);
 }
-#endif
