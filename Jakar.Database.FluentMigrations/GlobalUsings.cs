@@ -19,6 +19,7 @@ global using FluentMigrator.Builders.Create.Table;
 global using FluentMigrator.Builders.Insert;
 global using FluentMigrator.Builders.Schema.Schema;
 global using FluentMigrator.Builders.Schema.Table;
+global using FluentMigrator.Builders.Update;
 global using FluentMigrator.Infrastructure;
 global using FluentMigrator.Infrastructure.Extensions;
 global using FluentMigrator.Runner;

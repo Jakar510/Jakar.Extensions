@@ -4,16 +4,19 @@
 namespace Jakar.Database.FluentMigrations;
 
 
-public abstract class CreateUserTable : BaseMigration<UserRecord>
+[Migration(0)]
+public class CreateUserTable : Migration<UserRecord>
 {
-    protected void CreateTable()
+    public CreateUserTable() : this("dbo") { }
+    public CreateUserTable( string currentScheme ) : base(currentScheme) { }
+
+
+    public override void Down() => DeleteTable();
+    public override void Up()
     {
-        ISchemaTableSyntax tableSchema = CheckSchema()
-           .Table(TableName);
+        CheckSchema();
+        ICreateTableWithColumnSyntax table = CreateTable();
 
-        if ( tableSchema.Exists() ) { return; }
-
-        ICreateTableWithColumnSyntax table = CreateTable(TableName);
 
         table.WithColumn(nameof(UserRecord.ID))
              .AsInt64()
@@ -213,6 +216,4 @@ public abstract class CreateUserTable : BaseMigration<UserRecord>
              .AsInt64()
              .Nullable();
     }
-    protected void DeleteTable() => Delete.Table(TableName)
-                                          .InSchema(CurrentScheme);
 }
