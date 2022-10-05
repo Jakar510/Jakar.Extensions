@@ -76,7 +76,7 @@ public readonly struct WebResponse<T>
     }
 
 
-    public static async Task<WebResponse<T>> Create( WebHandler handler, Func<HttpResponseMessage, Task<T>> func )
+    public static async ValueTask<WebResponse<T>> Create( WebHandler handler, Func<HttpResponseMessage, ValueTask<T>> func )
     {
         using ( handler )
         {
@@ -92,7 +92,7 @@ public readonly struct WebResponse<T>
             catch ( HttpRequestException e ) { return await Create(handler, response, e); }
         }
     }
-    public static async Task<WebResponse<T>> Create<TArg>( WebHandler handler, TArg arg, Func<HttpResponseMessage, TArg, Task<T>> func )
+    public static async ValueTask<WebResponse<T>> Create<TArg>( WebHandler handler, TArg arg, Func<HttpResponseMessage, TArg, ValueTask<T>> func )
     {
         using ( handler )
         {
@@ -108,7 +108,7 @@ public readonly struct WebResponse<T>
             catch ( HttpRequestException e ) { return await Create(handler, response, e); }
         }
     }
-    public static async Task<WebResponse<T>> Create( WebHandler handler, HttpResponseMessage response )
+    public static async ValueTask<WebResponse<T>> Create( WebHandler handler, HttpResponseMessage response )
     {
     #if NETSTANDARD2_1
         await using Stream? stream = await response.Content.ReadAsStreamAsync();
@@ -132,7 +132,7 @@ public readonly struct WebResponse<T>
 
         return new WebResponse<T>(response, error);
     }
-    public static async Task<WebResponse<T>> Create( WebHandler handler, HttpResponseMessage response, Exception e )
+    public static async ValueTask<WebResponse<T>> Create( WebHandler handler, HttpResponseMessage response, Exception e )
     {
     #if NETSTANDARD2_1
         await using Stream? stream = await response.Content.ReadAsStreamAsync();

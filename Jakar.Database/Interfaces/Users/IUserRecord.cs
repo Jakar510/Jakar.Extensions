@@ -46,6 +46,6 @@ public interface IUserRecord<TRecord> : IComparable<TRecord>, IEquatable<TRecord
     public PasswordVerificationResult VerifyPassword( string password );
 
 
-    public Task<UserRecord?> GetBoss( DbConnection           connection, DbTransaction? transaction, DbTable<UserRecord> table, CancellationToken token );
-    public Task<UserRecord?> GetUserWhoCreated( DbConnection connection, DbTransaction? transaction, DbTable<UserRecord> db,    CancellationToken token );
+    public ValueTask<UserRecord?> GetBoss( DbConnection           connection, DbTransaction? transaction, DbTable<UserRecord> table, CancellationToken token );
+    public ValueTask<UserRecord?> GetUserWhoCreated( DbConnection connection, DbTransaction? transaction, DbTable<UserRecord> db,    CancellationToken token );
 }

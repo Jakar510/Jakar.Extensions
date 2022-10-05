@@ -29,6 +29,8 @@ public class WebHandler : IDisposable
         get => _request.Version;
         set => _request.Version = value.ToVersion();
     }
+
+
 #if NET6_0
     public HttpVersionPolicy VersionPolicy
     {
@@ -53,9 +55,9 @@ public class WebHandler : IDisposable
                                                                    .GetAwaiter();
 
 
-    public virtual Task<WebResponse<JToken>> AsJson() => AsJson(JsonNet.LoadSettings);
-    public virtual async Task<WebResponse<JToken>> AsJson( JsonLoadSettings settings ) => await WebResponse<JToken>.Create(this, settings, AsJson);
-    public virtual async Task<JToken> AsJson( HttpResponseMessage response, JsonLoadSettings settings )
+    public virtual ValueTask<WebResponse<JToken>> AsJson() => AsJson(JsonNet.LoadSettings);
+    public virtual async ValueTask<WebResponse<JToken>> AsJson( JsonLoadSettings settings ) => await WebResponse<JToken>.Create(this, settings, AsJson);
+    public virtual async ValueTask<JToken> AsJson( HttpResponseMessage response, JsonLoadSettings settings )
     {
         await using MemoryStream stream = await AsStream(response);
         using var                sr     = new StreamReader(stream, Encoding);
@@ -64,9 +66,9 @@ public class WebHandler : IDisposable
     }
 
 
-    public virtual Task<WebResponse<TResult>> AsJson<TResult>() => AsJson<TResult>(JsonNet.Serializer);
-    public virtual Task<WebResponse<TResult>> AsJson<TResult>( JsonSerializer serializer ) => WebResponse<TResult>.Create(this, serializer, AsJson<TResult>);
-    public virtual async Task<TResult> AsJson<TResult>( HttpResponseMessage response, JsonSerializer serializer )
+    public virtual ValueTask<WebResponse<TResult>> AsJson<TResult>() => AsJson<TResult>(JsonNet.Serializer);
+    public virtual ValueTask<WebResponse<TResult>> AsJson<TResult>( JsonSerializer serializer ) => WebResponse<TResult>.Create(this, serializer, AsJson<TResult>);
+    public virtual async ValueTask<TResult> AsJson<TResult>( HttpResponseMessage response, JsonSerializer serializer )
     {
         await using MemoryStream stream = await AsStream(response);
         using var                sr     = new StreamReader(stream, Encoding);
@@ -76,7 +78,7 @@ public class WebHandler : IDisposable
     }
 
 
-    public virtual async Task NoResponse()
+    public virtual async ValueTask NoResponse()
     {
         using ( this )
         {
@@ -86,16 +88,16 @@ public class WebHandler : IDisposable
     }
 
 
-    public virtual Task<WebResponse<bool>> AsBool() => WebResponse<bool>.Create(this, AsBool);
-    public virtual async Task<bool> AsBool( HttpResponseMessage response )
+    public virtual ValueTask<WebResponse<bool>> AsBool() => WebResponse<bool>.Create(this, AsBool);
+    public virtual async ValueTask<bool> AsBool( HttpResponseMessage response )
     {
         string content = await AsString(response);
         return bool.TryParse(content, out bool result) && result;
     }
 
 
-    public virtual Task<WebResponse<string>> AsString() => WebResponse<string>.Create(this, AsString);
-    public virtual async Task<string> AsString( HttpResponseMessage response )
+    public virtual ValueTask<WebResponse<string>> AsString() => WebResponse<string>.Create(this, AsString);
+    public virtual async ValueTask<string> AsString( HttpResponseMessage response )
     {
         response.EnsureSuccessStatusCode();
         using HttpContent content = response.Content;
@@ -108,20 +110,20 @@ public class WebHandler : IDisposable
     }
 
 
-    public virtual Task<WebResponse<byte[]>> AsBytes() => WebResponse<byte[]>.Create(this, AsBytes);
-    public virtual async Task<byte[]> AsBytes( HttpResponseMessage response )
+    public virtual ValueTask<WebResponse<byte[]>> AsBytes() => WebResponse<byte[]>.Create(this, AsBytes);
+    public virtual async ValueTask<byte[]> AsBytes( HttpResponseMessage response )
     {
         await using MemoryStream stream = await AsStream(response);
         return stream.ToArray();
     }
 
 
-    public virtual Task<WebResponse<ReadOnlyMemory<byte>>> AsMemory() => WebResponse<ReadOnlyMemory<byte>>.Create(this, AsMemory);
-    public virtual async Task<ReadOnlyMemory<byte>> AsMemory( HttpResponseMessage response ) => await AsBytes(response);
+    public virtual ValueTask<WebResponse<ReadOnlyMemory<byte>>> AsMemory() => WebResponse<ReadOnlyMemory<byte>>.Create(this, AsMemory);
+    public virtual async ValueTask<ReadOnlyMemory<byte>> AsMemory( HttpResponseMessage response ) => await AsBytes(response);
 
 
-    public virtual Task<WebResponse<LocalFile>> AsFile() => WebResponse<LocalFile>.Create(this, AsFile);
-    public virtual async Task<LocalFile> AsFile( HttpResponseMessage response )
+    public virtual ValueTask<WebResponse<LocalFile>> AsFile() => WebResponse<LocalFile>.Create(this, AsFile);
+    public virtual async ValueTask<LocalFile> AsFile( HttpResponseMessage response )
     {
         await using MemoryStream stream = await AsStream(response);
         await using FileStream   fs     = LocalFile.CreateTempFileAndOpen(out LocalFile file);
@@ -131,8 +133,8 @@ public class WebHandler : IDisposable
     }
 
 
-    public virtual Task<WebResponse<LocalFile>> AsFile( string fileNameHeader ) => WebResponse<LocalFile>.Create(this, fileNameHeader, AsFile);
-    public virtual async Task<LocalFile> AsFile( HttpResponseMessage response, string fileNameHeader )
+    public virtual ValueTask<WebResponse<LocalFile>> AsFile( string fileNameHeader ) => WebResponse<LocalFile>.Create(this, fileNameHeader, AsFile);
+    public virtual async ValueTask<LocalFile> AsFile( HttpResponseMessage response, string fileNameHeader )
     {
         if ( response.Headers.Contains(fileNameHeader) )
         {
@@ -162,16 +164,16 @@ public class WebHandler : IDisposable
     }
 
 
-    public virtual Task<WebResponse<LocalFile>> AsFile( FileInfo path ) => WebResponse<LocalFile>.Create(this, path, AsFile);
-    public virtual async Task<LocalFile> AsFile( HttpResponseMessage response, FileInfo path )
+    public virtual ValueTask<WebResponse<LocalFile>> AsFile( FileInfo path ) => WebResponse<LocalFile>.Create(this, path, AsFile);
+    public virtual async ValueTask<LocalFile> AsFile( HttpResponseMessage response, FileInfo path )
     {
         var file = new LocalFile(path);
         return await AsFile(response, file);
     }
 
 
-    public virtual Task<WebResponse<LocalFile>> AsFile( LocalFile file ) => WebResponse<LocalFile>.Create(this, file, AsFile);
-    public virtual async Task<LocalFile> AsFile( HttpResponseMessage response, LocalFile file )
+    public virtual ValueTask<WebResponse<LocalFile>> AsFile( LocalFile file ) => WebResponse<LocalFile>.Create(this, file, AsFile);
+    public virtual async ValueTask<LocalFile> AsFile( HttpResponseMessage response, LocalFile file )
     {
         await using MemoryStream stream = await AsStream(response);
         await file.WriteAsync(stream, Token);
@@ -179,8 +181,8 @@ public class WebHandler : IDisposable
     }
 
 
-    public virtual Task<WebResponse<LocalFile>> AsFile( MimeType type ) => WebResponse<LocalFile>.Create(this, type, AsFile);
-    public virtual async Task<LocalFile> AsFile( HttpResponseMessage response, MimeType type )
+    public virtual ValueTask<WebResponse<LocalFile>> AsFile( MimeType type ) => WebResponse<LocalFile>.Create(this, type, AsFile);
+    public virtual async ValueTask<LocalFile> AsFile( HttpResponseMessage response, MimeType type )
     {
         await using MemoryStream stream = await AsStream(response);
         await using FileStream   fs     = LocalFile.CreateTempFileAndOpen(type, out LocalFile file);
@@ -189,8 +191,8 @@ public class WebHandler : IDisposable
     }
 
 
-    public virtual Task<WebResponse<MemoryStream>> AsStream() => WebResponse<MemoryStream>.Create(this, AsStream);
-    public virtual async Task<MemoryStream> AsStream( HttpResponseMessage response )
+    public virtual ValueTask<WebResponse<MemoryStream>> AsStream() => WebResponse<MemoryStream>.Create(this, AsStream);
+    public virtual async ValueTask<MemoryStream> AsStream( HttpResponseMessage response )
     {
         response.EnsureSuccessStatusCode();
         using HttpContent content = response.Content;

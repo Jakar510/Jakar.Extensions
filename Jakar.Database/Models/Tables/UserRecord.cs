@@ -519,7 +519,7 @@ public sealed record UserRecord : TableRecord<UserRecord>, IUserRecord<UserRecor
                                           };
 
 
-    public async Task<UserRecord?> GetBoss( DbConnection connection, DbTransaction? transaction, DbTable<UserRecord> table, CancellationToken token ) => EscalateTo.HasValue
+    public async ValueTask<UserRecord?> GetBoss( DbConnection connection, DbTransaction? transaction, DbTable<UserRecord> table, CancellationToken token ) => EscalateTo.HasValue
                                                                                                                                                              ? await table.Get(connection, transaction, EscalateTo.Value, token)
                                                                                                                                                              : default;
 

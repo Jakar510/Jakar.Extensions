@@ -47,7 +47,7 @@ public abstract record TableRecord<TRecord> : BaseCollectionsRecord<TRecord, lon
     protected virtual void VerifyAccess() { }
 
 
-    public async Task<UserRecord?> GetUserWhoCreated( DbConnection connection, DbTransaction? transaction, DbTable<UserRecord> table, CancellationToken token ) => await table.Get(connection, transaction, CreatedBy, token);
+    public async ValueTask<UserRecord?> GetUserWhoCreated( DbConnection connection, DbTransaction? transaction, DbTable<UserRecord> table, CancellationToken token ) => await table.Get(connection, transaction, CreatedBy, token);
 
 
     public override int GetHashCode()
