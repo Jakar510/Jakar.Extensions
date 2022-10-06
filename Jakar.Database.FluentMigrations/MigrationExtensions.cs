@@ -1,4 +1,9 @@
-﻿namespace Jakar.Database.FluentMigrations;
+﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
+
+
+
+namespace Jakar.Database.FluentMigrations;
 // /// <summary>
 // ///     <para>
 // ///         <see href="https://github.com/dotnet/roslyn/blob/main/docs/features/nullable-metadata.md"/>
@@ -55,6 +60,45 @@
 
 public static class MigrationExtensions
 {
+    public static WebApplicationBuilder AddFluentMigrator( this WebApplicationBuilder builder, Func<IMigrationRunnerBuilder, IMigrationRunnerBuilder> addSqlDb, Func<IServiceProvider, string> getConnectionString )
+    {
+        builder.Services.AddFluentMigratorCore()
+               .ConfigureRunner(configure =>
+                                {
+                                    addSqlDb(configure);
+                                    configure.WithGlobalConnectionString(getConnectionString);
+
+                                    configure.ScanIn(Assembly.GetEntryAssembly())
+                                             .For.Migrations();
+                                });
+
+        return builder;
+    }
+    public static WebApplicationBuilder AddFluentMigrator( this WebApplicationBuilder builder, Func<IMigrationRunnerBuilder, IMigrationRunnerBuilder> addSqlDb, Func<IConfiguration, string> getConnectionString ) =>
+        builder.AddFluentMigrator(addSqlDb, provider => getConnectionString(provider.GetRequiredService<IConfiguration>()));
+
+
+    public static async ValueTask MigrateUp( this WebApplication app )
+    {
+        await using AsyncServiceScope scope  = app.Services.CreateAsyncScope();
+        var                           runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
+        runner.ListMigrations();
+        if ( runner.HasMigrationsToApplyUp() ) { runner.MigrateUp(); }
+    }
+
+
+    public static async ValueTask MigrateDown( this WebApplication app )
+    {
+        await using AsyncServiceScope scope  = app.Services.CreateAsyncScope();
+        var                           runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
+        runner.MigrateDown(0);
+    }
+    public static async ValueTask MigrateDown( this WebApplication app, string key )
+    {
+        if ( app.Configuration.GetValue<bool>(key) ) { await app.MigrateDown(); }
+    }
+
+
     public static IInsertDataSyntax AddRow<T>( this IInsertDataSyntax insert, in T context ) where T : BaseRecord
     {
         PropertyInfo[] items   = typeof(T).GetProperties(BindingFlags.Instance | BindingFlags.Public);
