@@ -185,19 +185,19 @@ public partial class WebRequester
 
 
 
-        internal readonly struct Placeholder : IHostInfo
+        public readonly struct HostHolder : IHostInfo
         {
             public Uri HostInfo { get; }
 
 
-            public Placeholder( Uri hostInfo ) => HostInfo = hostInfo;
+            public HostHolder( Uri hostInfo ) => HostInfo = hostInfo;
         }
 
 
 
         public Builder With_Host( Uri value )
         {
-            _hostInfo = new Placeholder(value);
+            _hostInfo = new HostHolder(value);
             return this;
         }
         public Builder With_Host( IHostInfo value )
