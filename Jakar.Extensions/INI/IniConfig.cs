@@ -17,7 +17,7 @@ public partial class IniConfig : ConcurrentDictionary<string, IniConfig.Section>
     public IniConfig( IEnumerable<KeyValuePair<string, Section>> collection, IEqualityComparer<string> comparer ) : base(collection, comparer) { }
 
 
-    public Task WriteToFile( LocalFile file ) => file.WriteAsync(ToString());
+    public ValueTask WriteToFile( LocalFile file ) => file.WriteAsync(ToString());
 
 
     [SuppressMessage("ReSharper", "UseDeconstruction", Justification = "Support NetFramework")]
@@ -50,7 +50,7 @@ public partial class IniConfig : ConcurrentDictionary<string, IniConfig.Section>
     }
 
 
-    public static Task<IniConfig?> ReadFromFileAsync( LocalFile file ) => ReadFromFileAsync<IniConfig>(file);
+    public static ValueTask<IniConfig?> ReadFromFileAsync( LocalFile file ) => ReadFromFileAsync<IniConfig>(file);
     public static IniConfig? ReadFromFile( LocalFile            file ) => ReadFromFile<IniConfig>(file);
 
 
@@ -61,7 +61,7 @@ public partial class IniConfig : ConcurrentDictionary<string, IniConfig.Section>
 
         return From<T>(content);
     }
-    public static async Task<T?> ReadFromFileAsync<T>( LocalFile file ) where T : IniConfig, new()
+    public static async ValueTask<T?> ReadFromFileAsync<T>( LocalFile file ) where T : IniConfig, new()
     {
         string content = await file.ReadAsync()
                                    .AsString();

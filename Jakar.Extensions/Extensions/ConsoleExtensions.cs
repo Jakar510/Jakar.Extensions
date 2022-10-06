@@ -84,35 +84,22 @@ public static class ConsoleExtensions
     public static void PrintLine( this object self ) => Console.WriteLine(self);
 
 
-    public static void WriteToConsole( this Span<char> self )
-    {
-        Console.WriteLine();
-        Console.WriteLine(self.ToString());
-        Console.WriteLine();
-    }
-    public static void WriteToConsole( this ReadOnlySpan<char> self )
-    {
-        Console.WriteLine();
-        Console.WriteLine(self.ToString());
-        Console.WriteLine();
-    }
+    public static void WriteToConsole( this Span<char> self ) => self.ToString()
+                                                                     .WriteToConsole();
+    public static void WriteToConsole( this ReadOnlySpan<char> self ) => self.ToString()
+                                                                             .WriteToConsole();
+    public static void WriteToConsole( this ValueStringBuilder self ) => self.Span.WriteToConsole();
+    public static void WriteToConsole( this Buffer<char>       self ) => self.Span.WriteToConsole();
+    public static void WriteToConsole( this StringBuilder self ) => self.ToString()
+                                                                        .WriteToConsole();
+    public static void WriteToConsole<T>( this T self ) where T : notnull => self.ToString()
+                                                                                ?.WriteToConsole();
     public static void WriteToConsole( this string self )
     {
         Console.WriteLine();
         Console.WriteLine(self);
         Console.WriteLine();
     }
-    public static void WriteToConsole( this ValueStringBuilder self ) => self.Span.WriteToConsole();
-    public static void WriteToConsole( this Buffer<char>       self ) => self.Span.WriteToConsole();
-    public static void WriteToConsole( this StringBuilder self ) => self.ToString()
-                                                                        .WriteToConsole();
-    public static void WriteToConsole( this object self )
-    {
-        Console.WriteLine();
-        Console.WriteLine(self);
-        Console.WriteLine();
-    }
-    public static void WriteToConsole<T>( this T self ) where T : struct => Console.WriteLine(self);
 
 
 #if NETSTANDARD2_1

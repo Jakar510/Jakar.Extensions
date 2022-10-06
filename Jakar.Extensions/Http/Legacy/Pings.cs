@@ -2,7 +2,7 @@
 namespace Jakar.Extensions;
 
 
-[Obsolete($"Use {nameof(WebRequestBuilder)} instead")]
+[Obsolete($"Use {nameof(WebRequester)} instead")]
 public static class Pings
 {
     /// <summary>

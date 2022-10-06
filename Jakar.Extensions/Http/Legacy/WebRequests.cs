@@ -1,13 +1,8 @@
 ﻿#nullable enable
-using System.Net.Http;
-using System.Net.Http.Headers;
-
-
-
 namespace Jakar.Extensions;
 
 
-[Obsolete($"Use {nameof(WebRequestBuilder)} instead")]
+[Obsolete($"Use {nameof(WebRequester)} instead")]
 public static class WebRequests
 {
     /// <summary>

@@ -1,11 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 08/15/2022  11:51 AM
 
-using System.Net.Http;
-using System.Net.Http.Headers;
-
-
-
 namespace Jakar.Extensions;
 
 
@@ -55,7 +50,6 @@ public readonly struct WebResponse<T>
     {
         if ( Payload is not null ) { return Payload; }
 
-        // throw new HttpRequestException(ErrorMessage?.ToString(Formatting.Indented) ?? nameof(Payload), Exception);
         throw new HttpRequestException(this.ToPrettyJson(), Exception);
     }
 
@@ -81,15 +75,7 @@ public readonly struct WebResponse<T>
         using ( handler )
         {
             using HttpResponseMessage response = await handler;
-
-            try
-            {
-                if ( !response.IsSuccessStatusCode ) { return await Create(handler, response); }
-
-                T result = await func(response);
-                return new WebResponse<T>(response, result);
-            }
-            catch ( HttpRequestException e ) { return await Create(handler, response, e); }
+            return await Create(response, func, handler.Token);
         }
     }
     public static async ValueTask<WebResponse<T>> Create<TArg>( WebHandler handler, TArg arg, Func<HttpResponseMessage, TArg, ValueTask<T>> func )
@@ -97,23 +83,41 @@ public readonly struct WebResponse<T>
         using ( handler )
         {
             using HttpResponseMessage response = await handler;
-
-            try
-            {
-                if ( !response.IsSuccessStatusCode ) { return await Create(handler, response); }
-
-                T result = await func(response, arg);
-                return new WebResponse<T>(response, result);
-            }
-            catch ( HttpRequestException e ) { return await Create(handler, response, e); }
+            return await Create(response, arg, func, handler.Token);
         }
     }
-    public static async ValueTask<WebResponse<T>> Create( WebHandler handler, HttpResponseMessage response )
+
+
+    public static async ValueTask<WebResponse<T>> Create( HttpResponseMessage response, Func<HttpResponseMessage, ValueTask<T>> func, CancellationToken token )
+    {
+        try
+        {
+            if ( !response.IsSuccessStatusCode ) { return await Create(response, token); }
+
+            T result = await func(response);
+            return new WebResponse<T>(response, result);
+        }
+        catch ( HttpRequestException e ) { return await Create(response, e, token); }
+    }
+    public static async ValueTask<WebResponse<T>> Create<TArg>( HttpResponseMessage response, TArg arg, Func<HttpResponseMessage, TArg, ValueTask<T>> func, CancellationToken token )
+    {
+        try
+        {
+            if ( !response.IsSuccessStatusCode ) { return await Create(response, token); }
+
+            T result = await func(response, arg);
+            return new WebResponse<T>(response, result);
+        }
+        catch ( HttpRequestException e ) { return await Create(response, e, token); }
+    }
+
+
+    public static async ValueTask<WebResponse<T>> Create( HttpResponseMessage response, CancellationToken token )
     {
     #if NETSTANDARD2_1
         await using Stream? stream = await response.Content.ReadAsStreamAsync();
     #else
-        await using Stream? stream = await response.Content.ReadAsStreamAsync(handler.Token);
+        await using Stream? stream = await response.Content.ReadAsStreamAsync(token);
     #endif
 
         string error;
@@ -132,12 +136,14 @@ public readonly struct WebResponse<T>
 
         return new WebResponse<T>(response, error);
     }
-    public static async ValueTask<WebResponse<T>> Create( WebHandler handler, HttpResponseMessage response, Exception e )
+
+
+    public static async ValueTask<WebResponse<T>> Create( HttpResponseMessage response, Exception e, CancellationToken token )
     {
     #if NETSTANDARD2_1
         await using Stream? stream = await response.Content.ReadAsStreamAsync();
     #else
-        await using Stream? stream = await response.Content.ReadAsStreamAsync(handler.Token);
+        await using Stream? stream = await response.Content.ReadAsStreamAsync(token);
     #endif
 
         string error;

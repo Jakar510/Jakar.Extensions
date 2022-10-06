@@ -1,11 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 08/15/2022  11:36 AM
 
-using System.Net.Http;
-using System.Net.Http.Headers;
-
-
-
 namespace Jakar.Extensions;
 
 

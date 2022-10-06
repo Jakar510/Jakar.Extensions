@@ -1,8 +1,4 @@
 ﻿#nullable enable
-using System.Net.Http;
-
-
-
 namespace Jakar.Extensions;
 
 
@@ -17,7 +13,7 @@ namespace Jakar.Extensions;
 ///         <seealso href = "https://www.w3.org/Protocols/rfc1341/7_2_Multipart.html" />
 ///     </para>
 /// </summary>
-[Obsolete($"Use {nameof(WebRequestBuilder)} instead")]
+[Obsolete($"Use {nameof(WebRequester)} instead")]
 public static class Posts
 {
     public static async Task<WebResponse> Post( this Uri url, ReadOnlyMemory<byte> payload, HeaderCollection headers, CancellationToken token, int? timeout = default )

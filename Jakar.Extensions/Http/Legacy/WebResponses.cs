@@ -2,7 +2,7 @@
 namespace Jakar.Extensions;
 
 
-[Obsolete($"Use {nameof(WebRequestBuilder)} instead")]
+[Obsolete($"Use {nameof(WebRequester)} instead")]
 public static class WebResponses
 {
     public static T VerifyReply<T>( this string reply )

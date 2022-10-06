@@ -58,6 +58,18 @@ public static class Tasks
     public static int WaitAny( this                          IEnumerable<Task>          tasks, CancellationToken token = default ) => Task.WaitAny(tasks.ToArray(), token);
 
 
+    public static Task WhenAny( this                         IEnumerable<ValueTask>          tasks ) => Task.WhenAny(tasks.Select(x => x.AsTask()));
+    public static Task<Task<TResult>> WhenAny<TResult>( this IEnumerable<ValueTask<TResult>> tasks ) => Task.WhenAny(tasks.Select(x => x.AsTask()));
+    public static Task WhenAll( this                         IEnumerable<ValueTask>          tasks ) => Task.WhenAll(tasks.Select(x => x.AsTask()));
+    public static Task<TResult[]> WhenAll<TResult>( this     IEnumerable<ValueTask<TResult>> tasks ) => Task.WhenAll(tasks.Select(x => x.AsTask()));
+    public static void WaitAll( this IEnumerable<ValueTask> tasks, CancellationToken token = default ) => Task.WaitAll(tasks.Select(x => x.AsTask())
+                                                                                                                            .ToArray(),
+                                                                                                                       token);
+    public static int WaitAny( this IEnumerable<ValueTask> tasks, CancellationToken token = default ) => Task.WaitAny(tasks.Select(x => x.AsTask())
+                                                                                                                           .ToArray(),
+                                                                                                                      token);
+
+
     public static Task TaskFromCanceled( this                    CancellationToken token ) => Task.FromCanceled(token);
     public static Task<TResult> TaskFromCanceled<TResult>( this  CancellationToken token ) => Task.FromCanceled<TResult>(token);
     public static Task TaskFromException( this                   Exception         e ) => Task.FromException(e);

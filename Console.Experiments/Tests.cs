@@ -101,7 +101,7 @@ public static class Tests
         var host    = new Uri("https://httpbin.org/");
         var content = new AppVersion(1, 2, 3).ToString();
 
-        WebRequester builder = WebRequestBuilder.Create(host)
+        WebRequester builder = WebRequester.Builder.Create(host)
                                                 .With_Timeout(10)
                                                 .Build();
 

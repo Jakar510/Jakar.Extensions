@@ -3,7 +3,7 @@ namespace Jakar.Extensions;
 
 
 [Serializable]
-public class LocalDirectory : BaseCollections<LocalDirectory>, TempFile.ITempFile, IEquatable<LocalDirectory>, IAsyncDisposable
+public class LocalDirectory : BaseCollections<LocalDirectory>, TempFile.ITempFile, IAsyncDisposable
 {
     protected DirectoryInfo? _info;
 
@@ -48,9 +48,7 @@ public class LocalDirectory : BaseCollections<LocalDirectory>, TempFile.ITempFil
     }
 
 
-    /// <summary>
-    ///     Gets or sets the application's fully qualified path of the current working directory.
-    /// </summary>
+    /// <summary> Gets or sets the application's fully qualified path of the current working directory. </summary>
     public static LocalDirectory CurrentDirectory
     {
         get => new(Environment.CurrentDirectory);
@@ -80,41 +78,20 @@ public class LocalDirectory : BaseCollections<LocalDirectory>, TempFile.ITempFil
     }
 
 
-    /// <summary>
-    ///     Uses the
-    ///     <paramref name = "path" />
-    ///     and creates the tree structure based on
-    ///     <paramref name = "subFolders" />
-    /// </summary>
-    /// <param name = "path" > </param>
-    /// <param name = "subFolders" > </param>
-    /// <returns>
-    ///     <see cref = "LocalDirectory" />
-    /// </returns>
+    /// <summary> Uses the <paramref name="path"/> and creates the tree structure based on <paramref name="subFolders"/> </summary>
+    /// <param name="path"> </param>
+    /// <param name="subFolders"> </param>
+    /// <returns> <see cref="LocalDirectory"/> </returns>
     public static LocalDirectory Create( LocalDirectory path, params string[] subFolders ) => Directory.CreateDirectory(path.Combine(subFolders));
 
-    /// <summary>
-    ///     Uses the
-    ///     <see cref = "CurrentDirectory" />
-    ///     and creates the tree structure based on
-    ///     <paramref name = "subFolders" />
-    /// </summary>
-    /// <param name = "subFolders" > </param>
-    /// <returns>
-    ///     <see cref = "LocalDirectory" />
-    /// </returns>
+    /// <summary> Uses the <see cref="CurrentDirectory"/> and creates the tree structure based on <paramref name="subFolders"/> </summary>
+    /// <param name="subFolders"> </param>
+    /// <returns> <see cref="LocalDirectory"/> </returns>
     public static LocalDirectory Create( params string[] subFolders ) => Create(CurrentDirectory, subFolders);
 
-    /// <summary>
-    ///     Uses
-    ///     <see cref = "Path.GetTempPath" />
-    ///     and creates the tree structure based on
-    ///     <paramref name = "subFolders" />
-    /// </summary>
-    /// <param name = "subFolders" > </param>
-    /// <returns>
-    ///     <see cref = "LocalDirectory" />
-    /// </returns>
+    /// <summary> Uses <see cref="Path.GetTempPath"/> and creates the tree structure based on <paramref name="subFolders"/> </summary>
+    /// <param name="subFolders"> </param>
+    /// <returns> <see cref="LocalDirectory"/> </returns>
     public static LocalDirectory CreateTemp( params string[] subFolders )
     {
         LocalDirectory d = Create(Path.GetTempPath()
@@ -138,99 +115,137 @@ public class LocalDirectory : BaseCollections<LocalDirectory>, TempFile.ITempFil
     }
 
 
-    /// <summary>
-    ///     Uses the
-    ///     <see cref = "Encoding.Default" />
-    ///     encoding to used for the file names
-    /// </summary>
-    /// <param name = "output" > file path to write the zip to </param>
-    /// <param name = "compression" >
-    ///     Defaults to
-    ///     <see cref = "CompressionLevel.Optimal" />
-    /// </param>
+    /// <summary> Uses the <see cref="Encoding.Default"/> encoding to used for the file names </summary>
+    /// <param name="output"> file path to write the zip to </param>
+    /// <param name="compression"> Defaults to <see cref="CompressionLevel.Optimal"/> </param>
     public void Zip( in LocalFile output, in CompressionLevel compression = CompressionLevel.Optimal ) => Zip(output, Encoding.Default, compression);
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name = "output" > file path to write the zip to </param>
-    /// <param name = "compression" >
-    ///     Defaults to
-    ///     <see cref = "CompressionLevel.Optimal" />
-    /// </param>
-    /// <param name = "encoding" > The encoding used for the file names </param>
+    /// <summary> </summary>
+    /// <param name="output"> file path to write the zip to </param>
+    /// <param name="compression"> Defaults to <see cref="CompressionLevel.Optimal"/> </param>
+    /// <param name="encoding"> The encoding used for the file names </param>
     public void Zip( in LocalFile output, in Encoding encoding, in CompressionLevel compression = CompressionLevel.Optimal ) => ZipFile.CreateFromDirectory(FullPath, output.FullPath, compression, true, encoding);
 
 
-    /// <summary>
-    ///     Gets the
-    ///     <see cref = "LocalDirectory" />
-    ///     object of the directory in this
-    ///     <see cref = "LocalDirectory" />
-    /// </summary>
-    /// <param name = "paths" > </param>
-    /// <exception cref = "ArgumentException" > </exception>
-    /// <exception cref = "ArgumentNullException" > </exception>
-    /// <exception cref = "DirectoryNotFoundException" > </exception>
-    /// <exception cref = "IOException" > </exception>
-    /// <exception cref = "PathTooLongException" > </exception>
-    /// <exception cref = "SecurityException" > </exception>
-    /// <exception cref = "NotSupportedException" > </exception>
-    /// <returns>
-    ///     <see cref = "LocalDirectory" />
-    /// </returns>
+    public async ValueTask<LocalFile> ZipAsync( LocalFile zipFilePath, CancellationToken token )
+    {
+        await using FileStream zipToOpen = File.Create(zipFilePath.FullPath);
+        using var              archive   = new ZipArchive(zipToOpen, ZipArchiveMode.Update);
+
+        foreach ( LocalFile file in GetFiles() )
+        {
+            ZipArchiveEntry    entry  = archive.CreateEntry(file.FullPath);
+            await using Stream stream = entry.Open();
+
+            ReadOnlyMemory<byte> data = await file.ReadAsync()
+                                                  .AsMemory(token);
+
+            await stream.WriteAsync(data, token);
+        }
+
+        return zipFilePath;
+    }
+    public async ValueTask<LocalFile> ZipAsync( LocalFile zipFilePath, string searchPattern, CancellationToken token )
+    {
+        await using FileStream zipToOpen = File.Create(zipFilePath.FullPath);
+        using var              archive   = new ZipArchive(zipToOpen, ZipArchiveMode.Update);
+
+        foreach ( LocalFile file in GetFiles(searchPattern) )
+        {
+            ZipArchiveEntry    entry  = archive.CreateEntry(file.FullPath);
+            await using Stream stream = entry.Open();
+
+            ReadOnlyMemory<byte> data = await file.ReadAsync()
+                                                  .AsMemory(token);
+
+            await stream.WriteAsync(data, token);
+        }
+
+        return zipFilePath;
+    }
+    public async ValueTask<LocalFile> ZipAsync( LocalFile zipFilePath, string searchPattern, SearchOption searchOption, CancellationToken token )
+    {
+        await using FileStream zipToOpen = File.Create(zipFilePath.FullPath);
+        using var              archive   = new ZipArchive(zipToOpen, ZipArchiveMode.Update);
+
+        foreach ( LocalFile file in GetFiles(searchPattern, searchOption) )
+        {
+            ZipArchiveEntry    entry  = archive.CreateEntry(file.FullPath);
+            await using Stream stream = entry.Open();
+
+            ReadOnlyMemory<byte> data = await file.ReadAsync()
+                                                  .AsMemory(token);
+
+            await stream.WriteAsync(data, token);
+        }
+
+        return zipFilePath;
+    }
+    public async ValueTask<LocalFile> ZipAsync( LocalFile zipFilePath, string searchPattern, EnumerationOptions enumerationOptions, CancellationToken token )
+    {
+        await using FileStream zipToOpen = File.Create(zipFilePath.FullPath);
+        using var              archive   = new ZipArchive(zipToOpen, ZipArchiveMode.Update);
+
+        foreach ( LocalFile file in GetFiles(searchPattern, enumerationOptions) )
+        {
+            ZipArchiveEntry    entry  = archive.CreateEntry(file.FullPath);
+            await using Stream stream = entry.Open();
+
+            ReadOnlyMemory<byte> data = await file.ReadAsync()
+                                                  .AsMemory(token);
+
+            await stream.WriteAsync(data, token);
+        }
+
+        return zipFilePath;
+    }
+
+
+    /// <summary> Gets the <see cref="LocalDirectory"/> object of the directory in this <see cref="LocalDirectory"/> </summary>
+    /// <param name="paths"> </param>
+    /// <exception cref="ArgumentException"> </exception>
+    /// <exception cref="ArgumentNullException"> </exception>
+    /// <exception cref="DirectoryNotFoundException"> </exception>
+    /// <exception cref="IOException"> </exception>
+    /// <exception cref="PathTooLongException"> </exception>
+    /// <exception cref="SecurityException"> </exception>
+    /// <exception cref="NotSupportedException"> </exception>
+    /// <returns> <see cref="LocalDirectory"/> </returns>
     public LocalDirectory CreateSubDirectory( params string[] paths ) => Info.CreateSubdirectory(FullPath.Combine(paths));
 
-    /// <summary>
-    ///     Gets the
-    ///     <see cref = "LocalFile" />
-    ///     object of the file in this
-    ///     <see cref = "LocalDirectory" />
-    /// </summary>
-    /// <param name = "path" > </param>
-    /// <exception cref = "ArgumentException" > </exception>
-    /// <exception cref = "ArgumentNullException" > </exception>
-    /// <exception cref = "DirectoryNotFoundException" > </exception>
-    /// <exception cref = "IOException" > </exception>
-    /// <exception cref = "PathTooLongException" > </exception>
-    /// <exception cref = "SecurityException" > </exception>
-    /// <exception cref = "NotSupportedException" > </exception>
-    /// <returns>
-    ///     <see cref = "LocalFile" />
-    /// </returns>
+    /// <summary> Gets the <see cref="LocalFile"/> object of the file in this <see cref="LocalDirectory"/> </summary>
+    /// <param name="path"> </param>
+    /// <exception cref="ArgumentException"> </exception>
+    /// <exception cref="ArgumentNullException"> </exception>
+    /// <exception cref="DirectoryNotFoundException"> </exception>
+    /// <exception cref="IOException"> </exception>
+    /// <exception cref="PathTooLongException"> </exception>
+    /// <exception cref="SecurityException"> </exception>
+    /// <exception cref="NotSupportedException"> </exception>
+    /// <returns> <see cref="LocalFile"/> </returns>
     public LocalFile Join( string path ) => Info.Combine(path);
 
-    /// <summary>
-    ///     Gets the path of the directory or file in this
-    ///     <see cref = "LocalDirectory" />
-    /// </summary>
-    /// <param name = "subPaths" > </param>
-    /// <exception cref = "ArgumentException" > </exception>
-    /// <exception cref = "ArgumentNullException" > </exception>
-    /// <exception cref = "DirectoryNotFoundException" > </exception>
-    /// <exception cref = "IOException" > </exception>
-    /// <exception cref = "PathTooLongException" > </exception>
-    /// <exception cref = "SecurityException" > </exception>
-    /// <exception cref = "NotSupportedException" > </exception>
-    /// <returns>
-    ///     <see cref = "string" />
-    /// </returns>
+    /// <summary> Gets the path of the directory or file in this <see cref="LocalDirectory"/> </summary>
+    /// <param name="subPaths"> </param>
+    /// <exception cref="ArgumentException"> </exception>
+    /// <exception cref="ArgumentNullException"> </exception>
+    /// <exception cref="DirectoryNotFoundException"> </exception>
+    /// <exception cref="IOException"> </exception>
+    /// <exception cref="PathTooLongException"> </exception>
+    /// <exception cref="SecurityException"> </exception>
+    /// <exception cref="NotSupportedException"> </exception>
+    /// <returns> <see cref="string"/> </returns>
     public string Combine( string subPaths ) => Info.Combine(subPaths);
 
-    /// <summary>
-    ///     Gets the path of the directory or file in this
-    ///     <see cref = "LocalDirectory" />
-    /// </summary>
-    /// <param name = "subPaths" > </param>
-    /// <exception cref = "ArgumentException" > </exception>
-    /// <exception cref = "ArgumentNullException" > </exception>
-    /// <exception cref = "DirectoryNotFoundException" > </exception>
-    /// <exception cref = "IOException" > </exception>
-    /// <exception cref = "PathTooLongException" > </exception>
-    /// <exception cref = "SecurityException" > </exception>
-    /// <exception cref = "NotSupportedException" > </exception>
-    /// <returns>
-    ///     <see cref = "string" />
-    /// </returns>
+    /// <summary> Gets the path of the directory or file in this <see cref="LocalDirectory"/> </summary>
+    /// <param name="subPaths"> </param>
+    /// <exception cref="ArgumentException"> </exception>
+    /// <exception cref="ArgumentNullException"> </exception>
+    /// <exception cref="DirectoryNotFoundException"> </exception>
+    /// <exception cref="IOException"> </exception>
+    /// <exception cref="PathTooLongException"> </exception>
+    /// <exception cref="SecurityException"> </exception>
+    /// <exception cref="NotSupportedException"> </exception>
+    /// <returns> <see cref="string"/> </returns>
     public string Combine( params string[] subPaths ) => Info.Combine(subPaths);
 
 
@@ -260,35 +275,29 @@ public class LocalDirectory : BaseCollections<LocalDirectory>, TempFile.ITempFil
     // ---------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-    /// <summary>
-    ///     Deletes this directory if it is empty.
-    /// </summary>
-    /// <exception cref = "UnauthorizedAccessException" > </exception>
-    /// <exception cref = "DirectoryNotFoundException" > </exception>
-    /// <exception cref = "IOException" > </exception>
-    /// <exception cref = "SecurityException" > </exception>
+    /// <summary> Deletes this directory if it is empty. </summary>
+    /// <exception cref="UnauthorizedAccessException"> </exception>
+    /// <exception cref="DirectoryNotFoundException"> </exception>
+    /// <exception cref="IOException"> </exception>
+    /// <exception cref="SecurityException"> </exception>
     public void Delete() => Info.Delete();
 
 
-    /// <summary>
-    ///     Deletes sub-directories and files. This occurs on another thread in Windows, and is not blocking.
-    /// </summary>
-    /// <param name = "recursive" > </param>
-    /// <exception cref = "UnauthorizedAccessException" > </exception>
-    /// <exception cref = "DirectoryNotFoundException" > </exception>
-    /// <exception cref = "IOException" > </exception>
-    /// <exception cref = "SecurityException" > </exception>
+    /// <summary> Deletes sub-directories and files. This occurs on another thread in Windows, and is not blocking. </summary>
+    /// <param name="recursive"> </param>
+    /// <exception cref="UnauthorizedAccessException"> </exception>
+    /// <exception cref="DirectoryNotFoundException"> </exception>
+    /// <exception cref="IOException"> </exception>
+    /// <exception cref="SecurityException"> </exception>
     public void Delete( bool recursive ) => Info.Delete(recursive);
 
 
-    /// <summary>
-    ///     Deletes sub-directories and files.
-    /// </summary>
-    /// <exception cref = "UnauthorizedAccessException" > </exception>
-    /// <exception cref = "DirectoryNotFoundException" > </exception>
-    /// <exception cref = "FileNotFoundException" > </exception>
-    /// <exception cref = "IOException" > </exception>
-    /// <exception cref = "SecurityException" > </exception>
+    /// <summary> Deletes sub-directories and files. </summary>
+    /// <exception cref="UnauthorizedAccessException"> </exception>
+    /// <exception cref="DirectoryNotFoundException"> </exception>
+    /// <exception cref="FileNotFoundException"> </exception>
+    /// <exception cref="IOException"> </exception>
+    /// <exception cref="SecurityException"> </exception>
     public void DeleteAllRecursively()
     {
         foreach ( LocalDirectory dir in GetSubFolders() )
@@ -307,14 +316,12 @@ public class LocalDirectory : BaseCollections<LocalDirectory>, TempFile.ITempFil
         Delete();
     }
 
-    /// <summary>
-    ///     Asynchronously deletes sub-directories and files.
-    /// </summary>
-    /// <exception cref = "UnauthorizedAccessException" > </exception>
-    /// <exception cref = "DirectoryNotFoundException" > </exception>
-    /// <exception cref = "FileNotFoundException" > </exception>
-    /// <exception cref = "IOException" > </exception>
-    /// <exception cref = "SecurityException" > </exception>
+    /// <summary> Asynchronously deletes sub-directories and files. </summary>
+    /// <exception cref="UnauthorizedAccessException"> </exception>
+    /// <exception cref="DirectoryNotFoundException"> </exception>
+    /// <exception cref="FileNotFoundException"> </exception>
+    /// <exception cref="IOException"> </exception>
+    /// <exception cref="SecurityException"> </exception>
     public Task DeleteAllRecursivelyAsync()
     {
         var tasks = new List<Task>();
@@ -334,18 +341,16 @@ public class LocalDirectory : BaseCollections<LocalDirectory>, TempFile.ITempFil
 
         Delete();
 
-        return Task.WhenAll(tasks);
+        return tasks.WhenAll();
     }
 
 
-    /// <summary>
-    ///     Deletes sub-directories.
-    /// </summary>
-    /// <exception cref = "UnauthorizedAccessException" > </exception>
-    /// <exception cref = "DirectoryNotFoundException" > </exception>
-    /// <exception cref = "FileNotFoundException" > </exception>
-    /// <exception cref = "IOException" > </exception>
-    /// <exception cref = "SecurityException" > </exception>
+    /// <summary> Deletes sub-directories. </summary>
+    /// <exception cref="UnauthorizedAccessException"> </exception>
+    /// <exception cref="DirectoryNotFoundException"> </exception>
+    /// <exception cref="FileNotFoundException"> </exception>
+    /// <exception cref="IOException"> </exception>
+    /// <exception cref="SecurityException"> </exception>
     public void DeleteFiles()
     {
         foreach ( LocalDirectory dir in GetSubFolders() )
@@ -356,14 +361,12 @@ public class LocalDirectory : BaseCollections<LocalDirectory>, TempFile.ITempFil
         }
     }
 
-    /// <summary>
-    ///     Asynchronously deletes files.
-    /// </summary>
-    /// <exception cref = "UnauthorizedAccessException" > </exception>
-    /// <exception cref = "DirectoryNotFoundException" > </exception>
-    /// <exception cref = "FileNotFoundException" > </exception>
-    /// <exception cref = "IOException" > </exception>
-    /// <exception cref = "SecurityException" > </exception>
+    /// <summary> Asynchronously deletes files. </summary>
+    /// <exception cref="UnauthorizedAccessException"> </exception>
+    /// <exception cref="DirectoryNotFoundException"> </exception>
+    /// <exception cref="FileNotFoundException"> </exception>
+    /// <exception cref="IOException"> </exception>
+    /// <exception cref="SecurityException"> </exception>
     public Task DeleteFilesAsync()
     {
         var tasks = new List<Task>();
@@ -375,18 +378,16 @@ public class LocalDirectory : BaseCollections<LocalDirectory>, TempFile.ITempFil
             tasks.Add(dir.DeleteFilesAsync());
         }
 
-        return Task.WhenAll(tasks);
+        return tasks.WhenAll();
     }
 
 
-    /// <summary>
-    ///     Deletes sub-directories.
-    /// </summary>
-    /// <exception cref = "UnauthorizedAccessException" > </exception>
-    /// <exception cref = "DirectoryNotFoundException" > </exception>
-    /// <exception cref = "FileNotFoundException" > </exception>
-    /// <exception cref = "IOException" > </exception>
-    /// <exception cref = "SecurityException" > </exception>
+    /// <summary> Deletes sub-directories. </summary>
+    /// <exception cref="UnauthorizedAccessException"> </exception>
+    /// <exception cref="DirectoryNotFoundException"> </exception>
+    /// <exception cref="FileNotFoundException"> </exception>
+    /// <exception cref="IOException"> </exception>
+    /// <exception cref="SecurityException"> </exception>
     public void DeleteSubFolders()
     {
         foreach ( LocalDirectory dir in GetSubFolders() )
@@ -396,14 +397,12 @@ public class LocalDirectory : BaseCollections<LocalDirectory>, TempFile.ITempFil
         }
     }
 
-    /// <summary>
-    ///     Asynchronously deletes sub-directories.
-    /// </summary>
-    /// <exception cref = "UnauthorizedAccessException" > </exception>
-    /// <exception cref = "DirectoryNotFoundException" > </exception>
-    /// <exception cref = "FileNotFoundException" > </exception>
-    /// <exception cref = "IOException" > </exception>
-    /// <exception cref = "SecurityException" > </exception>
+    /// <summary> Asynchronously deletes sub-directories. </summary>
+    /// <exception cref="UnauthorizedAccessException"> </exception>
+    /// <exception cref="DirectoryNotFoundException"> </exception>
+    /// <exception cref="FileNotFoundException"> </exception>
+    /// <exception cref="IOException"> </exception>
+    /// <exception cref="SecurityException"> </exception>
     public Task DeleteSubFoldersAsync()
     {
         var tasks = new List<Task>();
@@ -414,7 +413,7 @@ public class LocalDirectory : BaseCollections<LocalDirectory>, TempFile.ITempFil
             dir.Delete();
         }
 
-        return Task.WhenAll(tasks);
+        return tasks.WhenAll();
     }
 
 
@@ -538,10 +537,7 @@ public class LocalDirectory : BaseCollections<LocalDirectory>, TempFile.ITempFil
         public LocalDirectory Directory { get; init; }
 
 
-        /// <summary>
-        ///     Uses the
-        ///     <see cref = "CurrentDirectory" />
-        /// </summary>
+        /// <summary> Uses the <see cref="CurrentDirectory"/> </summary>
         public Watcher() : this(CurrentDirectory) { }
         public Watcher( LocalDirectory directory ) : this(directory, "*") { }
         public Watcher( LocalDirectory directory, string searchFilter ) : this(directory, searchFilter, NotifyFilters.Size | NotifyFilters.FileName | NotifyFilters.CreationTime | NotifyFilters.LastWrite) { }

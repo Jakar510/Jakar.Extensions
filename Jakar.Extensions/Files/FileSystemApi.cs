@@ -38,8 +38,8 @@ public abstract class BaseFileSystemApi : IFilePaths
     public void ZipCache( string           path, CompressionLevel level = CompressionLevel.Optimal ) => ZipFile.CreateFromDirectory(path,          ZipFileName, level, true, Encoding.UTF8);
 
 
-    public async Task<LocalFile?> SaveFileAsync( string filename, Stream stream, CancellationToken token ) => await LocalFile.SaveToFileAsync(GetCacheDataPath(filename), stream, token)
-                                                                                                                             .ConfigureAwait(false);
-    public async Task<LocalFile?> SaveFileAsync( string filename, byte[] payload, CancellationToken token ) => await LocalFile.SaveToFileAsync(GetCacheDataPath(filename), payload, token)
-                                                                                                                              .ConfigureAwait(false);
+    public async ValueTask<LocalFile?> SaveFileAsync( string filename, Stream stream, CancellationToken token ) => await LocalFile.SaveToFileAsync(GetCacheDataPath(filename), stream, token)
+                                                                                                                                  .ConfigureAwait(false);
+    public async ValueTask<LocalFile?> SaveFileAsync( string filename, byte[] payload, CancellationToken token ) => await LocalFile.SaveToFileAsync(GetCacheDataPath(filename), payload, token)
+                                                                                                                                   .ConfigureAwait(false);
 }
