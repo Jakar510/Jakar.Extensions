@@ -59,7 +59,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jakar.Database", "Jakar.Dat
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jakar.Extensions.Hosting", "Jakar.Extensions.Hosting\Jakar.Extensions.Hosting.csproj", "{D5FCD265-907F-4B6D-932D-3F72C3D42485}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jakar.Database.FluentMigrations", "Jakar.Database.FluentMigrations\Jakar.Database.FluentMigrations.csproj", "{B505380C-ED90-461C-A768-885DCD55FDE2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jakar.Database.FluentMigrations", "Jakar.Database.FluentMigrations\Jakar.Database.FluentMigrations.csproj", "{B505380C-ED90-461C-A768-885DCD55FDE2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jakar.Database.Migrations", "Jakar.Database.Migrations\Jakar.Database.Migrations.csproj", "{236D6971-E546-4BF0-A831-73B094C9E00C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -138,6 +140,10 @@ Global
 		{B505380C-ED90-461C-A768-885DCD55FDE2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B505380C-ED90-461C-A768-885DCD55FDE2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B505380C-ED90-461C-A768-885DCD55FDE2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{236D6971-E546-4BF0-A831-73B094C9E00C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{236D6971-E546-4BF0-A831-73B094C9E00C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{236D6971-E546-4BF0-A831-73B094C9E00C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{236D6971-E546-4BF0-A831-73B094C9E00C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

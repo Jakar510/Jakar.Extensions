@@ -15,6 +15,7 @@ global using System.Runtime.CompilerServices;
 global using System.Text;
 global using Dapper;
 global using Jakar.Extensions;
+global using Jakar.Extensions.Hosting;
 global using Microsoft.AspNetCore.Builder;
 global using Microsoft.AspNetCore.Identity;
 global using Microsoft.Extensions.DependencyInjection;

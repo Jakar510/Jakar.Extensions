@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<TargetFramework>net6.0</TargetFramework>
@@ -11,9 +11,9 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="FluentMigrator" Version="3.3.2" />
-		<PackageReference Include="FluentMigrator.Runner" Version="3.3.2" />
-		<PackageReference Include="Jakar.Extensions" Version="6.1.1" />
-		<PackageReference Include="Jakar.Database" Version="6.0.0.17-beta" />
+		<PackageReference Include="Jakar.Extensions"
+						  Version="6.1.1" />
+		<PackageReference Include="Jakar.Database"
+						  Version="6.0.0.17-beta" />
 	</ItemGroup>
 </Project>
