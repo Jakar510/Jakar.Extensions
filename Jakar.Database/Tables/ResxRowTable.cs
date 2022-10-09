@@ -8,124 +8,124 @@ namespace Jakar.Database;
 [Table( "Resx" )]
 public sealed record ResxRowTable : TableRecord<ResxRowTable>
 {
-    public string Key { get; init; } = string.Empty;
-    public string Neutral { get; init; } = string.Empty;
-    public string? English { get; init; }
-    public string? Spanish { get; init; }
-    public string? French { get; init; }
-    public string? Swedish { get; init; }
-    public string? German { get; init; }
-    public string? Chinese { get; init; }
-    public string? Polish { get; init; }
-    public string? Thai { get; init; }
-    public string? Japanese { get; init; }
-    public string? Czech { get; init; }
+    public string  Key        { get; init; } = string.Empty;
+    public string  Neutral    { get; init; } = string.Empty;
+    public string? English    { get; init; }
+    public string? Spanish    { get; init; }
+    public string? French     { get; init; }
+    public string? Swedish    { get; init; }
+    public string? German     { get; init; }
+    public string? Chinese    { get; init; }
+    public string? Polish     { get; init; }
+    public string? Thai       { get; init; }
+    public string? Japanese   { get; init; }
+    public string? Czech      { get; init; }
     public string? Portuguese { get; init; }
-    public string? Dutch { get; init; }
-    public string? Korean { get; init; }
-    public string? Arabic { get; init; }
+    public string? Dutch      { get; init; }
+    public string? Korean     { get; init; }
+    public string? Arabic     { get; init; }
 
 
     public ResxRowTable() { }
-    public ResxRowTable(string key)
+    public ResxRowTable( string key )
     {
-        Key = key;
+        Key         = key;
         DateCreated = DateTimeOffset.UtcNow;
     }
-    public ResxRowTable(string key, string neutral) : this( key ) => Neutral = neutral;
-    public ResxRowTable(string key,
-                    string neutral,
-                    string english,
-                    string spanish,
-                    string french,
-                    string swedish,
-                    string german,
-                    string chinese,
-                    string polish,
-                    string thai,
-                    string japanese,
-                    string czech,
-                    string portuguese,
-                    string dutch,
-                    string korean,
-                    string arabic
+    public ResxRowTable( string key, string neutral ) : this( key ) => Neutral = neutral;
+    public ResxRowTable( string key,
+                         string neutral,
+                         string english,
+                         string spanish,
+                         string french,
+                         string swedish,
+                         string german,
+                         string chinese,
+                         string polish,
+                         string thai,
+                         string japanese,
+                         string czech,
+                         string portuguese,
+                         string dutch,
+                         string korean,
+                         string arabic
     ) : this( key, neutral )
     {
-        English = english;
-        Spanish = spanish;
-        French = french;
-        Swedish = swedish;
-        German = german;
-        Chinese = chinese;
-        Polish = polish;
-        Thai = thai;
-        Japanese = japanese;
-        Czech = czech;
+        English    = english;
+        Spanish    = spanish;
+        French     = french;
+        Swedish    = swedish;
+        German     = german;
+        Chinese    = chinese;
+        Polish     = polish;
+        Thai       = thai;
+        Japanese   = japanese;
+        Czech      = czech;
         Portuguese = portuguese;
-        Dutch = dutch;
-        Korean = korean;
-        Arabic = arabic;
+        Dutch      = dutch;
+        Korean     = korean;
+        Arabic     = arabic;
     }
-    public ResxRowTable(UserRecord user) : base( user ) { }
+    public ResxRowTable( UserRecord user ) : base( user ) { }
 
-    public ResxRowTable Update(string english,
-                           string spanish,
-                           string french,
-                           string swedish,
-                           string german,
-                           string chinese,
-                           string polish,
-                           string thai,
-                           string japanese,
-                           string czech,
-                           string portuguese,
-                           string dutch,
-                           string korean,
-                           string arabic
+    public ResxRowTable Update( string english,
+                                string spanish,
+                                string french,
+                                string swedish,
+                                string german,
+                                string chinese,
+                                string polish,
+                                string thai,
+                                string japanese,
+                                string czech,
+                                string portuguese,
+                                string dutch,
+                                string korean,
+                                string arabic
     )
     {
         return this with
-        {
-            English = english,
-            Spanish = spanish,
-            French = french,
-            Swedish = swedish,
-            German = german,
-            Chinese = chinese,
-            Polish = polish,
-            Thai = thai,
-            Japanese = japanese,
-            Czech = czech,
-            Portuguese = portuguese,
-            Dutch = dutch,
-            Korean = korean,
-            Arabic = arabic,
-            LastModified = DateTimeOffset.UtcNow
-        };
+               {
+                   English = english,
+                   Spanish = spanish,
+                   French = french,
+                   Swedish = swedish,
+                   German = german,
+                   Chinese = chinese,
+                   Polish = polish,
+                   Thai = thai,
+                   Japanese = japanese,
+                   Czech = czech,
+                   Portuguese = portuguese,
+                   Dutch = dutch,
+                   Korean = korean,
+                   Arabic = arabic,
+                   LastModified = DateTimeOffset.UtcNow
+               };
     }
 
 
-    public string GetValue(in SupportedLanguage language) => language switch
-    {
-        SupportedLanguage.English => English,
-        SupportedLanguage.Spanish => Spanish,
-        SupportedLanguage.French => French,
-        SupportedLanguage.Swedish => Swedish,
-        SupportedLanguage.German => German,
-        SupportedLanguage.Chinese => Chinese,
-        SupportedLanguage.Polish => Polish,
-        SupportedLanguage.Thai => Thai,
-        SupportedLanguage.Japanese => Japanese,
-        SupportedLanguage.Czech => Czech,
-        SupportedLanguage.Portuguese => Portuguese,
-        SupportedLanguage.Dutch => Dutch,
-        SupportedLanguage.Korean => Korean,
-        SupportedLanguage.Arabic => Arabic,
-        _ => throw new OutOfRangeException( nameof( language ), language )
-    } ?? Neutral;
+    public string GetValue( in SupportedLanguage language ) => language switch
+                                                               {
+                                                                   SupportedLanguage.English    => English,
+                                                                   SupportedLanguage.Spanish    => Spanish,
+                                                                   SupportedLanguage.French     => French,
+                                                                   SupportedLanguage.Swedish    => Swedish,
+                                                                   SupportedLanguage.German     => German,
+                                                                   SupportedLanguage.Chinese    => Chinese,
+                                                                   SupportedLanguage.Polish     => Polish,
+                                                                   SupportedLanguage.Thai       => Thai,
+                                                                   SupportedLanguage.Japanese   => Japanese,
+                                                                   SupportedLanguage.Czech      => Czech,
+                                                                   SupportedLanguage.Portuguese => Portuguese,
+                                                                   SupportedLanguage.Dutch      => Dutch,
+                                                                   SupportedLanguage.Korean     => Korean,
+                                                                   SupportedLanguage.Arabic     => Arabic,
+                                                                   _                            => throw new OutOfRangeException( nameof(language), language )
+                                                               } ?? Neutral;
 
 
-    public override int CompareTo(ResxRowTable? other)
+    public override int CompareTo( ResxRowTable? other )
     {
         if (other is null) { return 1; }
 
@@ -154,7 +154,7 @@ public sealed record ResxRowTable : TableRecord<ResxRowTable>
         hashCode.Add( Arabic );
         return hashCode.ToHashCode();
     }
-    public override bool Equals(ResxRowTable? other)
+    public override bool Equals( ResxRowTable? other )
     {
         if (other is null) { return false; }
 

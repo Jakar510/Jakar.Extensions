@@ -1,7 +1,7 @@
 ﻿namespace Jakar.Extensions.Hosting;
 
 
-public static class CommonUrls
+public static class CommonUrl
 {
     public static readonly Uri Listen_443  = new("http://0.0.0.0:443");
     public static readonly Uri Listen_80   = new("http://0.0.0.0:80");

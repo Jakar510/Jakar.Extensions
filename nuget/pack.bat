@@ -14,6 +14,8 @@ nuget.exe pack Jakar.Extensions.Blazor.nuspec || goto :error
 
 nuget.exe pack Jakar.DataBase.nuspec || goto :error
 
+nuget.exe pack Jakar.Database.FluentMigrations.nuspec || goto :error
+
 nuget.exe pack Jakar.Extensions.Xamarin.Forms.nuspec || goto :error
 
 

@@ -4,7 +4,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata>
 		<id>Jakar.Extensions.Hosting</id>
-		<version>6.0.7</version>
+		<version>6.0.8</version>
 		<title>Extension Library</title>
 		<authors>Tyler Stegmaier</authors>
 		<owners>Jakar510/Jakar</owners>
@@ -18,7 +18,8 @@
 			Extensions to aid in development.
 		</description>
 		<releaseNotes>
-			Jakar.Extensions.Hosting 6.0.0
+			Jakar.Extensions.Hosting 6.0.8
+			Added CommonUrl
 		</releaseNotes>
 		<tags>Server WebBuilder Http</tags>
 		<language>en-US</language>

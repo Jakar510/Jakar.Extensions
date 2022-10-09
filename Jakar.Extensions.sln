@@ -7,6 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jakar.Extensions", "Jakar.E
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nuget", "nuget", "{07C27764-F156-4896-B028-6FD19BB2E82E}"
 	ProjectSection(SolutionItems) = preProject
+		nuget\Jakar.DataBase.FluentMigrations.nuspec = nuget\Jakar.DataBase.FluentMigrations.nuspec
 		nuget\Jakar.DataBase.nuspec = nuget\Jakar.DataBase.nuspec
 		nuget\Jakar.Extensions.Blazor.nuspec = nuget\Jakar.Extensions.Blazor.nuspec
 		nuget\Jakar.Extensions.Hosting.nuspec = nuget\Jakar.Extensions.Hosting.nuspec
@@ -61,7 +62,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jakar.Extensions.Hosting", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jakar.Database.FluentMigrations", "Jakar.Database.FluentMigrations\Jakar.Database.FluentMigrations.csproj", "{B505380C-ED90-461C-A768-885DCD55FDE2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jakar.Database.Migrations", "Jakar.Database.Migrations\Jakar.Database.Migrations.csproj", "{236D6971-E546-4BF0-A831-73B094C9E00C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jakar.Database.Migrations", "Jakar.Database.Migrations\Jakar.Database.Migrations.csproj", "{236D6971-E546-4BF0-A831-73B094C9E00C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

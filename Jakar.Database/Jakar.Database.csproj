@@ -10,8 +10,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Jakar.Extensions" Version="6.1.1" />
-		<PackageReference Include="Jakar.Extensions.Hosting" Version="6.0.7" />
+		<PackageReference Include="Jakar.Extensions" Version="6.1.2" />
+		<PackageReference Include="Jakar.Extensions.Hosting" Version="6.0.8" />
 		<PackageReference Include="Sigil" Version="5.0.0" />
 	</ItemGroup>
 

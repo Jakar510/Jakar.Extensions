@@ -3,8 +3,8 @@
 
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata>
-		<id>Jakar.DataBase</id>
-		<version>6.0.0.19-beta</version>
+		<id>Jakar.Database.FluentMigrations</id>
+		<version>6.0.0.1-beta</version>
 		<title>Extension Library</title>
 		<authors>Tyler Stegmaier</authors>
 		<owners>Jakar510/Jakar</owners>
@@ -18,7 +18,7 @@
 			Extensions to aid in development.
 		</description>
 		<releaseNotes>
-			Jakar.DataBase 6.0.0
+			Jakar.Database.FluentMigrations 6.0.0
 		</releaseNotes>
 		<tags>Jakar Api Extensions</tags>
 		<language>en-US</language>
@@ -29,8 +29,14 @@
 			<group targetFramework="net6.0">
 				<dependency id="Jakar.Extensions"
 							version="6.1.2" />
+				<dependency id="Jakar.Database"
+							version="6.0.0.19-beta" />
 				<dependency id="Jakar.Extensions.Hosting"
 							version="6.0.8" />
+				<dependency id="FluentMigrator"
+							version="3.3.2" />
+				<dependency id="FluentMigrator.Runner"
+							version="3.3.2" />
 			</group>
 		</dependencies>
 	</metadata>
