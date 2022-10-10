@@ -4,7 +4,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata>
 		<id>Jakar.Database.FluentMigrations</id>
-		<version>6.0.0.1-beta</version>
+		<version>6.0.0.2-beta</version>
 		<title>Extension Library</title>
 		<authors>Tyler Stegmaier</authors>
 		<owners>Jakar510/Jakar</owners>
@@ -48,11 +48,11 @@
 		<file src="..\images\icon.png" />
 
 		<!-- .net6.0 -->
-		<file src="../Jakar.DataBase/bin/Release/net6.0/Jakar.DataBase.dll"
+		<file src="../Jakar.Database.FluentMigrations/bin/Release/net6.0/Jakar.Database.FluentMigrations.dll"
 			  target="lib/net6.0" />
-		<file src="../Jakar.DataBase/bin/Release/net6.0/Jakar.DataBase.xml"
+		<file src="../Jakar.Database.FluentMigrations/bin/Release/net6.0/Jakar.Database.FluentMigrations.xml"
 			  target="net6.0" />
-		<file src="../Jakar.DataBase/bin/Release/net6.0/Jakar.DataBase.pdb"
+		<file src="../Jakar.Database.FluentMigrations/bin/Release/net6.0/Jakar.Database.FluentMigrations.pdb"
 			  target="lib/net6.0" />
 	</files>
 </package>
