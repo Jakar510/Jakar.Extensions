@@ -4,6 +4,9 @@ using System.Web;
 using ErrorEventArgs = System.IO.ErrorEventArgs;
 
 
+#pragma warning disable CS1584
+
+
 
 namespace Jakar.Extensions;
 #nullable enable
@@ -11,7 +14,7 @@ namespace Jakar.Extensions;
 
 
 [Serializable]
-public class LocalFile : BaseCollections<LocalFile>, TempFile.ITempFile, LocalFile.IReadHandler, LocalFile.IAsyncReadHandler
+public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<LocalFile>, IComparable, TempFile.ITempFile, LocalFile.IReadHandler, LocalFile.IAsyncReadHandler
 {
     private   bool      _isTemporary;
     protected FileInfo? _info;
@@ -23,9 +26,8 @@ public class LocalFile : BaseCollections<LocalFile>, TempFile.ITempFile, LocalFi
         get => _isTemporary;
         set => _isTemporary = value;
     }
-    public Encoding FileEncoding { get; init; } = Encoding.Default;
-
-    [JsonIgnore] public FileInfo Info => _info ??= new FileInfo( FullPath );
+    public              Encoding FileEncoding { get; init; } = Encoding.Default;
+    [JsonIgnore] public FileInfo Info         => _info ??= new FileInfo( FullPath );
 
 
     [JsonIgnore]
@@ -34,9 +36,10 @@ public class LocalFile : BaseCollections<LocalFile>, TempFile.ITempFile, LocalFi
         get
         {
             DirectoryInfo? parent = Directory.GetParent( FullPath );
-            if (parent is null) { return default; }
 
-            return new LocalDirectory( parent );
+            return parent is null
+                       ? default
+                       : new LocalDirectory( parent );
         }
     }
     public MimeType Mime => Extension.FromExtension();
@@ -948,22 +951,7 @@ public class LocalFile : BaseCollections<LocalFile>, TempFile.ITempFile, LocalFi
     }
 
 
-    public override int CompareTo( LocalFile? other )
-    {
-        if (ReferenceEquals( this, other )) { return 0; }
-
-        if (ReferenceEquals( null, other )) { return 1; }
-
-        return string.Compare( FullPath, other.FullPath, StringComparison.Ordinal );
-    }
-    public override bool Equals( LocalFile? other )
-    {
-        if (other is null) { return false; }
-
-        if (ReferenceEquals( this, other )) { return true; }
-
-        return this.IsTempFile() == other.IsTempFile() && FullPath == other.FullPath;
-    }
+    public override bool Equals( object? other ) => other is LocalFile file && Equals( file );
 
 
     async ValueTask<string> IAsyncReadHandler.AsString()
@@ -1030,6 +1018,32 @@ public class LocalFile : BaseCollections<LocalFile>, TempFile.ITempFile, LocalFi
         using var              stream = new StreamReader( file, FileEncoding );
 
         while (!stream.EndOfStream) { yield return await stream.ReadLineAsync() ?? string.Empty; }
+    }
+    public int CompareTo( object? other )
+    {
+        if (other is null) { return 1; }
+
+        if (ReferenceEquals( this, other )) { return 0; }
+
+        return other is LocalFile value
+                   ? CompareTo( value )
+                   : throw new ExpectedValueTypeException( nameof(other), other, typeof(LocalFile) );
+    }
+    public int CompareTo( LocalFile? other )
+    {
+        if (ReferenceEquals( this, other )) { return 0; }
+
+        if (ReferenceEquals( null, other )) { return 1; }
+
+        return string.Compare( FullPath, other.FullPath, StringComparison.Ordinal );
+    }
+    public bool Equals( LocalFile? other )
+    {
+        if (other is null) { return false; }
+
+        if (ReferenceEquals( this, other )) { return true; }
+
+        return this.IsTempFile() == other.IsTempFile() && FullPath == other.FullPath;
     }
 
 
@@ -1193,7 +1207,7 @@ public class LocalFile : BaseCollections<LocalFile>, TempFile.ITempFile, LocalFi
         ///     Reads the contents of the file as a
         ///     <see cref = "string" />
         ///     , then calls
-        ///     <see cref = "JsonExtensions.FromJson(string)" />
+        ///     <see cref = "JsonNet.FromJson(string)" />
         ///     on it, asynchronously.
         /// </summary>
         /// <typeparam name = "T" > </typeparam>
@@ -1256,7 +1270,7 @@ public class LocalFile : BaseCollections<LocalFile>, TempFile.ITempFile, LocalFi
     ///     <see cref = "LocalDirectory" />
     /// </summary>
     [Serializable]
-    public class Watcher : ConcurrentCollection, IDisposable
+    public class Watcher : ConcurrentObservableCollection<LocalFile>, IDisposable
     {
         private readonly LocalDirectory.Watcher _watcher;
 
@@ -1304,6 +1318,70 @@ public class LocalFile : BaseCollections<LocalFile>, TempFile.ITempFile, LocalFi
             _watcher.Dispose();
         }
     }
+
+
+
+    [Serializable]
+    public class Collection : ObservableCollection<LocalFile>
+    {
+        public Collection() : base() { }
+        public Collection( IEnumerable<LocalFile> items ) : base( items ) { }
+    }
+
+
+
+    [Serializable]
+    public class ConcurrentCollection : ConcurrentObservableCollection<LocalFile>
+    {
+        public ConcurrentCollection() : base() { }
+        public ConcurrentCollection( IEnumerable<LocalFile> items ) : base( items ) { }
+    }
+
+
+
+    [Serializable]
+    public class Queue : MultiQueue<LocalFile>
+    {
+        public Queue() : base() { }
+        public Queue( IEnumerable<LocalFile> items ) : base( items ) { }
+    }
+
+
+
+    [Serializable]
+    public class Deque : MultiDeque<LocalFile>
+    {
+        public Deque() : base() { }
+        public Deque( IEnumerable<LocalFile> items ) : base( items ) { }
+    }
+
+
+
+    [Serializable]
+    public class Items : List<LocalFile>
+    {
+        public Items() : base() { }
+        public Items( int                    capacity ) : base( capacity ) { }
+        public Items( IEnumerable<LocalFile> items ) : base( items ) { }
+    }
+
+
+
+    [Serializable]
+    public class Set : HashSet<LocalFile>
+    {
+        public Set() : base() { }
+        public Set( int                    capacity ) : base( capacity ) { }
+        public Set( IEnumerable<LocalFile> items ) : base( items ) { }
+    }
+
+
+
+    public sealed class Sorter : Sorter<LocalFile> { }
+
+
+
+    public sealed class Equalizer : Equalizer<LocalFile> { }
 
 
 

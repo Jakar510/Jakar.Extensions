@@ -3,7 +3,7 @@ namespace Jakar.Extensions;
 
 
 [Serializable]
-public class LocalDirectory : BaseCollections<LocalDirectory>, TempFile.ITempFile, IAsyncDisposable
+public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComparable<LocalDirectory>, IComparable, TempFile.ITempFile, IAsyncDisposable
 {
     private   bool           _isTemporary;
     protected DirectoryInfo? _info;
@@ -43,21 +43,11 @@ public class LocalDirectory : BaseCollections<LocalDirectory>, TempFile.ITempFil
         set => Directory.SetLastWriteTimeUtc( FullPath, value );
     }
 
-    [JsonIgnore]
-    public DirectoryInfo Info
-    {
-        get
-        {
-            _info ??= new DirectoryInfo( FullPath );
-            return _info;
-        }
-    }
-    [JsonIgnore] public LocalDirectory? Parent => GetParent();
-
-
-    public string FullPath { get; init; }
-    public string Name     => Info.Name;
-    public string Root     => Directory.GetDirectoryRoot( FullPath );
+    [JsonIgnore] public DirectoryInfo   Info     => _info ??= new DirectoryInfo( FullPath );
+    [JsonIgnore] public LocalDirectory? Parent   => GetParent();
+    public              string          FullPath { get; init; }
+    public              string          Name     => Info.Name;
+    public              string          Root     => Directory.GetDirectoryRoot( FullPath );
 
 
     public LocalDirectory() => FullPath = string.Empty;
@@ -130,26 +120,27 @@ public class LocalDirectory : BaseCollections<LocalDirectory>, TempFile.ITempFil
     }
 
 
-    public static bool operator ==( LocalDirectory?               left, LocalDirectory? right ) => EqualityComparer.Instance.Equals( left, right );
-    public static bool operator !=( LocalDirectory?               left, LocalDirectory? right ) => !EqualityComparer.Instance.Equals( left, right );
-    public static bool operator <( LocalDirectory?                left, LocalDirectory? right ) => RelationalComparer.Instance.Compare( left, right ) < 0;
-    public static bool operator >( LocalDirectory?                left, LocalDirectory? right ) => RelationalComparer.Instance.Compare( left, right ) > 0;
-    public static bool operator <=( LocalDirectory?               left, LocalDirectory? right ) => RelationalComparer.Instance.Compare( left, right ) <= 0;
-    public static bool operator >=( LocalDirectory?               left, LocalDirectory? right ) => RelationalComparer.Instance.Compare( left, right ) >= 0;
+    public static bool operator ==( LocalDirectory?               left, LocalDirectory? right ) => Equalizer.Instance.Equals( left, right );
+    public static bool operator !=( LocalDirectory?               left, LocalDirectory? right ) => !Equalizer.Instance.Equals( left, right );
+    public static bool operator <( LocalDirectory?                left, LocalDirectory? right ) => Sorter.Instance.Compare( left, right ) < 0;
+    public static bool operator >( LocalDirectory?                left, LocalDirectory? right ) => Sorter.Instance.Compare( left, right ) > 0;
+    public static bool operator <=( LocalDirectory?               left, LocalDirectory? right ) => Sorter.Instance.Compare( left, right ) <= 0;
+    public static bool operator >=( LocalDirectory?               left, LocalDirectory? right ) => Sorter.Instance.Compare( left, right ) >= 0;
     private static LocalFile ConvertFile( FileInfo                file ) => file;
     private static LocalDirectory ConvertDirectory( DirectoryInfo file ) => file;
 
 
-    public static implicit operator Collection( LocalDirectory                                      directory ) => new(directory.GetSubFolders());
-    public static implicit operator ConcurrentCollection( LocalDirectory                            directory ) => new(directory.GetSubFolders());
-    public static implicit operator Items( LocalDirectory                                           directory ) => new(directory.GetSubFolders());
-    public static implicit operator Set( LocalDirectory                                             directory ) => new(directory.GetSubFolders());
-    public static implicit operator Watcher( LocalDirectory                                         directory ) => new(directory);
-    public static implicit operator BaseCollections<LocalFile>.Collection( LocalDirectory           directory ) => new(directory.GetFiles());
-    public static implicit operator BaseCollections<LocalFile>.ConcurrentCollection( LocalDirectory directory ) => new(directory.GetFiles());
-    public static implicit operator BaseCollections<LocalFile>.Items( LocalDirectory                directory ) => new(directory.GetFiles());
-    public static implicit operator BaseCollections<LocalFile>.Set( LocalDirectory                  directory ) => new(directory.GetFiles());
-    public static implicit operator LocalFile.Watcher( LocalDirectory                               directory ) => new(new Watcher( directory ));
+    public static implicit operator Collection( LocalDirectory                     directory ) => new(directory.GetSubFolders());
+    public static implicit operator ConcurrentCollection( LocalDirectory           directory ) => new(directory.GetSubFolders());
+    public static implicit operator Items( LocalDirectory                          directory ) => new(directory.GetSubFolders());
+    public static implicit operator Set( LocalDirectory                            directory ) => new(directory.GetSubFolders());
+    public static implicit operator Watcher( LocalDirectory                        directory ) => new(directory);
+    public static implicit operator LocalFile.Collection( LocalDirectory           directory ) => new(directory.GetFiles());
+    public static implicit operator LocalFile.ConcurrentCollection( LocalDirectory directory ) => new(directory.GetFiles());
+    public static implicit operator LocalFile.Items( LocalDirectory                directory ) => new(directory.GetFiles());
+    public static implicit operator LocalFile.Set( LocalDirectory                  directory ) => new(directory.GetFiles());
+    public static implicit operator LocalFile.Watcher( LocalDirectory              directory ) => new(new Watcher( directory ));
+
 
     public sealed override string ToString() => FullPath;
     protected virtual LocalDirectory? GetParent()
@@ -328,16 +319,6 @@ public class LocalDirectory : BaseCollections<LocalDirectory>, TempFile.ITempFil
     ///     <see cref = "string" />
     /// </returns>
     public string Combine( params string[] subPaths ) => Info.Combine( subPaths );
-
-
-    public override int CompareTo( LocalDirectory? other )
-    {
-        if (ReferenceEquals( this, other )) { return 0; }
-
-        if (ReferenceEquals( null, other )) { return 1; }
-
-        return string.Compare( FullPath, other.FullPath, StringComparison.Ordinal );
-    }
     public override int GetHashCode() => HashCode.Combine( FullPath, this.IsTempFile() );
     protected virtual void Dispose( bool remove )
     {
@@ -514,19 +495,40 @@ public class LocalDirectory : BaseCollections<LocalDirectory>, TempFile.ITempFil
                                                                                                                .Select( ConvertDirectory );
     public IEnumerable<LocalDirectory> GetSubFolders( string searchPattern, EnumerationOptions enumerationOptions ) => Info.EnumerateDirectories( searchPattern, enumerationOptions )
                                                                                                                            .Select( ConvertDirectory );
-    public override bool Equals( LocalDirectory? other )
+    public override bool Equals( object? other ) => other is LocalDirectory directory && Equals( directory );
+    public async ValueTask DisposeAsync()
+    {
+        if (!this.IsTempFile()) { return; }
+
+        await DeleteAllRecursivelyAsync();
+    }
+
+
+    public int CompareTo( object? other )
+    {
+        if (other is null) { return 1; }
+
+        if (ReferenceEquals( this, other )) { return 0; }
+
+        return other is LocalDirectory value
+                   ? CompareTo( value )
+                   : throw new ExpectedValueTypeException( nameof(other), other, typeof(LocalDirectory) );
+    }
+    public int CompareTo( LocalDirectory? other )
+    {
+        if (ReferenceEquals( this, other )) { return 0; }
+
+        if (ReferenceEquals( null, other )) { return 1; }
+
+        return string.Compare( FullPath, other.FullPath, StringComparison.Ordinal );
+    }
+    public bool Equals( LocalDirectory? other )
     {
         if (other is null) { return false; }
 
         if (ReferenceEquals( this, other )) { return true; }
 
         return this.IsTempFile() == other.IsTempFile() && FullPath == other.FullPath;
-    }
-    public async ValueTask DisposeAsync()
-    {
-        if (!this.IsTempFile()) { return; }
-
-        await DeleteAllRecursivelyAsync();
     }
 
     public void Dispose()
@@ -540,47 +542,67 @@ public class LocalDirectory : BaseCollections<LocalDirectory>, TempFile.ITempFil
 
 
 
-    private sealed class EqualityComparer : IEqualityComparer<LocalDirectory>
+    [Serializable]
+    public class Collection : ObservableCollection<LocalDirectory>
     {
-        public static EqualityComparer Instance { get; } = new();
-
-
-        public bool Equals( LocalDirectory? x, LocalDirectory? y )
-        {
-            if (x is null) { return false; }
-
-            if (y is null) { return false; }
-
-            if (ReferenceEquals( x, y )) { return true; }
-
-            return x.Equals( y );
-        }
-
-        public int GetHashCode( LocalDirectory obj ) => obj.GetHashCode();
+        public Collection() : base() { }
+        public Collection( IEnumerable<LocalDirectory> items ) : base( items ) { }
     }
 
 
 
-    private sealed class RelationalComparer : IComparer<LocalDirectory>
+    [Serializable]
+    public class ConcurrentCollection : ConcurrentObservableCollection<LocalDirectory>
     {
-        public static RelationalComparer Instance { get; } = new();
-
-
-        public int Compare( LocalDirectory? left, LocalDirectory? right )
-        {
-            if (left is null) { return 1; }
-
-            if (right is null) { return -1; }
-
-            if (ReferenceEquals( left, right )) { return 0; }
-
-            return left.CompareTo( right );
-        }
+        public ConcurrentCollection() : base() { }
+        public ConcurrentCollection( IEnumerable<LocalDirectory> items ) : base( items ) { }
     }
 
 
 
-    // ---------------------------------------------------------------------------------------------------------------------------------------------------
+    [Serializable]
+    public class Queue : MultiQueue<LocalDirectory>
+    {
+        public Queue() : base() { }
+        public Queue( IEnumerable<LocalDirectory> items ) : base( items ) { }
+    }
+
+
+
+    [Serializable]
+    public class Deque : MultiDeque<LocalDirectory>
+    {
+        public Deque() : base() { }
+        public Deque( IEnumerable<LocalDirectory> items ) : base( items ) { }
+    }
+
+
+
+    [Serializable]
+    public class Items : List<LocalDirectory>
+    {
+        public Items() : base() { }
+        public Items( int                         capacity ) : base( capacity ) { }
+        public Items( IEnumerable<LocalDirectory> items ) : base( items ) { }
+    }
+
+
+
+    [Serializable]
+    public class Set : HashSet<LocalDirectory>
+    {
+        public Set() : base() { }
+        public Set( int                         capacity ) : base( capacity ) { }
+        public Set( IEnumerable<LocalDirectory> items ) : base( items ) { }
+    }
+
+
+
+    public sealed class Sorter : Sorter<LocalDirectory> { }
+
+
+
+    public sealed class Equalizer : Equalizer<LocalDirectory> { }
 
 
 
