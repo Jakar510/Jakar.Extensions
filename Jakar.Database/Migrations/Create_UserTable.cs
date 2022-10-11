@@ -1,6 +1,11 @@
 ﻿// Jakar.Extensions :: Jakar.Database.FluentMigrations
 // 09/30/2022  9:55 PM
 
+using Jakar.Database.Migrations;
+using Microsoft.IdentityModel.Tokens;
+
+
+
 namespace Jakar.Database.FluentMigrations;
 
 
@@ -150,8 +155,12 @@ public abstract class Create_UserTable : Migration<UserRecord>
              .AsDateTime2()
              .Nullable();
 
+        table.WithColumn( nameof(UserRecord.LockoutEnd) )
+             .AsDateTime2()
+             .Nullable();
+
         table.WithColumn( nameof(UserRecord.RefreshToken) )
-             .AsString( int.MaxValue )
+             .AsString( TokenValidationParameters.DefaultMaximumTokenSizeInBytes )
              .Nullable();
 
         table.WithColumn( nameof(UserRecord.RefreshTokenExpiryTime) )
@@ -205,6 +214,10 @@ public abstract class Create_UserTable : Migration<UserRecord>
         table.WithColumn( nameof(UserRecord.Rights) )
              .AsInt64()
              .Nullable();
+        
+        table.WithColumn( nameof(UserRecord.RecoveryCodes) )
+             .AsString(10240)
+             .NotNullable();
 
         table.WithColumn( nameof(UserRecord.DateCreated) )
              .AsDateTime2()

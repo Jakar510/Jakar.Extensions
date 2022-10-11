@@ -4,18 +4,18 @@ namespace Jakar.Extensions;
 
 public static class ExceptionExtensions
 {
-    public static string CallStack( Exception e ) => CallStack(new StackTrace(e));
-    public static string CallStack() => CallStack(new StackTrace());
-    public static string CallStack( StackTrace trace ) => string.Join("->", Frames(trace));
+    public static string CallStack( Exception e ) => CallStack( new StackTrace( e ) );
+    public static string CallStack() => CallStack( new StackTrace() );
+    public static string CallStack( StackTrace trace ) => string.Join( "->", Frames( trace ) );
     public static IEnumerable<string> Frames( StackTrace trace )
     {
-        foreach ( StackFrame frame in trace.GetFrames() )
+        foreach (StackFrame frame in trace.GetFrames())
         {
-            MethodBase method    = frame.GetMethod() ?? throw new NullReferenceException(nameof(frame.GetMethod));
-            string     className = method.MethodClass() ?? throw new NullReferenceException(nameof(TypeExtensions.MethodClass));
+            MethodBase method    = frame.GetMethod() ?? throw new NullReferenceException( nameof(frame.GetMethod) );
+            string     className = method.MethodClass() ?? throw new NullReferenceException( nameof(TypeExtensions.MethodClass) );
 
 
-            switch ( method.Name )
+            switch (method.Name)
             {
                 case nameof(CallStack) when className == nameof(ExceptionExtensions):
                 case nameof(Frames) when className == nameof(ExceptionExtensions):
@@ -30,8 +30,8 @@ public static class ExceptionExtensions
     }
     public static string Frame( StackFrame frame )
     {
-        MethodBase method    = frame.GetMethod() ?? throw new NullReferenceException(nameof(frame.GetMethod));
-        string     className = method.MethodClass() ?? throw new NullReferenceException(nameof(TypeExtensions.MethodClass));
+        MethodBase method    = frame.GetMethod() ?? throw new NullReferenceException( nameof(frame.GetMethod) );
+        string     className = method.MethodClass() ?? throw new NullReferenceException( nameof(TypeExtensions.MethodClass) );
 
         return $"{className}::{method.Name}";
     }
@@ -41,21 +41,21 @@ public static class ExceptionExtensions
     {
         var dictionary = new Dictionary<string, object?>();
 
-        e.GetProperties(ref dictionary);
+        e.GetProperties( ref dictionary );
 
         return dictionary;
     }
 
     public static void GetProperties( this Exception e, ref Dictionary<string, object?> dictionary )
     {
-        foreach ( PropertyInfo info in e.GetType()
-                                        .GetProperties(BindingFlags.Instance | BindingFlags.Public) )
+        foreach (PropertyInfo info in e.GetType()
+                                       .GetProperties( BindingFlags.Instance | BindingFlags.Public ))
         {
             string key = info.Name;
 
-            if ( dictionary.ContainsKey(key) || !info.CanRead || key == "TargetSite" ) { continue; }
+            if (dictionary.ContainsKey( key ) || !info.CanRead || key == "TargetSite") { continue; }
 
-            dictionary[key] = info.GetValue(e, null);
+            dictionary[key] = info.GetValue( e, null );
         }
     }
 
@@ -92,10 +92,10 @@ public static class ExceptionExtensions
                };
 
 
-        if ( includeFullMethodInfo ) { dict[nameof(Exception.TargetSite)]         = e.MethodInfo(); }
-        else if ( e.TargetSite is not null ) { dict[nameof(Exception.TargetSite)] = $"{e.MethodClass()}::{e.MethodSignature()}"; }
+        if (includeFullMethodInfo) { dict[nameof(Exception.TargetSite)]         = e.MethodInfo(); }
+        else if (e.TargetSite is not null) { dict[nameof(Exception.TargetSite)] = $"{e.MethodClass()}::{e.MethodSignature()}"; }
 
-        e.GetProperties(ref dict);
+        e.GetProperties( ref dict );
     }
 
 
@@ -104,16 +104,16 @@ public static class ExceptionExtensions
         var data = new Dictionary<string, JToken?>();
 
         // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
-        foreach ( DictionaryEntry pair in e.Data )
+        foreach (DictionaryEntry pair in e.Data)
         {
             // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
             // ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
-            var key = pair.Key?.ToString();
-            if ( key is null ) { continue; }
+            string? key = pair.Key?.ToString();
+            if (key is null) { continue; }
 
             data[key] = pair.Value is null
                             ? null
-                            : JToken.FromObject(pair.Value);
+                            : JToken.FromObject( pair.Value );
         }
 
         return data;
@@ -124,14 +124,14 @@ public static class ExceptionExtensions
     public static ExceptionDetails FullDetails( this Exception e ) => new(e, true);
 
 
-    [Obsolete($"Use {nameof(ExceptionDetails)} instead")]
+    [Obsolete( $"Use {nameof(ExceptionDetails)} instead" )]
     public static Dictionary<string, object?> FullDetails( this Exception e, bool includeFullMethodInfo )
     {
-        if ( e is null ) { throw new ArgumentNullException(nameof(e)); }
+        if (e is null) { throw new ArgumentNullException( nameof(e) ); }
 
-        e.Details(out Dictionary<string, object?> dict, includeFullMethodInfo);
+        e.Details( out Dictionary<string, object?> dict, includeFullMethodInfo );
 
-        dict[nameof(e.InnerException)] = e.GetInnerExceptions(includeFullMethodInfo);
+        dict[nameof(e.InnerException)] = e.GetInnerExceptions( includeFullMethodInfo );
 
         return dict;
     }
@@ -139,22 +139,22 @@ public static class ExceptionExtensions
 
     private static Dictionary<string, object?>? GetInnerExceptions( this Exception e, bool includeFullMethodInfo )
     {
-        if ( e.InnerException is null ) { return null; }
+        if (e.InnerException is null) { return null; }
 
         var innerDetails = new Dictionary<string, object?>();
 
-        return e.InnerException.GetInnerExceptions(ref innerDetails, includeFullMethodInfo);
+        return e.InnerException.GetInnerExceptions( ref innerDetails, includeFullMethodInfo );
     }
 
     private static Dictionary<string, object?> GetInnerExceptions( this Exception e, ref Dictionary<string, object?> dict, bool includeFullMethodInfo )
     {
-        if ( e is null ) { throw new NullReferenceException(nameof(e)); }
+        if (e is null) { throw new NullReferenceException( nameof(e) ); }
 
-        if ( e.InnerException is null ) { return dict; }
+        if (e.InnerException is null) { return dict; }
 
-        e.Details(out Dictionary<string, object?> inner, includeFullMethodInfo);
+        e.Details( out Dictionary<string, object?> inner, includeFullMethodInfo );
 
-        dict[nameof(e.InnerException)] = e.InnerException.GetInnerExceptions(ref inner, includeFullMethodInfo);
+        dict[nameof(e.InnerException)] = e.InnerException.GetInnerExceptions( ref inner, includeFullMethodInfo );
 
         return dict;
     }

@@ -1,10 +1,14 @@
 ﻿#nullable enable
+using Location = Plugin.Media.Abstractions.Location;
+
+
+
 namespace Jakar.Extensions.Xamarin.Forms;
 
 
 public static class LocationExtensions
 {
-    public static Plugin.Media.Abstractions.Location ToPluginLocation( this Location location ) =>
+    public static Location ToPluginLocation( this global::Xamarin.Essentials.Location location ) =>
         new()
         {
             Altitude           = location.Altitude ?? double.NaN,
@@ -12,6 +16,6 @@ public static class LocationExtensions
             Latitude           = location.Latitude,
             Longitude          = location.Longitude,
             Speed              = location.Speed ?? double.NaN,
-            Timestamp          = new DateTime(location.Timestamp.Ticks),
+            Timestamp          = new DateTime( location.Timestamp.Ticks )
         };
 }

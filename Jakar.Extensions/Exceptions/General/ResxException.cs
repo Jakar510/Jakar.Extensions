@@ -6,6 +6,6 @@ namespace Jakar.Extensions;
 
 public class ResxException : Exception
 {
-    public ResxException( SupportedLanguage language, Exception? inner                 = null ) : base($"language: {language}", inner) { }
-    public ResxException( SupportedLanguage language, in long    key, Exception? inner = null ) : base($"language: {language}  |  key: {key}", inner) { }
+    public ResxException( SupportedLanguage language, Exception? inner                 = null ) : base( $"language: {language}", inner ) { }
+    public ResxException( SupportedLanguage language, in long    key, Exception? inner = null ) : base( $"language: {language}  |  key: {key}", inner ) { }
 }

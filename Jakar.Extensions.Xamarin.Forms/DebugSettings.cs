@@ -6,22 +6,30 @@ namespace Jakar.Extensions.Xamarin.Forms;
 
 public interface IDebugSettings : INotifyPropertyChanged, INotifyPropertyChanging
 {
+    bool EnableAnalytics        { get; }
     bool EnableApi              { get; }
     bool EnableCrashes          { get; }
-    bool EnableAnalytics        { get; }
-    bool TakeScreenshotOnError  { get; }
     bool IncludeAppStateOnError { get; }
+    bool TakeScreenshotOnError  { get; }
 }
 
 
 
 public sealed class DebugSettings : ObservableClass, IDebugSettings
 {
-    private bool _enableApi              = Preferences.Get(nameof(EnableApi),              true);
-    private bool _enableCrashes          = Preferences.Get(nameof(EnableCrashes),          true);
-    private bool _enableAnalytics        = Preferences.Get(nameof(EnableAnalytics),        true);
-    private bool _includeAppStateOnError = Preferences.Get(nameof(IncludeAppStateOnError), true);
-    private bool _takeScreenshotOnError  = Preferences.Get(nameof(TakeScreenshotOnError),  true);
+    private bool _enableAnalytics        = Preferences.Get( nameof(EnableAnalytics),        true );
+    private bool _enableApi              = Preferences.Get( nameof(EnableApi),              true );
+    private bool _enableCrashes          = Preferences.Get( nameof(EnableCrashes),          true );
+    private bool _includeAppStateOnError = Preferences.Get( nameof(IncludeAppStateOnError), true );
+    private bool _takeScreenshotOnError  = Preferences.Get( nameof(TakeScreenshotOnError),  true );
+    public bool EnableAnalytics
+    {
+        get => _enableAnalytics && EnableApi;
+        set
+        {
+            if (SetProperty( ref _enableAnalytics, value )) { Preferences.Set( nameof(EnableAnalytics), value ); }
+        }
+    }
 
 
     public bool EnableApi
@@ -29,7 +37,7 @@ public sealed class DebugSettings : ObservableClass, IDebugSettings
         get => _enableApi;
         set
         {
-            if ( SetProperty(ref _enableApi, value) ) { Preferences.Set(nameof(EnableApi), value); }
+            if (SetProperty( ref _enableApi, value )) { Preferences.Set( nameof(EnableApi), value ); }
         }
     }
     public bool EnableCrashes
@@ -37,23 +45,7 @@ public sealed class DebugSettings : ObservableClass, IDebugSettings
         get => _enableCrashes && EnableApi;
         set
         {
-            if ( SetProperty(ref _enableCrashes, value) ) { Preferences.Set(nameof(EnableCrashes), value); }
-        }
-    }
-    public bool EnableAnalytics
-    {
-        get => _enableAnalytics && EnableApi;
-        set
-        {
-            if ( SetProperty(ref _enableAnalytics, value) ) { Preferences.Set(nameof(EnableAnalytics), value); }
-        }
-    }
-    public bool TakeScreenshotOnError
-    {
-        get => _takeScreenshotOnError && EnableApi;
-        set
-        {
-            if ( SetProperty(ref _takeScreenshotOnError, value) ) { Preferences.Set(nameof(TakeScreenshotOnError), value); }
+            if (SetProperty( ref _enableCrashes, value )) { Preferences.Set( nameof(EnableCrashes), value ); }
         }
     }
     public bool IncludeAppStateOnError
@@ -61,7 +53,15 @@ public sealed class DebugSettings : ObservableClass, IDebugSettings
         get => _includeAppStateOnError && EnableApi;
         set
         {
-            if ( SetProperty(ref _includeAppStateOnError, value) ) { Preferences.Set(nameof(IncludeAppStateOnError), value); }
+            if (SetProperty( ref _includeAppStateOnError, value )) { Preferences.Set( nameof(IncludeAppStateOnError), value ); }
+        }
+    }
+    public bool TakeScreenshotOnError
+    {
+        get => _takeScreenshotOnError && EnableApi;
+        set
+        {
+            if (SetProperty( ref _takeScreenshotOnError, value )) { Preferences.Set( nameof(TakeScreenshotOnError), value ); }
         }
     }
 

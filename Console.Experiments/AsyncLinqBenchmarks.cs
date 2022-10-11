@@ -17,14 +17,14 @@ namespace Console.Experiments;
 
 
 
-[SimpleJob(RuntimeMoniker.HostProcess)]
-[Orderer(SummaryOrderPolicy.FastestToSlowest)]
+[SimpleJob( RuntimeMoniker.HostProcess )]
+[Orderer( SummaryOrderPolicy.FastestToSlowest )]
 [RankColumn]
 [MemoryDiagnoser]
 public class AsyncLinqBenchmarks
 {
     // private readonly Dictionary<long, Guid> _dict = new();
-    private static readonly AsyncEnumerator<long> _data = AsyncLinq.Range(0L, 10_000)
+    private static readonly AsyncEnumerator<long> _data = AsyncLinq.Range( 0L, 10_000 )
                                                                    .AsAsyncEnumerable();
 
 
@@ -46,8 +46,8 @@ public class AsyncLinqBenchmarks
     //     return results;
     // }
     [Benchmark]
-    public ValueTask<List<long>> WhereValueTask() => _data.Where(x => x > 0)
-                                                          .Where(x => x % 5 == 0)
+    public ValueTask<List<long>> WhereValueTask() => _data.Where( x => x > 0 )
+                                                          .Where( x => x % 5 == 0 )
                                                           .ToList();
 
     // [Benchmark] public void Pairs() => _dict.ForEach(( KeyValuePair<long, Guid>           x ) => { });

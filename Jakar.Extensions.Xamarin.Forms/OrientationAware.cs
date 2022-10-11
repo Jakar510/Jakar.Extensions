@@ -8,13 +8,11 @@ public class OrientationService
 
     public const double SIZE_NOT_ALLOCATED = -1;
 
+    public    DisplayOrientation Orientation { get; set; }
+    protected double             _Height     { get; set; }
 
-    protected double _Width  { get; set; }
-    protected double _Height { get; set; }
 
-    public event EventHandler<RotationEventArgs>? OnOrientationChanged;
-
-    public DisplayOrientation Orientation { get; set; }
+    protected double _Width { get; set; }
 
 
     //Xamarin.Essentials.DeviceIdiom.Phone
@@ -25,7 +23,7 @@ public class OrientationService
     //Xamarin.Essentials.DeviceDisplay.MainDisplayInfo.Height
     //public static bool IsPhone { get; } = DeviceInfo.Idiom == DeviceIdiom.Phone;
 
-    public OrientationService() : this(SIZE_NOT_ALLOCATED, SIZE_NOT_ALLOCATED) { }
+    public OrientationService() : this( SIZE_NOT_ALLOCATED, SIZE_NOT_ALLOCATED ) { }
 
     public OrientationService( in double width, in double height )
     {
@@ -34,41 +32,43 @@ public class OrientationService
     }
 
 
-    public void OnSizeAllocated( in Page page ) => OnSizeAllocated(page.Width, page.Height);
+    public static DisplayOrientation GetOrientation( ContentPage page )
+    {
+        if (page is null) { throw new ArgumentNullException( nameof(page) ); }
+
+        return GetOrientation( page.Width, page.Height );
+    }
+
+    public static DisplayOrientation GetOrientation( in double width, in double height )
+    {
+        if (Equals( width, SIZE_NOT_ALLOCATED ) || Equals( height, SIZE_NOT_ALLOCATED )) { return DisplayOrientation.Unknown; }
+
+        return width < height
+                   ? DisplayOrientation.Portrait
+                   : DisplayOrientation.Landscape;
+    }
+
+    public event EventHandler<RotationEventArgs>? OnOrientationChanged;
+
+
+    public void OnSizeAllocated( in Page page ) => OnSizeAllocated( page.Width, page.Height );
 
     public void OnSizeAllocated( in double width, in double height )
     {
-        if ( Equals(_Width, width) && Equals(_Height, height) ) { return; }
+        if (Equals( _Width, width ) && Equals( _Height, height )) { return; }
 
         double oldWidth = _Width;
         _Width  = width;
         _Height = height;
 
-        Orientation = GetOrientation(_Width, _Height);
+        Orientation = GetOrientation( _Width, _Height );
 
         // ignore if the previous height was size unallocated OR Has the device been rotated
-        if ( Equals(_Width, oldWidth) ) { return; }
+        if (Equals( _Width, oldWidth )) { return; }
 
-        if ( Orientation == DisplayOrientation.Unknown ) { return; }
+        if (Orientation == DisplayOrientation.Unknown) { return; }
 
-        OnOrientationChanged?.Invoke(this, new RotationEventArgs(Orientation));
-    }
-
-
-    public static DisplayOrientation GetOrientation( ContentPage page )
-    {
-        if ( page is null ) { throw new ArgumentNullException(nameof(page)); }
-
-        return GetOrientation(page.Width, page.Height);
-    }
-
-    public static DisplayOrientation GetOrientation( in double width, in double height )
-    {
-        if ( Equals(width, SIZE_NOT_ALLOCATED) || Equals(height, SIZE_NOT_ALLOCATED) ) { return DisplayOrientation.Unknown; }
-
-        return ( width < height )
-                   ? DisplayOrientation.Portrait
-                   : DisplayOrientation.Landscape;
+        OnOrientationChanged?.Invoke( this, new RotationEventArgs( Orientation ) );
     }
 
 
@@ -87,12 +87,12 @@ public class OrientationContentPage : ContentPage
     public OrientationService Orientation { get; set; }
 
 
-    protected OrientationContentPage() : base() => Orientation = new OrientationService(Width, Height);
+    protected OrientationContentPage() : base() => Orientation = new OrientationService( Width, Height );
 
 
     protected override void OnSizeAllocated( double width, double height )
     {
-        base.OnSizeAllocated(width, height);
-        Orientation.OnSizeAllocated(width, height);
+        base.OnSizeAllocated( width, height );
+        Orientation.OnSizeAllocated( width, height );
     }
 }

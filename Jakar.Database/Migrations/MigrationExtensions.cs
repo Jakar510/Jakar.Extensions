@@ -1,61 +1,8 @@
-﻿using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 
 
 
-namespace Jakar.Database.FluentMigrations;
-// /// <summary>
-// ///     <para>
-// ///         <see href="https://github.com/dotnet/roslyn/blob/main/docs/features/nullable-metadata.md"/>
-// ///     </para>
-// ///     <para>
-// ///         <see href="https://stackoverflow.com/a/58454489/9530917"/>
-// ///     </para>
-// ///     <para>
-// ///         <see href="https://github.com/RicoSuter/Namotion.Reflection"/>
-// ///     </para>
-// /// </summary>
-// public static class NullableTypeExtensions
-// {
-//     public static readonly Type   NullableType     = typeof(Nullable<>);
-//     private const          string NULLABLE         = "System.Runtime.CompilerServices.NullableAttribute";
-//     private const          string NULLABLE_CONTEXT = "System.Runtime.CompilerServices.NullableContextAttribute";
-//
-//
-//     public static bool IsNullable( this PropertyInfo  property ) => property.PropertyType.IsNullableHelper(property.DeclaringType, property.CustomAttributes);
-//     public static bool IsNullable( this FieldInfo     field ) => field.FieldType.IsNullableHelper(field.DeclaringType, field.CustomAttributes);
-//     public static bool IsNullable( this ParameterInfo parameter ) => parameter.ParameterType.IsNullableHelper(parameter.Member, parameter.CustomAttributes);
-//     private static bool IsNullableHelper( this Type memberType, MemberInfo? declaringType, IEnumerable<CustomAttributeData> customAttributes )
-//     {
-//         if ( memberType.IsValueType ) { return Nullable.GetUnderlyingType(memberType) != null; }
-//
-//         CustomAttributeData? nullable = customAttributes.FirstOrDefault(x => x.AttributeType.FullName == NULLABLE);
-//
-//         if ( nullable is not null && nullable.ConstructorArguments.Count == 1 )
-//         {
-//             CustomAttributeTypedArgument attributeArgument = nullable.ConstructorArguments[0];
-//
-//             if ( attributeArgument.ArgumentType == typeof(byte[]) )
-//             {
-//                 var args = (ReadOnlyCollection<CustomAttributeTypedArgument>)attributeArgument.Value!;
-//
-//                 if ( args.Count > 0 && args[0].ArgumentType == typeof(byte) ) { return (byte)args[0].Value! == 2; }
-//             }
-//             else if ( attributeArgument.ArgumentType == typeof(byte) ) { return (byte)attributeArgument.Value! == 2; }
-//         }
-//
-//         for ( MemberInfo? type = declaringType; type != null; type = type.DeclaringType )
-//         {
-//             CustomAttributeData? context = type.CustomAttributes.FirstOrDefault(x => x.AttributeType.FullName == NULLABLE_CONTEXT);
-//
-//             if ( context is not null && context.ConstructorArguments.Count == 1 && context.ConstructorArguments[0].ArgumentType == typeof(byte) ) { return (byte)context.ConstructorArguments[0].Value! == 2; }
-//         }
-//
-//         return false; // Couldn't find a suitable attribute
-//     }
-// }
-//
-
+namespace Jakar.Database.Migrations;
 
 
 public static class MigrationExtensions
@@ -145,7 +92,7 @@ public static class MigrationExtensions
 
 
     /// <summary>
-    ///     <see href="https://github.com/fluentmigrator/fluentmigrator/issues/1038"/>
+    ///     <see href = "https://github.com/fluentmigrator/fluentmigrator/issues/1038" />
     /// </summary>
     public static bool CreateColumn_Enum( this ICreateTableColumnAsTypeSyntax col, PropertyInfo propertyInfo, Type propertyType )
     {
@@ -204,16 +151,16 @@ public static class MigrationExtensions
 
 
     /// <summary>
-    ///     <see href="https://stackoverflow.com/a/4963190/9530917"/>
+    ///     <see href = "https://stackoverflow.com/a/4963190/9530917" />
     /// </summary>
-    /// <param name="col"> </param>
-    /// <param name="propertyType"> </param>
+    /// <param name = "col" > </param>
+    /// <param name = "propertyType" > </param>
     /// <returns> </returns>
     public static bool CreateColumn_Reference( this ICreateTableColumnAsTypeSyntax col, Type propertyType )
     {
         ICreateTableColumnOptionOrWithColumnSyntax reference = col.AsInt64();
 
-        reference.ForeignKey( DapperTableExtensions.GetTableName( propertyType ), nameof(IDataBaseID.ID) );
+        reference.ForeignKey( propertyType.GetTableName(), nameof(IDataBaseID.ID) );
 
         // return reference.SetNullable(false);
         return true;
@@ -317,7 +264,7 @@ public static class MigrationExtensions
 
     public static void Throw( this Type classType, PropertyInfo prop )
     {
-        var key = $"{classType.FullName}.{prop.Name}";
+        string key = $"{classType.FullName}.{prop.Name}";
 
         _ = prop.PropertyType.TryGetUnderlyingEnumType( out Type? _ );
 
@@ -446,7 +393,7 @@ public static class MigrationExtensions
                       .SetNullable( propInfo );
         }
 
-        if ((propertyType.IsGenericType && propertyType.IsList()) || propertyType.IsSet() || propertyType.IsCollection())
+        if (propertyType.IsGenericType && propertyType.IsList() || propertyType.IsSet() || propertyType.IsCollection())
         {
             return col.AsXml( int.MaxValue )
                       .SetNullable( propInfo );

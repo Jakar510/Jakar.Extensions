@@ -1,59 +1,10 @@
-﻿
-
-
-#nullable enable
+﻿#nullable enable
 namespace Jakar.Extensions.Xamarin.Forms;
 
 
-[SuppressMessage("ReSharper", "MemberHidesStaticFromOuterClass")]
+[SuppressMessage( "ReSharper", "MemberHidesStaticFromOuterClass" )]
 public class KeyNames
 {
-    public enum FontSize
-    {
-        PageTitle,
-        Header,
-        Title,
-        Description,
-        Hint,
-        Value,
-        Misc,
-    }
-
-
-
-    public enum ShellColor
-    {
-        Foreground,
-        Background,
-        NavigationBar,
-        Disabled,
-        Unselected,
-        FlyOutBorder,
-    }
-
-
-
-    public enum ThemedColor
-    {
-        Text,
-        Background,
-        PageBackground,
-        Accent, // i.e. CheckBox
-        Valid,
-        Invalid,
-        InFocus,
-    }
-
-
-
-    public enum ListView
-    {
-        BackgroundColor,
-        SeparatorColor, // i.e. ListView
-    }
-
-
-
     public enum Button
     {
         BorderColor,
@@ -61,7 +12,7 @@ public class KeyNames
         BackgroundColor,
         FontSize,
         FontAttributes,
-        FontFamily,
+        FontFamily
     }
 
 
@@ -74,29 +25,20 @@ public class KeyNames
         BackgroundColor,
         FontSize,
         FontAttributes,
-        FontFamily,
+        FontFamily
     }
 
 
 
-    public enum Label
+    public enum FontSize
     {
-        TextColor,
-        BackgroundColor,
-        FontSize,
-        FontAttributes,
-        FontFamily,
-    }
-
-
-
-    public enum Header
-    {
-        TextColor,
-        BackgroundColor,
-        FontSize,
-        FontAttributes,
-        FontFamily,
+        PageTitle,
+        Header,
+        Title,
+        Description,
+        Hint,
+        Value,
+        Misc
     }
 
 
@@ -107,6 +49,61 @@ public class KeyNames
         BackgroundColor,
         FontSize,
         FontAttributes,
-        FontFamily,
+        FontFamily
+    }
+
+
+
+    public enum Header
+    {
+        TextColor,
+        BackgroundColor,
+        FontSize,
+        FontAttributes,
+        FontFamily
+    }
+
+
+
+    public enum Label
+    {
+        TextColor,
+        BackgroundColor,
+        FontSize,
+        FontAttributes,
+        FontFamily
+    }
+
+
+
+    public enum ListView
+    {
+        BackgroundColor,
+        SeparatorColor // i.e. ListView
+    }
+
+
+
+    public enum ShellColor
+    {
+        Foreground,
+        Background,
+        NavigationBar,
+        Disabled,
+        Unselected,
+        FlyOutBorder
+    }
+
+
+
+    public enum ThemedColor
+    {
+        Text,
+        Background,
+        PageBackground,
+        Accent, // i.e. CheckBox
+        Valid,
+        Invalid,
+        InFocus
     }
 }

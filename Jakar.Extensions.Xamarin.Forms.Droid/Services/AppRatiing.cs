@@ -2,12 +2,11 @@
 using Android.Content;
 using Android.Content.PM;
 using Jakar.Extensions.Xamarin.Forms.Droid;
+using Xamarin.Forms;
 using AUri = Android.Net.Uri;
 
 
-
-
-[assembly: Xamarin.Forms.Dependency(typeof(AppRating))]
+[assembly: Dependency( typeof(AppRating) )]
 
 
 #nullable enable
@@ -23,27 +22,27 @@ public class AppRating : IAppRating
 
         try
         {
-            context.PackageManager?.GetPackageInfo("com.android.vending", PackageInfoFlags.Activities);
-            using var intent = new Intent(Intent.ActionView, AUri.Parse(url));
+            context.PackageManager?.GetPackageInfo( "com.android.vending", PackageInfoFlags.Activities );
+            using var intent = new Intent( Intent.ActionView, AUri.Parse( url ) );
 
-            context.StartActivity(intent);
+            context.StartActivity( intent );
         }
-        catch ( PackageManager.NameNotFoundException ex )
+        catch (PackageManager.NameNotFoundException ex)
         {
             // this won't happen. But catching just in case the user has downloaded the app without having Google Play installed.
 
-            Console.WriteLine(ex.Message);
+            Console.WriteLine( ex.Message );
         }
-        catch ( ActivityNotFoundException )
+        catch (ActivityNotFoundException)
         {
             // if Google Play fails to load, open the App link on the browser 
 
             string playStoreUrl = $@"https://play.google.com/store/apps/details?id={AppDeviceInfo.PackageName}"; //Add here the url of your application on the store
 
-            var browserIntent = new Intent(Intent.ActionView, AUri.Parse(playStoreUrl));
-            browserIntent.AddFlags(ActivityFlags.NewTask | ActivityFlags.ResetTaskIfNeeded);
+            var browserIntent = new Intent( Intent.ActionView, AUri.Parse( playStoreUrl ) );
+            browserIntent.AddFlags( ActivityFlags.NewTask | ActivityFlags.ResetTaskIfNeeded );
 
-            context.StartActivity(browserIntent);
+            context.StartActivity( browserIntent );
         }
     }
 }

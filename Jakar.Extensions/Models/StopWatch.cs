@@ -17,7 +17,7 @@ public readonly struct StopWatch : IDisposable
         _caller = caller ?? string.Empty;
         _start  = DateTime.Now;
     }
-    public void Dispose() => Console.WriteLine(ToString());
+    public void Dispose() => Console.WriteLine( ToString() );
     public override string ToString() => $"[{_caller}] {Elapsed}";
 
 

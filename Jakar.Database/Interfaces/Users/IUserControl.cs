@@ -6,11 +6,11 @@ public interface IUserControl
     public bool            IsActive       { get; }
     public bool            IsDisabled     { get; }
     public bool            IsLocked       { get; }
-    public int?            BadLogins      { get; }
-    public Guid?           SessionID      { get; }
     public DateTimeOffset? LastActive     { get; }
     public DateTimeOffset? LastBadAttempt { get; }
     public DateTimeOffset? LockDate       { get; }
+    public Guid?           SessionID      { get; }
+    public int?            BadLogins      { get; }
 
 
     public UserRecord MarkBadLogin();

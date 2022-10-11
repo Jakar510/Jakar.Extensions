@@ -6,19 +6,19 @@ namespace Jakar.Database;
 
 public class SqlException<TParam> : Exception
 {
-    public string SQL { get; init; }
+    public bool?  MatchAll   { get; init; }
+    public string SQL        { get; init; }
     public TParam Parameters { get; init; }
-    public bool? MatchAll { get; init; }
 
 
-    public SqlException(string sql, TParam parameters, string message) : base( message )
+    public SqlException( string sql, TParam parameters, string message ) : base( message )
     {
-        SQL = sql;
+        SQL        = sql;
         Parameters = parameters;
     }
-    public SqlException(string sql, TParam parameters, string message, Exception inner) : base( message, inner )
+    public SqlException( string sql, TParam parameters, string message, Exception inner ) : base( message, inner )
     {
-        SQL = sql;
+        SQL        = sql;
         Parameters = parameters;
     }
 }
@@ -27,6 +27,6 @@ public class SqlException<TParam> : Exception
 
 public class SqlException : SqlException<object>
 {
-    public SqlException(string sql, object parameters, string message) : base( sql, parameters, message ) { }
-    public SqlException(string sql, object parameters, string message, Exception inner) : base( sql, parameters, message, inner ) { }
+    public SqlException( string sql, object parameters, string message ) : base( sql, parameters, message ) { }
+    public SqlException( string sql, object parameters, string message, Exception inner ) : base( sql, parameters, message, inner ) { }
 }

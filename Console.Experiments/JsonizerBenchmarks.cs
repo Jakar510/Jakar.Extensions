@@ -1,10 +1,11 @@
 ﻿// Jakar.Extensions :: Console.Experiments
 // 05/02/2022  4:11 PM
 
+#nullable enable
 using System.Security.Cryptography;
 
 
-#nullable enable
+
 namespace Console.Experiments;
 
 
@@ -45,8 +46,8 @@ GetObjects()   --- Manually serializing JsonNet.ToJson ----
 |   JsonNet_ToJson | 6.793 us | 0.0686 us | 0.0641 us |    2 | 0.6638 | 0.0076 |      5 KB |
 | JsonNet_FromJson | 8.914 us | 0.0858 us | 0.0717 us |    3 | 0.5035 |      - |      4 KB |
  */
-[SimpleJob(RuntimeMoniker.HostProcess)]
-[Orderer(SummaryOrderPolicy.FastestToSlowest)]
+[SimpleJob( RuntimeMoniker.HostProcess )]
+[Orderer( SummaryOrderPolicy.FastestToSlowest )]
 [RankColumn]
 [MemoryDiagnoser]
 public class JsonizerBenchmarks
@@ -58,47 +59,47 @@ public class JsonizerBenchmarks
     {
         _random = RandomNumberGenerator.Create();
         _source = GetObjects();
-        _json = _source.ToJson(Formatting.Indented);
+        _json   = _source.ToJson( Formatting.Indented );
     }
 
 
     public static string GenerateToken( in int length = 32 )
     {
-        var randomNumber = new byte[length];
-        _random.GetBytes(randomNumber);
-        return Convert.ToBase64String(randomNumber);
+        byte[] randomNumber = new byte[length];
+        _random.GetBytes( randomNumber );
+        return Convert.ToBase64String( randomNumber );
     }
 
 
     public static Test GetManyObjects()
     {
-        var children = new List<Test>(100);
+        var children = new List<Test>( 100 );
 
-        for ( var i = 0; i < 5000; i++ )
+        for (int i = 0; i < 5000; i++)
         {
-            int size   = Test.random.Next(250, 500);
-            var nested = new List<Test>(size);
+            int size   = Test.random.Next( 250, 500 );
+            var nested = new List<Test>( size );
 
-            for ( var j = 0; j < size; j++ ) { nested.Add(new Test(GenerateToken())); }
+            for (int j = 0; j < size; j++) { nested.Add( new Test( GenerateToken() ) ); }
 
-            children.Add(new Test(GenerateToken(), nested));
+            children.Add( new Test( GenerateToken(), nested ) );
         }
 
-        var test = new Test("Root", children);
+        var test = new Test( "Root", children );
         return test;
     }
     public static Test GetObjects()
     {
-        var first  = new Test("First",  new Test("1.1"), new Test("1.2"));
-        var second = new Test("Second", new Test("2.1"));
-        var test   = new Test("Root",   first, second);
+        var first  = new Test( "First",  new Test( "1.1" ), new Test( "1.2" ) );
+        var second = new Test( "Second", new Test( "2.1" ) );
+        var test   = new Test( "Root",   first, second );
         return test;
     }
     public static Test GetObject() => new(string.Empty);
 
 
     [Benchmark] public Test JsonNet_FromJson() => _json.FromJson<Test>();
-    [Benchmark] public string JsonNet_ToJson() => _source.ToJson(Formatting.Indented);
+    [Benchmark] public string JsonNet_ToJson() => _source.ToJson( Formatting.Indented );
     [Benchmark] public string Jsonizer_ToJson() => _source.ToJson();
 
 

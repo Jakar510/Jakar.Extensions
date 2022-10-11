@@ -9,5 +9,5 @@ public static partial class WebBuilder
         return builder;
     }
     public static OptionsBuilder<TOptions> AddOptions<TOptions>( this WebApplicationBuilder builder ) where TOptions : class => builder.Services.AddOptions<TOptions>();
-    public static OptionsBuilder<TOptions> AddOptions<TOptions>( this WebApplicationBuilder builder, string name ) where TOptions : class => builder.Services.AddOptions<TOptions>(name);
+    public static OptionsBuilder<TOptions> AddOptions<TOptions>( this WebApplicationBuilder builder, string name ) where TOptions : class => builder.Services.AddOptions<TOptions>( name );
 }

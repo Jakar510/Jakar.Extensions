@@ -1,7 +1,4 @@
-﻿
-
-
-#nullable enable
+﻿#nullable enable
 namespace Jakar.Extensions.Xamarin.Forms;
 
 
@@ -17,5 +14,5 @@ public abstract class BaseContentPage<TViewModel> : OrientationContentPage where
     public TViewModel ViewModel { get; protected set; }
 
 
-    protected BaseContentPage() : base() => ViewModel = InstanceCreator<TViewModel>.Create(this);
+    protected BaseContentPage() : base() => ViewModel = InstanceCreator<TViewModel>.Create( this );
 }

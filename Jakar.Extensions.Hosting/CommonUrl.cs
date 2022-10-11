@@ -3,8 +3,8 @@
 
 public static class CommonUrl
 {
-    public static readonly Uri Listen_443  = new("http://0.0.0.0:443");
-    public static readonly Uri Listen_80   = new("http://0.0.0.0:80");
+    public static readonly Uri Listen_443 = new("http://0.0.0.0:443");
+    public static readonly Uri Listen_80  = new("http://0.0.0.0:80");
 
 
     public static readonly Uri Listen_443S = new("https://0.0.0.0:443");

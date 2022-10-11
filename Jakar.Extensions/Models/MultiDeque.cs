@@ -7,50 +7,50 @@ namespace Jakar.Extensions;
 /// </summary>
 public class MultiDeque<T> : IMultiQueue<T>
 {
-    protected readonly object   _lock = new();
     protected readonly Deque<T> _queue;
-
-    public T? Next
-    {
-        get
-        {
-            lock ( _lock ) { return _queue.LastOrDefault(); }
-        }
-    }
+    protected readonly object   _lock = new();
     public bool IsEmpty
     {
         get
         {
-            lock ( _lock ) { return _queue.IsEmpty(); }
+            lock (_lock) { return _queue.IsEmpty(); }
         }
     }
     public int Count
     {
         get
         {
-            lock ( _lock ) { return _queue.Count; }
+            lock (_lock) { return _queue.Count; }
+        }
+    }
+
+    public T? Next
+    {
+        get
+        {
+            lock (_lock) { return _queue.LastOrDefault(); }
         }
     }
 
 
     public MultiDeque() => _queue = new Deque<T>();
-    public MultiDeque( int            capacity ) => _queue = new Deque<T>(capacity);
-    public MultiDeque( IEnumerable<T> items ) => _queue = new Deque<T>(items);
+    public MultiDeque( int            capacity ) => _queue = new Deque<T>( capacity );
+    public MultiDeque( IEnumerable<T> items ) => _queue = new Deque<T>( items );
 
 
     public void Add( T value )
     {
-        lock ( _lock ) { _queue.AddToBack(value); }
+        lock (_lock) { _queue.AddToBack( value ); }
     }
-    public bool Remove( [NotNullWhen(true)] out T? value )
+    public bool Remove( [NotNullWhen( true )] out T? value )
     {
-        lock ( _lock )
+        lock (_lock)
         {
-            if ( _queue.Count > 0 )
+            if (_queue.Count > 0)
             {
                 T item = _queue.RemoveFromBack();
 
-                if ( item is not null )
+                if (item is not null)
                 {
                     value = item;
                     return false;
@@ -65,17 +65,17 @@ public class MultiDeque<T> : IMultiQueue<T>
 
     public void Clear()
     {
-        lock ( _lock ) { _queue.Clear(); }
+        lock (_lock) { _queue.Clear(); }
     }
     public bool Contains( T obj )
     {
-        lock ( _lock ) { return _queue.Contains(obj); }
+        lock (_lock) { return _queue.Contains( obj ); }
     }
 
 
     public IEnumerator<T> GetEnumerator()
     {
-        lock ( _lock ) { return _queue.GetEnumerator(); }
+        lock (_lock) { return _queue.GetEnumerator(); }
     }
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }

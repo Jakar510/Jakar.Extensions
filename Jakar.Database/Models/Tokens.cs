@@ -1,0 +1,33 @@
+﻿// Jakar.Extensions :: Jakar.Database
+// 10/10/2022  4:17 PM
+
+namespace Jakar.Database;
+
+
+/// <summary> The SecurityToken created by JwtSecurityTokenHandler.CreateToken </summary>
+[Serializable]
+[SuppressMessage( "ReSharper", "InconsistentNaming" )]
+public readonly struct Tokens : IValidator
+{
+    public readonly AppVersion Version      = default;
+    public readonly Guid       UserID       = Guid.Empty;
+    public readonly string     AccessToken  = string.Empty;
+    public readonly string?    RefreshToken = default;
+    public readonly string?    FullName     = default;
+    public          bool       IsValid => !string.IsNullOrWhiteSpace( AccessToken );
+
+
+    [JsonConstructor]
+    public Tokens( string accessToken, string? refreshToken, AppVersion version, Guid userID, string? fullName )
+    {
+        Version      = version;
+        AccessToken  = accessToken;
+        RefreshToken = refreshToken;
+        UserID       = userID;
+        FullName     = fullName;
+    }
+    public static Tokens Create( string accessToken, string? refreshToken, AppVersion version, UserRecord user ) => new(accessToken, refreshToken, version, user.UserID, user.FullName);
+
+
+    public bool VerifyVersion( in AppVersion version ) => Version.FuzzyEquals( version );
+}

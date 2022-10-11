@@ -1,13 +1,13 @@
 ﻿// Jakar.Extensions :: Jakar.Xml
 // 04/28/2022  1:14 PM
 
+#nullable enable
 using System;
 using System.Collections.Generic;
 using Jakar.Xml.Deserialization;
 
 
 
-#nullable enable
 namespace Jakar.Xml;
 
 
@@ -17,7 +17,7 @@ public static partial class Xmlizer
     {
         // Activator.CreateInstance<T>() ?? throw new NullReferenceException(nameof(Activator.CreateInstance));
 
-        var document = new XDocument(xml);
+        var document = new XDocument( xml );
         var result   = new T();
 
         object obj  = result;

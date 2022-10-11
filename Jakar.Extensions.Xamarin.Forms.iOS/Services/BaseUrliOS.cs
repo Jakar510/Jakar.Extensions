@@ -1,9 +1,10 @@
 ﻿using System;
 using Foundation;
 using Jakar.Extensions.Xamarin.Forms.iOS;
+using Xamarin.Forms;
 
 
-[assembly: Xamarin.Forms.Dependency(typeof(BaseUrlIos))]
+[assembly: Dependency( typeof(BaseUrlIos) )]
 
 
 #nullable enable

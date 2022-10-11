@@ -2,7 +2,7 @@
 namespace Jakar.Extensions.Xamarin.Forms;
 
 
-[ContentProperty(nameof(Source))]
+[ContentProperty( nameof(Source) )]
 public abstract class ImageResourceExtension : IMarkupExtension
 {
     public string? Source { get; set; }
@@ -11,10 +11,12 @@ public abstract class ImageResourceExtension : IMarkupExtension
 
     public object? ProvideValue( IServiceProvider serviceProvider )
     {
-        if ( Source is null ) { return null; }
+        if (Source is null) { return null; }
 
         // Do your translation lookup here, using whatever method you require
-        ImageSource imageSource = ImageSource.FromResource(GetPath(Source), typeof(ImageResourceExtension).GetTypeInfo().Assembly);
+        ImageSource imageSource = ImageSource.FromResource( GetPath( Source ),
+                                                            typeof(ImageResourceExtension).GetTypeInfo()
+                                                                                          .Assembly );
 
         return imageSource;
     }

@@ -12,7 +12,7 @@ public readonly struct Language : IDataBaseID, IComparable<Language>, IEquatable
 
 
     public Language() { }
-    public Language( SupportedLanguage language ) : this(language.GetName(), language.GetShortName(), language) { }
+    public Language( SupportedLanguage language ) : this( language.GetName(), language.GetShortName(), language ) { }
     public Language( string name, string shortName, SupportedLanguage language )
     {
         DisplayName = name;
@@ -30,48 +30,48 @@ public readonly struct Language : IDataBaseID, IComparable<Language>, IEquatable
 
     public bool Equals( Language? other )
     {
-        if ( other is null ) { return false; }
+        if (other is null) { return false; }
 
-        return Equals(other.Value);
+        return Equals( other.Value );
     }
     public bool Equals( Language         other ) => DisplayName == other.DisplayName && ShortName == other.ShortName && Version == other.Version && ID == other.ID;
-    public override bool Equals( object? obj ) => obj is Language language && Equals(language);
-    public override int GetHashCode() => HashCode.Combine(DisplayName, ShortName, Version, ID);
+    public override bool Equals( object? obj ) => obj is Language language && Equals( language );
+    public override int GetHashCode() => HashCode.Combine( DisplayName, ShortName, Version, ID );
 
 
     public int CompareTo( Language? other )
     {
-        if ( other is null ) { return -1; }
+        if (other is null) { return -1; }
 
-        return CompareTo(other.Value);
+        return CompareTo( other.Value );
     }
     public int CompareTo( Language other )
     {
-        int displayNameComparison = string.Compare(DisplayName, other.DisplayName, StringComparison.Ordinal);
-        if ( displayNameComparison != 0 ) { return displayNameComparison; }
+        int displayNameComparison = string.Compare( DisplayName, other.DisplayName, StringComparison.Ordinal );
+        if (displayNameComparison != 0) { return displayNameComparison; }
 
-        int shortNameComparison = string.Compare(ShortName, other.ShortName, StringComparison.Ordinal);
-        if ( shortNameComparison != 0 ) { return shortNameComparison; }
+        int shortNameComparison = string.Compare( ShortName, other.ShortName, StringComparison.Ordinal );
+        if (shortNameComparison != 0) { return shortNameComparison; }
 
-        int versionComparison = Version.CompareTo(other.Version);
-        if ( versionComparison != 0 ) { return versionComparison; }
+        int versionComparison = Version.CompareTo( other.Version );
+        if (versionComparison != 0) { return versionComparison; }
 
-        return ID.CompareTo(other.ID);
+        return ID.CompareTo( other.ID );
     }
     public int CompareTo( object? obj )
     {
-        if ( obj is null ) { return 1; }
+        if (obj is null) { return 1; }
 
         return obj is Language other
-                   ? CompareTo(other)
-                   : throw new ExpectedValueTypeException(nameof(obj), obj, typeof(Language));
+                   ? CompareTo( other )
+                   : throw new ExpectedValueTypeException( nameof(obj), obj, typeof(Language) );
     }
 
 
-    public static bool operator <( Language?  left, Language? right ) => Sorter.Instance.Compare(left, right) < 0;
-    public static bool operator >( Language?  left, Language? right ) => Sorter.Instance.Compare(left, right) > 0;
-    public static bool operator <=( Language? left, Language? right ) => Sorter.Instance.Compare(left, right) <= 0;
-    public static bool operator >=( Language? left, Language? right ) => Sorter.Instance.Compare(left, right) >= 0;
+    public static bool operator <( Language?  left, Language? right ) => Sorter.Instance.Compare( left, right ) < 0;
+    public static bool operator >( Language?  left, Language? right ) => Sorter.Instance.Compare( left, right ) > 0;
+    public static bool operator <=( Language? left, Language? right ) => Sorter.Instance.Compare( left, right ) <= 0;
+    public static bool operator >=( Language? left, Language? right ) => Sorter.Instance.Compare( left, right ) >= 0;
 
 
     public static Language Arabic     { get; } = new(SupportedLanguage.Arabic);
@@ -98,7 +98,7 @@ public readonly struct Language : IDataBaseID, IComparable<Language>, IEquatable
     public class Collection : ObservableCollection<Language>
     {
         public Collection() : base() { }
-        public Collection( IEnumerable<Language> items ) : base(items) { }
+        public Collection( IEnumerable<Language> items ) : base( items ) { }
 
 
         public static Collection Default() => new(Language.Items.Default());
@@ -110,8 +110,8 @@ public readonly struct Language : IDataBaseID, IComparable<Language>, IEquatable
     public class Items : List<Language>
     {
         public Items() : base() { }
-        public Items( int                   capacity ) : base(capacity) { }
-        public Items( IEnumerable<Language> items ) : base(items) { }
+        public Items( int                   capacity ) : base( capacity ) { }
+        public Items( IEnumerable<Language> items ) : base( items ) { }
 
 
         public static Items Default() => new(14)

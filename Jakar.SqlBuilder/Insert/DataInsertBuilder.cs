@@ -27,16 +27,16 @@ public struct DataInsertBuilder
 
     public EasySqlBuilder Done()
     {
-        if ( !_cache.Any() ) { return _builder.NewLine(); }
+        if (!_cache.Any()) { return _builder.NewLine(); }
 
         _builder.Begin();
-        _builder.AddRange(',', _cache.Keys);
+        _builder.AddRange( ',', _cache.Keys );
         _builder.End();
 
-        _builder.Add(KeyWords.VALUES);
+        _builder.Add( KeyWords.VALUES );
 
         _builder.Begin();
-        _builder.AddRange(',', _cache.Values);
+        _builder.AddRange( ',', _cache.Values );
         _builder.End();
 
 

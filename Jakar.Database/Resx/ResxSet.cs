@@ -12,5 +12,3 @@ public sealed class ResxSet : ConcurrentDictionary<long, string>
     public ResxSet( int                                     concurrencyLevel, int capacity ) : base( concurrencyLevel, capacity ) { }
     public ResxSet( int                                     concurrencyLevel, int capacity, IEqualityComparer<long>? comparer ) : base( concurrencyLevel, capacity, comparer ) { }
 }
-
-

@@ -2,7 +2,7 @@
 namespace Jakar.Extensions;
 
 
-[SuppressMessage("ReSharper", "StringLiteralTypo")]
+[SuppressMessage( "ReSharper", "StringLiteralTypo" )]
 public static class LanguageExtensions
 {
     public static string GetName( this SupportedLanguage language ) =>
@@ -22,7 +22,7 @@ public static class LanguageExtensions
             SupportedLanguage.Dutch      => "Nederlands - Dutch",
             SupportedLanguage.Korean     => "한국어 - Korean",
             SupportedLanguage.Arabic     => "عربى - Arabic",
-            _                            => throw new ArgumentOutOfRangeException(nameof(language), language, null)
+            _                            => throw new ArgumentOutOfRangeException( nameof(language), language, null )
         };
     public static string GetShortName( this SupportedLanguage language ) =>
         language switch
@@ -41,6 +41,6 @@ public static class LanguageExtensions
             SupportedLanguage.Dutch      => "nl",
             SupportedLanguage.Korean     => "ko",
             SupportedLanguage.Arabic     => "ar",
-            _                            => throw new ArgumentOutOfRangeException(nameof(language), language, null)
+            _                            => throw new ArgumentOutOfRangeException( nameof(language), language, null )
         };
 }

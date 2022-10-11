@@ -1,5 +1,5 @@
 <?xml version="1.0"
-      encoding="utf-8"?>
+	  encoding="utf-8"?>
 
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata>
@@ -24,22 +24,22 @@
 		<tags>Xamarin.Forms Xamarin Jakar Jakar.Extensions Api Extensions</tags>
 		<language>en-US</language>
 		<repository type="Github"
-		            url="https://github.com/Jakar510/Jakar.Extensions"
-		            branch="master" />
+					url="https://github.com/Jakar510/Jakar.Extensions"
+					branch="master" />
 		<dependencies>
 			<group targetFramework="netstandard2.1">
 				<dependency id="Xamarin.Forms"
-				            version="5.0.0.2291" />
+							version="5.0.0.2291" />
 				<dependency id="Xamarin.Forms.Visual.Material"
-				            version="5.0.0.2291" />
+							version="5.0.0.2291" />
 				<dependency id="Xamarin.CommunityToolkit"
-				            version="2.0.4" />
+							version="2.0.4" />
 				<dependency id="Xamarin.CommunityToolkit.Markup"
-				            version="2.0.4" />
+							version="2.0.4" />
 				<dependency id="Xamarin.Essentials"
 							version="1.7.3" />
 				<dependency id="NETStandard.Library"
-				            version="2.0.3" />
+							version="2.0.3" />
 
 				<dependency id="Microsoft.AppCenter"
 							version="4.5.1" />
@@ -49,29 +49,29 @@
 							version="4.5.1" />
 
 				<dependency id="Newtonsoft.Json"
-				            version="13.0.1" />
+							version="13.0.1" />
 
 				<dependency id="Jakar.Extensions"
 							version="6.0.3" />
 
 				<dependency id="Acr.UserDialogs"
-				            version="7.2.0.562" />
+							version="7.2.0.562" />
 
 
 				<dependency id="Xam.Plugin.LatestVersion"
-				            version="2.1.0" />
+							version="2.1.0" />
 				<dependency id="Xam.Plugin.Screenshot"
-				            version="2.0.3" />
+							version="2.0.3" />
 				<dependency id="Xam.Plugin.Media"
-				            version="5.0.1" />
+							version="5.0.1" />
 			</group>
 
 
 			<group targetFramework="portable-win+net45+wp80+win81+wpa81+MonoAndroid10+MonoTouch10+Xamarin.iOS10">
 				<dependency id="Xamarin.Forms"
-				            version="5.0.0.2291" />
+							version="5.0.0.2291" />
 				<dependency id="Xamarin.Forms.Visual.Material"
-				            version="5.0.0.2291" />
+							version="5.0.0.2291" />
 				<dependency id="Xamarin.CommunityToolkit"
 							version="2.0.4" />
 				<dependency id="Xamarin.CommunityToolkit.Markup"
@@ -79,7 +79,7 @@
 				<dependency id="Xamarin.Essentials"
 							version="1.7.3" />
 				<dependency id="NETStandard.Library"
-				            version="2.0.3" />
+							version="2.0.3" />
 
 				<dependency id="Microsoft.AppCenter"
 							version="4.5.1" />
@@ -89,29 +89,29 @@
 							version="4.5.1" />
 
 				<dependency id="Newtonsoft.Json"
-				            version="13.0.1" />
+							version="13.0.1" />
 
 				<dependency id="Jakar.Extensions"
 							version="6.0.3" />
 
 				<dependency id="Acr.UserDialogs"
-				            version="7.2.0.562" />
+							version="7.2.0.562" />
 
 
 				<dependency id="Xam.Plugin.LatestVersion"
-				            version="2.1.0" />
+							version="2.1.0" />
 				<dependency id="Xam.Plugin.Screenshot"
-				            version="2.0.3" />
+							version="2.0.3" />
 				<dependency id="Xam.Plugin.Media"
-				            version="5.0.1" />
+							version="5.0.1" />
 			</group>
 
 
 			<group targetFramework="MonoAndroid">
 				<dependency id="Xamarin.Forms"
-				            version="5.0.0.2291" />
+							version="5.0.0.2291" />
 				<dependency id="Xamarin.Forms.Visual.Material"
-				            version="5.0.0.2291" />
+							version="5.0.0.2291" />
 				<dependency id="Xamarin.CommunityToolkit"
 							version="2.0.4" />
 				<dependency id="Xamarin.CommunityToolkit.Markup"
@@ -119,7 +119,7 @@
 				<dependency id="Xamarin.Essentials"
 							version="1.7.3" />
 				<dependency id="NETStandard.Library"
-				            version="2.0.3" />
+							version="2.0.3" />
 
 				<dependency id="Microsoft.AppCenter"
 							version="4.5.1" />
@@ -129,35 +129,35 @@
 							version="4.5.1" />
 
 				<dependency id="Newtonsoft.Json"
-				            version="13.0.1" />
+							version="13.0.1" />
 
 				<dependency id="Jakar.Extensions"
 							version="6.0.3" />
 
 				<dependency id="Acr.UserDialogs"
-				            version="7.2.0.562" />
+							version="7.2.0.562" />
 
 
 				<dependency id="Xam.Plugin.LatestVersion"
-				            version="2.1.0" />
+							version="2.1.0" />
 				<dependency id="Xam.Plugin.Screenshot"
-				            version="2.0.3" />
+							version="2.0.3" />
 				<dependency id="Xam.Plugin.Media"
-				            version="5.0.1" />
+							version="5.0.1" />
 			</group>
 
 
 			<group targetFramework="MonoTouch">
 				<dependency id="Xamarin.Forms"
-				            version="5.0.0.2291" />
+							version="5.0.0.2291" />
 			</group>
 
 
 			<group targetFramework="Xamarin.iOS1.0">
 				<dependency id="Xamarin.Forms"
-				            version="5.0.0.2291" />
+							version="5.0.0.2291" />
 				<dependency id="Xamarin.Forms.Visual.Material"
-				            version="5.0.0.2291" />
+							version="5.0.0.2291" />
 				<dependency id="Xamarin.CommunityToolkit"
 							version="2.0.4" />
 				<dependency id="Xamarin.CommunityToolkit.Markup"
@@ -165,97 +165,97 @@
 				<dependency id="Xamarin.Essentials"
 							version="1.7.3" />
 				<dependency id="NETStandard.Library"
-				            version="2.0.3" />
+							version="2.0.3" />
 
 				<dependency id="Microsoft.AppCenter"
-				            version="4.5.1" />
+							version="4.5.1" />
 				<dependency id="Microsoft.AppCenter.Analytics"
-				            version="4.5.1" />
+							version="4.5.1" />
 				<dependency id="Microsoft.AppCenter.Crashes"
-				            version="4.5.1" />
+							version="4.5.1" />
 
 				<dependency id="Newtonsoft.Json"
-				            version="13.0.1" />
+							version="13.0.1" />
 
 				<dependency id="Jakar.Extensions"
 							version="6.0.3" />
 
 				<dependency id="Acr.UserDialogs"
-				            version="7.2.0.562" />
+							version="7.2.0.562" />
 
 
 				<dependency id="Xam.Plugin.LatestVersion"
-				            version="2.1.0" />
+							version="2.1.0" />
 				<dependency id="Xam.Plugin.Screenshot"
-				            version="2.0.3" />
+							version="2.0.3" />
 				<dependency id="Xam.Plugin.Media"
-				            version="5.0.1" />
+							version="5.0.1" />
 			</group>
 		</dependencies>
 	</metadata>
 
 	<files>
 		<file src="..\LICENSE.txt"
-		      target="" />
+			  target="" />
 
 		<file src="..\images\icon.png" />
 
 		<!-- .net standard 2.1 -->
 		<file src="../Jakar.Extensions.Xamarin.Forms/bin/Release/netstandard2.1/Jakar.Extensions.Xamarin.Forms.dll"
-		      target="lib/netstandard2.1" />
+			  target="lib/netstandard2.1" />
 		<file src="../Jakar.Extensions.Xamarin.Forms/bin/Release/netstandard2.1/Jakar.Extensions.Xamarin.Forms.xml"
-		      target="lib/netstandard2.1" />
+			  target="lib/netstandard2.1" />
 		<file src="../Jakar.Extensions.Xamarin.Forms/bin/Release/netstandard2.1/Jakar.Extensions.Xamarin.Forms.pdb"
-		      target="lib/netstandard2.1" />
+			  target="lib/netstandard2.1" />
 
 		<!-- PCL -->
 		<file src="../Jakar.Extensions.Xamarin.Forms/bin/Release/netstandard2.1/Jakar.Extensions.Xamarin.Forms.dll"
-		      target="lib/portable-win+net45+wp80+win81+wpa81+MonoAndroid10+MonoTouch10+Xamarin.iOS10" />
+			  target="lib/portable-win+net45+wp80+win81+wpa81+MonoAndroid10+MonoTouch10+Xamarin.iOS10" />
 		<file src="../Jakar.Extensions.Xamarin.Forms/bin/Release/netstandard2.1/Jakar.Extensions.Xamarin.Forms.xml"
-		      target="lib/portable-win+net45+wp80+win81+wpa81+MonoAndroid10+MonoTouch10+Xamarin.iOS10" />
+			  target="lib/portable-win+net45+wp80+win81+wpa81+MonoAndroid10+MonoTouch10+Xamarin.iOS10" />
 		<file src="../Jakar.Extensions.Xamarin.Forms/bin/Release/netstandard2.1/Jakar.Extensions.Xamarin.Forms.pdb"
-		      target="lib/portable-win+net45+wp80+win81+wpa81+MonoAndroid10+MonoTouch10+Xamarin.iOS10" />
+			  target="lib/portable-win+net45+wp80+win81+wpa81+MonoAndroid10+MonoTouch10+Xamarin.iOS10" />
 
 		<!-- Mono.Android -->
 		<file src="../Jakar.Extensions.Xamarin.Forms/bin/Release/netstandard2.1/Jakar.Extensions.Xamarin.Forms.dll"
-		      target="lib/MonoAndroid" />
+			  target="lib/MonoAndroid" />
 		<file src="../Jakar.Extensions.Xamarin.Forms/bin/Release/netstandard2.1/Jakar.Extensions.Xamarin.Forms.xml"
-		      target="lib/MonoAndroid" />
+			  target="lib/MonoAndroid" />
 		<file src="../Jakar.Extensions.Xamarin.Forms/bin/Release/netstandard2.1/Jakar.Extensions.Xamarin.Forms.pdb"
-		      target="lib/MonoAndroid" />
+			  target="lib/MonoAndroid" />
 		<file src="../Jakar.Extensions.Xamarin.Forms.Droid/bin/Release/Jakar.Extensions.Xamarin.Forms.Droid.dll"
-		      target="lib/MonoAndroid" />
+			  target="lib/MonoAndroid" />
 		<file src="../Jakar.Extensions.Xamarin.Forms.Droid/bin/Release/Jakar.Extensions.Xamarin.Forms.Droid.xml"
-		      target="lib/MonoAndroid" />
+			  target="lib/MonoAndroid" />
 		<file src="../Jakar.Extensions.Xamarin.Forms.Droid/bin/Release/Jakar.Extensions.Xamarin.Forms.Droid.pdb"
-		      target="lib/MonoAndroid" />
+			  target="lib/MonoAndroid" />
 
 		<!-- Mono.Touch -->
 		<file src="../Jakar.Extensions.Xamarin.Forms/bin/Release/netstandard2.1/Jakar.Extensions.Xamarin.Forms.dll"
-		      target="lib/MonoTouch" />
+			  target="lib/MonoTouch" />
 		<file src="../Jakar.Extensions.Xamarin.Forms/bin/Release/netstandard2.1/Jakar.Extensions.Xamarin.Forms.xml"
-		      target="lib/MonoTouch" />
+			  target="lib/MonoTouch" />
 		<file src="../Jakar.Extensions.Xamarin.Forms/bin/Release/netstandard2.1/Jakar.Extensions.Xamarin.Forms.pdb"
-		      target="lib/MonoTouch" />
+			  target="lib/MonoTouch" />
 		<file src="../Jakar.Extensions.Xamarin.Forms.iOS/bin/Release/Jakar.Extensions.Xamarin.Forms.iOS.dll"
-		      target="lib/MonoTouch" />
+			  target="lib/MonoTouch" />
 		<file src="../Jakar.Extensions.Xamarin.Forms.iOS/bin/Release/Jakar.Extensions.Xamarin.Forms.iOS.xml"
-		      target="lib/MonoTouch" />
+			  target="lib/MonoTouch" />
 		<file src="../Jakar.Extensions.Xamarin.Forms.iOS/bin/Release/Jakar.Extensions.Xamarin.Forms.iOS.pdb"
-		      target="lib/MonoTouch" />
+			  target="lib/MonoTouch" />
 
 		<!-- Xamarin.iOS10 -->
 		<file src="../Jakar.Extensions.Xamarin.Forms/bin/Release/netstandard2.1/Jakar.Extensions.Xamarin.Forms.dll"
-		      target="lib/Xamarin.iOS10" />
+			  target="lib/Xamarin.iOS10" />
 		<file src="../Jakar.Extensions.Xamarin.Forms/bin/Release/netstandard2.1/Jakar.Extensions.Xamarin.Forms.xml"
-		      target="lib/Xamarin.iOS10" />
+			  target="lib/Xamarin.iOS10" />
 		<file src="../Jakar.Extensions.Xamarin.Forms/bin/Release/netstandard2.1/Jakar.Extensions.Xamarin.Forms.pdb"
-		      target="lib/Xamarin.iOS10" />
+			  target="lib/Xamarin.iOS10" />
 		<file src="../Jakar.Extensions.Xamarin.Forms.iOS/bin/Release/Jakar.Extensions.Xamarin.Forms.iOS.dll"
-		      target="lib/Xamarin.iOS10" />
+			  target="lib/Xamarin.iOS10" />
 		<file src="../Jakar.Extensions.Xamarin.Forms.iOS/bin/Release/Jakar.Extensions.Xamarin.Forms.iOS.xml"
-		      target="lib/Xamarin.iOS10" />
+			  target="lib/Xamarin.iOS10" />
 		<file src="../Jakar.Extensions.Xamarin.Forms.iOS/bin/Release/Jakar.Extensions.Xamarin.Forms.iOS.pdb"
-		      target="lib/Xamarin.iOS10" />
+			  target="lib/Xamarin.iOS10" />
 	</files>
 </package>

@@ -8,8 +8,8 @@ public class JsonSqlHandler<T> : SqlConverter<JsonSqlHandler<T>, T> where T : no
 
     public override T Parse( object? value )
     {
-        var item = value?.ToString();
-        if ( item is null ) { return default!; }
+        string? item = value?.ToString();
+        if (item is null) { return default!; }
 
         return item.FromJson<T>();
     }

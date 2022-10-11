@@ -4,7 +4,9 @@
 namespace Jakar.Extensions;
 
 
-/// <summary> <see href="https://github.com/xamarin/Essentials/blob/main/Xamarin.Essentials/Types/UnitConverters.shared.cs"/> </summary>
+/// <summary>
+///     <see href = "https://github.com/xamarin/Essentials/blob/main/Xamarin.Essentials/Types/UnitConverters.shared.cs" />
+/// </summary>
 public static class UnitConverters
 {
     private const double TWO_PI                          = 2.0 * Math.PI;
@@ -24,7 +26,7 @@ public static class UnitConverters
     private const double US_SURVEY_FOOT_DEFINITION       = 1200.0 / 3937;
 
 
-    public static double FahrenheitToCelsius( double                fahrenheit ) => ( fahrenheit - 32.0 ) / 1.8;
+    public static double FahrenheitToCelsius( double                fahrenheit ) => (fahrenheit - 32.0) / 1.8;
     public static double CelsiusToFahrenheit( double                celsius ) => celsius * 1.8 + 32.0;
     public static double CelsiusToKelvin( double                    celsius ) => celsius + CELSIUS_TO_KELVIN;
     public static double KelvinToCelsius( double                    kelvin ) => kelvin - CELSIUS_TO_KELVIN;
@@ -37,8 +39,8 @@ public static class UnitConverters
     public static double PoundsToStones( double                     pounds ) => pounds * POUNDS_TO_STONES;
     public static double StonesToPounds( double                     stones ) => stones * STONES_TO_POUNDS;
     public static double KilogramsToPounds( double                  kilograms ) => kilograms * KG_TO_POUNDS;
-    public static double DegreesPerSecondToRadiansPerSecond( double degrees ) => HertzToRadiansPerSecond(DegreesPerSecondToHertz(degrees));
-    public static double RadiansPerSecondToDegreesPerSecond( double radians ) => HertzToDegreesPerSecond(RadiansPerSecondToHertz(radians));
+    public static double DegreesPerSecondToRadiansPerSecond( double degrees ) => HertzToRadiansPerSecond( DegreesPerSecondToHertz( degrees ) );
+    public static double RadiansPerSecondToDegreesPerSecond( double radians ) => HertzToDegreesPerSecond( RadiansPerSecondToHertz( radians ) );
     public static double DegreesPerSecondToHertz( double            degrees ) => degrees / TOTAL_DEGREES;
     public static double RadiansPerSecondToHertz( double            radians ) => radians / TWO_PI;
     public static double HertzToDegreesPerSecond( double            hertz ) => hertz * TOTAL_DEGREES;
@@ -51,44 +53,46 @@ public static class UnitConverters
     public static double PascalsToAtmospheres( double               pascals ) => pascals / ATMOSPHERE_PASCALS;
 
 
-    public static double CoordinatesToMiles( double latStart, double longitudeStart, double latEnd, double longitudeEnd ) => KilometersToMiles(CoordinatesToKilometers(latStart, longitudeStart, latEnd, longitudeEnd));
+    public static double CoordinatesToMiles( double latStart, double longitudeStart, double latEnd, double longitudeEnd ) => KilometersToMiles( CoordinatesToKilometers( latStart, longitudeStart, latEnd, longitudeEnd ) );
     public static double CoordinatesToKilometers( double latStart, double longitudeStart, double latEnd, double longitudeEnd )
     {
-        if ( latStart.Equals(latEnd) && longitudeStart.Equals(longitudeEnd) ) { return 0; }
+        if (latStart.Equals( latEnd ) && longitudeStart.Equals( longitudeEnd )) { return 0; }
 
-        double dLat = DegreesToRadians(latEnd - latStart);
-        double dLon = DegreesToRadians(longitudeEnd - longitudeStart);
+        double dLat = DegreesToRadians( latEnd - latStart );
+        double dLon = DegreesToRadians( longitudeEnd - longitudeStart );
 
-        latStart = DegreesToRadians(latStart);
-        latEnd   = DegreesToRadians(latEnd);
+        latStart = DegreesToRadians( latStart );
+        latEnd   = DegreesToRadians( latEnd );
 
-        double dLat2 = Math.Sin(dLat / 2) * Math.Sin(dLat / 2);
-        double dLon2 = Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
+        double dLat2 = Math.Sin( dLat / 2 ) * Math.Sin( dLat / 2 );
+        double dLon2 = Math.Sin( dLon / 2 ) * Math.Sin( dLon / 2 );
 
-        double a = dLat2 + dLon2 * Math.Cos(latStart) * Math.Cos(latEnd);
-        double c = 2 * Math.Asin(Math.Sqrt(a));
+        double a = dLat2 + dLon2 * Math.Cos( latStart ) * Math.Cos( latEnd );
+        double c = 2 * Math.Asin( Math.Sqrt( a ) );
 
         return MEAN_EARTH_RADIUS_IN_KILOMETERS * c;
     }
 
 
     /// <summary>
-    /// International survey foot defined as exactly 0.3048 meters by convention in 1959. This is the most common modern foot measure.
+    ///     International survey foot defined as exactly 0.3048 meters by convention in 1959. This is the most common modern foot measure.
     /// </summary>
     public static double MetersToInternationalFeet( double meters ) => meters / INTERNATIONAL_FOOT_DEFINITION;
 
     /// <summary>
-    /// International survey foot defined as exactly 0.3048 meters by convention in 1959. This is the most common modern foot measure.
+    ///     International survey foot defined as exactly 0.3048 meters by convention in 1959. This is the most common modern foot measure.
     /// </summary>
     public static double InternationalFeetToMeters( double internationalFeet ) => internationalFeet * INTERNATIONAL_FOOT_DEFINITION;
 
     /// <summary>
-    /// Exactly 1200/3937 meters by definition. In decimal terms approximately 0.304 800 609 601 219 meters. Variation from the common international foot of exactly 0.3048 meters may only be considerable over large survey distances.
+    ///     Exactly 1200/3937 meters by definition. In decimal terms approximately 0.304 800 609 601 219 meters. Variation from the common international foot of exactly 0.3048 meters may only be considerable
+    ///     over large survey distances.
     /// </summary>
     public static double MetersToUsSurveyFeet( double meters ) => meters / US_SURVEY_FOOT_DEFINITION;
 
     /// <summary>
-    /// Exactly 1200/3937 meters by definition. In decimal terms approximately 0.304 800 609 601 219 meters. Variation from the common international foot of exactly 0.3048 meters may only be considerable over large survey distances.
+    ///     Exactly 1200/3937 meters by definition. In decimal terms approximately 0.304 800 609 601 219 meters. Variation from the common international foot of exactly 0.3048 meters may only be considerable
+    ///     over large survey distances.
     /// </summary>
     public static double UsSurveyFeetToMeters( double usFeet ) => usFeet * US_SURVEY_FOOT_DEFINITION;
 }

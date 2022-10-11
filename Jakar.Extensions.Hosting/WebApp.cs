@@ -1,20 +1,19 @@
 ﻿namespace Jakar.Extensions.Hosting;
 
 
-
-[SuppressMessage("ReSharper", "RedundantLambdaParameterType")]
-[SuppressMessage("ReSharper", "ParameterTypeCanBeEnumerable.Global")]
+[SuppressMessage( "ReSharper", "RedundantLambdaParameterType" )]
+[SuppressMessage( "ReSharper", "ParameterTypeCanBeEnumerable.Global" )]
 public static class WebApp
 {
     public static void ParsePort( this string[] args, in ReadOnlySpan<char> key, in int defaultPort, out int port )
     {
         port = defaultPort;
 
-        foreach ( ReadOnlySpan<char> arg in args )
+        foreach (ReadOnlySpan<char> arg in args)
         {
-            if ( arg.StartsWith(key) )
+            if (arg.StartsWith( key ))
             {
-                port = int.Parse(arg[key.Length..]);
+                port = int.Parse( arg[key.Length..] );
                 return;
             }
         }
@@ -23,18 +22,18 @@ public static class WebApp
 
     public static bool CheckArgs<TEnum>( this string[] args, in string version, string message, params string[] enumTriggers ) where TEnum : struct, Enum
     {
-        if ( args.Any(enumTriggers.Contains) )
+        if (args.Any( enumTriggers.Contains ))
         {
-            Console.WriteLine(message);
-            foreach ( string name in Enum.GetNames<TEnum>() ) { Console.WriteLine(name); }
+            Console.WriteLine( message );
+            foreach (string name in Enum.GetNames<TEnum>()) { Console.WriteLine( name ); }
 
             return true;
         }
 
 
-        if ( args.Any(x => x is "--version" or "-V") )
+        if (args.Any( x => x is "--version" or "-V" ))
         {
-            Console.WriteLine(version);
+            Console.WriteLine( version );
 
             return true;
         }
@@ -43,7 +42,7 @@ public static class WebApp
     }
     public static void CreateUrls( this string[] args, in int http, in int https, out bool useSLL, out string[] urls, string key = "--ssl" )
     {
-        if ( args.Contains(key) )
+        if (args.Contains( key ))
         {
             urls = new[]
                    {
@@ -60,7 +59,7 @@ public static class WebApp
             urls = new[]
                    {
                        $"http://0.0.0.0:{http}",
-                       $"http://localhost:{http}",
+                       $"http://localhost:{http}"
                    };
 
             useSLL = false;
@@ -70,7 +69,7 @@ public static class WebApp
 
     public static WebApplication UseUrls( this WebApplication app, params string[] urls )
     {
-        foreach ( string url in urls ) { app.Urls.Add(url); }
+        foreach (string url in urls) { app.Urls.Add( url ); }
 
         return app;
     }

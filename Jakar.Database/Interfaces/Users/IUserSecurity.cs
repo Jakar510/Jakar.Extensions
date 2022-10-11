@@ -2,25 +2,26 @@
 
 
 /// <summary>
-/// <see cref="UserLoginInfo"/>
+///     <see cref = "UserLoginInfo" />
 /// </summary>
 public interface IUserSecurity
 {
-    public DateTimeOffset? TokenExpiration        { get; }
-    public bool            IsTwoFactorEnabled     { get; }
     public bool            IsEmailConfirmed       { get; }
     public bool            IsPhoneNumberConfirmed { get; }
-    public string?         LoginProvider          { get; }
-    public string?         ProviderKey            { get; }
-    public string?         ProviderDisplayName    { get; }
-
-
-    /// <summary> A random value that must change whenever a users credentials change (password changed, login removed) </summary>
-    public string? SecurityStamp { get; }
+    public bool            IsTwoFactorEnabled     { get; }
+    public DateTimeOffset? TokenExpiration        { get; }
 
 
     /// <summary> A random value that must change whenever a user is persisted to the store </summary>
     public string? ConcurrencyStamp { get; }
+
+    public string? LoginProvider       { get; }
+    public string? ProviderDisplayName { get; }
+    public string? ProviderKey         { get; }
+
+
+    /// <summary> A random value that must change whenever a users credentials change (password changed, login removed) </summary>
+    public string? SecurityStamp { get; }
 
 
     public UserRecord ClearRefreshToken();

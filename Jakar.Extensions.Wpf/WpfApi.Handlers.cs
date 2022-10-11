@@ -4,7 +4,7 @@ namespace Jakar.Extensions.Wpf;
 
 public static partial class WpfApi
 {
-    public static readonly long maxTime = new TimeSpan(23, 59, 59).Ticks;
+    public static readonly long maxTime = new TimeSpan( 23, 59, 59 ).Ticks;
 
 
     public static DateTimeOffset? StartDate_OnSelectedDateTimeChanged( in DatePicker picker, in DateTime? endDate )
@@ -12,9 +12,9 @@ public static partial class WpfApi
         DateTime? selected = picker.SelectedDate;
 
         // ReSharper disable once InvertIf
-        if ( endDate.HasValue && selected.HasValue )
+        if (endDate.HasValue && selected.HasValue)
         {
-            if ( selected.Value > endDate.Value ) { picker.SelectedDate = endDate.Value.Date; }
+            if (selected.Value > endDate.Value) { picker.SelectedDate = endDate.Value.Date; }
         }
 
         return selected?.Date.ToUniversalTime();
@@ -23,12 +23,13 @@ public static partial class WpfApi
     {
         DateTime? selected = picker.SelectedDate;
 
-        if ( !selected.HasValue ) { return null; }
+        if (!selected.HasValue) { return null; }
 
         DateTime dt = selected.Value;
 
-        if ( startDate.HasValue && dt < startDate.Value ) { picker.SelectedDate = dt = startDate.Value.Date; }
+        if (startDate.HasValue && dt < startDate.Value) { picker.SelectedDate = dt = startDate.Value.Date; }
 
-        return dt.AddTicks(maxTime).ToUniversalTime();
+        return dt.AddTicks( maxTime )
+                 .ToUniversalTime();
     }
 }

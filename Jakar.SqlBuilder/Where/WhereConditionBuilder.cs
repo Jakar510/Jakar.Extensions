@@ -20,20 +20,22 @@ public struct WhereConditionBuilder<TNext>
 
     public TNext Done()
     {
-        _builder.AddRange(',', _cache);
+        _builder.AddRange( ',', _cache );
 
-        _builder.VerifyParentheses().NewLine();
+        _builder.VerifyParentheses()
+                .NewLine();
+
         return _next;
     }
 
     public WhereConditionBuilder<TNext> With( string columnName, string? value )
     {
-        _cache.Add($"{columnName}={value ?? KeyWords.NULL}");
+        _cache.Add( $"{columnName}={value ?? KeyWords.NULL}" );
         return this;
     }
     public WhereConditionBuilder<TNext> With<T>( string columnName, T value ) where T : struct
     {
-        _cache.Add($"{columnName}={value}");
+        _cache.Add( $"{columnName}={value}" );
         return this;
     }
 }

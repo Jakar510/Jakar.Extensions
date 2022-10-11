@@ -1,4 +1,5 @@
 ﻿#nullable enable
+using Foundation;
 using UIKit;
 using Xamarin.Forms;
 
@@ -7,7 +8,7 @@ using Xamarin.Forms;
 namespace Jakar.Extensions.Xamarin.Forms.iOS;
 
 
-[Foundation.Preserve(AllMembers = true)]
+[Preserve( AllMembers = true )]
 public static class StackViewAlignmentExtensions
 {
     public static UIStackViewAlignment ToNativeVertical( this LayoutAlignment forms ) =>

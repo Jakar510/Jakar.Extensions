@@ -4,14 +4,15 @@
 #nullable enable
 using System;
 using System.Diagnostics.CodeAnalysis;
+using Foundation;
 
 
 
 namespace Jakar.Extensions.Xamarin.Forms.iOS;
 
 
-[Foundation.Preserve(AllMembers = true)]
-[SuppressMessage("ReSharper", "InconsistentNaming")]
+[Preserve( AllMembers = true )]
+[SuppressMessage( "ReSharper", "InconsistentNaming" )]
 public static class PlatformExtensions
 {
     public static nfloat ToNFloat( this double value ) => (nfloat)value;

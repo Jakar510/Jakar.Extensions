@@ -2,7 +2,7 @@
 
 
 [Serializable]
-[DataBaseType(DbType.String)]
+[DataBaseType( DbType.String )]
 public sealed class IDCollection<T> : CollectionAlerts<long>, IReadOnlyCollection<long>, ISpanFormattable where T : IUniqueID<long>
 {
     public const     char          SEPARATOR = ',';
@@ -12,11 +12,11 @@ public sealed class IDCollection<T> : CollectionAlerts<long>, IReadOnlyCollectio
     public override int Count => _items.Count;
 
 
-    public IDCollection() : this(EqualityComparer<long>.Default) { }
-    public IDCollection( IEqualityComparer<long>? comparer ) : this(new HashSet<long>(comparer)) { }
-    public IDCollection( int                      capacity ) : this(new HashSet<long>(capacity)) { }
-    public IDCollection( int                      capacity, IEqualityComparer<long>? comparer ) : this(new HashSet<long>(capacity, comparer)) { }
-    public IDCollection( IEnumerable<T>           collection ) : this(new HashSet<long>(collection.Select(x => x.ID))) { }
+    public IDCollection() : this( EqualityComparer<long>.Default ) { }
+    public IDCollection( IEqualityComparer<long>? comparer ) : this( new HashSet<long>( comparer ) ) { }
+    public IDCollection( int                      capacity ) : this( new HashSet<long>( capacity ) ) { }
+    public IDCollection( int                      capacity, IEqualityComparer<long>? comparer ) : this( new HashSet<long>( capacity, comparer ) ) { }
+    public IDCollection( IEnumerable<T>           collection ) : this( new HashSet<long>( collection.Select( x => x.ID ) ) ) { }
     internal IDCollection( HashSet<long>          set ) => _items = set;
 
 
@@ -24,27 +24,32 @@ public sealed class IDCollection<T> : CollectionAlerts<long>, IReadOnlyCollectio
     /// <typeparamref name = "T" />
     /// <param name = "items" > </param>
     /// <returns>
-    /// Returns a IDCollection if <paramref name = "items" /> is not null. 
-    /// <para> Otherwise returns <see langword = "null" /> </para>
+    ///     Returns a IDCollection if
+    ///     <paramref name = "items" />
+    ///     is not null.
+    ///     <para>
+    ///         Otherwise returns
+    ///         <see langword = "null" />
+    ///     </para>
     /// </returns>
-    public static IDCollection<T>? Create( [NotNullIfNotNull("items")] ICollection<T>? items )
+    public static IDCollection<T>? Create( [NotNullIfNotNull( "items" )] ICollection<T>? items )
     {
-        if ( items is null ) { return null; }
+        if (items is null) { return null; }
 
-        var collection = new IDCollection<T>(items.Count);
+        var collection = new IDCollection<T>( items.Count );
 
-        foreach ( T value in items ) { collection.Add(value); }
+        foreach (T value in items) { collection.Add( value ); }
 
         return collection;
     }
-    public static IDCollection<T>? Create( [NotNullIfNotNull("jsonOrCsv")] string? jsonOrCsv )
+    public static IDCollection<T>? Create( [NotNullIfNotNull( "jsonOrCsv" )] string? jsonOrCsv )
     {
-        if ( string.IsNullOrWhiteSpace(jsonOrCsv) ) { return null; }
+        if (string.IsNullOrWhiteSpace( jsonOrCsv )) { return null; }
 
-        var items = jsonOrCsv.Replace("\"", string.Empty)
+        var items = jsonOrCsv.Replace( "\"", string.Empty )
                              .FromJson<List<long>>();
 
-        var collection = new IDCollection<T>(items.Count)
+        var collection = new IDCollection<T>( items.Count )
                          {
                              items
                          };
@@ -52,6 +57,10 @@ public sealed class IDCollection<T> : CollectionAlerts<long>, IReadOnlyCollectio
 
         return collection;
     }
+
+
+    // public static implicit operator IDCollection<T, long>( ReadOnlySpan<char> span ) => Create(span);
+    public static implicit operator IDCollection<T>?( string? jsonOrCsv ) => Create( jsonOrCsv );
 
     // public static IDCollection<T, long> Create( in ReadOnlySpan<char> span )
     // {
@@ -74,36 +83,36 @@ public sealed class IDCollection<T> : CollectionAlerts<long>, IReadOnlyCollectio
     public void Init( string? json )
     {
         Clear();
-        if ( string.IsNullOrWhiteSpace(json) ) { return; }
+        if (string.IsNullOrWhiteSpace( json )) { return; }
 
-        foreach ( long n in json.FromJson<List<long>>() ) { Add(n); }
+        foreach (long n in json.FromJson<List<long>>()) { Add( n ); }
     }
 
     internal void Add( IEnumerable<long>? value )
     {
-        if ( value is null ) { return; }
+        if (value is null) { return; }
 
-        foreach ( long id in value ) { Add(id); }
+        foreach (long id in value) { Add( id ); }
     }
-    internal  bool Add( long id )
+    internal bool Add( long id )
     {
-        OnPropertyChanging(nameof(Count));
-        bool result = _items.Add(id);
-        Added(id);
-        OnPropertyChanged(nameof(Count));
+        OnPropertyChanging( nameof(Count) );
+        bool result = _items.Add( id );
+        Added( id );
+        OnPropertyChanged( nameof(Count) );
         return result;
     }
 
 
-    public void Add( IEnumerable<T>? value ) => Add(value?.Select(x => x.ID));
-    public bool Add( T               value ) => Add(value.ID);
+    public void Add( IEnumerable<T>? value ) => Add( value?.Select( x => x.ID ) );
+    public bool Add( T               value ) => Add( value.ID );
     public void Add( IDCollection<T>? value )
     {
-        if ( value is null ) { return; }
+        if (value is null) { return; }
 
-        foreach ( long id in value ) { Add(id); }
+        foreach (long id in value) { Add( id ); }
     }
-    private void Added( long id ) => OnChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, id));
+    private void Added( long id ) => OnChanged( new NotifyCollectionChangedEventArgs( NotifyCollectionChangedAction.Add, id ) );
 
 
     public void Clear()
@@ -111,41 +120,37 @@ public sealed class IDCollection<T> : CollectionAlerts<long>, IReadOnlyCollectio
         _items.Clear();
         Cleared();
     }
-    private void Cleared() => OnChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
-    private bool Contains( long id ) => _items.Contains(id);
-    public bool Contains( T     value ) => Contains(value.ID);
-
-
-    // public static implicit operator IDCollection<T, long>( ReadOnlySpan<char> span ) => Create(span);
-    public static implicit operator IDCollection<T>?( string? jsonOrCsv ) => Create(jsonOrCsv);
+    private void Cleared() => OnChanged( new NotifyCollectionChangedEventArgs( NotifyCollectionChangedAction.Reset ) );
+    private bool Contains( long id ) => _items.Contains( id );
+    public bool Contains( T     value ) => Contains( value.ID );
     private bool Remove( long id )
     {
-        OnPropertyChanging(nameof(Count));
-        bool result = _items.Remove(id);
-        Removed(id);
-        OnPropertyChanged(nameof(Count));
+        OnPropertyChanging( nameof(Count) );
+        bool result = _items.Remove( id );
+        Removed( id );
+        OnPropertyChanged( nameof(Count) );
         return result;
     }
-    public bool Remove( T      value ) => Remove(value.ID);
-    private void Removed( long id ) => OnChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, id));
-    public string ToCsv() => $"\"{string.Join(SEPARATOR, this)}\"";
+    public bool Remove( T      value ) => Remove( value.ID );
+    private void Removed( long id ) => OnChanged( new NotifyCollectionChangedEventArgs( NotifyCollectionChangedAction.Remove, id ) );
+    public string ToCsv() => $"\"{string.Join( SEPARATOR, this )}\"";
 
 
-    public string ToJson() => JsonNet.ToJson(this);
-    public string ToPrettyJson() => JsonNet.ToPrettyJson(this);
+    public string ToJson() => JsonNet.ToJson( this );
+    public string ToPrettyJson() => JsonNet.ToPrettyJson( this );
 
     /// <summary> Gets the JSON representation of this collection </summary>
     public override string ToString() => ToJson();
     public string ToString( ReadOnlySpan<char> format, IFormatProvider? _ )
     {
-        if ( format.IsEmpty ) { return ToString(); }
+        if (format.IsEmpty) { return ToString(); }
 
         Span<char> span = stackalloc char[format.Length];
-        format.ToUpperInvariant(span);
+        format.ToUpperInvariant( span );
 
-        if ( span.SequenceEqual("CSV") ) { return ToCsv(); }
+        if (span.SequenceEqual( "CSV" )) { return ToCsv(); }
 
-        if ( span.SequenceEqual("JSON") ) { return ToJson(); }
+        if (span.SequenceEqual( "JSON" )) { return ToJson(); }
 
         return ToString();
     }
@@ -158,14 +163,14 @@ public sealed class IDCollection<T> : CollectionAlerts<long>, IReadOnlyCollectio
     public string ToString( string? format, IFormatProvider? formatProvider )
     {
         ReadOnlySpan<char> span = format;
-        return ToString(span, formatProvider);
+        return ToString( span, formatProvider );
     }
 
 
     public bool TryFormat( Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider )
     {
-        ReadOnlySpan<char> result = ToString(format, provider);
-        result.CopyTo(destination);
+        ReadOnlySpan<char> result = ToString( format, provider );
+        result.CopyTo( destination );
         charsWritten = result.Length;
         return true;
     }

@@ -1,45 +1,25 @@
-﻿using Microsoft.AppCenter;
+﻿#nullable enable
+using Microsoft.AppCenter;
 using Microsoft.AppCenter.Analytics;
 using Microsoft.AppCenter.Crashes;
 
 
-#nullable enable
+
 namespace Jakar.Extensions.Xamarin.Forms;
 
 
 public class Debug : ObservableClass
 {
-    private readonly BaseFileSystemApi  _fileSystemApi;
-    private readonly IAppSettings       _settings;
-    private          Guid               _installID;
-    private readonly Synchronized<bool> _apiEnabled = new(false);
+    private readonly BaseFileSystemApi _fileSystemApi;
+    private readonly IAppSettings      _settings;
+    private readonly LocalFile         _appStateFile;
+    private readonly LocalFile         _feedBackFile;
 
 
-    protected readonly string         _appName;
-    private readonly   LocalFile      _appStateFile;
-    private readonly   LocalFile      _feedBackFile;
-    private            DebugSettings  _debugSettings = new();
-    public virtual     bool           CanDebug       => Debugger.IsAttached;
-    public virtual     bool           UseDebugLogin  => CanDebug;
-    protected          IDebugSettings _DebugSettings => Settings;
-
-
-    public DebugSettings Settings
-    {
-        get
-        {
-            lock ( this ) { return _debugSettings; }
-        }
-        set
-        {
-            lock ( this ) { SetProperty(ref _debugSettings, value); }
-        }
-    }
-    public Guid InstallID
-    {
-        get => _installID;
-        protected set => SetProperty(ref _installID, value);
-    }
+    protected readonly string             _appName;
+    private readonly   Synchronized<bool> _apiEnabled    = new(false);
+    private            DebugSettings      _debugSettings = new();
+    private            Guid               _installID;
     public bool ApiEnabled
     {
         get => _apiEnabled;
@@ -49,6 +29,27 @@ public class Debug : ObservableClass
             OnPropertyChanged();
         }
     }
+    public virtual bool CanDebug      => Debugger.IsAttached;
+    public virtual bool UseDebugLogin => CanDebug;
+
+
+    public DebugSettings Settings
+    {
+        get
+        {
+            lock (this) { return _debugSettings; }
+        }
+        set
+        {
+            lock (this) { SetProperty( ref _debugSettings, value ); }
+        }
+    }
+    public Guid InstallID
+    {
+        get => _installID;
+        protected set => SetProperty( ref _installID, value );
+    }
+    protected IDebugSettings _DebugSettings => Settings;
 
 
     public Debug( BaseFileSystemApi api, IAppSettings settings, string appName )
@@ -56,8 +57,8 @@ public class Debug : ObservableClass
         _fileSystemApi = api;
         _settings      = settings;
         _appName       = appName;
-        _appStateFile  = new LocalFile(_fileSystemApi.AppStateFileName);
-        _feedBackFile  = new LocalFile(_fileSystemApi.FeedBackFileName);
+        _appStateFile  = new LocalFile( _fileSystemApi.AppStateFileName );
+        _feedBackFile  = new LocalFile( _fileSystemApi.FeedBackFileName );
     }
 
 
@@ -66,7 +67,7 @@ public class Debug : ObservableClass
         try
         {
             VersionTracking.Track();
-            AppCenter.Start($"ios={app_center_id};android={app_center_id}", appCenterServices);
+            AppCenter.Start( $"ios={app_center_id};android={app_center_id}", appCenterServices );
 
             AppCenter.LogLevel = CanDebug
                                      ? LogLevel.Verbose
@@ -74,19 +75,19 @@ public class Debug : ObservableClass
 
 
             Guid? id = await AppCenter.GetInstallIdAsync()
-                                      .ConfigureAwait(false);
+                                      .ConfigureAwait( false );
 
-            if ( id is null )
+            if (id is null)
             {
                 id = Guid.NewGuid();
-                AppCenter.SetUserId(id.ToString());
+                AppCenter.SetUserId( id.ToString() );
             }
 
             InstallID          = id.Value;
             _settings.DeviceID = InstallID;
             ApiEnabled         = true;
         }
-        catch ( Exception e )
+        catch (Exception e)
         {
             e.WriteToDebug();
             throw;
@@ -96,33 +97,33 @@ public class Debug : ObservableClass
 
     protected void ThrowIfNotEnabled()
     {
-        if ( ApiEnabled ) { return; }
+        if (ApiEnabled) { return; }
 
         // if ( _services is null ) { throw new ApiDisabledException($"Must call {nameof(InitAsync)} first.", new NullReferenceException(nameof(_services))); }
 
-        if ( _fileSystemApi is null ) { throw new ApiDisabledException($"Must call {nameof(InitAsync)} first.", new NullReferenceException(nameof(_fileSystemApi))); }
+        if (_fileSystemApi is null) { throw new ApiDisabledException( $"Must call {nameof(InitAsync)} first.", new NullReferenceException( nameof(_fileSystemApi) ) ); }
 
-        throw new ApiDisabledException($"Must call {nameof(InitAsync)} first.");
+        throw new ApiDisabledException( $"Must call {nameof(InitAsync)} first." );
     }
 
 
-    public void HandleException( Exception e ) => HandleException(e, default);
-    public void HandleException( Exception e, CancellationToken token ) => Task.Run(async () => await HandleExceptionAsync(e), token)
-                                                                               .Wait(token);
+    public void HandleException( Exception e ) => HandleException( e, default );
+    public void HandleException( Exception e, CancellationToken token ) => Task.Run( async () => await HandleExceptionAsync( e ), token )
+                                                                               .Wait( token );
     public async Task HandleExceptionAsync( Exception e )
     {
-        if ( !_DebugSettings.EnableApi ) { return; }
+        if (!_DebugSettings.EnableApi) { return; }
 
         ThrowIfNotEnabled();
 
         ReadOnlyMemory<byte> screenShot = _DebugSettings.TakeScreenshotOnError
                                               ? await AppShare.TakeScreenShot()
-                                                              .ConfigureAwait(false)
+                                                              .ConfigureAwait( false )
                                               : default;
 
 
-        await TrackError(e, screenShot)
-           .ConfigureAwait(false);
+        await TrackError( e, screenShot )
+           .ConfigureAwait( false );
     }
 
 
@@ -136,13 +137,13 @@ public class Debug : ObservableClass
                          [key]              = feedback
                      };
 
-        await _feedBackFile.WriteAsync(result.ToPrettyJson())
-                           .ConfigureAwait(false);
+        await _feedBackFile.WriteAsync( result.ToPrettyJson() )
+                           .ConfigureAwait( false );
     }
     protected virtual Dictionary<string, string> AppState() => new()
                                                                {
-                                                                   [nameof(_appName)]                     = _appName ?? throw new NullReferenceException(nameof(_appName)),
-                                                                   [nameof(DateTime)]                     = DateTime.UtcNow.ToString(CultureInfo.InvariantCulture),
+                                                                   [nameof(_appName)]                     = _appName ?? throw new NullReferenceException( nameof(_appName) ),
+                                                                   [nameof(DateTime)]                     = DateTime.UtcNow.ToString( CultureInfo.InvariantCulture ),
                                                                    [nameof(AppDeviceInfo.DeviceId)]       = AppDeviceInfo.DeviceId,
                                                                    [nameof(AppDeviceInfo.VersionNumber)]  = AppDeviceInfo.VersionNumber,
                                                                    [nameof(LanguageApi.SelectedLanguage)] = CultureInfo.CurrentCulture.DisplayName
@@ -151,88 +152,88 @@ public class Debug : ObservableClass
 
     public async Task TrackError( Exception e )
     {
-        if ( _DebugSettings.IncludeAppStateOnError )
+        if (_DebugSettings.IncludeAppStateOnError)
         {
-            e.Details(out Dictionary<string, string?> eventDetails);
+            e.Details( out Dictionary<string, string?> eventDetails );
 
-            await TrackError(e, eventDetails, e.FullDetails())
-               .ConfigureAwait(false);
+            await TrackError( e, eventDetails, e.FullDetails() )
+               .ConfigureAwait( false );
         }
         else
         {
-            await TrackError(e, default, e.FullDetails())
-               .ConfigureAwait(false);
+            await TrackError( e, default, e.FullDetails() )
+               .ConfigureAwait( false );
         }
     }
     public async Task TrackError( Exception e, ReadOnlyMemory<byte> screenShot )
     {
-        e.Details(out Dictionary<string, string?> dict);
+        e.Details( out Dictionary<string, string?> dict );
 
-        await TrackError(e, dict, new ExceptionDetails(e), screenShot)
-           .ConfigureAwait(false);
+        await TrackError( e, dict, new ExceptionDetails( e ), screenShot )
+           .ConfigureAwait( false );
     }
-    public Task TrackError( Exception ex, Dictionary<string, string?>? eventDetails ) => TrackError(ex,                                                                      eventDetails, exceptionDetails: default);
-    public Task TrackError( Exception ex, Dictionary<string, string?>? eventDetails, ExceptionDetails? exceptionDetails ) => TrackError(ex,                                  eventDetails, exceptionDetails, default, default);
-    public Task TrackError( Exception ex, Dictionary<string, string?>? eventDetails, ExceptionDetails? exceptionDetails, ReadOnlyMemory<byte> screenShot ) => TrackError(ex, eventDetails, exceptionDetails, default, default, screenShot);
+    public Task TrackError( Exception ex, Dictionary<string, string?>? eventDetails ) => TrackError( ex,                                                                      eventDetails, exceptionDetails: default );
+    public Task TrackError( Exception ex, Dictionary<string, string?>? eventDetails, ExceptionDetails? exceptionDetails ) => TrackError( ex,                                  eventDetails, exceptionDetails, default, default );
+    public Task TrackError( Exception ex, Dictionary<string, string?>? eventDetails, ExceptionDetails? exceptionDetails, ReadOnlyMemory<byte> screenShot ) => TrackError( ex, eventDetails, exceptionDetails, default, default, screenShot );
     public Task TrackError( Exception ex, Dictionary<string, string?>? eventDetails, ExceptionDetails? exceptionDetails, string? incomingText, string? outgoingText ) =>
-        TrackError(ex, eventDetails, exceptionDetails, incomingText, outgoingText, default);
+        TrackError( ex, eventDetails, exceptionDetails, incomingText, outgoingText, default );
     public async Task TrackError( Exception ex, Dictionary<string, string?>? eventDetails, ExceptionDetails? exceptionDetails, string? incomingText, string? outgoingText, ReadOnlyMemory<byte> screenShot )
     {
         ThrowIfNotEnabled();
-        if ( !_DebugSettings.EnableCrashes ) { return; }
+        if (!_DebugSettings.EnableCrashes) { return; }
 
-        if ( exceptionDetails is not null )
+        if (exceptionDetails is not null)
         {
-            await _appStateFile.WriteAsync(exceptionDetails.ToPrettyJson())
-                               .ConfigureAwait(false);
+            await _appStateFile.WriteAsync( exceptionDetails.ToPrettyJson() )
+                               .ConfigureAwait( false );
         }
 
-        var attachments = new List<ErrorAttachmentLog>(5);
+        var attachments = new List<ErrorAttachmentLog>( 5 );
 
-        if ( _DebugSettings.IncludeAppStateOnError )
+        if (_DebugSettings.IncludeAppStateOnError)
         {
-            if ( exceptionDetails is not null )
+            if (exceptionDetails is not null)
             {
-                ErrorAttachmentLog? state = ErrorAttachmentLog.AttachmentWithText(exceptionDetails.ToPrettyJson(), _fileSystemApi.AppStateFileName);
-                attachments.Add(state);
+                ErrorAttachmentLog? state = ErrorAttachmentLog.AttachmentWithText( exceptionDetails.ToPrettyJson(), _fileSystemApi.AppStateFileName );
+                attachments.Add( state );
             }
 
-            if ( eventDetails is not null )
+            if (eventDetails is not null)
             {
-                ErrorAttachmentLog? debug = ErrorAttachmentLog.AttachmentWithText(eventDetails.ToPrettyJson(), _fileSystemApi.DebugFileName);
-                attachments.Add(debug);
+                ErrorAttachmentLog? debug = ErrorAttachmentLog.AttachmentWithText( eventDetails.ToPrettyJson(), _fileSystemApi.DebugFileName );
+                attachments.Add( debug );
             }
 
 
-            if ( !string.IsNullOrWhiteSpace(incomingText) )
+            if (!string.IsNullOrWhiteSpace( incomingText ))
             {
-                ErrorAttachmentLog incoming = ErrorAttachmentLog.AttachmentWithText(incomingText.ToPrettyJson(), _fileSystemApi.IncomingFileName);
-                attachments.Add(incoming);
+                ErrorAttachmentLog incoming = ErrorAttachmentLog.AttachmentWithText( incomingText.ToPrettyJson(), _fileSystemApi.IncomingFileName );
+                attachments.Add( incoming );
             }
 
-            if ( !string.IsNullOrWhiteSpace(outgoingText) )
+            if (!string.IsNullOrWhiteSpace( outgoingText ))
             {
-                ErrorAttachmentLog outgoing = ErrorAttachmentLog.AttachmentWithText(outgoingText.ToPrettyJson(), _fileSystemApi.OutgoingFileName);
-                attachments.Add(outgoing);
+                ErrorAttachmentLog outgoing = ErrorAttachmentLog.AttachmentWithText( outgoingText.ToPrettyJson(), _fileSystemApi.OutgoingFileName );
+                attachments.Add( outgoing );
             }
         }
 
-        if ( _DebugSettings.TakeScreenshotOnError && !screenShot.IsEmpty )
+        if (_DebugSettings.TakeScreenshotOnError && !screenShot.IsEmpty)
         {
-            ErrorAttachmentLog? screenShotAttachment = ErrorAttachmentLog.AttachmentWithBinary(screenShot.ToArray(), "ScreenShot.jpeg", "image/jpeg");
-            attachments.Add(screenShotAttachment);
+            ErrorAttachmentLog? screenShotAttachment = ErrorAttachmentLog.AttachmentWithBinary( screenShot.ToArray(), "ScreenShot.jpeg", "image/jpeg" );
+            attachments.Add( screenShotAttachment );
         }
 
-        TrackError(ex, eventDetails, attachments.ToArray());
+        TrackError( ex, eventDetails, attachments.ToArray() );
     }
     public void TrackError( Exception ex, Dictionary<string, string?>? eventDetails, params ErrorAttachmentLog[] attachments )
     {
         ThrowIfNotEnabled();
-        if ( !_DebugSettings.EnableCrashes ) { return; }
+        if (!_DebugSettings.EnableCrashes) { return; }
 
-        if ( ex is null ) { throw new ArgumentNullException(nameof(ex)); }
+        if (ex is null) { throw new ArgumentNullException( nameof(ex) ); }
 
-        Crashes.TrackError(ex, eventDetails, attachments);
+        Crashes.TrackError( ex, eventDetails, attachments );
     }
 
 
@@ -240,16 +241,16 @@ public class Debug : ObservableClass
     {
         ThrowIfNotEnabled();
 
-        if ( !_DebugSettings.EnableAnalytics ) { return; }
+        if (!_DebugSettings.EnableAnalytics) { return; }
 
-        TrackEvent(AppState(), source);
+        TrackEvent( AppState(), source );
     }
     protected void TrackEvent( Dictionary<string, string> eventDetails, [CallerMemberName] string? source = default )
     {
         ThrowIfNotEnabled();
 
-        if ( !_DebugSettings.EnableAnalytics ) { return; }
+        if (!_DebugSettings.EnableAnalytics) { return; }
 
-        Analytics.TrackEvent(source, eventDetails);
+        Analytics.TrackEvent( source, eventDetails );
     }
 }

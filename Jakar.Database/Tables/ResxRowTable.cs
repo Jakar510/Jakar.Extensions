@@ -1,29 +1,26 @@
-﻿using Dapper.Contrib.Extensions;
+﻿namespace Jakar.Database;
 
 
-
-namespace Jakar.Database;
-
-
+[Serializable]
 [Table( "Resx" )]
 public sealed record ResxRowTable : TableRecord<ResxRowTable>
 {
     public string  Key        { get; init; } = string.Empty;
     public string  Neutral    { get; init; } = string.Empty;
-    public string? English    { get; init; }
-    public string? Spanish    { get; init; }
-    public string? French     { get; init; }
-    public string? Swedish    { get; init; }
-    public string? German     { get; init; }
-    public string? Chinese    { get; init; }
-    public string? Polish     { get; init; }
-    public string? Thai       { get; init; }
-    public string? Japanese   { get; init; }
-    public string? Czech      { get; init; }
-    public string? Portuguese { get; init; }
-    public string? Dutch      { get; init; }
-    public string? Korean     { get; init; }
     public string? Arabic     { get; init; }
+    public string? Chinese    { get; init; }
+    public string? Czech      { get; init; }
+    public string? Dutch      { get; init; }
+    public string? English    { get; init; }
+    public string? French     { get; init; }
+    public string? German     { get; init; }
+    public string? Japanese   { get; init; }
+    public string? Korean     { get; init; }
+    public string? Polish     { get; init; }
+    public string? Portuguese { get; init; }
+    public string? Spanish    { get; init; }
+    public string? Swedish    { get; init; }
+    public string? Thai       { get; init; }
 
 
     public ResxRowTable() { }
@@ -82,27 +79,25 @@ public sealed record ResxRowTable : TableRecord<ResxRowTable>
                                 string dutch,
                                 string korean,
                                 string arabic
-    )
-    {
-        return this with
-               {
-                   English = english,
-                   Spanish = spanish,
-                   French = french,
-                   Swedish = swedish,
-                   German = german,
-                   Chinese = chinese,
-                   Polish = polish,
-                   Thai = thai,
-                   Japanese = japanese,
-                   Czech = czech,
-                   Portuguese = portuguese,
-                   Dutch = dutch,
-                   Korean = korean,
-                   Arabic = arabic,
-                   LastModified = DateTimeOffset.UtcNow
-               };
-    }
+    ) =>
+        this with
+        {
+            English = english,
+            Spanish = spanish,
+            French = french,
+            Swedish = swedish,
+            German = german,
+            Chinese = chinese,
+            Polish = polish,
+            Thai = thai,
+            Japanese = japanese,
+            Czech = czech,
+            Portuguese = portuguese,
+            Dutch = dutch,
+            Korean = korean,
+            Arabic = arabic,
+            LastModified = DateTimeOffset.UtcNow
+        };
 
 
     public string GetValue( in SupportedLanguage language ) => language switch

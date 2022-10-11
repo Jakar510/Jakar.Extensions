@@ -1,13 +1,13 @@
 ﻿// Jakar.Extensions :: Jakar.Xml
 // 04/28/2022  1:13 PM
 
+#nullable enable
 using System;
 using System.Collections.Generic;
 using Jakar.Xml.Serialization;
 
 
 
-#nullable enable
 namespace Jakar.Xml;
 
 
@@ -15,7 +15,7 @@ public static partial class Xmlizer
 {
     public static string Serialize<T>( T obj, in IDictionary<string, string>? attributes = default )
     {
-        if ( obj is null ) { throw new NullReferenceException(nameof(obj)); }
+        if (obj is null) { throw new NullReferenceException( nameof(obj) ); }
 
         Type type   = typeof(T);
         var  writer = new XWriter();

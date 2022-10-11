@@ -22,51 +22,51 @@ public enum Page
 
 public static class Tests
 {
-    public static IReadOnlyList<long> List { get; } = AsyncLinq.Range(0L, 10000)
+    public static IReadOnlyList<long> List { get; } = AsyncLinq.Range( 0L, 10000 )
                                                                .ToArray();
 
 
     public static async Task Test_AsyncLinq( IReadOnlyList<long> source, CancellationToken token = default )
     {
-        await using AsyncEnumerator<long> data = source.AsAsyncEnumerable(token);
+        await using AsyncEnumerator<long> data = source.AsAsyncEnumerable( token );
 
-        using ( StopWatch.Start() )
+        using (StopWatch.Start())
         {
-            ( await data.Where(x => x > 0)
-                        .Where(x => x % 5 == 0)
-                        .ToList(token) ).Count.WriteToConsole();
+            (await data.Where( x => x > 0 )
+                       .Where( x => x % 5 == 0 )
+                       .ToList( token )).Count.WriteToConsole();
         }
 
 
-        using ( StopWatch.Start() )
+        using (StopWatch.Start())
         {
-            ( await data.Where(x => x > 0)
-                        .Where(x => x % 5 == 0)
-                        .ToList(token) ).Count.WriteToConsole();
+            (await data.Where( x => x > 0 )
+                       .Where( x => x % 5 == 0 )
+                       .ToList( token )).Count.WriteToConsole();
         }
 
 
-        using ( StopWatch.Start() )
+        using (StopWatch.Start())
         {
-            ( await data.Where(x => x > 0)
-                        .Where(x => x % 5 == 0)
-                        .ToList(token) ).Count.WriteToConsole();
+            (await data.Where( x => x > 0 )
+                       .Where( x => x % 5 == 0 )
+                       .ToList( token )).Count.WriteToConsole();
         }
 
 
-        using ( StopWatch.Start() )
+        using (StopWatch.Start())
         {
-            ( await data.Where(x => x > 0)
-                        .Where(x => x % 10 == 0)
-                        .ToList(token) ).Count.WriteToConsole();
+            (await data.Where( x => x > 0 )
+                       .Where( x => x % 10 == 0 )
+                       .ToList( token )).Count.WriteToConsole();
         }
 
 
-        using ( StopWatch.Start() )
+        using (StopWatch.Start())
         {
-            ( await data.Where(x => x > 0)
-                        .Where(x => x % 10 == 0)
-                        .ToList(token) ).Count.WriteToConsole();
+            (await data.Where( x => x > 0 )
+                       .Where( x => x % 10 == 0 )
+                       .ToList( token )).Count.WriteToConsole();
         }
 
 
@@ -98,56 +98,56 @@ public static class Tests
     public static async Task Test_HttpBuilder( CancellationToken token = default )
     {
         // var target  = new Uri("https://www.toptal.com/developers/postbin/");
-        var host    = new Uri("https://httpbin.org/");
-        var content = new AppVersion(1, 2, 3).ToString();
+        var    host    = new Uri( "https://httpbin.org/" );
+        string content = new AppVersion( 1, 2, 3 ).ToString();
 
-        WebRequester builder = WebRequester.Builder.Create(host)
-                                                .With_Timeout(10)
-                                                .Build();
-
-
-        ( await builder.Get("/bearer", token)
-                       .AsJson() ).WriteToConsole();
-
-        ( await builder.Put("/put", content, token)
-                       .AsJson() ).WriteToConsole();
-
-        ( await builder.Post("/post", content, token)
-                       .AsJson() ).WriteToConsole();
-
-        ( await builder.Get("/get", token)
-                       .AsJson() ).WriteToConsole();
-
-        ( await builder.Delete("/delete", token)
-                       .AsJson() ).WriteToConsole();
-
-        ( await builder.Patch("/patch", content, token)
-                       .AsJson() ).WriteToConsole();
-
-        ( await builder.Get("/headers", token)
-                       .AsJson() ).WriteToConsole();
-
-        ( await builder.Get("/ip", token)
-                       .AsJson() ).WriteToConsole();
-
-        ( await builder.Get("/user-agent", token)
-                       .AsJson() ).WriteToConsole();
-
-        ( await builder.Get("/cookies", token)
-                       .AsJson() ).WriteToConsole();
-
-        WebResponse<LocalFile> response = await builder.Get("/image/png", token)
-                                                       .AsFile(MimeType.Png);
-
-        using ( response.Payload ) { response.WriteToConsole(); }
+        WebRequester builder = WebRequester.Builder.Create( host )
+                                           .With_Timeout( 10 )
+                                           .Build();
 
 
-        ( await builder.Get("/cookies", token)
-                       .AsString() ).WriteToConsole();
+        (await builder.Get( "/bearer", token )
+                      .AsJson()).WriteToConsole();
+
+        (await builder.Put( "/put", content, token )
+                      .AsJson()).WriteToConsole();
+
+        (await builder.Post( "/post", content, token )
+                      .AsJson()).WriteToConsole();
+
+        (await builder.Get( "/get", token )
+                      .AsJson()).WriteToConsole();
+
+        (await builder.Delete( "/delete", token )
+                      .AsJson()).WriteToConsole();
+
+        (await builder.Patch( "/patch", content, token )
+                      .AsJson()).WriteToConsole();
+
+        (await builder.Get( "/headers", token )
+                      .AsJson()).WriteToConsole();
+
+        (await builder.Get( "/ip", token )
+                      .AsJson()).WriteToConsole();
+
+        (await builder.Get( "/user-agent", token )
+                      .AsJson()).WriteToConsole();
+
+        (await builder.Get( "/cookies", token )
+                      .AsJson()).WriteToConsole();
+
+        WebResponse<LocalFile> response = await builder.Get( "/image/png", token )
+                                                       .AsFile( MimeType.Png );
+
+        using (response.Payload) { response.WriteToConsole(); }
 
 
-        ( await builder.Post("/anything", content, token)
-                       .AsJson() ).WriteToConsole();
+        (await builder.Get( "/cookies", token )
+                      .AsString()).WriteToConsole();
+
+
+        (await builder.Post( "/anything", content, token )
+                      .AsJson()).WriteToConsole();
     }
 
 
@@ -173,9 +173,9 @@ public static class Tests
 
     public static void TestJson()
     {
-        var first  = new Test("First",  new Test("1.1"), new Test("1.2"));
-        var second = new Test("Second", new Test("2.1"));
-        var test   = new Test("Root",   first, second);
+        var first  = new Test( "First",  new Test( "1.1" ), new Test( "1.2" ) );
+        var second = new Test( "Second", new Test( "2.1" ) );
+        var test   = new Test( "Root",   first, second );
 
 
         test.ToJson()
@@ -187,7 +187,7 @@ public static class Tests
         "---TEST---".WriteToConsole();
         JToken json = temp.FromJson();
 
-        json.ToJson(Formatting.Indented)
+        json.ToJson( Formatting.Indented )
             .WriteToConsole();
     }
 

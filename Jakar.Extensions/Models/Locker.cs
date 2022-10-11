@@ -5,22 +5,30 @@ namespace Jakar.Extensions;
 
 
 /// <summary>
-/// A wrapper around various locking methods.
-/// <para>
-/// <list type="bullet">
-/// <item><see cref="ReaderWriterLockSlim"/></item>
-/// <item><see cref="SemaphoreSlim"/></item>
-/// <item><see cref="Semaphore"/></item>
-/// <item><see langword="lock"/></item>
-/// </list>
-/// </para>
+///     A wrapper around various locking methods.
+///     <para>
+///         <list type = "bullet" >
+///             <item>
+///                 <see cref = "ReaderWriterLockSlim" />
+///             </item>
+///             <item>
+///                 <see cref = "SemaphoreSlim" />
+///             </item>
+///             <item>
+///                 <see cref = "Semaphore" />
+///             </item>
+///             <item>
+///                 <see langword = "lock" />
+///             </item>
+///         </list>
+///     </para>
 /// </summary>
 public readonly struct Locker : IAsyncDisposable, IDisposable
 {
     public object Lock { get; }
 
 
-    public Locker() : this(new object()) { }
+    public Locker() : this( new object() ) { }
     public Locker( object               locker ) => Lock = locker;
     public Locker( Semaphore            locker ) => Lock = locker;
     public Locker( SemaphoreSlim        locker ) => Lock = locker;
@@ -34,14 +42,14 @@ public readonly struct Locker : IAsyncDisposable, IDisposable
 
     public void Enter( CancellationToken token = default )
     {
-        switch ( Lock )
+        switch (Lock)
         {
             case ReaderWriterLockSlim value:
                 value.EnterWriteLock();
                 break;
 
             case SemaphoreSlim value:
-                value.Wait(token);
+                value.Wait( token );
                 break;
 
             case Semaphore value:
@@ -49,20 +57,20 @@ public readonly struct Locker : IAsyncDisposable, IDisposable
                 break;
 
             default:
-                Monitor.Enter(Lock);
+                Monitor.Enter( Lock );
                 break;
         }
     }
     public async ValueTask EnterAsync( CancellationToken token = default )
     {
-        switch ( Lock )
+        switch (Lock)
         {
             case ReaderWriterLockSlim value:
                 value.EnterWriteLock();
                 break;
 
             case SemaphoreSlim value:
-                await value.WaitAsync(token);
+                await value.WaitAsync( token );
                 break;
 
             case Semaphore value:
@@ -70,13 +78,13 @@ public readonly struct Locker : IAsyncDisposable, IDisposable
                 break;
 
             default:
-                Monitor.Enter(Lock);
+                Monitor.Enter( Lock );
                 break;
         }
     }
     public void Exit()
     {
-        switch ( Lock )
+        switch (Lock)
         {
             case ReaderWriterLockSlim value:
                 value.ExitWriteLock();
@@ -91,8 +99,8 @@ public readonly struct Locker : IAsyncDisposable, IDisposable
                 break;
 
             default:
-                Monitor.Exit(Lock);
-                Monitor.PulseAll(Lock);
+                Monitor.Exit( Lock );
+                Monitor.PulseAll( Lock );
                 break;
         }
     }
@@ -101,13 +109,13 @@ public readonly struct Locker : IAsyncDisposable, IDisposable
     public void Dispose()
     {
         Exit();
-        ( Lock as IDisposable )?.Dispose();
+        (Lock as IDisposable)?.Dispose();
     }
     public async ValueTask DisposeAsync()
     {
         Exit();
 
-        switch ( Lock )
+        switch (Lock)
         {
             case IAsyncDisposable asyncDisposable:
                 await asyncDisposable.DisposeAsync();
@@ -133,9 +141,9 @@ public readonly struct Locker<T> : IEnumerator<T>, IAsyncEnumerator<T>
     {
         get
         {
-            if ( _enumerator is not null ) { return _enumerator.Current; }
+            if (_enumerator is not null) { return _enumerator.Current; }
 
-            if ( _asyncEnumerator is not null ) { return _asyncEnumerator.Current; }
+            if (_asyncEnumerator is not null) { return _asyncEnumerator.Current; }
 
             throw new InvalidOperationException();
         }
@@ -144,18 +152,28 @@ public readonly struct Locker<T> : IEnumerator<T>, IAsyncEnumerator<T>
 
 
     /// <summary> Creates the collection Locker </summary>
-    /// <param name="collection"></param>
-    /// <param name="locker">
-    /// Can be any of the following:
-    /// <para>
-    /// <list type="bullet">
-    /// <item><see cref="ReaderWriterLockSlim"/></item>
-    /// <item><see cref="SemaphoreSlim"/></item>
-    /// <item><see cref="Semaphore"/></item>
-    /// <item><see cref="object"/></item>
-    /// <item><see langword="null"/></item>
-    /// </list>
-    /// </para>
+    /// <param name = "collection" > </param>
+    /// <param name = "locker" >
+    ///     Can be any of the following:
+    ///     <para>
+    ///         <list type = "bullet" >
+    ///             <item>
+    ///                 <see cref = "ReaderWriterLockSlim" />
+    ///             </item>
+    ///             <item>
+    ///                 <see cref = "SemaphoreSlim" />
+    ///             </item>
+    ///             <item>
+    ///                 <see cref = "Semaphore" />
+    ///             </item>
+    ///             <item>
+    ///                 <see cref = "object" />
+    ///             </item>
+    ///             <item>
+    ///                 <see langword = "null" />
+    ///             </item>
+    ///         </list>
+    ///     </para>
     /// </param>
     public Locker( IEnumerable<T> collection, Locker locker = default )
     {
@@ -169,8 +187,8 @@ public readonly struct Locker<T> : IEnumerator<T>, IAsyncEnumerator<T>
     }
 
 
-    public void Enter( CancellationToken           token = default ) => _locker.Enter(token);
-    public ValueTask EnterAsync( CancellationToken token = default ) => _locker.EnterAsync(token);
+    public void Enter( CancellationToken           token = default ) => _locker.Enter( token );
+    public ValueTask EnterAsync( CancellationToken token = default ) => _locker.EnterAsync( token );
     public void Exit() => _locker.Exit();
 
 
@@ -183,7 +201,7 @@ public readonly struct Locker<T> : IEnumerator<T>, IAsyncEnumerator<T>
     {
         await _locker.DisposeAsync();
         _enumerator?.Dispose();
-        if ( _asyncEnumerator is not null ) { await _asyncEnumerator.DisposeAsync(); }
+        if (_asyncEnumerator is not null) { await _asyncEnumerator.DisposeAsync(); }
     }
 
 

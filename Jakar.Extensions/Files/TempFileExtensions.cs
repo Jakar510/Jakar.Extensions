@@ -2,7 +2,7 @@
 namespace Jakar.Extensions;
 
 
-[SuppressMessage("ReSharper", "UnusedMethodReturnValue.Global")]
+[SuppressMessage( "ReSharper", "UnusedMethodReturnValue.Global" )]
 public static class TempFile
 {
     public static TItem SetTemporary<TItem>( this TItem file ) where TItem : ITempFile

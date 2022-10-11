@@ -18,6 +18,6 @@ public sealed class Counter : IEnumerator<long>
     public void Dispose() => Current = default;
 
 
-    public bool MoveNext() => ( ++Current ).IsValidID();
+    public bool MoveNext() => (++Current).IsValidID();
     public void Reset() => Current = default;
 }

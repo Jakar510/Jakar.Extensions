@@ -5,7 +5,9 @@
 namespace Jakar.Extensions;
 
 
-/// <summary> <para>Based on System.ParamsArray</para> </summary>
+/// <summary>
+///     <para> Based on System.ParamsArray </para>
+/// </summary>
 public readonly ref struct ParamsArray
 {
     // Sentinel fixed-length arrays eliminate the need for a "count" field keeping this
@@ -83,14 +85,14 @@ public readonly ref struct ParamsArray
     public static ParamsArray Create( params object?[] args )
     {
         ReadOnlySpan<object?> span = args;
-        return new ParamsArray(span);
+        return new ParamsArray( span );
     }
 
 #if NET6_0_OR_GREATER
     public static ParamsArray Create( List<object?> args )
     {
-        ReadOnlySpan<object?> span = CollectionsMarshal.AsSpan(args);
-        return new ParamsArray(span);
+        ReadOnlySpan<object?> span = CollectionsMarshal.AsSpan( args );
+        return new ParamsArray( span );
     }
 #endif
 }

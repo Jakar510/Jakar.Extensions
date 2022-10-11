@@ -5,14 +5,14 @@ namespace Jakar.Extensions;
 [Serializable]
 public abstract class ObservableClass : BaseClass, INotifyPropertyChanged, INotifyPropertyChanging // IDataBaseID
 {
-    public static readonly DateTime sqlMinDate = DateTime.Parse("1/1/1753 12:00:00 AM", CultureInfo.InvariantCulture);
+    public static readonly DateTime sqlMinDate = DateTime.Parse( "1/1/1753 12:00:00 AM", CultureInfo.InvariantCulture );
 
 
-    [NotifyPropertyChangedInvocator] protected virtual void OnPropertyChanged( [CallerMemberName] string? property = default ) => OnPropertyChanged(new PropertyChangedEventArgs(property ?? string.Empty));
+    [NotifyPropertyChangedInvocator] protected virtual void OnPropertyChanged( [CallerMemberName] string? property = default ) => OnPropertyChanged( new PropertyChangedEventArgs( property ?? string.Empty ) );
 
-    [NotifyPropertyChangedInvocator] protected virtual void OnPropertyChanged( PropertyChangedEventArgs e ) => PropertyChanged?.Invoke(this, e);
-    protected virtual void OnPropertyChanging( [CallerMemberName] string?                               property = default ) => OnPropertyChanging(new PropertyChangingEventArgs(property ?? string.Empty));
-    protected virtual void OnPropertyChanging( PropertyChangingEventArgs                                e ) => PropertyChanging?.Invoke(this, e);
+    [NotifyPropertyChangedInvocator] protected virtual void OnPropertyChanged( PropertyChangedEventArgs e ) => PropertyChanged?.Invoke( this, e );
+    protected virtual void OnPropertyChanging( [CallerMemberName] string?                               property = default ) => OnPropertyChanging( new PropertyChangingEventArgs( property ?? string.Empty ) );
+    protected virtual void OnPropertyChanging( PropertyChangingEventArgs                                e ) => PropertyChanging?.Invoke( this, e );
 
 
     /// <summary>
@@ -39,7 +39,7 @@ public abstract class ObservableClass : BaseClass, INotifyPropertyChanged, INoti
     ///         <see langword = "true" />
     ///     </para>
     /// </returns>
-    protected virtual bool SetPropertyWithoutNotify<T>( ref T backingStore, T value ) => SetPropertyWithoutNotify(ref backingStore, value, EqualityComparer<T>.Default);
+    protected virtual bool SetPropertyWithoutNotify<T>( ref T backingStore, T value ) => SetPropertyWithoutNotify( ref backingStore, value, EqualityComparer<T>.Default );
 
     /// <summary>
     ///     <para>
@@ -68,7 +68,7 @@ public abstract class ObservableClass : BaseClass, INotifyPropertyChanged, INoti
     /// </returns>
     protected virtual bool SetPropertyWithoutNotify<T>( ref T backingStore, T value, IEqualityComparer<T> comparer )
     {
-        if ( comparer.Equals(backingStore, value) ) { return false; }
+        if (comparer.Equals( backingStore, value )) { return false; }
 
         backingStore = value;
         return true;
@@ -103,11 +103,11 @@ public abstract class ObservableClass : BaseClass, INotifyPropertyChanged, INoti
     /// </returns>
     protected virtual bool SetProperty<T>( ref T backingStore, T value, IEqualityComparer<T> comparer, [CallerMemberName] string? propertyName = default )
     {
-        if ( comparer.Equals(backingStore, value) ) { return false; }
+        if (comparer.Equals( backingStore, value )) { return false; }
 
-        OnPropertyChanging(propertyName);
+        OnPropertyChanging( propertyName );
         backingStore = value;
-        OnPropertyChanged(propertyName);
+        OnPropertyChanged( propertyName );
 
         return true;
     }
@@ -138,7 +138,7 @@ public abstract class ObservableClass : BaseClass, INotifyPropertyChanged, INoti
     ///         <see langword = "true" />
     ///     </para>
     /// </returns>
-    protected virtual bool SetProperty<T>( ref T backingStore, T value, [CallerMemberName] string? propertyName = default ) => SetProperty(ref backingStore, value, EqualityComparer<T>.Default, propertyName);
+    protected virtual bool SetProperty<T>( ref T backingStore, T value, [CallerMemberName] string? propertyName = default ) => SetProperty( ref backingStore, value, EqualityComparer<T>.Default, propertyName );
 
 
     /// <summary>
@@ -146,9 +146,9 @@ public abstract class ObservableClass : BaseClass, INotifyPropertyChanged, INoti
     /// </summary>
     protected virtual void SetProperty<T>( ref T backingStore, T value, ICommand onChanged, [CallerMemberName] string? propertyName = default )
     {
-        if ( !SetProperty(ref backingStore, value, propertyName) ) { return; }
+        if (!SetProperty( ref backingStore, value, propertyName )) { return; }
 
-        if ( onChanged.CanExecute(value) ) { onChanged.Execute(value); }
+        if (onChanged.CanExecute( value )) { onChanged.Execute( value ); }
     }
 
 
@@ -157,9 +157,9 @@ public abstract class ObservableClass : BaseClass, INotifyPropertyChanged, INoti
     /// </summary>
     protected virtual void SetProperty<T>( ref T backingStore, T value, IEqualityComparer<T> comparer, ICommand onChanged, [CallerMemberName] string? propertyName = default )
     {
-        if ( !SetProperty(ref backingStore, value, comparer, propertyName) ) { return; }
+        if (!SetProperty( ref backingStore, value, comparer, propertyName )) { return; }
 
-        if ( onChanged.CanExecute(value) ) { onChanged.Execute(value); }
+        if (onChanged.CanExecute( value )) { onChanged.Execute( value ); }
     }
 
 
@@ -168,7 +168,7 @@ public abstract class ObservableClass : BaseClass, INotifyPropertyChanged, INoti
     /// </summary>
     protected virtual void SetProperty<T>( ref T backingStore, T value, Action onChanged, [CallerMemberName] string? propertyName = default )
     {
-        if ( !SetProperty(ref backingStore, value, propertyName) ) { return; }
+        if (!SetProperty( ref backingStore, value, propertyName )) { return; }
 
         onChanged();
     }
@@ -179,7 +179,7 @@ public abstract class ObservableClass : BaseClass, INotifyPropertyChanged, INoti
     /// </summary>
     protected virtual void SetProperty<T>( ref T backingStore, T value, IEqualityComparer<T> comparer, Action onChanged, [CallerMemberName] string? propertyName = default )
     {
-        if ( !SetProperty(ref backingStore, value, comparer, propertyName) ) { return; }
+        if (!SetProperty( ref backingStore, value, comparer, propertyName )) { return; }
 
         onChanged();
     }
@@ -190,9 +190,9 @@ public abstract class ObservableClass : BaseClass, INotifyPropertyChanged, INoti
     /// </summary>
     protected virtual void SetProperty<T>( ref T backingStore, T value, Action<T> onChanged, [CallerMemberName] string? propertyName = default )
     {
-        if ( !SetProperty(ref backingStore, value, propertyName) ) { return; }
+        if (!SetProperty( ref backingStore, value, propertyName )) { return; }
 
-        onChanged(value);
+        onChanged( value );
     }
 
 
@@ -201,9 +201,9 @@ public abstract class ObservableClass : BaseClass, INotifyPropertyChanged, INoti
     /// </summary>
     protected virtual void SetProperty<T>( ref T backingStore, T value, IEqualityComparer<T> comparer, Action<T> onChanged, [CallerMemberName] string? propertyName = default )
     {
-        if ( !SetProperty(ref backingStore, value, comparer, propertyName) ) { return; }
+        if (!SetProperty( ref backingStore, value, comparer, propertyName )) { return; }
 
-        onChanged(value);
+        onChanged( value );
     }
 
 
@@ -212,7 +212,7 @@ public abstract class ObservableClass : BaseClass, INotifyPropertyChanged, INoti
     /// </summary>
     protected virtual Task SetProperty<T>( ref T backingStore, T value, Func<Task> onChanged, [CallerMemberName] string? propertyName = default )
     {
-        if ( !SetProperty(ref backingStore, value, propertyName) ) { return Task.CompletedTask; }
+        if (!SetProperty( ref backingStore, value, propertyName )) { return Task.CompletedTask; }
 
         return onChanged();
     }
@@ -223,7 +223,7 @@ public abstract class ObservableClass : BaseClass, INotifyPropertyChanged, INoti
     /// </summary>
     protected virtual Task SetProperty<T>( ref T backingStore, T value, IEqualityComparer<T> comparer, Func<Task> onChanged, [CallerMemberName] string? propertyName = default )
     {
-        if ( !SetProperty(ref backingStore, value, comparer, propertyName) ) { return Task.CompletedTask; }
+        if (!SetProperty( ref backingStore, value, comparer, propertyName )) { return Task.CompletedTask; }
 
         return onChanged();
     }
@@ -234,9 +234,9 @@ public abstract class ObservableClass : BaseClass, INotifyPropertyChanged, INoti
     /// </summary>
     protected virtual Task SetProperty<T>( ref T backingStore, T value, Func<T, Task> onChanged, [CallerMemberName] string? propertyName = default )
     {
-        if ( !SetProperty(ref backingStore, value, propertyName) ) { return Task.CompletedTask; }
+        if (!SetProperty( ref backingStore, value, propertyName )) { return Task.CompletedTask; }
 
-        return onChanged(value);
+        return onChanged( value );
     }
 
 
@@ -245,9 +245,9 @@ public abstract class ObservableClass : BaseClass, INotifyPropertyChanged, INoti
     /// </summary>
     protected virtual Task SetProperty<T>( ref T backingStore, T value, IEqualityComparer<T> comparer, Func<T, Task> onChanged, [CallerMemberName] string? propertyName = default )
     {
-        if ( !SetProperty(ref backingStore, value, comparer, propertyName) ) { return Task.CompletedTask; }
+        if (!SetProperty( ref backingStore, value, comparer, propertyName )) { return Task.CompletedTask; }
 
-        return onChanged(value);
+        return onChanged( value );
     }
 
 
@@ -257,7 +257,7 @@ public abstract class ObservableClass : BaseClass, INotifyPropertyChanged, INoti
                     ? minDate
                     : value;
 
-        return SetProperty(ref backingStore, value, ValueEqualizer<DateTime>.Instance, caller);
+        return SetProperty( ref backingStore, value, ValueEqualizer<DateTime>.Instance, caller );
     }
     protected virtual bool SetProperty( ref DateTime? backingStore, DateTime? value, in DateTime minDate, [CallerMemberName] string? caller = default )
     {
@@ -265,7 +265,7 @@ public abstract class ObservableClass : BaseClass, INotifyPropertyChanged, INoti
                     ? null
                     : value;
 
-        return SetProperty(ref backingStore, value, ValueEqualizer<DateTime>.Instance, caller);
+        return SetProperty( ref backingStore, value, ValueEqualizer<DateTime>.Instance, caller );
     }
 
 
@@ -275,7 +275,7 @@ public abstract class ObservableClass : BaseClass, INotifyPropertyChanged, INoti
                     ? minDate
                     : value;
 
-        return SetProperty(ref backingStore, value, ValueEqualizer<DateTimeOffset>.Instance, caller);
+        return SetProperty( ref backingStore, value, ValueEqualizer<DateTimeOffset>.Instance, caller );
     }
     protected virtual bool SetProperty( ref DateTimeOffset? backingStore, DateTimeOffset? value, in DateTimeOffset minDate, [CallerMemberName] string? caller = default )
     {
@@ -283,7 +283,7 @@ public abstract class ObservableClass : BaseClass, INotifyPropertyChanged, INoti
                     ? null
                     : value;
 
-        return SetProperty(ref backingStore, value, ValueEqualizer<DateTimeOffset>.Instance, caller);
+        return SetProperty( ref backingStore, value, ValueEqualizer<DateTimeOffset>.Instance, caller );
     }
 
 
@@ -293,7 +293,7 @@ public abstract class ObservableClass : BaseClass, INotifyPropertyChanged, INoti
                     ? minValue
                     : value;
 
-        return SetProperty(ref backingStore, value, ValueEqualizer<TimeSpan>.Instance, caller);
+        return SetProperty( ref backingStore, value, ValueEqualizer<TimeSpan>.Instance, caller );
     }
     protected virtual bool SetProperty( ref TimeSpan? backingStore, TimeSpan? value, in TimeSpan? minValue, [CallerMemberName] string? caller = default )
     {
@@ -301,7 +301,7 @@ public abstract class ObservableClass : BaseClass, INotifyPropertyChanged, INoti
                     ? null
                     : value;
 
-        return SetProperty(ref backingStore, value, ValueEqualizer<TimeSpan>.Instance, caller);
+        return SetProperty( ref backingStore, value, ValueEqualizer<TimeSpan>.Instance, caller );
     }
     public event PropertyChangedEventHandler?  PropertyChanged;
     public event PropertyChangingEventHandler? PropertyChanging;

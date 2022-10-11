@@ -1,15 +1,17 @@
 ﻿using System;
+using Android.Runtime;
 using Jakar.Extensions.Xamarin.Forms.Droid;
+using Xamarin.Forms;
 
 
-[assembly: Xamarin.Forms.Dependency(typeof(BaseUrlAndroid))]
+[assembly: Dependency( typeof(BaseUrlAndroid) )]
 
 
 #nullable enable
 namespace Jakar.Extensions.Xamarin.Forms.Droid;
 
 
-[global::Android.Runtime.Preserve(AllMembers = true)]
+[Preserve( AllMembers = true )]
 public class BaseUrlAndroid : IBaseUrl
 {
     public BaseUrlAndroid() { }

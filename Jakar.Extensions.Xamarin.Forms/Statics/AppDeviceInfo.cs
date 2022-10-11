@@ -1,20 +1,17 @@
-﻿
-
-
-#nullable enable
+﻿#nullable enable
 namespace Jakar.Extensions.Xamarin.Forms;
 
 
 public static class AppDeviceInfo
 {
-    public static string VersionNumber  => global::Xamarin.Essentials.AppInfo.VersionString;
-    public static string BuildNumber    => global::Xamarin.Essentials.AppInfo.BuildString;
-    public static string PackageName    => global::Xamarin.Essentials.AppInfo.PackageName;
-    public static string DeviceModel    => global::Xamarin.Essentials.DeviceInfo.Model;
-    public static string Manufacturer   => global::Xamarin.Essentials.DeviceInfo.Manufacturer;
-    public static string DeviceVersion  => global::Xamarin.Essentials.DeviceInfo.VersionString;
-    public static string DevicePlatform => global::Xamarin.Essentials.DeviceInfo.Platform.ToString();
+    public static string BuildNumber    => AppInfo.BuildString;
+    public static string DeviceId       => $"{Manufacturer}  {DeviceModel}: {DevicePlatform} {DeviceVersion} | {VersionNumber} [{BuildNumber}]";
+    public static string DeviceModel    => DeviceInfo.Model;
+    public static string DevicePlatform => DeviceInfo.Platform.ToString();
+    public static string DeviceVersion  => DeviceInfo.VersionString;
 
-    public static string FullVersion => $"{VersionNumber}.{BuildNumber}";
-    public static string DeviceId    => $"{Manufacturer}  {DeviceModel}: {DevicePlatform} {DeviceVersion} | {VersionNumber} [{BuildNumber}]";
+    public static string FullVersion   => $"{VersionNumber}.{BuildNumber}";
+    public static string Manufacturer  => DeviceInfo.Manufacturer;
+    public static string PackageName   => AppInfo.PackageName;
+    public static string VersionNumber => AppInfo.VersionString;
 }

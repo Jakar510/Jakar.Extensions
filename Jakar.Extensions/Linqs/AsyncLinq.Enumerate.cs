@@ -7,43 +7,43 @@ public static partial class AsyncLinq
     {
         int index = start;
 
-        await foreach ( TElement element in source.WithCancellation(token) )
+        await foreach (TElement element in source.WithCancellation( token ))
         {
             checked { index++; }
 
-            yield return ( index, element );
+            yield return (index, element);
         }
     }
     public static async IAsyncEnumerable<(long Index, TElement Value)> Enumerate<TElement>( this IAsyncEnumerable<TElement> source, long start = 0, [EnumeratorCancellation] CancellationToken token = default )
     {
         long index = start;
 
-        await foreach ( TElement element in source.WithCancellation(token) )
+        await foreach (TElement element in source.WithCancellation( token ))
         {
             checked { index++; }
 
-            yield return ( index, element );
+            yield return (index, element);
         }
     }
 
 
-    public static IEnumerable<(int index, object? item)> Enumerate( this IEnumerable element, int start  )
+    public static IEnumerable<(int index, object? item)> Enumerate( this IEnumerable element, int start )
     {
         int index = start;
 
-        foreach ( object? item in element )
+        foreach (object? item in element)
         {
-            yield return ( index, item );
+            yield return (index, item);
             index++;
         }
     }
-    public static IEnumerable<(int index, TElement item)> Enumerate<TElement>( this IEnumerable<TElement> element, int start  )
+    public static IEnumerable<(int index, TElement item)> Enumerate<TElement>( this IEnumerable<TElement> element, int start )
     {
         int index = start;
 
-        foreach ( TElement item in element )
+        foreach (TElement item in element)
         {
-            yield return ( index, item );
+            yield return (index, item);
             index++;
         }
     }
@@ -53,9 +53,9 @@ public static partial class AsyncLinq
     {
         long index = start;
 
-        foreach ( object? item in element )
+        foreach (object? item in element)
         {
-            yield return ( index, item );
+            yield return (index, item);
             index++;
         }
     }
@@ -63,9 +63,9 @@ public static partial class AsyncLinq
     {
         long index = start;
 
-        foreach ( TElement item in element )
+        foreach (TElement item in element)
         {
-            yield return ( index, item );
+            yield return (index, item);
             index++;
         }
     }
@@ -75,9 +75,9 @@ public static partial class AsyncLinq
     {
         int index = start;
 
-        foreach ( DictionaryEntry pair in element )
+        foreach (DictionaryEntry pair in element)
         {
-            yield return ( index, pair.Key, pair.Value );
+            yield return (index, pair.Key, pair.Value);
             index++;
         }
     }
@@ -85,9 +85,9 @@ public static partial class AsyncLinq
     {
         int index = start;
 
-        foreach ( KeyValuePair<TKey, TElement> pair in element )
+        foreach (KeyValuePair<TKey, TElement> pair in element)
         {
-            yield return ( index, pair );
+            yield return (index, pair);
             index++;
         }
     }
@@ -95,9 +95,9 @@ public static partial class AsyncLinq
     {
         int index = start;
 
-        foreach ( ( TKey key, TElement value ) in element )
+        foreach ((TKey key, TElement value) in element)
         {
-            yield return ( index, key, value );
+            yield return (index, key, value);
             index++;
         }
     }
@@ -107,9 +107,9 @@ public static partial class AsyncLinq
     {
         long index = start;
 
-        foreach ( DictionaryEntry pair in element )
+        foreach (DictionaryEntry pair in element)
         {
-            yield return ( index, pair.Key, pair.Value );
+            yield return (index, pair.Key, pair.Value);
             index++;
         }
     }
@@ -117,9 +117,9 @@ public static partial class AsyncLinq
     {
         long index = start;
 
-        foreach ( KeyValuePair<TKey, TElement> pair in element )
+        foreach (KeyValuePair<TKey, TElement> pair in element)
         {
-            yield return ( index, pair );
+            yield return (index, pair);
             index++;
         }
     }
@@ -127,9 +127,9 @@ public static partial class AsyncLinq
     {
         long index = start;
 
-        foreach ( ( TKey key, TElement value ) in element )
+        foreach ((TKey key, TElement value) in element)
         {
-            yield return ( index, key, value );
+            yield return (index, key, value);
             index++;
         }
     }

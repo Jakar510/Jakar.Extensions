@@ -7,41 +7,21 @@ public class PreferenceFile : IniConfig, IDisposable, IAsyncDisposable // TODO: 
     private readonly object     _lock = new();
     protected        LocalFile? _file;
     private          string?    _fileName;
-    public virtual   string     FileName => _fileName ??= $"{GetType().Name}.ini";
 
     public LocalFile Path
     {
-        get => _file ??= LocalDirectory.CurrentDirectory.Join(FileName);
+        get => _file ??= LocalDirectory.CurrentDirectory.Join( FileName );
         protected set => _file = value;
     }
+    public virtual string FileName => _fileName ??= $"{GetType().Name}.ini";
 
 
-    public PreferenceFile() : this(StringComparer.OrdinalIgnoreCase) { }
-    public PreferenceFile( IEqualityComparer<string>                  comparer ) : base(comparer) => Load();
-    public PreferenceFile( IDictionary<string, Section>               dictionary ) : base(dictionary) { }
-    public PreferenceFile( IDictionary<string, Section>               dictionary, IEqualityComparer<string> comparer ) : base(dictionary, comparer) { }
-    public PreferenceFile( IEnumerable<KeyValuePair<string, Section>> collection ) : base(collection) { }
-    public PreferenceFile( IEnumerable<KeyValuePair<string, Section>> collection, IEqualityComparer<string> comparer ) : base(collection, comparer) { }
-    public virtual void Dispose( bool disposing )
-    {
-        if ( !disposing ) { return; }
-
-        Task.Run(async () => await DisposeAsync())
-            .Wait();
-    }
-    public virtual async ValueTask DisposeAsync()
-    {
-        await SaveAsync()
-           .ConfigureAwait(false);
-
-        _file?.Dispose();
-        _file = null;
-    }
-    public void Dispose()
-    {
-        Dispose(true);
-        GC.SuppressFinalize(this);
-    }
+    public PreferenceFile() : this( StringComparer.OrdinalIgnoreCase ) { }
+    public PreferenceFile( IEqualityComparer<string>                  comparer ) : base( comparer ) => Load();
+    public PreferenceFile( IDictionary<string, Section>               dictionary ) : base( dictionary ) { }
+    public PreferenceFile( IDictionary<string, Section>               dictionary, IEqualityComparer<string> comparer ) : base( dictionary, comparer ) { }
+    public PreferenceFile( IEnumerable<KeyValuePair<string, Section>> collection ) : base( collection ) { }
+    public PreferenceFile( IEnumerable<KeyValuePair<string, Section>> collection, IEqualityComparer<string> comparer ) : base( collection, comparer ) { }
 
 
     public static PreferenceFile Create( LocalFile file )
@@ -49,7 +29,7 @@ public class PreferenceFile : IniConfig, IDisposable, IAsyncDisposable // TODO: 
         ReadOnlySpan<char> content = file.Read()
                                          .AsSpan();
 
-        PreferenceFile ini = From<PreferenceFile>(content) ?? new PreferenceFile();
+        PreferenceFile ini = From<PreferenceFile>( content ) ?? new PreferenceFile();
         ini.Path = file;
         return ini;
     }
@@ -58,27 +38,47 @@ public class PreferenceFile : IniConfig, IDisposable, IAsyncDisposable // TODO: 
         string content = await file.ReadAsync()
                                    .AsString();
 
-        PreferenceFile ini = From<PreferenceFile>(content) ?? new PreferenceFile();
+        PreferenceFile ini = From<PreferenceFile>( content ) ?? new PreferenceFile();
         ini.Path = file;
         return ini;
     }
+    public virtual void Dispose( bool disposing )
+    {
+        if (!disposing) { return; }
+
+        Task.Run( async () => await DisposeAsync() )
+            .Wait();
+    }
 
 
-    protected Task Load() => Task.Run(LoadAsync);
+    protected Task Load() => Task.Run( LoadAsync );
 
 
     protected virtual async Task LoadAsync()
     {
-        IniConfig? cfg = await ReadFromFileAsync(Path)
-                            .ConfigureAwait(false);
+        IniConfig? cfg = await ReadFromFileAsync( Path )
+                            .ConfigureAwait( false );
 
-        if ( cfg is null ) { return; }
+        if (cfg is null) { return; }
 
-        foreach ( KeyValuePair<string, Section> pair in cfg ) { Add(pair); }
+        foreach (KeyValuePair<string, Section> pair in cfg) { Add( pair ); }
     }
 
 
-    protected Task Save() => Task.Run(SaveAsync);
-    protected virtual async Task SaveAsync() => await WriteToFile(Path)
-                                                   .ConfigureAwait(false);
+    protected Task Save() => Task.Run( SaveAsync );
+    protected virtual async Task SaveAsync() => await WriteToFile( Path )
+                                                   .ConfigureAwait( false );
+    public virtual async ValueTask DisposeAsync()
+    {
+        await SaveAsync()
+           .ConfigureAwait( false );
+
+        _file?.Dispose();
+        _file = null;
+    }
+    public void Dispose()
+    {
+        Dispose( true );
+        GC.SuppressFinalize( this );
+    }
 }

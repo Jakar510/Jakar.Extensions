@@ -4,14 +4,13 @@
 namespace Jakar.Database;
 
 
-[SuppressMessage("ReSharper", "UnusedMethodReturnValue.Global")]
-[SuppressMessage("ReSharper", "ConvertToPrimaryConstructor")]
+[SuppressMessage( "ReSharper", "UnusedMethodReturnValue.Global" )]
+[SuppressMessage( "ReSharper", "ConvertToPrimaryConstructor" )]
 public sealed record TableCacheOptions : IOptions<TableCacheOptions>
 {
-    TableCacheOptions IOptions<TableCacheOptions>.Value => this;
-
-    public TimeSpan       RefreshTime { get; init; } = TimeSpan.FromSeconds(10);
-    public ILoggerFactory Factory     { get; init; }
+    public ILoggerFactory                         Factory     { get; init; }
+    TableCacheOptions IOptions<TableCacheOptions>.Value       => this;
+    public TimeSpan                               RefreshTime { get; init; } = TimeSpan.FromSeconds( 10 );
 
 
     public TableCacheOptions( ILoggerFactory factory ) => Factory = factory;
@@ -19,7 +18,7 @@ public sealed record TableCacheOptions : IOptions<TableCacheOptions>
 
     public static WebApplicationBuilder Register( WebApplicationBuilder builder )
     {
-        Register(builder.Services);
+        Register( builder.Services );
         return builder;
     }
     public static IServiceCollection Register( IServiceCollection collection )

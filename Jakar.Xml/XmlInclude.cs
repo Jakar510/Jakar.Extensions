@@ -1,10 +1,8 @@
-﻿using System;
+﻿#nullable enable
+using System;
 
 
 
-
-
-#nullable enable
 namespace Jakar.Xml;
 
 

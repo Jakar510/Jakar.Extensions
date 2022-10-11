@@ -2,14 +2,24 @@
 
 
 /// <summary>
-/// <para><see href="https://blazor.radzen.com/get-started"/></para>
-/// <para><see href="https://github.com/Blazored/Modal"/></para>
-/// <para><see href="https://github.com/Blazored/Toast"/></para>
-/// <para><see href="https://github.com/Blazored/LocalStorage"/></para>
-/// <para><see href="https://github.com/Blazored/SessionStorage"/></para>
+///     <para>
+///         <see href = "https://blazor.radzen.com/get-started" />
+///     </para>
+///     <para>
+///         <see href = "https://github.com/Blazored/Modal" />
+///     </para>
+///     <para>
+///         <see href = "https://github.com/Blazored/Toast" />
+///     </para>
+///     <para>
+///         <see href = "https://github.com/Blazored/LocalStorage" />
+///     </para>
+///     <para>
+///         <see href = "https://github.com/Blazored/SessionStorage" />
+///     </para>
 /// </summary>
-[SuppressMessage("ReSharper", "UnusedType.Global")]
-[SuppressMessage("ReSharper", "UnusedMethodReturnValue.Global")]
+[SuppressMessage( "ReSharper", "UnusedType.Global" )]
+[SuppressMessage( "ReSharper", "UnusedMethodReturnValue.Global" )]
 public static class BlazorBuilder
 {
     public static WebApplicationBuilder AddAppServices( this WebApplicationBuilder builder ) =>
@@ -19,17 +29,17 @@ public static class BlazorBuilder
                .AddScoped<AppServices>();
     public static WebApplicationBuilder AddAppServices( this WebApplicationBuilder builder, Action<LocalStorageOptions> configureLocal ) =>
         builder.AddAuthenticationCore()
-               .AddBlazored(configureLocal)
+               .AddBlazored( configureLocal )
                .AddRadzen()
                .AddScoped<AppServices>();
     public static WebApplicationBuilder AddAppServices( this WebApplicationBuilder builder, Action<SessionStorageOptions> configureSession ) =>
         builder.AddAuthenticationCore()
-               .AddBlazored(configureSession)
+               .AddBlazored( configureSession )
                .AddRadzen()
                .AddScoped<AppServices>();
     public static WebApplicationBuilder AddAppServices( this WebApplicationBuilder builder, Action<LocalStorageOptions> configureLocal, Action<SessionStorageOptions> configureSession ) =>
         builder.AddAuthenticationCore()
-               .AddBlazored(configureLocal, configureSession)
+               .AddBlazored( configureLocal, configureSession )
                .AddRadzen()
                .AddScoped<AppServices>();
 
@@ -41,23 +51,25 @@ public static class BlazorBuilder
                .AddScoped<TServices>();
     public static WebApplicationBuilder AddAppServices<TServices>( this WebApplicationBuilder builder, Action<LocalStorageOptions> configureLocal ) where TServices : AppServices =>
         builder.AddAuthenticationCore()
-               .AddBlazored(configureLocal)
+               .AddBlazored( configureLocal )
                .AddRadzen()
                .AddScoped<TServices>();
     public static WebApplicationBuilder AddAppServices<TServices>( this WebApplicationBuilder builder, Action<SessionStorageOptions> configureSession ) where TServices : AppServices =>
         builder.AddAuthenticationCore()
-               .AddBlazored(configureSession)
+               .AddBlazored( configureSession )
                .AddRadzen()
                .AddScoped<TServices>();
     public static WebApplicationBuilder AddAppServices<TServices>( this WebApplicationBuilder builder, Action<LocalStorageOptions> configureLocal, Action<SessionStorageOptions> configureSession ) where TServices : AppServices =>
         builder.AddAuthenticationCore()
-               .AddBlazored(configureLocal, configureSession)
+               .AddBlazored( configureLocal, configureSession )
                .AddRadzen()
                .AddScoped<TServices>();
 
 
     /// <summary>
-    /// <para><see href="https://blazor.radzen.com/get-started"/></para>
+    ///     <para>
+    ///         <see href = "https://blazor.radzen.com/get-started" />
+    ///     </para>
     /// </summary>
     public static WebApplicationBuilder AddRadzen( this WebApplicationBuilder builder ) => builder.AddScoped<DialogService>()
                                                                                                   .AddScoped<TooltipService>()
@@ -66,50 +78,84 @@ public static class BlazorBuilder
 
 
     /// <summary>
-    /// <para><see href="https://github.com/Blazored/Modal"/></para>
-    /// <para><see href="https://github.com/Blazored/Toast"/></para>
-    /// <para><see href="https://github.com/Blazored/LocalStorage"/></para>
-    /// <para><see href="https://github.com/Blazored/SessionStorage"/></para>
+    ///     <para>
+    ///         <see href = "https://github.com/Blazored/Modal" />
+    ///     </para>
+    ///     <para>
+    ///         <see href = "https://github.com/Blazored/Toast" />
+    ///     </para>
+    ///     <para>
+    ///         <see href = "https://github.com/Blazored/LocalStorage" />
+    ///     </para>
+    ///     <para>
+    ///         <see href = "https://github.com/Blazored/SessionStorage" />
+    ///     </para>
     /// </summary>
     public static WebApplicationBuilder AddBlazored( this WebApplicationBuilder builder ) => builder.AddBlazoredModal()
                                                                                                     .AddBlazoredToast()
                                                                                                     .AddBlazoredLocalStorage()
                                                                                                     .AddBlazoredSessionStorage();
     /// <summary>
-    /// <para><see href="https://github.com/Blazored/Modal"/></para>
-    /// <para><see href="https://github.com/Blazored/Toast"/></para>
-    /// <para><see href="https://github.com/Blazored/LocalStorage"/></para>
-    /// <para><see href="https://github.com/Blazored/SessionStorage"/></para>
+    ///     <para>
+    ///         <see href = "https://github.com/Blazored/Modal" />
+    ///     </para>
+    ///     <para>
+    ///         <see href = "https://github.com/Blazored/Toast" />
+    ///     </para>
+    ///     <para>
+    ///         <see href = "https://github.com/Blazored/LocalStorage" />
+    ///     </para>
+    ///     <para>
+    ///         <see href = "https://github.com/Blazored/SessionStorage" />
+    ///     </para>
     /// </summary>
     public static WebApplicationBuilder AddBlazored( this WebApplicationBuilder builder, Action<SessionStorageOptions> configureSession ) => builder.AddBlazoredModal()
                                                                                                                                                     .AddBlazoredToast()
                                                                                                                                                     .AddBlazoredLocalStorage()
-                                                                                                                                                    .AddBlazoredSessionStorage(configureSession);
+                                                                                                                                                    .AddBlazoredSessionStorage( configureSession );
     /// <summary>
-    /// <para><see href="https://github.com/Blazored/Modal"/></para>
-    /// <para><see href="https://github.com/Blazored/Toast"/></para>
-    /// <para><see href="https://github.com/Blazored/LocalStorage"/></para>
-    /// <para><see href="https://github.com/Blazored/SessionStorage"/></para>
+    ///     <para>
+    ///         <see href = "https://github.com/Blazored/Modal" />
+    ///     </para>
+    ///     <para>
+    ///         <see href = "https://github.com/Blazored/Toast" />
+    ///     </para>
+    ///     <para>
+    ///         <see href = "https://github.com/Blazored/LocalStorage" />
+    ///     </para>
+    ///     <para>
+    ///         <see href = "https://github.com/Blazored/SessionStorage" />
+    ///     </para>
     /// </summary>
     public static WebApplicationBuilder AddBlazored( this WebApplicationBuilder builder, Action<LocalStorageOptions> configureLocal ) => builder.AddBlazoredModal()
                                                                                                                                                 .AddBlazoredToast()
-                                                                                                                                                .AddBlazoredLocalStorage(configureLocal)
+                                                                                                                                                .AddBlazoredLocalStorage( configureLocal )
                                                                                                                                                 .AddBlazoredSessionStorage();
     /// <summary>
-    /// <para><see href="https://github.com/Blazored/Modal"/></para>
-    /// <para><see href="https://github.com/Blazored/Toast"/></para>
-    /// <para><see href="https://github.com/Blazored/LocalStorage"/></para>
-    /// <para><see href="https://github.com/Blazored/SessionStorage"/></para>
+    ///     <para>
+    ///         <see href = "https://github.com/Blazored/Modal" />
+    ///     </para>
+    ///     <para>
+    ///         <see href = "https://github.com/Blazored/Toast" />
+    ///     </para>
+    ///     <para>
+    ///         <see href = "https://github.com/Blazored/LocalStorage" />
+    ///     </para>
+    ///     <para>
+    ///         <see href = "https://github.com/Blazored/SessionStorage" />
+    ///     </para>
     /// </summary>
     public static WebApplicationBuilder AddBlazored( this WebApplicationBuilder builder, Action<LocalStorageOptions> configureLocal, Action<SessionStorageOptions> configureSession ) =>
         builder.AddBlazoredModal()
                .AddBlazoredToast()
-               .AddBlazoredLocalStorage(configureLocal)
-               .AddBlazoredSessionStorage(configureSession);
+               .AddBlazoredLocalStorage( configureLocal )
+               .AddBlazoredSessionStorage( configureSession );
 
 
     /// <summary>
-    /// <para><see href="https://github.com/Blazored/Toast"/></para>
+    ///     <para>
+    ///         <see href = "https://github.com/Blazored/Toast" />
+    ///     </para>
     /// </summary>
     public static WebApplicationBuilder AddBlazoredToast( this WebApplicationBuilder builder )
     {
@@ -119,7 +165,9 @@ public static class BlazorBuilder
 
 
     /// <summary>
-    /// <para><see href="https://github.com/Blazored/Modal"/></para>
+    ///     <para>
+    ///         <see href = "https://github.com/Blazored/Modal" />
+    ///     </para>
     /// </summary>
     public static WebApplicationBuilder AddBlazoredModal( this WebApplicationBuilder builder )
     {
@@ -129,7 +177,9 @@ public static class BlazorBuilder
 
 
     /// <summary>
-    /// <para><see href="https://github.com/Blazored/LocalStorage"/></para>
+    ///     <para>
+    ///         <see href = "https://github.com/Blazored/LocalStorage" />
+    ///     </para>
     /// </summary>
     public static WebApplicationBuilder AddBlazoredLocalStorage( this WebApplicationBuilder builder )
     {
@@ -137,17 +187,21 @@ public static class BlazorBuilder
         return builder;
     }
     /// <summary>
-    /// <para><see href="https://github.com/Blazored/LocalStorage"/></para>
+    ///     <para>
+    ///         <see href = "https://github.com/Blazored/LocalStorage" />
+    ///     </para>
     /// </summary>
     public static WebApplicationBuilder AddBlazoredLocalStorage( this WebApplicationBuilder builder, Action<LocalStorageOptions> configure )
     {
-        builder.Services.AddBlazoredLocalStorage(configure);
+        builder.Services.AddBlazoredLocalStorage( configure );
         return builder;
     }
 
 
     /// <summary>
-    /// <para><see href="https://github.com/Blazored/SessionStorage"/></para>
+    ///     <para>
+    ///         <see href = "https://github.com/Blazored/SessionStorage" />
+    ///     </para>
     /// </summary>
     public static WebApplicationBuilder AddBlazoredSessionStorage( this WebApplicationBuilder builder )
     {
@@ -155,11 +209,13 @@ public static class BlazorBuilder
         return builder;
     }
     /// <summary>
-    /// <para><see href="https://github.com/Blazored/SessionStorage"/></para>
+    ///     <para>
+    ///         <see href = "https://github.com/Blazored/SessionStorage" />
+    ///     </para>
     /// </summary>
     public static WebApplicationBuilder AddBlazoredSessionStorage( this WebApplicationBuilder builder, Action<SessionStorageOptions> configure )
     {
-        builder.Services.AddBlazoredSessionStorage(configure);
+        builder.Services.AddBlazoredSessionStorage( configure );
         return builder;
     }
 }

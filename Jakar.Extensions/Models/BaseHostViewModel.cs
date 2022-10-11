@@ -6,8 +6,8 @@ namespace Jakar.Extensions;
 
 public interface IHostViewModel : IHostInfo
 {
-    public string? Host        { get; set; }
     public bool    IsValidHost { get; set; }
+    public string? Host        { get; set; }
 }
 
 
@@ -15,9 +15,14 @@ public interface IHostViewModel : IHostInfo
 public abstract class BaseHostViewModel : BaseViewModel, IHostViewModel
 {
     protected readonly Uri     _defaultHostInfo;
+    private            bool    _isValidHost;
     private            string? _host;
     private            Uri?    _hostInfo;
-    private            bool    _isValidHost;
+    public virtual bool IsValidHost
+    {
+        get => _isValidHost;
+        set => SetProperty( ref _isValidHost, value );
+    }
 
 
     public virtual string? Host
@@ -25,9 +30,9 @@ public abstract class BaseHostViewModel : BaseViewModel, IHostViewModel
         get => _host;
         set
         {
-            SetProperty(ref _host, value);
-            IsValidHost = Uri.TryCreate(value, UriKind.Absolute, out _hostInfo);
-            OnPropertyChanged(nameof(HostInfo));
+            SetProperty( ref _host, value );
+            IsValidHost = Uri.TryCreate( value, UriKind.Absolute, out _hostInfo );
+            OnPropertyChanged( nameof(HostInfo) );
         }
     }
     public virtual Uri HostInfo
@@ -35,18 +40,13 @@ public abstract class BaseHostViewModel : BaseViewModel, IHostViewModel
         get => _hostInfo ?? _defaultHostInfo;
         set
         {
-            SetProperty(ref _hostInfo, value);
+            SetProperty( ref _hostInfo, value );
             Host = value.ToString();
         }
     }
-    public virtual bool IsValidHost
-    {
-        get => _isValidHost;
-        set => SetProperty(ref _isValidHost, value);
-    }
 
 
-    protected BaseHostViewModel( Uri hostInfo ) : this(hostInfo, hostInfo) { }
+    protected BaseHostViewModel( Uri hostInfo ) : this( hostInfo, hostInfo ) { }
     protected BaseHostViewModel( Uri hostInfo, Uri defaultHostInfo )
     {
         _defaultHostInfo = defaultHostInfo;

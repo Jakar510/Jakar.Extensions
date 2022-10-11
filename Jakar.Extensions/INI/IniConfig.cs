@@ -6,52 +6,19 @@ public partial class IniConfig : ConcurrentDictionary<string, IniConfig.Section>
 {
     public new Section this[ string sectionName ]
     {
-        get => GetOrAdd(sectionName);
+        get => GetOrAdd( sectionName );
         set => base[sectionName] = value;
     }
-    public IniConfig() : this(StringComparer.OrdinalIgnoreCase) { }
-    public IniConfig( IEqualityComparer<string>                  comparer ) : base(comparer) { }
-    public IniConfig( IDictionary<string, Section>               dictionary ) : this(dictionary, StringComparer.OrdinalIgnoreCase) { }
-    public IniConfig( IDictionary<string, Section>               dictionary, IEqualityComparer<string> comparer ) : base(dictionary, comparer) { }
-    public IniConfig( IEnumerable<KeyValuePair<string, Section>> collection ) : this(collection, StringComparer.OrdinalIgnoreCase) { }
-    public IniConfig( IEnumerable<KeyValuePair<string, Section>> collection, IEqualityComparer<string> comparer ) : base(collection, comparer) { }
+    public IniConfig() : this( StringComparer.OrdinalIgnoreCase ) { }
+    public IniConfig( IEqualityComparer<string>                  comparer ) : base( comparer ) { }
+    public IniConfig( IDictionary<string, Section>               dictionary ) : this( dictionary, StringComparer.OrdinalIgnoreCase ) { }
+    public IniConfig( IDictionary<string, Section>               dictionary, IEqualityComparer<string> comparer ) : base( dictionary, comparer ) { }
+    public IniConfig( IEnumerable<KeyValuePair<string, Section>> collection ) : this( collection, StringComparer.OrdinalIgnoreCase ) { }
+    public IniConfig( IEnumerable<KeyValuePair<string, Section>> collection, IEqualityComparer<string> comparer ) : base( collection, comparer ) { }
 
 
-    public ValueTask WriteToFile( LocalFile file ) => file.WriteAsync(ToString());
-
-
-    [SuppressMessage("ReSharper", "UseDeconstruction", Justification = "Support NetFramework")]
-    public override string ToString()
-    {
-        var builder = new StringBuilder();
-
-        foreach ( KeyValuePair<string, Section> pair in this )
-        {
-            builder.Append("[ ");
-            builder.Append(pair.Key);
-            builder.Append(" ]");
-            builder.AppendLine();
-
-            Section dictionary = pair.Value;
-            int     longest    = dictionary.Keys.Max(item => item.Length);
-
-            foreach ( KeyValuePair<string, string> setting in dictionary )
-            {
-                builder.Append(setting.Key.PadRight(longest));
-                builder.Append(" = ");
-                builder.Append(setting.Value);
-                builder.AppendLine();
-            }
-
-            builder.AppendLine();
-        }
-
-        return builder.ToString();
-    }
-
-
-    public static ValueTask<IniConfig?> ReadFromFileAsync( LocalFile file ) => ReadFromFileAsync<IniConfig>(file);
-    public static IniConfig? ReadFromFile( LocalFile            file ) => ReadFromFile<IniConfig>(file);
+    public static ValueTask<IniConfig?> ReadFromFileAsync( LocalFile file ) => ReadFromFileAsync<IniConfig>( file );
+    public static IniConfig? ReadFromFile( LocalFile                 file ) => ReadFromFile<IniConfig>( file );
 
 
     public static T? ReadFromFile<T>( LocalFile file ) where T : IniConfig, new()
@@ -59,14 +26,14 @@ public partial class IniConfig : ConcurrentDictionary<string, IniConfig.Section>
         ReadOnlySpan<char> content = file.Read()
                                          .AsSpan();
 
-        return From<T>(content);
+        return From<T>( content );
     }
     public static async ValueTask<T?> ReadFromFileAsync<T>( LocalFile file ) where T : IniConfig, new()
     {
         string content = await file.ReadAsync()
                                    .AsString();
 
-        return From<T>(content);
+        return From<T>( content );
     }
 
 
@@ -120,24 +87,24 @@ public partial class IniConfig : ConcurrentDictionary<string, IniConfig.Section>
     //     return data;
     // }
 
-    public static T? From<T>( in string content ) where T : IniConfig, new() => From<T>(content.AsSpan());
+    public static T? From<T>( in string content ) where T : IniConfig, new() => From<T>( content.AsSpan() );
 
     public static T? From<T>( in ReadOnlySpan<char> content ) where T : IniConfig, new()
     {
-        if ( content.IsEmpty ) { return default; }
+        if (content.IsEmpty) { return default; }
 
         var data = new T();
 
-        var section = string.Empty;
+        string section = string.Empty;
 
-        foreach ( LineSplitEntry<char> rawLine in content.SplitOn('\n') )
+        foreach (LineSplitEntry<char> rawLine in content.SplitOn( '\n' ))
         {
             ReadOnlySpan<char> line = rawLine.Value.Trim();
 
             // Ignore blank lines
-            if ( line.IsNullOrWhiteSpace() ) { continue; }
+            if (line.IsNullOrWhiteSpace()) { continue; }
 
-            switch ( line[0] )
+            switch (line[0])
             {
                 // Ignore comments
                 case ';':
@@ -147,10 +114,10 @@ public partial class IniConfig : ConcurrentDictionary<string, IniConfig.Section>
 
                 // [Section:header]
                 case '[' when line[^1] == ']':
-                    ReadOnlySpan<char> sectionSpan = line.Slice(1, line.Length - 2)
+                    ReadOnlySpan<char> sectionSpan = line.Slice( 1, line.Length - 2 )
                                                          .Trim(); // remove the brackets and whitespace
 
-                    if ( sectionSpan.IsNullOrWhiteSpace() ) { throw new FormatException("section title cannot be empty or whitespace."); }
+                    if (sectionSpan.IsNullOrWhiteSpace()) { throw new FormatException( "section title cannot be empty or whitespace." ); }
 
                     section       = sectionSpan.ToString();
                     data[section] = new Section();
@@ -158,30 +125,63 @@ public partial class IniConfig : ConcurrentDictionary<string, IniConfig.Section>
             }
 
             // key = value OR "value"
-            int separator = line.IndexOf('=');
+            int separator = line.IndexOf( '=' );
 
-            if ( separator < 0 ) { throw new FormatException($@"Line doesn't contain an equals sign. ""{line.ToString()}"" "); }
+            if (separator < 0) { throw new FormatException( $@"Line doesn't contain an equals sign. ""{line.ToString()}"" " ); }
 
 
             ReadOnlySpan<char> keySpan = line[..separator]
                .Trim();
 
-            ReadOnlySpan<char> valueSpan = line[( separator + 1 )..]
+            ReadOnlySpan<char> valueSpan = line[(separator + 1)..]
                .Trim();
 
             // Remove quotes
-            if ( valueSpan.Length > 1 && valueSpan[0] == '"' && valueSpan[^1] == '"' ) { valueSpan = valueSpan.Slice(1, valueSpan.Length - 2); }
+            if (valueSpan.Length > 1 && valueSpan[0] == '"' && valueSpan[^1] == '"') { valueSpan = valueSpan.Slice( 1, valueSpan.Length - 2 ); }
 
-            var key   = keySpan.ToString();
-            var value = valueSpan.ToString();
+            string key   = keySpan.ToString();
+            string value = valueSpan.ToString();
 
-            if ( data[section]
-               .ContainsKey(key) ) { throw new FormatException(@$"Duplicate key ""{key}"" in ""{section}"""); }
+            if (data[section]
+               .ContainsKey( key )) { throw new FormatException( @$"Duplicate key ""{key}"" in ""{section}""" ); }
 
             data[section][key] = value;
         }
 
         return data;
+    }
+
+
+    public ValueTask WriteToFile( LocalFile file ) => file.WriteAsync( ToString() );
+
+
+    [SuppressMessage( "ReSharper", "UseDeconstruction", Justification = "Support NetFramework" )]
+    public override string ToString()
+    {
+        var builder = new StringBuilder();
+
+        foreach (KeyValuePair<string, Section> pair in this)
+        {
+            builder.Append( "[ " );
+            builder.Append( pair.Key );
+            builder.Append( " ]" );
+            builder.AppendLine();
+
+            Section dictionary = pair.Value;
+            int     longest    = dictionary.Keys.Max( item => item.Length );
+
+            foreach (KeyValuePair<string, string> setting in dictionary)
+            {
+                builder.Append( setting.Key.PadRight( longest ) );
+                builder.Append( " = " );
+                builder.Append( setting.Value );
+                builder.AppendLine();
+            }
+
+            builder.AppendLine();
+        }
+
+        return builder.ToString();
     }
 
 
@@ -198,7 +198,7 @@ public partial class IniConfig : ConcurrentDictionary<string, IniConfig.Section>
     /// </returns>
     public Section GetOrAdd( in string sectionName )
     {
-        if ( !ContainsKey(sectionName) ) { Add(sectionName); }
+        if (!ContainsKey( sectionName )) { Add( sectionName ); }
 
         return base[sectionName];
     }
@@ -218,15 +218,15 @@ public partial class IniConfig : ConcurrentDictionary<string, IniConfig.Section>
     /// <exception cref = "KeyNotFoundException" > </exception>
     private Section Get( in string sectionName, in StringComparison comparison )
     {
-        foreach ( string key in Keys )
+        foreach (string key in Keys)
         {
-            if ( string.Compare(key, sectionName, comparison) == 0 ) { return base[key]; }
+            if (string.Compare( key, sectionName, comparison ) == 0) { return base[key]; }
         }
 
-        throw new KeyNotFoundException(sectionName);
+        throw new KeyNotFoundException( sectionName );
     }
 
-    public void Add( in string                     section ) => Add(section, new Section());
-    public void Add( KeyValuePair<string, Section> pair ) => Add(pair.Key,   pair.Value);
+    public void Add( in string                     section ) => Add( section, new Section() );
+    public void Add( KeyValuePair<string, Section> pair ) => Add( pair.Key,   pair.Value );
     public void Add( in string                     section, Section value ) => this[section] = value;
 }

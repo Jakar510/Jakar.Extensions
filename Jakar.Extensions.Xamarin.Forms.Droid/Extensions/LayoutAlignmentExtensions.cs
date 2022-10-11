@@ -1,4 +1,5 @@
 ﻿#nullable enable
+using Android.Runtime;
 using Android.Views;
 using Xamarin.Forms;
 
@@ -7,7 +8,7 @@ using Xamarin.Forms;
 namespace Jakar.Extensions.Xamarin.Forms.Droid;
 
 
-[global::Android.Runtime.Preserve(AllMembers = true)]
+[Preserve( AllMembers = true )]
 public static class LayoutAlignmentExtensions
 {
     public static GravityFlags ToNativeVertical( this LayoutAlignment forms ) =>

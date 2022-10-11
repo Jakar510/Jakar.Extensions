@@ -1,10 +1,10 @@
-﻿using System;
+﻿#nullable enable
+using System;
 using System.Collections;
 using System.Collections.Generic;
 
 
 
-#nullable enable
 namespace Jakar.Xml;
 
 

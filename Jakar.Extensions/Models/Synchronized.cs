@@ -23,17 +23,17 @@ public class Synchronized<TStruct> where TStruct : struct
     {
         get
         {
-            lock ( _lock ) { return _value; }
+            lock (_lock) { return _value; }
         }
         set
         {
-            lock ( _lock ) { _value = value; }
+            lock (_lock) { _value = value; }
         }
     }
 
 
-    public Synchronized() : this(default) { }
-    public Synchronized( TStruct value ) : this(value, new object()) { }
+    public Synchronized() : this( default ) { }
+    public Synchronized( TStruct value ) : this( value, new object() ) { }
 
     public Synchronized( TStruct value, object @lock )
     {

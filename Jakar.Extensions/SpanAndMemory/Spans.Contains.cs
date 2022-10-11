@@ -4,11 +4,15 @@
 namespace Jakar.Extensions;
 
 
-/// <summary> <para><see href="https://devblogs.microsoft.com/dotnet/performance_improvements_in_net_7/#vectorization"/></para> </summary>
+/// <summary>
+///     <para>
+///         <see href = "https://devblogs.microsoft.com/dotnet/performance_improvements_in_net_7/#vectorization" />
+///     </para>
+/// </summary>
 public static partial class Spans
 {
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool Contains( this Span<char>         span, in ReadOnlySpan<char> value ) => MemoryExtensions.Contains(span, value, StringComparison.Ordinal);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool Contains( this ReadOnlySpan<char> span, in ReadOnlySpan<char> value ) => span.Contains(value, StringComparison.Ordinal);
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool Contains( this Span<char>         span, in ReadOnlySpan<char> value ) => MemoryExtensions.Contains( span, value, StringComparison.Ordinal );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool Contains( this ReadOnlySpan<char> span, in ReadOnlySpan<char> value ) => span.Contains( value, StringComparison.Ordinal );
 
 
     public static bool Contains<T>( this Span<T> span, in T value ) where T : struct, IEquatable<T>
@@ -20,7 +24,7 @@ public static partial class Spans
         }
         return false;
     #else
-        return MemoryExtensions.Contains(span, value);
+        return MemoryExtensions.Contains( span, value );
     #endif
     }
     public static bool Contains<T>( this ReadOnlySpan<T> span, in T value ) where T : struct, IEquatable<T>
@@ -33,29 +37,29 @@ public static partial class Spans
 
         return false;
     #else
-        return MemoryExtensions.Contains(span, value);
+        return MemoryExtensions.Contains( span, value );
     #endif
     }
     public static bool Contains<T>( this Span<T> span, in ReadOnlySpan<T> value ) where T : struct, IEquatable<T>
     {
-        for ( var i = 0; i < span.Length || i + value.Length < span.Length; i++ )
+        for (int i = 0; i < span.Length || i + value.Length < span.Length; i++)
         {
-            Span<T> temp = span.Slice(i, value.Length);
-            if ( span.Length >= value.Length ) { return false; }
+            Span<T> temp = span.Slice( i, value.Length );
+            if (span.Length >= value.Length) { return false; }
 
-            if ( temp.SequenceEqual(value) ) { return true; }
+            if (temp.SequenceEqual( value )) { return true; }
         }
 
         return false;
     }
     public static bool Contains<T>( this ReadOnlySpan<T> span, in ReadOnlySpan<T> value ) where T : struct, IEquatable<T>
     {
-        for ( var i = 0; i < span.Length || i + value.Length < span.Length; i++ )
+        for (int i = 0; i < span.Length || i + value.Length < span.Length; i++)
         {
-            ReadOnlySpan<T> temp = span.Slice(i, value.Length);
-            if ( span.Length >= value.Length ) { return false; }
+            ReadOnlySpan<T> temp = span.Slice( i, value.Length );
+            if (span.Length >= value.Length) { return false; }
 
-            if ( temp.SequenceEqual(value) ) { return true; }
+            if (temp.SequenceEqual( value )) { return true; }
         }
 
         return false;
@@ -64,17 +68,17 @@ public static partial class Spans
 
     public static bool ContainsAll<T>( this Span<T> span, in ReadOnlySpan<T> values ) where T : struct, IEquatable<T>
     {
-        var result = true;
+        bool result = true;
 
-        foreach ( T c in values ) { result &= span.Contains(c); }
+        foreach (T c in values) { result &= span.Contains( c ); }
 
         return result;
     }
     public static bool ContainsAll<T>( this ReadOnlySpan<T> span, in ReadOnlySpan<T> values ) where T : struct, IEquatable<T>
     {
-        var result = true;
+        bool result = true;
 
-        foreach ( T c in values ) { result &= span.Contains(c); }
+        foreach (T c in values) { result &= span.Contains( c ); }
 
         return result;
     }
@@ -82,18 +86,18 @@ public static partial class Spans
 
     public static bool ContainsNone<T>( this ReadOnlySpan<T> span, in ReadOnlySpan<T> values ) where T : struct, IEquatable<T>
     {
-        foreach ( T c in values )
+        foreach (T c in values)
         {
-            if ( span.Contains(c) ) { return false; }
+            if (span.Contains( c )) { return false; }
         }
 
         return true;
     }
     public static bool ContainsNone<T>( this Span<T> span, in ReadOnlySpan<T> values ) where T : struct, IEquatable<T>
     {
-        foreach ( T c in values )
+        foreach (T c in values)
         {
-            if ( span.Contains(c) ) { return false; }
+            if (span.Contains( c )) { return false; }
         }
 
         return true;
@@ -102,18 +106,18 @@ public static partial class Spans
 
     public static bool ContainsNone( this Span<char> span, in ReadOnlySpan<char> values )
     {
-        foreach ( char c in values )
+        foreach (char c in values)
         {
-            if ( span.Contains(c) ) { return false; }
+            if (span.Contains( c )) { return false; }
         }
 
         return true;
     }
     public static bool ContainsNone( this ReadOnlySpan<char> span, in ReadOnlySpan<char> values )
     {
-        foreach ( char c in values )
+        foreach (char c in values)
         {
-            if ( span.Contains(c) ) { return false; }
+            if (span.Contains( c )) { return false; }
         }
 
         return true;
@@ -122,18 +126,18 @@ public static partial class Spans
 
     public static bool ContainsAny<T>( this Span<T> span, in ReadOnlySpan<T> values ) where T : struct, IEquatable<T>
     {
-        foreach ( T c in values )
+        foreach (T c in values)
         {
-            if ( span.Contains(c) ) { return true; }
+            if (span.Contains( c )) { return true; }
         }
 
         return false;
     }
     public static bool ContainsAny<T>( this ReadOnlySpan<T> span, in ReadOnlySpan<T> values ) where T : struct, IEquatable<T>
     {
-        foreach ( T c in values )
+        foreach (T c in values)
         {
-            if ( span.Contains(c) ) { return true; }
+            if (span.Contains( c )) { return true; }
         }
 
         return false;
@@ -142,18 +146,18 @@ public static partial class Spans
 
     public static bool ContainsAny( this Span<char> span, in ReadOnlySpan<char> values )
     {
-        foreach ( char c in values )
+        foreach (char c in values)
         {
-            if ( span.Contains(c) ) { return true; }
+            if (span.Contains( c )) { return true; }
         }
 
         return false;
     }
     public static bool ContainsAny( this ReadOnlySpan<char> span, in ReadOnlySpan<char> values )
     {
-        foreach ( char c in values )
+        foreach (char c in values)
         {
-            if ( span.Contains(c) ) { return true; }
+            if (span.Contains( c )) { return true; }
         }
 
         return false;
@@ -162,33 +166,33 @@ public static partial class Spans
 
     public static bool StartsWith<T>( this Span<T> span, in T value ) where T : struct, IEquatable<T>
     {
-        if ( span.IsEmpty ) { return false; }
+        if (span.IsEmpty) { return false; }
 
         return span[0]
-           .Equals(value);
+           .Equals( value );
     }
     public static bool StartsWith<T>( this ReadOnlySpan<T> span, in T value ) where T : struct, IEquatable<T>
     {
-        if ( span.IsEmpty ) { return false; }
+        if (span.IsEmpty) { return false; }
 
         return span[0]
-           .Equals(value);
+           .Equals( value );
     }
 
 
     public static bool EndsWith<T>( this Span<T> span, in T value ) where T : struct, IEquatable<T>
     {
-        if ( span.IsEmpty ) { return false; }
+        if (span.IsEmpty) { return false; }
 
         return span[^1]
-           .Equals(value);
+           .Equals( value );
     }
     public static bool EndsWith<T>( this ReadOnlySpan<T> span, in T value ) where T : struct, IEquatable<T>
     {
-        if ( span.IsEmpty ) { return false; }
+        if (span.IsEmpty) { return false; }
 
         return span[^1]
-           .Equals(value);
+           .Equals( value );
     }
 
 

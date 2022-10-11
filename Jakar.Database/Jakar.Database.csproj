@@ -12,11 +12,10 @@
 	<ItemGroup>
 		<PackageReference Include="Jakar.Extensions" Version="6.1.2" />
 		<PackageReference Include="Jakar.Extensions.Hosting" Version="6.0.8" />
+		<PackageReference Include="FluentMigrator" Version="3.3.2" />
+		<PackageReference Include="FluentMigrator.Runner" Version="3.3.2" />
+		<PackageReference Include="MailKit" Version="3.4.1" />
 		<PackageReference Include="Sigil" Version="5.0.0" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Folder Include="Migrations\" />
 	</ItemGroup>
 
 </Project>

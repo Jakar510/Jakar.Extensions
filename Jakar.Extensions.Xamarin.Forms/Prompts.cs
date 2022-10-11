@@ -1,23 +1,24 @@
-﻿using Acr.UserDialogs;
+﻿#nullable enable
+using Acr.UserDialogs;
 
 
-#nullable enable
+
 namespace Jakar.Extensions.Xamarin.Forms;
 
 
 public abstract class Prompts : IUserDialogs
 {
-    protected readonly IAppSettings _services;
     protected readonly Debug        _debug;
-
-
-    protected internal abstract string Cancel { get; }
-    protected internal abstract string Ok     { get; }
-    protected internal abstract string Yes    { get; }
-    protected internal abstract string No     { get; }
+    protected readonly IAppSettings _services;
 
 
     private IUserDialogs _Dialogs { get; } = UserDialogs.Instance;
+
+
+    protected internal abstract string Cancel { get; }
+    protected internal abstract string No     { get; }
+    protected internal abstract string Ok     { get; }
+    protected internal abstract string Yes    { get; }
 
 
     protected Prompts( IAppSettings services, Debug debug )
@@ -32,21 +33,26 @@ public abstract class Prompts : IUserDialogs
 
 
     public async Task SendFeedBack<TFeedBackPage>( string? title, string? message, Page page, Exception e, FileSystemApi api, CancellationToken token = default ) where TFeedBackPage : Page, new() =>
-        await SendFeedBack<TFeedBackPage>(title, message, Yes, No, page, e, api, token).ConfigureAwait(false);
+        await SendFeedBack<TFeedBackPage>( title, message, Yes, No, page, e, api, token )
+           .ConfigureAwait( false );
 
     public async Task SendFeedBack<TFeedBackPage>( string? title, string? message, string? yes, string? no, Page page, Exception e, FileSystemApi api, CancellationToken token = default ) where TFeedBackPage : Page, new()
     {
-        if ( page is null ) { throw new ArgumentNullException(nameof(page)); }
+        if (page is null) { throw new ArgumentNullException( nameof(page) ); }
 
-        if ( e is null ) { throw new ArgumentNullException(nameof(e)); }
+        if (e is null) { throw new ArgumentNullException( nameof(e) ); }
 
-        await _debug.HandleExceptionAsync(e).ConfigureAwait(false);
+        await _debug.HandleExceptionAsync( e )
+                    .ConfigureAwait( false );
 
-        if ( await ConfirmAsync(title, message, yes, no, token).ConfigureAwait(false) )
+        if (await ConfirmAsync( title, message, yes, no, token )
+               .ConfigureAwait( false ))
         {
-            _services.ScreenShotAddress = await api.GetScreenShot().ConfigureAwait(false);
+            _services.ScreenShotAddress = await api.GetScreenShot()
+                                                   .ConfigureAwait( false );
 
-            await page.Navigation.PushAsync(new TFeedBackPage()).ConfigureAwait(false);
+            await page.Navigation.PushAsync( new TFeedBackPage() )
+                      .ConfigureAwait( false );
         }
         else { _services.ScreenShotAddress = null; }
     }
@@ -54,31 +60,34 @@ public abstract class Prompts : IUserDialogs
 
     public async Task<bool> HandleExceptionAsync( Exception e, CancellationToken token )
     {
-        if ( token.IsCancellationRequested ) { return false; }
+        if (token.IsCancellationRequested) { return false; }
 
-        return await HandleExceptionAsync(e).ConfigureAwait(false);
+        return await HandleExceptionAsync( e )
+                  .ConfigureAwait( false );
     }
 
     public async Task<bool> HandleExceptionAsync( Exception e )
     {
-        await InternalHandleExceptionAsync(e).ConfigureAwait(false);
+        await InternalHandleExceptionAsync( e )
+           .ConfigureAwait( false );
 
-        return InternalHandleException(e);
+        return InternalHandleException( e );
     }
 
     public bool HandleException( Exception e )
     {
-        Task.Run(async () => await InternalHandleExceptionAsync(e).ConfigureAwait(false));
+        Task.Run( async () => await InternalHandleExceptionAsync( e )
+                                 .ConfigureAwait( false ) );
 
-        return InternalHandleException(e);
+        return InternalHandleException( e );
     }
 
 
     protected virtual async Task InternalHandleExceptionAsync( Exception e )
     {
-        switch ( e )
+        switch (e)
         {
-            case null: throw new ArgumentNullException(nameof(e));
+            case null: throw new ArgumentNullException( nameof(e) );
 
             case OperationCanceledException:
             case NameResolutionException:
@@ -88,25 +97,27 @@ public abstract class Prompts : IUserDialogs
 
 
             default:
-                await _debug.HandleExceptionAsync(e).ConfigureAwait(false);
+                await _debug.HandleExceptionAsync( e )
+                            .ConfigureAwait( false );
+
                 return;
         }
     }
 
 
     /// <summary>
-    /// switch the type of exception to show what ever prompt you want
+    ///     switch the type of exception to show what ever prompt you want
     /// </summary>
-    /// <param name="e"></param>
-    /// <returns></returns>
+    /// <param name = "e" > </param>
+    /// <returns> </returns>
     protected abstract bool InternalHandleException( Exception e );
 
 
     public void DebugMessage( Exception e, [CallerMemberName] string? caller = default )
     {
-        if ( !_debug.CanDebug ) { return; }
+        if (!_debug.CanDebug) { return; }
 
-        if ( !string.IsNullOrWhiteSpace(caller) ) { caller = $"DEBUG: {caller}"; }
+        if (!string.IsNullOrWhiteSpace( caller )) { caller = $"DEBUG: {caller}"; }
 
         //if ( !Debug.CanDebug )
         //{
@@ -114,7 +125,7 @@ public abstract class Prompts : IUserDialogs
         //	return;
         //}
 
-        Alert(caller, e.ToString());
+        Alert( caller, e.ToString() );
     }
 
 
@@ -123,8 +134,8 @@ public abstract class Prompts : IUserDialogs
 
     #region Toasts
 
-    public IDisposable Toast( string?      title, TimeSpan? dismissTimer = null ) => _Dialogs.Toast(title, dismissTimer);
-    public IDisposable Toast( ToastConfig? cfg ) => _Dialogs.Toast(cfg);
+    public IDisposable Toast( string?      title, TimeSpan? dismissTimer = null ) => _Dialogs.Toast( title, dismissTimer );
+    public IDisposable Toast( ToastConfig? cfg ) => _Dialogs.Toast( cfg );
 
     #endregion
 
@@ -132,15 +143,15 @@ public abstract class Prompts : IUserDialogs
 
     #region Alerts
 
-    protected void Alert( string?          title, string? message ) => _Dialogs.Alert(message,             title, Ok);
-    public IDisposable Alert( string?      title, string? message, string? ok ) => _Dialogs.Alert(message, title, ok);
-    public IDisposable Alert( AlertConfig? config ) => _Dialogs.Alert(config);
+    protected void Alert( string?          title, string? message ) => _Dialogs.Alert( message,             title, Ok );
+    public IDisposable Alert( string?      title, string? message, string? ok ) => _Dialogs.Alert( message, title, ok );
+    public IDisposable Alert( AlertConfig? config ) => _Dialogs.Alert( config );
 
 
-    public Task AlertAsync( string? title, string? message, CancellationToken? cancelToken                            = default ) => AlertAsync(message, title, Ok, cancelToken);
-    public Task AlertAsync( string? title, string? message, string?            okText, CancellationToken? cancelToken = default ) => _Dialogs.AlertAsync(message, title, okText, cancelToken);
+    public Task AlertAsync( string? title, string? message, CancellationToken? cancelToken                            = default ) => AlertAsync( message, title, Ok, cancelToken );
+    public Task AlertAsync( string? title, string? message, string?            okText, CancellationToken? cancelToken = default ) => _Dialogs.AlertAsync( message, title, okText, cancelToken );
 
-    public Task AlertAsync( AlertConfig? config, CancellationToken? cancelToken = default ) => _Dialogs.AlertAsync(config, cancelToken);
+    public Task AlertAsync( AlertConfig? config, CancellationToken? cancelToken = default ) => _Dialogs.AlertAsync( config, cancelToken );
 
     #endregion
 
@@ -148,9 +159,9 @@ public abstract class Prompts : IUserDialogs
 
     #region ActionSheets
 
-    public IDisposable ActionSheet( ActionSheetConfig? config ) => _Dialogs.ActionSheet(config);
+    public IDisposable ActionSheet( ActionSheetConfig? config ) => _Dialogs.ActionSheet( config );
 
-    public Task<string> ActionSheetAsync( string? title, string? cancel, string? destructive, CancellationToken? cancelToken = null, params string[] buttons ) => _Dialogs.ActionSheetAsync(title, cancel, destructive, cancelToken, buttons);
+    public Task<string> ActionSheetAsync( string? title, string? cancel, string? destructive, CancellationToken? cancelToken = null, params string[] buttons ) => _Dialogs.ActionSheetAsync( title, cancel, destructive, cancelToken, buttons );
 
     #endregion
 
@@ -158,12 +169,13 @@ public abstract class Prompts : IUserDialogs
 
     #region Confirm
 
-    public IDisposable Confirm( ConfirmConfig?     config ) => _Dialogs.Confirm(config);
-    public Task<bool> ConfirmAsync( ConfirmConfig? config, CancellationToken? cancelToken = null ) => _Dialogs.ConfirmAsync(config, cancelToken);
+    public IDisposable Confirm( ConfirmConfig?     config ) => _Dialogs.Confirm( config );
+    public Task<bool> ConfirmAsync( ConfirmConfig? config, CancellationToken? cancelToken = null ) => _Dialogs.ConfirmAsync( config, cancelToken );
 
-    public async Task<bool> ConfirmAsync( string? title, string? message, CancellationToken? cancelToken ) => await ConfirmAsync(message, title, Yes, No, cancelToken).ConfigureAwait(false);
+    public async Task<bool> ConfirmAsync( string? title, string? message, CancellationToken? cancelToken ) => await ConfirmAsync( message, title, Yes, No, cancelToken )
+                                                                                                                 .ConfigureAwait( false );
 
-    public Task<bool> ConfirmAsync( string? title, string? message, string? yes, string? no, CancellationToken? cancelToken ) => _Dialogs.ConfirmAsync(message, title, yes, no, cancelToken);
+    public Task<bool> ConfirmAsync( string? title, string? message, string? yes, string? no, CancellationToken? cancelToken ) => _Dialogs.ConfirmAsync( message, title, yes, no, cancelToken );
 
     #endregion
 
@@ -171,11 +183,11 @@ public abstract class Prompts : IUserDialogs
 
     #region Dates
 
-    public IDisposable DatePrompt( DatePromptConfig?                 config ) => _Dialogs.DatePrompt(config);
-    public Task<DatePromptResult> DatePromptAsync( DatePromptConfig? config, CancellationToken? cancelToken = null ) => _Dialogs.DatePromptAsync(config, cancelToken);
+    public IDisposable DatePrompt( DatePromptConfig?                 config ) => _Dialogs.DatePrompt( config );
+    public Task<DatePromptResult> DatePromptAsync( DatePromptConfig? config, CancellationToken? cancelToken = null ) => _Dialogs.DatePromptAsync( config, cancelToken );
 
     public Task<DatePromptResult> DatePromptAsync( string? title = null, DateTime? selectedDate = null, CancellationToken? cancelToken = null ) =>
-        _Dialogs.DatePromptAsync(title, selectedDate, cancelToken);
+        _Dialogs.DatePromptAsync( title, selectedDate, cancelToken );
 
     #endregion
 
@@ -183,11 +195,11 @@ public abstract class Prompts : IUserDialogs
 
     #region Times
 
-    public IDisposable TimePrompt( TimePromptConfig?                 config ) => _Dialogs.TimePrompt(config);
-    public Task<TimePromptResult> TimePromptAsync( TimePromptConfig? config, CancellationToken? cancelToken = null ) => _Dialogs.TimePromptAsync(config, cancelToken);
+    public IDisposable TimePrompt( TimePromptConfig?                 config ) => _Dialogs.TimePrompt( config );
+    public Task<TimePromptResult> TimePromptAsync( TimePromptConfig? config, CancellationToken? cancelToken = null ) => _Dialogs.TimePromptAsync( config, cancelToken );
 
     public Task<TimePromptResult> TimePromptAsync( string? title = null, TimeSpan? selectedTime = null, CancellationToken? cancelToken = null ) =>
-        _Dialogs.TimePromptAsync(title, selectedTime, cancelToken);
+        _Dialogs.TimePromptAsync( title, selectedTime, cancelToken );
 
     #endregion
 
@@ -195,12 +207,12 @@ public abstract class Prompts : IUserDialogs
 
     #region GenericPrompts
 
-    public IDisposable Prompt( PromptConfig? config ) => _Dialogs.Prompt(config);
+    public IDisposable Prompt( PromptConfig? config ) => _Dialogs.Prompt( config );
 
     public Task<PromptResult> PromptAsync( string? message, string? title = null, string? okText = null, string? cancelText = null, string? placeholder = "", InputType inputType = InputType.Default, CancellationToken? cancelToken = null ) =>
-        _Dialogs.PromptAsync(message, title, okText, cancelText, placeholder, inputType, cancelToken);
+        _Dialogs.PromptAsync( message, title, okText, cancelText, placeholder, inputType, cancelToken );
 
-    public Task<PromptResult> PromptAsync( PromptConfig? config, CancellationToken? cancelToken = null ) => _Dialogs.PromptAsync(config, cancelToken);
+    public Task<PromptResult> PromptAsync( PromptConfig? config, CancellationToken? cancelToken = null ) => _Dialogs.PromptAsync( config, cancelToken );
 
     #endregion
 
@@ -208,9 +220,9 @@ public abstract class Prompts : IUserDialogs
 
     #region Login
 
-    public IDisposable Login( LoginConfig?            config ) => _Dialogs.Login(config);
-    public Task<LoginResult> LoginAsync( string?      title = null, string?            message     = null, CancellationToken? cancelToken = null ) => _Dialogs.LoginAsync(title, message, cancelToken);
-    public Task<LoginResult> LoginAsync( LoginConfig? config,       CancellationToken? cancelToken = null ) => _Dialogs.LoginAsync(config, cancelToken);
+    public IDisposable Login( LoginConfig?            config ) => _Dialogs.Login( config );
+    public Task<LoginResult> LoginAsync( string?      title = null, string?            message     = null, CancellationToken? cancelToken = null ) => _Dialogs.LoginAsync( title, message, cancelToken );
+    public Task<LoginResult> LoginAsync( LoginConfig? config,       CancellationToken? cancelToken = null ) => _Dialogs.LoginAsync( config, cancelToken );
 
     #endregion
 
@@ -218,15 +230,15 @@ public abstract class Prompts : IUserDialogs
 
     #region Loading
 
-    public void ShowLoading( string? title = null, MaskType? maskType = null ) => _Dialogs.ShowLoading(title, maskType);
+    public void ShowLoading( string? title = null, MaskType? maskType = null ) => _Dialogs.ShowLoading( title, maskType );
     public void HideLoading() => _Dialogs.HideLoading();
 
 
-    public IProgressDialog Progress( ProgressDialogConfig? config ) => _Dialogs.Progress(config);
+    public IProgressDialog Progress( ProgressDialogConfig? config ) => _Dialogs.Progress( config );
 
-    public IProgressDialog Loading( string? title = null, Action? onCancel = null, string? cancelText = null, bool show = true, MaskType? maskType = null ) => _Dialogs.Loading(title, onCancel, cancelText, show, maskType);
+    public IProgressDialog Loading( string? title = null, Action? onCancel = null, string? cancelText = null, bool show = true, MaskType? maskType = null ) => _Dialogs.Loading( title, onCancel, cancelText, show, maskType );
 
-    public IProgressDialog Progress( string? title = null, Action? onCancel = null, string? cancelText = null, bool show = true, MaskType? maskType = null ) => _Dialogs.Progress(title, onCancel, cancelText, show, maskType);
+    public IProgressDialog Progress( string? title = null, Action? onCancel = null, string? cancelText = null, bool show = true, MaskType? maskType = null ) => _Dialogs.Progress( title, onCancel, cancelText, show, maskType );
 
     #endregion
 

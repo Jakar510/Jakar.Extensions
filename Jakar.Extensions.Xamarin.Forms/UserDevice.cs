@@ -4,19 +4,26 @@ namespace Jakar.Extensions.Xamarin.Forms;
 
 public interface IUserDevice<TID> : IEquatable<IUserDevice<TID>>, IUniqueID<TID> where TID : struct, IComparable<TID>, IEquatable<TID>
 {
-    public DateTime TimeStamp    { get; }
-    public Guid     DeviceID     { get; }
-    public string   Model        { get; }
-    public string   Manufacturer { get; }
-    public string   DeviceName   { get; }
-    string          OsVersion    { get; }
+    public DateTime TimeStamp { get; }
+    public Guid     DeviceID  { get; }
 
 
     /// <summary>
-    ///     Last known
-    ///     <see cref = "IPAddress" />
+    ///     <see cref = "DeviceType" />
     /// </summary>
-    public string? Ip { get; }
+    public int DeviceTypeID { get; }
+
+    public string DeviceName { get; }
+
+
+    /// <summary>
+    ///     <see cref = "DeviceIdiom" />
+    /// </summary>
+    public string Idiom { get; }
+
+    public string Manufacturer { get; }
+    public string Model        { get; }
+    string        OsVersion    { get; }
 
 
     /// <summary>
@@ -26,15 +33,10 @@ public interface IUserDevice<TID> : IEquatable<IUserDevice<TID>>, IUniqueID<TID>
 
 
     /// <summary>
-    ///     <see cref = "DeviceIdiom" />
+    ///     Last known
+    ///     <see cref = "IPAddress" />
     /// </summary>
-    public string Idiom { get; }
-
-
-    /// <summary>
-    ///     <see cref = "DeviceType" />
-    /// </summary>
-    public int DeviceTypeID { get; }
+    public string? Ip { get; }
 }
 
 
@@ -45,25 +47,25 @@ public interface IUserDevice<TID> : IEquatable<IUserDevice<TID>>, IUniqueID<TID>
 [Serializable]
 public class UserDevice<TID> : ObservableClass, IUserDevice<TID> where TID : struct, IComparable<TID>, IEquatable<TID>
 {
-    private string? _ip;
-
-
-    [Key] public TID      ID           { get; init; }
-    public       DateTime TimeStamp    { get; init; }
-    public       Guid     DeviceID     { get; init; }
-    public       string   Model        { get; init; } = string.Empty;
-    public       string   Manufacturer { get; init; } = string.Empty;
-    public       string   DeviceName   { get; init; } = string.Empty;
-    public       int      DeviceTypeID { get; init; }
-    public       string   Idiom        { get; init; } = string.Empty;
-    public       string   Platform     { get; init; } = string.Empty;
-    public       string   OsVersion    { get; init; } = string.Empty;
+    private string?  _ip;
+    public  DateTime TimeStamp    { get; init; }
+    public  Guid     DeviceID     { get; init; }
+    public  int      DeviceTypeID { get; init; }
+    public  string   DeviceName   { get; init; } = string.Empty;
+    public  string   Idiom        { get; init; } = string.Empty;
+    public  string   Manufacturer { get; init; } = string.Empty;
+    public  string   Model        { get; init; } = string.Empty;
+    public  string   OsVersion    { get; init; } = string.Empty;
+    public  string   Platform     { get; init; } = string.Empty;
 
     public string? Ip
     {
         get => _ip;
-        set => SetProperty(ref _ip, value);
+        set => SetProperty( ref _ip, value );
     }
+
+
+    [Key] public TID ID { get; init; }
 
 
     public UserDevice() { }
@@ -95,42 +97,42 @@ public class UserDevice<TID> : ObservableClass, IUserDevice<TID> where TID : str
     }
 
 
+    public static bool operator ==( UserDevice<TID>? left, UserDevice<TID>? right ) => Equals( left, right );
+    public static bool operator !=( UserDevice<TID>? left, UserDevice<TID>? right ) => !Equals( left, right );
+
+
     // public static UserDevice<TID> Create( Guid? deviceID ) => new(DeviceInfo.Model, DeviceInfo.Manufacturer, DeviceInfo.Name, (DeviceType)DeviceInfo.DeviceType, DeviceInfo.Idiom, DeviceInfo.Platform, DeviceInfo.Version, deviceID);
 
 
     public override bool Equals( object? obj )
     {
-        if ( obj is null ) { return false; }
+        if (obj is null) { return false; }
 
-        if ( ReferenceEquals(this, obj) ) { return true; }
+        if (ReferenceEquals( this, obj )) { return true; }
 
-        return obj is UserDevice<TID> device && Equals(device);
-    }
-    public bool Equals( IUserDevice<TID>? other )
-    {
-        if ( other is null ) { return false; }
-
-        if ( ReferenceEquals(this, other) ) { return true; }
-
-        return TimeStamp.Equals(other.TimeStamp) && Ip == other.Ip && Model == other.Model && Manufacturer == other.Manufacturer && DeviceName == other.DeviceName && DeviceTypeID == other.DeviceTypeID && Idiom == other.Idiom &&
-               Platform == other.Platform && OsVersion == other.OsVersion;
+        return obj is UserDevice<TID> device && Equals( device );
     }
     public override int GetHashCode()
     {
         var hashCode = new HashCode();
-        hashCode.Add(TimeStamp);
-        hashCode.Add(Ip);
-        hashCode.Add(Model);
-        hashCode.Add(Manufacturer);
-        hashCode.Add(DeviceName);
-        hashCode.Add(DeviceTypeID);
-        hashCode.Add(Idiom);
-        hashCode.Add(Platform);
-        hashCode.Add(OsVersion);
+        hashCode.Add( TimeStamp );
+        hashCode.Add( Ip );
+        hashCode.Add( Model );
+        hashCode.Add( Manufacturer );
+        hashCode.Add( DeviceName );
+        hashCode.Add( DeviceTypeID );
+        hashCode.Add( Idiom );
+        hashCode.Add( Platform );
+        hashCode.Add( OsVersion );
         return hashCode.ToHashCode();
     }
+    public bool Equals( IUserDevice<TID>? other )
+    {
+        if (other is null) { return false; }
 
+        if (ReferenceEquals( this, other )) { return true; }
 
-    public static bool operator ==( UserDevice<TID>? left, UserDevice<TID>? right ) => Equals(left, right);
-    public static bool operator !=( UserDevice<TID>? left, UserDevice<TID>? right ) => !Equals(left, right);
+        return TimeStamp.Equals( other.TimeStamp ) && Ip == other.Ip && Model == other.Model && Manufacturer == other.Manufacturer && DeviceName == other.DeviceName && DeviceTypeID == other.DeviceTypeID && Idiom == other.Idiom &&
+               Platform == other.Platform && OsVersion == other.OsVersion;
+    }
 }

@@ -5,5 +5,5 @@ public abstract class SqlConverter<T, TValue> : SqlMapper.TypeHandler<TValue> wh
 {
     protected SqlConverter() { }
 
-    public static void Register() => SqlMapper.AddTypeHandler(typeof(TValue), new T());
+    public static void Register() => SqlMapper.AddTypeHandler( typeof(TValue), new T() );
 }

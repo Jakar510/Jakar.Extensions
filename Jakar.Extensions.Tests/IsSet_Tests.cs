@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -5,7 +6,7 @@ using System.Collections.ObjectModel;
 using NUnit.Framework;
 
 
-#nullable enable
+
 namespace Jakar.Extensions.Tests;
 
 
@@ -15,41 +16,44 @@ namespace Jakar.Extensions.Tests;
 public class IsSet_Tests : Assert
 {
     [Test]
-    [TestCase(typeof(string),                       false)]
-    [TestCase(typeof(string[]),                     false)]
-    [TestCase(typeof(Dictionary<string, object>),   false)]
-    [TestCase(typeof(Dictionary<string, string>),   false)]
-    [TestCase(typeof(ConcurrentBag<string>),        false)]
-    [TestCase(typeof(ObservableCollection<string>), false)]
-    [TestCase(typeof(HashSet<string>),              true)]
-    [TestCase(typeof(HashSet<int>),                 true)]
-    [TestCase(typeof(HashSet<double>),              true)]
-    [TestCase(typeof(List<List<string>>),           false)]
-    [TestCase(typeof(List<Guid>),                   false)]
+    [TestCase( typeof(string),                       false )]
+    [TestCase( typeof(string[]),                     false )]
+    [TestCase( typeof(Dictionary<string, object>),   false )]
+    [TestCase( typeof(Dictionary<string, string>),   false )]
+    [TestCase( typeof(ConcurrentBag<string>),        false )]
+    [TestCase( typeof(ObservableCollection<string>), false )]
+    [TestCase( typeof(HashSet<string>),              true )]
+    [TestCase( typeof(HashSet<int>),                 true )]
+    [TestCase( typeof(HashSet<double>),              true )]
+    [TestCase( typeof(List<List<string>>),           false )]
+    [TestCase( typeof(List<Guid>),                   false )]
     public void IsSet_Test( Type objType, bool expected )
     {
-        objType.GetInterfaces().PrintJson().WriteToConsole();
-        AreEqual(objType.IsSet(), expected);
+        objType.GetInterfaces()
+               .PrintJson()
+               .WriteToConsole();
+
+        AreEqual( objType.IsSet(), expected );
     }
 
 
     [Test]
-    [TestCase(typeof(string),                     null)]
-    [TestCase(typeof(Dictionary<string, object>), null)]
-    [TestCase(typeof(Dictionary<string, string>), null)]
-    [TestCase(typeof(ConcurrentBag<string>),      null)]
-    [TestCase(typeof(HashSet<bool>),              typeof(bool))]
-    [TestCase(typeof(HashSet<string>),            typeof(string))]
-    [TestCase(typeof(List<List<string>>),         null)]
-    [TestCase(typeof(List<Guid>),                 null)]
+    [TestCase( typeof(string),                     null )]
+    [TestCase( typeof(Dictionary<string, object>), null )]
+    [TestCase( typeof(Dictionary<string, string>), null )]
+    [TestCase( typeof(ConcurrentBag<string>),      null )]
+    [TestCase( typeof(HashSet<bool>),              typeof(bool) )]
+    [TestCase( typeof(HashSet<string>),            typeof(string) )]
+    [TestCase( typeof(List<List<string>>),         null )]
+    [TestCase( typeof(List<Guid>),                 null )]
     public void IsSet_Args_Test( Type objType, Type? expected )
     {
-        if ( objType.IsSet(out Type? itemType) )
+        if (objType.IsSet( out Type? itemType ))
         {
-            AreEqual(itemType, expected);
+            AreEqual( itemType, expected );
             return;
         }
 
-        IsNull(expected);
+        IsNull( expected );
     }
 }

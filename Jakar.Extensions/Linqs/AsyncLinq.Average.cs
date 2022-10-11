@@ -8,7 +8,7 @@ public static partial class AsyncLinq
         long   count = 0;
         double value = 0;
 
-        await foreach ( int item in source.WithCancellation(token) )
+        await foreach (int item in source.WithCancellation( token ))
         {
             value += item;
             count++;
@@ -21,9 +21,9 @@ public static partial class AsyncLinq
         long   count = 0;
         double value = 0;
 
-        await foreach ( TSource item in source.WithCancellation(token) )
+        await foreach (TSource item in source.WithCancellation( token ))
         {
-            value += selector(item);
+            value += selector( item );
             count++;
         }
 
@@ -36,7 +36,7 @@ public static partial class AsyncLinq
         long   count = 0;
         double value = 0;
 
-        await foreach ( long item in source.WithCancellation(token) )
+        await foreach (long item in source.WithCancellation( token ))
         {
             value += item;
             count++;
@@ -49,9 +49,9 @@ public static partial class AsyncLinq
         long   count = 0;
         double value = 0;
 
-        await foreach ( TSource item in source.WithCancellation(token) )
+        await foreach (TSource item in source.WithCancellation( token ))
         {
-            value += selector(item);
+            value += selector( item );
             count++;
         }
 
@@ -64,26 +64,26 @@ public static partial class AsyncLinq
         long   count = 0;
         double value = 0;
 
-        await foreach ( float item in source.WithCancellation(token) )
+        await foreach (float item in source.WithCancellation( token ))
         {
             value += item;
             count++;
         }
 
-        return (float)( value / count );
+        return (float)(value / count);
     }
     public static async ValueTask<float> Average<TSource>( this IAsyncEnumerable<TSource> source, Func<TSource, float> selector, CancellationToken token = default )
     {
         long   count = 0;
         double value = 0;
 
-        await foreach ( TSource item in source.WithCancellation(token) )
+        await foreach (TSource item in source.WithCancellation( token ))
         {
-            value += selector(item);
+            value += selector( item );
             count++;
         }
 
-        return (float)( value / count );
+        return (float)(value / count);
     }
 
 
@@ -92,7 +92,7 @@ public static partial class AsyncLinq
         long   count = 0;
         double value = 0;
 
-        await foreach ( double item in source.WithCancellation(token) )
+        await foreach (double item in source.WithCancellation( token ))
         {
             value += item;
             count++;
@@ -105,9 +105,9 @@ public static partial class AsyncLinq
         long   count = 0;
         double value = 0;
 
-        await foreach ( TSource item in source.WithCancellation(token) )
+        await foreach (TSource item in source.WithCancellation( token ))
         {
-            value += selector(item);
+            value += selector( item );
             count++;
         }
 
@@ -120,7 +120,7 @@ public static partial class AsyncLinq
         long    count = 0;
         decimal value = 0;
 
-        await foreach ( decimal item in source.WithCancellation(token) )
+        await foreach (decimal item in source.WithCancellation( token ))
         {
             value += item;
             count++;
@@ -133,9 +133,9 @@ public static partial class AsyncLinq
         long    count = 0;
         decimal value = 0;
 
-        await foreach ( TSource item in source.WithCancellation(token) )
+        await foreach (TSource item in source.WithCancellation( token ))
         {
-            value += selector(item);
+            value += selector( item );
             count++;
         }
 
@@ -148,7 +148,7 @@ public static partial class AsyncLinq
         long    count = 0;
         double? value = 0;
 
-        await foreach ( int? item in source.WithCancellation(token) )
+        await foreach (int? item in source.WithCancellation( token ))
         {
             value += item;
             count++;
@@ -161,9 +161,9 @@ public static partial class AsyncLinq
         long    count = 0;
         double? value = 0;
 
-        await foreach ( TSource item in source.WithCancellation(token) )
+        await foreach (TSource item in source.WithCancellation( token ))
         {
-            value += selector(item);
+            value += selector( item );
             count++;
         }
 
@@ -176,7 +176,7 @@ public static partial class AsyncLinq
         long    count = 0;
         double? value = 0;
 
-        await foreach ( long? item in source.WithCancellation(token) )
+        await foreach (long? item in source.WithCancellation( token ))
         {
             value += item;
             count++;
@@ -189,9 +189,9 @@ public static partial class AsyncLinq
         long    count = 0;
         double? value = 0;
 
-        await foreach ( TSource item in source.WithCancellation(token) )
+        await foreach (TSource item in source.WithCancellation( token ))
         {
-            value += selector(item);
+            value += selector( item );
             count++;
         }
 
@@ -204,26 +204,26 @@ public static partial class AsyncLinq
         long    count = 0;
         double? value = 0;
 
-        await foreach ( float? item in source.WithCancellation(token) )
+        await foreach (float? item in source.WithCancellation( token ))
         {
             value += item;
             count++;
         }
 
-        return (float?)( value / count );
+        return (float?)(value / count);
     }
     public static async ValueTask<float?> Average<TSource>( this IAsyncEnumerable<TSource> source, Func<TSource, float?> selector, CancellationToken token = default )
     {
         long    count = 0;
         double? value = 0;
 
-        await foreach ( TSource item in source.WithCancellation(token) )
+        await foreach (TSource item in source.WithCancellation( token ))
         {
-            value += selector(item);
+            value += selector( item );
             count++;
         }
 
-        return (float?)( value / count );
+        return (float?)(value / count);
     }
 
 
@@ -232,7 +232,7 @@ public static partial class AsyncLinq
         long    count = 0;
         double? value = 0;
 
-        await foreach ( double? item in source.WithCancellation(token) )
+        await foreach (double? item in source.WithCancellation( token ))
         {
             value += item;
             count++;
@@ -245,9 +245,9 @@ public static partial class AsyncLinq
         long    count = 0;
         double? value = 0;
 
-        await foreach ( TSource item in source.WithCancellation(token) )
+        await foreach (TSource item in source.WithCancellation( token ))
         {
-            value += selector(item);
+            value += selector( item );
             count++;
         }
 
@@ -260,7 +260,7 @@ public static partial class AsyncLinq
         long     count = 0;
         decimal? value = 0;
 
-        await foreach ( decimal? item in source.WithCancellation(token) )
+        await foreach (decimal? item in source.WithCancellation( token ))
         {
             value += item;
             count++;
@@ -273,9 +273,9 @@ public static partial class AsyncLinq
         long     count = 0;
         decimal? value = 0;
 
-        await foreach ( TSource item in source.WithCancellation(token) )
+        await foreach (TSource item in source.WithCancellation( token ))
         {
-            value += selector(item);
+            value += selector( item );
             count++;
         }
 

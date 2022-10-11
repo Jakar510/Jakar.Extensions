@@ -58,8 +58,7 @@
 			<param name="key"></param>
 			<returns></returns>
 		</member>
-		<member
-			name="M:Jakar.Api.ResourceManager.ResourceDictionaryManager`2.BindAppTheme(Xamarin.Forms.BindableObject@,Xamarin.Forms.BindableProperty@,`1@)">
+		<member name="M:Jakar.Api.ResourceManager.ResourceDictionaryManager`2.BindAppTheme(Xamarin.Forms.BindableObject@,Xamarin.Forms.BindableProperty@,`1@)">
 			<summary>
 				<see cref="T:Xamarin.Forms.Color" /> is used in <see cref="!:BindAppTheme&lt;TValue, TThemedKey&gt;" />
 			</summary>
@@ -68,8 +67,7 @@
 			<param name="property"></param>
 			<param name="key"></param>
 		</member>
-		<member
-			name="M:Jakar.Api.ResourceManager.ResourceDictionaryManager`2.BindAppTheme``1(Xamarin.Forms.BindableObject@,Xamarin.Forms.BindableProperty@,`1@)">
+		<member name="M:Jakar.Api.ResourceManager.ResourceDictionaryManager`2.BindAppTheme``1(Xamarin.Forms.BindableObject@,Xamarin.Forms.BindableProperty@,`1@)">
 			<summary>
 
 			</summary>
@@ -92,20 +90,17 @@
 			<param name="key"></param>
 			<returns></returns>
 		</member>
-		<member
-			name="M:Jakar.Api.ResourceManager.ResourceDictionaryManager.BindAppTheme``1(Xamarin.Forms.BindableObject@,Xamarin.Forms.BindableProperty@,``0@)">
+		<member name="M:Jakar.Api.ResourceManager.ResourceDictionaryManager.BindAppTheme``1(Xamarin.Forms.BindableObject@,Xamarin.Forms.BindableProperty@,``0@)">
 			<summary>
 				<see cref="T:Xamarin.Forms.Color" /> is used in
-				<see
-					cref="M:Jakar.Api.ResourceManager.ResourceDictionaryManager.BindAppTheme``2(Xamarin.Forms.BindableObject@,Xamarin.Forms.BindableProperty@,``1@)" />
+				<see cref="M:Jakar.Api.ResourceManager.ResourceDictionaryManager.BindAppTheme``2(Xamarin.Forms.BindableObject@,Xamarin.Forms.BindableProperty@,``1@)" />
 			</summary>
 			<typeparam name="TThemedKey"></typeparam>
 			<param name="bindable"></param>
 			<param name="property"></param>
 			<param name="key"></param>
 		</member>
-		<member
-			name="M:Jakar.Api.ResourceManager.ResourceDictionaryManager.BindAppTheme``2(Xamarin.Forms.BindableObject@,Xamarin.Forms.BindableProperty@,``1@)">
+		<member name="M:Jakar.Api.ResourceManager.ResourceDictionaryManager.BindAppTheme``2(Xamarin.Forms.BindableObject@,Xamarin.Forms.BindableProperty@,``1@)">
 			<summary>
 
 			</summary>

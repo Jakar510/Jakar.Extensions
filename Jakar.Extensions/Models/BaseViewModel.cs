@@ -15,8 +15,8 @@ public abstract class BaseViewModel : ObservableClass
         get => _isBusy;
         set
         {
-            SetProperty(ref _isBusy, value);
-            OnPropertyChanged(nameof(IsNotBusy));
+            SetProperty( ref _isBusy, value );
+            OnPropertyChanged( nameof(IsNotBusy) );
         }
     }
 
@@ -26,7 +26,7 @@ public abstract class BaseViewModel : ObservableClass
     public string? Title
     {
         get => _title;
-        set => SetProperty(ref _title, value);
+        set => SetProperty( ref _title, value );
     }
 
 

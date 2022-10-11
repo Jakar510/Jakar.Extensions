@@ -4,12 +4,12 @@ namespace Jakar.Extensions;
 
 public interface IMultiQueue<T> : IEnumerable<T>
 {
-    public T?   Next    { get; }
     public bool IsEmpty { get; }
     public int  Count   { get; }
+    public T?   Next    { get; }
     public void Add( T value );
 
-    public bool Remove( [NotNullWhen(true)] out T? value );
+    public bool Remove( [NotNullWhen( true )] out T? value );
 
     public void Clear();
 
@@ -26,27 +26,27 @@ public class MultiQueue<T> : IMultiQueue<T>
 {
     protected readonly ConcurrentQueue<T> _queue;
 
-
-    public T? Next => _queue.TryPeek(out T? result)
-                          ? result
-                          : default;
-
     public bool IsEmpty => _queue.IsEmpty;
     public int  Count   => _queue.Count;
 
 
+    public T? Next => _queue.TryPeek( out T? result )
+                          ? result
+                          : default;
+
+
     public MultiQueue() => _queue = new ConcurrentQueue<T>();
-    public MultiQueue( IEnumerable<T> items ) => _queue = new ConcurrentQueue<T>(items);
+    public MultiQueue( IEnumerable<T> items ) => _queue = new ConcurrentQueue<T>( items );
 
 
-    public bool Contains( T value ) => _queue.Contains(value);
+    public bool Contains( T value ) => _queue.Contains( value );
     public void Clear() => _queue.Clear();
-    public void Add( T value ) => _queue.Enqueue(value);
+    public void Add( T value ) => _queue.Enqueue( value );
 
 
-    public bool Remove( [NotNullWhen(true)] out T? value )
+    public bool Remove( [NotNullWhen( true )] out T? value )
     {
-        bool result = _queue.TryDequeue(out value);
+        bool result = _queue.TryDequeue( out value );
 
         return result && value is not null;
     }

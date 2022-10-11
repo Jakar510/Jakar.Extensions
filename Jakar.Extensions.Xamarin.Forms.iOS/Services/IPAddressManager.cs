@@ -5,7 +5,7 @@ using UIKit;
 using Xamarin.Forms;
 
 
-[assembly: Dependency(typeof(IpAddressManager))]
+[assembly: Dependency( typeof(IpAddressManager) )]
 
 
 #nullable enable
@@ -20,21 +20,21 @@ public class IpAddressManager : INetworkManager
     {
         try
         {
-            using var wifiUrl = new NSUrl(@"prefs:root=WIFI");
+            using var wifiUrl = new NSUrl( @"prefs:root=WIFI" );
 
-            if ( UIApplication.SharedApplication.CanOpenUrl(wifiUrl) )
+            if (UIApplication.SharedApplication.CanOpenUrl( wifiUrl ))
             {
                 // Pre iOS 10
-                UIApplication.SharedApplication.OpenUrl(wifiUrl);
+                UIApplication.SharedApplication.OpenUrl( wifiUrl );
             }
             else
             {
                 // iOS 10
-                using var nSUrl = new NSUrl(@"App-Prefs:root=WIFI");
-                UIApplication.SharedApplication.OpenUrl(nSUrl);
+                using var nSUrl = new NSUrl( @"App-Prefs:root=WIFI" );
+                UIApplication.SharedApplication.OpenUrl( nSUrl );
             }
         }
-        catch ( Exception ex ) { throw new WiFiException("Could not open Wifi Settings", ex); }
+        catch (Exception ex) { throw new WiFiException( "Could not open Wifi Settings", ex ); }
     }
 
 

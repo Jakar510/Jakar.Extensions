@@ -5,29 +5,42 @@ namespace Jakar.Extensions;
 
 
 /// <summary>
-/// A <see langword="ref"/> <see langword="struct"/> that enumerates the items in a given <see cref="Span{T}"/> instance.
+///     A
+///     <see langword = "ref" />
+///     <see langword = "struct" />
+///     that enumerates the items in a given
+///     <see cref = "Span{T}" />
+///     instance.
 /// </summary>
-/// <typeparam name="T">The type of items to enumerate.</typeparam>
-[EditorBrowsable(EditorBrowsableState.Never)]
+/// <typeparam name = "T" > The type of items to enumerate. </typeparam>
+[EditorBrowsable( EditorBrowsableState.Never )]
 public ref struct SpanEnumerator<T>
 {
     private readonly ReadOnlySpan<T> _span;
     private          int             _index;
 
     /// <summary>
-    /// Gets the duck-typed <see cref="IEnumerator{T}.Current"/> property.
+    ///     Gets the duck-typed
+    ///     <see cref = "IEnumerator{T}.Current" />
+    ///     property.
     /// </summary>
     public readonly Item Current
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] get => new(_span, _index);
+        [MethodImpl( MethodImplOptions.AggressiveInlining )] get => new(_span, _index);
     }
 
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="SpanEnumerator{T}"/> struct.
+    ///     Initializes a new instance of the
+    ///     <see cref = "SpanEnumerator{T}" />
+    ///     struct.
     /// </summary>
-    /// <param name="span">The source <see cref="Span{T}"/> instance.</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    /// <param name = "span" >
+    ///     The source
+    ///     <see cref = "Span{T}" />
+    ///     instance.
+    /// </param>
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public SpanEnumerator( in ReadOnlySpan<T> span )
     {
         _span  = span;
@@ -36,59 +49,80 @@ public ref struct SpanEnumerator<T>
 
 
     /// <summary>
-    /// Implements the duck-typed <see cref="IEnumerable{T}.GetEnumerator"/> method.
+    ///     Implements the duck-typed
+    ///     <see cref = "IEnumerable{T}.GetEnumerator" />
+    ///     method.
     /// </summary>
-    /// <returns>An <see cref="SpanEnumerator{T}"/> instance targeting the current <see cref="Span{T}"/> value.</returns>
+    /// <returns>
+    ///     An
+    ///     <see cref = "SpanEnumerator{T}" />
+    ///     instance targeting the current
+    ///     <see cref = "Span{T}" />
+    ///     value.
+    /// </returns>
     [Pure]
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public readonly SpanEnumerator<T> GetEnumerator() => this;
 
     /// <summary>
-    /// Implements the duck-typed <see cref="System.Collections.IEnumerator.MoveNext"/> method.
+    ///     Implements the duck-typed
+    ///     <see cref = "System.Collections.IEnumerator.MoveNext" />
+    ///     method.
     /// </summary>
-    /// <returns><see langword="true"/> whether a new element is available, <see langword="false"/> otherwise</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    /// <returns>
+    ///     <see langword = "true" />
+    ///     whether a new element is available,
+    ///     <see langword = "false" />
+    ///     otherwise
+    /// </returns>
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public bool MoveNext() => ++_index < _span.Length;
 
 
 
     /// <summary>
-    /// An item from a source <see cref="Span{T}"/> instance.
+    ///     An item from a source
+    ///     <see cref = "Span{T}" />
+    ///     instance.
     /// </summary>
-    [EditorBrowsable(EditorBrowsableState.Never)]
+    [EditorBrowsable( EditorBrowsableState.Never )]
     public readonly ref struct Item
     {
         /// <summary>
-        /// The source <see cref="Span{T}"/> instance.
+        ///     The source
+        ///     <see cref = "Span{T}" />
+        ///     instance.
         /// </summary>
         private readonly ReadOnlySpan<T> _span;
 
         /// <summary>
-        /// The current index within <see cref="_span"/>.
+        ///     The current index within
+        ///     <see cref = "_span" />
+        ///     .
         /// </summary>
         private readonly int _index;
 
         /// <summary>
-        /// Gets the reference to the current value.
+        ///     Gets the reference to the current value.
         /// </summary>
         public ref T Value
         {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            [MethodImpl( MethodImplOptions.AggressiveInlining )]
             get
             {
-                ref T r0 = ref MemoryMarshal.GetReference(_span);
-                ref T ri = ref Unsafe.Add(ref r0, (nint)(uint)_index);
+                ref T r0 = ref MemoryMarshal.GetReference( _span );
+                ref T ri = ref Unsafe.Add( ref r0, (nint)(uint)_index );
 
                 return ref ri;
             }
         }
 
         /// <summary>
-        /// Gets the current index.
+        ///     Gets the current index.
         /// </summary>
         public int Index
         {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            [MethodImpl( MethodImplOptions.AggressiveInlining )]
             get
             {
             #if SPAN_RUNTIME_SUPPORT
@@ -100,11 +134,21 @@ public ref struct SpanEnumerator<T>
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Item"/> struct.
+        ///     Initializes a new instance of the
+        ///     <see cref = "Item" />
+        ///     struct.
         /// </summary>
-        /// <param name="span">The source <see cref="Span{T}"/> instance.</param>
-        /// <param name="index">The current index within <paramref name="span"/>.</param>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        /// <param name = "span" >
+        ///     The source
+        ///     <see cref = "Span{T}" />
+        ///     instance.
+        /// </param>
+        /// <param name = "index" >
+        ///     The current index within
+        ///     <paramref name = "span" />
+        ///     .
+        /// </param>
+        [MethodImpl( MethodImplOptions.AggressiveInlining )]
         public Item( in ReadOnlySpan<T> span, int index )
         {
             _span  = span;

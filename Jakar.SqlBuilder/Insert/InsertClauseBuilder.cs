@@ -15,33 +15,42 @@ public struct InsertClauseBuilder
 
     public EasySqlBuilder Into<T>( string tableName, T obj )
     {
-        _builder.Add(KeyWords.INSERT, KeyWords.INTO, obj.GetName(tableName));
-        return SetValues(obj);
+        _builder.Add( KeyWords.INSERT, KeyWords.INTO, obj.GetName( tableName ) );
+        return SetValues( obj );
     }
     public EasySqlBuilder Into<T>( T obj )
     {
-        _builder.Add(KeyWords.INSERT, KeyWords.INTO, typeof(T).GetTableName());
-        return SetValues(obj);
+        _builder.Add( KeyWords.INSERT, KeyWords.INTO, typeof(T).GetTableName() );
+        return SetValues( obj );
     }
     public EasySqlBuilder Into<T>( IEnumerable<T> obj )
     {
-        _builder.Add(KeyWords.INSERT, KeyWords.INTO, typeof(T).GetTableName());
-        return SetValues(obj);
+        _builder.Add( KeyWords.INSERT, KeyWords.INTO, typeof(T).GetTableName() );
+        return SetValues( obj );
     }
     private EasySqlBuilder SetValues<T>( T obj )
     {
         var cache = new Dictionary<string, string>();
 
-        foreach ( PropertyInfo info in typeof(T).GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.GetProperty) )
+        foreach (PropertyInfo info in typeof(T).GetProperties( BindingFlags.Instance | BindingFlags.Public | BindingFlags.GetProperty ))
         {
-            var value = info.GetValue(obj)?.ToString() ?? KeyWords.NULL;
+            string value = info.GetValue( obj )
+                              ?.ToString() ?? KeyWords.NULL;
+
             cache[info.Name] = value;
         }
 
 
-        _builder.Begin().AddRange(',', cache.Keys).End();
-        _builder.Add(KeyWords.VALUES);
-        _builder.Begin().AddRange(',', cache.Values).End();
+        _builder.Begin()
+                .AddRange( ',', cache.Keys )
+                .End();
+
+        _builder.Add( KeyWords.VALUES );
+
+        _builder.Begin()
+                .AddRange( ',', cache.Values )
+                .End();
+
         return _builder.NewLine();
     }
 
@@ -49,17 +58,17 @@ public struct InsertClauseBuilder
     public DataInsertBuilder In() => new(this, ref _builder);
     public DataInsertBuilder In( string tableName )
     {
-        _builder.Add(KeyWords.INSERT, KeyWords.INTO, tableName);
+        _builder.Add( KeyWords.INSERT, KeyWords.INTO, tableName );
         return In();
     }
     public DataInsertBuilder In<T>()
     {
-        _builder.Add(KeyWords.INSERT, KeyWords.INTO, typeof(T).GetName());
+        _builder.Add( KeyWords.INSERT, KeyWords.INTO, typeof(T).GetName() );
         return In();
     }
     public DataInsertBuilder In<T>( T _ )
     {
-        _builder.Add(KeyWords.INSERT, KeyWords.INTO, typeof(T).GetName());
+        _builder.Add( KeyWords.INSERT, KeyWords.INTO, typeof(T).GetName() );
         return In();
     }
 }

@@ -17,7 +17,7 @@ public struct WhereClauseBuilder<TNext>
 
     public TNext Exists()
     {
-        _builder.Add(KeyWords.EXISTS);
+        _builder.Add( KeyWords.EXISTS );
         return _next;
     }
 
@@ -37,51 +37,53 @@ public struct WhereClauseBuilder<TNext>
 
     public WhereClauseBuilder<TNext> Between( string columnName )
     {
-        _builder.Add(KeyWords.BETWEEN, columnName);
+        _builder.Add( KeyWords.BETWEEN, columnName );
         return this;
     }
 
 
     public WhereClauseBuilder<TNext> And()
     {
-        _builder.Add(KeyWords.AND);
+        _builder.Add( KeyWords.AND );
         return this;
     }
     public WhereClauseBuilder<TNext> Or()
     {
-        _builder.Add(KeyWords.OR);
+        _builder.Add( KeyWords.OR );
         return this;
     }
 
 
     public WhereClauseBuilder<TNext> IsNull( string columnName )
     {
-        _builder.Add(KeyWords.IS, KeyWords.NULL, columnName);
+        _builder.Add( KeyWords.IS, KeyWords.NULL, columnName );
         return this;
     }
     public WhereClauseBuilder<TNext> IsNotNull( string columnName )
     {
-        _builder.Add(KeyWords.IS, KeyWords.NOT, KeyWords.NULL, columnName);
+        _builder.Add( KeyWords.IS, KeyWords.NOT, KeyWords.NULL, columnName );
         return this;
     }
 
 
     public WhereClauseBuilder<TNext> Like( string pattern )
     {
-        _builder.Add(KeyWords.LIKE, pattern);
+        _builder.Add( KeyWords.LIKE, pattern );
         return this;
     }
 
 
     public WhereInChainBuilder<TNext> In( string columnName )
     {
-        _builder.Add(columnName, KeyWords.IN);
-        return new WhereInChainBuilder<TNext>(this, ref _builder);
+        _builder.Add( columnName, KeyWords.IN );
+        return new WhereInChainBuilder<TNext>( this, ref _builder );
     }
     public WhereInChainBuilder<TNext> NotIn( string columnName )
     {
-        _builder.Add(columnName, KeyWords.NOT, KeyWords.IN).Begin();
-        return new WhereInChainBuilder<TNext>(this, ref _builder);
+        _builder.Add( columnName, KeyWords.NOT, KeyWords.IN )
+                .Begin();
+
+        return new WhereInChainBuilder<TNext>( this, ref _builder );
     }
 
 

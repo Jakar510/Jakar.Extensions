@@ -2,17 +2,17 @@
 
 
 /// <Docs>
-///   <summary>Distance Unit for use in conversion.</summary>
-///   <remarks />
+///     <summary> Distance Unit for use in conversion. </summary>
+///     <remarks />
 /// </Docs>
 public enum DistanceUnit
 {
     /// <Docs>
-    ///   <summary>Kilometers</summary>
+    ///     <summary> Kilometers </summary>
     /// </Docs>
     Kilometers,
     /// <Docs>
-    ///   <summary>Miles</summary>
+    ///     <summary> Miles </summary>
     /// </Docs>
-    Miles,
+    Miles
 }

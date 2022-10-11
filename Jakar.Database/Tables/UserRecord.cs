@@ -1,74 +1,179 @@
 ﻿// ToothFairyDispatch :: ToothFairyDispatch.Cloud
 // 08/29/2022  9:55 PM
 
-using System.ComponentModel.DataAnnotations;
+using Microsoft.IdentityModel.Tokens;
+using System.Data;
 using System.Security.Claims;
-using Dapper.Contrib.Extensions;
-using Newtonsoft.Json.Linq;
 
 
 
 namespace Jakar.Database;
 
 
+[Serializable]
 [Table( "Users" )]
 public sealed record UserRecord : TableRecord<UserRecord>, IUserRecord<UserRecord>
 {
-    private static readonly PasswordHasher<UserRecord> _hasher = new();
+    public const            char                       RECOVERY_CODE_SEPARATOR = ';';
+    private static readonly PasswordHasher<UserRecord> _hasher                 = new();
+    private                 bool                       _isActive;
+    private                 bool                       _isDisabled;
+    private                 bool                       _isEmailConfirmed;
+    private                 bool                       _isLocked;
+    private                 bool                       _isPhoneNumberConfirmed;
+    private                 bool                       _isTwoFactorEnabled;
+    private                 DateTimeOffset?            _lastActive;
+    private                 DateTimeOffset?            _lastBadAttempt;
+    private                 DateTimeOffset?            _lockDate;
+    private                 DateTimeOffset?            _lockEnd;
+    private                 DateTimeOffset?            _refreshTokenExpiryTime;
+    private                 DateTimeOffset?            _subscriptionExpires;
+    private                 DateTimeOffset?            _tokenExpiration;
+    private                 Guid?                      _sessionID;
+    private                 int?                       _badLogins;
+    private                 long?                      _escalateTo;
+    private                 long?                      _rights;
+    private                 long?                      _subscriptionID;
+    private                 string                     _firstName     = string.Empty;
+    private                 string                     _lastName      = string.Empty;
+    private                 string                     _passwordHash  = string.Empty;
+    private                 string                     _recoveryCodes = string.Empty;
+    private                 string                     _userName      = string.Empty;
+    private                 string?                    _additionalData;
+    private                 string?                    _address;
+    private                 string?                    _city;
+    private                 string?                    _company;
+    private                 string?                    _concurrencyStamp;
+    private                 string?                    _country;
+    private                 string?                    _department;
+    private                 string?                    _description;
+    private                 string?                    _email;
+    private                 string?                    _ext;
+    private                 string?                    _fullName;
+    private                 string?                    _line1;
+    private                 string?                    _line2;
+    private                 string?                    _loginProvider;
+    private                 string?                    _phoneNumber;
+    private                 string?                    _postalCode;
+    private                 string?                    _providerDisplayName;
+    private                 string?                    _providerKey;
+    private                 string?                    _refreshToken;
+    private                 string?                    _securityStamp;
+    private                 string?                    _state;
+    private                 string?                    _title;
+    private                 string?                    _website;
+    private                 SupportedLanguage          _preferredLanguage;
 
 
-    private string            _userName  = string.Empty;
-    private string            _firstName = string.Empty;
-    private string            _lastName  = string.Empty;
-    private string?           _fullName;
-    private string?           _description;
-    private string?           _address;
-    private string?           _line1;
-    private string?           _line2;
-    private string?           _city;
-    private string?           _state;
-    private string?           _country;
-    private string?           _postalCode;
-    private string?           _website;
-    private string?           _email;
-    private string?           _phoneNumber;
-    private string?           _ext;
-    private string?           _title;
-    private string?           _department;
-    private string?           _company;
-    private SupportedLanguage _preferredLanguage;
-    private Guid?             _sessionID;
-    private DateTimeOffset?   _subscriptionExpires;
-    private long?             _subscriptionID;
-    private long?             _escalateTo;
-    private bool              _isActive;
-    private bool              _isDisabled;
-    private bool              _isLocked;
-    private int?              _badLogins;
-    private DateTimeOffset?   _lastActive;
-    private DateTimeOffset?   _lastBadAttempt;
-    private DateTimeOffset?   _lockDate;
-    private string?           _refreshToken;
-    private DateTimeOffset?   _refreshTokenExpiryTime;
-    private DateTimeOffset?   _tokenExpiration;
-    private bool              _isEmailConfirmed;
-    private bool              _isPhoneNumberConfirmed;
-    private bool              _isTwoFactorEnabled;
-    private string?           _loginProvider;
-    private string?           _providerKey;
-    private string?           _providerDisplayName;
-    private string?           _securityStamp;
-    private string?           _concurrencyStamp;
-    private string?           _additionalData;
-    private string?           _passwordHash;
-    private long?             _rights;
-
-
-    [MaxLength( 256 )]
-    public string UserName
+    public bool IsActive
     {
-        get => _userName;
-        set => SetProperty( ref _userName, value );
+        get => _isActive;
+        set => SetProperty( ref _isActive, value );
+    }
+
+    public bool IsDisabled
+    {
+        get => _isDisabled;
+        set => SetProperty( ref _isDisabled, value );
+    }
+
+    public bool IsEmailConfirmed
+    {
+        get => _isEmailConfirmed;
+        set => SetProperty( ref _isEmailConfirmed, value );
+    }
+
+    public bool IsLocked
+    {
+        get => _isLocked;
+        set => SetProperty( ref _isLocked, value );
+    }
+
+    public bool IsPhoneNumberConfirmed
+    {
+        get => _isPhoneNumberConfirmed;
+        set => SetProperty( ref _isPhoneNumberConfirmed, value );
+    }
+
+    public bool IsTwoFactorEnabled
+    {
+        get => _isTwoFactorEnabled;
+        set => SetProperty( ref _isTwoFactorEnabled, value );
+    }
+
+    public DateTimeOffset? LastActive
+    {
+        get => _lastActive;
+        set => SetProperty( ref _lastActive, value );
+    }
+    public DateTimeOffset? LastBadAttempt
+    {
+        get => _lastBadAttempt;
+        set => SetProperty( ref _lastBadAttempt, value );
+    }
+    public DateTimeOffset? LockDate
+    {
+        get => _lockDate;
+        set => SetProperty( ref _lockDate, value );
+    }
+    public DateTimeOffset? LockoutEnd
+    {
+        get => _lockEnd;
+        set => SetProperty( ref _lockEnd, value );
+    }
+    public DateTimeOffset? RefreshTokenExpiryTime
+    {
+        get => _refreshTokenExpiryTime;
+        set => SetProperty( ref _refreshTokenExpiryTime, value );
+    }
+    public DateTimeOffset? SubscriptionExpires
+    {
+        get => _subscriptionExpires;
+        set => SetProperty( ref _subscriptionExpires, value );
+    }
+    public DateTimeOffset? TokenExpiration
+    {
+        get => _tokenExpiration;
+        set => SetProperty( ref _tokenExpiration, value );
+    }
+
+    public Guid? SessionID
+    {
+        get => _sessionID;
+        set => SetProperty( ref _sessionID, value );
+    }
+
+
+    IDictionary<string, JToken?>? JsonModels.IJsonModel.AdditionalData
+    {
+        get => AdditionalData?.FromJson<Dictionary<string, JToken?>>();
+        set => AdditionalData = value?.ToJson();
+    }
+
+    public int? BadLogins
+    {
+        get => _badLogins;
+        set => SetProperty( ref _badLogins, value );
+    }
+    long? IUserRecord<UserRecord>.CreatedBy => CreatedBy;
+
+    public long? EscalateTo
+    {
+        get => _escalateTo;
+        set => SetProperty( ref _escalateTo, value );
+    }
+
+
+    public long? Rights
+    {
+        get => _rights;
+        set => SetProperty( ref _rights, value );
+    }
+
+    public long? SubscriptionID
+    {
+        get => _subscriptionID;
+        set => SetProperty( ref _subscriptionID, value );
     }
 
     [MaxLength( 256 )]
@@ -85,11 +190,74 @@ public sealed record UserRecord : TableRecord<UserRecord>, IUserRecord<UserRecor
         set => SetProperty( ref _lastName, value );
     }
 
-    [MaxLength( 512 )]
-    public string? FullName
+    [MaxLength( int.MaxValue )]
+    public string PasswordHash
     {
-        get => _fullName;
-        set => SetProperty( ref _fullName, value );
+        get => _passwordHash;
+        set => SetProperty( ref _passwordHash, value );
+    }
+
+    [MaxLength( 10240 )]
+    public string RecoveryCodes
+    {
+        get => _recoveryCodes;
+        set => SetProperty( ref _recoveryCodes, value );
+    }
+
+    [MaxLength( 256 )]
+    public string UserName
+    {
+        get => _userName;
+        set => SetProperty( ref _userName, value );
+    }
+
+    [MaxLength( int.MaxValue )]
+    public string? AdditionalData
+    {
+        get => _additionalData;
+        set => SetProperty( ref _additionalData, value );
+    }
+
+    [MaxLength( 4096 )]
+    public string? Address
+    {
+        get => _address;
+        set => SetProperty( ref _address, value );
+    }
+
+    [MaxLength( 256 )]
+    public string? City
+    {
+        get => _city;
+        set => SetProperty( ref _city, value );
+    }
+
+    [MaxLength( 256 )]
+    public string? Company
+    {
+        get => _company;
+        set => SetProperty( ref _company, value );
+    }
+
+    [MaxLength( int.MaxValue )]
+    public string? ConcurrencyStamp
+    {
+        get => _concurrencyStamp;
+        set => SetProperty( ref _concurrencyStamp, value );
+    }
+
+    [MaxLength( 256 )]
+    public string? Country
+    {
+        get => _country;
+        set => SetProperty( ref _country, value );
+    }
+
+    [MaxLength( 256 )]
+    public string? Department
+    {
+        get => _department;
+        set => SetProperty( ref _department, value );
     }
 
     [MaxLength( 256 )]
@@ -99,17 +267,25 @@ public sealed record UserRecord : TableRecord<UserRecord>, IUserRecord<UserRecor
         set => SetProperty( ref _description, value );
     }
 
-    public Guid? SessionID
+    [MaxLength( 1024 )]
+    public string? Email
     {
-        get => _sessionID;
-        set => SetProperty( ref _sessionID, value );
+        get => _email;
+        set => SetProperty( ref _email, value );
     }
 
-    [MaxLength( 4096 )]
-    public string? Address
+    [MaxLength( 256 )]
+    public string? Ext
     {
-        get => _address;
-        set => SetProperty( ref _address, value );
+        get => _ext;
+        set => SetProperty( ref _ext, value );
+    }
+
+    [MaxLength( 512 )]
+    public string? FullName
+    {
+        get => _fullName;
+        set => SetProperty( ref _fullName, value );
     }
 
     [MaxLength( 512 )]
@@ -126,46 +302,11 @@ public sealed record UserRecord : TableRecord<UserRecord>, IUserRecord<UserRecor
         set => SetProperty( ref _line2, value );
     }
 
-    [MaxLength( 256 )]
-    public string? City
+    [MaxLength( int.MaxValue )]
+    public string? LoginProvider
     {
-        get => _city;
-        set => SetProperty( ref _city, value );
-    }
-
-    [MaxLength( 256 )]
-    public string? State
-    {
-        get => _state;
-        set => SetProperty( ref _state, value );
-    }
-
-    [MaxLength( 256 )]
-    public string? Country
-    {
-        get => _country;
-        set => SetProperty( ref _country, value );
-    }
-
-    [MaxLength( 256 )]
-    public string? PostalCode
-    {
-        get => _postalCode;
-        set => SetProperty( ref _postalCode, value );
-    }
-
-    [MaxLength( 4096 )]
-    public string? Website
-    {
-        get => _website;
-        set => SetProperty( ref _website, value );
-    }
-
-    [MaxLength( 1024 )]
-    public string? Email
-    {
-        get => _email;
-        set => SetProperty( ref _email, value );
+        get => _loginProvider;
+        set => SetProperty( ref _loginProvider, value );
     }
 
     [MaxLength( 256 )]
@@ -176,148 +317,10 @@ public sealed record UserRecord : TableRecord<UserRecord>, IUserRecord<UserRecor
     }
 
     [MaxLength( 256 )]
-    public string? Ext
+    public string? PostalCode
     {
-        get => _ext;
-        set => SetProperty( ref _ext, value );
-    }
-
-    [MaxLength( 256 )]
-    public string? Title
-    {
-        get => _title;
-        set => SetProperty( ref _title, value );
-    }
-
-    [MaxLength( 256 )]
-    public string? Department
-    {
-        get => _department;
-        set => SetProperty( ref _department, value );
-    }
-
-    [MaxLength( 256 )]
-    public string? Company
-    {
-        get => _company;
-        set => SetProperty( ref _company, value );
-    }
-
-    public SupportedLanguage PreferredLanguage
-    {
-        get => _preferredLanguage;
-        set => SetProperty( ref _preferredLanguage, value );
-    }
-
-    public DateTimeOffset? SubscriptionExpires
-    {
-        get => _subscriptionExpires;
-        set => SetProperty( ref _subscriptionExpires, value );
-    }
-
-    public long? SubscriptionID
-    {
-        get => _subscriptionID;
-        set => SetProperty( ref _subscriptionID, value );
-    }
-
-    public long? EscalateTo
-    {
-        get => _escalateTo;
-        set => SetProperty( ref _escalateTo, value );
-    }
-
-    public bool IsActive
-    {
-        get => _isActive;
-        set => SetProperty( ref _isActive, value );
-    }
-
-    public bool IsDisabled
-    {
-        get => _isDisabled;
-        set => SetProperty( ref _isDisabled, value );
-    }
-
-    public bool IsLocked
-    {
-        get => _isLocked;
-        set => SetProperty( ref _isLocked, value );
-    }
-
-    public int? BadLogins
-    {
-        get => _badLogins;
-        set => SetProperty( ref _badLogins, value );
-    }
-
-    public DateTimeOffset? LastActive
-    {
-        get => _lastActive;
-        set => SetProperty( ref _lastActive, value );
-    }
-
-    public DateTimeOffset? LastBadAttempt
-    {
-        get => _lastBadAttempt;
-        set => SetProperty( ref _lastBadAttempt, value );
-    }
-
-    public DateTimeOffset? LockDate
-    {
-        get => _lockDate;
-        set => SetProperty( ref _lockDate, value );
-    }
-
-    [MaxLength( int.MaxValue )]
-    public string? RefreshToken
-    {
-        get => _refreshToken;
-        set => SetProperty( ref _refreshToken, value );
-    }
-
-    public DateTimeOffset? RefreshTokenExpiryTime
-    {
-        get => _refreshTokenExpiryTime;
-        set => SetProperty( ref _refreshTokenExpiryTime, value );
-    }
-
-    public DateTimeOffset? TokenExpiration
-    {
-        get => _tokenExpiration;
-        set => SetProperty( ref _tokenExpiration, value );
-    }
-
-    public bool IsEmailConfirmed
-    {
-        get => _isEmailConfirmed;
-        set => SetProperty( ref _isEmailConfirmed, value );
-    }
-
-    public bool IsPhoneNumberConfirmed
-    {
-        get => _isPhoneNumberConfirmed;
-        set => SetProperty( ref _isPhoneNumberConfirmed, value );
-    }
-
-    public bool IsTwoFactorEnabled
-    {
-        get => _isTwoFactorEnabled;
-        set => SetProperty( ref _isTwoFactorEnabled, value );
-    }
-
-    [MaxLength( int.MaxValue )]
-    public string? LoginProvider
-    {
-        get => _loginProvider;
-        set => SetProperty( ref _loginProvider, value );
-    }
-
-    [MaxLength( int.MaxValue )]
-    public string? ProviderKey
-    {
-        get => _providerKey;
-        set => SetProperty( ref _providerKey, value );
+        get => _postalCode;
+        set => SetProperty( ref _postalCode, value );
     }
 
     [MaxLength( int.MaxValue )]
@@ -328,46 +331,52 @@ public sealed record UserRecord : TableRecord<UserRecord>, IUserRecord<UserRecor
     }
 
     [MaxLength( int.MaxValue )]
+    public string? ProviderKey
+    {
+        get => _providerKey;
+        set => SetProperty( ref _providerKey, value );
+    }
+
+    [MaxLength( TokenValidationParameters.DefaultMaximumTokenSizeInBytes )]
+    public string? RefreshToken
+    {
+        get => _refreshToken;
+        set => SetProperty( ref _refreshToken, value );
+    }
+
+    [MaxLength( int.MaxValue )]
     public string? SecurityStamp
     {
         get => _securityStamp;
         set => SetProperty( ref _securityStamp, value );
     }
 
-    [MaxLength( int.MaxValue )]
-    public string? ConcurrencyStamp
+    [MaxLength( 256 )]
+    public string? State
     {
-        get => _concurrencyStamp;
-        set => SetProperty( ref _concurrencyStamp, value );
+        get => _state;
+        set => SetProperty( ref _state, value );
     }
 
-    [MaxLength( int.MaxValue )]
-    public string? AdditionalData
+    [MaxLength( 256 )]
+    public string? Title
     {
-        get => _additionalData;
-        set => SetProperty( ref _additionalData, value );
+        get => _title;
+        set => SetProperty( ref _title, value );
     }
 
-    [MaxLength( int.MaxValue )]
-    public string? PasswordHash
+    [MaxLength( 4096 )]
+    public string? Website
     {
-        get => _passwordHash;
-        set => SetProperty( ref _passwordHash, value );
+        get => _website;
+        set => SetProperty( ref _website, value );
     }
 
-    public long? Rights
+    public SupportedLanguage PreferredLanguage
     {
-        get => _rights;
-        set => SetProperty( ref _rights, value );
+        get => _preferredLanguage;
+        set => SetProperty( ref _preferredLanguage, value );
     }
-
-
-    IDictionary<string, JToken?>? JsonModels.IJsonModel.AdditionalData
-    {
-        get => AdditionalData?.FromJson<Dictionary<string, JToken?>>();
-        set => AdditionalData = value?.ToJson();
-    }
-    long? IUserRecord<UserRecord>.CreatedBy => CreatedBy;
 
 
     public UserRecord() { }
@@ -431,6 +440,98 @@ public sealed record UserRecord : TableRecord<UserRecord>, IUserRecord<UserRecor
     public bool Owns<TRecord>( TRecord       record ) where TRecord : TableRecord<TRecord> => record.CreatedBy == ID;
     public bool DoesNotOwn<TRecord>( TRecord record ) where TRecord : TableRecord<TRecord> => record.CreatedBy != ID;
 
+    public async ValueTask<List<Claim>> GetUserClaims( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token )
+    {
+        List<Claim> claims = GetUserClaims();
+        await foreach (RoleRecord role in GetRoles( connection, transaction, db, token )) { claims.Add( new Claim( ClaimTypes.Role, role.Name ) ); }
+
+        return claims;
+    }
+
+
+    [SuppressMessage( "ReSharper", "NonReadonlyMemberInGetHashCode" )]
+    public override int GetHashCode()
+    {
+        var hashCode = new HashCode();
+        hashCode.Add( base.GetHashCode() );
+        hashCode.Add( UserName );
+        hashCode.Add( FirstName );
+        hashCode.Add( LastName );
+        hashCode.Add( FullName );
+        hashCode.Add( Description );
+        hashCode.Add( Address );
+        hashCode.Add( Line1 );
+        hashCode.Add( Line2 );
+        hashCode.Add( City );
+        hashCode.Add( State );
+        hashCode.Add( Country );
+        hashCode.Add( PostalCode );
+        hashCode.Add( Website );
+        hashCode.Add( Email );
+        hashCode.Add( PhoneNumber );
+        hashCode.Add( Ext );
+        hashCode.Add( Title );
+        hashCode.Add( Department );
+        hashCode.Add( Company );
+        return hashCode.ToHashCode();
+    }
+
+    public bool HasPassword() => !string.IsNullOrWhiteSpace( PasswordHash );
+    public UserRecord Lock( in TimeSpan offset )
+    {
+        VerifyAccess();
+        IsDisabled = true;
+        LockDate   = DateTimeOffset.UtcNow;
+        LockoutEnd = LockDate + offset;
+        return this;
+    }
+
+
+    public UserRecord AddUserLoginInfo( UserLoginInfo info )
+    {
+        LoginProvider       = info.LoginProvider;
+        ProviderKey         = info.ProviderKey;
+        ProviderDisplayName = info.ProviderDisplayName;
+        return this;
+    }
+    public UserRecord RemoveUserLoginInfo()
+    {
+        LoginProvider       = default;
+        ProviderKey         = default;
+        ProviderDisplayName = default;
+        return this;
+    }
+    public IList<UserLoginInfo> GetUserLoginInfo() =>
+        new List<UserLoginInfo>
+        {
+            new(LoginProvider, ProviderKey, ProviderDisplayName)
+        };
+    public string[] Codes() => RecoveryCodes.Split( RECOVERY_CODE_SEPARATOR );
+    public int CountCodes() => Codes()
+       .Length;
+    public bool RedeemCode( string code )
+    {
+        string[] codes = Codes();
+        return codes.Contains( code ) && ReplaceCode( code );
+    }
+    public bool ReplaceCode( string code )
+    {
+        var updatedCodes = new List<string>( Codes()
+                                                .Where( s => s != code ) );
+
+        string.Join( RECOVERY_CODE_SEPARATOR, updatedCodes );
+        return true;
+    }
+    public bool ReplaceCode( params string[] codes ) => ReplaceCode( codes.AsEnumerable() );
+    public bool ReplaceCode( IEnumerable<string> codes )
+    {
+        var updatedCodes = new List<string>( Codes()
+                                                .Where( codes.Contains ) );
+
+        string.Join( RECOVERY_CODE_SEPARATOR, updatedCodes );
+        return true;
+    }
+
 
     public UserRecord UpdatePassword( string password )
     {
@@ -444,7 +545,7 @@ public sealed record UserRecord : TableRecord<UserRecord>, IUserRecord<UserRecor
     public UserRecord MarkBadLogin()
     {
         VerifyAccess();
-        LastBadAttempt = DateTimeOffset.Now;
+        LastBadAttempt = DateTimeOffset.UtcNow;
         BadLogins      = 0;
         IsDisabled     = BadLogins > 5;
 
@@ -455,7 +556,8 @@ public sealed record UserRecord : TableRecord<UserRecord>, IUserRecord<UserRecor
     public UserRecord SetActive()
     {
         VerifyAccess();
-        LastActive = DateTimeOffset.Now;
+        LastActive = DateTimeOffset.UtcNow;
+        IsDisabled = false;
         return this;
     }
     public UserRecord Disable()
@@ -464,13 +566,7 @@ public sealed record UserRecord : TableRecord<UserRecord>, IUserRecord<UserRecor
         IsDisabled = true;
         return Lock();
     }
-    public UserRecord Lock()
-    {
-        VerifyAccess();
-        IsDisabled = true;
-        LockDate   = DateTimeOffset.Now;
-        return this;
-    }
+    public UserRecord Lock() => Lock( TimeSpan.FromHours( 6 ) );
     public UserRecord Enable()
     {
         VerifyAccess();
@@ -485,6 +581,7 @@ public sealed record UserRecord : TableRecord<UserRecord>, IUserRecord<UserRecor
         IsDisabled     = BadLogins > 5;
         LastBadAttempt = default;
         LockDate       = default;
+        LockoutEnd     = default;
         return this;
     }
 
@@ -517,8 +614,39 @@ public sealed record UserRecord : TableRecord<UserRecord>, IUserRecord<UserRecor
                                               new Claim( ClaimTypes.Country,        Country ?? string.Empty ),
                                               new Claim( ClaimTypes.PostalCode,     PostalCode ?? string.Empty ),
                                               new Claim( ClaimTypes.Webpage,        Website ?? string.Empty ),
-                                              new Claim( ClaimTypes.Expiration,     SubscriptionExpires?.ToString() ?? string.Empty ),
+                                              new Claim( ClaimTypes.Expiration,     SubscriptionExpires?.ToString() ?? string.Empty )
                                           };
+
+
+    public async ValueTask AddRole( DbConnection connection, DbTransaction transaction, Database db, RoleRecord role, CancellationToken token )
+    {
+        var record = await db.UserRoles.Get( connection, transaction, true, UserRoleRecord.GetDynamicParameters( this, role ), token );
+
+        if (record is null)
+        {
+            record = new UserRoleRecord( this, role );
+            await db.UserRoles.Insert( connection, transaction, record, token );
+        }
+    }
+    public async ValueTask RemoveRole( DbConnection connection, DbTransaction transaction, Database db, RoleRecord role, CancellationToken token )
+    {
+        var record = await db.UserRoles.Get( connection, transaction, true, UserRoleRecord.GetDynamicParameters( this, role ), token );
+
+        if (record is not null) { await db.UserRoles.Delete( connection, transaction, record, token ); }
+    }
+    public async ValueTask<bool> HasRole( DbConnection connection, DbTransaction transaction, Database db, RoleRecord role, CancellationToken token )
+    {
+        var record = await db.UserRoles.Get( connection, transaction, true, UserRoleRecord.GetDynamicParameters( this, role ), token );
+        return record is not null;
+    }
+    public async IAsyncEnumerable<RoleRecord> GetRoles( DbConnection connection, DbTransaction? transaction, Database db, [EnumeratorCancellation] CancellationToken token = default )
+    {
+        await foreach (UserRoleRecord record in db.UserRoles.Where( connection, transaction, true, UserRoleRecord.GetDynamicParameters( this ), token ))
+        {
+            RoleRecord? role = await db.Roles.Get( connection, transaction, record.RoleID, token );
+            if (role is not null) { yield return role; }
+        }
+    }
 
 
     public async ValueTask<UserRecord?> GetBoss( DbConnection connection, DbTransaction? transaction, DbTable<UserRecord> table, CancellationToken token ) => EscalateTo.HasValue
@@ -632,33 +760,5 @@ public sealed record UserRecord : TableRecord<UserRecord>, IUserRecord<UserRecor
         return base.Equals( other ) && UserName == other.UserName && FirstName == other.FirstName && LastName == other.LastName && FullName == other.FullName && Description == other.Description && Address == other.Address && Line1 == other.Line1 &&
                Line2 == other.Line2 && City == other.City && State == other.State && Country == other.Country && PostalCode == other.PostalCode && Website == other.Website && Email == other.Email && PhoneNumber == other.PhoneNumber &&
                Ext == other.Ext && Title == other.Title && Department == other.Department && Company == other.Company;
-    }
-
-
-    [SuppressMessage( "ReSharper", "NonReadonlyMemberInGetHashCode" )]
-    public override int GetHashCode()
-    {
-        var hashCode = new HashCode();
-        hashCode.Add( base.GetHashCode() );
-        hashCode.Add( UserName );
-        hashCode.Add( FirstName );
-        hashCode.Add( LastName );
-        hashCode.Add( FullName );
-        hashCode.Add( Description );
-        hashCode.Add( Address );
-        hashCode.Add( Line1 );
-        hashCode.Add( Line2 );
-        hashCode.Add( City );
-        hashCode.Add( State );
-        hashCode.Add( Country );
-        hashCode.Add( PostalCode );
-        hashCode.Add( Website );
-        hashCode.Add( Email );
-        hashCode.Add( PhoneNumber );
-        hashCode.Add( Ext );
-        hashCode.Add( Title );
-        hashCode.Add( Department );
-        hashCode.Add( Company );
-        return hashCode.ToHashCode();
     }
 }

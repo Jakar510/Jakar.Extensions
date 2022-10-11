@@ -16,8 +16,8 @@ public static class MimeTypeExtensions
         // TODO: get more uri schemes
         mime switch
         {
-            MimeType.NotSet  => throw new ArgumentOutOfRangeException(nameof(mime), mime, "Must be a valid MimeType, not MimeType.NotSet"),
-            MimeType.Unknown => throw new ArgumentOutOfRangeException(nameof(mime), mime, "Cannot discern UriScheme for MimeType.Unknown"),
+            MimeType.NotSet  => throw new ArgumentOutOfRangeException( nameof(mime), mime, "Must be a valid MimeType, not MimeType.NotSet" ),
+            MimeType.Unknown => throw new ArgumentOutOfRangeException( nameof(mime), mime, "Cannot discern UriScheme for MimeType.Unknown" ),
 
             MimeType.Doc  => "ms-word",
             MimeType.Docx => "ms-word",
@@ -48,7 +48,7 @@ public static class MimeTypeExtensions
     /// </returns>
     public static string ToFileName( this MimeType mime, string fileName )
     {
-        if ( string.IsNullOrWhiteSpace(fileName) ) { throw new NullReferenceException(nameof(mime)); }
+        if (string.IsNullOrWhiteSpace( fileName )) { throw new NullReferenceException( nameof(mime) ); }
 
         return $"{fileName}.{mime.ToExtension().ToLower()}";
     }
@@ -150,22 +150,26 @@ public static class MimeTypeExtensions
 
 
                                         MimeType.Unknown => "dat",
-                                        MimeType.NotSet  => throw new ArgumentOutOfRangeException(nameof(mime)),
-                                        _                => throw new ArgumentOutOfRangeException(nameof(mime))
+                                        MimeType.NotSet  => throw new ArgumentOutOfRangeException( nameof(mime) ),
+                                        _                => throw new ArgumentOutOfRangeException( nameof(mime) )
                                     };
 
 
-        if ( !includePeriod ) { return result.ToString(); }
+        if (!includePeriod) { return result.ToString(); }
 
         Span<char> span = stackalloc char[result.Length + 1];
         span[0] = '.';
-        result.CopyTo(span[1..]);
+        result.CopyTo( span[1..] );
         return span.ToString();
     }
 
 
     /// <summary>
-    ///     Gets the <see cref = "MimeType" /> of the provided extension <see cref = "string" />.
+    ///     Gets the
+    ///     <see cref = "MimeType" />
+    ///     of the provided extension
+    ///     <see cref = "string" />
+    ///     .
     /// </summary>
     /// <param name = "mime" > </param>
     /// <returns>
@@ -174,7 +178,11 @@ public static class MimeTypeExtensions
     public static MimeType FromExtension( this string mime ) => mime.AsSpan()
                                                                     .FromExtension();
     /// <summary>
-    ///     Gets the <see cref = "MimeType" /> of the provided extension <see cref = "string" />.
+    ///     Gets the
+    ///     <see cref = "MimeType" />
+    ///     of the provided extension
+    ///     <see cref = "string" />
+    ///     .
     /// </summary>
     /// <param name = "mime" > </param>
     /// <returns>
@@ -183,153 +191,153 @@ public static class MimeTypeExtensions
     public static MimeType FromExtension( this ReadOnlySpan<char> mime )
     {
         Span<char> span = stackalloc char[mime.Length];
-        mime.ToLowerInvariant(span);
+        mime.ToLowerInvariant( span );
 
-        if ( span.SequenceEqual("text") || span.SequenceEqual(".text") ) { return MimeType.Text; }
+        if (span.SequenceEqual( "text" ) || span.SequenceEqual( ".text" )) { return MimeType.Text; }
 
-        if ( span.SequenceEqual("txt") || span.SequenceEqual(".txt") ) { return MimeType.PlainText; }
+        if (span.SequenceEqual( "txt" ) || span.SequenceEqual( ".txt" )) { return MimeType.PlainText; }
 
-        if ( span.SequenceEqual("html") || span.SequenceEqual(".html") || span.SequenceEqual("htm") || span.SequenceEqual(".htm") ) { return MimeType.Html; }
+        if (span.SequenceEqual( "html" ) || span.SequenceEqual( ".html" ) || span.SequenceEqual( "htm" ) || span.SequenceEqual( ".htm" )) { return MimeType.Html; }
 
-        if ( span.SequenceEqual("xml") || span.SequenceEqual(".xml") ) { return MimeType.Xml; }
+        if (span.SequenceEqual( "xml" ) || span.SequenceEqual( ".xml" )) { return MimeType.Xml; }
 
-        if ( span.SequenceEqual("xaml") || span.SequenceEqual(".xaml") ) { return MimeType.Xaml; }
+        if (span.SequenceEqual( "xaml" ) || span.SequenceEqual( ".xaml" )) { return MimeType.Xaml; }
 
-        if ( span.SequenceEqual("rt") || span.SequenceEqual(".rt") ) { return MimeType.RichText; }
+        if (span.SequenceEqual( "rt" ) || span.SequenceEqual( ".rt" )) { return MimeType.RichText; }
 
-        if ( span.SequenceEqual("css") || span.SequenceEqual(".css") ) { return MimeType.Css; }
+        if (span.SequenceEqual( "css" ) || span.SequenceEqual( ".css" )) { return MimeType.Css; }
 
-        if ( span.SequenceEqual("csv") || span.SequenceEqual(".csv") ) { return MimeType.Csv; }
+        if (span.SequenceEqual( "csv" ) || span.SequenceEqual( ".csv" )) { return MimeType.Csv; }
 
-        if ( span.SequenceEqual("ics") || span.SequenceEqual(".ics") ) { return MimeType.Calendar; }
+        if (span.SequenceEqual( "ics" ) || span.SequenceEqual( ".ics" )) { return MimeType.Calendar; }
 
-        if ( span.SequenceEqual("ini") || span.SequenceEqual(".ini") ) { return MimeType.Ini; }
+        if (span.SequenceEqual( "ini" ) || span.SequenceEqual( ".ini" )) { return MimeType.Ini; }
 
-        if ( span.SequenceEqual("cfg") || span.SequenceEqual(".cfg") ) { return MimeType.Cfg; }
+        if (span.SequenceEqual( "cfg" ) || span.SequenceEqual( ".cfg" )) { return MimeType.Cfg; }
 
-        if ( span.SequenceEqual("conf") || span.SequenceEqual(".conf") ) { return MimeType.Config; }
+        if (span.SequenceEqual( "conf" ) || span.SequenceEqual( ".conf" )) { return MimeType.Config; }
 
-        if ( span.SequenceEqual("b64") || span.SequenceEqual(".b64") ) { return MimeType.Base64; }
+        if (span.SequenceEqual( "b64" ) || span.SequenceEqual( ".b64" )) { return MimeType.Base64; }
 
-        if ( span.SequenceEqual("soap") || span.SequenceEqual(".soap") ) { return MimeType.Soap; }
+        if (span.SequenceEqual( "soap" ) || span.SequenceEqual( ".soap" )) { return MimeType.Soap; }
 
-        if ( span.SequenceEqual("stream") || span.SequenceEqual(".stream") ) { return MimeType.Stream; }
+        if (span.SequenceEqual( "stream" ) || span.SequenceEqual( ".stream" )) { return MimeType.Stream; }
 
-        if ( span.SequenceEqual("bin") || span.SequenceEqual(".bin") ) { return MimeType.Binary; }
+        if (span.SequenceEqual( "bin" ) || span.SequenceEqual( ".bin" )) { return MimeType.Binary; }
 
-        if ( span.SequenceEqual("pdf") || span.SequenceEqual(".pdf") ) { return MimeType.Pdf; }
+        if (span.SequenceEqual( "pdf" ) || span.SequenceEqual( ".pdf" )) { return MimeType.Pdf; }
 
-        if ( span.SequenceEqual("rtf") || span.SequenceEqual(".rtf") ) { return MimeType.Rtf; }
+        if (span.SequenceEqual( "rtf" ) || span.SequenceEqual( ".rtf" )) { return MimeType.Rtf; }
 
-        if ( span.SequenceEqual("json") || span.SequenceEqual(".json") ) { return MimeType.Json; }
+        if (span.SequenceEqual( "json" ) || span.SequenceEqual( ".json" )) { return MimeType.Json; }
 
-        if ( span.SequenceEqual("xul") || span.SequenceEqual(".xul") ) { return MimeType.Xul; }
+        if (span.SequenceEqual( "xul" ) || span.SequenceEqual( ".xul" )) { return MimeType.Xul; }
 
-        if ( span.SequenceEqual("js") || span.SequenceEqual(".js") ) { return MimeType.JavaScript; }
+        if (span.SequenceEqual( "js" ) || span.SequenceEqual( ".js" )) { return MimeType.JavaScript; }
 
-        if ( span.SequenceEqual("vbs") || span.SequenceEqual(".vbs") ) { return MimeType.Vbs; }
+        if (span.SequenceEqual( "vbs" ) || span.SequenceEqual( ".vbs" )) { return MimeType.Vbs; }
 
-        if ( span.SequenceEqual("sds") || span.SequenceEqual(".sds") ) { return MimeType.Sds; }
+        if (span.SequenceEqual( "sds" ) || span.SequenceEqual( ".sds" )) { return MimeType.Sds; }
 
-        if ( span.SequenceEqual("tds") || span.SequenceEqual(".tds") ) { return MimeType.Tds; }
+        if (span.SequenceEqual( "tds" ) || span.SequenceEqual( ".tds" )) { return MimeType.Tds; }
 
-        if ( span.SequenceEqual("coa") || span.SequenceEqual(".coa") ) { return MimeType.Coa; }
+        if (span.SequenceEqual( "coa" ) || span.SequenceEqual( ".coa" )) { return MimeType.Coa; }
 
-        if ( span.SequenceEqual("xmla") || span.SequenceEqual(".xmla") ) { return MimeType.XmlApp; }
+        if (span.SequenceEqual( "xmla" ) || span.SequenceEqual( ".xmla" )) { return MimeType.XmlApp; }
 
-        if ( span.SequenceEqual("url") || span.SequenceEqual(".url") ) { return MimeType.UrlEncodedContent; }
+        if (span.SequenceEqual( "url" ) || span.SequenceEqual( ".url" )) { return MimeType.UrlEncodedContent; }
 
-        if ( span.SequenceEqual("license") || span.SequenceEqual(".license") || span.SequenceEqual("licenses") || span.SequenceEqual(".licenses") ) { return MimeType.Licenses; }
+        if (span.SequenceEqual( "license" ) || span.SequenceEqual( ".license" ) || span.SequenceEqual( "licenses" ) || span.SequenceEqual( ".licenses" )) { return MimeType.Licenses; }
 
-        if ( span.SequenceEqual("dll") || span.SequenceEqual(".dll") ) { return MimeType.Dll; }
+        if (span.SequenceEqual( "dll" ) || span.SequenceEqual( ".dll" )) { return MimeType.Dll; }
 
-        if ( span.SequenceEqual("zip") || span.SequenceEqual(".zip") ) { return MimeType.Zip; }
+        if (span.SequenceEqual( "zip" ) || span.SequenceEqual( ".zip" )) { return MimeType.Zip; }
 
-        if ( span.SequenceEqual("7z") || span.SequenceEqual(".7z") ) { return MimeType.SevenZip; }
+        if (span.SequenceEqual( "7z" ) || span.SequenceEqual( ".7z" )) { return MimeType.SevenZip; }
 
-        if ( span.SequenceEqual("bz") || span.SequenceEqual(".bz") ) { return MimeType.Bzip; }
+        if (span.SequenceEqual( "bz" ) || span.SequenceEqual( ".bz" )) { return MimeType.Bzip; }
 
-        if ( span.SequenceEqual("bz2") || span.SequenceEqual(".bz2") ) { return MimeType.Bzip2; }
+        if (span.SequenceEqual( "bz2" ) || span.SequenceEqual( ".bz2" )) { return MimeType.Bzip2; }
 
-        if ( span.SequenceEqual("gz") || span.SequenceEqual(".gz") ) { return MimeType.Gzip; }
+        if (span.SequenceEqual( "gz" ) || span.SequenceEqual( ".gz" )) { return MimeType.Gzip; }
 
-        if ( span.SequenceEqual("tar.gz") || span.SequenceEqual(".tar.gz") ) { return MimeType.Tar; }
+        if (span.SequenceEqual( "tar.gz" ) || span.SequenceEqual( ".tar.gz" )) { return MimeType.Tar; }
 
-        if ( span.SequenceEqual("doc") || span.SequenceEqual(".doc") ) { return MimeType.Doc; }
+        if (span.SequenceEqual( "doc" ) || span.SequenceEqual( ".doc" )) { return MimeType.Doc; }
 
-        if ( span.SequenceEqual("docx") || span.SequenceEqual(".docx") ) { return MimeType.Docx; }
+        if (span.SequenceEqual( "docx" ) || span.SequenceEqual( ".docx" )) { return MimeType.Docx; }
 
-        if ( span.SequenceEqual("xls") || span.SequenceEqual(".xls") ) { return MimeType.Xls; }
+        if (span.SequenceEqual( "xls" ) || span.SequenceEqual( ".xls" )) { return MimeType.Xls; }
 
-        if ( span.SequenceEqual("xlsx") || span.SequenceEqual(".xlsx") ) { return MimeType.Xlsx; }
+        if (span.SequenceEqual( "xlsx" ) || span.SequenceEqual( ".xlsx" )) { return MimeType.Xlsx; }
 
-        if ( span.SequenceEqual("ppt") || span.SequenceEqual(".ppt") ) { return MimeType.Ppt; }
+        if (span.SequenceEqual( "ppt" ) || span.SequenceEqual( ".ppt" )) { return MimeType.Ppt; }
 
-        if ( span.SequenceEqual("pptx") || span.SequenceEqual(".pptx") ) { return MimeType.Pptx; }
+        if (span.SequenceEqual( "pptx" ) || span.SequenceEqual( ".pptx" )) { return MimeType.Pptx; }
 
-        if ( span.SequenceEqual("3gppa") || span.SequenceEqual(".3gppa") ) { return MimeType.ThreeGppAudio; }
+        if (span.SequenceEqual( "3gppa" ) || span.SequenceEqual( ".3gppa" )) { return MimeType.ThreeGppAudio; }
 
-        if ( span.SequenceEqual("3gpp2a") || span.SequenceEqual(".3gpp2a") ) { return MimeType.ThreeGpp2Audio; }
+        if (span.SequenceEqual( "3gpp2a" ) || span.SequenceEqual( ".3gpp2a" )) { return MimeType.ThreeGpp2Audio; }
 
-        if ( span.SequenceEqual("aac") || span.SequenceEqual(".aac") ) { return MimeType.Aac; }
+        if (span.SequenceEqual( "aac" ) || span.SequenceEqual( ".aac" )) { return MimeType.Aac; }
 
-        if ( span.SequenceEqual("mpega") || span.SequenceEqual(".mpega") ) { return MimeType.MpegAudio; }
+        if (span.SequenceEqual( "mpega" ) || span.SequenceEqual( ".mpega" )) { return MimeType.MpegAudio; }
 
-        if ( span.SequenceEqual("mp3") || span.SequenceEqual(".mp3") ) { return MimeType.Mp3; }
+        if (span.SequenceEqual( "mp3" ) || span.SequenceEqual( ".mp3" )) { return MimeType.Mp3; }
 
-        if ( span.SequenceEqual("weba") || span.SequenceEqual(".weba") ) { return MimeType.Weba; }
+        if (span.SequenceEqual( "weba" ) || span.SequenceEqual( ".weba" )) { return MimeType.Weba; }
 
-        if ( span.SequenceEqual("wav") || span.SequenceEqual(".wav") ) { return MimeType.Wav; }
+        if (span.SequenceEqual( "wav" ) || span.SequenceEqual( ".wav" )) { return MimeType.Wav; }
 
-        if ( span.SequenceEqual("3gpp") || span.SequenceEqual(".3gpp") ) { return MimeType.ThreeGppVideo; }
+        if (span.SequenceEqual( "3gpp" ) || span.SequenceEqual( ".3gpp" )) { return MimeType.ThreeGppVideo; }
 
-        if ( span.SequenceEqual("3gpp2") || span.SequenceEqual(".3gpp2") ) { return MimeType.ThreeGpp2Video; }
+        if (span.SequenceEqual( "3gpp2" ) || span.SequenceEqual( ".3gpp2" )) { return MimeType.ThreeGpp2Video; }
 
-        if ( span.SequenceEqual("mp4") || span.SequenceEqual(".mp4") ) { return MimeType.Mp4; }
+        if (span.SequenceEqual( "mp4" ) || span.SequenceEqual( ".mp4" )) { return MimeType.Mp4; }
 
-        if ( span.SequenceEqual("mpeg") || span.SequenceEqual(".mpeg") ) { return MimeType.MpegVideo; }
+        if (span.SequenceEqual( "mpeg" ) || span.SequenceEqual( ".mpeg" )) { return MimeType.MpegVideo; }
 
-        if ( span.SequenceEqual("mpeg4") || span.SequenceEqual(".mpeg4") ) { return MimeType.Mpeg4; }
+        if (span.SequenceEqual( "mpeg4" ) || span.SequenceEqual( ".mpeg4" )) { return MimeType.Mpeg4; }
 
-        if ( span.SequenceEqual("webm") || span.SequenceEqual(".webm") ) { return MimeType.Webm; }
+        if (span.SequenceEqual( "webm" ) || span.SequenceEqual( ".webm" )) { return MimeType.Webm; }
 
-        if ( span.SequenceEqual("h264") || span.SequenceEqual(".h264") ) { return MimeType.H264; }
+        if (span.SequenceEqual( "h264" ) || span.SequenceEqual( ".h264" )) { return MimeType.H264; }
 
-        if ( span.SequenceEqual("avi") || span.SequenceEqual(".avi") ) { return MimeType.Avi; }
+        if (span.SequenceEqual( "avi" ) || span.SequenceEqual( ".avi" )) { return MimeType.Avi; }
 
-        if ( span.SequenceEqual("mov") || span.SequenceEqual(".mov") ) { return MimeType.Mov; }
+        if (span.SequenceEqual( "mov" ) || span.SequenceEqual( ".mov" )) { return MimeType.Mov; }
 
-        if ( span.SequenceEqual("mpg") || span.SequenceEqual(".mpg") ) { return MimeType.Mpg; }
+        if (span.SequenceEqual( "mpg" ) || span.SequenceEqual( ".mpg" )) { return MimeType.Mpg; }
 
-        if ( span.SequenceEqual("ogg") || span.SequenceEqual(".ogg") ) { return MimeType.Ogg; }
+        if (span.SequenceEqual( "ogg" ) || span.SequenceEqual( ".ogg" )) { return MimeType.Ogg; }
 
-        if ( span.SequenceEqual("mkv") || span.SequenceEqual(".mkv") ) { return MimeType.Mkv; }
+        if (span.SequenceEqual( "mkv" ) || span.SequenceEqual( ".mkv" )) { return MimeType.Mkv; }
 
-        if ( span.SequenceEqual("gif") || span.SequenceEqual(".gif") ) { return MimeType.Gif; }
+        if (span.SequenceEqual( "gif" ) || span.SequenceEqual( ".gif" )) { return MimeType.Gif; }
 
-        if ( span.SequenceEqual("tif") || span.SequenceEqual(".tif") ) { return MimeType.Tiff; }
+        if (span.SequenceEqual( "tif" ) || span.SequenceEqual( ".tif" )) { return MimeType.Tiff; }
 
-        if ( span.SequenceEqual("png") || span.SequenceEqual(".png") ) { return MimeType.Png; }
+        if (span.SequenceEqual( "png" ) || span.SequenceEqual( ".png" )) { return MimeType.Png; }
 
-        if ( span.SequenceEqual("jpeg") || span.SequenceEqual(".jpeg") ) { return MimeType.Jpeg; }
+        if (span.SequenceEqual( "jpeg" ) || span.SequenceEqual( ".jpeg" )) { return MimeType.Jpeg; }
 
-        if ( span.SequenceEqual("jpg") || span.SequenceEqual(".jpg") ) { return MimeType.Jpg; }
+        if (span.SequenceEqual( "jpg" ) || span.SequenceEqual( ".jpg" )) { return MimeType.Jpg; }
 
-        if ( span.SequenceEqual("bmp") || span.SequenceEqual(".bmp") ) { return MimeType.Bmp; }
+        if (span.SequenceEqual( "bmp" ) || span.SequenceEqual( ".bmp" )) { return MimeType.Bmp; }
 
-        if ( span.SequenceEqual("webp") || span.SequenceEqual(".webp") ) { return MimeType.Webp; }
+        if (span.SequenceEqual( "webp" ) || span.SequenceEqual( ".webp" )) { return MimeType.Webp; }
 
-        if ( span.SequenceEqual("ico") || span.SequenceEqual(".ico") ) { return MimeType.Icon; }
+        if (span.SequenceEqual( "ico" ) || span.SequenceEqual( ".ico" )) { return MimeType.Icon; }
 
-        if ( span.SequenceEqual("svg") || span.SequenceEqual(".svg") ) { return MimeType.Svg; }
+        if (span.SequenceEqual( "svg" ) || span.SequenceEqual( ".svg" )) { return MimeType.Svg; }
 
-        if ( span.SequenceEqual("ttf") || span.SequenceEqual(".ttf") ) { return MimeType.TrueType; }
+        if (span.SequenceEqual( "ttf" ) || span.SequenceEqual( ".ttf" )) { return MimeType.TrueType; }
 
-        if ( span.SequenceEqual("otf") || span.SequenceEqual(".otf") ) { return MimeType.OpenType; }
+        if (span.SequenceEqual( "otf" ) || span.SequenceEqual( ".otf" )) { return MimeType.OpenType; }
 
-        if ( span.SequenceEqual("fd") || span.SequenceEqual(".fd") ) { return MimeType.FormData; }
+        if (span.SequenceEqual( "fd" ) || span.SequenceEqual( ".fd" )) { return MimeType.FormData; }
 
-        if ( span.SequenceEqual("dat") || span.SequenceEqual(".dat") ) { return MimeType.Unknown; }
+        if (span.SequenceEqual( "dat" ) || span.SequenceEqual( ".dat" )) { return MimeType.Unknown; }
 
         return MimeType.NotSet;
     }
@@ -350,7 +358,7 @@ public static class MimeTypeExtensions
     public static MimeType ToMimeType( this string mime ) =>
         mime switch
         {
-            null => throw new NullReferenceException(nameof(mime)),
+            null => throw new NullReferenceException( nameof(mime) ),
 
             MimeTypeNames.Text.PLAIN                  => MimeType.PlainText,
             MimeTypeNames.Text.HTML                   => MimeType.Html,
@@ -528,7 +536,7 @@ public static class MimeTypeExtensions
             MimeType.OpenType => MimeTypeNames.Font.OPEN_TYPE,
             MimeType.FormData => MimeTypeNames.MultiPart.FORM_DATA,
 
-            MimeType.NotSet => throw new ArgumentOutOfRangeException(nameof(mime), mime, null),
-            _               => throw new ArgumentOutOfRangeException(nameof(mime), mime, null)
+            MimeType.NotSet => throw new ArgumentOutOfRangeException( nameof(mime), mime, null ),
+            _               => throw new ArgumentOutOfRangeException( nameof(mime), mime, null )
         };
 }

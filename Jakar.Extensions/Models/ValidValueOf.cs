@@ -15,15 +15,15 @@ namespace Jakar.Extensions;
 /// </summary>
 /// <typeparam name = "TValue" > </typeparam>
 /// <typeparam name = "TThis" > </typeparam>
-[SuppressMessage("ReSharper", "ConditionalAccessQualifierIsNonNullableAccordingToAPIContract")]
+[SuppressMessage( "ReSharper", "ConditionalAccessQualifierIsNonNullableAccordingToAPIContract" )]
 public abstract class ValidValueOf<TValue, TThis> : IComparable<ValidValueOf<TValue, TThis>>, IEquatable<ValidValueOf<TValue, TThis>>, IComparable where TThis : ValidValueOf<TValue, TThis>, new()
                                                                                                                                                    where TValue : IComparable<TValue>, IEquatable<TValue>
 {
-    protected static readonly Func<TThis> _factory = (Func<TThis>)Expression.Lambda(typeof(Func<TThis>),
-                                                                                    Expression.New(typeof(TThis).GetTypeInfo()
-                                                                                                                .DeclaredConstructors.First(x => x.GetParameters()
-                                                                                                                                                  .IsEmpty()),
-                                                                                                   Array.Empty<Expression>()))
+    protected static readonly Func<TThis> _factory = (Func<TThis>)Expression.Lambda( typeof(Func<TThis>),
+                                                                                     Expression.New( typeof(TThis).GetTypeInfo()
+                                                                                                                  .DeclaredConstructors.First( x => x.GetParameters()
+                                                                                                                                                     .IsEmpty() ),
+                                                                                                     Array.Empty<Expression>() ) )
                                                                             .Compile();
 
 
@@ -40,7 +40,7 @@ public abstract class ValidValueOf<TValue, TThis> : IComparable<ValidValueOf<TVa
         return self;
     }
 
-    public static bool TryCreate( TValue item, [NotNullWhen(true)] out TThis? thisValue )
+    public static bool TryCreate( TValue item, [NotNullWhen( true )] out TThis? thisValue )
     {
         TThis self = _factory();
         self.Value = item;
@@ -52,12 +52,44 @@ public abstract class ValidValueOf<TValue, TThis> : IComparable<ValidValueOf<TVa
         return thisValue is not null;
     }
 
+    private static int Compare( TValue? left, TValue? right )
+    {
+        if (left is null) { return 1; }
 
-    [DoesNotReturn] protected virtual void ThrowError() => throw new FormatException($"Provided Value was in the wrong format: '{Value}'");
+        if (right is null) { return -1; }
+
+        if (ReferenceEquals( left, right )) { return 0; }
+
+        return left.CompareTo( right );
+    }
+    private static bool Equals( TValue? left, TValue? right )
+    {
+        // ReSharper disable once ConvertIfStatementToSwitchStatement
+        if (left is null && right is null) { return true; }
+
+        if (left is null) { return false; }
+
+        if (right is null) { return false; }
+
+        if (ReferenceEquals( left, right )) { return true; }
+
+        return left.Equals( right );
+    }
+
+
+    public static bool operator ==( ValidValueOf<TValue, TThis> left, ValidValueOf<TValue, TThis> right ) => Equals( left, right );
+    public static bool operator !=( ValidValueOf<TValue, TThis> left, ValidValueOf<TValue, TThis> right ) => !Equals( left, right );
+    public static bool operator <( ValidValueOf<TValue, TThis>  left, ValidValueOf<TValue, TThis> right ) => Compare( left.Value, right.Value ) < 0;
+    public static bool operator >( ValidValueOf<TValue, TThis>  left, ValidValueOf<TValue, TThis> right ) => Compare( left.Value, right.Value ) > 0;
+    public static bool operator <=( ValidValueOf<TValue, TThis> left, ValidValueOf<TValue, TThis> right ) => Compare( left.Value, right.Value ) <= 0;
+    public static bool operator >=( ValidValueOf<TValue, TThis> left, ValidValueOf<TValue, TThis> right ) => Compare( left.Value, right.Value ) >= 0;
+
+
+    [DoesNotReturn] protected virtual void ThrowError() => throw new FormatException( $"Provided Value was in the wrong format: '{Value}'" );
 
     protected void Validate()
     {
-        if ( !IsValid() ) { ThrowError(); }
+        if (!IsValid()) { ThrowError(); }
     }
 
     /// <summary>
@@ -75,71 +107,39 @@ public abstract class ValidValueOf<TValue, TThis> : IComparable<ValidValueOf<TVa
     public override string? ToString() => Value?.ToString();
     public override bool Equals( object? other )
     {
-        if ( other is null ) { return false; }
+        if (other is null) { return false; }
 
-        if ( ReferenceEquals(this, other) ) { return true; }
+        if (ReferenceEquals( this, other )) { return true; }
 
-        return other is ValidValueOf<TValue, TThis> value && Equals(value);
+        return other is ValidValueOf<TValue, TThis> value && Equals( value );
     }
 
     // ReSharper disable once NonReadonlyMemberInGetHashCode
     public override int GetHashCode() => Value?.GetHashCode() ?? 0;
 
-    private static int Compare( TValue? left, TValue? right )
-    {
-        if ( left is null ) { return 1; }
-
-        if ( right is null ) { return -1; }
-
-        if ( ReferenceEquals(left, right) ) { return 0; }
-
-        return left.CompareTo(right);
-    }
-    private static bool Equals( TValue? left, TValue? right )
-    {
-        // ReSharper disable once ConvertIfStatementToSwitchStatement
-        if ( left is null && right is null ) { return true; }
-
-        if ( left is null ) { return false; }
-
-        if ( right is null ) { return false; }
-
-        if ( ReferenceEquals(left, right) ) { return true; }
-
-        return left.Equals(right);
-    }
-
 
     public int CompareTo( object? other )
     {
-        if ( other is null ) { return 1; }
+        if (other is null) { return 1; }
 
-        if ( ReferenceEquals(this, other) ) { return 0; }
+        if (ReferenceEquals( this, other )) { return 0; }
 
         return other is ValidValueOf<TValue, TThis> value
-                   ? CompareTo(value)
-                   : throw new ExpectedValueTypeException(nameof(other), other, typeof(ValidValueOf<TValue, TThis>));
+                   ? CompareTo( value )
+                   : throw new ExpectedValueTypeException( nameof(other), other, typeof(ValidValueOf<TValue, TThis>) );
     }
 
 
     public int CompareTo( ValidValueOf<TValue, TThis>? other )
     {
-        if ( other is null ) { return 1; }
+        if (other is null) { return 1; }
 
-        return Compare(Value, other.Value);
+        return Compare( Value, other.Value );
     }
     public virtual bool Equals( ValidValueOf<TValue, TThis>? other )
     {
-        if ( other is null ) { return false; }
+        if (other is null) { return false; }
 
-        return Equals(Value, other.Value);
+        return Equals( Value, other.Value );
     }
-
-
-    public static bool operator ==( ValidValueOf<TValue, TThis> left, ValidValueOf<TValue, TThis> right ) => Equals(left, right);
-    public static bool operator !=( ValidValueOf<TValue, TThis> left, ValidValueOf<TValue, TThis> right ) => !Equals(left, right);
-    public static bool operator <( ValidValueOf<TValue, TThis>  left, ValidValueOf<TValue, TThis> right ) => Compare(left.Value, right.Value) < 0;
-    public static bool operator >( ValidValueOf<TValue, TThis>  left, ValidValueOf<TValue, TThis> right ) => Compare(left.Value, right.Value) > 0;
-    public static bool operator <=( ValidValueOf<TValue, TThis> left, ValidValueOf<TValue, TThis> right ) => Compare(left.Value, right.Value) <= 0;
-    public static bool operator >=( ValidValueOf<TValue, TThis> left, ValidValueOf<TValue, TThis> right ) => Compare(left.Value, right.Value) >= 0;
 }

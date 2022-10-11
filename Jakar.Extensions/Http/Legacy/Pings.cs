@@ -2,7 +2,7 @@
 namespace Jakar.Extensions;
 
 
-[Obsolete($"Use {nameof(WebRequester)} instead")]
+[Obsolete( $"Use {nameof(WebRequester)} instead" )]
 public static class Pings
 {
     /// <summary>
@@ -22,28 +22,28 @@ public static class Pings
         try
         {
             encoding ??= Encoding.Default;
-            headers  ??= new HeaderCollection(MimeTypeNames.Application.URL_ENCODED_CONTENT, encoding);
+            headers  ??= new HeaderCollection( MimeTypeNames.Application.URL_ENCODED_CONTENT, encoding );
 
             try
             {
-                using WebResponse response = await url.Get(token, headers, timeout)
-                                                      .ConfigureAwait(false);
+                using WebResponse response = await url.Get( token, headers, timeout )
+                                                      .ConfigureAwait( false );
 
-                string? reply = await response.AsString(encoding)
-                                              .ConfigureAwait(false);
+                string? reply = await response.AsString( encoding )
+                                              .ConfigureAwait( false );
 
-                return !string.IsNullOrWhiteSpace(reply);
+                return !string.IsNullOrWhiteSpace( reply );
             }
-            catch ( WebException we )
+            catch (WebException we)
             {
-                Exception? e = we.ConvertException(token);
-                if ( e is not null ) { throw e; }
+                Exception? e = we.ConvertException( token );
+                if (e is not null) { throw e; }
 
                 throw;
             }
         }
-        catch ( ConnectFailureException ) { return false; }
-        catch ( TimeoutException ) { return false; }
+        catch (ConnectFailureException) { return false; }
+        catch (TimeoutException) { return false; }
     }
 
 
@@ -65,31 +65,31 @@ public static class Pings
         try
         {
             encoding ??= Encoding.Default;
-            headers  ??= new HeaderCollection(MimeTypeNames.Text.PLAIN, encoding);
+            headers  ??= new HeaderCollection( MimeTypeNames.Text.PLAIN, encoding );
 
             try
             {
-                using WebResponse response = await url.Post(encoding.GetBytes(payload)
-                                                                    .AsMemory(),
-                                                            headers,
-                                                            token,
-                                                            timeout)
-                                                      .ConfigureAwait(false);
+                using WebResponse response = await url.Post( encoding.GetBytes( payload )
+                                                                     .AsMemory(),
+                                                             headers,
+                                                             token,
+                                                             timeout )
+                                                      .ConfigureAwait( false );
 
-                string? reply = await response.AsString(encoding)
-                                              .ConfigureAwait(false);
+                string? reply = await response.AsString( encoding )
+                                              .ConfigureAwait( false );
 
-                return !string.IsNullOrWhiteSpace(reply);
+                return !string.IsNullOrWhiteSpace( reply );
             }
-            catch ( WebException we )
+            catch (WebException we)
             {
-                Exception? e = we.ConvertException(token);
-                if ( e is not null ) { throw e; }
+                Exception? e = we.ConvertException( token );
+                if (e is not null) { throw e; }
 
                 throw;
             }
         }
-        catch ( ConnectFailureException ) { return false; }
-        catch ( TimeoutException ) { return false; }
+        catch (ConnectFailureException) { return false; }
+        catch (TimeoutException) { return false; }
     }
 }

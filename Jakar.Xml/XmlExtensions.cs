@@ -1,4 +1,5 @@
-﻿using System;
+﻿#nullable enable
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -13,22 +14,23 @@ using Newtonsoft.Json.Linq;
 
 
 
-#nullable enable
 namespace Jakar.Xml;
 
 
-[SuppressMessage("ReSharper", "ParameterTypeCanBeEnumerable.Global")]
+[SuppressMessage( "ReSharper", "ParameterTypeCanBeEnumerable.Global" )]
 public static class XmlExtensions
 {
-    public static string SetMappedIDs<T>( this IEnumerable<IEnumerable<T>> items ) where T : IDataBaseID => items.Consolidate().SetMappedIDs();
-    public static string SetMappedIDs<T>( this IEnumerable<T>              items ) where T : IDataBaseID => items.Select(item => item.ID).SetMappedIDs<T>();
+    public static string SetMappedIDs<T>( this IEnumerable<IEnumerable<T>> items ) where T : IDataBaseID => items.Consolidate()
+                                                                                                                 .SetMappedIDs();
+    public static string SetMappedIDs<T>( this IEnumerable<T> items ) where T : IDataBaseID => items.Select( item => item.ID )
+                                                                                                    .SetMappedIDs<T>();
 
-    public static string SetMappedIDs<T>( this IEnumerable<long> listOfIds ) => listOfIds.ToXml(new Dictionary<string, string>
-                                                                                                {
-                                                                                                    [Constants.GROUP] = typeof(T).GetTableName()
-                                                                                                });
+    public static string SetMappedIDs<T>( this IEnumerable<long> listOfIds ) => listOfIds.ToXml( new Dictionary<string, string>
+                                                                                                 {
+                                                                                                     [Constants.GROUP] = typeof(T).GetTableName()
+                                                                                                 } );
 
-    public static ICollection<long> GetMappedIDs( this string xml, out IDictionary<string, string>? attributes ) => xml.FromXml<List<long>>(out attributes);
+    public static ICollection<long> GetMappedIDs( this string xml, out IDictionary<string, string>? attributes ) => xml.FromXml<List<long>>( out attributes );
 
 
     public static string PrettyXml( this XmlDocument document, XmlWriterSettings? settings = default )
@@ -39,12 +41,12 @@ public static class XmlExtensions
                          Indent              = true,
                          NewLineOnAttributes = true,
                          OmitXmlDeclaration  = true,
-                         IndentChars         = new string(' ', 4)
+                         IndentChars         = new string( ' ', 4 )
                      };
 
         var builder = new StringBuilder();
-        var writer  = XmlWriter.Create(builder, settings);
-        document.Save(writer);
+        var writer  = XmlWriter.Create( builder, settings );
+        document.Save( writer );
         return builder.ToString();
     }
 
@@ -55,8 +57,8 @@ public static class XmlExtensions
     // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-    public static string GetNameSpaceUri( this Type type, PropertyInfo info ) => type.GetNameSpaceUri(info.Name);
-    public static string GetNameSpaceUri( this Type type, FieldInfo    info ) => type.GetNameSpaceUri(info.Name);
+    public static string GetNameSpaceUri( this Type type, PropertyInfo info ) => type.GetNameSpaceUri( info.Name );
+    public static string GetNameSpaceUri( this Type type, FieldInfo    info ) => type.GetNameSpaceUri( info.Name );
     public static string GetNameSpaceUri( this Type type, string       nameSpace ) => type.GetTypeName() + Constants.Dividers.NS + nameSpace;
 
 
@@ -68,46 +70,46 @@ public static class XmlExtensions
 
     public static IDictionary ToDictionary( this XmlNode root, out IDictionary<string, string>? attributes )
     {
-        if ( root.Name != Constants.DICTIONARY ) { throw new FormatException(nameof(root.Name)); }
+        if (root.Name != Constants.DICTIONARY) { throw new FormatException( nameof(root.Name) ); }
 
         // attributes = root.GetAttributes();
         attributes = null;
-        if ( attributes is null ) { throw new NullReferenceException(nameof(attributes)); }
+        if (attributes is null) { throw new NullReferenceException( nameof(attributes) ); }
 
         Type keyType   = Xmlizer.nameToType[attributes[Constants.KEY]];
         Type valueType = Xmlizer.nameToType[attributes[Constants.VALUE]];
 
-        Type        target  = typeof(Dictionary<,>).MakeGenericType(keyType, valueType);
-        IDictionary results = (IDictionary)Activator.CreateInstance(target);
+        Type target  = typeof(Dictionary<,>).MakeGenericType( keyType, valueType );
+        var  results = (IDictionary)Activator.CreateInstance( target );
 
-        for ( var i = 0; i < root.ChildNodes.Count; i++ )
+        for (int i = 0; i < root.ChildNodes.Count; i++)
         {
             XmlNode? node = root.ChildNodes[i];
-            if ( node?.Name is null ) { continue; }
+            if (node?.Name is null) { continue; }
 
-            if ( node.Name != Constants.KEY_VALUE_PAIR ) { throw new SerializationException(nameof(node.Name)); }
+            if (node.Name != Constants.KEY_VALUE_PAIR) { throw new SerializationException( nameof(node.Name) ); }
 
-            var     key   = string.Empty;
+            string  key   = string.Empty;
             object? value = default;
 
-            for ( var c = 0; c < node.ChildNodes.Count; c++ )
+            for (int c = 0; c < node.ChildNodes.Count; c++)
             {
                 XmlNode? child = node.ChildNodes[c];
-                if ( child?.Name is null ) { throw new NullReferenceException(nameof(child.InnerText)); }
+                if (child?.Name is null) { throw new NullReferenceException( nameof(child.InnerText) ); }
 
-                switch ( child.Name )
+                switch (child.Name)
                 {
                     case Constants.KEY:
                         key = child.InnerText;
                         break;
 
                     case Constants.VALUE:
-                        value = child.InnerText.ConvertTo(valueType);
+                        value = child.InnerText.ConvertTo( valueType );
                         break;
                 }
             }
 
-            if ( string.IsNullOrWhiteSpace(key) ) { throw new NullReferenceException(nameof(key)); }
+            if (string.IsNullOrWhiteSpace( key )) { throw new NullReferenceException( nameof(key) ); }
 
             results[key] = value;
         }
@@ -121,17 +123,17 @@ public static class XmlExtensions
 
         XmlNode? root = document.ChildNodes[0];
 
-        if ( root?.Name != Constants.ITEM ) { throw new SerializationException(nameof(root.Name)); }
+        if (root?.Name != Constants.ITEM) { throw new SerializationException( nameof(root.Name) ); }
 
         // attributes = root.GetAttributes();
         attributes = null;
 
-        for ( var i = 0; i < root.ChildNodes.Count; i++ )
+        for (int i = 0; i < root.ChildNodes.Count; i++)
         {
             XmlNode? node = root.ChildNodes[i];
-            if ( node?.InnerText is null ) { continue; }
+            if (node?.InnerText is null) { continue; }
 
-            results.Add(node.InnerText.ConvertTo<TValue>());
+            results.Add( node.InnerText.ConvertTo<TValue>() );
         }
 
         return results;
@@ -140,7 +142,7 @@ public static class XmlExtensions
     public static XmlDocument ToRawXml( this string xml )
     {
         var document = new XmlDocument();
-        document.LoadXml(xml);
+        document.LoadXml( xml );
 
         return document;
     }
@@ -148,7 +150,7 @@ public static class XmlExtensions
 
     public static string ToXml( this JObject item )
     {
-        XmlDocument? node = JsonConvert.DeserializeXmlNode(item.ToJson(), nameof(item), true, true);
+        XmlDocument? node = JsonConvert.DeserializeXmlNode( item.ToJson(), nameof(item), true, true );
 
         string? result = node?.PrettyXml();
         return result ?? throw new InvalidOperationException();
@@ -156,7 +158,7 @@ public static class XmlExtensions
 
     public static string ToXml( this IEnumerable<JObject> item )
     {
-        XmlDocument? node = JsonConvert.DeserializeXmlNode(item.ToJson(), nameof(item), true, true);
+        XmlDocument? node = JsonConvert.DeserializeXmlNode( item.ToJson(), nameof(item), true, true );
 
         string? result = node?.PrettyXml();
         return result ?? throw new InvalidOperationException();
@@ -164,12 +166,12 @@ public static class XmlExtensions
 
     public static TResult? DeserializeXml<TResult>( this string xml )
     {
-        if ( string.IsNullOrWhiteSpace(xml) ) { return default; }
+        if (string.IsNullOrWhiteSpace( xml )) { return default; }
 
         var doc = new XmlDocument();
-        doc.LoadXml(xml);
+        doc.LoadXml( xml );
 
-        string json = JsonConvert.SerializeXmlNode(doc);
+        string json = JsonConvert.SerializeXmlNode( doc );
         return json.FromJson<TResult>();
     }
 }

@@ -10,18 +10,18 @@ public struct UpdateClauseBuilder
 
     public UpdateChainBuilder To( string tableName )
     {
-        _builder.Add(KeyWords.UPDATE, tableName, KeyWords.SET);
-        return new UpdateChainBuilder(this, ref _builder);
+        _builder.Add( KeyWords.UPDATE, tableName, KeyWords.SET );
+        return new UpdateChainBuilder( this, ref _builder );
     }
     public UpdateChainBuilder To<T>( T _ )
     {
-        _builder.Add(KeyWords.UPDATE, typeof(T).GetName(), KeyWords.SET);
-        return new UpdateChainBuilder(this, ref _builder);
+        _builder.Add( KeyWords.UPDATE, typeof(T).GetName(), KeyWords.SET );
+        return new UpdateChainBuilder( this, ref _builder );
     }
     public UpdateChainBuilder To<T>()
     {
-        _builder.Add(KeyWords.UPDATE, typeof(T).GetName(), KeyWords.SET);
-        return new UpdateChainBuilder(this, ref _builder);
+        _builder.Add( KeyWords.UPDATE, typeof(T).GetName(), KeyWords.SET );
+        return new UpdateChainBuilder( this, ref _builder );
     }
 
 

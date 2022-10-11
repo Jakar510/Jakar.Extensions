@@ -1,4 +1,5 @@
-﻿using Android.Views;
+﻿using Android.Runtime;
+using Android.Views;
 using Xamarin.Forms;
 using ATextAlignment = Android.Views.TextAlignment;
 using TextAlignment = Xamarin.Forms.TextAlignment;
@@ -8,7 +9,7 @@ using TextAlignment = Xamarin.Forms.TextAlignment;
 namespace Jakar.Extensions.Xamarin.Forms.Droid;
 
 
-[global::Android.Runtime.Preserve(AllMembers = true)]
+[Preserve( AllMembers = true )]
 public static class TextAlignmentExtensions
 {
     public static GravityFlags ToGravityFlags( this LayoutAlignment forms, bool expand )
@@ -21,7 +22,7 @@ public static class TextAlignmentExtensions
                                   _                      => GravityFlags.Fill
                               };
 
-        if ( expand ) { result |= GravityFlags.Fill; }
+        if (expand) { result |= GravityFlags.Fill; }
 
         return result;
     }

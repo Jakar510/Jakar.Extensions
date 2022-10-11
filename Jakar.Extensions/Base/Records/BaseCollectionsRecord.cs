@@ -7,7 +7,7 @@ public abstract record BaseCollectionsRecord<T, TID> : ObservableRecord<T, TID> 
                                                                                 where TID : struct, IComparable<TID>, IEquatable<TID>
 {
     protected BaseCollectionsRecord() : base() { }
-    protected BaseCollectionsRecord( TID id ) : base(id) { }
+    protected BaseCollectionsRecord( TID id ) : base( id ) { }
 
 
 
@@ -15,7 +15,7 @@ public abstract record BaseCollectionsRecord<T, TID> : ObservableRecord<T, TID> 
     public class Collection : ObservableCollection<T>
     {
         public Collection() : base() { }
-        public Collection( IEnumerable<T> items ) : base(items) { }
+        public Collection( IEnumerable<T> items ) : base( items ) { }
     }
 
 
@@ -24,7 +24,7 @@ public abstract record BaseCollectionsRecord<T, TID> : ObservableRecord<T, TID> 
     public class ConcurrentCollection : ConcurrentObservableCollection<T>
     {
         public ConcurrentCollection() : base() { }
-        public ConcurrentCollection( IEnumerable<T> items ) : base(items) { }
+        public ConcurrentCollection( IEnumerable<T> items ) : base( items ) { }
     }
 
 
@@ -33,7 +33,7 @@ public abstract record BaseCollectionsRecord<T, TID> : ObservableRecord<T, TID> 
     public class Queue : MultiQueue<T>
     {
         public Queue() : base() { }
-        public Queue( IEnumerable<T> items ) : base(items) { }
+        public Queue( IEnumerable<T> items ) : base( items ) { }
     }
 
 
@@ -42,7 +42,7 @@ public abstract record BaseCollectionsRecord<T, TID> : ObservableRecord<T, TID> 
     public class Deque : MultiDeque<T>
     {
         public Deque() : base() { }
-        public Deque( IEnumerable<T> items ) : base(items) { }
+        public Deque( IEnumerable<T> items ) : base( items ) { }
     }
 
 
@@ -51,8 +51,8 @@ public abstract record BaseCollectionsRecord<T, TID> : ObservableRecord<T, TID> 
     public class Items : List<T>
     {
         public Items() : base() { }
-        public Items( int            capacity ) : base(capacity) { }
-        public Items( IEnumerable<T> items ) : base(items) { }
+        public Items( int            capacity ) : base( capacity ) { }
+        public Items( IEnumerable<T> items ) : base( items ) { }
     }
 
 
@@ -61,8 +61,8 @@ public abstract record BaseCollectionsRecord<T, TID> : ObservableRecord<T, TID> 
     public class Set : HashSet<T>
     {
         public Set() : base() { }
-        public Set( int            capacity ) : base(capacity) { }
-        public Set( IEnumerable<T> items ) : base(items) { }
+        public Set( int            capacity ) : base( capacity ) { }
+        public Set( IEnumerable<T> items ) : base( items ) { }
     }
 
 
@@ -75,22 +75,22 @@ public abstract record BaseCollectionsRecord<T, TID> : ObservableRecord<T, TID> 
 
         public int Compare( object? x, object? y )
         {
-            if ( x is not T left ) { throw new ExpectedValueTypeException(nameof(x), x, typeof(T)); }
+            if (x is not T left) { throw new ExpectedValueTypeException( nameof(x), x, typeof(T) ); }
 
-            if ( y is not T right ) { throw new ExpectedValueTypeException(nameof(y), y, typeof(T)); }
+            if (y is not T right) { throw new ExpectedValueTypeException( nameof(y), y, typeof(T) ); }
 
 
-            return Compare(left, right);
+            return Compare( left, right );
         }
         public int Compare( T? x, T? y )
         {
-            if ( ReferenceEquals(x, y) ) { return 0; }
+            if (ReferenceEquals( x, y )) { return 0; }
 
-            if ( y is null ) { return 1; }
+            if (y is null) { return 1; }
 
-            if ( x is null ) { return -1; }
+            if (x is null) { return -1; }
 
-            return x.CompareTo(y);
+            return x.CompareTo( y );
         }
     }
 
@@ -104,11 +104,11 @@ public abstract record BaseCollectionsRecord<T, TID> : ObservableRecord<T, TID> 
 
         public bool Equals( T? left, T? right )
         {
-            if ( left is null && right is null ) { return true; }
+            if (left is null && right is null) { return true; }
 
-            if ( left is null || right is null ) { return false; }
+            if (left is null || right is null) { return false; }
 
-            return left.Equals(right);
+            return left.Equals( right );
         }
         public int GetHashCode( T value ) => value.GetHashCode();
     }
@@ -120,5 +120,5 @@ public abstract record BaseCollectionsRecord<T, TID> : ObservableRecord<T, TID> 
 public abstract record BaseCollectionsRecord<T> : BaseCollectionsRecord<T, long> where T : BaseCollectionsRecord<T, long>
 {
     protected BaseCollectionsRecord() : base() { }
-    protected BaseCollectionsRecord( long id ) : base(id) { }
+    protected BaseCollectionsRecord( long id ) : base( id ) { }
 }
