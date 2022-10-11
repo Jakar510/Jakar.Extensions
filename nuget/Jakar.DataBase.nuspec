@@ -4,7 +4,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata>
 		<id>Jakar.DataBase</id>
-		<version>6.0.0.19-beta</version>
+		<version>6.0.0.20-beta</version>
 		<title>Extension Library</title>
 		<authors>Tyler Stegmaier</authors>
 		<owners>Jakar510/Jakar</owners>
@@ -19,6 +19,8 @@
 		</description>
 		<releaseNotes>
 			Jakar.DataBase 6.0.0
+			merged FluentMigrations into Database.
+			added Roles to Database.
 		</releaseNotes>
 		<tags>Jakar Api Extensions</tags>
 		<language>en-US</language>
