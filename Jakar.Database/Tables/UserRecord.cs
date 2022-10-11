@@ -30,7 +30,7 @@ public sealed record UserRecord : TableRecord<UserRecord>, IUserRecord<UserRecor
     private                 DateTimeOffset?            _subscriptionExpires;
     private                 DateTimeOffset?            _tokenExpiration;
     private                 Guid?                      _sessionID;
-    private                 int?                       _badLogins;
+    private                 int                        _badLogins;
     private                 long?                      _escalateTo;
     private                 long?                      _rights;
     private                 long?                      _subscriptionID;
@@ -150,7 +150,7 @@ public sealed record UserRecord : TableRecord<UserRecord>, IUserRecord<UserRecor
         set => AdditionalData = value?.ToJson();
     }
 
-    public int? BadLogins
+    public int BadLogins
     {
         get => _badLogins;
         set => SetProperty( ref _badLogins, value );
@@ -479,7 +479,6 @@ public sealed record UserRecord : TableRecord<UserRecord>, IUserRecord<UserRecor
     public bool HasPassword() => !string.IsNullOrWhiteSpace( PasswordHash );
     public UserRecord Lock( in TimeSpan offset )
     {
-        VerifyAccess();
         IsDisabled = true;
         LockDate   = DateTimeOffset.UtcNow;
         LockoutEnd = LockDate + offset;
@@ -535,7 +534,6 @@ public sealed record UserRecord : TableRecord<UserRecord>, IUserRecord<UserRecor
 
     public UserRecord UpdatePassword( string password )
     {
-        VerifyAccess();
         PasswordHash = _hasher.HashPassword( this, password );
         return this;
     }
@@ -544,10 +542,9 @@ public sealed record UserRecord : TableRecord<UserRecord>, IUserRecord<UserRecor
 
     public UserRecord MarkBadLogin()
     {
-        VerifyAccess();
-        LastBadAttempt = DateTimeOffset.UtcNow;
-        BadLogins      = 0;
-        IsDisabled     = BadLogins > 5;
+        LastBadAttempt =  DateTimeOffset.UtcNow;
+        BadLogins      += 1;
+        IsDisabled     =  BadLogins > 5;
 
         return IsDisabled
                    ? Lock()
@@ -555,28 +552,24 @@ public sealed record UserRecord : TableRecord<UserRecord>, IUserRecord<UserRecor
     }
     public UserRecord SetActive()
     {
-        VerifyAccess();
         LastActive = DateTimeOffset.UtcNow;
         IsDisabled = false;
         return this;
     }
     public UserRecord Disable()
     {
-        VerifyAccess();
         IsDisabled = true;
         return Lock();
     }
     public UserRecord Lock() => Lock( TimeSpan.FromHours( 6 ) );
     public UserRecord Enable()
     {
-        VerifyAccess();
         LockDate = default;
         IsActive = true;
         return Unlock();
     }
     public UserRecord Unlock()
     {
-        VerifyAccess();
         BadLogins      = 0;
         IsDisabled     = BadLogins > 5;
         LastBadAttempt = default;
@@ -588,14 +581,12 @@ public sealed record UserRecord : TableRecord<UserRecord>, IUserRecord<UserRecor
 
     public UserRecord ClearRefreshToken()
     {
-        VerifyAccess();
         RefreshToken           = default;
         RefreshTokenExpiryTime = default;
         return this;
     }
     public UserRecord SetRefreshToken( string token, DateTimeOffset date )
     {
-        VerifyAccess();
         RefreshToken           = token;
         RefreshTokenExpiryTime = date;
         return this;
@@ -662,7 +653,6 @@ public sealed record UserRecord : TableRecord<UserRecord>, IUserRecord<UserRecor
     }
     void IUserData.Update( IUserData value )
     {
-        VerifyAccess();
         FirstName         = value.FirstName;
         LastName          = value.LastName;
         FullName          = value.FullName;

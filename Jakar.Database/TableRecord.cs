@@ -5,7 +5,7 @@ namespace Jakar.Database;
 
 
 [Serializable]
-public abstract record TableRecord<TRecord> : BaseCollectionsRecord<TRecord, long>, IComparable<TableRecord<TRecord>> where TRecord : TableRecord<TRecord>
+public abstract record TableRecord<TRecord> : BaseCollectionsRecord<TRecord, long> where TRecord : TableRecord<TRecord>
 {
     private       DateTimeOffset? _lastModified;
     private       long            _createdBy;
@@ -42,8 +42,6 @@ public abstract record TableRecord<TRecord> : BaseCollectionsRecord<TRecord, lon
                                                         ID = id
                                                     });
 
-    protected virtual void VerifyAccess() { }
-
 
     public static DynamicParameters GetDynamicParameters( TableRecord<TRecord> tableRecord )
     {
@@ -60,7 +58,7 @@ public abstract record TableRecord<TRecord> : BaseCollectionsRecord<TRecord, lon
     public override int GetHashCode() => HashCode.Combine( base.GetHashCode(), _createdBy, _lastModified, UserID, DateCreated );
 
 
-    public virtual int CompareTo( TableRecord<TRecord>? other )
+    public override int CompareTo( TRecord? other )
     {
         if (other is null) { return 1; }
 
@@ -77,7 +75,7 @@ public abstract record TableRecord<TRecord> : BaseCollectionsRecord<TRecord, lon
 
         return DateCreated.CompareTo( other.DateCreated );
     }
-    public virtual bool Equals( TableRecord<TRecord>? other )
+    public override bool Equals( TRecord? other )
     {
         if (other is null) { return false; }
 

@@ -92,7 +92,7 @@ public sealed class UserStore : IUserStore
         token.ThrowIfCancellationRequested();
         await ValueTask.CompletedTask;
     }
-    public Task<int> GetAccessFailedCountAsync( UserRecord          user, CancellationToken token ) => Task.FromResult( user.BadLogins ?? 0 );
+    public Task<int> GetAccessFailedCountAsync( UserRecord          user, CancellationToken token ) => Task.FromResult( user.BadLogins );
     public Task<bool> GetLockoutEnabledAsync( UserRecord            user, CancellationToken token ) => Task.FromResult( user.IsLocked );
     public Task<DateTimeOffset?> GetLockoutEndDateAsync( UserRecord user, CancellationToken token ) => Task.FromResult( user.LockoutEnd );
 
@@ -101,7 +101,7 @@ public sealed class UserStore : IUserStore
     {
         user.MarkBadLogin();
         await _dbContext.Users.Update( user, token );
-        return user.BadLogins ?? 0;
+        return user.BadLogins;
     }
     public async Task ResetAccessFailedCountAsync( UserRecord user, CancellationToken token )
     {

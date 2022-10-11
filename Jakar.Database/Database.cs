@@ -18,13 +18,19 @@ public abstract class Database : Randoms, IConnectableDb, IAsyncDisposable, IHea
 {
     protected readonly ConcurrentBag<IAsyncDisposable> _disposables = new();
     protected readonly IConfiguration                  _configuration;
-    public abstract    AppVersion                      Version { get; }
-    public             DbTable<RoleRecord>             Roles   { get; }
+    private            string                          _domain = "https://localhost:443";
 
 
-    public DbTable<UserRecord>     Users     { get; }
-    public DbTable<UserRoleRecord> UserRoles { get; }
-    public string                  Domain    { get; set; } = "https://localhost:443";
+    public abstract AppVersion              Version          { get; }
+    public          DbTable<RoleRecord>     Roles            { get; }
+    public          DbTable<UserRecord>     Users            { get; }
+    public          DbTable<UserRoleRecord> UserRoles        { get; }
+    public virtual  string                  ConnectionString => _configuration.GetConnectionString( "Default" );
+    public string Domain
+    {
+        get => _domain;
+        set => SetProperty( ref _domain, value );
+    }
 
 
     static Database()
@@ -52,7 +58,48 @@ public abstract class Database : Randoms, IConnectableDb, IAsyncDisposable, IHea
         builder.AddSingleton<T>();
         return builder;
     }
-    private static async ValueTask<LoginResult> VerifyLogin( UserRecord user )
+
+
+    protected DbTable<TRecord> Create<TRecord>() where TRecord : TableRecord<TRecord> => AddDisposable( new DbTable<TRecord>( this ) );
+    protected TValue AddDisposable<TValue>( TValue value ) where TValue : IAsyncDisposable
+    {
+        _disposables.Add( value );
+        return value;
+    }
+
+
+    protected abstract DbConnection CreateConnection();
+
+
+    protected virtual async ValueTask<LoginResult> VerifyLogin( DbConnection connection, DbTransaction? transaction, VerifyRequest request, CancellationToken token = default )
+    {
+        UserRecord? user = await Users.Get( connection, transaction, nameof(UserRecord.UserName), request.UserLogin, token );
+        if (user is null) { return LoginResult.State.BadCredentials; }
+
+        PasswordVerificationResult passResult = user.VerifyPassword( request.UserPassword );
+
+        switch (passResult)
+        {
+            case PasswordVerificationResult.Failed:
+            {
+                user.MarkBadLogin();
+                await Users.Update( connection, transaction, user, token );
+                return LoginResult.State.BadCredentials;
+            }
+
+            case PasswordVerificationResult.Success: { return await VerifyLogin( user ); }
+
+            case PasswordVerificationResult.SuccessRehashNeeded:
+            {
+                user.UpdatePassword( request.UserPassword );
+                await Users.Update( connection, transaction, user, token );
+                return await VerifyLogin( user );
+            }
+
+            default: throw new OutOfRangeException( nameof(passResult), passResult );
+        }
+    }
+    protected virtual async ValueTask<LoginResult> VerifyLogin( UserRecord user )
     {
         await ValueTask.CompletedTask;
 
@@ -68,45 +115,48 @@ public abstract class Database : Randoms, IConnectableDb, IAsyncDisposable, IHea
         return user;
     }
 
-    protected DbTable<TRecord> Create<TRecord>() where TRecord : TableRecord<TRecord> => AddDisposable( new DbTable<TRecord>( this ) );
-    protected TValue AddDisposable<TValue>( TValue value ) where TValue : IAsyncDisposable
-    {
-        _disposables.Add( value );
-        return value;
-    }
 
-
-    protected abstract DbConnection CreateConnection();
-
-
-    private async ValueTask<LoginResult> VerifyLogin( DbConnection connection, DbTransaction? transaction, VerifyRequest request, CancellationToken token = default )
-    {
-        UserRecord? user = await Users.Get( connection, transaction, nameof(UserRecord.UserName), request.UserLogin, token );
-        if (user is null) { return LoginResult.State.BadCredentials; }
-
-        PasswordVerificationResult passResult = user.VerifyPassword( request.UserPassword );
-
-        switch (passResult)
-        {
-            case PasswordVerificationResult.Failed: { return LoginResult.State.BadCredentials; }
-
-            case PasswordVerificationResult.Success: { return await VerifyLogin( user ); }
-
-            case PasswordVerificationResult.SuccessRehashNeeded:
-            {
-                user.UpdatePassword( request.UserPassword );
-                return await VerifyLogin( user );
-            }
-
-            default: throw new OutOfRangeException( nameof(passResult), passResult );
-        }
-    }
-    public async ValueTask<ActionResult<UserRecord>> Verify( DbConnection connection, DbTransaction? transaction, ControllerBase controller, VerifyRequest request, CancellationToken token = default )
+    public ValueTask<ActionResult> Verify( ControllerBase controller, VerifyRequest request, CancellationToken token = default ) => this.TryCall( Verify, controller, request, token );
+    public virtual async ValueTask<ActionResult> Verify( DbConnection connection, DbTransaction? transaction, ControllerBase controller, VerifyRequest request, CancellationToken token = default )
     {
         LoginResult loginResult = await VerifyLogin( connection, transaction, request, token );
-        if (loginResult.GetResult( controller, out ActionResult? actionResult, out UserRecord? caller )) { return actionResult; }
 
-        return caller;
+        return loginResult.GetResult( controller, out ActionResult? actionResult, out UserRecord? _ )
+                   ? actionResult
+                   : controller.Ok();
+    }
+
+
+    public ValueTask<ActionResult> Verify( ControllerBase controller, VerifyRequest request, Func<UserRecord, ActionResult> func, CancellationToken token = default ) => this.TryCall( Verify, controller, request, func, token );
+    public virtual async ValueTask<ActionResult> Verify( DbConnection connection, DbTransaction? transaction, ControllerBase controller, VerifyRequest request, Func<UserRecord, ActionResult> func, CancellationToken token = default )
+    {
+        LoginResult loginResult = await VerifyLogin( connection, transaction, request, token );
+
+        return loginResult.GetResult( controller, out ActionResult? actionResult, out UserRecord? caller )
+                   ? actionResult
+                   : func( caller );
+    }
+
+
+    public ValueTask<ActionResult> Verify( ControllerBase controller, VerifyRequest request, Func<UserRecord, ValueTask<ActionResult>> func, CancellationToken token = default ) => this.TryCall( Verify, controller, request, func, token );
+    public virtual async ValueTask<ActionResult> Verify( DbConnection connection, DbTransaction? transaction, ControllerBase controller, VerifyRequest request, Func<UserRecord, ValueTask<ActionResult>> func, CancellationToken token = default )
+    {
+        LoginResult loginResult = await VerifyLogin( connection, transaction, request, token );
+
+        return loginResult.GetResult( controller, out ActionResult? actionResult, out UserRecord? caller )
+                   ? actionResult
+                   : await func( caller );
+    }
+
+
+    public ValueTask<ActionResult> Verify( ControllerBase controller, VerifyRequest request, Func<UserRecord, Task<ActionResult>> func, CancellationToken token = default ) => this.TryCall( Verify, controller, request, func, token );
+    public virtual async ValueTask<ActionResult> Verify( DbConnection connection, DbTransaction? transaction, ControllerBase controller, VerifyRequest request, Func<UserRecord, Task<ActionResult>> func, CancellationToken token = default )
+    {
+        LoginResult loginResult = await VerifyLogin( connection, transaction, request, token );
+
+        return loginResult.GetResult( controller, out ActionResult? actionResult, out UserRecord? caller )
+                   ? actionResult
+                   : await func( caller );
     }
 
 
@@ -134,6 +184,7 @@ public abstract class Database : Randoms, IConnectableDb, IAsyncDisposable, IHea
         string         refreshToken = GenerateToken();
         user.SetRefreshToken( refreshToken, date );
 
+        await Users.Update( connection, transaction, user, token );
         return Tokens.Create( handler.WriteToken( security ), refreshToken, Version, user );
     }
 

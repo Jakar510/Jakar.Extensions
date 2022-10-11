@@ -131,6 +131,10 @@ public abstract class Create_UserTable : Migration<UserRecord>
              .AsBoolean()
              .NotNullable();
 
+        table.WithColumn( nameof(UserRecord.LastActive) )
+             .AsDateTime2()
+             .Nullable();
+
         table.WithColumn( nameof(UserRecord.IsDisabled) )
              .AsBoolean()
              .NotNullable();
@@ -141,16 +145,12 @@ public abstract class Create_UserTable : Migration<UserRecord>
 
         table.WithColumn( nameof(UserRecord.BadLogins) )
              .AsInt64()
-             .Nullable();
-
-        table.WithColumn( nameof(UserRecord.LastActive) )
-             .AsDateTime2()
-             .Nullable();
+             .NotNullable();
 
         table.WithColumn( nameof(UserRecord.LastBadAttempt) )
              .AsDateTime2()
              .Nullable();
-
+        
         table.WithColumn( nameof(UserRecord.LockDate) )
              .AsDateTime2()
              .Nullable();

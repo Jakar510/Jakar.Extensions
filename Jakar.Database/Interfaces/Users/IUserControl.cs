@@ -10,7 +10,7 @@ public interface IUserControl
     public DateTimeOffset? LastBadAttempt { get; }
     public DateTimeOffset? LockDate       { get; }
     public Guid?           SessionID      { get; }
-    public int?            BadLogins      { get; }
+    public int            BadLogins      { get; }
 
 
     public UserRecord MarkBadLogin();
