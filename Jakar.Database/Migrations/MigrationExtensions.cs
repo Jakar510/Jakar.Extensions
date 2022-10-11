@@ -355,31 +355,6 @@ public static class MigrationExtensions
         dbType = default;
         return false;
     }
-    public static bool TryGetUnderlyingEnumType( this Type propertyType, [NotNullWhen( true )] out Type? result )
-    {
-        if (propertyType.IsEnum)
-        {
-            result = Enum.GetUnderlyingType( propertyType );
-            return true;
-        }
-
-        if (propertyType.IsGenericType)
-        {
-            if (propertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
-            {
-                Type argType = propertyType.GenericTypeArguments.First();
-
-                if (argType.IsEnum)
-                {
-                    result = Enum.GetUnderlyingType( argType );
-                    return true;
-                }
-            }
-        }
-
-        result = default;
-        return false;
-    }
 
 
     public static bool TryHandleOtherTypes( this ICreateTableColumnAsTypeSyntax col, PropertyInfo propInfo, Type propertyType )

@@ -10,8 +10,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Jakar.Extensions" Version="6.1.2" />
-		<PackageReference Include="Jakar.Extensions.Hosting" Version="6.0.8" />
+		<PackageReference Include="Jakar.Extensions" Version="6.1.3" />
+		<PackageReference Include="Jakar.Extensions.Hosting" Version="6.0.9" />
 		<PackageReference Include="FluentMigrator" Version="3.3.2" />
 		<PackageReference Include="FluentMigrator.Runner" Version="3.3.2" />
 		<PackageReference Include="MailKit" Version="3.4.1" />
