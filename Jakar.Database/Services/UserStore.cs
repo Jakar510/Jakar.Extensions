@@ -5,9 +5,6 @@
 namespace Jakar.Database;
 
 
-
-
-
 public sealed class UserStore : IUserStore
 {
     private readonly Database _dbContext;
@@ -18,6 +15,12 @@ public sealed class UserStore : IUserStore
 
     public static WebApplicationBuilder Register( WebApplicationBuilder builder )
     {
+        builder.Services.AddIdentity<UserRecord, RoleRecord>()
+               .AddRoleManager<RoleStore>()
+               .AddUserStore<UserStore>()
+               .AddPasswordValidator<PwdValidator>()
+               .AddUserValidator<UserValidator>();
+
         builder.AddScoped<IUserStore, UserStore>();
         builder.AddScoped<IUserLoginStore<UserRecord>, UserStore>();
         builder.AddScoped<IUserClaimStore<UserRecord>, UserStore>();

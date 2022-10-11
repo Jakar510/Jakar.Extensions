@@ -2,13 +2,17 @@
 // 09/07/2022  3:56 PM
 
 
+using Microsoft.Extensions.Options;
+
+
+
 namespace Jakar.Extensions;
 
 
 public readonly ref struct PasswordValidator
 {
-    public static JsonData? Current { get; set; }
-    public static LocalFile File    { get; set; } = "PasswordRequirements.json";
+    public static PasswordRequirements? Current { get; set; }
+    public static LocalFile             File    { get; set; } = "PasswordRequirements.json";
 
 
     private readonly Requirements _requirements;
@@ -71,7 +75,7 @@ public readonly ref struct PasswordValidator
 
     public static async ValueTask<bool> CheckAsync( string password )
     {
-        JsonData data = await JsonData.FromFile();
+        PasswordRequirements data = await Requirements.FromFile();
         return Check( password, data );
     }
     public static bool Check( in ReadOnlySpan<char> password ) => Check( password, Requirements.Default );
@@ -100,7 +104,7 @@ public readonly ref struct PasswordValidator
         public ReadOnlySpan<char>   SpecialChars             { get; init; } = Randoms.SpecialChars;
 
 
-        public static Requirements Default => Current ??= new JsonData();
+        public static Requirements Default => Current ??= new PasswordRequirements();
 
 
         public Requirements( string[] blockedPasswords ) : this( 10, blockedPasswords ) { }
@@ -110,7 +114,7 @@ public readonly ref struct PasswordValidator
 
             BlockedPasswords = blockedPasswords;
         }
-        public Requirements( JsonData data ) : this( data.MinLength, data.BlockedPasswords )
+        public Requirements( PasswordRequirements data ) : this( data.MinLength, data.BlockedPasswords )
         {
             MinLength                = data.MinLength;
             RequireLowerCase         = data.RequireLowerCase;
@@ -126,9 +130,26 @@ public readonly ref struct PasswordValidator
         }
 
 
-        public static implicit operator Requirements( JsonData        data ) => new(data);
-        public static implicit operator Requirements( string[]        blockedPasswords ) => new(blockedPasswords);
-        public static implicit operator Requirements( HashSet<string> blockedPasswords ) => new(Filter( blockedPasswords ));
+        public static implicit operator Requirements( PasswordRequirements data ) => new(data);
+        public static implicit operator Requirements( string[]             blockedPasswords ) => new(blockedPasswords);
+        public static implicit operator Requirements( HashSet<string>      blockedPasswords ) => new(Filter( blockedPasswords ));
+        
+
+        public PasswordRequirements ToPasswordRequirements() => new()
+                                                                {
+                                                                    BlockedPasswords         = Filter( BlockedPasswords.ToArray() ),
+                                                                    MinLength                = MinLength,
+                                                                    RequireLowerCase         = RequireLowerCase,
+                                                                    LowerCase                = LowerCase.ToString(),
+                                                                    RequireUpperCase         = RequireUpperCase,
+                                                                    UpperCase                = UpperCase.ToString(),
+                                                                    CantStartWithNumber      = CantStartWithNumber,
+                                                                    RequireNumber            = RequireNumber,
+                                                                    Numbers                  = Numbers.ToString(),
+                                                                    RequireSpecialChar       = RequireSpecialChar,
+                                                                    CantStartWithSpecialChar = CantStartWithSpecialChar,
+                                                                    SpecialChars             = SpecialChars.ToString()
+                                                                };
 
 
         public static string[] Filter( IEnumerable<string> blockedPasswords, int minLength = 10 ) => Filter( new HashSet<string>( blockedPasswords ), minLength );
@@ -137,59 +158,42 @@ public readonly ref struct PasswordValidator
                                                                                                                  .ToArray();
 
 
-        public JsonData ToJsonData() => new(this);
-        public override string ToString() => ToJsonData()
-           .ToPrettyJson();
-    }
-
-
-
-    public sealed record JsonData : BaseRecord
-    {
-        public bool     CantStartWithNumber      { get; init; } = true;
-        public bool     CantStartWithSpecialChar { get; init; } = true;
-        public bool     RequireLowerCase         { get; init; } = true;
-        public bool     RequireNumber            { get; init; } = true;
-        public bool     RequireSpecialChar       { get; init; } = true;
-        public bool     RequireUpperCase         { get; init; } = true;
-        public int      MinLength                { get; init; }
-        public string   LowerCase                { get; init; } = new(Randoms.LowerCase);
-        public string   Numbers                  { get; init; } = new(Randoms.Numeric);
-        public string   SpecialChars             { get; init; } = new(Randoms.SpecialChars);
-        public string   UpperCase                { get; init; } = new(Randoms.UpperCase);
-        public string[] BlockedPasswords         { get; init; } = Array.Empty<string>();
-
-
-        public JsonData() { }
-        public JsonData( in Requirements requirements )
-        {
-            BlockedPasswords         = Requirements.Filter( requirements.BlockedPasswords.ToArray() );
-            MinLength                = requirements.MinLength;
-            RequireLowerCase         = requirements.RequireLowerCase;
-            LowerCase                = requirements.LowerCase.ToString();
-            RequireUpperCase         = requirements.RequireUpperCase;
-            UpperCase                = requirements.UpperCase.ToString();
-            CantStartWithNumber      = requirements.CantStartWithNumber;
-            RequireNumber            = requirements.RequireNumber;
-            Numbers                  = requirements.Numbers.ToString();
-            RequireSpecialChar       = requirements.RequireSpecialChar;
-            CantStartWithSpecialChar = requirements.CantStartWithSpecialChar;
-            SpecialChars             = requirements.SpecialChars.ToString();
-        }
-
-
-        public static async ValueTask<JsonData> FromFile()
+        public static async ValueTask<PasswordRequirements> FromFile()
         {
             if (File.DoesNotExist)
             {
-                Current ??= new JsonData();
+                Current ??= new PasswordRequirements();
                 await File.WriteAsync( Current.ToPrettyJson() );
             }
 
             Current ??= await File.ReadAsync()
-                                  .AsJson<JsonData>();
+                                  .AsJson<PasswordRequirements>();
 
             return Current;
         }
+        public override string ToString() => ToPasswordRequirements()
+           .ToPrettyJson();
     }
+}
+
+
+
+public sealed record PasswordRequirements : IOptions<PasswordRequirements>
+{
+    public bool                                         CantStartWithNumber      { get; init; } = true;
+    public bool                                         CantStartWithSpecialChar { get; init; } = true;
+    public bool                                         RequireLowerCase         { get; init; } = true;
+    public bool                                         RequireNumber            { get; init; } = true;
+    public bool                                         RequireSpecialChar       { get; init; } = true;
+    public bool                                         RequireUpperCase         { get; init; } = true;
+    public int                                          MinLength                { get; init; }
+    public string                                       LowerCase                { get; init; } = new(Randoms.LowerCase);
+    public string                                       Numbers                  { get; init; } = new(Randoms.Numeric);
+    public string                                       SpecialChars             { get; init; } = new(Randoms.SpecialChars);
+    public string                                       UpperCase                { get; init; } = new(Randoms.UpperCase);
+    public string[]                                     BlockedPasswords         { get; init; } = Array.Empty<string>();
+    PasswordRequirements IOptions<PasswordRequirements>.Value                    => this;
+
+
+    public PasswordRequirements() { }
 }
