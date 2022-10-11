@@ -5,11 +5,6 @@
 namespace Jakar.Database;
 
 
-public interface IUserStore : IUserStore<UserRecord> { }
-
-
-
-// public interface IUserStore : IUserEmailStore<UserRecord>, IUserPhoneNumberStore<UserRecord>, IUserPasswordStore<UserRecord>, IUserTwoFactorStore<UserRecord> { }
 
 
 

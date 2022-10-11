@@ -14,3 +14,11 @@ public interface IUserStore<TUserRecord> : IUserLoginStore<TUserRecord>,
                                            IUserAuthenticatorKeyStore<TUserRecord>,
                                            IUserTwoFactorRecoveryCodeStore<TUserRecord>,
                                            IUserPhoneNumberStore<TUserRecord> where TUserRecord : TableRecord<TUserRecord>, IUserRecord<TUserRecord> { }
+
+
+
+// public interface IUserStore : IUserEmailStore<UserRecord>, IUserPhoneNumberStore<UserRecord>, IUserPasswordStore<UserRecord>, IUserTwoFactorStore<UserRecord> { }
+
+
+
+public interface IUserStore : IUserStore<UserRecord> { }
