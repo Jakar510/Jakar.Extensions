@@ -2,6 +2,7 @@ using System.Net.Mail;
 using MailKit.Net.Smtp;
 using Microsoft.Extensions.Configuration;
 using MimeKit;
+using Org.BouncyCastle.Asn1.X509;
 using SmtpClient = MailKit.Net.Smtp.SmtpClient;
 
 
@@ -9,76 +10,48 @@ using SmtpClient = MailKit.Net.Smtp.SmtpClient;
 namespace Jakar.Database;
 
 
-public sealed class EmailSenderOptions : IOptions<EmailSenderOptions>
-{
-    private EmailSettings? _settings;
-
-
-    EmailSenderOptions IOptions<EmailSenderOptions>.Value    => this;
-    public EmailSettings?                           Settings { get; set; }
-    public MailboxAddress?                          Sender   { get; set; }
-
-    public string  DefaultSubject { get; set; } = string.Empty;
-    public string? VerifySubject  { get; set; }
-
-
-    public EmailSenderOptions() { }
-    public EmailSenderOptions( string defaultSubject ) => DefaultSubject = defaultSubject;
-
-
-    internal MailboxAddress GetSender() => Sender ??= Settings?.Address() ?? throw new InvalidOperationException( $"{nameof(Sender)} is not set" );
-    internal EmailSettings GetSettings( IConfiguration configuration ) => _settings ??= configuration.GetSection( nameof(EmailSettings) )
-                                                                                                     .Get<EmailSettings>();
-}
-
-
-
+[SuppressMessage( "ReSharper", "SuggestBaseTypeForParameterInConstructor" )]
 public class Emailer
 {
-    private readonly EmailSenderOptions _options;
-    private readonly IConfiguration     _configuration;
-    private readonly ILogger<Emailer>   _logger;
-    private readonly ITokenService      _tokenService;
-    private          EmailSettings      _Settings => _options.GetSettings( _configuration );
+    private readonly IConfiguration _configuration;
+    private readonly ITokenService  _tokenService;
+    private readonly Options        _options;
+    private readonly ILogger        _logger;
+    private          EmailSettings  _Settings => _options.GetSettings( _configuration );
 
 
-    public Emailer( IConfiguration configuration, ILogger<Emailer> logger, ITokenService tokenService, IOptions<EmailSenderOptions> options ) : this( configuration, logger, tokenService, options.Value ) { }
-    internal Emailer( IConfiguration configuration, ILogger<Emailer> logger, ITokenService tokenService, EmailSenderOptions options )
+    public Emailer( IConfiguration configuration, ILogger<Emailer> logger, ITokenService tokenService, IOptions<Options> options ) : this( configuration, tokenService, options.Value, logger ) { }
+    internal Emailer( IConfiguration configuration, ITokenService tokenService, Options options, ILogger logger )
     {
         _configuration = configuration;
         _tokenService  = tokenService;
         _logger        = logger;
         _options       = options;
     }
+    public static Emailer Create( IConfiguration configuration, ITokenService tokenService, Options options, ILogger logger ) => new(configuration, tokenService, options, logger);
 
 
-    public static Task SendMessageAsync( EmailSettings settings, MailboxAddress target, string subject, string body, CancellationToken token ) => SendMessageAsync( settings, target, Array.Empty<Attachment>(), subject, body, token );
-    public static async Task SendMessageAsync( EmailSettings settings, MailboxAddress target, IEnumerable<Attachment> attachments, string subject, string body, CancellationToken token )
-    {
-        MimeMessage message = await EmailBuilder.From( settings.Address() )
-                                                .To( target )
-                                                .WithAttachments( attachments )
-                                                .WithSubject( subject )
-                                                .WithBody( body )
-                                                .Create();
-
-        await SendMessageAsync( settings, message, token );
-    }
-    public static Task SendMessageAsync( EmailSettings settings, IEnumerable<MailboxAddress> targets, string subject, string body, CancellationToken token ) => SendMessageAsync( settings, targets, Array.Empty<Attachment>(), subject, body, token );
-    public static Task SendMessageAsync( EmailSettings settings, IEnumerable<MailboxAddress> targets, string subject, string body, CancellationToken token, params Attachment[] attachments ) =>
-        SendMessageAsync( settings, targets, attachments, subject, body, token );
-    public static async Task SendMessageAsync( EmailSettings settings, IEnumerable<MailboxAddress> targets, IEnumerable<Attachment> attachments, string subject, string body, CancellationToken token )
-    {
-        MimeMessage message = await EmailBuilder.From( settings.Address() )
-                                                .To( targets )
-                                                .WithAttachments( attachments )
-                                                .WithSubject( subject )
-                                                .WithBody( body )
-                                                .Create();
-
-        await SendMessageAsync( settings, message, token );
-    }
-    public static async Task SendMessageAsync( EmailSettings settings, MimeMessage message, CancellationToken token = default )
+    public static ValueTask SendAsync( EmailSettings settings, MailboxAddress target, string subject, string body, CancellationToken token ) => SendAsync( settings, target, Array.Empty<Attachment>(), subject, body, token );
+    public static ValueTask SendAsync( EmailSettings settings, MailboxAddress target, IEnumerable<Attachment> attachments, string subject, string body, CancellationToken token ) =>
+        SendAsync( settings,
+                   EmailBuilder.From( settings.Address() )
+                               .To( target )
+                               .WithAttachment( attachments )
+                               .WithSubject( subject )
+                               .WithBody( body ),
+                   token );
+    public static ValueTask SendAsync( EmailSettings settings, IEnumerable<MailboxAddress> targets, string subject, string body, CancellationToken token ) => SendAsync( settings, targets, Array.Empty<Attachment>(), subject, body, token );
+    public static ValueTask SendAsync( EmailSettings settings, IEnumerable<MailboxAddress> targets, string subject, string body, CancellationToken token, params Attachment[] attachments ) =>
+        SendAsync( settings, targets, attachments, subject, body, token );
+    public static ValueTask SendAsync( EmailSettings settings, IEnumerable<MailboxAddress> targets, IEnumerable<Attachment> attachments, string subject, string body, CancellationToken token ) =>
+        SendAsync( settings,
+                   EmailBuilder.From( settings.Address() )
+                               .To( targets )
+                               .WithAttachment( attachments )
+                               .WithSubject( subject )
+                               .WithBody( body ),
+                   token );
+    public static async ValueTask SendAsync( EmailSettings settings, MimeMessage message, CancellationToken token = default )
     {
         using var client = new SmtpClient();
         await client.ConnectAsync( settings.Site, settings.Port, settings.Options, token );
@@ -91,26 +64,24 @@ public class Emailer
         }
         finally { await client.DisconnectAsync( true, token ); }
     }
+    public static async ValueTask SendAsync( EmailSettings settings, EmailBuilder builder, CancellationToken token ) => await SendAsync( settings, await builder.Create(), token );
 
 
-    public Task SendEmailAsync( string? email, string subject, string body ) => SendEmailAsync( email, subject, body, default );
-    public async Task SendEmailAsync( string? email, string subject, string body, CancellationToken token, params Attachment[] attachments )
-    {
-        MailboxAddress address = MailboxAddress.Parse( email );
-        await SendEmailAsync( address, subject, body, token, attachments );
-    }
-    public async Task SendEmailAsync( MailboxAddress target, string subject, string body, CancellationToken token, params Attachment[] attachments )
+    private ValueTask SendAsync( MimeMessage message, CancellationToken token = default ) => SendAsync( _Settings,                          message, token );
+    public ValueTask SendAsync( string?      email,   string            subject, string body ) => SendAsync( MailboxAddress.Parse( email ), subject, body, default );
+    public ValueTask SendAsync( MailboxAddress target, string subject, string body, CancellationToken token, params Attachment[] attachments ) =>
+        SendAsync( EmailBuilder.From( _options.GetSender() )
+                               .To( target )
+                               .WithAttachment( attachments )
+                               .WithSubject( subject )
+                               .WithBody( body ),
+                   token );
+    public async ValueTask SendAsync( EmailBuilder builder, CancellationToken token )
     {
         try
         {
-            MimeMessage message = await EmailBuilder.From( _options.GetSender() )
-                                                    .To( target )
-                                                    .WithAttachments( attachments )
-                                                    .WithSubject( subject )
-                                                    .WithBody( body )
-                                                    .Create();
-
-            await SendMessageAsync( message, token );
+            MimeMessage message = await builder.Create();
+            await SendAsync( message, token );
         }
         catch (Exception e)
         {
@@ -118,18 +89,57 @@ public class Emailer
                               "{ClassName}.'{Caller}'",
                               GetType()
                                  .Name,
-                              nameof(SendEmailAsync) );
+                              nameof(SendAsync) );
         }
     }
 
 
-    private Task SendMessageAsync( MimeMessage message, CancellationToken token = default ) => SendMessageAsync( _Settings, message, token );
-
-
-    public async Task VerifyEmail( UserRecord user, CancellationToken token, params Attachment[] attachments )
+    public async Task VerifyEmail( UserRecord user, CancellationToken token )
     {
-        string header  = _options.VerifySubject ?? _options.DefaultSubject;
-        string content = await _tokenService.CreateContent( header, user, token );
-        await SendEmailAsync( user.Email, header, content, token, attachments );
+        string subject = _options.VerifySubject ?? _options.DefaultSubject;
+        string content = await _tokenService.CreateContent( subject, user, token );
+
+        EmailBuilder builder = EmailBuilder.From( _options.GetSender() )
+                                           .To( MailboxAddress.Parse( user.Email ) )
+                                           .WithSubject( subject )
+                                           .WithBody( content );
+
+        await SendAsync( builder, token );
+    }
+    public async Task VerifyHTMLEmail( UserRecord user, CancellationToken token )
+    {
+        string subject = _options.VerifySubject ?? _options.DefaultSubject;
+        string content = await _tokenService.CreateHTMLContent( subject, user, token );
+
+        EmailBuilder builder = EmailBuilder.From( _options.GetSender() )
+                                           .To( MailboxAddress.Parse( user.Email ) )
+                                           .WithSubject( subject )
+                                           .WithHTML( content );
+
+        await SendAsync( builder, token );
+    }
+
+
+
+    public sealed class Options : IOptions<Options>
+    {
+        private EmailSettings? _settings;
+
+
+        Options IOptions<Options>.Value    => this;
+        public EmailSettings?     Settings { get; set; }
+        public MailboxAddress?    Sender   { get; set; }
+
+        public string  DefaultSubject { get; set; } = string.Empty;
+        public string? VerifySubject  { get; set; }
+
+
+        public Options() { }
+        public Options( string defaultSubject ) => DefaultSubject = defaultSubject;
+
+
+        internal MailboxAddress GetSender() => Sender ??= Settings?.Address() ?? throw new InvalidOperationException( $"{nameof(Sender)} is not set" );
+        internal EmailSettings GetSettings( IConfiguration configuration ) => _settings ??= configuration.GetSection( nameof(EmailSettings) )
+                                                                                                         .Get<EmailSettings>();
     }
 }

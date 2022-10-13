@@ -10,7 +10,7 @@ namespace Jakar.Database;
 /// <summary>
 ///     <see href = "http://www.mimekit.net/docs/html/Creating-Messages.htm" />
 /// </summary>
-public sealed class EmailBuilder : EmailBuilder.IToSenderSyntax, EmailBuilder.IWithAttachmentsSyntax, EmailBuilder.IBodySyntax, EmailBuilder.ICreatorSyntax, EmailBuilder.ISubjectSyntax
+public sealed class EmailBuilder
 {
     private readonly List<Attachment>     _attachments = new();
     private readonly List<MailboxAddress> _recipients  = new();
@@ -25,17 +25,58 @@ public sealed class EmailBuilder : EmailBuilder.IToSenderSyntax, EmailBuilder.IW
     private EmailBuilder( MailboxAddress[] senders ) => _senders = senders;
 
 
-    public static IToSenderSyntax From( params MailboxAddress[] senders ) => new EmailBuilder( senders );
+    public static EmailBuilder From( params MailboxAddress[] senders ) => new EmailBuilder( senders );
 
 
-    public ICreatorSyntax WithBody( string body )
+    public EmailBuilder WithBody( string? body )
     {
         _body = body;
         return this;
     }
-    public ICreatorSyntax WithHTML( string html )
+    public EmailBuilder WithHTML( string? html )
     {
         _html = html;
+        return this;
+    }
+
+
+    public EmailBuilder WithSubject( string subject )
+    {
+        _subject = subject;
+        return this;
+    }
+
+
+    public EmailBuilder To( MailboxAddress recipient )
+    {
+        _recipients.Add( recipient );
+        return this;
+    }
+    public EmailBuilder To( IEnumerable<MailboxAddress> recipients )
+    {
+        _recipients.AddRange( recipients );
+        return this;
+    }
+    public EmailBuilder To( params MailboxAddress[] recipients )
+    {
+        _recipients.AddRange( recipients );
+        return this;
+    }
+
+
+    public EmailBuilder WithAttachment( Attachment attachment )
+    {
+        _attachments.Add( attachment );
+        return this;
+    }
+    public EmailBuilder WithAttachment( IEnumerable<Attachment> attachments )
+    {
+        _attachments.AddRange( attachments );
+        return this;
+    }
+    public EmailBuilder WithAttachment( params Attachment[] attachments )
+    {
+        _attachments.AddRange( attachments );
         return this;
     }
 
@@ -51,93 +92,5 @@ public sealed class EmailBuilder : EmailBuilder.IToSenderSyntax, EmailBuilder.IW
         foreach (Attachment element in _attachments) { await builder.Attachments.AddAsync( element.Name, element.ContentStream ); }
 
         return new MimeMessage( _senders, _recipients, _subject, builder.ToMessageBody() );
-    }
-
-
-    public IBodySyntax WithSubject( string subject )
-    {
-        _subject = subject;
-        return this;
-    }
-
-
-    public IWithAttachmentsSyntax To( MailboxAddress recipient )
-    {
-        _recipients.Add( recipient );
-        return this;
-    }
-    public IWithAttachmentsSyntax To( IEnumerable<MailboxAddress> recipients )
-    {
-        _recipients.AddRange( recipients );
-        return this;
-    }
-    public IWithAttachmentsSyntax To( params MailboxAddress[] recipients )
-    {
-        _recipients.AddRange( recipients );
-        return this;
-    }
-
-
-    public ISubjectSyntax WithAttachments( Attachment attachment )
-    {
-        _attachments.Add( attachment );
-        return this;
-    }
-    public ISubjectSyntax WithAttachments( IEnumerable<Attachment> attachments )
-    {
-        _attachments.AddRange( attachments );
-        return this;
-    }
-    public ISubjectSyntax WithAttachments( params Attachment[] attachments )
-    {
-        _attachments.AddRange( attachments );
-        return this;
-    }
-
-
-
-    public interface IFromSyntax
-    {
-        public IToSenderSyntax From( params MailboxAddress[] senders );
-    }
-
-
-
-    public interface IToSenderSyntax
-    {
-        public IWithAttachmentsSyntax To( MailboxAddress              recipient );
-        public IWithAttachmentsSyntax To( IEnumerable<MailboxAddress> recipients );
-        public IWithAttachmentsSyntax To( params MailboxAddress[]     recipients );
-    }
-
-
-
-    public interface IWithAttachmentsSyntax
-    {
-        public ISubjectSyntax WithAttachments( Attachment              attachment );
-        public ISubjectSyntax WithAttachments( IEnumerable<Attachment> attachments );
-        public ISubjectSyntax WithAttachments( params Attachment[]     attachments );
-    }
-
-
-
-    public interface ISubjectSyntax
-    {
-        public IBodySyntax WithSubject( string body );
-    }
-
-
-
-    public interface IBodySyntax
-    {
-        public ICreatorSyntax WithBody( string body );
-        public ICreatorSyntax WithHTML( string html );
-    }
-
-
-
-    public interface ICreatorSyntax
-    {
-        public ValueTask<MimeMessage> Create();
     }
 }

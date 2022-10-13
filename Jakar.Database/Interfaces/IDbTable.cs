@@ -4,7 +4,6 @@
 #pragma warning disable CS8424
 
 
-
 namespace Jakar.Database;
 
 

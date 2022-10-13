@@ -9,11 +9,6 @@ public sealed class RoleStore : IRoleStore<RoleRecord>
     public RoleStore( Database dbContext ) => _dbContext = dbContext;
 
 
-    public static WebApplicationBuilder Register( WebApplicationBuilder builder )
-    {
-        builder.AddScoped<IRoleStore<RoleRecord>, RoleStore>();
-        return builder;
-    }
     public void Dispose() { }
 
 

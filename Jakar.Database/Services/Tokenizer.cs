@@ -15,6 +15,7 @@ public interface ITokenService
 {
     public Task<Tokens> Authenticate( VerifyRequest users,  CancellationToken token                         = default );
     public Task<string> CreateContent( string       header, UserRecord        user, CancellationToken token = default );
+    public Task<string> CreateHTMLContent( string   header, UserRecord        user, CancellationToken token = default );
 }
 
 
@@ -33,6 +34,8 @@ public class Tokenizer<TName> : ITokenService where TName : IAppName
     private readonly IConfiguration       _configuration;
     internal virtual string               Domain      => _configuration.GetValue( nameof(Domain), _db.Domain );
     internal virtual SymmetricSecurityKey SecurityKey => new(Encoding.UTF8.GetBytes( _configuration["JWT"] ));
+    internal virtual string               Issuer      => _configuration.GetValue( nameof(Issuer),   typeof(TName).Namespace ?? string.Empty );
+    internal virtual string               Audience    => _configuration.GetValue( nameof(Audience), typeof(TName).Name );
 
 
     public Tokenizer( IConfiguration configuration, Database dataBase )
@@ -40,6 +43,9 @@ public class Tokenizer<TName> : ITokenService where TName : IAppName
         _configuration = configuration;
         _db            = dataBase;
     }
+
+
+    public virtual Task<Tokens> Authenticate( VerifyRequest request, CancellationToken token = default ) => _db.Authenticate( request, token );
 
 
     public virtual string GenerateAccessToken( IEnumerable<Claim> claims )
@@ -52,7 +58,7 @@ public class Tokenizer<TName> : ITokenService where TName : IAppName
     }
     public virtual ClaimsPrincipal GetPrincipalFromExpiredToken( string token )
     {
-        TokenValidationParameters tokenValidationParameters = _configuration.GetTokenValidationParameters<TName>( _configuration.GetValue( "Issuer", typeof(TName).Namespace ?? string.Empty ) );
+        TokenValidationParameters tokenValidationParameters = _configuration.GetTokenValidationParameters( Issuer, Audience );
         var                       tokenHandler              = new JwtSecurityTokenHandler();
         ClaimsPrincipal?          principal                 = tokenHandler.ValidateToken( token, tokenValidationParameters, out SecurityToken securityToken );
 
@@ -62,18 +68,24 @@ public class Tokenizer<TName> : ITokenService where TName : IAppName
     }
     public virtual string GetUrl( in Tokens result ) => $"{Domain}/Token/{result.AccessToken}";
     public virtual string CreateContent( in Tokens result, string header ) =>
+        @$"{header}
+
+{GetUrl( result )}";
+    public virtual string CreateHTMLContent( in Tokens result, string header ) =>
         @$"<h1> {header} </h1>
 <p>
 	<a href='{GetUrl( result )}'>Click to approve</a>
 </p>";
 
 
-    public virtual Task<Tokens> Authenticate( VerifyRequest request, CancellationToken token = default ) => _db.Authenticate( request, token );
-
-
     public virtual async Task<string> CreateContent( string header, UserRecord user, CancellationToken token = default )
     {
         Tokens result = await _db.GetJwtToken( user, token );
         return CreateContent( result, header );
+    }
+    public virtual async Task<string> CreateHTMLContent( string header, UserRecord user, CancellationToken token = default )
+    {
+        Tokens result = await _db.GetJwtToken( user, token );
+        return CreateHTMLContent( result, header );
     }
 }

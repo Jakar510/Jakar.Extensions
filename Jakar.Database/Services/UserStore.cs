@@ -13,27 +13,6 @@ public sealed class UserStore : IUserStore
     public UserStore( Database dbContext ) => _dbContext = dbContext;
 
 
-    public static WebApplicationBuilder Register( WebApplicationBuilder builder )
-    {
-        builder.Services.AddIdentity<UserRecord, RoleRecord>()
-               .AddRoleManager<RoleStore>()
-               .AddUserStore<UserStore>()
-               .AddPasswordValidator<PwdValidator>()
-               .AddUserValidator<UserValidator>();
-
-        builder.AddScoped<IUserStore, UserStore>();
-        builder.AddScoped<IUserLoginStore<UserRecord>, UserStore>();
-        builder.AddScoped<IUserClaimStore<UserRecord>, UserStore>();
-        builder.AddScoped<IUserPasswordStore<UserRecord>, UserStore>();
-        builder.AddScoped<IUserSecurityStampStore<UserRecord>, UserStore>();
-        builder.AddScoped<IUserTwoFactorStore<UserRecord>, UserStore>();
-        builder.AddScoped<IUserEmailStore<UserRecord>, UserStore>();
-        builder.AddScoped<IUserLockoutStore<UserRecord>, UserStore>();
-        builder.AddScoped<IUserAuthenticatorKeyStore<UserRecord>, UserStore>();
-        builder.AddScoped<IUserTwoFactorRecoveryCodeStore<UserRecord>, UserStore>();
-        builder.AddScoped<IUserPhoneNumberStore<UserRecord>, UserStore>();
-        return builder;
-    }
     public void Dispose() { }
 
 

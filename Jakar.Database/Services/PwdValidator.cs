@@ -11,22 +11,6 @@ public sealed class PwdValidator : IPasswordValidator<UserRecord>
     public PwdValidator( IOptions<PasswordRequirements> options ) { PasswordValidator.Current = _options = options.Value; }
 
 
-    public static WebApplicationBuilder Register( WebApplicationBuilder builder )
-    {
-        builder.AddOptions<PasswordRequirements>();
-        builder.AddScoped<IPasswordValidator<UserRecord>, PwdValidator>();
-        return builder;
-    }
-    public static WebApplicationBuilder Register( WebApplicationBuilder builder, Action<PasswordRequirements> configure )
-    {
-        builder.AddOptions<PasswordRequirements>()
-               .Configure( configure );
-
-        builder.AddScoped<IPasswordValidator<UserRecord>, PwdValidator>();
-        return builder;
-    }
-
-
     public IdentityResult Validate( in ReadOnlySpan<char> password )
     {
         return PasswordValidator.Check( password, _options )
