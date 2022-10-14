@@ -8,11 +8,12 @@ namespace Jakar.Database;
 [Table( "Roles" )]
 public sealed record RoleRecord : TableRecord<RoleRecord>
 {
+    [MaxLength( 4096 )]
     public string ConcurrencyStamp { get; init; } = Guid.NewGuid()
                                                         .ToString();
 
-    public string Name           { get; init; } = string.Empty;
-    public string NormalizedName { get; init; } = string.Empty;
+    [MaxLength( 1024 )] public string Name           { get; init; } = string.Empty;
+    [MaxLength( 1024 )] public string NormalizedName { get; init; } = string.Empty;
 
 
     public RoleRecord() { }
