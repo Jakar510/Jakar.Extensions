@@ -484,6 +484,8 @@ public sealed record UserRecord : TableRecord<UserRecord>, IUserRecord<UserRecor
         hashCode.Add( Company );
         return hashCode.ToHashCode();
     }
+
+
     public async IAsyncEnumerable<RoleRecord> GetRoles( DbConnection connection, DbTransaction? transaction, Database db, [EnumeratorCancellation] CancellationToken token = default )
     {
         await foreach (UserRoleRecord record in db.UserRoles.Where( connection, transaction, true, UserRoleRecord.GetDynamicParameters( this ), token ))
@@ -492,7 +494,6 @@ public sealed record UserRecord : TableRecord<UserRecord>, IUserRecord<UserRecor
             if (role is not null) { yield return role; }
         }
     }
-
     public async ValueTask<List<Claim>> GetUserClaims( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token )
     {
         List<Claim> claims = GetUserClaims();
@@ -505,6 +506,7 @@ public sealed record UserRecord : TableRecord<UserRecord>, IUserRecord<UserRecor
         {
             new(LoginProvider, ProviderKey, ProviderDisplayName)
         };
+
 
     public bool HasPassword() => !string.IsNullOrWhiteSpace( PasswordHash );
 
@@ -640,9 +642,9 @@ public sealed record UserRecord : TableRecord<UserRecord>, IUserRecord<UserRecor
                                           };
 
 
-    public async ValueTask<UserRecord?> GetBoss( DbConnection connection, DbTransaction? transaction, MsSqlDbTable<UserRecord> table, CancellationToken token ) => EscalateTo.HasValue
-                                                                                                                                                                       ? await table.Get( connection, transaction, EscalateTo.Value, token )
-                                                                                                                                                                       : default;
+    public async ValueTask<UserRecord?> GetBoss( DbConnection connection, DbTransaction? transaction, DbTableBase<UserRecord> table, CancellationToken token ) => EscalateTo.HasValue
+                                                                                                                                                                      ? await table.Get( connection, transaction, EscalateTo.Value, token )
+                                                                                                                                                                      : default;
 
 
     public UserRecord Update( IUserData value )

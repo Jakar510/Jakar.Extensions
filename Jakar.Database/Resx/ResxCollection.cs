@@ -34,8 +34,8 @@ public sealed class ResxCollection : IResxCollection
 
 
     public ValueTask Init( IResxProvider  provider, CancellationToken          token                          = default ) => Init( provider, provider.Resx, token );
-    public ValueTask Init( IConnectableDb db,       MsSqlDbTable<ResxRowTable> table, CancellationToken token = default ) => db.Call( Init, table, token );
-    public async ValueTask Init( DbConnection connection, DbTransaction? transaction, MsSqlDbTable<ResxRowTable> table, CancellationToken token = default )
+    public ValueTask Init( IConnectableDb db, DbTableBase<ResxRowTable> table, CancellationToken token = default ) => db.Call( Init, table, token );
+    public async ValueTask Init( DbConnection connection, DbTransaction? transaction, DbTableBase<ResxRowTable> table, CancellationToken token = default )
     {
         _rows.Clear();
         List<ResxRowTable> records = await table.All( connection, transaction, token );

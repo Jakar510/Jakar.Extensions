@@ -4,7 +4,7 @@
 namespace Jakar.Database.Implementations;
 
 
-public sealed class MsSqlDbTable<TRecord> : DbTableBase<TRecord> where TRecord : TableRecord<TRecord>
+public class MsSqlDbTable<TRecord> : DbTableBase<TRecord> where TRecord : TableRecord<TRecord>
 {
     public MsSqlDbTable( IConnectableDb database ) : base( database ) { }
 }

@@ -10,5 +10,5 @@ namespace Jakar.Database;
 
 public interface IResxProvider : IConnectableDb
 {
-    public MsSqlDbTable<ResxRowTable> Resx { get; }
+    public DbTableBase<ResxRowTable> Resx { get; }
 }

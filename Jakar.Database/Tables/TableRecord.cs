@@ -79,8 +79,8 @@ public abstract record TableRecord<TRecord> : BaseCollectionsRecord<TRecord, lon
     public override int GetHashCode() => HashCode.Combine( base.GetHashCode(), _createdBy, _lastModified, UserID, DateCreated );
 
 
-    public async ValueTask<UserRecord?> GetUser( DbConnection connection, DbTransaction? transaction, MsSqlDbTable<UserRecord> table, CancellationToken token ) => await table.Get( connection, transaction, true, GetDynamicParameters( this ), token );
-    public async ValueTask<UserRecord?> GetUserWhoCreated( DbConnection connection, DbTransaction? transaction, MsSqlDbTable<UserRecord> table, CancellationToken token ) => await table.Get( connection, transaction, CreatedBy, token );
+    public async ValueTask<UserRecord?> GetUser( DbConnection connection, DbTransaction? transaction, DbTableBase<UserRecord> table, CancellationToken token ) => await table.Get( connection, transaction, true, GetDynamicParameters( this ), token );
+    public async ValueTask<UserRecord?> GetUserWhoCreated( DbConnection connection, DbTransaction? transaction, DbTableBase<UserRecord> table, CancellationToken token ) => await table.Get( connection, transaction, CreatedBy, token );
 
 
     public TRecord NewID( in long id ) => (TRecord)(this with
