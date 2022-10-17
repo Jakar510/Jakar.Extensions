@@ -13,7 +13,6 @@ public class BarometerReader
     public string?     Text  { get; protected set; }
 
     public BarometerReader() => Barometer.ReadingChanged += Barometer_ReadingChanged;
-    ~BarometerReader() => Barometer.ReadingChanged -= Barometer_ReadingChanged;
 
     private void Barometer_ReadingChanged( object sender, BarometerChangedEventArgs e )
     {
@@ -21,6 +20,7 @@ public class BarometerReader
         Text  = Data.PressureInHectopascals.ToString( CultureInfo.CurrentCulture );
         Value = Data.PressureInHectopascals;
     }
+    ~BarometerReader() => Barometer.ReadingChanged -= Barometer_ReadingChanged;
 
     public void Start() => Start( SensorSpeed.UI );
 

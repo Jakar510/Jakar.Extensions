@@ -39,6 +39,31 @@ public static class Posts
     }
 
 
+    // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+    public static async Task<WebResponse> Post( this Uri url, MultipartFormDataContent payload, HeaderCollection? headers, CancellationToken token, int? timeout = default )
+    {
+        HttpWebRequest req = WebRequest.CreateHttp( url );
+        if (timeout.HasValue) { req.Timeout = timeout.Value; }
+
+        req.Method = "POST";
+        req.SetHeaders( payload );
+        req.SetHeaders( headers );
+
+        await using (Stream stream = await req.GetRequestStreamAsync()
+                                              .ConfigureAwait( false ))
+        {
+            await payload.CopyToAsync( stream )
+                         .ConfigureAwait( false ); // Push it out there
+        }
+
+
+        return await req.GetResponseAsync( token )
+                        .ConfigureAwait( false );
+    }
+
+
     public static async Task<string> TryPost( this Uri url, string payload, HeaderCollection? headers = default, Encoding? encoding = default, CancellationToken token = default )
     {
         encoding ??= Encoding.Default;
@@ -161,31 +186,6 @@ public static class Posts
 
             throw;
         }
-    }
-
-
-    // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-
-    public static async Task<WebResponse> Post( this Uri url, MultipartFormDataContent payload, HeaderCollection? headers, CancellationToken token, int? timeout = default )
-    {
-        HttpWebRequest req = WebRequest.CreateHttp( url );
-        if (timeout.HasValue) { req.Timeout = timeout.Value; }
-
-        req.Method = "POST";
-        req.SetHeaders( payload );
-        req.SetHeaders( headers );
-
-        await using (Stream stream = await req.GetRequestStreamAsync()
-                                              .ConfigureAwait( false ))
-        {
-            await payload.CopyToAsync( stream )
-                         .ConfigureAwait( false ); // Push it out there
-        }
-
-
-        return await req.GetResponseAsync( token )
-                        .ConfigureAwait( false );
     }
 
     public static async Task<TResult> TryPost<TResult>( this Uri url, Func<WebResponse, Encoding, Task<TResult>> handler, MultipartFormDataContent payload, Encoding encoding, HeaderCollection? headers = default, CancellationToken token = default )

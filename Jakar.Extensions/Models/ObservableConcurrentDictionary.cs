@@ -100,8 +100,6 @@ public class ObservableConcurrentDictionary<TKey, TValue> : CollectionAlerts<Key
     /// </exception>
     public ObservableConcurrentDictionary( int concurrencyLevel, int capacity, IEqualityComparer<TKey> comparer ) : this( new ConcurrentDictionary<TKey, TValue>( concurrencyLevel, capacity, comparer ) ) { }
 
-    public bool ContainsValue( TValue value ) => _dictionary.Values.Contains( value );
-
 
     public void Add( params KeyValuePair<TKey, TValue>[] pairs )
     {
@@ -111,6 +109,8 @@ public class ObservableConcurrentDictionary<TKey, TValue> : CollectionAlerts<Key
     {
         foreach (KeyValuePair<TKey, TValue> pair in pairs) { Add( pair ); }
     }
+
+    public bool ContainsValue( TValue              value ) => _dictionary.Values.Contains( value );
     public bool TryAdd( KeyValuePair<TKey, TValue> pair ) => TryAdd( pair.Key, pair.Value );
     public bool TryAdd( TKey key, TValue value )
     {

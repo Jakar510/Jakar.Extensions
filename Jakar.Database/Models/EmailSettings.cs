@@ -22,10 +22,10 @@ public sealed record EmailSettings : ICredentials
 
 
     public EmailSettings() { }
-    public static EmailSettings Create( IConfiguration configuration ) => configuration.GetSection( nameof(EmailSettings) )
-                                                                                       .Get<EmailSettings>();
 
 
     public MailboxAddress Address() => MailboxAddress.Parse( UserName );
+    public static EmailSettings Create( IConfiguration configuration ) => configuration.GetSection( nameof(EmailSettings) )
+                                                                                       .Get<EmailSettings>();
     public NetworkCredential? GetCredential( Uri uri, string authType ) => new(UserName, Password, Site);
 }

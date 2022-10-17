@@ -9,159 +9,34 @@
 [SuppressMessage( "ReSharper", "UnusedMethodReturnValue.Global" )]
 public static partial class WebBuilder
 {
-    /// <summary>
-    ///     Adds a transient service of the type specified in
-    ///     <typeparamref name = "TService" />
-    ///     to the
-    ///     specified
-    ///     <see cref = "WebApplicationBuilder" />
-    ///     .
-    /// </summary>
-    /// <typeparam name = "TService" > The type of the service to add. </typeparam>
-    /// <param name = "builder" >
-    ///     The
-    ///     <see cref = "WebApplicationBuilder" />
-    ///     to add the service to.
-    /// </param>
-    /// <returns> A reference to this instance after the operation has completed. </returns>
-    /// <seealso cref = "ServiceLifetime.Transient" />
-    public static WebApplicationBuilder AddTransient<TService>( this WebApplicationBuilder builder ) where TService : class => builder.AddTransient( typeof(TService) );
+    public static WebApplicationBuilder AddHostedService<THostedService>( this WebApplicationBuilder builder, THostedService service ) where THostedService : class, IHostedService
+    {
+        builder.AddSingleton( service );
+        builder.Services.AddHostedService( provider => service );
+        return builder;
+    }
 
-    /// <summary>
-    ///     Adds a transient service of the type specified in
-    ///     <typeparamref name = "TService" />
-    ///     with a
-    ///     factory specified in
-    ///     <paramref name = "implementationFactory" />
-    ///     to the
-    ///     specified
-    ///     <see cref = "WebApplicationBuilder" />
-    ///     .
-    /// </summary>
-    /// <typeparam name = "TService" > The type of the service to add. </typeparam>
-    /// <param name = "builder" >
-    ///     The
-    ///     <see cref = "WebApplicationBuilder" />
-    ///     to add the service to.
-    /// </param>
-    /// <param name = "implementationFactory" > The factory that creates the service. </param>
-    /// <returns> A reference to this instance after the operation has completed. </returns>
-    /// <seealso cref = "ServiceLifetime.Transient" />
-    public static WebApplicationBuilder AddTransient<TService>( this WebApplicationBuilder builder, Func<IServiceProvider, TService> implementationFactory ) where TService : class => builder.AddTransient( typeof(TService), implementationFactory );
 
-    /// <summary>
-    ///     Adds a transient service of the type specified in
-    ///     <typeparamref name = "TService" />
-    ///     with an
-    ///     implementation type specified in
-    ///     <typeparamref name = "TImplementation" />
-    ///     to the
-    ///     specified
-    ///     <see cref = "WebApplicationBuilder" />
-    ///     .
-    /// </summary>
-    /// <typeparam name = "TService" > The type of the service to add. </typeparam>
-    /// <typeparam name = "TImplementation" > The type of the implementation to use. </typeparam>
-    /// <param name = "builder" >
-    ///     The
-    ///     <see cref = "WebApplicationBuilder" />
-    ///     to add the service to.
-    /// </param>
-    /// <returns> A reference to this instance after the operation has completed. </returns>
-    /// <seealso cref = "ServiceLifetime.Transient" />
-    public static WebApplicationBuilder AddTransient<TService, TImplementation>( this WebApplicationBuilder builder ) where TService : class
-                                                                                                                      where TImplementation : class, TService =>
-        builder.AddTransient( typeof(TService), typeof(TImplementation) );
+    public static WebApplicationBuilder AddHostedService<THostedService>( this WebApplicationBuilder builder ) where THostedService : class, IHostedService =>
+        builder.AddHostedService( provider => provider.GetRequiredService<THostedService>() );
+    public static WebApplicationBuilder AddHostedService<THostedService>( this WebApplicationBuilder builder, Func<IServiceProvider, THostedService> func ) where THostedService : class, IHostedService
+    {
+        builder.AddSingleton<THostedService>();
+        builder.Services.AddHostedService( func );
+        return builder;
+    }
 
-    /// <summary>
-    ///     Adds a transient service of the type specified in
-    ///     <typeparamref name = "TService" />
-    ///     with an
-    ///     implementation type specified in
-    ///     <typeparamref name = "TImplementation" />
-    ///     using the
-    ///     factory specified in
-    ///     <paramref name = "implementationFactory" />
-    ///     to the
-    ///     specified
-    ///     <see cref = "WebApplicationBuilder" />
-    ///     .
-    /// </summary>
-    /// <typeparam name = "TService" > The type of the service to add. </typeparam>
-    /// <typeparam name = "TImplementation" > The type of the implementation to use. </typeparam>
-    /// <param name = "builder" >
-    ///     The
-    ///     <see cref = "WebApplicationBuilder" />
-    ///     to add the service to.
-    /// </param>
-    /// <param name = "implementationFactory" > The factory that creates the service. </param>
-    /// <returns> A reference to this instance after the operation has completed. </returns>
-    /// <seealso cref = "ServiceLifetime.Transient" />
-    public static WebApplicationBuilder AddTransient<TService, TImplementation>( this WebApplicationBuilder builder, Func<IServiceProvider, TImplementation> implementationFactory ) where TService : class
-                                                                                                                                                                                     where TImplementation : class, TService =>
-        builder.AddTransient( typeof(TService), implementationFactory );
 
-    /// <summary>
-    ///     Adds a transient service of the type specified in
-    ///     <paramref name = "serviceType" />
-    ///     to the
-    ///     specified
-    ///     <see cref = "WebApplicationBuilder" />
-    ///     .
-    /// </summary>
-    /// <param name = "builder" >
-    ///     The
-    ///     <see cref = "WebApplicationBuilder" />
-    ///     to add the service to.
-    /// </param>
-    /// <param name = "serviceType" > The type of the service to register and the implementation to use. </param>
-    /// <returns> A reference to this instance after the operation has completed. </returns>
-    /// <seealso cref = "ServiceLifetime.Transient" />
-    public static WebApplicationBuilder AddTransient( this WebApplicationBuilder builder, Type serviceType ) => builder.AddTransient( serviceType, serviceType );
-
-    /// <summary>
-    ///     Adds a transient service of the type specified in
-    ///     <paramref name = "serviceType" />
-    ///     with an
-    ///     implementation of the type specified in
-    ///     <paramref name = "implementationType" />
-    ///     to the
-    ///     specified
-    ///     <see cref = "WebApplicationBuilder" />
-    ///     .
-    /// </summary>
-    /// <param name = "builder" >
-    ///     The
-    ///     <see cref = "WebApplicationBuilder" />
-    ///     to add the service to.
-    /// </param>
-    /// <param name = "serviceType" > The type of the service to register. </param>
-    /// <param name = "implementationType" > The implementation type of the service. </param>
-    /// <returns> A reference to this instance after the operation has completed. </returns>
-    /// <seealso cref = "ServiceLifetime.Transient" />
-    public static WebApplicationBuilder AddTransient( this WebApplicationBuilder builder, Type serviceType, Type implementationType ) => TryAdd( builder, serviceType, implementationType, ServiceLifetime.Transient );
-
-    /// <summary>
-    ///     Adds a transient service of the type specified in
-    ///     <paramref name = "serviceType" />
-    ///     with a
-    ///     factory specified in
-    ///     <paramref name = "implementationFactory" />
-    ///     to the
-    ///     specified
-    ///     <see cref = "WebApplicationBuilder" />
-    ///     .
-    /// </summary>
-    /// <param name = "builder" >
-    ///     The
-    ///     <see cref = "WebApplicationBuilder" />
-    ///     to add the service to.
-    /// </param>
-    /// <param name = "serviceType" > The type of the service to register. </param>
-    /// <param name = "implementationFactory" > The factory that creates the service. </param>
-    /// <returns> A reference to this instance after the operation has completed. </returns>
-    /// <seealso cref = "ServiceLifetime.Transient" />
-    public static WebApplicationBuilder AddTransient( this WebApplicationBuilder builder, Type serviceType, Func<IServiceProvider, object> implementationFactory ) => TryAdd( builder, serviceType, implementationFactory, ServiceLifetime.Transient );
+    public static WebApplicationBuilder AddHostedService<TService, THostedService>( this WebApplicationBuilder builder ) where TService : class, IHostedService
+                                                                                                                         where THostedService : class, TService =>
+        builder.AddHostedService<TService, THostedService>( provider => provider.GetRequiredService<TService>() );
+    public static WebApplicationBuilder AddHostedService<TService, THostedService>( this WebApplicationBuilder builder, Func<IServiceProvider, TService> func ) where TService : class, IHostedService
+                                                                                                                                                                where THostedService : class, TService
+    {
+        builder.AddSingleton<TService, THostedService>();
+        builder.Services.AddHostedService( func );
+        return builder;
+    }
 
 
     /// <summary>
@@ -519,6 +394,160 @@ public static partial class WebBuilder
     /// <returns> A reference to this instance after the operation has completed. </returns>
     /// <seealso cref = "ServiceLifetime.Singleton" />
     public static WebApplicationBuilder AddSingleton( this WebApplicationBuilder builder, Type serviceType, Func<IServiceProvider, object> implementationFactory ) => TryAdd( builder, serviceType, implementationFactory, ServiceLifetime.Singleton );
+    /// <summary>
+    ///     Adds a transient service of the type specified in
+    ///     <typeparamref name = "TService" />
+    ///     to the
+    ///     specified
+    ///     <see cref = "WebApplicationBuilder" />
+    ///     .
+    /// </summary>
+    /// <typeparam name = "TService" > The type of the service to add. </typeparam>
+    /// <param name = "builder" >
+    ///     The
+    ///     <see cref = "WebApplicationBuilder" />
+    ///     to add the service to.
+    /// </param>
+    /// <returns> A reference to this instance after the operation has completed. </returns>
+    /// <seealso cref = "ServiceLifetime.Transient" />
+    public static WebApplicationBuilder AddTransient<TService>( this WebApplicationBuilder builder ) where TService : class => builder.AddTransient( typeof(TService) );
+
+    /// <summary>
+    ///     Adds a transient service of the type specified in
+    ///     <typeparamref name = "TService" />
+    ///     with a
+    ///     factory specified in
+    ///     <paramref name = "implementationFactory" />
+    ///     to the
+    ///     specified
+    ///     <see cref = "WebApplicationBuilder" />
+    ///     .
+    /// </summary>
+    /// <typeparam name = "TService" > The type of the service to add. </typeparam>
+    /// <param name = "builder" >
+    ///     The
+    ///     <see cref = "WebApplicationBuilder" />
+    ///     to add the service to.
+    /// </param>
+    /// <param name = "implementationFactory" > The factory that creates the service. </param>
+    /// <returns> A reference to this instance after the operation has completed. </returns>
+    /// <seealso cref = "ServiceLifetime.Transient" />
+    public static WebApplicationBuilder AddTransient<TService>( this WebApplicationBuilder builder, Func<IServiceProvider, TService> implementationFactory ) where TService : class => builder.AddTransient( typeof(TService), implementationFactory );
+
+    /// <summary>
+    ///     Adds a transient service of the type specified in
+    ///     <typeparamref name = "TService" />
+    ///     with an
+    ///     implementation type specified in
+    ///     <typeparamref name = "TImplementation" />
+    ///     to the
+    ///     specified
+    ///     <see cref = "WebApplicationBuilder" />
+    ///     .
+    /// </summary>
+    /// <typeparam name = "TService" > The type of the service to add. </typeparam>
+    /// <typeparam name = "TImplementation" > The type of the implementation to use. </typeparam>
+    /// <param name = "builder" >
+    ///     The
+    ///     <see cref = "WebApplicationBuilder" />
+    ///     to add the service to.
+    /// </param>
+    /// <returns> A reference to this instance after the operation has completed. </returns>
+    /// <seealso cref = "ServiceLifetime.Transient" />
+    public static WebApplicationBuilder AddTransient<TService, TImplementation>( this WebApplicationBuilder builder ) where TService : class
+                                                                                                                      where TImplementation : class, TService =>
+        builder.AddTransient( typeof(TService), typeof(TImplementation) );
+
+    /// <summary>
+    ///     Adds a transient service of the type specified in
+    ///     <typeparamref name = "TService" />
+    ///     with an
+    ///     implementation type specified in
+    ///     <typeparamref name = "TImplementation" />
+    ///     using the
+    ///     factory specified in
+    ///     <paramref name = "implementationFactory" />
+    ///     to the
+    ///     specified
+    ///     <see cref = "WebApplicationBuilder" />
+    ///     .
+    /// </summary>
+    /// <typeparam name = "TService" > The type of the service to add. </typeparam>
+    /// <typeparam name = "TImplementation" > The type of the implementation to use. </typeparam>
+    /// <param name = "builder" >
+    ///     The
+    ///     <see cref = "WebApplicationBuilder" />
+    ///     to add the service to.
+    /// </param>
+    /// <param name = "implementationFactory" > The factory that creates the service. </param>
+    /// <returns> A reference to this instance after the operation has completed. </returns>
+    /// <seealso cref = "ServiceLifetime.Transient" />
+    public static WebApplicationBuilder AddTransient<TService, TImplementation>( this WebApplicationBuilder builder, Func<IServiceProvider, TImplementation> implementationFactory ) where TService : class
+                                                                                                                                                                                     where TImplementation : class, TService =>
+        builder.AddTransient( typeof(TService), implementationFactory );
+
+    /// <summary>
+    ///     Adds a transient service of the type specified in
+    ///     <paramref name = "serviceType" />
+    ///     to the
+    ///     specified
+    ///     <see cref = "WebApplicationBuilder" />
+    ///     .
+    /// </summary>
+    /// <param name = "builder" >
+    ///     The
+    ///     <see cref = "WebApplicationBuilder" />
+    ///     to add the service to.
+    /// </param>
+    /// <param name = "serviceType" > The type of the service to register and the implementation to use. </param>
+    /// <returns> A reference to this instance after the operation has completed. </returns>
+    /// <seealso cref = "ServiceLifetime.Transient" />
+    public static WebApplicationBuilder AddTransient( this WebApplicationBuilder builder, Type serviceType ) => builder.AddTransient( serviceType, serviceType );
+
+    /// <summary>
+    ///     Adds a transient service of the type specified in
+    ///     <paramref name = "serviceType" />
+    ///     with an
+    ///     implementation of the type specified in
+    ///     <paramref name = "implementationType" />
+    ///     to the
+    ///     specified
+    ///     <see cref = "WebApplicationBuilder" />
+    ///     .
+    /// </summary>
+    /// <param name = "builder" >
+    ///     The
+    ///     <see cref = "WebApplicationBuilder" />
+    ///     to add the service to.
+    /// </param>
+    /// <param name = "serviceType" > The type of the service to register. </param>
+    /// <param name = "implementationType" > The implementation type of the service. </param>
+    /// <returns> A reference to this instance after the operation has completed. </returns>
+    /// <seealso cref = "ServiceLifetime.Transient" />
+    public static WebApplicationBuilder AddTransient( this WebApplicationBuilder builder, Type serviceType, Type implementationType ) => TryAdd( builder, serviceType, implementationType, ServiceLifetime.Transient );
+
+    /// <summary>
+    ///     Adds a transient service of the type specified in
+    ///     <paramref name = "serviceType" />
+    ///     with a
+    ///     factory specified in
+    ///     <paramref name = "implementationFactory" />
+    ///     to the
+    ///     specified
+    ///     <see cref = "WebApplicationBuilder" />
+    ///     .
+    /// </summary>
+    /// <param name = "builder" >
+    ///     The
+    ///     <see cref = "WebApplicationBuilder" />
+    ///     to add the service to.
+    /// </param>
+    /// <param name = "serviceType" > The type of the service to register. </param>
+    /// <param name = "implementationFactory" > The factory that creates the service. </param>
+    /// <returns> A reference to this instance after the operation has completed. </returns>
+    /// <seealso cref = "ServiceLifetime.Transient" />
+    public static WebApplicationBuilder AddTransient( this WebApplicationBuilder builder, Type serviceType, Func<IServiceProvider, object> implementationFactory ) => TryAdd( builder, serviceType, implementationFactory, ServiceLifetime.Transient );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool Contains( this WebApplicationBuilder builder, Type serviceType ) => builder.Services.Any( x => x.ServiceType == serviceType );
 
 
     public static WebApplicationBuilder TryAdd( WebApplicationBuilder builder, Type serviceType, Type implementationType, in ServiceLifetime lifetime )
@@ -543,36 +572,5 @@ public static partial class WebBuilder
 
         builder.Services.Add( descriptor );
         return true;
-    }
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool Contains( this WebApplicationBuilder builder, Type serviceType ) => builder.Services.Any( x => x.ServiceType == serviceType );
-
-
-    public static WebApplicationBuilder AddHostedService<THostedService>( this WebApplicationBuilder builder, THostedService service ) where THostedService : class, IHostedService
-    {
-        builder.AddSingleton( service );
-        builder.Services.AddHostedService( provider => service );
-        return builder;
-    }
-
-
-    public static WebApplicationBuilder AddHostedService<THostedService>( this WebApplicationBuilder builder ) where THostedService : class, IHostedService =>
-        builder.AddHostedService( provider => provider.GetRequiredService<THostedService>() );
-    public static WebApplicationBuilder AddHostedService<THostedService>( this WebApplicationBuilder builder, Func<IServiceProvider, THostedService> func ) where THostedService : class, IHostedService
-    {
-        builder.AddSingleton<THostedService>();
-        builder.Services.AddHostedService( func );
-        return builder;
-    }
-
-
-    public static WebApplicationBuilder AddHostedService<TService, THostedService>( this WebApplicationBuilder builder ) where TService : class, IHostedService
-                                                                                                                         where THostedService : class, TService =>
-        builder.AddHostedService<TService, THostedService>( provider => provider.GetRequiredService<TService>() );
-    public static WebApplicationBuilder AddHostedService<TService, THostedService>( this WebApplicationBuilder builder, Func<IServiceProvider, TService> func ) where TService : class, IHostedService
-                                                                                                                                                                where THostedService : class, TService
-    {
-        builder.AddSingleton<TService, THostedService>();
-        builder.Services.AddHostedService( func );
-        return builder;
     }
 }

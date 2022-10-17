@@ -18,6 +18,9 @@ public abstract class Migration<TRecord> : Migration where TRecord : class
     protected Migration( string currentScheme ) => CurrentScheme = currentScheme;
 
 
+    protected IAlterTableAddColumnOrAlterColumnOrSchemaOrDescriptionSyntax AlterTable() => Alter.Table( TableName );
+
+
     protected ISchemaSchemaSyntax CheckSchema()
     {
         ISchemaSchemaSyntax schema = Schema.Schema( CurrentScheme );
@@ -33,6 +36,21 @@ public abstract class Migration<TRecord> : Migration where TRecord : class
 
     protected ICreateTableWithColumnSyntax CreateTable() => Create.Table( TableName )
                                                                   .InSchema( CurrentScheme );
+
+
+    protected void DeleteTable() => Delete.Table( TableName )
+                                          .InSchema( CurrentScheme );
+
+
+    protected void RenameTable( string name ) => Rename.Table( TableName )
+                                                       .InSchema( CurrentScheme )
+                                                       .To( name )
+                                                       .InSchema( CurrentScheme );
+    protected IInsertDataSyntax StartIdentityInsert() => Insert.IntoTable( TableName )
+                                                               .WithIdentityInsert();
+
+
+    protected IInsertDataSyntax StartInsert() => Insert.IntoTable( TableName );
 
 
     protected void UniqueConstraint( string columnName ) => Create.UniqueConstraint()
@@ -55,26 +73,8 @@ public abstract class Migration<TRecord> : Migration where TRecord : class
                                                                                           .Columns( columnNames );
 
 
-    protected IAlterTableAddColumnOrAlterColumnOrSchemaOrDescriptionSyntax AlterTable() => Alter.Table( TableName );
-
-
-    protected void DeleteTable() => Delete.Table( TableName )
-                                          .InSchema( CurrentScheme );
-
-
     /// <param name = "dataAsAnonymousType" > The columns and values to be used set </param>
     protected IUpdateWhereSyntax UpdateTable( object dataAsAnonymousType ) => Update.Table( TableName )
                                                                                     .InSchema( CurrentScheme )
                                                                                     .Set( dataAsAnonymousType );
-
-
-    protected void RenameTable( string name ) => Rename.Table( TableName )
-                                                       .InSchema( CurrentScheme )
-                                                       .To( name )
-                                                       .InSchema( CurrentScheme );
-
-
-    protected IInsertDataSyntax StartInsert() => Insert.IntoTable( TableName );
-    protected IInsertDataSyntax StartIdentityInsert() => Insert.IntoTable( TableName )
-                                                               .WithIdentityInsert();
 }

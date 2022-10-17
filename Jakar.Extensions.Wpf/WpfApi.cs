@@ -8,16 +8,6 @@ namespace Jakar.Extensions.Wpf;
 
 public static partial class WpfApi
 {
-    public static void SetContent( this ContentControl control, object? value )
-    {
-        object old = control.Content;
-        control.Content = value;
-
-        ContentControl.ContentProperty.GetMetadata( control )
-                      .PropertyChangedCallback.Invoke( control, new DependencyPropertyChangedEventArgs( ContentControl.ContentProperty, old, value ) );
-    }
-
-
     public static DispatcherOperation CallAsync( this DispatcherObject view, Action func, CancellationToken token = default ) => view.Dispatcher.CallAsync( func, token );
     public static DispatcherOperation CallAsync<T1>( this DispatcherObject view, Action<T1> func, T1 arg1, CancellationToken token = default ) =>
         view.Dispatcher.CallAsync( func, arg1, token );
@@ -91,6 +81,86 @@ public static partial class WpfApi
         dispatcher.InvokeAsync( async () => await func( arg1, arg2, arg3, arg4, arg5, token ), DispatcherPriority.Normal, token );
 
 
+    public static BitmapImage ConvertImage( this LocalFile file ) => new(file.ToUri());
+
+
+    /// <summary>
+    ///     <see href = "https://stackoverflow.com/a/41579163/9530917" > Convert drawing.bitmap to windows.controls.image </see>
+    /// </summary>
+    /// <param name = "image" > </param>
+    /// <returns>
+    ///     <see cref = "ImageSource" />
+    /// </returns>
+    public static ImageSource ConvertImage( this Bitmap image )
+    {
+        using var stream = new MemoryStream();
+        image.Save( stream, ImageFormat.Png );
+
+        var photo = new BitmapImage();
+
+        photo.BeginInit();
+        photo.CacheOption  = BitmapCacheOption.OnLoad;
+        photo.StreamSource = stream;
+        photo.EndInit();
+
+        return photo;
+    }
+
+    public static LocalFile? PickFile( string title, params string[] filters )
+    {
+        var file = new OpenFileDialog
+                   {
+                       Title            = title,
+                       Multiselect      = false,
+                       AddExtension     = true,
+                       CheckFileExists  = true,
+                       CheckPathExists  = true,
+                       InitialDirectory = LocalDirectory.CurrentDirectory.FullPath,
+                       Filter           = @"Files|" + string.Join( ';', filters )
+                   };
+
+        DialogResult result = file.ShowDialog();
+
+        return result is DialogResult.OK or DialogResult.Yes
+                   ? new LocalFile( file.FileName )
+                   : default;
+    }
+
+
+    // -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+    /// <summary>
+    ///     <see href = "https://stackoverflow.com/a/65200533/9530917" />
+    /// </summary>
+    /// <param name = "title" > </param>
+    /// <returns> </returns>
+    public static LocalDirectory? PickFolder( string title )
+    {
+        using var dialog = new FolderBrowserDialog
+                           {
+                               Description            = title,
+                               UseDescriptionForTitle = true,
+                               SelectedPath           = LocalDirectory.CurrentDirectory.FullPath,
+                               ShowNewFolderButton    = true
+                           };
+
+        DialogResult result = dialog.ShowDialog();
+
+        return result is DialogResult.OK or DialogResult.Yes
+                   ? new LocalDirectory( dialog.SelectedPath )
+                   : default;
+    }
+    public static void SetContent( this ContentControl control, object? value )
+    {
+        object old = control.Content;
+        control.Content = value;
+
+        ContentControl.ContentProperty.GetMetadata( control )
+                      .PropertyChangedCallback.Invoke( control, new DependencyPropertyChangedEventArgs( ContentControl.ContentProperty, old, value ) );
+    }
+
+
     // -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -124,77 +194,5 @@ public static partial class WpfApi
                          };
 
         return collection;
-    }
-
-
-    // -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-
-    /// <summary>
-    ///     <see href = "https://stackoverflow.com/a/65200533/9530917" />
-    /// </summary>
-    /// <param name = "title" > </param>
-    /// <returns> </returns>
-    public static LocalDirectory? PickFolder( string title )
-    {
-        using var dialog = new FolderBrowserDialog
-                           {
-                               Description            = title,
-                               UseDescriptionForTitle = true,
-                               SelectedPath           = LocalDirectory.CurrentDirectory.FullPath,
-                               ShowNewFolderButton    = true
-                           };
-
-        DialogResult result = dialog.ShowDialog();
-
-        return result is DialogResult.OK or DialogResult.Yes
-                   ? new LocalDirectory( dialog.SelectedPath )
-                   : default;
-    }
-
-    public static LocalFile? PickFile( string title, params string[] filters )
-    {
-        var file = new OpenFileDialog
-                   {
-                       Title            = title,
-                       Multiselect      = false,
-                       AddExtension     = true,
-                       CheckFileExists  = true,
-                       CheckPathExists  = true,
-                       InitialDirectory = LocalDirectory.CurrentDirectory.FullPath,
-                       Filter           = @"Files|" + string.Join( ';', filters )
-                   };
-
-        DialogResult result = file.ShowDialog();
-
-        return result is DialogResult.OK or DialogResult.Yes
-                   ? new LocalFile( file.FileName )
-                   : default;
-    }
-
-
-    public static BitmapImage ConvertImage( this LocalFile file ) => new(file.ToUri());
-
-
-    /// <summary>
-    ///     <see href = "https://stackoverflow.com/a/41579163/9530917" > Convert drawing.bitmap to windows.controls.image </see>
-    /// </summary>
-    /// <param name = "image" > </param>
-    /// <returns>
-    ///     <see cref = "ImageSource" />
-    /// </returns>
-    public static ImageSource ConvertImage( this Bitmap image )
-    {
-        using var stream = new MemoryStream();
-        image.Save( stream, ImageFormat.Png );
-
-        var photo = new BitmapImage();
-
-        photo.BeginInit();
-        photo.CacheOption  = BitmapCacheOption.OnLoad;
-        photo.StreamSource = stream;
-        photo.EndInit();
-
-        return photo;
     }
 }

@@ -25,26 +25,21 @@ public sealed class EmailBuilder
     private EmailBuilder( MailboxAddress[] senders ) => _senders = senders;
 
 
-    public static EmailBuilder From( params MailboxAddress[] senders ) => new EmailBuilder( senders );
-
-
-    public EmailBuilder WithBody( string? body )
+    public async ValueTask<MimeMessage> Create()
     {
-        _body = body;
-        return this;
-    }
-    public EmailBuilder WithHTML( string? html )
-    {
-        _html = html;
-        return this;
+        var builder = new BodyBuilder
+                      {
+                          TextBody = _body,
+                          HtmlBody = _html
+                      };
+
+        foreach (Attachment element in _attachments) { await builder.Attachments.AddAsync( element.Name, element.ContentStream ); }
+
+        return new MimeMessage( _senders, _recipients, _subject, builder.ToMessageBody() );
     }
 
 
-    public EmailBuilder WithSubject( string subject )
-    {
-        _subject = subject;
-        return this;
-    }
+    public static EmailBuilder From( params MailboxAddress[] senders ) => new(senders);
 
 
     public EmailBuilder To( MailboxAddress recipient )
@@ -81,16 +76,21 @@ public sealed class EmailBuilder
     }
 
 
-    public async ValueTask<MimeMessage> Create()
+    public EmailBuilder WithBody( string? body )
     {
-        var builder = new BodyBuilder
-                      {
-                          TextBody = _body,
-                          HtmlBody = _html
-                      };
+        _body = body;
+        return this;
+    }
+    public EmailBuilder WithHTML( string? html )
+    {
+        _html = html;
+        return this;
+    }
 
-        foreach (Attachment element in _attachments) { await builder.Attachments.AddAsync( element.Name, element.ContentStream ); }
 
-        return new MimeMessage( _senders, _recipients, _subject, builder.ToMessageBody() );
+    public EmailBuilder WithSubject( string subject )
+    {
+        _subject = subject;
+        return this;
     }
 }

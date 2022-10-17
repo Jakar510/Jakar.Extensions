@@ -19,6 +19,14 @@ public class Randoms : ObservableClass
     public static RandomNumberGenerator Rng          { get; set; } = RandomNumberGenerator.Create();
 
 
+    public static string GenerateToken( in int length = 32 )
+    {
+        byte[] randomNumber = new byte[length];
+        Rng.GetBytes( randomNumber );
+        return Convert.ToBase64String( randomNumber );
+    }
+
+
     public static string RandomString( in int length ) => RandomString( length, char.ToUpperInvariant );
     public static string RandomString( in int length, Func<char, char> converter )
     {
@@ -46,13 +54,5 @@ public class Randoms : ObservableClass
         }
 
         return builder.ToString();
-    }
-
-
-    public static string GenerateToken( in int length = 32 )
-    {
-        byte[] randomNumber = new byte[length];
-        Rng.GetBytes( randomNumber );
-        return Convert.ToBase64String( randomNumber );
     }
 }

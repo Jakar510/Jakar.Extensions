@@ -133,7 +133,7 @@ public readonly ref struct PasswordValidator
         public static implicit operator Requirements( PasswordRequirements data ) => new(data);
         public static implicit operator Requirements( string[]             blockedPasswords ) => new(blockedPasswords);
         public static implicit operator Requirements( HashSet<string>      blockedPasswords ) => new(Filter( blockedPasswords ));
-        
+
 
         public PasswordRequirements ToPasswordRequirements() => new()
                                                                 {
@@ -187,12 +187,12 @@ public sealed record PasswordRequirements : IOptions<PasswordRequirements>
     public bool                                         RequireSpecialChar       { get; init; } = true;
     public bool                                         RequireUpperCase         { get; init; } = true;
     public int                                          MinLength                { get; init; }
+    PasswordRequirements IOptions<PasswordRequirements>.Value                    => this;
     public string                                       LowerCase                { get; init; } = new(Randoms.LowerCase);
     public string                                       Numbers                  { get; init; } = new(Randoms.Numeric);
     public string                                       SpecialChars             { get; init; } = new(Randoms.SpecialChars);
     public string                                       UpperCase                { get; init; } = new(Randoms.UpperCase);
     public string[]                                     BlockedPasswords         { get; init; } = Array.Empty<string>();
-    PasswordRequirements IOptions<PasswordRequirements>.Value                    => this;
 
 
     public PasswordRequirements() { }

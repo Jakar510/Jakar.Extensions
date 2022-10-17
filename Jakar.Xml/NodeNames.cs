@@ -39,20 +39,6 @@ public static class NodeNames
     /// </summary>
     private static readonly ConcurrentDictionary<Type, string> _typeToNodeName = new();
 
-
-    public static void RegisterNodeName( Type type, string? nodeName = default )
-    {
-        ReadOnlySpan<char> name = nodeName ?? (type.IsArray
-                                                   ? Constants.GROUP
-                                                   : type.Name);
-
-
-        string result = name.GetXmlName();
-
-        AddOrUpdate( type,   result );
-        AddOrUpdate( result, type );
-    }
-
     private static void AddOrUpdate( Type type, string nodeName )
     {
         Type AddValue( string s ) { return type; }
@@ -70,33 +56,7 @@ public static class NodeNames
 
         _typeToNodeName.AddOrUpdate( type, AddValue, UpdateValue );
     }
-
-
-    private static bool GetType( string nodeName, [NotNullWhen( true )] out Type?   type ) => _nodeNameToType.TryGetValue( nodeName, out type );
-    private static bool GetName( Type   type,     [NotNullWhen( true )] out string? nodeName ) => _typeToNodeName.TryGetValue( type, out nodeName );
-
-
-    public static string GetXmlName( this ReadOnlySpan<char> name, params char[] trimmedChars )
-    {
-        name = name.TrimEnd( trimmedChars );
-        int index = name.IndexOf( Constants.Dividers.TYPES );
-
-        if (index < 0) { return name.ToString(); }
-
-        return name[..index]
-           .ToString();
-    }
-
-    public static string GetTypeName( this Type type, in bool useFullName = false )
-    {
-        ReadOnlySpan<char> name = (useFullName
-                                       ? type.FullName
-                                       : type.Name).AsSpan();
-
-        if (type.IsArray) { return name.GetXmlName( '[', ']' ); }
-
-        return name.GetXmlName();
-    }
+    private static bool GetName( Type type, [NotNullWhen( true )] out string? nodeName ) => _typeToNodeName.TryGetValue( type, out nodeName );
 
     public static string GetNodeName( this Type type, in bool useFullName = false )
     {
@@ -115,5 +75,45 @@ public static class NodeNames
     }
 
 
+    private static bool GetType( string nodeName, [NotNullWhen( true )] out Type? type ) => _nodeNameToType.TryGetValue( nodeName, out type );
+
+    public static string GetTypeName( this Type type, in bool useFullName = false )
+    {
+        ReadOnlySpan<char> name = (useFullName
+                                       ? type.FullName
+                                       : type.Name).AsSpan();
+
+        if (type.IsArray) { return name.GetXmlName( '[', ']' ); }
+
+        return name.GetXmlName();
+    }
+
+
+    public static string GetXmlName( this ReadOnlySpan<char> name, params char[] trimmedChars )
+    {
+        name = name.TrimEnd( trimmedChars );
+        int index = name.IndexOf( Constants.Dividers.TYPES );
+
+        if (index < 0) { return name.ToString(); }
+
+        return name[..index]
+           .ToString();
+    }
+
+
     public static XmlNodeAttribute GetXmlNodeAttribute( this Type type ) => type.GetCustomAttribute<XmlNodeAttribute>( false ) ?? XmlNodeAttribute.Default( type );
+
+
+    public static void RegisterNodeName( Type type, string? nodeName = default )
+    {
+        ReadOnlySpan<char> name = nodeName ?? (type.IsArray
+                                                   ? Constants.GROUP
+                                                   : type.Name);
+
+
+        string result = name.GetXmlName();
+
+        AddOrUpdate( type,   result );
+        AddOrUpdate( result, type );
+    }
 }

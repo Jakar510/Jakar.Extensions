@@ -14,33 +14,6 @@ public static class NetworkManager
     public static           bool            IsWiFiConnected => IsConnected && Connectivity.ConnectionProfiles.Any( p => p == ConnectionProfile.WiFi || p == ConnectionProfile.Ethernet );
 
 
-    public static string? GetIdentifier()
-    {
-        if (_manager is null) { throw new NullReferenceException( nameof(_manager) ); }
-
-        return _manager.GetIdentifier();
-    }
-
-    public static void OpenWifiSettings()
-    {
-        if (_manager is null) { throw new NullReferenceException( nameof(_manager) ); }
-
-        _manager.OpenWifiSettings();
-    }
-
-    public static string? GetIpAddressRange()
-    {
-        string? ip = GetIpAddress();
-
-        return string.IsNullOrWhiteSpace( ip )
-                   ? null
-                   : ip[..(ip.LastIndexOf( ".", StringComparison.InvariantCultureIgnoreCase ) + 1)];
-    }
-
-
-    public static string? GetIpAddress() => GetIpAddress( AddressFamily.InterNetwork, AddressFamily.InterNetworkV6 );
-
-
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static bool CheckIpAddress( this IPAddress? address, params AddressFamily[] families )
     {
@@ -58,6 +31,17 @@ public static class NetworkManager
 
         return address.AddressFamily.IsOneOf( families );
     }
+
+
+    public static string? GetIdentifier()
+    {
+        if (_manager is null) { throw new NullReferenceException( nameof(_manager) ); }
+
+        return _manager.GetIdentifier();
+    }
+
+
+    public static string? GetIpAddress() => GetIpAddress( AddressFamily.InterNetwork, AddressFamily.InterNetworkV6 );
 
     public static string? GetIpAddress( params AddressFamily[] families ) => GetIpAddresses( families )
                                                                             .FirstOrDefault()
@@ -82,6 +66,22 @@ public static class NetworkManager
                    select addressInfo.Address;
 
         foreach (IPAddress value in result) { yield return value; }
+    }
+
+    public static string? GetIpAddressRange()
+    {
+        string? ip = GetIpAddress();
+
+        return string.IsNullOrWhiteSpace( ip )
+                   ? null
+                   : ip[..(ip.LastIndexOf( ".", StringComparison.InvariantCultureIgnoreCase ) + 1)];
+    }
+
+    public static void OpenWifiSettings()
+    {
+        if (_manager is null) { throw new NullReferenceException( nameof(_manager) ); }
+
+        _manager.OpenWifiSettings();
     }
 
 

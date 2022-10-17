@@ -10,8 +10,7 @@ namespace Jakar.Extensions.Xamarin.Forms;
 [TypeConversion( typeof(TextAlignment?) )]
 public class NullableTextAlignmentConverter : TextAlignmentConverter
 {
-    public override bool CanConvertFrom( Type?                  sourceType ) => sourceType is null || sourceType == typeof(string);
-    public override object? ConvertFromInvariantString( string? value ) => Convert( value );
+    public override bool CanConvertFrom( Type? sourceType ) => sourceType is null || sourceType == typeof(string);
 
     public TextAlignment? Convert( string? value )
     {
@@ -19,6 +18,7 @@ public class NullableTextAlignmentConverter : TextAlignmentConverter
 
         return (TextAlignment)base.ConvertFromInvariantString( value );
     }
+    public override object? ConvertFromInvariantString( string? value ) => Convert( value );
 
     public override string? ConvertToInvariantString( object? value ) => value switch
                                                                          {

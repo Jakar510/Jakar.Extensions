@@ -91,10 +91,6 @@ public class UserDevice<TID> : ObservableClass, IUserDevice<TID> where TID : str
     }
 
 
-    public static bool operator ==( UserDevice<TID>? left, UserDevice<TID>? right ) => Equals( left, right );
-    public static bool operator !=( UserDevice<TID>? left, UserDevice<TID>? right ) => !Equals( left, right );
-
-
     // public static UserDevice<TID> Create( Guid? deviceID ) => new(DeviceInfo.Model, DeviceInfo.Manufacturer, DeviceInfo.Name, DeviceInfo.DeviceType, DeviceInfo.Idiom, DeviceInfo.Platform, DeviceInfo.Version, deviceID);
 
 
@@ -120,6 +116,10 @@ public class UserDevice<TID> : ObservableClass, IUserDevice<TID> where TID : str
         hashCode.Add( OsVersion );
         return hashCode.ToHashCode();
     }
+
+
+    public static bool operator ==( UserDevice<TID>? left, UserDevice<TID>? right ) => Equals( left, right );
+    public static bool operator !=( UserDevice<TID>? left, UserDevice<TID>? right ) => !Equals( left, right );
     public bool Equals( IUserDevice<TID>? other )
     {
         if (other is null) { return false; }

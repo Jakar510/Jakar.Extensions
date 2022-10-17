@@ -19,6 +19,42 @@ public sealed class IDCollection<T> : CollectionAlerts<long>, IReadOnlyCollectio
     public IDCollection( IEnumerable<T>           collection ) : this( new HashSet<long>( collection.Select( x => x.ID ) ) ) { }
     internal IDCollection( HashSet<long>          set ) => _items = set;
 
+    internal void Add( IEnumerable<long>? value )
+    {
+        if (value is null) { return; }
+
+        foreach (long id in value) { Add( id ); }
+    }
+    internal bool Add( long id )
+    {
+        OnPropertyChanging( nameof(Count) );
+        bool result = _items.Add( id );
+        Added( id );
+        OnPropertyChanged( nameof(Count) );
+        return result;
+    }
+
+
+    public void Add( IEnumerable<T>? value ) => Add( value?.Select( x => x.ID ) );
+    public bool Add( T               value ) => Add( value.ID );
+    public void Add( IDCollection<T>? value )
+    {
+        if (value is null) { return; }
+
+        foreach (long id in value) { Add( id ); }
+    }
+    private void Added( long id ) => OnChanged( new NotifyCollectionChangedEventArgs( NotifyCollectionChangedAction.Add, id ) );
+
+
+    public void Clear()
+    {
+        _items.Clear();
+        Cleared();
+    }
+    private void Cleared() => OnChanged( new NotifyCollectionChangedEventArgs( NotifyCollectionChangedAction.Reset ) );
+    private bool Contains( long id ) => _items.Contains( id );
+    public bool Contains( T     value ) => Contains( value.ID );
+
 
     /// <summary> </summary>
     /// <typeparamref name = "T" />
@@ -58,10 +94,6 @@ public sealed class IDCollection<T> : CollectionAlerts<long>, IReadOnlyCollectio
         return collection;
     }
 
-
-    // public static implicit operator IDCollection<T, long>( ReadOnlySpan<char> span ) => Create(span);
-    public static implicit operator IDCollection<T>?( string? jsonOrCsv ) => Create( jsonOrCsv );
-
     // public static IDCollection<T, long> Create( in ReadOnlySpan<char> span )
     // {
     //     if ( span.IsEmpty ) { return new IDCollection<T, long>(); }
@@ -88,41 +120,9 @@ public sealed class IDCollection<T> : CollectionAlerts<long>, IReadOnlyCollectio
         foreach (long n in json.FromJson<List<long>>()) { Add( n ); }
     }
 
-    internal void Add( IEnumerable<long>? value )
-    {
-        if (value is null) { return; }
 
-        foreach (long id in value) { Add( id ); }
-    }
-    internal bool Add( long id )
-    {
-        OnPropertyChanging( nameof(Count) );
-        bool result = _items.Add( id );
-        Added( id );
-        OnPropertyChanged( nameof(Count) );
-        return result;
-    }
-
-
-    public void Add( IEnumerable<T>? value ) => Add( value?.Select( x => x.ID ) );
-    public bool Add( T               value ) => Add( value.ID );
-    public void Add( IDCollection<T>? value )
-    {
-        if (value is null) { return; }
-
-        foreach (long id in value) { Add( id ); }
-    }
-    private void Added( long id ) => OnChanged( new NotifyCollectionChangedEventArgs( NotifyCollectionChangedAction.Add, id ) );
-
-
-    public void Clear()
-    {
-        _items.Clear();
-        Cleared();
-    }
-    private void Cleared() => OnChanged( new NotifyCollectionChangedEventArgs( NotifyCollectionChangedAction.Reset ) );
-    private bool Contains( long id ) => _items.Contains( id );
-    public bool Contains( T     value ) => Contains( value.ID );
+    // public static implicit operator IDCollection<T, long>( ReadOnlySpan<char> span ) => Create(span);
+    public static implicit operator IDCollection<T>?( string? jsonOrCsv ) => Create( jsonOrCsv );
     private bool Remove( long id )
     {
         OnPropertyChanging( nameof(Count) );

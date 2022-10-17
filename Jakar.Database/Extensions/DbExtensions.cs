@@ -4,8 +4,19 @@
 namespace Jakar.Database;
 
 
+[SuppressMessage( "ReSharper", "UnusedMethodReturnValue.Global" )]
 public static partial class DbExtensions
 {
+    public static WebApplicationBuilder AddDatabase<T>( this WebApplicationBuilder builder, Action<DbOptions> configure ) where T : Database
+    {
+        builder.AddOptions( configure );
+        builder.AddSingleton<T>();
+        builder.AddSingleton<Database>( provider => provider.GetRequiredService<T>() );
+        builder.AddHealthCheck<T>();
+        return builder;
+    }
+
+
     public static WebApplicationBuilder AddEmailer( this WebApplicationBuilder builder )
     {
         builder.AddOptions<Emailer.Options>();
@@ -18,6 +29,25 @@ public static partial class DbExtensions
 
         return builder.AddScoped<Emailer>();
     }
+
+
+    public static ILoggingBuilder AddFluentMigratorLogger( this ILoggingBuilder builder, bool showSql = true, bool showElapsedTime = true ) =>
+        builder.AddProvider( new FluentMigratorConsoleLoggerProvider( new OptionsWrapper<FluentMigratorLoggerOptions>( new FluentMigratorLoggerOptions
+                                                                                                                       {
+                                                                                                                           ShowElapsedTime = showElapsedTime,
+                                                                                                                           ShowSql         = showSql
+                                                                                                                       } ) ) );
+
+
+    public static IHealthChecksBuilder AddHealthCheck<T>( this WebApplicationBuilder builder ) where T : IHealthCheck =>
+        builder.AddHealthCheck( new HealthCheckRegistration( typeof(T).Name,
+                                                             provider => provider.GetRequiredService<T>(),
+                                                             HealthStatus.Degraded,
+                                                             typeof(T).GetCustomAttributes<HealthCheckTagAttribute>()
+                                                                      .Select( x => x.Name ) ) );
+    public static IHealthChecksBuilder AddHealthCheck( this WebApplicationBuilder builder, HealthCheckRegistration registration ) =>
+        builder.Services.AddHealthChecks()
+               .Add( registration );
 
 
     public static WebApplicationBuilder AddPwdValidator( this WebApplicationBuilder builder )

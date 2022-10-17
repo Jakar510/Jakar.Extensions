@@ -9,16 +9,6 @@ namespace Jakar.Extensions.Xamarin.Forms.iOS.Layout;
 
 public static class LayoutPriorityExtensions
 {
-    public static void Priorities( this UIView view, in LayoutPriority hugging, in LayoutPriority compression ) => view.Priorities( hugging.AsFloat(), compression.AsFloat() );
-
-    public static void Priorities( this UIView view, in float hugging, in float compression )
-    {
-        view.HuggingPriority( hugging, UILayoutConstraintAxis.Horizontal, UILayoutConstraintAxis.Vertical );
-
-        view.CompressionPriorities( compression, UILayoutConstraintAxis.Horizontal, UILayoutConstraintAxis.Vertical );
-    }
-
-
     public static void CompressionPriorities( this UIView view, in LayoutPriority value, params UILayoutConstraintAxis[] directions ) => view.CompressionPriorities( value.AsFloat(), directions );
 
     public static void CompressionPriorities( this UIView view, in float value, params UILayoutConstraintAxis[] directions )
@@ -32,6 +22,14 @@ public static class LayoutPriorityExtensions
     public static void HuggingPriority( this UIView view, in float value, params UILayoutConstraintAxis[] directions )
     {
         foreach (UILayoutConstraintAxis axis in directions) { view.SetContentHuggingPriority( value, axis ); }
+    }
+    public static void Priorities( this UIView view, in LayoutPriority hugging, in LayoutPriority compression ) => view.Priorities( hugging.AsFloat(), compression.AsFloat() );
+
+    public static void Priorities( this UIView view, in float hugging, in float compression )
+    {
+        view.HuggingPriority( hugging, UILayoutConstraintAxis.Horizontal, UILayoutConstraintAxis.Vertical );
+
+        view.CompressionPriorities( compression, UILayoutConstraintAxis.Horizontal, UILayoutConstraintAxis.Vertical );
     }
 
 

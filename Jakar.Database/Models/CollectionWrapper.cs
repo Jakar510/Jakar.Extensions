@@ -78,9 +78,8 @@ public class CollectionWrapper<TValue, TOwner> : CollectionAlerts<TValue>, IColl
         return new CollectionWrapper<TValue, TOwner>( IDCollection<TValue>.Create( jsonOrCsv ) );
     }
 
-
-    public static bool operator ==( CollectionWrapper<TValue, TOwner>? left, CollectionWrapper<TValue, TOwner>? right ) => Equals( left, right );
-    public static bool operator !=( CollectionWrapper<TValue, TOwner>? left, CollectionWrapper<TValue, TOwner>? right ) => !Equals( left, right );
+    public override bool Equals( object? obj ) => ReferenceEquals( this, obj ) || obj is CollectionWrapper<TValue, TOwner> other && Equals( other );
+    public override int GetHashCode() => HashCode.Combine( Json );
 
 
     private void Items_OnCollectionChanged( object? sender, NotifyCollectionChangedEventArgs e )
@@ -91,8 +90,9 @@ public class CollectionWrapper<TValue, TOwner> : CollectionAlerts<TValue>, IColl
     private void Items_OnPropertyChanged( object?  sender, PropertyChangedEventArgs  e ) => OnPropertyChanged( e.PropertyName );
     private void Items_OnPropertyChanging( object? sender, PropertyChangingEventArgs e ) => OnPropertyChanging( e.PropertyName );
 
-    public override bool Equals( object? obj ) => ReferenceEquals( this, obj ) || obj is CollectionWrapper<TValue, TOwner> other && Equals( other );
-    public override int GetHashCode() => HashCode.Combine( Json );
+
+    public static bool operator ==( CollectionWrapper<TValue, TOwner>? left, CollectionWrapper<TValue, TOwner>? right ) => Equals( left, right );
+    public static bool operator !=( CollectionWrapper<TValue, TOwner>? left, CollectionWrapper<TValue, TOwner>? right ) => !Equals( left, right );
 
     // public CollectionWrapper(  ReadOnlySpan<char>   span ) : this( IDCollection<TValue>.Create(span)) { }
     public virtual void Dispose()

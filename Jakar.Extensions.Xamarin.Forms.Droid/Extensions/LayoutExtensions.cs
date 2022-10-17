@@ -63,40 +63,6 @@ public static class AndroidLayoutExtensions
                                                                                                     { GridSpec.TopAlignment, AGridLayout.TopAlighment }
                                                                                                 };
 
-
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    private static void Run( Action action, string? caller )
-    {
-        try { action(); }
-        catch (Exception)
-        {
-            var temp = new StackTrace();
-            Console.WriteLine( $"------------------------- {caller} -------------------------\n\n" );
-            Console.WriteLine( temp + "\n\n" );
-            throw;
-        }
-    }
-
-
-    // -----------------------------------------------------------------------------------------------------------------------------------------------------
-
-    public static AGridLayout.Spec GetSpec( GridSpec spec, float weight ) =>
-        AGridLayout.InvokeSpec( AGridLayout.Undefined, _specMapper[spec], weight ) ?? throw new NullReferenceException( nameof(AGridLayout.InvokeSpec) );
-
-    public static void SetSpec( this AView view, GridSpec spec, float weight )
-    {
-        switch (view.LayoutParameters)
-        {
-            case null: return;
-
-            case GridLayout.LayoutParams parameters:
-                parameters.ColumnSpec = GetSpec( spec, weight );
-                break;
-        }
-
-        // throw new ArgumentException("view's LayoutParameters is not Android.Widget.GridLayout.LayoutParams", nameof(view));
-    }
-
     public static void Add( this AGridLayout           stack,
                             AView                      view,
                             int                        row,
@@ -241,5 +207,39 @@ public static class AndroidLayoutExtensions
         var      inflater = (LayoutInflater)(temp ?? throw new NullReferenceException( nameof(AContext.LayoutInflaterService) ));
 
         return inflater.Inflate( id, root, attach ) ?? throw new InflateException( $"ID: {id} not found. Called from {caller}" );
+    }
+
+
+    // -----------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public static GridLayout.Spec GetSpec( GridSpec spec, float weight ) =>
+        AGridLayout.InvokeSpec( AGridLayout.Undefined, _specMapper[spec], weight ) ?? throw new NullReferenceException( nameof(AGridLayout.InvokeSpec) );
+
+
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    private static void Run( Action action, string? caller )
+    {
+        try { action(); }
+        catch (Exception)
+        {
+            var temp = new StackTrace();
+            Console.WriteLine( $"------------------------- {caller} -------------------------\n\n" );
+            Console.WriteLine( temp + "\n\n" );
+            throw;
+        }
+    }
+
+    public static void SetSpec( this AView view, GridSpec spec, float weight )
+    {
+        switch (view.LayoutParameters)
+        {
+            case null: return;
+
+            case GridLayout.LayoutParams parameters:
+                parameters.ColumnSpec = GetSpec( spec, weight );
+                break;
+        }
+
+        // throw new ArgumentException("view's LayoutParameters is not Android.Widget.GridLayout.LayoutParams", nameof(view));
     }
 }

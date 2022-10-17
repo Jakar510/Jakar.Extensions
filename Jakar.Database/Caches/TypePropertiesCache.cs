@@ -9,7 +9,7 @@ public sealed class TypePropertiesCache : ConcurrentDictionary<Type, IReadOnlyLi
     public static TypePropertiesCache Current { get; } = new();
 
 
-    public new IReadOnlyList<Descriptor> this[Type type]
+    public new IReadOnlyList<Descriptor> this[ Type type ]
     {
         get => Register( type );
         private set => base[type] = value;
@@ -19,20 +19,20 @@ public sealed class TypePropertiesCache : ConcurrentDictionary<Type, IReadOnlyLi
     static TypePropertiesCache() => Current.Register( Assembly.GetCallingAssembly() );
     internal TypePropertiesCache() { }
 
-    public void Register(Assembly assembly) => Register( assembly.DefinedTypes.Where( x => x.GetCustomAttribute<SerializableAttribute>() is not null ) );
-    public void Register(IEnumerable<Type> types)
+    public void Register( Assembly assembly ) => Register( assembly.DefinedTypes.Where( x => x.GetCustomAttribute<SerializableAttribute>() is not null ) );
+    public void Register( IEnumerable<Type> types )
     {
         foreach (Type type in types) { Register( type ); }
     }
-    public void Register(params Type[] types)
+    public void Register( params Type[] types )
     {
         foreach (Type type in types) { Register( type ); }
     }
-    public IReadOnlyList<Descriptor> Register(Type type)
+    public IReadOnlyList<Descriptor> Register( Type type )
     {
         if (ContainsKey( type )) { return base[type]; }
 
-        var properties = type.GetProperties( BindingFlags.Instance | BindingFlags.Public | BindingFlags.SetProperty | BindingFlags.GetField )
+        List<PropertyInfo> properties = type.GetProperties( BindingFlags.Instance | BindingFlags.Public | BindingFlags.SetProperty | BindingFlags.GetField )
                                             .ToList();
 
         var results = new List<Descriptor>( properties.Count );

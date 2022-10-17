@@ -21,36 +21,6 @@ public static class GuidExtensions
     /// </summary>
     /// <param name = "value" > </param>
     /// <returns> </returns>
-    public static string ToBase64( this Guid value )
-    {
-        Span<byte> base64Bytes = stackalloc byte[24];
-        Span<char> result      = stackalloc char[22];
-
-        Span<byte> idBytes = stackalloc byte[16];
-        if (!value.TryWriteBytes( idBytes )) { throw new InvalidOperationException(); }
-
-        System.Buffers.Text.Base64.EncodeToUtf8( idBytes, base64Bytes, out _, out _ );
-
-
-        for (int i = 0; i < 22; i++)
-        {
-            result[i] = base64Bytes[i] switch
-                        {
-                            SLASH_BYTE => HYPHEN,
-                            PLUS_BYTE  => UNDERSCORE,
-                            _          => (char)base64Bytes[i]
-                        };
-        }
-
-        return new string( result );
-    }
-
-
-    /// <summary>
-    ///     <see href = "https://www.youtube.com/watch?v=B2yOjLyEZk0" > Writing C# without allocating ANY memory </see>
-    /// </summary>
-    /// <param name = "value" > </param>
-    /// <returns> </returns>
     public static Guid? AsGuid( this string value ) => value.AsSpan()
                                                             .AsGuid();
 
@@ -83,6 +53,36 @@ public static class GuidExtensions
         return Convert.TryFromBase64Chars( base64Chars, idBytes, out _ )
                    ? new Guid( idBytes )
                    : default;
+    }
+
+
+    /// <summary>
+    ///     <see href = "https://www.youtube.com/watch?v=B2yOjLyEZk0" > Writing C# without allocating ANY memory </see>
+    /// </summary>
+    /// <param name = "value" > </param>
+    /// <returns> </returns>
+    public static string ToBase64( this Guid value )
+    {
+        Span<byte> base64Bytes = stackalloc byte[24];
+        Span<char> result      = stackalloc char[22];
+
+        Span<byte> idBytes = stackalloc byte[16];
+        if (!value.TryWriteBytes( idBytes )) { throw new InvalidOperationException(); }
+
+        System.Buffers.Text.Base64.EncodeToUtf8( idBytes, base64Bytes, out _, out _ );
+
+
+        for (int i = 0; i < 22; i++)
+        {
+            result[i] = base64Bytes[i] switch
+                        {
+                            SLASH_BYTE => HYPHEN,
+                            PLUS_BYTE  => UNDERSCORE,
+                            _          => (char)base64Bytes[i]
+                        };
+        }
+
+        return new string( result );
     }
 
 

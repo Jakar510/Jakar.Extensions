@@ -43,7 +43,11 @@ public abstract class UrlTestsCore : UrlTests
 
         return string.IsNullOrWhiteSpace( result.Trim() );
     }
-    protected async Task RequestCore( string url ) => await RequestCore( new Uri( url ), _Token );
+
+
+    protected abstract Task Request( Uri      url, CancellationToken token );
+    protected abstract Task RequestBytes( Uri url, CancellationToken token );
+    protected async Task RequestCore( string  url ) => await RequestCore( new Uri( url ), _Token );
 
     private async Task RequestCore( Uri link, CancellationToken token )
     {
@@ -53,11 +57,7 @@ public abstract class UrlTestsCore : UrlTests
         await RequestMemory( link, token );
         await RequestFile( link, token );
     }
-
-
-    protected abstract Task Request( Uri       url, CancellationToken token );
-    protected abstract Task RequestStream( Uri url, CancellationToken token );
-    protected abstract Task RequestBytes( Uri  url, CancellationToken token );
-    protected abstract Task RequestMemory( Uri url, CancellationToken token );
     protected abstract Task RequestFile( Uri   url, CancellationToken token );
+    protected abstract Task RequestMemory( Uri url, CancellationToken token );
+    protected abstract Task RequestStream( Uri url, CancellationToken token );
 }

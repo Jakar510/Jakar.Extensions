@@ -42,14 +42,14 @@ public interface ISelectorSyntax : ISelector { }
 public interface ISqlBuilderRoot
 {
     public string Result { get; }
+    public IDelete Delete();
+    public IGroupBy Group();
+    public IInsertInto Insert();
+    public IJoin Join();
+    public IOrderBy Order();
     public ISelector Select();
     public ISelector Union();
     public ISelector UnionAll();
-    public IWhere Where();
-    public IOrderBy Order();
-    public IGroupBy Group();
-    public IInsertInto Insert();
     public IUpdate Update();
-    public IDelete Delete();
-    public IJoin Join();
+    public IWhere Where();
 }

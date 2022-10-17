@@ -9,11 +9,11 @@ public interface IMultiQueue<T> : IEnumerable<T>
     public T?   Next    { get; }
     public void Add( T value );
 
-    public bool Remove( [NotNullWhen( true )] out T? value );
-
     public void Clear();
 
     public bool Contains( T value );
+
+    public bool Remove( [NotNullWhen( true )] out T? value );
 }
 
 

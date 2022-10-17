@@ -19,13 +19,11 @@ public abstract class BaseViewModel<TPage> : BaseViewModel where TPage : Page
                                                                                                  .ConfigureAwait( false ) );
 
     // GoHomeCommand = new Command(async () => await _SourcePage.Navigation.PopToRootAsync(true).ConfigureAwait(false));
-    protected BaseViewModel( TPage source ) : this() => SetPage( source );
+    protected BaseViewModel( TPage                 source ) : this() => SetPage( source );
+    protected abstract Task LaunchWebsite( object? address = null );
 
 
     public void SetPage( TPage source ) => _SourcePage = source ?? throw new ArgumentNullException( nameof(source) );
-
-    protected abstract Task StartFeedBack();
-    protected abstract Task LaunchWebsite( object? address = null );
 
 
     protected abstract Task ShareScreenShot();
@@ -38,6 +36,8 @@ public abstract class BaseViewModel<TPage> : BaseViewModel where TPage : Page
         await _AppSettings.ScreenShotAddress.ShareFile( shareTitle, MimeTypeNames.Image.JPEG )
                           .ConfigureAwait( false );
     }
+
+    protected abstract Task StartFeedBack();
 }
 
 
@@ -64,12 +64,12 @@ public abstract class BaseViewModel<TPage, TItem> : BaseViewModel<TPage> where T
                                                                                 .ConfigureAwait( false ) );
     protected BaseViewModel( TPage source ) : base( source ) => LoadItemsCommand = new Command( async () => await ExecuteLoadItemsCommand()
                                                                                                                .ConfigureAwait( false ) );
+    protected abstract Task ExecuteLoadItemsCommand();
 
 
     public void LoadItems() => LoadItemsCommand.Execute( null );
     public async Task LoadItemsAsync() => await MainThread.InvokeOnMainThreadAsync( ExecuteLoadItemsCommand )
                                                           .ConfigureAwait( false );
-    protected abstract Task ExecuteLoadItemsCommand();
 }
 
 

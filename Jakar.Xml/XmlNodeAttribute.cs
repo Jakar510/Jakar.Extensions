@@ -24,10 +24,14 @@ public sealed class XmlNodeAttribute : Attribute
 
     public static XmlNodeAttribute Default( Type type ) => new(type.Name);
 
+    internal BindingFlags FieldFlags()
+    {
+        BindingFlags flags = BindingFlags.Instance | BindingFlags.Public;
 
-    internal bool ShouldIncludeProperties() => (Include & XmlInclude.Properties) > 0;
-    internal bool ShouldIncludeFields() => (Include & XmlInclude.Fields) > 0;
-    internal bool ShouldIncludeAttributes() => (Include & XmlInclude.Attributes) > 0;
+        if (ShouldIncludeFields()) { flags |= BindingFlags.GetField | BindingFlags.SetField; }
+
+        return flags;
+    }
 
 
     internal BindingFlags PropFlags()
@@ -38,13 +42,9 @@ public sealed class XmlNodeAttribute : Attribute
 
         return flags;
     }
+    internal bool ShouldIncludeAttributes() => (Include & XmlInclude.Attributes) > 0;
+    internal bool ShouldIncludeFields() => (Include & XmlInclude.Fields) > 0;
 
-    internal BindingFlags FieldFlags()
-    {
-        BindingFlags flags = BindingFlags.Instance | BindingFlags.Public;
 
-        if (ShouldIncludeFields()) { flags |= BindingFlags.GetField | BindingFlags.SetField; }
-
-        return flags;
-    }
+    internal bool ShouldIncludeProperties() => (Include & XmlInclude.Properties) > 0;
 }

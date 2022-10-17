@@ -32,10 +32,10 @@ public class Tokenizer<TName> : ITokenService where TName : IAppName
 {
     private readonly Database             _db;
     private readonly IConfiguration       _configuration;
-    internal virtual string               Domain      => _configuration.GetValue( nameof(Domain), _db.Domain );
-    internal virtual SymmetricSecurityKey SecurityKey => new(Encoding.UTF8.GetBytes( _configuration["JWT"] ));
-    internal virtual string               Issuer      => _configuration.GetValue( nameof(Issuer),   typeof(TName).Namespace ?? string.Empty );
     internal virtual string               Audience    => _configuration.GetValue( nameof(Audience), typeof(TName).Name );
+    internal virtual string               Domain      => _configuration.GetValue( nameof(Domain),   _db.Domain );
+    internal virtual string               Issuer      => _configuration.GetValue( nameof(Issuer),   typeof(TName).Namespace ?? string.Empty );
+    internal virtual SymmetricSecurityKey SecurityKey => new(Encoding.UTF8.GetBytes( _configuration["JWT"] ));
 
 
     public Tokenizer( IConfiguration configuration, Database dataBase )
@@ -43,9 +43,15 @@ public class Tokenizer<TName> : ITokenService where TName : IAppName
         _configuration = configuration;
         _db            = dataBase;
     }
+    public virtual string CreateContent( in Tokens result, string header ) =>
+        @$"{header}
 
-
-    public virtual Task<Tokens> Authenticate( VerifyRequest request, CancellationToken token = default ) => _db.Authenticate( request, token );
+{GetUrl( result )}";
+    public virtual string CreateHTMLContent( in Tokens result, string header ) =>
+        @$"<h1> {header} </h1>
+<p>
+	<a href='{GetUrl( result )}'>Click to approve</a>
+</p>";
 
 
     public virtual string GenerateAccessToken( IEnumerable<Claim> claims )
@@ -67,15 +73,9 @@ public class Tokenizer<TName> : ITokenService where TName : IAppName
                    : principal;
     }
     public virtual string GetUrl( in Tokens result ) => $"{Domain}/Token/{result.AccessToken}";
-    public virtual string CreateContent( in Tokens result, string header ) =>
-        @$"{header}
 
-{GetUrl( result )}";
-    public virtual string CreateHTMLContent( in Tokens result, string header ) =>
-        @$"<h1> {header} </h1>
-<p>
-	<a href='{GetUrl( result )}'>Click to approve</a>
-</p>";
+
+    public virtual async Task<Tokens> Authenticate( VerifyRequest request, CancellationToken token = default ) => await _db.Authenticate( request, token );
 
 
     public virtual async Task<string> CreateContent( string header, UserRecord user, CancellationToken token = default )

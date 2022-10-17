@@ -38,6 +38,32 @@ public static class Deletes
                         .ConfigureAwait( false );
     }
 
+
+    // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+    public static async Task<WebResponse> Delete( this Uri url, MultipartFormDataContent payload, HeaderCollection? headers, CancellationToken token, int? timeout = default )
+    {
+        HttpWebRequest req = WebRequest.CreateHttp( url );
+        if (timeout.HasValue) { req.Timeout = timeout.Value; }
+
+        req.Method = "DELETE";
+
+        req.SetHeaders( payload );
+        req.SetHeaders( headers );
+
+        await using (Stream stream = await req.GetRequestStreamAsync()
+                                              .ConfigureAwait( false ))
+        {
+            await payload.CopyToAsync( stream )
+                         .ConfigureAwait( false ); // Push it out there
+        }
+
+
+        return await req.GetResponseAsync( token )
+                        .ConfigureAwait( false );
+    }
+
     public static async Task<string> TryDelete( this Uri url, string payload, HeaderCollection? headers = default, Encoding? encoding = default, CancellationToken token = default )
     {
         encoding ??= Encoding.Default;
@@ -134,32 +160,6 @@ public static class Deletes
 
             throw;
         }
-    }
-
-
-    // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-
-    public static async Task<WebResponse> Delete( this Uri url, MultipartFormDataContent payload, HeaderCollection? headers, CancellationToken token, int? timeout = default )
-    {
-        HttpWebRequest req = WebRequest.CreateHttp( url );
-        if (timeout.HasValue) { req.Timeout = timeout.Value; }
-
-        req.Method = "DELETE";
-
-        req.SetHeaders( payload );
-        req.SetHeaders( headers );
-
-        await using (Stream stream = await req.GetRequestStreamAsync()
-                                              .ConfigureAwait( false ))
-        {
-            await payload.CopyToAsync( stream )
-                         .ConfigureAwait( false ); // Push it out there
-        }
-
-
-        return await req.GetResponseAsync( token )
-                        .ConfigureAwait( false );
     }
 
 

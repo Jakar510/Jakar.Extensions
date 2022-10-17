@@ -65,6 +65,57 @@ public sealed record ResxRowTable : TableRecord<ResxRowTable>
     }
     public ResxRowTable( UserRecord user ) : base( user ) { }
 
+
+    public override int CompareTo( ResxRowTable? other )
+    {
+        if (other is null) { return 1; }
+
+        if (ReferenceEquals( this, other )) { return 0; }
+
+        return string.Compare( Neutral, other.Neutral, StringComparison.Ordinal );
+    }
+    public override int GetHashCode()
+    {
+        var hashCode = new HashCode();
+        hashCode.Add( base.GetHashCode() );
+        hashCode.Add( Neutral );
+        hashCode.Add( English );
+        hashCode.Add( Spanish );
+        hashCode.Add( French );
+        hashCode.Add( Swedish );
+        hashCode.Add( German );
+        hashCode.Add( Chinese );
+        hashCode.Add( Polish );
+        hashCode.Add( Thai );
+        hashCode.Add( Japanese );
+        hashCode.Add( Czech );
+        hashCode.Add( Portuguese );
+        hashCode.Add( Dutch );
+        hashCode.Add( Korean );
+        hashCode.Add( Arabic );
+        return hashCode.ToHashCode();
+    }
+
+
+    public string GetValue( in SupportedLanguage language ) => language switch
+                                                               {
+                                                                   SupportedLanguage.English    => English,
+                                                                   SupportedLanguage.Spanish    => Spanish,
+                                                                   SupportedLanguage.French     => French,
+                                                                   SupportedLanguage.Swedish    => Swedish,
+                                                                   SupportedLanguage.German     => German,
+                                                                   SupportedLanguage.Chinese    => Chinese,
+                                                                   SupportedLanguage.Polish     => Polish,
+                                                                   SupportedLanguage.Thai       => Thai,
+                                                                   SupportedLanguage.Japanese   => Japanese,
+                                                                   SupportedLanguage.Czech      => Czech,
+                                                                   SupportedLanguage.Portuguese => Portuguese,
+                                                                   SupportedLanguage.Dutch      => Dutch,
+                                                                   SupportedLanguage.Korean     => Korean,
+                                                                   SupportedLanguage.Arabic     => Arabic,
+                                                                   _                            => throw new OutOfRangeException( nameof(language), language )
+                                                               } ?? Neutral;
+
     public ResxRowTable Update( string english,
                                 string spanish,
                                 string french,
@@ -98,57 +149,6 @@ public sealed record ResxRowTable : TableRecord<ResxRowTable>
             Arabic = arabic,
             LastModified = DateTimeOffset.UtcNow
         };
-
-
-    public string GetValue( in SupportedLanguage language ) => language switch
-                                                               {
-                                                                   SupportedLanguage.English    => English,
-                                                                   SupportedLanguage.Spanish    => Spanish,
-                                                                   SupportedLanguage.French     => French,
-                                                                   SupportedLanguage.Swedish    => Swedish,
-                                                                   SupportedLanguage.German     => German,
-                                                                   SupportedLanguage.Chinese    => Chinese,
-                                                                   SupportedLanguage.Polish     => Polish,
-                                                                   SupportedLanguage.Thai       => Thai,
-                                                                   SupportedLanguage.Japanese   => Japanese,
-                                                                   SupportedLanguage.Czech      => Czech,
-                                                                   SupportedLanguage.Portuguese => Portuguese,
-                                                                   SupportedLanguage.Dutch      => Dutch,
-                                                                   SupportedLanguage.Korean     => Korean,
-                                                                   SupportedLanguage.Arabic     => Arabic,
-                                                                   _                            => throw new OutOfRangeException( nameof(language), language )
-                                                               } ?? Neutral;
-
-
-    public override int CompareTo( ResxRowTable? other )
-    {
-        if (other is null) { return 1; }
-
-        if (ReferenceEquals( this, other )) { return 0; }
-
-        return string.Compare( Neutral, other.Neutral, StringComparison.Ordinal );
-    }
-    public override int GetHashCode()
-    {
-        var hashCode = new HashCode();
-        hashCode.Add( base.GetHashCode() );
-        hashCode.Add( Neutral );
-        hashCode.Add( English );
-        hashCode.Add( Spanish );
-        hashCode.Add( French );
-        hashCode.Add( Swedish );
-        hashCode.Add( German );
-        hashCode.Add( Chinese );
-        hashCode.Add( Polish );
-        hashCode.Add( Thai );
-        hashCode.Add( Japanese );
-        hashCode.Add( Czech );
-        hashCode.Add( Portuguese );
-        hashCode.Add( Dutch );
-        hashCode.Add( Korean );
-        hashCode.Add( Arabic );
-        return hashCode.ToHashCode();
-    }
     public override bool Equals( ResxRowTable? other )
     {
         if (other is null) { return false; }

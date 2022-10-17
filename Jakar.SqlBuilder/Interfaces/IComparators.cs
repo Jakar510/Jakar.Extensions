@@ -14,7 +14,7 @@ public interface IComparators<out TNext>
     /// <returns>
     ///     <typeparamref name = "TNext" />
     /// </returns>
-    public TNext Greater();
+    public TNext AboveOrBelow();
 
     /// <summary>
     ///     <para>
@@ -26,7 +26,18 @@ public interface IComparators<out TNext>
     /// <returns>
     ///     <typeparamref name = "TNext" />
     /// </returns>
-    public TNext LessThan();
+    public TNext Equal();
+    /// <summary>
+    ///     <para>
+    ///         Continues chain and goes to
+    ///         <typeparamref name = "TNext" />
+    ///         .
+    ///     </para>
+    /// </summary>
+    /// <returns>
+    ///     <typeparamref name = "TNext" />
+    /// </returns>
+    public TNext Greater();
 
     /// <summary>
     ///     <para>
@@ -50,6 +61,18 @@ public interface IComparators<out TNext>
     /// <returns>
     ///     <typeparamref name = "TNext" />
     /// </returns>
+    public TNext LessThan();
+
+    /// <summary>
+    ///     <para>
+    ///         Continues chain and goes to
+    ///         <typeparamref name = "TNext" />
+    ///         .
+    ///     </para>
+    /// </summary>
+    /// <returns>
+    ///     <typeparamref name = "TNext" />
+    /// </returns>
     public TNext LessThanOrEqual();
 
     /// <summary>
@@ -62,29 +85,5 @@ public interface IComparators<out TNext>
     /// <returns>
     ///     <typeparamref name = "TNext" />
     /// </returns>
-    public TNext Equal();
-
-    /// <summary>
-    ///     <para>
-    ///         Continues chain and goes to
-    ///         <typeparamref name = "TNext" />
-    ///         .
-    ///     </para>
-    /// </summary>
-    /// <returns>
-    ///     <typeparamref name = "TNext" />
-    /// </returns>
     public TNext NotEqual();
-
-    /// <summary>
-    ///     <para>
-    ///         Continues chain and goes to
-    ///         <typeparamref name = "TNext" />
-    ///         .
-    ///     </para>
-    /// </summary>
-    /// <returns>
-    ///     <typeparamref name = "TNext" />
-    /// </returns>
-    public TNext AboveOrBelow();
 }

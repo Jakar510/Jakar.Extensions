@@ -3,50 +3,6 @@
 
 public partial class WebBuilder
 {
-    public static IServerSideBlazorBuilder AddServerSideBlazor( this WebApplicationBuilder builder, Action<CircuitOptions>? configure = null ) => builder.Services.AddServerSideBlazor( configure );
-
-
-    /// <summary>
-    ///     Adds MVC services to the specified
-    ///     <see cref = "IServiceCollection" />
-    ///     .
-    /// </summary>
-    /// <param name = "builder" >
-    ///     The
-    ///     <see cref = "WebApplicationBuilder" />
-    ///     to add services to.
-    /// </param>
-    /// <returns>
-    ///     An
-    ///     <see cref = "IMvcBuilder" />
-    ///     that can be used to further configure the MVC services.
-    /// </returns>
-    public static IMvcBuilder AddMvc( this WebApplicationBuilder builder ) => builder.Services.AddMvc();
-
-    /// <summary>
-    ///     Adds MVC services to the specified
-    ///     <see cref = "IServiceCollection" />
-    ///     .
-    /// </summary>
-    /// <param name = "builder" >
-    ///     The
-    ///     <see cref = "WebApplicationBuilder" />
-    ///     to add services to.
-    /// </param>
-    /// <param name = "setupAction" >
-    ///     An
-    ///     <see cref = "Action{MvcOptions}" />
-    ///     to configure the provided
-    ///     <see cref = "MvcOptions" />
-    ///     .
-    /// </param>
-    /// <returns>
-    ///     An
-    ///     <see cref = "IMvcBuilder" />
-    ///     that can be used to further configure the MVC services.
-    /// </returns>
-    public static IMvcBuilder AddMvc( this WebApplicationBuilder builder, Action<MvcOptions> setupAction ) => builder.Services.AddMvc( setupAction );
-
     /// <summary>
     ///     Adds services for controllers to the specified
     ///     <see cref = "IServiceCollection" />
@@ -254,6 +210,48 @@ public partial class WebBuilder
 
 
     /// <summary>
+    ///     Adds MVC services to the specified
+    ///     <see cref = "IServiceCollection" />
+    ///     .
+    /// </summary>
+    /// <param name = "builder" >
+    ///     The
+    ///     <see cref = "WebApplicationBuilder" />
+    ///     to add services to.
+    /// </param>
+    /// <returns>
+    ///     An
+    ///     <see cref = "IMvcBuilder" />
+    ///     that can be used to further configure the MVC services.
+    /// </returns>
+    public static IMvcBuilder AddMvc( this WebApplicationBuilder builder ) => builder.Services.AddMvc();
+
+    /// <summary>
+    ///     Adds MVC services to the specified
+    ///     <see cref = "IServiceCollection" />
+    ///     .
+    /// </summary>
+    /// <param name = "builder" >
+    ///     The
+    ///     <see cref = "WebApplicationBuilder" />
+    ///     to add services to.
+    /// </param>
+    /// <param name = "setupAction" >
+    ///     An
+    ///     <see cref = "Action{MvcOptions}" />
+    ///     to configure the provided
+    ///     <see cref = "MvcOptions" />
+    ///     .
+    /// </param>
+    /// <returns>
+    ///     An
+    ///     <see cref = "IMvcBuilder" />
+    ///     that can be used to further configure the MVC services.
+    /// </returns>
+    public static IMvcBuilder AddMvc( this WebApplicationBuilder builder, Action<MvcOptions> setupAction ) => builder.Services.AddMvc( setupAction );
+
+
+    /// <summary>
     ///     Adds services for pages to the specified
     ///     <see cref = "IServiceCollection" />
     ///     .
@@ -347,4 +345,5 @@ public partial class WebBuilder
     ///     </para>
     /// </remarks>
     public static IMvcBuilder AddRazorPages( this WebApplicationBuilder builder, Action<RazorPagesOptions>? configure ) => builder.Services.AddRazorPages( configure );
+    public static IServerSideBlazorBuilder AddServerSideBlazor( this WebApplicationBuilder builder, Action<CircuitOptions>? configure = null ) => builder.Services.AddServerSideBlazor( configure );
 }

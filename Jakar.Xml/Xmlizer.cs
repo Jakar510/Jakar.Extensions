@@ -107,6 +107,9 @@ public static partial class Xmlizer
                                   typeof(TimeSpan) );
 
 
+    public static T FromXml<T>( this string xml, out IDictionary<string, string>? attributes ) where T : new() => Deserialize<T>( xml, out attributes );
+
+
     // Register(typeof(IPAddress),
     // typeof(DnsEndPoint),
     // typeof(SocketAddress));
@@ -129,8 +132,5 @@ public static partial class Xmlizer
 
         NodeNames.RegisterNodeName( type, nodeName );
     }
-
-
-    public static T FromXml<T>( this    string xml, out IDictionary<string, string>? attributes ) where T : new() => Deserialize<T>( xml, out attributes );
-    public static string ToXml<T>( this T      obj, in  IDictionary<string, string>? attributes = default ) => Serialize( obj, attributes );
+    public static string ToXml<T>( this T obj, in IDictionary<string, string>? attributes = default ) => Serialize( obj, attributes );
 }

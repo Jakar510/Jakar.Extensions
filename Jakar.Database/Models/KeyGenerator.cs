@@ -7,20 +7,20 @@ namespace Jakar.Database;
 [SuppressMessage( "ReSharper", "MemberCanBePrivate.Local" )]
 public sealed class KeyGenerator<TValue> : IEnumerator<long>
 {
-    private readonly IComparer<long> _comparer;
+    private readonly IComparer<long>                   _comparer;
     private readonly IReadOnlyDictionary<long, TValue> _dictionary;
-    private readonly List<long> _keys = new();
-    private int _index = -1;
-    public int Count => _keys.Count;
-    public long Current => _keys[_index];
-    object IEnumerator.Current => Current;
+    private readonly List<long>                        _keys  = new();
+    private          int                               _index = -1;
+    public           int                               Count   => _keys.Count;
+    public           long                              Current => _keys[_index];
+    object IEnumerator.                                Current => Current;
 
 
-    public KeyGenerator(IReadOnlyDictionary<long, TValue> dictionary) : this( dictionary, Comparer<long>.Default ) { }
-    public KeyGenerator(IReadOnlyDictionary<long, TValue> dictionary, IComparer<long> comparer)
+    public KeyGenerator( IReadOnlyDictionary<long, TValue> dictionary ) : this( dictionary, Comparer<long>.Default ) { }
+    public KeyGenerator( IReadOnlyDictionary<long, TValue> dictionary, IComparer<long> comparer )
     {
         _dictionary = dictionary;
-        _comparer = comparer;
+        _comparer   = comparer;
         Reset();
     }
     public void Dispose() => _keys.Clear();

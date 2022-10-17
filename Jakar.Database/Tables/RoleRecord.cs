@@ -35,14 +35,6 @@ public sealed record RoleRecord : TableRecord<RoleRecord>
     }
 
 
-    public IdentityRole ToIdentityRole() => new()
-                                            {
-                                                Name             = Name,
-                                                NormalizedName   = NormalizedName,
-                                                ConcurrencyStamp = ConcurrencyStamp
-                                            };
-
-
     public override int CompareTo( RoleRecord? other )
     {
         if (other is null) { return 1; }
@@ -59,6 +51,14 @@ public sealed record RoleRecord : TableRecord<RoleRecord>
         return string.Compare( ConcurrencyStamp, other.ConcurrencyStamp, StringComparison.Ordinal );
     }
     public override int GetHashCode() => HashCode.Combine( base.GetHashCode(), Name, NormalizedName, ConcurrencyStamp );
+
+
+    public IdentityRole ToIdentityRole() => new()
+                                            {
+                                                Name             = Name,
+                                                NormalizedName   = NormalizedName,
+                                                ConcurrencyStamp = ConcurrencyStamp
+                                            };
     public override bool Equals( RoleRecord? other )
     {
         if (other is null) { return false; }

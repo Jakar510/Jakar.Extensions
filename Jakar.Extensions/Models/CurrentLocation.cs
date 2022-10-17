@@ -70,6 +70,36 @@ public sealed class CurrentLocation<TID> : BaseJsonModel, ICurrentLocation<TID>,
             _                       => throw new OutOfRangeException( nameof(unit), unit )
         };
 
+
+    public double CalculateDistance( ICurrentLocation<TID> locationStart, in DistanceUnit units ) => CalculateDistance( locationStart,                                 this,           units );
+    public double CalculateDistance( in double             latitudeStart, in double       longitudeStart, in DistanceUnit units ) => CalculateDistance( latitudeStart, longitudeStart, this, units );
+    public bool EqualInstance( ICurrentLocation<TID>       other ) => InstanceID.Equals( other.InstanceID );
+    public override bool Equals( object? obj )
+    {
+        if (obj is null) { return false; }
+
+        if (ReferenceEquals( this, obj )) { return true; }
+
+        return obj is CurrentLocation<TID> location && Equals( location );
+    }
+    public override int GetHashCode()
+    {
+        var hashCode = new HashCode();
+        hashCode.Add( ID );
+        hashCode.Add( InstanceID );
+        hashCode.Add( Timestamp );
+        hashCode.Add( Latitude );
+        hashCode.Add( Longitude );
+        hashCode.Add( Altitude );
+        hashCode.Add( Accuracy );
+        hashCode.Add( VerticalAccuracy );
+        hashCode.Add( Speed );
+        hashCode.Add( Course );
+        hashCode.Add( IsFromMockProvider );
+        hashCode.Add( (int)AltitudeReferenceSystem );
+        return hashCode.ToHashCode();
+    }
+
     // private CurrentLocation( Location? point )
     // {
     //     InstanceID = Guid.NewGuid();
@@ -117,36 +147,6 @@ public sealed class CurrentLocation<TID> : BaseJsonModel, ICurrentLocation<TID>,
 
         return CalculateDistance( this, location, units ) <= maxDistance;
     }
-    public bool EqualInstance( ICurrentLocation<TID> other ) => InstanceID.Equals( other.InstanceID );
-    public override bool Equals( object? obj )
-    {
-        if (obj is null) { return false; }
-
-        if (ReferenceEquals( this, obj )) { return true; }
-
-        return obj is CurrentLocation<TID> location && Equals( location );
-    }
-    public override int GetHashCode()
-    {
-        var hashCode = new HashCode();
-        hashCode.Add( ID );
-        hashCode.Add( InstanceID );
-        hashCode.Add( Timestamp );
-        hashCode.Add( Latitude );
-        hashCode.Add( Longitude );
-        hashCode.Add( Altitude );
-        hashCode.Add( Accuracy );
-        hashCode.Add( VerticalAccuracy );
-        hashCode.Add( Speed );
-        hashCode.Add( Course );
-        hashCode.Add( IsFromMockProvider );
-        hashCode.Add( (int)AltitudeReferenceSystem );
-        return hashCode.ToHashCode();
-    }
-
-
-    public double CalculateDistance( ICurrentLocation<TID> locationStart, in DistanceUnit units ) => CalculateDistance( locationStart,                                 this,           units );
-    public double CalculateDistance( in double             latitudeStart, in double       longitudeStart, in DistanceUnit units ) => CalculateDistance( latitudeStart, longitudeStart, this, units );
     public bool Equals( ICurrentLocation<TID>? other )
     {
         if (other is null) { return false; }

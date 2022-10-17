@@ -8,10 +8,9 @@ namespace Jakar.SqlBuilder.Interfaces;
 
 public interface IJoin : IChainEnd<ISqlBuilderRoot>
 {
+    public IJoin Full( string  columnName );
     public IJoin Inner( string columnName );
     public IJoin Left( string  columnName );
-    public IJoin Right( string columnName );
-    public IJoin Full( string  columnName );
 
 
     /// <summary>
@@ -21,6 +20,7 @@ public interface IJoin : IChainEnd<ISqlBuilderRoot>
     ///     <see cref = "IJoinChain" />
     /// </returns>
     public IJoinChain On();
+    public IJoin Right( string columnName );
 }
 
 

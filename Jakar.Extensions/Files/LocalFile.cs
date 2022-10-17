@@ -81,26 +81,59 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     }
 
 
-    public static implicit operator LocalFile( string             info ) => new(info);
-    public static implicit operator LocalFile( FileInfo           info ) => new(info);
-    public static implicit operator LocalFile( Uri                info ) => new(info);
-    public static implicit operator LocalFile( ReadOnlySpan<char> info ) => new(info);
+    /// <summary> Changes the extension of the file. </summary>
+    /// <param name = "ext" > </param>
+    /// <returns>
+    ///     The modified path information. On Windows, if ext is null or empty, the path information is unchanged. If the extension is null, the returned path is with the extension removed. If the path
+    ///     has no extension, and the extension is not null, the returned string contains the extension appended to the end of the path.
+    /// </returns>
+    public LocalFile ChangeExtension( MimeType ext ) => ChangeExtension( ext.ToExtension() );
+
+    /// <summary> Changes the extension of the file. </summary>
+    /// <param name = "ext" > </param>
+    /// <returns>
+    ///     The modified path information. On Windows, if ext is null or empty, the path information is unchanged. If the extension is null, the returned path is with the extension removed. If the path
+    ///     has no extension, and the extension is not null, the returned string contains the extension appended to the end of the path.
+    /// </returns>
+    public LocalFile ChangeExtension( string? ext ) => Path.ChangeExtension( FullPath, ext );
+
+
+    /// <summary>
+    ///     Copies this file to the
+    ///     <paramref name = "newFile" />
+    /// </summary>
+    /// <param name = "newFile" > </param>
+    /// <param name = "token" > </param>
+    /// <returns> </returns>
+    public async ValueTask Clone( LocalFile newFile, CancellationToken token )
+    {
+        FileStream stream = OpenRead();
+        await newFile.WriteAsync( stream, token );
+    }
+
+
+    // ---------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+    public FileStream Create() => Info.Create();
 
 
     /// <summary> </summary>
-    /// <param name = "uri" > </param>
-    /// <exception cref = "ArgumentNullException" > </exception>
-    /// <exception cref = "SecurityException" > </exception>
+    /// <param name = "path" > </param>
+    /// <param name = "file" > </param>
+    /// <exception cref = "NullReferenceException" > </exception>
     /// <exception cref = "ArgumentException" > </exception>
-    /// <exception cref = "UnauthorizedAccessException" > </exception>
+    /// <exception cref = "ArgumentNullException" > </exception>
+    /// <exception cref = "FileNotFoundException" > </exception>
     /// <exception cref = "PathTooLongException" > </exception>
+    /// <exception cref = "DirectoryNotFoundException" > </exception>
+    /// <exception cref = "IOException" > </exception>
     /// <exception cref = "NotSupportedException" > </exception>
     /// <returns> </returns>
-    protected static FileInfo FromUri( Uri uri )
+    public static FileStream CreateAndOpen( string path, out LocalFile file )
     {
-        if (!uri.IsFile) { throw new ArgumentException( "Uri is not a file Uri.", nameof(uri) ); }
-
-        return new FileInfo( uri.AbsolutePath );
+        file = new LocalFile( path );
+        return File.Create( path );
     }
 
 
@@ -144,120 +177,6 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
         file.SetTemporary();
         return stream;
     }
-
-
-    /// <summary> </summary>
-    /// <param name = "path" > </param>
-    /// <param name = "file" > </param>
-    /// <exception cref = "NullReferenceException" > </exception>
-    /// <exception cref = "ArgumentException" > </exception>
-    /// <exception cref = "ArgumentNullException" > </exception>
-    /// <exception cref = "FileNotFoundException" > </exception>
-    /// <exception cref = "PathTooLongException" > </exception>
-    /// <exception cref = "DirectoryNotFoundException" > </exception>
-    /// <exception cref = "IOException" > </exception>
-    /// <exception cref = "NotSupportedException" > </exception>
-    /// <returns> </returns>
-    public static FileStream CreateAndOpen( string path, out LocalFile file )
-    {
-        file = new LocalFile( path );
-        return File.Create( path );
-    }
-
-
-    // ---------------------------------------------------------------------------------------------------------------------------------------------------
-
-
-    /// <summary>
-    ///     Write the
-    ///     <paramref name = "payload" />
-    ///     to the file.
-    /// </summary>
-    /// <param name = "payload" > the data being written to the file </param>
-    /// <param name = "path" > </param>
-    /// <param name = "token" > </param>
-    /// <exception cref = "ArgumentNullException" > </exception>
-    /// <exception cref = "WebException" > </exception>
-    /// <exception cref = "NotSupportedException" > </exception>
-    /// <returns> </returns>
-    public static async ValueTask<LocalFile> SaveToFileAsync( string path, Stream payload, CancellationToken token )
-    {
-        var file = new LocalFile( path );
-
-        await file.WriteAsync( payload, token )
-                  .ConfigureAwait( false );
-
-        return file;
-    }
-
-
-    /// <summary>
-    ///     Write the
-    ///     <paramref name = "payload" />
-    ///     to the file.
-    /// </summary>
-    /// <param name = "payload" > the data being written to the file </param>
-    /// <param name = "path" > </param>
-    /// <param name = "token" > </param>
-    /// <exception cref = "ArgumentNullException" > </exception>
-    /// <exception cref = "WebException" > </exception>
-    /// <exception cref = "NotSupportedException" > </exception>
-    /// <returns>
-    ///     <see cref = "LocalFile" />
-    /// </returns>
-    public static async ValueTask<LocalFile> SaveToFileAsync( string path, ReadOnlyMemory<byte> payload, CancellationToken token )
-    {
-        var file = new LocalFile( path );
-
-        await file.WriteAsync( payload, token )
-                  .ConfigureAwait( false );
-
-        return file;
-    }
-
-
-    // ---------------------------------------------------------------------------------------------------------------------------------------------------
-
-
-    public static bool operator ==( LocalFile? left, LocalFile? right ) => Equalizer.Instance.Equals( left, right );
-    public static bool operator !=( LocalFile? left, LocalFile? right ) => !Equalizer.Instance.Equals( left, right );
-    public static bool operator <( LocalFile?  left, LocalFile? right ) => Sorter.Instance.Compare( left, right ) < 0;
-    public static bool operator >( LocalFile?  left, LocalFile? right ) => Sorter.Instance.Compare( left, right ) > 0;
-    public static bool operator <=( LocalFile? left, LocalFile? right ) => Sorter.Instance.Compare( left, right ) <= 0;
-    public static bool operator >=( LocalFile? left, LocalFile? right ) => Sorter.Instance.Compare( left, right ) >= 0;
-
-
-    public sealed override string ToString() => FullPath;
-
-
-    /// <summary> Changes the extension of the file. </summary>
-    /// <param name = "ext" > </param>
-    /// <returns>
-    ///     The modified path information. On Windows, if ext is null or empty, the path information is unchanged. If the extension is null, the returned path is with the extension removed. If the path
-    ///     has no extension, and the extension is not null, the returned string contains the extension appended to the end of the path.
-    /// </returns>
-    public LocalFile ChangeExtension( MimeType ext ) => ChangeExtension( ext.ToExtension() );
-
-    /// <summary> Changes the extension of the file. </summary>
-    /// <param name = "ext" > </param>
-    /// <returns>
-    ///     The modified path information. On Windows, if ext is null or empty, the path information is unchanged. If the extension is null, the returned path is with the extension removed. If the path
-    ///     has no extension, and the extension is not null, the returned string contains the extension appended to the end of the path.
-    /// </returns>
-    public LocalFile ChangeExtension( string? ext ) => Path.ChangeExtension( FullPath, ext );
-
-
-    /// <summary> Permanently deletes a file. </summary>
-    public void Delete() => Info.Delete();
-
-
-    /// <summary> Encrypts the file so that only the account used to encrypt the file can decrypt it. </summary>
-    public void Encrypt()
-    {
-        if (!RuntimeInformation.IsOSPlatform( OSPlatform.Windows )) { throw new InvalidOperationException(); }
-
-        File.Encrypt( FullPath );
-    }
     /// <summary>
     ///     Decrypts a file that was encrypted by the current account using the
     ///     <see cref = "File.Encrypt(string)" />
@@ -271,114 +190,52 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     }
 
 
-    /// <summary>
-    ///     Creates an
-    ///     <see cref = "UriKind.Absolute" />
-    ///     based on the detected
-    ///     <see cref = "Mime" />
-    /// </summary>
-    /// <param name = "mime" >
-    ///     To override the detected
-    ///     <see cref = "Mime" />
-    ///     , provide a non-null value
-    /// </param>
-    /// <returns> </returns>
-    public Uri ToUri( MimeType? mime = null )
+    /// <summary> Permanently deletes a file. </summary>
+    public void Delete() => Info.Delete();
+    protected virtual void Dispose( bool remove )
     {
-        if (string.IsNullOrWhiteSpace( FullPath )) { throw new NullReferenceException( nameof(FullPath) ); }
-
-        MimeType type = mime ?? Mime;
-
-        if (!FullPath.StartsWith( "/", StringComparison.InvariantCultureIgnoreCase )) { return new Uri( $"{type.ToUriScheme()}://{FullPath}", UriKind.Absolute ); }
-
-        string path = FullPath.Remove( 0, 1 );
-        return new Uri( $"{type.ToUriScheme()}://{path}", UriKind.Absolute );
-    }
-
-    /// <summary>
-    ///     Creates a
-    ///     <see cref = "Uri" />
-    ///     using provided prefix, and
-    ///     <see cref = "HttpUtility.UrlEncode(string)" />
-    ///     to encode the
-    ///     <see cref = "FullPath" />
-    ///     .
-    /// </summary>
-    /// <param name = "baseUri" > </param>
-    /// <param name = "prefix" >
-    ///     The key to attach the
-    ///     <see cref = "FullPath" />
-    ///     to. Defaults to "?path="
-    /// </param>
-    /// <param name = "mime" >
-    ///     To override the detected
-    ///     <see cref = "Mime" />
-    ///     , provide a non-null value
-    /// </param>
-    /// <returns> </returns>
-    public Uri ToUri( Uri baseUri, in string prefix = "?path=", MimeType? mime = null )
-    {
-        if (string.IsNullOrWhiteSpace( FullPath )) { throw new NullReferenceException( nameof(FullPath) ); }
-
-        MimeType type = mime ?? Mime;
-
-        if (!FullPath.StartsWith( "/", StringComparison.InvariantCultureIgnoreCase )) { return new Uri( $"{type.ToUriScheme()}://{FullPath}", UriKind.Absolute ); }
-
-        return new Uri( baseUri, $"{prefix}{HttpUtility.UrlEncode( FullPath )}" );
+        if (remove && Exists) { Delete(); }
     }
 
 
-    public ValueTask<LocalFile> ZipAsync( CancellationToken   token, params string[]    args ) => ZipAsync( args,                                           token );
-    public ValueTask<LocalFile> ZipAsync( IEnumerable<string> files, CancellationToken  token ) => ZipAsync( files.Select( item => new LocalFile( item ) ), token );
-    public ValueTask<LocalFile> ZipAsync( CancellationToken   token, params LocalFile[] files ) => ZipAsync( files,                                         token );
-    public async ValueTask<LocalFile> ZipAsync( IEnumerable<LocalFile> items, CancellationToken token )
+    /// <summary> Encrypts the file so that only the account used to encrypt the file can decrypt it. </summary>
+    public void Encrypt()
     {
-        if (items is null) { throw new ArgumentNullException( nameof(items) ); }
+        if (!RuntimeInformation.IsOSPlatform( OSPlatform.Windows )) { throw new InvalidOperationException(); }
 
-        await using FileStream zipToOpen = File.Create( FullPath );
-        using var              archive   = new ZipArchive( zipToOpen, ZipArchiveMode.Update );
+        File.Encrypt( FullPath );
+    }
 
-        foreach (LocalFile file in items)
+
+    public override bool Equals( object? other ) => other is LocalFile file && Equals( file );
+
+
+    /// <summary> </summary>
+    /// <param name = "uri" > </param>
+    /// <exception cref = "ArgumentNullException" > </exception>
+    /// <exception cref = "SecurityException" > </exception>
+    /// <exception cref = "ArgumentException" > </exception>
+    /// <exception cref = "UnauthorizedAccessException" > </exception>
+    /// <exception cref = "PathTooLongException" > </exception>
+    /// <exception cref = "NotSupportedException" > </exception>
+    /// <returns> </returns>
+    protected static FileInfo FromUri( Uri uri )
+    {
+        if (!uri.IsFile) { throw new ArgumentException( "Uri is not a file Uri.", nameof(uri) ); }
+
+        return new FileInfo( uri.AbsolutePath );
+    }
+    public override int GetHashCode() => HashCode.Combine( FullPath, this.IsTempFile() );
+
+    protected string Hash( HashAlgorithm hasher )
+    {
+        using (hasher)
         {
-            ZipArchiveEntry    entry  = archive.CreateEntry( file.FullPath );
-            await using Stream stream = entry.Open();
-
-            ReadOnlyMemory<byte> data = await file.ReadAsync()
-                                                  .AsMemory( token );
-
-            await stream.WriteAsync( data, token );
+            using FileStream stream = OpenRead();
+            byte[]           hash   = hasher.ComputeHash( stream );
+            return BitConverter.ToString( hash );
         }
-
-        return this;
     }
-
-
-    /// <summary>
-    ///     Copies this file to the
-    ///     <paramref name = "newFile" />
-    /// </summary>
-    /// <param name = "newFile" > </param>
-    /// <param name = "token" > </param>
-    /// <returns> </returns>
-    public async ValueTask Clone( LocalFile newFile, CancellationToken token )
-    {
-        FileStream stream = OpenRead();
-        await newFile.WriteAsync( stream, token );
-    }
-
-    /// <summary>
-    ///     Moves this file to the new
-    ///     <paramref name = "path" />
-    /// </summary>
-    /// <param name = "path" > </param>
-    public void Move( string path ) => Info.MoveTo( path );
-    /// <summary>
-    ///     Moves this file to the new
-    ///     <paramref name = "file" />
-    ///     location
-    /// </summary>
-    /// <param name = "file" > </param>
-    public void Move( LocalFile file ) => Info.MoveTo( file.FullPath );
 
 
     /// <summary>
@@ -407,21 +264,36 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     /// </summary>
     public string Hash_SHA512() => Hash( SHA512.Create() );
 
-    protected string Hash( HashAlgorithm hasher )
-    {
-        using (hasher)
-        {
-            using FileStream stream = OpenRead();
-            byte[]           hash   = hasher.ComputeHash( stream );
-            return BitConverter.ToString( hash );
-        }
-    }
+    /// <summary>
+    ///     Moves this file to the new
+    ///     <paramref name = "path" />
+    /// </summary>
+    /// <param name = "path" > </param>
+    public void Move( string path ) => Info.MoveTo( path );
+    /// <summary>
+    ///     Moves this file to the new
+    ///     <paramref name = "file" />
+    ///     location
+    /// </summary>
+    /// <param name = "file" > </param>
+    public void Move( LocalFile file ) => Info.MoveTo( file.FullPath );
 
 
     // ---------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-    public FileStream Create() => Info.Create();
+    public static bool operator ==( LocalFile? left, LocalFile? right ) => Equalizer.Instance.Equals( left, right );
+    public static bool operator >( LocalFile?  left, LocalFile? right ) => Sorter.Instance.Compare( left, right ) > 0;
+    public static bool operator >=( LocalFile? left, LocalFile? right ) => Sorter.Instance.Compare( left, right ) >= 0;
+
+
+    public static implicit operator LocalFile( string             info ) => new(info);
+    public static implicit operator LocalFile( FileInfo           info ) => new(info);
+    public static implicit operator LocalFile( Uri                info ) => new(info);
+    public static implicit operator LocalFile( ReadOnlySpan<char> info ) => new(info);
+    public static bool operator !=( LocalFile?                    left, LocalFile? right ) => !Equalizer.Instance.Equals( left, right );
+    public static bool operator <( LocalFile?                     left, LocalFile? right ) => Sorter.Instance.Compare( left, right ) < 0;
+    public static bool operator <=( LocalFile?                    left, LocalFile? right ) => Sorter.Instance.Compare( left, right ) <= 0;
 
     /// <summary>
     ///     <para>
@@ -654,6 +526,117 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     ///     to the file.
     /// </summary>
     /// <param name = "payload" > the data being written to the file </param>
+    /// <param name = "path" > </param>
+    /// <param name = "token" > </param>
+    /// <exception cref = "ArgumentNullException" > </exception>
+    /// <exception cref = "WebException" > </exception>
+    /// <exception cref = "NotSupportedException" > </exception>
+    /// <returns> </returns>
+    public static async ValueTask<LocalFile> SaveToFileAsync( string path, Stream payload, CancellationToken token )
+    {
+        var file = new LocalFile( path );
+
+        await file.WriteAsync( payload, token )
+                  .ConfigureAwait( false );
+
+        return file;
+    }
+
+
+    /// <summary>
+    ///     Write the
+    ///     <paramref name = "payload" />
+    ///     to the file.
+    /// </summary>
+    /// <param name = "payload" > the data being written to the file </param>
+    /// <param name = "path" > </param>
+    /// <param name = "token" > </param>
+    /// <exception cref = "ArgumentNullException" > </exception>
+    /// <exception cref = "WebException" > </exception>
+    /// <exception cref = "NotSupportedException" > </exception>
+    /// <returns>
+    ///     <see cref = "LocalFile" />
+    /// </returns>
+    public static async ValueTask<LocalFile> SaveToFileAsync( string path, ReadOnlyMemory<byte> payload, CancellationToken token )
+    {
+        var file = new LocalFile( path );
+
+        await file.WriteAsync( payload, token )
+                  .ConfigureAwait( false );
+
+        return file;
+    }
+
+
+    public sealed override string ToString() => FullPath;
+
+
+    /// <summary>
+    ///     Creates an
+    ///     <see cref = "UriKind.Absolute" />
+    ///     based on the detected
+    ///     <see cref = "Mime" />
+    /// </summary>
+    /// <param name = "mime" >
+    ///     To override the detected
+    ///     <see cref = "Mime" />
+    ///     , provide a non-null value
+    /// </param>
+    /// <returns> </returns>
+    public Uri ToUri( MimeType? mime = null )
+    {
+        if (string.IsNullOrWhiteSpace( FullPath )) { throw new NullReferenceException( nameof(FullPath) ); }
+
+        MimeType type = mime ?? Mime;
+
+        if (!FullPath.StartsWith( "/", StringComparison.InvariantCultureIgnoreCase )) { return new Uri( $"{type.ToUriScheme()}://{FullPath}", UriKind.Absolute ); }
+
+        string path = FullPath.Remove( 0, 1 );
+        return new Uri( $"{type.ToUriScheme()}://{path}", UriKind.Absolute );
+    }
+
+    /// <summary>
+    ///     Creates a
+    ///     <see cref = "Uri" />
+    ///     using provided prefix, and
+    ///     <see cref = "HttpUtility.UrlEncode(string)" />
+    ///     to encode the
+    ///     <see cref = "FullPath" />
+    ///     .
+    /// </summary>
+    /// <param name = "baseUri" > </param>
+    /// <param name = "prefix" >
+    ///     The key to attach the
+    ///     <see cref = "FullPath" />
+    ///     to. Defaults to "?path="
+    /// </param>
+    /// <param name = "mime" >
+    ///     To override the detected
+    ///     <see cref = "Mime" />
+    ///     , provide a non-null value
+    /// </param>
+    /// <returns> </returns>
+    public Uri ToUri( Uri baseUri, in string prefix = "?path=", MimeType? mime = null )
+    {
+        if (string.IsNullOrWhiteSpace( FullPath )) { throw new NullReferenceException( nameof(FullPath) ); }
+
+        MimeType type = mime ?? Mime;
+
+        if (!FullPath.StartsWith( "/", StringComparison.InvariantCultureIgnoreCase )) { return new Uri( $"{type.ToUriScheme()}://{FullPath}", UriKind.Absolute ); }
+
+        return new Uri( baseUri, $"{prefix}{HttpUtility.UrlEncode( FullPath )}" );
+    }
+
+
+    // ---------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+    /// <summary>
+    ///     Write the
+    ///     <paramref name = "payload" />
+    ///     to the file.
+    /// </summary>
+    /// <param name = "payload" > the data being written to the file </param>
     /// <exception cref = "NullReferenceException" > </exception>
     /// <exception cref = "ArgumentException" > </exception>
     /// <exception cref = "ArgumentNullException" > </exception>
@@ -678,23 +661,6 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     /// <returns>
     ///     <see cref = "ValueTask" />
     /// </returns>
-    public ValueTask WriteAsync( StringBuilder payload ) => WriteAsync( payload.ToString() );
-    public ValueTask WriteAsync( in ValueStringBuilder payload ) => WriteAsync( payload.ToString() );
-
-
-    /// <summary>
-    ///     Write the
-    ///     <paramref name = "payload" />
-    ///     to the file.
-    /// </summary>
-    /// <param name = "payload" > the data being written to the file </param>
-    /// <exception cref = "NullReferenceException" > </exception>
-    /// <exception cref = "ArgumentException" > </exception>
-    /// <exception cref = "ArgumentNullException" > </exception>
-    /// <exception cref = "FileNotFoundException" > </exception>
-    /// <returns>
-    ///     <see cref = "ValueTask" />
-    /// </returns>
     public void Write( string payload )
     {
         if (string.IsNullOrWhiteSpace( payload )) { throw new ArgumentNullException( nameof(payload) ); }
@@ -702,29 +668,6 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
         using FileStream stream = Create();
         using var        writer = new StreamWriter( stream, FileEncoding );
         writer.Write( payload );
-    }
-    /// <summary>
-    ///     Write the
-    ///     <paramref name = "payload" />
-    ///     to the file.
-    /// </summary>
-    /// <param name = "payload" > the data being written to the file </param>
-    /// <exception cref = "NullReferenceException" > </exception>
-    /// <exception cref = "ArgumentException" > </exception>
-    /// <exception cref = "ArgumentNullException" > </exception>
-    /// <exception cref = "FileNotFoundException" > </exception>
-    /// <returns>
-    ///     <see cref = "ValueTask" />
-    /// </returns>
-    public async ValueTask WriteAsync( string payload )
-    {
-        if (string.IsNullOrWhiteSpace( payload )) { throw new ArgumentNullException( nameof(payload) ); }
-
-        await using FileStream stream = Create();
-        await using var        writer = new StreamWriter( stream, FileEncoding );
-
-        await writer.WriteAsync( payload )
-                    .ConfigureAwait( false );
     }
 
 
@@ -746,28 +689,6 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
 
         using FileStream stream = Create();
         stream.Write( payload, 0, payload.Length );
-    }
-    /// <summary>
-    ///     Write the
-    ///     <paramref name = "payload" />
-    ///     to the file.
-    /// </summary>
-    /// <param name = "payload" > the data being written to the file </param>
-    /// <param name = "token" > </param>
-    /// <exception cref = "NullReferenceException" > </exception>
-    /// <exception cref = "ArgumentException" > </exception>
-    /// <exception cref = "FileNotFoundException" > </exception>
-    /// <returns>
-    ///     <see cref = "ValueTask" />
-    /// </returns>
-    public async ValueTask WriteAsync( byte[] payload, CancellationToken token )
-    {
-        if (payload.Length == 0) { throw new ArgumentException( @"payload.Length == 0", nameof(payload) ); }
-
-        await using FileStream stream = Create();
-
-        await stream.WriteAsync( payload, token )
-                    .ConfigureAwait( false );
     }
 
 
@@ -829,28 +750,6 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     ///     <see cref = "ValueTask" />
     /// </returns>
     public void Write( in ReadOnlyMemory<byte> payload ) => Write( payload.ToArray() );
-    /// <summary>
-    ///     Write the
-    ///     <paramref name = "payload" />
-    ///     to the file.
-    /// </summary>
-    /// <param name = "payload" > the data being written to the file </param>
-    /// <param name = "token" > </param>
-    /// <exception cref = "NullReferenceException" > </exception>
-    /// <exception cref = "ArgumentException" > </exception>
-    /// <exception cref = "FileNotFoundException" > </exception>
-    /// <returns>
-    ///     <see cref = "ValueTask" />
-    /// </returns>
-    public async ValueTask WriteAsync( ReadOnlyMemory<byte> payload, CancellationToken token )
-    {
-        if (payload.Length == 0) { throw new ArgumentException( @"payload.Length == 0", nameof(payload) ); }
-
-        await using FileStream stream = Create();
-
-        await stream.WriteAsync( payload, token )
-                    .ConfigureAwait( false );
-    }
 
 
     /// <summary>
@@ -873,27 +772,6 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
         using FileStream stream = Create();
         using var        writer = new StreamWriter( stream, FileEncoding );
         writer.Write( payload );
-    }
-    /// <summary>
-    ///     Write the
-    ///     <paramref name = "payload" />
-    ///     to the file.
-    /// </summary>
-    /// <param name = "payload" > the data being written to the file </param>
-    /// <param name = "token" > </param>
-    /// <exception cref = "NullReferenceException" > </exception>
-    /// <exception cref = "ArgumentException" > </exception>
-    /// <exception cref = "FileNotFoundException" > </exception>
-    /// <returns>
-    ///     <see cref = "ValueTask" />
-    /// </returns>
-    public async ValueTask WriteAsync( ReadOnlyMemory<char> payload, CancellationToken token )
-    {
-        await using FileStream stream = Create();
-        await using var        writer = new StreamWriter( stream, FileEncoding );
-
-        await writer.WriteAsync( payload, token )
-                    .ConfigureAwait( false );
     }
 
 
@@ -918,6 +796,111 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
         payload.CopyTo( memory );
         ReadOnlySpan<byte> data = memory.ToArray();
         Write( data );
+    }
+
+
+    /// <summary>
+    ///     Write the
+    ///     <paramref name = "payload" />
+    ///     to the file.
+    /// </summary>
+    /// <param name = "payload" > the data being written to the file </param>
+    /// <exception cref = "NullReferenceException" > </exception>
+    /// <exception cref = "ArgumentException" > </exception>
+    /// <exception cref = "ArgumentNullException" > </exception>
+    /// <exception cref = "FileNotFoundException" > </exception>
+    /// <returns>
+    ///     <see cref = "ValueTask" />
+    /// </returns>
+    public ValueTask WriteAsync( StringBuilder payload ) => WriteAsync( payload.ToString() );
+    public ValueTask WriteAsync( in ValueStringBuilder payload ) => WriteAsync( payload.ToString() );
+    /// <summary>
+    ///     Write the
+    ///     <paramref name = "payload" />
+    ///     to the file.
+    /// </summary>
+    /// <param name = "payload" > the data being written to the file </param>
+    /// <exception cref = "NullReferenceException" > </exception>
+    /// <exception cref = "ArgumentException" > </exception>
+    /// <exception cref = "ArgumentNullException" > </exception>
+    /// <exception cref = "FileNotFoundException" > </exception>
+    /// <returns>
+    ///     <see cref = "ValueTask" />
+    /// </returns>
+    public async ValueTask WriteAsync( string payload )
+    {
+        if (string.IsNullOrWhiteSpace( payload )) { throw new ArgumentNullException( nameof(payload) ); }
+
+        await using FileStream stream = Create();
+        await using var        writer = new StreamWriter( stream, FileEncoding );
+
+        await writer.WriteAsync( payload )
+                    .ConfigureAwait( false );
+    }
+    /// <summary>
+    ///     Write the
+    ///     <paramref name = "payload" />
+    ///     to the file.
+    /// </summary>
+    /// <param name = "payload" > the data being written to the file </param>
+    /// <param name = "token" > </param>
+    /// <exception cref = "NullReferenceException" > </exception>
+    /// <exception cref = "ArgumentException" > </exception>
+    /// <exception cref = "FileNotFoundException" > </exception>
+    /// <returns>
+    ///     <see cref = "ValueTask" />
+    /// </returns>
+    public async ValueTask WriteAsync( byte[] payload, CancellationToken token )
+    {
+        if (payload.Length == 0) { throw new ArgumentException( @"payload.Length == 0", nameof(payload) ); }
+
+        await using FileStream stream = Create();
+
+        await stream.WriteAsync( payload, token )
+                    .ConfigureAwait( false );
+    }
+    /// <summary>
+    ///     Write the
+    ///     <paramref name = "payload" />
+    ///     to the file.
+    /// </summary>
+    /// <param name = "payload" > the data being written to the file </param>
+    /// <param name = "token" > </param>
+    /// <exception cref = "NullReferenceException" > </exception>
+    /// <exception cref = "ArgumentException" > </exception>
+    /// <exception cref = "FileNotFoundException" > </exception>
+    /// <returns>
+    ///     <see cref = "ValueTask" />
+    /// </returns>
+    public async ValueTask WriteAsync( ReadOnlyMemory<byte> payload, CancellationToken token )
+    {
+        if (payload.Length == 0) { throw new ArgumentException( @"payload.Length == 0", nameof(payload) ); }
+
+        await using FileStream stream = Create();
+
+        await stream.WriteAsync( payload, token )
+                    .ConfigureAwait( false );
+    }
+    /// <summary>
+    ///     Write the
+    ///     <paramref name = "payload" />
+    ///     to the file.
+    /// </summary>
+    /// <param name = "payload" > the data being written to the file </param>
+    /// <param name = "token" > </param>
+    /// <exception cref = "NullReferenceException" > </exception>
+    /// <exception cref = "ArgumentException" > </exception>
+    /// <exception cref = "FileNotFoundException" > </exception>
+    /// <returns>
+    ///     <see cref = "ValueTask" />
+    /// </returns>
+    public async ValueTask WriteAsync( ReadOnlyMemory<char> payload, CancellationToken token )
+    {
+        await using FileStream stream = Create();
+        await using var        writer = new StreamWriter( stream, FileEncoding );
+
+        await writer.WriteAsync( payload, token )
+                    .ConfigureAwait( false );
     }
     /// <summary>
     ///     Write the
@@ -944,14 +927,31 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
         await WriteAsync( data, token )
            .ConfigureAwait( false );
     }
-    public override int GetHashCode() => HashCode.Combine( FullPath, this.IsTempFile() );
-    protected virtual void Dispose( bool remove )
+
+
+    public ValueTask<LocalFile> ZipAsync( CancellationToken   token, params string[]    args ) => ZipAsync( args,                                           token );
+    public ValueTask<LocalFile> ZipAsync( IEnumerable<string> files, CancellationToken  token ) => ZipAsync( files.Select( item => new LocalFile( item ) ), token );
+    public ValueTask<LocalFile> ZipAsync( CancellationToken   token, params LocalFile[] files ) => ZipAsync( files,                                         token );
+    public async ValueTask<LocalFile> ZipAsync( IEnumerable<LocalFile> items, CancellationToken token )
     {
-        if (remove && Exists) { Delete(); }
+        if (items is null) { throw new ArgumentNullException( nameof(items) ); }
+
+        await using FileStream zipToOpen = File.Create( FullPath );
+        using var              archive   = new ZipArchive( zipToOpen, ZipArchiveMode.Update );
+
+        foreach (LocalFile file in items)
+        {
+            ZipArchiveEntry    entry  = archive.CreateEntry( file.FullPath );
+            await using Stream stream = entry.Open();
+
+            ReadOnlyMemory<byte> data = await file.ReadAsync()
+                                                  .AsMemory( token );
+
+            await stream.WriteAsync( data, token );
+        }
+
+        return this;
     }
-
-
-    public override bool Equals( object? other ) => other is LocalFile file && Equals( file );
 
 
     async ValueTask<string> IAsyncReadHandler.AsString()
@@ -1145,6 +1145,35 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
 
     public interface IReadHandler
     {
+        /// <summary> Reads the contents of the file as a byte array. </summary>
+        /// <exception cref = "NullReferenceException" > if FullPath is null or empty </exception>
+        /// <exception cref = "FileNotFoundException" > if file is not found </exception>
+        /// <returns>
+        ///     <see cref = "byte[]" />
+        /// </returns>
+        byte[] AsBytes();
+        /// <summary>
+        ///     Reads the contents of the file as a
+        ///     <see cref = "string" />
+        ///     .
+        /// </summary>
+        /// <exception cref = "NullReferenceException" > if FullPath is null or empty </exception>
+        /// <exception cref = "FileNotFoundException" > if file is not found </exception>
+        /// <returns>
+        ///     <see cref = "string" />
+        /// </returns>
+        T AsJson<T>();
+        /// <summary>
+        ///     Reads the contents of the file as a
+        ///     <see cref = "ReadOnlyMemory{byte}" />
+        ///     .
+        /// </summary>
+        /// <exception cref = "NullReferenceException" > if FullPath is null or empty </exception>
+        /// <exception cref = "FileNotFoundException" > if file is not found </exception>
+        /// <returns>
+        ///     <see cref = "ReadOnlyMemory{byte}" />
+        /// </returns>
+        ReadOnlyMemory<byte> AsMemory();
         /// <summary>
         ///     Reads the contents of the file as a
         ///     <see cref = "ReadOnlySpan{byte}" />
@@ -1168,41 +1197,19 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
         ///     <see cref = "string" />
         /// </returns>
         string AsString();
-        /// <summary>
-        ///     Reads the contents of the file as a
-        ///     <see cref = "string" />
-        ///     .
-        /// </summary>
-        /// <exception cref = "NullReferenceException" > if FullPath is null or empty </exception>
-        /// <exception cref = "FileNotFoundException" > if file is not found </exception>
-        /// <returns>
-        ///     <see cref = "string" />
-        /// </returns>
-        T AsJson<T>();
-        /// <summary> Reads the contents of the file as a byte array. </summary>
-        /// <exception cref = "NullReferenceException" > if FullPath is null or empty </exception>
-        /// <exception cref = "FileNotFoundException" > if file is not found </exception>
-        /// <returns>
-        ///     <see cref = "byte[]" />
-        /// </returns>
-        byte[] AsBytes();
-        /// <summary>
-        ///     Reads the contents of the file as a
-        ///     <see cref = "ReadOnlyMemory{byte}" />
-        ///     .
-        /// </summary>
-        /// <exception cref = "NullReferenceException" > if FullPath is null or empty </exception>
-        /// <exception cref = "FileNotFoundException" > if file is not found </exception>
-        /// <returns>
-        ///     <see cref = "ReadOnlyMemory{byte}" />
-        /// </returns>
-        ReadOnlyMemory<byte> AsMemory();
     }
 
 
 
     public interface IAsyncReadHandler
     {
+        /// <summary> Reads the contents of the file as a byte array. </summary>
+        /// <exception cref = "NullReferenceException" > if FullPath is null or empty </exception>
+        /// <exception cref = "FileNotFoundException" > if file is not found </exception>
+        /// <returns>
+        ///     <see cref = "byte[]" />
+        /// </returns>
+        ValueTask<byte[]> AsBytes( CancellationToken token );
         /// <summary>
         ///     Reads the contents of the file as a
         ///     <see cref = "string" />
@@ -1219,25 +1226,8 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
         /// </returns>
         ValueTask<T> AsJson<T>();
 
-        /// <summary>
-        ///     Reads the contents of the file as a
-        ///     <see cref = "string" />
-        ///     , asynchronously.
-        /// </summary>
-        /// <exception cref = "NullReferenceException" > if FullPath is null or empty </exception>
-        /// <exception cref = "FileNotFoundException" > if file is not found </exception>
-        /// <returns>
-        ///     <see cref = "string" />
-        /// </returns>
-        ValueTask<string> AsString();
 
-        /// <summary> Reads the contents of the file as a byte array. </summary>
-        /// <exception cref = "NullReferenceException" > if FullPath is null or empty </exception>
-        /// <exception cref = "FileNotFoundException" > if file is not found </exception>
-        /// <returns>
-        ///     <see cref = "byte[]" />
-        /// </returns>
-        ValueTask<byte[]> AsBytes( CancellationToken token );
+        IAsyncEnumerable<string> AsLines();
 
         /// <summary>
         ///     Reads the contents of the file as a
@@ -1255,8 +1245,17 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
 
         ValueTask<MemoryStream> AsStream( CancellationToken token );
 
-
-        IAsyncEnumerable<string> AsLines();
+        /// <summary>
+        ///     Reads the contents of the file as a
+        ///     <see cref = "string" />
+        ///     , asynchronously.
+        /// </summary>
+        /// <exception cref = "NullReferenceException" > if FullPath is null or empty </exception>
+        /// <exception cref = "FileNotFoundException" > if file is not found </exception>
+        /// <returns>
+        ///     <see cref = "string" />
+        /// </returns>
+        ValueTask<string> AsString();
     }
 
 
@@ -1286,6 +1285,14 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
             _watcher.EnableRaisingEvents =  true;
         }
         public event ErrorEventHandler? Error;
+        private void OnChanged( object sender, FileSystemEventArgs e )
+        {
+            var file = new LocalFile( e.FullPath );
+            Replaced( file, file );
+        }
+        private void OnCreated( object sender, FileSystemEventArgs e ) => Add( e.FullPath );
+        private void OnDeleted( object sender, FileSystemEventArgs e ) => Remove( e.FullPath );
+        private void OnError( object   sender, ErrorEventArgs      e ) => Error?.Invoke( sender, e );
 
 
         private void OnRenamed( object sender, RenamedEventArgs e )
@@ -1295,14 +1302,6 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
 
             Add( e.FullPath );
         }
-        private void OnDeleted( object sender, FileSystemEventArgs e ) => Remove( e.FullPath );
-        private void OnChanged( object sender, FileSystemEventArgs e )
-        {
-            var file = new LocalFile( e.FullPath );
-            Replaced( file, file );
-        }
-        private void OnCreated( object sender, FileSystemEventArgs e ) => Add( e.FullPath );
-        private void OnError( object   sender, ErrorEventArgs      e ) => Error?.Invoke( sender, e );
 
 
         public void Dispose()

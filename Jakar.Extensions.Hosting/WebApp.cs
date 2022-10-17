@@ -5,21 +5,6 @@
 [SuppressMessage( "ReSharper", "ParameterTypeCanBeEnumerable.Global" )]
 public static class WebApp
 {
-    public static void ParsePort( this string[] args, in ReadOnlySpan<char> key, in int defaultPort, out int port )
-    {
-        port = defaultPort;
-
-        foreach (ReadOnlySpan<char> arg in args)
-        {
-            if (arg.StartsWith( key ))
-            {
-                port = int.Parse( arg[key.Length..] );
-                return;
-            }
-        }
-    }
-
-
     public static bool CheckArgs<TEnum>( this string[] args, in string version, string message, params string[] enumTriggers ) where TEnum : struct, Enum
     {
         if (args.Any( enumTriggers.Contains ))
@@ -63,6 +48,19 @@ public static class WebApp
                    };
 
             useSLL = false;
+        }
+    }
+    public static void ParsePort( this string[] args, in ReadOnlySpan<char> key, in int defaultPort, out int port )
+    {
+        port = defaultPort;
+
+        foreach (ReadOnlySpan<char> arg in args)
+        {
+            if (arg.StartsWith( key ))
+            {
+                port = int.Parse( arg[key.Length..] );
+                return;
+            }
         }
     }
 

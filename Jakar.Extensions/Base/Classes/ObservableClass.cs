@@ -18,66 +18,6 @@ public abstract class ObservableClass : BaseClass, INotifyPropertyChanged, INoti
     /// <summary>
     ///     <para>
     ///         Checks the values with
-    ///         <see cref = "EqualityComparer{T}.Default" />
-    ///         .
-    ///     </para>
-    ///     Then calls
-    ///     <see cref = "OnPropertyChanging(string)" />
-    ///     , sets the value, then calls
-    ///     <see cref = "OnPropertyChanged(string)" />
-    /// </summary>
-    /// <typeparam name = "T" > </typeparam>
-    /// <param name = "backingStore" > </param>
-    /// <param name = "value" > </param>
-    /// <returns>
-    ///     <para>
-    ///         Returns
-    ///         <see langword = "false" />
-    ///         if the values are equal, and therefore the
-    ///         <paramref name = "backingStore" />
-    ///         was not changed, otherwise
-    ///         <see langword = "true" />
-    ///     </para>
-    /// </returns>
-    protected virtual bool SetPropertyWithoutNotify<T>( ref T backingStore, T value ) => SetPropertyWithoutNotify( ref backingStore, value, EqualityComparer<T>.Default );
-
-    /// <summary>
-    ///     <para>
-    ///         Checks the values with
-    ///         <paramref name = "comparer" />
-    ///         .
-    ///     </para>
-    ///     Then calls
-    ///     <see cref = "OnPropertyChanging(string)" />
-    ///     , sets the value, then calls
-    ///     <see cref = "OnPropertyChanged(string)" />
-    /// </summary>
-    /// <typeparam name = "T" > </typeparam>
-    /// <param name = "backingStore" > </param>
-    /// <param name = "value" > </param>
-    /// <param name = "comparer" > </param>
-    /// <returns>
-    ///     <para>
-    ///         Returns
-    ///         <see langword = "false" />
-    ///         if the values are equal, and therefore the
-    ///         <paramref name = "backingStore" />
-    ///         was not changed, otherwise
-    ///         <see langword = "true" />
-    ///     </para>
-    /// </returns>
-    protected virtual bool SetPropertyWithoutNotify<T>( ref T backingStore, T value, IEqualityComparer<T> comparer )
-    {
-        if (comparer.Equals( backingStore, value )) { return false; }
-
-        backingStore = value;
-        return true;
-    }
-
-
-    /// <summary>
-    ///     <para>
-    ///         Checks the values with
     ///         <paramref name = "comparer" />
     ///         .
     ///     </para>
@@ -302,6 +242,66 @@ public abstract class ObservableClass : BaseClass, INotifyPropertyChanged, INoti
                     : value;
 
         return SetProperty( ref backingStore, value, ValueEqualizer<TimeSpan>.Instance, caller );
+    }
+
+
+    /// <summary>
+    ///     <para>
+    ///         Checks the values with
+    ///         <see cref = "EqualityComparer{T}.Default" />
+    ///         .
+    ///     </para>
+    ///     Then calls
+    ///     <see cref = "OnPropertyChanging(string)" />
+    ///     , sets the value, then calls
+    ///     <see cref = "OnPropertyChanged(string)" />
+    /// </summary>
+    /// <typeparam name = "T" > </typeparam>
+    /// <param name = "backingStore" > </param>
+    /// <param name = "value" > </param>
+    /// <returns>
+    ///     <para>
+    ///         Returns
+    ///         <see langword = "false" />
+    ///         if the values are equal, and therefore the
+    ///         <paramref name = "backingStore" />
+    ///         was not changed, otherwise
+    ///         <see langword = "true" />
+    ///     </para>
+    /// </returns>
+    protected virtual bool SetPropertyWithoutNotify<T>( ref T backingStore, T value ) => SetPropertyWithoutNotify( ref backingStore, value, EqualityComparer<T>.Default );
+
+    /// <summary>
+    ///     <para>
+    ///         Checks the values with
+    ///         <paramref name = "comparer" />
+    ///         .
+    ///     </para>
+    ///     Then calls
+    ///     <see cref = "OnPropertyChanging(string)" />
+    ///     , sets the value, then calls
+    ///     <see cref = "OnPropertyChanged(string)" />
+    /// </summary>
+    /// <typeparam name = "T" > </typeparam>
+    /// <param name = "backingStore" > </param>
+    /// <param name = "value" > </param>
+    /// <param name = "comparer" > </param>
+    /// <returns>
+    ///     <para>
+    ///         Returns
+    ///         <see langword = "false" />
+    ///         if the values are equal, and therefore the
+    ///         <paramref name = "backingStore" />
+    ///         was not changed, otherwise
+    ///         <see langword = "true" />
+    ///     </para>
+    /// </returns>
+    protected virtual bool SetPropertyWithoutNotify<T>( ref T backingStore, T value, IEqualityComparer<T> comparer )
+    {
+        if (comparer.Equals( backingStore, value )) { return false; }
+
+        backingStore = value;
+        return true;
     }
     public event PropertyChangedEventHandler?  PropertyChanged;
     public event PropertyChangingEventHandler? PropertyChanging;

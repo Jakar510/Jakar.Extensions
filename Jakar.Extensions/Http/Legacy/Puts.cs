@@ -38,6 +38,32 @@ public static class Puts
                         .ConfigureAwait( false );
     }
 
+
+    // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+    public static async Task<WebResponse> Put( this Uri url, MultipartFormDataContent payload, HeaderCollection? headers, CancellationToken token, int? timeout = default )
+    {
+        HttpWebRequest req = WebRequest.CreateHttp( url );
+        if (timeout.HasValue) { req.Timeout = timeout.Value; }
+
+        req.Method = "PUT";
+
+        req.SetHeaders( payload );
+        req.SetHeaders( headers );
+
+        await using (Stream os = await req.GetRequestStreamAsync()
+                                          .ConfigureAwait( false ))
+        {
+            await payload.CopyToAsync( os )
+                         .ConfigureAwait( false ); // Push it out there
+        }
+
+
+        return await req.GetResponseAsync( token )
+                        .ConfigureAwait( false );
+    }
+
     public static async Task<string> TryPut( this Uri url, string payload, Encoding? encoding = default, CancellationToken token = default )
     {
         encoding ??= Encoding.Default;
@@ -135,32 +161,6 @@ public static class Puts
 
             throw;
         }
-    }
-
-
-    // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-
-    public static async Task<WebResponse> Put( this Uri url, MultipartFormDataContent payload, HeaderCollection? headers, CancellationToken token, int? timeout = default )
-    {
-        HttpWebRequest req = WebRequest.CreateHttp( url );
-        if (timeout.HasValue) { req.Timeout = timeout.Value; }
-
-        req.Method = "PUT";
-
-        req.SetHeaders( payload );
-        req.SetHeaders( headers );
-
-        await using (Stream os = await req.GetRequestStreamAsync()
-                                          .ConfigureAwait( false ))
-        {
-            await payload.CopyToAsync( os )
-                         .ConfigureAwait( false ); // Push it out there
-        }
-
-
-        return await req.GetResponseAsync( token )
-                        .ConfigureAwait( false );
     }
 
 

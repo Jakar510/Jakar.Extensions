@@ -112,14 +112,6 @@ public class ConcurrentObservableCollection<T> : CollectionAlerts<T>, IList<T>, 
     public ConcurrentObservableCollection( IEnumerable<T> items, IComparer<T> comparer ) : this( comparer, new List<T>( items ) ) { }
 
 
-    public static implicit operator ConcurrentObservableCollection<T>( List<T>                 items ) => new(items);
-    public static implicit operator ConcurrentObservableCollection<T>( HashSet<T>              items ) => new(items);
-    public static implicit operator ConcurrentObservableCollection<T>( ConcurrentBag<T>        items ) => new(items);
-    public static implicit operator ConcurrentObservableCollection<T>( ObservableCollection<T> items ) => new(items);
-    public static implicit operator ConcurrentObservableCollection<T>( Collection<T>           items ) => new(items);
-    public static implicit operator ConcurrentObservableCollection<T>( T[]                     items ) => new(items);
-
-
     public virtual void Add( params T[] items )
     {
         lock (_lock)
@@ -139,70 +131,6 @@ public class ConcurrentObservableCollection<T> : CollectionAlerts<T>, IList<T>, 
             {
                 _items.Add( item );
                 Added( item );
-            }
-        }
-    }
-
-    public virtual bool TryAdd( T item )
-    {
-        lock (_lock)
-        {
-            if (_items.Contains( item )) { return false; }
-
-            _items.Add( item );
-            Added( item );
-            return true;
-        }
-    }
-    public void InsertRange( int index, IEnumerable<T> collection )
-    {
-        lock (_lock)
-        {
-            foreach ((int i, T? item) in collection.Enumerate( index ))
-            {
-                _items.Insert( i, item );
-                Added( item, i );
-            }
-        }
-    }
-
-    public void RemoveAt( int index, out T? item )
-    {
-        lock (_lock)
-        {
-            item = this[index];
-            _items.RemoveAt( index );
-            Removed( item, index );
-        }
-    }
-
-    public int RemoveAll( Predicate<T> match )
-    {
-        lock (_lock)
-        {
-            int results = 0;
-
-            foreach (T item in _items.Where( item => match( item ) ))
-            {
-                _items.Remove( item );
-                Removed( item );
-                results++;
-            }
-
-            return results;
-        }
-    }
-    public void RemoveRange( in int start, in int count )
-    {
-        lock (_lock)
-        {
-            Guard.IsInRangeFor( start, (ICollection<T>)_items, nameof(start) );
-            Guard.IsInRangeFor( count, (ICollection<T>)_items, nameof(count) );
-
-            for (int x = start; x < start + count; x++)
-            {
-                _items.RemoveAt( x );
-                Removed( x );
             }
         }
     }
@@ -288,6 +216,17 @@ public class ConcurrentObservableCollection<T> : CollectionAlerts<T>, IList<T>, 
             return _items.IndexOf( value, start, count );
         }
     }
+    public void InsertRange( int index, IEnumerable<T> collection )
+    {
+        lock (_lock)
+        {
+            foreach ((int i, T? item) in collection.Enumerate( index ))
+            {
+                _items.Insert( i, item );
+                Added( item, i );
+            }
+        }
+    }
     public int LastIndexOf( T value )
     {
         lock (_lock) { return _items.LastIndexOf( value ); }
@@ -307,6 +246,55 @@ public class ConcurrentObservableCollection<T> : CollectionAlerts<T>, IList<T>, 
             Guard.IsInRangeFor( start, (ICollection<T>)_items, nameof(start) );
             Guard.IsInRangeFor( count, (ICollection<T>)_items, nameof(count) );
             return _items.LastIndexOf( value, start, count );
+        }
+    }
+
+
+    public static implicit operator ConcurrentObservableCollection<T>( List<T>                 items ) => new(items);
+    public static implicit operator ConcurrentObservableCollection<T>( HashSet<T>              items ) => new(items);
+    public static implicit operator ConcurrentObservableCollection<T>( ConcurrentBag<T>        items ) => new(items);
+    public static implicit operator ConcurrentObservableCollection<T>( ObservableCollection<T> items ) => new(items);
+    public static implicit operator ConcurrentObservableCollection<T>( Collection<T>           items ) => new(items);
+    public static implicit operator ConcurrentObservableCollection<T>( T[]                     items ) => new(items);
+
+    public int RemoveAll( Predicate<T> match )
+    {
+        lock (_lock)
+        {
+            int results = 0;
+
+            foreach (T item in _items.Where( item => match( item ) ))
+            {
+                _items.Remove( item );
+                Removed( item );
+                results++;
+            }
+
+            return results;
+        }
+    }
+
+    public void RemoveAt( int index, out T? item )
+    {
+        lock (_lock)
+        {
+            item = this[index];
+            _items.RemoveAt( index );
+            Removed( item, index );
+        }
+    }
+    public void RemoveRange( in int start, in int count )
+    {
+        lock (_lock)
+        {
+            Guard.IsInRangeFor( start, (ICollection<T>)_items, nameof(start) );
+            Guard.IsInRangeFor( count, (ICollection<T>)_items, nameof(count) );
+
+            for (int x = start; x < start + count; x++)
+            {
+                _items.RemoveAt( x );
+                Removed( x );
+            }
         }
     }
 
@@ -350,6 +338,18 @@ public class ConcurrentObservableCollection<T> : CollectionAlerts<T>, IList<T>, 
 
             _items.Sort( start, count, comparer );
             Reset();
+        }
+    }
+
+    public virtual bool TryAdd( T item )
+    {
+        lock (_lock)
+        {
+            if (_items.Contains( item )) { return false; }
+
+            _items.Add( item );
+            Added( item );
+            return true;
         }
     }
 

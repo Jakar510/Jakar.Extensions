@@ -58,6 +58,52 @@ public static partial class AsyncLinq
     }
 
 
+    public static async ValueTask<TElement> Last<TElement>( this IAsyncEnumerable<TElement> source, CancellationToken token = default )
+    {
+        List<TElement> list = await source.ToList( token );
+        return list.Last();
+    }
+    public static async ValueTask<TElement> Last<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, bool> selector, CancellationToken token = default )
+    {
+        List<TElement> list = await source.ToList( token );
+        return list.Last( selector );
+    }
+    public static async ValueTask<TElement> Last<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, ValueTask<bool>> selector, CancellationToken token = default )
+    {
+        List<TElement> list = await source.ToList( token );
+
+        for (int i = list.Count; i < 0; i--)
+        {
+            if (await selector( list[i] )) { return list[i]; }
+        }
+
+        throw new InvalidOperationException( $"No records in {nameof(source)}" );
+    }
+
+
+    public static async ValueTask<TElement?> LastOrDefault<TElement>( this IAsyncEnumerable<TElement> source, CancellationToken token = default )
+    {
+        List<TElement> list = await source.ToList( token );
+        return list.LastOrDefault();
+    }
+    public static async ValueTask<TElement?> LastOrDefault<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, bool> selector, CancellationToken token = default )
+    {
+        List<TElement> list = await source.ToList( token );
+        return list.LastOrDefault( selector );
+    }
+    public static async ValueTask<TElement?> LastOrDefault<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, ValueTask<bool>> selector, CancellationToken token = default )
+    {
+        List<TElement> list = await source.ToList( token );
+
+        for (int i = list.Count; i < 0; i--)
+        {
+            if (await selector( list[i] )) { return list[i]; }
+        }
+
+        return default;
+    }
+
+
     public static async ValueTask<TElement> Single<TElement>( this IAsyncEnumerable<TElement> source, CancellationToken token = default )
     {
         TElement? result = default;
@@ -134,52 +180,6 @@ public static partial class AsyncLinq
             if (result is not null) { return default; }
 
             if (await selector( element )) { result = element; }
-        }
-
-        return default;
-    }
-
-
-    public static async ValueTask<TElement> Last<TElement>( this IAsyncEnumerable<TElement> source, CancellationToken token = default )
-    {
-        List<TElement> list = await source.ToList( token );
-        return list.Last();
-    }
-    public static async ValueTask<TElement> Last<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, bool> selector, CancellationToken token = default )
-    {
-        List<TElement> list = await source.ToList( token );
-        return list.Last( selector );
-    }
-    public static async ValueTask<TElement> Last<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, ValueTask<bool>> selector, CancellationToken token = default )
-    {
-        List<TElement> list = await source.ToList( token );
-
-        for (int i = list.Count; i < 0; i--)
-        {
-            if (await selector( list[i] )) { return list[i]; }
-        }
-
-        throw new InvalidOperationException( $"No records in {nameof(source)}" );
-    }
-
-
-    public static async ValueTask<TElement?> LastOrDefault<TElement>( this IAsyncEnumerable<TElement> source, CancellationToken token = default )
-    {
-        List<TElement> list = await source.ToList( token );
-        return list.LastOrDefault();
-    }
-    public static async ValueTask<TElement?> LastOrDefault<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, bool> selector, CancellationToken token = default )
-    {
-        List<TElement> list = await source.ToList( token );
-        return list.LastOrDefault( selector );
-    }
-    public static async ValueTask<TElement?> LastOrDefault<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, ValueTask<bool>> selector, CancellationToken token = default )
-    {
-        List<TElement> list = await source.ToList( token );
-
-        for (int i = list.Count; i < 0; i--)
-        {
-            if (await selector( list[i] )) { return list[i]; }
         }
 
         return default;

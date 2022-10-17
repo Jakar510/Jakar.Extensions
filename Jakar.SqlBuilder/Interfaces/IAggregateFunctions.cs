@@ -16,14 +16,6 @@ public interface IAggregateFunctions<out TNext>
     /// </returns>
     public TNext All();
 
-    /// <summary>
-    ///     return only distinct (different) values.
-    /// </summary>
-    /// <returns>
-    ///     <typeparamref name = "TNext" />
-    /// </returns>
-    public TNext Distinct();
-
 
     /// <summary>
     ///     Return the average value of values in all columns
@@ -78,58 +70,6 @@ public interface IAggregateFunctions<out TNext>
 
 
     /// <summary>
-    ///     Return the total value of values in all columns
-    /// </summary>
-    /// <returns>
-    ///     <typeparamref name = "TNext" />
-    /// </returns>
-    public TNext Sum();
-
-    /// <summary>
-    ///     Return the total value of values in
-    ///     <paramref name = "columnName" />
-    /// </summary>
-    /// <returns>
-    ///     <typeparamref name = "TNext" />
-    /// </returns>
-    public TNext Sum( string columnName );
-
-    /// <summary>
-    ///     <para>
-    ///         Uses the
-    ///         <see cref = "Type" />
-    ///         of
-    ///         <typeparamref name = "T" />
-    ///         to get the table_name using
-    ///         <see cref = "DapperTableExtensions.GetTableName{T}" />
-    ///     </para>
-    ///     Return the maximum value of values in table_name.
-    ///     <paramref name = "columnName" />
-    /// </summary>
-    /// <returns>
-    ///     <typeparamref name = "TNext" />
-    /// </returns>
-    public TNext Sum<T>( string columnName );
-
-    /// <summary>
-    ///     <para>
-    ///         Uses the
-    ///         <see cref = "Type" />
-    ///         of
-    ///         <typeparamref name = "T" />
-    ///         to get the table_name using
-    ///         <see cref = "DapperTableExtensions.GetTableName{T}" />
-    ///     </para>
-    ///     Return the maximum value of values in table_name.
-    ///     <paramref name = "columnName" />
-    /// </summary>
-    /// <returns>
-    ///     <typeparamref name = "TNext" />
-    /// </returns>
-    public TNext Sum<T>( T obj, string columnName );
-
-
-    /// <summary>
     ///     Return count of values in all columns
     /// </summary>
     /// <returns>
@@ -179,6 +119,66 @@ public interface IAggregateFunctions<out TNext>
     ///     <typeparamref name = "TNext" />
     /// </returns>
     public TNext Count<T>( T obj, string columnName );
+
+    /// <summary>
+    ///     return only distinct (different) values.
+    /// </summary>
+    /// <returns>
+    ///     <typeparamref name = "TNext" />
+    /// </returns>
+    public TNext Distinct();
+
+
+    /// <summary>
+    ///     Return the maximum value of values in all columns
+    /// </summary>
+    /// <returns>
+    ///     <typeparamref name = "TNext" />
+    /// </returns>
+    public TNext Max();
+
+    /// <summary>
+    ///     Return the maximum value of values in
+    ///     <paramref name = "columnName" />
+    /// </summary>
+    /// <returns>
+    ///     <typeparamref name = "TNext" />
+    /// </returns>
+    public TNext Max( string columnName );
+
+    /// <summary>
+    ///     <para>
+    ///         Uses the
+    ///         <see cref = "Type" />
+    ///         of
+    ///         <typeparamref name = "T" />
+    ///         to get the table_name using
+    ///         <see cref = "DapperTableExtensions.GetTableName{T}" />
+    ///     </para>
+    ///     Return the maximum value of values in table_name.
+    ///     <paramref name = "columnName" />
+    /// </summary>
+    /// <returns>
+    ///     <typeparamref name = "TNext" />
+    /// </returns>
+    public TNext Max<T>( string columnName );
+
+    /// <summary>
+    ///     <para>
+    ///         Uses the
+    ///         <see cref = "Type" />
+    ///         of
+    ///         <typeparamref name = "T" />
+    ///         to get the table_name using
+    ///         <see cref = "DapperTableExtensions.GetTableName{T}" />
+    ///     </para>
+    ///     Return the maximum value of values in table_name.
+    ///     <paramref name = "columnName" />
+    /// </summary>
+    /// <returns>
+    ///     <typeparamref name = "TNext" />
+    /// </returns>
+    public TNext Max<T>( T obj, string columnName );
 
 
     /// <summary>
@@ -234,38 +234,21 @@ public interface IAggregateFunctions<out TNext>
 
 
     /// <summary>
-    ///     Return the maximum value of values in all columns
+    ///     Return the total value of values in all columns
     /// </summary>
     /// <returns>
     ///     <typeparamref name = "TNext" />
     /// </returns>
-    public TNext Max();
+    public TNext Sum();
 
     /// <summary>
-    ///     Return the maximum value of values in
+    ///     Return the total value of values in
     ///     <paramref name = "columnName" />
     /// </summary>
     /// <returns>
     ///     <typeparamref name = "TNext" />
     /// </returns>
-    public TNext Max( string columnName );
-
-    /// <summary>
-    ///     <para>
-    ///         Uses the
-    ///         <see cref = "Type" />
-    ///         of
-    ///         <typeparamref name = "T" />
-    ///         to get the table_name using
-    ///         <see cref = "DapperTableExtensions.GetTableName{T}" />
-    ///     </para>
-    ///     Return the maximum value of values in table_name.
-    ///     <paramref name = "columnName" />
-    /// </summary>
-    /// <returns>
-    ///     <typeparamref name = "TNext" />
-    /// </returns>
-    public TNext Max<T>( string columnName );
+    public TNext Sum( string columnName );
 
     /// <summary>
     ///     <para>
@@ -282,5 +265,22 @@ public interface IAggregateFunctions<out TNext>
     /// <returns>
     ///     <typeparamref name = "TNext" />
     /// </returns>
-    public TNext Max<T>( T obj, string columnName );
+    public TNext Sum<T>( string columnName );
+
+    /// <summary>
+    ///     <para>
+    ///         Uses the
+    ///         <see cref = "Type" />
+    ///         of
+    ///         <typeparamref name = "T" />
+    ///         to get the table_name using
+    ///         <see cref = "DapperTableExtensions.GetTableName{T}" />
+    ///     </para>
+    ///     Return the maximum value of values in table_name.
+    ///     <paramref name = "columnName" />
+    /// </summary>
+    /// <returns>
+    ///     <typeparamref name = "TNext" />
+    /// </returns>
+    public TNext Sum<T>( T obj, string columnName );
 }

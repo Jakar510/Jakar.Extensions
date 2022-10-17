@@ -23,11 +23,6 @@ public class GuidBenchmarks
     private const           string GUID  = "0365BC9B-3DE3-4B75-9F7E-2A0F23EFA5A2";
     private static readonly Guid   _guid = Guid.Parse( GUID );
     private static readonly string _b64  = _guid.ToBase64();
-
-
-    [Benchmark] public Guid StringParse() => Guid.Parse( GUID );
-    [Benchmark] public Guid? SpanParse() => _b64.AsGuid();
-    [Benchmark] public new string? ToString() => _guid.ToString();
     [Benchmark] public string AsBase64() => _guid.ToBase64();
 
 
@@ -35,4 +30,9 @@ public class GuidBenchmarks
     public Memory<byte>? AsMemory() => _guid.TryWriteBytes( out Memory<byte> memory )
                                            ? memory
                                            : default;
+    [Benchmark] public Guid? SpanParse() => _b64.AsGuid();
+
+
+    [Benchmark] public Guid StringParse() => Guid.Parse( GUID );
+    [Benchmark] public new string? ToString() => _guid.ToString();
 }

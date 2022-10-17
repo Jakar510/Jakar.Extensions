@@ -10,12 +10,12 @@ namespace Jakar.Extensions.Xamarin.Forms;
 [TypeConversion( typeof(Color?) )]
 public class NullableColorTypeConverter : ColorTypeConverter, IValueConverter, IExtendedTypeConverter // IExtendedTypeConverter 
 {
-    public override bool CanConvertFrom( Type?                  sourceType ) => sourceType is null || sourceType == typeof(string);
-    public override object? ConvertFromInvariantString( string? value ) => Convert( value );
+    public override bool CanConvertFrom( Type? sourceType ) => sourceType is null || sourceType == typeof(string);
 
     public Color? Convert( string? value ) => string.IsNullOrWhiteSpace( value )
                                                   ? null
                                                   : (Color)base.ConvertFromInvariantString( value );
+    public override object? ConvertFromInvariantString( string? value ) => Convert( value );
 
     public object? ConvertFrom( CultureInfo            culture, object?          value, IServiceProvider serviceProvider ) => Convert( value?.ToString() );
     public object? ConvertFromInvariantString( string? value,   IServiceProvider serviceProvider ) => Convert( value );

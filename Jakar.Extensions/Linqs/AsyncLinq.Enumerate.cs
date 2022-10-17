@@ -81,16 +81,6 @@ public static partial class AsyncLinq
             index++;
         }
     }
-    public static IEnumerable<(int index, KeyValuePair<TKey, TElement> pair)> EnumeratePairs<TKey, TElement>( this IDictionary<TKey, TElement> element, int start = 0 )
-    {
-        int index = start;
-
-        foreach (KeyValuePair<TKey, TElement> pair in element)
-        {
-            yield return (index, pair);
-            index++;
-        }
-    }
     public static IEnumerable<(int index, TKey key, TElement value)> Enumerate<TKey, TElement>( this IDictionary<TKey, TElement> element, int start = 0 )
     {
         int index = start;
@@ -113,16 +103,6 @@ public static partial class AsyncLinq
             index++;
         }
     }
-    public static IEnumerable<(long index, KeyValuePair<TKey, TElement> pair)> EnumeratePairs<TKey, TElement>( this IDictionary<TKey, TElement> element, long start = 0 )
-    {
-        long index = start;
-
-        foreach (KeyValuePair<TKey, TElement> pair in element)
-        {
-            yield return (index, pair);
-            index++;
-        }
-    }
     public static IEnumerable<(long index, TKey key, TElement value)> Enumerate<TKey, TElement>( this IDictionary<TKey, TElement> element, long start = 0 )
     {
         long index = start;
@@ -130,6 +110,26 @@ public static partial class AsyncLinq
         foreach ((TKey key, TElement value) in element)
         {
             yield return (index, key, value);
+            index++;
+        }
+    }
+    public static IEnumerable<(int index, KeyValuePair<TKey, TElement> pair)> EnumeratePairs<TKey, TElement>( this IDictionary<TKey, TElement> element, int start = 0 )
+    {
+        int index = start;
+
+        foreach (KeyValuePair<TKey, TElement> pair in element)
+        {
+            yield return (index, pair);
+            index++;
+        }
+    }
+    public static IEnumerable<(long index, KeyValuePair<TKey, TElement> pair)> EnumeratePairs<TKey, TElement>( this IDictionary<TKey, TElement> element, long start = 0 )
+    {
+        long index = start;
+
+        foreach (KeyValuePair<TKey, TElement> pair in element)
+        {
+            yield return (index, pair);
             index++;
         }
     }

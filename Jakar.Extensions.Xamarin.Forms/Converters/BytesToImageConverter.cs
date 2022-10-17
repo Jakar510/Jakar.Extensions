@@ -4,6 +4,8 @@ namespace Jakar.Extensions.Xamarin.Forms;
 
 public class BytesToImageConverter : TypeConverter, IValueConverter, IExtendedTypeConverter
 {
+    public override bool CanConvertFrom( Type? value ) => value != null && CheckTypes( value );
+    protected static bool CheckTypes( Type     value ) => typeof(byte[]) == value || typeof(Memory<byte>) == value || typeof(ReadOnlyMemory<byte>) == value;
     public static ImageSource? Convert( object? value ) => value switch
                                                            {
                                                                null                                => null,
@@ -18,12 +20,8 @@ public class BytesToImageConverter : TypeConverter, IValueConverter, IExtendedTy
                                                                null => null,
                                                                _    => ImageSource.FromStream( () => new MemoryStream( value ) )
                                                            };
-    protected static bool CheckTypes( Type value ) => typeof(byte[]) == value || typeof(Memory<byte>) == value || typeof(ReadOnlyMemory<byte>) == value;
 
     public override object? ConvertFromInvariantString( string? value ) => Convert( value?.FromBase64String() );
-
-
-    public override bool CanConvertFrom( Type? value ) => value != null && CheckTypes( value );
 
 
     public object? ConvertFrom( CultureInfo            culture, object?          value, IServiceProvider serviceProvider ) => Convert( value?.ToString() );

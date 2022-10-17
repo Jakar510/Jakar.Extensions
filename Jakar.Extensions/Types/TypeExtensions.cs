@@ -4,22 +4,6 @@ namespace Jakar.Extensions;
 
 public static partial class TypeExtensions
 {
-    public static bool IsEqualType( this Type value, Type other )
-    {
-        if (value is null) { throw new NullReferenceException( nameof(value) ); }
-
-        if (other is null) { throw new NullReferenceException( nameof(other) ); }
-
-        return value == other;
-    }
-
-    public static bool IsOneOfType( this Type value, params Type[] items ) => items.Any( value.IsEqualType );
-
-
-    public static bool IsOneOfType<TValue>( this TValue value, params Type[] items ) where TValue : class => items.Any( value.IsEqualType );
-    public static bool IsEqualType<TValue>( this TValue value, Type          other ) where TValue : class => value.GetType() == other;
-
-
     // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -29,6 +13,15 @@ public static partial class TypeExtensions
 
         return Activator.CreateInstance( type );
     }
+    public static bool IsEqualType( this Type value, Type other )
+    {
+        if (value is null) { throw new NullReferenceException( nameof(value) ); }
+
+        if (other is null) { throw new NullReferenceException( nameof(other) ); }
+
+        return value == other;
+    }
+    public static bool IsEqualType<TValue>( this TValue value, Type other ) where TValue : class => value.GetType() == other;
 
 
     // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -46,4 +39,9 @@ public static partial class TypeExtensions
         return setMethod.ReturnParameter.GetRequiredCustomModifiers()
                         .Contains( isExternalInit );
     }
+
+    public static bool IsOneOfType( this Type value, params Type[] items ) => items.Any( value.IsEqualType );
+
+
+    public static bool IsOneOfType<TValue>( this TValue value, params Type[] items ) where TValue : class => items.Any( value.IsEqualType );
 }

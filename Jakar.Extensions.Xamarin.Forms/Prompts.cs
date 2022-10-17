@@ -28,8 +28,79 @@ public abstract class Prompts : IUserDialogs
     }
 
 
+    public void DebugMessage( Exception e, [CallerMemberName] string? caller = default )
+    {
+        if (!_debug.CanDebug) { return; }
+
+        if (!string.IsNullOrWhiteSpace( caller )) { caller = $"DEBUG: {caller}"; }
+
+        //if ( !Debug.CanDebug )
+        //{
+        //	Alert(e.Message, caller);
+        //	return;
+        //}
+
+        Alert( caller, e.ToString() );
+    }
+
+    public bool HandleException( Exception e )
+    {
+        Task.Run( async () => await InternalHandleExceptionAsync( e )
+                                 .ConfigureAwait( false ) );
+
+        return InternalHandleException( e );
+    }
+
+
     public abstract Task HandleExceptionAsync( Exception                e, Page page, CancellationToken token );
     public abstract Task HandleExceptionAsync<TFeedBackPage>( Exception e, Page page, CancellationToken token ) where TFeedBackPage : Page, new();
+
+
+    public async Task<bool> HandleExceptionAsync( Exception e, CancellationToken token )
+    {
+        if (token.IsCancellationRequested) { return false; }
+
+        return await HandleExceptionAsync( e )
+                  .ConfigureAwait( false );
+    }
+
+    public async Task<bool> HandleExceptionAsync( Exception e )
+    {
+        await InternalHandleExceptionAsync( e )
+           .ConfigureAwait( false );
+
+        return InternalHandleException( e );
+    }
+
+
+    /// <summary>
+    ///     switch the type of exception to show what ever prompt you want
+    /// </summary>
+    /// <param name = "e" > </param>
+    /// <returns> </returns>
+    protected abstract bool InternalHandleException( Exception e );
+
+
+    protected virtual async Task InternalHandleExceptionAsync( Exception e )
+    {
+        switch (e)
+        {
+            case null: throw new ArgumentNullException( nameof(e) );
+
+            case OperationCanceledException:
+            case NameResolutionException:
+            case RequestAbortedException:
+            case TimeoutException:
+                return;
+
+
+            default:
+                await _debug.HandleExceptionAsync( e )
+                            .ConfigureAwait( false );
+
+                return;
+        }
+    }
 
 
     public async Task SendFeedBack<TFeedBackPage>( string? title, string? message, Page page, Exception e, FileSystemApi api, CancellationToken token = default ) where TFeedBackPage : Page, new() =>
@@ -55,77 +126,6 @@ public abstract class Prompts : IUserDialogs
                       .ConfigureAwait( false );
         }
         else { _services.ScreenShotAddress = null; }
-    }
-
-
-    public async Task<bool> HandleExceptionAsync( Exception e, CancellationToken token )
-    {
-        if (token.IsCancellationRequested) { return false; }
-
-        return await HandleExceptionAsync( e )
-                  .ConfigureAwait( false );
-    }
-
-    public async Task<bool> HandleExceptionAsync( Exception e )
-    {
-        await InternalHandleExceptionAsync( e )
-           .ConfigureAwait( false );
-
-        return InternalHandleException( e );
-    }
-
-    public bool HandleException( Exception e )
-    {
-        Task.Run( async () => await InternalHandleExceptionAsync( e )
-                                 .ConfigureAwait( false ) );
-
-        return InternalHandleException( e );
-    }
-
-
-    protected virtual async Task InternalHandleExceptionAsync( Exception e )
-    {
-        switch (e)
-        {
-            case null: throw new ArgumentNullException( nameof(e) );
-
-            case OperationCanceledException:
-            case NameResolutionException:
-            case RequestAbortedException:
-            case TimeoutException:
-                return;
-
-
-            default:
-                await _debug.HandleExceptionAsync( e )
-                            .ConfigureAwait( false );
-
-                return;
-        }
-    }
-
-
-    /// <summary>
-    ///     switch the type of exception to show what ever prompt you want
-    /// </summary>
-    /// <param name = "e" > </param>
-    /// <returns> </returns>
-    protected abstract bool InternalHandleException( Exception e );
-
-
-    public void DebugMessage( Exception e, [CallerMemberName] string? caller = default )
-    {
-        if (!_debug.CanDebug) { return; }
-
-        if (!string.IsNullOrWhiteSpace( caller )) { caller = $"DEBUG: {caller}"; }
-
-        //if ( !Debug.CanDebug )
-        //{
-        //	Alert(e.Message, caller);
-        //	return;
-        //}
-
-        Alert( caller, e.ToString() );
     }
 
 

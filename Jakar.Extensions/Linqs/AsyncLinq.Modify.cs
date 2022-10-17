@@ -33,18 +33,11 @@ public static partial class AsyncLinq
     }
 
 
-    public static void Remove<TElement>( this ICollection<TElement> collection, params TElement[] items )
+    public static void AddDefault<TKey, TElement>( this IDictionary<TKey, TElement?> dict, IEnumerable<TKey> keys )
     {
-        foreach (TElement value in items) { collection.Remove( value ); }
+        foreach (TKey value in keys) { dict.AddDefault( value ); }
     }
-    public static async ValueTask Remove<TElement>( this ICollection<TElement> collection, IAsyncEnumerable<TElement> items, CancellationToken token = default )
-    {
-        await foreach (TElement value in items.WithCancellation( token )) { collection.Remove( value ); }
-    }
-    public static void Remove<TElement>( this ICollection<TElement> collection, IEnumerable<TElement> items )
-    {
-        foreach (TElement value in items) { collection.Remove( value ); }
-    }
+    public static void AddDefault<TKey, TElement>( this IDictionary<TKey, TElement?> dict, TKey key ) => dict.Add( key, default );
 
 
     public static void AddOrUpdate<TElement>( this IList<TElement> collection, params TElement[] value )
@@ -68,6 +61,20 @@ public static partial class AsyncLinq
     }
 
 
+    public static void Remove<TElement>( this ICollection<TElement> collection, params TElement[] items )
+    {
+        foreach (TElement value in items) { collection.Remove( value ); }
+    }
+    public static async ValueTask Remove<TElement>( this ICollection<TElement> collection, IAsyncEnumerable<TElement> items, CancellationToken token = default )
+    {
+        await foreach (TElement value in items.WithCancellation( token )) { collection.Remove( value ); }
+    }
+    public static void Remove<TElement>( this ICollection<TElement> collection, IEnumerable<TElement> items )
+    {
+        foreach (TElement value in items) { collection.Remove( value ); }
+    }
+
+
     public static void TryAdd<TElement>( this ICollection<TElement> collection, params TElement[] value )
     {
         foreach (TElement element in value) { collection.TryAdd( element ); }
@@ -86,11 +93,4 @@ public static partial class AsyncLinq
 
         collection.Add( value );
     }
-
-
-    public static void AddDefault<TKey, TElement>( this IDictionary<TKey, TElement?> dict, IEnumerable<TKey> keys )
-    {
-        foreach (TKey value in keys) { dict.AddDefault( value ); }
-    }
-    public static void AddDefault<TKey, TElement>( this IDictionary<TKey, TElement?> dict, TKey key ) => dict.Add( key, default );
 }

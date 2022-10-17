@@ -25,6 +25,16 @@ public static class XmlNames
 [SuppressMessage( "ReSharper", "ParameterTypeCanBeEnumerable.Global" )]
 public static class XmlExtensions
 {
+    public static TResult? DeserializeXml<TResult>( this string xml )
+    {
+        if (string.IsNullOrWhiteSpace( xml )) { return default; }
+
+        var doc = new XmlDocument();
+        doc.LoadXml( xml );
+
+        string json = JsonConvert.SerializeXmlNode( doc );
+        return json.FromJson<TResult>();
+    }
     private static string PrettyXml( this XmlDocument document )
     {
         var settings = new XmlWriterSettings
@@ -59,17 +69,6 @@ public static class XmlExtensions
 
         string? result = node?.PrettyXml();
         return result ?? throw new InvalidOperationException();
-    }
-
-    public static TResult? DeserializeXml<TResult>( this string xml )
-    {
-        if (string.IsNullOrWhiteSpace( xml )) { return default; }
-
-        var doc = new XmlDocument();
-        doc.LoadXml( xml );
-
-        string json = JsonConvert.SerializeXmlNode( doc );
-        return json.FromJson<TResult>();
     }
 
 

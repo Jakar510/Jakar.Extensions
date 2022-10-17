@@ -24,11 +24,6 @@ public class ExpectedValueTypeException<TKey> : Exception // Jakar.Api.Exception
     public ExpectedValueTypeException( Exception inner, Type?         value, params Type[] expected ) : base( GetMessage( value, expected ), inner ) => Update( value,         expected );
 
 
-    protected static IEnumerable<string?> GetTypeNames( params Type[] expected ) => expected.Select( item => item.FullName );
-    protected static string GetTypes( params Type[] expected ) => GetTypeNames( expected )
-       .ToPrettyJson();
-
-
     protected static string GetMessage( Type? actual, Type[] expected, TKey? key = default )
     {
         var builder = new StringBuilder();
@@ -46,6 +41,23 @@ public class ExpectedValueTypeException<TKey> : Exception // Jakar.Api.Exception
     }
 
 
+    protected static IEnumerable<string?> GetTypeNames( params Type[] expected ) => expected.Select( item => item.FullName );
+    protected static string GetTypes( params Type[] expected ) => GetTypeNames( expected )
+       .ToPrettyJson();
+
+
+    protected void Update( Type? value, Type[] expected, TKey? key = default )
+    {
+        Key      = key;
+        Actual   = value;
+        Expected = expected;
+
+        Data[nameof(Key)]      = Key?.ToString();
+        Data[nameof(Actual)]   = Actual?.FullName;
+        Data[nameof(Expected)] = GetTypeNames( expected );
+    }
+
+
     public static T Verify<T>( object? item, TKey key )
     {
         if (item is T value) { return value; }
@@ -58,18 +70,6 @@ public class ExpectedValueTypeException<TKey> : Exception // Jakar.Api.Exception
         if (item is T value) { return value; }
 
         throw new ExpectedValueTypeException<TKey>( item?.GetType(), typeof(T) );
-    }
-
-
-    protected void Update( Type? value, Type[] expected, TKey? key = default )
-    {
-        Key      = key;
-        Actual   = value;
-        Expected = expected;
-
-        Data[nameof(Key)]      = Key?.ToString();
-        Data[nameof(Actual)]   = Actual?.FullName;
-        Data[nameof(Expected)] = GetTypeNames( expected );
     }
 }
 

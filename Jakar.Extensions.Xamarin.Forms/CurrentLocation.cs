@@ -64,28 +64,6 @@ public class CurrentLocation<TID> : ICurrentLocation<TID>, IDataBaseIgnore where
         AltitudeReferenceSystem = point.AltitudeReferenceSystem;
     }
 
-    public static async Task<CurrentLocation<TID>> Create( CancellationToken token, GeolocationAccuracy accuracy = GeolocationAccuracy.Best )
-    {
-        var      request  = new GeolocationRequest( accuracy );
-        Location location = await Geolocation.GetLocationAsync( request, token );
-        return new CurrentLocation<TID>( location );
-    }
-
-
-    public static implicit operator Location( CurrentLocation<TID> point ) => new()
-                                                                              {
-                                                                                  Latitude                = point.Latitude,
-                                                                                  Longitude               = point.Longitude,
-                                                                                  Timestamp               = point.Timestamp,
-                                                                                  Altitude                = point.Altitude,
-                                                                                  Accuracy                = point.Accuracy,
-                                                                                  VerticalAccuracy        = point.VerticalAccuracy,
-                                                                                  Speed                   = point.Speed,
-                                                                                  Course                  = point.Course,
-                                                                                  IsFromMockProvider      = point.IsFromMockProvider,
-                                                                                  AltitudeReferenceSystem = point.AltitudeReferenceSystem
-                                                                              };
-
 
     public static double CalculateDistance( double latitudeStart, double longitudeStart, ICurrentLocation<TID> locationEnd, DistanceUnits units ) =>
         CalculateDistance( latitudeStart, longitudeStart, locationEnd.Latitude, locationEnd.Longitude, units );
@@ -127,14 +105,15 @@ public class CurrentLocation<TID> : ICurrentLocation<TID>, IDataBaseIgnore where
     /// </returns>
     public double CalculateDistance( double latitudeStart, double longitudeStart, DistanceUnits units ) => CalculateDistance( latitudeStart, longitudeStart, this, units );
 
-
-    public bool IsValid( ICurrentLocation<TID> location, DistanceUnits units, double maxDistance )
+    public static async Task<CurrentLocation<TID>> Create( CancellationToken token, GeolocationAccuracy accuracy = GeolocationAccuracy.Best )
     {
-        if (InstanceID == Guid.Empty) { return false; }
-
-
-        return CalculateDistance( this, location, units ) <= maxDistance;
+        var      request  = new GeolocationRequest( accuracy );
+        Location location = await Geolocation.GetLocationAsync( request, token );
+        return new CurrentLocation<TID>( location );
     }
+
+
+    public bool EqualInstance( ICurrentLocation<TID> other ) => InstanceID.Equals( other.InstanceID );
 
 
     public override bool Equals( object? obj )
@@ -145,9 +124,6 @@ public class CurrentLocation<TID> : ICurrentLocation<TID>, IDataBaseIgnore where
 
         return obj is CurrentLocation<TID> location && Equals( location );
     }
-
-
-    public bool EqualInstance( ICurrentLocation<TID> other ) => InstanceID.Equals( other.InstanceID );
     public override int GetHashCode()
     {
         var hashCode = new HashCode();
@@ -165,6 +141,30 @@ public class CurrentLocation<TID> : ICurrentLocation<TID>, IDataBaseIgnore where
         hashCode.Add( (int)AltitudeReferenceSystem );
         return hashCode.ToHashCode();
     }
+
+
+    public bool IsValid( ICurrentLocation<TID> location, DistanceUnits units, double maxDistance )
+    {
+        if (InstanceID == Guid.Empty) { return false; }
+
+
+        return CalculateDistance( this, location, units ) <= maxDistance;
+    }
+
+
+    public static implicit operator Location( CurrentLocation<TID> point ) => new()
+                                                                              {
+                                                                                  Latitude                = point.Latitude,
+                                                                                  Longitude               = point.Longitude,
+                                                                                  Timestamp               = point.Timestamp,
+                                                                                  Altitude                = point.Altitude,
+                                                                                  Accuracy                = point.Accuracy,
+                                                                                  VerticalAccuracy        = point.VerticalAccuracy,
+                                                                                  Speed                   = point.Speed,
+                                                                                  Course                  = point.Course,
+                                                                                  IsFromMockProvider      = point.IsFromMockProvider,
+                                                                                  AltitudeReferenceSystem = point.AltitudeReferenceSystem
+                                                                              };
 
 
     public bool Equals( ICurrentLocation<TID>? other )

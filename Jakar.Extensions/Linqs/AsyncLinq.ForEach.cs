@@ -26,18 +26,6 @@ public static partial class AsyncLinq
 
         foreach (TElement item in source) { action( item ); }
     }
-    public static void ForEachParallel<TElement>( this IEnumerable<TElement> source, Action<TElement> action ) => source.AsParallel()
-                                                                                                                        .ForAll( action );
-
-
-    public static async Task ForEachAsync<TElement>( this IEnumerable<TElement> source, Func<TElement, Task> action )
-    {
-        foreach (TElement item in source) { await action( item ); }
-    }
-    public static async ValueTask ForEachAsync<TElement>( this IEnumerable<TElement> source, Func<TElement, ValueTask> action )
-    {
-        foreach (TElement item in source) { await action( item ); }
-    }
 
 
     public static void ForEach<TKey, TElement>( this IDictionary<TKey, TElement> dict, Action<TKey, TElement> action )
@@ -51,6 +39,16 @@ public static partial class AsyncLinq
     public static void ForEach<TKey, TElement>( this IDictionary<TKey, TElement> dict, Action<TElement> action )
     {
         foreach (TElement value in dict.Values) { action( value ); }
+    }
+
+
+    public static async Task ForEachAsync<TElement>( this IEnumerable<TElement> source, Func<TElement, Task> action )
+    {
+        foreach (TElement item in source) { await action( item ); }
+    }
+    public static async ValueTask ForEachAsync<TElement>( this IEnumerable<TElement> source, Func<TElement, ValueTask> action )
+    {
+        foreach (TElement item in source) { await action( item ); }
     }
 
 
@@ -92,6 +90,8 @@ public static partial class AsyncLinq
     {
         await foreach (TElement item in source.WithCancellation( token )) { await action( item ); }
     }
+    public static void ForEachParallel<TElement>( this IEnumerable<TElement> source, Action<TElement> action ) => source.AsParallel()
+                                                                                                                        .ForAll( action );
 
 
     public static async Task ForEachParallelAsync<TElement>( this IEnumerable<TElement> source, Func<TElement, Task> body, int? maxDegreeOfParallelism = default )

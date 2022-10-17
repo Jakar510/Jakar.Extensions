@@ -1,13 +1,13 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 09/01/2022  6:40 PM
 
-namespace Jakar.Database;
+namespace Jakar.Database.Caches;
 
 
 public sealed class TableCache<TRecord> : Service, IHostedService, IReadOnlyCollection<TRecord>, IAsyncEnumerator<TRecord?> where TRecord : TableRecord<TRecord>
 {
     private readonly ConcurrentDictionary<long, CacheEntry<TRecord>> _records = new();
-    private readonly IDbTable<TRecord>                               _table;
+    private readonly DbTableBase<TRecord>                            _table;
     private readonly ILogger                                         _logger;
     private readonly KeyGenerator<CacheEntry<TRecord>>               _generator;
     private readonly TimeSpan                                        _expireTime = TimeSpan.FromMinutes( 1 );
@@ -29,34 +29,14 @@ public sealed class TableCache<TRecord> : Service, IHostedService, IReadOnlyColl
                                             : default;
 
 
-    public TableCache( IDbTable<TRecord> table, IOptions<TableCacheOptions> options ) : this( table, options.Value ) { }
-    public TableCache( IDbTable<TRecord> table, TableCacheOptions           options ) : this( table, options.Factory, options.RefreshTime ) { }
-    public TableCache( IDbTable<TRecord> table, ILoggerFactory factory, TimeSpan refreshTime ) : base()
+    public TableCache( DbTableBase<TRecord> table, IOptions<TableCacheOptions> options ) : this( table, options.Value ) { }
+    public TableCache( DbTableBase<TRecord> table, TableCacheOptions           options ) : this( table, options.Factory, options.RefreshTime ) { }
+    public TableCache( DbTableBase<TRecord> table, ILoggerFactory factory, TimeSpan refreshTime ) : base()
     {
         _table       = table;
         _refreshTime = refreshTime;
         _logger      = factory.CreateLogger( GetType() );
         _generator   = new KeyGenerator<CacheEntry<TRecord>>( _records );
-    }
-    protected override void Dispose( bool disposing )
-    {
-        _generator.Dispose();
-        _records.Clear();
-        Clear();
-    }
-    public void Reset() => _generator.Reset();
-    private async ValueTask Refresh( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
-    {
-        if (HasChanged)
-        {
-            await _table.Update( connection, transaction, RecordsChanged, token );
-            await AddOrUpdate( _table.Get( connection, transaction, Changed, token ), token );
-        }
-
-
-        List<TRecord> records = await _table.All( connection, transaction, token );
-        _records.Clear();
-        AddOrUpdate( records );
     }
 
 
@@ -87,14 +67,31 @@ public sealed class TableCache<TRecord> : Service, IHostedService, IReadOnlyColl
     public void Clear() => _records.Clear();
     public bool Contains( long    key ) => _records.Values.Any( x => x.ID.Equals( key ) );
     public bool Contains( TRecord key ) => _records.Values.Any( x => x.Equals( key ) );
-
-
-    public bool TryRemove( TRecord pair ) => _records.TryRemove( pair.ID, out _ );
-    public bool TryRemove( TRecord pair, [NotNullWhen( true )] out TRecord? value ) => TryRemove( pair.ID, out value );
-    public bool TryRemove( long    key ) => _records.TryRemove( key, out _ );
-    public bool TryRemove( long key, [NotNullWhen( true )] out TRecord? value )
+    protected override void Dispose( bool disposing )
     {
-        if (_records.TryRemove( key, out CacheEntry<TRecord>? entry ))
+        _generator.Dispose();
+        _records.Clear();
+        Clear();
+    }
+    private async ValueTask Refresh( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
+    {
+        if (HasChanged)
+        {
+            await _table.Update( connection, transaction, RecordsChanged, token );
+            await AddOrUpdate( _table.Get( connection, transaction, Changed, token ), token );
+        }
+
+
+        List<TRecord> records = await _table.All( connection, transaction, token );
+        _records.Clear();
+        AddOrUpdate( records );
+    }
+    public void Reset() => _generator.Reset();
+
+
+    public bool TryGetValue( long key, [NotNullWhen( true )] out TRecord? value )
+    {
+        if (_records.TryGetValue( key, out CacheEntry<TRecord>? entry ))
         {
             value = entry.Value;
             return true;
@@ -105,9 +102,12 @@ public sealed class TableCache<TRecord> : Service, IHostedService, IReadOnlyColl
     }
 
 
-    public bool TryGetValue( long key, [NotNullWhen( true )] out TRecord? value )
+    public bool TryRemove( TRecord pair ) => _records.TryRemove( pair.ID, out _ );
+    public bool TryRemove( TRecord pair, [NotNullWhen( true )] out TRecord? value ) => TryRemove( pair.ID, out value );
+    public bool TryRemove( long    key ) => _records.TryRemove( key, out _ );
+    public bool TryRemove( long key, [NotNullWhen( true )] out TRecord? value )
     {
-        if (_records.TryGetValue( key, out CacheEntry<TRecord>? entry ))
+        if (_records.TryRemove( key, out CacheEntry<TRecord>? entry ))
         {
             value = entry.Value;
             return true;

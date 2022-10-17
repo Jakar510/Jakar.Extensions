@@ -13,8 +13,9 @@ namespace Jakar.Json.Generator;
 
 public static class SourceGenExtensions
 {
-    private static bool IsPartial( this MemberDeclarationSyntax syntax ) => syntax.Modifiers.Any( m => m.IsKind( SyntaxKind.PartialKeyword ) );
-    private static bool IsPublic( this  MemberDeclarationSyntax syntax ) => syntax.Modifiers.Any( m => m.IsKind( SyntaxKind.PublicKeyword ) );
+    public static void Finalize( this   GeneratorExecutionContext context, in IMethodSymbol method, in string source ) => context.AddSource( $"{method.ContainingType.Name}.g.cs", source );
+    private static bool IsPartial( this MemberDeclarationSyntax   syntax ) => syntax.Modifiers.Any( m => m.IsKind( SyntaxKind.PartialKeyword ) );
+    private static bool IsPublic( this  MemberDeclarationSyntax   syntax ) => syntax.Modifiers.Any( m => m.IsKind( SyntaxKind.PublicKeyword ) );
     public static bool IsRecordStruct( this RecordDeclarationSyntax record )
     {
         if (record.IsKind( SyntaxKind.RecordStructDeclaration )) { return true; }
@@ -22,6 +23,4 @@ public static class SourceGenExtensions
         return record.Modifiers.Any( m => m.IsKind( SyntaxKind.RecordStructDeclaration ) );
     }
     public static bool IsSyntaxTarget( this SyntaxNode syntax ) => syntax is RecordDeclarationSyntax r && r.IsPartial() && r.IsPublic() && r.IsRecordStruct();
-
-    public static void Finalize( this GeneratorExecutionContext context, in IMethodSymbol method, in string source ) => context.AddSource( $"{method.ContainingType.Name}.g.cs", source );
 }

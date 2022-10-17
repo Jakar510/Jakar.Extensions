@@ -17,6 +17,8 @@ public class ObjectToNullableBoolConverter : TypeConverter, IValueConverter, IEx
         typeof(string)
     };
 
+    public override bool CanConvertFrom( Type? sourceType ) => sourceType is null || sourceType.IsOneOf( _types );
+
     public static bool? Convert( object? value ) => value switch
                                                     {
                                                         null     => null,
@@ -33,12 +35,10 @@ public class ObjectToNullableBoolConverter : TypeConverter, IValueConverter, IEx
                                                         _ => true
                                                     };
 
-    public override bool CanConvertFrom( Type? sourceType ) => sourceType is null || sourceType.IsOneOf( _types );
-
-    protected virtual bool? InternalConvert( object? value ) => Convert( value );
-
 
     public override object? ConvertFromInvariantString( string? value ) => InternalConvert( value );
+
+    protected virtual bool? InternalConvert( object? value ) => Convert( value );
 
 
     public object? ConvertFrom( CultureInfo            culture, object?          value, IServiceProvider serviceProvider ) => InternalConvert( value );

@@ -12,10 +12,10 @@ namespace Jakar.Extensions.Xamarin.Forms;
 [TypeConversion( typeof(double?) )]
 public class NullableDoubleTypeConverter : FontSizeConverter, IValueConverter, IExtendedTypeConverter // IExtendedTypeConverter 
 {
+    public override bool CanConvertFrom( Type? sourceType ) => sourceType is null || sourceType == typeof(string);
     public static double? Convert( string? value ) => double.TryParse( value, out double d )
                                                           ? d
                                                           : null;
-    public override bool CanConvertFrom( Type?                  sourceType ) => sourceType is null || sourceType == typeof(string);
     public override object? ConvertFromInvariantString( string? value ) => Convert( value );
 
     public override string? ConvertToInvariantString( object? value ) => value?.ToString();

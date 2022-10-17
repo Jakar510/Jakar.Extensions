@@ -18,23 +18,6 @@ public static class JsonNet
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static string ToJson( this JToken json ) => json.ToJson( Formatting.Indented );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static string ToJson( this JToken json, params JsonConverter[] converters ) => json.ToJson( Formatting.Indented, converters );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static string ToJson( this JToken json, Formatting             formatting ) => json.ToString( formatting );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static string ToJson( this JToken json, Formatting             formatting, params JsonConverter[] converters ) => json.ToString( formatting, converters );
-
-
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static string ToPrettyJson( this object item ) => item.ToJson( Formatting.Indented );
-
-
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static string ToJson( this object item ) => JsonConvert.SerializeObject( item );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static string ToJson( this object item, in Formatting          formatting ) => JsonConvert.SerializeObject( item, formatting );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static string ToJson( this object item, JsonSerializerSettings settings ) => item.ToJson( Formatting.Indented, settings );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static string ToJson( this object item, in     Formatting      formatting, JsonSerializerSettings settings ) => JsonConvert.SerializeObject( item, formatting, settings );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static string ToJson( this object item, params JsonConverter[] converters ) => item.ToJson( Formatting.Indented, converters );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static string ToJson( this object item, in     Formatting      formatting, params JsonConverter[] converters ) => JsonConvert.SerializeObject( item, formatting, converters );
-
-
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static TResult FromJson<TResult>( this ReadOnlySpan<char> json ) => json.ToString()
                                                                                    .FromJson<TResult>(); // TODO: 
@@ -52,6 +35,23 @@ public static class JsonNet
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static JToken FromJson( this object json ) => JToken.FromObject( json ) ?? throw new NullReferenceException( nameof(JToken.Parse) );
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static JToken FromJson( this object json, JsonSerializer serializer ) => JToken.FromObject( json, serializer ) ?? throw new NullReferenceException( nameof(JToken.Parse) );
+
+
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static string ToJson( this JToken json ) => json.ToJson( Formatting.Indented );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static string ToJson( this JToken json, params JsonConverter[] converters ) => json.ToJson( Formatting.Indented, converters );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static string ToJson( this JToken json, Formatting             formatting ) => json.ToString( formatting );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static string ToJson( this JToken json, Formatting             formatting, params JsonConverter[] converters ) => json.ToString( formatting, converters );
+
+
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static string ToJson( this object item ) => JsonConvert.SerializeObject( item );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static string ToJson( this object item, in Formatting          formatting ) => JsonConvert.SerializeObject( item, formatting );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static string ToJson( this object item, JsonSerializerSettings settings ) => item.ToJson( Formatting.Indented, settings );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static string ToJson( this object item, in     Formatting      formatting, JsonSerializerSettings settings ) => JsonConvert.SerializeObject( item, formatting, settings );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static string ToJson( this object item, params JsonConverter[] converters ) => item.ToJson( Formatting.Indented, converters );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static string ToJson( this object item, in     Formatting      formatting, params JsonConverter[] converters ) => JsonConvert.SerializeObject( item, formatting, converters );
+
+
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static string ToPrettyJson( this object item ) => item.ToJson( Formatting.Indented );
 
 
     // TODO: SaveDebug

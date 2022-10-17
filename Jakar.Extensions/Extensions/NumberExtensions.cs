@@ -7,33 +7,6 @@ namespace Jakar.Extensions;
 
 public static class Numbers
 {
-    public static float AsFloat( this   decimal value ) => (float)value;
-    public static int AsInt( this       decimal value ) => (int)value;
-    public static uint AsUInt( this     decimal value ) => (uint)value;
-    public static ushort AsUShort( this decimal value ) => (ushort)value;
-    public static short AsShort( this   decimal value ) => (short)value;
-    public static sbyte AsSByte( this   decimal value ) => (sbyte)value;
-    public static byte AsByte( this     decimal value ) => (byte)value;
-
-
-    public static float AsFloat( this   double value ) => (float)value;
-    public static int AsInt( this       double value ) => (int)value;
-    public static uint AsUInt( this     double value ) => (uint)value;
-    public static ushort AsUShort( this double value ) => (ushort)value;
-    public static short AsShort( this   double value ) => (short)value;
-    public static sbyte AsSByte( this   double value ) => (sbyte)value;
-    public static byte AsByte( this     double value ) => (byte)value;
-
-
-    public static float AsFloat( this   float value ) => value;
-    public static int AsInt( this       float value ) => (int)value;
-    public static uint AsUInt( this     float value ) => (uint)value;
-    public static ushort AsUShort( this float value ) => (ushort)value;
-    public static short AsShort( this   float value ) => (short)value;
-    public static sbyte AsSByte( this   float value ) => (sbyte)value;
-    public static byte AsByte( this     float value ) => (byte)value;
-
-
     public static byte As( this string? value, in byte defaultValue ) => byte.TryParse( value, out byte result )
                                                                              ? result
                                                                              : defaultValue;
@@ -129,17 +102,42 @@ public static class Numbers
     public static decimal? As( this string? value, in decimal? defaultValue ) => decimal.TryParse( value, out decimal d )
                                                                                      ? d
                                                                                      : defaultValue;
+    public static byte AsByte( this         decimal value ) => (byte)value;
+    public static byte AsByte( this         double  value ) => (byte)value;
+    public static byte AsByte( this         float   value ) => (byte)value;
+    public static byte AsByte<TValue>( this TValue  value ) where TValue : struct, Enum => Convert.ToByte( value );
 
 
-    public static decimal AsDecimal<TValue>( this TValue value ) where TValue : struct, Enum => value.AsLong();
-    public static double AsDouble<TValue>( this   TValue value ) where TValue : struct, Enum => value.AsLong();
-    public static float AsFloat<TValue>( this     TValue value ) where TValue : struct, Enum => value.AsLong();
-    public static ulong AsULong<TValue>( this     TValue value ) where TValue : struct, Enum => Convert.ToUInt64( value );
-    public static long AsLong<TValue>( this       TValue value ) where TValue : struct, Enum => Convert.ToInt64( value );
-    public static int AsInt<TValue>( this         TValue value ) where TValue : struct, Enum => Convert.ToInt32( value );
-    public static uint AsUInt<TValue>( this       TValue value ) where TValue : struct, Enum => Convert.ToUInt32( value );
-    public static short AsShort<TValue>( this     TValue value ) where TValue : struct, Enum => Convert.ToInt16( value );
-    public static ushort AsUShort<TValue>( this   TValue value ) where TValue : struct, Enum => Convert.ToUInt16( value );
-    public static byte AsByte<TValue>( this       TValue value ) where TValue : struct, Enum => Convert.ToByte( value );
-    public static sbyte AsSByte<TValue>( this     TValue value ) where TValue : struct, Enum => Convert.ToSByte( value );
+    public static decimal AsDecimal<TValue>( this TValue  value ) where TValue : struct, Enum => value.AsLong();
+    public static double AsDouble<TValue>( this   TValue  value ) where TValue : struct, Enum => value.AsLong();
+    public static float AsFloat( this             decimal value ) => (float)value;
+
+
+    public static float AsFloat( this double value ) => (float)value;
+
+
+    public static float AsFloat( this           float   value ) => value;
+    public static float AsFloat<TValue>( this   TValue  value ) where TValue : struct, Enum => value.AsLong();
+    public static int AsInt( this               decimal value ) => (int)value;
+    public static int AsInt( this               double  value ) => (int)value;
+    public static int AsInt( this               float   value ) => (int)value;
+    public static int AsInt<TValue>( this       TValue  value ) where TValue : struct, Enum => Convert.ToInt32( value );
+    public static long AsLong<TValue>( this     TValue  value ) where TValue : struct, Enum => Convert.ToInt64( value );
+    public static sbyte AsSByte( this           decimal value ) => (sbyte)value;
+    public static sbyte AsSByte( this           double  value ) => (sbyte)value;
+    public static sbyte AsSByte( this           float   value ) => (sbyte)value;
+    public static sbyte AsSByte<TValue>( this   TValue  value ) where TValue : struct, Enum => Convert.ToSByte( value );
+    public static short AsShort( this           decimal value ) => (short)value;
+    public static short AsShort( this           double  value ) => (short)value;
+    public static short AsShort( this           float   value ) => (short)value;
+    public static short AsShort<TValue>( this   TValue  value ) where TValue : struct, Enum => Convert.ToInt16( value );
+    public static uint AsUInt( this             decimal value ) => (uint)value;
+    public static uint AsUInt( this             double  value ) => (uint)value;
+    public static uint AsUInt( this             float   value ) => (uint)value;
+    public static uint AsUInt<TValue>( this     TValue  value ) where TValue : struct, Enum => Convert.ToUInt32( value );
+    public static ulong AsULong<TValue>( this   TValue  value ) where TValue : struct, Enum => Convert.ToUInt64( value );
+    public static ushort AsUShort( this         decimal value ) => (ushort)value;
+    public static ushort AsUShort( this         double  value ) => (ushort)value;
+    public static ushort AsUShort( this         float   value ) => (ushort)value;
+    public static ushort AsUShort<TValue>( this TValue  value ) where TValue : struct, Enum => Convert.ToUInt16( value );
 }

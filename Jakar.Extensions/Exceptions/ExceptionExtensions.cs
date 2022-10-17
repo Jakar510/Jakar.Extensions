@@ -7,63 +7,6 @@ public static class ExceptionExtensions
     public static string CallStack( Exception e ) => CallStack( new StackTrace( e ) );
     public static string CallStack() => CallStack( new StackTrace() );
     public static string CallStack( StackTrace trace ) => string.Join( "->", Frames( trace ) );
-    public static IEnumerable<string> Frames( StackTrace trace )
-    {
-        foreach (StackFrame frame in trace.GetFrames())
-        {
-            MethodBase method    = frame.GetMethod() ?? throw new NullReferenceException( nameof(frame.GetMethod) );
-            string     className = method.MethodClass() ?? throw new NullReferenceException( nameof(TypeExtensions.MethodClass) );
-
-
-            switch (method.Name)
-            {
-                case nameof(CallStack) when className == nameof(ExceptionExtensions):
-                case nameof(Frames) when className == nameof(ExceptionExtensions):
-                case nameof(Frame) when className == nameof(ExceptionExtensions):
-                    continue;
-
-                default:
-                    yield return $"{className}::{method.Name}";
-                    break;
-            }
-        }
-    }
-    public static string Frame( StackFrame frame )
-    {
-        MethodBase method    = frame.GetMethod() ?? throw new NullReferenceException( nameof(frame.GetMethod) );
-        string     className = method.MethodClass() ?? throw new NullReferenceException( nameof(TypeExtensions.MethodClass) );
-
-        return $"{className}::{method.Name}";
-    }
-
-
-    public static Dictionary<string, object?> GetProperties( this Exception e )
-    {
-        var dictionary = new Dictionary<string, object?>();
-
-        e.GetProperties( ref dictionary );
-
-        return dictionary;
-    }
-
-    public static void GetProperties( this Exception e, ref Dictionary<string, object?> dictionary )
-    {
-        foreach (PropertyInfo info in e.GetType()
-                                       .GetProperties( BindingFlags.Instance | BindingFlags.Public ))
-        {
-            string key = info.Name;
-
-            if (dictionary.ContainsKey( key ) || !info.CanRead || key == "TargetSite") { continue; }
-
-            dictionary[key] = info.GetValue( e, null );
-        }
-    }
-
-
-    public static MethodDetails? MethodInfo( this Exception e ) => e.TargetSite?.MethodInfo();
-    public static string? MethodName( this        Exception e ) => e.TargetSite?.MethodName();
-    public static string? MethodSignature( this   Exception e ) => e.TargetSite?.MethodSignature();
-    public static string? MethodClass( this       Exception e ) => e.TargetSite?.MethodClass();
 
 
     public static void Details( this Exception e, out Dictionary<string, string?> dict ) => dict = new Dictionary<string, string?>
@@ -99,6 +42,51 @@ public static class ExceptionExtensions
     }
 
 
+    public static ExceptionDetails Details( this Exception e ) => new(e);
+    public static string Frame( StackFrame frame )
+    {
+        MethodBase method    = frame.GetMethod() ?? throw new NullReferenceException( nameof(frame.GetMethod) );
+        string     className = method.MethodClass() ?? throw new NullReferenceException( nameof(TypeExtensions.MethodClass) );
+
+        return $"{className}::{method.Name}";
+    }
+    public static IEnumerable<string> Frames( StackTrace trace )
+    {
+        foreach (StackFrame frame in trace.GetFrames())
+        {
+            MethodBase method    = frame.GetMethod() ?? throw new NullReferenceException( nameof(frame.GetMethod) );
+            string     className = method.MethodClass() ?? throw new NullReferenceException( nameof(TypeExtensions.MethodClass) );
+
+
+            switch (method.Name)
+            {
+                case nameof(CallStack) when className == nameof(ExceptionExtensions):
+                case nameof(Frames) when className == nameof(ExceptionExtensions):
+                case nameof(Frame) when className == nameof(ExceptionExtensions):
+                    continue;
+
+                default:
+                    yield return $"{className}::{method.Name}";
+                    break;
+            }
+        }
+    }
+    public static ExceptionDetails FullDetails( this Exception e ) => new(e, true);
+
+
+    [Obsolete( $"Use {nameof(ExceptionDetails)} instead" )]
+    public static Dictionary<string, object?> FullDetails( this Exception e, bool includeFullMethodInfo )
+    {
+        if (e is null) { throw new ArgumentNullException( nameof(e) ); }
+
+        e.Details( out Dictionary<string, object?> dict, includeFullMethodInfo );
+
+        dict[nameof(e.InnerException)] = e.GetInnerExceptions( includeFullMethodInfo );
+
+        return dict;
+    }
+
+
     public static Dictionary<string, JToken?> GetData( this Exception e )
     {
         var data = new Dictionary<string, JToken?>();
@@ -117,23 +105,6 @@ public static class ExceptionExtensions
         }
 
         return data;
-    }
-
-
-    public static ExceptionDetails Details( this     Exception e ) => new(e);
-    public static ExceptionDetails FullDetails( this Exception e ) => new(e, true);
-
-
-    [Obsolete( $"Use {nameof(ExceptionDetails)} instead" )]
-    public static Dictionary<string, object?> FullDetails( this Exception e, bool includeFullMethodInfo )
-    {
-        if (e is null) { throw new ArgumentNullException( nameof(e) ); }
-
-        e.Details( out Dictionary<string, object?> dict, includeFullMethodInfo );
-
-        dict[nameof(e.InnerException)] = e.GetInnerExceptions( includeFullMethodInfo );
-
-        return dict;
     }
 
 
@@ -158,4 +129,33 @@ public static class ExceptionExtensions
 
         return dict;
     }
+
+
+    public static Dictionary<string, object?> GetProperties( this Exception e )
+    {
+        var dictionary = new Dictionary<string, object?>();
+
+        e.GetProperties( ref dictionary );
+
+        return dictionary;
+    }
+
+    public static void GetProperties( this Exception e, ref Dictionary<string, object?> dictionary )
+    {
+        foreach (PropertyInfo info in e.GetType()
+                                       .GetProperties( BindingFlags.Instance | BindingFlags.Public ))
+        {
+            string key = info.Name;
+
+            if (dictionary.ContainsKey( key ) || !info.CanRead || key == "TargetSite") { continue; }
+
+            dictionary[key] = info.GetValue( e, null );
+        }
+    }
+    public static string? MethodClass( this Exception e ) => e.TargetSite?.MethodClass();
+
+
+    public static MethodDetails? MethodInfo( this Exception e ) => e.TargetSite?.MethodInfo();
+    public static string? MethodName( this        Exception e ) => e.TargetSite?.MethodName();
+    public static string? MethodSignature( this   Exception e ) => e.TargetSite?.MethodSignature();
 }

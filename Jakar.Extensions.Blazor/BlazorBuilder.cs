@@ -68,17 +68,6 @@ public static class BlazorBuilder
 
     /// <summary>
     ///     <para>
-    ///         <see href = "https://blazor.radzen.com/get-started" />
-    ///     </para>
-    /// </summary>
-    public static WebApplicationBuilder AddRadzen( this WebApplicationBuilder builder ) => builder.AddScoped<DialogService>()
-                                                                                                  .AddScoped<TooltipService>()
-                                                                                                  .AddScoped<ContextMenuService>()
-                                                                                                  .AddScoped<NotificationService>();
-
-
-    /// <summary>
-    ///     <para>
     ///         <see href = "https://github.com/Blazored/Modal" />
     ///     </para>
     ///     <para>
@@ -154,30 +143,6 @@ public static class BlazorBuilder
 
     /// <summary>
     ///     <para>
-    ///         <see href = "https://github.com/Blazored/Toast" />
-    ///     </para>
-    /// </summary>
-    public static WebApplicationBuilder AddBlazoredToast( this WebApplicationBuilder builder )
-    {
-        builder.Services.AddBlazoredToast();
-        return builder;
-    }
-
-
-    /// <summary>
-    ///     <para>
-    ///         <see href = "https://github.com/Blazored/Modal" />
-    ///     </para>
-    /// </summary>
-    public static WebApplicationBuilder AddBlazoredModal( this WebApplicationBuilder builder )
-    {
-        builder.Services.AddBlazoredModal();
-        return builder;
-    }
-
-
-    /// <summary>
-    ///     <para>
     ///         <see href = "https://github.com/Blazored/LocalStorage" />
     ///     </para>
     /// </summary>
@@ -194,6 +159,18 @@ public static class BlazorBuilder
     public static WebApplicationBuilder AddBlazoredLocalStorage( this WebApplicationBuilder builder, Action<LocalStorageOptions> configure )
     {
         builder.Services.AddBlazoredLocalStorage( configure );
+        return builder;
+    }
+
+
+    /// <summary>
+    ///     <para>
+    ///         <see href = "https://github.com/Blazored/Modal" />
+    ///     </para>
+    /// </summary>
+    public static WebApplicationBuilder AddBlazoredModal( this WebApplicationBuilder builder )
+    {
+        builder.Services.AddBlazoredModal();
         return builder;
     }
 
@@ -218,4 +195,27 @@ public static class BlazorBuilder
         builder.Services.AddBlazoredSessionStorage( configure );
         return builder;
     }
+
+
+    /// <summary>
+    ///     <para>
+    ///         <see href = "https://github.com/Blazored/Toast" />
+    ///     </para>
+    /// </summary>
+    public static WebApplicationBuilder AddBlazoredToast( this WebApplicationBuilder builder )
+    {
+        builder.Services.AddBlazoredToast();
+        return builder;
+    }
+
+
+    /// <summary>
+    ///     <para>
+    ///         <see href = "https://blazor.radzen.com/get-started" />
+    ///     </para>
+    /// </summary>
+    public static WebApplicationBuilder AddRadzen( this WebApplicationBuilder builder ) => builder.AddScoped<DialogService>()
+                                                                                                  .AddScoped<TooltipService>()
+                                                                                                  .AddScoped<ContextMenuService>()
+                                                                                                  .AddScoped<NotificationService>();
 }

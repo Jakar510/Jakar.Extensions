@@ -17,8 +17,8 @@ public interface ICollectionWrapper<TValue> : IReadOnlyCollection<long>, IEquata
     void Add( HashSet<TValue>?            value );
     bool Add( TValue                      value );
     void Add( ICollectionWrapper<TValue>? value );
-    bool Remove( TValue                   value );
     bool Contains( TValue                 value );
+    bool Remove( TValue                   value );
     void SetValues( string?               json, [CallerMemberName] string? caller = default );
 
 

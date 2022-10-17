@@ -39,6 +39,23 @@ public class EmbeddedResources<T>
     protected string GetPath( string fileName ) => $"{_Namespace}.{fileName}";
 
 
+    public ReadOnlyMemory<byte> GetResourceBytes( string fileName )
+    {
+        Stream    stream = GetResourceStream( fileName );
+        using var reader = new MemoryStream();
+        stream.CopyTo( stream );
+        return reader.ToArray();
+    }
+
+    public async Task<ReadOnlyMemory<byte>> GetResourceBytesAsync( string fileName )
+    {
+        Stream          stream = GetResourceStream( fileName );
+        await using var reader = new MemoryStream();
+        await stream.CopyToAsync( stream );
+        return reader.ToArray();
+    }
+
+
     public Stream GetResourceStream( string fileName )
     {
         string path = GetPath( fileName );
@@ -72,23 +89,6 @@ public class EmbeddedResources<T>
     {
         string text = await GetResourceTextAsync( fileName, encoding );
         return text.FromJson<TValue>();
-    }
-
-
-    public ReadOnlyMemory<byte> GetResourceBytes( string fileName )
-    {
-        Stream    stream = GetResourceStream( fileName );
-        using var reader = new MemoryStream();
-        stream.CopyTo( stream );
-        return reader.ToArray();
-    }
-
-    public async Task<ReadOnlyMemory<byte>> GetResourceBytesAsync( string fileName )
-    {
-        Stream          stream = GetResourceStream( fileName );
-        await using var reader = new MemoryStream();
-        await stream.CopyToAsync( stream );
-        return reader.ToArray();
     }
 
 

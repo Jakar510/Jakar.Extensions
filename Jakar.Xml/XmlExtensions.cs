@@ -20,17 +20,29 @@ namespace Jakar.Xml;
 [SuppressMessage( "ReSharper", "ParameterTypeCanBeEnumerable.Global" )]
 public static class XmlExtensions
 {
-    public static string SetMappedIDs<T>( this IEnumerable<IEnumerable<T>> items ) where T : IDataBaseID => items.Consolidate()
-                                                                                                                 .SetMappedIDs();
-    public static string SetMappedIDs<T>( this IEnumerable<T> items ) where T : IDataBaseID => items.Select( item => item.ID )
-                                                                                                    .SetMappedIDs<T>();
+    public static TResult? DeserializeXml<TResult>( this string xml )
+    {
+        if (string.IsNullOrWhiteSpace( xml )) { return default; }
 
-    public static string SetMappedIDs<T>( this IEnumerable<long> listOfIds ) => listOfIds.ToXml( new Dictionary<string, string>
-                                                                                                 {
-                                                                                                     [Constants.GROUP] = typeof(T).GetTableName()
-                                                                                                 } );
+        var doc = new XmlDocument();
+        doc.LoadXml( xml );
+
+        string json = JsonConvert.SerializeXmlNode( doc );
+        return json.FromJson<TResult>();
+    }
 
     public static ICollection<long> GetMappedIDs( this string xml, out IDictionary<string, string>? attributes ) => xml.FromXml<List<long>>( out attributes );
+
+
+    // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+    // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+    public static string GetNameSpaceUri( this Type type, PropertyInfo info ) => type.GetNameSpaceUri( info.Name );
+    public static string GetNameSpaceUri( this Type type, FieldInfo    info ) => type.GetNameSpaceUri( info.Name );
+    public static string GetNameSpaceUri( this Type type, string       nameSpace ) => type.GetTypeName() + Constants.Dividers.NS + nameSpace;
 
 
     public static string PrettyXml( this XmlDocument document, XmlWriterSettings? settings = default )
@@ -49,17 +61,15 @@ public static class XmlExtensions
         document.Save( writer );
         return builder.ToString();
     }
+    public static string SetMappedIDs<T>( this IEnumerable<IEnumerable<T>> items ) where T : IDataBaseID => items.Consolidate()
+                                                                                                                 .SetMappedIDs();
+    public static string SetMappedIDs<T>( this IEnumerable<T> items ) where T : IDataBaseID => items.Select( item => item.ID )
+                                                                                                    .SetMappedIDs<T>();
 
-
-    // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-
-    // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-
-    public static string GetNameSpaceUri( this Type type, PropertyInfo info ) => type.GetNameSpaceUri( info.Name );
-    public static string GetNameSpaceUri( this Type type, FieldInfo    info ) => type.GetNameSpaceUri( info.Name );
-    public static string GetNameSpaceUri( this Type type, string       nameSpace ) => type.GetTypeName() + Constants.Dividers.NS + nameSpace;
+    public static string SetMappedIDs<T>( this IEnumerable<long> listOfIds ) => listOfIds.ToXml( new Dictionary<string, string>
+                                                                                                 {
+                                                                                                     [Constants.GROUP] = typeof(T).GetTableName()
+                                                                                                 } );
 
 
     // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -162,16 +172,5 @@ public static class XmlExtensions
 
         string? result = node?.PrettyXml();
         return result ?? throw new InvalidOperationException();
-    }
-
-    public static TResult? DeserializeXml<TResult>( this string xml )
-    {
-        if (string.IsNullOrWhiteSpace( xml )) { return default; }
-
-        var doc = new XmlDocument();
-        doc.LoadXml( xml );
-
-        string json = JsonConvert.SerializeXmlNode( doc );
-        return json.FromJson<TResult>();
     }
 }

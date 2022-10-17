@@ -10,13 +10,7 @@ public interface IUserControl
     public DateTimeOffset? LastBadAttempt { get; }
     public DateTimeOffset? LockDate       { get; }
     public Guid?           SessionID      { get; }
-    public int            BadLogins      { get; }
-
-
-    public UserRecord MarkBadLogin();
-    public UserRecord SetActive();
-    public UserRecord Unlock();
-    public UserRecord Lock();
+    public int             BadLogins      { get; }
 
 
     /// <summary> Disable the user, with current rights. </summary>
@@ -25,4 +19,10 @@ public interface IUserControl
 
     /// <summary> Enable the user, with current rights. </summary>
     public UserRecord Enable();
+    public UserRecord Lock();
+
+
+    public UserRecord MarkBadLogin();
+    public UserRecord SetActive();
+    public UserRecord Unlock();
 }

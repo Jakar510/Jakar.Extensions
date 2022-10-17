@@ -8,15 +8,13 @@ public sealed class PwdValidator : IPasswordValidator<UserRecord>
 {
     private readonly PasswordRequirements _options;
 
-    public PwdValidator( IOptions<PasswordRequirements> options ) { PasswordValidator.Current = _options = options.Value; }
+    public PwdValidator( IOptions<PasswordRequirements> options ) => PasswordValidator.Current = _options = options.Value;
 
 
-    public IdentityResult Validate( in ReadOnlySpan<char> password )
-    {
-        return PasswordValidator.Check( password, _options )
-                   ? IdentityResult.Success
-                   : IdentityResult.Failed();
-    }
+    public IdentityResult Validate( in ReadOnlySpan<char> password ) =>
+        PasswordValidator.Check( password, _options )
+            ? IdentityResult.Success
+            : IdentityResult.Failed();
 
 
     public Task<IdentityResult> ValidateAsync( UserManager<UserRecord> manager, UserRecord user, string password ) => Task.FromResult( Validate( password ) );

@@ -31,27 +31,6 @@ public abstract class ValidValueOf<TValue, TThis> : IComparable<ValidValueOf<TVa
 
     protected ValidValueOf() => Value = default!;
 
-
-    public static TThis Create( TValue item )
-    {
-        TThis self = _factory();
-        self.Value = item;
-        self.Validate();
-        return self;
-    }
-
-    public static bool TryCreate( TValue item, [NotNullWhen( true )] out TThis? thisValue )
-    {
-        TThis self = _factory();
-        self.Value = item;
-
-        thisValue = self.IsValid()
-                        ? self
-                        : default;
-
-        return thisValue is not null;
-    }
-
     private static int Compare( TValue? left, TValue? right )
     {
         if (left is null) { return 1; }
@@ -61,6 +40,15 @@ public abstract class ValidValueOf<TValue, TThis> : IComparable<ValidValueOf<TVa
         if (ReferenceEquals( left, right )) { return 0; }
 
         return left.CompareTo( right );
+    }
+
+
+    public static TThis Create( TValue item )
+    {
+        TThis self = _factory();
+        self.Value = item;
+        self.Validate();
+        return self;
     }
     private static bool Equals( TValue? left, TValue? right )
     {
@@ -75,22 +63,17 @@ public abstract class ValidValueOf<TValue, TThis> : IComparable<ValidValueOf<TVa
 
         return left.Equals( right );
     }
-
-
-    public static bool operator ==( ValidValueOf<TValue, TThis> left, ValidValueOf<TValue, TThis> right ) => Equals( left, right );
-    public static bool operator !=( ValidValueOf<TValue, TThis> left, ValidValueOf<TValue, TThis> right ) => !Equals( left, right );
-    public static bool operator <( ValidValueOf<TValue, TThis>  left, ValidValueOf<TValue, TThis> right ) => Compare( left.Value, right.Value ) < 0;
-    public static bool operator >( ValidValueOf<TValue, TThis>  left, ValidValueOf<TValue, TThis> right ) => Compare( left.Value, right.Value ) > 0;
-    public static bool operator <=( ValidValueOf<TValue, TThis> left, ValidValueOf<TValue, TThis> right ) => Compare( left.Value, right.Value ) <= 0;
-    public static bool operator >=( ValidValueOf<TValue, TThis> left, ValidValueOf<TValue, TThis> right ) => Compare( left.Value, right.Value ) >= 0;
-
-
-    [DoesNotReturn] protected virtual void ThrowError() => throw new FormatException( $"Provided Value was in the wrong format: '{Value}'" );
-
-    protected void Validate()
+    public override bool Equals( object? other )
     {
-        if (!IsValid()) { ThrowError(); }
+        if (other is null) { return false; }
+
+        if (ReferenceEquals( this, other )) { return true; }
+
+        return other is ValidValueOf<TValue, TThis> value && Equals( value );
     }
+
+    // ReSharper disable once NonReadonlyMemberInGetHashCode
+    public override int GetHashCode() => Value?.GetHashCode() ?? 0;
 
     /// <summary>
     /// 
@@ -104,18 +87,35 @@ public abstract class ValidValueOf<TValue, TThis> : IComparable<ValidValueOf<TVa
     /// </returns>
     protected abstract bool IsValid();
 
+
+    public static bool operator ==( ValidValueOf<TValue, TThis> left, ValidValueOf<TValue, TThis> right ) => Equals( left, right );
+    public static bool operator >( ValidValueOf<TValue, TThis>  left, ValidValueOf<TValue, TThis> right ) => Compare( left.Value, right.Value ) > 0;
+    public static bool operator >=( ValidValueOf<TValue, TThis> left, ValidValueOf<TValue, TThis> right ) => Compare( left.Value, right.Value ) >= 0;
+    public static bool operator !=( ValidValueOf<TValue, TThis> left, ValidValueOf<TValue, TThis> right ) => !Equals( left, right );
+    public static bool operator <( ValidValueOf<TValue, TThis>  left, ValidValueOf<TValue, TThis> right ) => Compare( left.Value, right.Value ) < 0;
+    public static bool operator <=( ValidValueOf<TValue, TThis> left, ValidValueOf<TValue, TThis> right ) => Compare( left.Value, right.Value ) <= 0;
+
+
+    [DoesNotReturn] protected virtual void ThrowError() => throw new FormatException( $"Provided Value was in the wrong format: '{Value}'" );
+
     public override string? ToString() => Value?.ToString();
-    public override bool Equals( object? other )
+
+    public static bool TryCreate( TValue item, [NotNullWhen( true )] out TThis? thisValue )
     {
-        if (other is null) { return false; }
+        TThis self = _factory();
+        self.Value = item;
 
-        if (ReferenceEquals( this, other )) { return true; }
+        thisValue = self.IsValid()
+                        ? self
+                        : default;
 
-        return other is ValidValueOf<TValue, TThis> value && Equals( value );
+        return thisValue is not null;
     }
 
-    // ReSharper disable once NonReadonlyMemberInGetHashCode
-    public override int GetHashCode() => Value?.GetHashCode() ?? 0;
+    protected void Validate()
+    {
+        if (!IsValid()) { ThrowError(); }
+    }
 
 
     public int CompareTo( object? other )

@@ -1,7 +1,7 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 09/02/2022  3:43 PM
 
-namespace Jakar.Database;
+namespace Jakar.Database.Caches;
 
 
 public sealed class CacheEntry<TRecord> : ObservableClass, IEquatable<TRecord>, IComparable<TRecord>, IEquatable<CacheEntry<TRecord>>, IComparable<CacheEntry<TRecord>>, IComparable where TRecord : TableRecord<TRecord>
@@ -27,21 +27,21 @@ public sealed class CacheEntry<TRecord> : ObservableClass, IEquatable<TRecord>, 
     }
 
 
-    public CacheEntry( TRecord                                   value ) => Value = value;
-    public static implicit operator CacheEntry<TRecord>( TRecord value ) => new(value);
-
-
-    public static bool operator ==( CacheEntry<TRecord>? left, CacheEntry<TRecord>? right ) => Equalizer<CacheEntry<TRecord>>.Instance.Equals( left, right );
-    public static bool operator !=( CacheEntry<TRecord>? left, CacheEntry<TRecord>? right ) => !Equalizer<CacheEntry<TRecord>>.Instance.Equals( left, right );
-    public static bool operator <( CacheEntry<TRecord>?  left, CacheEntry<TRecord>? right ) => Sorter<CacheEntry<TRecord>>.Instance.Compare( left, right ) < 0;
-    public static bool operator >( CacheEntry<TRecord>?  left, CacheEntry<TRecord>? right ) => Sorter<CacheEntry<TRecord>>.Instance.Compare( left, right ) > 0;
-    public static bool operator <=( CacheEntry<TRecord>? left, CacheEntry<TRecord>? right ) => Sorter<CacheEntry<TRecord>>.Instance.Compare( left, right ) <= 0;
-    public static bool operator >=( CacheEntry<TRecord>? left, CacheEntry<TRecord>? right ) => Sorter<CacheEntry<TRecord>>.Instance.Compare( left, right ) >= 0;
-
-
-    public bool HasExpired( in TimeSpan  time ) => DateTimeOffset.Now - _lastTime >= time;
+    public CacheEntry( TRecord           value ) => Value = value;
     public override bool Equals( object? obj ) => ReferenceEquals( this, obj ) || obj is CacheEntry<TRecord> other && Equals( other );
     public override int GetHashCode() => Value.GetHashCode();
+
+
+    public bool HasExpired( in TimeSpan time ) => DateTimeOffset.Now - _lastTime >= time;
+
+
+    public static bool operator ==( CacheEntry<TRecord>?         left, CacheEntry<TRecord>? right ) => Equalizer<CacheEntry<TRecord>>.Instance.Equals( left, right );
+    public static bool operator >( CacheEntry<TRecord>?          left, CacheEntry<TRecord>? right ) => Sorter<CacheEntry<TRecord>>.Instance.Compare( left, right ) > 0;
+    public static bool operator >=( CacheEntry<TRecord>?         left, CacheEntry<TRecord>? right ) => Sorter<CacheEntry<TRecord>>.Instance.Compare( left, right ) >= 0;
+    public static implicit operator CacheEntry<TRecord>( TRecord value ) => new(value);
+    public static bool operator !=( CacheEntry<TRecord>?         left, CacheEntry<TRecord>? right ) => !Equalizer<CacheEntry<TRecord>>.Instance.Equals( left, right );
+    public static bool operator <( CacheEntry<TRecord>?          left, CacheEntry<TRecord>? right ) => Sorter<CacheEntry<TRecord>>.Instance.Compare( left, right ) < 0;
+    public static bool operator <=( CacheEntry<TRecord>?         left, CacheEntry<TRecord>? right ) => Sorter<CacheEntry<TRecord>>.Instance.Compare( left, right ) <= 0;
     public int CompareTo( object? other )
     {
         if (other is null) { return 1; }

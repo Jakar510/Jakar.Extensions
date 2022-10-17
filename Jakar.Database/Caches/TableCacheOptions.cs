@@ -1,7 +1,7 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 09/02/2022  7:26 PM
 
-namespace Jakar.Database;
+namespace Jakar.Database.Caches;
 
 
 [SuppressMessage( "ReSharper", "UnusedMethodReturnValue.Global" )]

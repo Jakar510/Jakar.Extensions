@@ -16,25 +16,9 @@ public partial class IniConfig : ConcurrentDictionary<string, IniConfig.Section>
     public IniConfig( IEnumerable<KeyValuePair<string, Section>> collection ) : this( collection, StringComparer.OrdinalIgnoreCase ) { }
     public IniConfig( IEnumerable<KeyValuePair<string, Section>> collection, IEqualityComparer<string> comparer ) : base( collection, comparer ) { }
 
-
-    public static ValueTask<IniConfig?> ReadFromFileAsync( LocalFile file ) => ReadFromFileAsync<IniConfig>( file );
-    public static IniConfig? ReadFromFile( LocalFile                 file ) => ReadFromFile<IniConfig>( file );
-
-
-    public static T? ReadFromFile<T>( LocalFile file ) where T : IniConfig, new()
-    {
-        ReadOnlySpan<char> content = file.Read()
-                                         .AsSpan();
-
-        return From<T>( content );
-    }
-    public static async ValueTask<T?> ReadFromFileAsync<T>( LocalFile file ) where T : IniConfig, new()
-    {
-        string content = await file.ReadAsync()
-                                   .AsString();
-
-        return From<T>( content );
-    }
+    public void Add( in string                     section ) => Add( section, new Section() );
+    public void Add( KeyValuePair<string, Section> pair ) => Add( pair.Key,   pair.Value );
+    public void Add( in string                     section, Section value ) => this[section] = value;
 
 
     // public static IniConfig? From( in string content )
@@ -151,8 +135,67 @@ public partial class IniConfig : ConcurrentDictionary<string, IniConfig.Section>
         return data;
     }
 
+    /// <summary>
+    ///     Gets the
+    ///     <see cref = "Section" />
+    ///     with the
+    ///     <paramref name = "sectionName" />
+    ///     , using the
+    ///     <paramref name = "comparison" />
+    ///     rules.
+    /// </summary>
+    /// <param name = "sectionName" > </param>
+    /// <param name = "comparison" > </param>
+    /// <returns> </returns>
+    /// <exception cref = "KeyNotFoundException" > </exception>
+    private Section Get( in string sectionName, in StringComparison comparison )
+    {
+        foreach (string key in Keys)
+        {
+            if (string.Compare( key, sectionName, comparison ) == 0) { return base[key]; }
+        }
 
-    public ValueTask WriteToFile( LocalFile file ) => file.WriteAsync( ToString() );
+        throw new KeyNotFoundException( sectionName );
+    }
+
+
+    /// <summary>
+    ///     Gets the
+    ///     <see cref = "Section" />
+    ///     with the
+    ///     <paramref name = "sectionName" />
+    ///     . If it doesn't exist, it is created, then returned.
+    /// </summary>
+    /// <param name = "sectionName" > Section Name </param>
+    /// <returns>
+    ///     <see cref = "Section" />
+    /// </returns>
+    public Section GetOrAdd( in string sectionName )
+    {
+        if (!ContainsKey( sectionName )) { Add( sectionName ); }
+
+        return base[sectionName];
+    }
+    public static IniConfig? ReadFromFile( LocalFile file ) => ReadFromFile<IniConfig>( file );
+
+
+    public static T? ReadFromFile<T>( LocalFile file ) where T : IniConfig, new()
+    {
+        ReadOnlySpan<char> content = file.Read()
+                                         .AsSpan();
+
+        return From<T>( content );
+    }
+
+
+    public static ValueTask<IniConfig?> ReadFromFileAsync( LocalFile file ) => ReadFromFileAsync<IniConfig>( file );
+    public static async ValueTask<T?> ReadFromFileAsync<T>( LocalFile file ) where T : IniConfig, new()
+    {
+        string content = await file.ReadAsync()
+                                   .AsString();
+
+        return From<T>( content );
+    }
 
 
     [SuppressMessage( "ReSharper", "UseDeconstruction", Justification = "Support NetFramework" )]
@@ -185,48 +228,5 @@ public partial class IniConfig : ConcurrentDictionary<string, IniConfig.Section>
     }
 
 
-    /// <summary>
-    ///     Gets the
-    ///     <see cref = "Section" />
-    ///     with the
-    ///     <paramref name = "sectionName" />
-    ///     . If it doesn't exist, it is created, then returned.
-    /// </summary>
-    /// <param name = "sectionName" > Section Name </param>
-    /// <returns>
-    ///     <see cref = "Section" />
-    /// </returns>
-    public Section GetOrAdd( in string sectionName )
-    {
-        if (!ContainsKey( sectionName )) { Add( sectionName ); }
-
-        return base[sectionName];
-    }
-
-    /// <summary>
-    ///     Gets the
-    ///     <see cref = "Section" />
-    ///     with the
-    ///     <paramref name = "sectionName" />
-    ///     , using the
-    ///     <paramref name = "comparison" />
-    ///     rules.
-    /// </summary>
-    /// <param name = "sectionName" > </param>
-    /// <param name = "comparison" > </param>
-    /// <returns> </returns>
-    /// <exception cref = "KeyNotFoundException" > </exception>
-    private Section Get( in string sectionName, in StringComparison comparison )
-    {
-        foreach (string key in Keys)
-        {
-            if (string.Compare( key, sectionName, comparison ) == 0) { return base[key]; }
-        }
-
-        throw new KeyNotFoundException( sectionName );
-    }
-
-    public void Add( in string                     section ) => Add( section, new Section() );
-    public void Add( KeyValuePair<string, Section> pair ) => Add( pair.Key,   pair.Value );
-    public void Add( in string                     section, Section value ) => this[section] = value;
+    public ValueTask WriteToFile( LocalFile file ) => file.WriteAsync( ToString() );
 }

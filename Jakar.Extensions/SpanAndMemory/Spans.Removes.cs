@@ -7,58 +7,97 @@ namespace Jakar.Extensions;
 public static partial class Spans
 {
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public static ReadOnlySpan<T> Slice<T>( this ReadOnlySpan<T> value, in T startValue, in T endValue, in bool includeEnds ) where T : unmanaged, IEquatable<T>
+    public static ReadOnlySpan<T> RemoveAll<T>( this ReadOnlySpan<T> value, in T c ) where T : unmanaged, IEquatable<T>
     {
-        int start = value.IndexOf( startValue );
-        int end   = value.IndexOf( endValue );
-
-        if (start < 0 && end < 0) { return value; }
-
-        start += includeEnds
-                     ? 0
-                     : 1;
-
-        end += includeEnds
-                   ? 1
-                   : 0;
-
-        int length = end - start;
-
-        if (start + length >= value.Length) { return value[start..]; }
-
-        Guard.IsInRangeFor( start, value, nameof(value) );
-        Guard.IsInRangeFor( end,   value, nameof(value) );
-        return value.Slice( start, length );
+        Span<T> buffer = stackalloc T[value.Length];
+        RemoveAll( value, c, ref buffer, out int charWritten );
+        return MemoryMarshal.CreateReadOnlySpan( ref buffer.GetPinnableReference(), charWritten );
     }
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public static void Slice<T>( in ReadOnlySpan<T> value, in T startValue, in T endValue, in bool includeEnds, ref Span<T> buffer, out int charWritten ) where T : unmanaged, IEquatable<T>
+    public static void RemoveAll<T>( in ReadOnlySpan<T> value, in T c, ref Span<T> buffer, out int charWritten ) where T : unmanaged, IEquatable<T>
     {
-        int start = value.IndexOf( startValue );
-        int end   = value.IndexOf( endValue );
+        Guard.IsInRangeFor( value.Length - 1, buffer, nameof(buffer) );
+        int offset = 0;
 
-        if (start > 0 && end > 0)
+        for (int i = 0; i < value.Length; i++)
         {
-            start += includeEnds
-                         ? 0
-                         : 1;
+            if (value[i]
+               .Equals( c ))
+            {
+                offset++;
+                continue;
+            }
 
-            end += includeEnds
-                       ? 1
-                       : 0;
-
-            ReadOnlySpan<T> result = start + end - start >= value.Length
-                                         ? value[start..]
-                                         : value.Slice( start, end );
-
-            result.CopyTo( buffer );
-            charWritten = result.Length;
-            return;
+            buffer[i - offset] = value[i];
         }
 
-        value.CopyTo( buffer );
-        charWritten = value.Length;
+        charWritten = value.Length - offset;
+    }
+
+
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public static Span<char> RemoveAll( this Span<char> value, in ReadOnlySpan<char> removed )
+    {
+        Span<char> buffer = stackalloc char[value.Length];
+        RemoveAll( value, ref buffer, out int charWritten, removed );
+        return MemoryMarshal.CreateSpan( ref buffer.GetPinnableReference(), charWritten );
+    }
+
+
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public static ReadOnlySpan<char> RemoveAll( this ReadOnlySpan<char> value, in ReadOnlySpan<char> removed )
+    {
+        Span<char> buffer = stackalloc char[value.Length];
+        RemoveAll( value, ref buffer, out int charWritten, removed );
+        return MemoryMarshal.CreateReadOnlySpan( ref buffer.GetPinnableReference(), charWritten );
+    }
+
+
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public static Span<T> RemoveAll<T>( this Span<T> value, in ReadOnlySpan<T> removed ) where T : unmanaged, IEquatable<T>
+    {
+        Span<T> buffer = stackalloc T[value.Length];
+        RemoveAll( value, ref buffer, out int charWritten, removed );
+        return MemoryMarshal.CreateSpan( ref buffer.GetPinnableReference(), charWritten );
+    }
+
+
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public static ReadOnlySpan<T> RemoveAll<T>( this ReadOnlySpan<T> value, in ReadOnlySpan<T> removed ) where T : unmanaged, IEquatable<T>
+    {
+        Span<T> buffer = stackalloc T[value.Length];
+        RemoveAll( value, ref buffer, out int charWritten, removed );
+        return MemoryMarshal.CreateReadOnlySpan( ref buffer.GetPinnableReference(), charWritten );
+    }
+
+
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public static void RemoveAll<T>( in ReadOnlySpan<T> value, ref Span<T> buffer, out int charWritten, in ReadOnlySpan<T> removed ) where T : unmanaged, IEquatable<T>
+    {
+        Guard.IsInRangeFor( value.Length - 1, buffer, nameof(buffer) );
+        int offset = 0;
+
+        for (int i = 0; i < value.Length; i++)
+        {
+            bool skip = false;
+
+            foreach (T item in removed)
+            {
+                if (!value[i]
+                       .Equals( item )) { continue; }
+
+                offset++;
+                skip = true;
+            }
+
+            if (skip) { continue; }
+
+            buffer[i - offset] = value[i];
+        }
+
+        charWritten = value.Length - offset;
     }
 
 
@@ -152,99 +191,58 @@ public static partial class Spans
         Join( buffer[..first], value[end..], buffer, out int second );
         charWritten = first + second;
     }
-
-
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public static ReadOnlySpan<T> RemoveAll<T>( this ReadOnlySpan<T> value, in T c ) where T : unmanaged, IEquatable<T>
+    public static ReadOnlySpan<T> Slice<T>( this ReadOnlySpan<T> value, in T startValue, in T endValue, in bool includeEnds ) where T : unmanaged, IEquatable<T>
     {
-        Span<T> buffer = stackalloc T[value.Length];
-        RemoveAll( value, c, ref buffer, out int charWritten );
-        return MemoryMarshal.CreateReadOnlySpan( ref buffer.GetPinnableReference(), charWritten );
+        int start = value.IndexOf( startValue );
+        int end   = value.IndexOf( endValue );
+
+        if (start < 0 && end < 0) { return value; }
+
+        start += includeEnds
+                     ? 0
+                     : 1;
+
+        end += includeEnds
+                   ? 1
+                   : 0;
+
+        int length = end - start;
+
+        if (start + length >= value.Length) { return value[start..]; }
+
+        Guard.IsInRangeFor( start, value, nameof(value) );
+        Guard.IsInRangeFor( end,   value, nameof(value) );
+        return value.Slice( start, length );
     }
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public static void RemoveAll<T>( in ReadOnlySpan<T> value, in T c, ref Span<T> buffer, out int charWritten ) where T : unmanaged, IEquatable<T>
+    public static void Slice<T>( in ReadOnlySpan<T> value, in T startValue, in T endValue, in bool includeEnds, ref Span<T> buffer, out int charWritten ) where T : unmanaged, IEquatable<T>
     {
-        Guard.IsInRangeFor( value.Length - 1, buffer, nameof(buffer) );
-        int offset = 0;
+        int start = value.IndexOf( startValue );
+        int end   = value.IndexOf( endValue );
 
-        for (int i = 0; i < value.Length; i++)
+        if (start > 0 && end > 0)
         {
-            if (value[i]
-               .Equals( c ))
-            {
-                offset++;
-                continue;
-            }
+            start += includeEnds
+                         ? 0
+                         : 1;
 
-            buffer[i - offset] = value[i];
+            end += includeEnds
+                       ? 1
+                       : 0;
+
+            ReadOnlySpan<T> result = start + end - start >= value.Length
+                                         ? value[start..]
+                                         : value.Slice( start, end );
+
+            result.CopyTo( buffer );
+            charWritten = result.Length;
+            return;
         }
 
-        charWritten = value.Length - offset;
-    }
-
-
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public static Span<char> RemoveAll( this Span<char> value, in ReadOnlySpan<char> removed )
-    {
-        Span<char> buffer = stackalloc char[value.Length];
-        RemoveAll( value, ref buffer, out int charWritten, removed );
-        return MemoryMarshal.CreateSpan( ref buffer.GetPinnableReference(), charWritten );
-    }
-
-
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public static ReadOnlySpan<char> RemoveAll( this ReadOnlySpan<char> value, in ReadOnlySpan<char> removed )
-    {
-        Span<char> buffer = stackalloc char[value.Length];
-        RemoveAll( value, ref buffer, out int charWritten, removed );
-        return MemoryMarshal.CreateReadOnlySpan( ref buffer.GetPinnableReference(), charWritten );
-    }
-
-
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public static Span<T> RemoveAll<T>( this Span<T> value, in ReadOnlySpan<T> removed ) where T : unmanaged, IEquatable<T>
-    {
-        Span<T> buffer = stackalloc T[value.Length];
-        RemoveAll( value, ref buffer, out int charWritten, removed );
-        return MemoryMarshal.CreateSpan( ref buffer.GetPinnableReference(), charWritten );
-    }
-
-
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public static ReadOnlySpan<T> RemoveAll<T>( this ReadOnlySpan<T> value, in ReadOnlySpan<T> removed ) where T : unmanaged, IEquatable<T>
-    {
-        Span<T> buffer = stackalloc T[value.Length];
-        RemoveAll( value, ref buffer, out int charWritten, removed );
-        return MemoryMarshal.CreateReadOnlySpan( ref buffer.GetPinnableReference(), charWritten );
-    }
-
-
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public static void RemoveAll<T>( in ReadOnlySpan<T> value, ref Span<T> buffer, out int charWritten, in ReadOnlySpan<T> removed ) where T : unmanaged, IEquatable<T>
-    {
-        Guard.IsInRangeFor( value.Length - 1, buffer, nameof(buffer) );
-        int offset = 0;
-
-        for (int i = 0; i < value.Length; i++)
-        {
-            bool skip = false;
-
-            foreach (T item in removed)
-            {
-                if (!value[i]
-                       .Equals( item )) { continue; }
-
-                offset++;
-                skip = true;
-            }
-
-            if (skip) { continue; }
-
-            buffer[i - offset] = value[i];
-        }
-
-        charWritten = value.Length - offset;
+        value.CopyTo( buffer );
+        charWritten = value.Length;
     }
 }

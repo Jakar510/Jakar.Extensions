@@ -56,55 +56,6 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     public LocalDirectory( string             path, params string[] subFolders ) : this( path.Combine( subFolders ) ) { }
     public LocalDirectory( string             path ) => FullPath = Path.GetFullPath( path );
 
-    // public static implicit operator LocalDirectory( string             path ) => new(path);
-    public static implicit operator LocalDirectory( DirectoryInfo      info ) => new(info);
-    public static implicit operator LocalDirectory( ReadOnlySpan<char> info ) => new(info);
-    public static implicit operator LocalDirectory( string             info ) => new(info);
-
-
-    /// <summary>
-    ///     Uses the
-    ///     <paramref name = "path" />
-    ///     and creates the tree structure based on
-    ///     <paramref name = "subFolders" />
-    /// </summary>
-    /// <param name = "path" > </param>
-    /// <param name = "subFolders" > </param>
-    /// <returns>
-    ///     <see cref = "LocalDirectory" />
-    /// </returns>
-    public static LocalDirectory Create( LocalDirectory path, params string[] subFolders ) => Directory.CreateDirectory( path.Combine( subFolders ) );
-
-    /// <summary>
-    ///     Uses the
-    ///     <see cref = "CurrentDirectory" />
-    ///     and creates the tree structure based on
-    ///     <paramref name = "subFolders" />
-    /// </summary>
-    /// <param name = "subFolders" > </param>
-    /// <returns>
-    ///     <see cref = "LocalDirectory" />
-    /// </returns>
-    public static LocalDirectory Create( params string[] subFolders ) => Create( CurrentDirectory, subFolders );
-
-    /// <summary>
-    ///     Uses
-    ///     <see cref = "Path.GetTempPath" />
-    ///     and creates the tree structure based on
-    ///     <paramref name = "subFolders" />
-    /// </summary>
-    /// <param name = "subFolders" > </param>
-    /// <returns>
-    ///     <see cref = "LocalDirectory" />
-    /// </returns>
-    public static LocalDirectory CreateTemp( params string[] subFolders )
-    {
-        LocalDirectory d = Create( Path.GetTempPath()
-                                       .Combine( subFolders ) );
-
-        return d.SetTemporary();
-    }
-
     public static LocalDirectory AppData( string subPath )
     {
     #if __WINDOWS__
@@ -118,173 +69,6 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
         string path = Environment.ExpandEnvironmentVariables( subPath );
         return path;
     }
-
-
-    public static bool operator ==( LocalDirectory?               left, LocalDirectory? right ) => Equalizer.Instance.Equals( left, right );
-    public static bool operator !=( LocalDirectory?               left, LocalDirectory? right ) => !Equalizer.Instance.Equals( left, right );
-    public static bool operator <( LocalDirectory?                left, LocalDirectory? right ) => Sorter.Instance.Compare( left, right ) < 0;
-    public static bool operator >( LocalDirectory?                left, LocalDirectory? right ) => Sorter.Instance.Compare( left, right ) > 0;
-    public static bool operator <=( LocalDirectory?               left, LocalDirectory? right ) => Sorter.Instance.Compare( left, right ) <= 0;
-    public static bool operator >=( LocalDirectory?               left, LocalDirectory? right ) => Sorter.Instance.Compare( left, right ) >= 0;
-    private static LocalFile ConvertFile( FileInfo                file ) => file;
-    private static LocalDirectory ConvertDirectory( DirectoryInfo file ) => file;
-
-
-    public static implicit operator Collection( LocalDirectory                     directory ) => new(directory.GetSubFolders());
-    public static implicit operator ConcurrentCollection( LocalDirectory           directory ) => new(directory.GetSubFolders());
-    public static implicit operator Items( LocalDirectory                          directory ) => new(directory.GetSubFolders());
-    public static implicit operator Set( LocalDirectory                            directory ) => new(directory.GetSubFolders());
-    public static implicit operator Watcher( LocalDirectory                        directory ) => new(directory);
-    public static implicit operator LocalFile.Collection( LocalDirectory           directory ) => new(directory.GetFiles());
-    public static implicit operator LocalFile.ConcurrentCollection( LocalDirectory directory ) => new(directory.GetFiles());
-    public static implicit operator LocalFile.Items( LocalDirectory                directory ) => new(directory.GetFiles());
-    public static implicit operator LocalFile.Set( LocalDirectory                  directory ) => new(directory.GetFiles());
-    public static implicit operator LocalFile.Watcher( LocalDirectory              directory ) => new(new Watcher( directory ));
-
-
-    public sealed override string ToString() => FullPath;
-    protected virtual LocalDirectory? GetParent()
-    {
-        DirectoryInfo? info = Info.Parent;
-
-        return info is null
-                   ? default(LocalDirectory)
-                   : info;
-    }
-
-
-    /// <summary>
-    ///     Uses the
-    ///     <see cref = "Encoding.Default" />
-    ///     encoding to used for the file names
-    /// </summary>
-    /// <param name = "output" > file path to write the zip to </param>
-    /// <param name = "compression" >
-    ///     Defaults to
-    ///     <see cref = "CompressionLevel.Optimal" />
-    /// </param>
-    public void Zip( in LocalFile output, in CompressionLevel compression = CompressionLevel.Optimal ) => Zip( output, Encoding.Default, compression );
-    /// <summary> </summary>
-    /// <param name = "output" > file path to write the zip to </param>
-    /// <param name = "compression" >
-    ///     Defaults to
-    ///     <see cref = "CompressionLevel.Optimal" />
-    /// </param>
-    /// <param name = "encoding" > The encoding used for the file names </param>
-    public void Zip( in LocalFile output, in Encoding encoding, in CompressionLevel compression = CompressionLevel.Optimal ) => ZipFile.CreateFromDirectory( FullPath, output.FullPath, compression, true, encoding );
-
-
-    public async ValueTask<LocalFile> ZipAsync( LocalFile zipFilePath, CancellationToken token )
-    {
-        await using FileStream zipToOpen = File.Create( zipFilePath.FullPath );
-        using var              archive   = new ZipArchive( zipToOpen, ZipArchiveMode.Update );
-
-        foreach (LocalFile file in GetFiles())
-        {
-            ZipArchiveEntry    entry  = archive.CreateEntry( file.FullPath );
-            await using Stream stream = entry.Open();
-
-            ReadOnlyMemory<byte> data = await file.ReadAsync()
-                                                  .AsMemory( token );
-
-            await stream.WriteAsync( data, token );
-        }
-
-        return zipFilePath;
-    }
-    public async ValueTask<LocalFile> ZipAsync( LocalFile zipFilePath, string searchPattern, CancellationToken token )
-    {
-        await using FileStream zipToOpen = File.Create( zipFilePath.FullPath );
-        using var              archive   = new ZipArchive( zipToOpen, ZipArchiveMode.Update );
-
-        foreach (LocalFile file in GetFiles( searchPattern ))
-        {
-            ZipArchiveEntry    entry  = archive.CreateEntry( file.FullPath );
-            await using Stream stream = entry.Open();
-
-            ReadOnlyMemory<byte> data = await file.ReadAsync()
-                                                  .AsMemory( token );
-
-            await stream.WriteAsync( data, token );
-        }
-
-        return zipFilePath;
-    }
-    public async ValueTask<LocalFile> ZipAsync( LocalFile zipFilePath, string searchPattern, SearchOption searchOption, CancellationToken token )
-    {
-        await using FileStream zipToOpen = File.Create( zipFilePath.FullPath );
-        using var              archive   = new ZipArchive( zipToOpen, ZipArchiveMode.Update );
-
-        foreach (LocalFile file in GetFiles( searchPattern, searchOption ))
-        {
-            ZipArchiveEntry    entry  = archive.CreateEntry( file.FullPath );
-            await using Stream stream = entry.Open();
-
-            ReadOnlyMemory<byte> data = await file.ReadAsync()
-                                                  .AsMemory( token );
-
-            await stream.WriteAsync( data, token );
-        }
-
-        return zipFilePath;
-    }
-    public async ValueTask<LocalFile> ZipAsync( LocalFile zipFilePath, string searchPattern, EnumerationOptions enumerationOptions, CancellationToken token )
-    {
-        await using FileStream zipToOpen = File.Create( zipFilePath.FullPath );
-        using var              archive   = new ZipArchive( zipToOpen, ZipArchiveMode.Update );
-
-        foreach (LocalFile file in GetFiles( searchPattern, enumerationOptions ))
-        {
-            ZipArchiveEntry    entry  = archive.CreateEntry( file.FullPath );
-            await using Stream stream = entry.Open();
-
-            ReadOnlyMemory<byte> data = await file.ReadAsync()
-                                                  .AsMemory( token );
-
-            await stream.WriteAsync( data, token );
-        }
-
-        return zipFilePath;
-    }
-
-
-    /// <summary>
-    ///     Gets the
-    ///     <see cref = "LocalDirectory" />
-    ///     object of the directory in this
-    ///     <see cref = "LocalDirectory" />
-    /// </summary>
-    /// <param name = "paths" > </param>
-    /// <exception cref = "ArgumentException" > </exception>
-    /// <exception cref = "ArgumentNullException" > </exception>
-    /// <exception cref = "DirectoryNotFoundException" > </exception>
-    /// <exception cref = "IOException" > </exception>
-    /// <exception cref = "PathTooLongException" > </exception>
-    /// <exception cref = "SecurityException" > </exception>
-    /// <exception cref = "NotSupportedException" > </exception>
-    /// <returns>
-    ///     <see cref = "LocalDirectory" />
-    /// </returns>
-    public LocalDirectory CreateSubDirectory( params string[] paths ) => Info.CreateSubdirectory( FullPath.Combine( paths ) );
-
-    /// <summary>
-    ///     Gets the
-    ///     <see cref = "LocalFile" />
-    ///     object of the file in this
-    ///     <see cref = "LocalDirectory" />
-    /// </summary>
-    /// <param name = "path" > </param>
-    /// <exception cref = "ArgumentException" > </exception>
-    /// <exception cref = "ArgumentNullException" > </exception>
-    /// <exception cref = "DirectoryNotFoundException" > </exception>
-    /// <exception cref = "IOException" > </exception>
-    /// <exception cref = "PathTooLongException" > </exception>
-    /// <exception cref = "SecurityException" > </exception>
-    /// <exception cref = "NotSupportedException" > </exception>
-    /// <returns>
-    ///     <see cref = "LocalFile" />
-    /// </returns>
-    public LocalFile Join( string path ) => Info.Combine( path );
 
     /// <summary>
     ///     Gets the path of the directory or file in this
@@ -319,10 +103,71 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     ///     <see cref = "string" />
     /// </returns>
     public string Combine( params string[] subPaths ) => Info.Combine( subPaths );
-    public override int GetHashCode() => HashCode.Combine( FullPath, this.IsTempFile() );
-    protected virtual void Dispose( bool remove )
+    private static LocalDirectory ConvertDirectory( DirectoryInfo file ) => file;
+    private static LocalFile ConvertFile( FileInfo                file ) => file;
+
+
+    /// <summary>
+    ///     Uses the
+    ///     <paramref name = "path" />
+    ///     and creates the tree structure based on
+    ///     <paramref name = "subFolders" />
+    /// </summary>
+    /// <param name = "path" > </param>
+    /// <param name = "subFolders" > </param>
+    /// <returns>
+    ///     <see cref = "LocalDirectory" />
+    /// </returns>
+    public static LocalDirectory Create( LocalDirectory path, params string[] subFolders ) => Directory.CreateDirectory( path.Combine( subFolders ) );
+
+    /// <summary>
+    ///     Uses the
+    ///     <see cref = "CurrentDirectory" />
+    ///     and creates the tree structure based on
+    ///     <paramref name = "subFolders" />
+    /// </summary>
+    /// <param name = "subFolders" > </param>
+    /// <returns>
+    ///     <see cref = "LocalDirectory" />
+    /// </returns>
+    public static LocalDirectory Create( params string[] subFolders ) => Create( CurrentDirectory, subFolders );
+
+
+    /// <summary>
+    ///     Gets the
+    ///     <see cref = "LocalDirectory" />
+    ///     object of the directory in this
+    ///     <see cref = "LocalDirectory" />
+    /// </summary>
+    /// <param name = "paths" > </param>
+    /// <exception cref = "ArgumentException" > </exception>
+    /// <exception cref = "ArgumentNullException" > </exception>
+    /// <exception cref = "DirectoryNotFoundException" > </exception>
+    /// <exception cref = "IOException" > </exception>
+    /// <exception cref = "PathTooLongException" > </exception>
+    /// <exception cref = "SecurityException" > </exception>
+    /// <exception cref = "NotSupportedException" > </exception>
+    /// <returns>
+    ///     <see cref = "LocalDirectory" />
+    /// </returns>
+    public LocalDirectory CreateSubDirectory( params string[] paths ) => Info.CreateSubdirectory( FullPath.Combine( paths ) );
+
+    /// <summary>
+    ///     Uses
+    ///     <see cref = "Path.GetTempPath" />
+    ///     and creates the tree structure based on
+    ///     <paramref name = "subFolders" />
+    /// </summary>
+    /// <param name = "subFolders" > </param>
+    /// <returns>
+    ///     <see cref = "LocalDirectory" />
+    /// </returns>
+    public static LocalDirectory CreateTemp( params string[] subFolders )
     {
-        if (remove && Exists) { Delete( true ); }
+        LocalDirectory d = Create( Path.GetTempPath()
+                                       .Combine( subFolders ) );
+
+        return d.SetTemporary();
     }
 
 
@@ -469,6 +314,11 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
 
         return tasks.WhenAll();
     }
+    protected virtual void Dispose( bool remove )
+    {
+        if (remove && Exists) { Delete( true ); }
+    }
+    public override bool Equals( object? other ) => other is LocalDirectory directory && Equals( directory );
 
 
     // ---------------------------------------------------------------------------------------------------------------------------------------------------
@@ -482,6 +332,15 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
                                                                                                      .Select( ConvertFile );
     public IEnumerable<LocalFile> GetFiles( string searchPattern, EnumerationOptions enumerationOptions ) => Info.EnumerateFiles( searchPattern, enumerationOptions )
                                                                                                                  .Select( ConvertFile );
+    public override int GetHashCode() => HashCode.Combine( FullPath, this.IsTempFile() );
+    protected virtual LocalDirectory? GetParent()
+    {
+        DirectoryInfo? info = Info.Parent;
+
+        return info is null
+                   ? default(LocalDirectory)
+                   : info;
+    }
 
 
     // ---------------------------------------------------------------------------------------------------------------------------------------------------
@@ -495,7 +354,148 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
                                                                                                                .Select( ConvertDirectory );
     public IEnumerable<LocalDirectory> GetSubFolders( string searchPattern, EnumerationOptions enumerationOptions ) => Info.EnumerateDirectories( searchPattern, enumerationOptions )
                                                                                                                            .Select( ConvertDirectory );
-    public override bool Equals( object? other ) => other is LocalDirectory directory && Equals( directory );
+
+    /// <summary>
+    ///     Gets the
+    ///     <see cref = "LocalFile" />
+    ///     object of the file in this
+    ///     <see cref = "LocalDirectory" />
+    /// </summary>
+    /// <param name = "path" > </param>
+    /// <exception cref = "ArgumentException" > </exception>
+    /// <exception cref = "ArgumentNullException" > </exception>
+    /// <exception cref = "DirectoryNotFoundException" > </exception>
+    /// <exception cref = "IOException" > </exception>
+    /// <exception cref = "PathTooLongException" > </exception>
+    /// <exception cref = "SecurityException" > </exception>
+    /// <exception cref = "NotSupportedException" > </exception>
+    /// <returns>
+    ///     <see cref = "LocalFile" />
+    /// </returns>
+    public LocalFile Join( string path ) => Info.Combine( path );
+
+
+    public static bool operator ==( LocalDirectory? left, LocalDirectory? right ) => Equalizer.Instance.Equals( left, right );
+    public static bool operator >( LocalDirectory?  left, LocalDirectory? right ) => Sorter.Instance.Compare( left, right ) > 0;
+    public static bool operator >=( LocalDirectory? left, LocalDirectory? right ) => Sorter.Instance.Compare( left, right ) >= 0;
+
+    // public static implicit operator LocalDirectory( string             path ) => new(path);
+    public static implicit operator LocalDirectory( DirectoryInfo      info ) => new(info);
+    public static implicit operator LocalDirectory( ReadOnlySpan<char> info ) => new(info);
+    public static implicit operator LocalDirectory( string             info ) => new(info);
+
+
+    public static implicit operator Collection( LocalDirectory                     directory ) => new(directory.GetSubFolders());
+    public static implicit operator ConcurrentCollection( LocalDirectory           directory ) => new(directory.GetSubFolders());
+    public static implicit operator Items( LocalDirectory                          directory ) => new(directory.GetSubFolders());
+    public static implicit operator Set( LocalDirectory                            directory ) => new(directory.GetSubFolders());
+    public static implicit operator Watcher( LocalDirectory                        directory ) => new(directory);
+    public static implicit operator LocalFile.Collection( LocalDirectory           directory ) => new(directory.GetFiles());
+    public static implicit operator LocalFile.ConcurrentCollection( LocalDirectory directory ) => new(directory.GetFiles());
+    public static implicit operator LocalFile.Items( LocalDirectory                directory ) => new(directory.GetFiles());
+    public static implicit operator LocalFile.Set( LocalDirectory                  directory ) => new(directory.GetFiles());
+    public static implicit operator LocalFile.Watcher( LocalDirectory              directory ) => new(new Watcher( directory ));
+    public static bool operator !=( LocalDirectory?                                left, LocalDirectory? right ) => !Equalizer.Instance.Equals( left, right );
+    public static bool operator <( LocalDirectory?                                 left, LocalDirectory? right ) => Sorter.Instance.Compare( left, right ) < 0;
+    public static bool operator <=( LocalDirectory?                                left, LocalDirectory? right ) => Sorter.Instance.Compare( left, right ) <= 0;
+
+
+    public sealed override string ToString() => FullPath;
+
+
+    /// <summary>
+    ///     Uses the
+    ///     <see cref = "Encoding.Default" />
+    ///     encoding to used for the file names
+    /// </summary>
+    /// <param name = "output" > file path to write the zip to </param>
+    /// <param name = "compression" >
+    ///     Defaults to
+    ///     <see cref = "CompressionLevel.Optimal" />
+    /// </param>
+    public void Zip( in LocalFile output, in CompressionLevel compression = CompressionLevel.Optimal ) => Zip( output, Encoding.Default, compression );
+    /// <summary> </summary>
+    /// <param name = "output" > file path to write the zip to </param>
+    /// <param name = "compression" >
+    ///     Defaults to
+    ///     <see cref = "CompressionLevel.Optimal" />
+    /// </param>
+    /// <param name = "encoding" > The encoding used for the file names </param>
+    public void Zip( in LocalFile output, in Encoding encoding, in CompressionLevel compression = CompressionLevel.Optimal ) => ZipFile.CreateFromDirectory( FullPath, output.FullPath, compression, true, encoding );
+
+
+    public async ValueTask<LocalFile> ZipAsync( LocalFile zipFilePath, CancellationToken token )
+    {
+        await using FileStream zipToOpen = File.Create( zipFilePath.FullPath );
+        using var              archive   = new ZipArchive( zipToOpen, ZipArchiveMode.Update );
+
+        foreach (LocalFile file in GetFiles())
+        {
+            ZipArchiveEntry    entry  = archive.CreateEntry( file.FullPath );
+            await using Stream stream = entry.Open();
+
+            ReadOnlyMemory<byte> data = await file.ReadAsync()
+                                                  .AsMemory( token );
+
+            await stream.WriteAsync( data, token );
+        }
+
+        return zipFilePath;
+    }
+    public async ValueTask<LocalFile> ZipAsync( LocalFile zipFilePath, string searchPattern, CancellationToken token )
+    {
+        await using FileStream zipToOpen = File.Create( zipFilePath.FullPath );
+        using var              archive   = new ZipArchive( zipToOpen, ZipArchiveMode.Update );
+
+        foreach (LocalFile file in GetFiles( searchPattern ))
+        {
+            ZipArchiveEntry    entry  = archive.CreateEntry( file.FullPath );
+            await using Stream stream = entry.Open();
+
+            ReadOnlyMemory<byte> data = await file.ReadAsync()
+                                                  .AsMemory( token );
+
+            await stream.WriteAsync( data, token );
+        }
+
+        return zipFilePath;
+    }
+    public async ValueTask<LocalFile> ZipAsync( LocalFile zipFilePath, string searchPattern, SearchOption searchOption, CancellationToken token )
+    {
+        await using FileStream zipToOpen = File.Create( zipFilePath.FullPath );
+        using var              archive   = new ZipArchive( zipToOpen, ZipArchiveMode.Update );
+
+        foreach (LocalFile file in GetFiles( searchPattern, searchOption ))
+        {
+            ZipArchiveEntry    entry  = archive.CreateEntry( file.FullPath );
+            await using Stream stream = entry.Open();
+
+            ReadOnlyMemory<byte> data = await file.ReadAsync()
+                                                  .AsMemory( token );
+
+            await stream.WriteAsync( data, token );
+        }
+
+        return zipFilePath;
+    }
+    public async ValueTask<LocalFile> ZipAsync( LocalFile zipFilePath, string searchPattern, EnumerationOptions enumerationOptions, CancellationToken token )
+    {
+        await using FileStream zipToOpen = File.Create( zipFilePath.FullPath );
+        using var              archive   = new ZipArchive( zipToOpen, ZipArchiveMode.Update );
+
+        foreach (LocalFile file in GetFiles( searchPattern, enumerationOptions ))
+        {
+            ZipArchiveEntry    entry  = archive.CreateEntry( file.FullPath );
+            await using Stream stream = entry.Open();
+
+            ReadOnlyMemory<byte> data = await file.ReadAsync()
+                                                  .AsMemory( token );
+
+            await stream.WriteAsync( data, token );
+        }
+
+        return zipFilePath;
+    }
     public async ValueTask DisposeAsync()
     {
         if (!this.IsTempFile()) { return; }

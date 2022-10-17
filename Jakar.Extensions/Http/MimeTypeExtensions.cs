@@ -5,166 +5,6 @@ namespace Jakar.Extensions;
 public static class MimeTypeExtensions
 {
     /// <summary>
-    ///     <seealso href = "https://docs.microsoft.com/en-us/office/client-developer/office-uri-schemes" />
-    /// </summary>
-    /// <param name = "mime" > </param>
-    /// <returns>
-    ///     <see cref = "string" />
-    /// </returns>
-    public static string ToUriScheme( this MimeType mime ) =>
-
-        // TODO: get more uri schemes
-        mime switch
-        {
-            MimeType.NotSet  => throw new ArgumentOutOfRangeException( nameof(mime), mime, "Must be a valid MimeType, not MimeType.NotSet" ),
-            MimeType.Unknown => throw new ArgumentOutOfRangeException( nameof(mime), mime, "Cannot discern UriScheme for MimeType.Unknown" ),
-
-            MimeType.Doc  => "ms-word",
-            MimeType.Docx => "ms-word",
-
-            MimeType.Xls  => "ms-excel",
-            MimeType.Xlsx => "ms-excel",
-
-            MimeType.Ppt  => "ms-powerpoint",
-            MimeType.Pptx => "ms-powerpoint",
-
-            _ => "file"
-
-            //_ => throw new ArgumentOutOfRangeException(nameof(mime), mime, $"Cannot discern UriScheme for {typeof(mime).FullName}.{mime}")
-        };
-
-
-    /// <summary>
-    ///     Uses the provided
-    ///     <paramref name = "fileName" />
-    ///     and adds the extension based on provided
-    ///     <see cref = "MimeType" />
-    ///     .
-    /// </summary>
-    /// <param name = "mime" > </param>
-    /// <param name = "fileName" > </param>
-    /// <returns>
-    ///     <see cref = "string" />
-    /// </returns>
-    public static string ToFileName( this MimeType mime, string fileName )
-    {
-        if (string.IsNullOrWhiteSpace( fileName )) { throw new NullReferenceException( nameof(mime) ); }
-
-        return $"{fileName}.{mime.ToExtension().ToLower()}";
-    }
-
-
-    /// <summary>
-    ///     Gets the extension of the provided
-    ///     <see cref = "MimeType" />
-    ///     .
-    /// </summary>
-    /// <param name = "mime" > </param>
-    /// <param name = "includePeriod" > </param>
-    /// <returns>
-    ///     <see cref = "string" />
-    /// </returns>
-    public static string ToExtension( this MimeType mime, bool includePeriod = false )
-    {
-        ReadOnlySpan<char> result = mime switch
-                                    {
-                                        MimeType.Text      => "text",
-                                        MimeType.PlainText => "txt",
-                                        MimeType.Html      => "html",
-                                        MimeType.Xml       => "xml",
-                                        MimeType.Xaml      => "xaml",
-                                        MimeType.RichText  => "rt",
-                                        MimeType.Css       => "css",
-                                        MimeType.Csv       => "csv",
-                                        MimeType.Calendar  => "ics",
-                                        MimeType.Ini       => "ini",
-                                        MimeType.Config    => "conf",
-                                        MimeType.Cfg       => "cfg",
-                                        MimeType.Base64    => "b64",
-
-                                        MimeType.UrlEncodedContent => "url",
-                                        MimeType.Soap              => "soap",
-                                        MimeType.Stream            => "stream",
-                                        MimeType.Binary            => "bin",
-                                        MimeType.Rtf               => "rtf",
-                                        MimeType.Pdf               => "pdf",
-                                        MimeType.Json              => "json",
-                                        MimeType.XmlApp            => "xmla",
-                                        MimeType.Xul               => "xul",
-                                        MimeType.JavaScript        => "js",
-                                        MimeType.Vbs               => "vbs",
-                                        MimeType.Sds               => "sds",
-                                        MimeType.Tds               => "tds",
-                                        MimeType.Coa               => "coa",
-                                        MimeType.Licenses          => "licenses",
-                                        MimeType.Dll               => "dll",
-
-                                        MimeType.Zip      => "zip",
-                                        MimeType.SevenZip => "7z",
-                                        MimeType.Bzip     => "bz",
-                                        MimeType.Bzip2    => "bz2",
-                                        MimeType.Gzip     => "gz",
-                                        MimeType.Tar      => "tar.gz",
-
-                                        MimeType.Doc  => "doc",
-                                        MimeType.Docx => "docx",
-                                        MimeType.Xls  => "xls",
-                                        MimeType.Xlsx => "xlsx",
-                                        MimeType.Ppt  => "ppt",
-                                        MimeType.Pptx => "pptx",
-
-                                        MimeType.ThreeGppAudio  => "3gppa",
-                                        MimeType.ThreeGpp2Audio => "3gpp2a",
-                                        MimeType.Aac            => "aac",
-                                        MimeType.MpegAudio      => "mpega",
-                                        MimeType.Mp3            => "mp3",
-                                        MimeType.Weba           => "weba",
-                                        MimeType.Wav            => "wav",
-
-                                        MimeType.ThreeGppVideo  => "3gpp",
-                                        MimeType.ThreeGpp2Video => "3gpp2",
-                                        MimeType.Mp4            => "mp4",
-                                        MimeType.MpegVideo      => "mpeg",
-                                        MimeType.Mpeg4          => "mpeg4",
-                                        MimeType.Webm           => "webm",
-                                        MimeType.H264           => "h264",
-                                        MimeType.Avi            => "avi",
-                                        MimeType.Mov            => "mov",
-                                        MimeType.Mpg            => "mpg",
-                                        MimeType.Ogg            => "ogg",
-                                        MimeType.Mkv            => "mkv",
-
-                                        MimeType.Gif  => "gif",
-                                        MimeType.Tiff => "tif",
-                                        MimeType.Png  => "png",
-                                        MimeType.Jpeg => "jpeg",
-                                        MimeType.Jpg  => "jpg",
-                                        MimeType.Bmp  => "bmp",
-                                        MimeType.Webp => "webp",
-                                        MimeType.Icon => "ico",
-                                        MimeType.Svg  => "svg",
-
-                                        MimeType.TrueType => "ttf",
-                                        MimeType.OpenType => "otf",
-                                        MimeType.FormData => "fd",
-
-
-                                        MimeType.Unknown => "dat",
-                                        MimeType.NotSet  => throw new ArgumentOutOfRangeException( nameof(mime) ),
-                                        _                => throw new ArgumentOutOfRangeException( nameof(mime) )
-                                    };
-
-
-        if (!includePeriod) { return result.ToString(); }
-
-        Span<char> span = stackalloc char[result.Length + 1];
-        span[0] = '.';
-        result.CopyTo( span[1..] );
-        return span.ToString();
-    }
-
-
-    /// <summary>
     ///     Gets the
     ///     <see cref = "MimeType" />
     ///     of the provided extension
@@ -342,6 +182,234 @@ public static class MimeTypeExtensions
         return MimeType.NotSet;
     }
 
+    /// <summary>
+    ///     Converts the provided
+    ///     <see cref = "MimeType" />
+    ///     to it's associated ContentType via
+    ///     <seealso cref = "MimeTypeNames" />
+    /// </summary>
+    /// <param name = "mime" > </param>
+    /// <returns>
+    ///     <see cref = "string" />
+    /// </returns>
+    public static string ToContentType( this MimeType mime ) =>
+        mime switch
+        {
+            MimeType.Text      => MimeTypeNames.Text.PLAIN,
+            MimeType.PlainText => MimeTypeNames.Text.PLAIN,
+            MimeType.Html      => MimeTypeNames.Text.HTML,
+            MimeType.Xml       => MimeTypeNames.Text.XML,
+            MimeType.Xaml      => MimeTypeNames.Text.XAML,
+            MimeType.RichText  => MimeTypeNames.Text.RICH_TEXT,
+            MimeType.Css       => MimeTypeNames.Text.CASCADING_STYLE_SHEETS,
+            MimeType.Csv       => MimeTypeNames.Text.COMMA_SEPARATED_VALUES,
+            MimeType.Calendar  => MimeTypeNames.Text.CALENDAR,
+            MimeType.Ini       => MimeTypeNames.Text.INI,
+            MimeType.Config    => MimeTypeNames.Text.CONFIGURATION,
+            MimeType.Cfg       => MimeTypeNames.Text.CONFIG,
+
+            MimeType.UrlEncodedContent => MimeTypeNames.Application.URL_ENCODED_CONTENT,
+            MimeType.Soap              => MimeTypeNames.Application.SOAP,
+            MimeType.Stream            => MimeTypeNames.Application.BINARY,
+            MimeType.Unknown           => MimeTypeNames.Application.BINARY,
+            MimeType.Binary            => MimeTypeNames.Application.BINARY,
+            MimeType.Base64            => MimeTypeNames.Application.BASE64,
+            MimeType.Rtf               => MimeTypeNames.Application.RTF,
+            MimeType.Pdf               => MimeTypeNames.Application.PDF,
+            MimeType.Json              => MimeTypeNames.Application.JSON,
+            MimeType.XmlApp            => MimeTypeNames.Application.XML,
+            MimeType.Xul               => MimeTypeNames.Application.XUL,
+            MimeType.JavaScript        => MimeTypeNames.Application.JAVA_SCRIPT,
+            MimeType.Dll               => MimeTypeNames.Application.DLL,
+            MimeType.Vbs               => MimeTypeNames.Application.VBS,
+            MimeType.Licenses          => MimeTypeNames.Application.LICENSES,
+            MimeType.Sds               => MimeTypeNames.Application.SAFETY_DATA_SHEET,
+            MimeType.Tds               => MimeTypeNames.Application.TECHNICAL_DATA_SHEET,
+            MimeType.Coa               => MimeTypeNames.Application.CERTIFICATE_AUTHENTICITY,
+
+            MimeType.Zip      => MimeTypeNames.Application.Archive.ZIP,
+            MimeType.SevenZip => MimeTypeNames.Application.Archive.SEVEN_ZIP,
+            MimeType.Bzip     => MimeTypeNames.Application.Archive.B_ZIP,
+            MimeType.Bzip2    => MimeTypeNames.Application.Archive.B_ZIP_2,
+            MimeType.Gzip     => MimeTypeNames.Application.Archive.GZIP,
+            MimeType.Tar      => MimeTypeNames.Application.Archive.TAR,
+
+            MimeType.Doc  => MimeTypeNames.Application.MsOffice.DOC,
+            MimeType.Docx => MimeTypeNames.Application.MsOffice.DOCX,
+            MimeType.Xls  => MimeTypeNames.Application.MsOffice.XLS,
+            MimeType.Xlsx => MimeTypeNames.Application.MsOffice.XLSX,
+            MimeType.Ppt  => MimeTypeNames.Application.MsOffice.PPT,
+            MimeType.Pptx => MimeTypeNames.Application.MsOffice.PPTX,
+
+            MimeType.ThreeGppAudio  => MimeTypeNames.Audio.THREE_GPP_AUDIO,
+            MimeType.ThreeGpp2Audio => MimeTypeNames.Audio.THREE_GPP2_AUDIO,
+            MimeType.Aac            => MimeTypeNames.Audio.AAC,
+            MimeType.MpegAudio      => MimeTypeNames.Audio.MPEG,
+            MimeType.Mp3            => MimeTypeNames.Audio.MP3,
+            MimeType.Weba           => MimeTypeNames.Audio.WEBA,
+            MimeType.Wav            => MimeTypeNames.Audio.WAVE,
+
+            MimeType.ThreeGppVideo  => MimeTypeNames.Video.THREE_GPP_VIDEO,
+            MimeType.ThreeGpp2Video => MimeTypeNames.Video.THREE_GPP2_VIDEO,
+            MimeType.Mp4            => MimeTypeNames.Video.MP4,
+            MimeType.MpegVideo      => MimeTypeNames.Video.MPEG,
+            MimeType.Mpeg4          => MimeTypeNames.Video.MPEG4,
+            MimeType.Webm           => MimeTypeNames.Video.WEBM,
+            MimeType.H264           => MimeTypeNames.Video.H264,
+            MimeType.Avi            => MimeTypeNames.Video.AVI,
+            MimeType.Mov            => MimeTypeNames.Video.MOV,
+            MimeType.Mpg            => MimeTypeNames.Video.MPG,
+            MimeType.Ogg            => MimeTypeNames.Video.OGG,
+            MimeType.Mkv            => MimeTypeNames.Video.MKV,
+
+            MimeType.Gif  => MimeTypeNames.Image.GIF,
+            MimeType.Tiff => MimeTypeNames.Image.TIFF,
+            MimeType.Png  => MimeTypeNames.Image.PNG,
+            MimeType.Jpeg => MimeTypeNames.Image.JPEG,
+            MimeType.Jpg  => MimeTypeNames.Image.JPG,
+            MimeType.Bmp  => MimeTypeNames.Image.BMP,
+            MimeType.Webp => MimeTypeNames.Image.WEBP,
+            MimeType.Icon => MimeTypeNames.Image.ICON,
+            MimeType.Svg  => MimeTypeNames.Image.SVG,
+
+            MimeType.TrueType => MimeTypeNames.Font.TRUE_TYPE,
+            MimeType.OpenType => MimeTypeNames.Font.OPEN_TYPE,
+            MimeType.FormData => MimeTypeNames.MultiPart.FORM_DATA,
+
+            MimeType.NotSet => throw new ArgumentOutOfRangeException( nameof(mime), mime, null ),
+            _               => throw new ArgumentOutOfRangeException( nameof(mime), mime, null )
+        };
+
+
+    /// <summary>
+    ///     Gets the extension of the provided
+    ///     <see cref = "MimeType" />
+    ///     .
+    /// </summary>
+    /// <param name = "mime" > </param>
+    /// <param name = "includePeriod" > </param>
+    /// <returns>
+    ///     <see cref = "string" />
+    /// </returns>
+    public static string ToExtension( this MimeType mime, bool includePeriod = false )
+    {
+        ReadOnlySpan<char> result = mime switch
+                                    {
+                                        MimeType.Text      => "text",
+                                        MimeType.PlainText => "txt",
+                                        MimeType.Html      => "html",
+                                        MimeType.Xml       => "xml",
+                                        MimeType.Xaml      => "xaml",
+                                        MimeType.RichText  => "rt",
+                                        MimeType.Css       => "css",
+                                        MimeType.Csv       => "csv",
+                                        MimeType.Calendar  => "ics",
+                                        MimeType.Ini       => "ini",
+                                        MimeType.Config    => "conf",
+                                        MimeType.Cfg       => "cfg",
+                                        MimeType.Base64    => "b64",
+
+                                        MimeType.UrlEncodedContent => "url",
+                                        MimeType.Soap              => "soap",
+                                        MimeType.Stream            => "stream",
+                                        MimeType.Binary            => "bin",
+                                        MimeType.Rtf               => "rtf",
+                                        MimeType.Pdf               => "pdf",
+                                        MimeType.Json              => "json",
+                                        MimeType.XmlApp            => "xmla",
+                                        MimeType.Xul               => "xul",
+                                        MimeType.JavaScript        => "js",
+                                        MimeType.Vbs               => "vbs",
+                                        MimeType.Sds               => "sds",
+                                        MimeType.Tds               => "tds",
+                                        MimeType.Coa               => "coa",
+                                        MimeType.Licenses          => "licenses",
+                                        MimeType.Dll               => "dll",
+
+                                        MimeType.Zip      => "zip",
+                                        MimeType.SevenZip => "7z",
+                                        MimeType.Bzip     => "bz",
+                                        MimeType.Bzip2    => "bz2",
+                                        MimeType.Gzip     => "gz",
+                                        MimeType.Tar      => "tar.gz",
+
+                                        MimeType.Doc  => "doc",
+                                        MimeType.Docx => "docx",
+                                        MimeType.Xls  => "xls",
+                                        MimeType.Xlsx => "xlsx",
+                                        MimeType.Ppt  => "ppt",
+                                        MimeType.Pptx => "pptx",
+
+                                        MimeType.ThreeGppAudio  => "3gppa",
+                                        MimeType.ThreeGpp2Audio => "3gpp2a",
+                                        MimeType.Aac            => "aac",
+                                        MimeType.MpegAudio      => "mpega",
+                                        MimeType.Mp3            => "mp3",
+                                        MimeType.Weba           => "weba",
+                                        MimeType.Wav            => "wav",
+
+                                        MimeType.ThreeGppVideo  => "3gpp",
+                                        MimeType.ThreeGpp2Video => "3gpp2",
+                                        MimeType.Mp4            => "mp4",
+                                        MimeType.MpegVideo      => "mpeg",
+                                        MimeType.Mpeg4          => "mpeg4",
+                                        MimeType.Webm           => "webm",
+                                        MimeType.H264           => "h264",
+                                        MimeType.Avi            => "avi",
+                                        MimeType.Mov            => "mov",
+                                        MimeType.Mpg            => "mpg",
+                                        MimeType.Ogg            => "ogg",
+                                        MimeType.Mkv            => "mkv",
+
+                                        MimeType.Gif  => "gif",
+                                        MimeType.Tiff => "tif",
+                                        MimeType.Png  => "png",
+                                        MimeType.Jpeg => "jpeg",
+                                        MimeType.Jpg  => "jpg",
+                                        MimeType.Bmp  => "bmp",
+                                        MimeType.Webp => "webp",
+                                        MimeType.Icon => "ico",
+                                        MimeType.Svg  => "svg",
+
+                                        MimeType.TrueType => "ttf",
+                                        MimeType.OpenType => "otf",
+                                        MimeType.FormData => "fd",
+
+
+                                        MimeType.Unknown => "dat",
+                                        MimeType.NotSet  => throw new ArgumentOutOfRangeException( nameof(mime) ),
+                                        _                => throw new ArgumentOutOfRangeException( nameof(mime) )
+                                    };
+
+
+        if (!includePeriod) { return result.ToString(); }
+
+        Span<char> span = stackalloc char[result.Length + 1];
+        span[0] = '.';
+        result.CopyTo( span[1..] );
+        return span.ToString();
+    }
+
+
+    /// <summary>
+    ///     Uses the provided
+    ///     <paramref name = "fileName" />
+    ///     and adds the extension based on provided
+    ///     <see cref = "MimeType" />
+    ///     .
+    /// </summary>
+    /// <param name = "mime" > </param>
+    /// <param name = "fileName" > </param>
+    /// <returns>
+    ///     <see cref = "string" />
+    /// </returns>
+    public static string ToFileName( this MimeType mime, string fileName )
+    {
+        if (string.IsNullOrWhiteSpace( fileName )) { throw new NullReferenceException( nameof(mime) ); }
+
+        return $"{fileName}.{mime.ToExtension().ToLower()}";
+    }
+
 
     /// <summary>
     ///     Converts the provided ContentType
@@ -441,102 +509,32 @@ public static class MimeTypeExtensions
 
             _ => MimeType.Unknown
         };
-
     /// <summary>
-    ///     Converts the provided
-    ///     <see cref = "MimeType" />
-    ///     to it's associated ContentType via
-    ///     <seealso cref = "MimeTypeNames" />
+    ///     <seealso href = "https://docs.microsoft.com/en-us/office/client-developer/office-uri-schemes" />
     /// </summary>
     /// <param name = "mime" > </param>
     /// <returns>
     ///     <see cref = "string" />
     /// </returns>
-    public static string ToContentType( this MimeType mime ) =>
+    public static string ToUriScheme( this MimeType mime ) =>
+
+        // TODO: get more uri schemes
         mime switch
         {
-            MimeType.Text      => MimeTypeNames.Text.PLAIN,
-            MimeType.PlainText => MimeTypeNames.Text.PLAIN,
-            MimeType.Html      => MimeTypeNames.Text.HTML,
-            MimeType.Xml       => MimeTypeNames.Text.XML,
-            MimeType.Xaml      => MimeTypeNames.Text.XAML,
-            MimeType.RichText  => MimeTypeNames.Text.RICH_TEXT,
-            MimeType.Css       => MimeTypeNames.Text.CASCADING_STYLE_SHEETS,
-            MimeType.Csv       => MimeTypeNames.Text.COMMA_SEPARATED_VALUES,
-            MimeType.Calendar  => MimeTypeNames.Text.CALENDAR,
-            MimeType.Ini       => MimeTypeNames.Text.INI,
-            MimeType.Config    => MimeTypeNames.Text.CONFIGURATION,
-            MimeType.Cfg       => MimeTypeNames.Text.CONFIG,
+            MimeType.NotSet  => throw new ArgumentOutOfRangeException( nameof(mime), mime, "Must be a valid MimeType, not MimeType.NotSet" ),
+            MimeType.Unknown => throw new ArgumentOutOfRangeException( nameof(mime), mime, "Cannot discern UriScheme for MimeType.Unknown" ),
 
-            MimeType.UrlEncodedContent => MimeTypeNames.Application.URL_ENCODED_CONTENT,
-            MimeType.Soap              => MimeTypeNames.Application.SOAP,
-            MimeType.Stream            => MimeTypeNames.Application.BINARY,
-            MimeType.Unknown           => MimeTypeNames.Application.BINARY,
-            MimeType.Binary            => MimeTypeNames.Application.BINARY,
-            MimeType.Base64            => MimeTypeNames.Application.BASE64,
-            MimeType.Rtf               => MimeTypeNames.Application.RTF,
-            MimeType.Pdf               => MimeTypeNames.Application.PDF,
-            MimeType.Json              => MimeTypeNames.Application.JSON,
-            MimeType.XmlApp            => MimeTypeNames.Application.XML,
-            MimeType.Xul               => MimeTypeNames.Application.XUL,
-            MimeType.JavaScript        => MimeTypeNames.Application.JAVA_SCRIPT,
-            MimeType.Dll               => MimeTypeNames.Application.DLL,
-            MimeType.Vbs               => MimeTypeNames.Application.VBS,
-            MimeType.Licenses          => MimeTypeNames.Application.LICENSES,
-            MimeType.Sds               => MimeTypeNames.Application.SAFETY_DATA_SHEET,
-            MimeType.Tds               => MimeTypeNames.Application.TECHNICAL_DATA_SHEET,
-            MimeType.Coa               => MimeTypeNames.Application.CERTIFICATE_AUTHENTICITY,
+            MimeType.Doc  => "ms-word",
+            MimeType.Docx => "ms-word",
 
-            MimeType.Zip      => MimeTypeNames.Application.Archive.ZIP,
-            MimeType.SevenZip => MimeTypeNames.Application.Archive.SEVEN_ZIP,
-            MimeType.Bzip     => MimeTypeNames.Application.Archive.B_ZIP,
-            MimeType.Bzip2    => MimeTypeNames.Application.Archive.B_ZIP_2,
-            MimeType.Gzip     => MimeTypeNames.Application.Archive.GZIP,
-            MimeType.Tar      => MimeTypeNames.Application.Archive.TAR,
+            MimeType.Xls  => "ms-excel",
+            MimeType.Xlsx => "ms-excel",
 
-            MimeType.Doc  => MimeTypeNames.Application.MsOffice.DOC,
-            MimeType.Docx => MimeTypeNames.Application.MsOffice.DOCX,
-            MimeType.Xls  => MimeTypeNames.Application.MsOffice.XLS,
-            MimeType.Xlsx => MimeTypeNames.Application.MsOffice.XLSX,
-            MimeType.Ppt  => MimeTypeNames.Application.MsOffice.PPT,
-            MimeType.Pptx => MimeTypeNames.Application.MsOffice.PPTX,
+            MimeType.Ppt  => "ms-powerpoint",
+            MimeType.Pptx => "ms-powerpoint",
 
-            MimeType.ThreeGppAudio  => MimeTypeNames.Audio.THREE_GPP_AUDIO,
-            MimeType.ThreeGpp2Audio => MimeTypeNames.Audio.THREE_GPP2_AUDIO,
-            MimeType.Aac            => MimeTypeNames.Audio.AAC,
-            MimeType.MpegAudio      => MimeTypeNames.Audio.MPEG,
-            MimeType.Mp3            => MimeTypeNames.Audio.MP3,
-            MimeType.Weba           => MimeTypeNames.Audio.WEBA,
-            MimeType.Wav            => MimeTypeNames.Audio.WAVE,
+            _ => "file"
 
-            MimeType.ThreeGppVideo  => MimeTypeNames.Video.THREE_GPP_VIDEO,
-            MimeType.ThreeGpp2Video => MimeTypeNames.Video.THREE_GPP2_VIDEO,
-            MimeType.Mp4            => MimeTypeNames.Video.MP4,
-            MimeType.MpegVideo      => MimeTypeNames.Video.MPEG,
-            MimeType.Mpeg4          => MimeTypeNames.Video.MPEG4,
-            MimeType.Webm           => MimeTypeNames.Video.WEBM,
-            MimeType.H264           => MimeTypeNames.Video.H264,
-            MimeType.Avi            => MimeTypeNames.Video.AVI,
-            MimeType.Mov            => MimeTypeNames.Video.MOV,
-            MimeType.Mpg            => MimeTypeNames.Video.MPG,
-            MimeType.Ogg            => MimeTypeNames.Video.OGG,
-            MimeType.Mkv            => MimeTypeNames.Video.MKV,
-
-            MimeType.Gif  => MimeTypeNames.Image.GIF,
-            MimeType.Tiff => MimeTypeNames.Image.TIFF,
-            MimeType.Png  => MimeTypeNames.Image.PNG,
-            MimeType.Jpeg => MimeTypeNames.Image.JPEG,
-            MimeType.Jpg  => MimeTypeNames.Image.JPG,
-            MimeType.Bmp  => MimeTypeNames.Image.BMP,
-            MimeType.Webp => MimeTypeNames.Image.WEBP,
-            MimeType.Icon => MimeTypeNames.Image.ICON,
-            MimeType.Svg  => MimeTypeNames.Image.SVG,
-
-            MimeType.TrueType => MimeTypeNames.Font.TRUE_TYPE,
-            MimeType.OpenType => MimeTypeNames.Font.OPEN_TYPE,
-            MimeType.FormData => MimeTypeNames.MultiPart.FORM_DATA,
-
-            MimeType.NotSet => throw new ArgumentOutOfRangeException( nameof(mime), mime, null ),
-            _               => throw new ArgumentOutOfRangeException( nameof(mime), mime, null )
+            //_ => throw new ArgumentOutOfRangeException(nameof(mime), mime, $"Cannot discern UriScheme for {typeof(mime).FullName}.{mime}")
         };
 }

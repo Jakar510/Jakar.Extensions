@@ -10,11 +10,10 @@ public static class ControllerBaseExtensions
     public const string ERROR   = nameof(ERROR);
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void AddError( this      ControllerBase controller, string              error ) => controller.ModelState.AddError( error );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void AddError( this      ControllerBase controller, string              key, string error ) => controller.ModelState.AddError( key, error );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void AddError( this      ControllerBase controller, params string[]     errors ) => controller.ModelState.AddError( errors );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void AddError( this      ControllerBase controller, IEnumerable<string> errors ) => controller.ModelState.AddError( errors );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void AddModelError( this ControllerBase controller, Exception           e ) => controller.ModelState.AddError( e );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void AddError( this ControllerBase controller, string              error ) => controller.ModelState.AddError( error );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void AddError( this ControllerBase controller, string              key, string error ) => controller.ModelState.AddError( key, error );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void AddError( this ControllerBase controller, params string[]     errors ) => controller.ModelState.AddError( errors );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void AddError( this ControllerBase controller, IEnumerable<string> errors ) => controller.ModelState.AddError( errors );
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
@@ -38,6 +37,7 @@ public static class ControllerBaseExtensions
     {
         foreach (string error in errors) { state.AddError( error ); }
     }
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void AddModelError( this ControllerBase controller, Exception e ) => controller.ModelState.AddError( e );
 
 
     public static ActionResult ClientClosed( this ControllerBase _ ) => new StatusCodeResult( Status.ClientClosedRequest.AsInt() );
@@ -159,8 +159,37 @@ public static class ControllerBaseExtensions
     }
 
 
+    public static ActionResult Problem( this ControllerBase controller, in Status status ) => controller.Problem( controller.ToProblemDetails( status ) );
+    public static ActionResult Problem( this ControllerBase _, ProblemDetails details ) => new ObjectResult( details )
+                                                                                           {
+                                                                                               StatusCode = details.Status
+                                                                                           };
+
+
     public static ActionResult ServerProblem( this ControllerBase controller, Exception e ) => controller.ServerProblem( e.Message );
     public static ActionResult ServerProblem( this ControllerBase controller, string    message = "Unknown Error" ) => controller.Problem( message, statusCode: Status.InternalServerError.AsInt() );
+
+
+    public static ActionResult TimeoutOccurred( this ControllerBase controller, Exception e )
+    {
+        controller.AddModelError( e );
+        return controller.NotAcceptable();
+    }
+    public static ActionResult TimeoutOccurred( this ControllerBase controller, TimeoutException e )
+    {
+        controller.AddModelError( e );
+        return controller.NotAcceptable();
+    }
+    public static ActionResult TimeoutOccurred( this ControllerBase controller )
+    {
+        ModelStateDictionary modelState = controller.ModelState;
+        Guard.IsGreaterThan( modelState.ErrorCount, 0, nameof(modelState) );
+
+        return new ObjectResult( new SerializableError( modelState ) )
+               {
+                   StatusCode = Status.GatewayTimeout.AsInt()
+               };
+    }
 
 
     public static ProblemDetails ToProblemDetails( this ControllerBase controller, in Status status ) => controller.ModelState.ToProblemDetails( status );
@@ -188,35 +217,6 @@ public static class ControllerBaseExtensions
         }
 
         return problem;
-    }
-
-
-    public static ActionResult Problem( this ControllerBase controller, in Status status ) => controller.Problem( controller.ToProblemDetails( status ) );
-    public static ActionResult Problem( this ControllerBase _, ProblemDetails details ) => new ObjectResult( details )
-                                                                                           {
-                                                                                               StatusCode = details.Status
-                                                                                           };
-
-
-    public static ActionResult TimeoutOccurred( this ControllerBase controller, Exception e )
-    {
-        controller.AddModelError( e );
-        return controller.NotAcceptable();
-    }
-    public static ActionResult TimeoutOccurred( this ControllerBase controller, TimeoutException e )
-    {
-        controller.AddModelError( e );
-        return controller.NotAcceptable();
-    }
-    public static ActionResult TimeoutOccurred( this ControllerBase controller )
-    {
-        ModelStateDictionary modelState = controller.ModelState;
-        Guard.IsGreaterThan( modelState.ErrorCount, 0, nameof(modelState) );
-
-        return new ObjectResult( new SerializableError( modelState ) )
-               {
-                   StatusCode = Status.GatewayTimeout.AsInt()
-               };
     }
 
 

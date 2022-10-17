@@ -5,6 +5,41 @@ namespace Jakar.Extensions;
 [Obsolete( $"Use {nameof(WebRequester)} instead" )]
 public static class WebRequests
 {
+    public static Exception? ConvertException( this WebException we, CancellationToken token )
+    {
+        Exception? exception = we.Status switch
+                               {
+                                   WebExceptionStatus.ConnectFailure             => new ConnectFailureException( we.Message, we, token ),
+                                   WebExceptionStatus.ConnectionClosed           => new ConnectionClosedException( we.Message, we, token ),
+                                   WebExceptionStatus.KeepAliveFailure           => new KeepAliveFailureException( we.Message, we, token ),
+                                   WebExceptionStatus.MessageLengthLimitExceeded => new MessageLengthLimitExceededException( we.Message, we, token ),
+                                   WebExceptionStatus.NameResolutionFailure      => new NameResolutionException( we.Message, we, token ),
+                                   WebExceptionStatus.Pending                    => new PendingWebException( we, token ),
+                                   WebExceptionStatus.PipelineFailure            => new PipelineFailureException( we, token ),
+                                   WebExceptionStatus.ProtocolError              => new ProtocolErrorException( we.Message, we, token ),
+                                   WebExceptionStatus.ReceiveFailure             => new ReceiveFailureException( we.Message, we, token ),
+                                   WebExceptionStatus.RequestCanceled            => new RequestAbortedException( we.Message, we, token ),
+                                   WebExceptionStatus.SecureChannelFailure       => new SecureChannelFailureException( we.Message, we, token ),
+                                   WebExceptionStatus.SendFailure                => new SendFailureException( we.Message, we, token ),
+                                   WebExceptionStatus.ServerProtocolViolation    => new ServerProtocolViolationException( we.Message, we, token ),
+                                   WebExceptionStatus.Timeout                    => new TimeoutException( we.Message, we ),
+                                   WebExceptionStatus.TrustFailure               => new TrustFailureException( we.Message, we, token ),
+                                   WebExceptionStatus.UnknownError => we.Message.Contains( ActivelyRefusedConnectionException.REFUSED, StringComparison.OrdinalIgnoreCase )
+                                                                          ? new ActivelyRefusedConnectionException( we.Message, we, token )
+                                                                          : new UnknownWebErrorException( we.Message, we, token ),
+
+
+                                   // WebExceptionStatus.CacheEntryNotFound => new ,
+                                   // WebExceptionStatus.ProxyNameResolutionFailure => new ,
+                                   // WebExceptionStatus.RequestProhibitedByCachePolicy => new ,
+                                   // WebExceptionStatus.RequestProhibitedByProxy => new ,
+
+                                   WebExceptionStatus.Success => default,
+                                   _                          => default
+                               };
+
+        return exception;
+    }
     /// <summary>
     ///     <seealso href = "https://stackoverflow.com/questions/19211972/getresponseasync-does-not-accept-cancellationtoken" />
     ///     <seealso href = "https://github.com/palburtus/HttpClient.net/blob/master/Aaks.Restclient/HttpRestClient.cs" />
@@ -46,43 +81,6 @@ public static class WebRequests
                 throw;
             }
         }
-    }
-
-
-    public static Exception? ConvertException( this WebException we, CancellationToken token )
-    {
-        Exception? exception = we.Status switch
-                               {
-                                   WebExceptionStatus.ConnectFailure             => new ConnectFailureException( we.Message, we, token ),
-                                   WebExceptionStatus.ConnectionClosed           => new ConnectionClosedException( we.Message, we, token ),
-                                   WebExceptionStatus.KeepAliveFailure           => new KeepAliveFailureException( we.Message, we, token ),
-                                   WebExceptionStatus.MessageLengthLimitExceeded => new MessageLengthLimitExceededException( we.Message, we, token ),
-                                   WebExceptionStatus.NameResolutionFailure      => new NameResolutionException( we.Message, we, token ),
-                                   WebExceptionStatus.Pending                    => new PendingWebException( we, token ),
-                                   WebExceptionStatus.PipelineFailure            => new PipelineFailureException( we, token ),
-                                   WebExceptionStatus.ProtocolError              => new ProtocolErrorException( we.Message, we, token ),
-                                   WebExceptionStatus.ReceiveFailure             => new ReceiveFailureException( we.Message, we, token ),
-                                   WebExceptionStatus.RequestCanceled            => new RequestAbortedException( we.Message, we, token ),
-                                   WebExceptionStatus.SecureChannelFailure       => new SecureChannelFailureException( we.Message, we, token ),
-                                   WebExceptionStatus.SendFailure                => new SendFailureException( we.Message, we, token ),
-                                   WebExceptionStatus.ServerProtocolViolation    => new ServerProtocolViolationException( we.Message, we, token ),
-                                   WebExceptionStatus.Timeout                    => new TimeoutException( we.Message, we ),
-                                   WebExceptionStatus.TrustFailure               => new TrustFailureException( we.Message, we, token ),
-                                   WebExceptionStatus.UnknownError => we.Message.Contains( ActivelyRefusedConnectionException.REFUSED, StringComparison.OrdinalIgnoreCase )
-                                                                          ? new ActivelyRefusedConnectionException( we.Message, we, token )
-                                                                          : new UnknownWebErrorException( we.Message, we, token ),
-
-
-                                   // WebExceptionStatus.CacheEntryNotFound => new ,
-                                   // WebExceptionStatus.ProxyNameResolutionFailure => new ,
-                                   // WebExceptionStatus.RequestProhibitedByCachePolicy => new ,
-                                   // WebExceptionStatus.RequestProhibitedByProxy => new ,
-
-                                   WebExceptionStatus.Success => default,
-                                   _                          => default
-                               };
-
-        return exception;
     }
 
 
@@ -161,30 +159,6 @@ public static class WebRequests
                                   string item               => item,
                                   _                         => throw new HeaderException( HttpRequestHeader.ContentType, value, typeof(string), typeof(IEnumerable<string>) )
                               };
-
-    public static void SetHeaders( this HttpWebRequest request, MultipartFormDataContent data ) => request.SetHeaders( data.Headers );
-    public static void SetHeaders( this HttpWebRequest request, HttpContentHeaders? headers )
-    {
-        if (headers is null) { return; }
-
-        foreach ((string key, IEnumerable<string> items) in headers)
-        {
-            if (Enum.TryParse( key, true, out HttpRequestHeader httpRequestHeader )) { request.SetHeader( httpRequestHeader, items ); }
-            else { request.SetHeader( key,                                                                                   items ); }
-        }
-    }
-
-
-    public static void SetHeaders( this HttpWebRequest request, HeaderCollection? headers )
-    {
-        if (headers is null) { return; }
-
-        foreach ((string key, object value) in headers)
-        {
-            if (Enum.TryParse( key, true, out HttpRequestHeader header )) { request.SetHeader( header, value ); }
-            else { request.SetHeader( key,                                                             value ); }
-        }
-    }
 
     public static void SetHeader( this HttpWebRequest request, HttpRequestHeader key, object value )
     {
@@ -386,6 +360,30 @@ public static class WebRequests
                 else { content.Headers.Add( key,                   value.ToJson() ); }
 
                 break;
+        }
+    }
+
+    public static void SetHeaders( this HttpWebRequest request, MultipartFormDataContent data ) => request.SetHeaders( data.Headers );
+    public static void SetHeaders( this HttpWebRequest request, HttpContentHeaders? headers )
+    {
+        if (headers is null) { return; }
+
+        foreach ((string key, IEnumerable<string> items) in headers)
+        {
+            if (Enum.TryParse( key, true, out HttpRequestHeader httpRequestHeader )) { request.SetHeader( httpRequestHeader, items ); }
+            else { request.SetHeader( key,                                                                                   items ); }
+        }
+    }
+
+
+    public static void SetHeaders( this HttpWebRequest request, HeaderCollection? headers )
+    {
+        if (headers is null) { return; }
+
+        foreach ((string key, object value) in headers)
+        {
+            if (Enum.TryParse( key, true, out HttpRequestHeader header )) { request.SetHeader( header, value ); }
+            else { request.SetHeader( key,                                                             value ); }
         }
     }
 }

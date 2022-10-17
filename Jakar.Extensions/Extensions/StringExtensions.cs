@@ -4,16 +4,23 @@ namespace Jakar.Extensions;
 
 public static class StringExtensions
 {
-    public static unsafe SecureString ToSecureString( this string value, bool makeReadonly = true )
-    {
-        fixed (char* token = value)
-        {
-            var secure = new SecureString( token, value.Length );
-            if (makeReadonly) { secure.MakeReadOnly(); }
+    public static bool ContainsAbout( this string source, string search ) => source.Contains( search, StringComparison.OrdinalIgnoreCase );
 
-            return secure;
-        }
-    }
+
+    public static bool ContainsExact( this string source, string search ) => source.Contains( search, StringComparison.Ordinal );
+
+
+    public static TResult ConvertTo<TResult>( this string value ) where TResult : IConvertible => (TResult)value.ConvertTo( typeof(TResult) );
+    public static object ConvertTo( this           string value, Type target ) => Convert.ChangeType( value, target );
+
+
+    public static string ConvertToString( this byte[] s, Encoding? encoding = default ) => (encoding ?? Encoding.Default).GetString( s );
+
+    public static string ConvertToString( this Memory<byte> s, Encoding? encoding = default ) => s.ToArray()
+                                                                                                  .ConvertToString( encoding ?? Encoding.Default );
+
+    public static string ConvertToString( this ReadOnlyMemory<byte> s, Encoding? encoding = default ) => s.ToArray()
+                                                                                                          .ConvertToString( encoding ?? Encoding.Default );
     public static string GetStringValue( this SecureString value )
     {
         IntPtr valuePtr = IntPtr.Zero;
@@ -25,85 +32,6 @@ public static class StringExtensions
         }
         finally { Marshal.ZeroFreeBSTR( valuePtr ); }
     }
-
-
-    public static byte[] ToByteArray( this string s, Encoding? encoding = default ) => (encoding ?? Encoding.Default).GetBytes( s );
-
-    public static Memory<byte> ToMemory( this string s, Encoding? encoding = default ) => s.ToByteArray( encoding ?? Encoding.Default )
-                                                                                           .AsMemory();
-
-    public static ReadOnlyMemory<byte> ToReadOnlyMemory( this string s, Encoding? encoding = default ) => s.ToMemory( encoding ?? Encoding.Default );
-
-
-    public static string ConvertToString( this byte[] s, Encoding? encoding = default ) => (encoding ?? Encoding.Default).GetString( s );
-
-    public static string ConvertToString( this Memory<byte> s, Encoding? encoding = default ) => s.ToArray()
-                                                                                                  .ConvertToString( encoding ?? Encoding.Default );
-
-    public static string ConvertToString( this ReadOnlyMemory<byte> s, Encoding? encoding = default ) => s.ToArray()
-                                                                                                          .ConvertToString( encoding ?? Encoding.Default );
-
-
-    public static string RemoveAll( this string source, string old ) => source.Replace( old,                  "", StringComparison.Ordinal );
-    public static string RemoveAll( this string source, char   old ) => source.Replace( new string( old, 1 ), "" );
-
-    public static string ReplaceAll( this string source, string old, string newString ) => source.Replace( old, newString, StringComparison.Ordinal );
-    public static string ReplaceAll( this string source, char   old, char   newString ) => source.Replace( old, newString );
-
-
-    public static bool ContainsExact( this string source, string search ) => source.Contains( search, StringComparison.Ordinal );
-    public static bool ContainsAbout( this string source, string search ) => source.Contains( search, StringComparison.OrdinalIgnoreCase );
-
-
-    public static TResult ConvertTo<TResult>( this string value ) where TResult : IConvertible => (TResult)value.ConvertTo( typeof(TResult) );
-    public static object ConvertTo( this           string value, Type target ) => Convert.ChangeType( value, target );
-
-
-    /// <summary>
-    ///     <seealso href = "https://stackoverflow.com/a/48832421/9530917" />
-    /// </summary>
-    /// <param name = "c" > </param>
-    /// <param name = "count" > </param>
-    /// <returns>
-    ///     <see cref = "string" />
-    /// </returns>
-    public static string Repeat( this char c, int count ) => new(c, count);
-
-    /// <summary>
-    ///     <seealso href = "https://stackoverflow.com/a/720915/9530917" />
-    /// </summary>
-    /// <param name = "value" > </param>
-    /// <param name = "count" > </param>
-    /// <returns>
-    ///     <see cref = "string" />
-    /// </returns>
-    public static string Repeat( this string value, int count ) => new StringBuilder( value.Length * count ).Insert( 0, value, count )
-                                                                                                            .ToString();
-
-
-    /// <summary>
-    ///     Wraps a string in
-    ///     <paramref name = "c" > </paramref>
-    ///     repeated
-    ///     <paramref name = "padding" > </paramref>
-    ///     times.
-    /// </summary>
-    /// <param name = "self" > </param>
-    /// <param name = "c" > </param>
-    /// <param name = "padding" > </param>
-    /// <returns> </returns>
-    public static string Wrapper( this string self, in char c, in int padding ) => self.PadLeft( padding, c )
-                                                                                       .PadRight( padding, c );
-
-
-    public static IEnumerable<string> SplitLines( this string text, char   separator = '\n' ) => text.Split( separator );
-    public static IEnumerable<string> SplitLines( this string text, string separator ) => text.Split( separator );
-
-
-    public static IEnumerable<string> SplitAndTrimLines( this string text, char separator = '\n' ) => text.Split( separator )
-                                                                                                          .Select( line => line.Trim() );
-    public static IEnumerable<string> SplitAndTrimLines( this string text, string separator ) => text.Split( separator )
-                                                                                                     .Select( line => line.Trim() );
 
 
     /// <summary>
@@ -185,9 +113,130 @@ public static class StringExtensions
         return !brackets.Any();
     }
 
+
+    public static string RemoveAll( this string source, string old ) => source.Replace( old,                  "", StringComparison.Ordinal );
+    public static string RemoveAll( this string source, char   old ) => source.Replace( new string( old, 1 ), "" );
+
+
+    /// <summary>
+    ///     <seealso href = "https://stackoverflow.com/a/48832421/9530917" />
+    /// </summary>
+    /// <param name = "c" > </param>
+    /// <param name = "count" > </param>
+    /// <returns>
+    ///     <see cref = "string" />
+    /// </returns>
+    public static string Repeat( this char c, int count ) => new(c, count);
+
+    /// <summary>
+    ///     <seealso href = "https://stackoverflow.com/a/720915/9530917" />
+    /// </summary>
+    /// <param name = "value" > </param>
+    /// <param name = "count" > </param>
+    /// <returns>
+    ///     <see cref = "string" />
+    /// </returns>
+    public static string Repeat( this string value, int count ) => new StringBuilder( value.Length * count ).Insert( 0, value, count )
+                                                                                                            .ToString();
+
+    public static string ReplaceAll( this string source, string old, string newString ) => source.Replace( old, newString, StringComparison.Ordinal );
+    public static string ReplaceAll( this string source, char   old, char   newString ) => source.Replace( old, newString );
+
+
+    public static IEnumerable<string> SplitAndTrimLines( this string text, char separator = '\n' ) => text.Split( separator )
+                                                                                                          .Select( line => line.Trim() );
+    public static IEnumerable<string> SplitAndTrimLines( this string text, string separator ) => text.Split( separator )
+                                                                                                     .Select( line => line.Trim() );
+
+
+    public static IEnumerable<string> SplitLines( this string text, char   separator = '\n' ) => text.Split( separator );
+    public static IEnumerable<string> SplitLines( this string text, string separator ) => text.Split( separator );
+
+
+    /// <summary>
+    ///     <para>
+    ///         <see href = "https://www.meziantou.net/split-a-string-into-lines-without-allocation.htm" />
+    ///     </para>
+    /// </summary>
+    /// <param name = "str" > </param>
+    /// <param name = "separator" >
+    ///     the
+    ///     <see cref = "char" />
+    ///     to split on
+    /// </param>
+    /// <returns>
+    ///     <see cref = "SpanSplitEnumerator{T}" />
+    /// </returns>
+    public static SpanSplitEnumerator<char> SplitOn( this string str, char separator ) => str.AsSpan()
+                                                                                             .SplitOn( separator );
+
+    /// <summary>
+    ///     <para>
+    ///         <see href = "https://www.meziantou.net/split-a-string-into-lines-without-allocation.htm" />
+    ///     </para>
+    ///     Default chars
+    ///     <see cref = "char" />
+    ///     to '\n' and '\r'
+    /// </summary>
+    /// <param name = "str" > </param>
+    /// <returns>
+    ///     <see cref = "SpanSplitEnumerator{T}" />
+    /// </returns>
+    public static SpanSplitEnumerator<char> SplitOn( this string str ) => str.AsSpan()
+                                                                             .SplitOn();
+
+
+    /// <summary>
+    ///     <para>
+    ///         <see href = "https://www.meziantou.net/split-a-string-into-lines-without-allocation.htm" />
+    ///     </para>
+    /// </summary>
+    /// <param name = "span" > </param>
+    /// <param name = "separator" >
+    ///     the
+    ///     <see cref = "char" />
+    ///     to split on
+    /// </param>
+    /// <returns>
+    ///     <see cref = "SpanSplitEnumerator{T}" />
+    /// </returns>
+    public static SpanSplitEnumerator<T> SplitOn<T>( this ReadOnlySpan<T> span, T separator ) where T : IEquatable<T> => new(span, separator);
+
+    /// <summary>
+    ///     <para>
+    ///         <see href = "https://www.meziantou.net/split-a-string-into-lines-without-allocation.htm" />
+    ///     </para>
+    ///     Default chars
+    ///     <see cref = "char" />
+    ///     to '\n' and '\r'
+    /// </summary>
+    /// <param name = "span" > </param>
+    /// <returns>
+    ///     <see cref = "SpanSplitEnumerator{T}" />
+    /// </returns>
+    public static SpanSplitEnumerator<char> SplitOn( this ReadOnlySpan<char> span ) => new(span, '\n', '\r');
+
+
+    public static byte[] ToByteArray( this string s, Encoding? encoding = default ) => (encoding ?? Encoding.Default).GetBytes( s );
+
+    public static Memory<byte> ToMemory( this string s, Encoding? encoding = default ) => s.ToByteArray( encoding ?? Encoding.Default )
+                                                                                           .AsMemory();
+
+    public static ReadOnlyMemory<byte> ToReadOnlyMemory( this string s, Encoding? encoding = default ) => s.ToMemory( encoding ?? Encoding.Default );
+
     public static string ToScreamingCase( this string text ) => text.ToSnakeCase()
                                                                     .ToUpper()
                                                                     .Replace( "__", "_" );
+    public static unsafe SecureString ToSecureString( this string value, bool makeReadonly = true )
+    {
+        fixed (char* token = value)
+        {
+            var secure = new SecureString( token, value.Length );
+            if (makeReadonly) { secure.MakeReadOnly(); }
+
+            return secure;
+        }
+    }
 
 
     /// <summary>
@@ -253,65 +302,16 @@ public static class StringExtensions
 
 
     /// <summary>
-    ///     <para>
-    ///         <see href = "https://www.meziantou.net/split-a-string-into-lines-without-allocation.htm" />
-    ///     </para>
+    ///     Wraps a string in
+    ///     <paramref name = "c" > </paramref>
+    ///     repeated
+    ///     <paramref name = "padding" > </paramref>
+    ///     times.
     /// </summary>
-    /// <param name = "str" > </param>
-    /// <param name = "separator" >
-    ///     the
-    ///     <see cref = "char" />
-    ///     to split on
-    /// </param>
-    /// <returns>
-    ///     <see cref = "SpanSplitEnumerator{T}" />
-    /// </returns>
-    public static SpanSplitEnumerator<char> SplitOn( this string str, char separator ) => str.AsSpan()
-                                                                                             .SplitOn( separator );
-
-    /// <summary>
-    ///     <para>
-    ///         <see href = "https://www.meziantou.net/split-a-string-into-lines-without-allocation.htm" />
-    ///     </para>
-    ///     Default chars
-    ///     <see cref = "char" />
-    ///     to '\n' and '\r'
-    /// </summary>
-    /// <param name = "str" > </param>
-    /// <returns>
-    ///     <see cref = "SpanSplitEnumerator{T}" />
-    /// </returns>
-    public static SpanSplitEnumerator<char> SplitOn( this string str ) => str.AsSpan()
-                                                                             .SplitOn();
-
-
-    /// <summary>
-    ///     <para>
-    ///         <see href = "https://www.meziantou.net/split-a-string-into-lines-without-allocation.htm" />
-    ///     </para>
-    /// </summary>
-    /// <param name = "span" > </param>
-    /// <param name = "separator" >
-    ///     the
-    ///     <see cref = "char" />
-    ///     to split on
-    /// </param>
-    /// <returns>
-    ///     <see cref = "SpanSplitEnumerator{T}" />
-    /// </returns>
-    public static SpanSplitEnumerator<T> SplitOn<T>( this ReadOnlySpan<T> span, T separator ) where T : IEquatable<T> => new(span, separator);
-
-    /// <summary>
-    ///     <para>
-    ///         <see href = "https://www.meziantou.net/split-a-string-into-lines-without-allocation.htm" />
-    ///     </para>
-    ///     Default chars
-    ///     <see cref = "char" />
-    ///     to '\n' and '\r'
-    /// </summary>
-    /// <param name = "span" > </param>
-    /// <returns>
-    ///     <see cref = "SpanSplitEnumerator{T}" />
-    /// </returns>
-    public static SpanSplitEnumerator<char> SplitOn( this ReadOnlySpan<char> span ) => new(span, '\n', '\r');
+    /// <param name = "self" > </param>
+    /// <param name = "c" > </param>
+    /// <param name = "padding" > </param>
+    /// <returns> </returns>
+    public static string Wrapper( this string self, in char c, in int padding ) => self.PadLeft( padding, c )
+                                                                                       .PadRight( padding, c );
 }

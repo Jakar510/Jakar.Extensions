@@ -26,6 +26,21 @@ public class JsonizerGenerator : ISourceGenerator
     public const            string FROM_JSON  = "FromJson";
     public const            string GENERATED  = $"[System.CodeDom.Compiler.GeneratedCode({nameof(JsonizerGenerator)})]";
     private static readonly string _attribute = typeof(JsonizerAttribute).FullName ?? throw new InvalidOperationException();
+
+    private static string ChooseName( string fieldName, in TypedConstant overridenNameOpt )
+    {
+        if (!overridenNameOpt.IsNull) { return overridenNameOpt.Value.ToString(); }
+
+        fieldName = fieldName.TrimStart( '_' );
+
+        return fieldName.Length switch
+               {
+                   0 => string.Empty,
+                   1 => fieldName.ToUpper(),
+                   _ => fieldName[..1]
+                           .ToUpper() + fieldName[1..]
+               };
+    }
     private static void Execute( in GeneratorExecutionContext context, in SyntaxReceiver receiver, in CancellationToken token )
     {
         // get the added attribute, and INotifyPropertyChanged
@@ -108,21 +123,6 @@ public {fieldType} {propertyName}
     }}
 }}
 " );
-    }
-
-    private static string ChooseName( string fieldName, in TypedConstant overridenNameOpt )
-    {
-        if (!overridenNameOpt.IsNull) { return overridenNameOpt.Value.ToString(); }
-
-        fieldName = fieldName.TrimStart( '_' );
-
-        return fieldName.Length switch
-               {
-                   0 => string.Empty,
-                   1 => fieldName.ToUpper(),
-                   _ => fieldName[..1]
-                           .ToUpper() + fieldName[1..]
-               };
     }
 
     public void Initialize( GeneratorInitializationContext context )

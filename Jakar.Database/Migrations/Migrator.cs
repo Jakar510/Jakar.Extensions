@@ -30,13 +30,6 @@
 /// </summary>
 public static class Migrator
 {
-    public static void UpdateDatabase( Func<IMigrationRunnerBuilder, IMigrationRunnerBuilder> addDbType, string connectionString, params Assembly[] assemblies )
-    {
-        using ServiceProvider serviceProvider = new ServiceCollection().AddFluentMigrator( addDbType, connectionString, assemblies )
-                                                                       .BuildServiceProvider( true );
-
-        serviceProvider.UpdateDatabase();
-    }
     public static IServiceCollection AddFluentMigrator( this IServiceCollection collection, Func<IMigrationRunnerBuilder, IMigrationRunnerBuilder> addDbType, string connectionString, params Assembly[] assemblies ) =>
         collection.AddFluentMigratorCore()
                   .ConfigureRunner( configure => addDbType( configure )
@@ -44,6 +37,13 @@ public static class Migrator
                                                 .ScanIn( assemblies )
                                                 .For.Migrations() )
                   .AddLogging( builder => builder.AddFluentMigratorConsole() );
+    public static void UpdateDatabase( Func<IMigrationRunnerBuilder, IMigrationRunnerBuilder> addDbType, string connectionString, params Assembly[] assemblies )
+    {
+        using ServiceProvider serviceProvider = new ServiceCollection().AddFluentMigrator( addDbType, connectionString, assemblies )
+                                                                       .BuildServiceProvider( true );
+
+        serviceProvider.UpdateDatabase();
+    }
 
 
     /// <summary>

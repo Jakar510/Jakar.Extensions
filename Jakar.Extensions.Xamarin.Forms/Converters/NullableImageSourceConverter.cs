@@ -13,12 +13,12 @@ namespace Jakar.Extensions.Xamarin.Forms;
 public class NullableImageSourceConverter : TypeConverter, IValueConverter, IExtendedTypeConverter // IExtendedTypeConverter 
 {
     private readonly ImageSourceConverter _converter = new();
-    public override bool CanConvertFrom( Type?                  sourceType ) => sourceType is null || sourceType == typeof(string);
-    public override object? ConvertFromInvariantString( string? value ) => Convert( value );
+    public override bool CanConvertFrom( Type? sourceType ) => sourceType is null || sourceType == typeof(string);
 
     public ImageSource? Convert( string? value ) => string.IsNullOrWhiteSpace( value )
                                                         ? null
                                                         : (ImageSource)_converter.ConvertFromInvariantString( value );
+    public override object? ConvertFromInvariantString( string? value ) => Convert( value );
 
     public override string ConvertToInvariantString( object? _ ) => throw new NotImplementedException();
 

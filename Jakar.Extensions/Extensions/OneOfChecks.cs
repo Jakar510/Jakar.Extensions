@@ -4,6 +4,16 @@ namespace Jakar.Extensions;
 
 public static class OneOfChecks
 {
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsEqual( this PropertyChangedEventArgs e, string property ) => string.Equals( e.PropertyName, property, StringComparison.Ordinal );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsEqual( this PropertyChangedEventArgs e, string property1, string property2 ) => e.IsEqual( property1 ) || e.IsEqual( property2 );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public static bool IsEqual( this PropertyChangedEventArgs e, string property1, string property2, string property3 ) => e.IsEqual( property1 ) || e.IsEqual( property2 ) || e.IsEqual( property3 );
+
+
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsEqual( this PropertyChangedEventArgs e, in ReadOnlySpan<char> property ) => property.SequenceEqual( e.PropertyName );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsEqual( this PropertyChangedEventArgs e, in ReadOnlySpan<char> property1, in ReadOnlySpan<char> property2 ) => e.IsEqual( property1 ) || e.IsEqual( property2 );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public static bool IsEqual( this PropertyChangedEventArgs e, in ReadOnlySpan<char> property1, in ReadOnlySpan<char> property2, in ReadOnlySpan<char> property3 ) => e.IsEqual( property1 ) || e.IsEqual( property2 ) || e.IsEqual( property3 );
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static bool IsOneOf<TValue>( this TValue value, params TValue[] items )
     {
@@ -65,16 +75,6 @@ public static class OneOfChecks
         return false;
     }
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsOneOf( this PropertyChangedEventArgs e, params string[] properties ) => e.PropertyName?.IsOneOf( properties ) ?? false;
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsEqual( this PropertyChangedEventArgs e, string          property ) => string.Equals( e.PropertyName, property, StringComparison.Ordinal );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsEqual( this PropertyChangedEventArgs e, string          property1, string property2 ) => e.IsEqual( property1 ) || e.IsEqual( property2 );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public static bool IsEqual( this PropertyChangedEventArgs e, string property1, string property2, string property3 ) => e.IsEqual( property1 ) || e.IsEqual( property2 ) || e.IsEqual( property3 );
-
-
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsEqual( this PropertyChangedEventArgs e, in ReadOnlySpan<char> property ) => property.SequenceEqual( e.PropertyName );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsEqual( this PropertyChangedEventArgs e, in ReadOnlySpan<char> property1, in ReadOnlySpan<char> property2 ) => e.IsEqual( property1 ) || e.IsEqual( property2 );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public static bool IsEqual( this PropertyChangedEventArgs e, in ReadOnlySpan<char> property1, in ReadOnlySpan<char> property2, in ReadOnlySpan<char> property3 ) => e.IsEqual( property1 ) || e.IsEqual( property2 ) || e.IsEqual( property3 );
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static bool IsOneOf( this PropertyChangedEventArgs e, in ReadOnlySpan<string> properties )
     {

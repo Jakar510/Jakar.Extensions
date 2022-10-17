@@ -5,20 +5,19 @@ namespace Jakar.Database;
 
 
 [Serializable]
-public sealed class CounterAsync<TID> : IAsyncEnumerator<TID> where TID : struct, IComparable<TID>, IEquatable<TID>
+public sealed class CounterAsync : IAsyncEnumerator<long>
 {
-    private readonly Func<TID?, TID> _adder;
-    private          TID?            _current;
+    private long? _current;
 
 
-    public TID Current
+    public long Current
     {
         get => _current ?? throw new InvalidOperationException( nameof(_current) );
         private set => _current = value;
     }
 
 
-    public CounterAsync( Func<TID?, TID> adder ) => _adder = adder;
+    public CounterAsync() { }
     public void Reset() => _current = default;
     public ValueTask DisposeAsync()
     {
@@ -27,9 +26,6 @@ public sealed class CounterAsync<TID> : IAsyncEnumerator<TID> where TID : struct
     }
 
 
-    public ValueTask<bool> MoveNextAsync()
-    {
-        Current = _adder( _current );
-        return true.ValueTaskFromResult();
-    }
+    public ValueTask<bool> MoveNextAsync() => (++Current).IsValidID()
+                                                         .ValueTaskFromResult();
 }

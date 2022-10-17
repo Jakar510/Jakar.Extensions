@@ -7,14 +7,15 @@ namespace Jakar.Database;
 /// <summary> The SecurityToken created by JwtSecurityTokenHandler.CreateToken </summary>
 [Serializable]
 [SuppressMessage( "ReSharper", "InconsistentNaming" )]
+[SuppressMessage( "ReSharper", "NotAccessedField.Global" )]
 public readonly struct Tokens : IValidator
 {
-    public readonly AppVersion Version      = default;
-    public readonly Guid       UserID       = Guid.Empty;
-    public readonly string     AccessToken  = string.Empty;
-    public readonly string?    RefreshToken = default;
-    public readonly string?    FullName     = default;
-    public          bool       IsValid => !string.IsNullOrWhiteSpace( AccessToken );
+    public AppVersion Version      { get; init; } = default;
+    public Guid       UserID       { get; init; } = Guid.Empty;
+    public string     AccessToken  { get; init; } = string.Empty;
+    public string?    RefreshToken { get; init; } = default;
+    public string?    FullName     { get; init; } = default;
+    public bool       IsValid      => !string.IsNullOrWhiteSpace( AccessToken );
 
 
     [JsonConstructor]

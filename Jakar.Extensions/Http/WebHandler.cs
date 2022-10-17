@@ -35,62 +35,11 @@ public class WebHandler : IDisposable
     }
 
 
-    public TaskAwaiter<HttpResponseMessage> GetAwaiter() => _client.SendAsync( _request, Token )
-                                                                   .GetAwaiter();
-
-
-    public virtual ValueTask<WebResponse<JToken>> AsJson() => AsJson( JsonNet.LoadSettings );
-    public virtual async ValueTask<WebResponse<JToken>> AsJson( JsonLoadSettings settings ) => await WebResponse<JToken>.Create( this, settings, AsJson );
-    public virtual async ValueTask<JToken> AsJson( HttpResponseMessage response, JsonLoadSettings settings )
-    {
-        await using MemoryStream stream = await AsStream( response );
-        using var                sr     = new StreamReader( stream, Encoding );
-        using JsonReader         reader = new JsonTextReader( sr );
-        return await JToken.ReadFromAsync( reader, settings, Token );
-    }
-
-
-    public virtual ValueTask<WebResponse<TResult>> AsJson<TResult>() => AsJson<TResult>( JsonNet.Serializer );
-    public virtual ValueTask<WebResponse<TResult>> AsJson<TResult>( JsonSerializer serializer ) => WebResponse<TResult>.Create( this, serializer, AsJson<TResult> );
-    public virtual async ValueTask<TResult> AsJson<TResult>( HttpResponseMessage response, JsonSerializer serializer )
-    {
-        await using MemoryStream stream = await AsStream( response );
-        using var                sr     = new StreamReader( stream, Encoding );
-        using JsonReader         reader = new JsonTextReader( sr );
-
-        return serializer.Deserialize<TResult>( reader ) ?? throw new NullReferenceException( nameof(JsonConvert.DeserializeObject) );
-    }
-
-
-    public virtual async ValueTask NoResponse()
-    {
-        using (this)
-        {
-            using HttpResponseMessage response = await this;
-            response.EnsureSuccessStatusCode();
-        }
-    }
-
-
     public virtual ValueTask<WebResponse<bool>> AsBool() => WebResponse<bool>.Create( this, AsBool );
     public virtual async ValueTask<bool> AsBool( HttpResponseMessage response )
     {
         string content = await AsString( response );
         return bool.TryParse( content, out bool result ) && result;
-    }
-
-
-    public virtual ValueTask<WebResponse<string>> AsString() => WebResponse<string>.Create( this, AsString );
-    public virtual async ValueTask<string> AsString( HttpResponseMessage response )
-    {
-        response.EnsureSuccessStatusCode();
-        using HttpContent content = response.Content;
-
-    #if NETSTANDARD2_1
-        return await content.ReadAsStringAsync();
-    #else
-        return await content.ReadAsStringAsync( Token );
-    #endif
     }
 
 
@@ -100,10 +49,6 @@ public class WebHandler : IDisposable
         await using MemoryStream stream = await AsStream( response );
         return stream.ToArray();
     }
-
-
-    public virtual ValueTask<WebResponse<ReadOnlyMemory<byte>>> AsMemory() => WebResponse<ReadOnlyMemory<byte>>.Create( this, AsMemory );
-    public virtual async ValueTask<ReadOnlyMemory<byte>> AsMemory( HttpResponseMessage response ) => await AsBytes( response );
 
 
     public virtual ValueTask<WebResponse<LocalFile>> AsFile() => WebResponse<LocalFile>.Create( this, AsFile );
@@ -175,6 +120,33 @@ public class WebHandler : IDisposable
     }
 
 
+    public virtual ValueTask<WebResponse<JToken>> AsJson() => AsJson( JsonNet.LoadSettings );
+    public virtual async ValueTask<WebResponse<JToken>> AsJson( JsonLoadSettings settings ) => await WebResponse<JToken>.Create( this, settings, AsJson );
+    public virtual async ValueTask<JToken> AsJson( HttpResponseMessage response, JsonLoadSettings settings )
+    {
+        await using MemoryStream stream = await AsStream( response );
+        using var                sr     = new StreamReader( stream, Encoding );
+        using JsonReader         reader = new JsonTextReader( sr );
+        return await JToken.ReadFromAsync( reader, settings, Token );
+    }
+
+
+    public virtual ValueTask<WebResponse<TResult>> AsJson<TResult>() => AsJson<TResult>( JsonNet.Serializer );
+    public virtual ValueTask<WebResponse<TResult>> AsJson<TResult>( JsonSerializer serializer ) => WebResponse<TResult>.Create( this, serializer, AsJson<TResult> );
+    public virtual async ValueTask<TResult> AsJson<TResult>( HttpResponseMessage response, JsonSerializer serializer )
+    {
+        await using MemoryStream stream = await AsStream( response );
+        using var                sr     = new StreamReader( stream, Encoding );
+        using JsonReader         reader = new JsonTextReader( sr );
+
+        return serializer.Deserialize<TResult>( reader ) ?? throw new NullReferenceException( nameof(JsonConvert.DeserializeObject) );
+    }
+
+
+    public virtual ValueTask<WebResponse<ReadOnlyMemory<byte>>> AsMemory() => WebResponse<ReadOnlyMemory<byte>>.Create( this, AsMemory );
+    public virtual async ValueTask<ReadOnlyMemory<byte>> AsMemory( HttpResponseMessage response ) => await AsBytes( response );
+
+
     public virtual ValueTask<WebResponse<MemoryStream>> AsStream() => WebResponse<MemoryStream>.Create( this, AsStream );
     public virtual async ValueTask<MemoryStream> AsStream( HttpResponseMessage response )
     {
@@ -192,6 +164,34 @@ public class WebHandler : IDisposable
 
         buffer.Seek( 0, SeekOrigin.Begin );
         return buffer;
+    }
+
+
+    public virtual ValueTask<WebResponse<string>> AsString() => WebResponse<string>.Create( this, AsString );
+    public virtual async ValueTask<string> AsString( HttpResponseMessage response )
+    {
+        response.EnsureSuccessStatusCode();
+        using HttpContent content = response.Content;
+
+    #if NETSTANDARD2_1
+        return await content.ReadAsStringAsync();
+    #else
+        return await content.ReadAsStringAsync( Token );
+    #endif
+    }
+
+
+    public TaskAwaiter<HttpResponseMessage> GetAwaiter() => _client.SendAsync( _request, Token )
+                                                                   .GetAwaiter();
+
+
+    public virtual async ValueTask NoResponse()
+    {
+        using (this)
+        {
+            using HttpResponseMessage response = await this;
+            response.EnsureSuccessStatusCode();
+        }
     }
     public virtual void Dispose() => _request.Dispose();
 

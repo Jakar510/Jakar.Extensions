@@ -25,27 +25,6 @@ public static class MigrationExtensions
         builder.AddFluentMigrator( addSqlDb, provider => getConnectionString( provider.GetRequiredService<IConfiguration>() ) );
 
 
-    public static async ValueTask MigrateUp( this WebApplication app )
-    {
-        await using AsyncServiceScope scope  = app.Services.CreateAsyncScope();
-        var                           runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
-        runner.ListMigrations();
-        if (runner.HasMigrationsToApplyUp()) { runner.MigrateUp(); }
-    }
-
-
-    public static async ValueTask MigrateDown( this WebApplication app )
-    {
-        await using AsyncServiceScope scope  = app.Services.CreateAsyncScope();
-        var                           runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
-        runner.MigrateDown( 0 );
-    }
-    public static async ValueTask MigrateDown( this WebApplication app, string key )
-    {
-        if (app.Configuration.GetValue<bool>( key )) { await app.MigrateDown(); }
-    }
-
-
     public static IInsertDataSyntax AddRow<T>( this IInsertDataSyntax insert, T context ) where T : BaseRecord
     {
         PropertyInfo[] items   = typeof(T).GetProperties( BindingFlags.Instance | BindingFlags.Public );
@@ -225,6 +204,20 @@ public static class MigrationExtensions
     }
 
 
+    public static string GetMappingTableName( this Type parent, PropertyInfo propertyInfo )
+    {
+        if (!propertyInfo.IsList( out Type? itemType )) { throw new ExpectedValueTypeException( nameof(propertyInfo), propertyInfo.PropertyType, typeof(IList<>) ); }
+
+        return parent.GetMappingTableName( propertyInfo, itemType );
+    }
+
+
+    public static string GetMappingTableName<T>( this Type   parent, string       propertyName, IEnumerable<T> items ) => parent.GetMappingTableName( propertyName,      typeof(T) );
+    public static string GetMappingTableName( this    Type   parent, PropertyInfo propertyInfo, Type           other ) => parent.GetMappingTableName( propertyInfo.Name, other );
+    public static string GetMappingTableName( this    Type   parent, string       propertyName, Type           other ) => parent.Name.GetMappingTableName( propertyName, other.Name );
+    public static string GetMappingTableName( this    string parent, string       propertyName, string         other ) => $"{parent}_{other}_{propertyName}_mapping";
+
+
     public static bool IsInitOnly( this PropertyInfo propertyInfo )
     {
         MethodInfo? setMethod = propertyInfo.SetMethod;
@@ -236,6 +229,27 @@ public static class MigrationExtensions
         return setMethod.ReturnParameter.GetRequiredCustomModifiers()
                         .ToList()
                         .Contains( isExternalInitType );
+    }
+
+
+    public static async ValueTask MigrateDown( this WebApplication app )
+    {
+        await using AsyncServiceScope scope  = app.Services.CreateAsyncScope();
+        var                           runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
+        runner.MigrateDown( 0 );
+    }
+    public static async ValueTask MigrateDown( this WebApplication app, string key )
+    {
+        if (app.Configuration.GetValue<bool>( key )) { await app.MigrateDown(); }
+    }
+
+
+    public static async ValueTask MigrateUp( this WebApplication app )
+    {
+        await using AsyncServiceScope scope  = app.Services.CreateAsyncScope();
+        var                           runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
+        runner.ListMigrations();
+        if (runner.HasMigrationsToApplyUp()) { runner.MigrateUp(); }
     }
 
 
@@ -385,20 +399,6 @@ public static class MigrationExtensions
 
         return false;
     }
-
-
-    public static string GetMappingTableName( this Type parent, PropertyInfo propertyInfo )
-    {
-        if (!propertyInfo.IsList( out Type? itemType )) { throw new ExpectedValueTypeException( nameof(propertyInfo), propertyInfo.PropertyType, typeof(IList<>) ); }
-
-        return parent.GetMappingTableName( propertyInfo, itemType );
-    }
-
-
-    public static string GetMappingTableName<T>( this Type   parent, string       propertyName, IEnumerable<T> items ) => parent.GetMappingTableName( propertyName,      typeof(T) );
-    public static string GetMappingTableName( this    Type   parent, PropertyInfo propertyInfo, Type           other ) => parent.GetMappingTableName( propertyInfo.Name, other );
-    public static string GetMappingTableName( this    Type   parent, string       propertyName, Type           other ) => parent.Name.GetMappingTableName( propertyName, other.Name );
-    public static string GetMappingTableName( this    string parent, string       propertyName, string         other ) => $"{parent}_{other}_{propertyName}_mapping";
 
 
 //

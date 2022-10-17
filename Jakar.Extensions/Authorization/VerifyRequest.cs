@@ -22,12 +22,12 @@ public class VerifyRequest : BaseClass, ILoginRequest, ICredentials, IEquatable<
         UserLogin    = userName ?? throw new ArgumentNullException( nameof(userName) );
         UserPassword = userPassword ?? throw new ArgumentNullException( nameof(userPassword) );
     }
+    public override bool Equals( object? obj ) => obj is VerifyRequest request && Equals( request );
+    public override int GetHashCode() => HashCode.Combine( UserLogin, UserPassword );
 
 
     public static bool operator ==( VerifyRequest? left, VerifyRequest? right ) => Equals( left, right );
     public static bool operator !=( VerifyRequest? left, VerifyRequest? right ) => !Equals( left, right );
-    public override bool Equals( object?           obj ) => obj is VerifyRequest request && Equals( request );
-    public override int GetHashCode() => HashCode.Combine( UserLogin, UserPassword );
 
 
     public virtual NetworkCredential GetCredential( Uri uri, string authType ) => new(UserLogin, UserPassword.ToSecureString());
@@ -61,10 +61,6 @@ public class VerifyRequest<T> : BaseClass, ICredentials, IValidator, IEquatable<
         Request = request;
         Data    = data;
     }
-
-
-    public static bool operator ==( VerifyRequest<T>? left, VerifyRequest<T>? right ) => Equals( left, right );
-    public static bool operator !=( VerifyRequest<T>? left, VerifyRequest<T>? right ) => !Equals( left, right );
     public override bool Equals( object? other )
     {
         if (other is null) { return false; }
@@ -74,6 +70,10 @@ public class VerifyRequest<T> : BaseClass, ICredentials, IValidator, IEquatable<
         return other is VerifyRequest<T> request && Equals( request );
     }
     public override int GetHashCode() => HashCode.Combine( Request, Data );
+
+
+    public static bool operator ==( VerifyRequest<T>? left, VerifyRequest<T>? right ) => Equals( left, right );
+    public static bool operator !=( VerifyRequest<T>? left, VerifyRequest<T>? right ) => !Equals( left, right );
 
 
     public NetworkCredential GetCredential( Uri uri, string authType ) => Request.GetCredential( uri, authType );

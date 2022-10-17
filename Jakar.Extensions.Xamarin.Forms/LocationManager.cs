@@ -33,12 +33,6 @@ public class LocationManager
         return null;
     }
 
-    protected void Reset()
-    {
-        Status   = default;
-        Location = null;
-    }
-
     protected async Task<State> GetLocationAsync( GeolocationAccuracy accuracy = GeolocationAccuracy.Default )
     {
         Reset();
@@ -74,6 +68,12 @@ public class LocationManager
         // }
 
         return Status;
+    }
+
+    protected void Reset()
+    {
+        Status   = default;
+        Location = null;
     }
 
     public async Task<bool> Update()

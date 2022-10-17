@@ -6,8 +6,11 @@ namespace Jakar.Database;
 
 public interface IConnectableDb
 {
+    public string CurrentSchema { get; }
+
+
     public DbConnection Connect();
-    public ValueTask<DbConnection> ConnectAsync(CancellationToken token);
+    public ValueTask<DbConnection> ConnectAsync( CancellationToken token );
 }
 
 

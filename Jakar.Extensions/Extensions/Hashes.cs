@@ -8,6 +8,20 @@ namespace Jakar.Extensions;
 
 public static class Hashes
 {
+    public static ReadOnlySpan<char> Hash( this ReadOnlyMemory<byte> data, HashAlgorithm hasher )
+    {
+        using var stream = new MemoryStream();
+        stream.Write( data.AsReadOnlySpan() );
+        stream.Seek( 0, SeekOrigin.Begin );
+        Span<byte> hash = stackalloc byte[1024];
+
+        if (!hasher.TryComputeHash( data.Span, hash, out int bytesWritten )) { throw new InvalidOperationException( nameof(hash) ); }
+
+        Span<char> span = stackalloc char[bytesWritten + 1];
+        for (int i = 0; i < bytesWritten; i++) { span[i] = (char)hash[i]; }
+
+        return MemoryMarshal.CreateReadOnlySpan( ref span.GetPinnableReference(), bytesWritten );
+    }
     /// <summary>
     ///     Calculates a file hash using
     ///     <see cref = "MD5" />
@@ -52,20 +66,6 @@ public static class Hashes
     {
         using var hasher = SHA512.Create();
         return data.Hash( hasher );
-    }
-    public static ReadOnlySpan<char> Hash( this ReadOnlyMemory<byte> data, HashAlgorithm hasher )
-    {
-        using var stream = new MemoryStream();
-        stream.Write( data.AsReadOnlySpan() );
-        stream.Seek( 0, SeekOrigin.Begin );
-        Span<byte> hash = stackalloc byte[1024];
-
-        if (!hasher.TryComputeHash( data.Span, hash, out int bytesWritten )) { throw new InvalidOperationException( nameof(hash) ); }
-
-        Span<char> span = stackalloc char[bytesWritten + 1];
-        for (int i = 0; i < bytesWritten; i++) { span[i] = (char)hash[i]; }
-
-        return MemoryMarshal.CreateReadOnlySpan( ref span.GetPinnableReference(), bytesWritten );
     }
 
 

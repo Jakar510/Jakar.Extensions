@@ -2,7 +2,6 @@ using System.Net.Mail;
 using MailKit.Net.Smtp;
 using Microsoft.Extensions.Configuration;
 using MimeKit;
-using Org.BouncyCastle.Asn1.X509;
 using SmtpClient = MailKit.Net.Smtp.SmtpClient;
 
 
@@ -14,9 +13,9 @@ namespace Jakar.Database;
 public class Emailer
 {
     private readonly IConfiguration _configuration;
+    private readonly ILogger        _logger;
     private readonly ITokenService  _tokenService;
     private readonly Options        _options;
-    private readonly ILogger        _logger;
     private          EmailSettings  _Settings => _options.GetSettings( _configuration );
 
 
@@ -123,12 +122,12 @@ public class Emailer
 
     public sealed class Options : IOptions<Options>
     {
-        private EmailSettings? _settings;
+        private EmailSettings?  _settings;
+        public  EmailSettings?  Settings { get; set; }
+        public  MailboxAddress? Sender   { get; set; }
 
 
-        Options IOptions<Options>.Value    => this;
-        public EmailSettings?     Settings { get; set; }
-        public MailboxAddress?    Sender   { get; set; }
+        Options IOptions<Options>.Value => this;
 
         public string  DefaultSubject { get; set; } = string.Empty;
         public string? VerifySubject  { get; set; }

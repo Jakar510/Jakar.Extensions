@@ -60,6 +60,34 @@ public class Debug : ObservableClass
         _appStateFile  = new LocalFile( _fileSystemApi.AppStateFileName );
         _feedBackFile  = new LocalFile( _fileSystemApi.FeedBackFileName );
     }
+    protected virtual Dictionary<string, string> AppState() => new()
+                                                               {
+                                                                   [nameof(_appName)]                     = _appName ?? throw new NullReferenceException( nameof(_appName) ),
+                                                                   [nameof(DateTime)]                     = DateTime.UtcNow.ToString( CultureInfo.InvariantCulture ),
+                                                                   [nameof(AppDeviceInfo.DeviceId)]       = AppDeviceInfo.DeviceId,
+                                                                   [nameof(AppDeviceInfo.VersionNumber)]  = AppDeviceInfo.VersionNumber,
+                                                                   [nameof(LanguageApi.SelectedLanguage)] = CultureInfo.CurrentCulture.DisplayName
+                                                               };
+
+
+    public void HandleException( Exception e ) => HandleException( e, default );
+    public void HandleException( Exception e, CancellationToken token ) => Task.Run( async () => await HandleExceptionAsync( e ), token )
+                                                                               .Wait( token );
+    public async Task HandleExceptionAsync( Exception e )
+    {
+        if (!_DebugSettings.EnableApi) { return; }
+
+        ThrowIfNotEnabled();
+
+        ReadOnlyMemory<byte> screenShot = _DebugSettings.TakeScreenshotOnError
+                                              ? await AppShare.TakeScreenShot()
+                                                              .ConfigureAwait( false )
+                                              : default;
+
+
+        await TrackError( e, screenShot )
+           .ConfigureAwait( false );
+    }
 
 
     public async Task InitAsync( string app_center_id, params Type[] appCenterServices )
@@ -95,38 +123,6 @@ public class Debug : ObservableClass
     }
 
 
-    protected void ThrowIfNotEnabled()
-    {
-        if (ApiEnabled) { return; }
-
-        // if ( _services is null ) { throw new ApiDisabledException($"Must call {nameof(InitAsync)} first.", new NullReferenceException(nameof(_services))); }
-
-        if (_fileSystemApi is null) { throw new ApiDisabledException( $"Must call {nameof(InitAsync)} first.", new NullReferenceException( nameof(_fileSystemApi) ) ); }
-
-        throw new ApiDisabledException( $"Must call {nameof(InitAsync)} first." );
-    }
-
-
-    public void HandleException( Exception e ) => HandleException( e, default );
-    public void HandleException( Exception e, CancellationToken token ) => Task.Run( async () => await HandleExceptionAsync( e ), token )
-                                                                               .Wait( token );
-    public async Task HandleExceptionAsync( Exception e )
-    {
-        if (!_DebugSettings.EnableApi) { return; }
-
-        ThrowIfNotEnabled();
-
-        ReadOnlyMemory<byte> screenShot = _DebugSettings.TakeScreenshotOnError
-                                              ? await AppShare.TakeScreenShot()
-                                                              .ConfigureAwait( false )
-                                              : default;
-
-
-        await TrackError( e, screenShot )
-           .ConfigureAwait( false );
-    }
-
-
     public async Task SaveFeedBackAppState( Dictionary<string, string?> feedback, string key = "feedback" )
     {
         ThrowIfNotEnabled();
@@ -140,14 +136,18 @@ public class Debug : ObservableClass
         await _feedBackFile.WriteAsync( result.ToPrettyJson() )
                            .ConfigureAwait( false );
     }
-    protected virtual Dictionary<string, string> AppState() => new()
-                                                               {
-                                                                   [nameof(_appName)]                     = _appName ?? throw new NullReferenceException( nameof(_appName) ),
-                                                                   [nameof(DateTime)]                     = DateTime.UtcNow.ToString( CultureInfo.InvariantCulture ),
-                                                                   [nameof(AppDeviceInfo.DeviceId)]       = AppDeviceInfo.DeviceId,
-                                                                   [nameof(AppDeviceInfo.VersionNumber)]  = AppDeviceInfo.VersionNumber,
-                                                                   [nameof(LanguageApi.SelectedLanguage)] = CultureInfo.CurrentCulture.DisplayName
-                                                               };
+
+
+    protected void ThrowIfNotEnabled()
+    {
+        if (ApiEnabled) { return; }
+
+        // if ( _services is null ) { throw new ApiDisabledException($"Must call {nameof(InitAsync)} first.", new NullReferenceException(nameof(_services))); }
+
+        if (_fileSystemApi is null) { throw new ApiDisabledException( $"Must call {nameof(InitAsync)} first.", new NullReferenceException( nameof(_fileSystemApi) ) ); }
+
+        throw new ApiDisabledException( $"Must call {nameof(InitAsync)} first." );
+    }
 
 
     public async Task TrackError( Exception e )

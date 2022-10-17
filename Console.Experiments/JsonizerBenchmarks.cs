@@ -88,6 +88,7 @@ public class JsonizerBenchmarks
         var test = new Test( "Root", children );
         return test;
     }
+    public static Test GetObject() => new(string.Empty);
     public static Test GetObjects()
     {
         var first  = new Test( "First",  new Test( "1.1" ), new Test( "1.2" ) );
@@ -95,12 +96,11 @@ public class JsonizerBenchmarks
         var test   = new Test( "Root",   first, second );
         return test;
     }
-    public static Test GetObject() => new(string.Empty);
+    [Benchmark] public string Jsonizer_ToJson() => _source.ToJson();
 
 
     [Benchmark] public Test JsonNet_FromJson() => _json.FromJson<Test>();
     [Benchmark] public string JsonNet_ToJson() => _source.ToJson( Formatting.Indented );
-    [Benchmark] public string Jsonizer_ToJson() => _source.ToJson();
 
 
     // [Benchmark] public StringBuilder Create_StringBuilder() => new();

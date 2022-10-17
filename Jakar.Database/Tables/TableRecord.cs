@@ -1,6 +1,10 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 08/14/2022  8:38 PM
 
+using Jakar.Database.Implementations;
+
+
+
 namespace Jakar.Database;
 
 
@@ -37,27 +41,6 @@ public abstract record TableRecord<TRecord> : BaseCollectionsRecord<TRecord, lon
     protected TableRecord( long id ) : base( id ) => DateCreated = DateTimeOffset.Now;
 
 
-    public TRecord NewID( in long id ) => (TRecord)(this with
-                                                    {
-                                                        ID = id
-                                                    });
-
-
-    public static DynamicParameters GetDynamicParameters( TableRecord<TRecord> tableRecord )
-    {
-        var parameters = new DynamicParameters();
-        parameters.Add( nameof(UserID), tableRecord.UserID );
-        return parameters;
-    }
-
-
-    public async ValueTask<UserRecord?> GetUser( DbConnection connection, DbTransaction? transaction, DbTable<UserRecord> table, CancellationToken token ) => await table.Get( connection, transaction, true, GetDynamicParameters( this ), token );
-    public async ValueTask<UserRecord?> GetUserWhoCreated( DbConnection connection, DbTransaction? transaction, DbTable<UserRecord> table, CancellationToken token ) => await table.Get( connection, transaction, CreatedBy, token );
-
-
-    public override int GetHashCode() => HashCode.Combine( base.GetHashCode(), _createdBy, _lastModified, UserID, DateCreated );
-
-
     public override int CompareTo( TRecord? other )
     {
         if (other is null) { return 1; }
@@ -83,4 +66,25 @@ public abstract record TableRecord<TRecord> : BaseCollectionsRecord<TRecord, lon
 
         return base.Equals( other ) && _createdBy == other._createdBy && Nullable.Equals( _lastModified, other._lastModified ) && UserID.Equals( other.UserID ) && DateCreated.Equals( other.DateCreated );
     }
+
+
+    public static DynamicParameters GetDynamicParameters( TableRecord<TRecord> tableRecord )
+    {
+        var parameters = new DynamicParameters();
+        parameters.Add( nameof(UserID), tableRecord.UserID );
+        return parameters;
+    }
+
+
+    public override int GetHashCode() => HashCode.Combine( base.GetHashCode(), _createdBy, _lastModified, UserID, DateCreated );
+
+
+    public async ValueTask<UserRecord?> GetUser( DbConnection connection, DbTransaction? transaction, MsSqlDbTable<UserRecord> table, CancellationToken token ) => await table.Get( connection, transaction, true, GetDynamicParameters( this ), token );
+    public async ValueTask<UserRecord?> GetUserWhoCreated( DbConnection connection, DbTransaction? transaction, MsSqlDbTable<UserRecord> table, CancellationToken token ) => await table.Get( connection, transaction, CreatedBy, token );
+
+
+    public TRecord NewID( in long id ) => (TRecord)(this with
+                                                    {
+                                                        ID = id
+                                                    });
 }

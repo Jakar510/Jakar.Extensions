@@ -14,7 +14,6 @@ namespace Jakar.Database;
 public static class JwtExtensions
 {
     public static byte[] GetJWTKey( this                                          IConfiguration configuration ) => Encoding.UTF8.GetBytes( configuration["JWT"] );
-    public static IConfigurationSection TokenValidation( this                     IConfiguration configuration ) => configuration.GetSection( nameof(TokenValidation) );
     public static SigningCredentials GetSigningCredentials( this                  IConfiguration configuration ) => new(new SymmetricSecurityKey( configuration.GetJWTKey() ), SecurityAlgorithms.HmacSha256Signature);
     public static TokenValidationParameters GetTokenValidationParameters<T>( this IConfiguration configuration, string issuer ) where T : IAppName => configuration.GetTokenValidationParameters( issuer, typeof(T).Name );
     public static TokenValidationParameters GetTokenValidationParameters( this IConfiguration configuration, string issuer, string audience )
@@ -50,4 +49,5 @@ public static class JwtExtensions
 
         return DateTimeOffset.UtcNow + offset;
     }
+    public static IConfigurationSection TokenValidation( this IConfiguration configuration ) => configuration.GetSection( nameof(TokenValidation) );
 }
