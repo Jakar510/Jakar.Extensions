@@ -1,8 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
-
-
-
-namespace Jakar.Database.Migrations;
+﻿namespace Jakar.Database.Migrations;
 
 
 public static class MigrationExtensions

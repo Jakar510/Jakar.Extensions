@@ -45,7 +45,7 @@ public readonly struct LoginResult
     }
 
 
-
+    
     public enum State
     {
         UnknownError,

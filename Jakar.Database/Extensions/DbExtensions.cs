@@ -7,6 +7,9 @@ namespace Jakar.Database;
 [SuppressMessage( "ReSharper", "UnusedMethodReturnValue.Global" )]
 public static partial class DbExtensions
 {
+    [Pure] public static DateTimeOffset TokenExpireTime( this IConfiguration configuration, string key = nameof(TokenExpireTime) ) => DateTimeOffset.UtcNow + configuration.GetValue( key, TimeSpan.FromMinutes( 30 ) );
+
+
     public static WebApplicationBuilder AddDatabase<T>( this WebApplicationBuilder builder, DbInstance instance ) where T : Database => builder.AddDatabase<T>( configure => configure.DbType = instance );
     public static WebApplicationBuilder AddDatabase<T>( this WebApplicationBuilder builder, Action<DbOptions> configure ) where T : Database
     {

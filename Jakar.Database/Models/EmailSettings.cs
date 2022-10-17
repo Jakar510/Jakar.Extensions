@@ -3,7 +3,6 @@
 
 using System.Net;
 using MailKit.Security;
-using Microsoft.Extensions.Configuration;
 using MimeKit;
 
 

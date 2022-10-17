@@ -5,7 +5,6 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Jakar.Database.Implementations;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
 
@@ -16,8 +15,7 @@ namespace Jakar.Database;
 [SuppressMessage( "ReSharper", "SuggestBaseTypeForParameter" )]
 public abstract class Database : Randoms, IConnectableDb, IAsyncDisposable, IHealthCheck
 {
-    protected readonly ConcurrentBag<IAsyncDisposable> _disposables = new();
-    protected readonly IConfiguration                  _configuration;
+    protected readonly ConcurrentBag<IAsyncDisposable> _disposables   = new();
     private            string                          _currentSchema = "public";
     private            string                          _domain        = "https://localhost:443";
 
@@ -27,7 +25,8 @@ public abstract class Database : Randoms, IConnectableDb, IAsyncDisposable, IHea
     public          DbTableBase<RoleRecord>     Roles            { get; }
     public          DbTableBase<UserRecord>     Users            { get; }
     public          DbTableBase<UserRoleRecord> UserRoles        { get; }
-    public virtual  string                      ConnectionString => _configuration.GetConnectionString( "Default" );
+    public          IConfiguration              Configuration    { get; init; }
+    public virtual  string                      ConnectionString => Configuration.GetConnectionString( "Default" );
     public string CurrentSchema
     {
         get => _currentSchema;
@@ -54,11 +53,11 @@ public abstract class Database : Randoms, IConnectableDb, IAsyncDisposable, IHea
     }
     protected Database( IConfiguration configuration, IOptions<DbOptions> options ) : base()
     {
-        _configuration = configuration;
-        Options        = options.Value;
-        Users          = Create<UserRecord>();
-        Roles          = Create<RoleRecord>();
-        UserRoles      = Create<UserRoleRecord>();
+        Configuration = configuration;
+        Options       = options.Value;
+        Users         = Create<UserRecord>();
+        Roles         = Create<RoleRecord>();
+        UserRoles     = Create<UserRoleRecord>();
     }
     protected TValue AddDisposable<TValue>( TValue value ) where TValue : IAsyncDisposable
     {
@@ -153,7 +152,7 @@ public abstract class Database : Randoms, IConnectableDb, IAsyncDisposable, IHea
     {
         var            handler = new JwtSecurityTokenHandler();
         List<Claim>    claims  = await user.GetUserClaims( connection, transaction, this, token );
-        DateTimeOffset date    = _configuration.TokenExpiration();
+        DateTimeOffset date    = Configuration.TokenExpiration();
 
         if (user.SubscriptionExpires.HasValue)
         {
@@ -165,7 +164,7 @@ public abstract class Database : Randoms, IConnectableDb, IAsyncDisposable, IHea
                          {
                              Subject            = new ClaimsIdentity( claims ),
                              Expires            = date.LocalDateTime.ToUniversalTime(),
-                             SigningCredentials = _configuration.GetSigningCredentials()
+                             SigningCredentials = Configuration.GetSigningCredentials()
                          };
 
         SecurityToken? security     = handler.CreateToken( descriptor );
