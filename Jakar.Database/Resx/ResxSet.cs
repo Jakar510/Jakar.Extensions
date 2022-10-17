@@ -1,4 +1,4 @@
-﻿namespace Jakar.Database;
+﻿namespace Jakar.Database.Resx;
 
 
 public sealed class ResxSet : ConcurrentDictionary<long, string>

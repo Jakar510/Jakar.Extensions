@@ -3,14 +3,12 @@
 
 using Jakar.Database.Migrations;
 
-
-
-namespace Jakar.Database.FluentMigrations;
+namespace Jakar.Database.Resx;
 
 
 public abstract class Create_ResxRowTable : Migration<ResxRowTable>
 {
-    protected Create_ResxRowTable( string currentScheme ) : base( currentScheme ) { }
+    protected Create_ResxRowTable(string currentScheme) : base( currentScheme ) { }
 
 
     public override void Down() => DeleteTable();
@@ -20,73 +18,73 @@ public abstract class Create_ResxRowTable : Migration<ResxRowTable>
         ICreateTableWithColumnSyntax table = CreateTable();
 
 
-        table.WithColumn( nameof(ResxRowTable.ID) )
+        table.WithColumn( nameof( ResxRowTable.ID ) )
              .AsInt64()
              .NotNullable()
              .PrimaryKey()
              .Identity();
 
-        table.WithColumn( nameof(ResxRowTable.Key) )
+        table.WithColumn( nameof( ResxRowTable.Key ) )
              .AsString( int.MaxValue )
              .NotNullable();
 
-        table.WithColumn( nameof(ResxRowTable.Neutral) )
+        table.WithColumn( nameof( ResxRowTable.Neutral ) )
              .AsString( int.MaxValue )
              .NotNullable();
 
-        table.WithColumn( nameof(ResxRowTable.English) )
+        table.WithColumn( nameof( ResxRowTable.English ) )
              .AsString( int.MaxValue )
              .Nullable();
 
-        table.WithColumn( nameof(ResxRowTable.Spanish) )
+        table.WithColumn( nameof( ResxRowTable.Spanish ) )
              .AsString( int.MaxValue )
              .Nullable();
 
-        table.WithColumn( nameof(ResxRowTable.French) )
+        table.WithColumn( nameof( ResxRowTable.French ) )
              .AsString( int.MaxValue )
              .Nullable();
 
-        table.WithColumn( nameof(ResxRowTable.Swedish) )
+        table.WithColumn( nameof( ResxRowTable.Swedish ) )
              .AsString( int.MaxValue )
              .Nullable();
 
-        table.WithColumn( nameof(ResxRowTable.German) )
+        table.WithColumn( nameof( ResxRowTable.German ) )
              .AsString( int.MaxValue )
              .Nullable();
 
-        table.WithColumn( nameof(ResxRowTable.Chinese) )
+        table.WithColumn( nameof( ResxRowTable.Chinese ) )
              .AsString( int.MaxValue )
              .Nullable();
 
-        table.WithColumn( nameof(ResxRowTable.Polish) )
+        table.WithColumn( nameof( ResxRowTable.Polish ) )
              .AsString( int.MaxValue )
              .Nullable();
 
-        table.WithColumn( nameof(ResxRowTable.Thai) )
+        table.WithColumn( nameof( ResxRowTable.Thai ) )
              .AsString( int.MaxValue )
              .Nullable();
 
-        table.WithColumn( nameof(ResxRowTable.Japanese) )
+        table.WithColumn( nameof( ResxRowTable.Japanese ) )
              .AsString( int.MaxValue )
              .Nullable();
 
-        table.WithColumn( nameof(ResxRowTable.Czech) )
+        table.WithColumn( nameof( ResxRowTable.Czech ) )
              .AsString( int.MaxValue )
              .Nullable();
 
-        table.WithColumn( nameof(ResxRowTable.Portuguese) )
+        table.WithColumn( nameof( ResxRowTable.Portuguese ) )
              .AsString( int.MaxValue )
              .Nullable();
 
-        table.WithColumn( nameof(ResxRowTable.Dutch) )
+        table.WithColumn( nameof( ResxRowTable.Dutch ) )
              .AsString( int.MaxValue )
              .Nullable();
 
-        table.WithColumn( nameof(ResxRowTable.Korean) )
+        table.WithColumn( nameof( ResxRowTable.Korean ) )
              .AsString( int.MaxValue )
              .Nullable();
 
-        table.WithColumn( nameof(ResxRowTable.Arabic) )
+        table.WithColumn( nameof( ResxRowTable.Arabic ) )
              .AsString( int.MaxValue )
              .Nullable();
     }

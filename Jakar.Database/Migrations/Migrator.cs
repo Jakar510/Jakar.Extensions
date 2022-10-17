@@ -1,4 +1,8 @@
-﻿namespace Jakar.Database.Migrations;
+﻿using CommunityToolkit.Diagnostics;
+
+
+
+namespace Jakar.Database.Migrations;
 
 
 /// <summary>
@@ -30,13 +34,19 @@
 /// </summary>
 public static class Migrator
 {
-    public static IServiceCollection AddFluentMigrator( this IServiceCollection collection, Func<IMigrationRunnerBuilder, IMigrationRunnerBuilder> addDbType, string connectionString, params Assembly[] assemblies ) =>
-        collection.AddFluentMigratorCore()
-                  .ConfigureRunner( configure => addDbType( configure )
-                                                .WithGlobalConnectionString( connectionString )
-                                                .ScanIn( assemblies )
-                                                .For.Migrations() )
-                  .AddLogging( builder => builder.AddFluentMigratorConsole() );
+    public static IServiceCollection AddFluentMigrator( this IServiceCollection collection, Func<IMigrationRunnerBuilder, IMigrationRunnerBuilder> addDbType, string connectionString, params Assembly[] assemblies )
+    {
+        Guard.HasSizeGreaterThan( assemblies, 0, nameof(assemblies) );
+
+        return collection.AddFluentMigratorCore()
+                         .ConfigureRunner( configure => addDbType( configure )
+                                                       .WithGlobalConnectionString( connectionString )
+                                                       .ScanIn( assemblies )
+                                                       .For.All() )
+                         .AddLogging( builder => builder.AddFluentMigratorConsole() );
+    }
+
+
     public static void UpdateDatabase( Func<IMigrationRunnerBuilder, IMigrationRunnerBuilder> addDbType, string connectionString, params Assembly[] assemblies )
     {
         using ServiceProvider serviceProvider = new ServiceCollection().AddFluentMigrator( addDbType, connectionString, assemblies )

@@ -1,8 +1,4 @@
-﻿using Jakar.Database.Implementations;
-
-
-
-namespace Jakar.Database;
+﻿namespace Jakar.Database.Resx;
 
 
 public sealed class ResxCollection : IResxCollection

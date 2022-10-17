@@ -2,6 +2,7 @@
 // 09/15/2022  5:00 PM
 
 global using System;
+global using System.Collections.Concurrent;
 global using System.Collections.Generic;
 global using System.Diagnostics;
 global using System.Linq;

@@ -35,8 +35,8 @@ public readonly struct Tokens : IValidator
     }
 
 
-    public static ValueTask<Tokens> CreateAsync( Database db, UserRecord user, CancellationToken token                            = default ) => db.TryCall( CreateAsync, db, user, db.Configuration.TokenExpireTime(), token );
-    public static ValueTask<Tokens> CreateAsync( Database db, UserRecord user, DateTimeOffset    expires, CancellationToken token = default ) => db.TryCall( CreateAsync, db, user, expires,                            token );
+    public static ValueTask<Tokens> CreateAsync( Database db, UserRecord user, CancellationToken token                            = default ) => CreateAsync( db, user, db.Configuration.TokenExpireTime(), token );
+    public static ValueTask<Tokens> CreateAsync( Database db, UserRecord user, DateTimeOffset    expires, CancellationToken token = default ) => db.TryCall( CreateAsync, db, user, expires, token );
     public static async ValueTask<Tokens> CreateAsync( DbConnection connection, DbTransaction transaction, Database db, UserRecord user, DateTimeOffset expires, CancellationToken token = default )
     {
         List<Claim> claims = await user.GetUserClaims( connection, transaction, db, token );

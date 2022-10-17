@@ -6,12 +6,12 @@ using Microsoft.IdentityModel.Tokens;
 
 
 
-namespace Jakar.Database.FluentMigrations;
+namespace Jakar.Database;
 
 
 public abstract class Create_UserTable : Migration<UserRecord>
 {
-    protected Create_UserTable( string currentScheme ) : base( currentScheme ) { }
+    protected Create_UserTable(string currentScheme) : base( currentScheme ) { }
 
 
     public override void Down() => DeleteTable();
@@ -21,209 +21,209 @@ public abstract class Create_UserTable : Migration<UserRecord>
         ICreateTableWithColumnSyntax table = CreateTable();
 
 
-        table.WithColumn( nameof(UserRecord.ID) )
+        table.WithColumn( nameof( UserRecord.ID ) )
              .AsInt64()
              .NotNullable()
              .PrimaryKey()
              .Identity();
 
-        table.WithColumn( nameof(UserRecord.UserID) )
+        table.WithColumn( nameof( UserRecord.UserID ) )
              .AsGuid()
              .NotNullable();
 
-        table.WithColumn( nameof(UserRecord.UserName) )
+        table.WithColumn( nameof( UserRecord.UserName ) )
              .AsString( 256 )
              .NotNullable();
 
-        table.WithColumn( nameof(UserRecord.FirstName) )
+        table.WithColumn( nameof( UserRecord.FirstName ) )
              .AsString( 256 )
              .NotNullable();
 
-        table.WithColumn( nameof(UserRecord.LastName) )
+        table.WithColumn( nameof( UserRecord.LastName ) )
              .AsString( 256 )
              .NotNullable();
 
-        table.WithColumn( nameof(UserRecord.FullName) )
+        table.WithColumn( nameof( UserRecord.FullName ) )
              .AsString( 512 )
              .Nullable();
 
-        table.WithColumn( nameof(UserRecord.Description) )
+        table.WithColumn( nameof( UserRecord.Description ) )
              .AsString( 256 )
              .Nullable();
 
-        table.WithColumn( nameof(UserRecord.SessionID) )
+        table.WithColumn( nameof( UserRecord.SessionID ) )
              .AsGuid()
              .Nullable();
 
-        table.WithColumn( nameof(UserRecord.Address) )
+        table.WithColumn( nameof( UserRecord.Address ) )
              .AsString( 4096 )
              .Nullable();
 
-        table.WithColumn( nameof(UserRecord.Line1) )
+        table.WithColumn( nameof( UserRecord.Line1 ) )
              .AsString( 512 )
              .Nullable();
 
-        table.WithColumn( nameof(UserRecord.Line2) )
+        table.WithColumn( nameof( UserRecord.Line2 ) )
              .AsString( 256 )
              .Nullable();
 
-        table.WithColumn( nameof(UserRecord.City) )
+        table.WithColumn( nameof( UserRecord.City ) )
              .AsString( 256 )
              .Nullable();
 
-        table.WithColumn( nameof(UserRecord.State) )
+        table.WithColumn( nameof( UserRecord.State ) )
              .AsString( 256 )
              .Nullable();
 
-        table.WithColumn( nameof(UserRecord.Country) )
+        table.WithColumn( nameof( UserRecord.Country ) )
              .AsString( 256 )
              .Nullable();
 
-        table.WithColumn( nameof(UserRecord.PostalCode) )
+        table.WithColumn( nameof( UserRecord.PostalCode ) )
              .AsString( 256 )
              .Nullable();
 
-        table.WithColumn( nameof(UserRecord.Website) )
+        table.WithColumn( nameof( UserRecord.Website ) )
              .AsString( 4096 )
              .Nullable();
 
-        table.WithColumn( nameof(UserRecord.Email) )
+        table.WithColumn( nameof( UserRecord.Email ) )
              .AsString( 1024 )
              .Nullable();
 
-        table.WithColumn( nameof(UserRecord.PhoneNumber) )
+        table.WithColumn( nameof( UserRecord.PhoneNumber ) )
              .AsString( 256 )
              .Nullable();
 
-        table.WithColumn( nameof(UserRecord.Ext) )
+        table.WithColumn( nameof( UserRecord.Ext ) )
              .AsString( 256 )
              .Nullable();
 
-        table.WithColumn( nameof(UserRecord.Title) )
+        table.WithColumn( nameof( UserRecord.Title ) )
              .AsString( 256 )
              .Nullable();
 
-        table.WithColumn( nameof(UserRecord.Department) )
+        table.WithColumn( nameof( UserRecord.Department ) )
              .AsString( 256 )
              .Nullable();
 
-        table.WithColumn( nameof(UserRecord.Company) )
+        table.WithColumn( nameof( UserRecord.Company ) )
              .AsString( 256 )
              .Nullable();
 
-        table.WithColumn( nameof(UserRecord.PreferredLanguage) )
+        table.WithColumn( nameof( UserRecord.PreferredLanguage ) )
              .AsInt32()
              .Nullable();
 
-        table.WithColumn( nameof(UserRecord.SubscriptionExpires) )
+        table.WithColumn( nameof( UserRecord.SubscriptionExpires ) )
              .AsDateTime2()
              .Nullable();
 
-        table.WithColumn( nameof(UserRecord.SubscriptionID) )
+        table.WithColumn( nameof( UserRecord.SubscriptionID ) )
              .AsInt64()
              .Nullable();
 
-        table.WithColumn( nameof(UserRecord.EscalateTo) )
+        table.WithColumn( nameof( UserRecord.EscalateTo ) )
              .AsInt64()
              .Nullable();
 
-        table.WithColumn( nameof(UserRecord.IsActive) )
+        table.WithColumn( nameof( UserRecord.IsActive ) )
              .AsBoolean()
              .NotNullable();
 
-        table.WithColumn( nameof(UserRecord.LastActive) )
+        table.WithColumn( nameof( UserRecord.LastActive ) )
              .AsDateTime2()
              .Nullable();
 
-        table.WithColumn( nameof(UserRecord.IsDisabled) )
+        table.WithColumn( nameof( UserRecord.IsDisabled ) )
              .AsBoolean()
              .NotNullable();
 
-        table.WithColumn( nameof(UserRecord.IsLocked) )
+        table.WithColumn( nameof( UserRecord.IsLocked ) )
              .AsBoolean()
              .NotNullable();
 
-        table.WithColumn( nameof(UserRecord.BadLogins) )
+        table.WithColumn( nameof( UserRecord.BadLogins ) )
              .AsInt64()
              .NotNullable();
 
-        table.WithColumn( nameof(UserRecord.LastBadAttempt) )
-             .AsDateTime2()
-             .Nullable();
-        
-        table.WithColumn( nameof(UserRecord.LockDate) )
+        table.WithColumn( nameof( UserRecord.LastBadAttempt ) )
              .AsDateTime2()
              .Nullable();
 
-        table.WithColumn( nameof(UserRecord.LockoutEnd) )
+        table.WithColumn( nameof( UserRecord.LockDate ) )
              .AsDateTime2()
              .Nullable();
 
-        table.WithColumn( nameof(UserRecord.RefreshToken) )
+        table.WithColumn( nameof( UserRecord.LockoutEnd ) )
+             .AsDateTime2()
+             .Nullable();
+
+        table.WithColumn( nameof( UserRecord.RefreshToken ) )
              .AsString( TokenValidationParameters.DefaultMaximumTokenSizeInBytes )
              .Nullable();
 
-        table.WithColumn( nameof(UserRecord.RefreshTokenExpiryTime) )
+        table.WithColumn( nameof( UserRecord.RefreshTokenExpiryTime ) )
              .AsDateTime2()
              .Nullable();
 
-        table.WithColumn( nameof(UserRecord.TokenExpiration) )
+        table.WithColumn( nameof( UserRecord.TokenExpiration ) )
              .AsDateTime2()
              .Nullable();
 
-        table.WithColumn( nameof(UserRecord.IsEmailConfirmed) )
+        table.WithColumn( nameof( UserRecord.IsEmailConfirmed ) )
              .AsBoolean()
              .NotNullable();
 
-        table.WithColumn( nameof(UserRecord.IsPhoneNumberConfirmed) )
+        table.WithColumn( nameof( UserRecord.IsPhoneNumberConfirmed ) )
              .AsBoolean()
              .NotNullable();
 
-        table.WithColumn( nameof(UserRecord.IsTwoFactorEnabled) )
+        table.WithColumn( nameof( UserRecord.IsTwoFactorEnabled ) )
              .AsBoolean()
              .NotNullable();
 
-        table.WithColumn( nameof(UserRecord.LoginProvider) )
+        table.WithColumn( nameof( UserRecord.LoginProvider ) )
              .AsString( int.MaxValue )
              .Nullable();
 
-        table.WithColumn( nameof(UserRecord.ProviderKey) )
+        table.WithColumn( nameof( UserRecord.ProviderKey ) )
              .AsString( int.MaxValue )
              .Nullable();
 
-        table.WithColumn( nameof(UserRecord.ProviderDisplayName) )
+        table.WithColumn( nameof( UserRecord.ProviderDisplayName ) )
              .AsString( int.MaxValue )
              .Nullable();
 
-        table.WithColumn( nameof(UserRecord.SecurityStamp) )
+        table.WithColumn( nameof( UserRecord.SecurityStamp ) )
              .AsString( int.MaxValue )
              .Nullable();
 
-        table.WithColumn( nameof(UserRecord.ConcurrencyStamp) )
+        table.WithColumn( nameof( UserRecord.ConcurrencyStamp ) )
              .AsString( int.MaxValue )
              .Nullable();
 
-        table.WithColumn( nameof(UserRecord.AdditionalData) )
+        table.WithColumn( nameof( UserRecord.AdditionalData ) )
              .AsString( int.MaxValue )
              .Nullable();
 
-        table.WithColumn( nameof(UserRecord.PasswordHash) )
+        table.WithColumn( nameof( UserRecord.PasswordHash ) )
              .AsString( int.MaxValue )
              .Nullable();
 
-        table.WithColumn( nameof(UserRecord.Rights) )
+        table.WithColumn( nameof( UserRecord.Rights ) )
              .AsInt64()
              .Nullable();
-        
-        table.WithColumn( nameof(UserRecord.RecoveryCodes) )
-             .AsString(10240)
+
+        table.WithColumn( nameof( UserRecord.RecoveryCodes ) )
+             .AsString( 10240 )
              .NotNullable();
 
-        table.WithColumn( nameof(UserRecord.DateCreated) )
+        table.WithColumn( nameof( UserRecord.DateCreated ) )
              .AsDateTime2()
              .NotNullable();
 
-        table.WithColumn( nameof(UserRecord.CreatedBy) )
+        table.WithColumn( nameof( UserRecord.CreatedBy ) )
              .AsInt64()
              .Nullable();
     }
