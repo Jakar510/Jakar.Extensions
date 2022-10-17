@@ -7,6 +7,7 @@ namespace Jakar.Database;
 [SuppressMessage( "ReSharper", "UnusedMethodReturnValue.Global" )]
 public static partial class DbExtensions
 {
+    public static WebApplicationBuilder AddDatabase<T>( this WebApplicationBuilder builder, DbInstance instance ) where T : Database => builder.AddDatabase<T>( configure => configure.DbType = instance );
     public static WebApplicationBuilder AddDatabase<T>( this WebApplicationBuilder builder, Action<DbOptions> configure ) where T : Database
     {
         builder.AddOptions( configure );
@@ -39,12 +40,7 @@ public static partial class DbExtensions
                                                                                                                        } ) ) );
 
 
-    public static IHealthChecksBuilder AddHealthCheck<T>( this WebApplicationBuilder builder ) where T : IHealthCheck =>
-        builder.AddHealthCheck( new HealthCheckRegistration( typeof(T).Name,
-                                                             provider => provider.GetRequiredService<T>(),
-                                                             HealthStatus.Degraded,
-                                                             typeof(T).GetCustomAttributes<HealthCheckTagAttribute>()
-                                                                      .Select( x => x.Name ) ) );
+    public static IHealthChecksBuilder AddHealthCheck<T>( this WebApplicationBuilder builder ) where T : IHealthCheck => builder.AddHealthCheck( WebBuilder.CreateHealthCheck<T>() );
     public static IHealthChecksBuilder AddHealthCheck( this WebApplicationBuilder builder, HealthCheckRegistration registration ) =>
         builder.Services.AddHealthChecks()
                .Add( registration );
