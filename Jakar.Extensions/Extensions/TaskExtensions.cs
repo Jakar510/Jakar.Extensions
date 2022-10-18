@@ -4,10 +4,7 @@ namespace Jakar.Extensions;
 
 public static class Tasks
 {
-    /// <summary>
-    ///     Creates a cancellable delay from the given
-    ///     <paramref name = "delay" />
-    /// </summary>
+    /// <summary> Creates a cancellable delay from the given <paramref name="delay"/> </summary>
     public static Task Delay( this TimeSpan delay, in CancellationToken token = default ) => Task.Delay( delay, token );
 
 
@@ -60,11 +57,53 @@ public static class Tasks
     public static void WaitAll( this                         IEnumerable<Task>          tasks, CancellationToken token = default ) => Task.WaitAll( tasks.ToArray(), token );
     public static int WaitAny( this                          IEnumerable<Task>          tasks, CancellationToken token = default ) => Task.WaitAny( tasks.ToArray(), token );
 
+    
+    /// <summary>
+    ///     <see href="https://stackoverflow.com/a/63141544/9530917"/>
+    /// </summary>
+    /// <exception cref="AggregateException"> </exception>
+    public static async ValueTask WhenAll( this IEnumerable<ValueTask> tasks, List<Exception>? exceptions = default )
+    {
+        foreach (ValueTask task in tasks)
+        {
+            try { await task.ConfigureAwait( false ); }
+            catch (Exception ex)
+            {
+                exceptions ??= new List<Exception>();
+                exceptions.Add( ex );
+            }
+        }
 
+        if (exceptions is not null) { throw new AggregateException( exceptions ); }
+    }
+    /// <summary>
+    ///     <see href="https://stackoverflow.com/a/63141544/9530917"/>
+    /// </summary>
+    /// <exception cref="AggregateException"> </exception>
+    public static async ValueTask<List<TResult>> WhenAll<TResult>( this IEnumerable<ValueTask<TResult>> tasks, List<Exception>? exceptions = default )
+    {
+        var results = new List<TResult>();
+
+        foreach (ValueTask<TResult> task in tasks)
+        {
+            try
+            {
+                TResult result = await task.ConfigureAwait( false );
+                results.Add( result );
+            }
+            catch (Exception ex)
+            {
+                exceptions ??= new List<Exception>();
+                exceptions.Add( ex );
+            }
+        }
+
+        return exceptions is null
+                   ? results
+                   : throw new AggregateException( exceptions );
+    }
     public static Task WhenAny( this                         IEnumerable<ValueTask>          tasks ) => Task.WhenAny( tasks.Select( x => x.AsTask() ) );
     public static Task<Task<TResult>> WhenAny<TResult>( this IEnumerable<ValueTask<TResult>> tasks ) => Task.WhenAny( tasks.Select( x => x.AsTask() ) );
-    public static Task WhenAll( this                         IEnumerable<ValueTask>          tasks ) => Task.WhenAll( tasks.Select( x => x.AsTask() ) );
-    public static Task<TResult[]> WhenAll<TResult>( this     IEnumerable<ValueTask<TResult>> tasks ) => Task.WhenAll( tasks.Select( x => x.AsTask() ) );
     public static void WaitAll( this IEnumerable<ValueTask> tasks, CancellationToken token = default ) => Task.WaitAll( tasks.Select( x => x.AsTask() )
                                                                                                                              .ToArray(),
                                                                                                                         token );

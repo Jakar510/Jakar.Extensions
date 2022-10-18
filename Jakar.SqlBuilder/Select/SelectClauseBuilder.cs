@@ -50,58 +50,33 @@ public struct SelectClauseBuilder<TNext>
     public AggregateFunctionsBuilder<SelectClauseBuilder<TNext>> WithFunction() => new(this, ref _builder);
 
 
-    /// <summary>
-    ///     Adds
-    ///     <param name = "columnName" > </param>
-    ///     to SELECT set
-    /// </summary>
-    /// <returns>
-    ///     <see cref = "SelectClauseBuilder" />
-    /// </returns>
+    /// <summary> Adds
+    ///     <param name="columnName"> </param>
+    ///     to SELECT set </summary>
     public SelectClauseBuilder<TNext> Next( string columnName )
     {
         _builder.Add( columnName );
         return this;
     }
     /// <summary>
-    ///     <para>
-    ///         Uses the
-    ///         <see cref = "Type" />
-    ///         of
-    ///         <typeparamref name = "T" />
-    ///         to get the table_name using
-    ///         <see cref = "DapperTableExtensions.GetTableName(Type)" />
-    ///     </para>
+    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="DapperTableExtensions.GetTableName(Type)"/> </para>
     ///     Adds table_name.
-    ///     <param name = "columnName" > </param>
+    ///     <param name="columnName"> </param>
     ///     to SELECT set
     /// </summary>
     /// <example> SELECT Orders.OrderID, Customers.CustomerName, Orders.OrderDate </example>
-    /// <returns>
-    ///     <see cref = "SelectClauseBuilder" />
-    /// </returns>
     public SelectClauseBuilder<TNext> Next<T>( string columnName )
     {
         _builder.Add( columnName.GetName<T>() );
         return this;
     }
     /// <summary>
-    ///     <para>
-    ///         Uses the
-    ///         <see cref = "Type" />
-    ///         of
-    ///         <typeparamref name = "T" />
-    ///         to get the table_name using
-    ///         <see cref = "DapperTableExtensions.GetTableName(Type)" />
-    ///     </para>
+    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="TNext"/> to get the table_name using <see cref="DapperTableExtensions.GetTableName(Type)"/> </para>
     ///     Adds table_name.
-    ///     <param name = "columnNames" > </param>
+    ///     <param name="columnNames"> </param>
     ///     to SELECT set
     /// </summary>
     /// <example> SELECT Orders.OrderID, Customers.CustomerName, Orders.OrderDate </example>
-    /// <returns>
-    ///     <see cref = "SelectClauseBuilder" />
-    /// </returns>
     public SelectClauseBuilder<TNext> Next( params string[] columnNames )
     {
         _builder.Begin()
@@ -122,16 +97,11 @@ public struct SelectClauseBuilder<TNext>
     }
 
 
-    /// <summary>
-    ///     Adds
-    ///     <param name = "columnNames" > </param>
+    /// <summary> Adds
+    ///     <param name="columnNames"> </param>
     ///     to SELECT set and setting it to the
-    ///     <param name = "alias" > </param>
-    ///     variable
-    /// </summary>
-    /// <returns>
-    ///     <see cref = "SelectClauseBuilder" />
-    /// </returns>
+    ///     <param name="alias"> </param>
+    ///     variable </summary>
     public SelectClauseBuilder<TNext> NextAs( string alias, params string[] columnNames )
     {
         _builder.Begin()
@@ -143,21 +113,11 @@ public struct SelectClauseBuilder<TNext>
     }
 
     /// <summary>
-    ///     <para>
-    ///         Uses the
-    ///         <see cref = "Type" />
-    ///         of
-    ///         <typeparamref name = "T" />
-    ///         to get the table_name using
-    ///         <see cref = "DapperTableExtensions.GetTableName(Type)" />
-    ///     </para>
+    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="DapperTableExtensions.GetTableName(Type)"/> </para>
     ///     Adds table_name.columnName to SELECT set and setting it to the
-    ///     <param name = "alias" > </param>
+    ///     <param name="alias"> </param>
     ///     variable
     /// </summary>
-    /// <returns>
-    ///     <see cref = "SelectClauseBuilder" />
-    /// </returns>
     public SelectClauseBuilder<TNext> NextAs<T>( string alias, params string[] columnNames )
     {
         _builder.Begin()

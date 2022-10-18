@@ -1,57 +1,63 @@
-﻿using System.Globalization;
-
-
-try
+﻿try
 {
     "Hello World!".WriteToConsole();
 
-    byte.MaxValue.ToString()
-        .Length.WriteToDebug();
+    using var source = new CancellationTokenSource( TimeSpan.FromSeconds( 15 ) );
+    var       time   = TimeSpan.FromSeconds( 5 );
 
-    sbyte.MaxValue.ToString()
-         .Length.WriteToDebug();
+    $"Start: {DateTime.Now}".WriteToConsole();
+    var task = new DelayValueTask( time, source.Token );
+    await task;
+    $"End: {DateTime.Now}".WriteToConsole();
 
-    short.MaxValue.ToString()
-         .Length.WriteToDebug();
 
-    ushort.MaxValue.ToString()
-          .Length.WriteToDebug();
-
-    int.MaxValue.ToString()
-       .Length.WriteToDebug();
-
-    uint.MaxValue.ToString()
-        .Length.WriteToDebug();
-
-    long.MaxValue.ToString()
-        .Length.WriteToDebug();
-
-    ulong.MaxValue.ToString()
-         .Length.WriteToDebug();
-
-    float.MaxValue.ToString( CultureInfo.InvariantCulture )
-         .Length.WriteToDebug();
-
-    double.MaxValue.ToString( CultureInfo.InvariantCulture )
-          .Length.WriteToDebug();
-
-    decimal.MaxValue.ToString( CultureInfo.InvariantCulture )
-           .Length.WriteToDebug();
-
-    TimeSpan.MaxValue.ToString()
-            .Length.WriteToDebug();
-
-    TimeSpan.MinValue.ToString()
-            .Length.WriteToDebug();
-
-    DateTime.Now.ToString( CultureInfo.InvariantCulture )
-            .Length.WriteToDebug();
-
-    DateTimeOffset.Now.ToString( CultureInfo.InvariantCulture )
-                  .Length.WriteToDebug();
-
-    new AppVersion(int.MaxValue, int.MaxValue, int.MaxValue, int.MaxValue, int.MaxValue, int.MaxValue).ToString()
-                                                                                                      .Length.WriteToDebug();
+    // byte.MaxValue.ToString()
+    //     .Length.WriteToDebug();
+    //
+    // sbyte.MaxValue.ToString()
+    //      .Length.WriteToDebug();
+    //
+    // short.MaxValue.ToString()
+    //      .Length.WriteToDebug();
+    //
+    // ushort.MaxValue.ToString()
+    //       .Length.WriteToDebug();
+    //
+    // int.MaxValue.ToString()
+    //    .Length.WriteToDebug();
+    //
+    // uint.MaxValue.ToString()
+    //     .Length.WriteToDebug();
+    //
+    // long.MaxValue.ToString()
+    //     .Length.WriteToDebug();
+    //
+    // ulong.MaxValue.ToString()
+    //      .Length.WriteToDebug();
+    //
+    // float.MaxValue.ToString( CultureInfo.InvariantCulture )
+    //      .Length.WriteToDebug();
+    //
+    // double.MaxValue.ToString( CultureInfo.InvariantCulture )
+    //       .Length.WriteToDebug();
+    //
+    // decimal.MaxValue.ToString( CultureInfo.InvariantCulture )
+    //        .Length.WriteToDebug();
+    //
+    // TimeSpan.MaxValue.ToString()
+    //         .Length.WriteToDebug();
+    //
+    // TimeSpan.MinValue.ToString()
+    //         .Length.WriteToDebug();
+    //
+    // DateTime.Now.ToString( CultureInfo.InvariantCulture )
+    //         .Length.WriteToDebug();
+    //
+    // DateTimeOffset.Now.ToString( CultureInfo.InvariantCulture )
+    //               .Length.WriteToDebug();
+    //
+    // new AppVersion(int.MaxValue, int.MaxValue, int.MaxValue, int.MaxValue, int.MaxValue, int.MaxValue).ToString()
+    //                                                                                                   .Length.WriteToDebug();
 
 
     // var builder = new ValueStringBuilder();

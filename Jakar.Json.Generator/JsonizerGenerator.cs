@@ -16,7 +16,7 @@ namespace Jakar.Json.Generator;
 
 /// <summary>
 ///     <para>
-///         <see cref = "https://github.com/dotnet/roslyn-sdk/blob/main/samples/CSharp/SourceGenerators/SourceGeneratorSamples/AutoNotifyGenerator.cs" />
+///         <see href = "https://github.com/dotnet/roslyn-sdk/blob/main/samples/CSharp/SourceGenerators/SourceGeneratorSamples/AutoNotifyGenerator.cs" />
 ///     </para>
 /// </summary>
 [Generator]
@@ -27,9 +27,10 @@ public class JsonizerGenerator : ISourceGenerator
     public const            string GENERATED  = $"[System.CodeDom.Compiler.GeneratedCode({nameof(JsonizerGenerator)})]";
     private static readonly string _attribute = typeof(JsonizerAttribute).FullName ?? throw new InvalidOperationException();
 
+
     private static string ChooseName( string fieldName, in TypedConstant overridenNameOpt )
     {
-        if (!overridenNameOpt.IsNull) { return overridenNameOpt.Value.ToString(); }
+        if (!overridenNameOpt.IsNull) { return overridenNameOpt.Value?.ToString() ?? throw new NullReferenceException( nameof(TypedConstant.Value) ); }
 
         fieldName = fieldName.TrimStart( '_' );
 
