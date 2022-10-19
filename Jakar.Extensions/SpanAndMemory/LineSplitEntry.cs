@@ -9,7 +9,7 @@ namespace Jakar.Extensions;
 /// </summary>
 public readonly ref struct LineSplitEntry<T> where T : IEquatable<T>
 {
-    public LineSplitEntry( ReadOnlySpan<T> line, ReadOnlySpan<T> separator )
+    public LineSplitEntry( in ReadOnlySpan<T> line, in ReadOnlySpan<T> separator )
     {
         Value     = line;
         Separator = separator;
@@ -17,6 +17,7 @@ public readonly ref struct LineSplitEntry<T> where T : IEquatable<T>
 
     public ReadOnlySpan<T> Value     { get; }
     public ReadOnlySpan<T> Separator { get; }
+
 
     // This method allow to deconstruct the type, so you can write any of the following code
     // foreach (var entry in str.SplitLines()) { _ = entry.Line; }

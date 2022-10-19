@@ -14,8 +14,6 @@ namespace Jakar.Extensions;
 public partial class WebRequester
 {
 // ReSharper disable once ClassWithMembersNeverInherited.Global
-    [SuppressMessage( "ReSharper", "MemberNeverOverridden.Global" )]
-    [SuppressMessage( "ReSharper", "ClassWithMembersNeverInherited.Global" )]
     public struct Builder
     {
         private Encoding                   _encoding                 = Encoding.Default;
@@ -31,6 +29,7 @@ public partial class WebRequester
         private int?                       _maxResponseHeadersLength = default;
         private int?                       _maxConnectionsPerServer  = default;
         private AuthenticationHeaderValue? _authenticationHeader     = default;
+        private RetryPolicy                _retryPolicy              = default;
 
 
     #if NETSTANDARD2_1
@@ -183,35 +182,53 @@ public partial class WebRequester
 
             return handler;
         }
-        public WebRequester Build() => new(GetClient(), _hostInfo ?? throw new InvalidOperationException( $"Must call {nameof(With_Host)}" ), _encoding);
+        public WebRequester Build() => new(GetClient(), _hostInfo ?? throw new InvalidOperationException( $"Must call {nameof(With_Host)}" ), _encoding, _retryPolicy);
 
 
 
         public readonly struct HostHolder : IHostInfo
         {
             public Uri HostInfo { get; }
-
-
             public HostHolder( Uri hostInfo ) => HostInfo = hostInfo;
         }
 
 
 
-        public Builder With_Host( Uri value )
-        {
-            _hostInfo = new HostHolder( value );
-            return this;
-        }
+        public Builder With_Host( Uri value ) => With_Host( new HostHolder( value ) );
         public Builder With_Host( IHostInfo value )
         {
             _hostInfo = value;
             return this;
         }
+
+
+        public Builder With_Retry() => With_Retry( _retryPolicy with
+                                                   {
+                                                       AllowRetries = true
+                                                   } );
+        public Builder With_Retry( in RetryPolicy policy )
+        {
+            _retryPolicy = policy;
+            return this;
+        }
+        public Builder With_Retry( int         maxRetires ) => With_Retry( _retryPolicy.Delay,  _retryPolicy.Scale, maxRetires );
+        public Builder With_Retry( in TimeSpan delay, in TimeSpan scale ) => With_Retry( delay, scale,              _retryPolicy.MaxRetires );
+        public Builder With_Retry( in TimeSpan delay, in TimeSpan scale, int maxRetires ) => With_Retry( _retryPolicy with
+                                                                                                         {
+                                                                                                             Delay = delay,
+                                                                                                             Scale = scale,
+                                                                                                             MaxRetires = Math.Max( maxRetires, 1 ),
+                                                                                                             AllowRetries = true
+                                                                                                         } );
+
+
         public Builder With_Encoding( Encoding value )
         {
             _encoding = value;
             return this;
         }
+
+
         public Builder With_Proxy( IWebProxy value )
         {
             _proxy    = value;

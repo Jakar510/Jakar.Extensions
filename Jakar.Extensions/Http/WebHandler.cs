@@ -1,6 +1,10 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 08/15/2022  11:36 AM
 
+using static Jakar.Extensions.WebRequester;
+
+
+
 namespace Jakar.Extensions;
 
 
@@ -21,17 +25,17 @@ public class WebHandler : IDisposable
     protected internal Encoding            Encoding       { get; }
     public             HttpContentHeaders? ContentHeaders => _request.Content?.Headers;
     public             HttpRequestHeaders  Headers        => _request.Headers;
+    public             string              Method         => _request.Method.Method;
+    protected internal RetryPolicy         RetryPolicy    { get; private set; }
 
 
-    public string Method => _request.Method.Method;
-
-
-    public WebHandler( HttpClient client, HttpRequestMessage request, Encoding encoding, CancellationToken token )
+    public WebHandler( HttpClient client, HttpRequestMessage request, Encoding encoding, in RetryPolicy retryPolicy, in CancellationToken token )
     {
-        _request = request;
-        _client  = client;
-        Encoding = encoding;
-        Token    = token;
+        _request    = request;
+        _client     = client;
+        Encoding    = encoding;
+        Token       = token;
+        RetryPolicy = retryPolicy;
     }
 
 
@@ -193,7 +197,11 @@ public class WebHandler : IDisposable
             response.EnsureSuccessStatusCode();
         }
     }
-    public virtual void Dispose() => _request.Dispose();
+    public virtual void Dispose()
+    {
+        _request.Dispose();
+        RetryPolicy = default;
+    }
 
 
 #if NET6_0

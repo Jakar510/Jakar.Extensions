@@ -19,11 +19,7 @@ public ref struct SpanEnumerator<T>
     private readonly ReadOnlySpan<T> _span;
     private          int             _index;
 
-    /// <summary>
-    ///     Gets the duck-typed
-    ///     <see cref = "IEnumerator{T}.Current" />
-    ///     property.
-    /// </summary>
+
     public readonly Item Current
     {
         [MethodImpl( MethodImplOptions.AggressiveInlining )] get => new(_span, _index);
@@ -48,35 +44,9 @@ public ref struct SpanEnumerator<T>
     }
 
 
-    /// <summary>
-    ///     Implements the duck-typed
-    ///     <see cref = "IEnumerable{T}.GetEnumerator" />
-    ///     method.
-    /// </summary>
-    /// <returns>
-    ///     An
-    ///     <see cref = "SpanEnumerator{T}" />
-    ///     instance targeting the current
-    ///     <see cref = "Span{T}" />
-    ///     value.
-    /// </returns>
-    [Pure]
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public readonly SpanEnumerator<T> GetEnumerator() => this;
+    [Pure] [MethodImpl( MethodImplOptions.AggressiveInlining )] public readonly SpanEnumerator<T> GetEnumerator() => this;
 
-    /// <summary>
-    ///     Implements the duck-typed
-    ///     <see cref = "System.Collections.IEnumerator.MoveNext" />
-    ///     method.
-    /// </summary>
-    /// <returns>
-    ///     <see langword = "true" />
-    ///     whether a new element is available,
-    ///     <see langword = "false" />
-    ///     otherwise
-    /// </returns>
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public bool MoveNext() => ++_index < _span.Length;
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public bool MoveNext() => ++_index < _span.Length;
 
 
 
@@ -88,50 +58,20 @@ public ref struct SpanEnumerator<T>
     [EditorBrowsable( EditorBrowsableState.Never )]
     public readonly ref struct Item
     {
-        /// <summary>
-        ///     The source
-        ///     <see cref = "Span{T}" />
-        ///     instance.
-        /// </summary>
         private readonly ReadOnlySpan<T> _span;
+        private readonly int             _index;
 
-        /// <summary>
-        ///     The current index within
-        ///     <see cref = "_span" />
-        ///     .
-        /// </summary>
-        private readonly int _index;
 
-        /// <summary>
-        ///     Gets the reference to the current value.
-        /// </summary>
         public ref T Value
         {
-            [MethodImpl( MethodImplOptions.AggressiveInlining )]
-            get
-            {
-                ref T r0 = ref MemoryMarshal.GetReference( _span );
-                ref T ri = ref Unsafe.Add( ref r0, (nint)(uint)_index );
-
-                return ref ri;
-            }
+            [MethodImpl( MethodImplOptions.AggressiveInlining )] get => ref Unsafe.Add( ref MemoryMarshal.GetReference( _span ), (nint)(uint)_index );
         }
 
-        /// <summary>
-        ///     Gets the current index.
-        /// </summary>
         public int Index
         {
-            [MethodImpl( MethodImplOptions.AggressiveInlining )]
-            get
-            {
-            #if SPAN_RUNTIME_SUPPORT
-                    return this.span.Length;
-            #else
-                return _index;
-            #endif
-            }
+            [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _index;
         }
+
 
         /// <summary>
         ///     Initializes a new instance of the
@@ -153,6 +93,13 @@ public ref struct SpanEnumerator<T>
         {
             _span  = span;
             _index = index;
+        }
+
+
+        public void Deconstruct( out T line, out int separator )
+        {
+            line      = Value;
+            separator = Index;
         }
     }
 }

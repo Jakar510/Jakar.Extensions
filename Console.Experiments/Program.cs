@@ -1,16 +1,7 @@
 ﻿try
 {
     "Hello World!".WriteToConsole();
-
-    using var source = new CancellationTokenSource( TimeSpan.FromSeconds( 15 ) );
-    var       time   = TimeSpan.FromSeconds( 5 );
-
-    $"Start: {DateTime.Now}".WriteToConsole();
-    var task = new DelayValueTask( time, source.Token );
-    await task;
-    $"End: {DateTime.Now}".WriteToConsole();
-
-
+    
     // byte.MaxValue.ToString()
     //     .Length.WriteToDebug();
     //

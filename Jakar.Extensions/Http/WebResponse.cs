@@ -1,6 +1,10 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 08/15/2022  11:51 AM
 
+using static Jakar.Extensions.WebRequester;
+
+
+
 namespace Jakar.Extensions;
 
 
@@ -75,7 +79,10 @@ public readonly struct WebResponse<T>
         using (handler)
         {
             using HttpResponseMessage response = await handler;
-            return await Create( response, func, handler.Token );
+
+            return handler.RetryPolicy.AllowRetries
+                       ? await Create( response, func, handler.RetryPolicy, handler.Token )
+                       : await Create( response, func, handler.Token );
         }
     }
     public static async ValueTask<WebResponse<T>> Create<TArg>( WebHandler handler, TArg arg, Func<HttpResponseMessage, TArg, ValueTask<T>> func )
@@ -83,7 +90,15 @@ public readonly struct WebResponse<T>
         using (handler)
         {
             using HttpResponseMessage response = await handler;
-            return await Create( response, arg, func, handler.Token );
+
+            try
+            {
+                if (!response.IsSuccessStatusCode) { return await Create( response, handler.Token ); }
+
+                T result = await func( response, arg );
+                return new WebResponse<T>( response, result );
+            }
+            catch (HttpRequestException e) { return await Create( response, e, handler.Token ); }
         }
     }
 
@@ -112,6 +127,41 @@ public readonly struct WebResponse<T>
     }
 
 
+    public static async ValueTask<WebResponse<T>> Create( HttpResponseMessage response, Func<HttpResponseMessage, ValueTask<T>> func, RetryPolicy policy, CancellationToken token )
+    {
+        try
+        {
+            if (!response.IsSuccessStatusCode) { return await Create( response, token ); }
+
+            T result = await func( response );
+            return new WebResponse<T>( response, result );
+        }
+        catch (HttpRequestException e) { return await Create( response, e, token ); }
+    }
+    public static async ValueTask<WebResponse<T>> Create<TArg>( HttpResponseMessage response, TArg arg, Func<HttpResponseMessage, TArg, ValueTask<T>> func, RetryPolicy policy, CancellationToken token )
+    {
+        int count      = 0;
+        var exceptions = new Exception[policy.MaxRetires];
+
+        while (count < policy.MaxRetires)
+        {
+            try
+            {
+                if (!response.IsSuccessStatusCode) { return await Create( response, token ); }
+
+                T result = await func( response, arg );
+                return new WebResponse<T>( response, result );
+            }
+            catch (HttpRequestException e) { exceptions[count] = e; }
+
+
+            await policy.Wait( ref count, token);
+        }
+
+        return await Create( response, new AggregateException( exceptions ), token );
+    }
+
+
     public static async ValueTask<WebResponse<T>> Create( HttpResponseMessage response, CancellationToken token )
     {
     #if NETSTANDARD2_1
@@ -136,8 +186,6 @@ public readonly struct WebResponse<T>
 
         return new WebResponse<T>( response, error );
     }
-
-
     public static async ValueTask<WebResponse<T>> Create( HttpResponseMessage response, Exception e, CancellationToken token )
     {
     #if NETSTANDARD2_1

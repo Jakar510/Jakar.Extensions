@@ -7,6 +7,7 @@ namespace Jakar.Extensions;
 [SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
 public partial class WebRequester : IDisposable
 {
+    private readonly RetryPolicy        _retryPolicy;
     private readonly HttpClient         _client;
     private readonly IHostInfo          _host;
     public           Encoding           Encoding              { get; init; } = Encoding.Default;
@@ -18,7 +19,11 @@ public partial class WebRequester : IDisposable
         _client = client;
         _host   = host;
     }
-    public WebRequester( HttpClient client, IHostInfo host, Encoding encoding ) : this( client, host ) => Encoding = encoding;
+    public WebRequester( HttpClient client, IHostInfo host, Encoding encoding, in RetryPolicy retryPolicy ) : this( client, host )
+    {
+        _retryPolicy = retryPolicy;
+        Encoding     = encoding;
+    }
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )] protected virtual WebHandler CreateHandler( Uri url, HttpMethod method, in CancellationToken token ) => CreateHandler( new HttpRequestMessage( method, url ), token );
@@ -28,7 +33,7 @@ public partial class WebRequester : IDisposable
                                                                                                                                                   Content = value
                                                                                                                                               },
                                                                                                                                               token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] protected virtual WebHandler CreateHandler( HttpRequestMessage request, in CancellationToken token ) => new(_client, request, Encoding, token);
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] protected virtual WebHandler CreateHandler( HttpRequestMessage request, in CancellationToken token ) => new(_client, request, Encoding, _retryPolicy, token);
     [MethodImpl( MethodImplOptions.AggressiveInlining )] protected virtual Uri CreateUrl( string                        relativePath ) => new(_host.HostInfo, relativePath);
     [MethodImpl( MethodImplOptions.AggressiveInlining )] protected virtual Uri CreateUrl( Uri                           relativePath ) => new(_host.HostInfo, relativePath);
 
@@ -93,5 +98,9 @@ public partial class WebRequester : IDisposable
     public WebHandler Put( string relativePath, IEnumerable<BaseClass>      value,   in CancellationToken token ) => Put( relativePath,              new JsonContent( value.ToPrettyJson(), Encoding ),   token );
     public WebHandler Put( string relativePath, BaseRecord                  value,   in CancellationToken token ) => Put( relativePath,              new JsonContent( value.ToPrettyJson(), Encoding ),   token );
     public WebHandler Put( string relativePath, IEnumerable<BaseRecord>     value,   in CancellationToken token ) => Put( relativePath,              new JsonContent( value.ToPrettyJson(), Encoding ),   token );
-    public void Dispose() => _client.Dispose();
+    public void Dispose()
+    {
+        _client.Dispose();
+        GC.SuppressFinalize( this );
+    }
 }

@@ -79,3 +79,14 @@ csharp_style_var_when_type_is_apparent = true:silent
 csharp_style_var_elsewhere = false:silent
 csharp_space_between_method_call_parameter_list_parentheses = true
 csharp_space_between_parentheses = false
+
+# ReSharper properties
+resharper_space_within_catch_parentheses = true
+resharper_space_within_fixed_parentheses = false
+resharper_space_within_foreach_parentheses = true
+resharper_space_within_for_parentheses = true
+resharper_space_within_if_parentheses = true
+resharper_space_within_lock_parentheses = false
+resharper_space_within_switch_parentheses = true
+resharper_space_within_using_parentheses = true
+resharper_space_within_while_parentheses = true
