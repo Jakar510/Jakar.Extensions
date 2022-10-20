@@ -13,26 +13,31 @@ namespace Jakar.Extensions;
 ///         <see href = "https://www.meziantou.net/split-a-string-into-lines-without-allocation.htm" />
 ///     </para>
 /// </summary>
-public ref struct SpanSplitEnumerator<T> where T : IEquatable<T>
+public ref struct SpanSplitEnumerator<T> where T : unmanaged, IEquatable<T>
 {
+    private readonly ParamsArray<T>  _separators;
     private readonly ReadOnlySpan<T> _originalString;
     private          ReadOnlySpan<T> _span;
-    private readonly T[]             _separators;
 
-    public SpanSplitEnumerator( ReadOnlySpan<T> span, params T[] separators )
+
+    public LineSplitEntry<T> Current { get; private set; }
+
+
+    public SpanSplitEnumerator( in ReadOnlySpan<T> span, in ParamsArray<T> separators )
     {
-        if ( separators.IsEmpty() ) { throw new ArgumentException( $"{nameof(separators)} cannot be empty" ); }
+        if ( separators.IsEmpty ) { throw new ArgumentException( $"{nameof(separators)} cannot be empty" ); }
 
         _originalString = span;
         _span           = span;
         _separators     = separators;
         Current         = default;
     }
+    public override string ToString() => $"{nameof(LineSplitEntry<T>)}({nameof(Current)}: {Current.ToString()}, {nameof(_originalString)}: '{_originalString.ToString()}')";
 
 
     public SpanSplitEnumerator<T> GetEnumerator() => this;
-
     public void Reset() => _span = _originalString;
+
 
     public bool MoveNext()
     {
@@ -45,10 +50,11 @@ public ref struct SpanSplitEnumerator<T> where T : IEquatable<T>
 
         if ( index == -1 ) // The string doesn't contain the separators
         {
-            _span   = ReadOnlySpan<T>.Empty; // The remaining string is an empty string
-            Current = new LineSplitEntry<T>( span, ReadOnlySpan<T>.Empty );
+            _span   = default; // The remaining string is an empty string
+            Current = new LineSplitEntry<T>( span, default );
             return true;
         }
+
 
         for ( int i = 0; i < _separators.Length; i++ )
         {
@@ -71,10 +77,9 @@ public ref struct SpanSplitEnumerator<T> where T : IEquatable<T>
             }
         }
 
+
         Current = new LineSplitEntry<T>( span[..index], span.Slice( index, 1 ) );
         _span   = span[(index + 1)..];
         return true;
     }
-
-    public LineSplitEntry<T> Current { get; private set; }
 }

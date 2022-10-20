@@ -12,6 +12,7 @@ using NUnit.Framework;
 namespace Jakar.Extensions.Tests.Http;
 
 
+[Obsolete]
 [TestFixture]
 public sealed class ErrorTests : UrlTests
 {
@@ -19,7 +20,7 @@ public sealed class ErrorTests : UrlTests
     [TestCase( "http://httpstat.us/400" )]
     public void Request( string url )
     {
-        async Task TryRequest() { await RequestError( new Uri( url ), _Token ); }
+        async Task TryRequest() => await RequestError( new Uri( url ), _Token );
 
         ThrowsAsync<ProtocolErrorException>( TryRequest );
     }

@@ -130,7 +130,7 @@ public class AppVersion_Tests : Assert
             AreEqual( version, result );
         }
 
-        if (shouldPass) { DoesNotThrow( Action ); }
+        if ( shouldPass ) { DoesNotThrow( Action ); }
         else { Throws<InvalidOperationException>( Action ); }
     }
 
@@ -150,7 +150,7 @@ public class AppVersion_Tests : Assert
     [TestCase( "0.7.0.25" )]
     public void TryParse( string s, bool shouldWork = true )
     {
-        if (AppVersion.TryParse( s, out AppVersion? version ))
+        if ( AppVersion.TryParse( s, out AppVersion? version ) )
         {
             NotNull( version );
             return;
@@ -176,7 +176,7 @@ public class AppVersion_Tests : Assert
 
     private static void TryParse_Span( in ReadOnlySpan<char> s, bool shouldWork )
     {
-        if (AppVersion.TryParse( s, out AppVersion? version ))
+        if ( AppVersion.TryParse( s, out AppVersion? version ) )
         {
             NotNull( version );
             return;
@@ -216,7 +216,7 @@ public class AppVersion_Tests : Assert
     [TestCase( "1.0.0...0.0.0", false )]
     public void ToString( string s, bool shouldWork = true )
     {
-        if (AppVersion.TryParse( s, out AppVersion? version ))
+        if ( AppVersion.TryParse( s, out AppVersion? version ) )
         {
             AreEqual( s, version.ToString() );
             return;
@@ -238,11 +238,11 @@ public class AppVersion_Tests : Assert
     [TestCase( "1.2.3..4.5.6.7", null )]
     public void Format( string s, AppVersion.Format? expectedFormat )
     {
-        if (AppVersion.TryParse( s, out AppVersion? version ))
+        if ( AppVersion.TryParse( s, out AppVersion? version ) )
         {
             NotNull( version );
             NotNull( expectedFormat );
-            if (expectedFormat is null) { throw new NullReferenceException( s ); }
+            if ( expectedFormat is null ) { throw new NullReferenceException( s ); }
 
             AppVersion.Format format = expectedFormat.Value;
             AreEqual( format, version.Value.Scheme );
@@ -268,7 +268,7 @@ public class AppVersion_Tests : Assert
 
     private static void Compare_Test_GreaterEqual( string s, in AppVersion other, in bool expected )
     {
-        if (AppVersion.TryParse( s, out AppVersion? version ))
+        if ( AppVersion.TryParse( s, out AppVersion? version ) )
         {
             NotNull( version );
 
@@ -295,7 +295,7 @@ public class AppVersion_Tests : Assert
 
     private static void Compare_Test_Greater( string s, in AppVersion other, in bool expected )
     {
-        if (AppVersion.TryParse( s, out AppVersion? version ))
+        if ( AppVersion.TryParse( s, out AppVersion? version ) )
         {
             NotNull( version );
 
@@ -322,7 +322,7 @@ public class AppVersion_Tests : Assert
 
     private static void Compare_Test_Less( string s, in AppVersion other, in bool expected )
     {
-        if (AppVersion.TryParse( s, out AppVersion? version ))
+        if ( AppVersion.TryParse( s, out AppVersion? version ) )
         {
             NotNull( version );
 
@@ -349,7 +349,7 @@ public class AppVersion_Tests : Assert
 
     private static void Compare_Test_LessEqual( string s, AppVersion other, bool expected )
     {
-        if (AppVersion.TryParse( s, out AppVersion? version ))
+        if ( AppVersion.TryParse( s, out AppVersion? version ) )
         {
             NotNull( version );
 

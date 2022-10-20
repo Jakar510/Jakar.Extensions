@@ -35,42 +35,27 @@ public static class StringExtensions
 
 
     /// <summary>
-    ///     <seealso href = "https://www.codeproject.com/Tips/1175562/Check-for-Balanced-Parenthesis-in-a-String" />
+    ///     <seealso href="https://www.codeproject.com/Tips/1175562/Check-for-Balanced-Parenthesis-in-a-String"/>
     ///     <para>
-    ///         <paramref name = "bracketPairs" />
-    ///         defaults to matching:
-    ///         <br />
-    ///         <list type = "bullet" >
+    ///         <paramref name="bracketPairs"/> defaults to matching: <br/>
+    ///         <list type="bullet">
     ///             <item>
-    ///                 <term> ( ) </term>
-    ///                 <description> Parenthesis </description>
+    ///                 <term> ( ) </term> <description> Parenthesis </description>
     ///             </item>
     /// 
     ///             <item>
-    ///                 <term> [ ] </term>
-    ///                 <description> Square Brackets </description>
+    ///                 <term> [ ] </term> <description> Square Brackets </description>
     ///             </item>
     /// 
     ///             <item>
-    ///                 <term> { } </term>
-    ///                 <description> Curly Braces </description>
+    ///                 <term> { } </term> <description> Curly Braces </description>
     ///             </item>
     /// 
     ///         </list>
     ///     </para>
-    ///     <para>
-    ///         Provide your own
-    ///         <c> IDictionary{char, char} </c>
-    ///         to
-    ///         <paramref name = "bracketPairs" />
-    ///         to customize the mapping.
-    ///     </para>
+    ///     <para> Provide your own <c> IDictionary{char, char} </c> to <paramref name="bracketPairs"/> to customize the mapping. </para>
     /// </summary>
-    /// <returns>
-    ///     <see langword = "true" />
-    ///     if balanced; otherwise
-    ///     <see langword = "false" />
-    /// </returns>
+    /// <returns> <see langword="true"/> if balanced; otherwise <see langword="false"/> </returns>
     public static bool IsBalanced( this string input, IReadOnlyDictionary<char, char>? bracketPairs = default ) // TODO: ReadOnlySpan<char>
     {
         bracketPairs ??= new Dictionary<char, char>
@@ -85,18 +70,18 @@ public static class StringExtensions
         try
         {
             // Iterate through each character in the input string
-            foreach (char c in input)
+            foreach ( char c in input )
             {
                 // check if the character is one of the 'opening' brackets
-                if (bracketPairs.Keys.Contains( c ))
+                if ( bracketPairs.Keys.Contains( c ) )
                 {
                     // if yes, push to stack
                     brackets.Push( c );
                 }
-                else if (bracketPairs.Values.Contains( c )) // check if the character is one of the 'closing' brackets
+                else if ( bracketPairs.Values.Contains( c ) ) // check if the character is one of the 'closing' brackets
                 {
                     // check if the closing bracket matches the 'latest' 'opening' bracket
-                    if (c == bracketPairs[brackets.First()]) { brackets.Pop(); }
+                    if ( c == bracketPairs[brackets.First()] ) { brackets.Pop(); }
                     else { return false; } // if not, its an unbalanced string
                 }
 
@@ -119,22 +104,22 @@ public static class StringExtensions
 
 
     /// <summary>
-    ///     <seealso href = "https://stackoverflow.com/a/48832421/9530917" />
+    ///     <seealso href="https://stackoverflow.com/a/48832421/9530917"/>
     /// </summary>
-    /// <param name = "c" > </param>
-    /// <param name = "count" > </param>
+    /// <param name="c"> </param>
+    /// <param name="count"> </param>
     /// <returns>
-    ///     <see cref = "string" />
+    ///     <see cref="string"/>
     /// </returns>
     public static string Repeat( this char c, int count ) => new(c, count);
 
     /// <summary>
-    ///     <seealso href = "https://stackoverflow.com/a/720915/9530917" />
+    ///     <seealso href="https://stackoverflow.com/a/720915/9530917"/>
     /// </summary>
-    /// <param name = "value" > </param>
-    /// <param name = "count" > </param>
+    /// <param name="value"> </param>
+    /// <param name="count"> </param>
     /// <returns>
-    ///     <see cref = "string" />
+    ///     <see cref="string"/>
     /// </returns>
     public static string Repeat( this string value, int count ) => new StringBuilder( value.Length * count ).Insert( 0, value, count )
                                                                                                             .ToString();
@@ -155,66 +140,39 @@ public static class StringExtensions
 
     /// <summary>
     ///     <para>
-    ///         <see href = "https://www.meziantou.net/split-a-string-into-lines-without-allocation.htm" />
+    ///         <see href="https://www.meziantou.net/split-a-string-into-lines-without-allocation.htm"/>
     ///     </para>
     /// </summary>
-    /// <param name = "str" > </param>
-    /// <param name = "separator" >
-    ///     the
-    ///     <see cref = "char" />
-    ///     to split on
-    /// </param>
-    /// <returns>
-    ///     <see cref = "SpanSplitEnumerator{T}" />
-    /// </returns>
+    /// <param name="str"> </param>
+    /// <param name="separator"> the <see cref="char"/> to split on </param>
     public static SpanSplitEnumerator<char> SplitOn( this string str, char separator ) => str.AsSpan()
                                                                                              .SplitOn( separator );
 
     /// <summary>
     ///     <para>
-    ///         <see href = "https://www.meziantou.net/split-a-string-into-lines-without-allocation.htm" />
+    ///         <see href="https://www.meziantou.net/split-a-string-into-lines-without-allocation.htm"/>
     ///     </para>
-    ///     Default chars
-    ///     <see cref = "char" />
-    ///     to '\n' and '\r'
+    ///     Default chars <see cref="char"/> to '\n' and '\r'
     /// </summary>
-    /// <param name = "str" > </param>
-    /// <returns>
-    ///     <see cref = "SpanSplitEnumerator{T}" />
-    /// </returns>
+    /// <param name="str"> </param>
     public static SpanSplitEnumerator<char> SplitOn( this string str ) => str.AsSpan()
                                                                              .SplitOn();
 
 
     /// <summary>
     ///     <para>
-    ///         <see href = "https://www.meziantou.net/split-a-string-into-lines-without-allocation.htm" />
+    ///         <see href="https://www.meziantou.net/split-a-string-into-lines-without-allocation.htm"/>
     ///     </para>
+    ///     Default chars <see cref="char"/> to '\n' and '\r'
     /// </summary>
-    /// <param name = "span" > </param>
-    /// <param name = "separator" >
-    ///     the
-    ///     <see cref = "char" />
-    ///     to split on
-    /// </param>
-    /// <returns>
-    ///     <see cref = "SpanSplitEnumerator{T}" />
-    /// </returns>
-    public static SpanSplitEnumerator<T> SplitOn<T>( this ReadOnlySpan<T> span, T separator ) where T : IEquatable<T> => new(span, separator);
+    /// <param name="span"> </param>
+    public static SpanSplitEnumerator<char> SplitOn( this ReadOnlySpan<char> span ) => new(span, new ParamsArray<char>( '\n', '\r' ));
 
-    /// <summary>
-    ///     <para>
-    ///         <see href = "https://www.meziantou.net/split-a-string-into-lines-without-allocation.htm" />
-    ///     </para>
-    ///     Default chars
-    ///     <see cref = "char" />
-    ///     to '\n' and '\r'
-    /// </summary>
-    /// <param name = "span" > </param>
-    /// <returns>
-    ///     <see cref = "SpanSplitEnumerator{T}" />
-    /// </returns>
-    public static SpanSplitEnumerator<char> SplitOn( this ReadOnlySpan<char> span ) => new(span, '\n', '\r');
+
+    public static SpanSplitEnumerator<T> SplitOn<T>( this ReadOnlySpan<T> span, params T[]        separators ) where T : unmanaged, IEquatable<T> => new(span, ParamsArray<T>.Create( separators ));
+    public static SpanSplitEnumerator<T> SplitOn<T>( this ReadOnlySpan<T> span, T                 separator ) where T : unmanaged, IEquatable<T> => new(span, separator);
+    public static SpanSplitEnumerator<T> SplitOn<T>( this Span<T>         span, in ParamsArray<T> array ) where T : unmanaged, IEquatable<T> => new(span, array);
+    public static SpanSplitEnumerator<T> SplitOn<T>( this ReadOnlySpan<T> span, in ParamsArray<T> array ) where T : unmanaged, IEquatable<T> => new(span, array);
 
 
     public static byte[] ToByteArray( this string s, Encoding? encoding = default ) => (encoding ?? Encoding.Default).GetBytes( s );
@@ -232,31 +190,28 @@ public static class StringExtensions
         fixed (char* token = value)
         {
             var secure = new SecureString( token, value.Length );
-            if (makeReadonly) { secure.MakeReadOnly(); }
+            if ( makeReadonly ) { secure.MakeReadOnly(); }
 
             return secure;
         }
     }
 
 
-    /// <summary>
-    ///     copied from
-    ///     <seealso href = "https://stackoverflow.com/a/67332992/9530917" />
-    /// </summary>
-    /// <param name = "text" > </param>
+    /// <summary> copied from <seealso href="https://stackoverflow.com/a/67332992/9530917"/> </summary>
+    /// <param name="text"> </param>
     /// <returns> </returns>
     public static string ToSnakeCase( this string text )
     {
-        if (string.IsNullOrEmpty( text )) { return text; }
+        if ( string.IsNullOrEmpty( text ) ) { return text; }
 
         var builder          = new StringBuilder( text.Length + Math.Min( 2, text.Length / 5 ) );
         var previousCategory = default(UnicodeCategory?);
 
-        for (int currentIndex = 0; currentIndex < text.Length; currentIndex++)
+        for ( int currentIndex = 0; currentIndex < text.Length; currentIndex++ )
         {
             char currentChar = text[currentIndex];
 
-            switch (currentChar)
+            switch ( currentChar )
             {
                 case '_':
                     builder.Append( '_' );
@@ -272,23 +227,23 @@ public static class StringExtensions
             UnicodeCategory currentCategory = char.GetUnicodeCategory( currentChar );
 
             // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
-            switch (currentCategory)
+            switch ( currentCategory )
             {
                 case UnicodeCategory.UppercaseLetter:
                 case UnicodeCategory.TitlecaseLetter:
-                    if (previousCategory is UnicodeCategory.SpaceSeparator or UnicodeCategory.LowercaseLetter ||
-                        previousCategory != UnicodeCategory.DecimalDigitNumber && previousCategory != null && currentIndex > 0 && currentIndex + 1 < text.Length && char.IsLower( text[currentIndex + 1] )) { builder.Append( '_' ); }
+                    if ( previousCategory is UnicodeCategory.SpaceSeparator or UnicodeCategory.LowercaseLetter ||
+                         previousCategory != UnicodeCategory.DecimalDigitNumber && previousCategory != null && currentIndex > 0 && currentIndex + 1 < text.Length && char.IsLower( text[currentIndex + 1] ) ) { builder.Append( '_' ); }
 
                     currentChar = char.ToLower( currentChar, CultureInfo.InvariantCulture );
                     break;
 
                 case UnicodeCategory.LowercaseLetter:
-                    if (previousCategory == UnicodeCategory.SpaceSeparator) { builder.Append( '_' ); }
+                    if ( previousCategory == UnicodeCategory.SpaceSeparator ) { builder.Append( '_' ); }
 
                     break;
 
                 default:
-                    if (previousCategory != null) { previousCategory = UnicodeCategory.SpaceSeparator; }
+                    if ( previousCategory != null ) { previousCategory = UnicodeCategory.SpaceSeparator; }
 
                     continue;
             }
@@ -301,16 +256,10 @@ public static class StringExtensions
     }
 
 
-    /// <summary>
-    ///     Wraps a string in
-    ///     <paramref name = "c" > </paramref>
-    ///     repeated
-    ///     <paramref name = "padding" > </paramref>
-    ///     times.
-    /// </summary>
-    /// <param name = "self" > </param>
-    /// <param name = "c" > </param>
-    /// <param name = "padding" > </param>
+    /// <summary> Wraps a string in <paramref name="c"> </paramref> repeated <paramref name="padding"> </paramref> times. </summary>
+    /// <param name="self"> </param>
+    /// <param name="c"> </param>
+    /// <param name="padding"> </param>
     /// <returns> </returns>
     public static string Wrapper( this string self, in char c, in int padding ) => self.PadLeft( padding, c )
                                                                                        .PadRight( padding, c );

@@ -6,9 +6,7 @@ using System.Net.Mail;
 namespace Jakar.Extensions;
 
 
-/// <summary>
-///     Validator Extensions
-/// </summary>
+/// <summary> Validator Extensions </summary>
 public static partial class Validate
 {
     private static volatile string _demo = "DEMO";
@@ -28,14 +26,14 @@ public static partial class Validate
     public static bool IsDemo( this string value ) => value.IsDemo( CultureInfo.CurrentCulture );
     public static bool IsDemo( this string value, in CultureInfo info )
     {
-        if (string.IsNullOrWhiteSpace( value )) { return false; }
+        if ( string.IsNullOrWhiteSpace( value ) ) { return false; }
 
         return value == _demo || value.ToLower( info ) == "demo";
     }
     public static bool IsDemo( this ReadOnlySpan<char> value ) => value.IsDemo( CultureInfo.CurrentCulture );
     public static bool IsDemo( this ReadOnlySpan<char> value, in CultureInfo info )
     {
-        if (value.IsEmpty) { return false; }
+        if ( value.IsEmpty ) { return false; }
 
         var temp = new Span<char>();
         value.ToLower( temp, info );
@@ -59,18 +57,18 @@ public static partial class Validate
     public static bool IsIPv4( this ReadOnlySpan<char> value )
     {
         value = value.Trim();
-        if (value.IsEmpty) { return false; }
+        if ( value.IsEmpty ) { return false; }
 
 
-        foreach ((ReadOnlySpan<char> line, ReadOnlySpan<char> _) in value.SplitOn( '.' ))
+        foreach ( (ReadOnlySpan<char> line, ReadOnlySpan<char> _) in value.SplitOn( '.' ) )
         {
-            if (!line.IsInteger()) { return false; }
+            if ( !line.IsInteger() ) { return false; }
         }
 
         return ParseIPv4( value ) != null;
     }
 
-    private static bool IsValidEmail( this string value ) => Re.Email.IsMatch( value ) && ParseEmail( value ) is not null;
+    private static bool IsValidEmail( this string value ) => Re.Email.IsMatch( value );
 
 
     public static bool IsValidPort( this string             value ) => int.TryParse( value, out int n ) && n.IsValidPort();
@@ -78,19 +76,21 @@ public static partial class Validate
     public static bool IsValidPort( this int                value ) => value is > 0 and <= IPEndPoint.MaxPort;
 
 
-    public static bool IsWebAddress( this string value )
+    public static bool IsWebAddress( this string value, UriKind kind = UriKind.Absolute )
     {
-        if (string.IsNullOrWhiteSpace( value )) { return false; }
+        if ( string.IsNullOrWhiteSpace( value ) ) { return false; }
 
-        Uri? uriResult = ParseWebAddress( value );
-        return uriResult != null && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
+        Uri? uriResult = ParseWebAddress( value, kind );
+        return uriResult != null && uriResult.IsWellFormedOriginalString() && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
     }
+
 
     public static MailAddress? ParseEmail( this string value )
     {
         try { return new MailAddress( value ); }
-        catch (FormatException) { return null; }
+        catch ( FormatException ) { return null; }
     }
+
 
     public static IPAddress? ParseIPv4( this string? value ) => value?.AsSpan()
                                                                       .ParseIPv4();
@@ -98,27 +98,46 @@ public static partial class Validate
                                                                                ? address
                                                                                : default;
 
-    public static Uri? ParseWebAddress( this string value ) => Uri.TryCreate( value, UriKind.Absolute, out Uri? uriResult )
-                                                                   ? uriResult
-                                                                   : default;
+
+    public static Uri? ParseWebAddress( this string value, UriKind kind = UriKind.Absolute ) => Uri.TryCreate( value, kind, out Uri? uriResult )
+                                                                                                    ? uriResult
+                                                                                                    : default;
+
 
     public static string SetDemo( string value )
     {
-        if (value is null) { throw new ArgumentNullException( nameof(value) ); }
+        if ( value is null ) { throw new ArgumentNullException( nameof(value) ); }
 
         return Interlocked.Exchange( ref _demo, value );
     }
 
 
-    public static T ThrowIfNull<T>( T? value, string name, [CallerMemberName] string? caller = default ) =>
-        value ?? throw new ArgumentNullException( name, caller ); // TODO: CallerArgumentExpression : https://stackoverflow.com/questions/70034586/how-can-i-use-callerargumentexpression-with-visual-studio-2022-and-net-standard
-    public static string ThrowIfNull( string? value, string name, [CallerMemberName] string? caller = default ) => string.IsNullOrWhiteSpace( value )
-                                                                                                                       ? throw new ArgumentNullException( name, caller )
-                                                                                                                       : value;
+    // https://stackoverflow.com/questions/70034586/how-can-i-use-callerargumentexpression-with-visual-studio-2022-and-net-standard
 
+// #if NETSTANDARD2_1
+//     public static T ThrowIfNull<T>( T? value, string name, [CallerMemberName] string? caller = default ) =>
+//         value ?? throw new ArgumentNullException( name, caller ); 
+//     public static string ThrowIfNull( string? value, string name, [CallerMemberName] string? caller = default ) => string.IsNullOrWhiteSpace( value )
+//                                                                                                                        ? throw new ArgumentNullException( name, caller )
+//                                                                                                                        : value;
+//
+// #else
+//     public static T ThrowIfNull<T>( T? value, [CallerArgumentExpression( "value" )] string? name = default, [CallerMemberName] string? caller = default ) =>
+//         value ?? throw new ArgumentNullException( name, caller );
+//     public static string ThrowIfNull( string? value, [CallerArgumentExpression( "value" )] string? name = default, [CallerMemberName] string? caller = default ) => string.IsNullOrWhiteSpace( value )
+//                                                                                                                                                                         ? throw new ArgumentNullException( name, caller )
+//                                                                                                                                                                         : value;
+// #endif
+    
+
+    public static T ThrowIfNull<T>( T? value, [CallerArgumentExpression( "value" )] string? name = default, [CallerMemberName] string? caller = default ) =>
+        value ?? throw new ArgumentNullException( name, caller );
+    public static string ThrowIfNull( string? value, [CallerArgumentExpression( "value" )] string? name = default, [CallerMemberName] string? caller = default ) => string.IsNullOrWhiteSpace( value )
+                                                                                                                                                                        ? throw new ArgumentNullException( name, caller )
+                                                                                                                                                                        : value;
     public static bool ValidateEmail( this string value )
     {
-        if (string.IsNullOrWhiteSpace( value )) { return false; }
+        if ( string.IsNullOrWhiteSpace( value ) ) { return false; }
 
         return value.Contains( '@' ) && value.Contains( '.' ) && !value.Contains( ',' ) && !value.Contains( '~' );
     }

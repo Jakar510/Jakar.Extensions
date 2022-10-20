@@ -10,7 +10,7 @@ using NUnit.Framework;
 
 namespace Jakar.Extensions.Tests.Http;
 
-
+[Obsolete]
 [TestFixture]
 [SuppressMessage( "ReSharper", "SuggestVarOrType_SimpleTypes" )]
 [SuppressMessage( "ReSharper", "SuggestVarOrType_BuiltInTypes" )]

@@ -2,6 +2,10 @@
 // 06/09/2022  3:00 PM
 
 #nullable enable
+using System;
+
+
+
 namespace Jakar.Extensions;
 
 
@@ -106,61 +110,61 @@ public readonly ref struct ParamsArray
 /// <summary>
 ///     <para> Based on System.ParamsArray </para>
 /// </summary>
-public readonly ref struct ParamsArray<T>
+public readonly ref struct ParamsArray<T> where T : unmanaged
 {
-    // Sentinel fixed-length arrays eliminate the need for a "count" field keeping this
-    // struct down to just 4 fields. These are only used for their "Length" property,
-    // that is, their elements are never set or referenced.
-    private static readonly T?[] _oneArgArray   = new T?[1];
-    private static readonly T?[] _twoArgArray   = new T?[2];
-    private static readonly T?[] _threeArgArray = new T?[3];
+    private readonly T               _arg0 = default;
+    private readonly T               _arg1 = default;
+    private readonly T               _arg2 = default;
+    private readonly ReadOnlySpan<T> _args; // After construction, the first three elements of this array will never be accessed because the indexer will retrieve those values from arg0, arg1, and arg2.
 
-    private readonly T? _arg0;
-    private readonly T? _arg1;
-    private readonly T? _arg2;
-
-    // After construction, the first three elements of this array will never be accessed because the indexer will retrieve those values from arg0, arg1, and arg2.
-    private readonly ReadOnlySpan<T?> _args;
-
-    public int Length => _args.Length;
-
-    public T? this[ int index ] => index switch
-                                   {
-                                       0 => _arg0,
-                                       1 => _arg1,
-                                       2 => _arg2,
-                                       _ => _args[index]
-                                   };
+    public int  Length     => _args.Length;
+    public bool IsEmpty    => _args.IsEmpty;
+    public bool IsNotEmpty => !_args.IsEmpty;
 
 
-    public ParamsArray( T? arg0 )
+    public T this[ int index ] => index switch
+                                  {
+                                      0 => _arg0,
+                                      1 => _arg1,
+                                      2 => _arg2,
+                                      _ => _args[index]
+                                  };
+
+
+    public ParamsArray( T arg0 )
     {
         _arg0 = arg0;
         _arg1 = default;
         _arg2 = default;
 
-        // Always assign this.args to make use of its "Length" property
-        _args = _oneArgArray;
+        Span<T> separators = stackalloc T[1];
+        separators[0] = arg0;
+        _args         = MemoryMarshal.CreateReadOnlySpan( ref separators.GetPinnableReference(), separators.Length );
     }
-    public ParamsArray( T? arg0, T? arg1 )
+    public ParamsArray( T arg0, T arg1 )
     {
         _arg0 = arg0;
         _arg1 = arg1;
         _arg2 = default;
 
-        // Always assign this.args to make use of its "Length" property
-        _args = _twoArgArray;
+        Span<T> separators = stackalloc T[2];
+        separators[0] = arg0;
+        separators[1] = arg1;
+        _args         = MemoryMarshal.CreateReadOnlySpan( ref separators.GetPinnableReference(), separators.Length );
     }
-    public ParamsArray( T? arg0, T? arg1, T? arg2 )
+    public ParamsArray( T arg0, T arg1, T arg2 )
     {
         _arg0 = arg0;
         _arg1 = arg1;
         _arg2 = arg2;
 
-        // Always assign this.args to make use of its "Length" property
-        _args = _threeArgArray;
+        Span<T> separators = stackalloc T[3];
+        separators[0] = arg0;
+        separators[1] = arg1;
+        separators[2] = arg2;
+        _args         = MemoryMarshal.CreateReadOnlySpan( ref separators.GetPinnableReference(), separators.Length );
     }
-    public ParamsArray( in ReadOnlySpan<T?> args )
+    public ParamsArray( in ReadOnlySpan<T> args )
     {
         int len = args.Length;
 
@@ -180,21 +184,20 @@ public readonly ref struct ParamsArray<T>
     }
 
 
-    [Pure] public ReadOnlySpan<T?>.Enumerator GetEnumerator() => _args.GetEnumerator();
+    public static implicit operator ParamsArray<T>( T                   span ) => new(span);
+    public static implicit operator ParamsArray<T>( in  ReadOnlySpan<T> span ) => new(span);
+    public static implicit operator ReadOnlySpan<T>( in ParamsArray<T>  span ) => span._args;
 
-    [Pure]
-    public static ParamsArray<T> Create( params T?[] args )
-    {
-        ReadOnlySpan<T?> span = args;
-        return new ParamsArray<T>( span );
-    }
+
+    public ReadOnlySpan<T>.Enumerator GetEnumerator() => _args.GetEnumerator();
+    public override string ToString() => $"{nameof(ParamsArray<T>)}( {nameof(Length)}: {Length} )";
+
+
+    [Pure] public static ParamsArray<T> Create( params T[] args ) => new(args);
 
 #if NET6_0_OR_GREATER
     [Pure]
-    public static ParamsArray<T> Create( List<T?> args )
-    {
-        ReadOnlySpan<T?> span = CollectionsMarshal.AsSpan( args );
-        return new ParamsArray<T>( span );
-    }
+    public static ParamsArray<T> Create( List<T> args ) => new(CollectionsMarshal.AsSpan( args )
+                                                                                 .AsSpan());
 #endif
 }
