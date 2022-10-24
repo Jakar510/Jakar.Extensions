@@ -82,7 +82,7 @@ public sealed class TableCache<TRecord> : Service, IHostedService, IReadOnlyColl
         }
 
 
-        List<TRecord> records = await _table.All( connection, transaction, token );
+        IReadOnlyList<TRecord> records = await _table.All( connection, transaction, token );
         _records.Clear();
         AddOrUpdate( records );
     }

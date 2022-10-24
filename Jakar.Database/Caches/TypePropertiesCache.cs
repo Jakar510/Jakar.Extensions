@@ -4,16 +4,10 @@
 namespace Jakar.Database.Caches;
 
 
-public sealed class TypePropertiesCache : ConcurrentDictionary<Type, IReadOnlyList<Descriptor>>
+[SuppressMessage( "ReSharper", "ReturnTypeCanBeEnumerable.Global" )]
+public sealed class TypePropertiesCache : ConcurrentDictionary<Type, ConcurrentDictionary<DbInstance, IReadOnlyList<Descriptor>>>
 {
     public static TypePropertiesCache Current { get; } = new();
-
-
-    public new IReadOnlyList<Descriptor> this[ Type type ]
-    {
-        get => Register( type );
-        private set => base[type] = value;
-    }
 
 
     static TypePropertiesCache() => Current.Register( Assembly.GetCallingAssembly() );
@@ -22,23 +16,39 @@ public sealed class TypePropertiesCache : ConcurrentDictionary<Type, IReadOnlyLi
     public void Register( Assembly assembly ) => Register( assembly.DefinedTypes.Where( x => x.GetCustomAttribute<SerializableAttribute>() is not null ) );
     public void Register( IEnumerable<Type> types )
     {
-        foreach (Type type in types) { Register( type ); }
+        foreach ( Type type in types ) { Register( type ); }
     }
     public void Register( params Type[] types )
     {
-        foreach (Type type in types) { Register( type ); }
+        foreach ( Type type in types ) { Register( type ); }
     }
-    public IReadOnlyList<Descriptor> Register( Type type )
+    public void Register( Type type )
     {
-        if (ContainsKey( type )) { return base[type]; }
+        if ( ContainsKey( type ) ) { return; }
 
-        List<PropertyInfo> properties = type.GetProperties( BindingFlags.Instance | BindingFlags.Public | BindingFlags.SetProperty | BindingFlags.GetField )
-                                            .ToList();
 
-        var results = new List<Descriptor>( properties.Count );
-        results.AddRange( properties.Select( property => (Descriptor)property ) );
+        PropertyInfo[] properties = type.GetProperties( BindingFlags.Instance | BindingFlags.Public | BindingFlags.SetProperty | BindingFlags.GetField )
+                                        .ToArray();
 
-        this[type] = results;
-        return results;
+        this[type] = new ConcurrentDictionary<DbInstance, IReadOnlyList<Descriptor>>
+                     {
+                         [DbInstance.Postgres] = properties.Select( property => new PostgresDescriptor( property ) )
+                                                           .ToArray(),
+                         [DbInstance.MsSql] = properties.Select( property => new MsSqlDescriptor( property ) )
+                                                        .ToArray()
+                     };
     }
+
+    [Pure]
+    public IReadOnlyList<Descriptor> Get( Type type, in DbInstance instance )
+    {
+        if ( !ContainsKey( type ) ) { Register( type ); }
+
+        return this[type][instance];
+    }
+    [Pure]
+    public Descriptor Get( Type type, in DbInstance instance, string columnName ) => Get( type, instance )
+       .First( x => x.ColumnName == columnName );
 }
+
+

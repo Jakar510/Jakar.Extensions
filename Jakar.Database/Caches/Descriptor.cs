@@ -4,41 +4,53 @@
 namespace Jakar.Database.Caches;
 
 
-public sealed record Descriptor
+public abstract record Descriptor
 {
-    public bool                 IsKey    { get; init; }
-    public Func<object, object> GetValue { get; init; }
-
-    /// <summary> " Name " </summary>
-    public string ColumnName { get; init; }
-
-    public string Name { get; init; }
-
-    /// <summary> " Name = @{Name} " </summary>
-    public string UpdateName { get; init; }
-
-    /// <summary> " @{Name} " </summary>
-    public string VariableName { get; init; }
+    public bool                 IsKey        { get; init; }
+    public Func<object, object> GetValue     { get; init; }
+    public string               ColumnName   { get; init; }
+    public string               Name         { get; init; }
+    public string               KeyValuePair { get; init; }
+    public string               VariableName { get; init; }
 
 
-    public Descriptor( PropertyInfo property )
+    protected Descriptor( PropertyInfo property, string name, string columnName, string variableName, string keyValuePair )
     {
-        MethodInfo method = property.GetMethod ?? throw new ArgumentNullException( nameof(property), nameof(property.GetMethod) );
-        Name         = property.Name;
-        ColumnName   = $" {Name} ";
-        VariableName = $" @{Name} ";
-        UpdateName   = $" Name = @{Name} ";
-        IsKey        = property.GetCustomAttribute<KeyAttribute>() is not null || property.GetCustomAttribute<System.ComponentModel.DataAnnotations.KeyAttribute>() is not null;
+        ArgumentNullException.ThrowIfNull( property.GetMethod );
+        ArgumentNullException.ThrowIfNull( property.DeclaringType );
+
+        Name         = name;
+        ColumnName   = columnName;
+        VariableName = variableName;
+        KeyValuePair = keyValuePair;
+        IsKey        = IsDbKey( property );
 
 
-        GetValue = Emit<Func<object, object>>.NewDynamicMethod( typeof(Descriptor) )
+        var emit = Emit<Func<object, object>>.NewDynamicMethod( GetType() )
                                              .LoadArgument( 0 )
                                              .CastClass( property.DeclaringType )
-                                             .Call( method )
-                                             .Return()
-                                             .CreateDelegate();
+                                             .Call( property.GetMethod );
+
+        if ( property.PropertyType.IsValueType ) { emit = emit.Box( property.PropertyType ); }
+         
+        GetValue = emit.Return()
+                       .CreateDelegate();
     }
+    protected static bool IsDbKey( MemberInfo property ) => property.GetCustomAttribute<KeyAttribute>() is not null || property.GetCustomAttribute<System.ComponentModel.DataAnnotations.KeyAttribute>() is not null;
+}
 
 
-    public static implicit operator Descriptor( PropertyInfo property ) => new(property);
+
+public sealed record MsSqlDescriptor : Descriptor
+{
+    public MsSqlDescriptor( PropertyInfo property ) : this( property, property.Name ) { }
+    public MsSqlDescriptor( PropertyInfo property, string name ) : base( property, name, $" {name} ", $" @{name} ", $" {name} = @{name} " ) { }
+}
+
+
+
+public sealed record PostgresDescriptor : Descriptor
+{
+    public PostgresDescriptor( PropertyInfo property ) : this( property, property.Name ) { }
+    public PostgresDescriptor( PropertyInfo property, string name ) : base( property, name, $" \"{name}\" ", $" @{name} ", $" \"{name}\" = @{name} " ) { }
 }

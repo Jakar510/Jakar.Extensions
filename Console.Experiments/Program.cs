@@ -1,7 +1,18 @@
-﻿try
+﻿using Dapper;
+using Jakar.Database;
+
+
+try
 {
     "Hello World!".WriteToConsole();
-    
+
+    var p = new DynamicParameters();
+    p.Add( nameof(AppVersion), "1.0.0" );
+
+    try { throw new SqlException("select * from table", p, true); }
+    catch ( Exception e ) { e.WriteToConsole(); }
+
+
     // byte.MaxValue.ToString()
     //     .Length.WriteToDebug();
     //
@@ -95,5 +106,5 @@
 
     // await Tests.Test_AsyncLinq(Tests.List);
 }
-catch (Exception e) { e.WriteToDebug(); }
+catch ( Exception e ) { e.WriteToDebug(); }
 finally { "Bye".WriteToConsole(); }

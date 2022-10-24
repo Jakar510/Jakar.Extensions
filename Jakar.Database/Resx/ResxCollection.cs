@@ -34,7 +34,7 @@ public sealed class ResxCollection : IResxCollection
     public async ValueTask Init( DbConnection connection, DbTransaction? transaction, DbTableBase<ResxRowTable> table, CancellationToken token = default )
     {
         _rows.Clear();
-        List<ResxRowTable> records = await table.All( connection, transaction, token );
+        IReadOnlyList<ResxRowTable> records = await table.All( connection, transaction, token );
         _rows.Add( records );
     }
 

@@ -27,6 +27,7 @@ public abstract class Database : Randoms, IConnectableDb, IAsyncDisposable, IHea
     public          DbTableBase<UserRoleRecord> UserRoles        { get; }
     public          IConfiguration              Configuration    { get; init; }
     public virtual  string                      ConnectionString => Configuration.GetConnectionString( "Default" );
+    public abstract DbInstance                  Instance         { get; }
     public string CurrentSchema
     {
         get => _currentSchema;
@@ -75,11 +76,11 @@ public abstract class Database : Randoms, IConnectableDb, IAsyncDisposable, IHea
     protected virtual async ValueTask<Tokens> Authenticate( DbConnection connection, DbTransaction transaction, VerifyRequest request, CancellationToken token )
     {
         UserRecord? user = await Users.Get( nameof(UserRecord.UserName), request.UserLogin, token );
-        if (user is null) { return default; }
+        if ( user is null ) { return default; }
 
-        if (user.SubscriptionExpires.HasValue)
+        if ( user.SubscriptionExpires.HasValue )
         {
-            if (user.SubscriptionExpires.Value < DateTimeOffset.UtcNow)
+            if ( user.SubscriptionExpires.Value < DateTimeOffset.UtcNow )
             {
                 user.LastBadAttempt = DateTimeOffset.UtcNow;
                 await Users.Update( connection, transaction, user, token );
@@ -88,7 +89,7 @@ public abstract class Database : Randoms, IConnectableDb, IAsyncDisposable, IHea
             }
         }
 
-        if (user.IsDisabled)
+        if ( user.IsDisabled )
         {
             user.LastBadAttempt = DateTimeOffset.UtcNow;
             await Users.Update( connection, transaction, user, token );
@@ -96,7 +97,7 @@ public abstract class Database : Randoms, IConnectableDb, IAsyncDisposable, IHea
             return default;
         }
 
-        if (user.IsLocked)
+        if ( user.IsLocked )
         {
             user.LastBadAttempt = DateTimeOffset.UtcNow;
             await Users.Update( connection, transaction, user, token );
@@ -107,7 +108,7 @@ public abstract class Database : Randoms, IConnectableDb, IAsyncDisposable, IHea
 
         PasswordVerificationResult passwordVerificationResult = user.VerifyPassword( request.UserPassword );
 
-        switch (passwordVerificationResult)
+        switch ( passwordVerificationResult )
         {
             case PasswordVerificationResult.Failed:
                 user.MarkBadLogin();
@@ -154,10 +155,10 @@ public abstract class Database : Randoms, IConnectableDb, IAsyncDisposable, IHea
         List<Claim>    claims  = await user.GetUserClaims( connection, transaction, this, token );
         DateTimeOffset date    = Configuration.TokenExpiration();
 
-        if (user.SubscriptionExpires.HasValue)
+        if ( user.SubscriptionExpires.HasValue )
         {
             DateTimeOffset expires = user.SubscriptionExpires.Value;
-            if (date > expires) { date = expires; }
+            if ( date > expires ) { date = expires; }
         }
 
         var descriptor = new SecurityTokenDescriptor
@@ -224,11 +225,11 @@ public abstract class Database : Randoms, IConnectableDb, IAsyncDisposable, IHea
     protected virtual async ValueTask<LoginResult> VerifyLogin( DbConnection connection, DbTransaction? transaction, VerifyRequest request, CancellationToken token = default )
     {
         UserRecord? user = await Users.Get( connection, transaction, nameof(UserRecord.UserName), request.UserLogin, token );
-        if (user is null) { return LoginResult.State.BadCredentials; }
+        if ( user is null ) { return LoginResult.State.BadCredentials; }
 
         PasswordVerificationResult passResult = user.VerifyPassword( request.UserPassword );
 
-        switch (passResult)
+        switch ( passResult )
         {
             case PasswordVerificationResult.Failed:
             {
@@ -253,11 +254,11 @@ public abstract class Database : Randoms, IConnectableDb, IAsyncDisposable, IHea
     {
         await ValueTask.CompletedTask;
 
-        if (!user.IsActive) { return LoginResult.State.Inactive; }
+        if ( !user.IsActive ) { return LoginResult.State.Inactive; }
 
-        if (!user.IsDisabled) { return LoginResult.State.Disabled; }
+        if ( !user.IsDisabled ) { return LoginResult.State.Disabled; }
 
-        if (!user.IsLocked) { return LoginResult.State.Locked; }
+        if ( !user.IsLocked ) { return LoginResult.State.Locked; }
 
         // if ( user.SubscriptionExpires > DateTimeOffset.UtcNow ) { return LoginResult.State.ExpiredSubscription; }
         // if ( user.SubscriptionID.IsValidID() ) { return LoginResult.State.NoSubscription; }
@@ -268,7 +269,7 @@ public abstract class Database : Randoms, IConnectableDb, IAsyncDisposable, IHea
 
     public virtual async ValueTask DisposeAsync()
     {
-        foreach (IAsyncDisposable disposable in _disposables) { await disposable.DisposeAsync(); }
+        foreach ( IAsyncDisposable disposable in _disposables ) { await disposable.DisposeAsync(); }
 
         _disposables.Clear();
     }
@@ -303,6 +304,6 @@ public abstract class Database : Randoms, IConnectableDb, IAsyncDisposable, IHea
                        _                          => throw new ArgumentOutOfRangeException()
                    };
         }
-        catch (Exception e) { return HealthCheckResult.Unhealthy( e.Message ); }
+        catch ( Exception e ) { return HealthCheckResult.Unhealthy( e.Message ); }
     }
 }
