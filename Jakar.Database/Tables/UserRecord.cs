@@ -431,14 +431,24 @@ public sealed record UserRecord : TableRecord<UserRecord>, IUserRecord<UserRecor
     public void AddRight<TRights>( TRights right ) where TRights : struct, Enum => Rights = (Rights ?? 0) | right.AsLong();
 
 
-    public async ValueTask AddRole( DbConnection connection, DbTransaction transaction, Database db, RoleRecord role, CancellationToken token )
+    public async ValueTask Add( DbConnection connection, DbTransaction transaction, Database db, RoleRecord value, CancellationToken token )
     {
-        UserRoleRecord? record = await db.UserRoles.Get( connection, transaction, true, UserRoleRecord.GetDynamicParameters( this, role ), token );
+        UserRoleRecord? record = await db.UserRoles.Get( connection, transaction, true, UserRoleRecord.GetDynamicParameters( this, value ), token );
 
-        if (record is null)
+        if ( record is null )
         {
-            record = new UserRoleRecord( this, role );
+            record = new UserRoleRecord( this, value );
             await db.UserRoles.Insert( connection, transaction, record, token );
+        }
+    }
+    public async ValueTask Add( DbConnection connection, DbTransaction transaction, Database db, GroupRecord value, CancellationToken token )
+    {
+        UserGroupRecord? record = await db.UserGroups.Get( connection, transaction, true, UserGroupRecord.GetDynamicParameters( this, value ), token );
+
+        if ( record is null )
+        {
+            record = new UserGroupRecord( this, value );
+            await db.UserGroups.Insert( connection, transaction, record, token );
         }
     }
 
@@ -486,35 +496,40 @@ public sealed record UserRecord : TableRecord<UserRecord>, IUserRecord<UserRecor
     }
 
 
-    public async IAsyncEnumerable<RoleRecord> GetRoles( DbConnection connection, DbTransaction? transaction, Database db, [EnumeratorCancellation] CancellationToken token = default )
+    public async IAsyncEnumerable<GroupRecord> GetGroups( DbConnection connection, DbTransaction? transaction, Database db, [EnumeratorCancellation] CancellationToken token = default )
     {
-        await foreach (UserRoleRecord record in db.UserRoles.Where( connection, transaction, true, UserRoleRecord.GetDynamicParameters( this ), token ))
+        await foreach ( UserGroupRecord record in db.UserGroups.Where( connection, transaction, true, UserGroupRecord.GetDynamicParameters( this ), token ) )
         {
-            RoleRecord? role = await db.Roles.Get( connection, transaction, record.RoleID, token );
-            if (role is not null) { yield return role; }
+            GroupRecord? role = await db.Groups.Get( connection, transaction, record.GroupID, token );
+            if ( role is not null ) { yield return role; }
         }
     }
-    public async ValueTask<List<Claim>> GetUserClaims( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token )
+    public async IAsyncEnumerable<RoleRecord> GetRoles( DbConnection connection, DbTransaction? transaction, Database db, [EnumeratorCancellation] CancellationToken token = default )
     {
-        List<Claim> claims = GetUserClaims();
-        await foreach (RoleRecord role in GetRoles( connection, transaction, db, token )) { claims.Add( new Claim( ClaimTypes.Role, role.Name ) ); }
-
-        return claims;
-    }
-    public IList<UserLoginInfo> GetUserLoginInfo() =>
-        new List<UserLoginInfo>
+        await foreach ( UserRoleRecord record in db.UserRoles.Where( connection, transaction, true, UserRoleRecord.GetDynamicParameters( this ), token ) )
         {
-            new(LoginProvider, ProviderKey, ProviderDisplayName)
-        };
+            RoleRecord? role = await db.Roles.Get( connection, transaction, record.RoleID, token );
+            if ( role is not null ) { yield return role; }
+        }
+    }
+    public IList<UserLoginInfo> GetUserLoginInfo() => new List<UserLoginInfo>
+                                                      {
+                                                          new(LoginProvider, ProviderKey, ProviderDisplayName)
+                                                      };
 
 
     public bool HasPassword() => !string.IsNullOrWhiteSpace( PasswordHash );
 
 
     public bool HasRight<TRights>( TRights right ) where TRights : struct, Enum => Rights.HasValue && (Rights.Value & right.AsLong()) > 0;
-    public async ValueTask<bool> HasRole( DbConnection connection, DbTransaction transaction, Database db, RoleRecord role, CancellationToken token )
+    public async ValueTask<bool> HasRole( DbConnection connection, DbTransaction transaction, Database db, RoleRecord value, CancellationToken token )
     {
-        UserRoleRecord? record = await db.UserRoles.Get( connection, transaction, true, UserRoleRecord.GetDynamicParameters( this, role ), token );
+        UserRoleRecord? record = await db.UserRoles.Get( connection, transaction, true, UserRoleRecord.GetDynamicParameters( this, value ), token );
+        return record is not null;
+    }
+    public async ValueTask<bool> IsPartOfGroup( DbConnection connection, DbTransaction transaction, Database db, GroupRecord value, CancellationToken token )
+    {
+        UserGroupRecord? record = await db.UserGroups.Get( connection, transaction, true, UserGroupRecord.GetDynamicParameters( this, value ), token );
         return record is not null;
     }
     public UserRecord Lock( in TimeSpan offset )
@@ -533,11 +548,17 @@ public sealed record UserRecord : TableRecord<UserRecord>, IUserRecord<UserRecor
         return codes.Contains( code ) && ReplaceCode( code );
     }
     public void RemoveRight<TRights>( TRights right ) where TRights : struct, Enum => Rights = (Rights ?? 0) & right.AsLong();
-    public async ValueTask RemoveRole( DbConnection connection, DbTransaction transaction, Database db, RoleRecord role, CancellationToken token )
+    public async ValueTask Remove( DbConnection connection, DbTransaction transaction, Database db, RoleRecord role, CancellationToken token )
     {
         UserRoleRecord? record = await db.UserRoles.Get( connection, transaction, true, UserRoleRecord.GetDynamicParameters( this, role ), token );
 
-        if (record is not null) { await db.UserRoles.Delete( connection, transaction, record, token ); }
+        if ( record is not null ) { await db.UserRoles.Delete( connection, transaction, record, token ); }
+    }
+    public async ValueTask Remove( DbConnection connection, DbTransaction transaction, Database db, GroupRecord role, CancellationToken token )
+    {
+        UserGroupRecord? record = await db.UserGroups.Get( connection, transaction, true, UserGroupRecord.GetDynamicParameters( this, role ), token );
+
+        if ( record is not null ) { await db.UserGroups.Delete( connection, transaction, record, token ); }
     }
     public UserRecord RemoveUserLoginInfo()
     {
@@ -640,11 +661,26 @@ public sealed record UserRecord : TableRecord<UserRecord>, IUserRecord<UserRecor
                                               new Claim( ClaimTypes.Webpage,        Website ?? string.Empty ),
                                               new Claim( ClaimTypes.Expiration,     SubscriptionExpires?.ToString() ?? string.Empty )
                                           };
+    public async ValueTask<List<Claim>> GetUserClaims( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token, bool includeRoles = true, bool includeGroups = false )
+    {
+        List<Claim> claims = GetUserClaims();
+
+        if ( includeRoles )
+        {
+            await foreach ( RoleRecord record in GetRoles( connection, transaction, db, token ) ) { claims.Add( new Claim( ClaimTypes.Role, record.Name ) ); }
+        }
+
+        if ( !includeGroups ) { return claims; }
+
+        await foreach ( GroupRecord record in GetGroups( connection, transaction, db, token ) ) { claims.Add( new Claim( ClaimTypes.GroupSid, record.NameOfGroup ) ); }
+
+        return claims;
+    }
 
 
-    public async ValueTask<UserRecord?> GetBoss( DbConnection connection, DbTransaction? transaction, DbTableBase<UserRecord> table, CancellationToken token ) => EscalateTo.HasValue
-                                                                                                                                                                      ? await table.Get( connection, transaction, EscalateTo.Value, token )
-                                                                                                                                                                      : default;
+    public async ValueTask<UserRecord?> GetBoss( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => EscalateTo.HasValue
+                                                                                                                                                    ? await db.Users.Get( connection, transaction, EscalateTo.Value, token )
+                                                                                                                                                    : default;
 
 
     public UserRecord Update( IUserData value )
@@ -679,75 +715,75 @@ public sealed record UserRecord : TableRecord<UserRecord>, IUserRecord<UserRecor
 
     public override int CompareTo( UserRecord? other )
     {
-        if (other is null) { return 1; }
+        if ( other is null ) { return 1; }
 
-        if (ReferenceEquals( this, other )) { return 0; }
+        if ( ReferenceEquals( this, other ) ) { return 0; }
 
 
         int userNameComparison = string.Compare( UserName, other.UserName, StringComparison.Ordinal );
-        if (userNameComparison != 0) { return userNameComparison; }
+        if ( userNameComparison != 0 ) { return userNameComparison; }
 
         int firstNameComparison = string.Compare( FirstName, other.FirstName, StringComparison.Ordinal );
-        if (firstNameComparison != 0) { return firstNameComparison; }
+        if ( firstNameComparison != 0 ) { return firstNameComparison; }
 
         int lastNameComparison = string.Compare( LastName, other.LastName, StringComparison.Ordinal );
-        if (lastNameComparison != 0) { return lastNameComparison; }
+        if ( lastNameComparison != 0 ) { return lastNameComparison; }
 
         int fullNameComparison = string.Compare( FullName, other.FullName, StringComparison.Ordinal );
-        if (fullNameComparison != 0) { return fullNameComparison; }
+        if ( fullNameComparison != 0 ) { return fullNameComparison; }
 
         int descriptionComparison = string.Compare( Description, other.Description, StringComparison.Ordinal );
-        if (descriptionComparison != 0) { return descriptionComparison; }
+        if ( descriptionComparison != 0 ) { return descriptionComparison; }
 
         int sessionIDComparison = Nullable.Compare( SessionID, other.SessionID );
-        if (sessionIDComparison != 0) { return sessionIDComparison; }
+        if ( sessionIDComparison != 0 ) { return sessionIDComparison; }
 
         int addressComparison = string.Compare( Address, other.Address, StringComparison.Ordinal );
-        if (addressComparison != 0) { return addressComparison; }
+        if ( addressComparison != 0 ) { return addressComparison; }
 
         int line1Comparison = string.Compare( Line1, other.Line1, StringComparison.Ordinal );
-        if (line1Comparison != 0) { return line1Comparison; }
+        if ( line1Comparison != 0 ) { return line1Comparison; }
 
         int line2Comparison = string.Compare( Line2, other.Line2, StringComparison.Ordinal );
-        if (line2Comparison != 0) { return line2Comparison; }
+        if ( line2Comparison != 0 ) { return line2Comparison; }
 
         int cityComparison = string.Compare( City, other.City, StringComparison.Ordinal );
-        if (cityComparison != 0) { return cityComparison; }
+        if ( cityComparison != 0 ) { return cityComparison; }
 
         int stateComparison = string.Compare( State, other.State, StringComparison.Ordinal );
-        if (stateComparison != 0) { return stateComparison; }
+        if ( stateComparison != 0 ) { return stateComparison; }
 
         int countryComparison = string.Compare( Country, other.Country, StringComparison.Ordinal );
-        if (countryComparison != 0) { return countryComparison; }
+        if ( countryComparison != 0 ) { return countryComparison; }
 
         int postalCodeComparison = string.Compare( PostalCode, other.PostalCode, StringComparison.Ordinal );
-        if (postalCodeComparison != 0) { return postalCodeComparison; }
+        if ( postalCodeComparison != 0 ) { return postalCodeComparison; }
 
         int websiteComparison = string.Compare( Website, other.Website, StringComparison.Ordinal );
-        if (websiteComparison != 0) { return websiteComparison; }
+        if ( websiteComparison != 0 ) { return websiteComparison; }
 
         int emailComparison = string.Compare( Email, other.Email, StringComparison.Ordinal );
-        if (emailComparison != 0) { return emailComparison; }
+        if ( emailComparison != 0 ) { return emailComparison; }
 
         int phoneNumberComparison = string.Compare( PhoneNumber, other.PhoneNumber, StringComparison.Ordinal );
-        if (phoneNumberComparison != 0) { return phoneNumberComparison; }
+        if ( phoneNumberComparison != 0 ) { return phoneNumberComparison; }
 
         int extComparison = string.Compare( Ext, other.Ext, StringComparison.Ordinal );
-        if (extComparison != 0) { return extComparison; }
+        if ( extComparison != 0 ) { return extComparison; }
 
         int titleComparison = string.Compare( Title, other.Title, StringComparison.Ordinal );
-        if (titleComparison != 0) { return titleComparison; }
+        if ( titleComparison != 0 ) { return titleComparison; }
 
         int departmentComparison = string.Compare( Department, other.Department, StringComparison.Ordinal );
-        if (departmentComparison != 0) { return departmentComparison; }
+        if ( departmentComparison != 0 ) { return departmentComparison; }
 
         return string.Compare( Company, other.Company, StringComparison.Ordinal );
     }
     public override bool Equals( UserRecord? other )
     {
-        if (other is null) { return false; }
+        if ( other is null ) { return false; }
 
-        if (ReferenceEquals( this, other )) { return true; }
+        if ( ReferenceEquals( this, other ) ) { return true; }
 
         return base.Equals( other ) && UserName == other.UserName && FirstName == other.FirstName && LastName == other.LastName && FullName == other.FullName && Description == other.Description && Address == other.Address && Line1 == other.Line1 &&
                Line2 == other.Line2 && City == other.City && State == other.State && Country == other.Country && PostalCode == other.PostalCode && Website == other.Website && Email == other.Email && PhoneNumber == other.PhoneNumber &&

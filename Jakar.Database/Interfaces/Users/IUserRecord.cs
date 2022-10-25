@@ -41,11 +41,11 @@ public interface IUserRecord<TRecord> : IComparable<TRecord>, IEquatable<TRecord
     public string? UserName     { get; }
 
 
-    public ValueTask<UserRecord?> GetBoss( DbConnection connection, DbTransaction? transaction, DbTableBase<UserRecord> table, CancellationToken token );
+    public ValueTask<UserRecord?> GetBoss( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token );
 
 
     public List<Claim> GetUserClaims();
-    public ValueTask<UserRecord?> GetUserWhoCreated( DbConnection connection, DbTransaction? transaction, DbTableBase<UserRecord> db, CancellationToken token );
+    public ValueTask<UserRecord?> GetUserWhoCreated( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token );
 
 
     /// <summary>

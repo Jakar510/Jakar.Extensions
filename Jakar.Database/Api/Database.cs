@@ -20,14 +20,16 @@ public abstract class Database : Randoms, IConnectableDb, IAsyncDisposable, IHea
     private            string                          _domain        = "https://localhost:443";
 
 
-    public abstract AppVersion                  Version          { get; }
-    public          DbOptions                   Options          { get; }
-    public          DbTableBase<RoleRecord>     Roles            { get; }
-    public          DbTableBase<UserRecord>     Users            { get; }
-    public          DbTableBase<UserRoleRecord> UserRoles        { get; }
-    public          IConfiguration              Configuration    { get; init; }
-    public virtual  string                      ConnectionString => Configuration.GetConnectionString( "Default" );
-    public abstract DbInstance                  Instance         { get; }
+    public abstract AppVersion                   Version          { get; }
+    public          DbOptions                    Options          { get; }
+    public          DbTableBase<UserRecord>      Users            { get; }
+    public          DbTableBase<UserRoleRecord>  UserRoles        { get; }
+    public          DbTableBase<RoleRecord>      Roles            { get; }
+    public          DbTableBase<UserGroupRecord> UserGroups       { get; }
+    public          DbTableBase<GroupRecord>     Groups           { get; }
+    public          IConfiguration               Configuration    { get; }
+    public virtual  string                       ConnectionString => Configuration.GetConnectionString( "Default" );
+    public abstract DbInstance                   Instance         { get; }
     public string CurrentSchema
     {
         get => _currentSchema;
@@ -59,12 +61,72 @@ public abstract class Database : Randoms, IConnectableDb, IAsyncDisposable, IHea
         Users         = Create<UserRecord>();
         Roles         = Create<RoleRecord>();
         UserRoles     = Create<UserRoleRecord>();
+        UserGroups    = Create<UserGroupRecord>();
+        Groups        = Create<GroupRecord>();
     }
+
+
+
+    #region Core
+
     protected TValue AddDisposable<TValue>( TValue value ) where TValue : IAsyncDisposable
     {
         _disposables.Add( value );
         return value;
     }
+    protected virtual DbTableBase<TRecord> Create<TRecord>() where TRecord : TableRecord<TRecord>
+    {
+        DbTableBase<TRecord> table = Options.DbType switch
+                                     {
+                                         DbInstance.Postgres => new PostgresDbTable<TRecord>( this ),
+                                         DbInstance.MsSql    => new MsSqlDbTable<TRecord>( this ),
+                                         _                   => new DbTableBase<TRecord>( this )
+                                     };
+
+        return AddDisposable( table );
+    }
+
+    public virtual async ValueTask DisposeAsync()
+    {
+        foreach ( IAsyncDisposable disposable in _disposables ) { await disposable.DisposeAsync(); }
+
+        _disposables.Clear();
+    }
+    public DbConnection Connect()
+    {
+        DbConnection connection = CreateConnection();
+        connection.Open();
+        return connection;
+    }
+    public async ValueTask<DbConnection> ConnectAsync( CancellationToken token )
+    {
+        DbConnection connection = CreateConnection();
+        await connection.OpenAsync( token );
+        return connection;
+    }
+
+    public virtual async Task<HealthCheckResult> CheckHealthAsync( HealthCheckContext context, CancellationToken token = default )
+    {
+        try
+        {
+            await using DbConnection connection = await ConnectAsync( token );
+
+            return connection.State switch
+                   {
+                       ConnectionState.Broken     => HealthCheckResult.Unhealthy(),
+                       ConnectionState.Closed     => HealthCheckResult.Degraded(),
+                       ConnectionState.Open       => HealthCheckResult.Healthy(),
+                       ConnectionState.Connecting => HealthCheckResult.Healthy(),
+                       ConnectionState.Executing  => HealthCheckResult.Healthy(),
+                       ConnectionState.Fetching   => HealthCheckResult.Healthy(),
+                       _                          => throw new ArgumentOutOfRangeException()
+                   };
+        }
+        catch ( Exception e ) { return HealthCheckResult.Unhealthy( e.Message ); }
+    }
+
+    #endregion
+
 
 
     /// <summary>
@@ -129,19 +191,6 @@ public abstract class Database : Randoms, IConnectableDb, IAsyncDisposable, IHea
 
             default: throw new ArgumentOutOfRangeException( nameof(passwordVerificationResult), passwordVerificationResult, "out of range" );
         }
-    }
-
-
-    protected virtual DbTableBase<TRecord> Create<TRecord>() where TRecord : TableRecord<TRecord>
-    {
-        DbTableBase<TRecord> table = Options.DbType switch
-                                     {
-                                         DbInstance.Postgres => new PostgresDbTable<TRecord>( this ),
-                                         DbInstance.MsSql    => new MsSqlDbTable<TRecord>( this ),
-                                         _                   => new DbTableBase<TRecord>( this )
-                                     };
-
-        return AddDisposable( table );
     }
 
 
@@ -264,46 +313,5 @@ public abstract class Database : Randoms, IConnectableDb, IAsyncDisposable, IHea
         // if ( user.SubscriptionID.IsValidID() ) { return LoginResult.State.NoSubscription; }
 
         return user;
-    }
-
-
-    public virtual async ValueTask DisposeAsync()
-    {
-        foreach ( IAsyncDisposable disposable in _disposables ) { await disposable.DisposeAsync(); }
-
-        _disposables.Clear();
-    }
-    public DbConnection Connect()
-    {
-        DbConnection connection = CreateConnection();
-        connection.Open();
-        return connection;
-    }
-    public async ValueTask<DbConnection> ConnectAsync( CancellationToken token )
-    {
-        DbConnection connection = CreateConnection();
-        await connection.OpenAsync( token );
-        return connection;
-    }
-
-
-    public virtual async Task<HealthCheckResult> CheckHealthAsync( HealthCheckContext context, CancellationToken token = default )
-    {
-        try
-        {
-            await using DbConnection connection = await ConnectAsync( token );
-
-            return connection.State switch
-                   {
-                       ConnectionState.Broken     => HealthCheckResult.Unhealthy(),
-                       ConnectionState.Closed     => HealthCheckResult.Degraded(),
-                       ConnectionState.Open       => HealthCheckResult.Healthy(),
-                       ConnectionState.Connecting => HealthCheckResult.Healthy(),
-                       ConnectionState.Executing  => HealthCheckResult.Healthy(),
-                       ConnectionState.Fetching   => HealthCheckResult.Healthy(),
-                       _                          => throw new ArgumentOutOfRangeException()
-                   };
-        }
-        catch ( Exception e ) { return HealthCheckResult.Unhealthy( e.Message ); }
     }
 }

@@ -25,12 +25,12 @@ public sealed record UserRoleRecord : TableRecord<UserRoleRecord>
 
     public override int CompareTo( UserRoleRecord? other )
     {
-        if (ReferenceEquals( this, other )) { return 0; }
+        if ( ReferenceEquals( this, other ) ) { return 0; }
 
-        if (other is null) { return 1; }
+        if ( other is null ) { return 1; }
 
         int userIDComparison = UserID.CompareTo( other.UserID );
-        if (userIDComparison != 0) { return userIDComparison; }
+        if ( userIDComparison != 0 ) { return userIDComparison; }
 
         return RoleID.CompareTo( other.RoleID );
     }
@@ -42,17 +42,17 @@ public sealed record UserRoleRecord : TableRecord<UserRoleRecord>
         parameters.Add( nameof(UserID), user.UserID );
         return parameters;
     }
-    public static DynamicParameters GetDynamicParameters( RoleRecord role )
+    public static DynamicParameters GetDynamicParameters( RoleRecord record )
     {
         var parameters = new DynamicParameters();
-        parameters.Add( nameof(RoleID), role.ID );
+        parameters.Add( nameof(RoleID), record.ID );
         return parameters;
     }
-    public static DynamicParameters GetDynamicParameters( UserRecord user, RoleRecord role )
+    public static DynamicParameters GetDynamicParameters( UserRecord user, RoleRecord record )
     {
         var parameters = new DynamicParameters();
         parameters.Add( nameof(UserID), user.UserID );
-        parameters.Add( nameof(RoleID), role.ID );
+        parameters.Add( nameof(RoleID), record.ID );
         return parameters;
     }
     public override int GetHashCode() => HashCode.Combine( base.GetHashCode(), UserID, CreatedBy, RoleID );
@@ -61,9 +61,9 @@ public sealed record UserRoleRecord : TableRecord<UserRoleRecord>
     public async ValueTask<RoleRecord?> GetRole( DbConnection connection, DbTransaction? transaction, DbTableBase<RoleRecord> table, CancellationToken token ) => await table.Get( connection, transaction, RoleID, token );
     public override bool Equals( UserRoleRecord? other )
     {
-        if (other is null) { return false; }
+        if ( other is null ) { return false; }
 
-        if (ReferenceEquals( this, other )) { return true; }
+        if ( ReferenceEquals( this, other ) ) { return true; }
 
         return base.Equals( other ) && RoleID == other.RoleID;
     }

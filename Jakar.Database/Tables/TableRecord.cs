@@ -43,26 +43,26 @@ public abstract record TableRecord<TRecord> : BaseCollectionsRecord<TRecord, lon
 
     public override int CompareTo( TRecord? other )
     {
-        if (other is null) { return 1; }
+        if ( other is null ) { return 1; }
 
-        if (ReferenceEquals( this, other )) { return 0; }
+        if ( ReferenceEquals( this, other ) ) { return 0; }
 
         int createdByComparison = _createdBy.CompareTo( other._createdBy );
-        if (createdByComparison != 0) { return createdByComparison; }
+        if ( createdByComparison != 0 ) { return createdByComparison; }
 
         int userIDComparison = UserID.CompareTo( other.UserID );
-        if (userIDComparison != 0) { return userIDComparison; }
+        if ( userIDComparison != 0 ) { return userIDComparison; }
 
         int lastModifiedComparison = Nullable.Compare( _lastModified, other._lastModified );
-        if (lastModifiedComparison != 0) { return lastModifiedComparison; }
+        if ( lastModifiedComparison != 0 ) { return lastModifiedComparison; }
 
         return DateCreated.CompareTo( other.DateCreated );
     }
     public override bool Equals( TRecord? other )
     {
-        if (other is null) { return false; }
+        if ( other is null ) { return false; }
 
-        if (ReferenceEquals( this, other )) { return true; }
+        if ( ReferenceEquals( this, other ) ) { return true; }
 
         return base.Equals( other ) && _createdBy == other._createdBy && Nullable.Equals( _lastModified, other._lastModified ) && UserID.Equals( other.UserID ) && DateCreated.Equals( other.DateCreated );
     }
@@ -76,11 +76,11 @@ public abstract record TableRecord<TRecord> : BaseCollectionsRecord<TRecord, lon
     }
 
 
-    public override int GetHashCode() => HashCode.Combine( base.GetHashCode(), _createdBy, _lastModified, UserID, DateCreated );
+    public override int GetHashCode() => HashCode.Combine( CreatedBy, LastModified, UserID, DateCreated );
 
 
-    public async ValueTask<UserRecord?> GetUser( DbConnection connection, DbTransaction? transaction, DbTableBase<UserRecord> table, CancellationToken token ) => await table.Get( connection, transaction, true, GetDynamicParameters( this ), token );
-    public async ValueTask<UserRecord?> GetUserWhoCreated( DbConnection connection, DbTransaction? transaction, DbTableBase<UserRecord> table, CancellationToken token ) => await table.Get( connection, transaction, CreatedBy, token );
+    public async ValueTask<UserRecord?> GetUser( DbConnection           connection, DbTransaction? transaction, Database db, CancellationToken token ) => await db.Users.Get( connection, transaction, true,      GetDynamicParameters( this ), token );
+    public async ValueTask<UserRecord?> GetUserWhoCreated( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => await db.Users.Get( connection, transaction, CreatedBy, token );
 
 
     public TRecord NewID( in long id ) => (TRecord)(this with

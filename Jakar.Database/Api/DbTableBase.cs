@@ -13,12 +13,13 @@ public class DbTableBase<TRecord> : ObservableClass, IConnectableDb<TRecord>, IA
     protected readonly IConnectableDb           _database;
     protected readonly object?                  _nullParameters = null;
     protected readonly TypePropertiesCache      _propertiesCache;
-    internal static    IReadOnlyList<TRecord>   Empty         { get; } = new List<TRecord>();
-    public             DbInstance               Instance      => _database.Instance;
-    public             IDGenerator<TRecord>     IDs           => new(this);
-    public             RecordGenerator<TRecord> Records       => new(this);
-    public             string                   CurrentSchema => _database.CurrentSchema;
-    public virtual     string                   TableName     { get; } = typeof(TRecord).GetTableName();
+    internal static    IReadOnlyList<TRecord>   Empty           { get; } = new List<TRecord>();
+    public             DbInstance               Instance        => _database.Instance;
+    public             IDGenerator<TRecord>     IDs             => new(this);
+    public             RecordGenerator<TRecord> Records         => new(this);
+    public             string                   CurrentSchema   => _database.CurrentSchema;
+    public virtual     string                   TableName       { get; } = typeof(TRecord).GetTableName();
+    public             string                   SchemaTableName => $"{CurrentSchema}.{TableName}";
 
 
     protected virtual string IDKey => Instance switch
