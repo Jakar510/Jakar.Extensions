@@ -19,7 +19,7 @@ public sealed class CacheEntry<TRecord> : ObservableClass, IEquatable<TRecord>, 
         get => _value ?? throw new NullReferenceException( nameof(_value) );
         set
         {
-            if (!SetProperty( ref _value, value )) { return; }
+            if ( !SetProperty( ref _value, value ) ) { return; }
 
             _hash     = value.GetHashCode();
             _lastTime = DateTimeOffset.Now;
@@ -27,12 +27,48 @@ public sealed class CacheEntry<TRecord> : ObservableClass, IEquatable<TRecord>, 
     }
 
 
-    public CacheEntry( TRecord           value ) => Value = value;
-    public override bool Equals( object? obj ) => ReferenceEquals( this, obj ) || obj is CacheEntry<TRecord> other && Equals( other );
-    public override int GetHashCode() => Value.GetHashCode();
+    public CacheEntry( TRecord value ) => Value = value;
 
+
+    internal TRecord Saved()
+    {
+        _hash = _value?.GetHashCode() ?? 0;
+        return Value;
+    }
 
     public bool HasExpired( in TimeSpan time ) => DateTimeOffset.Now - _lastTime >= time;
+
+
+    public override bool Equals( object? obj ) => ReferenceEquals( this, obj ) || obj is CacheEntry<TRecord> other && Equals( other );
+    public override int GetHashCode() => Value.GetHashCode();
+    public int CompareTo( object? other )
+    {
+        if ( other is null ) { return 1; }
+
+        if ( ReferenceEquals( this, other ) ) { return 0; }
+
+        return other is CacheEntry<TRecord> entry
+                   ? CompareTo( entry )
+                   : throw new ArgumentException( $"Object must be of type {nameof(CacheEntry<TRecord>)}" );
+    }
+    public int CompareTo( CacheEntry<TRecord>? other )
+    {
+        if ( other is null ) { return 1; }
+
+        if ( ReferenceEquals( this, other ) ) { return 0; }
+
+        return Value.CompareTo( other.Value );
+    }
+    public int CompareTo( TRecord? other ) => Value.CompareTo( other );
+    public bool Equals( CacheEntry<TRecord>? other )
+    {
+        if ( other is null ) { return false; }
+
+        if ( ReferenceEquals( this, other ) ) { return true; }
+
+        return Value.Equals( other.Value );
+    }
+    public bool Equals( TRecord? other ) => Value.Equals( other );
 
 
     public static bool operator ==( CacheEntry<TRecord>?         left, CacheEntry<TRecord>? right ) => Equalizer<CacheEntry<TRecord>>.Instance.Equals( left, right );
@@ -42,34 +78,4 @@ public sealed class CacheEntry<TRecord> : ObservableClass, IEquatable<TRecord>, 
     public static bool operator !=( CacheEntry<TRecord>?         left, CacheEntry<TRecord>? right ) => !Equalizer<CacheEntry<TRecord>>.Instance.Equals( left, right );
     public static bool operator <( CacheEntry<TRecord>?          left, CacheEntry<TRecord>? right ) => Sorter<CacheEntry<TRecord>>.Instance.Compare( left, right ) < 0;
     public static bool operator <=( CacheEntry<TRecord>?         left, CacheEntry<TRecord>? right ) => Sorter<CacheEntry<TRecord>>.Instance.Compare( left, right ) <= 0;
-    public int CompareTo( object? other )
-    {
-        if (other is null) { return 1; }
-
-        if (ReferenceEquals( this, other )) { return 0; }
-
-        return other is CacheEntry<TRecord> entry
-                   ? CompareTo( entry )
-                   : throw new ArgumentException( $"Object must be of type {nameof(CacheEntry<TRecord>)}" );
-    }
-    public int CompareTo( CacheEntry<TRecord>? other )
-    {
-        if (other is null) { return 1; }
-
-        if (ReferenceEquals( this, other )) { return 0; }
-
-        return Value.CompareTo( other.Value );
-    }
-    public int CompareTo( TRecord? other ) => Value.CompareTo( other );
-    public bool Equals( CacheEntry<TRecord>? other )
-    {
-        if (other is null) { return false; }
-
-        if (ReferenceEquals( this, other )) { return true; }
-
-        return Value.Equals( other.Value );
-    }
-
-
-    public bool Equals( TRecord? other ) => Value.Equals( other );
 }

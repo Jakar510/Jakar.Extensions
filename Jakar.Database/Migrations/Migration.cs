@@ -9,13 +9,15 @@ namespace Jakar.Database.Migrations;
 ///         <see href = "https://fluentmigrator.github.io/articles/fluent-interface.html" />
 ///     </para>
 /// </summary>
-public abstract class Migration<TRecord> : Migration where TRecord : class
+public abstract class Migration<TRecord> : Migration where TRecord : TableRecord<TRecord>
 {
-    public string CurrentScheme { get; }
-    public string TableName     { get; } = typeof(TRecord).GetTableName();
+    /// <summary> This is due to FluentMigrations default scheme value -- that can't be changed -- </summary>
+    public string CurrentScheme { get; init; } = "public";
+
+    public string TableName { get; } = typeof(TRecord).GetTableName();
 
 
-    protected Migration( string currentScheme ) => CurrentScheme = currentScheme;
+    protected Migration() : base() { }
 
 
     protected IAlterTableAddColumnOrAlterColumnOrSchemaOrDescriptionSyntax AlterTable() => Alter.Table( TableName );
@@ -24,7 +26,7 @@ public abstract class Migration<TRecord> : Migration where TRecord : class
     protected ISchemaSchemaSyntax CheckSchema()
     {
         ISchemaSchemaSyntax schema = Schema.Schema( CurrentScheme );
-        if (!schema.Exists()) { Create.Schema( CurrentScheme ); }
+        if ( !schema.Exists() ) { Create.Schema( CurrentScheme ); }
 
         return schema;
     }
@@ -34,8 +36,32 @@ public abstract class Migration<TRecord> : Migration where TRecord : class
        .Table( TableName );
 
 
-    protected ICreateTableWithColumnSyntax CreateTable() => Create.Table( TableName )
-                                                                  .InSchema( CurrentScheme );
+    protected virtual ICreateTableWithColumnSyntax CreateTable()
+    {
+        var table = Create.Table( TableName )
+                          .InSchema( CurrentScheme );
+
+
+        table.WithColumn( nameof(TableRecord<TRecord>.ID) )
+             .AsInt64()
+             .NotNullable()
+             .PrimaryKey()
+             .Identity();
+
+        table.WithColumn( nameof(TableRecord<TRecord>.UserID) )
+             .AsGuid()
+             .NotNullable();
+
+        table.WithColumn( nameof(TableRecord<TRecord>.CreatedBy) )
+             .AsInt64()
+             .Nullable();
+
+        table.WithColumn( nameof(TableRecord<TRecord>.DateCreated) )
+             .AsDateTime2()
+             .NotNullable();
+
+        return table;
+    }
 
 
     protected void DeleteTable() => Delete.Table( TableName )

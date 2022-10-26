@@ -15,12 +15,8 @@ public sealed record UserRoleRecord : TableRecord<UserRoleRecord>
     public long RoleID { get; init; }
 
 
-    public UserRoleRecord( UserRecord user, RoleRecord role )
-    {
-        UserID      = user.UserID;
-        RoleID      = role.ID;
-        DateCreated = DateTimeOffset.UtcNow;
-    }
+    public UserRoleRecord() { }
+    public UserRoleRecord( UserRecord user, RoleRecord role ) : base( user ) => RoleID = role.ID;
 
 
     public override int CompareTo( UserRoleRecord? other )
@@ -36,12 +32,6 @@ public sealed record UserRoleRecord : TableRecord<UserRoleRecord>
     }
 
 
-    public static DynamicParameters GetDynamicParameters( UserRecord user )
-    {
-        var parameters = new DynamicParameters();
-        parameters.Add( nameof(UserID), user.UserID );
-        return parameters;
-    }
     public static DynamicParameters GetDynamicParameters( RoleRecord record )
     {
         var parameters = new DynamicParameters();
@@ -50,8 +40,7 @@ public sealed record UserRoleRecord : TableRecord<UserRoleRecord>
     }
     public static DynamicParameters GetDynamicParameters( UserRecord user, RoleRecord record )
     {
-        var parameters = new DynamicParameters();
-        parameters.Add( nameof(UserID), user.UserID );
+        DynamicParameters parameters = GetDynamicParameters( user );
         parameters.Add( nameof(RoleID), record.ID );
         return parameters;
     }

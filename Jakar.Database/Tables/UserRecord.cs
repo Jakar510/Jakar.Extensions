@@ -498,7 +498,7 @@ public sealed record UserRecord : TableRecord<UserRecord>, IUserRecord<UserRecor
 
     public async IAsyncEnumerable<GroupRecord> GetGroups( DbConnection connection, DbTransaction? transaction, Database db, [EnumeratorCancellation] CancellationToken token = default )
     {
-        await foreach ( UserGroupRecord record in db.UserGroups.Where( connection, transaction, true, UserGroupRecord.GetDynamicParameters( this ), token ) )
+        foreach ( UserGroupRecord record in await db.UserGroups.Where( connection, transaction, true, UserGroupRecord.GetDynamicParameters( this ), token ) )
         {
             GroupRecord? role = await db.Groups.Get( connection, transaction, record.GroupID, token );
             if ( role is not null ) { yield return role; }
@@ -506,7 +506,7 @@ public sealed record UserRecord : TableRecord<UserRecord>, IUserRecord<UserRecor
     }
     public async IAsyncEnumerable<RoleRecord> GetRoles( DbConnection connection, DbTransaction? transaction, Database db, [EnumeratorCancellation] CancellationToken token = default )
     {
-        await foreach ( UserRoleRecord record in db.UserRoles.Where( connection, transaction, true, UserRoleRecord.GetDynamicParameters( this ), token ) )
+        foreach ( UserRoleRecord record in await db.UserRoles.Where( connection, transaction, true, UserRoleRecord.GetDynamicParameters( this ), token ) )
         {
             RoleRecord? role = await db.Roles.Get( connection, transaction, record.RoleID, token );
             if ( role is not null ) { yield return role; }

@@ -18,7 +18,7 @@ public sealed class TableCache<TRecord> : Service, IHostedService, IReadOnlyColl
     public IEnumerable<long>    Changed        => from entry in _records.Values where entry.HasChanged select entry.ID;
     public IEnumerable<long>    Keys           => _records.Keys;
     public IEnumerable<TRecord> Records        => _records.Values.Select( x => x.Value );
-    public IEnumerable<TRecord> RecordsChanged => from entry in _records.Values where entry.HasChanged select entry.Value;
+    public IEnumerable<TRecord> RecordsChanged => from entry in _records.Values where entry.HasChanged select entry.Saved();
     public IEnumerable<TRecord> RecordsExpired => from entry in _records.Values where entry.HasExpired( _expireTime ) select entry.Value;
     public int                  Count          => _records.Count;
     public TRecord?             Current        => this[_generator.Current];
@@ -42,20 +42,20 @@ public sealed class TableCache<TRecord> : Service, IHostedService, IReadOnlyColl
 
     public async ValueTask AddOrUpdate( IAsyncEnumerable<TRecord?> records, CancellationToken token = default )
     {
-        await foreach (TRecord? record in records.WithCancellation( token ))
+        await foreach ( TRecord? record in records.WithCancellation( token ) )
         {
-            if (record is null) { continue; }
+            if ( record is null ) { continue; }
 
             AddOrUpdate( record );
         }
     }
     public void AddOrUpdate( IEnumerable<TRecord> records )
     {
-        foreach (TRecord? record in records) { AddOrUpdate( record ); }
+        foreach ( TRecord? record in records ) { AddOrUpdate( record ); }
     }
     public void AddOrUpdate( TRecord record )
     {
-        if (Contains( record.ID ))
+        if ( Contains( record.ID ) )
         {
             _records[record.ID]
                .Value = record;
@@ -75,14 +75,16 @@ public sealed class TableCache<TRecord> : Service, IHostedService, IReadOnlyColl
     }
     private async ValueTask Refresh( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
-        if (HasChanged)
+        if ( HasChanged )
         {
             await _table.Update( connection, transaction, RecordsChanged, token );
-            await AddOrUpdate( _table.Get( connection, transaction, Changed, token ), token );
+            TRecord[] changed = await _table.Get( connection, transaction, Changed, token );
+            AddOrUpdate( changed );
+            return;
         }
 
 
-        IReadOnlyList<TRecord> records = await _table.All( connection, transaction, token );
+        TRecord[] records = await _table.All( connection, transaction, token );
         _records.Clear();
         AddOrUpdate( records );
     }
@@ -91,7 +93,7 @@ public sealed class TableCache<TRecord> : Service, IHostedService, IReadOnlyColl
 
     public bool TryGetValue( long key, [NotNullWhen( true )] out TRecord? value )
     {
-        if (_records.TryGetValue( key, out CacheEntry<TRecord>? entry ))
+        if ( _records.TryGetValue( key, out CacheEntry<TRecord>? entry ) )
         {
             value = entry.Value;
             return true;
@@ -107,7 +109,7 @@ public sealed class TableCache<TRecord> : Service, IHostedService, IReadOnlyColl
     public bool TryRemove( long    key ) => _records.TryRemove( key, out _ );
     public bool TryRemove( long key, [NotNullWhen( true )] out TRecord? value )
     {
-        if (_records.TryRemove( key, out CacheEntry<TRecord>? entry ))
+        if ( _records.TryRemove( key, out CacheEntry<TRecord>? entry ) )
         {
             value = entry.Value;
             return true;
@@ -135,14 +137,14 @@ public sealed class TableCache<TRecord> : Service, IHostedService, IReadOnlyColl
     {
         using var timer = new PeriodicTimer( _refreshTime );
 
-        while (token.ShouldContinue())
+        while ( token.ShouldContinue() )
         {
             try
             {
                 await timer.WaitForNextTickAsync( token );
                 await _table.Call( Refresh, token );
             }
-            catch (Exception e) { _logger.LogCritical( e, default, Array.Empty<object?>() ); }
+            catch ( Exception e ) { _logger.LogCritical( e, default, Array.Empty<object?>() ); }
         }
     }
     public async Task StopAsync( CancellationToken token ) => await _table.Update( RecordsChanged, token );

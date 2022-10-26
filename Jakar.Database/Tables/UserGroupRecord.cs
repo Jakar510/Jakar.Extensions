@@ -12,19 +12,9 @@ public record UserGroupRecord : TableRecord<UserGroupRecord>
 
 
     public UserGroupRecord() { }
-    public UserGroupRecord( UserRecord user, GroupRecord group )
-    {
-        UserID  = user.UserID;
-        GroupID = group.ID;
-    }
+    public UserGroupRecord( UserRecord user, GroupRecord group ) : base( user ) => GroupID = group.ID;
 
 
-    public static DynamicParameters GetDynamicParameters( UserRecord user )
-    {
-        var parameters = new DynamicParameters();
-        parameters.Add( nameof(UserID), user.UserID );
-        return parameters;
-    }
     public static DynamicParameters GetDynamicParameters( GroupRecord record )
     {
         var parameters = new DynamicParameters();
@@ -33,8 +23,7 @@ public record UserGroupRecord : TableRecord<UserGroupRecord>
     }
     public static DynamicParameters GetDynamicParameters( UserRecord user, GroupRecord record )
     {
-        var parameters = new DynamicParameters();
-        parameters.Add( nameof(UserID),  user.UserID );
+        DynamicParameters parameters = GetDynamicParameters(user);
         parameters.Add( nameof(GroupID), record.ID );
         return parameters;
     }

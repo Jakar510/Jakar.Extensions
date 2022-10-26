@@ -13,7 +13,7 @@ public class DbTableBase<TRecord> : ObservableClass, IConnectableDb<TRecord>, IA
     protected readonly IConnectableDb           _database;
     protected readonly object?                  _nullParameters = null;
     protected readonly TypePropertiesCache      _propertiesCache;
-    internal static    IReadOnlyList<TRecord>   Empty           { get; } = new List<TRecord>();
+    internal static    TRecord[]                Empty           => Array.Empty<TRecord>();
     public             DbInstance               Instance        => _database.Instance;
     public             IDGenerator<TRecord>     IDs             => new(this);
     public             RecordGenerator<TRecord> Records         => new(this);
@@ -37,21 +37,29 @@ public class DbTableBase<TRecord> : ObservableClass, IConnectableDb<TRecord>, IA
     }
 
 
-    public ValueTask<IReadOnlyList<TRecord>> All( CancellationToken token = default ) => this.Call( All, token );
-    [SuppressMessage( "ReSharper", "ReplaceConditionalExpressionWithNullCoalescing" )]
-    public virtual async ValueTask<IReadOnlyList<TRecord>> All( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
+    protected virtual T[] Convert<T>( IEnumerable<T> enumerable )
     {
-        string sql = $"SELECT * FROM {CurrentSchema}.{TableName}";
+        return enumerable switch
+               {
+                   List<T> list => list.GetInternalArray(),
+                   T[] array    => array,
+                   _            => enumerable.ToArray()
+               };
+    }
+
+
+    public ValueTask<TRecord[]> All( CancellationToken token = default ) => this.Call( All, token );
+    public virtual async ValueTask<TRecord[]> All( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
+    {
+        string sql = $"SELECT * FROM {SchemaTableName}";
 
         if ( token.IsCancellationRequested ) { return Empty; }
 
+
         try
         {
-            IEnumerable<TRecord> items = await connection.QueryAsync<TRecord>( sql, default, transaction );
-
-            return items is List<TRecord> list
-                       ? list
-                       : items.ToArray();
+            IEnumerable<TRecord> records = await connection.QueryAsync<TRecord>( sql, default, transaction );
+            return Convert( records );
         }
         catch ( Exception e ) { throw new SqlException( sql, _nullParameters, e ); }
     }
@@ -92,7 +100,7 @@ public class DbTableBase<TRecord> : ObservableClass, IConnectableDb<TRecord>, IA
     public ValueTask<long> Count( CancellationToken token = default ) => this.Call( Count, token );
     public virtual async ValueTask<long> Count( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
-        string sql = $"SELECT COUNT({IDKey}) FROM {CurrentSchema}.{TableName}";
+        string sql = $"SELECT COUNT({IDKey}) FROM {SchemaTableName}";
 
         if ( token.IsCancellationRequested ) { return default; }
 
@@ -108,7 +116,7 @@ public class DbTableBase<TRecord> : ObservableClass, IConnectableDb<TRecord>, IA
     public ValueTask Delete( DbConnection              connection, DbTransaction     transaction, IEnumerable<TRecord> records, CancellationToken token = default ) => Delete( connection, transaction, records.Select( x => x.ID ), token );
     public async ValueTask Delete( DbConnection connection, DbTransaction transaction, IAsyncEnumerable<TRecord> records, CancellationToken token = default )
     {
-        var ids = new List<long>();
+        List<long> ids = new List<long>();
         await foreach ( TRecord record in records.WithCancellation( token ) ) { ids.Add( record.ID ); }
 
         await Delete( connection, transaction, ids, token );
@@ -120,14 +128,14 @@ public class DbTableBase<TRecord> : ObservableClass, IConnectableDb<TRecord>, IA
     public ValueTask Delete( IAsyncEnumerable<long> ids, CancellationToken token = default ) => this.TryCall( Delete, ids, token );
     public async ValueTask Delete( DbConnection connection, DbTransaction transaction, IAsyncEnumerable<long> ids, CancellationToken token = default )
     {
-        var records = new List<long>();
+        List<long> records = new List<long>();
         await foreach ( long id in ids.WithCancellation( token ) ) { records.Add( id ); }
 
         await Delete( connection, transaction, records, token );
     }
     public virtual async ValueTask Delete( DbConnection connection, DbTransaction transaction, long id, CancellationToken token = default )
     {
-        string cmd = $"DELETE FROM {CurrentSchema}.{TableName} WHERE {IDKey} = {id};";
+        string cmd = $"DELETE FROM {SchemaTableName} WHERE {IDKey} = {id};";
 
         if ( token.IsCancellationRequested ) { return; }
 
@@ -135,7 +143,7 @@ public class DbTableBase<TRecord> : ObservableClass, IConnectableDb<TRecord>, IA
     }
     public virtual async ValueTask Delete( DbConnection connection, DbTransaction transaction, IEnumerable<long> ids, CancellationToken token = default )
     {
-        string sql = $"DELETE FROM {CurrentSchema}.{TableName} WHERE {IDKey} in ( {string.Join( ',', ids.Select( x => $"'{x}'" ) )} );";
+        string sql = $"DELETE FROM {SchemaTableName} WHERE {IDKey} in ( {string.Join( ',', ids.Select( x => $"'{x}'" ) )} );";
 
         if ( token.IsCancellationRequested ) { return; }
 
@@ -147,7 +155,7 @@ public class DbTableBase<TRecord> : ObservableClass, IConnectableDb<TRecord>, IA
     public ValueTask<TRecord?> First( CancellationToken token = default ) => this.Call( First, token );
     public virtual async ValueTask<TRecord?> First( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
-        string sql = $"SELECT * FROM {CurrentSchema}.{TableName} ORDER BY {IDKey} ASC LIMIT 1";
+        string sql = $"SELECT * FROM {SchemaTableName} ORDER BY {IDKey} ASC LIMIT 1";
 
         if ( token.IsCancellationRequested ) { return default; }
 
@@ -159,25 +167,25 @@ public class DbTableBase<TRecord> : ObservableClass, IConnectableDb<TRecord>, IA
     public ValueTask<TRecord?> FirstOrDefault( CancellationToken token = default ) => this.Call( FirstOrDefault, token );
     public virtual async ValueTask<TRecord?> FirstOrDefault( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
-        string sql = $"SELECT * FROM {CurrentSchema}.{TableName} ORDER BY {IDKey} ASC LIMIT 1";
+        string sql = $"SELECT * FROM {SchemaTableName} ORDER BY {IDKey} ASC LIMIT 1";
 
         if ( token.IsCancellationRequested ) { return default; }
 
         try { return await connection.QueryFirstOrDefaultAsync<TRecord>( sql, default, transaction ); }
         catch ( Exception e ) { throw new SqlException( sql, _nullParameters, e ); }
     }
-    public IAsyncEnumerable<TRecord?> Get( IEnumerable<long>      ids, CancellationToken token = default ) => this.Call( Get, ids, token );
-    public IAsyncEnumerable<TRecord?> Get( IAsyncEnumerable<long> ids, CancellationToken token = default ) => this.Call( Get, ids, token );
-    public async IAsyncEnumerable<TRecord?> Get( DbConnection connection, DbTransaction? transaction, IAsyncEnumerable<long> ids, [EnumeratorCancellation] CancellationToken token = default )
+    public ValueTask<TRecord[]> Get( IEnumerable<long>      ids, CancellationToken token = default ) => this.Call( Get, ids, token );
+    public ValueTask<TRecord[]> Get( IAsyncEnumerable<long> ids, CancellationToken token = default ) => this.Call( Get, ids, token );
+    public async ValueTask<TRecord[]> Get( DbConnection connection, DbTransaction? transaction, IAsyncEnumerable<long> ids, [EnumeratorCancellation] CancellationToken token = default )
     {
-        var values = new List<long>();
+        List<long> values = new List<long>();
         await foreach ( long id in ids.WithCancellation( token ) ) { values.Add( id ); }
 
-        await foreach ( TRecord? record in Get( connection, transaction, values, token ) ) { yield return record; }
+        return await Get( connection, transaction, values, token );
     }
-    public virtual IAsyncEnumerable<TRecord?> Get( DbConnection connection, DbTransaction? transaction, IEnumerable<long> ids, [EnumeratorCancellation] CancellationToken token = default )
+    public virtual ValueTask<TRecord[]> Get( DbConnection connection, DbTransaction? transaction, IEnumerable<long> ids, [EnumeratorCancellation] CancellationToken token = default )
     {
-        string sql = $"SELECT * FROM {CurrentSchema}.{TableName} WHERE {IDKey} in {string.Join( ',', ids.Select( x => $"'{x}'" ) )}";
+        string sql = $"SELECT * FROM {SchemaTableName} WHERE {IDKey} in {string.Join( ',', ids.Select( x => $"'{x}'" ) )}";
 
         return Where( connection, transaction, sql, default, token );
     }
@@ -189,11 +197,11 @@ public class DbTableBase<TRecord> : ObservableClass, IConnectableDb<TRecord>, IA
     public async ValueTask<TRecord?> Get( DbConnection connection, DbTransaction?    transaction, long id, CancellationToken token = default ) => await Get( connection, transaction, nameof(IDataBaseID.ID), id, token );
     public virtual async ValueTask<TRecord?> Get( DbConnection connection, DbTransaction? transaction, bool matchAll, DynamicParameters parameters, CancellationToken token = default )
     {
-        string sql = new StringBuilder( $"SELECT * FROM {CurrentSchema}.{TableName} WHERE " ).AppendJoin( matchAll
-                                                                                                              ? "AND"
-                                                                                                              : "OR",
-                                                                                                          parameters.ParameterNames.Select( x => $"{x} = @{x}" ) )
-                                                                                             .ToString();
+        string sql = new StringBuilder( $"SELECT * FROM {SchemaTableName} WHERE " ).AppendJoin( matchAll
+                                                                                                    ? "AND"
+                                                                                                    : "OR",
+                                                                                                parameters.ParameterNames.Select( x => $"{x} = @{x}" ) )
+                                                                                   .ToString();
 
 
         if ( token.IsCancellationRequested ) { return default; }
@@ -221,10 +229,10 @@ public class DbTableBase<TRecord> : ObservableClass, IConnectableDb<TRecord>, IA
     }
     public virtual async ValueTask<TRecord?> Get<TValue>( DbConnection connection, DbTransaction? transaction, string columnName, TValue? value, CancellationToken token = default )
     {
-        var parameters = new DynamicParameters();
+        DynamicParameters parameters = new DynamicParameters();
         parameters.Add( nameof(value), value );
 
-        string sql = $"SELECT * FROM {CurrentSchema}.{TableName} WHERE {_propertiesCache.Get( columnName ).ColumnName} = @{nameof(value)}";
+        string sql = $"SELECT * FROM {SchemaTableName} WHERE {_propertiesCache.Get( columnName ).ColumnName} = @{nameof(value)}";
 
         if ( token.IsCancellationRequested ) { return default; }
 
@@ -245,19 +253,19 @@ public class DbTableBase<TRecord> : ObservableClass, IConnectableDb<TRecord>, IA
         try { return await connection.QuerySingleAsync<long>( sql, parameters, transaction ); }
         catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
     }
-
-
     public ValueTask<long> GetID<TValue>( string columnName, TValue value, CancellationToken token = default ) => this.Call( GetID, columnName, value, token );
     public virtual async ValueTask<long> GetID<TValue>( DbConnection connection, DbTransaction? transaction, string columnName, TValue value, CancellationToken token = default )
     {
-        string sql        = $"SELECT {IDKey} FROM {CurrentSchema}.{TableName} WHERE {_propertiesCache.Get( columnName ).ColumnName} = @{nameof(value)}";
-        var    parameters = new DynamicParameters();
+        string            sql        = $"SELECT {IDKey} FROM {SchemaTableName} WHERE {_propertiesCache.Get( columnName ).ColumnName} = @{nameof(value)}";
+        DynamicParameters parameters = new DynamicParameters();
         parameters.Add( nameof(value), value );
         token.ThrowIfCancellationRequested();
 
         try { return await connection.QuerySingleAsync<long>( sql, parameters, transaction ); }
         catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
     }
+
+
     public IAsyncEnumerable<TRecord> Insert( IEnumerable<TRecord>      records, CancellationToken token = default ) => this.TryCall( Insert, records, token );
     public IAsyncEnumerable<TRecord> Insert( IAsyncEnumerable<TRecord> records, CancellationToken token = default ) => this.TryCall( Insert, records, token );
     public async IAsyncEnumerable<TRecord> Insert( DbConnection connection, DbTransaction transaction, IEnumerable<TRecord> records, [EnumeratorCancellation] CancellationToken token = default )
@@ -268,8 +276,6 @@ public class DbTableBase<TRecord> : ObservableClass, IConnectableDb<TRecord>, IA
     {
         await foreach ( TRecord record in records.WithCancellation( token ) ) { yield return await Insert( connection, transaction, record, token ); }
     }
-
-
     public ValueTask<TRecord> Insert( TRecord record, CancellationToken token = default ) => this.TryCall( Insert, record, token );
     public virtual async ValueTask<TRecord> Insert( DbConnection connection, DbTransaction transaction, TRecord record, CancellationToken token = default )
     {
@@ -277,16 +283,16 @@ public class DbTableBase<TRecord> : ObservableClass, IConnectableDb<TRecord>, IA
                                                        .ToList();
 
 
-        var sbColumnList = new StringBuilder();
+        StringBuilder sbColumnList = new StringBuilder();
         sbColumnList.AppendJoin( ',', descriptors.Select( x => x.ColumnName ) );
 
 
-        var sbParameterList = new StringBuilder();
+        StringBuilder sbParameterList = new StringBuilder();
         sbParameterList.AppendJoin( ',', descriptors.Select( x => x.VariableName ) );
 
 
-        string sql        = $"INSERT INTO {CurrentSchema}.{TableName} ({sbColumnList}) values ({sbParameterList});";
-        var    parameters = new DynamicParameters( record );
+        string            sql        = $"INSERT INTO {SchemaTableName} ({sbColumnList}) values ({sbParameterList});";
+        DynamicParameters parameters = new DynamicParameters( record );
 
 
         if ( token.IsCancellationRequested ) { return record; }
@@ -303,7 +309,7 @@ public class DbTableBase<TRecord> : ObservableClass, IConnectableDb<TRecord>, IA
     public ValueTask<TRecord?> Last( CancellationToken token = default ) => this.Call( Last, token );
     public virtual async ValueTask<TRecord?> Last( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
-        string sql = $"SELECT * FROM {CurrentSchema}.{TableName} ORDER BY {IDKey} DESC LIMIT 1";
+        string sql = $"SELECT * FROM {SchemaTableName} ORDER BY {IDKey} DESC LIMIT 1";
 
         if ( token.IsCancellationRequested ) { return default; }
 
@@ -317,7 +323,7 @@ public class DbTableBase<TRecord> : ObservableClass, IConnectableDb<TRecord>, IA
     {
         if ( token.IsCancellationRequested ) { return default; }
 
-        string sql = $"SELECT * FROM {CurrentSchema}.{TableName} ORDER BY {IDKey} DESC LIMIT 1";
+        string sql = $"SELECT * FROM {SchemaTableName} ORDER BY {IDKey} DESC LIMIT 1";
 
         try { return await connection.QueryFirstOrDefaultAsync<TRecord>( sql, default, transaction ); }
         catch ( Exception e ) { throw new SqlException( sql, _nullParameters, e ); }
@@ -327,9 +333,9 @@ public class DbTableBase<TRecord> : ObservableClass, IConnectableDb<TRecord>, IA
     public ValueTask<TRecord?> Next( long id, CancellationToken token = default ) => this.Call( Next, id, token );
     public virtual async ValueTask<TRecord?> Next( DbConnection connection, DbTransaction? transaction, long id, CancellationToken token = default )
     {
-        var parameters = new DynamicParameters();
+        DynamicParameters parameters = new DynamicParameters();
         parameters.Add( nameof(IDataBaseID.ID), id );
-        string sql = @$"SELECT * FROM {CurrentSchema}.{TableName} WHERE ( id = IFNULL((SELECT MIN({IDKey}) FROM {CurrentSchema}.{TableName} WHERE {IDKey} > @{nameof(IDataBaseID.ID)}), 0) )";
+        string sql = @$"SELECT * FROM {SchemaTableName} WHERE ( id = IFNULL((SELECT MIN({IDKey}) FROM {SchemaTableName} WHERE {IDKey} > @{nameof(IDataBaseID.ID)}), 0) )";
         if ( token.IsCancellationRequested ) { return default; }
 
         try { return await connection.ExecuteScalarAsync<TRecord>( sql, parameters, transaction ); }
@@ -340,10 +346,10 @@ public class DbTableBase<TRecord> : ObservableClass, IConnectableDb<TRecord>, IA
     public ValueTask<long> NextID( long id, CancellationToken token = default ) => this.Call( NextID, id, token );
     public virtual async ValueTask<long> NextID( DbConnection connection, DbTransaction? transaction, long id, CancellationToken token = default )
     {
-        var parameters = new DynamicParameters();
+        DynamicParameters parameters = new DynamicParameters();
         parameters.Add( nameof(IDataBaseID.ID), id );
 
-        string sql = @$"SELECT {IDKey} FROM {CurrentSchema}.{TableName} WHERE ( id = IFNULL((SELECT MIN({IDKey}) FROM {CurrentSchema}.{TableName} WHERE {IDKey} > @{nameof(IDataBaseID.ID)}), 0) )";
+        string sql = @$"SELECT {IDKey} FROM {SchemaTableName} WHERE ( id = IFNULL((SELECT MIN({IDKey}) FROM {SchemaTableName} WHERE {IDKey} > @{nameof(IDataBaseID.ID)}), 0) )";
         if ( token.IsCancellationRequested ) { return default; }
 
         try { return await connection.ExecuteScalarAsync<long>( sql, parameters, transaction ); }
@@ -351,10 +357,10 @@ public class DbTableBase<TRecord> : ObservableClass, IConnectableDb<TRecord>, IA
     }
 
 
-    public IAsyncEnumerable<TRecord> Random( long count, CancellationToken token = default ) => this.Call( Random, count, token );
-    public virtual IAsyncEnumerable<TRecord> Random( DbConnection connection, DbTransaction? transaction, long count, [EnumeratorCancellation] CancellationToken token = default )
+    public ValueTask<TRecord[]> Random( long count, CancellationToken token = default ) => this.Call( Random, count, token );
+    public virtual ValueTask<TRecord[]> Random( DbConnection connection, DbTransaction? transaction, long count, [EnumeratorCancellation] CancellationToken token = default )
     {
-        string sql = $"SELECT * FROM {CurrentSchema}.{TableName} WHERE {IDKey} >= RAND() * ( SELECT MAX ({IDKey}) FROM table ) ORDER BY {IDKey} LIMIT {count}";
+        string sql = $"SELECT * FROM {SchemaTableName} WHERE {IDKey} >= RAND() * ( SELECT MAX ({IDKey}) FROM table ) ORDER BY {IDKey} LIMIT {count}";
 
         return Where( connection, transaction, sql, default, token );
     }
@@ -362,7 +368,7 @@ public class DbTableBase<TRecord> : ObservableClass, IConnectableDb<TRecord>, IA
     public ValueTask<TRecord?> Random( UserRecord        user, CancellationToken token = default ) => this.Call( Random, user, token );
     public virtual async ValueTask<TRecord?> Random( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
-        string sql = $"SELECT * FROM {CurrentSchema}.{TableName} WHERE {IDKey} >= RAND() * ( SELECT MAX ({IDKey}) FROM table ) ORDER BY {IDKey} LIMIT 1";
+        string sql = $"SELECT * FROM {SchemaTableName} WHERE {IDKey} >= RAND() * ( SELECT MAX ({IDKey}) FROM table ) ORDER BY {IDKey} LIMIT 1";
 
         if ( token.IsCancellationRequested ) { return default; }
 
@@ -371,10 +377,10 @@ public class DbTableBase<TRecord> : ObservableClass, IConnectableDb<TRecord>, IA
     }
     public virtual async ValueTask<TRecord?> Random( DbConnection connection, DbTransaction? transaction, UserRecord user, CancellationToken token = default )
     {
-        var param = new DynamicParameters();
+        DynamicParameters param = new DynamicParameters();
         param.Add( nameof(TableRecord<TRecord>.UserID), user.UserID );
 
-        string sql = $"SELECT * FROM {CurrentSchema}.{TableName} WHERE {IDKey} >= RAND() * ( SELECT MAX ({IDKey}) FROM table ) AND {nameof(TableRecord<TRecord>.UserID)} = @{nameof(TableRecord<TRecord>.UserID)} ORDER BY {IDKey} LIMIT 1";
+        string sql = $"SELECT * FROM {SchemaTableName} WHERE {IDKey} >= RAND() * ( SELECT MAX ({IDKey}) FROM table ) AND {nameof(TableRecord<TRecord>.UserID)} = @{nameof(TableRecord<TRecord>.UserID)} ORDER BY {IDKey} LIMIT 1";
 
         if ( token.IsCancellationRequested ) { return default; }
 
@@ -439,10 +445,10 @@ public class DbTableBase<TRecord> : ObservableClass, IConnectableDb<TRecord>, IA
     public ValueTask<TRecord?> Single( string sql, DynamicParameters? parameters, CancellationToken token = default ) => this.Call( Single, sql, parameters, token );
     public virtual async ValueTask<TRecord?> Single( DbConnection connection, DbTransaction? transaction, long id, CancellationToken token = default )
     {
-        var parameters = new DynamicParameters();
+        DynamicParameters parameters = new DynamicParameters();
         parameters.Add( nameof(IDataBaseID.ID), id );
 
-        string sql = $"SELECT * FROM {CurrentSchema}.{TableName} WHERE {IDKey} = @{IDKey}";
+        string sql = $"SELECT * FROM {SchemaTableName} WHERE {IDKey} = @{IDKey}";
 
         if ( token.IsCancellationRequested ) { return default; }
 
@@ -463,10 +469,10 @@ public class DbTableBase<TRecord> : ObservableClass, IConnectableDb<TRecord>, IA
     public ValueTask<TRecord?> SingleOrDefault( string sql, DynamicParameters? parameters, CancellationToken token = default ) => this.Call( SingleOrDefault, sql, parameters, token );
     public virtual async ValueTask<TRecord?> SingleOrDefault( DbConnection connection, DbTransaction? transaction, long id, CancellationToken token = default )
     {
-        var parameters = new DynamicParameters();
+        DynamicParameters parameters = new DynamicParameters();
         parameters.Add( nameof(IDataBaseID.ID), id );
 
-        string sql = $"SELECT * FROM {CurrentSchema}.{TableName} WHERE {IDKey} = @{IDKey}";
+        string sql = $"SELECT * FROM {SchemaTableName} WHERE {IDKey} = @{IDKey}";
 
         if ( token.IsCancellationRequested ) { return default; }
 
@@ -495,8 +501,8 @@ public class DbTableBase<TRecord> : ObservableClass, IConnectableDb<TRecord>, IA
     }
     public virtual async ValueTask Update( DbConnection connection, DbTransaction? transaction, TRecord record, CancellationToken token = default )
     {
-        string sql        = $"UPDATE {CurrentSchema}.{TableName} SET {string.Join( ',', _propertiesCache.Where( x => !x.IsKey ).Select( x => x.KeyValuePair ) )} WHERE {IDKey} = @{nameof(IDataBaseID.ID)};";
-        var    parameters = new DynamicParameters( record );
+        string            sql        = $"UPDATE {SchemaTableName} SET {string.Join( ',', _propertiesCache.Where( x => !x.IsKey ).Select( x => x.KeyValuePair ) )} WHERE {IDKey} = @{nameof(IDataBaseID.ID)};";
+        DynamicParameters parameters = new DynamicParameters( record );
 
         if ( token.IsCancellationRequested ) { return; }
 
@@ -505,41 +511,36 @@ public class DbTableBase<TRecord> : ObservableClass, IConnectableDb<TRecord>, IA
     }
 
 
-    public IAsyncEnumerable<TRecord> Where( bool           matchAll,   DynamicParameters  parameters, CancellationToken token = default ) => this.Call( Where, matchAll,   parameters, token );
-    public IAsyncEnumerable<TRecord> Where( string         sql,        DynamicParameters? parameters, CancellationToken token = default ) => this.Call( Where, sql,        parameters, token );
-    public IAsyncEnumerable<TRecord> Where<TValue>( string columnName, TValue?            value,      CancellationToken token = default ) => this.Call( Where, columnName, value,      token );
-    public virtual IAsyncEnumerable<TRecord> Where( DbConnection connection, DbTransaction? transaction, bool matchAll, DynamicParameters parameters, CancellationToken token = default )
+    public ValueTask<TRecord[]> Where( bool matchAll, DynamicParameters parameters, CancellationToken token = default ) => this.Call( Where, matchAll, parameters, token );
+    public ValueTask<TRecord[]> Where( string sql, DynamicParameters? parameters, CancellationToken token = default ) =>
+        this.Call( Where, sql, parameters, token );
+    public ValueTask<TRecord[]> Where<TValue>( string columnName, TValue? value, CancellationToken token = default ) => this.Call( Where, columnName, value, token );
+    public virtual ValueTask<TRecord[]> Where( DbConnection connection, DbTransaction? transaction, bool matchAll, DynamicParameters parameters, CancellationToken token = default )
     {
-        string sql = new StringBuilder( $"SELECT * FROM {CurrentSchema}.{TableName} WHERE " ).AppendJoin( matchAll
-                                                                                                              ? "AND"
-                                                                                                              : "OR",
-                                                                                                          parameters.ParameterNames.Select( x => _propertiesCache.Get( x )
-                                                                                                                                                                 .KeyValuePair ) )
-                                                                                             .ToString();
+        string sql = new StringBuilder( $"SELECT * FROM {SchemaTableName} WHERE " ).AppendJoin( matchAll
+                                                                                                    ? "AND"
+                                                                                                    : "OR",
+                                                                                                parameters.ParameterNames.Select( x => _propertiesCache.Get( x )
+                                                                                                                                                       .KeyValuePair ) )
+                                                                                   .ToString();
 
         return Where( connection, transaction, sql, parameters, token );
     }
-    public virtual async IAsyncEnumerable<TRecord> Where( DbConnection connection, DbTransaction? transaction, string sql, DynamicParameters? parameters, [EnumeratorCancellation] CancellationToken token = default )
+    public virtual async ValueTask<TRecord[]> Where( DbConnection connection, DbTransaction? transaction, string sql, DynamicParameters? parameters, [EnumeratorCancellation] CancellationToken token = default )
     {
-        if ( token.IsCancellationRequested ) { yield break; }
+        if ( token.IsCancellationRequested ) { return Empty; }
 
-
-        IEnumerable<TRecord> items;
-
-        try { items = await connection.QueryAsync<TRecord>( sql, parameters, transaction ); }
-        catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
-
-        foreach ( TRecord record in items )
+        try
         {
-            if ( token.IsCancellationRequested ) { yield break; }
-
-            yield return record;
+            IEnumerable<TRecord> records = await connection.QueryAsync<TRecord>( sql, parameters, transaction );
+            return Convert( records );
         }
+        catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
     }
-    public virtual IAsyncEnumerable<TRecord> Where<TValue>( DbConnection connection, DbTransaction? transaction, string columnName, TValue? value, [EnumeratorCancellation] CancellationToken token = default )
+    public virtual ValueTask<TRecord[]> Where<TValue>( DbConnection connection, DbTransaction? transaction, string columnName, TValue? value, [EnumeratorCancellation] CancellationToken token = default )
     {
-        string sql        = $"SELECT * FROM {CurrentSchema}.{TableName} WHERE {_propertiesCache.Get( columnName ).ColumnName} = @{nameof(value)}";
-        var    parameters = new DynamicParameters();
+        string            sql        = $"SELECT * FROM {SchemaTableName} WHERE {_propertiesCache.Get( columnName ).ColumnName} = @{nameof(value)}";
+        DynamicParameters parameters = new DynamicParameters();
         parameters.Add( nameof(value), value );
 
         return Where( connection, transaction, sql, parameters, token );

@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 08/14/2022  8:38 PM
 
-using Jakar.Database.Implementations;
-
-
-
 namespace Jakar.Database;
 
 
@@ -22,7 +18,6 @@ public abstract record TableRecord<TRecord> : BaseCollectionsRecord<TRecord, lon
         get => _lastModified;
         set => SetProperty( ref _lastModified, value );
     }
-
     public Guid UserID { get; init; }
     public long CreatedBy
     {
@@ -31,14 +26,13 @@ public abstract record TableRecord<TRecord> : BaseCollectionsRecord<TRecord, lon
     }
 
 
-    protected TableRecord() { }
-    protected TableRecord( UserRecord user )
-    {
-        UserID      = user.UserID;
-        CreatedBy   = user.ID;
-        DateCreated = DateTimeOffset.Now;
-    }
+    protected TableRecord() : base() { }
     protected TableRecord( long id ) : base( id ) => DateCreated = DateTimeOffset.Now;
+    protected TableRecord( UserRecord user ) : this( 0 )
+    {
+        UserID    = user.UserID;
+        CreatedBy = user.ID;
+    }
 
 
     public override int CompareTo( TRecord? other )
@@ -68,10 +62,16 @@ public abstract record TableRecord<TRecord> : BaseCollectionsRecord<TRecord, lon
     }
 
 
-    public static DynamicParameters GetDynamicParameters( TableRecord<TRecord> tableRecord )
+    public static DynamicParameters GetDynamicParameters( UserRecord record )
     {
         var parameters = new DynamicParameters();
-        parameters.Add( nameof(UserID), tableRecord.UserID );
+        parameters.Add( nameof(UserID), record.UserID );
+        return parameters;
+    }
+    protected static DynamicParameters GetDynamicParameters( TableRecord<TRecord> record )
+    {
+        var parameters = new DynamicParameters();
+        parameters.Add( nameof(UserID), record.UserID );
         return parameters;
     }
 

@@ -13,6 +13,7 @@ public sealed class TypePropertiesCache : ConcurrentDictionary<Type, ConcurrentD
     static TypePropertiesCache() => Current.Register( Assembly.GetCallingAssembly() );
     internal TypePropertiesCache() { }
 
+    
     public void Register( Assembly assembly ) => Register( assembly.DefinedTypes.Where( x => x.GetCustomAttribute<SerializableAttribute>() is not null ) );
     public void Register( IEnumerable<Type> types )
     {
