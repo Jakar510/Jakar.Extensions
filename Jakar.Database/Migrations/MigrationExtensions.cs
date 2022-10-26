@@ -9,6 +9,7 @@ public static class MigrationExtensions
                .ConfigureRunner( configure =>
                                  {
                                      addSqlDb( configure );
+
                                      configure.WithGlobalConnectionString( getConnectionString );
 
                                      configure.ScanIn( Assembly.GetEntryAssembly() )
@@ -17,8 +18,10 @@ public static class MigrationExtensions
 
         return builder;
     }
-    public static WebApplicationBuilder AddFluentMigrator( this WebApplicationBuilder builder, Func<IMigrationRunnerBuilder, IMigrationRunnerBuilder> addSqlDb, Func<IConfiguration, string> getConnectionString ) =>
-        builder.AddFluentMigrator( addSqlDb, provider => getConnectionString( provider.GetRequiredService<IConfiguration>() ) );
+    public static WebApplicationBuilder AddFluentMigrator( this WebApplicationBuilder builder, Func<IMigrationRunnerBuilder, IMigrationRunnerBuilder> addSqlDb ) =>
+        builder.AddFluentMigrator( addSqlDb,
+                                   provider => provider.GetRequiredService<IConfiguration>()
+                                                       .GetConnectionString( "Default" ) );
 
 
     public static IInsertDataSyntax AddRow<T>( this IInsertDataSyntax insert, T context ) where T : BaseRecord
@@ -26,7 +29,7 @@ public static class MigrationExtensions
         PropertyInfo[] items   = typeof(T).GetProperties( BindingFlags.Instance | BindingFlags.Public );
         var            columns = new Dictionary<string, object?>();
 
-        foreach (PropertyInfo property in items)
+        foreach ( PropertyInfo property in items )
 
         {
             object? value = property.GetValue( context );
@@ -71,17 +74,17 @@ public static class MigrationExtensions
     /// </summary>
     public static bool CreateColumn_Enum( this ICreateTableColumnAsTypeSyntax col, PropertyInfo propertyInfo, Type propertyType )
     {
-        if (!propertyType.TryGetUnderlyingEnumType( out Type? enumType )) { return false; }
+        if ( !propertyType.TryGetUnderlyingEnumType( out Type? enumType ) ) { return false; }
 
         ICreateTableColumnOptionOrWithColumnSyntax item;
 
         DbType? type = propertyInfo.GetCustomAttribute<DataBaseTypeAttribute>()
                                   ?.Type;
 
-        if (type.HasValue)
+        if ( type.HasValue )
         {
             // ReSharper disable once SwitchStatementMissingSomeEnumCasesNoDefault
-            switch (type)
+            switch ( type )
             {
                 case DbType.Byte:
                     item = col.AsByte();
@@ -106,13 +109,13 @@ public static class MigrationExtensions
         }
 
 
-        if (enumType == typeof(byte)) { item = col.AsByte(); }
+        if ( enumType == typeof(byte) ) { item = col.AsByte(); }
 
-        else if (enumType.IsOneOfType( typeof(sbyte), typeof(short) )) { item = col.AsInt16(); }
+        else if ( enumType.IsOneOfType( typeof(sbyte), typeof(short) ) ) { item = col.AsInt16(); }
 
-        else if (enumType.IsOneOfType( typeof(ushort), typeof(int) )) { item = col.AsInt32(); }
+        else if ( enumType.IsOneOfType( typeof(ushort), typeof(int) ) ) { item = col.AsInt32(); }
 
-        else if (enumType.IsOneOfType( typeof(uint), typeof(long), typeof(ulong) )) { item = col.AsInt64(); }
+        else if ( enumType.IsOneOfType( typeof(uint), typeof(long), typeof(ulong) ) ) { item = col.AsInt64(); }
 
         else { throw new ExpectedValueTypeException( nameof(enumType), enumType, typeof(byte), typeof(sbyte), typeof(ushort), typeof(short), typeof(int), typeof(uint), typeof(long), typeof(ulong) ); }
 
@@ -145,55 +148,55 @@ public static class MigrationExtensions
     public static DbType GetDbType( this PropertyInfo propertyInfo ) => propertyInfo.PropertyType.GetDbType();
     public static DbType GetDbType( this Type propertyType )
     {
-        if (propertyType.TryGetUnderlyingEnumType( out DbType? type )) { return type.Value; }
+        if ( propertyType.TryGetUnderlyingEnumType( out DbType? type ) ) { return type.Value; }
 
 
-        if (propertyType.IsEqualType( typeof(string) )) { return DbType.String; }
+        if ( propertyType.IsEqualType( typeof(string) ) ) { return DbType.String; }
 
 
-        if (propertyType.IsOneOfType( typeof(bool), typeof(bool?) )) { return DbType.Boolean; }
+        if ( propertyType.IsOneOfType( typeof(bool), typeof(bool?) ) ) { return DbType.Boolean; }
 
 
-        if (propertyType.IsOneOfType( typeof(byte), typeof(byte?) )) { return DbType.Byte; }
+        if ( propertyType.IsOneOfType( typeof(byte), typeof(byte?) ) ) { return DbType.Byte; }
 
 
-        if (propertyType.IsOneOfType( typeof(short), typeof(short?) )) { return DbType.Int16; }
+        if ( propertyType.IsOneOfType( typeof(short), typeof(short?) ) ) { return DbType.Int16; }
 
 
-        if (propertyType.IsOneOfType( typeof(ushort), typeof(ushort?) )) { return DbType.UInt16; }
+        if ( propertyType.IsOneOfType( typeof(ushort), typeof(ushort?) ) ) { return DbType.UInt16; }
 
 
-        if (propertyType.IsOneOfType( typeof(int), typeof(int?) )) { return DbType.Int32; }
+        if ( propertyType.IsOneOfType( typeof(int), typeof(int?) ) ) { return DbType.Int32; }
 
 
-        if (propertyType.IsOneOfType( typeof(uint), typeof(uint?) )) { return DbType.UInt32; }
+        if ( propertyType.IsOneOfType( typeof(uint), typeof(uint?) ) ) { return DbType.UInt32; }
 
 
-        if (propertyType.IsOneOfType( typeof(long), typeof(long?) )) { return DbType.Int64; }
+        if ( propertyType.IsOneOfType( typeof(long), typeof(long?) ) ) { return DbType.Int64; }
 
 
-        if (propertyType.IsOneOfType( typeof(ulong), typeof(ulong?) )) { return DbType.UInt64; }
+        if ( propertyType.IsOneOfType( typeof(ulong), typeof(ulong?) ) ) { return DbType.UInt64; }
 
 
-        if (propertyType.IsOneOfType( typeof(float), typeof(float?), typeof(double), typeof(double?) )) { return DbType.Double; }
+        if ( propertyType.IsOneOfType( typeof(float), typeof(float?), typeof(double), typeof(double?) ) ) { return DbType.Double; }
 
 
-        if (propertyType.IsOneOfType( typeof(decimal), typeof(decimal?) )) { return DbType.Decimal; }
+        if ( propertyType.IsOneOfType( typeof(decimal), typeof(decimal?) ) ) { return DbType.Decimal; }
 
 
-        if (propertyType.IsOneOfType( typeof(byte[]), typeof(ReadOnlySpan<byte>) )) { return DbType.Binary; }
+        if ( propertyType.IsOneOfType( typeof(byte[]), typeof(ReadOnlySpan<byte>) ) ) { return DbType.Binary; }
 
 
-        if (propertyType.IsOneOfType( typeof(Guid), typeof(Guid?) )) { return DbType.Guid; }
+        if ( propertyType.IsOneOfType( typeof(Guid), typeof(Guid?) ) ) { return DbType.Guid; }
 
 
-        if (propertyType.IsOneOfType( typeof(TimeSpan), typeof(TimeSpan?) )) { return DbType.Time; }
+        if ( propertyType.IsOneOfType( typeof(TimeSpan), typeof(TimeSpan?) ) ) { return DbType.Time; }
 
 
-        if (propertyType.IsOneOfType( typeof(DateTime), typeof(DateTime?) )) { return DbType.DateTime; }
+        if ( propertyType.IsOneOfType( typeof(DateTime), typeof(DateTime?) ) ) { return DbType.DateTime; }
 
 
-        if (propertyType.IsOneOfType( typeof(DateTimeOffset), typeof(DateTimeOffset?) )) { return DbType.DateTimeOffset; }
+        if ( propertyType.IsOneOfType( typeof(DateTimeOffset), typeof(DateTimeOffset?) ) ) { return DbType.DateTimeOffset; }
 
 
         throw new ArgumentOutOfRangeException( nameof(propertyType), propertyType, "Can't discern DbType" );
@@ -202,7 +205,7 @@ public static class MigrationExtensions
 
     public static string GetMappingTableName( this Type parent, PropertyInfo propertyInfo )
     {
-        if (!propertyInfo.IsList( out Type? itemType )) { throw new ExpectedValueTypeException( nameof(propertyInfo), propertyInfo.PropertyType, typeof(IList<>) ); }
+        if ( !propertyInfo.IsList( out Type? itemType ) ) { throw new ExpectedValueTypeException( nameof(propertyInfo), propertyInfo.PropertyType, typeof(IList<>) ); }
 
         return parent.GetMappingTableName( propertyInfo, itemType );
     }
@@ -218,7 +221,7 @@ public static class MigrationExtensions
     {
         MethodInfo? setMethod = propertyInfo.SetMethod;
 
-        if (setMethod is null) { return false; }
+        if ( setMethod is null ) { return false; }
 
         Type isExternalInitType = typeof(IsExternalInit);
 
@@ -236,29 +239,29 @@ public static class MigrationExtensions
     }
     public static async ValueTask MigrateDown( this WebApplication app, string key )
     {
-        if (app.Configuration.GetValue<bool>( key )) { await app.MigrateDown(); }
+        if ( app.Configuration.GetValue<bool>( key ) ) { await app.MigrateDown(); }
     }
 
 
-    public static async ValueTask MigrateUp( this WebApplication app )
+    public static async ValueTask MigrateUp( this IHost app )
     {
         await using AsyncServiceScope scope  = app.Services.CreateAsyncScope();
         var                           runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
         runner.ListMigrations();
-        if (runner.HasMigrationsToApplyUp()) { runner.MigrateUp(); }
+        if ( runner.HasMigrationsToApplyUp() ) { runner.MigrateUp(); }
     }
 
 
     public static bool SetNullable<TNext, TNextFk>( this IColumnOptionSyntax<TNext, TNextFk> item, PropertyInfo propInfo ) where TNext : IFluentSyntax
                                                                                                                            where TNextFk : IFluentSyntax
     {
-        if (propInfo.Name == "DeviceIDs")
+        if ( propInfo.Name == "DeviceIDs" )
         {
             propInfo.Name.WriteToConsole();
             "------------------------------------------------------------------------".WriteToConsole();
         }
 
-        if (propInfo.PropertyType.IsNullableType() || propInfo.IsNullable()) { item.Nullable(); }
+        if ( propInfo.PropertyType.IsNullableType() || propInfo.IsNullable() ) { item.Nullable(); }
         else { item.NotNullable(); }
 
         return true;
@@ -266,7 +269,7 @@ public static class MigrationExtensions
 
     public static bool ShouldIgnore( this PropertyInfo propInfo )
     {
-        if (propInfo.HasAttribute<DataBaseIgnoreAttribute>() || propInfo.IsDefined( typeof(JsonIgnoreAttribute) )) { return true; }
+        if ( propInfo.HasAttribute<DataBaseIgnoreAttribute>() || propInfo.IsDefined( typeof(JsonIgnoreAttribute) ) ) { return true; }
 
         return propInfo.HasInterface<IDataBaseIgnore>();
     }
@@ -309,45 +312,45 @@ public static class MigrationExtensions
 
     public static TNext? TryBuiltInValueTypes<TNext>( this IColumnTypeSyntax<TNext> col, PropertyInfo propInfo, Type propertyType ) where TNext : IFluentSyntax
     {
-        if (propertyType.TryGetUnderlyingEnumType( out Type? _ ))
+        if ( propertyType.TryGetUnderlyingEnumType( out Type? _ ) )
         {
             // return table.TryCreateBuiltInValueTypes(ref col, propInfo, type);
             return default;
         }
 
 
-        if (propertyType.IsEqualType( typeof(string) ))
+        if ( propertyType.IsEqualType( typeof(string) ) )
         {
             return col.AsString( propInfo.GetCustomAttribute<MaxLengthAttribute>()
                                         ?.Length ?? throw new InvalidOperationException( $"{propertyType.DeclaringType?.Name}.{propertyType.Name}.{propInfo.Name}" ) );
         }
 
 
-        if (propertyType.IsOneOfType( typeof(bool), typeof(bool?) )) { return col.AsBoolean(); }
+        if ( propertyType.IsOneOfType( typeof(bool), typeof(bool?) ) ) { return col.AsBoolean(); }
 
-        if (propertyType.IsOneOfType( typeof(byte), typeof(byte?) )) { return col.AsByte(); }
+        if ( propertyType.IsOneOfType( typeof(byte), typeof(byte?) ) ) { return col.AsByte(); }
 
-        if (propertyType.IsOneOfType( typeof(short), typeof(short?) )) { return col.AsInt16(); }
+        if ( propertyType.IsOneOfType( typeof(short), typeof(short?) ) ) { return col.AsInt16(); }
 
-        if (propertyType.IsOneOfType( typeof(int), typeof(int?) )) { return col.AsInt32(); }
+        if ( propertyType.IsOneOfType( typeof(int), typeof(int?) ) ) { return col.AsInt32(); }
 
-        if (propertyType.IsOneOfType( typeof(long), typeof(long?) )) { return col.AsInt64(); }
+        if ( propertyType.IsOneOfType( typeof(long), typeof(long?) ) ) { return col.AsInt64(); }
 
-        if (propertyType.IsOneOfType( typeof(float), typeof(float?), typeof(double), typeof(double?) )) { return col.AsDouble(); }
+        if ( propertyType.IsOneOfType( typeof(float), typeof(float?), typeof(double), typeof(double?) ) ) { return col.AsDouble(); }
 
-        if (propertyType.IsOneOfType( typeof(decimal), typeof(decimal?) )) { return col.AsDecimal(); }
+        if ( propertyType.IsOneOfType( typeof(decimal), typeof(decimal?) ) ) { return col.AsDecimal(); }
 
-        if (propertyType.IsOneOfType( typeof(byte[]), typeof(ReadOnlyMemory<byte>) )) { return col.AsBinary(); }
+        if ( propertyType.IsOneOfType( typeof(byte[]), typeof(ReadOnlyMemory<byte>) ) ) { return col.AsBinary(); }
 
-        if (propertyType.IsOneOfType( typeof(Guid), typeof(Guid?) )) { return col.AsGuid(); }
+        if ( propertyType.IsOneOfType( typeof(Guid), typeof(Guid?) ) ) { return col.AsGuid(); }
 
-        if (propertyType.IsOneOfType( typeof(TimeSpan), typeof(TimeSpan?), typeof(TimeOnly), typeof(TimeOnly?) )) { return col.AsTime(); }
+        if ( propertyType.IsOneOfType( typeof(TimeSpan), typeof(TimeSpan?), typeof(TimeOnly), typeof(TimeOnly?) ) ) { return col.AsTime(); }
 
-        if (propertyType.IsOneOfType( typeof(DateOnly), typeof(DateOnly?) )) { return col.AsDate(); }
+        if ( propertyType.IsOneOfType( typeof(DateOnly), typeof(DateOnly?) ) ) { return col.AsDate(); }
 
-        if (propertyType.IsOneOfType( typeof(DateTime), typeof(DateTime?) )) { return col.AsDateTime2(); }
+        if ( propertyType.IsOneOfType( typeof(DateTime), typeof(DateTime?) ) ) { return col.AsDateTime2(); }
 
-        if (propertyType.IsOneOfType( typeof(DateTimeOffset), typeof(DateTimeOffset?) )) { return col.AsDateTimeOffset(); }
+        if ( propertyType.IsOneOfType( typeof(DateTimeOffset), typeof(DateTimeOffset?) ) ) { return col.AsDateTimeOffset(); }
 
 
         return default;
@@ -356,7 +359,7 @@ public static class MigrationExtensions
 
     public static bool TryGetUnderlyingEnumType( this Type propertyType, [NotNullWhen( true )] out DbType? dbType )
     {
-        if (propertyType.TryGetUnderlyingEnumType( out Type? type ))
+        if ( propertyType.TryGetUnderlyingEnumType( out Type? type ) )
         {
             dbType = type.GetDbType();
             return true;
@@ -369,29 +372,29 @@ public static class MigrationExtensions
 
     public static bool TryHandleOtherTypes( this ICreateTableColumnAsTypeSyntax col, PropertyInfo propInfo, Type propertyType )
     {
-        if (col.CreateColumn_Enum( propInfo, propertyType )) { return true; }
+        if ( col.CreateColumn_Enum( propInfo, propertyType ) ) { return true; }
 
-        if (propertyType == typeof(JObject) || propertyType == typeof(JToken) || propertyType == typeof(List<JObject>) || propertyType == typeof(List<JObject?>) || propertyType == typeof(IDictionary<string, JToken?>) ||
-            propertyType == typeof(IDictionary<string, JToken>))
+        if ( propertyType == typeof(JObject) || propertyType == typeof(JToken) || propertyType == typeof(List<JObject>) || propertyType == typeof(List<JObject?>) || propertyType == typeof(IDictionary<string, JToken?>) ||
+             propertyType == typeof(IDictionary<string, JToken>) )
         {
             return col.AsXml( int.MaxValue )
                       .SetNullable( propInfo );
         }
 
-        if (propertyType.IsGenericType && propertyType.IsList() || propertyType.IsSet() || propertyType.IsCollection())
+        if ( propertyType.IsGenericType && propertyType.IsList() || propertyType.IsSet() || propertyType.IsCollection() )
         {
             return col.AsXml( int.MaxValue )
                       .SetNullable( propInfo );
         }
 
-        if (propInfo.GetCustomAttribute<DataBaseTypeAttribute>()
-                   ?.Type is DbType.Xml)
+        if ( propInfo.GetCustomAttribute<DataBaseTypeAttribute>()
+                    ?.Type is DbType.Xml )
         {
             return col.AsXml( int.MaxValue )
                       .SetNullable( propInfo );
         }
 
-        if (propertyType.HasInterface<IDataBaseID>()) { return col.CreateColumn_Reference( propertyType ); }
+        if ( propertyType.HasInterface<IDataBaseID>() ) { return col.CreateColumn_Reference( propertyType ); }
 
         return false;
     }

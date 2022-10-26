@@ -10,6 +10,17 @@ namespace Jakar.Extensions.Hosting;
 
 public static partial class WebBuilder
 {
+    public const string DEFAULT            = "Default";
+    public const string CONNECTION_STRINGS = "ConnectionStrings";
+
+
+    public static string? GetConnectionString( this IConfiguration configuration, string name = DEFAULT ) => configuration.GetSection( CONNECTION_STRINGS )
+                                                                                                                         ?.GetValue<string>( name );
+    public static string? GetConnectionString( this IServiceProvider provider, string name = DEFAULT ) => provider.GetRequiredService<IConfiguration>()
+                                                                                                                  .GetConnectionString( name );
+    public static string? GetConnectionString( this WebApplication configuration, string name = DEFAULT ) => configuration.Services.GetConnectionString( name );
+
+
     public static IConfigurationBuilder AddCommandLine( this          WebApplicationBuilder builder, string[] args ) => builder.Configuration.AddCommandLine( args );
     public static IConfigurationBuilder AddCommandLine( this          WebApplicationBuilder builder, string[] args, IDictionary<string, string> switchMappings ) => builder.Configuration.AddCommandLine( args, switchMappings );
     public static IConfigurationBuilder AddCommandLine( this          WebApplicationBuilder builder, Action<CommandLineConfigurationSource> configureSource ) => builder.Configuration.AddCommandLine( configureSource );
@@ -17,7 +28,7 @@ public static partial class WebBuilder
     public static IConfigurationBuilder AddEnvironmentVariables( this WebApplicationBuilder builder, string prefix ) => builder.Configuration.AddEnvironmentVariables( prefix );
     public static IConfigurationBuilder AddEnvironmentVariables( this WebApplicationBuilder builder, params string[] prefix )
     {
-        foreach (string s in prefix) { builder.Configuration.AddEnvironmentVariables( s ); }
+        foreach ( string s in prefix ) { builder.Configuration.AddEnvironmentVariables( s ); }
 
         return builder.Configuration;
     }

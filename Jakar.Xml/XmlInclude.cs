@@ -13,5 +13,5 @@ public enum XmlInclude
     Attributes = 1,
     Fields     = 2,
     Properties = 4,
-    All        = Attributes | Fields | Properties
+    All        = ~None
 }
