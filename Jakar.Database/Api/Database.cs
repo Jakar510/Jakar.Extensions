@@ -28,7 +28,7 @@ public abstract class Database : Randoms, IConnectableDb, IAsyncDisposable, IHea
     public          DbTableBase<UserGroupRecord> UserGroups       { get; }
     public          DbTableBase<GroupRecord>     Groups           { get; }
     public          IConfiguration               Configuration    { get; }
-    public virtual  string                       ConnectionString => Configuration.GetConnectionString( "Default" );
+    public virtual  string                       ConnectionString => Configuration.ConnectionString();
     public abstract DbInstance                   Instance         { get; }
     public string CurrentSchema
     {

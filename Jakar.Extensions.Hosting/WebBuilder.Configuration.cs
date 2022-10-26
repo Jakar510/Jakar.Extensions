@@ -14,11 +14,11 @@ public static partial class WebBuilder
     public const string CONNECTION_STRINGS = "ConnectionStrings";
 
 
-    public static string? GetConnectionString( this IConfiguration configuration, string name = DEFAULT ) => configuration.GetSection( CONNECTION_STRINGS )
-                                                                                                                         ?.GetValue<string>( name );
-    public static string? GetConnectionString( this IServiceProvider provider, string name = DEFAULT ) => provider.GetRequiredService<IConfiguration>()
-                                                                                                                  .GetConnectionString( name );
-    public static string? GetConnectionString( this WebApplication configuration, string name = DEFAULT ) => configuration.Services.GetConnectionString( name );
+    public static string ConnectionString( this IConfiguration configuration, string name = DEFAULT ) => configuration.GetSection( CONNECTION_STRINGS )
+                                                                                                                        ?.GetValue<string>( name ) ?? throw new InvalidOperationException( $"{CONNECTION_STRINGS}::{DEFAULT} is not found" );
+    public static string ConnectionString( this IServiceProvider provider, string name = DEFAULT ) => provider.GetRequiredService<IConfiguration>()
+                                                                                                                 .ConnectionString( name );
+    public static string ConnectionString( this WebApplication configuration, string name = DEFAULT ) => configuration.Services.ConnectionString( name );
 
 
     public static IConfigurationBuilder AddCommandLine( this          WebApplicationBuilder builder, string[] args ) => builder.Configuration.AddCommandLine( args );

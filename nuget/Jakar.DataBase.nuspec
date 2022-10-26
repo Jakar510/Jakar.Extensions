@@ -4,7 +4,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata>
 		<id>Jakar.DataBase</id>
-		<version>6.0.0.28-beta</version>
+		<version>6.0.0.29-beta</version>
 		<title>Extension Library</title>
 		<authors>Tyler Stegmaier</authors>
 		<owners>Jakar510/Jakar</owners>
@@ -30,7 +30,7 @@
 				<dependency id="Jakar.Extensions"
 							version="6.1.4" />
 				<dependency id="Jakar.Extensions.Hosting"
-							version="6.1.0" />
+							version="6.1.3" />
 			</group>
 		</dependencies>
 	</metadata>

@@ -50,7 +50,7 @@
 				<dependency id="PanoramicData.Blazor"
 							version="2.1.42" />
 				<dependency id="Radzen.Blazor"
-							version="4.1.8" />
+							version="4.1.14" />
 			</group>
 		</dependencies>
 	</metadata>

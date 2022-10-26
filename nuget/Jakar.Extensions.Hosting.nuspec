@@ -4,7 +4,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata>
 		<id>Jakar.Extensions.Hosting</id>
-		<version>6.1.0</version>
+		<version>6.1.3</version>
 		<title>Extension Library</title>
 		<authors>Tyler Stegmaier</authors>
 		<owners>Jakar510/Jakar</owners>
@@ -18,8 +18,8 @@
 			Extensions to aid in development.
 		</description>
 		<releaseNotes>
-			Jakar.Extensions.Hosting 6.1.0
-			update dependencies
+			Jakar.Extensions.Hosting 6.1.2
+			bug fixes
 		</releaseNotes>
 		<tags>Server WebBuilder Http</tags>
 		<language>en-US</language>
@@ -61,7 +61,7 @@
 				<dependency id="Microsoft.Extensions.Diagnostics.HealthChecks"
 							version="6.0.10" />
 				<dependency id="Microsoft.Extensions.Hosting.Systemd"
-							version="6.0.1" />
+							version="6.0.0" />
 				<dependency id="Microsoft.Extensions.Hosting.WindowsServices"
 							version="6.0.1" />
 			</group>
