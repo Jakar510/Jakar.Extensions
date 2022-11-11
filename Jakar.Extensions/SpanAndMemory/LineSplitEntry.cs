@@ -4,19 +4,20 @@ namespace Jakar.Extensions;
 
 /// <summary>
 ///     <para>
-///         <see href = "https://www.meziantou.net/split-a-string-into-lines-without-allocation.htm" />
+///         <see href="https://www.meziantou.net/split-a-string-into-lines-without-allocation.htm"/>
 ///     </para>
 /// </summary>
 public readonly ref struct LineSplitEntry<T> where T : IEquatable<T>
 {
-    public LineSplitEntry( in ReadOnlySpan<T> line, in ReadOnlySpan<T> separator )
+    public ReadOnlySpan<T> Value     { get; }
+    public ReadOnlySpan<T> Separator { get; }
+
+
+    public LineSplitEntry( ReadOnlySpan<T> line, ReadOnlySpan<T> separator )
     {
         Value     = line;
         Separator = separator;
     }
-
-    public ReadOnlySpan<T> Value     { get; }
-    public ReadOnlySpan<T> Separator { get; }
 
 
     // This method allow to deconstruct the type, so you can write any of the following code

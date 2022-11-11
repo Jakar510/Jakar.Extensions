@@ -90,3 +90,6 @@ resharper_space_within_lock_parentheses = false
 resharper_space_within_switch_parentheses = true
 resharper_space_within_using_parentheses = true
 resharper_space_within_while_parentheses = true
+
+# IDE0055: Fix formatting
+dotnet_diagnostic.IDE0055.severity = none

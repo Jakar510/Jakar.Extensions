@@ -20,7 +20,7 @@ public ref struct JObject
     internal         JWriter writer;
 
 
-    public JObject( ref JWriter writer, in bool shouldIndent )
+    public JObject( ref JWriter writer, bool shouldIndent )
     {
         _shouldIndent = shouldIndent;
         this.writer   = writer;
@@ -37,13 +37,13 @@ public ref struct JObject
     public void Complete() => writer.FinishBlock( END );
 
 
-    private JWriter Start( in ReadOnlySpan<char> key ) => writer.Indent()
-                                                                .Append( '"' )
-                                                                .Append( key )
-                                                                .Append( '"' )
-                                                                .Append( ':' )
-                                                                .Append( ' ' );
-    public JObject Null( in ReadOnlySpan<char> key )
+    private JWriter Start( ReadOnlySpan<char> key ) => writer.Indent()
+                                                             .Append( '"' )
+                                                             .Append( key )
+                                                             .Append( '"' )
+                                                             .Append( ':' )
+                                                             .Append( ' ' );
+    public JObject Null( ReadOnlySpan<char> key )
     {
         Start( key )
            .Null()
@@ -53,7 +53,7 @@ public ref struct JObject
     }
 
 
-    public JObject Add( in char value, [CallerArgumentExpression( "value" )] string key = "" )
+    public JObject Add( char value, [CallerArgumentExpression( "value" )] string key = "" )
     {
         Start( key )
            .Append( value )
@@ -61,7 +61,7 @@ public ref struct JObject
 
         return this;
     }
-    public JObject Add( in short value, [CallerArgumentExpression( "value" )] string key = "" )
+    public JObject Add( short value, [CallerArgumentExpression( "value" )] string key = "" )
     {
         Start( key )
            .Append( value )
@@ -69,7 +69,7 @@ public ref struct JObject
 
         return this;
     }
-    public JObject Add( in ushort value, [CallerArgumentExpression( "value" )] string key = "" )
+    public JObject Add( ushort value, [CallerArgumentExpression( "value" )] string key = "" )
     {
         Start( key )
            .Append( value )
@@ -77,7 +77,7 @@ public ref struct JObject
 
         return this;
     }
-    public JObject Add( in int value, [CallerArgumentExpression( "value" )] string key = "" )
+    public JObject Add( int value, [CallerArgumentExpression( "value" )] string key = "" )
     {
         Start( key )
            .Append( value )
@@ -85,7 +85,7 @@ public ref struct JObject
 
         return this;
     }
-    public JObject Add( in uint value, [CallerArgumentExpression( "value" )] string key = "" )
+    public JObject Add( uint value, [CallerArgumentExpression( "value" )] string key = "" )
     {
         Start( key )
            .Append( value )
@@ -93,7 +93,7 @@ public ref struct JObject
 
         return this;
     }
-    public JObject Add( in long value, [CallerArgumentExpression( "value" )] string key = "" )
+    public JObject Add( long value, [CallerArgumentExpression( "value" )] string key = "" )
     {
         Start( key )
            .Append( value )
@@ -101,7 +101,7 @@ public ref struct JObject
 
         return this;
     }
-    public JObject Add( in ulong value, [CallerArgumentExpression( "value" )] string key = "" )
+    public JObject Add( ulong value, [CallerArgumentExpression( "value" )] string key = "" )
     {
         Start( key )
            .Append( value )
@@ -109,7 +109,7 @@ public ref struct JObject
 
         return this;
     }
-    public JObject Add( in float value, [CallerArgumentExpression( "value" )] string key = "" )
+    public JObject Add( float value, [CallerArgumentExpression( "value" )] string key = "" )
     {
         Start( key )
            .Append( value )
@@ -117,7 +117,7 @@ public ref struct JObject
 
         return this;
     }
-    public JObject Add( in double value, [CallerArgumentExpression( "value" )] string key = "" )
+    public JObject Add( double value, [CallerArgumentExpression( "value" )] string key = "" )
     {
         Start( key )
            .Append( value )
@@ -125,7 +125,7 @@ public ref struct JObject
 
         return this;
     }
-    public JObject Add( in decimal value, [CallerArgumentExpression( "value" )] string key = "" )
+    public JObject Add( decimal value, [CallerArgumentExpression( "value" )] string key = "" )
     {
         Start( key )
            .Append( value )
@@ -135,40 +135,40 @@ public ref struct JObject
     }
 
 
-    public JObject Add( in char? value, [CallerArgumentExpression( "value" )] string key = "" ) => value.HasValue
-                                                                                                       ? Add( value.Value, key )
-                                                                                                       : Null( key );
-    public JObject Add( in short? value, [CallerArgumentExpression( "value" )] string key = "" ) => value.HasValue
-                                                                                                        ? Add( value.Value, key )
-                                                                                                        : Null( key );
-    public JObject Add( in ushort? value, [CallerArgumentExpression( "value" )] string key = "" ) => value.HasValue
-                                                                                                         ? Add( value.Value, key )
-                                                                                                         : Null( key );
-    public JObject Add( in int? value, [CallerArgumentExpression( "value" )] string key = "" ) => value.HasValue
+    public JObject Add( char? value, [CallerArgumentExpression( "value" )] string key = "" ) => value.HasValue
+                                                                                                    ? Add( value.Value, key )
+                                                                                                    : Null( key );
+    public JObject Add( short? value, [CallerArgumentExpression( "value" )] string key = "" ) => value.HasValue
+                                                                                                     ? Add( value.Value, key )
+                                                                                                     : Null( key );
+    public JObject Add( ushort? value, [CallerArgumentExpression( "value" )] string key = "" ) => value.HasValue
                                                                                                       ? Add( value.Value, key )
                                                                                                       : Null( key );
-    public JObject Add( in uint? value, [CallerArgumentExpression( "value" )] string key = "" ) => value.HasValue
+    public JObject Add( int? value, [CallerArgumentExpression( "value" )] string key = "" ) => value.HasValue
+                                                                                                   ? Add( value.Value, key )
+                                                                                                   : Null( key );
+    public JObject Add( uint? value, [CallerArgumentExpression( "value" )] string key = "" ) => value.HasValue
+                                                                                                    ? Add( value.Value, key )
+                                                                                                    : Null( key );
+    public JObject Add( long? value, [CallerArgumentExpression( "value" )] string key = "" ) => value.HasValue
+                                                                                                    ? Add( value.Value, key )
+                                                                                                    : Null( key );
+    public JObject Add( ulong? value, [CallerArgumentExpression( "value" )] string key = "" ) => value.HasValue
+                                                                                                     ? Add( value.Value, key )
+                                                                                                     : Null( key );
+    public JObject Add( float? value, [CallerArgumentExpression( "value" )] string key = "" ) => value.HasValue
+                                                                                                     ? Add( value.Value, key )
+                                                                                                     : Null( key );
+    public JObject Add( double? value, [CallerArgumentExpression( "value" )] string key = "" ) => value.HasValue
+                                                                                                      ? Add( value.Value, key )
+                                                                                                      : Null( key );
+    public JObject Add( decimal? value, [CallerArgumentExpression( "value" )] string key = "" ) => value.HasValue
                                                                                                        ? Add( value.Value, key )
                                                                                                        : Null( key );
-    public JObject Add( in long? value, [CallerArgumentExpression( "value" )] string key = "" ) => value.HasValue
-                                                                                                       ? Add( value.Value, key )
-                                                                                                       : Null( key );
-    public JObject Add( in ulong? value, [CallerArgumentExpression( "value" )] string key = "" ) => value.HasValue
-                                                                                                        ? Add( value.Value, key )
-                                                                                                        : Null( key );
-    public JObject Add( in float? value, [CallerArgumentExpression( "value" )] string key = "" ) => value.HasValue
-                                                                                                        ? Add( value.Value, key )
-                                                                                                        : Null( key );
-    public JObject Add( in double? value, [CallerArgumentExpression( "value" )] string key = "" ) => value.HasValue
-                                                                                                         ? Add( value.Value, key )
-                                                                                                         : Null( key );
-    public JObject Add( in decimal? value, [CallerArgumentExpression( "value" )] string key = "" ) => value.HasValue
-                                                                                                          ? Add( value.Value, key )
-                                                                                                          : Null( key );
 
 
-    public JObject Add( in string value, [CallerArgumentExpression( "value" )] string key = "" ) => Add( key.AsSpan(), value.AsSpan() );
-    public JObject Add( in ReadOnlySpan<char> key, in ReadOnlySpan<char> value )
+    public JObject Add( string value, [CallerArgumentExpression( "value" )] string key = "" ) => Add( key.AsSpan(), value.AsSpan() );
+    public JObject Add( ReadOnlySpan<char> key, ReadOnlySpan<char> value )
     {
         Start( key )
            .Append( '"' )
@@ -180,10 +180,10 @@ public ref struct JObject
     }
 
 
-    public JObject Add( in ISpanFormattable value, in int bufferSize, [CallerArgumentExpression( "value" )] string      key                                                       = "" ) => Add( value, bufferSize, CultureInfo.CurrentCulture, key );
-    public JObject Add( in ISpanFormattable value, in int bufferSize, in                                    CultureInfo culture, [CallerArgumentExpression( "value" )] string key = "" ) => Add( value, bufferSize, default, culture, key );
+    public JObject Add( ISpanFormattable value, int bufferSize, [CallerArgumentExpression( "value" )] string key                                                       = "" ) => Add( value, bufferSize, CultureInfo.CurrentCulture, key );
+    public JObject Add( ISpanFormattable value, int bufferSize, CultureInfo                                  culture, [CallerArgumentExpression( "value" )] string key = "" ) => Add( value, bufferSize, default,                    culture, key );
 
-    public JObject Add( in ISpanFormattable value, in int bufferSize, in ReadOnlySpan<char> format, in CultureInfo culture, [CallerArgumentExpression( "value" )] string key = "" )
+    public JObject Add( ISpanFormattable value, int bufferSize, ReadOnlySpan<char> format, CultureInfo culture, [CallerArgumentExpression( "value" )] string key = "" )
     {
         Start( key )
            .Append( '"' )
@@ -195,10 +195,10 @@ public ref struct JObject
     }
 
 
-    public JObject Add<T>( in T? value, in int bufferSize, [CallerArgumentExpression( "value" )] string key = "" ) where T : struct, ISpanFormattable => Add( value, bufferSize, CultureInfo.CurrentCulture, key );
-    public JObject Add<T>( in T? value, in int bufferSize, in CultureInfo culture, [CallerArgumentExpression( "value" )] string key = "" ) where T : struct, ISpanFormattable => Add( value, bufferSize, default, culture, key );
+    public JObject Add<T>( T? value, int bufferSize, [CallerArgumentExpression( "value" )] string key = "" ) where T : struct, ISpanFormattable => Add( value, bufferSize, CultureInfo.CurrentCulture, key );
+    public JObject Add<T>( T? value, int bufferSize, CultureInfo                                  culture, [CallerArgumentExpression( "value" )] string key = "" ) where T : struct, ISpanFormattable => Add( value, bufferSize, default, culture, key );
 
-    public JObject Add<T>( in T? value, in int bufferSize, in ReadOnlySpan<char> format, in CultureInfo culture, [CallerArgumentExpression( "value" )] string key = "" ) where T : struct, ISpanFormattable
+    public JObject Add<T>( T? value, int bufferSize, ReadOnlySpan<char> format, CultureInfo culture, [CallerArgumentExpression( "value" )] string key = "" ) where T : struct, ISpanFormattable
     {
         Start( key )
            .Append( '"' )
@@ -210,28 +210,28 @@ public ref struct JObject
     }
 
 
-    public JObject Add( in KeyValuePair<string, string>  pair ) => Add( pair.Value, pair.Key );
-    public JObject Add( in KeyValuePair<string, char>    pair ) => Add( pair.Value, pair.Key );
-    public JObject Add( in KeyValuePair<string, short>   pair ) => Add( pair.Value, pair.Key );
-    public JObject Add( in KeyValuePair<string, ushort>  pair ) => Add( pair.Value, pair.Key );
-    public JObject Add( in KeyValuePair<string, int>     pair ) => Add( pair.Value, pair.Key );
-    public JObject Add( in KeyValuePair<string, uint>    pair ) => Add( pair.Value, pair.Key );
-    public JObject Add( in KeyValuePair<string, long>    pair ) => Add( pair.Value, pair.Key );
-    public JObject Add( in KeyValuePair<string, ulong>   pair ) => Add( pair.Value, pair.Key );
-    public JObject Add( in KeyValuePair<string, float>   pair ) => Add( pair.Value, pair.Key );
-    public JObject Add( in KeyValuePair<string, double>  pair ) => Add( pair.Value, pair.Key );
-    public JObject Add( in KeyValuePair<string, decimal> pair ) => Add( pair.Value, pair.Key );
+    public JObject Add( KeyValuePair<string, string>  pair ) => Add( pair.Value, pair.Key );
+    public JObject Add( KeyValuePair<string, char>    pair ) => Add( pair.Value, pair.Key );
+    public JObject Add( KeyValuePair<string, short>   pair ) => Add( pair.Value, pair.Key );
+    public JObject Add( KeyValuePair<string, ushort>  pair ) => Add( pair.Value, pair.Key );
+    public JObject Add( KeyValuePair<string, int>     pair ) => Add( pair.Value, pair.Key );
+    public JObject Add( KeyValuePair<string, uint>    pair ) => Add( pair.Value, pair.Key );
+    public JObject Add( KeyValuePair<string, long>    pair ) => Add( pair.Value, pair.Key );
+    public JObject Add( KeyValuePair<string, ulong>   pair ) => Add( pair.Value, pair.Key );
+    public JObject Add( KeyValuePair<string, float>   pair ) => Add( pair.Value, pair.Key );
+    public JObject Add( KeyValuePair<string, double>  pair ) => Add( pair.Value, pair.Key );
+    public JObject Add( KeyValuePair<string, decimal> pair ) => Add( pair.Value, pair.Key );
 
 
-    public JObject Add( in KeyValuePair<string, DateOnly>         pair ) => Add( pair.Value,                           100,        pair.Key );
-    public JObject Add( in KeyValuePair<string, TimeOnly>         pair ) => Add( pair.Value,                           100,        pair.Key );
-    public JObject Add( in KeyValuePair<string, TimeSpan>         pair ) => Add( pair.Value,                           100,        pair.Key );
-    public JObject Add( in KeyValuePair<string, DateTimeOffset>   pair ) => Add( pair.Value,                           100,        pair.Key );
-    public JObject Add( in KeyValuePair<string, DateTime>         pair ) => Add( pair.Value,                           100,        pair.Key );
-    public JObject Add( in KeyValuePair<string, ISpanFormattable> pair, in int bufferSize = 1000 ) => Add( pair.Value, bufferSize, pair.Key );
+    public JObject Add( KeyValuePair<string, DateOnly>         pair ) => Add( pair.Value,                        100,        pair.Key );
+    public JObject Add( KeyValuePair<string, TimeOnly>         pair ) => Add( pair.Value,                        100,        pair.Key );
+    public JObject Add( KeyValuePair<string, TimeSpan>         pair ) => Add( pair.Value,                        100,        pair.Key );
+    public JObject Add( KeyValuePair<string, DateTimeOffset>   pair ) => Add( pair.Value,                        100,        pair.Key );
+    public JObject Add( KeyValuePair<string, DateTime>         pair ) => Add( pair.Value,                        100,        pair.Key );
+    public JObject Add( KeyValuePair<string, ISpanFormattable> pair, int bufferSize = 1000 ) => Add( pair.Value, bufferSize, pair.Key );
 
 
-    public JObject Add( in DictionaryEntry pair, in int bufferSize = 1000 )
+    public JObject Add( DictionaryEntry pair, int bufferSize = 1000 )
     {
         string? k = pair.Key.ToString();
         ArgumentNullException.ThrowIfNull( k );
@@ -261,9 +261,9 @@ public ref struct JObject
     }
 
 
-    public JArray AddArray( in ReadOnlySpan<char> key ) => Start( key )
+    public JArray AddArray( ReadOnlySpan<char> key ) => Start( key )
        .AddArray();
-    public JObject AddArray( in IEnumerable<IJsonizer>? value, [CallerArgumentExpression( "value" )] string key = "" )
+    public JObject AddArray( IEnumerable<IJsonizer>? value, [CallerArgumentExpression( "value" )] string key = "" )
     {
         AddArray( key )
            .AddObjects( value );
@@ -272,13 +272,13 @@ public ref struct JObject
     }
 
 
-    public JObject AddObject( in ReadOnlySpan<char> key ) => Start( key )
+    public JObject AddObject( ReadOnlySpan<char> key ) => Start( key )
        .AddObject();
-    public JObject AddObject( in IDictionary value, [CallerArgumentExpression( "value" )] string key = "" )
+    public JObject AddObject( IDictionary value, [CallerArgumentExpression( "value" )] string key = "" )
     {
         JObject node = AddObject( key );
 
-        if (value.Count == 0)
+        if ( value.Count == 0 )
         {
             node.Empty();
             return this;
@@ -287,7 +287,7 @@ public ref struct JObject
 
         node.Begin();
 
-        foreach (DictionaryEntry pair in value)
+        foreach ( DictionaryEntry pair in value )
         {
             node.Add( pair );
             node.writer.Next();
@@ -296,11 +296,11 @@ public ref struct JObject
         node.Complete();
         return this;
     }
-    public JObject AddObject( in IDictionary<string, IJsonizer> value, [CallerArgumentExpression( "value" )] string key = "" )
+    public JObject AddObject( IDictionary<string, IJsonizer> value, [CallerArgumentExpression( "value" )] string key = "" )
     {
         JObject node = AddObject( key );
 
-        if (value.Count == 0)
+        if ( value.Count == 0 )
         {
             node.Empty();
             return this;
@@ -309,23 +309,23 @@ public ref struct JObject
 
         node.Begin();
 
-        foreach ((int index, string? k, IJsonizer? jsonizer) in value.Enumerate( 0 ))
+        foreach ( (int index, string? k, IJsonizer? jsonizer) in value.Enumerate( 0 ) )
         {
             JObject item = node.AddObject( k );
             jsonizer.Serialize( ref item );
             item.writer.Next();
 
-            if (index < value.Count) { node.writer.Next(); }
+            if ( index < value.Count ) { node.writer.Next(); }
         }
 
         node.Complete();
         return this;
     }
-    public JObject AddObject( in ICollection<KeyValuePair<string, IJsonizer>> value, [CallerArgumentExpression( "value" )] string key = "" )
+    public JObject AddObject( ICollection<KeyValuePair<string, IJsonizer>> value, [CallerArgumentExpression( "value" )] string key = "" )
     {
         JObject node = AddObject( key );
 
-        if (value.Count == 0)
+        if ( value.Count == 0 )
         {
             node.Empty();
             return this;
@@ -334,13 +334,13 @@ public ref struct JObject
 
         node.Begin();
 
-        foreach ((int index, (string? k, IJsonizer? jsonizer)) in value.Enumerate( 0 ))
+        foreach ( (int index, (string? k, IJsonizer? jsonizer)) in value.Enumerate( 0 ) )
         {
             JObject item = node.AddObject( k );
             jsonizer.Serialize( ref item );
             item.writer.Next();
 
-            if (index < value.Count) { node.writer.Next(); }
+            if ( index < value.Count ) { node.writer.Next(); }
         }
 
         node.Complete();

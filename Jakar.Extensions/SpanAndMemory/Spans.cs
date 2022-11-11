@@ -5,7 +5,7 @@ namespace Jakar.Extensions;
 [SuppressMessage( "ReSharper", "OutParameterValueIsAlwaysDiscarded.Global" )]
 public static partial class Spans
 {
-    [Pure] [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Span<T> AsSpan<T>( this ReadOnlySpan<T> span ) => span.AsSpan( span.Length );
+    [Pure] [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Span<T> AsSpan<T>( this ReadOnlySpan<T> span ) => MemoryMarshal.CreateSpan( ref MemoryMarshal.GetReference( span ), span.Length );
     [Pure]
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static Span<T> AsSpan<T>( this ReadOnlySpan<T> span, in int length )
@@ -13,15 +13,15 @@ public static partial class Spans
         Guard.IsLessThanOrEqualTo( length, span.Length, nameof(length) );
         return MemoryMarshal.CreateSpan( ref MemoryMarshal.GetReference( span ), length );
     }
-    [Pure] [MethodImpl( MethodImplOptions.AggressiveInlining )] public static ReadOnlySpan<T> AsSpan<T>( this Span<T> span ) => span.AsSpan( span.Length );
+    [Pure] [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Span<T> AsSpan<T>( this Span<T> span ) => MemoryMarshal.CreateSpan( ref span.GetPinnableReference(), span.Length );
     [Pure]
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public static ReadOnlySpan<T> AsSpan<T>( this Span<T> span, in int length )
+    public static Span<T> AsSpan<T>( this Span<T> span, in int length )
     {
         Guard.IsLessThanOrEqualTo( length, span.Length, nameof(length) );
-        return MemoryMarshal.CreateReadOnlySpan( ref span.GetPinnableReference(), length );
+        return MemoryMarshal.CreateSpan( ref span.GetPinnableReference(), length );
     }
-    [Pure] [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Memory<T> AsSpan<T>( this T[] span ) => MemoryMarshal.CreateFromPinnedArray( span, 0, span.Length );
+    [Pure] [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Memory<T> AsMemory<T>( this T[] span ) => MemoryMarshal.CreateFromPinnedArray( span, 0, span.Length );
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
@@ -29,25 +29,25 @@ public static partial class Spans
     {
         Guard.IsInRangeFor( value.Length - 1, buffer, nameof(buffer) );
 
-        for (int i = 0; i < value.Length; i++) { buffer[i] = value[i]; }
+        for ( int i = 0; i < value.Length; i++ ) { buffer[i] = value[i]; }
     }
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static void CopyTo<T>( this ReadOnlySpan<T> value, in Span<T> buffer, in T defaultValue ) where T : IEquatable<T>
     {
         Guard.IsInRangeFor( value.Length - 1, buffer, nameof(buffer) );
 
-        for (int i = 0; i < value.Length; i++) { buffer[i] = value[i]; }
+        for ( int i = 0; i < value.Length; i++ ) { buffer[i] = value[i]; }
 
-        for (int i = value.Length; i < buffer.Length; i++) { buffer[i] = defaultValue; }
+        for ( int i = value.Length; i < buffer.Length; i++ ) { buffer[i] = defaultValue; }
     }
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static bool IsNullOrWhiteSpace( this Span<char> span )
     {
-        if (span.IsEmpty) { return true; }
+        if ( span.IsEmpty ) { return true; }
 
-        foreach (char t in span)
+        foreach ( char t in span )
         {
-            if (!char.IsWhiteSpace( t )) { return false; }
+            if ( !char.IsWhiteSpace( t ) ) { return false; }
         }
 
         return true;
@@ -55,11 +55,11 @@ public static partial class Spans
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static bool IsNullOrWhiteSpace( this ReadOnlySpan<char> span )
     {
-        if (span.IsEmpty) { return true; }
+        if ( span.IsEmpty ) { return true; }
 
-        foreach (char t in span)
+        foreach ( char t in span )
         {
-            if (!char.IsWhiteSpace( t )) { return false; }
+            if ( !char.IsWhiteSpace( t ) ) { return false; }
         }
 
         return true;
@@ -67,11 +67,11 @@ public static partial class Spans
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static bool IsNullOrWhiteSpace( this Buffer<char> span )
     {
-        if (span.IsEmpty) { return true; }
+        if ( span.IsEmpty ) { return true; }
 
-        foreach (char t in span)
+        foreach ( char t in span )
         {
-            if (!char.IsWhiteSpace( t )) { return false; }
+            if ( !char.IsWhiteSpace( t ) ) { return false; }
         }
 
         return true;
@@ -79,11 +79,11 @@ public static partial class Spans
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static bool IsNullOrWhiteSpace( this ValueStringBuilder span )
     {
-        if (span.IsEmpty) { return true; }
+        if ( span.IsEmpty ) { return true; }
 
-        foreach (char t in span)
+        foreach ( char t in span )
         {
-            if (!char.IsWhiteSpace( t )) { return false; }
+            if ( !char.IsWhiteSpace( t ) ) { return false; }
         }
 
         return true;
@@ -120,9 +120,9 @@ public static partial class Spans
         charWritten = first.Length + last.Length;
         Guard.IsInRangeFor( charWritten - 1, buffer, nameof(buffer) );
 
-        for (int i = 0; i < first.Length; i++) { buffer[i] = first[i]; }
+        for ( int i = 0; i < first.Length; i++ ) { buffer[i] = first[i]; }
 
-        for (int i = 0; i < last.Length; i++) { buffer[i + first.Length] = last[i]; }
+        for ( int i = 0; i < last.Length; i++ ) { buffer[i + first.Length] = last[i]; }
     }
 
 

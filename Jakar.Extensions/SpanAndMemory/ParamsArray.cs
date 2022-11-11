@@ -80,6 +80,7 @@ public readonly ref struct ParamsArray
 
         _args = args;
     }
+    public static implicit operator ParamsArray( in ReadOnlySpan<object?> args ) => new(args);
 
 
     [Pure] public ReadOnlySpan<object?>.Enumerator GetEnumerator() => _args.GetEnumerator();
@@ -88,7 +89,7 @@ public readonly ref struct ParamsArray
     public static ParamsArray Create( params object?[] args )
     {
         ReadOnlySpan<object?> span = args;
-        return new ParamsArray( span );
+        return MemoryMarshal.CreateReadOnlySpan( ref MemoryMarshal.GetReference( span ), span.Length );
     }
 
 #if NET6_0_OR_GREATER
@@ -96,7 +97,7 @@ public readonly ref struct ParamsArray
     public static ParamsArray Create( List<object?> args )
     {
         ReadOnlySpan<object?> span = CollectionsMarshal.AsSpan( args );
-        return new ParamsArray( span );
+        return MemoryMarshal.CreateReadOnlySpan( ref MemoryMarshal.GetReference( span ), span.Length );
     }
 #endif
 }
@@ -179,14 +180,16 @@ public readonly ref struct ParamsArray<T>
         _args = args;
     }
 
+    public static implicit operator ParamsArray<T>( in ReadOnlySpan<T?> args ) => new(args);
 
     [Pure] public ReadOnlySpan<T?>.Enumerator GetEnumerator() => _args.GetEnumerator();
+
 
     [Pure]
     public static ParamsArray<T> Create( params T?[] args )
     {
         ReadOnlySpan<T?> span = args;
-        return new ParamsArray<T>( span );
+        return MemoryMarshal.CreateReadOnlySpan( ref MemoryMarshal.GetReference( span ), span.Length );
     }
 
 #if NET6_0_OR_GREATER
@@ -194,7 +197,7 @@ public readonly ref struct ParamsArray<T>
     public static ParamsArray<T> Create( List<T?> args )
     {
         ReadOnlySpan<T?> span = CollectionsMarshal.AsSpan( args );
-        return new ParamsArray<T>( span );
+        return MemoryMarshal.CreateReadOnlySpan( ref MemoryMarshal.GetReference( span ), span.Length );
     }
 #endif
 }

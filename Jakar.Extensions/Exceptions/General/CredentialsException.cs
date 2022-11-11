@@ -9,7 +9,7 @@ public class CredentialsException : Exception
     public CredentialsException( string? user, string? password, Exception? inner ) : base( CreateMessage( user, password ), inner ) { }
 
 
-    protected static string CreateMessage( string? user, string? password ) => $"User: \"{user?.ToUpper() ?? "null"}\" | password: \"{password?.ToUpper() ?? "null"}\"";
+    protected static string CreateMessage( string? user, string? password ) => $"User: '{user ?? "null"}'";
 
     public static void ThrowIfInvalid( string? user, string? password )
     {

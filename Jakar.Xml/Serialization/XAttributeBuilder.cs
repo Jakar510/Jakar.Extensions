@@ -15,11 +15,11 @@ public readonly ref struct XAttributeBuilder
     internal readonly StringBuilder sb = new();
 
     public XAttributeBuilder() { }
-    public XAttributeBuilder( in Type               type ) : this( type.AssemblyQualifiedName ?? type.FullName ?? type.Name ) { }
-    public XAttributeBuilder( in ReadOnlySpan<char> xmls ) => With( nameof(xmls), xmls );
+    public XAttributeBuilder( Type               type ) : this( type.AssemblyQualifiedName ?? type.FullName ?? type.Name ) { }
+    public XAttributeBuilder( ReadOnlySpan<char> xmls ) => With( nameof(xmls), xmls );
 
 
-    public XAttributeBuilder With( in ReadOnlySpan<char> key, in ReadOnlySpan<char> value )
+    public XAttributeBuilder With( ReadOnlySpan<char> key, ReadOnlySpan<char> value )
     {
         sb.Append( ' ' )
           .Append( key )

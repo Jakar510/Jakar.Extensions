@@ -1,6 +1,7 @@
 ﻿namespace Jakar.Database.Migrations;
 
 
+[SuppressMessage( "ReSharper", "UnusedMethodReturnValue.Global")]
 public static class MigrationExtensions
 {
     public static WebApplicationBuilder AddFluentMigrator( this WebApplicationBuilder builder, Func<IMigrationRunnerBuilder, IMigrationRunnerBuilder> addSqlDb, Func<IServiceProvider, string> getConnectionString )
@@ -19,9 +20,7 @@ public static class MigrationExtensions
         return builder;
     }
     public static WebApplicationBuilder AddFluentMigrator( this WebApplicationBuilder builder, Func<IMigrationRunnerBuilder, IMigrationRunnerBuilder> addSqlDb ) =>
-        builder.AddFluentMigrator( addSqlDb,
-                                   provider => provider.GetRequiredService<IConfiguration>()
-                                                       .GetConnectionString( "Default" ) );
+        builder.AddFluentMigrator( addSqlDb, provider => provider.ConnectionString() );
 
 
     public static IInsertDataSyntax AddRow<T>( this IInsertDataSyntax insert, T context ) where T : BaseRecord
@@ -248,6 +247,7 @@ public static class MigrationExtensions
         await using AsyncServiceScope scope  = app.Services.CreateAsyncScope();
         var                           runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
         runner.ListMigrations();
+
         if ( runner.HasMigrationsToApplyUp() ) { runner.MigrateUp(); }
     }
 

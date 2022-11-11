@@ -21,7 +21,7 @@ public readonly ref struct JAttribute
     public readonly  bool               IsNameSpace;
 
 
-    public JAttribute( in ReadOnlySpan<char> span )
+    public JAttribute( ReadOnlySpan<char> span )
     {
         if (span.StartsWith( '<' )) { throw new FormatException( $"Cannot start with {'<'}" ); }
 

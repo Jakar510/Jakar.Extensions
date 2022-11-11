@@ -24,17 +24,17 @@ public ref struct XWriter
     public XWriter( bool shouldIndent ) => this.shouldIndent = shouldIndent;
 
 
-    public XArray AddArray( in   ReadOnlySpan<char> name ) => new(name, ref this);
-    public XObject AddObject( in ReadOnlySpan<char> name ) => new(name, ref this);
+    public XArray AddArray( ReadOnlySpan<char>   name ) => new(name, ref this);
+    public XObject AddObject( ReadOnlySpan<char> name ) => new(name, ref this);
 
-    public XWriter Add( in XObject parent, in ReadOnlySpan<char> key, in IEnumerable<IXmlizer> enumerable )
+    public XWriter Add( XObject parent, ReadOnlySpan<char> key, IEnumerable<IXmlizer> enumerable )
     {
         using XArray node = parent.AddArray( key );
         return Add( node, enumerable );
     }
-    public XWriter Add( in XArray parent, in IEnumerable<IXmlizer> enumerable )
+    public XWriter Add( XArray parent, IEnumerable<IXmlizer> enumerable )
     {
-        foreach (IXmlizer item in enumerable)
+        foreach ( IXmlizer item in enumerable )
         {
             ReadOnlySpan<char> name = item.Name;
             using XObject      node = parent.AddObject( name );
@@ -43,19 +43,19 @@ public ref struct XWriter
 
         return this;
     }
-    public XWriter Add( in XObject parent, in ReadOnlySpan<char> key, in IDictionary dictionary )
+    public XWriter Add( XObject parent, ReadOnlySpan<char> key, IDictionary dictionary )
     {
         using XObject node = parent.AddObject( key );
 
-        foreach (DictionaryEntry pair in dictionary) { node.Add( pair ); }
+        foreach ( DictionaryEntry pair in dictionary ) { node.Add( pair ); }
 
         return this;
     }
-    public XWriter Add( in XObject parent, in ReadOnlySpan<char> key, in IDictionary<string, IXmlizer> dictionary )
+    public XWriter Add( XObject parent, ReadOnlySpan<char> key, IDictionary<string, IXmlizer> dictionary )
     {
         using XObject node = parent.AddObject( key );
 
-        foreach ((string? k, IXmlizer? value) in dictionary)
+        foreach ( (string? k, IXmlizer? value) in dictionary )
         {
             using XObject item = node.AddObject( k );
             value.Serialize( item );
@@ -65,19 +65,19 @@ public ref struct XWriter
     }
 
 
-    public void StartBlock( in ReadOnlySpan<char> name )
+    public void StartBlock( ReadOnlySpan<char> name )
     {
         _sb.Append( '<' )
            .Append( name )
            .Append( '>' );
 
-        if (shouldIndent)
+        if ( shouldIndent )
         {
             _sb.Append( '\n' );
             indentLevel += 1;
         }
     }
-    public void StartBlock( in ReadOnlySpan<char> name, in XAttributeBuilder builder )
+    public void StartBlock( ReadOnlySpan<char> name, XAttributeBuilder builder )
     {
         _sb.Append( '<' )
            .Append( name )
@@ -85,19 +85,19 @@ public ref struct XWriter
            .Append( builder.sb )
            .Append( '>' );
 
-        if (shouldIndent)
+        if ( shouldIndent )
         {
             _sb.Append( '\n' );
             indentLevel += 1;
         }
     }
-    public void FinishBlock( in ReadOnlySpan<char> name )
+    public void FinishBlock( ReadOnlySpan<char> name )
     {
         _sb.Append( "</" )
            .Append( name )
            .Append( '>' );
 
-        if (shouldIndent)
+        if ( shouldIndent )
         {
             _sb.Append( '\n' );
             indentLevel -= 1;
@@ -105,11 +105,11 @@ public ref struct XWriter
     }
 
 
-    public XWriter Indent( in ReadOnlySpan<char> key )
+    public XWriter Indent( ReadOnlySpan<char> key )
     {
-        if (shouldIndent)
+        if ( shouldIndent )
         {
-            // throw new InvalidOperationException($"{nameof(Indent)} should not be used in this context"); 
+            // throw new InvalidOperationException($"{nameof(Indent)} should not be used  this context"); 
             _sb.Append( '\t', indentLevel );
         }
 
@@ -119,13 +119,13 @@ public ref struct XWriter
 
         return this;
     }
-    public XWriter Next( in ReadOnlySpan<char> key )
+    public XWriter Next( ReadOnlySpan<char> key )
     {
         _sb.Append( "</" )
            .Append( key )
            .Append( '>' );
 
-        if (shouldIndent) { _sb.Append( '\n' ); }
+        if ( shouldIndent ) { _sb.Append( '\n' ); }
 
         return this;
     }
@@ -136,82 +136,82 @@ public ref struct XWriter
         _sb.Append( NULL );
         return this;
     }
-    public XWriter Append( in string value ) => Append( value.AsSpan() );
-    public XWriter Append( in ReadOnlySpan<char> value )
+    public XWriter Append( string value ) => Append( value.AsSpan() );
+    public XWriter Append( ReadOnlySpan<char> value )
     {
         _sb.Append( value );
         return this;
     }
-    public XWriter Append( in char value )
-    {
-        _sb.Append( value );
-        return this;
-    }
-
-
-    public XWriter Append( in short value )
-    {
-        _sb.Append( value );
-        return this;
-    }
-    public XWriter Append( in ushort value )
-    {
-        _sb.Append( value );
-        return this;
-    }
-    public XWriter Append( in int value )
-    {
-        _sb.Append( value );
-        return this;
-    }
-    public XWriter Append( in uint value )
-    {
-        _sb.Append( value );
-        return this;
-    }
-    public XWriter Append( in long value )
-    {
-        _sb.Append( value );
-        return this;
-    }
-    public XWriter Append( in ulong value )
-    {
-        _sb.Append( value );
-        return this;
-    }
-    public XWriter Append( in float value )
-    {
-        _sb.Append( value );
-        return this;
-    }
-    public XWriter Append( in double value )
-    {
-        _sb.Append( value );
-        return this;
-    }
-    public XWriter Append( in decimal value )
+    public XWriter Append( char value )
     {
         _sb.Append( value );
         return this;
     }
 
 
-    public XWriter Append( in ISpanFormattable value, in ReadOnlySpan<char> format, in CultureInfo culture, in int bufferSize )
+    public XWriter Append( short value )
+    {
+        _sb.Append( value );
+        return this;
+    }
+    public XWriter Append( ushort value )
+    {
+        _sb.Append( value );
+        return this;
+    }
+    public XWriter Append( int value )
+    {
+        _sb.Append( value );
+        return this;
+    }
+    public XWriter Append( uint value )
+    {
+        _sb.Append( value );
+        return this;
+    }
+    public XWriter Append( long value )
+    {
+        _sb.Append( value );
+        return this;
+    }
+    public XWriter Append( ulong value )
+    {
+        _sb.Append( value );
+        return this;
+    }
+    public XWriter Append( float value )
+    {
+        _sb.Append( value );
+        return this;
+    }
+    public XWriter Append( double value )
+    {
+        _sb.Append( value );
+        return this;
+    }
+    public XWriter Append( decimal value )
+    {
+        _sb.Append( value );
+        return this;
+    }
+
+
+    public XWriter Append( ISpanFormattable value, ReadOnlySpan<char> format, CultureInfo culture, int bufferSize )
     {
         Span<char> buffer = stackalloc char[bufferSize];
 
-        if (!value.TryFormat( buffer, out int charsWritten, format, culture )) { throw new InvalidOperationException( $"Can't format value: '{value}'" ); }
+        if ( !value.TryFormat( buffer, out int charsWritten, format, culture ) ) { throw new InvalidOperationException( $"Can't format value: '{value}'" ); }
 
         _sb.Append( buffer[..charsWritten] );
         return this;
     }
-    public XWriter Append<T>( in T? value, in ReadOnlySpan<char> format, in CultureInfo culture, in int bufferSize ) where T : struct, ISpanFormattable
+    public XWriter Append<T>( T? value, ReadOnlySpan<char> format, CultureInfo culture, int bufferSize ) where T : struct, ISpanFormattable
     {
-        if (value.HasValue)
+        if ( value.HasValue )
         {
             Span<char> buffer = stackalloc char[bufferSize];
 
-            if (!value.Value.TryFormat( buffer, out int charsWritten, format, culture )) { throw new InvalidOperationException( $"Can't format value: '{value}'" ); }
+            if ( !value.Value.TryFormat( buffer, out int charsWritten, format, culture ) ) { throw new InvalidOperationException( $"Can't format value: '{value}'" ); }
 
             _sb.Append( buffer[..charsWritten] );
         }

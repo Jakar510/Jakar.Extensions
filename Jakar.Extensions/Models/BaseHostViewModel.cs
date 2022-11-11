@@ -18,6 +18,8 @@ public abstract class BaseHostViewModel : BaseViewModel, IHostViewModel
     private            bool    _isValidHost;
     private            string? _host;
     private            Uri?    _hostInfo;
+
+
     public virtual bool IsValidHost
     {
         get => _isValidHost;

@@ -18,7 +18,7 @@ public readonly ref struct PasswordValidator
     private readonly Requirements _requirements;
 
 
-    public PasswordValidator() : this( Requirements.Default ) { }
+    public static PasswordValidator Default => new(Requirements.Default);
     public PasswordValidator( in Requirements requirements ) => _requirements = requirements;
 
 
@@ -30,7 +30,7 @@ public readonly ref struct PasswordValidator
     private bool HandleLength( in ReadOnlySpan<char> span ) => span.Length >= _requirements.MinLength;
     private bool HandleNumeric( in ReadOnlySpan<char> span )
     {
-        if (!_requirements.RequireNumber) { return true; }
+        if ( !_requirements.RequireNumber ) { return true; }
 
         int index = _requirements.CantStartWithNumber
                         ? 1
@@ -40,7 +40,7 @@ public readonly ref struct PasswordValidator
     }
     private bool HandleSpecial( in ReadOnlySpan<char> span )
     {
-        if (!_requirements.RequireSpecialChar) { return true; }
+        if ( !_requirements.RequireSpecialChar ) { return true; }
 
         int index = _requirements.CantStartWithSpecialChar
                         ? 1
@@ -50,23 +50,23 @@ public readonly ref struct PasswordValidator
     }
     private bool HandleUpper( in ReadOnlySpan<char> span )
     {
-        if (!_requirements.RequireUpperCase) { return true; }
+        if ( !_requirements.RequireUpperCase ) { return true; }
 
         return span.IndexOfAny( _requirements.UpperCase ) >= 0;
     }
     private bool HandleLower( in ReadOnlySpan<char> span )
     {
-        if (!_requirements.RequireLowerCase) { return true; }
+        if ( !_requirements.RequireLowerCase ) { return true; }
 
         return span.IndexOfAny( _requirements.LowerCase ) >= 0;
     }
     private bool HandleBlocked( in ReadOnlySpan<char> span )
     {
-        if (_requirements.BlockedPasswords.IsEmpty) { return true; }
+        if ( _requirements.BlockedPasswords.IsEmpty ) { return true; }
 
-        foreach (ReadOnlySpan<char> password in _requirements.BlockedPasswords)
+        foreach ( ReadOnlySpan<char> password in _requirements.BlockedPasswords )
         {
-            if (span.Equals( password, StringComparison.OrdinalIgnoreCase )) { return false; }
+            if ( span.Equals( password, StringComparison.OrdinalIgnoreCase ) ) { return false; }
         }
 
         return true;
@@ -160,7 +160,7 @@ public readonly ref struct PasswordValidator
 
         public static async ValueTask<PasswordRequirements> FromFile()
         {
-            if (File.DoesNotExist)
+            if ( File.DoesNotExist )
             {
                 Current ??= new PasswordRequirements();
                 await File.WriteAsync( Current.ToPrettyJson() );

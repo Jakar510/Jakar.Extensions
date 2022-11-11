@@ -20,7 +20,7 @@ public ref struct XArray
     private          XWriter            _writer;
 
 
-    public XArray( in ReadOnlySpan<char> name, ref XWriter context )
+    public XArray( ReadOnlySpan<char> name, ref XWriter context )
     {
         _name   = name;
         _writer = context;
@@ -32,14 +32,14 @@ public ref struct XArray
         _writer.StartBlock( _name );
         return this;
     }
-    public XArray Init( in XAttributeBuilder builder )
+    public XArray Init( XAttributeBuilder builder )
     {
         _writer.StartBlock( _name, builder );
         return this;
     }
 
 
-    public XArray Null( in ReadOnlySpan<char> key )
+    public XArray Null( ReadOnlySpan<char> key )
     {
         _writer.Indent( key )
                .Append( XWriter.NULL )
@@ -47,7 +47,7 @@ public ref struct XArray
 
         return this;
     }
-    public XArray Add( in ReadOnlySpan<char> key, in char value )
+    public XArray Add( ReadOnlySpan<char> key, char value )
     {
         _writer.Indent( key )
                .Append( value )
@@ -55,7 +55,7 @@ public ref struct XArray
 
         return this;
     }
-    public XArray Add( in ReadOnlySpan<char> key, in short value )
+    public XArray Add( ReadOnlySpan<char> key, short value )
     {
         _writer.Indent( key )
                .Append( value )
@@ -63,7 +63,7 @@ public ref struct XArray
 
         return this;
     }
-    public XArray Add( in ReadOnlySpan<char> key, in ushort value )
+    public XArray Add( ReadOnlySpan<char> key, ushort value )
     {
         _writer.Indent( key )
                .Append( value )
@@ -71,7 +71,7 @@ public ref struct XArray
 
         return this;
     }
-    public XArray Add( in ReadOnlySpan<char> key, in int value )
+    public XArray Add( ReadOnlySpan<char> key, int value )
     {
         _writer.Indent( key )
                .Append( value )
@@ -79,7 +79,7 @@ public ref struct XArray
 
         return this;
     }
-    public XArray Add( in ReadOnlySpan<char> key, in uint value )
+    public XArray Add( ReadOnlySpan<char> key, uint value )
     {
         _writer.Indent( key )
                .Append( value )
@@ -87,7 +87,7 @@ public ref struct XArray
 
         return this;
     }
-    public XArray Add( in ReadOnlySpan<char> key, in long value )
+    public XArray Add( ReadOnlySpan<char> key, long value )
     {
         _writer.Indent( key )
                .Append( value )
@@ -95,7 +95,7 @@ public ref struct XArray
 
         return this;
     }
-    public XArray Add( in ReadOnlySpan<char> key, in ulong value )
+    public XArray Add( ReadOnlySpan<char> key, ulong value )
     {
         _writer.Indent( key )
                .Append( value )
@@ -103,7 +103,7 @@ public ref struct XArray
 
         return this;
     }
-    public XArray Add( in ReadOnlySpan<char> key, in float value )
+    public XArray Add( ReadOnlySpan<char> key, float value )
     {
         _writer.Indent( key )
                .Append( value )
@@ -111,7 +111,7 @@ public ref struct XArray
 
         return this;
     }
-    public XArray Add( in ReadOnlySpan<char> key, in double value )
+    public XArray Add( ReadOnlySpan<char> key, double value )
     {
         _writer.Indent( key )
                .Append( value )
@@ -119,50 +119,7 @@ public ref struct XArray
 
         return this;
     }
-    public XArray Add( in ReadOnlySpan<char> key, in decimal value )
-    {
-        _writer.Indent( key )
-               .Append( value )
-               .Next( key );
-
-        return this;
-    }
-
-
-    public XArray Add( in ReadOnlySpan<char> key, in char? value ) => value.HasValue
-                                                                          ? Add( key, value.Value )
-                                                                          : Null( key );
-    public XArray Add( in ReadOnlySpan<char> key, in short? value ) => value.HasValue
-                                                                           ? Add( key, value.Value )
-                                                                           : Null( key );
-    public XArray Add( in ReadOnlySpan<char> key, in ushort? value ) => value.HasValue
-                                                                            ? Add( key, value.Value )
-                                                                            : Null( key );
-    public XArray Add( in ReadOnlySpan<char> key, in int? value ) => value.HasValue
-                                                                         ? Add( key, value.Value )
-                                                                         : Null( key );
-    public XArray Add( in ReadOnlySpan<char> key, in uint? value ) => value.HasValue
-                                                                          ? Add( key, value.Value )
-                                                                          : Null( key );
-    public XArray Add( in ReadOnlySpan<char> key, in long? value ) => value.HasValue
-                                                                          ? Add( key, value.Value )
-                                                                          : Null( key );
-    public XArray Add( in ReadOnlySpan<char> key, in ulong? value ) => value.HasValue
-                                                                           ? Add( key, value.Value )
-                                                                           : Null( key );
-    public XArray Add( in ReadOnlySpan<char> key, in float? value ) => value.HasValue
-                                                                           ? Add( key, value.Value )
-                                                                           : Null( key );
-    public XArray Add( in ReadOnlySpan<char> key, in double? value ) => value.HasValue
-                                                                            ? Add( key, value.Value )
-                                                                            : Null( key );
-    public XArray Add( in ReadOnlySpan<char> key, in decimal? value ) => value.HasValue
-                                                                             ? Add( key, value.Value )
-                                                                             : Null( key );
-
-
-    public XArray Add( in ReadOnlySpan<char> key, in string value ) => Add( key, value.AsSpan() );
-    public XArray Add( in ReadOnlySpan<char> key, in ReadOnlySpan<char> value )
+    public XArray Add( ReadOnlySpan<char> key, decimal value )
     {
         _writer.Indent( key )
                .Append( value )
@@ -172,9 +129,52 @@ public ref struct XArray
     }
 
 
-    public XArray Add( in ReadOnlySpan<char> key, in ISpanFormattable value, in int bufferSize ) => Add( key,                         value, bufferSize, CultureInfo.CurrentCulture );
-    public XArray Add( in ReadOnlySpan<char> key, in ISpanFormattable value, in int bufferSize, in CultureInfo culture ) => Add( key, value, bufferSize, default, culture );
-    public XArray Add( in ReadOnlySpan<char> key, in ISpanFormattable value, in int bufferSize, in ReadOnlySpan<char> format, in CultureInfo culture )
+    public XArray Add( ReadOnlySpan<char> key, char? value ) => value.HasValue
+                                                                    ? Add( key, value.Value )
+                                                                    : Null( key );
+    public XArray Add( ReadOnlySpan<char> key, short? value ) => value.HasValue
+                                                                     ? Add( key, value.Value )
+                                                                     : Null( key );
+    public XArray Add( ReadOnlySpan<char> key, ushort? value ) => value.HasValue
+                                                                      ? Add( key, value.Value )
+                                                                      : Null( key );
+    public XArray Add( ReadOnlySpan<char> key, int? value ) => value.HasValue
+                                                                   ? Add( key, value.Value )
+                                                                   : Null( key );
+    public XArray Add( ReadOnlySpan<char> key, uint? value ) => value.HasValue
+                                                                    ? Add( key, value.Value )
+                                                                    : Null( key );
+    public XArray Add( ReadOnlySpan<char> key, long? value ) => value.HasValue
+                                                                    ? Add( key, value.Value )
+                                                                    : Null( key );
+    public XArray Add( ReadOnlySpan<char> key, ulong? value ) => value.HasValue
+                                                                     ? Add( key, value.Value )
+                                                                     : Null( key );
+    public XArray Add( ReadOnlySpan<char> key, float? value ) => value.HasValue
+                                                                     ? Add( key, value.Value )
+                                                                     : Null( key );
+    public XArray Add( ReadOnlySpan<char> key, double? value ) => value.HasValue
+                                                                      ? Add( key, value.Value )
+                                                                      : Null( key );
+    public XArray Add( ReadOnlySpan<char> key, decimal? value ) => value.HasValue
+                                                                       ? Add( key, value.Value )
+                                                                       : Null( key );
+
+
+    public XArray Add( ReadOnlySpan<char> key, string value ) => Add( key, value.AsSpan() );
+    public XArray Add( ReadOnlySpan<char> key, ReadOnlySpan<char> value )
+    {
+        _writer.Indent( key )
+               .Append( value )
+               .Next( key );
+
+        return this;
+    }
+
+
+    public XArray Add( ReadOnlySpan<char> key, ISpanFormattable value, int bufferSize ) => Add( key,                      value, bufferSize, CultureInfo.CurrentCulture );
+    public XArray Add( ReadOnlySpan<char> key, ISpanFormattable value, int bufferSize, CultureInfo culture ) => Add( key, value, bufferSize, default, culture );
+    public XArray Add( ReadOnlySpan<char> key, ISpanFormattable value, int bufferSize, ReadOnlySpan<char> format, CultureInfo culture )
     {
         _writer.Indent( key )
                .Append( value, format, culture, bufferSize )
@@ -184,9 +184,9 @@ public ref struct XArray
     }
 
 
-    public XArray Add<T>( in ReadOnlySpan<char> key, in T? value, in int bufferSize ) where T : struct, ISpanFormattable => Add( key,                         value, bufferSize, CultureInfo.CurrentCulture );
-    public XArray Add<T>( in ReadOnlySpan<char> key, in T? value, in int bufferSize, in CultureInfo culture ) where T : struct, ISpanFormattable => Add( key, value, bufferSize, default, culture );
-    public XArray Add<T>( in ReadOnlySpan<char> key, in T? value, in int bufferSize, in ReadOnlySpan<char> format, in CultureInfo culture ) where T : struct, ISpanFormattable
+    public XArray Add<T>( ReadOnlySpan<char> key, T? value, int bufferSize ) where T : struct, ISpanFormattable => Add( key,                      value, bufferSize, CultureInfo.CurrentCulture );
+    public XArray Add<T>( ReadOnlySpan<char> key, T? value, int bufferSize, CultureInfo culture ) where T : struct, ISpanFormattable => Add( key, value, bufferSize, default, culture );
+    public XArray Add<T>( ReadOnlySpan<char> key, T? value, int bufferSize, ReadOnlySpan<char> format, CultureInfo culture ) where T : struct, ISpanFormattable
     {
         _writer.Indent( key )
                .Append( value, format, culture, bufferSize )
@@ -196,28 +196,28 @@ public ref struct XArray
     }
 
 
-    public XArray Add( in KeyValuePair<string, string>  pair ) => Add( pair.Key, pair.Value );
-    public XArray Add( in KeyValuePair<string, char>    pair ) => Add( pair.Key, pair.Value );
-    public XArray Add( in KeyValuePair<string, short>   pair ) => Add( pair.Key, pair.Value );
-    public XArray Add( in KeyValuePair<string, ushort>  pair ) => Add( pair.Key, pair.Value );
-    public XArray Add( in KeyValuePair<string, int>     pair ) => Add( pair.Key, pair.Value );
-    public XArray Add( in KeyValuePair<string, uint>    pair ) => Add( pair.Key, pair.Value );
-    public XArray Add( in KeyValuePair<string, long>    pair ) => Add( pair.Key, pair.Value );
-    public XArray Add( in KeyValuePair<string, ulong>   pair ) => Add( pair.Key, pair.Value );
-    public XArray Add( in KeyValuePair<string, float>   pair ) => Add( pair.Key, pair.Value );
-    public XArray Add( in KeyValuePair<string, double>  pair ) => Add( pair.Key, pair.Value );
-    public XArray Add( in KeyValuePair<string, decimal> pair ) => Add( pair.Key, pair.Value );
+    public XArray Add( KeyValuePair<string, string>  pair ) => Add( pair.Key, pair.Value );
+    public XArray Add( KeyValuePair<string, char>    pair ) => Add( pair.Key, pair.Value );
+    public XArray Add( KeyValuePair<string, short>   pair ) => Add( pair.Key, pair.Value );
+    public XArray Add( KeyValuePair<string, ushort>  pair ) => Add( pair.Key, pair.Value );
+    public XArray Add( KeyValuePair<string, int>     pair ) => Add( pair.Key, pair.Value );
+    public XArray Add( KeyValuePair<string, uint>    pair ) => Add( pair.Key, pair.Value );
+    public XArray Add( KeyValuePair<string, long>    pair ) => Add( pair.Key, pair.Value );
+    public XArray Add( KeyValuePair<string, ulong>   pair ) => Add( pair.Key, pair.Value );
+    public XArray Add( KeyValuePair<string, float>   pair ) => Add( pair.Key, pair.Value );
+    public XArray Add( KeyValuePair<string, double>  pair ) => Add( pair.Key, pair.Value );
+    public XArray Add( KeyValuePair<string, decimal> pair ) => Add( pair.Key, pair.Value );
 
 
-    public XArray Add( in KeyValuePair<string, DateOnly>         pair ) => Add( pair.Key,                           pair.Value, 100 );
-    public XArray Add( in KeyValuePair<string, TimeOnly>         pair ) => Add( pair.Key,                           pair.Value, 100 );
-    public XArray Add( in KeyValuePair<string, TimeSpan>         pair ) => Add( pair.Key,                           pair.Value, 100 );
-    public XArray Add( in KeyValuePair<string, DateTimeOffset>   pair ) => Add( pair.Key,                           pair.Value, 100 );
-    public XArray Add( in KeyValuePair<string, DateTime>         pair ) => Add( pair.Key,                           pair.Value, 100 );
-    public XArray Add( in KeyValuePair<string, ISpanFormattable> pair, in int bufferSize = 1000 ) => Add( pair.Key, pair.Value, bufferSize );
+    public XArray Add( KeyValuePair<string, DateOnly>         pair ) => Add( pair.Key,                        pair.Value, 100 );
+    public XArray Add( KeyValuePair<string, TimeOnly>         pair ) => Add( pair.Key,                        pair.Value, 100 );
+    public XArray Add( KeyValuePair<string, TimeSpan>         pair ) => Add( pair.Key,                        pair.Value, 100 );
+    public XArray Add( KeyValuePair<string, DateTimeOffset>   pair ) => Add( pair.Key,                        pair.Value, 100 );
+    public XArray Add( KeyValuePair<string, DateTime>         pair ) => Add( pair.Key,                        pair.Value, 100 );
+    public XArray Add( KeyValuePair<string, ISpanFormattable> pair, int bufferSize = 1000 ) => Add( pair.Key, pair.Value, bufferSize );
 
 
-    public XArray Add( in DictionaryEntry pair, in int bufferSize = 1000 )
+    public XArray Add( DictionaryEntry pair, int bufferSize = 1000 )
     {
         ReadOnlySpan<char> k = pair.Key.ToString();
 
@@ -246,8 +246,8 @@ public ref struct XArray
     }
 
 
-    public XArray AddArray( in   ReadOnlySpan<char> name ) => new(name, ref _writer);
-    public XObject AddObject( in ReadOnlySpan<char> name ) => new(name, ref _writer);
+    public XArray AddArray( ReadOnlySpan<char>   name ) => new(name, ref _writer);
+    public XObject AddObject( ReadOnlySpan<char> name ) => new(name, ref _writer);
 
 
     public void Dispose() => _writer.FinishBlock( _name );

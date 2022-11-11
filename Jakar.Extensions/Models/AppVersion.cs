@@ -344,7 +344,7 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
 
 
     public ReadOnlySpan<char> AsSpan() => AsSpan( CultureInfo.CurrentCulture );
-    public ReadOnlySpan<char> AsSpan( in CultureInfo culture )
+    public ReadOnlySpan<char> AsSpan( CultureInfo culture )
     {
         Span<char> buffer = stackalloc char[150];
 
