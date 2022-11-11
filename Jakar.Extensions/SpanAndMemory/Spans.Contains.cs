@@ -16,7 +16,14 @@ public static partial class Spans
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public static bool Contains<T>( this Span<T> span, T value ) where T : struct, IEquatable<T>
+    public static bool Contains<T>(
+
+    #if NETSTANDARD2_1
+        this
+    #endif
+        Span<T> span,
+        T       value
+    ) where T : struct, IEquatable<T>
     {
     #if NETSTANDARD2_1
         foreach ( T item in span )
@@ -26,11 +33,17 @@ public static partial class Spans
 
         return false;
     #else
-        return MemoryExtensions.Contains( span, value );
+        return span.Contains( value );
     #endif
     }
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public static bool Contains<T>( this ReadOnlySpan<T> span, T value ) where T : struct, IEquatable<T>
+    public static bool Contains<T>(
+    #if NETSTANDARD2_1
+        this
+    #endif
+        ReadOnlySpan<T> span,
+        T               value
+    ) where T : struct, IEquatable<T>
     {
     #if NETSTANDARD2_1
         foreach ( T item in span )
@@ -40,7 +53,7 @@ public static partial class Spans
 
         return false;
     #else
-        return MemoryExtensions.Contains( span, value );
+        return span.Contains( value );
     #endif
     }
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
