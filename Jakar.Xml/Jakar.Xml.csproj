@@ -18,11 +18,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Jakar.Extensions" Version="6.2.2" />
 		<PackageReference Include="Sigil" Version="5.0.0" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <ProjectReference Include="..\Jakar.Extensions\Jakar.Extensions.csproj" />
 	</ItemGroup>
 
 </Project>
