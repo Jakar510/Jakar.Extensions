@@ -18,7 +18,7 @@ public ref struct Buffer<T> where T : unmanaged, IEquatable<T>
     public          bool    IsReadOnly { get; init; }
 
 
-    public readonly Span<T> this[ in Range range ] => _span[range];
+    public readonly Span<T> this[ Range range ] => _span[range];
     public ref T this[ int index ]
     {
         get
@@ -55,14 +55,14 @@ public ref struct Buffer<T> where T : unmanaged, IEquatable<T>
     {
         if ( IsReadOnly ) { throw new InvalidOperationException( $"{nameof(Buffer<T>)} is read only" ); }
     }
-    private static int GetLength( in ReadOnlySpan<T> span, in bool isReadOnly ) => span.Length * (isReadOnly
-                                                                                                      ? 1
-                                                                                                      : 2);
+    private static int GetLength( ReadOnlySpan<T> span, bool isReadOnly ) => span.Length * (isReadOnly
+                                                                                                ? 1
+                                                                                                : 2);
 
 
-    [Pure] public static Buffer<T> Create( in ReadOnlySpan<T> span, bool isReadOnly ) => new Buffer<T>().Init( span, isReadOnly );
+    [Pure] public static Buffer<T> Create( ReadOnlySpan<T> span, bool isReadOnly ) => new Buffer<T>().Init( span, isReadOnly );
     [Pure]
-    public Buffer<T> Init( in ReadOnlySpan<T> span, bool isReadOnly )
+    public Buffer<T> Init( ReadOnlySpan<T> span, bool isReadOnly )
     {
         if ( _arrayToReturnToPool is not null ) { ArrayPool<T>.Shared.Return( _arrayToReturnToPool ); }
 
@@ -136,7 +136,7 @@ public ref struct Buffer<T> where T : unmanaged, IEquatable<T>
     ///     <see cref = "Index" />
     /// </summary>
     /// <param name = "terminate" > </param>
-    public ref T GetPinnableReference( in T terminate )
+    public ref T GetPinnableReference( T terminate )
     {
         EnsureCapacity( Index + 1 );
         _span[++Index] = terminate;
@@ -162,12 +162,12 @@ public ref struct Buffer<T> where T : unmanaged, IEquatable<T>
     public int LastIndexOf( T                         value, int end ) => Next.LastIndexOf( value, end );
 
 
-    public bool Contains( T                  value ) => _span.Contains( value );
-    public bool Contains( in Span<T>         value ) => _span.Contains( value );
-    public bool Contains( in ReadOnlySpan<T> value ) => _span.Contains( value );
+    public bool Contains( T               value ) => _span.Contains( value );
+    public bool Contains( Span<T>         value ) => _span.Contains( value );
+    public bool Contains( ReadOnlySpan<T> value ) => _span.Contains( value );
 
 
-    public bool TryCopyTo( in Span<T> destination, out int charsWritten )
+    public bool TryCopyTo( Span<T> destination, out int charsWritten )
     {
         if ( _span[.._index]
            .TryCopyTo( destination ) )
@@ -192,7 +192,7 @@ public ref struct Buffer<T> where T : unmanaged, IEquatable<T>
 
         return this;
     }
-    public Buffer<T> Replace( int index, in ReadOnlySpan<T> span )
+    public Buffer<T> Replace( int index, ReadOnlySpan<T> span )
     {
         ThrowIfReadOnly();
         if ( _index + span.Length > _span.Length ) { Grow( span.Length ); }
@@ -219,7 +219,7 @@ public ref struct Buffer<T> where T : unmanaged, IEquatable<T>
         _index += count;
         return this;
     }
-    public Buffer<T> Insert( int index, in ReadOnlySpan<T> span )
+    public Buffer<T> Insert( int index, ReadOnlySpan<T> span )
     {
         ThrowIfReadOnly();
         if ( _index + span.Length > _span.Length ) { Grow( span.Length ); }
@@ -250,7 +250,7 @@ public ref struct Buffer<T> where T : unmanaged, IEquatable<T>
 
         return this;
     }
-    public Buffer<T> Append( in ReadOnlySpan<T> span )
+    public Buffer<T> Append( ReadOnlySpan<T> span )
     {
         ThrowIfReadOnly();
 
@@ -322,7 +322,7 @@ public ref struct Buffer<T> where T : unmanaged, IEquatable<T>
         public readonly ref T         Current => ref _buffer[_index];
 
 
-        internal Enumerator( in Buffer<T> buffer ) => _buffer = buffer;
+        internal Enumerator( Buffer<T> buffer ) => _buffer = buffer;
 
 
         public void Reset() => _index = 0;

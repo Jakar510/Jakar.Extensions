@@ -14,28 +14,28 @@ public static partial class Validate
     private static volatile string _demo = "DEMO";
 
 
-    public static string FormatNumber( this float value, int            maxDecimals              = 4 ) => value.FormatNumber( CultureInfo.CurrentCulture, maxDecimals );
-    public static string FormatNumber( this float value, in CultureInfo info, in int maxDecimals = 4 ) => Regex.Replace( string.Format( info, $"{{0:n{maxDecimals}}}", value ), $"[{info.NumberFormat.NumberDecimalSeparator}]?0+$", string.Empty );
+    public static string FormatNumber( this float value, int         maxDecimals           = 4 ) => value.FormatNumber( CultureInfo.CurrentCulture, maxDecimals );
+    public static string FormatNumber( this float value, CultureInfo info, int maxDecimals = 4 ) => Regex.Replace( string.Format( info, $"{{0:n{maxDecimals}}}", value ), $"[{info.NumberFormat.NumberDecimalSeparator}]?0+$", string.Empty );
 
 
-    public static string FormatNumber( this double value, int            maxDecimals              = 4 ) => value.FormatNumber( CultureInfo.CurrentCulture, maxDecimals );
-    public static string FormatNumber( this double value, in CultureInfo info, in int maxDecimals = 4 ) => Regex.Replace( string.Format( info, $"{{0:n{maxDecimals}}}", value ), $"[{info.NumberFormat.NumberDecimalSeparator}]?0+$", string.Empty );
+    public static string FormatNumber( this double value, int         maxDecimals           = 4 ) => value.FormatNumber( CultureInfo.CurrentCulture, maxDecimals );
+    public static string FormatNumber( this double value, CultureInfo info, int maxDecimals = 4 ) => Regex.Replace( string.Format( info, $"{{0:n{maxDecimals}}}", value ), $"[{info.NumberFormat.NumberDecimalSeparator}]?0+$", string.Empty );
 
 
-    public static string FormatNumber( this decimal value, int            maxDecimals              = 4 ) => value.FormatNumber( CultureInfo.CurrentCulture, maxDecimals );
-    public static string FormatNumber( this decimal value, in CultureInfo info, in int maxDecimals = 4 ) => Regex.Replace( string.Format( info, $"{{0:n{maxDecimals}}}", value ), $"[{info.NumberFormat.NumberDecimalSeparator}]?0+$", string.Empty );
+    public static string FormatNumber( this decimal value, int         maxDecimals           = 4 ) => value.FormatNumber( CultureInfo.CurrentCulture, maxDecimals );
+    public static string FormatNumber( this decimal value, CultureInfo info, int maxDecimals = 4 ) => Regex.Replace( string.Format( info, $"{{0:n{maxDecimals}}}", value ), $"[{info.NumberFormat.NumberDecimalSeparator}]?0+$", string.Empty );
 
     public static bool IsDemo( this string value ) => value.IsDemo( CultureInfo.CurrentCulture );
-    public static bool IsDemo( this string value, in CultureInfo info )
+    public static bool IsDemo( this string value, CultureInfo info )
     {
-        if (string.IsNullOrWhiteSpace( value )) { return false; }
+        if ( string.IsNullOrWhiteSpace( value ) ) { return false; }
 
         return value == _demo || value.ToLower( info ) == "demo";
     }
     public static bool IsDemo( this ReadOnlySpan<char> value ) => value.IsDemo( CultureInfo.CurrentCulture );
-    public static bool IsDemo( this ReadOnlySpan<char> value, in CultureInfo info )
+    public static bool IsDemo( this ReadOnlySpan<char> value, CultureInfo info )
     {
-        if (value.IsEmpty) { return false; }
+        if ( value.IsEmpty ) { return false; }
 
         var temp = new Span<char>();
         value.ToLower( temp, info );
@@ -59,12 +59,13 @@ public static partial class Validate
     public static bool IsIPv4( this ReadOnlySpan<char> value )
     {
         value = value.Trim();
-        if (value.IsEmpty) { return false; }
+        if ( value.IsEmpty ) { return false; }
 
 
-        foreach ((ReadOnlySpan<char> line, ReadOnlySpan<char> _) in value.SplitOn( '.' ))
+        foreach ( (ReadOnlySpan<char> line, ReadOnlySpan<char> _) in value.SplitOn( '.' ) )
+
         {
-            if (!line.IsInteger()) { return false; }
+            if ( !line.IsInteger() ) { return false; }
         }
 
         return ParseIPv4( value ) != null;
@@ -80,7 +81,7 @@ public static partial class Validate
 
     public static bool IsWebAddress( this string value )
     {
-        if (string.IsNullOrWhiteSpace( value )) { return false; }
+        if ( string.IsNullOrWhiteSpace( value ) ) { return false; }
 
         Uri? uriResult = ParseWebAddress( value );
         return uriResult != null && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
@@ -89,7 +90,7 @@ public static partial class Validate
     public static MailAddress? ParseEmail( this string value )
     {
         try { return new MailAddress( value ); }
-        catch (FormatException) { return null; }
+        catch ( FormatException ) { return null; }
     }
 
     public static IPAddress? ParseIPv4( this string? value ) => value?.AsSpan()
@@ -104,7 +105,7 @@ public static partial class Validate
 
     public static string SetDemo( string value )
     {
-        if (value is null) { throw new ArgumentNullException( nameof(value) ); }
+        if ( value is null ) { throw new ArgumentNullException( nameof(value) ); }
 
         return Interlocked.Exchange( ref _demo, value );
     }
@@ -118,7 +119,7 @@ public static partial class Validate
 
     public static bool ValidateEmail( this string value )
     {
-        if (string.IsNullOrWhiteSpace( value )) { return false; }
+        if ( string.IsNullOrWhiteSpace( value ) ) { return false; }
 
         return value.Contains( '@' ) && value.Contains( '.' ) && !value.Contains( ',' ) && !value.Contains( '~' );
     }

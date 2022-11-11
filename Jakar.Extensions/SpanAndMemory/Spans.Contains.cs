@@ -11,30 +11,17 @@ namespace Jakar.Extensions;
 /// </summary>
 public static partial class Spans
 {
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool Contains( this Span<char>         span, in ReadOnlySpan<char> value ) => MemoryExtensions.Contains( span, value, StringComparison.Ordinal );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool Contains( this ReadOnlySpan<char> span, in ReadOnlySpan<char> value ) => span.Contains( value, StringComparison.Ordinal );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool Contains( this Span<char>         span, ReadOnlySpan<char> value ) => MemoryExtensions.Contains( span, value, StringComparison.Ordinal );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool Contains( this ReadOnlySpan<char> span, ReadOnlySpan<char> value ) => span.Contains( value, StringComparison.Ordinal );
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public static bool Contains<T>( this Span<T> span, in T value ) where T : struct, IEquatable<T>
+    public static bool Contains<T>( this Span<T> span, T value ) where T : struct, IEquatable<T>
     {
     #if NETSTANDARD2_1
         foreach ( T item in span )
         {
-            if ( item.Equals(value) ) { return true; }
-        }
-        return false;
-    #else
-        return MemoryExtensions.Contains( span, value );
-    #endif
-    }
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] 
-    public static bool Contains<T>( this ReadOnlySpan<T> span, in T value ) where T : struct, IEquatable<T>
-    {
-    #if NETSTANDARD2_1
-        foreach ( T item in span )
-        {
-            if ( item.Equals(value) ) { return true; }
+            if ( item.Equals( value ) ) { return true; }
         }
 
         return false;
@@ -42,8 +29,22 @@ public static partial class Spans
         return MemoryExtensions.Contains( span, value );
     #endif
     }
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] 
-    public static bool Contains<T>( this Span<T> span, in ReadOnlySpan<T> value ) where T : struct, IEquatable<T>
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public static bool Contains<T>( this ReadOnlySpan<T> span, T value ) where T : struct, IEquatable<T>
+    {
+    #if NETSTANDARD2_1
+        foreach ( T item in span )
+        {
+            if ( item.Equals( value ) ) { return true; }
+        }
+
+        return false;
+    #else
+        return MemoryExtensions.Contains( span, value );
+    #endif
+    }
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public static bool Contains<T>( this Span<T> span, ReadOnlySpan<T> value ) where T : struct, IEquatable<T>
     {
         if ( value.Length > span.Length ) { return false; }
 
@@ -58,8 +59,8 @@ public static partial class Spans
 
         return false;
     }
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] 
-    public static bool Contains<T>( this ReadOnlySpan<T> span, in ReadOnlySpan<T> value ) where T : struct, IEquatable<T>
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public static bool Contains<T>( this ReadOnlySpan<T> span, ReadOnlySpan<T> value ) where T : struct, IEquatable<T>
     {
         if ( value.Length > span.Length ) { return false; }
 
@@ -75,9 +76,9 @@ public static partial class Spans
         return false;
     }
 
-    
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] 
-    public static bool ContainsAll<T>( this Span<T> span, in ReadOnlySpan<T> values ) where T : struct, IEquatable<T>
+
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public static bool ContainsAll<T>( this Span<T> span, ReadOnlySpan<T> values ) where T : struct, IEquatable<T>
     {
         foreach ( T c in values )
         {
@@ -86,8 +87,8 @@ public static partial class Spans
 
         return true;
     }
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] 
-    public static bool ContainsAll<T>( this ReadOnlySpan<T> span, in ReadOnlySpan<T> values ) where T : struct, IEquatable<T>
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public static bool ContainsAll<T>( this ReadOnlySpan<T> span, ReadOnlySpan<T> values ) where T : struct, IEquatable<T>
     {
         foreach ( T c in values )
         {
@@ -97,9 +98,9 @@ public static partial class Spans
         return true;
     }
 
-    
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] 
-    public static bool ContainsAny<T>( this Span<T> span, in ReadOnlySpan<T> values ) where T : struct, IEquatable<T>
+
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public static bool ContainsAny<T>( this Span<T> span, ReadOnlySpan<T> values ) where T : struct, IEquatable<T>
     {
         foreach ( T c in values )
         {
@@ -108,8 +109,8 @@ public static partial class Spans
 
         return false;
     }
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] 
-    public static bool ContainsAny<T>( this ReadOnlySpan<T> span, in ReadOnlySpan<T> values ) where T : struct, IEquatable<T>
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public static bool ContainsAny<T>( this ReadOnlySpan<T> span, ReadOnlySpan<T> values ) where T : struct, IEquatable<T>
     {
         foreach ( T c in values )
         {
@@ -119,9 +120,9 @@ public static partial class Spans
         return false;
     }
 
-    
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] 
-    public static bool ContainsAny( this Span<char> span, in ReadOnlySpan<char> values )
+
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public static bool ContainsAny( this Span<char> span, ReadOnlySpan<char> values )
     {
         foreach ( char c in values )
         {
@@ -130,8 +131,8 @@ public static partial class Spans
 
         return false;
     }
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] 
-    public static bool ContainsAny( this ReadOnlySpan<char> span, in ReadOnlySpan<char> values )
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public static bool ContainsAny( this ReadOnlySpan<char> span, ReadOnlySpan<char> values )
     {
         foreach ( char c in values )
         {
@@ -141,9 +142,9 @@ public static partial class Spans
         return false;
     }
 
-    
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] 
-    public static bool ContainsNone<T>( this ReadOnlySpan<T> span, in ReadOnlySpan<T> values ) where T : struct, IEquatable<T>
+
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public static bool ContainsNone<T>( this ReadOnlySpan<T> span, ReadOnlySpan<T> values ) where T : struct, IEquatable<T>
     {
         foreach ( T c in values )
         {
@@ -152,8 +153,8 @@ public static partial class Spans
 
         return true;
     }
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] 
-    public static bool ContainsNone<T>( this Span<T> span, in ReadOnlySpan<T> values ) where T : struct, IEquatable<T>
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public static bool ContainsNone<T>( this Span<T> span, ReadOnlySpan<T> values ) where T : struct, IEquatable<T>
     {
         foreach ( T c in values )
         {
@@ -163,9 +164,9 @@ public static partial class Spans
         return true;
     }
 
-    
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] 
-    public static bool ContainsNone( this Span<char> span, in ReadOnlySpan<char> values )
+
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public static bool ContainsNone( this Span<char> span, ReadOnlySpan<char> values )
     {
         foreach ( char c in values )
         {
@@ -174,8 +175,8 @@ public static partial class Spans
 
         return true;
     }
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] 
-    public static bool ContainsNone( this ReadOnlySpan<char> span, in ReadOnlySpan<char> values )
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public static bool ContainsNone( this ReadOnlySpan<char> span, ReadOnlySpan<char> values )
     {
         foreach ( char c in values )
         {
@@ -185,21 +186,21 @@ public static partial class Spans
         return true;
     }
 
-    
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] 
-    public static bool EndsWith<T>( this Span<T> span, in T value ) where T : struct, IEquatable<T> => !span.IsEmpty && span[^1]
-                                                                                                          .Equals( value );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] 
-    public static bool EndsWith<T>( this ReadOnlySpan<T> span, in T value ) where T : struct, IEquatable<T> => !span.IsEmpty && span[^1]
-                                                                                                                  .Equals( value );
 
-    
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] 
-    public static bool StartsWith<T>( this Span<T> span, in T value ) where T : struct, IEquatable<T> => !span.IsEmpty && span[0]
-                                                                                                            .Equals( value );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] 
-    public static bool StartsWith<T>( this ReadOnlySpan<T> span, in T value ) where T : struct, IEquatable<T> => !span.IsEmpty && span[0]
-                                                                                                                    .Equals( value );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public static bool EndsWith<T>( this Span<T> span, T value ) where T : struct, IEquatable<T> => !span.IsEmpty && span[^1]
+                                                                                                       .Equals( value );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public static bool EndsWith<T>( this ReadOnlySpan<T> span, T value ) where T : struct, IEquatable<T> => !span.IsEmpty && span[^1]
+                                                                                                               .Equals( value );
+
+
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public static bool StartsWith<T>( this Span<T> span, T value ) where T : struct, IEquatable<T> => !span.IsEmpty && span[0]
+                                                                                                         .Equals( value );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public static bool StartsWith<T>( this ReadOnlySpan<T> span, T value ) where T : struct, IEquatable<T> => !span.IsEmpty && span[0]
+                                                                                                                 .Equals( value );
 
 
     // TODO: prep for DotNet 7

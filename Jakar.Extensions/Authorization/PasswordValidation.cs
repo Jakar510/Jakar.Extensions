@@ -19,16 +19,16 @@ public readonly ref struct PasswordValidator
 
 
     public static PasswordValidator Default => new(Requirements.Default);
-    public PasswordValidator( in Requirements requirements ) => _requirements = requirements;
+    public PasswordValidator( Requirements requirements ) => _requirements = requirements;
 
 
-    public bool Validate( in ReadOnlySpan<char> password )
+    public bool Validate( ReadOnlySpan<char> password )
     {
         ReadOnlySpan<char> span = password.Trim();
         return HandleLength( span ) && HandleSpecial( span ) && HandleNumeric( span ) && HandleLower( span ) && HandleUpper( span ) && HandleBlocked( span );
     }
-    private bool HandleLength( in ReadOnlySpan<char> span ) => span.Length >= _requirements.MinLength;
-    private bool HandleNumeric( in ReadOnlySpan<char> span )
+    private bool HandleLength( ReadOnlySpan<char> span ) => span.Length >= _requirements.MinLength;
+    private bool HandleNumeric( ReadOnlySpan<char> span )
     {
         if ( !_requirements.RequireNumber ) { return true; }
 
@@ -38,7 +38,7 @@ public readonly ref struct PasswordValidator
 
         return span.IndexOfAny( _requirements.Numbers ) >= index;
     }
-    private bool HandleSpecial( in ReadOnlySpan<char> span )
+    private bool HandleSpecial( ReadOnlySpan<char> span )
     {
         if ( !_requirements.RequireSpecialChar ) { return true; }
 
@@ -48,19 +48,19 @@ public readonly ref struct PasswordValidator
 
         return span.IndexOfAny( _requirements.SpecialChars ) >= index;
     }
-    private bool HandleUpper( in ReadOnlySpan<char> span )
+    private bool HandleUpper( ReadOnlySpan<char> span )
     {
         if ( !_requirements.RequireUpperCase ) { return true; }
 
         return span.IndexOfAny( _requirements.UpperCase ) >= 0;
     }
-    private bool HandleLower( in ReadOnlySpan<char> span )
+    private bool HandleLower( ReadOnlySpan<char> span )
     {
         if ( !_requirements.RequireLowerCase ) { return true; }
 
         return span.IndexOfAny( _requirements.LowerCase ) >= 0;
     }
-    private bool HandleBlocked( in ReadOnlySpan<char> span )
+    private bool HandleBlocked( ReadOnlySpan<char> span )
     {
         if ( _requirements.BlockedPasswords.IsEmpty ) { return true; }
 
@@ -78,8 +78,8 @@ public readonly ref struct PasswordValidator
         PasswordRequirements data = await Requirements.FromFile();
         return Check( password, data );
     }
-    public static bool Check( in ReadOnlySpan<char> password ) => Check( password, Requirements.Default );
-    public static bool Check( in ReadOnlySpan<char> password, in Requirements requirements )
+    public static bool Check( ReadOnlySpan<char> password ) => Check( password, Requirements.Default );
+    public static bool Check( ReadOnlySpan<char> password, Requirements requirements )
     {
         var validator = new PasswordValidator( requirements );
         return validator.Validate( password );
@@ -104,6 +104,7 @@ public readonly ref struct PasswordValidator
         public ReadOnlySpan<char>   SpecialChars             { get; init; } = Randoms.SpecialChars;
 
 
+        // ReSharper disable once MemberHidesStaticFromOuterClass
         public static Requirements Default => Current ??= new PasswordRequirements();
 
 

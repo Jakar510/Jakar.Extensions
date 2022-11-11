@@ -52,17 +52,17 @@ public sealed class CurrentLocation<TID> : BaseJsonModel, ICurrentLocation<TID>,
     }
 
 
-    public static double CalculateDistance( in double latitudeStart, in double longitudeStart, ICurrentLocation<TID> locationEnd, in DistanceUnit units ) =>
+    public static double CalculateDistance( double latitudeStart, double longitudeStart, ICurrentLocation<TID> locationEnd, DistanceUnit units ) =>
         CalculateDistance( latitudeStart, longitudeStart, locationEnd.Latitude, locationEnd.Longitude, units );
 
-    public static double CalculateDistance( ICurrentLocation<TID> locationStart, in double latitudeEnd, in double longitudeEnd, in DistanceUnit units ) =>
+    public static double CalculateDistance( ICurrentLocation<TID> locationStart, double latitudeEnd, double longitudeEnd, DistanceUnit units ) =>
         CalculateDistance( locationStart.Latitude, locationStart.Longitude, latitudeEnd, longitudeEnd, units );
 
-    public static double CalculateDistance( ICurrentLocation<TID> locationStart, ICurrentLocation<TID> locationEnd, in DistanceUnit units ) =>
+    public static double CalculateDistance( ICurrentLocation<TID> locationStart, ICurrentLocation<TID> locationEnd, DistanceUnit units ) =>
         CalculateDistance( locationStart.Latitude, locationStart.Longitude, locationEnd.Latitude, locationEnd.Longitude, units );
 
 
-    public static double CalculateDistance( in double latitudeStart, in double longitudeStart, in double latitudeEnd, in double longitudeEnd, in DistanceUnit unit ) =>
+    public static double CalculateDistance( double latitudeStart, double longitudeStart, double latitudeEnd, double longitudeEnd, DistanceUnit unit ) =>
         unit switch
         {
             DistanceUnit.Kilometers => UnitConverters.CoordinatesToKilometers( latitudeStart, longitudeStart, latitudeEnd, longitudeEnd ),
@@ -71,14 +71,14 @@ public sealed class CurrentLocation<TID> : BaseJsonModel, ICurrentLocation<TID>,
         };
 
 
-    public double CalculateDistance( ICurrentLocation<TID> locationStart, in DistanceUnit units ) => CalculateDistance( locationStart,                                 this,           units );
-    public double CalculateDistance( in double             latitudeStart, in double       longitudeStart, in DistanceUnit units ) => CalculateDistance( latitudeStart, longitudeStart, this, units );
+    public double CalculateDistance( ICurrentLocation<TID> locationStart, DistanceUnit units ) => CalculateDistance( locationStart,                              this,           units );
+    public double CalculateDistance( double                latitudeStart, double       longitudeStart, DistanceUnit units ) => CalculateDistance( latitudeStart, longitudeStart, this, units );
     public bool EqualInstance( ICurrentLocation<TID>       other ) => InstanceID.Equals( other.InstanceID );
     public override bool Equals( object? obj )
     {
-        if (obj is null) { return false; }
+        if ( obj is null ) { return false; }
 
-        if (ReferenceEquals( this, obj )) { return true; }
+        if ( ReferenceEquals( this, obj ) ) { return true; }
 
         return obj is CurrentLocation<TID> location && Equals( location );
     }
@@ -142,16 +142,16 @@ public sealed class CurrentLocation<TID> : BaseJsonModel, ICurrentLocation<TID>,
 
     public bool IsValid( ICurrentLocation<TID> location, DistanceUnit units, double maxDistance )
     {
-        if (InstanceID == Guid.Empty) { return false; }
+        if ( InstanceID == Guid.Empty ) { return false; }
 
 
         return CalculateDistance( this, location, units ) <= maxDistance;
     }
     public bool Equals( ICurrentLocation<TID>? other )
     {
-        if (other is null) { return false; }
+        if ( other is null ) { return false; }
 
-        if (ReferenceEquals( this, other )) { return true; }
+        if ( ReferenceEquals( this, other ) ) { return true; }
 
         return InstanceID.Equals( other.InstanceID ) && Timestamp.Equals( other.Timestamp ) && Latitude.Equals( other.Latitude ) && Longitude.Equals( other.Longitude ) && Nullable.Equals( Altitude, other.Altitude ) &&
                Nullable.Equals( Accuracy, other.Accuracy ) && Nullable.Equals( VerticalAccuracy, other.VerticalAccuracy ) && Nullable.Equals( Speed, other.Speed ) && Nullable.Equals( Course, other.Course ) &&

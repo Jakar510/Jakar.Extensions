@@ -199,14 +199,14 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     /// <exception cref = "SecurityException" > </exception>
     public void DeleteAllRecursively()
     {
-        foreach (LocalDirectory dir in GetSubFolders())
+        foreach ( LocalDirectory dir in GetSubFolders() )
         {
-            foreach (LocalFile file in dir.GetFiles()) { file.Delete(); }
+            foreach ( LocalFile file in dir.GetFiles() ) { file.Delete(); }
 
             dir.DeleteAllRecursively();
         }
 
-        foreach (LocalDirectory dir in GetSubFolders())
+        foreach ( LocalDirectory dir in GetSubFolders() )
         {
             dir.DeleteAllRecursively();
             dir.Delete();
@@ -225,14 +225,14 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     {
         var tasks = new List<Task>();
 
-        foreach (LocalDirectory dir in GetSubFolders())
+        foreach ( LocalDirectory dir in GetSubFolders() )
         {
-            foreach (LocalFile file in dir.GetFiles()) { file.Delete(); }
+            foreach ( LocalFile file in dir.GetFiles() ) { file.Delete(); }
 
             tasks.Add( dir.DeleteAllRecursivelyAsync() );
         }
 
-        foreach (LocalDirectory dir in GetSubFolders())
+        foreach ( LocalDirectory dir in GetSubFolders() )
         {
             tasks.Add( dir.DeleteAllRecursivelyAsync() );
             dir.Delete();
@@ -252,9 +252,9 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     /// <exception cref = "SecurityException" > </exception>
     public void DeleteFiles()
     {
-        foreach (LocalDirectory dir in GetSubFolders())
+        foreach ( LocalDirectory dir in GetSubFolders() )
         {
-            foreach (LocalFile file in dir.GetFiles()) { file.Delete(); }
+            foreach ( LocalFile file in dir.GetFiles() ) { file.Delete(); }
 
             dir.DeleteFiles();
         }
@@ -270,9 +270,9 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     {
         var tasks = new List<Task>();
 
-        foreach (LocalDirectory dir in GetSubFolders())
+        foreach ( LocalDirectory dir in GetSubFolders() )
         {
-            foreach (LocalFile file in dir.GetFiles()) { file.Delete(); }
+            foreach ( LocalFile file in dir.GetFiles() ) { file.Delete(); }
 
             tasks.Add( dir.DeleteFilesAsync() );
         }
@@ -289,7 +289,7 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     /// <exception cref = "SecurityException" > </exception>
     public void DeleteSubFolders()
     {
-        foreach (LocalDirectory dir in GetSubFolders())
+        foreach ( LocalDirectory dir in GetSubFolders() )
         {
             dir.DeleteSubFolders();
             dir.Delete();
@@ -306,7 +306,7 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     {
         var tasks = new List<Task>();
 
-        foreach (LocalDirectory dir in GetSubFolders())
+        foreach ( LocalDirectory dir in GetSubFolders() )
         {
             tasks.Add( dir.DeleteSubFoldersAsync() );
             dir.Delete();
@@ -316,7 +316,7 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     }
     protected virtual void Dispose( bool remove )
     {
-        if (remove && Exists) { Delete( true ); }
+        if ( remove && Exists ) { Delete( true ); }
     }
     public override bool Equals( object? other ) => other is LocalDirectory directory && Equals( directory );
 
@@ -413,7 +413,7 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     ///     Defaults to
     ///     <see cref = "CompressionLevel.Optimal" />
     /// </param>
-    public void Zip( in LocalFile output, in CompressionLevel compression = CompressionLevel.Optimal ) => Zip( output, Encoding.Default, compression );
+    public void Zip( in LocalFile output, CompressionLevel compression = CompressionLevel.Optimal ) => Zip( output, Encoding.Default, compression );
     /// <summary> </summary>
     /// <param name = "output" > file path to write the zip to </param>
     /// <param name = "compression" >
@@ -421,7 +421,7 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     ///     <see cref = "CompressionLevel.Optimal" />
     /// </param>
     /// <param name = "encoding" > The encoding used for the file names </param>
-    public void Zip( in LocalFile output, in Encoding encoding, in CompressionLevel compression = CompressionLevel.Optimal ) => ZipFile.CreateFromDirectory( FullPath, output.FullPath, compression, true, encoding );
+    public void Zip( in LocalFile output, Encoding encoding, CompressionLevel compression = CompressionLevel.Optimal ) => ZipFile.CreateFromDirectory( FullPath, output.FullPath, compression, true, encoding );
 
 
     public async ValueTask<LocalFile> ZipAsync( LocalFile zipFilePath, CancellationToken token )
@@ -429,7 +429,7 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
         await using FileStream zipToOpen = File.Create( zipFilePath.FullPath );
         using var              archive   = new ZipArchive( zipToOpen, ZipArchiveMode.Update );
 
-        foreach (LocalFile file in GetFiles())
+        foreach ( LocalFile file in GetFiles() )
         {
             ZipArchiveEntry    entry  = archive.CreateEntry( file.FullPath );
             await using Stream stream = entry.Open();
@@ -447,7 +447,7 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
         await using FileStream zipToOpen = File.Create( zipFilePath.FullPath );
         using var              archive   = new ZipArchive( zipToOpen, ZipArchiveMode.Update );
 
-        foreach (LocalFile file in GetFiles( searchPattern ))
+        foreach ( LocalFile file in GetFiles( searchPattern ) )
         {
             ZipArchiveEntry    entry  = archive.CreateEntry( file.FullPath );
             await using Stream stream = entry.Open();
@@ -465,7 +465,7 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
         await using FileStream zipToOpen = File.Create( zipFilePath.FullPath );
         using var              archive   = new ZipArchive( zipToOpen, ZipArchiveMode.Update );
 
-        foreach (LocalFile file in GetFiles( searchPattern, searchOption ))
+        foreach ( LocalFile file in GetFiles( searchPattern, searchOption ) )
         {
             ZipArchiveEntry    entry  = archive.CreateEntry( file.FullPath );
             await using Stream stream = entry.Open();
@@ -483,7 +483,7 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
         await using FileStream zipToOpen = File.Create( zipFilePath.FullPath );
         using var              archive   = new ZipArchive( zipToOpen, ZipArchiveMode.Update );
 
-        foreach (LocalFile file in GetFiles( searchPattern, enumerationOptions ))
+        foreach ( LocalFile file in GetFiles( searchPattern, enumerationOptions ) )
         {
             ZipArchiveEntry    entry  = archive.CreateEntry( file.FullPath );
             await using Stream stream = entry.Open();
@@ -498,7 +498,7 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     }
     public async ValueTask DisposeAsync()
     {
-        if (!this.IsTempFile()) { return; }
+        if ( !this.IsTempFile() ) { return; }
 
         await DeleteAllRecursivelyAsync();
     }
@@ -506,9 +506,9 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
 
     public int CompareTo( object? other )
     {
-        if (other is null) { return 1; }
+        if ( other is null ) { return 1; }
 
-        if (ReferenceEquals( this, other )) { return 0; }
+        if ( ReferenceEquals( this, other ) ) { return 0; }
 
         return other is LocalDirectory value
                    ? CompareTo( value )
@@ -516,17 +516,17 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     }
     public int CompareTo( LocalDirectory? other )
     {
-        if (ReferenceEquals( this, other )) { return 0; }
+        if ( ReferenceEquals( this, other ) ) { return 0; }
 
-        if (ReferenceEquals( null, other )) { return 1; }
+        if ( ReferenceEquals( null, other ) ) { return 1; }
 
         return string.Compare( FullPath, other.FullPath, StringComparison.Ordinal );
     }
     public bool Equals( LocalDirectory? other )
     {
-        if (other is null) { return false; }
+        if ( other is null ) { return false; }
 
-        if (ReferenceEquals( this, other )) { return true; }
+        if ( ReferenceEquals( this, other ) ) { return true; }
 
         return this.IsTempFile() == other.IsTempFile() && FullPath == other.FullPath;
     }

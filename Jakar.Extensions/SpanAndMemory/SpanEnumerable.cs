@@ -37,7 +37,7 @@ public ref struct SpanEnumerator<T>
     ///     instance.
     /// </param>
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public SpanEnumerator( in ReadOnlySpan<T> span )
+    public SpanEnumerator( ReadOnlySpan<T> span )
     {
         _span  = span;
         _index = -1;
@@ -89,7 +89,7 @@ public ref struct SpanEnumerator<T>
         ///     .
         /// </param>
         [MethodImpl( MethodImplOptions.AggressiveInlining )]
-        public Item( in ReadOnlySpan<T> span, int index )
+        public Item( ReadOnlySpan<T> span, int index )
         {
             _span  = span;
             _index = index;

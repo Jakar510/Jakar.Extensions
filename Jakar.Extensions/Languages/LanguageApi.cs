@@ -54,7 +54,7 @@ public class LanguageApi : ObservableClass
 
 
     public LanguageApi() : this( CultureInfo.CurrentUICulture ) { }
-    public LanguageApi( in CultureInfo culture )
+    public LanguageApi( CultureInfo culture )
     {
         string id = culture.TwoLetterISOLanguageName;
 

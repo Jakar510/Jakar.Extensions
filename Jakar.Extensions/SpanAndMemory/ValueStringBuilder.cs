@@ -224,7 +224,7 @@ public ref struct ValueStringBuilder
     }
     public ValueStringBuilder AppendFormat( ReadOnlySpan<char> format, params object?[] args )
     {
-        if ( args == null )
+        if ( args is null )
         {
             // To preserve the original exception behavior, throw an exception about format if both
             // args and format are null. The actual null check for format is  AppendFormatHelper.
@@ -235,7 +235,7 @@ public ref struct ValueStringBuilder
             throw new ArgumentNullException( paramName );
         }
 
-        AppendFormatHelper( null, format, new ParamsArray( args ) );
+        AppendFormatHelper( null, format, args );
         return this;
     }
 
@@ -508,7 +508,6 @@ public ref struct ValueStringBuilder
             if ( s == null )
             {
             #if NET6_0
-
                 // If arg is ISpanFormattable and the beginning doesn't need padding, try formatting it into the remaining current chunk.
                 if ( arg is ISpanFormattable spanFormattableArg && (leftJustify || width == 0) && spanFormattableArg.TryFormat( Next, out int charsWritten, itemFormatSpan, provider ) )
                 {

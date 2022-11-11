@@ -64,8 +64,7 @@ public readonly ref struct XNode
 
         if ( !xml.StartsWith( '<' ) ) { throw new FormatException( "Must start with '<'" ); }
 
-        if ( !xml.Contains( '>' ) ) { throw new FormatException( "Must contain '<'" ); }
-
+        if ( !MemoryExtensions.Contains( xml, '>' ) ) { throw new FormatException( "Must contain '<'" ); }
 
         if ( !xml.Contains( "</" ) ) { throw new FormatException( "Must contain '</'" ); }
 
@@ -106,13 +105,13 @@ public readonly ref struct XNode
         {
             if ( span.IsEmpty ) { throw new ArgumentNullException( nameof(span) ); }
 
-            if ( span.Contains( '<' ) ) { throw new FormatException( $"Cannot start with {'<'}" ); }
+            if ( MemoryExtensions.Contains( span, '<' ) ) { throw new FormatException( $"Cannot start with {'<'}" ); }
 
-            if ( span.Contains( '>' ) ) { throw new FormatException( $"Cannot start with {'<'}" ); }
+            if ( MemoryExtensions.Contains( span, '>' ) ) { throw new FormatException( $"Cannot start with {'<'}" ); }
 
             if ( span.Contains( "</" ) ) { throw new FormatException( $"Cannot start with {'<'}" ); }
 
-            if ( span.Contains( '>' ) ) { throw new FormatException( $"Cannot start with {'<'}" ); }
+            if ( MemoryExtensions.Contains( span, '>' ) ) { throw new FormatException( $"Cannot start with {'<'}" ); }
 
             _xml = _span = span;
         }

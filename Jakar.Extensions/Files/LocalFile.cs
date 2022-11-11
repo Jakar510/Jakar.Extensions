@@ -48,7 +48,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
         get
         {
             try { return Mime.ToContentType(); }
-            catch (ArgumentOutOfRangeException)
+            catch ( ArgumentOutOfRangeException )
             {
                 FullPath.WriteToConsole();
                 FullPath.WriteToDebug();
@@ -184,7 +184,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     /// </summary>
     public void Decrypt()
     {
-        if (!RuntimeInformation.IsOSPlatform( OSPlatform.Windows )) { throw new InvalidOperationException(); }
+        if ( !RuntimeInformation.IsOSPlatform( OSPlatform.Windows ) ) { throw new InvalidOperationException(); }
 
         File.Decrypt( FullPath );
     }
@@ -194,14 +194,14 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     public void Delete() => Info.Delete();
     protected virtual void Dispose( bool remove )
     {
-        if (remove && Exists) { Delete(); }
+        if ( remove && Exists ) { Delete(); }
     }
 
 
     /// <summary> Encrypts the file so that only the account used to encrypt the file can decrypt it. </summary>
     public void Encrypt()
     {
-        if (!RuntimeInformation.IsOSPlatform( OSPlatform.Windows )) { throw new InvalidOperationException(); }
+        if ( !RuntimeInformation.IsOSPlatform( OSPlatform.Windows ) ) { throw new InvalidOperationException(); }
 
         File.Encrypt( FullPath );
     }
@@ -221,7 +221,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     /// <returns> </returns>
     protected static FileInfo FromUri( Uri uri )
     {
-        if (!uri.IsFile) { throw new ArgumentException( "Uri is not a file Uri.", nameof(uri) ); }
+        if ( !uri.IsFile ) { throw new ArgumentException( "Uri is not a file Uri.", nameof(uri) ); }
 
         return new FileInfo( uri.AbsolutePath );
     }
@@ -229,7 +229,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
 
     protected string Hash( HashAlgorithm hasher )
     {
-        using (hasher)
+        using ( hasher )
         {
             using FileStream stream = OpenRead();
             byte[]           hash   = hasher.ComputeHash( stream );
@@ -321,7 +321,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     /// </returns>
     public FileStream Open( FileMode mode, FileAccess access, FileShare share, int bufferSize = 4096, bool useAsync = true )
     {
-        if (string.IsNullOrWhiteSpace( FullPath )) { throw new NullReferenceException( nameof(FullPath) ); }
+        if ( string.IsNullOrWhiteSpace( FullPath ) ) { throw new NullReferenceException( nameof(FullPath) ); }
 
         return new FileStream( FullPath, mode, access, share, bufferSize, useAsync );
     }
@@ -414,7 +414,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     //     /// <typeparam name="T"></typeparam>
     //     /// <exception cref="NullReferenceException">if FullPath is null or empty</exception>
     //     /// <exception cref="FileNotFoundException">if file is not found</exception>
-    //     /// <exception cref="JsonReaderException">if an error in deserialization occurs</exception>
+    //     /// <exception cref="JsonReaderException">if an error  deserialization occurs</exception>
     //     /// <returns><typeparamref name="T"/></returns>
     // }
     // /// <summary>
@@ -423,7 +423,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     // /// <typeparam name="T"></typeparam>
     // /// <exception cref="NullReferenceException">if FullPath is null or empty</exception>
     // /// <exception cref="FileNotFoundException">if file is not found</exception>
-    // /// <exception cref="JsonReaderException">if an error in deserialization occurs</exception>
+    // /// <exception cref="JsonReaderException">if an error  deserialization occurs</exception>
     // /// <returns><typeparamref name="T"/></returns>
     // public async ValueTask<T> ReadAsync<T>()
     // {
@@ -585,11 +585,11 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     /// <returns> </returns>
     public Uri ToUri( MimeType? mime = null )
     {
-        if (string.IsNullOrWhiteSpace( FullPath )) { throw new NullReferenceException( nameof(FullPath) ); }
+        if ( string.IsNullOrWhiteSpace( FullPath ) ) { throw new NullReferenceException( nameof(FullPath) ); }
 
         MimeType type = mime ?? Mime;
 
-        if (!FullPath.StartsWith( "/", StringComparison.InvariantCultureIgnoreCase )) { return new Uri( $"{type.ToUriScheme()}://{FullPath}", UriKind.Absolute ); }
+        if ( !FullPath.StartsWith( "/", StringComparison.InvariantCultureIgnoreCase ) ) { return new Uri( $"{type.ToUriScheme()}://{FullPath}", UriKind.Absolute ); }
 
         string path = FullPath.Remove( 0, 1 );
         return new Uri( $"{type.ToUriScheme()}://{path}", UriKind.Absolute );
@@ -616,13 +616,13 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     ///     , provide a non-null value
     /// </param>
     /// <returns> </returns>
-    public Uri ToUri( Uri baseUri, in string prefix = "?path=", MimeType? mime = null )
+    public Uri ToUri( Uri baseUri, string prefix = "?path=", MimeType? mime = null )
     {
-        if (string.IsNullOrWhiteSpace( FullPath )) { throw new NullReferenceException( nameof(FullPath) ); }
+        if ( string.IsNullOrWhiteSpace( FullPath ) ) { throw new NullReferenceException( nameof(FullPath) ); }
 
         MimeType type = mime ?? Mime;
 
-        if (!FullPath.StartsWith( "/", StringComparison.InvariantCultureIgnoreCase )) { return new Uri( $"{type.ToUriScheme()}://{FullPath}", UriKind.Absolute ); }
+        if ( !FullPath.StartsWith( "/", StringComparison.InvariantCultureIgnoreCase ) ) { return new Uri( $"{type.ToUriScheme()}://{FullPath}", UriKind.Absolute ); }
 
         return new Uri( baseUri, $"{prefix}{HttpUtility.UrlEncode( FullPath )}" );
     }
@@ -645,7 +645,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     ///     <see cref = "ValueTask" />
     /// </returns>
     public void Write( StringBuilder payload ) => Write( payload.ToString() );
-    public void Write( in ValueStringBuilder payload ) => Write( payload.ToString() );
+    public void Write( ValueStringBuilder payload ) => Write( payload.ToString() );
 
 
     /// <summary>
@@ -663,7 +663,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     /// </returns>
     public void Write( string payload )
     {
-        if (string.IsNullOrWhiteSpace( payload )) { throw new ArgumentNullException( nameof(payload) ); }
+        if ( string.IsNullOrWhiteSpace( payload ) ) { throw new ArgumentNullException( nameof(payload) ); }
 
         using FileStream stream = Create();
         using var        writer = new StreamWriter( stream, FileEncoding );
@@ -685,7 +685,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     /// </returns>
     public void Write( byte[] payload )
     {
-        if (payload.Length == 0) { throw new ArgumentException( @"payload.Length == 0", nameof(payload) ); }
+        if ( payload.Length == 0 ) { throw new ArgumentException( @"payload.Length == 0", nameof(payload) ); }
 
         using FileStream stream = Create();
         stream.Write( payload, 0, payload.Length );
@@ -705,9 +705,9 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     /// <returns>
     ///     <see cref = "ValueTask" />
     /// </returns>
-    public void Write( in Span<byte> payload )
+    public void Write( Span<byte> payload )
     {
-        if (payload.Length == 0) { throw new ArgumentException( @"payload.Length == 0", nameof(payload) ); }
+        if ( payload.Length == 0 ) { throw new ArgumentException( @"payload.Length == 0", nameof(payload) ); }
 
         using FileStream stream = Create();
         stream.Write( payload );
@@ -727,9 +727,9 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     /// <returns>
     ///     <see cref = "ValueTask" />
     /// </returns>
-    public void Write( in ReadOnlySpan<byte> payload )
+    public void Write( ReadOnlySpan<byte> payload )
     {
-        if (payload.Length == 0) { throw new ArgumentException( @"payload.Length == 0", nameof(payload) ); }
+        if ( payload.Length == 0 ) { throw new ArgumentException( @"payload.Length == 0", nameof(payload) ); }
 
         using FileStream stream = Create();
         stream.Write( payload );
@@ -749,7 +749,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     /// <returns>
     ///     <see cref = "ValueTask" />
     /// </returns>
-    public void Write( in ReadOnlyMemory<byte> payload ) => Write( payload.ToArray() );
+    public void Write( ReadOnlyMemory<byte> payload ) => Write( payload.ToArray() );
 
 
     /// <summary>
@@ -765,9 +765,9 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     /// <returns>
     ///     <see cref = "ValueTask" />
     /// </returns>
-    public void Write( in ReadOnlyMemory<char> payload )
+    public void Write( ReadOnlyMemory<char> payload )
     {
-        if (payload.Length == 0) { throw new ArgumentException( @"payload.Length == 0", nameof(payload) ); }
+        if ( payload.Length == 0 ) { throw new ArgumentException( @"payload.Length == 0", nameof(payload) ); }
 
         using FileStream stream = Create();
         using var        writer = new StreamWriter( stream, FileEncoding );
@@ -790,7 +790,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     /// </returns>
     public void Write( Stream payload )
     {
-        if (payload is null) { throw new ArgumentNullException( nameof(payload) ); }
+        if ( payload is null ) { throw new ArgumentNullException( nameof(payload) ); }
 
         using var memory = new MemoryStream();
         payload.CopyTo( memory );
@@ -813,7 +813,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     ///     <see cref = "ValueTask" />
     /// </returns>
     public ValueTask WriteAsync( StringBuilder payload ) => WriteAsync( payload.ToString() );
-    public ValueTask WriteAsync( in ValueStringBuilder payload ) => WriteAsync( payload.ToString() );
+    public ValueTask WriteAsync( ValueStringBuilder payload ) => WriteAsync( payload.ToString() );
     /// <summary>
     ///     Write the
     ///     <paramref name = "payload" />
@@ -829,7 +829,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     /// </returns>
     public async ValueTask WriteAsync( string payload )
     {
-        if (string.IsNullOrWhiteSpace( payload )) { throw new ArgumentNullException( nameof(payload) ); }
+        if ( string.IsNullOrWhiteSpace( payload ) ) { throw new ArgumentNullException( nameof(payload) ); }
 
         await using FileStream stream = Create();
         await using var        writer = new StreamWriter( stream, FileEncoding );
@@ -852,7 +852,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     /// </returns>
     public async ValueTask WriteAsync( byte[] payload, CancellationToken token )
     {
-        if (payload.Length == 0) { throw new ArgumentException( @"payload.Length == 0", nameof(payload) ); }
+        if ( payload.Length == 0 ) { throw new ArgumentException( @"payload.Length == 0", nameof(payload) ); }
 
         await using FileStream stream = Create();
 
@@ -874,7 +874,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     /// </returns>
     public async ValueTask WriteAsync( ReadOnlyMemory<byte> payload, CancellationToken token )
     {
-        if (payload.Length == 0) { throw new ArgumentException( @"payload.Length == 0", nameof(payload) ); }
+        if ( payload.Length == 0 ) { throw new ArgumentException( @"payload.Length == 0", nameof(payload) ); }
 
         await using FileStream stream = Create();
 
@@ -918,7 +918,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     /// </returns>
     public async ValueTask WriteAsync( Stream payload, CancellationToken token )
     {
-        if (payload is null) { throw new ArgumentNullException( nameof(payload) ); }
+        if ( payload is null ) { throw new ArgumentNullException( nameof(payload) ); }
 
         await using var memory = new MemoryStream();
         await payload.CopyToAsync( memory, token );
@@ -934,12 +934,12 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     public ValueTask<LocalFile> ZipAsync( CancellationToken   token, params LocalFile[] files ) => ZipAsync( files,                                         token );
     public async ValueTask<LocalFile> ZipAsync( IEnumerable<LocalFile> items, CancellationToken token )
     {
-        if (items is null) { throw new ArgumentNullException( nameof(items) ); }
+        if ( items is null ) { throw new ArgumentNullException( nameof(items) ); }
 
         await using FileStream zipToOpen = File.Create( FullPath );
         using var              archive   = new ZipArchive( zipToOpen, ZipArchiveMode.Update );
 
-        foreach (LocalFile file in items)
+        foreach ( LocalFile file in items )
         {
             ZipArchiveEntry    entry  = archive.CreateEntry( file.FullPath );
             await using Stream stream = entry.Open();
@@ -1017,13 +1017,13 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
         await using FileStream file   = OpenRead();
         using var              stream = new StreamReader( file, FileEncoding );
 
-        while (!stream.EndOfStream) { yield return await stream.ReadLineAsync() ?? string.Empty; }
+        while ( !stream.EndOfStream ) { yield return await stream.ReadLineAsync() ?? string.Empty; }
     }
     public int CompareTo( object? other )
     {
-        if (other is null) { return 1; }
+        if ( other is null ) { return 1; }
 
-        if (ReferenceEquals( this, other )) { return 0; }
+        if ( ReferenceEquals( this, other ) ) { return 0; }
 
         return other is LocalFile value
                    ? CompareTo( value )
@@ -1031,17 +1031,17 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     }
     public int CompareTo( LocalFile? other )
     {
-        if (ReferenceEquals( this, other )) { return 0; }
+        if ( ReferenceEquals( this, other ) ) { return 0; }
 
-        if (ReferenceEquals( null, other )) { return 1; }
+        if ( ReferenceEquals( null, other ) ) { return 1; }
 
         return string.Compare( FullPath, other.FullPath, StringComparison.Ordinal );
     }
     public bool Equals( LocalFile? other )
     {
-        if (other is null) { return false; }
+        if ( other is null ) { return false; }
 
-        if (ReferenceEquals( this, other )) { return true; }
+        if ( ReferenceEquals( this, other ) ) { return true; }
 
         return this.IsTempFile() == other.IsTempFile() && FullPath == other.FullPath;
     }
@@ -1220,7 +1220,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
         /// <typeparam name = "T" > </typeparam>
         /// <exception cref = "NullReferenceException" > if FullPath is null or empty </exception>
         /// <exception cref = "FileNotFoundException" > if file is not found </exception>
-        /// <exception cref = "JsonReaderException" > if an error in deserialization occurs </exception>
+        /// <exception cref = "JsonReaderException" > if an error  deserialization occurs </exception>
         /// <returns>
         ///     <typeparamref name = "T" />
         /// </returns>
@@ -1265,7 +1265,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
 
 
     /// <summary>
-    ///     A collection of files that are in the
+    ///     A collection of files that are  the
     ///     <see cref = "LocalDirectory" />
     /// </summary>
     [Serializable]
@@ -1298,7 +1298,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
         private void OnRenamed( object sender, RenamedEventArgs e )
         {
             LocalFile? file = this.FirstOrDefault( x => x.FullPath == e.OldFullPath );
-            if (file is not null) { Remove( file ); }
+            if ( file is not null ) { Remove( file ); }
 
             Add( e.FullPath );
         }
@@ -1385,7 +1385,6 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
 
 
 #if NET6_0
-
     /// <summary>
     ///     Calculates a file hash using
     ///     <see cref = "MD5" />
@@ -1418,7 +1417,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
         using (hasher)
         {
             await using FileStream stream = OpenRead();
-            byte[]                 hash   = await hasher.ComputeHashAsync( stream );
+            byte[]                 hash = await hasher.ComputeHashAsync( stream );
 
             return BitConverter.ToString( hash );
         }

@@ -116,7 +116,7 @@ public class ConcurrentObservableCollection<T> : CollectionAlerts<T>, IList<T>, 
     {
         lock (_lock)
         {
-            foreach (T item in items)
+            foreach ( T item in items )
             {
                 _items.Add( item );
                 Added( item );
@@ -127,7 +127,7 @@ public class ConcurrentObservableCollection<T> : CollectionAlerts<T>, IList<T>, 
     {
         lock (_lock)
         {
-            foreach (T item in items)
+            foreach ( T item in items )
             {
                 _items.Add( item );
                 Added( item );
@@ -154,7 +154,7 @@ public class ConcurrentObservableCollection<T> : CollectionAlerts<T>, IList<T>, 
     {
         lock (_lock) { return _items.FindAll( match ); }
     }
-    public int FindIndex( in int start, in int count, Predicate<T> match )
+    public int FindIndex( int start, int count, Predicate<T> match )
     {
         lock (_lock)
         {
@@ -179,7 +179,7 @@ public class ConcurrentObservableCollection<T> : CollectionAlerts<T>, IList<T>, 
     {
         lock (_lock) { return _items.FindLast( match ); }
     }
-    public int FindLastIndex( in int start, in int count, Predicate<T> match )
+    public int FindLastIndex( int start, int count, Predicate<T> match )
     {
         lock (_lock)
         {
@@ -188,7 +188,7 @@ public class ConcurrentObservableCollection<T> : CollectionAlerts<T>, IList<T>, 
             return _items.FindLastIndex( start, count, match );
         }
     }
-    public int FindLastIndex( in int start, Predicate<T> match )
+    public int FindLastIndex( int start, Predicate<T> match )
     {
         lock (_lock)
         {
@@ -200,7 +200,7 @@ public class ConcurrentObservableCollection<T> : CollectionAlerts<T>, IList<T>, 
     {
         lock (_lock) { return _items.FindLastIndex( match ); }
     }
-    public int IndexOf( T value, in int start )
+    public int IndexOf( T value, int start )
     {
         lock (_lock)
         {
@@ -208,7 +208,7 @@ public class ConcurrentObservableCollection<T> : CollectionAlerts<T>, IList<T>, 
             return _items.IndexOf( value, start );
         }
     }
-    public int IndexOf( T value, in int start, in int count )
+    public int IndexOf( T value, int start, int count )
     {
         lock (_lock)
         {
@@ -220,7 +220,7 @@ public class ConcurrentObservableCollection<T> : CollectionAlerts<T>, IList<T>, 
     {
         lock (_lock)
         {
-            foreach ((int i, T? item) in collection.Enumerate( index ))
+            foreach ( (int i, T? item) in collection.Enumerate( index ) )
             {
                 _items.Insert( i, item );
                 Added( item, i );
@@ -231,7 +231,7 @@ public class ConcurrentObservableCollection<T> : CollectionAlerts<T>, IList<T>, 
     {
         lock (_lock) { return _items.LastIndexOf( value ); }
     }
-    public int LastIndexOf( T value, in int start )
+    public int LastIndexOf( T value, int start )
     {
         lock (_lock)
         {
@@ -239,7 +239,7 @@ public class ConcurrentObservableCollection<T> : CollectionAlerts<T>, IList<T>, 
             return _items.LastIndexOf( value, start );
         }
     }
-    public int LastIndexOf( T value, in int start, in int count )
+    public int LastIndexOf( T value, int start, int count )
     {
         lock (_lock)
         {
@@ -263,7 +263,7 @@ public class ConcurrentObservableCollection<T> : CollectionAlerts<T>, IList<T>, 
         {
             int results = 0;
 
-            foreach (T item in _items.Where( item => match( item ) ))
+            foreach ( T item in _items.Where( item => match( item ) ) )
             {
                 _items.Remove( item );
                 Removed( item );
@@ -283,14 +283,14 @@ public class ConcurrentObservableCollection<T> : CollectionAlerts<T>, IList<T>, 
             Removed( item, index );
         }
     }
-    public void RemoveRange( in int start, in int count )
+    public void RemoveRange( int start, int count )
     {
         lock (_lock)
         {
             Guard.IsInRangeFor( start, (ICollection<T>)_items, nameof(start) );
             Guard.IsInRangeFor( count, (ICollection<T>)_items, nameof(count) );
 
-            for (int x = start; x < start + count; x++)
+            for ( int x = start; x < start + count; x++ )
             {
                 _items.RemoveAt( x );
                 Removed( x );
@@ -318,23 +318,23 @@ public class ConcurrentObservableCollection<T> : CollectionAlerts<T>, IList<T>, 
 
 
     public virtual void Sort() => Sort( _comparer );
-    public virtual void Sort( in IComparer<T> comparer ) => Sort( comparer.Compare );
-    public virtual void Sort( in Comparison<T> compare )
+    public virtual void Sort( IComparer<T> comparer ) => Sort( comparer.Compare );
+    public virtual void Sort( Comparison<T> compare )
     {
         lock (_lock)
         {
-            if (_items.Count == 0) { return; }
+            if ( _items.Count == 0 ) { return; }
 
             _items.Sort( compare );
             Reset();
         }
     }
-    public virtual void Sort( in int start, in int count ) => Sort( start, count, _comparer );
-    public virtual void Sort( in int start, in int count, IComparer<T> comparer )
+    public virtual void Sort( int start, int count ) => Sort( start, count, _comparer );
+    public virtual void Sort( int start, int count, IComparer<T> comparer )
     {
         lock (_lock)
         {
-            if (_items.Count == 0) { return; }
+            if ( _items.Count == 0 ) { return; }
 
             _items.Sort( start, count, comparer );
             Reset();
@@ -345,7 +345,7 @@ public class ConcurrentObservableCollection<T> : CollectionAlerts<T>, IList<T>, 
     {
         lock (_lock)
         {
-            if (_items.Contains( item )) { return false; }
+            if ( _items.Contains( item ) ) { return false; }
 
             _items.Add( item );
             Added( item );
@@ -416,7 +416,7 @@ public class ConcurrentObservableCollection<T> : CollectionAlerts<T>, IList<T>, 
         lock (_lock)
         {
             bool result = _items.Remove( item );
-            if (result) { Removed( item ); }
+            if ( result ) { Removed( item ); }
 
             return result;
         }

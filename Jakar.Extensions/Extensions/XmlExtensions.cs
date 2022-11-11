@@ -118,7 +118,7 @@ public static class XmlExtensions
 
     [Obsolete( "Will be removed in a future version, and moved to a dedicated nuget" )] public static string ToXml( this List<int?> item, in IDictionary<string, string>? attributes = default ) => item.Serialize( attributes );
 
-    private static string Serialize<TValue>( this IEnumerable<TValue> item, in IDictionary<string, string>? attributes )
+    private static string Serialize<TValue>( this IEnumerable<TValue> item, IDictionary<string, string>? attributes )
     {
         var          document  = new XmlDocument();
         XmlNode      node      = document.CreateNode( XmlNodeType.Element, XmlNames.ITEM, null );
@@ -179,7 +179,7 @@ public static class XmlExtensions
 
     [Obsolete( "Will be removed in a future version, and moved to a dedicated nuget" )] public static string ToXml( this Dictionary<string, bool> item, in IDictionary<string, string>? attributes = default ) => item.Serialize( attributes );
 
-    private static string Serialize<TValue>( this IDictionary<string, TValue> item, in IDictionary<string, string>? attributes )
+    private static string Serialize<TValue>( this IDictionary<string, TValue> item, IDictionary<string, string>? attributes )
     {
         var          document  = new XmlDocument();
         XmlNode      node      = document.CreateNode( XmlNodeType.Element, XmlNames.ITEM, null );

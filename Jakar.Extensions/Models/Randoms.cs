@@ -6,7 +6,7 @@ namespace Jakar.Extensions;
 
 
 /// <summary>
-///     <see href = "https://www.educative.io/edpresso/how-to-generate-a-random-string-in-c-sharp" />
+///     <see href = "https://www.educative.io/edpresso/how-to-generate-a-random-string--c-sharp" />
 /// </summary>
 public class Randoms : ObservableClass
 {
@@ -19,7 +19,7 @@ public class Randoms : ObservableClass
     public static RandomNumberGenerator Rng          { get; set; } = RandomNumberGenerator.Create();
 
 
-    public static string GenerateToken( in int length = 32 )
+    public static string GenerateToken( int length = 32 )
     {
         byte[] randomNumber = new byte[length];
         Rng.GetBytes( randomNumber );
@@ -27,12 +27,12 @@ public class Randoms : ObservableClass
     }
 
 
-    public static string RandomString( in int length ) => RandomString( length, char.ToUpperInvariant );
-    public static string RandomString( in int length, Func<char, char> converter )
+    public static string RandomString( int length ) => RandomString( length, char.ToUpperInvariant );
+    public static string RandomString( int length, Func<char, char> converter )
     {
         Span<char> builder = stackalloc char[length];
 
-        for (int i = 0; i < length; i++)
+        for ( int i = 0; i < length; i++ )
         {
             char letter = Convert.ToChar( RandomNumberGenerator.GetInt32( 97, 122 ) );
             builder[i] = converter( letter );
@@ -42,12 +42,12 @@ public class Randoms : ObservableClass
     }
 
 
-    public static string RandomString( in int length, IReadOnlyList<char> values ) => RandomString( length, values, Random );
-    public static string RandomString( in int length, IReadOnlyList<char> values, Random random )
+    public static string RandomString( int length, IReadOnlyList<char> values ) => RandomString( length, values, Random );
+    public static string RandomString( int length, IReadOnlyList<char> values, Random random )
     {
         Span<char> builder = stackalloc char[length];
 
-        for (int i = 0; i < length; i++)
+        for ( int i = 0; i < length; i++ )
         {
             int index = random.Next( values.Count );
             builder[i] = values[index];

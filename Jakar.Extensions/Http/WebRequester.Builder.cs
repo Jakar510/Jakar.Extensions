@@ -8,7 +8,7 @@ namespace Jakar.Extensions;
 
 /// <summary>
 ///     <para>
-///         <see href = "https://www.stevejgordon.co.uk/httpclient-connection-pooling-in-dotnet-core" />
+///         <see href = "https://www.stevejgordon.co.uk/httpclient-connection-pooling--dotnet-core" />
 ///     </para>
 /// </summary>
 public partial class WebRequester
@@ -33,22 +33,22 @@ public partial class WebRequester
 
 
     #if NETSTANDARD2_1
-    private SslProtocols?              _sslProtocols = default;
-    private ClientCertificateOption?   _clientCertificateOptions = default;
-    private X509CertificateCollection? _clientCertificates = default;
-    private DecompressionMethods?      _automaticDecompression = default;
-    private long?                      _maxRequestContentBufferSize = default;
+        private SslProtocols?              _sslProtocols                = default;
+        private ClientCertificateOption?   _clientCertificateOptions    = default;
+        private X509CertificateCollection? _clientCertificates          = default;
+        private DecompressionMethods?      _automaticDecompression      = default;
+        private long?                      _maxRequestContentBufferSize = default;
 
     #else
-        private SslClientAuthenticationOptions? _sslOptions                  = default;
-        private TimeSpan?                       _responseDrainTimeout        = default;
-        private TimeSpan?                       _connectTimeout              = default;
-        private HttpKeepAlivePingPolicy?        _keepAlivePingPolicy         = default;
-        private TimeSpan?                       _keepAlivePingTimeout        = default;
-        private TimeSpan?                       _keepAlivePingDelay          = default;
-        private TimeSpan?                       _pooledConnectionLifetime    = default;
+        private SslClientAuthenticationOptions? _sslOptions = default;
+        private TimeSpan?                       _responseDrainTimeout = default;
+        private TimeSpan?                       _connectTimeout = default;
+        private HttpKeepAlivePingPolicy?        _keepAlivePingPolicy = default;
+        private TimeSpan?                       _keepAlivePingTimeout = default;
+        private TimeSpan?                       _keepAlivePingDelay = default;
+        private TimeSpan?                       _pooledConnectionLifetime = default;
         private TimeSpan?                       _pooledConnectionIdleTimeout = default;
-        private int?                            _maxResponseDrainSize        = default;
+        private int?                            _maxResponseDrainSize = default;
 
     #endif
 
@@ -85,22 +85,22 @@ public partial class WebRequester
 
 
         #if NETSTANDARD2_1
-        _sslProtocols = default;
-        _clientCertificateOptions = default;
-        _clientCertificates = default;
-        _automaticDecompression = default;
-        _maxRequestContentBufferSize = default;
+            _sslProtocols                = default;
+            _clientCertificateOptions    = default;
+            _clientCertificates          = default;
+            _automaticDecompression      = default;
+            _maxRequestContentBufferSize = default;
 
         #else
-            _sslOptions                  = default;
-            _responseDrainTimeout        = default;
-            _connectTimeout              = default;
-            _keepAlivePingPolicy         = default;
-            _keepAlivePingTimeout        = default;
-            _keepAlivePingDelay          = default;
-            _pooledConnectionLifetime    = default;
+            _sslOptions = default;
+            _responseDrainTimeout = default;
+            _connectTimeout = default;
+            _keepAlivePingPolicy = default;
+            _keepAlivePingTimeout = default;
+            _keepAlivePingDelay = default;
+            _pooledConnectionLifetime = default;
             _pooledConnectionIdleTimeout = default;
-            _maxResponseDrainSize        = default;
+            _maxResponseDrainSize = default;
 
         #endif
 
@@ -117,18 +117,18 @@ public partial class WebRequester
         private HttpMessageHandler GetHandler()
         {
         #if NETSTANDARD2_1
-        var handler = new HttpClientHandler();
+            var handler = new HttpClientHandler();
 
 
-        if ( _sslProtocols.HasValue ) { handler.SslProtocols = _sslProtocols.Value; }
+            if ( _sslProtocols.HasValue ) { handler.SslProtocols = _sslProtocols.Value; }
 
-        if ( _maxRequestContentBufferSize.HasValue ) { handler.MaxRequestContentBufferSize = _maxRequestContentBufferSize.Value; }
+            if ( _maxRequestContentBufferSize.HasValue ) { handler.MaxRequestContentBufferSize = _maxRequestContentBufferSize.Value; }
 
-        if ( _automaticDecompression.HasValue ) { handler.AutomaticDecompression = _automaticDecompression.Value; }
+            if ( _automaticDecompression.HasValue ) { handler.AutomaticDecompression = _automaticDecompression.Value; }
 
-        if ( _clientCertificateOptions.HasValue ) { handler.ClientCertificateOptions = _clientCertificateOptions.Value; }
+            if ( _clientCertificateOptions.HasValue ) { handler.ClientCertificateOptions = _clientCertificateOptions.Value; }
 
-        if ( _clientCertificates is not null ) { handler.ClientCertificates.AddRange(_clientCertificates); }
+            if ( _clientCertificates is not null ) { handler.ClientCertificates.AddRange( _clientCertificates ); }
 
         #else
             var handler = new SocketsHttpHandler();
@@ -155,30 +155,30 @@ public partial class WebRequester
         #endif
 
 
-            if (_maxResponseHeadersLength.HasValue) { handler.MaxResponseHeadersLength = _maxResponseHeadersLength.Value; }
+            if ( _maxResponseHeadersLength.HasValue ) { handler.MaxResponseHeadersLength = _maxResponseHeadersLength.Value; }
 
-            if (_maxConnectionsPerServer.HasValue) { handler.MaxConnectionsPerServer = _maxConnectionsPerServer.Value; }
+            if ( _maxConnectionsPerServer.HasValue ) { handler.MaxConnectionsPerServer = _maxConnectionsPerServer.Value; }
 
-            if (_maxAutomaticRedirections.HasValue) { handler.MaxAutomaticRedirections = _maxAutomaticRedirections.Value; }
+            if ( _maxAutomaticRedirections.HasValue ) { handler.MaxAutomaticRedirections = _maxAutomaticRedirections.Value; }
 
-            if (_allowAutoRedirect.HasValue) { handler.AllowAutoRedirect = _allowAutoRedirect.Value; }
-
-
-            if (_useProxy.HasValue) { handler.UseProxy = _useProxy.Value; }
-
-            if (_proxy is not null) { handler.Proxy = _proxy; }
-
-            if (_defaultProxyCredentials is not null) { handler.DefaultProxyCredentials = _defaultProxyCredentials; }
+            if ( _allowAutoRedirect.HasValue ) { handler.AllowAutoRedirect = _allowAutoRedirect.Value; }
 
 
-            if (_credentials is not null) { handler.Credentials = _credentials; }
+            if ( _useProxy.HasValue ) { handler.UseProxy = _useProxy.Value; }
 
-            if (_preAuthenticate.HasValue) { handler.PreAuthenticate = _preAuthenticate.Value; }
+            if ( _proxy is not null ) { handler.Proxy = _proxy; }
+
+            if ( _defaultProxyCredentials is not null ) { handler.DefaultProxyCredentials = _defaultProxyCredentials; }
 
 
-            if (_useCookies.HasValue) { handler.UseCookies = _useCookies.Value; }
+            if ( _credentials is not null ) { handler.Credentials = _credentials; }
 
-            if (_cookieContainer is not null) { handler.CookieContainer = _cookieContainer; }
+            if ( _preAuthenticate.HasValue ) { handler.PreAuthenticate = _preAuthenticate.Value; }
+
+
+            if ( _useCookies.HasValue ) { handler.UseCookies = _useCookies.Value; }
+
+            if ( _cookieContainer is not null ) { handler.CookieContainer = _cookieContainer; }
 
             return handler;
         }
@@ -206,20 +206,20 @@ public partial class WebRequester
                                                    {
                                                        AllowRetries = true
                                                    } );
-        public Builder With_Retry( in RetryPolicy policy )
+        public Builder With_Retry( RetryPolicy policy )
         {
             _retryPolicy = policy;
             return this;
         }
-        public Builder With_Retry( int         maxRetires ) => With_Retry( _retryPolicy.Delay,  _retryPolicy.Scale, maxRetires );
-        public Builder With_Retry( in TimeSpan delay, in TimeSpan scale ) => With_Retry( delay, scale,              _retryPolicy.MaxRetires );
-        public Builder With_Retry( in TimeSpan delay, in TimeSpan scale, int maxRetires ) => With_Retry( _retryPolicy with
-                                                                                                         {
-                                                                                                             Delay = delay,
-                                                                                                             Scale = scale,
-                                                                                                             MaxRetires = Math.Max( maxRetires, 1 ),
-                                                                                                             AllowRetries = true
-                                                                                                         } );
+        public Builder With_Retry( int      maxRetires ) => With_Retry( _retryPolicy.Delay, _retryPolicy.Scale, maxRetires );
+        public Builder With_Retry( TimeSpan delay, TimeSpan scale ) => With_Retry( delay,   scale,              _retryPolicy.MaxRetires );
+        public Builder With_Retry( TimeSpan delay, TimeSpan scale, int maxRetires ) => With_Retry( _retryPolicy with
+                                                                                                   {
+                                                                                                       Delay = delay,
+                                                                                                       Scale = scale,
+                                                                                                       MaxRetires = Math.Max( maxRetires, 1 ),
+                                                                                                       AllowRetries = true
+                                                                                                   } );
 
 
         public Builder With_Encoding( Encoding value )
@@ -291,7 +291,7 @@ public partial class WebRequester
         public Builder With_Cookie( params Cookie[] value )
         {
             CookieContainer container = _cookieContainer ??= new CookieContainer();
-            foreach (Cookie cookie in value) { container.Add( cookie ); }
+            foreach ( Cookie cookie in value ) { container.Add( cookie ); }
 
             _useCookies = true;
             return this;
@@ -308,7 +308,7 @@ public partial class WebRequester
         public Builder With_Timeout( int    minutes ) => With_Timeout( TimeSpan.FromMinutes( minutes ) );
         public Builder With_Timeout( float  seconds ) => With_Timeout( TimeSpan.FromSeconds( seconds ) );
         public Builder With_Timeout( double milliseconds ) => With_Timeout( TimeSpan.FromMilliseconds( milliseconds ) );
-        public Builder With_Timeout( in TimeSpan value )
+        public Builder With_Timeout(  TimeSpan value )
         {
             _connectTimeout = value;
             return this;
@@ -327,11 +327,11 @@ public partial class WebRequester
             With_KeepAlive( TimeSpan.FromSeconds( pingDelaySeconds ), TimeSpan.FromSeconds( pingTimeoutSeconds ), policy );
         public Builder With_KeepAlive( double pingDelayMilliseconds, double pingTimeoutMilliseconds, HttpKeepAlivePingPolicy policy = HttpKeepAlivePingPolicy.WithActiveRequests ) =>
             With_KeepAlive( TimeSpan.FromMilliseconds( pingDelayMilliseconds ), TimeSpan.FromMilliseconds( pingTimeoutMilliseconds ), policy );
-        public Builder With_KeepAlive( in TimeSpan pingDelay, in TimeSpan pingTimeout, HttpKeepAlivePingPolicy policy = HttpKeepAlivePingPolicy.WithActiveRequests )
+        public Builder With_KeepAlive(  TimeSpan pingDelay,  TimeSpan pingTimeout, HttpKeepAlivePingPolicy policy = HttpKeepAlivePingPolicy.WithActiveRequests )
         {
-            _keepAlivePingDelay   = pingDelay;
+            _keepAlivePingDelay = pingDelay;
             _keepAlivePingTimeout = pingTimeout;
-            _keepAlivePingPolicy  = policy;
+            _keepAlivePingPolicy = policy;
             return this;
         }
     #endif
@@ -348,7 +348,7 @@ public partial class WebRequester
         public Builder With_PooledConnectionIdleTimeout( int    pingDelayMinutes ) => With_PooledConnectionIdleTimeout( TimeSpan.FromMinutes( pingDelayMinutes ) );
         public Builder With_PooledConnectionIdleTimeout( float  pingDelaySeconds ) => With_PooledConnectionIdleTimeout( TimeSpan.FromSeconds( pingDelaySeconds ) );
         public Builder With_PooledConnectionIdleTimeout( double pingDelayMilliseconds ) => With_PooledConnectionIdleTimeout( TimeSpan.FromMilliseconds( pingDelayMilliseconds ) );
-        public Builder With_PooledConnectionIdleTimeout( in TimeSpan value )
+        public Builder With_PooledConnectionIdleTimeout(  TimeSpan value )
         {
             _pooledConnectionIdleTimeout = value;
             return this;
@@ -358,7 +358,7 @@ public partial class WebRequester
         public Builder With_PooledConnectionLifetime( int    pingDelayMinutes ) => With_PooledConnectionLifetime( TimeSpan.FromMinutes( pingDelayMinutes ) );
         public Builder With_PooledConnectionLifetime( float  pingDelaySeconds ) => With_PooledConnectionLifetime( TimeSpan.FromSeconds( pingDelaySeconds ) );
         public Builder With_PooledConnectionLifetime( double pingDelayMilliseconds ) => With_PooledConnectionLifetime( TimeSpan.FromMilliseconds( pingDelayMilliseconds ) );
-        public Builder With_PooledConnectionLifetime( in TimeSpan value )
+        public Builder With_PooledConnectionLifetime(  TimeSpan value )
         {
             _pooledConnectionLifetime = value;
             return this;
@@ -368,63 +368,63 @@ public partial class WebRequester
         public Builder With_ResponseDrainTimeout( int    pingDelayMinutes ) => With_ResponseDrainTimeout( TimeSpan.FromMinutes( pingDelayMinutes ) );
         public Builder With_ResponseDrainTimeout( float  pingDelaySeconds ) => With_ResponseDrainTimeout( TimeSpan.FromSeconds( pingDelaySeconds ) );
         public Builder With_ResponseDrainTimeout( double pingDelayMilliseconds ) => With_ResponseDrainTimeout( TimeSpan.FromMilliseconds( pingDelayMilliseconds ) );
-        public Builder With_ResponseDrainTimeout( in TimeSpan value )
+        public Builder With_ResponseDrainTimeout(  TimeSpan value )
         {
             _responseDrainTimeout = value;
             return this;
         }
 
     #else
-    public Builder With_MaxRequestContentBufferSize( int value )
-    {
-        _maxRequestContentBufferSize = value;
-        return this;
-    }
+        public Builder With_MaxRequestContentBufferSize( int value )
+        {
+            _maxRequestContentBufferSize = value;
+            return this;
+        }
 
 
-    public Builder With_ClientCertificateOptions( ClientCertificateOption value )
-    {
-        _clientCertificateOptions = value;
-        return this;
-    }
-    public Builder With_ClientCertificates( X509Certificate value )
-    {
-        _clientCertificates ??= new X509CertificateCollection();
-        _clientCertificates.Add(value);
-        return this;
-    }
-    public Builder With_ClientCertificates( params X509Certificate[] value )
-    {
-        _clientCertificates ??= new X509CertificateCollection();
-        _clientCertificates.AddRange(value);
-        return this;
-    }
-    public Builder With_ClientCertificates( IEnumerable<X509Certificate> value )
-    {
-        _clientCertificates ??= new X509CertificateCollection();
-        foreach ( X509Certificate certificate in value ) { _clientCertificates.Add(certificate); }
+        public Builder With_ClientCertificateOptions( ClientCertificateOption value )
+        {
+            _clientCertificateOptions = value;
+            return this;
+        }
+        public Builder With_ClientCertificates( X509Certificate value )
+        {
+            _clientCertificates ??= new X509CertificateCollection();
+            _clientCertificates.Add( value );
+            return this;
+        }
+        public Builder With_ClientCertificates( params X509Certificate[] value )
+        {
+            _clientCertificates ??= new X509CertificateCollection();
+            _clientCertificates.AddRange( value );
+            return this;
+        }
+        public Builder With_ClientCertificates( IEnumerable<X509Certificate> value )
+        {
+            _clientCertificates ??= new X509CertificateCollection();
+            foreach ( X509Certificate certificate in value ) { _clientCertificates.Add( certificate ); }
 
-        return this;
-    }
-    public Builder With_ClientCertificates( X509CertificateCollection value )
-    {
-        _clientCertificates = value;
-        return this;
-    }
-
-
-    public Builder With_AutomaticDecompression( DecompressionMethods value )
-    {
-        _automaticDecompression = value;
-        return this;
-    }
+            return this;
+        }
+        public Builder With_ClientCertificates( X509CertificateCollection value )
+        {
+            _clientCertificates = value;
+            return this;
+        }
 
 
-    public Builder With_SSL( SslProtocols value )
-    {
-        _sslProtocols = value;
-        return this;
-    }
+        public Builder With_AutomaticDecompression( DecompressionMethods value )
+        {
+            _automaticDecompression = value;
+            return this;
+        }
+
+
+        public Builder With_SSL( SslProtocols value )
+        {
+            _sslProtocols = value;
+            return this;
+        }
     #endif
     }
 }

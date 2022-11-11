@@ -17,5 +17,5 @@ public static class DrawingSizeExtensions
     }
 
 
-    public static Size Scaled( this Size baseSize, in int value ) => new(baseSize.Width * value, baseSize.Height * value);
+    public static Size Scaled( this Size baseSize, int value ) => new(baseSize.Width * value, baseSize.Height * value);
 }

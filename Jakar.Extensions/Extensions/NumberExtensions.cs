@@ -7,101 +7,101 @@ namespace Jakar.Extensions;
 
 public static class Numbers
 {
-    public static byte As( this string? value, in byte defaultValue ) => byte.TryParse( value, out byte result )
-                                                                             ? result
-                                                                             : defaultValue;
+    public static byte As( this string? value, byte defaultValue ) => byte.TryParse( value, out byte result )
+                                                                          ? result
+                                                                          : defaultValue;
 
-    public static byte? As( this string? value, in byte? defaultValue ) => byte.TryParse( value, out byte result )
-                                                                               ? result
-                                                                               : defaultValue;
+    public static byte? As( this string? value, byte? defaultValue ) => byte.TryParse( value, out byte result )
+                                                                            ? result
+                                                                            : defaultValue;
 
-    public static sbyte As( this string? value, in sbyte defaultValue ) => sbyte.TryParse( value, out sbyte result )
-                                                                               ? result
-                                                                               : defaultValue;
+    public static sbyte As( this string? value, sbyte defaultValue ) => sbyte.TryParse( value, out sbyte result )
+                                                                            ? result
+                                                                            : defaultValue;
 
-    public static sbyte? As( this string? value, in sbyte? defaultValue ) => sbyte.TryParse( value, out sbyte result )
-                                                                                 ? result
-                                                                                 : defaultValue;
-
-
-    public static short As( this string? value, in short defaultValue ) => short.TryParse( value, out short result )
-                                                                               ? result
-                                                                               : defaultValue;
-
-    public static short? As( this string? value, in short? defaultValue ) => short.TryParse( value, out short result )
-                                                                                 ? result
-                                                                                 : defaultValue;
-
-    public static ushort As( this string? value, in ushort defaultValue ) => ushort.TryParse( value, out ushort result )
-                                                                                 ? result
-                                                                                 : defaultValue;
-
-    public static ushort? As( this string? value, in ushort? defaultValue ) => ushort.TryParse( value, out ushort result )
-                                                                                   ? result
-                                                                                   : defaultValue;
-
-
-    public static int As( this string? value, in int defaultValue ) => int.TryParse( value, out int result )
-                                                                           ? result
-                                                                           : defaultValue;
-
-    public static int? As( this string? value, in int? defaultValue ) => int.TryParse( value, out int result )
-                                                                             ? result
-                                                                             : defaultValue;
-
-    public static uint As( this string? value, in uint defaultValue ) => uint.TryParse( value, out uint result )
-                                                                             ? result
-                                                                             : defaultValue;
-
-    public static uint? As( this string? value, in uint? defaultValue ) => uint.TryParse( value, out uint result )
-                                                                               ? result
-                                                                               : defaultValue;
-
-
-    public static long? As( this string? value, in long? defaultValue ) => string.IsNullOrWhiteSpace( value )
-                                                                               ? default
-                                                                               : long.TryParse( value, out long result )
-                                                                                   ? result
-                                                                                   : defaultValue;
-
-    public static long? As( this string? value, in long defaultValue ) => long.TryParse( value, out long result )
+    public static sbyte? As( this string? value, sbyte? defaultValue ) => sbyte.TryParse( value, out sbyte result )
                                                                               ? result
                                                                               : defaultValue;
 
-    public static ulong As( this string? value, in ulong defaultValue ) => ulong.TryParse( value, out ulong result )
-                                                                               ? result
-                                                                               : defaultValue;
 
-    public static ulong? As( this string? value, in ulong? defaultValue ) => ulong.TryParse( value, out ulong result )
-                                                                                 ? result
-                                                                                 : defaultValue;
+    public static short As( this string? value, short defaultValue ) => short.TryParse( value, out short result )
+                                                                            ? result
+                                                                            : defaultValue;
 
+    public static short? As( this string? value, short? defaultValue ) => short.TryParse( value, out short result )
+                                                                              ? result
+                                                                              : defaultValue;
 
-    public static float As( this string? value, in float defaultValue ) => float.TryParse( value, out float d )
-                                                                               ? d
-                                                                               : defaultValue;
+    public static ushort As( this string? value, ushort defaultValue ) => ushort.TryParse( value, out ushort result )
+                                                                              ? result
+                                                                              : defaultValue;
 
-    public static float? As( this string? value, in float? defaultValue ) => float.TryParse( value, out float d )
-                                                                                 ? d
-                                                                                 : defaultValue;
-
-
-    public static double As( this string? value, in double defaultValue ) => double.TryParse( value, out double d )
-                                                                                 ? d
-                                                                                 : defaultValue;
-
-    public static double? As( this string? value, in double? defaultValue ) => double.TryParse( value, out double d )
-                                                                                   ? d
-                                                                                   : defaultValue;
+    public static ushort? As( this string? value, ushort? defaultValue ) => ushort.TryParse( value, out ushort result )
+                                                                                ? result
+                                                                                : defaultValue;
 
 
-    public static decimal As( this string? value, in decimal defaultValue ) => decimal.TryParse( value, out decimal d )
-                                                                                   ? d
-                                                                                   : defaultValue;
+    public static int As( this string? value, int defaultValue ) => int.TryParse( value, out int result )
+                                                                        ? result
+                                                                        : defaultValue;
 
-    public static decimal? As( this string? value, in decimal? defaultValue ) => decimal.TryParse( value, out decimal d )
-                                                                                     ? d
-                                                                                     : defaultValue;
+    public static int? As( this string? value, int? defaultValue ) => int.TryParse( value, out int result )
+                                                                          ? result
+                                                                          : defaultValue;
+
+    public static uint As( this string? value, uint defaultValue ) => uint.TryParse( value, out uint result )
+                                                                          ? result
+                                                                          : defaultValue;
+
+    public static uint? As( this string? value, uint? defaultValue ) => uint.TryParse( value, out uint result )
+                                                                            ? result
+                                                                            : defaultValue;
+
+
+    public static long? As( this string? value, long? defaultValue ) => string.IsNullOrWhiteSpace( value )
+                                                                            ? default
+                                                                            : long.TryParse( value, out long result )
+                                                                                ? result
+                                                                                : defaultValue;
+
+    public static long? As( this string? value, long defaultValue ) => long.TryParse( value, out long result )
+                                                                           ? result
+                                                                           : defaultValue;
+
+    public static ulong As( this string? value, ulong defaultValue ) => ulong.TryParse( value, out ulong result )
+                                                                            ? result
+                                                                            : defaultValue;
+
+    public static ulong? As( this string? value, ulong? defaultValue ) => ulong.TryParse( value, out ulong result )
+                                                                              ? result
+                                                                              : defaultValue;
+
+
+    public static float As( this string? value, float defaultValue ) => float.TryParse( value, out float d )
+                                                                            ? d
+                                                                            : defaultValue;
+
+    public static float? As( this string? value, float? defaultValue ) => float.TryParse( value, out float d )
+                                                                              ? d
+                                                                              : defaultValue;
+
+
+    public static double As( this string? value, double defaultValue ) => double.TryParse( value, out double d )
+                                                                              ? d
+                                                                              : defaultValue;
+
+    public static double? As( this string? value, double? defaultValue ) => double.TryParse( value, out double d )
+                                                                                ? d
+                                                                                : defaultValue;
+
+
+    public static decimal As( this string? value, decimal defaultValue ) => decimal.TryParse( value, out decimal d )
+                                                                                ? d
+                                                                                : defaultValue;
+
+    public static decimal? As( this string? value, decimal? defaultValue ) => decimal.TryParse( value, out decimal d )
+                                                                                  ? d
+                                                                                  : defaultValue;
     public static byte AsByte( this         decimal value ) => (byte)value;
     public static byte AsByte( this         double  value ) => (byte)value;
     public static byte AsByte( this         float   value ) => (byte)value;

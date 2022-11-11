@@ -17,10 +17,8 @@ public class AppServices : BaseViewModel, ILocalStorageService, IAuthenticationS
     public           ProtectedLocalStorage   ProtectedLocalStorage { get; init; }
     public           ProtectedSessionStorage SessionStorage        { get; init; }
     public           string                  BaseUri               => _navigation.BaseUri;
-
-
-    public string         Uri      => _navigation.Uri;
-    public TooltipService Tooltips { get; init; }
+    public           string                  Uri                   => _navigation.Uri;
+    public           TooltipService          Tooltips              { get; init; }
 
 
     public AppServices( IModalService           modal,
@@ -76,19 +74,19 @@ public class AppServices : BaseViewModel, ILocalStorageService, IAuthenticationS
     }
 
 
-    public ValueTask ClearAsync( CancellationToken?       token                           = default ) => _localStorage.ClearAsync( token );
-    public ValueTask<bool> ContainKeyAsync( string        key,   CancellationToken? token = default ) => _localStorage.ContainKeyAsync( key, token );
-    public ValueTask<string> GetItemAsStringAsync( string key,   CancellationToken? token = default ) => _localStorage.GetItemAsStringAsync( key, token );
-    public ValueTask<T> GetItemAsync<T>( string           key,   CancellationToken? token = default ) => _localStorage.GetItemAsync<T>( key, token );
-    public ValueTask<string> KeyAsync( int                index, CancellationToken? token = default ) => _localStorage.KeyAsync( index, token );
+    public ValueTask ClearAsync( CancellationToken        token                          = default ) => _localStorage.ClearAsync( token );
+    public ValueTask<bool> ContainKeyAsync( string        key,   CancellationToken token = default ) => _localStorage.ContainKeyAsync( key, token );
+    public ValueTask<string> GetItemAsStringAsync( string key,   CancellationToken token = default ) => _localStorage.GetItemAsStringAsync( key, token );
+    public ValueTask<T> GetItemAsync<T>( string           key,   CancellationToken token = default ) => _localStorage.GetItemAsync<T>( key, token );
+    public ValueTask<string> KeyAsync( int                index, CancellationToken token = default ) => _localStorage.KeyAsync( index, token );
 
-    public ValueTask<IEnumerable<string>> KeysAsync( CancellationToken? token                          = default ) => _localStorage.KeysAsync( token );
-    public ValueTask<int> LengthAsync( CancellationToken?               token                          = default ) => _localStorage.LengthAsync( token );
-    public ValueTask RemoveItemAsync( string                            key,  CancellationToken? token = default ) => _localStorage.RemoveItemAsync( key, token );
-    public ValueTask RemoveItemsAsync( IEnumerable<string>              keys, CancellationToken? token = default ) => _localStorage.RemoveItemsAsync( keys, token );
+    public ValueTask<IEnumerable<string>> KeysAsync( CancellationToken token                         = default ) => _localStorage.KeysAsync( token );
+    public ValueTask<int> LengthAsync( CancellationToken               token                         = default ) => _localStorage.LengthAsync( token );
+    public ValueTask RemoveItemAsync( string                           key,  CancellationToken token = default ) => _localStorage.RemoveItemAsync( key, token );
+    public ValueTask RemoveItemsAsync( IEnumerable<string>             keys, CancellationToken token = default ) => _localStorage.RemoveItemsAsync( keys, token );
 
-    public ValueTask SetItemAsStringAsync( string key, string data, CancellationToken? token = default ) => _localStorage.SetItemAsStringAsync( key, data, token );
-    public ValueTask SetItemAsync<T>( string      key, T      data, CancellationToken? token = default ) => _localStorage.SetItemAsync( key, data, token );
+    public ValueTask SetItemAsStringAsync( string key, string data, CancellationToken token = default ) => _localStorage.SetItemAsStringAsync( key, data, token );
+    public ValueTask SetItemAsync<T>( string      key, T      data, CancellationToken token = default ) => _localStorage.SetItemAsync( key, data, token );
 
 
     public IModalReference Show<TComponent>() where TComponent : IComponent => _modal.Show<TComponent>();
