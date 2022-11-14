@@ -277,7 +277,7 @@ public ref struct ValueStringBuilder
     }
 
 
-#if NET6_0
+#if NET6_0_OR_GREATER
     public ValueStringBuilder AppendSpanFormattable<T>( T value, ReadOnlySpan<char> format, IFormatProvider? provider = default ) where T : ISpanFormattable
     {
         if ( typeof(T) == typeof(DateTime) ) { EnsureCapacity( Math.Max( format.Length,            25 ) ); }
@@ -507,7 +507,7 @@ public ref struct ValueStringBuilder
 
             if ( s == null )
             {
-            #if NET6_0
+            #if NET6_0_OR_GREATER
                 // If arg is ISpanFormattable and the beginning doesn't need padding, try formatting it into the remaining current chunk.
                 if ( arg is ISpanFormattable spanFormattableArg && (leftJustify || width == 0) && spanFormattableArg.TryFormat( Next, out int charsWritten, itemFormatSpan, provider ) )
                 {

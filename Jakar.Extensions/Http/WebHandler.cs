@@ -204,7 +204,7 @@ public class WebHandler : IDisposable
     }
 
 
-#if NET6_0
+#if NET6_0_OR_GREATER
     public HttpVersionPolicy VersionPolicy
     {
         get => _request.VersionPolicy;

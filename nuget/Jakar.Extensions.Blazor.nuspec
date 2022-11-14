@@ -38,7 +38,7 @@
 				<dependency id="BlazorComponentUtilities" version="1.8.0" />
 				<dependency id="BlazorPro.BlazorSize" version="6.1.2" />
 				<dependency id="PanoramicData.Blazor" version="2.1.48" />
-				<dependency id="Radzen.Blazor" version="4.3.2" />
+				<dependency id="Radzen.Blazor" version="4.3.4" />
 			</group>
 		</dependencies>
 	</metadata>

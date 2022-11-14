@@ -220,7 +220,7 @@ public static class ControllerBaseExtensions
     }
 
 
-    public static ActionResult UnauthorizedAccess( this ControllerBase controller, SecurityTokenExpiredException e )
+    public static ActionResult UnauthorizedAccess( this ControllerBase controller, Exception e )
     {
         controller.AddModelError( e );
         ModelStateDictionary modelState = controller.ModelState;

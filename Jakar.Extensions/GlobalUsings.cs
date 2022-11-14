@@ -56,7 +56,7 @@ global using KeyAttribute = Dapper.Contrib.Extensions.KeyAttribute;
 
 
 /*
-#if NET6_0
+#if NET6_0_OR_GREATER
 global using System.Net.Http;
 global using Microsoft.Extensions.Http;
 global using Microsoft.Extensions.Options;

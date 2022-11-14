@@ -55,4 +55,3 @@ global using Microsoft.AspNetCore.Mvc.ModelBinding;
 global using Microsoft.AspNetCore.Mvc.RazorPages;
 global using Microsoft.Extensions.Diagnostics.HealthChecks;
 global using Microsoft.Extensions.Localization;
-global using Microsoft.IdentityModel.Tokens;

@@ -1,13 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>net6.0;netstandard2.1</TargetFrameworks>
+		<TargetFrameworks>net6.0;net7.0;netstandard2.1</TargetFrameworks>
 		<LangVersion>latest</LangVersion>
 		<Nullable>enable</Nullable>
 		<NoWarn>$(NoWarn);1591</NoWarn>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<OpenApiGenerateDocuments>false</OpenApiGenerateDocuments>
-		<Version>6.2.2</Version>
+		<Version>6.3.0</Version>
 		<PackageId>Jakar.Extensions</PackageId>
 		<Company></Company>
 		<Authors>Tyler Stegmaier</Authors>
@@ -17,20 +17,8 @@
 		<RepositoryType>git</RepositoryType>
 		<RepositoryUrl>https://github.com/Jakar510/Jakar.Extensions</RepositoryUrl>
 		<PackageReleaseNotes>
-			Jakar.Extensions 6.0.0
-			multi-targets NetStandard2.1 and Net6.0
-			Added MailKit Email Builder
-			Added Models.Service
-			Added HttpRequestBuilder for .Net 6.0
-			Updated Enum extensions
-			Added more Span extensions
-			Reworked AppSettings
-			Reworked LocalFile and LocalDirectory a bit
-			Reworked IniConfig and PreferenceFile
-			WebRequests.GetResponseAsync now tries to get the error details, including anything sent sent from server in the body.
-			Reworked ValidValueOf
-			Fix xml documentation.
-			Moving to DotNet 6.0 going forward once MAUI is released.
+			Jakar.Extensions 6.3.0
+
 		</PackageReleaseNotes>
 		<Description>Extensions to aid in development.</Description>
 		<EnableNETAnalyzers>true</EnableNETAnalyzers>

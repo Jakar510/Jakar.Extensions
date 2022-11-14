@@ -304,7 +304,7 @@ public partial class WebRequester
         }
 
 
-    #if NET6_0
+    #if NET6_0_OR_GREATER
         public Builder With_Timeout( int    minutes ) => With_Timeout( TimeSpan.FromMinutes( minutes ) );
         public Builder With_Timeout( float  seconds ) => With_Timeout( TimeSpan.FromSeconds( seconds ) );
         public Builder With_Timeout( double milliseconds ) => With_Timeout( TimeSpan.FromMilliseconds( milliseconds ) );
@@ -337,7 +337,7 @@ public partial class WebRequester
     #endif
 
 
-    #if NET6_0
+    #if NET6_0_OR_GREATER
         public Builder With_SSL( SslClientAuthenticationOptions value )
         {
             _sslOptions = value;

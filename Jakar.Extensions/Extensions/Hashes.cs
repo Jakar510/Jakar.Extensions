@@ -69,7 +69,7 @@ public static class Hashes
     }
 
 
-#if NET6_0
+#if NET6_0_OR_GREATER
     /// <summary>
     ///     Calculates a file hash using
     ///     <see cref = "MD5" />

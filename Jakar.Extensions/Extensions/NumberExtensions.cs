@@ -23,7 +23,6 @@ public static class Numbers
                                                                               ? result
                                                                               : defaultValue;
 
-
     public static short As( this string? value, short defaultValue ) => short.TryParse( value, out short result )
                                                                             ? result
                                                                             : defaultValue;
@@ -40,7 +39,6 @@ public static class Numbers
                                                                                 ? result
                                                                                 : defaultValue;
 
-
     public static int As( this string? value, int defaultValue ) => int.TryParse( value, out int result )
                                                                         ? result
                                                                         : defaultValue;
@@ -56,7 +54,6 @@ public static class Numbers
     public static uint? As( this string? value, uint? defaultValue ) => uint.TryParse( value, out uint result )
                                                                             ? result
                                                                             : defaultValue;
-
 
     public static long? As( this string? value, long? defaultValue ) => string.IsNullOrWhiteSpace( value )
                                                                             ? default
@@ -76,7 +73,6 @@ public static class Numbers
                                                                               ? result
                                                                               : defaultValue;
 
-
     public static float As( this string? value, float defaultValue ) => float.TryParse( value, out float d )
                                                                             ? d
                                                                             : defaultValue;
@@ -84,7 +80,6 @@ public static class Numbers
     public static float? As( this string? value, float? defaultValue ) => float.TryParse( value, out float d )
                                                                               ? d
                                                                               : defaultValue;
-
 
     public static double As( this string? value, double defaultValue ) => double.TryParse( value, out double d )
                                                                               ? d
@@ -94,7 +89,6 @@ public static class Numbers
                                                                                 ? d
                                                                                 : defaultValue;
 
-
     public static decimal As( this string? value, decimal defaultValue ) => decimal.TryParse( value, out decimal d )
                                                                                 ? d
                                                                                 : defaultValue;
@@ -102,20 +96,16 @@ public static class Numbers
     public static decimal? As( this string? value, decimal? defaultValue ) => decimal.TryParse( value, out decimal d )
                                                                                   ? d
                                                                                   : defaultValue;
+
+
     public static byte AsByte( this         decimal value ) => (byte)value;
     public static byte AsByte( this         double  value ) => (byte)value;
     public static byte AsByte( this         float   value ) => (byte)value;
     public static byte AsByte<TValue>( this TValue  value ) where TValue : struct, Enum => Convert.ToByte( value );
-
-
     public static decimal AsDecimal<TValue>( this TValue  value ) where TValue : struct, Enum => value.AsLong();
     public static double AsDouble<TValue>( this   TValue  value ) where TValue : struct, Enum => value.AsLong();
     public static float AsFloat( this             decimal value ) => (float)value;
-
-
     public static float AsFloat( this double value ) => (float)value;
-
-
     public static float AsFloat( this           float   value ) => value;
     public static float AsFloat<TValue>( this   TValue  value ) where TValue : struct, Enum => value.AsLong();
     public static int AsInt( this               decimal value ) => (int)value;
