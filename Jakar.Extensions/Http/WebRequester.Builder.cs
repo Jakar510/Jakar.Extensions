@@ -8,7 +8,7 @@ namespace Jakar.Extensions;
 
 /// <summary>
 ///     <para>
-///         <see href = "https://www.stevejgordon.co.uk/httpclient-connection-pooling--dotnet-core" />
+///         <see href="https://www.stevejgordon.co.uk/httpclient-connection-pooling--dotnet-core"/>
 ///     </para>
 /// </summary>
 public partial class WebRequester
@@ -62,6 +62,8 @@ public partial class WebRequester
 
         public static Builder Create() => new();
         public static Builder Create( Uri value ) => Create()
+           .With_Host( value );
+        public static Builder Create( Func<IHostInfo> value ) => Create()
            .With_Host( value );
         public static Builder Create( IHostInfo value ) => Create()
            .With_Host( value );
@@ -186,15 +188,24 @@ public partial class WebRequester
 
 
 
-        public readonly struct HostHolder : IHostInfo
+        public sealed record HostHolder( Uri HostInfo ) : IHostInfo;
+
+
+
+        public sealed record MethodHolder : IHostInfo
         {
-            public Uri HostInfo { get; }
-            public HostHolder( Uri hostInfo ) => HostInfo = hostInfo;
+            private readonly Func<IHostInfo> _value;
+
+            public Uri HostInfo => _value()
+               .HostInfo;
+
+            public MethodHolder( Func<IHostInfo> value ) => _value = value;
         }
 
 
 
-        public Builder With_Host( Uri value ) => With_Host( new HostHolder( value ) );
+        public Builder With_Host( Uri             value ) => With_Host( new HostHolder( value ) );
+        public Builder With_Host( Func<IHostInfo> value ) => With_Host( new MethodHolder( value ) );
         public Builder With_Host( IHostInfo value )
         {
             _hostInfo = value;
@@ -204,7 +215,7 @@ public partial class WebRequester
 
         public Builder With_Retry() => With_Retry( _retryPolicy with
                                                    {
-                                                       AllowRetries = true
+                                                       AllowRetries = true,
                                                    } );
         public Builder With_Retry( RetryPolicy policy )
         {
@@ -218,7 +229,7 @@ public partial class WebRequester
                                                                                                        Delay = delay,
                                                                                                        Scale = scale,
                                                                                                        MaxRetires = Math.Max( maxRetires, 1 ),
-                                                                                                       AllowRetries = true
+                                                                                                       AllowRetries = true,
                                                                                                    } );
 
 

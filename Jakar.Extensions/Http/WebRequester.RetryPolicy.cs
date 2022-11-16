@@ -14,6 +14,6 @@ public partial class WebRequester
         public RetryPolicy() { }
 
 
-        public Task Wait( ref int count, in CancellationToken token = default) => (Delay + Scale * count++).Delay(token);
+        public Task Wait( ref int count, CancellationToken token = default) => (Delay + Scale * count++).Delay(token);
     }
 }
