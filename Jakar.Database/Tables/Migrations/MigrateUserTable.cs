@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Database.FluentMigrations
 // 09/30/2022  9:55 PM
 
-using Microsoft.IdentityModel.Tokens;
-
-
-
 namespace Jakar.Database.Migrations;
 
 

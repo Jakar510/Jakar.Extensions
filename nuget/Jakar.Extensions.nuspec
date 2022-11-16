@@ -4,7 +4,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata>
 		<id>Jakar.Extensions</id>
-		<version>6.3.1</version>
+		<version>6.3.2</version>
 		<title>Extension Library</title>
 		<authors>Tyler Stegmaier</authors>
 		<owners>Jakar510/Jakar</owners>
@@ -31,7 +31,7 @@
 				<dependency id="Dapper" version="2.0.123" />
 				<dependency id="Dapper.Contrib" version="2.0.78" />
 				<dependency id="JetBrains.Annotations" version="2022.3.1" />
-				<dependency id="Microsoft.CodeAnalysis.CSharp" version="4.3.1" />
+				<dependency id="Microsoft.CodeAnalysis.CSharp" version="4.4.0" />
 				<dependency id="Microsoft.CSharp" version="4.7.0" />
 				<dependency id="Microsoft.Extensions.DependencyInjection" version="7.0.0" />
 				<dependency id="Microsoft.Extensions.Hosting.Abstractions" version="7.0.0" />

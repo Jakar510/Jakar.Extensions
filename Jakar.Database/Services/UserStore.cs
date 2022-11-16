@@ -1,8 +1,4 @@
-﻿using System.Security.Claims;
-
-
-
-namespace Jakar.Database;
+﻿namespace Jakar.Database;
 
 
 public sealed class UserStore : IUserStore

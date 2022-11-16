@@ -4,7 +4,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata>
 		<id>Jakar.DataBase</id>
-		<version>6.0.0.31-beta</version>
+		<version>6.0.0.33-beta</version>
 		<title>Extension Library</title>
 		<authors>Tyler Stegmaier</authors>
 		<owners>Jakar510/Jakar</owners>
@@ -18,7 +18,7 @@
 			Extensions to aid in development.
 		</description>
 		<releaseNotes>
-			Added .Net 7 support
+			bug fixes
 		</releaseNotes>
 		<tags>Jakar Api Extensions</tags>
 		<language>en-US</language>
@@ -28,14 +28,14 @@
 		<dependencies>
 			<group targetFramework="net6.0">
 				<dependency id="Jakar.Extensions"
-							version="6.3.1" />
+							version="6.3.2" />
 				<dependency id="Jakar.Extensions.Hosting"
-							version="6.3.1" />
+							version="6.3.2" />
 			</group>
 
 			<group targetFramework="net7.0">
 				<dependency id="Jakar.Extensions"
-							version="6.3.1" />
+							version="6.3.2" />
 				<dependency id="Jakar.Extensions.Hosting"
 							version="6.3.2" />
 			</group>

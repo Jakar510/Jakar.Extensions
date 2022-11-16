@@ -6,7 +6,6 @@ namespace Jakar.Extensions;
 
 public static partial class Spans
 {
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static ReadOnlySpan<T> RemoveAll<T>( this ReadOnlySpan<T> value, T c ) where T : unmanaged, IEquatable<T>
     {
         Span<T> buffer = stackalloc T[value.Length];
@@ -15,7 +14,6 @@ public static partial class Spans
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static void RemoveAll<T>( ReadOnlySpan<T> value, T c, ref Span<T> buffer, out int charWritten ) where T : unmanaged, IEquatable<T>
     {
         Guard.IsInRangeFor( value.Length - 1, buffer, nameof(buffer) );
@@ -37,7 +35,6 @@ public static partial class Spans
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static Span<char> RemoveAll( this Span<char> value, ReadOnlySpan<char> removed )
     {
         Span<char> buffer = stackalloc char[value.Length];
@@ -46,7 +43,6 @@ public static partial class Spans
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static ReadOnlySpan<char> RemoveAll( this ReadOnlySpan<char> value, ReadOnlySpan<char> removed )
     {
         Span<char> buffer = stackalloc char[value.Length];
@@ -55,7 +51,6 @@ public static partial class Spans
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static Span<T> RemoveAll<T>( this Span<T> value, ReadOnlySpan<T> removed ) where T : unmanaged, IEquatable<T>
     {
         Span<T> buffer = stackalloc T[value.Length];
@@ -64,7 +59,6 @@ public static partial class Spans
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static ReadOnlySpan<T> RemoveAll<T>( this ReadOnlySpan<T> value, ReadOnlySpan<T> removed ) where T : unmanaged, IEquatable<T>
     {
         Span<T> buffer = stackalloc T[value.Length];
@@ -73,7 +67,6 @@ public static partial class Spans
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static void RemoveAll<T>( ReadOnlySpan<T> value, ref Span<T> buffer, out int charWritten, ReadOnlySpan<T> removed ) where T : unmanaged, IEquatable<T>
     {
         Guard.IsInRangeFor( value.Length - 1, buffer, nameof(buffer) );
@@ -101,7 +94,6 @@ public static partial class Spans
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static Span<T> Replace<T>( this Span<T> value, ReadOnlySpan<T> oldValue, ReadOnlySpan<T> newValue ) where T : unmanaged, IEquatable<T>
     {
         Span<T> buffer = stackalloc T[value.Length + newValue.Length];
@@ -110,7 +102,6 @@ public static partial class Spans
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static ReadOnlySpan<T> Replace<T>( this ReadOnlySpan<T> value, ReadOnlySpan<T> oldValue, ReadOnlySpan<T> newValue ) where T : unmanaged, IEquatable<T>
     {
         Span<T> buffer = stackalloc T[value.Length + newValue.Length];
@@ -119,7 +110,6 @@ public static partial class Spans
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static void Replace<T>( ReadOnlySpan<T> value, ReadOnlySpan<T> oldValue, ReadOnlySpan<T> newValue, ref Span<T> buffer, out int charWritten ) where T : unmanaged, IEquatable<T>
     {
         Guard.IsInRangeFor( value.Length + newValue.Length - 1, buffer, nameof(buffer) );
@@ -146,7 +136,6 @@ public static partial class Spans
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static Span<T> Replace<T>( this Span<T> value, ReadOnlySpan<T> oldValue, ReadOnlySpan<T> newValue, T startValue, T endValue ) where T : unmanaged, IEquatable<T>
     {
         Span<T> buffer = stackalloc T[value.Length + newValue.Length];
@@ -191,7 +180,7 @@ public static partial class Spans
         Join( buffer[..first], value[end..], buffer, out int second );
         charWritten = first + second;
     }
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+
     public static ReadOnlySpan<T> Slice<T>( this ReadOnlySpan<T> value, T startValue, T endValue, bool includeEnds ) where T : unmanaged, IEquatable<T>
     {
         int start = value.IndexOf( startValue );
@@ -217,7 +206,6 @@ public static partial class Spans
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static void Slice<T>( ReadOnlySpan<T> value, T startValue, T endValue, bool includeEnds, ref Span<T> buffer, out int charWritten ) where T : unmanaged, IEquatable<T>
     {
         int start = value.IndexOf( startValue );

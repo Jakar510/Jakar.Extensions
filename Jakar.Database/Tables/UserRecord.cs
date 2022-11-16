@@ -1,12 +1,6 @@
 ﻿// ToothFairyDispatch :: ToothFairyDispatch.Cloud
 // 08/29/2022  9:55 PM
 
-using System.Security.Claims;
-using Jakar.Database.Implementations;
-using Microsoft.IdentityModel.Tokens;
-
-
-
 namespace Jakar.Database;
 
 
@@ -31,8 +25,8 @@ public sealed record UserRecord : TableRecord<UserRecord>, IUserRecord<UserRecor
     private                 DateTimeOffset?            _tokenExpiration;
     private                 Guid?                      _sessionID;
     private                 int                        _badLogins;
+    private                 long                       _rights;
     private                 long?                      _escalateTo;
-    private                 long?                      _rights;
     private                 long?                      _subscriptionID;
     private                 string                     _firstName     = string.Empty;
     private                 string                     _lastName      = string.Empty;
@@ -155,19 +149,19 @@ public sealed record UserRecord : TableRecord<UserRecord>, IUserRecord<UserRecor
         get => _badLogins;
         set => SetProperty( ref _badLogins, value );
     }
+
+
+    public long Rights
+    {
+        get => _rights;
+        set => SetProperty( ref _rights, value );
+    }
     long? IUserRecord<UserRecord>.CreatedBy => CreatedBy;
 
     public long? EscalateTo
     {
         get => _escalateTo;
         set => SetProperty( ref _escalateTo, value );
-    }
-
-
-    public long? Rights
-    {
-        get => _rights;
-        set => SetProperty( ref _rights, value );
     }
 
     public long? SubscriptionID
@@ -380,7 +374,7 @@ public sealed record UserRecord : TableRecord<UserRecord>, IUserRecord<UserRecor
 
 
     public UserRecord() { }
-    public UserRecord( IUserData value, long? rights = default )
+    public UserRecord( IUserData value, long rights = default )
     {
         FirstName         = value.FirstName;
         LastName          = value.LastName;
@@ -402,9 +396,10 @@ public sealed record UserRecord : TableRecord<UserRecord>, IUserRecord<UserRecor
         Company           = value.Company;
         PreferredLanguage = value.PreferredLanguage;
         Rights            = rights;
+        DateCreated       = DateTimeOffset.UtcNow;
         UserID            = Guid.NewGuid();
     }
-    public UserRecord( IUserData value, UserRecord caller, long? rights = default ) : base( caller )
+    public UserRecord( IUserData value, UserRecord caller, long rights = default ) : base( caller )
     {
         FirstName         = value.FirstName;
         LastName          = value.LastName;
@@ -425,47 +420,129 @@ public sealed record UserRecord : TableRecord<UserRecord>, IUserRecord<UserRecor
         Department        = value.Department;
         Company           = value.Company;
         PreferredLanguage = value.PreferredLanguage;
+        DateCreated       = DateTimeOffset.UtcNow;
         Rights            = rights;
-        UserID            = Guid.NewGuid();
     }
-    public void AddRight<TRights>( TRights right ) where TRights : struct, Enum => Rights = (Rights ?? 0) | right.AsLong();
-
-
-    public async ValueTask Add( DbConnection connection, DbTransaction transaction, Database db, RoleRecord value, CancellationToken token )
+    public UserRecord( long id, long rights = default ) : base( id )
     {
-        UserRoleRecord? record = await db.UserRoles.Get( connection, transaction, true, UserRoleRecord.GetDynamicParameters( this, value ), token );
-
-        if ( record is null )
-        {
-            record = new UserRoleRecord( this, value );
-            await db.UserRoles.Insert( connection, transaction, record, token );
-        }
+        UserID      = Guid.NewGuid();
+        DateCreated = DateTimeOffset.UtcNow;
+        Rights      = rights;
     }
-    public async ValueTask Add( DbConnection connection, DbTransaction transaction, Database db, GroupRecord value, CancellationToken token )
+
+
+    public static DynamicParameters GetDynamicParameters( IUserData data )
     {
-        UserGroupRecord? record = await db.UserGroups.Get( connection, transaction, true, UserGroupRecord.GetDynamicParameters( this, value ), token );
-
-        if ( record is null )
-        {
-            record = new UserGroupRecord( this, value );
-            await db.UserGroups.Insert( connection, transaction, record, token );
-        }
+        var parameters = new DynamicParameters();
+        parameters.Add( nameof(FirstName), data.FirstName );
+        parameters.Add( nameof(LastName),  data.LastName );
+        parameters.Add( nameof(FullName),  data.FullName );
+        return parameters;
     }
-
-
-    public UserRecord AddUserLoginInfo( UserLoginInfo info )
+    public static DynamicParameters GetDynamicParameters( ILoginRequest request )
     {
-        LoginProvider       = info.LoginProvider;
-        ProviderKey         = info.ProviderKey;
-        ProviderDisplayName = info.ProviderDisplayName;
-        return this;
+        var parameters = new DynamicParameters();
+        parameters.Add( nameof(UserID), request.UserLogin );
+        return parameters;
     }
-    public string[] Codes() => RecoveryCodes.Split( RECOVERY_CODE_SEPARATOR );
-    public int CountCodes() => Codes()
-       .Length;
+
+
+    public static UserRecord Create<TUser>( VerifyRequest<TUser> request, long rights = default ) where TUser : IUserData
+    {
+        var record = new UserRecord( request.Data, rights )
+                     {
+                         UserName = request.Request.UserLogin,
+                     };
+
+        record.UpdatePassword( request.Request.UserPassword );
+        return record;
+    }
+    public static UserRecord Create<TUser>( VerifyRequest<TUser> request, UserRecord caller, long rights = default ) where TUser : IUserData
+    {
+        var record = new UserRecord( request.Data, caller, rights )
+                     {
+                         UserName = request.Request.UserLogin,
+                     };
+
+        record.UpdatePassword( request.Request.UserPassword );
+        return record;
+    }
+    public static UserRecord Create<TUser, TRights>( VerifyRequest<TUser> request, TRights rights = default ) where TUser : IUserData
+                                                                                                              where TRights : struct, Enum
+    {
+        var record = new UserRecord( request.Data, rights.AsLong() )
+                     {
+                         UserName = request.Request.UserLogin,
+                     };
+
+        record.UpdatePassword( request.Request.UserPassword );
+        return record;
+    }
+    public static UserRecord Create<TUser, TRights>( VerifyRequest<TUser> request, UserRecord caller, TRights rights = default ) where TUser : IUserData
+                                                                                                                                 where TRights : struct, Enum
+    {
+        var record = new UserRecord( request.Data, caller, rights.AsLong() )
+                     {
+                         UserName = request.Request.UserLogin,
+                     };
+
+        record.UpdatePassword( request.Request.UserPassword );
+        return record;
+    }
     public static UserRecord Create<TRights>( IUserData value, TRights    rights ) where TRights : struct, Enum => new(value, rights.AsLong());
     public static UserRecord Create<TRights>( IUserData value, UserRecord caller, TRights rights ) where TRights : struct, Enum => new(value, caller, rights.AsLong());
-    public bool DoesNotOwn<TRecord>( TRecord            record ) where TRecord : TableRecord<TRecord> => record.CreatedBy != ID;
+
+
+    public bool DoesNotOwn<TRecord>( TRecord record ) where TRecord : TableRecord<TRecord> => record.CreatedBy != ID;
+    public bool HasPassword() => !string.IsNullOrWhiteSpace( PasswordHash );
+    public bool HasRight<TRights>( TRights right ) where TRights : struct, Enum => (Rights & right.AsLong()) > 0;
+    public bool Owns<TRecord>( TRecord     record ) where TRecord : TableRecord<TRecord> => record.CreatedBy == ID;
+    public bool RedeemCode( string code )
+    {
+        string[] codes = Codes();
+        return codes.Contains( code ) && ReplaceCode( code );
+    }
+    public bool ReplaceCode( string code )
+    {
+        var updatedCodes = new List<string>( Codes()
+                                                .Where( s => s != code ) );
+
+        string.Join( RECOVERY_CODE_SEPARATOR, updatedCodes );
+        return true;
+    }
+    public bool ReplaceCode( params string[] codes ) => ReplaceCode( codes.AsEnumerable() );
+    public bool ReplaceCode( IEnumerable<string> codes )
+    {
+        var updatedCodes = new List<string>( Codes()
+                                                .Where( codes.Contains ) );
+
+        string.Join( RECOVERY_CODE_SEPARATOR, updatedCodes );
+        return true;
+    }
+
+
+    public async IAsyncEnumerable<GroupRecord> GetGroups( DbConnection connection, DbTransaction? transaction, Database db, [EnumeratorCancellation] CancellationToken token = default )
+    {
+        foreach ( UserGroupRecord record in await db.UserGroups.Where( connection, transaction, true, UserGroupRecord.GetDynamicParameters( this ), token ) )
+        {
+            GroupRecord? role = await db.Groups.Get( connection, transaction, record.GroupID, token );
+            if ( role is not null ) { yield return role; }
+        }
+    }
+    public async IAsyncEnumerable<RoleRecord> GetRoles( DbConnection connection, DbTransaction? transaction, Database db, [EnumeratorCancellation] CancellationToken token = default )
+    {
+        foreach ( UserRoleRecord record in await db.UserRoles.Where( connection, transaction, true, UserRoleRecord.GetDynamicParameters( this ), token ) )
+        {
+            RoleRecord? role = await db.Roles.Get( connection, transaction, record.RoleID, token );
+            if ( role is not null ) { yield return role; }
+        }
+    }
+    public IList<UserLoginInfo> GetUserLoginInfo() => new List<UserLoginInfo>
+                                                      {
+                                                          new(LoginProvider, ProviderKey, ProviderDisplayName),
+                                                      };
+    public int CountCodes() => Codes()
+       .Length;
 
 
     [SuppressMessage( "ReSharper", "NonReadonlyMemberInGetHashCode" )]
@@ -494,43 +571,15 @@ public sealed record UserRecord : TableRecord<UserRecord>, IUserRecord<UserRecor
         hashCode.Add( Company );
         return hashCode.ToHashCode();
     }
+    public string[] Codes() => RecoveryCodes.Split( RECOVERY_CODE_SEPARATOR );
 
 
-    public async IAsyncEnumerable<GroupRecord> GetGroups( DbConnection connection, DbTransaction? transaction, Database db, [EnumeratorCancellation] CancellationToken token = default )
+    public UserRecord AddUserLoginInfo( UserLoginInfo info )
     {
-        foreach ( UserGroupRecord record in await db.UserGroups.Where( connection, transaction, true, UserGroupRecord.GetDynamicParameters( this ), token ) )
-        {
-            GroupRecord? role = await db.Groups.Get( connection, transaction, record.GroupID, token );
-            if ( role is not null ) { yield return role; }
-        }
-    }
-    public async IAsyncEnumerable<RoleRecord> GetRoles( DbConnection connection, DbTransaction? transaction, Database db, [EnumeratorCancellation] CancellationToken token = default )
-    {
-        foreach ( UserRoleRecord record in await db.UserRoles.Where( connection, transaction, true, UserRoleRecord.GetDynamicParameters( this ), token ) )
-        {
-            RoleRecord? role = await db.Roles.Get( connection, transaction, record.RoleID, token );
-            if ( role is not null ) { yield return role; }
-        }
-    }
-    public IList<UserLoginInfo> GetUserLoginInfo() => new List<UserLoginInfo>
-                                                      {
-                                                          new(LoginProvider, ProviderKey, ProviderDisplayName)
-                                                      };
-
-
-    public bool HasPassword() => !string.IsNullOrWhiteSpace( PasswordHash );
-
-
-    public bool HasRight<TRights>( TRights right ) where TRights : struct, Enum => Rights.HasValue && (Rights.Value & right.AsLong()) > 0;
-    public async ValueTask<bool> HasRole( DbConnection connection, DbTransaction transaction, Database db, RoleRecord value, CancellationToken token )
-    {
-        UserRoleRecord? record = await db.UserRoles.Get( connection, transaction, true, UserRoleRecord.GetDynamicParameters( this, value ), token );
-        return record is not null;
-    }
-    public async ValueTask<bool> IsPartOfGroup( DbConnection connection, DbTransaction transaction, Database db, GroupRecord value, CancellationToken token )
-    {
-        UserGroupRecord? record = await db.UserGroups.Get( connection, transaction, true, UserGroupRecord.GetDynamicParameters( this, value ), token );
-        return record is not null;
+        LoginProvider       = info.LoginProvider;
+        ProviderKey         = info.ProviderKey;
+        ProviderDisplayName = info.ProviderDisplayName;
+        return this;
     }
     public UserRecord Lock( in TimeSpan offset )
     {
@@ -539,15 +588,48 @@ public sealed record UserRecord : TableRecord<UserRecord>, IUserRecord<UserRecor
         LockoutEnd = LockDate + offset;
         return this;
     }
-
-
-    public bool Owns<TRecord>( TRecord record ) where TRecord : TableRecord<TRecord> => record.CreatedBy == ID;
-    public bool RedeemCode( string code )
+    public UserRecord RemoveUserLoginInfo()
     {
-        string[] codes = Codes();
-        return codes.Contains( code ) && ReplaceCode( code );
+        LoginProvider       = default;
+        ProviderKey         = default;
+        ProviderDisplayName = default;
+        return this;
     }
-    public void RemoveRight<TRights>( TRights right ) where TRights : struct, Enum => Rights = (Rights ?? 0) & right.AsLong();
+
+
+    public UserRecord Update( IDictionary<string, JToken?>? value )
+    {
+        if ( value is null ) { return this; }
+
+        JsonModels.IJsonStringModel  model = this;
+        IDictionary<string, JToken?> data  = model.GetData();
+        foreach ( (string? key, JToken? jToken) in value ) { data[key] = jToken; }
+
+        model.SetAdditionalData( data );
+        return this;
+    }
+
+
+    public async ValueTask Add( DbConnection connection, DbTransaction transaction, Database db, RoleRecord value, CancellationToken token )
+    {
+        UserRoleRecord? record = await db.UserRoles.Get( connection, transaction, true, UserRoleRecord.GetDynamicParameters( this, value ), token );
+
+        if ( record is null )
+        {
+            record = new UserRoleRecord( this, value );
+            await db.UserRoles.Insert( connection, transaction, record, token );
+        }
+    }
+    public async ValueTask Add( DbConnection connection, DbTransaction transaction, Database db, GroupRecord value, CancellationToken token )
+    {
+        UserGroupRecord? record = await db.UserGroups.Get( connection, transaction, true, UserGroupRecord.GetDynamicParameters( this, value ), token );
+
+        if ( record is null )
+        {
+            record = new UserGroupRecord( this, value );
+            await db.UserGroups.Insert( connection, transaction, record, token );
+        }
+    }
     public async ValueTask Remove( DbConnection connection, DbTransaction transaction, Database db, RoleRecord role, CancellationToken token )
     {
         UserRoleRecord? record = await db.UserRoles.Get( connection, transaction, true, UserRoleRecord.GetDynamicParameters( this, role ), token );
@@ -560,30 +642,33 @@ public sealed record UserRecord : TableRecord<UserRecord>, IUserRecord<UserRecor
 
         if ( record is not null ) { await db.UserGroups.Delete( connection, transaction, record, token ); }
     }
-    public UserRecord RemoveUserLoginInfo()
+    public async ValueTask<bool> HasRole( DbConnection connection, DbTransaction transaction, Database db, RoleRecord value, CancellationToken token )
     {
-        LoginProvider       = default;
-        ProviderKey         = default;
-        ProviderDisplayName = default;
-        return this;
+        UserRoleRecord? record = await db.UserRoles.Get( connection, transaction, true, UserRoleRecord.GetDynamicParameters( this, value ), token );
+        return record is not null;
     }
-    public bool ReplaceCode( string code )
+    public async ValueTask<bool> IsPartOfGroup( DbConnection connection, DbTransaction transaction, Database db, GroupRecord value, CancellationToken token )
     {
-        var updatedCodes = new List<string>( Codes()
-                                                .Where( s => s != code ) );
+        UserGroupRecord? record = await db.UserGroups.Get( connection, transaction, true, UserGroupRecord.GetDynamicParameters( this, value ), token );
+        return record is not null;
+    }
+    public async ValueTask<List<Claim>> GetUserClaims( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token, bool includeRoles = true, bool includeGroups = false )
+    {
+        List<Claim> claims = GetUserClaims();
 
-        string.Join( RECOVERY_CODE_SEPARATOR, updatedCodes );
-        return true;
-    }
-    public bool ReplaceCode( params string[] codes ) => ReplaceCode( codes.AsEnumerable() );
-    public bool ReplaceCode( IEnumerable<string> codes )
-    {
-        var updatedCodes = new List<string>( Codes()
-                                                .Where( codes.Contains ) );
+        if ( includeRoles )
+        {
+            await foreach ( RoleRecord record in GetRoles( connection, transaction, db, token ) ) { claims.Add( new Claim( ClaimTypes.Role, record.Name ) ); }
+        }
 
-        string.Join( RECOVERY_CODE_SEPARATOR, updatedCodes );
-        return true;
+        if ( !includeGroups ) { return claims; }
+
+        await foreach ( GroupRecord record in GetGroups( connection, transaction, db, token ) ) { claims.Add( new Claim( ClaimTypes.GroupSid, record.NameOfGroup ) ); }
+
+        return claims;
     }
+    public void AddRight<TRights>( TRights    right ) where TRights : struct, Enum => Rights |= right.AsLong();
+    public void RemoveRight<TRights>( TRights right ) where TRights : struct, Enum => Rights &= right.AsLong();
 
 
     public UserRecord UpdatePassword( string password )
@@ -659,23 +744,8 @@ public sealed record UserRecord : TableRecord<UserRecord>, IUserRecord<UserRecor
                                               new Claim( ClaimTypes.Country,        Country ?? string.Empty ),
                                               new Claim( ClaimTypes.PostalCode,     PostalCode ?? string.Empty ),
                                               new Claim( ClaimTypes.Webpage,        Website ?? string.Empty ),
-                                              new Claim( ClaimTypes.Expiration,     SubscriptionExpires?.ToString() ?? string.Empty )
+                                              new Claim( ClaimTypes.Expiration,     SubscriptionExpires?.ToString() ?? string.Empty ),
                                           };
-    public async ValueTask<List<Claim>> GetUserClaims( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token, bool includeRoles = true, bool includeGroups = false )
-    {
-        List<Claim> claims = GetUserClaims();
-
-        if ( includeRoles )
-        {
-            await foreach ( RoleRecord record in GetRoles( connection, transaction, db, token ) ) { claims.Add( new Claim( ClaimTypes.Role, record.Name ) ); }
-        }
-
-        if ( !includeGroups ) { return claims; }
-
-        await foreach ( GroupRecord record in GetGroups( connection, transaction, db, token ) ) { claims.Add( new Claim( ClaimTypes.GroupSid, record.NameOfGroup ) ); }
-
-        return claims;
-    }
 
 
     public async ValueTask<UserRecord?> GetBoss( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => EscalateTo.HasValue
@@ -684,12 +754,6 @@ public sealed record UserRecord : TableRecord<UserRecord>, IUserRecord<UserRecor
 
 
     public UserRecord Update( IUserData value )
-    {
-        IUserData data = this;
-        data.Update( value );
-        return this;
-    }
-    void IUserData.Update( IUserData value )
     {
         FirstName         = value.FirstName;
         LastName          = value.LastName;
@@ -710,7 +774,9 @@ public sealed record UserRecord : TableRecord<UserRecord>, IUserRecord<UserRecor
         Department        = value.Department;
         Company           = value.Company;
         PreferredLanguage = value.PreferredLanguage;
+        return Update( value.AdditionalData );
     }
+    void IUserData.Update( IUserData value ) => Update( value );
 
 
     public override int CompareTo( UserRecord? other )
