@@ -25,14 +25,15 @@ public readonly ref struct ParamsArray
     // After construction, the first three elements of this array will never be accessed because the indexer will retrieve those values from arg0, arg1, and arg2.
     private readonly ReadOnlySpan<object?> _args;
 
-    public int Length => _args.Length;
+    public int  Length  => _args.Length;
+    public bool IsEmpty => _args.IsEmpty;
 
     public object? this[ int index ] => index switch
                                         {
                                             0 => _arg0,
                                             1 => _arg1,
                                             2 => _arg2,
-                                            _ => _args[index]
+                                            _ => _args[index],
                                         };
 
 
@@ -81,8 +82,14 @@ public readonly ref struct ParamsArray
 
         _args = args;
     }
+
+
     public static implicit operator ParamsArray( ReadOnlySpan<object?> args ) => new(args);
+    public static implicit operator ReadOnlySpan<object?>( ParamsArray args ) => args._args;
     public static implicit operator ParamsArray( object?[]             args ) => new(args.AsSpan());
+
+
+    public override string ToString() => $"{nameof(ParamsArray)}<{nameof(Length)}: {Length}>";
 
 
     [Pure] public ReadOnlySpan<object?>.Enumerator GetEnumerator() => _args.GetEnumerator();
@@ -127,22 +134,22 @@ public readonly ref struct ParamsArray<T>
     // After construction, the first three elements of this array will never be accessed because the indexer will retrieve those values from arg0, arg1, and arg2.
     private readonly ReadOnlySpan<T> _args;
 
-    public int Length => _args.Length;
+    public int  Length  => _args.Length;
+    public bool IsEmpty => _args.IsEmpty;
+
 
     public T this[ int index ] => index switch
                                   {
                                       0 => _arg0,
                                       1 => _arg1,
                                       2 => _arg2,
-                                      _ => _args[index]
+                                      _ => _args[index],
                                   };
 
 
     public ParamsArray( T arg0 )
     {
         _arg0 = arg0;
-        _arg1 = default;
-        _arg2 = default;
 
         // Always assign this.args to make use of its "Length" property
         _args = _oneArgArray;
@@ -151,7 +158,6 @@ public readonly ref struct ParamsArray<T>
     {
         _arg0 = arg0;
         _arg1 = arg1;
-        _arg2 = default;
 
         // Always assign this.args to make use of its "Length" property
         _args = _twoArgArray;
@@ -171,24 +177,29 @@ public readonly ref struct ParamsArray<T>
 
         _arg0 = len > 0
                     ? args[0]
-                    : default;
+                    : default!;
 
         _arg1 = len > 1
                     ? args[1]
-                    : default;
+                    : default!;
 
         _arg2 = len > 2
                     ? args[2]
-                    : default;
+                    : default!;
 
         _args = args;
     }
 
+
     public static implicit operator ParamsArray<T>( ReadOnlySpan<T> args ) => new(args);
+    public static implicit operator ReadOnlySpan<T>( ParamsArray<T> args ) => args._args;
+    public static implicit operator ParamsArray<T>( T               args ) => new(args);
     public static implicit operator ParamsArray<T>( T[]             args ) => new(args);
+
 
     [Pure] public ReadOnlySpan<T>.Enumerator GetEnumerator() => _args.GetEnumerator();
 
+    public override string ToString() => $"{nameof(ParamsArray<T>)}<{nameof(Length)}: {Length}>";
 
     [Pure]
     public static ParamsArray<T> Create( params T[] args )
@@ -196,6 +207,7 @@ public readonly ref struct ParamsArray<T>
         ReadOnlySpan<T> span = args;
         return MemoryMarshal.CreateReadOnlySpan( ref MemoryMarshal.GetReference( span ), span.Length );
     }
+
 
 #if NET6_0_OR_GREATER
     public static implicit operator ParamsArray<T>( List<T> args ) => Create( args );

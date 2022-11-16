@@ -52,7 +52,6 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
         Scheme        = GetFormat( Minor, Maintenance, MajorRevision, MinorRevision, Build );
         Flags         = AppVersionFlags.Stable;
     }
-    public AppVersion( Span<int> items, AppVersionFlags flags = default ) : this( items.AsSpan(), flags ) { }
     public AppVersion( ReadOnlySpan<int> items, AppVersionFlags flags = default )
     {
         Flags  = flags;
@@ -102,6 +101,7 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
             default: throw new OutOfRangeException( nameof(Scheme), Scheme, @"value doesn't contain the correct amount of items." );
         }
     }
+
 
 #if NETSTANDARD2_1
     public AppVersion( List<int> items,  AppVersionFlags flags = default )

@@ -7,11 +7,13 @@ namespace Jakar.Extensions;
 ///         <see href="https://www.meziantou.net/split-a-string-into-lines-without-allocation.htm"/>
 ///     </para>
 /// </summary>
+[SuppressMessage( "ReSharper", "OutParameterValueIsAlwaysDiscarded.Global" )]
 public readonly ref struct LineSplitEntry<T> where T : unmanaged, IEquatable<T>
 {
-    public ReadOnlySpan<T> Value     { get; }
-    public ParamsArray<T>  Separator { get; }
-    public bool            IsEmpty   => Value.IsEmpty;
+    public ReadOnlySpan<T> Value      { get; }
+    public ParamsArray<T>  Separator  { get; }
+    public bool            IsEmpty    => Value.IsEmpty;
+    public bool            IsNotEmpty => !IsEmpty;
 
 
     public LineSplitEntry( ReadOnlySpan<T> line, ParamsArray<T> separator )
@@ -34,4 +36,7 @@ public readonly ref struct LineSplitEntry<T> where T : unmanaged, IEquatable<T>
     // This method allow to implicitly cast the type into a ReadOnlySpan<char>, so you can write the following code
     // foreach (ReadOnlySpan<char> entry in str.SplitLines())
     public static implicit operator ReadOnlySpan<T>( LineSplitEntry<T> entry ) => entry.Value;
+
+
+    public override string ToString() => $"{nameof(LineSplitEntry<T>)}<{nameof(Value)}: {Value.ToString()}, {nameof(Separator)}: {Separator.ToString()}  >";
 }

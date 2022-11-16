@@ -23,7 +23,7 @@ public ref struct SpanSplitEnumerator<T> where T : unmanaged, IEquatable<T>
     public LineSplitEntry<T> Current { get; private set; }
 
 
-    public SpanSplitEnumerator( in ReadOnlySpan<T> span, in ParamsArray<T> separators )
+    public SpanSplitEnumerator( ReadOnlySpan<T> span, ParamsArray<T> separators )
     {
         if ( separators.IsEmpty ) { throw new ArgumentException( $"{nameof(separators)} cannot be empty" ); }
 
