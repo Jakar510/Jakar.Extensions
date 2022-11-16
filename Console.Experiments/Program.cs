@@ -6,12 +6,16 @@ try
 {
     "Hello World!".WriteToConsole();
 
-    var p = new DynamicParameters();
-    p.Add( nameof(AppVersion), "1.0.0" );
+    // var p = new DynamicParameters();
+    // p.Add( nameof(AppVersion), "1.0.0" );
+    //
+    // try { throw new SqlException("select * from table", p, true); }
+    // catch ( Exception e ) { e.WriteToConsole(); }
 
-    try { throw new SqlException("select * from table", p, true); }
-    catch ( Exception e ) { e.WriteToConsole(); }
+    var version = AppVersion.Parse( "1.2.3.4.5.6" );
+    version.WriteToConsole();
 
+    (AppVersion.Parse( "1.2.3" ) >= AppVersion.Parse( "1.0.0" )).WriteToDebug();
 
     // byte.MaxValue.ToString()
     //     .Length.WriteToDebug();

@@ -236,9 +236,6 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
     public static AppVersion Parse( ReadOnlySpan<char> value, IFormatProvider provider ) => Parse( value, value, provider );
     private static AppVersion Parse( ReadOnlySpan<char> value, ReadOnlySpan<char> original, IFormatProvider provider )
     {
-        if ( value.IsEmpty ) { throw new ArgumentNullException( nameof(value) ); }
-
-
         try
         {
             value.WriteToDebug();
@@ -248,12 +245,12 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
             var result = new List<int>( 6 );
 
             foreach ( LineSplitEntry<char> item in value.SplitOn( SEPARATOR ) )
-
             {
                 if ( item.IsEmpty ) { continue; }
 
-                item.ToString()
-                    .WriteToDebug();
+                Debug.Assert( !item.Value.Contains( SEPARATOR ) );
+
+                item.Value.WriteToDebug();
 
                 if ( int.TryParse( item, NumberStyles.Number, provider, out int n ) ) { result.Add( n ); }
                 else { throw new FormatException( $"Cannot convert '{item.ToString()}' to an int." ); }

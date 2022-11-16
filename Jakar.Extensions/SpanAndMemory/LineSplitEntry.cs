@@ -38,5 +38,5 @@ public readonly ref struct LineSplitEntry<T> where T : unmanaged, IEquatable<T>
     public static implicit operator ReadOnlySpan<T>( LineSplitEntry<T> entry ) => entry.Value;
 
 
-    public override string ToString() => $"{nameof(LineSplitEntry<T>)}<{nameof(Value)}: {Value.ToString()}, {nameof(Separator)}: {Separator.ToString()}  >";
+    public override string ToString() => $"{nameof(LineSplitEntry<T>)}<{nameof(Value)}: {Value.ToString()}, {nameof(Separator)}: {Separator.ToString()}>";
 }
