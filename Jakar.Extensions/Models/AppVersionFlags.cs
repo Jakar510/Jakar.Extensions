@@ -4,7 +4,6 @@
 namespace Jakar.Extensions;
 
 
-[SuppressMessage( "ReSharper", "InconsistentNaming" )]
 public readonly struct AppVersionFlags : IEquatable<AppVersionFlags>, IComparable<AppVersionFlags>, IComparable, IFormattable
 {
     public const  char   SEPARATOR = '-';
@@ -14,11 +13,11 @@ public readonly struct AppVersionFlags : IEquatable<AppVersionFlags>, IComparabl
     private const string BETA      = nameof(BETA);
 
 
-    public readonly string Flag;
-    public readonly int    Iteration;
-    internal        int    Length     => Flag.Length + 15;
-    public          bool   IsEmpty    => Flag.Length == 0;
-    public          bool   IsNotEmpty => Flag.Length > 0;
+    public   string Flag       { get; init; }
+    public   int    Iteration  { get; init; }
+    internal int    Length     => Flag.Length + 15;
+    public   bool   IsEmpty    => string.IsNullOrWhiteSpace( Flag );
+    public   bool   IsNotEmpty => !IsEmpty;
 
 
     public AppVersionFlags( string flag, int iteration )
@@ -40,9 +39,9 @@ public readonly struct AppVersionFlags : IEquatable<AppVersionFlags>, IComparabl
        .ToString();
 
 
-    public ReadOnlySpan<char> AsSpan() => AsSpan( default,                              CultureInfo.CurrentCulture );
-    public ReadOnlySpan<char> AsSpan( in ReadOnlySpan<char> format ) => AsSpan( format, CultureInfo.CurrentCulture );
-    public ReadOnlySpan<char> AsSpan( in ReadOnlySpan<char> format, IFormatProvider? provider )
+    public ReadOnlySpan<char> AsSpan() => AsSpan( default,                           CultureInfo.CurrentCulture );
+    public ReadOnlySpan<char> AsSpan( ReadOnlySpan<char> format ) => AsSpan( format, CultureInfo.CurrentCulture );
+    public ReadOnlySpan<char> AsSpan( ReadOnlySpan<char> format, IFormatProvider? provider )
     {
         Span<char> buffer = stackalloc char[Length];
 
@@ -52,19 +51,15 @@ public readonly struct AppVersionFlags : IEquatable<AppVersionFlags>, IComparabl
             return MemoryMarshal.CreateReadOnlySpan( ref buffer.GetPinnableReference(), buffer.Length );
         }
 
-        Flag.WriteToConsole();
-        Iteration.WriteToConsole();
-        Length.WriteToConsole();
-
         throw new InvalidOperationException( "Conversion failed" );
     }
 
 
-    public bool TryFormat( in Span<char> destination, out int charsWritten, in ReadOnlySpan<char> format = default, IFormatProvider? provider = default )
+    public bool TryFormat( Span<char> destination, out int charsWritten, ReadOnlySpan<char> format = default, IFormatProvider? provider = default )
     {
         if ( destination.IsEmpty || destination.Length < Length ) { throw new ArgumentException( $"{nameof(destination)} is too small" ); }
 
-        if ( Flag.Length == 0 )
+        if ( IsEmpty )
         {
             charsWritten = 0;
             return true;
@@ -77,23 +72,20 @@ public readonly struct AppVersionFlags : IEquatable<AppVersionFlags>, IComparabl
 
         charsWritten = Flag.Length + 1;
 
-        if ( Iteration > 0 && Iteration.TryFormat( destination[charsWritten..], out int intCharsWritten, format, provider ) )
-        {
-            charsWritten += intCharsWritten;
-            return true;
-        }
+        if ( Iteration > 0 && Iteration.TryFormat( destination[charsWritten..], out int intCharsWritten, format, provider ) ) { charsWritten += intCharsWritten; }
 
         return true;
     }
 
 
-    public static readonly AppVersionFlags Stable = new(STABLE, 0);
+    public static AppVersionFlags Default => Stable;
+    public static AppVersionFlags Stable  => new(STABLE, 0);
     public static AppVersionFlags ReleaseCandidate( int iteration = 0 ) => new(RC, iteration);
     public static AppVersionFlags Alpha( int            iteration = 0 ) => new(ALPHA, iteration);
     public static AppVersionFlags Beta( int             iteration = 0 ) => new(BETA, iteration);
 
 
-    public static AppVersionFlags Parse( ref ReadOnlySpan<char> value, in StringComparison comparison = StringComparison.OrdinalIgnoreCase )
+    public static AppVersionFlags Parse( ref ReadOnlySpan<char> value, StringComparison comparison = StringComparison.OrdinalIgnoreCase )
     {
         if ( value.EndsWith( "-rc", comparison ) )
         {
@@ -160,7 +152,7 @@ public readonly struct AppVersionFlags : IEquatable<AppVersionFlags>, IComparabl
             int index = value.IndexOf( SEPARATOR );
             value = value[..index];
 
-            var span = value[(index - 1)..]
+            ReadOnlySpan<char> span = value[(index - 1)..]
                .Trim( SEPARATOR );
 
             int end = span.IndexOfAny( Randoms.Numeric );
@@ -187,7 +179,7 @@ public readonly struct AppVersionFlags : IEquatable<AppVersionFlags>, IComparabl
                                                RC     => 1,
                                                ALPHA  => 1,
                                                BETA   => 1,
-                                               _      => string.Compare( Flag, other.Flag, StringComparison.OrdinalIgnoreCase )
+                                               _      => string.Compare( Flag, other.Flag, StringComparison.OrdinalIgnoreCase ),
                                            },
                                  RC => other.Flag switch
                                        {
@@ -195,7 +187,7 @@ public readonly struct AppVersionFlags : IEquatable<AppVersionFlags>, IComparabl
                                            RC     => 0,
                                            ALPHA  => 1,
                                            BETA   => 1,
-                                           _      => string.Compare( Flag, other.Flag, StringComparison.OrdinalIgnoreCase )
+                                           _      => string.Compare( Flag, other.Flag, StringComparison.OrdinalIgnoreCase ),
                                        },
                                  ALPHA => other.Flag switch
                                           {
@@ -203,7 +195,7 @@ public readonly struct AppVersionFlags : IEquatable<AppVersionFlags>, IComparabl
                                               RC     => -1,
                                               ALPHA  => 0,
                                               BETA   => 1,
-                                              _      => string.Compare( Flag, other.Flag, StringComparison.OrdinalIgnoreCase )
+                                              _      => string.Compare( Flag, other.Flag, StringComparison.OrdinalIgnoreCase ),
                                           },
                                  BETA => other.Flag switch
                                          {
@@ -211,9 +203,9 @@ public readonly struct AppVersionFlags : IEquatable<AppVersionFlags>, IComparabl
                                              RC     => -1,
                                              ALPHA  => -1,
                                              BETA   => 1,
-                                             _      => string.Compare( Flag, other.Flag, StringComparison.OrdinalIgnoreCase )
+                                             _      => string.Compare( Flag, other.Flag, StringComparison.OrdinalIgnoreCase ),
                                          },
-                                 _ => string.Compare( Flag, other.Flag, StringComparison.Ordinal )
+                                 _ => string.Compare( Flag, other.Flag, StringComparison.Ordinal ),
                              };
 
 
@@ -225,7 +217,7 @@ public readonly struct AppVersionFlags : IEquatable<AppVersionFlags>, IComparabl
                                              {
                                                  null                  => 1,
                                                  AppVersionFlags flags => CompareTo( flags ),
-                                                 _                     => throw new ArgumentException( $"Object must be of type {nameof(AppVersionFlags)}" )
+                                                 _                     => throw new ArgumentException( $"Object must be of type {nameof(AppVersionFlags)}" ),
                                              };
     public bool Equals( AppVersionFlags  other ) => string.Equals( Flag, other.Flag, StringComparison.OrdinalIgnoreCase ) && Iteration.Equals( other.Iteration );
     public override bool Equals( object? obj ) => obj is AppVersionFlags other && Equals( other );

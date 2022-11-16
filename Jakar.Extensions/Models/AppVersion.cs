@@ -23,14 +23,14 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
     private const   StringComparison COMPARISON = StringComparison.OrdinalIgnoreCase;
 
 
-    public AppVersion() : this( 0, null, null, null, null, null ) { }
-    public AppVersion( int major ) : this( major, null, null, null, null, null ) { }
-    public AppVersion( int major, int  minor ) : this( major, minor, null, null, null, null ) { }
-    public AppVersion( int major, int  minor, int  build ) : this( major, minor, null, null, null, build ) { }
-    public AppVersion( int major, int  minor, int  maintenance, int  build ) : this( major, minor, maintenance, null, null, build ) { }
-    public AppVersion( int major, int  minor, int  maintenance, int  majorRevision, int  build ) : this( major, minor, maintenance, majorRevision, null, build ) { }
+    public AppVersion() : this( 0, default, default, default, default, default ) { }
+    public AppVersion( int major ) : this( major, default, default, default, default, default ) { }
+    public AppVersion( int major, int  minor ) : this( major, minor, default, default, default, default ) { }
+    public AppVersion( int major, int  minor, int  build ) : this( major, minor, default, default, default, build ) { }
+    public AppVersion( int major, int  minor, int  maintenance, int  build ) : this( major, minor, maintenance, default, default, build ) { }
+    public AppVersion( int major, int  minor, int  maintenance, int  majorRevision, int  build ) : this( major, minor, maintenance, majorRevision, default, build ) { }
     public AppVersion( int major, int? minor, int? maintenance, int? majorRevision, int? minorRevision, int? build ) : this( major, minor, maintenance, majorRevision, minorRevision, build, AppVersionFlags.Stable ) { }
-    public AppVersion( int major, int? minor, int? maintenance, int? majorRevision, int? minorRevision, int? build, in AppVersionFlags flags )
+    public AppVersion( int major, int? minor, int? maintenance, int? majorRevision, int? minorRevision, int? build, AppVersionFlags flags )
     {
         Major         = major;
         Minor         = minor;
@@ -41,7 +41,7 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
         Scheme        = GetFormat( Minor, Maintenance, MajorRevision, MinorRevision, Build );
         Flags         = flags;
     }
-    public AppVersion( in Version version )
+    public AppVersion( Version version )
     {
         Major         = version.Major;
         Minor         = version.Minor;
@@ -52,8 +52,8 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
         Scheme        = GetFormat( Minor, Maintenance, MajorRevision, MinorRevision, Build );
         Flags         = AppVersionFlags.Stable;
     }
-    public AppVersion( in Span<int> items, in AppVersionFlags flags = default ) : this( items.AsSpan(), flags ) { }
-    public AppVersion( in ReadOnlySpan<int> items, in AppVersionFlags flags = default )
+    public AppVersion( Span<int> items, AppVersionFlags flags = default ) : this( items.AsSpan(), flags ) { }
+    public AppVersion( ReadOnlySpan<int> items, AppVersionFlags flags = default )
     {
         Flags  = flags;
         Scheme = (Format)items.Length;
@@ -104,7 +104,7 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
     }
 
 #if NETSTANDARD2_1
-    public AppVersion( List<int> items, in AppVersionFlags flags = default )
+    public AppVersion( List<int> items,  AppVersionFlags flags = default )
     {
         if ( items is null ) { throw new ArgumentNullException( nameof(items) ); }
 
@@ -157,7 +157,7 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
     }
 
 #else
-    public AppVersion( List<int> items, in AppVersionFlags flags = default ) : this( CollectionsMarshal.AsSpan( items ), flags ) { }
+    public AppVersion( List<int> items, AppVersionFlags flags = default ) : this( CollectionsMarshal.AsSpan( items ), flags ) { }
 
 #endif
 
@@ -172,7 +172,7 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
     /// <param name="value"> </param>
     /// <param name="version"> </param>
     /// <returns> <see langword="true"/> if <see cref="Parse(string)"/> as successful. <br/> <see langword="false"/> otherwise. </returns>
-    public static bool TryParse( in string? value, [NotNullWhen( true )] out AppVersion? version )
+    public static bool TryParse( string? value, [NotNullWhen( true )] out AppVersion? version )
     {
         try
         {
@@ -204,8 +204,8 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
     /// <param name="value"> </param>
     /// <param name="version"> </param>
     /// <returns> <see langword="true"/> Parse was successful. <br/> <see langword="false"/> otherwise. </returns>
-    public static bool TryParse( in ReadOnlySpan<char> value, [NotNullWhen( true )] out AppVersion? version ) => TryParse( value, CultureInfo.CurrentCulture, out version );
-    public static bool TryParse( in ReadOnlySpan<char> value, IFormatProvider provider, [NotNullWhen( true )] out AppVersion? version )
+    public static bool TryParse( ReadOnlySpan<char> value, [NotNullWhen( true )] out AppVersion? version ) => TryParse( value, CultureInfo.CurrentCulture, out version );
+    public static bool TryParse( ReadOnlySpan<char> value, IFormatProvider provider, [NotNullWhen( true )] out AppVersion? version )
     {
         if ( !value.IsEmpty )
         {
@@ -232,9 +232,9 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
     /// <returns>
     ///     <see cref="AppVersion"/>
     /// </returns>
-    public static AppVersion Parse( in ReadOnlySpan<char> value ) => Parse( value, CultureInfo.CurrentCulture );
-    public static AppVersion Parse( in ReadOnlySpan<char> value, IFormatProvider provider ) => Parse( value, value, provider );
-    private static AppVersion Parse( ReadOnlySpan<char> value, in ReadOnlySpan<char> original, IFormatProvider provider )
+    public static AppVersion Parse( ReadOnlySpan<char> value ) => Parse( value, CultureInfo.CurrentCulture );
+    public static AppVersion Parse( ReadOnlySpan<char> value, IFormatProvider provider ) => Parse( value, value, provider );
+    private static AppVersion Parse( ReadOnlySpan<char> value, ReadOnlySpan<char> original, IFormatProvider provider )
     {
         if ( value.IsEmpty ) { throw new ArgumentNullException( nameof(value) ); }
 
@@ -248,6 +248,7 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
             var result = new List<int>( 6 );
 
             foreach ( LineSplitEntry<char> item in value.SplitOn( SEPARATOR ) )
+
             {
                 if ( item.IsEmpty ) { continue; }
 
@@ -264,7 +265,7 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
     }
 
 
-    private static Format GetFormat( in int? minor, in int? maintenance, in int? majorRevision, in int? minorRevision, in int? build )
+    private static Format GetFormat( int? minor, int? maintenance, int? majorRevision, int? minorRevision, int? build )
     {
         return minor.HasValue && maintenance.HasValue && majorRevision.HasValue && minorRevision.HasValue && build.HasValue
                    ? Format.Complete
@@ -292,9 +293,9 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
        .ToString();
 
 
-    public ReadOnlySpan<char> AsSpan() => AsSpan( default,                              CultureInfo.CurrentCulture );
-    public ReadOnlySpan<char> AsSpan( in ReadOnlySpan<char> format ) => AsSpan( format, CultureInfo.CurrentCulture );
-    public ReadOnlySpan<char> AsSpan( in ReadOnlySpan<char> format, IFormatProvider? provider )
+    public ReadOnlySpan<char> AsSpan() => AsSpan( default,                           CultureInfo.CurrentCulture );
+    public ReadOnlySpan<char> AsSpan( ReadOnlySpan<char> format ) => AsSpan( format, CultureInfo.CurrentCulture );
+    public ReadOnlySpan<char> AsSpan( ReadOnlySpan<char> format, IFormatProvider? provider )
     {
         Span<char> buffer = stackalloc char[65 + Flags.Length];
 
@@ -308,13 +309,14 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
     }
 
 
-    public bool TryFormat( in Span<char> destination, out int charsWritten, in ReadOnlySpan<char> format = default, IFormatProvider? provider = default )
+    public bool TryFormat( Span<char> destination, out int charsWritten, ReadOnlySpan<char> format = default, IFormatProvider? provider = default )
     {
         charsWritten = 0;
 
         Span<char> numberBuffer = stackalloc char[20];
 
         foreach ( int value in this )
+
         {
             if ( value.TryFormat( numberBuffer, out int intCharsWritten, format, provider ) )
             {
@@ -368,21 +370,21 @@ public readonly struct AppVersion : IComparable, IComparable<AppVersion>, ICompa
     int IReadOnlyCollection<int>.Count => Scheme.AsInt();
 
 
-    public static bool operator ==( in AppVersion  left, in AppVersion  right ) => Equalizer.Instance.Equals( left, right );
-    public static bool operator !=( in AppVersion  left, in AppVersion  right ) => !Equalizer.Instance.Equals( left, right );
-    public static bool operator >( in  AppVersion  left, in AppVersion  right ) => Sorter.Instance.Compare( left, right ) > 0;
-    public static bool operator >=( in AppVersion  left, in AppVersion  right ) => Sorter.Instance.Compare( left, right ) >= 0;
-    public static bool operator <( in  AppVersion  left, in AppVersion  right ) => Sorter.Instance.Compare( left, right ) < 0;
-    public static bool operator <=( in AppVersion  left, in AppVersion  right ) => Sorter.Instance.Compare( left, right ) <= 0;
-    public static bool operator ==( in AppVersion? left, in AppVersion? right ) => Equalizer.Instance.Equals( left, right );
-    public static bool operator !=( in AppVersion? left, in AppVersion? right ) => !Equalizer.Instance.Equals( left, right );
-    public static bool operator >( in  AppVersion? left, in AppVersion? right ) => Sorter.Instance.Compare( left, right ) > 0;
-    public static bool operator >=( in AppVersion? left, in AppVersion? right ) => Sorter.Instance.Compare( left, right ) >= 0;
-    public static bool operator <( in  AppVersion? left, in AppVersion? right ) => Sorter.Instance.Compare( left, right ) < 0;
-    public static bool operator <=( in AppVersion? left, in AppVersion? right ) => Sorter.Instance.Compare( left, right ) <= 0;
+    public static bool operator ==( AppVersion  left, AppVersion  right ) => Equalizer.Instance.Equals( left, right );
+    public static bool operator !=( AppVersion  left, AppVersion  right ) => !Equalizer.Instance.Equals( left, right );
+    public static bool operator >( AppVersion   left, AppVersion  right ) => Sorter.Instance.Compare( left, right ) > 0;
+    public static bool operator >=( AppVersion  left, AppVersion  right ) => Sorter.Instance.Compare( left, right ) >= 0;
+    public static bool operator <( AppVersion   left, AppVersion  right ) => Sorter.Instance.Compare( left, right ) < 0;
+    public static bool operator <=( AppVersion  left, AppVersion  right ) => Sorter.Instance.Compare( left, right ) <= 0;
+    public static bool operator ==( AppVersion? left, AppVersion? right ) => Equalizer.Instance.Equals( left, right );
+    public static bool operator !=( AppVersion? left, AppVersion? right ) => !Equalizer.Instance.Equals( left, right );
+    public static bool operator >( AppVersion?  left, AppVersion? right ) => Sorter.Instance.Compare( left, right ) > 0;
+    public static bool operator >=( AppVersion? left, AppVersion? right ) => Sorter.Instance.Compare( left, right ) >= 0;
+    public static bool operator <( AppVersion?  left, AppVersion? right ) => Sorter.Instance.Compare( left, right ) < 0;
+    public static bool operator <=( AppVersion? left, AppVersion? right ) => Sorter.Instance.Compare( left, right ) <= 0;
 
 
-    private void AssertFormat( in AppVersion other )
+    private void AssertFormat( AppVersion other )
     {
         if ( Scheme == 0 || Scheme == other.Scheme ) { return; }
 

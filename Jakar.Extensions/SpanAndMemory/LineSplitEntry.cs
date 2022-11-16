@@ -14,7 +14,7 @@ public readonly ref struct LineSplitEntry<T> where T : unmanaged, IEquatable<T>
     public bool            IsEmpty   => Value.IsEmpty;
 
 
-    public LineSplitEntry( in ReadOnlySpan<T> line, in ParamsArray<T> separator )
+    public LineSplitEntry( ReadOnlySpan<T> line, ParamsArray<T> separator )
     {
         Value     = line;
         Separator = separator;
