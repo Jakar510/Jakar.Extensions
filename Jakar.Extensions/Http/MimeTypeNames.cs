@@ -35,9 +35,7 @@ public static class MimeTypeNames
     public static class Application
     {
         public const string URL_ENCODED_CONTENT = "application/x-www-form-urlencoded";
-
         public const string BINARY = "application/octet-stream";
-
         public const string SOAP                     = "application/soap+xml";
         public const string RTF                      = "application/rtf";
         public const string BASE64                   = "application/base64";

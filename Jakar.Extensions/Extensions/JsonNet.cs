@@ -54,14 +54,15 @@ public static class JsonNet
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static string ToPrettyJson( this object item ) => item.ToJson( Formatting.Indented );
 
 
-    // TODO: SaveDebug
-    // [Conditional("DEBUG")]
-    // public static void SaveDebug<T>( this T item, [CallerMemberName] string? caller = default, [CallerArgumentExpression("item")] string? variableName = default ) where T : notnull
-    // {
-    //     Task.Run(async () =>
-    //              {
-    //                  LocalFile file = LocalDirectory.Create("DEBUG").Join($"{caller}__{variableName}.json");
-    //                  await file.WriteAsync(item.ToPrettyJson());
-    //              });
-    // }
+    [Conditional( "DEBUG" )]
+    public static void SaveDebug<T>( this T value, [CallerMemberName] string? caller = default, [CallerArgumentExpression( "value" )] string? variableName = default ) where T : notnull
+    {
+        Task.Run( async () =>
+                  {
+                      LocalFile file = LocalDirectory.Create( "DEBUG" )
+                                                     .Join( $"{caller}__{variableName}.json" );
+
+                      await file.WriteAsync( value.ToPrettyJson() );
+                  } );
+    }
 }
