@@ -74,7 +74,7 @@ public ref struct Buffer<T> where T : unmanaged, IEquatable<T>
         return this with
                {
                    IsReadOnly = isReadOnly,
-                   Index = span.Length
+                   Index = span.Length,
                };
     }
     public Buffer<T> Reset( T value )

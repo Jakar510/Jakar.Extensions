@@ -4,13 +4,13 @@
 namespace Jakar.Extensions;
 
 
-public readonly struct AppVersionFlags : IEquatable<AppVersionFlags>, IComparable<AppVersionFlags>, IComparable, IFormattable
+public readonly struct AppVersionFlags : IEquatable<AppVersionFlags>, IEquatable<AppVersionFlags?>, IComparable<AppVersionFlags>, IComparable<AppVersionFlags?>, IComparable, IFormattable
 {
-    public const  char   SEPARATOR = '-';
-    private const string STABLE    = "";
-    private const string RC        = nameof(RC);
-    private const string ALPHA     = nameof(ALPHA);
-    private const string BETA      = nameof(BETA);
+    internal const char   SEPARATOR = '-';
+    private const  string STABLE    = "";
+    private const  string RC        = "rc";
+    private const  string ALPHA     = "alpha";
+    private const  string BETA      = "beta";
 
 
     public   string Flag       { get; init; }
@@ -169,6 +169,12 @@ public readonly struct AppVersionFlags : IEquatable<AppVersionFlags>, IComparabl
     }
 
 
+    public int CompareTo( AppVersionFlags? other )
+    {
+        if ( other is null ) { return 1; }
+
+        return CompareTo( other.Value );
+    }
     public int CompareTo( AppVersionFlags other )
     {
         int flagComparison = Flag switch
@@ -202,7 +208,7 @@ public readonly struct AppVersionFlags : IEquatable<AppVersionFlags>, IComparabl
                                              STABLE => -1,
                                              RC     => -1,
                                              ALPHA  => -1,
-                                             BETA   => 1,
+                                             BETA   => 0,
                                              _      => string.Compare( Flag, other.Flag, StringComparison.OrdinalIgnoreCase ),
                                          },
                                  _ => string.Compare( Flag, other.Flag, StringComparison.Ordinal ),
@@ -219,6 +225,12 @@ public readonly struct AppVersionFlags : IEquatable<AppVersionFlags>, IComparabl
                                                  AppVersionFlags flags => CompareTo( flags ),
                                                  _                     => throw new ArgumentException( $"Object must be of type {nameof(AppVersionFlags)}" ),
                                              };
+    public bool Equals( AppVersionFlags? other )
+    {
+        if ( other is null ) { return false; }
+
+        return Equals( other.Value );
+    }
     public bool Equals( AppVersionFlags  other ) => string.Equals( Flag, other.Flag, StringComparison.OrdinalIgnoreCase ) && Iteration.Equals( other.Iteration );
     public override bool Equals( object? obj ) => obj is AppVersionFlags other && Equals( other );
     public override int GetHashCode() => Flag.GetHashCode();
@@ -230,4 +242,11 @@ public readonly struct AppVersionFlags : IEquatable<AppVersionFlags>, IComparabl
     public static bool operator >=( AppVersionFlags left, AppVersionFlags right ) => left.CompareTo( right ) >= 0;
     public static bool operator ==( AppVersionFlags left, AppVersionFlags right ) => left.Equals( right );
     public static bool operator !=( AppVersionFlags left, AppVersionFlags right ) => !left.Equals( right );
+
+    public static bool operator <( AppVersionFlags?  left, AppVersionFlags? right ) => ValueSorter<AppVersionFlags>.Instance.Compare( left, right ) < 0;
+    public static bool operator >( AppVersionFlags?  left, AppVersionFlags? right ) => ValueSorter<AppVersionFlags>.Instance.Compare( left, right ) > 0;
+    public static bool operator <=( AppVersionFlags? left, AppVersionFlags? right ) => ValueSorter<AppVersionFlags>.Instance.Compare( left, right ) <= 0;
+    public static bool operator >=( AppVersionFlags? left, AppVersionFlags? right ) => ValueSorter<AppVersionFlags>.Instance.Compare( left, right ) >= 0;
+    public static bool operator ==( AppVersionFlags? left, AppVersionFlags? right ) => ValueEqualizer<AppVersionFlags>.Instance.Equals( left, right );
+    public static bool operator !=( AppVersionFlags? left, AppVersionFlags? right ) => !ValueEqualizer<AppVersionFlags>.Instance.Equals( left, right );
 }

@@ -15,7 +15,7 @@ namespace Jakar.Extensions;
 /// </summary>
 public ref struct SpanSplitEnumerator<T> where T : unmanaged, IEquatable<T>
 {
-    private readonly ParamsArray<T>  _separators;
+    private readonly ReadOnlySpan<T> _separators;
     private readonly ReadOnlySpan<T> _originalString;
     private          ReadOnlySpan<T> _span;
 
@@ -23,7 +23,7 @@ public ref struct SpanSplitEnumerator<T> where T : unmanaged, IEquatable<T>
     public LineSplitEntry<T> Current { get; private set; }
 
 
-    public SpanSplitEnumerator( ReadOnlySpan<T> span, ParamsArray<T> separators )
+    public SpanSplitEnumerator( ReadOnlySpan<T> span, ReadOnlySpan<T> separators )
     {
         if ( separators.IsEmpty ) { throw new ArgumentException( $"{nameof(separators)} cannot be empty" ); }
 
@@ -32,53 +32,42 @@ public ref struct SpanSplitEnumerator<T> where T : unmanaged, IEquatable<T>
         _separators     = separators;
         Current         = default;
     }
-    public override string ToString() => $"{nameof(LineSplitEntry<T>)}({nameof(Current)}: {Current.ToString()}, {nameof(_originalString)}: '{_originalString.ToString()}')";
+
+
+    public override string ToString() => $"{nameof(LineSplitEntry<T>)}({nameof(Current)}: '{Current.ToString()}', {nameof(_originalString)}: '{_originalString.ToString()}')";
 
 
     public SpanSplitEnumerator<T> GetEnumerator() => this;
     public void Reset() => _span = _originalString;
 
 
+#if NET6_0_OR_GREATER
+    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
+#endif
     public bool MoveNext()
     {
         ReadOnlySpan<T> span = _span;
 
-        // Reach the end of the string
-        if ( span.Length == 0 ) { return false; }
+        if ( span.IsEmpty )
+        {
+            Current = default;
+            return false;
+        }
 
-        int index = span.IndexOfAny( _separators );
 
-        if ( index == -1 ) // The string doesn't contain the separators
+        int start;
+        int index = start = span.IndexOfAny( _separators );
+
+        if ( index < 0 ) // The string doesn't contain the separators
         {
             _span   = default; // The remaining string is an empty string
             Current = new LineSplitEntry<T>( span, default );
             return true;
         }
 
+        while ( index < span.Length - 1 && _separators.Contains( span[index + 1] ) ) { index++; }
 
-        for ( int i = 0; i < _separators.Length; i++ )
-        {
-            T c = _separators[i];
-
-            if ( index < span.Length - 1 && span[index]
-                    .Equals( c ) )
-            {
-                // Try to consume the char associated to the next char
-                T next = span[index + 1];
-
-                if ( i + 1 >= _separators.Length ) { continue; }
-
-                if ( next.Equals( _separators[i + 1] ) )
-                {
-                    Current = new LineSplitEntry<T>( span[..index], span.Slice( index, 2 ) );
-                    _span   = span[(index + 2)..];
-                    return true;
-                }
-            }
-        }
-
-
-        Current = new LineSplitEntry<T>( span[..index], span.Slice( index, 1 ) );
+        Current = new LineSplitEntry<T>( span[..start], span.Slice( start, Math.Max( index - start, 1 ) ) );
         _span   = span[(index + 1)..];
         return true;
     }

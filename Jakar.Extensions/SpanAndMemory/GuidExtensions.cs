@@ -41,7 +41,7 @@ public static class GuidExtensions
                              {
                                  HYPHEN     => SLASH,
                                  UNDERSCORE => PLUS,
-                                 _          => value[i]
+                                 _          => value[i],
                              };
         }
 
@@ -78,7 +78,7 @@ public static class GuidExtensions
                         {
                             SLASH_BYTE => HYPHEN,
                             PLUS_BYTE  => UNDERSCORE,
-                            _          => (char)base64Bytes[i]
+                            _          => (char)base64Bytes[i],
                         };
         }
 

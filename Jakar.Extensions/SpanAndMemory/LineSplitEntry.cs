@@ -12,6 +12,7 @@ public readonly ref struct LineSplitEntry<T> where T : unmanaged, IEquatable<T>
 {
     public ReadOnlySpan<T> Value      { get; }
     public ParamsArray<T>  Separator  { get; }
+    public int             Length     => Value.Length;
     public bool            IsEmpty    => Value.IsEmpty;
     public bool            IsNotEmpty => !IsEmpty;
 
@@ -39,4 +40,15 @@ public readonly ref struct LineSplitEntry<T> where T : unmanaged, IEquatable<T>
 
 
     public override string ToString() => $"{nameof(LineSplitEntry<T>)}<{nameof(Value)}: {Value.ToString()}, {nameof(Separator)}: {Separator.ToString()}>";
+    bool TryFormat( Span<T> destination, out int charsWritten, ReadOnlySpan<T> format, IFormatProvider? provider )
+    {
+        if ( Value.TryCopyTo( destination ) )
+        {
+            charsWritten = Length;
+            return true;
+        }
+
+        charsWritten = 0;
+        return false;
+    }
 }
