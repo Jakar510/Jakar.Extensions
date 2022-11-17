@@ -7,8 +7,8 @@ namespace Jakar.Database;
 public sealed class SqlException : Exception
 {
     [JsonProperty] public bool?   MatchAll   { get; init; }
-    [JsonProperty] public string  SQL        { get; init; }
     [JsonProperty] public object? Parameters { get; init; }
+    [JsonProperty] public string  SQL        { get; init; }
 
     // [JsonProperty] public string Value => base.ToString();
 

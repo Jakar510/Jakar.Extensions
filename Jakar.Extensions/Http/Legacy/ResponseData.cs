@@ -49,18 +49,18 @@ public readonly struct ResponseData
 
     public static JToken? ParseError( ReadOnlySpan<char> error )
     {
-        if (error.IsNullOrWhiteSpace()) { return default; }
+        if ( error.IsNullOrWhiteSpace() ) { return default; }
 
-        if (error.StartsWith( ERROR_MESSAGE, StringComparison.OrdinalIgnoreCase )) { error = error[ERROR_MESSAGE.Length..]; }
+        if ( error.StartsWith( ERROR_MESSAGE, StringComparison.OrdinalIgnoreCase ) ) { error = error[ERROR_MESSAGE.Length..]; }
 
         try { return error.FromJson(); }
-        catch (Exception) { return error.ToString(); }
+        catch ( Exception ) { return error.ToString(); }
     }
 
 
     public static async Task<ResponseData> Create( WebException e )
     {
-        if (e.Response is null) { return _none; }
+        if ( e.Response is null ) { return _none; }
 
         return e.Response is HttpWebResponse response
                    ? await Create( response )
@@ -73,7 +73,7 @@ public readonly struct ResponseData
         string msg;
 
         // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
-        if (stream is not null)
+        if ( stream is not null )
         {
             using var reader = new StreamReader( stream );
 
@@ -91,7 +91,7 @@ public readonly struct ResponseData
         string msg;
 
         // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
-        if (stream is not null)
+        if ( stream is not null )
         {
             using var reader = new StreamReader( stream );
 

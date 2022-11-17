@@ -12,7 +12,7 @@ public class KeyNames
         BackgroundColor,
         FontSize,
         FontAttributes,
-        FontFamily
+        FontFamily,
     }
 
 
@@ -25,7 +25,7 @@ public class KeyNames
         BackgroundColor,
         FontSize,
         FontAttributes,
-        FontFamily
+        FontFamily,
     }
 
 
@@ -38,7 +38,7 @@ public class KeyNames
         Description,
         Hint,
         Value,
-        Misc
+        Misc,
     }
 
 
@@ -49,7 +49,7 @@ public class KeyNames
         BackgroundColor,
         FontSize,
         FontAttributes,
-        FontFamily
+        FontFamily,
     }
 
 
@@ -60,7 +60,7 @@ public class KeyNames
         BackgroundColor,
         FontSize,
         FontAttributes,
-        FontFamily
+        FontFamily,
     }
 
 
@@ -71,7 +71,7 @@ public class KeyNames
         BackgroundColor,
         FontSize,
         FontAttributes,
-        FontFamily
+        FontFamily,
     }
 
 
@@ -79,7 +79,7 @@ public class KeyNames
     public enum ListView
     {
         BackgroundColor,
-        SeparatorColor // i.e. ListView
+        SeparatorColor, // i.e. ListView
     }
 
 
@@ -91,7 +91,7 @@ public class KeyNames
         NavigationBar,
         Disabled,
         Unselected,
-        FlyOutBorder
+        FlyOutBorder,
     }
 
 
@@ -104,6 +104,6 @@ public class KeyNames
         Accent, // i.e. CheckBox
         Valid,
         Invalid,
-        InFocus
+        InFocus,
     }
 }

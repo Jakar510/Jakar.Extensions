@@ -10,14 +10,13 @@ namespace Jakar.Extensions.Xamarin.Forms;
 [TypeConversion( typeof(Size) )]
 public class SizeConverter : TypeConverter, IValueConverter, IExtendedTypeConverter
 {
-    public override bool CanConvertFrom( Type? sourceType ) => sourceType is null || sourceType == typeof(string);
     public static Size Convert( string? value )
     {
-        if (string.IsNullOrWhiteSpace( value )) { throw new InvalidOperationException( $"Cannot convert \"{value}\" into {typeof(Size).FullName}" ); }
+        if ( string.IsNullOrWhiteSpace( value ) ) { throw new InvalidOperationException( $"Cannot convert \"{value}\" into {typeof(Size).FullName}" ); }
 
         string[] items = value.Split( ',' );
 
-        switch (items.Length)
+        switch ( items.Length )
         {
             case 1:
                 double w = double.Parse( items[0] );
@@ -28,13 +27,14 @@ public class SizeConverter : TypeConverter, IValueConverter, IExtendedTypeConver
 
         throw new InvalidOperationException( $"Cannot convert \"{value}\" into {typeof(Size).FullName}" );
     }
+    public override bool CanConvertFrom( Type? sourceType ) => sourceType is null || sourceType == typeof(string);
 
     public override object ConvertFromInvariantString( string value ) => Convert( value );
 
     public override string ConvertToInvariantString( object value ) => value switch
                                                                        {
                                                                            Size size => $"{size.Width},{size.Height}",
-                                                                           _         => value.ToString()
+                                                                           _         => value.ToString(),
                                                                        };
 
 

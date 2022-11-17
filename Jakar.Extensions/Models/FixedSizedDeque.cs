@@ -3,9 +3,9 @@ namespace Jakar.Extensions;
 
 
 /// <summary>
-///     <seealso href = "https://stackoverflow.com/a/5852926/9530917" />
+///     <seealso href="https://stackoverflow.com/a/5852926/9530917"/>
 /// </summary>
-/// <typeparam name = "T" > </typeparam>
+/// <typeparam name="T"> </typeparam>
 public class FixedSizedDeque<T>
 {
     protected readonly Deque<T> _q;
@@ -35,7 +35,7 @@ public class FixedSizedDeque<T>
         lock (_lock)
         {
             _q.AddToFront( obj );
-            while (_q.Count > Limit) { _q.RemoveFromBack(); }
+            while ( _q.Count > Limit ) { _q.RemoveFromBack(); }
         }
     }
 }

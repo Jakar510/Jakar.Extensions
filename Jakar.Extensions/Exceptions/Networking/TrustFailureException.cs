@@ -2,9 +2,7 @@
 namespace Jakar.Extensions;
 
 
-/// <summary>
-///     A Server certificate could not be verified.
-/// </summary>
+/// <summary> A Server certificate could not be verified. </summary>
 public sealed class TrustFailureException : WebException
 {
     public CancellationToken Token { get; }

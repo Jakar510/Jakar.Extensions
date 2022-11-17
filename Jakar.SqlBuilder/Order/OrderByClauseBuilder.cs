@@ -8,14 +8,9 @@ public struct OrderByClauseBuilder
     public OrderByClauseBuilder( ref EasySqlBuilder builder ) => _builder = builder;
 
 
-    /// <summary>
-    ///     Simple ORDER BY
-    ///     <paramref name = "columnNames" />
-    ///     delimited by
-    ///     <paramref name = "separator" />
-    /// </summary>
+    /// <summary> Simple ORDER BY <paramref name="columnNames"/> delimited by <paramref name="separator"/> </summary>
     /// <returns>
-    ///     <see cref = "EasySqlBuilder" />
+    ///     <see cref="EasySqlBuilder"/>
     /// </returns>
     public EasySqlBuilder By( string separator, params string[] columnNames ) => _builder.Begin()
                                                                                          .Add( KeyWords.ORDER, KeyWords.BY )
@@ -23,11 +18,9 @@ public struct OrderByClauseBuilder
                                                                                          .End();
 
 
-    /// <summary>
-    ///     Starts an ORDER BY chain
-    /// </summary>
+    /// <summary> Starts an ORDER BY chain </summary>
     /// <returns>
-    ///     <see cref = "OrderByClauseChainBuilder" />
+    ///     <see cref="OrderByClauseChainBuilder"/>
     /// </returns>
     public OrderByClauseChainBuilder Chain()
     {
@@ -36,12 +29,9 @@ public struct OrderByClauseBuilder
 
         return new OrderByClauseChainBuilder( this, ref _builder );
     }
-    /// <summary>
-    ///     Starts an ORDER BY chain starting with
-    ///     <paramref name = "columnName" />
-    /// </summary>
+    /// <summary> Starts an ORDER BY chain starting with <paramref name="columnName"/> </summary>
     /// <returns>
-    ///     <see cref = "OrderByClauseChainBuilder" />
+    ///     <see cref="OrderByClauseChainBuilder"/>
     /// </returns>
     public OrderByClauseChainBuilder Chain( string columnName )
     {
@@ -73,16 +63,10 @@ public struct OrderByClauseBuilder
     public SortersBuilder<OrderByClauseBuilder> SortBy() => new(this, ref _builder);
 
 
-    /// <summary>
-    ///     continues previous clause and adds
-    ///     <paramref name = "columnName" />
-    /// </summary>
-    /// <example>
-    ///     SELECT * FROM Customers
-    ///     ORDER BY Country, CustomerName;
-    /// </example>
+    /// <summary> continues previous clause and adds <paramref name="columnName"/> </summary>
+    /// <example> SELECT * FROM Customers ORDER BY Country, CustomerName; </example>
     /// <returns>
-    ///     <see cref = "OrderByClauseBuilder" />
+    ///     <see cref="OrderByClauseBuilder"/>
     /// </returns>
     public OrderByClauseBuilder By( string columnName )
     {

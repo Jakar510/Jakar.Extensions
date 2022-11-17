@@ -38,7 +38,7 @@ public class ExceptionDetails
         Str             = e.ToString();
 
 
-        if (includeMethodInfo) { TargetSite = e.MethodInfo(); }
+        if ( includeMethodInfo ) { TargetSite = e.MethodInfo(); }
 
 
         Inner = e.InnerException is null

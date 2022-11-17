@@ -15,10 +15,8 @@ public sealed class JsonizerAttribute : Attribute { }
 
 /// <summary>
 ///     A PREDICTABLE (de)serializer for any given object.
-///     <para>
-///         Primary goals are to be PERFORMANT, easily human readable, predictable and consistent.
-///     </para>
-///     <see cref = "JsonModels.IJsonModel" />
+///     <para> Primary goals are to be PERFORMANT, easily human readable, predictable and consistent. </para>
+///     <see cref="JsonModels.IJsonModel"/>
 /// </summary>
 public static class Jsonizer
 {
@@ -34,7 +32,7 @@ public static class Jsonizer
     public static string ToJson( this IJsonizer value, Formatting formatting = Formatting.Indented ) => ToJson( value, new JWriter( formatting ) );
     public static string ToJson( this IJsonizer value, in JWriter writer )
     {
-        using (writer)
+        using ( writer )
         {
             value.ToJson( writer );
             return writer.ToString();

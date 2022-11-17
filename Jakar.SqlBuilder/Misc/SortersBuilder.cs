@@ -13,16 +13,10 @@ public struct SortersBuilder<TNext>
     }
 
 
-    /// <summary>
-    ///     Ends with a ASC and returns to
-    ///     <typeparamref name = "TNext" />
-    /// </summary>
-    /// <example>
-    ///     SELECT * FROM Customers
-    ///     ORDER BY Country ASC, CustomerName DESC;
-    /// </example>
+    /// <summary> Ends with a ASC and returns to <typeparamref name="TNext"/> </summary>
+    /// <example> SELECT * FROM Customers ORDER BY Country ASC, CustomerName DESC; </example>
     /// <returns>
-    ///     <typeparamref name = "TNext" />
+    ///     <typeparamref name="TNext"/>
     /// </returns>
     public TNext Ascending()
     {
@@ -30,17 +24,10 @@ public struct SortersBuilder<TNext>
         return _next;
     }
 
-    /// <summary>
-    ///     continues previous clause and adds
-    ///     <paramref name = "columnName" />
-    ///     followed by ASC
-    /// </summary>
-    /// <example>
-    ///     SELECT * FROM Customers
-    ///     ORDER BY Country ASC, CustomerName DESC;
-    /// </example>
+    /// <summary> continues previous clause and adds <paramref name="columnName"/> followed by ASC </summary>
+    /// <example> SELECT * FROM Customers ORDER BY Country ASC, CustomerName DESC; </example>
     /// <returns>
-    ///     <typeparamref name = "TNext" />
+    ///     <typeparamref name="TNext"/>
     /// </returns>
     public TNext Ascending( string columnName )
     {
@@ -49,16 +36,10 @@ public struct SortersBuilder<TNext>
     }
 
 
-    /// <summary>
-    ///     Ends with a DESC and returns to
-    ///     <typeparamref name = "TNext" />
-    /// </summary>
-    /// <example>
-    ///     SELECT * FROM Customers
-    ///     ORDER BY Country ASC, CustomerName DESC;
-    /// </example>
+    /// <summary> Ends with a DESC and returns to <typeparamref name="TNext"/> </summary>
+    /// <example> SELECT * FROM Customers ORDER BY Country ASC, CustomerName DESC; </example>
     /// <returns>
-    ///     <typeparamref name = "TNext" />
+    ///     <typeparamref name="TNext"/>
     /// </returns>
     public TNext Descending()
     {
@@ -66,17 +47,10 @@ public struct SortersBuilder<TNext>
         return _next;
     }
 
-    /// <summary>
-    ///     continues previous clause and adds
-    ///     <paramref name = "columnName" />
-    ///     followed by DESC
-    /// </summary>
-    /// <example>
-    ///     SELECT * FROM Customers
-    ///     ORDER BY Country ASC, CustomerName DESC;
-    /// </example>
+    /// <summary> continues previous clause and adds <paramref name="columnName"/> followed by DESC </summary>
+    /// <example> SELECT * FROM Customers ORDER BY Country ASC, CustomerName DESC; </example>
     /// <returns>
-    ///     <typeparamref name = "TNext" />
+    ///     <typeparamref name="TNext"/>
     /// </returns>
     public TNext Descending( string columnName )
     {

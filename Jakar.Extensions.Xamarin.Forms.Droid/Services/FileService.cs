@@ -21,14 +21,14 @@ public class FileService : IFileService
 
     public Task<FileInfo> DownloadFile( Uri link, string fileName )
     {
-        if (link is null) { throw new ArgumentNullException( nameof(link) ); }
+        if ( link is null ) { throw new ArgumentNullException( nameof(link) ); }
 
-        if (string.IsNullOrWhiteSpace( fileName )) { throw new ArgumentNullException( nameof(fileName) ); }
+        if ( string.IsNullOrWhiteSpace( fileName ) ) { throw new ArgumentNullException( nameof(fileName) ); }
 
         using var client = new WebClient();
 
         File? root = BaseApplication.Instance.GetExternalFilesDir( MediaStore.Downloads.ContentType );
-        if (root is null) { throw new NullReferenceException( nameof(root) ); }
+        if ( root is null ) { throw new NullReferenceException( nameof(root) ); }
 
         string path = Path.Combine( root.AbsolutePath, fileName );
 

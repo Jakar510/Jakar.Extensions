@@ -12,7 +12,7 @@ public static partial class TypeExtensions
 
     public static bool IsDictionary( this Type classType, [NotNullWhen( true )] out Type? keyType, [NotNullWhen( true )] out Type? valueType, [NotNullWhen( true )] out bool? isKeyBuiltInType, [NotNullWhen( true )] out bool? isValueBuiltInType )
     {
-        if (classType.IsDictionary( out IReadOnlyList<Type>? itemTypes ))
+        if ( classType.IsDictionary( out IReadOnlyList<Type>? itemTypes ) )
         {
             keyType            = itemTypes[0];
             valueType          = itemTypes[1];
@@ -30,7 +30,7 @@ public static partial class TypeExtensions
 
     public static bool IsDictionary( this Type classType, [NotNullWhen( true )] out Type? keyType, [NotNullWhen( true )] out Type? valueType )
     {
-        if (classType.IsDictionary( out IReadOnlyList<Type>? itemTypes ))
+        if ( classType.IsDictionary( out IReadOnlyList<Type>? itemTypes ) )
         {
             keyType   = itemTypes[0];
             valueType = itemTypes[1];
@@ -44,15 +44,15 @@ public static partial class TypeExtensions
 
     public static bool IsDictionary( this Type classType, [NotNullWhen( true )] out IReadOnlyList<Type>? itemTypes )
     {
-        if (classType.IsGenericType && classType.IsDictionary())
+        if ( classType.IsGenericType && classType.IsDictionary() )
         {
             itemTypes = classType.GetGenericArguments();
             return true;
         }
 
-        foreach (Type interfaceType in classType.GetInterfaces())
+        foreach ( Type interfaceType in classType.GetInterfaces() )
         {
-            if (interfaceType.IsGenericType && interfaceType.GetGenericTypeDefinition() == typeof(IDictionary<,>))
+            if ( interfaceType.IsGenericType && interfaceType.GetGenericTypeDefinition() == typeof(IDictionary<,>) )
             {
                 itemTypes = interfaceType.GetGenericArguments();
                 return true;
@@ -68,7 +68,7 @@ public static partial class TypeExtensions
 
     public static bool IsKeyValuePair( this Type classType, [NotNullWhen( true )] out Type? keyType, [NotNullWhen( true )] out Type? valueType )
     {
-        if (classType.IsKeyValuePair( out IReadOnlyList<Type>? itemTypes ))
+        if ( classType.IsKeyValuePair( out IReadOnlyList<Type>? itemTypes ) )
         {
             keyType   = itemTypes[0];
             valueType = itemTypes[1];
@@ -82,15 +82,15 @@ public static partial class TypeExtensions
 
     public static bool IsKeyValuePair( this Type classType, [NotNullWhen( true )] out IReadOnlyList<Type>? itemTypes )
     {
-        if (classType.IsKeyValuePair())
+        if ( classType.IsKeyValuePair() )
         {
             itemTypes = classType.GetGenericArguments();
             return true;
         }
 
-        foreach (Type interfaceType in classType.GetInterfaces())
+        foreach ( Type interfaceType in classType.GetInterfaces() )
         {
-            if (interfaceType.IsGenericType && interfaceType.GetGenericTypeDefinition() == typeof(KeyValuePair<,>))
+            if ( interfaceType.IsGenericType && interfaceType.GetGenericTypeDefinition() == typeof(KeyValuePair<,>) )
             {
                 itemTypes = interfaceType.GetGenericArguments();
                 return true;

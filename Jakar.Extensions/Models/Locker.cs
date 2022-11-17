@@ -7,18 +7,18 @@ namespace Jakar.Extensions;
 /// <summary>
 ///     A wrapper around various locking methods.
 ///     <para>
-///         <list type = "bullet" >
+///         <list type="bullet">
 ///             <item>
-///                 <see cref = "ReaderWriterLockSlim" />
+///                 <see cref="ReaderWriterLockSlim"/>
 ///             </item>
 ///             <item>
-///                 <see cref = "SemaphoreSlim" />
+///                 <see cref="SemaphoreSlim"/>
 ///             </item>
 ///             <item>
-///                 <see cref = "Semaphore" />
+///                 <see cref="Semaphore"/>
 ///             </item>
 ///             <item>
-///                 <see langword = "lock" />
+///                 <see langword="lock"/>
 ///             </item>
 ///         </list>
 ///     </para>
@@ -42,7 +42,7 @@ public readonly struct Locker : IAsyncDisposable, IDisposable
 
     public void Enter( CancellationToken token = default )
     {
-        switch (Lock)
+        switch ( Lock )
         {
             case ReaderWriterLockSlim value:
                 value.EnterWriteLock();
@@ -63,7 +63,7 @@ public readonly struct Locker : IAsyncDisposable, IDisposable
     }
     public async ValueTask EnterAsync( CancellationToken token = default )
     {
-        switch (Lock)
+        switch ( Lock )
         {
             case ReaderWriterLockSlim value:
                 value.EnterWriteLock();
@@ -84,7 +84,7 @@ public readonly struct Locker : IAsyncDisposable, IDisposable
     }
     public void Exit()
     {
-        switch (Lock)
+        switch ( Lock )
         {
             case ReaderWriterLockSlim value:
                 value.ExitWriteLock();
@@ -115,7 +115,7 @@ public readonly struct Locker : IAsyncDisposable, IDisposable
     {
         Exit();
 
-        switch (Lock)
+        switch ( Lock )
         {
             case IAsyncDisposable asyncDisposable:
                 await asyncDisposable.DisposeAsync();
@@ -141,9 +141,9 @@ public readonly struct Locker<T> : IEnumerator<T>, IAsyncEnumerator<T>
     {
         get
         {
-            if (_enumerator is not null) { return _enumerator.Current; }
+            if ( _enumerator is not null ) { return _enumerator.Current; }
 
-            if (_asyncEnumerator is not null) { return _asyncEnumerator.Current; }
+            if ( _asyncEnumerator is not null ) { return _asyncEnumerator.Current; }
 
             throw new InvalidOperationException();
         }
@@ -152,25 +152,25 @@ public readonly struct Locker<T> : IEnumerator<T>, IAsyncEnumerator<T>
 
 
     /// <summary> Creates the collection Locker </summary>
-    /// <param name = "collection" > </param>
-    /// <param name = "locker" >
+    /// <param name="collection"> </param>
+    /// <param name="locker">
     ///     Can be any of the following:
     ///     <para>
-    ///         <list type = "bullet" >
+    ///         <list type="bullet">
     ///             <item>
-    ///                 <see cref = "ReaderWriterLockSlim" />
+    ///                 <see cref="ReaderWriterLockSlim"/>
     ///             </item>
     ///             <item>
-    ///                 <see cref = "SemaphoreSlim" />
+    ///                 <see cref="SemaphoreSlim"/>
     ///             </item>
     ///             <item>
-    ///                 <see cref = "Semaphore" />
+    ///                 <see cref="Semaphore"/>
     ///             </item>
     ///             <item>
-    ///                 <see cref = "object" />
+    ///                 <see cref="object"/>
     ///             </item>
     ///             <item>
-    ///                 <see langword = "null" />
+    ///                 <see langword="null"/>
     ///             </item>
     ///         </list>
     ///     </para>
@@ -201,7 +201,7 @@ public readonly struct Locker<T> : IEnumerator<T>, IAsyncEnumerator<T>
     {
         await _locker.DisposeAsync();
         _enumerator?.Dispose();
-        if (_asyncEnumerator is not null) { await _asyncEnumerator.DisposeAsync(); }
+        if ( _asyncEnumerator is not null ) { await _asyncEnumerator.DisposeAsync(); }
     }
 
 

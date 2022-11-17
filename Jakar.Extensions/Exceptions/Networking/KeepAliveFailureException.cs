@@ -2,9 +2,7 @@
 namespace Jakar.Extensions;
 
 
-/// <summary>
-///     The connection for a request that specifies the Keep-alive header was closed unexpectedly.
-/// </summary>
+/// <summary> The connection for a request that specifies the Keep-alive header was closed unexpectedly. </summary>
 public sealed class KeepAliveFailureException : WebException
 {
     public CancellationToken Token { get; init; }

@@ -9,12 +9,9 @@ public abstract class MigrateUserTable : Migration<UserRecord>
     protected MigrateUserTable() : base() { }
 
 
-    public override void Down() => DeleteTable();
-
-
     protected override ICreateTableWithColumnSyntax CreateTable()
     {
-        var table = base.CreateTable();
+        ICreateTableWithColumnSyntax table = base.CreateTable();
 
         table.WithColumn( nameof(UserRecord.UserName) )
              .AsString( 256 )
@@ -206,4 +203,7 @@ public abstract class MigrateUserTable : Migration<UserRecord>
 
         return table;
     }
+
+
+    public override void Down() => DeleteTable();
 }

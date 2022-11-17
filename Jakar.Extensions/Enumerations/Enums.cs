@@ -5,6 +5,7 @@ namespace Jakar.Extensions;
 [SuppressMessage( "ReSharper", "PartialTypeWithSinglePart" )]
 public static partial class Enums
 {
+    public static bool ToEnum<TResult>( this string input, out TResult result, bool ignoreCase = true ) where TResult : struct => Enum.TryParse( input, ignoreCase, out result );
     /// <summary> Inspired by <seealso href="https://stackoverflow.com/a/8086788/9530917"/> </summary>
     /// <typeparam name="TEnum"> </typeparam>
     /// <typeparam name="TValue"> </typeparam>
@@ -20,10 +21,9 @@ public static partial class Enums
 
         return values.ToDictionary( KeySelector, ElementSelector );
     }
+    public static TEnum GetEnumValue<TEnum>( this IReadOnlyDictionary<string, TEnum> dictionary, TEnum value ) where TEnum : Enum => dictionary.First( pair => pair.Key == value.ToString() )
+                                                                                                                                               .Value;
     public static TValue GetEnumValue<TValue, TEnum>( this TEnum value ) where TEnum : Enum => GetEnumNamedValues<TEnum, TValue>()
                                                                                               .First( pair => pair.Key == value.ToString() )
                                                                                               .Value;
-    public static TEnum GetEnumValue<TEnum>( this IReadOnlyDictionary<string, TEnum> dictionary, TEnum value ) where TEnum : Enum => dictionary.First( pair => pair.Key == value.ToString() )
-                                                                                                                                               .Value;
-    public static bool ToEnum<TResult>( this string input, out TResult result, bool ignoreCase = true ) where TResult : struct => Enum.TryParse( input, ignoreCase, out result );
 }

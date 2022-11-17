@@ -8,7 +8,7 @@ namespace Jakar.Database;
 
 
 /// <summary>
-///     <see href = "http://www.mimekit.net/docs/html/Creating-Messages.htm" />
+///     <see href="http://www.mimekit.net/docs/html/Creating-Messages.htm"/>
 /// </summary>
 public sealed class EmailBuilder
 {
@@ -23,20 +23,6 @@ public sealed class EmailBuilder
 
 
     private EmailBuilder( MailboxAddress[] senders ) => _senders = senders;
-
-
-    public async ValueTask<MimeMessage> Create()
-    {
-        var builder = new BodyBuilder
-                      {
-                          TextBody = _body,
-                          HtmlBody = _html
-                      };
-
-        foreach (Attachment element in _attachments) { await builder.Attachments.AddAsync( element.Name, element.ContentStream ); }
-
-        return new MimeMessage( _senders, _recipients, _subject, builder.ToMessageBody() );
-    }
 
 
     public static EmailBuilder From( params MailboxAddress[] senders ) => new(senders);
@@ -92,5 +78,19 @@ public sealed class EmailBuilder
     {
         _subject = subject;
         return this;
+    }
+
+
+    public async ValueTask<MimeMessage> Create()
+    {
+        var builder = new BodyBuilder
+                      {
+                          TextBody = _body,
+                          HtmlBody = _html,
+                      };
+
+        foreach ( Attachment element in _attachments ) { await builder.Attachments.AddAsync( element.Name, element.ContentStream ); }
+
+        return new MimeMessage( _senders, _recipients, _subject, builder.ToMessageBody() );
     }
 }

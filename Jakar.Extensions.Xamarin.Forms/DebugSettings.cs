@@ -27,7 +27,7 @@ public sealed class DebugSettings : ObservableClass, IDebugSettings
         get => _enableAnalytics && EnableApi;
         set
         {
-            if (SetProperty( ref _enableAnalytics, value )) { Preferences.Set( nameof(EnableAnalytics), value ); }
+            if ( SetProperty( ref _enableAnalytics, value ) ) { Preferences.Set( nameof(EnableAnalytics), value ); }
         }
     }
 
@@ -37,7 +37,7 @@ public sealed class DebugSettings : ObservableClass, IDebugSettings
         get => _enableApi;
         set
         {
-            if (SetProperty( ref _enableApi, value )) { Preferences.Set( nameof(EnableApi), value ); }
+            if ( SetProperty( ref _enableApi, value ) ) { Preferences.Set( nameof(EnableApi), value ); }
         }
     }
     public bool EnableCrashes
@@ -45,7 +45,7 @@ public sealed class DebugSettings : ObservableClass, IDebugSettings
         get => _enableCrashes && EnableApi;
         set
         {
-            if (SetProperty( ref _enableCrashes, value )) { Preferences.Set( nameof(EnableCrashes), value ); }
+            if ( SetProperty( ref _enableCrashes, value ) ) { Preferences.Set( nameof(EnableCrashes), value ); }
         }
     }
     public bool IncludeAppStateOnError
@@ -53,7 +53,7 @@ public sealed class DebugSettings : ObservableClass, IDebugSettings
         get => _includeAppStateOnError && EnableApi;
         set
         {
-            if (SetProperty( ref _includeAppStateOnError, value )) { Preferences.Set( nameof(IncludeAppStateOnError), value ); }
+            if ( SetProperty( ref _includeAppStateOnError, value ) ) { Preferences.Set( nameof(IncludeAppStateOnError), value ); }
         }
     }
     public bool TakeScreenshotOnError
@@ -61,7 +61,7 @@ public sealed class DebugSettings : ObservableClass, IDebugSettings
         get => _takeScreenshotOnError && EnableApi;
         set
         {
-            if (SetProperty( ref _takeScreenshotOnError, value )) { Preferences.Set( nameof(TakeScreenshotOnError), value ); }
+            if ( SetProperty( ref _takeScreenshotOnError, value ) ) { Preferences.Set( nameof(TakeScreenshotOnError), value ); }
         }
     }
 

@@ -25,7 +25,7 @@ public readonly ref struct JAttribute
     {
         if ( span.StartsWith( '<' ) ) { throw new FormatException( $"Cannot start with {'<'}" ); }
 
-        if ( MemoryExtensions.Contains( span, '>' ) ) { throw new FormatException( $"Cannot start with {'<'}" ); }
+        if ( span.Contains( '>' ) ) { throw new FormatException( $"Cannot start with {'<'}" ); }
 
         if ( span.EndsWith( "</" ) ) { throw new FormatException( $"Cannot start with {'<'}" ); }
 

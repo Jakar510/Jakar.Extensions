@@ -32,7 +32,7 @@ public struct InsertClauseBuilder
     {
         var cache = new Dictionary<string, string>();
 
-        foreach (PropertyInfo info in typeof(T).GetProperties( BindingFlags.Instance | BindingFlags.Public | BindingFlags.GetProperty ))
+        foreach ( PropertyInfo info in typeof(T).GetProperties( BindingFlags.Instance | BindingFlags.Public | BindingFlags.GetProperty ) )
         {
             string value = info.GetValue( obj )
                               ?.ToString() ?? KeyWords.NULL;

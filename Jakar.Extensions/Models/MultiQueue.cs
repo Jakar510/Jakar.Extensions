@@ -7,21 +7,21 @@ public interface IMultiQueue<T> : IEnumerable<T>
     public bool IsEmpty { get; }
     public int  Count   { get; }
     public T?   Next    { get; }
-    public void Add( T value );
-
-    public void Clear();
 
     public bool Contains( T value );
 
     public bool Remove( [NotNullWhen( true )] out T? value );
+    public void Add( T                               value );
+
+    public void Clear();
 }
 
 
 
 /// <summary>
-///     <seealso href = "https://stackoverflow.com/a/5852926/9530917" />
+///     <seealso href="https://stackoverflow.com/a/5852926/9530917"/>
 /// </summary>
-/// <typeparam name = "T" > </typeparam>
+/// <typeparam name="T"> </typeparam>
 public class MultiQueue<T> : IMultiQueue<T>
 {
     protected readonly ConcurrentQueue<T> _queue;

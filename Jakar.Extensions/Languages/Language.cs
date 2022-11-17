@@ -30,7 +30,7 @@ public readonly struct Language : IDataBaseID, IComparable<Language>, IEquatable
 
     public bool Equals( Language? other )
     {
-        if (other is null) { return false; }
+        if ( other is null ) { return false; }
 
         return Equals( other.Value );
     }
@@ -41,26 +41,26 @@ public readonly struct Language : IDataBaseID, IComparable<Language>, IEquatable
 
     public int CompareTo( Language? other )
     {
-        if (other is null) { return -1; }
+        if ( other is null ) { return -1; }
 
         return CompareTo( other.Value );
     }
     public int CompareTo( Language other )
     {
         int displayNameComparison = string.Compare( DisplayName, other.DisplayName, StringComparison.Ordinal );
-        if (displayNameComparison != 0) { return displayNameComparison; }
+        if ( displayNameComparison != 0 ) { return displayNameComparison; }
 
         int shortNameComparison = string.Compare( ShortName, other.ShortName, StringComparison.Ordinal );
-        if (shortNameComparison != 0) { return shortNameComparison; }
+        if ( shortNameComparison != 0 ) { return shortNameComparison; }
 
         int versionComparison = Version.CompareTo( other.Version );
-        if (versionComparison != 0) { return versionComparison; }
+        if ( versionComparison != 0 ) { return versionComparison; }
 
         return ID.CompareTo( other.ID );
     }
     public int CompareTo( object? obj )
     {
-        if (obj is null) { return 1; }
+        if ( obj is null ) { return 1; }
 
         return obj is Language other
                    ? CompareTo( other )
@@ -129,7 +129,7 @@ public readonly struct Language : IDataBaseID, IComparable<Language>, IEquatable
                                              Portuguese,
                                              Spanish,
                                              Swedish,
-                                             Thai
+                                             Thai,
                                          };
     }
 

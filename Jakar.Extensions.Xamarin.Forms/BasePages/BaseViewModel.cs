@@ -23,9 +23,6 @@ public abstract class BaseViewModel<TPage> : BaseViewModel where TPage : Page
     protected abstract Task LaunchWebsite( object? address = null );
 
 
-    public void SetPage( TPage source ) => _SourcePage = source ?? throw new ArgumentNullException( nameof(source) );
-
-
     protected abstract Task ShareScreenShot();
 
     protected virtual async Task ShareScreenShot( FileSystemApi api, string shareTitle )
@@ -38,6 +35,9 @@ public abstract class BaseViewModel<TPage> : BaseViewModel where TPage : Page
     }
 
     protected abstract Task StartFeedBack();
+
+
+    public void SetPage( TPage source ) => _SourcePage = source ?? throw new ArgumentNullException( nameof(source) );
 }
 
 
@@ -65,11 +65,11 @@ public abstract class BaseViewModel<TPage, TItem> : BaseViewModel<TPage> where T
     protected BaseViewModel( TPage source ) : base( source ) => LoadItemsCommand = new Command( async () => await ExecuteLoadItemsCommand()
                                                                                                                .ConfigureAwait( false ) );
     protected abstract Task ExecuteLoadItemsCommand();
+    public async Task LoadItemsAsync() => await MainThread.InvokeOnMainThreadAsync( ExecuteLoadItemsCommand )
+                                                          .ConfigureAwait( false );
 
 
     public void LoadItems() => LoadItemsCommand.Execute( null );
-    public async Task LoadItemsAsync() => await MainThread.InvokeOnMainThreadAsync( ExecuteLoadItemsCommand )
-                                                          .ConfigureAwait( false );
 }
 
 

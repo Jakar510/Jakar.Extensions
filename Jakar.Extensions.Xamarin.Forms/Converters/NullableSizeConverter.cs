@@ -12,14 +12,13 @@ namespace Jakar.Extensions.Xamarin.Forms;
 [TypeConversion( typeof(Size?) )]
 public class NullableSizeConverter : TypeConverter, IValueConverter, IExtendedTypeConverter
 {
-    public override bool CanConvertFrom( Type? sourceType ) => sourceType is null || sourceType == typeof(string);
     public static Size? Convert( string? value )
     {
-        if (string.IsNullOrWhiteSpace( value )) { return null; }
+        if ( string.IsNullOrWhiteSpace( value ) ) { return null; }
 
         string[] items = value.Split( ',' );
 
-        switch (items.Length)
+        switch ( items.Length )
         {
             case 1:
                 double w = double.Parse( items[0] );
@@ -30,6 +29,7 @@ public class NullableSizeConverter : TypeConverter, IValueConverter, IExtendedTy
 
         throw new InvalidOperationException( $"Cannot convert \"{value}\" into {typeof(Size)}" );
     }
+    public override bool CanConvertFrom( Type?                  sourceType ) => sourceType is null || sourceType == typeof(string);
     public override object? ConvertFromInvariantString( string? value ) => Convert( value );
 
 
@@ -37,7 +37,7 @@ public class NullableSizeConverter : TypeConverter, IValueConverter, IExtendedTy
                                                                          {
                                                                              null      => null,
                                                                              Size size => $"{size.Width},{size.Height}",
-                                                                             _         => value.ToString()
+                                                                             _         => value.ToString(),
                                                                          };
 
     public object? ConvertFrom( CultureInfo            culture, object?          value, IServiceProvider serviceProvider ) => Convert( value?.ToString() );

@@ -35,14 +35,14 @@ public sealed class RoleStore : IRoleStore<RoleRecord>
     public async Task SetNormalizedRoleNameAsync( RoleRecord role, string name, CancellationToken token ) =>
         await _dbContext.Roles.Update( role with
                                        {
-                                           NormalizedName = name
+                                           NormalizedName = name,
                                        },
                                        token );
 
     public async Task SetRoleNameAsync( RoleRecord role, string name, CancellationToken token ) =>
         await _dbContext.Roles.Update( role with
                                        {
-                                           Name = name
+                                           Name = name,
                                        },
                                        token );
 
@@ -53,11 +53,11 @@ public sealed class RoleStore : IRoleStore<RoleRecord>
             await _dbContext.Roles.Update( role, token );
             return IdentityResult.Success;
         }
-        catch (Exception e)
+        catch ( Exception e )
         {
             return IdentityResult.Failed( new IdentityError
                                           {
-                                              Description = e.Message
+                                              Description = e.Message,
                                           } );
         }
     }

@@ -39,7 +39,7 @@ public class IsCollection_Tests : Assert
     [TestCase( typeof(List<Guid>),                 typeof(Guid) )]
     public void IsCollection_Args_Test( Type objType, Type? expected )
     {
-        if (objType.IsCollection( out Type? itemType ))
+        if ( objType.IsCollection( out Type? itemType ) )
         {
             AreEqual( itemType, expected );
             return;

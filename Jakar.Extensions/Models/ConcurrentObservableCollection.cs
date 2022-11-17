@@ -4,13 +4,13 @@ namespace Jakar.Extensions;
 
 /// <summary>
 ///     <para>
-///         <see href = "https://stackoverflow.com/a/54733415/9530917" > This type of CollectionView does not support changes to its SourceCollection from a thread different from the Dispatcher thread </see>
+///         <see href="https://stackoverflow.com/a/54733415/9530917"> This type of CollectionView does not support changes to its SourceCollection from a thread different from the Dispatcher thread </see>
 ///     </para>
 ///     <para>
-///         <see href = "https://stackoverflow.com/a/14602121/9530917" > How do I update an ObservableCollection via a worker thread? </see>
+///         <see href="https://stackoverflow.com/a/14602121/9530917"> How do I update an ObservableCollection via a worker thread? </see>
 ///     </para>
 /// </summary>
-/// <typeparam name = "T" > </typeparam>
+/// <typeparam name="T"> </typeparam>
 [Serializable]
 public class ConcurrentObservableCollection<T> : CollectionAlerts<T>, IList<T>, IReadOnlyList<T>, IList
 {
@@ -112,47 +112,29 @@ public class ConcurrentObservableCollection<T> : CollectionAlerts<T>, IList<T>, 
     public ConcurrentObservableCollection( IEnumerable<T> items, IComparer<T> comparer ) : this( comparer, new List<T>( items ) ) { }
 
 
-    public virtual void Add( params T[] items )
-    {
-        lock (_lock)
-        {
-            foreach ( T item in items )
-            {
-                _items.Add( item );
-                Added( item );
-            }
-        }
-    }
-    public virtual void Add( IEnumerable<T> items )
-    {
-        lock (_lock)
-        {
-            foreach ( T item in items )
-            {
-                _items.Add( item );
-                Added( item );
-            }
-        }
-    }
-
-
-    public void CopyTo( T[] array )
-    {
-        lock (_lock) { _items.CopyTo( array, 0 ); }
-    }
+    public static implicit operator ConcurrentObservableCollection<T>( List<T>                 items ) => new(items);
+    public static implicit operator ConcurrentObservableCollection<T>( HashSet<T>              items ) => new(items);
+    public static implicit operator ConcurrentObservableCollection<T>( ConcurrentBag<T>        items ) => new(items);
+    public static implicit operator ConcurrentObservableCollection<T>( ObservableCollection<T> items ) => new(items);
+    public static implicit operator ConcurrentObservableCollection<T>( Collection<T>           items ) => new(items);
+    public static implicit operator ConcurrentObservableCollection<T>( T[]                     items ) => new(items);
 
 
     public bool Exists( Predicate<T> match )
     {
         lock (_lock) { return _items.Exists( match ); }
     }
-    public T? Find( Predicate<T> match )
+
+    public virtual bool TryAdd( T item )
     {
-        lock (_lock) { return _items.Find( match ); }
-    }
-    public List<T> FindAll( Predicate<T> match )
-    {
-        lock (_lock) { return _items.FindAll( match ); }
+        lock (_lock)
+        {
+            if ( _items.Contains( item ) ) { return false; }
+
+            _items.Add( item );
+            Added( item );
+            return true;
+        }
     }
     public int FindIndex( int start, int count, Predicate<T> match )
     {
@@ -174,10 +156,6 @@ public class ConcurrentObservableCollection<T> : CollectionAlerts<T>, IList<T>, 
     public int FindIndex( Predicate<T> match )
     {
         lock (_lock) { return _items.FindIndex( match ); }
-    }
-    public T? FindLast( Predicate<T> match )
-    {
-        lock (_lock) { return _items.FindLast( match ); }
     }
     public int FindLastIndex( int start, int count, Predicate<T> match )
     {
@@ -216,17 +194,6 @@ public class ConcurrentObservableCollection<T> : CollectionAlerts<T>, IList<T>, 
             return _items.IndexOf( value, start, count );
         }
     }
-    public void InsertRange( int index, IEnumerable<T> collection )
-    {
-        lock (_lock)
-        {
-            foreach ( (int i, T? item) in collection.Enumerate( index ) )
-            {
-                _items.Insert( i, item );
-                Added( item, i );
-            }
-        }
-    }
     public int LastIndexOf( T value )
     {
         lock (_lock) { return _items.LastIndexOf( value ); }
@@ -249,14 +216,6 @@ public class ConcurrentObservableCollection<T> : CollectionAlerts<T>, IList<T>, 
         }
     }
 
-
-    public static implicit operator ConcurrentObservableCollection<T>( List<T>                 items ) => new(items);
-    public static implicit operator ConcurrentObservableCollection<T>( HashSet<T>              items ) => new(items);
-    public static implicit operator ConcurrentObservableCollection<T>( ConcurrentBag<T>        items ) => new(items);
-    public static implicit operator ConcurrentObservableCollection<T>( ObservableCollection<T> items ) => new(items);
-    public static implicit operator ConcurrentObservableCollection<T>( Collection<T>           items ) => new(items);
-    public static implicit operator ConcurrentObservableCollection<T>( T[]                     items ) => new(items);
-
     public int RemoveAll( Predicate<T> match )
     {
         lock (_lock)
@@ -271,6 +230,59 @@ public class ConcurrentObservableCollection<T> : CollectionAlerts<T>, IList<T>, 
             }
 
             return results;
+        }
+    }
+    public List<T> FindAll( Predicate<T> match )
+    {
+        lock (_lock) { return _items.FindAll( match ); }
+    }
+    public T? Find( Predicate<T> match )
+    {
+        lock (_lock) { return _items.Find( match ); }
+    }
+    public T? FindLast( Predicate<T> match )
+    {
+        lock (_lock) { return _items.FindLast( match ); }
+    }
+
+
+    public virtual void Add( params T[] items )
+    {
+        lock (_lock)
+        {
+            foreach ( T item in items )
+            {
+                _items.Add( item );
+                Added( item );
+            }
+        }
+    }
+    public virtual void Add( IEnumerable<T> items )
+    {
+        lock (_lock)
+        {
+            foreach ( T item in items )
+            {
+                _items.Add( item );
+                Added( item );
+            }
+        }
+    }
+
+
+    public void CopyTo( T[] array )
+    {
+        lock (_lock) { _items.CopyTo( array, 0 ); }
+    }
+    public void InsertRange( int index, IEnumerable<T> collection )
+    {
+        lock (_lock)
+        {
+            foreach ( (int i, T? item) in collection.Enumerate( index ) )
+            {
+                _items.Insert( i, item );
+                Added( item, i );
+            }
         }
     }
 
@@ -338,18 +350,6 @@ public class ConcurrentObservableCollection<T> : CollectionAlerts<T>, IList<T>, 
 
             _items.Sort( start, count, comparer );
             Reset();
-        }
-    }
-
-    public virtual bool TryAdd( T item )
-    {
-        lock (_lock)
-        {
-            if ( _items.Contains( item ) ) { return false; }
-
-            _items.Add( item );
-            Added( item );
-            return true;
         }
     }
 

@@ -7,12 +7,10 @@ public static class Base64
     public static byte[] FromBase64String( this string b64 ) => Convert.FromBase64String( b64 );
 
 
-    public static TResult JsonFromBase64String<TResult>( this string b64 ) => b64.JsonFromBase64String<TResult>( Encoding.Default );
-    public static TResult JsonFromBase64String<TResult>( this string b64, Encoding encoding )
+    public static MemoryStream ToStreamFromBase64String( this string b64 )
     {
-        byte[] bytes = b64.FromBase64String();
-        string temp  = encoding.GetString( bytes );
-        return temp.FromJson<TResult>();
+        byte[] buffer = b64.FromBase64String();
+        return new MemoryStream( buffer );
     }
 
 
@@ -42,9 +40,11 @@ public static class Base64
     public static string ToBase64( this ReadOnlySpan<byte> payload ) => Convert.ToBase64String( payload );
 
 
-    public static MemoryStream ToStreamFromBase64String( this string b64 )
+    public static TResult JsonFromBase64String<TResult>( this string b64 ) => b64.JsonFromBase64String<TResult>( Encoding.Default );
+    public static TResult JsonFromBase64String<TResult>( this string b64, Encoding encoding )
     {
-        byte[] buffer = b64.FromBase64String();
-        return new MemoryStream( buffer );
+        byte[] bytes = b64.FromBase64String();
+        string temp  = encoding.GetString( bytes );
+        return temp.FromJson<TResult>();
     }
 }

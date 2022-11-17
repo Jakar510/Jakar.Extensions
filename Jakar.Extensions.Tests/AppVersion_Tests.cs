@@ -111,27 +111,17 @@ public class AppVersion_Tests : Assert
     }
 
     [Test]
-    [TestCase( "1", false )]
     [TestCase( "1.0" )]
     [TestCase( "1.2.3" )]
     [TestCase( "1.2.3.4" )]
-    [TestCase( "1.2.3.4.5",   false )]
-    [TestCase( "1.2.3.4.5.6", false )]
     [TestCase( "0.7.0.25" )]
-    [TestCase( "2147483647.2147483647.2147483647.2147483647.2147483647.2147483647", false )]
-    public void ToVersion( string s, bool shouldPass = true )
+    [TestCase( "2147483647.2147483647.2147483647.2147483647" )]
+    public void ToVersion( string s )
     {
-        void Action()
-        {
-            var result = AppVersion.Parse( s )
-                                   .ToVersion();
+        var value = AppVersion.Parse( s )
+                              .ToVersion();
 
-            Version version = Version.Parse( s );
-            AreEqual( version, result );
-        }
-
-        if ( shouldPass ) { DoesNotThrow( Action ); }
-        else { Throws<InvalidOperationException>( Action ); }
+        AreEqual( Version.Parse( s ), value );
     }
 
 
@@ -150,13 +140,10 @@ public class AppVersion_Tests : Assert
     [TestCase( "0.7.0.25" )]
     public void TryParse( string s, bool shouldWork = true )
     {
-        if ( AppVersion.TryParse( s, out AppVersion? version ) )
-        {
-            NotNull( version );
-            return;
-        }
+        bool result = AppVersion.TryParse( s, out AppVersion? version );
+        AreEqual( shouldWork, result );
 
-        False( shouldWork );
+        if ( result ) { NotNull( version ); }
     }
 
 
@@ -242,10 +229,7 @@ public class AppVersion_Tests : Assert
         {
             NotNull( version );
             NotNull( expectedFormat );
-            if ( expectedFormat is null ) { throw new NullReferenceException( s ); }
-
-            AppVersion.Format format = expectedFormat.Value;
-            AreEqual( format, version.Value.Scheme );
+            AreEqual( expectedFormat!.Value, version.Scheme );
 
             return;
         }
@@ -264,7 +248,7 @@ public class AppVersion_Tests : Assert
     [TestCase( "21.12.1", "21.10.3" )]
     [TestCase( "22.10.3", "21.10.3" )]
     [TestCase( "22.12.1", "21.10.3" )]
-    public void Compare_Test_GreaterEqual( string s, string other, bool expected = true ) => AreEqual( expected, AppVersion.Parse( other ) >= AppVersion.Parse( s ) );
+    public void Compare_Test_GreaterEqual( string left, string right, bool expected = true ) => AreEqual( expected, AppVersion.Parse( left ) >= AppVersion.Parse( right ) );
 
 
     [Test]
@@ -277,7 +261,7 @@ public class AppVersion_Tests : Assert
     [TestCase( "21.12.1", "21.10.3" )]
     [TestCase( "22.10.3", "21.10.3" )]
     [TestCase( "22.12.1", "21.10.3" )]
-    public void Compare_Test_Greater( string s, string other, bool expected = true ) => AreEqual( expected, AppVersion.Parse( other ) > AppVersion.Parse( s ) );
+    public void Compare_Test_Greater( string left, string right, bool expected = true ) => AreEqual( expected, AppVersion.Parse( left ) > AppVersion.Parse( right ) );
 
 
     [Test]
@@ -290,7 +274,7 @@ public class AppVersion_Tests : Assert
     [TestCase( "21.12.1", "21.10.3", false )]
     [TestCase( "22.10.3", "21.10.3", false )]
     [TestCase( "22.12.1", "21.10.3", false )]
-    public void Compare_Test_Less( string s, string other, bool expected = true ) => AreEqual( expected, AppVersion.Parse( other ) < AppVersion.Parse( s ) );
+    public void Compare_Test_Less( string left, string right, bool expected = true ) => AreEqual( expected, AppVersion.Parse( left ) < AppVersion.Parse( right ) );
 
 
     [Test]
@@ -303,7 +287,7 @@ public class AppVersion_Tests : Assert
     [TestCase( "21.12.1", "21.10.3", false )]
     [TestCase( "22.10.3", "21.10.3", false )]
     [TestCase( "22.12.1", "21.10.3", false )]
-    public void Compare_Test_LessEqual( string s, string other, bool expected = true ) => AreEqual( expected, AppVersion.Parse( other ) <= AppVersion.Parse( s ) );
+    public void Compare_Test_LessEqual( string left, string right, bool expected = true ) => AreEqual( expected, AppVersion.Parse( left ) <= AppVersion.Parse( right ) );
 
 
     [Test]

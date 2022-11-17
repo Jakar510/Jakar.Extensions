@@ -28,5 +28,5 @@ public enum AltitudeReference
     /// <Docs>
     ///     <summary> The altitude reference system is based on the distance above the tallest surface structures, such as buildings, trees, roads, etc., above terrain or ground level. </summary>
     /// </Docs>
-    Surface
+    Surface,
 }

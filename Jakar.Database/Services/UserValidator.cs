@@ -6,29 +6,6 @@ namespace Jakar.Database;
 
 public class UserValidator : IUserValidator<UserRecord>
 {
-    protected virtual List<IdentityError> Check( UserRecord user )
-    {
-        var errors = new List<IdentityError>();
-
-        if (!user.UserID.IsValidID())
-        {
-            errors.Add( new IdentityError
-                        {
-                            Description = $"{nameof(UserRecord.UserID)} is invalid"
-                        } );
-        }
-
-
-        if (!string.IsNullOrWhiteSpace( user.UserName ))
-        {
-            errors.Add( new IdentityError
-                        {
-                            Description = $"{nameof(UserRecord.UserName)} is invalid"
-                        } );
-        }
-
-        return errors;
-    }
     public static WebApplicationBuilder Register( WebApplicationBuilder builder )
     {
         builder.AddScoped<IUserValidator<UserRecord>, UserValidator>();
@@ -38,6 +15,29 @@ public class UserValidator : IUserValidator<UserRecord>
     {
         builder.AddScoped<IUserValidator<UserRecord>, T>();
         return builder;
+    }
+    protected virtual List<IdentityError> Check( UserRecord user )
+    {
+        var errors = new List<IdentityError>();
+
+        if ( !user.UserID.IsValidID() )
+        {
+            errors.Add( new IdentityError
+                        {
+                            Description = $"{nameof(UserRecord.UserID)} is invalid",
+                        } );
+        }
+
+
+        if ( !string.IsNullOrWhiteSpace( user.UserName ) )
+        {
+            errors.Add( new IdentityError
+                        {
+                            Description = $"{nameof(UserRecord.UserName)} is invalid",
+                        } );
+        }
+
+        return errors;
     }
 
 

@@ -13,7 +13,7 @@ public sealed class RecordCollection<TRecord> : ObservableCollection<TRecord> wh
     public void Add( IEnumerable<TRecord> items ) => items.ForEach( Add );
     public new void Add( TRecord item )
     {
-        if (item.IsValidID())
+        if ( item.IsValidID() )
         {
             base.Add( item );
             return;
@@ -21,7 +21,7 @@ public sealed class RecordCollection<TRecord> : ObservableCollection<TRecord> wh
 
         base.Add( item with
                   {
-                      ID = Count
+                      ID = Count,
                   } );
     }
 }

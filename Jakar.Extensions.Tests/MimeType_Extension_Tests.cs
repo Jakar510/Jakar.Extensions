@@ -13,9 +13,9 @@ namespace Jakar.Extensions.Tests;
 public class MimeType_Extension_Tests : Assert
 {
     [Test]
-    public void Test_FromExtension([Values] MimeType mime)
+    public void Test_FromExtension( [Values] MimeType mime )
     {
-        if (mime is MimeType.NotSet)
+        if ( mime is MimeType.NotSet )
         {
             Throws<ArgumentOutOfRangeException>( () => AreEqual( mime.ToExtension()
                                                                      .FromExtension(),

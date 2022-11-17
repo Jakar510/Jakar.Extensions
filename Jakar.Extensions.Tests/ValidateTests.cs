@@ -89,7 +89,7 @@ public class ValidateTests : Assert
     [TestCase( "bob-tom@random.com", true )]
     [TestCase( "bob_tom@random.com", true )]
     [TestCase( "bob@random",         false )]
-    [TestCase( "bob~@random.com",    false )]
+    [TestCase( "bob~@random.com",    true )]
     [TestCase( "bob@random,com",     false )]
     public void IsEmailAddress( string s, bool expected ) => AreEqual( s.IsEmailAddress(), expected );
 
@@ -106,9 +106,9 @@ public class ValidateTests : Assert
 
     [Test]
     [TestCase( "1.1.1.1",          true )]
-    [TestCase( "1.1.1.1 ",         true )]
-    [TestCase( " 1.1.1.1",         true )]
-    [TestCase( " 1.1.1.1 ",        true )]
+    [TestCase( "1.1.1.1 ",         false )]
+    [TestCase( " 1.1.1.1",         false )]
+    [TestCase( " 1.1.1.1 ",        false )]
     [TestCase( "1.1 .1.1",         false )]
     [TestCase( "1.1..1.1",         false )]
     [TestCase( "1.111.1.1",        true )]
@@ -116,5 +116,5 @@ public class ValidateTests : Assert
     [TestCase( "11.11.11.11",      true )]
     [TestCase( "111.111.111.111",  true )]
     [TestCase( "111.111.111.1111", false )]
-    public void Ip( string s, bool expected ) => AreEqual( s.IsIPv4(), expected );
+    public void Ip( string s, bool expected ) => AreEqual( expected, s.IsIPAddress() );
 }

@@ -7,12 +7,9 @@ namespace Jakar.Database.Migrations;
 public abstract class MigrateUserRoleTable : Migration<UserRoleRecord>
 {
     protected MigrateUserRoleTable() : base() { }
-
-
-    public override void Down() => DeleteTable();
     protected override ICreateTableWithColumnSyntax CreateTable()
     {
-        var table = base.CreateTable();
+        ICreateTableWithColumnSyntax table = base.CreateTable();
 
         table.WithColumn( nameof(UserRoleRecord.RoleID) )
              .AsInt64()
@@ -20,4 +17,7 @@ public abstract class MigrateUserRoleTable : Migration<UserRoleRecord>
 
         return table;
     }
+
+
+    public override void Down() => DeleteTable();
 }

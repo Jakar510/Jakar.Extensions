@@ -8,55 +8,53 @@ namespace Jakar.Database;
 [Table( "Users" )]
 public sealed record UserRecord : TableRecord<UserRecord>, IUserRecord<UserRecord>
 {
-    public const            char                       RECOVERY_CODE_SEPARATOR = ';';
-    private static readonly PasswordHasher<UserRecord> _hasher                 = new();
-    private                 bool                       _isActive;
-    private                 bool                       _isDisabled;
-    private                 bool                       _isEmailConfirmed;
-    private                 bool                       _isLocked;
-    private                 bool                       _isPhoneNumberConfirmed;
-    private                 bool                       _isTwoFactorEnabled;
-    private                 DateTimeOffset?            _lastActive;
-    private                 DateTimeOffset?            _lastBadAttempt;
-    private                 DateTimeOffset?            _lockDate;
-    private                 DateTimeOffset?            _lockEnd;
-    private                 DateTimeOffset?            _refreshTokenExpiryTime;
-    private                 DateTimeOffset?            _subscriptionExpires;
-    private                 DateTimeOffset?            _tokenExpiration;
-    private                 Guid?                      _sessionID;
-    private                 int                        _badLogins;
-    private                 long                       _rights;
-    private                 long?                      _escalateTo;
-    private                 long?                      _subscriptionID;
-    private                 string                     _firstName     = string.Empty;
-    private                 string                     _lastName      = string.Empty;
-    private                 string                     _passwordHash  = string.Empty;
-    private                 string                     _recoveryCodes = string.Empty;
-    private                 string                     _userName      = string.Empty;
-    private                 string?                    _additionalData;
-    private                 string?                    _address;
-    private                 string?                    _city;
-    private                 string?                    _company;
-    private                 string?                    _concurrencyStamp;
-    private                 string?                    _country;
-    private                 string?                    _department;
-    private                 string?                    _description;
-    private                 string?                    _email;
-    private                 string?                    _ext;
-    private                 string?                    _fullName;
-    private                 string?                    _line1;
-    private                 string?                    _line2;
-    private                 string?                    _loginProvider;
-    private                 string?                    _phoneNumber;
-    private                 string?                    _postalCode;
-    private                 string?                    _providerDisplayName;
-    private                 string?                    _providerKey;
-    private                 string?                    _refreshToken;
-    private                 string?                    _securityStamp;
-    private                 string?                    _state;
-    private                 string?                    _title;
-    private                 string?                    _website;
-    private                 SupportedLanguage          _preferredLanguage;
+    private bool              _isActive;
+    private bool              _isDisabled;
+    private bool              _isEmailConfirmed;
+    private bool              _isLocked;
+    private bool              _isPhoneNumberConfirmed;
+    private bool              _isTwoFactorEnabled;
+    private DateTimeOffset?   _lastActive;
+    private DateTimeOffset?   _lastBadAttempt;
+    private DateTimeOffset?   _lockDate;
+    private DateTimeOffset?   _lockEnd;
+    private DateTimeOffset?   _refreshTokenExpiryTime;
+    private DateTimeOffset?   _subscriptionExpires;
+    private DateTimeOffset?   _tokenExpiration;
+    private Guid?             _sessionID;
+    private int               _badLogins;
+    private long              _rights;
+    private long?             _escalateTo;
+    private long?             _subscriptionID;
+    private string            _firstName     = string.Empty;
+    private string            _lastName      = string.Empty;
+    private string            _passwordHash  = string.Empty;
+    private string            _recoveryCodes = string.Empty;
+    private string            _userName      = string.Empty;
+    private string?           _additionalData;
+    private string?           _address;
+    private string?           _city;
+    private string?           _company;
+    private string?           _concurrencyStamp;
+    private string?           _country;
+    private string?           _department;
+    private string?           _description;
+    private string?           _email;
+    private string?           _ext;
+    private string?           _fullName;
+    private string?           _line1;
+    private string?           _line2;
+    private string?           _loginProvider;
+    private string?           _phoneNumber;
+    private string?           _postalCode;
+    private string?           _providerDisplayName;
+    private string?           _providerKey;
+    private string?           _refreshToken;
+    private string?           _securityStamp;
+    private string?           _state;
+    private string?           _title;
+    private string?           _website;
+    private SupportedLanguage _preferredLanguage;
 
 
     public bool IsActive
@@ -429,6 +427,7 @@ public sealed record UserRecord : TableRecord<UserRecord>, IUserRecord<UserRecor
         DateCreated = DateTimeOffset.UtcNow;
         Rights      = rights;
     }
+    public const char RECOVERY_CODE_SEPARATOR = ';';
 
 
     public static DynamicParameters GetDynamicParameters( IUserData data )
@@ -445,6 +444,7 @@ public sealed record UserRecord : TableRecord<UserRecord>, IUserRecord<UserRecor
         parameters.Add( nameof(UserID), request.UserLogin );
         return parameters;
     }
+    private static readonly PasswordHasher<UserRecord> _hasher = new();
 
 
     public static UserRecord Create<TUser>( VerifyRequest<TUser> request, long rights = default ) where TUser : IUserData

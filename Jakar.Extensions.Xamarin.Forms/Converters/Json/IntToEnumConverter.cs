@@ -16,7 +16,7 @@ public class IntToEnumConverter<TEnum> : JsonConverter where TEnum : Enum
         {
             TEnum screens => screens,
             int value     => Enum.ToObject( typeof(TEnum), value ),
-            _             => throw new JsonReaderException( nameof(existingValue) )
+            _             => throw new JsonReaderException( nameof(existingValue) ),
         };
     public override void WriteJson( JsonWriter writer, object? value, JsonSerializer serializer )
     {
@@ -25,7 +25,7 @@ public class IntToEnumConverter<TEnum> : JsonConverter where TEnum : Enum
                             TEnum n => Enum.ToObject( typeof(TEnum), n )
                                            .ToString(),
                             int number => number.ToString(),
-                            _          => throw new JsonReaderException( nameof(value) )
+                            _          => throw new JsonReaderException( nameof(value) ),
                         };
 
         writer.WriteValue( result );

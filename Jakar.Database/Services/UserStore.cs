@@ -85,7 +85,7 @@ public sealed class UserStore : IUserStore
     }
     public async Task SetLockoutEnabledAsync( UserRecord user, bool enabled, CancellationToken token )
     {
-        if (enabled) { user.Disable(); }
+        if ( enabled ) { user.Disable(); }
         else { user.Enable(); }
 
         await _dbContext.Users.Update( user, token );
@@ -156,11 +156,11 @@ public sealed class UserStore : IUserStore
         token.ThrowIfCancellationRequested();
 
 
-        if (await _dbContext.Users.Get( nameof(UserRecord.UserName), user.UserName, token ) is not null)
+        if ( await _dbContext.Users.Get( nameof(UserRecord.UserName), user.UserName, token ) is not null )
         {
             return IdentityResult.Failed( new IdentityError
                                           {
-                                              Description = "User Exists"
+                                              Description = "User Exists",
                                           } );
         }
 
@@ -178,11 +178,11 @@ public sealed class UserStore : IUserStore
             await _dbContext.Users.Delete( user.ID, token );
             return IdentityResult.Success;
         }
-        catch (Exception e)
+        catch ( Exception e )
         {
             return IdentityResult.Failed( new IdentityError
                                           {
-                                              Description = e.Message
+                                              Description = e.Message,
                                           } );
         }
     }
@@ -218,14 +218,14 @@ public sealed class UserStore : IUserStore
     public async Task<bool> RedeemCodeAsync( UserRecord user, string code, CancellationToken token )
     {
         await ValueTask.CompletedTask;
-        if (token.IsCancellationRequested) { return false; }
+        if ( token.IsCancellationRequested ) { return false; }
 
         return user.RedeemCode( code );
     }
     public async Task ReplaceCodesAsync( UserRecord user, IEnumerable<string> recoveryCodes, CancellationToken token )
     {
         await ValueTask.CompletedTask;
-        if (token.IsCancellationRequested) { return; }
+        if ( token.IsCancellationRequested ) { return; }
 
         user.ReplaceCode( recoveryCodes );
     }

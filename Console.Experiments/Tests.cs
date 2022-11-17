@@ -15,7 +15,7 @@ public enum Page
 {
     Home,
     Master,
-    Detail
+    Detail,
 }
 
 
@@ -30,7 +30,7 @@ public static class Tests
     {
         await using AsyncEnumerator<long> data = source.AsAsyncEnumerable( token );
 
-        using (StopWatch.Start())
+        using ( StopWatch.Start() )
         {
             (await data.Where( x => x > 0 )
                        .Where( x => x % 5 == 0 )
@@ -38,7 +38,7 @@ public static class Tests
         }
 
 
-        using (StopWatch.Start())
+        using ( StopWatch.Start() )
         {
             (await data.Where( x => x > 0 )
                        .Where( x => x % 5 == 0 )
@@ -46,7 +46,7 @@ public static class Tests
         }
 
 
-        using (StopWatch.Start())
+        using ( StopWatch.Start() )
         {
             (await data.Where( x => x > 0 )
                        .Where( x => x % 5 == 0 )
@@ -54,7 +54,7 @@ public static class Tests
         }
 
 
-        using (StopWatch.Start())
+        using ( StopWatch.Start() )
         {
             (await data.Where( x => x > 0 )
                        .Where( x => x % 10 == 0 )
@@ -62,7 +62,7 @@ public static class Tests
         }
 
 
-        using (StopWatch.Start())
+        using ( StopWatch.Start() )
         {
             (await data.Where( x => x > 0 )
                        .Where( x => x % 10 == 0 )
@@ -139,7 +139,7 @@ public static class Tests
         WebResponse<LocalFile> response = await builder.Get( "/image/png", token )
                                                        .AsFile( MimeType.Png );
 
-        using (response.Payload) { response.WriteToConsole(); }
+        using ( response.Payload ) { response.WriteToConsole(); }
 
 
         (await builder.Get( "/cookies", token )

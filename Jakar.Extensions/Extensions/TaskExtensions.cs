@@ -57,24 +57,24 @@ public static class Tasks
     public static void WaitAll( this                         IEnumerable<Task>          tasks, CancellationToken token = default ) => Task.WaitAll( tasks.ToArray(), token );
     public static int WaitAny( this                          IEnumerable<Task>          tasks, CancellationToken token = default ) => Task.WaitAny( tasks.ToArray(), token );
 
-    
+
     /// <summary>
     ///     <see href="https://stackoverflow.com/a/63141544/9530917"/>
     /// </summary>
     /// <exception cref="AggregateException"> </exception>
     public static async ValueTask WhenAll( this IEnumerable<ValueTask> tasks, List<Exception>? exceptions = default )
     {
-        foreach (ValueTask task in tasks)
+        foreach ( ValueTask task in tasks )
         {
             try { await task.ConfigureAwait( false ); }
-            catch (Exception ex)
+            catch ( Exception ex )
             {
                 exceptions ??= new List<Exception>();
                 exceptions.Add( ex );
             }
         }
 
-        if (exceptions is not null) { throw new AggregateException( exceptions ); }
+        if ( exceptions is not null ) { throw new AggregateException( exceptions ); }
     }
     /// <summary>
     ///     <see href="https://stackoverflow.com/a/63141544/9530917"/>
@@ -84,14 +84,14 @@ public static class Tasks
     {
         var results = new List<TResult>();
 
-        foreach (ValueTask<TResult> task in tasks)
+        foreach ( ValueTask<TResult> task in tasks )
         {
             try
             {
                 TResult result = await task.ConfigureAwait( false );
                 results.Add( result );
             }
-            catch (Exception ex)
+            catch ( Exception ex )
             {
                 exceptions ??= new List<Exception>();
                 exceptions.Add( ex );

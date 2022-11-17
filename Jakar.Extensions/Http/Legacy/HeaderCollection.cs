@@ -43,20 +43,20 @@ public class HeaderCollection : Dictionary<string, object>
     public HeaderCollection Add( HttpRequestHeader header, object value ) => Add( header.ToString(), value );
     public new HeaderCollection Add( string header, object value )
     {
-        if (string.IsNullOrWhiteSpace( header )) { throw new ArgumentNullException( nameof(header) ); }
+        if ( string.IsNullOrWhiteSpace( header ) ) { throw new ArgumentNullException( nameof(header) ); }
 
         base.Add( header, value );
         return this;
     }
     public HeaderCollection Add( IDictionary<string, object> headers )
     {
-        foreach ((string key, object value) in headers) { Add( key, value ); }
+        foreach ( (string key, object value) in headers ) { Add( key, value ); }
 
         return this;
     }
     public HeaderCollection Add( IDictionary<HttpRequestHeader, object> headers )
     {
-        foreach (KeyValuePair<HttpRequestHeader, object> pair in headers) { Add( pair ); }
+        foreach ( KeyValuePair<HttpRequestHeader, object> pair in headers ) { Add( pair ); }
 
         return this;
     }
@@ -71,16 +71,16 @@ public class HeaderCollection : Dictionary<string, object>
 
     public HeaderCollection Merge( HeaderCollection headers )
     {
-        foreach ((string key, object value) in headers) { this[key] = value; }
+        foreach ( (string key, object value) in headers ) { this[key] = value; }
 
         return this;
     }
     public HeaderCollection Merge( HttpRequestMessage request ) => Merge( request.Headers );
     public HeaderCollection Merge( HttpHeaders headers )
     {
-        foreach ((string key, object value) in this)
+        foreach ( (string key, object value) in this )
         {
-            switch (value)
+            switch ( value )
             {
                 case string s:
                     headers.Add( key, s );
@@ -96,9 +96,9 @@ public class HeaderCollection : Dictionary<string, object>
     }
     public HeaderCollection Merge( HttpContentHeaders headers )
     {
-        foreach ((string key, object value) in this)
+        foreach ( (string key, object value) in this )
         {
-            switch (value)
+            switch ( value )
             {
                 case string s:
                     headers.Add( key, s );

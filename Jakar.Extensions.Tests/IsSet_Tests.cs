@@ -48,7 +48,7 @@ public class IsSet_Tests : Assert
     [TestCase( typeof(List<Guid>),                 null )]
     public void IsSet_Args_Test( Type objType, Type? expected )
     {
-        if (objType.IsSet( out Type? itemType ))
+        if ( objType.IsSet( out Type? itemType ) )
         {
             AreEqual( itemType, expected );
             return;

@@ -22,12 +22,12 @@ public class VerifyRequest : BaseClass, ILoginRequest, ICredentials, IEquatable<
         UserLogin    = userName ?? throw new ArgumentNullException( nameof(userName) );
         UserPassword = userPassword ?? throw new ArgumentNullException( nameof(userPassword) );
     }
-    public override bool Equals( object? obj ) => obj is VerifyRequest request && Equals( request );
-    public override int GetHashCode() => HashCode.Combine( UserLogin, UserPassword );
 
 
     public static bool operator ==( VerifyRequest? left, VerifyRequest? right ) => Equals( left, right );
     public static bool operator !=( VerifyRequest? left, VerifyRequest? right ) => !Equals( left, right );
+    public override bool Equals( object?           obj ) => obj is VerifyRequest request && Equals( request );
+    public override int GetHashCode() => HashCode.Combine( UserLogin, UserPassword );
 
 
     public virtual NetworkCredential GetCredential( Uri uri, string authType ) => new(UserLogin, UserPassword.ToSecureString());
@@ -35,9 +35,9 @@ public class VerifyRequest : BaseClass, ILoginRequest, ICredentials, IEquatable<
 
     public virtual bool Equals( VerifyRequest? other )
     {
-        if (other is null) { return false; }
+        if ( other is null ) { return false; }
 
-        if (ReferenceEquals( this, other )) { return true; }
+        if ( ReferenceEquals( this, other ) ) { return true; }
 
         return UserLogin == other.UserLogin && UserPassword == other.UserPassword;
     }
@@ -61,19 +61,19 @@ public class VerifyRequest<T> : BaseClass, ICredentials, IValidator, IEquatable<
         Request = request;
         Data    = data;
     }
-    public override bool Equals( object? other )
-    {
-        if (other is null) { return false; }
-
-        if (ReferenceEquals( this, other )) { return true; }
-
-        return other is VerifyRequest<T> request && Equals( request );
-    }
-    public override int GetHashCode() => HashCode.Combine( Request, Data );
 
 
     public static bool operator ==( VerifyRequest<T>? left, VerifyRequest<T>? right ) => Equals( left, right );
     public static bool operator !=( VerifyRequest<T>? left, VerifyRequest<T>? right ) => !Equals( left, right );
+    public override bool Equals( object? other )
+    {
+        if ( other is null ) { return false; }
+
+        if ( ReferenceEquals( this, other ) ) { return true; }
+
+        return other is VerifyRequest<T> request && Equals( request );
+    }
+    public override int GetHashCode() => HashCode.Combine( Request, Data );
 
 
     public NetworkCredential GetCredential( Uri uri, string authType ) => Request.GetCredential( uri, authType );
@@ -81,9 +81,9 @@ public class VerifyRequest<T> : BaseClass, ICredentials, IValidator, IEquatable<
 
     public bool Equals( VerifyRequest<T>? other )
     {
-        if (other is null) { return false; }
+        if ( other is null ) { return false; }
 
-        if (ReferenceEquals( this, other )) { return true; }
+        if ( ReferenceEquals( this, other ) ) { return true; }
 
         return Request.Equals( other.Request ) && EqualityComparer<T>.Default.Equals( Data, other.Data );
     }

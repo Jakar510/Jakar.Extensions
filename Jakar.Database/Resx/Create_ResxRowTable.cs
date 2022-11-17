@@ -13,12 +13,9 @@ public abstract class MigrateResxRowTable : Migration<ResxRowTable>
     protected MigrateResxRowTable() : base() { }
 
 
-    public override void Down() => DeleteTable();
-
-
     protected override ICreateTableWithColumnSyntax CreateTable()
     {
-        var table = base.CreateTable();
+        ICreateTableWithColumnSyntax table = base.CreateTable();
 
         table.WithColumn( nameof(ResxRowTable.Key) )
              .AsString( int.MaxValue )
@@ -86,4 +83,7 @@ public abstract class MigrateResxRowTable : Migration<ResxRowTable>
 
         return table;
     }
+
+
+    public override void Down() => DeleteTable();
 }

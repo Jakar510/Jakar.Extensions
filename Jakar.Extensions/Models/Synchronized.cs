@@ -10,9 +10,9 @@ namespace Jakar.Extensions;
 
 
 /// <summary>
-///     <seealso href = "https://www.codeproject.com/Articles/33559/Handy-wrapper-class-for-thread-safe-property-acces" />
+///     <seealso href="https://www.codeproject.com/Articles/33559/Handy-wrapper-class-for-thread-safe-property-acces"/>
 /// </summary>
-/// <typeparam name = "TStruct" > The value type. </typeparam>
+/// <typeparam name="TStruct"> The value type. </typeparam>
 public class Synchronized<TStruct> where TStruct : struct
 {
     private readonly object _lock;

@@ -6,7 +6,7 @@ namespace Jakar.Extensions;
 
 
 /// <summary>
-///     <see href = "https://www.educative.io/edpresso/how-to-generate-a-random-string--c-sharp" />
+///     <see href="https://www.educative.io/edpresso/how-to-generate-a-random-string--c-sharp"/>
 /// </summary>
 public class Randoms : ObservableClass
 {

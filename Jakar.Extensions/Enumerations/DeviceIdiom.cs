@@ -8,5 +8,5 @@ public enum DeviceIdiom
     Tablet,
     Desktop,
     TV,
-    Watch
+    Watch,
 }

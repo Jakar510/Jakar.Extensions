@@ -6,8 +6,8 @@ namespace Jakar.Database;
 
 public interface IConnectableDb
 {
-    public string     CurrentSchema { get; }
     public DbInstance Instance      { get; }
+    public string     CurrentSchema { get; }
 
 
     public DbConnection Connect();

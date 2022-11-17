@@ -9,12 +9,9 @@ public abstract class MigrateRoleTable : Migration<RoleRecord>
     protected MigrateRoleTable() : base() { }
 
 
-    public override void Down() => DeleteTable();
-
-
     protected override ICreateTableWithColumnSyntax CreateTable()
     {
-        var table = base.CreateTable();
+        ICreateTableWithColumnSyntax table = base.CreateTable();
 
         table.WithColumn( nameof(RoleRecord.Name) )
              .AsString( 1024 )
@@ -30,4 +27,7 @@ public abstract class MigrateRoleTable : Migration<RoleRecord>
 
         return table;
     }
+
+
+    public override void Down() => DeleteTable();
 }

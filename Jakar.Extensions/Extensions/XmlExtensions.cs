@@ -9,14 +9,14 @@ namespace Jakar.Extensions;
 [Obsolete( "Will be removed in a future version, and moved to a dedicated nuget" )]
 public static class XmlNames
 {
-    public const string ITEM              = "item";
-    public const string ELEMENT           = "element";
-    public const string PAIR              = "pair";
-    public const string KEY               = "key";
-    public const string VALUE             = "value";
     public const string DICTIONARY        = "Dictionary";
+    public const string ELEMENT           = "element";
+    public const string ITEM              = "item";
+    public const string KEY               = "key";
     public const string LIST              = "List";
+    public const string PAIR              = "pair";
     public const string TARGET_TABLE_NAME = "TargetTableName";
+    public const string VALUE             = "value";
 }
 
 
@@ -25,16 +25,6 @@ public static class XmlNames
 [SuppressMessage( "ReSharper", "ParameterTypeCanBeEnumerable.Global" )]
 public static class XmlExtensions
 {
-    public static TResult? DeserializeXml<TResult>( this string xml )
-    {
-        if (string.IsNullOrWhiteSpace( xml )) { return default; }
-
-        var doc = new XmlDocument();
-        doc.LoadXml( xml );
-
-        string json = JsonConvert.SerializeXmlNode( doc );
-        return json.FromJson<TResult>();
-    }
     private static string PrettyXml( this XmlDocument document )
     {
         var settings = new XmlWriterSettings
@@ -43,7 +33,7 @@ public static class XmlExtensions
                            Indent              = true,
                            NewLineOnAttributes = true,
                            OmitXmlDeclaration  = true,
-                           IndentChars         = new string( ' ', 4 )
+                           IndentChars         = new string( ' ', 4 ),
                        };
 
         var builder = new StringBuilder();
@@ -70,6 +60,16 @@ public static class XmlExtensions
         string? result = node?.PrettyXml();
         return result ?? throw new InvalidOperationException();
     }
+    public static TResult? DeserializeXml<TResult>( this string xml )
+    {
+        if ( string.IsNullOrWhiteSpace( xml ) ) { return default; }
+
+        var doc = new XmlDocument();
+        doc.LoadXml( xml );
+
+        string json = JsonConvert.SerializeXmlNode( doc );
+        return json.FromJson<TResult>();
+    }
 
 
 
@@ -84,7 +84,7 @@ public static class XmlExtensions
         listOfIds.ToList()
                  .ToXml( new Dictionary<string, string>
                          {
-                             [XmlNames.TARGET_TABLE_NAME] = typeof(T).GetTableName()
+                             [XmlNames.TARGET_TABLE_NAME] = typeof(T).GetTableName(),
                          } );
 
     public static List<long> GetMappedIDs( this string xml, out IDictionary<string, string>? attributes ) => xml.ToRawXml()
@@ -126,9 +126,9 @@ public static class XmlExtensions
         attribute.InnerText = XmlNames.LIST;
         node.Attributes?.Append( attribute );
 
-        if (attributes is not null)
+        if ( attributes is not null )
         {
-            foreach ((string key, string value) in attributes)
+            foreach ( (string key, string value) in attributes )
             {
                 XmlAttribute attributeItem = document.CreateAttribute( key, null );
                 attributeItem.InnerText = value;
@@ -137,12 +137,12 @@ public static class XmlExtensions
         }
 
 
-        foreach (TValue element in item)
+        foreach ( TValue element in item )
         {
             XmlNode child = document.CreateNode( XmlNodeType.Element, XmlNames.ELEMENT, null );
 
             XmlNode? id = node.AppendChild( child );
-            if (id is null) { throw new NullReferenceException( nameof(id) ); }
+            if ( id is null ) { throw new NullReferenceException( nameof(id) ); }
 
             id.InnerText = element?.ToString() ?? throw new SerializationException( nameof(element) );
         }
@@ -187,9 +187,9 @@ public static class XmlExtensions
         attribute.InnerText = XmlNames.DICTIONARY;
         node.Attributes?.Append( attribute );
 
-        if (attributes is not null)
+        if ( attributes is not null )
         {
-            foreach ((string key, string value) in attributes)
+            foreach ( (string key, string value) in attributes )
             {
                 XmlAttribute attributeItem = document.CreateAttribute( key, null );
                 attributeItem.InnerText = value;
@@ -197,7 +197,7 @@ public static class XmlExtensions
             }
         }
 
-        foreach (KeyValuePair<string, TValue> pair in item)
+        foreach ( KeyValuePair<string, TValue> pair in item )
         {
             XmlNode element = document.CreateNode( XmlNodeType.Element, XmlNames.PAIR,  null );
             XmlNode key     = document.CreateNode( XmlNodeType.Element, XmlNames.KEY,   null );
@@ -205,15 +205,15 @@ public static class XmlExtensions
 
             XmlNode? keyId   = element.AppendChild( key );
             XmlNode? valueId = element.AppendChild( value );
-            if (keyId is null) { throw new NullReferenceException( nameof(keyId) ); }
+            if ( keyId is null ) { throw new NullReferenceException( nameof(keyId) ); }
 
-            if (valueId is null) { throw new NullReferenceException( nameof(valueId) ); }
+            if ( valueId is null ) { throw new NullReferenceException( nameof(valueId) ); }
 
             keyId.InnerText   = pair.Key ?? throw new SerializationException( nameof(pair.Key) );
             valueId.InnerText = pair.Value?.ToString() ?? throw new SerializationException( nameof(pair.Value) );
 
             XmlNode? id = node.AppendChild( element );
-            if (id is null) { throw new NullReferenceException( nameof(id) ); }
+            if ( id is null ) { throw new NullReferenceException( nameof(id) ); }
         }
 
         document.AppendChild( node );
@@ -235,15 +235,15 @@ public static class XmlExtensions
     {
         XmlNode? root = document.ChildNodes[0];
 
-        if (root?.Name != XmlNames.ITEM) { throw new SerializationException( nameof(root.Name) ); }
+        if ( root?.Name != XmlNames.ITEM ) { throw new SerializationException( nameof(root.Name) ); }
 
         XmlAttributeCollection? attributesCollection = root.Attributes;
 
-        if (attributesCollection is not null)
+        if ( attributesCollection is not null )
         {
             attributes = new Dictionary<string, string>();
 
-            for (int i = 0; i < attributesCollection.Count; i++)
+            for ( int i = 0; i < attributesCollection.Count; i++ )
             {
                 XmlAttribute attribute = attributesCollection[i];
                 attributes[attribute.Name] = attribute.InnerText;
@@ -254,22 +254,22 @@ public static class XmlExtensions
 
         var results = new Dictionary<string, string>();
 
-        for (int i = 0; i < root.ChildNodes.Count; i++)
+        for ( int i = 0; i < root.ChildNodes.Count; i++ )
         {
             XmlNode? node = root.ChildNodes[i];
-            if (node?.Name is null) { continue; }
+            if ( node?.Name is null ) { continue; }
 
-            if (node.Name != XmlNames.PAIR) { throw new SerializationException( nameof(node.Name) ); }
+            if ( node.Name != XmlNames.PAIR ) { throw new SerializationException( nameof(node.Name) ); }
 
             string key   = "";
             string value = "";
 
-            for (int c = 0; c < node.ChildNodes.Count; c++)
+            for ( int c = 0; c < node.ChildNodes.Count; c++ )
             {
                 XmlNode? child = node.ChildNodes[c];
-                if (child?.Name is null) { throw new NullReferenceException( nameof(child.InnerText) ); }
+                if ( child?.Name is null ) { throw new NullReferenceException( nameof(child.InnerText) ); }
 
-                switch (child.Name)
+                switch ( child.Name )
                 {
                     case XmlNames.KEY:
                         key = child.InnerText;
@@ -281,7 +281,7 @@ public static class XmlExtensions
                 }
             }
 
-            if (string.IsNullOrWhiteSpace( key )) { throw new NullReferenceException( nameof(key) ); }
+            if ( string.IsNullOrWhiteSpace( key ) ) { throw new NullReferenceException( nameof(key) ); }
 
             results[key] = value;
         }
@@ -294,15 +294,15 @@ public static class XmlExtensions
     {
         XmlNode? root = document.ChildNodes[0];
 
-        if (root?.Name != XmlNames.ITEM) { throw new SerializationException( nameof(root.Name) ); }
+        if ( root?.Name != XmlNames.ITEM ) { throw new SerializationException( nameof(root.Name) ); }
 
         XmlAttributeCollection? attributesCollection = root.Attributes;
 
-        if (attributesCollection is not null)
+        if ( attributesCollection is not null )
         {
             attributes = new Dictionary<string, string>();
 
-            for (int i = 0; i < attributesCollection.Count; i++)
+            for ( int i = 0; i < attributesCollection.Count; i++ )
             {
                 XmlAttribute attribute = attributesCollection[i];
                 attributes[attribute.Name] = attribute.InnerText;
@@ -313,22 +313,22 @@ public static class XmlExtensions
 
         var results = new Dictionary<string, Guid>();
 
-        for (int i = 0; i < root.ChildNodes.Count; i++)
+        for ( int i = 0; i < root.ChildNodes.Count; i++ )
         {
             XmlNode? node = root.ChildNodes[i];
-            if (node?.Name is null) { continue; }
+            if ( node?.Name is null ) { continue; }
 
-            if (node.Name != XmlNames.PAIR) { throw new SerializationException( nameof(node.Name) ); }
+            if ( node.Name != XmlNames.PAIR ) { throw new SerializationException( nameof(node.Name) ); }
 
             string key   = "";
             Guid   value = default;
 
-            for (int c = 0; c < node.ChildNodes.Count; c++)
+            for ( int c = 0; c < node.ChildNodes.Count; c++ )
             {
                 XmlNode? child = node.ChildNodes[c];
-                if (child?.Name is null) { throw new NullReferenceException( nameof(child.InnerText) ); }
+                if ( child?.Name is null ) { throw new NullReferenceException( nameof(child.InnerText) ); }
 
-                switch (child.Name)
+                switch ( child.Name )
                 {
                     case XmlNames.KEY:
                         key = child.InnerText;
@@ -340,7 +340,7 @@ public static class XmlExtensions
                 }
             }
 
-            if (string.IsNullOrWhiteSpace( key )) { throw new NullReferenceException( nameof(key) ); }
+            if ( string.IsNullOrWhiteSpace( key ) ) { throw new NullReferenceException( nameof(key) ); }
 
             results[key] = value;
         }
@@ -353,15 +353,15 @@ public static class XmlExtensions
     {
         XmlNode? root = document.ChildNodes[0];
 
-        if (root?.Name != XmlNames.ITEM) { throw new SerializationException( nameof(root.Name) ); }
+        if ( root?.Name != XmlNames.ITEM ) { throw new SerializationException( nameof(root.Name) ); }
 
         XmlAttributeCollection? attributesCollection = root.Attributes;
 
-        if (attributesCollection is not null)
+        if ( attributesCollection is not null )
         {
             attributes = new Dictionary<string, string>();
 
-            for (int i = 0; i < attributesCollection.Count; i++)
+            for ( int i = 0; i < attributesCollection.Count; i++ )
             {
                 XmlAttribute attribute = attributesCollection[i];
                 attributes[attribute.Name] = attribute.InnerText;
@@ -372,22 +372,22 @@ public static class XmlExtensions
 
         var results = new Dictionary<string, Guid?>();
 
-        for (int i = 0; i < root.ChildNodes.Count; i++)
+        for ( int i = 0; i < root.ChildNodes.Count; i++ )
         {
             XmlNode? node = root.ChildNodes[i];
-            if (node?.Name is null) { continue; }
+            if ( node?.Name is null ) { continue; }
 
-            if (node.Name != XmlNames.PAIR) { throw new SerializationException( nameof(node.Name) ); }
+            if ( node.Name != XmlNames.PAIR ) { throw new SerializationException( nameof(node.Name) ); }
 
             string key   = "";
             Guid?  value = default;
 
-            for (int c = 0; c < node.ChildNodes.Count; c++)
+            for ( int c = 0; c < node.ChildNodes.Count; c++ )
             {
                 XmlNode? child = node.ChildNodes[c];
-                if (child?.Name is null) { throw new NullReferenceException( nameof(child.InnerText) ); }
+                if ( child?.Name is null ) { throw new NullReferenceException( nameof(child.InnerText) ); }
 
-                switch (child.Name)
+                switch ( child.Name )
                 {
                     case XmlNames.KEY:
                         key = child.InnerText;
@@ -399,7 +399,7 @@ public static class XmlExtensions
                 }
             }
 
-            if (string.IsNullOrWhiteSpace( key )) { throw new NullReferenceException( nameof(key) ); }
+            if ( string.IsNullOrWhiteSpace( key ) ) { throw new NullReferenceException( nameof(key) ); }
 
             results[key] = value;
         }
@@ -412,15 +412,15 @@ public static class XmlExtensions
     {
         XmlNode? root = document.ChildNodes[0];
 
-        if (root?.Name != XmlNames.ITEM) { throw new SerializationException( nameof(root.Name) ); }
+        if ( root?.Name != XmlNames.ITEM ) { throw new SerializationException( nameof(root.Name) ); }
 
         XmlAttributeCollection? attributesCollection = root.Attributes;
 
-        if (attributesCollection is not null)
+        if ( attributesCollection is not null )
         {
             attributes = new Dictionary<string, string>();
 
-            for (int i = 0; i < attributesCollection.Count; i++)
+            for ( int i = 0; i < attributesCollection.Count; i++ )
             {
                 XmlAttribute attribute = attributesCollection[i];
                 attributes[attribute.Name] = attribute.InnerText;
@@ -431,22 +431,22 @@ public static class XmlExtensions
 
         var results = new Dictionary<string, bool>();
 
-        for (int i = 0; i < root.ChildNodes.Count; i++)
+        for ( int i = 0; i < root.ChildNodes.Count; i++ )
         {
             XmlNode? node = root.ChildNodes[i];
-            if (node?.Name is null) { continue; }
+            if ( node?.Name is null ) { continue; }
 
-            if (node.Name != XmlNames.PAIR) { throw new SerializationException( nameof(node.Name) ); }
+            if ( node.Name != XmlNames.PAIR ) { throw new SerializationException( nameof(node.Name) ); }
 
             string key   = "";
             bool   value = default;
 
-            for (int c = 0; c < node.ChildNodes.Count; c++)
+            for ( int c = 0; c < node.ChildNodes.Count; c++ )
             {
                 XmlNode? child = node.ChildNodes[c];
-                if (child?.Name is null) { throw new NullReferenceException( nameof(child.InnerText) ); }
+                if ( child?.Name is null ) { throw new NullReferenceException( nameof(child.InnerText) ); }
 
-                switch (child.Name)
+                switch ( child.Name )
                 {
                     case XmlNames.KEY:
                         key = child.InnerText;
@@ -458,7 +458,7 @@ public static class XmlExtensions
                 }
             }
 
-            if (string.IsNullOrWhiteSpace( key )) { throw new NullReferenceException( nameof(key) ); }
+            if ( string.IsNullOrWhiteSpace( key ) ) { throw new NullReferenceException( nameof(key) ); }
 
             results[key] = value;
         }
@@ -471,15 +471,15 @@ public static class XmlExtensions
     {
         XmlNode? root = document.ChildNodes[0];
 
-        if (root?.Name != XmlNames.ITEM) { throw new SerializationException( nameof(root.Name) ); }
+        if ( root?.Name != XmlNames.ITEM ) { throw new SerializationException( nameof(root.Name) ); }
 
         XmlAttributeCollection? attributesCollection = root.Attributes;
 
-        if (attributesCollection is not null)
+        if ( attributesCollection is not null )
         {
             attributes = new Dictionary<string, string>();
 
-            for (int i = 0; i < attributesCollection.Count; i++)
+            for ( int i = 0; i < attributesCollection.Count; i++ )
             {
                 XmlAttribute attribute = attributesCollection[i];
                 attributes[attribute.Name] = attribute.InnerText;
@@ -490,22 +490,22 @@ public static class XmlExtensions
 
         var results = new Dictionary<string, bool?>();
 
-        for (int i = 0; i < root.ChildNodes.Count; i++)
+        for ( int i = 0; i < root.ChildNodes.Count; i++ )
         {
             XmlNode? node = root.ChildNodes[i];
-            if (node?.Name is null) { continue; }
+            if ( node?.Name is null ) { continue; }
 
-            if (node.Name != XmlNames.PAIR) { throw new SerializationException( nameof(node.Name) ); }
+            if ( node.Name != XmlNames.PAIR ) { throw new SerializationException( nameof(node.Name) ); }
 
             string key   = "";
             bool?  value = default;
 
-            for (int c = 0; c < node.ChildNodes.Count; c++)
+            for ( int c = 0; c < node.ChildNodes.Count; c++ )
             {
                 XmlNode? child = node.ChildNodes[c];
-                if (child?.Name is null) { throw new NullReferenceException( nameof(child.InnerText) ); }
+                if ( child?.Name is null ) { throw new NullReferenceException( nameof(child.InnerText) ); }
 
-                switch (child.Name)
+                switch ( child.Name )
                 {
                     case XmlNames.KEY:
                         key = child.InnerText;
@@ -517,7 +517,7 @@ public static class XmlExtensions
                 }
             }
 
-            if (string.IsNullOrWhiteSpace( key )) { throw new NullReferenceException( nameof(key) ); }
+            if ( string.IsNullOrWhiteSpace( key ) ) { throw new NullReferenceException( nameof(key) ); }
 
             results[key] = value;
         }
@@ -530,15 +530,15 @@ public static class XmlExtensions
     {
         XmlNode? root = document.ChildNodes[0];
 
-        if (root?.Name != XmlNames.ITEM) { throw new SerializationException( nameof(root.Name) ); }
+        if ( root?.Name != XmlNames.ITEM ) { throw new SerializationException( nameof(root.Name) ); }
 
         XmlAttributeCollection? attributesCollection = root.Attributes;
 
-        if (attributesCollection is not null)
+        if ( attributesCollection is not null )
         {
             attributes = new Dictionary<string, string>();
 
-            for (int i = 0; i < attributesCollection.Count; i++)
+            for ( int i = 0; i < attributesCollection.Count; i++ )
             {
                 XmlAttribute attribute = attributesCollection[i];
                 attributes[attribute.Name] = attribute.InnerText;
@@ -549,22 +549,22 @@ public static class XmlExtensions
 
         var results = new Dictionary<string, double>();
 
-        for (int i = 0; i < root.ChildNodes.Count; i++)
+        for ( int i = 0; i < root.ChildNodes.Count; i++ )
         {
             XmlNode? node = root.ChildNodes[i];
-            if (node?.Name is null) { continue; }
+            if ( node?.Name is null ) { continue; }
 
-            if (node.Name != XmlNames.PAIR) { throw new SerializationException( nameof(node.Name) ); }
+            if ( node.Name != XmlNames.PAIR ) { throw new SerializationException( nameof(node.Name) ); }
 
             string key   = "";
             double value = default;
 
-            for (int c = 0; c < node.ChildNodes.Count; c++)
+            for ( int c = 0; c < node.ChildNodes.Count; c++ )
             {
                 XmlNode? child = node.ChildNodes[c];
-                if (child?.Name is null) { throw new NullReferenceException( nameof(child.InnerText) ); }
+                if ( child?.Name is null ) { throw new NullReferenceException( nameof(child.InnerText) ); }
 
-                switch (child.Name)
+                switch ( child.Name )
                 {
                     case XmlNames.KEY:
                         key = child.InnerText;
@@ -576,7 +576,7 @@ public static class XmlExtensions
                 }
             }
 
-            if (string.IsNullOrWhiteSpace( key )) { throw new NullReferenceException( nameof(key) ); }
+            if ( string.IsNullOrWhiteSpace( key ) ) { throw new NullReferenceException( nameof(key) ); }
 
             results[key] = value;
         }
@@ -589,15 +589,15 @@ public static class XmlExtensions
     {
         XmlNode? root = document.ChildNodes[0];
 
-        if (root?.Name != XmlNames.ITEM) { throw new SerializationException( nameof(root.Name) ); }
+        if ( root?.Name != XmlNames.ITEM ) { throw new SerializationException( nameof(root.Name) ); }
 
         XmlAttributeCollection? attributesCollection = root.Attributes;
 
-        if (attributesCollection is not null)
+        if ( attributesCollection is not null )
         {
             attributes = new Dictionary<string, string>();
 
-            for (int i = 0; i < attributesCollection.Count; i++)
+            for ( int i = 0; i < attributesCollection.Count; i++ )
             {
                 XmlAttribute attribute = attributesCollection[i];
                 attributes[attribute.Name] = attribute.InnerText;
@@ -608,22 +608,22 @@ public static class XmlExtensions
 
         var results = new Dictionary<string, double?>();
 
-        for (int i = 0; i < root.ChildNodes.Count; i++)
+        for ( int i = 0; i < root.ChildNodes.Count; i++ )
         {
             XmlNode? node = root.ChildNodes[i];
-            if (node?.Name is null) { continue; }
+            if ( node?.Name is null ) { continue; }
 
-            if (node.Name != XmlNames.PAIR) { throw new SerializationException( nameof(node.Name) ); }
+            if ( node.Name != XmlNames.PAIR ) { throw new SerializationException( nameof(node.Name) ); }
 
             string  key   = "";
             double? value = default;
 
-            for (int c = 0; c < node.ChildNodes.Count; c++)
+            for ( int c = 0; c < node.ChildNodes.Count; c++ )
             {
                 XmlNode? child = node.ChildNodes[c];
-                if (child?.Name is null) { throw new NullReferenceException( nameof(child.InnerText) ); }
+                if ( child?.Name is null ) { throw new NullReferenceException( nameof(child.InnerText) ); }
 
-                switch (child.Name)
+                switch ( child.Name )
                 {
                     case XmlNames.KEY:
                         key = child.InnerText;
@@ -635,7 +635,7 @@ public static class XmlExtensions
                 }
             }
 
-            if (string.IsNullOrWhiteSpace( key )) { throw new NullReferenceException( nameof(key) ); }
+            if ( string.IsNullOrWhiteSpace( key ) ) { throw new NullReferenceException( nameof(key) ); }
 
             results[key] = value;
         }
@@ -650,24 +650,24 @@ public static class XmlExtensions
 
         XmlNode? root = document.ChildNodes[0];
 
-        if (root?.Name != XmlNames.ITEM) { throw new SerializationException( nameof(root.Name) ); }
+        if ( root?.Name != XmlNames.ITEM ) { throw new SerializationException( nameof(root.Name) ); }
 
-        for (int i = 0; i < root.ChildNodes.Count; i++)
+        for ( int i = 0; i < root.ChildNodes.Count; i++ )
         {
             XmlNode? node = root.ChildNodes[i];
-            if (node?.Name is null) { continue; }
+            if ( node?.Name is null ) { continue; }
 
-            if (node.Name != XmlNames.PAIR) { throw new SerializationException( nameof(node.Name) ); }
+            if ( node.Name != XmlNames.PAIR ) { throw new SerializationException( nameof(node.Name) ); }
 
             string key   = "";
             long   value = default;
 
-            for (int c = 0; c < node.ChildNodes.Count; c++)
+            for ( int c = 0; c < node.ChildNodes.Count; c++ )
             {
                 XmlNode? child = node.ChildNodes[c];
-                if (child?.Name is null) { throw new NullReferenceException( nameof(child.InnerText) ); }
+                if ( child?.Name is null ) { throw new NullReferenceException( nameof(child.InnerText) ); }
 
-                switch (child.Name)
+                switch ( child.Name )
                 {
                     case XmlNames.KEY:
                         key = child.InnerText;
@@ -679,7 +679,7 @@ public static class XmlExtensions
                 }
             }
 
-            if (string.IsNullOrWhiteSpace( key )) { throw new NullReferenceException( nameof(key) ); }
+            if ( string.IsNullOrWhiteSpace( key ) ) { throw new NullReferenceException( nameof(key) ); }
 
             results[key] = value;
         }
@@ -692,15 +692,15 @@ public static class XmlExtensions
     {
         XmlNode? root = document.ChildNodes[0];
 
-        if (root?.Name != XmlNames.ITEM) { throw new SerializationException( nameof(root.Name) ); }
+        if ( root?.Name != XmlNames.ITEM ) { throw new SerializationException( nameof(root.Name) ); }
 
         XmlAttributeCollection? attributesCollection = root.Attributes;
 
-        if (attributesCollection is not null)
+        if ( attributesCollection is not null )
         {
             attributes = new Dictionary<string, string>();
 
-            for (int i = 0; i < attributesCollection.Count; i++)
+            for ( int i = 0; i < attributesCollection.Count; i++ )
             {
                 XmlAttribute attribute = attributesCollection[i];
                 attributes[attribute.Name] = attribute.InnerText;
@@ -711,22 +711,22 @@ public static class XmlExtensions
 
         var results = new Dictionary<string, long?>();
 
-        for (int i = 0; i < root.ChildNodes.Count; i++)
+        for ( int i = 0; i < root.ChildNodes.Count; i++ )
         {
             XmlNode? node = root.ChildNodes[i];
-            if (node?.Name is null) { continue; }
+            if ( node?.Name is null ) { continue; }
 
-            if (node.Name != XmlNames.PAIR) { throw new SerializationException( nameof(node.Name) ); }
+            if ( node.Name != XmlNames.PAIR ) { throw new SerializationException( nameof(node.Name) ); }
 
             string key   = "";
             long?  value = default;
 
-            for (int c = 0; c < node.ChildNodes.Count; c++)
+            for ( int c = 0; c < node.ChildNodes.Count; c++ )
             {
                 XmlNode? child = node.ChildNodes[c];
-                if (child?.Name is null) { throw new NullReferenceException( nameof(child.InnerText) ); }
+                if ( child?.Name is null ) { throw new NullReferenceException( nameof(child.InnerText) ); }
 
-                switch (child.Name)
+                switch ( child.Name )
                 {
                     case XmlNames.KEY:
                         key = child.InnerText;
@@ -738,7 +738,7 @@ public static class XmlExtensions
                 }
             }
 
-            if (string.IsNullOrWhiteSpace( key )) { throw new NullReferenceException( nameof(key) ); }
+            if ( string.IsNullOrWhiteSpace( key ) ) { throw new NullReferenceException( nameof(key) ); }
 
             results[key] = value;
         }
@@ -751,15 +751,15 @@ public static class XmlExtensions
     {
         XmlNode? root = document.ChildNodes[0];
 
-        if (root?.Name != XmlNames.ITEM) { throw new SerializationException( nameof(root.Name) ); }
+        if ( root?.Name != XmlNames.ITEM ) { throw new SerializationException( nameof(root.Name) ); }
 
         XmlAttributeCollection? attributesCollection = root.Attributes;
 
-        if (attributesCollection is not null)
+        if ( attributesCollection is not null )
         {
             attributes = new Dictionary<string, string>();
 
-            for (int i = 0; i < attributesCollection.Count; i++)
+            for ( int i = 0; i < attributesCollection.Count; i++ )
             {
                 XmlAttribute attribute = attributesCollection[i];
                 attributes[attribute.Name] = attribute.InnerText;
@@ -770,22 +770,22 @@ public static class XmlExtensions
 
         var results = new Dictionary<string, int>();
 
-        for (int i = 0; i < root.ChildNodes.Count; i++)
+        for ( int i = 0; i < root.ChildNodes.Count; i++ )
         {
             XmlNode? node = root.ChildNodes[i];
-            if (node?.Name is null) { continue; }
+            if ( node?.Name is null ) { continue; }
 
-            if (node.Name != XmlNames.PAIR) { throw new SerializationException( nameof(node.Name) ); }
+            if ( node.Name != XmlNames.PAIR ) { throw new SerializationException( nameof(node.Name) ); }
 
             string key   = "";
             int    value = default;
 
-            for (int c = 0; c < node.ChildNodes.Count; c++)
+            for ( int c = 0; c < node.ChildNodes.Count; c++ )
             {
                 XmlNode? child = node.ChildNodes[c];
-                if (child?.Name is null) { throw new NullReferenceException( nameof(child.InnerText) ); }
+                if ( child?.Name is null ) { throw new NullReferenceException( nameof(child.InnerText) ); }
 
-                switch (child.Name)
+                switch ( child.Name )
                 {
                     case XmlNames.KEY:
                         key = child.InnerText;
@@ -797,7 +797,7 @@ public static class XmlExtensions
                 }
             }
 
-            if (string.IsNullOrWhiteSpace( key )) { throw new NullReferenceException( nameof(key) ); }
+            if ( string.IsNullOrWhiteSpace( key ) ) { throw new NullReferenceException( nameof(key) ); }
 
             results[key] = value;
         }
@@ -810,15 +810,15 @@ public static class XmlExtensions
     {
         XmlNode? root = document.ChildNodes[0];
 
-        if (root?.Name != XmlNames.ITEM) { throw new SerializationException( nameof(root.Name) ); }
+        if ( root?.Name != XmlNames.ITEM ) { throw new SerializationException( nameof(root.Name) ); }
 
         XmlAttributeCollection? attributesCollection = root.Attributes;
 
-        if (attributesCollection is not null)
+        if ( attributesCollection is not null )
         {
             attributes = new Dictionary<string, string>();
 
-            for (int i = 0; i < attributesCollection.Count; i++)
+            for ( int i = 0; i < attributesCollection.Count; i++ )
             {
                 XmlAttribute attribute = attributesCollection[i];
                 attributes[attribute.Name] = attribute.InnerText;
@@ -829,22 +829,22 @@ public static class XmlExtensions
 
         var results = new Dictionary<string, int?>();
 
-        for (int i = 0; i < root.ChildNodes.Count; i++)
+        for ( int i = 0; i < root.ChildNodes.Count; i++ )
         {
             XmlNode? node = root.ChildNodes[i];
-            if (node?.Name is null) { continue; }
+            if ( node?.Name is null ) { continue; }
 
-            if (node.Name != XmlNames.PAIR) { throw new SerializationException( nameof(node.Name) ); }
+            if ( node.Name != XmlNames.PAIR ) { throw new SerializationException( nameof(node.Name) ); }
 
             string key   = "";
             int    value = default;
 
-            for (int c = 0; c < node.ChildNodes.Count; c++)
+            for ( int c = 0; c < node.ChildNodes.Count; c++ )
             {
                 XmlNode? child = node.ChildNodes[c];
-                if (child?.Name is null) { throw new NullReferenceException( nameof(child.InnerText) ); }
+                if ( child?.Name is null ) { throw new NullReferenceException( nameof(child.InnerText) ); }
 
-                switch (child.Name)
+                switch ( child.Name )
                 {
                     case XmlNames.KEY:
                         key = child.InnerText;
@@ -856,7 +856,7 @@ public static class XmlExtensions
                 }
             }
 
-            if (string.IsNullOrWhiteSpace( key )) { throw new NullReferenceException( nameof(key) ); }
+            if ( string.IsNullOrWhiteSpace( key ) ) { throw new NullReferenceException( nameof(key) ); }
 
             results[key] = value;
         }
@@ -877,15 +877,15 @@ public static class XmlExtensions
 
         XmlNode? root = document.ChildNodes[0];
 
-        if (root?.Name != XmlNames.ITEM) { throw new SerializationException( nameof(root.Name) ); }
+        if ( root?.Name != XmlNames.ITEM ) { throw new SerializationException( nameof(root.Name) ); }
 
         XmlAttributeCollection? attributesCollection = root.Attributes;
 
-        if (attributesCollection is not null)
+        if ( attributesCollection is not null )
         {
             attributes = new Dictionary<string, string>();
 
-            for (int i = 0; i < attributesCollection.Count; i++)
+            for ( int i = 0; i < attributesCollection.Count; i++ )
             {
                 XmlAttribute attribute = attributesCollection[i];
                 attributes[attribute.Name] = attribute.InnerText;
@@ -894,10 +894,10 @@ public static class XmlExtensions
         else { attributes = default; }
 
 
-        for (int i = 0; i < root.ChildNodes.Count; i++)
+        for ( int i = 0; i < root.ChildNodes.Count; i++ )
         {
             XmlNode? node = root.ChildNodes[i];
-            if (node?.InnerText is null) { continue; }
+            if ( node?.InnerText is null ) { continue; }
 
             results.Add( node.InnerText );
         }
@@ -912,15 +912,15 @@ public static class XmlExtensions
 
         XmlNode? root = document.ChildNodes[0];
 
-        if (root?.Name != XmlNames.ITEM) { throw new SerializationException( nameof(root.Name) ); }
+        if ( root?.Name != XmlNames.ITEM ) { throw new SerializationException( nameof(root.Name) ); }
 
         XmlAttributeCollection? attributesCollection = root.Attributes;
 
-        if (attributesCollection is not null)
+        if ( attributesCollection is not null )
         {
             attributes = new Dictionary<string, string>();
 
-            for (int i = 0; i < attributesCollection.Count; i++)
+            for ( int i = 0; i < attributesCollection.Count; i++ )
             {
                 XmlAttribute attribute = attributesCollection[i];
                 attributes[attribute.Name] = attribute.InnerText;
@@ -929,12 +929,12 @@ public static class XmlExtensions
         else { attributes = default; }
 
 
-        for (int i = 0; i < root.ChildNodes.Count; i++)
+        for ( int i = 0; i < root.ChildNodes.Count; i++ )
         {
             XmlNode? node = root.ChildNodes[i];
-            if (node?.InnerText is null) { continue; }
+            if ( node?.InnerText is null ) { continue; }
 
-            if (Guid.TryParse( node.InnerText, out Guid n )) { results.Add( n ); }
+            if ( Guid.TryParse( node.InnerText, out Guid n ) ) { results.Add( n ); }
         }
 
         return results;
@@ -947,15 +947,15 @@ public static class XmlExtensions
 
         XmlNode? root = document.ChildNodes[0];
 
-        if (root?.Name != XmlNames.ITEM) { throw new SerializationException( nameof(root.Name) ); }
+        if ( root?.Name != XmlNames.ITEM ) { throw new SerializationException( nameof(root.Name) ); }
 
         XmlAttributeCollection? attributesCollection = root.Attributes;
 
-        if (attributesCollection is not null)
+        if ( attributesCollection is not null )
         {
             attributes = new Dictionary<string, string>();
 
-            for (int i = 0; i < attributesCollection.Count; i++)
+            for ( int i = 0; i < attributesCollection.Count; i++ )
             {
                 XmlAttribute attribute = attributesCollection[i];
                 attributes[attribute.Name] = attribute.InnerText;
@@ -964,12 +964,12 @@ public static class XmlExtensions
         else { attributes = default; }
 
 
-        for (int i = 0; i < root.ChildNodes.Count; i++)
+        for ( int i = 0; i < root.ChildNodes.Count; i++ )
         {
             XmlNode? node = root.ChildNodes[i];
-            if (node?.InnerText is null) { continue; }
+            if ( node?.InnerText is null ) { continue; }
 
-            if (bool.TryParse( node.InnerText, out bool n )) { results.Add( n ); }
+            if ( bool.TryParse( node.InnerText, out bool n ) ) { results.Add( n ); }
         }
 
         return results;
@@ -982,15 +982,15 @@ public static class XmlExtensions
 
         XmlNode? root = document.ChildNodes[0];
 
-        if (root?.Name != XmlNames.ITEM) { throw new SerializationException( nameof(root.Name) ); }
+        if ( root?.Name != XmlNames.ITEM ) { throw new SerializationException( nameof(root.Name) ); }
 
         XmlAttributeCollection? attributesCollection = root.Attributes;
 
-        if (attributesCollection is not null)
+        if ( attributesCollection is not null )
         {
             attributes = new Dictionary<string, string>();
 
-            for (int i = 0; i < attributesCollection.Count; i++)
+            for ( int i = 0; i < attributesCollection.Count; i++ )
             {
                 XmlAttribute attribute = attributesCollection[i];
                 attributes[attribute.Name] = attribute.InnerText;
@@ -999,10 +999,10 @@ public static class XmlExtensions
         else { attributes = default; }
 
 
-        for (int i = 0; i < root.ChildNodes.Count; i++)
+        for ( int i = 0; i < root.ChildNodes.Count; i++ )
         {
             XmlNode? node = root.ChildNodes[i];
-            if (node?.InnerText is null) { continue; }
+            if ( node?.InnerText is null ) { continue; }
 
             results.Add( double.TryParse( node.InnerText, out double n )
                              ? n
@@ -1019,15 +1019,15 @@ public static class XmlExtensions
 
         XmlNode? root = document.ChildNodes[0];
 
-        if (root?.Name != XmlNames.ITEM) { throw new SerializationException( nameof(root.Name) ); }
+        if ( root?.Name != XmlNames.ITEM ) { throw new SerializationException( nameof(root.Name) ); }
 
         XmlAttributeCollection? attributesCollection = root.Attributes;
 
-        if (attributesCollection is not null)
+        if ( attributesCollection is not null )
         {
             attributes = new Dictionary<string, string>();
 
-            for (int i = 0; i < attributesCollection.Count; i++)
+            for ( int i = 0; i < attributesCollection.Count; i++ )
             {
                 XmlAttribute attribute = attributesCollection[i];
                 attributes[attribute.Name] = attribute.InnerText;
@@ -1036,12 +1036,12 @@ public static class XmlExtensions
         else { attributes = default; }
 
 
-        for (int i = 0; i < root.ChildNodes.Count; i++)
+        for ( int i = 0; i < root.ChildNodes.Count; i++ )
         {
             XmlNode? node = root.ChildNodes[i];
-            if (node?.InnerText is null) { continue; }
+            if ( node?.InnerText is null ) { continue; }
 
-            if (double.TryParse( node.InnerText, out double n )) { results.Add( n ); }
+            if ( double.TryParse( node.InnerText, out double n ) ) { results.Add( n ); }
             else { results.Add( null ); }
         }
 
@@ -1055,15 +1055,15 @@ public static class XmlExtensions
 
         XmlNode? root = document.ChildNodes[0];
 
-        if (root?.Name != XmlNames.ITEM) { throw new SerializationException( nameof(root.Name) ); }
+        if ( root?.Name != XmlNames.ITEM ) { throw new SerializationException( nameof(root.Name) ); }
 
         XmlAttributeCollection? attributesCollection = root.Attributes;
 
-        if (attributesCollection is not null)
+        if ( attributesCollection is not null )
         {
             attributes = new Dictionary<string, string>();
 
-            for (int i = 0; i < attributesCollection.Count; i++)
+            for ( int i = 0; i < attributesCollection.Count; i++ )
             {
                 XmlAttribute attribute = attributesCollection[i];
                 attributes[attribute.Name] = attribute.InnerText;
@@ -1072,12 +1072,12 @@ public static class XmlExtensions
         else { attributes = default; }
 
 
-        for (int i = 0; i < root.ChildNodes.Count; i++)
+        for ( int i = 0; i < root.ChildNodes.Count; i++ )
         {
             XmlNode? node = root.ChildNodes[i];
-            if (node?.InnerText is null) { continue; }
+            if ( node?.InnerText is null ) { continue; }
 
-            if (long.TryParse( node.InnerText, out long n )) { results.Add( n ); }
+            if ( long.TryParse( node.InnerText, out long n ) ) { results.Add( n ); }
         }
 
         return results;
@@ -1090,15 +1090,15 @@ public static class XmlExtensions
 
         XmlNode? root = document.ChildNodes[0];
 
-        if (root?.Name != XmlNames.ITEM) { throw new SerializationException( nameof(root.Name) ); }
+        if ( root?.Name != XmlNames.ITEM ) { throw new SerializationException( nameof(root.Name) ); }
 
         XmlAttributeCollection? attributesCollection = root.Attributes;
 
-        if (attributesCollection is not null)
+        if ( attributesCollection is not null )
         {
             attributes = new Dictionary<string, string>();
 
-            for (int i = 0; i < attributesCollection.Count; i++)
+            for ( int i = 0; i < attributesCollection.Count; i++ )
             {
                 XmlAttribute attribute = attributesCollection[i];
                 attributes[attribute.Name] = attribute.InnerText;
@@ -1107,12 +1107,12 @@ public static class XmlExtensions
         else { attributes = default; }
 
 
-        for (int i = 0; i < root.ChildNodes.Count; i++)
+        for ( int i = 0; i < root.ChildNodes.Count; i++ )
         {
             XmlNode? node = root.ChildNodes[i];
-            if (node?.InnerText is null) { continue; }
+            if ( node?.InnerText is null ) { continue; }
 
-            if (long.TryParse( node.InnerText, out long n )) { results.Add( n ); }
+            if ( long.TryParse( node.InnerText, out long n ) ) { results.Add( n ); }
             else { results.Add( null ); }
         }
 
@@ -1126,15 +1126,15 @@ public static class XmlExtensions
 
         XmlNode? root = document.ChildNodes[0];
 
-        if (root?.Name != XmlNames.ITEM) { throw new SerializationException( nameof(root.Name) ); }
+        if ( root?.Name != XmlNames.ITEM ) { throw new SerializationException( nameof(root.Name) ); }
 
         XmlAttributeCollection? attributesCollection = root.Attributes;
 
-        if (attributesCollection is not null)
+        if ( attributesCollection is not null )
         {
             attributes = new Dictionary<string, string>();
 
-            for (int i = 0; i < attributesCollection.Count; i++)
+            for ( int i = 0; i < attributesCollection.Count; i++ )
             {
                 XmlAttribute attribute = attributesCollection[i];
                 attributes[attribute.Name] = attribute.InnerText;
@@ -1143,12 +1143,12 @@ public static class XmlExtensions
         else { attributes = default; }
 
 
-        for (int i = 0; i < root.ChildNodes.Count; i++)
+        for ( int i = 0; i < root.ChildNodes.Count; i++ )
         {
             XmlNode? node = root.ChildNodes[i];
-            if (node?.InnerText is null) { continue; }
+            if ( node?.InnerText is null ) { continue; }
 
-            if (int.TryParse( node.InnerText, out int n )) { results.Add( n ); }
+            if ( int.TryParse( node.InnerText, out int n ) ) { results.Add( n ); }
         }
 
         return results;
@@ -1161,15 +1161,15 @@ public static class XmlExtensions
 
         XmlNode? root = document.ChildNodes[0];
 
-        if (root?.Name != XmlNames.ITEM) { throw new SerializationException( nameof(root.Name) ); }
+        if ( root?.Name != XmlNames.ITEM ) { throw new SerializationException( nameof(root.Name) ); }
 
         XmlAttributeCollection? attributesCollection = root.Attributes;
 
-        if (attributesCollection is not null)
+        if ( attributesCollection is not null )
         {
             attributes = new Dictionary<string, string>();
 
-            for (int i = 0; i < attributesCollection.Count; i++)
+            for ( int i = 0; i < attributesCollection.Count; i++ )
             {
                 XmlAttribute attribute = attributesCollection[i];
                 attributes[attribute.Name] = attribute.InnerText;
@@ -1178,12 +1178,12 @@ public static class XmlExtensions
         else { attributes = default; }
 
 
-        for (int i = 0; i < root.ChildNodes.Count; i++)
+        for ( int i = 0; i < root.ChildNodes.Count; i++ )
         {
             XmlNode? node = root.ChildNodes[i];
-            if (node?.InnerText is null) { continue; }
+            if ( node?.InnerText is null ) { continue; }
 
-            if (int.TryParse( node.InnerText, out int n )) { results.Add( n ); }
+            if ( int.TryParse( node.InnerText, out int n ) ) { results.Add( n ); }
             else { results.Add( null ); }
         }
 

@@ -52,15 +52,14 @@ GetObjects()   --- Manually serializing JsonNet.ToJson ----
 [MemoryDiagnoser]
 public class JsonizerBenchmarks
 {
-    private static readonly RandomNumberGenerator _random;
-    private static readonly Test                  _source;
-    private static readonly string                _json;
     static JsonizerBenchmarks()
     {
         _random = RandomNumberGenerator.Create();
         _source = GetObjects();
         _json   = _source.ToJson( Formatting.Indented );
     }
+    private static readonly RandomNumberGenerator _random;
+    private static readonly string                _json;
 
 
     public static string GenerateToken( in int length = 32 )
@@ -69,18 +68,19 @@ public class JsonizerBenchmarks
         _random.GetBytes( randomNumber );
         return Convert.ToBase64String( randomNumber );
     }
+    private static readonly Test _source;
 
 
     public static Test GetManyObjects()
     {
         var children = new List<Test>( 100 );
 
-        for (int i = 0; i < 5000; i++)
+        for ( int i = 0; i < 5000; i++ )
         {
             int size   = Test.random.Next( 250, 500 );
             var nested = new List<Test>( size );
 
-            for (int j = 0; j < size; j++) { nested.Add( new Test( GenerateToken() ) ); }
+            for ( int j = 0; j < size; j++ ) { nested.Add( new Test( GenerateToken() ) ); }
 
             children.Add( new Test( GenerateToken(), nested ) );
         }
@@ -97,10 +97,10 @@ public class JsonizerBenchmarks
         return test;
     }
     [Benchmark] public string Jsonizer_ToJson() => _source.ToJson();
+    [Benchmark] public string JsonNet_ToJson() => _source.ToJson( Formatting.Indented );
 
 
     [Benchmark] public Test JsonNet_FromJson() => _json.FromJson<Test>();
-    [Benchmark] public string JsonNet_ToJson() => _source.ToJson( Formatting.Indented );
 
 
     // [Benchmark] public StringBuilder Create_StringBuilder() => new();

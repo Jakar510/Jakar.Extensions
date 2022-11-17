@@ -14,7 +14,7 @@ public struct DeleteClauseBuilder
 
     public DeleteChainBuilder From( string tableName, string? alias )
     {
-        if (string.IsNullOrWhiteSpace( alias )) { _builder.Add( KeyWords.FROM, tableName ); }
+        if ( string.IsNullOrWhiteSpace( alias ) ) { _builder.Add( KeyWords.FROM, tableName ); }
 
         else { _builder.Add( KeyWords.FROM, tableName, KeyWords.AS, alias ); }
 
@@ -25,7 +25,7 @@ public struct DeleteClauseBuilder
 
     public DeleteChainBuilder From<T>( T _, string? alias )
     {
-        if (string.IsNullOrWhiteSpace( alias )) { _builder.Add( KeyWords.FROM, typeof(T).GetTableName() ); }
+        if ( string.IsNullOrWhiteSpace( alias ) ) { _builder.Add( KeyWords.FROM, typeof(T).GetTableName() ); }
 
         else { _builder.Add( KeyWords.FROM, typeof(T).GetName(), KeyWords.AS, alias ); }
 
@@ -36,7 +36,7 @@ public struct DeleteClauseBuilder
 
     public DeleteChainBuilder From<T>( string? alias )
     {
-        if (string.IsNullOrWhiteSpace( alias )) { _builder.Add( KeyWords.FROM, typeof(T).GetTableName() ); }
+        if ( string.IsNullOrWhiteSpace( alias ) ) { _builder.Add( KeyWords.FROM, typeof(T).GetTableName() ); }
 
         else { _builder.Add( KeyWords.FROM, typeof(T).GetName(), KeyWords.AS, alias ); }
 

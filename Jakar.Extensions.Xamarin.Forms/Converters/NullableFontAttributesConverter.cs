@@ -10,15 +10,14 @@ namespace Jakar.Extensions.Xamarin.Forms;
 [TypeConversion( typeof(FontAttributes?) )]
 public class NullableFontAttributesConverter : TypeConverter, IValueConverter, IExtendedTypeConverter // IExtendedTypeConverter 
 {
-    protected static readonly FontAttributesConverter _converter = new();
-
-    public override bool CanConvertFrom( Type? sourceType ) => sourceType is null || sourceType == typeof(string);
-
     public static FontAttributes? Convert( string? value ) => value switch
                                                               {
                                                                   null => null,
-                                                                  _    => (FontAttributes)_converter.ConvertFromInvariantString( value )
+                                                                  _    => (FontAttributes)_converter.ConvertFromInvariantString( value ),
                                                               };
+    protected static readonly FontAttributesConverter _converter = new();
+
+    public override bool CanConvertFrom( Type?                  sourceType ) => sourceType is null || sourceType == typeof(string);
     public override object? ConvertFromInvariantString( string? value ) => Convert( value );
 
     public object? ConvertFrom( CultureInfo            culture, object?          value, IServiceProvider serviceProvider ) => Convert( value?.ToString() );

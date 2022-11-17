@@ -22,14 +22,6 @@ public abstract class BaseFileSystemApi : IFilePaths
     protected BaseFileSystemApi() { }
 
 
-    public void CreateZipCache()
-    {
-        if (File.Exists( ZipFileName )) { File.Delete( ZipFileName ); }
-
-        ZipCache();
-    }
-
-
     public string GetAppDataPath( string   fileName ) => Path.Combine( _AppDataDirectory, fileName );
     public string GetCacheDataPath( string fileName ) => Path.Combine( _CacheDirectory,   fileName );
 
@@ -38,6 +30,14 @@ public abstract class BaseFileSystemApi : IFilePaths
                                                                                                                                   .ConfigureAwait( false );
     public async ValueTask<LocalFile?> SaveFileAsync( string filename, byte[] payload, CancellationToken token ) => await LocalFile.SaveToFileAsync( GetCacheDataPath( filename ), payload, token )
                                                                                                                                    .ConfigureAwait( false );
+
+
+    public void CreateZipCache()
+    {
+        if ( File.Exists( ZipFileName ) ) { File.Delete( ZipFileName ); }
+
+        ZipCache();
+    }
 
     public void ZipCache( CompressionLevel level                        = CompressionLevel.Optimal ) => ZipCache( _CacheDirectory, level );
     public void ZipCache( LocalDirectory   path, CompressionLevel level = CompressionLevel.Optimal ) => ZipFile.CreateFromDirectory( path.FullPath, ZipFileName, level, true, Encoding.UTF8 );

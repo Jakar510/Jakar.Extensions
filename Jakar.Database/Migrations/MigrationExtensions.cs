@@ -1,75 +1,11 @@
 ﻿namespace Jakar.Database.Migrations;
 
 
-[SuppressMessage( "ReSharper", "UnusedMethodReturnValue.Global")]
+[SuppressMessage( "ReSharper", "UnusedMethodReturnValue.Global" )]
 public static class MigrationExtensions
 {
-    public static WebApplicationBuilder AddFluentMigrator( this WebApplicationBuilder builder, Func<IMigrationRunnerBuilder, IMigrationRunnerBuilder> addSqlDb, Func<IServiceProvider, string> getConnectionString )
-    {
-        builder.Services.AddFluentMigratorCore()
-               .ConfigureRunner( configure =>
-                                 {
-                                     addSqlDb( configure );
-
-                                     configure.WithGlobalConnectionString( getConnectionString );
-
-                                     configure.ScanIn( Assembly.GetEntryAssembly() )
-                                              .For.Migrations();
-                                 } );
-
-        return builder;
-    }
-    public static WebApplicationBuilder AddFluentMigrator( this WebApplicationBuilder builder, Func<IMigrationRunnerBuilder, IMigrationRunnerBuilder> addSqlDb ) =>
-        builder.AddFluentMigrator( addSqlDb, provider => provider.ConnectionString() );
-
-
-    public static IInsertDataSyntax AddRow<T>( this IInsertDataSyntax insert, T context ) where T : BaseRecord
-    {
-        PropertyInfo[] items   = typeof(T).GetProperties( BindingFlags.Instance | BindingFlags.Public );
-        var            columns = new Dictionary<string, object?>();
-
-        foreach ( PropertyInfo property in items )
-
-        {
-            object? value = property.GetValue( context );
-
-            columns[property.Name] = value switch
-                                     {
-                                         Enum => Convert.ChangeType( value, Enum.GetUnderlyingType( property.PropertyType ) ),
-                                         _    => value
-                                     };
-        }
-
-        return insert.Row( columns );
-    }
-    public static void AsGuidKey( this ICreateTableColumnAsTypeSyntax col ) =>
-        col.AsGuid()
-           .NotNullable()
-           .PrimaryKey()
-           .Identity();
-    public static void AsIntKey( this ICreateTableColumnAsTypeSyntax col ) =>
-        col.AsInt32()
-           .NotNullable()
-           .PrimaryKey()
-           .Identity();
-    public static void AsLongKey( this ICreateTableColumnAsTypeSyntax col ) =>
-        col.AsInt64()
-           .NotNullable()
-           .PrimaryKey()
-           .Identity();
-    public static void AsStringKey( this ICreateTableColumnAsTypeSyntax col ) =>
-        col.AsString( int.MaxValue )
-           .NotNullable()
-           .PrimaryKey()
-           .Identity();
-
-
-    public static string ColumnName( this PropertyInfo prop ) => prop.GetCustomAttribute<ColumnAttribute>()
-                                                                    ?.Name ?? prop.Name;
-
-
     /// <summary>
-    ///     <see href = "https://github.com/fluentmigrator/fluentmigrator/issues/1038" />
+    ///     <see href="https://github.com/fluentmigrator/fluentmigrator/issues/1038"/>
     /// </summary>
     public static bool CreateColumn_Enum( this ICreateTableColumnAsTypeSyntax col, PropertyInfo propertyInfo, Type propertyType )
     {
@@ -128,10 +64,10 @@ public static class MigrationExtensions
 
 
     /// <summary>
-    ///     <see href = "https://stackoverflow.com/a/4963190/9530917" />
+    ///     <see href="https://stackoverflow.com/a/4963190/9530917"/>
     /// </summary>
-    /// <param name = "col" > </param>
-    /// <param name = "propertyType" > </param>
+    /// <param name="col"> </param>
+    /// <param name="propertyType"> </param>
     /// <returns> </returns>
     public static bool CreateColumn_Reference( this ICreateTableColumnAsTypeSyntax col, Type propertyType )
     {
@@ -141,6 +77,86 @@ public static class MigrationExtensions
 
         // return reference.SetNullable(false);
         return true;
+    }
+
+
+    public static bool IsInitOnly( this PropertyInfo propertyInfo )
+    {
+        MethodInfo? setMethod = propertyInfo.SetMethod;
+
+        if ( setMethod is null ) { return false; }
+
+        Type isExternalInitType = typeof(IsExternalInit);
+
+        return setMethod.ReturnParameter.GetRequiredCustomModifiers()
+                        .ToList()
+                        .Contains( isExternalInitType );
+    }
+
+
+    public static bool SetNullable<TNext, TNextFk>( this IColumnOptionSyntax<TNext, TNextFk> item, PropertyInfo propInfo ) where TNext : IFluentSyntax
+                                                                                                                           where TNextFk : IFluentSyntax
+    {
+        if ( propInfo.Name == "DeviceIDs" )
+        {
+            propInfo.Name.WriteToConsole();
+            "------------------------------------------------------------------------".WriteToConsole();
+        }
+
+        if ( propInfo.PropertyType.IsNullableType() || propInfo.IsNullable() ) { item.Nullable(); }
+        else { item.NotNullable(); }
+
+        return true;
+    }
+
+    public static bool ShouldIgnore( this PropertyInfo propInfo )
+    {
+        if ( propInfo.HasAttribute<DataBaseIgnoreAttribute>() || propInfo.IsDefined( typeof(JsonIgnoreAttribute) ) ) { return true; }
+
+        return propInfo.HasInterface<IDataBaseIgnore>();
+    }
+
+
+    public static bool TryGetUnderlyingEnumType( this Type propertyType, [NotNullWhen( true )] out DbType? dbType )
+    {
+        if ( propertyType.TryGetUnderlyingEnumType( out Type? type ) )
+        {
+            dbType = type.GetDbType();
+            return true;
+        }
+
+        dbType = default;
+        return false;
+    }
+
+
+    public static bool TryHandleOtherTypes( this ICreateTableColumnAsTypeSyntax col, PropertyInfo propInfo, Type propertyType )
+    {
+        if ( col.CreateColumn_Enum( propInfo, propertyType ) ) { return true; }
+
+        if ( propertyType == typeof(JObject) || propertyType == typeof(JToken) || propertyType == typeof(List<JObject>) || propertyType == typeof(List<JObject?>) || propertyType == typeof(IDictionary<string, JToken?>) ||
+             propertyType == typeof(IDictionary<string, JToken>) )
+        {
+            return col.AsXml( int.MaxValue )
+                      .SetNullable( propInfo );
+        }
+
+        if ( propertyType.IsGenericType && propertyType.IsList() || propertyType.IsSet() || propertyType.IsCollection() )
+        {
+            return col.AsXml( int.MaxValue )
+                      .SetNullable( propInfo );
+        }
+
+        if ( propInfo.GetCustomAttribute<DataBaseTypeAttribute>()
+                    ?.Type is DbType.Xml )
+        {
+            return col.AsXml( int.MaxValue )
+                      .SetNullable( propInfo );
+        }
+
+        if ( propertyType.HasInterface<IDataBaseID>() ) { return col.CreateColumn_Reference( propertyType ); }
+
+        return false;
     }
 
 
@@ -202,6 +218,31 @@ public static class MigrationExtensions
     }
 
 
+    public static IInsertDataSyntax AddRow<T>( this IInsertDataSyntax insert, T context ) where T : BaseRecord
+    {
+        PropertyInfo[] items   = typeof(T).GetProperties( BindingFlags.Instance | BindingFlags.Public );
+        var            columns = new Dictionary<string, object?>();
+
+        foreach ( PropertyInfo property in items )
+
+        {
+            object? value = property.GetValue( context );
+
+            columns[property.Name] = value switch
+                                     {
+                                         Enum => Convert.ChangeType( value, Enum.GetUnderlyingType( property.PropertyType ) ),
+                                         _    => value,
+                                     };
+        }
+
+        return insert.Row( columns );
+    }
+
+
+    public static string ColumnName( this PropertyInfo prop ) => prop.GetCustomAttribute<ColumnAttribute>()
+                                                                    ?.Name ?? prop.Name;
+
+
     public static string GetMappingTableName( this Type parent, PropertyInfo propertyInfo )
     {
         if ( !propertyInfo.IsList( out Type? itemType ) ) { throw new ExpectedValueTypeException( nameof(propertyInfo), propertyInfo.PropertyType, typeof(IList<>) ); }
@@ -214,100 +255,6 @@ public static class MigrationExtensions
     public static string GetMappingTableName( this    Type   parent, PropertyInfo propertyInfo, Type           other ) => parent.GetMappingTableName( propertyInfo.Name, other );
     public static string GetMappingTableName( this    Type   parent, string       propertyName, Type           other ) => parent.Name.GetMappingTableName( propertyName, other.Name );
     public static string GetMappingTableName( this    string parent, string       propertyName, string         other ) => $"{parent}_{other}_{propertyName}_mapping";
-
-
-    public static bool IsInitOnly( this PropertyInfo propertyInfo )
-    {
-        MethodInfo? setMethod = propertyInfo.SetMethod;
-
-        if ( setMethod is null ) { return false; }
-
-        Type isExternalInitType = typeof(IsExternalInit);
-
-        return setMethod.ReturnParameter.GetRequiredCustomModifiers()
-                        .ToList()
-                        .Contains( isExternalInitType );
-    }
-
-
-    public static async ValueTask MigrateDown( this WebApplication app )
-    {
-        await using AsyncServiceScope scope  = app.Services.CreateAsyncScope();
-        var                           runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
-        runner.MigrateDown( 0 );
-    }
-    public static async ValueTask MigrateDown( this WebApplication app, string key )
-    {
-        if ( app.Configuration.GetValue<bool>( key ) ) { await app.MigrateDown(); }
-    }
-
-
-    public static async ValueTask MigrateUp( this IHost app )
-    {
-        await using AsyncServiceScope scope  = app.Services.CreateAsyncScope();
-        var                           runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
-        runner.ListMigrations();
-
-        if ( runner.HasMigrationsToApplyUp() ) { runner.MigrateUp(); }
-    }
-
-
-    public static bool SetNullable<TNext, TNextFk>( this IColumnOptionSyntax<TNext, TNextFk> item, PropertyInfo propInfo ) where TNext : IFluentSyntax
-                                                                                                                           where TNextFk : IFluentSyntax
-    {
-        if ( propInfo.Name == "DeviceIDs" )
-        {
-            propInfo.Name.WriteToConsole();
-            "------------------------------------------------------------------------".WriteToConsole();
-        }
-
-        if ( propInfo.PropertyType.IsNullableType() || propInfo.IsNullable() ) { item.Nullable(); }
-        else { item.NotNullable(); }
-
-        return true;
-    }
-
-    public static bool ShouldIgnore( this PropertyInfo propInfo )
-    {
-        if ( propInfo.HasAttribute<DataBaseIgnoreAttribute>() || propInfo.IsDefined( typeof(JsonIgnoreAttribute) ) ) { return true; }
-
-        return propInfo.HasInterface<IDataBaseIgnore>();
-    }
-
-
-    public static void Throw( this Type classType, PropertyInfo prop )
-    {
-        string key = $"{classType.FullName}.{prop.Name}";
-
-        _ = prop.PropertyType.TryGetUnderlyingEnumType( out Type? _ );
-
-        throw new ExpectedValueTypeException( key,
-                                              prop.PropertyType,
-                                              typeof(IDataBaseIgnore),
-                                              typeof(string),
-                                              typeof(bool),
-                                              typeof(byte),
-                                              typeof(byte[]),
-                                              typeof(ReadOnlyMemory<byte>),
-                                              typeof(short),
-                                              typeof(int),
-                                              typeof(long),
-                                              typeof(double),
-                                              typeof(decimal),
-                                              typeof(Guid),
-                                              typeof(DateTime),
-                                              typeof(DateTimeOffset),
-                                              typeof(TimeSpan),
-                                              typeof(Enum),
-                                              typeof(JObject),
-                                              typeof(JToken),
-                                              typeof(List<JObject>),
-                                              typeof(List<JObject?>),
-                                              typeof(IDictionary<string, JToken?>),
-                                              typeof(IDictionary<string, JToken>),
-                                              typeof(IDictionary),
-                                              typeof(IList) );
-    }
 
 
     public static TNext? TryBuiltInValueTypes<TNext>( this IColumnTypeSyntax<TNext> col, PropertyInfo propInfo, Type propertyType ) where TNext : IFluentSyntax
@@ -357,47 +304,98 @@ public static class MigrationExtensions
     }
 
 
-    public static bool TryGetUnderlyingEnumType( this Type propertyType, [NotNullWhen( true )] out DbType? dbType )
+    public static async ValueTask MigrateDown( this WebApplication app )
     {
-        if ( propertyType.TryGetUnderlyingEnumType( out Type? type ) )
-        {
-            dbType = type.GetDbType();
-            return true;
-        }
-
-        dbType = default;
-        return false;
+        await using AsyncServiceScope scope  = app.Services.CreateAsyncScope();
+        var                           runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
+        runner.MigrateDown( 0 );
+    }
+    public static async ValueTask MigrateDown( this WebApplication app, string key )
+    {
+        if ( app.Configuration.GetValue<bool>( key ) ) { await app.MigrateDown(); }
     }
 
 
-    public static bool TryHandleOtherTypes( this ICreateTableColumnAsTypeSyntax col, PropertyInfo propInfo, Type propertyType )
+    public static async ValueTask MigrateUp( this IHost app )
     {
-        if ( col.CreateColumn_Enum( propInfo, propertyType ) ) { return true; }
+        await using AsyncServiceScope scope  = app.Services.CreateAsyncScope();
+        var                           runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
+        runner.ListMigrations();
 
-        if ( propertyType == typeof(JObject) || propertyType == typeof(JToken) || propertyType == typeof(List<JObject>) || propertyType == typeof(List<JObject?>) || propertyType == typeof(IDictionary<string, JToken?>) ||
-             propertyType == typeof(IDictionary<string, JToken>) )
-        {
-            return col.AsXml( int.MaxValue )
-                      .SetNullable( propInfo );
-        }
-
-        if ( propertyType.IsGenericType && propertyType.IsList() || propertyType.IsSet() || propertyType.IsCollection() )
-        {
-            return col.AsXml( int.MaxValue )
-                      .SetNullable( propInfo );
-        }
-
-        if ( propInfo.GetCustomAttribute<DataBaseTypeAttribute>()
-                    ?.Type is DbType.Xml )
-        {
-            return col.AsXml( int.MaxValue )
-                      .SetNullable( propInfo );
-        }
-
-        if ( propertyType.HasInterface<IDataBaseID>() ) { return col.CreateColumn_Reference( propertyType ); }
-
-        return false;
+        if ( runner.HasMigrationsToApplyUp() ) { runner.MigrateUp(); }
     }
+    public static void AsGuidKey( this ICreateTableColumnAsTypeSyntax col ) =>
+        col.AsGuid()
+           .NotNullable()
+           .PrimaryKey()
+           .Identity();
+    public static void AsIntKey( this ICreateTableColumnAsTypeSyntax col ) =>
+        col.AsInt32()
+           .NotNullable()
+           .PrimaryKey()
+           .Identity();
+    public static void AsLongKey( this ICreateTableColumnAsTypeSyntax col ) =>
+        col.AsInt64()
+           .NotNullable()
+           .PrimaryKey()
+           .Identity();
+    public static void AsStringKey( this ICreateTableColumnAsTypeSyntax col ) =>
+        col.AsString( int.MaxValue )
+           .NotNullable()
+           .PrimaryKey()
+           .Identity();
+
+
+    public static void Throw( this Type classType, PropertyInfo prop )
+    {
+        string key = $"{classType.FullName}.{prop.Name}";
+
+        _ = prop.PropertyType.TryGetUnderlyingEnumType( out Type? _ );
+
+        throw new ExpectedValueTypeException( key,
+                                              prop.PropertyType,
+                                              typeof(IDataBaseIgnore),
+                                              typeof(string),
+                                              typeof(bool),
+                                              typeof(byte),
+                                              typeof(byte[]),
+                                              typeof(ReadOnlyMemory<byte>),
+                                              typeof(short),
+                                              typeof(int),
+                                              typeof(long),
+                                              typeof(double),
+                                              typeof(decimal),
+                                              typeof(Guid),
+                                              typeof(DateTime),
+                                              typeof(DateTimeOffset),
+                                              typeof(TimeSpan),
+                                              typeof(Enum),
+                                              typeof(JObject),
+                                              typeof(JToken),
+                                              typeof(List<JObject>),
+                                              typeof(List<JObject?>),
+                                              typeof(IDictionary<string, JToken?>),
+                                              typeof(IDictionary<string, JToken>),
+                                              typeof(IDictionary),
+                                              typeof(IList) );
+    }
+    public static WebApplicationBuilder AddFluentMigrator( this WebApplicationBuilder builder, Func<IMigrationRunnerBuilder, IMigrationRunnerBuilder> addSqlDb, Func<IServiceProvider, string> getConnectionString )
+    {
+        builder.Services.AddFluentMigratorCore()
+               .ConfigureRunner( configure =>
+                                 {
+                                     addSqlDb( configure );
+
+                                     configure.WithGlobalConnectionString( getConnectionString );
+
+                                     configure.ScanIn( Assembly.GetEntryAssembly() )
+                                              .For.Migrations();
+                                 } );
+
+        return builder;
+    }
+    public static WebApplicationBuilder AddFluentMigrator( this WebApplicationBuilder builder, Func<IMigrationRunnerBuilder, IMigrationRunnerBuilder> addSqlDb ) =>
+        builder.AddFluentMigrator( addSqlDb, provider => provider.ConnectionString() );
 
 
 //

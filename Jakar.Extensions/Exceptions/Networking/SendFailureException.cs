@@ -2,9 +2,7 @@
 namespace Jakar.Extensions;
 
 
-/// <summary>
-///     A complete response was not received from the remote server.
-/// </summary>
+/// <summary> A complete response was not received from the remote server. </summary>
 public sealed class SendFailureException : WebException
 {
     public CancellationToken Token { get; }

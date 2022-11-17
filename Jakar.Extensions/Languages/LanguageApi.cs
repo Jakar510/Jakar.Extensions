@@ -62,6 +62,6 @@ public class LanguageApi : ObservableClass
         CultureInfo = new CultureInfo( id );
 
         try { SelectedLanguage = Languages.First( language => language.ShortName == id ); }
-        catch (Exception) { SelectedLanguage = Languages.First( language => language.ShortName == "en" ); }
+        catch ( Exception ) { SelectedLanguage = Languages.First( language => language.ShortName == "en" ); }
     }
 }

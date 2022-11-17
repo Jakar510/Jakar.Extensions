@@ -24,7 +24,7 @@ public class IPAddressManager : INetworkManager
             using var intent = new Intent( Settings.ActionWifiSettings );
             BaseApplication.Instance.StartActivity( intent );
         }
-        catch (Exception ex) { throw new WiFiException( "Opening Wifi settings was not possible", ex ); }
+        catch ( Exception ex ) { throw new WiFiException( "Opening Wifi settings was not possible", ex ); }
     }
 
     public string? GetIdentifier() => Settings.Secure.GetString( Application.Context.ContentResolver, Settings.Secure.AndroidId );

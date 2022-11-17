@@ -2,9 +2,7 @@
 namespace Jakar.Extensions;
 
 
-/// <summary>
-///     The remote service point could not be contacted at the transport level.
-/// </summary>
+/// <summary> The remote service point could not be contacted at the transport level. </summary>
 public sealed class ConnectFailureException : WebException
 {
     public CancellationToken Token { get; }

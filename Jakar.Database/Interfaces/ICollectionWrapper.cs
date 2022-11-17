@@ -10,16 +10,9 @@ public interface ICollectionWrapper<TValue> : IReadOnlyCollection<long>, IEquata
     bool    IsEmpty    { get; }
     bool    IsNotEmpty { get; }
     string? Json       { get; set; }
-
-
-    void Add( IEnumerable<TValue>?        value );
-    void Add( params TValue[]?            value );
-    void Add( HashSet<TValue>?            value );
-    bool Add( TValue                      value );
-    void Add( ICollectionWrapper<TValue>? value );
-    bool Contains( TValue                 value );
-    bool Remove( TValue                   value );
-    void SetValues( string?               json, [CallerMemberName] string? caller = default );
+    bool Add( TValue      value );
+    bool Contains( TValue value );
+    bool Remove( TValue   value );
 
 
     string ToJson();
@@ -28,4 +21,11 @@ public interface ICollectionWrapper<TValue> : IReadOnlyCollection<long>, IEquata
     /// <summary> Gets the JSON representation of this collection </summary>
     string ToString();
     string ToString( ReadOnlySpan<char> format, IFormatProvider? _ );
+
+
+    void Add( IEnumerable<TValue>?        value );
+    void Add( params TValue[]?            value );
+    void Add( HashSet<TValue>?            value );
+    void Add( ICollectionWrapper<TValue>? value );
+    void SetValues( string?               json, [CallerMemberName] string? caller = default );
 }

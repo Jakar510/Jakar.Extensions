@@ -5,16 +5,13 @@
 
 /// <summary>
 ///     <para>
-///         <see cref = "Enumerable" />
+///         <see cref="Enumerable"/>
 ///     </para>
 ///     <para> AsyncEnumerable </para>
 ///     <para>
-///         <seealso href = "https://gist.github.com/scattered-code/b834bbc355a9ee710e3147321d6f985a" />
+///         <seealso href="https://gist.github.com/scattered-code/b834bbc355a9ee710e3147321d6f985a"/>
 ///     </para>
-///     <para>
-///         Also a debugging improvement:
-///         <see href = "https://youtu.be/gW19LaAYczI?t=497" />
-///     </para>
+///     <para> Also a debugging improvement: <see href="https://youtu.be/gW19LaAYczI?t=497"/> </para>
 /// </summary>
 public static partial class AsyncLinq
 {
@@ -28,7 +25,7 @@ public static partial class AsyncLinq
     public static async ValueTask<HashSet<TElement>> ToHashSet<TElement>( this IAsyncEnumerable<TElement> source, IEqualityComparer<TElement> comparer, CancellationToken token = default )
     {
         var list = new HashSet<TElement>( comparer );
-        await foreach (TElement element in source.WithCancellation( token )) { list.Add( element ); }
+        await foreach ( TElement element in source.WithCancellation( token ) ) { list.Add( element ); }
 
         return list;
     }
@@ -37,14 +34,14 @@ public static partial class AsyncLinq
     public static async ValueTask<List<TElement>> ToList<TElement>( this IAsyncEnumerable<TElement> source, CancellationToken token = default )
     {
         var list = new List<TElement>();
-        await foreach (TElement element in source.WithCancellation( token )) { list.Add( element ); }
+        await foreach ( TElement element in source.WithCancellation( token ) ) { list.Add( element ); }
 
         return list;
     }
     public static async ValueTask<ObservableCollection<TElement>> ToObservableCollection<TElement>( this IAsyncEnumerable<TElement> source, CancellationToken token = default )
     {
         var list = new ObservableCollection<TElement>();
-        await foreach (TElement element in source.WithCancellation( token )) { list.Add( element ); }
+        await foreach ( TElement element in source.WithCancellation( token ) ) { list.Add( element ); }
 
         return list;
     }

@@ -40,7 +40,7 @@ public class IsDictionary_Tests : Assert
     [TestCase( typeof(List<Guid>),                           null )]
     public void IsDictionary_Args_Test( Type objType, Type? expected )
     {
-        if (objType.IsDictionary( out Type? _, out Type? valueType ))
+        if ( objType.IsDictionary( out Type? _, out Type? valueType ) )
         {
             AreEqual( valueType, expected );
             return;

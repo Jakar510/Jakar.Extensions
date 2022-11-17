@@ -28,13 +28,6 @@ public class AsyncLinqBenchmarks
                                                                    .AsAsyncEnumerable();
 
 
-    [GlobalSetup]
-    public void Setup()
-    {
-        // for ( long i = 0; i < 10_000; i++ ) { _dict[i] = Guid.NewGuid(); }
-    }
-
-
     // [Benchmark]
     // public async Task<List<long>> WhereTask()
     // {
@@ -49,6 +42,13 @@ public class AsyncLinqBenchmarks
     public ValueTask<List<long>> WhereValueTask() => _data.Where( x => x > 0 )
                                                           .Where( x => x % 5 == 0 )
                                                           .ToList();
+
+
+    [GlobalSetup]
+    public void Setup()
+    {
+        // for ( long i = 0; i < 10_000; i++ ) { _dict[i] = Guid.NewGuid(); }
+    }
 
     // [Benchmark] public void Pairs() => _dict.ForEach(( KeyValuePair<long, Guid>           x ) => { });
     // [Benchmark] public void Keys() => _dict.ForEach(( long                                x ) => { });

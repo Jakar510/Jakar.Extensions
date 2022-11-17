@@ -32,6 +32,6 @@ public class BarometerReader
 
     public void Stop()
     {
-        if (Barometer.IsMonitoring) { Barometer.Stop(); }
+        if ( Barometer.IsMonitoring ) { Barometer.Stop(); }
     }
 }

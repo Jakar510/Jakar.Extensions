@@ -4,10 +4,6 @@ namespace Jakar.Extensions.Xamarin.Forms;
 
 public class OrientationService
 {
-    // https://www.wintellect.com/responding-to-orientation-changes-in-xamarin-forms/
-
-    public const double SIZE_NOT_ALLOCATED = -1;
-
     public    DisplayOrientation Orientation { get; set; }
     protected double             _Height     { get; set; }
 
@@ -34,28 +30,41 @@ public class OrientationService
 
     public static DisplayOrientation GetOrientation( ContentPage page )
     {
-        if (page is null) { throw new ArgumentNullException( nameof(page) ); }
+        if ( page is null ) { throw new ArgumentNullException( nameof(page) ); }
 
         return GetOrientation( page.Width, page.Height );
     }
 
     public static DisplayOrientation GetOrientation( in double width, in double height )
     {
-        if (Equals( width, SIZE_NOT_ALLOCATED ) || Equals( height, SIZE_NOT_ALLOCATED )) { return DisplayOrientation.Unknown; }
+        if ( Equals( width, SIZE_NOT_ALLOCATED ) || Equals( height, SIZE_NOT_ALLOCATED ) ) { return DisplayOrientation.Unknown; }
 
         return width < height
                    ? DisplayOrientation.Portrait
                    : DisplayOrientation.Landscape;
     }
 
+    // https://www.wintellect.com/responding-to-orientation-changes-in-xamarin-forms/
+
+    public const double SIZE_NOT_ALLOCATED = -1;
+
     public event EventHandler<RotationEventArgs>? OnOrientationChanged;
+
+
+
+    public class RotationEventArgs : EventArgs
+    {
+        public DisplayOrientation Orientation { get; }
+        public RotationEventArgs( DisplayOrientation orientation ) => Orientation = orientation;
+    }
+
 
 
     public void OnSizeAllocated( in Page page ) => OnSizeAllocated( page.Width, page.Height );
 
     public void OnSizeAllocated( in double width, in double height )
     {
-        if (Equals( _Width, width ) && Equals( _Height, height )) { return; }
+        if ( Equals( _Width, width ) && Equals( _Height, height ) ) { return; }
 
         double oldWidth = _Width;
         _Width  = width;
@@ -64,19 +73,11 @@ public class OrientationService
         Orientation = GetOrientation( _Width, _Height );
 
         // ignore if the previous height was size unallocated OR Has the device been rotated
-        if (Equals( _Width, oldWidth )) { return; }
+        if ( Equals( _Width, oldWidth ) ) { return; }
 
-        if (Orientation == DisplayOrientation.Unknown) { return; }
+        if ( Orientation == DisplayOrientation.Unknown ) { return; }
 
         OnOrientationChanged?.Invoke( this, new RotationEventArgs( Orientation ) );
-    }
-
-
-
-    public class RotationEventArgs : EventArgs
-    {
-        public DisplayOrientation Orientation { get; }
-        public RotationEventArgs( DisplayOrientation orientation ) => Orientation = orientation;
     }
 }
 

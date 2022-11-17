@@ -324,19 +324,17 @@ public sealed class AppVersion : IComparable,
     /// </summary>
     /// <returns> </returns>
     /// <exception cref="InvalidOperationException"> </exception>
-    public Version ToVersion()
-    {
-        return Scheme switch
-               {
-                   Format.Singular          => new Version( Major, 0 ),
-                   Format.Minimal           => new Version( Major, Minor ?? 0 ),
-                   Format.Typical           => new Version( Major, Minor ?? 0, Build ?? 0 ),
-                   Format.Detailed          => new Version( Major, Minor ?? 0, Maintenance ?? 0, Build ?? 0 ),
-                   Format.DetailedRevisions => new Version( Major, Minor ?? 0, Maintenance ?? 0, Build ?? 0 ),
-                   Format.Complete          => new Version( Major, Minor ?? 0, Maintenance ?? 0, Build ?? 0 ),
-                   _                        => throw new OutOfRangeException( nameof(Scheme), Scheme ),
-               };
-    }
+    public Version ToVersion() =>
+        Scheme switch
+        {
+            Format.Singular          => new Version( Major, 0 ),
+            Format.Minimal           => new Version( Major, Minor ?? 0 ),
+            Format.Typical           => new Version( Major, Minor ?? 0, Build ?? 0 ),
+            Format.Detailed          => new Version( Major, Minor ?? 0, Maintenance ?? 0, Build ?? 0 ),
+            Format.DetailedRevisions => new Version( Major, Minor ?? 0, Maintenance ?? 0, Build ?? 0 ),
+            Format.Complete          => new Version( Major, Minor ?? 0, Maintenance ?? 0, Build ?? 0 ),
+            _                        => throw new OutOfRangeException( nameof(Scheme), Scheme ),
+        };
 
 
     public IEnumerator<int> GetEnumerator()

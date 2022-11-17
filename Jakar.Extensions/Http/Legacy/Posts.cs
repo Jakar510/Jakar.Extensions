@@ -4,66 +4,18 @@ namespace Jakar.Extensions;
 
 /// <summary>
 ///     <para>
-///         <seealso href = "https://www.hanselman.com/blog/HTTPPOSTsAndHTTPGETsWithWebClientAndCAndFakingAPostBack.aspx" />
+///         <seealso href="https://www.hanselman.com/blog/HTTPPOSTsAndHTTPGETsWithWebClientAndCAndFakingAPostBack.aspx"/>
 ///     </para>
 ///     <para>
-///         <seealso href = "https://docs.microsoft.com/en-us/dotnet/standard/threading/cancellation-in-managed-threads" />
+///         <seealso href="https://docs.microsoft.com/en-us/dotnet/standard/threading/cancellation-in-managed-threads"/>
 ///     </para>
 ///     <para>
-///         <seealso href = "https://www.w3.org/Protocols/rfc1341/7_2_Multipart.html" />
+///         <seealso href="https://www.w3.org/Protocols/rfc1341/7_2_Multipart.html"/>
 ///     </para>
 /// </summary>
 [Obsolete( $"Use {nameof(WebRequester)} instead" )]
 public static class Posts
 {
-    public static async Task<WebResponse> Post( this Uri url, ReadOnlyMemory<byte> payload, HeaderCollection headers, CancellationToken token, int? timeout = default )
-    {
-        // var client = new HttpClient();
-        HttpWebRequest req = WebRequest.CreateHttp( url );
-        if (timeout.HasValue) { req.Timeout = timeout.Value; }
-
-        req.Method = "POST";
-        req.SetHeaders( headers );
-
-        //req.Proxy = new WebProxy(ProxyString, true);
-
-        await using (Stream stream = await req.GetRequestStreamAsync()
-                                              .ConfigureAwait( false ))
-        {
-            await stream.WriteAsync( payload, token )
-                        .ConfigureAwait( false ); // Push it out there
-        }
-
-        return await req.GetResponseAsync( token )
-                        .ConfigureAwait( false );
-    }
-
-
-    // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-
-    public static async Task<WebResponse> Post( this Uri url, MultipartFormDataContent payload, HeaderCollection? headers, CancellationToken token, int? timeout = default )
-    {
-        HttpWebRequest req = WebRequest.CreateHttp( url );
-        if (timeout.HasValue) { req.Timeout = timeout.Value; }
-
-        req.Method = "POST";
-        req.SetHeaders( payload );
-        req.SetHeaders( headers );
-
-        await using (Stream stream = await req.GetRequestStreamAsync()
-                                              .ConfigureAwait( false ))
-        {
-            await payload.CopyToAsync( stream )
-                         .ConfigureAwait( false ); // Push it out there
-        }
-
-
-        return await req.GetResponseAsync( token )
-                        .ConfigureAwait( false );
-    }
-
-
     public static async Task<string> TryPost( this Uri url, string payload, HeaderCollection? headers = default, Encoding? encoding = default, CancellationToken token = default )
     {
         encoding ??= Encoding.Default;
@@ -122,10 +74,10 @@ public static class Posts
             return await handler( response, encoding )
                       .ConfigureAwait( false );
         }
-        catch (WebException we)
+        catch ( WebException we )
         {
             Exception? e = we.ConvertException( token );
-            if (e is not null) { throw e; }
+            if ( e is not null ) { throw e; }
 
             throw;
         }
@@ -147,10 +99,10 @@ public static class Posts
             return await handler( response, encoding )
                       .ConfigureAwait( false );
         }
-        catch (WebException we)
+        catch ( WebException we )
         {
             Exception? e = we.ConvertException( token );
-            if (e is not null) { throw e; }
+            if ( e is not null ) { throw e; }
 
             throw;
         }
@@ -179,10 +131,10 @@ public static class Posts
             return await handler( response, token )
                       .ConfigureAwait( false );
         }
-        catch (WebException we)
+        catch ( WebException we )
         {
             Exception? e = we.ConvertException( token );
-            if (e is not null) { throw e; }
+            if ( e is not null ) { throw e; }
 
             throw;
         }
@@ -198,10 +150,10 @@ public static class Posts
             return await handler( response, encoding )
                       .ConfigureAwait( false );
         }
-        catch (WebException we)
+        catch ( WebException we )
         {
             Exception? e = we.ConvertException( token );
-            if (e is not null) { throw e; }
+            if ( e is not null ) { throw e; }
 
             throw;
         }
@@ -217,12 +169,58 @@ public static class Posts
             return await handler( response )
                       .ConfigureAwait( false );
         }
-        catch (WebException we)
+        catch ( WebException we )
         {
             Exception? e = we.ConvertException( token );
-            if (e is not null) { throw e; }
+            if ( e is not null ) { throw e; }
 
             throw;
         }
+    }
+    public static async Task<WebResponse> Post( this Uri url, ReadOnlyMemory<byte> payload, HeaderCollection headers, CancellationToken token, int? timeout = default )
+    {
+        // var client = new HttpClient();
+        HttpWebRequest req = WebRequest.CreateHttp( url );
+        if ( timeout.HasValue ) { req.Timeout = timeout.Value; }
+
+        req.Method = "POST";
+        req.SetHeaders( headers );
+
+        //req.Proxy = new WebProxy(ProxyString, true);
+
+        await using ( Stream stream = await req.GetRequestStreamAsync()
+                                               .ConfigureAwait( false ) )
+        {
+            await stream.WriteAsync( payload, token )
+                        .ConfigureAwait( false ); // Push it out there
+        }
+
+        return await req.GetResponseAsync( token )
+                        .ConfigureAwait( false );
+    }
+
+
+    // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+    public static async Task<WebResponse> Post( this Uri url, MultipartFormDataContent payload, HeaderCollection? headers, CancellationToken token, int? timeout = default )
+    {
+        HttpWebRequest req = WebRequest.CreateHttp( url );
+        if ( timeout.HasValue ) { req.Timeout = timeout.Value; }
+
+        req.Method = "POST";
+        req.SetHeaders( payload );
+        req.SetHeaders( headers );
+
+        await using ( Stream stream = await req.GetRequestStreamAsync()
+                                               .ConfigureAwait( false ) )
+        {
+            await payload.CopyToAsync( stream )
+                         .ConfigureAwait( false ); // Push it out there
+        }
+
+
+        return await req.GetResponseAsync( token )
+                        .ConfigureAwait( false );
     }
 }

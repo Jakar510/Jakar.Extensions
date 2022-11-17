@@ -49,10 +49,10 @@ public readonly struct WebResponse<T>
 
 
     /// <summary> Gets the payload if available; otherwise throws. </summary>
-    /// <exception cref = "HttpRequestException" > </exception>
+    /// <exception cref="HttpRequestException"> </exception>
     public T GetPayload()
     {
-        if (Payload is not null) { return Payload; }
+        if ( Payload is not null ) { return Payload; }
 
         throw new HttpRequestException( this.ToPrettyJson(), Exception );
     }
@@ -65,18 +65,18 @@ public readonly struct WebResponse<T>
     internal static WebResponse<T> None( HttpResponseMessage response, Exception e ) => new(response, e, "NO RESPONSE");
     public static JToken? ParseError( ReadOnlySpan<char> error )
     {
-        if (error.IsNullOrWhiteSpace()) { return default; }
+        if ( error.IsNullOrWhiteSpace() ) { return default; }
 
-        if (error.StartsWith( ERROR_MESSAGE, StringComparison.OrdinalIgnoreCase )) { error = error[ERROR_MESSAGE.Length..]; }
+        if ( error.StartsWith( ERROR_MESSAGE, StringComparison.OrdinalIgnoreCase ) ) { error = error[ERROR_MESSAGE.Length..]; }
 
         try { return error.FromJson(); }
-        catch (Exception) { return error.ToString(); }
+        catch ( Exception ) { return error.ToString(); }
     }
 
 
     public static async ValueTask<WebResponse<T>> Create( WebHandler handler, Func<HttpResponseMessage, ValueTask<T>> func )
     {
-        using (handler)
+        using ( handler )
         {
             using HttpResponseMessage response = await handler;
 
@@ -87,18 +87,18 @@ public readonly struct WebResponse<T>
     }
     public static async ValueTask<WebResponse<T>> Create<TArg>( WebHandler handler, TArg arg, Func<HttpResponseMessage, TArg, ValueTask<T>> func )
     {
-        using (handler)
+        using ( handler )
         {
             using HttpResponseMessage response = await handler;
 
             try
             {
-                if (!response.IsSuccessStatusCode) { return await Create( response, handler.Token ); }
+                if ( !response.IsSuccessStatusCode ) { return await Create( response, handler.Token ); }
 
                 T result = await func( response, arg );
                 return new WebResponse<T>( response, result );
             }
-            catch (HttpRequestException e) { return await Create( response, e, handler.Token ); }
+            catch ( HttpRequestException e ) { return await Create( response, e, handler.Token ); }
         }
     }
 
@@ -107,23 +107,23 @@ public readonly struct WebResponse<T>
     {
         try
         {
-            if (!response.IsSuccessStatusCode) { return await Create( response, token ); }
+            if ( !response.IsSuccessStatusCode ) { return await Create( response, token ); }
 
             T result = await func( response );
             return new WebResponse<T>( response, result );
         }
-        catch (HttpRequestException e) { return await Create( response, e, token ); }
+        catch ( HttpRequestException e ) { return await Create( response, e, token ); }
     }
     public static async ValueTask<WebResponse<T>> Create<TArg>( HttpResponseMessage response, TArg arg, Func<HttpResponseMessage, TArg, ValueTask<T>> func, CancellationToken token )
     {
         try
         {
-            if (!response.IsSuccessStatusCode) { return await Create( response, token ); }
+            if ( !response.IsSuccessStatusCode ) { return await Create( response, token ); }
 
             T result = await func( response, arg );
             return new WebResponse<T>( response, result );
         }
-        catch (HttpRequestException e) { return await Create( response, e, token ); }
+        catch ( HttpRequestException e ) { return await Create( response, e, token ); }
     }
 
 
@@ -131,31 +131,31 @@ public readonly struct WebResponse<T>
     {
         try
         {
-            if (!response.IsSuccessStatusCode) { return await Create( response, token ); }
+            if ( !response.IsSuccessStatusCode ) { return await Create( response, token ); }
 
             T result = await func( response );
             return new WebResponse<T>( response, result );
         }
-        catch (HttpRequestException e) { return await Create( response, e, token ); }
+        catch ( HttpRequestException e ) { return await Create( response, e, token ); }
     }
     public static async ValueTask<WebResponse<T>> Create<TArg>( HttpResponseMessage response, TArg arg, Func<HttpResponseMessage, TArg, ValueTask<T>> func, RetryPolicy policy, CancellationToken token )
     {
         int count      = 0;
         var exceptions = new Exception[policy.MaxRetires];
 
-        while (count < policy.MaxRetires)
+        while ( count < policy.MaxRetires )
         {
             try
             {
-                if (!response.IsSuccessStatusCode) { return await Create( response, token ); }
+                if ( !response.IsSuccessStatusCode ) { return await Create( response, token ); }
 
                 T result = await func( response, arg );
                 return new WebResponse<T>( response, result );
             }
-            catch (HttpRequestException e) { exceptions[count] = e; }
+            catch ( HttpRequestException e ) { exceptions[count] = e; }
 
 
-            await policy.Wait( ref count, token);
+            await policy.Wait( ref count, token );
         }
 
         return await Create( response, new AggregateException( exceptions ), token );
@@ -173,13 +173,13 @@ public readonly struct WebResponse<T>
         string error;
 
         // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
-        if (stream is null) { error = UNKNOWN_ERROR; }
+        if ( stream is null ) { error = UNKNOWN_ERROR; }
         else
         {
             using var reader       = new StreamReader( stream );
             string    errorMessage = await reader.ReadToEndAsync();
 
-            if (string.IsNullOrWhiteSpace( errorMessage )) { return None( response ); }
+            if ( string.IsNullOrWhiteSpace( errorMessage ) ) { return None( response ); }
 
             error = $"Error Message: '{errorMessage}'";
         }
@@ -197,13 +197,13 @@ public readonly struct WebResponse<T>
         string error;
 
         // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
-        if (stream is null) { error = UNKNOWN_ERROR; }
+        if ( stream is null ) { error = UNKNOWN_ERROR; }
         else
         {
             using var reader       = new StreamReader( stream );
             string    errorMessage = await reader.ReadToEndAsync();
 
-            if (string.IsNullOrWhiteSpace( errorMessage )) { return None( response, e ); }
+            if ( string.IsNullOrWhiteSpace( errorMessage ) ) { return None( response, e ); }
 
             error = $"Error Message: '{errorMessage}'";
         }

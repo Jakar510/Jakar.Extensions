@@ -5,9 +5,15 @@
 [Table( "Groups" )]
 public sealed record GroupRecord : TableRecord<GroupRecord>
 {
+    private long?  _ownerID;
     private string _customerID  = string.Empty;
     private string _nameOfGroup = string.Empty;
-    private long?  _ownerID;
+
+    public long? OwnerID
+    {
+        get => _ownerID;
+        init => SetProperty( ref _ownerID, value );
+    }
 
 
     [MaxLength( 256 )]
@@ -25,12 +31,6 @@ public sealed record GroupRecord : TableRecord<GroupRecord>
         set => SetProperty( ref _nameOfGroup, value );
     }
 
-    public long? OwnerID
-    {
-        get => _ownerID;
-        init => SetProperty( ref _ownerID, value );
-    }
-
 
     public GroupRecord() { }
     public GroupRecord( UserRecord owner, string nameOfGroup, string customerID, UserRecord caller ) : base( caller )
@@ -40,6 +40,7 @@ public sealed record GroupRecord : TableRecord<GroupRecord>
         NameOfGroup = nameOfGroup;
         CustomerID  = customerID;
     }
+    public override int GetHashCode() => HashCode.Combine( base.GetHashCode(), NameOfGroup, OwnerID, CustomerID );
 
 
     public async Task<UserRecord?> GetOwner( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => OwnerID.HasValue
@@ -64,5 +65,4 @@ WHERE {db.UserGroups.SchemaTableName}.{nameof(ID)} = {ID}";
 
         return base.Equals( other ) && _nameOfGroup == other._nameOfGroup && _ownerID == other._ownerID && _customerID == other._customerID;
     }
-    public override int GetHashCode() => HashCode.Combine( base.GetHashCode(), NameOfGroup, OwnerID, CustomerID );
 }

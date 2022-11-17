@@ -23,7 +23,7 @@ public record UserGroupRecord : TableRecord<UserGroupRecord>
     }
     public static DynamicParameters GetDynamicParameters( UserRecord user, GroupRecord record )
     {
-        DynamicParameters parameters = GetDynamicParameters(user);
+        DynamicParameters parameters = GetDynamicParameters( user );
         parameters.Add( nameof(GroupID), record.ID );
         return parameters;
     }

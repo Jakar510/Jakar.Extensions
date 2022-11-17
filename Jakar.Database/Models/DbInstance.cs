@@ -7,5 +7,5 @@ namespace Jakar.Database;
 public enum DbInstance
 {
     MsSql,
-    Postgres
+    Postgres,
 }

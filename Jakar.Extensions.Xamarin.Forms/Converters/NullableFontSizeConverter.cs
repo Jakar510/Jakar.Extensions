@@ -17,7 +17,7 @@ public class NullableFontSizeConverter : FontSizeConverter, IValueConverter, IEx
     public double? Convert( string? value ) => value switch
                                                {
                                                    null => default,
-                                                   _    => (double)base.ConvertFromInvariantString( value )
+                                                   _    => (double)base.ConvertFromInvariantString( value ),
                                                };
     public override object? ConvertFromInvariantString( string? value ) => Convert( value );
 

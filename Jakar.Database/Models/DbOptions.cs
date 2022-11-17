@@ -6,7 +6,7 @@ namespace Jakar.Database;
 
 public sealed class DbOptions : IOptions<DbOptions>
 {
-    public DbInstance DbType  { get; set; } = DbInstance.MsSql;
+    public DbInstance DbType { get; set; } = DbInstance.MsSql;
 
 
     DbOptions IOptions<DbOptions>.Value => this;

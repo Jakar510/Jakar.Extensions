@@ -15,7 +15,7 @@ public static partial class Xmlizer
 {
     public static string Serialize<T>( T obj, in IDictionary<string, string>? attributes = default )
     {
-        if (obj is null) { throw new NullReferenceException( nameof(obj) ); }
+        if ( obj is null ) { throw new NullReferenceException( nameof(obj) ); }
 
         Type type   = typeof(T);
         var  writer = new XWriter();

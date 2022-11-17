@@ -14,16 +14,16 @@ public sealed record TableCacheOptions : IOptions<TableCacheOptions>
 
 
     public TableCacheOptions( ILoggerFactory factory ) => Factory = factory;
+    public static IServiceCollection Register( IServiceCollection collection )
+    {
+        collection.AddSingleton<IOptions<TableCacheOptions>, TableCacheOptions>();
+        return collection;
+    }
 
 
     public static WebApplicationBuilder Register( WebApplicationBuilder builder )
     {
         Register( builder.Services );
         return builder;
-    }
-    public static IServiceCollection Register( IServiceCollection collection )
-    {
-        collection.AddSingleton<IOptions<TableCacheOptions>, TableCacheOptions>();
-        return collection;
     }
 }

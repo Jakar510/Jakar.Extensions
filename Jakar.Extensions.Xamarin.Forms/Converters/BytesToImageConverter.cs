@@ -4,22 +4,22 @@ namespace Jakar.Extensions.Xamarin.Forms;
 
 public class BytesToImageConverter : TypeConverter, IValueConverter, IExtendedTypeConverter
 {
-    public override bool CanConvertFrom( Type? value ) => value != null && CheckTypes( value );
-    protected static bool CheckTypes( Type     value ) => typeof(byte[]) == value || typeof(Memory<byte>) == value || typeof(ReadOnlyMemory<byte>) == value;
+    protected static bool CheckTypes( Type value ) => typeof(byte[]) == value || typeof(Memory<byte>) == value || typeof(ReadOnlyMemory<byte>) == value;
     public static ImageSource? Convert( object? value ) => value switch
                                                            {
                                                                null                                => null,
                                                                byte[] bytes                        => Convert( bytes ),
                                                                Memory<byte> readOnlyMemory         => Convert( readOnlyMemory.ToArray() ),
                                                                ReadOnlyMemory<byte> readOnlyMemory => Convert( readOnlyMemory.ToArray() ),
-                                                               _                                   => null
+                                                               _                                   => null,
                                                            };
 
     public static ImageSource? Convert( byte[]? value ) => value switch
                                                            {
                                                                null => null,
-                                                               _    => ImageSource.FromStream( () => new MemoryStream( value ) )
+                                                               _    => ImageSource.FromStream( () => new MemoryStream( value ) ),
                                                            };
+    public override bool CanConvertFrom( Type? value ) => value != null && CheckTypes( value );
 
     public override object? ConvertFromInvariantString( string? value ) => Convert( value?.FromBase64String() );
 

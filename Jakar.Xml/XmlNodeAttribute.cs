@@ -28,7 +28,7 @@ public sealed class XmlNodeAttribute : Attribute
     {
         BindingFlags flags = BindingFlags.Instance | BindingFlags.Public;
 
-        if (ShouldIncludeFields()) { flags |= BindingFlags.GetField | BindingFlags.SetField; }
+        if ( ShouldIncludeFields() ) { flags |= BindingFlags.GetField | BindingFlags.SetField; }
 
         return flags;
     }
@@ -38,7 +38,7 @@ public sealed class XmlNodeAttribute : Attribute
     {
         BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
 
-        if (ShouldIncludeProperties()) { flags |= BindingFlags.GetProperty | BindingFlags.SetProperty; }
+        if ( ShouldIncludeProperties() ) { flags |= BindingFlags.GetProperty | BindingFlags.SetProperty; }
 
         return flags;
     }

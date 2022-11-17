@@ -66,16 +66,11 @@ public class Debug : ObservableClass
                                                                    [nameof(DateTime)]                     = DateTime.UtcNow.ToString( CultureInfo.InvariantCulture ),
                                                                    [nameof(AppDeviceInfo.DeviceId)]       = AppDeviceInfo.DeviceId,
                                                                    [nameof(AppDeviceInfo.VersionNumber)]  = AppDeviceInfo.VersionNumber,
-                                                                   [nameof(LanguageApi.SelectedLanguage)] = CultureInfo.CurrentCulture.DisplayName
+                                                                   [nameof(LanguageApi.SelectedLanguage)] = CultureInfo.CurrentCulture.DisplayName,
                                                                };
-
-
-    public void HandleException( Exception e ) => HandleException( e, default );
-    public void HandleException( Exception e, CancellationToken token ) => Task.Run( async () => await HandleExceptionAsync( e ), token )
-                                                                               .Wait( token );
     public async Task HandleExceptionAsync( Exception e )
     {
-        if (!_DebugSettings.EnableApi) { return; }
+        if ( !_DebugSettings.EnableApi ) { return; }
 
         ThrowIfNotEnabled();
 
@@ -105,7 +100,7 @@ public class Debug : ObservableClass
             Guid? id = await AppCenter.GetInstallIdAsync()
                                       .ConfigureAwait( false );
 
-            if (id is null)
+            if ( id is null )
             {
                 id = Guid.NewGuid();
                 AppCenter.SetUserId( id.ToString() );
@@ -115,7 +110,7 @@ public class Debug : ObservableClass
             _settings.DeviceID = InstallID;
             ApiEnabled         = true;
         }
-        catch (Exception e)
+        catch ( Exception e )
         {
             e.WriteToDebug();
             throw;
@@ -130,7 +125,7 @@ public class Debug : ObservableClass
         var result = new Dictionary<string, object?>
                      {
                          [nameof(AppState)] = AppState(),
-                         [key]              = feedback
+                         [key]              = feedback,
                      };
 
         await _feedBackFile.WriteAsync( result.ToPrettyJson() )
@@ -138,21 +133,9 @@ public class Debug : ObservableClass
     }
 
 
-    protected void ThrowIfNotEnabled()
-    {
-        if (ApiEnabled) { return; }
-
-        // if ( _services is null ) { throw new ApiDisabledException($"Must call {nameof(InitAsync)} first.", new NullReferenceException(nameof(_services))); }
-
-        if (_fileSystemApi is null) { throw new ApiDisabledException( $"Must call {nameof(InitAsync)} first.", new NullReferenceException( nameof(_fileSystemApi) ) ); }
-
-        throw new ApiDisabledException( $"Must call {nameof(InitAsync)} first." );
-    }
-
-
     public async Task TrackError( Exception e )
     {
-        if (_DebugSettings.IncludeAppStateOnError)
+        if ( _DebugSettings.IncludeAppStateOnError )
         {
             e.Details( out Dictionary<string, string?> eventDetails );
 
@@ -180,9 +163,9 @@ public class Debug : ObservableClass
     public async Task TrackError( Exception ex, Dictionary<string, string?>? eventDetails, ExceptionDetails? exceptionDetails, string? incomingText, string? outgoingText, ReadOnlyMemory<byte> screenShot )
     {
         ThrowIfNotEnabled();
-        if (!_DebugSettings.EnableCrashes) { return; }
+        if ( !_DebugSettings.EnableCrashes ) { return; }
 
-        if (exceptionDetails is not null)
+        if ( exceptionDetails is not null )
         {
             await _appStateFile.WriteAsync( exceptionDetails.ToPrettyJson() )
                                .ConfigureAwait( false );
@@ -190,35 +173,35 @@ public class Debug : ObservableClass
 
         var attachments = new List<ErrorAttachmentLog>( 5 );
 
-        if (_DebugSettings.IncludeAppStateOnError)
+        if ( _DebugSettings.IncludeAppStateOnError )
         {
-            if (exceptionDetails is not null)
+            if ( exceptionDetails is not null )
             {
                 ErrorAttachmentLog? state = ErrorAttachmentLog.AttachmentWithText( exceptionDetails.ToPrettyJson(), _fileSystemApi.AppStateFileName );
                 attachments.Add( state );
             }
 
-            if (eventDetails is not null)
+            if ( eventDetails is not null )
             {
                 ErrorAttachmentLog? debug = ErrorAttachmentLog.AttachmentWithText( eventDetails.ToPrettyJson(), _fileSystemApi.DebugFileName );
                 attachments.Add( debug );
             }
 
 
-            if (!string.IsNullOrWhiteSpace( incomingText ))
+            if ( !string.IsNullOrWhiteSpace( incomingText ) )
             {
                 ErrorAttachmentLog incoming = ErrorAttachmentLog.AttachmentWithText( incomingText.ToPrettyJson(), _fileSystemApi.IncomingFileName );
                 attachments.Add( incoming );
             }
 
-            if (!string.IsNullOrWhiteSpace( outgoingText ))
+            if ( !string.IsNullOrWhiteSpace( outgoingText ) )
             {
                 ErrorAttachmentLog outgoing = ErrorAttachmentLog.AttachmentWithText( outgoingText.ToPrettyJson(), _fileSystemApi.OutgoingFileName );
                 attachments.Add( outgoing );
             }
         }
 
-        if (_DebugSettings.TakeScreenshotOnError && !screenShot.IsEmpty)
+        if ( _DebugSettings.TakeScreenshotOnError && !screenShot.IsEmpty )
         {
             ErrorAttachmentLog? screenShotAttachment = ErrorAttachmentLog.AttachmentWithBinary( screenShot.ToArray(), "ScreenShot.jpeg", "image/jpeg" );
             attachments.Add( screenShotAttachment );
@@ -226,12 +209,29 @@ public class Debug : ObservableClass
 
         TrackError( ex, eventDetails, attachments.ToArray() );
     }
+
+
+    public void HandleException( Exception e ) => HandleException( e, default );
+    public void HandleException( Exception e, CancellationToken token ) => Task.Run( async () => await HandleExceptionAsync( e ), token )
+                                                                               .Wait( token );
+
+
+    protected void ThrowIfNotEnabled()
+    {
+        if ( ApiEnabled ) { return; }
+
+        // if ( _services is null ) { throw new ApiDisabledException($"Must call {nameof(InitAsync)} first.", new NullReferenceException(nameof(_services))); }
+
+        if ( _fileSystemApi is null ) { throw new ApiDisabledException( $"Must call {nameof(InitAsync)} first.", new NullReferenceException( nameof(_fileSystemApi) ) ); }
+
+        throw new ApiDisabledException( $"Must call {nameof(InitAsync)} first." );
+    }
     public void TrackError( Exception ex, Dictionary<string, string?>? eventDetails, params ErrorAttachmentLog[] attachments )
     {
         ThrowIfNotEnabled();
-        if (!_DebugSettings.EnableCrashes) { return; }
+        if ( !_DebugSettings.EnableCrashes ) { return; }
 
-        if (ex is null) { throw new ArgumentNullException( nameof(ex) ); }
+        if ( ex is null ) { throw new ArgumentNullException( nameof(ex) ); }
 
         Crashes.TrackError( ex, eventDetails, attachments );
     }
@@ -241,7 +241,7 @@ public class Debug : ObservableClass
     {
         ThrowIfNotEnabled();
 
-        if (!_DebugSettings.EnableAnalytics) { return; }
+        if ( !_DebugSettings.EnableAnalytics ) { return; }
 
         TrackEvent( AppState(), source );
     }
@@ -249,7 +249,7 @@ public class Debug : ObservableClass
     {
         ThrowIfNotEnabled();
 
-        if (!_DebugSettings.EnableAnalytics) { return; }
+        if ( !_DebugSettings.EnableAnalytics ) { return; }
 
         Analytics.TrackEvent( source, eventDetails );
     }

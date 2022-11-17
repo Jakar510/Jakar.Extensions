@@ -31,8 +31,8 @@ public class ObservableConcurrentDictionary<TKey, TValue> : CollectionAlerts<Key
 
             _dictionary[key] = value;
 
-            if (exists) { Replaced( new KeyValuePair<TKey, TValue?>( key, old ), new KeyValuePair<TKey, TValue?>( key, value ) ); }
-            else { Added( new KeyValuePair<TKey, TValue?>( key,           value ) ); }
+            if ( exists ) { Replaced( new KeyValuePair<TKey, TValue?>( key, old ), new KeyValuePair<TKey, TValue?>( key, value ) ); }
+            else { Added( new KeyValuePair<TKey, TValue?>( key,             value ) ); }
         }
     }
 
@@ -46,78 +46,46 @@ public class ObservableConcurrentDictionary<TKey, TValue> : CollectionAlerts<Key
     public ObservableConcurrentDictionary( IEqualityComparer<TKey>                 comparer ) : this( new ConcurrentDictionary<TKey, TValue>( comparer ) ) { }
 
     /// <summary>
-    ///     Initializes a new instance of the
-    ///     <see cref = "ConcurrentDictionary{TKey,TValue}" />
-    ///     class that is empty, has the specified concurrency level, has the specified initial capacity, and uses the specified
-    ///     <see cref = "T:System.Collections.Generic.IEqualityComparer{TKey}" />
+    ///     Initializes a new instance of the <see cref="ConcurrentDictionary{TKey,TValue}"/> class that is empty, has the specified concurrency level, has the specified initial capacity, and uses the specified
+    ///     <see
+    ///         cref="T:System.Collections.Generic.IEqualityComparer{TKey}"/>
     ///     .
     /// </summary>
-    /// <param name = "concurrencyLevel" >
-    ///     The estimated number of threads that will update the
-    ///     <see cref = "ConcurrentDictionary{TKey,TValue}" />
-    ///     concurrently.
-    /// </param>
-    /// <param name = "capacity" >
-    ///     The initial number of elements that the
-    ///     <see cref = "ConcurrentDictionary{TKey,TValue}" />
-    ///     can contain.
-    /// </param>
-    /// <exception cref = "T:System.ArgumentOutOfRangeException" >
-    ///     <paramref name = "concurrencyLevel" />
-    ///     is less than 1. -or-
-    ///     <paramref name = "capacity" />
-    ///     is less than 0.
-    /// </exception>
+    /// <param name="concurrencyLevel"> The estimated number of threads that will update the <see cref="ConcurrentDictionary{TKey,TValue}"/> concurrently. </param>
+    /// <param name="capacity"> The initial number of elements that the <see cref="ConcurrentDictionary{TKey,TValue}"/> can contain. </param>
+    /// <exception cref="T:System.ArgumentOutOfRangeException"> <paramref name="concurrencyLevel"/> is less than 1. -or- <paramref name="capacity"/> is less than 0. </exception>
     public ObservableConcurrentDictionary( int concurrencyLevel, int capacity ) : this( new ConcurrentDictionary<TKey, TValue>( concurrencyLevel, capacity ) ) { }
 
     /// <summary>
-    ///     Initializes a new instance of the
-    ///     <see cref = "ConcurrentDictionary{TKey,TValue}" />
-    ///     class that is empty, has the specified concurrency level, has the specified initial capacity, and uses the specified
-    ///     <see cref = "T:System.Collections.Generic.IEqualityComparer{TKey}" />
+    ///     Initializes a new instance of the <see cref="ConcurrentDictionary{TKey,TValue}"/> class that is empty, has the specified concurrency level, has the specified initial capacity, and uses the specified
+    ///     <see
+    ///         cref="T:System.Collections.Generic.IEqualityComparer{TKey}"/>
     ///     .
     /// </summary>
-    /// <param name = "concurrencyLevel" >
-    ///     The estimated number of threads that will update the
-    ///     <see cref = "ConcurrentDictionary{TKey,TValue}" />
-    ///     concurrently.
-    /// </param>
-    /// <param name = "capacity" >
-    ///     The initial number of elements that the
-    ///     <see cref = "ConcurrentDictionary{TKey,TValue}" />
-    ///     can contain.
-    /// </param>
-    /// <param name = "comparer" >
-    ///     The
-    ///     <see cref = "T:System.Collections.Generic.IEqualityComparer{TKey}" />
-    ///     implementation to use when comparing keys.
-    /// </param>
-    /// <exception cref = "T:System.ArgumentOutOfRangeException" >
-    ///     <paramref name = "concurrencyLevel" />
-    ///     is less than 1. -or-
-    ///     <paramref name = "capacity" />
-    ///     is less than 0.
-    /// </exception>
+    /// <param name="concurrencyLevel"> The estimated number of threads that will update the <see cref="ConcurrentDictionary{TKey,TValue}"/> concurrently. </param>
+    /// <param name="capacity"> The initial number of elements that the <see cref="ConcurrentDictionary{TKey,TValue}"/> can contain. </param>
+    /// <param name="comparer"> The <see cref="T:System.Collections.Generic.IEqualityComparer{TKey}"/> implementation to use when comparing keys. </param>
+    /// <exception cref="T:System.ArgumentOutOfRangeException"> <paramref name="concurrencyLevel"/> is less than 1. -or- <paramref name="capacity"/> is less than 0. </exception>
     public ObservableConcurrentDictionary( int concurrencyLevel, int capacity, IEqualityComparer<TKey> comparer ) : this( new ConcurrentDictionary<TKey, TValue>( concurrencyLevel, capacity, comparer ) ) { }
-
-
-    public void Add( params KeyValuePair<TKey, TValue>[] pairs )
-    {
-        foreach (KeyValuePair<TKey, TValue> pair in pairs) { Add( pair ); }
-    }
-    public void Add( IEnumerable<KeyValuePair<TKey, TValue>> pairs )
-    {
-        foreach (KeyValuePair<TKey, TValue> pair in pairs) { Add( pair ); }
-    }
 
     public bool ContainsValue( TValue              value ) => _dictionary.Values.Contains( value );
     public bool TryAdd( KeyValuePair<TKey, TValue> pair ) => TryAdd( pair.Key, pair.Value );
     public bool TryAdd( TKey key, TValue value )
     {
-        if (!_dictionary.TryAdd( key, value )) { return false; }
+        if ( !_dictionary.TryAdd( key, value ) ) { return false; }
 
         Added( new KeyValuePair<TKey, TValue?>( key, value ) );
         return true;
+    }
+
+
+    public void Add( params KeyValuePair<TKey, TValue>[] pairs )
+    {
+        foreach ( KeyValuePair<TKey, TValue> pair in pairs ) { Add( pair ); }
+    }
+    public void Add( IEnumerable<KeyValuePair<TKey, TValue>> pairs )
+    {
+        foreach ( KeyValuePair<TKey, TValue> pair in pairs ) { Add( pair ); }
     }
 
 
@@ -137,9 +105,9 @@ public class ObservableConcurrentDictionary<TKey, TValue> : CollectionAlerts<Key
 
     public bool Remove( TKey key )
     {
-        if (!_dictionary.ContainsKey( key )) { return false; }
+        if ( !_dictionary.ContainsKey( key ) ) { return false; }
 
-        if (!_dictionary.TryRemove( key, out TValue? value )) { return false; }
+        if ( !_dictionary.TryRemove( key, out TValue? value ) ) { return false; }
 
         Removed( new KeyValuePair<TKey, TValue?>( key, value ) );
         OnCountChanged();
@@ -156,9 +124,9 @@ public class ObservableConcurrentDictionary<TKey, TValue> : CollectionAlerts<Key
 
     public void CopyTo( KeyValuePair<TKey, TValue>[] array, int startIndex )
     {
-        foreach ((int index, KeyValuePair<TKey, TValue> pair) in this.EnumeratePairs( 0 ))
+        foreach ( (int index, KeyValuePair<TKey, TValue> pair) in this.EnumeratePairs( 0 ) )
         {
-            if (index < startIndex) { continue; }
+            if ( index < startIndex ) { continue; }
 
             array[index] = pair;
         }

@@ -100,5 +100,5 @@ public enum MimeType
 
     // misc
     Licenses,
-    Dll
+    Dll,
 }

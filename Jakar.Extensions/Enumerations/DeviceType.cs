@@ -3,7 +3,7 @@
 
 /// <Docs>
 ///     <summary> Various types of devices. </summary>
-///     <remarks />
+///     <remarks/>
 /// </Docs>
 public enum DeviceType
 {
@@ -18,5 +18,5 @@ public enum DeviceType
     /// <Docs>
     ///     <summary> The device is virtual, such as the iOS simulators, Android emulators or Windows emulators. </summary>
     /// </Docs>
-    Virtual
+    Virtual,
 }

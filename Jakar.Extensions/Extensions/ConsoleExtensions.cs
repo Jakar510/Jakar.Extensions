@@ -104,6 +104,13 @@ public static class ConsoleExtensions
 
 #if NETSTANDARD2_1
     [Conditional( "DEBUG" )]
+    public static void WriteToDebug( this Span<char> self, [CallerMemberName] string? caller = default )
+    {
+        Console.WriteLine( $"{caller} '{self.ToString()}'" );
+        Debug.WriteLine( $"{caller} '{self.ToString()}'" );
+    }
+
+    [Conditional( "DEBUG" )]
     public static void WriteToDebug( this ReadOnlySpan<char> self, [CallerMemberName] string? caller = default )
     {
         Console.WriteLine( $"{caller} '{self.ToString()}'" );
@@ -159,6 +166,12 @@ public static class ConsoleExtensions
 
 
 #else
+    [Conditional( "DEBUG" )]
+    public static void WriteToDebug( this Span<char> self, [CallerArgumentExpression( "self" )] string? variable = default, [CallerMemberName] string? caller = default )
+    {
+        Console.WriteLine( $"{caller} -> {variable} '{self}'" );
+        Debug.WriteLine( $"{caller} -> {variable} '{self}'" );
+    }
     [Conditional( "DEBUG" )]
     public static void WriteToDebug( this ReadOnlySpan<char> self, [CallerArgumentExpression( "self" )] string? variable = default, [CallerMemberName] string? caller = default )
     {

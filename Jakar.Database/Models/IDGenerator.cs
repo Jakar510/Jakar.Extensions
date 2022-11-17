@@ -5,15 +5,15 @@ namespace Jakar.Database;
 
 
 /// <summary>
-///     <see href = "https://stackoverflow.com/a/15992856/9530917" />
+///     <see href="https://stackoverflow.com/a/15992856/9530917"/>
 /// </summary>
 public struct IDGenerator<TRecord> : IAsyncEnumerator<long> where TRecord : TableRecord<TRecord>
 {
     private readonly DbTableBase<TRecord> _table;
-    public long Current { get; set; } = default;
+    public           long                 Current { get; set; } = default;
 
 
-    public IDGenerator(DbTableBase<TRecord> table) => _table = table;
+    public IDGenerator( DbTableBase<TRecord> table ) => _table = table;
     public ValueTask DisposeAsync()
     {
         Current = default;
@@ -22,10 +22,10 @@ public struct IDGenerator<TRecord> : IAsyncEnumerator<long> where TRecord : Tabl
 
 
     public void Reset() => Current = default;
-    public ValueTask<bool> MoveNextAsync(CancellationToken token = default) => _table.Call( MoveNextAsync, token );
-    public async ValueTask<bool> MoveNextAsync(DbConnection connection, DbTransaction? transaction, CancellationToken token = default)
+    public ValueTask<bool> MoveNextAsync( CancellationToken token = default ) => _table.Call( MoveNextAsync, token );
+    public async ValueTask<bool> MoveNextAsync( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
-        if (token.IsCancellationRequested)
+        if ( token.IsCancellationRequested )
         {
             Current = default;
             return default;

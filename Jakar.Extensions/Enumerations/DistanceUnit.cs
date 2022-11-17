@@ -3,7 +3,7 @@
 
 /// <Docs>
 ///     <summary> Distance Unit for use in conversion. </summary>
-///     <remarks />
+///     <remarks/>
 /// </Docs>
 public enum DistanceUnit
 {
@@ -14,5 +14,5 @@ public enum DistanceUnit
     /// <Docs>
     ///     <summary> Miles </summary>
     /// </Docs>
-    Miles
+    Miles,
 }

@@ -21,7 +21,7 @@ public struct SelectClauseBuilder<TNext>
 
     public EasySqlBuilder From( string tableName, string? alias )
     {
-        if (string.IsNullOrWhiteSpace( alias )) { _builder.Add( KeyWords.FROM ); }
+        if ( string.IsNullOrWhiteSpace( alias ) ) { _builder.Add( KeyWords.FROM ); }
 
         else { _builder.Add( KeyWords.FROM, tableName, KeyWords.AS, alias ); }
 
@@ -29,9 +29,9 @@ public struct SelectClauseBuilder<TNext>
     }
     public EasySqlBuilder From<T>( T obj, string? alias )
     {
-        if (obj is null) { throw new NullReferenceException( nameof(obj) ); }
+        if ( obj is null ) { throw new NullReferenceException( nameof(obj) ); }
 
-        if (string.IsNullOrWhiteSpace( alias )) { _builder.Add( KeyWords.FROM, obj.GetTableName() ); } // TODO: Bug...?
+        if ( string.IsNullOrWhiteSpace( alias ) ) { _builder.Add( KeyWords.FROM, obj.GetTableName() ); } // TODO: Bug...?
 
         else { _builder.Add( KeyWords.FROM, obj.GetName(), KeyWords.AS, alias ); }
 
@@ -39,7 +39,7 @@ public struct SelectClauseBuilder<TNext>
     }
     public EasySqlBuilder From<T>( string? alias )
     {
-        if (string.IsNullOrWhiteSpace( alias )) { _builder.Add( KeyWords.FROM, typeof(T).GetTableName() ); }
+        if ( string.IsNullOrWhiteSpace( alias ) ) { _builder.Add( KeyWords.FROM, typeof(T).GetTableName() ); }
 
         else { _builder.Add( KeyWords.FROM, typeof(T).GetName(), KeyWords.AS, alias ); }
 

@@ -11,48 +11,6 @@ namespace Jakar.Extensions;
 /// </summary>
 public static partial class Spans
 {
-    public static ReadOnlySpan<T> Create<T>( T arg0 ) where T : unmanaged
-    {
-        Span<T> span = stackalloc T[1];
-        span[0] = arg0;
-        return MemoryMarshal.CreateReadOnlySpan( ref span.GetPinnableReference(), span.Length );
-    }
-    public static ReadOnlySpan<T> Create<T>( T arg0, T arg1 ) where T : unmanaged
-    {
-        Span<T> span = stackalloc T[2];
-        span[0] = arg0;
-        span[1] = arg1;
-        return MemoryMarshal.CreateReadOnlySpan( ref span.GetPinnableReference(), span.Length );
-    }
-    public static ReadOnlySpan<T> Create<T>( T arg0, T arg1, T arg2 ) where T : unmanaged
-    {
-        Span<T> span = stackalloc T[3];
-        span[0] = arg0;
-        span[1] = arg1;
-        span[2] = arg2;
-        return MemoryMarshal.CreateReadOnlySpan( ref span.GetPinnableReference(), span.Length );
-    }
-    public static ReadOnlySpan<T> Create<T>( T arg0, T arg1, T arg2, T arg3 ) where T : unmanaged
-    {
-        Span<T> span = stackalloc T[4];
-        span[0] = arg0;
-        span[1] = arg1;
-        span[2] = arg2;
-        span[3] = arg3;
-        return MemoryMarshal.CreateReadOnlySpan( ref span.GetPinnableReference(), span.Length );
-    }
-    public static ReadOnlySpan<T> Create<T>( T arg0, T arg1, T arg2, T arg3, T arg4 ) where T : unmanaged
-    {
-        Span<T> span = stackalloc T[5];
-        span[0] = arg0;
-        span[1] = arg1;
-        span[2] = arg2;
-        span[3] = arg3;
-        span[4] = arg4;
-        return MemoryMarshal.CreateReadOnlySpan( ref span.GetPinnableReference(), span.Length );
-    }
-
-
     public static bool Contains( this Span<char>         span, ReadOnlySpan<char> value ) => MemoryExtensions.Contains( span, value, StringComparison.Ordinal );
     public static bool Contains( this ReadOnlySpan<char> span, ReadOnlySpan<char> value ) => span.Contains( value, StringComparison.Ordinal );
 
@@ -61,9 +19,9 @@ public static partial class Spans
 
     #if NETSTANDARD2_1
         this
-        #endif
-            Span<T> span,
-        T value
+    #endif
+        Span<T> span,
+        T       value
     ) where T : IEquatable<T>
     {
     #if NETSTANDARD2_1
@@ -81,9 +39,9 @@ public static partial class Spans
     public static bool Contains<T>(
     #if NETSTANDARD2_1
         this
-        #endif
-            ReadOnlySpan<T> span,
-        T value
+    #endif
+        ReadOnlySpan<T> span,
+        T               value
     ) where T : IEquatable<T>
     {
     #if NETSTANDARD2_1
@@ -271,6 +229,46 @@ public static partial class Spans
         }
 
         return result;
+    }
+    public static ReadOnlySpan<T> Create<T>( T arg0 ) where T : unmanaged
+    {
+        Span<T> span = stackalloc T[1];
+        span[0] = arg0;
+        return MemoryMarshal.CreateReadOnlySpan( ref span.GetPinnableReference(), span.Length );
+    }
+    public static ReadOnlySpan<T> Create<T>( T arg0, T arg1 ) where T : unmanaged
+    {
+        Span<T> span = stackalloc T[2];
+        span[0] = arg0;
+        span[1] = arg1;
+        return MemoryMarshal.CreateReadOnlySpan( ref span.GetPinnableReference(), span.Length );
+    }
+    public static ReadOnlySpan<T> Create<T>( T arg0, T arg1, T arg2 ) where T : unmanaged
+    {
+        Span<T> span = stackalloc T[3];
+        span[0] = arg0;
+        span[1] = arg1;
+        span[2] = arg2;
+        return MemoryMarshal.CreateReadOnlySpan( ref span.GetPinnableReference(), span.Length );
+    }
+    public static ReadOnlySpan<T> Create<T>( T arg0, T arg1, T arg2, T arg3 ) where T : unmanaged
+    {
+        Span<T> span = stackalloc T[4];
+        span[0] = arg0;
+        span[1] = arg1;
+        span[2] = arg2;
+        span[3] = arg3;
+        return MemoryMarshal.CreateReadOnlySpan( ref span.GetPinnableReference(), span.Length );
+    }
+    public static ReadOnlySpan<T> Create<T>( T arg0, T arg1, T arg2, T arg3, T arg4 ) where T : unmanaged
+    {
+        Span<T> span = stackalloc T[5];
+        span[0] = arg0;
+        span[1] = arg1;
+        span[2] = arg2;
+        span[3] = arg3;
+        span[4] = arg4;
+        return MemoryMarshal.CreateReadOnlySpan( ref span.GetPinnableReference(), span.Length );
     }
 
 

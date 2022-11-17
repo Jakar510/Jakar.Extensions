@@ -240,7 +240,7 @@ public ref struct XObject
                    DateTimeOffset v   => Add( k, v, 100 ),
                    DateTime v         => Add( k, v, 100 ),
                    ISpanFormattable v => Add( k, v, bufferSize ),
-                   _                  => Add( k, pair.Value.ToString() ?? XWriter.NULL )
+                   _                  => Add( k, pair.Value.ToString() ?? XWriter.NULL ),
                };
     }
 

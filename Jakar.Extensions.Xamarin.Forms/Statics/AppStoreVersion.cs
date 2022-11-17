@@ -9,14 +9,12 @@ namespace Jakar.Extensions.Xamarin.Forms;
 public static class AppStoreVersion
 {
     public static string InstalledVersionNumber => CrossLatestVersion.Current.InstalledVersionNumber;
+    public static async Task OpenAppInStore() => await CrossLatestVersion.Current.OpenAppInStore()
+                                                                         .ConfigureAwait( false );
 
     // https://github.com/edsnider/latestversionplugin
 
     public static async Task<bool> IsLatest() => await CrossLatestVersion.Current.IsUsingLatestVersion()
-                                                                         .ConfigureAwait( false );
-    public static async Task<string> LatestVersionNumber() => await CrossLatestVersion.Current.GetLatestVersionNumber()
-                                                                                      .ConfigureAwait( false );
-    public static async Task OpenAppInStore() => await CrossLatestVersion.Current.OpenAppInStore()
                                                                          .ConfigureAwait( false );
 
 
@@ -25,12 +23,12 @@ public static class AppStoreVersion
         bool isLatest = await IsLatest()
                            .ConfigureAwait( false );
 
-        if (isLatest) { return false; }
+        if ( isLatest ) { return false; }
 
         bool update = await prompts.ConfirmAsync( newVersionAvailable, newVersionUpdateNowOrLater, token )
                                    .ConfigureAwait( false );
 
-        if (!update) { return false; }
+        if ( !update ) { return false; }
 
         await OpenAppInStore()
            .ConfigureAwait( false );
@@ -43,16 +41,18 @@ public static class AppStoreVersion
         bool isLatest = await IsLatest()
                            .ConfigureAwait( false );
 
-        if (isLatest) { return false; }
+        if ( isLatest ) { return false; }
 
         bool update = await prompts.ConfirmAsync( newVersionAvailable, newVersionUpdateNowOrLater, yes, no, token )
                                    .ConfigureAwait( false );
 
-        if (!update) { return false; }
+        if ( !update ) { return false; }
 
         await OpenAppInStore()
            .ConfigureAwait( false );
 
         return true;
     }
+    public static async Task<string> LatestVersionNumber() => await CrossLatestVersion.Current.GetLatestVersionNumber()
+                                                                                      .ConfigureAwait( false );
 }

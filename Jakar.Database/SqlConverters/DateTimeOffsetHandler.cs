@@ -9,7 +9,7 @@ public class DateTimeOffsetHandler : SqlConverter<DateTimeOffsetHandler, DateTim
             DateTime item                                                               => DateTime.SpecifyKind( item, DateTimeKind.Utc ),
             DateTimeOffset item                                                         => item,
             string item when DateTimeOffset.TryParse( item, out DateTimeOffset offset ) => offset,
-            _                                                                           => throw new ExpectedValueTypeException( nameof(value), value, typeof(DateTime), typeof(DateTimeOffset), typeof(string) )
+            _                                                                           => throw new ExpectedValueTypeException( nameof(value), value, typeof(DateTime), typeof(DateTimeOffset), typeof(string) ),
         };
     public override void SetValue( IDbDataParameter parameter, DateTimeOffset value )
     {

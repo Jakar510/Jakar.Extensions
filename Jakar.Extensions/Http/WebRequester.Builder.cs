@@ -33,22 +33,22 @@ public partial class WebRequester
 
 
     #if NETSTANDARD2_1
-        private SslProtocols?              _sslProtocols                = default;
-        private ClientCertificateOption?   _clientCertificateOptions    = default;
-        private X509CertificateCollection? _clientCertificates          = default;
-        private DecompressionMethods?      _automaticDecompression      = default;
+        private SslProtocols?              _sslProtocols = default;
+        private ClientCertificateOption?   _clientCertificateOptions = default;
+        private X509CertificateCollection? _clientCertificates = default;
+        private DecompressionMethods?      _automaticDecompression = default;
         private long?                      _maxRequestContentBufferSize = default;
 
     #else
-        private SslClientAuthenticationOptions? _sslOptions = default;
-        private TimeSpan?                       _responseDrainTimeout = default;
-        private TimeSpan?                       _connectTimeout = default;
-        private HttpKeepAlivePingPolicy?        _keepAlivePingPolicy = default;
-        private TimeSpan?                       _keepAlivePingTimeout = default;
-        private TimeSpan?                       _keepAlivePingDelay = default;
-        private TimeSpan?                       _pooledConnectionLifetime = default;
+        private SslClientAuthenticationOptions? _sslOptions                  = default;
+        private TimeSpan?                       _responseDrainTimeout        = default;
+        private TimeSpan?                       _connectTimeout              = default;
+        private HttpKeepAlivePingPolicy?        _keepAlivePingPolicy         = default;
+        private TimeSpan?                       _keepAlivePingTimeout        = default;
+        private TimeSpan?                       _keepAlivePingDelay          = default;
+        private TimeSpan?                       _pooledConnectionLifetime    = default;
         private TimeSpan?                       _pooledConnectionIdleTimeout = default;
-        private int?                            _maxResponseDrainSize = default;
+        private int?                            _maxResponseDrainSize        = default;
 
     #endif
 
@@ -87,22 +87,22 @@ public partial class WebRequester
 
 
         #if NETSTANDARD2_1
-            _sslProtocols                = default;
-            _clientCertificateOptions    = default;
-            _clientCertificates          = default;
-            _automaticDecompression      = default;
+            _sslProtocols = default;
+            _clientCertificateOptions = default;
+            _clientCertificates = default;
+            _automaticDecompression = default;
             _maxRequestContentBufferSize = default;
 
         #else
-            _sslOptions = default;
-            _responseDrainTimeout = default;
-            _connectTimeout = default;
-            _keepAlivePingPolicy = default;
-            _keepAlivePingTimeout = default;
-            _keepAlivePingDelay = default;
-            _pooledConnectionLifetime = default;
+            _sslOptions                  = default;
+            _responseDrainTimeout        = default;
+            _connectTimeout              = default;
+            _keepAlivePingPolicy         = default;
+            _keepAlivePingTimeout        = default;
+            _keepAlivePingDelay          = default;
+            _pooledConnectionLifetime    = default;
             _pooledConnectionIdleTimeout = default;
-            _maxResponseDrainSize = default;
+            _maxResponseDrainSize        = default;
 
         #endif
 
@@ -136,23 +136,23 @@ public partial class WebRequester
             var handler = new SocketsHttpHandler();
 
 
-            if (_connectTimeout.HasValue) { handler.ConnectTimeout = _connectTimeout.Value; }
+            if ( _connectTimeout.HasValue ) { handler.ConnectTimeout = _connectTimeout.Value; }
 
-            if (_keepAlivePingPolicy.HasValue) { handler.KeepAlivePingPolicy = _keepAlivePingPolicy.Value; }
+            if ( _keepAlivePingPolicy.HasValue ) { handler.KeepAlivePingPolicy = _keepAlivePingPolicy.Value; }
 
-            if (_keepAlivePingTimeout.HasValue) { handler.KeepAlivePingTimeout = _keepAlivePingTimeout.Value; }
+            if ( _keepAlivePingTimeout.HasValue ) { handler.KeepAlivePingTimeout = _keepAlivePingTimeout.Value; }
 
-            if (_keepAlivePingDelay.HasValue) { handler.KeepAlivePingDelay = _keepAlivePingDelay.Value; }
+            if ( _keepAlivePingDelay.HasValue ) { handler.KeepAlivePingDelay = _keepAlivePingDelay.Value; }
 
-            if (_sslOptions is not null) { handler.SslOptions = _sslOptions; }
+            if ( _sslOptions is not null ) { handler.SslOptions = _sslOptions; }
 
-            if (_maxResponseDrainSize.HasValue) { handler.MaxResponseDrainSize = _maxResponseDrainSize.Value; }
+            if ( _maxResponseDrainSize.HasValue ) { handler.MaxResponseDrainSize = _maxResponseDrainSize.Value; }
 
-            if (_responseDrainTimeout.HasValue) { handler.ResponseDrainTimeout = _responseDrainTimeout.Value; }
+            if ( _responseDrainTimeout.HasValue ) { handler.ResponseDrainTimeout = _responseDrainTimeout.Value; }
 
-            if (_pooledConnectionLifetime.HasValue) { handler.PooledConnectionLifetime = _pooledConnectionLifetime.Value; }
+            if ( _pooledConnectionLifetime.HasValue ) { handler.PooledConnectionLifetime = _pooledConnectionLifetime.Value; }
 
-            if (_pooledConnectionIdleTimeout.HasValue) { handler.PooledConnectionIdleTimeout = _pooledConnectionIdleTimeout.Value; }
+            if ( _pooledConnectionIdleTimeout.HasValue ) { handler.PooledConnectionIdleTimeout = _pooledConnectionIdleTimeout.Value; }
 
         #endif
 
@@ -319,7 +319,7 @@ public partial class WebRequester
         public Builder With_Timeout( int    minutes ) => With_Timeout( TimeSpan.FromMinutes( minutes ) );
         public Builder With_Timeout( float  seconds ) => With_Timeout( TimeSpan.FromSeconds( seconds ) );
         public Builder With_Timeout( double milliseconds ) => With_Timeout( TimeSpan.FromMilliseconds( milliseconds ) );
-        public Builder With_Timeout(  TimeSpan value )
+        public Builder With_Timeout( TimeSpan value )
         {
             _connectTimeout = value;
             return this;
@@ -338,11 +338,11 @@ public partial class WebRequester
             With_KeepAlive( TimeSpan.FromSeconds( pingDelaySeconds ), TimeSpan.FromSeconds( pingTimeoutSeconds ), policy );
         public Builder With_KeepAlive( double pingDelayMilliseconds, double pingTimeoutMilliseconds, HttpKeepAlivePingPolicy policy = HttpKeepAlivePingPolicy.WithActiveRequests ) =>
             With_KeepAlive( TimeSpan.FromMilliseconds( pingDelayMilliseconds ), TimeSpan.FromMilliseconds( pingTimeoutMilliseconds ), policy );
-        public Builder With_KeepAlive(  TimeSpan pingDelay,  TimeSpan pingTimeout, HttpKeepAlivePingPolicy policy = HttpKeepAlivePingPolicy.WithActiveRequests )
+        public Builder With_KeepAlive( TimeSpan pingDelay, TimeSpan pingTimeout, HttpKeepAlivePingPolicy policy = HttpKeepAlivePingPolicy.WithActiveRequests )
         {
-            _keepAlivePingDelay = pingDelay;
+            _keepAlivePingDelay   = pingDelay;
             _keepAlivePingTimeout = pingTimeout;
-            _keepAlivePingPolicy = policy;
+            _keepAlivePingPolicy  = policy;
             return this;
         }
     #endif
@@ -359,7 +359,7 @@ public partial class WebRequester
         public Builder With_PooledConnectionIdleTimeout( int    pingDelayMinutes ) => With_PooledConnectionIdleTimeout( TimeSpan.FromMinutes( pingDelayMinutes ) );
         public Builder With_PooledConnectionIdleTimeout( float  pingDelaySeconds ) => With_PooledConnectionIdleTimeout( TimeSpan.FromSeconds( pingDelaySeconds ) );
         public Builder With_PooledConnectionIdleTimeout( double pingDelayMilliseconds ) => With_PooledConnectionIdleTimeout( TimeSpan.FromMilliseconds( pingDelayMilliseconds ) );
-        public Builder With_PooledConnectionIdleTimeout(  TimeSpan value )
+        public Builder With_PooledConnectionIdleTimeout( TimeSpan value )
         {
             _pooledConnectionIdleTimeout = value;
             return this;
@@ -369,7 +369,7 @@ public partial class WebRequester
         public Builder With_PooledConnectionLifetime( int    pingDelayMinutes ) => With_PooledConnectionLifetime( TimeSpan.FromMinutes( pingDelayMinutes ) );
         public Builder With_PooledConnectionLifetime( float  pingDelaySeconds ) => With_PooledConnectionLifetime( TimeSpan.FromSeconds( pingDelaySeconds ) );
         public Builder With_PooledConnectionLifetime( double pingDelayMilliseconds ) => With_PooledConnectionLifetime( TimeSpan.FromMilliseconds( pingDelayMilliseconds ) );
-        public Builder With_PooledConnectionLifetime(  TimeSpan value )
+        public Builder With_PooledConnectionLifetime( TimeSpan value )
         {
             _pooledConnectionLifetime = value;
             return this;
@@ -379,7 +379,7 @@ public partial class WebRequester
         public Builder With_ResponseDrainTimeout( int    pingDelayMinutes ) => With_ResponseDrainTimeout( TimeSpan.FromMinutes( pingDelayMinutes ) );
         public Builder With_ResponseDrainTimeout( float  pingDelaySeconds ) => With_ResponseDrainTimeout( TimeSpan.FromSeconds( pingDelaySeconds ) );
         public Builder With_ResponseDrainTimeout( double pingDelayMilliseconds ) => With_ResponseDrainTimeout( TimeSpan.FromMilliseconds( pingDelayMilliseconds ) );
-        public Builder With_ResponseDrainTimeout(  TimeSpan value )
+        public Builder With_ResponseDrainTimeout( TimeSpan value )
         {
             _responseDrainTimeout = value;
             return this;

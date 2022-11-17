@@ -35,43 +35,44 @@ public static class WebRequests
                                    // WebExceptionStatus.RequestProhibitedByProxy => new ,
 
                                    WebExceptionStatus.Success => default,
-                                   _                          => default
+                                   _                          => default,
                                };
 
         return exception;
     }
     /// <summary>
-    ///     <seealso href = "https://stackoverflow.com/questions/19211972/getresponseasync-does-not-accept-cancellationtoken" />
-    ///     <seealso href = "https://github.com/palburtus/HttpClient.net/blob/master/Aaks.Restclient/HttpRestClient.cs" />
+    ///     <seealso href="https://stackoverflow.com/questions/19211972/getresponseasync-does-not-accept-cancellationtoken"/>
+    ///     <seealso
+    ///         href="https://github.com/palburtus/HttpClient.net/blob/master/Aaks.Restclient/HttpRestClient.cs"/>
     /// </summary>
-    /// <param name = "request" > </param>
-    /// <param name = "token" > </param>
-    /// <param name = "useSynchronizationContext" > </param>
+    /// <param name="request"> </param>
+    /// <param name="token"> </param>
+    /// <param name="useSynchronizationContext"> </param>
     /// <returns> </returns>
-    /// <exception cref = "WebException" > </exception>
-    /// <exception cref = "ArgumentNullException" > </exception>
-    /// <exception cref = "OperationCanceledException" > </exception>
+    /// <exception cref="WebException"> </exception>
+    /// <exception cref="ArgumentNullException"> </exception>
+    /// <exception cref="OperationCanceledException"> </exception>
     public static async Task<WebResponse> GetResponseAsync( this WebRequest request, CancellationToken token, bool useSynchronizationContext = true )
     {
-        if (request is null) { throw new ArgumentNullException( nameof(request) ); }
+        if ( request is null ) { throw new ArgumentNullException( nameof(request) ); }
 
 
-        await using (token.Register( request.Abort, useSynchronizationContext ))
+        await using ( token.Register( request.Abort, useSynchronizationContext ) )
         {
             try
             {
                 return await request.GetResponseAsync()
                                     .ConfigureAwait( false );
             }
-            catch (WebException ex)
+            catch ( WebException ex )
             {
-                if (token.IsCancellationRequested) // WebException is thrown when request.Abort() is called, but there may be many other reasons, propagate the WebException to the caller correctly
+                if ( token.IsCancellationRequested ) // WebException is thrown when request.Abort() is called, but there may be many other reasons, propagate the WebException to the caller correctly
                 {
                     throw new OperationCanceledException( ex.Message, ex, token ); // the WebException will be available as Exception.InnerException
                 }
 
                 // cancellation hasn't been requested, rethrow the original WebException
-                if (!Debugger.IsAttached) { throw; }
+                if ( !Debugger.IsAttached ) { throw; }
 
 
                 ResponseData details = await ResponseData.Create( ex )
@@ -157,13 +158,13 @@ public static class WebRequests
                               {
                                   IEnumerable<string> items => items.First(),
                                   string item               => item,
-                                  _                         => throw new HeaderException( HttpRequestHeader.ContentType, value, typeof(string), typeof(IEnumerable<string>) )
+                                  _                         => throw new HeaderException( HttpRequestHeader.ContentType, value, typeof(string), typeof(IEnumerable<string>) ),
                               };
 
     public static void SetHeader( this HttpWebRequest request, HttpRequestHeader key, object value )
     {
         // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
-        switch (key)
+        switch ( key )
         {
             // case HttpRequestHeader.From:
             // 	break;
@@ -188,7 +189,7 @@ public static class WebRequests
                 break;
 
             case HttpRequestHeader.ContentLength:
-                if (value is long contentLength) { request.ContentLength = contentLength; }
+                if ( value is long contentLength ) { request.ContentLength = contentLength; }
                 else { throw new HeaderException( key, value, typeof(long) ); }
 
                 break;
@@ -200,14 +201,14 @@ public static class WebRequests
             case HttpRequestHeader.Cookie:
                 request.CookieContainer ??= new CookieContainer();
 
-                switch (value)
+                switch ( value )
                 {
                     case Cookie cookie:
                         request.CookieContainer.Add( cookie );
                         break;
 
                     case IEnumerable<Cookie> cookies:
-                        foreach (Cookie item in cookies) { request.CookieContainer.Add( item ); }
+                        foreach ( Cookie item in cookies ) { request.CookieContainer.Add( item ); }
 
                         break;
 
@@ -217,7 +218,7 @@ public static class WebRequests
                 break;
 
             case HttpRequestHeader.Date:
-                if (value is DateTime dateTime) { request.Date = dateTime; }
+                if ( value is DateTime dateTime ) { request.Date = dateTime; }
                 else { throw new HeaderException( key, value, typeof(DateTime) ); }
 
                 break;
@@ -227,19 +228,19 @@ public static class WebRequests
                 break;
 
             case HttpRequestHeader.KeepAlive:
-                if (value is bool keepAlive) { request.KeepAlive = keepAlive; }
+                if ( value is bool keepAlive ) { request.KeepAlive = keepAlive; }
                 else { throw new HeaderException( key, value, typeof(bool) ); }
 
                 break;
 
             case HttpRequestHeader.MaxForwards:
-                if (value is int redirects) { request.MaximumAutomaticRedirections = redirects; }
+                if ( value is int redirects ) { request.MaximumAutomaticRedirections = redirects; }
                 else { throw new HeaderException( key, value, typeof(int) ); }
 
                 break;
 
             case HttpRequestHeader.ProxyAuthorization:
-                if (value is IWebProxy proxy) { request.Proxy = proxy; }
+                if ( value is IWebProxy proxy ) { request.Proxy = proxy; }
                 else { throw new HeaderException( key, value, typeof(IWebProxy) ); }
 
                 break;
@@ -253,8 +254,8 @@ public static class WebRequests
                 break;
 
             default:
-                if (value is string s) { request.Headers.Add( key, s ); }
-                else { request.Headers.Add( key,                   value.ToJson() ); }
+                if ( value is string s ) { request.Headers.Add( key, s ); }
+                else { request.Headers.Add( key,                     value.ToJson() ); }
 
                 return;
         }
@@ -262,32 +263,32 @@ public static class WebRequests
 
     public static void SetHeader( this HttpWebRequest request, string key, object value )
     {
-        switch (key)
+        switch ( key )
         {
             case "Content-Type":
                 request.SetContentType( value );
                 break;
 
             case "Content-Length":
-                if (value is long contentLength) { request.ContentLength = contentLength; }
+                if ( value is long contentLength ) { request.ContentLength = contentLength; }
                 else { throw new HeaderException( HttpRequestHeader.ContentLength, value, typeof(long) ); }
 
                 break;
 
             case "Keep-Alive":
-                if (value is bool keepAlive) { request.KeepAlive = keepAlive; }
+                if ( value is bool keepAlive ) { request.KeepAlive = keepAlive; }
                 else { throw new HeaderException( HttpRequestHeader.KeepAlive, value, typeof(bool) ); }
 
                 break;
 
             case "Max-Forwards":
-                if (value is int redirects) { request.MaximumAutomaticRedirections = redirects; }
+                if ( value is int redirects ) { request.MaximumAutomaticRedirections = redirects; }
                 else { throw new HeaderException( HttpRequestHeader.MaxForwards, value, typeof(int) ); }
 
                 break;
 
             case "Proxy-Authorization":
-                if (value is IWebProxy proxy) { request.Proxy = proxy; }
+                if ( value is IWebProxy proxy ) { request.Proxy = proxy; }
                 else { throw new HeaderException( HttpRequestHeader.ProxyAuthorization, value, typeof(IWebProxy) ); }
 
                 break;
@@ -301,8 +302,8 @@ public static class WebRequests
                 break;
 
             default:
-                if (value is string s) { request.Headers.Add( key, s ); }
-                else { request.Headers.Add( key,                   value.ToJson() ); }
+                if ( value is string s ) { request.Headers.Add( key, s ); }
+                else { request.Headers.Add( key,                     value.ToJson() ); }
 
                 break;
         }
@@ -311,26 +312,26 @@ public static class WebRequests
 
     public static void SetHeader( this HttpContent content, string key, object value )
     {
-        switch (key)
+        switch ( key )
         {
             case "Content-Type":
                 content.Headers.ContentType = value switch
                                               {
                                                   MediaTypeHeaderValue v => v,
                                                   string v               => new MediaTypeHeaderValue( v ),
-                                                  _                      => throw new HeaderException( HttpRequestHeader.ContentType, value, typeof(MediaTypeHeaderValue), typeof(string) )
+                                                  _                      => throw new HeaderException( HttpRequestHeader.ContentType, value, typeof(MediaTypeHeaderValue), typeof(string) ),
                                               };
 
                 break;
 
             case "Content-Length":
-                if (value is long contentLength) { content.Headers.ContentLength = contentLength; }
+                if ( value is long contentLength ) { content.Headers.ContentLength = contentLength; }
                 else { throw new HeaderException( HttpRequestHeader.ContentLength, value, typeof(long) ); }
 
                 break;
 
             case "Keep-Alive":
-                if (value is bool keepAlive) { content.Headers.Add( key, keepAlive.ToString() ); }
+                if ( value is bool keepAlive ) { content.Headers.Add( key, keepAlive.ToString() ); }
                 else { throw new HeaderException( HttpRequestHeader.KeepAlive, value, typeof(bool) ); }
 
                 break;
@@ -356,8 +357,8 @@ public static class WebRequests
             //     break;
 
             default:
-                if (value is string s) { content.Headers.Add( key, s ); }
-                else { content.Headers.Add( key,                   value.ToJson() ); }
+                if ( value is string s ) { content.Headers.Add( key, s ); }
+                else { content.Headers.Add( key,                     value.ToJson() ); }
 
                 break;
         }
@@ -366,24 +367,24 @@ public static class WebRequests
     public static void SetHeaders( this HttpWebRequest request, MultipartFormDataContent data ) => request.SetHeaders( data.Headers );
     public static void SetHeaders( this HttpWebRequest request, HttpContentHeaders? headers )
     {
-        if (headers is null) { return; }
+        if ( headers is null ) { return; }
 
-        foreach ((string key, IEnumerable<string> items) in headers)
+        foreach ( (string key, IEnumerable<string> items) in headers )
         {
-            if (Enum.TryParse( key, true, out HttpRequestHeader httpRequestHeader )) { request.SetHeader( httpRequestHeader, items ); }
-            else { request.SetHeader( key,                                                                                   items ); }
+            if ( Enum.TryParse( key, true, out HttpRequestHeader httpRequestHeader ) ) { request.SetHeader( httpRequestHeader, items ); }
+            else { request.SetHeader( key,                                                                                     items ); }
         }
     }
 
 
     public static void SetHeaders( this HttpWebRequest request, HeaderCollection? headers )
     {
-        if (headers is null) { return; }
+        if ( headers is null ) { return; }
 
-        foreach ((string key, object value) in headers)
+        foreach ( (string key, object value) in headers )
         {
-            if (Enum.TryParse( key, true, out HttpRequestHeader header )) { request.SetHeader( header, value ); }
-            else { request.SetHeader( key,                                                             value ); }
+            if ( Enum.TryParse( key, true, out HttpRequestHeader header ) ) { request.SetHeader( header, value ); }
+            else { request.SetHeader( key,                                                               value ); }
         }
     }
 }

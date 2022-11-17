@@ -51,7 +51,7 @@ public class ObservableHashSet<TElement> : CollectionAlerts<TElement>, ISet<TEle
     public virtual bool Add( TElement item )
     {
         bool result = _values.Add( item );
-        if (result) { Added( item ); }
+        if ( result ) { Added( item ); }
 
         return result;
     }
@@ -60,7 +60,7 @@ public class ObservableHashSet<TElement> : CollectionAlerts<TElement>, ISet<TEle
     public virtual bool Remove( TElement item )
     {
         bool result = _values.Remove( item );
-        if (result) { Removed( item ); }
+        if ( result ) { Removed( item ); }
 
         return result;
     }

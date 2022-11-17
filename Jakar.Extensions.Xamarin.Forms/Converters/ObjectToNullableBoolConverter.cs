@@ -5,20 +5,6 @@ namespace Jakar.Extensions.Xamarin.Forms;
 [TypeConverter( typeof(bool?) )]
 public class ObjectToNullableBoolConverter : TypeConverter, IValueConverter, IExtendedTypeConverter
 {
-    private static readonly Type[] _types =
-    {
-        typeof(bool),
-        typeof(int),
-        typeof(uint),
-        typeof(long),
-        typeof(ulong),
-        typeof(float),
-        typeof(double),
-        typeof(string)
-    };
-
-    public override bool CanConvertFrom( Type? sourceType ) => sourceType is null || sourceType.IsOneOf( _types );
-
     public static bool? Convert( object? value ) => value switch
                                                     {
                                                         null     => null,
@@ -32,13 +18,26 @@ public class ObjectToNullableBoolConverter : TypeConverter, IValueConverter, IEx
                                                         string s => bool.TryParse( s, out bool result )
                                                                         ? result
                                                                         : !string.IsNullOrWhiteSpace( s ),
-                                                        _ => true
+                                                        _ => true,
                                                     };
+    private static readonly Type[] _types =
+    {
+        typeof(bool),
+        typeof(int),
+        typeof(uint),
+        typeof(long),
+        typeof(ulong),
+        typeof(float),
+        typeof(double),
+        typeof(string),
+    };
+
+    public override bool CanConvertFrom( Type? sourceType ) => sourceType is null || sourceType.IsOneOf( _types );
+
+    protected virtual bool? InternalConvert( object? value ) => Convert( value );
 
 
     public override object? ConvertFromInvariantString( string? value ) => InternalConvert( value );
-
-    protected virtual bool? InternalConvert( object? value ) => Convert( value );
 
 
     public object? ConvertFrom( CultureInfo            culture, object?          value, IServiceProvider serviceProvider ) => InternalConvert( value );

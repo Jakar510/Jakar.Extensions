@@ -25,18 +25,13 @@ public interface IUserDevice<TID> : IEquatable<IUserDevice<TID>>, IUniqueID<TID>
     string        OsVersion    { get; }
 
 
-    /// <summary>
-    ///     Last known
-    ///     <see cref = "IPAddress" />
-    /// </summary>
+    /// <summary> Last known <see cref="IPAddress"/> </summary>
     public string? IP { get; }
 }
 
 
 
-/// <summary>
-///     Debug and/or identify info for IT
-/// </summary>
+/// <summary> Debug and/or identify info for IT </summary>
 [Serializable]
 public class UserDevice<TID> : ObservableClass, IUserDevice<TID> where TID : struct, IComparable<TID>, IEquatable<TID>
 {
@@ -91,14 +86,18 @@ public class UserDevice<TID> : ObservableClass, IUserDevice<TID> where TID : str
     }
 
 
+    public static bool operator ==( UserDevice<TID>? left, UserDevice<TID>? right ) => Equals( left, right );
+    public static bool operator !=( UserDevice<TID>? left, UserDevice<TID>? right ) => !Equals( left, right );
+
+
     // public static UserDevice<TID> Create( Guid? deviceID ) => new(DeviceInfo.Model, DeviceInfo.Manufacturer, DeviceInfo.Name, DeviceInfo.DeviceType, DeviceInfo.Idiom, DeviceInfo.Platform, DeviceInfo.Version, deviceID);
 
 
     public override bool Equals( object? obj )
     {
-        if (obj is null) { return false; }
+        if ( obj is null ) { return false; }
 
-        if (ReferenceEquals( this, obj )) { return true; }
+        if ( ReferenceEquals( this, obj ) ) { return true; }
 
         return obj is UserDevice<TID> device && Equals( device );
     }
@@ -116,15 +115,11 @@ public class UserDevice<TID> : ObservableClass, IUserDevice<TID> where TID : str
         hashCode.Add( OsVersion );
         return hashCode.ToHashCode();
     }
-
-
-    public static bool operator ==( UserDevice<TID>? left, UserDevice<TID>? right ) => Equals( left, right );
-    public static bool operator !=( UserDevice<TID>? left, UserDevice<TID>? right ) => !Equals( left, right );
     public bool Equals( IUserDevice<TID>? other )
     {
-        if (other is null) { return false; }
+        if ( other is null ) { return false; }
 
-        if (ReferenceEquals( this, other )) { return true; }
+        if ( ReferenceEquals( this, other ) ) { return true; }
 
         return TimeStamp.Equals( other.TimeStamp ) && IP == other.IP && Model == other.Model && Manufacturer == other.Manufacturer && DeviceName == other.DeviceName && DeviceType == other.DeviceType && Idiom == other.Idiom &&
                Platform == other.Platform && OsVersion == other.OsVersion;

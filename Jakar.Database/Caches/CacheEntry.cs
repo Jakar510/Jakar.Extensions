@@ -30,17 +30,26 @@ public sealed class CacheEntry<TRecord> : ObservableClass, IEquatable<TRecord>, 
     public CacheEntry( TRecord value ) => Value = value;
 
 
+    public static bool operator ==( CacheEntry<TRecord>?         left, CacheEntry<TRecord>? right ) => Equalizer<CacheEntry<TRecord>>.Instance.Equals( left, right );
+    public static bool operator >( CacheEntry<TRecord>?          left, CacheEntry<TRecord>? right ) => Sorter<CacheEntry<TRecord>>.Instance.Compare( left, right ) > 0;
+    public static bool operator >=( CacheEntry<TRecord>?         left, CacheEntry<TRecord>? right ) => Sorter<CacheEntry<TRecord>>.Instance.Compare( left, right ) >= 0;
+    public static bool operator !=( CacheEntry<TRecord>?         left, CacheEntry<TRecord>? right ) => !Equalizer<CacheEntry<TRecord>>.Instance.Equals( left, right );
+    public static bool operator <( CacheEntry<TRecord>?          left, CacheEntry<TRecord>? right ) => Sorter<CacheEntry<TRecord>>.Instance.Compare( left, right ) < 0;
+    public static bool operator <=( CacheEntry<TRecord>?         left, CacheEntry<TRecord>? right ) => Sorter<CacheEntry<TRecord>>.Instance.Compare( left, right ) <= 0;
+    public static implicit operator CacheEntry<TRecord>( TRecord value ) => new(value);
+
+
+    public override bool Equals( object? obj ) => ReferenceEquals( this, obj ) || obj is CacheEntry<TRecord> other && Equals( other );
+
+    public bool HasExpired( in TimeSpan time ) => DateTimeOffset.Now - _lastTime >= time;
+    public override int GetHashCode() => Value.GetHashCode();
+
+
     internal TRecord Saved()
     {
         _hash = _value?.GetHashCode() ?? 0;
         return Value;
     }
-
-    public bool HasExpired( in TimeSpan time ) => DateTimeOffset.Now - _lastTime >= time;
-
-
-    public override bool Equals( object? obj ) => ReferenceEquals( this, obj ) || obj is CacheEntry<TRecord> other && Equals( other );
-    public override int GetHashCode() => Value.GetHashCode();
     public int CompareTo( object? other )
     {
         if ( other is null ) { return 1; }
@@ -69,13 +78,4 @@ public sealed class CacheEntry<TRecord> : ObservableClass, IEquatable<TRecord>, 
         return Value.Equals( other.Value );
     }
     public bool Equals( TRecord? other ) => Value.Equals( other );
-
-
-    public static bool operator ==( CacheEntry<TRecord>?         left, CacheEntry<TRecord>? right ) => Equalizer<CacheEntry<TRecord>>.Instance.Equals( left, right );
-    public static bool operator >( CacheEntry<TRecord>?          left, CacheEntry<TRecord>? right ) => Sorter<CacheEntry<TRecord>>.Instance.Compare( left, right ) > 0;
-    public static bool operator >=( CacheEntry<TRecord>?         left, CacheEntry<TRecord>? right ) => Sorter<CacheEntry<TRecord>>.Instance.Compare( left, right ) >= 0;
-    public static implicit operator CacheEntry<TRecord>( TRecord value ) => new(value);
-    public static bool operator !=( CacheEntry<TRecord>?         left, CacheEntry<TRecord>? right ) => !Equalizer<CacheEntry<TRecord>>.Instance.Equals( left, right );
-    public static bool operator <( CacheEntry<TRecord>?          left, CacheEntry<TRecord>? right ) => Sorter<CacheEntry<TRecord>>.Instance.Compare( left, right ) < 0;
-    public static bool operator <=( CacheEntry<TRecord>?         left, CacheEntry<TRecord>? right ) => Sorter<CacheEntry<TRecord>>.Instance.Compare( left, right ) <= 0;
 }

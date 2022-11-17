@@ -6,26 +6,6 @@ namespace Jakar.Database;
 
 public static class TableLinq
 {
-    public static async IAsyncEnumerable<TResult> Select<TRecord, TResult>( this IAsyncEnumerable<TRecord>                                          source,
-                                                                            Func<DbConnection, DbTransaction?, TRecord, CancellationToken, TResult> func,
-                                                                            DbConnection                                                            connection,
-                                                                            DbTransaction?                                                          transaction,
-                                                                            [EnumeratorCancellation] CancellationToken                              token = default
-    )
-    {
-        await foreach (TRecord record in source.WithCancellation( token )) { yield return func( connection, transaction, record, token ); }
-    }
-    public static async IAsyncEnumerable<TResult> Select<TRecord, TResult>( this IAsyncEnumerable<TRecord>                                                source,
-                                                                            Func<DbConnection, DbTransaction?, TRecord, CancellationToken, Task<TResult>> func,
-                                                                            DbConnection                                                                  connection,
-                                                                            DbTransaction?                                                                transaction,
-                                                                            [EnumeratorCancellation] CancellationToken                                    token = default
-    )
-    {
-        await foreach (TRecord record in source.WithCancellation( token )) { yield return await func( connection, transaction, record, token ); }
-    }
-
-
     public static async IAsyncEnumerable<TRecord> Where<TRecord>( this IAsyncEnumerable<TRecord>                                       source,
                                                                   Func<DbConnection, DbTransaction?, TRecord, CancellationToken, bool> func,
                                                                   DbConnection                                                         connection,
@@ -33,9 +13,9 @@ public static class TableLinq
                                                                   [EnumeratorCancellation] CancellationToken                           token = default
     )
     {
-        await foreach (TRecord record in source.WithCancellation( token ))
+        await foreach ( TRecord record in source.WithCancellation( token ) )
         {
-            if (func( connection, transaction, record, token )) { yield return record; }
+            if ( func( connection, transaction, record, token ) ) { yield return record; }
         }
     }
     public static async IAsyncEnumerable<TRecord> Where<TRecord>( this IAsyncEnumerable<TRecord>                                             source,
@@ -45,9 +25,27 @@ public static class TableLinq
                                                                   [EnumeratorCancellation] CancellationToken                                 token = default
     )
     {
-        await foreach (TRecord record in source.WithCancellation( token ))
+        await foreach ( TRecord record in source.WithCancellation( token ) )
         {
-            if (await func( connection, transaction, record, token )) { yield return record; }
+            if ( await func( connection, transaction, record, token ) ) { yield return record; }
         }
+    }
+    public static async IAsyncEnumerable<TResult> Select<TRecord, TResult>( this IAsyncEnumerable<TRecord>                                          source,
+                                                                            Func<DbConnection, DbTransaction?, TRecord, CancellationToken, TResult> func,
+                                                                            DbConnection                                                            connection,
+                                                                            DbTransaction?                                                          transaction,
+                                                                            [EnumeratorCancellation] CancellationToken                              token = default
+    )
+    {
+        await foreach ( TRecord record in source.WithCancellation( token ) ) { yield return func( connection, transaction, record, token ); }
+    }
+    public static async IAsyncEnumerable<TResult> Select<TRecord, TResult>( this IAsyncEnumerable<TRecord>                                                source,
+                                                                            Func<DbConnection, DbTransaction?, TRecord, CancellationToken, Task<TResult>> func,
+                                                                            DbConnection                                                                  connection,
+                                                                            DbTransaction?                                                                transaction,
+                                                                            [EnumeratorCancellation] CancellationToken                                    token = default
+    )
+    {
+        await foreach ( TRecord record in source.WithCancellation( token ) ) { yield return await func( connection, transaction, record, token ); }
     }
 }

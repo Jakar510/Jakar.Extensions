@@ -40,7 +40,7 @@ public readonly ref struct LineSplitEntry<T> where T : unmanaged, IEquatable<T>
 
 
     public override string ToString() => $"{nameof(LineSplitEntry<T>)}<{nameof(Value)}: {Value.ToString()}, {nameof(Separator)}: {Separator.ToString()}>";
-    bool TryFormat( Span<T> destination, out int charsWritten, ReadOnlySpan<T> format, IFormatProvider? provider )
+    private bool TryFormat( Span<T> destination, out int charsWritten, ReadOnlySpan<T> format, IFormatProvider? provider )
     {
         if ( Value.TryCopyTo( destination ) )
         {

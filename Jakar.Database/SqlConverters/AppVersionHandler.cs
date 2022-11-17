@@ -11,7 +11,7 @@ public class AppVersionHandler : SqlConverter<AppVersionHandler, AppVersion>
         {
             AppVersion item                                                      => item,
             string item when AppVersion.TryParse( item, out AppVersion? offset ) => offset.Value,
-            _                                                                    => throw new ExpectedValueTypeException( nameof(value), value, typeof(DateOnly), typeof(string) )
+            _                                                                    => throw new ExpectedValueTypeException( nameof(value), value, typeof(DateOnly), typeof(string) ),
         };
     public override void SetValue( IDbDataParameter parameter, AppVersion value )
     {

@@ -5,23 +5,23 @@ namespace Jakar.Database;
 
 
 /// <summary>
-///     <see href = "https://stackoverflow.com/a/15992856/9530917" />
+///     <see href="https://stackoverflow.com/a/15992856/9530917"/>
 /// </summary>
 public struct RecordGenerator<TRecord> : IAsyncEnumerator<TRecord?> where TRecord : TableRecord<TRecord>
 {
     private readonly DbTableBase<TRecord> _table;
-    private TRecord? _current = default;
-    private long _ID => _current?.ID ?? 0;
+    private          TRecord?             _current = default;
+    private          long                 _ID => _current?.ID ?? 0;
 
 
     public TRecord Current
     {
-        get => _current ?? throw new NullReferenceException( nameof( _current ) );
+        get => _current ?? throw new NullReferenceException( nameof(_current) );
         set => _current = value;
     }
 
 
-    public RecordGenerator(DbTableBase<TRecord> table) => _table = table;
+    public RecordGenerator( DbTableBase<TRecord> table ) => _table = table;
     public ValueTask DisposeAsync()
     {
         _current = default;
@@ -30,14 +30,14 @@ public struct RecordGenerator<TRecord> : IAsyncEnumerator<TRecord?> where TRecor
 
 
     public void Reset() => _current = default;
-    public async ValueTask<bool> MoveNextAsync(CancellationToken token = default)
+    public async ValueTask<bool> MoveNextAsync( CancellationToken token = default )
     {
         await using DbConnection connection = await _table.ConnectAsync( token );
         return await MoveNextAsync( connection, default, token );
     }
-    public async ValueTask<bool> MoveNextAsync(DbConnection connection, DbTransaction? transaction, CancellationToken token = default)
+    public async ValueTask<bool> MoveNextAsync( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
-        if (token.IsCancellationRequested)
+        if ( token.IsCancellationRequested )
         {
             _current = default;
             return default;

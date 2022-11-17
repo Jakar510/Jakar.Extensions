@@ -1,7 +1,6 @@
 #nullable enable
 using System;
 using System.Net;
-using System.Text;
 using NUnit.Framework;
 
 
@@ -22,7 +21,7 @@ public class IniConfig_Tests : Assert
     {
         var project = new IniConfig.Section
                       {
-                          ["Name"] = nameof(IniConfig_Tests)
+                          ["Name"] = nameof(IniConfig_Tests),
                       };
 
         project.Add( nameof(DateTime), DateTime.Now );
@@ -32,20 +31,18 @@ public class IniConfig_Tests : Assert
 
         var server = new IniConfig.Section
                      {
-                         ["Name"] = nameof(ServicePoint)
+                         ["Name"] = nameof(ServicePoint),
                      };
 
-        server.Add( "Port", 5000 );
+        server.Add( "Port", _random.Next( IPEndPoint.MinPort, IPEndPoint.MaxPort ) );
 
 
-        var sb = new StringBuilder();
-        sb.AppendJoin( '.', _random.Next( 255 ), _random.Next( 255 ), _random.Next( 255 ), _random.Next( 255 ) );
-        server.Add( nameof(IPAddress), sb.ToString() );
+        server.Add( nameof(IPAddress), string.Join( '.', _random.Next( 255 ), _random.Next( 255 ), _random.Next( 255 ), _random.Next( 255 ) ) );
 
         var ini = new IniConfig
                   {
                       [nameof(project)] = project,
-                      [nameof(server)]  = server
+                      [nameof(server)]  = server,
                   };
 
         ini[nameof(Random)]

@@ -66,7 +66,7 @@ public struct EasySqlBuilder
         _sb.Append( func );
         Begin();
 
-        if (columnName is null) { _sb.Append( '*' ); }
+        if ( columnName is null ) { _sb.Append( '*' ); }
         else { _sb.Append( columnName ); }
 
         End();
@@ -92,7 +92,7 @@ public struct EasySqlBuilder
     }
     internal EasySqlBuilder VerifyParentheses()
     {
-        if (_needToClose) { End(); }
+        if ( _needToClose ) { End(); }
 
         return this;
     }
@@ -115,7 +115,7 @@ public struct EasySqlBuilder
         // }
         // else if ( end >= 0 ) { throw new FormatException("Should not occur, no start ("); }
 
-        if (!result.IsBalanced()) { throw new FormatException( $@"String is not balanced! ""{result}""" ); }
+        if ( !result.IsBalanced() ) { throw new FormatException( $@"String is not balanced! ""{result}""" ); }
 
         return result;
     }

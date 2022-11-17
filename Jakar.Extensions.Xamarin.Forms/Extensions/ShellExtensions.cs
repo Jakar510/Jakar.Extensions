@@ -11,7 +11,7 @@ public static class ShellExtensions
 
     public static string GetPath( this string type, bool root, IDictionary<string, object>? parameters = null )
     {
-        if (parameters is null) { return type; }
+        if ( parameters is null ) { return type; }
 
         string result = type + parameters.Parameterize();
 
@@ -25,13 +25,6 @@ public static class ShellExtensions
                              ? "//"
                              : "",
                          Parameterize ) + parameters.Parameterize();
-    public static async Task GoToAsync( this Shell shell, bool root, params Type[] types ) =>
-        await shell.GoToAsync( GetPath( root, types ) )
-                   .ConfigureAwait( false );
-
-    public static async Task GoToAsync( this Shell shell, bool root, IDictionary<string, object> parameters, params Type[] types ) =>
-        await shell.GoToAsync( types.GetPath( root, parameters ) )
-                   .ConfigureAwait( false );
 
     public static string Parameterize( this IEnumerable<Type> types, bool root ) =>
         types.Aggregate( root
@@ -50,4 +43,11 @@ public static class ShellExtensions
 
         return previous + $"{key}={value},";
     }
+    public static async Task GoToAsync( this Shell shell, bool root, params Type[] types ) =>
+        await shell.GoToAsync( GetPath( root, types ) )
+                   .ConfigureAwait( false );
+
+    public static async Task GoToAsync( this Shell shell, bool root, IDictionary<string, object> parameters, params Type[] types ) =>
+        await shell.GoToAsync( types.GetPath( root, parameters ) )
+                   .ConfigureAwait( false );
 }

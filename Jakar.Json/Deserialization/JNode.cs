@@ -33,17 +33,17 @@ public readonly ref struct JNode
         {
             _span = _span.Trim();
 
-            if (_span.IsNullOrWhiteSpace())
+            if ( _span.IsNullOrWhiteSpace() )
             {
                 Current = default;
                 return false;
             }
 
-            if (_span.StartsWith( '{' ) && _span.EndsWith( '}' ))
+            if ( _span.StartsWith( '{' ) && _span.EndsWith( '}' ) )
             {
                 int start = _span.IndexOf( '{' );
             }
-            else if (_span.StartsWith( '[' ) && _span.EndsWith( ']' )) { }
+            else if ( _span.StartsWith( '[' ) && _span.EndsWith( ']' ) ) { }
 
 
             return false;

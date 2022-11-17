@@ -9,8 +9,8 @@ public abstract record Descriptor
     public bool                 IsKey        { get; init; }
     public Func<object, object> GetValue     { get; init; }
     public string               ColumnName   { get; init; }
-    public string               Name         { get; init; }
     public string               KeyValuePair { get; init; }
+    public string               Name         { get; init; }
     public string               VariableName { get; init; }
 
 
@@ -26,13 +26,13 @@ public abstract record Descriptor
         IsKey        = IsDbKey( property );
 
 
-        var emit = Emit<Func<object, object>>.NewDynamicMethod( GetType() )
-                                             .LoadArgument( 0 )
-                                             .CastClass( property.DeclaringType )
-                                             .Call( property.GetMethod );
+        Emit<Func<object, object>>? emit = Emit<Func<object, object>>.NewDynamicMethod( GetType() )
+                                                                     .LoadArgument( 0 )
+                                                                     .CastClass( property.DeclaringType )
+                                                                     .Call( property.GetMethod );
 
         if ( property.PropertyType.IsValueType ) { emit = emit.Box( property.PropertyType ); }
-         
+
         GetValue = emit.Return()
                        .CreateDelegate();
     }

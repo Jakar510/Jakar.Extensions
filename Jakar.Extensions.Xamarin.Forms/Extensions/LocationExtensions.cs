@@ -16,6 +16,6 @@ public static class LocationExtensions
             Latitude           = location.Latitude,
             Longitude          = location.Longitude,
             Speed              = location.Speed ?? double.NaN,
-            Timestamp          = new DateTime( location.Timestamp.Ticks )
+            Timestamp          = new DateTime( location.Timestamp.Ticks ),
         };
 }

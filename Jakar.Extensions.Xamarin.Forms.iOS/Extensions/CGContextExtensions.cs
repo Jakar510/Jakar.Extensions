@@ -36,7 +36,7 @@ public static class DrawingExtensions
     {
         con.SetAlpha( alpha );
 
-        if (isChecked)
+        if ( isChecked )
         {
             CGColor color = on ?? Color.Accent.ToCGColor();
             con.DrawCircle( rect, 5, color );

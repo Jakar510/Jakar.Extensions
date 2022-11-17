@@ -3,6 +3,258 @@
 
 public static partial class DbExtensions
 {
+    public static async IAsyncEnumerable<TResult> TryCall<TResult>( this IConnectableDb db, Func<DbConnection, DbTransaction, CancellationToken, IAsyncEnumerable<TResult>> func, [EnumeratorCancellation] CancellationToken token = default )
+    {
+        await using DbConnection  conn        = await db.ConnectAsync( token );
+        await using DbTransaction transaction = await conn.BeginTransactionAsync( IsolationLevel.ReadCommitted, token );
+        IAsyncEnumerable<TResult> result;
+
+        try
+        {
+            result = func( conn, transaction, token );
+
+            await transaction.CommitAsync( token );
+        }
+        catch ( Exception )
+        {
+            await transaction.RollbackAsync( token );
+            throw;
+        }
+
+        await foreach ( TResult item in result.WithCancellation( token ) ) { yield return item; }
+    }
+    public static async IAsyncEnumerable<TResult> TryCall<TArg1, TResult>( this IConnectableDb                                                                    db,
+                                                                           Func<DbConnection, DbTransaction, TArg1, CancellationToken, IAsyncEnumerable<TResult>> func,
+                                                                           TArg1                                                                                  arg1,
+                                                                           [EnumeratorCancellation] CancellationToken                                             token
+    )
+    {
+        await using DbConnection  conn        = await db.ConnectAsync( token );
+        await using DbTransaction transaction = await conn.BeginTransactionAsync( IsolationLevel.ReadCommitted, token );
+        IAsyncEnumerable<TResult> result;
+
+        try
+        {
+            result = func( conn, transaction, arg1, token );
+
+            await transaction.CommitAsync( token );
+        }
+        catch ( Exception )
+        {
+            await transaction.RollbackAsync( token );
+            throw;
+        }
+
+        await foreach ( TResult item in result.WithCancellation( token ) ) { yield return item; }
+    }
+    public static async IAsyncEnumerable<TResult> TryCall<TArg1, TArg2, TResult>( this IConnectableDb                                                                           db,
+                                                                                  Func<DbConnection, DbTransaction, TArg1, TArg2, CancellationToken, IAsyncEnumerable<TResult>> func,
+                                                                                  TArg1                                                                                         arg1,
+                                                                                  TArg2                                                                                         arg2,
+                                                                                  [EnumeratorCancellation] CancellationToken                                                    token
+    )
+    {
+        await using DbConnection  conn        = await db.ConnectAsync( token );
+        await using DbTransaction transaction = await conn.BeginTransactionAsync( IsolationLevel.ReadCommitted, token );
+        IAsyncEnumerable<TResult> result;
+
+        try
+        {
+            result = func( conn, transaction, arg1, arg2, token );
+
+            await transaction.CommitAsync( token );
+        }
+        catch ( Exception )
+        {
+            await transaction.RollbackAsync( token );
+            throw;
+        }
+
+        await foreach ( TResult item in result.WithCancellation( token ) ) { yield return item; }
+    }
+    public static async IAsyncEnumerable<TResult> TryCall<TArg1, TArg2, TArg3, TResult>( this IConnectableDb                                                                                  db,
+                                                                                         Func<DbConnection, DbTransaction, TArg1, TArg2, TArg3, CancellationToken, IAsyncEnumerable<TResult>> func,
+                                                                                         TArg1                                                                                                arg1,
+                                                                                         TArg2                                                                                                arg2,
+                                                                                         TArg3                                                                                                arg3,
+                                                                                         [EnumeratorCancellation] CancellationToken                                                           token
+    )
+    {
+        await using DbConnection  conn        = await db.ConnectAsync( token );
+        await using DbTransaction transaction = await conn.BeginTransactionAsync( IsolationLevel.ReadCommitted, token );
+        IAsyncEnumerable<TResult> result;
+
+        try
+        {
+            result = func( conn, transaction, arg1, arg2, arg3, token );
+
+            await transaction.CommitAsync( token );
+        }
+        catch ( Exception )
+        {
+            await transaction.RollbackAsync( token );
+            throw;
+        }
+
+        await foreach ( TResult item in result.WithCancellation( token ) ) { yield return item; }
+    }
+    public static async IAsyncEnumerable<TResult> TryCall<TArg1, TArg2, TArg3, TArg4, TResult>( this IConnectableDb                                                                                         db,
+                                                                                                Func<DbConnection, DbTransaction, TArg1, TArg2, TArg3, TArg4, CancellationToken, IAsyncEnumerable<TResult>> func,
+                                                                                                TArg1                                                                                                       arg1,
+                                                                                                TArg2                                                                                                       arg2,
+                                                                                                TArg3                                                                                                       arg3,
+                                                                                                TArg4                                                                                                       arg4,
+                                                                                                [EnumeratorCancellation] CancellationToken                                                                  token
+    )
+    {
+        await using DbConnection  conn        = await db.ConnectAsync( token );
+        await using DbTransaction transaction = await conn.BeginTransactionAsync( IsolationLevel.ReadCommitted, token );
+        IAsyncEnumerable<TResult> result;
+
+        try
+        {
+            result = func( conn, transaction, arg1, arg2, arg3, arg4, token );
+
+            await transaction.CommitAsync( token );
+        }
+        catch ( Exception )
+        {
+            await transaction.RollbackAsync( token );
+            throw;
+        }
+
+        await foreach ( TResult item in result.WithCancellation( token ) ) { yield return item; }
+    }
+    public static async IAsyncEnumerable<TResult> TryCall<TArg1, TArg2, TArg3, TArg4, TArg5, TResult>( this IConnectableDb                                                                                                db,
+                                                                                                       Func<DbConnection, DbTransaction, TArg1, TArg2, TArg3, TArg4, TArg5, CancellationToken, IAsyncEnumerable<TResult>> func,
+                                                                                                       TArg1                                                                                                              arg1,
+                                                                                                       TArg2                                                                                                              arg2,
+                                                                                                       TArg3                                                                                                              arg3,
+                                                                                                       TArg4                                                                                                              arg4,
+                                                                                                       TArg5                                                                                                              arg5,
+                                                                                                       [EnumeratorCancellation] CancellationToken                                                                         token
+    )
+    {
+        await using DbConnection  conn        = await db.ConnectAsync( token );
+        await using DbTransaction transaction = await conn.BeginTransactionAsync( IsolationLevel.ReadCommitted, token );
+        IAsyncEnumerable<TResult> result;
+
+        try
+        {
+            result = func( conn, transaction, arg1, arg2, arg3, arg4, arg5, token );
+
+            await transaction.CommitAsync( token );
+        }
+        catch ( Exception )
+        {
+            await transaction.RollbackAsync( token );
+            throw;
+        }
+
+        await foreach ( TResult item in result.WithCancellation( token ) ) { yield return item; }
+    }
+    public static async IAsyncEnumerable<TResult> TryCall<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TResult>( this IConnectableDb                                                                                                       db,
+                                                                                                              Func<DbConnection, DbTransaction, TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, CancellationToken, IAsyncEnumerable<TResult>> func,
+                                                                                                              TArg1                                                                                                                     arg1,
+                                                                                                              TArg2                                                                                                                     arg2,
+                                                                                                              TArg3                                                                                                                     arg3,
+                                                                                                              TArg4                                                                                                                     arg4,
+                                                                                                              TArg5                                                                                                                     arg5,
+                                                                                                              TArg6                                                                                                                     arg6,
+                                                                                                              [EnumeratorCancellation] CancellationToken                                                                                token
+    )
+    {
+        await using DbConnection  conn        = await db.ConnectAsync( token );
+        await using DbTransaction transaction = await conn.BeginTransactionAsync( IsolationLevel.ReadCommitted, token );
+        IAsyncEnumerable<TResult> result;
+
+        try
+        {
+            result = func( conn, transaction, arg1, arg2, arg3, arg4, arg5, arg6, token );
+
+            await transaction.CommitAsync( token );
+        }
+        catch ( Exception )
+        {
+            await transaction.RollbackAsync( token );
+            throw;
+        }
+
+        await foreach ( TResult item in result.WithCancellation( token ) ) { yield return item; }
+    }
+    public static async IAsyncEnumerable<TResult> TryCall<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TResult>( this IConnectableDb db,
+                                                                                                                     Func<DbConnection, DbTransaction, TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, CancellationToken, IAsyncEnumerable<TResult>>
+                                                                                                                         func,
+                                                                                                                     TArg1                                      arg1,
+                                                                                                                     TArg2                                      arg2,
+                                                                                                                     TArg3                                      arg3,
+                                                                                                                     TArg4                                      arg4,
+                                                                                                                     TArg5                                      arg5,
+                                                                                                                     TArg6                                      arg6,
+                                                                                                                     TArg7                                      arg7,
+                                                                                                                     [EnumeratorCancellation] CancellationToken token
+    )
+    {
+        await using DbConnection  conn        = await db.ConnectAsync( token );
+        await using DbTransaction transaction = await conn.BeginTransactionAsync( IsolationLevel.ReadCommitted, token );
+        IAsyncEnumerable<TResult> result;
+
+        try
+        {
+            result = func( conn, transaction, arg1, arg2, arg3, arg4, arg5, arg6, arg7, token );
+
+            await transaction.CommitAsync( token );
+        }
+        catch ( Exception )
+        {
+            await transaction.RollbackAsync( token );
+            throw;
+        }
+
+        await foreach ( TResult item in result.WithCancellation( token ) ) { yield return item; }
+    }
+    public static async IAsyncEnumerable<TResult> TryCall<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TResult>( this IConnectableDb db,
+                                                                                                                            Func<DbConnection, DbTransaction, TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, CancellationToken,
+                                                                                                                                IAsyncEnumerable<TResult>> func,
+                                                                                                                            TArg1                                      arg1,
+                                                                                                                            TArg2                                      arg2,
+                                                                                                                            TArg3                                      arg3,
+                                                                                                                            TArg4                                      arg4,
+                                                                                                                            TArg5                                      arg5,
+                                                                                                                            TArg6                                      arg6,
+                                                                                                                            TArg7                                      arg7,
+                                                                                                                            TArg8                                      arg8,
+                                                                                                                            [EnumeratorCancellation] CancellationToken token
+    )
+    {
+        await using DbConnection  conn        = await db.ConnectAsync( token );
+        await using DbTransaction transaction = await conn.BeginTransactionAsync( IsolationLevel.ReadCommitted, token );
+        IAsyncEnumerable<TResult> result;
+
+        try
+        {
+            result = func( conn,
+                           transaction,
+                           arg1,
+                           arg2,
+                           arg3,
+                           arg4,
+                           arg5,
+                           arg6,
+                           arg7,
+                           arg8,
+                           token );
+
+            await transaction.CommitAsync( token );
+        }
+        catch ( Exception )
+        {
+            await transaction.RollbackAsync( token );
+            throw;
+        }
+
+        await foreach ( TResult item in result.WithCancellation( token ) ) { yield return item; }
+    }
     public static async ValueTask TryCall( this IConnectableDb db, Func<DbConnection, DbTransaction, CancellationToken, ValueTask> func, CancellationToken token = default )
     {
         await using DbConnection  conn        = await db.ConnectAsync( token );
@@ -13,7 +265,7 @@ public static partial class DbExtensions
             await func( conn, transaction, token );
             await transaction.CommitAsync( token );
         }
-        catch (Exception)
+        catch ( Exception )
         {
             await transaction.RollbackAsync( token );
             throw;
@@ -29,7 +281,7 @@ public static partial class DbExtensions
             await func( conn, transaction, arg1, token );
             await transaction.CommitAsync( token );
         }
-        catch (Exception)
+        catch ( Exception )
         {
             await transaction.RollbackAsync( token );
             throw;
@@ -45,7 +297,7 @@ public static partial class DbExtensions
             await func( conn, transaction, arg1, arg2, token );
             await transaction.CommitAsync( token );
         }
-        catch (Exception)
+        catch ( Exception )
         {
             await transaction.RollbackAsync( token );
             throw;
@@ -61,7 +313,7 @@ public static partial class DbExtensions
             await func( conn, transaction, arg1, arg2, arg3, token );
             await transaction.CommitAsync( token );
         }
-        catch (Exception)
+        catch ( Exception )
         {
             await transaction.RollbackAsync( token );
             throw;
@@ -84,7 +336,7 @@ public static partial class DbExtensions
             await func( conn, transaction, arg1, arg2, arg3, arg4, token );
             await transaction.CommitAsync( token );
         }
-        catch (Exception)
+        catch ( Exception )
         {
             await transaction.RollbackAsync( token );
             throw;
@@ -108,7 +360,7 @@ public static partial class DbExtensions
             await func( conn, transaction, arg1, arg2, arg3, arg4, arg5, token );
             await transaction.CommitAsync( token );
         }
-        catch (Exception)
+        catch ( Exception )
         {
             await transaction.RollbackAsync( token );
             throw;
@@ -133,7 +385,7 @@ public static partial class DbExtensions
             await func( conn, transaction, arg1, arg2, arg3, arg4, arg5, arg6, token );
             await transaction.CommitAsync( token );
         }
-        catch (Exception)
+        catch ( Exception )
         {
             await transaction.RollbackAsync( token );
             throw;
@@ -159,7 +411,7 @@ public static partial class DbExtensions
             await func( conn, transaction, arg1, arg2, arg3, arg4, arg5, arg6, arg7, token );
             await transaction.CommitAsync( token );
         }
-        catch (Exception)
+        catch ( Exception )
         {
             await transaction.RollbackAsync( token );
             throw;
@@ -197,7 +449,7 @@ public static partial class DbExtensions
 
             await transaction.CommitAsync( token );
         }
-        catch (Exception)
+        catch ( Exception )
         {
             await transaction.RollbackAsync( token );
             throw;
@@ -216,7 +468,7 @@ public static partial class DbExtensions
             await transaction.CommitAsync( token );
             return result;
         }
-        catch (Exception)
+        catch ( Exception )
         {
             await transaction.RollbackAsync( token );
             throw;
@@ -233,7 +485,7 @@ public static partial class DbExtensions
             await transaction.CommitAsync( token );
             return result;
         }
-        catch (Exception)
+        catch ( Exception )
         {
             await transaction.RollbackAsync( token );
             throw;
@@ -255,7 +507,7 @@ public static partial class DbExtensions
             await transaction.CommitAsync( token );
             return result;
         }
-        catch (Exception)
+        catch ( Exception )
         {
             await transaction.RollbackAsync( token );
             throw;
@@ -278,7 +530,7 @@ public static partial class DbExtensions
             await transaction.CommitAsync( token );
             return result;
         }
-        catch (Exception)
+        catch ( Exception )
         {
             await transaction.RollbackAsync( token );
             throw;
@@ -302,7 +554,7 @@ public static partial class DbExtensions
             await transaction.CommitAsync( token );
             return result;
         }
-        catch (Exception)
+        catch ( Exception )
         {
             await transaction.RollbackAsync( token );
             throw;
@@ -327,7 +579,7 @@ public static partial class DbExtensions
             await transaction.CommitAsync( token );
             return result;
         }
-        catch (Exception)
+        catch ( Exception )
         {
             await transaction.RollbackAsync( token );
             throw;
@@ -353,7 +605,7 @@ public static partial class DbExtensions
             await transaction.CommitAsync( token );
             return result;
         }
-        catch (Exception)
+        catch ( Exception )
         {
             await transaction.RollbackAsync( token );
             throw;
@@ -380,7 +632,7 @@ public static partial class DbExtensions
             await transaction.CommitAsync( token );
             return result;
         }
-        catch (Exception)
+        catch ( Exception )
         {
             await transaction.RollbackAsync( token );
             throw;
@@ -420,264 +672,10 @@ public static partial class DbExtensions
             await transaction.CommitAsync( token );
             return result;
         }
-        catch (Exception)
+        catch ( Exception )
         {
             await transaction.RollbackAsync( token );
             throw;
         }
-    }
-
-
-    public static async IAsyncEnumerable<TResult> TryCall<TResult>( this IConnectableDb db, Func<DbConnection, DbTransaction, CancellationToken, IAsyncEnumerable<TResult>> func, [EnumeratorCancellation] CancellationToken token = default )
-    {
-        await using DbConnection  conn        = await db.ConnectAsync( token );
-        await using DbTransaction transaction = await conn.BeginTransactionAsync( IsolationLevel.ReadCommitted, token );
-        IAsyncEnumerable<TResult> result;
-
-        try
-        {
-            result = func( conn, transaction, token );
-
-            await transaction.CommitAsync( token );
-        }
-        catch (Exception)
-        {
-            await transaction.RollbackAsync( token );
-            throw;
-        }
-
-        await foreach (TResult item in result.WithCancellation( token )) { yield return item; }
-    }
-    public static async IAsyncEnumerable<TResult> TryCall<TArg1, TResult>( this IConnectableDb                                                                    db,
-                                                                           Func<DbConnection, DbTransaction, TArg1, CancellationToken, IAsyncEnumerable<TResult>> func,
-                                                                           TArg1                                                                                  arg1,
-                                                                           [EnumeratorCancellation] CancellationToken                                             token
-    )
-    {
-        await using DbConnection  conn        = await db.ConnectAsync( token );
-        await using DbTransaction transaction = await conn.BeginTransactionAsync( IsolationLevel.ReadCommitted, token );
-        IAsyncEnumerable<TResult> result;
-
-        try
-        {
-            result = func( conn, transaction, arg1, token );
-
-            await transaction.CommitAsync( token );
-        }
-        catch (Exception)
-        {
-            await transaction.RollbackAsync( token );
-            throw;
-        }
-
-        await foreach (TResult item in result.WithCancellation( token )) { yield return item; }
-    }
-    public static async IAsyncEnumerable<TResult> TryCall<TArg1, TArg2, TResult>( this IConnectableDb                                                                           db,
-                                                                                  Func<DbConnection, DbTransaction, TArg1, TArg2, CancellationToken, IAsyncEnumerable<TResult>> func,
-                                                                                  TArg1                                                                                         arg1,
-                                                                                  TArg2                                                                                         arg2,
-                                                                                  [EnumeratorCancellation] CancellationToken                                                    token
-    )
-    {
-        await using DbConnection  conn        = await db.ConnectAsync( token );
-        await using DbTransaction transaction = await conn.BeginTransactionAsync( IsolationLevel.ReadCommitted, token );
-        IAsyncEnumerable<TResult> result;
-
-        try
-        {
-            result = func( conn, transaction, arg1, arg2, token );
-
-            await transaction.CommitAsync( token );
-        }
-        catch (Exception)
-        {
-            await transaction.RollbackAsync( token );
-            throw;
-        }
-
-        await foreach (TResult item in result.WithCancellation( token )) { yield return item; }
-    }
-    public static async IAsyncEnumerable<TResult> TryCall<TArg1, TArg2, TArg3, TResult>( this IConnectableDb                                                                                  db,
-                                                                                         Func<DbConnection, DbTransaction, TArg1, TArg2, TArg3, CancellationToken, IAsyncEnumerable<TResult>> func,
-                                                                                         TArg1                                                                                                arg1,
-                                                                                         TArg2                                                                                                arg2,
-                                                                                         TArg3                                                                                                arg3,
-                                                                                         [EnumeratorCancellation] CancellationToken                                                           token
-    )
-    {
-        await using DbConnection  conn        = await db.ConnectAsync( token );
-        await using DbTransaction transaction = await conn.BeginTransactionAsync( IsolationLevel.ReadCommitted, token );
-        IAsyncEnumerable<TResult> result;
-
-        try
-        {
-            result = func( conn, transaction, arg1, arg2, arg3, token );
-
-            await transaction.CommitAsync( token );
-        }
-        catch (Exception)
-        {
-            await transaction.RollbackAsync( token );
-            throw;
-        }
-
-        await foreach (TResult item in result.WithCancellation( token )) { yield return item; }
-    }
-    public static async IAsyncEnumerable<TResult> TryCall<TArg1, TArg2, TArg3, TArg4, TResult>( this IConnectableDb                                                                                         db,
-                                                                                                Func<DbConnection, DbTransaction, TArg1, TArg2, TArg3, TArg4, CancellationToken, IAsyncEnumerable<TResult>> func,
-                                                                                                TArg1                                                                                                       arg1,
-                                                                                                TArg2                                                                                                       arg2,
-                                                                                                TArg3                                                                                                       arg3,
-                                                                                                TArg4                                                                                                       arg4,
-                                                                                                [EnumeratorCancellation] CancellationToken                                                                  token
-    )
-    {
-        await using DbConnection  conn        = await db.ConnectAsync( token );
-        await using DbTransaction transaction = await conn.BeginTransactionAsync( IsolationLevel.ReadCommitted, token );
-        IAsyncEnumerable<TResult> result;
-
-        try
-        {
-            result = func( conn, transaction, arg1, arg2, arg3, arg4, token );
-
-            await transaction.CommitAsync( token );
-        }
-        catch (Exception)
-        {
-            await transaction.RollbackAsync( token );
-            throw;
-        }
-
-        await foreach (TResult item in result.WithCancellation( token )) { yield return item; }
-    }
-    public static async IAsyncEnumerable<TResult> TryCall<TArg1, TArg2, TArg3, TArg4, TArg5, TResult>( this IConnectableDb                                                                                                db,
-                                                                                                       Func<DbConnection, DbTransaction, TArg1, TArg2, TArg3, TArg4, TArg5, CancellationToken, IAsyncEnumerable<TResult>> func,
-                                                                                                       TArg1                                                                                                              arg1,
-                                                                                                       TArg2                                                                                                              arg2,
-                                                                                                       TArg3                                                                                                              arg3,
-                                                                                                       TArg4                                                                                                              arg4,
-                                                                                                       TArg5                                                                                                              arg5,
-                                                                                                       [EnumeratorCancellation] CancellationToken                                                                         token
-    )
-    {
-        await using DbConnection  conn        = await db.ConnectAsync( token );
-        await using DbTransaction transaction = await conn.BeginTransactionAsync( IsolationLevel.ReadCommitted, token );
-        IAsyncEnumerable<TResult> result;
-
-        try
-        {
-            result = func( conn, transaction, arg1, arg2, arg3, arg4, arg5, token );
-
-            await transaction.CommitAsync( token );
-        }
-        catch (Exception)
-        {
-            await transaction.RollbackAsync( token );
-            throw;
-        }
-
-        await foreach (TResult item in result.WithCancellation( token )) { yield return item; }
-    }
-    public static async IAsyncEnumerable<TResult> TryCall<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TResult>( this IConnectableDb                                                                                                       db,
-                                                                                                              Func<DbConnection, DbTransaction, TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, CancellationToken, IAsyncEnumerable<TResult>> func,
-                                                                                                              TArg1                                                                                                                     arg1,
-                                                                                                              TArg2                                                                                                                     arg2,
-                                                                                                              TArg3                                                                                                                     arg3,
-                                                                                                              TArg4                                                                                                                     arg4,
-                                                                                                              TArg5                                                                                                                     arg5,
-                                                                                                              TArg6                                                                                                                     arg6,
-                                                                                                              [EnumeratorCancellation] CancellationToken                                                                                token
-    )
-    {
-        await using DbConnection  conn        = await db.ConnectAsync( token );
-        await using DbTransaction transaction = await conn.BeginTransactionAsync( IsolationLevel.ReadCommitted, token );
-        IAsyncEnumerable<TResult> result;
-
-        try
-        {
-            result = func( conn, transaction, arg1, arg2, arg3, arg4, arg5, arg6, token );
-
-            await transaction.CommitAsync( token );
-        }
-        catch (Exception)
-        {
-            await transaction.RollbackAsync( token );
-            throw;
-        }
-
-        await foreach (TResult item in result.WithCancellation( token )) { yield return item; }
-    }
-    public static async IAsyncEnumerable<TResult> TryCall<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TResult>( this IConnectableDb db,
-                                                                                                                     Func<DbConnection, DbTransaction, TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, CancellationToken, IAsyncEnumerable<TResult>>
-                                                                                                                         func,
-                                                                                                                     TArg1                                      arg1,
-                                                                                                                     TArg2                                      arg2,
-                                                                                                                     TArg3                                      arg3,
-                                                                                                                     TArg4                                      arg4,
-                                                                                                                     TArg5                                      arg5,
-                                                                                                                     TArg6                                      arg6,
-                                                                                                                     TArg7                                      arg7,
-                                                                                                                     [EnumeratorCancellation] CancellationToken token
-    )
-    {
-        await using DbConnection  conn        = await db.ConnectAsync( token );
-        await using DbTransaction transaction = await conn.BeginTransactionAsync( IsolationLevel.ReadCommitted, token );
-        IAsyncEnumerable<TResult> result;
-
-        try
-        {
-            result = func( conn, transaction, arg1, arg2, arg3, arg4, arg5, arg6, arg7, token );
-
-            await transaction.CommitAsync( token );
-        }
-        catch (Exception)
-        {
-            await transaction.RollbackAsync( token );
-            throw;
-        }
-
-        await foreach (TResult item in result.WithCancellation( token )) { yield return item; }
-    }
-    public static async IAsyncEnumerable<TResult> TryCall<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TResult>( this IConnectableDb db,
-                                                                                                                            Func<DbConnection, DbTransaction, TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, CancellationToken,
-                                                                                                                                IAsyncEnumerable<TResult>> func,
-                                                                                                                            TArg1                                      arg1,
-                                                                                                                            TArg2                                      arg2,
-                                                                                                                            TArg3                                      arg3,
-                                                                                                                            TArg4                                      arg4,
-                                                                                                                            TArg5                                      arg5,
-                                                                                                                            TArg6                                      arg6,
-                                                                                                                            TArg7                                      arg7,
-                                                                                                                            TArg8                                      arg8,
-                                                                                                                            [EnumeratorCancellation] CancellationToken token
-    )
-    {
-        await using DbConnection  conn        = await db.ConnectAsync( token );
-        await using DbTransaction transaction = await conn.BeginTransactionAsync( IsolationLevel.ReadCommitted, token );
-        IAsyncEnumerable<TResult> result;
-
-        try
-        {
-            result = func( conn,
-                           transaction,
-                           arg1,
-                           arg2,
-                           arg3,
-                           arg4,
-                           arg5,
-                           arg6,
-                           arg7,
-                           arg8,
-                           token );
-
-            await transaction.CommitAsync( token );
-        }
-        catch (Exception)
-        {
-            await transaction.RollbackAsync( token );
-            throw;
-        }
-
-        await foreach (TResult item in result.WithCancellation( token )) { yield return item; }
     }
 }

@@ -17,7 +17,7 @@ public static class StackViewAlignmentExtensions
             LayoutAlignment.Start  => UIStackViewAlignment.Top,
             LayoutAlignment.Center => UIStackViewAlignment.Center,
             LayoutAlignment.End    => UIStackViewAlignment.Bottom,
-            _                      => UIStackViewAlignment.Fill
+            _                      => UIStackViewAlignment.Fill,
         };
     public static UIStackViewAlignment ToNativeVertical( this LayoutAlignment forms ) =>
         forms switch
@@ -25,6 +25,6 @@ public static class StackViewAlignmentExtensions
             LayoutAlignment.Start  => UIStackViewAlignment.Leading,
             LayoutAlignment.Center => UIStackViewAlignment.Center,
             LayoutAlignment.End    => UIStackViewAlignment.Trailing,
-            _                      => UIStackViewAlignment.Fill
+            _                      => UIStackViewAlignment.Fill,
         };
 }

@@ -38,57 +38,8 @@ public sealed class TableCache<TRecord> : Service, IHostedService, IReadOnlyColl
         _logger      = factory.CreateLogger( GetType() );
         _generator   = new KeyGenerator<CacheEntry<TRecord>>( _records );
     }
-
-
-    public async ValueTask AddOrUpdate( IAsyncEnumerable<TRecord?> records, CancellationToken token = default )
-    {
-        await foreach ( TRecord? record in records.WithCancellation( token ) )
-        {
-            if ( record is null ) { continue; }
-
-            AddOrUpdate( record );
-        }
-    }
-    public void AddOrUpdate( IEnumerable<TRecord> records )
-    {
-        foreach ( TRecord? record in records ) { AddOrUpdate( record ); }
-    }
-    public void AddOrUpdate( TRecord record )
-    {
-        if ( Contains( record.ID ) )
-        {
-            _records[record.ID]
-               .Value = record;
-        }
-        else { _records.TryAdd( record.ID, record ); }
-    }
-
-
-    public void Clear() => _records.Clear();
     public bool Contains( long    key ) => _records.Values.Any( x => x.ID.Equals( key ) );
     public bool Contains( TRecord key ) => _records.Values.Any( x => x.Equals( key ) );
-    protected override void Dispose( bool disposing )
-    {
-        _generator.Dispose();
-        _records.Clear();
-        Clear();
-    }
-    private async ValueTask Refresh( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
-    {
-        if ( HasChanged )
-        {
-            await _table.Update( connection, transaction, RecordsChanged, token );
-            TRecord[] changed = await _table.Get( connection, transaction, Changed, token );
-            AddOrUpdate( changed );
-            return;
-        }
-
-
-        TRecord[] records = await _table.All( connection, transaction, token );
-        _records.Clear();
-        AddOrUpdate( records );
-    }
-    public void Reset() => _generator.Reset();
 
 
     public bool TryGetValue( long key, [NotNullWhen( true )] out TRecord? value )
@@ -118,6 +69,55 @@ public sealed class TableCache<TRecord> : Service, IHostedService, IReadOnlyColl
         value = default;
         return false;
     }
+
+
+    public async ValueTask AddOrUpdate( IAsyncEnumerable<TRecord?> records, CancellationToken token = default )
+    {
+        await foreach ( TRecord? record in records.WithCancellation( token ) )
+        {
+            if ( record is null ) { continue; }
+
+            AddOrUpdate( record );
+        }
+    }
+    private async ValueTask Refresh( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
+    {
+        if ( HasChanged )
+        {
+            await _table.Update( connection, transaction, RecordsChanged, token );
+            TRecord[] changed = await _table.Get( connection, transaction, Changed, token );
+            AddOrUpdate( changed );
+            return;
+        }
+
+
+        TRecord[] records = await _table.All( connection, transaction, token );
+        _records.Clear();
+        AddOrUpdate( records );
+    }
+    public void AddOrUpdate( IEnumerable<TRecord> records )
+    {
+        foreach ( TRecord? record in records ) { AddOrUpdate( record ); }
+    }
+    public void AddOrUpdate( TRecord record )
+    {
+        if ( Contains( record.ID ) )
+        {
+            _records[record.ID]
+               .Value = record;
+        }
+        else { _records.TryAdd( record.ID, record ); }
+    }
+
+
+    public void Clear() => _records.Clear();
+    protected override void Dispose( bool disposing )
+    {
+        _generator.Dispose();
+        _records.Clear();
+        Clear();
+    }
+    public void Reset() => _generator.Reset();
     public override ValueTask DisposeAsync()
     {
         _records.Clear();

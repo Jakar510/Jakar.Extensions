@@ -4,11 +4,9 @@ namespace Jakar.SqlBuilder.Interfaces;
 
 public interface INextChain<out TNext>
 {
-    /// <summary>
-    ///     Ends chain and return to parent syntax.
-    /// </summary>
+    /// <summary> Ends chain and return to parent syntax. </summary>
     /// <returns>
-    ///     <typeparamref name = "TNext" />
+    ///     <typeparamref name="TNext"/>
     /// </returns>
     public TNext Next();
 }

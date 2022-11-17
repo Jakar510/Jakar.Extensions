@@ -35,6 +35,28 @@ public abstract record TableRecord<TRecord> : BaseCollectionsRecord<TRecord, lon
     }
 
 
+    public static DynamicParameters GetDynamicParameters( UserRecord record )
+    {
+        var parameters = new DynamicParameters();
+        parameters.Add( nameof(UserID), record.UserID );
+        return parameters;
+    }
+    protected static DynamicParameters GetDynamicParameters( TableRecord<TRecord> record )
+    {
+        var parameters = new DynamicParameters();
+        parameters.Add( nameof(UserID), record.UserID );
+        return parameters;
+    }
+    public override bool Equals( TRecord? other )
+    {
+        if ( other is null ) { return false; }
+
+        if ( ReferenceEquals( this, other ) ) { return true; }
+
+        return base.Equals( other ) && _createdBy == other._createdBy && Nullable.Equals( _lastModified, other._lastModified ) && UserID.Equals( other.UserID ) && DateCreated.Equals( other.DateCreated );
+    }
+
+
     public override int CompareTo( TRecord? other )
     {
         if ( other is null ) { return 1; }
@@ -52,39 +74,17 @@ public abstract record TableRecord<TRecord> : BaseCollectionsRecord<TRecord, lon
 
         return DateCreated.CompareTo( other.DateCreated );
     }
-    public override bool Equals( TRecord? other )
-    {
-        if ( other is null ) { return false; }
-
-        if ( ReferenceEquals( this, other ) ) { return true; }
-
-        return base.Equals( other ) && _createdBy == other._createdBy && Nullable.Equals( _lastModified, other._lastModified ) && UserID.Equals( other.UserID ) && DateCreated.Equals( other.DateCreated );
-    }
-
-
-    public static DynamicParameters GetDynamicParameters( UserRecord record )
-    {
-        var parameters = new DynamicParameters();
-        parameters.Add( nameof(UserID), record.UserID );
-        return parameters;
-    }
-    protected static DynamicParameters GetDynamicParameters( TableRecord<TRecord> record )
-    {
-        var parameters = new DynamicParameters();
-        parameters.Add( nameof(UserID), record.UserID );
-        return parameters;
-    }
 
 
     public override int GetHashCode() => HashCode.Combine( CreatedBy, LastModified, UserID, DateCreated );
 
 
-    public async ValueTask<UserRecord?> GetUser( DbConnection           connection, DbTransaction? transaction, Database db, CancellationToken token ) => await db.Users.Get( connection, transaction, true,      GetDynamicParameters( this ), token );
-    public async ValueTask<UserRecord?> GetUserWhoCreated( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => await db.Users.Get( connection, transaction, CreatedBy, token );
-
-
     public TRecord NewID( in long id ) => (TRecord)(this with
                                                     {
-                                                        ID = id
+                                                        ID = id,
                                                     });
+
+
+    public async ValueTask<UserRecord?> GetUser( DbConnection           connection, DbTransaction? transaction, Database db, CancellationToken token ) => await db.Users.Get( connection, transaction, true,      GetDynamicParameters( this ), token );
+    public async ValueTask<UserRecord?> GetUserWhoCreated( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => await db.Users.Get( connection, transaction, CreatedBy, token );
 }

@@ -38,14 +38,14 @@ public readonly struct LoginResult
                            State.Disabled            => controller.Unauthorized(),
                            State.ExpiredSubscription => controller.BadRequest(),
                            State.NoSubscription      => controller.BadRequest(),
-                           _                         => throw new OutOfRangeException( nameof(Result), Result )
+                           _                         => throw new OutOfRangeException( nameof(Result), Result ),
                        };
 
         return actionResult is not null && caller is null;
     }
 
 
-    
+
     public enum State
     {
         UnknownError,
@@ -55,6 +55,6 @@ public readonly struct LoginResult
         Locked,
         Disabled,
         ExpiredSubscription,
-        NoSubscription
+        NoSubscription,
     }
 }

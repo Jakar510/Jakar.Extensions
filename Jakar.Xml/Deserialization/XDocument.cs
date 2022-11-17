@@ -21,7 +21,7 @@ public ref struct XDocument
     public XDocument() : this( default ) { }
     public XDocument( ReadOnlySpan<char> xml )
     {
-        if (xml.IsEmpty) { throw new ArgumentNullException( nameof(xml) ); }
+        if ( xml.IsEmpty ) { throw new ArgumentNullException( nameof(xml) ); }
 
         _span = _xml = xml;
     }

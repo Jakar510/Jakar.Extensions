@@ -27,7 +27,7 @@ public struct DataInsertBuilder
 
     public EasySqlBuilder Done()
     {
-        if (!_cache.Any()) { return _builder.NewLine(); }
+        if ( !_cache.Any() ) { return _builder.NewLine(); }
 
         _builder.Begin();
         _builder.AddRange( ',', _cache.Keys );

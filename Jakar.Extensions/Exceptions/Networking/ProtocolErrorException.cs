@@ -2,9 +2,7 @@
 namespace Jakar.Extensions;
 
 
-/// <summary>
-///     A response was received from server but was indicated a protocol-level error.
-/// </summary>
+/// <summary> A response was received from server but was indicated a protocol-level error. </summary>
 public sealed class ProtocolErrorException : WebException
 {
     public CancellationToken Token { get; }

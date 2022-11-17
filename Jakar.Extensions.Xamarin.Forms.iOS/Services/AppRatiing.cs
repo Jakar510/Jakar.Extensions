@@ -17,7 +17,7 @@ public class AppRating : IAppRating
 {
     public void RateApp()
     {
-        if (UIDevice.CurrentDevice.CheckSystemVersion( 10, 3 )) { SKStoreReviewController.RequestReview(); }
+        if ( UIDevice.CurrentDevice.CheckSystemVersion( 10, 3 ) ) { SKStoreReviewController.RequestReview(); }
         else
         {
             string storeUrl = $@"itms-apps://itunes.apple.com/app/{AppDeviceInfo.PackageName}?action=write-review";
@@ -27,7 +27,7 @@ public class AppRating : IAppRating
                 using var uri = new NSUrl( storeUrl );
                 UIApplication.SharedApplication.OpenUrl( uri );
             }
-            catch (Exception ex)
+            catch ( Exception ex )
             {
                 // Here you could show an alert to the user telling that App Store was unable to launch
 

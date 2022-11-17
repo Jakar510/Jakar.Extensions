@@ -4,22 +4,25 @@ namespace Jakar.Extensions;
 
 public partial class IniConfig : ConcurrentDictionary<string, IniConfig.Section>
 {
+    protected readonly IEqualityComparer<string> _comparer;
+
+
     public new Section this[ string sectionName ]
     {
         get => GetOrAdd( sectionName );
         set => base[sectionName] = value;
     }
+
+
     public IniConfig() : this( StringComparer.OrdinalIgnoreCase ) { }
-    public IniConfig( IEqualityComparer<string>                  comparer ) : base( comparer ) { }
+    public IniConfig( IEqualityComparer<string>                  comparer ) : base( comparer ) => _comparer = comparer;
     public IniConfig( IDictionary<string, Section>               dictionary ) : this( dictionary, StringComparer.OrdinalIgnoreCase ) { }
-    public IniConfig( IDictionary<string, Section>               dictionary, IEqualityComparer<string> comparer ) : base( dictionary, comparer ) { }
+    public IniConfig( IDictionary<string, Section>               dictionary, IEqualityComparer<string> comparer ) : base( dictionary, comparer ) => _comparer = comparer;
     public IniConfig( IEnumerable<KeyValuePair<string, Section>> collection ) : this( collection, StringComparer.OrdinalIgnoreCase ) { }
-    public IniConfig( IEnumerable<KeyValuePair<string, Section>> collection, IEqualityComparer<string> comparer ) : base( collection, comparer ) { }
+    public IniConfig( IEnumerable<KeyValuePair<string, Section>> collection, IEqualityComparer<string> comparer ) : base( collection, comparer ) => _comparer = comparer;
 
 
-    public void Add( string                        section ) => Add( section, new Section() );
-    public void Add( KeyValuePair<string, Section> pair ) => Add( pair.Key,   pair.Value );
-    public void Add( string                        section, Section value ) => this[section] = value;
+    public static IniConfig? ReadFromFile( LocalFile file ) => ReadFromFile<IniConfig>( file );
 
 
     // public static IniConfig? From(  string content )
@@ -73,7 +76,6 @@ public partial class IniConfig : ConcurrentDictionary<string, IniConfig.Section>
     // }
 
     public static T? From<T>( string content ) where T : IniConfig, new() => From<T>( content.AsSpan() );
-
     public static T? From<T>( ReadOnlySpan<char> content ) where T : IniConfig, new()
     {
         if ( content.IsEmpty ) { return default; }
@@ -137,50 +139,6 @@ public partial class IniConfig : ConcurrentDictionary<string, IniConfig.Section>
         return data;
     }
 
-    /// <summary>
-    ///     Gets the
-    ///     <see cref = "Section" />
-    ///     with the
-    ///     <paramref name = "sectionName" />
-    ///     , using the
-    ///     <paramref name = "comparison" />
-    ///     rules.
-    /// </summary>
-    /// <param name = "sectionName" > </param>
-    /// <param name = "comparison" > </param>
-    /// <returns> </returns>
-    /// <exception cref = "KeyNotFoundException" > </exception>
-    private Section Get( string sectionName, StringComparison comparison )
-    {
-        foreach ( string key in Keys )
-
-        {
-            if ( string.Compare( key, sectionName, comparison ) == 0 ) { return base[key]; }
-        }
-
-        throw new KeyNotFoundException( sectionName );
-    }
-
-
-    /// <summary>
-    ///     Gets the
-    ///     <see cref = "Section" />
-    ///     with the
-    ///     <paramref name = "sectionName" />
-    ///     . If it doesn't exist, it is created, then returned.
-    /// </summary>
-    /// <param name = "sectionName" > Section Name </param>
-    /// <returns>
-    ///     <see cref = "Section" />
-    /// </returns>
-    public Section GetOrAdd( string sectionName )
-    {
-        if ( !ContainsKey( sectionName ) ) { Add( sectionName ); }
-
-        return base[sectionName];
-    }
-    public static IniConfig? ReadFromFile( LocalFile file ) => ReadFromFile<IniConfig>( file );
-
 
     public static T? ReadFromFile<T>( LocalFile file ) where T : IniConfig, new()
     {
@@ -198,6 +156,22 @@ public partial class IniConfig : ConcurrentDictionary<string, IniConfig.Section>
                                    .AsString();
 
         return From<T>( content );
+    }
+
+
+    /// <summary> Gets the <see cref="Section"/> with the <paramref name="sectionName"/> . If it doesn't exist, it is created, then returned. </summary>
+    /// <param name="sectionName"> Section Name </param>
+    /// <returns>
+    ///     <see cref="Section"/>
+    /// </returns>
+    public Section GetOrAdd( string sectionName )
+    {
+        foreach ( string key in Keys )
+        {
+            if ( _comparer.Equals( key, sectionName ) ) { return base[key]; }
+        }
+
+        return base[sectionName] = new Section();
     }
 
 
@@ -234,4 +208,9 @@ public partial class IniConfig : ConcurrentDictionary<string, IniConfig.Section>
 
 
     public ValueTask WriteToFile( LocalFile file ) => file.WriteAsync( ToString() );
+
+
+    public void Add( string                        section ) => Add( section, new Section() );
+    public void Add( KeyValuePair<string, Section> pair ) => Add( pair.Key,   pair.Value );
+    public void Add( string                        section, Section value ) => this[section] = value;
 }

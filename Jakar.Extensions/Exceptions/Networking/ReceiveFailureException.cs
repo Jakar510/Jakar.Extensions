@@ -2,10 +2,7 @@
 namespace Jakar.Extensions;
 
 
-/// <summary>
-///     The request was canceled, the System.Net.WebRequest.Abort method was called,
-///     or an unclassifiable error occurred. This is the default value for System.Net.WebException.Status.
-/// </summary>
+/// <summary> The request was canceled, the System.Net.WebRequest.Abort method was called, or an unclassifiable error occurred. This is the default value for System.Net.WebException.Status. </summary>
 public sealed class ReceiveFailureException : WebException
 {
     public CancellationToken Token { get; }

@@ -2,9 +2,7 @@
 namespace Jakar.Extensions;
 
 
-/// <summary>
-///     The name resolver service could not resolve the host name.
-/// </summary>
+/// <summary> The name resolver service could not resolve the host name. </summary>
 public sealed class NameResolutionException : WebException
 {
     public CancellationToken Token { get; }

@@ -10,7 +10,7 @@ public static partial class TypeExtensions
     public static bool HasInterface( this Type type, Type interfaceType )
     {
         Type[] interfaces = type.GetInterfaces();
-        if (interfaces.Contains( interfaceType )) { return true; }
+        if ( interfaces.Contains( interfaceType ) ) { return true; }
 
         return interfaces.Any( t => t == interfaceType || t.IsGenericType && t.GetGenericTypeDefinition() == interfaceType );
     }

@@ -48,16 +48,16 @@ public readonly struct Tokens : IValidator
         Create( configuration, claims, user, version, configuration.TokenExpireTime() );
     public static Tokens Create( IConfiguration configuration, IEnumerable<Claim> claims, UserRecord user, in AppVersion version, DateTimeOffset expires )
     {
-        if (user.SubscriptionExpires < expires) { expires = user.SubscriptionExpires.Value; }
+        if ( user.SubscriptionExpires < expires ) { expires = user.SubscriptionExpires.Value; }
 
-        JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
+        var handler = new JwtSecurityTokenHandler();
 
-        SecurityTokenDescriptor descriptor = new SecurityTokenDescriptor
-                                             {
-                                                 Subject            = new ClaimsIdentity( claims ),
-                                                 Expires            = expires.LocalDateTime,
-                                                 SigningCredentials = configuration.GetSigningCredentials()
-                                             };
+        var descriptor = new SecurityTokenDescriptor
+                         {
+                             Subject            = new ClaimsIdentity( claims ),
+                             Expires            = expires.LocalDateTime,
+                             SigningCredentials = configuration.GetSigningCredentials(),
+                         };
 
         string token   = handler.WriteToken( handler.CreateToken( descriptor ) );
         string refresh = handler.WriteToken( handler.CreateToken( descriptor ) );

@@ -2,9 +2,7 @@
 namespace Jakar.Extensions;
 
 
-/// <summary>
-///     An error occurred while establishing a connection using SSL.
-/// </summary>
+/// <summary> An error occurred while establishing a connection using SSL. </summary>
 public sealed class SecureChannelFailureException : WebException
 {
     public CancellationToken Token { get; }

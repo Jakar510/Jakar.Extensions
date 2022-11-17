@@ -28,8 +28,8 @@ public class ObservableDictionary<TKey, TValue> : CollectionAlerts<KeyValuePair<
 
             _dictionary[key] = value;
 
-            if (exists) { Replaced( new KeyValuePair<TKey, TValue?>( key, old ), new KeyValuePair<TKey, TValue?>( key, value ) ); }
-            else { Added( new KeyValuePair<TKey, TValue?>( key,           value ) ); }
+            if ( exists ) { Replaced( new KeyValuePair<TKey, TValue?>( key, old ), new KeyValuePair<TKey, TValue?>( key, value ) ); }
+            else { Added( new KeyValuePair<TKey, TValue?>( key,             value ) ); }
         }
     }
 
@@ -56,7 +56,7 @@ public class ObservableDictionary<TKey, TValue> : CollectionAlerts<KeyValuePair<
     public virtual void Add( KeyValuePair<TKey, TValue> item ) => Add( item.Key, item.Value );
     public virtual void Add( TKey key, TValue value )
     {
-        if (!_dictionary.TryAdd( key, value )) { return; }
+        if ( !_dictionary.TryAdd( key, value ) ) { return; }
 
         Added( new KeyValuePair<TKey, TValue?>( key, value ) );
     }
@@ -65,7 +65,7 @@ public class ObservableDictionary<TKey, TValue> : CollectionAlerts<KeyValuePair<
     public bool Remove( KeyValuePair<TKey, TValue> item ) => Remove( item.Key );
     public bool Remove( TKey key )
     {
-        if (!_dictionary.ContainsKey( key )) { return false; }
+        if ( !_dictionary.ContainsKey( key ) ) { return false; }
 
         TValue value = _dictionary[key];
         _dictionary.Remove( key );
@@ -83,9 +83,9 @@ public class ObservableDictionary<TKey, TValue> : CollectionAlerts<KeyValuePair<
 
     public void CopyTo( KeyValuePair<TKey, TValue>[] array, int startIndex )
     {
-        foreach ((int index, KeyValuePair<TKey, TValue> pair) in this.EnumeratePairs( 0 ))
+        foreach ( (int index, KeyValuePair<TKey, TValue> pair) in this.EnumeratePairs( 0 ) )
         {
-            if (index < startIndex) { continue; }
+            if ( index < startIndex ) { continue; }
 
             array[index] = pair;
         }

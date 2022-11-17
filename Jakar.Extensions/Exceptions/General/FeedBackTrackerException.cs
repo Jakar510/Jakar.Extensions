@@ -15,18 +15,18 @@ public class FeedBackTrackerException : Exception
 
     protected void Update( object value )
     {
-        switch (value)
+        switch ( value )
         {
             case IDictionary dict:
             {
-                foreach (DictionaryEntry pair in dict) { Data[pair.Key.ToString() ?? throw new NullReferenceException( nameof(pair.Key) )] = pair.Value?.ToString(); }
+                foreach ( DictionaryEntry pair in dict ) { Data[pair.Key.ToString() ?? throw new NullReferenceException( nameof(pair.Key) )] = pair.Value?.ToString(); }
 
                 break;
             }
 
             case IList list:
             {
-                foreach ((int index, object? item) in list.Enumerate( 0 )) { Data[index.ToString()] = item?.ToString(); }
+                foreach ( (int index, object? item) in list.Enumerate( 0 ) ) { Data[index.ToString()] = item?.ToString(); }
 
                 break;
             }

@@ -22,7 +22,7 @@ public class IpAddressManager : INetworkManager
         {
             using var wifiUrl = new NSUrl( @"prefs:root=WIFI" );
 
-            if (UIApplication.SharedApplication.CanOpenUrl( wifiUrl ))
+            if ( UIApplication.SharedApplication.CanOpenUrl( wifiUrl ) )
             {
                 // Pre iOS 10
                 UIApplication.SharedApplication.OpenUrl( wifiUrl );
@@ -34,7 +34,7 @@ public class IpAddressManager : INetworkManager
                 UIApplication.SharedApplication.OpenUrl( nSUrl );
             }
         }
-        catch (Exception ex) { throw new WiFiException( "Could not open Wifi Settings", ex ); }
+        catch ( Exception ex ) { throw new WiFiException( "Could not open Wifi Settings", ex ); }
     }
 
 

@@ -3,7 +3,7 @@ namespace Jakar.Extensions;
 
 
 /// <summary>
-///     <seealso href = "https://stackoverflow.com/a/5852926/9530917" />
+///     <seealso href="https://stackoverflow.com/a/5852926/9530917"/>
 /// </summary>
 public class MultiDeque<T> : IMultiQueue<T>
 {
@@ -46,11 +46,11 @@ public class MultiDeque<T> : IMultiQueue<T>
     {
         lock (_lock)
         {
-            if (_queue.Count > 0)
+            if ( _queue.Count > 0 )
             {
                 T item = _queue.RemoveFromBack();
 
-                if (item is not null)
+                if ( item is not null )
                 {
                     value = item;
                     return false;

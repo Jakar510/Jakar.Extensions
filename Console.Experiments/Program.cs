@@ -1,8 +1,4 @@
-﻿using Dapper;
-using Jakar.Database;
-
-
-try
+﻿try
 {
     "Hello World!".WriteToConsole();
 
@@ -12,10 +8,11 @@ try
     // try { throw new SqlException("select * from table", p, true); }
     // catch ( Exception e ) { e.WriteToConsole(); }
 
-    var version = AppVersion.Parse( "1.2.3.4.5.6" );
-    version.WriteToConsole();
-
-    (AppVersion.Parse( "1.2.3" ) >= AppVersion.Parse( "1.0.0" )).WriteToDebug();
+    const string SOURCE  = "1.2.3.4.5.6";
+    bool         success = AppVersion.TryParse( SOURCE, out AppVersion? version );
+    success.WriteToDebug();
+    version?.WriteToDebug();
+    (SOURCE == version.ToString()).WriteToDebug();
 
     // byte.MaxValue.ToString()
     //     .Length.WriteToDebug();

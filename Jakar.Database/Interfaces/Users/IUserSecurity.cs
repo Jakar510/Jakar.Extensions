@@ -2,7 +2,7 @@
 
 
 /// <summary>
-///     <see cref = "UserLoginInfo" />
+///     <see cref="UserLoginInfo"/>
 /// </summary>
 public interface IUserSecurity
 {

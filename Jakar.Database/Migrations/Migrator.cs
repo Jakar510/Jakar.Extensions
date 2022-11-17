@@ -8,28 +8,28 @@ namespace Jakar.Database.Migrations;
 /// <summary>
 ///     Add DB implementation support to FluentMigrator, Set the connection string, and Define the assembly containing the migrations
 ///     <para>
-///         <see href = "https://fluentmigrator.github.io/articles/migration-runners.html?tabs=vs-pkg-manager-console" />
+///         <see href="https://fluentmigrator.github.io/articles/migration-runners.html?tabs=vs-pkg-manager-console"/>
 ///     </para>
 ///     <para>
-///         <see cref = "PostgresRunnerBuilderExtensions.AddPostgres" />
+///         <see cref="PostgresRunnerBuilderExtensions.AddPostgres"/>
 ///     </para>
 ///     <para>
-///         <see cref = "SQLiteRunnerBuilderExtensions.AddSQLite" />
+///         <see cref="SQLiteRunnerBuilderExtensions.AddSQLite"/>
 ///     </para>
 ///     <para>
-///         <see cref = "SqlServerRunnerBuilderExtensions.AddSqlServer2008" />
+///         <see cref="SqlServerRunnerBuilderExtensions.AddSqlServer2008"/>
 ///     </para>
 ///     <para>
-///         <see cref = "SqlServerRunnerBuilderExtensions.AddSqlServer2012" />
+///         <see cref="SqlServerRunnerBuilderExtensions.AddSqlServer2012"/>
 ///     </para>
 ///     <para>
-///         <see cref = "SqlServerRunnerBuilderExtensions.AddSqlServer2014" />
+///         <see cref="SqlServerRunnerBuilderExtensions.AddSqlServer2014"/>
 ///     </para>
 ///     <para>
-///         <see cref = "SqlServerRunnerBuilderExtensions.AddSqlServer2016" />
+///         <see cref="SqlServerRunnerBuilderExtensions.AddSqlServer2016"/>
 ///     </para>
 ///     <para>
-///         <see cref = "Db2RunnerBuilderExtensions.AddDb2" />
+///         <see cref="Db2RunnerBuilderExtensions.AddDb2"/>
 ///     </para>
 /// </summary>
 public static class Migrator

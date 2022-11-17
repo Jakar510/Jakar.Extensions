@@ -16,9 +16,9 @@ public class ValueFuzzyEqualizer<T> : IEqualityComparer<T?>, IEqualityComparer<T
 
     bool IEqualityComparer.Equals( object? x, object? y )
     {
-        if (x is not T left) { throw new ExpectedValueTypeException( nameof(x), x, typeof(T) ); }
+        if ( x is not T left ) { throw new ExpectedValueTypeException( nameof(x), x, typeof(T) ); }
 
-        if (y is not T right) { throw new ExpectedValueTypeException( nameof(y), y, typeof(T) ); }
+        if ( y is not T right ) { throw new ExpectedValueTypeException( nameof(y), y, typeof(T) ); }
 
         return left.Equals( right );
     }
@@ -28,9 +28,9 @@ public class ValueFuzzyEqualizer<T> : IEqualityComparer<T?>, IEqualityComparer<T
 
     public bool Equals( T? left, T? right )
     {
-        if (left.HasValue && right.HasValue) { left.Value.FuzzyEquals( right.Value ); }
+        if ( left.HasValue && right.HasValue ) { left.Value.FuzzyEquals( right.Value ); }
 
-        if (left is null && right is null) { return true; }
+        if ( left is null && right is null ) { return true; }
 
         return false;
     }
@@ -51,9 +51,9 @@ public class FuzzyEqualizer<T> : IEqualityComparer<T>, IEqualityComparer where T
 
     bool IEqualityComparer.Equals( object? x, object? y )
     {
-        if (x is not T left) { throw new ExpectedValueTypeException( nameof(x), x, typeof(T) ); }
+        if ( x is not T left ) { throw new ExpectedValueTypeException( nameof(x), x, typeof(T) ); }
 
-        if (y is not T right) { throw new ExpectedValueTypeException( nameof(y), y, typeof(T) ); }
+        if ( y is not T right ) { throw new ExpectedValueTypeException( nameof(y), y, typeof(T) ); }
 
         return left.Equals( right );
     }
@@ -63,9 +63,9 @@ public class FuzzyEqualizer<T> : IEqualityComparer<T>, IEqualityComparer where T
 
     public bool Equals( T? left, T? right )
     {
-        if (left is null && right is null) { return true; }
+        if ( left is null && right is null ) { return true; }
 
-        if (left is null || right is null) { return false; }
+        if ( left is null || right is null ) { return false; }
 
         return left.FuzzyEquals( right );
     }

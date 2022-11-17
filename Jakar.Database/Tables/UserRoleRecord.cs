@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 10/10/2022  4:57 PM
 
-using Jakar.Database.Implementations;
-
-
-
 namespace Jakar.Database;
 
 
@@ -19,19 +15,6 @@ public sealed record UserRoleRecord : TableRecord<UserRoleRecord>
     public UserRoleRecord( UserRecord user, RoleRecord role ) : base( user ) => RoleID = role.ID;
 
 
-    public override int CompareTo( UserRoleRecord? other )
-    {
-        if ( ReferenceEquals( this, other ) ) { return 0; }
-
-        if ( other is null ) { return 1; }
-
-        int userIDComparison = UserID.CompareTo( other.UserID );
-        if ( userIDComparison != 0 ) { return userIDComparison; }
-
-        return RoleID.CompareTo( other.RoleID );
-    }
-
-
     public static DynamicParameters GetDynamicParameters( RoleRecord record )
     {
         var parameters = new DynamicParameters();
@@ -43,6 +26,19 @@ public sealed record UserRoleRecord : TableRecord<UserRoleRecord>
         DynamicParameters parameters = GetDynamicParameters( user );
         parameters.Add( nameof(RoleID), record.ID );
         return parameters;
+    }
+
+
+    public override int CompareTo( UserRoleRecord? other )
+    {
+        if ( ReferenceEquals( this, other ) ) { return 0; }
+
+        if ( other is null ) { return 1; }
+
+        int userIDComparison = UserID.CompareTo( other.UserID );
+        if ( userIDComparison != 0 ) { return userIDComparison; }
+
+        return RoleID.CompareTo( other.RoleID );
     }
     public override int GetHashCode() => HashCode.Combine( base.GetHashCode(), UserID, CreatedBy, RoleID );
 

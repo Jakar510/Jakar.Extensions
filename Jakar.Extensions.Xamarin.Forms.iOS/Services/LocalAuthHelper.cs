@@ -30,7 +30,7 @@ public class LocalAuthHelper : Biometrics.IAuthHelperForIOS
                    Biometrics.LocalAuthType.PassCode => "LockIcon",
                    Biometrics.LocalAuthType.TouchId  => "TouchIdIcon",
                    Biometrics.LocalAuthType.FaceId   => "FaceIdIcon",
-                   _                                 => string.Empty
+                   _                                 => string.Empty,
                };
     }
 
@@ -43,7 +43,7 @@ public class LocalAuthHelper : Biometrics.IAuthHelperForIOS
                    Biometrics.LocalAuthType.PassCode => "UnlockWithPasscode",
                    Biometrics.LocalAuthType.TouchId  => "UnlockWithTouchID",
                    Biometrics.LocalAuthType.FaceId   => "UnlockWithFaceID",
-                   _                                 => string.Empty
+                   _                                 => string.Empty,
                };
     }
 
@@ -51,11 +51,11 @@ public class LocalAuthHelper : Biometrics.IAuthHelperForIOS
     {
         using var context = new LAContext();
 
-        if (context.CanEvaluatePolicy( LAPolicy.DeviceOwnerAuthenticationWithBiometrics, out NSError? authError ) || context.CanEvaluatePolicy( LAPolicy.DeviceOwnerAuthentication, out authError ))
+        if ( context.CanEvaluatePolicy( LAPolicy.DeviceOwnerAuthenticationWithBiometrics, out NSError? authError ) || context.CanEvaluatePolicy( LAPolicy.DeviceOwnerAuthentication, out authError ) )
         {
             var replyHandler = new LAContextReplyHandler( ( success, error ) =>
                                                           {
-                                                              if (success) { onSuccess?.Invoke(); }
+                                                              if ( success ) { onSuccess?.Invoke(); }
                                                               else { onFailure?.Invoke(); }
                                                           } );
 
@@ -70,13 +70,13 @@ public class LocalAuthHelper : Biometrics.IAuthHelperForIOS
     {
         using var context = new LAContext();
 
-        if (context.CanEvaluatePolicy( LAPolicy.DeviceOwnerAuthenticationWithBiometrics, out NSError? authError ) || context.CanEvaluatePolicy( LAPolicy.DeviceOwnerAuthentication, out authError ))
+        if ( context.CanEvaluatePolicy( LAPolicy.DeviceOwnerAuthenticationWithBiometrics, out NSError? authError ) || context.CanEvaluatePolicy( LAPolicy.DeviceOwnerAuthentication, out authError ) )
         {
             var replyHandler = new LAContextReplyHandler( async ( success, error ) =>
                                                           {
-                                                              if (success)
+                                                              if ( success )
                                                               {
-                                                                  if (onSuccess is not null)
+                                                                  if ( onSuccess is not null )
                                                                   {
                                                                       await onSuccess()
                                                                          .ConfigureAwait( false );
@@ -84,7 +84,7 @@ public class LocalAuthHelper : Biometrics.IAuthHelperForIOS
                                                               }
                                                               else
                                                               {
-                                                                  if (onFailure is not null)
+                                                                  if ( onFailure is not null )
                                                                   {
                                                                       await onFailure()
                                                                          .ConfigureAwait( false );
@@ -102,11 +102,11 @@ public class LocalAuthHelper : Biometrics.IAuthHelperForIOS
     public Biometrics.LocalAuthType GetLocalAuthType()
     {
         using var localAuthContext = new LAContext();
-        if (!localAuthContext.CanEvaluatePolicy( LAPolicy.DeviceOwnerAuthentication, out NSError _ )) { return Biometrics.LocalAuthType.None; }
+        if ( !localAuthContext.CanEvaluatePolicy( LAPolicy.DeviceOwnerAuthentication, out NSError _ ) ) { return Biometrics.LocalAuthType.None; }
 
-        if (!localAuthContext.CanEvaluatePolicy( LAPolicy.DeviceOwnerAuthenticationWithBiometrics, out NSError _ )) { return Biometrics.LocalAuthType.PassCode; }
+        if ( !localAuthContext.CanEvaluatePolicy( LAPolicy.DeviceOwnerAuthenticationWithBiometrics, out NSError _ ) ) { return Biometrics.LocalAuthType.PassCode; }
 
-        if (GetOsMajorVersion() >= 11 && localAuthContext.BiometryType == LABiometryType.FaceId) { return Biometrics.LocalAuthType.FaceId; }
+        if ( GetOsMajorVersion() >= 11 && localAuthContext.BiometryType == LABiometryType.FaceId ) { return Biometrics.LocalAuthType.FaceId; }
 
         return Biometrics.LocalAuthType.TouchId;
     }

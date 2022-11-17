@@ -4,19 +4,6 @@ namespace Jakar.Extensions.Xamarin.Forms;
 
 public class LocationManager
 {
-    public enum State
-    {
-        Default,
-        Success,
-        UnknownError,
-        PermissionIssue,
-        FeatureNotEnabled,
-        FeatureNotSupported,
-        IsFromMockProvider
-    }
-
-
-
     public Location? Location { get; protected set; }
 
 
@@ -27,10 +14,21 @@ public class LocationManager
     {
         var manager = new LocationManager();
 
-        if (await manager.Update()
-                         .ConfigureAwait( false )) { return manager.Location; }
+        if ( await manager.Update()
+                          .ConfigureAwait( false ) ) { return manager.Location; }
 
         return null;
+    }
+
+    public async Task<bool> Update()
+    {
+        if ( await AppPermissions.LocationWhenInUsePermission()
+                                 .ConfigureAwait( false ) != PermissionStatus.Granted ) { return false; }
+
+        State status = await GetLocationAsync()
+                          .ConfigureAwait( false );
+
+        return status == State.Success;
     }
 
     protected async Task<State> GetLocationAsync( GeolocationAccuracy accuracy = GeolocationAccuracy.Default )
@@ -41,7 +39,7 @@ public class LocationManager
         Location = await Geolocation.GetLocationAsync( request )
                                     .ConfigureAwait( false );
 
-        if (Location is null) { return State.UnknownError; }
+        if ( Location is null ) { return State.UnknownError; }
 
         Status = Location.IsFromMockProvider
                      ? State.IsFromMockProvider
@@ -76,14 +74,16 @@ public class LocationManager
         Location = null;
     }
 
-    public async Task<bool> Update()
+
+
+    public enum State
     {
-        if (await AppPermissions.LocationWhenInUsePermission()
-                                .ConfigureAwait( false ) != PermissionStatus.Granted) { return false; }
-
-        State status = await GetLocationAsync()
-                          .ConfigureAwait( false );
-
-        return status == State.Success;
+        Default,
+        Success,
+        UnknownError,
+        PermissionIssue,
+        FeatureNotEnabled,
+        FeatureNotSupported,
+        IsFromMockProvider,
     }
 }

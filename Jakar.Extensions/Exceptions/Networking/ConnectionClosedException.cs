@@ -2,9 +2,7 @@
 namespace Jakar.Extensions;
 
 
-/// <summary>
-///     The connection was prematurely closed.
-/// </summary>
+/// <summary> The connection was prematurely closed. </summary>
 public sealed class ConnectionClosedException : WebException
 {
     public CancellationToken Token { get; }

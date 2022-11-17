@@ -4,15 +4,8 @@
 namespace Jakar.Extensions;
 
 
-/// <summary>
-///     A
-///     <see langword = "ref" />
-///     <see langword = "struct" />
-///     that enumerates the items in a given
-///     <see cref = "Span{T}" />
-///     instance.
-/// </summary>
-/// <typeparam name = "T" > The type of items to enumerate. </typeparam>
+/// <summary> A <see langword="ref"/> <see langword="struct"/> that enumerates the items in a given <see cref="Span{T}"/> instance. </summary>
+/// <typeparam name="T"> The type of items to enumerate. </typeparam>
 [EditorBrowsable( EditorBrowsableState.Never )]
 public ref struct SpanEnumerator<T>
 {
@@ -26,16 +19,8 @@ public ref struct SpanEnumerator<T>
     }
 
 
-    /// <summary>
-    ///     Initializes a new instance of the
-    ///     <see cref = "SpanEnumerator{T}" />
-    ///     struct.
-    /// </summary>
-    /// <param name = "span" >
-    ///     The source
-    ///     <see cref = "Span{T}" />
-    ///     instance.
-    /// </param>
+    /// <summary> Initializes a new instance of the <see cref="SpanEnumerator{T}"/> struct. </summary>
+    /// <param name="span"> The source <see cref="Span{T}"/> instance. </param>
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public SpanEnumerator( ReadOnlySpan<T> span )
     {
@@ -50,11 +35,7 @@ public ref struct SpanEnumerator<T>
 
 
 
-    /// <summary>
-    ///     An item from a source
-    ///     <see cref = "Span{T}" />
-    ///     instance.
-    /// </summary>
+    /// <summary> An item from a source <see cref="Span{T}"/> instance. </summary>
     [EditorBrowsable( EditorBrowsableState.Never )]
     public readonly ref struct Item
     {
@@ -73,21 +54,9 @@ public ref struct SpanEnumerator<T>
         }
 
 
-        /// <summary>
-        ///     Initializes a new instance of the
-        ///     <see cref = "Item" />
-        ///     struct.
-        /// </summary>
-        /// <param name = "span" >
-        ///     The source
-        ///     <see cref = "Span{T}" />
-        ///     instance.
-        /// </param>
-        /// <param name = "index" >
-        ///     The current index within
-        ///     <paramref name = "span" />
-        ///     .
-        /// </param>
+        /// <summary> Initializes a new instance of the <see cref="Item"/> struct. </summary>
+        /// <param name="span"> The source <see cref="Span{T}"/> instance. </param>
+        /// <param name="index"> The current index within <paramref name="span"/> . </param>
         [MethodImpl( MethodImplOptions.AggressiveInlining )]
         public Item( ReadOnlySpan<T> span, int index )
         {

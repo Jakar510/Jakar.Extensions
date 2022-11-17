@@ -17,5 +17,5 @@ public enum SupportedLanguage
     Portuguese,
     Dutch,
     Korean,
-    Arabic
+    Arabic,
 }

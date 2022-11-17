@@ -17,7 +17,7 @@ public static class LayoutAlignmentExtensions
             LayoutAlignment.Start  => GravityFlags.Start,
             LayoutAlignment.Center => GravityFlags.CenterHorizontal,
             LayoutAlignment.End    => GravityFlags.End,
-            _                      => GravityFlags.FillVertical
+            _                      => GravityFlags.FillVertical,
         };
     public static GravityFlags ToNativeVertical( this LayoutAlignment forms ) =>
         forms switch
@@ -25,6 +25,6 @@ public static class LayoutAlignmentExtensions
             LayoutAlignment.Start  => GravityFlags.Top,
             LayoutAlignment.Center => GravityFlags.CenterVertical,
             LayoutAlignment.End    => GravityFlags.Bottom,
-            _                      => GravityFlags.FillHorizontal
+            _                      => GravityFlags.FillHorizontal,
         };
 }

@@ -38,11 +38,11 @@ public static class InstanceCreator<T1, TInstance>
     {
         Type[] argsTypes =
         {
-            typeof(T1)
+            typeof(T1),
         };
 
         ConstructorInfo? constructor = typeof(TInstance).GetConstructor( BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, Type.DefaultBinder, argsTypes, null );
-        if (constructor is null) { throw InstanceCreator.CreateException( argsTypes ); }
+        if ( constructor is null ) { throw InstanceCreator.CreateException( argsTypes ); }
 
         ParameterExpression[] args = argsTypes.Select( Expression.Parameter )
                                               .ToArray();
@@ -65,11 +65,11 @@ public static class InstanceCreator<T1, T2, TInstance>
         Type[] argsTypes =
         {
             typeof(T1),
-            typeof(T2)
+            typeof(T2),
         };
 
         ConstructorInfo? constructor = typeof(TInstance).GetConstructor( BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, Type.DefaultBinder, argsTypes, null );
-        if (constructor is null) { throw InstanceCreator.CreateException( argsTypes ); }
+        if ( constructor is null ) { throw InstanceCreator.CreateException( argsTypes ); }
 
         ParameterExpression[] args = argsTypes.Select( Expression.Parameter )
                                               .ToArray();
@@ -93,11 +93,11 @@ public static class InstanceCreator<T1, T2, T3, TInstance>
         {
             typeof(T1),
             typeof(T2),
-            typeof(T3)
+            typeof(T3),
         };
 
         ConstructorInfo? constructor = typeof(TInstance).GetConstructor( BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, Type.DefaultBinder, argsTypes, null );
-        if (constructor is null) { throw InstanceCreator.CreateException( argsTypes ); }
+        if ( constructor is null ) { throw InstanceCreator.CreateException( argsTypes ); }
 
         ParameterExpression[] args = argsTypes.Select( Expression.Parameter )
                                               .ToArray();
@@ -122,11 +122,11 @@ public static class InstanceCreator<T1, T2, T3, T4, TInstance>
             typeof(T1),
             typeof(T2),
             typeof(T3),
-            typeof(T4)
+            typeof(T4),
         };
 
         ConstructorInfo? constructor = typeof(TInstance).GetConstructor( BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, Type.DefaultBinder, argsTypes, null );
-        if (constructor is null) { throw InstanceCreator.CreateException( argsTypes ); }
+        if ( constructor is null ) { throw InstanceCreator.CreateException( argsTypes ); }
 
         ParameterExpression[] args = argsTypes.Select( Expression.Parameter )
                                               .ToArray();
@@ -151,11 +151,11 @@ public static class InstanceCreator<T1, T2, T3, T4, T5, TInstance>
             typeof(T1),
             typeof(T2),
             typeof(T3),
-            typeof(T4)
+            typeof(T4),
         };
 
         ConstructorInfo? constructor = typeof(TInstance).GetConstructor( BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, Type.DefaultBinder, argsTypes, null );
-        if (constructor is null) { throw InstanceCreator.CreateException( argsTypes ); }
+        if ( constructor is null ) { throw InstanceCreator.CreateException( argsTypes ); }
 
         ParameterExpression[] args = argsTypes.Select( Expression.Parameter )
                                               .ToArray();
@@ -180,11 +180,11 @@ public static class InstanceCreator<T1, T2, T3, T4, T5, T6, TInstance>
             typeof(T1),
             typeof(T2),
             typeof(T3),
-            typeof(T4)
+            typeof(T4),
         };
 
         ConstructorInfo? constructor = typeof(TInstance).GetConstructor( BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, Type.DefaultBinder, argsTypes, null );
-        if (constructor is null) { throw InstanceCreator.CreateException( argsTypes ); }
+        if ( constructor is null ) { throw InstanceCreator.CreateException( argsTypes ); }
 
         ParameterExpression[] args = argsTypes.Select( Expression.Parameter )
                                               .ToArray();
@@ -209,11 +209,11 @@ public static class InstanceCreator<T1, T2, T3, T4, T5, T6, T7, TInstance>
             typeof(T1),
             typeof(T2),
             typeof(T3),
-            typeof(T4)
+            typeof(T4),
         };
 
         ConstructorInfo? constructor = typeof(TInstance).GetConstructor( BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, Type.DefaultBinder, argsTypes, null );
-        if (constructor is null) { throw InstanceCreator.CreateException( argsTypes ); }
+        if ( constructor is null ) { throw InstanceCreator.CreateException( argsTypes ); }
 
         ParameterExpression[] args = argsTypes.Select( Expression.Parameter )
                                               .ToArray();

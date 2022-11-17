@@ -39,7 +39,7 @@ public class IsList_Tests : Assert
     [TestCase( typeof(List<Guid>),                 typeof(Guid) )]
     public void IsList_Args_Test( Type objType, Type? expected )
     {
-        if (objType.IsList( out Type? itemType ))
+        if ( objType.IsList( out Type? itemType ) )
         {
             AreEqual( itemType, expected );
             return;

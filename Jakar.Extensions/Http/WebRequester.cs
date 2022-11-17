@@ -7,9 +7,9 @@ namespace Jakar.Extensions;
 [SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
 public partial class WebRequester : IDisposable
 {
-    private readonly RetryPolicy        _retryPolicy;
     private readonly HttpClient         _client;
     private readonly IHostInfo          _host;
+    private readonly RetryPolicy        _retryPolicy;
     public           Encoding           Encoding              { get; init; } = Encoding.Default;
     public           HttpRequestHeaders DefaultRequestHeaders => _client.DefaultRequestHeaders;
 
@@ -24,18 +24,18 @@ public partial class WebRequester : IDisposable
         _retryPolicy = retryPolicy;
         Encoding     = encoding;
     }
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] protected virtual Uri CreateUrl( string relativePath ) => new(_host.HostInfo, relativePath);
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] protected virtual Uri CreateUrl( Uri    relativePath ) => new(_host.HostInfo, relativePath);
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )] protected virtual WebHandler CreateHandler( Uri url, HttpMethod method, CancellationToken token ) => CreateHandler( new HttpRequestMessage( method, url ), token );
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     protected virtual WebHandler CreateHandler( Uri url, HttpMethod method, HttpContent value, CancellationToken token ) => CreateHandler( new HttpRequestMessage( method, url )
                                                                                                                                            {
-                                                                                                                                               Content = value
+                                                                                                                                               Content = value,
                                                                                                                                            },
                                                                                                                                            token );
     [MethodImpl( MethodImplOptions.AggressiveInlining )] protected virtual WebHandler CreateHandler( HttpRequestMessage request, CancellationToken token ) => new(_client, request, Encoding, _retryPolicy, token);
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] protected virtual Uri CreateUrl( string                        relativePath ) => new(_host.HostInfo, relativePath);
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] protected virtual Uri CreateUrl( Uri                           relativePath ) => new(_host.HostInfo, relativePath);
 
 
     public WebHandler Delete( Uri    url,          CancellationToken           token ) => CreateHandler( url, HttpMethod.Delete, token );

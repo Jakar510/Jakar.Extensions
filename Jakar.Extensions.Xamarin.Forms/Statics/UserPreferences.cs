@@ -21,6 +21,9 @@ public static class UserPreferences
     public static string GetPassword( this string key ) => GetPasswordAsync( key )
        .Result;
 
+    public static async Task SetPasswordAsync( this string key, string value ) => await SecureStorage.SetAsync( key, value )
+                                                                                                     .ConfigureAwait( false );
+
     public static async Task<string> GetPasswordAsync( this string key )
     {
         try
@@ -37,7 +40,4 @@ public static class UserPreferences
 
     public static void SetPassword( this string key, string value ) => MainThread.InvokeOnMainThreadAsync( async () => await SetPasswordAsync( key, value ) )
                                                                                  .Wait();
-
-    public static async Task SetPasswordAsync( this string key, string value ) => await SecureStorage.SetAsync( key, value )
-                                                                                                     .ConfigureAwait( false );
 }

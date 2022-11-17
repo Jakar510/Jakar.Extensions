@@ -13,6 +13,6 @@ public class CredentialsException : Exception
 
     public static void ThrowIfInvalid( string? user, string? password )
     {
-        if (string.IsNullOrWhiteSpace( user ) || string.IsNullOrWhiteSpace( password )) { throw new CredentialsException( user, password ); }
+        if ( string.IsNullOrWhiteSpace( user ) || string.IsNullOrWhiteSpace( password ) ) { throw new CredentialsException( user, password ); }
     }
 }

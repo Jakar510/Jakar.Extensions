@@ -7,35 +7,75 @@ namespace Jakar.Extensions;
 
 public static class GuidExtensions
 {
+    public static bool TryAsGuid( this Span<char> value, [NotNullWhen( true )] out Guid? result )
+    {
+        result = AsGuid( value );
+        return result.HasValue;
+    }
+    public static bool TryAsGuid( this ReadOnlySpan<char> value, [NotNullWhen( true )] out Guid? result )
+    {
+        result = AsGuid( value );
+        return result.HasValue;
+    }
+    public static bool TryAsGuid( this string value, [NotNullWhen( true )] out Guid? result ) => value.AsSpan()
+                                                                                                      .TryAsGuid( out result );
+
+
+    public static bool TryWriteBytes( this Guid value, out Memory<byte> result )
+    {
+        Span<byte> span = stackalloc byte[16];
+
+        if ( value.TryWriteBytes( span ) )
+        {
+            result = span.AsMemory();
+            return true;
+        }
+
+        result = default;
+        return false;
+    }
+    public static bool TryWriteBytes( this Guid value, out ReadOnlyMemory<byte> result )
+    {
+        Span<byte> span = stackalloc byte[16];
+
+        if ( value.TryWriteBytes( span ) )
+        {
+            result = span.AsMemory();
+            return true;
+        }
+
+        result = default;
+        return false;
+    }
+    private const byte PLUS_BYTE  = (byte)'+';
+    private const byte SLASH_BYTE = (byte)'/';
     private const char EQUALS     = '=';
     private const char HYPHEN     = '-';
-    private const char UNDERSCORE = '_';
-    private const char SLASH      = '/';
-    private const byte SLASH_BYTE = (byte)'/';
     private const char PLUS       = '+';
-    private const byte PLUS_BYTE  = (byte)'+';
+    private const char SLASH      = '/';
+    private const char UNDERSCORE = '_';
 
 
     /// <summary>
-    ///     <see href = "https://www.youtube.com/watch?v=B2yOjLyEZk0" > Writing C# without allocating ANY memory </see>
+    ///     <see href="https://www.youtube.com/watch?v=B2yOjLyEZk0"> Writing C# without allocating ANY memory </see>
     /// </summary>
-    /// <param name = "value" > </param>
+    /// <param name="value"> </param>
     /// <returns> </returns>
     public static Guid? AsGuid( this string value ) => value.AsSpan()
                                                             .AsGuid();
 
     /// <summary>
-    ///     <see href = "https://www.youtube.com/watch?v=B2yOjLyEZk0" > Writing C# without allocating ANY memory </see>
+    ///     <see href="https://www.youtube.com/watch?v=B2yOjLyEZk0"> Writing C# without allocating ANY memory </see>
     /// </summary>
-    /// <param name = "value" > </param>
+    /// <param name="value"> </param>
     /// <returns> </returns>
     public static Guid? AsGuid( this ReadOnlySpan<char> value )
     {
-        if (Guid.TryParse( value, out Guid result )) { return result; }
+        if ( Guid.TryParse( value, out Guid result ) ) { return result; }
 
         Span<char> base64Chars = stackalloc char[24];
 
-        for (int i = 0; i < 22; i++)
+        for ( int i = 0; i < 22; i++ )
         {
             base64Chars[i] = value[i] switch
                              {
@@ -57,9 +97,9 @@ public static class GuidExtensions
 
 
     /// <summary>
-    ///     <see href = "https://www.youtube.com/watch?v=B2yOjLyEZk0" > Writing C# without allocating ANY memory </see>
+    ///     <see href="https://www.youtube.com/watch?v=B2yOjLyEZk0"> Writing C# without allocating ANY memory </see>
     /// </summary>
-    /// <param name = "value" > </param>
+    /// <param name="value"> </param>
     /// <returns> </returns>
     public static string ToBase64( this Guid value )
     {
@@ -67,12 +107,12 @@ public static class GuidExtensions
         Span<char> result      = stackalloc char[22];
 
         Span<byte> idBytes = stackalloc byte[16];
-        if (!value.TryWriteBytes( idBytes )) { throw new InvalidOperationException(); }
+        if ( !value.TryWriteBytes( idBytes ) ) { throw new InvalidOperationException(); }
 
         System.Buffers.Text.Base64.EncodeToUtf8( idBytes, base64Bytes, out _, out _ );
 
 
-        for (int i = 0; i < 22; i++)
+        for ( int i = 0; i < 22; i++ )
         {
             result[i] = base64Bytes[i] switch
                         {
@@ -83,47 +123,5 @@ public static class GuidExtensions
         }
 
         return new string( result );
-    }
-
-
-    public static bool TryAsGuid( this Span<char> value, [NotNullWhen( true )] out Guid? result )
-    {
-        result = AsGuid( value );
-        return result.HasValue;
-    }
-    public static bool TryAsGuid( this ReadOnlySpan<char> value, [NotNullWhen( true )] out Guid? result )
-    {
-        result = AsGuid( value );
-        return result.HasValue;
-    }
-    public static bool TryAsGuid( this string value, [NotNullWhen( true )] out Guid? result ) => value.AsSpan()
-                                                                                                      .TryAsGuid( out result );
-
-
-    public static bool TryWriteBytes( this Guid value, out Memory<byte> result )
-    {
-        Span<byte> span = stackalloc byte[16];
-
-        if (value.TryWriteBytes( span ))
-        {
-            result = span.AsMemory();
-            return true;
-        }
-
-        result = default;
-        return false;
-    }
-    public static bool TryWriteBytes( this Guid value, out ReadOnlyMemory<byte> result )
-    {
-        Span<byte> span = stackalloc byte[16];
-
-        if (value.TryWriteBytes( span ))
-        {
-            result = span.AsMemory();
-            return true;
-        }
-
-        result = default;
-        return false;
     }
 }

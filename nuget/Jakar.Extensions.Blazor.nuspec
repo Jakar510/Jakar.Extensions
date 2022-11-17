@@ -27,18 +27,30 @@
 					branch="master" />
 		<dependencies>
 			<group targetFramework="net6.0">
-				<dependency id="Blazored.LocalStorage" version="4.3.0" />
-				<dependency id="Blazored.Modal" version="7.1.0" />
-				<dependency id="Blazored.SessionStorage" version="2.2.0" />
-				<dependency id="Blazored.TextEditor" version="1.0.8" />
-				<dependency id="Blazored.Toast" version="3.2.2" />
-				<dependency id="Blazored.Video" version="1.0.0" />
-				<dependency id="Jakar.Extensions" version="6.2.2" />
-				<dependency id="Jakar.Extensions.Hosting" version="6.2.2" />
-				<dependency id="BlazorComponentUtilities" version="1.8.0" />
-				<dependency id="BlazorPro.BlazorSize" version="6.1.2" />
-				<dependency id="PanoramicData.Blazor" version="2.1.52" />
-				<dependency id="Radzen.Blazor" version="4.3.5" />
+				<dependency id="Blazored.LocalStorage"
+							version="4.3.0" />
+				<dependency id="Blazored.Modal"
+							version="7.1.0" />
+				<dependency id="Blazored.SessionStorage"
+							version="2.2.0" />
+				<dependency id="Blazored.TextEditor"
+							version="1.0.8" />
+				<dependency id="Blazored.Toast"
+							version="3.2.2" />
+				<dependency id="Blazored.Video"
+							version="1.0.0" />
+				<dependency id="Jakar.Extensions"
+							version="6.2.2" />
+				<dependency id="Jakar.Extensions.Hosting"
+							version="6.2.2" />
+				<dependency id="BlazorComponentUtilities"
+							version="1.8.0" />
+				<dependency id="BlazorPro.BlazorSize"
+							version="6.1.2" />
+				<dependency id="PanoramicData.Blazor"
+							version="2.1.52" />
+				<dependency id="Radzen.Blazor"
+							version="4.3.5" />
 			</group>
 		</dependencies>
 	</metadata>

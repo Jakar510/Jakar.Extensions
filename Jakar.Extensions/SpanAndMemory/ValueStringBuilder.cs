@@ -24,7 +24,7 @@ public ref struct ValueStringBuilder
     {
         get
         {
-            var span = _chars[range];
+            Span<char> span = _chars[range];
             return MemoryMarshal.CreateSpan( ref span.GetPinnableReference(), span.Length );
         }
     }
@@ -54,20 +54,11 @@ public ref struct ValueStringBuilder
     public void EnsureCapacity( int capacity ) => _chars.EnsureCapacity( capacity );
 
 
-    /// <summary>
-    ///     Get a pinnable reference to the builder.
-    ///     Does not ensure there is a null char after
-    ///     <see cref = "Length" />
-    ///     .
-    ///     This overload is pattern matched  the C# 7.3+ compiler so you can omit the explicit method call, and write eg "fixed (char* c = builder)"
-    /// </summary>
+    /// <summary> Get a pinnable reference to the builder. Does not ensure there is a null char after <see cref="Length"/> . This overload is pattern matched  the C# 7.3+ compiler so you can omit the explicit method call, and write eg "fixed (char* c = builder)" </summary>
     public ref char GetPinnableReference() => ref _chars.GetPinnableReference();
 
     /// <summary> Get a pinnable reference to the builder. </summary>
-    /// <param name = "terminate" >
-    ///     Ensures that the builder has a null char after
-    ///     <see cref = "Length" />
-    /// </param>
+    /// <param name="terminate"> Ensures that the builder has a null char after <see cref="Length"/> </param>
     public ref char GetPinnableReference( bool terminate )
     {
         if ( !terminate ) { return ref GetPinnableReference(); }
@@ -79,10 +70,7 @@ public ref struct ValueStringBuilder
     }
 
     /// <summary> Get a pinnable reference to the builder. </summary>
-    /// <param name = "terminate" >
-    ///     Ensures that the builder has a null char after
-    ///     <see cref = "Length" />
-    /// </param>
+    /// <param name="terminate"> Ensures that the builder has a null char after <see cref="Length"/> </param>
     public ref char GetPinnableReference( char terminate )
     {
         EnsureCapacity( Length + 1 );
@@ -103,10 +91,7 @@ public ref struct ValueStringBuilder
 
     /// <summary> Returns the underlying storage of the builder. </summary>
     /// <summary> Returns a span around the contents of the builder. </summary>
-    /// <param name = "terminate" >
-    ///     Ensures that the builder has a null char after
-    ///     <see cref = "Length" />
-    /// </param>
+    /// <param name="terminate"> Ensures that the builder has a null char after <see cref="Length"/> </param>
     [Pure]
     public ReadOnlySpan<char> AsSpan( bool terminate ) => _chars.AsSpan( terminate
                                                                              ? '\0'
@@ -114,7 +99,7 @@ public ref struct ValueStringBuilder
     [Pure]
     public readonly ReadOnlySpan<char> Slice( int start )
     {
-        var span = _chars[start..];
+        Span<char> span = _chars[start..];
         return MemoryMarshal.CreateSpan( ref MemoryMarshal.GetReference( span ), span.Length );
     }
     [Pure] public readonly ReadOnlySpan<char> Slice( int start, int length ) => _chars.Slice( start, length );
@@ -301,15 +286,13 @@ public ref struct ValueStringBuilder
 
 #endif
 
-    /// <summary>
-    ///     Copied from StringBuilder, can't be done via generic extension as ValueStringBuilder is a ref struct and cannot be used  a generic.
-    /// </summary>
-    /// <param name = "provider" > </param>
-    /// <param name = "format" > </param>
-    /// <param name = "args" > </param>
+    /// <summary> Copied from StringBuilder, can't be done via generic extension as ValueStringBuilder is a ref struct and cannot be used  a generic. </summary>
+    /// <param name="provider"> </param>
+    /// <param name="format"> </param>
+    /// <param name="args"> </param>
     /// <returns> </returns>
-    /// <exception cref = "ArgumentNullException" > </exception>
-    /// <exception cref = "FormatException" > </exception>
+    /// <exception cref="ArgumentNullException"> </exception>
+    /// <exception cref="FormatException"> </exception>
     internal void AppendFormatHelper( IFormatProvider? provider, ReadOnlySpan<char> format, ParamsArray args )
     {
         // Undocumented exclusive limits on the range for Argument Hole Index and Argument Hole Alignment.
@@ -508,6 +491,7 @@ public ref struct ValueStringBuilder
             if ( s == null )
             {
             #if NET6_0_OR_GREATER
+
                 // If arg is ISpanFormattable and the beginning doesn't need padding, try formatting it into the remaining current chunk.
                 if ( arg is ISpanFormattable spanFormattableArg && (leftJustify || width == 0) && spanFormattableArg.TryFormat( Next, out int charsWritten, itemFormatSpan, provider ) )
                 {

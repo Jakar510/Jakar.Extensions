@@ -5,9 +5,14 @@ namespace Jakar.Extensions.Xamarin.Forms;
 [TypeConverter( typeof(double) )]
 public sealed class StringDoubleConverter : JsonConverter, IValueConverter, IExtendedTypeConverter
 {
+    public static double? ConvertTo( string? value ) => string.IsNullOrWhiteSpace( value )
+                                                            ? null
+                                                            : double.TryParse( value, out double d )
+                                                                ? d
+                                                                : double.NaN;
     public static string? ConvertBack( object? value )
     {
-        switch (value)
+        switch ( value )
         {
             case null: return null;
 
@@ -28,12 +33,6 @@ public sealed class StringDoubleConverter : JsonConverter, IValueConverter, IExt
             default: throw new ExpectedValueTypeException( nameof(value), value, typeof(double), typeof(string) );
         }
     }
-
-    public static double? ConvertTo( string? value ) => string.IsNullOrWhiteSpace( value )
-                                                            ? null
-                                                            : double.TryParse( value, out double d )
-                                                                ? d
-                                                                : double.NaN;
 
 
     public object? ConvertFrom( CultureInfo            culture, object?          value, IServiceProvider serviceProvider ) => ConvertTo( value?.ToString() );

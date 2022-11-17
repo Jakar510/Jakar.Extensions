@@ -6,7 +6,7 @@ namespace Jakar.Database.Migrations;
 
 /// <summary>
 ///     <para>
-///         <see href = "https://fluentmigrator.github.io/articles/fluent-interface.html" />
+///         <see href="https://fluentmigrator.github.io/articles/fluent-interface.html"/>
 ///     </para>
 /// </summary>
 public abstract class Migration<TRecord> : Migration where TRecord : TableRecord<TRecord>
@@ -23,23 +23,10 @@ public abstract class Migration<TRecord> : Migration where TRecord : TableRecord
     protected IAlterTableAddColumnOrAlterColumnOrSchemaOrDescriptionSyntax AlterTable() => Alter.Table( TableName );
 
 
-    protected ISchemaSchemaSyntax CheckSchema()
-    {
-        ISchemaSchemaSyntax schema = Schema.Schema( CurrentScheme );
-        if ( !schema.Exists() ) { Create.Schema( CurrentScheme ); }
-
-        return schema;
-    }
-
-
-    protected ISchemaTableSyntax CheckTableSchema() => CheckSchema()
-       .Table( TableName );
-
-
     protected virtual ICreateTableWithColumnSyntax CreateTable()
     {
-        var table = Create.Table( TableName )
-                          .InSchema( CurrentScheme );
+        ICreateTableWithColumnSyntax? table = Create.Table( TableName )
+                                                    .InSchema( CurrentScheme );
 
 
         table.WithColumn( nameof(TableRecord<TRecord>.ID) )
@@ -62,6 +49,30 @@ public abstract class Migration<TRecord> : Migration where TRecord : TableRecord
 
         return table;
     }
+    protected IInsertDataSyntax StartIdentityInsert() => Insert.IntoTable( TableName )
+                                                               .WithIdentityInsert();
+
+
+    protected IInsertDataSyntax StartInsert() => Insert.IntoTable( TableName );
+
+
+    protected ISchemaSchemaSyntax CheckSchema()
+    {
+        ISchemaSchemaSyntax schema = Schema.Schema( CurrentScheme );
+        if ( !schema.Exists() ) { Create.Schema( CurrentScheme ); }
+
+        return schema;
+    }
+
+
+    protected ISchemaTableSyntax CheckTableSchema() => CheckSchema()
+       .Table( TableName );
+
+
+    /// <param name="dataAsAnonymousType"> The columns and values to be used set </param>
+    protected IUpdateWhereSyntax UpdateTable( object dataAsAnonymousType ) => Update.Table( TableName )
+                                                                                    .InSchema( CurrentScheme )
+                                                                                    .Set( dataAsAnonymousType );
 
 
     protected void DeleteTable() => Delete.Table( TableName )
@@ -72,11 +83,6 @@ public abstract class Migration<TRecord> : Migration where TRecord : TableRecord
                                                        .InSchema( CurrentScheme )
                                                        .To( name )
                                                        .InSchema( CurrentScheme );
-    protected IInsertDataSyntax StartIdentityInsert() => Insert.IntoTable( TableName )
-                                                               .WithIdentityInsert();
-
-
-    protected IInsertDataSyntax StartInsert() => Insert.IntoTable( TableName );
 
 
     protected void UniqueConstraint( string columnName ) => Create.UniqueConstraint()
@@ -97,10 +103,4 @@ public abstract class Migration<TRecord> : Migration where TRecord : TableRecord
                                                                                           .OnTable( TableName )
                                                                                           .WithSchema( CurrentScheme )
                                                                                           .Columns( columnNames );
-
-
-    /// <param name = "dataAsAnonymousType" > The columns and values to be used set </param>
-    protected IUpdateWhereSyntax UpdateTable( object dataAsAnonymousType ) => Update.Table( TableName )
-                                                                                    .InSchema( CurrentScheme )
-                                                                                    .Set( dataAsAnonymousType );
 }

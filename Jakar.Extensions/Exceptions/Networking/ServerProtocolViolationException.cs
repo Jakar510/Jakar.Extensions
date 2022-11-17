@@ -2,9 +2,7 @@
 namespace Jakar.Extensions;
 
 
-/// <summary>
-///     The response was not a valid HTTP response.
-/// </summary>
+/// <summary> The response was not a valid HTTP response. </summary>
 public sealed class ServerProtocolViolationException : WebException
 {
     public CancellationToken Token { get; }

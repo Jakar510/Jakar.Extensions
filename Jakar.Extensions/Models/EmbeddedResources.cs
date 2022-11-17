@@ -36,22 +36,11 @@ public class EmbeddedResources<T>
     public EmbeddedResources() { }
 
 
-    protected string GetPath( string fileName ) => $"{_Namespace}.{fileName}";
-
-
     public ReadOnlyMemory<byte> GetResourceBytes( string fileName )
     {
         Stream    stream = GetResourceStream( fileName );
         using var reader = new MemoryStream();
         stream.CopyTo( stream );
-        return reader.ToArray();
-    }
-
-    public async Task<ReadOnlyMemory<byte>> GetResourceBytesAsync( string fileName )
-    {
-        Stream          stream = GetResourceStream( fileName );
-        await using var reader = new MemoryStream();
-        await stream.CopyToAsync( stream );
         return reader.ToArray();
     }
 
@@ -64,6 +53,9 @@ public class EmbeddedResources<T>
     }
 
 
+    protected string GetPath( string fileName ) => $"{_Namespace}.{fileName}";
+
+
     public string GetResourceText( string fileName ) => GetResourceText( fileName, Encoding.Default );
 
     public string GetResourceText( string fileName, Encoding encoding )
@@ -72,6 +64,22 @@ public class EmbeddedResources<T>
         using var reader = new StreamReader( stream, encoding );
         string    text   = reader.ReadToEnd();
         return text;
+    }
+
+
+    public Task SaveToFile( string fileName, LocalDirectory directory, CancellationToken token ) => SaveToFile( fileName, directory.Join( fileName ), token );
+    public async Task SaveToFile( string fileName, LocalFile file, CancellationToken token )
+    {
+        Stream stream = GetResourceStream( fileName );
+        await file.WriteAsync( stream, token );
+    }
+
+    public async Task<ReadOnlyMemory<byte>> GetResourceBytesAsync( string fileName )
+    {
+        Stream          stream = GetResourceStream( fileName );
+        await using var reader = new MemoryStream();
+        await stream.CopyToAsync( stream );
+        return reader.ToArray();
     }
 
     public async Task<string> GetResourceTextAsync( string fileName ) => await GetResourceTextAsync( fileName, Encoding.Default );
@@ -89,13 +97,5 @@ public class EmbeddedResources<T>
     {
         string text = await GetResourceTextAsync( fileName, encoding );
         return text.FromJson<TValue>();
-    }
-
-
-    public Task SaveToFile( string fileName, LocalDirectory directory, CancellationToken token ) => SaveToFile( fileName, directory.Join( fileName ), token );
-    public async Task SaveToFile( string fileName, LocalFile file, CancellationToken token )
-    {
-        Stream stream = GetResourceStream( fileName );
-        await file.WriteAsync( stream, token );
     }
 }

@@ -9,25 +9,25 @@ public abstract class MigrateGroupTable : Migration<GroupRecord>
     protected MigrateGroupTable() : base() { }
 
 
-    public override void Down() => DeleteTable();
-
-
     protected override ICreateTableWithColumnSyntax CreateTable()
     {
-        var table = base.CreateTable();
+        ICreateTableWithColumnSyntax table = base.CreateTable();
 
-        table.WithColumn( nameof( GroupRecord.NameOfGroup ) )
+        table.WithColumn( nameof(GroupRecord.NameOfGroup) )
              .AsString( 1024 )
              .NotNullable();
 
-        table.WithColumn( nameof( GroupRecord.CustomerID ) )
+        table.WithColumn( nameof(GroupRecord.CustomerID) )
              .AsString( 1024 )
              .NotNullable();
 
-        table.WithColumn( nameof( GroupRecord.OwnerID ) )
+        table.WithColumn( nameof(GroupRecord.OwnerID) )
              .AsString( 4096 )
              .NotNullable();
 
         return table;
     }
+
+
+    public override void Down() => DeleteTable();
 }

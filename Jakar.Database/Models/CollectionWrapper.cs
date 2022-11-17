@@ -21,7 +21,7 @@ public class CollectionWrapper<TValue, TOwner> : CollectionAlerts<TValue>, IColl
         set
         {
             // ReSharper disable once ConditionIsAlwaysTrueOrFalse
-            if (_items is not null)
+            if ( _items is not null )
             {
                 _items.CollectionChanged -= Items_OnCollectionChanged;
                 _items.PropertyChanged   -= Items_OnPropertyChanged;
@@ -31,7 +31,7 @@ public class CollectionWrapper<TValue, TOwner> : CollectionAlerts<TValue>, IColl
             SetProperty( ref _items, value );
 
             // ReSharper disable once ConditionIsAlwaysTrueOrFalse
-            if (_items is null) { return; }
+            if ( _items is null ) { return; }
 
             _items.CollectionChanged += Items_OnCollectionChanged;
             _items.PropertyChanged   += Items_OnPropertyChanged;
@@ -61,9 +61,13 @@ public class CollectionWrapper<TValue, TOwner> : CollectionAlerts<TValue>, IColl
     protected CollectionWrapper( IDCollection<TValue>? collection ) => Items = collection ?? new IDCollection<TValue>();
 
 
+    public static bool operator ==( CollectionWrapper<TValue, TOwner>? left, CollectionWrapper<TValue, TOwner>? right ) => Equals( left, right );
+    public static bool operator !=( CollectionWrapper<TValue, TOwner>? left, CollectionWrapper<TValue, TOwner>? right ) => !Equals( left, right );
+
+
     public static CollectionWrapper<TValue, TOwner> Create( ICollection<TValue>? value )
     {
-        if (value is null) { return new CollectionWrapper<TValue, TOwner>(); }
+        if ( value is null ) { return new CollectionWrapper<TValue, TOwner>(); }
 
         var collection = new CollectionWrapper<TValue, TOwner>( value );
 
@@ -71,7 +75,7 @@ public class CollectionWrapper<TValue, TOwner> : CollectionAlerts<TValue>, IColl
     }
     public static CollectionWrapper<TValue, TOwner> Create( string? jsonOrCsv )
     {
-        if (string.IsNullOrWhiteSpace( jsonOrCsv )) { return new CollectionWrapper<TValue, TOwner>(); }
+        if ( string.IsNullOrWhiteSpace( jsonOrCsv ) ) { return new CollectionWrapper<TValue, TOwner>(); }
 
         jsonOrCsv = jsonOrCsv.Replace( "\"", string.Empty );
 
@@ -89,10 +93,6 @@ public class CollectionWrapper<TValue, TOwner> : CollectionAlerts<TValue>, IColl
     }
     private void Items_OnPropertyChanged( object?  sender, PropertyChangedEventArgs  e ) => OnPropertyChanged( e.PropertyName );
     private void Items_OnPropertyChanging( object? sender, PropertyChangingEventArgs e ) => OnPropertyChanging( e.PropertyName );
-
-
-    public static bool operator ==( CollectionWrapper<TValue, TOwner>? left, CollectionWrapper<TValue, TOwner>? right ) => Equals( left, right );
-    public static bool operator !=( CollectionWrapper<TValue, TOwner>? left, CollectionWrapper<TValue, TOwner>? right ) => !Equals( left, right );
 
     // public CollectionWrapper(  ReadOnlySpan<char>   span ) : this( IDCollection<TValue>.Create(span)) { }
     public virtual void Dispose()
@@ -120,14 +120,14 @@ public class CollectionWrapper<TValue, TOwner> : CollectionAlerts<TValue>, IColl
     public override string ToString() => Json ?? ToJson();
     public string ToString( ReadOnlySpan<char> format, IFormatProvider? _ )
     {
-        if (format.IsEmpty) { return ToString(); }
+        if ( format.IsEmpty ) { return ToString(); }
 
         Span<char> span = stackalloc char[format.Length];
         format.ToUpperInvariant( span );
 
-        if (span.SequenceEqual( "CSV" )) { return Items.ToCsv(); }
+        if ( span.SequenceEqual( "CSV" ) ) { return Items.ToCsv(); }
 
-        if (span.SequenceEqual( "JSON" )) { return Items.ToJson(); }
+        if ( span.SequenceEqual( "JSON" ) ) { return Items.ToJson(); }
 
         return ToString();
     }
@@ -139,7 +139,7 @@ public class CollectionWrapper<TValue, TOwner> : CollectionAlerts<TValue>, IColl
     string IConvertible.ToString( IFormatProvider? provider ) => ToString();
     object IConvertible.ToType( Type conversionType, IFormatProvider? provider )
     {
-        if (conversionType == typeof(string)) { return ToString(); }
+        if ( conversionType == typeof(string) ) { return ToString(); }
 
         throw new NotImplementedException();
     }
@@ -161,16 +161,16 @@ public class CollectionWrapper<TValue, TOwner> : CollectionAlerts<TValue>, IColl
 
     public IEnumerator<long> GetEnumerator()
     {
-        if (_items is null) { yield break; }
+        if ( _items is null ) { yield break; }
 
-        foreach (long id in _items) { yield return id; }
+        foreach ( long id in _items ) { yield return id; }
     }
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     public bool Equals( ICollectionWrapper<TValue>? other )
     {
-        if (other is null) { return false; }
+        if ( other is null ) { return false; }
 
-        if (ReferenceEquals( this, other )) { return true; }
+        if ( ReferenceEquals( this, other ) ) { return true; }
 
         return Json == other.Json;
     }

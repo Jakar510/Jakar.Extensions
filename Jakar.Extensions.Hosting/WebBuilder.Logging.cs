@@ -24,14 +24,14 @@ public static partial class WebBuilder
                                           } );
 
 
-        if (OperatingSystem.IsWindows())
+        if ( OperatingSystem.IsWindows() )
         {
             builder.Logging.AddProvider( new EventLogLoggerProvider( new EventLogSettings
                                                                      {
                                                                          SourceName  = name,
                                                                          LogName     = name,
                                                                          MachineName = GetMachineName(),
-                                                                         Filter      = ( category, level ) => level > LogLevel.Information
+                                                                         Filter      = ( category, level ) => level > LogLevel.Information,
                                                                      } ) );
         }
         else { builder.Logging.AddSystemdConsole( options => options.UseUtcTimestamp = true ); }
@@ -44,6 +44,6 @@ public static partial class WebBuilder
     public static string GetMachineName()
     {
         try { return Environment.MachineName; }
-        catch (InvalidOperationException) { return Dns.GetHostName(); }
+        catch ( InvalidOperationException ) { return Dns.GetHostName(); }
     }
 }

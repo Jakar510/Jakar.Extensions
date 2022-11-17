@@ -42,13 +42,6 @@ public class PreferenceFile : IniConfig, IDisposable, IAsyncDisposable // TODO: 
         ini.Path = file;
         return ini;
     }
-    public virtual void Dispose( bool disposing )
-    {
-        if (!disposing) { return; }
-
-        Task.Run( async () => await DisposeAsync() )
-            .Wait();
-    }
 
 
     protected Task Load() => Task.Run( LoadAsync );
@@ -59,15 +52,22 @@ public class PreferenceFile : IniConfig, IDisposable, IAsyncDisposable // TODO: 
         IniConfig? cfg = await ReadFromFileAsync( Path )
                             .ConfigureAwait( false );
 
-        if (cfg is null) { return; }
+        if ( cfg is null ) { return; }
 
-        foreach (KeyValuePair<string, Section> pair in cfg) { Add( pair ); }
+        foreach ( KeyValuePair<string, Section> pair in cfg ) { Add( pair ); }
     }
 
 
     protected Task Save() => Task.Run( SaveAsync );
     protected virtual async Task SaveAsync() => await WriteToFile( Path )
                                                    .ConfigureAwait( false );
+    public virtual void Dispose( bool disposing )
+    {
+        if ( !disposing ) { return; }
+
+        Task.Run( async () => await DisposeAsync() )
+            .Wait();
+    }
     public virtual async ValueTask DisposeAsync()
     {
         await SaveAsync()

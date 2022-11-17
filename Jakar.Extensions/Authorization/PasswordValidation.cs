@@ -149,7 +149,7 @@ public readonly ref struct PasswordValidator
                                                                     Numbers                  = Numbers.ToString(),
                                                                     RequireSpecialChar       = RequireSpecialChar,
                                                                     CantStartWithSpecialChar = CantStartWithSpecialChar,
-                                                                    SpecialChars             = SpecialChars.ToString()
+                                                                    SpecialChars             = SpecialChars.ToString(),
                                                                 };
 
 

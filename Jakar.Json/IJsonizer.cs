@@ -4,8 +4,8 @@ namespace Jakar.Json;
 
 public interface IJsonizer
 {
-    public void Serialize( ref           JObject parent );
     protected internal string ToJson( in JWriter writer );
+    public void Serialize( ref           JObject parent );
 }
 
 

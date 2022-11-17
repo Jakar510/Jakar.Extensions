@@ -11,7 +11,7 @@ public abstract class ImageResourceExtension : IMarkupExtension
 
     public object? ProvideValue( IServiceProvider serviceProvider )
     {
-        if (Source is null) { return null; }
+        if ( Source is null ) { return null; }
 
         // Do your translation lookup here, using whatever method you require
         ImageSource imageSource = ImageSource.FromResource( GetPath( Source ),

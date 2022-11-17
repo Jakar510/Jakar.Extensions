@@ -18,9 +18,7 @@ public abstract class ApiServices<TDebug, TPrompts, TAppSettings, TFileSystem, T
     public TPrompts        Prompts    { get; init; }
 
 
-    /// <summary>
-    ///     appCenterServices: pass in the types you want to initialize, for example:  typeof(Microsoft.AppCenter.Analytics.Analytics), typeof(Microsoft.AppCenter.Crashes.Crashes)
-    /// </summary>
+    /// <summary> appCenterServices: pass in the types you want to initialize, for example:  typeof(Microsoft.AppCenter.Analytics.Analytics), typeof(Microsoft.AppCenter.Crashes.Crashes) </summary>
     protected ApiServices( TAppSettings settings, TPrompts prompts, TFileSystem fileSystem, TDebug debug, string app_center_id, params Type[] appCenterServices )
     {
         Settings   = settings ?? throw new ArgumentNullException( nameof(settings) );
@@ -53,9 +51,7 @@ public abstract class ApiServices<TDebug, TPrompts, TAppSettings, TFileSystem, T
     public TPrompts        Prompts    { get; init; }
 
 
-    /// <summary>
-    ///     appCenterServices: pass in the types you want to initialize, for example:  typeof(Microsoft.AppCenter.Analytics.Analytics), typeof(Microsoft.AppCenter.Crashes.Crashes)
-    /// </summary>
+    /// <summary> appCenterServices: pass in the types you want to initialize, for example:  typeof(Microsoft.AppCenter.Analytics.Analytics), typeof(Microsoft.AppCenter.Crashes.Crashes) </summary>
     protected ApiServices( TAppSettings settings, TPrompts prompts, TLanguage language, TFileSystem fileSystem, TDebug debug, string app_center_id, params Type[] appCenterServices )
     {
         Settings   = settings ?? throw new ArgumentNullException( nameof(settings) );
@@ -84,9 +80,7 @@ public abstract class ApiServices<TDebug, TPrompts, TAppSettings, TFileSystem, T
     public TResourceManager Resources { get; init; }
 
 
-    /// <summary>
-    ///     appCenterServices: pass in the types you want to initialize, for example:  typeof(Microsoft.AppCenter.Analytics.Analytics), typeof(Microsoft.AppCenter.Crashes.Crashes)
-    /// </summary>
+    /// <summary> appCenterServices: pass in the types you want to initialize, for example:  typeof(Microsoft.AppCenter.Analytics.Analytics), typeof(Microsoft.AppCenter.Crashes.Crashes) </summary>
     protected ApiServices( TAppSettings settings, TPrompts prompts, TLanguage language, TFileSystem fileSystem, TDebug debug, TResourceManager resources, in string app_center_id, params Type[] appCenterServices ) :
         base( settings, prompts, language, fileSystem, debug, app_center_id, appCenterServices ) => Resources = resources ?? throw new ArgumentNullException( nameof(resources) );
 }

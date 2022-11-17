@@ -27,13 +27,13 @@ public class AppRating : IAppRating
 
             context.StartActivity( intent );
         }
-        catch (PackageManager.NameNotFoundException ex)
+        catch ( PackageManager.NameNotFoundException ex )
         {
             // this won't happen. But catching just in case the user has downloaded the app without having Google Play installed.
 
             Console.WriteLine( ex.Message );
         }
-        catch (ActivityNotFoundException)
+        catch ( ActivityNotFoundException )
         {
             // if Google Play fails to load, open the App link on the browser 
 

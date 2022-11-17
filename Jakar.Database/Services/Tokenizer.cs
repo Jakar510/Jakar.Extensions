@@ -10,19 +10,19 @@ namespace Jakar.Database;
 
 public interface ITokenService
 {
-    public Task<Tokens> Authenticate( VerifyRequest users,  CancellationToken token                         = default );
     public Task<string> CreateContent( string       header, UserRecord        user, CancellationToken token = default );
     public Task<string> CreateHTMLContent( string   header, UserRecord        user, CancellationToken token = default );
+    public Task<Tokens> Authenticate( VerifyRequest users,  CancellationToken token = default );
 }
 
 
 
 /// <summary>
 ///     <para>
-///         <see href = "https://codepedia.info/jwt-authentication-in-aspnet-core-web-api-token" />
+///         <see href="https://codepedia.info/jwt-authentication-in-aspnet-core-web-api-token"/>
 ///     </para>
 ///     <para>
-///         <see href = "https://stackoverflow.com/a/55740879/9530917" > How do I get current user in .NET Core Web API (from JWT Token) </see>
+///         <see href="https://stackoverflow.com/a/55740879/9530917"> How do I get current user in .NET Core Web API (from JWT Token) </see>
 ///     </para>
 /// </summary>
 public class Tokenizer<TName> : ITokenService where TName : IAppName
@@ -39,6 +39,16 @@ public class Tokenizer<TName> : ITokenService where TName : IAppName
     {
         _configuration = configuration;
         _db            = dataBase;
+    }
+    public virtual ClaimsPrincipal GetPrincipalFromExpiredToken( string token )
+    {
+        TokenValidationParameters tokenValidationParameters = _configuration.GetTokenValidationParameters( Issuer, Audience );
+        var                       tokenHandler              = new JwtSecurityTokenHandler();
+        ClaimsPrincipal?          principal                 = tokenHandler.ValidateToken( token, tokenValidationParameters, out SecurityToken securityToken );
+
+        return securityToken is not JwtSecurityToken jwtSecurityToken || !jwtSecurityToken.Header.Alg.Equals( SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase )
+                   ? throw new SecurityTokenException( "Invalid token" )
+                   : principal;
     }
     public virtual string CreateContent( in Tokens result, string header ) =>
         @$"{header}
@@ -58,16 +68,6 @@ public class Tokenizer<TName> : ITokenService where TName : IAppName
         var     tokeOptions       = new JwtSecurityToken( name, name, claims, DateTime.Now, DateTime.Now.AddMinutes( 15 ), signinCredentials );
         string? tokenString       = new JwtSecurityTokenHandler().WriteToken( tokeOptions );
         return tokenString;
-    }
-    public virtual ClaimsPrincipal GetPrincipalFromExpiredToken( string token )
-    {
-        TokenValidationParameters tokenValidationParameters = _configuration.GetTokenValidationParameters( Issuer, Audience );
-        var                       tokenHandler              = new JwtSecurityTokenHandler();
-        ClaimsPrincipal?          principal                 = tokenHandler.ValidateToken( token, tokenValidationParameters, out SecurityToken securityToken );
-
-        return securityToken is not JwtSecurityToken jwtSecurityToken || !jwtSecurityToken.Header.Alg.Equals( SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase )
-                   ? throw new SecurityTokenException( "Invalid token" )
-                   : principal;
     }
     public virtual string GetUrl( in Tokens result ) => $"{Domain}/Token/{result.AccessToken}";
 

@@ -256,7 +256,7 @@ public ref struct JObject
                    DateTimeOffset v   => Add( v,                               100,        k ),
                    DateTime v         => Add( v,                               100,        k ),
                    ISpanFormattable v => Add( v,                               bufferSize, k ),
-                   _                  => Add( pair.Value.ToString() ?? "null", k )
+                   _                  => Add( pair.Value.ToString() ?? "null", k ),
                };
     }
 

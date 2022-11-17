@@ -18,6 +18,6 @@ public static class TextAlignmentExtensions
             TextAlignment.Start  => UITextAlignment.Left,
             TextAlignment.Center => UITextAlignment.Center,
             TextAlignment.End    => UITextAlignment.Right,
-            _                    => UITextAlignment.Right
+            _                    => UITextAlignment.Right,
         };
 }

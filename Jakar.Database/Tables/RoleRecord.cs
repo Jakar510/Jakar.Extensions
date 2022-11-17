@@ -35,35 +35,35 @@ public sealed record RoleRecord : TableRecord<RoleRecord>
     }
 
 
-    public override int CompareTo( RoleRecord? other )
-    {
-        if (other is null) { return 1; }
-
-        if (ReferenceEquals( this, other )) { return 0; }
-
-
-        int nameComparison = string.Compare( Name, other.Name, StringComparison.Ordinal );
-        if (nameComparison != 0) { return nameComparison; }
-
-        int normalizedNameComparison = string.Compare( NormalizedName, other.NormalizedName, StringComparison.Ordinal );
-        if (normalizedNameComparison != 0) { return normalizedNameComparison; }
-
-        return string.Compare( ConcurrencyStamp, other.ConcurrencyStamp, StringComparison.Ordinal );
-    }
-    public override int GetHashCode() => HashCode.Combine( base.GetHashCode(), Name, NormalizedName, ConcurrencyStamp );
-
-
     public IdentityRole ToIdentityRole() => new()
                                             {
                                                 Name             = Name,
                                                 NormalizedName   = NormalizedName,
-                                                ConcurrencyStamp = ConcurrencyStamp
+                                                ConcurrencyStamp = ConcurrencyStamp,
                                             };
+
+
+    public override int CompareTo( RoleRecord? other )
+    {
+        if ( other is null ) { return 1; }
+
+        if ( ReferenceEquals( this, other ) ) { return 0; }
+
+
+        int nameComparison = string.Compare( Name, other.Name, StringComparison.Ordinal );
+        if ( nameComparison != 0 ) { return nameComparison; }
+
+        int normalizedNameComparison = string.Compare( NormalizedName, other.NormalizedName, StringComparison.Ordinal );
+        if ( normalizedNameComparison != 0 ) { return normalizedNameComparison; }
+
+        return string.Compare( ConcurrencyStamp, other.ConcurrencyStamp, StringComparison.Ordinal );
+    }
+    public override int GetHashCode() => HashCode.Combine( base.GetHashCode(), Name, NormalizedName, ConcurrencyStamp );
     public override bool Equals( RoleRecord? other )
     {
-        if (other is null) { return false; }
+        if ( other is null ) { return false; }
 
-        if (ReferenceEquals( this, other )) { return true; }
+        if ( ReferenceEquals( this, other ) ) { return true; }
 
         return base.Equals( other ) && Name == other.Name && NormalizedName == other.NormalizedName && ConcurrencyStamp == other.ConcurrencyStamp;
     }

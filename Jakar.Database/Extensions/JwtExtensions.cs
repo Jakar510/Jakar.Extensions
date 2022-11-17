@@ -13,6 +13,17 @@ public static class JwtExtensions
     public static byte[] GetJWTKey( this IConfiguration configuration ) => Encoding.UTF8.GetBytes( configuration["JWT"] );
 
 
+    [Pure]
+    public static DateTimeOffset TokenExpiration( this IConfiguration configuration )
+    {
+        TimeSpan offset = configuration.TokenValidation()
+                                       .GetValue( nameof(TokenExpiration), TimeSpan.FromMinutes( 30 ) );
+
+        return DateTimeOffset.UtcNow + offset;
+    }
+    public static IConfigurationSection TokenValidation( this IConfiguration configuration ) => configuration.GetSection( nameof(TokenValidation) );
+
+
     public static SigningCredentials GetSigningCredentials( this IConfiguration configuration ) => new(new SymmetricSecurityKey( configuration.GetJWTKey() ), SecurityAlgorithms.HmacSha256Signature);
 
 
@@ -37,18 +48,7 @@ public static class JwtExtensions
                    ValidateIssuer                            = section.GetValue( nameof(TokenValidationParameters.ValidateIssuer),                            true ),
                    ValidIssuer                               = section.GetValue( nameof(TokenValidationParameters.ValidIssuer),                               issuer ),
                    ValidateAudience                          = section.GetValue( nameof(TokenValidationParameters.ValidateAudience),                          true ),
-                   ValidAudience                             = section.GetValue( nameof(TokenValidationParameters.ValidAudience),                             audience )
+                   ValidAudience                             = section.GetValue( nameof(TokenValidationParameters.ValidAudience),                             audience ),
                };
     }
-
-
-    [Pure]
-    public static DateTimeOffset TokenExpiration( this IConfiguration configuration )
-    {
-        TimeSpan offset = configuration.TokenValidation()
-                                       .GetValue( nameof(TokenExpiration), TimeSpan.FromMinutes( 30 ) );
-
-        return DateTimeOffset.UtcNow + offset;
-    }
-    public static IConfigurationSection TokenValidation( this IConfiguration configuration ) => configuration.GetSection( nameof(TokenValidation) );
 }

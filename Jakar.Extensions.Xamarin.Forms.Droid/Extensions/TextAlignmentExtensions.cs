@@ -12,14 +12,6 @@ namespace Jakar.Extensions.Xamarin.Forms.Droid;
 [Preserve( AllMembers = true )]
 public static class TextAlignmentExtensions
 {
-    public static ATextAlignment ToAndroidTextAlignment( this TextAlignment forms ) =>
-        forms switch
-        {
-            TextAlignment.Start  => ATextAlignment.ViewStart,
-            TextAlignment.Center => ATextAlignment.Center,
-            TextAlignment.End    => ATextAlignment.ViewEnd,
-            _                    => ATextAlignment.Gravity
-        };
     public static GravityFlags ToGravityFlags( this LayoutAlignment forms, bool expand )
     {
         GravityFlags result = forms switch
@@ -27,10 +19,10 @@ public static class TextAlignmentExtensions
                                   LayoutAlignment.Start  => GravityFlags.Start | GravityFlags.CenterVertical,
                                   LayoutAlignment.Center => GravityFlags.CenterHorizontal | GravityFlags.CenterVertical,
                                   LayoutAlignment.End    => GravityFlags.End | GravityFlags.CenterVertical,
-                                  _                      => GravityFlags.Fill
+                                  _                      => GravityFlags.Fill,
                               };
 
-        if (expand) { result |= GravityFlags.Fill; }
+        if ( expand ) { result |= GravityFlags.Fill; }
 
         return result;
     }
@@ -41,6 +33,14 @@ public static class TextAlignmentExtensions
             TextAlignment.Start  => GravityFlags.Left | GravityFlags.CenterVertical,
             TextAlignment.Center => GravityFlags.CenterHorizontal | GravityFlags.CenterVertical,
             TextAlignment.End    => GravityFlags.Right | GravityFlags.CenterVertical,
-            _                    => GravityFlags.Center | GravityFlags.CenterHorizontal
+            _                    => GravityFlags.Center | GravityFlags.CenterHorizontal,
+        };
+    public static ATextAlignment ToAndroidTextAlignment( this TextAlignment forms ) =>
+        forms switch
+        {
+            TextAlignment.Start  => ATextAlignment.ViewStart,
+            TextAlignment.Center => ATextAlignment.Center,
+            TextAlignment.End    => ATextAlignment.ViewEnd,
+            _                    => ATextAlignment.Gravity,
         };
 }

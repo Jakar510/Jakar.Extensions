@@ -2,9 +2,7 @@
 namespace Jakar.Extensions;
 
 
-/// <summary>
-///     A web exception of unknown type occurred.
-/// </summary>
+/// <summary> A web exception of unknown type occurred. </summary>
 public sealed class UnknownWebErrorException : WebException
 {
     public CancellationToken Token { get; }

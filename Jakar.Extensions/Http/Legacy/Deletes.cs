@@ -4,66 +4,18 @@ namespace Jakar.Extensions;
 
 /// <summary>
 ///     <para>
-///         <seealso href = "https://www.hanselman.com/blog/HTTPPOSTsAndHTTPGETsWithWebClientAndCAndFakingADeleteBack.aspx" />
+///         <seealso href="https://www.hanselman.com/blog/HTTPPOSTsAndHTTPGETsWithWebClientAndCAndFakingADeleteBack.aspx"/>
 ///     </para>
 ///     <para>
-///         <seealso href = "https://docs.microsoft.com/en-us/dotnet/standard/threading/cancellation-in-managed-threads" />
+///         <seealso href="https://docs.microsoft.com/en-us/dotnet/standard/threading/cancellation-in-managed-threads"/>
 ///     </para>
 ///     <para>
-///         <seealso href = "https://www.w3.org/Protocols/rfc1341/7_2_Multipart.html" />
+///         <seealso href="https://www.w3.org/Protocols/rfc1341/7_2_Multipart.html"/>
 ///     </para>
 /// </summary>
 [Obsolete( $"Use {nameof(WebRequester)} instead" )]
 public static class Deletes
 {
-    public static async Task<WebResponse> Delete( this Uri url, ReadOnlyMemory<byte> payload, HeaderCollection headers, CancellationToken token, int? timeout = default )
-    {
-        HttpWebRequest req = WebRequest.CreateHttp( url );
-        if (timeout.HasValue) { req.Timeout = timeout.Value; }
-
-        req.Method = "DELETE";
-
-        req.SetHeaders( headers );
-
-        req.ContentLength = payload.Length;
-
-        await using (Stream stream = await req.GetRequestStreamAsync()
-                                              .ConfigureAwait( false ))
-        {
-            await stream.WriteAsync( payload, token )
-                        .ConfigureAwait( false ); //Push it out there
-        }
-
-        return await req.GetResponseAsync( token )
-                        .ConfigureAwait( false );
-    }
-
-
-    // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-
-    public static async Task<WebResponse> Delete( this Uri url, MultipartFormDataContent payload, HeaderCollection? headers, CancellationToken token, int? timeout = default )
-    {
-        HttpWebRequest req = WebRequest.CreateHttp( url );
-        if (timeout.HasValue) { req.Timeout = timeout.Value; }
-
-        req.Method = "DELETE";
-
-        req.SetHeaders( payload );
-        req.SetHeaders( headers );
-
-        await using (Stream stream = await req.GetRequestStreamAsync()
-                                              .ConfigureAwait( false ))
-        {
-            await payload.CopyToAsync( stream )
-                         .ConfigureAwait( false ); // Push it out there
-        }
-
-
-        return await req.GetResponseAsync( token )
-                        .ConfigureAwait( false );
-    }
-
     public static async Task<string> TryDelete( this Uri url, string payload, HeaderCollection? headers = default, Encoding? encoding = default, CancellationToken token = default )
     {
         encoding ??= Encoding.Default;
@@ -102,10 +54,10 @@ public static class Deletes
             return await handler( response, encoding )
                       .ConfigureAwait( false );
         }
-        catch (WebException we)
+        catch ( WebException we )
         {
             Exception? e = we.ConvertException( token );
-            if (e is not null) { throw e; }
+            if ( e is not null ) { throw e; }
 
             throw;
         }
@@ -122,10 +74,10 @@ public static class Deletes
             return await handler( response, encoding )
                       .ConfigureAwait( false );
         }
-        catch (WebException we)
+        catch ( WebException we )
         {
             Exception? e = we.ConvertException( token );
-            if (e is not null) { throw e; }
+            if ( e is not null ) { throw e; }
 
             throw;
         }
@@ -153,10 +105,10 @@ public static class Deletes
             return await handler( response, token )
                       .ConfigureAwait( false );
         }
-        catch (WebException we)
+        catch ( WebException we )
         {
             Exception? e = we.ConvertException( token );
-            if (e is not null) { throw e; }
+            if ( e is not null ) { throw e; }
 
             throw;
         }
@@ -173,10 +125,10 @@ public static class Deletes
             return await handler( response, encoding )
                       .ConfigureAwait( false );
         }
-        catch (WebException we)
+        catch ( WebException we )
         {
             Exception? e = we.ConvertException( token );
-            if (e is not null) { throw e; }
+            if ( e is not null ) { throw e; }
 
             throw;
         }
@@ -192,12 +144,59 @@ public static class Deletes
             return await handler( response )
                       .ConfigureAwait( false );
         }
-        catch (WebException we)
+        catch ( WebException we )
         {
             Exception? e = we.ConvertException( token );
-            if (e is not null) { throw e; }
+            if ( e is not null ) { throw e; }
 
             throw;
         }
+    }
+    public static async Task<WebResponse> Delete( this Uri url, ReadOnlyMemory<byte> payload, HeaderCollection headers, CancellationToken token, int? timeout = default )
+    {
+        HttpWebRequest req = WebRequest.CreateHttp( url );
+        if ( timeout.HasValue ) { req.Timeout = timeout.Value; }
+
+        req.Method = "DELETE";
+
+        req.SetHeaders( headers );
+
+        req.ContentLength = payload.Length;
+
+        await using ( Stream stream = await req.GetRequestStreamAsync()
+                                               .ConfigureAwait( false ) )
+        {
+            await stream.WriteAsync( payload, token )
+                        .ConfigureAwait( false ); //Push it out there
+        }
+
+        return await req.GetResponseAsync( token )
+                        .ConfigureAwait( false );
+    }
+
+
+    // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+    public static async Task<WebResponse> Delete( this Uri url, MultipartFormDataContent payload, HeaderCollection? headers, CancellationToken token, int? timeout = default )
+    {
+        HttpWebRequest req = WebRequest.CreateHttp( url );
+        if ( timeout.HasValue ) { req.Timeout = timeout.Value; }
+
+        req.Method = "DELETE";
+
+        req.SetHeaders( payload );
+        req.SetHeaders( headers );
+
+        await using ( Stream stream = await req.GetRequestStreamAsync()
+                                               .ConfigureAwait( false ) )
+        {
+            await payload.CopyToAsync( stream )
+                         .ConfigureAwait( false ); // Push it out there
+        }
+
+
+        return await req.GetResponseAsync( token )
+                        .ConfigureAwait( false );
     }
 }

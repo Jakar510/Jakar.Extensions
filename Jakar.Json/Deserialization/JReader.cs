@@ -16,7 +16,7 @@ public ref struct JReader
 
     public JReader( in ReadOnlySpan<char> xml )
     {
-        if (xml.IsEmpty) { throw new ArgumentNullException( nameof(xml) ); }
+        if ( xml.IsEmpty ) { throw new ArgumentNullException( nameof(xml) ); }
 
         _span = _xml = xml.Trim();
     }

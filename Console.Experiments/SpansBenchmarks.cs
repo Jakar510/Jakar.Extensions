@@ -20,16 +20,11 @@ namespace Console.Experiments;
 [MemoryDiagnoser]
 public class SpansBenchmarks
 {
-    private const string OLD       = "0365BC9B";
-    private const string ALPHABET  = "abcdefghijklmnopqrstuvwxyz";
-    private const string TEST      = $"{ALPHABET}__{OLD}-3DE3-4B75-9F7E-2A0F23EFA5A2";
-    private const string NEW_VALUE = "----NEW-VALUE";
-
-
     [Params( "", ALPHABET, TEST )] public string Value { get; set; } = string.Empty;
-
-
-    [Benchmark] public ReadOnlySpan<char> AsSpan() => ((ReadOnlySpan<char>)Value).AsSpan();
+    private const                         string ALPHABET  = "abcdefghijklmnopqrstuvwxyz";
+    private const                         string NEW_VALUE = "----NEW-VALUE";
+    private const                         string OLD       = "0365BC9B";
+    private const                         string TEST      = $"{ALPHABET}__{OLD}-3DE3-4B75-9F7E-2A0F23EFA5A2";
     [Benchmark] public bool Contains_span() => Value.Contains( '2' );
     [Benchmark] public bool Contains_value() => Spans.Contains( Value, NEW_VALUE );
     [Benchmark]
@@ -54,6 +49,10 @@ public class SpansBenchmarks
     }
     [Benchmark] public bool EndsWith() => Spans.EndsWith( Value, '1' );
     [Benchmark] public bool IsNullOrWhiteSpace() => Spans.IsNullOrWhiteSpace( Value );
+    [Benchmark] public bool StartsWith() => Spans.StartsWith( Value, '1' );
+
+
+    [Benchmark] public ReadOnlySpan<char> AsSpan() => ((ReadOnlySpan<char>)Value).AsSpan();
     [Benchmark] public ReadOnlySpan<char> Join() => Spans.Join<char>( Value, NEW_VALUE );
     [Benchmark]
     public ReadOnlySpan<char> RemoveAll_Params()
@@ -73,5 +72,4 @@ public class SpansBenchmarks
     [Benchmark] public ReadOnlySpan<char> Replace() => Spans.Replace<char>( Value, OLD, NEW_VALUE );
     [Benchmark] public ReadOnlySpan<char> Slice_False() => Spans.Slice( Value, 'z', '4', false );
     [Benchmark] public ReadOnlySpan<char> Slice_True() => Spans.Slice( Value,  'z', '4', true );
-    [Benchmark] public bool StartsWith() => Spans.StartsWith( Value, '1' );
 }

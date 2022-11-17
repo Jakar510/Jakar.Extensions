@@ -4,15 +4,12 @@
 namespace Jakar.Database.Migrations;
 
 
-public abstract class MigrateUserGroupRecord: Migration<UserGroupRecord>
+public abstract class MigrateUserGroupRecord : Migration<UserGroupRecord>
 {
     protected MigrateUserGroupRecord() : base() { }
-
-
-    public override void Down() => DeleteTable();
     protected override ICreateTableWithColumnSyntax CreateTable()
     {
-        var table = base.CreateTable();
+        ICreateTableWithColumnSyntax table = base.CreateTable();
 
         table.WithColumn( nameof(UserGroupRecord.GroupID) )
              .AsInt64()
@@ -20,4 +17,7 @@ public abstract class MigrateUserGroupRecord: Migration<UserGroupRecord>
 
         return table;
     }
+
+
+    public override void Down() => DeleteTable();
 }

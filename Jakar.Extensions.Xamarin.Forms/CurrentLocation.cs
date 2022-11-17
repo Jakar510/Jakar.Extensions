@@ -78,32 +78,23 @@ public class CurrentLocation<TID> : ICurrentLocation<TID>, IDataBaseIgnore where
         {
             DistanceUnits.Kilometers => UnitConverters.CoordinatesToKilometers( latitudeStart, longitudeStart, latitudeEnd, longitudeEnd ),
             DistanceUnits.Miles      => UnitConverters.CoordinatesToMiles( latitudeStart, longitudeStart, latitudeEnd, longitudeEnd ),
-            _                        => throw new ArgumentOutOfRangeException( nameof(units) )
+            _                        => throw new ArgumentOutOfRangeException( nameof(units) ),
         };
 
 
-    /// <summary>
-    ///     Check distance from starting to this location.
-    /// </summary>
-    /// <param name = "locationStart" > </param>
-    /// <param name = "units" > </param>
-    /// <returns>
-    ///     Distance as a
-    ///     <see cref = "double" />
-    /// </returns>
-    public double CalculateDistance( ICurrentLocation<TID> locationStart, DistanceUnits units ) => CalculateDistance( locationStart, this, units );
-
-    /// <summary>
-    ///     Check distance from starting to this location.
-    /// </summary>
-    /// <param name = "latitudeStart" > </param>
-    /// <param name = "longitudeStart" > </param>
-    /// <param name = "units" > </param>
-    /// <returns>
-    ///     Distance as a
-    ///     <see cref = "double" />
-    /// </returns>
-    public double CalculateDistance( double latitudeStart, double longitudeStart, DistanceUnits units ) => CalculateDistance( latitudeStart, longitudeStart, this, units );
+    public static implicit operator Location( CurrentLocation<TID> point ) => new()
+                                                                              {
+                                                                                  Latitude                = point.Latitude,
+                                                                                  Longitude               = point.Longitude,
+                                                                                  Timestamp               = point.Timestamp,
+                                                                                  Altitude                = point.Altitude,
+                                                                                  Accuracy                = point.Accuracy,
+                                                                                  VerticalAccuracy        = point.VerticalAccuracy,
+                                                                                  Speed                   = point.Speed,
+                                                                                  Course                  = point.Course,
+                                                                                  IsFromMockProvider      = point.IsFromMockProvider,
+                                                                                  AltitudeReferenceSystem = point.AltitudeReferenceSystem,
+                                                                              };
 
     public static async Task<CurrentLocation<TID>> Create( CancellationToken token, GeolocationAccuracy accuracy = GeolocationAccuracy.Best )
     {
@@ -118,12 +109,35 @@ public class CurrentLocation<TID> : ICurrentLocation<TID>, IDataBaseIgnore where
 
     public override bool Equals( object? obj )
     {
-        if (obj is null) { return false; }
+        if ( obj is null ) { return false; }
 
-        if (ReferenceEquals( this, obj )) { return true; }
+        if ( ReferenceEquals( this, obj ) ) { return true; }
 
         return obj is CurrentLocation<TID> location && Equals( location );
     }
+
+
+    public bool IsValid( ICurrentLocation<TID> location, DistanceUnits units, double maxDistance )
+    {
+        if ( InstanceID == Guid.Empty ) { return false; }
+
+
+        return CalculateDistance( this, location, units ) <= maxDistance;
+    }
+
+
+    /// <summary> Check distance from starting to this location. </summary>
+    /// <param name="locationStart"> </param>
+    /// <param name="units"> </param>
+    /// <returns> Distance as a <see cref="double"/> </returns>
+    public double CalculateDistance( ICurrentLocation<TID> locationStart, DistanceUnits units ) => CalculateDistance( locationStart, this, units );
+
+    /// <summary> Check distance from starting to this location. </summary>
+    /// <param name="latitudeStart"> </param>
+    /// <param name="longitudeStart"> </param>
+    /// <param name="units"> </param>
+    /// <returns> Distance as a <see cref="double"/> </returns>
+    public double CalculateDistance( double latitudeStart, double longitudeStart, DistanceUnits units ) => CalculateDistance( latitudeStart, longitudeStart, this, units );
     public override int GetHashCode()
     {
         var hashCode = new HashCode();
@@ -143,35 +157,11 @@ public class CurrentLocation<TID> : ICurrentLocation<TID>, IDataBaseIgnore where
     }
 
 
-    public bool IsValid( ICurrentLocation<TID> location, DistanceUnits units, double maxDistance )
-    {
-        if (InstanceID == Guid.Empty) { return false; }
-
-
-        return CalculateDistance( this, location, units ) <= maxDistance;
-    }
-
-
-    public static implicit operator Location( CurrentLocation<TID> point ) => new()
-                                                                              {
-                                                                                  Latitude                = point.Latitude,
-                                                                                  Longitude               = point.Longitude,
-                                                                                  Timestamp               = point.Timestamp,
-                                                                                  Altitude                = point.Altitude,
-                                                                                  Accuracy                = point.Accuracy,
-                                                                                  VerticalAccuracy        = point.VerticalAccuracy,
-                                                                                  Speed                   = point.Speed,
-                                                                                  Course                  = point.Course,
-                                                                                  IsFromMockProvider      = point.IsFromMockProvider,
-                                                                                  AltitudeReferenceSystem = point.AltitudeReferenceSystem
-                                                                              };
-
-
     public bool Equals( ICurrentLocation<TID>? other )
     {
-        if (other is null) { return false; }
+        if ( other is null ) { return false; }
 
-        if (ReferenceEquals( this, other )) { return true; }
+        if ( ReferenceEquals( this, other ) ) { return true; }
 
         return InstanceID.Equals( other.InstanceID ) && Timestamp.Equals( other.Timestamp ) && Latitude.Equals( other.Latitude ) && Longitude.Equals( other.Longitude ) && Nullable.Equals( Altitude, other.Altitude ) &&
                Nullable.Equals( Accuracy, other.Accuracy ) && Nullable.Equals( VerticalAccuracy, other.VerticalAccuracy ) && Nullable.Equals( Speed, other.Speed ) && Nullable.Equals( Course, other.Course ) &&

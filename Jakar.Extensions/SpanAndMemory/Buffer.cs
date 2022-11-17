@@ -85,17 +85,8 @@ public ref struct Buffer<T> where T : unmanaged, IEquatable<T>
     }
 
 
-    /// <summary>
-    ///     Resize the internal buffer either by doubling current buffer size or
-    ///     by adding
-    ///     <paramref name = "additionalCapacityBeyondPos" />
-    ///     to
-    ///     <see cref = "_index" />
-    ///     whichever is greater.
-    /// </summary>
-    /// <param name = "additionalCapacityBeyondPos" >
-    ///     Number of chars requested beyond current position.
-    /// </param>
+    /// <summary> Resize the internal buffer either by doubling current buffer size or by adding <paramref name="additionalCapacityBeyondPos"/> to <see cref="_index"/> whichever is greater. </summary>
+    /// <param name="additionalCapacityBeyondPos"> Number of chars requested beyond current position. </param>
     private void Grow( int additionalCapacityBeyondPos )
     {
         ThrowIfReadOnly();
@@ -120,22 +111,11 @@ public ref struct Buffer<T> where T : unmanaged, IEquatable<T>
     }
 
 
-    /// <summary>
-    ///     Get a pinnable reference to the builder.
-    ///     Does not ensure there is a null T after
-    ///     <see cref = "Index" />
-    ///     .
-    ///     This overload is pattern matched in the C# 7.3+ compiler so you can omit the explicit method call, and write eg "fixed (T* c = builder)"
-    /// </summary>
+    /// <summary> Get a pinnable reference to the builder. Does not ensure there is a null T after <see cref="Index"/> . This overload is pattern matched in the C# 7.3+ compiler so you can omit the explicit method call, and write eg "fixed (T* c = builder)" </summary>
     public ref T GetPinnableReference() => ref _span.GetPinnableReference();
 
-    /// <summary>
-    ///     Get a pinnable reference to the builder. Ensures that the builder has a
-    ///     <paramref name = "terminate" />
-    ///     value after
-    ///     <see cref = "Index" />
-    /// </summary>
-    /// <param name = "terminate" > </param>
+    /// <summary> Get a pinnable reference to the builder. Ensures that the builder has a <paramref name="terminate"/> value after <see cref="Index"/> </summary>
+    /// <param name="terminate"> </param>
     public ref T GetPinnableReference( T terminate )
     {
         EnsureCapacity( Index + 1 );

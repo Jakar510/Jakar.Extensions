@@ -40,16 +40,14 @@ public static class HostedServiceExtensions
             _thread = new Thread( ThreadStart )
                       {
                           Name         = $"{nameof(ServiceThread)}.{service.GetType().Name}",
-                          IsBackground = true
+                          IsBackground = true,
                       };
         }
-
-
-        protected override void Dispose( bool disposing )
+        public bool Stop( in TimeSpan timeout )
         {
-            if (!disposing) { return; }
-
-            Stop();
+            _source?.Cancel();
+            _source?.Dispose();
+            return _thread.Join( timeout );
         }
         public override ValueTask DisposeAsync()
         {
@@ -58,9 +56,17 @@ public static class HostedServiceExtensions
         }
 
 
+        protected override void Dispose( bool disposing )
+        {
+            if ( !disposing ) { return; }
+
+            Stop();
+        }
+
+
         public void Start()
         {
-            if (IsAlive) { return; }
+            if ( IsAlive ) { return; }
 
             _thread.Start();
         }
@@ -72,21 +78,15 @@ public static class HostedServiceExtensions
             _source?.Dispose();
             _thread.Join();
         }
-        public bool Stop( in TimeSpan timeout )
-        {
-            _source?.Cancel();
-            _source?.Dispose();
-            return _thread.Join( timeout );
-        }
         private async void ThreadStart()
         {
-            if (IsAlive) { return; }
+            if ( IsAlive ) { return; }
 
             _source?.Cancel();
             _source?.Dispose();
             _source = new CancellationTokenSource();
 
-            await using (_token.Register( _source.Cancel ))
+            await using ( _token.Register( _source.Cancel ) )
             {
                 try
                 {
@@ -95,8 +95,8 @@ public static class HostedServiceExtensions
                     try { await _service.StartAsync( _source.Token ); }
                     finally { await _service.StopAsync( default ); }
                 }
-                catch (TaskCanceledException) { }
-                catch (Exception e)
+                catch ( TaskCanceledException ) { }
+                catch ( Exception e )
                 {
                     _logger.LogCritical( e,
                                          "{ClassName}.{Caller} -> '{ServiceName}'",

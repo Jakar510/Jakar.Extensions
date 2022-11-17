@@ -18,7 +18,7 @@ public abstract class PopupBase : Popup, IChangeable
         {
             base.IsOpen = value;
 
-            if (value) { OnAppearing(); }
+            if ( value ) { OnAppearing(); }
             else { OnDisappearing(); }
         }
     }

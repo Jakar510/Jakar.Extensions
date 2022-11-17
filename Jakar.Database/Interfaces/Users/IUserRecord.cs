@@ -1,28 +1,24 @@
-﻿using Jakar.Database.Implementations;
-
-
-
-namespace Jakar.Database;
+﻿namespace Jakar.Database;
 
 
 /// <summary>
 ///     <para>
-///         <see cref = "IUserID" />
+///         <see cref="IUserID"/>
 ///     </para>
 ///     <para>
-///         <see cref = "IUserData" />
+///         <see cref="IUserData"/>
 ///     </para>
 ///     <para>
-///         <see cref = "IUserControl" />
+///         <see cref="IUserControl"/>
 ///     </para>
 ///     <para>
-///         <see cref = "IUserSubscription" />
+///         <see cref="IUserSubscription"/>
 ///     </para>
 ///     <para>
-///         <see cref = "IRefreshToken" />
+///         <see cref="IRefreshToken"/>
 ///     </para>
 /// </summary>
-/// <typeparam name = "TRecord" > </typeparam>
+/// <typeparam name="TRecord"> </typeparam>
 [SuppressMessage( "ReSharper", "UnusedType.Global" )]
 
 // ReSharper disable once PossibleInterfaceMemberAmbiguity
@@ -40,31 +36,31 @@ public interface IUserRecord<TRecord> : IComparable<TRecord>, IEquatable<TRecord
     public string? UserName     { get; }
 
 
-    public ValueTask<UserRecord?> GetBoss( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token );
-
-
     public List<Claim> GetUserClaims();
-    public ValueTask<UserRecord?> GetUserWhoCreated( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token );
-
-
     /// <summary>
     ///     <para>
-    ///         <see href = "https://stackoverflow.com/a/63733365/9530917" />
+    ///         <see href="https://stackoverflow.com/a/63733365/9530917"/>
     ///     </para>
     ///     <para>
-    ///         <see href = "https://stackoverflow.com/questions/10520048/calculate-md5-checksum-for-a-file" />
+    ///         <see href="https://stackoverflow.com/questions/10520048/calculate-md5-checksum-for-a-file"/>
     ///     </para>
-    ///     <see cref = "PasswordHasher{TRecord}" />
-    /// </summary>
-    public UserRecord UpdatePassword( string password );
-    /// <summary>
-    ///     <para>
-    ///         <see href = "https://stackoverflow.com/a/63733365/9530917" />
-    ///     </para>
-    ///     <para>
-    ///         <see href = "https://stackoverflow.com/questions/10520048/calculate-md5-checksum-for-a-file" />
-    ///     </para>
-    ///     <see cref = "PasswordHasher{TRecord}" />
+    ///     <see cref="PasswordHasher{TRecord}"/>
     /// </summary>
     public PasswordVerificationResult VerifyPassword( string password );
+
+
+    /// <summary>
+    ///     <para>
+    ///         <see href="https://stackoverflow.com/a/63733365/9530917"/>
+    ///     </para>
+    ///     <para>
+    ///         <see href="https://stackoverflow.com/questions/10520048/calculate-md5-checksum-for-a-file"/>
+    ///     </para>
+    ///     <see cref="PasswordHasher{TRecord}"/>
+    /// </summary>
+    public UserRecord UpdatePassword( string password );
+
+
+    public ValueTask<UserRecord?> GetBoss( DbConnection           connection, DbTransaction? transaction, Database db, CancellationToken token );
+    public ValueTask<UserRecord?> GetUserWhoCreated( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token );
 }

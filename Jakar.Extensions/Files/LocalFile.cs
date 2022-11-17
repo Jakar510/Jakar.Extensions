@@ -81,54 +81,45 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     }
 
 
-    /// <summary> Changes the extension of the file. </summary>
-    /// <param name = "ext" > </param>
-    /// <returns>
-    ///     The modified path information. On Windows, if ext is null or empty, the path information is unchanged. If the extension is null, the returned path is with the extension removed. If the path
-    ///     has no extension, and the extension is not null, the returned string contains the extension appended to the end of the path.
-    /// </returns>
-    public LocalFile ChangeExtension( MimeType ext ) => ChangeExtension( ext.ToExtension() );
-
-    /// <summary> Changes the extension of the file. </summary>
-    /// <param name = "ext" > </param>
-    /// <returns>
-    ///     The modified path information. On Windows, if ext is null or empty, the path information is unchanged. If the extension is null, the returned path is with the extension removed. If the path
-    ///     has no extension, and the extension is not null, the returned string contains the extension appended to the end of the path.
-    /// </returns>
-    public LocalFile ChangeExtension( string? ext ) => Path.ChangeExtension( FullPath, ext );
-
-
-    /// <summary>
-    ///     Copies this file to the
-    ///     <paramref name = "newFile" />
-    /// </summary>
-    /// <param name = "newFile" > </param>
-    /// <param name = "token" > </param>
-    /// <returns> </returns>
-    public async ValueTask Clone( LocalFile newFile, CancellationToken token )
-    {
-        FileStream stream = OpenRead();
-        await newFile.WriteAsync( stream, token );
-    }
-
-
     // ---------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-    public FileStream Create() => Info.Create();
+    public static bool operator ==( LocalFile? left, LocalFile? right ) => Equalizer.Instance.Equals( left, right );
+    public static bool operator >( LocalFile?  left, LocalFile? right ) => Sorter.Instance.Compare( left, right ) > 0;
+    public static bool operator >=( LocalFile? left, LocalFile? right ) => Sorter.Instance.Compare( left, right ) >= 0;
+    public static bool operator !=( LocalFile? left, LocalFile? right ) => !Equalizer.Instance.Equals( left, right );
+    public static bool operator <( LocalFile?  left, LocalFile? right ) => Sorter.Instance.Compare( left, right ) < 0;
+    public static bool operator <=( LocalFile? left, LocalFile? right ) => Sorter.Instance.Compare( left, right ) <= 0;
 
 
     /// <summary> </summary>
-    /// <param name = "path" > </param>
-    /// <param name = "file" > </param>
-    /// <exception cref = "NullReferenceException" > </exception>
-    /// <exception cref = "ArgumentException" > </exception>
-    /// <exception cref = "ArgumentNullException" > </exception>
-    /// <exception cref = "FileNotFoundException" > </exception>
-    /// <exception cref = "PathTooLongException" > </exception>
-    /// <exception cref = "DirectoryNotFoundException" > </exception>
-    /// <exception cref = "IOException" > </exception>
-    /// <exception cref = "NotSupportedException" > </exception>
+    /// <param name="uri"> </param>
+    /// <exception cref="ArgumentNullException"> </exception>
+    /// <exception cref="SecurityException"> </exception>
+    /// <exception cref="ArgumentException"> </exception>
+    /// <exception cref="UnauthorizedAccessException"> </exception>
+    /// <exception cref="PathTooLongException"> </exception>
+    /// <exception cref="NotSupportedException"> </exception>
+    /// <returns> </returns>
+    protected static FileInfo FromUri( Uri uri )
+    {
+        if ( !uri.IsFile ) { throw new ArgumentException( "Uri is not a file Uri.", nameof(uri) ); }
+
+        return new FileInfo( uri.AbsolutePath );
+    }
+
+
+    /// <summary> </summary>
+    /// <param name="path"> </param>
+    /// <param name="file"> </param>
+    /// <exception cref="NullReferenceException"> </exception>
+    /// <exception cref="ArgumentException"> </exception>
+    /// <exception cref="ArgumentNullException"> </exception>
+    /// <exception cref="FileNotFoundException"> </exception>
+    /// <exception cref="PathTooLongException"> </exception>
+    /// <exception cref="DirectoryNotFoundException"> </exception>
+    /// <exception cref="IOException"> </exception>
+    /// <exception cref="NotSupportedException"> </exception>
     /// <returns> </returns>
     public static FileStream CreateAndOpen( string path, out LocalFile file )
     {
@@ -138,14 +129,14 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
 
 
     /// <summary> </summary>
-    /// <exception cref = "NullReferenceException" > </exception>
-    /// <exception cref = "ArgumentException" > </exception>
-    /// <exception cref = "ArgumentNullException" > </exception>
-    /// <exception cref = "FileNotFoundException" > </exception>
-    /// <exception cref = "PathTooLongException" > </exception>
-    /// <exception cref = "DirectoryNotFoundException" > </exception>
-    /// <exception cref = "IOException" > </exception>
-    /// <exception cref = "NotSupportedException" > </exception>
+    /// <exception cref="NullReferenceException"> </exception>
+    /// <exception cref="ArgumentException"> </exception>
+    /// <exception cref="ArgumentNullException"> </exception>
+    /// <exception cref="FileNotFoundException"> </exception>
+    /// <exception cref="PathTooLongException"> </exception>
+    /// <exception cref="DirectoryNotFoundException"> </exception>
+    /// <exception cref="IOException"> </exception>
+    /// <exception cref="NotSupportedException"> </exception>
     /// <returns> </returns>
     public static FileStream CreateTempFileAndOpen( out LocalFile file )
     {
@@ -154,14 +145,14 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
         return stream;
     }
     /// <summary> </summary>
-    /// <exception cref = "NullReferenceException" > </exception>
-    /// <exception cref = "ArgumentException" > </exception>
-    /// <exception cref = "ArgumentNullException" > </exception>
-    /// <exception cref = "FileNotFoundException" > </exception>
-    /// <exception cref = "PathTooLongException" > </exception>
-    /// <exception cref = "DirectoryNotFoundException" > </exception>
-    /// <exception cref = "IOException" > </exception>
-    /// <exception cref = "NotSupportedException" > </exception>
+    /// <exception cref="NullReferenceException"> </exception>
+    /// <exception cref="ArgumentException"> </exception>
+    /// <exception cref="ArgumentNullException"> </exception>
+    /// <exception cref="FileNotFoundException"> </exception>
+    /// <exception cref="PathTooLongException"> </exception>
+    /// <exception cref="DirectoryNotFoundException"> </exception>
+    /// <exception cref="IOException"> </exception>
+    /// <exception cref="NotSupportedException"> </exception>
     /// <returns> </returns>
     public static FileStream CreateTempFileAndOpen( MimeType type, out LocalFile file )
     {
@@ -177,147 +168,120 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
         file.SetTemporary();
         return stream;
     }
-    /// <summary>
-    ///     Decrypts a file that was encrypted by the current account using the
-    ///     <see cref = "File.Encrypt(string)" />
-    ///     method.
-    /// </summary>
-    public void Decrypt()
-    {
-        if ( !RuntimeInformation.IsOSPlatform( OSPlatform.Windows ) ) { throw new InvalidOperationException(); }
-
-        File.Decrypt( FullPath );
-    }
-
-
-    /// <summary> Permanently deletes a file. </summary>
-    public void Delete() => Info.Delete();
-    protected virtual void Dispose( bool remove )
-    {
-        if ( remove && Exists ) { Delete(); }
-    }
-
-
-    /// <summary> Encrypts the file so that only the account used to encrypt the file can decrypt it. </summary>
-    public void Encrypt()
-    {
-        if ( !RuntimeInformation.IsOSPlatform( OSPlatform.Windows ) ) { throw new InvalidOperationException(); }
-
-        File.Encrypt( FullPath );
-    }
-
-
-    public override bool Equals( object? other ) => other is LocalFile file && Equals( file );
-
-
-    /// <summary> </summary>
-    /// <param name = "uri" > </param>
-    /// <exception cref = "ArgumentNullException" > </exception>
-    /// <exception cref = "SecurityException" > </exception>
-    /// <exception cref = "ArgumentException" > </exception>
-    /// <exception cref = "UnauthorizedAccessException" > </exception>
-    /// <exception cref = "PathTooLongException" > </exception>
-    /// <exception cref = "NotSupportedException" > </exception>
-    /// <returns> </returns>
-    protected static FileInfo FromUri( Uri uri )
-    {
-        if ( !uri.IsFile ) { throw new ArgumentException( "Uri is not a file Uri.", nameof(uri) ); }
-
-        return new FileInfo( uri.AbsolutePath );
-    }
-    public override int GetHashCode() => HashCode.Combine( FullPath, this.IsTempFile() );
-
-    protected string Hash( HashAlgorithm hasher )
-    {
-        using ( hasher )
-        {
-            using FileStream stream = OpenRead();
-            byte[]           hash   = hasher.ComputeHash( stream );
-            return BitConverter.ToString( hash );
-        }
-    }
-
-
-    /// <summary>
-    ///     Calculates a file hash using
-    ///     <see cref = "MD5" />
-    /// </summary>
-    public string Hash_MD5() => Hash( MD5.Create() );
-    /// <summary>
-    ///     Calculates a file hash using
-    ///     <see cref = "SHA1" />
-    /// </summary>
-    public string Hash_SHA1() => Hash( SHA1.Create() );
-    /// <summary>
-    ///     Calculates a file hash using
-    ///     <see cref = "SHA256" />
-    /// </summary>
-    public string Hash_SHA256() => Hash( SHA256.Create() );
-    /// <summary>
-    ///     Calculates a file hash using
-    ///     <see cref = "SHA384" />
-    /// </summary>
-    public string Hash_SHA384() => Hash( SHA384.Create() );
-    /// <summary>
-    ///     Calculates a file hash using
-    ///     <see cref = "SHA512" />
-    /// </summary>
-    public string Hash_SHA512() => Hash( SHA512.Create() );
-
-    /// <summary>
-    ///     Moves this file to the new
-    ///     <paramref name = "path" />
-    /// </summary>
-    /// <param name = "path" > </param>
-    public void Move( string path ) => Info.MoveTo( path );
-    /// <summary>
-    ///     Moves this file to the new
-    ///     <paramref name = "file" />
-    ///     location
-    /// </summary>
-    /// <param name = "file" > </param>
-    public void Move( LocalFile file ) => Info.MoveTo( file.FullPath );
-
-
-    // ---------------------------------------------------------------------------------------------------------------------------------------------------
-
-
-    public static bool operator ==( LocalFile? left, LocalFile? right ) => Equalizer.Instance.Equals( left, right );
-    public static bool operator >( LocalFile?  left, LocalFile? right ) => Sorter.Instance.Compare( left, right ) > 0;
-    public static bool operator >=( LocalFile? left, LocalFile? right ) => Sorter.Instance.Compare( left, right ) >= 0;
 
 
     public static implicit operator LocalFile( string             info ) => new(info);
     public static implicit operator LocalFile( FileInfo           info ) => new(info);
     public static implicit operator LocalFile( Uri                info ) => new(info);
     public static implicit operator LocalFile( ReadOnlySpan<char> info ) => new(info);
-    public static bool operator !=( LocalFile?                    left, LocalFile? right ) => !Equalizer.Instance.Equals( left, right );
-    public static bool operator <( LocalFile?                     left, LocalFile? right ) => Sorter.Instance.Compare( left, right ) < 0;
-    public static bool operator <=( LocalFile?                    left, LocalFile? right ) => Sorter.Instance.Compare( left, right ) <= 0;
+
+
+    // ---------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+    /// <summary> Write the <paramref name="payload"/> to the file. </summary>
+    /// <param name="payload"> the data being written to the file </param>
+    /// <param name="path"> </param>
+    /// <param name="token"> </param>
+    /// <exception cref="ArgumentNullException"> </exception>
+    /// <exception cref="WebException"> </exception>
+    /// <exception cref="NotSupportedException"> </exception>
+    /// <returns> </returns>
+    public static async ValueTask<LocalFile> SaveToFileAsync( string path, Stream payload, CancellationToken token )
+    {
+        var file = new LocalFile( path );
+
+        await file.WriteAsync( payload, token )
+                  .ConfigureAwait( false );
+
+        return file;
+    }
+
+
+    /// <summary> Write the <paramref name="payload"/> to the file. </summary>
+    /// <param name="payload"> the data being written to the file </param>
+    /// <param name="path"> </param>
+    /// <param name="token"> </param>
+    /// <exception cref="ArgumentNullException"> </exception>
+    /// <exception cref="WebException"> </exception>
+    /// <exception cref="NotSupportedException"> </exception>
+    /// <returns>
+    ///     <see cref="LocalFile"/>
+    /// </returns>
+    public static async ValueTask<LocalFile> SaveToFileAsync( string path, ReadOnlyMemory<byte> payload, CancellationToken token )
+    {
+        var file = new LocalFile( path );
+
+        await file.WriteAsync( payload, token )
+                  .ConfigureAwait( false );
+
+        return file;
+    }
+
+
+    public override bool Equals( object? other ) => other is LocalFile file && Equals( file );
+
+
+
+    [Serializable]
+    public class Collection : ObservableCollection<LocalFile>
+    {
+        public Collection() : base() { }
+        public Collection( IEnumerable<LocalFile> items ) : base( items ) { }
+    }
+
+
+
+    [Serializable]
+    public class ConcurrentCollection : ConcurrentObservableCollection<LocalFile>
+    {
+        public ConcurrentCollection() : base() { }
+        public ConcurrentCollection( IEnumerable<LocalFile> items ) : base( items ) { }
+    }
+
+
+
+    [Serializable]
+    public class Deque : MultiDeque<LocalFile>
+    {
+        public Deque() : base() { }
+        public Deque( IEnumerable<LocalFile> items ) : base( items ) { }
+    }
+
+
+
+    public sealed class Equalizer : Equalizer<LocalFile> { }
+
+
+
+    // ---------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+    public FileStream Create() => Info.Create();
 
     /// <summary>
     ///     <para>
-    ///         <seealso href = "https://stackoverflow.com/a/11541330/9530917" />
+    ///         <seealso href="https://stackoverflow.com/a/11541330/9530917"/>
     ///     </para>
     /// </summary>
-    /// <param name = "mode" > </param>
-    /// <param name = "access" > </param>
-    /// <param name = "share" > </param>
-    /// <param name = "bufferSize" > </param>
-    /// <param name = "useAsync" > </param>
-    /// <exception cref = "FileNotFoundException" > </exception>
-    /// <exception cref = "ArgumentException" > </exception>
-    /// <exception cref = "ArgumentNullException" > </exception>
-    /// <exception cref = "NullReferenceException" > </exception>
-    /// <exception cref = "NotSupportedException" > </exception>
-    /// <exception cref = "ArgumentOutOfRangeException" > </exception>
-    /// <exception cref = "IOException" > </exception>
-    /// <exception cref = "SecurityException" > </exception>
-    /// <exception cref = "DirectoryNotFoundException" > </exception>
-    /// <exception cref = "UnauthorizedAccessException" > </exception>
-    /// <exception cref = "PathTooLongException" > </exception>
+    /// <param name="mode"> </param>
+    /// <param name="access"> </param>
+    /// <param name="share"> </param>
+    /// <param name="bufferSize"> </param>
+    /// <param name="useAsync"> </param>
+    /// <exception cref="FileNotFoundException"> </exception>
+    /// <exception cref="ArgumentException"> </exception>
+    /// <exception cref="ArgumentNullException"> </exception>
+    /// <exception cref="NullReferenceException"> </exception>
+    /// <exception cref="NotSupportedException"> </exception>
+    /// <exception cref="ArgumentOutOfRangeException"> </exception>
+    /// <exception cref="IOException"> </exception>
+    /// <exception cref="SecurityException"> </exception>
+    /// <exception cref="DirectoryNotFoundException"> </exception>
+    /// <exception cref="UnauthorizedAccessException"> </exception>
+    /// <exception cref="PathTooLongException"> </exception>
     /// <returns>
-    ///     <see cref = "FileStream" />
+    ///     <see cref="FileStream"/>
     /// </returns>
     public FileStream Open( FileMode mode, FileAccess access, FileShare share, int bufferSize = 4096, bool useAsync = true )
     {
@@ -327,47 +291,137 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     }
 
 
-    /// <summary>
-    ///     Opens file for read only actions. If it doesn't exist,
-    ///     <see cref = "FileNotFoundException" />
-    ///     will be raised.
-    /// </summary>
-    /// <param name = "bufferSize" > </param>
-    /// <param name = "useAsync" > </param>
-    /// <exception cref = "FileNotFoundException" > </exception>
-    /// <exception cref = "ArgumentException" > </exception>
-    /// <exception cref = "ArgumentNullException" > </exception>
-    /// <exception cref = "NotSupportedException" > </exception>
-    /// <exception cref = "NullReferenceException" > </exception>
-    /// <exception cref = "ArgumentOutOfRangeException" > </exception>
-    /// <exception cref = "IOException" > </exception>
-    /// <exception cref = "SecurityException" > </exception>
-    /// <exception cref = "DirectoryNotFoundException" > </exception>
-    /// <exception cref = "UnauthorizedAccessException" > </exception>
-    /// <exception cref = "PathTooLongException" > </exception>
+    /// <summary> Opens file for read only actions. If it doesn't exist, <see cref="FileNotFoundException"/> will be raised. </summary>
+    /// <param name="bufferSize"> </param>
+    /// <param name="useAsync"> </param>
+    /// <exception cref="FileNotFoundException"> </exception>
+    /// <exception cref="ArgumentException"> </exception>
+    /// <exception cref="ArgumentNullException"> </exception>
+    /// <exception cref="NotSupportedException"> </exception>
+    /// <exception cref="NullReferenceException"> </exception>
+    /// <exception cref="ArgumentOutOfRangeException"> </exception>
+    /// <exception cref="IOException"> </exception>
+    /// <exception cref="SecurityException"> </exception>
+    /// <exception cref="DirectoryNotFoundException"> </exception>
+    /// <exception cref="UnauthorizedAccessException"> </exception>
+    /// <exception cref="PathTooLongException"> </exception>
     /// <returns>
-    ///     <see cref = "FileStream" />
+    ///     <see cref="FileStream"/>
     /// </returns>
     public FileStream OpenRead( int bufferSize = 4096, bool useAsync = true ) => Open( FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize, useAsync );
     /// <summary> Opens file for write only actions. If it doesn't exist, file will be created. </summary>
-    /// <param name = "mode" > </param>
-    /// <param name = "bufferSize" > </param>
-    /// <param name = "useAsync" > </param>
-    /// <exception cref = "FileNotFoundException" > </exception>
-    /// <exception cref = "ArgumentException" > </exception>
-    /// <exception cref = "ArgumentNullException" > </exception>
-    /// <exception cref = "NotSupportedException" > </exception>
-    /// <exception cref = "NullReferenceException" > </exception>
-    /// <exception cref = "ArgumentOutOfRangeException" > </exception>
-    /// <exception cref = "IOException" > </exception>
-    /// <exception cref = "SecurityException" > </exception>
-    /// <exception cref = "DirectoryNotFoundException" > </exception>
-    /// <exception cref = "UnauthorizedAccessException" > </exception>
-    /// <exception cref = "PathTooLongException" > </exception>
+    /// <param name="mode"> </param>
+    /// <param name="bufferSize"> </param>
+    /// <param name="useAsync"> </param>
+    /// <exception cref="FileNotFoundException"> </exception>
+    /// <exception cref="ArgumentException"> </exception>
+    /// <exception cref="ArgumentNullException"> </exception>
+    /// <exception cref="NotSupportedException"> </exception>
+    /// <exception cref="NullReferenceException"> </exception>
+    /// <exception cref="ArgumentOutOfRangeException"> </exception>
+    /// <exception cref="IOException"> </exception>
+    /// <exception cref="SecurityException"> </exception>
+    /// <exception cref="DirectoryNotFoundException"> </exception>
+    /// <exception cref="UnauthorizedAccessException"> </exception>
+    /// <exception cref="PathTooLongException"> </exception>
     /// <returns>
-    ///     <see cref = "FileStream" />
+    ///     <see cref="FileStream"/>
     /// </returns>
     public FileStream OpenWrite( FileMode mode, int bufferSize = 4096, bool useAsync = true ) => Open( mode, FileAccess.Write, FileShare.None, bufferSize, useAsync );
+
+
+
+    public interface IAsyncReadHandler
+    {
+        IAsyncEnumerable<string> AsLines();
+        /// <summary> Reads the contents of the file as a byte array. </summary>
+        /// <exception cref="NullReferenceException"> if FullPath is null or empty </exception>
+        /// <exception cref="FileNotFoundException"> if file is not found </exception>
+        /// <returns>
+        ///     <see cref="byte[]"/>
+        /// </returns>
+        ValueTask<byte[]> AsBytes( CancellationToken token );
+
+
+        ValueTask<MemoryStream> AsStream( CancellationToken token );
+
+        /// <summary> Reads the contents of the file as a <see cref="ReadOnlyMemory{byte}"/> , asynchronously. </summary>
+        /// <param name="token"> </param>
+        /// <exception cref="NullReferenceException"> if FullPath is null or empty </exception>
+        /// <exception cref="FileNotFoundException"> if file is not found </exception>
+        /// <returns>
+        ///     <see cref="ReadOnlyMemory{byte}"/>
+        /// </returns>
+        ValueTask<ReadOnlyMemory<byte>> AsMemory( CancellationToken token );
+
+        /// <summary> Reads the contents of the file as a <see cref="string"/> , asynchronously. </summary>
+        /// <exception cref="NullReferenceException"> if FullPath is null or empty </exception>
+        /// <exception cref="FileNotFoundException"> if file is not found </exception>
+        /// <returns>
+        ///     <see cref="string"/>
+        /// </returns>
+        ValueTask<string> AsString();
+        /// <summary> Reads the contents of the file as a <see cref="string"/> , then calls <see cref="JsonNet.FromJson(string)"/> on it, asynchronously. </summary>
+        /// <typeparam name="T"> </typeparam>
+        /// <exception cref="NullReferenceException"> if FullPath is null or empty </exception>
+        /// <exception cref="FileNotFoundException"> if file is not found </exception>
+        /// <exception cref="JsonReaderException"> if an error  deserialization occurs </exception>
+        /// <returns>
+        ///     <typeparamref name="T"/>
+        /// </returns>
+        ValueTask<T> AsJson<T>();
+    }
+
+
+
+    // ---------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+    public IAsyncReadHandler ReadAsync() => this;
+    public override int GetHashCode() => HashCode.Combine( FullPath, this.IsTempFile() );
+
+
+
+    public interface IReadHandler
+    {
+        /// <summary> Reads the contents of the file as a byte array. </summary>
+        /// <exception cref="NullReferenceException"> if FullPath is null or empty </exception>
+        /// <exception cref="FileNotFoundException"> if file is not found </exception>
+        /// <returns>
+        ///     <see cref="byte[]"/>
+        /// </returns>
+        byte[] AsBytes();
+        /// <summary> Reads the contents of the file as a <see cref="ReadOnlyMemory{byte}"/> . </summary>
+        /// <exception cref="NullReferenceException"> if FullPath is null or empty </exception>
+        /// <exception cref="FileNotFoundException"> if file is not found </exception>
+        /// <returns>
+        ///     <see cref="ReadOnlyMemory{byte}"/>
+        /// </returns>
+        ReadOnlyMemory<byte> AsMemory();
+        /// <summary> Reads the contents of the file as a <see cref="ReadOnlySpan{byte}"/> . </summary>
+        /// <exception cref="NullReferenceException"> if FullPath is null or empty </exception>
+        /// <exception cref="FileNotFoundException"> if file is not found </exception>
+        /// <returns>
+        ///     <see cref="ReadOnlySpan{byte}"/>
+        /// </returns>
+        ReadOnlySpan<char> AsSpan();
+        /// <summary> Reads the contents of the file as a <see cref="string"/> . </summary>
+        /// <exception cref="NullReferenceException"> if FullPath is null or empty </exception>
+        /// <exception cref="FileNotFoundException"> if file is not found </exception>
+        /// '
+        /// <returns>
+        ///     <see cref="string"/>
+        /// </returns>
+        string AsString();
+        /// <summary> Reads the contents of the file as a <see cref="string"/> . </summary>
+        /// <exception cref="NullReferenceException"> if FullPath is null or empty </exception>
+        /// <exception cref="FileNotFoundException"> if file is not found </exception>
+        /// <returns>
+        ///     <see cref="string"/>
+        /// </returns>
+        T AsJson<T>();
+    }
+
 
 
     // ---------------------------------------------------------------------------------------------------------------------------------------------------
@@ -511,77 +565,80 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     public IReadHandler Read() => this;
 
 
-    // ---------------------------------------------------------------------------------------------------------------------------------------------------
 
-
-    public IAsyncReadHandler ReadAsync() => this;
-
-
-    // ---------------------------------------------------------------------------------------------------------------------------------------------------
-
-
-    /// <summary>
-    ///     Write the
-    ///     <paramref name = "payload" />
-    ///     to the file.
-    /// </summary>
-    /// <param name = "payload" > the data being written to the file </param>
-    /// <param name = "path" > </param>
-    /// <param name = "token" > </param>
-    /// <exception cref = "ArgumentNullException" > </exception>
-    /// <exception cref = "WebException" > </exception>
-    /// <exception cref = "NotSupportedException" > </exception>
-    /// <returns> </returns>
-    public static async ValueTask<LocalFile> SaveToFileAsync( string path, Stream payload, CancellationToken token )
+    [Serializable]
+    public class Items : List<LocalFile>
     {
-        var file = new LocalFile( path );
-
-        await file.WriteAsync( payload, token )
-                  .ConfigureAwait( false );
-
-        return file;
+        public Items() : base() { }
+        public Items( int                    capacity ) : base( capacity ) { }
+        public Items( IEnumerable<LocalFile> items ) : base( items ) { }
     }
 
 
-    /// <summary>
-    ///     Write the
-    ///     <paramref name = "payload" />
-    ///     to the file.
-    /// </summary>
-    /// <param name = "payload" > the data being written to the file </param>
-    /// <param name = "path" > </param>
-    /// <param name = "token" > </param>
-    /// <exception cref = "ArgumentNullException" > </exception>
-    /// <exception cref = "WebException" > </exception>
-    /// <exception cref = "NotSupportedException" > </exception>
-    /// <returns>
-    ///     <see cref = "LocalFile" />
-    /// </returns>
-    public static async ValueTask<LocalFile> SaveToFileAsync( string path, ReadOnlyMemory<byte> payload, CancellationToken token )
+
+    /// <summary> Changes the extension of the file. </summary>
+    /// <param name="ext"> </param>
+    /// <returns> The modified path information. On Windows, if ext is null or empty, the path information is unchanged. If the extension is null, the returned path is with the extension removed. If the path has no extension, and the extension is not null, the returned string contains the extension appended to the end of the path. </returns>
+    public LocalFile ChangeExtension( MimeType ext ) => ChangeExtension( ext.ToExtension() );
+
+    /// <summary> Changes the extension of the file. </summary>
+    /// <param name="ext"> </param>
+    /// <returns> The modified path information. On Windows, if ext is null or empty, the path information is unchanged. If the extension is null, the returned path is with the extension removed. If the path has no extension, and the extension is not null, the returned string contains the extension appended to the end of the path. </returns>
+    public LocalFile ChangeExtension( string? ext ) => Path.ChangeExtension( FullPath, ext );
+
+
+
+    [Serializable]
+    public class Queue : MultiQueue<LocalFile>
     {
-        var file = new LocalFile( path );
-
-        await file.WriteAsync( payload, token )
-                  .ConfigureAwait( false );
-
-        return file;
+        public Queue() : base() { }
+        public Queue( IEnumerable<LocalFile> items ) : base( items ) { }
     }
+
+
+
+    [Serializable]
+    public class Set : HashSet<LocalFile>
+    {
+        public Set() : base() { }
+        public Set( int                    capacity ) : base( capacity ) { }
+        public Set( IEnumerable<LocalFile> items ) : base( items ) { }
+    }
+
+
+
+    public sealed class Sorter : Sorter<LocalFile> { }
+
+
+
+    protected string Hash( HashAlgorithm hasher )
+    {
+        using ( hasher )
+        {
+            using FileStream stream = OpenRead();
+            byte[]           hash   = hasher.ComputeHash( stream );
+            return BitConverter.ToString( hash );
+        }
+    }
+
+
+    /// <summary> Calculates a file hash using <see cref="MD5"/> </summary>
+    public string Hash_MD5() => Hash( MD5.Create() );
+    /// <summary> Calculates a file hash using <see cref="SHA1"/> </summary>
+    public string Hash_SHA1() => Hash( SHA1.Create() );
+    /// <summary> Calculates a file hash using <see cref="SHA256"/> </summary>
+    public string Hash_SHA256() => Hash( SHA256.Create() );
+    /// <summary> Calculates a file hash using <see cref="SHA384"/> </summary>
+    public string Hash_SHA384() => Hash( SHA384.Create() );
+    /// <summary> Calculates a file hash using <see cref="SHA512"/> </summary>
+    public string Hash_SHA512() => Hash( SHA512.Create() );
 
 
     public sealed override string ToString() => FullPath;
 
 
-    /// <summary>
-    ///     Creates an
-    ///     <see cref = "UriKind.Absolute" />
-    ///     based on the detected
-    ///     <see cref = "Mime" />
-    /// </summary>
-    /// <param name = "mime" >
-    ///     To override the detected
-    ///     <see cref = "Mime" />
-    ///     , provide a non-null value
-    /// </param>
+    /// <summary> Creates an <see cref="UriKind.Absolute"/> based on the detected <see cref="Mime"/> </summary>
+    /// <param name="mime"> To override the detected <see cref="Mime"/> , provide a non-null value </param>
     /// <returns> </returns>
     public Uri ToUri( MimeType? mime = null )
     {
@@ -595,26 +652,10 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
         return new Uri( $"{type.ToUriScheme()}://{path}", UriKind.Absolute );
     }
 
-    /// <summary>
-    ///     Creates a
-    ///     <see cref = "Uri" />
-    ///     using provided prefix, and
-    ///     <see cref = "HttpUtility.UrlEncode(string)" />
-    ///     to encode the
-    ///     <see cref = "FullPath" />
-    ///     .
-    /// </summary>
-    /// <param name = "baseUri" > </param>
-    /// <param name = "prefix" >
-    ///     The key to attach the
-    ///     <see cref = "FullPath" />
-    ///     to. Defaults to "?path="
-    /// </param>
-    /// <param name = "mime" >
-    ///     To override the detected
-    ///     <see cref = "Mime" />
-    ///     , provide a non-null value
-    /// </param>
+    /// <summary> Creates a <see cref="Uri"/> using provided prefix, and <see cref="HttpUtility.UrlEncode(string)"/> to encode the <see cref="FullPath"/> . </summary>
+    /// <param name="baseUri"> </param>
+    /// <param name="prefix"> The key to attach the <see cref="FullPath"/> to. Defaults to "?path=" </param>
+    /// <param name="mime"> To override the detected <see cref="Mime"/> , provide a non-null value </param>
     /// <returns> </returns>
     public Uri ToUri( Uri baseUri, string prefix = "?path=", MimeType? mime = null )
     {
@@ -628,204 +669,36 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     }
 
 
-    // ---------------------------------------------------------------------------------------------------------------------------------------------------
-
-
-    /// <summary>
-    ///     Write the
-    ///     <paramref name = "payload" />
-    ///     to the file.
-    /// </summary>
-    /// <param name = "payload" > the data being written to the file </param>
-    /// <exception cref = "NullReferenceException" > </exception>
-    /// <exception cref = "ArgumentException" > </exception>
-    /// <exception cref = "ArgumentNullException" > </exception>
-    /// <exception cref = "FileNotFoundException" > </exception>
-    /// <returns>
-    ///     <see cref = "ValueTask" />
-    /// </returns>
-    public void Write( StringBuilder payload ) => Write( payload.ToString() );
-    public void Write( ValueStringBuilder payload ) => Write( payload.ToString() );
-
-
-    /// <summary>
-    ///     Write the
-    ///     <paramref name = "payload" />
-    ///     to the file.
-    /// </summary>
-    /// <param name = "payload" > the data being written to the file </param>
-    /// <exception cref = "NullReferenceException" > </exception>
-    /// <exception cref = "ArgumentException" > </exception>
-    /// <exception cref = "ArgumentNullException" > </exception>
-    /// <exception cref = "FileNotFoundException" > </exception>
-    /// <returns>
-    ///     <see cref = "ValueTask" />
-    /// </returns>
-    public void Write( string payload )
+    /// <summary> Copies this file to the <paramref name="newFile"/> </summary>
+    /// <param name="newFile"> </param>
+    /// <param name="token"> </param>
+    /// <returns> </returns>
+    public async ValueTask Clone( LocalFile newFile, CancellationToken token )
     {
-        if ( string.IsNullOrWhiteSpace( payload ) ) { throw new ArgumentNullException( nameof(payload) ); }
-
-        using FileStream stream = Create();
-        using var        writer = new StreamWriter( stream, FileEncoding );
-        writer.Write( payload );
+        FileStream stream = OpenRead();
+        await newFile.WriteAsync( stream, token );
     }
 
 
-    /// <summary>
-    ///     Write the
-    ///     <paramref name = "payload" />
-    ///     to the file.
-    /// </summary>
-    /// <param name = "payload" > the data being written to the file </param>
-    /// <exception cref = "NullReferenceException" > </exception>
-    /// <exception cref = "ArgumentException" > </exception>
-    /// <exception cref = "FileNotFoundException" > </exception>
+    /// <summary> Write the <paramref name="payload"/> to the file. </summary>
+    /// <param name="payload"> the data being written to the file </param>
+    /// <exception cref="NullReferenceException"> </exception>
+    /// <exception cref="ArgumentException"> </exception>
+    /// <exception cref="ArgumentNullException"> </exception>
+    /// <exception cref="FileNotFoundException"> </exception>
     /// <returns>
-    ///     <see cref = "ValueTask" />
-    /// </returns>
-    public void Write( byte[] payload )
-    {
-        if ( payload.Length == 0 ) { throw new ArgumentException( @"payload.Length == 0", nameof(payload) ); }
-
-        using FileStream stream = Create();
-        stream.Write( payload, 0, payload.Length );
-    }
-
-
-    /// <summary>
-    ///     Write the
-    ///     <paramref name = "payload" />
-    ///     to the file.
-    /// </summary>
-    /// <param name = "payload" > the data being written to the file </param>
-    /// <exception cref = "NullReferenceException" > </exception>
-    /// <exception cref = "ArgumentException" > </exception>
-    /// <exception cref = "ArgumentNullException" > </exception>
-    /// <exception cref = "FileNotFoundException" > </exception>
-    /// <returns>
-    ///     <see cref = "ValueTask" />
-    /// </returns>
-    public void Write( Span<byte> payload )
-    {
-        if ( payload.Length == 0 ) { throw new ArgumentException( @"payload.Length == 0", nameof(payload) ); }
-
-        using FileStream stream = Create();
-        stream.Write( payload );
-    }
-
-
-    /// <summary>
-    ///     Write the
-    ///     <paramref name = "payload" />
-    ///     to the file.
-    /// </summary>
-    /// <param name = "payload" > the data being written to the file </param>
-    /// <exception cref = "NullReferenceException" > </exception>
-    /// <exception cref = "ArgumentException" > </exception>
-    /// <exception cref = "ArgumentNullException" > </exception>
-    /// <exception cref = "FileNotFoundException" > </exception>
-    /// <returns>
-    ///     <see cref = "ValueTask" />
-    /// </returns>
-    public void Write( ReadOnlySpan<byte> payload )
-    {
-        if ( payload.Length == 0 ) { throw new ArgumentException( @"payload.Length == 0", nameof(payload) ); }
-
-        using FileStream stream = Create();
-        stream.Write( payload );
-    }
-
-
-    /// <summary>
-    ///     Write the
-    ///     <paramref name = "payload" />
-    ///     to the file.
-    /// </summary>
-    /// <param name = "payload" > the data being written to the file </param>
-    /// <exception cref = "NullReferenceException" > </exception>
-    /// <exception cref = "ArgumentException" > </exception>
-    /// <exception cref = "ArgumentNullException" > </exception>
-    /// <exception cref = "FileNotFoundException" > </exception>
-    /// <returns>
-    ///     <see cref = "ValueTask" />
-    /// </returns>
-    public void Write( ReadOnlyMemory<byte> payload ) => Write( payload.ToArray() );
-
-
-    /// <summary>
-    ///     Write the
-    ///     <paramref name = "payload" />
-    ///     to the file.
-    /// </summary>
-    /// <param name = "payload" > the data being written to the file </param>
-    /// <exception cref = "NullReferenceException" > </exception>
-    /// <exception cref = "ArgumentException" > </exception>
-    /// <exception cref = "ArgumentNullException" > </exception>
-    /// <exception cref = "FileNotFoundException" > </exception>
-    /// <returns>
-    ///     <see cref = "ValueTask" />
-    /// </returns>
-    public void Write( ReadOnlyMemory<char> payload )
-    {
-        if ( payload.Length == 0 ) { throw new ArgumentException( @"payload.Length == 0", nameof(payload) ); }
-
-        using FileStream stream = Create();
-        using var        writer = new StreamWriter( stream, FileEncoding );
-        writer.Write( payload );
-    }
-
-
-    /// <summary>
-    ///     Write the
-    ///     <paramref name = "payload" />
-    ///     to the file.
-    /// </summary>
-    /// <param name = "payload" > the data being written to the file </param>
-    /// <exception cref = "NullReferenceException" > </exception>
-    /// <exception cref = "ArgumentException" > </exception>
-    /// <exception cref = "ArgumentNullException" > </exception>
-    /// <exception cref = "FileNotFoundException" > </exception>
-    /// <returns>
-    ///     <see cref = "ValueTask" />
-    /// </returns>
-    public void Write( Stream payload )
-    {
-        if ( payload is null ) { throw new ArgumentNullException( nameof(payload) ); }
-
-        using var memory = new MemoryStream();
-        payload.CopyTo( memory );
-        ReadOnlySpan<byte> data = memory.ToArray();
-        Write( data );
-    }
-
-
-    /// <summary>
-    ///     Write the
-    ///     <paramref name = "payload" />
-    ///     to the file.
-    /// </summary>
-    /// <param name = "payload" > the data being written to the file </param>
-    /// <exception cref = "NullReferenceException" > </exception>
-    /// <exception cref = "ArgumentException" > </exception>
-    /// <exception cref = "ArgumentNullException" > </exception>
-    /// <exception cref = "FileNotFoundException" > </exception>
-    /// <returns>
-    ///     <see cref = "ValueTask" />
+    ///     <see cref="ValueTask"/>
     /// </returns>
     public ValueTask WriteAsync( StringBuilder payload ) => WriteAsync( payload.ToString() );
     public ValueTask WriteAsync( ValueStringBuilder payload ) => WriteAsync( payload.ToString() );
-    /// <summary>
-    ///     Write the
-    ///     <paramref name = "payload" />
-    ///     to the file.
-    /// </summary>
-    /// <param name = "payload" > the data being written to the file </param>
-    /// <exception cref = "NullReferenceException" > </exception>
-    /// <exception cref = "ArgumentException" > </exception>
-    /// <exception cref = "ArgumentNullException" > </exception>
-    /// <exception cref = "FileNotFoundException" > </exception>
+    /// <summary> Write the <paramref name="payload"/> to the file. </summary>
+    /// <param name="payload"> the data being written to the file </param>
+    /// <exception cref="NullReferenceException"> </exception>
+    /// <exception cref="ArgumentException"> </exception>
+    /// <exception cref="ArgumentNullException"> </exception>
+    /// <exception cref="FileNotFoundException"> </exception>
     /// <returns>
-    ///     <see cref = "ValueTask" />
+    ///     <see cref="ValueTask"/>
     /// </returns>
     public async ValueTask WriteAsync( string payload )
     {
@@ -837,18 +710,14 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
         await writer.WriteAsync( payload )
                     .ConfigureAwait( false );
     }
-    /// <summary>
-    ///     Write the
-    ///     <paramref name = "payload" />
-    ///     to the file.
-    /// </summary>
-    /// <param name = "payload" > the data being written to the file </param>
-    /// <param name = "token" > </param>
-    /// <exception cref = "NullReferenceException" > </exception>
-    /// <exception cref = "ArgumentException" > </exception>
-    /// <exception cref = "FileNotFoundException" > </exception>
+    /// <summary> Write the <paramref name="payload"/> to the file. </summary>
+    /// <param name="payload"> the data being written to the file </param>
+    /// <param name="token"> </param>
+    /// <exception cref="NullReferenceException"> </exception>
+    /// <exception cref="ArgumentException"> </exception>
+    /// <exception cref="FileNotFoundException"> </exception>
     /// <returns>
-    ///     <see cref = "ValueTask" />
+    ///     <see cref="ValueTask"/>
     /// </returns>
     public async ValueTask WriteAsync( byte[] payload, CancellationToken token )
     {
@@ -859,18 +728,14 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
         await stream.WriteAsync( payload, token )
                     .ConfigureAwait( false );
     }
-    /// <summary>
-    ///     Write the
-    ///     <paramref name = "payload" />
-    ///     to the file.
-    /// </summary>
-    /// <param name = "payload" > the data being written to the file </param>
-    /// <param name = "token" > </param>
-    /// <exception cref = "NullReferenceException" > </exception>
-    /// <exception cref = "ArgumentException" > </exception>
-    /// <exception cref = "FileNotFoundException" > </exception>
+    /// <summary> Write the <paramref name="payload"/> to the file. </summary>
+    /// <param name="payload"> the data being written to the file </param>
+    /// <param name="token"> </param>
+    /// <exception cref="NullReferenceException"> </exception>
+    /// <exception cref="ArgumentException"> </exception>
+    /// <exception cref="FileNotFoundException"> </exception>
     /// <returns>
-    ///     <see cref = "ValueTask" />
+    ///     <see cref="ValueTask"/>
     /// </returns>
     public async ValueTask WriteAsync( ReadOnlyMemory<byte> payload, CancellationToken token )
     {
@@ -881,18 +746,14 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
         await stream.WriteAsync( payload, token )
                     .ConfigureAwait( false );
     }
-    /// <summary>
-    ///     Write the
-    ///     <paramref name = "payload" />
-    ///     to the file.
-    /// </summary>
-    /// <param name = "payload" > the data being written to the file </param>
-    /// <param name = "token" > </param>
-    /// <exception cref = "NullReferenceException" > </exception>
-    /// <exception cref = "ArgumentException" > </exception>
-    /// <exception cref = "FileNotFoundException" > </exception>
+    /// <summary> Write the <paramref name="payload"/> to the file. </summary>
+    /// <param name="payload"> the data being written to the file </param>
+    /// <param name="token"> </param>
+    /// <exception cref="NullReferenceException"> </exception>
+    /// <exception cref="ArgumentException"> </exception>
+    /// <exception cref="FileNotFoundException"> </exception>
     /// <returns>
-    ///     <see cref = "ValueTask" />
+    ///     <see cref="ValueTask"/>
     /// </returns>
     public async ValueTask WriteAsync( ReadOnlyMemory<char> payload, CancellationToken token )
     {
@@ -902,19 +763,15 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
         await writer.WriteAsync( payload, token )
                     .ConfigureAwait( false );
     }
-    /// <summary>
-    ///     Write the
-    ///     <paramref name = "payload" />
-    ///     to the file.
-    /// </summary>
-    /// <param name = "payload" > the data being written to the file </param>
-    /// <param name = "token" > </param>
-    /// <exception cref = "NullReferenceException" > </exception>
-    /// <exception cref = "ArgumentException" > </exception>
-    /// <exception cref = "ArgumentNullException" > </exception>
-    /// <exception cref = "FileNotFoundException" > </exception>
+    /// <summary> Write the <paramref name="payload"/> to the file. </summary>
+    /// <param name="payload"> the data being written to the file </param>
+    /// <param name="token"> </param>
+    /// <exception cref="NullReferenceException"> </exception>
+    /// <exception cref="ArgumentException"> </exception>
+    /// <exception cref="ArgumentNullException"> </exception>
+    /// <exception cref="FileNotFoundException"> </exception>
     /// <returns>
-    ///     <see cref = "ValueTask" />
+    ///     <see cref="ValueTask"/>
     /// </returns>
     public async ValueTask WriteAsync( Stream payload, CancellationToken token )
     {
@@ -952,6 +809,233 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
 
         return this;
     }
+    /// <summary> Decrypts a file that was encrypted by the current account using the <see cref="File.Encrypt(string)"/> method. </summary>
+    public void Decrypt()
+    {
+        if ( !RuntimeInformation.IsOSPlatform( OSPlatform.Windows ) ) { throw new InvalidOperationException(); }
+
+        File.Decrypt( FullPath );
+    }
+
+
+    /// <summary> Permanently deletes a file. </summary>
+    public void Delete() => Info.Delete();
+    protected virtual void Dispose( bool remove )
+    {
+        if ( remove && Exists ) { Delete(); }
+    }
+
+
+    /// <summary> Encrypts the file so that only the account used to encrypt the file can decrypt it. </summary>
+    public void Encrypt()
+    {
+        if ( !RuntimeInformation.IsOSPlatform( OSPlatform.Windows ) ) { throw new InvalidOperationException(); }
+
+        File.Encrypt( FullPath );
+    }
+
+    /// <summary> Moves this file to the new <paramref name="path"/> </summary>
+    /// <param name="path"> </param>
+    public void Move( string path ) => Info.MoveTo( path );
+    /// <summary> Moves this file to the new <paramref name="file"/> location </summary>
+    /// <param name="file"> </param>
+    public void Move( LocalFile file ) => Info.MoveTo( file.FullPath );
+
+
+    // ---------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+    /// <summary> Write the <paramref name="payload"/> to the file. </summary>
+    /// <param name="payload"> the data being written to the file </param>
+    /// <exception cref="NullReferenceException"> </exception>
+    /// <exception cref="ArgumentException"> </exception>
+    /// <exception cref="ArgumentNullException"> </exception>
+    /// <exception cref="FileNotFoundException"> </exception>
+    /// <returns>
+    ///     <see cref="ValueTask"/>
+    /// </returns>
+    public void Write( StringBuilder payload ) => Write( payload.ToString() );
+    public void Write( ValueStringBuilder payload ) => Write( payload.ToString() );
+
+
+    /// <summary> Write the <paramref name="payload"/> to the file. </summary>
+    /// <param name="payload"> the data being written to the file </param>
+    /// <exception cref="NullReferenceException"> </exception>
+    /// <exception cref="ArgumentException"> </exception>
+    /// <exception cref="ArgumentNullException"> </exception>
+    /// <exception cref="FileNotFoundException"> </exception>
+    /// <returns>
+    ///     <see cref="ValueTask"/>
+    /// </returns>
+    public void Write( string payload )
+    {
+        if ( string.IsNullOrWhiteSpace( payload ) ) { throw new ArgumentNullException( nameof(payload) ); }
+
+        using FileStream stream = Create();
+        using var        writer = new StreamWriter( stream, FileEncoding );
+        writer.Write( payload );
+    }
+
+
+    /// <summary> Write the <paramref name="payload"/> to the file. </summary>
+    /// <param name="payload"> the data being written to the file </param>
+    /// <exception cref="NullReferenceException"> </exception>
+    /// <exception cref="ArgumentException"> </exception>
+    /// <exception cref="FileNotFoundException"> </exception>
+    /// <returns>
+    ///     <see cref="ValueTask"/>
+    /// </returns>
+    public void Write( byte[] payload )
+    {
+        if ( payload.Length == 0 ) { throw new ArgumentException( @"payload.Length == 0", nameof(payload) ); }
+
+        using FileStream stream = Create();
+        stream.Write( payload, 0, payload.Length );
+    }
+
+
+    /// <summary> Write the <paramref name="payload"/> to the file. </summary>
+    /// <param name="payload"> the data being written to the file </param>
+    /// <exception cref="NullReferenceException"> </exception>
+    /// <exception cref="ArgumentException"> </exception>
+    /// <exception cref="ArgumentNullException"> </exception>
+    /// <exception cref="FileNotFoundException"> </exception>
+    /// <returns>
+    ///     <see cref="ValueTask"/>
+    /// </returns>
+    public void Write( Span<byte> payload )
+    {
+        if ( payload.Length == 0 ) { throw new ArgumentException( @"payload.Length == 0", nameof(payload) ); }
+
+        using FileStream stream = Create();
+        stream.Write( payload );
+    }
+
+
+    /// <summary> Write the <paramref name="payload"/> to the file. </summary>
+    /// <param name="payload"> the data being written to the file </param>
+    /// <exception cref="NullReferenceException"> </exception>
+    /// <exception cref="ArgumentException"> </exception>
+    /// <exception cref="ArgumentNullException"> </exception>
+    /// <exception cref="FileNotFoundException"> </exception>
+    /// <returns>
+    ///     <see cref="ValueTask"/>
+    /// </returns>
+    public void Write( ReadOnlySpan<byte> payload )
+    {
+        if ( payload.Length == 0 ) { throw new ArgumentException( @"payload.Length == 0", nameof(payload) ); }
+
+        using FileStream stream = Create();
+        stream.Write( payload );
+    }
+
+
+    /// <summary> Write the <paramref name="payload"/> to the file. </summary>
+    /// <param name="payload"> the data being written to the file </param>
+    /// <exception cref="NullReferenceException"> </exception>
+    /// <exception cref="ArgumentException"> </exception>
+    /// <exception cref="ArgumentNullException"> </exception>
+    /// <exception cref="FileNotFoundException"> </exception>
+    /// <returns>
+    ///     <see cref="ValueTask"/>
+    /// </returns>
+    public void Write( ReadOnlyMemory<byte> payload ) => Write( payload.ToArray() );
+
+
+    /// <summary> Write the <paramref name="payload"/> to the file. </summary>
+    /// <param name="payload"> the data being written to the file </param>
+    /// <exception cref="NullReferenceException"> </exception>
+    /// <exception cref="ArgumentException"> </exception>
+    /// <exception cref="ArgumentNullException"> </exception>
+    /// <exception cref="FileNotFoundException"> </exception>
+    /// <returns>
+    ///     <see cref="ValueTask"/>
+    /// </returns>
+    public void Write( ReadOnlyMemory<char> payload )
+    {
+        if ( payload.Length == 0 ) { throw new ArgumentException( @"payload.Length == 0", nameof(payload) ); }
+
+        using FileStream stream = Create();
+        using var        writer = new StreamWriter( stream, FileEncoding );
+        writer.Write( payload );
+    }
+
+
+    /// <summary> Write the <paramref name="payload"/> to the file. </summary>
+    /// <param name="payload"> the data being written to the file </param>
+    /// <exception cref="NullReferenceException"> </exception>
+    /// <exception cref="ArgumentException"> </exception>
+    /// <exception cref="ArgumentNullException"> </exception>
+    /// <exception cref="FileNotFoundException"> </exception>
+    /// <returns>
+    ///     <see cref="ValueTask"/>
+    /// </returns>
+    public void Write( Stream payload )
+    {
+        if ( payload is null ) { throw new ArgumentNullException( nameof(payload) ); }
+
+        using var memory = new MemoryStream();
+        payload.CopyTo( memory );
+        ReadOnlySpan<byte> data = memory.ToArray();
+        Write( data );
+    }
+
+
+    // ---------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+    /// <summary> A collection of files that are  the <see cref="LocalDirectory"/> </summary>
+    [Serializable]
+    public class Watcher : ConcurrentObservableCollection<LocalFile>, IDisposable
+    {
+        private readonly LocalDirectory.Watcher _watcher;
+
+
+        public Watcher( LocalDirectory.Watcher watcher ) : base( watcher.Directory.GetFiles() )
+        {
+            _watcher                     =  watcher;
+            _watcher.Created             += OnCreated;
+            _watcher.Changed             += OnChanged;
+            _watcher.Deleted             += OnDeleted;
+            _watcher.Renamed             += OnRenamed;
+            _watcher.Error               += OnError;
+            _watcher.EnableRaisingEvents =  true;
+        }
+        public event ErrorEventHandler? Error;
+        private void OnChanged( object sender, FileSystemEventArgs e )
+        {
+            var file = new LocalFile( e.FullPath );
+            Replaced( file, file );
+        }
+        private void OnCreated( object sender, FileSystemEventArgs e ) => Add( e.FullPath );
+        private void OnDeleted( object sender, FileSystemEventArgs e ) => Remove( e.FullPath );
+        private void OnError( object   sender, ErrorEventArgs      e ) => Error?.Invoke( sender, e );
+
+
+        private void OnRenamed( object sender, RenamedEventArgs e )
+        {
+            LocalFile? file = this.FirstOrDefault( x => x.FullPath == e.OldFullPath );
+            if ( file is not null ) { Remove( file ); }
+
+            Add( e.FullPath );
+        }
+
+
+        public void Dispose()
+        {
+            _watcher.EnableRaisingEvents = false;
+
+            _watcher.Created -= OnCreated;
+            _watcher.Changed -= OnChanged;
+            _watcher.Deleted -= OnDeleted;
+            _watcher.Renamed -= OnRenamed;
+            _watcher.Error   -= OnError;
+
+            _watcher.Dispose();
+        }
+    }
+
 
 
     async ValueTask<string> IAsyncReadHandler.AsString()
@@ -1047,15 +1131,11 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     }
 
 
-    /// <summary>
-    ///     Reads the contents of the file as a
-    ///     <see cref = "string" />
-    ///     .
-    /// </summary>
-    /// <exception cref = "NullReferenceException" > if FullPath is null or empty </exception>
-    /// <exception cref = "FileNotFoundException" > if file is not found </exception>
+    /// <summary> Reads the contents of the file as a <see cref="string"/> . </summary>
+    /// <exception cref="NullReferenceException"> if FullPath is null or empty </exception>
+    /// <exception cref="FileNotFoundException"> if file is not found </exception>
     /// <returns>
-    ///     <see cref = "string" />
+    ///     <see cref="string"/>
     /// </returns>
     T IReadHandler.AsJson<T>()
     {
@@ -1064,16 +1144,12 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
         return content.FromJson<T>();
     }
 
-    /// <summary>
-    ///     Reads the contents of the file as a
-    ///     <see cref = "string" />
-    ///     .
-    /// </summary>
-    /// <exception cref = "NullReferenceException" > if FullPath is null or empty </exception>
-    /// <exception cref = "FileNotFoundException" > if file is not found </exception>
+    /// <summary> Reads the contents of the file as a <see cref="string"/> . </summary>
+    /// <exception cref="NullReferenceException"> if FullPath is null or empty </exception>
+    /// <exception cref="FileNotFoundException"> if file is not found </exception>
     /// '
     /// <returns>
-    ///     <see cref = "string" />
+    ///     <see cref="string"/>
     /// </returns>
     string IReadHandler.AsString()
     {
@@ -1082,15 +1158,11 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     }
 
 
-    /// <summary>
-    ///     Reads the contents of the file as a
-    ///     <see cref = "ReadOnlySpan{byte}" />
-    ///     .
-    /// </summary>
-    /// <exception cref = "NullReferenceException" > if FullPath is null or empty </exception>
-    /// <exception cref = "FileNotFoundException" > if file is not found </exception>
+    /// <summary> Reads the contents of the file as a <see cref="ReadOnlySpan{byte}"/> . </summary>
+    /// <exception cref="NullReferenceException"> if FullPath is null or empty </exception>
+    /// <exception cref="FileNotFoundException"> if file is not found </exception>
     /// <returns>
-    ///     <see cref = "ReadOnlySpan{byte}" />
+    ///     <see cref="ReadOnlySpan{byte}"/>
     /// </returns>
     ReadOnlySpan<char> IReadHandler.AsSpan()
     {
@@ -1101,10 +1173,10 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
 
 
     /// <summary> Reads the contents of the file as a byte array. </summary>
-    /// <exception cref = "NullReferenceException" > if FullPath is null or empty </exception>
-    /// <exception cref = "FileNotFoundException" > if file is not found </exception>
+    /// <exception cref="NullReferenceException"> if FullPath is null or empty </exception>
+    /// <exception cref="FileNotFoundException"> if file is not found </exception>
     /// <returns>
-    ///     <see cref = "byte[]" />
+    ///     <see cref="byte[]"/>
     /// </returns>
     byte[] IReadHandler.AsBytes()
     {
@@ -1115,15 +1187,11 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     }
 
 
-    /// <summary>
-    ///     Reads the contents of the file as a
-    ///     <see cref = "ReadOnlyMemory{byte}" />
-    ///     .
-    /// </summary>
-    /// <exception cref = "NullReferenceException" > if FullPath is null or empty </exception>
-    /// <exception cref = "FileNotFoundException" > if file is not found </exception>
+    /// <summary> Reads the contents of the file as a <see cref="ReadOnlyMemory{byte}"/> . </summary>
+    /// <exception cref="NullReferenceException"> if FullPath is null or empty </exception>
+    /// <exception cref="FileNotFoundException"> if file is not found </exception>
     /// <returns>
-    ///     <see cref = "ReadOnlyMemory{byte}" />
+    ///     <see cref="ReadOnlyMemory{byte}"/>
     /// </returns>
     ReadOnlyMemory<byte> IReadHandler.AsMemory()
     {
@@ -1142,282 +1210,25 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     }
 
 
-
-    public interface IReadHandler
-    {
-        /// <summary> Reads the contents of the file as a byte array. </summary>
-        /// <exception cref = "NullReferenceException" > if FullPath is null or empty </exception>
-        /// <exception cref = "FileNotFoundException" > if file is not found </exception>
-        /// <returns>
-        ///     <see cref = "byte[]" />
-        /// </returns>
-        byte[] AsBytes();
-        /// <summary>
-        ///     Reads the contents of the file as a
-        ///     <see cref = "string" />
-        ///     .
-        /// </summary>
-        /// <exception cref = "NullReferenceException" > if FullPath is null or empty </exception>
-        /// <exception cref = "FileNotFoundException" > if file is not found </exception>
-        /// <returns>
-        ///     <see cref = "string" />
-        /// </returns>
-        T AsJson<T>();
-        /// <summary>
-        ///     Reads the contents of the file as a
-        ///     <see cref = "ReadOnlyMemory{byte}" />
-        ///     .
-        /// </summary>
-        /// <exception cref = "NullReferenceException" > if FullPath is null or empty </exception>
-        /// <exception cref = "FileNotFoundException" > if file is not found </exception>
-        /// <returns>
-        ///     <see cref = "ReadOnlyMemory{byte}" />
-        /// </returns>
-        ReadOnlyMemory<byte> AsMemory();
-        /// <summary>
-        ///     Reads the contents of the file as a
-        ///     <see cref = "ReadOnlySpan{byte}" />
-        ///     .
-        /// </summary>
-        /// <exception cref = "NullReferenceException" > if FullPath is null or empty </exception>
-        /// <exception cref = "FileNotFoundException" > if file is not found </exception>
-        /// <returns>
-        ///     <see cref = "ReadOnlySpan{byte}" />
-        /// </returns>
-        ReadOnlySpan<char> AsSpan();
-        /// <summary>
-        ///     Reads the contents of the file as a
-        ///     <see cref = "string" />
-        ///     .
-        /// </summary>
-        /// <exception cref = "NullReferenceException" > if FullPath is null or empty </exception>
-        /// <exception cref = "FileNotFoundException" > if file is not found </exception>
-        /// '
-        /// <returns>
-        ///     <see cref = "string" />
-        /// </returns>
-        string AsString();
-    }
-
-
-
-    public interface IAsyncReadHandler
-    {
-        /// <summary> Reads the contents of the file as a byte array. </summary>
-        /// <exception cref = "NullReferenceException" > if FullPath is null or empty </exception>
-        /// <exception cref = "FileNotFoundException" > if file is not found </exception>
-        /// <returns>
-        ///     <see cref = "byte[]" />
-        /// </returns>
-        ValueTask<byte[]> AsBytes( CancellationToken token );
-        /// <summary>
-        ///     Reads the contents of the file as a
-        ///     <see cref = "string" />
-        ///     , then calls
-        ///     <see cref = "JsonNet.FromJson(string)" />
-        ///     on it, asynchronously.
-        /// </summary>
-        /// <typeparam name = "T" > </typeparam>
-        /// <exception cref = "NullReferenceException" > if FullPath is null or empty </exception>
-        /// <exception cref = "FileNotFoundException" > if file is not found </exception>
-        /// <exception cref = "JsonReaderException" > if an error  deserialization occurs </exception>
-        /// <returns>
-        ///     <typeparamref name = "T" />
-        /// </returns>
-        ValueTask<T> AsJson<T>();
-
-
-        IAsyncEnumerable<string> AsLines();
-
-        /// <summary>
-        ///     Reads the contents of the file as a
-        ///     <see cref = "ReadOnlyMemory{byte}" />
-        ///     , asynchronously.
-        /// </summary>
-        /// <param name = "token" > </param>
-        /// <exception cref = "NullReferenceException" > if FullPath is null or empty </exception>
-        /// <exception cref = "FileNotFoundException" > if file is not found </exception>
-        /// <returns>
-        ///     <see cref = "ReadOnlyMemory{byte}" />
-        /// </returns>
-        ValueTask<ReadOnlyMemory<byte>> AsMemory( CancellationToken token );
-
-
-        ValueTask<MemoryStream> AsStream( CancellationToken token );
-
-        /// <summary>
-        ///     Reads the contents of the file as a
-        ///     <see cref = "string" />
-        ///     , asynchronously.
-        /// </summary>
-        /// <exception cref = "NullReferenceException" > if FullPath is null or empty </exception>
-        /// <exception cref = "FileNotFoundException" > if file is not found </exception>
-        /// <returns>
-        ///     <see cref = "string" />
-        /// </returns>
-        ValueTask<string> AsString();
-    }
-
-
-
-    // ---------------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-    /// <summary>
-    ///     A collection of files that are  the
-    ///     <see cref = "LocalDirectory" />
-    /// </summary>
-    [Serializable]
-    public class Watcher : ConcurrentObservableCollection<LocalFile>, IDisposable
-    {
-        private readonly LocalDirectory.Watcher _watcher;
-
-
-        public Watcher( LocalDirectory.Watcher watcher ) : base( watcher.Directory.GetFiles() )
-        {
-            _watcher                     =  watcher;
-            _watcher.Created             += OnCreated;
-            _watcher.Changed             += OnChanged;
-            _watcher.Deleted             += OnDeleted;
-            _watcher.Renamed             += OnRenamed;
-            _watcher.Error               += OnError;
-            _watcher.EnableRaisingEvents =  true;
-        }
-        public event ErrorEventHandler? Error;
-        private void OnChanged( object sender, FileSystemEventArgs e )
-        {
-            var file = new LocalFile( e.FullPath );
-            Replaced( file, file );
-        }
-        private void OnCreated( object sender, FileSystemEventArgs e ) => Add( e.FullPath );
-        private void OnDeleted( object sender, FileSystemEventArgs e ) => Remove( e.FullPath );
-        private void OnError( object   sender, ErrorEventArgs      e ) => Error?.Invoke( sender, e );
-
-
-        private void OnRenamed( object sender, RenamedEventArgs e )
-        {
-            LocalFile? file = this.FirstOrDefault( x => x.FullPath == e.OldFullPath );
-            if ( file is not null ) { Remove( file ); }
-
-            Add( e.FullPath );
-        }
-
-
-        public void Dispose()
-        {
-            _watcher.EnableRaisingEvents = false;
-
-            _watcher.Created -= OnCreated;
-            _watcher.Changed -= OnChanged;
-            _watcher.Deleted -= OnDeleted;
-            _watcher.Renamed -= OnRenamed;
-            _watcher.Error   -= OnError;
-
-            _watcher.Dispose();
-        }
-    }
-
-
-
-    [Serializable]
-    public class Collection : ObservableCollection<LocalFile>
-    {
-        public Collection() : base() { }
-        public Collection( IEnumerable<LocalFile> items ) : base( items ) { }
-    }
-
-
-
-    [Serializable]
-    public class ConcurrentCollection : ConcurrentObservableCollection<LocalFile>
-    {
-        public ConcurrentCollection() : base() { }
-        public ConcurrentCollection( IEnumerable<LocalFile> items ) : base( items ) { }
-    }
-
-
-
-    [Serializable]
-    public class Queue : MultiQueue<LocalFile>
-    {
-        public Queue() : base() { }
-        public Queue( IEnumerable<LocalFile> items ) : base( items ) { }
-    }
-
-
-
-    [Serializable]
-    public class Deque : MultiDeque<LocalFile>
-    {
-        public Deque() : base() { }
-        public Deque( IEnumerable<LocalFile> items ) : base( items ) { }
-    }
-
-
-
-    [Serializable]
-    public class Items : List<LocalFile>
-    {
-        public Items() : base() { }
-        public Items( int                    capacity ) : base( capacity ) { }
-        public Items( IEnumerable<LocalFile> items ) : base( items ) { }
-    }
-
-
-
-    [Serializable]
-    public class Set : HashSet<LocalFile>
-    {
-        public Set() : base() { }
-        public Set( int                    capacity ) : base( capacity ) { }
-        public Set( IEnumerable<LocalFile> items ) : base( items ) { }
-    }
-
-
-
-    public sealed class Sorter : Sorter<LocalFile> { }
-
-
-
-    public sealed class Equalizer : Equalizer<LocalFile> { }
-
-
-
 #if NET6_0_OR_GREATER
-    /// <summary>
-    ///     Calculates a file hash using
-    ///     <see cref = "MD5" />
-    /// </summary>
+    /// <summary> Calculates a file hash using <see cref="MD5"/> </summary>
     public ValueTask<string> HashAsync_MD5() => HashAsync( MD5.Create() );
-    /// <summary>
-    ///     Calculates a file hash using
-    ///     <see cref = "SHA1" />
-    /// </summary>
+    /// <summary> Calculates a file hash using <see cref="SHA1"/> </summary>
     public ValueTask<string> HashAsync_SHA1() => HashAsync( SHA1.Create() );
-    /// <summary>
-    ///     Calculates a file hash using
-    ///     <see cref = "SHA256" />
-    /// </summary>
+    /// <summary> Calculates a file hash using <see cref="SHA256"/> </summary>
     public ValueTask<string> HashAsync_SHA256() => HashAsync( SHA256.Create() );
-    /// <summary>
-    ///     Calculates a file hash using
-    ///     <see cref = "SHA384" />
-    /// </summary>
+    /// <summary> Calculates a file hash using <see cref="SHA384"/> </summary>
     public ValueTask<string> HashAsync_SHA384() => HashAsync( SHA384.Create() );
-    /// <summary>
-    ///     Calculates a file hash using
-    ///     <see cref = "SHA512" />
-    /// </summary>
+    /// <summary> Calculates a file hash using <see cref="SHA512"/> </summary>
     public ValueTask<string> HashAsync_SHA512() => HashAsync( SHA512.Create() );
 
 
     public async ValueTask<string> HashAsync( HashAlgorithm hasher )
     {
-        using (hasher)
+        using ( hasher )
         {
             await using FileStream stream = OpenRead();
-            byte[]                 hash = await hasher.ComputeHashAsync( stream );
+            byte[]                 hash   = await hasher.ComputeHashAsync( stream );
 
             return BitConverter.ToString( hash );
         }

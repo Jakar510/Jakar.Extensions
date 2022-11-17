@@ -23,9 +23,9 @@ public sealed class AttributeException : Exception
                                                         .Append( info.Name )
                                                         .Append( '"' );
 
-        if (!info.CanRead) { sb = sb.Append( " cannot be read from. It's of type " ); }
+        if ( !info.CanRead ) { sb = sb.Append( " cannot be read from. It's of type " ); }
 
-        else if (!info.CanWrite) { sb = sb.Append( " cannot be written to. It's of type " ); }
+        else if ( !info.CanWrite ) { sb = sb.Append( " cannot be written to. It's of type " ); }
 
         else { sb = sb.Append( " of type " ); }
 

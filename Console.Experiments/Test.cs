@@ -14,9 +14,8 @@ namespace Console.Experiments;
 
 public class Test : IJsonizer
 {
-    public static readonly Random      random = new();
-    public                 double      Number   { get; init; }
-    public                 List<Test>? Children { get; init; }
+    public double      Number   { get; init; }
+    public List<Test>? Children { get; init; }
 
 
     public string Name { get; init; } = string.Empty;
@@ -32,6 +31,7 @@ public class Test : IJsonizer
         Number   = number;
         Children = children;
     }
+    public static readonly Random random = new();
 
 
     public string ToJson()
@@ -40,7 +40,7 @@ public class Test : IJsonizer
 
         var writer = new JsonTextWriter( sw )
                      {
-                         Formatting = Formatting.Indented
+                         Formatting = Formatting.Indented,
                      };
 
         ToJson( writer );
@@ -59,9 +59,9 @@ public class Test : IJsonizer
         writer.WritePropertyName( nameof(Children) );
         writer.WriteStartArray();
 
-        if (Children is not null)
+        if ( Children is not null )
         {
-            foreach (Test child in Children) { child.ToJson( writer ); }
+            foreach ( Test child in Children ) { child.ToJson( writer ); }
         }
 
         writer.WriteEndArray();

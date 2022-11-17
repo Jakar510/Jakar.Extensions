@@ -10,6 +10,20 @@ public static partial class DbExtensions
     [Pure] public static DateTimeOffset TokenExpireTime( this IConfiguration configuration, string key = nameof(TokenExpireTime) ) => DateTimeOffset.UtcNow + configuration.GetValue( key, TimeSpan.FromMinutes( 30 ) );
 
 
+    public static IHealthChecksBuilder AddHealthCheck<T>( this WebApplicationBuilder builder ) where T : IHealthCheck => builder.AddHealthCheck( WebBuilder.CreateHealthCheck<T>() );
+    public static IHealthChecksBuilder AddHealthCheck( this WebApplicationBuilder builder, HealthCheckRegistration registration ) =>
+        builder.Services.AddHealthChecks()
+               .Add( registration );
+
+
+    public static ILoggingBuilder AddFluentMigratorLogger( this ILoggingBuilder builder, bool showSql = true, bool showElapsedTime = true ) =>
+        builder.AddProvider( new FluentMigratorConsoleLoggerProvider( new OptionsWrapper<FluentMigratorLoggerOptions>( new FluentMigratorLoggerOptions
+                                                                                                                       {
+                                                                                                                           ShowElapsedTime = showElapsedTime,
+                                                                                                                           ShowSql         = showSql,
+                                                                                                                       } ) ) );
+
+
     public static WebApplicationBuilder AddDatabase<T>( this WebApplicationBuilder builder, DbInstance instance ) where T : Database => builder.AddDatabase<T>( configure => configure.DbType = instance );
     public static WebApplicationBuilder AddDatabase<T>( this WebApplicationBuilder builder, Action<DbOptions> configure ) where T : Database
     {
@@ -33,20 +47,6 @@ public static partial class DbExtensions
 
         return builder.AddScoped<Emailer>();
     }
-
-
-    public static ILoggingBuilder AddFluentMigratorLogger( this ILoggingBuilder builder, bool showSql = true, bool showElapsedTime = true ) =>
-        builder.AddProvider( new FluentMigratorConsoleLoggerProvider( new OptionsWrapper<FluentMigratorLoggerOptions>( new FluentMigratorLoggerOptions
-                                                                                                                       {
-                                                                                                                           ShowElapsedTime = showElapsedTime,
-                                                                                                                           ShowSql         = showSql
-                                                                                                                       } ) ) );
-
-
-    public static IHealthChecksBuilder AddHealthCheck<T>( this WebApplicationBuilder builder ) where T : IHealthCheck => builder.AddHealthCheck( WebBuilder.CreateHealthCheck<T>() );
-    public static IHealthChecksBuilder AddHealthCheck( this WebApplicationBuilder builder, HealthCheckRegistration registration ) =>
-        builder.Services.AddHealthChecks()
-               .Add( registration );
 
 
     public static WebApplicationBuilder AddPwdValidator( this WebApplicationBuilder builder )

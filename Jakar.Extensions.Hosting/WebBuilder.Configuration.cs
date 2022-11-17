@@ -10,17 +10,6 @@ namespace Jakar.Extensions.Hosting;
 
 public static partial class WebBuilder
 {
-    public const string DEFAULT            = "Default";
-    public const string CONNECTION_STRINGS = "ConnectionStrings";
-
-
-    public static string ConnectionString( this IConfiguration configuration, string name = DEFAULT ) => configuration.GetSection( CONNECTION_STRINGS )
-                                                                                                                        .GetValue<string>( name ) ?? throw new InvalidOperationException( $"{CONNECTION_STRINGS}::{DEFAULT} is not found" );
-    public static string ConnectionString( this IServiceProvider provider, string name = DEFAULT ) => provider.GetRequiredService<IConfiguration>()
-                                                                                                                 .ConnectionString( name );
-    public static string ConnectionString( this WebApplication configuration, string name = DEFAULT ) => configuration.Services.ConnectionString( name );
-
-
     public static IConfigurationBuilder AddCommandLine( this          WebApplicationBuilder builder, string[] args ) => builder.Configuration.AddCommandLine( args );
     public static IConfigurationBuilder AddCommandLine( this          WebApplicationBuilder builder, string[] args, IDictionary<string, string> switchMappings ) => builder.Configuration.AddCommandLine( args, switchMappings );
     public static IConfigurationBuilder AddCommandLine( this          WebApplicationBuilder builder, Action<CommandLineConfigurationSource> configureSource ) => builder.Configuration.AddCommandLine( configureSource );
@@ -48,4 +37,13 @@ public static partial class WebBuilder
     public static IConfigurationBuilder AddJsonFile( this   WebApplicationBuilder builder, IFileProvider provider, string path, bool optional, bool reloadOnChange ) => builder.Configuration.AddJsonFile( provider, path, optional, reloadOnChange );
     public static IConfigurationBuilder AddJsonFile( this   WebApplicationBuilder builder, Action<JsonConfigurationSource> configureSource ) => builder.Configuration.AddJsonFile( configureSource );
     public static IConfigurationBuilder AddJsonStream( this WebApplicationBuilder builder, Stream stream ) => builder.Configuration.AddJsonStream( stream );
+    public const string CONNECTION_STRINGS = "ConnectionStrings";
+
+
+    public static string ConnectionString( this IConfiguration configuration, string name = DEFAULT ) => configuration.GetSection( CONNECTION_STRINGS )
+                                                                                                                      .GetValue<string>( name ) ?? throw new InvalidOperationException( $"{CONNECTION_STRINGS}::{DEFAULT} is not found" );
+    public static string ConnectionString( this IServiceProvider provider, string name = DEFAULT ) => provider.GetRequiredService<IConfiguration>()
+                                                                                                              .ConnectionString( name );
+    public static string ConnectionString( this WebApplication configuration, string name = DEFAULT ) => configuration.Services.ConnectionString( name );
+    public const string DEFAULT = "Default";
 }

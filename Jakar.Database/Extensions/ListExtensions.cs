@@ -7,11 +7,11 @@ namespace Jakar.Database;
 
 public static class ListExtensions
 {
-    /// <summary> <see href="https://stackoverflow.com/a/17308019/9530917"/> </summary>
+    /// <summary>
+    ///     <see href="https://stackoverflow.com/a/17308019/9530917"/>
+    /// </summary>
     private static class ArrayAccessor<T>
     {
-        public static readonly Func<List<T>, T[]> Getter;
-
         static ArrayAccessor()
         {
             FieldInfo field = typeof(List<T>).GetField( "_items", BindingFlags.NonPublic | BindingFlags.Instance ) ?? throw new InvalidOperationException();
@@ -22,7 +22,7 @@ public static class ListExtensions
                                         typeof(T[]),
                                         new[]
                                         {
-                                            typeof(List<T>)
+                                            typeof(List<T>),
                                         },
                                         typeof(ArrayAccessor<T>),
                                         true );
@@ -33,6 +33,7 @@ public static class ListExtensions
             il.Emit( OpCodes.Ret );          // Return field
             Getter = (Func<List<T>, T[]>)dm.CreateDelegate( typeof(Func<List<T>, T[]>) );
         }
+        public static readonly Func<List<T>, T[]> Getter;
     }
 
 

@@ -7,8 +7,8 @@ namespace Jakar.Extensions;
 
 public static class StatusExtensions
 {
-    public static Status ToStatus( this         HttpStatusCode code ) => (Status)(int)code;
     public static HttpStatusCode ToStatus( this Status         code ) => (HttpStatusCode)(int)code;
+    public static Status ToStatus( this         HttpStatusCode code ) => (Status)(int)code;
 
 
     public static string ToStringFast( this HttpStatusCode status ) => status.ToStatus()
@@ -82,6 +82,6 @@ public static class StatusExtensions
                                                                    Status.LoopDetected                  => nameof(Status.LoopDetected),
                                                                    Status.NotExtended                   => nameof(Status.NotExtended),
                                                                    Status.NetworkAuthenticationRequired => nameof(Status.NetworkAuthenticationRequired),
-                                                                   _                                    => status.ToString()
+                                                                   _                                    => status.ToString(),
                                                                };
 }
