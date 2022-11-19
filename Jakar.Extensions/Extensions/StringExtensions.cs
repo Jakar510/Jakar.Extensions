@@ -4,6 +4,13 @@ namespace Jakar.Extensions;
 
 public static class StringExtensions
 {
+    private static readonly char[] _ends = new[]
+                                           {
+                                               '\n',
+                                               '\r'
+                                           };
+
+
     public static bool ContainsAbout( this string source, string search ) => source.Contains( search, StringComparison.OrdinalIgnoreCase );
     public static bool ContainsExact( this string source, string search ) => source.Contains( search, StringComparison.Ordinal );
 
@@ -128,8 +135,7 @@ public static class StringExtensions
     ///     Default chars <see cref="char"/> to '\n' and '\r'
     /// </summary>
     /// <param name="span"> </param>
-    public static SpanSplitEnumerator<char> SplitOn( this ReadOnlySpan<char> span ) => new(span, ParamsArray<char>.Create( '\n', '\r' ));
-
+    public static SpanSplitEnumerator<char> SplitOn( this ReadOnlySpan<char> span ) => new(span, _ends);
 
     // public static SpanSplitEnumerator<T> SplitOn<T>( this Span<T>         span, ParamsArray<T> array ) where T : unmanaged, IEquatable<T> => new(span, array);
     public static SpanSplitEnumerator<T> SplitOn<T>( this Span<T> span, params T[]      separators ) where T : unmanaged, IEquatable<T> => new(span, separators);
@@ -161,8 +167,8 @@ public static class StringExtensions
     }
 
 
-    public static string RemoveAll( this string source, string old ) => source.Replace( old,                  "", StringComparison.Ordinal );
-    public static string RemoveAll( this string source, char   old ) => source.Replace( new string( old, 1 ), "" );
+    public static string RemoveAll( this string source, string old ) => source.Replace( old,                  string.Empty, StringComparison.Ordinal );
+    public static string RemoveAll( this string source, char   old ) => source.Replace( new string( old, 1 ), string.Empty );
 
 
     /// <summary>

@@ -13,7 +13,6 @@ namespace Jakar.Extensions.Tests;
 // ReSharper disable once InconsistentNaming
 public class IniConfig_Tests : Assert
 {
-    private static readonly Random _random = new();
 
 
     [Test]
@@ -34,10 +33,10 @@ public class IniConfig_Tests : Assert
                          ["Name"] = nameof(ServicePoint),
                      };
 
-        server.Add( "Port", _random.Next( IPEndPoint.MinPort, IPEndPoint.MaxPort ) );
+        server.Add( "Port", Random.Shared.Next( IPEndPoint.MinPort, IPEndPoint.MaxPort ) );
 
 
-        server.Add( nameof(IPAddress), string.Join( '.', _random.Next( 255 ), _random.Next( 255 ), _random.Next( 255 ), _random.Next( 255 ) ) );
+        server.Add( nameof(IPAddress), string.Join( '.', Random.Shared.Next( 255 ), Random.Shared.Next( 255 ), Random.Shared.Next( 255 ), Random.Shared.Next( 255 ) ) );
 
         var ini = new IniConfig
                   {
@@ -46,18 +45,21 @@ public class IniConfig_Tests : Assert
                   };
 
         ini[nameof(Random)]
-           .Add( nameof(Random.Next), _random.Next() );
+           .Add( nameof(Random.Next), Random.Shared.Next() );
 
         ini[nameof(IniConfig_Tests)]
-           .Add( nameof(Random.Next), _random.Next() );
+           .Add( nameof(Random.Next), Random.Shared.Next() );
+
 
         string actual = ini.ToString();
         $"-- {nameof(actual)} --\n{actual}".WriteToConsole();
-        var results = IniConfig.From<IniConfig>( actual );
+        var results = IniConfig.Parse( actual );
 
         $"-- {nameof(results)} --\n{results}".WriteToConsole();
+
+
         NotNull( results );
         AreEqual( results,                   ini );
-        AreEqual( results?[nameof(project)], project );
+        AreEqual( results[nameof(project)], project );
     }
 }

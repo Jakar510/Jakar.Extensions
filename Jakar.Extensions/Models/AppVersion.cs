@@ -16,15 +16,15 @@ public sealed class AppVersion : IComparable,
                                  ISpanFormattable
 #endif
 {
-    public        Format           Scheme        { get; init; }
-    public        int              Major         { get; init; }
-    public        int?             Minor         { get; init; }
-    public        int?             Maintenance   { get; init; }
-    public        int?             MajorRevision { get; init; }
-    public        int?             MinorRevision { get; init; }
-    public        int?             Build         { get; init; }
-    public        AppVersionFlags  Flags         { get; init; }
-    private const StringComparison COMPARISON = StringComparison.OrdinalIgnoreCase;
+    public Format          Scheme        { get; init; }
+    public int             Major         { get; init; }
+    public int?            Minor         { get; init; }
+    public int?            Maintenance   { get; init; }
+    public int?            MajorRevision { get; init; }
+    public int?            MinorRevision { get; init; }
+    public int?            Build         { get; init; }
+    public AppVersionFlags Flags         { get; init; }
+    public int             Length        => Flags.Length + 65;
 
 
     public AppVersion() : this( 0, default, default, default, default, default, AppVersionFlags.Stable ) { }
@@ -264,31 +264,43 @@ public sealed class AppVersion : IComparable,
     // ---------------------------------------------------------------------------------------------------------------------------------
 
 
-    internal const string FORMAT    = "G";
-    internal const char   SEPARATOR = '.';
+    internal const char SEPARATOR = '.';
 
 
-    public override string ToString() => ToString( FORMAT, CultureInfo.InvariantCulture );
-    public string ToString( string? format, IFormatProvider? formatProvider ) => AsSpan( format, formatProvider )
-       .ToString();
+    public override string ToString() => ToString( default, CultureInfo.CurrentCulture );
+    public string ToString( string? format, IFormatProvider? formatProvider )
+    {
+        var    span   = AsSpan( format, formatProvider );
+        string result = span.ToString();
+        result.WriteToDebug();
+        return result;
+    }
 
 
-    public ReadOnlySpan<char> AsSpan() => AsSpan( FORMAT,                            CultureInfo.InvariantCulture );
-    public ReadOnlySpan<char> AsSpan( ReadOnlySpan<char> format ) => AsSpan( format, CultureInfo.InvariantCulture );
+    public ReadOnlySpan<char> AsSpan() => AsSpan( default,                           CultureInfo.CurrentCulture );
+    public ReadOnlySpan<char> AsSpan( ReadOnlySpan<char> format ) => AsSpan( format, CultureInfo.CurrentCulture );
     public ReadOnlySpan<char> AsSpan( ReadOnlySpan<char> format, IFormatProvider? provider )
     {
-        Span<char> span = stackalloc char[65 + Flags.Length];
+        Span<char> span = stackalloc char[Length + 1];
+        if ( !TryFormat( span, out int charsWritten, format, provider ) ) { throw new InvalidOperationException( "Conversion failed" ); }
 
-        if ( TryFormat( span, out int charsWritten, format, provider ) )
-        {
-            span = span[..charsWritten];
-            return MemoryMarshal.CreateReadOnlySpan( ref span.GetPinnableReference(), span.Length );
-        }
+        Span<char> result = span[..charsWritten];
 
-        throw new InvalidOperationException( "Conversion failed" );
+        result.ToString()
+              .WriteToDebug();
+
+        // return MemoryMarshal.CreateReadOnlySpan( ref result.GetPinnableReference(), result.Length );
+        // return new string( result );
+        return result;
     }
+
+
+#if NET6_0_OR_GREATER
+    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
+#endif
     public bool TryFormat( Span<char> span, out int charsWritten, ReadOnlySpan<char> format = default, IFormatProvider? provider = default )
     {
+        Debug.Assert( span.Length > Length );
         charsWritten = 0;
         Span<char> numberBuffer = stackalloc char[20];
 
@@ -296,19 +308,18 @@ public sealed class AppVersion : IComparable,
         {
             if ( value.TryFormat( numberBuffer, out int intCharsWritten, format, provider ) )
             {
-                numberBuffer[..intCharsWritten]
-                   .CopyTo( span[charsWritten..] );
+                foreach ( char c in numberBuffer[..intCharsWritten] ) { span[charsWritten++] = c; }
 
-                charsWritten         += intCharsWritten;
-                span[charsWritten++] =  SEPARATOR;
+                span[charsWritten++] = SEPARATOR;
             }
             else { throw new InvalidOperationException( "Conversion failed" ); }
         }
 
-        charsWritten--;
 
-        if ( Flags.IsNotEmpty && Flags.TryFormat( span[charsWritten..], out int flagsCharsWritten, format, provider ) ) { charsWritten += flagsCharsWritten; }
+        Span<char> flags = span[--charsWritten..];
+        if ( Flags.IsNotEmpty && Flags.TryFormat( flags, out int flagsCharsWritten, format, provider ) ) { charsWritten += flagsCharsWritten; }
 
+        span.WriteToDebug();
         return true;
     }
 
@@ -318,9 +329,7 @@ public sealed class AppVersion : IComparable,
 
 
     /// <summary>
-    ///     If the <see cref="Scheme"/> is any of [ <see cref="Format.Singular"/> , <see cref="Format.DetailedRevisions"/> , <see cref="Format.Complete"/> ], will throw
-    ///     <see
-    ///         cref="InvalidOperationException"/>
+    ///     If the <see cref="Scheme"/> is any of [ <see cref="Format.Singular"/> , <see cref="Format.DetailedRevisions"/> , <see cref="Format.Complete"/> ], will throw <see cref="InvalidOperationException"/>
     /// </summary>
     /// <returns> </returns>
     /// <exception cref="InvalidOperationException"> </exception>

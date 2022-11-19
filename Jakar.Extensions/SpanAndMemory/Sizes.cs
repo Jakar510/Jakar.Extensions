@@ -24,9 +24,9 @@ public static class Sizes
                                                                      };
 
 
-    public static int? GetSize<T>() => GetSize( typeof(T) );
-    public static int? GetSize<T>( this T _ ) => typeof(T).GetSize();
-    public static int? GetSize( this Type type ) => _sizes.TryGetValue( type, out int value )
-                                                        ? value
-                                                        : default;
+    public static int GetSize<T>() => GetSize( typeof(T) );
+    public static int GetSize<T>( this T _ ) => typeof(T).GetSize();
+    public static int GetSize( this Type type ) => _sizes.TryGetValue( type, out int value )
+                                                       ? value
+                                                       : default;
 }

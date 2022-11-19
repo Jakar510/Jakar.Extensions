@@ -1,6 +1,10 @@
-﻿try
+﻿using System.Net;
+
+
+try
 {
     "Hello World!".WriteToConsole();
+
 
     // var p = new DynamicParameters();
     // p.Add( nameof(AppVersion), "1.0.0" );
@@ -8,11 +12,57 @@
     // try { throw new SqlException("select * from table", p, true); }
     // catch ( Exception e ) { e.WriteToConsole(); }
 
-    const string SOURCE  = "1.2.3.4.5.6";
-    bool         success = AppVersion.TryParse( SOURCE, out AppVersion? version );
-    success.WriteToDebug();
-    version?.WriteToDebug();
-    (SOURCE == version.ToString()).WriteToDebug();
+
+    // const string SOURCE  = "1.2.3.4.5.6";
+    // bool         success = AppVersion.TryParse( SOURCE, out AppVersion? version );
+    // success.WriteToDebug();
+    // version?.WriteToDebug();
+    // (SOURCE == version.ToString()).WriteToDebug();
+
+
+    var project = new IniConfig.Section
+                  {
+                      ["Name"] = nameof(Program),
+                  };
+
+    project.Add( nameof(DateTime), DateTime.Now );
+    project.Add( nameof(Guid),     Guid.NewGuid() );
+
+    project.Add( nameof(AppVersion), new AppVersion( 1, 2, 3, 4, 5, 6, AppVersionFlags.Alpha( 1 ) ) );
+
+    var server = new IniConfig.Section
+                 {
+                     ["Name"] = nameof(ServicePoint),
+                 };
+
+    server.Add( "Port", Random.Shared.Next( IPEndPoint.MinPort, IPEndPoint.MaxPort ) );
+
+
+    server.Add( nameof(IPAddress), string.Join( '.', Random.Shared.Next( 255 ), Random.Shared.Next( 255 ), Random.Shared.Next( 255 ), Random.Shared.Next( 255 ) ) );
+
+    var ini = new IniConfig
+              {
+                  [nameof(project)] = project,
+                  [nameof(server)]  = server,
+              };
+
+    ini[nameof(Random)]
+       .Add( nameof(Random.Next), Random.Shared.Next() );
+
+    ini[nameof(Program)]
+       .Add( nameof(Random.Next), Random.Shared.Next() );
+
+
+    string actual = ini.ToString();
+    $"-- {nameof(actual)} --\n{actual}".WriteToConsole();
+
+    var results = IniConfig.Parse( actual )
+                           .ToString();
+
+    $"-- {nameof(results)} --\n{results}".WriteToConsole();
+
+    (actual == results).WriteToDebug();
+
 
     // byte.MaxValue.ToString()
     //     .Length.WriteToDebug();
@@ -59,8 +109,7 @@
     // DateTimeOffset.Now.ToString( CultureInfo.InvariantCulture )
     //               .Length.WriteToDebug();
     //
-    // new AppVersion(int.MaxValue, int.MaxValue, int.MaxValue, int.MaxValue, int.MaxValue, int.MaxValue).ToString()
-    //                                                                                                   .Length.WriteToDebug();
+    // new AppVersion(int.MaxValue, int.MaxValue, int.MaxValue, int.MaxValue, int.MaxValue, int.MaxValue).ToString().Length.WriteToDebug();
 
 
     // var builder = new ValueStringBuilder();

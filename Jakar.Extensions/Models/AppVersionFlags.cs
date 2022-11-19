@@ -1,6 +1,10 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 10/20/2022  2:37 PM
 
+using System;
+
+
+
 namespace Jakar.Extensions;
 
 
@@ -14,13 +18,13 @@ public readonly struct AppVersionFlags : IEquatable<AppVersionFlags>, IEquatable
 
 
     public   string Flag       { get; init; }
-    public   int    Iteration  { get; init; }
+    public   uint   Iteration  { get; init; }
     internal int    Length     => Flag.Length + 15;
     public   bool   IsEmpty    => string.IsNullOrWhiteSpace( Flag );
     public   bool   IsNotEmpty => !IsEmpty;
 
 
-    public AppVersionFlags( string flag, int iteration )
+    public AppVersionFlags( string flag, uint iteration )
     {
         Flag      = flag;
         Iteration = iteration;
@@ -55,9 +59,12 @@ public readonly struct AppVersionFlags : IEquatable<AppVersionFlags>, IEquatable
     }
 
 
-    public bool TryFormat( Span<char> destination, out int charsWritten, ReadOnlySpan<char> format = default, IFormatProvider? provider = default )
+#if NET6_0_OR_GREATER
+    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
+#endif
+    public bool TryFormat( Span<char> span, out int charsWritten, ReadOnlySpan<char> format = default, IFormatProvider? provider = default )
     {
-        if ( destination.IsEmpty || destination.Length < Length ) { throw new ArgumentException( $"{nameof(destination)} is too small" ); }
+        Debug.Assert( span.Length > Length );
 
         if ( IsEmpty )
         {
@@ -66,23 +73,22 @@ public readonly struct AppVersionFlags : IEquatable<AppVersionFlags>, IEquatable
         }
 
 
-        destination[0] = SEPARATOR;
-        for ( int i = 0; i < Flag.Length; i++ ) { destination[i + 1] = Flag[i]; }
+        charsWritten         = 0;
+        span[charsWritten++] = SEPARATOR;
+        foreach ( char t in Flag ) { span[charsWritten++] = t; }
 
+        if ( Iteration > 0 && Iteration.TryFormat( span[charsWritten..], out int intCharsWritten, format, provider ) ) { charsWritten += intCharsWritten; }
 
-        charsWritten = Flag.Length + 1;
-
-        if ( Iteration > 0 && Iteration.TryFormat( destination[charsWritten..], out int intCharsWritten, format, provider ) ) { charsWritten += intCharsWritten; }
-
+        span.WriteToDebug();
         return true;
     }
 
 
     public static AppVersionFlags Default => Stable;
     public static AppVersionFlags Stable  => new(STABLE, 0);
-    public static AppVersionFlags ReleaseCandidate( int iteration = 0 ) => new(RC, iteration);
-    public static AppVersionFlags Alpha( int            iteration = 0 ) => new(ALPHA, iteration);
-    public static AppVersionFlags Beta( int             iteration = 0 ) => new(BETA, iteration);
+    public static AppVersionFlags ReleaseCandidate( uint iteration = 0 ) => new(RC, iteration);
+    public static AppVersionFlags Alpha( uint            iteration = 0 ) => new(ALPHA, iteration);
+    public static AppVersionFlags Beta( uint             iteration = 0 ) => new(BETA, iteration);
 
 
     public static AppVersionFlags Parse( ref ReadOnlySpan<char> value, StringComparison comparison = StringComparison.OrdinalIgnoreCase )
@@ -161,7 +167,7 @@ public readonly struct AppVersionFlags : IEquatable<AppVersionFlags>, IEquatable
                        ? new AppVersionFlags( span.ToString(), 0 )
                        : new AppVersionFlags( span[..end]
                                                  .ToString(),
-                                              int.Parse( span[end..] ) );
+                                              uint.Parse( span[end..] ) );
         }
 
 
