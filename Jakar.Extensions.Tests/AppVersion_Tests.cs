@@ -85,9 +85,7 @@ public class AppVersion_Tests : Assert
     {
         AppVersion version = AppVersion.Parse( s );
 
-        string result = version.AsSpan()
-                               .ToString();
-
+        string result = version.ToString();
         result.WriteToConsole();
         AreEqual( s, result );
     }

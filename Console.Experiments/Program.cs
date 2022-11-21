@@ -20,17 +20,18 @@ try
     // (SOURCE == version.ToString()).WriteToDebug();
 
 
-    var project = new IniConfig.Section
+    var project = new IniConfig.Section( "Project" )
                   {
                       ["Name"] = nameof(Program),
                   };
 
-    project.Add( nameof(DateTime), DateTime.Now );
-    project.Add( nameof(Guid),     Guid.NewGuid() );
+    project.Add( nameof(DateTime),       DateTime.Now );
+    project.Add( nameof(DateTimeOffset), DateTimeOffset.UtcNow );
+    project.Add( nameof(Guid),           Guid.NewGuid() );
 
     project.Add( nameof(AppVersion), new AppVersion( 1, 2, 3, 4, 5, 6, AppVersionFlags.Alpha( 1 ) ) );
 
-    var server = new IniConfig.Section
+    var server = new IniConfig.Section( "Server" )
                  {
                      ["Name"] = nameof(ServicePoint),
                  };
@@ -42,8 +43,8 @@ try
 
     var ini = new IniConfig
               {
-                  [nameof(project)] = project,
-                  [nameof(server)]  = server,
+                  project,
+                  server,
               };
 
     ini[nameof(Random)]

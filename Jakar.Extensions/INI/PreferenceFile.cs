@@ -1,88 +1,64 @@
-﻿// #nullable enable
-// using static Org.BouncyCastle.Math.EC.ECCurve;
-//
-//
-//
-// namespace Jakar.Extensions;
-//
-//
-// public class PreferenceFile : IDisposable, IAsyncDisposable // TODO: Add watcher to update if file changes
-// {
-//     private readonly object     _lock = new();
-//     protected        LocalFile? _file;
-//     private          string?    _fileName;
-//
-//     public LocalFile Path
-//     {
-//         get => _file ??= LocalDirectory.CurrentDirectory.Join( FileName );
-//         protected set => _file = value;
-//     }
-//     public virtual string    FileName => _fileName ??= $"{GetType().Name}.ini";
-//     public         IniConfig Config   { get; }
-//
-//
-//     public PreferenceFile() : this( new IniConfig() ) { }
-//     public PreferenceFile( IniConfig config )
-//     {
-//         Config = config;
-//         Load();
-//     }
-//
-//     public static PreferenceFile Create( LocalFile file )
-//     {
-//         var ini = IniConfig.ReadFromFile( file ) ?? new IniConfig();
-//
-//         return new PreferenceFile( ini )
-//                {
-//                    Path = file,
-//                };
-//     }
-//     public static async Task<PreferenceFile> CreateAsync( LocalFile file )
-//     {
-//         var ini = await IniConfig.ReadFromFileAsync( file ) ?? new IniConfig();
-//
-//         return new PreferenceFile( ini )
-//                {
-//                    Path = file,
-//                };
-//     }
-//
-//
-//     protected Task Load() => Task.Run( LoadAsync );
-//
-//
-//     protected virtual async Task LoadAsync()
-//     {
-//         IniConfig? cfg = await IniConfig.ReadFromFileAsync( Path )
-//                                         .ConfigureAwait( false );
-//
-//         if ( cfg is null ) { return; }
-//
-//         foreach ( KeyValuePair<string, IniConfig.Section> pair in cfg ) { Add( pair ); }
-//     }
-//
-//
-//     protected Task Save() => Task.Run( SaveAsync );
-//     protected virtual async Task SaveAsync() => await IniConfig.WriteToFile( Path )
-//                                                                .ConfigureAwait( false );
-//     public virtual void Dispose( bool disposing )
-//     {
-//         if ( !disposing ) { return; }
-//
-//         Task.Run( async () => await DisposeAsync() )
-//             .Wait();
-//     }
-//     public virtual async ValueTask DisposeAsync()
-//     {
-//         await SaveAsync()
-//            .ConfigureAwait( false );
-//
-//         _file?.Dispose();
-//         _file = null;
-//     }
-//     public void Dispose()
-//     {
-//         Dispose( true );
-//         GC.SuppressFinalize( this );
-//     }
-// }
+﻿#nullable enable
+namespace Jakar.Extensions;
+
+
+public class PreferenceFile : ObservableClass, IAsyncDisposable // TODO: Add watcher to update if file changes
+{
+    private readonly object     _lock = new();
+    protected        DateTime   _lastWriteTimeUtc;
+    private          IniConfig? _config;
+    protected        LocalFile? _file;
+
+
+    protected internal DateTime LastWriteTimeUtc => File.Info.LastWriteTimeUtc;
+    public IniConfig Config
+    {
+        get
+        {
+            lock (_lock)
+            {
+                if ( LastWriteTimeUtc <= _lastWriteTimeUtc ) { return _config ??= IniConfig.ReadFromFile( File ); }
+
+                _lastWriteTimeUtc = LastWriteTimeUtc;
+                return _config = IniConfig.ReadFromFile( File );
+            }
+        }
+        protected set
+        {
+            lock (_lock) { SetProperty( ref _config, value ); }
+        }
+    }
+    public LocalFile File => _file ??= $"{GetType().Name}.ini";
+
+
+    public PreferenceFile() { }
+    public PreferenceFile( LocalFile file ) => _file = file;
+
+
+    public static PreferenceFile Create() => new();
+    public static async ValueTask<PreferenceFile> CreateAsync()
+    {
+        var result = new PreferenceFile();
+        await result.LoadAsync();
+        return result;
+    }
+    public static PreferenceFile Create( LocalFile file ) => new(file);
+    public static async ValueTask<PreferenceFile> CreateAsync( LocalFile file )
+    {
+        var result = new PreferenceFile( file );
+        await result.LoadAsync();
+        return result;
+    }
+    protected ValueTask SaveAsync() => Config.WriteToFile( File );
+
+
+    protected async ValueTask<IniConfig> LoadAsync() => Config = await IniConfig.ReadFromFileAsync( File );
+
+
+    public virtual async ValueTask DisposeAsync()
+    {
+        await SaveAsync();
+        _file?.Dispose();
+        _file = null;
+    }
+}

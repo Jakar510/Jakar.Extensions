@@ -270,28 +270,11 @@ public sealed class AppVersion : IComparable,
     public override string ToString() => ToString( default, CultureInfo.CurrentCulture );
     public string ToString( string? format, IFormatProvider? formatProvider )
     {
-        var    span   = AsSpan( format, formatProvider );
-        string result = span.ToString();
-        result.WriteToDebug();
-        return result;
-    }
-
-
-    public ReadOnlySpan<char> AsSpan() => AsSpan( default,                           CultureInfo.CurrentCulture );
-    public ReadOnlySpan<char> AsSpan( ReadOnlySpan<char> format ) => AsSpan( format, CultureInfo.CurrentCulture );
-    public ReadOnlySpan<char> AsSpan( ReadOnlySpan<char> format, IFormatProvider? provider )
-    {
         Span<char> span = stackalloc char[Length + 1];
-        if ( !TryFormat( span, out int charsWritten, format, provider ) ) { throw new InvalidOperationException( "Conversion failed" ); }
+        if ( !TryFormat( span, out int charsWritten, format, formatProvider ) ) { throw new InvalidOperationException( "Conversion failed" ); }
 
         Span<char> result = span[..charsWritten];
-
-        result.ToString()
-              .WriteToDebug();
-
-        // return MemoryMarshal.CreateReadOnlySpan( ref result.GetPinnableReference(), result.Length );
-        // return new string( result );
-        return result;
+        return result.ToString();
     }
 
 

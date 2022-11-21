@@ -13,22 +13,21 @@ namespace Jakar.Extensions.Tests;
 // ReSharper disable once InconsistentNaming
 public class IniConfig_Tests : Assert
 {
-
-
     [Test]
     public void Test()
     {
-        var project = new IniConfig.Section
+        var project = new IniConfig.Section( "Project" )
                       {
                           ["Name"] = nameof(IniConfig_Tests),
                       };
 
-        project.Add( nameof(DateTime), DateTime.Now );
-        project.Add( nameof(Guid),     Guid.NewGuid() );
+        project.Add( nameof(DateTime),       DateTime.Now );
+        project.Add( nameof(DateTimeOffset), DateTimeOffset.UtcNow );
+        project.Add( nameof(Guid),           Guid.NewGuid() );
+        project.Add( nameof(AppVersion),     new AppVersion( 1, 2, 3, 4, 5, 6, AppVersionFlags.Stable ) );
 
-        project.Add( nameof(AppVersion), new AppVersion( 1, 2, 3, 4, 5, 6, AppVersionFlags.Stable ) );
 
-        var server = new IniConfig.Section
+        var server = new IniConfig.Section( "Server" )
                      {
                          ["Name"] = nameof(ServicePoint),
                      };
@@ -40,8 +39,8 @@ public class IniConfig_Tests : Assert
 
         var ini = new IniConfig
                   {
-                      [nameof(project)] = project,
-                      [nameof(server)]  = server,
+                      project,
+                      server,
                   };
 
         ini[nameof(Random)]
@@ -59,7 +58,7 @@ public class IniConfig_Tests : Assert
 
 
         NotNull( results );
-        AreEqual( results,                   ini );
+        AreEqual( results,                  ini );
         AreEqual( results[nameof(project)], project );
     }
 }

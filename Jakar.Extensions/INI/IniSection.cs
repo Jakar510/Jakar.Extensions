@@ -16,34 +16,28 @@ public partial class IniConfig
 
 
     public sealed class Section : ConcurrentDictionary<string, string?>
-                              #if NET6_0_OR_GREATER
-                                  ,
-                                  ISpanFormattable
-                              #endif
-                              #if NET7_0_OR_GREATER
-                                  ,
-                                  ISpanParsable<Section>
-#endif
     {
-        internal int Longest => Keys.Max( item => item.Length );
+        public   string Name    { get; }
+        internal int    Longest => Keys.Max( item => item.Length );
         public int Length
         {
             get
             {
+                int title  = Name.Length + OPEN.Length + CLOSE.Length;
                 int keys   = (Longest + EQUALS.Length) * Keys.Count;
                 int values = Values.Sum( x => x?.Length ?? 0 );
-                int result = keys + values + Keys.Count;
-                return result * 2;
+                int result = title + keys + values + Keys.Count;
+                return result;
             }
         }
 
 
-        public Section() : this( StringComparer.OrdinalIgnoreCase ) { }
-        public Section( IEqualityComparer<string>                  comparer ) : base( comparer ) { }
-        public Section( IDictionary<string, string?>               dictionary ) : this( dictionary, StringComparer.OrdinalIgnoreCase ) { }
-        public Section( IDictionary<string, string?>               dictionary, IEqualityComparer<string> comparer ) : base( dictionary, comparer ) { }
-        public Section( IEnumerable<KeyValuePair<string, string?>> collection ) : this( collection, StringComparer.OrdinalIgnoreCase ) { }
-        public Section( IEnumerable<KeyValuePair<string, string?>> collection, IEqualityComparer<string> comparer ) : base( collection, comparer ) { }
+        public Section( string name ) : this( name, StringComparer.OrdinalIgnoreCase ) { }
+        public Section( string name, IEqualityComparer<string>                  comparer ) : base( comparer ) => Name = name;
+        public Section( string name, IDictionary<string, string?>               dictionary ) : this( name, dictionary, StringComparer.OrdinalIgnoreCase ) { }
+        public Section( string name, IDictionary<string, string?>               dictionary, IEqualityComparer<string> comparer ) : base( dictionary, comparer ) => Name = name;
+        public Section( string name, IEnumerable<KeyValuePair<string, string?>> collection ) : this( name, collection, StringComparer.OrdinalIgnoreCase ) { }
+        public Section( string name, IEnumerable<KeyValuePair<string, string?>> collection, IEqualityComparer<string> comparer ) : base( collection, comparer ) => Name = name;
 
 
 
@@ -132,17 +126,20 @@ public partial class IniConfig
         public void Add( string    key, IEnumerable<string> values, char   separator ) => this[key] = string.Join( separator, values );
         public void Add( string    key, IEnumerable<string> values, string separator ) => this[key] = string.Join( separator, values );
 
-        public void Add( string key, double    value ) => this[key] = value.ToString( CultureInfo.InvariantCulture );
-        public void Add( string key, float     value ) => this[key] = value.ToString( CultureInfo.InvariantCulture );
-        public void Add( string key, long      value ) => this[key] = value.ToString( CultureInfo.InvariantCulture );
-        public void Add( string key, ulong     value ) => this[key] = value.ToString( CultureInfo.InvariantCulture );
-        public void Add( string key, int       value ) => this[key] = value.ToString( CultureInfo.InvariantCulture );
-        public void Add( string key, uint      value ) => this[key] = value.ToString( CultureInfo.InvariantCulture );
-        public void Add( string key, short     value ) => this[key] = value.ToString( CultureInfo.InvariantCulture );
-        public void Add( string key, ushort    value ) => this[key] = value.ToString( CultureInfo.InvariantCulture );
-        public void Add( string key, IPAddress value ) => this[key] = value.ToString();
-        public void Add( string key, Guid      value ) => this[key] = value.ToString();
-        public void Add( string key, bool      value ) => this[key] = value.ToString();
+        public void Add( string key, double         value ) => this[key] = value.ToString( CultureInfo.CurrentCulture );
+        public void Add( string key, float          value ) => this[key] = value.ToString( CultureInfo.CurrentCulture );
+        public void Add( string key, long           value ) => this[key] = value.ToString( CultureInfo.CurrentCulture );
+        public void Add( string key, ulong          value ) => this[key] = value.ToString( CultureInfo.CurrentCulture );
+        public void Add( string key, int            value ) => this[key] = value.ToString( CultureInfo.CurrentCulture );
+        public void Add( string key, uint           value ) => this[key] = value.ToString( CultureInfo.CurrentCulture );
+        public void Add( string key, short          value ) => this[key] = value.ToString( CultureInfo.CurrentCulture );
+        public void Add( string key, ushort         value ) => this[key] = value.ToString( CultureInfo.CurrentCulture );
+        public void Add( string key, TimeSpan       value ) => this[key] = value.ToString();
+        public void Add( string key, DateTime       value ) => this[key] = value.ToString( CultureInfo.CurrentCulture );
+        public void Add( string key, DateTimeOffset value ) => this[key] = value.ToString( CultureInfo.CurrentCulture );
+        public void Add( string key, IPAddress      value ) => this[key] = value.ToString();
+        public void Add( string key, Guid           value ) => this[key] = value.ToString();
+        public void Add( string key, bool           value ) => this[key] = value.ToString();
         public void Add( string key, AppVersion value )
         {
             string version = value.ToString();
@@ -158,24 +155,29 @@ public partial class IniConfig
             string.Empty.WriteToConsole();
         }
         public void Add( string key, Version value ) => this[key] = value.ToString();
-        public void Add( string key, string  value ) => this[key] = value;
+        public void Add( string key, string? value ) => this[key] = value;
 
 
-        public void Add( string key, TimeSpan value, string? format = default, CultureInfo? culture = default ) =>
+        public void Add( string key, TimeSpan value, string? format, CultureInfo? culture = default ) =>
             this[key] = format is null
                             ? value.ToString()
-                            : value.ToString( format, culture ?? CultureInfo.InvariantCulture );
+                            : value.ToString( format, culture ?? CultureInfo.CurrentCulture );
 
-        public void Add( string key, DateTime value, string? format = default, CultureInfo? culture = default ) =>
+        public void Add( string key, DateTime value, string? format, CultureInfo? culture = default ) =>
             this[key] = format is null
-                            ? value.ToString( culture ?? CultureInfo.InvariantCulture )
-                            : value.ToString( format, culture ?? CultureInfo.InvariantCulture );
+                            ? value.ToString( culture ?? CultureInfo.CurrentCulture )
+                            : value.ToString( format, culture ?? CultureInfo.CurrentCulture );
+
+        public void Add( string key, DateTimeOffset value, string? format, CultureInfo? culture = default ) =>
+            this[key] = format is null
+                            ? value.ToString( culture ?? CultureInfo.CurrentCulture )
+                            : value.ToString( format, culture ?? CultureInfo.CurrentCulture );
 
         #endregion
 
 
 
-        public override string ToString() => ToString( default, CultureInfo.InvariantCulture );
+        public override string ToString() => ToString( default, CultureInfo.CurrentCulture );
         public string ToString( string? format, IFormatProvider? formatProvider )
         {
             Span<char> span = stackalloc char[Length + 1];
@@ -199,10 +201,18 @@ public partial class IniConfig
             charsWritten = 0;
             int longest = Longest;
 
+            foreach ( char t in OPEN ) { destination[charsWritten++] = t; }
+
+            foreach ( char t in Name ) { destination[charsWritten++] = t; }
+
+            foreach ( char t in CLOSE ) { destination[charsWritten++] = t; }
+
+            destination[charsWritten++] = '\n';
+
+
             foreach ( (string sKey, string? sValue) in this )
             {
                 ReadOnlySpan<char> sectionValue = sValue;
-                if ( sKey == nameof(AppVersion) ) { sectionValue.WriteToDebug(); }
 
                 foreach ( char c in sKey.PadRight( longest ) ) { destination[charsWritten++] = c; }
 
@@ -214,25 +224,6 @@ public partial class IniConfig
             }
 
             return true;
-        }
-        public static Section Parse( string s ) => Parse( s,                                     CultureInfo.InvariantCulture );
-        public static Section Parse( string s, IFormatProvider? provider ) => Parse( s.AsSpan(), provider );
-        public static bool TryParse( string? s, IFormatProvider? provider, [NotNullWhen( true )] out Section? result )
-        {
-            result = null;
-            return false;
-        }
-        public static Section Parse( ReadOnlySpan<char> span, IFormatProvider? provider )
-        {
-            var result = new Section();
-
-
-            return result;
-        }
-        public static bool TryParse( ReadOnlySpan<char> span, IFormatProvider? provider, [NotNullWhen( true )] out Section? result )
-        {
-            result = null;
-            return false;
         }
     }
 }
