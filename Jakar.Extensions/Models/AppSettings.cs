@@ -29,32 +29,27 @@ public class AppSettings : BaseHostViewModel, IAppSettings
     private string     _deviceVersion = string.Empty;
     private string?    _screenShotAddress;
 
+
     public virtual AppVersion AppVersion
     {
         get => _appVersion;
         set => SetProperty( ref _appVersion, value );
     }
-
-
     public virtual Guid DeviceID
     {
         get => _deviceID;
         set => SetProperty( ref _deviceID, value );
     }
-
     public virtual string AppName
     {
         get => _appName;
         set => SetProperty( ref _appName, value );
     }
-
     public virtual string DeviceVersion
     {
         get => _deviceVersion;
         set => SetProperty( ref _deviceVersion, value );
     }
-
-
     public virtual string? ScreenShotAddress
     {
         get => _screenShotAddress;
@@ -62,12 +57,11 @@ public class AppSettings : BaseHostViewModel, IAppSettings
     }
 
 
-    public AppSettings( string appName, in AppVersion version, string deviceVersion, Uri  hostInfo ) : this( appName, version, deviceVersion, true, hostInfo ) { }
-    public AppSettings( string appName, in AppVersion version, string deviceVersion, bool sendCrashes, Uri hostInfo ) : this( appName, version, deviceVersion, sendCrashes, hostInfo, hostInfo ) { }
-    public AppSettings( string appName, in AppVersion version, string deviceVersion, bool sendCrashes, Uri hostInfo, Uri defaultHostInfo ) : base( hostInfo, defaultHostInfo )
+    public AppSettings( string appName, in AppVersion version, string deviceVersion, Uri hostInfo ) : this( appName, version, deviceVersion, hostInfo, hostInfo ) { }
+    public AppSettings( string appName, in AppVersion version, string deviceVersion, Uri hostInfo, Uri defaultHostInfo ) : base( hostInfo, defaultHostInfo )
     {
         AppName       = appName;
-        AppVersion    = version;
+        _appVersion   = version;
         DeviceVersion = deviceVersion;
     }
 }
@@ -86,7 +80,6 @@ public class AppSettings<TViewPage> : AppSettings, IAppSettings<TViewPage>
     }
 
 
-    public AppSettings( string appName, in AppVersion version, string deviceVersion, Uri  hostInfo ) : base( appName, version, deviceVersion, hostInfo ) { }
-    public AppSettings( string appName, in AppVersion version, string deviceVersion, bool sendCrashes, Uri hostInfo ) : base( appName, version, deviceVersion, sendCrashes, hostInfo ) { }
-    public AppSettings( string appName, in AppVersion version, string deviceVersion, bool sendCrashes, Uri hostInfo, Uri defaultHostInfo ) : base( appName, version, deviceVersion, sendCrashes, hostInfo, defaultHostInfo ) { }
+    public AppSettings( string appName, in AppVersion version, string deviceVersion, Uri hostInfo ) : base( appName, version, deviceVersion, hostInfo ) { }
+    public AppSettings( string appName, in AppVersion version, string deviceVersion, Uri hostInfo, Uri defaultHostInfo ) : base( appName, version, deviceVersion, hostInfo, defaultHostInfo ) { }
 }

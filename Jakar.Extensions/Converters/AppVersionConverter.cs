@@ -23,6 +23,12 @@ public class AppVersionConverter : JsonConverter<AppVersion>
 
     public override void WriteJson( JsonWriter writer, AppVersion? value, JsonSerializer serializer )
     {
+        if ( value is null )
+        {
+            writer.WriteNull();
+            return;
+        }
+
         JToken item = JToken.FromObject( value.ToString() );
         item.WriteTo( writer );
     }
