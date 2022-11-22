@@ -15,16 +15,16 @@ internal static class InstanceCreator
 
 public static class InstanceCreator<TItem>
 {
-    private static Type _Type => typeof(TItem);
+    public static Type Type { get; } = typeof(TItem);
 
 
-    public static TItem Create() => (TItem)(Activator.CreateInstance( _Type ) ?? throw new InvalidOperationException());
-    public static TItem Create( params object[] args ) => (TItem)(Activator.CreateInstance( _Type,                                                             args ) ?? throw new InvalidOperationException());
-    public static TItem Create( bool            nonPublic ) => (TItem)(Activator.CreateInstance( _Type,                                                        nonPublic ) ?? throw new InvalidOperationException());
-    public static TItem Create( object[]        args,        object[] activationAttributes ) => (TItem)(Activator.CreateInstance( _Type,                       args,        activationAttributes ) ?? throw new InvalidOperationException());
-    public static TItem Create( BindingFlags    bindingAttr, Binder   binder, object[] args, CultureInfo culture ) => (TItem)(Activator.CreateInstance( _Type, bindingAttr, binder, args, culture ) ?? throw new InvalidOperationException());
+    public static TItem Create() => (TItem)(Activator.CreateInstance( Type ) ?? throw new InvalidOperationException());
+    public static TItem Create( params object[] args ) => (TItem)(Activator.CreateInstance( Type,                                                             args ) ?? throw new InvalidOperationException());
+    public static TItem Create( bool            nonPublic ) => (TItem)(Activator.CreateInstance( Type,                                                        nonPublic ) ?? throw new InvalidOperationException());
+    public static TItem Create( object[]        args,        object[] activationAttributes ) => (TItem)(Activator.CreateInstance( Type,                       args,        activationAttributes ) ?? throw new InvalidOperationException());
+    public static TItem Create( BindingFlags    bindingAttr, Binder   binder, object[] args, CultureInfo culture ) => (TItem)(Activator.CreateInstance( Type, bindingAttr, binder, args, culture ) ?? throw new InvalidOperationException());
     public static TItem Create( BindingFlags bindingAttr, Binder binder, object[] args, CultureInfo culture, object[] activationAttributes ) =>
-        (TItem)(Activator.CreateInstance( _Type, bindingAttr, binder, args, culture, activationAttributes ) ?? throw new InvalidOperationException());
+        (TItem)(Activator.CreateInstance( Type, bindingAttr, binder, args, culture, activationAttributes ) ?? throw new InvalidOperationException());
 }
 
 
