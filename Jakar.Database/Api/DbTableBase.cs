@@ -1,6 +1,10 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 10/16/2022  4:54 PM
 
+using FluentMigrator.Runner.Generators.Base;
+
+
+
 namespace Jakar.Database;
 #nullable enable
 #pragma warning disable CS8424 // The EnumeratorCancellationAttribute will have no effect. The attribute is only effective on a parameter of type CancellationToken in an async-iterator method returning IAsyncEnumerable
@@ -40,36 +44,28 @@ public class DbTableBase<TRecord> : ObservableClass, IConnectableDb<TRecord>, IA
 
 
     [SuppressMessage( "ReSharper", "ReturnTypeCanBeEnumerable.Global" )]
-    public sealed class TypePropertiesCache : IEnumerable<Descriptor>
+    public sealed class TypePropertiesCache
     {
-        private readonly IConnectableDb                                             _table;
-        private readonly IReadOnlyDictionary<DbInstance, IReadOnlyList<Descriptor>> _dictionary;
+        private readonly IConnectableDb                                                           _table;
+        private readonly IReadOnlyDictionary<DbInstance, IReadOnlyDictionary<string, Descriptor>> _dictionary = GetDescriptors();
+        public           IReadOnlyDictionary<string, Descriptor>                                  Descriptors => _dictionary[_table.Instance];
+        public           IEnumerable<Descriptor>                                                  NotKeys     => Descriptors.Values.Where( x => !x.IsKey );
+        public Descriptor this[ string columnName ] => Descriptors[columnName];
 
 
-        public TypePropertiesCache( IConnectableDb table )
+        public TypePropertiesCache( IConnectableDb table ) => _table = table;
+
+
+        private static IReadOnlyDictionary<DbInstance, IReadOnlyDictionary<string, Descriptor>> GetDescriptors()
         {
-            _table = table;
             PropertyInfo[] properties = typeof(TRecord).GetProperties( BindingFlags.Instance | BindingFlags.Public | BindingFlags.SetProperty | BindingFlags.GetProperty );
 
-
-            _dictionary = new ConcurrentDictionary<DbInstance, IReadOnlyList<Descriptor>>
-                          {
-                              [DbInstance.Postgres] = properties.Select( property => new PostgresDescriptor( property ) )
-                                                                .ToArray(),
-
-                              [DbInstance.MsSql] = properties.Select( property => new MsSqlDescriptor( property ) )
-                                                             .ToArray(),
-                          };
+            return new ConcurrentDictionary<DbInstance, IReadOnlyDictionary<string, Descriptor>>
+                   {
+                       [DbInstance.Postgres] = properties.ToDictionary<PropertyInfo, string, Descriptor>( property => property.Name, property => new PostgresDescriptor( property ) ),
+                       [DbInstance.MsSql]    = properties.ToDictionary<PropertyInfo, string, Descriptor>( property => property.Name, property => new MsSqlDescriptor( property ) ),
+                   };
         }
-
-
-        [Pure] public Descriptor Get( string columnName ) => this.First( x => x.Name == columnName );
-
-
-        public IEnumerator<Descriptor> GetEnumerator() =>
-            _dictionary[_table.Instance]
-               .GetEnumerator();
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 
 
@@ -83,6 +79,30 @@ public class DbTableBase<TRecord> : ObservableClass, IConnectableDb<TRecord>, IA
     public async IAsyncEnumerable<TRecord> Insert( DbConnection connection, DbTransaction transaction, IAsyncEnumerable<TRecord> records, [EnumeratorCancellation] CancellationToken token = default )
     {
         await foreach ( TRecord record in records.WithCancellation( token ) ) { yield return await Insert( connection, transaction, record, token ); }
+    }
+    public ValueTask<TRecord> Insert( TRecord record, CancellationToken token = default ) => this.TryCall( Insert, record, token );
+    public virtual async ValueTask<TRecord> Insert( DbConnection connection, DbTransaction transaction, TRecord record, CancellationToken token = default )
+    {
+        var sbColumnList = new StringBuilder();
+        sbColumnList.AppendJoin( ',', _propertiesCache.NotKeys.Select( x => x.ColumnName ) );
+
+
+        var sbParameterList = new StringBuilder();
+        sbParameterList.AppendJoin( ',', _propertiesCache.NotKeys.Select( x => x.VariableName ) );
+
+
+        string sql        = $"INSERT INTO {SchemaTableName} ({sbColumnList}) values ({sbParameterList});";
+        var    parameters = new DynamicParameters( record );
+
+
+        if ( token.IsCancellationRequested ) { return record; }
+
+        try
+        {
+            long id = await connection.ExecuteScalarAsync<long>( sql, parameters, transaction );
+            return record.NewID( id );
+        }
+        catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
     }
 
 
@@ -171,7 +191,7 @@ public class DbTableBase<TRecord> : ObservableClass, IConnectableDb<TRecord>, IA
     }
     public virtual async ValueTask Update( DbConnection connection, DbTransaction? transaction, TRecord record, CancellationToken token = default )
     {
-        string sql        = $"UPDATE {SchemaTableName} SET {string.Join( ',', _propertiesCache.Where( x => !x.IsKey ).Select( x => x.KeyValuePair ) )} WHERE {IDKey} = @{nameof(IDataBaseID.ID)};";
+        string sql        = $"UPDATE {SchemaTableName} SET {string.Join( ',', _propertiesCache.NotKeys.Where( x => !x.IsKey ).Select( x => x.KeyValuePair ) )} WHERE {IDKey} = @{nameof(IDataBaseID.ID)};";
         var    parameters = new DynamicParameters( record );
 
         if ( token.IsCancellationRequested ) { return; }
@@ -209,7 +229,7 @@ public class DbTableBase<TRecord> : ObservableClass, IConnectableDb<TRecord>, IA
     public ValueTask<long> GetID<TValue>( string columnName, TValue value, CancellationToken token = default ) => this.Call( GetID, columnName, value, token );
     public virtual async ValueTask<long> GetID<TValue>( DbConnection connection, DbTransaction? transaction, string columnName, TValue value, CancellationToken token = default )
     {
-        string sql        = $"SELECT {IDKey} FROM {SchemaTableName} WHERE {_propertiesCache.Get( columnName ).ColumnName} = @{nameof(value)}";
+        string sql        = $"SELECT {IDKey} FROM {SchemaTableName} WHERE {_propertiesCache[columnName].ColumnName} = @{nameof(value)}";
         var    parameters = new DynamicParameters();
         parameters.Add( nameof(value), value );
         token.ThrowIfCancellationRequested();
@@ -305,7 +325,7 @@ public class DbTableBase<TRecord> : ObservableClass, IConnectableDb<TRecord>, IA
         var parameters = new DynamicParameters();
         parameters.Add( nameof(value), value );
 
-        string sql = $"SELECT * FROM {SchemaTableName} WHERE {_propertiesCache.Get( columnName ).ColumnName} = @{nameof(value)}";
+        string sql = $"SELECT * FROM {SchemaTableName} WHERE {_propertiesCache[columnName].ColumnName} = @{nameof(value)}";
 
         if ( token.IsCancellationRequested ) { return default; }
 
@@ -475,8 +495,8 @@ public class DbTableBase<TRecord> : ObservableClass, IConnectableDb<TRecord>, IA
         string sql = new StringBuilder( $"SELECT * FROM {SchemaTableName} WHERE " ).AppendJoin( matchAll
                                                                                                     ? "AND"
                                                                                                     : "OR",
-                                                                                                parameters.ParameterNames.Select( x => _propertiesCache.Get( x )
-                                                                                                                                                       .KeyValuePair ) )
+                                                                                                parameters.ParameterNames.Select( x => _propertiesCache[x]
+                                                                                                                                     .KeyValuePair ) )
                                                                                    .ToString();
 
         return Where( connection, transaction, sql, parameters, token );
@@ -494,39 +514,11 @@ public class DbTableBase<TRecord> : ObservableClass, IConnectableDb<TRecord>, IA
     }
     public virtual ValueTask<TRecord[]> Where<TValue>( DbConnection connection, DbTransaction? transaction, string columnName, TValue? value, [EnumeratorCancellation] CancellationToken token = default )
     {
-        string sql        = $"SELECT * FROM {SchemaTableName} WHERE {_propertiesCache.Get( columnName ).ColumnName} = @{nameof(value)}";
+        string sql        = $"SELECT * FROM {SchemaTableName} WHERE {_propertiesCache[columnName].ColumnName} = @{nameof(value)}";
         var    parameters = new DynamicParameters();
         parameters.Add( nameof(value), value );
 
         return Where( connection, transaction, sql, parameters, token );
-    }
-    public ValueTask<TRecord> Insert( TRecord record, CancellationToken token = default ) => this.TryCall( Insert, record, token );
-    public virtual async ValueTask<TRecord> Insert( DbConnection connection, DbTransaction transaction, TRecord record, CancellationToken token = default )
-    {
-        List<Descriptor> descriptors = _propertiesCache.Where( x => !x.IsKey )
-                                                       .ToList();
-
-
-        var sbColumnList = new StringBuilder();
-        sbColumnList.AppendJoin( ',', descriptors.Select( x => x.ColumnName ) );
-
-
-        var sbParameterList = new StringBuilder();
-        sbParameterList.AppendJoin( ',', descriptors.Select( x => x.VariableName ) );
-
-
-        string sql        = $"INSERT INTO {SchemaTableName} ({sbColumnList}) values ({sbParameterList});";
-        var    parameters = new DynamicParameters( record );
-
-
-        if ( token.IsCancellationRequested ) { return record; }
-
-        try
-        {
-            long id = await connection.ExecuteScalarAsync<long>( sql, parameters, transaction );
-            return record.NewID( id );
-        }
-        catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
     }
 
 

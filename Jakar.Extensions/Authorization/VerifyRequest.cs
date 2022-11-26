@@ -3,9 +3,10 @@ namespace Jakar.Extensions;
 
 
 [Serializable]
-public class VerifyRequest : BaseClass, ILoginRequest, ICredentials, IEquatable<VerifyRequest>
+public record VerifyRequest : BaseRecord, ILoginRequest, ICredentials
 {
     public virtual bool IsValid => !string.IsNullOrWhiteSpace( UserLogin ) && !string.IsNullOrWhiteSpace( UserPassword );
+
 
     [Required( ErrorMessage = "Email address is required." )]
     [JsonProperty( nameof(UserLogin), Required = Required.Always )]
@@ -22,12 +23,7 @@ public class VerifyRequest : BaseClass, ILoginRequest, ICredentials, IEquatable<
         UserLogin    = userName ?? throw new ArgumentNullException( nameof(userName) );
         UserPassword = userPassword ?? throw new ArgumentNullException( nameof(userPassword) );
     }
-
-
-    public static bool operator ==( VerifyRequest? left, VerifyRequest? right ) => Equals( left, right );
-    public static bool operator !=( VerifyRequest? left, VerifyRequest? right ) => !Equals( left, right );
-    public override bool Equals( object?           obj ) => obj is VerifyRequest request && Equals( request );
-    public override int GetHashCode() => HashCode.Combine( UserLogin, UserPassword );
+    public override int GetHashCode() => HashCode.Combine( base.GetHashCode(), UserLogin, UserPassword );
 
 
     public virtual NetworkCredential GetCredential( Uri uri, string authType ) => new(UserLogin, UserPassword.ToSecureString());
@@ -39,17 +35,18 @@ public class VerifyRequest : BaseClass, ILoginRequest, ICredentials, IEquatable<
 
         if ( ReferenceEquals( this, other ) ) { return true; }
 
-        return UserLogin == other.UserLogin && UserPassword == other.UserPassword;
+        return base.Equals( other ) && UserLogin == other.UserLogin && UserPassword == other.UserPassword;
     }
 }
 
 
 
-public class VerifyRequest<T> : BaseClass, ICredentials, IValidator, IEquatable<VerifyRequest<T>> where T : notnull
+public record VerifyRequest<T> : BaseRecord, ICredentials, IValidator where T : notnull
 {
     public bool IsValid => Data is IValidator validator
                                ? Request.IsValid && validator.IsValid
                                : Request.IsValid;
+
 
     public T             Data    { get; init; } = default!;
     public VerifyRequest Request { get; init; } = new();
@@ -63,23 +60,13 @@ public class VerifyRequest<T> : BaseClass, ICredentials, IValidator, IEquatable<
     }
 
 
-    public static bool operator ==( VerifyRequest<T>? left, VerifyRequest<T>? right ) => Equals( left, right );
-    public static bool operator !=( VerifyRequest<T>? left, VerifyRequest<T>? right ) => !Equals( left, right );
-    public override bool Equals( object? other )
-    {
-        if ( other is null ) { return false; }
-
-        if ( ReferenceEquals( this, other ) ) { return true; }
-
-        return other is VerifyRequest<T> request && Equals( request );
-    }
     public override int GetHashCode() => HashCode.Combine( Request, Data );
 
 
     public NetworkCredential GetCredential( Uri uri, string authType ) => Request.GetCredential( uri, authType );
 
 
-    public bool Equals( VerifyRequest<T>? other )
+    public virtual bool Equals( VerifyRequest<T>? other )
     {
         if ( other is null ) { return false; }
 

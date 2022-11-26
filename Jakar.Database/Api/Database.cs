@@ -246,7 +246,22 @@ public abstract class Database : Randoms, IConnectableDb, IAsyncDisposable, IHea
         return Tokens.Create( handler.WriteToken( security ), refreshToken, Version, user );
     }
     protected virtual ValueTask<Tokens> GetToken( DbConnection connection, DbTransaction? transaction, UserRecord user, CancellationToken token ) => GetJwtToken( connection, transaction, user, token );
+    
 
+    public ValueTask<ActionResult<bool>> Register( ControllerBase controller, VerifyRequest<IUserData> request, CancellationToken token = default ) => this.TryCall(Register, controller, request, token);
+    public async ValueTask<ActionResult<bool>> Register( DbConnection connection, DbTransaction transaction, ControllerBase controller, VerifyRequest<IUserData> request, CancellationToken token = default )
+    {
+        var parameters = new DynamicParameters();
+        parameters.Add(nameof(UserRecord.UserName), request.Request.UserLogin);
+
+
+        UserRecord? record = await Users.Get(connection, transaction, true, parameters, token);
+        if ( record is not null ) { return controller.Duplicate(); }
+
+        record = UserRecord.Create(request);
+        record = await Users.Insert(connection, transaction, record, token);
+        return record.IsValidID();
+    }
 
 
     #region Core

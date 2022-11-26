@@ -39,13 +39,16 @@ public ref struct Buffer<T> where T : unmanaged, IEquatable<T>
     public Buffer() : this( 64, false ) { }
     public Buffer( int initialCapacity, bool isReadOnly )
     {
+        // var sb = new StringBuilder( "", 0, 0, initialCapacity );
+        // GC.AllocateUninitializedArray<T>( initialCapacity );
+
         _span      = _arrayToReturnToPool = ArrayPool<T>.Shared.Rent( initialCapacity );
         IsReadOnly = isReadOnly;
     }
     public void Dispose()
     {
         T[]? toReturn = _arrayToReturnToPool;
-        this = default; // for safety, to avoid using pooled array if this instance is erroneously appended to again
+        this = default; // For safety, to avoid using pooled array if this instance is erroneously appended to again
         if ( toReturn is not null ) { ArrayPool<T>.Shared.Return( toReturn ); }
     }
     public readonly Enumerator GetEnumerator() => new(this);
@@ -61,7 +64,6 @@ public ref struct Buffer<T> where T : unmanaged, IEquatable<T>
 
 
     [Pure] public static Buffer<T> Create( ReadOnlySpan<T> span, bool isReadOnly ) => new Buffer<T>().Init( span, isReadOnly );
-    [Pure]
     public Buffer<T> Init( ReadOnlySpan<T> span, bool isReadOnly )
     {
         if ( _arrayToReturnToPool is not null ) { ArrayPool<T>.Shared.Return( _arrayToReturnToPool ); }
