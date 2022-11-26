@@ -9,12 +9,12 @@ public class ExceptionDetails
     public int                          HResult         { get; init; }
     public List<string>?                StackTrace      { get; init; }
     public MethodDetails?               TargetSite      { get; init; }
-    public string                       Message         { get; init; } = string.Empty;
-    public string                       Str             { get; init; } = string.Empty;
-    public string?                      HelpLink        { get; init; }
-    public string?                      MethodSignature { get; init; }
-    public string?                      Source          { get; init; }
-    public string?                      Type            { get; init; }
+    [MaxLength(int.MaxValue )] public string                       Message         { get; init; } = string.Empty;
+    [MaxLength(4096 )] public string                       Str             { get; init; } = string.Empty;
+    [MaxLength(4096 )] public string?                      HelpLink        { get; init; }
+    [MaxLength(10240 )] public string?                      MethodSignature { get; init; }
+    [MaxLength(4096 )] public string?                      Source          { get; init; }
+    [MaxLength(4096 )] public string?                      Type            { get; init; }
 
 
     public ExceptionDetails() { }
@@ -65,9 +65,9 @@ public class MethodDetails
     public bool                    IsVirtual           { get; init; }
     public List<ParameterDetails>? Parameters          { get; init; }
     public MethodAttributes        Attributes          { get; init; }
-    public string                  Name                { get; init; } = string.Empty;
-    public string                  Signature           { get; init; } = string.Empty;
-    public string?                 DeclaringType       { get; init; }
+    [MaxLength(4096 )] public string                  Name                { get; init; } = string.Empty;
+    [MaxLength(10240 )] public string                  Signature           { get; init; } = string.Empty;
+    [MaxLength(10240 )] public string?                 DeclaringType       { get; init; }
 
 
     public MethodDetails() { }
@@ -104,8 +104,8 @@ public class ParameterDetails
     public bool    IsOptional      { get; init; }
     public bool    IsOut           { get; init; }
     public int     Position        { get; init; }
-    public string? Name            { get; init; }
-    public string? Type            { get; init; }
+    [MaxLength(4096 )] public string? Name            { get; init; }
+    [MaxLength(10240 )] public string? Type            { get; init; }
 
 
     public ParameterDetails() { }
