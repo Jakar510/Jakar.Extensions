@@ -1,0 +1,42 @@
+﻿#processing {
+    height: 100%;
+    left: 0px;
+    position: fixed;
+    top: 0px;
+    visibility: visible;
+    width: 100%;
+    z-index: 99999;
+}
+
+#mask {
+    background-color: #ffffff;
+    height: 100%;
+    left: 0px;
+    opacity: 0.0;
+    position: fixed;
+    top: 0px;
+    visibility: hidden;
+    width: 100%;
+    z-index: 99999;
+}
+
+#loading {
+    background-image: url('../img/loading.gif');
+    background-position: center;
+    background-repeat: no-repeat;
+    cursor: wait;
+    height: 100%;
+    left: 0px;
+    position: fixed;
+    top: 0px;
+    visibility: visible;
+    width: 100%;
+    z-index: 99999;
+}
+
+#loading div {
+    background-color: #c9def5;
+    height: 100%;
+    opacity: 0.1;
+    width: 100%;
+}

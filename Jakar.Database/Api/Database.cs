@@ -156,8 +156,11 @@ public abstract class Database : Randoms, IConnectableDb, IAsyncDisposable, IHea
     }
 
 
-    /// <summary> Only to be used for <see cref="ITokenService"/> </summary>
-    /// <exception cref="ArgumentOutOfRangeException"> </exception>
+    /// <summary>
+    ///     Only to be used for
+    ///     <see cref = "ITokenService" />
+    /// </summary>
+    /// <exception cref = "ArgumentOutOfRangeException" > </exception>
     public ValueTask<Tokens> Authenticate( VerifyRequest request, CancellationToken token ) => this.TryCall( Authenticate, request, token );
     protected virtual async ValueTask<Tokens> Authenticate( DbConnection connection, DbTransaction transaction, VerifyRequest request, CancellationToken token )
     {
@@ -246,22 +249,23 @@ public abstract class Database : Randoms, IConnectableDb, IAsyncDisposable, IHea
         return Tokens.Create( handler.WriteToken( security ), refreshToken, Version, user );
     }
     protected virtual ValueTask<Tokens> GetToken( DbConnection connection, DbTransaction? transaction, UserRecord user, CancellationToken token ) => GetJwtToken( connection, transaction, user, token );
-    
 
-    public ValueTask<ActionResult<bool>> Register( ControllerBase controller, VerifyRequest<IUserData> request, CancellationToken token = default ) => this.TryCall(Register, controller, request, token);
-    public async ValueTask<ActionResult<bool>> Register( DbConnection connection, DbTransaction transaction, ControllerBase controller, VerifyRequest<IUserData> request, CancellationToken token = default )
+
+    public ValueTask<ActionResult<bool>> Register( ControllerBase controller, VerifyRequest<IUserData> request, CancellationToken token = default ) => this.TryCall( Register, controller, request, token );
+    public virtual async ValueTask<ActionResult<bool>> Register( DbConnection connection, DbTransaction transaction, ControllerBase controller, VerifyRequest<IUserData> request, CancellationToken token = default )
     {
         var parameters = new DynamicParameters();
-        parameters.Add(nameof(UserRecord.UserName), request.Request.UserLogin);
+        parameters.Add( nameof(UserRecord.UserName), request.Request.UserLogin );
 
 
-        UserRecord? record = await Users.Get(connection, transaction, true, parameters, token);
+        UserRecord? record = await Users.Get( connection, transaction, true, parameters, token );
         if ( record is not null ) { return controller.Duplicate(); }
 
-        record = UserRecord.Create(request);
-        record = await Users.Insert(connection, transaction, record, token);
+        record = UserRecord.Create( request );
+        record = await Users.Insert( connection, transaction, record, token );
         return record.IsValidID();
     }
+
 
 
     #region Core

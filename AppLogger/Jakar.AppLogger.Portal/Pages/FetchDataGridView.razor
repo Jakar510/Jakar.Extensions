@@ -1,0 +1,64 @@
+﻿@page "/fetchdata-gridview"
+@inherits ControlComponent
+
+
+<pagetitle>Weather forecast (GridView)</pagetitle>
+@* @inject WeatherForecastService _ForecastService *@
+
+<div>
+    <h1>Weather forecast (GridView)</h1>
+    <asp.Button OnClick="Button_Click"
+                Text="Load Data" >
+    </asp.Button>
+    <hr />
+    <asp.Label @ref="_label" ></asp.Label>
+    <br />
+    <asp.GridView AllowPaging="true"
+                  AutoGenerateColumns="false"
+                  CssClass="table"
+                  OnPageIndexChanging="GridView_PageIndexChanging"
+                  PageSize="4"
+                  @ref="_gridview" >
+        <Columns>
+            <asp.BoundField DataField="Date"
+                            DataFormatString="{0:yyyy/M/d}"
+                            HeaderText="Date" >
+            </asp.BoundField>
+            <asp.BoundField DataField="TemperatureC"
+                            HeaderText="Temp. (C)" >
+            </asp.BoundField>
+            <asp.BoundField DataField="TemperatureF"
+                            HeaderText="Temp. (F)" >
+            </asp.BoundField>
+            <asp.BoundField DataField="Summary"
+                            HeaderText="Summary" >
+            </asp.BoundField>
+        </Columns>
+    </asp.GridView>
+</div>
+
+@code {
+    // private WeatherForecast[] _forecasts;
+    private Label _label;
+    private GridView _gridview;
+
+
+    protected void Button_Click( object? sender, EventArgs e )
+    {
+    // _forecasts = await _ForecastService.GetForecastAsync(DateTime.Now);
+    //
+    // _label.Text = DateTime.Now.ToString();
+    //
+    // _gridview.PageIndex = 0;
+    // _gridview.DataSource = _forecasts;
+    // _gridview.DataBind();
+
+        this.RequestRefresh();
+    }
+
+    protected void GridView_PageIndexChanging( object? sender, GridViewPageEventArgs e )
+    {
+        _gridview.PageIndex = e.NewPageIndex;
+        _gridview.DataBind();
+    }
+}

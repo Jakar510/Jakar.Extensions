@@ -1,0 +1,40 @@
+﻿@inherits LayoutComponentBase
+
+<PageTitle>AppLogger Portal</PageTitle>
+
+
+<div class="wrapper" >
+    <TopBar />
+
+    <aside class="elevation-4 main-sidebar sidebar-dark-primary" >
+        <a class="brand-link"
+           href="" >
+            <img alt="Blazor.WebForm Logo"
+                 class="brand-image"
+                 src="img/logo.png" >
+            <span class="brand-text font-weight-light" >AppLogger Portal</span>
+        </a>
+
+        <div class="sidebar" >
+            <nav class="mt-2" >
+                <NavMenu />
+            </nav>
+        </div>
+    </aside>
+
+    <div class="content-wrapper" >
+        <div class="content" >
+            <div class="container-fluid" >
+                @Body
+            </div>
+        </div>
+    </div>
+
+    <footer class="main-footer" >
+    </footer>
+
+    <aside class="control-sidebar control-sidebar-dark" >
+    </aside>
+</div>
+
+<MainScript />

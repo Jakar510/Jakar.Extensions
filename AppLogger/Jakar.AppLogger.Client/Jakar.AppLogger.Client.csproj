@@ -1,0 +1,58 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFrameworks>netstandard2.1;net6.0</TargetFrameworks>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<LangVersion>latest</LangVersion>
+		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(TargetFramework)'=='net6.0'">
+		<UseMaui>true</UseMaui>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard2.1|AnyCPU'">
+		<DefineConstants>$(DefineConstants);__WINDOWS__;__LINUX__;__IOS__;__ANDROID__;__MACOS__</DefineConstants>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|netstandard2.1|AnyCPU'">
+		<DefineConstants>$(DefineConstants);__WINDOWS__;__LINUX__;__IOS__;__ANDROID__;__MACOS__</DefineConstants>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net6.0|AnyCPU'">
+		<DefineConstants>$(DefineConstants);__WINDOWS__;__LINUX__;__IOS__;__ANDROID__;__MACOS__</DefineConstants>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net6.0|AnyCPU'">
+		<DefineConstants>$(DefineConstants);__WINDOWS__;__LINUX__;__IOS__;__ANDROID__;__MACOS__</DefineConstants>
+	</PropertyGroup>
+
+	<!-- 
+	<PropertyGroup Condition="'$(TargetFramework.TrimEnd(`0123456789`))' == 'net'">
+		<UseWindowsForms>true</UseWindowsForms>
+	</PropertyGroup>
+	-->
+
+	<ItemGroup>
+		<PackageReference Condition="'$(TargetFramework)'=='netstandard2.1'" Include="Xamarin.Essentials" Version="1.7.3" />
+		<PackageReference Include="Microsoft.Extensions.ApiDescription.Client" Version="7.0.0">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="NSwag.ApiDescription.Client" Version="13.17.0">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+	</ItemGroup>
+
+
+	<ItemGroup>
+		<Folder Include="Properties\PublishProfiles\" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Jakar.AppLogger.Common\Jakar.AppLogger.Common.csproj" />
+	</ItemGroup>
+
+</Project>

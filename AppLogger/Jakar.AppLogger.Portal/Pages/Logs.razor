@@ -1,0 +1,81 @@
+﻿@page "/Logs"
+@inherits ControlBase
+
+
+<h3>Logs</h3>
+
+<div class="container" >
+    <div class="py-5 row" >
+        <div class="col" >
+            <RadzenCard>
+                <RadzenDataList AllowPaging="true"
+                                Data="@Records"
+                                PagerHorizontalAlign="@HorizontalAlign.Left"
+                                PageSize="5"
+                                ShowPagingSummary="true"
+                                TItem="LogRecord"
+                                WrapItems="true" >
+                    <Template Context=" log " >
+                        <RadzenCard Style="overflow: hidden; padding: 0; width: 100%;" >
+                            <div class="container" >
+                                <div class="row" >
+                                    <div class="col-lg-3 log-title p-3" >
+                                        <RadzenText TagName="TagName.H5"
+                                                    TextStyle="TextStyle.H6" >
+                                            @(log.Message)
+                                        </RadzenText>
+                                    </div>
+
+                                    <div class="col-lg-7 p-3" >
+                                        <div class="d-flex row" >
+                                            <div class="col-lg-2 col-md-6" >
+                                                <RadzenText class="mb-0"
+                                                            TagName="TagName.H5"
+                                                            TextStyle="TextStyle.H6" >
+                                                    Level
+                                                </RadzenText>
+                                                <RadzenText class="mb-lg-0 mb-sm-2"
+                                                            TextStyle="TextStyle.Body2" >
+                                                    @(log.Level)
+                                                </RadzenText>
+                                            </div>
+
+                                            <div class="col-lg-2 col-md-6" >
+                                                <RadzenText class="mb-0"
+                                                            TagName="TagName.H5"
+                                                            TextStyle="TextStyle.H6" >
+                                                    Time Stamp
+                                                </RadzenText>
+                                                <RadzenText class="mb-lg-0 mb-sm-2"
+                                                            TextStyle="TextStyle.Body2" >
+                                                    @(log.Timestamp.LocalDateTime)
+                                                </RadzenText>
+                                            </div>
+
+                                            <div class="col-lg-5 col-md-6" >
+                                                <RadzenText class="mb-0"
+                                                            TagName="TagName.H5"
+                                                            TextStyle="TextStyle.H6" >
+                                                    Is Fatal
+                                                </RadzenText>
+                                                <RadzenText class="mb-lg-0 mb-sm-2"
+                                                            TextStyle="TextStyle.Body2" >
+                                                    @(log.IsFatal)
+                                                </RadzenText>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-2 p-3" >
+                                        <RadzenButton Class="w-100"
+                                                      Text="Order now" />
+                                    </div>
+                                </div>
+                            </div>
+                        </RadzenCard>
+                    </Template>
+                </RadzenDataList>
+            </RadzenCard>
+        </div>
+    </div>
+</div>

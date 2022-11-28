@@ -1,0 +1,1305 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "AppLoggerPortal",
+    "description": "Cross-platform application logger framework",
+    "termsOfService": "https://github.com/Jakar510/Jakar.AppLogger/blob/master/LICENSE.md",
+    "contact": {
+      "name": "Jakar.AppLogger",
+      "url": "https://github.com/Jakar510/Jakar.AppLogger"
+    },
+    "license": {
+      "name": "GNU General Public License v3.0",
+      "url": "https://www.gnu.org/licenses/gpl-3.0.en.html"
+    },
+    "version": "V1"
+  },
+  "paths": {
+    "/API/StartSession": {
+      "post": {
+        "tags": [
+          "API"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/StartSession"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StartSession"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StartSession"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/StartSession"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/API/EndSession": {
+      "post": {
+        "tags": [
+          "API"
+        ],
+        "parameters": [
+          {
+            "name": "sessionID",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/API/Log": {
+      "post": {
+        "tags": [
+          "API"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Log"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Log"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Log"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Log"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Attachment": {
+        "type": "object",
+        "properties": {
+          "IsBinary": {
+            "type": "boolean"
+          },
+          "Data": {
+            "type": "string",
+            "format": "byte",
+            "nullable": true,
+            "readOnly": true
+          },
+          "Length": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "Content": {
+            "type": "string",
+            "nullable": true
+          },
+          "Description": {
+            "type": "string",
+            "nullable": true
+          },
+          "FileName": {
+            "type": "string",
+            "nullable": true
+          },
+          "Type": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "BIOS": {
+        "type": "object",
+        "properties": {
+          "Caption": {
+            "type": "string",
+            "nullable": true
+          },
+          "Description": {
+            "type": "string",
+            "nullable": true
+          },
+          "Manufacturer": {
+            "type": "string",
+            "nullable": true
+          },
+          "Name": {
+            "type": "string",
+            "nullable": true
+          },
+          "ReleaseDate": {
+            "type": "string",
+            "nullable": true
+          },
+          "SerialNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "SoftwareElementID": {
+            "type": "string",
+            "nullable": true
+          },
+          "Version": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Battery": {
+        "type": "object",
+        "properties": {
+          "FullChargeCapacity": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "DesignCapacity": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "BatteryStatus": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "EstimatedChargeRemaining": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "EstimatedRunTime": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ExpectedLife": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "MaxRechargeTime": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "TimeOnBattery": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "TimeToFullCharge": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "BatteryStatusDescription": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CPU": {
+        "type": "object",
+        "properties": {
+          "Caption": {
+            "type": "string",
+            "nullable": true
+          },
+          "CurrentClockSpeed": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "Description": {
+            "type": "string",
+            "nullable": true
+          },
+          "L2CacheSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "L3CacheSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "Manufacturer": {
+            "type": "string",
+            "nullable": true
+          },
+          "MaxClockSpeed": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "Name": {
+            "type": "string",
+            "nullable": true
+          },
+          "NumberOfCores": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "NumberOfLogicalProcessors": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ProcessorId": {
+            "type": "string",
+            "nullable": true
+          },
+          "SecondLevelAddressTranslationExtensions": {
+            "type": "boolean"
+          },
+          "SocketDesignation": {
+            "type": "string",
+            "nullable": true
+          },
+          "VirtualizationFirmwareEnabled": {
+            "type": "boolean"
+          },
+          "VMMonitorModeExtensions": {
+            "type": "boolean"
+          },
+          "PercentProcessorTime": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "CpuCoreList": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CpuCore"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CpuCore": {
+        "type": "object",
+        "properties": {
+          "Name": {
+            "type": "string",
+            "nullable": true
+          },
+          "PercentProcessorTime": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "additionalProperties": false
+      },
+      "DeviceDescriptor": {
+        "type": "object",
+        "properties": {
+          "AppVersion": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          "TimeZoneOffset": {
+            "type": "number",
+            "format": "double"
+          },
+          "HwInfo": {
+            "$ref": "#/components/schemas/HwInfo"
+          },
+          "AppBuild": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "OsApiLevel": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "DeviceID": {
+            "type": "string",
+            "nullable": true
+          },
+          "Locale": {
+            "type": "string",
+            "nullable": true
+          },
+          "OsName": {
+            "type": "string",
+            "nullable": true
+          },
+          "SdkName": {
+            "type": "string",
+            "nullable": true
+          },
+          "SdkVersion": {
+            "type": "string",
+            "nullable": true
+          },
+          "AppNamespace": {
+            "type": "string",
+            "nullable": true
+          },
+          "Model": {
+            "type": "string",
+            "nullable": true
+          },
+          "OsBuild": {
+            "type": "string",
+            "nullable": true
+          },
+          "OsVersion": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Drive": {
+        "type": "object",
+        "properties": {
+          "PartitionList": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Partition"
+            },
+            "nullable": true
+          },
+          "Caption": {
+            "type": "string",
+            "nullable": true
+          },
+          "Description": {
+            "type": "string",
+            "nullable": true
+          },
+          "FirmwareRevision": {
+            "type": "string",
+            "nullable": true
+          },
+          "Index": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "Manufacturer": {
+            "type": "string",
+            "nullable": true
+          },
+          "Model": {
+            "type": "string",
+            "nullable": true
+          },
+          "Name": {
+            "type": "string",
+            "nullable": true
+          },
+          "Partitions": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "SerialNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "Size": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ExceptionDetails": {
+        "type": "object",
+        "properties": {
+          "Data": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/JToken"
+            },
+            "nullable": true
+          },
+          "Inner": {
+            "$ref": "#/components/schemas/ExceptionDetails"
+          },
+          "HResult": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "StackTrace": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "TargetSite": {
+            "$ref": "#/components/schemas/MethodDetails"
+          },
+          "Message": {
+            "type": "string",
+            "nullable": true
+          },
+          "Str": {
+            "type": "string",
+            "nullable": true
+          },
+          "HelpLink": {
+            "type": "string",
+            "nullable": true
+          },
+          "MethodSignature": {
+            "type": "string",
+            "nullable": true
+          },
+          "Source": {
+            "type": "string",
+            "nullable": true
+          },
+          "Type": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "FormFactor": {
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "HwInfo": {
+        "type": "object",
+        "properties": {
+          "BatteryList": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Battery"
+            },
+            "nullable": true
+          },
+          "BiosList": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BIOS"
+            },
+            "nullable": true
+          },
+          "CpuList": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CPU"
+            },
+            "nullable": true
+          },
+          "DriveList": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Drive"
+            },
+            "nullable": true
+          },
+          "KeyboardList": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Keyboard"
+            },
+            "nullable": true
+          },
+          "MemoryList": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Memory"
+            },
+            "nullable": true
+          },
+          "MonitorList": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Monitor"
+            },
+            "nullable": true
+          },
+          "MotherboardList": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Motherboard"
+            },
+            "nullable": true
+          },
+          "MouseList": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Mouse"
+            },
+            "nullable": true
+          },
+          "PrinterList": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Printer"
+            },
+            "nullable": true
+          },
+          "SoundDeviceList": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SoundDevice"
+            },
+            "nullable": true
+          },
+          "VideoControllerList": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VideoController"
+            },
+            "nullable": true
+          },
+          "MemoryStatus": {
+            "$ref": "#/components/schemas/MemoryStatus"
+          }
+        },
+        "additionalProperties": false
+      },
+      "JToken": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/JToken"
+        }
+      },
+      "Keyboard": {
+        "type": "object",
+        "properties": {
+          "Caption": {
+            "type": "string",
+            "nullable": true
+          },
+          "Description": {
+            "type": "string",
+            "nullable": true
+          },
+          "Name": {
+            "type": "string",
+            "nullable": true
+          },
+          "NumberOfFunctionKeys": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Log": {
+        "type": "object",
+        "properties": {
+          "AdditionalData": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/JToken"
+            },
+            "nullable": true
+          },
+          "IsError": {
+            "type": "boolean",
+            "readOnly": true
+          },
+          "IsFatal": {
+            "type": "boolean"
+          },
+          "IsValid": {
+            "type": "boolean",
+            "readOnly": true
+          },
+          "AppErrorTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "AppLaunchTimestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "AppStartTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "Timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "Device": {
+            "$ref": "#/components/schemas/DeviceDescriptor"
+          },
+          "Exception": {
+            "$ref": "#/components/schemas/ExceptionDetails"
+          },
+          "SessionID": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ScopeID": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "Attachments": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Attachment"
+            },
+            "nullable": true
+          },
+          "EventID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ThreadID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "Level": {
+            "$ref": "#/components/schemas/LogLevel"
+          },
+          "AppID": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "DeviceID": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ID": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "Message": {
+            "maxLength": 2147483647,
+            "type": "string",
+            "nullable": true
+          },
+          "AppUserID": {
+            "maxLength": 1024,
+            "type": "string",
+            "nullable": true
+          },
+          "BuildID": {
+            "maxLength": 1024,
+            "type": "string",
+            "nullable": true
+          },
+          "EventName": {
+            "maxLength": 1024,
+            "type": "string",
+            "nullable": true
+          },
+          "StackTrace": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "LogLevel": {
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "Memory": {
+        "type": "object",
+        "properties": {
+          "BankLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "Capacity": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "FormFactor": {
+            "$ref": "#/components/schemas/FormFactor"
+          },
+          "Manufacturer": {
+            "type": "string",
+            "nullable": true
+          },
+          "MaxVoltage": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "MinVoltage": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "PartNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "SerialNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "Speed": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "MemoryStatus": {
+        "type": "object",
+        "properties": {
+          "TotalPhysical": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "AvailablePhysical": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "TotalPageFile": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "AvailablePageFile": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "TotalVirtual": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "AvailableVirtual": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "AvailableExtendedVirtual": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "additionalProperties": false
+      },
+      "MethodAttributes": {
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          16,
+          32,
+          64,
+          128,
+          256,
+          512,
+          1024,
+          2048,
+          4096,
+          8192,
+          16384,
+          32768,
+          53248
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "MethodDetails": {
+        "type": "object",
+        "properties": {
+          "IsAbstract": {
+            "type": "boolean"
+          },
+          "IsAssembly": {
+            "type": "boolean"
+          },
+          "IsConstructor": {
+            "type": "boolean"
+          },
+          "IsFamily": {
+            "type": "boolean"
+          },
+          "IsFamilyAndAssembly": {
+            "type": "boolean"
+          },
+          "IsFamilyOrAssembly": {
+            "type": "boolean"
+          },
+          "IsFinal": {
+            "type": "boolean"
+          },
+          "IsPrivate": {
+            "type": "boolean"
+          },
+          "IsPublic": {
+            "type": "boolean"
+          },
+          "IsSpecialName": {
+            "type": "boolean"
+          },
+          "IsStatic": {
+            "type": "boolean"
+          },
+          "IsVirtual": {
+            "type": "boolean"
+          },
+          "Parameters": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ParameterDetails"
+            },
+            "nullable": true
+          },
+          "Attributes": {
+            "$ref": "#/components/schemas/MethodAttributes"
+          },
+          "Name": {
+            "type": "string",
+            "nullable": true
+          },
+          "Signature": {
+            "type": "string",
+            "nullable": true
+          },
+          "DeclaringType": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Monitor": {
+        "type": "object",
+        "properties": {
+          "Caption": {
+            "type": "string",
+            "nullable": true
+          },
+          "Description": {
+            "type": "string",
+            "nullable": true
+          },
+          "MonitorManufacturer": {
+            "type": "string",
+            "nullable": true
+          },
+          "MonitorType": {
+            "type": "string",
+            "nullable": true
+          },
+          "Name": {
+            "type": "string",
+            "nullable": true
+          },
+          "PixelsPerXLogicalInch": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "PixelsPerYLogicalInch": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Motherboard": {
+        "type": "object",
+        "properties": {
+          "Manufacturer": {
+            "type": "string",
+            "nullable": true
+          },
+          "Product": {
+            "type": "string",
+            "nullable": true
+          },
+          "SerialNumber": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Mouse": {
+        "type": "object",
+        "properties": {
+          "Caption": {
+            "type": "string",
+            "nullable": true
+          },
+          "Description": {
+            "type": "string",
+            "nullable": true
+          },
+          "Manufacturer": {
+            "type": "string",
+            "nullable": true
+          },
+          "Name": {
+            "type": "string",
+            "nullable": true
+          },
+          "NumberOfButtons": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ParameterDetails": {
+        "type": "object",
+        "properties": {
+          "HasDefaultValue": {
+            "type": "boolean"
+          },
+          "IsIn": {
+            "type": "boolean"
+          },
+          "IsOptional": {
+            "type": "boolean"
+          },
+          "IsOut": {
+            "type": "boolean"
+          },
+          "Position": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "Name": {
+            "type": "string",
+            "nullable": true
+          },
+          "Type": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Partition": {
+        "type": "object",
+        "properties": {
+          "VolumeList": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Volume"
+            },
+            "nullable": true
+          },
+          "Bootable": {
+            "type": "boolean"
+          },
+          "BootPartition": {
+            "type": "boolean"
+          },
+          "Caption": {
+            "type": "string",
+            "nullable": true
+          },
+          "Description": {
+            "type": "string",
+            "nullable": true
+          },
+          "DiskIndex": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "Index": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "Name": {
+            "type": "string",
+            "nullable": true
+          },
+          "PrimaryPartition": {
+            "type": "boolean"
+          },
+          "Size": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "StartingOffset": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Printer": {
+        "type": "object",
+        "properties": {
+          "Caption": {
+            "type": "string",
+            "nullable": true
+          },
+          "Default": {
+            "type": "boolean"
+          },
+          "Description": {
+            "type": "string",
+            "nullable": true
+          },
+          "HorizontalResolution": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "Local": {
+            "type": "boolean"
+          },
+          "Name": {
+            "type": "string",
+            "nullable": true
+          },
+          "Network": {
+            "type": "boolean"
+          },
+          "Shared": {
+            "type": "boolean"
+          },
+          "VerticalResolution": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "SoundDevice": {
+        "type": "object",
+        "properties": {
+          "Caption": {
+            "type": "string",
+            "nullable": true
+          },
+          "Description": {
+            "type": "string",
+            "nullable": true
+          },
+          "Manufacturer": {
+            "type": "string",
+            "nullable": true
+          },
+          "Name": {
+            "type": "string",
+            "nullable": true
+          },
+          "ProductName": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "StartSession": {
+        "type": "object",
+        "properties": {
+          "Device": {
+            "$ref": "#/components/schemas/DeviceDescriptor"
+          },
+          "AppLoggerSecret": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "VideoController": {
+        "type": "object",
+        "properties": {
+          "AdapterRAM": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "Caption": {
+            "type": "string",
+            "nullable": true
+          },
+          "CurrentBitsPerPixel": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "CurrentHorizontalResolution": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "CurrentNumberOfColors": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "CurrentRefreshRate": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "CurrentVerticalResolution": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "Description": {
+            "type": "string",
+            "nullable": true
+          },
+          "DriverDate": {
+            "type": "string",
+            "nullable": true
+          },
+          "DriverVersion": {
+            "type": "string",
+            "nullable": true
+          },
+          "Manufacturer": {
+            "type": "string",
+            "nullable": true
+          },
+          "MaxRefreshRate": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "MinRefreshRate": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "Name": {
+            "type": "string",
+            "nullable": true
+          },
+          "VideoModeDescription": {
+            "type": "string",
+            "nullable": true
+          },
+          "VideoProcessor": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Volume": {
+        "type": "object",
+        "properties": {
+          "Caption": {
+            "type": "string",
+            "nullable": true
+          },
+          "Compressed": {
+            "type": "boolean"
+          },
+          "Description": {
+            "type": "string",
+            "nullable": true
+          },
+          "FileSystem": {
+            "type": "string",
+            "nullable": true
+          },
+          "FreeSpace": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "Name": {
+            "type": "string",
+            "nullable": true
+          },
+          "Size": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "VolumeName": {
+            "type": "string",
+            "nullable": true
+          },
+          "VolumeSerialNumber": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  }
+}
