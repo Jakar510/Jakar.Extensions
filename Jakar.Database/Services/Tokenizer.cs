@@ -10,9 +10,9 @@ namespace Jakar.Database;
 
 public interface ITokenService
 {
-    public Task<string> CreateContent( string       header, UserRecord        user, CancellationToken token = default );
-    public Task<string> CreateHTMLContent( string   header, UserRecord        user, CancellationToken token = default );
-    public Task<Tokens> Authenticate( VerifyRequest users,  CancellationToken token = default );
+    public ValueTask<string> CreateContent( string        header, UserRecord        user, CancellationToken token = default );
+    public ValueTask<string> CreateHTMLContent( string    header, UserRecord        user, CancellationToken token = default );
+    public ValueTask<Tokens?> Authenticate( VerifyRequest users,  CancellationToken token = default );
 }
 
 
@@ -27,12 +27,13 @@ public interface ITokenService
 /// </summary>
 public class Tokenizer<TName> : ITokenService where TName : IAppName
 {
+    private const    string               JWT = "JWT";
     private readonly Database             _db;
     private readonly IConfiguration       _configuration;
-    internal virtual string               Audience    => _configuration.GetValue( nameof(Audience), typeof(TName).Name );
-    internal virtual string               Domain      => _configuration.GetValue( nameof(Domain),   _db.Domain );
-    internal virtual string               Issuer      => _configuration.GetValue( nameof(Issuer),   typeof(TName).Namespace ?? string.Empty );
-    internal virtual SymmetricSecurityKey SecurityKey => new(Encoding.UTF8.GetBytes( _configuration["JWT"] ));
+    internal virtual string               Audience    => _configuration.GetValue( nameof(Audience), typeof(TName).Name ) ?? throw new KeyNotFoundException( nameof(Audience) );
+    internal virtual string               Domain      => _configuration.GetValue( nameof(Domain),   _db.Domain.OriginalString ) ?? throw new KeyNotFoundException( nameof(Domain) );
+    internal virtual string               Issuer      => _configuration.GetValue( nameof(Issuer),   typeof(TName).Namespace ) ?? throw new KeyNotFoundException( nameof(Issuer) );
+    internal virtual SymmetricSecurityKey SecurityKey => new(Encoding.UTF8.GetBytes( _configuration[JWT] ?? throw new KeyNotFoundException( JWT ) ));
 
 
     public Tokenizer( IConfiguration configuration, Database dataBase )
@@ -40,6 +41,8 @@ public class Tokenizer<TName> : ITokenService where TName : IAppName
         _configuration = configuration;
         _db            = dataBase;
     }
+
+
     public virtual ClaimsPrincipal GetPrincipalFromExpiredToken( string token )
     {
         TokenValidationParameters tokenValidationParameters = _configuration.GetTokenValidationParameters( Issuer, Audience );
@@ -72,17 +75,17 @@ public class Tokenizer<TName> : ITokenService where TName : IAppName
     public virtual string GetUrl( in Tokens result ) => $"{Domain}/Token/{result.AccessToken}";
 
 
-    public virtual async Task<Tokens> Authenticate( VerifyRequest request, CancellationToken token = default ) => await _db.Authenticate( request, token );
+    public virtual ValueTask<Tokens?> Authenticate( VerifyRequest request, CancellationToken token = default ) => _db.Authenticate( request, token );
 
 
-    public virtual async Task<string> CreateContent( string header, UserRecord user, CancellationToken token = default )
+    public virtual async ValueTask<string> CreateContent( string header, UserRecord user, CancellationToken token = default )
     {
-        Tokens result = await _db.GetJwtToken( user, token );
+        Tokens result = await _db.GetToken( user, token );
         return CreateContent( result, header );
     }
-    public virtual async Task<string> CreateHTMLContent( string header, UserRecord user, CancellationToken token = default )
+    public virtual async ValueTask<string> CreateHTMLContent( string header, UserRecord user, CancellationToken token = default )
     {
-        Tokens result = await _db.GetJwtToken( user, token );
+        Tokens result = await _db.GetToken( user, token );
         return CreateHTMLContent( result, header );
     }
 }

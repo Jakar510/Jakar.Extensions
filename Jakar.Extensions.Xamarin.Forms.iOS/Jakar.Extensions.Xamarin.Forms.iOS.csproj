@@ -87,7 +87,7 @@
       <Version>7.2.0.564</Version>
     </PackageReference>
     <PackageReference Include="Jakar.Extensions">
-      <Version>6.4.0</Version>
+      <Version>6.4.2</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.AppCenter">
       <Version>4.5.3</Version>
@@ -102,7 +102,7 @@
       <Version>2.0.3</Version>
     </PackageReference>
     <PackageReference Include="Newtonsoft.Json">
-      <Version>13.0.1</Version>
+      <Version>13.0.2</Version>
     </PackageReference>
     <PackageReference Include="Xam.Plugin.LatestVersion">
       <Version>2.1.0</Version>
@@ -123,10 +123,10 @@
       <Version>1.7.3</Version>
     </PackageReference>
     <PackageReference Include="Xamarin.Forms">
-      <Version>5.0.0.2478</Version>
+      <Version>5.0.0.2515</Version>
     </PackageReference>
     <PackageReference Include="Xamarin.Forms.Visual.Material">
-      <Version>5.0.0.2478</Version>
+      <Version>5.0.0.2515</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>

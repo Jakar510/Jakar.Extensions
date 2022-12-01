@@ -4,7 +4,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata>
 		<id>Jakar.Extensions</id>
-		<version>6.4.0</version>
+		<version>6.4.2</version>
 		<title>Extension Library</title>
 		<authors>Tyler Stegmaier</authors>
 		<owners>Jakar510/Jakar</owners>
@@ -19,7 +19,7 @@
 		</description>
 		<!-- <readme>..\README.md</readme> -->
 		<releaseNotes>
-			AppVersion, IniConfig and PreferenceFile bug fixes
+			Bug Fixes
 		</releaseNotes>
 		<tags>Api Extension Linq Http Files Files Strings Types Languages Collections Ini</tags>
 		<language>en-US</language>
@@ -49,7 +49,7 @@
 				<dependency id="Microsoft.Extensions.Options"
 							version="7.0.0" />
 				<dependency id="Newtonsoft.Json"
-							version="13.0.1" />
+							version="13.0.2" />
 				<dependency id="Nito.Collections.Deque"
 							version="1.1.1" />
 				<dependency id="Portable.BouncyCastle"
@@ -104,7 +104,7 @@
 				<dependency id="Microsoft.Extensions.Options"
 							version="7.0.0" />
 				<dependency id="Newtonsoft.Json"
-							version="13.0.1" />
+							version="13.0.2" />
 				<dependency id="Nito.Collections.Deque"
 							version="1.1.1" />
 				<dependency id="Portable.BouncyCastle"
@@ -159,7 +159,7 @@
 				<dependency id="Microsoft.Extensions.Options"
 							version="7.0.0" />
 				<dependency id="Newtonsoft.Json"
-							version="13.0.1" />
+							version="13.0.2" />
 				<dependency id="Nito.Collections.Deque"
 							version="1.1.1" />
 				<dependency id="Portable.BouncyCastle"

@@ -48,9 +48,9 @@
 				<dependency id="BlazorPro.BlazorSize"
 							version="6.1.2" />
 				<dependency id="PanoramicData.Blazor"
-							version="2.1.57" />
+							version="2.1.68" />
 				<dependency id="Radzen.Blazor"
-							version="4.3.7" />
+							version="4.4.1" />
 			</group>
 
 			<group targetFramework="net7.0">
@@ -75,9 +75,9 @@
 				<dependency id="BlazorPro.BlazorSize"
 							version="6.1.2" />
 				<dependency id="PanoramicData.Blazor"
-							version="2.1.57" />
+							version="2.1.68" />
 				<dependency id="Radzen.Blazor"
-							version="4.3.7" />
+							version="4.4.1" />
 			</group>
 		</dependencies>
 	</metadata>

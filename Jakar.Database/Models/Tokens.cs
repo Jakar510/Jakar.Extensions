@@ -12,17 +12,17 @@ namespace Jakar.Database;
 [Serializable]
 [SuppressMessage( "ReSharper", "InconsistentNaming" )]
 [SuppressMessage( "ReSharper", "NotAccessedField.Global" )]
-public readonly struct Tokens : IValidator
+public sealed record Tokens : IValidator
 {
-    public AppVersion Version      { get; init; } = default;
+    public AppVersion Version      { get; init; } = default!;
     public Guid       UserID       { get; init; } = Guid.Empty;
     public string     AccessToken  { get; init; } = string.Empty;
-    public string?    RefreshToken { get; init; } = default;
-    public string?    FullName     { get; init; } = default;
+    public string?    RefreshToken { get; init; }
+    public string?    FullName     { get; init; }
     public bool       IsValid      => !string.IsNullOrWhiteSpace( AccessToken );
 
 
-    [JsonConstructor]
+    public Tokens() { }
     public Tokens( string accessToken, string? refreshToken, AppVersion version, Guid userID, string? fullName )
     {
         Version      = version;
@@ -38,15 +38,14 @@ public readonly struct Tokens : IValidator
     public static async ValueTask<Tokens> CreateAsync( DbConnection connection, DbTransaction transaction, Database db, UserRecord user, DateTimeOffset expires, CancellationToken token = default )
     {
         List<Claim> claims = await user.GetUserClaims( connection, transaction, db, token );
-        Tokens      result = Create( db.Configuration, claims, user, db.Version, expires );
+        Tokens      result = Create( db.Configuration, claims, db.Version, user, expires );
         await db.Users.Update( connection, transaction, user, token );
         return result;
     }
 
 
-    public static Tokens Create( IConfiguration configuration, IEnumerable<Claim> claims, in AppVersion version, UserRecord user ) =>
-        Create( configuration, claims, user, version, configuration.TokenExpireTime() );
-    public static Tokens Create( IConfiguration configuration, IEnumerable<Claim> claims, UserRecord user, in AppVersion version, DateTimeOffset expires )
+    public static Tokens Create( IConfiguration configuration, IEnumerable<Claim> claims, AppVersion version, UserRecord user ) => Create( configuration, claims, version, user, configuration.TokenExpireTime() );
+    public static Tokens Create( IConfiguration configuration, IEnumerable<Claim> claims, AppVersion version, UserRecord user, DateTimeOffset expires )
     {
         if ( user.SubscriptionExpires < expires ) { expires = user.SubscriptionExpires.Value; }
 
@@ -68,5 +67,5 @@ public readonly struct Tokens : IValidator
     public static Tokens Create( string accessToken, string? refreshToken, AppVersion version, UserRecord user ) => new(accessToken, refreshToken, version, user.UserID, user.FullName);
 
 
-    public bool VerifyVersion( in AppVersion version ) => Version.FuzzyEquals( version );
+    public bool VerifyVersion( AppVersion version ) => Version.FuzzyEquals( version );
 }

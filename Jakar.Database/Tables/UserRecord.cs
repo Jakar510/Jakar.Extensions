@@ -438,6 +438,12 @@ public sealed record UserRecord : TableRecord<UserRecord>, IUserRecord<UserRecor
         parameters.Add( nameof(FullName),  data.FullName );
         return parameters;
     }
+    public static DynamicParameters GetDynamicParameters<T>( VerifyRequest<T> request ) where T : notnull
+    {
+        var parameters = new DynamicParameters();
+        parameters.Add( nameof(UserName), request.Request.UserLogin );
+        return parameters;
+    }
     public static DynamicParameters GetDynamicParameters( ILoginRequest request )
     {
         var parameters = new DynamicParameters();

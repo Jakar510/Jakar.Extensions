@@ -4,7 +4,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata>
 		<id>Jakar.DataBase</id>
-		<version>6.4.0-beta</version>
+		<version>6.4.1-beta</version>
 		<title>Extension Library</title>
 		<authors>Tyler Stegmaier</authors>
 		<owners>Jakar510/Jakar</owners>
@@ -28,16 +28,20 @@
 		<dependencies>
 			<group targetFramework="net6.0">
 				<dependency id="Jakar.Extensions"
-							version="6.4.0" />
+							version="6.4.2" />
 				<dependency id="Jakar.Extensions.Hosting"
 							version="6.4.0" />
+				<dependency id="MailKit"
+							version="3.4.3" />
 			</group>
 
 			<group targetFramework="net7.0">
 				<dependency id="Jakar.Extensions"
-							version="6.4.0" />
+							version="6.4.2" />
 				<dependency id="Jakar.Extensions.Hosting"
 							version="6.4.0" />
+				<dependency id="MailKit"
+							version="3.4.3" />
 			</group>
 		</dependencies>
 	</metadata>

@@ -48,8 +48,8 @@ public record VerifyRequest<T> : BaseRecord, ICredentials, IValidator where T : 
                                : Request.IsValid;
 
 
-    public T             Data    { get; init; } = default!;
-    public VerifyRequest Request { get; init; } = new();
+    [JsonProperty( nameof(Data),    Required = Required.Always )] public T             Data    { get; init; } = default!;
+    [JsonProperty( nameof(Request), Required = Required.Always )] public VerifyRequest Request { get; init; } = default!;
 
 
     public VerifyRequest() { }
