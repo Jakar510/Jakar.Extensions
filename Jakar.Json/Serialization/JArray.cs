@@ -19,7 +19,7 @@ public ref struct JArray
     internal         JWriter writer;
 
 
-    public JArray( ref JWriter writer, bool shouldIndent )
+    public JArray( JWriter writer, bool shouldIndent )
     {
         this.writer   = writer;
         _shouldIndent = shouldIndent;
@@ -196,8 +196,8 @@ public ref struct JArray
     }
 
 
-    public JArray AddArray() => new(ref writer, true);
-    public JObject AddObject() => new(ref writer, true);
+    public JArray AddArray() => new(writer, true);
+    public JObject AddObject() => new(writer, true);
 
 
     public JArray AddObjects( IEnumerable<IJsonizer>? value )

@@ -20,7 +20,7 @@ public ref struct XArray
     private          XWriter            _writer;
 
 
-    public XArray( ReadOnlySpan<char> name, ref XWriter context )
+    public XArray( ReadOnlySpan<char> name, XWriter context )
     {
         _name   = name;
         _writer = context;
@@ -246,8 +246,8 @@ public ref struct XArray
     }
 
 
-    public XArray AddArray( ReadOnlySpan<char>   name ) => new(name, ref _writer);
-    public XObject AddObject( ReadOnlySpan<char> name ) => new(name, ref _writer);
+    public XArray AddArray( ReadOnlySpan<char>   name ) => new(name, _writer);
+    public XObject AddObject( ReadOnlySpan<char> name ) => new(name, _writer);
 
 
     public void Dispose() => _writer.FinishBlock( _name );

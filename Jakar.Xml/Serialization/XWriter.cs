@@ -24,8 +24,9 @@ public ref struct XWriter
     public XWriter( bool shouldIndent ) => this.shouldIndent = shouldIndent;
 
 
-    public XArray AddArray( ReadOnlySpan<char>   name ) => new(name, ref this);
-    public XObject AddObject( ReadOnlySpan<char> name ) => new(name, ref this);
+    public XArray AddArray( ReadOnlySpan<char>   name ) => new(name, this);
+    public XObject AddObject( ReadOnlySpan<char> name ) => new(name, this);
+
 
     public XWriter Add( XObject parent, ReadOnlySpan<char> key, IEnumerable<IXmlizer> enumerable )
     {

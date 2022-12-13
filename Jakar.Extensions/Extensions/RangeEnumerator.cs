@@ -7,7 +7,7 @@ public ref struct RangeEnumerator
     public           int   Current { get; private set; }
 
 
-    public RangeEnumerator( in Range range )
+    public RangeEnumerator( Range range )
     {
         _range  = range;
         Current = _range.Start.Value - 1;

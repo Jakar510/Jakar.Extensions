@@ -24,7 +24,7 @@ public readonly ref struct JNode
         public           JNode              Current { get; private set; } = default;
 
 
-        public NodeEnumerator( in ReadOnlySpan<char> span ) => _json = _span = span;
+        public NodeEnumerator( ReadOnlySpan<char> span ) => _json = _span = span;
         public NodeEnumerator GetEnumerator() => this;
         public void Reset() => _span = _json;
 

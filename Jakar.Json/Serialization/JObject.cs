@@ -20,7 +20,7 @@ public ref struct JObject
     internal         JWriter writer;
 
 
-    public JObject( ref JWriter writer, bool shouldIndent )
+    public JObject( JWriter writer, bool shouldIndent )
     {
         _shouldIndent = shouldIndent;
         this.writer   = writer;

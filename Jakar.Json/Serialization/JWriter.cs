@@ -21,8 +21,8 @@ public ref struct JWriter
     public JWriter( Formatting formatting ) => _shouldIndent = formatting is Formatting.Indented;
 
 
-    [Pure] public JArray AddArray() => new(ref this, false);
-    [Pure] public JObject AddObject() => new(ref this, false);
+    [Pure] public JArray AddArray() => new(this, false);
+    [Pure] public JObject AddObject() => new(this, false);
 
 
     public JWriter StartBlock( char start, bool shouldIndent )
