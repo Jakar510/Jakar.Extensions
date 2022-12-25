@@ -120,7 +120,7 @@ public partial class IniConfig
 
         #region Adds
 
-        public void Add<T>( string key, T                   value ) where T : notnull => this[key] = value?.ToJson();
+        public void Add<T>( string key, T                   value ) where T : notnull => this[key] = value.ToJson();
         public void Add<T>( string key, IEnumerable<T>      values ) => this[key] = values.ToJson();
         public void Add( string    key, IEnumerable<string> values ) => this[key] = values.ToJson();
         public void Add( string    key, IEnumerable<string> values, char   separator ) => this[key] = string.Join( separator, values );

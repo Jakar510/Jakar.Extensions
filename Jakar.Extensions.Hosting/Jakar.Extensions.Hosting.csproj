@@ -12,7 +12,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="Jakar.Extensions" Version="6.4.2" />
-		<PackageReference Include="Hardware.Info" Version="10.1.0" />
+		<PackageReference Include="Hardware.Info" Version="10.1.0.1" />
 		<PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.0" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
 		<PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.4.0" />

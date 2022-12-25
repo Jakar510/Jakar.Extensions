@@ -1,4 +1,5 @@
-﻿using Jakar.Extensions;
+﻿using Jakar.AppLogger.Common;
+using Jakar.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 

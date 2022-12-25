@@ -11,7 +11,7 @@
 	<ItemGroup>
 		<PackageReference Include="FluentMigrator" Version="3.3.2" />
 		<PackageReference Include="FluentMigrator.Runner" Version="3.3.2" />
-		<PackageReference Include="Blazor.WebForm.Components" Version="2.3.0.3" />
+		<PackageReference Include="Blazor.WebForm.Components" Version="2.3.0.4" />
 		<PackageReference Include="Blazored.LocalStorage" Version="4.3.0" />
 		<PackageReference Include="Blazored.Modal" Version="7.1.0" />
 		<PackageReference Include="Blazored.SessionStorage" Version="2.2.0" />
@@ -21,9 +21,9 @@
 		<!-- <PackageReference Include="Jakar.Database" Version="6.0.0.26-beta" /> -->
 		<!-- <PackageReference Include="Jakar.Extensions.Blazor" Version="6.0.0.17-beta" /> -->
 		<PackageReference Include="MailKit" Version="3.4.3" />
-		<PackageReference Include="Npgsql" Version="7.0.0" />
-		<PackageReference Include="Npgsql.Json.NET" Version="7.0.0" />
-		<PackageReference Include="Radzen.Blazor" Version="4.4.1" />
+		<PackageReference Include="Npgsql" Version="7.0.1" />
+		<PackageReference Include="Npgsql.Json.NET" Version="7.0.1" />
+		<PackageReference Include="Radzen.Blazor" Version="4.4.7" />
 	</ItemGroup>
 
 	<ItemGroup>

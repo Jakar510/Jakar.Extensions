@@ -21,24 +21,24 @@ public sealed class AppLoggerIni : LoggingSettings
     internal IniConfig.Section Section => _config[nameof(AppLogger)];
 
 
-    public AppLoggerIni( in AppVersion version, DeviceDescriptor device, LocalDirectory directory ) : this( version, device, directory.Join( CONFIG_FILE_NAME ) ) { }
-    public AppLoggerIni( in AppVersion version, DeviceDescriptor device, LocalFile      file ) : this( version, device ) => Path = file;
-    public AppLoggerIni( in AppVersion version, DeviceDescriptor device ) : base( version, device ) { }
+    public AppLoggerIni( AppVersion version, DeviceDescriptor device, LocalDirectory directory ) : this( version, device, directory.Join( CONFIG_FILE_NAME ) ) { }
+    public AppLoggerIni( AppVersion version, DeviceDescriptor device, LocalFile      file ) : this( version, device ) => Path = file;
+    public AppLoggerIni( AppVersion version, DeviceDescriptor device ) : base( version, device ) { }
 
 
-    public static AppLoggerIni Create( in AppVersion version, string appName, bool             includeHwInfo ) => Create( version,                           appName, DeviceDescriptor.Create( includeHwInfo, version ) );
-    public static AppLoggerIni Create( in AppVersion version, string appName, DeviceDescriptor device ) => Create( version,                                  appName, device, LocalDirectory.CurrentDirectory );
-    public static AppLoggerIni Create( in AppVersion version, string appName, DeviceDescriptor device,        LocalDirectory directory ) => Create( version, appName, device, directory.Join( CONFIG_FILE_NAME ) );
-    public static AppLoggerIni Create( in AppVersion version, string appName, bool             includeHwInfo, LocalDirectory directory ) => Create( version, appName, includeHwInfo, directory.Join( CONFIG_FILE_NAME ) );
-    public static AppLoggerIni Create( in AppVersion version, string appName, bool             includeHwInfo, LocalFile      file ) => Create( version,      appName, DeviceDescriptor.Create( includeHwInfo, version ), file );
-    public static AppLoggerIni Create( in AppVersion version, string appName, DeviceDescriptor device, LocalFile file ) => new(version, device, file)
-                                                                                                                           {
-                                                                                                                               AppName = appName
-                                                                                                                           };
+    public static AppLoggerIni Create( AppVersion version, string appName, bool             includeHwInfo ) => Create( version,                           appName, DeviceDescriptor.Create( includeHwInfo, version ) );
+    public static AppLoggerIni Create( AppVersion version, string appName, DeviceDescriptor device ) => Create( version,                                  appName, device, LocalDirectory.CurrentDirectory );
+    public static AppLoggerIni Create( AppVersion version, string appName, DeviceDescriptor device,        LocalDirectory directory ) => Create( version, appName, device, directory.Join( CONFIG_FILE_NAME ) );
+    public static AppLoggerIni Create( AppVersion version, string appName, bool             includeHwInfo, LocalDirectory directory ) => Create( version, appName, includeHwInfo, directory.Join( CONFIG_FILE_NAME ) );
+    public static AppLoggerIni Create( AppVersion version, string appName, bool             includeHwInfo, LocalFile      file ) => Create( version,      appName, DeviceDescriptor.Create( includeHwInfo, version ), file );
+    public static AppLoggerIni Create( AppVersion version, string appName, DeviceDescriptor device, LocalFile file ) => new(version, device, file)
+                                                                                                                        {
+                                                                                                                            AppName = appName
+                                                                                                                        };
 
 
-    public static ValueTask<AppLoggerIni> CreateAsync( in AppVersion version, DeviceDescriptor device, string appName ) => CreateAsync( version,                           device, appName, LocalDirectory.CurrentDirectory );
-    public static ValueTask<AppLoggerIni> CreateAsync( in AppVersion version, DeviceDescriptor device, string appName, LocalDirectory directory ) => CreateAsync( version, device, appName, directory.Join( CONFIG_FILE_NAME ) );
+    public static ValueTask<AppLoggerIni> CreateAsync( AppVersion version, DeviceDescriptor device, string appName ) => CreateAsync( version,                           device, appName, LocalDirectory.CurrentDirectory );
+    public static ValueTask<AppLoggerIni> CreateAsync( AppVersion version, DeviceDescriptor device, string appName, LocalDirectory directory ) => CreateAsync( version, device, appName, directory.Join( CONFIG_FILE_NAME ) );
     public static async ValueTask<AppLoggerIni> CreateAsync( AppVersion version, DeviceDescriptor device, string appName, LocalFile file )
     {
         AppLoggerIni ini = await new AppLoggerIni( version, device, file ).RefreshAsync();
@@ -89,17 +89,17 @@ public sealed class AppLoggerIni : LoggingSettings
 
     private AppLoggerIni Refresh( IniConfig? config )
     {
-        if (config is null) { return this; }
+        if ( config is null ) { return this; }
 
         IniConfig.Section section = config[nameof(AppLogger)];
 
-        foreach ((string key, string value) in section)
+        foreach ( (string key, string? value) in section )
         {
-            switch (key)
+            switch ( key )
             {
                 case nameof(AppName):
                 {
-                    AppName = value;
+                    AppName = value ?? string.Empty;
                     break;
                 }
 
