@@ -1,24 +1,30 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions.Blazor
 // 09/26/2022  10:52 AM
 
+using Blazored.Toast.Configuration;
+
+
+
 namespace Jakar.Extensions.Blazor;
 
 
 public class AppServices : BaseViewModel, ILocalStorageService, IAuthenticationService, IToastService, IModalService
 {
-    private readonly IAuthenticationService  _authenticationService;
-    private readonly ILocalStorageService    _localStorage;
-    private readonly IModalService           _modal;
-    private readonly IToastService           _toastService;
-    private readonly NavigationManager       _navigation;
-    public           ContextMenuService      ContextMenus          { get; init; }
-    public           DialogService           Dialogs               { get; init; }
-    public           NotificationService     Notifications         { get; init; }
-    public           ProtectedLocalStorage   ProtectedLocalStorage { get; init; }
-    public           ProtectedSessionStorage SessionStorage        { get; init; }
-    public           string                  BaseUri               => _navigation.BaseUri;
-    public           string                  Uri                   => _navigation.Uri;
-    public           TooltipService          Tooltips              { get; init; }
+    private readonly IAuthenticationService _authenticationService;
+    private readonly ILocalStorageService   _localStorage;
+    private readonly IModalService          _modal;
+    private readonly IToastService          _toastService;
+    private readonly NavigationManager      _navigation;
+
+
+    public ContextMenuService      ContextMenus          { get; init; }
+    public DialogService           Dialogs               { get; init; }
+    public NotificationService     Notifications         { get; init; }
+    public ProtectedLocalStorage   ProtectedLocalStorage { get; init; }
+    public ProtectedSessionStorage SessionStorage        { get; init; }
+    public string                  BaseUri               => _navigation.BaseUri;
+    public string                  Uri                   => _navigation.Uri;
+    public TooltipService          Tooltips              { get; init; }
 
 
     public AppServices( IModalService           modal,
@@ -101,13 +107,35 @@ public class AppServices : BaseViewModel, ILocalStorageService, IAuthenticationS
     public IModalReference Show( Type               component, string title, ModalParameters parameters, ModalOptions options ) => _modal.Show( component, title, parameters, options );
 
 
+    public void ShowInfo( string            message, Action<ToastSettings>? settings                                 = null ) => _toastService.ShowInfo( message, settings );
+    public void ShowInfo( RenderFragment    message, Action<ToastSettings>? settings                                 = null ) => _toastService.ShowInfo( message, settings );
+    public void ShowSuccess( string         message, Action<ToastSettings>? settings                                 = null ) => _toastService.ShowSuccess( message, settings );
+    public void ShowSuccess( RenderFragment message, Action<ToastSettings>? settings                                 = null ) => _toastService.ShowSuccess( message, settings );
+    public void ShowWarning( string         message, Action<ToastSettings>? settings                                 = null ) => _toastService.ShowWarning( message, settings );
+    public void ShowWarning( RenderFragment message, Action<ToastSettings>? settings                                 = null ) => _toastService.ShowWarning( message, settings );
+    public void ShowError( string           message, Action<ToastSettings>? settings                                 = null ) => _toastService.ShowError( message, settings );
+    public void ShowError( RenderFragment   message, Action<ToastSettings>? settings                                 = null ) => _toastService.ShowError( message, settings );
+    public void ShowToast( ToastLevel       level,   string                 message, Action<ToastSettings>? settings = null ) => _toastService.ShowToast( level, message, settings );
+    public void ShowToast( ToastLevel       level,   RenderFragment         message, Action<ToastSettings>? settings = null ) => _toastService.ShowToast( level, message, settings );
+    public void ShowToast<TComponent>() where TComponent : IComponent => _toastService.ShowToast<TComponent>();
+    public void ShowToast<TComponent>( ToastParameters       parameters ) where TComponent : IComponent => _toastService.ShowToast<TComponent>( parameters );
+    public void ShowToast<TComponent>( Action<ToastSettings> settings ) where TComponent : IComponent => _toastService.ShowToast<TComponent>( settings );
+    public void ShowToast<TComponent>( ToastParameters       parameters, Action<ToastSettings> settings ) where TComponent : IComponent => _toastService.ShowToast<TComponent>( parameters, settings );
     public void ClearAll() => _toastService.ClearAll();
     public void ClearCustomToasts() => _toastService.ClearCustomToasts();
+    public void ClearQueue() => _toastService.ClearQueue();
+    public void ClearQueueToasts( ToastLevel toastLevel ) => _toastService.ClearQueueToasts( toastLevel );
+    public void ClearQueueWarningToasts() => _toastService.ClearQueueWarningToasts();
+    public void ClearQueueInfoToasts() => _toastService.ClearQueueInfoToasts();
+    public void ClearQueueSuccessToasts() => _toastService.ClearQueueSuccessToasts();
+    public void ClearQueueErrorToasts() => _toastService.ClearQueueErrorToasts();
     public void ClearErrorToasts() => _toastService.ClearErrorToasts();
     public void ClearInfoToasts() => _toastService.ClearInfoToasts();
     public void ClearSuccessToasts() => _toastService.ClearSuccessToasts();
     public void ClearToasts( ToastLevel toastLevel ) => _toastService.ClearToasts( toastLevel );
     public void ClearWarningToasts() => _toastService.ClearWarningToasts();
+
+
     public event Action? OnClearAll
     {
         add => _toastService.OnClearAll += value;
@@ -125,28 +153,24 @@ public class AppServices : BaseViewModel, ILocalStorageService, IAuthenticationS
     }
 
 
-    public event Action<ToastLevel, RenderFragment, string, Action>? OnShow
+    public event Action<ToastLevel, RenderFragment, Action<ToastSettings>?> OnShow
     {
         add => _toastService.OnShow += value;
         remove => _toastService.OnShow -= value;
     }
-    public event Action<Type, ToastParameters, ToastInstanceSettings>? OnShowComponent
+    public event Action<Type, ToastParameters?, Action<ToastSettings>?>? OnShowComponent
     {
         add => _toastService.OnShowComponent += value;
         remove => _toastService.OnShowComponent -= value;
     }
-    public void ShowError( string           message, string         heading = "", Action? onClick = default ) => _toastService.ShowError( message, heading, onClick );
-    public void ShowError( RenderFragment   message, string         heading = "", Action? onClick = default ) => _toastService.ShowError( message, heading, onClick );
-    public void ShowInfo( string            message, string         heading = "", Action? onClick = default ) => _toastService.ShowInfo( message, heading, onClick );
-    public void ShowInfo( RenderFragment    message, string         heading = "", Action? onClick = default ) => _toastService.ShowInfo( message, heading, onClick );
-    public void ShowSuccess( string         message, string         heading = "", Action? onClick = default ) => _toastService.ShowSuccess( message, heading, onClick );
-    public void ShowSuccess( RenderFragment message, string         heading = "", Action? onClick = default ) => _toastService.ShowSuccess( message, heading, onClick );
-    public void ShowToast( ToastLevel       level,   string         message,      string  heading = "", Action? onClick = default ) => _toastService.ShowToast( level, message, heading, onClick );
-    public void ShowToast( ToastLevel       level,   RenderFragment message,      string  heading = "", Action? onClick = default ) => _toastService.ShowToast( level, message, heading, onClick );
-    public void ShowToast<TComponent>() where TComponent : IComponent => _toastService.ShowToast<TComponent>();
-    public void ShowToast<TComponent>( ToastParameters       parameters ) where TComponent : IComponent => _toastService.ShowToast<TComponent>( parameters );
-    public void ShowToast<TComponent>( ToastInstanceSettings settings ) where TComponent : IComponent => _toastService.ShowToast<TComponent>( settings );
-    public void ShowToast<TComponent>( ToastParameters       parameters, ToastInstanceSettings settings ) where TComponent : IComponent => _toastService.ShowToast<TComponent>( parameters, settings );
-    public void ShowWarning( string                          message,    string                heading = "", Action? onClick = default ) => _toastService.ShowWarning( message, heading, onClick );
-    public void ShowWarning( RenderFragment                  message,    string                heading = "", Action? onClick = default ) => _toastService.ShowWarning( message, heading, onClick );
+    public event Action? OnClearQueue
+    {
+        add => _toastService.OnClearQueue += value;
+        remove => _toastService.OnClearQueue -= value;
+    }
+    public event Action<ToastLevel>? OnClearQueueToasts
+    {
+        add => _toastService.OnClearQueueToasts += value;
+        remove => _toastService.OnClearQueueToasts -= value;
+    }
 }

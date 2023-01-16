@@ -4,7 +4,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata>
 		<id>Jakar.Extensions.Hosting</id>
-		<version>6.4.0</version>
+		<version>6.4.3</version>
 		<title>Extension Library</title>
 		<authors>Tyler Stegmaier</authors>
 		<owners>Jakar510/Jakar</owners>
@@ -18,7 +18,7 @@
 			Extensions to aid in development.
 		</description>
 		<releaseNotes>
-			Added .Net 7 support
+			Bug Fixes
 		</releaseNotes>
 		<tags>Server WebBuilder Http</tags>
 		<language>en-US</language>
@@ -28,17 +28,17 @@
 		<dependencies>
 			<group targetFramework="net6.0">
 				<dependency id="Jakar.Extensions"
-							version="6.4.0" />
+							version="6.4.3" />
 				<dependency id="Hardware.Info"
-							version="10.1.0" />
+							version="10.1.1" />
 				<dependency id="Microsoft.Extensions.Hosting"
 							version="7.0.0" />
 				<dependency id="Swashbuckle.AspNetCore"
-							version="6.4.0" />
+							version="6.5.0" />
 				<dependency id="Swashbuckle.AspNetCore.Annotations"
-							version="6.4.0" />
+							version="6.5.0" />
 				<dependency id="Swashbuckle.AspNetCore.Newtonsoft"
-							version="6.4.0" />
+							version="6.5.0" />
 				<dependency id="Microsoft.Extensions.Options.DataAnnotations"
 							version="7.0.0" />
 				<dependency id="Microsoft.Extensions.Options.ConfigurationExtensions"
@@ -71,15 +71,15 @@
 				<dependency id="Jakar.Extensions"
 							version="6.4.0" />
 				<dependency id="Hardware.Info"
-							version="10.1.0" />
+							version="10.1.1" />
 				<dependency id="Microsoft.Extensions.Hosting"
 							version="7.0.0" />
 				<dependency id="Swashbuckle.AspNetCore"
-							version="6.4.0" />
+							version="6.5.0" />
 				<dependency id="Swashbuckle.AspNetCore.Annotations"
-							version="6.4.0" />
+							version="6.5.0" />
 				<dependency id="Swashbuckle.AspNetCore.Newtonsoft"
-							version="6.4.0" />
+							version="6.5.0" />
 				<dependency id="Microsoft.Extensions.Options.DataAnnotations"
 							version="7.0.0" />
 				<dependency id="Microsoft.Extensions.Options.ConfigurationExtensions"

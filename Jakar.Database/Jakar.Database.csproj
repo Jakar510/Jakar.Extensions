@@ -36,7 +36,6 @@
 		<PackageReference Include="FluentMigrator" Version="3.3.2" />
 		<PackageReference Include="FluentMigrator.Runner" Version="3.3.2" />
 		<PackageReference Include="MailKit" Version="3.4.3" />
-		<PackageReference Include="Sigil" Version="5.0.0" />
 	</ItemGroup>
 
 </Project>
