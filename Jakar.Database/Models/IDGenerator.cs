@@ -9,11 +9,11 @@ namespace Jakar.Database;
 /// </summary>
 public struct IDGenerator<TRecord> : IAsyncEnumerator<long> where TRecord : TableRecord<TRecord>
 {
-    private readonly DbTableBase<TRecord> _table;
+    private readonly DbTable<TRecord> _table;
     public           long                 Current { get; set; } = default;
 
 
-    public IDGenerator( DbTableBase<TRecord> table ) => _table = table;
+    public IDGenerator( DbTable<TRecord> table ) => _table = table;
     public ValueTask DisposeAsync()
     {
         Current = default;

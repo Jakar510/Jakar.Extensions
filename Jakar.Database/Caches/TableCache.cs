@@ -7,7 +7,7 @@ namespace Jakar.Database.Caches;
 public sealed class TableCache<TRecord> : Service, IHostedService, IReadOnlyCollection<TRecord>, IAsyncEnumerator<TRecord?> where TRecord : TableRecord<TRecord>
 {
     private readonly ConcurrentDictionary<long, CacheEntry<TRecord>> _records = new();
-    private readonly DbTableBase<TRecord>                            _table;
+    private readonly DbTable<TRecord>                            _table;
     private readonly ILogger                                         _logger;
     private readonly KeyGenerator<CacheEntry<TRecord>>               _generator;
     private readonly TimeSpan                                        _expireTime = TimeSpan.FromMinutes( 1 );
@@ -29,9 +29,9 @@ public sealed class TableCache<TRecord> : Service, IHostedService, IReadOnlyColl
                                             : default;
 
 
-    public TableCache( DbTableBase<TRecord> table, IOptions<TableCacheOptions> options ) : this( table, options.Value ) { }
-    public TableCache( DbTableBase<TRecord> table, TableCacheOptions           options ) : this( table, options.Factory, options.RefreshTime ) { }
-    public TableCache( DbTableBase<TRecord> table, ILoggerFactory factory, TimeSpan refreshTime ) : base()
+    public TableCache( DbTable<TRecord> table, IOptions<TableCacheOptions> options ) : this( table, options.Value ) { }
+    public TableCache( DbTable<TRecord> table, TableCacheOptions           options ) : this( table, options.Factory, options.RefreshTime ) { }
+    public TableCache( DbTable<TRecord> table, ILoggerFactory factory, TimeSpan refreshTime ) : base()
     {
         _table       = table;
         _refreshTime = refreshTime;

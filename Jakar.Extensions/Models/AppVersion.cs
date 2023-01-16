@@ -247,6 +247,11 @@ public sealed class AppVersion : IComparable,
     }
 
 
+    public static AppVersion FromAssembly<T>() => FromAssembly( typeof(T).Assembly );
+    public static AppVersion FromAssembly( Assembly     assembly ) => FromAssembly( assembly.GetName() );
+    public static AppVersion FromAssembly( AssemblyName assembly ) => assembly.Version ?? throw new NullReferenceException( nameof(assembly.Version) );
+
+
     private static Format GetFormat( int? minor, int? maintenance, int? majorRevision, int? minorRevision, int? build ) =>
         minor.HasValue && maintenance.HasValue && majorRevision.HasValue && minorRevision.HasValue && build.HasValue
             ? Format.Complete

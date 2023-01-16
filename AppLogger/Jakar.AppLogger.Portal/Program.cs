@@ -10,7 +10,7 @@ string[] urls =
 {
     "https://localhost",
     CommonUrl.Listen_443.OriginalString,
-    "https://0.0.0.0:6969",
+    "https://0.0.0.0:6969"
 };
 
 
@@ -39,7 +39,7 @@ builder.AddServerSideBlazor();
 builder.AddAuthorization();
 builder.AddAuthentication();
 builder.AddAppServices();
-builder.AddDatabase<LoggerDB>( DbInstance.Postgres );
+builder.AddDatabase<LoggerDB>( DbInstance.Postgres, AppVersion.FromAssembly<Program>() );
 builder.AddScoped<CircuitHandler, ScriptManagerCircuitHandler>();
 builder.AddTokenizer<AppLoggerPortal>();
 builder.AddEmailer();

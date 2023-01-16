@@ -16,7 +16,7 @@ public interface IToSyntax<out TNext>
 
     /// <summary>
     ///     <para>
-    ///         <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="DapperTableExtensions.GetTableName{T}"/> </para>
+    ///         <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="TableExtensions.GetTableName{T}"/> </para>
     ///     </para>
     /// </summary>
     /// <typeparam name="T"> The type being passed </typeparam>
@@ -26,7 +26,7 @@ public interface IToSyntax<out TNext>
     public TNext To<T>( T obj );
 
     /// <summary>
-    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="DapperTableExtensions.GetTableName{T}"/> </para>
+    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="TableExtensions.GetTableName{T}"/> </para>
     /// </summary>
     /// <typeparam name="T"> The type being passed </typeparam>
     /// <returns>

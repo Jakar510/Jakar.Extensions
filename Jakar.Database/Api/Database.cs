@@ -2,7 +2,6 @@
 // 08/14/2022  8:39 PM
 
 using System.IdentityModel.Tokens.Jwt;
-using Jakar.Database.Implementations;
 using Microsoft.AspNetCore.Mvc;
 
 
@@ -18,18 +17,18 @@ public abstract class Database : Randoms, IConnectableDb, IAsyncDisposable, IHea
     private            Uri                             _domain        = new("https://localhost:443");
 
 
-    public abstract    AppVersion                   Version           { get; }
-    public abstract    DbInstance                   Instance          { get; }
-    public             DbOptions                    Options           { get; }
-    public             DbTableBase<GroupRecord>     Groups            { get; }
-    public             DbTableBase<RoleRecord>      Roles             { get; }
-    public             DbTableBase<UserGroupRecord> UserGroups        { get; }
-    public             DbTableBase<UserRecord>      Users             { get; }
-    public             DbTableBase<UserRoleRecord>  UserRoles         { get; }
-    public             IConfiguration               Configuration     { get; }
-    protected abstract PasswordRequirements         _Requirements     { get; }
-    protected internal PasswordValidator            PasswordValidator => new(_Requirements);
-    public virtual     string                       ConnectionString  => Configuration.ConnectionString();
+    public virtual     AppVersion               Version           => Options.Version ?? throw new NullReferenceException( nameof(DbOptions.Version) );
+    public virtual     DbInstance               Instance          => Options.DbType;
+    public             DbOptions                Options           { get; }
+    public             DbTable<GroupRecord>     Groups            { get; }
+    public             DbTable<RoleRecord>      Roles             { get; }
+    public             DbTable<UserGroupRecord> UserGroups        { get; }
+    public             DbTable<UserRecord>      Users             { get; }
+    public             DbTable<UserRoleRecord>  UserRoles         { get; }
+    public             IConfiguration           Configuration     { get; }
+    protected abstract PasswordRequirements     _Requirements     { get; }
+    protected internal PasswordValidator        PasswordValidator => new(_Requirements);
+    public virtual     string                   ConnectionString  => Configuration.ConnectionString();
     public string CurrentSchema
     {
         get => _currentSchema;
@@ -351,15 +350,9 @@ public abstract class Database : Randoms, IConnectableDb, IAsyncDisposable, IHea
         _disposables.Add( value );
         return value;
     }
-    protected virtual DbTableBase<TRecord> Create<TRecord>() where TRecord : TableRecord<TRecord>
+    protected virtual DbTable<TRecord> Create<TRecord>() where TRecord : TableRecord<TRecord>
     {
-        DbTableBase<TRecord> table = Options.DbType switch
-                                     {
-                                         DbInstance.Postgres => new PostgresDbTable<TRecord>( this ),
-                                         DbInstance.MsSql    => new MsSqlDbTable<TRecord>( this ),
-                                         _                   => new DbTableBase<TRecord>( this ),
-                                     };
-
+        var table = new DbTable<TRecord>( this );
         return AddDisposable( table );
     }
 

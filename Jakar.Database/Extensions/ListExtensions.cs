@@ -33,6 +33,8 @@ public static class ListExtensions
             il.Emit( OpCodes.Ret );          // Return field
             Getter = (Func<List<T>, T[]>)dm.CreateDelegate( typeof(Func<List<T>, T[]>) );
         }
+
+
         public static readonly Func<List<T>, T[]> Getter;
     }
 

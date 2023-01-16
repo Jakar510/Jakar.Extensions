@@ -18,7 +18,7 @@ public interface IInsertInto
     public IDataInsert In( string tableName );
 
     /// <summary>
-    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="DapperTableExtensions.GetTableName(System.Type)"/> </para>
+    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="TableExtensions.GetTableName(System.Type)"/> </para>
     ///     Starts a <see cref="IDataInsert"/> chain.
     /// </summary>
     /// <typeparam name="T"> The type being passed </typeparam>
@@ -28,7 +28,7 @@ public interface IInsertInto
     public IDataInsert In<T>() where T : class;
 
     /// <summary>
-    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="DapperTableExtensions.GetTableName(Type)"/> </para>
+    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="TableExtensions.GetTableName(Type)"/> </para>
     ///     Starts a <see cref="IDataInsert"/> chain.
     /// </summary>
     /// <typeparam name="T"> The type being passed </typeparam>
@@ -39,7 +39,7 @@ public interface IInsertInto
 
 
     /// <summary>
-    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="DapperTableExtensions.GetTableName(Type)"/> </para>
+    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="TableExtensions.GetTableName(Type)"/> </para>
     ///     Uses <see cref="System.Reflection"/> to determine the column names and its values. Uses public properties only.
     /// </summary>
     /// <typeparam name="T"> The type being passed </typeparam>
@@ -49,7 +49,7 @@ public interface IInsertInto
     public ISqlBuilderRoot Into<T>( string tableName, T obj );
 
     /// <summary>
-    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="DapperTableExtensions.GetTableName(Type)"/> </para>
+    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="TableExtensions.GetTableName(Type)"/> </para>
     ///     Also uses <see cref="System.Reflection"/> to determine the column names and its values.
     ///     <para> Checks public properties only. </para>
     /// </summary>
@@ -60,7 +60,7 @@ public interface IInsertInto
     public ISqlBuilderRoot Into<T>( T obj ) where T : class;
 
     /// <summary>
-    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="DapperTableExtensions.GetTableName(Type)"/> </para>
+    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="TableExtensions.GetTableName(Type)"/> </para>
     ///     Also uses <see cref="System.Reflection"/> to determine the column names and its values.
     ///     <para> Checks public properties only. </para>
     /// </summary>

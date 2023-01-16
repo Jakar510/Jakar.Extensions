@@ -59,7 +59,7 @@ public struct SelectClauseBuilder<TNext>
         return this;
     }
     /// <summary>
-    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="DapperTableExtensions.GetTableName(Type)"/> </para>
+    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="TableExtensions.GetTableName(Type)"/> </para>
     ///     Adds table_name.
     ///     <param name="columnName"> </param>
     ///     to SELECT set
@@ -71,7 +71,7 @@ public struct SelectClauseBuilder<TNext>
         return this;
     }
     /// <summary>
-    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="TNext"/> to get the table_name using <see cref="DapperTableExtensions.GetTableName(Type)"/> </para>
+    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="TNext"/> to get the table_name using <see cref="TableExtensions.GetTableName(Type)"/> </para>
     ///     Adds table_name.
     ///     <param name="columnNames"> </param>
     ///     to SELECT set
@@ -113,7 +113,7 @@ public struct SelectClauseBuilder<TNext>
     }
 
     /// <summary>
-    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="DapperTableExtensions.GetTableName(Type)"/> </para>
+    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="TableExtensions.GetTableName(Type)"/> </para>
     ///     Adds table_name.columnName to SELECT set and setting it to the
     ///     <param name="alias"> </param>
     ///     variable

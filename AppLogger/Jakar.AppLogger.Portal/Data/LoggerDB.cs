@@ -6,13 +6,12 @@ public sealed class LoggerDB : Database.Database
 {
     public override    AppVersion                                   Version       { get; } = new(1, 0, 0);
     public             ConcurrentObservableCollection<Notification> Notifications { get; } = new();
-    public override    DbInstance                                   Instance      => DbInstance.Postgres;
-    public             DbTableBase<AppRecord>                       Apps          { get; }
-    public             DbTableBase<AttachmentRecord>                Attachments   { get; }
-    public             DbTableBase<DeviceRecord>                    Devices       { get; }
-    public             DbTableBase<LogRecord>                       Logs          { get; }
-    public             DbTableBase<ScopeRecord>                     Scopes        { get; }
-    public             DbTableBase<SessionRecord>                   Sessions      { get; }
+    public             DbTable<AppRecord>                       Apps          { get; }
+    public             DbTable<AttachmentRecord>                Attachments   { get; }
+    public             DbTable<DeviceRecord>                    Devices       { get; }
+    public             DbTable<LogRecord>                       Logs          { get; }
+    public             DbTable<ScopeRecord>                     Scopes        { get; }
+    public             DbTable<SessionRecord>                   Sessions      { get; }
     protected override PasswordRequirements                         _Requirements { get; } = new();
 
 

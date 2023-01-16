@@ -43,7 +43,7 @@ public sealed record UserRoleRecord : TableRecord<UserRoleRecord>
     public override int GetHashCode() => HashCode.Combine( base.GetHashCode(), UserID, CreatedBy, RoleID );
 
 
-    public async ValueTask<RoleRecord?> GetRole( DbConnection connection, DbTransaction? transaction, DbTableBase<RoleRecord> table, CancellationToken token ) => await table.Get( connection, transaction, RoleID, token );
+    public async ValueTask<RoleRecord?> GetRole( DbConnection connection, DbTransaction? transaction, DbTable<RoleRecord> table, CancellationToken token ) => await table.Get( connection, transaction, RoleID, token );
     public override bool Equals( UserRoleRecord? other )
     {
         if ( other is null ) { return false; }

@@ -12,30 +12,48 @@ namespace Jakar.Database;
 
 
 [SuppressMessage( "ReSharper", "InconsistentNaming" )]
-public class DbTableBase<TRecord> : ObservableClass, IConnectableDb<TRecord>, IAsyncDisposable where TRecord : TableRecord<TRecord>
+public abstract class Constants<TRecord> : ObservableClass where TRecord : TableRecord<TRecord>
 {
-    protected readonly TypePropertiesCache      _propertiesCache;
-    protected readonly IConnectableDb           _database;
-    protected readonly object?                  _nullParameters = null;
-    internal static    TRecord[]                Empty         => Array.Empty<TRecord>();
-    public             DbInstance               Instance      => _database.Instance;
-    public             IDGenerator<TRecord>     IDs           => new(this);
-    public             RecordGenerator<TRecord> Records       => new(this);
-    public             string                   CurrentSchema => _database.CurrentSchema;
+    public static readonly string TABLE_NAME          = typeof(TRecord).GetTableName();
+    public static readonly string POSTGRES_TABLE_NAME = $"\"{typeof(TRecord).GetTableName()}\"";
+    public const           string ID                  = nameof(IDataBaseID.ID);
+    public const           string POSTGRES_ID         = $@"""{nameof(IDataBaseID.ID)}""";
+}
 
 
-    protected virtual string IDKey => Instance switch
-                                      {
-                                          DbInstance.Postgres => $@"""{nameof(IDataBaseID.ID)}""",
-                                          DbInstance.MsSql    => nameof(IDataBaseID.ID),
-                                          _                   => throw new OutOfRangeException( nameof(Instance), Instance ),
-                                      };
 
-    public         string SchemaTableName => $"{CurrentSchema}.{TableName}";
-    public virtual string TableName       { get; } = typeof(TRecord).GetTableName();
+public class DbTable<TRecord> : Constants<TRecord>, IConnectableDb<TRecord>, IAsyncDisposable where TRecord : TableRecord<TRecord>
+{
+    protected readonly TypePropertiesCache _propertiesCache;
+    protected readonly IConnectableDb      _database;
+    protected readonly object?             _nullParameters = null;
+    internal static    TRecord[]           Empty    => Array.Empty<TRecord>();
+    public             DbInstance          Instance => _database.Instance;
+
+    // ReSharper disable once InconsistentNaming
+    public IDGenerator<TRecord>     IDs           => new(this);
+    public RecordGenerator<TRecord> Records       => new(this);
+    public string                   CurrentSchema => _database.CurrentSchema;
 
 
-    public DbTableBase( IConnectableDb database )
+    protected internal virtual string IDKey => Instance switch
+                                               {
+                                                   DbInstance.Postgres => POSTGRES_ID,
+                                                   DbInstance.MsSql    => ID,
+                                                   _                   => throw new OutOfRangeException( nameof(Instance), Instance )
+                                               };
+
+    public string SchemaTableName => $"{CurrentSchema}.{TableName}";
+
+    public string TableName => Instance switch
+                               {
+                                   DbInstance.Postgres => POSTGRES_TABLE_NAME,
+                                   DbInstance.MsSql    => TABLE_NAME,
+                                   _                   => TABLE_NAME
+                               };
+
+
+    public DbTable( IConnectableDb database )
     {
         _database        = database;
         _propertiesCache = new TypePropertiesCache( this );
@@ -63,7 +81,7 @@ public class DbTableBase<TRecord> : ObservableClass, IConnectableDb<TRecord>, IA
             return new ConcurrentDictionary<DbInstance, IReadOnlyDictionary<string, Descriptor>>
                    {
                        [DbInstance.Postgres] = properties.ToDictionary<PropertyInfo, string, Descriptor>( property => property.Name, property => new PostgresDescriptor( property ) ),
-                       [DbInstance.MsSql]    = properties.ToDictionary<PropertyInfo, string, Descriptor>( property => property.Name, property => new MsSqlDescriptor( property ) ),
+                       [DbInstance.MsSql]    = properties.ToDictionary<PropertyInfo, string, Descriptor>( property => property.Name, property => new MsSqlDescriptor( property ) )
                    };
         }
     }
@@ -106,13 +124,12 @@ public class DbTableBase<TRecord> : ObservableClass, IConnectableDb<TRecord>, IA
     }
 
 
-    protected virtual T[] Convert<T>( IEnumerable<T> enumerable ) =>
-        enumerable switch
-        {
-            List<T> list => list.GetInternalArray(),
-            T[] array    => array,
-            _            => enumerable.ToArray(),
-        };
+    protected virtual T[] Convert<T>( IEnumerable<T> enumerable ) => enumerable switch
+                                                                     {
+                                                                         List<T> list => list.GetInternalArray(),
+                                                                         T[] array    => array,
+                                                                         _            => enumerable.ToArray()
+                                                                     };
 
 
     public ValueTask Delete( TRecord                   record,     CancellationToken token                                                              = default ) => this.TryCall( Delete, record,  token );
@@ -311,7 +328,7 @@ public class DbTableBase<TRecord> : ObservableClass, IConnectableDb<TRecord>, IA
             {
                 throw new SqlException( sql, parameters, "Multiple records found" )
                       {
-                          MatchAll = matchAll,
+                          MatchAll = matchAll
                       };
             }
 

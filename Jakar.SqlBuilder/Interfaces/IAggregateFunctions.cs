@@ -28,7 +28,7 @@ public interface IAggregateFunctions<out TNext>
     public TNext Average( string columnName );
 
     /// <summary>
-    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="DapperTableExtensions.GetTableName{T}"/> </para>
+    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="TableExtensions.GetTableName{T}"/> </para>
     ///     Return the maximum value of values in table_name. <paramref name="columnName"/>
     /// </summary>
     /// <returns>
@@ -37,7 +37,7 @@ public interface IAggregateFunctions<out TNext>
     public TNext Average<T>( string columnName );
 
     /// <summary>
-    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="DapperTableExtensions.GetTableName{T}"/> </para>
+    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="TableExtensions.GetTableName{T}"/> </para>
     ///     Return the maximum value of values in table_name. <paramref name="columnName"/>
     /// </summary>
     /// <returns>
@@ -59,7 +59,7 @@ public interface IAggregateFunctions<out TNext>
     public TNext Count( string columnName );
 
     /// <summary>
-    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="DapperTableExtensions.GetTableName{T}"/> </para>
+    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="TableExtensions.GetTableName{T}"/> </para>
     ///     Return the maximum value of values in table_name. <paramref name="columnName"/>
     /// </summary>
     /// <returns>
@@ -68,7 +68,7 @@ public interface IAggregateFunctions<out TNext>
     public TNext Count<T>( string columnName );
 
     /// <summary>
-    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="DapperTableExtensions.GetTableName{T}"/> </para>
+    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="TableExtensions.GetTableName{T}"/> </para>
     ///     Return the maximum value of values in table_name. <paramref name="columnName"/>
     /// </summary>
     /// <returns>
@@ -96,7 +96,7 @@ public interface IAggregateFunctions<out TNext>
     public TNext Max( string columnName );
 
     /// <summary>
-    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="DapperTableExtensions.GetTableName{T}"/> </para>
+    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="TableExtensions.GetTableName{T}"/> </para>
     ///     Return the maximum value of values in table_name. <paramref name="columnName"/>
     /// </summary>
     /// <returns>
@@ -105,7 +105,7 @@ public interface IAggregateFunctions<out TNext>
     public TNext Max<T>( string columnName );
 
     /// <summary>
-    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="DapperTableExtensions.GetTableName{T}"/> </para>
+    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="TableExtensions.GetTableName{T}"/> </para>
     ///     Return the maximum value of values in table_name. <paramref name="columnName"/>
     /// </summary>
     /// <returns>
@@ -127,7 +127,7 @@ public interface IAggregateFunctions<out TNext>
     public TNext Min( string columnName );
 
     /// <summary>
-    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="DapperTableExtensions.GetTableName{T}"/> </para>
+    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="TableExtensions.GetTableName{T}"/> </para>
     ///     Return the maximum value of values in table_name. <paramref name="columnName"/>
     /// </summary>
     /// <returns>
@@ -136,7 +136,7 @@ public interface IAggregateFunctions<out TNext>
     public TNext Min<T>( string columnName );
 
     /// <summary>
-    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="DapperTableExtensions.GetTableName{T}"/> </para>
+    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="TableExtensions.GetTableName{T}"/> </para>
     ///     Return the maximum value of values in table_name. <paramref name="columnName"/>
     /// </summary>
     /// <returns>
@@ -158,7 +158,7 @@ public interface IAggregateFunctions<out TNext>
     public TNext Sum( string columnName );
 
     /// <summary>
-    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="DapperTableExtensions.GetTableName{T}"/> </para>
+    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="TableExtensions.GetTableName{T}"/> </para>
     ///     Return the maximum value of values in table_name. <paramref name="columnName"/>
     /// </summary>
     /// <returns>
@@ -167,7 +167,7 @@ public interface IAggregateFunctions<out TNext>
     public TNext Sum<T>( string columnName );
 
     /// <summary>
-    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="DapperTableExtensions.GetTableName{T}"/> </para>
+    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="TableExtensions.GetTableName{T}"/> </para>
     ///     Return the maximum value of values in table_name. <paramref name="columnName"/>
     /// </summary>
     /// <returns>

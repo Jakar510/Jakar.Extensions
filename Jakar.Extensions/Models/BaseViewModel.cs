@@ -32,12 +32,13 @@ public abstract class BaseViewModel : ObservableClass
 
     protected BaseViewModel() { }
     protected BaseViewModel( string title ) => Title = title;
+
+
     public virtual Task OnAppearingAsync() => Task.CompletedTask;
     public virtual Task OnDisappearingAsync() => Task.CompletedTask;
 
 
     public virtual void OnAppearing() { }
-
 
     public virtual void OnDisappearing() { }
 }

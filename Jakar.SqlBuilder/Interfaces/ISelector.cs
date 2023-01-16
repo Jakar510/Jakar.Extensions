@@ -17,7 +17,7 @@ public interface ISelector : IFromSyntax<ISqlBuilderRoot>, IAggregateFunctions<I
     public ISelector Next( string columnName );
 
     /// <summary>
-    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="DapperTableExtensions.GetTableName(System.Type)"/> </para>
+    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="TableExtensions.GetTableName(System.Type)"/> </para>
     ///     Adds table_name.
     ///     <param name="columnName"> </param>
     ///     to SELECT set
@@ -42,7 +42,7 @@ public interface ISelector : IFromSyntax<ISqlBuilderRoot>, IAggregateFunctions<I
     public ISelector Next( string alias, string separator, params string[] columnNames );
 
     /// <summary>
-    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="DapperTableExtensions.GetTableName(Type)"/> </para>
+    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="TableExtensions.GetTableName(Type)"/> </para>
     ///     Adds table_name.columnName separated by
     ///     <param name="separator"> </param>
     ///     to SELECT set and setting it to the

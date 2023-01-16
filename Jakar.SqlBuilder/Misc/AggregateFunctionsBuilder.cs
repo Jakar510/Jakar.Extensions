@@ -69,7 +69,7 @@ public struct AggregateFunctionsBuilder<TNext> where TNext : struct
         return _next;
     }
     /// <summary>
-    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="DapperTableExtensions.GetTableName(System.Type)"/> </para>
+    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="TableExtensions.GetTableName(System.Type)"/> </para>
     ///     Return the maximum value of values in table_name. <paramref name="columnName"/>
     /// </summary>
     /// <returns>
@@ -81,7 +81,7 @@ public struct AggregateFunctionsBuilder<TNext> where TNext : struct
         return _next;
     }
     /// <summary>
-    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="DapperTableExtensions.GetTableName{T}"/> </para>
+    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="TableExtensions.GetTableName{T}"/> </para>
     ///     Return the maximum value of values in table_name. <paramref name="columnName"/>
     /// </summary>
     /// <returns>
@@ -113,7 +113,7 @@ public struct AggregateFunctionsBuilder<TNext> where TNext : struct
         return _next;
     }
     /// <summary>
-    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="DapperTableExtensions.GetTableName{T}"/> </para>
+    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="TableExtensions.GetTableName{T}"/> </para>
     ///     Return the maximum value of values in table_name. <paramref name="columnName"/>
     /// </summary>
     /// <returns>
@@ -125,7 +125,7 @@ public struct AggregateFunctionsBuilder<TNext> where TNext : struct
         return _next;
     }
     /// <summary>
-    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="DapperTableExtensions.GetTableName{T}"/> </para>
+    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="TableExtensions.GetTableName{T}"/> </para>
     ///     Return the maximum value of values in table_name. <paramref name="columnName"/>
     /// </summary>
     /// <returns>
@@ -157,7 +157,7 @@ public struct AggregateFunctionsBuilder<TNext> where TNext : struct
         return _next;
     }
     /// <summary>
-    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="DapperTableExtensions.GetTableName{T}"/> </para>
+    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="TableExtensions.GetTableName{T}"/> </para>
     ///     Return the maximum value of values in table_name. <paramref name="columnName"/>
     /// </summary>
     /// <returns>
@@ -169,7 +169,7 @@ public struct AggregateFunctionsBuilder<TNext> where TNext : struct
         return _next;
     }
     /// <summary>
-    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="DapperTableExtensions.GetTableName{T}"/> </para>
+    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="TableExtensions.GetTableName{T}"/> </para>
     ///     Return the maximum value of values in table_name. <paramref name="columnName"/>
     /// </summary>
     /// <returns>
@@ -201,7 +201,7 @@ public struct AggregateFunctionsBuilder<TNext> where TNext : struct
         return _next;
     }
     /// <summary>
-    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="DapperTableExtensions.GetTableName{T}"/> </para>
+    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="TableExtensions.GetTableName{T}"/> </para>
     ///     Return the maximum value of values in table_name. <paramref name="columnName"/>
     /// </summary>
     /// <returns>
@@ -213,7 +213,7 @@ public struct AggregateFunctionsBuilder<TNext> where TNext : struct
         return _next;
     }
     /// <summary>
-    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="DapperTableExtensions.GetTableName{T}"/> </para>
+    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="TableExtensions.GetTableName{T}"/> </para>
     ///     Return the maximum value of values in table_name. <paramref name="columnName"/>
     /// </summary>
     /// <returns>
@@ -245,7 +245,7 @@ public struct AggregateFunctionsBuilder<TNext> where TNext : struct
         return _next;
     }
     /// <summary>
-    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="DapperTableExtensions.GetTableName{T}"/> </para>
+    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="TableExtensions.GetTableName{T}"/> </para>
     ///     Return the maximum value of values in table_name. <paramref name="columnName"/>
     /// </summary>
     /// <returns>
@@ -257,7 +257,7 @@ public struct AggregateFunctionsBuilder<TNext> where TNext : struct
         return _next;
     }
     /// <summary>
-    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="DapperTableExtensions.GetTableName{T}"/> </para>
+    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="TableExtensions.GetTableName{T}"/> </para>
     ///     Return the maximum value of values in table_name. <paramref name="columnName"/>
     /// </summary>
     /// <returns>

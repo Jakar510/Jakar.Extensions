@@ -24,7 +24,11 @@ public static partial class DbExtensions
                                                                                                                        } ) ) );
 
 
-    public static WebApplicationBuilder AddDatabase<T>( this WebApplicationBuilder builder, DbInstance instance ) where T : Database => builder.AddDatabase<T>( configure => configure.DbType = instance );
+    public static WebApplicationBuilder AddDatabase<T>( this WebApplicationBuilder builder, DbInstance instance, AppVersion version ) where T : Database => builder.AddDatabase<T>( configure =>
+                                                                                                                                                                                    {
+                                                                                                                                                                                        configure.DbType  = instance;
+                                                                                                                                                                                        configure.Version = version;
+                                                                                                                                                                                    } );
     public static WebApplicationBuilder AddDatabase<T>( this WebApplicationBuilder builder, Action<DbOptions> configure ) where T : Database
     {
         builder.AddOptions( configure );

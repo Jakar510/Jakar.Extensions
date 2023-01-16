@@ -43,7 +43,7 @@ public static class StringExtensions
                          {
                              { '(', ')' },
                              { '{', '}' },
-                             { '[', ']' },
+                             { '[', ']' }
                          };
 
         var brackets = new Stack<char>();
@@ -200,14 +200,15 @@ public static class StringExtensions
 
 
     /// <summary> copied from <seealso href="https://stackoverflow.com/a/67332992/9530917"/> </summary>
-    /// <param name="text"> </param>
-    /// <returns> </returns>
-    public static string ToSnakeCase( this string text )
+    public static string ToSnakeCase( this string text ) => text.ToSnakeCase( CultureInfo.InvariantCulture );
+    /// <summary> copied from <seealso href="https://stackoverflow.com/a/67332992/9530917"/> </summary>
+    public static string ToSnakeCase( this string text, CultureInfo cultureInfo )
     {
-        if ( string.IsNullOrEmpty( text ) ) { return text; }
+        if ( string.IsNullOrWhiteSpace( text ) ) { return text; }
 
-        var builder          = new StringBuilder( text.Length + Math.Min( 2, text.Length / 5 ) );
-        var previousCategory = default(UnicodeCategory?);
+
+        var builder          = new StringBuilder( text.Length + Math.Max( 2, text.Length / 5 ) );
+        UnicodeCategory? previousCategory = default;
 
         for ( int currentIndex = 0; currentIndex < text.Length; currentIndex++ )
         {
@@ -233,19 +234,19 @@ public static class StringExtensions
             {
                 case UnicodeCategory.UppercaseLetter:
                 case UnicodeCategory.TitlecaseLetter:
-                    if ( previousCategory is UnicodeCategory.SpaceSeparator or UnicodeCategory.LowercaseLetter ||
-                         previousCategory != UnicodeCategory.DecimalDigitNumber && previousCategory != null && currentIndex > 0 && currentIndex + 1 < text.Length && char.IsLower( text[currentIndex + 1] ) ) { builder.Append( '_' ); }
+                    if ( previousCategory is UnicodeCategory.SpaceSeparator or UnicodeCategory.LowercaseLetter || previousCategory is not UnicodeCategory.DecimalDigitNumber && previousCategory is not null && currentIndex > 0 &&
+                         currentIndex + 1 < text.Length && char.IsLower( text[currentIndex + 1] ) ) { builder.Append( '_' ); }
 
-                    currentChar = char.ToLower( currentChar, CultureInfo.InvariantCulture );
+                    currentChar = char.ToLower( currentChar, cultureInfo );
                     break;
 
                 case UnicodeCategory.LowercaseLetter:
-                    if ( previousCategory == UnicodeCategory.SpaceSeparator ) { builder.Append( '_' ); }
+                    if ( previousCategory is UnicodeCategory.SpaceSeparator ) { builder.Append( '_' ); }
 
                     break;
 
                 default:
-                    if ( previousCategory != null ) { previousCategory = UnicodeCategory.SpaceSeparator; }
+                    if ( previousCategory is not null ) { previousCategory = UnicodeCategory.SpaceSeparator; }
 
                     continue;
             }

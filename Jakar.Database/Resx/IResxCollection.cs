@@ -10,7 +10,7 @@ public interface IResxCollection : IReadOnlyCollection<ResxRowTable>
 
 
     public ValueTask Init( IResxProvider                 provider,   CancellationToken         token                                                                 = default );
-    public ValueTask Init( IConnectableDb                db,         DbTableBase<ResxRowTable> table,       CancellationToken         token                          = default );
-    public ValueTask Init( DbConnection                  connection, DbTransaction             transaction, DbTableBase<ResxRowTable> table, CancellationToken token = default );
+    public ValueTask Init( IConnectableDb                db,         DbTable<ResxRowTable> table,       CancellationToken         token                          = default );
+    public ValueTask Init( DbConnection                  connection, DbTransaction             transaction, DbTable<ResxRowTable> table, CancellationToken token = default );
     public ValueTask<ResxSet> GetSetAsync( IResxProvider provider,   SupportedLanguage         language,    CancellationToken         token = default );
 }

@@ -26,7 +26,7 @@ public interface IJoin : IChainEnd<ISqlBuilderRoot>
 public interface IJoinChain : IChainEnd<ISqlBuilderRoot>
 {
     /// <summary>
-    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="DapperTableExtensions.GetTableName{T}"/> </para>
+    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="TableExtensions.GetTableName{T}"/> </para>
     /// 
     /// </summary>
     /// <typeparam name="T"> </typeparam>
@@ -35,7 +35,7 @@ public interface IJoinChain : IChainEnd<ISqlBuilderRoot>
     public IJoinChainMiddle Left<T>( string columnName );
 
     /// <summary>
-    ///     <para> Uses the <paramref name="obj"/> to get the table_name using <see cref="DapperTableExtensions.GetTableName{T}"/> </para>
+    ///     <para> Uses the <paramref name="obj"/> to get the table_name using <see cref="TableExtensions.GetTableName{T}"/> </para>
     /// 
     /// </summary>
     /// <typeparam name="T"> </typeparam>
@@ -60,7 +60,7 @@ public interface IJoinChainMiddle : IComparators<IJoinChainRight> { }
 public interface IJoinChainRight
 {
     /// <summary>
-    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="DapperTableExtensions.GetTableName{T}"/> </para>
+    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="TableExtensions.GetTableName{T}"/> </para>
     /// 
     /// </summary>
     /// <typeparam name="T"> </typeparam>
@@ -69,7 +69,7 @@ public interface IJoinChainRight
     public IJoinChain Right<T>( string columnName );
 
     /// <summary>
-    ///     <para> Uses the <paramref name="obj"/> to get the table_name using <see cref="DapperTableExtensions.GetTableName{T}"/> </para>
+    ///     <para> Uses the <paramref name="obj"/> to get the table_name using <see cref="TableExtensions.GetTableName{T}"/> </para>
     /// 
     /// </summary>
     /// <typeparam name="T"> </typeparam>
