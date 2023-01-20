@@ -22,6 +22,8 @@ public sealed class DebugSettings : ObservableClass, IDebugSettings
     private bool _enableCrashes          = Preferences.Get( nameof(EnableCrashes),          true );
     private bool _includeAppStateOnError = Preferences.Get( nameof(IncludeAppStateOnError), true );
     private bool _takeScreenshotOnError  = Preferences.Get( nameof(TakeScreenshotOnError),  true );
+
+
     public bool EnableAnalytics
     {
         get => _enableAnalytics && EnableApi;
@@ -30,8 +32,6 @@ public sealed class DebugSettings : ObservableClass, IDebugSettings
             if ( SetProperty( ref _enableAnalytics, value ) ) { Preferences.Set( nameof(EnableAnalytics), value ); }
         }
     }
-
-
     public bool EnableApi
     {
         get => _enableApi;

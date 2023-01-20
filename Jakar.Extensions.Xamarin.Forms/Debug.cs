@@ -10,16 +10,16 @@ namespace Jakar.Extensions.Xamarin.Forms;
 
 public class Debug : ObservableClass
 {
-    private readonly BaseFileSystemApi _fileSystemApi;
-    private readonly IAppSettings      _settings;
-    private readonly LocalFile         _appStateFile;
-    private readonly LocalFile         _feedBackFile;
-
-
+    protected readonly BaseFileSystemApi  _fileSystemApi;
+    protected readonly IAppSettings       _settings;
+    protected readonly LocalFile          _appStateFile;
+    protected readonly LocalFile          _feedBackFile;
     protected readonly string             _appName;
     private readonly   Synchronized<bool> _apiEnabled    = new(false);
     private            DebugSettings      _debugSettings = new();
     private            Guid               _installID;
+
+
     public bool ApiEnabled
     {
         get => _apiEnabled;
