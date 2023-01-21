@@ -4,7 +4,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata>
 		<id>Jakar.Extensions</id>
-		<version>6.4.3</version>
+		<version>6.4.4</version>
 		<title>Extension Library</title>
 		<authors>Tyler Stegmaier</authors>
 		<owners>Jakar510/Jakar</owners>
@@ -29,7 +29,7 @@
 		<dependencies>
 			<group targetFramework="netstandard2.1">
 				<dependency id="CommunityToolkit.Diagnostics"
-							version="8.0.0" />
+							version="8.1.0" />
 				<dependency id="Dapper"
 							version="2.0.123" />
 				<dependency id="Dapper.Contrib"
@@ -84,7 +84,7 @@
 
 			<group targetFramework="net6.0">
 				<dependency id="CommunityToolkit.Diagnostics"
-							version="8.0.0" />
+							version="8.1.0" />
 				<dependency id="Dapper"
 							version="2.0.123" />
 				<dependency id="Dapper.Contrib"
@@ -139,7 +139,7 @@
 
 			<group targetFramework="net7.0">
 				<dependency id="CommunityToolkit.Diagnostics"
-							version="8.0.0" />
+							version="8.1.0" />
 				<dependency id="Dapper"
 							version="2.0.123" />
 				<dependency id="Dapper.Contrib"
