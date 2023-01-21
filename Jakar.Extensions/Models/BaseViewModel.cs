@@ -39,6 +39,5 @@ public abstract class BaseViewModel : ObservableClass
 
 
     public virtual void OnAppearing() { }
-
     public virtual void OnDisappearing() { }
 }
