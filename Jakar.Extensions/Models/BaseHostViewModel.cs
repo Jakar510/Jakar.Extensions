@@ -8,6 +8,9 @@ public interface IHostViewModel : IHostInfo
 {
     public bool    IsValidHost { get; set; }
     public string? Host        { get; set; }
+
+
+    public void Reset();
 }
 
 
@@ -20,30 +23,29 @@ public abstract class BaseHostViewModel : BaseViewModel, IHostViewModel
     private            Uri?    _hostInfo;
 
 
-    public virtual bool IsValidHost
+    public bool IsValidHost
     {
         get => _isValidHost;
         set => SetProperty( ref _isValidHost, value );
     }
-
-
-    public virtual string? Host
+    public string? Host
     {
         get => _host;
         set
         {
-            SetProperty( ref _host, value );
+            if ( !SetProperty( ref _host, value ) ) { return; }
+
             IsValidHost = Uri.TryCreate( value, UriKind.Absolute, out _hostInfo );
             OnPropertyChanged( nameof(HostInfo) );
+            OnHostChanged( value, IsValidHost, _hostInfo );
         }
     }
-    public virtual Uri HostInfo
+    public Uri HostInfo
     {
         get => _hostInfo ?? _defaultHostInfo;
         set
         {
-            SetProperty( ref _hostInfo, value );
-            Host = value.ToString();
+            if ( SetProperty( ref _hostInfo, value ) ) { Host = value.ToString(); }
         }
     }
 
@@ -52,6 +54,10 @@ public abstract class BaseHostViewModel : BaseViewModel, IHostViewModel
     protected BaseHostViewModel( Uri hostInfo, Uri defaultHostInfo )
     {
         _defaultHostInfo = defaultHostInfo;
-        HostInfo         = hostInfo;
+        Host             = hostInfo.OriginalString;
     }
+
+
+    [SuppressMessage( "ReSharper", "UnusedParameter.Global" )] protected virtual void OnHostChanged( in string? host, in bool isValid, in Uri? hostInfo ) { }
+    public virtual void Reset() => Host = _defaultHostInfo.OriginalString;
 }
