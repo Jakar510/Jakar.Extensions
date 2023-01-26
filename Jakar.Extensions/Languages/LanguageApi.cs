@@ -6,7 +6,7 @@ namespace Jakar.Extensions;
 public sealed class LanguageApi : ObservableClass
 {
     private Language?           _selectedLanguage;
-    private Language.Collection _languages = new(Language.Common);
+    private Language.Collection _languages = new(Language.Supported);
 
 
     public Language SelectedLanguage

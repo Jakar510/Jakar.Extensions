@@ -3,7 +3,7 @@
     "Hello World!".WriteToConsole();
 
 
-    var values = Language.Common;
+    var values = Language.Supported;
 
     values
 
