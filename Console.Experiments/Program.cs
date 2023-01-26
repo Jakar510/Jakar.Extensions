@@ -1,10 +1,17 @@
-﻿using System.Net;
-
-
-try
+﻿try
 {
     "Hello World!".WriteToConsole();
 
+
+    var values = Language.Common;
+
+    values
+
+        //
+        // .Where( x => x.DisplayName.Contains( "Czech", StringComparison.OrdinalIgnoreCase ) )
+       .Where( x => x.Version is not null )
+       .ToPrettyJson()
+       .WriteToConsole();
 
     // var p = new DynamicParameters();
     // p.Add( nameof(AppVersion), "1.0.0" );
@@ -20,49 +27,49 @@ try
     // (SOURCE == version.ToString()).WriteToDebug();
 
 
-    var project = new IniConfig.Section( "Project" )
-                  {
-                      ["Name"] = nameof(Program),
-                  };
-
-    project.Add( nameof(DateTime),       DateTime.Now );
-    project.Add( nameof(DateTimeOffset), DateTimeOffset.UtcNow );
-    project.Add( nameof(Guid),           Guid.NewGuid() );
-
-    project.Add( nameof(AppVersion), new AppVersion( 1, 2, 3, 4, 5, 6, AppVersionFlags.Alpha( 1 ) ) );
-
-    var server = new IniConfig.Section( "Server" )
-                 {
-                     ["Name"] = nameof(ServicePoint),
-                 };
-
-    server.Add( "Port", Random.Shared.Next( IPEndPoint.MinPort, IPEndPoint.MaxPort ) );
-
-
-    server.Add( nameof(IPAddress), string.Join( '.', Random.Shared.Next( 255 ), Random.Shared.Next( 255 ), Random.Shared.Next( 255 ), Random.Shared.Next( 255 ) ) );
-
-    var ini = new IniConfig
-              {
-                  project,
-                  server,
-              };
-
-    ini[nameof(Random)]
-       .Add( nameof(Random.Next), Random.Shared.Next() );
-
-    ini[nameof(Program)]
-       .Add( nameof(Random.Next), Random.Shared.Next() );
-
-
-    string actual = ini.ToString();
-    $"-- {nameof(actual)} --\n{actual}".WriteToConsole();
-
-    var results = IniConfig.Parse( actual )
-                           .ToString();
-
-    $"-- {nameof(results)} --\n{results}".WriteToConsole();
-
-    (actual == results).WriteToDebug();
+    // var project = new IniConfig.Section( "Project" )
+    //               {
+    //                   ["Name"] = nameof(Program),
+    //               };
+    //
+    // project.Add( nameof(DateTime),       DateTime.Now );
+    // project.Add( nameof(DateTimeOffset), DateTimeOffset.UtcNow );
+    // project.Add( nameof(Guid),           Guid.NewGuid() );
+    //
+    // project.Add( nameof(AppVersion), new AppVersion( 1, 2, 3, 4, 5, 6, AppVersionFlags.Alpha( 1 ) ) );
+    //
+    // var server = new IniConfig.Section( "Server" )
+    //              {
+    //                  ["Name"] = nameof(ServicePoint),
+    //              };
+    //
+    // server.Add( "Port", Random.Shared.Next( IPEndPoint.MinPort, IPEndPoint.MaxPort ) );
+    //
+    //
+    // server.Add( nameof(IPAddress), string.Join( '.', Random.Shared.Next( 255 ), Random.Shared.Next( 255 ), Random.Shared.Next( 255 ), Random.Shared.Next( 255 ) ) );
+    //
+    // var ini = new IniConfig
+    //           {
+    //               project,
+    //               server,
+    //           };
+    //
+    // ini[nameof(Random)]
+    //    .Add( nameof(Random.Next), Random.Shared.Next() );
+    //
+    // ini[nameof(Program)]
+    //    .Add( nameof(Random.Next), Random.Shared.Next() );
+    //
+    //
+    // string actual = ini.ToString();
+    // $"-- {nameof(actual)} --\n{actual}".WriteToConsole();
+    //
+    // var results = IniConfig.Parse( actual )
+    //                        .ToString();
+    //
+    // $"-- {nameof(results)} --\n{results}".WriteToConsole();
+    //
+    // (actual == results).WriteToDebug();
 
 
     // byte.MaxValue.ToString()

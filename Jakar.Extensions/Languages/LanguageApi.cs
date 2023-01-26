@@ -3,65 +3,47 @@ namespace Jakar.Extensions;
 
 
 [Serializable]
-public class LanguageApi : ObservableClass
+public sealed class LanguageApi : ObservableClass
 {
-    private CultureInfo?      _currentCultureInfo;
-    private Language          _selectedLanguage;
-    private string            _selectedLanguageName = string.Empty;
-    private SupportedLanguage _currentLangVersion;
-
-
-    public virtual CultureInfo CultureInfo
-    {
-        get => _currentCultureInfo ?? throw new NullReferenceException( nameof(_currentCultureInfo) );
-        protected set
-        {
-            _currentCultureInfo                 = value;
-            Thread.CurrentThread.CurrentCulture = value;
-            CultureInfo.CurrentUICulture        = value;
-        }
-    }
+    private Language?           _selectedLanguage;
+    private Language.Collection _languages = new(Language.Common);
 
 
     public Language SelectedLanguage
     {
-        get => _selectedLanguage; // ?? throw new NullReferenceException(nameof(_selectedLanguage));
+        get => _selectedLanguage ?? throw new NullReferenceException( nameof(_selectedLanguage) ); // ?? throw new NullReferenceException(nameof(_selectedLanguage));
         set
         {
-            _selectedLanguage    = value;
-            CultureInfo          = value.ToCultureInfo();
-            CurrentLangVersion   = value.Version;
-            SelectedLanguageName = value.DisplayName;
+            if ( !SetProperty( ref _selectedLanguage, value ) ) { return; }
+
+            CultureInfo.DefaultThreadCurrentCulture   = value;
+            CultureInfo.DefaultThreadCurrentUICulture = value;
+            CultureInfo.CurrentCulture                = value;
+            CultureInfo.CurrentUICulture              = value;
+            Thread.CurrentThread.CurrentCulture       = value;
+            Thread.CurrentThread.CurrentUICulture     = value;
+        }
+    }
+    public Language.Collection Languages
+    {
+        get => _languages;
+        set
+        {
+            if ( !SetProperty( ref _languages, value ) ) { return; }
+
+            if ( value.Contains( SelectedLanguage ) ) { return; }
+
+            value.Add( SelectedLanguage );
         }
     }
 
 
-    public ObservableCollection<Language> Languages { get; } = Language.Collection.Default();
-
-
-    public virtual string SelectedLanguageName
-    {
-        get => _selectedLanguageName;
-        set => SetProperty( ref _selectedLanguageName, value );
-    }
-
-
-    public virtual SupportedLanguage CurrentLangVersion
-    {
-        get => _currentLangVersion;
-        set => SetProperty( ref _currentLangVersion, value );
-    }
-
-
     public LanguageApi() : this( CultureInfo.CurrentUICulture ) { }
-    public LanguageApi( CultureInfo culture )
+    public LanguageApi( Language culture )
     {
-        string id = culture.TwoLetterISOLanguageName;
+        SelectedLanguage = culture;
+        if ( Languages.Contains( culture ) ) { return; }
 
-        // ReSharper disable once VirtualMemberCallInConstructor
-        CultureInfo = new CultureInfo( id );
-
-        try { SelectedLanguage = Languages.First( language => language.ShortName == id ); }
-        catch ( Exception ) { SelectedLanguage = Languages.First( language => language.ShortName == "en" ); }
+        Languages.Add( culture );
     }
 }

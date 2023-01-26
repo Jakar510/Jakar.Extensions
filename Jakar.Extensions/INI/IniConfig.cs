@@ -192,7 +192,7 @@ public sealed partial class IniConfig : ConcurrentDictionary<string, IniConfig.S
 #endif
     public bool TryFormat( Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider )
     {
-        Debug.Assert( destination.Length > Length );
+        Debug.Assert( destination.Length >= Length );
         charsWritten = 0;
 
         foreach ( (string key, Section section) in this )

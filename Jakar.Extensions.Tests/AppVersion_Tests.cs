@@ -227,7 +227,7 @@ public class AppVersion_Tests : Assert
         {
             NotNull( version );
             NotNull( expectedFormat );
-            AreEqual( expectedFormat!.Value, version.Scheme );
+            AreEqual( expectedFormat.Value, version.Scheme );
 
             return;
         }

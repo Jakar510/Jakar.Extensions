@@ -2,6 +2,7 @@
 using System;
 using System.Net;
 using NUnit.Framework;
+#pragma warning disable IDE0071
 
 
 
@@ -54,7 +55,7 @@ public class IniConfig_Tests : Assert
         $"-- {nameof(actual)} --\n{actual}".WriteToConsole();
         var results = IniConfig.Parse( actual );
 
-        $"-- {nameof(results)} --\n{results}".WriteToConsole();
+        $"-- {nameof(results)} --\n{results.ToString()}".WriteToConsole();
 
 
         NotNull( results );

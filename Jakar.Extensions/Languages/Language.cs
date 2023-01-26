@@ -3,76 +3,100 @@ namespace Jakar.Extensions;
 
 
 [Serializable]
-public readonly struct Language : IDataBaseID, IComparable<Language>, IEquatable<Language>, IComparable<Language?>, IEquatable<Language?>, IComparable
+public sealed class Language : BaseClass, IComparable<Language>, IEquatable<Language>, IComparable
 {
-    public       string            DisplayName { get; init; } = string.Empty;
-    public       string            ShortName   { get; init; } = string.Empty;
-    public       SupportedLanguage Version     { get; init; } = SupportedLanguage.English;
-    [Key] public long              ID          { get; init; } = SupportedLanguage.English.AsLong();
+    private readonly CultureInfo        _culture;
+    public           bool               IsNeutralCulture { get; init; }
+    public           string             DisplayName      { get; init; }
+    public           string             EnglishName      { get; init; }
+    public           string             Name             { get; init; }
+    public           string             ThreeLetterISO   { get; init; }
+    public           string             TwoLetterISO     { get; init; }
+    public           SupportedLanguage? Version          { get; init; }
 
 
-    public Language() { }
-    public Language( SupportedLanguage language ) : this( language.GetName(), language.GetShortName(), language ) { }
-    public Language( string name, string shortName, SupportedLanguage language )
+    public Language( CultureInfo culture, in SupportedLanguage? version = default )
     {
-        DisplayName = name;
-        ShortName   = shortName;
-        Version     = language;
-        ID          = language.AsLong();
+        _culture         = culture;
+        Version          = version ?? culture.GetSupportedLanguage();
+        Name             = culture.Name;
+        EnglishName      = culture.EnglishName;
+        TwoLetterISO     = culture.TwoLetterISOLanguageName;
+        ThreeLetterISO   = culture.ThreeLetterISOLanguageName;
+        IsNeutralCulture = culture.IsNeutralCulture;
+        DisplayName      = Version?.GetName() ?? culture.DisplayName;
     }
+    public Language( SupportedLanguage language ) : this( new CultureInfo( language.GetShortName() ), language ) { }
 
 
-    public static implicit operator Language( SupportedLanguage language ) => new(language);
-
-
-    public CultureInfo ToCultureInfo() => new(ShortName);
-
-
-    public bool Equals( Language? other )
-    {
-        if ( other is null ) { return false; }
-
-        return Equals( other.Value );
-    }
-    public bool Equals( Language         other ) => DisplayName == other.DisplayName && ShortName == other.ShortName && Version == other.Version && ID == other.ID;
     public override bool Equals( object? obj ) => obj is Language language && Equals( language );
-    public override int GetHashCode() => HashCode.Combine( DisplayName, ShortName, Version, ID );
+    public override int GetHashCode() => HashCode.Combine( DisplayName, Name, Version );
+    public override string ToString() => DisplayName;
 
 
+    public static bool operator ==( Language?                   left, Language? right ) => Equalizer.Instance.Equals( left, right );
+    public static bool operator >( Language?                    left, Language? right ) => Sorter.Instance.Compare( left, right ) > 0;
+    public static bool operator >=( Language?                   left, Language? right ) => Sorter.Instance.Compare( left, right ) >= 0;
+    public static implicit operator Language( CultureInfo       value ) => new(value);
+    public static implicit operator Language( SupportedLanguage value ) => new(value);
+    public static implicit operator CultureInfo( Language       value ) => value._culture;
+    public static bool operator !=( Language?                   left, Language? right ) => Equalizer.Instance.Equals( left, right );
+    public static bool operator <( Language?                    left, Language? right ) => Sorter.Instance.Compare( left, right ) < 0;
+    public static bool operator <=( Language?                   left, Language? right ) => Sorter.Instance.Compare( left, right ) <= 0;
+    public int CompareTo( object? value ) => value is null
+                                                 ? 1
+                                                 : value is Language other
+                                                     ? CompareTo( other )
+                                                     : throw new ExpectedValueTypeException( nameof(value), value, typeof(Language) );
     public int CompareTo( Language? other )
     {
         if ( other is null ) { return -1; }
 
-        return CompareTo( other.Value );
-    }
-    public int CompareTo( Language other )
-    {
         int displayNameComparison = string.Compare( DisplayName, other.DisplayName, StringComparison.Ordinal );
         if ( displayNameComparison != 0 ) { return displayNameComparison; }
 
-        int shortNameComparison = string.Compare( ShortName, other.ShortName, StringComparison.Ordinal );
+        int shortNameComparison = string.Compare( Name, other.Name, StringComparison.Ordinal );
         if ( shortNameComparison != 0 ) { return shortNameComparison; }
 
-        int versionComparison = Version.CompareTo( other.Version );
-        if ( versionComparison != 0 ) { return versionComparison; }
-
-        return ID.CompareTo( other.ID );
+        return Nullable.Compare( Version, other.Version );
     }
-    public int CompareTo( object? obj )
+    public bool Equals( Language? other )
     {
-        if ( obj is null ) { return 1; }
+        if ( other is null ) { return false; }
 
-        return obj is Language other
-                   ? CompareTo( other )
-                   : throw new ExpectedValueTypeException( nameof(obj), obj, typeof(Language) );
+        return DisplayName == other.DisplayName && Name == other.Name && Version == other.Version;
     }
 
 
-    public static bool operator <( Language?  left, Language? right ) => Sorter.Instance.Compare( left, right ) < 0;
-    public static bool operator >( Language?  left, Language? right ) => Sorter.Instance.Compare( left, right ) > 0;
-    public static bool operator <=( Language? left, Language? right ) => Sorter.Instance.Compare( left, right ) <= 0;
-    public static bool operator >=( Language? left, Language? right ) => Sorter.Instance.Compare( left, right ) >= 0;
 
+    [Serializable]
+    public class Collection : ObservableCollection<Language>
+    {
+        public Collection() : base() { }
+        public Collection( IEnumerable<Language> items ) : base( items ) { }
+    }
+
+
+
+    public sealed class Equalizer : Equalizer<Language> { }
+
+
+
+    [Serializable]
+    public class Items : List<Language>
+    {
+        public Items() : base() { }
+        public Items( int                   capacity ) : base( capacity ) { }
+        public Items( IEnumerable<Language> items ) : base( items ) => Sort( Sorter.Instance );
+    }
+
+
+
+    public sealed class Sorter : Sorter<Language> { }
+
+
+
+    #region Instances
 
     public static Language Arabic     { get; } = new(SupportedLanguage.Arabic);
     public static Language Chinese    { get; } = new(SupportedLanguage.Chinese);
@@ -89,55 +113,38 @@ public readonly struct Language : IDataBaseID, IComparable<Language>, IEquatable
     public static Language Swedish    { get; } = new(SupportedLanguage.Swedish);
     public static Language Thai       { get; } = new(SupportedLanguage.Thai);
 
-
-    public static Items All => Items.Default();
-
-
-
-    [Serializable]
-    public class Collection : ObservableCollection<Language>
-    {
-        public Collection() : base() { }
-        public Collection( IEnumerable<Language> items ) : base( items ) { }
-
-
-        public static Collection Default() => new(Language.Items.Default());
-    }
+    #endregion
 
 
 
-    [Serializable]
-    public class Items : List<Language>
-    {
-        public Items() : base() { }
-        public Items( int                   capacity ) : base( capacity ) { }
-        public Items( IEnumerable<Language> items ) : base( items ) { }
+    #region Lists
 
+    public static Items NeutralCultures => new(CultureInfo.GetCultures( CultureTypes.NeutralCultures )
+                                                          .Select( culture => new Language( culture ) ));
 
-        public static Items Default() => new(14)
-                                         {
-                                             Arabic,
-                                             Chinese,
-                                             Czech,
-                                             Dutch,
-                                             English,
-                                             French,
-                                             German,
-                                             Japanese,
-                                             Korean,
-                                             Polish,
-                                             Portuguese,
-                                             Spanish,
-                                             Swedish,
-                                             Thai,
-                                         };
-    }
+    public static Items SpecificCultures => new(CultureInfo.GetCultures( CultureTypes.SpecificCultures )
+                                                           .Select( culture => new Language( culture ) ));
 
+    public static Items All => new(CultureInfo.GetCultures( CultureTypes.AllCultures )
+                                              .Select( culture => new Language( culture ) ));
 
+    public static Items Supported { get; } = new()
+                                             {
+                                                 Arabic,
+                                                 Chinese,
+                                                 Czech,
+                                                 Dutch,
+                                                 English,
+                                                 French,
+                                                 German,
+                                                 Japanese,
+                                                 Korean,
+                                                 Polish,
+                                                 Portuguese,
+                                                 Spanish,
+                                                 Swedish,
+                                                 Thai
+                                             };
 
-    public sealed class Equalizer : ValueEqualizer<Language> { }
-
-
-
-    public sealed class Sorter : ValueSorter<Language> { }
+    #endregion
 }
