@@ -27,10 +27,8 @@ public abstract class Widget<TServices> : ComponentBase, IModelState where TServ
     public                                                             string?              ErrorText  { get; set; }
 
 
-    [Parameter] public string? Title { get; set; }
-
-
-    [Inject] public TServices Services { get; set; } = default!;
+    [Parameter] public string?   Title    { get; set; }
+    [Inject]    public TServices Services { get; set; }
 
 
     public Task StateHasChangedAsync() => InvokeAsync( StateHasChanged );

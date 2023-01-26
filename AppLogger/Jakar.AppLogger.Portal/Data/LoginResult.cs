@@ -7,7 +7,7 @@ namespace Jakar.AppLogger.Portal.Data;
 public readonly struct LoginResult
 {
     public State       Result    { get; init; } = default;
-    public UserRecord? User      { get; init; } = default!;
+    public UserRecord? User      { get; init; } = default;
     public bool        Succeeded => User is not null && Result == State.Success;
 
 
