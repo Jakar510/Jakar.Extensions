@@ -23,7 +23,7 @@
 		<PackageReference Include="MailKit" Version="3.4.3" />
 		<PackageReference Include="Npgsql" Version="7.0.1" />
 		<PackageReference Include="Npgsql.Json.NET" Version="7.0.1" />
-		<PackageReference Include="Radzen.Blazor" Version="4.6.1" />
+		<PackageReference Include="Radzen.Blazor" Version="4.6.3" />
 	</ItemGroup>
 
 	<ItemGroup>
