@@ -97,6 +97,7 @@ public class CollectionWrapper<TValue, TOwner> : CollectionAlerts<TValue>, IColl
     // public CollectionWrapper(  ReadOnlySpan<char>   span ) : this( IDCollection<TValue>.Create(span)) { }
     public virtual void Dispose()
     {
+        // ReSharper disable once NullableWarningSuppressionIsUsed
         Items = null!;
         GC.SuppressFinalize( this );
     }

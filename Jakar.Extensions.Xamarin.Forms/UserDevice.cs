@@ -64,6 +64,7 @@ public class UserDevice<TID> : ObservableClass, IUserDevice<TID> where TID : str
 
 
     public UserDevice() { }
+    // ReSharper disable once NullableWarningSuppressionIsUsed
     public UserDevice( string model, string manufacturer, string deviceName, DeviceType deviceType, DeviceIdiom idiom, DevicePlatform platform, AppVersion osVersion, Guid? deviceID, TID id = default! )
     {
         Model        = model;
@@ -77,6 +78,7 @@ public class UserDevice<TID> : ObservableClass, IUserDevice<TID> where TID : str
         TimeStamp    = DateTime.UtcNow;
         ID           = id;
     }
+    // ReSharper disable once NullableWarningSuppressionIsUsed
     public UserDevice( IUserDevice<TID> device, TID id = default! )
     {
         ID           = id;

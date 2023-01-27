@@ -14,7 +14,7 @@ namespace Jakar.Database;
 [SuppressMessage( "ReSharper", "NotAccessedField.Global" )]
 public sealed record Tokens : IValidator
 {
-    public AppVersion Version      { get; init; } = default!;
+    public AppVersion Version      { get; init; } = new();
     public Guid       UserID       { get; init; } = Guid.Empty;
     public string     AccessToken  { get; init; } = string.Empty;
     public string?    RefreshToken { get; init; }

@@ -12,7 +12,7 @@ namespace Jakar.Database;
 public readonly struct LoginResult
 {
     public readonly State       Result = default;
-    public readonly UserRecord? User   = default!;
+    public readonly UserRecord? User   = default;
     public          bool        Succeeded => User is not null && Result == State.Success;
 
 

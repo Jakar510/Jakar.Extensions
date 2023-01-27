@@ -3,12 +3,58 @@ namespace Jakar.Extensions;
 
 
 [Serializable]
-public sealed class LanguageApi : ObservableClass
+public class LanguageApi : ObservableClass
 {
     private Language?           _selectedLanguage;
     private Language.Collection _languages = new(Language.Supported);
+    private CultureInfo?        _defaultThreadCurrentCulture;
+    private CultureInfo?        _defaultThreadCurrentUiCulture;
+    private CultureInfo         _currentCulture   = CultureInfo.CurrentCulture;
+    private CultureInfo         _currentUiCulture = CultureInfo.CurrentUICulture;
 
 
+    public CultureInfo? DefaultThreadCurrentUiCulture
+    {
+        get => _defaultThreadCurrentUiCulture;
+        set
+        {
+            if ( !SetProperty( ref _defaultThreadCurrentUiCulture, value ) ) { return; }
+
+            CultureInfo.DefaultThreadCurrentUICulture = value;
+        }
+    }
+    public CultureInfo? DefaultThreadCurrentCulture
+    {
+        get => _defaultThreadCurrentCulture;
+        set
+        {
+            if ( !SetProperty( ref _defaultThreadCurrentCulture, value ) ) { return; }
+
+            CultureInfo.DefaultThreadCurrentCulture = value;
+        }
+    }
+    public CultureInfo CurrentCulture
+    {
+        get => _currentCulture;
+        set
+        {
+            if ( !SetProperty( ref _currentCulture, value ) ) { return; }
+
+            CultureInfo.CurrentCulture          = value;
+            Thread.CurrentThread.CurrentCulture = value;
+        }
+    }
+    public CultureInfo CurrentUICulture
+    {
+        get => _currentUiCulture;
+        set
+        {
+            if ( !SetProperty( ref _currentUiCulture, value ) ) { return; }
+
+            CultureInfo.CurrentUICulture          = value;
+            Thread.CurrentThread.CurrentUICulture = value;
+        }
+    }
     public Language SelectedLanguage
     {
         get => _selectedLanguage ?? throw new NullReferenceException( nameof(_selectedLanguage) ); // ?? throw new NullReferenceException(nameof(_selectedLanguage));
@@ -16,12 +62,9 @@ public sealed class LanguageApi : ObservableClass
         {
             if ( !SetProperty( ref _selectedLanguage, value ) ) { return; }
 
-            CultureInfo.DefaultThreadCurrentCulture   = value;
-            CultureInfo.DefaultThreadCurrentUICulture = value;
-            CultureInfo.CurrentCulture                = value;
-            CultureInfo.CurrentUICulture              = value;
-            Thread.CurrentThread.CurrentCulture       = value;
-            Thread.CurrentThread.CurrentUICulture     = value;
+            OnLanguageChanged( value );
+            CurrentCulture   = value;
+            CurrentUICulture = value;
         }
     }
     public Language.Collection Languages
@@ -46,4 +89,7 @@ public sealed class LanguageApi : ObservableClass
 
         Languages.Add( culture );
     }
+
+
+    protected virtual void OnLanguageChanged( Language value ) { }
 }
