@@ -24,7 +24,7 @@ public static class DatabaseDefaults
     }
 
 
-    public const            string DEFAULT_SCHEMA = "pbo";
+    public const            string DEFAULT_SCHEMA = "dbo";
     private static readonly object _schemaLock    = new();
     private static          string _defaultSchema = DEFAULT_SCHEMA;
 }
