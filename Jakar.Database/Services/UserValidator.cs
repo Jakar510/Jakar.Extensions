@@ -16,10 +16,16 @@ public class UserValidator : IUserValidator<UserRecord>
         builder.AddScoped<IUserValidator<UserRecord>, T>();
         return builder;
     }
-    protected virtual List<IdentityError> Check( UserRecord user )
-    {
-        var errors = new List<IdentityError>();
 
+
+    protected IdentityError[] Check( UserRecord user )
+    {
+        var errors = new List<IdentityError>( 5 );
+        Check( errors, user );
+        return errors.ToArray();
+    }
+    protected virtual void Check( in ICollection<IdentityError> errors, UserRecord user )
+    {
         if ( !user.UserID.IsValidID() )
         {
             errors.Add( new IdentityError
@@ -28,7 +34,6 @@ public class UserValidator : IUserValidator<UserRecord>
                         } );
         }
 
-
         if ( !string.IsNullOrWhiteSpace( user.UserName ) )
         {
             errors.Add( new IdentityError
@@ -36,17 +41,15 @@ public class UserValidator : IUserValidator<UserRecord>
                             Description = $"{nameof(UserRecord.UserName)} is invalid",
                         } );
         }
-
-        return errors;
     }
 
 
     public Task<IdentityResult> ValidateAsync( UserManager<UserRecord> manager, UserRecord user )
     {
-        List<IdentityError> errors = Check( user );
+        IdentityError[] errors = Check( user );
 
         return Task.FromResult( errors.Any()
-                                    ? IdentityResult.Failed( errors.ToArray() )
+                                    ? IdentityResult.Failed( errors )
                                     : IdentityResult.Success );
     }
 }

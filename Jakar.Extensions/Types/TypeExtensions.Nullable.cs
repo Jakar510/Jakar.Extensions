@@ -15,6 +15,7 @@ namespace Jakar.Extensions;
 ///         <see href="https://github.com/RicoSuter/Namotion.Reflection"/>
 ///     </para>
 /// </summary>
+[SuppressMessage( "ReSharper", "NullableWarningSuppressionIsUsed" )]
 public static partial class TypeExtensions
 {
     public static bool IsNullable( this PropertyInfo  property ) => property.PropertyType.IsNullableHelper( property.DeclaringType, property.CustomAttributes );

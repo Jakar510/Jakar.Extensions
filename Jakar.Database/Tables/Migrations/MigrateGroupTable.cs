@@ -27,7 +27,4 @@ public abstract class MigrateGroupTable : Migration<GroupRecord>
 
         return table;
     }
-
-
-    public override void Down() => DeleteTable();
 }

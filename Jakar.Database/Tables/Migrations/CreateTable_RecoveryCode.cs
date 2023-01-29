@@ -1,5 +1,5 @@
-﻿// Jakar.AppLogger :: Jakar.AppLogger.Portal
-// 10/26/2022  11:26 AM
+﻿// Jakar.Extensions :: Jakar.Database
+// 01/29/2023  1:51 PM
 
 using Jakar.Database.Migrations;
 
@@ -8,15 +8,17 @@ using Jakar.Database.Migrations;
 namespace Jakar.Database.Tables.Migrations;
 
 
-[Migration( 3 )]
+[Migration( 6 )]
+
 // ReSharper disable once InconsistentNaming
-public sealed class CreateTable_UserRole : MigrateUserRoleTable
+public sealed class CreateTable_RecoveryCode : MigrateRecoveryCodeTable
 {
-    public CreateTable_UserRole() : base() { }
+    public CreateTable_RecoveryCode() : base() { }
     public override void Up()
     {
         CheckSchema();
         CreateTable();
     }
     public override void Down() => DeleteTable();
+    
 }

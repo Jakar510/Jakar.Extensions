@@ -10,12 +10,12 @@ namespace Jakar.Database.Tables.Migrations;
 public sealed class CreateTable_Role : MigrateRoleTable
 {
     public CreateTable_Role() : base() { }
-
-
-    public override void Down() => DeleteTable();
     public override void Up()
     {
         CheckSchema();
         CreateTable();
     }
+    public override void Down() => DeleteTable();
+
+    
 }

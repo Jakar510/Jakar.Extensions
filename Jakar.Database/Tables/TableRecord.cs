@@ -28,10 +28,11 @@ public abstract record TableRecord<TRecord> : BaseCollectionsRecord<TRecord, lon
 
     protected TableRecord() : base() { }
     protected TableRecord( long id ) : base( id ) => DateCreated = DateTimeOffset.Now;
-    protected TableRecord( UserRecord user ) : this( 0 )
+    protected TableRecord( UserRecord user )
     {
-        UserID    = user.UserID;
-        CreatedBy = user.ID;
+        DateCreated = DateTimeOffset.Now;
+        UserID      = user.UserID;
+        CreatedBy   = user.ID;
     }
 
 

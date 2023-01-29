@@ -17,7 +17,4 @@ public abstract class MigrateUserGroupRecord : Migration<UserGroupRecord>
 
         return table;
     }
-
-
-    public override void Down() => DeleteTable();
 }

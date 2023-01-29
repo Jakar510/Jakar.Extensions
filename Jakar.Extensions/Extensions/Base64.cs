@@ -26,7 +26,6 @@ public static class Base64
     public static string ToBase64( this string data, Encoding encoding )
     {
         byte[] payload = encoding.GetBytes( data );
-
         return Convert.ToBase64String( payload );
     }
     public static string ToBase64( this byte[]               payload ) => Convert.ToBase64String( payload );

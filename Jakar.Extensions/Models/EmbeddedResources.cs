@@ -67,14 +67,14 @@ public class EmbeddedResources<T>
     }
 
 
-    public Task SaveToFile( string fileName, LocalDirectory directory, CancellationToken token ) => SaveToFile( fileName, directory.Join( fileName ), token );
-    public async Task SaveToFile( string fileName, LocalFile file, CancellationToken token )
+    public ValueTask SaveToFile( string fileName, LocalDirectory directory, CancellationToken token ) => SaveToFile( fileName, directory.Join( fileName ), token );
+    public async ValueTask SaveToFile( string fileName, LocalFile file, CancellationToken token )
     {
         Stream stream = GetResourceStream( fileName );
         await file.WriteAsync( stream, token );
     }
 
-    public async Task<ReadOnlyMemory<byte>> GetResourceBytesAsync( string fileName )
+    public async ValueTask<ReadOnlyMemory<byte>> GetResourceBytesAsync( string fileName )
     {
         Stream          stream = GetResourceStream( fileName );
         await using var reader = new MemoryStream();
@@ -82,18 +82,18 @@ public class EmbeddedResources<T>
         return reader.ToArray();
     }
 
-    public async Task<string> GetResourceTextAsync( string fileName ) => await GetResourceTextAsync( fileName, Encoding.Default );
+    public async ValueTask<string> GetResourceTextAsync( string fileName ) => await GetResourceTextAsync( fileName, Encoding.Default );
 
-    public async Task<string> GetResourceTextAsync( string fileName, Encoding encoding )
+    public async ValueTask<string> GetResourceTextAsync( string fileName, Encoding encoding )
     {
         Stream    stream = GetResourceStream( fileName );
         using var reader = new StreamReader( stream, encoding );
         return await reader.ReadToEndAsync();
     }
 
-    public async Task<TValue> GetResourceTextAsync<TValue>( string fileName ) => await GetResourceTextAsync<TValue>( fileName, Encoding.Default );
+    public async ValueTask<TValue> GetResourceTextAsync<TValue>( string fileName ) => await GetResourceTextAsync<TValue>( fileName, Encoding.Default );
 
-    public async Task<TValue> GetResourceTextAsync<TValue>( string fileName, Encoding encoding )
+    public async ValueTask<TValue> GetResourceTextAsync<TValue>( string fileName, Encoding encoding )
     {
         string text = await GetResourceTextAsync( fileName, encoding );
         return text.FromJson<TValue>();

@@ -197,13 +197,6 @@ public abstract class MigrateUserTable : Migration<UserRecord>
              .AsInt64()
              .Nullable();
 
-        table.WithColumn( nameof(UserRecord.RecoveryCodes) )
-             .AsString( 10240 )
-             .NotNullable();
-
         return table;
     }
-
-
-    public override void Down() => DeleteTable();
 }

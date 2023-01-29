@@ -75,25 +75,35 @@ public static partial class DbExtensions
                                                                                                               where TTokenizer : Tokenizer<TName> => builder.AddScoped<ITokenService, TTokenizer>();
 
 
-    public static WebApplicationBuilder AddUserStore( this WebApplicationBuilder builder )
+    public static WebApplicationBuilder AddUserStore( this WebApplicationBuilder builder, Action<UserStoreOptions>? configureUserStoreOptions = default, Action<PasswordRequirements>? configurePasswordRequirements = default ) =>
+        builder.AddUserStore<UserValidator>( configureUserStoreOptions, configurePasswordRequirements );
+    public static WebApplicationBuilder AddUserStore<TUserValidator>( this WebApplicationBuilder builder, Action<UserStoreOptions>? configureUserStoreOptions = default, Action<PasswordRequirements>? configurePasswordRequirements = default )
+        where TUserValidator : UserValidator
     {
+        OptionsBuilder<PasswordRequirements> req = builder.Services.AddOptions<PasswordRequirements>();
+        if ( configurePasswordRequirements is not null ) { req.Configure( configurePasswordRequirements ); }
+
+        OptionsBuilder<UserStoreOptions> user = builder.Services.AddOptions<UserStoreOptions>();
+        if ( configureUserStoreOptions is not null ) { user.Configure( configureUserStoreOptions ); }
+
+
         builder.Services.AddIdentity<UserRecord, RoleRecord>()
                .AddRoleManager<RoleStore>()
                .AddUserStore<UserStore>()
                .AddPasswordValidator<PwdValidator>()
-               .AddUserValidator<UserValidator>();
+               .AddUserValidator<TUserValidator>();
 
-        builder.AddScoped<IUserStore, UserStore>();
-        builder.AddScoped<IUserLoginStore<UserRecord>, UserStore>();
-        builder.AddScoped<IUserClaimStore<UserRecord>, UserStore>();
-        builder.AddScoped<IUserPasswordStore<UserRecord>, UserStore>();
-        builder.AddScoped<IUserSecurityStampStore<UserRecord>, UserStore>();
-        builder.AddScoped<IUserTwoFactorStore<UserRecord>, UserStore>();
-        builder.AddScoped<IUserEmailStore<UserRecord>, UserStore>();
-        builder.AddScoped<IUserLockoutStore<UserRecord>, UserStore>();
-        builder.AddScoped<IUserAuthenticatorKeyStore<UserRecord>, UserStore>();
-        builder.AddScoped<IUserTwoFactorRecoveryCodeStore<UserRecord>, UserStore>();
-        builder.AddScoped<IUserPhoneNumberStore<UserRecord>, UserStore>();
+        builder.AddTransient<IUserStore, UserStore>();
+        builder.AddTransient<IUserLoginStore<UserRecord>, UserStore>();
+        builder.AddTransient<IUserClaimStore<UserRecord>, UserStore>();
+        builder.AddTransient<IUserPasswordStore<UserRecord>, UserStore>();
+        builder.AddTransient<IUserSecurityStampStore<UserRecord>, UserStore>();
+        builder.AddTransient<IUserTwoFactorStore<UserRecord>, UserStore>();
+        builder.AddTransient<IUserEmailStore<UserRecord>, UserStore>();
+        builder.AddTransient<IUserLockoutStore<UserRecord>, UserStore>();
+        builder.AddTransient<IUserAuthenticatorKeyStore<UserRecord>, UserStore>();
+        builder.AddTransient<IUserTwoFactorRecoveryCodeStore<UserRecord>, UserStore>();
+        builder.AddTransient<IUserPhoneNumberStore<UserRecord>, UserStore>();
         return builder;
     }
 }

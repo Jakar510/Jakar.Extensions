@@ -9,30 +9,56 @@ using Microsoft.AspNetCore.Mvc;
 namespace Jakar.Database;
 
 
+public static class DatabaseDefaults
+{
+    public static string Schema
+    {
+        get
+        {
+            lock (_schemaLock) { return _defaultSchema; }
+        }
+        set
+        {
+            lock (_schemaLock) { _defaultSchema = value; }
+        }
+    }
+
+
+    public const            string DEFAULT_SCHEMA = "pbo";
+    private static readonly object _schemaLock    = new();
+    private static          string _defaultSchema = DEFAULT_SCHEMA;
+}
+
+
+
 [SuppressMessage( "ReSharper", "SuggestBaseTypeForParameter" )]
 public abstract class Database : Randoms, IConnectableDb, IAsyncDisposable, IHealthCheck
 {
     protected readonly ConcurrentBag<IAsyncDisposable> _disposables   = new();
-    private            string                          _currentSchema = "public";
+    private            string                          _currentSchema = DatabaseDefaults.Schema;
     private            Uri                             _domain        = new("https://localhost:443");
 
 
-    public virtual     AppVersion               Version           => Options.Version ?? throw new NullReferenceException( nameof(DbOptions.Version) );
-    public virtual     DbInstance               Instance          => Options.DbType;
-    public             DbOptions                Options           { get; }
-    public             DbTable<GroupRecord>     Groups            { get; }
-    public             DbTable<RoleRecord>      Roles             { get; }
-    public             DbTable<UserGroupRecord> UserGroups        { get; }
-    public             DbTable<UserRecord>      Users             { get; }
-    public             DbTable<UserRoleRecord>  UserRoles         { get; }
-    public             IConfiguration           Configuration     { get; }
-    protected abstract PasswordRequirements     _Requirements     { get; }
-    protected internal PasswordValidator        PasswordValidator => new(_Requirements);
-    public virtual     string                   ConnectionString  => Configuration.ConnectionString();
+    public virtual     AppVersion                  Version           => Options.Version ?? throw new NullReferenceException( nameof(DbOptions.Version) );
+    public virtual     DbInstance                  Instance          => Options.DbType;
+    public             DbOptions                   Options           { get; }
+    public             DbTable<GroupRecord>        Groups            { get; }
+    public             DbTable<RecoveryCodeRecord> RecoveryCodes     { get; }
+    public             DbTable<RoleRecord>         Roles             { get; }
+    public             DbTable<UserGroupRecord>    UserGroups        { get; }
+    public             DbTable<UserRecord>         Users             { get; }
+    public             DbTable<UserRoleRecord>     UserRoles         { get; }
+    public             IConfiguration              Configuration     { get; }
+    protected abstract PasswordRequirements        _Requirements     { get; }
+    protected internal PasswordValidator           PasswordValidator => new(_Requirements);
+    public virtual     string                      ConnectionString  => Configuration.ConnectionString();
     public string CurrentSchema
     {
         get => _currentSchema;
-        set => SetProperty( ref _currentSchema, value );
+        set
+        {
+            if ( SetProperty( ref _currentSchema, value ) ) { DatabaseDefaults.Schema = value; }
+        }
     }
     public Uri Domain
     {
@@ -62,10 +88,189 @@ public abstract class Database : Randoms, IConnectableDb, IAsyncDisposable, IHea
         UserRoles     = Create<UserRoleRecord>();
         UserGroups    = Create<UserGroupRecord>();
         Groups        = Create<GroupRecord>();
+        RecoveryCodes = Create<RecoveryCodeRecord>();
     }
 
 
+    /// <summary> Only to be used for <see cref="ITokenService"/> </summary>
+    /// <exception cref="ArgumentOutOfRangeException"> </exception>
+    public ValueTask<Tokens?> Authenticate( VerifyRequest request, CancellationToken token ) => this.TryCall( Authenticate, request, token );
+    protected virtual async ValueTask<Tokens?> Authenticate( DbConnection connection, DbTransaction transaction, VerifyRequest request, CancellationToken token )
+    {
+        UserRecord? user = await Users.Get( nameof(UserRecord.UserName), request.UserLogin, token );
+        if ( user is null ) { return default; }
+
+        if ( user.SubscriptionExpires.HasValue )
+        {
+            if ( user.SubscriptionExpires.Value < DateTimeOffset.UtcNow )
+            {
+                user.LastBadAttempt = DateTimeOffset.UtcNow;
+                await Users.Update( connection, transaction, user, token );
+
+                return default;
+            }
+        }
+
+        if ( user.IsDisabled )
+        {
+            user.LastBadAttempt = DateTimeOffset.UtcNow;
+            await Users.Update( connection, transaction, user, token );
+
+            return default;
+        }
+
+        if ( user.IsLocked )
+        {
+            user.LastBadAttempt = DateTimeOffset.UtcNow;
+            await Users.Update( connection, transaction, user, token );
+
+            return default;
+        }
+
+
+        PasswordVerificationResult passwordVerificationResult = user.VerifyPassword( request.UserPassword );
+
+        switch ( passwordVerificationResult )
+        {
+            case PasswordVerificationResult.Failed:
+                user.MarkBadLogin();
+                await Users.Update( connection, transaction, user, token );
+
+                return default;
+
+            case PasswordVerificationResult.Success:
+                user.SetActive();
+                await Users.Update( connection, transaction, user, token );
+                return await GetToken( connection, transaction, user, token );
+
+            case PasswordVerificationResult.SuccessRehashNeeded:
+                user.SetActive();
+                user.UpdatePassword( request.UserPassword );
+                await Users.Update( connection, transaction, user, token );
+                return await GetToken( connection, transaction, user, token );
+
+            default: throw new ArgumentOutOfRangeException( nameof(passwordVerificationResult), passwordVerificationResult, "out of range" );
+        }
+    }
+
+
+    protected internal ValueTask<IReadOnlyCollection<RecoveryCodeRecord>> Codes( UserRecord user, CancellationToken token ) => this.TryCall( Codes, user, token );
+    protected internal async ValueTask<IReadOnlyCollection<RecoveryCodeRecord>> Codes( DbConnection connection, DbTransaction transaction, UserRecord user, CancellationToken token ) =>
+        await RecoveryCodes.Where( connection, transaction, nameof(RecoveryCodeRecord.CreatedBy), user.UserID, token );
+
+
     protected abstract DbConnection CreateConnection();
+
+
+    public ValueTask<Tokens> GetJwtToken( UserRecord user, CancellationToken token ) => this.Call( GetJwtToken, user, token );
+    public async ValueTask<Tokens> GetJwtToken( DbConnection connection, DbTransaction? transaction, UserRecord user, CancellationToken token )
+    {
+        var            handler = new JwtSecurityTokenHandler();
+        List<Claim>    claims  = await user.GetUserClaims( connection, transaction, this, token );
+        DateTimeOffset date    = Configuration.TokenExpiration();
+
+        if ( user.SubscriptionExpires.HasValue )
+        {
+            DateTimeOffset expires = user.SubscriptionExpires.Value;
+            if ( date > expires ) { date = expires; }
+        }
+
+        var descriptor = new SecurityTokenDescriptor
+                         {
+                             Subject            = new ClaimsIdentity( claims ),
+                             Expires            = date.LocalDateTime.ToUniversalTime(),
+                             SigningCredentials = Configuration.GetSigningCredentials()
+                         };
+
+        SecurityToken? security     = handler.CreateToken( descriptor );
+        string         refreshToken = GenerateToken();
+        user.SetRefreshToken( refreshToken, date );
+
+        await Users.Update( connection, transaction, user, token );
+        return Tokens.Create( handler.WriteToken( security ), refreshToken, Version, user );
+    }
+
+
+    public ValueTask<Tokens> GetToken( UserRecord           user,       CancellationToken token ) => this.Call( GetToken, user, token );
+    public virtual ValueTask<Tokens> GetToken( DbConnection connection, DbTransaction?    transaction, UserRecord user, CancellationToken token ) => GetJwtToken( connection, transaction, user, token );
+
+
+    public ValueTask<bool> RedeemCode( UserRecord user, string code, CancellationToken token ) => this.TryCall( RedeemCode, user, code, token );
+    public async ValueTask<bool> RedeemCode( DbConnection connection, DbTransaction transaction, UserRecord user, string code, CancellationToken token )
+    {
+        IReadOnlyCollection<RecoveryCodeRecord> records = await Codes( connection, transaction, user, token );
+
+        foreach ( RecoveryCodeRecord record in records )
+        {
+            if ( !record.IsValid( code ) ) { continue; }
+
+            await RecoveryCodes.Delete( connection, transaction, record, token );
+            return true;
+        }
+
+        return false;
+    }
+
+
+    public ValueTask<ActionResult<Tokens>> Refresh( ControllerBase controller, string refreshToken, CancellationToken token ) => this.TryCall( Refresh, controller, refreshToken, token );
+    public async ValueTask<ActionResult<Tokens>> Refresh( DbConnection connection, DbTransaction? transaction, ControllerBase controller, string refreshToken, CancellationToken token )
+    {
+        LoginResult loginResult = await VerifyLogin( connection, transaction, refreshToken, token );
+
+        return loginResult.GetResult( controller, out ActionResult? actionResult, out UserRecord? user )
+                   ? actionResult
+                   : await GetToken( connection, transaction, user, token );
+    }
+
+
+    public ValueTask<ActionResult<Tokens>> Register( ControllerBase controller, VerifyRequest<UserData> request, CancellationToken token = default ) => this.TryCall( Register, controller, request, token );
+    public virtual async ValueTask<ActionResult<Tokens>> Register( DbConnection connection, DbTransaction transaction, ControllerBase controller, VerifyRequest<UserData> request, CancellationToken token = default )
+    {
+        UserRecord? record = await Users.Get( connection, transaction, true, UserRecord.GetDynamicParameters( request ), token );
+        if ( record is not null ) { return controller.Duplicate(); }
+
+
+        if ( !PasswordValidator.Validate( request.Request.UserPassword ) )
+        {
+            controller.AddError( "Password Validation Failed" );
+            return controller.BadRequest( controller.ModelState );
+        }
+
+
+        record = UserRecord.Create( request );
+        record = await Users.Insert( connection, transaction, record, token );
+        return await GetToken( connection, transaction, record, token );
+    }
+    public ValueTask<string[]> ReplaceCodes( UserRecord user, int count = 10, CancellationToken token = default ) => this.TryCall( ReplaceCodes, user, count, token );
+    public async ValueTask<string[]> ReplaceCodes( DbConnection connection, DbTransaction transaction, UserRecord user, int count = 10, CancellationToken token = default )
+    {
+        await RecoveryCodes.Delete( connection, transaction, await Codes( connection, transaction, user, token ), token );
+
+
+        string[] codes = new string[count];
+
+        for ( int i = 0; i < count; i++ )
+        {
+            (RecoveryCodeRecord record, string code) = RecoveryCodeRecord.Create( user );
+            codes[i]                                 = code;
+            await RecoveryCodes.Insert( connection, transaction, record, token );
+        }
+
+        return codes;
+    }
+    public ValueTask ReplaceCodes( UserRecord user, IEnumerable<string> recoveryCodes, CancellationToken token = default ) => this.TryCall( ReplaceCodes, user, recoveryCodes, token );
+    public async ValueTask ReplaceCodes( DbConnection connection, DbTransaction transaction, UserRecord user, IEnumerable<string> recoveryCodes, CancellationToken token = default )
+    {
+        await RecoveryCodes.Delete( connection, transaction, await Codes( connection, transaction, user, token ), token );
+
+        foreach ( string recoveryCode in recoveryCodes )
+        {
+            var record = RecoveryCodeRecord.Create( user, recoveryCode );
+            await RecoveryCodes.Insert( connection, transaction, record, token );
+        }
+    }
+    
+    
     public ValueTask<ActionResult<T>> Verify<T>( ControllerBase controller, VerifyRequest request, Func<UserRecord, ActionResult<T>> func, CancellationToken token = default ) => this.TryCall( Verify, controller, request, func, token );
     public virtual async ValueTask<ActionResult<T>> Verify<T>( DbConnection connection, DbTransaction? transaction, ControllerBase controller, VerifyRequest request, Func<UserRecord, ActionResult<T>> func, CancellationToken token = default )
     {
@@ -98,37 +303,6 @@ public abstract class Database : Randoms, IConnectableDb, IAsyncDisposable, IHea
         return loginResult.GetResult( controller, out ActionResult? actionResult, out UserRecord? caller )
                    ? actionResult
                    : await func( caller );
-    }
-
-
-    public ValueTask<ActionResult<Tokens>> Refresh( ControllerBase controller, string refreshToken, CancellationToken token ) => this.TryCall( Refresh, controller, refreshToken, token );
-    public async ValueTask<ActionResult<Tokens>> Refresh( DbConnection connection, DbTransaction? transaction, ControllerBase controller, string refreshToken, CancellationToken token )
-    {
-        LoginResult loginResult = await VerifyLogin( connection, transaction, refreshToken, token );
-
-        return loginResult.GetResult( controller, out ActionResult? actionResult, out UserRecord? user )
-                   ? actionResult
-                   : await GetToken( connection, transaction, user, token );
-    }
-
-
-    public ValueTask<ActionResult<Tokens>> Register( ControllerBase controller, VerifyRequest<UserData> request, CancellationToken token = default ) => this.TryCall( Register, controller, request, token );
-    public virtual async ValueTask<ActionResult<Tokens>> Register( DbConnection connection, DbTransaction transaction, ControllerBase controller, VerifyRequest<UserData> request, CancellationToken token = default )
-    {
-        UserRecord? record = await Users.Get( connection, transaction, true, UserRecord.GetDynamicParameters( request ), token );
-        if ( record is not null ) { return controller.Duplicate(); }
-
-
-        if ( !PasswordValidator.Validate( request.Request.UserPassword ) )
-        {
-            controller.AddError( "Password Validation Failed" );
-            return controller.BadRequest( controller.ModelState );
-        }
-
-
-        record = UserRecord.Create( request );
-        record = await Users.Insert( connection, transaction, record, token );
-        return await GetToken( connection, transaction, record, token );
     }
 
 
@@ -247,101 +421,6 @@ public abstract class Database : Randoms, IConnectableDb, IAsyncDisposable, IHea
     }
 
 
-    /// <summary> Only to be used for <see cref="ITokenService"/> </summary>
-    /// <exception cref="ArgumentOutOfRangeException"> </exception>
-    public ValueTask<Tokens?> Authenticate( VerifyRequest request, CancellationToken token ) => this.TryCall( Authenticate, request, token );
-    protected virtual async ValueTask<Tokens?> Authenticate( DbConnection connection, DbTransaction transaction, VerifyRequest request, CancellationToken token )
-    {
-        UserRecord? user = await Users.Get( nameof(UserRecord.UserName), request.UserLogin, token );
-        if ( user is null ) { return default; }
-
-        if ( user.SubscriptionExpires.HasValue )
-        {
-            if ( user.SubscriptionExpires.Value < DateTimeOffset.UtcNow )
-            {
-                user.LastBadAttempt = DateTimeOffset.UtcNow;
-                await Users.Update( connection, transaction, user, token );
-
-                return default;
-            }
-        }
-
-        if ( user.IsDisabled )
-        {
-            user.LastBadAttempt = DateTimeOffset.UtcNow;
-            await Users.Update( connection, transaction, user, token );
-
-            return default;
-        }
-
-        if ( user.IsLocked )
-        {
-            user.LastBadAttempt = DateTimeOffset.UtcNow;
-            await Users.Update( connection, transaction, user, token );
-
-            return default;
-        }
-
-
-        PasswordVerificationResult passwordVerificationResult = user.VerifyPassword( request.UserPassword );
-
-        switch ( passwordVerificationResult )
-        {
-            case PasswordVerificationResult.Failed:
-                user.MarkBadLogin();
-                await Users.Update( connection, transaction, user, token );
-
-                return default;
-
-            case PasswordVerificationResult.Success:
-                user.SetActive();
-                await Users.Update( connection, transaction, user, token );
-                return await GetToken( connection, transaction, user, token );
-
-            case PasswordVerificationResult.SuccessRehashNeeded:
-                user.SetActive();
-                user.UpdatePassword( request.UserPassword );
-                await Users.Update( connection, transaction, user, token );
-                return await GetToken( connection, transaction, user, token );
-
-            default: throw new ArgumentOutOfRangeException( nameof(passwordVerificationResult), passwordVerificationResult, "out of range" );
-        }
-    }
-
-
-    public ValueTask<Tokens> GetJwtToken( UserRecord user, CancellationToken token ) => this.Call( GetJwtToken, user, token );
-    public async ValueTask<Tokens> GetJwtToken( DbConnection connection, DbTransaction? transaction, UserRecord user, CancellationToken token )
-    {
-        var            handler = new JwtSecurityTokenHandler();
-        List<Claim>    claims  = await user.GetUserClaims( connection, transaction, this, token );
-        DateTimeOffset date    = Configuration.TokenExpiration();
-
-        if ( user.SubscriptionExpires.HasValue )
-        {
-            DateTimeOffset expires = user.SubscriptionExpires.Value;
-            if ( date > expires ) { date = expires; }
-        }
-
-        var descriptor = new SecurityTokenDescriptor
-                         {
-                             Subject            = new ClaimsIdentity( claims ),
-                             Expires            = date.LocalDateTime.ToUniversalTime(),
-                             SigningCredentials = Configuration.GetSigningCredentials(),
-                         };
-
-        SecurityToken? security     = handler.CreateToken( descriptor );
-        string         refreshToken = GenerateToken();
-        user.SetRefreshToken( refreshToken, date );
-
-        await Users.Update( connection, transaction, user, token );
-        return Tokens.Create( handler.WriteToken( security ), refreshToken, Version, user );
-    }
-
-
-    public ValueTask<Tokens> GetToken( UserRecord           user,       CancellationToken token ) => this.Call( GetToken, user, token );
-    public virtual ValueTask<Tokens> GetToken( DbConnection connection, DbTransaction?    transaction, UserRecord user, CancellationToken token ) => GetJwtToken( connection, transaction, user, token );
-
-
 
     #region Core
 
@@ -389,7 +468,7 @@ public abstract class Database : Randoms, IConnectableDb, IAsyncDisposable, IHea
                        ConnectionState.Connecting => HealthCheckResult.Healthy(),
                        ConnectionState.Executing  => HealthCheckResult.Healthy(),
                        ConnectionState.Fetching   => HealthCheckResult.Healthy(),
-                       _                          => throw new ArgumentOutOfRangeException(),
+                       _                          => throw new ArgumentOutOfRangeException()
                    };
         }
         catch ( Exception e ) { return HealthCheckResult.Unhealthy( e.Message ); }

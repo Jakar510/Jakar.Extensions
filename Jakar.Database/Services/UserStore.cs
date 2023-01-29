@@ -1,12 +1,25 @@
 ﻿namespace Jakar.Database;
 
 
+public sealed record UserStoreOptions : IOptions<UserStoreOptions>
+{
+    UserStoreOptions IOptions<UserStoreOptions>.Value      => this;
+    public string                               UserExists { get; set; } = "User Exists";
+}
+
+
+
 public sealed class UserStore : IUserStore
 {
-    private readonly Database _dbContext;
+    private readonly Database         _dbContext;
+    private readonly UserStoreOptions _options;
 
 
-    public UserStore( Database dbContext ) => _dbContext = dbContext;
+    public UserStore( Database dbContext, IOptions<UserStoreOptions> options )
+    {
+        _dbContext = dbContext;
+        _options   = options.Value;
+    }
 
 
     public void Dispose() { }
@@ -57,15 +70,13 @@ public sealed class UserStore : IUserStore
     public async Task SetEmailConfirmedAsync( UserRecord user, bool confirmed, CancellationToken token )
     {
         user.IsEmailConfirmed = confirmed;
-        token.ThrowIfCancellationRequested();
-        await ValueTask.CompletedTask;
+        await _dbContext.Users.Update( user, token );
     }
 
     public async Task SetNormalizedEmailAsync( UserRecord user, string? normalizedEmail, CancellationToken token )
     {
         user.Email = normalizedEmail;
-        token.ThrowIfCancellationRequested();
-        await ValueTask.CompletedTask;
+        await _dbContext.Users.Update( user, token );
     }
     public Task<int> GetAccessFailedCountAsync( UserRecord          user, CancellationToken token ) => Task.FromResult( user.BadLogins );
     public Task<bool> GetLockoutEnabledAsync( UserRecord            user, CancellationToken token ) => Task.FromResult( user.IsLocked );
@@ -97,12 +108,12 @@ public sealed class UserStore : IUserStore
     }
 
 
-    public async Task AddLoginAsync( UserRecord user, UserLoginInfo login, CancellationToken token )
+    public async Task AddLoginAsync( UserRecord user, UserLoginInfo login, CancellationToken token ) // TODO: 
     {
         user.AddUserLoginInfo( login );
         await _dbContext.Users.Update( user, token );
     }
-    public async Task<UserRecord> FindByLoginAsync( string loginProvider, string providerKey, CancellationToken token )
+    public async Task<UserRecord> FindByLoginAsync( string loginProvider, string providerKey, CancellationToken token ) // TODO: 
     {
         var parameters = new DynamicParameters();
         parameters.Add( nameof(UserRecord.LoginProvider), loginProvider );
@@ -110,8 +121,8 @@ public sealed class UserStore : IUserStore
 
         return await _dbContext.Users.Get( true, parameters, token ) ?? new UserRecord();
     }
-    public Task<IList<UserLoginInfo>> GetLoginsAsync( UserRecord user, CancellationToken token ) => Task.FromResult( user.GetUserLoginInfo() );
-    public async Task RemoveLoginAsync( UserRecord user, string loginProvider, string providerKey, CancellationToken token )
+    public Task<IList<UserLoginInfo>> GetLoginsAsync( UserRecord user, CancellationToken token ) => Task.FromResult( user.GetUserLoginInfo() ); // TODO: 
+    public async Task RemoveLoginAsync( UserRecord user, string loginProvider, string providerKey, CancellationToken token )                    // TODO: 
     {
         user.RemoveUserLoginInfo();
         await _dbContext.Users.Update( user, token );
@@ -160,7 +171,7 @@ public sealed class UserStore : IUserStore
         {
             return IdentityResult.Failed( new IdentityError
                                           {
-                                              Description = "User Exists",
+                                              Description = _options.UserExists,
                                           } );
         }
 
@@ -211,28 +222,30 @@ public sealed class UserStore : IUserStore
 
     public async Task<IdentityResult> UpdateAsync( UserRecord user, CancellationToken token )
     {
-        await _dbContext.Users.Update( user, token );
-        return IdentityResult.Success;
+        try
+        {
+            await _dbContext.Users.Update( user, token );
+            return IdentityResult.Success;
+        }
+        catch ( Exception e )
+        {
+            return IdentityResult.Failed( new IdentityError
+                                          {
+                                              Description = e.Message
+                                          } );
+        }
     }
-    public Task<int> CountCodesAsync( UserRecord user, CancellationToken token ) => Task.FromResult( user.CountCodes() );
-    public async Task<bool> RedeemCodeAsync( UserRecord user, string code, CancellationToken token )
+    public async Task<int> CountCodesAsync( UserRecord user, CancellationToken token )
     {
-        await ValueTask.CompletedTask;
-        if ( token.IsCancellationRequested ) { return false; }
-
-        return user.RedeemCode( code );
+        IReadOnlyCollection<RecoveryCodeRecord> codes = await _dbContext.Codes( user, token );
+        return codes.Count;
     }
-    public async Task ReplaceCodesAsync( UserRecord user, IEnumerable<string> recoveryCodes, CancellationToken token )
-    {
-        await ValueTask.CompletedTask;
-        if ( token.IsCancellationRequested ) { return; }
-
-        user.ReplaceCode( recoveryCodes );
-    }
+    public async Task<bool> RedeemCodeAsync( UserRecord user, string              code,          CancellationToken token ) => await _dbContext.RedeemCode( user, code, token );
+    public async Task ReplaceCodesAsync( UserRecord     user, IEnumerable<string> recoveryCodes, CancellationToken token ) => await _dbContext.ReplaceCodes( user, recoveryCodes, token );
 
 
-    public Task<bool> GetTwoFactorEnabledAsync( UserRecord user, CancellationToken token ) => Task.FromResult( user.IsTwoFactorEnabled );
-    public async Task SetTwoFactorEnabledAsync( UserRecord user, bool enabled, CancellationToken token )
+    public Task<bool> GetTwoFactorEnabledAsync( UserRecord user, CancellationToken token ) => Task.FromResult( user.IsTwoFactorEnabled ); // TODO: 
+    public async Task SetTwoFactorEnabledAsync( UserRecord user, bool enabled, CancellationToken token )                                  // TODO: 
     {
         user.IsTwoFactorEnabled = enabled;
         await _dbContext.Users.Update( user, token );

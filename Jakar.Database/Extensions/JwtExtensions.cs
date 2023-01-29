@@ -10,7 +10,10 @@ namespace Jakar.Database;
 
 public static class JwtExtensions
 {
-    public static byte[] GetJWTKey( this IConfiguration configuration ) => Encoding.UTF8.GetBytes( configuration["JWT"] );
+    public const string JWT = nameof(JWT);
+
+
+    public static byte[] GetJWTKey( this IConfiguration configuration ) => Encoding.UTF8.GetBytes( configuration[JWT] ?? string.Empty );
 
 
     [Pure]
@@ -31,11 +34,18 @@ public static class JwtExtensions
     public static TokenValidationParameters GetTokenValidationParameters( this IConfiguration configuration, string issuer, string audience )
     {
         IConfigurationSection section = configuration.TokenValidation();
+        var                   key     = new SymmetricSecurityKey( section.GetJWTKey() );
+        return section.GetTokenValidationParameters( key, issuer, audience );
+    }
 
+
+    public static TokenValidationParameters GetTokenValidationParameters<T>( this IConfigurationSection section, SymmetricSecurityKey key, string issuer ) where T : IAppName => section.GetTokenValidationParameters( key, issuer, typeof(T).Name );
+    public static TokenValidationParameters GetTokenValidationParameters( this IConfigurationSection section, SymmetricSecurityKey key, string issuer, string audience )
+    {
         return new TokenValidationParameters
                {
                    AuthenticationType                        = JwtBearerDefaults.AuthenticationScheme,
-                   IssuerSigningKey                          = new SymmetricSecurityKey( section.GetJWTKey() ),
+                   IssuerSigningKey                          = key,
                    ClockSkew                                 = section.GetValue( nameof(TokenValidationParameters.ClockSkew),                                 TimeSpan.FromSeconds( 300 ) ),
                    IgnoreTrailingSlashWhenValidatingAudience = section.GetValue( nameof(TokenValidationParameters.IgnoreTrailingSlashWhenValidatingAudience), true ),
                    RequireAudience                           = section.GetValue( nameof(TokenValidationParameters.RequireAudience),                           true ),

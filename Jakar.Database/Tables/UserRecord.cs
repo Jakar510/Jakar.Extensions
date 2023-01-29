@@ -26,11 +26,10 @@ public sealed record UserRecord : TableRecord<UserRecord>, IUserRecord<UserRecor
     private long              _rights;
     private long?             _escalateTo;
     private long?             _subscriptionID;
-    private string            _firstName     = string.Empty;
-    private string            _lastName      = string.Empty;
-    private string            _passwordHash  = string.Empty;
-    private string            _recoveryCodes = string.Empty;
-    private string            _userName      = string.Empty;
+    private string            _firstName    = string.Empty;
+    private string            _lastName     = string.Empty;
+    private string            _passwordHash = string.Empty;
+    private string            _userName     = string.Empty;
     private string?           _additionalData;
     private string?           _address;
     private string?           _city;
@@ -187,13 +186,6 @@ public sealed record UserRecord : TableRecord<UserRecord>, IUserRecord<UserRecor
     {
         get => _passwordHash;
         set => SetProperty( ref _passwordHash, value );
-    }
-
-    [MaxLength( 10240 )]
-    public string RecoveryCodes
-    {
-        get => _recoveryCodes;
-        set => SetProperty( ref _recoveryCodes, value );
     }
 
     [MaxLength( 256 )]
@@ -427,7 +419,6 @@ public sealed record UserRecord : TableRecord<UserRecord>, IUserRecord<UserRecor
         DateCreated = DateTimeOffset.UtcNow;
         Rights      = rights;
     }
-    public const char RECOVERY_CODE_SEPARATOR = ';';
 
 
     public static DynamicParameters GetDynamicParameters( IUserData data )
@@ -503,28 +494,6 @@ public sealed record UserRecord : TableRecord<UserRecord>, IUserRecord<UserRecor
     public bool HasPassword() => !string.IsNullOrWhiteSpace( PasswordHash );
     public bool HasRight<TRights>( TRights right ) where TRights : struct, Enum => (Rights & right.AsLong()) > 0;
     public bool Owns<TRecord>( TRecord     record ) where TRecord : TableRecord<TRecord> => record.CreatedBy == ID;
-    public bool RedeemCode( string code )
-    {
-        string[] codes = Codes();
-        return codes.Contains( code ) && ReplaceCode( code );
-    }
-    public bool ReplaceCode( string code )
-    {
-        var updatedCodes = new List<string>( Codes()
-                                                .Where( s => s != code ) );
-
-        string.Join( RECOVERY_CODE_SEPARATOR, updatedCodes );
-        return true;
-    }
-    public bool ReplaceCode( params string[] codes ) => ReplaceCode( codes.AsEnumerable() );
-    public bool ReplaceCode( IEnumerable<string> codes )
-    {
-        var updatedCodes = new List<string>( Codes()
-                                                .Where( codes.Contains ) );
-
-        string.Join( RECOVERY_CODE_SEPARATOR, updatedCodes );
-        return true;
-    }
 
 
     public async IAsyncEnumerable<GroupRecord> GetGroups( DbConnection connection, DbTransaction? transaction, Database db, [EnumeratorCancellation] CancellationToken token = default )
@@ -547,8 +516,6 @@ public sealed record UserRecord : TableRecord<UserRecord>, IUserRecord<UserRecor
                                                       {
                                                           new(LoginProvider, ProviderKey, ProviderDisplayName),
                                                       };
-    public int CountCodes() => Codes()
-       .Length;
 
 
     [SuppressMessage( "ReSharper", "NonReadonlyMemberInGetHashCode" )]
@@ -577,7 +544,6 @@ public sealed record UserRecord : TableRecord<UserRecord>, IUserRecord<UserRecor
         hashCode.Add( Company );
         return hashCode.ToHashCode();
     }
-    public string[] Codes() => RecoveryCodes.Split( RECOVERY_CODE_SEPARATOR );
 
 
     public UserRecord AddUserLoginInfo( UserLoginInfo info )

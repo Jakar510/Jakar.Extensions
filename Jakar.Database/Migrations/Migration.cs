@@ -11,13 +11,11 @@ namespace Jakar.Database.Migrations;
 /// </summary>
 public abstract class Migration<TRecord> : Migration where TRecord : TableRecord<TRecord>
 {
-    /// <summary> This is due to FluentMigrations default scheme value -- that can't be changed -- </summary>
-    public string CurrentScheme { get; init; } = "public";
-
-    public string TableName { get; } = typeof(TRecord).GetTableName();
+    public virtual string CurrentScheme => DatabaseDefaults.Schema;
+    public         string TableName     { get; } = typeof(TRecord).GetTableName();
 
 
-    protected Migration() : base() { }
+    protected Migration() : base() => CheckSchema();
 
 
     protected IAlterTableAddColumnOrAlterColumnOrSchemaOrDescriptionSyntax AlterTable() => Alter.Table( TableName );

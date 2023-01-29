@@ -14,11 +14,10 @@ namespace Jakar.Database.Tables.Migrations;
 public sealed class CreateTable_UserGroup : MigrateUserGroupRecord
 {
     public CreateTable_UserGroup() : base() { }
-
-
     public override void Up()
     {
         CheckSchema();
         CreateTable();
     }
+    public override void Down() => DeleteTable();
 }

@@ -18,6 +18,7 @@ public abstract class ValidValueOf<TValue, TThis> : IComparable<ValidValueOf<TVa
 {
     public TValue Value { get; protected set; }
 
+    // ReSharper disable once NullableWarningSuppressionIsUsed
     protected ValidValueOf() => Value = default!;
     private static bool Equals( TValue? left, TValue? right )
     {

@@ -27,7 +27,4 @@ public abstract class MigrateRoleTable : Migration<RoleRecord>
 
         return table;
     }
-
-
-    public override void Down() => DeleteTable();
 }

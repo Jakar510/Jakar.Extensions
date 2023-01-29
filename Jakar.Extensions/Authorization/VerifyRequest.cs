@@ -41,6 +41,7 @@ public record VerifyRequest : BaseRecord, ILoginRequest, ICredentials
 
 
 
+[SuppressMessage( "ReSharper", "NullableWarningSuppressionIsUsed" )]
 public record VerifyRequest<T> : BaseRecord, ICredentials, IValidator where T : notnull
 {
     public bool IsValid => Data is IValidator validator
