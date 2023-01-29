@@ -15,7 +15,7 @@ public abstract class Migration<TRecord> : Migration where TRecord : TableRecord
     public         string TableName     { get; } = typeof(TRecord).GetTableName();
 
 
-    protected Migration() : base() => CheckSchema();
+    protected Migration() : base() { }
 
 
     protected IAlterTableAddColumnOrAlterColumnOrSchemaOrDescriptionSyntax AlterTable() => Alter.Table( TableName );

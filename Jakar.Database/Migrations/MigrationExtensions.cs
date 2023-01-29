@@ -304,26 +304,33 @@ public static class MigrationExtensions
     }
 
 
-    public static async ValueTask MigrateDown( this WebApplication app )
+    public static async ValueTask MigrateDown( this IHost app )
     {
         await using AsyncServiceScope scope  = app.Services.CreateAsyncScope();
         var                           runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
         runner.MigrateDown( 0 );
     }
-    public static async ValueTask MigrateDown( this WebApplication app, string key )
+    public static async ValueTask MigrateDown( this IHost app, string key )
     {
-        if ( app.Configuration.GetValue<bool>( key ) ) { await app.MigrateDown(); }
+        var config = app.Services.GetRequiredService<IConfiguration>();
+        if ( !config.GetValue( key, false ) ) { return; }
+
+        await app.MigrateDown();
     }
-
-
-    public static async ValueTask MigrateUp( this IHost app )
+    public static async ValueTask MigrateUp( this IHost app, long? version = default )
     {
         await using AsyncServiceScope scope  = app.Services.CreateAsyncScope();
         var                           runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
         runner.ListMigrations();
 
-        if ( runner.HasMigrationsToApplyUp() ) { runner.MigrateUp(); }
+        if ( version.HasValue )
+        {
+            if ( runner.HasMigrationsToApplyUp( version.Value ) ) { runner.MigrateUp( version.Value ); }
+        }
+        else if ( runner.HasMigrationsToApplyUp() ) { runner.MigrateUp(); }
     }
+
+
     public static void AsGuidKey( this ICreateTableColumnAsTypeSyntax col ) =>
         col.AsGuid()
            .NotNullable()
