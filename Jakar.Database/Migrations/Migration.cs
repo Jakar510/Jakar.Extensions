@@ -45,6 +45,10 @@ public abstract class Migration<TRecord> : Migration where TRecord : TableRecord
              .AsDateTime2()
              .NotNullable();
 
+        table.WithColumn( nameof(TableRecord<TRecord>.LastModified) )
+             .AsDateTime2()
+             .Nullable();
+
         return table;
     }
     protected IInsertDataSyntax StartIdentityInsert() => Insert.IntoTable( TableName )

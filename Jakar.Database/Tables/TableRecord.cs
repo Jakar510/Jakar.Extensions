@@ -8,7 +8,6 @@ namespace Jakar.Database;
 public abstract record TableRecord<TRecord> : BaseCollectionsRecord<TRecord, long> where TRecord : TableRecord<TRecord>
 {
     private       DateTimeOffset? _lastModified;
-    private       long            _createdBy;
     public static string          TableName { get; } = typeof(TRecord).GetTableName();
 
 
@@ -18,12 +17,8 @@ public abstract record TableRecord<TRecord> : BaseCollectionsRecord<TRecord, lon
         get => _lastModified;
         set => SetProperty( ref _lastModified, value );
     }
-    public Guid UserID { get; init; }
-    public long CreatedBy
-    {
-        get => _createdBy;
-        set => SetProperty( ref _createdBy, value );
-    }
+    public Guid UserID    { get; init; }
+    public long CreatedBy { get; init; }
 
 
     protected TableRecord() : base() { }
@@ -54,7 +49,7 @@ public abstract record TableRecord<TRecord> : BaseCollectionsRecord<TRecord, lon
 
         if ( ReferenceEquals( this, other ) ) { return true; }
 
-        return base.Equals( other ) && _createdBy == other._createdBy && Nullable.Equals( _lastModified, other._lastModified ) && UserID.Equals( other.UserID ) && DateCreated.Equals( other.DateCreated );
+        return base.Equals( other ) && CreatedBy == other.CreatedBy && Nullable.Equals( _lastModified, other._lastModified ) && UserID.Equals( other.UserID ) && DateCreated.Equals( other.DateCreated );
     }
 
 
@@ -64,7 +59,7 @@ public abstract record TableRecord<TRecord> : BaseCollectionsRecord<TRecord, lon
 
         if ( ReferenceEquals( this, other ) ) { return 0; }
 
-        int createdByComparison = _createdBy.CompareTo( other._createdBy );
+        int createdByComparison = CreatedBy.CompareTo( other.CreatedBy );
         if ( createdByComparison != 0 ) { return createdByComparison; }
 
         int userIDComparison = UserID.CompareTo( other.UserID );
