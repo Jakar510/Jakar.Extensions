@@ -2,7 +2,10 @@
 
 	<PropertyGroup>
 		<TargetFrameworks>net6.0;net7.0</TargetFrameworks>
+		<NoWarn>$(NoWarn);1591</NoWarn>
 		<Nullable>enable</Nullable>
+		<LangVersion>latest</LangVersion>
+		<OpenApiGenerateDocuments>false</OpenApiGenerateDocuments>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<OpenApiGenerateDocuments>false</OpenApiGenerateDocuments>
 		<Version>6.0.0.1-beta</Version>
@@ -21,8 +24,6 @@
 			Initial Release
 		</PackageReleaseNotes>
 		<Description>Extensions to aid in development.</Description>
-		<NoWarn>$(NoWarn);1591</NoWarn>
-		<LangVersion>latest</LangVersion><OpenApiGenerateDocuments>false</OpenApiGenerateDocuments>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -33,11 +34,11 @@
 		<PackageReference Include="Blazored.Toast" Version="4.0.0" />
 		<PackageReference Include="Blazored.Video" Version="1.0.1" />
 		<PackageReference Include="Jakar.Extensions" Version="6.5.1" />
-		<PackageReference Include="Jakar.Extensions.Hosting" Version="6.4.4" />
+		<PackageReference Include="Jakar.Extensions.Hosting" Version="6.5.0" />
 		<PackageReference Include="BlazorComponentUtilities" Version="1.8.0" />
 		<PackageReference Include="BlazorPro.BlazorSize" Version="6.2.0" />
 		<PackageReference Include="PanoramicData.Blazor" Version="2.1.81" />
-		<PackageReference Include="Radzen.Blazor" Version="4.6.3" />
+		<PackageReference Include="Radzen.Blazor" Version="4.6.4" />
 	</ItemGroup>
 
 </Project>

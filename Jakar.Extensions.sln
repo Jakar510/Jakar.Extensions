@@ -9,7 +9,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nuget", "nuget", "{07C27764
 	ProjectSection(SolutionItems) = preProject
 		nuget\Jakar.DataBase.nuspec = nuget\Jakar.DataBase.nuspec
 		nuget\Jakar.Extensions.Blazor.nuspec = nuget\Jakar.Extensions.Blazor.nuspec
+		nuget\Jakar.Extensions.Blazor.Syncfusion.nuspec = nuget\Jakar.Extensions.Blazor.Syncfusion.nuspec
 		nuget\Jakar.Extensions.Hosting.nuspec = nuget\Jakar.Extensions.Hosting.nuspec
+		nuget\Jakar.Extensions.Maui.nuspec = nuget\Jakar.Extensions.Maui.nuspec
 		nuget\Jakar.Extensions.nuspec = nuget\Jakar.Extensions.nuspec
 		nuget\Jakar.Extensions.Xamarin.Forms.nuspec = nuget\Jakar.Extensions.Xamarin.Forms.nuspec
 		nuget\Jakar.Xml.nuspec = nuget\Jakar.Xml.nuspec
@@ -94,6 +96,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorWASM", "AppLogger\Examples\BlazorWASM\BlazorWASM.csproj", "{FEF0E90D-C2B7-4886-8C71-A7CDFF7106FE}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AppLogger", "AppLogger", "{16A01E75-3A4D-4001-826A-2786C0B4B14E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jakar.Extensions.Blazor.Syncfusion", "Jakar.Extensions.Blazor.Syncfusion\Jakar.Extensions.Blazor.Syncfusion.csproj", "{26F0EB17-A2AF-4C8E-A29E-338BE76068B1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -518,6 +522,18 @@ Global
 		{FEF0E90D-C2B7-4886-8C71-A7CDFF7106FE}.Release|iPhone.Build.0 = Release|Any CPU
 		{FEF0E90D-C2B7-4886-8C71-A7CDFF7106FE}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
 		{FEF0E90D-C2B7-4886-8C71-A7CDFF7106FE}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
+		{26F0EB17-A2AF-4C8E-A29E-338BE76068B1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{26F0EB17-A2AF-4C8E-A29E-338BE76068B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{26F0EB17-A2AF-4C8E-A29E-338BE76068B1}.Debug|iPhone.ActiveCfg = Debug|Any CPU
+		{26F0EB17-A2AF-4C8E-A29E-338BE76068B1}.Debug|iPhone.Build.0 = Debug|Any CPU
+		{26F0EB17-A2AF-4C8E-A29E-338BE76068B1}.Debug|iPhoneSimulator.ActiveCfg = Debug|Any CPU
+		{26F0EB17-A2AF-4C8E-A29E-338BE76068B1}.Debug|iPhoneSimulator.Build.0 = Debug|Any CPU
+		{26F0EB17-A2AF-4C8E-A29E-338BE76068B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{26F0EB17-A2AF-4C8E-A29E-338BE76068B1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{26F0EB17-A2AF-4C8E-A29E-338BE76068B1}.Release|iPhone.ActiveCfg = Release|Any CPU
+		{26F0EB17-A2AF-4C8E-A29E-338BE76068B1}.Release|iPhone.Build.0 = Release|Any CPU
+		{26F0EB17-A2AF-4C8E-A29E-338BE76068B1}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
+		{26F0EB17-A2AF-4C8E-A29E-338BE76068B1}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

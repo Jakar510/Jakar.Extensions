@@ -216,7 +216,7 @@ public partial class Database
 
     public ValueTask<UserRecord?> FindByEmailAsync( string email, CancellationToken token ) => this.TryCall( FindByEmailAsync, email, token );
     public async ValueTask<UserRecord?> FindByEmailAsync( DbConnection connection, DbTransaction transaction, string email, CancellationToken token ) =>
-        await Users.Get( connection, transaction, nameof(UserRecord.Email), email, token ) ?? throw new RecordNotFoundException( email );
+        await Users.Get( connection, transaction, nameof(UserRecord.Email), email, token );
 
     #endregion
 
