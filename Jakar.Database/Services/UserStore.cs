@@ -1,253 +1,71 @@
-﻿namespace Jakar.Database;
+﻿#pragma warning disable CS8619
+namespace Jakar.Database;
 
 
-public sealed record UserStoreOptions : IOptions<UserStoreOptions>
+[SuppressMessage( "ReSharper", "AccessToStaticMemberViaDerivedType" )]
+public sealed class UserStore : IUserLoginStore<UserRecord>,
+                                IUserClaimStore<UserRecord>,
+                                IUserSecurityStampStore<UserRecord>,
+                                IUserTwoFactorStore<UserRecord>,
+                                IUserEmailStore<UserRecord>,
+                                IUserLockoutStore<UserRecord>,
+                                IUserAuthenticatorKeyStore<UserRecord>,
+                                IUserTwoFactorRecoveryCodeStore<UserRecord>,
+                                IUserPhoneNumberStore<UserRecord>
+
+    // IUserPasswordStore<UserRecord>,
 {
-    UserStoreOptions IOptions<UserStoreOptions>.Value      => this;
-    public string                               UserExists { get; set; } = "User Exists";
-}
+    private readonly Database _dbContext;
 
 
-
-public sealed class UserStore : IUserStore
-{
-    private readonly Database         _dbContext;
-    private readonly UserStoreOptions _options;
+    public UserStore( Database dbContext ) => _dbContext = dbContext;
 
 
-    public UserStore( Database dbContext, IOptions<UserStoreOptions> options )
-    {
-        _dbContext = dbContext;
-        _options   = options.Value;
-    }
-
-
-    public void Dispose() { }
-
-
-    public Task<string> GetAuthenticatorKeyAsync( UserRecord user, CancellationToken token ) => Task.FromResult( user.ProviderKey ?? string.Empty );
-    public async Task SetAuthenticatorKeyAsync( UserRecord user, string key, CancellationToken token )
-    {
-        user.ProviderKey = key;
-        await _dbContext.Users.Update( user, token );
-    }
-
-
-    public async Task AddClaimsAsync( UserRecord user, IEnumerable<Claim> claims, CancellationToken token ) =>
-
-        // TODO: 
-        await Task.CompletedTask;
-    public async Task<IList<Claim>> GetClaimsAsync( UserRecord user, CancellationToken token )
-    {
-        await using DbConnection connection = await _dbContext.ConnectAsync( token );
-        return await user.GetUserClaims( connection, default, _dbContext, token );
-    }
-    public async Task<IList<UserRecord>> GetUsersForClaimAsync( Claim claim, CancellationToken token ) =>
-
-        // TODO: 
-        await Task.FromResult( new List<UserRecord>() );
-    public async Task RemoveClaimsAsync( UserRecord user, IEnumerable<Claim> claims, CancellationToken token ) =>
-
-        // TODO: 
-        await Task.CompletedTask;
-    public async Task ReplaceClaimAsync( UserRecord user, Claim claim, Claim newClaim, CancellationToken token ) =>
-
-        // TODO: 
-        await Task.CompletedTask;
-
-
-    public async Task<UserRecord> FindByEmailAsync( string email, CancellationToken token ) => await _dbContext.Users.Get( nameof(UserRecord.Email), email, token ) ?? throw new RecordNotFoundException( email );
-
-    public Task<string?> GetEmailAsync( UserRecord           user, CancellationToken token ) => Task.FromResult( user.Email );
-    public Task<string?> GetNormalizedEmailAsync( UserRecord user, CancellationToken token ) => Task.FromResult( user.Email );
-    public Task<bool> GetEmailConfirmedAsync( UserRecord     user, CancellationToken token ) => Task.FromResult( user.IsEmailConfirmed );
-    public async Task SetEmailAsync( UserRecord user, string? email, CancellationToken token )
-    {
-        user.Email = email;
-        await _dbContext.Users.Update( user, token );
-    }
-
-    public async Task SetEmailConfirmedAsync( UserRecord user, bool confirmed, CancellationToken token )
-    {
-        user.IsEmailConfirmed = confirmed;
-        await _dbContext.Users.Update( user, token );
-    }
-
-    public async Task SetNormalizedEmailAsync( UserRecord user, string? normalizedEmail, CancellationToken token )
-    {
-        user.Email = normalizedEmail;
-        await _dbContext.Users.Update( user, token );
-    }
-    public Task<int> GetAccessFailedCountAsync( UserRecord          user, CancellationToken token ) => Task.FromResult( user.BadLogins );
-    public Task<bool> GetLockoutEnabledAsync( UserRecord            user, CancellationToken token ) => Task.FromResult( user.IsLocked );
-    public Task<DateTimeOffset?> GetLockoutEndDateAsync( UserRecord user, CancellationToken token ) => Task.FromResult( user.LockoutEnd );
-
-
-    public async Task<int> IncrementAccessFailedCountAsync( UserRecord user, CancellationToken token )
-    {
-        user.MarkBadLogin();
-        await _dbContext.Users.Update( user, token );
-        return user.BadLogins;
-    }
-    public async Task ResetAccessFailedCountAsync( UserRecord user, CancellationToken token )
-    {
-        user.Unlock();
-        await _dbContext.Users.Update( user, token );
-    }
-    public async Task SetLockoutEnabledAsync( UserRecord user, bool enabled, CancellationToken token )
-    {
-        if ( enabled ) { user.Disable(); }
-        else { user.Enable(); }
-
-        await _dbContext.Users.Update( user, token );
-    }
-    public async Task SetLockoutEndDateAsync( UserRecord user, DateTimeOffset? lockoutEnd, CancellationToken token )
-    {
-        user.LockoutEnd = lockoutEnd;
-        await _dbContext.Users.Update( user, token );
-    }
-
-
-    public async Task AddLoginAsync( UserRecord user, UserLoginInfo login, CancellationToken token ) // TODO: 
-    {
-        user.AddUserLoginInfo( login );
-        await _dbContext.Users.Update( user, token );
-    }
-    public async Task<UserRecord> FindByLoginAsync( string loginProvider, string providerKey, CancellationToken token ) // TODO: 
-    {
-        var parameters = new DynamicParameters();
-        parameters.Add( nameof(UserRecord.LoginProvider), loginProvider );
-        parameters.Add( nameof(UserRecord.ProviderKey),   providerKey );
-
-        return await _dbContext.Users.Get( true, parameters, token ) ?? new UserRecord();
-    }
-    public Task<IList<UserLoginInfo>> GetLoginsAsync( UserRecord user, CancellationToken token ) => Task.FromResult( user.GetUserLoginInfo() ); // TODO: 
-    public async Task RemoveLoginAsync( UserRecord user, string loginProvider, string providerKey, CancellationToken token )                    // TODO: 
-    {
-        user.RemoveUserLoginInfo();
-        await _dbContext.Users.Update( user, token );
-    }
-
-
-    public Task<string> GetPasswordHashAsync( UserRecord user, CancellationToken token ) => Task.FromResult( user.PasswordHash );
-    public Task<bool> HasPasswordAsync( UserRecord       user, CancellationToken token ) => Task.FromResult( user.HasPassword() );
-    public async Task SetPasswordHashAsync( UserRecord user, string passwordHash, CancellationToken token )
-    {
-        // user.UpdatePassword(passwordHash);
-        user.PasswordHash  = passwordHash;
-        user.SecurityStamp = Randoms.GenerateToken();
-        await _dbContext.Users.Update( user, token );
-    }
-
-
-    public Task<string?> GetPhoneNumberAsync( UserRecord       user, CancellationToken token ) => Task.FromResult( user.PhoneNumber );
-    public Task<bool> GetPhoneNumberConfirmedAsync( UserRecord user, CancellationToken token ) => Task.FromResult( user.IsPhoneNumberConfirmed );
-    public async Task SetPhoneNumberAsync( UserRecord user, string? phoneNumber, CancellationToken token )
-    {
-        user.PhoneNumber = phoneNumber;
-        await _dbContext.Users.Update( user, token );
-    }
-    public async Task SetPhoneNumberConfirmedAsync( UserRecord user, bool confirmed, CancellationToken token )
-    {
-        user.IsPhoneNumberConfirmed = confirmed;
-        await _dbContext.Users.Update( user, token );
-    }
-
-
-    public Task<string> GetSecurityStampAsync( UserRecord user, CancellationToken token ) => Task.FromResult( user.SecurityStamp ?? string.Empty );
-    public async Task SetSecurityStampAsync( UserRecord user, string stamp, CancellationToken token )
-    {
-        user.SecurityStamp = stamp;
-        await _dbContext.Users.Update( user, token );
-    }
-
-
-    public async Task<IdentityResult> CreateAsync( UserRecord user, CancellationToken token )
-    {
-        token.ThrowIfCancellationRequested();
-
-
-        if ( await _dbContext.Users.Get( nameof(UserRecord.UserName), user.UserName, token ) is not null )
-        {
-            return IdentityResult.Failed( new IdentityError
-                                          {
-                                              Description = _options.UserExists,
-                                          } );
-        }
-
-
-        await _dbContext.Users.Insert( user, token );
-
-        return IdentityResult.Success;
-    }
-    public async Task<IdentityResult> DeleteAsync( UserRecord user, CancellationToken token )
-    {
-        token.ThrowIfCancellationRequested();
-
-        try
-        {
-            await _dbContext.Users.Delete( user.ID, token );
-            return IdentityResult.Success;
-        }
-        catch ( Exception e )
-        {
-            return IdentityResult.Failed( new IdentityError
-                                          {
-                                              Description = e.Message,
-                                          } );
-        }
-    }
-
-
-    public async Task<UserRecord> FindByIdAsync( string userId, CancellationToken token ) => await _dbContext.Users.Get( long.Parse( userId ), token ) ?? throw new RecordNotFoundException( userId );
-    public async Task<UserRecord> FindByNameAsync( string normalizedUserName, CancellationToken token ) =>
-        await _dbContext.Users.Get( nameof(UserRecord.FullName), normalizedUserName, token ) ?? throw new RecordNotFoundException( normalizedUserName );
-
-
-    public Task<string> GetNormalizedUserNameAsync( UserRecord user, CancellationToken token ) => Task.FromResult( user.FullName ?? string.Empty );
-    public Task<string> GetUserIdAsync( UserRecord             user, CancellationToken token ) => Task.FromResult( user.ID.ToString() );
-    public Task<string> GetUserNameAsync( UserRecord           user, CancellationToken token ) => Task.FromResult( user.UserName );
-
-    public async Task SetNormalizedUserNameAsync( UserRecord user, string fullName, CancellationToken token )
-    {
-        user.FullName = fullName;
-        await _dbContext.Users.Update( user, token );
-    }
-    public async Task SetUserNameAsync( UserRecord user, string userName, CancellationToken token )
-    {
-        user.UserName = userName;
-        await _dbContext.Users.Update( user, token );
-    }
-
-
-    public async Task<IdentityResult> UpdateAsync( UserRecord user, CancellationToken token )
-    {
-        try
-        {
-            await _dbContext.Users.Update( user, token );
-            return IdentityResult.Success;
-        }
-        catch ( Exception e )
-        {
-            return IdentityResult.Failed( new IdentityError
-                                          {
-                                              Description = e.Message
-                                          } );
-        }
-    }
-    public async Task<int> CountCodesAsync( UserRecord user, CancellationToken token )
-    {
-        IReadOnlyCollection<RecoveryCodeRecord> codes = await _dbContext.Codes( user, token );
-        return codes.Count;
-    }
-    public async Task<bool> RedeemCodeAsync( UserRecord user, string              code,          CancellationToken token ) => await _dbContext.RedeemCode( user, code, token );
-    public async Task ReplaceCodesAsync( UserRecord     user, IEnumerable<string> recoveryCodes, CancellationToken token ) => await _dbContext.ReplaceCodes( user, recoveryCodes, token );
-
-
-    public Task<bool> GetTwoFactorEnabledAsync( UserRecord user, CancellationToken token ) => Task.FromResult( user.IsTwoFactorEnabled ); // TODO: 
-    public async Task SetTwoFactorEnabledAsync( UserRecord user, bool enabled, CancellationToken token )                                  // TODO: 
-    {
-        user.IsTwoFactorEnabled = enabled;
-        await _dbContext.Users.Update( user, token );
-    }
+    public async Task<string?> GetAuthenticatorKeyAsync( UserRecord       user,  CancellationToken  token ) => await _dbContext.GetAuthenticatorKeyAsync( user, token );
+    public async Task SetAuthenticatorKeyAsync( UserRecord                user,  string             key,    CancellationToken token ) => await _dbContext.SetAuthenticatorKeyAsync( user, key, token );
+    public async Task AddClaimsAsync( UserRecord                          user,  IEnumerable<Claim> claims, CancellationToken token ) => await _dbContext.AddClaimsAsync( user, claims, token );
+    public async Task<IList<Claim>> GetClaimsAsync( UserRecord            user,  CancellationToken  token ) => await _dbContext.GetClaimsAsync( user, token );
+    public async Task<IList<UserRecord>> GetUsersForClaimAsync( Claim     claim, CancellationToken  token ) => await _dbContext.GetUsersForClaimAsync( claim, token );
+    public async Task RemoveClaimsAsync( UserRecord                       user,  IEnumerable<Claim> claims, CancellationToken token ) => await _dbContext.RemoveClaimsAsync( user, claims, token );
+    public async Task ReplaceClaimAsync( UserRecord                       user,  Claim              claim,  Claim             newClaim, CancellationToken token ) => await _dbContext.ReplaceClaimAsync( user, claim, newClaim, token );
+    public async Task<UserRecord?> FindByEmailAsync( string               email, CancellationToken  token ) => await _dbContext.FindByEmailAsync( email, token );
+    public async Task<string?> GetEmailAsync( UserRecord                  user,  CancellationToken  token ) => await _dbContext.GetEmailAsync( user, token );
+    public async Task<string?> GetNormalizedEmailAsync( UserRecord        user,  CancellationToken  token ) => await _dbContext.GetNormalizedEmailAsync( user, token );
+    public async Task<bool> GetEmailConfirmedAsync( UserRecord            user,  CancellationToken  token ) => await _dbContext.GetEmailConfirmedAsync( user, token );
+    public async Task SetEmailAsync( UserRecord                           user,  string?            email,           CancellationToken token ) => await _dbContext.SetEmailAsync( user, email, token );
+    public async Task SetEmailConfirmedAsync( UserRecord                  user,  bool               confirmed,       CancellationToken token ) => await _dbContext.SetEmailConfirmedAsync( user, confirmed, token );
+    public async Task SetNormalizedEmailAsync( UserRecord                 user,  string?            normalizedEmail, CancellationToken token ) => await _dbContext.SetNormalizedEmailAsync( user, normalizedEmail, token );
+    public async Task<int> GetAccessFailedCountAsync( UserRecord          user,  CancellationToken  token ) => await _dbContext.GetAccessFailedCountAsync( user, token );
+    public async Task<bool> GetLockoutEnabledAsync( UserRecord            user,  CancellationToken  token ) => await _dbContext.GetLockoutEnabledAsync( user, token );
+    public async Task<DateTimeOffset?> GetLockoutEndDateAsync( UserRecord user,  CancellationToken  token ) => await _dbContext.GetLockoutEndDateAsync( user, token );
+    public async Task<int> IncrementAccessFailedCountAsync( UserRecord    user,  CancellationToken  token ) => await _dbContext.IncrementAccessFailedCountAsync( user, token );
+    public async Task ResetAccessFailedCountAsync( UserRecord             user,  CancellationToken  token ) => await _dbContext.ResetAccessFailedCountAsync( user, token );
+    public async Task SetLockoutEnabledAsync( UserRecord                  user,  bool               enabled,    CancellationToken token ) => await _dbContext.SetLockoutEnabledAsync( user, enabled, token );
+    public async Task SetLockoutEndDateAsync( UserRecord                  user,  DateTimeOffset?    lockoutEnd, CancellationToken token ) => await _dbContext.SetLockoutEndDateAsync( user, lockoutEnd, token );
+    void IDisposable.Dispose() { }
+    public async Task AddLoginAsync( UserRecord                        user,               UserLoginInfo login, CancellationToken token ) => await _dbContext.AddLoginAsync( user, login, token );
+    public async Task<UserRecord?> FindByLoginAsync( string            loginProvider,      string providerKey, CancellationToken token ) => await _dbContext.FindByLoginAsync( loginProvider, providerKey, token );
+    public async Task<IList<UserLoginInfo>> GetLoginsAsync( UserRecord user,               CancellationToken token ) => await _dbContext.GetLoginsAsync( user, token );
+    public async Task RemoveLoginAsync( UserRecord                     user,               string loginProvider, string providerKey, CancellationToken token ) => await _dbContext.RemoveLoginAsync( user, loginProvider, providerKey, token );
+    public async Task<IdentityResult> CreateAsync( UserRecord          user,               CancellationToken token ) => await _dbContext.CreateAsync( user, token );
+    public async Task<IdentityResult> DeleteAsync( UserRecord          user,               CancellationToken token ) => await _dbContext.DeleteAsync( user, token );
+    public async Task<UserRecord?> FindByIdAsync( string               userId,             CancellationToken token ) => await _dbContext.Users.Get( long.Parse( userId ), token ) ?? throw new RecordNotFoundException( userId );
+    public async Task<UserRecord?> FindByNameAsync( string             normalizedUserName, CancellationToken token ) => await _dbContext.Users.Get( nameof(UserRecord.FullName), normalizedUserName, token );
+    public async Task<string?> GetNormalizedUserNameAsync( UserRecord  user,               CancellationToken token ) => await _dbContext.GetNormalizedUserNameAsync( user, token );
+    public async Task<string> GetUserIdAsync( UserRecord               user,               CancellationToken token ) => await _dbContext.GetUserIdAsync( user, token );
+    public async Task<string?> GetUserNameAsync( UserRecord            user,               CancellationToken token ) => await _dbContext.GetUserNameAsync( user, token );
+    public async Task SetNormalizedUserNameAsync( UserRecord           user,               string? fullName, CancellationToken token ) => await _dbContext.SetNormalizedUserNameAsync( user, fullName, token );
+    public async Task SetUserNameAsync( UserRecord                     user,               string? userName, CancellationToken token ) => await _dbContext.SetUserNameAsync( user, userName, token );
+    public async Task<IdentityResult> UpdateAsync( UserRecord          user,               CancellationToken token ) => await _dbContext.UpdateAsync( user, token );
+    public async Task<string?> GetPhoneNumberAsync( UserRecord         user,               CancellationToken token ) => await _dbContext.GetPhoneNumberAsync( user, token );
+    public async Task<bool> GetPhoneNumberConfirmedAsync( UserRecord   user,               CancellationToken token ) => await _dbContext.GetPhoneNumberConfirmedAsync( user, token );
+    public async Task SetPhoneNumberAsync( UserRecord                  user,               string? phoneNumber, CancellationToken token ) => await _dbContext.SetPhoneNumberAsync( user, phoneNumber, token );
+    public async Task SetPhoneNumberConfirmedAsync( UserRecord         user,               bool confirmed, CancellationToken token ) => await _dbContext.SetPhoneNumberConfirmedAsync( user, confirmed, token );
+    public async Task<string?> GetSecurityStampAsync( UserRecord       user,               CancellationToken token ) => await _dbContext.GetSecurityStampAsync( user, token );
+    public async Task SetSecurityStampAsync( UserRecord                user,               string stamp, CancellationToken token ) => await _dbContext.SetSecurityStampAsync( user, stamp, token );
+    public async Task<int> CountCodesAsync( UserRecord                 user,               CancellationToken token ) => (await _dbContext.Codes( user, token )).Count;
+    public async Task<bool> RedeemCodeAsync( UserRecord                user,               string code, CancellationToken token ) => await _dbContext.RedeemCode( user, code, token );
+    public async Task ReplaceCodesAsync( UserRecord                    user,               IEnumerable<string> recoveryCodes, CancellationToken token ) => await _dbContext.ReplaceCodes( user, recoveryCodes, token );
+    public async Task<bool> GetTwoFactorEnabledAsync( UserRecord       user,               CancellationToken token ) => await _dbContext.GetTwoFactorEnabledAsync( user, token );
+    public async Task SetTwoFactorEnabledAsync( UserRecord             user,               bool enabled, CancellationToken token ) => await _dbContext.SetTwoFactorEnabledAsync( user, enabled, token );
 }

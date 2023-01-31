@@ -40,18 +40,28 @@ public abstract record TableRecord<TRecord> : BaseCollectionsRecord<TRecord, lon
     protected static DynamicParameters GetDynamicParameters( TableRecord<TRecord> record )
     {
         var parameters = new DynamicParameters();
-        parameters.Add( nameof(UserID), record.UserID );
+        parameters.Add( nameof(UserID),    record.UserID );
+        parameters.Add( nameof(CreatedBy), record.CreatedBy );
         return parameters;
     }
-    public override bool Equals( TRecord? other )
-    {
-        if ( other is null ) { return false; }
 
-        if ( ReferenceEquals( this, other ) ) { return true; }
 
-        return base.Equals( other ) && CreatedBy == other.CreatedBy && Nullable.Equals( _lastModified, other._lastModified ) && UserID.Equals( other.UserID ) && DateCreated.Equals( other.DateCreated );
-    }
+    public bool DoesNotOwn( UserRecord record ) => record.CreatedBy != record.ID;
+    public bool Owns( UserRecord       record ) => record.CreatedBy == record.ID;
 
+
+    public TRecord NewID( in long id ) => (TRecord)(this with
+                                                    {
+                                                        ID = id,
+                                                    });
+
+
+    public async ValueTask<UserRecord?> GetUser( DbConnection           connection, DbTransaction? transaction, Database db, CancellationToken token ) => await db.Users.Get( connection, transaction, true,      GetDynamicParameters( this ), token );
+    public async ValueTask<UserRecord?> GetUserWhoCreated( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => await db.Users.Get( connection, transaction, CreatedBy, token );
+
+
+
+    #region Core
 
     public override int CompareTo( TRecord? other )
     {
@@ -70,17 +80,17 @@ public abstract record TableRecord<TRecord> : BaseCollectionsRecord<TRecord, lon
 
         return DateCreated.CompareTo( other.DateCreated );
     }
+    public override bool Equals( TRecord? other )
+    {
+        if ( other is null ) { return false; }
+
+        if ( ReferenceEquals( this, other ) ) { return true; }
+
+        return base.Equals( other ) && CreatedBy == other.CreatedBy && Nullable.Equals( _lastModified, other._lastModified ) && UserID.Equals( other.UserID ) && DateCreated.Equals( other.DateCreated );
+    }
 
 
     public override int GetHashCode() => HashCode.Combine( CreatedBy, LastModified, UserID, DateCreated );
 
-
-    public TRecord NewID( in long id ) => (TRecord)(this with
-                                                    {
-                                                        ID = id,
-                                                    });
-
-
-    public async ValueTask<UserRecord?> GetUser( DbConnection           connection, DbTransaction? transaction, Database db, CancellationToken token ) => await db.Users.Get( connection, transaction, true,      GetDynamicParameters( this ), token );
-    public async ValueTask<UserRecord?> GetUserWhoCreated( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => await db.Users.Get( connection, transaction, CreatedBy, token );
+    #endregion
 }

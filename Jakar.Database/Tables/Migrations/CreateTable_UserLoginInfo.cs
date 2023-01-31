@@ -1,5 +1,5 @@
 ﻿// Jakar.Extensions :: Jakar.Database
-// 01/29/2023  1:51 PM
+// 01/30/2023  9:44 PM
 
 using Jakar.Database.Migrations;
 
@@ -8,12 +8,12 @@ using Jakar.Database.Migrations;
 namespace Jakar.Database.Tables.Migrations;
 
 
-[Migration( 6 )]
+[Migration( 7 )]
 
 // ReSharper disable once InconsistentNaming
-public sealed class CreateTable_RecoveryCode : MigrateRecoveryCodeTable
+public sealed class CreateTable_UserLoginInfo : MigrateUserLoginInfoTable
 {
-    public CreateTable_RecoveryCode() : base() { }
+    public CreateTable_UserLoginInfo() : base() { }
     public override void Up()
     {
         CheckSchema();

@@ -4,6 +4,15 @@
 namespace Jakar.Database;
 
 
+public class DuplicateRecordException : NotFoundException
+{
+    public DuplicateRecordException() : base() { }
+    public DuplicateRecordException( string message ) : base( message ) { }
+    public DuplicateRecordException( string message, Exception inner ) : base( message, inner ) { }
+}
+
+
+
 public class RecordNotFoundException : NotFoundException
 {
     public RecordNotFoundException() : base() { }

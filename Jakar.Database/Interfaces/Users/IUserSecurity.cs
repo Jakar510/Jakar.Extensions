@@ -15,10 +15,6 @@ public interface IUserSecurity
     /// <summary> A random value that must change whenever a user is persisted to the store </summary>
     public string? ConcurrencyStamp { get; }
 
-    public string? LoginProvider       { get; }
-    public string? ProviderDisplayName { get; }
-    public string? ProviderKey         { get; }
-
 
     /// <summary> A random value that must change whenever a users credentials change (password changed, login removed) </summary>
     public string? SecurityStamp { get; }

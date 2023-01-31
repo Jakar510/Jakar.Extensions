@@ -165,18 +165,6 @@ public abstract class MigrateUserTable : Migration<UserRecord>
              .AsBoolean()
              .NotNullable();
 
-        table.WithColumn( nameof(UserRecord.LoginProvider) )
-             .AsString( int.MaxValue )
-             .Nullable();
-
-        table.WithColumn( nameof(UserRecord.ProviderKey) )
-             .AsString( int.MaxValue )
-             .Nullable();
-
-        table.WithColumn( nameof(UserRecord.ProviderDisplayName) )
-             .AsString( int.MaxValue )
-             .Nullable();
-
         table.WithColumn( nameof(UserRecord.SecurityStamp) )
              .AsString( int.MaxValue )
              .Nullable();
