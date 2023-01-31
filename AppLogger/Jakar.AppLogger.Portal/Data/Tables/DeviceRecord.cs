@@ -8,24 +8,25 @@ namespace Jakar.AppLogger.Portal.Data.Tables;
 [Table( "Devices" )]
 public sealed record DeviceRecord : LoggerTable<DeviceRecord>, IDevice
 {
-    public AppVersion?                          AppVersion     { get; init; }
-    public double                              TimeZoneOffset { get; init; }
-    HwInfo? IDevice.                           HwInfo         => HardwareInfo?.FromJson<HwInfo>();
-    public                             int?    AppBuild       { get; init; }
-    public                             int?    OsApiLevel     { get; init; }
-    [MaxLength( 4096 )]         public string  DeviceID       { get; init; } = string.Empty;
-    [MaxLength( 256 )]          public string  Locale         { get; init; } = string.Empty;
-    [MaxLength( 256 )]          public string  OsName         { get; init; } = string.Empty;
-    [MaxLength( 256 )]          public string  SdkName        { get; init; } = string.Empty;
-    [MaxLength( 256 )]          public string  SdkVersion     { get; init; } = string.Empty;
-    [MaxLength( 4096 )]         public string? AppNamespace   { get; init; }
-    [MaxLength( int.MaxValue )] public string? HardwareInfo   { get; init; }
-    [MaxLength( 4096 )]         public string? Model          { get; init; }
-    [MaxLength( 256 )]          public string? OsBuild        { get; init; }
-    [MaxLength( 256 )]          public string? OsVersion      { get; init; }
+    public AppVersion?                            AppVersion     { get; init; }
+    public double                                 TimeZoneOffset { get; init; }
+    HwInfo? IDevice.                              HwInfo         => HardwareInfo?.FromJson<HwInfo>();
+    public                             int?       AppBuild       { get; init; }
+    public                             int?       OsApiLevel     { get; init; }
+    [MaxLength( 4096 )]         public string     DeviceID       { get; init; } = string.Empty;
+    [MaxLength( 256 )]          public string     Locale         { get; init; } = string.Empty;
+    [MaxLength( 256 )]          public string     OsName         { get; init; } = string.Empty;
+    [MaxLength( 256 )]          public string     SdkName        { get; init; } = string.Empty;
+    [MaxLength( 256 )]          public string     SdkVersion     { get; init; } = string.Empty;
+    [MaxLength( 4096 )]         public string?    AppNamespace   { get; init; }
+    [MaxLength( int.MaxValue )] public string?    HardwareInfo   { get; init; }
+    [MaxLength( 4096 )]         public string?    Model          { get; init; }
+    [MaxLength( 256 )]          public string?    OsBuild        { get; init; }
+    [MaxLength( 256 )]          public string?    OsVersion      { get; init; }
+    public                             PlatformID Platform       { get; init; }
 
 
-    public DeviceRecord() : base()  { }
+    public DeviceRecord() : base() { }
     public DeviceRecord( IDevice device ) : base( 0 )
     {
         DeviceID       = device.DeviceID;
@@ -65,7 +66,7 @@ public sealed record DeviceRecord : LoggerTable<DeviceRecord>, IDevice
     // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Global
     public DeviceRecord Update( IDevice device, UserRecord caller )
     {
-        if (CreatedBy != caller.ID) { throw new ArgumentException( $"{nameof(caller)} doesn't own this {nameof(device)}", nameof(caller) ); }
+        if ( CreatedBy != caller.ID ) { throw new ArgumentException( $"{nameof(caller)} doesn't own this {nameof(device)}", nameof(caller) ); }
 
         return this with
                {
@@ -100,9 +101,9 @@ public sealed record DeviceRecord : LoggerTable<DeviceRecord>, IDevice
     public override int GetHashCode() => HashCode.Combine( DeviceID, base.GetHashCode() );
     public override bool Equals( DeviceRecord? other )
     {
-        if (other is null) { return false; }
+        if ( other is null ) { return false; }
 
-        if (ReferenceEquals( this, other )) { return true; }
+        if ( ReferenceEquals( this, other ) ) { return true; }
 
         return string.Equals( DeviceID, other.DeviceID, StringComparison.Ordinal );
     }

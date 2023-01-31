@@ -8,7 +8,7 @@ public interface IDevice
 {
     /// <summary> Gets the application version. </summary>
     /// <value> Application version name, e.g. 1.1.0 </value>
-    AppVersion? AppVersion { get; }
+    AppVersion AppVersion { get; }
 
     /// <summary> Gets the time zone offset. </summary>
     /// <value> The offset in minutes from UTC for the device time zone, including daylight savings time. </value>
@@ -64,4 +64,7 @@ public interface IDevice
     /// <summary> Gets the OS version. </summary>
     /// <value> OS version (example: 9.3.0). </value>
     string? OsVersion { get; }
+
+
+    public PlatformID Platform { get; init; }
 }

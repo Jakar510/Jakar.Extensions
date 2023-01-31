@@ -31,8 +31,6 @@ public class Debug : ObservableClass
     }
     public virtual bool CanDebug      => Debugger.IsAttached;
     public virtual bool UseDebugLogin => CanDebug;
-
-
     public DebugSettings Settings
     {
         get
@@ -60,6 +58,8 @@ public class Debug : ObservableClass
         _appStateFile  = new LocalFile( _fileSystemApi.AppStateFileName );
         _feedBackFile  = new LocalFile( _fileSystemApi.FeedBackFileName );
     }
+
+
     protected virtual Dictionary<string, string> AppState() => new()
                                                                {
                                                                    [nameof(_appName)]                     = _appName ?? throw new NullReferenceException( nameof(_appName) ),
@@ -68,7 +68,7 @@ public class Debug : ObservableClass
                                                                    [nameof(AppDeviceInfo.VersionNumber)]  = AppDeviceInfo.VersionNumber,
                                                                    [nameof(LanguageApi.SelectedLanguage)] = CultureInfo.CurrentCulture.DisplayName,
                                                                };
-    public async Task HandleExceptionAsync( Exception e )
+    public async ValueTask HandleExceptionAsync( Exception e )
     {
         if ( !_DebugSettings.EnableApi ) { return; }
 
@@ -76,16 +76,13 @@ public class Debug : ObservableClass
 
         ReadOnlyMemory<byte> screenShot = _DebugSettings.TakeScreenshotOnError
                                               ? await AppShare.TakeScreenShot()
-                                                              .ConfigureAwait( false )
                                               : default;
 
-
-        await TrackError( e, screenShot )
-           .ConfigureAwait( false );
+        await TrackError( e, screenShot );
     }
 
 
-    public async Task InitAsync( string app_center_id, params Type[] appCenterServices )
+    public async ValueTask InitAsync( string app_center_id, params Type[] appCenterServices )
     {
         try
         {
@@ -118,7 +115,7 @@ public class Debug : ObservableClass
     }
 
 
-    public async Task SaveFeedBackAppState( Dictionary<string, string?> feedback, string key = "feedback" )
+    public async ValueTask SaveFeedBackAppState( Dictionary<string, string?> feedback, string key = "feedback" )
     {
         ThrowIfNotEnabled();
 
@@ -133,7 +130,7 @@ public class Debug : ObservableClass
     }
 
 
-    public async Task TrackError( Exception e )
+    public async ValueTask TrackError( Exception e )
     {
         if ( _DebugSettings.IncludeAppStateOnError )
         {
@@ -148,19 +145,19 @@ public class Debug : ObservableClass
                .ConfigureAwait( false );
         }
     }
-    public async Task TrackError( Exception e, ReadOnlyMemory<byte> screenShot )
+    public async ValueTask TrackError( Exception e, ReadOnlyMemory<byte> screenShot )
     {
         e.Details( out Dictionary<string, string?> dict );
 
         await TrackError( e, dict, new ExceptionDetails( e ), screenShot )
            .ConfigureAwait( false );
     }
-    public Task TrackError( Exception ex, Dictionary<string, string?>? eventDetails ) => TrackError( ex,                                                                      eventDetails, exceptionDetails: default );
-    public Task TrackError( Exception ex, Dictionary<string, string?>? eventDetails, ExceptionDetails? exceptionDetails ) => TrackError( ex,                                  eventDetails, exceptionDetails, default, default );
-    public Task TrackError( Exception ex, Dictionary<string, string?>? eventDetails, ExceptionDetails? exceptionDetails, ReadOnlyMemory<byte> screenShot ) => TrackError( ex, eventDetails, exceptionDetails, default, default, screenShot );
-    public Task TrackError( Exception ex, Dictionary<string, string?>? eventDetails, ExceptionDetails? exceptionDetails, string? incomingText, string? outgoingText ) =>
+    public ValueTask TrackError( Exception ex, Dictionary<string, string?>? eventDetails ) => TrackError( ex,                                                                      eventDetails, exceptionDetails: default );
+    public ValueTask TrackError( Exception ex, Dictionary<string, string?>? eventDetails, ExceptionDetails? exceptionDetails ) => TrackError( ex,                                  eventDetails, exceptionDetails, default, default );
+    public ValueTask TrackError( Exception ex, Dictionary<string, string?>? eventDetails, ExceptionDetails? exceptionDetails, ReadOnlyMemory<byte> screenShot ) => TrackError( ex, eventDetails, exceptionDetails, default, default, screenShot );
+    public ValueTask TrackError( Exception ex, Dictionary<string, string?>? eventDetails, ExceptionDetails? exceptionDetails, string? incomingText, string? outgoingText ) =>
         TrackError( ex, eventDetails, exceptionDetails, incomingText, outgoingText, default );
-    public async Task TrackError( Exception ex, Dictionary<string, string?>? eventDetails, ExceptionDetails? exceptionDetails, string? incomingText, string? outgoingText, ReadOnlyMemory<byte> screenShot )
+    public async ValueTask TrackError( Exception ex, Dictionary<string, string?>? eventDetails, ExceptionDetails? exceptionDetails, string? incomingText, string? outgoingText, ReadOnlyMemory<byte> screenShot )
     {
         ThrowIfNotEnabled();
         if ( !_DebugSettings.EnableCrashes ) { return; }
@@ -211,9 +208,8 @@ public class Debug : ObservableClass
     }
 
 
-    public void HandleException( Exception e ) => HandleException( e, default );
-    public void HandleException( Exception e, CancellationToken token ) => Task.Run( async () => await HandleExceptionAsync( e ), token )
-                                                                               .Wait( token );
+    public void HandleException( Exception e, CancellationToken token = default ) => Task.Run( async () => await HandleExceptionAsync( e ), token )
+                                                                                         .Wait( token );
 
 
     protected void ThrowIfNotEnabled()

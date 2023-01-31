@@ -9,9 +9,8 @@ public static class AppDeviceInfo
     public static string DeviceModel    => DeviceInfo.Model;
     public static string DevicePlatform => DeviceInfo.Platform.ToString();
     public static string DeviceVersion  => DeviceInfo.VersionString;
-
-    public static string FullVersion   => $"{VersionNumber}.{BuildNumber}";
-    public static string Manufacturer  => DeviceInfo.Manufacturer;
-    public static string PackageName   => AppInfo.PackageName;
-    public static string VersionNumber => AppInfo.VersionString;
+    public static string FullVersion    => $"{VersionNumber}.{BuildNumber}";
+    public static string Manufacturer   => DeviceInfo.Manufacturer;
+    public static string PackageName    => AppInfo.PackageName;
+    public static string VersionNumber  => AppInfo.VersionString;
 }

@@ -6,14 +6,12 @@ namespace Jakar.AppLogger.Common;
 
 public sealed class AppLoggerIni : LoggingSettings
 {
-    public const     string    CONFIG_FILE_NAME = "AppCenter.ini";
-    private readonly IniConfig _config          = new();
+    public const     string     CONFIG_FILE_NAME = "AppCenter.ini";
+    private readonly IniConfig  _config          = new();
+    private          LocalFile? _file;
 
 
-    private LocalFile? _file;
-
-
-    internal LocalFile Path
+    internal LocalFile File
     {
         get => _file ??= LocalDirectory.CurrentDirectory.Join( CONFIG_FILE_NAME );
         set => _file = value;
@@ -22,67 +20,91 @@ public sealed class AppLoggerIni : LoggingSettings
 
 
     public AppLoggerIni( AppVersion version, DeviceDescriptor device, LocalDirectory directory ) : this( version, device, directory.Join( CONFIG_FILE_NAME ) ) { }
-    public AppLoggerIni( AppVersion version, DeviceDescriptor device, LocalFile      file ) : this( version, device ) => Path = file;
+    public AppLoggerIni( AppVersion version, DeviceDescriptor device, LocalFile      file ) : this( version, device ) => File = file;
     public AppLoggerIni( AppVersion version, DeviceDescriptor device ) : base( version, device ) { }
 
 
-    public static AppLoggerIni Create( AppVersion version, string appName, bool             includeHwInfo ) => Create( version,                           appName, DeviceDescriptor.Create( includeHwInfo, version ) );
-    public static AppLoggerIni Create( AppVersion version, string appName, DeviceDescriptor device ) => Create( version,                                  appName, device, LocalDirectory.CurrentDirectory );
-    public static AppLoggerIni Create( AppVersion version, string appName, DeviceDescriptor device,        LocalDirectory directory ) => Create( version, appName, device, directory.Join( CONFIG_FILE_NAME ) );
-    public static AppLoggerIni Create( AppVersion version, string appName, bool             includeHwInfo, LocalDirectory directory ) => Create( version, appName, includeHwInfo, directory.Join( CONFIG_FILE_NAME ) );
-    public static AppLoggerIni Create( AppVersion version, string appName, bool             includeHwInfo, LocalFile      file ) => Create( version,      appName, DeviceDescriptor.Create( includeHwInfo, version ), file );
-    public static AppLoggerIni Create( AppVersion version, string appName, DeviceDescriptor device, LocalFile file ) => new(version, device, file)
-                                                                                                                        {
-                                                                                                                            AppName = appName
-                                                                                                                        };
-
-
-    public static ValueTask<AppLoggerIni> CreateAsync( AppVersion version, DeviceDescriptor device, string appName ) => CreateAsync( version,                           device, appName, LocalDirectory.CurrentDirectory );
-    public static ValueTask<AppLoggerIni> CreateAsync( AppVersion version, DeviceDescriptor device, string appName, LocalDirectory directory ) => CreateAsync( version, device, appName, directory.Join( CONFIG_FILE_NAME ) );
-    public static async ValueTask<AppLoggerIni> CreateAsync( AppVersion version, DeviceDescriptor device, string appName, LocalFile file )
+    public static async ValueTask<AppLoggerIni> CreateAsync( AppVersion version, string deviceID, string appName )
     {
-        AppLoggerIni ini = await new AppLoggerIni( version, device, file ).RefreshAsync();
+        PlatformID platform = Environment.OSVersion.Platform;
+
+        switch ( platform )
+        {
+            case PlatformID.MacOSX:
+                return await CreateAsync( version,
+                                          deviceID,
+                                          appName,
+                                          LocalDirectory.Create( $"~/Library/{appName}" )
+                                                        .Join( appName ) );
+
+
+            case PlatformID.Unix:
+                return await CreateAsync( version,
+                                          deviceID,
+                                          appName,
+                                          LocalDirectory.Create( $"/etc/{appName}" )
+                                                        .Join( appName ) );
+
+            case PlatformID.Win32NT:
+            case PlatformID.Win32S:
+            case PlatformID.Win32Windows:
+            case PlatformID.WinCE:
+            case PlatformID.Xbox:
+                return await CreateAsync( version,
+                                          deviceID,
+                                          appName,
+                                          LocalDirectory.Create( Environment.ExpandEnvironmentVariables( $"%APPDATA%/{appName}" ) )
+                                                        .Join( appName ) );
+
+            default:
+                LocalDirectory directory = Environment.GetFolderPath( Environment.SpecialFolder.CommonApplicationData );
+                if ( directory.DoesNotExist ) { directory = LocalDirectory.CurrentDirectory; }
+
+                return await CreateAsync( version, deviceID, appName, directory.Join( appName ) );
+        }
+    }
+    public static ValueTask<AppLoggerIni> CreateAsync( AppVersion version, string deviceID, string appName, LocalDirectory directory ) => CreateAsync( version, deviceID, appName, directory.Join( CONFIG_FILE_NAME ) );
+    public static async ValueTask<AppLoggerIni> CreateAsync( AppVersion version, string deviceID, string appName, LocalFile file )
+    {
+        AppLoggerIni ini = await new AppLoggerIni( version, DeviceDescriptor.Create( version, deviceID ), file ).RefreshAsync();
         ini.AppName = appName;
         return ini;
     }
 
 
-    protected override void HandleValue<T>( T value, string propertyName ) =>
-        Section[propertyName] = value switch
-                                {
-                                    null     => string.Empty,
-                                    string s => s,
-                                    Enum b   => b.ToString(),
-                                    Guid b   => b.ToString(),
-                                    bool b   => b.ToString(),
-                                    JToken b => b.ToString(),
-                                    short b  => b.ToString(),
-                                    ushort b => b.ToString(),
-                                    int b    => b.ToString(),
-                                    uint b   => b.ToString(),
-                                    long b   => b.ToString(),
-                                    ulong b  => b.ToString(),
-                                    float b  => b.ToString( CultureInfo.InvariantCulture ),
-                                    double b => b.ToString( CultureInfo.InvariantCulture ),
-                                    _        => value.ToJson()
-                                };
+    protected override void HandleValue<T>( T value, string propertyName ) => Section[propertyName] = value switch
+                                                                                                      {
+                                                                                                          null     => string.Empty,
+                                                                                                          string s => s,
+                                                                                                          Enum b   => b.ToString(),
+                                                                                                          Guid b   => b.ToString(),
+                                                                                                          bool b   => b.ToString(),
+                                                                                                          JToken b => b.ToString(),
+                                                                                                          short b  => b.ToString(),
+                                                                                                          ushort b => b.ToString(),
+                                                                                                          int b    => b.ToString(),
+                                                                                                          uint b   => b.ToString(),
+                                                                                                          long b   => b.ToString(),
+                                                                                                          ulong b  => b.ToString(),
+                                                                                                          float b  => b.ToString( CultureInfo.InvariantCulture ),
+                                                                                                          double b => b.ToString( CultureInfo.InvariantCulture ),
+                                                                                                          _        => value.ToJson()
+                                                                                                      };
+
 
     public override async ValueTask InitAsync()
     {
-        var device = await DeviceDescriptor.CreateAsync( IncludeHwInfo, Version );
-        SetDevice( device );
         await RefreshAsync();
+
+        Device.HwInfo = IncludeHwInfo
+                            ? HwInfo.TryCreate()
+                            : default;
     }
 
 
     public async ValueTask<AppLoggerIni> RefreshAsync()
     {
-        IniConfig? ini = await IniConfig.ReadFromFileAsync( Path );
-        return Refresh( ini );
-    }
-    public AppLoggerIni Refresh()
-    {
-        IniConfig? ini = IniConfig.ReadFromFile( Path );
+        IniConfig ini = await IniConfig.ReadFromFileAsync( File );
         return Refresh( ini );
     }
 
@@ -202,5 +224,5 @@ public sealed class AppLoggerIni : LoggingSettings
     }
 
 
-    public async Task SaveAsync() => await _config.WriteToFile( Path );
+    public async Task SaveAsync() => await _config.WriteToFile( File );
 }

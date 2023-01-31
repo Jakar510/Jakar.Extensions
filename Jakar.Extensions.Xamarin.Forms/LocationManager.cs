@@ -5,40 +5,31 @@ namespace Jakar.Extensions.Xamarin.Forms;
 public class LocationManager
 {
     public Location? Location { get; protected set; }
+    public State     Status   { get; protected set; }
 
 
-    public State Status { get; protected set; }
-
-
-    public static async Task<Location?> GetLocation()
+    public static async ValueTask<Location?> GetLocation()
     {
         var manager = new LocationManager();
 
-        if ( await manager.Update()
-                          .ConfigureAwait( false ) ) { return manager.Location; }
-
-        return null;
+        return await manager.Update()
+                   ? manager.Location
+                   : default;
     }
 
-    public async Task<bool> Update()
+    public async ValueTask<bool> Update()
     {
-        if ( await AppPermissions.LocationWhenInUsePermission()
-                                 .ConfigureAwait( false ) != PermissionStatus.Granted ) { return false; }
+        if ( await AppPermissions.LocationWhenInUsePermission() != PermissionStatus.Granted ) { return false; }
 
-        State status = await GetLocationAsync()
-                          .ConfigureAwait( false );
-
+        State status = await GetLocationAsync();
         return status == State.Success;
     }
 
-    protected async Task<State> GetLocationAsync( GeolocationAccuracy accuracy = GeolocationAccuracy.Default )
+    protected async ValueTask<State> GetLocationAsync( GeolocationAccuracy accuracy = GeolocationAccuracy.Default )
     {
         Reset();
         var request = new GeolocationRequest( accuracy );
-
-        Location = await Geolocation.GetLocationAsync( request )
-                                    .ConfigureAwait( false );
-
+        Location = await Geolocation.GetLocationAsync( request );
         if ( Location is null ) { return State.UnknownError; }
 
         Status = Location.IsFromMockProvider

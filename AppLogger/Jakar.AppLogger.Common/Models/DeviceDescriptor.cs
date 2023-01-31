@@ -9,21 +9,21 @@ namespace Jakar.AppLogger.Common;
 public sealed record DeviceDescriptor : BaseRecord, IDevice
 {
     public const string     UNKNOWN = "Unknown";
-    public       AppVersion AppVersion     { get; init; }
+    public       AppVersion AppVersion     { get; init; } = new();
     public       double     TimeZoneOffset { get; init; }
-    public       HwInfo?    HwInfo         { get; init; }
+    public       HwInfo?    HwInfo         { get; set; }
     public       int?       AppBuild       { get; init; }
     public       int?       OsApiLevel     { get; set; }
-
-    public string  DeviceID     { get; init; } = string.Empty;
-    public string  Locale       { get; init; } = string.Empty;
-    public string  OsName       { get; init; } = string.Empty;
-    public string  SdkName      { get; init; } = string.Empty;
-    public string  SdkVersion   { get; init; } = string.Empty;
-    public string? AppNamespace { get; init; }
-    public string? Model        { get; init; }
-    public string? OsBuild      { get; init; }
-    public string? OsVersion    { get; init; }
+    public       string     DeviceID       { get; init; } = string.Empty;
+    public       string     Locale         { get; init; } = string.Empty;
+    public       string     OsName         { get; init; } = string.Empty;
+    public       string     SdkName        { get; init; } = string.Empty;
+    public       string     SdkVersion     { get; init; } = string.Empty;
+    public       string?    AppNamespace   { get; init; }
+    public       string?    Model          { get; init; }
+    public       string?    OsBuild        { get; init; }
+    public       string?    OsVersion      { get; init; }
+    public       PlatformID Platform       { get; init; }
 
 
     public DeviceDescriptor() { }
@@ -46,83 +46,42 @@ public sealed record DeviceDescriptor : BaseRecord, IDevice
     }
 
 
-    public static DeviceDescriptor Create( bool includeHwInfo, in AppVersion version )
+    public static DeviceDescriptor Create( AppVersion version, string deviceID )
     {
-        HwInfo? info = includeHwInfo
-                           ? HwInfo.Create()
-                           : default;
-
-        var device = new DeviceDescriptor
-                     {
-                         // TODO:  DeviceID       = HardwareInfo.DeviceID,
-                         SdkName = RuntimeInformation.FrameworkDescription,
-                         SdkVersion = typeof(DeviceDescriptor).GetTypeInfo()
-                                                              .Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()
-                                                             ?.InformationalVersion ?? RuntimeEnvironment.GetSystemVersion(),
-                         Model          = GetDeviceModel(),
-                         OsName         = Environment.OSVersion.VersionString,
-                         OsVersion      = Environment.OSVersion.Version.ToString(),
-                         OsBuild        = GetOsBuild(),
-                         Locale         = CultureInfo.CurrentCulture.Name,
-                         TimeZoneOffset = TimeZoneInfo.Local.BaseUtcOffset.TotalMinutes,
-                         AppVersion     = version,
-                         AppBuild = version.Build ?? GetFileVersion()
-                                       .Build,
-                         AppNamespace = Assembly.GetEntryAssembly()
-                                               ?.EntryPoint?.DeclaringType?.Namespace,
-                         HwInfo   = info,
-                         DeviceID = GetDeviceID( info )
-                     };
-
-        return device;
-    }
-    public static async ValueTask<DeviceDescriptor> CreateAsync( bool includeHwInfo, AppVersion version )
-    {
-        HwInfo? info = includeHwInfo
-                           ? await HwInfo.Create()
-                                         .ValueTaskFromResult()
-                           : default;
-
-        var device = new DeviceDescriptor
-                     {
-                         // TODO:  DeviceID       = HardwareInfo.DeviceID,
-                         SdkName = RuntimeInformation.FrameworkDescription,
-                         SdkVersion = typeof(DeviceDescriptor).GetTypeInfo()
-                                                              .Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()
-                                                             ?.InformationalVersion ?? RuntimeEnvironment.GetSystemVersion(),
-                         Model          = GetDeviceModel(),
-                         OsName         = Environment.OSVersion.VersionString,
-                         OsVersion      = Environment.OSVersion.Version.ToString(),
-                         OsBuild        = GetOsBuild(),
-                         Locale         = CultureInfo.CurrentCulture.Name,
-                         TimeZoneOffset = TimeZoneInfo.Local.BaseUtcOffset.TotalMinutes,
-                         AppVersion     = version,
-                         AppBuild = version.Build ?? GetFileVersion()
-                                       .Build,
-                         AppNamespace = Assembly.GetEntryAssembly()
-                                               ?.EntryPoint?.DeclaringType?.Namespace,
-                         HwInfo   = info,
-                         DeviceID = GetDeviceID( info )
-                     };
-
-        return device;
-    }
-
-
-    public static string GetDeviceID( HwInfo? info )
-    {
-        string? id = info?.DeviceID();
-        if (!string.IsNullOrWhiteSpace( id )) { return id; }
-
         // #if __IOS__
-        //     return UIDevice.CurrentDevice.IdentifierForVendor.AsString();
+        //     deviceID = UIDevice.CurrentDevice.IdentifierForVendor.AsString();
         // #elif __ANDROID__
-        //     return Settings.Secure.GetString(context.ContentResolver, Settings.Secure.AndroidId);
+        //         deviceID = Settings.Secure.GetString(context.ContentResolver, Settings.Secure.AndroidId);
+        // #else
+        //         deviceID = info.DeviceID();
         // #endif
-        //
-        // throw new NotImplementedException(nameof(GetDeviceID));
 
-        return string.Empty;
+
+        OperatingSystem osVersion = Environment.OSVersion;
+
+        var device = new DeviceDescriptor
+                     {
+                         // DeviceID       = HardwareInfo.DeviceID,
+                         SdkName = RuntimeInformation.FrameworkDescription,
+                         SdkVersion = typeof(DeviceDescriptor).GetTypeInfo()
+                                                              .Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()
+                                                             ?.InformationalVersion ?? RuntimeEnvironment.GetSystemVersion(),
+                         Model          = GetDeviceModel(),
+                         OsName         = osVersion.VersionString,
+                         OsVersion      = osVersion.Version.ToString(),
+                         Platform       = osVersion.Platform,
+                         OsBuild        = GetOsBuild(),
+                         Locale         = CultureInfo.CurrentCulture.Name,
+                         TimeZoneOffset = TimeZoneInfo.Local.BaseUtcOffset.TotalMinutes,
+                         AppVersion     = version,
+                         AppBuild = version.Build ?? GetFileVersion()
+                                       .Build,
+                         AppNamespace = Assembly.GetEntryAssembly()
+                                               ?.EntryPoint?.DeclaringType?.Namespace,
+                         DeviceID = deviceID
+                     };
+
+        return device;
     }
 
 
@@ -131,7 +90,7 @@ public sealed record DeviceDescriptor : BaseRecord, IDevice
         string? fileName = Assembly.GetEntryAssembly()
                                   ?.Location;
 
-        if (string.IsNullOrWhiteSpace( fileName )) { fileName = Environment.GetCommandLineArgs()[0]; }
+        if ( string.IsNullOrWhiteSpace( fileName ) ) { fileName = Environment.GetCommandLineArgs()[0]; }
 
         return FileVersionInfo.GetVersionInfo( fileName )
                               .FileVersion ?? UNKNOWN;
@@ -146,7 +105,7 @@ public sealed record DeviceDescriptor : BaseRecord, IDevice
     // }
     public static string? GetDeviceModel()
     {
-        if (RuntimeInformation.IsOSPlatform( OSPlatform.Windows )) { }
+        if ( RuntimeInformation.IsOSPlatform( OSPlatform.Windows ) ) { }
 
         return default;
     }
@@ -160,11 +119,11 @@ public sealed record DeviceDescriptor : BaseRecord, IDevice
     #elif __WINDOWS__
         using RegistryKey  localMachine = Registry.LocalMachine;
         using RegistryKey? registryKey  = localMachine.OpenSubKey( "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion" );
-        if (registryKey is null) { return default; }
+        if ( registryKey is null ) { return default; }
 
         object? obj1 = registryKey.GetValue( "CurrentMajorVersionNumber" );
 
-        if (obj1 is not null)
+        if ( obj1 is not null )
         {
             object? obj2 = registryKey.GetValue( "CurrentMinorVersionNumber", "0" );
             object? obj3 = registryKey.GetValue( "CurrentBuildNumber",        "0" );

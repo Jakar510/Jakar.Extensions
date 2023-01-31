@@ -190,10 +190,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     public static async ValueTask<LocalFile> SaveToFileAsync( string path, Stream payload, CancellationToken token )
     {
         var file = new LocalFile( path );
-
-        await file.WriteAsync( payload, token )
-                  .ConfigureAwait( false );
-
+        await file.WriteAsync( payload, token );
         return file;
     }
 
@@ -211,10 +208,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     public static async ValueTask<LocalFile> SaveToFileAsync( string path, ReadOnlyMemory<byte> payload, CancellationToken token )
     {
         var file = new LocalFile( path );
-
-        await file.WriteAsync( payload, token )
-                  .ConfigureAwait( false );
-
+        await file.WriteAsync( payload, token );
         return file;
     }
 
@@ -554,7 +548,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     // {
     //     await using FileStream file   = OpenRead();
     //     var                    stream = new MemoryStream();
-    //     await file.CopyToAsync(stream, token).ConfigureAwait(false);
+    //     await file.CopyToAsync(stream, token);
     //     return stream;
     // }
 
@@ -707,8 +701,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
         await using FileStream stream = Create();
         await using var        writer = new StreamWriter( stream, FileEncoding );
 
-        await writer.WriteAsync( payload )
-                    .ConfigureAwait( false );
+        await writer.WriteAsync( payload );
     }
     /// <summary> Write the <paramref name="payload"/> to the file. </summary>
     /// <param name="payload"> the data being written to the file </param>
@@ -725,8 +718,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
 
         await using FileStream stream = Create();
 
-        await stream.WriteAsync( payload, token )
-                    .ConfigureAwait( false );
+        await stream.WriteAsync( payload, token );
     }
     /// <summary> Write the <paramref name="payload"/> to the file. </summary>
     /// <param name="payload"> the data being written to the file </param>
@@ -743,8 +735,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
 
         await using FileStream stream = Create();
 
-        await stream.WriteAsync( payload, token )
-                    .ConfigureAwait( false );
+        await stream.WriteAsync( payload, token );
     }
     /// <summary> Write the <paramref name="payload"/> to the file. </summary>
     /// <param name="payload"> the data being written to the file </param>
@@ -760,8 +751,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
         await using FileStream stream = Create();
         await using var        writer = new StreamWriter( stream, FileEncoding );
 
-        await writer.WriteAsync( payload, token )
-                    .ConfigureAwait( false );
+        await writer.WriteAsync( payload, token );
     }
     /// <summary> Write the <paramref name="payload"/> to the file. </summary>
     /// <param name="payload"> the data being written to the file </param>
@@ -781,8 +771,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
         await payload.CopyToAsync( memory, token );
         ReadOnlyMemory<byte> data = memory.ToArray();
 
-        await WriteAsync( data, token )
-           .ConfigureAwait( false );
+        await WriteAsync( data, token );
     }
 
 
@@ -1043,8 +1032,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
         await using FileStream file   = OpenRead();
         using var              stream = new StreamReader( file, FileEncoding );
 
-        return await stream.ReadToEndAsync()
-                           .ConfigureAwait( false );
+        return await stream.ReadToEndAsync();
     }
 
 
@@ -1052,8 +1040,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     {
         using var stream = new StreamReader( OpenRead(), FileEncoding );
 
-        string content = await stream.ReadToEndAsync()
-                                     .ConfigureAwait( false );
+        string content = await stream.ReadToEndAsync();
 
         return content.FromJson<T>();
     }
@@ -1064,8 +1051,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
         await using FileStream file   = OpenRead();
         await using var        stream = new MemoryStream();
 
-        await file.CopyToAsync( stream, token )
-                  .ConfigureAwait( false );
+        await file.CopyToAsync( stream, token );
 
         return stream.ToArray();
     }
@@ -1076,8 +1062,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
         await using FileStream file   = OpenRead();
         await using var        stream = new MemoryStream();
 
-        await file.CopyToAsync( stream, token )
-                  .ConfigureAwait( false );
+        await file.CopyToAsync( stream, token );
 
         ReadOnlyMemory<byte> results = stream.ToArray();
         return results;
@@ -1089,8 +1074,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
         await using FileStream file   = OpenRead();
         var                    stream = new MemoryStream();
 
-        await file.CopyToAsync( stream, token )
-                  .ConfigureAwait( false );
+        await file.CopyToAsync( stream, token );
 
         return stream;
     }

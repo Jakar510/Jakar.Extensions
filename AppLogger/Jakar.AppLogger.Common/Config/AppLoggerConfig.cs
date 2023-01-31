@@ -3,13 +3,10 @@
 
 public sealed class AppLoggerConfig : LoggingSettings
 {
-    public AppLoggerConfig( in AppVersion version ) : base( version ) { }
-    public AppLoggerConfig( in AppVersion version, DeviceDescriptor device ) : base( version, device ) { }
-    public AppLoggerConfig( in AppVersion version, string           appName ) : base( version ) => AppName = appName;
-    public AppLoggerConfig( in AppVersion version, DeviceDescriptor device, string appName ) : base( version, device ) => AppName = appName;
+    public AppLoggerConfig( AppVersion version, string deviceID, string appName ) : base( version, DeviceDescriptor.Create( version, deviceID ) ) => AppName = appName;
 
 
-    public override async ValueTask InitAsync()
+    public override ValueTask InitAsync()
     {
         InstallID                  = Guid.Parse( Preferences.Get( nameof(InstallID), EmptyGuid ) );
         SessionID                  = Guid.Parse( Preferences.Get( nameof(SessionID), EmptyGuid ) );
@@ -27,14 +24,17 @@ public sealed class AppLoggerConfig : LoggingSettings
         IncludeRequestsOnError     = Preferences.Get( nameof(IncludeRequestsOnError),     true );
         IncludeHwInfo              = Preferences.Get( nameof(IncludeHwInfo),              true );
 
-        var device = await DeviceDescriptor.CreateAsync( IncludeHwInfo, Version );
-        SetDevice( device );
+        Device.HwInfo = IncludeHwInfo
+                            ? HwInfo.TryCreate()
+                            : default;
+
+        return default;
     }
 
 
     protected override void HandleValue<T>( T value, string propertyName )
     {
-        switch (value)
+        switch ( value )
         {
             case null:
                 Preferences.Set( propertyName, null );

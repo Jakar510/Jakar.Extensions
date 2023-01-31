@@ -50,6 +50,16 @@ public static class Tasks
     }
 
 
+    public static Task Run( this       Func<Task>                            func, CancellationToken token = default ) => Task.Run( async () => await func(),        token );
+    public static Task Run( this       Func<ValueTask>                       func, CancellationToken token = default ) => Task.Run( async () => await func(),        token );
+    public static Task<T> Run<T>( this Func<Task<T>>                         func, CancellationToken token = default ) => Task.Run( async () => await func(),        token );
+    public static Task<T> Run<T>( this Func<ValueTask<T>>                    func, CancellationToken token = default ) => Task.Run( async () => await func(),        token );
+    public static Task Run( this       Func<CancellationToken, Task>         func, CancellationToken token = default ) => Task.Run( async () => await func( token ), token );
+    public static Task Run( this       Func<CancellationToken, ValueTask>    func, CancellationToken token = default ) => Task.Run( async () => await func( token ), token );
+    public static Task<T> Run<T>( this Func<CancellationToken, Task<T>>      func, CancellationToken token = default ) => Task.Run( async () => await func( token ), token );
+    public static Task<T> Run<T>( this Func<CancellationToken, ValueTask<T>> func, CancellationToken token = default ) => Task.Run( async () => await func( token ), token );
+
+
     public static Task WhenAny( this                         IEnumerable<Task>          tasks ) => Task.WhenAny( tasks );
     public static Task<Task<TResult>> WhenAny<TResult>( this IEnumerable<Task<TResult>> tasks ) => Task.WhenAny( tasks );
     public static Task WhenAll( this                         IEnumerable<Task>          tasks ) => Task.WhenAll( tasks );

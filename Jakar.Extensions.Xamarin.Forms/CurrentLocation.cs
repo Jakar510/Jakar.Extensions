@@ -34,6 +34,8 @@ public class CurrentLocation<TID> : ICurrentLocation<TID>, IDataBaseIgnore where
     public       double?                 VerticalAccuracy        { get; init; }
     public       Guid                    InstanceID              { get; init; } = Guid.Empty;
     [Key] public TID                     ID                      { get; init; }
+
+
     public CurrentLocation() { }
     public CurrentLocation( ICurrentLocation<TID> point )
     {

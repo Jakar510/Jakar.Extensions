@@ -7,14 +7,15 @@ namespace Jakar.AppLogger.Client;
 [SuppressMessage( "ReSharper", "SuggestBaseTypeForParameter" )]
 public sealed class AppLogger : Service, IAppLogger
 {
-    private readonly MultiDeque<Log> _logs = new();
-    private readonly WebRequester    _requester;
+    private readonly        MultiDeque<Log> _logs = new();
+    private readonly        WebRequester    _requester;
+    private static readonly TimeSpan        _delay = TimeSpan.FromMilliseconds( 1 );
 
 
     public          AppLoggerOptions        Options     { get; }
     public override bool                    IsValid     => Options.IsValid && base.IsValid;
-    internal        IEnumerable<Attachment> Attachments => Options.Config.AttachmentProviders.Select( x => x.GetAttachment() );
-    public          LoggingSettings         Config      => Options.Config;
+    internal        IEnumerable<Attachment> Attachments => Config.AttachmentProviders.Select( x => x.GetAttachment() );
+    public          LoggingSettings         Config      => Options.Config ?? throw new InvalidOperationException( $"{nameof(AppLoggerOptions)}.{nameof(AppLoggerOptions.Config)} is not set" );
     internal        string                  ApiToken    => Options.APIToken;
 
 
@@ -36,15 +37,23 @@ public sealed class AppLogger : Service, IAppLogger
     }
 
 
-    public static AppLogger Create( string apiToken, string appName, AppVersion version, Uri baseHost, bool includeHwInfo = true )
+    public static AppLogger Create( string apiToken, string appName, AppVersion version, string deviceID, Uri host )
     {
     #if __WINDOWS__ || __MACOS__ || __ANDROID__ || __IOS__
-        var config = new AppLoggerConfig( version, DeviceDescriptor.Create( includeHwInfo, version ), appName );
+        var config = new AppLoggerConfig( version, deviceID, appName );
     #else
-        var config = AppLoggerIni.Create(version, appName, includeHwInfo);
+        var config = AppLoggerIni.CreateAsync( version, deviceID, appName )
+                                 .CallSynchronously();
     #endif
 
-        return new AppLogger( new AppLoggerOptions( apiToken, baseHost, config ) );
+        var options = new AppLoggerOptions
+                      {
+                          Config   = config,
+                          APIToken = apiToken,
+                          HostInfo = host
+                      };
+
+        return new AppLogger( options );
     }
 
 
@@ -98,7 +107,7 @@ public sealed class AppLogger : Service, IAppLogger
 
             await Config.InitAsync();
 
-            using ( var source = new CancellationTokenSource( TimeSpan.FromSeconds( 15 ) ) )
+            using ( var source = new CancellationTokenSource( Options.TimeOut ) )
             {
                 await using ( token.Register( source.Cancel ) ) { await StartSession( source.Token ); }
             }
@@ -106,11 +115,13 @@ public sealed class AppLogger : Service, IAppLogger
 
             if ( !Config.SessionID.IsValidID() ) { throw new ApiDisabledException( $"{nameof(LoggingSettings.SessionID)} is not set." ); }
 
+
+            // using var timer = new PeriodicTimer( _delay );
             while ( !token.IsCancellationRequested )
             {
                 if ( _logs.Remove( out Log? log ) ) { await Log( log.Update( Config ), token ); }
 
-                await Delay( 1, token );
+                await _delay.Delay( token );
             }
         }
         finally { IsAlive = false; }
@@ -191,7 +202,7 @@ public sealed class AppLogger : Service, IAppLogger
     {
         if ( logLevel is LogLevel.None ) { return false; }
 
-        return logLevel >= Options.Config.LogLevel;
+        return logLevel >= Config.LogLevel;
     }
 
 

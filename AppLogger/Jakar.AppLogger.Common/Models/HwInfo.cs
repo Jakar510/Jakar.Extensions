@@ -4,31 +4,29 @@
 namespace Jakar.AppLogger.Common;
 
 
-/// <summary>
-///     <see cref = "HwInfo" />
-///     can only be used on Windows, MacOS or Linux
-/// </summary>
+/// <summary> <see cref="HwInfo"/> can only be used on Windows, MacOS or Linux </summary>
 [SuppressMessage( "ReSharper", "HeuristicUnreachableCode" )]
-public record HwInfo
+public record HwInfo : BaseRecord
 {
-    public List<HwBattery>   BatteryList     { get; set; }
-    public List<BIOS>        BiosList        { get; set; }
-    public List<CPU>         CpuList         { get; set; }
-    public List<Drive>       DriveList       { get; set; }
-    public List<HwKeyboard>  KeyboardList    { get; set; }
-    public List<Memory>      MemoryList      { get; init; }
-    public List<HwMonitor>   MonitorList     { get; set; }
-    public List<Motherboard> MotherboardList { get; set; }
-    public List<Mouse>       MouseList       { get; set; }
-    public List<Printer>     PrinterList     { get; set; }
-    public List<SoundDevice> SoundDeviceList { get; set; }
+    private string? _deviceID;
 
-    public List<VideoController> VideoControllerList { get; set; }
+    // public List<NetworkAdapter> NetworkAdapterList { get; init; }  = new();
+    public List<HwBattery>       BatteryList         { get; init; } = new();
+    public List<BIOS>            BiosList            { get; init; } = new();
+    public List<CPU>             CpuList             { get; init; } = new();
+    public List<Drive>           DriveList           { get; init; } = new();
+    public List<HwKeyboard>      KeyboardList        { get; init; } = new();
+    public List<Memory>          MemoryList          { get; init; } = new();
+    public List<HwMonitor>       MonitorList         { get; init; } = new();
+    public List<Motherboard>     MotherboardList     { get; init; } = new();
+    public List<Mouse>           MouseList           { get; init; } = new();
+    public List<Printer>         PrinterList         { get; init; } = new();
+    public List<SoundDevice>     SoundDeviceList     { get; init; } = new();
+    public List<VideoController> VideoControllerList { get; init; } = new();
+    public MemoryStatus          MemoryStatus        { get; init; } = new();
 
-    // public List<NetworkAdapter> NetworkAdapterList { get; set; } 
-    public MemoryStatus MemoryStatus { get; set; }
 
-
+    public HwInfo() { }
     private HwInfo( IHardwareInfo hardware )
     {
         hardware.RefreshAll();
@@ -50,28 +48,37 @@ public record HwInfo
     }
 
 
-    // ReSharper disable once ReturnTypeCanBeNotNullable
-    public static HwInfo? Create()
+    public static HwInfo Create()
     {
-    #if __LINUX__ || __WINDOWS__ || __MACOS__
         var hardware = new HardwareInfo();
         return new HwInfo( hardware );
-    #else
-        return default;
-    #endif
+    }
+    public static HwInfo? TryCreate()
+    {
+        try { return Create(); }
+        catch ( Exception ) { return default; }
     }
 
-    public string? DeviceID()
+
+    public string DeviceID( string? defaultDeviceID = default )
     {
-        CPU?         cpu         = CpuList.FirstOrDefault();
-        Motherboard? motherboard = MotherboardList.FirstOrDefault();
+        if ( _deviceID is not null ) { return _deviceID; }
 
-        if (cpu is not null && motherboard is not null) { return $"{cpu.ProcessorId}|{motherboard.SerialNumber}"; }
+        string? cpu = CpuList.FirstOrDefault()
+                            ?.ProcessorId;
 
-        if (motherboard is not null) { return $"{motherboard.SerialNumber}"; }
+        string? motherboard = MotherboardList.FirstOrDefault()
+                                            ?.SerialNumber;
 
-        if (cpu is not null) { return $"{cpu.ProcessorId}"; }
 
-        return default;
+        _deviceID = cpu is not null && motherboard is not null
+                        ? $"{cpu}|{motherboard}"
+                        : motherboard is not null
+                            ? $"{motherboard}"
+                            : cpu is not null
+                                ? $"{cpu}"
+                                : defaultDeviceID ?? throw new ArgumentNullException( nameof(defaultDeviceID) );
+
+        return _deviceID;
     }
 }

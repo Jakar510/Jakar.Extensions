@@ -4,48 +4,48 @@
 namespace Jakar.AppLogger.Client;
 
 
-public sealed class AppLoggerOptions : BaseHostViewModel, IOptions<AppLoggerOptions>, IValidator, IHostInfo
+public sealed record AppLoggerOptions : IOptions<AppLoggerOptions>, IValidator, IHostInfo
 {
-    private         LoggingSettings _config   = DefaultConfig;
-    private         string          _apiToken = string.Empty;
-    internal static AppLoggerConfig DefaultConfig { get; } = new(default);
+    private static readonly Uri _defaultUri = new("http://localhost:6969");
+
+    AppLoggerOptions IOptions<AppLoggerOptions>.Value    => this;
+    public bool                                 IsValid  => !string.IsNullOrWhiteSpace( APIToken ) && !string.IsNullOrWhiteSpace( Config?.AppName ) && ReferenceEquals( HostInfo, _defaultUri );
+    public LoggingSettings?                     Config   { get; set; }
+    public string                               APIToken { get; set; } = string.Empty;
+    public TimeSpan                             TimeOut  { get; set; } = TimeSpan.FromSeconds( 15 );
+    public Uri                                  HostInfo { get; set; } = _defaultUri;
 
 
-    AppLoggerOptions IOptions<AppLoggerOptions>.Value   => this;
-    public bool                                 IsValid => !string.IsNullOrWhiteSpace( APIToken ) && !string.IsNullOrWhiteSpace( _config.AppName ) && !ReferenceEquals( Config, DefaultConfig );
-    public LoggingSettings Config
+    public AppLoggerOptions() { }
+
+
+    public void Init( AppVersion version, string appName, string deviceID ) =>
+        InitAsync( version, appName, deviceID )
+           .CallSynchronously();
+    public async ValueTask InitAsync( AppVersion version, string appName, string deviceID )
     {
-        get
-        {
-            lock (this) { return _config; }
-        }
-        set
-        {
-            lock (this) { SetProperty( ref _config, value ); }
-        }
+    #if __WINDOWS__ || __MACOS__ || __ANDROID__ || __IOS__
+        var config = new AppLoggerConfig( version, deviceID, appName )
+                     {
+                         AppName = appName
+                     };
+
+    #elif __LINUX__
+            var config = await AppLoggerIni.CreateAsync(version, deviceID, appName, Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), appName));
+
+    #elif __WINDOWS__
+            var  config = await AppLoggerIni.CreateAsync(version, deviceID, appName, Environment.ExpandEnvironmentVariables($"%APPDATA%/{appName}"));
+
+    #elif __MACOS__
+            var  config = await AppLoggerIni.CreateAsync(version, deviceID, appName, $"~/Library/{appName}");
+
+    #else
+        var config = await AppLoggerIni.CreateAsync( version, deviceID, appName, LocalDirectory.CurrentDirectory );
+
+    #endif
+
+        Config = config;
     }
-
-
-    public string APIToken
-    {
-        get
-        {
-            lock (this) { return _apiToken; }
-        }
-        set
-        {
-            lock (this) { SetProperty( ref _apiToken, value ); }
-        }
-    }
-
-
-    public AppLoggerOptions() : base( new Uri( "https://localhost:6969" ) ) { }
-    public AppLoggerOptions( string apiToken, Uri baseHost, LoggingSettings settings ) : base( baseHost )
-    {
-        APIToken = apiToken;
-        Config   = settings;
-    }
-
 
     internal WebRequester CreateWebRequester() => WebRequester.Builder.Create( this )
                                                               .Build();

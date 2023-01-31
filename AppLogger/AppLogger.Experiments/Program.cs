@@ -7,7 +7,7 @@ using Jakar.Extensions;
 
 
 #nullable enable
-namespace Console.Experiments;
+namespace AppLogger.Experiments;
 
 
 public enum Page

@@ -11,7 +11,7 @@ using Jakar.Extensions;
 
 
 
-namespace Console.Experiments;
+namespace AppLogger.Experiments;
 
 
 /*

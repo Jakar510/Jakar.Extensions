@@ -20,7 +20,6 @@ public class OrientationService
     //public static bool IsPhone { get; } = DeviceInfo.Idiom == DeviceIdiom.Phone;
 
     public OrientationService() : this( SIZE_NOT_ALLOCATED, SIZE_NOT_ALLOCATED ) { }
-
     public OrientationService( in double width, in double height )
     {
         _Width  = width;

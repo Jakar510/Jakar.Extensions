@@ -26,10 +26,8 @@ public abstract class BaseFileSystemApi : IFilePaths
     public string GetCacheDataPath( string fileName ) => Path.Combine( _CacheDirectory,   fileName );
 
 
-    public async ValueTask<LocalFile?> SaveFileAsync( string filename, Stream stream, CancellationToken token ) => await LocalFile.SaveToFileAsync( GetCacheDataPath( filename ), stream, token )
-                                                                                                                                  .ConfigureAwait( false );
-    public async ValueTask<LocalFile?> SaveFileAsync( string filename, byte[] payload, CancellationToken token ) => await LocalFile.SaveToFileAsync( GetCacheDataPath( filename ), payload, token )
-                                                                                                                                   .ConfigureAwait( false );
+    public ValueTask<LocalFile> SaveFileAsync( string filename, Stream stream,  CancellationToken token ) => LocalFile.SaveToFileAsync( GetCacheDataPath( filename ), stream,  token );
+    public ValueTask<LocalFile> SaveFileAsync( string filename, byte[] payload, CancellationToken token ) => LocalFile.SaveToFileAsync( GetCacheDataPath( filename ), payload, token );
 
 
     public void CreateZipCache()

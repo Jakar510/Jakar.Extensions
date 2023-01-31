@@ -27,8 +27,7 @@ public abstract class ApiServices<TDebug, TPrompts, TAppSettings, TFileSystem, T
         Debug      = debug ?? throw new ArgumentNullException( nameof(debug) );
         Loading    = new Commands( Prompts );
 
-        Task.Run( () => Debug.InitAsync( app_center_id, appCenterServices ) )
-            .Wait();
+        Task.Run( () => Debug.InitAsync( app_center_id, appCenterServices ) );
     }
 }
 
@@ -61,8 +60,7 @@ public abstract class ApiServices<TDebug, TPrompts, TAppSettings, TFileSystem, T
         Debug      = debug ?? throw new ArgumentNullException( nameof(debug) );
         Loading    = new Commands( Prompts );
 
-        Task.Run( () => Debug.InitAsync( app_center_id, appCenterServices ) )
-            .Wait();
+        Task.Run( () => Debug.InitAsync( app_center_id, appCenterServices ) );
     }
 }
 
