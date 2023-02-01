@@ -162,24 +162,7 @@ public abstract class LoggingSettings : ObservableClass, IScopeID, ISessionID, I
                                                                             [nameof(DateTime)]                     = DateTimeOffset.UtcNow
                                                                         }
                                                                       : default;
-    public static async ValueTask<byte[]?> TakeScreenshot()
-    {
-        if ( !Screenshot.IsCaptureSupported ) { return default; }
-
-        await using var target = new MemoryStream();
-
-    #if NETSTANDARD2_1
-        ScreenshotResult result = await Screenshot.CaptureAsync();
-        await using Stream stream = await result.OpenReadAsync();
-        await stream.CopyToAsync( target );
-
-    #else
-        IScreenshotResult result = await Screenshot.CaptureAsync();
-        await result.CopyToAsync( target );
-
-    #endif
-        return target.ToArray();
-    }
+    public abstract ValueTask<byte[]?> TakeScreenshot();
 
 
     protected internal LoggingSettings SetScope( IScope scope )
@@ -199,5 +182,7 @@ public abstract class LoggingSettings : ObservableClass, IScopeID, ISessionID, I
         _scope = default;
 
         foreach ( IAttachmentProvider provider in AttachmentProviders ) { await provider.DisposeAsync(); }
+
+        GC.SuppressFinalize( this );
     }
 }

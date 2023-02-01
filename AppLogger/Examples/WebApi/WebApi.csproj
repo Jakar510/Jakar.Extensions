@@ -13,8 +13,4 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\Jakar.AppLogger.Client\Jakar.AppLogger.Client.csproj" />
-  </ItemGroup>
-
 </Project>

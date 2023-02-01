@@ -5,7 +5,7 @@ VisualStudioVersion = 17.0.32126.317
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppLogger.Experiments", "AppLogger.Experiments\AppLogger.Experiments.csproj", "{3FAB8906-E295-47C5-9568-55A5F845E0EF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jakar.AppLogger.Client", "Jakar.AppLogger.Client\Jakar.AppLogger.Client.csproj", "{D25E8D3D-67BC-481C-8642-1A52A09C71CF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jakar.AppLogger.Client.Maui", "Jakar.AppLogger.Client.Maui\Jakar.AppLogger.Client.Maui.csproj", "{D25E8D3D-67BC-481C-8642-1A52A09C71CF}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jakar.AppLogger.Common", "Jakar.AppLogger.Common\Jakar.AppLogger.Common.csproj", "{E729E4AA-CAB5-4292-B512-B561EA4AED3D}"
 EndProject
@@ -28,12 +28,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wpf", "Examples\Wpf\Wpf.csproj", "{3D8F04A6-666B-4E36-93BD-F6F6635DA01B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WinForms", "Examples\WinForms\WinForms.csproj", "{9CC22C6E-34AD-4E9E-8F74-6D387C95B24B}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XamarinForms.Android", "Examples\XamarinForms\XamarinForms.Android\XamarinForms.Android.csproj", "{57DCA8D7-B9D4-4C98-B54F-609D18ED5871}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XamarinForms.iOS", "Examples\XamarinForms\XamarinForms.iOS\XamarinForms.iOS.csproj", "{0B8F1EBE-8128-4584-9CA6-E4D7D6CB5C49}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XamarinForms", "Examples\XamarinForms\XamarinForms\XamarinForms.csproj", "{F1DA0D7C-E4C2-45DD-9F4B-3C98F42EDB56}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorWASM", "Examples\BlazorWASM\BlazorWASM.csproj", "{FEF0E90D-C2B7-4886-8C71-A7CDFF7106FE}"
 EndProject
