@@ -14,7 +14,7 @@ public sealed class Debug : ObservableClass
 
 
     public   Guid      InstallID => _logger.Config.InstallID;
-    internal LocalFile FeedBack  => _fileSystemApi.FeedBackFileName;
+    internal LocalFile FeedBack  => _fileSystemApi.FeedBackFile;
     public object? AppState
     {
         get => _appState;
@@ -57,14 +57,14 @@ public sealed class Debug : ObservableClass
     }
     public async Task SaveFeedBack( object? feedback )
     {
-        if (feedback is null) { FeedBack.Delete(); }
+        if ( feedback is null ) { FeedBack.Delete(); }
         else { await FeedBack.WriteAsync( feedback.ToPrettyJson() ); }
     }
 
 
     public void TrackError( Exception e )
     {
-        if (!_logger.Config.IncludeAppStateOnError)
+        if ( !_logger.Config.IncludeAppStateOnError )
         {
             TrackError( e, default );
             return;
@@ -73,7 +73,7 @@ public sealed class Debug : ObservableClass
 
         e.Details( out Dictionary<string, string?> dict );
         var eventDetails = new Dictionary<string, JToken?>();
-        foreach ((string? key, string? value) in dict) { eventDetails.Add( key, value ); }
+        foreach ( (string? key, string? value) in dict ) { eventDetails.Add( key, value ); }
 
         TrackError( e, eventDetails );
     }
@@ -81,7 +81,7 @@ public sealed class Debug : ObservableClass
     {
         List<Attachment> attachments = GetAttachments( ex, eventDetails );
 
-        if (FeedBack.Exists) { attachments.Add( Attachment.Create( FeedBack ) ); }
+        if ( FeedBack.Exists ) { attachments.Add( Attachment.Create( FeedBack ) ); }
 
         _logger.TrackError( ex, eventDetails, attachments );
         ScreenShot = default;
@@ -90,7 +90,7 @@ public sealed class Debug : ObservableClass
     {
         List<Attachment> attachments = GetAttachments( ex, eventDetails );
 
-        if (FeedBack.Exists) { attachments.Add( await Attachment.CreateAsync( FeedBack ) ); }
+        if ( FeedBack.Exists ) { attachments.Add( await Attachment.CreateAsync( FeedBack ) ); }
 
         _logger.TrackError( ex, eventDetails, attachments );
         ScreenShot = default;
@@ -105,20 +105,20 @@ public sealed class Debug : ObservableClass
                           };
 
 
-        if (_logger.Config.IncludeAppStateOnError && AppState is not null) { attachments.Add( Attachment.Create( AppState.ToPrettyJson(), _fileSystemApi.AppStateFileName ) ); }
+        if ( _logger.Config.IncludeAppStateOnError && AppState is not null ) { attachments.Add( Attachment.Create( AppState.ToPrettyJson(), _fileSystemApi.AppStateFile.Name ) ); }
 
-        if (_logger.Config.IncludeEventDetailsOnError && eventDetails is not null) { attachments.Add( Attachment.Create( eventDetails.ToPrettyJson(), _fileSystemApi.DebugFileName ) ); }
+        if ( _logger.Config.IncludeEventDetailsOnError && eventDetails is not null ) { attachments.Add( Attachment.Create( eventDetails.ToPrettyJson(), _fileSystemApi.DebugFile.Name ) ); }
 
 
-        if (_logger.Config.IncludeRequestsOnError)
+        if ( _logger.Config.IncludeRequestsOnError )
         {
-            if (Incoming is not null) { attachments.Add( Attachment.Create( Incoming.ToPrettyJson(), _fileSystemApi.IncomingFileName ) ); }
+            if ( Incoming is not null ) { attachments.Add( Attachment.Create( Incoming.ToPrettyJson(), _fileSystemApi.IncomingFile.Name ) ); }
 
-            if (Outgoing is not null) { attachments.Add( Attachment.Create( Outgoing.ToPrettyJson(), _fileSystemApi.OutgoingFileName ) ); }
+            if ( Outgoing is not null ) { attachments.Add( Attachment.Create( Outgoing.ToPrettyJson(), _fileSystemApi.OutgoingFile.Name ) ); }
         }
 
 
-        if (_logger.Config.TakeScreenshotOnError && !ScreenShot.IsEmpty) { attachments.Add( Attachment.Create( ScreenShot, "ScreenShot.jpeg", "image/jpeg" ) ); }
+        if ( _logger.Config.TakeScreenshotOnError && !ScreenShot.IsEmpty ) { attachments.Add( Attachment.Create( ScreenShot, "ScreenShot.jpeg", "image/jpeg" ) ); }
 
         return attachments;
     }

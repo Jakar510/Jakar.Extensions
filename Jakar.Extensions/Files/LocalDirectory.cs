@@ -494,6 +494,8 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
 
             dir.DeleteFiles();
         }
+
+        foreach ( LocalFile file in GetFiles() ) { file.Delete(); }
     }
 
 

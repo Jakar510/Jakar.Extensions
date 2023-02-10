@@ -7,6 +7,51 @@ namespace Jakar.Extensions.Xamarin.Forms;
 
 public static class AppPermissions
 {
+    public static async ValueTask<PermissionStatus> CalendarReadPermission() => await CheckAndRequestPermissionAsync( new Permissions.CalendarRead() )
+                                                                                   ;
+    public static async ValueTask<PermissionStatus> CalendarWritePermission() => await CheckAndRequestPermissionAsync( new Permissions.CalendarWrite() )
+                                                                                    ;
+    public static async ValueTask<PermissionStatus> CameraPermission() => await CheckAndRequestPermissionAsync( new Permissions.Camera() )
+                                                                             ;
+    public static async ValueTask<PermissionStatus> ContactsReadPermission() => await CheckAndRequestPermissionAsync( new Permissions.ContactsRead() )
+                                                                                   ;
+    public static async ValueTask<PermissionStatus> ContactsWritePermission() => await CheckAndRequestPermissionAsync( new Permissions.ContactsWrite() )
+                                                                                    ;
+    public static async ValueTask<PermissionStatus> LocationAlwaysPermission() => await CheckAndRequestPermissionAsync( new Permissions.LocationAlways() )
+                                                                                     ;
+    public static async ValueTask<PermissionStatus> LocationWhenInUsePermission() => await CheckAndRequestPermissionAsync( new Permissions.LocationWhenInUse() )
+                                                                                        ;
+    public static async ValueTask<PermissionStatus> MediaLibraryPermission() => await CheckAndRequestPermissionAsync( new Permissions.Media() )
+                                                                                   ;
+    public static async ValueTask<PermissionStatus> MicrophonePermission() => await CheckAndRequestPermissionAsync( new Permissions.Microphone() )
+                                                                                 ;
+    public static async ValueTask<PermissionStatus> PhonePermission() => await CheckAndRequestPermissionAsync( new Permissions.Phone() )
+                                                                            ;
+    public static async ValueTask<PermissionStatus> PhotosPermission() => await CheckAndRequestPermissionAsync( new Permissions.Photos() )
+                                                                             ;
+    public static async ValueTask<PermissionStatus> RemindersPermission() => await CheckAndRequestPermissionAsync( new Permissions.Reminders() )
+                                                                                ;
+    public static async ValueTask<PermissionStatus> SensorsPermission() => await CheckAndRequestPermissionAsync( new Permissions.Sensors() )
+                                                                              ;
+    public static async ValueTask<PermissionStatus> SmsPermission() => await CheckAndRequestPermissionAsync( new Permissions.Sms() )
+                                                                          ;
+    public static async ValueTask<PermissionStatus> SpeechPermission() => await CheckAndRequestPermissionAsync( new Permissions.Speech() )
+                                                                             ;
+    public static async ValueTask<PermissionStatus> StorageReadPermission() => await CheckAndRequestPermissionAsync( new Permissions.StorageRead() )
+                                                                                  ;
+    public static async ValueTask<PermissionStatus> StorageWritePermission() => await CheckAndRequestPermissionAsync( new Permissions.StorageWrite() )
+                                                                                   ;
+    
+    
+    private static async ValueTask<PermissionStatus> CheckAndRequestPermissionAsync<T>( T permission ) where T : Permissions.BasePermission, new()
+    {
+        PermissionStatus status = await permission.CheckStatusAsync();
+        if ( status != PermissionStatus.Granted ) { status = await permission.RequestAsync(); }
+
+        return status;
+    }
+
+
     public static T? Handle<T>( PermissionStatus status, Func<T>? denial, Func<T>? granted, Func<T>? unknown ) =>
         status switch
         {
@@ -26,7 +71,6 @@ public static class AppPermissions
             PermissionStatus.Restricted => default,
             _                           => throw new ArgumentOutOfRangeException( nameof(status), status, null ),
         };
-
     public static async ValueTask Handle( PermissionStatus status, Func<ValueTask>? denial, Func<ValueTask>? granted, Func<ValueTask>? unknown )
     {
         switch ( status )
@@ -36,7 +80,7 @@ public static class AppPermissions
 
             case PermissionStatus.Granted:
                 await granted()
-                   .ConfigureAwait( false );
+                   ;
 
                 break;
 
@@ -45,7 +89,7 @@ public static class AppPermissions
 
             case PermissionStatus.Unknown:
                 await unknown()
-                   .ConfigureAwait( false );
+                   ;
 
                 break;
 
@@ -53,7 +97,7 @@ public static class AppPermissions
                 if ( denial is null ) { return; }
 
                 await denial()
-                   .ConfigureAwait( false );
+                   ;
 
                 break;
 
@@ -64,74 +108,26 @@ public static class AppPermissions
             default: throw new ArgumentOutOfRangeException( nameof(status), status, null );
         }
     }
-    public static async ValueTask<PermissionStatus> CalendarReadPermission() => await CheckAndRequestPermissionAsync( new Permissions.CalendarRead() )
-                                                                                   .ConfigureAwait( false );
-    public static async ValueTask<PermissionStatus> CalendarWritePermission() => await CheckAndRequestPermissionAsync( new Permissions.CalendarWrite() )
-                                                                                    .ConfigureAwait( false );
-    public static async ValueTask<PermissionStatus> CameraPermission() => await CheckAndRequestPermissionAsync( new Permissions.Camera() )
-                                                                             .ConfigureAwait( false );
-    private static async ValueTask<PermissionStatus> CheckAndRequestPermissionAsync<T>( T permission ) where T : Permissions.BasePermission, new()
-    {
-        PermissionStatus status = await permission.CheckStatusAsync()
-                                                  .ConfigureAwait( false );
-
-        if ( status != PermissionStatus.Granted )
-        {
-            status = await permission.RequestAsync()
-                                     .ConfigureAwait( false );
-        }
-
-        return status;
-    }
-    public static async ValueTask<PermissionStatus> ContactsReadPermission() => await CheckAndRequestPermissionAsync( new Permissions.ContactsRead() )
-                                                                                   .ConfigureAwait( false );
-    public static async ValueTask<PermissionStatus> ContactsWritePermission() => await CheckAndRequestPermissionAsync( new Permissions.ContactsWrite() )
-                                                                                    .ConfigureAwait( false );
-    public static async ValueTask<PermissionStatus> LocationAlwaysPermission() => await CheckAndRequestPermissionAsync( new Permissions.LocationAlways() )
-                                                                                     .ConfigureAwait( false );
-    public static async ValueTask<PermissionStatus> LocationWhenInUsePermission() => await CheckAndRequestPermissionAsync( new Permissions.LocationWhenInUse() )
-                                                                                        .ConfigureAwait( false );
-    public static async ValueTask<PermissionStatus> MediaLibraryPermission() => await CheckAndRequestPermissionAsync( new Permissions.Media() )
-                                                                                   .ConfigureAwait( false );
-    public static async ValueTask<PermissionStatus> MicrophonePermission() => await CheckAndRequestPermissionAsync( new Permissions.Microphone() )
-                                                                                 .ConfigureAwait( false );
-    public static async ValueTask<PermissionStatus> PhonePermission() => await CheckAndRequestPermissionAsync( new Permissions.Phone() )
-                                                                            .ConfigureAwait( false );
-    public static async ValueTask<PermissionStatus> PhotosPermission() => await CheckAndRequestPermissionAsync( new Permissions.Photos() )
-                                                                             .ConfigureAwait( false );
-    public static async ValueTask<PermissionStatus> RemindersPermission() => await CheckAndRequestPermissionAsync( new Permissions.Reminders() )
-                                                                                .ConfigureAwait( false );
-    public static async ValueTask<PermissionStatus> SensorsPermission() => await CheckAndRequestPermissionAsync( new Permissions.Sensors() )
-                                                                              .ConfigureAwait( false );
-    public static async ValueTask<PermissionStatus> SmsPermission() => await CheckAndRequestPermissionAsync( new Permissions.Sms() )
-                                                                          .ConfigureAwait( false );
-    public static async ValueTask<PermissionStatus> SpeechPermission() => await CheckAndRequestPermissionAsync( new Permissions.Speech() )
-                                                                             .ConfigureAwait( false );
-    public static async ValueTask<PermissionStatus> StorageReadPermission() => await CheckAndRequestPermissionAsync( new Permissions.StorageRead() )
-                                                                                  .ConfigureAwait( false );
-    public static async ValueTask<PermissionStatus> StorageWritePermission() => await CheckAndRequestPermissionAsync( new Permissions.StorageWrite() )
-                                                                                   .ConfigureAwait( false );
     public static async ValueTask<T?> Handle<T>( PermissionStatus status, Func<ValueTask<T>>? denial, Func<ValueTask<T>>? granted, Func<ValueTask<T>>? unknown ) =>
         status switch
         {
             //Query permission
             PermissionStatus.Granted when granted is null => default,
             PermissionStatus.Granted => await granted()
-                                           .ConfigureAwait( false ),
+                                           ,
 
             //Permission denied
             PermissionStatus.Denied when denial is null => default,
             PermissionStatus.Denied => await denial()
-                                          .ConfigureAwait( false ),
+                                          ,
 
             //Permission denied
             PermissionStatus.Unknown when unknown is null => default,
             PermissionStatus.Unknown => await unknown()
-                                           .ConfigureAwait( false ),
+                                           ,
 
             _ => default,
         };
-
     public static void Handle( PermissionStatus status, Action? denial, Action? granted, Action? unknown )
     {
         switch ( status )

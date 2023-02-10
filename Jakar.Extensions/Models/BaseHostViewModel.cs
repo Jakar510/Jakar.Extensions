@@ -35,29 +35,39 @@ public abstract class BaseHostViewModel : BaseViewModel, IHostViewModel
         {
             if ( !SetProperty( ref _host, value ) ) { return; }
 
-            IsValidHost = Uri.TryCreate( value, UriKind.Absolute, out _hostInfo );
+            IsValidHost = Uri.TryCreate( value, UriKind.Absolute, out _hostInfo ) && ValidateUri( _hostInfo );
             OnPropertyChanged( nameof(HostInfo) );
             OnHostChanged( value, IsValidHost, _hostInfo );
         }
     }
     public Uri HostInfo
     {
-        get => _hostInfo ?? _defaultHostInfo;
+        get
+        {
+            if ( _hostInfo is null ) { Host = _defaultHostInfo.OriginalString; }
+
+            return _hostInfo ?? throw new NullReferenceException( nameof(_hostInfo) );
+        }
         set
         {
-            if ( SetProperty( ref _hostInfo, value ) ) { Host = value.ToString(); }
+            if ( !SetProperty( ref _hostInfo, value ) ) { return; }
+
+            Host = value.OriginalString;
         }
     }
 
 
-    protected BaseHostViewModel( Uri hostInfo ) : this( hostInfo, hostInfo ) { }
-    protected BaseHostViewModel( Uri hostInfo, Uri defaultHostInfo )
+    protected BaseHostViewModel( Uri defaultHostInfo ) : this( default, defaultHostInfo ) { }
+    protected BaseHostViewModel( Uri? hostInfo, Uri defaultHostInfo )
     {
         _defaultHostInfo = defaultHostInfo;
-        Host             = hostInfo.OriginalString;
+        Host             = hostInfo?.OriginalString;
     }
 
 
-    [SuppressMessage( "ReSharper", "UnusedParameter.Global" )] protected virtual void OnHostChanged( in string? host, in bool isValid, in Uri? hostInfo ) { }
+    protected virtual bool ValidateUri( Uri hostInfo ) => hostInfo.Scheme.StartsWith( "http", StringComparison.OrdinalIgnoreCase );
+    
+    protected abstract void OnHostChanged( in string? host, in bool isValid, in Uri? hostInfo );
+    
     public virtual void Reset() => Host = _defaultHostInfo.OriginalString;
 }

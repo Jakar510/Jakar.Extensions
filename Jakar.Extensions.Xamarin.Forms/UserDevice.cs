@@ -2,7 +2,7 @@
 namespace Jakar.Extensions.Xamarin.Forms;
 
 
-public interface IUserDevice<TID> : IEquatable<IUserDevice<TID>>, IUniqueID<TID> where TID : struct, IComparable<TID>, IEquatable<TID>
+public interface IUserDevice<TID> : IEquatable<IUserDevice<TID>>, IUniqueID<TID> where TID : IComparable<TID>, IEquatable<TID>
 {
     public DateTime TimeStamp { get; }
     public Guid     DeviceID  { get; }
@@ -40,7 +40,7 @@ public interface IUserDevice<TID> : IEquatable<IUserDevice<TID>>, IUniqueID<TID>
 
 /// <summary> Debug and/or identify info for IT </summary>
 [Serializable]
-public class UserDevice<TID> : ObservableClass, IUserDevice<TID> where TID : struct, IComparable<TID>, IEquatable<TID>
+public class UserDevice<TID> : ObservableClass, IUserDevice<TID> where TID : IComparable<TID>, IEquatable<TID>
 {
     private string?  _ip;
     public  DateTime TimeStamp    { get; init; }
@@ -64,6 +64,7 @@ public class UserDevice<TID> : ObservableClass, IUserDevice<TID> where TID : str
 
 
     public UserDevice() { }
+
     // ReSharper disable once NullableWarningSuppressionIsUsed
     public UserDevice( string model, string manufacturer, string deviceName, DeviceType deviceType, DeviceIdiom idiom, DevicePlatform platform, AppVersion osVersion, Guid? deviceID, TID id = default! )
     {
@@ -78,6 +79,7 @@ public class UserDevice<TID> : ObservableClass, IUserDevice<TID> where TID : str
         TimeStamp    = DateTime.UtcNow;
         ID           = id;
     }
+
     // ReSharper disable once NullableWarningSuppressionIsUsed
     public UserDevice( IUserDevice<TID> device, TID id = default! )
     {

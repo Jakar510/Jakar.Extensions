@@ -1,0 +1,72 @@
+{
+  "id": "f2a4f586-ddf6-4f34-b2c4-6887bd0605cf",
+  "name": "My Visual Studio extensions",
+  "description": "A collection of my Visual Studio extensions",
+  "version": "1.0",
+  "extensions": [
+    {
+      "name": "Advanced Installer for Visual Studio 2022",
+      "vsixId": "Caphyon.AdvancedInstaller.8ce74dd8-0586-4ec3-ba1d-ff35fefaa4d7"
+    },
+    {
+      "name": "Blazor Desktop Templates",
+      "vsixId": "BlazorTemplates.316c4442-1dec-424e-9a59-e9c637daede6"
+    },
+    {
+      "name": "Bootstrap Blazor Project Template",
+      "vsixId": "BootstrapBlazorVsix.c821b4dc-2e1f-4784-98da-16692643a224"
+    },
+    {
+      "name": "Extension Manager 2022",
+      "vsixId": "4a196712-2c3f-4730-ad1d-e7cda4185eb3"
+    },
+    {
+      "name": "HTML Snippet Pack",
+      "vsixId": "7f30a50b-8211-40cf-b881-bd1eb2866478"
+    },
+    {
+      "name": "Live Share 2022",
+      "vsixId": "Microsoft.VisualStudio.LiveShare.2022"
+    },
+    {
+      "name": "Markdown Editor v2",
+      "vsixId": "MarkdownEditor2022.2347dc70-1875-4775-bf48-f2b9fdfee8d4"
+    },
+    {
+      "name": "Microsoft Visual Studio Installer Projects 2022",
+      "vsixId": "VSInstallerProjects2022"
+    },
+    {
+      "name": "ML.NET Model Builder 2022",
+      "vsixId": "A274A0E2-E41E-40CC-A694-8D5D14BBD2D0"
+    },
+    {
+      "name": "Project Reunion",
+      "vsixId": "Microsoft.ProjectReunion"
+    },
+    {
+      "name": "ResXManager",
+      "vsixId": "43b35fe0-1f30-48de-887a-68256474202a"
+    },
+    {
+      "name": "Single-project MSIX Packaging Tools for VS 2022",
+      "vsixId": "Microsoft.SingleProjectMSIXPackagingTools.Dev17"
+    },
+    {
+      "name": "Template Studio for WinUI (C#)",
+      "vsixId": "TemplateStudioForWinUICs.843dd154-7a62-4aab-8482-1ce4c73cb580"
+    },
+    {
+      "name": "Template Studio for WPF",
+      "vsixId": "TemplateStudioForWPF.f4e060e0-bdf6-4ed0-9924-983506ec9862"
+    },
+    {
+      "name": "Visual Studio Theme Pack",
+      "vsixId": "VisualStudioThemePack.453e3fa1-2e0e-467e-abbd-1d08fe6468d1"
+    },
+    {
+      "name": "VSColorOutput64",
+      "vsixId": "65dd734b-180a-4c67-b245-56de889637e1"
+    }
+  ]
+}

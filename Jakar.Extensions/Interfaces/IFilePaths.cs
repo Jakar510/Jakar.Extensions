@@ -4,12 +4,14 @@ namespace Jakar.Extensions;
 
 public interface IFilePaths
 {
-    public string AccountsFileName { get; }
-    public string AppStateFileName { get; }
-    public string DebugFileName    { get; }
-    public string FeedBackFileName { get; }
-    public string IncomingFileName { get; }
-    public string OutgoingFileName { get; }
-    public string ScreenShot       { get; }
-    public string ZipFileName      { get; }
+    public LocalDirectory AppDataDirectory { get; }
+    public LocalDirectory CacheDirectory   { get; }
+    public LocalFile      AccountsFile     { get; }
+    public LocalFile      AppStateFile     { get; }
+    public LocalFile      DebugFile        { get; }
+    public LocalFile      FeedBackFile     { get; }
+    public LocalFile      IncomingFile     { get; }
+    public LocalFile      OutgoingFile     { get; }
+    public LocalFile      ZipFile          { get; }
+    public LocalFile      ScreenShot       { get; }
 }

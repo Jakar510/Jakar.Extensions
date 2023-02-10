@@ -8,6 +8,7 @@ using Microsoft.AppCenter.Crashes;
 namespace Jakar.Extensions.Xamarin.Forms;
 
 
+[Obsolete]
 public class Debug : ObservableClass
 {
     protected readonly BaseFileSystemApi  _fileSystemApi;
@@ -55,8 +56,8 @@ public class Debug : ObservableClass
         _fileSystemApi = api;
         _settings      = settings;
         _appName       = appName;
-        _appStateFile  = new LocalFile( _fileSystemApi.AppStateFileName );
-        _feedBackFile  = new LocalFile( _fileSystemApi.FeedBackFileName );
+        _appStateFile  = _fileSystemApi.AppStateFile;
+        _feedBackFile  = _fileSystemApi.FeedBackFile;
     }
 
 
@@ -75,7 +76,7 @@ public class Debug : ObservableClass
         ThrowIfNotEnabled();
 
         ReadOnlyMemory<byte> screenShot = _DebugSettings.TakeScreenshotOnError
-                                              ? await AppShare.TakeScreenShot()
+                                              ? await AppDebug.TakeScreenShot()
                                               : default;
 
         await TrackError( e, screenShot );
@@ -174,26 +175,26 @@ public class Debug : ObservableClass
         {
             if ( exceptionDetails is not null )
             {
-                ErrorAttachmentLog? state = ErrorAttachmentLog.AttachmentWithText( exceptionDetails.ToPrettyJson(), _fileSystemApi.AppStateFileName );
+                ErrorAttachmentLog? state = ErrorAttachmentLog.AttachmentWithText( exceptionDetails.ToPrettyJson(), _fileSystemApi.AppStateFile.Name );
                 attachments.Add( state );
             }
 
             if ( eventDetails is not null )
             {
-                ErrorAttachmentLog? debug = ErrorAttachmentLog.AttachmentWithText( eventDetails.ToPrettyJson(), _fileSystemApi.DebugFileName );
+                ErrorAttachmentLog? debug = ErrorAttachmentLog.AttachmentWithText( eventDetails.ToPrettyJson(), _fileSystemApi.DebugFile.Name );
                 attachments.Add( debug );
             }
 
 
             if ( !string.IsNullOrWhiteSpace( incomingText ) )
             {
-                ErrorAttachmentLog incoming = ErrorAttachmentLog.AttachmentWithText( incomingText.ToPrettyJson(), _fileSystemApi.IncomingFileName );
+                ErrorAttachmentLog incoming = ErrorAttachmentLog.AttachmentWithText( incomingText.ToPrettyJson(), _fileSystemApi.IncomingFile.Name );
                 attachments.Add( incoming );
             }
 
             if ( !string.IsNullOrWhiteSpace( outgoingText ) )
             {
-                ErrorAttachmentLog outgoing = ErrorAttachmentLog.AttachmentWithText( outgoingText.ToPrettyJson(), _fileSystemApi.OutgoingFileName );
+                ErrorAttachmentLog outgoing = ErrorAttachmentLog.AttachmentWithText( outgoingText.ToPrettyJson(), _fileSystemApi.OutgoingFile.Name );
                 attachments.Add( outgoing );
             }
         }

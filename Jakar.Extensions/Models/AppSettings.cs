@@ -8,7 +8,7 @@ public interface IAppSettings : IHostViewModel
     public Guid       DeviceID          { get; set; }
     public string     AppName           { get; }
     public string     DeviceVersion     { get; }
-    public string?    ScreenShotAddress { get; set; }
+    public LocalFile? ScreenShotAddress { get; set; }
 }
 
 
@@ -27,7 +27,7 @@ public class AppSettings : BaseHostViewModel, IAppSettings
     private Guid       _deviceID;
     private string     _appName       = string.Empty;
     private string     _deviceVersion = string.Empty;
-    private string?    _screenShotAddress;
+    private LocalFile? _screenShotAddress;
 
 
     public virtual AppVersion AppVersion
@@ -50,20 +50,23 @@ public class AppSettings : BaseHostViewModel, IAppSettings
         get => _deviceVersion;
         set => SetProperty( ref _deviceVersion, value );
     }
-    public virtual string? ScreenShotAddress
+    public virtual LocalFile? ScreenShotAddress
     {
         get => _screenShotAddress;
         set => SetProperty( ref _screenShotAddress, value );
     }
 
 
-    public AppSettings( string appName, in AppVersion version, string deviceVersion, Uri hostInfo ) : this( appName, version, deviceVersion, hostInfo, hostInfo ) { }
-    public AppSettings( string appName, in AppVersion version, string deviceVersion, Uri hostInfo, Uri defaultHostInfo ) : base( hostInfo, defaultHostInfo )
+    public AppSettings( string appName, AppVersion version, string deviceVersion, Uri hostInfo ) : this( appName, version, deviceVersion, hostInfo, hostInfo ) { }
+    public AppSettings( string appName, AppVersion version, string deviceVersion, Uri hostInfo, Uri defaultHostInfo ) : base( hostInfo, defaultHostInfo )
     {
         AppName       = appName;
         _appVersion   = version;
         DeviceVersion = deviceVersion;
     }
+
+
+    protected override void OnHostChanged( in string? host, in bool isValid, in Uri? hostInfo ) { }
 }
 
 
@@ -80,6 +83,6 @@ public class AppSettings<TViewPage> : AppSettings, IAppSettings<TViewPage>
     }
 
 
-    public AppSettings( string appName, in AppVersion version, string deviceVersion, Uri hostInfo ) : base( appName, version, deviceVersion, hostInfo ) { }
-    public AppSettings( string appName, in AppVersion version, string deviceVersion, Uri hostInfo, Uri defaultHostInfo ) : base( appName, version, deviceVersion, hostInfo, defaultHostInfo ) { }
+    public AppSettings( string appName, AppVersion version, string deviceVersion, Uri hostInfo ) : base( appName, version, deviceVersion, hostInfo ) { }
+    public AppSettings( string appName, AppVersion version, string deviceVersion, Uri hostInfo, Uri defaultHostInfo ) : base( appName, version, deviceVersion, hostInfo, defaultHostInfo ) { }
 }

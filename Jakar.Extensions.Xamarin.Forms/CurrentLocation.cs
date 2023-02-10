@@ -2,7 +2,7 @@
 namespace Jakar.Extensions.Xamarin.Forms;
 
 
-public interface ICurrentLocation<TID> : IUniqueID<TID>, IEquatable<ICurrentLocation<TID>> where TID : struct, IComparable<TID>, IEquatable<TID>
+public interface ICurrentLocation<TID> : IUniqueID<TID>, IEquatable<ICurrentLocation<TID>> where TID :  IComparable<TID>, IEquatable<TID>
 {
     AltitudeReferenceSystem AltitudeReferenceSystem { get; }
     bool                    IsFromMockProvider      { get; }
@@ -20,7 +20,7 @@ public interface ICurrentLocation<TID> : IUniqueID<TID>, IEquatable<ICurrentLoca
 
 
 [Serializable]
-public class CurrentLocation<TID> : ICurrentLocation<TID>, IDataBaseIgnore where TID : struct, IComparable<TID>, IEquatable<TID>
+public class CurrentLocation<TID> : ICurrentLocation<TID>, IDataBaseIgnore where TID :  IComparable<TID>, IEquatable<TID>
 {
     public       AltitudeReferenceSystem AltitudeReferenceSystem { get; init; }
     public       bool                    IsFromMockProvider      { get; init; }

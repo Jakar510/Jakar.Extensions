@@ -1,27 +1,33 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions.Xamarin.Forms
 // 09/08/2022  11:16 AM
 
+using Microsoft.AppCenter;
+
+
+
 namespace Jakar.Extensions.Xamarin.Forms;
 
 
 public interface IDebugSettings : INotifyPropertyChanged, INotifyPropertyChanging
 {
-    bool EnableAnalytics        { get; }
-    bool EnableApi              { get; }
-    bool EnableCrashes          { get; }
-    bool IncludeAppStateOnError { get; }
-    bool TakeScreenshotOnError  { get; }
+    bool     EnableAnalytics        { get; }
+    bool     EnableApi              { get; }
+    bool     EnableCrashes          { get; }
+    bool     IncludeAppStateOnError { get; }
+    bool     TakeScreenshotOnError  { get; }
+    LogLevel LogLevel               { get; }
 }
 
 
 
 public sealed class DebugSettings : ObservableClass, IDebugSettings
 {
-    private bool _enableAnalytics        = Preferences.Get( nameof(EnableAnalytics),        true );
-    private bool _enableApi              = Preferences.Get( nameof(EnableApi),              true );
-    private bool _enableCrashes          = Preferences.Get( nameof(EnableCrashes),          true );
-    private bool _includeAppStateOnError = Preferences.Get( nameof(IncludeAppStateOnError), true );
-    private bool _takeScreenshotOnError  = Preferences.Get( nameof(TakeScreenshotOnError),  true );
+    private bool     _enableAnalytics        = Preferences.Get( nameof(EnableAnalytics),        true );
+    private bool     _enableApi              = Preferences.Get( nameof(EnableApi),              true );
+    private bool     _enableCrashes          = Preferences.Get( nameof(EnableCrashes),          true );
+    private bool     _includeAppStateOnError = Preferences.Get( nameof(IncludeAppStateOnError), true );
+    private bool     _takeScreenshotOnError  = Preferences.Get( nameof(TakeScreenshotOnError),  true );
+    private LogLevel _logLevel               = AppCenter.LogLevel;
 
 
     public bool EnableAnalytics
@@ -64,9 +70,18 @@ public sealed class DebugSettings : ObservableClass, IDebugSettings
             if ( SetProperty( ref _takeScreenshotOnError, value ) ) { Preferences.Set( nameof(TakeScreenshotOnError), value ); }
         }
     }
+    public LogLevel LogLevel
+    {
+        get => _logLevel;
+        set
+        {
+            if ( SetProperty( ref _logLevel, value ) ) { AppCenter.LogLevel = value; }
+        }
+    }
 
 
     public DebugSettings() { }
+    public DebugSettings( bool enabled ) : this( enabled, enabled, enabled, enabled, enabled ) { }
     public DebugSettings( bool enableApi, bool enableCrashes, bool enableAnalytics, bool includeAppStateOnError, bool takeScreenshotOnError )
     {
         _enableApi              = enableApi;

@@ -10,6 +10,7 @@ public class BarometerReader
     public SensorSpeed   Speed { get; protected set; } = SensorSpeed.Default; // Set speed delay for monitoring changes.
     public string?       Text  { get; protected set; }
 
+
     public BarometerReader() => Barometer.ReadingChanged += Barometer_ReadingChanged;
     ~BarometerReader() => Barometer.ReadingChanged -= Barometer_ReadingChanged;
 

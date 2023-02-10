@@ -8,12 +8,14 @@
 		<NoWarn>$(NoWarn);1591</NoWarn>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<OpenApiGenerateDocuments>false</OpenApiGenerateDocuments>
+		<!-- <UseBlazorWebAssembly>true</UseBlazorWebAssembly> -->
 	</PropertyGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Jakar.Extensions" Version="6.5.1" />
 		<PackageReference Include="Hardware.Info" Version="10.1.1" />
 		<PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.0" />
+		<PackageReference Include="Microsoft.NETCore.Platforms" Version="7.0.0" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
 		<PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.5.0" />
 		<PackageReference Include="Swashbuckle.AspNetCore.Newtonsoft" Version="6.5.0" />
@@ -34,6 +36,7 @@
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.10" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="6.0.10" />
 		<PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="6.0.10" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.0.13" />
 	</ItemGroup>
 
 	<ItemGroup Condition="'$$(TargetFramework)'=='net7.0'">
@@ -43,5 +46,6 @@
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="7.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="7.0.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="7.0.2" />
 	</ItemGroup>
 </Project>

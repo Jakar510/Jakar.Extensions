@@ -1,0 +1,17 @@
+﻿<?xml version="1.0"
+      encoding="UTF-8"?>
+
+<forms:BaseLoadingPopup xmlns="http://xamarin.com/schemas/2014/forms"
+                        xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                        xmlns:forms="clr-namespace:Jakar.Extensions.Xamarin.Forms;assembly=Jakar.Extensions.Xamarin.Forms"
+                        x:Class="Jakar.Extensions.Xamarin.Forms.LoadingPopup"
+                        HorizontalOptions="Center"
+                        VerticalOptions="Center">
+    <StackLayout Orientation="Vertical">
+        <ActivityIndicator IsRunning="True"
+                           Margin="10" />
+        <Button x:Name="CancelButton"
+                x:FieldModifier="public"
+                Clicked="Cancel_OnClicked" />
+    </StackLayout>
+</forms:BaseLoadingPopup>
