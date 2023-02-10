@@ -1,34 +1,29 @@
-﻿#nullable enable
-using Org.BouncyCastle.Crypto;
+﻿namespace Jakar.Extensions.Xamarin.Forms;
 
 
-
-namespace Jakar.Extensions.Xamarin.Forms;
-
-
-public abstract class BasePage : OrientationContentPage
+public abstract class BaseContentPage : OrientationContentPage
 {
-    protected BasePage() : base() { }
+    protected BaseContentPage() : base()
+    {
+        NavigationPage.SetHasNavigationBar( this, false );
+        Shell.SetNavBarIsVisible( this, false );
+    }
 }
 
 
 
-public class BasePage<TViewModel> : BasePage where TViewModel : BaseViewModel
+public class BaseContentPage<TViewModel> : BaseContentPage where TViewModel : BaseViewModel
 {
     private TViewModel? _viewModel;
 
     public TViewModel ViewModel
     {
         get => _viewModel ?? throw new NullReferenceException( nameof(_viewModel) );
-        set
-        {
-            _viewModel     = value;
-            BindingContext = value;
-        }
+        init => BindingContext = _viewModel = value;
     }
 
 
-    public BasePage() : base() => Shell.SetNavBarIsVisible( this, false );
+    public BaseContentPage() : base() { }
 
 
     protected override void OnAppearing()
@@ -45,8 +40,8 @@ public class BasePage<TViewModel> : BasePage where TViewModel : BaseViewModel
 
 
 
-public class BasePage<TView, TViewModel> : BasePage<TViewModel> where TView : AppView
-                                                                where TViewModel : ViewModelBase<TView>
+public class BaseContentPage<TView, TViewModel> : BaseContentPage<TViewModel> where TView : AppView<TViewModel>
+                                                                              where TViewModel : ViewModelBase<TView>
 {
     private TView? _view;
 
@@ -54,15 +49,11 @@ public class BasePage<TView, TViewModel> : BasePage<TViewModel> where TView : Ap
     public new virtual TView Content
     {
         get => _view ?? throw new NullReferenceException( nameof(_view) );
-        set
-        {
-            _view        = value;
-            base.Content = value;
-        }
+        init => base.Content = _view = value;
     }
 
 
-    public BasePage() : base() { }
+    public BaseContentPage() : base() { }
 
 
     protected override void OnAppearing()

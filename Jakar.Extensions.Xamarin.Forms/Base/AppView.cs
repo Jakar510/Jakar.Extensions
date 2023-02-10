@@ -6,10 +6,10 @@ namespace Jakar.Extensions.Xamarin.Forms;
 
 public class AppView : ContentView
 {
-    public BasePage Page { get; }
+    public BaseContentPage Page { get; }
 
 
-    public AppView( BasePage page ) => Page = page;
+    public AppView( BaseContentPage page ) => Page = page;
 
 
     public virtual void OnAppearing() { }
@@ -20,9 +20,21 @@ public class AppView : ContentView
 
 public class AppView<TViewModel> : AppView where TViewModel : BaseViewModel
 {
-    public new BasePage<TViewModel> Page      { get; }
-    public     TViewModel           ViewModel => Page.ViewModel;
+    public new BaseContentPage<TViewModel> Page      { get; }
+    public     TViewModel                  ViewModel => Page.ViewModel;
 
 
-    public AppView( BasePage<TViewModel> page ) : base( page ) => Page = page;
+    public AppView( BaseContentPage<TViewModel> page ) : base( page ) => Page = page;
+
+
+    public override void OnAppearing()
+    {
+        base.OnAppearing();
+        ViewModel.OnAppearing();
+    }
+    public override void OnDisappearing()
+    {
+        base.OnDisappearing();
+        ViewModel.OnDisappearing();
+    }
 }

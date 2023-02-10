@@ -8,11 +8,11 @@ namespace Jakar.Extensions.Xamarin.Forms;
 
 public abstract class ViewModelBase : BaseViewModel
 {
-    public BasePage Page { get; }
+    public BaseContentPage Page { get; }
 
 
-    protected ViewModelBase( BasePage page ) : base() => Page = page;
-    protected ViewModelBase( BasePage page, string title ) : this( page ) => Title = title;
+    protected ViewModelBase( BaseContentPage page ) : base() => Page = page;
+    protected ViewModelBase( BaseContentPage page, string title ) : this( page ) => Title = title;
 
 
     protected virtual ValueTask HandleException( Exception e ) => default;
@@ -45,16 +45,16 @@ public abstract class ViewModelBase<TValue> : ViewModelBase, IDisposable where T
         set
         {
             SetProperty( ref _selectedItem, value );
-            OnSelectedItem( value );
+            OnSelected( value );
         }
     }
 
 
-    protected ViewModelBase( BasePage page, IEnumerable<TValue> values ) : this( page ) => Items.Add( values );
-    protected ViewModelBase( BasePage page, IEnumerable<TValue> values, TValue              value ) : this( page, values ) => SelectedItem = value;
-    protected ViewModelBase( BasePage page, IEnumerable<TValue> values, IEnumerable<TValue> selectedItems ) : this( page, values ) => SelectedItems.Add( selectedItems );
-    protected ViewModelBase( BasePage page, IEnumerable<TValue> values, TValue              value, IEnumerable<TValue> selectedItems ) : this( page, values, value ) => SelectedItems.Add( selectedItems );
-    protected ViewModelBase( BasePage page ) : base( page )
+    protected ViewModelBase( BaseContentPage page, IEnumerable<TValue> values ) : this( page ) => Items.Add( values );
+    protected ViewModelBase( BaseContentPage page, IEnumerable<TValue> values, TValue              value ) : this( page, values ) => SelectedItem = value;
+    protected ViewModelBase( BaseContentPage page, IEnumerable<TValue> values, IEnumerable<TValue> selectedItems ) : this( page, values ) => SelectedItems.Add( selectedItems );
+    protected ViewModelBase( BaseContentPage page, IEnumerable<TValue> values, TValue              value, IEnumerable<TValue> selectedItems ) : this( page, values, value ) => SelectedItems.Add( selectedItems );
+    protected ViewModelBase( BaseContentPage page ) : base( page )
     {
         RefreshCommand          =  new AsyncCommand( async () => await RefreshAsync() );
         SaveAsyncCommand        =  new AsyncCommand( async () => await SaveAsync() );
@@ -68,12 +68,12 @@ public abstract class ViewModelBase<TValue> : ViewModelBase, IDisposable where T
     public override void OnAppearing()
     {
         base.OnAppearing();
-        RefreshCommand.Execute( null );
-        SelectedItem = null;
+        RefreshCommand.Execute( default );
+        SelectedItem = default;
     }
 
 
-    private async void OnSelectedItem( TValue? value )
+    private async void OnSelected( TValue? value )
     {
         try
         {
@@ -97,6 +97,8 @@ public abstract class ViewModelBase<TValue> : ViewModelBase, IDisposable where T
 
     protected ValueTask RefreshAsync() => RefreshAsync( default );
     protected abstract ValueTask RefreshAsync( CancellationToken token );
+
+
     protected ValueTask SaveAsync() => SaveAsync( default );
     protected abstract ValueTask SaveAsync( CancellationToken token );
 
