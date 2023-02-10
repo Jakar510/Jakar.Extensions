@@ -2,7 +2,7 @@
 namespace Jakar.Extensions;
 
 
-public class ValueEqualizer<T> : IEqualityComparer<T?>, IEqualityComparer<T>, IEqualityComparer where T : struct, IComparable<T>
+public sealed class ValueEqualizer<T> : IEqualityComparer<T?>, IEqualityComparer<T>, IEqualityComparer where T : struct, IComparable<T>
 {
     public static ValueEqualizer<T> Instance { get; } = new();
 
@@ -28,7 +28,7 @@ public class ValueEqualizer<T> : IEqualityComparer<T?>, IEqualityComparer<T>, IE
 
 
 
-public class Equalizer<T> : IEqualityComparer<T>, IEqualityComparer where T : class, IComparable<T>
+public sealed class Equalizer<T> : IEqualityComparer<T>, IEqualityComparer where T : class, IComparable<T>
 {
     public static Equalizer<T> Instance { get; } = new();
 

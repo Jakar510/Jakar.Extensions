@@ -23,16 +23,18 @@ namespace Jakar.Extensions;
 ///         </list>
 ///     </para>
 /// </summary>
-public readonly struct Locker : IAsyncDisposable, IDisposable
+[SuppressMessage( "ReSharper", "UnusedMethodReturnValue.Global" )]
+public sealed class Locker : IAsyncDisposable, IDisposable
 {
-    public object Lock { get; }
+    private readonly object   _lock;
+    public           TimeSpan TimeOut { get; init; }
 
 
     public Locker() : this( new object() ) { }
-    public Locker( object               locker ) => Lock = locker;
-    public Locker( Semaphore            locker ) => Lock = locker;
-    public Locker( SemaphoreSlim        locker ) => Lock = locker;
-    public Locker( ReaderWriterLockSlim locker ) => Lock = locker;
+    public Locker( object               locker ) => _lock = locker;
+    public Locker( Semaphore            locker ) => _lock = locker;
+    public Locker( SemaphoreSlim        locker ) => _lock = locker;
+    public Locker( ReaderWriterLockSlim locker ) => _lock = locker;
 
 
     public static implicit operator Locker( Semaphore            value ) => new(value);
@@ -42,28 +44,28 @@ public readonly struct Locker : IAsyncDisposable, IDisposable
 
     public void Enter( CancellationToken token = default )
     {
-        switch ( Lock )
+        switch ( _lock )
         {
             case ReaderWriterLockSlim value:
-                value.EnterWriteLock();
-                break;
+                value.EnterReadLock();
+                return;
 
             case SemaphoreSlim value:
                 value.Wait( token );
-                break;
+                return;
 
             case Semaphore value:
                 value.WaitOne();
-                break;
+                return;
 
             default:
-                Monitor.Enter( Lock );
-                break;
+                Monitor.Enter( _lock );
+                return;
         }
     }
     public async ValueTask EnterAsync( CancellationToken token = default )
     {
-        switch ( Lock )
+        switch ( _lock )
         {
             case ReaderWriterLockSlim value:
                 value.EnterWriteLock();
@@ -78,13 +80,13 @@ public readonly struct Locker : IAsyncDisposable, IDisposable
                 break;
 
             default:
-                Monitor.Enter( Lock );
+                Monitor.Enter( _lock );
                 break;
         }
     }
     public void Exit()
     {
-        switch ( Lock )
+        switch ( _lock )
         {
             case ReaderWriterLockSlim value:
                 value.ExitWriteLock();
@@ -99,8 +101,8 @@ public readonly struct Locker : IAsyncDisposable, IDisposable
                 break;
 
             default:
-                Monitor.Exit( Lock );
-                Monitor.PulseAll( Lock );
+                Monitor.Exit( _lock );
+                Monitor.PulseAll( _lock );
                 break;
         }
     }
@@ -109,13 +111,13 @@ public readonly struct Locker : IAsyncDisposable, IDisposable
     public void Dispose()
     {
         Exit();
-        (Lock as IDisposable)?.Dispose();
+        (_lock as IDisposable)?.Dispose();
     }
     public async ValueTask DisposeAsync()
     {
         Exit();
 
-        switch ( Lock )
+        switch ( _lock )
         {
             case IAsyncDisposable asyncDisposable:
                 await asyncDisposable.DisposeAsync();
@@ -175,15 +177,15 @@ public readonly struct Locker<T> : IEnumerator<T>, IAsyncEnumerator<T>
     ///         </list>
     ///     </para>
     /// </param>
-    public Locker( IEnumerable<T> collection, Locker locker = default )
+    public Locker( IEnumerable<T> collection, Locker? locker = default )
     {
         _enumerator = collection.GetEnumerator();
-        _locker     = locker;
+        _locker     = locker ?? new Locker();
     }
-    public Locker( IAsyncEnumerable<T> collection, Locker locker = default )
+    public Locker( IAsyncEnumerable<T> collection, Locker? locker = default )
     {
         _asyncEnumerator = collection.GetAsyncEnumerator();
-        _locker          = locker;
+        _locker          = locker ?? new Locker();
     }
 
 
@@ -196,6 +198,9 @@ public readonly struct Locker<T> : IEnumerator<T>, IAsyncEnumerator<T>
     {
         _locker.Dispose();
         _enumerator?.Dispose();
+
+        _asyncEnumerator?.DisposeAsync()
+                         .CallSynchronously();
     }
     public async ValueTask DisposeAsync()
     {

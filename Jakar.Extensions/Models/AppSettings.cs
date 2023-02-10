@@ -23,33 +23,18 @@ public interface IAppSettings<TViewPage> : IAppSettings
 [Serializable]
 public class AppSettings : BaseHostViewModel, IAppSettings
 {
-    private AppVersion _appVersion;
     private Guid       _deviceID;
-    private string     _appName       = string.Empty;
-    private string     _deviceVersion = string.Empty;
     private LocalFile? _screenShotAddress;
 
 
-    public virtual AppVersion AppVersion
-    {
-        get => _appVersion;
-        set => SetProperty( ref _appVersion, value );
-    }
+    public AppVersion AppVersion { get; }
     public virtual Guid DeviceID
     {
         get => _deviceID;
         set => SetProperty( ref _deviceID, value );
     }
-    public virtual string AppName
-    {
-        get => _appName;
-        set => SetProperty( ref _appName, value );
-    }
-    public virtual string DeviceVersion
-    {
-        get => _deviceVersion;
-        set => SetProperty( ref _deviceVersion, value );
-    }
+    public virtual string AppName       { get; }
+    public virtual string DeviceVersion { get; }
     public virtual LocalFile? ScreenShotAddress
     {
         get => _screenShotAddress;
@@ -61,7 +46,7 @@ public class AppSettings : BaseHostViewModel, IAppSettings
     public AppSettings( string appName, AppVersion version, string deviceVersion, Uri hostInfo, Uri defaultHostInfo ) : base( hostInfo, defaultHostInfo )
     {
         AppName       = appName;
-        _appVersion   = version;
+        AppVersion    = version;
         DeviceVersion = deviceVersion;
     }
 

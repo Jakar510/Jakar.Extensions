@@ -9,17 +9,18 @@ public readonly struct StopWatch : IDisposable
     private readonly string   _caller;
     private readonly DateTime _start;
 
+
     public TimeSpan Elapsed => DateTime.Now - _start;
 
 
-    public StopWatch( string? caller )
+    public StopWatch( string caller )
     {
-        _caller = caller ?? string.Empty;
+        _caller = caller;
         _start  = DateTime.Now;
     }
     public void Dispose() => Console.WriteLine( ToString() );
     public override string ToString() => $"[{_caller}] {Elapsed}";
 
 
-    public static StopWatch Start( [CallerMemberName] string? caller = default ) => new(caller);
+    public static StopWatch Start( [CallerMemberName] string? caller = default ) => new(caller ?? string.Empty);
 }

@@ -21,7 +21,7 @@ public abstract class Service : ObservableClass, IDisposable, IAsyncDisposable, 
         }
     }
     public virtual bool   IsValid   => IsAlive;
-    public         string ClassName => ClassType.Name;
+    public         string ClassName { get; }
     public         string FullName  { get; }
     public         Type   ClassType { get; }
 
@@ -29,6 +29,7 @@ public abstract class Service : ObservableClass, IDisposable, IAsyncDisposable, 
     protected Service()
     {
         ClassType = GetType();
+        ClassName = ClassType.Name;
         FullName  = ClassType.AssemblyQualifiedName ?? ClassType.FullName ?? ClassName;
     }
 
@@ -50,26 +51,22 @@ public abstract class Service : ObservableClass, IDisposable, IAsyncDisposable, 
 #if !NETSTANDARD2_1
     [StackTraceHidden]
 #endif
-    [DoesNotReturn]
-    protected virtual void ThrowDisabled( [CallerMemberName] string? caller = default ) => throw new InvalidOperationException( $"{ClassName}.{caller}" );
+    [DoesNotReturn] protected virtual void ThrowDisabled( [CallerMemberName] string? caller = default ) => throw new InvalidOperationException( $"{ClassName}.{caller}" );
 
 #if !NETSTANDARD2_1
     [StackTraceHidden]
 #endif
-    [DoesNotReturn]
-    protected virtual void ThrowDisabled( Exception inner, [CallerMemberName] string? caller = default ) => throw new InvalidOperationException( $"{ClassName}.{caller}", inner );
+    [DoesNotReturn] protected virtual void ThrowDisabled( Exception inner, [CallerMemberName] string? caller = default ) => throw new InvalidOperationException( $"{ClassName}.{caller}", inner );
 
 #if !NETSTANDARD2_1
     [StackTraceHidden]
 #endif
-    [DoesNotReturn]
-    protected void ThrowDisposed( [CallerMemberName] string? caller = default ) => throw new ObjectDisposedException( $"{ClassName}.{caller}" );
+    [DoesNotReturn] protected void ThrowDisposed( [CallerMemberName] string? caller = default ) => throw new ObjectDisposedException( $"{ClassName}.{caller}" );
 
 #if !NETSTANDARD2_1
     [StackTraceHidden]
 #endif
-    [DoesNotReturn]
-    protected void ThrowDisposed( Exception inner, [CallerMemberName] string? caller = default ) => throw new ObjectDisposedException( $"{ClassName}.{caller}", inner );
+    [DoesNotReturn] protected void ThrowDisposed( Exception inner, [CallerMemberName] string? caller = default ) => throw new ObjectDisposedException( $"{ClassName}.{caller}", inner );
     public abstract ValueTask DisposeAsync();
     public void Dispose()
     {

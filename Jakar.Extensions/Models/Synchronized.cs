@@ -15,9 +15,8 @@ namespace Jakar.Extensions;
 /// <typeparam name="TStruct"> The value type. </typeparam>
 public class Synchronized<TStruct> where TStruct : struct
 {
-    private readonly object _lock;
-
-    private TStruct _value;
+    private readonly object  _lock;
+    private          TStruct _value;
 
     public TStruct Value
     {
@@ -34,14 +33,12 @@ public class Synchronized<TStruct> where TStruct : struct
 
     public Synchronized() : this( default ) { }
     public Synchronized( TStruct value ) : this( value, new object() ) { }
-
-    public Synchronized( TStruct value, object @lock )
+    public Synchronized( TStruct value, object locker )
     {
-        _lock = @lock;
+        _lock = locker;
         Value = value;
     }
 
 
-    // public static implicit operator Synchronized<TStruct>( TStruct value ) => value.Value;
     public static implicit operator TStruct( Synchronized<TStruct> value ) => value.Value;
 }

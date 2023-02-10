@@ -26,43 +26,33 @@ public class ResourceException<T> : ResourceException
 
 public class EmbeddedResources<T>
 {
-    protected         Assembly _Assembly  => _Type.Assembly;
-    protected virtual string   _Namespace => _Type.Namespace ?? throw new NullReferenceException( nameof(_Type.Namespace) );
-
-    // ReSharper disable once MemberCanBeMadeStatic.Local
-    protected Type _Type => typeof(T);
+    private readonly Assembly _assembly;
+    public           string   Namespace { get; }
 
 
-    public EmbeddedResources() { }
-
-
-    public ReadOnlyMemory<byte> GetResourceBytes( string fileName )
+    public EmbeddedResources()
     {
-        Stream    stream = GetResourceStream( fileName );
-        using var reader = new MemoryStream();
-        stream.CopyTo( stream );
-        return reader.ToArray();
+        _assembly = typeof(T).Assembly;
+        Namespace = typeof(T).Namespace ?? throw new NullReferenceException( nameof(Type.Namespace) );
     }
 
 
     public Stream GetResourceStream( string fileName )
     {
         string path = GetPath( fileName );
-
-        return _Assembly.GetManifestResourceStream( path ) ?? throw new ResourceException<T>( path );
+        return _assembly.GetManifestResourceStream( path ) ?? throw new ResourceException<T>( path );
     }
 
 
-    protected string GetPath( string fileName ) => $"{_Namespace}.{fileName}";
+    protected string GetPath( string fileName ) => $"{Namespace}.{fileName}";
 
 
     public string GetResourceText( string fileName ) => GetResourceText( fileName, Encoding.Default );
-
     public string GetResourceText( string fileName, Encoding encoding )
     {
-        Stream    stream = GetResourceStream( fileName );
-        using var reader = new StreamReader( stream, encoding );
-        string    text   = reader.ReadToEnd();
+        using Stream stream = GetResourceStream( fileName );
+        using var    reader = new StreamReader( stream, encoding );
+        string       text   = reader.ReadToEnd();
         return text;
     }
 
@@ -70,29 +60,37 @@ public class EmbeddedResources<T>
     public ValueTask SaveToFile( string fileName, LocalDirectory directory, CancellationToken token ) => SaveToFile( fileName, directory.Join( fileName ), token );
     public async ValueTask SaveToFile( string fileName, LocalFile file, CancellationToken token )
     {
-        Stream stream = GetResourceStream( fileName );
+        await using Stream stream = GetResourceStream( fileName );
         await file.WriteAsync( stream, token );
     }
 
-    public async ValueTask<ReadOnlyMemory<byte>> GetResourceBytesAsync( string fileName )
+
+    public byte[] GetResourceBytes( string fileName )
     {
-        Stream          stream = GetResourceStream( fileName );
-        await using var reader = new MemoryStream();
+        using Stream stream = GetResourceStream( fileName );
+        using var    memory = new MemoryStream( (int)stream.Length );
+        stream.CopyTo( memory );
+        return memory.GetBuffer();
+    }
+    public async ValueTask<byte[]> GetResourceBytesAsync( string fileName )
+    {
+        await using Stream stream = GetResourceStream( fileName );
+        await using var    reader = new MemoryStream();
         await stream.CopyToAsync( stream );
-        return reader.ToArray();
+        return reader.GetBuffer();
     }
 
-    public async ValueTask<string> GetResourceTextAsync( string fileName ) => await GetResourceTextAsync( fileName, Encoding.Default );
 
+    public async ValueTask<string> GetResourceTextAsync( string fileName ) => await GetResourceTextAsync( fileName, Encoding.Default );
     public async ValueTask<string> GetResourceTextAsync( string fileName, Encoding encoding )
     {
-        Stream    stream = GetResourceStream( fileName );
-        using var reader = new StreamReader( stream, encoding );
+        await using Stream stream = GetResourceStream( fileName );
+        using var          reader = new StreamReader( stream, encoding );
         return await reader.ReadToEndAsync();
     }
 
-    public async ValueTask<TValue> GetResourceTextAsync<TValue>( string fileName ) => await GetResourceTextAsync<TValue>( fileName, Encoding.Default );
 
+    public async ValueTask<TValue> GetResourceTextAsync<TValue>( string fileName ) => await GetResourceTextAsync<TValue>( fileName, Encoding.Default );
     public async ValueTask<TValue> GetResourceTextAsync<TValue>( string fileName, Encoding encoding )
     {
         string text = await GetResourceTextAsync( fileName, encoding );

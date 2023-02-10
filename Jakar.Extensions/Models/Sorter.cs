@@ -2,7 +2,7 @@
 namespace Jakar.Extensions;
 
 
-public class ValueSorter<T> : IComparer<T?>, IComparer<T>, IComparer where T : struct, IComparable<T>
+public sealed class ValueSorter<T> : IComparer<T?>, IComparer<T>, IComparer where T : struct, IComparable<T>
 {
     public static ValueSorter<T> Instance { get; } = new();
 
@@ -23,7 +23,7 @@ public class ValueSorter<T> : IComparer<T?>, IComparer<T>, IComparer where T : s
 
 
 
-public class Sorter<T> : IComparer<T>, IComparer where T : class, IComparable<T>
+public sealed class Sorter<T> : IComparer<T>, IComparer where T : class, IComparable<T>
 {
     public static Sorter<T> Instance { get; } = new();
 

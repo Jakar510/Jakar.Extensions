@@ -15,30 +15,29 @@ public class Randoms : ObservableClass
     public static char[]                Numeric      { get; }      = @"0123456789".ToArray();
     public static char[]                SpecialChars { get; }      = @"_-.!#@+/*^=>|/\".ToArray();
     public static char[]                UpperCase    { get; }      = @"ABCDEFGHJKLMNOPQRSTUVWXYZ".ToArray();
-    public static Random                Random       { get; set; } = new(69);
+    public static Random                Random       { get; set; } = new(69420);
     public static RandomNumberGenerator Rng          { get; set; } = RandomNumberGenerator.Create();
 
 
     public static string GenerateToken( int length = 32 )
     {
-        byte[] randomNumber = new byte[length];
-        Rng.GetBytes( randomNumber );
+        Span<byte> randomNumber = stackalloc byte[length];
+        Rng.GetNonZeroBytes( randomNumber );
         return Convert.ToBase64String( randomNumber );
     }
+
+
+    public static char RandomChar( char startInclusive, char endExclusive ) => Convert.ToChar( RandomNumberGenerator.GetInt32( startInclusive, endExclusive ) );
+    public static char RandomChar( int  startInclusive, int  endExclusive ) => Convert.ToChar( RandomNumberGenerator.GetInt32( startInclusive, endExclusive ) );
 
 
     public static string RandomString( int length ) => RandomString( length, char.ToUpperInvariant );
     public static string RandomString( int length, Func<char, char> converter )
     {
-        Span<char> builder = stackalloc char[length];
+        Span<char> span = stackalloc char[length];
+        for ( int i = 0; i < length; i++ ) { span[i] = converter( RandomChar( 97, 123 ) ); }
 
-        for ( int i = 0; i < length; i++ )
-        {
-            char letter = Convert.ToChar( RandomNumberGenerator.GetInt32( 97, 122 ) );
-            builder[i] = converter( letter );
-        }
-
-        return builder.ToString();
+        return span.ToString();
     }
 
 
