@@ -1,10 +1,9 @@
-﻿#nullable enable
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
 
 
-public sealed class ValueEqualizer<T> : IEqualityComparer<T?>, IEqualityComparer<T>, IEqualityComparer where T : struct, IComparable<T>
+public class ValueEqualizer<T> : IEqualityComparer<T?>, IEqualityComparer<T>, IEqualityComparer where T : struct, IComparable<T>
 {
-    public static ValueEqualizer<T> Instance { get; } = new();
+    public static ValueEqualizer<T> Default { get; } = new();
 
 
     bool IEqualityComparer.Equals( object? x, object? y )
@@ -28,9 +27,9 @@ public sealed class ValueEqualizer<T> : IEqualityComparer<T?>, IEqualityComparer
 
 
 
-public sealed class Equalizer<T> : IEqualityComparer<T>, IEqualityComparer where T : class, IComparable<T>
+public class Equalizer<T> : IEqualityComparer<T>, IEqualityComparer where T : class, IComparable<T>
 {
-    public static Equalizer<T> Instance { get; } = new();
+    public static Equalizer<T> Default { get; } = new();
 
 
     bool IEqualityComparer.Equals( object? x, object? y )
@@ -41,7 +40,6 @@ public sealed class Equalizer<T> : IEqualityComparer<T>, IEqualityComparer where
 
         return left.Equals( right );
     }
-
     int IEqualityComparer.GetHashCode( object obj ) => obj.GetHashCode();
 
 

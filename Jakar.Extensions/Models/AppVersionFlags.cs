@@ -249,10 +249,10 @@ public readonly struct AppVersionFlags : IEquatable<AppVersionFlags>, IEquatable
     public static bool operator ==( AppVersionFlags left, AppVersionFlags right ) => left.Equals( right );
     public static bool operator !=( AppVersionFlags left, AppVersionFlags right ) => !left.Equals( right );
 
-    public static bool operator <( AppVersionFlags?  left, AppVersionFlags? right ) => ValueSorter<AppVersionFlags>.Instance.Compare( left, right ) < 0;
-    public static bool operator >( AppVersionFlags?  left, AppVersionFlags? right ) => ValueSorter<AppVersionFlags>.Instance.Compare( left, right ) > 0;
-    public static bool operator <=( AppVersionFlags? left, AppVersionFlags? right ) => ValueSorter<AppVersionFlags>.Instance.Compare( left, right ) <= 0;
-    public static bool operator >=( AppVersionFlags? left, AppVersionFlags? right ) => ValueSorter<AppVersionFlags>.Instance.Compare( left, right ) >= 0;
-    public static bool operator ==( AppVersionFlags? left, AppVersionFlags? right ) => ValueEqualizer<AppVersionFlags>.Instance.Equals( left, right );
-    public static bool operator !=( AppVersionFlags? left, AppVersionFlags? right ) => !ValueEqualizer<AppVersionFlags>.Instance.Equals( left, right );
+    public static bool operator <( AppVersionFlags?  left, AppVersionFlags? right ) => ValueSorter<AppVersionFlags>.Default.Compare( left, right ) < 0;
+    public static bool operator >( AppVersionFlags?  left, AppVersionFlags? right ) => ValueSorter<AppVersionFlags>.Default.Compare( left, right ) > 0;
+    public static bool operator <=( AppVersionFlags? left, AppVersionFlags? right ) => ValueSorter<AppVersionFlags>.Default.Compare( left, right ) <= 0;
+    public static bool operator >=( AppVersionFlags? left, AppVersionFlags? right ) => ValueSorter<AppVersionFlags>.Default.Compare( left, right ) >= 0;
+    public static bool operator ==( AppVersionFlags? left, AppVersionFlags? right ) => ValueEqualizer<AppVersionFlags>.Default.Equals( left, right );
+    public static bool operator !=( AppVersionFlags? left, AppVersionFlags? right ) => !ValueEqualizer<AppVersionFlags>.Default.Equals( left, right );
 }

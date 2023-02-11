@@ -57,12 +57,12 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     public LocalDirectory( string             path ) => FullPath = Path.GetFullPath( path );
 
 
-    public static bool operator ==( LocalDirectory? left, LocalDirectory? right ) => Equalizer.Instance.Equals( left, right );
-    public static bool operator >( LocalDirectory?  left, LocalDirectory? right ) => Sorter.Instance.Compare( left, right ) > 0;
-    public static bool operator >=( LocalDirectory? left, LocalDirectory? right ) => Sorter.Instance.Compare( left, right ) >= 0;
-    public static bool operator !=( LocalDirectory? left, LocalDirectory? right ) => !Equalizer.Instance.Equals( left, right );
-    public static bool operator <( LocalDirectory?  left, LocalDirectory? right ) => Sorter.Instance.Compare( left, right ) < 0;
-    public static bool operator <=( LocalDirectory? left, LocalDirectory? right ) => Sorter.Instance.Compare( left, right ) <= 0;
+    public static bool operator ==( LocalDirectory? left, LocalDirectory? right ) => Equalizer.Default.Equals( left, right );
+    public static bool operator >( LocalDirectory?  left, LocalDirectory? right ) => Sorter.Default.Compare( left, right ) > 0;
+    public static bool operator >=( LocalDirectory? left, LocalDirectory? right ) => Sorter.Default.Compare( left, right ) >= 0;
+    public static bool operator !=( LocalDirectory? left, LocalDirectory? right ) => !Equalizer.Default.Equals( left, right );
+    public static bool operator <( LocalDirectory?  left, LocalDirectory? right ) => Sorter.Default.Compare( left, right ) < 0;
+    public static bool operator <=( LocalDirectory? left, LocalDirectory? right ) => Sorter.Default.Compare( left, right ) <= 0;
 
 
     public static implicit operator Collection( LocalDirectory                     directory ) => new(directory.GetSubFolders());

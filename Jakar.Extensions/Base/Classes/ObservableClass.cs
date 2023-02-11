@@ -52,7 +52,7 @@ public abstract class ObservableClass : BaseClass, INotifyPropertyChanged, INoti
                     ? minDate
                     : value;
 
-        return SetProperty( ref backingStore, value, ValueEqualizer<DateTime>.Instance, caller );
+        return SetProperty( ref backingStore, value, ValueEqualizer<DateTime>.Default, caller );
     }
     protected virtual bool SetProperty( ref DateTime? backingStore, DateTime? value, in DateTime minDate, [CallerMemberName] string? caller = default )
     {
@@ -60,7 +60,7 @@ public abstract class ObservableClass : BaseClass, INotifyPropertyChanged, INoti
                     ? null
                     : value;
 
-        return SetProperty( ref backingStore, value, ValueEqualizer<DateTime>.Instance, caller );
+        return SetProperty( ref backingStore, value, ValueEqualizer<DateTime>.Default, caller );
     }
 
 
@@ -70,7 +70,7 @@ public abstract class ObservableClass : BaseClass, INotifyPropertyChanged, INoti
                     ? minDate
                     : value;
 
-        return SetProperty( ref backingStore, value, ValueEqualizer<DateTimeOffset>.Instance, caller );
+        return SetProperty( ref backingStore, value, ValueEqualizer<DateTimeOffset>.Default, caller );
     }
     protected virtual bool SetProperty( ref DateTimeOffset? backingStore, DateTimeOffset? value, in DateTimeOffset minDate, [CallerMemberName] string? caller = default )
     {
@@ -78,7 +78,7 @@ public abstract class ObservableClass : BaseClass, INotifyPropertyChanged, INoti
                     ? null
                     : value;
 
-        return SetProperty( ref backingStore, value, ValueEqualizer<DateTimeOffset>.Instance, caller );
+        return SetProperty( ref backingStore, value, ValueEqualizer<DateTimeOffset>.Default, caller );
     }
 
 
@@ -88,7 +88,7 @@ public abstract class ObservableClass : BaseClass, INotifyPropertyChanged, INoti
                     ? minValue
                     : value;
 
-        return SetProperty( ref backingStore, value, ValueEqualizer<TimeSpan>.Instance, caller );
+        return SetProperty( ref backingStore, value, ValueEqualizer<TimeSpan>.Default, caller );
     }
     protected virtual bool SetProperty( ref TimeSpan? backingStore, TimeSpan? value, in TimeSpan? minValue, [CallerMemberName] string? caller = default )
     {
@@ -96,7 +96,7 @@ public abstract class ObservableClass : BaseClass, INotifyPropertyChanged, INoti
                     ? null
                     : value;
 
-        return SetProperty( ref backingStore, value, ValueEqualizer<TimeSpan>.Instance, caller );
+        return SetProperty( ref backingStore, value, ValueEqualizer<TimeSpan>.Default, caller );
     }
 
 

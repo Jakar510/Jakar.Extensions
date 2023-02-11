@@ -84,12 +84,12 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     // ---------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-    public static bool operator ==( LocalFile? left, LocalFile? right ) => Equalizer.Instance.Equals( left, right );
-    public static bool operator >( LocalFile?  left, LocalFile? right ) => Sorter.Instance.Compare( left, right ) > 0;
-    public static bool operator >=( LocalFile? left, LocalFile? right ) => Sorter.Instance.Compare( left, right ) >= 0;
-    public static bool operator !=( LocalFile? left, LocalFile? right ) => !Equalizer.Instance.Equals( left, right );
-    public static bool operator <( LocalFile?  left, LocalFile? right ) => Sorter.Instance.Compare( left, right ) < 0;
-    public static bool operator <=( LocalFile? left, LocalFile? right ) => Sorter.Instance.Compare( left, right ) <= 0;
+    public static bool operator ==( LocalFile? left, LocalFile? right ) => Equalizer.Default.Equals( left, right );
+    public static bool operator >( LocalFile?  left, LocalFile? right ) => Sorter.Default.Compare( left, right ) > 0;
+    public static bool operator >=( LocalFile? left, LocalFile? right ) => Sorter.Default.Compare( left, right ) >= 0;
+    public static bool operator !=( LocalFile? left, LocalFile? right ) => !Equalizer.Default.Equals( left, right );
+    public static bool operator <( LocalFile?  left, LocalFile? right ) => Sorter.Default.Compare( left, right ) < 0;
+    public static bool operator <=( LocalFile? left, LocalFile? right ) => Sorter.Default.Compare( left, right ) <= 0;
 
 
     /// <summary> </summary>

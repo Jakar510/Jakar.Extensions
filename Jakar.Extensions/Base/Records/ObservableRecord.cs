@@ -59,7 +59,7 @@ public record ObservableRecord : BaseRecord, INotifyPropertyChanged, INotifyProp
                     ? minDate
                     : value;
 
-        return SetProperty( ref backingStore, value, ValueEqualizer<DateTime>.Instance, propertyName );
+        return SetProperty( ref backingStore, value, ValueEqualizer<DateTime>.Default, propertyName );
     }
     protected virtual bool SetProperty( ref DateTime? backingStore, DateTime? value, [CallerMemberName] string? propertyName = default ) => SetProperty( ref backingStore, value, SQLMinDate, propertyName );
     protected virtual bool SetProperty( ref DateTime? backingStore, DateTime? value, in DateTime minDate, [CallerMemberName] string? propertyName = default )
@@ -82,7 +82,7 @@ public record ObservableRecord : BaseRecord, INotifyPropertyChanged, INotifyProp
                     ? minDate
                     : value;
 
-        return SetProperty( ref backingStore, value, ValueEqualizer<DateTimeOffset>.Instance, propertyName );
+        return SetProperty( ref backingStore, value, ValueEqualizer<DateTimeOffset>.Default, propertyName );
     }
     protected virtual bool SetProperty( ref DateTimeOffset? backingStore, DateTimeOffset? value, in DateTimeOffset minDate, [CallerMemberName] string? propertyName = default )
     {
@@ -90,7 +90,7 @@ public record ObservableRecord : BaseRecord, INotifyPropertyChanged, INotifyProp
                     ? null
                     : value;
 
-        return SetProperty( ref backingStore, value, ValueEqualizer<DateTimeOffset>.Instance, propertyName );
+        return SetProperty( ref backingStore, value, ValueEqualizer<DateTimeOffset>.Default, propertyName );
     }
 
 
@@ -100,7 +100,7 @@ public record ObservableRecord : BaseRecord, INotifyPropertyChanged, INotifyProp
                     ? minValue
                     : value;
 
-        return SetProperty( ref backingStore, value, ValueEqualizer<TimeSpan>.Instance, propertyName );
+        return SetProperty( ref backingStore, value, ValueEqualizer<TimeSpan>.Default, propertyName );
     }
     protected virtual bool SetProperty( ref TimeSpan? backingStore, TimeSpan? value, in TimeSpan? minValue, [CallerMemberName] string? propertyName = default )
     {
@@ -109,7 +109,7 @@ public record ObservableRecord : BaseRecord, INotifyPropertyChanged, INotifyProp
                     : value;
 
 
-        return SetProperty( ref backingStore, value, ValueEqualizer<TimeSpan>.Instance, propertyName );
+        return SetProperty( ref backingStore, value, ValueEqualizer<TimeSpan>.Default, propertyName );
     }
 
 
@@ -261,7 +261,7 @@ public record ObservableRecord : BaseRecord, INotifyPropertyChanged, INotifyProp
                     ? minDate
                     : value;
 
-        return SetProperty( ref backingStore, value, ValueEqualizer<TimeOnly>.Instance, propertyName );
+        return SetProperty( ref backingStore, value, ValueEqualizer<TimeOnly>.Default, propertyName );
     }
 
 
@@ -282,7 +282,7 @@ public record ObservableRecord : BaseRecord, INotifyPropertyChanged, INotifyProp
                     ? minDate
                     : value;
 
-        return SetProperty( ref backingStore, value, ValueEqualizer<DateOnly>.Instance, propertyName );
+        return SetProperty( ref backingStore, value, ValueEqualizer<DateOnly>.Default, propertyName );
     }
 #endif
 }

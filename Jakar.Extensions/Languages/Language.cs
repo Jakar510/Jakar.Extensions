@@ -34,15 +34,15 @@ public sealed class Language : BaseClass, IComparable<Language>, IEquatable<Lang
     public override string ToString() => DisplayName;
 
 
-    public static bool operator ==( Language?                   left, Language? right ) => Equalizer.Instance.Equals( left, right );
-    public static bool operator >( Language?                    left, Language? right ) => Sorter.Instance.Compare( left, right ) > 0;
-    public static bool operator >=( Language?                   left, Language? right ) => Sorter.Instance.Compare( left, right ) >= 0;
+    public static bool operator ==( Language?                   left, Language? right ) => Equalizer.Default.Equals( left, right );
+    public static bool operator >( Language?                    left, Language? right ) => Sorter.Default.Compare( left, right ) > 0;
+    public static bool operator >=( Language?                   left, Language? right ) => Sorter.Default.Compare( left, right ) >= 0;
     public static implicit operator Language( CultureInfo       value ) => new(value);
     public static implicit operator Language( SupportedLanguage value ) => new(value);
     public static implicit operator CultureInfo( Language       value ) => value._culture;
-    public static bool operator !=( Language?                   left, Language? right ) => Equalizer.Instance.Equals( left, right );
-    public static bool operator <( Language?                    left, Language? right ) => Sorter.Instance.Compare( left, right ) < 0;
-    public static bool operator <=( Language?                   left, Language? right ) => Sorter.Instance.Compare( left, right ) <= 0;
+    public static bool operator !=( Language?                   left, Language? right ) => Equalizer.Default.Equals( left, right );
+    public static bool operator <( Language?                    left, Language? right ) => Sorter.Default.Compare( left, right ) < 0;
+    public static bool operator <=( Language?                   left, Language? right ) => Sorter.Default.Compare( left, right ) <= 0;
     public int CompareTo( object? value ) => value is null
                                                  ? 1
                                                  : value is Language other
@@ -87,7 +87,7 @@ public sealed class Language : BaseClass, IComparable<Language>, IEquatable<Lang
     {
         public Items() : base() { }
         public Items( int                   capacity ) : base( capacity ) { }
-        public Items( IEnumerable<Language> items ) : base( items ) => Sort( Sorter.Instance );
+        public Items( IEnumerable<Language> items ) : base( items ) => Sort( Sorter.Default );
     }
 
 
