@@ -1,13 +1,4 @@
 ﻿#nullable enable
-using Microsoft.AppCenter;
-using Microsoft.AppCenter.Analytics;
-using Microsoft.AppCenter.Crashes;
-using Microsoft.Extensions.Logging;
-using Plugin.Screenshot;
-using LogLevel = Microsoft.AppCenter.LogLevel;
-
-
-
 namespace Jakar.Extensions.Xamarin.Forms;
 
 
@@ -61,14 +52,17 @@ public class AppDebug : ObservableClass, ILogger, IDebugSettings, IFilePaths
             OnPropertyChanged();
         }
     }
-    public LocalFile AppStateFile => _paths.AppStateFile;
-    public LocalFile DebugFile    => _paths.DebugFile;
-    public LocalFile FeedBackFile => _paths.FeedBackFile;
-    public LocalFile IncomingFile => _paths.IncomingFile;
-    public LocalFile OutgoingFile => _paths.OutgoingFile;
-    public LocalFile ScreenShot   => _paths.ScreenShot;
-    public LocalFile ZipFile      => _paths.ZipFile;
-    public LogLevel  LogLevel     => Settings.LogLevel;
+    LocalDirectory IFilePaths.AppDataDirectory => _paths.AppDataDirectory;
+    LocalDirectory IFilePaths.CacheDirectory   => _paths.CacheDirectory;
+    LocalFile IFilePaths.     AccountsFile     => _paths.AccountsFile;
+    public LocalFile          AppStateFile     => _paths.AppStateFile;
+    public LocalFile          DebugFile        => _paths.DebugFile;
+    public LocalFile          FeedBackFile     => _paths.FeedBackFile;
+    public LocalFile          IncomingFile     => _paths.IncomingFile;
+    public LocalFile          OutgoingFile     => _paths.OutgoingFile;
+    public LocalFile          ScreenShot       => _paths.ScreenShot;
+    public LocalFile          ZipFile          => _paths.ZipFile;
+    public LogLevel           LogLevel         => Settings.LogLevel;
 
 
     public AppDebug( IFilePaths paths, IAppSettings settings )
@@ -126,7 +120,9 @@ public class AppDebug : ObservableClass, ILogger, IDebugSettings, IFilePaths
 
         attachments.Add( ErrorAttachmentLog.AttachmentWithBinary( _screenShot.ToArray(), "ScreenShot.jpeg", "image/jpeg" ) );
 
-        if ( !string.IsNullOrEmpty( _settings.ScreenShotAddress ) ) { await Handle_File( _settings.ScreenShotAddress, attachments, token ); }
+        if ( _settings.ScreenShotAddress is null || _settings.ScreenShotAddress.DoesNotExist ) { return; }
+
+        await Handle_File( _settings.ScreenShotAddress, attachments, token );
     }
 
 
@@ -262,10 +258,10 @@ public class AppDebug : ObservableClass, ILogger, IDebugSettings, IFilePaths
 
     #region ILogger
 
-    public void Log<TState>( Microsoft.Extensions.Logging.LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter ) => Log( ConvertLevel( logLevel ), eventId, state, exception, formatter );
-    public bool IsEnabled( Microsoft.Extensions.Logging.LogLevel   logLevel ) => IsEnabled( ConvertLevel( logLevel ) );
-    public IDisposable? BeginScope<TState>( TState                 state ) where TState : notnull => default;
-    public bool IsEnabled( LogLevel                                logLevel ) => logLevel != LogLevel;
+    public void Log<TState>( MsLogLevel            logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter ) => Log( ConvertLevel( logLevel ), eventId, state, exception, formatter );
+    public bool IsEnabled( MsLogLevel              logLevel ) => IsEnabled( ConvertLevel( logLevel ) );
+    public IDisposable? BeginScope<TState>( TState state ) where TState : notnull => default;
+    public bool IsEnabled( LogLevel                logLevel ) => logLevel != LogLevel;
     public void Log<TState>( LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter )
     {
         if ( ApiDisabled ) { ThrowNotEnabled(); }
@@ -291,17 +287,17 @@ public class AppDebug : ObservableClass, ILogger, IDebugSettings, IFilePaths
                                   } );
         }
     }
-    public static LogLevel ConvertLevel( Microsoft.Extensions.Logging.LogLevel logLevel ) => logLevel switch
-                                                                                             {
-                                                                                                 Microsoft.Extensions.Logging.LogLevel.Trace       => LogLevel.Verbose,
-                                                                                                 Microsoft.Extensions.Logging.LogLevel.Debug       => LogLevel.Debug,
-                                                                                                 Microsoft.Extensions.Logging.LogLevel.Information => LogLevel.Info,
-                                                                                                 Microsoft.Extensions.Logging.LogLevel.Warning     => LogLevel.Warn,
-                                                                                                 Microsoft.Extensions.Logging.LogLevel.Error       => LogLevel.Error,
-                                                                                                 Microsoft.Extensions.Logging.LogLevel.Critical    => LogLevel.Error,
-                                                                                                 Microsoft.Extensions.Logging.LogLevel.None        => LogLevel.None,
-                                                                                                 _                                                 => throw new OutOfRangeException( nameof(logLevel), logLevel )
-                                                                                             };
+    public static LogLevel ConvertLevel( MsLogLevel logLevel ) => logLevel switch
+                                                                  {
+                                                                      MsLogLevel.Trace       => LogLevel.Verbose,
+                                                                      MsLogLevel.Debug       => LogLevel.Debug,
+                                                                      MsLogLevel.Information => LogLevel.Info,
+                                                                      MsLogLevel.Warning     => LogLevel.Warn,
+                                                                      MsLogLevel.Error       => LogLevel.Error,
+                                                                      MsLogLevel.Critical    => LogLevel.Error,
+                                                                      MsLogLevel.None        => LogLevel.None,
+                                                                      _                      => throw new OutOfRangeException( nameof(logLevel), logLevel )
+                                                                  };
 
     #endregion
 }

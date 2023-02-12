@@ -1,4 +1,5 @@
-﻿using Microsoft.Win32;
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.Win32;
 
 
 
@@ -111,56 +112,68 @@ public sealed record DeviceDescriptor : BaseRecord, IDevice
     }
 
 
-    public static string? GetOsBuild()
+    public static string? GetOsBuild() // TODO: GetOsBuild other than windows
     {
-    #if TARGET_BROWSER
-            return platform.Equals("BROWSER", StringComparison.OrdinalIgnoreCase);
+        /*
+        #if TARGET_BROWSER
+        #elif __WINDOWS__
+        #elif __MACOS__
+        #elif TARGET_MACCATALYST
+        #elif __IOS__
+        #elif __ANDROID__
+        #elif __LINUX__
+        #else
+        #endif
+        */
 
-    #elif __WINDOWS__
-        using RegistryKey  localMachine = Registry.LocalMachine;
-        using RegistryKey? registryKey  = localMachine.OpenSubKey( "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion" );
-        if ( registryKey is null ) { return default; }
-
-        object? obj1 = registryKey.GetValue( "CurrentMajorVersionNumber" );
-
-        if ( obj1 is not null )
+        if ( OperatingSystem.IsWindows() )
         {
-            object? obj2 = registryKey.GetValue( "CurrentMinorVersionNumber", "0" );
-            object? obj3 = registryKey.GetValue( "CurrentBuildNumber",        "0" );
-            object? obj4 = registryKey.GetValue( "UBR",                       "0" );
-            return $"{obj1}.{obj2}.{obj3}.{obj4}";
+            using RegistryKey  localMachine = Registry.LocalMachine;
+            using RegistryKey? registryKey  = localMachine.OpenSubKey( "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion" );
+            if ( registryKey is null ) { return default; }
+
+            object? obj1 = registryKey.GetValue( "CurrentMajorVersionNumber" );
+
+            if ( obj1 is not null )
+            {
+                object? obj2 = registryKey.GetValue( "CurrentMinorVersionNumber", "0" );
+                object? obj3 = registryKey.GetValue( "CurrentBuildNumber",        "0" );
+                object? obj4 = registryKey.GetValue( "UBR",                       "0" );
+                return $"{obj1}.{obj2}.{obj3}.{obj4}";
+            }
+
+            object? version = registryKey.GetValue( "CurrentVersion", "0.0" );
+            object? build = registryKey.GetValue( "CurrentBuild",   "0" );
+
+            string[]? strArray = registryKey.GetValue( "BuildLabEx" )
+                                           ?.ToString()
+                                           ?.Split( '.' );
+
+            string str = strArray is null || strArray.Length < 2
+                             ? "0"
+                             : strArray[1];
+
+            return $"{version}.{build}.{str}";
         }
 
-        object? obj5 = registryKey.GetValue( "CurrentVersion", "0.0" );
-        object? obj6 = registryKey.GetValue( "CurrentBuild",   "0" );
+        if ( OperatingSystem.IsMacOS() ) { }
 
-        string[]? strArray = registryKey.GetValue( "BuildLabEx" )
-                                       ?.ToString()
-                                       ?.Split( '.' );
+        if ( OperatingSystem.IsMacCatalyst() ) { }
 
-        string str = strArray is null || strArray.Length < 2
-                         ? "0"
-                         : strArray[1];
+        if ( OperatingSystem.IsAndroid() ) { }
 
-        return $"{obj5}.{obj6}.{str}";
+        if ( OperatingSystem.IsIOS() ) { }
 
-    #elif __MACOS__
-            return platform.Equals("OSX", StringComparison.OrdinalIgnoreCase) || platform.Equals("MACOS", StringComparison.OrdinalIgnoreCase);
+        if ( OperatingSystem.IsLinux() ) { }
 
-    #elif TARGET_MACCATALYST
-            return platform.Equals("MACCATALYST", StringComparison.OrdinalIgnoreCase) || platform.Equals("IOS", StringComparison.OrdinalIgnoreCase);
+        if ( OperatingSystem.IsBrowser() ) { }
 
-    #elif __IOS__
-            return platform.Equals("IOS", StringComparison.OrdinalIgnoreCase);
+        if ( OperatingSystem.IsFreeBSD() ) { }
 
-    #elif __ANDROID__
-            return platform.Equals("IOS", StringComparison.OrdinalIgnoreCase);
+        if ( OperatingSystem.IsWatchOS() ) { }
 
-    #elif __LINUX__
-            return platform.Equals(s_osPlatformName, StringComparison.OrdinalIgnoreCase);
+        if ( OperatingSystem.IsTvOS() ) { }
 
-    #else
         return default;
-    #endif
     }
 }

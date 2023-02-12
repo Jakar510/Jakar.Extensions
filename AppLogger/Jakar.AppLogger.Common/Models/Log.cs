@@ -8,6 +8,7 @@ using System.ComponentModel.DataAnnotations;
 namespace Jakar.AppLogger.Common;
 
 
+[Serializable]
 public sealed record Log : BaseJsonModelRecord, ILog, ILogDetails
 {
     public                             bool                IsError            => Level > LogLevel.Error;

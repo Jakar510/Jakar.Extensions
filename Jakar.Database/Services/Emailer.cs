@@ -81,8 +81,7 @@ public class Emailer
 
         public Options() { }
         public Options( string defaultSubject ) => DefaultSubject = defaultSubject;
-        internal EmailSettings GetSettings( IConfiguration configuration ) => _settings ??= configuration.GetSection( nameof(EmailSettings) )
-                                                                                                         .Get<EmailSettings>();
+        internal EmailSettings GetSettings( IConfiguration configuration ) => _settings ??= EmailSettings.Create( configuration );
 
 
         internal MailboxAddress GetSender() => Sender ??= Settings?.Address() ?? throw new InvalidOperationException( $"{nameof(Sender)} is not set" );

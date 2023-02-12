@@ -28,7 +28,8 @@ public abstract class Widget<TServices> : ComponentBase, IModelState where TServ
 
 
     [Parameter] public string?   Title    { get; set; }
-    [Inject]    public TServices Services { get; set; }
+    // ReSharper disable once NullableWarningSuppressionIsUsed
+    [Inject] public TServices Services { get; set; } = default!;
 
 
     public Task StateHasChangedAsync() => InvokeAsync( StateHasChanged );

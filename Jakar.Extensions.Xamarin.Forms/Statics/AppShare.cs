@@ -1,7 +1,7 @@
 ﻿#nullable enable
 using Plugin.Media;
 using Plugin.Media.Abstractions;
-using Plugin.Screenshot;
+using Device = Xamarin.Forms.Device;
 using Location = Xamarin.Essentials.Location;
 
 

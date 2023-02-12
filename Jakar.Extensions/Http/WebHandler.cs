@@ -1,6 +1,7 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 08/15/2022  11:36 AM
 
+using System;
 using static Jakar.Extensions.WebRequester;
 
 
@@ -53,6 +54,14 @@ public class WebHandler : IDisposable
     {
         string content = await AsString( response );
         return bool.TryParse( content, out bool result ) && result;
+    }
+    public virtual async ValueTask<Guid?> AsGuid( HttpResponseMessage response )
+    {
+        string content = await AsString( response );
+
+        return Guid.TryParse( content, out Guid result )
+                   ? result
+                   : default;
     }
     public virtual async ValueTask<byte[]> AsBytes( HttpResponseMessage response )
     {
@@ -160,36 +169,16 @@ public class WebHandler : IDisposable
 
 
     public virtual ValueTask<WebResponse<bool>> AsBool() => WebResponse<bool>.Create( this, AsBool );
-
-
     public virtual ValueTask<WebResponse<byte[]>> AsBytes() => WebResponse<byte[]>.Create( this, AsBytes );
-
-
     public virtual ValueTask<WebResponse<JToken>> AsJson() => AsJson( JsonNet.LoadSettings );
     public virtual async ValueTask<WebResponse<JToken>> AsJson( JsonLoadSettings settings ) => await WebResponse<JToken>.Create( this, settings, AsJson );
-
-
-    public virtual ValueTask<WebResponse<LocalFile>> AsFile() => WebResponse<LocalFile>.Create( this, AsFile );
-
-
-    public virtual ValueTask<WebResponse<LocalFile>> AsFile( string fileNameHeader ) => WebResponse<LocalFile>.Create( this, fileNameHeader, AsFile );
-
-
-    public virtual ValueTask<WebResponse<LocalFile>> AsFile( FileInfo path ) => WebResponse<LocalFile>.Create( this, path, AsFile );
-
-
-    public virtual ValueTask<WebResponse<LocalFile>> AsFile( LocalFile file ) => WebResponse<LocalFile>.Create( this, file, AsFile );
-
-
-    public virtual ValueTask<WebResponse<LocalFile>> AsFile( MimeType type ) => WebResponse<LocalFile>.Create( this, type, AsFile );
-
-
+    public virtual ValueTask<WebResponse<LocalFile>> AsFile() => WebResponse<LocalFile>.Create( this,                           AsFile );
+    public virtual ValueTask<WebResponse<LocalFile>> AsFile( string    fileNameHeader ) => WebResponse<LocalFile>.Create( this, fileNameHeader, AsFile );
+    public virtual ValueTask<WebResponse<LocalFile>> AsFile( FileInfo  path ) => WebResponse<LocalFile>.Create( this,           path,           AsFile );
+    public virtual ValueTask<WebResponse<LocalFile>> AsFile( LocalFile file ) => WebResponse<LocalFile>.Create( this,           file,           AsFile );
+    public virtual ValueTask<WebResponse<LocalFile>> AsFile( MimeType  type ) => WebResponse<LocalFile>.Create( this,           type,           AsFile );
     public virtual ValueTask<WebResponse<MemoryStream>> AsStream() => WebResponse<MemoryStream>.Create( this, AsStream );
-
-
     public virtual ValueTask<WebResponse<ReadOnlyMemory<byte>>> AsMemory() => WebResponse<ReadOnlyMemory<byte>>.Create( this, AsMemory );
-
-
     public virtual ValueTask<WebResponse<string>> AsString() => WebResponse<string>.Create( this, AsString );
 
 

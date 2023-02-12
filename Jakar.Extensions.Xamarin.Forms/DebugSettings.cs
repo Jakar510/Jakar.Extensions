@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions.Xamarin.Forms
 // 09/08/2022  11:16 AM
 
-using Microsoft.AppCenter;
-
-
-
 namespace Jakar.Extensions.Xamarin.Forms;
 
 

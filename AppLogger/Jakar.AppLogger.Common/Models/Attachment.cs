@@ -16,17 +16,18 @@ public interface IAttachment
 
 
 
+[Serializable]
 public sealed record Attachment : BaseRecord
 {
     public const long MAX_SIZE = 2 ^ 20; // 1MB
-    public       bool IsBinary { get; init; }
 
+
+    public bool IsBinary { get; init; }
 
     [JsonIgnore]
     public byte[]? Data => IsBinary
                                ? Convert.FromBase64String( Content )
                                : default;
-
 
     public long    Length      { get; init; }
     public string  Content     { get; init; } = string.Empty;
@@ -45,67 +46,61 @@ public sealed record Attachment : BaseRecord
         FileName    = attachment.FileName;
         IsBinary    = attachment.IsBinary;
     }
-    public Attachment( MemoryStream         content, string? description = default, string? type = default ) : this( content.ToArray(), description, type ) { }
-    public Attachment( ReadOnlyMemory<byte> content, string? description = default, string? type = default ) : this( content.ToArray(), description, type ) { }
-    public Attachment( byte[] content, string? description = default, string? type = default )
+    public Attachment( MemoryStream content, string? fileName, string? description = default, string? type = default ) : this( content.GetBuffer()
+                                                                                                                                      .AsSpan(),
+                                                                                                                               fileName,
+                                                                                                                               description,
+                                                                                                                               type ) { }
+    public Attachment( ReadOnlyMemory<byte> content, string? fileName, string? description = default, string? type = default ) : this( content.Span, fileName, description, type ) { }
+    public Attachment( ReadOnlySpan<byte> content, string? fileName, string? description = default, string? type = default ) :
+        this( Convert.ToBase64String( content ), content.Length, fileName, description, type, !string.IsNullOrEmpty( fileName ) ) { }
+    public Attachment( byte[] content, string? fileName,              string? description = default, string? type = default ) : this( Convert.ToBase64String( content ), content.Length, fileName, description, type, true ) { }
+    public Attachment( string content, string? description = default, string? type        = default ) : this( content, content.Length, default, description, type, false ) { }
+    private Attachment( string content, long length, string? fileName, string? description, string? type, bool isBinary )
     {
-        if (content.Length > MAX_SIZE) { ThrowTooLong(); }
+        if ( length > MAX_SIZE ) { ThrowTooLong(); }
 
-        Length      = content.Length;
-        Content     = Convert.ToBase64String( content );
-        Description = description;
-        Type        = type;
-        IsBinary    = true;
-    }
-    public Attachment( string content, string? description = default, string? type = default )
-    {
-        if (content.Length > MAX_SIZE) { ThrowTooLong(); }
-
-        Length      = content.Length;
+        Length      = length;
+        FileName    = fileName;
         Content     = content;
         Description = description;
         Type        = type;
-        IsBinary    = false;
+        IsBinary    = isBinary;
     }
 
 
     [DoesNotReturn] public static void ThrowTooLong() => throw new ArgumentException( $"{nameof(Content)}.{nameof(Length)} is too long; Must be < {MAX_SIZE}." );
 
 
+    public static Attachment Create( ReadOnlySpan<byte>   content, string? description = default, string? type = default ) => new(content, description, type);
     public static Attachment Create( ReadOnlyMemory<byte> content, string? description = default, string? type = default ) => new(content, description, type);
     public static Attachment Create( string               content, string? description = default, string? type = default ) => new(content, description, type);
-    public static Attachment Create( Stream stream, string? description = default, string? type = default )
+    public static Attachment Create( Stream stream, string? fileName, string? description = default, string? type = default )
     {
         using var ms = new MemoryStream();
         stream.CopyTo( ms );
 
-        return new Attachment( ms, description, type );
+        return new Attachment( ms, fileName, description, type );
     }
-    public static async Task<Attachment> CreateAsync( Stream stream, string? description = default, string? type = default, CancellationToken token = default )
+    public static async ValueTask<Attachment> CreateAsync( Stream stream, string? fileName, string? description = default, string? type = default, CancellationToken token = default )
     {
         using var ms = new MemoryStream();
         await stream.CopyToAsync( ms, token );
 
-        return new Attachment( ms, description, type );
+        return new Attachment( ms, fileName, description, type );
     }
     public static Attachment Create( LocalFile file, string? description = default, string? type = default )
     {
         byte[] content = file.Read()
                              .AsBytes();
 
-        return new Attachment( content, description ?? file.Name, type ?? file.ContentType )
-               {
-                   FileName = file.Name
-               };
+        return new Attachment( content, file.Name, description ?? file.Name, type ?? file.ContentType );
     }
-    public static async Task<Attachment> CreateAsync( LocalFile file, string? description = default, string? type = default, CancellationToken token = default )
+    public static async ValueTask<Attachment> CreateAsync( LocalFile file, string? description = default, string? type = default, CancellationToken token = default )
     {
         byte[] content = await file.ReadAsync()
                                    .AsBytes( token );
 
-        return new Attachment( content, description ?? file.Name, type ?? file.ContentType )
-               {
-                   FileName = file.Name
-               };
+        return new Attachment( content, file.Name, description ?? file.Name, type ?? file.ContentType );
     }
 }

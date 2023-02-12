@@ -46,9 +46,9 @@
 @code {
     private bool collapseNavMenu = true;
 
-    private string NavMenuCssClass => collapseNavMenu
+    private string? NavMenuCssClass => collapseNavMenu
                                           ? "collapse"
-                                          : null;
+                                          : default;
 
     private void ToggleNavMenu() { collapseNavMenu = !collapseNavMenu; }
 }

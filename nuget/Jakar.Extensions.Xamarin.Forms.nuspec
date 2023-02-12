@@ -4,7 +4,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata>
 		<id>Jakar.Extensions.Xamarin.Forms</id>
-		<version>6.5.0</version>
+		<version>6.6.0</version>
 		<title>Base library for all others in Xamarin.Forms, and extensions to help with Xamarin.Forms development.</title>
 		<authors>Tyler Stegmaier</authors>
 		<owners>Jakar510/Jakar</owners>
@@ -28,30 +28,30 @@
 		<dependencies>
 			<group targetFramework="netstandard2.1">
 				<dependency id="Xamarin.Forms"
-							version="5.0.0.2525" />
+							version="5.0.0.2545" />
 				<dependency id="Xamarin.Forms.Visual.Material"
-							version="5.0.0.2525" />
+							version="5.0.0.2545" />
 				<dependency id="Xamarin.CommunityToolkit"
 							version="2.0.5" />
 				<dependency id="Xamarin.CommunityToolkit.Markup"
 							version="2.0.5" />
 				<dependency id="Xamarin.Essentials"
-							version="1.7.3" />
+							version="1.7.4" />
 				<dependency id="NETStandard.Library"
 							version="2.0.3" />
 
 				<dependency id="Microsoft.AppCenter"
-							version="4.5.3" />
+							version="5.0.1" />
 				<dependency id="Microsoft.AppCenter.Analytics"
-							version="4.5.3" />
+							version="5.0.1" />
 				<dependency id="Microsoft.AppCenter.Crashes"
-							version="4.5.3" />
+							version="5.0.1" />
 
 				<dependency id="Newtonsoft.Json"
-							version="13.0.1" />
+							version="13.0.2" />
 
 				<dependency id="Jakar.Extensions"
-							version="6.5.1" />
+							version="6.6.0" />
 
 				<dependency id="Acr.UserDialogs"
 							version="7.2.0.564" />
@@ -68,30 +68,30 @@
 
 			<group targetFramework="portable-win+net45+wp80+win81+wpa81+MonoAndroid10+MonoTouch10+Xamarin.iOS10">
 				<dependency id="Xamarin.Forms"
-							version="5.0.0.2525" />
+							version="5.0.0.2545" />
 				<dependency id="Xamarin.Forms.Visual.Material"
-							version="5.0.0.2525" />
+							version="5.0.0.2545" />
 				<dependency id="Xamarin.CommunityToolkit"
 							version="2.0.5" />
 				<dependency id="Xamarin.CommunityToolkit.Markup"
 							version="2.0.5" />
 				<dependency id="Xamarin.Essentials"
-							version="1.7.3" />
+							version="1.7.4" />
 				<dependency id="NETStandard.Library"
 							version="2.0.3" />
 
 				<dependency id="Microsoft.AppCenter"
-							version="4.5.3" />
+							version="5.0.1" />
 				<dependency id="Microsoft.AppCenter.Analytics"
-							version="4.5.3" />
+							version="5.0.1" />
 				<dependency id="Microsoft.AppCenter.Crashes"
-							version="4.5.3" />
+							version="5.0.1" />
 
 				<dependency id="Newtonsoft.Json"
-							version="13.0.1" />
+							version="13.0.2" />
 
 				<dependency id="Jakar.Extensions"
-							version="6.5.1" />
+							version="6.6.0" />
 
 				<dependency id="Acr.UserDialogs"
 							version="7.2.0.564" />
@@ -108,30 +108,30 @@
 
 			<group targetFramework="MonoAndroid">
 				<dependency id="Xamarin.Forms"
-							version="5.0.0.2525" />
+							version="5.0.0.2545" />
 				<dependency id="Xamarin.Forms.Visual.Material"
-							version="5.0.0.2525" />
+							version="5.0.0.2545" />
 				<dependency id="Xamarin.CommunityToolkit"
 							version="2.0.5" />
 				<dependency id="Xamarin.CommunityToolkit.Markup"
 							version="2.0.5" />
 				<dependency id="Xamarin.Essentials"
-							version="1.7.3" />
+							version="1.7.4" />
 				<dependency id="NETStandard.Library"
 							version="2.0.3" />
 
 				<dependency id="Microsoft.AppCenter"
-							version="4.5.3" />
+							version="5.0.1" />
 				<dependency id="Microsoft.AppCenter.Analytics"
-							version="4.5.3" />
+							version="5.0.1" />
 				<dependency id="Microsoft.AppCenter.Crashes"
-							version="4.5.3" />
+							version="5.0.1" />
 
 				<dependency id="Newtonsoft.Json"
-							version="13.0.1" />
+							version="13.0.2" />
 
 				<dependency id="Jakar.Extensions"
-							version="6.5.1" />
+							version="6.6.0" />
 
 				<dependency id="Acr.UserDialogs"
 							version="7.2.0.564" />
@@ -154,30 +154,30 @@
 
 			<group targetFramework="Xamarin.iOS1.0">
 				<dependency id="Xamarin.Forms"
-							version="5.0.0.2525" />
+							version="5.0.0.2545" />
 				<dependency id="Xamarin.Forms.Visual.Material"
-							version="5.0.0.2525" />
+							version="5.0.0.2545" />
 				<dependency id="Xamarin.CommunityToolkit"
 							version="2.0.5" />
 				<dependency id="Xamarin.CommunityToolkit.Markup"
 							version="2.0.5" />
 				<dependency id="Xamarin.Essentials"
-							version="1.7.3" />
+							version="1.7.4" />
 				<dependency id="NETStandard.Library"
 							version="2.0.3" />
 
 				<dependency id="Microsoft.AppCenter"
-							version="4.5.3" />
+							version="5.0.1" />
 				<dependency id="Microsoft.AppCenter.Analytics"
-							version="4.5.3" />
+							version="5.0.1" />
 				<dependency id="Microsoft.AppCenter.Crashes"
-							version="4.5.3" />
+							version="5.0.1" />
 
 				<dependency id="Newtonsoft.Json"
-							version="13.0.1" />
+							version="13.0.2" />
 
 				<dependency id="Jakar.Extensions"
-							version="6.5.1" />
+							version="6.6.0" />
 
 				<dependency id="Acr.UserDialogs"
 							version="7.2.0.564" />

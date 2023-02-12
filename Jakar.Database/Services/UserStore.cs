@@ -28,7 +28,7 @@ public sealed class UserStore : IUserLoginStore<UserRecord>,
     public async Task<IList<UserRecord>> GetUsersForClaimAsync( Claim     claim, CancellationToken  token ) => await _dbContext.GetUsersForClaimAsync( claim, token );
     public async Task RemoveClaimsAsync( UserRecord                       user,  IEnumerable<Claim> claims, CancellationToken token ) => await _dbContext.RemoveClaimsAsync( user, claims, token );
     public async Task ReplaceClaimAsync( UserRecord                       user,  Claim              claim,  Claim             newClaim, CancellationToken token ) => await _dbContext.ReplaceClaimAsync( user, claim, newClaim, token );
-    public async Task<UserRecord> FindByEmailAsync( string               email, CancellationToken  token ) => await _dbContext.FindByEmailAsync( email, token ) ?? throw new RecordNotFoundException($"{nameof(email)} not found: '{email}'");
+    public async Task<UserRecord?> FindByEmailAsync( string               email, CancellationToken  token ) => await _dbContext.FindByEmailAsync( email, token );
     public async Task<string?> GetEmailAsync( UserRecord                  user,  CancellationToken  token ) => await _dbContext.GetEmailAsync( user, token );
     public async Task<string?> GetNormalizedEmailAsync( UserRecord        user,  CancellationToken  token ) => await _dbContext.GetNormalizedEmailAsync( user, token );
     public async Task<bool> GetEmailConfirmedAsync( UserRecord            user,  CancellationToken  token ) => await _dbContext.GetEmailConfirmedAsync( user, token );
@@ -49,7 +49,7 @@ public sealed class UserStore : IUserLoginStore<UserRecord>,
     public async Task RemoveLoginAsync( UserRecord                     user,               string loginProvider, string providerKey, CancellationToken token ) => await _dbContext.RemoveLoginAsync( user, loginProvider, providerKey, token );
     public async Task<IdentityResult> CreateAsync( UserRecord          user,               CancellationToken token ) => await _dbContext.CreateAsync( user, token );
     public async Task<IdentityResult> DeleteAsync( UserRecord          user,               CancellationToken token ) => await _dbContext.DeleteAsync( user, token );
-    public async Task<UserRecord?> FindByIdAsync( string               userId,             CancellationToken token ) => await _dbContext.Users.Get( long.Parse( userId ), token ) ?? throw new RecordNotFoundException( userId );
+    public async Task<UserRecord?> FindByIdAsync( string               userId,             CancellationToken token ) => await _dbContext.Users.Get( long.Parse( userId ), token );
     public async Task<UserRecord?> FindByNameAsync( string             normalizedUserName, CancellationToken token ) => await _dbContext.Users.Get( nameof(UserRecord.FullName), normalizedUserName, token );
     public async Task<string?> GetNormalizedUserNameAsync( UserRecord  user,               CancellationToken token ) => await _dbContext.GetNormalizedUserNameAsync( user, token );
     public async Task<string> GetUserIdAsync( UserRecord               user,               CancellationToken token ) => await _dbContext.GetUserIdAsync( user, token );

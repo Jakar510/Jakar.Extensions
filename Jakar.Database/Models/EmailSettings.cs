@@ -22,7 +22,7 @@ public sealed record EmailSettings : ICredentials
 
     public EmailSettings() { }
     public static EmailSettings Create( IConfiguration configuration ) => configuration.GetSection( nameof(EmailSettings) )
-                                                                                       .Get<EmailSettings>();
+                                                                                       .Get<EmailSettings>() ?? throw new InvalidOperationException( $"Section '{nameof(EmailSettings)}' is invalid" );
 
 
     public MailboxAddress Address() => MailboxAddress.Parse( UserName );

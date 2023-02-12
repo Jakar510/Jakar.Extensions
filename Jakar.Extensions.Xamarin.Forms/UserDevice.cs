@@ -2,7 +2,7 @@
 namespace Jakar.Extensions.Xamarin.Forms;
 
 
-public interface IUserDevice<TID> : IEquatable<IUserDevice<TID>>, IUniqueID<TID> where TID : IComparable<TID>, IEquatable<TID>
+public interface IUserDevice : IEquatable<IUserDevice>
 {
     public DateTime TimeStamp { get; }
     public Guid     DeviceID  { get; }
@@ -40,7 +40,7 @@ public interface IUserDevice<TID> : IEquatable<IUserDevice<TID>>, IUniqueID<TID>
 
 /// <summary> Debug and/or identify info for IT </summary>
 [Serializable]
-public class UserDevice<TID> : ObservableClass, IUserDevice<TID> where TID : IComparable<TID>, IEquatable<TID>
+public class UserDevice : ObservableClass, IUserDevice
 {
     private string?  _ip;
     public  DateTime TimeStamp    { get; init; }
@@ -60,13 +60,10 @@ public class UserDevice<TID> : ObservableClass, IUserDevice<TID> where TID : ICo
     }
 
 
-    [Key] public TID ID { get; init; }
-
-
     public UserDevice() { }
 
     // ReSharper disable once NullableWarningSuppressionIsUsed
-    public UserDevice( string model, string manufacturer, string deviceName, DeviceType deviceType, DeviceIdiom idiom, DevicePlatform platform, AppVersion osVersion, Guid? deviceID, TID id = default! )
+    public UserDevice( string model, string manufacturer, string deviceName, DeviceType deviceType, DeviceIdiom idiom, DevicePlatform platform, AppVersion osVersion, Guid? deviceID )
     {
         Model        = model;
         Manufacturer = manufacturer;
@@ -77,13 +74,11 @@ public class UserDevice<TID> : ObservableClass, IUserDevice<TID> where TID : ICo
         OsVersion    = osVersion.ToString();
         DeviceID     = deviceID ?? Guid.NewGuid();
         TimeStamp    = DateTime.UtcNow;
-        ID           = id;
     }
 
     // ReSharper disable once NullableWarningSuppressionIsUsed
-    public UserDevice( IUserDevice<TID> device, TID id = default! )
+    public UserDevice( IUserDevice device )
     {
-        ID           = id;
         DeviceID     = device.DeviceID;
         TimeStamp    = device.TimeStamp;
         Model        = device.Model;
@@ -96,11 +91,11 @@ public class UserDevice<TID> : ObservableClass, IUserDevice<TID> where TID : ICo
     }
 
 
-    public static bool operator ==( UserDevice<TID>? left, UserDevice<TID>? right ) => Equals( left, right );
-    public static bool operator !=( UserDevice<TID>? left, UserDevice<TID>? right ) => !Equals( left, right );
+    public static bool operator ==( UserDevice? left, UserDevice? right ) => Equals( left, right );
+    public static bool operator !=( UserDevice? left, UserDevice? right ) => !Equals( left, right );
 
 
-    // public static UserDevice<TID> Create( Guid? deviceID ) => new(DeviceInfo.Model, DeviceInfo.Manufacturer, DeviceInfo.Name, (DeviceType)DeviceInfo.DeviceType, DeviceInfo.Idiom, DeviceInfo.Platform, DeviceInfo.Version, deviceID);
+    // public static UserDevice Create( Guid? deviceID ) => new(DeviceInfo.Model, DeviceInfo.Manufacturer, DeviceInfo.Name, (DeviceType)DeviceInfo.DeviceType, DeviceInfo.Idiom, DeviceInfo.Platform, DeviceInfo.Version, deviceID);
 
 
     public override bool Equals( object? obj )
@@ -109,7 +104,7 @@ public class UserDevice<TID> : ObservableClass, IUserDevice<TID> where TID : ICo
 
         if ( ReferenceEquals( this, obj ) ) { return true; }
 
-        return obj is UserDevice<TID> device && Equals( device );
+        return obj is UserDevice device && Equals( device );
     }
     public override int GetHashCode()
     {
@@ -125,7 +120,7 @@ public class UserDevice<TID> : ObservableClass, IUserDevice<TID> where TID : ICo
         hashCode.Add( OsVersion );
         return hashCode.ToHashCode();
     }
-    public bool Equals( IUserDevice<TID>? other )
+    public bool Equals( IUserDevice? other )
     {
         if ( other is null ) { return false; }
 

@@ -6,12 +6,12 @@ public sealed class LoggerDB : Database.Database
 {
     public override    AppVersion                                   Version       { get; } = new(1, 0, 0);
     public             ConcurrentObservableCollection<Notification> Notifications { get; } = new();
-    public             DbTable<AppRecord>                       Apps          { get; }
-    public             DbTable<AttachmentRecord>                Attachments   { get; }
-    public             DbTable<DeviceRecord>                    Devices       { get; }
-    public             DbTable<LogRecord>                       Logs          { get; }
-    public             DbTable<ScopeRecord>                     Scopes        { get; }
-    public             DbTable<SessionRecord>                   Sessions      { get; }
+    public             DbTable<AppRecord>                           Apps          { get; }
+    public             DbTable<AttachmentRecord>                    Attachments   { get; }
+    public             DbTable<DeviceRecord>                        Devices       { get; }
+    public             DbTable<LogRecord>                           Logs          { get; }
+    public             DbTable<ScopeRecord>                         Scopes        { get; }
+    public             DbTable<SessionRecord>                       Sessions      { get; }
     protected override PasswordRequirements                         _Requirements { get; } = new();
 
 
@@ -66,11 +66,33 @@ public sealed class LoggerDB : Database.Database
 
 
     public ValueTask<ActionResult> EndSession( ControllerBase controller, Guid sessionID, CancellationToken token ) => this.TryCall( EndSession, controller, sessionID, token );
-    public async ValueTask<ActionResult> Log( DbConnection connection, DbTransaction transaction, ControllerBase controller, Log log, CancellationToken token )
+    public async ValueTask<ActionResult<bool>> SendLog( DbConnection connection, DbTransaction transaction, ControllerBase controller, IEnumerable<Log> logs, CancellationToken token )
+    {
+        foreach ( Log log in logs )
+        {
+            try
+            {
+                var reply = await SendLog( connection, transaction, controller, log, token );
+
+                if ( !reply.Value )
+                {
+
+                }
+            }
+            catch ( Exception e )
+            {
+                Console.WriteLine( e );
+                throw;
+            }
+        }
+
+        return true;
+    }
+    public async ValueTask<ActionResult<bool>> SendLog( DbConnection connection, DbTransaction transaction, ControllerBase controller, Log log, CancellationToken token )
     {
         if ( !log.SessionID.IsValidID() )
         {
-            controller.AddError( nameof(log.SessionID), $"{nameof(log.SessionID)} is null or empty" );
+            controller.AddError( nameof(Log.SessionID), $"{nameof(Log.SessionID)} is null or empty" );
             return controller.BadRequest( controller.ModelState );
         }
 
@@ -97,11 +119,11 @@ public sealed class LoggerDB : Database.Database
             else { await Attachments.Update( connection, transaction, attachmentRecord.Update( attachment ), token ); }
         }
 
-        return controller.Ok();
+        return true;
     }
 
 
-    public ValueTask<ActionResult> Log( ControllerBase controller, Log log, CancellationToken token ) => this.TryCall( Log, controller, log, token );
+    public ValueTask<ActionResult<bool>> SendLog( ControllerBase controller, IEnumerable<Log> logs, CancellationToken token ) => this.TryCall( SendLog, controller, logs, token );
 
 
     public async ValueTask<DeviceRecord?> AddOrUpdate_Device( DbConnection connection, DbTransaction transaction, ControllerBase controller, DeviceDescriptor device, UserRecord caller, CancellationToken token )

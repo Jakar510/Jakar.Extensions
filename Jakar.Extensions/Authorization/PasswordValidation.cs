@@ -78,7 +78,9 @@ public readonly ref struct PasswordValidator
         PasswordRequirements data = await Requirements.FromFile();
         return Check( password, data );
     }
-    public static bool Check( ReadOnlySpan<char> password ) => Check( password, Requirements.Default );
+    public static bool Check( ReadOnlySpan<char> password ) => Current is not null
+                                                                   ? Check( password, Current )
+                                                                   : Check( password, Requirements.Default );
     public static bool Check( ReadOnlySpan<char> password, Requirements requirements )
     {
         var validator = new PasswordValidator( requirements );
