@@ -4,7 +4,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata>
 		<id>Jakar.Extensions</id>
-		<version>6.6.0</version>
+		<version>6.6.2</version>
 		<title>Extension Library</title>
 		<authors>Tyler Stegmaier</authors>
 		<owners>Jakar510/Jakar</owners>
@@ -47,7 +47,7 @@
 				<dependency id="Microsoft.Extensions.Logging.Abstractions"
 							version="7.0.0" />
 				<dependency id="Microsoft.Extensions.Options"
-							version="7.0.0" />
+							version="7.0.1" />
 				<dependency id="Newtonsoft.Json"
 							version="13.0.2" />
 				<dependency id="Nito.Collections.Deque"
@@ -63,7 +63,7 @@
 				<dependency id="System.Text.Encodings.Web"
 							version="7.0.0" />
 				<dependency id="System.Text.Json"
-							version="7.0.0" />
+							version="7.0.2" />
 				<dependency id="System.Threading.Tasks"
 							version="4.3.0" />
 				<dependency id="System.Threading.Tasks.Dataflow"
@@ -102,7 +102,7 @@
 				<dependency id="Microsoft.Extensions.Logging.Abstractions"
 							version="7.0.0" />
 				<dependency id="Microsoft.Extensions.Options"
-							version="7.0.0" />
+							version="7.0.1" />
 				<dependency id="Newtonsoft.Json"
 							version="13.0.2" />
 				<dependency id="Nito.Collections.Deque"
@@ -118,7 +118,7 @@
 				<dependency id="System.Text.Encodings.Web"
 							version="7.0.0" />
 				<dependency id="System.Text.Json"
-							version="7.0.0" />
+							version="7.0.2" />
 				<dependency id="System.Threading.Tasks"
 							version="4.3.0" />
 				<dependency id="System.Threading.Tasks.Dataflow"
@@ -157,7 +157,7 @@
 				<dependency id="Microsoft.Extensions.Logging.Abstractions"
 							version="7.0.0" />
 				<dependency id="Microsoft.Extensions.Options"
-							version="7.0.0" />
+							version="7.0.1" />
 				<dependency id="Newtonsoft.Json"
 							version="13.0.2" />
 				<dependency id="Nito.Collections.Deque"
@@ -173,7 +173,7 @@
 				<dependency id="System.Text.Encodings.Web"
 							version="7.0.0" />
 				<dependency id="System.Text.Json"
-							version="7.0.0" />
+							version="7.0.2" />
 				<dependency id="System.Threading.Tasks"
 							version="4.3.0" />
 				<dependency id="System.Threading.Tasks.Dataflow"

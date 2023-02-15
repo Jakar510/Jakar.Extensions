@@ -28,19 +28,12 @@ public interface IUserData : JsonModels.IJsonModel
     [Required] public SupportedLanguage PreferredLanguage { get; set; }
 
 
-    public void Update( IUserData model );
+    public IUserData Update( IUserData model );
 }
 
 
 
-public interface IUserData<out T> : IUserData where T : IUserData<T>
-{
-    public new T Update( IUserData model );
-}
-
-
-
-public record UserData : BaseJsonModelRecord, IUserData<UserData>
+public record UserData : BaseJsonModelRecord, IUserData
 {
     private string            _firstName = string.Empty;
     private string            _lastName  = string.Empty;
@@ -199,18 +192,5 @@ public record UserData : BaseJsonModelRecord, IUserData<UserData>
 
         return this;
     }
-    void IUserData.Update( IUserData value ) => Update( value );
-}
-
-
-
-public record UserData<T> : UserData, IUserData<T> where T : UserData<T>
-{
-    public UserData() { }
-    public UserData( IUserData model ) : base( model ) { }
-    public UserData( string    firstName, string lastName ) : base( firstName, lastName ) { }
-
-
-    public new T Update( IUserData   value ) => (T)base.Update( value );
-    void IUserData.Update( IUserData value ) => Update( value );
+    IUserData IUserData.Update( IUserData value ) => Update( value );
 }

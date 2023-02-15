@@ -17,62 +17,44 @@ public record VerifyRequest : BaseRecord, ILoginRequest, ICredentials
     [JsonProperty( nameof(UserPassword), Required = Required.Always )]
     public string UserPassword { get; init; } = string.Empty;
 
+
     public VerifyRequest() { }
     public VerifyRequest( string? userName, string? userPassword )
     {
         UserLogin    = userName ?? throw new ArgumentNullException( nameof(userName) );
         UserPassword = userPassword ?? throw new ArgumentNullException( nameof(userPassword) );
     }
-    public override int GetHashCode() => HashCode.Combine( base.GetHashCode(), UserLogin, UserPassword );
 
 
     public virtual NetworkCredential GetCredential( Uri uri, string authType ) => new(UserLogin, UserPassword.ToSecureString());
-
-
-    public virtual bool Equals( VerifyRequest? other )
-    {
-        if ( other is null ) { return false; }
-
-        if ( ReferenceEquals( this, other ) ) { return true; }
-
-        return base.Equals( other ) && UserLogin == other.UserLogin && UserPassword == other.UserPassword;
-    }
 }
 
 
 
 [SuppressMessage( "ReSharper", "NullableWarningSuppressionIsUsed" )]
-public record VerifyRequest<T> : BaseRecord, ICredentials, IValidator where T : notnull
+public record VerifyRequest<T> : VerifyRequest
 {
-    public bool IsValid => Data is IValidator validator
-                               ? Request.IsValid && validator.IsValid
-                               : Request.IsValid;
+    private VerifyRequest? _request;
+
+    public override bool IsValid => Data is IValidator validator
+                                        ? base.IsValid && validator.IsValid
+                                        : base.IsValid;
 
 
-    [JsonProperty( nameof(Data),    Required = Required.Always )] public T             Data    { get; init; } = default!;
-    [JsonProperty( nameof(Request), Required = Required.Always )] public VerifyRequest Request { get; init; } = default!;
+    [JsonProperty( nameof(Data), Required = Required.AllowNull )] public T? Data { get; init; }
+
+
+    [JsonIgnore]
+    [Obsolete( "Will be removed in a future version" )]
+    public VerifyRequest Request
+    {
+        get => _request ??= this;
+        init => _request = value;
+    }
 
 
     public VerifyRequest() { }
-    public VerifyRequest( VerifyRequest request, T data )
-    {
-        Request = request;
-        Data    = data;
-    }
-
-
-    public override int GetHashCode() => HashCode.Combine( Request, Data );
-
-
-    public NetworkCredential GetCredential( Uri uri, string authType ) => Request.GetCredential( uri, authType );
-
-
-    public virtual bool Equals( VerifyRequest<T>? other )
-    {
-        if ( other is null ) { return false; }
-
-        if ( ReferenceEquals( this, other ) ) { return true; }
-
-        return Request.Equals( other.Request ) && EqualityComparer<T>.Default.Equals( Data, other.Data );
-    }
+    public VerifyRequest( string? userLogin, string? userPassword, T? data ) : base( userLogin, userPassword ) => Data = data;
+    
+    [Obsolete( "Will be removed in a future version" )] public VerifyRequest( VerifyRequest request, T? data ) : this( request.UserLogin, request.UserPassword, data ) { }
 }

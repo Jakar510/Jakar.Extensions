@@ -43,7 +43,7 @@ public sealed class AppLogger : Service, IAppLogger
         if ( !IsValid ) { throw new ApiDisabledException( $"Must call {nameof(AppLogger)}.{nameof(StartAsync)} first." ); }
     }
 
-
+    
     public void Add( Log log ) => _logs.Add( log );
     public void Add( params Log[] logs )
     {

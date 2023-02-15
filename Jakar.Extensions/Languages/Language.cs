@@ -3,6 +3,7 @@ namespace Jakar.Extensions;
 
 
 [Serializable]
+[DebuggerDisplay( nameof(DisplayName) )]
 public sealed class Language : BaseClass, IComparable<Language>, IEquatable<Language>, IComparable
 {
     private readonly CultureInfo        _culture;
@@ -29,20 +30,14 @@ public sealed class Language : BaseClass, IComparable<Language>, IEquatable<Lang
     public Language( SupportedLanguage language ) : this( new CultureInfo( language.GetShortName() ), language ) { }
 
 
-    public override bool Equals( object? obj ) => obj is Language language && Equals( language );
-    public override int GetHashCode() => HashCode.Combine( DisplayName, Name, Version );
-    public override string ToString() => DisplayName;
-
-
-    public static bool operator ==( Language?                   left, Language? right ) => Equalizer.Default.Equals( left, right );
-    public static bool operator >( Language?                    left, Language? right ) => Sorter.Default.Compare( left, right ) > 0;
-    public static bool operator >=( Language?                   left, Language? right ) => Sorter.Default.Compare( left, right ) >= 0;
     public static implicit operator Language( CultureInfo       value ) => new(value);
     public static implicit operator Language( SupportedLanguage value ) => new(value);
     public static implicit operator CultureInfo( Language       value ) => value._culture;
-    public static bool operator !=( Language?                   left, Language? right ) => Equalizer.Default.Equals( left, right );
-    public static bool operator <( Language?                    left, Language? right ) => Sorter.Default.Compare( left, right ) < 0;
-    public static bool operator <=( Language?                   left, Language? right ) => Sorter.Default.Compare( left, right ) <= 0;
+
+
+    public override string ToString() => DisplayName;
+
+
     public int CompareTo( object? value ) => value is null
                                                  ? 1
                                                  : value is Language other
@@ -66,6 +61,16 @@ public sealed class Language : BaseClass, IComparable<Language>, IEquatable<Lang
 
         return DisplayName == other.DisplayName && Name == other.Name && Version == other.Version;
     }
+    public override bool Equals( object? obj ) => obj is Language language && Equals( language );
+    public override int GetHashCode() => HashCode.Combine( DisplayName, Name, Version );
+
+
+    public static bool operator ==( Language? left, Language? right ) => Equalizer.Default.Equals( left, right );
+    public static bool operator >( Language?  left, Language? right ) => Sorter.Default.Compare( left, right ) > 0;
+    public static bool operator >=( Language? left, Language? right ) => Sorter.Default.Compare( left, right ) >= 0;
+    public static bool operator !=( Language? left, Language? right ) => Equalizer.Default.Equals( left, right );
+    public static bool operator <( Language?  left, Language? right ) => Sorter.Default.Compare( left, right ) < 0;
+    public static bool operator <=( Language? left, Language? right ) => Sorter.Default.Compare( left, right ) <= 0;
 
 
 
@@ -128,23 +133,23 @@ public sealed class Language : BaseClass, IComparable<Language>, IEquatable<Lang
     public static Items All => new(CultureInfo.GetCultures( CultureTypes.AllCultures )
                                               .Select( culture => new Language( culture ) ));
 
-    public static Items Supported { get; } = new()
-                                             {
-                                                 Arabic,
-                                                 Chinese,
-                                                 Czech,
-                                                 Dutch,
-                                                 English,
-                                                 French,
-                                                 German,
-                                                 Japanese,
-                                                 Korean,
-                                                 Polish,
-                                                 Portuguese,
-                                                 Spanish,
-                                                 Swedish,
-                                                 Thai
-                                             };
+    public static Collection Supported { get; } = new()
+                                                  {
+                                                      Arabic,
+                                                      Chinese,
+                                                      Czech,
+                                                      Dutch,
+                                                      English,
+                                                      French,
+                                                      German,
+                                                      Japanese,
+                                                      Korean,
+                                                      Polish,
+                                                      Portuguese,
+                                                      Spanish,
+                                                      Swedish,
+                                                      Thai
+                                                  };
 
     #endregion
 }

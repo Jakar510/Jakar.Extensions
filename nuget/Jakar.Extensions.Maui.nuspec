@@ -27,8 +27,7 @@
 					branch="master" />
 		<dependencies>
 			<group targetFramework="net6.0">
-				<dependency id="Jakar.Extensions"
-							version="6.5.1" />
+				<dependency id="Jakar.Extensions" version="6.6.2" />
 			</group>
 		</dependencies>
 	</metadata>

@@ -71,6 +71,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jakar.AppLogger.Portal", "A
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jakar.AppLogger.Client.AspNetCore", "AppLogger\Jakar.AppLogger.Client.AspNetCore\Jakar.AppLogger.Client.AspNetCore.csproj", "{6E68DB7D-3D06-4E31-92C0-901920CD2DAA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jakar.AppLogger.Client.Maui", "AppLogger\Jakar.AppLogger.Client.Maui\Jakar.AppLogger.Client.Maui.csproj", "{CCCD9169-B2A8-4407-A3FB-F478CE58748E}"
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Examples", "Examples", "{9112EAE7-2905-431E-AC5B-DC4A3D9F79E9}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Console", "AppLogger\Examples\Console\Console.csproj", "{A480829B-64FB-4C78-826B-FCF4ABC0B1EB}"
@@ -90,8 +92,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorWASM", "AppLogger\Examples\BlazorWASM\BlazorWASM.csproj", "{FEF0E90D-C2B7-4886-8C71-A7CDFF7106FE}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AppLogger", "AppLogger", "{16A01E75-3A4D-4001-826A-2786C0B4B14E}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jakar.AppLogger.Client.Maui", "AppLogger\Jakar.AppLogger.Client.Maui\Jakar.AppLogger.Client.Maui.csproj", "{CCCD9169-B2A8-4407-A3FB-F478CE58748E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

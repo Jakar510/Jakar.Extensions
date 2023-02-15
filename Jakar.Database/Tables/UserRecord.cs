@@ -98,12 +98,14 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, IUserRecord<U
 
     public static UserRecord Create<TUser>( VerifyRequest<TUser> request, long rights = default ) where TUser : IUserData
     {
+        ArgumentNullException.ThrowIfNull( request.Data );
+
         var record = new UserRecord( request.Data, rights )
                      {
-                         UserName = request.Request.UserLogin
+                         UserName = request.UserLogin
                      };
 
-        record.UpdatePassword( request.Request.UserPassword );
+        record.UpdatePassword( request.UserPassword );
         return record;
     }
     public static UserRecord Create<TUser>( VerifyRequest<TUser> request, UserRecord caller, long rights = default ) where TUser : IUserData
@@ -286,7 +288,7 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, IUserRecord<U
         PreferredLanguage = value.PreferredLanguage;
         return Update( value.AdditionalData );
     }
-    void IUserData.Update( IUserData value ) => Update( value );
+    IUserData IUserData.Update( IUserData value ) => Update( value );
 
     #endregion
 

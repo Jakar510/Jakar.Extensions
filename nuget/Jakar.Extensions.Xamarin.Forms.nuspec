@@ -36,7 +36,7 @@
 				<dependency id="Xamarin.CommunityToolkit.Markup"
 							version="2.0.5" />
 				<dependency id="Xamarin.Essentials"
-							version="1.7.4" />
+							version="1.7.5" />
 				<dependency id="NETStandard.Library"
 							version="2.0.3" />
 
@@ -50,8 +50,7 @@
 				<dependency id="Newtonsoft.Json"
 							version="13.0.2" />
 
-				<dependency id="Jakar.Extensions"
-							version="6.6.0" />
+				<dependency id="Jakar.Extensions" version="6.6.2" />
 
 				<dependency id="Acr.UserDialogs"
 							version="7.2.0.564" />
@@ -76,7 +75,7 @@
 				<dependency id="Xamarin.CommunityToolkit.Markup"
 							version="2.0.5" />
 				<dependency id="Xamarin.Essentials"
-							version="1.7.4" />
+							version="1.7.5" />
 				<dependency id="NETStandard.Library"
 							version="2.0.3" />
 
@@ -90,8 +89,7 @@
 				<dependency id="Newtonsoft.Json"
 							version="13.0.2" />
 
-				<dependency id="Jakar.Extensions"
-							version="6.6.0" />
+				<dependency id="Jakar.Extensions" version="6.6.2" />
 
 				<dependency id="Acr.UserDialogs"
 							version="7.2.0.564" />
@@ -116,7 +114,7 @@
 				<dependency id="Xamarin.CommunityToolkit.Markup"
 							version="2.0.5" />
 				<dependency id="Xamarin.Essentials"
-							version="1.7.4" />
+							version="1.7.5" />
 				<dependency id="NETStandard.Library"
 							version="2.0.3" />
 
@@ -130,8 +128,7 @@
 				<dependency id="Newtonsoft.Json"
 							version="13.0.2" />
 
-				<dependency id="Jakar.Extensions"
-							version="6.6.0" />
+				<dependency id="Jakar.Extensions" version="6.6.2" />
 
 				<dependency id="Acr.UserDialogs"
 							version="7.2.0.564" />
@@ -162,7 +159,7 @@
 				<dependency id="Xamarin.CommunityToolkit.Markup"
 							version="2.0.5" />
 				<dependency id="Xamarin.Essentials"
-							version="1.7.4" />
+							version="1.7.5" />
 				<dependency id="NETStandard.Library"
 							version="2.0.3" />
 
