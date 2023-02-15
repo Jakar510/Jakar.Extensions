@@ -5,13 +5,13 @@ namespace Jakar.Extensions.Xamarin.Forms;
 [SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
 [SuppressMessage( "ReSharper", "MemberCanBeMadeStatic.Global" )]
 [SuppressMessage( "ReSharper", "AsyncVoidLambda" )]
-public class AppDebug : ObservableClass, ILogger, IDebugSettings, IFilePaths
+public class AppDebug : ObservableClass, ILogger
 {
     protected readonly IAppSettings         _settings;
-    private readonly   IFilePaths           _paths;
-    private readonly   Synchronized<bool>   _apiEnabled    = new(false);
-    private readonly   Synchronized<Guid>   _installID     = new(Guid.Empty);
-    private            DebugSettings        _debugSettings = new();
+    protected readonly IFilePaths           _paths;
+    private readonly   Synchronized<bool>   _apiEnabled = new(false);
+    private readonly   Synchronized<Guid>   _installID  = new(Guid.Empty);
+    private            DebugSettings?       _debugSettings;
     protected          ReadOnlyMemory<byte> _screenShot;
 
 
@@ -19,24 +19,20 @@ public class AppDebug : ObservableClass, ILogger, IDebugSettings, IFilePaths
     public bool ApiEnabled
     {
         get => _apiEnabled;
-        private set
+        protected set
         {
             _apiEnabled.Value = value;
             OnPropertyChanged();
+            OnPropertyChanged( nameof(ApiDisabled) );
         }
     }
-    public virtual bool CanDebug               => Debugger.IsAttached;
-    public         bool EnableAnalytics        => Settings.EnableAnalytics;
-    public         bool EnableApi              => Settings.EnableApi;
-    public         bool EnableCrashes          => Settings.EnableCrashes;
-    public         bool IncludeAppStateOnError => Settings.IncludeAppStateOnError;
-    public         bool TakeScreenshotOnError  => Settings.TakeScreenshotOnError;
-    public virtual bool UseDebugLogin          => CanDebug;
+    public virtual bool CanDebug      => Debugger.IsAttached;
+    public virtual bool UseDebugLogin => CanDebug;
     public DebugSettings Settings
     {
         get
         {
-            lock (this) { return _debugSettings; }
+            lock (this) { return _debugSettings ??= new DebugSettings(); }
         }
         set
         {
@@ -52,17 +48,6 @@ public class AppDebug : ObservableClass, ILogger, IDebugSettings, IFilePaths
             OnPropertyChanged();
         }
     }
-    LocalDirectory IFilePaths.AppDataDirectory => _paths.AppDataDirectory;
-    LocalDirectory IFilePaths.CacheDirectory   => _paths.CacheDirectory;
-    LocalFile IFilePaths.     AccountsFile     => _paths.AccountsFile;
-    public LocalFile          AppStateFile     => _paths.AppStateFile;
-    public LocalFile          DebugFile        => _paths.DebugFile;
-    public LocalFile          FeedBackFile     => _paths.FeedBackFile;
-    public LocalFile          IncomingFile     => _paths.IncomingFile;
-    public LocalFile          OutgoingFile     => _paths.OutgoingFile;
-    public LocalFile          ScreenShot       => _paths.ScreenShot;
-    public LocalFile          ZipFile          => _paths.ZipFile;
-    public LogLevel           LogLevel         => Settings.LogLevel;
 
 
     public AppDebug( IFilePaths paths, IAppSettings settings )
@@ -85,15 +70,15 @@ public class AppDebug : ObservableClass, ILogger, IDebugSettings, IFilePaths
                                                                };
     protected virtual async ValueTask<EventDetails?> Handle_AppState( Exception e, ICollection<ErrorAttachmentLog> attachments, CancellationToken token = default )
     {
-        if ( !IncludeAppStateOnError ) { return default; }
+        if ( !Settings.IncludeAppStateOnError ) { return default; }
 
 
-        await Handle_File( FeedBackFile, attachments, token );
-        await Handle_File( AppStateFile, attachments, token );
-        await Handle_File( DebugFile,    attachments, token );
-        await Handle_File( IncomingFile, attachments, token );
-        await Handle_File( OutgoingFile, attachments, token );
-        await Handle_File( ZipFile,      attachments, token );
+        await Handle_File( _paths.FeedBackFile, attachments, token );
+        await Handle_File( _paths.AppStateFile, attachments, token );
+        await Handle_File( _paths.DebugFile,    attachments, token );
+        await Handle_File( _paths.IncomingFile, attachments, token );
+        await Handle_File( _paths.OutgoingFile, attachments, token );
+        await Handle_File( _paths.ZipFile,      attachments, token );
 
 
         var eventDetails = EventDetails.Create( e );
@@ -116,7 +101,7 @@ public class AppDebug : ObservableClass, ILogger, IDebugSettings, IFilePaths
     }
     protected virtual async ValueTask Handle_ScreenShot( Exception e, ICollection<ErrorAttachmentLog> attachments, CancellationToken token = default )
     {
-        if ( !TakeScreenshotOnError || _screenShot.IsEmpty ) { return; }
+        if ( !Settings.TakeScreenshotOnError || _screenShot.IsEmpty ) { return; }
 
         attachments.Add( ErrorAttachmentLog.AttachmentWithBinary( _screenShot.ToArray(), "ScreenShot.jpeg", "image/jpeg" ) );
 
@@ -131,11 +116,11 @@ public class AppDebug : ObservableClass, ILogger, IDebugSettings, IFilePaths
     public ValueTask HandleExceptionAsync( Exception e ) => HandleExceptionAsync( e, Empty );
     public async ValueTask HandleExceptionAsync( Exception e, params ErrorAttachmentLog[] attachmentLogs )
     {
-        if ( !EnableApi ) { return; }
+        if ( Settings.EnableApi ) { return; }
 
-        ThrowNotEnabled();
+        if ( ApiDisabled ) { ThrowNotEnabled(); }
 
-        _screenShot = TakeScreenshotOnError
+        _screenShot = Settings.TakeScreenshotOnError
                           ? await TakeScreenShot()
                           : default;
 
@@ -187,11 +172,12 @@ public class AppDebug : ObservableClass, ILogger, IDebugSettings, IFilePaths
 
         if ( Settings.IncludeAppStateOnError ) { result[nameof(AppState)] = AppState(); }
 
-        await FeedBackFile.WriteAsync( result.ToPrettyJson() );
+        await _paths.FeedBackFile.WriteAsync( result.ToPrettyJson() );
     }
 
 
     [DoesNotReturn]
+    [DebuggerHidden]
     protected void ThrowNotEnabled() => throw new ApiDisabledException( GetType()
                                                                            .Name );
 
@@ -200,7 +186,7 @@ public class AppDebug : ObservableClass, ILogger, IDebugSettings, IFilePaths
     {
         if ( ApiDisabled ) { ThrowNotEnabled(); }
 
-        if ( !EnableCrashes ) { return; }
+        if ( !Settings.EnableCrashes ) { return; }
 
         var attachments = new List<ErrorAttachmentLog>( attachmentLogs.Length + 10 );
         attachments.AddRange( attachmentLogs );
@@ -213,7 +199,7 @@ public class AppDebug : ObservableClass, ILogger, IDebugSettings, IFilePaths
     {
         if ( ApiDisabled ) { ThrowNotEnabled(); }
 
-        if ( !EnableCrashes ) { return; }
+        if ( !Settings.EnableCrashes ) { return; }
 
         Crashes.TrackError( ex, eventDetails, attachments );
     }
@@ -221,7 +207,7 @@ public class AppDebug : ObservableClass, ILogger, IDebugSettings, IFilePaths
     {
         if ( ApiDisabled ) { ThrowNotEnabled(); }
 
-        if ( !EnableAnalytics ) { return; }
+        if ( !Settings.EnableAnalytics ) { return; }
 
         TrackEvent( AppState(), source );
     }
@@ -229,7 +215,7 @@ public class AppDebug : ObservableClass, ILogger, IDebugSettings, IFilePaths
     {
         if ( ApiDisabled ) { ThrowNotEnabled(); }
 
-        if ( !EnableAnalytics ) { return; }
+        if ( !Settings.EnableAnalytics ) { return; }
 
         Analytics.TrackEvent( source, eventDetails );
     }
@@ -248,8 +234,9 @@ public class AppDebug : ObservableClass, ILogger, IDebugSettings, IFilePaths
     public async ValueTask<LocalFile> WriteScreenShot( CancellationToken token = default ) => await WriteScreenShot( _screenShot.ToArray(), token );
     public async ValueTask<LocalFile> WriteScreenShot( ReadOnlyMemory<byte> screenShot, CancellationToken token = default )
     {
-        await ScreenShot.WriteAsync( screenShot, token );
-        return ScreenShot;
+        LocalFile file = _paths.ScreenShot;
+        await file.WriteAsync( screenShot, token );
+        return file;
     }
 
     #endregion
@@ -261,7 +248,7 @@ public class AppDebug : ObservableClass, ILogger, IDebugSettings, IFilePaths
     public void Log<TState>( MsLogLevel            logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter ) => Log( ConvertLevel( logLevel ), eventId, state, exception, formatter );
     public bool IsEnabled( MsLogLevel              logLevel ) => IsEnabled( ConvertLevel( logLevel ) );
     public IDisposable? BeginScope<TState>( TState state ) where TState : notnull => default;
-    public bool IsEnabled( LogLevel                logLevel ) => logLevel != LogLevel;
+    public bool IsEnabled( LogLevel                logLevel ) => logLevel != Settings.LogLevel;
     public void Log<TState>( LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter )
     {
         if ( ApiDisabled ) { ThrowNotEnabled(); }
