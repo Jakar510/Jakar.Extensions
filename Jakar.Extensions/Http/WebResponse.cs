@@ -8,6 +8,7 @@ using static Jakar.Extensions.WebRequester;
 namespace Jakar.Extensions;
 
 
+[SuppressMessage( "ReSharper", "UnusedParameter.Global")]
 public readonly struct WebResponse<T>
 {
     public const string ERROR_MESSAGE = "Error Message: ";
@@ -28,8 +29,7 @@ public readonly struct WebResponse<T>
 
     public WebResponse( HttpResponseMessage response, string    error ) : this( response, default, default, error ) { }
     public WebResponse( HttpResponseMessage response, Exception e, in string error ) : this( response, default, e, error ) { }
-    public WebResponse( HttpResponseMessage response, in T      payload ) : this( response, payload, default ) { }
-    public WebResponse( HttpResponseMessage response, in T? payload, Exception? exception, string? error = default )
+    public WebResponse( HttpResponseMessage response, T? payload, Exception? exception = default, string? error = default )
     {
         HttpRequestHeaders? requestHeaders = response.RequestMessage?.Headers;
         HttpContentHeaders? contentHeaders = response.RequestMessage?.Content?.Headers;
@@ -80,8 +80,8 @@ public readonly struct WebResponse<T>
         {
             using HttpResponseMessage response = await handler;
 
-            return handler.RetryPolicy.AllowRetries
-                       ? await Create( response, func, handler.RetryPolicy, handler.Token )
+            return handler.RetryPolicy?.AllowRetries is true
+                       ? await Create( response, func, handler.RetryPolicy.Value, handler.Token )
                        : await Create( response, func, handler.Token );
         }
     }
@@ -129,14 +129,26 @@ public readonly struct WebResponse<T>
 
     public static async ValueTask<WebResponse<T>> Create( HttpResponseMessage response, Func<HttpResponseMessage, ValueTask<T>> func, RetryPolicy policy, CancellationToken token )
     {
-        try
-        {
-            if ( !response.IsSuccessStatusCode ) { return await Create( response, token ); }
+        int count      = 0;
+        var exceptions = new Exception[policy.MaxRetires];
 
-            T result = await func( response );
-            return new WebResponse<T>( response, result );
+        while ( count < policy.MaxRetires )
+        {
+            try
+            {
+                if ( !response.IsSuccessStatusCode ) { return await Create( response, token ); }
+
+                T result = await func( response );
+                return new WebResponse<T>( response, result );
+            }
+            catch ( HttpRequestException e ) { exceptions[count] = e; }
+
+
+            await policy.Wait( ref count, token );
         }
-        catch ( HttpRequestException e ) { return await Create( response, e, token ); }
+
+        try { throw new AggregateException( exceptions ); }
+        catch ( AggregateException e ) { return await Create( response, e, token ); }
     }
     public static async ValueTask<WebResponse<T>> Create<TArg>( HttpResponseMessage response, TArg arg, Func<HttpResponseMessage, TArg, ValueTask<T>> func, RetryPolicy policy, CancellationToken token )
     {
@@ -158,7 +170,8 @@ public readonly struct WebResponse<T>
             await policy.Wait( ref count, token );
         }
 
-        return await Create( response, new AggregateException( exceptions ), token );
+        try { throw new AggregateException( exceptions ); }
+        catch ( AggregateException e ) { return await Create( response, e, token ); }
     }
 
 

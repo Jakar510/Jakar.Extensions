@@ -54,7 +54,6 @@ public record VerifyRequest<T> : VerifyRequest
 
 
     public VerifyRequest() { }
-    public VerifyRequest( string? userLogin, string? userPassword, T? data ) : base( userLogin, userPassword ) => Data = data;
-    
-    [Obsolete( "Will be removed in a future version" )] public VerifyRequest( VerifyRequest request, T? data ) : this( request.UserLogin, request.UserPassword, data ) { }
+    public VerifyRequest( string?       userLogin, string? userPassword, T? data ) : base( userLogin, userPassword ) => Data = data;
+    public VerifyRequest( VerifyRequest request,   T?      data ) : this( request.UserLogin, request.UserPassword, data ) { }
 }

@@ -14,59 +14,54 @@ namespace Jakar.Extensions;
 public partial class WebRequester
 {
 // ReSharper disable once ClassWithMembersNeverInherited.Global
-    public struct Builder
+    public ref struct Builder
     {
-        private Encoding                   _encoding                 = Encoding.Default;
-        private bool?                      _useProxy                 = default;
-        private IWebProxy?                 _proxy                    = default;
-        private bool?                      _allowAutoRedirect        = default;
-        private int?                       _maxAutomaticRedirections = default;
-        private ICredentials?              _defaultProxyCredentials  = default;
-        private ICredentials?              _credentials              = default;
-        private bool?                      _preAuthenticate          = default;
-        private bool?                      _useCookies               = default;
-        private CookieContainer?           _cookieContainer          = default;
-        private int?                       _maxResponseHeadersLength = default;
-        private int?                       _maxConnectionsPerServer  = default;
-        private AuthenticationHeaderValue? _authenticationHeader     = default;
-        private RetryPolicy                _retryPolicy              = default;
+        private readonly WebHeaders                 _headers = new();
+        private readonly IHostInfo                  _hostInfo;
+        private          Encoding                   _encoding                     = Encoding.Default;
+        private          bool?                      _useProxy                     = default;
+        private          IWebProxy?                 _proxy                        = default;
+        private          bool?                      _allowAutoRedirect            = default;
+        private          int?                       _maxAutomaticRedirections     = default;
+        private          ICredentials?              _defaultProxyCredentials      = default;
+        private          ICredentials?              _credentials                  = default;
+        private          bool?                      _preAuthenticate              = default;
+        private          bool?                      _useCookies                   = default;
+        private          CookieContainer?           _cookieContainer              = default;
+        private          int?                       _maxResponseHeadersLength     = default;
+        private          int?                       _maxConnectionsPerServer      = default;
+        private          AuthenticationHeaderValue? _authenticationHeader         = default;
+        private          TimeSpan?                  _connectTimeout               = default;
+        private          RetryPolicy?               _retryPolicy                  = default;
+        private          int?                       _maxResponseContentBufferSize = default;
 
 
     #if NETSTANDARD2_1
-        private SslProtocols?              _sslProtocols = default;
-        private ClientCertificateOption?   _clientCertificateOptions = default;
-        private X509CertificateCollection? _clientCertificates = default;
-        private DecompressionMethods?      _automaticDecompression = default;
+        private SslProtocols?              _sslProtocols                = default;
+        private ClientCertificateOption?   _clientCertificateOptions    = default;
+        private X509CertificateCollection? _clientCertificates          = default;
+        private DecompressionMethods?      _automaticDecompression      = default;
         private long?                      _maxRequestContentBufferSize = default;
 
     #else
-        private SslClientAuthenticationOptions? _sslOptions                  = default;
-        private TimeSpan?                       _responseDrainTimeout        = default;
-        private TimeSpan?                       _connectTimeout              = default;
-        private HttpKeepAlivePingPolicy?        _keepAlivePingPolicy         = default;
-        private TimeSpan?                       _keepAlivePingTimeout        = default;
-        private TimeSpan?                       _keepAlivePingDelay          = default;
-        private TimeSpan?                       _pooledConnectionLifetime    = default;
+        private SslClientAuthenticationOptions? _sslOptions = default;
+        private TimeSpan?                       _responseDrainTimeout = default;
+        private HttpKeepAlivePingPolicy?        _keepAlivePingPolicy = default;
+        private TimeSpan?                       _keepAlivePingTimeout = default;
+        private TimeSpan?                       _keepAlivePingDelay = default;
+        private TimeSpan?                       _pooledConnectionLifetime = default;
         private TimeSpan?                       _pooledConnectionIdleTimeout = default;
-        private int?                            _maxResponseDrainSize        = default;
+        private int?                            _maxResponseDrainSize = default;
 
     #endif
 
 
-        private  IHostInfo? _hostInfo = default;
-        internal Uri        Host => _hostInfo?.HostInfo ?? throw new ArgumentNullException( nameof(Host) );
+        public Builder( IHostInfo value ) => _hostInfo = value;
 
 
-        public Builder() { }
-
-
-        public static Builder Create() => new();
-        public static Builder Create( Uri value ) => Create()
-           .With_Host( value );
-        public static Builder Create( Func<IHostInfo> value ) => Create()
-           .With_Host( value );
-        public static Builder Create( IHostInfo value ) => Create()
-           .With_Host( value );
+        public static Builder Create( IHostInfo       value ) => new(value);
+        public static Builder Create( Uri             value ) => new(new HostHolder( value ));
+        public static Builder Create( Func<IHostInfo> value ) => new(new MethodHolder( value ));
 
 
         public Builder Reset()
@@ -87,22 +82,22 @@ public partial class WebRequester
 
 
         #if NETSTANDARD2_1
-            _sslProtocols = default;
-            _clientCertificateOptions = default;
-            _clientCertificates = default;
-            _automaticDecompression = default;
+            _sslProtocols                = default;
+            _clientCertificateOptions    = default;
+            _clientCertificates          = default;
+            _automaticDecompression      = default;
             _maxRequestContentBufferSize = default;
 
         #else
-            _sslOptions                  = default;
-            _responseDrainTimeout        = default;
-            _connectTimeout              = default;
-            _keepAlivePingPolicy         = default;
-            _keepAlivePingTimeout        = default;
-            _keepAlivePingDelay          = default;
-            _pooledConnectionLifetime    = default;
+            _sslOptions = default;
+            _responseDrainTimeout = default;
+            _connectTimeout = default;
+            _keepAlivePingPolicy = default;
+            _keepAlivePingTimeout = default;
+            _keepAlivePingDelay = default;
+            _pooledConnectionLifetime = default;
             _pooledConnectionIdleTimeout = default;
-            _maxResponseDrainSize        = default;
+            _maxResponseDrainSize = default;
 
         #endif
 
@@ -113,7 +108,13 @@ public partial class WebRequester
         private HttpClient GetClient()
         {
             var client = new HttpClient( GetHandler() );
+            foreach ( (string? key, IEnumerable<string>? value) in _headers ) { client.DefaultRequestHeaders.Add( key, value ); }
+
             client.DefaultRequestHeaders.Authorization = _authenticationHeader;
+            if ( _connectTimeout.HasValue ) { client.Timeout = _connectTimeout.Value; }
+
+            if ( _maxResponseContentBufferSize.HasValue ) { client.MaxResponseContentBufferSize = _maxResponseContentBufferSize.Value; }
+
             return client;
         }
         private HttpMessageHandler GetHandler()
@@ -184,53 +185,36 @@ public partial class WebRequester
 
             return handler;
         }
-        public WebRequester Build() => new(GetClient(), _hostInfo ?? throw new InvalidOperationException( $"Must call {nameof(With_Host)}" ), _encoding, _retryPolicy);
+        public WebRequester Build() => new(GetClient(), _hostInfo, _retryPolicy, _encoding);
 
 
-
-        public sealed record HostHolder( Uri HostInfo ) : IHostInfo;
-
-
-
-        public sealed record MethodHolder : IHostInfo
+        public Builder With_Header( string name, IEnumerable<string?> values )
         {
-            private readonly Func<IHostInfo> _value;
-
-            public Uri HostInfo => _value()
-               .HostInfo;
-
-            public MethodHolder( Func<IHostInfo> value ) => _value = value;
+            _headers.Add( name, values );
+            return this;
         }
-
-
-
-        public Builder With_Host( Uri             value ) => With_Host( new HostHolder( value ) );
-        public Builder With_Host( Func<IHostInfo> value ) => With_Host( new MethodHolder( value ) );
-        public Builder With_Host( IHostInfo value )
+        public Builder With_Header( string name, string? value )
         {
-            _hostInfo = value;
+            _headers.Add( name, value );
             return this;
         }
 
 
-        public Builder With_Retry() => With_Retry( _retryPolicy with
-                                                   {
-                                                       AllowRetries = true,
-                                                   } );
+        public Builder With_MaxResponseContentBufferSize( int value )
+        {
+            _maxResponseContentBufferSize = Math.Max( 0, value );
+            return this;
+        }
+
+
+        public Builder With_Retry() => With_Retry( new RetryPolicy( true ) );
         public Builder With_Retry( RetryPolicy policy )
         {
             _retryPolicy = policy;
             return this;
         }
-        public Builder With_Retry( int      maxRetires ) => With_Retry( _retryPolicy.Delay, _retryPolicy.Scale, maxRetires );
-        public Builder With_Retry( TimeSpan delay, TimeSpan scale ) => With_Retry( delay,   scale,              _retryPolicy.MaxRetires );
-        public Builder With_Retry( TimeSpan delay, TimeSpan scale, int maxRetires ) => With_Retry( _retryPolicy with
-                                                                                                   {
-                                                                                                       Delay = delay,
-                                                                                                       Scale = scale,
-                                                                                                       MaxRetires = Math.Max( maxRetires, 1 ),
-                                                                                                       AllowRetries = true,
-                                                                                                   } );
+        public Builder With_Retry( int      maxRetires ) => With_Retry( new RetryPolicy( true,                                 maxRetires ) );
+        public Builder With_Retry( TimeSpan delay, TimeSpan scale, int maxRetires = 3 ) => With_Retry( new RetryPolicy( delay, scale, maxRetires ) );
 
 
         public Builder With_Encoding( Encoding value )
@@ -273,17 +257,13 @@ public partial class WebRequester
         }
 
 
+        public Builder With_Credentials( string scheme, string? value ) => With_Credentials( new AuthenticationHeaderValue( scheme, value ) );
         public Builder With_Credentials( AuthenticationHeaderValue? value )
         {
             _authenticationHeader = value;
             return this;
         }
-        public Builder With_Credentials( ICredentials? value )
-        {
-            _credentials     = value;
-            _preAuthenticate = value is not null;
-            return this;
-        }
+        public Builder With_Credentials( ICredentials? value ) => With_Credentials( value, value is not null );
         public Builder With_Credentials( ICredentials? value, bool preAuthenticate )
         {
             _credentials     = value;
@@ -315,7 +295,6 @@ public partial class WebRequester
         }
 
 
-    #if NET6_0_OR_GREATER
         public Builder With_Timeout( int    minutes ) => With_Timeout( TimeSpan.FromMinutes( minutes ) );
         public Builder With_Timeout( float  seconds ) => With_Timeout( TimeSpan.FromSeconds( seconds ) );
         public Builder With_Timeout( double milliseconds ) => With_Timeout( TimeSpan.FromMilliseconds( milliseconds ) );
@@ -325,6 +304,8 @@ public partial class WebRequester
             return this;
         }
 
+
+    #if NET6_0_OR_GREATER
         public Builder With_MaxResponseDrainSize( int value )
         {
             _maxResponseDrainSize = value;
@@ -340,15 +321,13 @@ public partial class WebRequester
             With_KeepAlive( TimeSpan.FromMilliseconds( pingDelayMilliseconds ), TimeSpan.FromMilliseconds( pingTimeoutMilliseconds ), policy );
         public Builder With_KeepAlive( TimeSpan pingDelay, TimeSpan pingTimeout, HttpKeepAlivePingPolicy policy = HttpKeepAlivePingPolicy.WithActiveRequests )
         {
-            _keepAlivePingDelay   = pingDelay;
+            _keepAlivePingDelay = pingDelay;
             _keepAlivePingTimeout = pingTimeout;
-            _keepAlivePingPolicy  = policy;
+            _keepAlivePingPolicy = policy;
             return this;
         }
-    #endif
 
 
-    #if NET6_0_OR_GREATER
         public Builder With_SSL( SslClientAuthenticationOptions value )
         {
             _sslOptions = value;
@@ -437,5 +416,21 @@ public partial class WebRequester
             return this;
         }
     #endif
+
+
+
+        public sealed record HostHolder( Uri HostInfo ) : IHostInfo;
+
+
+
+        public sealed record MethodHolder : IHostInfo
+        {
+            private readonly Func<IHostInfo> _value;
+
+            public Uri HostInfo => _value()
+               .HostInfo;
+
+            public MethodHolder( Func<IHostInfo> value ) => _value = value;
+        }
     }
 }
