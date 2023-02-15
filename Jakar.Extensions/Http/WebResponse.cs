@@ -8,8 +8,8 @@ using static Jakar.Extensions.WebRequester;
 namespace Jakar.Extensions;
 
 
-[SuppressMessage( "ReSharper", "UnusedParameter.Global")]
-public readonly struct WebResponse<T>
+[SuppressMessage( "ReSharper", "UnusedParameter.Global" )]
+public readonly record struct WebResponse<T>
 {
     public const string ERROR_MESSAGE = "Error Message: ";
     public const string UNKNOWN_ERROR = "Unknown Error";
@@ -52,12 +52,17 @@ public readonly struct WebResponse<T>
     /// <exception cref="HttpRequestException"> </exception>
     public T GetPayload()
     {
-        if ( Payload is not null ) { return Payload; }
+        EnsureSuccessStatusCode();
+        Debug.Assert( Payload is not null );
+        return Payload ?? throw new NullReferenceException( nameof(Payload), Exception );
+    }
+    public bool IsSuccessStatusCode() => StatusCode < Status.BadRequest;
+    public void EnsureSuccessStatusCode()
+    {
+        if ( IsSuccessStatusCode() ) { return; }
 
         throw new HttpRequestException( this.ToPrettyJson(), Exception );
     }
-
-
     public override string ToString() => this.ToJson( Formatting.Indented );
 
 
