@@ -2,9 +2,7 @@
 namespace Jakar.Extensions.Xamarin.Forms;
 
 
-[SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
-[SuppressMessage( "ReSharper", "MemberCanBeMadeStatic.Global" )]
-[SuppressMessage( "ReSharper", "AsyncVoidLambda" )]
+[SuppressMessage( "ReSharper", "AsyncVoidLambda")]
 public class AppDebug : ObservableClass, ILogger
 {
     protected readonly IAppSettings         _settings;
@@ -93,11 +91,15 @@ public class AppDebug : ObservableClass, ILogger
     {
         if ( file.DoesNotExist ) { return; }
 
+        attachments.Add( await CreateLog( file, token ) );
+        file.Delete();
+    }
+    public static async ValueTask<ErrorAttachmentLog> CreateLog( LocalFile file, CancellationToken token = default )
+    {
         byte[] content = await file.ReadAsync()
                                    .AsBytes( token );
 
-        attachments.Add( ErrorAttachmentLog.AttachmentWithBinary( content, file.Name, file.ContentType ) );
-        file.Delete();
+        return ErrorAttachmentLog.AttachmentWithBinary( content, file.Name, file.ContentType );
     }
     protected virtual async ValueTask Handle_ScreenShot( Exception e, ICollection<ErrorAttachmentLog> attachments, CancellationToken token = default )
     {
@@ -116,7 +118,7 @@ public class AppDebug : ObservableClass, ILogger
     public ValueTask HandleExceptionAsync( Exception e ) => HandleExceptionAsync( e, Empty );
     public async ValueTask HandleExceptionAsync( Exception e, params ErrorAttachmentLog[] attachmentLogs )
     {
-        if ( Settings.EnableApi ) { return; }
+        if ( !Settings.EnableApi ) { return; }
 
         if ( ApiDisabled ) { ThrowNotEnabled(); }
 
@@ -186,7 +188,7 @@ public class AppDebug : ObservableClass, ILogger
     {
         if ( ApiDisabled ) { ThrowNotEnabled(); }
 
-        if ( !Settings.EnableCrashes ) { return; }
+        if ( !Settings.EnableApi || !Settings.EnableCrashes ) { return; }
 
         var attachments = new List<ErrorAttachmentLog>( attachmentLogs.Length + 10 );
         attachments.AddRange( attachmentLogs );
@@ -199,7 +201,7 @@ public class AppDebug : ObservableClass, ILogger
     {
         if ( ApiDisabled ) { ThrowNotEnabled(); }
 
-        if ( !Settings.EnableCrashes ) { return; }
+        if ( !Settings.EnableApi || !Settings.EnableCrashes ) { return; }
 
         Crashes.TrackError( ex, eventDetails, attachments );
     }
@@ -207,7 +209,7 @@ public class AppDebug : ObservableClass, ILogger
     {
         if ( ApiDisabled ) { ThrowNotEnabled(); }
 
-        if ( !Settings.EnableAnalytics ) { return; }
+        if ( !Settings.EnableApi || !Settings.EnableAnalytics ) { return; }
 
         TrackEvent( AppState(), source );
     }
@@ -215,7 +217,7 @@ public class AppDebug : ObservableClass, ILogger
     {
         if ( ApiDisabled ) { ThrowNotEnabled(); }
 
-        if ( !Settings.EnableAnalytics ) { return; }
+        if ( !Settings.EnableApi || !Settings.EnableAnalytics ) { return; }
 
         Analytics.TrackEvent( source, eventDetails );
     }
