@@ -64,6 +64,8 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, IUserRecord<U
         DateCreated = DateTimeOffset.UtcNow;
         Rights      = rights;
     }
+
+
     private static readonly PasswordHasher<UserRecord> _hasher = new();
 
 
@@ -110,34 +112,40 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, IUserRecord<U
     }
     public static UserRecord Create<TUser>( VerifyRequest<TUser> request, UserRecord caller, long rights = default ) where TUser : IUserData
     {
+        ArgumentNullException.ThrowIfNull( request.Data );
+
         var record = new UserRecord( request.Data, caller, rights )
                      {
-                         UserName = request.Request.UserLogin
+                         UserName = request.UserLogin
                      };
 
-        record.UpdatePassword( request.Request.UserPassword );
+        record.UpdatePassword( request.UserPassword );
         return record;
     }
     public static UserRecord Create<TUser, TRights>( VerifyRequest<TUser> request, TRights rights = default ) where TUser : IUserData
                                                                                                               where TRights : struct, Enum
     {
+        ArgumentNullException.ThrowIfNull( request.Data );
+
         var record = new UserRecord( request.Data, rights.AsLong() )
                      {
-                         UserName = request.Request.UserLogin
+                         UserName = request.UserLogin
                      };
 
-        record.UpdatePassword( request.Request.UserPassword );
+        record.UpdatePassword( request.UserPassword );
         return record;
     }
     public static UserRecord Create<TUser, TRights>( VerifyRequest<TUser> request, UserRecord caller, TRights rights = default ) where TUser : IUserData
                                                                                                                                  where TRights : struct, Enum
     {
+        ArgumentNullException.ThrowIfNull( request.Data );
+
         var record = new UserRecord( request.Data, caller, rights.AsLong() )
                      {
-                         UserName = request.Request.UserLogin
+                         UserName = request.UserLogin
                      };
 
-        record.UpdatePassword( request.Request.UserPassword );
+        record.UpdatePassword( request.UserPassword );
         return record;
     }
     public static UserRecord Create<TRights>( IUserData value, TRights    rights ) where TRights : struct, Enum => new(value, rights.AsLong());
@@ -155,7 +163,7 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, IUserRecord<U
     public static DynamicParameters GetDynamicParameters<T>( VerifyRequest<T> request ) where T : notnull
     {
         var parameters = new DynamicParameters();
-        parameters.Add( nameof(UserName), request.Request.UserLogin );
+        parameters.Add( nameof(UserName), request.UserLogin );
         return parameters;
     }
     public static DynamicParameters GetDynamicParameters( ILoginRequest request )

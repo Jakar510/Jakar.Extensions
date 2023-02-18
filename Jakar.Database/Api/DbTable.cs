@@ -22,19 +22,19 @@ public abstract class Constants<TRecord> : ObservableClass where TRecord : Table
 
 
 
+[SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
 public class DbTable<TRecord> : Constants<TRecord>, IConnectableDb<TRecord>, IAsyncDisposable where TRecord : TableRecord<TRecord>
 {
     protected readonly TypePropertiesCache _propertiesCache;
     protected readonly IConnectableDb      _database;
     protected readonly object?             _nullParameters = null;
-    internal static    TRecord[]           Empty    => Array.Empty<TRecord>();
-    public             DbInstance          Instance => _database.Instance;
 
-    // ReSharper disable once InconsistentNaming
-    public IDGenerator<TRecord>     IDs           => new(this);
-    public RecordGenerator<TRecord> Records       => new(this);
-    public string                   CurrentSchema => _database.CurrentSchema;
 
+    internal static                                               TRecord[]                Empty         => Array.Empty<TRecord>();
+    public                                                        DbInstance               Instance      => _database.Instance;
+    [SuppressMessage( "ReSharper", "InconsistentNaming" )] public IDGenerator<TRecord>     IDs           => new(this);
+    public                                                        RecordGenerator<TRecord> Records       => new(this);
+    public                                                        string                   CurrentSchema => _database.CurrentSchema;
 
     protected internal virtual string IDKey => Instance switch
                                                {
@@ -60,32 +60,9 @@ public class DbTable<TRecord> : Constants<TRecord>, IConnectableDb<TRecord>, IAs
     }
 
 
-
-    [SuppressMessage( "ReSharper", "ReturnTypeCanBeEnumerable.Global" )]
-    public sealed class TypePropertiesCache
-    {
-        private readonly IConnectableDb                                                           _table;
-        private readonly IReadOnlyDictionary<DbInstance, IReadOnlyDictionary<string, Descriptor>> _dictionary = GetDescriptors();
-        public           IReadOnlyDictionary<string, Descriptor>                                  Descriptors => _dictionary[_table.Instance];
-        public           IEnumerable<Descriptor>                                                  NotKeys     => Descriptors.Values.Where( x => !x.IsKey );
-        public Descriptor this[ string columnName ] => Descriptors[columnName];
-
-
-        public TypePropertiesCache( IConnectableDb table ) => _table = table;
-
-
-        private static IReadOnlyDictionary<DbInstance, IReadOnlyDictionary<string, Descriptor>> GetDescriptors()
-        {
-            PropertyInfo[] properties = typeof(TRecord).GetProperties( BindingFlags.Instance | BindingFlags.Public | BindingFlags.SetProperty | BindingFlags.GetProperty );
-
-            return new ConcurrentDictionary<DbInstance, IReadOnlyDictionary<string, Descriptor>>
-                   {
-                       [DbInstance.Postgres] = properties.ToDictionary<PropertyInfo, string, Descriptor>( property => property.Name, property => new PostgresDescriptor( property ) ),
-                       [DbInstance.MsSql]    = properties.ToDictionary<PropertyInfo, string, Descriptor>( property => property.Name, property => new MsSqlDescriptor( property ) )
-                   };
-        }
-    }
-
+    public virtual ValueTask DisposeAsync() => default;
+    public DbConnection Connect() => _database.Connect();
+    public ValueTask<DbConnection> ConnectAsync( CancellationToken token = default ) => _database.ConnectAsync( token );
 
 
     public IAsyncEnumerable<TRecord> Insert( IEnumerable<TRecord>      records, CancellationToken token = default ) => this.TryCall( Insert, records, token );
@@ -119,6 +96,26 @@ public class DbTable<TRecord> : Constants<TRecord>, IConnectableDb<TRecord>, IAs
         {
             long id = await connection.ExecuteScalarAsync<long>( sql, parameters, transaction );
             return record.NewID( id );
+        }
+        catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
+    }
+
+
+    public ValueTask<bool> Exists( bool matchAll, DynamicParameters parameters, CancellationToken token ) => this.TryCall( Exists, matchAll, parameters, token );
+    public async ValueTask<bool> Exists( DbConnection connection, DbTransaction transaction, bool matchAll, DynamicParameters parameters, CancellationToken token )
+    {
+        string sql = $"SELECT TOP 1 {nameof(IDataBaseID.ID)} FROM {SchemaTableName} WHERE {string.Join( matchAll
+                                                                                                            ? "AND"
+                                                                                                            : "OR",
+                                                                                                        parameters.ParameterNames.Select( x => $" {x} = @{x} " ) )}";
+
+
+        token.ThrowIfCancellationRequested();
+
+        try
+        {
+            IEnumerable<long> results = await connection.QueryAsync<long>( sql, parameters, transaction );
+            return results.Any();
         }
         catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
     }
@@ -591,9 +588,29 @@ public class DbTable<TRecord> : Constants<TRecord>, IConnectableDb<TRecord>, IAs
     }
 
 
-    public virtual ValueTask DisposeAsync() => default;
+
+    [SuppressMessage( "ReSharper", "ReturnTypeCanBeEnumerable.Global" )]
+    public sealed class TypePropertiesCache
+    {
+        private readonly IConnectableDb                                                           _table;
+        private readonly IReadOnlyDictionary<DbInstance, IReadOnlyDictionary<string, Descriptor>> _dictionary = GetDescriptors();
+        public           IReadOnlyDictionary<string, Descriptor>                                  Descriptors => _dictionary[_table.Instance];
+        public           IEnumerable<Descriptor>                                                  NotKeys     => Descriptors.Values.Where( x => !x.IsKey );
+        public Descriptor this[ string columnName ] => Descriptors[columnName];
 
 
-    public DbConnection Connect() => _database.Connect();
-    public ValueTask<DbConnection> ConnectAsync( CancellationToken token = default ) => _database.ConnectAsync( token );
+        public TypePropertiesCache( IConnectableDb table ) => _table = table;
+
+
+        private static IReadOnlyDictionary<DbInstance, IReadOnlyDictionary<string, Descriptor>> GetDescriptors()
+        {
+            PropertyInfo[] properties = typeof(TRecord).GetProperties( BindingFlags.Instance | BindingFlags.Public | BindingFlags.SetProperty | BindingFlags.GetProperty );
+
+            return new ConcurrentDictionary<DbInstance, IReadOnlyDictionary<string, Descriptor>>
+                   {
+                       [DbInstance.Postgres] = properties.ToDictionary<PropertyInfo, string, Descriptor>( property => property.Name, property => new PostgresDescriptor( property ) ),
+                       [DbInstance.MsSql]    = properties.ToDictionary<PropertyInfo, string, Descriptor>( property => property.Name, property => new MsSqlDescriptor( property ) )
+                   };
+        }
+    }
 }

@@ -276,7 +276,7 @@ public abstract partial class Database : Randoms, IConnectableDb, IAsyncDisposab
         if ( record is not null ) { return controller.Duplicate(); }
 
 
-        if ( !PasswordValidator.Validate( request.Request.UserPassword ) )
+        if ( !PasswordValidator.Validate( request.UserPassword ) )
         {
             controller.AddError( "Password Validation Failed" );
             return controller.BadRequest( controller.ModelState );

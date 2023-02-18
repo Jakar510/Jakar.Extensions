@@ -19,9 +19,9 @@ public sealed record RoleRecord : TableRecord<RoleRecord>
     public RoleRecord() { }
     public RoleRecord( IdentityRole role )
     {
-        Name             = role.Name;
-        NormalizedName   = role.NormalizedName;
-        ConcurrencyStamp = role.ConcurrencyStamp;
+        Name             = role.Name ?? string.Empty;
+        NormalizedName   = role.NormalizedName ?? string.Empty;
+        ConcurrencyStamp = role.ConcurrencyStamp ?? string.Empty;
     }
     public RoleRecord( string name )
     {
