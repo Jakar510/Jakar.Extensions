@@ -26,9 +26,7 @@ public sealed class RoleStore : IRoleStore<RoleRecord>
 
     public async Task<RoleRecord> FindByIdAsync( string roleId, CancellationToken token )
     {
-        RoleRecord? result = long.TryParse( roleId, out long id )
-                                 ? await _dbContext.Roles.Get( id,                      token )
-                                 : await _dbContext.Roles.Get( nameof(RoleRecord.Name), roleId, token );
+        RoleRecord? result = await _dbContext.Roles.Get( nameof(RoleRecord.Name), roleId, token );
 
         return result ?? throw new ArgumentException( roleId, nameof(roleId) );
     }
@@ -36,7 +34,7 @@ public sealed class RoleStore : IRoleStore<RoleRecord>
 
 
     public async Task<string?> GetNormalizedRoleNameAsync( RoleRecord role, CancellationToken token ) => await ValueTask.FromResult( role.Name );
-    public async Task<string> GetRoleIdAsync( RoleRecord              role, CancellationToken token ) => await ValueTask.FromResult( role.ID.ToString() );
+    public async Task<string> GetRoleIdAsync( RoleRecord              role, CancellationToken token ) => await ValueTask.FromResult( role.ID );
     public async Task<string?> GetRoleNameAsync( RoleRecord           role, CancellationToken token ) => await ValueTask.FromResult( role.Name );
 
 

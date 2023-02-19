@@ -11,7 +11,7 @@ public struct RecordGenerator<TRecord> : IAsyncEnumerator<TRecord?> where TRecor
 {
     private readonly DbTable<TRecord> _table;
     private          TRecord?             _current = default;
-    private          long                 _ID => _current?.ID ?? 0;
+    private          string?                 _ID => _current?.ID;
 
 
     public TRecord Current

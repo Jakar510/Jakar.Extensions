@@ -8,7 +8,7 @@ namespace Jakar.Database;
 [Table( "UserRoles" )]
 public sealed record UserRoleRecord : TableRecord<UserRoleRecord>
 {
-    public long RoleID { get; init; }
+    public string RoleID { get; init; } = string.Empty;
 
 
     public UserRoleRecord() { }
@@ -38,7 +38,7 @@ public sealed record UserRoleRecord : TableRecord<UserRoleRecord>
         int userIDComparison = UserID.CompareTo( other.UserID );
         if ( userIDComparison != 0 ) { return userIDComparison; }
 
-        return RoleID.CompareTo( other.RoleID );
+        return string.Compare( RoleID, other.RoleID, StringComparison.Ordinal );
     }
     public override int GetHashCode() => HashCode.Combine( base.GetHashCode(), UserID, CreatedBy, RoleID );
 

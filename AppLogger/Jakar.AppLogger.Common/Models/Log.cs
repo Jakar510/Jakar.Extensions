@@ -13,7 +13,7 @@ public sealed record Log : BaseJsonModelRecord, ILog, ILogDetails
 {
     public                             bool                IsError            => Level > LogLevel.Error;
     public                             bool                IsFatal            { get; init; }
-    public                             bool                IsValid            => ID.IsValidID() && !string.IsNullOrWhiteSpace( Message );
+    public                             bool                IsValid            => !string.IsNullOrWhiteSpace( Message );
     public                             DateTimeOffset      AppErrorTime       { get; init; }
     public                             DateTimeOffset      AppLaunchTimestamp { get; init; }
     public                             DateTimeOffset      AppStartTime       { get; init; }
@@ -28,7 +28,7 @@ public sealed record Log : BaseJsonModelRecord, ILog, ILogDetails
     public                             LogLevel            Level              { get; init; }
     public                             long                AppID              { get; init; }
     public                             long                DeviceID           { get; init; }
-    public                             long                ID                 { get; init; }
+    public                             string              ID                 { get; init; } = string.Empty;
     [MaxLength( int.MaxValue )] public string              Message            { get; init; } = string.Empty;
     [MaxLength( 1024 )]         public string?             AppUserID          { get; init; }
     [MaxLength( 1024 )]         public string?             BuildID            { get; init; }
@@ -95,6 +95,9 @@ public sealed record Log : BaseJsonModelRecord, ILog, ILogDetails
         SessionID          = value.SessionID;
         ScopeID            = value.ScopeID;
         Level              = level;
+
+        ID = Guid.NewGuid()
+                 .ToBase64();
     }
     public Log( LoggingSettings value, LogLevel level, IEnumerable<Attachment> attachments ) : this( value, level ) => Attachments = new HashSet<Attachment>( attachments );
     public Log( LoggingSettings config, IEnumerable<Attachment> attachments, Exception e, LogLevel level = LogLevel.Error ) : this( config, level, attachments )

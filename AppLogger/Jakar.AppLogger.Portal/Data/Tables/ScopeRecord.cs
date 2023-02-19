@@ -8,14 +8,14 @@ namespace Jakar.AppLogger.Portal.Data.Tables;
 [Table( "Scopes" )]
 public sealed record ScopeRecord : LoggerTable<ScopeRecord>
 {
-    public Guid ScopeID   { get; init; }
-    public Guid SessionID { get; init; }
-    public long AppID     { get; init; }
-    public long DeviceID  { get; init; }
+    public Guid   ScopeID   { get; init; }
+    public Guid   SessionID { get; init; }
+    public string AppID     { get; init; } = string.Empty;
+    public string DeviceID  { get; init; } = string.Empty;
 
 
-    public ScopeRecord() : base()  { }
-    public ScopeRecord( Log log, AppRecord app, DeviceRecord device, SessionRecord session ) : base( 0 )
+    public ScopeRecord() : base() { }
+    public ScopeRecord( Log log, AppRecord app, DeviceRecord device, SessionRecord session ) : base( Guid.NewGuid() )
     {
         ArgumentNullException.ThrowIfNull( log.ScopeID );
 
@@ -35,13 +35,13 @@ public sealed record ScopeRecord : LoggerTable<ScopeRecord>
     }
 
 
-    public override int CompareTo( ScopeRecord? other ) => Nullable.Compare( AppID, other?.AppID );
+    public override int CompareTo( ScopeRecord? other ) => string.Compare( AppID, other?.AppID, StringComparison.Ordinal );
     public override int GetHashCode() => HashCode.Combine( AppID, DeviceID, base.GetHashCode() );
     public override bool Equals( ScopeRecord? other )
     {
-        if (other is null) { return false; }
+        if ( other is null ) { return false; }
 
-        if (ReferenceEquals( this, other )) { return true; }
+        if ( ReferenceEquals( this, other ) ) { return true; }
 
         return AppID == other.AppID && DeviceID == other.DeviceID;
     }

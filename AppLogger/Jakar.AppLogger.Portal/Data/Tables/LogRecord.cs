@@ -3,6 +3,8 @@
 
 using Jakar.AppLogger.Portal.Data.Interfaces;
 
+
+
 namespace Jakar.AppLogger.Portal.Data.Tables;
 
 
@@ -21,9 +23,9 @@ public sealed record LogRecord : LoggerTable<LogRecord>, ILog, ILogInfo
     public Guid?                               ScopeID            { get; init; }
     public int                                 EventID            { get; init; }
     public LogLevel                            Level              { get; init; }
-    public long                                AppID              { get; init; }
-    public long                                DeviceID           { get; init; }
-    long ILogInfo.                             LogID              => ID;
+    public string                              AppID              { get; init; } = string.Empty;
+    public string                              DeviceID           { get; init; } = string.Empty;
+    string ILogInfo.                           LogID              => ID;
     [MaxLength( int.MaxValue )] public string  Message            { get; init; } = string.Empty;
     [MaxLength( 1024 )]         public string? AppUserID          { get; init; }
     [MaxLength( 1024 )]         public string? BuildID            { get; init; }
@@ -32,10 +34,9 @@ public sealed record LogRecord : LoggerTable<LogRecord>, ILog, ILogInfo
     [MaxLength( int.MaxValue )] public string? StackTrace         { get; init; }
 
 
-    public LogRecord()  : base() { }
-    public LogRecord( Log log, SessionRecord session ) : base( 0 )
+    public LogRecord() : base() { }
+    public LogRecord( Log log, SessionRecord session ) : base( log.ID )
     {
-        ID                 = log.ID;
         IsValid            = log.IsValid;
         IsError            = log.IsError;
         IsFatal            = log.IsFatal;
@@ -101,7 +102,7 @@ public sealed record LogRecord : LoggerTable<LogRecord>, ILog, ILogInfo
     public async ValueTask<Log> ToLog( DbConnection connection, DbTransaction transaction, LoggerDB db, CancellationToken token = default )
     {
         AttachmentRecord[] records = await db.Attachments.Where( connection, transaction, true, AttachmentRecord.GetDynamicParameters( this ), token );
-        
+
         return new Log( this,
                         records.Select( x => x.ToAttachment() )
                                .ToHashSet(),
@@ -116,9 +117,9 @@ public sealed record LogRecord : LoggerTable<LogRecord>, ILog, ILogInfo
     public override int GetHashCode() => HashCode.Combine( Message, base.GetHashCode() );
     public override bool Equals( LogRecord? other )
     {
-        if (other is null) { return false; }
+        if ( other is null ) { return false; }
 
-        if (ReferenceEquals( this, other )) { return true; }
+        if ( ReferenceEquals( this, other ) ) { return true; }
 
         return string.Equals( Message, other.Message, StringComparison.Ordinal );
     }

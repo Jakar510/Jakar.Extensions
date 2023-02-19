@@ -5,22 +5,21 @@ namespace Jakar.Database;
 
 
 [SuppressMessage( "ReSharper", "MemberCanBePrivate.Local" )]
-public sealed class KeyGenerator<TValue> : IEnumerator<long>
+public sealed class KeyGenerator<TValue> : IEnumerator<string> where TValue : ITableRecord
 {
-    private readonly IComparer<long>                   _comparer;
-    private readonly IReadOnlyDictionary<long, TValue> _dictionary;
-    private readonly List<long>                        _keys  = new();
-    private          int                               _index = -1;
-    public           int                               Count   => _keys.Count;
-    public           long                              Current => _keys[_index];
-    object IEnumerator.                                Current => Current;
+    private readonly List<string>        _keys  = new();
+    private          int                 _index = -1;
+    private readonly IEnumerable<TValue> _records;
 
 
-    public KeyGenerator( IReadOnlyDictionary<long, TValue> dictionary ) : this( dictionary, Comparer<long>.Default ) { }
-    public KeyGenerator( IReadOnlyDictionary<long, TValue> dictionary, IComparer<long> comparer )
+    public int         Count   => _keys.Count;
+    public string      Current => _keys[_index];
+    object IEnumerator.Current => Current;
+
+
+    public KeyGenerator( IEnumerable<TValue> records )
     {
-        _dictionary = dictionary;
-        _comparer   = comparer;
+        _records = records;
         Reset();
     }
     public void Dispose() => _keys.Clear();
@@ -31,8 +30,9 @@ public sealed class KeyGenerator<TValue> : IEnumerator<long>
     {
         _index = -1;
         _keys.Clear();
-        _keys.EnsureCapacity( _dictionary.Count );
-        _keys.AddRange( _dictionary.Keys );
-        _keys.Sort( _comparer );
+        var dictionary = new SortedDictionary<DateTimeOffset, string>( ValueSorter<DateTimeOffset>.Default );
+        foreach ( TValue value in _records ) { dictionary.Add( value.DateCreated, value.ID ); }
+
+        _keys.AddRange( dictionary.Values );
     }
 }

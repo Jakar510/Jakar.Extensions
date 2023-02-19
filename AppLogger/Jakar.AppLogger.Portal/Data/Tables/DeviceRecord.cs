@@ -8,7 +8,7 @@ namespace Jakar.AppLogger.Portal.Data.Tables;
 [Table( "Devices" )]
 public sealed record DeviceRecord : LoggerTable<DeviceRecord>, IDevice
 {
-    public AppVersion?                            AppVersion     { get; init; }
+    public AppVersion                             AppVersion     { get; init; } = new();
     public double                                 TimeZoneOffset { get; init; }
     HwInfo? IDevice.                              HwInfo         => HardwareInfo?.FromJson<HwInfo>();
     public                             int?       AppBuild       { get; init; }
@@ -27,7 +27,7 @@ public sealed record DeviceRecord : LoggerTable<DeviceRecord>, IDevice
 
 
     public DeviceRecord() : base() { }
-    public DeviceRecord( IDevice device ) : base( 0 )
+    public DeviceRecord( IDevice device ) : base( Guid.NewGuid() )
     {
         DeviceID       = device.DeviceID;
         SdkName        = device.SdkName;

@@ -22,8 +22,8 @@ public sealed partial record UserRecord
     private Guid?             _sessionID;
     private int               _badLogins;
     private long              _rights;
-    private long?             _escalateTo;
-    private long?             _subscriptionID;
+    private string?           _escalateTo;
+    private string?           _subscriptionID;
     private string            _firstName    = string.Empty;
     private string            _lastName     = string.Empty;
     private string            _passwordHash = string.Empty;
@@ -142,13 +142,13 @@ public sealed partial record UserRecord
         get => _rights;
         set => SetProperty( ref _rights, value );
     }
-    long? IUserRecord<UserRecord>.CreatedBy => CreatedBy;
-    public long? EscalateTo
+    string? IUserRecord<UserRecord>.CreatedBy => CreatedBy;
+    public string? EscalateTo
     {
         get => _escalateTo;
         set => SetProperty( ref _escalateTo, value );
     }
-    public long? SubscriptionID
+    public string? SubscriptionID
     {
         get => _subscriptionID;
         set => SetProperty( ref _subscriptionID, value );

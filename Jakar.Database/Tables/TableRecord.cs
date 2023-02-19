@@ -4,30 +4,51 @@
 namespace Jakar.Database;
 
 
-[Serializable]
-public abstract record TableRecord<TRecord> : BaseCollectionsRecord<TRecord, long> where TRecord : TableRecord<TRecord>
+public interface ITableRecord
 {
-    private       DateTimeOffset? _lastModified;
-    public static string          TableName { get; } = typeof(TRecord).GetTableName();
+    public DateTimeOffset  DateCreated  { get; }
+    public DateTimeOffset? LastModified { get; }
+    public string          ID           { get; }
+    public string?         CreatedBy    { get; }
+}
 
 
-    public DateTimeOffset DateCreated { get; init; }
+
+[Serializable]
+public abstract record TableRecord<TRecord> : ObservableRecord<TRecord>, ITableRecord, IUniqueID<string> where TRecord : TableRecord<TRecord>
+{
+    private DateTimeOffset? _lastModified;
+
+
+    public static string         TableName   { get; } = typeof(TRecord).GetTableName();
+    public        DateTimeOffset DateCreated { get; init; }
     public DateTimeOffset? LastModified
     {
         get => _lastModified;
         set => SetProperty( ref _lastModified, value );
     }
-    public Guid UserID    { get; init; }
-    public long CreatedBy { get; init; }
+    public               Guid    UserID    { get; init; }
+    public               string? CreatedBy { get; init; }
+    [Key] public virtual string  ID        { get; init; } = string.Empty;
 
 
     protected TableRecord() : base() { }
-    protected TableRecord( long id ) : base( id ) => DateCreated = DateTimeOffset.Now;
-    protected TableRecord( UserRecord user )
+    protected TableRecord( string id ) : base()
     {
-        DateCreated = DateTimeOffset.Now;
-        UserID      = user.UserID;
-        CreatedBy   = user.ID;
+        ID          = Validate.ThrowIfNull( id, nameof(id) );
+        DateCreated = DateTimeOffset.UtcNow;
+    }
+    protected TableRecord( Guid id ) : base()
+    {
+        ID          = id.ToBase64();
+        DateCreated = DateTimeOffset.UtcNow;
+    }
+    protected TableRecord( UserRecord user ) : this( Guid.NewGuid(), user ) { }
+    protected TableRecord( Guid       id, UserRecord user ) : this( id.ToBase64(), user ) { }
+    protected TableRecord( string id, UserRecord user ) : this( id )
+    {
+        UserID    = user.UserID;
+        CreatedBy = user.ID;
     }
 
 
@@ -50,18 +71,16 @@ public abstract record TableRecord<TRecord> : BaseCollectionsRecord<TRecord, lon
     public bool Owns( UserRecord       record ) => record.CreatedBy == record.ID;
 
 
-    public TRecord NewID( in long id ) => (TRecord)(this with
-                                                    {
-                                                        ID = id,
-                                                    });
+    public TRecord NewID( Guid id ) => NewID( id.ToBase64() );
+    public TRecord NewID( string id ) => (TRecord)(this with
+                                                   {
+                                                       ID = id,
+                                                   });
 
 
     public async ValueTask<UserRecord?> GetUser( DbConnection           connection, DbTransaction? transaction, Database db, CancellationToken token ) => await db.Users.Get( connection, transaction, true,      GetDynamicParameters( this ), token );
     public async ValueTask<UserRecord?> GetUserWhoCreated( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => await db.Users.Get( connection, transaction, CreatedBy, token );
 
-
-
-    #region Core
 
     public override int CompareTo( TRecord? other )
     {
@@ -86,11 +105,7 @@ public abstract record TableRecord<TRecord> : BaseCollectionsRecord<TRecord, lon
 
         if ( ReferenceEquals( this, other ) ) { return true; }
 
-        return base.Equals( other ) && CreatedBy == other.CreatedBy && Nullable.Equals( _lastModified, other._lastModified ) && UserID.Equals( other.UserID ) && DateCreated.Equals( other.DateCreated );
+        return string.Equals( ID, other.ID, StringComparison.Ordinal ) && CreatedBy == other.CreatedBy && UserID.Equals( other.UserID ) && DateCreated.Equals( other.DateCreated );
     }
-
-
     public override int GetHashCode() => HashCode.Combine( CreatedBy, LastModified, UserID, DateCreated );
-
-    #endregion
 }

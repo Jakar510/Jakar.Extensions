@@ -5,11 +5,11 @@
 [Table( "Groups" )]
 public sealed record GroupRecord : TableRecord<GroupRecord>
 {
-    private long?  _ownerID;
-    private string _customerID  = string.Empty;
-    private string _nameOfGroup = string.Empty;
+    private string? _ownerID;
+    private string  _customerID  = string.Empty;
+    private string  _nameOfGroup = string.Empty;
 
-    public long? OwnerID
+    public string? OwnerID
     {
         get => _ownerID;
         init => SetProperty( ref _ownerID, value );
@@ -43,8 +43,8 @@ public sealed record GroupRecord : TableRecord<GroupRecord>
     public override int GetHashCode() => HashCode.Combine( base.GetHashCode(), NameOfGroup, OwnerID, CustomerID );
 
 
-    public async Task<UserRecord?> GetOwner( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => OwnerID.HasValue
-                                                                                                                                                ? await db.Users.Get( connection, transaction, OwnerID.Value, token )
+    public async Task<UserRecord?> GetOwner( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => !string.IsNullOrEmpty( OwnerID )
+                                                                                                                                                ? await db.Users.Get( connection, transaction, OwnerID, token )
                                                                                                                                                 : default;
     public async ValueTask<IEnumerable<UserRecord>> GetUsers( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token )
     {

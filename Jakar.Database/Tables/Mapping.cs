@@ -1,8 +1,4 @@
-﻿using System.Runtime.Versioning;
-
-
-
-namespace Jakar.Database;
+﻿namespace Jakar.Database;
 
 
 public interface ICreateMapping<out TSelf, in TKey, in TValue> where TValue : TableRecord<TValue>
@@ -10,6 +6,22 @@ public interface ICreateMapping<out TSelf, in TKey, in TValue> where TValue : Ta
                                                                where TSelf : Mapping<TSelf, TKey, TValue>, ICreateMapping<TSelf, TKey, TValue>
 {
     [RequiresPreviewFeatures] public abstract static TSelf Create( TKey key, TValue value );
+}
+
+
+
+public interface ICreateMapping<out TSelf, in TValue> : ICreateMapping<TSelf, UserRecord, TValue> where TValue : TableRecord<TValue>
+                                                                                                  where TSelf : Mapping<TSelf, TValue>, ICreateMapping<TSelf, TValue> { }
+
+
+
+[Serializable]
+public abstract record Mapping<TSelf, TValue> : Mapping<TSelf, UserRecord, TValue> where TValue : TableRecord<TValue>
+                                                                                   where TSelf : Mapping<TSelf, TValue>, ICreateMapping<TSelf, TValue>
+{
+    protected Mapping() { }
+    protected Mapping( UserRecord key,   TValue     value ) : this( key, key, value ) { }
+    protected Mapping( UserRecord owner, UserRecord key, TValue value ) : base( owner, key, value ) { }
 }
 
 
@@ -23,12 +35,20 @@ public abstract record Mapping<TSelf, TKey, TValue> : TableRecord<TSelf> where T
     private WeakReference<TValue>? _value;
 
 
-    public long OwnerID { get; init; }
-    public long ValueID { get; init; }
+    public string OwnerID { get; init; } = string.Empty;
+    public string ValueID { get; init; } = string.Empty;
 
 
     protected Mapping() { }
     protected Mapping( TKey key, TValue value )
+    {
+        _owner      = new WeakReference<TKey>( key );
+        _value      = new WeakReference<TValue>( value );
+        DateCreated = DateTimeOffset.UtcNow;
+        OwnerID     = key.ID;
+        ValueID     = value.ID;
+    }
+    protected Mapping( UserRecord user, TKey key, TValue value ) : base( user )
     {
         _owner  = new WeakReference<TKey>( key );
         _value  = new WeakReference<TValue>( value );
@@ -63,10 +83,10 @@ public abstract record Mapping<TSelf, TKey, TValue> : TableRecord<TSelf> where T
 
         if ( ReferenceEquals( this, other ) ) { return 0; }
 
-        int ownerComparision = OwnerID.CompareTo( other.OwnerID );
+        int ownerComparision = string.Compare( OwnerID, other.OwnerID, StringComparison.Ordinal );
         if ( ownerComparision == 0 ) { return ownerComparision; }
 
-        return ValueID.CompareTo( other.ValueID );
+        return string.Compare( ValueID, other.ValueID, StringComparison.Ordinal );
     }
     public override bool Equals( TSelf? other )
     {
@@ -76,17 +96,17 @@ public abstract record Mapping<TSelf, TKey, TValue> : TableRecord<TSelf> where T
     }
     public override int GetHashCode() => HashCode.Combine( OwnerID, ValueID );
 
-    
-    [RequiresPreviewFeatures] 
+
+    [RequiresPreviewFeatures]
     public static async ValueTask<bool> TryAdd( DbConnection connection, DbTransaction transaction, DbTable<TSelf> table, TKey key, TValue value, CancellationToken token )
     {
         if ( await Exists( connection, transaction, table, key, value, token ) ) { return false; }
 
         var   record = TSelf.Create( key, value );
         TSelf self   = await table.Insert( connection, transaction, record, token );
-        return self.IsValidID();
+        return !string.IsNullOrEmpty( self.ID );
     }
-    [RequiresPreviewFeatures] 
+    [RequiresPreviewFeatures]
     public static async ValueTask TryAdd( DbConnection connection, DbTransaction transaction, DbTable<TSelf> table, TKey key, IEnumerable<TValue> values, CancellationToken token )
     {
         TSelf[] records = await Where( connection, transaction, table, key, token );
@@ -137,8 +157,8 @@ public abstract record Mapping<TSelf, TKey, TValue> : TableRecord<TSelf> where T
         foreach ( TSelf mapping in records ) { yield return await mapping.Get( connection, transaction, valueTable, token ); }
     }
 
-    
-    [RequiresPreviewFeatures] 
+
+    [RequiresPreviewFeatures]
     public static async ValueTask Replace( DbConnection connection, DbTransaction transaction, DbTable<TSelf> table, TKey key, IEnumerable<TValue> values, CancellationToken token )
     {
         await Delete( connection, transaction, table, key, token );

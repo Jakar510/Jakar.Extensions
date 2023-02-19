@@ -4,7 +4,7 @@
 namespace Jakar.AppLogger.Common;
 
 
-public interface ILog : IUniqueID<long>, IValidator
+public interface ILog : IUniqueID<string>, IValidator
 {
     bool IsError { get; }
 
@@ -17,10 +17,8 @@ public interface ILog : IUniqueID<long>, IValidator
 
     public DateTimeOffset AppErrorTime       { get; }
     public DateTimeOffset AppLaunchTimestamp { get; }
-
-
-    public DateTimeOffset AppStartTime { get; }
-    public DateTimeOffset Timestamp    { get; }
+    public DateTimeOffset AppStartTime       { get; }
+    public DateTimeOffset Timestamp          { get; }
 
 
     /// <summary>

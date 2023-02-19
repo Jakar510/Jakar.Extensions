@@ -6,17 +6,17 @@ namespace Jakar.Database.Caches;
 
 public sealed class TableCache<TRecord> : Service, IHostedService, IReadOnlyCollection<TRecord>, IAsyncEnumerator<TRecord?> where TRecord : TableRecord<TRecord>
 {
-    private readonly ConcurrentDictionary<long, CacheEntry<TRecord>> _records = new();
-    private readonly DbTable<TRecord>                            _table;
-    private readonly ILogger                                         _logger;
-    private readonly KeyGenerator<CacheEntry<TRecord>>               _generator;
-    private readonly TimeSpan                                        _expireTime = TimeSpan.FromMinutes( 1 );
-    private readonly TimeSpan                                        _refreshTime;
+    private readonly ConcurrentDictionary<string, CacheEntry<TRecord>> _records = new();
+    private readonly DbTable<TRecord>                                  _table;
+    private readonly ILogger                                           _logger;
+    private readonly KeyGenerator<CacheEntry<TRecord>>                 _generator;
+    private readonly TimeSpan                                          _expireTime = TimeSpan.FromMinutes( 1 );
+    private readonly TimeSpan                                          _refreshTime;
 
 
     public bool                 HasChanged     => _records.Values.Any( x => x.HasChanged );
-    public IEnumerable<long>    Changed        => from entry in _records.Values where entry.HasChanged select entry.ID;
-    public IEnumerable<long>    Keys           => _records.Keys;
+    public IEnumerable<string>  Changed        => from entry in _records.Values where entry.HasChanged select entry.ID;
+    public IEnumerable<string>  Keys           => _records.Keys;
     public IEnumerable<TRecord> Records        => _records.Values.Select( x => x.Value );
     public IEnumerable<TRecord> RecordsChanged => from entry in _records.Values where entry.HasChanged select entry.Saved();
     public IEnumerable<TRecord> RecordsExpired => from entry in _records.Values where entry.HasExpired( _expireTime ) select entry.Value;
@@ -24,9 +24,9 @@ public sealed class TableCache<TRecord> : Service, IHostedService, IReadOnlyColl
     public TRecord?             Current        => this[_generator.Current];
 
 
-    public TRecord? this[ long key ] => TryGetValue( key, out TRecord? value )
-                                            ? value
-                                            : default;
+    public TRecord? this[ string key ] => TryGetValue( key, out TRecord? value )
+                                              ? value
+                                              : default;
 
 
     public TableCache( DbTable<TRecord> table, IOptions<TableCacheOptions> options ) : this( table, options.Value ) { }
@@ -36,13 +36,28 @@ public sealed class TableCache<TRecord> : Service, IHostedService, IReadOnlyColl
         _table       = table;
         _refreshTime = refreshTime;
         _logger      = factory.CreateLogger( GetType() );
-        _generator   = new KeyGenerator<CacheEntry<TRecord>>( _records );
+        _generator   = new KeyGenerator<CacheEntry<TRecord>>( _records.Values );
     }
-    public bool Contains( long    key ) => _records.Values.Any( x => x.ID.Equals( key ) );
+    protected override void Dispose( bool disposing )
+    {
+        if ( !disposing ) { return; }
+
+        _generator.Dispose();
+        _records.Clear();
+        Clear();
+    }
+    public override ValueTask DisposeAsync()
+    {
+        Dispose( true );
+        return default;
+    }
+
+
+    public bool Contains( string  key ) => _records.Values.Any( x => x.ID.Equals( key ) );
     public bool Contains( TRecord key ) => _records.Values.Any( x => x.Equals( key ) );
 
 
-    public bool TryGetValue( long key, [NotNullWhen( true )] out TRecord? value )
+    public bool TryGetValue( string key, [NotNullWhen( true )] out TRecord? value )
     {
         if ( _records.TryGetValue( key, out CacheEntry<TRecord>? entry ) )
         {
@@ -57,8 +72,8 @@ public sealed class TableCache<TRecord> : Service, IHostedService, IReadOnlyColl
 
     public bool TryRemove( TRecord pair ) => _records.TryRemove( pair.ID, out _ );
     public bool TryRemove( TRecord pair, [NotNullWhen( true )] out TRecord? value ) => TryRemove( pair.ID, out value );
-    public bool TryRemove( long    key ) => _records.TryRemove( key, out _ );
-    public bool TryRemove( long key, [NotNullWhen( true )] out TRecord? value )
+    public bool TryRemove( string  key ) => _records.TryRemove( key, out _ );
+    public bool TryRemove( string key, [NotNullWhen( true )] out TRecord? value )
     {
         if ( _records.TryRemove( key, out CacheEntry<TRecord>? entry ) )
         {
@@ -111,19 +126,7 @@ public sealed class TableCache<TRecord> : Service, IHostedService, IReadOnlyColl
 
 
     public void Clear() => _records.Clear();
-    protected override void Dispose( bool disposing )
-    {
-        _generator.Dispose();
-        _records.Clear();
-        Clear();
-    }
     public void Reset() => _generator.Reset();
-    public override ValueTask DisposeAsync()
-    {
-        _records.Clear();
-        _generator.Dispose();
-        return default;
-    }
 
 
     public async ValueTask<bool> MoveNextAsync()

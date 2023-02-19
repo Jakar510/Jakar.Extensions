@@ -48,7 +48,6 @@ public sealed record UserLoginInfoRecord : TableRecord<UserLoginInfoRecord>
     }
 
 
-
     public UserLoginInfoRecord() { }
     public UserLoginInfoRecord( UserRecord user, UserLoginInfo info ) : this( user, info.LoginProvider, info.ProviderKey, info.ProviderDisplayName ) { }
     public UserLoginInfoRecord( UserRecord user, string loginProvider, string providerKey, string? providerDisplayName ) : base( user )
@@ -75,13 +74,13 @@ public sealed record UserLoginInfoRecord : TableRecord<UserLoginInfoRecord>
 
 
     public static implicit operator UserLoginInfo( UserLoginInfoRecord value ) => value.ToUserLoginInfo();
-    public static implicit operator IdentityUserToken<long>( UserLoginInfoRecord value ) => new()
-                                                                                            {
-                                                                                                UserId        = value.CreatedBy,
-                                                                                                LoginProvider = value.LoginProvider,
-                                                                                                Name          = value.ProviderDisplayName ?? string.Empty,
-                                                                                                Value         = value.ProviderKey
-                                                                                            };
+    public static implicit operator IdentityUserToken<string>( UserLoginInfoRecord value ) => new()
+                                                                                              {
+                                                                                                  UserId        = value.ID,
+                                                                                                  LoginProvider = value.LoginProvider,
+                                                                                                  Name          = value.ProviderDisplayName ?? string.Empty,
+                                                                                                  Value         = value.ProviderKey
+                                                                                              };
     public static implicit operator IdentityUserToken<Guid>( UserLoginInfoRecord value ) => new()
                                                                                             {
                                                                                                 UserId        = value.UserID,

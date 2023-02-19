@@ -8,7 +8,7 @@ namespace Jakar.Database;
 [Table( "UserGroups" )]
 public record UserGroupRecord : TableRecord<UserGroupRecord>
 {
-    public long GroupID { get; init; }
+    public string GroupID { get; init; } = string.Empty;
 
 
     public UserGroupRecord() { }

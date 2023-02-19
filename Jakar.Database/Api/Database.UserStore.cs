@@ -2,10 +2,6 @@
 #pragma warning disable CA1822
 
 
-using System.Security.Claims;
-
-
-
 namespace Jakar.Database;
 
 
@@ -204,9 +200,7 @@ public partial class Database
     public virtual async ValueTask<UserRecord?> FindByIdAsync( DbConnection connection, DbTransaction transaction, string userID, CancellationToken token ) =>
         Guid.TryParse( userID, out Guid guid )
             ? await Users.Get( connection, transaction, nameof(UserRecord.UserID), guid, token )
-            : long.TryParse( userID, out long id )
-                ? await Users.Get( connection, transaction, id,                          token )
-                : await Users.Get( connection, transaction, nameof(UserRecord.UserName), userID, token );
+            : await Users.Get( connection, transaction, userID,                    token );
 
 
     public ValueTask<UserRecord?> FindByNameAsync( string normalizedUserName, CancellationToken token ) => this.TryCall( FindByNameAsync, normalizedUserName, token );

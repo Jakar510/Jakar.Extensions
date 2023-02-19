@@ -2,7 +2,7 @@
 
 
 [Serializable]
-public sealed class RecordCollection<TRecord> : ObservableCollection<TRecord> where TRecord : BaseRecord, IUniqueID<long>
+public sealed class RecordCollection<TRecord> : ObservableCollection<TRecord> where TRecord : BaseRecord, IUniqueID<string>
 {
     public RecordCollection() : base() { }
     public RecordCollection( params TRecord[]     items ) : this() => Add( items );
@@ -13,7 +13,7 @@ public sealed class RecordCollection<TRecord> : ObservableCollection<TRecord> wh
     public void Add( IEnumerable<TRecord> items ) => items.ForEach( Add );
     public new void Add( TRecord item )
     {
-        if ( item.IsValidID() )
+        if ( !string.IsNullOrEmpty( item.ID ) )
         {
             base.Add( item );
             return;
@@ -21,7 +21,8 @@ public sealed class RecordCollection<TRecord> : ObservableCollection<TRecord> wh
 
         base.Add( item with
                   {
-                      ID = Count,
+                      ID = Guid.NewGuid()
+                               .ToBase64(),
                   } );
     }
 }

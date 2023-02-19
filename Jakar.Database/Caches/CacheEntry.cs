@@ -4,14 +4,22 @@
 namespace Jakar.Database.Caches;
 
 
-public sealed class CacheEntry<TRecord> : ObservableClass, IEquatable<TRecord>, IComparable<TRecord>, IEquatable<CacheEntry<TRecord>>, IComparable<CacheEntry<TRecord>>, IComparable where TRecord : TableRecord<TRecord>
+public sealed class CacheEntry<TRecord> : ObservableClass, ITableRecord, IEquatable<TRecord>, IComparable<TRecord>, IEquatable<CacheEntry<TRecord>>, IComparable<CacheEntry<TRecord>>, IComparable where TRecord : TableRecord<TRecord>
 
 {
     private DateTimeOffset _lastTime;
     private int            _hash;
     private TRecord?       _value;
-    public  bool           HasChanged => Value.GetHashCode() != _hash;
-    public  long           ID         => Value.ID;
+
+
+    public bool            HasChanged   => Value.GetHashCode() != _hash;
+    public DateTimeOffset  DateCreated  => _value?.DateCreated ?? default;
+    public DateTimeOffset? LastModified => _value?.LastModified;
+    public string ID
+    {
+        get => Value.ID;
+    }
+    public string? CreatedBy => _value?.CreatedBy;
 
 
     public TRecord Value
@@ -22,7 +30,7 @@ public sealed class CacheEntry<TRecord> : ObservableClass, IEquatable<TRecord>, 
             if ( !SetProperty( ref _value, value ) ) { return; }
 
             _hash     = value.GetHashCode();
-            _lastTime = DateTimeOffset.Now;
+            _lastTime = DateTimeOffset.UtcNow;
         }
     }
 
@@ -39,17 +47,15 @@ public sealed class CacheEntry<TRecord> : ObservableClass, IEquatable<TRecord>, 
     public static implicit operator CacheEntry<TRecord>( TRecord value ) => new(value);
 
 
-    public override bool Equals( object? obj ) => ReferenceEquals( this, obj ) || obj is CacheEntry<TRecord> other && Equals( other );
-
-    public bool HasExpired( in TimeSpan time ) => DateTimeOffset.Now - _lastTime >= time;
-    public override int GetHashCode() => Value.GetHashCode();
-
+    public bool HasExpired( in TimeSpan time ) => DateTimeOffset.UtcNow - _lastTime >= time;
 
     internal TRecord Saved()
     {
         _hash = _value?.GetHashCode() ?? 0;
         return Value;
     }
+
+
     public int CompareTo( object? other )
     {
         if ( other is null ) { return 1; }
@@ -77,5 +83,7 @@ public sealed class CacheEntry<TRecord> : ObservableClass, IEquatable<TRecord>, 
 
         return Value.Equals( other.Value );
     }
-    public bool Equals( TRecord? other ) => Value.Equals( other );
+    public bool Equals( TRecord?         other ) => Value.Equals( other );
+    public override bool Equals( object? obj ) => ReferenceEquals( this, obj ) || obj is CacheEntry<TRecord> other && Equals( other );
+    public override int GetHashCode() => Value.GetHashCode();
 }

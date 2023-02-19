@@ -6,7 +6,7 @@ namespace Jakar.Database;
 
 [Serializable]
 [DataBaseType( DbType.String )]
-public class CollectionWrapper<TValue, TOwner> : CollectionAlerts<TValue>, ICollectionWrapper<TValue> where TValue : IUniqueID<long>
+public class CollectionWrapper<TValue, TOwner> : CollectionAlerts<TValue>, ICollectionWrapper<TValue> where TValue : IUniqueID<string>
                                                                                                       where TOwner : TableRecord<TOwner>
 {
     private IDCollection<TValue>? _items;
@@ -160,11 +160,11 @@ public class CollectionWrapper<TValue, TOwner> : CollectionAlerts<TValue>, IColl
     }
 
 
-    public IEnumerator<long> GetEnumerator()
+    public IEnumerator<string> GetEnumerator()
     {
         if ( _items is null ) { yield break; }
 
-        foreach ( long id in _items ) { yield return id; }
+        foreach ( string id in _items ) { yield return id; }
     }
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     public bool Equals( ICollectionWrapper<TValue>? other )

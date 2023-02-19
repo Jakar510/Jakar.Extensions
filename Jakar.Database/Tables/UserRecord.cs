@@ -1,6 +1,10 @@
 ﻿// ToothFairyDispatch :: ToothFairyDispatch.Cloud
 // 08/29/2022  9:55 PM
 
+using Microsoft.IdentityModel.Tokens;
+
+
+
 namespace Jakar.Database;
 
 
@@ -58,7 +62,7 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, IUserRecord<U
         DateCreated       = DateTimeOffset.UtcNow;
         Rights            = rights;
     }
-    public UserRecord( long id, long rights = default ) : base( id )
+    public UserRecord( string id, long rights = default ) : base( id )
     {
         UserID      = Guid.NewGuid();
         DateCreated = DateTimeOffset.UtcNow;
@@ -197,8 +201,8 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, IUserRecord<U
 
     #region Owners
 
-    public async ValueTask<UserRecord?> GetBoss( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => EscalateTo.HasValue
-                                                                                                                                                    ? await db.Users.Get( connection, transaction, EscalateTo.Value, token )
+    public async ValueTask<UserRecord?> GetBoss( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => !string.IsNullOrEmpty( EscalateTo )
+                                                                                                                                                    ? await db.Users.Get( connection, transaction, EscalateTo, token )
                                                                                                                                                     : default;
 
 

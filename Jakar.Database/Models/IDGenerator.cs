@@ -7,10 +7,10 @@ namespace Jakar.Database;
 /// <summary>
 ///     <see href="https://stackoverflow.com/a/15992856/9530917"/>
 /// </summary>
-public struct IDGenerator<TRecord> : IAsyncEnumerator<long> where TRecord : TableRecord<TRecord>
+public struct IDGenerator<TRecord> : IAsyncEnumerator<string?> where TRecord : TableRecord<TRecord>
 {
     private readonly DbTable<TRecord> _table;
-    public           long                 Current { get; set; } = default;
+    public           string?          Current { get; set; }
 
 
     public IDGenerator( DbTable<TRecord> table ) => _table = table;
@@ -28,11 +28,11 @@ public struct IDGenerator<TRecord> : IAsyncEnumerator<long> where TRecord : Tabl
         if ( token.IsCancellationRequested )
         {
             Current = default;
-            return default;
+            return false;
         }
 
         Current = await _table.NextID( connection, transaction, Current, token );
-        return Current.IsValidID();
+        return !string.IsNullOrEmpty( Current );
     }
-    ValueTask<bool> IAsyncEnumerator<long>.MoveNextAsync() => MoveNextAsync();
+    ValueTask<bool> IAsyncEnumerator<string?>.MoveNextAsync() => MoveNextAsync();
 }

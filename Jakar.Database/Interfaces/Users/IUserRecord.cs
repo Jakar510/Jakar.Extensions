@@ -26,11 +26,11 @@ public interface IUserRecord<TRecord> : IComparable<TRecord>, IEquatable<TRecord
     where TRecord : TableRecord<TRecord>, IUserRecord<TRecord>
 {
     public DateTimeOffset DateCreated { get; }
-    public long?          CreatedBy   { get; }
+    public string?        CreatedBy   { get; }
 
 
     /// <summary> A unique User ID for which user to contact </summary>
-    public long? EscalateTo { get; }
+    public string? EscalateTo { get; }
 
     public string  PasswordHash { get; }
     public string? UserName     { get; }

@@ -61,8 +61,8 @@ public static class GuidExtensions
     /// </summary>
     /// <param name="value"> </param>
     /// <returns> </returns>
-    public static Guid? AsGuid( this string value ) => value.AsSpan()
-                                                            .AsGuid();
+    public static Guid? AsGuid( this string value ) => AsGuid( value.AsSpan() );
+
 
     /// <summary>
     ///     <see href="https://www.youtube.com/watch?v=B2yOjLyEZk0"> Writing C# without allocating ANY memory </see>
@@ -90,8 +90,8 @@ public static class GuidExtensions
 
         Span<byte> idBytes = stackalloc byte[16];
 
-        return Convert.TryFromBase64Chars( base64Chars, idBytes, out _ )
-                   ? new Guid( idBytes )
+        return Convert.TryFromBase64Chars( base64Chars, idBytes, out int bytesWritten )
+                   ? new Guid( idBytes[..bytesWritten] )
                    : default;
     }
 
@@ -101,7 +101,15 @@ public static class GuidExtensions
     /// </summary>
     /// <param name="value"> </param>
     /// <returns> </returns>
-    public static string ToBase64( this Guid value )
+    public static string ToBase64( this Guid value ) => new(value.AsSpan());
+
+
+    /// <summary>
+    ///     <see href="https://www.youtube.com/watch?v=B2yOjLyEZk0"> Writing C# without allocating ANY memory </see>
+    /// </summary>
+    /// <param name="value"> </param>
+    /// <returns> </returns>
+    public static ReadOnlySpan<char> AsSpan( this Guid value )
     {
         Span<byte> base64Bytes = stackalloc byte[24];
         Span<char> result      = stackalloc char[22];
@@ -109,10 +117,10 @@ public static class GuidExtensions
         Span<byte> idBytes = stackalloc byte[16];
         if ( !value.TryWriteBytes( idBytes ) ) { throw new InvalidOperationException(); }
 
-        System.Buffers.Text.Base64.EncodeToUtf8( idBytes, base64Bytes, out _, out _ );
+        System.Buffers.Text.Base64.EncodeToUtf8( idBytes, base64Bytes, out _, out int bytesWritten );
 
 
-        for ( int i = 0; i < 22; i++ )
+        for ( int i = 0; i < bytesWritten; i++ )
         {
             result[i] = base64Bytes[i] switch
                         {
@@ -122,6 +130,6 @@ public static class GuidExtensions
                         };
         }
 
-        return new string( result );
+        return MemoryMarshal.CreateReadOnlySpan( ref result.GetPinnableReference(), result.Length );
     }
 }

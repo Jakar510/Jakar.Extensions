@@ -3,6 +3,8 @@
 
 using Jakar.AppLogger.Portal.Data.Interfaces;
 
+
+
 namespace Jakar.AppLogger.Portal.Data.Tables;
 
 
@@ -13,20 +15,20 @@ public sealed record AttachmentRecord : LoggerTable<AttachmentRecord>, IAttachme
     public                       bool    IsBinary    { get; init; }
     public                       Guid    SessionID   { get; init; }
     public                       Guid?   ScopeID     { get; init; }
-    public                       long    AppID       { get; init; }
-    public                       long    DeviceID    { get; init; }
+    public                       string  AppID       { get; init; } = string.Empty;
+    public                       string  DeviceID    { get; init; } = string.Empty;
     public                       long    Length      { get; init; }
-    public                       long    LogID       { get; init; }
+    public                       string  LogID       { get; init; } = string.Empty;
     [MaxLength( 2 ^ 20 )] public string  Content     { get; init; } = string.Empty;
-    [MaxLength( 1024 )]    public string? Description { get; init; }
+    [MaxLength( 1024 )]   public string? Description { get; init; }
     [MaxLength( 256 )]    public string? FileName    { get; init; }
     [MaxLength( 256 )]    public string? Type        { get; init; }
 
 
-    public AttachmentRecord() : base()  { }
-    public AttachmentRecord( Attachment attachment, ILogInfo info ) : base( 0 )
+    public AttachmentRecord() : base() { }
+    public AttachmentRecord( Attachment attachment, ILogInfo info ) : base( Guid.NewGuid() )
     {
-        if (attachment.Length > Attachment.MAX_SIZE) { Attachment.ThrowTooLong(); }
+        if ( attachment.Length > Attachment.MAX_SIZE ) { Attachment.ThrowTooLong(); }
 
         Length      = attachment.Length;
         Content     = attachment.Content;
@@ -42,7 +44,7 @@ public sealed record AttachmentRecord : LoggerTable<AttachmentRecord>, IAttachme
     }
     public AttachmentRecord( Attachment attachment, ILogInfo info, UserRecord caller ) : base( caller )
     {
-        if (attachment.Length > Attachment.MAX_SIZE) { Attachment.ThrowTooLong(); }
+        if ( attachment.Length > Attachment.MAX_SIZE ) { Attachment.ThrowTooLong(); }
 
         Length      = attachment.Length;
         Content     = attachment.Content;
@@ -91,9 +93,9 @@ public sealed record AttachmentRecord : LoggerTable<AttachmentRecord>, IAttachme
     public override int GetHashCode() => HashCode.Combine( Content, base.GetHashCode() );
     public override bool Equals( AttachmentRecord? other )
     {
-        if (other is null) { return false; }
+        if ( other is null ) { return false; }
 
-        if (ReferenceEquals( this, other )) { return true; }
+        if ( ReferenceEquals( this, other ) ) { return true; }
 
         return string.Equals( Content, other.Content, StringComparison.Ordinal );
     }

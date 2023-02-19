@@ -4,7 +4,7 @@
 namespace Jakar.Database;
 
 
-public interface ICollectionWrapper<TValue> : IReadOnlyCollection<long>, IEquatable<ICollectionWrapper<TValue>>, IConvertible, ICollectionAlerts, ISpanFormattable, IDisposable where TValue : IUniqueID<long>
+public interface ICollectionWrapper<TValue> : IReadOnlyCollection<string>, IEquatable<ICollectionWrapper<TValue>>, IConvertible, ICollectionAlerts, ISpanFormattable, IDisposable where TValue : IUniqueID<string>
 
 {
     bool    IsEmpty    { get; }

@@ -3,6 +3,8 @@
 
 using Jakar.AppLogger.Portal.Data.Interfaces;
 
+
+
 namespace Jakar.AppLogger.Portal.Data.Tables;
 
 
@@ -10,13 +12,13 @@ namespace Jakar.AppLogger.Portal.Data.Tables;
 [Table( "Sessions" )]
 public sealed record SessionRecord : LoggerTable<SessionRecord>, ISession
 {
-    public Guid SessionID { get; init; }
-    public long AppID     { get; init; }
-    public long DeviceID  { get; init; }
+    public Guid   SessionID { get; init; }
+    public string AppID     { get; init; } = string.Empty;
+    public string DeviceID  { get; init; } = string.Empty;
 
 
-    public SessionRecord() : base()  { }
-    public SessionRecord( AppRecord app, DeviceRecord device ) : base( 0 )
+    public SessionRecord() : base() { }
+    public SessionRecord( AppRecord app, DeviceRecord device ) : base( Guid.NewGuid() )
     {
         AppID    = app.ID;
         DeviceID = device.ID;
@@ -36,13 +38,13 @@ public sealed record SessionRecord : LoggerTable<SessionRecord>, ISession
     }
 
 
-    public override int CompareTo( SessionRecord? other ) => Nullable.Compare( AppID, other?.AppID );
+    public override int CompareTo( SessionRecord? other ) => string.Compare( AppID, other?.AppID, StringComparison.Ordinal );
     public override int GetHashCode() => HashCode.Combine( AppID, DeviceID, base.GetHashCode() );
     public override bool Equals( SessionRecord? other )
     {
-        if (other is null) { return false; }
+        if ( other is null ) { return false; }
 
-        if (ReferenceEquals( this, other )) { return true; }
+        if ( ReferenceEquals( this, other ) ) { return true; }
 
         return AppID == other.AppID && DeviceID == other.DeviceID;
     }
