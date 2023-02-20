@@ -10,7 +10,7 @@ namespace Jakar.Database;
 public struct RecordGenerator<TRecord> : IAsyncEnumerator<TRecord?> where TRecord : TableRecord<TRecord>
 {
     private readonly DbTable<TRecord> _table;
-    private          TRecord?             _current = default;
+    private          TRecord?                _current = default;
     private          string?                 _ID => _current?.ID;
 
 

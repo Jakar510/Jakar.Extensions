@@ -92,7 +92,56 @@ public abstract partial class Database : Randoms, IConnectableDb, IAsyncDisposab
         RecoveryCodes = Create<RecoveryCodeRecord>();
         UserLogins    = Create<UserLoginInfoRecord>();
     }
+    protected TValue AddDisposable<TValue>( TValue value ) where TValue : IAsyncDisposable
+    {
+        _disposables.Add( value );
+        return value;
+    }
+    protected virtual DbTable<TRecord> Create<TRecord>() where TRecord : TableRecord<TRecord>
+    {
+        var table = new DbTable<TRecord>( this );
+        return AddDisposable( table );
+    }
+    public virtual async ValueTask DisposeAsync()
+    {
+        foreach ( IAsyncDisposable disposable in _disposables ) { await disposable.DisposeAsync(); }
 
+        _disposables.Clear();
+        GC.SuppressFinalize( this );
+    }
+
+
+    public DbConnection Connect()
+    {
+        DbConnection connection = CreateConnection();
+        connection.Open();
+        return connection;
+    }
+    public async ValueTask<DbConnection> ConnectAsync( CancellationToken token )
+    {
+        DbConnection connection = CreateConnection();
+        await connection.OpenAsync( token );
+        return connection;
+    }
+    public virtual async Task<HealthCheckResult> CheckHealthAsync( HealthCheckContext context, CancellationToken token = default )
+    {
+        try
+        {
+            await using DbConnection connection = await ConnectAsync( token );
+
+            return connection.State switch
+                   {
+                       ConnectionState.Broken     => HealthCheckResult.Unhealthy(),
+                       ConnectionState.Closed     => HealthCheckResult.Degraded(),
+                       ConnectionState.Open       => HealthCheckResult.Healthy(),
+                       ConnectionState.Connecting => HealthCheckResult.Healthy(),
+                       ConnectionState.Executing  => HealthCheckResult.Healthy(),
+                       ConnectionState.Fetching   => HealthCheckResult.Healthy(),
+                       _                          => throw new ArgumentOutOfRangeException()
+                   };
+        }
+        catch ( Exception e ) { return HealthCheckResult.Unhealthy( e.Message ); }
+    }
 
 
     protected internal ValueTask<IReadOnlyCollection<RecoveryCodeRecord>> Codes( UserRecord user, CancellationToken token ) => this.TryCall( Codes, user, token );
@@ -104,9 +153,8 @@ public abstract partial class Database : Randoms, IConnectableDb, IAsyncDisposab
 
 
 
-
     #region Tokens
-    
+
     /// <summary> Only to be used for <see cref="ITokenService"/> </summary>
     /// <exception cref="ArgumentOutOfRangeException"> </exception>
     public ValueTask<Tokens?> Authenticate( VerifyRequest request, CancellationToken token ) => this.TryCall( Authenticate, request, token );
@@ -436,62 +484,6 @@ public abstract partial class Database : Randoms, IConnectableDb, IAsyncDisposab
         // if ( user.SubscriptionID.IsValidID() ) { return LoginResult.State.NoSubscription; }
 
         return user;
-    }
-
-    #endregion
-
-
-
-    #region Core
-
-    protected TValue AddDisposable<TValue>( TValue value ) where TValue : IAsyncDisposable
-    {
-        _disposables.Add( value );
-        return value;
-    }
-    protected virtual DbTable<TRecord> Create<TRecord>() where TRecord : TableRecord<TRecord>
-    {
-        var table = new DbTable<TRecord>( this );
-        return AddDisposable( table );
-    }
-
-    public virtual async ValueTask DisposeAsync()
-    {
-        foreach ( IAsyncDisposable disposable in _disposables ) { await disposable.DisposeAsync(); }
-
-        _disposables.Clear();
-    }
-    public DbConnection Connect()
-    {
-        DbConnection connection = CreateConnection();
-        connection.Open();
-        return connection;
-    }
-    public async ValueTask<DbConnection> ConnectAsync( CancellationToken token )
-    {
-        DbConnection connection = CreateConnection();
-        await connection.OpenAsync( token );
-        return connection;
-    }
-
-    public virtual async Task<HealthCheckResult> CheckHealthAsync( HealthCheckContext context, CancellationToken token = default )
-    {
-        try
-        {
-            await using DbConnection connection = await ConnectAsync( token );
-
-            return connection.State switch
-                   {
-                       ConnectionState.Broken     => HealthCheckResult.Unhealthy(),
-                       ConnectionState.Closed     => HealthCheckResult.Degraded(),
-                       ConnectionState.Open       => HealthCheckResult.Healthy(),
-                       ConnectionState.Connecting => HealthCheckResult.Healthy(),
-                       ConnectionState.Executing  => HealthCheckResult.Healthy(),
-                       ConnectionState.Fetching   => HealthCheckResult.Healthy(),
-                       _                          => throw new ArgumentOutOfRangeException()
-                   };
-        }
-        catch ( Exception e ) { return HealthCheckResult.Unhealthy( e.Message ); }
     }
 
     #endregion

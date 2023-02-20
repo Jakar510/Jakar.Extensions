@@ -33,20 +33,20 @@ public abstract class Migration<TRecord> : Migration where TRecord : TableRecord
              .PrimaryKey()
              .Identity();
 
-        table.WithColumn( nameof(TableRecord<TRecord>.UserID) )
-             .AsGuid()
-             .NotNullable();
-
-        table.WithColumn( nameof(TableRecord<TRecord>.CreatedBy) )
-             .AsString( 256 )
-             .Nullable();
-
         table.WithColumn( nameof(TableRecord<TRecord>.DateCreated) )
              .AsDateTime2()
              .NotNullable();
 
         table.WithColumn( nameof(TableRecord<TRecord>.LastModified) )
              .AsDateTime2()
+             .Nullable();
+
+        table.WithColumn( nameof(TableRecord<TRecord>.UserID) )
+             .AsGuid()
+             .NotNullable();
+
+        table.WithColumn( nameof(TableRecord<TRecord>.CreatedBy) )
+             .AsString( 256 )
              .Nullable();
 
         return table;

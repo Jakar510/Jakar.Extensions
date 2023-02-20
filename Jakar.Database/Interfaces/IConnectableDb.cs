@@ -16,4 +16,3 @@ public interface IConnectableDb
 
 
 
-public interface IConnectableDb<TRecord> : IConnectableDb where TRecord : TableRecord<TRecord> { }

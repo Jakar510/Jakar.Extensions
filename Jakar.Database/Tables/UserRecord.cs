@@ -348,25 +348,12 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, JsonModels.IJ
 
     #region Roles
 
-    public async IAsyncEnumerable<RoleRecord> GetRoles( DbConnection connection, DbTransaction? transaction, Database db, [EnumeratorCancellation] CancellationToken token = default )
-    {
-        foreach ( UserRoleRecord record in await db.UserRoles.Where( connection, transaction, true, UserRoleRecord.GetDynamicParameters( this ), token ) )
-        {
-            RoleRecord? role = await db.Roles.Get( connection, transaction, record.ValueID, token );
-            if ( role is not null ) { yield return role; }
-        }
-    }
-    public async ValueTask<bool> HasRole( DbConnection connection, DbTransaction transaction, Database db, RoleRecord value, CancellationToken token )
-    {
-        UserRoleRecord? record = await db.UserRoles.Get( connection, transaction, true, UserRoleRecord.GetDynamicParameters( this, value ), token );
-        return record is not null;
-    }
-    public async ValueTask Remove( DbConnection connection, DbTransaction transaction, Database db, RoleRecord role, CancellationToken token )
-    {
-        UserRoleRecord? record = await db.UserRoles.Get( connection, transaction, true, UserRoleRecord.GetDynamicParameters( this, role ), token );
-
-        if ( record is not null ) { await db.UserRoles.Delete( connection, transaction, record, token ); }
-    }
+    public async ValueTask<RoleRecord[]> GetRoles( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token = default ) =>
+        await UserRoleRecord.Where( connection, transaction, db.UserRoles, db.Roles, this, token );
+    public async ValueTask<bool> HasRole( DbConnection connection, DbTransaction transaction, Database db, RoleRecord value, CancellationToken token ) =>
+        await UserRoleRecord.Exists( connection, transaction, db.UserRoles, this, value, token );
+    public async ValueTask Remove( DbConnection connection, DbTransaction transaction, Database db, RoleRecord value, CancellationToken token ) =>
+        await UserRoleRecord.Delete( connection, transaction, db.UserRoles, this, value, token );
 
     #endregion
 
@@ -374,25 +361,12 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, JsonModels.IJ
 
     #region Groups
 
-    public async IAsyncEnumerable<GroupRecord> GetGroups( DbConnection connection, DbTransaction? transaction, Database db, [EnumeratorCancellation] CancellationToken token = default )
-    {
-        foreach ( UserGroupRecord record in await db.UserGroups.Where( connection, transaction, true, UserGroupRecord.GetDynamicParameters( this ), token ) )
-        {
-            GroupRecord? role = await db.Groups.Get( connection, transaction, record.ValueID, token );
-            if ( role is not null ) { yield return role; }
-        }
-    }
-    public async ValueTask<bool> IsPartOfGroup( DbConnection connection, DbTransaction transaction, Database db, GroupRecord value, CancellationToken token )
-    {
-        UserGroupRecord? record = await db.UserGroups.Get( connection, transaction, true, UserGroupRecord.GetDynamicParameters( this, value ), token );
-        return record is not null;
-    }
-    public async ValueTask Remove( DbConnection connection, DbTransaction transaction, Database db, GroupRecord role, CancellationToken token )
-    {
-        UserGroupRecord? record = await db.UserGroups.Get( connection, transaction, true, UserGroupRecord.GetDynamicParameters( this, role ), token );
-
-        if ( record is not null ) { await db.UserGroups.Delete( connection, transaction, record, token ); }
-    }
+    public async ValueTask<GroupRecord[]> GetGroups( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token = default ) =>
+        await UserGroupRecord.Where( connection, transaction, db.UserGroups, db.Groups, this, token );
+    public async ValueTask<bool> IsPartOfGroup( DbConnection connection, DbTransaction transaction, Database db, GroupRecord value, CancellationToken token ) =>
+        await UserGroupRecord.Exists( connection, transaction, db.UserGroups, this, value, token );
+    public async ValueTask Remove( DbConnection connection, DbTransaction transaction, Database db, GroupRecord value, CancellationToken token ) =>
+        await UserGroupRecord.Delete( connection, transaction, db.UserGroups, this, value, token );
 
     #endregion
 
@@ -441,18 +415,13 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, JsonModels.IJ
         claims.Add( new Claim( ClaimTypes.Webpage,       Website ?? string.Empty ) );
         return claims;
     }
-    public async ValueTask<List<Claim>> GetUserClaims( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token, bool includeRoles = true, bool includeGroups = false, bool includePersonalData = false )
+    public async ValueTask<List<Claim>> GetUserClaims( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token, bool includeRoles = true, bool includeGroups = true, bool includePersonalData = false )
     {
         List<Claim> claims = GetUserClaims( includePersonalData );
 
-        if ( includeRoles )
-        {
-            await foreach ( RoleRecord record in GetRoles( connection, transaction, db, token ) ) { claims.Add( new Claim( ClaimTypes.Role, record.Name ) ); }
-        }
+        if ( includeRoles ) { claims.AddRange( from record in await GetRoles( connection, transaction, db, token ) select new Claim( ClaimTypes.Role, record.Name ) ); }
 
-        if ( !includeGroups ) { return claims; }
-
-        await foreach ( GroupRecord record in GetGroups( connection, transaction, db, token ) ) { claims.Add( new Claim( ClaimTypes.GroupSid, record.NameOfGroup ) ); }
+        if ( includeGroups ) { claims.AddRange( from record in await GetGroups( connection, transaction, db, token ) select new Claim( ClaimTypes.GroupSid, record.NameOfGroup ) ); }
 
         return claims;
     }

@@ -45,18 +45,13 @@ public sealed record GroupRecord : TableRecord<GroupRecord>
     public override int GetHashCode() => HashCode.Combine( base.GetHashCode(), NameOfGroup, OwnerID, CustomerID );
 
 
-    public async Task<UserRecord?> GetOwner( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => !string.IsNullOrEmpty( OwnerID )
-                                                                                                                                                ? await db.Users.Get( connection, transaction, OwnerID, token )
-                                                                                                                                                : default;
-    public async ValueTask<IEnumerable<UserRecord>> GetUsers( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token )
-    {
-        string sql = @$"SELECT * FROM {db.Users.SchemaTableName}
-INNER JOIN {db.UserGroups.SchemaTableName} ON {db.UserGroups.SchemaTableName}.{nameof(UserGroupRecord.UserID)} = {db.Users.SchemaTableName}.{nameof(UserRecord.UserID)} 
-WHERE {db.UserGroups.SchemaTableName}.{nameof(ID)} = {ID}";
+    public async Task<UserRecord?> GetOwner( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) =>
+        !string.IsNullOrEmpty( OwnerID )
+            ? await db.Users.Get( connection, transaction, OwnerID, token )
+            : default;
 
-        token.ThrowIfCancellationRequested();
-        return await connection.QueryAsync<UserRecord>( sql, default, transaction );
-    }
+    public async ValueTask<UserRecord[]> GetUsers( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) =>
+        await UserGroupRecord.Where( connection, transaction, db.UserGroups, db.Users, this, token );
 
 
     public override bool Equals( GroupRecord? other )
