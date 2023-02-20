@@ -1,30 +1,15 @@
 ﻿// TrueLogic :: TrueLogic.Common.Hosting
-// 10/25/2022  9:19 AM
+// 02/17/2023  2:39 PM
 
 namespace Jakar.Database;
 
 
 [Serializable]
 [Table( "UserGroups" )]
-public record UserGroupRecord : TableRecord<UserGroupRecord>
+public sealed record UserGroupRecord : Mapping<UserGroupRecord, GroupRecord>, ICreateMapping<UserGroupRecord, GroupRecord>
 {
-    public string GroupID { get; init; } = string.Empty;
+    public UserGroupRecord() : base() { }
+    public UserGroupRecord( UserRecord                                         owner, GroupRecord value ) : base( owner, value ) { }
+    [RequiresPreviewFeatures] public static UserGroupRecord Create( UserRecord owner, GroupRecord value ) => new(owner, value);
 
-
-    public UserGroupRecord() { }
-    public UserGroupRecord( UserRecord user, GroupRecord group ) : base( user ) => GroupID = group.ID;
-
-
-    public static DynamicParameters GetDynamicParameters( GroupRecord record )
-    {
-        var parameters = new DynamicParameters();
-        parameters.Add( nameof(GroupID), record.ID );
-        return parameters;
-    }
-    public static DynamicParameters GetDynamicParameters( UserRecord user, GroupRecord record )
-    {
-        DynamicParameters parameters = GetDynamicParameters( user );
-        parameters.Add( nameof(GroupID), record.ID );
-        return parameters;
-    }
 }

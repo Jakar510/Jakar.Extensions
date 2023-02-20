@@ -21,9 +21,6 @@ public sealed partial record UserRecord
     private DateTimeOffset?   _tokenExpiration;
     private Guid?             _sessionID;
     private int               _badLogins;
-    private long              _rights;
-    private string?           _escalateTo;
-    private string?           _subscriptionID;
     private string            _firstName    = string.Empty;
     private string            _lastName     = string.Empty;
     private string            _passwordHash = string.Empty;
@@ -37,6 +34,7 @@ public sealed partial record UserRecord
     private string?           _department;
     private string?           _description;
     private string?           _email;
+    private string?           _escalateTo;
     private string?           _ext;
     private string?           _fullName;
     private string?           _line1;
@@ -44,8 +42,10 @@ public sealed partial record UserRecord
     private string?           _phoneNumber;
     private string?           _postalCode;
     private string?           _refreshToken;
+    private string            _rights = string.Empty;
     private string?           _securityStamp;
     private string?           _state;
+    private string?           _subscriptionID;
     private string?           _title;
     private string?           _website;
     private SupportedLanguage _preferredLanguage;
@@ -137,22 +137,6 @@ public sealed partial record UserRecord
         get => _badLogins;
         set => SetProperty( ref _badLogins, value );
     }
-    public long Rights
-    {
-        get => _rights;
-        set => SetProperty( ref _rights, value );
-    }
-    string? IUserRecord<UserRecord>.CreatedBy => CreatedBy;
-    public string? EscalateTo
-    {
-        get => _escalateTo;
-        set => SetProperty( ref _escalateTo, value );
-    }
-    public string? SubscriptionID
-    {
-        get => _subscriptionID;
-        set => SetProperty( ref _subscriptionID, value );
-    }
 
 
     [ProtectedPersonalData]
@@ -173,7 +157,7 @@ public sealed partial record UserRecord
     }
 
 
-    [MaxLength( int.MaxValue )]
+    [MaxLength( TokenValidationParameters.DefaultMaximumTokenSizeInBytes )]
     public string PasswordHash
     {
         get => _passwordHash;
@@ -226,7 +210,7 @@ public sealed partial record UserRecord
     }
 
 
-    [MaxLength( int.MaxValue )]
+    [MaxLength( TokenValidationParameters.DefaultMaximumTokenSizeInBytes )]
     public string? ConcurrencyStamp
     {
         get => _concurrencyStamp;
@@ -267,6 +251,12 @@ public sealed partial record UserRecord
     {
         get => _email;
         set => SetProperty( ref _email, value );
+    }
+    [MaxLength( 256 )]
+    public string? EscalateTo
+    {
+        get => _escalateTo;
+        set => SetProperty( ref _escalateTo, value );
     }
 
 
@@ -332,7 +322,15 @@ public sealed partial record UserRecord
     }
 
 
-    [MaxLength( int.MaxValue )]
+    [MaxLength( TokenValidationParameters.DefaultMaximumTokenSizeInBytes )]
+    public string Rights
+    {
+        get => _rights;
+        set => SetProperty( ref _rights, value );
+    }
+
+
+    [MaxLength( TokenValidationParameters.DefaultMaximumTokenSizeInBytes )]
     public string? SecurityStamp
     {
         get => _securityStamp;
@@ -346,6 +344,12 @@ public sealed partial record UserRecord
     {
         get => _state;
         set => SetProperty( ref _state, value );
+    }
+    [MaxLength( 256 )]
+    public string? SubscriptionID
+    {
+        get => _subscriptionID;
+        set => SetProperty( ref _subscriptionID, value );
     }
 
 
@@ -365,6 +369,8 @@ public sealed partial record UserRecord
         get => _website;
         set => SetProperty( ref _website, value );
     }
+
+
     public SupportedLanguage PreferredLanguage
     {
         get => _preferredLanguage;

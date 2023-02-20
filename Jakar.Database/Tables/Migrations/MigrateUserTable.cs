@@ -102,11 +102,11 @@ public abstract class MigrateUserTable : Migration<UserRecord>
              .Nullable();
 
         table.WithColumn( nameof(UserRecord.SubscriptionID) )
-             .AsInt64()
+             .AsString( 256 )
              .Nullable();
 
         table.WithColumn( nameof(UserRecord.EscalateTo) )
-             .AsInt64()
+             .AsString( 255 )
              .Nullable();
 
         table.WithColumn( nameof(UserRecord.IsActive) )
@@ -166,11 +166,11 @@ public abstract class MigrateUserTable : Migration<UserRecord>
              .NotNullable();
 
         table.WithColumn( nameof(UserRecord.SecurityStamp) )
-             .AsString( int.MaxValue )
+             .AsString( TokenValidationParameters.DefaultMaximumTokenSizeInBytes )
              .Nullable();
 
         table.WithColumn( nameof(UserRecord.ConcurrencyStamp) )
-             .AsString( int.MaxValue )
+             .AsString( TokenValidationParameters.DefaultMaximumTokenSizeInBytes )
              .Nullable();
 
         table.WithColumn( nameof(UserRecord.AdditionalData) )
@@ -178,12 +178,12 @@ public abstract class MigrateUserTable : Migration<UserRecord>
              .Nullable();
 
         table.WithColumn( nameof(UserRecord.PasswordHash) )
-             .AsString( int.MaxValue )
+             .AsString( TokenValidationParameters.DefaultMaximumTokenSizeInBytes )
              .Nullable();
 
         table.WithColumn( nameof(UserRecord.Rights) )
-             .AsInt64()
-             .Nullable();
+             .AsString( TokenValidationParameters.DefaultMaximumTokenSizeInBytes )
+             .NotNullable();
 
         return table;
     }

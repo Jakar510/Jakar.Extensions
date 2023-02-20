@@ -35,8 +35,8 @@ public abstract record Mapping<TSelf, TKey, TValue> : TableRecord<TSelf> where T
     private WeakReference<TValue>? _value;
 
 
-    public string OwnerID { get; init; } = string.Empty;
-    public string ValueID { get; init; } = string.Empty;
+    [MaxLength( 256 )] public string KeyID   { get; init; } = string.Empty;
+    [MaxLength( 256 )] public string ValueID { get; init; } = string.Empty;
 
 
     protected Mapping() { }
@@ -45,15 +45,43 @@ public abstract record Mapping<TSelf, TKey, TValue> : TableRecord<TSelf> where T
         _owner      = new WeakReference<TKey>( key );
         _value      = new WeakReference<TValue>( value );
         DateCreated = DateTimeOffset.UtcNow;
-        OwnerID     = key.ID;
+        KeyID       = key.ID;
         ValueID     = value.ID;
     }
     protected Mapping( UserRecord user, TKey key, TValue value ) : base( user )
     {
         _owner  = new WeakReference<TKey>( key );
         _value  = new WeakReference<TValue>( value );
-        OwnerID = key.ID;
+        KeyID   = key.ID;
         ValueID = value.ID;
+    }
+
+
+    public static DynamicParameters GetDynamicParameters( TValue record )
+    {
+        var parameters = new DynamicParameters();
+        parameters.Add( nameof(KeyID), record.ID );
+        return parameters;
+    }
+    public static DynamicParameters GetDynamicParameters( TKey key )
+    {
+        var parameters = new DynamicParameters();
+        parameters.Add( nameof(KeyID), key.ID );
+        return parameters;
+    }
+    public static DynamicParameters GetDynamicParameters( TKey key, TValue value )
+    {
+        var parameters = new DynamicParameters();
+        parameters.Add( nameof(KeyID),   key.ID );
+        parameters.Add( nameof(ValueID), value.ID );
+        return parameters;
+    }
+    public static DynamicParameters GetDynamicParameters( UserRecord user, TKey key, TValue value )
+    {
+        DynamicParameters parameters = GetDynamicParameters( user );
+        parameters.Add( nameof(KeyID),   key.ID );
+        parameters.Add( nameof(ValueID), value.ID );
+        return parameters;
     }
 
 
@@ -61,7 +89,7 @@ public abstract record Mapping<TSelf, TKey, TValue> : TableRecord<TSelf> where T
     {
         if ( _owner is not null && _owner.TryGetTarget( out TKey? value ) ) { return value; }
 
-        TKey? record = await table.Get( connection, transaction, OwnerID, token );
+        TKey? record = await table.Get( connection, transaction, KeyID, token );
         if ( record is not null ) { _owner = new WeakReference<TKey>( record ); }
 
         return record;
@@ -83,7 +111,7 @@ public abstract record Mapping<TSelf, TKey, TValue> : TableRecord<TSelf> where T
 
         if ( ReferenceEquals( this, other ) ) { return 0; }
 
-        int ownerComparision = string.Compare( OwnerID, other.OwnerID, StringComparison.Ordinal );
+        int ownerComparision = string.Compare( KeyID, other.KeyID, StringComparison.Ordinal );
         if ( ownerComparision == 0 ) { return ownerComparision; }
 
         return string.Compare( ValueID, other.ValueID, StringComparison.Ordinal );
@@ -92,9 +120,9 @@ public abstract record Mapping<TSelf, TKey, TValue> : TableRecord<TSelf> where T
     {
         if ( other is null ) { return false; }
 
-        return ReferenceEquals( this, other ) || ValueID == other.ValueID && OwnerID == other.ValueID;
+        return ReferenceEquals( this, other ) || ValueID == other.ValueID && KeyID == other.ValueID;
     }
-    public override int GetHashCode() => HashCode.Combine( OwnerID, ValueID );
+    public override int GetHashCode() => HashCode.Combine( KeyID, ValueID );
 
 
     [RequiresPreviewFeatures]
@@ -135,7 +163,7 @@ public abstract record Mapping<TSelf, TKey, TValue> : TableRecord<TSelf> where T
     public static async ValueTask<bool> Exists( DbConnection connection, DbTransaction transaction, DbTable<TSelf> table, TKey key, TValue value, CancellationToken token )
     {
         var parameters = new DynamicParameters();
-        parameters.Add( nameof(OwnerID), key.ID );
+        parameters.Add( nameof(KeyID),   key.ID );
         parameters.Add( nameof(ValueID), value.ID );
 
         return await table.Exists( connection, transaction, true, parameters, token );
@@ -145,13 +173,13 @@ public abstract record Mapping<TSelf, TKey, TValue> : TableRecord<TSelf> where T
     public static async ValueTask<TSelf[]> Where( DbConnection connection, DbTransaction transaction, DbTable<TSelf> table, TKey key, CancellationToken token )
     {
         var parameters = new DynamicParameters();
-        parameters.Add( nameof(OwnerID), key.ID );
+        parameters.Add( nameof(KeyID), key.ID );
         return await table.Where( connection, transaction, true, parameters, token );
     }
     public static async IAsyncEnumerable<TValue?> Where( DbConnection connection, DbTransaction transaction, DbTable<TSelf> table, DbTable<TValue> valueTable, TKey key, [EnumeratorCancellation] CancellationToken token )
     {
         var parameters = new DynamicParameters();
-        parameters.Add( nameof(OwnerID), key.ID );
+        parameters.Add( nameof(KeyID), key.ID );
         TSelf[] records = await table.Where( connection, transaction, true, parameters, token );
 
         foreach ( TSelf mapping in records ) { yield return await mapping.Get( connection, transaction, valueTable, token ); }
@@ -179,7 +207,7 @@ public abstract record Mapping<TSelf, TKey, TValue> : TableRecord<TSelf> where T
     public static async ValueTask Delete( DbConnection connection, DbTransaction transaction, DbTable<TSelf> table, TKey key, IEnumerable<TValue> values, CancellationToken token )
     {
         var parameters = new DynamicParameters();
-        parameters.Add( nameof(OwnerID), key.ID );
+        parameters.Add( nameof(KeyID), key.ID );
         string sql = $"SELECT {nameof(IDataBaseID.ID)} FROM {table.TableName} WHERE {nameof(ValueID)} IN ( {string.Join( ',', values.Select( x => x.ID ) )} )";
 
         TSelf[] records = await table.Where( connection, transaction, sql, parameters, token );

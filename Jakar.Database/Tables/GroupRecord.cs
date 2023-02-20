@@ -6,9 +6,11 @@
 public sealed record GroupRecord : TableRecord<GroupRecord>
 {
     private string? _ownerID;
-    private string  _customerID  = string.Empty;
+    private string? _customerID;
     private string  _nameOfGroup = string.Empty;
 
+
+    [MaxLength( 256 )]
     public string? OwnerID
     {
         get => _ownerID;
@@ -17,14 +19,14 @@ public sealed record GroupRecord : TableRecord<GroupRecord>
 
 
     [MaxLength( 256 )]
-    public string CustomerID
+    public string? CustomerID
     {
         get => _customerID;
         init => SetProperty( ref _customerID, value );
     }
 
 
-    [MaxLength( 256 )]
+    [MaxLength( 1024 )]
     public string NameOfGroup
     {
         get => _nameOfGroup;
@@ -33,7 +35,7 @@ public sealed record GroupRecord : TableRecord<GroupRecord>
 
 
     public GroupRecord() { }
-    public GroupRecord( UserRecord owner, string nameOfGroup, string customerID, UserRecord caller ) : base( caller )
+    public GroupRecord( UserRecord owner, string nameOfGroup, string? customerID, UserRecord caller ) : base( caller )
     {
         CreatedBy   = caller.ID;
         OwnerID     = owner.ID;

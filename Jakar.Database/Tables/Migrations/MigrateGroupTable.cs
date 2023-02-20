@@ -18,11 +18,11 @@ public abstract class MigrateGroupTable : Migration<GroupRecord>
              .NotNullable();
 
         table.WithColumn( nameof(GroupRecord.CustomerID) )
-             .AsString( 1024 )
-             .NotNullable();
+             .AsString( 256 )
+             .Nullable();
 
         table.WithColumn( nameof(GroupRecord.OwnerID) )
-             .AsString( 4096 )
+             .AsString( 256 )
              .NotNullable();
 
         return table;

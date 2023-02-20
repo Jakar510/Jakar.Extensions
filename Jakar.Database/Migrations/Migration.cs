@@ -28,7 +28,7 @@ public abstract class Migration<TRecord> : Migration where TRecord : TableRecord
 
 
         table.WithColumn( nameof(TableRecord<TRecord>.ID) )
-             .AsInt64()
+             .AsString( 256 )
              .NotNullable()
              .PrimaryKey()
              .Identity();
@@ -38,7 +38,7 @@ public abstract class Migration<TRecord> : Migration where TRecord : TableRecord
              .NotNullable();
 
         table.WithColumn( nameof(TableRecord<TRecord>.CreatedBy) )
-             .AsInt64()
+             .AsString( 256 )
              .Nullable();
 
         table.WithColumn( nameof(TableRecord<TRecord>.DateCreated) )
