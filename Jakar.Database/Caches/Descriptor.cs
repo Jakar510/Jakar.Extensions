@@ -4,17 +4,17 @@
 namespace Jakar.Database.Caches;
 
 
-public abstract record Descriptor
+public sealed record Descriptor
 {
-    public bool                 IsKey        { get; init; }
-    public Func<object, object> GetValue     { get; init; }
-    public string               ColumnName   { get; init; }
-    public string               KeyValuePair { get; init; }
-    public string               Name         { get; init; }
-    public string               VariableName { get; init; }
+    public bool                 IsKey        { get;  }
+    public Func<object, object> GetValue     { get;  }
+    public string               ColumnName   { get;  }
+    public string               KeyValuePair { get;  }
+    public string               Name         { get;  }
+    public string               VariableName { get;  }
 
 
-    protected Descriptor( PropertyInfo property, string name, string columnName, string variableName, string keyValuePair )
+    private Descriptor( PropertyInfo property, string name, string columnName, string variableName, string keyValuePair )
     {
         ArgumentNullException.ThrowIfNull( property.GetMethod );
         ArgumentNullException.ThrowIfNull( property.DeclaringType );
@@ -26,7 +26,7 @@ public abstract record Descriptor
         IsKey        = IsDbKey( property );
 
 
-        Emit<Func<object, object>>? emit = Emit<Func<object, object>>.NewDynamicMethod( GetType() )
+        Emit<Func<object, object>>? emit = Emit<Func<object, object>>.NewDynamicMethod( GetType(), "GetTablePropertyValue" )
                                                                      .LoadArgument( 0 )
                                                                      .CastClass( property.DeclaringType )
                                                                      .Call( property.GetMethod );
@@ -36,21 +36,20 @@ public abstract record Descriptor
         GetValue = emit.Return()
                        .CreateDelegate();
     }
-    protected static bool IsDbKey( MemberInfo property ) => property.GetCustomAttribute<KeyAttribute>() is not null || property.GetCustomAttribute<System.ComponentModel.DataAnnotations.KeyAttribute>() is not null;
-}
+    private static bool IsDbKey( MemberInfo property ) => property.GetCustomAttribute<KeyAttribute>() is not null || property.GetCustomAttribute<System.ComponentModel.DataAnnotations.KeyAttribute>() is not null;
+
+    
+    public static Descriptor Create( PropertyInfo property ) => Create( property, property.Name );
+    public static Descriptor Create( PropertyInfo property, in string name ) =>
+        new(property, name, $" {name} ", $" @{name} ", $" {name} = @{name} ");
 
 
-
-public sealed record MsSqlDescriptor : Descriptor
-{
-    public MsSqlDescriptor( PropertyInfo property ) : this( property, property.Name ) { }
-    public MsSqlDescriptor( PropertyInfo property, string name ) : base( property, name, $" {name} ", $" @{name} ", $" {name} = @{name} " ) { }
-}
+    public static Descriptor MsSql( PropertyInfo property ) => MsSql( property, property.Name );
+    public static Descriptor MsSql( PropertyInfo property, in string name ) =>
+        new(property, name, $" {name} ", $" @{name} ", $" {name} = @{name} ");
 
 
-
-public sealed record PostgresDescriptor : Descriptor
-{
-    public PostgresDescriptor( PropertyInfo property ) : this( property, property.Name ) { }
-    public PostgresDescriptor( PropertyInfo property, string name ) : base( property, name, $" \"{name}\" ", $" @{name} ", $" \"{name}\" = @{name} " ) { }
+    public static Descriptor Postgres( PropertyInfo property ) => Postgres( property, property.Name );
+    public static Descriptor Postgres( PropertyInfo property, in string name ) =>
+        new(property, name, $" \"{name}\" ", $" @{name} ", $" \"{name}\" = @{name} ");
 }

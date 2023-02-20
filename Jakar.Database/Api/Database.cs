@@ -9,36 +9,14 @@ using Microsoft.AspNetCore.Mvc;
 namespace Jakar.Database;
 
 
-public static class DatabaseDefaults
-{
-    public static string Schema
-    {
-        get
-        {
-            lock (_schemaLock) { return _defaultSchema; }
-        }
-        set
-        {
-            lock (_schemaLock) { _defaultSchema = value; }
-        }
-    }
-
-
-    public const            string DEFAULT_SCHEMA = "dbo";
-    private static readonly object _schemaLock    = new();
-    private static          string _defaultSchema = DEFAULT_SCHEMA;
-}
-
-
-
 [SuppressMessage( "ReSharper", "SuggestBaseTypeForParameter" )]
 public abstract partial class Database : Randoms, IConnectableDb, IAsyncDisposable, IHealthCheck
 {
-    protected readonly ConcurrentBag<IAsyncDisposable> _disposables   = new();
-    private            string                          _currentSchema = DatabaseDefaults.Schema;
-    private            Uri                             _domain        = new("https://localhost:443");
+    protected readonly ConcurrentBag<IAsyncDisposable> _disposables = new();
+    private            Uri                             _domain      = new("https://localhost:443");
 
 
+    public static      string                       Schema            { get; set; } = "dbo";
     public virtual     AppVersion                   Version           => Options.Version ?? throw new NullReferenceException( nameof(DbOptions.Version) );
     public virtual     DbInstance                   Instance          => Options.DbType;
     public             DbOptions                    Options           { get; }
@@ -46,21 +24,14 @@ public abstract partial class Database : Randoms, IConnectableDb, IAsyncDisposab
     public             DbTable<RecoveryCodeRecord>  RecoveryCodes     { get; }
     public             DbTable<RoleRecord>          Roles             { get; }
     public             DbTable<UserGroupRecord>     UserGroups        { get; }
+    public             DbTable<UserLoginInfoRecord> UserLogins        { get; }
     public             DbTable<UserRecord>          Users             { get; }
     public             DbTable<UserRoleRecord>      UserRoles         { get; }
-    public             DbTable<UserLoginInfoRecord> UserLogins        { get; }
     public             IConfiguration               Configuration     { get; }
     protected abstract PasswordRequirements         _Requirements     { get; }
     protected internal PasswordValidator            PasswordValidator => new(_Requirements);
     public virtual     string                       ConnectionString  => Configuration.ConnectionString();
-    public string CurrentSchema
-    {
-        get => _currentSchema;
-        set
-        {
-            if ( SetProperty( ref _currentSchema, value ) ) { DatabaseDefaults.Schema = value; }
-        }
-    }
+    string IConnectableDb.                          CurrentSchema     => Schema;
     public Uri Domain
     {
         get => _domain;
@@ -91,17 +62,35 @@ public abstract partial class Database : Randoms, IConnectableDb, IAsyncDisposab
         Groups        = Create<GroupRecord>();
         RecoveryCodes = Create<RecoveryCodeRecord>();
         UserLogins    = Create<UserLoginInfoRecord>();
+
+
+        Schema = Instance switch
+                 {
+                     DbInstance.MsSql    => "dbo",
+                     DbInstance.Postgres => "public",
+                     _                   => throw new OutOfRangeException( nameof(Instance), Instance )
+                 };
     }
+
+
     protected TValue AddDisposable<TValue>( TValue value ) where TValue : IAsyncDisposable
     {
         _disposables.Add( value );
         return value;
     }
+
+
+    protected internal ValueTask<IReadOnlyCollection<RecoveryCodeRecord>> Codes( UserRecord user, CancellationToken token ) => this.TryCall( Codes, user, token );
+    protected internal async ValueTask<IReadOnlyCollection<RecoveryCodeRecord>> Codes( DbConnection connection, DbTransaction transaction, UserRecord user, CancellationToken token ) =>
+        await RecoveryCodes.Where( connection, transaction, nameof(RecoveryCodeRecord.CreatedBy), user.UserID, token );
     protected virtual DbTable<TRecord> Create<TRecord>() where TRecord : TableRecord<TRecord>
     {
         var table = new DbTable<TRecord>( this );
         return AddDisposable( table );
     }
+
+
+    protected abstract DbConnection CreateConnection();
     public virtual async ValueTask DisposeAsync()
     {
         foreach ( IAsyncDisposable disposable in _disposables ) { await disposable.DisposeAsync(); }
@@ -142,14 +131,6 @@ public abstract partial class Database : Randoms, IConnectableDb, IAsyncDisposab
         }
         catch ( Exception e ) { return HealthCheckResult.Unhealthy( e.Message ); }
     }
-
-
-    protected internal ValueTask<IReadOnlyCollection<RecoveryCodeRecord>> Codes( UserRecord user, CancellationToken token ) => this.TryCall( Codes, user, token );
-    protected internal async ValueTask<IReadOnlyCollection<RecoveryCodeRecord>> Codes( DbConnection connection, DbTransaction transaction, UserRecord user, CancellationToken token ) =>
-        await RecoveryCodes.Where( connection, transaction, nameof(RecoveryCodeRecord.CreatedBy), user.UserID, token );
-
-
-    protected abstract DbConnection CreateConnection();
 
 
 

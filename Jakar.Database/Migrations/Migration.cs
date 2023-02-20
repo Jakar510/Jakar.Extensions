@@ -11,7 +11,7 @@ namespace Jakar.Database.Migrations;
 /// </summary>
 public abstract class Migration<TRecord> : Migration where TRecord : TableRecord<TRecord>
 {
-    public virtual string CurrentScheme => DatabaseDefaults.Schema;
+    public virtual string CurrentScheme => Database.Schema;
     public         string TableName     { get; } = typeof(TRecord).GetTableName();
 
 

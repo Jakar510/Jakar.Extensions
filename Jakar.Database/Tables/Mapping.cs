@@ -196,16 +196,11 @@ WHERE {selfTableName}.{nameof(ValueID)} = @{nameof(ValueID)}";
     }
     public static async ValueTask Delete( DbConnection connection, DbTransaction transaction, DbTable<TSelf> selfTable, TKey key, IEnumerable<TValue> values, CancellationToken token )
     {
-        string sql = $"SELECT {nameof(ID)} FROM {selfTable.TableName} WHERE {nameof(ValueID)} IN ( {string.Join( ',', values.Select( x => x.ID ) )} )";
+        string sql = $"SELECT {nameof(ID)} FROM {selfTable.TableName} WHERE {nameof(ValueID)} IN ( {string.Join( ',', values.Select( x => x.ID ) )} ) AND {nameof(KeyID)} = @{nameof(key)}";
 
         TSelf[] records = await selfTable.Where( connection, transaction, sql, GetDynamicParameters( key ), token );
-        foreach ( TSelf mapping in records ) { await selfTable.Delete( connection, transaction, mapping.ID, token ); }
+        await selfTable.Delete( connection, transaction, records.Select( x => x.ID ), token );
     }
-    public static async ValueTask Delete( DbConnection connection, DbTransaction transaction, DbTable<TSelf> selfTable, TKey key, TValue value, CancellationToken token )
-    {
-        string sql = $"SELECT {nameof(ID)} FROM {selfTable.TableName} WHERE {nameof(ValueID)} = @{nameof(ValueID)}";
-        selfTable.Delete( connection, transaction, true, GetDynamicParameters( key, value ), token );
-        TSelf[] records = await selfTable.Where( connection, transaction, sql, GetDynamicParameters( key, value ), token );
-        foreach ( TSelf mapping in records ) { await selfTable.Delete( connection, transaction, mapping.ID, token ); }
-    }
+    public static async ValueTask Delete( DbConnection connection, DbTransaction transaction, DbTable<TSelf> selfTable, TKey key, TValue value, CancellationToken token ) =>
+        await selfTable.Delete( connection, transaction, true, GetDynamicParameters( key, value ), token );
 }
