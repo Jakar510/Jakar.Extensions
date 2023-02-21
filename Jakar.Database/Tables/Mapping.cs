@@ -10,21 +10,6 @@ public interface ICreateMapping<out TSelf, in TKey, in TValue> where TValue : Ta
 
 
 
-public interface ICreateMapping<out TSelf, in TValue> : ICreateMapping<TSelf, UserRecord, TValue> where TValue : TableRecord<TValue>
-                                                                                                  where TSelf : Mapping<TSelf, TValue>, ICreateMapping<TSelf, TValue> { }
-
-
-
-[Serializable]
-public abstract record Mapping<TSelf, TValue> : Mapping<TSelf, UserRecord, TValue> where TValue : TableRecord<TValue>
-                                                                                   where TSelf : Mapping<TSelf, TValue>, ICreateMapping<TSelf, TValue>
-{
-    protected Mapping() { }
-    protected Mapping( UserRecord key, TValue value ) : base( key, value ) { }
-}
-
-
-
 [Serializable]
 public abstract record Mapping<TSelf, TKey, TValue> : TableRecord<TSelf> where TValue : TableRecord<TValue>
                                                                          where TKey : TableRecord<TKey>
@@ -98,7 +83,7 @@ public abstract record Mapping<TSelf, TKey, TValue> : TableRecord<TSelf> where T
         int ownerComparision = KeyID.CompareTo( other.KeyID );
         if ( ownerComparision == 0 ) { return ownerComparision; }
 
-        return ValueID.CompareTo(  other.ValueID );
+        return ValueID.CompareTo( other.ValueID );
     }
     public override bool Equals( TSelf? other )
     {
@@ -123,21 +108,29 @@ public abstract record Mapping<TSelf, TKey, TValue> : TableRecord<TSelf> where T
     {
         TSelf[] records = await Where( connection, transaction, selfTable, key, token );
 
+        foreach ( TSelf self in FilterExisting( records, key, values ) ) { await selfTable.Insert( connection, transaction, self, token ); }
+    }
+   
+    
+    [RequiresPreviewFeatures]
+    [MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization )]
+    private static IEnumerable<TSelf> FilterExisting( TSelf[] records, TKey key, IEnumerable<TValue> values )
+    {
+        // ReSharper disable once LoopCanBeConvertedToQuery
         foreach ( TValue value in values )
         {
             if ( Exists( records, value ) ) { continue; }
 
-            var record = TSelf.Create( key, value );
-            await selfTable.Insert( connection, transaction, record, token );
+            yield return TSelf.Create( key, value );
         }
     }
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    private static bool Exists( IEnumerable<TSelf> existing, TValue value )
+    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
+    private static bool Exists( ReadOnlySpan<TSelf> existing, TValue value )
     {
         // ReSharper disable once LoopCanBeConvertedToQuery
-        foreach ( TSelf x in existing )
+        foreach ( TSelf self in existing )
         {
-            if ( x.ValueID == value.ID ) { return true; }
+            if ( self.ValueID == value.ID ) { return true; }
         }
 
         return false;
