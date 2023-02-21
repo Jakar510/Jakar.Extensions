@@ -19,8 +19,8 @@ public abstract record Mapping<TSelf, TKey, TValue> : TableRecord<TSelf> where T
     private WeakReference<TValue>? _value;
 
 
-    [MaxLength( 256 )] public Guid KeyID   { get; init; }
-    [MaxLength( 256 )] public Guid ValueID { get; init; }
+    public Guid KeyID   { get; init; }
+    public Guid ValueID { get; init; }
 
 
     protected Mapping() { }
