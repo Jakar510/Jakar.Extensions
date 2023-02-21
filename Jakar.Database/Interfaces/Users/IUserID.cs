@@ -1,7 +1,7 @@
 ﻿namespace Jakar.Database;
 
 
-public interface IUserID : IUniqueID<string>
+public interface IUserID : IUniqueID<Guid>
 {
-    public Guid UserID { get; init; }
+    public Guid UserID { get; }
 }

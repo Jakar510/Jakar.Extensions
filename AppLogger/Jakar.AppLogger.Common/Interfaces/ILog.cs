@@ -4,7 +4,7 @@
 namespace Jakar.AppLogger.Common;
 
 
-public interface ILog : IUniqueID<string>, IValidator
+public interface ILog : IUniqueID<Guid>, IValidator
 {
     bool IsError { get; }
 

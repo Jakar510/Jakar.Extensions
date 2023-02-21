@@ -15,8 +15,8 @@ public sealed class CacheEntry<TRecord> : ObservableClass, ITableRecord, IEquata
     public bool            HasChanged   => Value.GetHashCode() != _hash;
     public DateTimeOffset  DateCreated  => _value?.DateCreated ?? default;
     public DateTimeOffset? LastModified => _value?.LastModified;
-    public string          ID           => _value?.ID ?? string.Empty;
-    public string?         CreatedBy    => _value?.CreatedBy;
+    public Guid ID           => _value?.ID ?? Guid.Empty;
+    public Guid?         CreatedBy    => _value?.CreatedBy;
 
 
     public TRecord Value

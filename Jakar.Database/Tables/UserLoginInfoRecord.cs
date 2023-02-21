@@ -50,7 +50,7 @@ public sealed record UserLoginInfoRecord : TableRecord<UserLoginInfoRecord>
 
     public UserLoginInfoRecord() { }
     public UserLoginInfoRecord( UserRecord user, UserLoginInfo info ) : this( user, info.LoginProvider, info.ProviderKey, info.ProviderDisplayName ) { }
-    public UserLoginInfoRecord( UserRecord user, string loginProvider, string providerKey, string? providerDisplayName ) : base( user )
+    public UserLoginInfoRecord( UserRecord user, string loginProvider, string providerKey, string? providerDisplayName ) : base( Guid.NewGuid(), user )
     {
         LoginProvider       = loginProvider;
         ProviderKey         = providerKey;
@@ -62,10 +62,10 @@ public sealed record UserLoginInfoRecord : TableRecord<UserLoginInfoRecord>
     public static DynamicParameters GetDynamicParameters( UserRecord user, string loginProvider, string providerKey )
     {
         var parameters = new DynamicParameters();
-        parameters.Add( nameof(UserRecord.CreatedBy), user.CreatedBy );
-        parameters.Add( nameof(UserRecord.UserID),    user.UserID );
-        parameters.Add( nameof(ProviderKey),          providerKey );
-        parameters.Add( nameof(LoginProvider),        loginProvider );
+        parameters.Add( nameof(UserRecord.CreatedBy),   user.CreatedBy );
+        parameters.Add( nameof(UserRecord.OwnerUserID), user.OwnerUserID );
+        parameters.Add( nameof(ProviderKey),            providerKey );
+        parameters.Add( nameof(LoginProvider),          loginProvider );
         return parameters;
     }
 
@@ -76,14 +76,14 @@ public sealed record UserLoginInfoRecord : TableRecord<UserLoginInfoRecord>
     public static implicit operator UserLoginInfo( UserLoginInfoRecord value ) => value.ToUserLoginInfo();
     public static implicit operator IdentityUserToken<string>( UserLoginInfoRecord value ) => new()
                                                                                               {
-                                                                                                  UserId        = value.ID,
+                                                                                                  UserId        = value.OwnerUserID?.ToString() ?? throw new NullReferenceException( nameof(value.OwnerUserID) ),
                                                                                                   LoginProvider = value.LoginProvider,
                                                                                                   Name          = value.ProviderDisplayName ?? string.Empty,
                                                                                                   Value         = value.ProviderKey
                                                                                               };
     public static implicit operator IdentityUserToken<Guid>( UserLoginInfoRecord value ) => new()
                                                                                             {
-                                                                                                UserId        = value.UserID,
+                                                                                                UserId        = value.OwnerUserID ?? throw new NullReferenceException( nameof(value.OwnerUserID) ),
                                                                                                 LoginProvider = value.LoginProvider,
                                                                                                 Name          = value.ProviderDisplayName ?? string.Empty,
                                                                                                 Value         = value.ProviderKey

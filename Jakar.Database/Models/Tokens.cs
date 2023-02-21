@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 10/10/2022  4:17 PM
 
-using System.IdentityModel.Tokens.Jwt;
-
-
-
 namespace Jakar.Database;
 
 

@@ -11,12 +11,12 @@ public class APIController : ControllerBase
     public APIController( LoggerDB api ) => _api = api;
 
 
-    [HttpPost] public async ValueTask<ActionResult<Tokens>> Register( VerifyRequest<UserData> request,      CancellationToken token ) => await _api.Register( this, request, token );
+    [HttpPost] public async ValueTask<ActionResult<Tokens>> Register( VerifyRequest<UserData> request,      CancellationToken token ) => await _api.Register( this, request, string.Empty, token ); // TODO: rights
     [HttpPost] public async ValueTask<ActionResult<Tokens>> Verify( VerifyRequest             request,      CancellationToken token ) => await _api.Verify( this, request, token );
     [HttpPost] public async ValueTask<ActionResult<Tokens>> Refresh( string                   refreshToken, CancellationToken token ) => await _api.Refresh( this, refreshToken, token );
 
 
     [HttpPost] public async ValueTask<ActionResult<Guid>> StartSession( StartSession session,   CancellationToken token ) => await _api.StartSession( this, session, token );
     [HttpPost] public async ValueTask<ActionResult> EndSession( Guid                 sessionID, CancellationToken token ) => await _api.EndSession( this, sessionID, token );
-    [HttpPost] public async ValueTask<ActionResult<bool>> Log( IEnumerable<Log> logs,       CancellationToken token ) => await _api.SendLog( this, logs, token );
+    [HttpPost] public async ValueTask<ActionResult<bool>> Log( IEnumerable<Log>      logs,      CancellationToken token ) => await _api.SendLog( this, logs, token );
 }

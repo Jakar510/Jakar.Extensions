@@ -5,15 +5,15 @@ namespace Jakar.Database;
 
 
 [SuppressMessage( "ReSharper", "MemberCanBePrivate.Local" )]
-public sealed class KeyGenerator<TValue> : IEnumerator<string> where TValue : ITableRecord
+public sealed class KeyGenerator<TValue> : IEnumerator<Guid> where TValue : ITableRecord
 {
-    private readonly List<string>        _keys  = new();
+    private readonly List<Guid>          _keys  = new();
     private          int                 _index = -1;
     private readonly IEnumerable<TValue> _records;
 
 
     public int         Count   => _keys.Count;
-    public string      Current => _keys[_index];
+    public Guid        Current => _keys[_index];
     object IEnumerator.Current => Current;
 
 
@@ -30,7 +30,7 @@ public sealed class KeyGenerator<TValue> : IEnumerator<string> where TValue : IT
     {
         _index = -1;
         _keys.Clear();
-        var dictionary = new SortedDictionary<DateTimeOffset, string>( ValueSorter<DateTimeOffset>.Default );
+        var dictionary = new SortedDictionary<DateTimeOffset, Guid>( ValueSorter<DateTimeOffset>.Default );
         foreach ( TValue value in _records ) { dictionary.Add( value.DateCreated, value.ID ); }
 
         _keys.AddRange( dictionary.Values );

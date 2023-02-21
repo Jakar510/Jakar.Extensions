@@ -1,7 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 08/14/2022  8:39 PM
 
-using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Mvc;
 
 
@@ -82,7 +81,7 @@ public abstract partial class Database : Randoms, IConnectableDb, IAsyncDisposab
 
     protected internal ValueTask<IReadOnlyCollection<RecoveryCodeRecord>> Codes( UserRecord user, CancellationToken token ) => this.TryCall( Codes, user, token );
     protected internal async ValueTask<IReadOnlyCollection<RecoveryCodeRecord>> Codes( DbConnection connection, DbTransaction transaction, UserRecord user, CancellationToken token ) =>
-        await RecoveryCodes.Where( connection, transaction, nameof(RecoveryCodeRecord.CreatedBy), user.UserID, token );
+        await RecoveryCodes.Where( connection, transaction, nameof(RecoveryCodeRecord.CreatedBy), user.OwnerUserID, token );
     protected virtual DbTable<TRecord> Create<TRecord>() where TRecord : TableRecord<TRecord>
     {
         var table = new DbTable<TRecord>( this );
@@ -298,8 +297,8 @@ public abstract partial class Database : Randoms, IConnectableDb, IAsyncDisposab
 
     #region Logins
 
-    public ValueTask<ActionResult<Tokens>> Register( ControllerBase controller, VerifyRequest<UserData> request, CancellationToken token = default ) => this.TryCall( Register, controller, request, token );
-    public virtual async ValueTask<ActionResult<Tokens>> Register( DbConnection connection, DbTransaction transaction, ControllerBase controller, VerifyRequest<UserData> request, CancellationToken token = default )
+    public ValueTask<ActionResult<Tokens>> Register( ControllerBase controller, VerifyRequest<UserData> request, string rights, CancellationToken token = default ) => this.TryCall( Register, controller, request, rights, token );
+    public virtual async ValueTask<ActionResult<Tokens>> Register( DbConnection connection, DbTransaction transaction, ControllerBase controller, VerifyRequest<UserData> request, string rights, CancellationToken token = default )
     {
         UserRecord? record = await Users.Get( connection, transaction, true, UserRecord.GetDynamicParameters( request ), token );
         if ( record is not null ) { return controller.Duplicate(); }
@@ -312,7 +311,7 @@ public abstract partial class Database : Randoms, IConnectableDb, IAsyncDisposab
         }
 
 
-        record = UserRecord.Create( request );
+        record = UserRecord.Create( request, rights );
         record = await Users.Insert( connection, transaction, record, token );
         return await GetToken( connection, transaction, record, token );
     }

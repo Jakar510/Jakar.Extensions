@@ -12,33 +12,26 @@ namespace Jakar.Extensions;
 /// <summary>
 ///     <seealso href="https://www.codeproject.com/Articles/33559/Handy-wrapper-class-for-thread-safe-property-acces"/>
 /// </summary>
-/// <typeparam name="TStruct"> The value type. </typeparam>
-public class Synchronized<TStruct> where TStruct : struct
+/// <typeparam name="TValue"> The value type. </typeparam>
+public sealed class Synchronized<TValue>
 {
-    private readonly object  _lock;
-    private          TStruct _value;
+    private TValue _value;
 
-    public TStruct Value
+    public TValue Value
     {
         get
         {
-            lock (_lock) { return _value; }
+            lock (this) { return _value; }
         }
         set
         {
-            lock (_lock) { _value = value; }
+            lock (this) { _value = value; }
         }
     }
 
 
-    public Synchronized() : this( default ) { }
-    public Synchronized( TStruct value ) : this( value, new object() ) { }
-    public Synchronized( TStruct value, object locker )
-    {
-        _lock = locker;
-        Value = value;
-    }
+    public Synchronized( TValue value ) => _value = value;
 
 
-    public static implicit operator TStruct( Synchronized<TStruct> value ) => value.Value;
+    public static implicit operator TValue( Synchronized<TValue> value ) => value.Value;
 }

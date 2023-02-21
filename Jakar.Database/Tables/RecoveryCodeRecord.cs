@@ -21,7 +21,7 @@ public sealed record RecoveryCodeRecord : TableRecord<RecoveryCodeRecord>
 
 
     public RecoveryCodeRecord() { }
-    private RecoveryCodeRecord( UserRecord user, string value ) : base( user ) => Value = _hasher.HashPassword( this, value );
+    private RecoveryCodeRecord( string value, UserRecord caller ) : base( Guid.NewGuid(), caller ) => Value = _hasher.HashPassword( this, value );
 
 
     public static (RecoveryCodeRecord Record, string Code) Create( UserRecord user )
@@ -31,7 +31,7 @@ public sealed record RecoveryCodeRecord : TableRecord<RecoveryCodeRecord>
 
         return (Create( user, value ), value);
     }
-    public static RecoveryCodeRecord Create( UserRecord user, string value ) => new(user, value);
+    public static RecoveryCodeRecord Create( UserRecord user, string value ) => new(value, user);
 
 
     public bool IsValid( string value )

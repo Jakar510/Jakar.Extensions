@@ -10,12 +10,7 @@ public sealed record AppRecord : LoggerTable<AppRecord>
 
 
     public AppRecord() : base() { }
-    public AppRecord( string appName, string secret ) : base( Guid.NewGuid() )
-    {
-        AppName = appName;
-        Secret  = secret;
-    }
-    public AppRecord( string appName, string secret, UserRecord caller ) : base( caller )
+    public AppRecord( string appName, string secret, UserRecord? caller = default ) : base( Guid.NewGuid(), caller )
     {
         AppName = appName;
         Secret  = secret;
@@ -34,9 +29,9 @@ public sealed record AppRecord : LoggerTable<AppRecord>
     public override int GetHashCode() => HashCode.Combine( AppName, base.GetHashCode() );
     public override bool Equals( AppRecord? other )
     {
-        if (other is null) { return false; }
+        if ( other is null ) { return false; }
 
-        if (ReferenceEquals( this, other )) { return true; }
+        if ( ReferenceEquals( this, other ) ) { return true; }
 
         return string.Equals( AppName, other?.AppName, StringComparison.Ordinal );
     }

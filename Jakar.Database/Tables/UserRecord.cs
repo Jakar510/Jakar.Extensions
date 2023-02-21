@@ -26,101 +26,57 @@ namespace Jakar.Database;
 public sealed partial record UserRecord : TableRecord<UserRecord>, JsonModels.IJsonStringModel, IRefreshToken, IUserControl, IUserID, IUserDataRecord, IUserSecurity, IUserSubscription
 {
     public UserRecord() { }
-    public UserRecord( IUserData value, UserRights? rights = default ) : this( Guid.NewGuid(), rights )
+    public UserRecord( IUserData data, string? rights, UserRecord? caller = default ) : this( Guid.NewGuid(), caller )
     {
-        FirstName         = value.FirstName;
-        LastName          = value.LastName;
-        FullName          = value.FullName;
-        Address           = value.Address;
-        Line1             = value.Line1;
-        Line2             = value.Line2;
-        City              = value.City;
-        State             = value.State;
-        Country           = value.Country;
-        PostalCode        = value.PostalCode;
-        Description       = value.Description;
-        Website           = value.Website;
-        Email             = value.Email;
-        PhoneNumber       = value.PhoneNumber;
-        Ext               = value.Ext;
-        Title             = value.Title;
-        Department        = value.Department;
-        Company           = value.Company;
-        PreferredLanguage = value.PreferredLanguage;
-        DateCreated       = DateTimeOffset.UtcNow;
-        UserID            = Guid.NewGuid();
+        ArgumentNullException.ThrowIfNull( data );
+        FirstName         = data.FirstName;
+        LastName          = data.LastName;
+        FullName          = data.FullName;
+        Address           = data.Address;
+        Line1             = data.Line1;
+        Line2             = data.Line2;
+        City              = data.City;
+        State             = data.State;
+        Country           = data.Country;
+        PostalCode        = data.PostalCode;
+        Description       = data.Description;
+        Website           = data.Website;
+        Email             = data.Email;
+        PhoneNumber       = data.PhoneNumber;
+        Ext               = data.Ext;
+        Title             = data.Title;
+        Department        = data.Department;
+        Company           = data.Company;
+        PreferredLanguage = data.PreferredLanguage;
+        Rights            = rights ?? string.Empty;
     }
-    public UserRecord( IUserData value, UserRecord caller, UserRights? rights = default ) : base( caller )
+    public UserRecord( Guid   id, UserRecord? caller = default ) : base( id, caller ) => UserID = Guid.NewGuid();
+    public UserRecord( string userName, string password, string rights, UserRecord? caller = default ) : base( Guid.NewGuid(), caller )
     {
-        FirstName         = value.FirstName;
-        LastName          = value.LastName;
-        FullName          = value.FullName;
-        Address           = value.Address;
-        Line1             = value.Line1;
-        Line2             = value.Line2;
-        City              = value.City;
-        State             = value.State;
-        Country           = value.Country;
-        PostalCode        = value.PostalCode;
-        Description       = value.Description;
-        Website           = value.Website;
-        Email             = value.Email;
-        PhoneNumber       = value.PhoneNumber;
-        Ext               = value.Ext;
-        Title             = value.Title;
-        Department        = value.Department;
-        Company           = value.Company;
-        PreferredLanguage = value.PreferredLanguage;
-        Rights            = rights?.ToString() ?? string.Empty;
-    }
-    public UserRecord( string id, UserRights? rights = default ) : base( id )
-    {
-        UserID = Guid.NewGuid();
-        Rights = rights?.ToString() ?? string.Empty;
-    }
-    public UserRecord( Guid id, UserRights? rights = default ) : this( id.ToBase64(), rights ) { }
-    public UserRecord( UserRecord caller, UserRights? rights = default ) : base( Guid.NewGuid(), caller )
-    {
-        UserID = Guid.NewGuid();
-        Rights = rights?.ToString() ?? string.Empty;
-    }
-    public UserRecord( UserRecord caller, string id, UserRights? rights = default ) : base( id, caller )
-    {
-        UserID = Guid.NewGuid();
-        Rights = rights?.ToString() ?? string.Empty;
+        ArgumentNullException.ThrowIfNull( userName );
+        ArgumentNullException.ThrowIfNull( password );
+        UserID   = Guid.NewGuid();
+        UserName = userName;
+        Rights   = rights;
+        UpdatePassword( password );
     }
 
 
     private static readonly PasswordHasher<UserRecord> _hasher = new();
 
 
-    public static UserRecord Create<TUser>( VerifyRequest<TUser> request, UserRights? rights = default ) where TUser : IUserData
-    {
-        ArgumentNullException.ThrowIfNull( request.Data );
-
-        var record = new UserRecord( request.Data, rights )
-                     {
-                         UserName = request.UserLogin
-                     };
-
-        record.UpdatePassword( request.UserPassword );
-        return record;
-    }
-    public static UserRecord Create<TUser>( VerifyRequest<TUser> request, UserRecord caller, UserRights? rights = default ) where TUser : IUserData
+    public static UserRecord Create<TUser>( VerifyRequest<TUser> request, string rights, UserRecord? caller = default ) where TUser : IUserData
 
     {
         ArgumentNullException.ThrowIfNull( request.Data );
 
-        var record = new UserRecord( request.Data, caller, rights )
-                     {
-                         UserName = request.UserLogin
-                     };
-
+        UserRecord record = Create( request.Data, rights, caller );
+        record.UserName = request.UserLogin;
         record.UpdatePassword( request.UserPassword );
         return record;
     }
-    public static UserRecord Create( IUserData value, UserRights? rights ) => new(value, rights);
-    public static UserRecord Create( IUserData value, UserRecord  caller, UserRights? rights ) => new(value, caller, rights);
+    public static UserRecord Create( IUserData value,    string rights,   UserRecord? caller                     = default ) => new(value, rights, caller);
+    public static UserRecord Create( string    userName, string password, string      rights, UserRecord? caller = default ) => new(userName, password, rights, caller);
 
 
     public static DynamicParameters GetDynamicParameters( IUserData data )
@@ -151,26 +107,6 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, JsonModels.IJ
     }
 
 
-    public async ValueTask Add( DbConnection connection, DbTransaction transaction, Database db, RoleRecord value, CancellationToken token )
-    {
-        UserRoleRecord? record = await db.UserRoles.Get( connection, transaction, true, UserRoleRecord.GetDynamicParameters( this, value ), token );
-
-        if ( record is null )
-        {
-            record = new UserRoleRecord( this, value );
-            await db.UserRoles.Insert( connection, transaction, record, token );
-        }
-    }
-    public async ValueTask Add( DbConnection connection, DbTransaction transaction, Database db, GroupRecord value, CancellationToken token )
-    {
-        UserGroupRecord? record = await db.UserGroups.Get( connection, transaction, true, UserGroupRecord.GetDynamicParameters( this, value ), token );
-
-        if ( record is null )
-        {
-            record = new UserGroupRecord( this, value );
-            await db.UserGroups.Insert( connection, transaction, record, token );
-        }
-    }
     public UserRecord ClearRefreshToken( string securityStamp )
     {
         RefreshToken           = default;
@@ -348,6 +284,9 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, JsonModels.IJ
 
     #region Roles
 
+    [RequiresPreviewFeatures]
+    public async ValueTask<bool> TryAdd( DbConnection connection, DbTransaction transaction, Database db, RoleRecord value, CancellationToken token ) =>
+        await UserRoleRecord.TryAdd( connection, transaction, db.UserRoles, this, value, token );
     public async ValueTask<RoleRecord[]> GetRoles( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token = default ) =>
         await UserRoleRecord.Where( connection, transaction, db.UserRoles, db.Roles, this, token );
     public async ValueTask<bool> HasRole( DbConnection connection, DbTransaction transaction, Database db, RoleRecord value, CancellationToken token ) =>
@@ -361,6 +300,9 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, JsonModels.IJ
 
     #region Groups
 
+    [RequiresPreviewFeatures]
+    public async ValueTask<bool> TryAdd( DbConnection connection, DbTransaction transaction, Database db, GroupRecord value, CancellationToken token ) =>
+        await UserGroupRecord.TryAdd( connection, transaction, db.UserGroups, this, value, token );
     public async ValueTask<GroupRecord[]> GetGroups( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token = default ) =>
         await UserGroupRecord.Where( connection, transaction, db.UserGroups, db.Groups, this, token );
     public async ValueTask<bool> IsPartOfGroup( DbConnection connection, DbTransaction transaction, Database db, GroupRecord value, CancellationToken token ) =>

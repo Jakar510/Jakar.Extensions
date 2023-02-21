@@ -13,12 +13,12 @@ namespace Jakar.AppLogger.Portal.Data.Tables;
 public sealed record AttachmentRecord : LoggerTable<AttachmentRecord>, IAttachment, ILogInfo
 {
     public                       bool    IsBinary    { get; init; }
+    public                       Guid    AppID       { get; init; }
+    public                       Guid    DeviceID    { get; init; }
+    public                       Guid    LogID       { get; init; }
     public                       Guid    SessionID   { get; init; }
     public                       Guid?   ScopeID     { get; init; }
-    public                       string  AppID       { get; init; } = string.Empty;
-    public                       string  DeviceID    { get; init; } = string.Empty;
     public                       long    Length      { get; init; }
-    public                       string  LogID       { get; init; } = string.Empty;
     [MaxLength( 2 ^ 20 )] public string  Content     { get; init; } = string.Empty;
     [MaxLength( 1024 )]   public string? Description { get; init; }
     [MaxLength( 256 )]    public string? FileName    { get; init; }
@@ -26,7 +26,7 @@ public sealed record AttachmentRecord : LoggerTable<AttachmentRecord>, IAttachme
 
 
     public AttachmentRecord() : base() { }
-    public AttachmentRecord( Attachment attachment, ILogInfo info ) : base( Guid.NewGuid() )
+    public AttachmentRecord( Attachment attachment, ILogInfo info, UserRecord? caller = default ) : base( Guid.NewGuid(), caller )
     {
         if ( attachment.Length > Attachment.MAX_SIZE ) { Attachment.ThrowTooLong(); }
 
@@ -42,22 +42,9 @@ public sealed record AttachmentRecord : LoggerTable<AttachmentRecord>, IAttachme
         ScopeID     = info.ScopeID;
         DeviceID    = info.DeviceID;
     }
-    public AttachmentRecord( Attachment attachment, ILogInfo info, UserRecord caller ) : base( caller )
-    {
-        if ( attachment.Length > Attachment.MAX_SIZE ) { Attachment.ThrowTooLong(); }
 
-        Length      = attachment.Length;
-        Content     = attachment.Content;
-        Description = attachment.Description;
-        Type        = attachment.Type;
-        FileName    = attachment.FileName;
-        IsBinary    = attachment.IsBinary;
-        LogID       = info.LogID;
-        AppID       = info.AppID;
-        SessionID   = info.SessionID;
-        ScopeID     = info.ScopeID;
-        DeviceID    = info.DeviceID;
-    }
+
+    public override int CompareTo( AttachmentRecord? other ) => string.CompareOrdinal( Content, other?.Content );
 
 
     public static DynamicParameters GetDynamicParameters( Attachment attachment )
@@ -75,6 +62,7 @@ public sealed record AttachmentRecord : LoggerTable<AttachmentRecord>, IAttachme
         parameters.Add( nameof(ScopeID),   info.ScopeID );
         return parameters;
     }
+    public override int GetHashCode() => HashCode.Combine( Content, base.GetHashCode() );
 
 
     public Attachment ToAttachment() => new(this);
@@ -87,10 +75,6 @@ public sealed record AttachmentRecord : LoggerTable<AttachmentRecord>, IAttachme
                                                                    FileName = attachment.FileName,
                                                                    IsBinary = attachment.IsBinary
                                                                };
-
-
-    public override int CompareTo( AttachmentRecord? other ) => string.CompareOrdinal( Content, other?.Content );
-    public override int GetHashCode() => HashCode.Combine( Content, base.GetHashCode() );
     public override bool Equals( AttachmentRecord? other )
     {
         if ( other is null ) { return false; }

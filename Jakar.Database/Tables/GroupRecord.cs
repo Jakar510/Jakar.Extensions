@@ -5,13 +5,13 @@
 [Table( "Groups" )]
 public sealed record GroupRecord : TableRecord<GroupRecord>
 {
-    private string? _ownerID;
+    private Guid    _ownerID;
     private string? _customerID;
     private string  _nameOfGroup = string.Empty;
 
 
     [MaxLength( 256 )]
-    public string? OwnerID
+    public Guid OwnerID
     {
         get => _ownerID;
         init => SetProperty( ref _ownerID, value );
@@ -35,9 +35,8 @@ public sealed record GroupRecord : TableRecord<GroupRecord>
 
 
     public GroupRecord() { }
-    public GroupRecord( UserRecord owner, string nameOfGroup, string? customerID, UserRecord caller ) : base( caller )
+    public GroupRecord( UserRecord owner, string nameOfGroup, string? customerID, UserRecord? caller = default ) : base( Guid.NewGuid(), caller )
     {
-        CreatedBy   = caller.ID;
         OwnerID     = owner.ID;
         NameOfGroup = nameOfGroup;
         CustomerID  = customerID;
@@ -45,10 +44,8 @@ public sealed record GroupRecord : TableRecord<GroupRecord>
     public override int GetHashCode() => HashCode.Combine( base.GetHashCode(), NameOfGroup, OwnerID, CustomerID );
 
 
-    public async Task<UserRecord?> GetOwner( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) =>
-        !string.IsNullOrEmpty( OwnerID )
-            ? await db.Users.Get( connection, transaction, OwnerID, token )
-            : default;
+    public async ValueTask<UserRecord?> GetOwner( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => await db.Users.Get( connection, transaction, OwnerID, token );
+
 
     public async ValueTask<UserRecord[]> GetUsers( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) =>
         await UserGroupRecord.Where( connection, transaction, db.UserGroups, db.Users, this, token );

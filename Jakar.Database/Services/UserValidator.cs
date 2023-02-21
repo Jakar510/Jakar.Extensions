@@ -26,11 +26,11 @@ public class UserValidator : IUserValidator<UserRecord>
     }
     protected virtual void Check( in ICollection<IdentityError> errors, UserRecord user )
     {
-        if ( !user.UserID.IsValidID() )
+        if ( !user.OwnerUserID.IsValidID() )
         {
             errors.Add( new IdentityError
                         {
-                            Description = $"{nameof(UserRecord.UserID)} is invalid",
+                            Description = $"{nameof(UserRecord.OwnerUserID)} is invalid",
                         } );
         }
 

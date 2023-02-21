@@ -28,7 +28,7 @@ public abstract class Migration<TRecord> : Migration where TRecord : TableRecord
 
 
         table.WithColumn( nameof(TableRecord<TRecord>.ID) )
-             .AsString( 256 )
+             .AsGuid()
              .NotNullable()
              .PrimaryKey()
              .Identity();
@@ -41,12 +41,12 @@ public abstract class Migration<TRecord> : Migration where TRecord : TableRecord
              .AsDateTime2()
              .Nullable();
 
-        table.WithColumn( nameof(TableRecord<TRecord>.UserID) )
+        table.WithColumn( nameof(TableRecord<TRecord>.OwnerUserID) )
              .AsGuid()
-             .NotNullable();
+             .Nullable();
 
         table.WithColumn( nameof(TableRecord<TRecord>.CreatedBy) )
-             .AsString( 256 )
+             .AsGuid()
              .Nullable();
 
         return table;

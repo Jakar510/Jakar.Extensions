@@ -34,8 +34,8 @@ public abstract record Mapping<TSelf, TKey, TValue> : TableRecord<TSelf> where T
     private WeakReference<TValue>? _value;
 
 
-    [MaxLength( 256 )] public string KeyID   { get; init; } = string.Empty;
-    [MaxLength( 256 )] public string ValueID { get; init; } = string.Empty;
+    [MaxLength( 256 )] public Guid KeyID   { get; init; }
+    [MaxLength( 256 )] public Guid ValueID { get; init; }
 
 
     protected Mapping() { }
@@ -95,10 +95,10 @@ public abstract record Mapping<TSelf, TKey, TValue> : TableRecord<TSelf> where T
 
         if ( ReferenceEquals( this, other ) ) { return 0; }
 
-        int ownerComparision = string.Compare( KeyID, other.KeyID, StringComparison.Ordinal );
+        int ownerComparision = KeyID.CompareTo( other.KeyID );
         if ( ownerComparision == 0 ) { return ownerComparision; }
 
-        return string.Compare( ValueID, other.ValueID, StringComparison.Ordinal );
+        return ValueID.CompareTo(  other.ValueID );
     }
     public override bool Equals( TSelf? other )
     {
@@ -116,7 +116,7 @@ public abstract record Mapping<TSelf, TKey, TValue> : TableRecord<TSelf> where T
 
         var   record = TSelf.Create( key, value );
         TSelf self   = await selfTable.Insert( connection, transaction, record, token );
-        return !string.IsNullOrEmpty( self.ID );
+        return self.ID != Guid.Empty;
     }
     [RequiresPreviewFeatures]
     public static async ValueTask TryAdd( DbConnection connection, DbTransaction transaction, DbTable<TSelf> selfTable, TKey key, IEnumerable<TValue> values, CancellationToken token )

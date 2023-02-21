@@ -37,6 +37,10 @@ public abstract class MigrateUserTable : Migration<UserRecord>
              .AsGuid()
              .Nullable();
 
+        table.WithColumn( nameof(UserRecord.UserID) )
+             .AsGuid()
+             .NotNullable();
+
         table.WithColumn( nameof(UserRecord.Address) )
              .AsString( 4096 )
              .Nullable();

@@ -27,24 +27,7 @@ public sealed record DeviceRecord : LoggerTable<DeviceRecord>, IDevice
 
 
     public DeviceRecord() : base() { }
-    public DeviceRecord( IDevice device ) : base( Guid.NewGuid() )
-    {
-        DeviceID       = device.DeviceID;
-        SdkName        = device.SdkName;
-        SdkVersion     = device.SdkVersion;
-        Model          = device.Model;
-        OsName         = device.OsName;
-        OsVersion      = device.OsVersion;
-        OsBuild        = device.OsBuild;
-        OsApiLevel     = device.OsApiLevel;
-        Locale         = device.Locale;
-        TimeZoneOffset = device.TimeZoneOffset;
-        AppVersion     = device.AppVersion;
-        AppBuild       = device.AppBuild;
-        AppNamespace   = device.AppNamespace;
-        HardwareInfo   = device.HwInfo?.ToJson();
-    }
-    public DeviceRecord( IDevice device, UserRecord caller ) : base( caller )
+    public DeviceRecord( IDevice device, UserRecord? caller = default ) : base( Guid.NewGuid(), caller )
     {
         DeviceID       = device.DeviceID;
         SdkName        = device.SdkName;

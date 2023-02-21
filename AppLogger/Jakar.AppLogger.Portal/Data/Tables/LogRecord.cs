@@ -23,9 +23,9 @@ public sealed record LogRecord : LoggerTable<LogRecord>, ILog, ILogInfo
     public Guid?                               ScopeID            { get; init; }
     public int                                 EventID            { get; init; }
     public LogLevel                            Level              { get; init; }
-    public string                              AppID              { get; init; } = string.Empty;
-    public string                              DeviceID           { get; init; } = string.Empty;
-    string ILogInfo.                           LogID              => ID;
+    public Guid                                AppID              { get; init; }
+    public Guid                                DeviceID           { get; init; }
+    Guid ILogInfo.                             LogID              => ID;
     [MaxLength( int.MaxValue )] public string  Message            { get; init; } = string.Empty;
     [MaxLength( 1024 )]         public string? AppUserID          { get; init; }
     [MaxLength( 1024 )]         public string? BuildID            { get; init; }
@@ -35,32 +35,8 @@ public sealed record LogRecord : LoggerTable<LogRecord>, ILog, ILogInfo
 
 
     public LogRecord() : base() { }
-    public LogRecord( Log log, SessionRecord session ) : base( log.ID )
+    public LogRecord( Log log, SessionRecord session, UserRecord? caller = default ) : base( log.ID, caller )
     {
-        IsValid            = log.IsValid;
-        IsError            = log.IsError;
-        IsFatal            = log.IsFatal;
-        Message            = log.Message;
-        Level              = log.Level;
-        Timestamp          = log.Timestamp;
-        AppLaunchTimestamp = log.AppLaunchTimestamp;
-        SessionID          = log.SessionID;
-        ScopeID            = log.ScopeID;
-        AppUserID          = log.AppUserID;
-        AppStartTime       = log.AppStartTime;
-        AppErrorTime       = log.AppErrorTime;
-        StackTrace         = log.StackTrace;
-        EventID            = log.EventID;
-        EventName          = log.EventName;
-        BuildID            = log.BuildID;
-        AdditionalData     = log.AdditionalData?.ToPrettyJson();
-        ExceptionDetails   = log.Exception?.ToPrettyJson();
-        AppID              = session.AppID;
-        DeviceID           = session.DeviceID;
-    }
-    public LogRecord( Log log, SessionRecord session, UserRecord caller ) : base( caller )
-    {
-        ID                 = log.ID;
         IsValid            = log.IsValid;
         IsError            = log.IsError;
         IsFatal            = log.IsFatal;

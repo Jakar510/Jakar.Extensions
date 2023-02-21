@@ -21,32 +21,36 @@ public sealed record ResxRowTable : TableRecord<ResxRowTable>
     public string? Spanish    { get; init; }
     public string? Swedish    { get; init; }
     public string? Thai       { get; init; }
+    public long    KeyID      { get; init; }
 
 
     public ResxRowTable() { }
-    public ResxRowTable( string key )
+    public ResxRowTable( string key, long keyID, UserRecord? caller = default ) : base( Guid.NewGuid(), caller )
     {
         Key         = key;
+        KeyID       = keyID;
         DateCreated = DateTimeOffset.UtcNow;
     }
-    public ResxRowTable( string key, string neutral ) : this( key ) => Neutral = neutral;
-    public ResxRowTable( string key,
-                         string neutral,
-                         string english,
-                         string spanish,
-                         string french,
-                         string swedish,
-                         string german,
-                         string chinese,
-                         string polish,
-                         string thai,
-                         string japanese,
-                         string czech,
-                         string portuguese,
-                         string dutch,
-                         string korean,
-                         string arabic
-    ) : this( key, neutral )
+    public ResxRowTable( string key, long keyID, string neutral, UserRecord? caller = default ) : this( key, keyID, caller ) => Neutral = neutral;
+    public ResxRowTable( string      key,
+                         long        keyID,
+                         string      neutral,
+                         string      english,
+                         string      spanish,
+                         string      french,
+                         string      swedish,
+                         string      german,
+                         string      chinese,
+                         string      polish,
+                         string      thai,
+                         string      japanese,
+                         string      czech,
+                         string      portuguese,
+                         string      dutch,
+                         string      korean,
+                         string      arabic,
+                         UserRecord? caller = default
+    ) : this( key, keyID, neutral, caller )
     {
         English    = english;
         Spanish    = spanish;
@@ -63,7 +67,6 @@ public sealed record ResxRowTable : TableRecord<ResxRowTable>
         Korean     = korean;
         Arabic     = arabic;
     }
-    public ResxRowTable( UserRecord user ) : base( user ) { }
 
 
     public override int CompareTo( ResxRowTable? other )

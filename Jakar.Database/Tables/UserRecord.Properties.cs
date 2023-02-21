@@ -123,7 +123,7 @@ public sealed partial record UserRecord
         get => _sessionID;
         set => SetProperty( ref _sessionID, value );
     }
-
+    public Guid UserID { get; init; }
 
     IDictionary<string, JToken?>? JsonModels.IJsonModel.AdditionalData
     {

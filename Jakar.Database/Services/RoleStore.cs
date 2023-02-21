@@ -24,17 +24,13 @@ public sealed class RoleStore : IRoleStore<RoleRecord>
     }
 
 
-    public async Task<RoleRecord> FindByIdAsync( string roleId, CancellationToken token )
-    {
-        RoleRecord? result = await _dbContext.Roles.Get( nameof(RoleRecord.Name), roleId, token );
-
-        return result ?? throw new ArgumentException( roleId, nameof(roleId) );
-    }
-    public async Task<RoleRecord> FindByNameAsync( string name, CancellationToken token ) => await _dbContext.Roles.Get( nameof(RoleRecord.Name), name, token ) ?? throw new ArgumentException( name, nameof(name) );
+    public async Task<RoleRecord> FindByIdAsync( string roleId, CancellationToken token ) => await _dbContext.Roles.Get( Guid.Parse( roleId ), token ) ?? throw new ArgumentException( roleId, nameof(roleId) );
+    public async Task<RoleRecord> FindByNameAsync( string name, CancellationToken token ) =>
+        await _dbContext.Roles.Get( nameof(RoleRecord.Name), name, token ) ?? await _dbContext.Roles.Get( nameof(RoleRecord.NormalizedName), name, token ) ?? throw new ArgumentException( name, nameof(name) );
 
 
     public async Task<string?> GetNormalizedRoleNameAsync( RoleRecord role, CancellationToken token ) => await ValueTask.FromResult( role.Name );
-    public async Task<string> GetRoleIdAsync( RoleRecord              role, CancellationToken token ) => await ValueTask.FromResult( role.ID );
+    public async Task<string> GetRoleIdAsync( RoleRecord              role, CancellationToken token ) => await ValueTask.FromResult( role.ID.ToString() );
     public async Task<string?> GetRoleNameAsync( RoleRecord           role, CancellationToken token ) => await ValueTask.FromResult( role.Name );
 
 

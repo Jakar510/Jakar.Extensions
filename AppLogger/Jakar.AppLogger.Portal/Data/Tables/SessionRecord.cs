@@ -12,18 +12,13 @@ namespace Jakar.AppLogger.Portal.Data.Tables;
 [Table( "Sessions" )]
 public sealed record SessionRecord : LoggerTable<SessionRecord>, ISession
 {
-    public Guid   SessionID { get; init; }
-    public string AppID     { get; init; } = string.Empty;
-    public string DeviceID  { get; init; } = string.Empty;
+    public Guid SessionID { get; init; }
+    public Guid AppID     { get; init; }
+    public Guid DeviceID  { get; init; }
 
 
     public SessionRecord() : base() { }
-    public SessionRecord( AppRecord app, DeviceRecord device ) : base( Guid.NewGuid() )
-    {
-        AppID    = app.ID;
-        DeviceID = device.ID;
-    }
-    public SessionRecord( AppRecord app, DeviceRecord device, UserRecord caller ) : base( caller )
+    public SessionRecord( AppRecord app, DeviceRecord device, UserRecord? caller = default ) : base( Guid.NewGuid(), caller )
     {
         AppID    = app.ID;
         DeviceID = device.ID;
@@ -38,7 +33,7 @@ public sealed record SessionRecord : LoggerTable<SessionRecord>, ISession
     }
 
 
-    public override int CompareTo( SessionRecord? other ) => string.Compare( AppID, other?.AppID, StringComparison.Ordinal );
+    public override int CompareTo( SessionRecord? other ) => Nullable.Compare( AppID, other?.AppID );
     public override int GetHashCode() => HashCode.Combine( AppID, DeviceID, base.GetHashCode() );
     public override bool Equals( SessionRecord? other )
     {

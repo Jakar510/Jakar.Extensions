@@ -2,6 +2,7 @@
 #pragma warning disable CA1822
 
 
+
 namespace Jakar.Database;
 
 
@@ -23,7 +24,7 @@ public partial class Database
     public ValueTask<UserLoginInfo[]> GetLoginsAsync( UserRecord user, CancellationToken token ) => this.TryCall( GetLoginsAsync, user, token );
     public virtual async ValueTask<UserLoginInfo[]> GetLoginsAsync( DbConnection connection, DbTransaction transaction, UserRecord user, CancellationToken token )
     {
-        UserLoginInfoRecord[] records = await UserLogins.Where( connection, transaction, nameof(UserRecord.UserID), user.UserID, token );
+        UserLoginInfoRecord[] records = await UserLogins.Where( connection, transaction, nameof(UserRecord.OwnerUserID), user.OwnerUserID, token );
 
         return records.Select( x => x.ToUserLoginInfo() )
                       .ToArray();
@@ -37,7 +38,7 @@ public partial class Database
 
         if ( record is not null )
         {
-            string message = $"[ {nameof(login.LoginProvider)}: {login.LoginProvider}  |  {nameof(login.ProviderKey)}: {login.ProviderKey} ] already exists for {nameof(UserRecord.UserID)}: {user.UserID}";
+            string message = $"[ {nameof(login.LoginProvider)}: {login.LoginProvider}  |  {nameof(login.ProviderKey)}: {login.ProviderKey} ] already exists for {nameof(UserRecord.OwnerUserID)}: {user.OwnerUserID}";
             throw new DuplicateRecordException( message );
         }
 
@@ -199,8 +200,8 @@ public partial class Database
     public ValueTask<UserRecord?> FindByIdAsync( string userID, CancellationToken token ) => this.TryCall( FindByIdAsync, userID, token );
     public virtual async ValueTask<UserRecord?> FindByIdAsync( DbConnection connection, DbTransaction transaction, string userID, CancellationToken token ) =>
         Guid.TryParse( userID, out Guid guid )
-            ? await Users.Get( connection, transaction, nameof(UserRecord.UserID), guid, token )
-            : await Users.Get( connection, transaction, userID,                    token );
+            ? await Users.Get( connection, transaction, nameof(UserRecord.UserID),   guid,   token )
+            : await Users.Get( connection, transaction, nameof(UserRecord.UserName), userID, token );
 
 
     public ValueTask<UserRecord?> FindByNameAsync( string normalizedUserName, CancellationToken token ) => this.TryCall( FindByNameAsync, normalizedUserName, token );
@@ -277,7 +278,7 @@ public partial class Database
     #region User UserName
 
     public virtual ValueTask<string> GetNormalizedUserNameAsync( UserRecord user, CancellationToken token = default ) => new(user.UserName);
-    public virtual ValueTask<string> GetUserIdAsync( UserRecord             user, CancellationToken token = default ) => new(user.UserID.ToString());
+    public virtual ValueTask<string> GetUserIdAsync( UserRecord             user, CancellationToken token = default ) => new(user.ID.ToString());
     public virtual ValueTask<string> GetUserNameAsync( UserRecord           user, CancellationToken token = default ) => new(user.UserName);
 
 
