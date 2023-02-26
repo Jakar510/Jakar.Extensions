@@ -5,7 +5,7 @@ namespace Jakar.Database;
 
 
 [Serializable]
-public sealed class Counter : IEnumerator<long>
+public struct Counter : IEnumerator<long>
 {
     public static Counter Instance { get; } = new();
 

@@ -40,16 +40,19 @@ public sealed record Descriptor
 
     
     public static Descriptor Create( PropertyInfo property ) => Create( property, property.Name );
+    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public static Descriptor Create( PropertyInfo property, in string name ) =>
         new(property, name, $" {name} ", $" @{name} ", $" {name} = @{name} ");
 
 
     public static Descriptor MsSql( PropertyInfo property ) => MsSql( property, property.Name );
+    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public static Descriptor MsSql( PropertyInfo property, in string name ) =>
         new(property, name, $" {name} ", $" @{name} ", $" {name} = @{name} ");
 
 
     public static Descriptor Postgres( PropertyInfo property ) => Postgres( property, property.Name );
+    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public static Descriptor Postgres( PropertyInfo property, in string name ) =>
         new(property, name, $" \"{name}\" ", $" @{name} ", $" \"{name}\" = @{name} ");
 }

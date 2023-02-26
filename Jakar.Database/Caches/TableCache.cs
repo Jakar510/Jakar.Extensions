@@ -1,60 +1,105 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 09/01/2022  6:40 PM
 
+using System.Diagnostics;
+
+
+
 namespace Jakar.Database.Caches;
 
 
-public sealed class TableCache<TRecord> : Service, IHostedService, IReadOnlyCollection<TRecord>, IAsyncEnumerator<TRecord?> where TRecord : TableRecord<TRecord>
+public sealed class TableCache<TRecord> : IHostedService, IReadOnlyCollection<TRecord>, IAsyncEnumerator<TRecord?> where TRecord : TableRecord<TRecord>
 {
     private readonly ConcurrentDictionary<Guid, CacheEntry<TRecord>> _records = new();
-    private readonly DbTable<TRecord>                                  _table;
-    private readonly ILogger                                           _logger;
-    private readonly KeyGenerator<CacheEntry<TRecord>>                 _generator;
-    private readonly TimeSpan                                          _expireTime = TimeSpan.FromMinutes( 1 );
-    private readonly TimeSpan                                          _refreshTime;
+    private readonly DbTable<TRecord>                                _table;
+    private readonly ILogger<TableCache<TRecord>>                    _logger;
+    private readonly List<Guid>                                      _keys = new();
+    private readonly TableCacheOptions                               _options;
+    private          int                                             _index = -1;
+    public           IEnumerable<Guid>                               Changed => from entry in _records.Values where entry.HasChanged select entry.ID;
+    public           int                                             Count   => _records.Count;
 
 
-    public bool                 HasChanged     => _records.Values.Any( x => x.HasChanged );
-    public IEnumerable<Guid>    Changed        => from entry in _records.Values where entry.HasChanged select entry.ID;
-    public IEnumerable<Guid>  Keys           => _records.Keys;
-    public IEnumerable<TRecord> Records        => _records.Values.Select( x => x.Value );
-    public IEnumerable<TRecord> RecordsChanged => from entry in _records.Values where entry.HasChanged select entry.Saved();
-    public IEnumerable<TRecord> RecordsExpired => from entry in _records.Values where entry.HasExpired( _expireTime ) select entry.Value;
-    public int                  Count          => _records.Count;
-    public TRecord?             Current        => this[_generator.Current];
+    public TRecord? Current
+    {
+        get
+        {
+            Debug.Assert( _index >= 0 && _keys.Count >= 0 && _index < _keys.Count );
+
+            return TryGetValue( _keys[_index], out TRecord? value )
+                       ? value
+                       : default;
+        }
+    }
+
+    public bool HasChanged => _records.Values.Any( x => x.HasChanged );
 
 
     public TRecord? this[ Guid key ] => TryGetValue( key, out TRecord? value )
                                             ? value
                                             : default;
+    public IEnumerable<Guid>    Keys           => _records.Keys;
+    public IEnumerable<TRecord> Records        => _records.Values.Select( x => x.Value );
+    public IEnumerable<TRecord> RecordsChanged => from entry in _records.Values where entry.HasChanged select entry.Saved();
+    public IEnumerable<TRecord> RecordsExpired => from entry in _records.Values where entry.HasExpired( _options.ExpireTime ) select entry.Value;
 
 
-    public TableCache( DbTable<TRecord> table, IOptions<TableCacheOptions> options ) : this( table, options.Value ) { }
-    public TableCache( DbTable<TRecord> table, TableCacheOptions           options ) : this( table, options.Factory, options.RefreshTime ) { }
-    public TableCache( DbTable<TRecord> table, ILoggerFactory factory, TimeSpan refreshTime ) : base()
+    public TableCache( DbTable<TRecord> table, ILogger<TableCache<TRecord>> logger, IOptions<TableCacheOptions> options )
     {
-        _table       = table;
-        _refreshTime = refreshTime;
-        _logger      = factory.CreateLogger( GetType() );
-        _generator   = new KeyGenerator<CacheEntry<TRecord>>( _records.Values );
+        _table   = table;
+        _options = options.Value;
+        _logger  = logger;
     }
-    protected override void Dispose( bool disposing )
+    public async ValueTask DisposeAsync()
     {
-        if ( !disposing ) { return; }
-
-        _generator.Dispose();
-        _records.Clear();
+        await _table.TryCall( Refresh );
         Clear();
     }
-    public override ValueTask DisposeAsync()
+
+
+    public void Clear()
     {
-        Dispose( true );
-        return default;
+        _records.Clear();
+        _keys.Clear();
     }
+    public bool Contains( Guid    key ) => _records.ContainsKey( key );
+    public bool Contains( TRecord record ) => _records.ContainsKey( record.ID );
 
 
-    public bool Contains( Guid key ) => _records.Values.Any( x => x.ID.Equals( key ) );
-    public bool Contains( TRecord key ) => _records.Values.Any( x => x.Equals( key ) );
+    public async ValueTask AddOrUpdate( IAsyncEnumerable<TRecord?> records )
+    {
+        await foreach ( TRecord? record in records )
+        {
+            if ( record is null ) { continue; }
+
+            AddOrUpdate( record );
+        }
+    }
+    public async ValueTask AddOrUpdate( IAsyncEnumerable<TRecord?> records, CancellationToken token )
+    {
+        await foreach ( TRecord? record in records.WithCancellation( token ) )
+        {
+            if ( record is null ) { continue; }
+
+            AddOrUpdate( record );
+        }
+    }
+    public void AddOrUpdate( IEnumerable<TRecord> records )
+    {
+        foreach ( TRecord record in records ) { AddOrUpdate( record ); }
+    }
+    public void AddOrUpdate( TRecord record )
+    {
+        if ( _keys.Any() ) { Reset(); }
+
+        if ( _records.TryGetValue( record.ID, out CacheEntry<TRecord>? entry ) )
+        {
+            entry.Value = record;
+            return;
+        }
+
+        _records[record.ID] = new CacheEntry<TRecord>( record );
+    }
 
 
     public bool TryGetValue( Guid key, [NotNullWhen( true )] out TRecord? value )
@@ -72,9 +117,11 @@ public sealed class TableCache<TRecord> : Service, IHostedService, IReadOnlyColl
 
     public bool TryRemove( TRecord pair ) => _records.TryRemove( pair.ID, out _ );
     public bool TryRemove( TRecord pair, [NotNullWhen( true )] out TRecord? value ) => TryRemove( pair.ID, out value );
-    public bool TryRemove( Guid key ) => _records.TryRemove( key, out _ );
+    public bool TryRemove( Guid    key ) => _records.TryRemove( key, out _ );
     public bool TryRemove( Guid key, [NotNullWhen( true )] out TRecord? value )
     {
+        if ( _keys.Any() ) { Reset(); }
+
         if ( _records.TryRemove( key, out CacheEntry<TRecord>? entry ) )
         {
             value = entry.Value;
@@ -86,68 +133,52 @@ public sealed class TableCache<TRecord> : Service, IHostedService, IReadOnlyColl
     }
 
 
-    public async ValueTask AddOrUpdate( IAsyncEnumerable<TRecord?> records, CancellationToken token = default )
+    public void Reset()
     {
-        await foreach ( TRecord? record in records.WithCancellation( token ) )
-        {
-            if ( record is null ) { continue; }
+        var dictionary = new SortedDictionary<DateTimeOffset, Guid>( ValueSorter<DateTimeOffset>.Default );
+        foreach ( CacheEntry<TRecord> value in _records.Values ) { dictionary.Add( value.DateCreated, value.ID ); }
 
-            AddOrUpdate( record );
-        }
+        _keys.AddRange( dictionary.Values );
+        _index = -1;
     }
-    private async ValueTask Refresh( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
+
+    public async ValueTask<bool> MoveNextAsync()
     {
+        await _table.TryCall( Refresh );
+
+
+        if ( _keys.Count == 0 ) { Reset(); }
+
+        return ++_index < Count;
+    }
+    private async ValueTask Refresh( DbConnection connection, DbTransaction transaction, CancellationToken token = default )
+    {
+        if ( _records.IsEmpty )
+        {
+            AddOrUpdate( await _table.All( connection, transaction, token ) );
+            return;
+        }
+
+
         if ( HasChanged )
         {
             await _table.Update( connection, transaction, RecordsChanged, token );
             TRecord[] changed = await _table.Get( connection, transaction, Changed, token );
             AddOrUpdate( changed );
-            return;
         }
-
-
-        TRecord[] records = await _table.All( connection, transaction, token );
-        _records.Clear();
-        AddOrUpdate( records );
     }
-    public void AddOrUpdate( IEnumerable<TRecord> records )
-    {
-        foreach ( TRecord? record in records ) { AddOrUpdate( record ); }
-    }
-    public void AddOrUpdate( TRecord record )
-    {
-        if ( Contains( record.ID ) )
-        {
-            _records[record.ID]
-               .Value = record;
-        }
-        else { _records.TryAdd( record.ID, record ); }
-    }
-
-
-    public void Clear() => _records.Clear();
-    public void Reset() => _generator.Reset();
-
-
-    public async ValueTask<bool> MoveNextAsync()
-    {
-        await _table.Call( Refresh );
-        return _generator.MoveNext();
-    }
-
-
     public async Task StartAsync( CancellationToken token )
     {
-        using var timer = new PeriodicTimer( _refreshTime );
+        using var timer = new PeriodicTimer( _options.RefreshTime );
 
         while ( token.ShouldContinue() )
         {
             try
             {
                 await timer.WaitForNextTickAsync( token );
-                await _table.Call( Refresh, token );
+                await _table.TryCall( Refresh, token );
             }
-            catch ( Exception e ) { _logger.LogCritical( e, default, Array.Empty<object?>() ); }
+            catch ( Exception e ) { _logger.LogCritical( e, "Cache Failure: [ {Table} ]", nameof(TableCache<TRecord>) ); }
         }
     }
     public async Task StopAsync( CancellationToken token ) => await _table.Update( RecordsChanged, token );

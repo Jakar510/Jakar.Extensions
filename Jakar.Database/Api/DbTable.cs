@@ -24,7 +24,7 @@ public class DbTable<TRecord> : Constants<TRecord>, IConnectableDb, IAsyncDispos
     protected readonly TypePropertiesCache.Properties _propertiesCache;
 
 
-    internal static                                               TRecord[]                Empty         => Array.Empty<TRecord>();
+    protected internal static                                     TRecord[]                Empty         => Array.Empty<TRecord>();
     public                                                        DbInstance               Instance      => _database.Instance;
     [SuppressMessage( "ReSharper", "InconsistentNaming" )] public IDGenerator<TRecord>     IDs           => new(this);
     public                                                        RecordGenerator<TRecord> Records       => new(this);
@@ -37,14 +37,20 @@ public class DbTable<TRecord> : Constants<TRecord>, IConnectableDb, IAsyncDispos
                                                    _                   => throw new OutOfRangeException( nameof(Instance), Instance )
                                                };
 
-    public virtual string SchemaTableName => $"{CurrentSchema}.{TableName}";
-
-    public virtual string TableName => Instance switch
-                                       {
-                                           DbInstance.Postgres => POSTGRES_TABLE_NAME,
-                                           DbInstance.MsSql    => TABLE_NAME,
-                                           _                   => TABLE_NAME
-                                       };
+    public virtual string SchemaTableName
+    {
+        [MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization )] get => $"{CurrentSchema}.{TableName}";
+    }
+    public virtual string TableName
+    {
+        [MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization )]
+        get => Instance switch
+               {
+                   DbInstance.Postgres => POSTGRES_TABLE_NAME,
+                   DbInstance.MsSql    => TABLE_NAME,
+                   _                   => TABLE_NAME
+               };
+    }
 
 
     protected internal IEnumerable<Descriptor> Descriptors   => _propertiesCache.NotKeys( this );
@@ -60,13 +66,14 @@ public class DbTable<TRecord> : Constants<TRecord>, IConnectableDb, IAsyncDispos
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] protected internal Descriptor GetDescriptor( string columnName ) => _propertiesCache[columnName, this];
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] protected internal Descriptor GetDescriptor( string columnName ) => _propertiesCache.Get( this, columnName );
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     protected internal string KeyValuePair( string columnName ) => GetDescriptor( columnName )
        .KeyValuePair;
 
 
     public ValueTask<TRecord[]> All( CancellationToken token = default ) => this.Call( All, token );
+    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask<TRecord[]> All( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
         string sql = $"SELECT * FROM {SchemaTableName}";
@@ -122,6 +129,7 @@ public class DbTable<TRecord> : Constants<TRecord>, IConnectableDb, IAsyncDispos
 
 
     public ValueTask<long> Count( CancellationToken token = default ) => this.Call( Count, token );
+    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask<long> Count( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
         string sql = $"SELECT COUNT({IDKey}) FROM {SchemaTableName}";
@@ -162,6 +170,7 @@ public class DbTable<TRecord> : Constants<TRecord>, IConnectableDb, IAsyncDispos
 
         await connection.ExecuteScalarAsync( cmd, default, transaction );
     }
+    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask Delete( DbConnection connection, DbTransaction transaction, IEnumerable<Guid> ids, CancellationToken token = default )
     {
         string sql = $"DELETE FROM {SchemaTableName} WHERE {IDKey} in ( {string.Join( ',', ids.Select( x => $"'{x}'" ) )} );";
@@ -171,6 +180,7 @@ public class DbTable<TRecord> : Constants<TRecord>, IConnectableDb, IAsyncDispos
         try { await connection.ExecuteScalarAsync( sql, default, transaction ); }
         catch ( Exception e ) { throw new SqlException( sql, _nullParameters, e ); }
     }
+    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public async ValueTask Delete( DbConnection connection, DbTransaction transaction, bool matchAll, DynamicParameters parameters, CancellationToken token )
     {
         string cmd = $"DELETE FROM {SchemaTableName} WHERE {string.Join( matchAll
@@ -185,6 +195,7 @@ public class DbTable<TRecord> : Constants<TRecord>, IConnectableDb, IAsyncDispos
 
 
     public ValueTask<bool> Exists( bool matchAll, DynamicParameters parameters, CancellationToken token ) => this.TryCall( Exists, matchAll, parameters, token );
+    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask<bool> Exists( DbConnection connection, DbTransaction transaction, bool matchAll, DynamicParameters parameters, CancellationToken token )
     {
         string sql = $"SELECT TOP 1 {IDKey} FROM {SchemaTableName} WHERE {string.Join( matchAll
@@ -235,6 +246,7 @@ public class DbTable<TRecord> : Constants<TRecord>, IConnectableDb, IAsyncDispos
     public async ValueTask<TRecord?> Get( DbConnection connection, DbTransaction? transaction, Guid? id, CancellationToken token = default ) => id.HasValue
                                                                                                                                                     ? await Get( connection, transaction, id.Value, token )
                                                                                                                                                     : default;
+    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask<TRecord?> Get( DbConnection connection, DbTransaction? transaction, bool matchAll, DynamicParameters parameters, CancellationToken token = default )
     {
         string sql = $"SELECT * FROM {SchemaTableName} WHERE {string.Join( matchAll
@@ -266,6 +278,7 @@ public class DbTable<TRecord> : Constants<TRecord>, IConnectableDb, IAsyncDispos
 
         return result;
     }
+    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask<TRecord?> Get( DbConnection connection, DbTransaction? transaction, string columnName, object? value, CancellationToken token = default )
     {
         DynamicParameters parameters = GetParameters( value );
@@ -288,6 +301,7 @@ public class DbTable<TRecord> : Constants<TRecord>, IConnectableDb, IAsyncDispos
         HashSet<Guid> values = await ids.ToHashSet( token );
         return await Get( connection, transaction, values, token );
     }
+    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual ValueTask<TRecord[]> Get( DbConnection connection, DbTransaction? transaction, IEnumerable<Guid> ids, CancellationToken token = default )
     {
         string sql = $"SELECT * FROM {SchemaTableName} WHERE {IDKey} in {string.Join( ',', ids.Select( x => $"'{x}'" ) )}";
@@ -296,6 +310,7 @@ public class DbTable<TRecord> : Constants<TRecord>, IConnectableDb, IAsyncDispos
     }
 
 
+    [MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization )]
     public virtual T[] GetArray<T>( IEnumerable<T> enumerable ) => enumerable switch
                                                                    {
                                                                        List<T> list       => list.GetInternalArray(),
@@ -314,6 +329,7 @@ public class DbTable<TRecord> : Constants<TRecord>, IConnectableDb, IAsyncDispos
         catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
     }
     public ValueTask<string?> GetID( string columnName, object value, CancellationToken token = default ) => this.Call( GetID, columnName, value, token );
+    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask<string?> GetID( DbConnection connection, DbTransaction? transaction, string columnName, object value, CancellationToken token = default )
     {
         string sql = $"SELECT {IDKey} FROM {SchemaTableName} WHERE {columnName} = @{nameof(value)}";
@@ -341,15 +357,10 @@ public class DbTable<TRecord> : Constants<TRecord>, IConnectableDb, IAsyncDispos
         await foreach ( TRecord record in records.WithCancellation( token ) ) { yield return await Insert( connection, transaction, record, token ); }
     }
     public ValueTask<TRecord> Insert( TRecord record, CancellationToken token = default ) => this.TryCall( Insert, record, token );
+    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask<TRecord> Insert( DbConnection connection, DbTransaction transaction, TRecord record, CancellationToken token = default )
     {
-        var sbColumnList = new StringBuilder();
-        sbColumnList.AppendJoin( ',', ColumnNames );
-
-        var sbParameterList = new StringBuilder();
-        sbParameterList.AppendJoin( ',', VariableNames );
-
-        string sql        = $@"SET NOCOUNT ON INSERT INTO {SchemaTableName} ({sbColumnList}) values ({sbParameterList}) SELECT scope_identity();";
+        string sql        = $@"SET NOCOUNT ON INSERT INTO {SchemaTableName} ({string.Join( ',', ColumnNames )}) values ({string.Join( ',', VariableNames )}) SELECT scope_identity();";
         var    parameters = new DynamicParameters( record );
 
         if ( token.IsCancellationRequested ) { return record; }
@@ -363,7 +374,39 @@ public class DbTable<TRecord> : Constants<TRecord>, IConnectableDb, IAsyncDispos
     }
 
 
+    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
+    public virtual async ValueTask<TRecord?> TryInsert( DbConnection connection, DbTransaction transaction, TRecord record, bool matchAll, DynamicParameters parameters, CancellationToken token = default )
+    {
+        string sql = $@"IF NOT EXISTS(SELECT * FROM {SchemaTableName} WHERE {string.Join( matchAll
+                                                                                              ? "AND"
+                                                                                              : "OR",
+                                                                                          parameters.ParameterNames.Select( KeyValuePair ) )})
+BEGIN
+    SET NOCOUNT ON INSERT INTO {SchemaTableName} ({string.Join( ',', ColumnNames )}) values ({string.Join( ',', VariableNames )}) SELECT scope_identity()
+END
+
+ELSE 
+BEGIN 
+    SELECT NULL FROM {SchemaTableName} TOP 1
+END";
+
+
+        if ( token.IsCancellationRequested ) { return default; }
+
+        try
+        {
+            Guid? id = await connection.ExecuteScalarAsync<Guid?>( sql, parameters, transaction );
+
+            if ( id.HasValue ) { return record.NewID( id.Value ); }
+
+            return default;
+        }
+        catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
+    }
+
+
     public ValueTask<TRecord?> Last( CancellationToken token = default ) => this.Call( Last, token );
+    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask<TRecord?> Last( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
         string sql = $"SELECT * FROM {SchemaTableName} ORDER BY {IDKey} DESC LIMIT 1";
@@ -375,6 +418,7 @@ public class DbTable<TRecord> : Constants<TRecord>, IConnectableDb, IAsyncDispos
 
 
     public ValueTask<TRecord?> LastOrDefault( CancellationToken token = default ) => this.Call( LastOrDefault, token );
+    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask<TRecord?> LastOrDefault( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
         if ( token.IsCancellationRequested ) { return default; }
@@ -387,6 +431,7 @@ public class DbTable<TRecord> : Constants<TRecord>, IConnectableDb, IAsyncDispos
 
 
     public ValueTask<TRecord?> Next( Guid? id, CancellationToken token = default ) => this.Call( Next, id, token );
+    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask<TRecord?> Next( DbConnection connection, DbTransaction? transaction, Guid? id, CancellationToken token = default )
     {
         if ( id is null ) { return default; }
@@ -402,6 +447,7 @@ public class DbTable<TRecord> : Constants<TRecord>, IConnectableDb, IAsyncDispos
 
 
     public ValueTask<Guid?> NextID( Guid? id, CancellationToken token = default ) => this.Call( NextID, id, token );
+    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask<Guid?> NextID( DbConnection connection, DbTransaction? transaction, Guid? id, CancellationToken token = default )
     {
         if ( id is null ) { return default; }
@@ -418,9 +464,10 @@ public class DbTable<TRecord> : Constants<TRecord>, IConnectableDb, IAsyncDispos
 
 
     public ValueTask<TRecord?> Random( CancellationToken token = default ) => this.Call( Random, token );
+    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask<TRecord?> Random( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
-        string sql = $"SELECT * FROM {SchemaTableName} WHERE {IDKey} >= RAND() * ( SELECT MAX ({IDKey}) FROM table ) ORDER BY {IDKey} LIMIT 1";
+        string sql = $"SELECT * FROM {SchemaTableName} WHERE {IDKey} >= RAND() * ( SELECT MAX ({IDKey}) FROM {SchemaTableName} ) ORDER BY {IDKey} LIMIT 1";
 
         if ( token.IsCancellationRequested ) { return default; }
 
@@ -430,12 +477,13 @@ public class DbTable<TRecord> : Constants<TRecord>, IConnectableDb, IAsyncDispos
 
 
     public ValueTask<TRecord?> Random( UserRecord user, CancellationToken token = default ) => this.Call( Random, user, token );
+    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask<TRecord?> Random( DbConnection connection, DbTransaction? transaction, UserRecord user, CancellationToken token = default )
     {
         var param = new DynamicParameters();
         param.Add( nameof(TableRecord<TRecord>.OwnerUserID), user.OwnerUserID );
 
-        string sql = $"SELECT * FROM {SchemaTableName} WHERE {IDKey} >= RAND() * ( SELECT MAX ({IDKey}) FROM table ) AND {nameof(TableRecord<TRecord>.OwnerUserID)} = @{nameof(TableRecord<TRecord>.OwnerUserID)} ORDER BY {IDKey} LIMIT 1";
+        string sql = $"SELECT * FROM {SchemaTableName} WHERE {IDKey} >= RAND() * ( SELECT MAX ({IDKey}) FROM {SchemaTableName} ) AND {nameof(TableRecord<TRecord>.OwnerUserID)} = @{nameof(TableRecord<TRecord>.OwnerUserID)} ORDER BY {IDKey} LIMIT 1";
 
         if ( token.IsCancellationRequested ) { return default; }
 
@@ -445,9 +493,10 @@ public class DbTable<TRecord> : Constants<TRecord>, IConnectableDb, IAsyncDispos
 
 
     public ValueTask<TRecord[]> Random( string count, CancellationToken token = default ) => this.Call( Random, count, token );
+    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual ValueTask<TRecord[]> Random( DbConnection connection, DbTransaction? transaction, string count, CancellationToken token = default )
     {
-        string sql = $"SELECT * FROM {SchemaTableName} WHERE {IDKey} >= RAND() * ( SELECT MAX ({IDKey}) FROM table ) ORDER BY {IDKey} LIMIT {count}";
+        string sql = $"SELECT * FROM {SchemaTableName} WHERE {IDKey} >= RAND() * ( SELECT MAX ({IDKey}) FROM {SchemaTableName} ) ORDER BY {IDKey} LIMIT {count}";
 
         return Where( connection, transaction, sql, default, token );
     }
@@ -507,6 +556,7 @@ public class DbTable<TRecord> : Constants<TRecord>, IConnectableDb, IAsyncDispos
 
     public ValueTask<TRecord?> Single( string id,  CancellationToken  token                               = default ) => this.Call( Single, id,  token );
     public ValueTask<TRecord?> Single( string sql, DynamicParameters? parameters, CancellationToken token = default ) => this.Call( Single, sql, parameters, token );
+    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask<TRecord?> Single( DbConnection connection, DbTransaction? transaction, string id, CancellationToken token = default )
     {
         DynamicParameters parameters = GetParameters( id );
@@ -530,6 +580,7 @@ public class DbTable<TRecord> : Constants<TRecord>, IConnectableDb, IAsyncDispos
 
     public ValueTask<TRecord?> SingleOrDefault( string id,  CancellationToken  token                               = default ) => this.Call( SingleOrDefault, id,  token );
     public ValueTask<TRecord?> SingleOrDefault( string sql, DynamicParameters? parameters, CancellationToken token = default ) => this.Call( SingleOrDefault, sql, parameters, token );
+    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask<TRecord?> SingleOrDefault( DbConnection connection, DbTransaction? transaction, string id, CancellationToken token = default )
     {
         DynamicParameters parameters = GetParameters( id );
@@ -561,6 +612,7 @@ public class DbTable<TRecord> : Constants<TRecord>, IConnectableDb, IAsyncDispos
     {
         await foreach ( TRecord record in records.WithCancellation( token ) ) { await Update( connection, transaction, record, token ); }
     }
+    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask Update( DbConnection connection, DbTransaction? transaction, TRecord record, CancellationToken token = default )
     {
         Guid              id         = record.ID;
@@ -578,6 +630,7 @@ public class DbTable<TRecord> : Constants<TRecord>, IConnectableDb, IAsyncDispos
     public ValueTask<TRecord[]> Where( string sql, DynamicParameters? parameters, CancellationToken token = default ) =>
         this.Call( Where, sql, parameters, token );
     public ValueTask<TRecord[]> Where<TValue>( string columnName, TValue? value, CancellationToken token = default ) => this.Call( Where, columnName, value, token );
+    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual ValueTask<TRecord[]> Where( DbConnection connection, DbTransaction? transaction, bool matchAll, DynamicParameters parameters, CancellationToken token = default )
     {
         string sql = $"SELECT * FROM {SchemaTableName} WHERE {string.Join( matchAll
@@ -598,6 +651,7 @@ public class DbTable<TRecord> : Constants<TRecord>, IConnectableDb, IAsyncDispos
         }
         catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
     }
+    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual ValueTask<TRecord[]> Where<TValue>( DbConnection connection, DbTransaction? transaction, string columnName, TValue? value, CancellationToken token = default )
     {
         string sql        = $"SELECT * FROM {SchemaTableName} WHERE {columnName} = @{nameof(value)}";

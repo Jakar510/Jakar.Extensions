@@ -3,6 +3,10 @@
 
 
 #nullable enable
+using System;
+
+
+
 namespace Jakar.Extensions;
 
 
@@ -30,18 +34,16 @@ public static partial class Spans
     public static Span<T> AsSpan<T>( this                 ReadOnlyMemory<T> value ) => value.Span.AsSpan();
     public static Span<T> AsSpan<T>( this                 Memory<T>         value ) => value.Span;
 
+
     public static string? ConvertToString( this Memory<char> value ) => MemoryMarshal.TryGetString( value, out string? result, out _, out _ )
                                                                             ? result
                                                                             : default;
-
     public static string? ConvertToString( this ReadOnlyMemory<char> value ) => MemoryMarshal.TryGetString( value, out string? result, out _, out _ )
                                                                                     ? result
                                                                                     : default;
-
     public static string? ConvertToString( this Memory<char> value, out int start, out int length ) => MemoryMarshal.TryGetString( value, out string? result, out start, out length )
                                                                                                            ? result
                                                                                                            : default;
-
     public static string? ConvertToString( this ReadOnlyMemory<char> value, out int start, out int length ) => MemoryMarshal.TryGetString( value, out string? result, out start, out length )
                                                                                                                    ? result
                                                                                                                    : default;
@@ -52,7 +54,6 @@ public static partial class Spans
         Guard.IsInRangeFor( value.Length, buffer, nameof(buffer) );
         value.Span.CopyTo( buffer );
     }
-
     public static void CopyTo<T>( this Memory<T> value, ref Span<T> buffer )
     {
         Guard.IsInRangeFor( value.Length, buffer, nameof(buffer) );

@@ -5,11 +5,10 @@ namespace Jakar.Database;
 
 
 [SuppressMessage( "ReSharper", "MemberCanBePrivate.Local" )]
-public sealed class KeyGenerator<TValue> : IEnumerator<Guid> where TValue : ITableRecord
+public struct KeyGenerator : IEnumerator<Guid>
 {
-    private readonly List<Guid>          _keys  = new();
-    private          int                 _index = -1;
-    private readonly IEnumerable<TValue> _records;
+    private readonly List<Guid> _keys = new();
+    private          int        _index = -1;
 
 
     public int         Count   => _keys.Count;
@@ -17,22 +16,19 @@ public sealed class KeyGenerator<TValue> : IEnumerator<Guid> where TValue : ITab
     object IEnumerator.Current => Current;
 
 
-    public KeyGenerator( IEnumerable<TValue> records )
-    {
-        _records = records;
-        Reset();
-    }
+    public KeyGenerator( IEnumerable<Guid> keys ) => _keys.AddRange( keys );
+
+
     public void Dispose() => _keys.Clear();
-
-
+    public void Reset() => _index = -1;
     public bool MoveNext() => ++_index < Count;
-    public void Reset()
-    {
-        _index = -1;
-        _keys.Clear();
-        var dictionary = new SortedDictionary<DateTimeOffset, Guid>( ValueSorter<DateTimeOffset>.Default );
-        foreach ( TValue value in _records ) { dictionary.Add( value.DateCreated, value.ID ); }
 
-        _keys.AddRange( dictionary.Values );
+
+    public static KeyGenerator Create<TValue>( IEnumerable<TValue> records ) where TValue : ITableRecord
+    {
+        var dictionary = new SortedDictionary<DateTimeOffset, Guid>( ValueSorter<DateTimeOffset>.Default );
+        foreach ( TValue value in records ) { dictionary.Add( value.DateCreated, value.ID ); }
+
+        return new KeyGenerator( dictionary.Values );
     }
 }

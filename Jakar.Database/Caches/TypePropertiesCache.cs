@@ -63,13 +63,22 @@ public sealed class TypePropertiesCache : ConcurrentDictionary<Type, TypePropert
         private readonly IReadOnlyDictionary<DbInstance, Descriptors> _dictionary;
 
 
-        public Descriptor this[ string          columnName, IConnectableDb table ] => this[table][columnName];
-        public Descriptor this[ string          columnName, DbInstance     value ] => this[value][columnName];
-        public Descriptors this[ DbInstance     value ] => _dictionary[value];
-        public Descriptors this[ IConnectableDb value ] => this[value.Instance];
-        public IEnumerable<DbInstance>  Keys   => _dictionary.Keys;
-        public IEnumerable<Descriptors> Values => _dictionary.Values;
-        public int                      Count  => _dictionary.Count;
+        public Descriptors this[ DbInstance value ]
+        {
+            [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _dictionary[value];
+        }
+        public IEnumerable<DbInstance> Keys
+        {
+            [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _dictionary.Keys;
+        }
+        public IEnumerable<Descriptors> Values
+        {
+            [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _dictionary.Values;
+        }
+        public int Count
+        {
+            [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _dictionary.Count;
+        }
 
 
         public Properties( Type type )
@@ -82,11 +91,12 @@ public sealed class TypePropertiesCache : ConcurrentDictionary<Type, TypePropert
                               [DbInstance.MsSql]    = properties.ToDictionary( x => x.Name, Descriptor.MsSql )
                           };
         }
+        public bool ContainsKey( IConnectableDb value ) => ContainsKey( value.Instance );
 
 
         public IEnumerable<Descriptor> NotKeys( DbInstance value ) => this[value]
                                                                      .Values.Where( x => !x.IsKey );
-        public IEnumerable<Descriptor> NotKeys( IConnectableDb value ) => this[value]
+        public IEnumerable<Descriptor> NotKeys( IConnectableDb value ) => this[value.Instance]
                                                                          .Values.Where( x => !x.IsKey );
 
 
@@ -94,12 +104,15 @@ public sealed class TypePropertiesCache : ConcurrentDictionary<Type, TypePropert
         public bool TryGetValue( DbInstance     key, [NotNullWhen( true )] out Descriptors? value ) => _dictionary.TryGetValue( key, out value );
 
 
-        public bool ContainsKey( DbInstance     value ) => _dictionary.ContainsKey( value );
-        public bool ContainsKey( IConnectableDb value ) => ContainsKey( value.Instance );
+        public bool ContainsKey( DbInstance value ) => _dictionary.ContainsKey( value );
 
 
         public IEnumerator<KeyValuePair<DbInstance, Descriptors>> GetEnumerator() => _dictionary.GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => _dictionary.GetEnumerator();
+
+
+        [MethodImpl( MethodImplOptions.AggressiveInlining )] public Descriptor Get( DbInstance     table, string columnName ) => _dictionary[table][columnName];
+        [MethodImpl( MethodImplOptions.AggressiveInlining )] public Descriptor Get( IConnectableDb table, string columnName ) => Get( table.Instance, columnName );
 
 
 

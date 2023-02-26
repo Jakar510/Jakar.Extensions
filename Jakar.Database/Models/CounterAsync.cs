@@ -5,7 +5,7 @@ namespace Jakar.Database;
 
 
 [Serializable]
-public sealed class CounterAsync : IAsyncEnumerator<long>
+public struct CounterAsync : IAsyncEnumerator<long>
 {
     private long? _current;
 
@@ -26,6 +26,5 @@ public sealed class CounterAsync : IAsyncEnumerator<long>
     }
 
 
-    public ValueTask<bool> MoveNextAsync() => (++Current).IsValidID()
-                                                         .ValueTaskFromResult();
+    public ValueTask<bool> MoveNextAsync() => new((++Current).IsValidID());
 }

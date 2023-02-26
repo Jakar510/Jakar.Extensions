@@ -10,7 +10,7 @@ namespace Jakar.Database;
 public struct IDGenerator<TRecord> : IAsyncEnumerator<Guid?> where TRecord : TableRecord<TRecord>
 {
     private readonly DbTable<TRecord> _table;
-    public           Guid?            Current { get; set; }
+    public           Guid?            Current { get; private set; }
 
 
     public IDGenerator( DbTable<TRecord> table ) => _table = table;

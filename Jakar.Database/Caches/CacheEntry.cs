@@ -15,8 +15,8 @@ public sealed class CacheEntry<TRecord> : ObservableClass, ITableRecord, IEquata
     public bool            HasChanged   => Value.GetHashCode() != _hash;
     public DateTimeOffset  DateCreated  => _value?.DateCreated ?? default;
     public DateTimeOffset? LastModified => _value?.LastModified;
-    public Guid ID           => _value?.ID ?? Guid.Empty;
-    public Guid?         CreatedBy    => _value?.CreatedBy;
+    public Guid            ID           { get; }
+    public Guid?           CreatedBy    => _value?.CreatedBy;
 
 
     public TRecord Value
@@ -32,27 +32,17 @@ public sealed class CacheEntry<TRecord> : ObservableClass, ITableRecord, IEquata
     }
 
 
-    public CacheEntry( TRecord           value ) => Value = value;
-    public override bool Equals( object? obj ) => ReferenceEquals( this, obj ) || obj is CacheEntry<TRecord> other && Equals( other );
-    public override int GetHashCode() => Value.GetHashCode();
-
-
-    public bool HasExpired( in TimeSpan time ) => DateTimeOffset.UtcNow - _lastTime >= time;
-
+    public CacheEntry( TRecord value )
+    {
+        Value = value;
+        ID    = value.ID;
+    }
     internal TRecord Saved()
     {
         _hash = _value?.GetHashCode() ?? 0;
         return Value;
     }
-
-
-    public static bool operator ==( CacheEntry<TRecord>?         left, CacheEntry<TRecord>? right ) => Equalizer<CacheEntry<TRecord>>.Default.Equals( left, right );
-    public static bool operator >( CacheEntry<TRecord>?          left, CacheEntry<TRecord>? right ) => Sorter<CacheEntry<TRecord>>.Default.Compare( left, right ) > 0;
-    public static bool operator >=( CacheEntry<TRecord>?         left, CacheEntry<TRecord>? right ) => Sorter<CacheEntry<TRecord>>.Default.Compare( left, right ) >= 0;
-    public static implicit operator CacheEntry<TRecord>( TRecord value ) => new(value);
-    public static bool operator !=( CacheEntry<TRecord>?         left, CacheEntry<TRecord>? right ) => !Equalizer<CacheEntry<TRecord>>.Default.Equals( left, right );
-    public static bool operator <( CacheEntry<TRecord>?          left, CacheEntry<TRecord>? right ) => Sorter<CacheEntry<TRecord>>.Default.Compare( left, right ) < 0;
-    public static bool operator <=( CacheEntry<TRecord>?         left, CacheEntry<TRecord>? right ) => Sorter<CacheEntry<TRecord>>.Default.Compare( left, right ) <= 0;
+    public bool HasExpired( in TimeSpan time ) => DateTimeOffset.UtcNow - _lastTime >= time;
 
 
     public int CompareTo( object? other )
@@ -63,7 +53,7 @@ public sealed class CacheEntry<TRecord> : ObservableClass, ITableRecord, IEquata
 
         return other is CacheEntry<TRecord> entry
                    ? CompareTo( entry )
-                   : throw new ArgumentException( $"Object must be of type {nameof(CacheEntry<TRecord>)}" );
+                   : throw new ExpectedValueTypeException( other, typeof(CacheEntry<TRecord>) );
     }
     public int CompareTo( CacheEntry<TRecord>? other )
     {
@@ -82,5 +72,15 @@ public sealed class CacheEntry<TRecord> : ObservableClass, ITableRecord, IEquata
 
         return Value.Equals( other.Value );
     }
-    public bool Equals( TRecord? other ) => Value.Equals( other );
+    public bool Equals( TRecord?         other ) => Value.Equals( other );
+    public override bool Equals( object? obj ) => ReferenceEquals( this, obj ) || obj is CacheEntry<TRecord> other && Equals( other );
+    public override int GetHashCode() => Value.GetHashCode();
+
+
+    public static bool operator ==( CacheEntry<TRecord>? left, CacheEntry<TRecord>? right ) => Equalizer<CacheEntry<TRecord>>.Default.Equals( left, right );
+    public static bool operator >( CacheEntry<TRecord>?  left, CacheEntry<TRecord>? right ) => Sorter<CacheEntry<TRecord>>.Default.Compare( left, right ) > 0;
+    public static bool operator >=( CacheEntry<TRecord>? left, CacheEntry<TRecord>? right ) => Sorter<CacheEntry<TRecord>>.Default.Compare( left, right ) >= 0;
+    public static bool operator !=( CacheEntry<TRecord>? left, CacheEntry<TRecord>? right ) => !Equalizer<CacheEntry<TRecord>>.Default.Equals( left, right );
+    public static bool operator <( CacheEntry<TRecord>?  left, CacheEntry<TRecord>? right ) => Sorter<CacheEntry<TRecord>>.Default.Compare( left, right ) < 0;
+    public static bool operator <=( CacheEntry<TRecord>? left, CacheEntry<TRecord>? right ) => Sorter<CacheEntry<TRecord>>.Default.Compare( left, right ) <= 0;
 }

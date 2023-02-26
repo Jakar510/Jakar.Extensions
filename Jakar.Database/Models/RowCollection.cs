@@ -2,27 +2,45 @@
 
 
 [Serializable]
-public sealed class RecordCollection<TRecord> : ObservableCollection<TRecord> where TRecord : BaseRecord, IUniqueID<string>
+public sealed class RecordCollection<TRecord> : IReadOnlyList<TRecord> where TRecord : BaseRecord, IUniqueID<Guid>
 {
+    private readonly List<TRecord> _records = new();
+
+
+    public TRecord this[ int index ] => _records[index];
+    public int Count => _records.Count;
+
+
     public RecordCollection() : base() { }
     public RecordCollection( params TRecord[]     items ) : this() => Add( items );
     public RecordCollection( IEnumerable<TRecord> items ) : this() => Add( items );
 
 
-    public void Add( params TRecord[]     items ) => items.ForEach( Add );
-    public void Add( IEnumerable<TRecord> items ) => items.ForEach( Add );
-    public new void Add( TRecord item )
+    public RecordCollection<TRecord> Add( params TRecord[] records ) => Add( records.AsEnumerable() );
+    public RecordCollection<TRecord> Add( IEnumerable<TRecord> records )
     {
-        if ( !string.IsNullOrEmpty( item.ID ) )
+        foreach ( TRecord record in records ) { Add( record ); }
+
+        return this;
+    }
+    public RecordCollection<TRecord> Add( TRecord item )
+    {
+        if ( item.IsValidID() )
         {
-            base.Add( item );
-            return;
+            _records.Add( item );
+            return this;
         }
 
-        base.Add( item with
-                  {
-                      ID = Guid.NewGuid()
-                               .ToBase64(),
-                  } );
+
+        _records.Add( item with
+                      {
+                          ID = Guid.NewGuid()
+                      } );
+
+        return this;
     }
+
+
+    public IEnumerator<TRecord> GetEnumerator() => _records.GetEnumerator();
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }

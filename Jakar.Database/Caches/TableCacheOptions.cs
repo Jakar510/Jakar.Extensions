@@ -8,12 +8,11 @@ namespace Jakar.Database.Caches;
 [SuppressMessage( "ReSharper", "ConvertToPrimaryConstructor" )]
 public sealed record TableCacheOptions : IOptions<TableCacheOptions>
 {
-    public ILoggerFactory                         Factory     { get; init; }
     TableCacheOptions IOptions<TableCacheOptions>.Value       => this;
-    public TimeSpan                               RefreshTime { get; init; } = TimeSpan.FromSeconds( 10 );
+    public TimeSpan                               ExpireTime  { get; set; } = TimeSpan.FromMinutes( 1 );
+    public TimeSpan                               RefreshTime { get; set; } = TimeSpan.FromSeconds( 10 );
 
 
-    public TableCacheOptions( ILoggerFactory factory ) => Factory = factory;
     public static IServiceCollection Register( IServiceCollection collection )
     {
         collection.AddSingleton<IOptions<TableCacheOptions>, TableCacheOptions>();
