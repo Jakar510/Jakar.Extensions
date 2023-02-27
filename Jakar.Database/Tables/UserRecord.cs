@@ -1,6 +1,11 @@
 ﻿// ToothFairyDispatch :: ToothFairyDispatch.Cloud
 // 08/29/2022  9:55 PM
 
+using System.Diagnostics;
+using System.Reflection.Emit;
+
+
+
 namespace Jakar.Database;
 
 
@@ -50,7 +55,7 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, JsonModels.IJ
         PreferredLanguage = data.PreferredLanguage;
         Rights            = rights ?? string.Empty;
     }
-    public UserRecord( Guid   id, UserRecord? caller = default ) : base( id, caller ) => UserID = Guid.NewGuid();
+    public UserRecord( Guid id, UserRecord? caller = default ) : base( id, caller ) => UserID = Guid.NewGuid();
     public UserRecord( string userName, string password, string rights, UserRecord? caller = default ) : base( Guid.NewGuid(), caller )
     {
         ArgumentNullException.ThrowIfNull( userName );
@@ -114,6 +119,65 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, JsonModels.IJ
         SecurityStamp          = securityStamp;
         return this;
     }
+
+
+    [RequiresPreviewFeatures] public ValueTask<bool> RedeemCode( Database db, string code, CancellationToken token ) => db.TryCall( RedeemCode, db, code, token );
+    [RequiresPreviewFeatures]
+    public async ValueTask<bool> RedeemCode( DbConnection connection, DbTransaction transaction, Database db, string code, CancellationToken token )
+    {
+        UserRecoveryCodeRecord[] mappings = await UserRecoveryCodeRecord.Where( connection, transaction, db.UserRecoveryCodes, this, token );
+
+        foreach ( UserRecoveryCodeRecord mapping in mappings )
+        {
+            RecoveryCodeRecord? record = await mapping.Get( connection, transaction, db.RecoveryCodes, token );
+
+            if ( record is null ) { await db.UserRecoveryCodes.Delete( connection, transaction, mapping, token ); }
+            else if ( record.IsValid( code ) )
+            {
+                await db.RecoveryCodes.Delete( connection, transaction, record, token );
+                await db.UserRecoveryCodes.Delete( connection, transaction, mapping, token );
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+
+    [RequiresPreviewFeatures] public ValueTask<string[]> ReplaceCodes( Database db, int count = 10, CancellationToken token = default ) => db.TryCall( ReplaceCodes, db, count, token );
+    [RequiresPreviewFeatures]
+    public async ValueTask<string[]> ReplaceCodes( DbConnection connection, DbTransaction transaction, Database db, int count = 10, CancellationToken token = default )
+    {
+        RecoveryCodeRecord[]                            old        = await Codes( connection, transaction, db, token );
+        IReadOnlyDictionary<string, RecoveryCodeRecord> dictionary = RecoveryCodeRecord.Create( this, count );
+        string[]                                        codes      = dictionary.Keys.ToArray();
+
+
+        await db.RecoveryCodes.Delete( connection, transaction, old, token );
+        await UserRecoveryCodeRecord.Replace( connection, transaction, db.UserRecoveryCodes, this, dictionary.Values, token );
+        return codes;
+    }
+
+
+    [RequiresPreviewFeatures] public ValueTask<string[]> ReplaceCodes( Database db, IEnumerable<string> recoveryCodes, CancellationToken token = default ) => db.TryCall( ReplaceCodes, db, recoveryCodes, token );
+    [RequiresPreviewFeatures]
+    public async ValueTask<string[]> ReplaceCodes( DbConnection connection, DbTransaction transaction, Database db, IEnumerable<string> recoveryCodes, CancellationToken token = default )
+    {
+        RecoveryCodeRecord[]                            old        = await Codes( connection, transaction, db, token );
+        IReadOnlyDictionary<string, RecoveryCodeRecord> dictionary = RecoveryCodeRecord.Create( this, recoveryCodes );
+        string[]                                        codes      = dictionary.Keys.ToArray();
+
+
+        await db.RecoveryCodes.Delete( connection, transaction, old, token );
+        await UserRecoveryCodeRecord.Replace( connection, transaction, db.UserRecoveryCodes, this, dictionary.Values, token );
+        return codes;
+    }
+
+
+    [RequiresPreviewFeatures] public ValueTask<RecoveryCodeRecord[]> Codes( Database db, CancellationToken token ) => db.TryCall( Codes, db, token );
+    [RequiresPreviewFeatures]
+    public async ValueTask<RecoveryCodeRecord[]> Codes( DbConnection connection, DbTransaction transaction, Database db, CancellationToken token ) =>
+        await UserRecoveryCodeRecord.Where( connection, transaction, db.UserRecoveryCodes, db.RecoveryCodes, this, token );
 
 
 

@@ -4,7 +4,6 @@
 [SuppressMessage( "ReSharper", "SuggestBaseTypeForParameter" )]
 public sealed class LoggerDB : Database.Database
 {
-    public override    AppVersion                                   Version       { get; } = new(1, 0, 0);
     public             ConcurrentObservableCollection<Notification> Notifications { get; } = new();
     public             DbTable<AppRecord>                           Apps          { get; }
     public             DbTable<AttachmentRecord>                    Attachments   { get; }
@@ -12,7 +11,6 @@ public sealed class LoggerDB : Database.Database
     public             DbTable<LogRecord>                           Logs          { get; }
     public             DbTable<ScopeRecord>                         Scopes        { get; }
     public             DbTable<SessionRecord>                       Sessions      { get; }
-    protected override PasswordRequirements                         _Requirements { get; } = new();
 
 
     public LoggerDB( IConfiguration configuration, IOptions<DbOptions> options ) : base( configuration, options )

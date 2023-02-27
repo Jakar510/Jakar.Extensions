@@ -5,6 +5,10 @@
 [SuppressMessage( "ReSharper", "BaseObjectGetHashCodeCallInGetHashCode" )]
 public abstract class BaseCollections<T> : ObservableClass, IEquatable<T>, IComparable<T>, IComparable where T : BaseCollections<T>
 {
+    public static Equalizer<T> Equalizer => Equalizer<T>.Default;
+    public static Sorter<T>    Sorter    => Sorter<T>.Default;
+
+
     public sealed override bool Equals( object? other ) => ReferenceEquals( this, other ) || other is T file && Equals( file );
     public override int GetHashCode() => base.GetHashCode();
 
@@ -55,10 +59,6 @@ public abstract class BaseCollections<T> : ObservableClass, IEquatable<T>, IComp
 
 
 
-    public sealed class Equalizer : Equalizer<T> { }
-
-
-
     [Serializable]
     public class Items : List<T>
     {
@@ -85,8 +85,4 @@ public abstract class BaseCollections<T> : ObservableClass, IEquatable<T>, IComp
         public Set( int            capacity ) : base( capacity ) { }
         public Set( IEnumerable<T> items ) : base( items ) { }
     }
-
-
-
-    public sealed class Sorter : Sorter<T> { }
 }

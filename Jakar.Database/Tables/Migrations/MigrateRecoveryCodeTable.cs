@@ -13,7 +13,7 @@ public abstract class MigrateRecoveryCodeTable : Migration<RecoveryCodeRecord>
     {
         ICreateTableWithColumnSyntax table = base.CreateTable();
 
-        table.WithColumn( nameof(RecoveryCodeRecord.Value) )
+        table.WithColumn( nameof(RecoveryCodeRecord.Code) )
              .AsString( 10240 )
              .NotNullable();
 

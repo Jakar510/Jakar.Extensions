@@ -15,14 +15,8 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
         get => new(Environment.CurrentDirectory);
         set => Environment.CurrentDirectory = Path.GetFullPath( value.FullPath );
     }
-    public bool DoesNotExist => !Exists;
-    public bool Exists       => Info.Exists;
-
-    bool TempFile.ITempFile.IsTemporary
-    {
-        get => _isTemporary;
-        set => _isTemporary = value;
-    }
+    public static Equalizer<LocalDirectory> Equalizer => Equalizer<LocalDirectory>.Default;
+    public static Sorter<LocalDirectory>    Sorter    => Sorter<LocalDirectory>.Default;
 
 
     public DateTime CreationTimeUtc
@@ -30,24 +24,29 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
         get => Directory.GetCreationTimeUtc( FullPath );
         set => Directory.SetCreationTimeUtc( FullPath, value );
     }
+    public              bool          DoesNotExist => !Exists;
+    public              bool          Exists       => Info.Exists;
+    public              string        FullPath     { get; init; }
+    [JsonIgnore] public DirectoryInfo Info         => _info ??= new DirectoryInfo( FullPath );
 
+    bool TempFile.ITempFile.IsTemporary
+    {
+        get => _isTemporary;
+        set => _isTemporary = value;
+    }
     public DateTime LastAccessTimeUtc
     {
         get => Directory.GetLastAccessTimeUtc( FullPath );
         set => Directory.SetLastWriteTimeUtc( FullPath, value );
     }
-
     public DateTime LastWriteTimeUtc
     {
         get => Directory.GetLastWriteTimeUtc( FullPath );
         set => Directory.SetLastWriteTimeUtc( FullPath, value );
     }
-
-    [JsonIgnore] public DirectoryInfo   Info     => _info ??= new DirectoryInfo( FullPath );
-    [JsonIgnore] public LocalDirectory? Parent   => GetParent();
-    public              string          FullPath { get; init; }
-    public              string          Name     => Info.Name;
-    public              string          Root     => Directory.GetDirectoryRoot( FullPath );
+    public              string          Name   => Info.Name;
+    [JsonIgnore] public LocalDirectory? Parent => GetParent();
+    public              string          Root   => Directory.GetDirectoryRoot( FullPath );
 
 
     public LocalDirectory() => FullPath = string.Empty;
@@ -55,14 +54,21 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     public LocalDirectory( DirectoryInfo      path ) : this( path.FullName ) { }
     public LocalDirectory( string             path, params string[] subFolders ) : this( path.Combine( subFolders ) ) { }
     public LocalDirectory( string             path ) => FullPath = Path.GetFullPath( path );
+    public void Dispose()
+    {
+        Dispose( this.IsTempFile() );
+        GC.SuppressFinalize( this );
+    }
+    protected virtual void Dispose( bool remove )
+    {
+        if ( remove && Exists ) { Delete( true ); }
+    }
+    public async ValueTask DisposeAsync()
+    {
+        if ( !this.IsTempFile() ) { return; }
 
-
-    public static bool operator ==( LocalDirectory? left, LocalDirectory? right ) => Equalizer.Default.Equals( left, right );
-    public static bool operator >( LocalDirectory?  left, LocalDirectory? right ) => Sorter.Default.Compare( left, right ) > 0;
-    public static bool operator >=( LocalDirectory? left, LocalDirectory? right ) => Sorter.Default.Compare( left, right ) >= 0;
-    public static bool operator !=( LocalDirectory? left, LocalDirectory? right ) => !Equalizer.Default.Equals( left, right );
-    public static bool operator <( LocalDirectory?  left, LocalDirectory? right ) => Sorter.Default.Compare( left, right ) < 0;
-    public static bool operator <=( LocalDirectory? left, LocalDirectory? right ) => Sorter.Default.Compare( left, right ) <= 0;
+        await DeleteAllRecursivelyAsync();
+    }
 
 
     public static implicit operator Collection( LocalDirectory                     directory ) => new(directory.GetSubFolders());
@@ -116,51 +122,17 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
         return d.SetTemporary();
     }
 
+    private static LocalFile ConvertFile( FileInfo file ) => file;
+
+
     // public static implicit operator LocalDirectory( string             path ) => new(path);
     public static implicit operator LocalDirectory( DirectoryInfo      info ) => new(info);
     public static implicit operator LocalDirectory( ReadOnlySpan<char> info ) => new(info);
     public static implicit operator LocalDirectory( string             info ) => new(info);
-    private static LocalFile ConvertFile( FileInfo                     file ) => file;
     public static implicit operator Set( LocalDirectory                directory ) => new(directory.GetSubFolders());
     public static implicit operator LocalFile.Set( LocalDirectory      directory ) => new(directory.GetFiles());
     public static implicit operator Watcher( LocalDirectory            directory ) => new(directory);
     public static implicit operator LocalFile.Watcher( LocalDirectory  directory ) => new(new Watcher( directory ));
-    public override bool Equals( object?                               other ) => other is LocalDirectory directory && Equals( directory );
-
-
-    // ---------------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-    [Serializable]
-    public class Collection : ObservableCollection<LocalDirectory>
-    {
-        public Collection() : base() { }
-        public Collection( IEnumerable<LocalDirectory> items ) : base( items ) { }
-    }
-
-
-
-    [Serializable]
-    public class ConcurrentCollection : ConcurrentObservableCollection<LocalDirectory>
-    {
-        public ConcurrentCollection() : base() { }
-        public ConcurrentCollection( IEnumerable<LocalDirectory> items ) : base( items ) { }
-    }
-
-
-
-    [Serializable]
-    public class Deque : MultiDeque<LocalDirectory>
-    {
-        public Deque() : base() { }
-        public Deque( IEnumerable<LocalDirectory> items ) : base( items ) { }
-    }
-
-
-
-    public sealed class Equalizer : Equalizer<LocalDirectory> { }
-
 
 
     // ---------------------------------------------------------------------------------------------------------------------------------------------------
@@ -187,18 +159,6 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
                                                                                                      .Select( ConvertFile );
     public IEnumerable<LocalFile> GetFiles( string searchPattern, EnumerationOptions enumerationOptions ) => Info.EnumerateFiles( searchPattern, enumerationOptions )
                                                                                                                  .Select( ConvertFile );
-    public override int GetHashCode() => HashCode.Combine( FullPath, this.IsTempFile() );
-
-
-
-    [Serializable]
-    public class Items : List<LocalDirectory>
-    {
-        public Items() : base() { }
-        public Items( int                         capacity ) : base( capacity ) { }
-        public Items( IEnumerable<LocalDirectory> items ) : base( items ) { }
-    }
-
 
 
     /// <summary> Gets the <see cref="LocalDirectory"/> object of the directory in this <see cref="LocalDirectory"/> </summary>
@@ -236,30 +196,6 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     ///     <see cref="LocalFile"/>
     /// </returns>
     public LocalFile Join( string path ) => Info.Combine( path );
-
-
-
-    [Serializable]
-    public class Queue : MultiQueue<LocalDirectory>
-    {
-        public Queue() : base() { }
-        public Queue( IEnumerable<LocalDirectory> items ) : base( items ) { }
-    }
-
-
-
-    [Serializable]
-    public class Set : HashSet<LocalDirectory>
-    {
-        public Set() : base() { }
-        public Set( int                         capacity ) : base( capacity ) { }
-        public Set( IEnumerable<LocalDirectory> items ) : base( items ) { }
-    }
-
-
-
-    public sealed class Sorter : Sorter<LocalDirectory> { }
-
 
 
     /// <summary> Gets the path of the directory or file in this <see cref="LocalDirectory"/> </summary>
@@ -513,10 +449,6 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
             dir.Delete();
         }
     }
-    protected virtual void Dispose( bool remove )
-    {
-        if ( remove && Exists ) { Delete( true ); }
-    }
 
 
     /// <summary> Uses the <see cref="Encoding.Default"/> encoding to used for the file names </summary>
@@ -528,34 +460,6 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     /// <param name="compression"> Defaults to <see cref="CompressionLevel.Optimal"/> </param>
     /// <param name="encoding"> The encoding used for the file names </param>
     public void Zip( in LocalFile output, Encoding encoding, CompressionLevel compression = CompressionLevel.Optimal ) => ZipFile.CreateFromDirectory( FullPath, output.FullPath, compression, true, encoding );
-
-
-
-    [SuppressMessage( "ReSharper", "IntroduceOptionalParameters.Global" )]
-    public class Watcher : FileSystemWatcher
-    {
-        public LocalDirectory Directory { get; init; }
-
-
-        /// <summary> Uses the <see cref="CurrentDirectory"/> </summary>
-        public Watcher() : this( CurrentDirectory ) { }
-        public Watcher( LocalDirectory directory ) : this( directory, "*" ) { }
-        public Watcher( LocalDirectory directory, string searchFilter ) : this( directory, searchFilter, NotifyFilters.Size | NotifyFilters.FileName | NotifyFilters.CreationTime | NotifyFilters.LastWrite ) { }
-        public Watcher( LocalDirectory directory, string searchFilter, NotifyFilters filters ) : base( directory.FullPath, searchFilter )
-        {
-            Directory    = directory;
-            NotifyFilter = filters;
-        }
-    }
-
-
-
-    public async ValueTask DisposeAsync()
-    {
-        if ( !this.IsTempFile() ) { return; }
-
-        await DeleteAllRecursivelyAsync();
-    }
 
 
     public int CompareTo( object? other )
@@ -584,10 +488,92 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
 
         return this.IsTempFile() == other.IsTempFile() && FullPath == other.FullPath;
     }
+    public override bool Equals( object? other ) => other is LocalDirectory directory && Equals( directory );
+    public override int GetHashCode() => HashCode.Combine( FullPath, this.IsTempFile() );
 
-    public void Dispose()
+
+    public static bool operator ==( LocalDirectory? left, LocalDirectory? right ) => Equalizer.Equals( left, right );
+    public static bool operator >( LocalDirectory?  left, LocalDirectory? right ) => Sorter.Compare( left, right ) > 0;
+    public static bool operator >=( LocalDirectory? left, LocalDirectory? right ) => Sorter.Compare( left, right ) >= 0;
+    public static bool operator !=( LocalDirectory? left, LocalDirectory? right ) => !Equalizer.Equals( left, right );
+    public static bool operator <( LocalDirectory?  left, LocalDirectory? right ) => Sorter.Compare( left, right ) < 0;
+    public static bool operator <=( LocalDirectory? left, LocalDirectory? right ) => Sorter.Compare( left, right ) <= 0;
+
+
+    // ---------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+    [Serializable]
+    public class Collection : ObservableCollection<LocalDirectory>
     {
-        Dispose( this.IsTempFile() );
-        GC.SuppressFinalize( this );
+        public Collection() : base() { }
+        public Collection( IEnumerable<LocalDirectory> items ) : base( items ) { }
+    }
+
+
+
+    [Serializable]
+    public class ConcurrentCollection : ConcurrentObservableCollection<LocalDirectory>
+    {
+        public ConcurrentCollection() : base() { }
+        public ConcurrentCollection( IEnumerable<LocalDirectory> items ) : base( items ) { }
+    }
+
+
+
+    [Serializable]
+    public class Deque : MultiDeque<LocalDirectory>
+    {
+        public Deque() : base() { }
+        public Deque( IEnumerable<LocalDirectory> items ) : base( items ) { }
+    }
+
+
+
+    [Serializable]
+    public class Items : List<LocalDirectory>
+    {
+        public Items() : base() { }
+        public Items( int                         capacity ) : base( capacity ) { }
+        public Items( IEnumerable<LocalDirectory> items ) : base( items ) { }
+    }
+
+
+
+    [Serializable]
+    public class Queue : MultiQueue<LocalDirectory>
+    {
+        public Queue() : base() { }
+        public Queue( IEnumerable<LocalDirectory> items ) : base( items ) { }
+    }
+
+
+
+    [Serializable]
+    public class Set : HashSet<LocalDirectory>
+    {
+        public Set() : base() { }
+        public Set( int                         capacity ) : base( capacity ) { }
+        public Set( IEnumerable<LocalDirectory> items ) : base( items ) { }
+    }
+
+
+
+    [SuppressMessage( "ReSharper", "IntroduceOptionalParameters.Global" )]
+    public class Watcher : FileSystemWatcher
+    {
+        public LocalDirectory Directory { get; init; }
+
+
+        /// <summary> Uses the <see cref="CurrentDirectory"/> </summary>
+        public Watcher() : this( CurrentDirectory ) { }
+        public Watcher( LocalDirectory directory ) : this( directory, "*" ) { }
+        public Watcher( LocalDirectory directory, string searchFilter ) : this( directory, searchFilter, NotifyFilters.Size | NotifyFilters.FileName | NotifyFilters.CreationTime | NotifyFilters.LastWrite ) { }
+        public Watcher( LocalDirectory directory, string searchFilter, NotifyFilters filters ) : base( directory.FullPath, searchFilter )
+        {
+            Directory    = directory;
+            NotifyFilter = filters;
+        }
     }
 }

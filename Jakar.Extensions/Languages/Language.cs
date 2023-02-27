@@ -6,14 +6,18 @@ namespace Jakar.Extensions;
 [DebuggerDisplay( nameof(DisplayName) )]
 public sealed class Language : BaseClass, IComparable<Language>, IEquatable<Language>, IComparable
 {
-    private readonly CultureInfo        _culture;
-    public           bool               IsNeutralCulture { get; init; }
-    public           string             DisplayName      { get; init; }
-    public           string             EnglishName      { get; init; }
-    public           string             Name             { get; init; }
-    public           string             ThreeLetterISO   { get; init; }
-    public           string             TwoLetterISO     { get; init; }
-    public           SupportedLanguage? Version          { get; init; }
+    private readonly CultureInfo _culture;
+
+
+    public static Equalizer<Language> Equalizer        => Equalizer<Language>.Default;
+    public static Sorter<Language>    Sorter           => Sorter<Language>.Default;
+    public        string              DisplayName      { get; init; }
+    public        string              EnglishName      { get; init; }
+    public        bool                IsNeutralCulture { get; init; }
+    public        string              Name             { get; init; }
+    public        string              ThreeLetterISO   { get; init; }
+    public        string              TwoLetterISO     { get; init; }
+    public        SupportedLanguage?  Version          { get; init; }
 
 
     public Language( CultureInfo culture, in SupportedLanguage? version = default )
@@ -65,12 +69,12 @@ public sealed class Language : BaseClass, IComparable<Language>, IEquatable<Lang
     public override int GetHashCode() => HashCode.Combine( DisplayName, Name, Version );
 
 
-    public static bool operator ==( Language? left, Language? right ) => Equalizer.Default.Equals( left, right );
-    public static bool operator >( Language?  left, Language? right ) => Sorter.Default.Compare( left, right ) > 0;
-    public static bool operator >=( Language? left, Language? right ) => Sorter.Default.Compare( left, right ) >= 0;
-    public static bool operator !=( Language? left, Language? right ) => Equalizer.Default.Equals( left, right );
-    public static bool operator <( Language?  left, Language? right ) => Sorter.Default.Compare( left, right ) < 0;
-    public static bool operator <=( Language? left, Language? right ) => Sorter.Default.Compare( left, right ) <= 0;
+    public static bool operator ==( Language? left, Language? right ) => Equalizer.Equals( left, right );
+    public static bool operator >( Language?  left, Language? right ) => Sorter.Compare( left, right ) > 0;
+    public static bool operator >=( Language? left, Language? right ) => Sorter.Compare( left, right ) >= 0;
+    public static bool operator !=( Language? left, Language? right ) => Equalizer.Equals( left, right );
+    public static bool operator <( Language?  left, Language? right ) => Sorter.Compare( left, right ) < 0;
+    public static bool operator <=( Language? left, Language? right ) => Sorter.Compare( left, right ) <= 0;
 
 
 
@@ -83,21 +87,13 @@ public sealed class Language : BaseClass, IComparable<Language>, IEquatable<Lang
 
 
 
-    public sealed class Equalizer : Equalizer<Language> { }
-
-
-
     [Serializable]
     public class Items : List<Language>
     {
         public Items() : base() { }
         public Items( int                   capacity ) : base( capacity ) { }
-        public Items( IEnumerable<Language> items ) : base( items ) => Sort( Sorter.Default );
+        public Items( IEnumerable<Language> items ) : base( items ) => Sort( Sorter );
     }
-
-
-
-    public sealed class Sorter : Sorter<Language> { }
 
 
 

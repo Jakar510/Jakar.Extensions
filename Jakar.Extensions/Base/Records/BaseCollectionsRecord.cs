@@ -6,6 +6,10 @@ namespace Jakar.Extensions;
 public abstract record BaseCollectionsRecord<T, TID> : ObservableRecord<T, TID> where T : BaseCollectionsRecord<T, TID>
                                                                                 where TID : struct, IComparable<TID>, IEquatable<TID>
 {
+    public static Equalizer<T> Equalizer => Equalizer<T>.Default;
+    public static Sorter<T>    Sorter    => Sorter<T>.Default;
+
+
     protected BaseCollectionsRecord() : base() { }
     protected BaseCollectionsRecord( TID id ) : base( id ) { }
 
@@ -64,14 +68,6 @@ public abstract record BaseCollectionsRecord<T, TID> : ObservableRecord<T, TID> 
         public Set( int            capacity ) : base( capacity ) { }
         public Set( IEnumerable<T> items ) : base( items ) { }
     }
-
-
-
-    public sealed class Equalizer : Equalizer<T> { }
-
-
-
-    public sealed class Sorter : Sorter<T> { }
 }
 
 

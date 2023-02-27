@@ -9,40 +9,59 @@ namespace Jakar.Database;
 public sealed record RecoveryCodeRecord : TableRecord<RecoveryCodeRecord>
 {
     private static readonly PasswordHasher<RecoveryCodeRecord> _hasher = new();
-    private                 string                             _value  = string.Empty;
+    private                 string                             _code   = string.Empty;
 
 
     [MaxLength( 10240 )]
-    public string Value
+    public string Code
     {
-        get => _value;
-        set => SetProperty( ref _value, value );
+        get => _code;
+        set => SetProperty( ref _code, value );
     }
 
 
     public RecoveryCodeRecord() { }
-    private RecoveryCodeRecord( string value, UserRecord caller ) : base( Guid.NewGuid(), caller ) => Value = _hasher.HashPassword( this, value );
+    private RecoveryCodeRecord( string code, UserRecord caller ) : base( Guid.NewGuid(), caller ) => Code = _hasher.HashPassword( this, code );
 
 
-    public static (RecoveryCodeRecord Record, string Code) Create( UserRecord user )
+    public static IReadOnlyDictionary<string, RecoveryCodeRecord> Create( UserRecord user, IEnumerable<string> recoveryCodes )
     {
-        string value = Guid.NewGuid()
-                           .ToBase64();
+        var codes = new Dictionary<string, RecoveryCodeRecord>( StringComparer.Ordinal );
 
-        return (Create( user, value ), value);
+        foreach ( string recoveryCode in recoveryCodes )
+        {
+            (string code, RecoveryCodeRecord record) = Create( user, recoveryCode );
+            codes[code]                              = record;
+        }
+
+        return codes;
     }
-    public static RecoveryCodeRecord Create( UserRecord user, string value ) => new(value, user);
-
-
-    public bool IsValid( string value )
+    public static IReadOnlyDictionary<string, RecoveryCodeRecord> Create( UserRecord user, int count )
     {
-        switch ( _hasher.VerifyHashedPassword( this, Value, value ) )
+        var codes = new Dictionary<string, RecoveryCodeRecord>( count, StringComparer.Ordinal );
+
+        for ( int i = 0; i < count; i++ )
+        {
+            (string code, RecoveryCodeRecord record) = Create( user );
+            codes[code]                              = record;
+        }
+
+        return codes;
+    }
+    public static (string Code, RecoveryCodeRecord Record) Create( UserRecord user ) => Create( user,              Guid.NewGuid() );
+    public static (string Code, RecoveryCodeRecord Record) Create( UserRecord user, Guid   code ) => Create( user, code.ToBase64() );
+    public static (string Code, RecoveryCodeRecord Record) Create( UserRecord user, string code ) => (code, new RecoveryCodeRecord( code, user ));
+
+
+    public bool IsValid( string code )
+    {
+        switch ( _hasher.VerifyHashedPassword( this, Code, code ) )
         {
             case PasswordVerificationResult.Failed:  return false;
             case PasswordVerificationResult.Success: return true;
 
             case PasswordVerificationResult.SuccessRehashNeeded:
-                Value = _hasher.HashPassword( this, value );
+                Code = _hasher.HashPassword( this, code );
                 return true;
 
             default: throw new ArgumentOutOfRangeException();

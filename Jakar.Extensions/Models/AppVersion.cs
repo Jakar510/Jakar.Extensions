@@ -248,7 +248,7 @@ public sealed class AppVersion : IComparable,
 
 
     public static AppVersion FromAssembly<T>() => FromAssembly( typeof(T).Assembly );
-    public static AppVersion FromAssembly( Type type ) => FromAssembly( type.Assembly );
+    public static AppVersion FromAssembly( Type         type ) => FromAssembly( type.Assembly );
     public static AppVersion FromAssembly( Assembly     assembly ) => FromAssembly( assembly.GetName() );
     public static AppVersion FromAssembly( AssemblyName assembly ) => assembly.Version ?? throw new NullReferenceException( nameof(assembly.Version) );
 
@@ -318,7 +318,9 @@ public sealed class AppVersion : IComparable,
 
 
     /// <summary>
-    ///     If the <see cref="Scheme"/> is any of [ <see cref="Format.Singular"/> , <see cref="Format.DetailedRevisions"/> , <see cref="Format.Complete"/> ], will throw <see cref="InvalidOperationException"/>
+    ///     If the <see cref="Scheme"/> is any of [ <see cref="Format.Singular"/> , <see cref="Format.DetailedRevisions"/> , <see cref="Format.Complete"/> ], will throw
+    ///     <see
+    ///         cref="InvalidOperationException"/>
     /// </summary>
     /// <returns> </returns>
     /// <exception cref="InvalidOperationException"> </exception>
@@ -359,12 +361,12 @@ public sealed class AppVersion : IComparable,
     // public static bool operator >=( AppVersion  left, AppVersion  right ) => Sorter.Instance.Compare( left, right ) >= 0;
     // public static bool operator <( AppVersion   left, AppVersion  right ) => Sorter.Instance.Compare( left, right ) < 0;
     // public static bool operator <=( AppVersion  left, AppVersion  right ) => Sorter.Instance.Compare( left, right ) <= 0;
-    public static bool operator ==( AppVersion? left, AppVersion? right ) => Equalizer.Default.Equals( left, right );
-    public static bool operator !=( AppVersion? left, AppVersion? right ) => !Equalizer.Default.Equals( left, right );
-    public static bool operator >( AppVersion?  left, AppVersion? right ) => Sorter.Default.Compare( left, right ) > 0;
-    public static bool operator >=( AppVersion? left, AppVersion? right ) => Sorter.Default.Compare( left, right ) >= 0;
-    public static bool operator <( AppVersion?  left, AppVersion? right ) => Sorter.Default.Compare( left, right ) < 0;
-    public static bool operator <=( AppVersion? left, AppVersion? right ) => Sorter.Default.Compare( left, right ) <= 0;
+    public static bool operator ==( AppVersion? left, AppVersion? right ) => Equalizer.Equals( left, right );
+    public static bool operator !=( AppVersion? left, AppVersion? right ) => !Equalizer.Equals( left, right );
+    public static bool operator >( AppVersion?  left, AppVersion? right ) => Sorter.Compare( left, right ) > 0;
+    public static bool operator >=( AppVersion? left, AppVersion? right ) => Sorter.Compare( left, right ) >= 0;
+    public static bool operator <( AppVersion?  left, AppVersion? right ) => Sorter.Compare( left, right ) < 0;
+    public static bool operator <=( AppVersion? left, AppVersion? right ) => Sorter.Compare( left, right ) <= 0;
 
 
     private void AssertFormat( AppVersion other )
@@ -514,13 +516,7 @@ public sealed class AppVersion : IComparable,
 
 
 
-    public sealed class Equalizer : Equalizer<AppVersion> {}
-
-
-
-    public sealed class Sorter : Sorter<AppVersion> {}
-
-
-
-    public sealed class FuzzyEqualityComparer : FuzzyEqualizer<AppVersion> {}
+    public static Equalizer<AppVersion>      Equalizer             => Equalizer<AppVersion>.Default;
+    public static Sorter<AppVersion>         Sorter                => Sorter<AppVersion>.Default;
+    public static FuzzyEqualizer<AppVersion> FuzzyEqualityComparer => FuzzyEqualizer<AppVersion>.Default;
 }

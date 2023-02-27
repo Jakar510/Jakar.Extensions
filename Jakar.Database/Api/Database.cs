@@ -15,27 +15,27 @@ public abstract partial class Database : Randoms, IConnectableDb, IAsyncDisposab
     private            Uri                             _domain      = new("https://localhost:443");
 
 
-    public static      string                       Schema            { get; set; } = "dbo";
-    public virtual     AppVersion                   Version           => Options.Version ?? throw new NullReferenceException( nameof(DbOptions.Version) );
-    public virtual     DbInstance                   Instance          => Options.DbType;
-    public             DbOptions                    Options           { get; }
-    public             DbTable<GroupRecord>         Groups            { get; }
-    public             DbTable<RecoveryCodeRecord>  RecoveryCodes     { get; }
-    public             DbTable<RoleRecord>          Roles             { get; }
-    public             DbTable<UserGroupRecord>     UserGroups        { get; }
-    public             DbTable<UserLoginInfoRecord> UserLogins        { get; }
-    public             DbTable<UserRecord>          Users             { get; }
-    public             DbTable<UserRoleRecord>      UserRoles         { get; }
-    public             IConfiguration               Configuration     { get; }
-    protected abstract PasswordRequirements         _Requirements     { get; }
-    protected internal PasswordValidator            PasswordValidator => new(_Requirements);
-    public virtual     string                       ConnectionString  => Configuration.ConnectionString();
-    string IConnectableDb.                          CurrentSchema     => Schema;
+    public static  string         CurrentSchema    { get; set; } = "dbo";
+    public         IConfiguration Configuration    { get; }
+    public virtual string         ConnectionString => Configuration.ConnectionString();
+    string IConnectableDb.        CurrentSchema    => CurrentSchema;
     public Uri Domain
     {
         get => _domain;
         set => SetProperty( ref _domain, value );
     }
+    public             DbTable<GroupRecord>            Groups            { get; }
+    public             DbInstance                      Instance          => Options.DbType;
+    public             DbOptions                       Options           { get; }
+    protected internal PasswordValidator               PasswordValidator => new(Options.PasswordRequirements);
+    public             DbTable<RecoveryCodeRecord>     RecoveryCodes     { get; }
+    public             DbTable<RoleRecord>             Roles             { get; }
+    public             DbTable<UserGroupRecord>        UserGroups        { get; }
+    public             DbTable<UserLoginInfoRecord>    UserLogins        { get; }
+    public             DbTable<UserRecoveryCodeRecord> UserRecoveryCodes { get; }
+    public             DbTable<UserRoleRecord>         UserRoles         { get; }
+    public             DbTable<UserRecord>             Users             { get; }
+    public             AppVersion                      Version           => Options.Version ?? throw new NullReferenceException( nameof(DbOptions.Version) );
 
 
     static Database()
@@ -52,23 +52,23 @@ public abstract partial class Database : Randoms, IConnectableDb, IAsyncDisposab
     }
     protected Database( IConfiguration configuration, IOptions<DbOptions> options ) : base()
     {
-        Configuration = configuration;
-        Options       = options.Value;
-        Users         = Create<UserRecord>();
-        Roles         = Create<RoleRecord>();
-        UserRoles     = Create<UserRoleRecord>();
-        UserGroups    = Create<UserGroupRecord>();
-        Groups        = Create<GroupRecord>();
-        RecoveryCodes = Create<RecoveryCodeRecord>();
-        UserLogins    = Create<UserLoginInfoRecord>();
+        Configuration     = configuration;
+        Options           = options.Value;
+        Users             = Create<UserRecord>();
+        Roles             = Create<RoleRecord>();
+        UserRoles         = Create<UserRoleRecord>();
+        UserGroups        = Create<UserGroupRecord>();
+        Groups            = Create<GroupRecord>();
+        RecoveryCodes     = Create<RecoveryCodeRecord>();
+        UserLogins        = Create<UserLoginInfoRecord>();
+        UserRecoveryCodes = Create<UserRecoveryCodeRecord>();
 
-
-        Schema = Instance switch
-                 {
-                     DbInstance.MsSql    => "dbo",
-                     DbInstance.Postgres => "public",
-                     _                   => throw new OutOfRangeException( nameof(Instance), Instance )
-                 };
+        CurrentSchema = Instance switch
+                        {
+                            DbInstance.MsSql    => "dbo",
+                            DbInstance.Postgres => "public",
+                            _                   => throw new OutOfRangeException( nameof(Instance), Instance )
+                        };
     }
 
 
@@ -79,9 +79,6 @@ public abstract partial class Database : Randoms, IConnectableDb, IAsyncDisposab
     }
 
 
-    protected internal ValueTask<IReadOnlyCollection<RecoveryCodeRecord>> Codes( UserRecord user, CancellationToken token ) => this.TryCall( Codes, user, token );
-    protected internal async ValueTask<IReadOnlyCollection<RecoveryCodeRecord>> Codes( DbConnection connection, DbTransaction transaction, UserRecord user, CancellationToken token ) =>
-        await RecoveryCodes.Where( connection, transaction, nameof(RecoveryCodeRecord.CreatedBy), user.OwnerUserID, token );
     protected virtual DbTable<TRecord> Create<TRecord>() where TRecord : TableRecord<TRecord>
     {
         var table = new DbTable<TRecord>( this );
@@ -235,60 +232,6 @@ public abstract partial class Database : Randoms, IConnectableDb, IAsyncDisposab
         return loginResult.GetResult( controller, out ActionResult? actionResult, out UserRecord? user )
                    ? actionResult
                    : await GetToken( connection, transaction, user, token );
-    }
-
-    #endregion
-
-
-
-    #region Recovery Codes
-
-    public ValueTask<bool> RedeemCode( UserRecord user, string code, CancellationToken token ) => this.TryCall( RedeemCode, user, code, token );
-    public async ValueTask<bool> RedeemCode( DbConnection connection, DbTransaction transaction, UserRecord user, string code, CancellationToken token )
-    {
-        IReadOnlyCollection<RecoveryCodeRecord> records = await Codes( connection, transaction, user, token );
-
-        foreach ( RecoveryCodeRecord record in records )
-        {
-            if ( !record.IsValid( code ) ) { continue; }
-
-            await RecoveryCodes.Delete( connection, transaction, record, token );
-            return true;
-        }
-
-        return false;
-    }
-
-
-    public ValueTask<string[]> ReplaceCodes( UserRecord user, int count = 10, CancellationToken token = default ) => this.TryCall( ReplaceCodes, user, count, token );
-    public async ValueTask<string[]> ReplaceCodes( DbConnection connection, DbTransaction transaction, UserRecord user, int count = 10, CancellationToken token = default )
-    {
-        await RecoveryCodes.Delete( connection, transaction, await Codes( connection, transaction, user, token ), token );
-
-
-        string[] codes = new string[count];
-
-        for ( int i = 0; i < count; i++ )
-        {
-            (RecoveryCodeRecord record, string code) = RecoveryCodeRecord.Create( user );
-            codes[i]                                 = code;
-            await RecoveryCodes.Insert( connection, transaction, record, token );
-        }
-
-        return codes;
-    }
-
-
-    public ValueTask ReplaceCodes( UserRecord user, IEnumerable<string> recoveryCodes, CancellationToken token = default ) => this.TryCall( ReplaceCodes, user, recoveryCodes, token );
-    public async ValueTask ReplaceCodes( DbConnection connection, DbTransaction transaction, UserRecord user, IEnumerable<string> recoveryCodes, CancellationToken token = default )
-    {
-        await RecoveryCodes.Delete( connection, transaction, await Codes( connection, transaction, user, token ), token );
-
-        foreach ( string recoveryCode in recoveryCodes )
-        {
-            var record = RecoveryCodeRecord.Create( user, recoveryCode );
-            await RecoveryCodes.Insert( connection, transaction, record, token );
-        }
     }
 
     #endregion
