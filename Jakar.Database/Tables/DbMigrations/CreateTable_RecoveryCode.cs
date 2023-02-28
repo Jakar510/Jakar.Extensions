@@ -1,11 +1,7 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 01/29/2023  1:51 PM
 
-using Jakar.Database.Migrations;
-
-
-
-namespace Jakar.Database.Tables.Migrations;
+namespace Jakar.Database.DbMigrations;
 
 
 [Migration( 6 )]

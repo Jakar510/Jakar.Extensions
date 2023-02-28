@@ -1,7 +1,7 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 01/29/2023  1:49 PM
 
-namespace Jakar.Database.Migrations;
+namespace Jakar.Database.DbMigrations;
 
 
 public abstract class MigrateRecoveryCodeTable : Migration<RecoveryCodeRecord>

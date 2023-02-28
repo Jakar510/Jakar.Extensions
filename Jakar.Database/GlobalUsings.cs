@@ -50,6 +50,7 @@ global using Microsoft.Extensions.Options;
 global using Sigil;
 global using Jakar.Database;
 global using Jakar.Database.Caches;
+global using Jakar.Database.DbMigrations;
 global using Jakar.Extensions;
 global using Jakar.Extensions.Hosting;
 global using JetBrains.Annotations;

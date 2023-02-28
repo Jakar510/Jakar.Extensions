@@ -1,4 +1,8 @@
 ﻿#nullable enable
+using System.Text;
+
+
+
 namespace Jakar.Extensions;
 
 
@@ -80,21 +84,28 @@ public static class StringExtensions
     }
 
 
-    public static byte[] ToByteArray( this string s, Encoding? encoding = default ) => (encoding ?? Encoding.Default).GetBytes( s );
+    public static byte[] ToByteArray( this                    string value, Encoding? encoding = default ) => (encoding ?? Encoding.Default).GetBytes( value );
+    public static unsafe ReadOnlySpan<byte> AsSpanBytes( this string value, Encoding  encoding ) => AsSpanBytes( value.AsSpan(), encoding );
+    public static unsafe ReadOnlySpan<byte> AsSpanBytes( this ReadOnlySpan<char> value, Encoding encoding )
+    {
+        Span<byte> span = stackalloc byte[encoding.GetByteCount( value )];
+        Encoding.Unicode.GetBytes( value, span );
+        return MemoryMarshal.CreateReadOnlySpan( ref span.GetPinnableReference(), span.Length );
+    }
 
 
-    public static IEnumerable<string> SplitAndTrimLines( this string text, char separator = '\n' ) => text.Split( separator )
-                                                                                                          .Select( line => line.Trim() );
-    public static IEnumerable<string> SplitAndTrimLines( this string text, string separator ) => text.Split( separator )
-                                                                                                     .Select( line => line.Trim() );
+    public static IEnumerable<string> SplitAndTrimLines( this string value, char separator = '\n' ) => value.Split( separator )
+                                                                                                            .Select( line => line.Trim() );
+    public static IEnumerable<string> SplitAndTrimLines( this string value, string separator ) => value.Split( separator )
+                                                                                                       .Select( line => line.Trim() );
 
 
-    public static IEnumerable<string> SplitLines( this string text, char   separator = '\n' ) => text.Split( separator );
-    public static IEnumerable<string> SplitLines( this string text, string separator ) => text.Split( separator );
-    public static Memory<byte> ToMemory( this string s, Encoding? encoding = default ) => s.ToByteArray( encoding ?? Encoding.Default )
-                                                                                           .AsMemory();
+    public static IEnumerable<string> SplitLines( this string value, char   separator = '\n' ) => value.Split( separator );
+    public static IEnumerable<string> SplitLines( this string value, string separator ) => value.Split( separator );
+    public static Memory<byte> ToMemory( this string value, Encoding? encoding = default ) => value.ToByteArray( encoding ?? Encoding.Default )
+                                                                                                   .AsMemory();
     public static object ConvertTo( this                      string value, Type      target ) => Convert.ChangeType( value, target );
-    public static ReadOnlyMemory<byte> ToReadOnlyMemory( this string s,     Encoding? encoding = default ) => s.ToMemory( encoding ?? Encoding.Default );
+    public static ReadOnlyMemory<byte> ToReadOnlyMemory( this string value, Encoding? encoding = default ) => value.ToMemory( encoding ?? Encoding.Default );
     public static unsafe SecureString ToSecureString( this string value, bool makeReadonly = true )
     {
         fixed (char* token = value)
@@ -149,11 +160,11 @@ public static class StringExtensions
     public static SpanSplitEnumerator<T> SplitOn<T>( this ReadOnlySpan<T> span, ReadOnlySpan<T> separators ) where T : unmanaged, IEquatable<T> => new(span, separators);
 
 
-    public static string ConvertToString( this byte[] s, Encoding? encoding = default ) => (encoding ?? Encoding.Default).GetString( s );
-    public static string ConvertToString( this Memory<byte> s, Encoding? encoding = default ) => s.ToArray()
-                                                                                                  .ConvertToString( encoding ?? Encoding.Default );
-    public static string ConvertToString( this ReadOnlyMemory<byte> s, Encoding? encoding = default ) => s.ToArray()
+    public static string ConvertToString( this byte[] value, Encoding? encoding = default ) => (encoding ?? Encoding.Default).GetString( value );
+    public static string ConvertToString( this Memory<byte> value, Encoding? encoding = default ) => value.ToArray()
                                                                                                           .ConvertToString( encoding ?? Encoding.Default );
+    public static string ConvertToString( this ReadOnlyMemory<byte> value, Encoding? encoding = default ) => value.ToArray()
+                                                                                                                  .ConvertToString( encoding ?? Encoding.Default );
     public static string GetStringValue( this SecureString value )
     {
         IntPtr valuePtr = IntPtr.Zero;
@@ -194,25 +205,25 @@ public static class StringExtensions
 
     public static string ReplaceAll( this string source, string old, string newString ) => source.Replace( old, newString, StringComparison.Ordinal );
     public static string ReplaceAll( this string source, char   old, char   newString ) => source.Replace( old, newString );
-    public static string ToScreamingCase( this string text ) => text.ToSnakeCase()
-                                                                    .ToUpper()
-                                                                    .Replace( "__", "_" );
+    public static string ToScreamingCase( this string value ) => value.ToSnakeCase()
+                                                                      .ToUpper()
+                                                                      .Replace( "__", "_" );
 
 
     /// <summary> copied from <seealso href="https://stackoverflow.com/a/67332992/9530917"/> </summary>
-    public static string ToSnakeCase( this string text ) => text.ToSnakeCase( CultureInfo.InvariantCulture );
+    public static string ToSnakeCase( this string value ) => value.ToSnakeCase( CultureInfo.InvariantCulture );
     /// <summary> copied from <seealso href="https://stackoverflow.com/a/67332992/9530917"/> </summary>
-    public static string ToSnakeCase( this string text, CultureInfo cultureInfo )
+    public static string ToSnakeCase( this string value, CultureInfo cultureInfo )
     {
-        if ( string.IsNullOrWhiteSpace( text ) ) { return text; }
+        if ( string.IsNullOrWhiteSpace( value ) ) { return value; }
 
 
-        var builder          = new StringBuilder( text.Length + Math.Max( 2, text.Length / 5 ) );
+        var              builder          = new StringBuilder( value.Length + Math.Max( 2, value.Length / 5 ) );
         UnicodeCategory? previousCategory = default;
 
-        for ( int currentIndex = 0; currentIndex < text.Length; currentIndex++ )
+        for ( int currentIndex = 0; currentIndex < value.Length; currentIndex++ )
         {
-            char currentChar = text[currentIndex];
+            char currentChar = value[currentIndex];
 
             switch ( currentChar )
             {
@@ -235,7 +246,7 @@ public static class StringExtensions
                 case UnicodeCategory.UppercaseLetter:
                 case UnicodeCategory.TitlecaseLetter:
                     if ( previousCategory is UnicodeCategory.SpaceSeparator or UnicodeCategory.LowercaseLetter || previousCategory is not UnicodeCategory.DecimalDigitNumber && previousCategory is not null && currentIndex > 0 &&
-                         currentIndex + 1 < text.Length && char.IsLower( text[currentIndex + 1] ) ) { builder.Append( '_' ); }
+                         currentIndex + 1 < value.Length && char.IsLower( value[currentIndex + 1] ) ) { builder.Append( '_' ); }
 
                     currentChar = char.ToLower( currentChar, cultureInfo );
                     break;

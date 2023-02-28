@@ -11,14 +11,18 @@ namespace Jakar.Database;
 [SuppressMessage( "ReSharper", "SuggestBaseTypeForParameter" )]
 public abstract partial class Database : Randoms, IConnectableDb, IAsyncDisposable, IHealthCheck
 {
-    protected readonly ConcurrentBag<IAsyncDisposable> _disposables = new();
-    private            Uri                             _domain      = new("https://localhost:443");
+    protected readonly ConcurrentBag<IAsyncDisposable> _disposables   = new();
+    private            Uri                             _domain        = new("https://localhost:443");
+    private            string                          _currentSchema = string.Empty;
 
 
-    public static  string         CurrentSchema    { get; set; } = "dbo";
+    public string CurrentSchema
+    {
+        get => _currentSchema;
+        protected set => SetProperty( ref _currentSchema, value );
+    }
     public         IConfiguration Configuration    { get; }
     public virtual string         ConnectionString => Configuration.ConnectionString();
-    string IConnectableDb.        CurrentSchema    => CurrentSchema;
     public Uri Domain
     {
         get => _domain;
@@ -35,7 +39,7 @@ public abstract partial class Database : Randoms, IConnectableDb, IAsyncDisposab
     public             DbTable<UserRecoveryCodeRecord> UserRecoveryCodes { get; }
     public             DbTable<UserRoleRecord>         UserRoles         { get; }
     public             DbTable<UserRecord>             Users             { get; }
-    public             AppVersion                      Version           => Options.Version ?? throw new NullReferenceException( nameof(DbOptions.Version) );
+    public             AppVersion                      Version           => Options.Version;
 
 
     static Database()

@@ -1,7 +1,7 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 01/30/2023  9:42 PM
 
-namespace Jakar.Database.Migrations;
+namespace Jakar.Database.DbMigrations;
 
 
 public abstract class MigrateUserLoginInfoTable : Migration<UserLoginInfoRecord>

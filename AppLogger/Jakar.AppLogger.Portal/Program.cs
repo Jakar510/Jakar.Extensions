@@ -1,6 +1,10 @@
+using FluentMigrator.Infrastructure;
+using FluentMigrator;
+using System;
 using FluentMigrator.Runner;
+using FluentMigrator.Runner.Initialization;
 using FluentMigrator.Runner.Logging;
-using Jakar.Database.Migrations;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -157,6 +161,14 @@ builder.AddFluentMigrator( configure =>
 
                                return configure;
                            } );
+
+builder.AddTransient<IMigrationContext>( provider =>
+                                         {
+                                             var     querySchema              = provider.GetRequiredService<IQuerySchema>();
+                                             var     connectionStringAccessor = provider.GetRequiredService<IConnectionStringAccessor>();
+                                             string? connectionString         = connectionStringAccessor.ConnectionString;
+                                             return new MigrationContext( querySchema, provider, provider.GetRequiredService<Database>(), connectionString );
+                                         } );
 
 
 // builder.Services.AddHsts(options =>

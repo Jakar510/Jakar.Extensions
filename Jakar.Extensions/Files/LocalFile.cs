@@ -858,8 +858,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     async ValueTask<ReadOnlyMemory<byte>> IAsyncReadHandler.AsMemory( CancellationToken token )
     {
         await using FileStream file   = OpenRead();
-        await using var        stream = new MemoryStream();
-
+        await using var        stream = new MemoryStream( (int)file.Length );
         await file.CopyToAsync( stream, token );
 
         ReadOnlyMemory<byte> results = stream.GetBuffer();
@@ -898,13 +897,6 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
         return stream.ReadToEnd();
     }
 
-    ReadOnlySpan<char> IReadHandler.AsSpan()
-    {
-        using var          stream = new StreamReader( OpenRead(), FileEncoding );
-        ReadOnlySpan<char> result = stream.ReadToEnd();
-        return result;
-    }
-
     byte[] IReadHandler.AsBytes()
     {
         using FileStream file   = OpenRead();
@@ -915,11 +907,18 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
 
     ReadOnlyMemory<byte> IReadHandler.AsMemory()
     {
+        IReadHandler handler = this;
+        return handler.AsMemory();
+    }
+    ReadOnlySpan<byte> IReadHandler.AsSpan()
+    {
         using FileStream file   = OpenRead();
-        using var        stream = new MemoryStream();
-        file.CopyTo( stream );
-        ReadOnlyMemory<byte> results = stream.GetBuffer();
-        return results;
+        int              length = (int)file.Length;
+        Span<byte>       span   = stackalloc byte[length];
+        length = file.Read( span );
+
+        span = span[..length];
+        return MemoryMarshal.CreateReadOnlySpan( ref span.GetPinnableReference(), span.Length );
     }
 
 
@@ -1055,7 +1054,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
         /// <returns>
         ///     <see cref="ReadOnlySpan{byte}"/>
         /// </returns>
-        ReadOnlySpan<char> AsSpan();
+        ReadOnlySpan<byte> AsSpan();
 
         /// <summary> Reads the contents of the file as a <see cref="string"/> . </summary>
         /// <exception cref="NullReferenceException"> if FullPath is null or empty </exception>

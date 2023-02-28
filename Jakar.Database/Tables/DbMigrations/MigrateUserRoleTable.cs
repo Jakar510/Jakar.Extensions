@@ -1,7 +1,7 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 10/11/2022  12:10 AM
 
-namespace Jakar.Database.Migrations;
+namespace Jakar.Database.DbMigrations;
 
 
 public abstract class MigrateUserRoleTable : Migration<UserRoleRecord>

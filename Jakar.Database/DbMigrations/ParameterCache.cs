@@ -1,4 +1,4 @@
-﻿namespace Jakar.Database.Migrations;
+﻿namespace Jakar.Database.DbMigrations;
 
 
 public static class PropertyCache

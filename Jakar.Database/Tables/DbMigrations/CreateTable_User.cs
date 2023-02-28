@@ -1,8 +1,4 @@
-﻿using Jakar.Database.Migrations;
-
-
-
-namespace Jakar.Database.Tables.Migrations;
+﻿namespace Jakar.Database.DbMigrations;
 
 
 [Migration( 1 )]

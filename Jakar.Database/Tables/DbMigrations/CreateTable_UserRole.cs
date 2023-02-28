@@ -1,11 +1,7 @@
 ﻿// Jakar.AppLogger :: Jakar.AppLogger.Portal
 // 10/26/2022  11:26 AM
 
-using Jakar.Database.Migrations;
-
-
-
-namespace Jakar.Database.Tables.Migrations;
+namespace Jakar.Database.DbMigrations;
 
 
 [Migration( 3 )]

@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Database.FluentMigrations
 // 10/07/2022  11:04 PM
 
-using Jakar.Database.Migrations;
-
-
-
 namespace Jakar.Database.Resx;
 
 

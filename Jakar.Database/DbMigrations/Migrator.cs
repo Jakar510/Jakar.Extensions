@@ -2,7 +2,7 @@
 
 
 
-namespace Jakar.Database.Migrations;
+namespace Jakar.Database.DbMigrations;
 
 
 /// <summary>

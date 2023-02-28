@@ -1,7 +1,7 @@
 ﻿// Jakar.AppLogger :: Jakar.Database
 // 10/26/2022  11:03 AM
 
-namespace Jakar.Database.Migrations;
+namespace Jakar.Database.DbMigrations;
 
 
 public abstract class MigrateGroupTable : Migration<GroupRecord>

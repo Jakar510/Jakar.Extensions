@@ -1,7 +1,7 @@
 ﻿// TrueLogic :: TrueLogic.Common.Hosting
 // 08/02/2022  3:20 PM
 
-namespace Jakar.Database.Migrations;
+namespace Jakar.Database.DbMigrations;
 
 
 /// <summary>
@@ -11,11 +11,30 @@ namespace Jakar.Database.Migrations;
 /// </summary>
 public abstract class Migration<TRecord> : Migration where TRecord : TableRecord<TRecord>
 {
-    public virtual string CurrentScheme => Database.CurrentSchema;
-    public         string TableName     { get; } = typeof(TRecord).GetTableName();
+    private        Database? _dbContext;
+    public virtual string    CurrentScheme => _dbContext?.CurrentSchema ?? throw new NullReferenceException( nameof(_dbContext) );
+    public         string    TableName     { get; } = typeof(TRecord).GetTableName();
 
 
     protected Migration() : base() { }
+
+
+    public override void GetUpExpressions( IMigrationContext context )
+    {
+    #pragma warning disable CS0618
+        _dbContext = context.ApplicationContext as Database;
+    #pragma warning restore CS0618
+
+        base.GetUpExpressions( context );
+    }
+    public override void GetDownExpressions( IMigrationContext context )
+    {
+    #pragma warning disable CS0618
+        _dbContext = context.ApplicationContext as Database;
+    #pragma warning restore CS0618
+
+        base.GetDownExpressions( context );
+    }
 
 
     protected IAlterTableAddColumnOrAlterColumnOrSchemaOrDescriptionSyntax AlterTable() => Alter.Table( TableName );

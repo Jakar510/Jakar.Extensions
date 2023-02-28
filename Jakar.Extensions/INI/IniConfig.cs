@@ -6,8 +6,8 @@ public sealed partial class IniConfig : ConcurrentDictionary<string, IniConfig.S
                                     #if NET6_0_OR_GREATER
                                         ,
                                         ISpanFormattable
-#endif
-#if NET7_0_OR_GREATER
+                                    #endif
+                                    #if NET7_0_OR_GREATER
                                         ,
                                         ISpanParsable<IniConfig>
 #endif
@@ -46,8 +46,8 @@ public sealed partial class IniConfig : ConcurrentDictionary<string, IniConfig.S
 
     public static IniConfig ReadFromFile( LocalFile file, IFormatProvider? provider = default )
     {
-        ReadOnlySpan<char> content = file.Read()
-                                         .AsSpan();
+        string content = file.Read()
+                             .AsString();
 
         return Parse( content, provider );
     }

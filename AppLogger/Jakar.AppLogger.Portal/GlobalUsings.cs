@@ -16,6 +16,7 @@ global using Jakar.AppLogger.Portal.Data;
 global using Jakar.AppLogger.Portal.Data.Tables;
 global using Jakar.AppLogger.Portal.Shared;
 global using Jakar.Database;
+global using Jakar.Database.DbMigrations;
 global using Jakar.Extensions;
 global using Jakar.Extensions.Blazor;
 global using Jakar.Extensions.Hosting;

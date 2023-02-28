@@ -1,7 +1,7 @@
 ﻿// Jakar.Extensions :: Jakar.Database.FluentMigrations
 // 09/30/2022  9:55 PM
 
-namespace Jakar.Database.Migrations;
+namespace Jakar.Database.DbMigrations;
 
 
 public abstract class MigrateUserTable : Migration<UserRecord>
