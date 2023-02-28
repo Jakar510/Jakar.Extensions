@@ -12,7 +12,7 @@
 // namespace Console.Experiments;
 //
 //
-// public class Test : IJsonizer
+// public class JsonTest : IJsonizer
 // {
 //     public double      Number   { get; init; }
 //     public List<Test>? Children { get; init; }
@@ -81,3 +81,13 @@
 //                                                          .AddArray( Children )
 //                                                          .Complete();
 // }
+
+namespace Console.Experiments;
+
+
+public sealed record Test
+{
+    public string?        Name      { get; init; }
+    public double         Value     { get; init; }
+    public DateTimeOffset TimeStamp { get; init; } 
+}

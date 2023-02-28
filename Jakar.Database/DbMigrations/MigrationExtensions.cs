@@ -1,4 +1,8 @@
-﻿namespace Jakar.Database.DbMigrations;
+﻿using FluentMigrator.Runner.Initialization;
+
+
+
+namespace Jakar.Database.DbMigrations;
 
 
 [SuppressMessage( "ReSharper", "UnusedMethodReturnValue.Global" )]
@@ -398,6 +402,14 @@ public static class MigrationExtensions
                                      configure.ScanIn( Assembly.GetEntryAssembly() )
                                               .For.Migrations();
                                  } );
+
+        builder.AddTransient<IMigrationContext>( provider =>
+                                                 {
+                                                     var     querySchema              = provider.GetRequiredService<IQuerySchema>();
+                                                     var     connectionStringAccessor = provider.GetRequiredService<IConnectionStringAccessor>();
+                                                     string? connectionString         = connectionStringAccessor.ConnectionString;
+                                                     return new MigrationContext( querySchema, provider, provider.GetRequiredService<Database>(), connectionString );
+                                                 } );
 
         return builder;
     }

@@ -89,7 +89,7 @@ public static class StringExtensions
     public static unsafe ReadOnlySpan<byte> AsSpanBytes( this ReadOnlySpan<char> value, Encoding encoding )
     {
         Span<byte> span = stackalloc byte[encoding.GetByteCount( value )];
-        Encoding.Unicode.GetBytes( value, span );
+        encoding.GetBytes( value, span );
         return MemoryMarshal.CreateReadOnlySpan( ref span.GetPinnableReference(), span.Length );
     }
 
@@ -106,15 +106,35 @@ public static class StringExtensions
                                                                                                    .AsMemory();
     public static object ConvertTo( this                      string value, Type      target ) => Convert.ChangeType( value, target );
     public static ReadOnlyMemory<byte> ToReadOnlyMemory( this string value, Encoding? encoding = default ) => value.ToMemory( encoding ?? Encoding.Default );
-    public static unsafe SecureString ToSecureString( this string value, bool makeReadonly = true )
+
+
+    public static SecureString ToSecureString( this ReadOnlySpan<byte> value, bool makeReadonly = true ) => Convert.ToBase64String( value )
+                                                                                                                   .AsSpan()
+                                                                                                                   .ToSecureString( makeReadonly );
+    public static SecureString ToSecureString( this string               value, bool makeReadonly = true ) => ToSecureString( value.AsSpan(), makeReadonly );
+    public static SecureString ToSecureString( this Memory<char>         value, bool makeReadonly = true ) => value.Span.ToSecureString( makeReadonly );
+    public static SecureString ToSecureString( this ReadOnlyMemory<char> value, bool makeReadonly = true ) => value.Span.ToSecureString( makeReadonly );
+    public static SecureString ToSecureString( this Span<char>           value, bool makeReadonly = true ) => ((ReadOnlySpan<char>)value).ToSecureString( makeReadonly );
+    public static unsafe SecureString ToSecureString( this ReadOnlySpan<char> value, bool makeReadonly = true )
     {
-        fixed (char* token = value)
+        fixed (char* token = &value.GetPinnableReference())
         {
             var secure = new SecureString( token, value.Length );
             if ( makeReadonly ) { secure.MakeReadOnly(); }
 
             return secure;
         }
+    }
+    public static string GetValue( this SecureString value )
+    {
+        IntPtr valuePtr = IntPtr.Zero;
+
+        try
+        {
+            valuePtr = Marshal.SecureStringToBSTR( value );
+            return Marshal.PtrToStringBSTR( valuePtr );
+        }
+        finally { Marshal.ZeroFreeBSTR( valuePtr ); }
     }
 
 
@@ -165,17 +185,6 @@ public static class StringExtensions
                                                                                                           .ConvertToString( encoding ?? Encoding.Default );
     public static string ConvertToString( this ReadOnlyMemory<byte> value, Encoding? encoding = default ) => value.ToArray()
                                                                                                                   .ConvertToString( encoding ?? Encoding.Default );
-    public static string GetStringValue( this SecureString value )
-    {
-        IntPtr valuePtr = IntPtr.Zero;
-
-        try
-        {
-            valuePtr = Marshal.SecureStringToBSTR( value );
-            return Marshal.PtrToStringBSTR( valuePtr );
-        }
-        finally { Marshal.ZeroFreeBSTR( valuePtr ); }
-    }
 
 
     public static string RemoveAll( this string source, string old ) => source.Replace( old,                  string.Empty, StringComparison.Ordinal );
