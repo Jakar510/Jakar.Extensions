@@ -1,7 +1,7 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 10/10/2022  4:17 PM
 
-namespace Jakar.Database;
+namespace Jakar.Extensions;
 
 
 /// <summary> The SecurityToken created by JwtSecurityTokenHandler.CreateToken </summary>
