@@ -7,16 +7,22 @@ namespace Jakar.Extensions.Hosting;
 
 public static partial class WebBuilder
 {
+    public static WebApplicationBuilder UseSetting( this WebApplicationBuilder builder, string key, string value )
+    {
+        builder.WebHost.UseSetting( key, value );
+        return builder;
+    }
+
     /// <summary> Set whether startup errors should be captured in the configuration settings of the web host. When enabled, startup exceptions will be caught and an error page will be returned. If disabled, startup exceptions will be propagated. </summary>
     /// <param name="builder"> The <see cref="WebApplicationBuilder"/> to configure. </param>
     /// <param name="captureStartupErrors"> <c> true </c> to use startup error page; otherwise <c> false </c> . </param>
     /// <returns> The <see cref="WebApplicationBuilder"/> . </returns>
     public static WebApplicationBuilder CaptureStartupErrors( this WebApplicationBuilder builder, bool captureStartupErrors )
     {
-        builder.WebHost.UseSetting( WebHostDefaults.CaptureStartupErrorsKey,
-                                    captureStartupErrors
-                                        ? "true"
-                                        : "false" );
+        builder.UseSetting( WebHostDefaults.CaptureStartupErrorsKey,
+                            captureStartupErrors
+                                ? "true"
+                                : "false" );
 
         return builder;
     }
@@ -28,12 +34,10 @@ public static partial class WebBuilder
     /// <returns> The <see cref="WebApplicationBuilder"/> . </returns>
     public static WebApplicationBuilder PreferHostingUrls( this WebApplicationBuilder builder, bool preferHostingUrls )
     {
-        builder.WebHost.UseSetting( WebHostDefaults.PreferHostingUrlsKey,
-                                    preferHostingUrls
-                                        ? "true"
-                                        : "false" );
-
-        return builder;
+        return builder.UseSetting( WebHostDefaults.PreferHostingUrlsKey,
+                                   preferHostingUrls
+                                       ? "true"
+                                       : "false" );
     }
 
 
@@ -43,12 +47,10 @@ public static partial class WebBuilder
     /// <returns> The <see cref="WebApplicationBuilder"/> . </returns>
     public static WebApplicationBuilder SuppressStatusMessages( this WebApplicationBuilder builder, bool suppressStatusMessages )
     {
-        builder.WebHost.UseSetting( WebHostDefaults.SuppressStatusMessagesKey,
-                                    suppressStatusMessages
-                                        ? "true"
-                                        : "false" );
-
-        return builder;
+        return builder.UseSetting( WebHostDefaults.SuppressStatusMessagesKey,
+                                   suppressStatusMessages
+                                       ? "true"
+                                       : "false" );
     }
     /// <summary> Use the given configuration settings on the web host. </summary>
     /// <param name="builder"> The <see cref="WebApplicationBuilder"/> to configure. </param>
@@ -67,10 +69,9 @@ public static partial class WebBuilder
     /// <returns> The <see cref="WebApplicationBuilder"/> . </returns>
     public static WebApplicationBuilder UseContentRoot( this WebApplicationBuilder builder, string contentRoot )
     {
-        if ( contentRoot == null ) { throw new ArgumentNullException( nameof(contentRoot) ); }
+        if ( contentRoot is null ) { throw new ArgumentNullException( nameof(contentRoot) ); }
 
-        builder.WebHost.UseSetting( WebHostDefaults.ContentRootKey, contentRoot );
-        return builder;
+        return builder.UseSetting( WebHostDefaults.ContentRootKey, contentRoot );
     }
 
 
@@ -80,10 +81,9 @@ public static partial class WebBuilder
     /// <returns> The <see cref="WebApplicationBuilder"/> . </returns>
     public static WebApplicationBuilder UseEnvironment( this WebApplicationBuilder builder, string environment )
     {
-        if ( environment == null ) { throw new ArgumentNullException( nameof(environment) ); }
+        if ( environment is null ) { throw new ArgumentNullException( nameof(environment) ); }
 
-        builder.WebHost.UseSetting( WebHostDefaults.EnvironmentKey, environment );
-        return builder;
+        return builder.UseSetting( WebHostDefaults.EnvironmentKey, environment );
     }
 
 
@@ -96,9 +96,7 @@ public static partial class WebBuilder
         if ( server is null ) { throw new ArgumentNullException( nameof(server) ); }
 
         // It would be nicer if this was transient but we need to pass in the factory instance directly
-        builder.WebHost.ConfigureServices( services => services.AddSingleton( server ) );
-
-        return builder;
+        return builder.AddSingleton( server );
     }
 
 
@@ -108,8 +106,7 @@ public static partial class WebBuilder
     /// <returns> The <see cref="WebApplicationBuilder"/> . </returns>
     public static WebApplicationBuilder UseShutdownTimeout( this WebApplicationBuilder builder, TimeSpan timeout )
     {
-        builder.WebHost.UseSetting( WebHostDefaults.ShutdownTimeoutKey, ((int)timeout.TotalSeconds).ToString( CultureInfo.InvariantCulture ) );
-        return builder;
+        return builder.UseSetting( WebHostDefaults.ShutdownTimeoutKey, ((int)timeout.TotalSeconds).ToString( CultureInfo.InvariantCulture ) );
     }
 
 
@@ -119,10 +116,9 @@ public static partial class WebBuilder
     /// <returns> The <see cref="WebApplicationBuilder"/> . </returns>
     public static WebApplicationBuilder UseUrls( this WebApplicationBuilder builder, params string[] urls )
     {
-        if ( urls == null ) { throw new ArgumentNullException( nameof(urls) ); }
+        if ( urls is null ) { throw new ArgumentNullException( nameof(urls) ); }
 
-        builder.WebHost.UseSetting( WebHostDefaults.ServerUrlsKey, string.Join( ';', urls ) );
-        return builder;
+        return builder.UseSetting( WebHostDefaults.ServerUrlsKey, string.Join( ';', urls ) );
     }
 
 
@@ -132,9 +128,8 @@ public static partial class WebBuilder
     /// <returns> The <see cref="WebApplicationBuilder"/> . </returns>
     public static WebApplicationBuilder UseWebRoot( this WebApplicationBuilder builder, string webRoot )
     {
-        if ( webRoot == null ) { throw new ArgumentNullException( nameof(webRoot) ); }
+        if ( webRoot is null ) { throw new ArgumentNullException( nameof(webRoot) ); }
 
-        builder.WebHost.UseSetting( WebHostDefaults.WebRootKey, webRoot );
-        return builder;
+        return builder.UseSetting( WebHostDefaults.WebRootKey, webRoot );
     }
 }

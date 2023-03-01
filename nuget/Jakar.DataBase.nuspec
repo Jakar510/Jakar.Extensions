@@ -4,7 +4,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata>
 		<id>Jakar.DataBase</id>
-		<version>6.6.0</version>
+		<version>6.7.0</version>
 		<title>Extension Library</title>
 		<authors>Tyler Stegmaier</authors>
 		<owners>Jakar510/Jakar</owners>
@@ -18,7 +18,8 @@
 			Extensions to aid in development.
 		</description>
 		<releaseNotes>
-			bug fixes
+			Bug Fixes
+			Many Breaking, but necessary, changes
 		</releaseNotes>
 		<tags>Jakar Api Extensions</tags>
 		<language>en-US</language>
@@ -27,27 +28,45 @@
 					branch="master" />
 		<dependencies>
 			<group targetFramework="net6.0">
-				<dependency id="Jakar.Extensions" version="6.6.2" />
-				<dependency id="Jakar.Extensions.Hosting" version="6.6.0" />
-				<dependency id="FluentMigrator" version="3.3.2" />
-				<dependency id="FluentMigrator.Runner" version="3.3.2" />
-				<dependency id="MailKit" version="3.5.0" />
-				<dependency id="Microsoft.Identity.Client" version="4.50.0" />
-				<dependency id="Microsoft.IdentityModel.JsonWebTokens" version="6.26.1" />
-				<dependency id="Microsoft.IdentityModel.Protocols.OpenIdConnect" version="6.26.1" />
-				<dependency id="Microsoft.IdentityModel.Tokens" version="6.26.1" />
+				<dependency id="Jakar.Extensions"
+							version="6.7.1" />
+				<dependency id="Jakar.Extensions.Hosting"
+							version="6.7.0" />
+				<dependency id="FluentMigrator"
+							version="3.3.2" />
+				<dependency id="FluentMigrator.Runner"
+							version="3.3.2" />
+				<dependency id="MailKit"
+							version="3.5.0" />
+				<dependency id="Microsoft.Identity.Client"
+							version="4.50.0" />
+				<dependency id="Microsoft.IdentityModel.JsonWebTokens"
+							version="6.27.0" />
+				<dependency id="Microsoft.IdentityModel.Protocols.OpenIdConnect"
+							version="6.27.0" />
+				<dependency id="Microsoft.IdentityModel.Tokens"
+							version="6.27.0" />
 			</group>
 
 			<group targetFramework="net7.0">
-				<dependency id="Jakar.Extensions" version="6.6.2" />
-				<dependency id="Jakar.Extensions.Hosting" version="6.6.0" />
-				<dependency id="FluentMigrator" version="3.3.2" />
-				<dependency id="FluentMigrator.Runner" version="3.3.2" />
-				<dependency id="MailKit" version="3.5.0" />
-				<dependency id="Microsoft.Identity.Client" version="4.50.0" />
-				<dependency id="Microsoft.IdentityModel.JsonWebTokens" version="6.26.1" />
-				<dependency id="Microsoft.IdentityModel.Protocols.OpenIdConnect" version="6.26.1" />
-				<dependency id="Microsoft.IdentityModel.Tokens" version="6.26.1" />
+				<dependency id="Jakar.Extensions"
+							version="6.7.1" />
+				<dependency id="Jakar.Extensions.Hosting"
+							version="6.7.0" />
+				<dependency id="FluentMigrator"
+							version="3.3.2" />
+				<dependency id="FluentMigrator.Runner"
+							version="3.3.2" />
+				<dependency id="MailKit"
+							version="3.5.0" />
+				<dependency id="Microsoft.Identity.Client"
+							version="4.50.0" />
+				<dependency id="Microsoft.IdentityModel.JsonWebTokens"
+							version="6.27.0" />
+				<dependency id="Microsoft.IdentityModel.Protocols.OpenIdConnect"
+							version="6.27.0" />
+				<dependency id="Microsoft.IdentityModel.Tokens"
+							version="6.27.0" />
 			</group>
 		</dependencies>
 	</metadata>

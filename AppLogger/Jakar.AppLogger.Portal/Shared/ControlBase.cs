@@ -6,5 +6,6 @@ namespace Jakar.AppLogger.Portal.Shared;
 
 public abstract class ControlBase : Widget
 {
-    [Inject] public LoggerDB Api { get; set; }
+    // ReSharper disable once NullableWarningSuppressionIsUsed
+    [Inject] public LoggerDB Api { get; set; } = default!;
 }

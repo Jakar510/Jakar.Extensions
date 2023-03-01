@@ -3,17 +3,20 @@
   <PropertyGroup>
 	  <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
 	  <ImplicitUsings>enable</ImplicitUsings>
+	  <LangVersion>preview</LangVersion>
 	  <Nullable>enable</Nullable>
-	  <LangVersion>latest</LangVersion>
+	  <NoWarn>$(NoWarn);1591</NoWarn>
+	  <EnablePreviewFeatures>true</EnablePreviewFeatures>
+	  <GenerateDocumentationFile>True</GenerateDocumentationFile>
+	  <OpenApiGenerateDocuments>false</OpenApiGenerateDocuments>
   </PropertyGroup>
 
   <ItemGroup>
-	  <PackageReference Include="Jakar.Extensions" Version="6.6.2" />
-	  <PackageReference Include="Jakar.Extensions.Hosting" Version="6.6.0" />
+	  <PackageReference Include="Jakar.Extensions" Version="6.7.1" />
+	  <PackageReference Include="Jakar.Extensions.Hosting" Version="6.7.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Jakar.AppLogger.Client\Jakar.AppLogger.Client.csproj" />
     <ProjectReference Include="..\Jakar.AppLogger.Common\Jakar.AppLogger.Common.csproj" />
   </ItemGroup>
 

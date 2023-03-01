@@ -1,10 +1,6 @@
 ﻿// Jakar.AppLogger :: Jakar.AppLogger.Portal
 // 09/21/2022  4:52 PM
 
-using Jakar.AppLogger.Portal.Data.Interfaces;
-
-
-
 namespace Jakar.AppLogger.Portal.Data.Tables;
 
 

@@ -4,7 +4,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata>
 		<id>Jakar.Extensions.Xamarin.Forms</id>
-		<version>6.6.2</version>
+		<version>6.7.0</version>
 		<title>Base library for all others in Xamarin.Forms, and extensions to help with Xamarin.Forms development.</title>
 		<authors>Tyler Stegmaier</authors>
 		<owners>Jakar510/Jakar</owners>
@@ -50,11 +50,11 @@
 				<dependency id="Newtonsoft.Json"
 							version="13.0.2" />
 
-				<dependency id="Jakar.Extensions" version="6.6.4" />
+				<dependency id="Jakar.Extensions"
+							version="6.7.1" />
 
 				<dependency id="Acr.UserDialogs"
 							version="7.2.0.564" />
-
 
 				<dependency id="Xam.Plugin.LatestVersion"
 							version="2.1.0" />
@@ -89,11 +89,11 @@
 				<dependency id="Newtonsoft.Json"
 							version="13.0.2" />
 
-				<dependency id="Jakar.Extensions" version="6.6.4" />
+				<dependency id="Jakar.Extensions"
+							version="6.7.1" />
 
 				<dependency id="Acr.UserDialogs"
 							version="7.2.0.564" />
-
 
 				<dependency id="Xam.Plugin.LatestVersion"
 							version="2.1.0" />
@@ -128,11 +128,11 @@
 				<dependency id="Newtonsoft.Json"
 							version="13.0.2" />
 
-				<dependency id="Jakar.Extensions" version="6.6.4" />
+				<dependency id="Jakar.Extensions"
+							version="6.7.1" />
 
 				<dependency id="Acr.UserDialogs"
 							version="7.2.0.564" />
-
 
 				<dependency id="Xam.Plugin.LatestVersion"
 							version="2.1.0" />
@@ -145,7 +145,7 @@
 
 			<group targetFramework="MonoTouch">
 				<dependency id="Xamarin.Forms"
-							version="5.0.0.2291" />
+							version="5.0.0.2545" />
 			</group>
 
 
@@ -173,11 +173,11 @@
 				<dependency id="Newtonsoft.Json"
 							version="13.0.2" />
 
-				<dependency id="Jakar.Extensions" version="6.6.4" />
+				<dependency id="Jakar.Extensions"
+							version="6.7.1" />
 
 				<dependency id="Acr.UserDialogs"
 							version="7.2.0.564" />
-
 
 				<dependency id="Xam.Plugin.LatestVersion"
 							version="2.1.0" />
