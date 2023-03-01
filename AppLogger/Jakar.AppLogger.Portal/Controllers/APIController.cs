@@ -11,9 +11,9 @@ public class APIController : ControllerBase
     public APIController( LoggerDB api ) => _api = api;
 
 
-    [HttpPost] public async ValueTask<ActionResult<Tokens>> Register( VerifyRequest<UserData> request,      CancellationToken token ) => await _api.Register( this, request, string.Empty, token ); // TODO: rights
-    [HttpPost] public async ValueTask<ActionResult<Tokens>> Verify( VerifyRequest             request,      CancellationToken token ) => await _api.Verify( this, request, token );
-    [HttpPost] public async ValueTask<ActionResult<Tokens>> Refresh( string                   refreshToken, CancellationToken token ) => await _api.Refresh( this, refreshToken, token );
+    [HttpPost] public async ValueTask<ActionResult<Tokens>> Register( VerifyRequest<UserData> request,      CancellationToken token ) => await _api.Register( this, request, string.Empty, ClaimType.UserID | ClaimType.UserName, token ); // TODO: rights
+    [HttpPost] public async ValueTask<ActionResult<Tokens>> Verify( VerifyRequest             request,      CancellationToken token ) => await _api.Verify( this, request, ClaimType.UserID | ClaimType.UserName, token );
+    [HttpPost] public async ValueTask<ActionResult<Tokens>> Refresh( string                   refreshToken, CancellationToken token ) => await _api.Refresh( this, refreshToken, ClaimType.UserID | ClaimType.UserName, token );
 
 
     [HttpPost] public async ValueTask<ActionResult<Guid>> StartSession( StartSession session,   CancellationToken token ) => await _api.StartSession( this, session, token );

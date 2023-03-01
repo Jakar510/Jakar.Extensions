@@ -24,7 +24,7 @@ public sealed class UserStore : IUserLoginStore<UserRecord>,
     public async Task<string?> GetAuthenticatorKeyAsync( UserRecord       user,  CancellationToken  token ) => await _dbContext.GetAuthenticatorKeyAsync( user, token );
     public async Task SetAuthenticatorKeyAsync( UserRecord                user,  string             key,    CancellationToken token ) => await _dbContext.SetAuthenticatorKeyAsync( user, key, token );
     public async Task AddClaimsAsync( UserRecord                          user,  IEnumerable<Claim> claims, CancellationToken token ) => await _dbContext.AddClaimsAsync( user, claims, token );
-    public async Task<IList<Claim>> GetClaimsAsync( UserRecord            user,  CancellationToken  token ) => await _dbContext.GetClaimsAsync( user, token );
+    public async Task<IList<Claim>> GetClaimsAsync( UserRecord            user,  CancellationToken  token ) => await _dbContext.GetClaimsAsync( user, ClaimType.All, token );
     public async Task<IList<UserRecord>> GetUsersForClaimAsync( Claim     claim, CancellationToken  token ) => await _dbContext.GetUsersForClaimAsync( claim, token );
     public async Task RemoveClaimsAsync( UserRecord                       user,  IEnumerable<Claim> claims, CancellationToken token ) => await _dbContext.RemoveClaimsAsync( user, claims, token );
     public async Task ReplaceClaimAsync( UserRecord                       user,  Claim              claim,  Claim             newClaim, CancellationToken token ) => await _dbContext.ReplaceClaimAsync( user, claim, newClaim, token );

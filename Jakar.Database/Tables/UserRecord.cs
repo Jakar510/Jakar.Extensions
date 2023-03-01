@@ -1,11 +1,6 @@
 ﻿// ToothFairyDispatch :: ToothFairyDispatch.Cloud
 // 08/29/2022  9:55 PM
 
-using System.Diagnostics;
-using System.Reflection.Emit;
-
-
-
 namespace Jakar.Database;
 
 
@@ -400,37 +395,84 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, JsonModels.IJ
 
     #region Claims
 
-    public List<Claim> GetUserClaims( bool includePersonalData = false )
+    public async ValueTask<List<Claim>> GetUserClaims( DbConnection connection, DbTransaction? transaction, Database db, ClaimType types, CancellationToken token )
     {
-        var claims = new List<Claim>( 25 )
-                     {
-                         new(ClaimTypes.Sid, UserID.ToString()),
-                         new(ClaimTypes.Dsa, UserID.ToString()),
-                         new(ClaimTypes.NameIdentifier, UserName),
-                         new(ClaimTypes.Name, FullName ?? string.Empty),
-                         new(ClaimTypes.Expiration, SubscriptionExpires?.ToString() ?? string.Empty)
-                     };
+        GroupRecord[] groups = Array.Empty<GroupRecord>();
+        RoleRecord[]  roles  = Array.Empty<RoleRecord>();
 
-        if ( !includePersonalData ) { return claims; }
 
-        claims.Add( new Claim( ClaimTypes.MobilePhone,   PhoneNumber ?? string.Empty ) );
-        claims.Add( new Claim( ClaimTypes.Email,         Email ?? string.Empty ) );
-        claims.Add( new Claim( ClaimTypes.StreetAddress, Address ?? string.Empty ) );
-        claims.Add( new Claim( ClaimTypes.Country,       Country ?? string.Empty ) );
-        claims.Add( new Claim( ClaimTypes.PostalCode,    PostalCode ?? string.Empty ) );
-        claims.Add( new Claim( ClaimTypes.Webpage,       Website ?? string.Empty ) );
-        return claims;
-    }
-    public async ValueTask<List<Claim>> GetUserClaims( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token, bool includeRoles = true, bool includeGroups = true, bool includePersonalData = false )
-    {
-        List<Claim> claims = GetUserClaims( includePersonalData );
+        if ( types.HasFlag( ClaimType.Groups ) ) { groups = await GetGroups( connection, transaction, db, token ); }
 
-        if ( includeRoles ) { claims.AddRange( from record in await GetRoles( connection, transaction, db, token ) select new Claim( ClaimTypes.Role, record.Name ) ); }
+        if ( types.HasFlag( ClaimType.Roles ) ) { roles = await GetRoles( connection, transaction, db, token ); }
 
-        if ( includeGroups ) { claims.AddRange( from record in await GetGroups( connection, transaction, db, token ) select new Claim( ClaimTypes.GroupSid, record.NameOfGroup ) ); }
+
+        var claims = new List<Claim>( 16 + groups.Length + roles.Length );
+
+        if ( types.HasFlag( ClaimType.UserID ) ) { claims.Add( new Claim( ClaimTypes.Sid, UserID.ToString(), ClaimValueTypes.String ) ); }
+
+        if ( types.HasFlag( ClaimType.UserName ) ) { claims.Add( new Claim( ClaimTypes.NameIdentifier, UserName, ClaimValueTypes.String ) ); }
+
+        if ( types.HasFlag( ClaimType.FirstName ) ) { claims.Add( new Claim( ClaimTypes.GivenName, FirstName, ClaimValueTypes.String ) ); }
+
+        if ( types.HasFlag( ClaimType.LastName ) ) { claims.Add( new Claim( ClaimTypes.Surname, LastName, ClaimValueTypes.String ) ); }
+
+        if ( types.HasFlag( ClaimType.FullName ) ) { claims.Add( new Claim( ClaimTypes.Name, FullName ?? string.Empty, ClaimValueTypes.String ) ); }
+
+        if ( types.HasFlag( ClaimType.Gender ) ) { claims.Add( new Claim( ClaimTypes.Gender, Gender ?? string.Empty, ClaimValueTypes.String ) ); }
+
+        if ( types.HasFlag( ClaimType.SubscriptionExpiration ) ) { claims.Add( new Claim( ClaimTypes.Expiration, SubscriptionExpires?.ToString() ?? string.Empty, ClaimValueTypes.DateTime ) ); }
+
+        if ( types.HasFlag( ClaimType.Expired ) ) { claims.Add( new Claim( ClaimTypes.Expired, (SubscriptionExpires > DateTimeOffset.UtcNow).ToString(), ClaimValueTypes.Boolean ) ); }
+
+        if ( types.HasFlag( ClaimType.Email ) ) { claims.Add( new Claim( ClaimTypes.Email, Email ?? string.Empty, ClaimValueTypes.String ) ); }
+
+        if ( types.HasFlag( ClaimType.MobilePhone ) ) { claims.Add( new Claim( ClaimTypes.MobilePhone, PhoneNumber ?? string.Empty, ClaimValueTypes.String ) ); }
+
+        if ( types.HasFlag( ClaimType.StreetAddress ) ) { claims.Add( new Claim( ClaimTypes.StreetAddress, Line1 ?? string.Empty, ClaimValueTypes.String ) ); }
+
+        if ( types.HasFlag( ClaimType.Locality ) ) { claims.Add( new Claim( ClaimTypes.Locality, Line2 ?? string.Empty, ClaimValueTypes.String ) ); }
+
+        if ( types.HasFlag( ClaimType.State ) ) { claims.Add( new Claim( ClaimTypes.Country, State ?? string.Empty, ClaimValueTypes.String ) ); }
+
+        if ( types.HasFlag( ClaimType.Country ) ) { claims.Add( new Claim( ClaimTypes.Country, Country ?? string.Empty, ClaimValueTypes.String ) ); }
+
+        if ( types.HasFlag( ClaimType.PostalCode ) ) { claims.Add( new Claim( ClaimTypes.PostalCode, PostalCode ?? string.Empty, ClaimValueTypes.String ) ); }
+
+        if ( types.HasFlag( ClaimType.WebSite ) ) { claims.Add( new Claim( ClaimTypes.Webpage, Website ?? string.Empty, ClaimValueTypes.String ) ); }
+
+        if ( types.HasFlag( ClaimType.Groups ) ) { claims.AddRange( from record in groups select new Claim( ClaimTypes.GroupSid, record.NameOfGroup, ClaimValueTypes.String ) ); }
+
+        if ( types.HasFlag( ClaimType.Roles ) ) { claims.AddRange( from record in roles select new Claim( ClaimTypes.Role, record.Name, ClaimValueTypes.String ) ); }
 
         return claims;
     }
 
     #endregion
+}
+
+
+
+[Flags]
+public enum ClaimType : long
+{
+    None                                                                         = 1 << 0,
+    [Display( Description = ClaimTypes.Sid )]             UserID                 = 1 << 1,
+    [Display( Description = ClaimTypes.NameIdentifier )]  UserName               = 1 << 2,
+    [Display( Description = ClaimTypes.GivenName )]       FirstName              = 1 << 3,
+    [Display( Description = ClaimTypes.Surname )]         LastName               = 1 << 4,
+    [Display( Description = ClaimTypes.Name )]            FullName               = 1 << 5,
+    [Display( Description = ClaimTypes.Gender )]          Gender                 = 1 << 7,
+    [Display( Description = ClaimTypes.Expiration )]      SubscriptionExpiration = 1 << 8,
+    [Display( Description = ClaimTypes.Expiration )]      Expired                = 1 << 9,
+    [Display( Description = ClaimTypes.Email )]           Email                  = 1 << 10,
+    [Display( Description = ClaimTypes.MobilePhone )]     MobilePhone            = 1 << 11,
+    [Display( Description = ClaimTypes.StreetAddress )]   StreetAddress          = 1 << 12,
+    [Display( Description = ClaimTypes.Locality )]        Locality               = 1 << 12,
+    [Display( Description = ClaimTypes.StateOrProvince )] State                  = 1 << 13,
+    [Display( Description = ClaimTypes.Country )]         Country                = 1 << 14,
+    [Display( Description = ClaimTypes.PostalCode )]      PostalCode             = 1 << 15,
+    [Display( Description = ClaimTypes.Webpage )]         WebSite                = 1 << 16,
+    [Display( Description = ClaimTypes.GroupSid )]        Groups                 = 1 << 17,
+    [Display( Description = ClaimTypes.Role )]            Roles                  = 1 << 18,
+    All                                                                          = ~0
 }

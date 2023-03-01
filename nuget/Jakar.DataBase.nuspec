@@ -4,7 +4,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata>
 		<id>Jakar.DataBase</id>
-		<version>6.7.0</version>
+		<version>6.7.1</version>
 		<title>Extension Library</title>
 		<authors>Tyler Stegmaier</authors>
 		<owners>Jakar510/Jakar</owners>
@@ -19,7 +19,6 @@
 		</description>
 		<releaseNotes>
 			Bug Fixes
-			Many Breaking, but necessary, changes
 		</releaseNotes>
 		<tags>Jakar Api Extensions</tags>
 		<language>en-US</language>

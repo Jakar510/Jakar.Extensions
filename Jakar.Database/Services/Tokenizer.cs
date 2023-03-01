@@ -6,9 +6,9 @@ namespace Jakar.Database;
 
 public interface ITokenService
 {
-    public ValueTask<string> CreateContent( string        header, UserRecord        user, CancellationToken token = default );
-    public ValueTask<string> CreateHTMLContent( string    header, UserRecord        user, CancellationToken token = default );
-    public ValueTask<Tokens?> Authenticate( VerifyRequest users,  CancellationToken token = default );
+    public ValueTask<string> CreateContent( string        header, UserRecord user,  ClaimType         types, CancellationToken token = default );
+    public ValueTask<string> CreateHTMLContent( string    header, UserRecord user,  ClaimType         types, CancellationToken token = default );
+    public ValueTask<Tokens?> Authenticate( VerifyRequest users,  ClaimType  types, CancellationToken token = default );
 }
 
 
@@ -71,17 +71,17 @@ public class Tokenizer<TName> : ITokenService where TName : IAppName
     public virtual string GetUrl( in Tokens result ) => $"{Domain}/Token/{result.AccessToken}";
 
 
-    public virtual ValueTask<Tokens?> Authenticate( VerifyRequest request, CancellationToken token = default ) => _db.Authenticate( request, token );
+    public virtual ValueTask<Tokens?> Authenticate( VerifyRequest request, ClaimType types, CancellationToken token = default ) => _db.Authenticate( request, types, token );
 
 
-    public virtual async ValueTask<string> CreateContent( string header, UserRecord user, CancellationToken token = default )
+    public virtual async ValueTask<string> CreateContent( string header, UserRecord user, ClaimType types, CancellationToken token = default )
     {
-        Tokens result = await _db.GetToken( user, token );
+        Tokens result = await _db.GetToken( user, types, token );
         return CreateContent( result, header );
     }
-    public virtual async ValueTask<string> CreateHTMLContent( string header, UserRecord user, CancellationToken token = default )
+    public virtual async ValueTask<string> CreateHTMLContent( string header, UserRecord user, ClaimType types, CancellationToken token = default )
     {
-        Tokens result = await _db.GetToken( user, token );
+        Tokens result = await _db.GetToken( user, types, token );
         return CreateHTMLContent( result, header );
     }
 }

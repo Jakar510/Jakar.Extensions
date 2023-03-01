@@ -80,7 +80,7 @@ public class Emailer
 
 
         public Options() { }
-        public Options( string defaultSubject ) => DefaultSubject = defaultSubject;
+        public Options( string                             defaultSubject ) => DefaultSubject = defaultSubject;
         internal EmailSettings GetSettings( IConfiguration configuration ) => _settings ??= EmailSettings.Create( configuration );
 
 
@@ -89,10 +89,10 @@ public class Emailer
 
 
 
-    public async Task VerifyEmail( UserRecord user, CancellationToken token )
+    public async Task VerifyEmail( UserRecord user, ClaimType types, CancellationToken token )
     {
         string subject = _options.VerifySubject ?? _options.DefaultSubject;
-        string content = await _tokenService.CreateContent( subject, user, token );
+        string content = await _tokenService.CreateContent( subject, user, types, token );
 
         EmailBuilder builder = EmailBuilder.From( _options.GetSender() )
                                            .To( MailboxAddress.Parse( user.Email ) )
@@ -101,10 +101,10 @@ public class Emailer
 
         await SendAsync( builder, token );
     }
-    public async Task VerifyHTMLEmail( UserRecord user, CancellationToken token )
+    public async Task VerifyHTMLEmail( UserRecord user, ClaimType types, CancellationToken token )
     {
         string subject = _options.VerifySubject ?? _options.DefaultSubject;
-        string content = await _tokenService.CreateHTMLContent( subject, user, token );
+        string content = await _tokenService.CreateHTMLContent( subject, user, types, token );
 
         EmailBuilder builder = EmailBuilder.From( _options.GetSender() )
                                            .To( MailboxAddress.Parse( user.Email ) )

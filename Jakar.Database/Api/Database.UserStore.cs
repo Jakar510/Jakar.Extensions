@@ -307,8 +307,9 @@ public partial class Database
     public virtual ValueTask AddClaimsAsync( DbConnection connection, DbTransaction      transaction, UserRecord        user, IEnumerable<Claim> claims, CancellationToken token ) => ValueTask.CompletedTask;
 
 
-    public ValueTask<IList<Claim>> GetClaimsAsync( UserRecord                 user,       CancellationToken token ) => this.Call( GetClaimsAsync, user, token );
-    public virtual async ValueTask<IList<Claim>> GetClaimsAsync( DbConnection connection, DbTransaction?    transaction, UserRecord user, CancellationToken token ) => await user.GetUserClaims( connection, transaction, this, token );
+    public ValueTask<IList<Claim>> GetClaimsAsync( UserRecord user, ClaimType types, CancellationToken token ) => this.Call( GetClaimsAsync, user, types, token );
+    public virtual async ValueTask<IList<Claim>> GetClaimsAsync( DbConnection connection, DbTransaction? transaction, UserRecord user, ClaimType types, CancellationToken token ) =>
+        await user.GetUserClaims( connection, transaction, this, types, token );
 
 
     public ValueTask<IList<UserRecord>> GetUsersForClaimAsync( Claim                claim,      CancellationToken token ) => this.TryCall( GetUsersForClaimAsync, claim, token );

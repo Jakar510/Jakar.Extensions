@@ -7,9 +7,6 @@ namespace Jakar.Database;
 [SuppressMessage( "ReSharper", "UnusedMethodReturnValue.Global" )]
 public static partial class DbExtensions
 {
-    [Pure] public static DateTimeOffset TokenExpireTime( this IConfiguration configuration, string key = nameof(TokenExpireTime) ) => DateTimeOffset.UtcNow + configuration.GetValue( key, TimeSpan.FromMinutes( 30 ) );
-
-
     public static IHealthChecksBuilder AddHealthCheck<T>( this WebApplicationBuilder builder ) where T : IHealthCheck => builder.AddHealthCheck( WebBuilder.CreateHealthCheck<T>() );
     public static IHealthChecksBuilder AddHealthCheck( this WebApplicationBuilder builder, HealthCheckRegistration registration ) =>
         builder.Services.AddHealthChecks()
@@ -77,12 +74,11 @@ public static partial class DbExtensions
 
     public static WebApplicationBuilder AddUserStore( this WebApplicationBuilder builder, Action<PasswordRequirements>? configurePasswordRequirements = default ) =>
         builder.AddUserStore<UserValidator>( configurePasswordRequirements );
-    public static WebApplicationBuilder AddUserStore<TUserValidator>( this WebApplicationBuilder builder, Action<PasswordRequirements>? configurePasswordRequirements = default )
-        where TUserValidator : UserValidator
+    public static WebApplicationBuilder AddUserStore<TUserValidator>( this WebApplicationBuilder builder, Action<PasswordRequirements>? configurePasswordRequirements = default ) where TUserValidator : UserValidator
     {
         OptionsBuilder<PasswordRequirements> req = builder.Services.AddOptions<PasswordRequirements>();
         if ( configurePasswordRequirements is not null ) { req.Configure( configurePasswordRequirements ); }
-        
+
 
         builder.Services.AddIdentity<UserRecord, RoleRecord>()
                .AddRoleManager<RoleStore>()

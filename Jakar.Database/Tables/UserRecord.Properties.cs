@@ -24,6 +24,7 @@ public sealed partial record UserRecord
     private string            _firstName    = string.Empty;
     private string            _lastName     = string.Empty;
     private string            _passwordHash = string.Empty;
+    private string            _rights       = string.Empty;
     private string            _userName     = string.Empty;
     private string?           _additionalData;
     private string?           _address;
@@ -37,12 +38,12 @@ public sealed partial record UserRecord
     private string?           _escalateTo;
     private string?           _ext;
     private string?           _fullName;
+    private string?           _gender;
     private string?           _line1;
     private string?           _line2;
     private string?           _phoneNumber;
     private string?           _postalCode;
     private string?           _refreshToken;
-    private string            _rights = string.Empty;
     private string?           _securityStamp;
     private string?           _state;
     private string?           _subscriptionID;
@@ -50,127 +51,10 @@ public sealed partial record UserRecord
     private string?           _website;
     private SupportedLanguage _preferredLanguage;
 
-
-    public bool IsActive
-    {
-        get => _isActive;
-        set => SetProperty( ref _isActive, value );
-    }
-    public bool IsDisabled
-    {
-        get => _isDisabled;
-        set => SetProperty( ref _isDisabled, value );
-    }
-    public bool IsEmailConfirmed
-    {
-        get => _isEmailConfirmed;
-        set => SetProperty( ref _isEmailConfirmed, value );
-    }
-    public bool IsLocked
-    {
-        get => _isLocked;
-        set => SetProperty( ref _isLocked, value );
-    }
-    public bool IsPhoneNumberConfirmed
-    {
-        get => _isPhoneNumberConfirmed;
-        set => SetProperty( ref _isPhoneNumberConfirmed, value );
-    }
-    public bool IsTwoFactorEnabled
-    {
-        get => _isTwoFactorEnabled;
-        set => SetProperty( ref _isTwoFactorEnabled, value );
-    }
-
-
-    public DateTimeOffset? LastActive
-    {
-        get => _lastActive;
-        set => SetProperty( ref _lastActive, value );
-    }
-    public DateTimeOffset? LastBadAttempt
-    {
-        get => _lastBadAttempt;
-        set => SetProperty( ref _lastBadAttempt, value );
-    }
-    public DateTimeOffset? LockDate
-    {
-        get => _lockDate;
-        set => SetProperty( ref _lockDate, value );
-    }
-    public DateTimeOffset? LockoutEnd
-    {
-        get => _lockEnd;
-        set => SetProperty( ref _lockEnd, value );
-    }
-    public DateTimeOffset? RefreshTokenExpiryTime
-    {
-        get => _refreshTokenExpiryTime;
-        set => SetProperty( ref _refreshTokenExpiryTime, value );
-    }
-    public DateTimeOffset? SubscriptionExpires
-    {
-        get => _subscriptionExpires;
-        set => SetProperty( ref _subscriptionExpires, value );
-    }
-    public DateTimeOffset? TokenExpiration
-    {
-        get => _tokenExpiration;
-        set => SetProperty( ref _tokenExpiration, value );
-    }
-    public Guid? SessionID
-    {
-        get => _sessionID;
-        set => SetProperty( ref _sessionID, value );
-    }
-    public Guid UserID { get; init; }
-
     IDictionary<string, JToken?>? JsonModels.IJsonModel.AdditionalData
     {
         get => AdditionalData?.FromJson<Dictionary<string, JToken?>>();
         set => AdditionalData = value?.ToJson();
-    }
-
-
-    public int BadLogins
-    {
-        get => _badLogins;
-        set => SetProperty( ref _badLogins, value );
-    }
-
-
-    [ProtectedPersonalData]
-    [MaxLength( 256 )]
-    public string FirstName
-    {
-        get => _firstName;
-        set => SetProperty( ref _firstName, value );
-    }
-
-
-    [ProtectedPersonalData]
-    [MaxLength( 256 )]
-    public string LastName
-    {
-        get => _lastName;
-        set => SetProperty( ref _lastName, value );
-    }
-
-
-    [MaxLength( TokenValidationParameters.DefaultMaximumTokenSizeInBytes )]
-    public string PasswordHash
-    {
-        get => _passwordHash;
-        set => SetProperty( ref _passwordHash, value );
-    }
-
-
-    [ProtectedPersonalData]
-    [MaxLength( 256 )]
-    public string UserName
-    {
-        get => _userName;
-        set => SetProperty( ref _userName, value );
     }
 
 
@@ -189,6 +73,13 @@ public sealed partial record UserRecord
     {
         get => _address;
         set => SetProperty( ref _address, value );
+    }
+
+
+    public int BadLogins
+    {
+        get => _badLogins;
+        set => SetProperty( ref _badLogins, value );
     }
 
 
@@ -270,11 +161,80 @@ public sealed partial record UserRecord
 
 
     [ProtectedPersonalData]
+    [MaxLength( 256 )]
+    public string FirstName
+    {
+        get => _firstName;
+        set => SetProperty( ref _firstName, value );
+    }
+
+
+    [ProtectedPersonalData]
     [MaxLength( 512 )]
     public string? FullName
     {
         get => _fullName;
         set => SetProperty( ref _fullName, value );
+    }
+
+    [MaxLength( 256 )]
+    public string? Gender
+    {
+        get => _gender;
+        set => SetProperty( ref _gender, value );
+    }
+
+
+    public bool IsActive
+    {
+        get => _isActive;
+        set => SetProperty( ref _isActive, value );
+    }
+    public bool IsDisabled
+    {
+        get => _isDisabled;
+        set => SetProperty( ref _isDisabled, value );
+    }
+    public bool IsEmailConfirmed
+    {
+        get => _isEmailConfirmed;
+        set => SetProperty( ref _isEmailConfirmed, value );
+    }
+    public bool IsLocked
+    {
+        get => _isLocked;
+        set => SetProperty( ref _isLocked, value );
+    }
+    public bool IsPhoneNumberConfirmed
+    {
+        get => _isPhoneNumberConfirmed;
+        set => SetProperty( ref _isPhoneNumberConfirmed, value );
+    }
+    public bool IsTwoFactorEnabled
+    {
+        get => _isTwoFactorEnabled;
+        set => SetProperty( ref _isTwoFactorEnabled, value );
+    }
+
+
+    public DateTimeOffset? LastActive
+    {
+        get => _lastActive;
+        set => SetProperty( ref _lastActive, value );
+    }
+    public DateTimeOffset? LastBadAttempt
+    {
+        get => _lastBadAttempt;
+        set => SetProperty( ref _lastBadAttempt, value );
+    }
+
+
+    [ProtectedPersonalData]
+    [MaxLength( 256 )]
+    public string LastName
+    {
+        get => _lastName;
+        set => SetProperty( ref _lastName, value );
     }
 
 
@@ -293,6 +253,24 @@ public sealed partial record UserRecord
     {
         get => _line2;
         set => SetProperty( ref _line2, value );
+    }
+    public DateTimeOffset? LockDate
+    {
+        get => _lockDate;
+        set => SetProperty( ref _lockDate, value );
+    }
+    public DateTimeOffset? LockoutEnd
+    {
+        get => _lockEnd;
+        set => SetProperty( ref _lockEnd, value );
+    }
+
+
+    [MaxLength( TokenValidationParameters.DefaultMaximumTokenSizeInBytes )]
+    public string PasswordHash
+    {
+        get => _passwordHash;
+        set => SetProperty( ref _passwordHash, value );
     }
 
 
@@ -314,11 +292,23 @@ public sealed partial record UserRecord
     }
 
 
+    public SupportedLanguage PreferredLanguage
+    {
+        get => _preferredLanguage;
+        set => SetProperty( ref _preferredLanguage, value );
+    }
+
+
     [MaxLength( TokenValidationParameters.DefaultMaximumTokenSizeInBytes )]
     public string? RefreshToken
     {
         get => _refreshToken;
         set => SetProperty( ref _refreshToken, value );
+    }
+    public DateTimeOffset? RefreshTokenExpiryTime
+    {
+        get => _refreshTokenExpiryTime;
+        set => SetProperty( ref _refreshTokenExpiryTime, value );
     }
 
 
@@ -336,6 +326,11 @@ public sealed partial record UserRecord
         get => _securityStamp;
         set => SetProperty( ref _securityStamp, value );
     }
+    public Guid? SessionID
+    {
+        get => _sessionID;
+        set => SetProperty( ref _sessionID, value );
+    }
 
 
     [ProtectedPersonalData]
@@ -344,6 +339,11 @@ public sealed partial record UserRecord
     {
         get => _state;
         set => SetProperty( ref _state, value );
+    }
+    public DateTimeOffset? SubscriptionExpires
+    {
+        get => _subscriptionExpires;
+        set => SetProperty( ref _subscriptionExpires, value );
     }
     [MaxLength( 256 )]
     public string? SubscriptionID
@@ -360,6 +360,21 @@ public sealed partial record UserRecord
         get => _title;
         set => SetProperty( ref _title, value );
     }
+    public DateTimeOffset? TokenExpiration
+    {
+        get => _tokenExpiration;
+        set => SetProperty( ref _tokenExpiration, value );
+    }
+    public Guid UserID { get; init; }
+
+
+    [ProtectedPersonalData]
+    [MaxLength( 256 )]
+    public string UserName
+    {
+        get => _userName;
+        set => SetProperty( ref _userName, value );
+    }
 
 
     [ProtectedPersonalData]
@@ -368,13 +383,6 @@ public sealed partial record UserRecord
     {
         get => _website;
         set => SetProperty( ref _website, value );
-    }
-
-
-    public SupportedLanguage PreferredLanguage
-    {
-        get => _preferredLanguage;
-        set => SetProperty( ref _preferredLanguage, value );
     }
 
 
