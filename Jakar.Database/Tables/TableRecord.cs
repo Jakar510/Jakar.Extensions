@@ -4,12 +4,29 @@
 namespace Jakar.Database;
 
 
-public interface ITableRecord
+public interface IRecordPair
 {
-    public DateTimeOffset  DateCreated  { get; }
+    public Guid           ID          { get; }
+    public DateTimeOffset DateCreated { get; }
+}
+
+
+
+public interface ITableRecord : IRecordPair
+{
     public DateTimeOffset? LastModified { get; }
-    public Guid            ID           { get; }
     public Guid?           CreatedBy    { get; }
+}
+
+
+
+public readonly record struct RecordPair( Guid ID, DateTimeOffset DateCreated ) : IComparable<RecordPair>, IRecordPair
+{
+    public int CompareTo( RecordPair other ) => DateCreated.CompareTo( other.DateCreated );
+
+
+    public static implicit operator RecordPair( (Guid ID, DateTimeOffset DateCreated) value ) => new(value.ID, value.DateCreated);
+    public static implicit operator KeyValuePair<Guid, DateTimeOffset>( RecordPair    value ) => new(value.ID, value.DateCreated);
 }
 
 
@@ -40,38 +57,6 @@ public abstract record TableRecord<TRecord> : ObservableRecord<TRecord>, ITableR
         OwnerUserID = user?.OwnerUserID;
         CreatedBy   = user?.CreatedBy;
     }
-    public static string GenerateID() => Guid.NewGuid()
-                                             .ToBase64();
-
-
-    public override int CompareTo( TRecord? other )
-    {
-        if ( other is null ) { return 1; }
-
-        if ( ReferenceEquals( this, other ) ) { return 0; }
-
-        int lastModifiedComparison = Nullable.Compare( _lastModified, other._lastModified );
-        if ( lastModifiedComparison != 0 ) { return lastModifiedComparison; }
-
-        int createdByComparison = Nullable.Compare( CreatedBy, other.CreatedBy );
-        if ( createdByComparison != 0 ) { return createdByComparison; }
-
-        int userIDComparison = Nullable.Compare( OwnerUserID, other.OwnerUserID );
-        if ( userIDComparison != 0 ) { return userIDComparison; }
-
-        return DateCreated.CompareTo( other.DateCreated );
-    }
-
-
-    public bool DoesNotOwn( UserRecord record ) => record.CreatedBy != record.ID;
-    public override bool Equals( TRecord? other )
-    {
-        if ( other is null ) { return false; }
-
-        if ( ReferenceEquals( this, other ) ) { return true; }
-
-        return ID == other.ID && CreatedBy == other.CreatedBy && OwnerUserID.Equals( other.OwnerUserID ) && DateCreated.Equals( other.DateCreated );
-    }
 
 
     public static DynamicParameters GetDynamicParameters( UserRecord record )
@@ -98,5 +83,34 @@ public abstract record TableRecord<TRecord> : ObservableRecord<TRecord>, ITableR
                                                  {
                                                      ID = id
                                                  });
-    public bool Owns( UserRecord record ) => record.CreatedBy == record.ID;
+    public bool Owns( UserRecord       record ) => record.CreatedBy == record.ID;
+    public bool DoesNotOwn( UserRecord record ) => record.CreatedBy != record.ID;
+
+
+    public override int CompareTo( TRecord? other )
+    {
+        if ( other is null ) { return 1; }
+
+        if ( ReferenceEquals( this, other ) ) { return 0; }
+
+        int lastModifiedComparison = Nullable.Compare( _lastModified, other._lastModified );
+        if ( lastModifiedComparison != 0 ) { return lastModifiedComparison; }
+
+        int createdByComparison = Nullable.Compare( CreatedBy, other.CreatedBy );
+        if ( createdByComparison != 0 ) { return createdByComparison; }
+
+        int userIDComparison = Nullable.Compare( OwnerUserID, other.OwnerUserID );
+        if ( userIDComparison != 0 ) { return userIDComparison; }
+
+        return DateCreated.CompareTo( other.DateCreated );
+    }
+
+    public override bool Equals( TRecord? other )
+    {
+        if ( other is null ) { return false; }
+
+        if ( ReferenceEquals( this, other ) ) { return true; }
+
+        return ID == other.ID && CreatedBy == other.CreatedBy && OwnerUserID.Equals( other.OwnerUserID ) && DateCreated.Equals( other.DateCreated );
+    }
 }

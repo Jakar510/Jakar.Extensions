@@ -2,7 +2,7 @@
 
 
 
-namespace Jakar.Database;
+namespace Jakar.Extensions;
 
 
 public static class ListExtensions

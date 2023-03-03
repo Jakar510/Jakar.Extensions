@@ -21,10 +21,11 @@ public sealed class SqlException : Exception
         Parameters = parameters;
         MatchAll   = matchAll;
     }
-    public SqlException( string sql, string  message,    Exception inner ) : this( sql, default, message, inner ) { }
-    public SqlException( string sql, object? parameters, Exception inner ) : this( sql, parameters, inner.Message, inner ) { }
-    public SqlException( string sql, object? parameters, bool?     matchAll, Exception inner ) : this( sql, parameters, matchAll, inner.Message, inner ) { }
-    public SqlException( string sql, object? parameters, string    message,  Exception inner ) : this( sql, parameters, default, message, inner ) { }
+    public SqlException( string sql, Exception inner ) : base( sql, inner ) => SQL = sql;
+    public SqlException( string sql, string    message,    Exception inner ) : this( sql, default, message, inner ) { }
+    public SqlException( string sql, object?   parameters, Exception inner ) : this( sql, parameters, inner.Message, inner ) { }
+    public SqlException( string sql, object?   parameters, bool?     matchAll, Exception inner ) : this( sql, parameters, matchAll, inner.Message, inner ) { }
+    public SqlException( string sql, object?   parameters, string    message,  Exception inner ) : this( sql, parameters, default, message, inner ) { }
     public SqlException( string sql, object? parameters, bool? matchAll, string message, Exception inner ) : base( message, inner )
     {
         SQL        = sql;

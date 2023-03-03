@@ -7,22 +7,27 @@ namespace Jakar.Database;
 /// <summary>
 ///     <see href="https://stackoverflow.com/a/15992856/9530917"/>
 /// </summary>
-public struct IDGenerator<TRecord> : IAsyncEnumerator<Guid?> where TRecord : TableRecord<TRecord>
+public struct AsyncKeyGenerator<TRecord> : IAsyncEnumerator<Guid>, IAsyncEnumerable<Guid> where TRecord : TableRecord<TRecord>
 {
-    private readonly DbTable<TRecord> _table;
-    public           Guid?            Current { get; private set; }
+    private readonly DbTable<TRecord>  _table;
+    private readonly CancellationToken _token = default;
+    private          KeyGenerator      _generator;
+    public           Guid              Current { get; private set; } = default;
 
 
-    public IDGenerator( DbTable<TRecord> table ) => _table = table;
+    public AsyncKeyGenerator( DbTable<TRecord> table ) => _table = table;
+    public AsyncKeyGenerator( DbTable<TRecord> table, CancellationToken token ) : this( table ) => _token = token;
     public ValueTask DisposeAsync()
     {
+        _generator.Dispose();
         Current = default;
-        return ValueTask.CompletedTask;
+        this    = default;
+        return default;
     }
+    public void Reset() => _generator = default;
 
 
-    public void Reset() => Current = default;
-    public ValueTask<bool> MoveNextAsync( CancellationToken token = default ) => _table.Call( MoveNextAsync, token );
+    public ValueTask<bool> MoveNextAsync() => _table.Call( MoveNextAsync, _token );
     public async ValueTask<bool> MoveNextAsync( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
         if ( token.IsCancellationRequested )
@@ -31,8 +36,19 @@ public struct IDGenerator<TRecord> : IAsyncEnumerator<Guid?> where TRecord : Tab
             return false;
         }
 
-        Current = await _table.NextID( connection, transaction, Current, token );
-        return Current.HasValue && Current.Value != Guid.Empty;
+        if ( _generator.IsEmpty ) { _generator = await _table.SortedIDs( connection, transaction, token ); }
+
+        if ( _generator.MoveNext() ) { Current = _generator.Current; }
+        else
+        {
+            Current    = default;
+            _generator = default;
+        }
+
+        return Current != Guid.Empty;
     }
-    ValueTask<bool> IAsyncEnumerator<Guid?>.MoveNextAsync() => MoveNextAsync();
+
+
+    IAsyncEnumerator<Guid> IAsyncEnumerable<Guid>.GetAsyncEnumerator( CancellationToken token ) => WithCancellation( token );
+    public AsyncKeyGenerator<TRecord> WithCancellation( CancellationToken               token ) => new(_table, token);
 }

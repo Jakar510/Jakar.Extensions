@@ -50,11 +50,13 @@ public abstract class Migration<TRecord> : Migration where TRecord : TableRecord
              .AsGuid()
              .NotNullable()
              .PrimaryKey()
-             .Identity();
+             .Identity()
+             .WithDefaultValue( SystemMethods.NewGuid );
 
         table.WithColumn( nameof(TableRecord<TRecord>.DateCreated) )
              .AsDateTime2()
-             .NotNullable();
+             .NotNullable()
+             .WithDefaultValue( SystemMethods.CurrentDateTimeOffset );
 
         table.WithColumn( nameof(TableRecord<TRecord>.LastModified) )
              .AsDateTime2()

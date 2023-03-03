@@ -24,11 +24,11 @@ public class DbTable<TRecord> : Constants<TRecord>, IConnectableDb, IAsyncDispos
     protected readonly TypePropertiesCache.Properties _propertiesCache;
 
 
-    protected internal static                                     TRecord[]                Empty         => Array.Empty<TRecord>();
-    public                                                        DbInstance               Instance      => _database.Instance;
-    [SuppressMessage( "ReSharper", "InconsistentNaming" )] public IDGenerator<TRecord>     IDs           => new(this);
-    public                                                        RecordGenerator<TRecord> Records       => new(this);
-    public                                                        string                   CurrentSchema => _database.CurrentSchema;
+    protected internal static TRecord[]                Empty         => Array.Empty<TRecord>();
+    public                    DbInstance               Instance      => _database.Instance;
+    public                    RecordGenerator<TRecord> Records       => new(this);
+    public                    string                   CurrentSchema => _database.CurrentSchema;
+
 
     protected internal virtual string IDKey => Instance switch
                                                {
@@ -84,7 +84,7 @@ public class DbTable<TRecord> : Constants<TRecord>, IConnectableDb, IAsyncDispos
         try
         {
             IEnumerable<TRecord> records = await connection.QueryAsync<TRecord>( sql, default, transaction );
-            return GetArray( records );
+            return Database.GetArray( records );
         }
         catch ( Exception e ) { throw new SqlException( sql, _nullParameters, e ); }
     }
@@ -310,16 +310,6 @@ public class DbTable<TRecord> : Constants<TRecord>, IConnectableDb, IAsyncDispos
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization )]
-    public virtual T[] GetArray<T>( IEnumerable<T> enumerable ) => enumerable switch
-                                                                   {
-                                                                       List<T> list       => list.GetInternalArray(),
-                                                                       Collection<T> list => list.GetInternalArray(),
-                                                                       T[] array          => array,
-                                                                       _                  => enumerable.ToArray()
-                                                                   };
-
-
     public ValueTask<string?> GetID( string sql, DynamicParameters? parameters, CancellationToken token = default ) => this.Call( GetID, sql, parameters, token );
     public async ValueTask<string?> GetID( DbConnection connection, DbTransaction? transaction, string sql, DynamicParameters? parameters, CancellationToken token = default )
     {
@@ -430,19 +420,40 @@ END";
     }
 
 
-    public ValueTask<TRecord?> Next( Guid? id, CancellationToken token = default ) => this.Call( Next, id, token );
+    public ValueTask<TRecord?> Next( RecordPair pair, CancellationToken token = default ) => this.Call( Next, pair, token );
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
-    public virtual async ValueTask<TRecord?> Next( DbConnection connection, DbTransaction? transaction, Guid? id, CancellationToken token = default )
+    public virtual async ValueTask<TRecord?> Next( DbConnection connection, DbTransaction? transaction, RecordPair pair, CancellationToken token = default )
     {
-        if ( id is null ) { return default; }
-
         var parameters = new DynamicParameters();
-        parameters.Add( ID, id.Value );
-        string sql = @$"SELECT * FROM {SchemaTableName} WHERE ( id = IFNULL((SELECT MIN({IDKey}) FROM {SchemaTableName} WHERE {IDKey} > @{ID}), 0) )";
+        parameters.Add( nameof(RecordPair.ID),          pair.ID );
+        parameters.Add( nameof(RecordPair.DateCreated), pair.DateCreated );
+
+        string sql = @$"SELECT * FROM {SchemaTableName} WHERE ( id = IFNULL((SELECT MIN({IDKey}) FROM {SchemaTableName} WHERE {IDKey} > @{nameof(RecordPair.ID)}), 0) )";
         if ( token.IsCancellationRequested ) { return default; }
 
         try { return await connection.ExecuteScalarAsync<TRecord>( sql, parameters, transaction ); }
         catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
+    }
+
+
+    public ValueTask<RecordPair[]> SortedIDs( CancellationToken token = default ) => this.Call( SortedIDs, token );
+    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
+    public virtual async ValueTask<RecordPair[]> SortedIDs( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
+    {
+        string sql = @$"SELECT {nameof(TableRecord<TRecord>.ID)}, {nameof(TableRecord<TRecord>.DateCreated)} FROM {SchemaTableName}";
+
+
+        try
+        {
+            if ( token.IsCancellationRequested ) { return Array.Empty<RecordPair>(); }
+
+            (Guid ID, DateTimeOffset DateCreated)[] pairs   = Database.GetArray( await connection.QueryAsync<(Guid ID, DateTimeOffset DateCreated)>( sql, default, transaction ) );
+            var                                     results = new List<RecordPair>( pairs.Length );
+            for ( int i = 0; i < pairs.Length; i++ ) { results[i] = pairs[i]; }
+
+            return Database.GetArray( results );
+        }
+        catch ( Exception e ) { throw new SqlException( sql, e ); }
     }
 
 
@@ -453,9 +464,9 @@ END";
         if ( id is null ) { return default; }
 
         var parameters = new DynamicParameters();
-        parameters.Add( ID, id );
+        parameters.Add( nameof(id), id );
 
-        string sql = @$"SELECT {IDKey} FROM {SchemaTableName} WHERE ( id = IFNULL((SELECT MIN({IDKey}) FROM {SchemaTableName} WHERE {IDKey} > @{ID}), 0) )";
+        string sql = @$"SELECT {IDKey} FROM {SchemaTableName} WHERE ( id = IFNULL((SELECT MIN({IDKey}) FROM {SchemaTableName} WHERE {IDKey} > @{nameof(id)}), 0) )";
         if ( token.IsCancellationRequested ) { return default; }
 
         try { return await connection.ExecuteScalarAsync<Guid>( sql, parameters, transaction ); }
@@ -647,7 +658,7 @@ END";
         try
         {
             IEnumerable<TRecord> records = await connection.QueryAsync<TRecord>( sql, parameters, transaction );
-            return GetArray( records );
+            return Database.GetArray( records );
         }
         catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
     }

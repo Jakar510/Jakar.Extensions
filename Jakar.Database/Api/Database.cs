@@ -88,6 +88,16 @@ public abstract partial class Database : Randoms, IConnectableDb, IAsyncDisposab
         var table = new DbTable<TRecord>( this );
         return AddDisposable( table );
     }
+    
+
+    [MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization )]
+    public static T[] GetArray<T>( IEnumerable<T> enumerable ) => enumerable switch
+                                                                  {
+                                                                      List<T> list       => list.GetInternalArray(),
+                                                                      Collection<T> list => list.GetInternalArray(),
+                                                                      T[] array          => array,
+                                                                      _                  => enumerable.ToArray()
+                                                                  };
 
 
     protected abstract DbConnection CreateConnection();

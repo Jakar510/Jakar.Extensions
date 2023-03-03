@@ -33,12 +33,12 @@
 		<PackageReference Include="Blazored.TextEditor" Version="1.0.8" />
 		<PackageReference Include="Blazored.Toast" Version="4.1.0" />
 		<PackageReference Include="Blazored.Video" Version="1.0.1" />
-		<PackageReference Include="Jakar.Extensions" Version="6.7.2" />
+		<PackageReference Include="Jakar.Extensions" Version="6.7.3" />
 		<PackageReference Include="Jakar.Extensions.Hosting" Version="6.7.0" />
 		<PackageReference Include="BlazorComponentUtilities" Version="1.8.0" />
 		<PackageReference Include="BlazorPro.BlazorSize" Version="6.2.0" />
 		<PackageReference Include="PanoramicData.Blazor" Version="2.1.81" />
-		<PackageReference Include="Radzen.Blazor" Version="4.7.4" />
+		<PackageReference Include="Radzen.Blazor" Version="4.7.5" />
 	</ItemGroup>
 
 </Project>
