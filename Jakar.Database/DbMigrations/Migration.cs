@@ -44,7 +44,6 @@ public abstract class Migration<TRecord> : Migration where TRecord : TableRecord
              .AsGuid()
              .NotNullable()
              .PrimaryKey()
-             .Identity()
              .WithDefaultValue( SystemMethods.NewGuid );
 
         table.WithColumn( nameof(TableRecord<TRecord>.DateCreated) )
