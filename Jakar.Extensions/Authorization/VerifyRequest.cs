@@ -3,7 +3,7 @@ namespace Jakar.Extensions;
 
 
 [Serializable]
-public record VerifyRequest : BaseRecord, ILoginRequest, ICredentials
+public class VerifyRequest : BaseClass, ILoginRequest, ICredentials, ICloneable, IEquatable<VerifyRequest>
 {
     public virtual bool IsValid => !string.IsNullOrWhiteSpace( UserLogin ) && !string.IsNullOrWhiteSpace( UserPassword );
 
@@ -26,34 +26,79 @@ public record VerifyRequest : BaseRecord, ILoginRequest, ICredentials
     }
 
 
+    public bool ValidatePassword() => ValidatePassword( PasswordValidator.Default );
+    public bool ValidatePassword( PasswordValidator validator ) => validator.Validate( UserPassword );
+
+
     public virtual NetworkCredential GetCredential( Uri uri, string authType ) => new(UserLogin, UserPassword.ToSecureString());
+
+
+    public VerifyRequest Clone() => new(UserLogin, UserPassword);
+    object ICloneable.Clone() => Clone();
+
+
+    public bool Equals( VerifyRequest? other )
+    {
+        if ( other is null ) { return false; }
+
+        if ( ReferenceEquals( this, other ) ) { return true; }
+
+        return string.Equals( UserLogin, other.UserLogin, StringComparison.Ordinal ) && string.Equals( UserPassword, other.UserPassword, StringComparison.Ordinal );
+    }
+    public override bool Equals( object? other )
+    {
+        if ( other is null ) { return false; }
+
+        if ( ReferenceEquals( this, other ) ) { return true; }
+
+        return other is VerifyRequest request && Equals( request );
+    }
+    public override int GetHashCode() => HashCode.Combine( UserLogin, UserPassword );
+
+
+    public static bool operator ==( VerifyRequest? left, VerifyRequest? right ) => Equals( left, right );
+    public static bool operator !=( VerifyRequest? left, VerifyRequest? right ) => !Equals( left, right );
 }
 
 
 
 [SuppressMessage( "ReSharper", "NullableWarningSuppressionIsUsed" )]
-public record VerifyRequest<T> : VerifyRequest
+public class VerifyRequest<T> : VerifyRequest, IEquatable<VerifyRequest<T>>
 {
-    private VerifyRequest? _request;
+    [JsonProperty( nameof(Data), Required = Required.AllowNull )] public T? Data { get; init; }
 
     public override bool IsValid => Data is IValidator validator
                                         ? base.IsValid && validator.IsValid
                                         : base.IsValid;
 
 
-    [JsonProperty( nameof(Data), Required = Required.AllowNull )] public T? Data { get; init; }
-
-
-    [JsonIgnore]
-    [Obsolete( "Will be removed in a future version" )]
-    public VerifyRequest Request
-    {
-        get => _request ??= this;
-        init => _request = value;
-    }
-
-
     public VerifyRequest() { }
     public VerifyRequest( string?       userLogin, string? userPassword, T? data ) : base( userLogin, userPassword ) => Data = data;
     public VerifyRequest( VerifyRequest request,   T?      data ) : this( request.UserLogin, request.UserPassword, data ) { }
+
+
+    public new VerifyRequest<T> Clone() => new(UserLogin, UserPassword, Data);
+
+
+    public bool Equals( VerifyRequest<T>? other )
+    {
+        if ( other is null ) { return false; }
+
+        if ( ReferenceEquals( this, other ) ) { return true; }
+
+        return base.Equals( other ) && EqualityComparer<T?>.Default.Equals( Data, other.Data );
+    }
+    public override bool Equals( object? other )
+    {
+        if ( other is null ) { return false; }
+
+        if ( ReferenceEquals( this, other ) ) { return true; }
+
+        return other is VerifyRequest<T> request && Equals( request );
+    }
+    public override int GetHashCode() => HashCode.Combine( base.GetHashCode(), Data );
+
+
+    public static bool operator ==( VerifyRequest<T>? left, VerifyRequest<T>? right ) => Equals( left, right );
+    public static bool operator !=( VerifyRequest<T>? left, VerifyRequest<T>? right ) => !Equals( left, right );
 }
