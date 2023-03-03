@@ -42,7 +42,6 @@ public abstract class Migration<TRecord> : Migration where TRecord : TableRecord
 
         table.WithColumn( nameof(TableRecord<TRecord>.ID) )
              .AsGuid()
-             .NotNullable()
              .PrimaryKey()
              .WithDefaultValue( SystemMethods.NewGuid );
 
