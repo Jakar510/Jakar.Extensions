@@ -21,18 +21,12 @@ public abstract class Migration<TRecord> : Migration where TRecord : TableRecord
 
     public override void GetUpExpressions( IMigrationContext context )
     {
-    #pragma warning disable CS0618
-        _dbContext = context.ApplicationContext as Database;
-    #pragma warning restore CS0618
-
+        _dbContext = context.ServiceProvider.GetRequiredService<Database>();
         base.GetUpExpressions( context );
     }
     public override void GetDownExpressions( IMigrationContext context )
     {
-    #pragma warning disable CS0618
-        _dbContext = context.ApplicationContext as Database;
-    #pragma warning restore CS0618
-
+        _dbContext = context.ServiceProvider.GetRequiredService<Database>();
         base.GetDownExpressions( context );
     }
 

@@ -390,34 +390,37 @@ public static class MigrationExtensions
                                               typeof(IDictionary),
                                               typeof(IList) );
     }
-    public static WebApplicationBuilder AddFluentMigrator( this WebApplicationBuilder builder, Func<IMigrationRunnerBuilder, IMigrationRunnerBuilder> addSqlDb, Func<IServiceProvider, string> getConnectionString )
+
+
+    public static WebApplicationBuilder AddFluentMigrator( this WebApplicationBuilder builder, Func<IMigrationRunnerBuilder, IMigrationRunnerBuilder> configureRunner ) =>
+        builder.AddFluentMigrator( configureRunner, ConfigureScanIn, GetConnectionString );
+    public static WebApplicationBuilder AddFluentMigrator( this WebApplicationBuilder                             builder,
+                                                           Func<IMigrationRunnerBuilder, IMigrationRunnerBuilder> configureRunner,
+                                                           Func<IMigrationRunnerBuilder, IMigrationRunnerBuilder> configureScanIn,
+                                                           Func<IServiceProvider, string>                         getConnectionString
+    )
     {
         builder.Services.AddFluentMigratorCore()
-               .ConfigureRunner( configure =>
+               .ConfigureRunner( runner =>
                                  {
-                                     addSqlDb( configure );
+                                     configureRunner( runner );
 
-                                     configure.WithGlobalConnectionString( getConnectionString );
+                                     runner.WithGlobalConnectionString( getConnectionString );
 
-                                     configure.ScanIn( Assembly.GetEntryAssembly() )
-                                              .For.Migrations();
+                                     configureScanIn( runner );
                                  } );
-
-        builder.AddTransient<IMigrationContext>( provider =>
-                                                 {
-                                                     var     querySchema              = provider.GetRequiredService<IQuerySchema>();
-                                                     var     connectionStringAccessor = provider.GetRequiredService<IConnectionStringAccessor>();
-                                                     string? connectionString         = connectionStringAccessor.ConnectionString;
-                                                     return new MigrationContext( querySchema, provider, provider.GetRequiredService<Database>(), connectionString );
-                                                 } );
 
         return builder;
     }
-    public static WebApplicationBuilder AddFluentMigrator( this WebApplicationBuilder builder, Func<IMigrationRunnerBuilder, IMigrationRunnerBuilder> addSqlDb ) =>
-        builder.AddFluentMigrator( addSqlDb, provider => provider.ConnectionString() );
+    public static string GetConnectionString( IServiceProvider provider ) { return provider.ConnectionString(); }
+    public static IMigrationRunnerBuilder ConfigureScanIn( IMigrationRunnerBuilder runner )
+    {
+        return runner.ScanIn( Assembly.GetEntryAssembly(), typeof(UserRecord).Assembly )
+                     .For.All();
+    }
 
 
-//
+    //
 //		/// <summary>
 //		/// junction table / XML
 //		/// </summary>
