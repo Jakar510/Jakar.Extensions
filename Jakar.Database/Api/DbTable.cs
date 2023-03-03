@@ -350,8 +350,10 @@ public class DbTable<TRecord> : Constants<TRecord>, IConnectableDb, IAsyncDispos
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask<TRecord> Insert( DbConnection connection, DbTransaction transaction, TRecord record, CancellationToken token = default )
     {
-        string sql        = $@"SET NOCOUNT ON INSERT INTO {SchemaTableName} ({string.Join( ',', ColumnNames )}) values ({string.Join( ',', VariableNames )}) SELECT scope_identity();";
-        var    parameters = new DynamicParameters( record );
+        string sql = $@"SET IDENTITY_INSERT {SchemaTableName} OFF;
+SET NOCOUNT ON INSERT INTO {SchemaTableName} ({string.Join( ',', ColumnNames )}) OUTPUT INSERTED.ID values ({string.Join( ',', VariableNames )});";
+
+        var parameters = new DynamicParameters( record );
 
         if ( token.IsCancellationRequested ) { return record; }
 
@@ -372,12 +374,53 @@ public class DbTable<TRecord> : Constants<TRecord>, IConnectableDb, IAsyncDispos
                                                                                               : "OR",
                                                                                           parameters.ParameterNames.Select( KeyValuePair ) )})
 BEGIN
-    SET NOCOUNT ON INSERT INTO {SchemaTableName} ({string.Join( ',', ColumnNames )}) values ({string.Join( ',', VariableNames )}) SELECT scope_identity()
+    SET IDENTITY_INSERT {SchemaTableName} OFF;
+    SET NOCOUNT ON INSERT INTO {SchemaTableName} ({string.Join( ',', ColumnNames )}) OUTPUT INSERTED.ID values ({string.Join( ',', VariableNames )})
 END
 
 ELSE 
 BEGIN 
     SELECT NULL FROM {SchemaTableName} TOP 1
+END";
+
+
+        if ( token.IsCancellationRequested ) { return default; }
+
+        try
+        {
+            Guid? id = await connection.ExecuteScalarAsync<Guid?>( sql, parameters, transaction );
+
+            if ( id.HasValue ) { return record.NewID( id.Value ); }
+
+            return default;
+        }
+        catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
+    }
+
+
+    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
+    public virtual async ValueTask<TRecord?> InsertOrUpdate( DbConnection connection, DbTransaction transaction, TRecord record, bool matchAll, DynamicParameters parameters, CancellationToken token = default )
+    {
+        string sql = $@"IF NOT EXISTS(SELECT * FROM {SchemaTableName} WHERE {string.Join( matchAll
+                                                                                              ? "AND"
+                                                                                              : "OR",
+                                                                                          parameters.ParameterNames.Select( KeyValuePair ) )})
+BEGIN
+    SET IDENTITY_INSERT {SchemaTableName} OFF;
+    SET NOCOUNT ON INSERT INTO {SchemaTableName} ({string.Join( ',', ColumnNames )}) OUTPUT INSERTED.ID values ({string.Join( ',', VariableNames )})
+END
+
+ELSE 
+BEGIN 
+    UPDATE {SchemaTableName} SET {string.Join( ',', KeyValuePairs )} WHERE {IDKey} = @{string.Join( matchAll
+                                                                                                        ? "AND"
+                                                                                                        : "OR",
+                                                                                                    parameters.ParameterNames.Select( KeyValuePair ) )};
+
+    SELECT {IDKey} FROM {SchemaTableName} WHERE {string.Join( matchAll
+                                                                  ? "AND"
+                                                                  : "OR",
+                                                              parameters.ParameterNames.Select( KeyValuePair ) )} TOP 1
 END";
 
 

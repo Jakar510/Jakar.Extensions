@@ -103,7 +103,7 @@ public abstract class MigrateUserTable : Migration<UserRecord>
              .Nullable();
 
         table.WithColumn( nameof(UserRecord.PreferredLanguage) )
-             .AsInt32()
+             .AsString( 256 )
              .Nullable();
 
         table.WithColumn( nameof(UserRecord.SubscriptionExpires) )

@@ -64,8 +64,6 @@ public abstract class Migration<TRecord> : Migration where TRecord : TableRecord
 
         return table;
     }
-    protected IInsertDataSyntax StartIdentityInsert() => Insert.IntoTable( TableName )
-                                                               .WithIdentityInsert();
 
 
     protected IInsertDataSyntax StartInsert() => Insert.IntoTable( TableName );
