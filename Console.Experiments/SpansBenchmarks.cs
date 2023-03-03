@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 
 
 
-namespace Console.Experiments;
+namespace Experiments;
 
 
 /*

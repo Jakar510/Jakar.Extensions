@@ -2,7 +2,7 @@
 // 04/25/2022  9:42 PM
 
 #nullable enable
-namespace Console.Experiments;
+namespace Experiments;
 
 
 /*

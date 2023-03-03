@@ -10,7 +10,13 @@ public sealed class TypePropertiesCache : ConcurrentDictionary<Type, TypePropert
     public static TypePropertiesCache Current { get; } = new();
 
 
-    static TypePropertiesCache() => Current.Register( Assembly.GetCallingAssembly() );
+    static TypePropertiesCache()
+    {
+        Assembly? assembly = Assembly.GetEntryAssembly();
+        if ( assembly is not null ) { Current.Register( assembly ); }
+
+        Current.Register( Assembly.GetCallingAssembly() );
+    }
     internal TypePropertiesCache() { }
 
 
@@ -37,7 +43,7 @@ public sealed class TypePropertiesCache : ConcurrentDictionary<Type, TypePropert
     }
 
 
-    public void Register( Assembly assembly ) => Register( assembly.DefinedTypes.Where( x => x.GetCustomAttribute<SerializableAttribute>( true ) is not null ) );
+    public void Register( Assembly assembly ) => Register( assembly.DefinedTypes.Where( x => x.GetCustomAttribute<TableAttribute>( true ) is not null ) );
     public void Register( IEnumerable<Type> types )
     {
         foreach ( Type type in types ) { Register( type ); }
@@ -119,10 +125,14 @@ public sealed class TypePropertiesCache : ConcurrentDictionary<Type, TypePropert
         public sealed class Descriptors : IReadOnlyDictionary<string, Descriptor>
         {
             private readonly IReadOnlyDictionary<string, Descriptor> _dictionary;
+
+
             public Descriptor this[ string key ] => _dictionary[key];
             public IEnumerable<Descriptor> Values => _dictionary.Values;
             public IEnumerable<string>     Keys   => _dictionary.Keys;
             public int                     Count  => _dictionary.Count;
+
+
             public Descriptors( Dictionary<string, Descriptor>                          dictionary ) => _dictionary = dictionary;
             public static implicit operator Descriptors( Dictionary<string, Descriptor> dictionary ) => new(dictionary);
 

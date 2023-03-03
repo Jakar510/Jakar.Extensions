@@ -5,8 +5,7 @@ using System.Text;
 try
 {
     "Hello World!".WriteToConsole();
-
-
+    Console.WriteLine();
 }
 catch ( Exception e ) { e.WriteToConsole(); }
 finally { "Bye".WriteToConsole(); }

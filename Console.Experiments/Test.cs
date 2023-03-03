@@ -82,7 +82,7 @@
 //                                                          .Complete();
 // }
 
-namespace Console.Experiments;
+namespace Experiments;
 
 
 public sealed record Test
