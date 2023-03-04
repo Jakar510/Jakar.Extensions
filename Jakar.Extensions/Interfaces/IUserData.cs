@@ -33,7 +33,7 @@ public interface IUserData : JsonModels.IJsonModel
 
 
 
-public class UserData : ObservableClass, IUserData
+public class UserData : ObservableClass, IUserData, IEquatable<UserData>, IComparable<UserData>, IComparable
 {
     private IDictionary<string, JToken?>? _additionalData;
     private string                        _address           = string.Empty;
@@ -242,4 +242,131 @@ public class UserData : ObservableClass, IUserData
         return this;
     }
     IUserData IUserData.Update( IUserData value ) => Update( value );
+
+
+    public bool Equals( UserData? other )
+    {
+        if ( ReferenceEquals( null, other ) ) { return false; }
+
+        if ( ReferenceEquals( this, other ) ) { return true; }
+
+        return Equals( _additionalData, other._additionalData ) && _address == other._address && _city == other._city && _company == other._company && _country == other._country && _department == other._department &&
+               _description == other._description && _email == other._email && _ext == other._ext && _firstName == other._firstName && _fullName == other._fullName && _lastName == other._lastName && _line1 == other._line1 && _line2 == other._line2 &&
+               _phoneNumber == other._phoneNumber && _postalCode == other._postalCode && _state == other._state && _title == other._title && _website == other._website && _preferredLanguage == other._preferredLanguage;
+    }
+    public override bool Equals( object? obj )
+    {
+        if ( ReferenceEquals( null, obj ) ) { return false; }
+
+        if ( ReferenceEquals( this, obj ) ) { return true; }
+
+        if ( obj.GetType() != this.GetType() ) { return false; }
+
+        return Equals( (UserData)obj );
+    }
+    public override int GetHashCode()
+    {
+        var hashCode = new HashCode();
+        hashCode.Add( _additionalData );
+        hashCode.Add( _address );
+        hashCode.Add( _city );
+        hashCode.Add( _company );
+        hashCode.Add( _country );
+        hashCode.Add( _department );
+        hashCode.Add( _description );
+        hashCode.Add( _email );
+        hashCode.Add( _ext );
+        hashCode.Add( _firstName );
+        hashCode.Add( _fullName );
+        hashCode.Add( _lastName );
+        hashCode.Add( _line1 );
+        hashCode.Add( _line2 );
+        hashCode.Add( _phoneNumber );
+        hashCode.Add( _postalCode );
+        hashCode.Add( _state );
+        hashCode.Add( _title );
+        hashCode.Add( _website );
+        hashCode.Add( (int)_preferredLanguage );
+        return hashCode.ToHashCode();
+    }
+    public int CompareTo( UserData? other )
+    {
+        if ( ReferenceEquals( this, other ) ) { return 0; }
+
+        if ( ReferenceEquals( null, other ) ) { return 1; }
+
+        int addressComparison = string.Compare( _address, other._address, StringComparison.Ordinal );
+        if ( addressComparison != 0 ) { return addressComparison; }
+
+        int cityComparison = string.Compare( _city, other._city, StringComparison.Ordinal );
+        if ( cityComparison != 0 ) { return cityComparison; }
+
+        int companyComparison = string.Compare( _company, other._company, StringComparison.Ordinal );
+        if ( companyComparison != 0 ) { return companyComparison; }
+
+        int countryComparison = string.Compare( _country, other._country, StringComparison.Ordinal );
+        if ( countryComparison != 0 ) { return countryComparison; }
+
+        int departmentComparison = string.Compare( _department, other._department, StringComparison.Ordinal );
+        if ( departmentComparison != 0 ) { return departmentComparison; }
+
+        int descriptionComparison = string.Compare( _description, other._description, StringComparison.Ordinal );
+        if ( descriptionComparison != 0 ) { return descriptionComparison; }
+
+        int emailComparison = string.Compare( _email, other._email, StringComparison.Ordinal );
+        if ( emailComparison != 0 ) { return emailComparison; }
+
+        int extComparison = string.Compare( _ext, other._ext, StringComparison.Ordinal );
+        if ( extComparison != 0 ) { return extComparison; }
+
+        int firstNameComparison = string.Compare( _firstName, other._firstName, StringComparison.Ordinal );
+        if ( firstNameComparison != 0 ) { return firstNameComparison; }
+
+        int fullNameComparison = string.Compare( _fullName, other._fullName, StringComparison.Ordinal );
+        if ( fullNameComparison != 0 ) { return fullNameComparison; }
+
+        int lastNameComparison = string.Compare( _lastName, other._lastName, StringComparison.Ordinal );
+        if ( lastNameComparison != 0 ) { return lastNameComparison; }
+
+        int line1Comparison = string.Compare( _line1, other._line1, StringComparison.Ordinal );
+        if ( line1Comparison != 0 ) { return line1Comparison; }
+
+        int line2Comparison = string.Compare( _line2, other._line2, StringComparison.Ordinal );
+        if ( line2Comparison != 0 ) { return line2Comparison; }
+
+        int phoneNumberComparison = string.Compare( _phoneNumber, other._phoneNumber, StringComparison.Ordinal );
+        if ( phoneNumberComparison != 0 ) { return phoneNumberComparison; }
+
+        int postalCodeComparison = string.Compare( _postalCode, other._postalCode, StringComparison.Ordinal );
+        if ( postalCodeComparison != 0 ) { return postalCodeComparison; }
+
+        int stateComparison = string.Compare( _state, other._state, StringComparison.Ordinal );
+        if ( stateComparison != 0 ) { return stateComparison; }
+
+        int titleComparison = string.Compare( _title, other._title, StringComparison.Ordinal );
+        if ( titleComparison != 0 ) { return titleComparison; }
+
+        int websiteComparison = string.Compare( _website, other._website, StringComparison.Ordinal );
+        if ( websiteComparison != 0 ) { return websiteComparison; }
+
+        return _preferredLanguage.CompareTo( other._preferredLanguage );
+    }
+    public int CompareTo( object? obj )
+    {
+        if ( ReferenceEquals( null, obj ) ) { return 1; }
+
+        if ( ReferenceEquals( this, obj ) ) { return 0; }
+
+        return obj is UserData other
+                   ? CompareTo( other )
+                   : throw new ArgumentException( $"Object must be of type {nameof(UserData)}" );
+    }
+
+
+    public static bool operator ==( UserData? left, UserData? right ) => Equalizer<UserData>.Default.Equals( left, right );
+    public static bool operator !=( UserData? left, UserData? right ) => !Equalizer<UserData>.Default.Equals( left, right );
+    public static bool operator <( UserData?  left, UserData? right ) => Sorter<UserData>.Default.Compare( left, right ) < 0;
+    public static bool operator >( UserData?  left, UserData? right ) => Sorter<UserData>.Default.Compare( left, right ) > 0;
+    public static bool operator <=( UserData? left, UserData? right ) => Sorter<UserData>.Default.Compare( left, right ) <= 0;
+    public static bool operator >=( UserData? left, UserData? right ) => Sorter<UserData>.Default.Compare( left, right ) >= 0;
 }
