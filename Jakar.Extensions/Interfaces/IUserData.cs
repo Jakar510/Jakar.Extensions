@@ -33,27 +33,36 @@ public interface IUserData : JsonModels.IJsonModel
 
 
 
-public record UserData : BaseJsonModelRecord, IUserData
+public class UserData : ObservableClass, IUserData
 {
-    private string            _address           = string.Empty;
-    private string            _city              = string.Empty;
-    private string            _company           = string.Empty;
-    private string            _country           = string.Empty;
-    private string            _department        = string.Empty;
-    private string            _description       = string.Empty;
-    private string            _email             = string.Empty;
-    private string            _ext               = string.Empty;
-    private string            _firstName         = string.Empty;
-    private string            _fullName          = string.Empty;
-    private string            _lastName          = string.Empty;
-    private string            _line1             = string.Empty;
-    private string            _line2             = string.Empty;
-    private string            _phoneNumber       = string.Empty;
-    private string            _postalCode        = string.Empty;
-    private string            _state             = string.Empty;
-    private string            _title             = string.Empty;
-    private string            _website           = string.Empty;
-    private SupportedLanguage _preferredLanguage = SupportedLanguage.English;
+    private IDictionary<string, JToken?>? _additionalData;
+    private string                        _address           = string.Empty;
+    private string                        _city              = string.Empty;
+    private string                        _company           = string.Empty;
+    private string                        _country           = string.Empty;
+    private string                        _department        = string.Empty;
+    private string                        _description       = string.Empty;
+    private string                        _email             = string.Empty;
+    private string                        _ext               = string.Empty;
+    private string                        _firstName         = string.Empty;
+    private string                        _fullName          = string.Empty;
+    private string                        _lastName          = string.Empty;
+    private string                        _line1             = string.Empty;
+    private string                        _line2             = string.Empty;
+    private string                        _phoneNumber       = string.Empty;
+    private string                        _postalCode        = string.Empty;
+    private string                        _state             = string.Empty;
+    private string                        _title             = string.Empty;
+    private string                        _website           = string.Empty;
+    private SupportedLanguage             _preferredLanguage = SupportedLanguage.English;
+
+
+    [JsonExtensionData]
+    public IDictionary<string, JToken?>? AdditionalData
+    {
+        get => _additionalData;
+        set => SetProperty( ref _additionalData, value );
+    }
 
 
     [MaxLength( 4096 )]
