@@ -22,7 +22,7 @@ public abstract class MigrateGroupTable : Migration<GroupRecord>
              .Nullable();
 
         table.WithColumn( nameof(GroupRecord.OwnerID) )
-             .AsString( 256 )
+             .AsGuid()
              .NotNullable();
 
         return table;

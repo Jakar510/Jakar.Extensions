@@ -27,11 +27,11 @@ public abstract class MigrateUserTable : Migration<UserRecord>
 
         table.WithColumn( nameof(UserRecord.FullName) )
              .AsString( 512 )
-             .Nullable();
+             .NotNullable();
 
         table.WithColumn( nameof(UserRecord.Description) )
              .AsString( 256 )
-             .Nullable();
+             .NotNullable();
 
         table.WithColumn( nameof(UserRecord.SessionID) )
              .AsGuid()
@@ -48,82 +48,82 @@ public abstract class MigrateUserTable : Migration<UserRecord>
 
         table.WithColumn( nameof(UserRecord.Address) )
              .AsString( 4096 )
-             .Nullable();
+             .NotNullable();
 
         table.WithColumn( nameof(UserRecord.Line1) )
              .AsString( 512 )
-             .Nullable();
+             .NotNullable();
 
         table.WithColumn( nameof(UserRecord.Line2) )
              .AsString( 256 )
-             .Nullable();
+             .NotNullable();
 
         table.WithColumn( nameof(UserRecord.City) )
              .AsString( 256 )
-             .Nullable();
+             .NotNullable();
 
-        table.WithColumn( nameof(UserRecord.State) )
+        table.WithColumn( nameof(UserRecord.StateOrProvince) )
              .AsString( 256 )
-             .Nullable();
+             .NotNullable();
 
         table.WithColumn( nameof(UserRecord.Country) )
              .AsString( 256 )
-             .Nullable();
+             .NotNullable();
 
         table.WithColumn( nameof(UserRecord.PostalCode) )
              .AsString( 256 )
-             .Nullable();
+             .NotNullable();
 
         table.WithColumn( nameof(UserRecord.Website) )
              .AsString( 4096 )
-             .Nullable();
+             .NotNullable();
 
         table.WithColumn( nameof(UserRecord.Email) )
              .AsString( 1024 )
-             .Nullable();
+             .NotNullable();
 
         table.WithColumn( nameof(UserRecord.PhoneNumber) )
              .AsString( 256 )
-             .Nullable();
+             .NotNullable();
 
         table.WithColumn( nameof(UserRecord.Ext) )
              .AsString( 256 )
-             .Nullable();
+             .NotNullable();
 
         table.WithColumn( nameof(UserRecord.Title) )
              .AsString( 256 )
-             .Nullable();
+             .NotNullable();
 
         table.WithColumn( nameof(UserRecord.Department) )
              .AsString( 256 )
-             .Nullable();
+             .NotNullable();
 
         table.WithColumn( nameof(UserRecord.Company) )
              .AsString( 256 )
-             .Nullable();
+             .NotNullable();
 
         table.WithColumn( nameof(UserRecord.PreferredLanguage) )
              .AsString( 256 )
-             .Nullable();
+             .NotNullable();
 
         table.WithColumn( nameof(UserRecord.SubscriptionExpires) )
-             .AsDateTime2()
+             .AsDateTimeOffset()
              .Nullable();
 
         table.WithColumn( nameof(UserRecord.SubscriptionID) )
-             .AsString( 256 )
+             .AsGuid()
              .Nullable();
 
         table.WithColumn( nameof(UserRecord.EscalateTo) )
-             .AsString( 255 )
+             .AsGuid()
              .Nullable();
 
         table.WithColumn( nameof(UserRecord.IsActive) )
              .AsBoolean()
              .NotNullable();
 
-        table.WithColumn( nameof(UserRecord.LastActive) )
-             .AsDateTime2()
+        table.WithColumn( nameof(UserRecord.LastLogin) )
+             .AsDateTimeOffset()
              .Nullable();
 
         table.WithColumn( nameof(UserRecord.IsDisabled) )
@@ -139,15 +139,15 @@ public abstract class MigrateUserTable : Migration<UserRecord>
              .NotNullable();
 
         table.WithColumn( nameof(UserRecord.LastBadAttempt) )
-             .AsDateTime2()
+             .AsDateTimeOffset()
              .Nullable();
 
         table.WithColumn( nameof(UserRecord.LockDate) )
-             .AsDateTime2()
+             .AsDateTimeOffset()
              .Nullable();
 
         table.WithColumn( nameof(UserRecord.LockoutEnd) )
-             .AsDateTime2()
+             .AsDateTimeOffset()
              .Nullable();
 
         table.WithColumn( nameof(UserRecord.RefreshToken) )
@@ -155,11 +155,11 @@ public abstract class MigrateUserTable : Migration<UserRecord>
              .Nullable();
 
         table.WithColumn( nameof(UserRecord.RefreshTokenExpiryTime) )
-             .AsDateTime2()
+             .AsDateTimeOffset()
              .Nullable();
 
         table.WithColumn( nameof(UserRecord.TokenExpiration) )
-             .AsDateTime2()
+             .AsDateTimeOffset()
              .Nullable();
 
         table.WithColumn( nameof(UserRecord.IsEmailConfirmed) )
@@ -176,11 +176,11 @@ public abstract class MigrateUserTable : Migration<UserRecord>
 
         table.WithColumn( nameof(UserRecord.SecurityStamp) )
              .AsString( TokenValidationParameters.DefaultMaximumTokenSizeInBytes )
-             .Nullable();
+             .NotNullable();
 
         table.WithColumn( nameof(UserRecord.ConcurrencyStamp) )
              .AsString( TokenValidationParameters.DefaultMaximumTokenSizeInBytes )
-             .Nullable();
+             .NotNullable();
 
         table.WithColumn( nameof(UserRecord.AdditionalData) )
              .AsString( int.MaxValue )
@@ -188,7 +188,7 @@ public abstract class MigrateUserTable : Migration<UserRecord>
 
         table.WithColumn( nameof(UserRecord.PasswordHash) )
              .AsString( TokenValidationParameters.DefaultMaximumTokenSizeInBytes )
-             .Nullable();
+             .NotNullable();
 
         table.WithColumn( nameof(UserRecord.Rights) )
              .AsString( TokenValidationParameters.DefaultMaximumTokenSizeInBytes )

@@ -12,11 +12,11 @@ public abstract class MigrateUserRoleTable : Migration<UserRoleRecord>
         ICreateTableWithColumnSyntax table = base.CreateTable();
 
         table.WithColumn( nameof(UserRoleRecord.KeyID) )
-             .AsString( 256 )
+             .AsGuid()
              .NotNullable();
 
         table.WithColumn( nameof(UserRoleRecord.ValueID) )
-             .AsString( 256 )
+             .AsGuid()
              .NotNullable();
 
         return table;

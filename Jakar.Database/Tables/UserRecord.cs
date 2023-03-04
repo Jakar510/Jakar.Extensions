@@ -4,26 +4,9 @@
 namespace Jakar.Database;
 
 
-/// <summary>
-///     <para>
-///         <see cref="IUserID"/>
-///     </para>
-///     <para>
-///         <see cref="IUserData"/>
-///     </para>
-///     <para>
-///         <see cref="IUserControl"/>
-///     </para>
-///     <para>
-///         <see cref="IUserSubscription"/>
-///     </para>
-///     <para>
-///         <see cref="IRefreshToken"/>
-///     </para>
-/// </summary>
 [Serializable]
 [Table( "Users" )]
-public sealed partial record UserRecord : TableRecord<UserRecord>, JsonModels.IJsonStringModel, IRefreshToken, IUserControl, IUserID, IUserDataRecord, IUserSecurity, IUserSubscription
+public sealed partial record UserRecord : TableRecord<UserRecord>, JsonModels.IJsonStringModel, IRefreshToken, IUserID, IUserDataRecord, IUserSubscription
 {
     public UserRecord() { }
     public UserRecord( IUserData data, string? rights, UserRecord? caller = default ) : this( Guid.NewGuid(), caller )
@@ -36,7 +19,7 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, JsonModels.IJ
         Line1             = data.Line1;
         Line2             = data.Line2;
         City              = data.City;
-        State             = data.State;
+        StateOrProvince   = data.StateOrProvince;
         Country           = data.Country;
         PostalCode        = data.PostalCode;
         Description       = data.Description;
@@ -109,7 +92,7 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, JsonModels.IJ
 
     public UserRecord ClearRefreshToken( string securityStamp )
     {
-        RefreshToken           = default;
+        RefreshToken           = string.Empty;
         RefreshTokenExpiryTime = default;
         SecurityStamp          = securityStamp;
         return this;
@@ -175,6 +158,16 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, JsonModels.IJ
         await UserRecoveryCodeRecord.Where( connection, transaction, db.UserRecoveryCodes, db.RecoveryCodes, this, token );
 
 
+    public UserRecord SetSubscription<TRecord>( TRecord record ) where TRecord : TableRecord<TRecord>, IUserSubscription
+    {
+        SubscriptionExpires = record.SubscriptionExpires;
+        SubscriptionID      = record.SubscriptionID;
+        return this;
+    }
+    public async ValueTask<TRecord?> GetSubscription<TRecord>( DbConnection connection, DbTransaction transaction, DbTable<TRecord> table, CancellationToken token ) where TRecord : TableRecord<TRecord>, IUserSubscription =>
+        await table.Get( connection, transaction, SubscriptionID, token );
+
+
 
     #region Passwords
 
@@ -202,7 +195,34 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, JsonModels.IJ
     ///     </para>
     ///     <see cref="PasswordHasher{TRecord}"/>
     /// </summary>
-    public PasswordVerificationResult VerifyPassword( string password ) => _hasher.VerifyHashedPassword( this, PasswordHash, password );
+    public bool VerifyPassword( string password )
+    {
+        PasswordVerificationResult result = _hasher.VerifyHashedPassword( this, PasswordHash, password );
+
+        switch ( result )
+        {
+            case PasswordVerificationResult.Failed:
+            {
+                MarkBadLogin();
+                return false;
+            }
+
+            case PasswordVerificationResult.Success:
+            {
+                LastLogin = DateTimeOffset.UtcNow;
+                return true;
+            }
+
+            case PasswordVerificationResult.SuccessRehashNeeded:
+            {
+                UpdatePassword( password );
+                LastLogin = DateTimeOffset.UtcNow;
+                return true;
+            }
+
+            default: throw new OutOfRangeException( nameof(result), result );
+        }
+    }
 
     #endregion
 
@@ -210,8 +230,8 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, JsonModels.IJ
 
     #region Owners
 
-    public async ValueTask<UserRecord?> GetBoss( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => !string.IsNullOrEmpty( EscalateTo )
-                                                                                                                                                    ? await db.Users.Get( connection, transaction, EscalateTo, token )
+    public async ValueTask<UserRecord?> GetBoss( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => EscalateTo.HasValue
+                                                                                                                                                    ? await db.Users.Get( connection, transaction, EscalateTo.Value, token )
                                                                                                                                                     : default;
 
 
@@ -226,46 +246,65 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, JsonModels.IJ
 
     public UserRecord MarkBadLogin()
     {
-        LastBadAttempt =  DateTimeOffset.UtcNow;
         BadLogins      += 1;
         IsDisabled     =  BadLogins > 5;
+        LastBadAttempt =  DateTimeOffset.UtcNow;
 
         return IsDisabled
                    ? Lock()
                    : Unlock();
     }
-    public UserRecord SetActive()
+    public UserRecord SetActive( bool? isActive = default )
     {
-        LastActive = DateTimeOffset.UtcNow;
-        IsDisabled = false;
+        if ( isActive is not null ) { IsActive = isActive.Value; }
+
         return this;
+    }
+
+
+    public bool TryEnable()
+    {
+        if ( LockoutEnd.HasValue && DateTimeOffset.UtcNow <= LockoutEnd.Value ) { Enable(); }
+
+        return !IsDisabled && IsActive;
     }
     public UserRecord Disable()
     {
+        IsActive   = false;
         IsDisabled = true;
-        return Lock();
-    }
-    public UserRecord Lock() => Lock( TimeSpan.FromHours( 6 ) );
-    public UserRecord Lock( in TimeSpan offset )
-    {
-        IsDisabled = true;
-        LockDate   = DateTimeOffset.UtcNow;
-        LockoutEnd = LockDate + offset;
         return this;
     }
     public UserRecord Enable()
     {
-        LockDate = default;
-        IsActive = true;
-        return Unlock();
+        IsDisabled = false;
+        IsActive   = true;
+        return this;
     }
+
+
+    public UserRecord Reset()
+    {
+        BadLogins = 0;
+
+        return Unlock()
+              .Enable()
+              .SetActive( true );
+    }
+
+
     public UserRecord Unlock()
     {
-        BadLogins      = 0;
-        IsDisabled     = BadLogins > 5;
-        LastBadAttempt = default;
-        LockDate       = default;
-        LockoutEnd     = default;
+        IsLocked   = false;
+        LockDate   = default;
+        LockoutEnd = default;
+        return this;
+    }
+    public UserRecord Lock() => Lock( TimeSpan.FromHours( 6 ) );
+    public UserRecord Lock( in TimeSpan offset )
+    {
+        IsLocked   = true;
+        LockDate   = DateTimeOffset.UtcNow;
+        LockoutEnd = LockDate + offset;
         return this;
     }
 
@@ -295,7 +334,7 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, JsonModels.IJ
         Line1             = value.Line1;
         Line2             = value.Line2;
         City              = value.City;
-        State             = value.State;
+        StateOrProvince   = value.StateOrProvince;
         Country           = value.Country;
         PostalCode        = value.PostalCode;
         Description       = value.Description;
@@ -319,7 +358,7 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, JsonModels.IJ
 
     public UserRecord ClearRefreshToken()
     {
-        RefreshToken           = default;
+        RefreshToken           = string.Empty;
         RefreshTokenExpiryTime = default;
         return this;
     }
@@ -416,29 +455,29 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, JsonModels.IJ
 
         if ( types.HasFlag( ClaimType.LastName ) ) { claims.Add( new Claim( ClaimTypes.Surname, LastName, ClaimValueTypes.String ) ); }
 
-        if ( types.HasFlag( ClaimType.FullName ) ) { claims.Add( new Claim( ClaimTypes.Name, FullName ?? string.Empty, ClaimValueTypes.String ) ); }
+        if ( types.HasFlag( ClaimType.FullName ) ) { claims.Add( new Claim( ClaimTypes.Name, FullName, ClaimValueTypes.String ) ); }
 
-        if ( types.HasFlag( ClaimType.Gender ) ) { claims.Add( new Claim( ClaimTypes.Gender, Gender ?? string.Empty, ClaimValueTypes.String ) ); }
+        if ( types.HasFlag( ClaimType.Gender ) ) { claims.Add( new Claim( ClaimTypes.Gender, Gender, ClaimValueTypes.String ) ); }
 
         if ( types.HasFlag( ClaimType.SubscriptionExpiration ) ) { claims.Add( new Claim( ClaimTypes.Expiration, SubscriptionExpires?.ToString() ?? string.Empty, ClaimValueTypes.DateTime ) ); }
 
         if ( types.HasFlag( ClaimType.Expired ) ) { claims.Add( new Claim( ClaimTypes.Expired, (SubscriptionExpires > DateTimeOffset.UtcNow).ToString(), ClaimValueTypes.Boolean ) ); }
 
-        if ( types.HasFlag( ClaimType.Email ) ) { claims.Add( new Claim( ClaimTypes.Email, Email ?? string.Empty, ClaimValueTypes.String ) ); }
+        if ( types.HasFlag( ClaimType.Email ) ) { claims.Add( new Claim( ClaimTypes.Email, Email, ClaimValueTypes.String ) ); }
 
-        if ( types.HasFlag( ClaimType.MobilePhone ) ) { claims.Add( new Claim( ClaimTypes.MobilePhone, PhoneNumber ?? string.Empty, ClaimValueTypes.String ) ); }
+        if ( types.HasFlag( ClaimType.MobilePhone ) ) { claims.Add( new Claim( ClaimTypes.MobilePhone, PhoneNumber, ClaimValueTypes.String ) ); }
 
-        if ( types.HasFlag( ClaimType.StreetAddress ) ) { claims.Add( new Claim( ClaimTypes.StreetAddress, Line1 ?? string.Empty, ClaimValueTypes.String ) ); }
+        if ( types.HasFlag( ClaimType.StreetAddressLine1 ) ) { claims.Add( new Claim( ClaimTypes.StreetAddress, Line1, ClaimValueTypes.String ) ); }
 
-        if ( types.HasFlag( ClaimType.Locality ) ) { claims.Add( new Claim( ClaimTypes.Locality, Line2 ?? string.Empty, ClaimValueTypes.String ) ); }
+        if ( types.HasFlag( ClaimType.StreetAddressLine2 ) ) { claims.Add( new Claim( ClaimTypes.Locality, Line2, ClaimValueTypes.String ) ); }
 
-        if ( types.HasFlag( ClaimType.State ) ) { claims.Add( new Claim( ClaimTypes.Country, State ?? string.Empty, ClaimValueTypes.String ) ); }
+        if ( types.HasFlag( ClaimType.State ) ) { claims.Add( new Claim( ClaimTypes.Country, StateOrProvince, ClaimValueTypes.String ) ); }
 
-        if ( types.HasFlag( ClaimType.Country ) ) { claims.Add( new Claim( ClaimTypes.Country, Country ?? string.Empty, ClaimValueTypes.String ) ); }
+        if ( types.HasFlag( ClaimType.Country ) ) { claims.Add( new Claim( ClaimTypes.Country, Country, ClaimValueTypes.String ) ); }
 
-        if ( types.HasFlag( ClaimType.PostalCode ) ) { claims.Add( new Claim( ClaimTypes.PostalCode, PostalCode ?? string.Empty, ClaimValueTypes.String ) ); }
+        if ( types.HasFlag( ClaimType.PostalCode ) ) { claims.Add( new Claim( ClaimTypes.PostalCode, PostalCode, ClaimValueTypes.String ) ); }
 
-        if ( types.HasFlag( ClaimType.WebSite ) ) { claims.Add( new Claim( ClaimTypes.Webpage, Website ?? string.Empty, ClaimValueTypes.String ) ); }
+        if ( types.HasFlag( ClaimType.WebSite ) ) { claims.Add( new Claim( ClaimTypes.Webpage, Website, ClaimValueTypes.String ) ); }
 
         if ( types.HasFlag( ClaimType.Groups ) ) { claims.AddRange( from record in groups select new Claim( ClaimTypes.GroupSid, record.NameOfGroup, ClaimValueTypes.String ) ); }
 
@@ -446,33 +485,104 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, JsonModels.IJ
 
         return claims;
     }
+    public static async ValueTask<UserRecord?> TryFromClaims( DbConnection connection, DbTransaction transaction, Database db, Claim[] claims, ClaimType types, CancellationToken token )
+    {
+        var parameters = new DynamicParameters();
+
+        parameters.Add( nameof(UserName),
+                        claims.Single( x => x.Type == ClaimTypes.NameIdentifier )
+                              .Value );
+
+        parameters.Add( nameof(UserID),
+                        Guid.Parse( claims.Single( x => x.Type == ClaimTypes.Sid )
+                                          .Value ) );
+
+        if ( types.HasFlag( ClaimType.FirstName ) )
+        {
+            parameters.Add( nameof(FirstName),
+                            claims.Single( x => x.Type == ClaimTypes.GivenName )
+                                  .Value );
+        }
+
+        if ( types.HasFlag( ClaimType.LastName ) )
+        {
+            parameters.Add( nameof(LastName),
+                            claims.Single( x => x.Type == ClaimTypes.Surname )
+                                  .Value );
+        }
+
+        if ( types.HasFlag( ClaimType.FullName ) )
+        {
+            parameters.Add( nameof(FullName),
+                            claims.Single( x => x.Type == ClaimTypes.Name )
+                                  .Value );
+        }
+
+        if ( types.HasFlag( ClaimType.SubscriptionExpiration ) )
+        {
+            parameters.Add( nameof(SubscriptionExpires),
+                            claims.Single( x => x.Type == ClaimTypes.Expiration )
+                                  .Value );
+        }
+
+        if ( types.HasFlag( ClaimType.Email ) )
+        {
+            parameters.Add( nameof(Email),
+                            claims.Single( x => x.Type == ClaimTypes.Email )
+                                  .Value );
+        }
+
+        if ( types.HasFlag( ClaimType.MobilePhone ) )
+        {
+            parameters.Add( nameof(PhoneNumber),
+                            claims.Single( x => x.Type == ClaimTypes.MobilePhone )
+                                  .Value );
+        }
+
+        if ( types.HasFlag( ClaimType.StreetAddressLine1 ) )
+        {
+            parameters.Add( nameof(Line1),
+                            claims.Single( x => x.Type == ClaimTypes.StreetAddress )
+                                  .Value );
+        }
+
+        if ( types.HasFlag( ClaimType.StreetAddressLine2 ) )
+        {
+            parameters.Add( nameof(Line2),
+                            claims.Single( x => x.Type == ClaimTypes.Locality )
+                                  .Value );
+        }
+
+        if ( types.HasFlag( ClaimType.State ) )
+        {
+            parameters.Add( nameof(StateOrProvince),
+                            claims.Single( x => x.Type == ClaimTypes.StateOrProvince )
+                                  .Value );
+        }
+
+        if ( types.HasFlag( ClaimType.Country ) )
+        {
+            parameters.Add( nameof(Country),
+                            claims.Single( x => x.Type == ClaimTypes.Country )
+                                  .Value );
+        }
+
+        if ( types.HasFlag( ClaimType.PostalCode ) )
+        {
+            parameters.Add( nameof(PostalCode),
+                            claims.Single( x => x.Type == ClaimTypes.PostalCode )
+                                  .Value );
+        }
+
+        if ( types.HasFlag( ClaimType.WebSite ) )
+        {
+            parameters.Add( nameof(Website),
+                            claims.Single( x => x.Type == ClaimTypes.Webpage )
+                                  .Value );
+        }
+
+        return await db.Users.Get( connection, transaction, true, parameters, token );
+    }
 
     #endregion
-}
-
-
-
-[Flags]
-public enum ClaimType : long
-{
-    None                                                                         = 1 << 0,
-    [Display( Description = ClaimTypes.Sid )]             UserID                 = 1 << 1,
-    [Display( Description = ClaimTypes.NameIdentifier )]  UserName               = 1 << 2,
-    [Display( Description = ClaimTypes.GivenName )]       FirstName              = 1 << 3,
-    [Display( Description = ClaimTypes.Surname )]         LastName               = 1 << 4,
-    [Display( Description = ClaimTypes.Name )]            FullName               = 1 << 5,
-    [Display( Description = ClaimTypes.Gender )]          Gender                 = 1 << 7,
-    [Display( Description = ClaimTypes.Expiration )]      SubscriptionExpiration = 1 << 8,
-    [Display( Description = ClaimTypes.Expiration )]      Expired                = 1 << 9,
-    [Display( Description = ClaimTypes.Email )]           Email                  = 1 << 10,
-    [Display( Description = ClaimTypes.MobilePhone )]     MobilePhone            = 1 << 11,
-    [Display( Description = ClaimTypes.StreetAddress )]   StreetAddress          = 1 << 12,
-    [Display( Description = ClaimTypes.Locality )]        Locality               = 1 << 12,
-    [Display( Description = ClaimTypes.StateOrProvince )] State                  = 1 << 13,
-    [Display( Description = ClaimTypes.Country )]         Country                = 1 << 14,
-    [Display( Description = ClaimTypes.PostalCode )]      PostalCode             = 1 << 15,
-    [Display( Description = ClaimTypes.Webpage )]         WebSite                = 1 << 16,
-    [Display( Description = ClaimTypes.GroupSid )]        Groups                 = 1 << 17,
-    [Display( Description = ClaimTypes.Role )]            Roles                  = 1 << 18,
-    All                                                                          = ~0
 }

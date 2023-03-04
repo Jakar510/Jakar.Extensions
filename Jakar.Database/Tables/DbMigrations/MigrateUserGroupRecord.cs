@@ -12,11 +12,11 @@ public abstract class MigrateUserGroupRecord : Migration<UserGroupRecord>
         ICreateTableWithColumnSyntax table = base.CreateTable();
 
         table.WithColumn( nameof(UserGroupRecord.KeyID) )
-             .AsString( 256 )
+             .AsGuid()
              .NotNullable();
 
         table.WithColumn( nameof(UserGroupRecord.ValueID) )
-             .AsString( 256 )
+             .AsGuid()
              .NotNullable();
 
         return table;

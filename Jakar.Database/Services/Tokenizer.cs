@@ -41,7 +41,7 @@ public class Tokenizer<TName> : ITokenService where TName : IAppName
 
     public virtual ClaimsPrincipal GetPrincipalFromExpiredToken( string token )
     {
-        TokenValidationParameters tokenValidationParameters = _configuration.GetTokenValidationParameters( Issuer, Audience );
+        TokenValidationParameters tokenValidationParameters = _configuration.GetTokenValidationParameters( _db.Options );
         var                       tokenHandler              = new JwtSecurityTokenHandler();
         ClaimsPrincipal?          principal                 = tokenHandler.ValidateToken( token, tokenValidationParameters, out SecurityToken securityToken );
 

@@ -19,37 +19,38 @@ public sealed partial record UserRecord
     private DateTimeOffset?   _refreshTokenExpiryTime;
     private DateTimeOffset?   _subscriptionExpires;
     private DateTimeOffset?   _tokenExpiration;
+    private Guid?             _escalateTo;
     private Guid?             _sessionID;
+    private Guid?             _subscriptionID;
     private int               _badLogins;
-    private string            _firstName    = string.Empty;
-    private string            _lastName     = string.Empty;
-    private string            _passwordHash = string.Empty;
-    private string            _rights       = string.Empty;
-    private string            _userName     = string.Empty;
+    private string            _address          = string.Empty;
+    private string            _city             = string.Empty;
+    private string            _company          = string.Empty;
+    private string            _concurrencyStamp = string.Empty;
+    private string            _country          = string.Empty;
+    private string            _department       = string.Empty;
+    private string            _description      = string.Empty;
+    private string            _email            = string.Empty;
+    private string            _ext              = string.Empty;
+    private string            _firstName        = string.Empty;
+    private string            _fullName         = string.Empty;
+    private string            _gender           = string.Empty;
+    private string            _lastName         = string.Empty;
+    private string            _line1            = string.Empty;
+    private string            _line2            = string.Empty;
+    private string            _passwordHash     = string.Empty;
+    private string            _phoneNumber      = string.Empty;
+    private string            _postalCode       = string.Empty;
+    private string            _refreshToken     = string.Empty;
+    private string            _rights           = string.Empty;
+    private string            _securityStamp    = string.Empty;
+    private string            _stateOrProvince  = string.Empty;
+    private string            _title            = string.Empty;
+    private string            _userName         = string.Empty;
+    private string            _website          = string.Empty;
     private string?           _additionalData;
-    private string?           _address;
-    private string?           _city;
-    private string?           _company;
-    private string?           _concurrencyStamp;
-    private string?           _country;
-    private string?           _department;
-    private string?           _description;
-    private string?           _email;
-    private string?           _escalateTo;
-    private string?           _ext;
-    private string?           _fullName;
-    private string?           _gender;
-    private string?           _line1;
-    private string?           _line2;
-    private string?           _phoneNumber;
-    private string?           _postalCode;
-    private string?           _refreshToken;
-    private string?           _securityStamp;
-    private string?           _state;
-    private string?           _subscriptionID;
-    private string?           _title;
-    private string?           _website;
     private SupportedLanguage _preferredLanguage;
+
 
     IDictionary<string, JToken?>? JsonModels.IJsonModel.AdditionalData
     {
@@ -69,7 +70,7 @@ public sealed partial record UserRecord
 
     [ProtectedPersonalData]
     [MaxLength( 4096 )]
-    public string? Address
+    public string Address
     {
         get => _address;
         set => SetProperty( ref _address, value );
@@ -85,7 +86,7 @@ public sealed partial record UserRecord
 
     [ProtectedPersonalData]
     [MaxLength( 256 )]
-    public string? City
+    public string City
     {
         get => _city;
         set => SetProperty( ref _city, value );
@@ -94,7 +95,7 @@ public sealed partial record UserRecord
 
     [ProtectedPersonalData]
     [MaxLength( 256 )]
-    public string? Company
+    public string Company
     {
         get => _company;
         set => SetProperty( ref _company, value );
@@ -102,7 +103,7 @@ public sealed partial record UserRecord
 
 
     [MaxLength( TokenValidationParameters.DefaultMaximumTokenSizeInBytes )]
-    public string? ConcurrencyStamp
+    public string ConcurrencyStamp
     {
         get => _concurrencyStamp;
         set => SetProperty( ref _concurrencyStamp, value );
@@ -111,7 +112,7 @@ public sealed partial record UserRecord
 
     [ProtectedPersonalData]
     [MaxLength( 256 )]
-    public string? Country
+    public string Country
     {
         get => _country;
         set => SetProperty( ref _country, value );
@@ -120,7 +121,7 @@ public sealed partial record UserRecord
 
     [ProtectedPersonalData]
     [MaxLength( 256 )]
-    public string? Department
+    public string Department
     {
         get => _department;
         set => SetProperty( ref _department, value );
@@ -129,7 +130,7 @@ public sealed partial record UserRecord
 
     [ProtectedPersonalData]
     [MaxLength( 256 )]
-    public string? Description
+    public string Description
     {
         get => _description;
         set => SetProperty( ref _description, value );
@@ -138,13 +139,13 @@ public sealed partial record UserRecord
 
     [ProtectedPersonalData]
     [MaxLength( 1024 )]
-    public string? Email
+    public string Email
     {
         get => _email;
         set => SetProperty( ref _email, value );
     }
     [MaxLength( 256 )]
-    public string? EscalateTo
+    public Guid? EscalateTo
     {
         get => _escalateTo;
         set => SetProperty( ref _escalateTo, value );
@@ -153,7 +154,7 @@ public sealed partial record UserRecord
 
     [ProtectedPersonalData]
     [MaxLength( 256 )]
-    public string? Ext
+    public string Ext
     {
         get => _ext;
         set => SetProperty( ref _ext, value );
@@ -171,14 +172,14 @@ public sealed partial record UserRecord
 
     [ProtectedPersonalData]
     [MaxLength( 512 )]
-    public string? FullName
+    public string FullName
     {
         get => _fullName;
         set => SetProperty( ref _fullName, value );
     }
 
     [MaxLength( 256 )]
-    public string? Gender
+    public string Gender
     {
         get => _gender;
         set => SetProperty( ref _gender, value );
@@ -215,17 +216,17 @@ public sealed partial record UserRecord
         get => _isTwoFactorEnabled;
         set => SetProperty( ref _isTwoFactorEnabled, value );
     }
-
-
-    public DateTimeOffset? LastActive
-    {
-        get => _lastActive;
-        set => SetProperty( ref _lastActive, value );
-    }
     public DateTimeOffset? LastBadAttempt
     {
         get => _lastBadAttempt;
         set => SetProperty( ref _lastBadAttempt, value );
+    }
+
+
+    public DateTimeOffset? LastLogin
+    {
+        get => _lastActive;
+        set => SetProperty( ref _lastActive, value );
     }
 
 
@@ -240,7 +241,7 @@ public sealed partial record UserRecord
 
     [ProtectedPersonalData]
     [MaxLength( 512 )]
-    public string? Line1
+    public string Line1
     {
         get => _line1;
         set => SetProperty( ref _line1, value );
@@ -249,11 +250,12 @@ public sealed partial record UserRecord
 
     [ProtectedPersonalData]
     [MaxLength( 256 )]
-    public string? Line2
+    public string Line2
     {
         get => _line2;
         set => SetProperty( ref _line2, value );
     }
+
     public DateTimeOffset? LockDate
     {
         get => _lockDate;
@@ -276,7 +278,7 @@ public sealed partial record UserRecord
 
     [ProtectedPersonalData]
     [MaxLength( 256 )]
-    public string? PhoneNumber
+    public string PhoneNumber
     {
         get => _phoneNumber;
         set => SetProperty( ref _phoneNumber, value );
@@ -285,7 +287,7 @@ public sealed partial record UserRecord
 
     [ProtectedPersonalData]
     [MaxLength( 256 )]
-    public string? PostalCode
+    public string PostalCode
     {
         get => _postalCode;
         set => SetProperty( ref _postalCode, value );
@@ -300,7 +302,7 @@ public sealed partial record UserRecord
 
 
     [MaxLength( TokenValidationParameters.DefaultMaximumTokenSizeInBytes )]
-    public string? RefreshToken
+    public string RefreshToken
     {
         get => _refreshToken;
         set => SetProperty( ref _refreshToken, value );
@@ -321,7 +323,7 @@ public sealed partial record UserRecord
 
 
     [MaxLength( TokenValidationParameters.DefaultMaximumTokenSizeInBytes )]
-    public string? SecurityStamp
+    public string SecurityStamp
     {
         get => _securityStamp;
         set => SetProperty( ref _securityStamp, value );
@@ -335,10 +337,10 @@ public sealed partial record UserRecord
 
     [ProtectedPersonalData]
     [MaxLength( 256 )]
-    public string? State
+    public string StateOrProvince
     {
-        get => _state;
-        set => SetProperty( ref _state, value );
+        get => _stateOrProvince;
+        set => SetProperty( ref _stateOrProvince, value );
     }
     public DateTimeOffset? SubscriptionExpires
     {
@@ -346,7 +348,7 @@ public sealed partial record UserRecord
         set => SetProperty( ref _subscriptionExpires, value );
     }
     [MaxLength( 256 )]
-    public string? SubscriptionID
+    public Guid? SubscriptionID
     {
         get => _subscriptionID;
         set => SetProperty( ref _subscriptionID, value );
@@ -355,7 +357,7 @@ public sealed partial record UserRecord
 
     [ProtectedPersonalData]
     [MaxLength( 256 )]
-    public string? Title
+    public string Title
     {
         get => _title;
         set => SetProperty( ref _title, value );
@@ -379,7 +381,7 @@ public sealed partial record UserRecord
 
     [ProtectedPersonalData]
     [MaxLength( 4096 )]
-    public string? Website
+    public string Website
     {
         get => _website;
         set => SetProperty( ref _website, value );
@@ -399,7 +401,7 @@ public sealed partial record UserRecord
         hashCode.Add( Line1 );
         hashCode.Add( Line2 );
         hashCode.Add( City );
-        hashCode.Add( State );
+        hashCode.Add( StateOrProvince );
         hashCode.Add( Country );
         hashCode.Add( PostalCode );
         hashCode.Add( Website );
@@ -450,7 +452,7 @@ public sealed partial record UserRecord
         int cityComparison = string.Compare( City, other.City, StringComparison.Ordinal );
         if ( cityComparison != 0 ) { return cityComparison; }
 
-        int stateComparison = string.Compare( State, other.State, StringComparison.Ordinal );
+        int stateComparison = string.Compare( StateOrProvince, other.StateOrProvince, StringComparison.Ordinal );
         if ( stateComparison != 0 ) { return stateComparison; }
 
         int countryComparison = string.Compare( Country, other.Country, StringComparison.Ordinal );
@@ -486,7 +488,7 @@ public sealed partial record UserRecord
         if ( ReferenceEquals( this, other ) ) { return true; }
 
         return base.Equals( other ) && UserName == other.UserName && FirstName == other.FirstName && LastName == other.LastName && FullName == other.FullName && Description == other.Description && Address == other.Address && Line1 == other.Line1 &&
-               Line2 == other.Line2 && City == other.City && State == other.State && Country == other.Country && PostalCode == other.PostalCode && Website == other.Website && Email == other.Email && PhoneNumber == other.PhoneNumber &&
-               Ext == other.Ext && Title == other.Title && Department == other.Department && Company == other.Company;
+               Line2 == other.Line2 && City == other.City && StateOrProvince == other.StateOrProvince && Country == other.Country && PostalCode == other.PostalCode && Website == other.Website && Email == other.Email &&
+               PhoneNumber == other.PhoneNumber && Ext == other.Ext && Title == other.Title && Department == other.Department && Company == other.Company;
     }
 }

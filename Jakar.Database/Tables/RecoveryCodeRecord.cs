@@ -12,7 +12,7 @@ public sealed record RecoveryCodeRecord : TableRecord<RecoveryCodeRecord>
     private                 string                             _code   = string.Empty;
 
 
-    [MaxLength( 10240 )]
+    [MaxLength( 1024 )]
     public string Code
     {
         get => _code;

@@ -46,12 +46,12 @@ public abstract class Migration<TRecord> : Migration where TRecord : TableRecord
              .WithDefaultValue( SystemMethods.NewGuid );
 
         table.WithColumn( nameof(TableRecord<TRecord>.DateCreated) )
-             .AsDateTime2()
+             .AsDateTimeOffset()
              .NotNullable()
              .WithDefaultValue( SystemMethods.CurrentDateTimeOffset );
 
         table.WithColumn( nameof(TableRecord<TRecord>.LastModified) )
-             .AsDateTime2()
+             .AsDateTimeOffset()
              .Nullable();
 
         table.WithColumn( nameof(TableRecord<TRecord>.OwnerUserID) )

@@ -4,5 +4,5 @@
 public interface IUserSubscription
 {
     public DateTimeOffset? SubscriptionExpires { get; }
-    public string?           SubscriptionID      { get; }
+    public Guid?           SubscriptionID      { get; }
 }

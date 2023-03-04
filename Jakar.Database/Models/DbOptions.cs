@@ -10,6 +10,8 @@ public sealed class DbOptions : IOptions<DbOptions>
     public AppVersion           Version              { get; set; } = new();
     public PasswordRequirements PasswordRequirements { get; set; } = new();
     public string               UserExists           { get; set; } = "User Exists";
+    public string               TokenIssuer          { get; set; } = string.Empty;
+    public string               TokenAudience        { get; set; } = string.Empty;
 
 
     DbOptions IOptions<DbOptions>.Value => this;

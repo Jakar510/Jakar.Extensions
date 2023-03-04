@@ -30,23 +30,21 @@ public static class JwtExtensions
     public static SigningCredentials GetSigningCredentials( this IConfiguration configuration ) => new(new SymmetricSecurityKey( configuration.GetJWTKey() ), SecurityAlgorithms.HmacSha256Signature);
 
 
-    public static TokenValidationParameters GetTokenValidationParameters<T>( this IConfiguration configuration, string issuer ) where T : IAppName => configuration.GetTokenValidationParameters( issuer, typeof(T).Name );
-    public static TokenValidationParameters GetTokenValidationParameters( this IConfiguration configuration, string issuer, string audience )
+    public static TokenValidationParameters GetTokenValidationParameters( this IConfiguration configuration, DbOptions options )
     {
         IConfigurationSection section = configuration.TokenValidation();
         var                   key     = new SymmetricSecurityKey( section.GetJWTKey() );
-        return section.GetTokenValidationParameters( key, issuer, audience );
+        return section.GetTokenValidationParameters( key, options );
     }
 
 
-    public static TokenValidationParameters GetTokenValidationParameters<T>( this IConfigurationSection section, SymmetricSecurityKey key, string issuer ) where T : IAppName => section.GetTokenValidationParameters( key, issuer, typeof(T).Name );
-    public static TokenValidationParameters GetTokenValidationParameters( this IConfigurationSection section, SymmetricSecurityKey key, string issuer, string audience )
+    public static TokenValidationParameters GetTokenValidationParameters( this IConfigurationSection section, SymmetricSecurityKey key, DbOptions options )
     {
         return new TokenValidationParameters
                {
                    AuthenticationType                        = JwtBearerDefaults.AuthenticationScheme,
                    IssuerSigningKey                          = key,
-                   ClockSkew                                 = section.GetValue( nameof(TokenValidationParameters.ClockSkew),                                 TimeSpan.FromSeconds( 300 ) ),
+                   ClockSkew                                 = section.GetValue( nameof(TokenValidationParameters.ClockSkew),                                 TimeSpan.FromSeconds( 60 ) ),
                    IgnoreTrailingSlashWhenValidatingAudience = section.GetValue( nameof(TokenValidationParameters.IgnoreTrailingSlashWhenValidatingAudience), true ),
                    RequireAudience                           = section.GetValue( nameof(TokenValidationParameters.RequireAudience),                           true ),
                    RequireSignedTokens                       = section.GetValue( nameof(TokenValidationParameters.RequireSignedTokens),                       true ),
@@ -56,9 +54,9 @@ public static class JwtExtensions
                    ValidateLifetime                          = section.GetValue( nameof(TokenValidationParameters.ValidateLifetime),                          true ),
                    ValidateIssuerSigningKey                  = section.GetValue( nameof(TokenValidationParameters.ValidateIssuerSigningKey),                  true ),
                    ValidateIssuer                            = section.GetValue( nameof(TokenValidationParameters.ValidateIssuer),                            true ),
-                   ValidIssuer                               = section.GetValue( nameof(TokenValidationParameters.ValidIssuer),                               issuer ),
+                   ValidIssuer                               = section.GetValue( nameof(TokenValidationParameters.ValidIssuer),                               options.TokenIssuer ),
                    ValidateAudience                          = section.GetValue( nameof(TokenValidationParameters.ValidateAudience),                          true ),
-                   ValidAudience                             = section.GetValue( nameof(TokenValidationParameters.ValidAudience),                             audience ),
+                   ValidAudience                             = section.GetValue( nameof(TokenValidationParameters.ValidAudience),                             options.TokenAudience ),
                };
     }
 }

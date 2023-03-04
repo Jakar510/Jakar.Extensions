@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 09/01/2022  6:40 PM
 
-using System.Diagnostics;
-
-
-
 namespace Jakar.Database.Caches;
 
 
