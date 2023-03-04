@@ -1,6 +1,10 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 08/14/2022  8:39 PM
 
+using System.Security.Claims;
+
+
+
 namespace Jakar.Database;
 
 
@@ -185,42 +189,64 @@ public abstract partial class Database : Randoms, IConnectableDb, IAsyncDisposab
 
     public async ValueTask<Tokens> GetJwtToken( DbConnection connection, DbTransaction transaction, UserRecord user, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default )
     {
-        types |= DEFAULT_CLAIM_TYPES;
-        List<Claim> claims = await user.GetUserClaims( connection, transaction, this, types, token );
+        List<Claim> claims = await user.GetUserClaims( connection, transaction, this, types | DEFAULT_CLAIM_TYPES, token );
 
-        DateTimeOffset expires = Configuration.TokenExpiration();
 
-        // ReSharper disable once InvertIf
+        DateTime expires = DateTime.UtcNow + TimeSpan.FromMinutes( 30 );
+
         if ( user.SubscriptionExpires.HasValue )
         {
-            DateTimeOffset date = user.SubscriptionExpires.Value;
+            DateTime date = user.SubscriptionExpires.Value.LocalDateTime;
             if ( expires > date ) { expires = date; }
         }
-
-        if ( user.SubscriptionExpires < expires ) { expires = user.SubscriptionExpires.Value; }
-
-
-        var handler = new JwtSecurityTokenHandler();
 
         var descriptor = new SecurityTokenDescriptor
                          {
                              Subject            = new ClaimsIdentity( claims ),
-                             Expires            = expires.LocalDateTime,
+                             Expires            = expires,
                              Issuer             = Options.TokenIssuer,
                              Audience           = Options.TokenAudience,
                              IssuedAt           = DateTime.UtcNow,
-                             NotBefore          = DateTime.UtcNow,
                              SigningCredentials = Configuration.GetSigningCredentials(),
                          };
 
+
+        DateTime refreshExpires = DateTime.UtcNow + TimeSpan.FromDays( 90 );
+
+        if ( user.SubscriptionExpires.HasValue )
+        {
+            DateTime date = user.SubscriptionExpires.Value.LocalDateTime;
+            if ( refreshExpires > date ) { refreshExpires = date; }
+        }
+
+        var refreshDescriptor = new SecurityTokenDescriptor
+                                {
+                                    Subject            = new ClaimsIdentity( claims ),
+                                    Expires            = refreshExpires,
+                                    Issuer             = Options.TokenIssuer,
+                                    Audience           = Options.TokenAudience,
+                                    IssuedAt           = DateTime.UtcNow,
+                                    SigningCredentials = Configuration.GetSigningCredentials(),
+                                };
+
+        return await GetJwtToken( connection, transaction, descriptor, refreshDescriptor, refreshExpires, user, token );
+    }
+    public async ValueTask<Tokens> GetJwtToken( DbConnection            connection,
+                                                DbTransaction           transaction,
+                                                SecurityTokenDescriptor descriptor,
+                                                SecurityTokenDescriptor refreshDescriptor,
+                                                DateTimeOffset          refreshExpires,
+                                                UserRecord              user,
+                                                CancellationToken       token = default
+    )
+    {
+        var    handler     = new JwtSecurityTokenHandler();
         string accessToken = handler.WriteToken( handler.CreateToken( descriptor ) );
-        string refresh     = handler.WriteToken( handler.CreateToken( descriptor ) );
+        string refresh     = handler.WriteToken( handler.CreateToken( refreshDescriptor ) );
 
-
-        user.SetRefreshToken( refresh, expires );
+        user.SetRefreshToken( refresh, refreshExpires );
         await Users.Update( connection, transaction, user, token );
-        var result = new Tokens( accessToken, refresh, Version, user.UserID, user.FullName );
-        return result;
+        return new Tokens( accessToken, refresh, Version, user.UserID, user.FullName );
     }
     public async ValueTask<UserRecord?> ValidateJwtToken( DbConnection connection, DbTransaction transaction, string refreshToken, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default )
     {

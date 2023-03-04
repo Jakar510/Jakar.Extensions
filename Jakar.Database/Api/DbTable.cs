@@ -350,11 +350,9 @@ public class DbTable<TRecord> : Constants<TRecord>, IConnectableDb, IAsyncDispos
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask<TRecord> Insert( DbConnection connection, DbTransaction transaction, TRecord record, CancellationToken token = default )
     {
-        string sql = $@"SET IDENTITY_INSERT {SchemaTableName} OFF;
-SET NOCOUNT ON INSERT INTO {SchemaTableName} ({string.Join( ',', ColumnNames )}) OUTPUT INSERTED.ID values ({string.Join( ',', VariableNames )});";
+        string sql = $@"SET NOCOUNT ON INSERT INTO {SchemaTableName} ({string.Join( ',', ColumnNames )}) OUTPUT INSERTED.ID values ({string.Join( ',', VariableNames )});";
 
         var parameters = new DynamicParameters( record );
-
         if ( token.IsCancellationRequested ) { return record; }
 
         try
@@ -374,7 +372,6 @@ SET NOCOUNT ON INSERT INTO {SchemaTableName} ({string.Join( ',', ColumnNames )})
                                                                                               : "OR",
                                                                                           parameters.ParameterNames.Select( KeyValuePair ) )})
 BEGIN
-    SET IDENTITY_INSERT {SchemaTableName} OFF;
     SET NOCOUNT ON INSERT INTO {SchemaTableName} ({string.Join( ',', ColumnNames )}) OUTPUT INSERTED.ID values ({string.Join( ',', VariableNames )})
 END
 
@@ -406,7 +403,6 @@ END";
                                                                                               : "OR",
                                                                                           parameters.ParameterNames.Select( KeyValuePair ) )})
 BEGIN
-    SET IDENTITY_INSERT {SchemaTableName} OFF;
     SET NOCOUNT ON INSERT INTO {SchemaTableName} ({string.Join( ',', ColumnNames )}) OUTPUT INSERTED.ID values ({string.Join( ',', VariableNames )})
 END
 

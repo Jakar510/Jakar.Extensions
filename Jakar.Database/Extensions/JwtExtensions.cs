@@ -16,18 +16,19 @@ public static class JwtExtensions
     public static byte[] GetJWTKey( this IConfiguration configuration ) => Encoding.UTF8.GetBytes( configuration[JWT] ?? string.Empty );
 
 
+    [Pure] public static DateTimeOffset TokenExpiration( this IConfiguration configuration ) => configuration.TokenExpiration( TimeSpan.FromMinutes( 30 ) );
     [Pure]
-    public static DateTimeOffset TokenExpiration( this IConfiguration configuration )
+    public static DateTimeOffset TokenExpiration( this IConfiguration configuration, TimeSpan defaultValue )
     {
         TimeSpan offset = configuration.TokenValidation()
-                                       .GetValue( nameof(TokenExpiration), TimeSpan.FromMinutes( 30 ) );
+                                       .GetValue( nameof(TokenExpiration), defaultValue );
 
         return DateTimeOffset.UtcNow + offset;
     }
     public static IConfigurationSection TokenValidation( this IConfiguration configuration ) => configuration.GetSection( nameof(TokenValidation) );
 
 
-    public static SigningCredentials GetSigningCredentials( this IConfiguration configuration ) => new(new SymmetricSecurityKey( configuration.GetJWTKey() ), SecurityAlgorithms.HmacSha256Signature);
+    public static SigningCredentials GetSigningCredentials( this IConfiguration configuration ) => new(new SymmetricSecurityKey( configuration.GetJWTKey() ), SecurityAlgorithms.HmacSha512Signature);
 
 
     public static TokenValidationParameters GetTokenValidationParameters( this IConfiguration configuration, DbOptions options )
