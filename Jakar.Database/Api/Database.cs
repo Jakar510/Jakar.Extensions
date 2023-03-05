@@ -82,7 +82,7 @@ public abstract partial class Database : Randoms, IConnectableDb, IAsyncDisposab
 
     protected virtual DbTable<TRecord> Create<TRecord>() where TRecord : TableRecord<TRecord>
     {
-        var table = new DbTable<TRecord>( this );
+        DbTable<TRecord> table = new DbTable<TRecord>( this );
         return AddDisposable( table );
     }
 
@@ -133,7 +133,7 @@ public abstract partial class Database : Randoms, IConnectableDb, IAsyncDisposab
                        ConnectionState.Connecting => HealthCheckResult.Healthy(),
                        ConnectionState.Executing  => HealthCheckResult.Healthy(),
                        ConnectionState.Fetching   => HealthCheckResult.Healthy(),
-                       _                          => throw new ArgumentOutOfRangeException()
+                       _                          => throw new OutOfRangeException( nameof(connection.State), connection.State )
                    };
         }
         catch ( Exception e ) { return HealthCheckResult.Unhealthy( e.Message ); }
@@ -142,8 +142,8 @@ public abstract partial class Database : Randoms, IConnectableDb, IAsyncDisposab
 
     /// <summary> Only to be used for <see cref="ITokenService"/> </summary>
     /// <exception cref="ArgumentOutOfRangeException"> </exception>
-    public ValueTask<Tokens?> Authenticate( VerifyRequest request, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default ) => this.TryCall( Authenticate, request, types, token );
-    protected virtual async ValueTask<Tokens?> Authenticate( DbConnection connection, DbTransaction transaction, VerifyRequest request, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default )
+    public ValueTask<Tokens?> Authenticate( VerifyRequest request, ClaimType types = default, CancellationToken token = default ) => this.TryCall( Authenticate, request, types, token );
+    protected virtual async ValueTask<Tokens?> Authenticate( DbConnection connection, DbTransaction transaction, VerifyRequest request, ClaimType types = default, CancellationToken token = default )
     {
         UserRecord? user = await Users.Get( nameof(UserRecord.UserName), request.UserLogin, token );
         if ( user is null ) { return default; }
@@ -183,94 +183,151 @@ public abstract partial class Database : Randoms, IConnectableDb, IAsyncDisposab
     }
 
 
-    public async ValueTask<Tokens> GetJwtToken( DbConnection connection, DbTransaction transaction, UserRecord user, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default )
+    [MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization )]
+    protected static DateTime GetExpiration( UserRecord record, TimeSpan offset )
     {
-        types |= DEFAULT_CLAIM_TYPES;
-        List<Claim> claims = await user.GetUserClaims( connection, transaction, this, types, token );
+        DateTime expires = DateTime.UtcNow + TimeSpan.FromMinutes( 30 );
 
-        DateTimeOffset expires = Configuration.TokenExpiration();
+        if ( record.SubscriptionExpires is null ) { return expires; }
 
-        // ReSharper disable once InvertIf
-        if ( user.SubscriptionExpires.HasValue )
-        {
-            DateTimeOffset date = user.SubscriptionExpires.Value;
-            if ( expires > date ) { expires = date; }
-        }
+        DateTime date = record.SubscriptionExpires.Value.LocalDateTime;
+        if ( expires > date ) { expires = date; }
 
-        if ( user.SubscriptionExpires < expires ) { expires = user.SubscriptionExpires.Value; }
+        return expires;
+    }
 
 
-        var handler = new JwtSecurityTokenHandler();
+    public virtual async ValueTask<Tokens> GetToken( DbConnection connection, DbTransaction transaction, UserRecord user, ClaimType types = default, CancellationToken token = default )
+    {
+        Claim[] claims = await user.GetUserClaims( connection, transaction, this, types | DEFAULT_CLAIM_TYPES, token );
 
         var descriptor = new SecurityTokenDescriptor
                          {
                              Subject            = new ClaimsIdentity( claims ),
-                             Expires            = expires.LocalDateTime,
+                             Expires            = GetExpiration( user, TimeSpan.FromMinutes( 15 ) ),
                              Issuer             = Options.TokenIssuer,
                              Audience           = Options.TokenAudience,
                              IssuedAt           = DateTime.UtcNow,
-                             NotBefore          = DateTime.UtcNow,
-                             SigningCredentials = Configuration.GetSigningCredentials(),
+                             SigningCredentials = Configuration.GetSigningCredentials( Options ),
                          };
 
-        string accessToken = handler.WriteToken( handler.CreateToken( descriptor ) );
-        string refresh     = handler.WriteToken( handler.CreateToken( descriptor ) );
+
+        DateTime refreshExpires = GetExpiration( user, TimeSpan.FromDays( 90 ) );
+
+        var refreshDescriptor = new SecurityTokenDescriptor
+                                {
+                                    Subject            = new ClaimsIdentity( claims ),
+                                    Expires            = refreshExpires,
+                                    Issuer             = Options.TokenIssuer,
+                                    Audience           = Options.TokenAudience,
+                                    IssuedAt           = DateTime.UtcNow,
+                                    SigningCredentials = Configuration.GetSigningCredentials( Options ),
+                                };
 
 
-        user.SetRefreshToken( refresh, expires );
+        JwtSecurityTokenHandler handler     = new JwtSecurityTokenHandler();
+        string                  accessToken = handler.WriteToken( handler.CreateToken( descriptor ) );
+        string                  refresh     = handler.WriteToken( handler.CreateToken( refreshDescriptor ) );
+
+
+        user.SetHashedRefreshToken( refresh, refreshExpires );
         await Users.Update( connection, transaction, user, token );
-        var result = new Tokens( accessToken, refresh, Version, user.UserID, user.FullName );
-        return result;
-    }
-    public async ValueTask<UserRecord?> ValidateJwtToken( DbConnection connection, DbTransaction transaction, string refreshToken, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default )
-    {
-        var                       handler              = new JwtSecurityTokenHandler();
-        TokenValidationParameters validationParameters = Configuration.GetTokenValidationParameters( Options );
-        TokenValidationResult     validationResult     = await handler.ValidateTokenAsync( refreshToken, validationParameters );
-        if ( validationResult.Exception is not null ) { throw validationResult.Exception; }
-
-        Claim[] claims = validationResult.ClaimsIdentity.Claims.ToArray();
-        return await UserRecord.TryFromClaims( connection, transaction, this, claims, types, token );
+        return new Tokens( accessToken, refresh, Version, user.UserID, user.FullName );
     }
 
 
-    public ValueTask<Tokens> GetToken( UserRecord user, ClaimType types, CancellationToken token ) => this.TryCall( GetToken, user, types, token );
-    public virtual ValueTask<Tokens> GetToken( DbConnection connection, DbTransaction transaction, UserRecord user, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default ) =>
-        GetJwtToken( connection, transaction, user, types, token );
-
-
-    public ValueTask<ActionResult<Tokens>> Refresh( string refreshToken, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default ) => this.TryCall( Refresh, refreshToken, types, token );
-    public async ValueTask<ActionResult<Tokens>> Refresh( DbConnection connection, DbTransaction transaction, string refreshToken, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default )
+    public ValueTask<OneOf<Tokens, Error>> Refresh( string refreshToken, ClaimType types = default, CancellationToken token = default ) => this.TryCall( Refresh, refreshToken, types, token );
+    public async ValueTask<OneOf<Tokens, Error>> Refresh( DbConnection connection, DbTransaction transaction, string refreshToken, ClaimType types = default, CancellationToken token = default )
     {
         LoginResult loginResult = await VerifyLogin( connection, transaction, refreshToken, types, token );
+        if ( loginResult.GetResult( out Error? error, out UserRecord? record ) ) { return error.Value; }
 
-        return loginResult.GetResult( out ActionResult? actionResult, out UserRecord? user )
-                   ? actionResult
-                   : await GetToken( connection, transaction, user, types, token );
+        if ( !record.IsHashedRefreshToken( refreshToken ) )
+        {
+            record.MarkBadLogin();
+            await Users.Update( connection, transaction, record, token );
+            return new Error( Status.Unauthorized );
+        }
+
+
+        Claim[] claims = await record.GetUserClaims( connection, transaction, this, types | DEFAULT_CLAIM_TYPES, token );
+
+        var descriptor = new SecurityTokenDescriptor
+                         {
+                             Subject            = new ClaimsIdentity( claims ),
+                             Expires            = GetExpiration( record, TimeSpan.FromMinutes( 15 ) ),
+                             Issuer             = Options.TokenIssuer,
+                             Audience           = Options.TokenAudience,
+                             IssuedAt           = DateTime.UtcNow,
+                             SigningCredentials = Configuration.GetSigningCredentials( Options ),
+                         };
+
+        JwtSecurityTokenHandler handler     = new JwtSecurityTokenHandler();
+        string                  accessToken = handler.WriteToken( handler.CreateToken( descriptor ) );
+        return new Tokens( accessToken, refreshToken, Version, record.UserID, record.FullName );
     }
 
 
-    protected virtual async ValueTask<LoginResult> VerifyLogin( DbConnection connection, DbTransaction transaction, string refreshToken, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default )
+    [SuppressMessage( "ReSharper", "UnusedParameter.Global" )]
+    protected virtual ValueTask<bool> ValidateSubscription( DbConnection connection, DbTransaction? transaction, UserRecord record, CancellationToken token = default )
     {
-        var user = await ValidateJwtToken( connection, transaction, refreshToken, types, token );
-        if ( user is null ) { return LoginResult.State.BadCredentials; }
+        // if ( user.SubscriptionID is null || user.SubscriptionID.Value != Guid.Empty ) { return LoginResult.State.NoSubscription; }
 
-
-        user.LastLogin = DateTimeOffset.UtcNow;
-        await Users.Update( connection, transaction, user, token );
-        return user;
+        return new ValueTask<bool>( false );
     }
-    public ValueTask<ActionResult<Tokens>> Register( VerifyRequest<UserData> request, string rights, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default ) =>
+    protected async ValueTask<LoginResult> VerifyLogin( DbConnection connection, DbTransaction? transaction, VerifyRequest request, CancellationToken token = default )
+    {
+        UserRecord? record = await Users.Get( connection, transaction, nameof(UserRecord.UserName), request.UserLogin, token );
+        if ( record is null ) { return LoginResult.State.NotFound; }
+
+        try
+        {
+            if ( !record.VerifyPassword( request.UserPassword ) ) { return LoginResult.State.BadCredentials; }
+        }
+        finally { await Users.Update( connection, transaction, record, token ); }
+
+
+        if ( !record.IsActive ) { return LoginResult.State.Inactive; }
+
+        if ( !record.IsDisabled ) { return LoginResult.State.Disabled; }
+
+        if ( !record.IsLocked ) { return LoginResult.State.Locked; }
+
+        if ( await ValidateSubscription( connection, transaction, record, token ) ) { return LoginResult.State.ExpiredSubscription; }
+
+
+        return record;
+    }
+    protected async ValueTask<LoginResult> VerifyLogin( DbConnection connection, DbTransaction transaction, string jwt, ClaimType types = default, CancellationToken token = default )
+    {
+        JwtSecurityTokenHandler   handler              = new JwtSecurityTokenHandler();
+        TokenValidationParameters validationParameters = Configuration.GetTokenValidationParameters( Options );
+        TokenValidationResult     validationResult     = await handler.ValidateTokenAsync( jwt, validationParameters );
+        if ( validationResult.Exception is not null ) { return new LoginResult( validationResult.Exception ); }
+
+
+        Claim[]     claims = validationResult.ClaimsIdentity.Claims.ToArray();
+        UserRecord? record = await UserRecord.TryFromClaims( connection, transaction, this, claims, types | DEFAULT_CLAIM_TYPES, token );
+        if ( record is null ) { return new LoginResult( LoginResult.State.NotFound ); }
+
+
+        record.LastLogin = DateTimeOffset.UtcNow;
+        await Users.Update( connection, transaction, record, token );
+        return record;
+    }
+
+
+    public ValueTask<OneOf<Tokens, Error>> Register( VerifyRequest<UserData> request, string rights, ClaimType types = default, CancellationToken token = default ) =>
         this.TryCall( Register, request, rights, types, token );
-    public virtual async ValueTask<ActionResult<Tokens>> Register( DbConnection connection, DbTransaction transaction, VerifyRequest<UserData> request, string rights, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default )
+    public virtual async ValueTask<OneOf<Tokens, Error>> Register( DbConnection connection, DbTransaction transaction, VerifyRequest<UserData> request, string rights, ClaimType types = default, CancellationToken token = default )
     {
         UserRecord? record = await Users.Get( connection, transaction, true, UserRecord.GetDynamicParameters( request ), token );
-        if ( record is not null ) { return new ConflictObjectResult( request ); }
+        if ( record is not null ) { return new Error( Status.BadRequest, request ); }
 
 
         if ( !PasswordValidator.Validate( request.UserPassword, out bool lengthPassed, out bool specialPassed, out bool numericPassed, out bool lowerPassed, out bool upperPassed, out bool blockedPassed ) )
         {
-            var state = new ModelStateDictionary();
+            ModelStateDictionary state = new ModelStateDictionary();
             state.AddModelError( "Error", "Password Validation Failed" );
 
             if ( lengthPassed ) { state.AddModelError( "Details", "Password not long enough" ); }
@@ -285,7 +342,7 @@ public abstract partial class Database : Randoms, IConnectableDb, IAsyncDisposab
 
             if ( blockedPassed ) { state.AddModelError( "Details", "Password cannot be a blocked password" ); }
 
-            return new BadRequestObjectResult( state );
+            return new Error( Status.BadRequest, state );
         }
 
 
@@ -295,7 +352,46 @@ public abstract partial class Database : Randoms, IConnectableDb, IAsyncDisposab
     }
 
 
-    public ValueTask<ActionResult<T>> Verify<T>( VerifyRequest request, Func<UserRecord, ActionResult<T>> func, CancellationToken token = default ) => this.TryCall( Verify, request, func, token );
+    public virtual async ValueTask<OneOf<T, Error>> Verify<T>( DbConnection connection, DbTransaction? transaction, VerifyRequest request, Func<UserRecord, T> func, CancellationToken token = default )
+    {
+        LoginResult loginResult = await VerifyLogin( connection, transaction, request, token );
+
+        return loginResult.GetResult( out Error? error, out UserRecord? record )
+                   ? error.Value
+                   : func( record );
+    }
+    public virtual async ValueTask<OneOf<T, Error>> Verify<T>( DbConnection connection, DbTransaction? transaction, VerifyRequest request, Func<UserRecord, ValueTask<T>> func, CancellationToken token = default )
+    {
+        LoginResult loginResult = await VerifyLogin( connection, transaction, request, token );
+
+        return loginResult.GetResult( out Error? error, out UserRecord? record )
+                   ? error.Value
+                   : await func( record );
+    }
+    public virtual async ValueTask<OneOf<T, Error>> Verify<T>( DbConnection connection, DbTransaction? transaction, VerifyRequest request, Func<UserRecord, Task<T>> func, CancellationToken token = default )
+    {
+        LoginResult loginResult = await VerifyLogin( connection, transaction, request, token );
+
+        return loginResult.GetResult( out Error? error, out UserRecord? record )
+                   ? error.Value
+                   : await func( record );
+    }
+    public async ValueTask<OneOf<Tokens, Error>> Verify( DbConnection connection, DbTransaction transaction, string jwt, ClaimType types = default, CancellationToken token = default )
+    {
+        LoginResult loginResult = await VerifyLogin( connection, transaction, jwt, types, token );
+
+        return loginResult.GetResult( out Error? error, out UserRecord? record )
+                   ? error.Value
+                   : await GetToken( connection, transaction, record, types, token );
+    }
+    public virtual async ValueTask<OneOf<Tokens, Error>> Verify( DbConnection connection, DbTransaction transaction, VerifyRequest request, ClaimType types = default, CancellationToken token = default )
+    {
+        LoginResult loginResult = await VerifyLogin( connection, transaction, request, token );
+
+        return loginResult.GetResult( out Error? error, out UserRecord? record )
+                   ? error.Value
+                   : await GetToken( connection, transaction, record, types, token );
+    }
     public virtual async ValueTask<ActionResult<T>> Verify<T>( DbConnection connection, DbTransaction? transaction, VerifyRequest request, Func<UserRecord, ActionResult<T>> func, CancellationToken token = default )
     {
         LoginResult loginResult = await VerifyLogin( connection, transaction, request, token );
@@ -304,7 +400,6 @@ public abstract partial class Database : Randoms, IConnectableDb, IAsyncDisposab
                    ? actionResult
                    : func( caller );
     }
-    public ValueTask<ActionResult<T>> Verify<T>( VerifyRequest request, Func<UserRecord, ValueTask<ActionResult<T>>> func, CancellationToken token = default ) => this.TryCall( Verify, request, func, token );
     public virtual async ValueTask<ActionResult<T>> Verify<T>( DbConnection connection, DbTransaction? transaction, VerifyRequest request, Func<UserRecord, ValueTask<ActionResult<T>>> func, CancellationToken token = default )
     {
         LoginResult loginResult = await VerifyLogin( connection, transaction, request, token );
@@ -313,7 +408,6 @@ public abstract partial class Database : Randoms, IConnectableDb, IAsyncDisposab
                    ? actionResult
                    : await func( caller );
     }
-    public ValueTask<ActionResult<T>> Verify<T>( VerifyRequest request, Func<UserRecord, Task<ActionResult<T>>> func, CancellationToken token = default ) => this.TryCall( Verify, request, func, token );
     public virtual async ValueTask<ActionResult<T>> Verify<T>( DbConnection connection, DbTransaction? transaction, VerifyRequest request, Func<UserRecord, Task<ActionResult<T>>> func, CancellationToken token = default )
     {
         LoginResult loginResult = await VerifyLogin( connection, transaction, request, token );
@@ -324,81 +418,12 @@ public abstract partial class Database : Randoms, IConnectableDb, IAsyncDisposab
     }
 
 
-    public ValueTask<ActionResult<Tokens>> Verify( string refreshToken, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default ) => this.TryCall( Verify, refreshToken, types, token );
-    public async ValueTask<ActionResult<Tokens>> Verify( DbConnection connection, DbTransaction transaction, string refreshToken, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default )
-    {
-        LoginResult loginResult = await VerifyLogin( connection, transaction, refreshToken, types, token );
-
-        return loginResult.GetResult( out ActionResult? actionResult, out UserRecord? user )
-                   ? actionResult
-                   : await GetToken( connection, transaction, user, types, token );
-    }
-
-
-    public ValueTask<ActionResult<Tokens>> Verify( VerifyRequest request, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default ) => this.TryCall( Verify, request, types, token );
-    public virtual async ValueTask<ActionResult<Tokens>> Verify( DbConnection connection, DbTransaction transaction, VerifyRequest request, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default )
-    {
-        LoginResult loginResult = await VerifyLogin( connection, transaction, request, token );
-
-        return loginResult.GetResult( out ActionResult? actionResult, out UserRecord? user )
-                   ? actionResult
-                   : await GetToken( connection, transaction, user, types, token );
-    }
-
-
-    public ValueTask<ActionResult> Verify( VerifyRequest request, Func<UserRecord, ActionResult> func, CancellationToken token = default ) => this.TryCall( Verify, request, func, token );
-    public virtual async ValueTask<ActionResult> Verify( DbConnection connection, DbTransaction? transaction, VerifyRequest request, Func<UserRecord, ActionResult> func, CancellationToken token = default )
-    {
-        LoginResult loginResult = await VerifyLogin( connection, transaction, request, token );
-
-        return loginResult.GetResult( out ActionResult? actionResult, out UserRecord? caller )
-                   ? actionResult
-                   : func( caller );
-    }
-
-
-    public ValueTask<ActionResult> Verify( VerifyRequest request, Func<UserRecord, ValueTask<ActionResult>> func, CancellationToken token = default ) => this.TryCall( Verify, request, func, token );
-    public virtual async ValueTask<ActionResult> Verify( DbConnection connection, DbTransaction? transaction, VerifyRequest request, Func<UserRecord, ValueTask<ActionResult>> func, CancellationToken token = default )
-    {
-        LoginResult loginResult = await VerifyLogin( connection, transaction, request, token );
-
-        return loginResult.GetResult( out ActionResult? actionResult, out UserRecord? caller )
-                   ? actionResult
-                   : await func( caller );
-    }
-
-
-    public ValueTask<ActionResult> Verify( VerifyRequest request, Func<UserRecord, Task<ActionResult>> func, CancellationToken token = default ) => this.TryCall( Verify, request, func, token );
-    public virtual async ValueTask<ActionResult> Verify( DbConnection connection, DbTransaction? transaction, VerifyRequest request, Func<UserRecord, Task<ActionResult>> func, CancellationToken token = default )
-    {
-        LoginResult loginResult = await VerifyLogin( connection, transaction, request, token );
-
-        return loginResult.GetResult( out ActionResult? actionResult, out UserRecord? caller )
-                   ? actionResult
-                   : await func( caller );
-    }
-
-
-    protected virtual async ValueTask<LoginResult> VerifyLogin( DbConnection connection, DbTransaction? transaction, VerifyRequest request, CancellationToken token = default )
-    {
-        UserRecord? user = await Users.Get( connection, transaction, nameof(UserRecord.UserName), request.UserLogin, token );
-        if ( user is null || !user.VerifyPassword( request.UserPassword ) ) { return LoginResult.State.BadCredentials; }
-
-        try
-        {
-            user.SetActive();
-            if ( !user.IsActive ) { return LoginResult.State.Inactive; }
-
-            if ( !user.IsDisabled ) { return LoginResult.State.Disabled; }
-
-            if ( !user.IsLocked ) { return LoginResult.State.Locked; }
-
-            // if ( user.SubscriptionExpires > DateTimeOffset.UtcNow ) { return LoginResult.State.ExpiredSubscription; }
-
-            // if ( user.SubscriptionID.IsValidID() ) { return LoginResult.State.NoSubscription; }
-
-            return user;
-        }
-        finally { await Users.Update( connection, transaction, user, token ); }
-    }
+    public ValueTask<OneOf<T, Error>> Verify<T>( VerifyRequest   request,      Func<UserRecord, T>                          func,            CancellationToken token = default ) => this.TryCall( Verify, request,      func,  token );
+    public ValueTask<OneOf<T, Error>> Verify<T>( VerifyRequest   request,      Func<UserRecord, ValueTask<T>>               func,            CancellationToken token = default ) => this.TryCall( Verify, request,      func,  token );
+    public ValueTask<OneOf<T, Error>> Verify<T>( VerifyRequest   request,      Func<UserRecord, Task<T>>                    func,            CancellationToken token = default ) => this.TryCall( Verify, request,      func,  token );
+    public ValueTask<OneOf<Tokens, Error>> Verify( string        refreshToken, ClaimType                                    types = default, CancellationToken token = default ) => this.TryCall( Verify, refreshToken, types, token );
+    public ValueTask<OneOf<Tokens, Error>> Verify( VerifyRequest request,      ClaimType                                    types = default, CancellationToken token = default ) => this.TryCall( Verify, request,      types, token );
+    public ValueTask<ActionResult<T>> Verify<T>( VerifyRequest   request,      Func<UserRecord, ActionResult<T>>            func,            CancellationToken token = default ) => this.TryCall( Verify, request,      func,  token );
+    public ValueTask<ActionResult<T>> Verify<T>( VerifyRequest   request,      Func<UserRecord, ValueTask<ActionResult<T>>> func,            CancellationToken token = default ) => this.TryCall( Verify, request,      func,  token );
+    public ValueTask<ActionResult<T>> Verify<T>( VerifyRequest   request,      Func<UserRecord, Task<ActionResult<T>>>      func,            CancellationToken token = default ) => this.TryCall( Verify, request,      func,  token );
 }

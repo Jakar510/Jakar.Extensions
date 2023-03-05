@@ -58,5 +58,6 @@ global using JetBrains.Annotations;
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.AspNetCore.Mvc.ModelBinding;
 global using Microsoft.IdentityModel.Tokens;
+global using OneOf;
 global using KeyAttribute = Dapper.Contrib.Extensions.KeyAttribute;
 global using TableAttribute = Dapper.Contrib.Extensions.TableAttribute;

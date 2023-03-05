@@ -1,4 +1,8 @@
-﻿namespace Jakar.AppLogger.Portal.Controllers;
+﻿using OneOf;
+
+
+
+namespace Jakar.AppLogger.Portal.Controllers;
 
 
 [ApiController]
@@ -11,9 +15,24 @@ public class APIController : ControllerBase
     public APIController( LoggerDB api ) => _api = api;
 
 
-    [HttpPost] public async ValueTask<ActionResult<Tokens>> Register( VerifyRequest<UserData> request,      CancellationToken token ) => await _api.Register( request, string.Empty, ClaimType.UserID | ClaimType.UserName, token ); // TODO: rights
-    [HttpPost] public async ValueTask<ActionResult<Tokens>> Verify( VerifyRequest             request,      CancellationToken token ) => await _api.Verify( request, ClaimType.UserID | ClaimType.UserName, token );
-    [HttpPost] public async ValueTask<ActionResult<Tokens>> Refresh( string                   refreshToken, CancellationToken token ) => await _api.Refresh( refreshToken, ClaimType.UserID | ClaimType.UserName, token );
+    [HttpPost]
+    public async ValueTask<ActionResult<Tokens>> Register( VerifyRequest<UserData> request, CancellationToken token )
+    {
+        OneOf<Tokens, Error> result = await _api.Register( request, string.Empty, default, token );
+        return result.Match();
+    }
+    [HttpPost]
+    public async ValueTask<ActionResult<Tokens>> Verify( VerifyRequest request, CancellationToken token )
+    {
+        OneOf<Tokens, Error> result = await _api.Verify( request, default, token );
+        return result.Match();
+    }
+    [HttpPost]
+    public async ValueTask<ActionResult<Tokens>> Refresh( string refreshToken, CancellationToken token )
+    {
+        OneOf<Tokens, Error> result = await _api.Refresh( refreshToken, default, token );
+        return result.Match();
+    }
 
 
     [HttpPost] public async ValueTask<ActionResult<Guid>> StartSession( StartSession session,   CancellationToken token ) => await _api.StartSession( this, session, token );

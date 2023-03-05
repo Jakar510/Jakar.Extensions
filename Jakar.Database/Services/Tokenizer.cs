@@ -21,7 +21,7 @@ public interface ITokenService
 ///         <see href="https://stackoverflow.com/a/55740879/9530917"> How do I get current user in .NET Core Web API (from JWT Token) </see>
 ///     </para>
 /// </summary>
-public class Tokenizer<TName> : ITokenService where TName : IAppName
+public class Tokenizer<TName> : ITokenService where TName : IAppName // TODO: update Tokenizer
 {
     private const    string               JWT = "JWT";
     private readonly Database             _db;
@@ -49,11 +49,11 @@ public class Tokenizer<TName> : ITokenService where TName : IAppName
                    ? throw new SecurityTokenException( "Invalid token" )
                    : principal;
     }
-    public virtual string CreateContent( in Tokens result, string header ) =>
+    public virtual string CreateContent( Tokens result, string header ) =>
         @$"{header}
 
 {GetUrl( result )}";
-    public virtual string CreateHTMLContent( in Tokens result, string header ) =>
+    public virtual string CreateHTMLContent( Tokens result, string header ) =>
         @$"<h1> {header} </h1>
 <p>
 	<a href='{GetUrl( result )}'>Click to approve</a>
@@ -68,7 +68,7 @@ public class Tokenizer<TName> : ITokenService where TName : IAppName
         string? tokenString       = new JwtSecurityTokenHandler().WriteToken( tokeOptions );
         return tokenString;
     }
-    public virtual string GetUrl( in Tokens result ) => $"{Domain}/Token/{result.AccessToken}";
+    public virtual string GetUrl( Tokens result ) => $"{Domain}/Token/{result.AccessToken}";
 
 
     public virtual ValueTask<Tokens?> Authenticate( VerifyRequest request, ClaimType types, CancellationToken token = default ) => _db.Authenticate( request, types, token );
@@ -76,12 +76,12 @@ public class Tokenizer<TName> : ITokenService where TName : IAppName
 
     public virtual async ValueTask<string> CreateContent( string header, UserRecord user, ClaimType types, CancellationToken token = default )
     {
-        Tokens result = await _db.GetToken( user, types, token );
+        Tokens result = await _db.TryCall( _db.GetToken, user, types, token );
         return CreateContent( result, header );
     }
     public virtual async ValueTask<string> CreateHTMLContent( string header, UserRecord user, ClaimType types, CancellationToken token = default )
     {
-        Tokens result = await _db.GetToken( user, types, token );
+        Tokens result = await _db.TryCall( _db.GetToken, user, types, token );
         return CreateHTMLContent( result, header );
     }
 }

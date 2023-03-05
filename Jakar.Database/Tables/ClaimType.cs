@@ -20,11 +20,69 @@ public enum ClaimType : long
     [Display( Description = ClaimTypes.MobilePhone )]     MobilePhone            = 1 << 11,
     [Display( Description = ClaimTypes.StreetAddress )]   StreetAddressLine1     = 1 << 12,
     [Display( Description = ClaimTypes.Locality )]        StreetAddressLine2     = 1 << 13,
-    [Display( Description = ClaimTypes.StateOrProvince )] State                  = 1 << 14,
+    [Display( Description = ClaimTypes.StateOrProvince )] StateOrProvince        = 1 << 14,
     [Display( Description = ClaimTypes.Country )]         Country                = 1 << 15,
     [Display( Description = ClaimTypes.PostalCode )]      PostalCode             = 1 << 16,
     [Display( Description = ClaimTypes.Webpage )]         WebSite                = 1 << 17,
-    [Display( Description = ClaimTypes.GroupSid )]        Groups                 = 1 << 18,
-    [Display( Description = ClaimTypes.Role )]            Roles                  = 1 << 19,
+    [Display( Description = ClaimTypes.GroupSid )]        GroupSid               = 1 << 18,
+    [Display( Description = ClaimTypes.Role )]            Role                   = 1 << 19,
     All                                                                          = ~0
+}
+
+
+
+public static class ClaimTypeExtensions
+{
+    public static string? ToClaimTypes( this ClaimType type )
+    {
+        return type switch
+               {
+                   ClaimType.None                   => default,
+                   ClaimType.UserID                 => ClaimTypes.Sid,
+                   ClaimType.UserName               => ClaimTypes.NameIdentifier,
+                   ClaimType.FirstName              => ClaimTypes.GivenName,
+                   ClaimType.LastName               => ClaimTypes.Surname,
+                   ClaimType.FullName               => ClaimTypes.Name,
+                   ClaimType.Gender                 => ClaimTypes.Gender,
+                   ClaimType.SubscriptionExpiration => ClaimTypes.Expiration,
+                   ClaimType.Expired                => ClaimTypes.Expired,
+                   ClaimType.Email                  => ClaimTypes.Email,
+                   ClaimType.MobilePhone            => ClaimTypes.MobilePhone,
+                   ClaimType.StreetAddressLine1     => ClaimTypes.StreetAddress,
+                   ClaimType.StreetAddressLine2     => ClaimTypes.Locality,
+                   ClaimType.StateOrProvince        => ClaimTypes.StateOrProvince,
+                   ClaimType.Country                => ClaimTypes.Country,
+                   ClaimType.PostalCode             => ClaimTypes.PostalCode,
+                   ClaimType.WebSite                => ClaimTypes.Webpage,
+                   ClaimType.GroupSid               => ClaimTypes.GroupSid,
+                   ClaimType.Role                   => ClaimTypes.Role,
+                   ClaimType.All                    => default,
+                   _                                => throw new OutOfRangeException( nameof(type), type )
+               };
+    }
+    public static ClaimType? FromClaimTypes( this string type )
+    {
+        return type switch
+               {
+                   ClaimTypes.Sid             => ClaimType.UserID,
+                   ClaimTypes.NameIdentifier  => ClaimType.UserName,
+                   ClaimTypes.GivenName       => ClaimType.FirstName,
+                   ClaimTypes.Surname         => ClaimType.LastName,
+                   ClaimTypes.Name            => ClaimType.FullName,
+                   ClaimTypes.Gender          => ClaimType.Gender,
+                   ClaimTypes.Expiration      => ClaimType.SubscriptionExpiration,
+                   ClaimTypes.Expired         => ClaimType.Expired,
+                   ClaimTypes.Email           => ClaimType.Email,
+                   ClaimTypes.MobilePhone     => ClaimType.MobilePhone,
+                   ClaimTypes.StreetAddress   => ClaimType.StreetAddressLine1,
+                   ClaimTypes.Locality        => ClaimType.StreetAddressLine2,
+                   ClaimTypes.StateOrProvince => ClaimType.StateOrProvince,
+                   ClaimTypes.Country         => ClaimType.Country,
+                   ClaimTypes.PostalCode      => ClaimType.PostalCode,
+                   ClaimTypes.Webpage         => ClaimType.WebSite,
+                   ClaimTypes.GroupSid        => ClaimType.GroupSid,
+                   ClaimTypes.Role            => ClaimType.Role,
+                   _                          => default
+               };
+    }
 }

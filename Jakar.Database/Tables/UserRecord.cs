@@ -1,6 +1,10 @@
 ﻿// ToothFairyDispatch :: ToothFairyDispatch.Cloud
 // 08/29/2022  9:55 PM
 
+using Microsoft.AspNetCore.Http;
+
+
+
 namespace Jakar.Database;
 
 
@@ -362,6 +366,24 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, JsonModels.IJ
         RefreshTokenExpiryTime = default;
         return this;
     }
+    public bool IsHashedRefreshToken( string token )
+    {
+        // ReSharper disable once InvertIf
+        if ( RefreshTokenExpiryTime.HasValue && DateTimeOffset.UtcNow > RefreshTokenExpiryTime.Value )
+        {
+            ClearRefreshToken();
+            return false;
+        }
+
+
+        return string.Equals( RefreshToken,
+                              token.GetHashCode()
+                                   .ToString(),
+                              StringComparison.Ordinal );
+    }
+    public UserRecord SetHashedRefreshToken( string token, DateTimeOffset date ) => SetRefreshToken( token.GetHashCode()
+                                                                                                          .ToString(),
+                                                                                                     date );
     public UserRecord SetRefreshToken( string token, DateTimeOffset date )
     {
         RefreshToken           = token;
@@ -434,15 +456,15 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, JsonModels.IJ
 
     #region Claims
 
-    public async ValueTask<List<Claim>> GetUserClaims( DbConnection connection, DbTransaction? transaction, Database db, ClaimType types, CancellationToken token )
+    public async ValueTask<Claim[]> GetUserClaims( DbConnection connection, DbTransaction? transaction, Database db, ClaimType types, CancellationToken token )
     {
         GroupRecord[] groups = Array.Empty<GroupRecord>();
         RoleRecord[]  roles  = Array.Empty<RoleRecord>();
 
 
-        if ( types.HasFlag( ClaimType.Groups ) ) { groups = await GetGroups( connection, transaction, db, token ); }
+        if ( types.HasFlag( ClaimType.GroupSid ) ) { groups = await GetGroups( connection, transaction, db, token ); }
 
-        if ( types.HasFlag( ClaimType.Roles ) ) { roles = await GetRoles( connection, transaction, db, token ); }
+        if ( types.HasFlag( ClaimType.Role ) ) { roles = await GetRoles( connection, transaction, db, token ); }
 
 
         var claims = new List<Claim>( 16 + groups.Length + roles.Length );
@@ -471,7 +493,7 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, JsonModels.IJ
 
         if ( types.HasFlag( ClaimType.StreetAddressLine2 ) ) { claims.Add( new Claim( ClaimTypes.Locality, Line2, ClaimValueTypes.String ) ); }
 
-        if ( types.HasFlag( ClaimType.State ) ) { claims.Add( new Claim( ClaimTypes.Country, StateOrProvince, ClaimValueTypes.String ) ); }
+        if ( types.HasFlag( ClaimType.StateOrProvince ) ) { claims.Add( new Claim( ClaimTypes.Country, StateOrProvince, ClaimValueTypes.String ) ); }
 
         if ( types.HasFlag( ClaimType.Country ) ) { claims.Add( new Claim( ClaimTypes.Country, Country, ClaimValueTypes.String ) ); }
 
@@ -479,14 +501,22 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, JsonModels.IJ
 
         if ( types.HasFlag( ClaimType.WebSite ) ) { claims.Add( new Claim( ClaimTypes.Webpage, Website, ClaimValueTypes.String ) ); }
 
-        if ( types.HasFlag( ClaimType.Groups ) ) { claims.AddRange( from record in groups select new Claim( ClaimTypes.GroupSid, record.NameOfGroup, ClaimValueTypes.String ) ); }
+        if ( types.HasFlag( ClaimType.GroupSid ) ) { claims.AddRange( from record in groups select new Claim( ClaimTypes.GroupSid, record.NameOfGroup, ClaimValueTypes.String ) ); }
 
-        if ( types.HasFlag( ClaimType.Roles ) ) { claims.AddRange( from record in roles select new Claim( ClaimTypes.Role, record.Name, ClaimValueTypes.String ) ); }
+        if ( types.HasFlag( ClaimType.Role ) ) { claims.AddRange( from record in roles select new Claim( ClaimTypes.Role, record.Name, ClaimValueTypes.String ) ); }
 
-        return claims;
+        return claims.GetInternalArray();
     }
+    public static ValueTask<UserRecord?> TryFromClaims( DbConnection connection, DbTransaction transaction, Database db, HttpContext context, ClaimType types, CancellationToken token ) =>
+        TryFromClaims( connection, transaction, db, context.User, types, token );
+    public static ValueTask<UserRecord?> TryFromClaims( DbConnection connection, DbTransaction transaction, Database db, ClaimsPrincipal principal, ClaimType types, CancellationToken token ) =>
+        TryFromClaims( connection, transaction, db, principal.Claims.ToArray(), types, token );
     public static async ValueTask<UserRecord?> TryFromClaims( DbConnection connection, DbTransaction transaction, Database db, Claim[] claims, ClaimType types, CancellationToken token )
     {
+        Debug.Assert( types.HasFlag( ClaimType.UserID ) );
+        Debug.Assert( types.HasFlag( ClaimType.UserName ) );
+
+
         var parameters = new DynamicParameters();
 
         parameters.Add( nameof(UserName),
@@ -496,6 +526,7 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, JsonModels.IJ
         parameters.Add( nameof(UserID),
                         Guid.Parse( claims.Single( x => x.Type == ClaimTypes.Sid )
                                           .Value ) );
+
 
         if ( types.HasFlag( ClaimType.FirstName ) )
         {
@@ -553,7 +584,7 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, JsonModels.IJ
                                   .Value );
         }
 
-        if ( types.HasFlag( ClaimType.State ) )
+        if ( types.HasFlag( ClaimType.StateOrProvince ) )
         {
             parameters.Add( nameof(StateOrProvince),
                             claims.Single( x => x.Type == ClaimTypes.StateOrProvince )
