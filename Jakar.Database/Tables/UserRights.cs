@@ -1,42 +1,74 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 02/19/2023  7:25 PM
 
+using System.Buffers;
+using System.Linq.Expressions;
+using static System.Net.WebRequestMethods;
+
+
+
 namespace Jakar.Database;
 
 
-public abstract class UserRights : IEnumerator<(int Index, bool Value)>
+public struct UserRights : IEnumerable<(int Index, bool Value)>, IDisposable
 {
-    protected int          _index = 0;
-    private   Memory<char> _rights;
-
-
-    public (int Index, bool Value) Current => (_index, Has( _index ));
-    public int                     Length  => _rights.Length;
-    object IEnumerator.            Current => Current;
-    public Span<char>              Span    => _rights.Span;
-    public char                    Valid   { get; init; } = '+';
-    public char                    Invalid { get; init; } = '-';
-
-
-    public void Init( string rights )
+    public interface IRights
     {
-        Span<char> buffer = stackalloc char[rights.Length];
-        rights.CopyTo( buffer );
-        _rights = buffer.AsMemory();
-    }
-    public void Init( int length )
-    {
-        Span<char> buffer = stackalloc char[length];
-        _rights = buffer.AsMemory();
-
-        for ( int i = 0; i < Length; i++ ) { Span[i] = Invalid; }
+        [MaxLength( TokenValidationParameters.DefaultMaximumTokenSizeInBytes )] public string Rights { get; set; }
     }
 
 
-    public virtual void Dispose()
+
+    private static readonly MemoryPool<byte>   _pool   = MemoryPool<byte>.Shared;
+    public const            byte               VALID   = 1;
+    public const            byte               INVALID = 0;
+    private readonly        Memory<byte>       _rights;
+    private readonly        IMemoryOwner<byte> _owner;
+    private                 int                _index = 0;
+
+
+    public   int                     Length  => _rights.Length;
+    public   (int Index, bool Value) Current => (_index, Has( _index ));
+    internal Span<byte>              Span    => _rights.Span;
+
+
+    private UserRights( int length )
     {
-        Span.Clear();
-        GC.SuppressFinalize( this );
+        _owner  = _pool.Rent( length );
+        _rights = _owner.Memory;
+
+        for ( int i = 0; i < Length; i++ ) { Span[i] = INVALID; }
+    }
+    public UserRights( IRights rights ) : this( rights.Rights ) { }
+    private UserRights( string rights )
+    {
+        Span<byte> span = stackalloc byte[rights.Length];
+        Convert.TryFromBase64String( rights, span, out int length );
+        span = span[..length];
+
+        _owner  = _pool.Rent( span.Length );
+        _rights = _owner.Memory;
+        span.CopyTo( Span );
+    }
+    public void Dispose() => _owner.Dispose();
+
+
+    public UserRights With( IRights rights )
+    {
+        using var other = new UserRights( rights );
+        Debug.Assert( Length == other.Length );
+        for ( int i = 0; i < Length; i++ ) { Span[i] |= other.Span[i]; }
+
+        return this;
+    }
+    public static UserRights Merge( List<IRights> values )
+    {
+        UserRights rights = default;
+
+        // ReSharper disable once ForeachCanBeConvertedToQueryUsingAnotherGetEnumerator
+        foreach ( IRights value in values ) { rights = rights.With( value ); }
+
+        return rights;
     }
 
 
@@ -44,25 +76,27 @@ public abstract class UserRights : IEnumerator<(int Index, bool Value)>
     public void Reset() => _index = -1;
 
 
-    public bool Has( int  index ) => Span[index] == Valid;
-    public bool Has<T>( T index ) where T : struct, Enum => Has( index.AsInt() );
+    public bool Has( int  index ) => Span[index] == VALID;
+    public bool Has<T>( T index ) where T : struct, Enum => Has( Convert.ToInt32( index ) );
 
 
-    public void Remove( int  index ) => Set( index, Invalid );
+    public void Remove( int  index ) => Set( index, INVALID );
     public void Remove<T>( T index ) where T : struct, Enum => Remove( index.AsInt() );
 
 
-    public void Add( int  index ) => Set( index, Valid );
+    public void Add( int  index ) => Set( index, VALID );
     public void Add<T>( T index ) where T : struct, Enum => Add( index.AsInt() );
 
 
-    protected void Set( int index, char right )
+    private void Set( int index, byte value )
     {
-        if ( right != Valid && right != Invalid ) { throw new ArgumentException( $"{nameof(right)} must be one of [ {Valid}, {Invalid} ]" ); }
-
-        Span[index] = right;
+        Debug.Assert( index < Length );
+        Debug.Assert( value is VALID or INVALID );
+        Span[index] = value;
     }
 
 
-    public override string ToString() => _rights.ToString();
+    public override string ToString() => Convert.ToBase64String( Span );
+    public IEnumerator<(int Index, bool Value)> GetEnumerator() { yield break; }
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }

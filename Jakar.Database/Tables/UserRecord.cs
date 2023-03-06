@@ -10,7 +10,7 @@ namespace Jakar.Database;
 
 [Serializable]
 [Table( "Users" )]
-public sealed partial record UserRecord : TableRecord<UserRecord>, JsonModels.IJsonStringModel, IRefreshToken, IUserID, IUserDataRecord, IUserSubscription
+public sealed partial record UserRecord : TableRecord<UserRecord>, JsonModels.IJsonStringModel, IRefreshToken, IUserID, IUserDataRecord, IUserSubscription, UserRights.IRights
 {
     public UserRecord() { }
     public UserRecord( IUserData data, string? rights, UserRecord? caller = default ) : this( Guid.NewGuid(), caller )
@@ -170,6 +170,21 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, JsonModels.IJ
     }
     public async ValueTask<TRecord?> GetSubscription<TRecord>( DbConnection connection, DbTransaction transaction, DbTable<TRecord> table, CancellationToken token ) where TRecord : TableRecord<TRecord>, IUserSubscription =>
         await table.Get( connection, transaction, SubscriptionID, token );
+
+
+    [RequiresPreviewFeatures]
+    public async Task<UserRights> GetRights( DbConnection connection, DbTransaction transaction, Database db, CancellationToken token )
+    {
+        GroupRecord[] groups = await GetGroups( connection, transaction, db, token );
+        RoleRecord[]  roles  = await GetRoles( connection, transaction, db, token );
+        var           rights = new List<UserRights.IRights>( 1 + groups.Length + roles.Length );
+
+        rights.AddRange( groups );
+        rights.AddRange( roles );
+        rights.Add( this );
+
+        return UserRights.Merge( rights );
+    }
 
 
 

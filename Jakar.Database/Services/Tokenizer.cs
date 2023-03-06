@@ -21,27 +21,25 @@ public interface ITokenService
 ///         <see href="https://stackoverflow.com/a/55740879/9530917"> How do I get current user in .NET Core Web API (from JWT Token) </see>
 ///     </para>
 /// </summary>
-public class Tokenizer<TName> : ITokenService where TName : IAppName // TODO: update Tokenizer
+public class Tokenizer : ITokenService // TODO: update Tokenizer
 {
-    private const    string               JWT = "JWT";
-    private readonly Database             _db;
-    private readonly IConfiguration       _configuration;
-    internal virtual string               Audience    => _configuration.GetValue( nameof(Audience), typeof(TName).Name ) ?? throw new KeyNotFoundException( nameof(Audience) );
-    internal virtual string               Domain      => _configuration.GetValue( nameof(Domain),   _db.Domain.OriginalString ) ?? throw new KeyNotFoundException( nameof(Domain) );
-    internal virtual string               Issuer      => _configuration.GetValue( nameof(Issuer),   typeof(TName).Namespace ) ?? throw new KeyNotFoundException( nameof(Issuer) );
-    internal virtual SymmetricSecurityKey SecurityKey => new(Encoding.UTF8.GetBytes( _configuration[JWT] ?? throw new KeyNotFoundException( JWT ) ));
+    private readonly Database _db;
+    internal virtual Uri      Domain => _db.Options.Domain;
 
 
-    public Tokenizer( IConfiguration configuration, Database dataBase )
+    public Tokenizer( Database dataBase ) => _db = dataBase;
+
+    public virtual string GetUrl( Tokens result ) => $"{Domain.OriginalString}/Token/{result.AccessToken}";
+
+    public virtual async ValueTask<string> GenerateAccessToken( IEnumerable<Claim> claims, CancellationToken token )
     {
-        _configuration = configuration;
-        _db            = dataBase;
+        var    security    = await _db.GetEmailJwtSecurityToken( claims, token );
+        string tokenString = new JwtSecurityTokenHandler().WriteToken( security );
+        return tokenString;
     }
-
-
-    public virtual ClaimsPrincipal GetPrincipalFromExpiredToken( string token )
+    public virtual async ValueTask<ClaimsPrincipal> GetPrincipalFromExpiredToken( string token, CancellationToken cancellationToken )
     {
-        TokenValidationParameters tokenValidationParameters = _configuration.GetTokenValidationParameters( _db.Options );
+        TokenValidationParameters tokenValidationParameters = await _db.GetTokenValidationParameters( cancellationToken );
         var                       tokenHandler              = new JwtSecurityTokenHandler();
         ClaimsPrincipal?          principal                 = tokenHandler.ValidateToken( token, tokenValidationParameters, out SecurityToken securityToken );
 
@@ -49,6 +47,8 @@ public class Tokenizer<TName> : ITokenService where TName : IAppName // TODO: up
                    ? throw new SecurityTokenException( "Invalid token" )
                    : principal;
     }
+
+
     public virtual string CreateContent( Tokens result, string header ) =>
         @$"{header}
 
@@ -60,28 +60,17 @@ public class Tokenizer<TName> : ITokenService where TName : IAppName // TODO: up
 </p>";
 
 
-    public virtual string GenerateAccessToken( IEnumerable<Claim> claims )
-    {
-        string  name              = typeof(TName).Name;
-        var     signinCredentials = new SigningCredentials( SecurityKey, SecurityAlgorithms.HmacSha256 );
-        var     tokeOptions       = new JwtSecurityToken( name, name, claims, DateTime.Now, DateTime.Now.AddMinutes( 15 ), signinCredentials );
-        string? tokenString       = new JwtSecurityTokenHandler().WriteToken( tokeOptions );
-        return tokenString;
-    }
-    public virtual string GetUrl( Tokens result ) => $"{Domain}/Token/{result.AccessToken}";
-
-
     public virtual ValueTask<Tokens?> Authenticate( VerifyRequest request, ClaimType types, CancellationToken token = default ) => _db.Authenticate( request, types, token );
 
 
     public virtual async ValueTask<string> CreateContent( string header, UserRecord user, ClaimType types, CancellationToken token = default )
     {
-        Tokens result = await _db.TryCall( _db.GetToken, user, types, token );
+        Tokens result = await _db.GetToken( user, types, token );
         return CreateContent( result, header );
     }
     public virtual async ValueTask<string> CreateHTMLContent( string header, UserRecord user, ClaimType types, CancellationToken token = default )
     {
-        Tokens result = await _db.TryCall( _db.GetToken, user, types, token );
+        Tokens result = await _db.GetToken( user, types, token );
         return CreateHTMLContent( result, header );
     }
 }

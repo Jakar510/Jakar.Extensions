@@ -20,11 +20,6 @@ public abstract partial class Database : Randoms, IConnectableDb, IAsyncDisposab
     }
     public         IConfiguration Configuration    { get; }
     public virtual string         ConnectionString => Configuration.ConnectionString();
-    public Uri Domain
-    {
-        get => _domain;
-        set => SetProperty( ref _domain, value );
-    }
     public             DbTable<GroupRecord>            Groups            { get; }
     public             DbInstance                      Instance          => Options.DbType;
     public             DbOptions                       Options           { get; }
@@ -140,6 +135,16 @@ public abstract partial class Database : Randoms, IConnectableDb, IAsyncDisposab
     }
 
 
+    public virtual async ValueTask<JwtSecurityToken> GetEmailJwtSecurityToken( IEnumerable<Claim> claims, CancellationToken token )
+    {
+        var signinCredentials = await GetSigningCredentials( token );
+        var security          = new JwtSecurityToken( Options.TokenIssuer, Options.TokenAudience, claims, DateTime.UtcNow, DateTime.UtcNow.AddMinutes( 15 ), signinCredentials );
+        return security;
+    }
+    public virtual ValueTask<SigningCredentials> GetSigningCredentials( CancellationToken               token ) => new(Configuration.GetSigningCredentials( Options ));
+    public virtual ValueTask<TokenValidationParameters> GetTokenValidationParameters( CancellationToken token ) => new(Configuration.GetTokenValidationParameters( Options ));
+
+
     /// <summary> Only to be used for <see cref="ITokenService"/> </summary>
     /// <exception cref="ArgumentOutOfRangeException"> </exception>
     public ValueTask<Tokens?> Authenticate( VerifyRequest request, ClaimType types = default, CancellationToken token = default ) => this.TryCall( Authenticate, request, types, token );
@@ -197,6 +202,7 @@ public abstract partial class Database : Randoms, IConnectableDb, IAsyncDisposab
     }
 
 
+    public ValueTask<Tokens> GetToken( UserRecord user, ClaimType types = default, CancellationToken token = default ) => this.TryCall( GetToken, user, types, token );
     public virtual async ValueTask<Tokens> GetToken( DbConnection connection, DbTransaction transaction, UserRecord user, ClaimType types = default, CancellationToken token = default )
     {
         Claim[] claims = await user.GetUserClaims( connection, transaction, this, types | DEFAULT_CLAIM_TYPES, token );
@@ -208,7 +214,7 @@ public abstract partial class Database : Randoms, IConnectableDb, IAsyncDisposab
                              Issuer             = Options.TokenIssuer,
                              Audience           = Options.TokenAudience,
                              IssuedAt           = DateTime.UtcNow,
-                             SigningCredentials = Configuration.GetSigningCredentials( Options ),
+                             SigningCredentials = await GetSigningCredentials( token )
                          };
 
 
@@ -221,7 +227,7 @@ public abstract partial class Database : Randoms, IConnectableDb, IAsyncDisposab
                                     Issuer             = Options.TokenIssuer,
                                     Audience           = Options.TokenAudience,
                                     IssuedAt           = DateTime.UtcNow,
-                                    SigningCredentials = Configuration.GetSigningCredentials( Options ),
+                                    SigningCredentials = await GetSigningCredentials( token )
                                 };
 
 
@@ -259,7 +265,7 @@ public abstract partial class Database : Randoms, IConnectableDb, IAsyncDisposab
                              Issuer             = Options.TokenIssuer,
                              Audience           = Options.TokenAudience,
                              IssuedAt           = DateTime.UtcNow,
-                             SigningCredentials = Configuration.GetSigningCredentials( Options ),
+                             SigningCredentials = await GetSigningCredentials( token )
                          };
 
         JwtSecurityTokenHandler handler     = new JwtSecurityTokenHandler();
@@ -301,7 +307,7 @@ public abstract partial class Database : Randoms, IConnectableDb, IAsyncDisposab
     protected async ValueTask<LoginResult> VerifyLogin( DbConnection connection, DbTransaction transaction, string jwt, ClaimType types = default, CancellationToken token = default )
     {
         JwtSecurityTokenHandler   handler              = new JwtSecurityTokenHandler();
-        TokenValidationParameters validationParameters = Configuration.GetTokenValidationParameters( Options );
+        TokenValidationParameters validationParameters = await GetTokenValidationParameters( token );
         TokenValidationResult     validationResult     = await handler.ValidateTokenAsync( jwt, validationParameters );
         if ( validationResult.Exception is not null ) { return new LoginResult( validationResult.Exception ); }
 

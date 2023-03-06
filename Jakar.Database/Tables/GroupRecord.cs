@@ -3,11 +3,12 @@
 
 [Serializable]
 [Table( "Groups" )]
-public sealed record GroupRecord : TableRecord<GroupRecord>
+public sealed record GroupRecord : TableRecord<GroupRecord>, UserRights.IRights
 {
     private Guid    _ownerID;
     private string? _customerID;
     private string  _nameOfGroup = string.Empty;
+    private string _rights = string.Empty;
 
 
     [MaxLength( 256 )]
@@ -31,6 +32,14 @@ public sealed record GroupRecord : TableRecord<GroupRecord>
     {
         get => _nameOfGroup;
         set => SetProperty( ref _nameOfGroup, value );
+    }
+
+
+    [MaxLength( TokenValidationParameters.DefaultMaximumTokenSizeInBytes )]
+    public string Rights
+    {
+        get => _rights;
+        set => SetProperty( ref _rights, value );
     }
 
 

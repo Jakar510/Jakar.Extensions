@@ -6,8 +6,10 @@ namespace Jakar.Database;
 
 [Serializable]
 [Table( "Roles" )]
-public sealed record RoleRecord : TableRecord<RoleRecord>
+public sealed record RoleRecord : TableRecord<RoleRecord>, UserRights.IRights
 {
+    private string _rights = string.Empty;
+
     [MaxLength( 4096 )]
     public string ConcurrencyStamp { get; init; } = Guid.NewGuid()
                                                         .ToString();
@@ -15,6 +17,12 @@ public sealed record RoleRecord : TableRecord<RoleRecord>
     [MaxLength( 1024 )] public string Name           { get; init; } = string.Empty;
     [MaxLength( 1024 )] public string NormalizedName { get; init; } = string.Empty;
 
+    [MaxLength( TokenValidationParameters.DefaultMaximumTokenSizeInBytes )]
+    public string Rights
+    {
+        get => _rights;
+        set => SetProperty( ref _rights, value );
+    }
 
     public RoleRecord() { }
     public RoleRecord( IdentityRole role )

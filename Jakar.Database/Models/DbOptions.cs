@@ -20,6 +20,7 @@ public sealed class DbOptions : IOptions<DbOptions>
     public string               JWTAlgorithm         { get; set; } = SecurityAlgorithms.HmacSha512Signature;
     public string               AuthenticationType   { get; set; } = JwtBearerDefaults.AuthenticationScheme;
     public TimeSpan             ClockSkew            { get; set; } = TimeSpan.FromSeconds( 60 );
+    public Uri                  Domain               { get; set; } = new("https://localhost");
 
 
     DbOptions IOptions<DbOptions>.Value => this;
