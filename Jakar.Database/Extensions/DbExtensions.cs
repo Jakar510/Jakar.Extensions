@@ -21,11 +21,6 @@ public static partial class DbExtensions
                                                                                                                        } ) ) );
 
 
-    public static WebApplicationBuilder AddDatabase<T>( this WebApplicationBuilder builder, DbInstance instance, AppVersion version ) where T : Database => builder.AddDatabase<T>( configure =>
-                                                                                                                                                                                    {
-                                                                                                                                                                                        configure.DbType  = instance;
-                                                                                                                                                                                        configure.Version = version;
-                                                                                                                                                                                    } );
     public static WebApplicationBuilder AddDatabase<T>( this WebApplicationBuilder builder, Action<DbOptions> configure ) where T : Database
     {
         builder.AddOptions( configure );
@@ -67,9 +62,8 @@ public static partial class DbExtensions
     public static WebApplicationBuilder AddRoleStore( this WebApplicationBuilder builder ) => builder.AddScoped<IRoleStore<RoleRecord>, RoleStore>();
 
 
-    public static WebApplicationBuilder AddTokenizer<TName>( this WebApplicationBuilder builder ) where TName : IAppName => builder.AddTokenizer<TName, Tokenizer<TName>>();
-    public static WebApplicationBuilder AddTokenizer<TName, TTokenizer>( this WebApplicationBuilder builder ) where TName : IAppName
-                                                                                                              where TTokenizer : Tokenizer<TName> => builder.AddScoped<ITokenService, TTokenizer>();
+    public static WebApplicationBuilder AddTokenizer( this             WebApplicationBuilder builder ) => builder.AddTokenizer<Tokenizer>();
+    public static WebApplicationBuilder AddTokenizer<TTokenizer>( this WebApplicationBuilder builder ) where TTokenizer : Tokenizer => builder.AddScoped<ITokenService, TTokenizer>();
 
 
     public static WebApplicationBuilder AddUserStore( this WebApplicationBuilder builder, Action<PasswordRequirements>? configurePasswordRequirements = default ) =>

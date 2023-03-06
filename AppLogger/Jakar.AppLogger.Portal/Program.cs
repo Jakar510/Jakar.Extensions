@@ -43,9 +43,17 @@ builder.AddServerSideBlazor();
 builder.AddAuthorization();
 builder.AddAuthentication();
 builder.AddAppServices();
-builder.AddDatabase<LoggerDB>( DbInstance.Postgres, AppVersion.FromAssembly<Program>() );
+
+builder.AddDatabase<LoggerDB>( options =>
+                               {
+                                   options.DbType        = DbInstance.Postgres;
+                                   options.Version       = AppVersion.FromAssembly<Program>();
+                                   options.TokenAudience = nameof(AppLoggerPortal);
+                                   options.TokenIssuer   = nameof(AppLoggerPortal);
+                               } );
+
 builder.AddScoped<CircuitHandler, ScriptManagerCircuitHandler>();
-builder.AddTokenizer<AppLoggerPortal>();
+builder.AddTokenizer();
 builder.AddEmailer();
 builder.AddWebEncoders();
 builder.AddEndpointsApiExplorer();

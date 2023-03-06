@@ -172,8 +172,7 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, JsonModels.IJ
         await table.Get( connection, transaction, SubscriptionID, token );
 
 
-    [RequiresPreviewFeatures]
-    public async Task<UserRights> GetRights( DbConnection connection, DbTransaction transaction, Database db, CancellationToken token )
+    public async Task<UserRights> GetRights( DbConnection connection, DbTransaction transaction, Database db, int totalRightCount, CancellationToken token )
     {
         GroupRecord[] groups = await GetGroups( connection, transaction, db, token );
         RoleRecord[]  roles  = await GetRoles( connection, transaction, db, token );
@@ -183,7 +182,7 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, JsonModels.IJ
         rights.AddRange( roles );
         rights.Add( this );
 
-        return UserRights.Merge( rights );
+        return UserRights.Merge( rights, totalRightCount );
     }
 
 

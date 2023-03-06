@@ -10,7 +10,7 @@ using static System.Net.WebRequestMethods;
 namespace Jakar.Database;
 
 
-public struct UserRights : IEnumerable<(int Index, bool Value)>, IDisposable
+public struct UserRights : IEnumerator<(int Index, bool Value)>, IEnumerable<(int Index, bool Value)>
 {
     public interface IRights
     {
@@ -27,16 +27,18 @@ public struct UserRights : IEnumerable<(int Index, bool Value)>, IDisposable
     private                 int                _index = 0;
 
 
-    public   int                     Length  => _rights.Length;
-    public   (int Index, bool Value) Current => (_index, Has( _index ));
-    internal Span<byte>              Span    => _rights.Span;
+    public int                     Length  => _rights.Length;
+    public (int Index, bool Value) Current => (_index, Has( _index ));
+    object IEnumerator.            Current => Current;
+    internal Span<byte>            Span    => _rights.Span;
 
 
-    private UserRights( int length )
+    public UserRights( int length )
     {
+        if ( length <= 0 ) { throw new ArgumentException( $"{length} must be > 0" ); }
+
         _owner  = _pool.Rent( length );
         _rights = _owner.Memory;
-
         for ( int i = 0; i < Length; i++ ) { Span[i] = INVALID; }
     }
     public UserRights( IRights rights ) : this( rights.Rights ) { }
@@ -50,7 +52,11 @@ public struct UserRights : IEnumerable<(int Index, bool Value)>, IDisposable
         _rights = _owner.Memory;
         span.CopyTo( Span );
     }
-    public void Dispose() => _owner.Dispose();
+    public void Dispose()
+    {
+        _owner.Dispose();
+        this = default;
+    }
 
 
     public UserRights With( IRights rights )
@@ -61,15 +67,8 @@ public struct UserRights : IEnumerable<(int Index, bool Value)>, IDisposable
 
         return this;
     }
-    public static UserRights Merge( List<IRights> values )
-    {
-        UserRights rights = default;
-
-        // ReSharper disable once ForeachCanBeConvertedToQueryUsingAnotherGetEnumerator
-        foreach ( IRights value in values ) { rights = rights.With( value ); }
-
-        return rights;
-    }
+    public static UserRights Merge( int                  totalRightCount, params IEnumerable<IRights>[] values ) => Merge( values.SelectMany( x => x ), totalRightCount );
+    public static UserRights Merge( IEnumerable<IRights> values,          int                           totalRightCount ) => values.Aggregate( new UserRights( totalRightCount ), ( current, value ) => current.With( value ) );
 
 
     public bool MoveNext() => ++_index < Length;
@@ -90,6 +89,7 @@ public struct UserRights : IEnumerable<(int Index, bool Value)>, IDisposable
 
     private void Set( int index, byte value )
     {
+        Debug.Assert( index >= 0 );
         Debug.Assert( index < Length );
         Debug.Assert( value is VALID or INVALID );
         Span[index] = value;
@@ -97,6 +97,6 @@ public struct UserRights : IEnumerable<(int Index, bool Value)>, IDisposable
 
 
     public override string ToString() => Convert.ToBase64String( Span );
-    public IEnumerator<(int Index, bool Value)> GetEnumerator() { yield break; }
+    public IEnumerator<(int Index, bool Value)> GetEnumerator() => this;
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }
