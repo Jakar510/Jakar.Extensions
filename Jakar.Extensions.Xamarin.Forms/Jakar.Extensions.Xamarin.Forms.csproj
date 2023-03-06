@@ -44,7 +44,7 @@
 	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="Acr.UserDialogs" Version="7.2.0.564" />
-		<PackageReference Include="Jakar.Extensions" Version="6.7.5" />
+		<PackageReference Include="Jakar.Extensions" Version="6.7.8" />
 		<PackageReference Include="Microsoft.AppCenter" Version="5.0.1" />
 		<PackageReference Include="Microsoft.AppCenter.Analytics" Version="5.0.1" />
 		<PackageReference Include="Microsoft.AppCenter.Crashes" Version="5.0.1" />
