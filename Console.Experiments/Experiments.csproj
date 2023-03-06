@@ -26,7 +26,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Jakar.Database\Jakar.Database.csproj" />
+    <ProjectReference Include="..\Jakar.Extensions\Jakar.Extensions.csproj" />
   </ItemGroup>
 
 </Project>

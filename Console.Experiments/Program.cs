@@ -1,11 +1,9 @@
-﻿using System.Security.Cryptography;
-using System.Text;
-
-
-try
+﻿try
 {
     "Hello World!".WriteToConsole();
     Console.WriteLine();
+
+    BenchmarkRunner.Run<CastToBenchmarks>();
 }
 catch ( Exception e ) { e.WriteToConsole(); }
 finally { "Bye".WriteToConsole(); }
