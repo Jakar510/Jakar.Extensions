@@ -69,6 +69,10 @@ public sealed class TypePropertiesCache : ConcurrentDictionary<Type, TypePropert
         private readonly IReadOnlyDictionary<DbInstance, Descriptors> _dictionary;
 
 
+        public Descriptors this[ IConnectableDb value ]
+        {
+            [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _dictionary[value.Instance];
+        }
         public Descriptors this[ DbInstance value ]
         {
             [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _dictionary[value];
@@ -97,20 +101,30 @@ public sealed class TypePropertiesCache : ConcurrentDictionary<Type, TypePropert
                               [DbInstance.MsSql]    = properties.ToDictionary( x => x.Name, Descriptor.MsSql )
                           };
         }
+
+
+        public bool ContainsKey( DbInstance     value ) => _dictionary.ContainsKey( value );
         public bool ContainsKey( IConnectableDb value ) => ContainsKey( value.Instance );
 
 
-        public IEnumerable<Descriptor> NotKeys( DbInstance value ) => this[value]
+        [MethodImpl( MethodImplOptions.AggressiveInlining )]
+        public IEnumerable<Descriptor> GetValues( DbInstance value ) => _dictionary[value]
+           .Values;
+        [MethodImpl( MethodImplOptions.AggressiveInlining )]
+        public IEnumerable<Descriptor> GetValues( IConnectableDb value ) => _dictionary[value.Instance]
+           .Values;
+
+
+        [MethodImpl( MethodImplOptions.AggressiveInlining )]
+        public IEnumerable<Descriptor> NotKeys( DbInstance value ) => _dictionary[value]
                                                                      .Values.Where( x => !x.IsKey );
-        public IEnumerable<Descriptor> NotKeys( IConnectableDb value ) => this[value.Instance]
+        [MethodImpl( MethodImplOptions.AggressiveInlining )]
+        public IEnumerable<Descriptor> NotKeys( IConnectableDb value ) => _dictionary[value.Instance]
                                                                          .Values.Where( x => !x.IsKey );
 
 
         public bool TryGetValue( IConnectableDb key, [NotNullWhen( true )] out Descriptors? value ) => TryGetValue( key.Instance, out value );
         public bool TryGetValue( DbInstance     key, [NotNullWhen( true )] out Descriptors? value ) => _dictionary.TryGetValue( key, out value );
-
-
-        public bool ContainsKey( DbInstance value ) => _dictionary.ContainsKey( value );
 
 
         public IEnumerator<KeyValuePair<DbInstance, Descriptors>> GetEnumerator() => _dictionary.GetEnumerator();

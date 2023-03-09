@@ -53,10 +53,10 @@ public class DbTable<TRecord> : Constants<TRecord>, IConnectableDb, IAsyncDispos
     }
 
 
-    protected internal IEnumerable<Descriptor> Descriptors   => _propertiesCache.NotKeys( this );
-    protected internal IEnumerable<string>     KeyValuePairs => Descriptors.Select( x => x.KeyValuePair );
-    protected internal IEnumerable<string>     ColumnNames   => Descriptors.Select( x => x.ColumnName );
-    protected internal IEnumerable<string>     VariableNames => Descriptors.Select( x => x.VariableName );
+    protected internal virtual IEnumerable<Descriptor> Descriptors => _propertiesCache.GetValues( this );
+    protected internal IEnumerable<string> KeyValuePairs => Descriptors.Select( x => x.KeyValuePair );
+    protected internal IEnumerable<string> ColumnNames   => Descriptors.Select( x => x.ColumnName );
+    protected internal IEnumerable<string> VariableNames => Descriptors.Select( x => x.VariableName );
 
 
     public DbTable( IConnectableDb database )
