@@ -10,6 +10,8 @@ public sealed class NullableShortConverter : JsonConverter<short?>
                {
                    null    => existingValue,
                    short n => n,
+                   int n   => (short)n,
+                   long n  => (short)n,
                    string s => short.TryParse( s, out short n )
                                    ? n
                                    : null,

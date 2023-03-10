@@ -11,6 +11,7 @@ public sealed class NullableIntConverter : JsonConverter<int?>
                    null    => existingValue,
                    short n => n,
                    int n   => n,
+                   long n => (int)n,
                    string s => int.TryParse( s, out int n )
                                    ? n
                                    : null,
