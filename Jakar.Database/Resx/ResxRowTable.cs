@@ -29,7 +29,6 @@ public sealed record ResxRowTable : TableRecord<ResxRowTable>
     {
         Key         = key;
         KeyID       = keyID;
-        DateCreated = DateTimeOffset.UtcNow;
     }
     public ResxRowTable( string key, long keyID, string neutral, UserRecord? caller = default ) : this( key, keyID, caller ) => Neutral = neutral;
     public ResxRowTable( string      key,

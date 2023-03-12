@@ -8,8 +8,10 @@ namespace Jakar.Database;
 [SuppressMessage( "ReSharper", "InconsistentNaming" )]
 public abstract class Constants<TRecord> : ObservableClass where TRecord : TableRecord<TRecord>
 {
-    public const           string ID                  = nameof(TableRecord<TRecord>.ID);
-    public const           string POSTGRES_ID         = $@"""{ID}""";
+    public const           string DateCreated         = nameof(TableRecord<TRecord>.DateCreated);
+    public const           string CreatedBy           = nameof(TableRecord<TRecord>.CreatedBy);
+    public const           string LastModified        = nameof(TableRecord<TRecord>.LastModified);
+    public const           string OwnerUserID         = nameof(TableRecord<TRecord>.OwnerUserID);
     public static readonly string POSTGRES_TABLE_NAME = $"\"{typeof(TRecord).GetTableName()}\"";
     public static readonly string TABLE_NAME          = typeof(TRecord).GetTableName();
 }
@@ -24,18 +26,36 @@ public class DbTable<TRecord> : Constants<TRecord>, IConnectableDb, IAsyncDispos
     protected readonly TypePropertiesCache.Properties _propertiesCache;
 
 
-    protected internal static TRecord[]                Empty         => Array.Empty<TRecord>();
-    public                    DbInstance               Instance      => _database.Instance;
-    public                    RecordGenerator<TRecord> Records       => new(this);
-    public                    string                   CurrentSchema => _database.CurrentSchema;
+    protected internal static TRecord[]           Empty         => Array.Empty<TRecord>();
+    protected internal        IEnumerable<string> ColumnNames   => Descriptors.Select( x => x.ColumnName );
+    public                    string              CurrentSchema => _database.CurrentSchema;
 
 
-    protected internal virtual string IDKey => Instance switch
-                                               {
-                                                   DbInstance.Postgres => POSTGRES_ID,
-                                                   DbInstance.MsSql    => ID,
-                                                   _                   => throw new OutOfRangeException( nameof(Instance), Instance )
-                                               };
+    protected internal virtual IEnumerable<Descriptor> Descriptors => _propertiesCache.GetValues( this );
+
+
+    protected internal virtual string ID => Instance switch
+                                            {
+                                                DbInstance.Postgres => $@"""{nameof(TableRecord<TRecord>.ID)}""",
+                                                DbInstance.MsSql    => nameof(TableRecord<TRecord>.ID),
+                                                _                   => throw new OutOfRangeException( nameof(Instance), Instance )
+                                            };
+
+    public             DbInstance          Instance      => _database.Instance;
+    protected internal IEnumerable<string> KeyValuePairs => Descriptors.Select( x => x.KeyValuePair );
+
+    public string RandomMethod
+    {
+        [MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization )]
+        get => Instance switch
+               {
+                   DbInstance.MsSql    => "NEWID()",
+                   DbInstance.Postgres => "RANDOM()",
+                   _                   => throw new OutOfRangeException( nameof(Instance), Instance )
+               };
+    }
+
+    public RecordGenerator<TRecord> Records => new(this);
 
     public virtual string SchemaTableName
     {
@@ -51,11 +71,6 @@ public class DbTable<TRecord> : Constants<TRecord>, IConnectableDb, IAsyncDispos
                    _                   => TABLE_NAME
                };
     }
-
-
-    protected internal virtual IEnumerable<Descriptor> Descriptors => _propertiesCache.GetValues( this );
-    protected internal IEnumerable<string> KeyValuePairs => Descriptors.Select( x => x.KeyValuePair );
-    protected internal IEnumerable<string> ColumnNames   => Descriptors.Select( x => x.ColumnName );
     protected internal IEnumerable<string> VariableNames => Descriptors.Select( x => x.VariableName );
 
 
@@ -132,7 +147,7 @@ public class DbTable<TRecord> : Constants<TRecord>, IConnectableDb, IAsyncDispos
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask<long> Count( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
-        string sql = $"SELECT COUNT({IDKey}) FROM {SchemaTableName}";
+        string sql = $"SELECT COUNT({ID}) FROM {SchemaTableName}";
 
         if ( token.IsCancellationRequested ) { return default; }
 
@@ -164,7 +179,7 @@ public class DbTable<TRecord> : Constants<TRecord>, IConnectableDb, IAsyncDispos
     }
     public virtual async ValueTask Delete( DbConnection connection, DbTransaction transaction, Guid id, CancellationToken token = default )
     {
-        string cmd = $"DELETE FROM {SchemaTableName} WHERE {IDKey} = {id};";
+        string cmd = $"DELETE FROM {SchemaTableName} WHERE {ID} = {id};";
 
         if ( token.IsCancellationRequested ) { return; }
 
@@ -173,7 +188,7 @@ public class DbTable<TRecord> : Constants<TRecord>, IConnectableDb, IAsyncDispos
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask Delete( DbConnection connection, DbTransaction transaction, IEnumerable<Guid> ids, CancellationToken token = default )
     {
-        string sql = $"DELETE FROM {SchemaTableName} WHERE {IDKey} in ( {string.Join( ',', ids.Select( x => $"'{x}'" ) )} );";
+        string sql = $"DELETE FROM {SchemaTableName} WHERE {ID} in ( {string.Join( ',', ids.Select( x => $"'{x}'" ) )} );";
 
         if ( token.IsCancellationRequested ) { return; }
 
@@ -198,10 +213,19 @@ public class DbTable<TRecord> : Constants<TRecord>, IConnectableDb, IAsyncDispos
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask<bool> Exists( DbConnection connection, DbTransaction transaction, bool matchAll, DynamicParameters parameters, CancellationToken token )
     {
-        string sql = $"SELECT TOP 1 {IDKey} FROM {SchemaTableName} WHERE {string.Join( matchAll
-                                                                                           ? "AND"
-                                                                                           : "OR",
-                                                                                       parameters.ParameterNames.Select( KeyValuePair ) )}";
+        string sql = Instance switch
+                     {
+                         DbInstance.MsSql => $"SELECT TOP 1 {ID} FROM {SchemaTableName} WHERE {string.Join( matchAll
+                                                                                                                ? "AND"
+                                                                                                                : "OR",
+                                                                                                            parameters.ParameterNames.Select( KeyValuePair ) )}",
+                         DbInstance.Postgres => $"SELECT {ID} FROM {SchemaTableName} WHERE {string.Join( matchAll
+                                                                                                             ? "AND"
+                                                                                                             : "OR",
+                                                                                                         parameters.ParameterNames.Select( KeyValuePair ) )} LIMIT 1",
+                         _ => throw new OutOfRangeException( nameof(Instance), Instance )
+                     };
+
 
         token.ThrowIfCancellationRequested();
 
@@ -217,7 +241,7 @@ public class DbTable<TRecord> : Constants<TRecord>, IConnectableDb, IAsyncDispos
     public ValueTask<TRecord?> First( CancellationToken token = default ) => this.Call( First, token );
     public virtual async ValueTask<TRecord?> First( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
-        string sql = $"SELECT * FROM {SchemaTableName} ORDER BY {IDKey} ASC LIMIT 1";
+        string sql = $"SELECT * FROM {SchemaTableName} ORDER BY {ID} ASC LIMIT 1";
 
         if ( token.IsCancellationRequested ) { return default; }
 
@@ -229,7 +253,7 @@ public class DbTable<TRecord> : Constants<TRecord>, IConnectableDb, IAsyncDispos
     public ValueTask<TRecord?> FirstOrDefault( CancellationToken token = default ) => this.Call( FirstOrDefault, token );
     public virtual async ValueTask<TRecord?> FirstOrDefault( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
-        string sql = $"SELECT * FROM {SchemaTableName} ORDER BY {IDKey} ASC LIMIT 1";
+        string sql = $"SELECT * FROM {SchemaTableName} ORDER BY {ID} ASC LIMIT 1";
 
         if ( token.IsCancellationRequested ) { return default; }
 
@@ -304,7 +328,7 @@ public class DbTable<TRecord> : Constants<TRecord>, IConnectableDb, IAsyncDispos
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual ValueTask<TRecord[]> Get( DbConnection connection, DbTransaction? transaction, IEnumerable<Guid> ids, CancellationToken token = default )
     {
-        string sql = $"SELECT * FROM {SchemaTableName} WHERE {IDKey} in {string.Join( ',', ids.Select( x => $"'{x}'" ) )}";
+        string sql = $"SELECT * FROM {SchemaTableName} WHERE {ID} in {string.Join( ',', ids.Select( x => $"'{x}'" ) )}";
 
         return Where( connection, transaction, sql, default, token );
     }
@@ -322,7 +346,7 @@ public class DbTable<TRecord> : Constants<TRecord>, IConnectableDb, IAsyncDispos
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask<string?> GetID( DbConnection connection, DbTransaction? transaction, string columnName, object value, CancellationToken token = default )
     {
-        string sql = $"SELECT {IDKey} FROM {SchemaTableName} WHERE {columnName} = @{nameof(value)}";
+        string sql = $"SELECT {ID} FROM {SchemaTableName} WHERE {columnName} = @{nameof(value)}";
         return await GetID( connection, transaction, sql, GetParameters( value ), token );
     }
 
@@ -358,7 +382,7 @@ public class DbTable<TRecord> : Constants<TRecord>, IConnectableDb, IAsyncDispos
 
         try
         {
-            Guid id = await connection.ExecuteScalarAsync<Guid>( sql, parameters, transaction );
+            var id = await connection.ExecuteScalarAsync<Guid>( sql, parameters, transaction );
             return record.NewID( id );
         }
         catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
@@ -368,26 +392,41 @@ public class DbTable<TRecord> : Constants<TRecord>, IConnectableDb, IAsyncDispos
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask<TRecord?> TryInsert( DbConnection connection, DbTransaction transaction, TRecord record, bool matchAll, DynamicParameters parameters, CancellationToken token = default )
     {
-        string sql = $@"IF NOT EXISTS(SELECT * FROM {SchemaTableName} WHERE {string.Join( matchAll
-                                                                                              ? "AND"
-                                                                                              : "OR",
-                                                                                          parameters.ParameterNames.Select( KeyValuePair ) )})
+        string sql = Instance switch
+                     {
+                         DbInstance.MsSql => $@"IF NOT EXISTS(SELECT * FROM {SchemaTableName} WHERE {string.Join( matchAll
+                                                                                                                      ? "AND"
+                                                                                                                      : "OR",
+                                                                                                                  parameters.ParameterNames.Select( KeyValuePair ) )})
 BEGIN
     SET NOCOUNT ON INSERT INTO {SchemaTableName} ({string.Join( ',', ColumnNames )}) OUTPUT INSERTED.ID values ({string.Join( ',', VariableNames )})
 END
 
 ELSE 
 BEGIN 
-    SELECT NULL FROM {SchemaTableName} TOP 1
-END";
+    SELECT {ID} = NULL 
+END",
+                         DbInstance.Postgres => $@"IF NOT EXISTS(SELECT * FROM {SchemaTableName} WHERE {string.Join( matchAll
+                                                                                                                         ? "AND"
+                                                                                                                         : "OR",
+                                                                                                                     parameters.ParameterNames.Select( KeyValuePair ) )})
+BEGIN
+    SET NOCOUNT ON INSERT INTO {SchemaTableName} ({string.Join( ',', ColumnNames )}) OUTPUT INSERTED.ID values ({string.Join( ',', VariableNames )})
+END
+
+ELSE 
+BEGIN 
+    SELECT {ID} = NULL 
+END",
+                         _ => throw new OutOfRangeException( nameof(Instance), Instance )
+                     };
 
 
         if ( token.IsCancellationRequested ) { return default; }
 
         try
         {
-            Guid? id = await connection.ExecuteScalarAsync<Guid?>( sql, parameters, transaction );
-
+            var id = await connection.ExecuteScalarAsync<Guid?>( sql, parameters, transaction );
             if ( id.HasValue ) { return record.NewID( id.Value ); }
 
             return default;
@@ -399,33 +438,57 @@ END";
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask<TRecord?> InsertOrUpdate( DbConnection connection, DbTransaction transaction, TRecord record, bool matchAll, DynamicParameters parameters, CancellationToken token = default )
     {
-        string sql = $@"IF NOT EXISTS(SELECT * FROM {SchemaTableName} WHERE {string.Join( matchAll
-                                                                                              ? "AND"
-                                                                                              : "OR",
-                                                                                          parameters.ParameterNames.Select( KeyValuePair ) )})
+        string sql = Instance switch
+                     {
+                         DbInstance.MsSql => $@"IF NOT EXISTS(SELECT * FROM {SchemaTableName} WHERE {string.Join( matchAll
+                                                                                                                      ? "AND"
+                                                                                                                      : "OR",
+                                                                                                                  parameters.ParameterNames.Select( KeyValuePair ) )})
 BEGIN
     SET NOCOUNT ON INSERT INTO {SchemaTableName} ({string.Join( ',', ColumnNames )}) OUTPUT INSERTED.ID values ({string.Join( ',', VariableNames )})
 END
 
 ELSE 
 BEGIN 
-    UPDATE {SchemaTableName} SET {string.Join( ',', KeyValuePairs )} WHERE {IDKey} = @{string.Join( matchAll
-                                                                                                        ? "AND"
-                                                                                                        : "OR",
-                                                                                                    parameters.ParameterNames.Select( KeyValuePair ) )};
+    UPDATE {SchemaTableName} SET {string.Join( ',', KeyValuePairs )} WHERE {ID} = @{string.Join( matchAll
+                                                                                                     ? "AND"
+                                                                                                     : "OR",
+                                                                                                 parameters.ParameterNames.Select( KeyValuePair ) )};
 
-    SELECT {IDKey} FROM {SchemaTableName} WHERE {string.Join( matchAll
-                                                                  ? "AND"
-                                                                  : "OR",
-                                                              parameters.ParameterNames.Select( KeyValuePair ) )} TOP 1
-END";
+    SELECT TOP 1 {ID} FROM {SchemaTableName} WHERE {string.Join( matchAll
+                                                                     ? "AND"
+                                                                     : "OR",
+                                                                 parameters.ParameterNames.Select( KeyValuePair ) )} 
+END",
+                         DbInstance.Postgres => $@"IF NOT EXISTS(SELECT * FROM {SchemaTableName} WHERE {string.Join( matchAll
+                                                                                                                         ? "AND"
+                                                                                                                         : "OR",
+                                                                                                                     parameters.ParameterNames.Select( KeyValuePair ) )})
+BEGIN
+    SET NOCOUNT ON INSERT INTO {SchemaTableName} ({string.Join( ',', ColumnNames )}) OUTPUT INSERTED.ID values ({string.Join( ',', VariableNames )})
+END
+
+ELSE 
+BEGIN 
+    UPDATE {SchemaTableName} SET {string.Join( ',', KeyValuePairs )} WHERE {ID} = @{string.Join( matchAll
+                                                                                                     ? "AND"
+                                                                                                     : "OR",
+                                                                                                 parameters.ParameterNames.Select( KeyValuePair ) )};
+
+    SELECT {ID} FROM {SchemaTableName} WHERE {string.Join( matchAll
+                                                               ? "AND"
+                                                               : "OR",
+                                                           parameters.ParameterNames.Select( KeyValuePair ) )} LIMIT 1
+END",
+                         _ => throw new OutOfRangeException( nameof(Instance), Instance )
+                     };
 
 
         if ( token.IsCancellationRequested ) { return default; }
 
         try
         {
-            Guid? id = await connection.ExecuteScalarAsync<Guid?>( sql, parameters, transaction );
+            var id = await connection.ExecuteScalarAsync<Guid?>( sql, parameters, transaction );
 
             if ( id.HasValue ) { return record.NewID( id.Value ); }
 
@@ -439,8 +502,9 @@ END";
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask<TRecord?> Last( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
-        string sql = $"SELECT * FROM {SchemaTableName} ORDER BY {IDKey} DESC LIMIT 1";
         if ( token.IsCancellationRequested ) { return default; }
+
+        string sql = $"SELECT * FROM {SchemaTableName} ORDER BY {ID} DESC LIMIT 1";
 
         try { return await connection.QueryFirstAsync<TRecord>( sql, default, transaction ); }
         catch ( Exception e ) { throw new SqlException( sql, _nullParameters, e ); }
@@ -453,7 +517,7 @@ END";
     {
         if ( token.IsCancellationRequested ) { return default; }
 
-        string sql = $"SELECT * FROM {SchemaTableName} ORDER BY {IDKey} DESC LIMIT 1";
+        string sql = $"SELECT * FROM {SchemaTableName} ORDER BY {ID} DESC LIMIT 1";
 
         try { return await connection.QueryFirstOrDefaultAsync<TRecord>( sql, default, transaction ); }
         catch ( Exception e ) { throw new SqlException( sql, _nullParameters, e ); }
@@ -468,7 +532,7 @@ END";
         parameters.Add( nameof(RecordPair.ID),          pair.ID );
         parameters.Add( nameof(RecordPair.DateCreated), pair.DateCreated );
 
-        string sql = @$"SELECT * FROM {SchemaTableName} WHERE ( id = IFNULL((SELECT MIN({IDKey}) FROM {SchemaTableName} WHERE {IDKey} > @{nameof(RecordPair.ID)}), 0) )";
+        string sql = @$"SELECT * FROM {SchemaTableName} WHERE ( id = IFNULL((SELECT MIN({ID}) FROM {SchemaTableName} WHERE {ID} > @{nameof(RecordPair.ID)}), 0) )";
         if ( token.IsCancellationRequested ) { return default; }
 
         try { return await connection.ExecuteScalarAsync<TRecord>( sql, parameters, transaction ); }
@@ -480,18 +544,14 @@ END";
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask<RecordPair[]> SortedIDs( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
-        string sql = @$"SELECT {nameof(TableRecord<TRecord>.ID)}, {nameof(TableRecord<TRecord>.DateCreated)} FROM {SchemaTableName}";
+        string sql = @$"SELECT {ID}, {DateCreated} FROM {SchemaTableName} ORDER BY {DateCreated} DESC";
 
 
         try
         {
             if ( token.IsCancellationRequested ) { return Array.Empty<RecordPair>(); }
 
-            (Guid ID, DateTimeOffset DateCreated)[] pairs   = Database.GetArray( await connection.QueryAsync<(Guid ID, DateTimeOffset DateCreated)>( sql, default, transaction ) );
-            var                                     results = new List<RecordPair>( pairs.Length );
-            for ( int i = 0; i < pairs.Length; i++ ) { results[i] = pairs[i]; }
-
-            return Database.GetArray( results );
+            return Database.GetArray( await connection.QueryAsync<RecordPair>( sql, default, transaction ) );
         }
         catch ( Exception e ) { throw new SqlException( sql, e ); }
     }
@@ -503,11 +563,12 @@ END";
     {
         if ( id is null ) { return default; }
 
+        if ( token.IsCancellationRequested ) { return default; }
+
         var parameters = new DynamicParameters();
         parameters.Add( nameof(id), id );
 
-        string sql = @$"SELECT {IDKey} FROM {SchemaTableName} WHERE ( id = IFNULL((SELECT MIN({IDKey}) FROM {SchemaTableName} WHERE {IDKey} > @{nameof(id)}), 0) )";
-        if ( token.IsCancellationRequested ) { return default; }
+        string sql = @$"SELECT {ID} FROM {SchemaTableName} WHERE ( id = IFNULL((SELECT MIN({ID}) FROM {SchemaTableName} WHERE {ID} > @{nameof(id)}), 0) )";
 
         try { return await connection.ExecuteScalarAsync<Guid>( sql, parameters, transaction ); }
         catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
@@ -518,36 +579,51 @@ END";
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask<TRecord?> Random( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
-        string sql = $"SELECT * FROM {SchemaTableName} WHERE {IDKey} >= RAND() * ( SELECT MAX ({IDKey}) FROM {SchemaTableName} ) ORDER BY {IDKey} LIMIT 1";
-
         if ( token.IsCancellationRequested ) { return default; }
+
+        string sql = Instance switch
+                     {
+                         DbInstance.MsSql    => $"SELECT TOP 1 * FROM {SchemaTableName} ORDER BY {RandomMethod}",
+                         DbInstance.Postgres => $"SELECT * FROM {SchemaTableName} ORDER BY {RandomMethod} LIMIT 1",
+                         _                   => throw new OutOfRangeException( nameof(Instance), Instance )
+                     };
 
         try { return await connection.QueryFirstAsync<TRecord>( sql, default, transaction ); }
         catch ( Exception e ) { throw new SqlException( sql, _nullParameters, e ); }
     }
 
 
-    public ValueTask<TRecord?> Random( UserRecord user, CancellationToken token = default ) => this.Call( Random, user, token );
+    public ValueTask<TRecord?> Random( UserRecord user, int count, CancellationToken token = default ) => this.Call( Random, user, count, token );
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
-    public virtual async ValueTask<TRecord?> Random( DbConnection connection, DbTransaction? transaction, UserRecord user, CancellationToken token = default )
+    public virtual async ValueTask<TRecord?> Random( DbConnection connection, DbTransaction? transaction, UserRecord user, int count, CancellationToken token = default )
     {
-        var param = new DynamicParameters();
-        param.Add( nameof(TableRecord<TRecord>.OwnerUserID), user.OwnerUserID );
-
-        string sql = $"SELECT * FROM {SchemaTableName} WHERE {IDKey} >= RAND() * ( SELECT MAX ({IDKey}) FROM {SchemaTableName} ) AND {nameof(TableRecord<TRecord>.OwnerUserID)} = @{nameof(TableRecord<TRecord>.OwnerUserID)} ORDER BY {IDKey} LIMIT 1";
-
         if ( token.IsCancellationRequested ) { return default; }
+
+        var param = new DynamicParameters();
+        param.Add( OwnerUserID, user.OwnerUserID );
+
+        string sql = Instance switch
+                     {
+                         DbInstance.MsSql    => $"SELECT TOP {count} * FROM {SchemaTableName} WHERE {OwnerUserID} = @{OwnerUserID} ORDER BY {RandomMethod}",
+                         DbInstance.Postgres => $"SELECT * FROM {SchemaTableName} WHERE {OwnerUserID} = @{OwnerUserID} ORDER BY {RandomMethod} LIMIT {count}",
+                         _                   => throw new OutOfRangeException( nameof(Instance), Instance )
+                     };
 
         try { return await connection.QueryFirstAsync<TRecord>( sql, param, transaction ); }
         catch ( Exception e ) { throw new SqlException( sql, _nullParameters, e ); }
     }
 
 
-    public ValueTask<TRecord[]> Random( string count, CancellationToken token = default ) => this.Call( Random, count, token );
+    public ValueTask<TRecord[]> Random( int count, CancellationToken token = default ) => this.Call( Random, count, token );
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
-    public virtual ValueTask<TRecord[]> Random( DbConnection connection, DbTransaction? transaction, string count, CancellationToken token = default )
+    public virtual ValueTask<TRecord[]> Random( DbConnection connection, DbTransaction? transaction, int count, CancellationToken token = default )
     {
-        string sql = $"SELECT * FROM {SchemaTableName} WHERE {IDKey} >= RAND() * ( SELECT MAX ({IDKey}) FROM {SchemaTableName} ) ORDER BY {IDKey} LIMIT {count}";
+        string sql = Instance switch
+                     {
+                         DbInstance.MsSql    => $"SELECT TOP {count} * FROM {SchemaTableName} ORDER BY {RandomMethod}",
+                         DbInstance.Postgres => $"SELECT * FROM {SchemaTableName} ORDER BY {RandomMethod} LIMIT {count}",
+                         _                   => throw new OutOfRangeException( nameof(Instance), Instance )
+                     };
 
         return Where( connection, transaction, sql, default, token );
     }
@@ -612,7 +688,7 @@ END";
     {
         DynamicParameters parameters = GetParameters( id );
 
-        string sql = $"SELECT * FROM {SchemaTableName} WHERE {IDKey} = @{nameof(id)}";
+        string sql = $"SELECT * FROM {SchemaTableName} WHERE {ID} = @{nameof(id)}";
 
         if ( token.IsCancellationRequested ) { return default; }
 
@@ -636,7 +712,7 @@ END";
     {
         DynamicParameters parameters = GetParameters( id );
 
-        string sql = $"SELECT * FROM {SchemaTableName} WHERE {IDKey} = @{nameof(id)}";
+        string sql = $"SELECT * FROM {SchemaTableName} WHERE {ID} = @{nameof(id)}";
 
         if ( token.IsCancellationRequested ) { return default; }
 
@@ -668,7 +744,7 @@ END";
     {
         Guid              id         = record.ID;
         DynamicParameters parameters = GetParameters( id, record );
-        string            sql        = $"UPDATE {SchemaTableName} SET {string.Join( ',', KeyValuePairs )} WHERE {IDKey} = @{nameof(id)};";
+        string            sql        = $"UPDATE {SchemaTableName} SET {string.Join( ',', KeyValuePairs )} WHERE {ID} = @{nameof(id)};";
 
         if ( token.IsCancellationRequested ) { return; }
 

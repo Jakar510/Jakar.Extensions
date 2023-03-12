@@ -20,17 +20,6 @@ public interface ITableRecord : IRecordPair
 
 
 
-public readonly record struct RecordPair( Guid ID, DateTimeOffset DateCreated ) : IComparable<RecordPair>, IRecordPair
-{
-    public int CompareTo( RecordPair other ) => DateCreated.CompareTo( other.DateCreated );
-
-
-    public static implicit operator RecordPair( (Guid ID, DateTimeOffset DateCreated) value ) => new(value.ID, value.DateCreated);
-    public static implicit operator KeyValuePair<Guid, DateTimeOffset>( RecordPair    value ) => new(value.ID, value.DateCreated);
-}
-
-
-
 [Serializable]
 public abstract record TableRecord<TRecord> : ObservableRecord<TRecord>, ITableRecord, IUniqueID<Guid> where TRecord : TableRecord<TRecord>
 {
@@ -44,9 +33,9 @@ public abstract record TableRecord<TRecord> : ObservableRecord<TRecord>, ITableR
         get => _lastModified;
         set => SetProperty( ref _lastModified, value );
     }
-    public                          Guid? OwnerUserID { get; init; }
-    [MaxLength( 256 )] [Key] public Guid  ID          { get; init; }
-    [MaxLength( 256 )]       public Guid? CreatedBy   { get; init; }
+    public       Guid? OwnerUserID { get; init; }
+    [Key] public Guid  ID          { get; init; }
+    public       Guid? CreatedBy   { get; init; }
 
 
     protected TableRecord() : base() { }
