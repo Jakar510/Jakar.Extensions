@@ -13,7 +13,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Jakar.Extensions.Hosting" Version="6.7.0" />
+		<PackageReference Include="Jakar.Extensions.Hosting" Version="6.7.1" />
 		<PackageReference Include="Syncfusion.Blazor" Version="20.4.0.53" />
 		<PackageReference Include="Syncfusion.Blazor.BarcodeGenerator" Version="20.4.0.53" />
 		<PackageReference Include="Syncfusion.Blazor.BulletChart" Version="20.4.0.53" />

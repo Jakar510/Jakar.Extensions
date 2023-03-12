@@ -32,8 +32,8 @@
 
 
 	<ItemGroup>
-		<PackageReference Include="Jakar.Extensions" Version="6.7.8" />
-		<PackageReference Include="Hardware.Info" Version="10.1.1" />
+		<PackageReference Include="Jakar.Extensions" Version="6.7.9" />
+		<PackageReference Include="Hardware.Info" Version="10.1.1.1" />
 		<PackageReference Condition="$([MSBuild]::IsOsPlatform('Windows'))" Include="Microsoft.Win32.Registry" Version="5.0.0" />
 	</ItemGroup>
 </Project>
