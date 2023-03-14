@@ -4,7 +4,7 @@
 namespace Jakar.Database.Caches;
 
 
-public sealed class CacheEntry<TRecord> : ObservableClass, ITableRecord, IEquatable<TRecord>, IComparable<TRecord>, IEquatable<CacheEntry<TRecord>>, IComparable<CacheEntry<TRecord>>, IComparable where TRecord : TableRecord<TRecord>
+public sealed class CacheEntry<TRecord> : ObservableClass, IRecordPair, IEquatable<TRecord>, IComparable<TRecord>, IEquatable<CacheEntry<TRecord>>, IComparable<CacheEntry<TRecord>>, IComparable where TRecord : TableRecord<TRecord>
 
 {
     private DateTimeOffset _lastTime;
@@ -15,7 +15,7 @@ public sealed class CacheEntry<TRecord> : ObservableClass, ITableRecord, IEquata
     public bool            HasChanged   => Value.GetHashCode() != _hash;
     public DateTimeOffset  DateCreated  => _value?.DateCreated ?? default;
     public DateTimeOffset? LastModified => _value?.LastModified;
-    public Guid            ID           { get; }
+    public Guid            ID           { get; init; }
     public Guid?           CreatedBy    => _value?.CreatedBy;
 
 

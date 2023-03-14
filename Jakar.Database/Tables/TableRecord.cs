@@ -4,9 +4,8 @@
 namespace Jakar.Database;
 
 
-public interface IRecordPair
+public interface IRecordPair : IUniqueID<Guid> // where TID : IComparable<TID>, IEquatable<TID>
 {
-    public Guid           ID          { get; }
     public DateTimeOffset DateCreated { get; }
 }
 
@@ -14,14 +13,15 @@ public interface IRecordPair
 
 public interface ITableRecord : IRecordPair
 {
-    public DateTimeOffset? LastModified { get; }
+    public Guid?           OwnerUserID  { get; }
     public Guid?           CreatedBy    { get; }
+    public DateTimeOffset? LastModified { get; }
 }
 
 
 
 [Serializable]
-public abstract record TableRecord<TRecord> : ObservableRecord<TRecord>, ITableRecord, IUniqueID<Guid> where TRecord : TableRecord<TRecord>
+public abstract record TableRecord<TRecord> : ObservableRecord<TRecord>, ITableRecord where TRecord : TableRecord<TRecord>
 {
     private DateTimeOffset? _lastModified;
 
