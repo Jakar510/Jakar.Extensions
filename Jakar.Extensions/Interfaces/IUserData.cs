@@ -248,43 +248,45 @@ public sealed class UserData : ObservableClass, IUserData, IEquatable<UserData>,
 
         if ( ReferenceEquals( this, other ) ) { return true; }
 
-        return Equals( _additionalData, other._additionalData ) && _address == other._address && _city == other._city && _company == other._company && _country == other._country && _department == other._department &&
-               _description == other._description && _email == other._email && _ext == other._ext && _firstName == other._firstName && _fullName == other._fullName && _lastName == other._lastName && _line1 == other._line1 && _line2 == other._line2 &&
-               _phoneNumber == other._phoneNumber && _postalCode == other._postalCode && _state == other._state && _title == other._title && _website == other._website && _preferredLanguage == other._preferredLanguage;
+        return Equals( _additionalData, other._additionalData ) && string.Equals( _address, other._address, StringComparison.Ordinal ) && string.Equals( _city, other._city, StringComparison.Ordinal ) &&
+               string.Equals( _company, other._company, StringComparison.Ordinal ) && string.Equals( _country, other._country, StringComparison.Ordinal ) && string.Equals( _department, other._department, StringComparison.Ordinal ) &&
+               string.Equals( _description, other._description, StringComparison.Ordinal ) && string.Equals( _email, other._email, StringComparison.Ordinal ) && string.Equals( _ext, other._ext, StringComparison.Ordinal ) &&
+               string.Equals( _firstName, other._firstName, StringComparison.Ordinal ) && string.Equals( _fullName, other._fullName, StringComparison.Ordinal ) && string.Equals( _lastName, other._lastName, StringComparison.Ordinal ) &&
+               string.Equals( _line1, other._line1, StringComparison.Ordinal ) && string.Equals( _line2, other._line2, StringComparison.Ordinal ) && string.Equals( _phoneNumber, other._phoneNumber, StringComparison.Ordinal ) &&
+               string.Equals( _postalCode, other._postalCode, StringComparison.Ordinal ) && string.Equals( _state, other._state, StringComparison.Ordinal ) && string.Equals( _title, other._title, StringComparison.Ordinal ) &&
+               string.Equals( _website, other._website, StringComparison.Ordinal ) && _preferredLanguage == other._preferredLanguage;
     }
-    public override bool Equals( object? obj )
+    public override bool Equals( object? other )
     {
-        if ( ReferenceEquals( null, obj ) ) { return false; }
+        if ( other is null ) { return false; }
 
-        if ( ReferenceEquals( this, obj ) ) { return true; }
+        if ( ReferenceEquals( this, other ) ) { return true; }
 
-        if ( obj.GetType() != this.GetType() ) { return false; }
-
-        return Equals( (UserData)obj );
+        return other is UserData data && Equals( data );
     }
     public override int GetHashCode()
     {
         var hashCode = new HashCode();
-        hashCode.Add( _additionalData );
-        hashCode.Add( _address );
-        hashCode.Add( _city );
-        hashCode.Add( _company );
-        hashCode.Add( _country );
-        hashCode.Add( _department );
-        hashCode.Add( _description );
-        hashCode.Add( _email );
-        hashCode.Add( _ext );
-        hashCode.Add( _firstName );
-        hashCode.Add( _fullName );
-        hashCode.Add( _lastName );
-        hashCode.Add( _line1 );
-        hashCode.Add( _line2 );
-        hashCode.Add( _phoneNumber );
-        hashCode.Add( _postalCode );
-        hashCode.Add( _state );
-        hashCode.Add( _title );
-        hashCode.Add( _website );
-        hashCode.Add( (int)_preferredLanguage );
+        hashCode.Add( AdditionalData );
+        hashCode.Add( Address );
+        hashCode.Add( City );
+        hashCode.Add( Company );
+        hashCode.Add( Country );
+        hashCode.Add( Department );
+        hashCode.Add( Description );
+        hashCode.Add( Email );
+        hashCode.Add( Ext );
+        hashCode.Add( FirstName );
+        hashCode.Add( FullName );
+        hashCode.Add( LastName );
+        hashCode.Add( Line1 );
+        hashCode.Add( Line2 );
+        hashCode.Add( PhoneNumber );
+        hashCode.Add( PostalCode );
+        hashCode.Add( StateOrProvince );
+        hashCode.Add( Title );
+        hashCode.Add( Website );
+        hashCode.Add( PreferredLanguage );
         return hashCode.ToHashCode();
     }
     public int CompareTo( UserData? other )
