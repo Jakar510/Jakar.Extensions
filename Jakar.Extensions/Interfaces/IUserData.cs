@@ -30,7 +30,8 @@ public interface IUserData : JsonModels.IJsonModel
 
 
 
-public sealed class UserData : ObservableClass, IUserData, IEquatable<UserData>, IComparable<UserData>, IComparable
+[Serializable]
+public class UserData : ObservableClass, IUserData, IEquatable<UserData>, IComparable<UserData>, IComparable
 {
     private IDictionary<string, JToken?>? _additionalData;
     private string                        _address           = string.Empty;
@@ -60,8 +61,7 @@ public sealed class UserData : ObservableClass, IUserData, IEquatable<UserData>,
         get => _additionalData;
         set => SetProperty( ref _additionalData, value );
     }
-
-
+    
     [MaxLength( 4096 )]
     public string Address
     {
