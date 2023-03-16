@@ -366,7 +366,6 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, JsonModels.IJ
         PreferredLanguage = value.PreferredLanguage;
         return Update( value.AdditionalData );
     }
-    IUserData IUserData.Update( IUserData value ) => Update( value );
 
     #endregion
 

@@ -7,33 +7,30 @@ namespace Jakar.Extensions;
 [SuppressMessage( "ReSharper", "UnusedMemberInSuper.Global" )]
 public interface IUserData : JsonModels.IJsonModel
 {
-    [MaxLength( 4096 )]           public string            Address           { get; set; }
-    [MaxLength( 256 )]            public string            City              { get; set; }
-    [MaxLength( 256 )]            public string            Company           { get; set; }
-    [MaxLength( 256 )]            public string            Country           { get; set; }
-    [MaxLength( 256 )]            public string            Department        { get; set; }
-    [MaxLength( 256 )]            public string            Description       { get; set; }
-    [MaxLength( 1024 )]           public string            Email             { get; set; }
-    [MaxLength( 256 )]            public string            Ext               { get; set; }
-    [MaxLength( 256 )] [Required] public string            FirstName         { get; set; }
-    [MaxLength( 512 )]            public string            FullName          { get; set; }
-    [MaxLength( 256 )] [Required] public string            LastName          { get; set; }
-    [MaxLength( 512 )]            public string            Line1             { get; set; }
-    [MaxLength( 256 )]            public string            Line2             { get; set; }
-    [MaxLength( 256 )]            public string            PhoneNumber       { get; set; }
-    [MaxLength( 256 )] [Required] public string            PostalCode        { get; set; }
-    [Required]                    public SupportedLanguage PreferredLanguage { get; set; }
-    [MaxLength( 256 )]            public string            StateOrProvince   { get; set; }
-    [MaxLength( 256 )]            public string            Title             { get; set; }
-    [MaxLength( 4096 )]           public string            Website           { get; set; }
-
-
-    public IUserData Update( IUserData model );
+    [MaxLength( 4096 )]                public string            Address           { get; set; }
+    [MaxLength( 256 )]                 public string            City              { get; set; }
+    [MaxLength( 256 )]                 public string            Company           { get; set; }
+    [MaxLength( 256 )]                 public string            Country           { get; set; }
+    [MaxLength( 256 )]                 public string            Department        { get; set; }
+    [MaxLength( 256 )]                 public string            Description       { get; set; }
+    [MaxLength( 1024 )] [EmailAddress] public string            Email             { get; set; }
+    [MaxLength( 256 )]                 public string            Ext               { get; set; }
+    [MaxLength( 256 )] [Required]      public string            FirstName         { get; set; }
+    [MaxLength( 512 )]                 public string            FullName          { get; set; }
+    [MaxLength( 256 )] [Required]      public string            LastName          { get; set; }
+    [MaxLength( 512 )]                 public string            Line1             { get; set; }
+    [MaxLength( 256 )]                 public string            Line2             { get; set; }
+    [MaxLength( 256 )] [Phone]         public string            PhoneNumber       { get; set; }
+    [MaxLength( 256 )] [Required]      public string            PostalCode        { get; set; }
+    [Required]                         public SupportedLanguage PreferredLanguage { get; set; }
+    [MaxLength( 256 )]                 public string            StateOrProvince   { get; set; }
+    [MaxLength( 256 )]                 public string            Title             { get; set; }
+    [MaxLength( 4096 )] [Url]          public string            Website           { get; set; }
 }
 
 
 
-public class UserData : ObservableClass, IUserData, IEquatable<UserData>, IComparable<UserData>, IComparable
+public sealed class UserData : ObservableClass, IUserData, IEquatable<UserData>, IComparable<UserData>, IComparable
 {
     private IDictionary<string, JToken?>? _additionalData;
     private string                        _address           = string.Empty;
@@ -107,6 +104,7 @@ public class UserData : ObservableClass, IUserData, IEquatable<UserData>, ICompa
         set => SetProperty( ref _description, value );
     }
 
+    [EmailAddress]
     [MaxLength( 1024 )]
     public string Email
     {
@@ -126,7 +124,10 @@ public class UserData : ObservableClass, IUserData, IEquatable<UserData>, ICompa
     public string FirstName
     {
         get => _firstName;
-        set => SetProperty( ref _firstName, value );
+        set
+        {
+            if ( SetProperty( ref _firstName, value ) ) { FullName = $"{value} {LastName}"; }
+        }
     }
 
     [MaxLength( 512 )]
@@ -141,7 +142,10 @@ public class UserData : ObservableClass, IUserData, IEquatable<UserData>, ICompa
     public string LastName
     {
         get => _lastName;
-        set => SetProperty( ref _lastName, value );
+        set
+        {
+            if ( SetProperty( ref _lastName, value ) ) { FullName = $"{FirstName} {value}"; }
+        }
     }
 
     [MaxLength( 512 )]
@@ -158,6 +162,7 @@ public class UserData : ObservableClass, IUserData, IEquatable<UserData>, ICompa
         set => SetProperty( ref _line2, value );
     }
 
+    [Phone]
     [MaxLength( 256 )]
     public string PhoneNumber
     {
@@ -165,7 +170,6 @@ public class UserData : ObservableClass, IUserData, IEquatable<UserData>, ICompa
         set => SetProperty( ref _phoneNumber, value );
     }
 
-    [Required]
     [MaxLength( 256 )]
     public string PostalCode
     {
@@ -194,6 +198,7 @@ public class UserData : ObservableClass, IUserData, IEquatable<UserData>, ICompa
         set => SetProperty( ref _title, value );
     }
 
+    [Url]
     [MaxLength( 4096 )]
     public string Website
     {
@@ -203,15 +208,7 @@ public class UserData : ObservableClass, IUserData, IEquatable<UserData>, ICompa
 
 
     public UserData() { }
-    public UserData( IUserData model ) => Update( model );
-    public UserData( string firstName, string lastName )
-    {
-        _firstName = firstName;
-        _lastName  = lastName;
-    }
-
-
-    public UserData Update( IUserData value )
+    public UserData( IUserData value )
     {
         FirstName         = value.FirstName;
         LastName          = value.LastName;
@@ -233,15 +230,16 @@ public class UserData : ObservableClass, IUserData, IEquatable<UserData>, ICompa
         Company           = value.Company;
         PreferredLanguage = value.PreferredLanguage;
 
-
-        if ( value.AdditionalData is null ) { return this; }
+        if ( value.AdditionalData is null ) { return; }
 
         AdditionalData ??= new Dictionary<string, JToken?>();
         foreach ( (string key, JToken? jToken) in value.AdditionalData ) { AdditionalData[key] = jToken; }
-
-        return this;
     }
-    IUserData IUserData.Update( IUserData value ) => Update( value );
+    public UserData( string firstName, string lastName )
+    {
+        _firstName = firstName;
+        _lastName  = lastName;
+    }
 
 
     public bool Equals( UserData? other )
