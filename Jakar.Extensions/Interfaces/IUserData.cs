@@ -26,6 +26,9 @@ public interface IUserData : JsonModels.IJsonModel
     [MaxLength( 256 )]                 public string            StateOrProvince   { get; set; }
     [MaxLength( 256 )]                 public string            Title             { get; set; }
     [MaxLength( 4096 )] [Url]          public string            Website           { get; set; }
+
+
+    public void Update( IUserData value );
 }
 
 
@@ -61,7 +64,7 @@ public class UserData : ObservableClass, IUserData, IEquatable<UserData>, ICompa
         get => _additionalData;
         set => SetProperty( ref _additionalData, value );
     }
-    
+
     [MaxLength( 4096 )]
     public string Address
     {
@@ -208,7 +211,15 @@ public class UserData : ObservableClass, IUserData, IEquatable<UserData>, ICompa
 
 
     public UserData() { }
-    public UserData( IUserData value )
+    public UserData( IUserData value ) => Update( value );
+    public UserData( string firstName, string lastName )
+    {
+        _firstName = firstName;
+        _lastName  = lastName;
+    }
+
+
+    public void Update( IUserData value )
     {
         FirstName         = value.FirstName;
         LastName          = value.LastName;
@@ -234,11 +245,6 @@ public class UserData : ObservableClass, IUserData, IEquatable<UserData>, ICompa
 
         AdditionalData ??= new Dictionary<string, JToken?>();
         foreach ( (string key, JToken? jToken) in value.AdditionalData ) { AdditionalData[key] = jToken; }
-    }
-    public UserData( string firstName, string lastName )
-    {
-        _firstName = firstName;
-        _lastName  = lastName;
     }
 
 

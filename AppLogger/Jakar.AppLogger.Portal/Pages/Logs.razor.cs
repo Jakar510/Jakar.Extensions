@@ -11,18 +11,8 @@ public partial class Logs : ControlBase
         try
         {
             Records.Clear();
-            foreach (LogRecord record in await Api.GetLogs()) { Records.Add( record ); }
+            foreach ( LogRecord record in await Api.GetLogs() ) { Records.Add( record ); }
         }
-        catch (SqlException e)
-        {
-            e.SQL.WriteToDebug();
-
-            e.MatchAll?.WriteToDebug();
-
-            e.Parameters?.ToPrettyJson()
-             .WriteToDebug();
-
-            e.WriteToConsole();
-        }
+        catch ( SqlException e ) { e.WriteToConsole(); }
     }
 }

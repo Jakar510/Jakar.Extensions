@@ -43,7 +43,7 @@ public partial class DbTable<TRecord>
         if ( token.IsCancellationRequested ) { return; }
 
         try { await connection.ExecuteScalarAsync( sql, default, transaction ); }
-        catch ( Exception e ) { throw new SqlException( sql, _nullParameters, e ); }
+        catch ( Exception e ) { throw new SqlException( sql, e ); }
     }
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public async ValueTask Delete( DbConnection connection, DbTransaction transaction, bool matchAll, DynamicParameters parameters, CancellationToken token )

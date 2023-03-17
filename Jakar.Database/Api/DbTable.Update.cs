@@ -33,6 +33,6 @@ public partial class DbTable<TRecord>
         if ( token.IsCancellationRequested ) { return; }
 
         try { await connection.ExecuteScalarAsync( sql, parameters, transaction ); }
-        catch ( Exception e ) { throw new SqlException( sql, record, e ); }
+        catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
     }
 }

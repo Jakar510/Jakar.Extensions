@@ -26,7 +26,7 @@ public partial class DbTable<TRecord>
         string sql = $"SELECT COUNT({ID}) FROM {SchemaTableName}";
 
         try { return await connection.QueryFirstAsync<long>( sql, default, transaction ); }
-        catch ( Exception e ) { throw new SqlException( sql, _nullParameters, e ); }
+        catch ( Exception e ) { throw new SqlException( sql, e ); }
     }
 
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
@@ -102,10 +102,7 @@ public partial class DbTable<TRecord>
         }
         catch ( Exception e )
         {
-            throw new SqlException( sql, parameters, e )
-                  {
-                      MatchAll = matchAll
-                  };
+            throw new SqlException( sql, parameters, e );
         }
     }
 

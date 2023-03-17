@@ -101,7 +101,7 @@ public partial class Database
     public ValueTask SetEmailAsync( UserRecord user, string? email, CancellationToken token ) => this.TryCall( SetEmailAsync, user, email, token );
     public async ValueTask SetEmailAsync( DbConnection connection, DbTransaction transaction, UserRecord user, string? email, CancellationToken token )
     {
-        user.Email = email;
+        user.Email = email ?? string.Empty;
         await Users.Update( connection, transaction, user, token );
     }
 
@@ -117,7 +117,7 @@ public partial class Database
     public ValueTask SetNormalizedEmailAsync( UserRecord user, string? normalizedEmail, CancellationToken token ) => this.TryCall( SetNormalizedEmailAsync, user, normalizedEmail, token );
     public async ValueTask SetNormalizedEmailAsync( DbConnection connection, DbTransaction transaction, UserRecord user, string? normalizedEmail, CancellationToken token )
     {
-        user.Email = normalizedEmail;
+        user.Email = normalizedEmail ?? string.Empty;
         await Users.Update( connection, transaction, user, token );
     }
 
@@ -139,7 +139,7 @@ public partial class Database
     public ValueTask SetPhoneNumberAsync( UserRecord user, string? phoneNumber, CancellationToken token ) => this.TryCall( SetPhoneNumberAsync, user, phoneNumber, token );
     public virtual async ValueTask SetPhoneNumberAsync( DbConnection connection, DbTransaction transaction, UserRecord user, string? phoneNumber, CancellationToken token )
     {
-        user.PhoneNumber = phoneNumber;
+        user.PhoneNumber = phoneNumber ?? string.Empty;
         await Users.Update( user, token );
     }
 
@@ -285,7 +285,7 @@ public partial class Database
     public ValueTask SetNormalizedUserNameAsync( UserRecord user, string? fullName, CancellationToken token ) => this.TryCall( SetNormalizedUserNameAsync, user, fullName, token );
     public virtual async ValueTask SetNormalizedUserNameAsync( DbConnection connection, DbTransaction transaction, UserRecord user, string? fullName, CancellationToken token )
     {
-        user.FullName = fullName;
+        user.FullName = fullName ?? string.Empty;
         await Users.Update( connection, transaction, user, token );
     }
 

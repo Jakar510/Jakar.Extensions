@@ -32,12 +32,12 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Jakar.Extensions" Version="6.7.9" />
+		<PackageReference Include="Jakar.Extensions" Version="6.7.13" />
 		<PackageReference Include="Jakar.Extensions.Hosting" Version="6.7.1" />
 		<PackageReference Include="FluentMigrator" Version="3.3.2" />
 		<PackageReference Include="FluentMigrator.Runner" Version="3.3.2" />
 		<PackageReference Include="MailKit" Version="3.6.0" />
-		<PackageReference Include="Microsoft.Identity.Client" Version="4.50.0" />
+		<PackageReference Include="Microsoft.Identity.Client" Version="4.51.0" />
 		<PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="6.27.0" />
 		<PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="6.27.0" />
 		<PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.27.0" />

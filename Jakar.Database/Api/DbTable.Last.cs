@@ -17,7 +17,7 @@ public partial class DbTable<TRecord>
         string sql = $"SELECT * FROM {SchemaTableName} ORDER BY {ID} DESC LIMIT 1";
 
         try { return await connection.QueryFirstAsync<TRecord>( sql, default, transaction ); }
-        catch ( Exception e ) { throw new SqlException( sql, _nullParameters, e ); }
+        catch ( Exception e ) { throw new SqlException( sql, e ); }
     }
 
 
@@ -32,6 +32,6 @@ public partial class DbTable<TRecord>
         string sql = $"SELECT * FROM {SchemaTableName} ORDER BY {ID} DESC LIMIT 1";
 
         try { return await connection.QueryFirstOrDefaultAsync<TRecord>( sql, default, transaction ); }
-        catch ( Exception e ) { throw new SqlException( sql, _nullParameters, e ); }
+        catch ( Exception e ) { throw new SqlException( sql, e ); }
     }
 }

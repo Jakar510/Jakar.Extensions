@@ -24,7 +24,7 @@ public partial class DbTable<TRecord>
                      };
 
         try { return await connection.QueryFirstAsync<TRecord>( sql, default, transaction ); }
-        catch ( Exception e ) { throw new SqlException( sql, _nullParameters, e ); }
+        catch ( Exception e ) { throw new SqlException( sql, e ); }
     }
 
 
@@ -44,7 +44,7 @@ public partial class DbTable<TRecord>
                      };
 
         try { return await connection.QueryFirstAsync<TRecord>( sql, param, transaction ); }
-        catch ( Exception e ) { throw new SqlException( sql, _nullParameters, e ); }
+        catch ( Exception e ) { throw new SqlException( sql, e ); }
     }
 
 

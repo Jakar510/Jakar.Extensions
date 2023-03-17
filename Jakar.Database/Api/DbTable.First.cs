@@ -17,7 +17,7 @@ public partial class DbTable<TRecord>
         if ( token.IsCancellationRequested ) { return default; }
 
         try { return await connection.QueryFirstAsync<TRecord>( sql, default, transaction ); }
-        catch ( Exception e ) { throw new SqlException( sql, _nullParameters, e ); }
+        catch ( Exception e ) { throw new SqlException( sql, e ); }
     }
     public virtual async ValueTask<TRecord?> FirstOrDefault( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
@@ -26,6 +26,6 @@ public partial class DbTable<TRecord>
         if ( token.IsCancellationRequested ) { return default; }
 
         try { return await connection.QueryFirstOrDefaultAsync<TRecord>( sql, default, transaction ); }
-        catch ( Exception e ) { throw new SqlException( sql, _nullParameters, e ); }
+        catch ( Exception e ) { throw new SqlException( sql, e ); }
     }
 }

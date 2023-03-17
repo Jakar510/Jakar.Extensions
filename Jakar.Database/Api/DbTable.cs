@@ -9,7 +9,6 @@ namespace Jakar.Database;
 public partial class DbTable<TRecord> : ObservableClass, IConnectableDb, IAsyncDisposable where TRecord : TableRecord<TRecord>
 {
     protected readonly IConnectableDb                 _database;
-    protected readonly object?                        _nullParameters = null;
     protected readonly TypePropertiesCache.Properties _propertiesCache;
 
 
@@ -113,7 +112,7 @@ public partial class DbTable<TRecord> : ObservableClass, IConnectableDb, IAsyncD
             IEnumerable<TRecord> records = await connection.QueryAsync<TRecord>( sql, default, transaction );
             return Database.GetArray( records );
         }
-        catch ( Exception e ) { throw new SqlException( sql, _nullParameters, e ); }
+        catch ( Exception e ) { throw new SqlException( sql, e ); }
     }
 
 
