@@ -3,7 +3,7 @@
     "Hello World!".WriteToConsole();
     Console.WriteLine();
 
-    BenchmarkRunner.Run<CastToBenchmarks>();
+    // BenchmarkRunner.Run<CastToBenchmarks>();
 }
 catch ( Exception e ) { e.WriteToConsole(); }
 finally { "Bye".WriteToConsole(); }

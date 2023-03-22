@@ -27,7 +27,7 @@ public sealed class WebHandler : IDisposable
     public   HttpRequestHeaders  Headers        => _request.Headers;
     internal RetryPolicy?        RetryPolicy    { get; }
     public   string              Method         => _request.Method.Method;
-    
+
 
 #if NET6_0_OR_GREATER
     public HttpVersionPolicy VersionPolicy
@@ -143,7 +143,7 @@ public sealed class WebHandler : IDisposable
     public async ValueTask<MemoryStream> AsStream( HttpResponseMessage response )
     {
         response.EnsureSuccessStatusCode();
-        using HttpContent content = response.Content;
+        HttpContent content = response.Content;
 
     #if NETSTANDARD2_1
         await using Stream stream = await content.ReadAsStreamAsync();
@@ -161,7 +161,7 @@ public sealed class WebHandler : IDisposable
     public async ValueTask<string> AsString( HttpResponseMessage response )
     {
         response.EnsureSuccessStatusCode();
-        using HttpContent content = response.Content;
+        HttpContent content = response.Content;
 
     #if NETSTANDARD2_1
         return await content.ReadAsStringAsync();
@@ -195,8 +195,7 @@ public sealed class WebHandler : IDisposable
 
     public ValueTask<WebResponse<TResult>> AsJson<TResult>() => AsJson<TResult>( JsonNet.Serializer );
     public ValueTask<WebResponse<TResult>> AsJson<TResult>( JsonSerializer serializer ) => WebResponse<TResult>.Create( this, serializer, AsJson<TResult> );
-    
-    
-    public void Dispose() => _request.Dispose();
 
+
+    public void Dispose() => _request.Dispose();
 }

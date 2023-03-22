@@ -43,9 +43,9 @@ public readonly record struct WebResponse<T>
         Exception         = exception;
         StatusCode        = response.StatusCode.ToStatus();
         StatusDescription = response.ReasonPhrase ?? StatusCode.ToStringFast();
-        URL               = response.RequestMessage.RequestUri;
-        Method            = response.RequestMessage.Method.Method;
-        Sender            = response.RequestMessage.Headers.From;
+        URL               = response.RequestMessage?.RequestUri;
+        Method            = response.RequestMessage?.Method.Method;
+        Sender            = response.RequestMessage?.Headers.From;
         Location          = response.Headers.Location;
         Server            = response.Headers.Server.ToString();
 
@@ -53,7 +53,7 @@ public readonly record struct WebResponse<T>
         ContentLength = contentHeaders.ContentLength;
         Expires       = contentHeaders.Expires;
         LastModified  = contentHeaders.LastModified;
-        ContentType   = contentHeaders.ContentType.ToString();
+        ContentType   = contentHeaders.ContentType?.ToString();
 
         ContentEncoding.AddRange( contentHeaders.ContentEncoding );
         Allow.AddRange( contentHeaders.Allow );
