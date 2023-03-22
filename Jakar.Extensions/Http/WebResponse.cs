@@ -9,42 +9,54 @@ namespace Jakar.Extensions;
 
 
 [SuppressMessage( "ReSharper", "UnusedParameter.Global" )]
+[SuppressMessage( "ReSharper", "CollectionNeverQueried.Global" )]
 public readonly record struct WebResponse<T>
 {
+    public              List<string>    Allow             { get; init; } = new();
+    public              List<string>    ContentEncoding   { get; init; } = new();
+    public              long?           ContentLength     { get; init; } = default;
+    public              string?         ContentType       { get; init; } = default;
+    public              JToken?         ErrorMessage      { get; init; } = default;
+    [JsonIgnore] public Exception?      Exception         { get; init; } = default;
+    public              DateTimeOffset? Expires           { get; init; } = default;
+    public              DateTimeOffset? LastModified      { get; init; } = default;
+    public              Uri?            Location          { get; init; } = default;
+    public              string?         Method            { get; init; } = default;
+    public              T?              Payload           { get; init; } = default;
+    public              string?         Sender            { get; init; } = default;
+    public              string?         Server            { get; init; } = default;
+    public              Status          StatusCode        { get; init; } = Status.NotSet;
+    public              string?         StatusDescription { get; init; } = default;
+    public              Uri?            URL               { get; init; } = default;
+
+
     public const string ERROR_MESSAGE = "Error Message: ";
     public const string UNKNOWN_ERROR = "Unknown Error";
-
-
-    public              string?    Method            { get; init; } = default;
-    public              Uri?       URL               { get; init; } = default;
-    public              Status     StatusCode        { get; init; } = Status.NotSet;
-    public              string?    StatusDescription { get; init; } = default;
-    public              string?    ContentEncoding   { get; init; } = default;
-    public              string?    Server            { get; init; } = default;
-    public              string?    ContentType       { get; init; } = default;
-    public              T?         Payload           { get; init; } = default;
-    public              JToken?    ErrorMessage      { get; init; } = default;
-    [JsonIgnore] public Exception? Exception         { get; init; } = default;
 
 
     public WebResponse( HttpResponseMessage response, string    error ) : this( response, default, default, error ) { }
     public WebResponse( HttpResponseMessage response, Exception e, in string error ) : this( response, default, e, error ) { }
     public WebResponse( HttpResponseMessage response, T? payload, Exception? exception = default, string? error = default )
     {
-        HttpRequestHeaders? requestHeaders = response.RequestMessage?.Headers;
-        HttpContentHeaders? contentHeaders = response.RequestMessage?.Content?.Headers;
-
-
         ErrorMessage      = ParseError( error ?? exception?.Message );
         Payload           = payload;
         Exception         = exception;
         StatusCode        = response.StatusCode.ToStatus();
         StatusDescription = response.ReasonPhrase ?? StatusCode.ToStringFast();
-        URL               = response.RequestMessage?.RequestUri;
-        Method            = response.RequestMessage?.Method.Method;
-        ContentType       = contentHeaders?.ContentType?.MediaType;
-        ContentEncoding   = contentHeaders?.ContentEncoding.ToJson();
-        Server            = requestHeaders?.From;
+        URL               = response.RequestMessage.RequestUri;
+        Method            = response.RequestMessage.Method.Method;
+        Sender            = response.RequestMessage.Headers.From;
+        Location          = response.Headers.Location;
+        Server            = response.Headers.Server.ToString();
+
+        HttpContentHeaders contentHeaders = response.Content.Headers;
+        ContentLength = contentHeaders.ContentLength;
+        Expires       = contentHeaders.Expires;
+        LastModified  = contentHeaders.LastModified;
+        ContentType   = contentHeaders.ContentType.ToString();
+
+        ContentEncoding.AddRange( contentHeaders.ContentEncoding );
+        Allow.AddRange( contentHeaders.Allow );
     }
 
 
