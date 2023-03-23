@@ -10,14 +10,14 @@ namespace Jakar.Extensions.Tests;
 
 
 [TestFixture]
-public class ComparersTests : Assert
+public class Validate_MinMax_Tests : Assert
 {
     [Test]
     public void TestMin_Integers()
     {
         int  left   = 5;
         int  right  = 3;
-        int? result = Comparers.Min<int>( left, right );
+        int? result = Validate.Min<int>( left, right );
         AreEqual( 3, result );
         NotNull( result );
     }
@@ -45,7 +45,7 @@ public class ComparersTests : Assert
     {
         int     left   = 5;
         int     right  = 3;
-        double? result = Comparers.Max<double>( left, right );
+        double? result = Validate.Max<double>( left, right );
         AreEqual( 5, result );
         NotNull( result );
     }
@@ -72,7 +72,7 @@ public class ComparersTests : Assert
     {
         double  left   = 5.0;
         double  right  = 3.0;
-        double? result = Comparers.Min<double>( left, right );
+        double? result = Validate.Min<double>( left, right );
         AreEqual( 3.0, result );
         NotNull( result );
     }
@@ -99,7 +99,7 @@ public class ComparersTests : Assert
     {
         double  left   = 5.0;
         double  right  = 3.0;
-        double? result = Comparers.Max<double>( left, right );
+        double? result = Validate.Max<double>( left, right );
         AreEqual( 5.0, result );
     }
 
@@ -126,7 +126,7 @@ public class ComparersTests : Assert
     {
         TimeSpan  left   = TimeSpan.FromSeconds( 5 );
         TimeSpan  right  = TimeSpan.FromSeconds( 3 );
-        TimeSpan? result = Comparers.Min<TimeSpan>( left, right );
+        TimeSpan? result = Validate.Min<TimeSpan>( left, right );
         AreEqual( TimeSpan.FromSeconds( 3 ), result );
         NotNull( result );
     }
@@ -136,7 +136,7 @@ public class ComparersTests : Assert
     {
         TimeSpan  left   = TimeSpan.FromSeconds( 5 );
         TimeSpan  right  = TimeSpan.FromSeconds( 3 );
-        TimeSpan? result = Comparers.Max<TimeSpan>( left, right );
+        TimeSpan? result = Validate.Max<TimeSpan>( left, right );
         AreEqual( TimeSpan.FromSeconds( 5 ), result );
         NotNull( result );
     }
@@ -151,40 +151,40 @@ public class ComparersTests : Assert
     {
         TimeSpan offset = TimeSpan.FromDays( 1 );
 
-        AreEqual( value - offset, Comparers.Min<DateTime>( value, value - offset ) );
-        AreEqual( value,          Comparers.Min<DateTime>( value, value + offset ) );
+        AreEqual( value - offset, Validate.Min<DateTime>( value, value - offset ) );
+        AreEqual( value,          Validate.Min<DateTime>( value, value + offset ) );
 
-        AreEqual( value - offset, Comparers.Min<DateTime>( default, value - offset ) );
-        AreEqual( value + offset, Comparers.Min<DateTime>( default, value + offset ) );
+        AreEqual( value - offset, Validate.Min<DateTime>( default, value - offset ) );
+        AreEqual( value + offset, Validate.Min<DateTime>( default, value + offset ) );
     }
     private static void TestMax( in DateTime value )
     {
         TimeSpan offset = TimeSpan.FromDays( 1 );
 
-        AreEqual( value,          Comparers.Max<DateTime>( value, value - offset ) );
-        AreEqual( value + offset, Comparers.Max<DateTime>( value, value + offset ) );
+        AreEqual( value,          Validate.Max<DateTime>( value, value - offset ) );
+        AreEqual( value + offset, Validate.Max<DateTime>( value, value + offset ) );
 
-        AreEqual( value - offset, Comparers.Max<DateTime>( default, value - offset ) );
-        AreEqual( value + offset, Comparers.Max<DateTime>( default, value + offset ) );
+        AreEqual( value - offset, Validate.Max<DateTime>( default, value - offset ) );
+        AreEqual( value + offset, Validate.Max<DateTime>( default, value + offset ) );
     }
     private static void TestMin( in DateTimeOffset value )
     {
         TimeSpan offset = TimeSpan.FromDays( 1 );
 
-        AreEqual( value - offset, Comparers.Min<DateTimeOffset>( value, value - offset ) );
-        AreEqual( value,          Comparers.Min<DateTimeOffset>( value, value + offset ) );
+        AreEqual( value - offset, Validate.Min<DateTimeOffset>( value, value - offset ) );
+        AreEqual( value,          Validate.Min<DateTimeOffset>( value, value + offset ) );
 
-        AreEqual( value - offset, Comparers.Min<DateTimeOffset>( default, value - offset ) );
-        AreEqual( value + offset, Comparers.Min<DateTimeOffset>( default, value + offset ) );
+        AreEqual( value - offset, Validate.Min<DateTimeOffset>( default, value - offset ) );
+        AreEqual( value + offset, Validate.Min<DateTimeOffset>( default, value + offset ) );
     }
     private static void TestMax( in DateTimeOffset value )
     {
         TimeSpan offset = TimeSpan.FromDays( 1 );
 
-        AreEqual( value,          Comparers.Max<DateTimeOffset>( value, value - offset ) );
-        AreEqual( value + offset, Comparers.Max<DateTimeOffset>( value, value + offset ) );
+        AreEqual( value,          Validate.Max<DateTimeOffset>( value, value - offset ) );
+        AreEqual( value + offset, Validate.Max<DateTimeOffset>( value, value + offset ) );
 
-        AreEqual( value - offset, Comparers.Max<DateTimeOffset>( default, value - offset ) );
-        AreEqual( value + offset, Comparers.Max<DateTimeOffset>( default, value + offset ) );
+        AreEqual( value - offset, Validate.Max<DateTimeOffset>( default, value - offset ) );
+        AreEqual( value + offset, Validate.Max<DateTimeOffset>( default, value + offset ) );
     }
 }

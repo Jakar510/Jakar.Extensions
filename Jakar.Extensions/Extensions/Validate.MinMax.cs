@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace Jakar.Extensions;
 
 
-public static class Comparers
+public static partial class Validate
 {
     public static T? Min<T>( [NotNullIfNotNull( "left" )] this T? left, [NotNullIfNotNull( "right" )] T? right ) where T : struct, IComparable<T>
     {
