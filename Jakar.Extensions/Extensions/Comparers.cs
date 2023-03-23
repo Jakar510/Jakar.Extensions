@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 namespace Jakar.Extensions;
 
 
-public static class Comparer
+public static class Comparers
 {
-    public static T? Min<T>( this T? left, T? right ) where T : struct, IComparable<T>
+    public static T? Min<T>( [NotNullIfNotNull( "left" )] this T? left, [NotNullIfNotNull( "right" )] T? right ) where T : struct, IComparable<T>
     {
         if ( left is null && right is null ) { return default; }
 
@@ -21,7 +21,7 @@ public static class Comparer
     }
 
 
-    public static T? Max<T>( this T? left, T? right ) where T : struct, IComparable<T>
+    public static T? Max<T>( [NotNullIfNotNull( "left" )] this T? left, [NotNullIfNotNull( "right" )] T? right ) where T : struct, IComparable<T>
     {
         if ( left is null && right is null ) { return default; }
 
