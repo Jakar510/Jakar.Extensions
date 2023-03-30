@@ -11,8 +11,6 @@ public abstract class BaseCollections<T> : ObservableClass, IEquatable<T>, IComp
 
     public sealed override bool Equals( object? other ) => ReferenceEquals( this, other ) || other is T file && Equals( file );
     public override int GetHashCode() => base.GetHashCode();
-
-
     public string ToJson() => JsonNet.ToJson( this );
     public string ToPrettyJson() => this.ToJson( Formatting.Indented );
 

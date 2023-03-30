@@ -1,7 +1,7 @@
 ﻿namespace Jakar.Extensions;
 
 
-public sealed class ValueEqualizer<T> : IEqualityComparer<T?>, IEqualityComparer<T>, IEqualityComparer where T : struct, IComparable<T>
+public sealed class ValueEqualizer<T> : IEqualityComparer<T?>, IEqualityComparer<T>, IEqualityComparer where T : struct, IEquatable<T>
 {
     public static ValueEqualizer<T> Default { get; } = new();
 
@@ -20,14 +20,12 @@ public sealed class ValueEqualizer<T> : IEqualityComparer<T?>, IEqualityComparer
     public bool Equals( T?     left, T? right ) => Nullable.Equals( left, right );
     public int GetHashCode( T? obj ) => obj.GetHashCode();
     public bool Equals( T      left, T right ) => left.Equals( right );
-
-
-    public int GetHashCode( T obj ) => obj.GetHashCode();
+    public int GetHashCode( T  obj ) => obj.GetHashCode();
 }
 
 
 
-public sealed class Equalizer<T> : IEqualityComparer<T>, IEqualityComparer where T : class, IComparable<T>
+public sealed class Equalizer<T> : IEqualityComparer<T>, IEqualityComparer where T : class, IEquatable<T>
 {
     public static Equalizer<T> Default { get; } = new();
 
@@ -48,13 +46,9 @@ public sealed class Equalizer<T> : IEqualityComparer<T>, IEqualityComparer where
         // ReSharper disable once ConvertIfStatementToSwitchStatement
         if ( left is null && right is null ) { return true; }
 
-        if ( left is null ) { return false; }
+        if ( left is null || right is null ) { return false; }
 
-        if ( right is null ) { return false; }
-
-        if ( ReferenceEquals( left, right ) ) { return true; }
-
-        return left.Equals( right );
+        return ReferenceEquals( left, right ) || left.Equals( right );
     }
 
 
