@@ -42,7 +42,7 @@ AMD Ryzen 9 3900X, 1 CPU, 24 logical and 12 physical cores
 [MemoryDiagnoser]
 public class SqlStatementBenchmarks
 {
-    public string TableName { get; set; } = "Users";
+    public string TableName { get; set; } = nameof(TableName);
     public IEnumerable<long> ids
     {
         get
@@ -66,6 +66,7 @@ public class SqlStatementBenchmarks
         using var sb = new ValueStringBuilder();
         sb.AppendJoin( ", ", ids );
     }
+    
 
     [Benchmark]
     public void Test_GetEnumerator()

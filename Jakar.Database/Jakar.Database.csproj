@@ -32,8 +32,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Jakar.Extensions" Version="6.7.13" />
-		<PackageReference Include="Jakar.Extensions.Hosting" Version="6.7.1" />
+		<PackageReference Include="Jakar.Extensions" Version="6.7.18" />
+		<PackageReference Include="Jakar.Extensions.Hosting" Version="6.7.2" />
 		<PackageReference Include="FluentMigrator" Version="3.3.2" />
 		<PackageReference Include="FluentMigrator.Runner" Version="3.3.2" />
 		<PackageReference Include="MailKit" Version="3.6.0" />
