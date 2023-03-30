@@ -3,7 +3,9 @@
     "Hello World!".WriteToConsole();
     Console.WriteLine();
 
-    // BenchmarkRunner.Run<CastToBenchmarks>();
+    // Console.WriteLine( new SqlStatementBenchmarks().Test_Span() );
+
+    BenchmarkRunner.Run<SqlStatementBenchmarks>();
 }
 catch ( Exception e ) { e.WriteToConsole(); }
 finally { "Bye".WriteToConsole(); }

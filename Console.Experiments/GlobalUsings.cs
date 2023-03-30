@@ -16,6 +16,7 @@ global using BenchmarkDotNet.Jobs;
 global using BenchmarkDotNet.Order;
 global using BenchmarkDotNet.Running;
 global using Experiments;
+global using Experiments.Benchmarks;
 global using Jakar.Extensions;
 global using Newtonsoft.Json;
 global using Newtonsoft.Json.Linq;

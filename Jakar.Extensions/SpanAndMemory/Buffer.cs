@@ -6,9 +6,11 @@ namespace Jakar.Extensions;
 
 public ref struct Buffer<T> where T : unmanaged, IEquatable<T>
 {
-    private         T[]?    _arrayToReturnToPool = default;
-    private         Span<T> _span                = default;
-    private         int     _index               = 0;
+    private T[]?    _arrayToReturnToPool = default;
+    private Span<T> _span                = default;
+    private int     _index               = 0;
+
+
     public          bool    IsEmpty    => Length == 0;
     public          bool    IsNotEmpty => Length > 0;
     public readonly int     Capacity   => _span.Length;
@@ -16,6 +18,11 @@ public ref struct Buffer<T> where T : unmanaged, IEquatable<T>
     public readonly Span<T> Next       => _span[_index..];
     public readonly Span<T> Span       => _span[.._index];
     public          bool    IsReadOnly { get; init; }
+    public int Index
+    {
+        readonly get => _index;
+        set => _index = Math.Max( Math.Min( Capacity, value ), 0 );
+    }
 
 
     public readonly Span<T> this[ Range range ] => _span[range];
@@ -29,61 +36,31 @@ public ref struct Buffer<T> where T : unmanaged, IEquatable<T>
     }
 
 
-    public int Index
-    {
-        readonly get => _index;
-        set => _index = Math.Max( Math.Min( Capacity, value ), 0 );
-    }
-
-
-    public Buffer() : this( 64, false ) { }
-    public Buffer( int initialCapacity, bool isReadOnly )
+    public Buffer() : this( 64 ) { }
+    public Buffer( int initialCapacity )
     {
         // var sb = new StringBuilder( "", 0, 0, initialCapacity );
         // GC.AllocateUninitializedArray<T>( initialCapacity );
 
         _span      = _arrayToReturnToPool = ArrayPool<T>.Shared.Rent( initialCapacity );
-        IsReadOnly = isReadOnly;
+        IsReadOnly = false;
     }
+    public Buffer( ReadOnlySpan<T> span ) : this( span.Length ) => Append( span );
     public void Dispose()
     {
         T[]? toReturn = _arrayToReturnToPool;
         this = default; // For safety, to avoid using pooled array if this instance is erroneously appended to again
         if ( toReturn is not null ) { ArrayPool<T>.Shared.Return( toReturn ); }
     }
+
+
+    public override string ToString() => $"{nameof(Buffer<T>)} ( {nameof(Capacity)}: {Capacity}, {nameof(_index)}: {_index}, {nameof(IsReadOnly)}: {IsReadOnly} )";
     public readonly Enumerator GetEnumerator() => new(this);
 
 
     private void ThrowIfReadOnly()
     {
         if ( IsReadOnly ) { throw new InvalidOperationException( $"{nameof(Buffer<T>)} is read only" ); }
-    }
-    private static int GetLength( ReadOnlySpan<T> span, bool isReadOnly ) => span.Length * (isReadOnly
-                                                                                                ? 1
-                                                                                                : 2);
-
-
-    [Pure] public static Buffer<T> Create( ReadOnlySpan<T> span, bool isReadOnly ) => new Buffer<T>().Init( span, isReadOnly );
-    public Buffer<T> Init( ReadOnlySpan<T> span, bool isReadOnly )
-    {
-        if ( _arrayToReturnToPool is not null ) { ArrayPool<T>.Shared.Return( _arrayToReturnToPool ); }
-
-        _index = 0;
-
-        _span = _arrayToReturnToPool = ArrayPool<T>.Shared.Rent( GetLength( span, isReadOnly ) );
-        span.CopyTo( _span );
-
-        return this with
-               {
-                   IsReadOnly = isReadOnly,
-                   Index = span.Length,
-               };
-    }
-    public Buffer<T> Reset( T value )
-    {
-        _index = 0;
-        _span.Fill( value );
-        return this;
     }
 
 
@@ -120,14 +97,24 @@ public ref struct Buffer<T> where T : unmanaged, IEquatable<T>
     /// <param name="terminate"> </param>
     public ref T GetPinnableReference( T terminate )
     {
-        EnsureCapacity( Index + 1 );
-        _span[++Index] = terminate;
-
+        Append( terminate );
         return ref GetPinnableReference();
     }
 
 
-    public override string ToString() => $"{nameof(Buffer<T>)} ( {nameof(Capacity)}: {Capacity}, {nameof(_index)}: {_index}, {nameof(IsReadOnly)}: {IsReadOnly} )";
+    public Buffer<T> Clear()
+    {
+        _index = 0;
+        _span.Clear();
+        return this;
+    }
+    public Buffer<T> Reset( T value )
+    {
+        _index = 0;
+        _span.Fill( value );
+        return this;
+    }
+
 
     [Pure]
     public ReadOnlySpan<T> AsSpan( T? terminate )
@@ -151,8 +138,7 @@ public ref struct Buffer<T> where T : unmanaged, IEquatable<T>
 
     public bool TryCopyTo( Span<T> destination, out int charsWritten )
     {
-        if ( _span[.._index]
-           .TryCopyTo( destination ) )
+        if ( Span.TryCopyTo( destination ) )
         {
             charsWritten = _index;
             return true;
@@ -221,13 +207,8 @@ public ref struct Buffer<T> where T : unmanaged, IEquatable<T>
     public Buffer<T> Append( T value )
     {
         ThrowIfReadOnly();
-        int pos = _index;
 
-        if ( (uint)pos < (uint)_span.Length )
-        {
-            _span[pos] = value;
-            _index     = pos + 1;
-        }
+        if ( (uint)_index < (uint)_span.Length ) { _span[_index++] = value; }
         else { GrowAndAppend( value ); }
 
         return this;

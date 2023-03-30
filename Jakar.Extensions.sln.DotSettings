@@ -340,6 +340,7 @@
         &lt;/And&gt;&#xD;
       &lt;/Entry.Match&gt;&#xD;
       &lt;Entry.SortBy&gt;&#xD;
+        &lt;Static /&gt;&#xD;
         &lt;Readonly /&gt;&#xD;
         &lt;Type /&gt;&#xD;
         &lt;Name /&gt;&#xD;

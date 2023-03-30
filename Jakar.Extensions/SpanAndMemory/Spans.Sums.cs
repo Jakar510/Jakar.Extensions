@@ -24,4 +24,22 @@ public static partial class Spans
 
         return size;
     }
+    [Pure]
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public static float Sum<T>( this Span<T> value, Func<T, float> selector )
+    {
+        float size = 0;
+        foreach ( T x in value ) { size += selector( x ); }
+
+        return size;
+    }
+    [Pure]
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public static double Sum<T>( this Span<T> value, Func<T, double> selector )
+    {
+        double size = 0;
+        foreach ( T x in value ) { size += selector( x ); }
+
+        return size;
+    }
 }
