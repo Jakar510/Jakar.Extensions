@@ -265,7 +265,6 @@ public ref struct ValueStringBuilder
     }
 
 
-    [SuppressMessage( "ReSharper", "PossibleMultipleEnumeration" )]
     public ValueStringBuilder AppendJoin( char separator, IEnumerable<string> enumerable )
     {
         Span<string> span = enumerable.GetArray();
@@ -284,7 +283,6 @@ public ref struct ValueStringBuilder
 
         return this;
     }
-    [SuppressMessage( "ReSharper", "PossibleMultipleEnumeration" )]
     public ValueStringBuilder AppendJoin( ReadOnlySpan<char> separator, IEnumerable<string> enumerable )
     {
         Span<string> span = enumerable.GetArray();
