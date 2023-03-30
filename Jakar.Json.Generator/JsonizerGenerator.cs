@@ -23,28 +23,30 @@ namespace Jakar.Json.Generator;
 [SuppressMessage( "ReSharper", "SuggestBaseTypeForParameter" )]
 public class JsonizerGenerator : ISourceGenerator
 {
+    public const            string FROM_JSON  = "FromJson";
+    public const            string GENERATED  = $"[System.CodeDom.Compiler.GeneratedCode({nameof(JsonizerGenerator)})]";
     private static readonly string _attribute = typeof(JsonizerAttribute).FullName ?? throw new InvalidOperationException();
 
 
-    private static string ChooseName( string fieldName, in TypedConstant overridenNameOpt )
+    private static string ChooseName( ReadOnlySpan<char> fieldName, in TypedConstant overridenNameOpt )
     {
         if ( !overridenNameOpt.IsNull ) { return overridenNameOpt.Value?.ToString() ?? throw new NullReferenceException( nameof(TypedConstant.Value) ); }
 
         fieldName = fieldName.TrimStart( '_' );
 
-        return fieldName.Length switch
-               {
-                   0 => string.Empty,
-                   1 => fieldName.ToUpper(),
-                   _ => fieldName[..1]
-                           .ToUpper() + fieldName[1..],
-               };
+        if ( fieldName.Length == 0 ) { return string.Empty; }
+
+        Span<char> span = stackalloc char[fieldName.Length];
+        span[0] = char.ToUpper( fieldName[0] );
+
+        fieldName[1..]
+           .CopyTo( span[1..] );
+
+        return span.ToString();
     }
-    public const string FROM_JSON = "FromJson";
-    public const string GENERATED = $"[System.CodeDom.Compiler.GeneratedCode({nameof(JsonizerGenerator)})]";
 
 
-    private static string? ProcessClass( INamedTypeSymbol classSymbol, List<IFieldSymbol> fields, in ISymbol? attributeSymbol, GeneratorExecutionContext context )
+    private static string? ProcessClass( INamedTypeSymbol classSymbol, IEnumerable<IFieldSymbol> fields, in ISymbol? attributeSymbol, GeneratorExecutionContext context )
     {
         ArgumentNullException.ThrowIfNull( attributeSymbol );
 
@@ -56,24 +58,23 @@ public class JsonizerGenerator : ISourceGenerator
         string namespaceName = classSymbol.ContainingNamespace.ToDisplayString();
 
         // begin building the generated source
-        var source = new StringBuilder( $@"
+        var sb = new StringBuilder( $@"
 #nullable enable
-namespace {namespaceName}
+namespace {namespaceName};
+
+
+public partial class {classSymbol.Name} 
 {{
-    public partial class {classSymbol.Name} 
-    {{
 " );
 
         // if the class doesn't implement INotifyPropertyChanged already, add it
         // if ( !classSymbol.Interfaces.Contains(notifySymbol, SymbolEqualityComparer.Default) ) { source.Append("public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;"); }
 
         // create properties for each field 
-        foreach ( IFieldSymbol fieldSymbol in fields ) { ProcessField( source, fieldSymbol, attributeSymbol ); }
+        foreach ( IFieldSymbol fieldSymbol in fields ) { ProcessField( sb, fieldSymbol, attributeSymbol ); }
 
-        source.Append( "    }" );
-        source.Append( '\n' );
-        source.Append( '}' );
-        return source.ToString();
+        sb.Append( '}' );
+        return sb.ToString();
     }
     private static void Execute( in GeneratorExecutionContext context, in SyntaxReceiver receiver, in CancellationToken token )
     {
@@ -84,12 +85,12 @@ namespace {namespaceName}
         // group the fields by class, and generate the source
         foreach ( IGrouping<INamedTypeSymbol, IFieldSymbol> group in receiver.Fields.GroupBy<IFieldSymbol, INamedTypeSymbol>( f => f.ContainingType, SymbolEqualityComparer.Default ) )
         {
-            string classSource = ProcessClass( group.Key, group.ToList(), attributeSymbol, context ) ?? throw new InvalidOperationException();
+            string classSource = ProcessClass( group.Key, group, attributeSymbol, context ) ?? throw new InvalidOperationException();
             context.AddSource( $"{group.Key.Name}_autoNotify.cs", SourceText.From( classSource, Encoding.UTF8 ) );
         }
     }
 
-    private static void ProcessField( StringBuilder source, in IFieldSymbol fieldSymbol, ISymbol attributeSymbol )
+    private static void ProcessField( StringBuilder sb, in IFieldSymbol fieldSymbol, ISymbol attributeSymbol )
     {
         // get the name and type of the field
         string      fieldName = fieldSymbol.Name;
@@ -110,20 +111,40 @@ namespace {namespaceName}
             return;
         }
 
-        source.Append( $@"
-public {fieldType} {propertyName} 
-{{
-    get 
+        sb.Append( $@"
+    public {fieldType} {propertyName} 
     {{
-        return this.{fieldName};
+        get 
+        {{
+            return this.{fieldName};
+        }}
+        set
+        {{
+            this.{fieldName} = value;
+            this.PropertyChanged?.Invoke(this, new System.ComponentModel.PropertyChangedEventArgs(nameof({propertyName})));
+        }}
     }}
-    set
-    {{
-        this.{fieldName} = value;
-        this.PropertyChanged?.Invoke(this, new System.ComponentModel.PropertyChangedEventArgs(nameof({propertyName})));
-    }}
-}}
 " );
+    }
+
+
+    public void Initialize( GeneratorInitializationContext context )
+    {
+        // Register the attribute source
+        // context.RegisterForPostInitialization(c => c.AddSource("AutoNotifyAttribute", ATTRIBUTE_TEXT));
+
+        if ( context.CancellationToken.IsCancellationRequested ) { return; }
+
+        // Register a syntax receiver that will be created for each generation pass
+        context.RegisterForSyntaxNotifications( () => new SyntaxReceiver() );
+    }
+
+
+    public void Execute( GeneratorExecutionContext context )
+    {
+        if ( context.SyntaxContextReceiver is not SyntaxReceiver receiver ) { return; }
+
+        Execute( context, receiver, context.CancellationToken );
     }
 
 
@@ -151,24 +172,83 @@ public {fieldType} {propertyName}
             }
         }
     }
+}
 
 
 
-    public void Initialize( GeneratorInitializationContext context )
-    {
-        // Register the attribute source
-        // context.RegisterForPostInitialization(c => c.AddSource("AutoNotifyAttribute", ATTRIBUTE_TEXT));
-
-        // Register a syntax receiver that will be created for each generation pass
-        context.CancellationToken.ThrowIfCancellationRequested();
-        context.RegisterForSyntaxNotifications( () => new SyntaxReceiver() );
-    }
-
+public class JsonSerializationGenerator : ISourceGenerator
+{
+    public void Initialize( GeneratorInitializationContext context ) { context.RegisterForSyntaxNotifications( () => new JsonSerializationSyntaxReceiver() ); }
 
     public void Execute( GeneratorExecutionContext context )
     {
-        if ( context.SyntaxContextReceiver is not SyntaxReceiver receiver ) { return; }
+        var syntaxReceiver = (JsonSerializationSyntaxReceiver)context.SyntaxReceiver;
 
-        Execute( context, receiver, context.CancellationToken );
+        foreach ( var classDeclaration in syntaxReceiver.CandidateClasses )
+        {
+            string namespaceName = classDeclaration.Parent is NamespaceDeclarationSyntax namespaceDeclaration
+                                       ? namespaceDeclaration.Name.ToString()
+                                       : string.Empty;
+
+            string className = classDeclaration.Identifier.ToString();
+            string source    = GenerateSerializationSource( namespaceName, className, classDeclaration.Members );
+            context.AddSource( $"{className}_JsonSerialization", SourceText.From( source, Encoding.UTF8 ) );
+        }
+    }
+
+    private string GenerateSerializationSource( string namespaceName, string className, SyntaxList<MemberDeclarationSyntax> members )
+    {
+        var properties = members.OfType<PropertyDeclarationSyntax>()
+                                .Where( p => p.Modifiers.Any( m => m.ValueText == "public" ) )
+                                .ToList();
+
+        var builder = new StringBuilder();
+        builder.AppendLine( $"namespace {namespaceName}" );
+        builder.AppendLine( "{" );
+        builder.AppendLine( $"    public static partial class {className}JsonSerializationExtensions" );
+        builder.AppendLine( "    {" );
+        builder.AppendLine( $"        public static string ToJson(this {className} obj)" );
+        builder.AppendLine( "        {" );
+        builder.AppendLine( "            var sb = new System.Text.StringBuilder();" );
+        builder.AppendLine( "            sb.Append(\"{\");" );
+
+        for ( int i = 0; i < properties.Count; i++ )
+        {
+            var    property     = properties[i];
+            string propertyName = property.Identifier.ToString();
+            string propertyType = property.Type.ToString();
+            builder.AppendLine( $"            sb.Append(\"\\\"{propertyName}\\\": \");" );
+
+            if ( propertyType == "string" ) { builder.AppendLine( $"            sb.Append($\"\\\"{{obj.{propertyName}}}.Replace(\"\\\"\", \"\\\\\\\"\")}}\\\"\");" ); }
+            else if ( propertyType == "int" ) { builder.AppendLine( $"            sb.Append(obj.{propertyName}.ToString());" ); }
+
+            if ( i < properties.Count - 1 ) { builder.AppendLine( "            sb.Append(\",\");" ); }
+        }
+
+        builder.AppendLine( "            sb.Append(\"}\");" );
+        builder.AppendLine( "            return sb.ToString();" );
+        builder.AppendLine( "        }" );
+        builder.AppendLine( "    }" );
+        builder.AppendLine( "}" );
+
+        return builder.ToString();
+    }
+
+
+
+    private class JsonSerializationSyntaxReceiver : ISyntaxReceiver
+    {
+        public List<ClassDeclarationSyntax> CandidateClasses { get; } = new();
+
+        public void OnVisitSyntaxNode( SyntaxNode syntaxNode )
+        {
+            if ( syntaxNode is ClassDeclarationSyntax { AttributeLists.Count: > 0 } classDeclaration )
+            {
+                var generateJsonAttribute = classDeclaration.AttributeLists.SelectMany( attrList => attrList.Attributes )
+                                                            .FirstOrDefault( attr => attr.Name.ToString() == "GenerateJsonSerializer" );
+
+                if ( generateJsonAttribute != null ) { CandidateClasses.Add( classDeclaration ); }
+            }
+        }
     }
 }

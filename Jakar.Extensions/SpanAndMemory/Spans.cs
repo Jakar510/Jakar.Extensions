@@ -130,6 +130,7 @@ public static partial class Spans
         for ( int i = value.Length; i < buffer.Length; i++ ) { buffer[i] = defaultValue; }
     }
 
+
     public static void Join<T>( ReadOnlySpan<T> first, ReadOnlySpan<T> last, Span<T> buffer, out int charWritten ) where T : IEquatable<T>
     {
         charWritten = first.Length + last.Length;

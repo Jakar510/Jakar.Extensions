@@ -69,7 +69,18 @@ public static class ListExtensions
 
 
 
-    public static T[] GetInternalArray<T>( this List<T> list ) => ArrayAccessor<T>.Getter( list );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public static TValue[] GetArray<TValue>( this IEnumerable<TValue> values ) => values switch
+                                                                                  {
+                                                                                      TValue[] array                => array,
+                                                                                      List<TValue> list             => list.GetInternalArray(),
+                                                                                      Collection<TValue> collection => collection.GetInternalArray(),
+                                                                                      _                             => values.ToArray()
+                                                                                  };
+
+
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static T[] GetInternalArray<T>( this List<T> list ) => ArrayAccessor<T>.Getter( list );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static T[] GetInternalArray<T>( this Collection<T> list ) => ArrayAccessor<T>.CollectionGetter( list )
                                                                                         .GetInternalArray();
 }

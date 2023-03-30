@@ -220,6 +220,9 @@ public enum Status
     /// <summary> The user-agent requested a resource that cannot legally be provided, such as a web page censored by a government. </summary>
     UnavailableForLegalReasons = 451,
 
+    /// <summary> Session Expired </summary>
+    SessionExpired = 452,
+
     /// <summary> Used when the client has closed the request before the server could send a response. </summary>
     ClientClosedRequest = 499,
 

@@ -1,5 +1,5 @@
 {
-  "id": "f2a4f586-ddf6-4f34-b2c4-6887bd0605cf",
+  "id": "94a43e83-68a6-462f-b2a3-773f4dcb9422",
   "name": "My Visual Studio extensions",
   "description": "A collection of my Visual Studio extensions",
   "version": "1.0",
@@ -63,10 +63,6 @@
     {
       "name": "Visual Studio Theme Pack",
       "vsixId": "VisualStudioThemePack.453e3fa1-2e0e-467e-abbd-1d08fe6468d1"
-    },
-    {
-      "name": "VSColorOutput64",
-      "vsixId": "65dd734b-180a-4c67-b245-56de889637e1"
     }
   ]
 }

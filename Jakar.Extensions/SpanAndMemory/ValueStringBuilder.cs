@@ -4,6 +4,9 @@
 #nullable enable
 
 
+using System;
+
+
 
 namespace Jakar.Extensions;
 
@@ -262,7 +265,76 @@ public ref struct ValueStringBuilder
     }
 
 
-#if NET6_0_OR_GREATER
+    [SuppressMessage( "ReSharper", "PossibleMultipleEnumeration" )]
+    public ValueStringBuilder AppendJoin( char separator, IEnumerable<string> enumerable )
+    {
+        Span<string> span = enumerable.GetArray();
+        EnsureCapacity( span.Sum( x => x.Length ) + span.Length * 2 + 1 );
+        var enumerator = span.GetEnumerator();
+        enumerator.MoveNext();
+
+        do
+        {
+            // ReadOnlySpan<char> current = enumerator.Current;
+            // if ( current.TryCopyTo( Next ) ) { _chars.Index += current.Length; }
+
+            _chars.Append( enumerator.Current );
+            _chars.Append( separator );
+        } while ( enumerator.MoveNext() );
+
+        return this;
+    }
+    [SuppressMessage( "ReSharper", "PossibleMultipleEnumeration" )]
+    public ValueStringBuilder AppendJoin( ReadOnlySpan<char> separator, IEnumerable<string> enumerable )
+    {
+        Span<string> span = enumerable.GetArray();
+        EnsureCapacity( span.Sum( x => x.Length ) + separator.Length * span.Length + 1 );
+        var enumerator = span.GetEnumerator();
+        enumerator.MoveNext();
+
+        do
+        {
+            // ReadOnlySpan<char> current = enumerator.Current;
+            // if ( current.TryCopyTo( Next ) ) { _chars.Index += current.Length; }
+
+            _chars.Append( enumerator.Current );
+            _chars.Append( separator );
+        } while ( enumerator.MoveNext() );
+
+        return this;
+    }
+    public ValueStringBuilder AppendJoin<T>( char separator, IEnumerable<T> enumerable, IFormatProvider? provider = default ) where T : ISpanFormattable
+    {
+        Span<T> span       = enumerable.GetArray();
+        var     enumerator = span.GetEnumerator();
+        enumerator.MoveNext();
+
+        do
+        {
+            if ( enumerator.Current.TryFormat( Next, out int charsWritten, default, provider ) ) { _chars.Index += charsWritten; }
+
+            _chars.Append( separator );
+        } while ( enumerator.MoveNext() );
+
+        return this;
+    }
+    public ValueStringBuilder AppendJoin<T>( ReadOnlySpan<char> separator, IEnumerable<T> enumerable, IFormatProvider? provider = default ) where T : ISpanFormattable
+    {
+        Span<T> span       = enumerable.GetArray();
+        var     enumerator = span.GetEnumerator();
+        enumerator.MoveNext();
+
+        do
+        {
+            if ( enumerator.Current.TryFormat( Next, out int charsWritten, default, provider ) ) { _chars.Index += charsWritten; }
+
+            _chars.Append( separator );
+        } while ( enumerator.MoveNext() );
+
+        return this;
+    }
+
+
     public ValueStringBuilder AppendSpanFormattable<T>( T value, ReadOnlySpan<char> format, IFormatProvider? provider = default ) where T : ISpanFormattable
     {
         if ( typeof(T) == typeof(DateTime) ) { EnsureCapacity( Math.Max( format.Length,            25 ) ); }
@@ -284,7 +356,6 @@ public ref struct ValueStringBuilder
         return this;
     }
 
-#endif
 
     /// <summary> Copied from StringBuilder, can't be done via generic extension as ValueStringBuilder is a ref struct and cannot be used  a generic. </summary>
     /// <param name="provider"> </param>
@@ -491,7 +562,6 @@ public ref struct ValueStringBuilder
             if ( s == null )
             {
             #if NET6_0_OR_GREATER
-
                 // If arg is ISpanFormattable and the beginning doesn't need padding, try formatting it into the remaining current chunk.
                 if ( arg is ISpanFormattable spanFormattableArg && (leftJustify || width == 0) && spanFormattableArg.TryFormat( Next, out int charsWritten, itemFormatSpan, provider ) )
                 {

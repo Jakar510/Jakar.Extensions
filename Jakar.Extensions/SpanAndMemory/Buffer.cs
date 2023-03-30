@@ -256,7 +256,7 @@ public ref struct Buffer<T> where T : unmanaged, IEquatable<T>
             {
                 if ( _index + span.Length >= Capacity ) { Grow( span.Length ); }
 
-                span.CopyTo( _span[_index..] );
+                span.CopyTo( Next );
                 _index += span.Length;
                 return this;
             }
