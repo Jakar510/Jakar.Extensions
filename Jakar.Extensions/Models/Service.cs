@@ -2,10 +2,14 @@
 // 05/17/2022  4:16 PM
 
 #nullable enable
+using Microsoft.Extensions.Hosting;
+
+
+
 namespace Jakar.Extensions;
 
 
-public abstract class Service : ObservableClass, IDisposable, IAsyncDisposable, IValidator
+public abstract class Service : ObservableClass, IAsyncDisposable, IValidator
 {
     private readonly Synchronized<bool> _isAlive = new(false);
 
@@ -23,54 +27,44 @@ public abstract class Service : ObservableClass, IDisposable, IAsyncDisposable, 
     public virtual bool   IsValid   => IsAlive;
     public         string ClassName { get; }
     public         string FullName  { get; }
-    public         Type   ClassType { get; }
 
 
     protected Service()
     {
-        ClassType = GetType();
-        ClassName = ClassType.Name;
-        FullName  = ClassType.AssemblyQualifiedName ?? ClassType.FullName ?? ClassName;
+        Type type = GetType();
+        ClassName = type.Name;
+        FullName  = type.AssemblyQualifiedName ?? type.FullName ?? ClassName;
     }
 
 
-    public static Task Delay( in double days, in CancellationToken token ) => TimeSpan.FromDays( days )
-                                                                                      .Delay( token );
-    public static Task Delay( in float minutes, in CancellationToken token ) => TimeSpan.FromMinutes( minutes )
-                                                                                        .Delay( token );
-    public static Task Delay( in long seconds, in CancellationToken token ) => TimeSpan.FromSeconds( seconds )
-                                                                                       .Delay( token );
-    public static Task Delay( in int ms, in CancellationToken token ) => TimeSpan.FromMilliseconds( ms )
-                                                                                 .Delay( token );
-    public static Task Delay( in TimeSpan delay, in CancellationToken token ) => delay.Delay( token );
-    protected abstract void Dispose( bool disposing );
+    public virtual ValueTask DisposeAsync() => default;
 
 
-    // public abstract void Register( in WebApplicationBuilder builder );
+    public static Task Delay( in double   days,    in CancellationToken token ) => Delay( TimeSpan.FromDays( days ),       token );
+    public static Task Delay( in float    minutes, in CancellationToken token ) => Delay( TimeSpan.FromMinutes( minutes ), token );
+    public static Task Delay( in long     seconds, in CancellationToken token ) => Delay( TimeSpan.FromSeconds( seconds ), token );
+    public static Task Delay( in int      ms,      in CancellationToken token ) => Delay( TimeSpan.FromMilliseconds( ms ), token );
+    public static Task Delay( in TimeSpan delay,   in CancellationToken token ) => delay.Delay( token );
 
-#if !NETSTANDARD2_1
+
+#if NET6_0_OR_GREATER
     [StackTraceHidden]
 #endif
-    [DoesNotReturn] protected virtual void ThrowDisabled( [CallerMemberName] string? caller = default ) => throw new InvalidOperationException( $"{ClassName}.{caller}" );
+    [DoesNotReturn]
+    protected virtual void ThrowDisabled( Exception? inner = default, [CallerMemberName] string? caller = default ) => throw new ApiDisabledException( $"{ClassName}.{caller}", inner );
 
-#if !NETSTANDARD2_1
+
+#if NET6_0_OR_GREATER
     [StackTraceHidden]
 #endif
-    [DoesNotReturn] protected virtual void ThrowDisabled( Exception inner, [CallerMemberName] string? caller = default ) => throw new InvalidOperationException( $"{ClassName}.{caller}", inner );
+    [DoesNotReturn]
+    protected void ThrowDisposed( Exception? inner = default, [CallerMemberName] string? caller = default ) => throw new ObjectDisposedException( $"{ClassName}.{caller}", inner );
+}
 
-#if !NETSTANDARD2_1
-    [StackTraceHidden]
-#endif
-    [DoesNotReturn] protected void ThrowDisposed( [CallerMemberName] string? caller = default ) => throw new ObjectDisposedException( $"{ClassName}.{caller}" );
 
-#if !NETSTANDARD2_1
-    [StackTraceHidden]
-#endif
-    [DoesNotReturn] protected void ThrowDisposed( Exception inner, [CallerMemberName] string? caller = default ) => throw new ObjectDisposedException( $"{ClassName}.{caller}", inner );
-    public abstract ValueTask DisposeAsync();
-    public void Dispose()
-    {
-        Dispose( true );
-        GC.SuppressFinalize( this );
-    }
+
+public abstract class HostedService : Service, IHostedService
+{
+    public abstract Task StartAsync( CancellationToken token );
+    public abstract Task StopAsync( CancellationToken  token );
 }

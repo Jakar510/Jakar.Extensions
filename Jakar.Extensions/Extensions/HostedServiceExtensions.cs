@@ -51,16 +51,8 @@ public static class HostedServiceExtensions
         }
         public override ValueTask DisposeAsync()
         {
-            Dispose( true );
-            return default;
-        }
-
-
-        protected override void Dispose( bool disposing )
-        {
-            if ( !disposing ) { return; }
-
             Stop();
+            return default;
         }
 
 
