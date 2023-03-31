@@ -11,6 +11,7 @@ namespace Jakar.AppLogger.Common;
 [SuppressMessage( "ReSharper", "SuggestBaseTypeForParameter" )]
 public sealed class AppLogger : Service, IAppLogger
 {
+    private                 bool               _disposed;
     private readonly        ILogger<AppLogger> _logger;
     private readonly        ConcurrentBag<Log> _logs = new();
     private readonly        WebRequester       _requester;
@@ -32,19 +33,24 @@ public sealed class AppLogger : Service, IAppLogger
         Options    = options;
         _requester = options.CreateWebRequester();
     }
-    protected override void Dispose( bool disposing )
+    public override async ValueTask DisposeAsync()
     {
-        if ( !disposing ) { return; }
+        if ( _disposed ) { ThrowDisposed(); }
 
         _logs.Clear();
+        await Config.DisposeAsync();
+        _disposed = true;
     }
-    internal void ThrowIfNotEnabled()
-    {
-        if ( !IsValid ) { throw new ApiDisabledException( $"Must call {nameof(AppLogger)}.{nameof(StartAsync)} first." ); }
-    }
+    public void Dispose() => DisposeAsync()
+       .CallSynchronously();
 
-    
-    public void Add( Log log ) => _logs.Add( log );
+
+    public void Add( Log log )
+    {
+        if ( _disposed ) { ThrowDisposed(); }
+
+        _logs.Add( log );
+    }
     public void Add( params Log[] logs )
     {
         foreach ( Log log in logs ) { _logs.Add( log ); }
@@ -57,6 +63,8 @@ public sealed class AppLogger : Service, IAppLogger
 
     private async ValueTask StartSession( CancellationToken token )
     {
+        if ( _disposed ) { ThrowDisposed(); }
+
         var session = new StartSession
                       {
                           AppLoggerSecret = ApiToken,
@@ -67,6 +75,8 @@ public sealed class AppLogger : Service, IAppLogger
     }
     private async ValueTask<bool> StartSession( StartSession session, CancellationToken token )
     {
+        if ( _disposed ) { ThrowDisposed(); }
+
         WebResponse<string> reply = await _requester.Post( $"/Api/{nameof(StartSession)}", session, token )
                                                     .AsString();
 
@@ -75,22 +85,24 @@ public sealed class AppLogger : Service, IAppLogger
         Config.SessionID = result;
         return true;
     }
-    private async ValueTask EndSession( CancellationToken token ) =>
+    private async ValueTask EndSession( CancellationToken token )
+    {
+        if ( _disposed ) { ThrowDisposed(); }
+
         await _requester.Post( $"/Api/{nameof(EndSession)}", Config.SessionID.ToString(), token )
                         .AsString();
-    public override async ValueTask DisposeAsync()
-    {
-        Dispose( true );
-        await Config.DisposeAsync();
     }
 
 
     public async Task StartAsync( CancellationToken token )
     {
-        IsAlive = true;
+        if ( _disposed ) { ThrowDisposed(); }
+
+        if ( IsAlive ) { return; }
 
         try
         {
+            IsAlive = true;
             if ( string.IsNullOrWhiteSpace( ApiToken ) ) { throw new ApiDisabledException( $"{nameof(ApiToken)} must be provided" ); }
 
             if ( !Options.IsValid ) { throw new ApiDisabledException( $"{nameof(Options)} must be provided" ); }
@@ -134,6 +146,8 @@ public sealed class AppLogger : Service, IAppLogger
     }
     public async Task StopAsync( CancellationToken token )
     {
+        if ( _disposed ) { ThrowDisposed(); }
+
         var logs = new HashSet<Log>( _logs.Select( x => x.Update( Config ) ) );
         await SendLog( logs, token );
         await EndSession( token );
@@ -142,6 +156,8 @@ public sealed class AppLogger : Service, IAppLogger
 
     public async ValueTask<byte[]?> TryTakeScreenShot()
     {
+        if ( _disposed ) { ThrowDisposed(); }
+
         if ( !Config.TakeScreenshotOnError ) { return default; }
 
         try { return await Config.TakeScreenshot(); }
@@ -151,6 +167,8 @@ public sealed class AppLogger : Service, IAppLogger
 
     public void TrackEvent( string? message, LogLevel level = LogLevel.Trace, IDictionary<string, JToken?>? eventDetails = default )
     {
+        if ( _disposed ) { ThrowDisposed(); }
+
         if ( !Config.EnableAnalytics ) { return; }
 
         if ( string.IsNullOrWhiteSpace( message ) ) { return; }
@@ -182,6 +200,8 @@ public sealed class AppLogger : Service, IAppLogger
     public void TrackError( Exception e, IEnumerable<Attachment> attachments ) => TrackError( e, default, attachments );
     public void TrackError( Exception e, IDictionary<string, JToken?>? eventDetails, IEnumerable<Attachment> attachments )
     {
+        if ( _disposed ) { ThrowDisposed(); }
+
         if ( !Config.EnableCrashes ) { return; }
 
         var log = new Log( Config, attachments.Concat( Attachments ), e )
@@ -204,12 +224,7 @@ public sealed class AppLogger : Service, IAppLogger
         var log = new Log( Config, Attachments, e, eventId, formatter( state, e ), logLevel );
         _logs.Add( log );
     }
-    public bool IsEnabled( LogLevel logLevel )
-    {
-        if ( logLevel is LogLevel.None ) { return false; }
-
-        return logLevel >= Config.LogLevel;
-    }
+    public bool IsEnabled( LogLevel logLevel ) => logLevel is not LogLevel.None && logLevel >= Config.LogLevel;
 
 
     public IDisposable BeginScope<TState>( TState state ) where TState : notnull => Config.CreateScope();

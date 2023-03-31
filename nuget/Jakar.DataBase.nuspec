@@ -38,7 +38,7 @@
 				<dependency id="MailKit"
 							version="3.6.0" />
 				<dependency id="Microsoft.Identity.Client"
-							version="4.51.0" />
+							version="4.52.0" />
 				<dependency id="Microsoft.IdentityModel.JsonWebTokens"
 							version="6.27.0" />
 				<dependency id="Microsoft.IdentityModel.Protocols.OpenIdConnect"
@@ -59,7 +59,7 @@
 				<dependency id="MailKit"
 							version="3.6.0" />
 				<dependency id="Microsoft.Identity.Client"
-							version="4.51.0" />
+							version="4.52.0" />
 				<dependency id="Microsoft.IdentityModel.JsonWebTokens"
 							version="6.27.0" />
 				<dependency id="Microsoft.IdentityModel.Protocols.OpenIdConnect"
