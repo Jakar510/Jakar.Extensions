@@ -144,7 +144,7 @@ public sealed class Language : BaseClass, IComparable<Language>, IEquatable<Lang
                                                       Portuguese,
                                                       Spanish,
                                                       Swedish,
-                                                      Thai
+                                                      Thai,
                                                   };
 
     #endregion

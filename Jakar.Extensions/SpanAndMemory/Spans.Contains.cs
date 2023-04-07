@@ -19,9 +19,9 @@ public static partial class Spans
 
     #if NETSTANDARD2_1
         this
-    #endif
-        Span<T> span,
-        T       value
+        #endif
+            Span<T> span,
+        T value
     ) where T : IEquatable<T>
     {
     #if NETSTANDARD2_1
@@ -39,9 +39,9 @@ public static partial class Spans
     public static bool Contains<T>(
     #if NETSTANDARD2_1
         this
-    #endif
-        ReadOnlySpan<T> span,
-        T               value
+        #endif
+            ReadOnlySpan<T> span,
+        T value
     ) where T : IEquatable<T>
     {
     #if NETSTANDARD2_1

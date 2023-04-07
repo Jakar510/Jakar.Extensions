@@ -4,6 +4,8 @@
 #nullable enable
 using System.Runtime.InteropServices;
 
+
+
 namespace Experiments.Benchmarks;
 
 
@@ -18,11 +20,11 @@ namespace Experiments.Benchmarks;
 [MemoryDiagnoser]
 public class SpansBenchmarks
 {
+    private const                         string ALPHABET  = "abcdefghijklmnopqrstuvwxyz";
+    private const                         string NEW_VALUE = "----NEW-VALUE";
+    private const                         string OLD       = "0365BC9B";
+    private const                         string TEST      = $"{ALPHABET}__{OLD}-3DE3-4B75-9F7E-2A0F23EFA5A2";
     [Params( "", ALPHABET, TEST )] public string Value { get; set; } = string.Empty;
-    private const string ALPHABET = "abcdefghijklmnopqrstuvwxyz";
-    private const string NEW_VALUE = "----NEW-VALUE";
-    private const string OLD = "0365BC9B";
-    private const string TEST = $"{ALPHABET}__{OLD}-3DE3-4B75-9F7E-2A0F23EFA5A2";
     [Benchmark] public bool Contains_span() => Value.Contains( '2' );
     [Benchmark] public bool Contains_value() => Spans.Contains( Value, NEW_VALUE );
     [Benchmark]
@@ -69,5 +71,5 @@ public class SpansBenchmarks
     [Benchmark] public ReadOnlySpan<char> RemoveAll_Single() => Spans.RemoveAll( Value, '1' );
     [Benchmark] public ReadOnlySpan<char> Replace() => Spans.Replace<char>( Value, OLD, NEW_VALUE );
     [Benchmark] public ReadOnlySpan<char> Slice_False() => Spans.Slice( Value, 'z', '4', false );
-    [Benchmark] public ReadOnlySpan<char> Slice_True() => Spans.Slice( Value, 'z', '4', true );
+    [Benchmark] public ReadOnlySpan<char> Slice_True() => Spans.Slice( Value,  'z', '4', true );
 }

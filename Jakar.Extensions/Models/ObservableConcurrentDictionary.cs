@@ -7,15 +7,9 @@ namespace Jakar.Extensions;
 
 public class ObservableConcurrentDictionary<TKey, TValue> : CollectionAlerts<KeyValuePair<TKey, TValue?>>, IDictionary<TKey, TValue>, IReadOnlyDictionary<TKey, TValue> where TKey : notnull
 {
-    protected readonly ConcurrentDictionary<TKey, TValue> _dictionary;
-    public             bool                               IsReadOnly => ((IDictionary)_dictionary).IsReadOnly;
-
-
-    public ICollection<TKey>                              Keys   => _dictionary.Keys;
-    public ICollection<TValue>                            Values => _dictionary.Values;
-    IEnumerable<TKey> IReadOnlyDictionary<TKey, TValue>.  Keys   => _dictionary.Keys;
-    IEnumerable<TValue> IReadOnlyDictionary<TKey, TValue>.Values => _dictionary.Values;
-    public sealed override int                            Count  => _dictionary.Count;
+    protected readonly     ConcurrentDictionary<TKey, TValue> _dictionary;
+    public sealed override int                                Count      => _dictionary.Count;
+    public                 bool                               IsReadOnly => ((IDictionary)_dictionary).IsReadOnly;
 
 
     public TValue this[ TKey key ]
@@ -35,6 +29,12 @@ public class ObservableConcurrentDictionary<TKey, TValue> : CollectionAlerts<Key
             else { Added( new KeyValuePair<TKey, TValue?>( key,             value ) ); }
         }
     }
+
+
+    public ICollection<TKey>                              Keys   => _dictionary.Keys;
+    IEnumerable<TKey> IReadOnlyDictionary<TKey, TValue>.  Keys   => _dictionary.Keys;
+    public ICollection<TValue>                            Values => _dictionary.Values;
+    IEnumerable<TValue> IReadOnlyDictionary<TKey, TValue>.Values => _dictionary.Values;
 
 
     public ObservableConcurrentDictionary() : this( new ConcurrentDictionary<TKey, TValue>() ) { }

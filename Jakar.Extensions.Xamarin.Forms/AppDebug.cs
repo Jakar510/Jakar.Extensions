@@ -2,15 +2,16 @@
 namespace Jakar.Extensions.Xamarin.Forms;
 
 
-[SuppressMessage( "ReSharper", "AsyncVoidLambda")]
+[SuppressMessage( "ReSharper", "AsyncVoidLambda" )]
 public class AppDebug : ObservableClass, ILogger
 {
-    protected readonly IAppSettings         _settings;
-    protected readonly IFilePaths           _paths;
-    private readonly   Synchronized<bool>   _apiEnabled = new(false);
-    private readonly   Synchronized<Guid>   _installID  = new(Guid.Empty);
-    private            DebugSettings?       _debugSettings;
-    protected          ReadOnlyMemory<byte> _screenShot;
+    public static readonly ErrorAttachmentLog[] Empty = Array.Empty<ErrorAttachmentLog>();
+    protected readonly     IAppSettings         _settings;
+    protected readonly     IFilePaths           _paths;
+    private readonly       Synchronized<bool>   _apiEnabled = new(false);
+    private readonly       Synchronized<Guid>   _installID  = new(Guid.Empty);
+    private                DebugSettings?       _debugSettings;
+    protected              ReadOnlyMemory<byte> _screenShot;
 
 
     public bool ApiDisabled => !ApiEnabled;
@@ -24,8 +25,16 @@ public class AppDebug : ObservableClass, ILogger
             OnPropertyChanged( nameof(ApiDisabled) );
         }
     }
-    public virtual bool CanDebug      => Debugger.IsAttached;
-    public virtual bool UseDebugLogin => CanDebug;
+    public virtual bool CanDebug => Debugger.IsAttached;
+    public Guid InstallID
+    {
+        get => _installID;
+        protected set
+        {
+            _installID.Value = value;
+            OnPropertyChanged();
+        }
+    }
     public DebugSettings Settings
     {
         get
@@ -37,15 +46,7 @@ public class AppDebug : ObservableClass, ILogger
             lock (this) { SetProperty( ref _debugSettings, value ); }
         }
     }
-    public Guid InstallID
-    {
-        get => _installID;
-        protected set
-        {
-            _installID.Value = value;
-            OnPropertyChanged();
-        }
-    }
+    public virtual bool UseDebugLogin => CanDebug;
 
 
     public AppDebug( IFilePaths paths, IAppSettings settings )
@@ -55,16 +56,13 @@ public class AppDebug : ObservableClass, ILogger
     }
 
 
-    public static readonly ErrorAttachmentLog[] Empty = Array.Empty<ErrorAttachmentLog>();
-
-
     protected virtual Dictionary<string, string> AppState() => new()
                                                                {
                                                                    [nameof(IAppSettings.AppName)]         = _settings.AppName,
                                                                    [nameof(DateTime)]                     = DateTime.UtcNow.ToString( CultureInfo.InvariantCulture ),
                                                                    [nameof(AppDeviceInfo.DeviceId)]       = AppDeviceInfo.DeviceId,
                                                                    [nameof(AppDeviceInfo.VersionNumber)]  = AppDeviceInfo.VersionNumber,
-                                                                   [nameof(LanguageApi.SelectedLanguage)] = CultureInfo.CurrentCulture.DisplayName
+                                                                   [nameof(LanguageApi.SelectedLanguage)] = CultureInfo.CurrentCulture.DisplayName,
                                                                };
     protected virtual async ValueTask<EventDetails?> Handle_AppState( Exception e, ICollection<ErrorAttachmentLog> attachments, CancellationToken token = default )
     {
@@ -169,7 +167,7 @@ public class AppDebug : ObservableClass, ILogger
 
         var result = new Dictionary<string, object?>
                      {
-                         [key] = feedback
+                         [key] = feedback,
                      };
 
         if ( Settings.IncludeAppStateOnError ) { result[nameof(AppState)] = AppState(); }
@@ -272,7 +270,7 @@ public class AppDebug : ObservableClass, ILogger
                                   {
                                       [nameof(EventId)]  = eventId.ToJson(),
                                       ["State"]          = state?.ToString(),
-                                      [nameof(LogLevel)] = logLevel.ToString()
+                                      [nameof(LogLevel)] = logLevel.ToString(),
                                   } );
         }
     }
@@ -285,7 +283,7 @@ public class AppDebug : ObservableClass, ILogger
                                                                       MsLogLevel.Error       => LogLevel.Error,
                                                                       MsLogLevel.Critical    => LogLevel.Error,
                                                                       MsLogLevel.None        => LogLevel.None,
-                                                                      _                      => throw new OutOfRangeException( nameof(logLevel), logLevel )
+                                                                      _                      => throw new OutOfRangeException( nameof(logLevel), logLevel ),
                                                                   };
 
     #endregion

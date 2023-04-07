@@ -11,7 +11,7 @@ public abstract class MigrateUserLoginInfoTable : Migration<UserLoginInfoRecord>
 
     protected override ICreateTableWithColumnSyntax CreateTable()
     {
-        var table = base.CreateTable();
+        ICreateTableWithColumnSyntax table = base.CreateTable();
 
         table.WithColumn( nameof(UserLoginInfoRecord.LoginProvider) )
              .AsString( int.MaxValue )

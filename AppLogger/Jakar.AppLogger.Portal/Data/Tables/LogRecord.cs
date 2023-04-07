@@ -18,10 +18,10 @@ public sealed record LogRecord : LoggerTable<LogRecord>, ILog, ILogInfo
     public                             DateTimeOffset AppStartTime       { get; init; }
     [MaxLength( 1024 )] public         string?        AppUserID          { get; init; }
     [MaxLength( 1024 )] public         string?        BuildID            { get; init; }
+    public                             string?        CategoryName       { get; init; }
     public                             Guid           DeviceID           { get; init; }
     public                             int            EventID            { get; init; }
-    [MaxLength( 1024 )] public         string?        EventName          { get; init; }
-    public                             string?        CategoryName       { get; init; }
+    [MaxLength( 1024 )]         public string?        EventName          { get; init; }
     [MaxLength( int.MaxValue )] public string?        ExceptionDetails   { get; init; }
     public                             bool           IsError            { get; init; }
     public                             bool           IsFatal            { get; init; }

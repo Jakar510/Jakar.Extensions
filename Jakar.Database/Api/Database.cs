@@ -7,9 +7,10 @@ namespace Jakar.Database;
 [SuppressMessage( "ReSharper", "SuggestBaseTypeForParameter" )]
 public abstract partial class Database : Randoms, IConnectableDb, IAsyncDisposable, IHealthCheck
 {
-    protected readonly ConcurrentBag<IAsyncDisposable> _disposables   = new();
-    private            string                          _currentSchema = string.Empty;
-    private            Uri                             _domain        = new("https://localhost:443");
+    public const       ClaimType                       DEFAULT_CLAIM_TYPES = ClaimType.UserID | ClaimType.UserName;
+    protected readonly ConcurrentBag<IAsyncDisposable> _disposables        = new();
+    private            string                          _currentSchema      = string.Empty;
+    private            Uri                             _domain             = new("https://localhost:443");
     public             IConfiguration                  Configuration    { get; }
     public virtual     string                          ConnectionString => Configuration.ConnectionString();
 
@@ -31,7 +32,6 @@ public abstract partial class Database : Randoms, IConnectableDb, IAsyncDisposab
     public             DbTable<UserRoleRecord>         UserRoles         { get; }
     public             DbTable<UserRecord>             Users             { get; }
     public             AppVersion                      Version           => Options.Version;
-    public const       ClaimType                       DEFAULT_CLAIM_TYPES = ClaimType.UserID | ClaimType.UserName;
 
 
     static Database()
@@ -63,7 +63,7 @@ public abstract partial class Database : Randoms, IConnectableDb, IAsyncDisposab
                         {
                             DbInstance.MsSql    => "dbo",
                             DbInstance.Postgres => "public",
-                            _                   => throw new OutOfRangeException( nameof(Instance), Instance )
+                            _                   => throw new OutOfRangeException( nameof(Instance), Instance ),
                         };
     }
 
@@ -88,7 +88,7 @@ public abstract partial class Database : Randoms, IConnectableDb, IAsyncDisposab
                                                                       List<T> list       => list.GetInternalArray(),
                                                                       Collection<T> list => list.GetInternalArray(),
                                                                       T[] array          => array,
-                                                                      _                  => enumerable.ToArray()
+                                                                      _                  => enumerable.ToArray(),
                                                                   };
 
 
@@ -128,7 +128,7 @@ public abstract partial class Database : Randoms, IConnectableDb, IAsyncDisposab
                        ConnectionState.Connecting => HealthCheckResult.Healthy(),
                        ConnectionState.Executing  => HealthCheckResult.Healthy(),
                        ConnectionState.Fetching   => HealthCheckResult.Healthy(),
-                       _                          => throw new OutOfRangeException( nameof(connection.State), connection.State )
+                       _                          => throw new OutOfRangeException( nameof(connection.State), connection.State ),
                    };
         }
         catch ( Exception e ) { return HealthCheckResult.Unhealthy( e.Message ); }

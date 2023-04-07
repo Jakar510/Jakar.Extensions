@@ -229,7 +229,7 @@ public sealed class AppLogger : Service, IAppLogger
         if ( !IsEnabled( logLevel ) ) { return; }
 
 
-        var log = e is not null
+        Log log = e is not null
                       ? new Log( this, e,        Attachments )
                       : new Log( this, logLevel, eventId, formatter( state, e ), Attachments );
 

@@ -7,9 +7,9 @@ namespace Jakar.Extensions;
 [SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
 public class ObservableHashSet<TElement> : CollectionAlerts<TElement>, ISet<TElement>, IReadOnlySet<TElement>, ISerializable, IDeserializationCallback
 {
-    private readonly HashSet<TElement> _values;
-    bool ICollection<TElement>.        IsReadOnly => ((ICollection<TElement>)_values).IsReadOnly;
-    public sealed override int         Count      => _values.Count;
+    private readonly       HashSet<TElement> _values;
+    public sealed override int               Count      => _values.Count;
+    bool ICollection<TElement>.              IsReadOnly => ((ICollection<TElement>)_values).IsReadOnly;
 
 
     public ObservableHashSet() : this( new HashSet<TElement>() ) { }

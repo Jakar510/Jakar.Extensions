@@ -13,9 +13,9 @@ namespace Jakar.Database;
 [Serializable]
 public sealed record EmailSettings : ICredentials
 {
-    [JsonProperty( Required = Required.Always )]    public int                 Port     { get; init; }
     [JsonProperty( Required = Required.Always )]    public SecureSocketOptions Options  { get; init; } = SecureSocketOptions.Auto;
     [JsonProperty( Required = Required.AllowNull )] public string              Password { get; init; } = string.Empty;
+    [JsonProperty( Required = Required.Always )]    public int                 Port     { get; init; }
     [JsonProperty( Required = Required.AllowNull )] public string              Site     { get; init; } = string.Empty;
     [JsonProperty( Required = Required.Always )]    public string              UserName { get; init; } = string.Empty;
 

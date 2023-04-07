@@ -7,6 +7,13 @@ namespace Jakar.Extensions;
 
 public static class GuidExtensions
 {
+    private const char EQUALS     = '=';
+    private const char HYPHEN     = '-';
+    private const char PLUS       = '+';
+    private const byte PLUS_BYTE  = (byte)'+';
+    private const char SLASH      = '/';
+    private const byte SLASH_BYTE = (byte)'/';
+    private const char UNDERSCORE = '_';
     public static bool TryAsGuid( this Span<char> value, [NotNullWhen( true )] out Guid? result )
     {
         result = AsGuid( value );
@@ -47,13 +54,6 @@ public static class GuidExtensions
         result = default;
         return false;
     }
-    private const byte PLUS_BYTE  = (byte)'+';
-    private const byte SLASH_BYTE = (byte)'/';
-    private const char EQUALS     = '=';
-    private const char HYPHEN     = '-';
-    private const char PLUS       = '+';
-    private const char SLASH      = '/';
-    private const char UNDERSCORE = '_';
 
 
     /// <summary>

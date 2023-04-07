@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 09/29/2022  8:03 PM
 
-using FluentMigrator.Runner.Exceptions;
-
-
-
 namespace Jakar.Database;
 
 

@@ -4,8 +4,9 @@ namespace Jakar.Extensions;
 
 public static class JsonNet
 {
-    public static JsonLoadSettings LoadSettings { get; set; } = new();
-    public static JsonSerializer   Serializer   { get; set; } = new();
+    private static JsonSerializerSettings _settings = new();
+    public static  JsonLoadSettings       LoadSettings { get; set; } = new();
+    public static  JsonSerializer         Serializer   { get; set; } = new();
     public static JsonSerializerSettings Settings
     {
         get => _settings;
@@ -15,7 +16,6 @@ public static class JsonNet
             Serializer = JsonSerializer.Create( value );
         }
     }
-    private static JsonSerializerSettings _settings = new();
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static JToken FromJson( this ReadOnlySpan<char> json ) => JToken.Parse( json.ToString() ) ?? throw new NullReferenceException( nameof(JToken.Parse) ); // TODO: optimize?

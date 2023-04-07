@@ -32,26 +32,22 @@ public static partial class WebBuilder
     /// <param name="builder"> The <see cref="WebApplicationBuilder"/> to configure. </param>
     /// <param name="preferHostingUrls"> <c> true </c> to prefer URLs configured on the <see cref="WebApplicationBuilder"/> ; otherwise <c> false </c> . </param>
     /// <returns> The <see cref="WebApplicationBuilder"/> . </returns>
-    public static WebApplicationBuilder PreferHostingUrls( this WebApplicationBuilder builder, bool preferHostingUrls )
-    {
-        return builder.UseSetting( WebHostDefaults.PreferHostingUrlsKey,
-                                   preferHostingUrls
-                                       ? "true"
-                                       : "false" );
-    }
+    public static WebApplicationBuilder PreferHostingUrls( this WebApplicationBuilder builder, bool preferHostingUrls ) =>
+        builder.UseSetting( WebHostDefaults.PreferHostingUrlsKey,
+                            preferHostingUrls
+                                ? "true"
+                                : "false" );
 
 
     /// <summary> Specify if startup status messages should be suppressed. </summary>
     /// <param name="builder"> The <see cref="WebApplicationBuilder"/> to configure. </param>
     /// <param name="suppressStatusMessages"> <c> true </c> to suppress writing of hosting startup status messages; otherwise <c> false </c> . </param>
     /// <returns> The <see cref="WebApplicationBuilder"/> . </returns>
-    public static WebApplicationBuilder SuppressStatusMessages( this WebApplicationBuilder builder, bool suppressStatusMessages )
-    {
-        return builder.UseSetting( WebHostDefaults.SuppressStatusMessagesKey,
-                                   suppressStatusMessages
-                                       ? "true"
-                                       : "false" );
-    }
+    public static WebApplicationBuilder SuppressStatusMessages( this WebApplicationBuilder builder, bool suppressStatusMessages ) =>
+        builder.UseSetting( WebHostDefaults.SuppressStatusMessagesKey,
+                            suppressStatusMessages
+                                ? "true"
+                                : "false" );
     /// <summary> Use the given configuration settings on the web host. </summary>
     /// <param name="builder"> The <see cref="WebApplicationBuilder"/> to configure. </param>
     /// <param name="configuration"> The <see cref="IConfiguration"/> containing settings to be used. </param>
@@ -104,10 +100,7 @@ public static partial class WebBuilder
     /// <param name="builder"> The <see cref="WebApplicationBuilder"/> to configure. </param>
     /// <param name="timeout"> The amount of time to wait for server shutdown. </param>
     /// <returns> The <see cref="WebApplicationBuilder"/> . </returns>
-    public static WebApplicationBuilder UseShutdownTimeout( this WebApplicationBuilder builder, TimeSpan timeout )
-    {
-        return builder.UseSetting( WebHostDefaults.ShutdownTimeoutKey, ((int)timeout.TotalSeconds).ToString( CultureInfo.InvariantCulture ) );
-    }
+    public static WebApplicationBuilder UseShutdownTimeout( this WebApplicationBuilder builder, TimeSpan timeout ) => builder.UseSetting( WebHostDefaults.ShutdownTimeoutKey, ((int)timeout.TotalSeconds).ToString( CultureInfo.InvariantCulture ) );
 
 
     /// <summary> Specify the urls the web host will listen on. </summary>

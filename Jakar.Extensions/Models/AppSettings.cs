@@ -4,9 +4,9 @@ namespace Jakar.Extensions;
 
 public interface IAppSettings : IHostViewModel
 {
+    public string     AppName           { get; }
     public AppVersion AppVersion        { get; }
     public Guid       DeviceID          { get; set; }
-    public string     AppName           { get; }
     public string     DeviceVersion     { get; }
     public LocalFile? ScreenShotAddress { get; set; }
 }
@@ -23,8 +23,9 @@ public interface IAppSettings<TViewPage> : IAppSettings
 [Serializable]
 public class AppSettings : BaseHostViewModel, IAppSettings
 {
-    private Guid       _deviceID;
-    private LocalFile? _screenShotAddress;
+    private        Guid       _deviceID;
+    private        LocalFile? _screenShotAddress;
+    public virtual string     AppName { get; }
 
 
     public AppVersion AppVersion { get; }
@@ -33,7 +34,6 @@ public class AppSettings : BaseHostViewModel, IAppSettings
         get => _deviceID;
         set => SetProperty( ref _deviceID, value );
     }
-    public virtual string AppName       { get; }
     public virtual string DeviceVersion { get; }
     public virtual LocalFile? ScreenShotAddress
     {

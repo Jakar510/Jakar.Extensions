@@ -10,14 +10,6 @@ namespace Jakar.Xml;
 
 public static class Constants
 {
-    public static class Dividers
-    {
-        public const char NS    = ':';
-        public const char TYPES = '`';
-    }
-
-
-
     public const string DICTIONARY     = "Dictionary";
     public const string FIELDS         = "Fields";
     public const string GROUP          = "Group";
@@ -30,4 +22,12 @@ public static class Constants
     public const string VALUE          = nameof(DictionaryEntry.Value);
     public const string XMLS           = "xmls";    // Name Space
     public const string XMLS_TAG       = "xmls=\""; // Name Space Tag
+
+
+
+    public static class Dividers
+    {
+        public const char NS    = ':';
+        public const char TYPES = '`';
+    }
 }

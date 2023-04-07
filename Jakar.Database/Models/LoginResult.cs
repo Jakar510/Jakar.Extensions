@@ -26,33 +26,31 @@ public readonly struct LoginResult
     public static implicit operator LoginResult( UserRecord           result ) => new(result);
 
 
-    public Error? GetResult()
-    {
-        return Result switch
-               {
-                   State.Success => default,
-                   State.UnknownError when Exception is not null => new Error( Status.InternalServerError,
-                                                                               new ProblemDetails
-                                                                               {
-                                                                                   Detail   = Exception.Message,
-                                                                                   Instance = Exception.Source,
-                                                                                   Status   = (int)Status.InternalServerError,
-                                                                                   Title    = Exception.MethodName(),
-                                                                                   Type = Exception.GetType()
-                                                                                                   .Name
-                                                                               } ),
-                   State.UnknownError when Model is not null => new Error( Status.InternalServerError, GetModelStateDictionary() ),
-                   State.UnknownError                        => new Error( Status.InternalServerError ),
-                   State.BadCredentials                      => new Error( Status.Unauthorized ),
-                   State.Inactive                            => new Error( Status.Forbidden ),
-                   State.Locked                              => new Error( Status.Locked ),
-                   State.Disabled                            => new Error( Status.Disabled ),
-                   State.ExpiredSubscription                 => new Error( Status.PaymentRequired ),
-                   State.NoSubscription                      => new Error( Status.PaymentRequired ),
-                   State.NotFound                            => new Error( Status.NotFound ),
-                   _                                         => throw new OutOfRangeException( nameof(Result), Result ),
-               };
-    }
+    public Error? GetResult() =>
+        Result switch
+        {
+            State.Success => default,
+            State.UnknownError when Exception is not null => new Error( Status.InternalServerError,
+                                                                        new ProblemDetails
+                                                                        {
+                                                                            Detail   = Exception.Message,
+                                                                            Instance = Exception.Source,
+                                                                            Status   = (int)Status.InternalServerError,
+                                                                            Title    = Exception.MethodName(),
+                                                                            Type = Exception.GetType()
+                                                                                            .Name,
+                                                                        } ),
+            State.UnknownError when Model is not null => new Error( Status.InternalServerError, GetModelStateDictionary() ),
+            State.UnknownError                        => new Error( Status.InternalServerError ),
+            State.BadCredentials                      => new Error( Status.Unauthorized ),
+            State.Inactive                            => new Error( Status.Forbidden ),
+            State.Locked                              => new Error( Status.Locked ),
+            State.Disabled                            => new Error( Status.Disabled ),
+            State.ExpiredSubscription                 => new Error( Status.PaymentRequired ),
+            State.NoSubscription                      => new Error( Status.PaymentRequired ),
+            State.NotFound                            => new Error( Status.NotFound ),
+            _                                         => throw new OutOfRangeException( nameof(Result), Result ),
+        };
     public bool GetResult( [NotNullWhen( false )] out UserRecord? caller )
     {
         caller = User;
@@ -86,7 +84,7 @@ public readonly struct LoginResult
 
     public ModelStateDictionary GetModelStateDictionary()
     {
-        var dictionary = Model ?? new ModelStateDictionary();
+        ModelStateDictionary dictionary = Model ?? new ModelStateDictionary();
         dictionary.AddModelError( nameof(State), Result.ToString() );
 
         dictionary.AddModelError( nameof(Status),
@@ -132,6 +130,6 @@ public readonly struct LoginResult
         Disabled,
         ExpiredSubscription,
         NoSubscription,
-        NotFound
+        NotFound,
     }
 }

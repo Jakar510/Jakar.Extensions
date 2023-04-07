@@ -1,7 +1,4 @@
 ﻿namespace Jakar.Extensions.Blazor.Syncfusion;
 
 
-public class Class1
-{
-
-}
+public class Class1 { }

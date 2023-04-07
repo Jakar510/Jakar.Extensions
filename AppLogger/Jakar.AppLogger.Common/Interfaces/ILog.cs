@@ -8,8 +8,8 @@ public interface ILog : IUniqueID<Guid>, IValidator
 {
     public const int APP_USER_ID_LENGTH   = 1024;
     public const int BUILD_ID_LENGTH      = 1024;
-    public const int EVENT_NAME_LENGTH    = 1024;
     public const int CATEGORY_NAME_LENGTH = 1024;
+    public const int EVENT_NAME_LENGTH    = 1024;
     public const int MESSAGE_LENGTH       = 0x3FFFFFDF; // 1 GB
 
 
@@ -25,6 +25,8 @@ public interface ILog : IUniqueID<Guid>, IValidator
     /// <summary> Gets or sets unique ID for a Xamarin/Maui build or another similar technology. </summary>
     public string? BuildID { get; }
 
+    public string? CategoryName { get; }
+
 
     /// <summary> Gets the numeric identifier for this event. </summary>
     public int EventID { get; }
@@ -33,8 +35,7 @@ public interface ILog : IUniqueID<Guid>, IValidator
     /// <summary> Gets the name of this event. </summary>
     public string? EventName { get; }
 
-    public string? CategoryName { get; }
-    bool           IsError      { get; }
+    bool IsError { get; }
 
 
     /// <summary> Gets or sets if true, this error report is an application crash. Corresponds to the number of milliseconds elapsed between the time the error occurred and the app was launched. </summary>

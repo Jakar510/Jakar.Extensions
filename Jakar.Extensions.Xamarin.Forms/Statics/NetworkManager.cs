@@ -9,8 +9,9 @@ namespace Jakar.Extensions.Xamarin.Forms;
 
 public static class NetworkManager
 {
-    public static bool IsConnected     => Connectivity.NetworkAccess == NetworkAccess.Internet;
-    public static bool IsWiFiConnected => IsConnected && Connectivity.ConnectionProfiles.Any( p => p == ConnectionProfile.WiFi || p == ConnectionProfile.Ethernet );
+    private static readonly INetworkManager _manager = DependencyService.Resolve<INetworkManager>();
+    public static           bool            IsConnected     => Connectivity.NetworkAccess == NetworkAccess.Internet;
+    public static           bool            IsWiFiConnected => IsConnected && Connectivity.ConnectionProfiles.Any( p => p == ConnectionProfile.WiFi || p == ConnectionProfile.Ethernet );
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
@@ -51,7 +52,6 @@ public static class NetworkManager
 
         foreach ( IPAddress value in result ) { yield return value; }
     }
-    private static readonly INetworkManager _manager = DependencyService.Resolve<INetworkManager>();
 
 
     public static string? GetIdentifier()

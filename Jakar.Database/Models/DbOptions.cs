@@ -10,18 +10,18 @@ namespace Jakar.Database;
 
 public sealed class DbOptions : IOptions<DbOptions>
 {
-    public DbInstance           DbType               { get; set; } = DbInstance.MsSql;
-    public AppVersion           Version              { get; set; } = new();
-    public PasswordRequirements PasswordRequirements { get; set; } = new();
-    public string               UserExists           { get; set; } = "User Exists";
-    public string               TokenIssuer          { get; set; } = string.Empty;
-    public string               TokenAudience        { get; set; } = string.Empty;
-    public string               JWTKey               { get; set; } = "JWT";
-    public string               JWTAlgorithm         { get; set; } = SecurityAlgorithms.HmacSha512Signature;
     public string               AuthenticationType   { get; set; } = JwtBearerDefaults.AuthenticationScheme;
     public TimeSpan             ClockSkew            { get; set; } = TimeSpan.FromSeconds( 60 );
+    public DbInstance           DbType               { get; set; } = DbInstance.MsSql;
     public Uri                  Domain               { get; set; } = new("https://localhost");
+    public string               JWTAlgorithm         { get; set; } = SecurityAlgorithms.HmacSha512Signature;
+    public string               JWTKey               { get; set; } = "JWT";
+    public PasswordRequirements PasswordRequirements { get; set; } = new();
+    public string               TokenAudience        { get; set; } = string.Empty;
+    public string               TokenIssuer          { get; set; } = string.Empty;
+    public string               UserExists           { get; set; } = "User Exists";
 
 
-    DbOptions IOptions<DbOptions>.Value => this;
+    DbOptions IOptions<DbOptions>.Value   => this;
+    public AppVersion             Version { get; set; } = new();
 }

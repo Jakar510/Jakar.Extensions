@@ -6,13 +6,10 @@ namespace Jakar.Database;
 
 public interface IConnectableDb
 {
-    public DbInstance Instance      { get; }
     public string     CurrentSchema { get; }
+    public DbInstance Instance      { get; }
 
 
     public DbConnection Connect();
     public ValueTask<DbConnection> ConnectAsync( CancellationToken token );
 }
-
-
-

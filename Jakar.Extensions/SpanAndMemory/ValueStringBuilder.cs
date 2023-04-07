@@ -4,10 +4,6 @@
 #nullable enable
 
 
-using System;
-
-
-
 namespace Jakar.Extensions;
 
 
@@ -295,7 +291,7 @@ public ref struct ValueStringBuilder
     {
         Span<string> span = enumerable.GetArray();
         EnsureCapacity( span.Sum( x => x.Length ) + span.Length * 2 + 1 );
-        var enumerator = span.GetEnumerator();
+        Span<string>.Enumerator enumerator = span.GetEnumerator();
         enumerator.MoveNext();
 
         do
@@ -313,7 +309,7 @@ public ref struct ValueStringBuilder
     {
         Span<string> span = enumerable.GetArray();
         EnsureCapacity( span.Sum( x => x.Length ) + separator.Length * span.Length + 1 );
-        var enumerator = span.GetEnumerator();
+        Span<string>.Enumerator enumerator = span.GetEnumerator();
         enumerator.MoveNext();
 
         do
@@ -450,9 +446,9 @@ public ref struct ValueStringBuilder
 
         if ( format.IsEmpty ) { throw new ArgumentNullException( nameof(format) ); }
 
-        int               pos             = 0;
-        char              ch              = '\0';
-        ICustomFormatter? customFormatter = provider?.GetFormat( typeof(ICustomFormatter) ) as ICustomFormatter;
+        int  pos             = 0;
+        char ch              = '\0';
+        var  customFormatter = provider?.GetFormat( typeof(ICustomFormatter) ) as ICustomFormatter;
 
         while ( true )
         {
@@ -637,7 +633,6 @@ public ref struct ValueStringBuilder
             if ( s == null )
             {
             #if NET6_0_OR_GREATER
-
                 // If arg is ISpanFormattable and the beginning doesn't need padding, try formatting it into the remaining current chunk.
                 if ( arg is ISpanFormattable spanFormattableArg && (leftJustify || width == 0) && spanFormattableArg.TryFormat( Next, out int charsWritten, itemFormatSpan, provider ) )
                 {
@@ -691,9 +686,9 @@ public ref struct ValueStringBuilder
 
         if ( format.IsEmpty ) { throw new ArgumentNullException( nameof(format) ); }
 
-        int               pos             = 0;
-        char              ch              = '\0';
-        ICustomFormatter? customFormatter = provider?.GetFormat( typeof(ICustomFormatter) ) as ICustomFormatter;
+        int  pos             = 0;
+        char ch              = '\0';
+        var  customFormatter = provider?.GetFormat( typeof(ICustomFormatter) ) as ICustomFormatter;
 
         while ( true )
         {
@@ -878,7 +873,6 @@ public ref struct ValueStringBuilder
             if ( s == null )
             {
             #if NET6_0_OR_GREATER
-
                 // If arg is ISpanFormattable and the beginning doesn't need padding, try formatting it into the remaining current chunk.
                 if ( arg is ISpanFormattable spanFormattableArg && (leftJustify || width == 0) && spanFormattableArg.TryFormat( Next, out int charsWritten, itemFormatSpan, provider ) )
                 {

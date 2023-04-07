@@ -16,5 +16,4 @@ public sealed class CreateTable_RecoveryCode : MigrateRecoveryCodeTable
         CreateTable();
     }
     public override void Down() => DeleteTable();
-    
 }

@@ -33,8 +33,8 @@ public class Tokenizer : ITokenService // TODO: update Tokenizer
 
     public virtual async ValueTask<string> GenerateAccessToken( IEnumerable<Claim> claims, CancellationToken token )
     {
-        var    security    = await _db.GetEmailJwtSecurityToken( claims, token );
-        string tokenString = new JwtSecurityTokenHandler().WriteToken( security );
+        JwtSecurityToken security    = await _db.GetEmailJwtSecurityToken( claims, token );
+        string           tokenString = new JwtSecurityTokenHandler().WriteToken( security );
         return tokenString;
     }
     public virtual async ValueTask<ClaimsPrincipal> GetPrincipalFromExpiredToken( string token, CancellationToken cancellationToken )

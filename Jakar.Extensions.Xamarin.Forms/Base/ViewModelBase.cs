@@ -34,10 +34,9 @@ public abstract class ViewModelBase<TValue> : ViewModelBase, IDisposable where T
         }
     }
     public bool                         HasNoItems       => !HasItems;
+    public ObservableCollection<TValue> Items            { get; } = new();
     public ICommand                     RefreshCommand   { get; }
     public ICommand                     SaveAsyncCommand { get; }
-    public ObservableCollection<TValue> Items            { get; } = new();
-    public ObservableCollection<TValue> SelectedItems    { get; } = new();
     public TValue? SelectedItem
     {
         get => _selectedItem;
@@ -47,6 +46,7 @@ public abstract class ViewModelBase<TValue> : ViewModelBase, IDisposable where T
             OnSelected( value );
         }
     }
+    public ObservableCollection<TValue> SelectedItems { get; } = new();
 
 
     protected ViewModelBase( BaseContentPage page, IEnumerable<TValue> values ) : this( page ) => Items.Add( values );

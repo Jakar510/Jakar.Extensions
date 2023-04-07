@@ -6,6 +6,12 @@ public static partial class Validate
 {
     public static class Re
     {
+        private static          Regex?       _email;
+        private static          Regex?       _ip;
+        private static readonly TimeSpan     _timeout = TimeSpan.FromMilliseconds( 200 );
+        private static          Regex?       _url;
+        private const           RegexOptions OPTIONS = RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Singleline;
+
         /// <summary>
         ///     General Email Regex (RFC 5322 Official Standard)
         ///     <para>
@@ -39,6 +45,20 @@ public static partial class Validate
         [SuppressMessage( "ReSharper", "InconsistentNaming" )]
         public static class PhoneNumbers
         {
+            private static Regex? _brazil;
+            private static Regex? _china1;
+            private static Regex? _china2;
+            private static Regex? _generic;
+            private static Regex? _germany;
+            private static Regex? _indiaNew;
+            private static Regex? _indiaOld;
+            private static Regex? _indonesia;
+            private static Regex? _japan;
+            private static Regex? _russia;
+            private static Regex? _uk;
+            private static Regex? _usCanada1;
+            private static Regex? _usCanada2;
+
             /// <summary>
             ///     <para>
             ///         <see href="https://phoneregex.com/"/>
@@ -148,28 +168,6 @@ public static partial class Validate
                         Regex( @"^(?:(?:\+?1\s*(?:[.-]\s*)?)?(?:\(\s*([2-9]1[02-9]|[2-9][02-8]1|[2-9][02-8][02-9])\s*\)|([2-9]1[02-9]|[2-9][02-8]1|[2-9][02-8][02-9]))\s*(?:[.-]\s*)?)?([2-9]1[02-9]|[2-9][02-9]1|[2-9][02-9]{2})\s*(?:[.-]\s*)?([0-9]{4})(?:\s*(?:#|x\.?|ext\.?|extension)\s*(\d+))?$",
                                OPTIONS,
                                _timeout );
-
-            private static Regex? _brazil;
-            private static Regex? _china1;
-            private static Regex? _china2;
-            private static Regex? _generic;
-            private static Regex? _germany;
-            private static Regex? _indiaNew;
-            private static Regex? _indiaOld;
-            private static Regex? _indonesia;
-            private static Regex? _japan;
-            private static Regex? _russia;
-            private static Regex? _uk;
-            private static Regex? _usCanada1;
-            private static Regex? _usCanada2;
         }
-
-
-
-        private static          Regex?       _email;
-        private static          Regex?       _ip;
-        private static          Regex?       _url;
-        private const           RegexOptions OPTIONS  = RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Singleline;
-        private static readonly TimeSpan     _timeout = TimeSpan.FromMilliseconds( 200 );
     }
 }

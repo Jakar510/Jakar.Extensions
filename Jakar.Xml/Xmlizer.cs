@@ -20,12 +20,25 @@ public interface IXmlizer
 
 
 
-/// <summary>
-///     A PREDICTABLE (de)serializer for any given object.
+/// <summary> A PREDICTABLE (de)serializer for any given object.
 ///     <para> Primary goals are to be PERFORMANT, easily human readable, predictable and consistent. </para>
 /// </summary>
 public static partial class Xmlizer
 {
+    /// <summary> Maps <see cref="XmlNode.Name"/> to <see cref="Type"/> </summary>
+    internal static readonly ConcurrentDictionary<string, Type> mapper = new();
+
+
+    /// <summary> Maps <see cref="Type.FullName"/> to <see cref="Type"/> .
+    ///     <para> Uses <see cref="NodeNames.GetTypeName"/> to get the <see cref="Type.FullName"/> </para>
+    /// </summary>
+    internal static readonly ConcurrentDictionary<string, Type> nameToType = new();
+
+
+    /// <summary> Maps <see cref="Type.FullName"/> to <see cref="Type"/> .
+    ///     <para> Uses <see cref="NodeNames.GetTypeName"/> to get the <see cref="Type.FullName"/> </para>
+    /// </summary>
+    internal static readonly ConcurrentDictionary<Type, Func<string, object>> parsers = new();
     /// <summary> register System built-ins </summary>
     static Xmlizer() => Register( typeof(bool?),
                                   typeof(byte?),
@@ -60,22 +73,6 @@ public static partial class Xmlizer
                                   typeof(double),
                                   typeof(decimal),
                                   typeof(TimeSpan) );
-    /// <summary> Maps <see cref="XmlNode.Name"/> to <see cref="Type"/> </summary>
-    internal static readonly ConcurrentDictionary<string, Type> mapper = new();
-
-
-    /// <summary>
-    ///     Maps <see cref="Type.FullName"/> to <see cref="Type"/> .
-    ///     <para> Uses <see cref="NodeNames.GetTypeName"/> to get the <see cref="Type.FullName"/> </para>
-    /// </summary>
-    internal static readonly ConcurrentDictionary<string, Type> nameToType = new();
-
-
-    /// <summary>
-    ///     Maps <see cref="Type.FullName"/> to <see cref="Type"/> .
-    ///     <para> Uses <see cref="NodeNames.GetTypeName"/> to get the <see cref="Type.FullName"/> </para>
-    /// </summary>
-    internal static readonly ConcurrentDictionary<Type, Func<string, object>> parsers = new();
     public static string ToXml<T>( this T obj, in IDictionary<string, string>? attributes = default ) => Serialize( obj, attributes );
 
 

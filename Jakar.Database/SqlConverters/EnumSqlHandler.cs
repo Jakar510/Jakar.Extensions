@@ -3,15 +3,13 @@
 
 public class EnumSqlHandler<T> : SqlConverter<EnumSqlHandler<T>, T> where T : struct, Enum
 {
-    public EnumSqlHandler() { }
-
-
     private static readonly IReadOnlyDictionary<long, T> _longs = Enum.GetValues<T>()
                                                                       .ToDictionary( k => k.AsLong(), v => v );
 
 
     private static readonly IReadOnlyDictionary<ulong, T> _uLongs = Enum.GetValues<T>()
                                                                         .ToDictionary( k => k.AsULong(), v => v );
+    public EnumSqlHandler() { }
 
 
     public override T Parse( object? value ) => value switch
@@ -38,7 +36,7 @@ public class EnumSqlHandler<T> : SqlConverter<EnumSqlHandler<T>, T> where T : st
                                                                                                typeof(uint),
                                                                                                typeof(long),
                                                                                                typeof(ulong),
-                                                                                               typeof(string) )
+                                                                                               typeof(string) ),
                                                 };
 
     public override void SetValue( IDbDataParameter parameter, T value )

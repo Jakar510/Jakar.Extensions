@@ -26,12 +26,12 @@ public readonly struct Error
                                        : Errors is not null
                                            ? new SerializableError
                                              {
-                                                 [nameof(Errors)] = Errors
+                                                 [nameof(Errors)] = Errors,
                                              }
                                            : Details ?? Value;
     public ActionResult ToActionResult() => new ObjectResult( GetResult() )
                                             {
-                                                StatusCode = (int)Status
+                                                StatusCode = (int)Status,
                                             };
 }
 

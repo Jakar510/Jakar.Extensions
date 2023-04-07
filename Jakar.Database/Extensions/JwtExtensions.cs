@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 10/10/2022  5:01 PM
 
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-
-
-
 namespace Jakar.Database;
 
 
@@ -35,25 +31,23 @@ public static class JwtExtensions
     }
 
 
-    public static TokenValidationParameters GetTokenValidationParameters( this IConfigurationSection section, SymmetricSecurityKey key, DbOptions options )
-    {
-        return new TokenValidationParameters
-               {
-                   IssuerSigningKey                          = key,
-                   AuthenticationType                        = options.AuthenticationType,
-                   IgnoreTrailingSlashWhenValidatingAudience = section.GetValue( nameof(TokenValidationParameters.IgnoreTrailingSlashWhenValidatingAudience), true ),
-                   RequireAudience                           = section.GetValue( nameof(TokenValidationParameters.RequireAudience),                           true ),
-                   RequireSignedTokens                       = section.GetValue( nameof(TokenValidationParameters.RequireSignedTokens),                       true ),
-                   RequireExpirationTime                     = section.GetValue( nameof(TokenValidationParameters.RequireExpirationTime),                     true ),
-                   ValidateLifetime                          = section.GetValue( nameof(TokenValidationParameters.ValidateLifetime),                          true ),
-                   ValidateIssuerSigningKey                  = section.GetValue( nameof(TokenValidationParameters.ValidateIssuerSigningKey),                  true ),
-                   ValidateIssuer                            = section.GetValue( nameof(TokenValidationParameters.ValidateIssuer),                            true ),
-                   ValidateAudience                          = section.GetValue( nameof(TokenValidationParameters.ValidateAudience),                          true ),
-                   ValidateActor                             = section.GetValue( nameof(TokenValidationParameters.ValidateActor),                             false ),
-                   ValidateTokenReplay                       = section.GetValue( nameof(TokenValidationParameters.ValidateTokenReplay),                       false ),
-                   ClockSkew                                 = section.GetValue( nameof(TokenValidationParameters.ClockSkew),                                 options.ClockSkew ),
-                   ValidIssuer                               = section.GetValue( nameof(TokenValidationParameters.ValidIssuer),                               options.TokenIssuer ),
-                   ValidAudience                             = section.GetValue( nameof(TokenValidationParameters.ValidAudience),                             options.TokenAudience ),
-               };
-    }
+    public static TokenValidationParameters GetTokenValidationParameters( this IConfigurationSection section, SymmetricSecurityKey key, DbOptions options ) =>
+        new()
+        {
+            IssuerSigningKey                          = key,
+            AuthenticationType                        = options.AuthenticationType,
+            IgnoreTrailingSlashWhenValidatingAudience = section.GetValue( nameof(TokenValidationParameters.IgnoreTrailingSlashWhenValidatingAudience), true ),
+            RequireAudience                           = section.GetValue( nameof(TokenValidationParameters.RequireAudience),                           true ),
+            RequireSignedTokens                       = section.GetValue( nameof(TokenValidationParameters.RequireSignedTokens),                       true ),
+            RequireExpirationTime                     = section.GetValue( nameof(TokenValidationParameters.RequireExpirationTime),                     true ),
+            ValidateLifetime                          = section.GetValue( nameof(TokenValidationParameters.ValidateLifetime),                          true ),
+            ValidateIssuerSigningKey                  = section.GetValue( nameof(TokenValidationParameters.ValidateIssuerSigningKey),                  true ),
+            ValidateIssuer                            = section.GetValue( nameof(TokenValidationParameters.ValidateIssuer),                            true ),
+            ValidateAudience                          = section.GetValue( nameof(TokenValidationParameters.ValidateAudience),                          true ),
+            ValidateActor                             = section.GetValue( nameof(TokenValidationParameters.ValidateActor),                             false ),
+            ValidateTokenReplay                       = section.GetValue( nameof(TokenValidationParameters.ValidateTokenReplay),                       false ),
+            ClockSkew                                 = section.GetValue( nameof(TokenValidationParameters.ClockSkew),                                 options.ClockSkew ),
+            ValidIssuer                               = section.GetValue( nameof(TokenValidationParameters.ValidIssuer),                               options.TokenIssuer ),
+            ValidAudience                             = section.GetValue( nameof(TokenValidationParameters.ValidAudience),                             options.TokenAudience ),
+        };
 }

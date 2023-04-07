@@ -5,8 +5,6 @@
 [Table( "Resx" )]
 public sealed record ResxRowTable : TableRecord<ResxRowTable>
 {
-    public string  Key        { get; init; } = string.Empty;
-    public string  Neutral    { get; init; } = string.Empty;
     public string? Arabic     { get; init; }
     public string? Chinese    { get; init; }
     public string? Czech      { get; init; }
@@ -15,13 +13,15 @@ public sealed record ResxRowTable : TableRecord<ResxRowTable>
     public string? French     { get; init; }
     public string? German     { get; init; }
     public string? Japanese   { get; init; }
+    public string  Key        { get; init; } = string.Empty;
+    public long    KeyID      { get; init; }
     public string? Korean     { get; init; }
+    public string  Neutral    { get; init; } = string.Empty;
     public string? Polish     { get; init; }
     public string? Portuguese { get; init; }
     public string? Spanish    { get; init; }
     public string? Swedish    { get; init; }
     public string? Thai       { get; init; }
-    public long    KeyID      { get; init; }
 
 
     public ResxRowTable() { }

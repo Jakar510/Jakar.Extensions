@@ -17,12 +17,12 @@ public sealed record Log : BaseJsonModelRecord, ILog, ILogDetails
     public                                          DateTimeOffset      AppStartTime       { get; init; }
     [MaxLength( ILog.APP_USER_ID_LENGTH )] public   string?             AppUserID          { get; init; }
     public                                          HashSet<Attachment> Attachments        { get; init; } = new();
-    [MaxLength( ILog.BUILD_ID_LENGTH )] public      string?             BuildID            { get; init; }
+    [MaxLength( ILog.BUILD_ID_LENGTH )]      public string?             BuildID            { get; init; }
+    [MaxLength( ILog.CATEGORY_NAME_LENGTH )] public string?             CategoryName       { get; init; }
     public                                          DeviceDescriptor?   Device             { get; init; }
     public                                          long                DeviceID           { get; init; }
     public                                          int                 EventID            { get; init; }
-    [MaxLength( ILog.EVENT_NAME_LENGTH )]    public string?             EventName          { get; init; }
-    [MaxLength( ILog.CATEGORY_NAME_LENGTH )] public string?             CategoryName       { get; init; }
+    [MaxLength( ILog.EVENT_NAME_LENGTH )] public    string?             EventName          { get; init; }
     public                                          ExceptionDetails?   Exception          { get; init; }
     public                                          Guid                ID                 { get; init; }
     public                                          bool                IsError            => Level > LogLevel.Error;

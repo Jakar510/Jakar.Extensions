@@ -3,7 +3,6 @@
 
 public static class Sizes
 {
-    public static bool Register( Type type, int size ) => _sizes.TryAdd( type, size );
     private static readonly ConcurrentDictionary<Type, int> _sizes = new()
                                                                      {
                                                                          [typeof(byte)]           = 3,
@@ -22,6 +21,7 @@ public static class Sizes
                                                                          [typeof(DateTimeOffset)] = 75,
                                                                          [typeof(AppVersion)]     = 65,
                                                                      };
+    public static bool Register( Type type, int size ) => _sizes.TryAdd( type, size );
 
 
     public static int GetSize<T>() => GetSize( typeof(T) );

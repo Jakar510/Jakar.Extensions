@@ -2,6 +2,9 @@
 // 10/20/2022  11:56 AM
 
 #if !NET6_0_OR_GREATER
+
+
+
 // ReSharper disable once CheckNamespace
 namespace System.Runtime.CompilerServices;
 
@@ -17,6 +20,7 @@ public sealed class CallerArgumentExpressionAttribute : Attribute
 
     public CallerArgumentExpressionAttribute( string parameterName ) => ParameterName = parameterName;
 }
+
 
 
 #endif

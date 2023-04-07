@@ -31,7 +31,7 @@ public static class LanguageExtensions
                                                                             SupportedLanguage.Korean      => "한국어 - Korean",
                                                                             SupportedLanguage.Arabic      => "عربى - Arabic",
                                                                             SupportedLanguage.Unspecified => null,
-                                                                            _                             => null
+                                                                            _                             => null,
                                                                         };
 
 
@@ -52,7 +52,7 @@ public static class LanguageExtensions
                                                                                 SupportedLanguage.Korean      => "ko",
                                                                                 SupportedLanguage.Arabic      => "ar",
                                                                                 SupportedLanguage.Unspecified => throw new OutOfRangeException( nameof(language), language ),
-                                                                                _                             => throw new OutOfRangeException( nameof(language), language )
+                                                                                _                             => throw new OutOfRangeException( nameof(language), language ),
                                                                             };
 
 

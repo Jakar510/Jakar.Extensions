@@ -23,9 +23,9 @@ namespace Jakar.Json.Generator;
 [SuppressMessage( "ReSharper", "SuggestBaseTypeForParameter" )]
 public class JsonizerGenerator : ISourceGenerator
 {
+    private static readonly string _attribute = typeof(JsonizerAttribute).FullName ?? throw new InvalidOperationException();
     public const            string FROM_JSON  = "FromJson";
     public const            string GENERATED  = $"[System.CodeDom.Compiler.GeneratedCode({nameof(JsonizerGenerator)})]";
-    private static readonly string _attribute = typeof(JsonizerAttribute).FullName ?? throw new InvalidOperationException();
 
 
     private static string ChooseName( ReadOnlySpan<char> fieldName, in TypedConstant overridenNameOpt )
@@ -178,13 +178,13 @@ public partial class {classSymbol.Name}
 
 public class JsonSerializationGenerator : ISourceGenerator
 {
-    public void Initialize( GeneratorInitializationContext context ) { context.RegisterForSyntaxNotifications( () => new JsonSerializationSyntaxReceiver() ); }
+    public void Initialize( GeneratorInitializationContext context ) => context.RegisterForSyntaxNotifications( () => new JsonSerializationSyntaxReceiver() );
 
     public void Execute( GeneratorExecutionContext context )
     {
         var syntaxReceiver = (JsonSerializationSyntaxReceiver)context.SyntaxReceiver;
 
-        foreach ( var classDeclaration in syntaxReceiver.CandidateClasses )
+        foreach ( ClassDeclarationSyntax classDeclaration in syntaxReceiver.CandidateClasses )
         {
             string namespaceName = classDeclaration.Parent is NamespaceDeclarationSyntax namespaceDeclaration
                                        ? namespaceDeclaration.Name.ToString()
@@ -198,9 +198,9 @@ public class JsonSerializationGenerator : ISourceGenerator
 
     private string GenerateSerializationSource( string namespaceName, string className, SyntaxList<MemberDeclarationSyntax> members )
     {
-        var properties = members.OfType<PropertyDeclarationSyntax>()
-                                .Where( p => p.Modifiers.Any( m => m.ValueText == "public" ) )
-                                .ToList();
+        List<PropertyDeclarationSyntax> properties = members.OfType<PropertyDeclarationSyntax>()
+                                                            .Where( p => p.Modifiers.Any( m => m.ValueText == "public" ) )
+                                                            .ToList();
 
         var builder = new StringBuilder();
         builder.AppendLine( $"namespace {namespaceName}" );
@@ -214,9 +214,9 @@ public class JsonSerializationGenerator : ISourceGenerator
 
         for ( int i = 0; i < properties.Count; i++ )
         {
-            var    property     = properties[i];
-            string propertyName = property.Identifier.ToString();
-            string propertyType = property.Type.ToString();
+            PropertyDeclarationSyntax property     = properties[i];
+            string                    propertyName = property.Identifier.ToString();
+            string                    propertyType = property.Type.ToString();
             builder.AppendLine( $"            sb.Append(\"\\\"{propertyName}\\\": \");" );
 
             if ( propertyType == "string" ) { builder.AppendLine( $"            sb.Append($\"\\\"{{obj.{propertyName}}}.Replace(\"\\\"\", \"\\\\\\\"\")}}\\\"\");" ); }
@@ -244,8 +244,8 @@ public class JsonSerializationGenerator : ISourceGenerator
         {
             if ( syntaxNode is ClassDeclarationSyntax { AttributeLists.Count: > 0 } classDeclaration )
             {
-                var generateJsonAttribute = classDeclaration.AttributeLists.SelectMany( attrList => attrList.Attributes )
-                                                            .FirstOrDefault( attr => attr.Name.ToString() == "GenerateJsonSerializer" );
+                AttributeSyntax? generateJsonAttribute = classDeclaration.AttributeLists.SelectMany( attrList => attrList.Attributes )
+                                                                         .FirstOrDefault( attr => attr.Name.ToString() == "GenerateJsonSerializer" );
 
                 if ( generateJsonAttribute != null ) { CandidateClasses.Add( classDeclaration ); }
             }

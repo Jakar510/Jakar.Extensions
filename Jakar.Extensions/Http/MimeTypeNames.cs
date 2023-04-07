@@ -17,6 +17,25 @@ public static class MimeTypeNames
 {
     public static class Application
     {
+        public const string BASE64                   = "application/base64";
+        public const string BINARY                   = "application/octet-stream";
+        public const string CERTIFICATE_AUTHENTICITY = "application/authenticity-certificate";
+        public const string DLL                      = "application/dll";
+        public const string JAVA_SCRIPT              = "application/js";
+        public const string JSON                     = "application/json";
+        public const string LICENSES                 = "application/Licenses";
+        public const string PDF                      = "application/pdf";
+        public const string RTF                      = "application/rtf";
+        public const string SAFETY_DATA_SHEET        = "application/pdf+safety-data-sheet";
+        public const string SOAP                     = "application/soap+xml";
+        public const string TECHNICAL_DATA_SHEET     = "application/pdf+technical-data-sheet";
+        public const string URL_ENCODED_CONTENT      = "application/x-www-form-urlencoded";
+        public const string VBS                      = "application/vbs";
+        public const string XML                      = "application/xml";
+        public const string XUL                      = "application/vnd.mozilla.xul+xml";
+
+
+
         public static class Archive
         {
             public const string B_ZIP     = "application/x-bzip";  // bz
@@ -40,25 +59,6 @@ public static class MimeTypeNames
             public const string XLS  = "application/vnd.ms-excel";
             public const string XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
         }
-
-
-
-        public const string BASE64                   = "application/base64";
-        public const string BINARY                   = "application/octet-stream";
-        public const string CERTIFICATE_AUTHENTICITY = "application/authenticity-certificate";
-        public const string DLL                      = "application/dll";
-        public const string JAVA_SCRIPT              = "application/js";
-        public const string JSON                     = "application/json";
-        public const string LICENSES                 = "application/Licenses";
-        public const string PDF                      = "application/pdf";
-        public const string RTF                      = "application/rtf";
-        public const string SAFETY_DATA_SHEET        = "application/pdf+safety-data-sheet";
-        public const string SOAP                     = "application/soap+xml";
-        public const string TECHNICAL_DATA_SHEET     = "application/pdf+technical-data-sheet";
-        public const string URL_ENCODED_CONTENT      = "application/x-www-form-urlencoded";
-        public const string VBS                      = "application/vbs";
-        public const string XML                      = "application/xml";
-        public const string XUL                      = "application/vnd.mozilla.xul+xml";
     }
 
 

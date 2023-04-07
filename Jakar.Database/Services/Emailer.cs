@@ -65,30 +65,6 @@ public class Emailer
     public static async ValueTask SendAsync( EmailSettings settings, EmailBuilder builder, CancellationToken token ) => await SendAsync( settings, await builder.Create(), token );
 
 
-
-    public sealed class Options : IOptions<Options>
-    {
-        private EmailSettings?  _settings;
-        public  EmailSettings?  Settings { get; set; }
-        public  MailboxAddress? Sender   { get; set; }
-
-
-        Options IOptions<Options>.Value => this;
-
-        public string  DefaultSubject { get; set; } = string.Empty;
-        public string? VerifySubject  { get; set; }
-
-
-        public Options() { }
-        public Options( string                             defaultSubject ) => DefaultSubject = defaultSubject;
-        internal EmailSettings GetSettings( IConfiguration configuration ) => _settings ??= EmailSettings.Create( configuration );
-
-
-        internal MailboxAddress GetSender() => Sender ??= Settings?.Address() ?? throw new InvalidOperationException( $"{nameof(Sender)} is not set" );
-    }
-
-
-
     public async Task VerifyEmail( UserRecord user, ClaimType types, CancellationToken token )
     {
         string subject = _options.VerifySubject ?? _options.DefaultSubject;
@@ -139,5 +115,28 @@ public class Emailer
                                  .Name,
                               nameof(SendAsync) );
         }
+    }
+
+
+
+    public sealed class Options : IOptions<Options>
+    {
+        private EmailSettings? _settings;
+
+        public string          DefaultSubject { get; set; } = string.Empty;
+        public MailboxAddress? Sender         { get; set; }
+        public EmailSettings?  Settings       { get; set; }
+
+
+        Options IOptions<Options>.Value         => this;
+        public string?            VerifySubject { get; set; }
+
+
+        public Options() { }
+        public Options( string                             defaultSubject ) => DefaultSubject = defaultSubject;
+        internal EmailSettings GetSettings( IConfiguration configuration ) => _settings ??= EmailSettings.Create( configuration );
+
+
+        internal MailboxAddress GetSender() => Sender ??= Settings?.Address() ?? throw new InvalidOperationException( $"{nameof(Sender)} is not set" );
     }
 }

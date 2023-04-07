@@ -129,7 +129,7 @@ public static class Hashes
     public static async ValueTask<string> HashAsync( this byte[] data, HashAlgorithm hasher )
     {
         await using var stream = new MemoryStream( data );
-        byte[]          hash   = await hasher.ComputeHashAsync( stream );
+        byte[]          hash = await hasher.ComputeHashAsync( stream );
         return BitConverter.ToString( hash );
     }
 #endif

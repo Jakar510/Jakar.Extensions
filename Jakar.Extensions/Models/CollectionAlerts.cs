@@ -36,6 +36,6 @@ public abstract class CollectionAlerts<T> : ObservableClass, ICollectionAlerts
     protected void Replaced( in T old, in T @new, in int index ) => OnChanged( new NotifyCollectionChangedEventArgs( NotifyCollectionChangedAction.Replace, @new, old, index ) );
     protected void Reset() => OnChanged( new NotifyCollectionChangedEventArgs( NotifyCollectionChangedAction.Reset ) );
 
-    
+
     public event NotifyCollectionChangedEventHandler? CollectionChanged;
 }

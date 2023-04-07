@@ -328,7 +328,6 @@ public static partial class AsyncLinq
     public static void ForEach<TElement>( this IEnumerable<TElement> source, Action<TElement> action )
     {
     #if NET6_0_OR_GREATER
-
         if ( source is List<TElement> list )
         {
             foreach ( TElement x in CollectionsMarshal.AsSpan( list ) ) { action( x ); }

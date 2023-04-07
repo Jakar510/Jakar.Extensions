@@ -19,6 +19,15 @@ public class ConcurrentObservableCollection<T> : CollectionAlerts<T>, IList<T>, 
 
     protected readonly List<T> _items;
     protected readonly object  _lock = new();
+
+
+    public sealed override int Count
+    {
+        get
+        {
+            lock (_lock) { return _items.Count; }
+        }
+    }
     bool IList.IsFixedSize
     {
         get
@@ -50,23 +59,6 @@ public class ConcurrentObservableCollection<T> : CollectionAlerts<T>, IList<T>, 
     }
 
 
-    public sealed override int Count
-    {
-        get
-        {
-            lock (_lock) { return _items.Count; }
-        }
-    }
-    public object Lock => _lock;
-    object ICollection.SyncRoot
-    {
-        get
-        {
-            lock (_lock) { return ((IList)_items).SyncRoot; }
-        }
-    }
-
-
     object? IList.this[ int index ]
 
     {
@@ -94,6 +86,14 @@ public class ConcurrentObservableCollection<T> : CollectionAlerts<T>, IList<T>, 
                 _items[index] = value;
                 Replaced( old, value, index );
             }
+        }
+    }
+    public object Lock => _lock;
+    object ICollection.SyncRoot
+    {
+        get
+        {
+            lock (_lock) { return ((IList)_items).SyncRoot; }
         }
     }
 

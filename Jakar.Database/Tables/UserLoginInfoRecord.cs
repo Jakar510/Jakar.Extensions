@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 01/30/2023  2:41 PM
 
-using Microsoft.AspNetCore.Identity;
-
-
-
 namespace Jakar.Database;
 
 
@@ -25,19 +21,19 @@ public sealed record UserLoginInfoRecord : TableRecord<UserLoginInfoRecord>
         set => SetProperty( ref _loginProvider, value );
     }
 
+    [MaxLength( int.MaxValue )]
+    public string? ProviderDisplayName
+    {
+        get => _providerDisplayName;
+        set => SetProperty( ref _providerDisplayName, value );
+    }
+
     [ProtectedPersonalData]
     [MaxLength( int.MaxValue )]
     public string ProviderKey
     {
         get => _providerKey;
         set => SetProperty( ref _providerKey, value );
-    }
-
-    [MaxLength( int.MaxValue )]
-    public string? ProviderDisplayName
-    {
-        get => _providerDisplayName;
-        set => SetProperty( ref _providerDisplayName, value );
     }
 
     [ProtectedPersonalData]
@@ -79,13 +75,13 @@ public sealed record UserLoginInfoRecord : TableRecord<UserLoginInfoRecord>
                                                                                                   UserId        = value.OwnerUserID?.ToString() ?? throw new NullReferenceException( nameof(value.OwnerUserID) ),
                                                                                                   LoginProvider = value.LoginProvider,
                                                                                                   Name          = value.ProviderDisplayName ?? string.Empty,
-                                                                                                  Value         = value.ProviderKey
+                                                                                                  Value         = value.ProviderKey,
                                                                                               };
     public static implicit operator IdentityUserToken<Guid>( UserLoginInfoRecord value ) => new()
                                                                                             {
                                                                                                 UserId        = value.OwnerUserID ?? throw new NullReferenceException( nameof(value.OwnerUserID) ),
                                                                                                 LoginProvider = value.LoginProvider,
                                                                                                 Name          = value.ProviderDisplayName ?? string.Empty,
-                                                                                                Value         = value.ProviderKey
+                                                                                                Value         = value.ProviderKey,
                                                                                             };
 }

@@ -88,7 +88,7 @@ public abstract partial class Database
                              Issuer             = Options.TokenIssuer,
                              Audience           = Options.TokenAudience,
                              IssuedAt           = DateTime.UtcNow,
-                             SigningCredentials = await GetSigningCredentials( token )
+                             SigningCredentials = await GetSigningCredentials( token ),
                          };
 
 
@@ -101,7 +101,7 @@ public abstract partial class Database
                                     Issuer             = Options.TokenIssuer,
                                     Audience           = Options.TokenAudience,
                                     IssuedAt           = DateTime.UtcNow,
-                                    SigningCredentials = await GetSigningCredentials( token )
+                                    SigningCredentials = await GetSigningCredentials( token ),
                                 };
 
 
@@ -139,7 +139,7 @@ public abstract partial class Database
                              Issuer             = Options.TokenIssuer,
                              Audience           = Options.TokenAudience,
                              IssuedAt           = DateTime.UtcNow,
-                             SigningCredentials = await GetSigningCredentials( token )
+                             SigningCredentials = await GetSigningCredentials( token ),
                          };
 
         var    handler     = new JwtSecurityTokenHandler();

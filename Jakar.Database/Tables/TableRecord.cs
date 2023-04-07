@@ -13,9 +13,9 @@ public interface IRecordPair : IUniqueID<Guid> // where TID : IComparable<TID>, 
 
 public interface ITableRecord : IRecordPair
 {
-    public Guid?           OwnerUserID  { get; }
     public Guid?           CreatedBy    { get; }
     public DateTimeOffset? LastModified { get; }
+    public Guid?           OwnerUserID  { get; }
 }
 
 
@@ -27,15 +27,15 @@ public abstract record TableRecord<TRecord> : ObservableRecord<TRecord>, ITableR
 
 
     public static string         TableName   { get; } = typeof(TRecord).GetTableName();
+    public        Guid?          CreatedBy   { get; init; }
     public        DateTimeOffset DateCreated { get; init; }
+    [Key] public  Guid           ID          { get; init; }
     public DateTimeOffset? LastModified
     {
         get => _lastModified;
         set => SetProperty( ref _lastModified, value );
     }
-    public       Guid? OwnerUserID { get; init; }
-    [Key] public Guid  ID          { get; init; }
-    public       Guid? CreatedBy   { get; init; }
+    public Guid? OwnerUserID { get; init; }
 
 
     protected TableRecord() : base() { }
@@ -70,7 +70,7 @@ public abstract record TableRecord<TRecord> : ObservableRecord<TRecord>, ITableR
 
     public TRecord NewID( Guid id ) => (TRecord)(this with
                                                  {
-                                                     ID = id
+                                                     ID = id,
                                                  });
     public bool Owns( UserRecord       record ) => record.CreatedBy == record.ID;
     public bool DoesNotOwn( UserRecord record ) => record.CreatedBy != record.ID;

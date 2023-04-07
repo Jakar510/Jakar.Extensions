@@ -12,8 +12,8 @@ public abstract class BaseLoadingPopup : Popup<bool> { }
 [XamlCompilation( XamlCompilationOptions.Compile )]
 public sealed partial class LoadingPopup : BaseLoadingPopup, IDisposable, IAsyncDisposable
 {
-    private          CancellationTokenSource?      _source;
     private readonly CancellationTokenRegistration _registration;
+    private          CancellationTokenSource?      _source;
 
 
     private LoadingPopup() : base() { }

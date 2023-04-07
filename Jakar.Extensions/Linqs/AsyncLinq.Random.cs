@@ -10,7 +10,7 @@ public static partial class AsyncLinq
     #if NET6_0_OR_GREATER
         TElement[] array = GC.AllocateUninitializedArray<TElement>( source.Count );
     #else
-        TElement[] array = new TElement[source.Count];
+        var array = new TElement[source.Count];
     #endif
 
         for ( int i = 0; i < array.Length; i++ ) { array[i] = source[i]; }

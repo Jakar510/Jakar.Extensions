@@ -10,8 +10,8 @@ public interface IDebugSettings : INotifyPropertyChanged, INotifyPropertyChangin
     bool     EnableApi              { get; }
     bool     EnableCrashes          { get; }
     bool     IncludeAppStateOnError { get; }
-    bool     TakeScreenshotOnError  { get; }
     LogLevel LogLevel               { get; }
+    bool     TakeScreenshotOnError  { get; }
 }
 
 
@@ -58,20 +58,20 @@ public sealed class DebugSettings : ObservableClass, IDebugSettings
             if ( SetProperty( ref _includeAppStateOnError, value ) ) { Preferences.Set( nameof(IncludeAppStateOnError), value ); }
         }
     }
-    public bool TakeScreenshotOnError
-    {
-        get => _takeScreenshotOnError && EnableApi;
-        set
-        {
-            if ( SetProperty( ref _takeScreenshotOnError, value ) ) { Preferences.Set( nameof(TakeScreenshotOnError), value ); }
-        }
-    }
     public LogLevel LogLevel
     {
         get => _logLevel;
         set
         {
             if ( SetProperty( ref _logLevel, value ) ) { AppCenter.LogLevel = value; }
+        }
+    }
+    public bool TakeScreenshotOnError
+    {
+        get => _takeScreenshotOnError && EnableApi;
+        set
+        {
+            if ( SetProperty( ref _takeScreenshotOnError, value ) ) { Preferences.Set( nameof(TakeScreenshotOnError), value ); }
         }
     }
 

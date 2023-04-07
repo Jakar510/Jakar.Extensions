@@ -4,11 +4,14 @@ namespace Jakar.Extensions.Xamarin.Forms;
 
 public class OrientationService
 {
+    // https://www.wintellect.com/responding-to-orientation-changes-in-xamarin-forms/
+
+    public const double SIZE_NOT_ALLOCATED = -1;
+    protected    double _Height { get; set; }
+
+
+    protected double             _Width      { get; set; }
     public    DisplayOrientation Orientation { get; set; }
-    protected double             _Height     { get; set; }
-
-
-    protected double _Width { get; set; }
 
 
     //Xamarin.Essentials.DeviceIdiom.Phone
@@ -43,20 +46,7 @@ public class OrientationService
                    : DisplayOrientation.Landscape;
     }
 
-    // https://www.wintellect.com/responding-to-orientation-changes-in-xamarin-forms/
-
-    public const double SIZE_NOT_ALLOCATED = -1;
-
     public event EventHandler<RotationEventArgs>? OnOrientationChanged;
-
-
-
-    public class RotationEventArgs : EventArgs
-    {
-        public DisplayOrientation Orientation { get; }
-        public RotationEventArgs( DisplayOrientation orientation ) => Orientation = orientation;
-    }
-
 
 
     public void OnSizeAllocated( in Page page ) => OnSizeAllocated( page.Width, page.Height );
@@ -77,6 +67,14 @@ public class OrientationService
         if ( Orientation == DisplayOrientation.Unknown ) { return; }
 
         OnOrientationChanged?.Invoke( this, new RotationEventArgs( Orientation ) );
+    }
+
+
+
+    public class RotationEventArgs : EventArgs
+    {
+        public DisplayOrientation Orientation { get; }
+        public RotationEventArgs( DisplayOrientation orientation ) => Orientation = orientation;
     }
 }
 

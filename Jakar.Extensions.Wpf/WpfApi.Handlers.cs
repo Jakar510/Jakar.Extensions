@@ -4,6 +4,7 @@ namespace Jakar.Extensions.Wpf;
 
 public static partial class WpfApi
 {
+    public static readonly long maxTime = new TimeSpan( 23, 59, 59 ).Ticks;
     public static DateTimeOffset? EndDate_OnSelectedDateTimeChanged( in DatePicker picker, in DateTime? startDate )
     {
         DateTime? selected = picker.SelectedDate;
@@ -31,5 +32,4 @@ public static partial class WpfApi
 
         return selected?.Date.ToUniversalTime();
     }
-    public static readonly long maxTime = new TimeSpan( 23, 59, 59 ).Ticks;
 }

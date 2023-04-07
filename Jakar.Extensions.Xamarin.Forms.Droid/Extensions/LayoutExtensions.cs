@@ -43,6 +43,11 @@ public enum GridSpec
 [Preserve( AllMembers = true )]
 public static class AndroidLayoutExtensions
 {
+    private static readonly IReadOnlyDictionary<Layout, int> _layoutMapper = new Dictionary<Layout, int>
+                                                                             {
+                                                                                 { Layout.Match, ViewGroup.LayoutParams.MatchParent },
+                                                                                 { Layout.Wrap, ViewGroup.LayoutParams.WrapContent },
+                                                                             };
     private static readonly IReadOnlyDictionary<GridSpec, AGridLayout.Alignment?> _specMapper = new Dictionary<GridSpec, AGridLayout.Alignment?>
                                                                                                 {
                                                                                                     { GridSpec.BaselineAlignment, AGridLayout.BaselineAlighment },
@@ -55,11 +60,6 @@ public static class AndroidLayoutExtensions
                                                                                                     { GridSpec.Start, AGridLayout.Start },
                                                                                                     { GridSpec.TopAlignment, AGridLayout.TopAlighment },
                                                                                                 };
-    private static readonly IReadOnlyDictionary<Layout, int> _layoutMapper = new Dictionary<Layout, int>
-                                                                             {
-                                                                                 { Layout.Match, ViewGroup.LayoutParams.MatchParent },
-                                                                                 { Layout.Wrap, ViewGroup.LayoutParams.WrapContent },
-                                                                             };
 
 
     // -----------------------------------------------------------------------------------------------------------------------------------------------------

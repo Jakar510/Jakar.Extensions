@@ -5,16 +5,16 @@ namespace Jakar.Extensions;
 public class ExceptionDetails
 {
     public                             Dictionary<string, JToken?>? Data            { get; init; }
-    public                             ExceptionDetails?            Inner           { get; init; }
+    [MaxLength( 4096 )] public         string?                      HelpLink        { get; init; }
     public                             int                          HResult         { get; init; }
-    public                             List<string>?                StackTrace      { get; init; }
-    public                             MethodDetails?               TargetSite      { get; init; }
+    public                             ExceptionDetails?            Inner           { get; init; }
     [MaxLength( int.MaxValue )] public string                       Message         { get; init; } = string.Empty;
-    [MaxLength( 4096 )]         public string                       Str             { get; init; } = string.Empty;
-    [MaxLength( 4096 )]         public string?                      HelpLink        { get; init; }
     [MaxLength( 10240 )]        public string?                      MethodSignature { get; init; }
     [MaxLength( 4096 )]         public string?                      Source          { get; init; }
-    [MaxLength( 4096 )]         public string?                      Type            { get; init; }
+    public                             List<string>?                StackTrace      { get; init; }
+    [MaxLength( 4096 )] public         string                       Str             { get; init; } = string.Empty;
+    public                             MethodDetails?               TargetSite      { get; init; }
+    [MaxLength( 4096 )] public         string?                      Type            { get; init; }
 
 
     public ExceptionDetails() { }
@@ -50,6 +50,8 @@ public class ExceptionDetails
 
 public class MethodDetails
 {
+    public                      MethodAttributes        Attributes          { get; init; }
+    [MaxLength( 10240 )] public string?                 DeclaringType       { get; init; }
     public                      bool                    IsAbstract          { get; init; }
     public                      bool                    IsAssembly          { get; init; }
     public                      bool                    IsConstructor       { get; init; }
@@ -62,11 +64,9 @@ public class MethodDetails
     public                      bool                    IsSpecialName       { get; init; }
     public                      bool                    IsStatic            { get; init; }
     public                      bool                    IsVirtual           { get; init; }
+    [MaxLength( 4096 )] public  string                  Name                { get; init; } = string.Empty;
     public                      List<ParameterDetails>? Parameters          { get; init; }
-    public                      MethodAttributes        Attributes          { get; init; }
-    [MaxLength( 4096 )]  public string                  Name                { get; init; } = string.Empty;
     [MaxLength( 10240 )] public string                  Signature           { get; init; } = string.Empty;
-    [MaxLength( 10240 )] public string?                 DeclaringType       { get; init; }
 
 
     public MethodDetails() { }
@@ -102,8 +102,8 @@ public class ParameterDetails
     public                      bool    IsIn            { get; init; }
     public                      bool    IsOptional      { get; init; }
     public                      bool    IsOut           { get; init; }
+    [MaxLength( 4096 )] public  string? Name            { get; init; }
     public                      int     Position        { get; init; }
-    [MaxLength( 4096 )]  public string? Name            { get; init; }
     [MaxLength( 10240 )] public string? Type            { get; init; }
 
 

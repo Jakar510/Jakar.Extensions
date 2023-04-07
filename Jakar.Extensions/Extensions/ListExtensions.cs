@@ -7,11 +7,32 @@ namespace Jakar.Extensions;
 
 public static class ListExtensions
 {
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public static TValue[] GetArray<TValue>( this IEnumerable<TValue> values ) => values switch
+                                                                                  {
+                                                                                      TValue[] array                => array,
+                                                                                      List<TValue> list             => list.GetInternalArray(),
+                                                                                      Collection<TValue> collection => collection.GetInternalArray(),
+                                                                                      _                             => values.ToArray(),
+                                                                                  };
+
+
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static T[] GetInternalArray<T>( this List<T> list ) => ArrayAccessor<T>.Getter( list );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public static T[] GetInternalArray<T>( this Collection<T> list ) => ArrayAccessor<T>.CollectionGetter( list )
+                                                                                        .GetInternalArray();
+
+
+
     /// <summary>
     ///     <see href="https://stackoverflow.com/a/17308019/9530917"/>
     /// </summary>
     internal static class ArrayAccessor<T>
     {
+        internal static readonly Func<Collection<T>, List<T>> CollectionGetter;
+
+
+        internal static readonly Func<List<T>, T[]> Getter;
         static ArrayAccessor()
         {
             Getter           = CreateGetter();
@@ -61,26 +82,5 @@ public static class ListExtensions
 
             return (Func<Collection<T>, List<T>>)dm.CreateDelegate( typeof(Func<Collection<T>, List<T>>) );
         }
-
-
-        internal static readonly Func<List<T>, T[]>           Getter;
-        internal static readonly Func<Collection<T>, List<T>> CollectionGetter;
     }
-
-
-
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public static TValue[] GetArray<TValue>( this IEnumerable<TValue> values ) => values switch
-                                                                                  {
-                                                                                      TValue[] array                => array,
-                                                                                      List<TValue> list             => list.GetInternalArray(),
-                                                                                      Collection<TValue> collection => collection.GetInternalArray(),
-                                                                                      _                             => values.ToArray()
-                                                                                  };
-
-
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static T[] GetInternalArray<T>( this List<T> list ) => ArrayAccessor<T>.Getter( list );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public static T[] GetInternalArray<T>( this Collection<T> list ) => ArrayAccessor<T>.CollectionGetter( list )
-                                                                                        .GetInternalArray();
 }

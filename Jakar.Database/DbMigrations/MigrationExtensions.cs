@@ -1,8 +1,4 @@
-﻿using FluentMigrator.Runner.Initialization;
-
-
-
-namespace Jakar.Database.DbMigrations;
+﻿namespace Jakar.Database.DbMigrations;
 
 
 [SuppressMessage( "ReSharper", "UnusedMethodReturnValue.Global" )]
@@ -412,12 +408,10 @@ public static class MigrationExtensions
 
         return builder;
     }
-    public static string GetConnectionString( IServiceProvider provider ) { return provider.ConnectionString(); }
-    public static IMigrationRunnerBuilder ConfigureScanIn( IMigrationRunnerBuilder runner )
-    {
-        return runner.ScanIn( Assembly.GetEntryAssembly(), typeof(UserRecord).Assembly )
-                     .For.All();
-    }
+    public static string GetConnectionString( IServiceProvider provider ) => provider.ConnectionString();
+    public static IMigrationRunnerBuilder ConfigureScanIn( IMigrationRunnerBuilder runner ) =>
+        runner.ScanIn( Assembly.GetEntryAssembly(), typeof(UserRecord).Assembly )
+              .For.All();
 
 
     //
