@@ -7,6 +7,6 @@ namespace Jakar.AppLogger.Common;
 [Serializable]
 public sealed class StartSession : BaseClass
 {
-    [JsonProperty( Required = Required.Always )] public DeviceDescriptor Device          { get; init; } = new();
     [JsonProperty( Required = Required.Always )] public string           AppLoggerSecret { get; init; } = string.Empty;
+    [JsonProperty( Required = Required.Always )] public DeviceDescriptor Device          { get; init; } = new();
 }

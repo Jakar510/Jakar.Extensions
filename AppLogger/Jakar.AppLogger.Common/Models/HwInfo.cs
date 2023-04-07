@@ -17,13 +17,13 @@ public record HwInfo : BaseRecord
     public List<Drive>           DriveList           { get; init; } = new();
     public List<HwKeyboard>      KeyboardList        { get; init; } = new();
     public List<Memory>          MemoryList          { get; init; } = new();
+    public MemoryStatus          MemoryStatus        { get; init; } = new();
     public List<HwMonitor>       MonitorList         { get; init; } = new();
     public List<Motherboard>     MotherboardList     { get; init; } = new();
     public List<Mouse>           MouseList           { get; init; } = new();
     public List<Printer>         PrinterList         { get; init; } = new();
     public List<SoundDevice>     SoundDeviceList     { get; init; } = new();
     public List<VideoController> VideoControllerList { get; init; } = new();
-    public MemoryStatus          MemoryStatus        { get; init; } = new();
 
 
     public HwInfo() { }

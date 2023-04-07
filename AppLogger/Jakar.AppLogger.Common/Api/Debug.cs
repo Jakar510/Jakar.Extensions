@@ -11,20 +11,20 @@ public sealed class Debug : ObservableClass
     private          object?              _incoming;
     private          object?              _outgoing;
     private          ReadOnlyMemory<byte> _screenShot;
-
-
-    public   Guid      InstallID => _logger.Config.InstallID;
-    internal LocalFile FeedBack  => _fileSystemApi.FeedBackFile;
     public object? AppState
     {
         get => _appState;
         set => SetProperty( ref _appState, value );
     }
+    internal LocalFile FeedBack => _fileSystemApi.FeedBackFile;
     public object? Incoming
     {
         get => _incoming;
         set => SetProperty( ref _incoming, value );
     }
+
+
+    public Guid InstallID => _logger.Config.InstallID;
     public object? Outgoing
     {
         get => _outgoing;
@@ -45,11 +45,9 @@ public sealed class Debug : ObservableClass
 
 
     /// <summary>
-    ///     <see cref = "Task.Run(Action)" />
+    ///     <see cref="Task.Run(Action)"/>
     /// </summary>
     public void HandleException( Exception e ) => Task.Run( () => HandleExceptionAsync( e ) );
-
-
     public async ValueTask HandleExceptionAsync( Exception e )
     {
         ScreenShot = await _logger.TryTakeScreenShot();
@@ -60,6 +58,12 @@ public sealed class Debug : ObservableClass
         if ( feedback is null ) { FeedBack.Delete(); }
         else { await FeedBack.WriteAsync( feedback.ToPrettyJson() ); }
     }
+    public async Task SaveFeedBack( string? feedback )
+    {
+        if ( feedback is null ) { FeedBack.Delete(); }
+        else { await FeedBack.WriteAsync( feedback ); }
+    }
+    public async Task SaveFeedBack( ReadOnlyMemory<byte> feedback, CancellationToken token ) => await FeedBack.WriteAsync( feedback, token );
 
 
     public void TrackError( Exception e )
@@ -101,7 +105,7 @@ public sealed class Debug : ObservableClass
                           {
                               Attachment.Create( ex.ToString(),
                                                  ex.GetType()
-                                                   .FullName )
+                                                   .FullName ),
                           };
 
 

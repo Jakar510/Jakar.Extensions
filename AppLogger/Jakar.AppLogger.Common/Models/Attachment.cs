@@ -6,11 +6,11 @@ namespace Jakar.AppLogger.Common;
 
 public interface IAttachment
 {
-    public bool    IsBinary    { get; init; }
-    public long    Length      { get; init; }
     public string  Content     { get; init; }
     public string? Description { get; init; }
     public string? FileName    { get; init; }
+    public bool    IsBinary    { get; init; }
+    public long    Length      { get; init; }
     public string? Type        { get; init; }
 }
 
@@ -19,21 +19,26 @@ public interface IAttachment
 [Serializable]
 public sealed record Attachment : BaseRecord
 {
-    public const long MAX_SIZE = 2 ^ 20; // 1MB
+    public const long MAX_SIZE = 0x3FFFFFDF; // 1GB
 
 
-    public bool IsBinary { get; init; }
+    public static Attachment   Default { get; }       = new();
+    public static Attachment[] Empty   { get; }       = Array.Empty<Attachment>();
+    public        string       Content { get; init; } = string.Empty;
 
     [JsonIgnore]
     public byte[]? Data => IsBinary
                                ? Convert.FromBase64String( Content )
                                : default;
 
-    public long    Length      { get; init; }
-    public string  Content     { get; init; } = string.Empty;
     public string? Description { get; init; }
     public string? FileName    { get; init; }
-    public string? Type        { get; init; }
+
+
+    public bool IsBinary { get; init; }
+
+    public long    Length { get; init; }
+    public string? Type   { get; init; }
 
 
     public Attachment() { }

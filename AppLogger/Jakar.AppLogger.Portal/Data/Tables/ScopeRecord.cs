@@ -8,10 +8,10 @@ namespace Jakar.AppLogger.Portal.Data.Tables;
 [Table( "Scopes" )]
 public sealed record ScopeRecord : LoggerTable<ScopeRecord>
 {
-    public Guid ScopeID   { get; init; }
-    public Guid SessionID { get; init; }
     public Guid AppID     { get; init; }
     public Guid DeviceID  { get; init; }
+    public Guid ScopeID   { get; init; }
+    public Guid SessionID { get; init; }
 
 
     public ScopeRecord() : base() { }

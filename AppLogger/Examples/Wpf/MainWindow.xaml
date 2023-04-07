@@ -14,7 +14,7 @@
                            Services="{StaticResource services}">
             <web:BlazorWebView.RootComponents>
                 <web:RootComponent ComponentType="{x:Type local:Main}"
-                                   Selector="#app"/>
+                                   Selector="#app" />
             </web:BlazorWebView.RootComponents>
         </web:BlazorWebView>
     </Grid>

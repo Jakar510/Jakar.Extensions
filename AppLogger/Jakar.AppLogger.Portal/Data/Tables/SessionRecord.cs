@@ -8,9 +8,9 @@ namespace Jakar.AppLogger.Portal.Data.Tables;
 [Table( "Sessions" )]
 public sealed record SessionRecord : LoggerTable<SessionRecord>, ISession
 {
-    public Guid SessionID { get; init; }
     public Guid AppID     { get; init; }
     public Guid DeviceID  { get; init; }
+    public Guid SessionID { get; init; }
 
 
     public SessionRecord() : base() { }

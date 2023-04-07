@@ -19,5 +19,3 @@ global using Newtonsoft.Json.Linq;
 global using HwBattery = Hardware.Info.Battery;
 global using HwKeyboard = Hardware.Info.Keyboard;
 global using HwMonitor = Hardware.Info.Monitor;
-
-

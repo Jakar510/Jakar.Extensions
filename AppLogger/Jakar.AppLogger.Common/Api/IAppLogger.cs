@@ -5,10 +5,10 @@ namespace Jakar.AppLogger.Common;
 
 
 [SuppressMessage( "ReSharper", "UnusedMemberInSuper.Global" )]
-public interface IAppLogger : ILoggerProvider, IHostedService, ILogger, IAsyncDisposable
+public interface IAppLogger : ILogger, ILoggerProvider, IHostedService, IAsyncDisposable
 {
-    public AppLoggerOptions Options { get; }
     public LoggingSettings  Config  { get; }
+    public AppLoggerOptions Options { get; }
 
 
     public void TrackError( Exception exception );

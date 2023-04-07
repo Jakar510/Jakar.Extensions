@@ -14,7 +14,7 @@ public enum Page
 {
     Home,
     Master,
-    Detail
+    Detail,
 }
 
 
@@ -31,7 +31,7 @@ public static class Program
             // BenchmarkRunner.Run<JsonizerBenchmarks>();
             // BenchmarkRunner.Run<SpansBenchmarks>();
         }
-        catch (Exception e)
+        catch ( Exception e )
         {
             e.WriteToConsole();
             e.WriteToDebug();

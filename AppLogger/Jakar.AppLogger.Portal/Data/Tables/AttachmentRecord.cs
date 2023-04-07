@@ -12,17 +12,17 @@ namespace Jakar.AppLogger.Portal.Data.Tables;
 [Table( "Attachments" )]
 public sealed record AttachmentRecord : LoggerTable<AttachmentRecord>, IAttachment, ILogInfo
 {
-    public                       bool    IsBinary    { get; init; }
     public                       Guid    AppID       { get; init; }
-    public                       Guid    DeviceID    { get; init; }
-    public                       Guid    LogID       { get; init; }
-    public                       Guid    SessionID   { get; init; }
-    public                       Guid?   ScopeID     { get; init; }
-    public                       long    Length      { get; init; }
     [MaxLength( 2 ^ 20 )] public string  Content     { get; init; } = string.Empty;
     [MaxLength( 1024 )]   public string? Description { get; init; }
-    [MaxLength( 256 )]    public string? FileName    { get; init; }
-    [MaxLength( 256 )]    public string? Type        { get; init; }
+    public                       Guid    DeviceID    { get; init; }
+    [MaxLength( 256 )] public    string? FileName    { get; init; }
+    public                       bool    IsBinary    { get; init; }
+    public                       long    Length      { get; init; }
+    public                       Guid    LogID       { get; init; }
+    public                       Guid?   ScopeID     { get; init; }
+    public                       Guid    SessionID   { get; init; }
+    [MaxLength( 256 )] public    string? Type        { get; init; }
 
 
     public AttachmentRecord() : base() { }
@@ -73,7 +73,7 @@ public sealed record AttachmentRecord : LoggerTable<AttachmentRecord>, IAttachme
                                                                    Description = attachment.Description,
                                                                    Type = attachment.Type,
                                                                    FileName = attachment.FileName,
-                                                                   IsBinary = attachment.IsBinary
+                                                                   IsBinary = attachment.IsBinary,
                                                                };
     public override bool Equals( AttachmentRecord? other )
     {

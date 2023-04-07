@@ -7,6 +7,7 @@ namespace Jakar.AppLogger.Portal.Data.DbMigrations;
 
 
 [Migration( 108 )]
+
 // ReSharper disable once InconsistentNaming
 public sealed class Create_SessionRecord : LoggerMigration<SessionRecord>
 {

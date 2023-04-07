@@ -1,5 +1,4 @@
-﻿using Microsoft.CodeAnalysis;
-using Microsoft.Win32;
+﻿using Microsoft.Win32;
 
 
 
@@ -10,21 +9,21 @@ namespace Jakar.AppLogger.Common;
 public sealed record DeviceDescriptor : BaseRecord, IDevice
 {
     public const string     UNKNOWN = "Unknown";
-    public       AppVersion AppVersion     { get; init; } = new();
-    public       double     TimeZoneOffset { get; init; }
-    public       HwInfo?    HwInfo         { get; set; }
     public       int?       AppBuild       { get; init; }
-    public       int?       OsApiLevel     { get; set; }
-    public       string     DeviceID       { get; init; } = string.Empty;
-    public       string     Locale         { get; init; } = string.Empty;
-    public       string     OsName         { get; init; } = string.Empty;
-    public       string     SdkName        { get; init; } = string.Empty;
-    public       string     SdkVersion     { get; init; } = string.Empty;
     public       string?    AppNamespace   { get; init; }
+    public       AppVersion AppVersion     { get; init; } = new();
+    public       string     DeviceID       { get; init; } = string.Empty;
+    public       HwInfo?    HwInfo         { get; set; }
+    public       string     Locale         { get; init; } = string.Empty;
     public       string?    Model          { get; init; }
+    public       int?       OsApiLevel     { get; set; }
     public       string?    OsBuild        { get; init; }
+    public       string     OsName         { get; init; } = string.Empty;
     public       string?    OsVersion      { get; init; }
     public       PlatformID Platform       { get; init; }
+    public       string     SdkName        { get; init; } = string.Empty;
+    public       string     SdkVersion     { get; init; } = string.Empty;
+    public       double     TimeZoneOffset { get; init; }
 
 
     public DeviceDescriptor() { }
@@ -79,7 +78,7 @@ public sealed record DeviceDescriptor : BaseRecord, IDevice
                                        .Build,
                          AppNamespace = Assembly.GetEntryAssembly()
                                                ?.EntryPoint?.DeclaringType?.Namespace,
-                         DeviceID = deviceID
+                         DeviceID = deviceID,
                      };
 
         return device;
@@ -143,7 +142,7 @@ public sealed record DeviceDescriptor : BaseRecord, IDevice
             }
 
             object? version = registryKey.GetValue( "CurrentVersion", "0.0" );
-            object? build = registryKey.GetValue( "CurrentBuild",   "0" );
+            object? build   = registryKey.GetValue( "CurrentBuild",   "0" );
 
             string[]? strArray = registryKey.GetValue( "BuildLabEx" )
                                            ?.ToString()

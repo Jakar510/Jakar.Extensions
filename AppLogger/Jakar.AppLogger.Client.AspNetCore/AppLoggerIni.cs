@@ -21,14 +21,14 @@ public sealed class AppLoggerIni : LoggingSettings
     internal IniConfig.Section Section => _config[nameof(AppLogger)];
 
 
-    public AppLoggerIni( AppVersion   version, string           deviceID, string    appName ) : this( version, deviceID, GetFile( appName ) ) { AppName = appName; }
+    public AppLoggerIni( AppVersion   version, string           deviceID, string    appName ) : this( version, deviceID, GetFile( appName ) ) => AppName = appName;
     internal AppLoggerIni( AppVersion version, string           deviceID, LocalFile file ) : this( version, DeviceDescriptor.Create( version, deviceID ), file ) { }
     internal AppLoggerIni( AppVersion version, DeviceDescriptor device,   LocalFile file ) : base( version, device ) => File = file;
 
 
     public static AppLoggerIni Create( AppVersion version, string deviceID, string appName )
     {
-        var task = Task.Run( async () => await CreateAsync( version, deviceID, appName ) );
+        Task<AppLoggerIni> task = Task.Run( async () => await CreateAsync( version, deviceID, appName ) );
         task.Wait();
 
         return task.Result;
@@ -56,7 +56,7 @@ public sealed class AppLoggerIni : LoggingSettings
                                                                                                           ulong b  => b.ToString(),
                                                                                                           float b  => b.ToString( CultureInfo.InvariantCulture ),
                                                                                                           double b => b.ToString( CultureInfo.InvariantCulture ),
-                                                                                                          _        => value.ToJson()
+                                                                                                          _        => value.ToJson(),
                                                                                                       };
 
 

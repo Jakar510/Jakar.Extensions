@@ -11,37 +11,35 @@ namespace Jakar.AppLogger.Common;
 [Serializable]
 public sealed record Log : BaseJsonModelRecord, ILog, ILogDetails
 {
-    public                             bool                IsError            => Level > LogLevel.Error;
-    public                             bool                IsFatal            { get; init; }
-    public                             bool                IsValid            => !string.IsNullOrWhiteSpace( Message );
-    public                             DateTimeOffset      AppErrorTime       { get; init; }
-    public                             DateTimeOffset      AppLaunchTimestamp { get; init; }
-    public                             DateTimeOffset      AppStartTime       { get; init; }
-    public                             DateTimeOffset      Timestamp          { get; init; }
-    public                             DeviceDescriptor?   Device             { get; init; }
-    public                             ExceptionDetails?   Exception          { get; init; }
-    public                             Guid                SessionID          { get; init; }
-    public                             Guid?               ScopeID            { get; init; }
-    public                             HashSet<Attachment> Attachments        { get; init; } = new();
-    public                             int                 EventID            { get; init; }
-    public                             int                 ThreadID           { get; init; } = Environment.CurrentManagedThreadId;
-    public                             LogLevel            Level              { get; init; }
-    public                             long                AppID              { get; init; }
-    public                             long                DeviceID           { get; init; }
-    public                             Guid                ID                 { get; init; }
-    [MaxLength( int.MaxValue )] public string              Message            { get; init; } = string.Empty;
-    [MaxLength( 1024 )]         public string?             AppUserID          { get; init; }
-    [MaxLength( 1024 )]         public string?             BuildID            { get; init; }
-    [MaxLength( 1024 )]         public string?             EventName          { get; init; }
-
-
-    // public ErrorDetails.Collection? Details { get; init; }
-
+    public                                          DateTimeOffset      AppErrorTime       { get; init; }
+    public                                          long                AppID              { get; init; }
+    public                                          DateTimeOffset      AppLaunchTimestamp { get; init; }
+    public                                          DateTimeOffset      AppStartTime       { get; init; }
+    [MaxLength( ILog.APP_USER_ID_LENGTH )] public   string?             AppUserID          { get; init; }
+    public                                          HashSet<Attachment> Attachments        { get; init; } = new();
+    [MaxLength( ILog.BUILD_ID_LENGTH )] public      string?             BuildID            { get; init; }
+    public                                          DeviceDescriptor?   Device             { get; init; }
+    public                                          long                DeviceID           { get; init; }
+    public                                          int                 EventID            { get; init; }
+    [MaxLength( ILog.EVENT_NAME_LENGTH )]    public string?             EventName          { get; init; }
+    [MaxLength( ILog.CATEGORY_NAME_LENGTH )] public string?             CategoryName       { get; init; }
+    public                                          ExceptionDetails?   Exception          { get; init; }
+    public                                          Guid                ID                 { get; init; }
+    public                                          bool                IsError            => Level > LogLevel.Error;
+    public                                          bool                IsFatal            { get; init; }
+    public                                          bool                IsValid            => !string.IsNullOrWhiteSpace( Message );
+    public                                          LogLevel            Level              { get; init; }
+    [MaxLength( ILog.MESSAGE_LENGTH )] public       string              Message            { get; init; } = string.Empty;
+    public                                          Guid?               ScopeID            { get; init; }
+    public                                          Guid                SessionID          { get; init; }
 
     [JsonIgnore]
     public string? StackTrace => Exception?.StackTrace is not null
                                      ? string.Join( '\n', Exception.StackTrace )
                                      : default;
+
+    public int            ThreadID  { get; init; } = Environment.CurrentManagedThreadId;
+    public DateTimeOffset Timestamp { get; init; }
 
 
     public Log() { }
@@ -63,14 +61,12 @@ public sealed record Log : BaseJsonModelRecord, ILog, ILogDetails
         IsFatal            = log.IsFatal;
         Exception          = log.Exception;
         Device             = log.Device;
+        CategoryName       = log.CategoryName;
         Attachments        = new HashSet<Attachment>( log.Attachments );
-
-        // if ( log.Details is not null ) { Details = new ErrorDetails.Collection(log.Details); }
     }
-    public Log( ILog log, IEnumerable<Attachment> attachments, ExceptionDetails? details = default )
+    public Log( ILog log, IEnumerable<Attachment> attachments, DeviceDescriptor device, ExceptionDetails? details = default )
     {
         ID                 = log.ID;
-        IsFatal            = log.IsFatal;
         Message            = log.Message;
         Level              = log.Level;
         Timestamp          = log.Timestamp;
@@ -83,74 +79,44 @@ public sealed record Log : BaseJsonModelRecord, ILog, ILogDetails
         EventID            = log.EventID;
         EventName          = log.EventName;
         BuildID            = log.BuildID;
+        IsFatal            = log.IsFatal;
+        Device             = device;
+        CategoryName       = log.CategoryName;
         Exception          = details;
         Attachments        = new HashSet<Attachment>( attachments );
+        Timestamp          = DateTimeOffset.UtcNow;
     }
-
-
-    public Log( LoggingSettings value, LogLevel level )
+    public Log( AppLogger logger, LogLevel level, EventId eventId, string message, IEnumerable<Attachment>? attachments = default, IDictionary<string, JToken?>? eventDetails = default )
     {
-        AppLaunchTimestamp = value.AppLaunchTimestamp;
-        AppUserID          = value.AppUserID;
-        SessionID          = value.SessionID;
-        ScopeID            = value.ScopeID;
+        AppLaunchTimestamp = logger.Config.AppLaunchTimestamp;
+        AppUserID          = logger.Config.AppUserID;
+        SessionID          = logger.Config.SessionID;
+        ScopeID            = logger.Config.ScopeID;
+        Device             = logger.Config.Device;
+        CategoryName       = logger.CategoryName;
+        EventID            = eventId.Id;
+        EventName          = eventId.Name;
         Level              = level;
+        Timestamp          = DateTimeOffset.UtcNow;
         ID                 = Guid.NewGuid();
-    }
-    public Log( LoggingSettings value, LogLevel level, IEnumerable<Attachment> attachments ) : this( value, level ) => Attachments = new HashSet<Attachment>( attachments );
-    public Log( LoggingSettings config, IEnumerable<Attachment> attachments, Exception e, LogLevel level = LogLevel.Error ) : this( config, level, attachments )
-    {
-        AppLaunchTimestamp = config.AppLaunchTimestamp;
-        Device             = config.Device;
-        EventID            = e.HResult;
-        EventName          = e.Source;
-        Message            = e.Message;
-        Level              = LogLevel.Error;
-        Exception          = e.Details();
-    }
-    public Log( LoggingSettings config, Exception? e, EventId eventId, string message, LogLevel level ) : this( config, level )
-    {
-        AppLaunchTimestamp = config.AppLaunchTimestamp;
-        Device             = config.Device;
-        EventID            = eventId.Id;
-        EventName          = eventId.Name;
         Message            = message;
-        Level              = level;
-        Exception          = e?.Details();
+        AdditionalData     = eventDetails;
+        if ( attachments is not null ) { Attachments.Add( attachments ); }
     }
-    public Log( LoggingSettings config, IEnumerable<Attachment> attachments, Exception? e, EventId eventId, string message, LogLevel level ) : this( config, level, attachments )
-    {
-        AppLaunchTimestamp = config.AppLaunchTimestamp;
-        Device             = config.Device;
-        EventID            = eventId.Id;
-        EventName          = eventId.Name;
-        Message            = message;
-        Level              = level;
-        Exception          = e?.Details();
-    }
+    public Log( AppLogger logger, Exception e, IEnumerable<Attachment>? attachments = default, IDictionary<string, JToken?>? eventDetails = default ) : this( logger,
+                                                                                                                                                              LogLevel.Error,
+                                                                                                                                                              new EventId( e.HResult, e.Source ),
+                                                                                                                                                              e.Message,
+                                                                                                                                                              attachments,
+                                                                                                                                                              eventDetails ) => Exception = e.Details();
 
 
-    public Log Update( LoggingSettings settings ) => this with
-                                                     {
-                                                         AppLaunchTimestamp = settings.AppLaunchTimestamp,
-                                                         AppUserID = settings.AppUserID,
-                                                         SessionID = settings.SessionID,
-                                                         ScopeID = settings.ScopeID
-                                                     };
-    public Log Update( LoggingSettings settings, LogLevel level ) => this with
-                                                                     {
-                                                                         AppLaunchTimestamp = settings.AppLaunchTimestamp,
-                                                                         AppUserID = settings.AppUserID,
-                                                                         SessionID = settings.SessionID,
-                                                                         ScopeID = settings.ScopeID,
-                                                                         Level = level
-                                                                     };
     public Log Update( LogLevel level ) => this with
                                            {
-                                               Level = level
+                                               Level = level,
                                            };
     public Log Update( IScopeID scope ) => this with
                                            {
-                                               ScopeID = scope.ScopeID
+                                               ScopeID = scope.ScopeID,
                                            };
 }

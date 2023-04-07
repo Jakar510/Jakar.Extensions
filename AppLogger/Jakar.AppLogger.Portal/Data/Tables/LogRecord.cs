@@ -12,26 +12,27 @@ namespace Jakar.AppLogger.Portal.Data.Tables;
 [Table( "Logs" )]
 public sealed record LogRecord : LoggerTable<LogRecord>, ILog, ILogInfo
 {
-    public bool                                IsError            { get; init; }
-    public bool                                IsFatal            { get; init; }
-    public bool                                IsValid            { get; init; }
-    public DateTimeOffset                      AppErrorTime       { get; init; }
-    public DateTimeOffset                      AppLaunchTimestamp { get; init; }
-    public DateTimeOffset                      AppStartTime       { get; init; }
-    public DateTimeOffset                      Timestamp          { get; init; }
-    public Guid                                SessionID          { get; init; }
-    public Guid?                               ScopeID            { get; init; }
-    public int                                 EventID            { get; init; }
-    public LogLevel                            Level              { get; init; }
-    public Guid                                AppID              { get; init; }
-    public Guid                                DeviceID           { get; init; }
-    Guid ILogInfo.                             LogID              => ID;
-    [MaxLength( int.MaxValue )] public string  Message            { get; init; } = string.Empty;
-    [MaxLength( 1024 )]         public string? AppUserID          { get; init; }
-    [MaxLength( 1024 )]         public string? BuildID            { get; init; }
-    [MaxLength( 1024 )]         public string? EventName          { get; init; }
-    [MaxLength( int.MaxValue )] public string? ExceptionDetails   { get; init; }
-    [MaxLength( int.MaxValue )] public string? StackTrace         { get; init; }
+    public                             DateTimeOffset AppErrorTime       { get; init; }
+    public                             Guid           AppID              { get; init; }
+    public                             DateTimeOffset AppLaunchTimestamp { get; init; }
+    public                             DateTimeOffset AppStartTime       { get; init; }
+    [MaxLength( 1024 )] public         string?        AppUserID          { get; init; }
+    [MaxLength( 1024 )] public         string?        BuildID            { get; init; }
+    public                             Guid           DeviceID           { get; init; }
+    public                             int            EventID            { get; init; }
+    [MaxLength( 1024 )] public         string?        EventName          { get; init; }
+    public                             string?        CategoryName       { get; init; }
+    [MaxLength( int.MaxValue )] public string?        ExceptionDetails   { get; init; }
+    public                             bool           IsError            { get; init; }
+    public                             bool           IsFatal            { get; init; }
+    public                             bool           IsValid            { get; init; }
+    public                             LogLevel       Level              { get; init; }
+    Guid ILogInfo.                                    LogID              => ID;
+    [MaxLength( int.MaxValue )] public string         Message            { get; init; } = string.Empty;
+    public                             Guid?          ScopeID            { get; init; }
+    public                             Guid           SessionID          { get; init; }
+    [MaxLength( int.MaxValue )] public string?        StackTrace         { get; init; }
+    public                             DateTimeOffset Timestamp          { get; init; }
 
 
     public LogRecord() : base() { }
@@ -78,11 +79,10 @@ public sealed record LogRecord : LoggerTable<LogRecord>, ILog, ILogInfo
     public async ValueTask<Log> ToLog( DbConnection connection, DbTransaction transaction, LoggerDB db, CancellationToken token = default )
     {
         AttachmentRecord[] records = await db.Attachments.Where( connection, transaction, true, AttachmentRecord.GetDynamicParameters( this ), token );
+        DeviceRecord       device  = await db.Devices.Get( connection, transaction, DeviceID, token ) ?? throw new RecordNotFoundException( DeviceID.ToString() );
+        ExceptionDetails?  details = GetDetails();
 
-        return new Log( this,
-                        records.Select( x => x.ToAttachment() )
-                               .ToHashSet(),
-                        GetDetails() );
+        return new Log( this, records.Select( x => x.ToAttachment() ), device.ToDeviceDescriptor(), details );
     }
 
 

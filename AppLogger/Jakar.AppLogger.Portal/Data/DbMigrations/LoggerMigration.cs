@@ -14,7 +14,7 @@ public abstract class LoggerMigration<TRecord> : Migration<TRecord> where TRecor
 
     protected override ICreateTableWithColumnSyntax CreateTable()
     {
-        var table = base.CreateTable();
+        ICreateTableWithColumnSyntax table = base.CreateTable();
 
         table.WithColumn( nameof(AppRecord.IsActive) )
              .AsBoolean()

@@ -7,30 +7,40 @@ namespace Jakar.AppLogger.Common;
 [SuppressMessage( "ReSharper", "CollectionNeverUpdated.Global" )]
 public abstract class LoggingSettings : ObservableClass, IScopeID, ISessionID, IAsyncDisposable
 {
-    public const           string   DEFAULT_OUTPUT_TEMPLATE       = "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}";
-    public const           long     DEFAULT_FILE_SIZE_LIMIT_BYTES = 1L * 1024 * 1024 * 1024; // 1GB
-    public const           string   INSTALL_ID                    = nameof(INSTALL_ID);
-    public static readonly string   EmptyGuid                     = Guid.Empty.ToString();
-    private                bool     _enableAnalytics;
-    private                bool     _enableApi;
-    private                bool     _enableCrashes;
-    private                bool     _includeAppStateOnError;
-    private                bool     _includeDeviceInfoOnError;
-    private                bool     _includeEventDetailsOnError;
-    private                bool     _includeHwInfo;
-    private                bool     _includeRequestsOnError;
-    private                bool     _includeUserIDOnError;
-    private                bool     _takeScreenshotOnError;
-    private                Guid     _installID;
-    private                Guid     _sessionID;
-    private                Guid?    _scopeID;
-    private                IScope?  _scope;
-    private                LogLevel _logLevel;
-    private                string   _appName = string.Empty;
-    private                string?  _userID;
-
-
-    public AppVersion Version { get; init; }
+    public const           long           DEFAULT_FILE_SIZE_LIMIT_BYTES = 1L * 1024 * 1024 * 1024; // 1GB
+    public const           string         DEFAULT_OUTPUT_TEMPLATE       = "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}";
+    public static readonly string         EmptyGuid                     = Guid.Empty.ToString();
+    public const           string         INSTALL_ID                    = nameof(INSTALL_ID);
+    private                bool           _enableAnalytics;
+    private                bool           _enableApi;
+    private                bool           _enableCrashes;
+    private                bool           _includeAppStateOnError;
+    private                bool           _includeDeviceInfoOnError;
+    private                bool           _includeEventDetailsOnError;
+    private                bool           _includeHwInfo;
+    private                bool           _includeRequestsOnError;
+    private                bool           _includeUserIDOnError;
+    private                bool           _takeScreenshotOnError;
+    private                Guid           _installID;
+    private                Guid           _sessionID;
+    private                Guid?          _scopeID;
+    private                IScope?        _scope;
+    private                LogLevel       _logLevel;
+    private                string         _appName = string.Empty;
+    private                string?        _userID;
+    public                 DateTimeOffset AppLaunchTimestamp { get; init; } = DateTimeOffset.UtcNow;
+    public string AppName
+    {
+        get => _appName;
+        set => SetProperty( ref _appName, value );
+    }
+    public string? AppUserID
+    {
+        get => _userID;
+        set => SetProperty( ref _userID, value );
+    }
+    [JsonIgnore] public ConcurrentBag<IAttachmentProvider> AttachmentProviders { get; init; } = new();
+    public              DeviceDescriptor                   Device              { get; init; }
     public bool EnableAnalytics
     {
         get => _enableAnalytics;
@@ -76,44 +86,34 @@ public abstract class LoggingSettings : ObservableClass, IScopeID, ISessionID, I
         get => _includeUserIDOnError;
         set => SetProperty( ref _includeUserIDOnError, value );
     }
-    public bool TakeScreenshotOnError
-    {
-        get => _takeScreenshotOnError;
-        set => SetProperty( ref _takeScreenshotOnError, value );
-    }
-    [JsonIgnore] public ConcurrentBag<IAttachmentProvider> AttachmentProviders { get; init; } = new();
-    public              DateTimeOffset                     AppLaunchTimestamp  { get; init; } = DateTimeOffset.UtcNow;
-    public              DeviceDescriptor                   Device              { get; init; }
     public Guid InstallID
     {
         get => _installID;
         set => SetProperty( ref _installID, value );
-    }
-    public Guid SessionID
-    {
-        get => _sessionID;
-        set => SetProperty( ref _sessionID, value );
-    }
-    public Guid? ScopeID
-    {
-        get => _scopeID;
-        set => SetProperty( ref _scopeID, value );
     }
     public LogLevel LogLevel
     {
         get => _logLevel;
         set => SetProperty( ref _logLevel, value );
     }
-    public string AppName
+    public Guid? ScopeID
     {
-        get => _appName;
-        set => SetProperty( ref _appName, value );
+        get => _scopeID;
+        set => SetProperty( ref _scopeID, value );
     }
-    public string? AppUserID
+    public Guid SessionID
     {
-        get => _userID;
-        set => SetProperty( ref _userID, value );
+        get => _sessionID;
+        set => SetProperty( ref _sessionID, value );
     }
+    public bool TakeScreenshotOnError
+    {
+        get => _takeScreenshotOnError;
+        set => SetProperty( ref _takeScreenshotOnError, value );
+    }
+
+
+    public AppVersion Version { get; init; }
 
 
     protected LoggingSettings( AppVersion version, DeviceDescriptor device )
@@ -126,12 +126,12 @@ public abstract class LoggingSettings : ObservableClass, IScopeID, ISessionID, I
     /// <summary>
     ///     Must initialize the following:
     ///     <para>
-    ///         <list type = "bullet" >
+    ///         <list type="bullet">
     ///             <item>
-    ///                 <see cref = "InstallID" />
+    ///                 <see cref="InstallID"/>
     ///             </item>
     ///             <item>
-    ///                 <see cref = "Device" />
+    ///                 <see cref="Device"/>
     ///             </item>
     ///         </list>
     ///     </para>
@@ -159,7 +159,7 @@ public abstract class LoggingSettings : ObservableClass, IScopeID, ISessionID, I
                                                                             [nameof(IDevice.DeviceID)]             = Device.DeviceID,
                                                                             [nameof(AppVersion)]                   = Device.AppVersion.ToString(),
                                                                             [nameof(LanguageApi.SelectedLanguage)] = CultureInfo.CurrentCulture.DisplayName,
-                                                                            [nameof(DateTime)]                     = DateTimeOffset.UtcNow
+                                                                            [nameof(DateTime)]                     = DateTimeOffset.UtcNow,
                                                                         }
                                                                       : default;
     public abstract ValueTask<byte[]?> TakeScreenshot();

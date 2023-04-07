@@ -25,10 +25,10 @@ namespace AppLogger.Experiments;
 [MemoryDiagnoser]
 public class SpansBenchmarks
 {
-    private const string OLD       = "0365BC9B";
     private const string ALPHABET  = "abcdefghijklmnopqrstuvwxyz";
-    private const string TEST      = $"{ALPHABET}__{OLD}-3DE3-4B75-9F7E-2A0F23EFA5A2";
     private const string NEW_VALUE = "----NEW-VALUE";
+    private const string OLD       = "0365BC9B";
+    private const string TEST      = $"{ALPHABET}__{OLD}-3DE3-4B75-9F7E-2A0F23EFA5A2";
 
 
     [Params( "", ALPHABET, TEST )] public string Value { get; set; } = string.Empty;

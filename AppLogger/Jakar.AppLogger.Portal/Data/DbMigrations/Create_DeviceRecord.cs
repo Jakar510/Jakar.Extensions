@@ -7,6 +7,7 @@ namespace Jakar.AppLogger.Portal.Data.DbMigrations;
 
 
 [Migration( 105 )]
+
 // ReSharper disable once InconsistentNaming
 public sealed class Create_DeviceRecord : LoggerMigration<DeviceRecord>
 {
@@ -18,7 +19,7 @@ public sealed class Create_DeviceRecord : LoggerMigration<DeviceRecord>
     {
         CheckSchema();
         ICreateTableWithColumnSyntax table = CreateTable();
-        
+
 
         table.WithColumn( nameof(DeviceRecord.AppVersion) )
              .AsString( 512 )
