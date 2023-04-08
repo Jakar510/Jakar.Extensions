@@ -11,6 +11,8 @@ public sealed class Debug : ObservableClass
     private          object?              _incoming;
     private          object?              _outgoing;
     private          ReadOnlyMemory<byte> _screenShot;
+
+
     public object? AppState
     {
         get => _appState;
@@ -22,8 +24,6 @@ public sealed class Debug : ObservableClass
         get => _incoming;
         set => SetProperty( ref _incoming, value );
     }
-
-
     public Guid InstallID => _logger.Config.InstallID;
     public object? Outgoing
     {

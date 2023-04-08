@@ -28,6 +28,8 @@ public abstract class LoggingSettings : ObservableClass, IScopeID, ISessionID, I
     private                LogLevel       _logLevel;
     private                string         _appName = string.Empty;
     private                string?        _userID;
+
+
     public                 DateTimeOffset AppLaunchTimestamp { get; init; } = DateTimeOffset.UtcNow;
     public string AppName
     {

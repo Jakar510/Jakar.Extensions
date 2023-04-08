@@ -125,7 +125,12 @@ public sealed record DeviceDescriptor : BaseRecord, IDevice
         #endif
         */
 
+
+    #if NETSTANDARD2_1
+        if ( RuntimeInformation.IsOSPlatform( OSPlatform.Windows ) )
+    #else
         if ( OperatingSystem.IsWindows() )
+    #endif
         {
             using RegistryKey  localMachine = Registry.LocalMachine;
             using RegistryKey? registryKey  = localMachine.OpenSubKey( "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion" );
@@ -155,15 +160,28 @@ public sealed record DeviceDescriptor : BaseRecord, IDevice
             return $"{version}.{build}.{str}";
         }
 
-        if ( OperatingSystem.IsMacOS() ) { }
 
-        if ( OperatingSystem.IsMacCatalyst() ) { }
+    #if NETSTANDARD2_1
+        if ( RuntimeInformation.IsOSPlatform( OSPlatform.Linux ) )
+    #else
+        if ( OperatingSystem.IsLinux() )
+    #endif
+        { }
 
+
+    #if NETSTANDARD2_1
+        if ( RuntimeInformation.IsOSPlatform( OSPlatform.OSX ) )
+    #else
+        if ( OperatingSystem.IsMacCatalyst() )
+        if ( OperatingSystem.IsMacOS() )
+    #endif
+        { }
+
+
+    #if !NETSTANDARD2_1
         if ( OperatingSystem.IsAndroid() ) { }
 
         if ( OperatingSystem.IsIOS() ) { }
-
-        if ( OperatingSystem.IsLinux() ) { }
 
         if ( OperatingSystem.IsBrowser() ) { }
 
@@ -172,7 +190,7 @@ public sealed record DeviceDescriptor : BaseRecord, IDevice
         if ( OperatingSystem.IsWatchOS() ) { }
 
         if ( OperatingSystem.IsTvOS() ) { }
-
+    #endif
         return default;
     }
 }

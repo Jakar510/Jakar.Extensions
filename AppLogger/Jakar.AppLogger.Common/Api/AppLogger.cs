@@ -128,12 +128,17 @@ public sealed class AppLogger : Service, IAppLogger
             await Config.InitAsync();
             await StartSession( token );
 
-
+        #if !NETSTANDARD2_1
             using var timer = new PeriodicTimer( TimeSpan.FromMilliseconds( 50 ) );
-
+        #endif
             while ( !token.IsCancellationRequested )
             {
+            #if !NETSTANDARD2_1
                 await timer.WaitForNextTickAsync( token );
+            #else
+                await TimeSpan.FromMilliseconds( 50 )
+                              .Delay( token );
+            #endif
 
                 try
                 {

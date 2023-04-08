@@ -16,7 +16,6 @@ public sealed record AppLoggerOptions : IOptions<AppLoggerOptions>, IValidator, 
     public                  Uri              HostInfo { get; set; } = _defaultUri;
     public                  bool             IsValid  => !string.IsNullOrWhiteSpace( APIToken ) && !string.IsNullOrWhiteSpace( Config?.AppName ) && ReferenceEquals( HostInfo, _defaultUri );
     public                  TimeSpan         TimeOut  { get; set; } = TimeSpan.FromSeconds( 30 );
-
     AppLoggerOptions IOptions<AppLoggerOptions>.Value => this;
 
 
