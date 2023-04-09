@@ -44,9 +44,6 @@ public sealed class Debug : ObservableClass
     }
 
 
-    /// <summary>
-    ///     <see cref="Task.Run(Action)"/>
-    /// </summary>
     public void HandleException( Exception e ) => Task.Run( () => HandleExceptionAsync( e ) );
     public async ValueTask HandleExceptionAsync( Exception e )
     {
@@ -66,11 +63,11 @@ public sealed class Debug : ObservableClass
     public async Task SaveFeedBack( ReadOnlyMemory<byte> feedback, CancellationToken token ) => await FeedBack.WriteAsync( feedback, token );
 
 
-    public void TrackError( Exception e )
+    public void TrackError( Exception e, EventId? eventId = default )
     {
         if ( !_logger.Config.IncludeAppStateOnError )
         {
-            TrackError( e, default );
+            TrackError( e, eventId );
             return;
         }
 
@@ -79,24 +76,24 @@ public sealed class Debug : ObservableClass
         var eventDetails = new Dictionary<string, JToken?>();
         foreach ( (string? key, string? value) in dict ) { eventDetails.Add( key, value ); }
 
-        TrackError( e, eventDetails );
+        TrackError( e, eventDetails, eventId );
     }
-    public void TrackError( Exception ex, IDictionary<string, JToken?>? eventDetails )
+    public void TrackError( Exception ex, IDictionary<string, JToken?>? eventDetails, EventId? eventId = default )
     {
         List<Attachment> attachments = GetAttachments( ex, eventDetails );
 
         if ( FeedBack.Exists ) { attachments.Add( Attachment.Create( FeedBack ) ); }
 
-        _logger.TrackError( ex, eventDetails, attachments );
+        _logger.TrackError( ex, eventId ?? new EventId( ex.Message.GetHashCode(), ex.Message ), attachments, eventDetails );
         ScreenShot = default;
     }
-    public async ValueTask TrackErrorAsync( Exception ex, IDictionary<string, JToken?>? eventDetails )
+    public async ValueTask TrackErrorAsync( Exception ex, IDictionary<string, JToken?>? eventDetails, EventId? eventId = default )
     {
         List<Attachment> attachments = GetAttachments( ex, eventDetails );
 
         if ( FeedBack.Exists ) { attachments.Add( await Attachment.CreateAsync( FeedBack ) ); }
 
-        _logger.TrackError( ex, eventDetails, attachments );
+        _logger.TrackError( ex, eventId ?? new EventId( ex.Message.GetHashCode(), ex.Message ), attachments, eventDetails );
         ScreenShot = default;
     }
     private List<Attachment> GetAttachments( Exception ex, IDictionary<string, JToken?>? eventDetails )

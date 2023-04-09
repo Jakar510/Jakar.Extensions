@@ -4,7 +4,7 @@
 namespace Jakar.AppLogger.Common;
 
 
-public interface ILog : IUniqueID<Guid>, IValidator
+public interface IAppLog : IUniqueID<Guid>, IValidator
 {
     public const int APP_USER_ID_LENGTH   = 1024;
     public const int BUILD_ID_LENGTH      = 1024;

@@ -1,6 +1,7 @@
 ﻿// Jakar.AppLogger :: Jakar.AppLogger.Client
 // 09/08/2022  1:54 PM
 
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 
@@ -11,13 +12,13 @@ namespace Jakar.AppLogger.Common;
 [SuppressMessage( "ReSharper", "SuggestBaseTypeForParameter" )]
 public sealed class AppLogger : Service, IAppLogger
 {
-    public static readonly EventId            EventID = new(1, nameof(AppLogger));
-    private readonly       ConcurrentBag<Log> _logs   = new();
-    private readonly       ILogger            _logger;
-    private readonly       ILoggerFactory     _factory;
-    private readonly       string?            _categoryName;
-    private readonly       WebRequester       _requester;
-    private                bool               _disposed;
+    public static readonly EventId               EventID = new(1, nameof(AppLogger));
+    private readonly       ConcurrentBag<AppLog> _logs   = new();
+    private readonly       ILogger               _logger;
+    private readonly       ILoggerFactory        _factory;
+    private readonly       string?               _categoryName;
+    private readonly       WebRequester          _requester;
+    private                bool                  _disposed;
 
 
     internal        string                  ApiToken     => Options.APIToken;
@@ -56,19 +57,19 @@ public sealed class AppLogger : Service, IAppLogger
        .CallSynchronously();
 
 
-    public void Add( Log log )
+    public void Add( AppLog log )
     {
         if ( _disposed ) { ThrowDisposed(); }
 
         _logs.Add( log );
     }
-    public void Add( params Log[] logs )
+    public void Add( params AppLog[] logs )
     {
-        foreach ( Log log in logs ) { _logs.Add( log ); }
+        foreach ( AppLog log in logs ) { _logs.Add( log ); }
     }
-    public void Add( IEnumerable<Log> logs )
+    public void Add( IEnumerable<AppLog> logs )
     {
-        foreach ( Log log in logs ) { _logs.Add( log ); }
+        foreach ( AppLog log in logs ) { _logs.Add( log ); }
     }
 
 
@@ -142,8 +143,8 @@ public sealed class AppLogger : Service, IAppLogger
 
                 try
                 {
-                    var logs = new HashSet<Log>( _logs.Count );
-                    while ( _logs.TryTake( out Log? log ) ) { logs.Add( log ); }
+                    var logs = new HashSet<AppLog>( _logs.Count );
+                    while ( _logs.TryTake( out AppLog? log ) ) { logs.Add( log ); }
 
                     using var source = new CancellationTokenSource( Options.TimeOut );
                     await using ( token.Register( source.Cancel ) ) { await SendLog( logs, source.Token ); }
@@ -153,7 +154,7 @@ public sealed class AppLogger : Service, IAppLogger
         }
         finally { IsAlive = false; }
     }
-    private async ValueTask<bool> SendLog( IEnumerable<Log> log, CancellationToken token )
+    private async ValueTask<bool> SendLog( IEnumerable<AppLog> log, CancellationToken token )
     {
         if ( !IsValid ) { throw new ApiDisabledException(); }
 
@@ -166,7 +167,7 @@ public sealed class AppLogger : Service, IAppLogger
     {
         if ( _disposed ) { ThrowDisposed(); }
 
-        var logs = new HashSet<Log>( _logs.Select( x => x.Update( Config ) ) );
+        var logs = new HashSet<AppLog>( _logs.Select( x => x.Update( Config ) ) );
         await SendLog( logs, token );
         await EndSession( token );
     }
@@ -187,63 +188,53 @@ public sealed class AppLogger : Service, IAppLogger
         TrackEvent( $"{typeof(T).Name}.{caller}", level, eventDetails );
     public void TrackEvent<T>( T _, LogLevel level = LogLevel.Trace, IDictionary<string, JToken?>? eventDetails = null, [CallerMemberName] string? caller = null ) =>
         TrackEvent( $"{typeof(T).Name}.{caller}", level, eventDetails );
-    public void TrackEvent( string? message, LogLevel level = LogLevel.Trace, IDictionary<string, JToken?>? eventDetails = default )
+    public void TrackEvent( string message, LogLevel level = LogLevel.Trace, IDictionary<string, JToken?>? eventDetails = default )
     {
-        if ( _disposed ) { ThrowDisposed(); }
-
-        if ( !Config.EnableAnalytics ) { return; }
+        if ( !IsEnabled( level ) ) { return; }
 
         if ( string.IsNullOrWhiteSpace( message ) ) { return; }
 
-
-        Add( new Log( this, level, EventID, message, Attachments, eventDetails ) );
+        var eventID = new EventId( message.GetHashCode(), message );
+        var log     = new AppLog( this, level, eventID, message, Attachments, eventDetails );
+        Add( log );
     }
 
 
-    public void TrackError( Exception e ) => TrackError( e,                                             default,      Attachment.Empty );
-    public void TrackError( Exception e, IDictionary<string, JToken?>? eventDetails ) => TrackError( e, eventDetails, Attachment.Empty );
-    public void TrackError( Exception e, params Attachment[]           attachments ) => TrackError( e,  default,      attachments );
-    public void TrackError( Exception e, IDictionary<string, JToken?>? eventDetails, params Attachment[] attachments )
+    public void TrackError( Exception e, EventId? eventId = default ) =>
+        TrackError( e, eventId, default, Attachment.Empty );
+    public void TrackError( Exception e, EventId? eventId, IDictionary<string, JToken?>? eventDetails ) =>
+        TrackError( e, eventId, eventDetails, Attachment.Empty );
+    public void TrackError( Exception e, EventId? eventId, params Attachment[] attachments ) =>
+        TrackError( e, eventId, default, attachments );
+    public void TrackError( Exception e, EventId? eventId, IDictionary<string, JToken?>? eventDetails, params Attachment[] attachments ) =>
+        TrackError( e, eventId ?? new EventId( e.HResult, e.Source ), attachments, eventDetails );
+    public void TrackError( Exception e, EventId eventId, IEnumerable<Attachment> attachments, IDictionary<string, JToken?>? eventDetails = default )
     {
-        if ( _disposed ) { ThrowDisposed(); }
+        if ( !IsEnabled( LogLevel.Error ) ) { return; }
 
-        if ( !Config.EnableCrashes ) { return; }
-
-
-        var log = new Log( this, e, Attachments.Concat( attachments ), eventDetails );
-        _logs.Add( log );
-    }
-    public void TrackError( Exception e, IEnumerable<Attachment> attachments ) => TrackError( e, default, attachments );
-    public void TrackError( Exception e, IDictionary<string, JToken?>? eventDetails, IEnumerable<Attachment> attachments )
-    {
-        if ( _disposed ) { ThrowDisposed(); }
-
-        if ( !Config.EnableCrashes ) { return; }
-
-
-        var log = new Log( this, e, Attachments.Concat( attachments ), eventDetails );
+        AppLog log = AppLog.Create( this, LogLevel.Error, eventId, e.Message, e, Attachments.Concat( attachments ), eventDetails );
         _logs.Add( log );
     }
 
-    public void Log<TState>( LogLevel logLevel, EventId eventId, TState state, Exception? e, Func<TState, Exception?, string> formatter )
+
+    public void Log<TState>( LogLevel level, EventId eventId, TState state, Exception? e, Func<TState, Exception?, string> formatter )
     {
-        if ( _disposed ) { ThrowDisposed(); }
+        if ( !IsEnabled( level ) ) { return; }
 
-        if ( !Config.EnableAnalytics || !Config.EnableCrashes ) { return; }
-
-        if ( !IsEnabled( logLevel ) ) { return; }
-
-
-        Log log = e is not null
-                      ? new Log( this, e,        Attachments )
-                      : new Log( this, logLevel, eventId, formatter( state, e ), Attachments );
-
+        AppLog log = AppLog.Create( this, level, eventId, state, e, formatter, Attachments );
         _logs.Add( log );
     }
-    public bool IsEnabled( LogLevel logLevel ) => logLevel is not LogLevel.None && logLevel >= Config.LogLevel;
+    public bool IsEnabled( LogLevel level )
+    {
+        if ( !Config.EnableAnalytics && level < LogLevel.Error ) { return false; }
+
+        if ( !Config.EnableCrashes && level >= LogLevel.Error ) { return false; }
+
+        return level is not LogLevel.None && level >= Config.LogLevel;
+    }
 
 
-    public IDisposable BeginScope<TState>( TState state ) where TState : notnull => Config.CreateScope();
+    public IDisposable BeginScope<TState>( TState state ) where TState : notnull => Config.CreateScope(state);
     public AppLogger CreateLogger( string         categoryName ) => new(this, categoryName);
     ILogger ILoggerProvider.CreateLogger( string  categoryName ) => CreateLogger( categoryName );
 }

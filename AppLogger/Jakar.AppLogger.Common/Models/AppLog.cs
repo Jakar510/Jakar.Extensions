@@ -9,36 +9,36 @@ namespace Jakar.AppLogger.Common;
 
 
 [Serializable]
-public sealed record Log : BaseJsonModelRecord, ILog, ILogDetails
+public sealed record AppLog : BaseJsonModelRecord, IAppLog, ILogDetails
 {
     public                                          DateTimeOffset      AppErrorTime       { get; init; }
     public                                          long                AppID              { get; init; }
     public                                          DateTimeOffset      AppLaunchTimestamp { get; init; }
     public                                          DateTimeOffset      AppStartTime       { get; init; }
-    [MaxLength( ILog.APP_USER_ID_LENGTH )] public   string?             AppUserID          { get; init; }
+    [MaxLength( IAppLog.APP_USER_ID_LENGTH )] public   string?             AppUserID          { get; init; }
     public                                          HashSet<Attachment> Attachments        { get; init; } = new();
-    [MaxLength( ILog.BUILD_ID_LENGTH )]      public string?             BuildID            { get; init; }
-    [MaxLength( ILog.CATEGORY_NAME_LENGTH )] public string?             CategoryName       { get; init; }
+    [MaxLength( IAppLog.BUILD_ID_LENGTH )]      public string?             BuildID            { get; init; }
+    [MaxLength( IAppLog.CATEGORY_NAME_LENGTH )] public string?             CategoryName       { get; init; }
     public                                          DeviceDescriptor?   Device             { get; init; }
     public                                          long                DeviceID           { get; init; }
     public                                          int                 EventID            { get; init; }
-    [MaxLength( ILog.EVENT_NAME_LENGTH )] public    string?             EventName          { get; init; }
+    [MaxLength( IAppLog.EVENT_NAME_LENGTH )] public    string?             EventName          { get; init; }
     public                                          ExceptionDetails?   Exception          { get; init; }
     public                                          Guid                ID                 { get; init; }
     public                                          bool                IsError            => Level > LogLevel.Error;
     public                                          bool                IsFatal            { get; init; }
     public                                          bool                IsValid            => !string.IsNullOrWhiteSpace( Message );
     public                                          LogLevel            Level              { get; init; }
-    [MaxLength( ILog.MESSAGE_LENGTH )] public       string              Message            { get; init; } = string.Empty;
+    [MaxLength( IAppLog.MESSAGE_LENGTH )] public       string              Message            { get; init; } = string.Empty;
     public                                          Guid?               ScopeID            { get; init; }
     public                                          Guid                SessionID          { get; init; }
-    string? ILog.                                                       StackTrace         => GetStackTrace();
+    string? IAppLog.                                                       StackTrace         => GetStackTrace();
     public int                                                          ThreadID           { get; init; } = Environment.CurrentManagedThreadId;
     public DateTimeOffset                                               Timestamp          { get; init; }
 
 
-    public Log() { }
-    public Log( Log log ) : base( log )
+    public AppLog() { }
+    public AppLog( AppLog log ) : base( log )
     {
         ID                 = log.ID;
         Message            = log.Message;
@@ -59,7 +59,7 @@ public sealed record Log : BaseJsonModelRecord, ILog, ILogDetails
         CategoryName       = log.CategoryName;
         Attachments        = new HashSet<Attachment>( log.Attachments );
     }
-    public Log( ILog log, IEnumerable<Attachment> attachments, DeviceDescriptor device, ExceptionDetails? details )
+    public AppLog( IAppLog log, IEnumerable<Attachment> attachments, DeviceDescriptor device, ExceptionDetails? details )
     {
         ID                 = log.ID;
         Message            = log.Message;
@@ -80,7 +80,7 @@ public sealed record Log : BaseJsonModelRecord, ILog, ILogDetails
         Exception          = details;
         Attachments        = new HashSet<Attachment>( attachments );
     }
-    public Log( AppLogger logger, LogLevel level, EventId eventId, string message, IEnumerable<Attachment>? attachments = default, IDictionary<string, JToken?>? eventDetails = default )
+    public AppLog( AppLogger logger, LogLevel level, EventId eventId, string message, IEnumerable<Attachment>? attachments = default, IDictionary<string, JToken?>? eventDetails = default )
     {
         AppLaunchTimestamp = logger.Config.AppLaunchTimestamp;
         AppUserID          = logger.Config.AppUserID;
@@ -97,24 +97,45 @@ public sealed record Log : BaseJsonModelRecord, ILog, ILogDetails
         AdditionalData     = eventDetails;
         if ( attachments is not null ) { Attachments.Add( attachments ); }
     }
-    public Log( AppLogger logger, Exception e, IEnumerable<Attachment>? attachments = default, IDictionary<string, JToken?>? eventDetails = default ) : this( logger,
-                                                                                                                                                              LogLevel.Error,
-                                                                                                                                                              new EventId( e.HResult, e.Source ),
-                                                                                                                                                              e.Message,
-                                                                                                                                                              attachments,
-                                                                                                                                                              eventDetails ) => Exception = e.Details();
 
+
+    public static AppLog Create( AppLogger logger, LogLevel logLevel, EventId eventId, string? message, Exception? e, IEnumerable<Attachment>? attachments = default, IDictionary<string, JToken?>? eventDetails = default )
+    {
+        var log = new AppLog( logger, logLevel, eventId, message ?? e?.Message ?? string.Empty, attachments, eventDetails )
+                  {
+                      Exception = e?.Details()
+                  };
+
+        return log;
+    }
+    public static AppLog Create<TState>( AppLogger                        logger,
+                                         LogLevel                         logLevel,
+                                         EventId                          eventId,
+                                         TState                           state,
+                                         Exception?                       e,
+                                         Func<TState, Exception?, string> formatter,
+                                         IEnumerable<Attachment>?         attachments  = default,
+                                         IDictionary<string, JToken?>?    eventDetails = default
+    )
+    {
+        var log = new AppLog( logger, logLevel, eventId, formatter( state, e ), attachments, eventDetails )
+                  {
+                      Exception = e?.Details()
+                  };
+
+        return log;
+    }
     public ExceptionDetails? GetExceptionDetails() => Exception;
     public string? GetStackTrace() => Exception?.StackTrace is not null
                                           ? string.Join( '\n', Exception.StackTrace )
                                           : default;
 
 
-    public Log Update( LogLevel level ) => this with
+    public AppLog Update( LogLevel level ) => this with
                                            {
                                                Level = level,
                                            };
-    public Log Update( IScopeID scope ) => this with
+    public AppLog Update( IScopeID scope ) => this with
                                            {
                                                ScopeID = scope.ScopeID,
                                            };

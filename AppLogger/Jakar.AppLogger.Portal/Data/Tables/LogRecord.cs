@@ -6,7 +6,7 @@ namespace Jakar.AppLogger.Portal.Data.Tables;
 
 [Serializable]
 [Table( "Logs" )]
-public sealed record LogRecord : LoggerTable<LogRecord>, ILog, ILogInfo
+public sealed record LogRecord : LoggerTable<LogRecord>, IAppLog, ILogInfo
 {
     public                                    DateTimeOffset AppErrorTime       { get; init; }
     public                                    Guid           AppID              { get; init; }
@@ -32,7 +32,7 @@ public sealed record LogRecord : LoggerTable<LogRecord>, ILog, ILogInfo
 
 
     public LogRecord() : base() { }
-    public LogRecord( Log log, SessionRecord session, UserRecord? caller = default ) : base( log.ID, caller )
+    public LogRecord( AppLog log, SessionRecord session, UserRecord? caller = default ) : base( log.ID, caller )
     {
         IsValid            = log.IsValid;
         IsError            = log.IsError;
@@ -57,7 +57,7 @@ public sealed record LogRecord : LoggerTable<LogRecord>, ILog, ILogInfo
     }
 
 
-    public static DynamicParameters GetDynamicParameters( Log log )
+    public static DynamicParameters GetDynamicParameters( AppLog log )
     {
         var parameters = new DynamicParameters();
         parameters.Add( nameof(Message),            log.Message );
@@ -72,13 +72,13 @@ public sealed record LogRecord : LoggerTable<LogRecord>, ILog, ILogInfo
         return parameters;
     }
 
-    public async ValueTask<Log> ToLog( DbConnection connection, DbTransaction transaction, LoggerDB db, CancellationToken token = default )
+    public async ValueTask<AppLog> ToLog( DbConnection connection, DbTransaction transaction, LoggerDB db, CancellationToken token = default )
     {
         AttachmentRecord[] records = await db.Attachments.Where( connection, transaction, true, AttachmentRecord.GetDynamicParameters( this ), token );
         DeviceRecord       device  = await db.Devices.Get( connection, transaction, DeviceID, token ) ?? throw new RecordNotFoundException( DeviceID.ToString() );
         ExceptionDetails?  details = GetExceptionDetails();
 
-        return new Log( this, records.Select( x => x.ToAttachment() ), device.ToDeviceDescriptor(), details );
+        return new AppLog( this, records.Select( x => x.ToAttachment() ), device.ToDeviceDescriptor(), details );
     }
 
 

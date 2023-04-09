@@ -7,30 +7,30 @@ namespace Jakar.AppLogger.Common;
 [SuppressMessage( "ReSharper", "CollectionNeverUpdated.Global" )]
 public abstract class LoggingSettings : ObservableClass, IScopeID, ISessionID, IAsyncDisposable
 {
-    public const           long           DEFAULT_FILE_SIZE_LIMIT_BYTES = 1L * 1024 * 1024 * 1024; // 1GB
-    public const           string         DEFAULT_OUTPUT_TEMPLATE       = "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}";
-    public static readonly string         EmptyGuid                     = Guid.Empty.ToString();
-    public const           string         INSTALL_ID                    = nameof(INSTALL_ID);
-    private                bool           _enableAnalytics;
-    private                bool           _enableApi;
-    private                bool           _enableCrashes;
-    private                bool           _includeAppStateOnError;
-    private                bool           _includeDeviceInfoOnError;
-    private                bool           _includeEventDetailsOnError;
-    private                bool           _includeHwInfo;
-    private                bool           _includeRequestsOnError;
-    private                bool           _includeUserIDOnError;
-    private                bool           _takeScreenshotOnError;
-    private                Guid           _installID;
-    private                Guid           _sessionID;
-    private                Guid?          _scopeID;
-    private                IScope?        _scope;
-    private                LogLevel       _logLevel;
-    private                string         _appName = string.Empty;
-    private                string?        _userID;
+    public const           string DEFAULT_OUTPUT_TEMPLATE = "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}";
+    public static readonly string EmptyGuid               = Guid.Empty.ToString();
 
 
-    public                 DateTimeOffset AppLaunchTimestamp { get; init; } = DateTimeOffset.UtcNow;
+    private bool     _enableAnalytics;
+    private bool     _enableApi;
+    private bool     _enableCrashes;
+    private bool     _includeAppStateOnError;
+    private bool     _includeDeviceInfoOnError;
+    private bool     _includeEventDetailsOnError;
+    private bool     _includeHwInfo;
+    private bool     _includeRequestsOnError;
+    private bool     _includeUserIDOnError;
+    private bool     _takeScreenshotOnError;
+    private Guid     _installID;
+    private Guid     _sessionID;
+    private Guid?    _scopeID;
+    private IScope?  _scope;
+    private LogLevel _logLevel;
+    private string   _appName = string.Empty;
+    private string?  _userID;
+
+
+    public DateTimeOffset AppLaunchTimestamp { get; init; } = DateTimeOffset.UtcNow;
     public string AppName
     {
         get => _appName;
@@ -173,16 +173,16 @@ public abstract class LoggingSettings : ObservableClass, IScopeID, ISessionID, I
         _scope = scope;
         return this;
     }
-    public IScope CreateScope()
+    public AppLoggerScope<TState> CreateScope<TState>( TState state )
     {
-        _scope?.Dispose();
-        return _scope = new AppLoggerScope( this );
+        var scope = new AppLoggerScope<TState>( this, state );
+        SetScope( scope );
+        return scope;
     }
     public virtual async ValueTask DisposeAsync()
     {
         _scope?.Dispose();
         _scope = default;
-
         foreach ( IAttachmentProvider provider in AttachmentProviders ) { await provider.DisposeAsync(); }
 
         GC.SuppressFinalize( this );

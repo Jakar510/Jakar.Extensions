@@ -70,9 +70,9 @@ public sealed class LoggerDB : Database.Database
 
 
     public ValueTask<ActionResult> EndSession( ControllerBase controller, Guid sessionID, CancellationToken token ) => this.TryCall( EndSession, controller, sessionID, token );
-    public async ValueTask<ActionResult<bool>> SendLog( DbConnection connection, DbTransaction transaction, ControllerBase controller, IEnumerable<Log> logs, CancellationToken token )
+    public async ValueTask<ActionResult<bool>> SendLog( DbConnection connection, DbTransaction transaction, ControllerBase controller, IEnumerable<AppLog> logs, CancellationToken token )
     {
-        foreach ( Log log in logs )
+        foreach ( AppLog log in logs )
         {
             try
             {
@@ -89,11 +89,11 @@ public sealed class LoggerDB : Database.Database
 
         return true;
     }
-    public async ValueTask<ActionResult<bool>> SendLog( DbConnection connection, DbTransaction transaction, ControllerBase controller, Log log, CancellationToken token )
+    public async ValueTask<ActionResult<bool>> SendLog( DbConnection connection, DbTransaction transaction, ControllerBase controller, AppLog log, CancellationToken token )
     {
         if ( !log.SessionID.IsValidID() )
         {
-            controller.AddError( nameof(Log.SessionID), $"{nameof(Log.SessionID)} is null or empty" );
+            controller.AddError( nameof(AppLog.SessionID), $"{nameof(AppLog.SessionID)} is null or empty" );
             return controller.BadRequest( controller.ModelState );
         }
 
@@ -124,7 +124,7 @@ public sealed class LoggerDB : Database.Database
     }
 
 
-    public ValueTask<ActionResult<bool>> SendLog( ControllerBase controller, IEnumerable<Log> logs, CancellationToken token ) => this.TryCall( SendLog, controller, logs, token );
+    public ValueTask<ActionResult<bool>> SendLog( ControllerBase controller, IEnumerable<AppLog> logs, CancellationToken token ) => this.TryCall( SendLog, controller, logs, token );
 
 
     public async ValueTask<DeviceRecord?> AddOrUpdate_Device( DbConnection connection, DbTransaction transaction, ControllerBase controller, DeviceDescriptor device, UserRecord caller, CancellationToken token )

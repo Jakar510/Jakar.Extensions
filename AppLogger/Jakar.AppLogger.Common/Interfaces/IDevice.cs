@@ -18,7 +18,7 @@ public interface IDevice
     /// <value> Application version name, e.g. 1.1.0 </value>
     AppVersion AppVersion { get; }
 
-    public string       DeviceID            { get; init; }
+    public string       DeviceID            { get; }
     public HwInfo?      HwInfo              { get; }
     public Architecture ProcessArchitecture { get; }
 

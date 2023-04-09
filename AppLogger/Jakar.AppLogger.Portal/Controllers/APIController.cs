@@ -37,5 +37,5 @@ public class APIController : ControllerBase
 
     [HttpPost] public async ValueTask<ActionResult<Guid>> StartSession( StartSession session,   CancellationToken token ) => await _api.StartSession( this, session, token );
     [HttpPost] public async ValueTask<ActionResult> EndSession( Guid                 sessionID, CancellationToken token ) => await _api.EndSession( this, sessionID, token );
-    [HttpPost] public async ValueTask<ActionResult<bool>> Log( IEnumerable<Log>      logs,      CancellationToken token ) => await _api.SendLog( this, logs, token );
+    [HttpPost] public async ValueTask<ActionResult<bool>> Log( IEnumerable<AppLog>      logs,      CancellationToken token ) => await _api.SendLog( this, logs, token );
 }

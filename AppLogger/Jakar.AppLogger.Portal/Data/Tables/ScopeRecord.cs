@@ -15,7 +15,7 @@ public sealed record ScopeRecord : LoggerTable<ScopeRecord>
 
 
     public ScopeRecord() : base() { }
-    public ScopeRecord( Log log, AppRecord app, DeviceRecord device, SessionRecord session, UserRecord? caller = default ) : base( log.ID, caller )
+    public ScopeRecord( AppLog log, AppRecord app, DeviceRecord device, SessionRecord session, UserRecord? caller = default ) : base( log.ID, caller )
     {
         ArgumentNullException.ThrowIfNull( log.ScopeID );
 
