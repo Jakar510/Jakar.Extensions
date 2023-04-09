@@ -8,41 +8,46 @@ namespace Jakar.AppLogger.Common;
 /// <summary> Device class to help retrieve device information. </summary>
 public sealed record DeviceDescriptor : BaseRecord, IDevice
 {
-    public const string     UNKNOWN = "Unknown";
-    public       int?       AppBuild       { get; init; }
-    public       string?    AppNamespace   { get; init; }
-    public       AppVersion AppVersion     { get; init; } = new();
-    public       string     DeviceID       { get; init; } = string.Empty;
-    public       HwInfo?    HwInfo         { get; set; }
-    public       string     Locale         { get; init; } = string.Empty;
-    public       string?    Model          { get; init; }
-    public       int?       OsApiLevel     { get; set; }
-    public       string?    OsBuild        { get; init; }
-    public       string     OsName         { get; init; } = string.Empty;
-    public       string?    OsVersion      { get; init; }
-    public       PlatformID Platform       { get; init; }
-    public       string     SdkName        { get; init; } = string.Empty;
-    public       string     SdkVersion     { get; init; } = string.Empty;
-    public       double     TimeZoneOffset { get; init; }
+    public const string UNKNOWN = "Unknown";
+
+
+    public int?         AppBuild            { get; init; }
+    public string?      AppNamespace        { get; init; }
+    public AppVersion   AppVersion          { get; init; } = new();
+    public string       DeviceID            { get; init; } = string.Empty;
+    public HwInfo?      HwInfo              { get; set; }
+    public string       Locale              { get; init; } = string.Empty;
+    public string?      Model               { get; init; }
+    public int?         OsApiLevel          { get; set; }
+    public string?      OsBuild             { get; init; }
+    public Architecture ProcessArchitecture { get; init; }
+    public string       OsName              { get; init; } = string.Empty;
+    public AppVersion   OsVersion           { get; init; } = new();
+    public PlatformID   Platform            { get; init; }
+    public string       SdkName             { get; init; } = string.Empty;
+    public string       SdkVersion          { get; init; } = string.Empty;
+    public TimeSpan     TimeZoneOffset      { get; init; }
+    string IDevice.     OsVersion           => OsVersion.ToString();
 
 
     public DeviceDescriptor() { }
     public DeviceDescriptor( IDevice device )
     {
-        DeviceID       = device.DeviceID;
-        SdkName        = device.SdkName;
-        SdkVersion     = device.SdkVersion;
-        Model          = device.Model;
-        OsName         = device.OsName;
-        OsVersion      = device.OsVersion;
-        OsBuild        = device.OsBuild;
-        OsApiLevel     = device.OsApiLevel;
-        Locale         = device.Locale;
-        TimeZoneOffset = device.TimeZoneOffset;
-        AppVersion     = device.AppVersion;
-        AppBuild       = device.AppBuild;
-        AppNamespace   = device.AppNamespace;
-        HwInfo         = device.HwInfo;
+        DeviceID            = device.DeviceID;
+        SdkName             = device.SdkName;
+        SdkVersion          = device.SdkVersion;
+        Model               = device.Model;
+        OsName              = device.OsName;
+        OsVersion           = device.OsVersion;
+        OsBuild             = device.OsBuild;
+        OsApiLevel          = device.OsApiLevel;
+        Locale              = device.Locale;
+        TimeZoneOffset      = device.TimeZoneOffset;
+        AppVersion          = device.AppVersion;
+        AppBuild            = device.AppBuild;
+        AppNamespace        = device.AppNamespace;
+        HwInfo              = device.HwInfo;
+        ProcessArchitecture = device.ProcessArchitecture;
     }
 
 
@@ -66,14 +71,15 @@ public sealed record DeviceDescriptor : BaseRecord, IDevice
                          SdkVersion = typeof(DeviceDescriptor).GetTypeInfo()
                                                               .Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()
                                                              ?.InformationalVersion ?? RuntimeEnvironment.GetSystemVersion(),
-                         Model          = GetDeviceModel(),
-                         OsName         = osVersion.VersionString,
-                         OsVersion      = osVersion.Version.ToString(),
-                         Platform       = osVersion.Platform,
-                         OsBuild        = GetOsBuild(),
-                         Locale         = CultureInfo.CurrentCulture.Name,
-                         TimeZoneOffset = TimeZoneInfo.Local.BaseUtcOffset.TotalMinutes,
-                         AppVersion     = version,
+                         ProcessArchitecture = RuntimeInformation.ProcessArchitecture,
+                         Model               = GetDeviceModel(),
+                         OsName              = osVersion.VersionString,
+                         OsVersion           = osVersion.Version,
+                         Platform            = osVersion.Platform,
+                         OsBuild             = GetOsBuild(),
+                         Locale              = CultureInfo.CurrentCulture.Name,
+                         TimeZoneOffset      = TimeZoneInfo.Local.BaseUtcOffset,
+                         AppVersion          = version,
                          AppBuild = version.Build ?? GetFileVersion()
                                        .Build,
                          AppNamespace = Assembly.GetEntryAssembly()
@@ -113,24 +119,7 @@ public sealed record DeviceDescriptor : BaseRecord, IDevice
 
     public static string? GetOsBuild() // TODO: GetOsBuild other than windows
     {
-        /*
-        #if TARGET_BROWSER
-        #elif __WINDOWS__
-        #elif __MACOS__
-        #elif TARGET_MACCATALYST
-        #elif __IOS__
-        #elif __ANDROID__
-        #elif __LINUX__
-        #else
-        #endif
-        */
-
-
-    #if NETSTANDARD2_1
         if ( RuntimeInformation.IsOSPlatform( OSPlatform.Windows ) )
-    #else
-        if ( OperatingSystem.IsWindows() )
-    #endif
         {
             using RegistryKey  localMachine = Registry.LocalMachine;
             using RegistryKey? registryKey  = localMachine.OpenSubKey( "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion" );
@@ -161,36 +150,40 @@ public sealed record DeviceDescriptor : BaseRecord, IDevice
         }
 
 
-    #if NETSTANDARD2_1
-        if ( RuntimeInformation.IsOSPlatform( OSPlatform.Linux ) )
-    #else
-        if ( OperatingSystem.IsLinux() )
-    #endif
-        { }
+        /*
+        #if NETSTANDARD2_1
+            if ( RuntimeInformation.IsOSPlatform( OSPlatform.Linux ) )
+        #else
+            if ( OperatingSystem.IsLinux() )
+        #endif
+            { }
+    
+    
+        #if NETSTANDARD2_1
+            if ( RuntimeInformation.IsOSPlatform( OSPlatform.OSX ) )
+        #else
+            if ( OperatingSystem.IsMacCatalyst() )
+                if ( OperatingSystem.IsMacOS() )
+        #endif
+            { }
+    
+    
+        #if !NETSTANDARD2_1
+            if ( OperatingSystem.IsAndroid() ) { }
+    
+            if ( OperatingSystem.IsIOS() ) { }
+    
+            if ( OperatingSystem.IsBrowser() ) { }
+    
+            if ( OperatingSystem.IsFreeBSD() ) { }
+    
+            if ( OperatingSystem.IsWatchOS() ) { }
+    
+            if ( OperatingSystem.IsTvOS() ) { }
+        #endif
+        */
 
 
-    #if NETSTANDARD2_1
-        if ( RuntimeInformation.IsOSPlatform( OSPlatform.OSX ) )
-    #else
-        if ( OperatingSystem.IsMacCatalyst() )
-        if ( OperatingSystem.IsMacOS() )
-    #endif
-        { }
-
-
-    #if !NETSTANDARD2_1
-        if ( OperatingSystem.IsAndroid() ) { }
-
-        if ( OperatingSystem.IsIOS() ) { }
-
-        if ( OperatingSystem.IsBrowser() ) { }
-
-        if ( OperatingSystem.IsFreeBSD() ) { }
-
-        if ( OperatingSystem.IsWatchOS() ) { }
-
-        if ( OperatingSystem.IsTvOS() ) { }
-    #endif
-        return default;
+        return Environment.OSVersion.Version.ToString();
     }
 }

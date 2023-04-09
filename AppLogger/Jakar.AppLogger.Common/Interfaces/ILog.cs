@@ -53,4 +53,8 @@ public interface ILog : IUniqueID<Guid>, IValidator
 
     public string?        StackTrace { get; }
     public DateTimeOffset Timestamp  { get; }
+
+
+    public ExceptionDetails? GetExceptionDetails();
+    public string? GetStackTrace();
 }

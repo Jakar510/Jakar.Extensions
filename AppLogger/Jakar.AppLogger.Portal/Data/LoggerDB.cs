@@ -13,6 +13,12 @@ public sealed class LoggerDB : Database.Database
     public DbTable<SessionRecord>                       Sessions      { get; }
 
 
+    static LoggerDB()
+    {
+        EnumSqlHandler<PlatformID>.Register();
+        EnumSqlHandler<Architecture>.Register();
+        EnumSqlHandler<LogLevel>.Register();
+    }
     public LoggerDB( IConfiguration configuration, IOptions<DbOptions> options ) : base( configuration, options )
     {
         Logs        = Create<LogRecord>();

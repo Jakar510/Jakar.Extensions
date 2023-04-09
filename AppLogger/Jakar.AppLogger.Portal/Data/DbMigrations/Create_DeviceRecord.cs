@@ -26,7 +26,7 @@ public sealed class Create_DeviceRecord : LoggerMigration<DeviceRecord>
              .NotNullable();
 
         table.WithColumn( nameof(DeviceRecord.TimeZoneOffset) )
-             .AsDouble()
+             .AsTime()
              .NotNullable();
 
         table.WithColumn( nameof(DeviceRecord.AppBuild) )
@@ -69,12 +69,16 @@ public sealed class Create_DeviceRecord : LoggerMigration<DeviceRecord>
              .AsString( 256 )
              .Nullable();
 
+        table.WithColumn( nameof(DeviceRecord.ProcessArchitecture) )
+             .AsString( 256 )
+             .Nullable();
+
         table.WithColumn( nameof(DeviceRecord.Model) )
              .AsString( 4096 )
              .Nullable();
 
         table.WithColumn( nameof(DeviceRecord.HardwareInfo) )
-             .AsString( int.MaxValue )
+             .AsString( Attachment.MAX_SIZE )
              .Nullable();
     }
 }

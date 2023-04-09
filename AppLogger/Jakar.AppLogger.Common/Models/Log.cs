@@ -32,14 +32,9 @@ public sealed record Log : BaseJsonModelRecord, ILog, ILogDetails
     [MaxLength( ILog.MESSAGE_LENGTH )] public       string              Message            { get; init; } = string.Empty;
     public                                          Guid?               ScopeID            { get; init; }
     public                                          Guid                SessionID          { get; init; }
-
-    [JsonIgnore]
-    public string? StackTrace => Exception?.StackTrace is not null
-                                     ? string.Join( '\n', Exception.StackTrace )
-                                     : default;
-
-    public int            ThreadID  { get; init; } = Environment.CurrentManagedThreadId;
-    public DateTimeOffset Timestamp { get; init; }
+    string? ILog.                                                       StackTrace         => GetStackTrace();
+    public int                                                          ThreadID           { get; init; } = Environment.CurrentManagedThreadId;
+    public DateTimeOffset                                               Timestamp          { get; init; }
 
 
     public Log() { }
@@ -64,7 +59,7 @@ public sealed record Log : BaseJsonModelRecord, ILog, ILogDetails
         CategoryName       = log.CategoryName;
         Attachments        = new HashSet<Attachment>( log.Attachments );
     }
-    public Log( ILog log, IEnumerable<Attachment> attachments, DeviceDescriptor device, ExceptionDetails? details = default )
+    public Log( ILog log, IEnumerable<Attachment> attachments, DeviceDescriptor device, ExceptionDetails? details )
     {
         ID                 = log.ID;
         Message            = log.Message;
@@ -84,7 +79,6 @@ public sealed record Log : BaseJsonModelRecord, ILog, ILogDetails
         CategoryName       = log.CategoryName;
         Exception          = details;
         Attachments        = new HashSet<Attachment>( attachments );
-        Timestamp          = DateTimeOffset.UtcNow;
     }
     public Log( AppLogger logger, LogLevel level, EventId eventId, string message, IEnumerable<Attachment>? attachments = default, IDictionary<string, JToken?>? eventDetails = default )
     {
@@ -109,6 +103,11 @@ public sealed record Log : BaseJsonModelRecord, ILog, ILogDetails
                                                                                                                                                               e.Message,
                                                                                                                                                               attachments,
                                                                                                                                                               eventDetails ) => Exception = e.Details();
+
+    public ExceptionDetails? GetExceptionDetails() => Exception;
+    public string? GetStackTrace() => Exception?.StackTrace is not null
+                                          ? string.Join( '\n', Exception.StackTrace )
+                                          : default;
 
 
     public Log Update( LogLevel level ) => this with

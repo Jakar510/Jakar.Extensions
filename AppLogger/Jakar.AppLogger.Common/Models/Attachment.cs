@@ -12,33 +12,26 @@ public interface IAttachment
     public bool    IsBinary    { get; init; }
     public long    Length      { get; init; }
     public string? Type        { get; init; }
+
+    public byte[]? GetData();
 }
 
 
 
 [Serializable]
-public sealed record Attachment : BaseRecord
+public sealed class Attachment : BaseClass
 {
-    public const long MAX_SIZE = 0x3FFFFFDF; // 1GB
+    public const int MAX_SIZE = 0x3FFFFFDF; // 1GB
 
 
-    public static Attachment   Default { get; }       = new();
-    public static Attachment[] Empty   { get; }       = Array.Empty<Attachment>();
-    public        string       Content { get; init; } = string.Empty;
-
-    [JsonIgnore]
-    public byte[]? Data => IsBinary
-                               ? Convert.FromBase64String( Content )
-                               : default;
-
-    public string? Description { get; init; }
-    public string? FileName    { get; init; }
-
-
-    public bool IsBinary { get; init; }
-
-    public long    Length { get; init; }
-    public string? Type   { get; init; }
+    public static Attachment   Default     { get; }       = new();
+    public static Attachment[] Empty       { get; }       = Array.Empty<Attachment>();
+    public        string       Content     { get; init; } = string.Empty;
+    public        string?      Description { get; init; }
+    public        string?      FileName    { get; init; }
+    public        bool         IsBinary    { get; init; }
+    public        long         Length      { get; init; }
+    public        string?      Type        { get; init; }
 
 
     public Attachment() { }
@@ -74,9 +67,12 @@ public sealed record Attachment : BaseRecord
     }
 
 
+    public byte[]? GetData() => IsBinary
+                                    ? Convert.FromBase64String( Content )
+                                    : default;
+
+
     [DoesNotReturn] public static void ThrowTooLong() => throw new ArgumentException( $"{nameof(Content)}.{nameof(Length)} is too long; Must be < {MAX_SIZE}." );
-
-
     public static Attachment Create( ReadOnlySpan<byte>   content, string? description = default, string? type = default ) => new(content, description, type);
     public static Attachment Create( ReadOnlyMemory<byte> content, string? description = default, string? type = default ) => new(content, description, type);
     public static Attachment Create( string               content, string? description = default, string? type = default ) => new(content, description, type);

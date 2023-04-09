@@ -16,6 +16,7 @@ public sealed class AppVersion : IComparable,
                                  ISpanFormattable
 #endif
 {
+    public static AppVersion Default { get; } = new();
     public Format          Scheme        { get; init; }
     public int             Major         { get; init; }
     public int?            Minor         { get; init; }
