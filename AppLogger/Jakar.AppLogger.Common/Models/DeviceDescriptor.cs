@@ -1,4 +1,5 @@
-﻿using Microsoft.Win32;
+﻿using CliWrap;
+using Microsoft.Win32;
 
 
 
@@ -111,7 +112,85 @@ public sealed record DeviceDescriptor : BaseRecord, IDevice
     // }
     public static string? GetDeviceModel()
     {
-        if ( RuntimeInformation.IsOSPlatform( OSPlatform.Windows ) ) { }
+    #if !NETSTANDARD2_1
+        if ( OperatingSystem.IsAndroid() ) { }
+
+        if ( OperatingSystem.IsIOS() ) { }
+
+        if ( OperatingSystem.IsBrowser() ) { }
+
+        if ( OperatingSystem.IsFreeBSD() ) { }
+
+        if ( OperatingSystem.IsWatchOS() ) { }
+
+        if ( OperatingSystem.IsTvOS() ) { }
+    #endif
+
+
+        if ( RuntimeInformation.IsOSPlatform( OSPlatform.Windows ) )
+        {
+            var process = new Process();
+
+            var processStartInfo = new ProcessStartInfo
+                                   {
+                                       WindowStyle            = ProcessWindowStyle.Hidden,
+                                       FileName               = "/bin/bash",
+                                       Arguments              = @"wmic computersystem get model",
+                                       RedirectStandardOutput = true,
+                                       RedirectStandardError  = true,
+                                       UseShellExecute        = false
+                                   };
+
+            process.StartInfo = processStartInfo;
+            process.Start();
+
+            return process.StandardOutput.ReadToEnd()
+                          .Replace( "Model", "", StringComparison.OrdinalIgnoreCase )
+                          .Trim();
+        }
+
+
+        if ( RuntimeInformation.IsOSPlatform( OSPlatform.Linux ) )
+        {
+            var process = new Process();
+
+            var processStartInfo = new ProcessStartInfo
+                                   {
+                                       WindowStyle            = ProcessWindowStyle.Hidden,
+                                       FileName               = "/bin/bash",
+                                       Arguments              = @"sudo dmidecode | less | grep Version | sed -n '2p'",
+                                       RedirectStandardOutput = true,
+                                       RedirectStandardError  = true,
+                                       UseShellExecute        = false
+                                   };
+
+            process.StartInfo = processStartInfo;
+            process.Start();
+
+            return process.StandardOutput.ReadToEnd();
+        }
+
+
+        if ( RuntimeInformation.IsOSPlatform( OSPlatform.OSX ) )
+        {
+            var process = new Process();
+
+            var processStartInfo = new ProcessStartInfo
+                                   {
+                                       WindowStyle            = ProcessWindowStyle.Hidden,
+                                       FileName               = "/bin/bash",
+                                       Arguments              = @"sysctl hw.model",
+                                       RedirectStandardOutput = true,
+                                       RedirectStandardError  = true,
+                                       UseShellExecute        = false
+                                   };
+
+            process.StartInfo = processStartInfo;
+            process.Start();
+
+            return process.StandardOutput.ReadToEnd();
+        }
+
 
         return default;
     }
@@ -151,6 +230,22 @@ public sealed record DeviceDescriptor : BaseRecord, IDevice
 
 
         /*
+    
+        #if !NETSTANDARD2_1
+            if ( OperatingSystem.IsAndroid() ) { }
+    
+            if ( OperatingSystem.IsIOS() ) { }
+    
+            if ( OperatingSystem.IsBrowser() ) { }
+    
+            if ( OperatingSystem.IsFreeBSD() ) { }
+    
+            if ( OperatingSystem.IsWatchOS() ) { }
+    
+            if ( OperatingSystem.IsTvOS() ) { }
+        #endif
+
+
         #if NETSTANDARD2_1
             if ( RuntimeInformation.IsOSPlatform( OSPlatform.Linux ) )
         #else
@@ -167,20 +262,6 @@ public sealed record DeviceDescriptor : BaseRecord, IDevice
         #endif
             { }
     
-    
-        #if !NETSTANDARD2_1
-            if ( OperatingSystem.IsAndroid() ) { }
-    
-            if ( OperatingSystem.IsIOS() ) { }
-    
-            if ( OperatingSystem.IsBrowser() ) { }
-    
-            if ( OperatingSystem.IsFreeBSD() ) { }
-    
-            if ( OperatingSystem.IsWatchOS() ) { }
-    
-            if ( OperatingSystem.IsTvOS() ) { }
-        #endif
         */
 
 
