@@ -42,7 +42,7 @@ public partial class DbTable<TRecord>
                                                                                                              ? "AND"
                                                                                                              : "OR",
                                                                                                          parameters.ParameterNames.Select( KeyValuePair ) )} LIMIT 1",
-                         _ => throw new OutOfRangeException( nameof(Instance), Instance )
+                         _ => throw new OutOfRangeException( nameof(Instance), Instance ),
                      };
 
 
@@ -100,10 +100,7 @@ public partial class DbTable<TRecord>
             TRecord[] records = await Where( connection, transaction, matchAll, parameters, token );
             return records.Single();
         }
-        catch ( Exception e )
-        {
-            throw new SqlException( sql, parameters, e );
-        }
+        catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
     }
 
 

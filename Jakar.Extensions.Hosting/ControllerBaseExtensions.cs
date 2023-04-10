@@ -6,6 +6,8 @@ namespace Jakar.Extensions.Hosting;
 
 public static class ControllerBaseExtensions
 {
+    public const string DETAILS = nameof(DETAILS);
+    public const string ERROR   = nameof(ERROR);
     public static ActionResult ClientClosed( this ControllerBase _ ) => new StatusCodeResult( Status.ClientClosedRequest.AsInt() );
 
 
@@ -216,8 +218,6 @@ public static class ControllerBaseExtensions
 
         return problem;
     }
-    public const string DETAILS = nameof(DETAILS);
-    public const string ERROR   = nameof(ERROR);
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void AddError( this ControllerBase controller, string              error ) => controller.ModelState.AddError( error );

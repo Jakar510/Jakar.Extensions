@@ -66,7 +66,7 @@ ELSE
 BEGIN 
     SELECT {ID} = NULL 
 END",
-                         _ => throw new OutOfRangeException( nameof(Instance), Instance )
+                         _ => throw new OutOfRangeException( nameof(Instance), Instance ),
                      };
 
 
@@ -128,7 +128,7 @@ BEGIN
                                                                : "OR",
                                                            parameters.ParameterNames.Select( KeyValuePair ) )} LIMIT 1
 END",
-                         _ => throw new OutOfRangeException( nameof(Instance), Instance )
+                         _ => throw new OutOfRangeException( nameof(Instance), Instance ),
                      };
 
 

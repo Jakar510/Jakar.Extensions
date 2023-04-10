@@ -387,9 +387,6 @@ public sealed partial record UserRecord
         set => SetProperty( ref _website, value );
     }
 
-    
-
-
 
     public override int GetHashCode()
     {

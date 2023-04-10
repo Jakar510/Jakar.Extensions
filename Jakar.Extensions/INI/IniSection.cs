@@ -1,17 +1,13 @@
 ﻿#nullable enable
-using Org.BouncyCastle.Utilities;
-
-
-
 namespace Jakar.Extensions;
 
 
 [SuppressMessage( "ReSharper", "MemberHidesStaticFromOuterClass" )]
 public partial class IniConfig
 {
-    internal const string OPEN   = "[ ";
     internal const string CLOSE  = " ]";
     internal const string EQUALS = " = ";
+    internal const string OPEN   = "[ ";
 
 
 

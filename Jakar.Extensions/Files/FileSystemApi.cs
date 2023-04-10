@@ -6,10 +6,10 @@ public abstract class BaseFileSystemApi : IFilePaths
 {
     protected abstract string         _AppDataDirectory { get; }
     protected abstract string         _CacheDirectory   { get; }
-    public             LocalDirectory AppDataDirectory  { get; }
-    public             LocalDirectory CacheDirectory    { get; }
     public             LocalFile      AccountsFile      { get; }
+    public             LocalDirectory AppDataDirectory  { get; }
     public             LocalFile      AppStateFile      { get; }
+    public             LocalDirectory CacheDirectory    { get; }
     public             LocalFile      DebugFile         { get; }
     public             LocalFile      FeedBackFile      { get; }
     public             LocalFile      IncomingFile      { get; }
@@ -39,13 +39,13 @@ public abstract class BaseFileSystemApi : IFilePaths
 
     public async ValueTask<LocalFile> SaveFileAsync( string filename, Stream stream, CancellationToken token )
     {
-        var file = GetCacheDataPath( filename );
+        LocalFile file = GetCacheDataPath( filename );
         await file.WriteAsync( stream, token );
         return file;
     }
     public async ValueTask<LocalFile> SaveFileAsync( string filename, byte[] payload, CancellationToken token )
     {
-        var file = GetCacheDataPath( filename );
+        LocalFile file = GetCacheDataPath( filename );
         await file.WriteAsync( payload, token );
         return file;
     }

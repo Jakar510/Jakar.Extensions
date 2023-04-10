@@ -88,6 +88,6 @@ namespace Experiments;
 public sealed record Test
 {
     public string?        Name      { get; init; }
+    public DateTimeOffset TimeStamp { get; init; }
     public double         Value     { get; init; }
-    public DateTimeOffset TimeStamp { get; init; } 
 }

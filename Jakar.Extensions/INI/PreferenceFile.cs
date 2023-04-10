@@ -8,9 +8,6 @@ public class PreferenceFile : ObservableClass, IAsyncDisposable // TODO: Add wat
     protected        DateTime   _lastWriteTimeUtc;
     private          IniConfig? _config;
     protected        LocalFile? _file;
-
-
-    protected internal DateTime LastWriteTimeUtc => File.Info.LastWriteTimeUtc;
     public IniConfig Config
     {
         get
@@ -29,6 +26,9 @@ public class PreferenceFile : ObservableClass, IAsyncDisposable // TODO: Add wat
         }
     }
     public LocalFile File => _file ??= $"{GetType().Name}.ini";
+
+
+    protected internal DateTime LastWriteTimeUtc => File.Info.LastWriteTimeUtc;
 
 
     public PreferenceFile() { }

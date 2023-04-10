@@ -4,9 +4,9 @@ namespace Jakar.Extensions;
 
 public class ExpectedValueTypeException<TKey> : Exception // Jakar.Api.Exceptions.Networking.HeaderException
 {
+    public Type?        Actual   { get; private set; }
     public IList<Type>? Expected { get; private set; }
     public TKey?        Key      { get; private set; }
-    public Type?        Actual   { get; private set; }
 
 
     public ExpectedValueTypeException( TKey key, object? value, params Type[] expected ) : this( key, value?.GetType(), expected ) { }

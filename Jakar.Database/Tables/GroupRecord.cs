@@ -6,17 +6,9 @@
 public sealed record GroupRecord : TableRecord<GroupRecord>, UserRights.IRights
 {
     private Guid    _ownerID;
-    private string? _customerID;
     private string  _nameOfGroup = string.Empty;
-    private string _rights = string.Empty;
-
-
-    [MaxLength( 256 )]
-    public Guid OwnerID
-    {
-        get => _ownerID;
-        init => SetProperty( ref _ownerID, value );
-    }
+    private string  _rights      = string.Empty;
+    private string? _customerID;
 
 
     [MaxLength( 256 )]
@@ -32,6 +24,14 @@ public sealed record GroupRecord : TableRecord<GroupRecord>, UserRights.IRights
     {
         get => _nameOfGroup;
         set => SetProperty( ref _nameOfGroup, value );
+    }
+
+
+    [MaxLength( 256 )]
+    public Guid OwnerID
+    {
+        get => _ownerID;
+        init => SetProperty( ref _ownerID, value );
     }
 
 

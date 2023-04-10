@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>net6.0;net7.0</TargetFrameworks>
+		<TargetFrameworks>net6.0;net7.0;netstandard2.1</TargetFrameworks>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<LangVersion>latest</LangVersion>
@@ -32,6 +32,7 @@
 
 
 	<ItemGroup>
+		<PackageReference Include="CliWrap" Version="3.6.0" />
 		<PackageReference Include="Jakar.Extensions" Version="6.7.20" />
 		<PackageReference Include="Hardware.Info" Version="11.0.0" />
 		<PackageReference Condition="$([MSBuild]::IsOsPlatform('Windows'))" Include="Microsoft.Win32.Registry" Version="5.0.0" />

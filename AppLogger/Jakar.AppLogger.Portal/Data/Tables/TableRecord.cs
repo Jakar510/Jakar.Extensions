@@ -9,16 +9,16 @@ public abstract record LoggerTable<TRecord> : TableRecord<TRecord>, JsonModels.I
     private string? _additionalData;
 
 
-    public   bool IsActive    { get; init; } = true;
-    internal bool IsNotActive => !IsActive;
-
-
     [MaxLength( int.MaxValue )]
     public string? AdditionalData
     {
         get => _additionalData;
         set => SetProperty( ref _additionalData, value );
     }
+
+
+    public   bool IsActive    { get; init; } = true;
+    internal bool IsNotActive => !IsActive;
 
 
     protected LoggerTable() : base() { }

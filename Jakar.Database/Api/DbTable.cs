@@ -19,7 +19,7 @@ public partial class DbTable<TRecord> : ObservableClass, IConnectableDb, IAsyncD
                                                    {
                                                        DbInstance.Postgres => $@"""{nameof(TableRecord<TRecord>.CreatedBy)}""",
                                                        DbInstance.MsSql    => nameof(TableRecord<TRecord>.CreatedBy),
-                                                       _                   => throw new OutOfRangeException( nameof(Instance), Instance )
+                                                       _                   => throw new OutOfRangeException( nameof(Instance), Instance ),
                                                    };
 
     public string CurrentSchema => _database.CurrentSchema;
@@ -28,7 +28,7 @@ public partial class DbTable<TRecord> : ObservableClass, IConnectableDb, IAsyncD
                                                      {
                                                          DbInstance.Postgres => $@"""{nameof(TableRecord<TRecord>.DateCreated)}""",
                                                          DbInstance.MsSql    => nameof(TableRecord<TRecord>.DateCreated),
-                                                         _                   => throw new OutOfRangeException( nameof(Instance), Instance )
+                                                         _                   => throw new OutOfRangeException( nameof(Instance), Instance ),
                                                      };
 
     protected internal virtual IEnumerable<Descriptor> Descriptors => _propertiesCache.GetValues( this );
@@ -37,7 +37,7 @@ public partial class DbTable<TRecord> : ObservableClass, IConnectableDb, IAsyncD
                                             {
                                                 DbInstance.Postgres => $@"""{nameof(TableRecord<TRecord>.ID)}""",
                                                 DbInstance.MsSql    => nameof(TableRecord<TRecord>.ID),
-                                                _                   => throw new OutOfRangeException( nameof(Instance), Instance )
+                                                _                   => throw new OutOfRangeException( nameof(Instance), Instance ),
                                             };
 
     public             DbInstance          Instance      => _database.Instance;
@@ -47,14 +47,14 @@ public partial class DbTable<TRecord> : ObservableClass, IConnectableDb, IAsyncD
                                                       {
                                                           DbInstance.Postgres => $@"""{nameof(TableRecord<TRecord>.LastModified)}""",
                                                           DbInstance.MsSql    => nameof(TableRecord<TRecord>.LastModified),
-                                                          _                   => throw new OutOfRangeException( nameof(Instance), Instance )
+                                                          _                   => throw new OutOfRangeException( nameof(Instance), Instance ),
                                                       };
 
     protected internal virtual string OwnerUserID => Instance switch
                                                      {
                                                          DbInstance.Postgres => $@"""{nameof(TableRecord<TRecord>.OwnerUserID)}""",
                                                          DbInstance.MsSql    => nameof(TableRecord<TRecord>.OwnerUserID),
-                                                         _                   => throw new OutOfRangeException( nameof(Instance), Instance )
+                                                         _                   => throw new OutOfRangeException( nameof(Instance), Instance ),
                                                      };
 
     public string RandomMethod
@@ -64,7 +64,7 @@ public partial class DbTable<TRecord> : ObservableClass, IConnectableDb, IAsyncD
                {
                    DbInstance.MsSql    => "NEWID()",
                    DbInstance.Postgres => "RANDOM()",
-                   _                   => throw new OutOfRangeException( nameof(Instance), Instance )
+                   _                   => throw new OutOfRangeException( nameof(Instance), Instance ),
                };
     }
     public RecordGenerator<TRecord> Records => new(this);
@@ -79,7 +79,7 @@ public partial class DbTable<TRecord> : ObservableClass, IConnectableDb, IAsyncD
                {
                    DbInstance.Postgres => $"\"{typeof(TRecord).GetTableName()}\"",
                    DbInstance.MsSql    => typeof(TRecord).GetTableName(),
-                   _                   => typeof(TRecord).GetTableName()
+                   _                   => typeof(TRecord).GetTableName(),
                };
     }
     protected internal IEnumerable<string> VariableNames => Descriptors.Select( x => x.VariableName );

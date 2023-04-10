@@ -5,7 +5,8 @@ namespace Jakar.Extensions;
 /// <summary> A web exception of unknown type occurred. </summary>
 public sealed class ActivelyRefusedConnectionException : WebException
 {
-    public CancellationToken Token { get; }
+    public const string            REFUSED = "No connection could be made because the target machine actively refused it";
+    public       CancellationToken Token { get; }
     public ActivelyRefusedConnectionException() { }
     public ActivelyRefusedConnectionException( string       message ) : base( message ) { }
     public ActivelyRefusedConnectionException( string       message, Exception         inner ) : base( message, inner ) { }
@@ -18,5 +19,4 @@ public sealed class ActivelyRefusedConnectionException : WebException
         Token         = token;
         Data["token"] = Token.ToString();
     }
-    public const string REFUSED = "No connection could be made because the target machine actively refused it";
 }

@@ -16,6 +16,12 @@ namespace Jakar.Extensions;
 public abstract class ValidValueOf<TValue, TThis> : IComparable<ValidValueOf<TValue, TThis>>, IEquatable<ValidValueOf<TValue, TThis>>, IComparable where TThis : ValidValueOf<TValue, TThis>, new()
                                                                                                                                                    where TValue : IComparable<TValue>, IEquatable<TValue>
 {
+    protected static readonly Func<TThis> _factory = (Func<TThis>)Expression.Lambda( typeof(Func<TThis>),
+                                                                                     Expression.New( typeof(TThis).GetTypeInfo()
+                                                                                                                  .DeclaredConstructors.First( x => x.GetParameters()
+                                                                                                                                                     .IsEmpty() ),
+                                                                                                     Array.Empty<Expression>() ) )
+                                                                            .Compile();
     public TValue Value { get; protected set; }
 
     // ReSharper disable once NullableWarningSuppressionIsUsed
@@ -53,12 +59,6 @@ public abstract class ValidValueOf<TValue, TThis> : IComparable<ValidValueOf<TVa
 
         return thisValue is not null;
     }
-    protected static readonly Func<TThis> _factory = (Func<TThis>)Expression.Lambda( typeof(Func<TThis>),
-                                                                                     Expression.New( typeof(TThis).GetTypeInfo()
-                                                                                                                  .DeclaredConstructors.First( x => x.GetParameters()
-                                                                                                                                                     .IsEmpty() ),
-                                                                                                     Array.Empty<Expression>() ) )
-                                                                            .Compile();
 
     private static int Compare( TValue? left, TValue? right )
     {

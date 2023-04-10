@@ -4,8 +4,9 @@ namespace Jakar.Extensions.Xamarin.Forms;
 
 public interface IUserDevice : IEquatable<IUserDevice>
 {
-    public DateTime TimeStamp { get; }
-    public Guid     DeviceID  { get; }
+    public Guid DeviceID { get; }
+
+    public string DeviceName { get; }
 
 
     /// <summary>
@@ -13,13 +14,15 @@ public interface IUserDevice : IEquatable<IUserDevice>
     /// </summary>
     public int DeviceTypeID { get; }
 
-    public string DeviceName { get; }
-
 
     /// <summary>
     ///     <see cref="DeviceIdiom"/>
     /// </summary>
     public string Idiom { get; }
+
+
+    /// <summary> Last known <see cref="IPAddress"/> </summary>
+    public string? Ip { get; }
 
     public string Manufacturer { get; }
     public string Model        { get; }
@@ -31,9 +34,7 @@ public interface IUserDevice : IEquatable<IUserDevice>
     /// </summary>
     public string Platform { get; }
 
-
-    /// <summary> Last known <see cref="IPAddress"/> </summary>
-    public string? Ip { get; }
+    public DateTime TimeStamp { get; }
 }
 
 
@@ -42,22 +43,22 @@ public interface IUserDevice : IEquatable<IUserDevice>
 [Serializable]
 public class UserDevice : ObservableClass, IUserDevice
 {
-    private string?  _ip;
-    public  DateTime TimeStamp    { get; init; }
-    public  Guid     DeviceID     { get; init; }
-    public  int      DeviceTypeID { get; init; }
-    public  string   DeviceName   { get; init; } = string.Empty;
-    public  string   Idiom        { get; init; } = string.Empty;
-    public  string   Manufacturer { get; init; } = string.Empty;
-    public  string   Model        { get; init; } = string.Empty;
-    public  string   OsVersion    { get; init; } = string.Empty;
-    public  string   Platform     { get; init; } = string.Empty;
+    private string? _ip;
+    public  Guid    DeviceID     { get; init; }
+    public  string  DeviceName   { get; init; } = string.Empty;
+    public  int     DeviceTypeID { get; init; }
+    public  string  Idiom        { get; init; } = string.Empty;
 
     public string? Ip
     {
         get => _ip;
         set => SetProperty( ref _ip, value );
     }
+    public string   Manufacturer { get; init; } = string.Empty;
+    public string   Model        { get; init; } = string.Empty;
+    public string   OsVersion    { get; init; } = string.Empty;
+    public string   Platform     { get; init; } = string.Empty;
+    public DateTime TimeStamp    { get; init; }
 
 
     public UserDevice() { }

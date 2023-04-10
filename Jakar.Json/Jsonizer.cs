@@ -13,11 +13,9 @@ public sealed class JsonizerAttribute : Attribute { }
 
 
 
-/// <summary>
-///     A PREDICTABLE (de)serializer for any given object.
+/// <summary> A PREDICTABLE (de)serializer for any given object.
 ///     <para> Primary goals are to be PERFORMANT, easily human readable, predictable and consistent. </para>
-///     <see cref="JsonModels.IJsonModel"/>
-/// </summary>
+///     <see cref="JsonModels.IJsonModel"/> </summary>
 public static class Jsonizer
 {
     // public static T FromJson<T>( this string json ) where T : IJsonizer, new()

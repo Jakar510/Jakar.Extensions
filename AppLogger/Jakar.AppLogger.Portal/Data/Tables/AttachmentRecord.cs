@@ -1,10 +1,6 @@
 ﻿// Jakar.AppLogger :: Jakar.AppLogger.Portal
 // 10/04/2022  5:57 PM
 
-using Jakar.AppLogger.Portal.Data.Interfaces;
-
-
-
 namespace Jakar.AppLogger.Portal.Data.Tables;
 
 
@@ -12,17 +8,17 @@ namespace Jakar.AppLogger.Portal.Data.Tables;
 [Table( "Attachments" )]
 public sealed record AttachmentRecord : LoggerTable<AttachmentRecord>, IAttachment, ILogInfo
 {
-    public                       bool    IsBinary    { get; init; }
     public                       Guid    AppID       { get; init; }
-    public                       Guid    DeviceID    { get; init; }
-    public                       Guid    LogID       { get; init; }
-    public                       Guid    SessionID   { get; init; }
-    public                       Guid?   ScopeID     { get; init; }
-    public                       long    Length      { get; init; }
     [MaxLength( 2 ^ 20 )] public string  Content     { get; init; } = string.Empty;
     [MaxLength( 1024 )]   public string? Description { get; init; }
-    [MaxLength( 256 )]    public string? FileName    { get; init; }
-    [MaxLength( 256 )]    public string? Type        { get; init; }
+    public                       Guid    DeviceID    { get; init; }
+    [MaxLength( 256 )] public    string? FileName    { get; init; }
+    public                       bool    IsBinary    { get; init; }
+    public                       long    Length      { get; init; }
+    public                       Guid    LogID       { get; init; }
+    public                       Guid?   ScopeID     { get; init; }
+    public                       Guid    SessionID   { get; init; }
+    [MaxLength( 256 )] public    string? Type        { get; init; }
 
 
     public AttachmentRecord() : base() { }
@@ -43,10 +39,6 @@ public sealed record AttachmentRecord : LoggerTable<AttachmentRecord>, IAttachme
         DeviceID    = info.DeviceID;
     }
 
-
-    public override int CompareTo( AttachmentRecord? other ) => string.CompareOrdinal( Content, other?.Content );
-
-
     public static DynamicParameters GetDynamicParameters( Attachment attachment )
     {
         var parameters = new DynamicParameters();
@@ -62,8 +54,11 @@ public sealed record AttachmentRecord : LoggerTable<AttachmentRecord>, IAttachme
         parameters.Add( nameof(ScopeID),   info.ScopeID );
         return parameters;
     }
-    public override int GetHashCode() => HashCode.Combine( Content, base.GetHashCode() );
 
+
+    public byte[]? GetData() => IsBinary
+                                    ? Convert.FromBase64String( Content )
+                                    : default;
 
     public Attachment ToAttachment() => new(this);
     public AttachmentRecord Update( Attachment attachment ) => this with
@@ -73,8 +68,10 @@ public sealed record AttachmentRecord : LoggerTable<AttachmentRecord>, IAttachme
                                                                    Description = attachment.Description,
                                                                    Type = attachment.Type,
                                                                    FileName = attachment.FileName,
-                                                                   IsBinary = attachment.IsBinary
+                                                                   IsBinary = attachment.IsBinary,
                                                                };
+
+
     public override bool Equals( AttachmentRecord? other )
     {
         if ( other is null ) { return false; }
@@ -83,4 +80,6 @@ public sealed record AttachmentRecord : LoggerTable<AttachmentRecord>, IAttachme
 
         return string.Equals( Content, other.Content, StringComparison.Ordinal );
     }
+    public override int CompareTo( AttachmentRecord? other ) => string.CompareOrdinal( Content, other?.Content );
+    public override int GetHashCode() => HashCode.Combine( Content, base.GetHashCode() );
 }

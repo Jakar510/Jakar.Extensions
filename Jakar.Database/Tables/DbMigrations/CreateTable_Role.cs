@@ -2,6 +2,7 @@
 
 
 [Migration( 2 )]
+
 // ReSharper disable once InconsistentNaming
 public sealed class CreateTable_Role : MigrateRoleTable
 {
@@ -12,6 +13,4 @@ public sealed class CreateTable_Role : MigrateRoleTable
         CreateTable();
     }
     public override void Down() => DeleteTable();
-
-    
 }

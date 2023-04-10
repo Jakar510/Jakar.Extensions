@@ -11,21 +11,19 @@ namespace Jakar.Xml;
 
 public static class NodeNames
 {
-    private static bool GetName( Type type, [NotNullWhen( true )] out string? nodeName ) => _typeToNodeName.TryGetValue( type, out nodeName );
-
-
-    private static bool GetType( string nodeName, [NotNullWhen( true )] out Type? type ) => _nodeNameToType.TryGetValue( nodeName, out type );
-    /// <summary>
-    ///     Maps <see cref="Type.FullName"/> to <see cref="Type"/> .
+    /// <summary> Maps <see cref="Type.FullName"/> to <see cref="Type"/> .
     ///     <para> Uses <see cref="RegisterNodeName"/> to register the name. </para>
     /// </summary>
     private static readonly ConcurrentDictionary<string, Type> _nodeNameToType = new();
 
-    /// <summary>
-    ///     Maps <see cref="Type.FullName"/> to <see cref="Type"/> .
+    /// <summary> Maps <see cref="Type.FullName"/> to <see cref="Type"/> .
     ///     <para> Uses <see cref="RegisterNodeName"/> to register the name. </para>
     /// </summary>
     private static readonly ConcurrentDictionary<Type, string> _typeToNodeName = new();
+    private static bool GetName( Type type, [NotNullWhen( true )] out string? nodeName ) => _typeToNodeName.TryGetValue( type, out nodeName );
+
+
+    private static bool GetType( string nodeName, [NotNullWhen( true )] out Type? type ) => _nodeNameToType.TryGetValue( nodeName, out type );
 
     public static string GetNodeName( this Type type, in bool useFullName = false )
     {

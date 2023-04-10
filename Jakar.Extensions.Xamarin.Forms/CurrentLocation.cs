@@ -4,17 +4,17 @@ namespace Jakar.Extensions.Xamarin.Forms;
 
 public interface ICurrentLocation : IEquatable<ICurrentLocation>
 {
-    AltitudeReferenceSystem AltitudeReferenceSystem { get; }
-    bool                    IsFromMockProvider      { get; }
-    DateTimeOffset          Timestamp               { get; }
-    double                  Latitude                { get; }
-    double                  Longitude               { get; }
     double?                 Accuracy                { get; }
     double?                 Altitude                { get; }
+    AltitudeReferenceSystem AltitudeReferenceSystem { get; }
     double?                 Course                  { get; }
-    double?                 Speed                   { get; }
-    double?                 VerticalAccuracy        { get; }
     Guid                    InstanceID              { get; }
+    bool                    IsFromMockProvider      { get; }
+    double                  Latitude                { get; }
+    double                  Longitude               { get; }
+    double?                 Speed                   { get; }
+    DateTimeOffset          Timestamp               { get; }
+    double?                 VerticalAccuracy        { get; }
 }
 
 
@@ -22,17 +22,17 @@ public interface ICurrentLocation : IEquatable<ICurrentLocation>
 [Serializable]
 public class CurrentLocation : ICurrentLocation, IDataBaseIgnore
 {
-    public AltitudeReferenceSystem AltitudeReferenceSystem { get; init; }
-    public bool                    IsFromMockProvider      { get; init; }
-    public DateTimeOffset          Timestamp               { get; init; }
-    public double                  Latitude                { get; init; }
-    public double                  Longitude               { get; init; }
     public double?                 Accuracy                { get; init; }
     public double?                 Altitude                { get; init; }
+    public AltitudeReferenceSystem AltitudeReferenceSystem { get; init; }
     public double?                 Course                  { get; init; }
-    public double?                 Speed                   { get; init; }
-    public double?                 VerticalAccuracy        { get; init; }
     public Guid                    InstanceID              { get; init; } = Guid.Empty;
+    public bool                    IsFromMockProvider      { get; init; }
+    public double                  Latitude                { get; init; }
+    public double                  Longitude               { get; init; }
+    public double?                 Speed                   { get; init; }
+    public DateTimeOffset          Timestamp               { get; init; }
+    public double?                 VerticalAccuracy        { get; init; }
 
 
     public CurrentLocation() { }
@@ -83,18 +83,18 @@ public class CurrentLocation : ICurrentLocation, IDataBaseIgnore
 
 
     public static implicit operator Location( CurrentLocation point ) => new()
-                                                                              {
-                                                                                  Latitude                = point.Latitude,
-                                                                                  Longitude               = point.Longitude,
-                                                                                  Timestamp               = point.Timestamp,
-                                                                                  Altitude                = point.Altitude,
-                                                                                  Accuracy                = point.Accuracy,
-                                                                                  VerticalAccuracy        = point.VerticalAccuracy,
-                                                                                  Speed                   = point.Speed,
-                                                                                  Course                  = point.Course,
-                                                                                  IsFromMockProvider      = point.IsFromMockProvider,
-                                                                                  AltitudeReferenceSystem = point.AltitudeReferenceSystem,
-                                                                              };
+                                                                         {
+                                                                             Latitude                = point.Latitude,
+                                                                             Longitude               = point.Longitude,
+                                                                             Timestamp               = point.Timestamp,
+                                                                             Altitude                = point.Altitude,
+                                                                             Accuracy                = point.Accuracy,
+                                                                             VerticalAccuracy        = point.VerticalAccuracy,
+                                                                             Speed                   = point.Speed,
+                                                                             Course                  = point.Course,
+                                                                             IsFromMockProvider      = point.IsFromMockProvider,
+                                                                             AltitudeReferenceSystem = point.AltitudeReferenceSystem,
+                                                                         };
 
     public static async Task<CurrentLocation> Create( CancellationToken token, GeolocationAccuracy accuracy = GeolocationAccuracy.Best )
     {

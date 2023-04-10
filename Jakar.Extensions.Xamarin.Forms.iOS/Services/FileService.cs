@@ -57,17 +57,6 @@ public class FileService : IFileService
 
 public static class IosFileSystem
 {
-    public static int SysMajorVersion
-    {
-        get
-        {
-            string value = UIDevice.CurrentDevice.SystemVersion.Split( '.' )[0];
-
-            return int.TryParse( value, out int result )
-                       ? result
-                       : -1;
-        }
-    }
     public static string SharedPath
     {
         get
@@ -78,6 +67,17 @@ public static class IosFileSystem
                                 : Environment.GetFolderPath( Environment.SpecialFolder.MyDocuments );
 
             return folder;
+        }
+    }
+    public static int SysMajorVersion
+    {
+        get
+        {
+            string value = UIDevice.CurrentDevice.SystemVersion.Split( '.' )[0];
+
+            return int.TryParse( value, out int result )
+                       ? result
+                       : -1;
         }
     }
 }

@@ -4,8 +4,8 @@ namespace Jakar.Extensions;
 
 public interface IMultiQueue<T> : IEnumerable<T>
 {
-    public bool IsEmpty { get; }
     public int  Count   { get; }
+    public bool IsEmpty { get; }
     public T?   Next    { get; }
 
     public bool Contains( T value );
@@ -25,9 +25,9 @@ public interface IMultiQueue<T> : IEnumerable<T>
 public class MultiQueue<T> : IMultiQueue<T>
 {
     protected readonly ConcurrentQueue<T> _queue;
+    public             int                Count => _queue.Count;
 
     public bool IsEmpty => _queue.IsEmpty;
-    public int  Count   => _queue.Count;
 
 
     public T? Next => _queue.TryPeek( out T? result )

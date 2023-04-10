@@ -5,17 +5,17 @@
 
 public interface ICurrentLocation<TID> : IUniqueID<TID>, IEquatable<ICurrentLocation<TID>> where TID : struct, IComparable<TID>, IEquatable<TID>
 {
-    AltitudeReference AltitudeReferenceSystem { get; }
-    bool              IsFromMockProvider      { get; }
-    DateTimeOffset    Timestamp               { get; }
-    double            Latitude                { get; }
-    double            Longitude               { get; }
     double?           Accuracy                { get; }
     double?           Altitude                { get; }
+    AltitudeReference AltitudeReferenceSystem { get; }
     double?           Course                  { get; }
-    double?           Speed                   { get; }
-    double?           VerticalAccuracy        { get; }
     Guid              InstanceID              { get; }
+    bool              IsFromMockProvider      { get; }
+    double            Latitude                { get; }
+    double            Longitude               { get; }
+    double?           Speed                   { get; }
+    DateTimeOffset    Timestamp               { get; }
+    double?           VerticalAccuracy        { get; }
 }
 
 
@@ -23,18 +23,18 @@ public interface ICurrentLocation<TID> : IUniqueID<TID>, IEquatable<ICurrentLoca
 [Serializable]
 public sealed class CurrentLocation<TID> : BaseJsonModel, ICurrentLocation<TID>, IDataBaseIgnore where TID : struct, IComparable<TID>, IEquatable<TID>
 {
-    public       AltitudeReference AltitudeReferenceSystem { get; init; }
-    public       bool              IsFromMockProvider      { get; init; }
-    public       DateTimeOffset    Timestamp               { get; init; }
-    public       double            Latitude                { get; init; }
-    public       double            Longitude               { get; init; }
     public       double?           Accuracy                { get; init; }
     public       double?           Altitude                { get; init; }
+    public       AltitudeReference AltitudeReferenceSystem { get; init; }
     public       double?           Course                  { get; init; }
-    public       double?           Speed                   { get; init; }
-    public       double?           VerticalAccuracy        { get; init; }
-    public       Guid              InstanceID              { get; init; } = Guid.Empty;
     [Key] public TID               ID                      { get; init; }
+    public       Guid              InstanceID              { get; init; } = Guid.Empty;
+    public       bool              IsFromMockProvider      { get; init; }
+    public       double            Latitude                { get; init; }
+    public       double            Longitude               { get; init; }
+    public       double?           Speed                   { get; init; }
+    public       DateTimeOffset    Timestamp               { get; init; }
+    public       double?           VerticalAccuracy        { get; init; }
 
 
     public CurrentLocation() { }

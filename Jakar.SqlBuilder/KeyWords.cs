@@ -8,27 +8,21 @@ namespace Jakar.SqlBuilder;
 
 public static class KeyWords
 {
-    public const string ABOVE_OR_BELOW = "<>";
-    public const string AND            = nameof(AND);
-    public const string AS             = nameof(AS);
-    public const string ASC            = nameof(ASC);
-    public const string AVERAGE        = nameof(AVERAGE);
-    public const string BETWEEN        = nameof(BETWEEN);
-    public const string BY             = nameof(BY);
-    public const string COUNT          = nameof(COUNT);
-    public const string DELETE         = nameof(DELETE);
-    public const string DESC           = nameof(DESC);
-    public const string DISTINCT       = nameof(DISTINCT);
-    public const string EQUAL          = "==";
-    public const string EXISTS         = nameof(EXISTS);
-    public const string FROM           = nameof(FROM);
-    public const string FULL           = nameof(FULL);
-
-
-    public static string GetName( this    Type   type ) => type.GetTableName();
-    public static string GetName<T>( this T      _ ) => typeof(T).GetTableName();
-    public static string GetName<T>( this T      _, string columnName ) => $"{typeof(T).GetTableName()}.{columnName}";
-    public static string GetName<T>( this string columnName ) => $"{typeof(T).GetTableName()}.{columnName}";
+    public const string ABOVE_OR_BELOW     = "<>";
+    public const string AND                = nameof(AND);
+    public const string AS                 = nameof(AS);
+    public const string ASC                = nameof(ASC);
+    public const string AVERAGE            = nameof(AVERAGE);
+    public const string BETWEEN            = nameof(BETWEEN);
+    public const string BY                 = nameof(BY);
+    public const string COUNT              = nameof(COUNT);
+    public const string DELETE             = nameof(DELETE);
+    public const string DESC               = nameof(DESC);
+    public const string DISTINCT           = nameof(DISTINCT);
+    public const string EQUAL              = "==";
+    public const string EXISTS             = nameof(EXISTS);
+    public const string FROM               = nameof(FROM);
+    public const string FULL               = nameof(FULL);
     public const string GREATER            = ">";
     public const string GREATER_OR_EQUAL   = ">=";
     public const string GROUP              = nameof(GROUP);
@@ -58,4 +52,10 @@ public static class KeyWords
     public const string UPDATE             = nameof(UPDATE);
     public const string VALUES             = nameof(VALUES);
     public const string WHERE              = nameof(WHERE);
+
+
+    public static string GetName( this    Type   type ) => type.GetTableName();
+    public static string GetName<T>( this T      _ ) => typeof(T).GetTableName();
+    public static string GetName<T>( this T      _, string columnName ) => $"{typeof(T).GetTableName()}.{columnName}";
+    public static string GetName<T>( this string columnName ) => $"{typeof(T).GetTableName()}.{columnName}";
 }

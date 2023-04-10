@@ -4,15 +4,20 @@
 namespace Jakar.AppLogger.Common;
 
 
-public sealed class AppLoggerScope : IScope
+public sealed class AppLoggerScope<TState> : IScope
 {
     private readonly IScopeID _scope;
+    public           TState   State { get; }
 
 
-    public AppLoggerScope( IScopeID scope )
+    public AppLoggerScope( IScopeID scope, TState state )
     {
+        State          = state;
         _scope         = scope;
         _scope.ScopeID = Guid.NewGuid();
     }
     public void Dispose() => _scope.ScopeID = default;
+
+
+    public static implicit operator TState( AppLoggerScope<TState> scope ) => scope.State;
 }

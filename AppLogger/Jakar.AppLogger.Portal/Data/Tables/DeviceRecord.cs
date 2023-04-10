@@ -8,41 +8,43 @@ namespace Jakar.AppLogger.Portal.Data.Tables;
 [Table( "Devices" )]
 public sealed record DeviceRecord : LoggerTable<DeviceRecord>, IDevice
 {
-    public AppVersion                             AppVersion     { get; init; } = new();
-    public double                                 TimeZoneOffset { get; init; }
-    HwInfo? IDevice.                              HwInfo         => HardwareInfo?.FromJson<HwInfo>();
-    public                             int?       AppBuild       { get; init; }
-    public                             int?       OsApiLevel     { get; init; }
-    [MaxLength( 4096 )]         public string     DeviceID       { get; init; } = string.Empty;
-    [MaxLength( 256 )]          public string     Locale         { get; init; } = string.Empty;
-    [MaxLength( 256 )]          public string     OsName         { get; init; } = string.Empty;
-    [MaxLength( 256 )]          public string     SdkName        { get; init; } = string.Empty;
-    [MaxLength( 256 )]          public string     SdkVersion     { get; init; } = string.Empty;
-    [MaxLength( 4096 )]         public string?    AppNamespace   { get; init; }
-    [MaxLength( int.MaxValue )] public string?    HardwareInfo   { get; init; }
-    [MaxLength( 4096 )]         public string?    Model          { get; init; }
-    [MaxLength( 256 )]          public string?    OsBuild        { get; init; }
-    [MaxLength( 256 )]          public string?    OsVersion      { get; init; }
-    public                             PlatformID Platform       { get; init; }
+    public                                    int?       AppBuild            { get; init; }
+    [MaxLength( 4096 )] public                string?    AppNamespace        { get; init; }
+    public                                    AppVersion AppVersion          { get; init; } = new();
+    [MaxLength( 4096 )]                public string     DeviceID            { get; init; } = string.Empty;
+    [MaxLength( Attachment.MAX_SIZE )] public string?    HardwareInfo        { get; init; }
+    HwInfo? IDevice.                                     HwInfo              => HardwareInfo?.FromJson<HwInfo>();
+    [MaxLength( 256 )]  public string                    Locale              { get; init; } = string.Empty;
+    [MaxLength( 4096 )] public string?                   Model               { get; init; }
+    public                     int?                      OsApiLevel          { get; init; }
+    [MaxLength( 256 )] public  string?                   OsBuild             { get; init; }
+    public                     Architecture              ProcessArchitecture { get; init; }
+    [MaxLength( 256 )] public  string                    OsName              { get; init; } = string.Empty;
+    [MaxLength( 256 )] public  string                    OsVersion           { get; init; } = string.Empty;
+    public                     PlatformID                Platform            { get; init; }
+    [MaxLength( 256 )] public  string                    SdkName             { get; init; } = string.Empty;
+    [MaxLength( 256 )] public  string                    SdkVersion          { get; init; } = string.Empty;
+    public                     TimeSpan                  TimeZoneOffset      { get; init; }
 
 
     public DeviceRecord() : base() { }
     public DeviceRecord( IDevice device, UserRecord? caller = default ) : base( Guid.NewGuid(), caller )
     {
-        DeviceID       = device.DeviceID;
-        SdkName        = device.SdkName;
-        SdkVersion     = device.SdkVersion;
-        Model          = device.Model;
-        OsName         = device.OsName;
-        OsVersion      = device.OsVersion;
-        OsBuild        = device.OsBuild;
-        OsApiLevel     = device.OsApiLevel;
-        Locale         = device.Locale;
-        TimeZoneOffset = device.TimeZoneOffset;
-        AppVersion     = device.AppVersion;
-        AppBuild       = device.AppBuild;
-        AppNamespace   = device.AppNamespace;
-        HardwareInfo   = device.HwInfo?.ToJson();
+        DeviceID            = device.DeviceID;
+        SdkName             = device.SdkName;
+        SdkVersion          = device.SdkVersion;
+        Model               = device.Model;
+        OsName              = device.OsName;
+        OsVersion           = device.OsVersion;
+        OsBuild             = device.OsBuild;
+        OsApiLevel          = device.OsApiLevel;
+        Locale              = device.Locale;
+        TimeZoneOffset      = device.TimeZoneOffset;
+        AppVersion          = device.AppVersion;
+        AppBuild            = device.AppBuild;
+        AppNamespace        = device.AppNamespace;
+        ProcessArchitecture = device.ProcessArchitecture;
+        HardwareInfo        = device.HwInfo?.ToJson();
     }
 
 
@@ -66,7 +68,8 @@ public sealed record DeviceRecord : LoggerTable<DeviceRecord>, IDevice
                    AppVersion = device.AppVersion,
                    AppBuild = device.AppBuild,
                    AppNamespace = device.AppNamespace,
-                   HardwareInfo = device.HwInfo?.ToJson()
+                   ProcessArchitecture = device.ProcessArchitecture,
+                   HardwareInfo = device.HwInfo?.ToJson(),
                };
     }
 
@@ -78,6 +81,9 @@ public sealed record DeviceRecord : LoggerTable<DeviceRecord>, IDevice
         parameters.Add( nameof(CreatedBy), caller.ID );
         return parameters;
     }
+
+
+    public DeviceDescriptor ToDeviceDescriptor() => new(this);
 
 
     public override int CompareTo( DeviceRecord? other ) => string.CompareOrdinal( DeviceID, other?.DeviceID );

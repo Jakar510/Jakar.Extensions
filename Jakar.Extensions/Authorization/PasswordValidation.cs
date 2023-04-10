@@ -148,24 +148,22 @@ public readonly ref struct Requirements
 
 public sealed record PasswordRequirements : IOptions<PasswordRequirements>
 {
+    public string[]                                     BlockedPasswords         { get; set; } = Array.Empty<string>();
     public bool                                         CantStartWithNumber      { get; set; } = true;
     public bool                                         CantStartWithSpecialChar { get; set; } = true;
+    public string                                       LowerCase                { get; set; } = new(Randoms.LowerCase);
+    public int                                          MinLength                { get; init; }
+    public string                                       Numbers                  { get; set; } = new(Randoms.Numeric);
     public bool                                         RequireLowerCase         { get; set; } = true;
     public bool                                         RequireNumber            { get; set; } = true;
     public bool                                         RequireSpecialChar       { get; set; } = true;
     public bool                                         RequireUpperCase         { get; set; } = true;
-    public int                                          MinLength                { get; init; }
-    PasswordRequirements IOptions<PasswordRequirements>.Value                    => this;
-    public string                                       LowerCase                { get; set; } = new(Randoms.LowerCase);
-    public string                                       Numbers                  { get; set; } = new(Randoms.Numeric);
     public string                                       SpecialChars             { get; set; } = new(Randoms.SpecialChars);
     public string                                       UpperCase                { get; set; } = new(Randoms.UpperCase);
-    public string[]                                     BlockedPasswords         { get; set; } = Array.Empty<string>();
+    PasswordRequirements IOptions<PasswordRequirements>.Value                    => this;
 
 
-    public void SetBlockedPasswords( IEnumerable<string> passwords )
-    {
+    public void SetBlockedPasswords( IEnumerable<string> passwords ) =>
         BlockedPasswords = passwords.ToHashSet()
                                     .ToArray();
-    }
 }

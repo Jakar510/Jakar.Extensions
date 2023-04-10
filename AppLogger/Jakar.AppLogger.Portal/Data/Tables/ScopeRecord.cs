@@ -8,14 +8,14 @@ namespace Jakar.AppLogger.Portal.Data.Tables;
 [Table( "Scopes" )]
 public sealed record ScopeRecord : LoggerTable<ScopeRecord>
 {
-    public Guid ScopeID   { get; init; }
-    public Guid SessionID { get; init; }
     public Guid AppID     { get; init; }
     public Guid DeviceID  { get; init; }
+    public Guid ScopeID   { get; init; }
+    public Guid SessionID { get; init; }
 
 
     public ScopeRecord() : base() { }
-    public ScopeRecord( Log log, AppRecord app, DeviceRecord device, SessionRecord session, UserRecord? caller = default ) : base( log.ID, caller )
+    public ScopeRecord( AppLog log, AppRecord app, DeviceRecord device, SessionRecord session, UserRecord? caller = default ) : base( log.ID, caller )
     {
         ArgumentNullException.ThrowIfNull( log.ScopeID );
 

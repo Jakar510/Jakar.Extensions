@@ -28,9 +28,11 @@ namespace AppLogger.Experiments;
 [MemoryDiagnoser]
 public class GuidBenchmarks
 {
-    private const           string GUID  = "0365BC9B-3DE3-4B75-9F7E-2A0F23EFA5A2";
     private static readonly Guid   _guid = Guid.Parse( GUID );
     private static readonly string _b64  = _guid.ToBase64();
+
+
+    private const string GUID = "0365BC9B-3DE3-4B75-9F7E-2A0F23EFA5A2";
 
 
     [Benchmark] public Guid StringParse() => Guid.Parse( GUID );

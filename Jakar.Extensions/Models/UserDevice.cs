@@ -5,28 +5,29 @@
 
 public interface IUserDevice<TID> : IEquatable<IUserDevice<TID>>, IUniqueID<TID> where TID : struct, IComparable<TID>, IEquatable<TID>
 {
-    public DateTime TimeStamp { get; }
-
-
-    /// <summary> DeviceIdiom </summary>
-    public DeviceIdiom Idiom { get; }
-
-    /// <summary> DevicePlatform </summary>
-    public DevicePlatform Platform { get; }
+    public Guid   DeviceID   { get; }
+    public string DeviceName { get; }
 
 
     /// <summary> DeviceType </summary>
     public DeviceType DeviceType { get; }
 
-    public Guid   DeviceID     { get; }
-    public string DeviceName   { get; }
-    public string Manufacturer { get; }
-    public string Model        { get; }
-    string        OsVersion    { get; }
+
+    /// <summary> DeviceIdiom </summary>
+    public DeviceIdiom Idiom { get; }
 
 
     /// <summary> Last known <see cref="IPAddress"/> </summary>
     public string? IP { get; }
+
+    public string Manufacturer { get; }
+    public string Model        { get; }
+    string        OsVersion    { get; }
+
+    /// <summary> DevicePlatform </summary>
+    public DevicePlatform Platform { get; }
+
+    public DateTime TimeStamp { get; }
 }
 
 
@@ -35,16 +36,14 @@ public interface IUserDevice<TID> : IEquatable<IUserDevice<TID>>, IUniqueID<TID>
 [Serializable]
 public class UserDevice<TID> : ObservableClass, IUserDevice<TID> where TID : struct, IComparable<TID>, IEquatable<TID>
 {
-    private string?        _ip;
-    public  DateTime       TimeStamp    { get; init; }
-    public  DeviceIdiom    Idiom        { get; init; }
-    public  DevicePlatform Platform     { get; init; }
-    public  DeviceType     DeviceType   { get; init; }
-    public  Guid           DeviceID     { get; init; }
-    public  string         DeviceName   { get; init; } = string.Empty;
-    public  string         Manufacturer { get; init; } = string.Empty;
-    public  string         Model        { get; init; } = string.Empty;
-    public  string         OsVersion    { get; init; } = string.Empty;
+    private string?    _ip;
+    public  Guid       DeviceID   { get; init; }
+    public  string     DeviceName { get; init; } = string.Empty;
+    public  DeviceType DeviceType { get; init; }
+
+
+    public TID         ID    { get; init; }
+    public DeviceIdiom Idiom { get; init; }
 
 
     public string? IP
@@ -52,9 +51,11 @@ public class UserDevice<TID> : ObservableClass, IUserDevice<TID> where TID : str
         get => _ip;
         set => SetProperty( ref _ip, value );
     }
-
-
-    public TID ID { get; init; }
+    public string         Manufacturer { get; init; } = string.Empty;
+    public string         Model        { get; init; } = string.Empty;
+    public string         OsVersion    { get; init; } = string.Empty;
+    public DevicePlatform Platform     { get; init; }
+    public DateTime       TimeStamp    { get; init; }
 
 
     public UserDevice() { }

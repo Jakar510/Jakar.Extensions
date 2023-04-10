@@ -13,10 +13,10 @@ public class Randoms : ObservableClass
     public static char[]                AlphaNumeric { get; }      = @"abcdefghijklmnopqrstuvwxyzABCDEFGHJKLMNOPQRSTUVWXYZ0123456789".ToArray();
     public static char[]                LowerCase    { get; }      = @"abcdefghijklmnopqrstuvwxyz".ToArray();
     public static char[]                Numeric      { get; }      = @"0123456789".ToArray();
-    public static char[]                SpecialChars { get; }      = @"_-.!#@+/*^=>|/\".ToArray();
-    public static char[]                UpperCase    { get; }      = @"ABCDEFGHJKLMNOPQRSTUVWXYZ".ToArray();
     public static Random                Random       { get; set; } = new(69420);
     public static RandomNumberGenerator Rng          { get; set; } = RandomNumberGenerator.Create();
+    public static char[]                SpecialChars { get; }      = @"_-.!#@+/*^=>|/\".ToArray();
+    public static char[]                UpperCase    { get; }      = @"ABCDEFGHJKLMNOPQRSTUVWXYZ".ToArray();
 
 
     public static string GenerateToken( int length = 32 )

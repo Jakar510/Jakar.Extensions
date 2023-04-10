@@ -9,18 +9,18 @@ public class MultiDeque<T> : IMultiQueue<T>
 {
     protected readonly Deque<T> _queue;
     protected readonly object   _lock = new();
-    public bool IsEmpty
-    {
-        get
-        {
-            lock (_lock) { return _queue.IsEmpty(); }
-        }
-    }
     public int Count
     {
         get
         {
             lock (_lock) { return _queue.Count; }
+        }
+    }
+    public bool IsEmpty
+    {
+        get
+        {
+            lock (_lock) { return _queue.IsEmpty(); }
         }
     }
 

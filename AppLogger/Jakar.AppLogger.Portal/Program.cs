@@ -1,10 +1,8 @@
-using FluentMigrator.Infrastructure;
 using FluentMigrator;
-using System;
+using FluentMigrator.Infrastructure;
 using FluentMigrator.Runner;
 using FluentMigrator.Runner.Initialization;
 using FluentMigrator.Runner.Logging;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -14,7 +12,7 @@ string[] urls =
 {
     "https://localhost",
     CommonUrl.Listen_443.OriginalString,
-    "https://0.0.0.0:6969"
+    "https://0.0.0.0:6969",
 };
 
 
@@ -26,7 +24,7 @@ builder.AddDefaultLogging<AppLoggerPortal>( true )
        .AddProvider( new FluentMigratorConsoleLoggerProvider( new OptionsWrapper<FluentMigratorLoggerOptions>( new FluentMigratorLoggerOptions
                                                                                                                {
                                                                                                                    ShowElapsedTime = true,
-                                                                                                                   ShowSql         = true
+                                                                                                                   ShowSql         = true,
                                                                                                                } ) ) );
 
 
@@ -73,13 +71,13 @@ builder.Services.AddSwaggerGen( swagger =>
                                                             Contact = new OpenApiContact
                                                                       {
                                                                           Url  = new Uri( "https://github.com/Jakar510/Jakar.AppLogger" ),
-                                                                          Name = "Jakar.AppLogger"
+                                                                          Name = "Jakar.AppLogger",
                                                                       },
                                                             License = new OpenApiLicense
                                                                       {
                                                                           Url  = new Uri( "https://www.gnu.org/licenses/gpl-3.0.en.html" ),
-                                                                          Name = "GNU General Public License v3.0"
-                                                                      }
+                                                                          Name = "GNU General Public License v3.0",
+                                                                      },
                                                         } );
 
 

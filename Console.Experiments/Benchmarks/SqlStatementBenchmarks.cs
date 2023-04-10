@@ -1,10 +1,7 @@
 ﻿// TrueLogic :: Experiments
 // 03/29/2023  5:39 PM
 
-using System.Text;
-using BenchmarkDotNet.Attributes;
-using BenchmarkDotNet.Jobs;
-using BenchmarkDotNet.Order;
+
 
 
 // using CommunityToolkit.HighPerformance;
@@ -42,7 +39,6 @@ AMD Ryzen 9 3900X, 1 CPU, 24 logical and 12 physical cores
 [MemoryDiagnoser]
 public class SqlStatementBenchmarks
 {
-    public string TableName { get; set; } = nameof(TableName);
     public IEnumerable<long> ids
     {
         get
@@ -51,6 +47,7 @@ public class SqlStatementBenchmarks
             foreach ( int i in Enumerable.Range( 1, 10 ) ) { yield return i; }
         }
     }
+    public string TableName { get; set; } = nameof(TableName);
 
 
     [Benchmark]
@@ -66,19 +63,19 @@ public class SqlStatementBenchmarks
         using var sb = new ValueStringBuilder();
         sb.AppendJoin( ", ", ids );
     }
-    
+
 
     [Benchmark]
     public void Test_GetEnumerator()
     {
-        using var sb = ids.GetEnumerator();
+        using IEnumerator<long> sb = ids.GetEnumerator();
     }
 
 
     [Benchmark]
     public ReadOnlySpan<char> Test_VSB()
     {
-        using var sb = new ValueStringBuilder( $"DELETE FROM " );
+        using var sb = new ValueStringBuilder( "DELETE FROM " );
         sb.Append( TableName );
         sb.Append( "WHERE ID in ( " );
         sb.AppendJoin( ", ", ids );

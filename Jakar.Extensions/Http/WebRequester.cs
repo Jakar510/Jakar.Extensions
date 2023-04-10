@@ -10,8 +10,8 @@ public sealed partial class WebRequester : IDisposable
     private readonly HttpClient         _client;
     private readonly IHostInfo          _host;
     private readonly RetryPolicy?       _retryPolicy;
-    public           Encoding           Encoding              { get; init; }
     public           HttpRequestHeaders DefaultRequestHeaders => _client.DefaultRequestHeaders;
+    public           Encoding           Encoding              { get; init; }
 
 
     public TimeSpan Timeout
@@ -102,7 +102,7 @@ public sealed partial class WebRequester : IDisposable
     public WebHandler Put( string relativePath, IEnumerable<BaseClass>      value,   CancellationToken token ) => Put( relativePath,              new JsonContent( value.ToPrettyJson(), Encoding ),   token );
     public WebHandler Put( string relativePath, BaseRecord                  value,   CancellationToken token ) => Put( relativePath,              new JsonContent( value.ToPrettyJson(), Encoding ),   token );
     public WebHandler Put( string relativePath, IEnumerable<BaseRecord>     value,   CancellationToken token ) => Put( relativePath,              new JsonContent( value.ToPrettyJson(), Encoding ),   token );
-    
-    
+
+
     public void Dispose() => _client.Dispose();
 }

@@ -13,18 +13,18 @@ public sealed class Debug : ObservableClass
     private          ReadOnlyMemory<byte> _screenShot;
 
 
-    public   Guid      InstallID => _logger.Config.InstallID;
-    internal LocalFile FeedBack  => _fileSystemApi.FeedBackFile;
     public object? AppState
     {
         get => _appState;
         set => SetProperty( ref _appState, value );
     }
+    internal LocalFile FeedBack => _fileSystemApi.FeedBackFile;
     public object? Incoming
     {
         get => _incoming;
         set => SetProperty( ref _incoming, value );
     }
+    public Guid InstallID => _logger.Config.InstallID;
     public object? Outgoing
     {
         get => _outgoing;
@@ -44,12 +44,7 @@ public sealed class Debug : ObservableClass
     }
 
 
-    /// <summary>
-    ///     <see cref = "Task.Run(Action)" />
-    /// </summary>
     public void HandleException( Exception e ) => Task.Run( () => HandleExceptionAsync( e ) );
-
-
     public async ValueTask HandleExceptionAsync( Exception e )
     {
         ScreenShot = await _logger.TryTakeScreenShot();
@@ -60,13 +55,19 @@ public sealed class Debug : ObservableClass
         if ( feedback is null ) { FeedBack.Delete(); }
         else { await FeedBack.WriteAsync( feedback.ToPrettyJson() ); }
     }
+    public async Task SaveFeedBack( string? feedback )
+    {
+        if ( feedback is null ) { FeedBack.Delete(); }
+        else { await FeedBack.WriteAsync( feedback ); }
+    }
+    public async Task SaveFeedBack( ReadOnlyMemory<byte> feedback, CancellationToken token ) => await FeedBack.WriteAsync( feedback, token );
 
 
-    public void TrackError( Exception e )
+    public void TrackError( Exception e, EventId? eventId = default )
     {
         if ( !_logger.Config.IncludeAppStateOnError )
         {
-            TrackError( e, default );
+            TrackError( e, eventId );
             return;
         }
 
@@ -75,24 +76,24 @@ public sealed class Debug : ObservableClass
         var eventDetails = new Dictionary<string, JToken?>();
         foreach ( (string? key, string? value) in dict ) { eventDetails.Add( key, value ); }
 
-        TrackError( e, eventDetails );
+        TrackError( e, eventDetails, eventId );
     }
-    public void TrackError( Exception ex, IDictionary<string, JToken?>? eventDetails )
+    public void TrackError( Exception ex, IDictionary<string, JToken?>? eventDetails, EventId? eventId = default )
     {
         List<Attachment> attachments = GetAttachments( ex, eventDetails );
 
         if ( FeedBack.Exists ) { attachments.Add( Attachment.Create( FeedBack ) ); }
 
-        _logger.TrackError( ex, eventDetails, attachments );
+        _logger.TrackError( ex, eventId ?? new EventId( ex.Message.GetHashCode(), ex.Message ), attachments, eventDetails );
         ScreenShot = default;
     }
-    public async ValueTask TrackErrorAsync( Exception ex, IDictionary<string, JToken?>? eventDetails )
+    public async ValueTask TrackErrorAsync( Exception ex, IDictionary<string, JToken?>? eventDetails, EventId? eventId = default )
     {
         List<Attachment> attachments = GetAttachments( ex, eventDetails );
 
         if ( FeedBack.Exists ) { attachments.Add( await Attachment.CreateAsync( FeedBack ) ); }
 
-        _logger.TrackError( ex, eventDetails, attachments );
+        _logger.TrackError( ex, eventId ?? new EventId( ex.Message.GetHashCode(), ex.Message ), attachments, eventDetails );
         ScreenShot = default;
     }
     private List<Attachment> GetAttachments( Exception ex, IDictionary<string, JToken?>? eventDetails )
@@ -101,7 +102,7 @@ public sealed class Debug : ObservableClass
                           {
                               Attachment.Create( ex.ToString(),
                                                  ex.GetType()
-                                                   .FullName )
+                                                   .FullName ),
                           };
 
 

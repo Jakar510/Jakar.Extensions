@@ -18,6 +18,9 @@ namespace Jakar.Extensions;
 [SuppressMessage( "ReSharper", "NullableWarningSuppressionIsUsed" )]
 public static partial class TypeExtensions
 {
+    private const          string NULLABLE         = "System.Runtime.CompilerServices.NullableAttribute";
+    private const          string NULLABLE_CONTEXT = "System.Runtime.CompilerServices.NullableContextAttribute";
+    public static readonly Type   NullableType     = typeof(Nullable<>);
     public static bool IsNullable( this PropertyInfo  property ) => property.PropertyType.IsNullableHelper( property.DeclaringType, property.CustomAttributes );
     public static bool IsNullable( this FieldInfo     field ) => field.FieldType.IsNullableHelper( field.DeclaringType, field.CustomAttributes );
     public static bool IsNullable( this ParameterInfo parameter ) => parameter.ParameterType.IsNullableHelper( parameter.Member, parameter.CustomAttributes );
@@ -86,7 +89,4 @@ public static partial class TypeExtensions
         result = default;
         return false;
     }
-    private const          string NULLABLE         = "System.Runtime.CompilerServices.NullableAttribute";
-    private const          string NULLABLE_CONTEXT = "System.Runtime.CompilerServices.NullableContextAttribute";
-    public static readonly Type   NullableType     = typeof(Nullable<>);
 }

@@ -12,7 +12,7 @@ public sealed class TypePropertiesCache : ConcurrentDictionary<Type, TypePropert
 
     static TypePropertiesCache()
     {
-        Assembly? assembly = Assembly.GetEntryAssembly();
+        var assembly = Assembly.GetEntryAssembly();
         if ( assembly is not null ) { Current.Register( assembly ); }
 
         Current.Register( Assembly.GetCallingAssembly() );
@@ -67,6 +67,10 @@ public sealed class TypePropertiesCache : ConcurrentDictionary<Type, TypePropert
     public sealed class Properties : IReadOnlyDictionary<DbInstance, Properties.Descriptors>
     {
         private readonly IReadOnlyDictionary<DbInstance, Descriptors> _dictionary;
+        public int Count
+        {
+            [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _dictionary.Count;
+        }
 
 
         public Descriptors this[ IConnectableDb value ]
@@ -85,10 +89,6 @@ public sealed class TypePropertiesCache : ConcurrentDictionary<Type, TypePropert
         {
             [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _dictionary.Values;
         }
-        public int Count
-        {
-            [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _dictionary.Count;
-        }
 
 
         public Properties( Type type )
@@ -98,7 +98,7 @@ public sealed class TypePropertiesCache : ConcurrentDictionary<Type, TypePropert
             _dictionary = new Dictionary<DbInstance, Descriptors>
                           {
                               [DbInstance.Postgres] = properties.ToDictionary( x => x.Name, Descriptor.Postgres ),
-                              [DbInstance.MsSql]    = properties.ToDictionary( x => x.Name, Descriptor.MsSql )
+                              [DbInstance.MsSql]    = properties.ToDictionary( x => x.Name, Descriptor.MsSql ),
                           };
         }
 
@@ -139,12 +139,12 @@ public sealed class TypePropertiesCache : ConcurrentDictionary<Type, TypePropert
         public sealed class Descriptors : IReadOnlyDictionary<string, Descriptor>
         {
             private readonly IReadOnlyDictionary<string, Descriptor> _dictionary;
+            public           int                                     Count => _dictionary.Count;
 
 
             public Descriptor this[ string key ] => _dictionary[key];
-            public IEnumerable<Descriptor> Values => _dictionary.Values;
             public IEnumerable<string>     Keys   => _dictionary.Keys;
-            public int                     Count  => _dictionary.Count;
+            public IEnumerable<Descriptor> Values => _dictionary.Values;
 
 
             public Descriptors( Dictionary<string, Descriptor>                          dictionary ) => _dictionary = dictionary;

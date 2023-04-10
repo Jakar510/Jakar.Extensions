@@ -5,8 +5,6 @@
 [Table( "Resx" )]
 public sealed record ResxRowTable : TableRecord<ResxRowTable>
 {
-    public string  Key        { get; init; } = string.Empty;
-    public string  Neutral    { get; init; } = string.Empty;
     public string? Arabic     { get; init; }
     public string? Chinese    { get; init; }
     public string? Czech      { get; init; }
@@ -15,20 +13,22 @@ public sealed record ResxRowTable : TableRecord<ResxRowTable>
     public string? French     { get; init; }
     public string? German     { get; init; }
     public string? Japanese   { get; init; }
+    public string  Key        { get; init; } = string.Empty;
+    public long    KeyID      { get; init; }
     public string? Korean     { get; init; }
+    public string  Neutral    { get; init; } = string.Empty;
     public string? Polish     { get; init; }
     public string? Portuguese { get; init; }
     public string? Spanish    { get; init; }
     public string? Swedish    { get; init; }
     public string? Thai       { get; init; }
-    public long    KeyID      { get; init; }
 
 
     public ResxRowTable() { }
     public ResxRowTable( string key, long keyID, UserRecord? caller = default ) : base( Guid.NewGuid(), caller )
     {
-        Key         = key;
-        KeyID       = keyID;
+        Key   = key;
+        KeyID = keyID;
     }
     public ResxRowTable( string key, long keyID, string neutral, UserRecord? caller = default ) : this( key, keyID, caller ) => Neutral = neutral;
     public ResxRowTable( string      key,
@@ -135,21 +135,22 @@ public sealed record ResxRowTable : TableRecord<ResxRowTable>
 
     public string GetValue( in SupportedLanguage language ) => language switch
                                                                {
-                                                                   SupportedLanguage.English    => English,
-                                                                   SupportedLanguage.Spanish    => Spanish,
-                                                                   SupportedLanguage.French     => French,
-                                                                   SupportedLanguage.Swedish    => Swedish,
-                                                                   SupportedLanguage.German     => German,
-                                                                   SupportedLanguage.Chinese    => Chinese,
-                                                                   SupportedLanguage.Polish     => Polish,
-                                                                   SupportedLanguage.Thai       => Thai,
-                                                                   SupportedLanguage.Japanese   => Japanese,
-                                                                   SupportedLanguage.Czech      => Czech,
-                                                                   SupportedLanguage.Portuguese => Portuguese,
-                                                                   SupportedLanguage.Dutch      => Dutch,
-                                                                   SupportedLanguage.Korean     => Korean,
-                                                                   SupportedLanguage.Arabic     => Arabic,
-                                                                   _                            => throw new OutOfRangeException( nameof(language), language ),
+                                                                   SupportedLanguage.English     => English,
+                                                                   SupportedLanguage.Spanish     => Spanish,
+                                                                   SupportedLanguage.French      => French,
+                                                                   SupportedLanguage.Swedish     => Swedish,
+                                                                   SupportedLanguage.German      => German,
+                                                                   SupportedLanguage.Chinese     => Chinese,
+                                                                   SupportedLanguage.Polish      => Polish,
+                                                                   SupportedLanguage.Thai        => Thai,
+                                                                   SupportedLanguage.Japanese    => Japanese,
+                                                                   SupportedLanguage.Czech       => Czech,
+                                                                   SupportedLanguage.Portuguese  => Portuguese,
+                                                                   SupportedLanguage.Dutch       => Dutch,
+                                                                   SupportedLanguage.Korean      => Korean,
+                                                                   SupportedLanguage.Arabic      => Arabic,
+                                                                   SupportedLanguage.Unspecified => throw new OutOfRangeException( nameof(language), language ),
+                                                                   _                             => throw new OutOfRangeException( nameof(language), language ),
                                                                } ?? Neutral;
     public override bool Equals( ResxRowTable? other )
     {

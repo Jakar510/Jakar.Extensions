@@ -15,6 +15,7 @@ public class AppServices : BaseViewModel, ILocalStorageService, IAuthenticationS
     private readonly IModalService          _modal;
     private readonly IToastService          _toastService;
     private readonly NavigationManager      _navigation;
+    public           string                 BaseUri => _navigation.BaseUri;
 
 
     public ContextMenuService      ContextMenus          { get; init; }
@@ -22,9 +23,8 @@ public class AppServices : BaseViewModel, ILocalStorageService, IAuthenticationS
     public NotificationService     Notifications         { get; init; }
     public ProtectedLocalStorage   ProtectedLocalStorage { get; init; }
     public ProtectedSessionStorage SessionStorage        { get; init; }
-    public string                  BaseUri               => _navigation.BaseUri;
-    public string                  Uri                   => _navigation.Uri;
     public TooltipService          Tooltips              { get; init; }
+    public string                  Uri                   => _navigation.Uri;
 
 
     public AppServices( IModalService           modal,

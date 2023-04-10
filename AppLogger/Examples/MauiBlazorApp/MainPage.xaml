@@ -10,7 +10,7 @@
     <BlazorWebView HostPage="wwwroot/index.html">
         <BlazorWebView.RootComponents>
             <RootComponent Selector="#app"
-                           ComponentType="{x:Type local:Main}"/>
+                           ComponentType="{x:Type local:Main}" />
         </BlazorWebView.RootComponents>
     </BlazorWebView>
 

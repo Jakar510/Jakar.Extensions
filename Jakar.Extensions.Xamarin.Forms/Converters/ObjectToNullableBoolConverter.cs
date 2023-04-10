@@ -5,6 +5,17 @@ namespace Jakar.Extensions.Xamarin.Forms;
 [TypeConverter( typeof(bool?) )]
 public class ObjectToNullableBoolConverter : TypeConverter, IValueConverter, IExtendedTypeConverter
 {
+    private static readonly Type[] _types =
+    {
+        typeof(bool),
+        typeof(int),
+        typeof(uint),
+        typeof(long),
+        typeof(ulong),
+        typeof(float),
+        typeof(double),
+        typeof(string),
+    };
     public static bool? Convert( object? value ) => value switch
                                                     {
                                                         null     => null,
@@ -20,17 +31,6 @@ public class ObjectToNullableBoolConverter : TypeConverter, IValueConverter, IEx
                                                                         : !string.IsNullOrWhiteSpace( s ),
                                                         _ => true,
                                                     };
-    private static readonly Type[] _types =
-    {
-        typeof(bool),
-        typeof(int),
-        typeof(uint),
-        typeof(long),
-        typeof(ulong),
-        typeof(float),
-        typeof(double),
-        typeof(string),
-    };
 
     public override bool CanConvertFrom( Type? sourceType ) => sourceType is null || sourceType.IsOneOf( _types );
 

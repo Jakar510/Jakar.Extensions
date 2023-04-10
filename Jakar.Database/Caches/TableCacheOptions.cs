@@ -8,9 +8,9 @@ namespace Jakar.Database.Caches;
 [SuppressMessage( "ReSharper", "ConvertToPrimaryConstructor" )]
 public sealed record TableCacheOptions : IOptions<TableCacheOptions>
 {
-    TableCacheOptions IOptions<TableCacheOptions>.Value       => this;
     public TimeSpan                               ExpireTime  { get; set; } = TimeSpan.FromMinutes( 1 );
     public TimeSpan                               RefreshTime { get; set; } = TimeSpan.FromSeconds( 10 );
+    TableCacheOptions IOptions<TableCacheOptions>.Value       => this;
 
 
     public static IServiceCollection Register( IServiceCollection collection )

@@ -1,18 +1,14 @@
 ﻿#nullable enable
-using System.Text;
-
-
-
 namespace Jakar.Extensions;
 
 
 public static class StringExtensions
 {
-    private static readonly char[] _ends = new[]
-                                           {
-                                               '\n',
-                                               '\r'
-                                           };
+    private static readonly char[] _ends =
+    {
+        '\n',
+        '\r',
+    };
 
 
     public static bool ContainsAbout( this string source, string search ) => source.Contains( search, StringComparison.OrdinalIgnoreCase );
@@ -47,7 +43,7 @@ public static class StringExtensions
                          {
                              { '(', ')' },
                              { '{', '}' },
-                             { '[', ']' }
+                             { '[', ']' },
                          };
 
         var brackets = new Stack<char>();
@@ -84,8 +80,8 @@ public static class StringExtensions
     }
 
 
-    public static byte[] ToByteArray( this                    string value, Encoding? encoding = default ) => (encoding ?? Encoding.Default).GetBytes( value );
-    public static unsafe ReadOnlySpan<byte> AsSpanBytes( this string value, Encoding  encoding ) => AsSpanBytes( value.AsSpan(), encoding );
+    public static byte[] ToByteArray( this             string value, Encoding? encoding = default ) => (encoding ?? Encoding.Default).GetBytes( value );
+    public static ReadOnlySpan<byte> AsSpanBytes( this string value, Encoding  encoding ) => AsSpanBytes( value.AsSpan(), encoding );
     public static unsafe ReadOnlySpan<byte> AsSpanBytes( this ReadOnlySpan<char> value, Encoding encoding )
     {
         Span<byte> span = stackalloc byte[encoding.GetByteCount( value )];

@@ -20,7 +20,7 @@ public partial class DbTable<TRecord>
                      {
                          DbInstance.MsSql    => $"SELECT TOP 1 * FROM {SchemaTableName} ORDER BY {RandomMethod}",
                          DbInstance.Postgres => $"SELECT * FROM {SchemaTableName} ORDER BY {RandomMethod} LIMIT 1",
-                         _                   => throw new OutOfRangeException( nameof(Instance), Instance )
+                         _                   => throw new OutOfRangeException( nameof(Instance), Instance ),
                      };
 
         try { return await connection.QueryFirstAsync<TRecord>( sql, default, transaction ); }
@@ -40,7 +40,7 @@ public partial class DbTable<TRecord>
                      {
                          DbInstance.MsSql    => $"SELECT TOP {count} * FROM {SchemaTableName} WHERE {OwnerUserID} = @{OwnerUserID} ORDER BY {RandomMethod}",
                          DbInstance.Postgres => $"SELECT * FROM {SchemaTableName} WHERE {OwnerUserID} = @{OwnerUserID} ORDER BY {RandomMethod} LIMIT {count}",
-                         _                   => throw new OutOfRangeException( nameof(Instance), Instance )
+                         _                   => throw new OutOfRangeException( nameof(Instance), Instance ),
                      };
 
         try { return await connection.QueryFirstAsync<TRecord>( sql, param, transaction ); }
@@ -55,7 +55,7 @@ public partial class DbTable<TRecord>
                      {
                          DbInstance.MsSql    => $"SELECT TOP {count} * FROM {SchemaTableName} ORDER BY {RandomMethod}",
                          DbInstance.Postgres => $"SELECT * FROM {SchemaTableName} ORDER BY {RandomMethod} LIMIT {count}",
-                         _                   => throw new OutOfRangeException( nameof(Instance), Instance )
+                         _                   => throw new OutOfRangeException( nameof(Instance), Instance ),
                      };
 
         return Where( connection, transaction, sql, default, token );

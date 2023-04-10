@@ -16,6 +16,7 @@ public sealed class AppVersion : IComparable,
                                  ISpanFormattable
 #endif
 {
+    public static AppVersion Default { get; } = new();
     public Format          Scheme        { get; init; }
     public int             Major         { get; init; }
     public int?            Minor         { get; init; }
@@ -333,7 +334,7 @@ public sealed class AppVersion : IComparable,
             Format.Detailed          => new Version( Major, Minor ?? 0, Maintenance ?? 0, Build ?? 0 ),
             Format.DetailedRevisions => new Version( Major, Minor ?? 0, Maintenance ?? 0, Build ?? 0 ),
             Format.Complete          => new Version( Major, Minor ?? 0, Maintenance ?? 0, Build ?? 0 ),
-            _                        => throw new OutOfRangeException( nameof(Scheme), Scheme )
+            _                        => throw new OutOfRangeException( nameof(Scheme), Scheme ),
         };
 
 
@@ -397,7 +398,7 @@ public sealed class AppVersion : IComparable,
         {
             Version version    => CompareTo( version ),
             AppVersion version => CompareTo( version ),
-            _                  => throw new ExpectedValueTypeException( nameof(other), other, typeof(Version), typeof(AppVersion) )
+            _                  => throw new ExpectedValueTypeException( nameof(other), other, typeof(Version), typeof(AppVersion) ),
         };
 
 
@@ -511,7 +512,7 @@ public sealed class AppVersion : IComparable,
         DetailedRevisions,
 
         /// <summary> Major.Minor.Maintenance.MajorRevision.MinorRevision.Build </summary>
-        Complete
+        Complete,
     }
 
 

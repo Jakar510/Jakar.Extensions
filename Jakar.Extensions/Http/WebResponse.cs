@@ -12,6 +12,8 @@ namespace Jakar.Extensions;
 [SuppressMessage( "ReSharper", "CollectionNeverQueried.Global" )]
 public readonly record struct WebResponse<T>
 {
+    public const        string          ERROR_MESSAGE = "Error Message: ";
+    public const        string          UNKNOWN_ERROR = "Unknown Error";
     public              List<string>    Allow             { get; init; } = new();
     public              List<string>    ContentEncoding   { get; init; } = new();
     public              long?           ContentLength     { get; init; } = default;
@@ -28,10 +30,6 @@ public readonly record struct WebResponse<T>
     public              Status          StatusCode        { get; init; } = Status.NotSet;
     public              string?         StatusDescription { get; init; } = default;
     public              Uri?            URL               { get; init; } = default;
-
-
-    public const string ERROR_MESSAGE = "Error Message: ";
-    public const string UNKNOWN_ERROR = "Unknown Error";
 
 
     public WebResponse( HttpResponseMessage response, string    error ) : this( response, default, default, error ) { }

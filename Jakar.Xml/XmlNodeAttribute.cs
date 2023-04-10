@@ -9,9 +9,9 @@ namespace Jakar.Xml;
 
 public sealed class XmlNodeAttribute : Attribute
 {
-    public bool       Properties { get; init; }
-    public string?    Name       { get; init; }
     public XmlInclude Include    { get; init; }
+    public string?    Name       { get; init; }
+    public bool       Properties { get; init; }
 
 
     public XmlNodeAttribute( Type type ) : this( type.Name ) { }

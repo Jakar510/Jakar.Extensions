@@ -7,6 +7,7 @@ namespace Jakar.AppLogger.Portal.Data.DbMigrations;
 
 
 [Migration( 104 )]
+
 // ReSharper disable once InconsistentNaming
 public sealed class Create_AttachmentRecord : LoggerMigration<AttachmentRecord>
 {
@@ -18,7 +19,7 @@ public sealed class Create_AttachmentRecord : LoggerMigration<AttachmentRecord>
     {
         CheckSchema();
         ICreateTableWithColumnSyntax table = CreateTable();
-        
+
         table.WithColumn( nameof(AttachmentRecord.IsBinary) )
              .AsBoolean()
              .NotNullable();

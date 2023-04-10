@@ -5,10 +5,10 @@
 public sealed class RecordCollection<TRecord> : IReadOnlyList<TRecord> where TRecord : BaseRecord, IUniqueID<Guid>
 {
     private readonly List<TRecord> _records = new();
+    public           int           Count => _records.Count;
 
 
     public TRecord this[ int index ] => _records[index];
-    public int Count => _records.Count;
 
 
     public RecordCollection() : base() { }
@@ -34,7 +34,7 @@ public sealed class RecordCollection<TRecord> : IReadOnlyList<TRecord> where TRe
 
         _records.Add( item with
                       {
-                          ID = Guid.NewGuid()
+                          ID = Guid.NewGuid(),
                       } );
 
         return this;

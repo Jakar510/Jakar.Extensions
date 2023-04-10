@@ -226,7 +226,7 @@ public partial class Database
         {
             return IdentityResult.Failed( new IdentityError
                                           {
-                                              Description = Options.UserExists
+                                              Description = Options.UserExists,
                                           } );
         }
 
@@ -248,7 +248,7 @@ public partial class Database
         {
             return IdentityResult.Failed( new IdentityError
                                           {
-                                              Description = e.Message
+                                              Description = e.Message,
                                           } );
         }
     }
@@ -266,7 +266,7 @@ public partial class Database
         {
             return IdentityResult.Failed( new IdentityError
                                           {
-                                              Description = e.Message
+                                              Description = e.Message,
                                           } );
         }
     }

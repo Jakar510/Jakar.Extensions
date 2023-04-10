@@ -5,34 +5,12 @@ namespace Jakar.Extensions;
 [Serializable]
 public class LanguageApi : ObservableClass
 {
-    private Language?           _selectedLanguage;
-    private Language.Collection _languages = new(Language.Supported);
-    private CultureInfo?        _defaultThreadCurrentCulture;
-    private CultureInfo?        _defaultThreadCurrentUiCulture;
+    private Language.Collection _languages        = new(Language.Supported);
     private CultureInfo         _currentCulture   = CultureInfo.CurrentCulture;
     private CultureInfo         _currentUiCulture = CultureInfo.CurrentUICulture;
-
-
-    public CultureInfo? DefaultThreadCurrentUiCulture
-    {
-        get => _defaultThreadCurrentUiCulture;
-        set
-        {
-            if ( !SetProperty( ref _defaultThreadCurrentUiCulture, value ) ) { return; }
-
-            CultureInfo.DefaultThreadCurrentUICulture = value;
-        }
-    }
-    public CultureInfo? DefaultThreadCurrentCulture
-    {
-        get => _defaultThreadCurrentCulture;
-        set
-        {
-            if ( !SetProperty( ref _defaultThreadCurrentCulture, value ) ) { return; }
-
-            CultureInfo.DefaultThreadCurrentCulture = value;
-        }
-    }
+    private CultureInfo?        _defaultThreadCurrentCulture;
+    private CultureInfo?        _defaultThreadCurrentUiCulture;
+    private Language?           _selectedLanguage;
     public CultureInfo CurrentCulture
     {
         get => _currentCulture;
@@ -55,16 +33,26 @@ public class LanguageApi : ObservableClass
             Thread.CurrentThread.CurrentUICulture = value;
         }
     }
-    public Language SelectedLanguage
+    public CultureInfo? DefaultThreadCurrentCulture
     {
-        get => _selectedLanguage ?? throw new NullReferenceException( nameof(_selectedLanguage) ); // ?? throw new NullReferenceException(nameof(_selectedLanguage));
+        get => _defaultThreadCurrentCulture;
         set
         {
-            if ( !SetProperty( ref _selectedLanguage, value ) ) { return; }
+            if ( !SetProperty( ref _defaultThreadCurrentCulture, value ) ) { return; }
 
-            OnLanguageChanged( value );
-            CurrentCulture   = value;
-            CurrentUICulture = value;
+            CultureInfo.DefaultThreadCurrentCulture = value;
+        }
+    }
+
+
+    public CultureInfo? DefaultThreadCurrentUiCulture
+    {
+        get => _defaultThreadCurrentUiCulture;
+        set
+        {
+            if ( !SetProperty( ref _defaultThreadCurrentUiCulture, value ) ) { return; }
+
+            CultureInfo.DefaultThreadCurrentUICulture = value;
         }
     }
     public Language.Collection Languages
@@ -77,6 +65,18 @@ public class LanguageApi : ObservableClass
             if ( value.Contains( SelectedLanguage ) ) { return; }
 
             value.Add( SelectedLanguage );
+        }
+    }
+    public Language SelectedLanguage
+    {
+        get => _selectedLanguage ?? throw new NullReferenceException( nameof(_selectedLanguage) ); // ?? throw new NullReferenceException(nameof(_selectedLanguage));
+        set
+        {
+            if ( !SetProperty( ref _selectedLanguage, value ) ) { return; }
+
+            OnLanguageChanged( value );
+            CurrentCulture   = value;
+            CurrentUICulture = value;
         }
     }
 

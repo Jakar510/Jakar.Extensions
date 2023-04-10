@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Authorization;
 namespace Jakar.Database;
 
 
-
 // TODO: asp.net authorization dapper
 public static partial class DbExtensions
 {
@@ -18,5 +17,7 @@ public static partial class DbExtensions
         return builder;
     }
 }
+
+
 
 #endif

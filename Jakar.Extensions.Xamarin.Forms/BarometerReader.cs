@@ -6,9 +6,9 @@ namespace Jakar.Extensions.Xamarin.Forms;
 public class BarometerReader
 {
     public BarometerData Data  { get; protected set; }
-    public double        Value { get; protected set; }
     public SensorSpeed   Speed { get; protected set; } = SensorSpeed.Default; // Set speed delay for monitoring changes.
     public string?       Text  { get; protected set; }
+    public double        Value { get; protected set; }
 
 
     public BarometerReader() => Barometer.ReadingChanged += Barometer_ReadingChanged;

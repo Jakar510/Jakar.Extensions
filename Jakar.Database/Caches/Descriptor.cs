@@ -6,12 +6,12 @@ namespace Jakar.Database.Caches;
 
 public sealed record Descriptor
 {
-    public bool                 IsKey        { get;  }
-    public Func<object, object> GetValue     { get;  }
-    public string               ColumnName   { get;  }
-    public string               KeyValuePair { get;  }
-    public string               Name         { get;  }
-    public string               VariableName { get;  }
+    public string               ColumnName   { get; }
+    public Func<object, object> GetValue     { get; }
+    public bool                 IsKey        { get; }
+    public string               KeyValuePair { get; }
+    public string               Name         { get; }
+    public string               VariableName { get; }
 
 
     private Descriptor( PropertyInfo property, string name, string columnName, string variableName, string keyValuePair )
@@ -38,7 +38,7 @@ public sealed record Descriptor
     }
     private static bool IsDbKey( MemberInfo property ) => property.GetCustomAttribute<KeyAttribute>() is not null || property.GetCustomAttribute<System.ComponentModel.DataAnnotations.KeyAttribute>() is not null;
 
-    
+
     public static Descriptor Create( PropertyInfo property ) => Create( property, property.Name );
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public static Descriptor Create( PropertyInfo property, in string name ) =>

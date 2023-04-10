@@ -6,15 +6,15 @@ namespace Jakar.AppLogger.Portal.Data.Interfaces;
 
 public interface ISession
 {
-    public Guid SessionID { get; init; }
     public Guid AppID     { get; init; }
     public Guid DeviceID  { get; init; }
+    public Guid SessionID { get; init; }
 }
 
 
 
 public interface ILogInfo : ISession
 {
-    public Guid? ScopeID { get; init; }
     public Guid  LogID   { get; }
+    public Guid? ScopeID { get; init; }
 }

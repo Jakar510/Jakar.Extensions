@@ -16,5 +16,4 @@ public sealed class CreateTable_UserLoginInfo : MigrateUserLoginInfoTable
         CreateTable();
     }
     public override void Down() => DeleteTable();
-    
 }
