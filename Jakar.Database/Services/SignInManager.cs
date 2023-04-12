@@ -1,4 +1,4 @@
-﻿// TrueLogic :: TrueLogic.Common.Hosting
+﻿// Jakar.Database ::  Jakar.Database 
 // 04/11/2023  11:34 PM
 
 using Microsoft.AspNetCore.Authentication;

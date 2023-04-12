@@ -1,4 +1,4 @@
-﻿// TrueLogic :: TrueLogic.Common.Hosting
+﻿// Jakar.Database ::  Jakar.Database 
 // 08/02/2022  3:20 PM
 
 namespace Jakar.Database.DbMigrations;

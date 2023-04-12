@@ -1,4 +1,4 @@
-﻿// TrueLogic :: TrueLogic.Common.Hosting
+﻿// Jakar.Database ::  Jakar.Database 
 // 02/17/2023  2:40 PM
 
 namespace Jakar.Database;
