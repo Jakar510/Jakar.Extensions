@@ -1,20 +1,23 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 08/14/2022  8:39 PM
 
+using Microsoft.AspNetCore.Identity;
+
+
+
 namespace Jakar.Database;
 
 
 [SuppressMessage( "ReSharper", "SuggestBaseTypeForParameter" )]
-public abstract partial class Database : Randoms, IConnectableDb, IAsyncDisposable, IHealthCheck
+public abstract partial class Database : Randoms, IConnectableDb, IAsyncDisposable, IHealthCheck, IUserTwoFactorTokenProvider<UserRecord>
 {
-    public const       ClaimType                       DEFAULT_CLAIM_TYPES = ClaimType.UserID | ClaimType.UserName;
+    public const       ClaimType                       DEFAULT_CLAIM_TYPES = ClaimType.UserID | ClaimType.UserName | ClaimType.GroupSid | ClaimType.Role;
     protected readonly ConcurrentBag<IAsyncDisposable> _disposables        = new();
     private            string                          _currentSchema      = string.Empty;
-    private            Uri                             _domain             = new("https://localhost:443");
-    public             IConfiguration                  Configuration    { get; }
-    public virtual     string                          ConnectionString => Configuration.ConnectionString();
 
 
+    public         IConfiguration Configuration    { get; }
+    public virtual string         ConnectionString => Configuration.ConnectionString();
     public string CurrentSchema
     {
         get => _currentSchema;
@@ -80,16 +83,6 @@ public abstract partial class Database : Randoms, IConnectableDb, IAsyncDisposab
         var table = new DbTable<TRecord>( this );
         return AddDisposable( table );
     }
-
-
-    [MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization )]
-    public static T[] GetArray<T>( IEnumerable<T> enumerable ) => enumerable switch
-                                                                  {
-                                                                      List<T> list       => list.GetInternalArray(),
-                                                                      Collection<T> list => list.GetInternalArray(),
-                                                                      T[] array          => array,
-                                                                      _                  => enumerable.ToArray(),
-                                                                  };
 
 
     protected abstract DbConnection CreateConnection();

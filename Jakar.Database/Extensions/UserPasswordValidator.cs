@@ -1,14 +1,14 @@
-// Jakar.Extensions :: Jakar.Database
-// 10/11/2022  11:26 AM
+﻿// Jakar.Extensions :: Jakar.Database
+// 04/12/2023  12:25 PM
 
 namespace Jakar.Database;
 
 
-public sealed class PwdValidator : IPasswordValidator<UserRecord>
+public sealed class UserPasswordValidator : IPasswordValidator<UserRecord>
 {
     private readonly PasswordRequirements _options;
 
-    public PwdValidator( IOptions<PasswordRequirements> options ) => _options = options.Value;
+    public UserPasswordValidator( IOptions<PasswordRequirements> options ) => _options = options.Value;
 
 
     public IdentityResult Validate( in ReadOnlySpan<char> password ) => PasswordValidator.Check( password, _options )

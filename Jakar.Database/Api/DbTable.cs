@@ -3,6 +3,11 @@
 
 
 namespace Jakar.Database;
+// TrueLogic :: TrueLogic.Common
+// 04/11/2023  11:33 AM
+
+
+
 
 
 [SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]

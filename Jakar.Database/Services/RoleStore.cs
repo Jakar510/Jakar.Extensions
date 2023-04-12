@@ -7,9 +7,9 @@ public sealed class RoleStore : IRoleStore<RoleRecord>
 
 
     public RoleStore( Database dbContext ) => _dbContext = dbContext;
-
-
     public void Dispose() { }
+
+    public static WebApplicationBuilder Register( WebApplicationBuilder builder ) => builder.AddSingleton<IRoleStore<RoleRecord>, RoleStore>();
 
 
     public async Task<IdentityResult> CreateAsync( RoleRecord role, CancellationToken token )
@@ -24,9 +24,9 @@ public sealed class RoleStore : IRoleStore<RoleRecord>
     }
 
 
-    public async Task<RoleRecord> FindByIdAsync( string roleId, CancellationToken token ) => await _dbContext.Roles.Get( Guid.Parse( roleId ), token ) ?? throw new ArgumentException( roleId, nameof(roleId) );
-    public async Task<RoleRecord> FindByNameAsync( string name, CancellationToken token ) =>
-        await _dbContext.Roles.Get( nameof(RoleRecord.Name), name, token ) ?? await _dbContext.Roles.Get( nameof(RoleRecord.NormalizedName), name, token ) ?? throw new ArgumentException( name, nameof(name) );
+    public async Task<RoleRecord?> FindByIdAsync( string roleId, CancellationToken token ) => await _dbContext.Roles.Get( Guid.Parse( roleId ), token );
+    public async Task<RoleRecord?> FindByNameAsync( string name, CancellationToken token ) =>
+        await _dbContext.Roles.Get( nameof(RoleRecord.Name), name, token ) ?? await _dbContext.Roles.Get( nameof(RoleRecord.NormalizedName), name, token );
 
 
     public async Task<string?> GetNormalizedRoleNameAsync( RoleRecord role, CancellationToken token ) => await ValueTask.FromResult( role.Name );

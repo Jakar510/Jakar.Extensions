@@ -91,6 +91,18 @@ public partial class Database
 
 
 
+    // ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
+    public Task<string?> GetPasswordHashAsync( UserRecord user, CancellationToken token ) => Task.FromResult( user?.PasswordHash );
+    public Task<bool> HasPasswordAsync( UserRecord        user, CancellationToken token ) => Task.FromResult( user.HasPassword() );
+    public async Task SetPasswordHashAsync( UserRecord user, string? passwordHash, CancellationToken token )
+    {
+        // user.UpdatePassword(passwordHash);
+        user.PasswordHash = passwordHash ?? string.Empty;
+        await Users.Update( user, token );
+    }
+
+
+
     #region User Email
 
     public ValueTask<string?> GetEmailAsync( UserRecord           user, CancellationToken token = default ) => new(user.Email);

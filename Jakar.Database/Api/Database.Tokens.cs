@@ -1,6 +1,10 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 03/12/2023  1:56 PM
 
+using Microsoft.AspNetCore.Identity;
+
+
+
 namespace Jakar.Database;
 
 
@@ -75,8 +79,22 @@ public abstract partial class Database
     }
 
 
-    public ValueTask<Tokens> GetToken( UserRecord user, ClaimType types = default, CancellationToken token = default ) => this.TryCall( GetToken, user, types, token );
+    public async Task<string> GenerateAsync( string purpose, UserManager<UserRecord> manager, UserRecord user )
+    {
+        // IUserTwoFactorTokenProvider<UserRecord> provider = new AuthenticatorTokenProvider<UserRecord>()
+        Tokens token = await GetToken( user, DEFAULT_CLAIM_TYPES, CancellationToken.None );
+        return token.AccessToken;
+    }
+    public async Task<bool> ValidateAsync( string purpose, string token, UserManager<UserRecord> manager, UserRecord user )
+    {
+        // IUserTwoFactorTokenProvider<UserRecord> provider = new AuthenticatorTokenProvider<UserRecord>()
+        OneOf<Tokens, Error> result = await Verify( token, default, CancellationToken.None );
+        return result.IsT0;
+    }
+    public Task<bool> CanGenerateTwoFactorTokenAsync( UserManager<UserRecord> manager, UserRecord user ) => Task.FromResult( true );
 
+
+    public ValueTask<Tokens> GetToken( UserRecord user, ClaimType types = default, CancellationToken token = default ) => this.TryCall( GetToken, user, types, token );
     public virtual async ValueTask<Tokens> GetToken( DbConnection connection, DbTransaction transaction, UserRecord user, ClaimType types = default, CancellationToken token = default )
     {
         Claim[] claims = await user.GetUserClaims( connection, transaction, this, types | DEFAULT_CLAIM_TYPES, token );
@@ -115,8 +133,8 @@ public abstract partial class Database
         return new Tokens( accessToken, refresh, Version, user.UserID, user.FullName );
     }
 
-    public ValueTask<OneOf<Tokens, Error>> Refresh( string refreshToken, ClaimType types = default, CancellationToken token = default ) => this.TryCall( Refresh, refreshToken, types, token );
 
+    public ValueTask<OneOf<Tokens, Error>> Refresh( string refreshToken, ClaimType types = default, CancellationToken token = default ) => this.TryCall( Refresh, refreshToken, types, token );
     public async ValueTask<OneOf<Tokens, Error>> Refresh( DbConnection connection, DbTransaction transaction, string refreshToken, ClaimType types = default, CancellationToken token = default )
     {
         LoginResult loginResult = await VerifyLogin( connection, transaction, refreshToken, types, token );
@@ -147,6 +165,8 @@ public abstract partial class Database
         return new Tokens( accessToken, refreshToken, Version, record.UserID, record.FullName );
     }
 
+
+    public ValueTask<OneOf<Tokens, Error>> Verify( string jwt, ClaimType types = default, CancellationToken token = default ) => this.TryCall( Verify, jwt, types, token );
     public async ValueTask<OneOf<Tokens, Error>> Verify( DbConnection connection, DbTransaction transaction, string jwt, ClaimType types = default, CancellationToken token = default )
     {
         LoginResult loginResult = await VerifyLogin( connection, transaction, jwt, types, token );
@@ -156,6 +176,8 @@ public abstract partial class Database
                    : await GetToken( connection, transaction, record, types, token );
     }
 
+
+    public ValueTask<LoginResult> VerifyLogin( string jwt, ClaimType types = default, CancellationToken token = default ) => this.TryCall( VerifyLogin, jwt, types, token );
     protected async ValueTask<LoginResult> VerifyLogin( DbConnection connection, DbTransaction transaction, string jwt, ClaimType types = default, CancellationToken token = default )
     {
         var                       handler              = new JwtSecurityTokenHandler();

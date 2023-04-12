@@ -7,18 +7,30 @@ public sealed class UserStore : IUserLoginStore<UserRecord>,
                                 IUserClaimStore<UserRecord>,
                                 IUserSecurityStampStore<UserRecord>,
                                 IUserTwoFactorStore<UserRecord>,
+                                IUserPasswordStore<UserRecord>,
                                 IUserEmailStore<UserRecord>,
                                 IUserLockoutStore<UserRecord>,
                                 IUserAuthenticatorKeyStore<UserRecord>,
                                 IUserTwoFactorRecoveryCodeStore<UserRecord>,
                                 IUserPhoneNumberStore<UserRecord>
-
-    // IUserPasswordStore<UserRecord>,
 {
     private readonly Database _dbContext;
 
-
     public UserStore( Database dbContext ) => _dbContext = dbContext;
+
+
+    public static WebApplicationBuilder Register( WebApplicationBuilder builder ) => builder.AddSingleton<UserStore>()
+                                                                                            .AddSingleton<IUserStore<UserRecord>>( provider => provider.GetRequiredService<UserStore>() )
+                                                                                            .AddSingleton<IUserLoginStore<UserRecord>>( provider => provider.GetRequiredService<UserStore>() )
+                                                                                            .AddSingleton<IUserClaimStore<UserRecord>>( provider => provider.GetRequiredService<UserStore>() )
+                                                                                            .AddSingleton<IUserPasswordStore<UserRecord>>( provider => provider.GetRequiredService<UserStore>() )
+                                                                                            .AddSingleton<IUserSecurityStampStore<UserRecord>>( provider => provider.GetRequiredService<UserStore>() )
+                                                                                            .AddSingleton<IUserTwoFactorStore<UserRecord>>( provider => provider.GetRequiredService<UserStore>() )
+                                                                                            .AddSingleton<IUserEmailStore<UserRecord>>( provider => provider.GetRequiredService<UserStore>() )
+                                                                                            .AddSingleton<IUserLockoutStore<UserRecord>>( provider => provider.GetRequiredService<UserStore>() )
+                                                                                            .AddSingleton<IUserAuthenticatorKeyStore<UserRecord>>( provider => provider.GetRequiredService<UserStore>() )
+                                                                                            .AddSingleton<IUserTwoFactorRecoveryCodeStore<UserRecord>>( provider => provider.GetRequiredService<UserStore>() )
+                                                                                            .AddSingleton<IUserPhoneNumberStore<UserRecord>>( provider => provider.GetRequiredService<UserStore>() );
 
 
     public async Task<string?> GetAuthenticatorKeyAsync( UserRecord       user,  CancellationToken  token ) => await _dbContext.GetAuthenticatorKeyAsync( user, token );
@@ -68,4 +80,7 @@ public sealed class UserStore : IUserLoginStore<UserRecord>,
     [RequiresPreviewFeatures] public async Task ReplaceCodesAsync( UserRecord     user,               IEnumerable<string> recoveryCodes, CancellationToken token ) => await user.ReplaceCodes( _dbContext, recoveryCodes, token );
     public async Task<bool> GetTwoFactorEnabledAsync( UserRecord                  user,               CancellationToken token ) => await _dbContext.GetTwoFactorEnabledAsync( user, token );
     public async Task SetTwoFactorEnabledAsync( UserRecord                        user,               bool enabled, CancellationToken token ) => await _dbContext.SetTwoFactorEnabledAsync( user, enabled, token );
+    public async Task SetPasswordHashAsync( UserRecord                            user,               string? passwordHash, CancellationToken token ) => await _dbContext.SetPasswordHashAsync( user, passwordHash, token );
+    public async Task<string?> GetPasswordHashAsync( UserRecord                   user,               CancellationToken token ) => await _dbContext.GetPasswordHashAsync( user, token );
+    public async Task<bool> HasPasswordAsync( UserRecord                          user,               CancellationToken token ) => await _dbContext.HasPasswordAsync( user, token );
 }

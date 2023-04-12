@@ -1,6 +1,17 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 08/18/2022  10:35 PM
 
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Authentication.MicrosoftAccount;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Identity.Web;
+
+
+
 namespace Jakar.Database;
 
 
@@ -19,6 +30,85 @@ public static partial class DbExtensions
                                                                                                                            ShowElapsedTime = showElapsedTime,
                                                                                                                            ShowSql         = showSql,
                                                                                                                        } ) ) );
+
+
+    /// <summary>
+    ///     <see href="https://stackoverflow.com/a/46775832/9530917"> Using ASP.NET Identity in an ASP.NET Core MVC application without Entity Framework and Migrations </see>
+    /// <para><see cref="AuthenticationScheme"/></para>
+    /// </summary> 
+    /// <returns> </returns>
+    public static IdentityBuilder AddIdentity( this WebApplicationBuilder          builder,
+                                               Action<AuthenticationOptions>       configureAuthentication,
+                                               Action<CookieAuthenticationOptions> configureApplication,
+                                               Action<CookieAuthenticationOptions> configureExternal,
+                                               Action<OpenIdConnectOptions>?       configureOpenIdConnect        = default,
+                                               Action<MicrosoftAccountOptions>?    configureMicrosoftAccount     = default,
+                                               Action<GoogleOptions>?              configureGoogle               = default,
+                                               Action<IdentityOptions>?            setupAction                   = default,
+                                               Action<PasswordRequirements>?       configurePasswordRequirements = default
+    )
+    {
+        // https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps/ApplicationsListBlade
+
+
+        /*
+{
+  "AzureAd": {
+    "Instance": "https://login.microsoftonline.com/",
+    "ClientId": "<Application_Client_ID>",
+    "TenantId": "<Directory_Tenant_ID>",
+    "Audience": "api://<Application_Client_ID>"
+  },
+  "Graph": {
+    "BaseUrl": "https://graph.microsoft.com/v1.0",
+    "Scopes": "User.Read"
+  }
+}
+*/
+
+
+        builder.AddPasswordValidator( configurePasswordRequirements ?? (( PasswordRequirements options ) => { }) );
+
+
+        builder.AddOptions<IdentityOptions>()
+               .Configure( setupAction ?? (( IdentityOptions options ) => { }) );
+
+
+        AuthenticationBuilder auth = builder.AddAuthentication( configureAuthentication )
+                                            .AddCookie( IdentityConstants.ApplicationScheme, configureApplication )
+                                            .AddCookie( IdentityConstants.ExternalScheme,    configureExternal );
+
+        if ( configureMicrosoftAccount is not null ) { auth.AddMicrosoftAccount( configureMicrosoftAccount ); }
+
+        if ( configureGoogle is not null ) { auth.AddGoogle( configureGoogle ); }
+
+        if ( configureOpenIdConnect is not null ) { auth.AddOpenIdConnect( configureOpenIdConnect ); }
+
+        auth.AddMicrosoftIdentityWebApi( builder.Configuration.GetSection( "AzureAd" ) )
+            .EnableTokenAcquisitionToCallDownstreamApi()
+            .AddInMemoryTokenCaches();
+
+        // .AddMicrosoftGraph( builder.Configuration.GetSection( "Graph" ) );
+
+        builder.AddAuthorization( options => options.AddPolicy( nameof(RequireMfa), policy => policy.Requirements.Add( new RequireMfa() ) ) );
+
+
+        RoleStore.Register( builder );
+        UserStore.Register( builder );
+
+
+        return builder.Services.AddIdentity<UserRecord, RoleRecord>()
+                      .AddUserStore<UserStore>()
+                      .AddUserManager<UserRecordManager>()
+                      .AddRoleStore<RoleStore>()
+                      .AddRoleManager<RoleManager>()
+                      .AddSignInManager<SignInManager>()
+                      .AddUserValidator<UserValidator>()
+                      .AddTokenProvider<TokenProvider>( nameof(TokenProvider) )
+                      .AddRoleValidator<RoleValidator>()
+                      .AddPasswordValidator<UserPasswordValidator>()
+                      .AddDefaultTokenProviders();
+    }
 
 
     public static WebApplicationBuilder AddDatabase<T>( this WebApplicationBuilder builder, Action<DbOptions> configure ) where T : Database
@@ -45,52 +135,20 @@ public static partial class DbExtensions
     }
 
 
-    public static WebApplicationBuilder AddPwdValidator( this WebApplicationBuilder builder )
-    {
-        builder.AddOptions<PasswordRequirements>();
-        return builder.AddScoped<IPasswordValidator<UserRecord>, PwdValidator>();
-    }
-    public static WebApplicationBuilder AddPwdValidator( this WebApplicationBuilder builder, Action<PasswordRequirements> configure )
+    public static WebApplicationBuilder AddPasswordValidator( this WebApplicationBuilder builder ) => builder.AddPasswordValidator( ( PasswordRequirements requirements ) => { } );
+    public static WebApplicationBuilder AddPasswordValidator( this WebApplicationBuilder builder, Action<PasswordRequirements> configure )
     {
         builder.AddOptions<PasswordRequirements>()
                .Configure( configure );
 
-        return builder.AddScoped<IPasswordValidator<UserRecord>, PwdValidator>();
+        return builder.AddScoped<IPasswordValidator<UserRecord>, UserPasswordValidator>();
     }
-
-
-    public static WebApplicationBuilder AddRoleStore( this WebApplicationBuilder builder ) => builder.AddScoped<IRoleStore<RoleRecord>, RoleStore>();
 
 
     public static WebApplicationBuilder AddTokenizer( this             WebApplicationBuilder builder ) => builder.AddTokenizer<Tokenizer>();
     public static WebApplicationBuilder AddTokenizer<TTokenizer>( this WebApplicationBuilder builder ) where TTokenizer : Tokenizer => builder.AddScoped<ITokenService, TTokenizer>();
-
-
-    public static WebApplicationBuilder AddUserStore( this WebApplicationBuilder builder, Action<PasswordRequirements>? configurePasswordRequirements = default ) =>
-        builder.AddUserStore<UserValidator>( configurePasswordRequirements );
-    public static WebApplicationBuilder AddUserStore<TUserValidator>( this WebApplicationBuilder builder, Action<PasswordRequirements>? configurePasswordRequirements = default ) where TUserValidator : UserValidator
-    {
-        OptionsBuilder<PasswordRequirements> req = builder.Services.AddOptions<PasswordRequirements>();
-        if ( configurePasswordRequirements is not null ) { req.Configure( configurePasswordRequirements ); }
-
-
-        builder.Services.AddIdentity<UserRecord, RoleRecord>()
-               .AddRoleManager<RoleStore>()
-               .AddUserStore<UserStore>()
-               .AddPasswordValidator<PwdValidator>()
-               .AddUserValidator<TUserValidator>();
-
-
-        // builder.AddTransient<IUserPasswordStore<UserRecord>, UserStore>();
-        builder.AddTransient<IUserLoginStore<UserRecord>, UserStore>();
-        builder.AddTransient<IUserClaimStore<UserRecord>, UserStore>();
-        builder.AddTransient<IUserSecurityStampStore<UserRecord>, UserStore>();
-        builder.AddTransient<IUserTwoFactorStore<UserRecord>, UserStore>();
-        builder.AddTransient<IUserEmailStore<UserRecord>, UserStore>();
-        builder.AddTransient<IUserLockoutStore<UserRecord>, UserStore>();
-        builder.AddTransient<IUserAuthenticatorKeyStore<UserRecord>, UserStore>();
-        builder.AddTransient<IUserTwoFactorRecoveryCodeStore<UserRecord>, UserStore>();
-        builder.AddTransient<IUserPhoneNumberStore<UserRecord>, UserStore>();
-        return builder;
-    }
 }
+
+
+
+public sealed class RequireMfa : IAuthorizationRequirement { }
