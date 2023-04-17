@@ -18,7 +18,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Jakar.Extensions" Version="6.7.20" />
+		<PackageReference Include="Jakar.Extensions" Version="6.7.21" />
 		<PackageReference Include="Sigil" Version="5.0.0" />
 	</ItemGroup>
 

@@ -6,14 +6,14 @@ namespace Jakar.Extensions;
 
 /// <summary> The SecurityToken created by JwtSecurityTokenHandler.CreateToken </summary>
 [Serializable]
-public sealed record Tokens : BaseRecord, IValidator
+public class Tokens : BaseClass, IValidator
 {
-    public string     AccessToken  { get; init; } = string.Empty;
-    public string?    FullName     { get; init; }
-    public bool       IsValid      => !string.IsNullOrWhiteSpace( AccessToken );
-    public string?    RefreshToken { get; init; }
-    public Guid       UserID       { get; init; } = Guid.Empty;
-    public AppVersion Version      { get; init; } = new();
+    public                      string     AccessToken  { get; init; } = string.Empty;
+    public                      string?    FullName     { get; init; }
+    [JsonIgnore] public virtual bool       IsValid      => !string.IsNullOrWhiteSpace( AccessToken );
+    public                      string?    RefreshToken { get; init; }
+    public                      Guid       UserID       { get; init; } = Guid.Empty;
+    public                      AppVersion Version      { get; init; } = new();
 
 
     public Tokens() { }

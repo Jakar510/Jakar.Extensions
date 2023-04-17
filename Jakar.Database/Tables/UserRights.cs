@@ -74,7 +74,7 @@ public struct UserRights : IEnumerator<(int Index, bool Value)>, IEnumerable<(in
 
 
     public bool Has( int  index ) => Span[index] == VALID;
-    public bool Has<T>( T index ) where T : struct, Enum => Has( Convert.ToInt32( index ) );
+    public bool Has<T>( T index ) where T : struct, Enum => Has( index.AsInt() );
 
 
     public void Remove( int  index ) => Set( index, INVALID );

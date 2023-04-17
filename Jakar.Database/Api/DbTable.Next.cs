@@ -36,7 +36,8 @@ public partial class DbTable<TRecord>
         {
             if ( token.IsCancellationRequested ) { return Array.Empty<RecordPair>(); }
 
-            return Database.GetArray( await connection.QueryAsync<RecordPair>( sql, default, transaction ) );
+            IEnumerable<RecordPair> pairs = await connection.QueryAsync<RecordPair>( sql, default, transaction );
+            return pairs.GetArray();
         }
         catch ( Exception e ) { throw new SqlException( sql, e ); }
     }

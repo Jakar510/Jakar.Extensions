@@ -11,10 +11,10 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Jakar.Extensions" Version="6.7.20" />
-		<PackageReference Include="Hardware.Info" Version="11.0.0" />
+		<PackageReference Include="Jakar.Extensions" Version="6.7.21" />
+		<PackageReference Include="Hardware.Info" Version="11.0.0.1" />
 		<PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.1" />
-		<PackageReference Include="Microsoft.NETCore.Platforms" Version="7.0.1" />
+		<PackageReference Include="Microsoft.NETCore.Platforms" Version="7.0.2" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
 		<PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.5.0" />
 		<PackageReference Include="Swashbuckle.AspNetCore.Newtonsoft" Version="6.5.0" />

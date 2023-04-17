@@ -8,8 +8,6 @@ namespace Jakar.Database;
 
 
 
-
-
 [SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
 public partial class DbTable<TRecord> : ObservableClass, IConnectableDb, IAsyncDisposable where TRecord : TableRecord<TRecord>
 {
@@ -115,7 +113,7 @@ public partial class DbTable<TRecord> : ObservableClass, IConnectableDb, IAsyncD
         try
         {
             IEnumerable<TRecord> records = await connection.QueryAsync<TRecord>( sql, default, transaction );
-            return Database.GetArray( records );
+            return records.GetArray();
         }
         catch ( Exception e ) { throw new SqlException( sql, e ); }
     }

@@ -30,7 +30,7 @@ public partial class DbTable<TRecord>
         try
         {
             IEnumerable<TRecord> records = await connection.QueryAsync<TRecord>( sql, parameters, transaction );
-            return Database.GetArray( records );
+            return records.GetArray();
         }
         catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
     }

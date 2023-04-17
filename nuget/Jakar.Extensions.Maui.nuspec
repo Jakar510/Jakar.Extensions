@@ -28,11 +28,11 @@
 		<dependencies>
 			<group targetFramework="net6.0">
 				<dependency id="Jakar.Extensions"
-							version="6.7.18" />
+							version="6.7.21" />
 			</group>
 			<group targetFramework="net7.0">
 				<dependency id="Jakar.Extensions"
-							version="6.7.18" />
+							version="6.7.21" />
 			</group>
 		</dependencies>
 	</metadata>

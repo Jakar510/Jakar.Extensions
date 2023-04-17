@@ -51,7 +51,7 @@
 							version="13.0.2" />
 
 				<dependency id="Jakar.Extensions"
-							version="6.7.18" />
+							version="6.7.21" />
 
 				<dependency id="Acr.UserDialogs"
 							version="7.2.0.564" />
@@ -90,7 +90,7 @@
 							version="13.0.2" />
 
 				<dependency id="Jakar.Extensions"
-							version="6.7.18" />
+							version="6.7.21" />
 
 				<dependency id="Acr.UserDialogs"
 							version="7.2.0.564" />
@@ -129,7 +129,7 @@
 							version="13.0.2" />
 
 				<dependency id="Jakar.Extensions"
-							version="6.7.18" />
+							version="6.7.21" />
 
 				<dependency id="Acr.UserDialogs"
 							version="7.2.0.564" />
@@ -174,7 +174,7 @@
 							version="13.0.2" />
 
 				<dependency id="Jakar.Extensions"
-							version="6.7.18" />
+							version="6.7.21" />
 
 				<dependency id="Acr.UserDialogs"
 							version="7.2.0.564" />
