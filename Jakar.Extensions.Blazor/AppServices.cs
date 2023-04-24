@@ -8,23 +8,70 @@ using Blazored.Toast.Configuration;
 namespace Jakar.Extensions.Blazor;
 
 
-public class AppServices : BaseViewModel, ILocalStorageService, IAuthenticationService, IToastService, IModalService
+public class AppServices : BaseViewModel
 {
     private readonly IAuthenticationService _authenticationService;
     private readonly ILocalStorageService   _localStorage;
     private readonly IModalService          _modal;
     private readonly IToastService          _toastService;
     private readonly NavigationManager      _navigation;
-    public           string                 BaseUri => _navigation.BaseUri;
 
 
-    public ContextMenuService      ContextMenus          { get; init; }
-    public DialogService           Dialogs               { get; init; }
-    public NotificationService     Notifications         { get; init; }
-    public ProtectedLocalStorage   ProtectedLocalStorage { get; init; }
-    public ProtectedSessionStorage SessionStorage        { get; init; }
-    public TooltipService          Tooltips              { get; init; }
+    public string                  BaseUri               => _navigation.BaseUri;
+    public ContextMenuService      ContextMenus          { get; }
+    public DialogService           Dialogs               { get; }
+    public NotificationService     Notifications         { get; }
+    public ProtectedLocalStorage   ProtectedLocalStorage { get; }
+    public ProtectedSessionStorage SessionStorage        { get; }
+    public TooltipService          Tooltips              { get; }
     public string                  Uri                   => _navigation.Uri;
+
+
+    public event Action? OnClearAll
+    {
+        add => _toastService.OnClearAll += value;
+        remove => _toastService.OnClearAll -= value;
+    }
+    public event Action? OnClearCustomToasts
+    {
+        add => _toastService.OnClearCustomToasts += value;
+        remove => _toastService.OnClearCustomToasts -= value;
+    }
+    public event Action<ToastLevel>? OnClearToasts
+    {
+        add => _toastService.OnClearToasts += value;
+        remove => _toastService.OnClearToasts -= value;
+    }
+    public event Action<ToastLevel, RenderFragment, Action<ToastSettings>?> OnShow
+    {
+        add => _toastService.OnShow += value;
+        remove => _toastService.OnShow -= value;
+    }
+    public event Action<Type, ToastParameters?, Action<ToastSettings>?>? OnShowComponent
+    {
+        add => _toastService.OnShowComponent += value;
+        remove => _toastService.OnShowComponent -= value;
+    }
+    public event Action? OnClearQueue
+    {
+        add => _toastService.OnClearQueue += value;
+        remove => _toastService.OnClearQueue -= value;
+    }
+    public event Action<ToastLevel>? OnClearQueueToasts
+    {
+        add => _toastService.OnClearQueueToasts += value;
+        remove => _toastService.OnClearQueueToasts -= value;
+    }
+    public event EventHandler<LocalChangedEventArgs>? Changed
+    {
+        add => _localStorage.Changed += value;
+        remove => _localStorage.Changed -= value;
+    }
+    public event EventHandler<LocalChangingEventArgs>? Changing
+    {
+        add => _localStorage.Changing += value;
+        remove => _localStorage.Changing -= value;
+    }
 
 
     public AppServices( IModalService           modal,
@@ -64,20 +111,6 @@ public class AppServices : BaseViewModel, ILocalStorageService, IAuthenticationS
     public Task ForbidAsync( HttpContext                           context, string? scheme, AuthenticationProperties? properties ) => _authenticationService.ForbidAsync( context, scheme, properties );
     public Task SignInAsync( HttpContext                           context, string? scheme, ClaimsPrincipal           principal, AuthenticationProperties? properties ) => _authenticationService.SignInAsync( context, scheme, principal, properties );
     public Task SignOutAsync( HttpContext                          context, string? scheme, AuthenticationProperties? properties ) => _authenticationService.SignOutAsync( context, scheme, properties );
-
-
-    public event EventHandler<LocalChangedEventArgs>? Changed
-    {
-        add => _localStorage.Changed += value;
-        remove => _localStorage.Changed -= value;
-    }
-
-
-    public event EventHandler<LocalChangingEventArgs>? Changing
-    {
-        add => _localStorage.Changing += value;
-        remove => _localStorage.Changing -= value;
-    }
 
 
     public ValueTask ClearAsync( CancellationToken        token                          = default ) => _localStorage.ClearAsync( token );
@@ -134,43 +167,4 @@ public class AppServices : BaseViewModel, ILocalStorageService, IAuthenticationS
     public void ClearSuccessToasts() => _toastService.ClearSuccessToasts();
     public void ClearToasts( ToastLevel toastLevel ) => _toastService.ClearToasts( toastLevel );
     public void ClearWarningToasts() => _toastService.ClearWarningToasts();
-
-
-    public event Action? OnClearAll
-    {
-        add => _toastService.OnClearAll += value;
-        remove => _toastService.OnClearAll -= value;
-    }
-    public event Action? OnClearCustomToasts
-    {
-        add => _toastService.OnClearCustomToasts += value;
-        remove => _toastService.OnClearCustomToasts -= value;
-    }
-    public event Action<ToastLevel>? OnClearToasts
-    {
-        add => _toastService.OnClearToasts += value;
-        remove => _toastService.OnClearToasts -= value;
-    }
-
-
-    public event Action<ToastLevel, RenderFragment, Action<ToastSettings>?> OnShow
-    {
-        add => _toastService.OnShow += value;
-        remove => _toastService.OnShow -= value;
-    }
-    public event Action<Type, ToastParameters?, Action<ToastSettings>?>? OnShowComponent
-    {
-        add => _toastService.OnShowComponent += value;
-        remove => _toastService.OnShowComponent -= value;
-    }
-    public event Action? OnClearQueue
-    {
-        add => _toastService.OnClearQueue += value;
-        remove => _toastService.OnClearQueue -= value;
-    }
-    public event Action<ToastLevel>? OnClearQueueToasts
-    {
-        add => _toastService.OnClearQueueToasts += value;
-        remove => _toastService.OnClearQueueToasts -= value;
-    }
 }

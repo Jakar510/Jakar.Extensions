@@ -309,7 +309,6 @@ public sealed class AppVersion : IComparable,
         Span<char> flags = span[--charsWritten..];
         if ( Flags.IsNotEmpty && Flags.TryFormat( flags, out int flagsCharsWritten, format, provider ) ) { charsWritten += flagsCharsWritten; }
 
-        span.WriteToDebug();
         return true;
     }
 
