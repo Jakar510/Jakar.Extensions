@@ -78,14 +78,18 @@ public readonly record struct WebResponse<T>
 
     internal static WebResponse<T> None( HttpResponseMessage response ) => new(response, "NO RESPONSE");
     internal static WebResponse<T> None( HttpResponseMessage response, Exception e ) => new(response, e, "NO RESPONSE");
-    public static JToken? ParseError( ReadOnlySpan<char> error )
+    public static JToken? ParseError( string? error )
     {
-        if ( error.IsNullOrWhiteSpace() ) { return default; }
+        if ( string.IsNullOrWhiteSpace( error ) ) { return default; }
 
         if ( error.StartsWith( ERROR_MESSAGE, StringComparison.OrdinalIgnoreCase ) ) { error = error[ERROR_MESSAGE.Length..]; }
 
-        try { return error.FromJson(); }
-        catch ( Exception ) { return error.ToString(); }
+        try
+        {
+            // return JToken.Parse( error, JsonNet.LoadSettings );
+            return error.FromJson();
+        }
+        catch ( Exception ) { return error; }
     }
 
 

@@ -116,9 +116,11 @@ public static partial class Validate
     }
 
 
-    public static T ThrowIfNull<T>( T? value, string name, [CallerMemberName] string? caller = default ) =>
-        value ?? throw new ArgumentNullException( name, caller ); // TODO: CallerArgumentExpression : https://stackoverflow.com/questions/70034586/how-can-i-use-callerargumentexpression-with-visual-studio-2022-and-net-standard
-    public static string ThrowIfNull( string? value, string name, [CallerMemberName] string? caller = default ) => string.IsNullOrWhiteSpace( value )
-                                                                                                                       ? throw new ArgumentNullException( name, caller )
-                                                                                                                       : value;
+    // TODO: CallerArgumentExpression : https://stackoverflow.com/questions/70034586/how-can-i-use-callerargumentexpression-with-visual-studio-2022-and-net-standard
+    public static T ThrowIfNull<T>( T? value, [CallerArgumentExpression( "value" )] string? name = default, [CallerMemberName] string? caller = default ) => value ?? throw new ArgumentNullException( name, caller );
+
+
+    public static string ThrowIfNull( string? value, [CallerArgumentExpression( "value" )] string? name = default, [CallerMemberName] string? caller = default ) => string.IsNullOrWhiteSpace( value )
+                                                                                                                                                                        ? throw new ArgumentNullException( name, caller )
+                                                                                                                                                                        : value;
 }
