@@ -16,6 +16,9 @@ public class VerifyRequest : BaseClass, ILoginRequest, ICredentials, ICloneable,
     [Required( ErrorMessage = "Password is required." )]
     [JsonProperty( nameof(UserPassword), Required = Required.Always )]
     public string UserPassword { get; init; } = string.Empty;
+    
+
+    [JsonExtensionData] public IDictionary<string, JToken?>? AdditionalData { get; set; }
 
 
     public VerifyRequest() { }

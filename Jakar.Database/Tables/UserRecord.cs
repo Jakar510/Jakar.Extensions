@@ -184,6 +184,97 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, JsonModels.IJ
     }
 
 
+    public bool Equals( IUserData? other )
+    {
+        if ( other is null ) { return false; }
+
+        if ( ReferenceEquals( this, other ) ) { return true; }
+
+        return Equals( _additionalData, other.AdditionalData ) &&
+               string.Equals( _address,        other.Address,         StringComparison.Ordinal ) &&
+               string.Equals( _city,           other.City,            StringComparison.Ordinal ) &&
+               string.Equals( _company,        other.Company,         StringComparison.Ordinal ) &&
+               string.Equals( _country,        other.Country,         StringComparison.Ordinal ) &&
+               string.Equals( _department,     other.Department,      StringComparison.Ordinal ) &&
+               string.Equals( _description,    other.Description,     StringComparison.Ordinal ) &&
+               string.Equals( _email,          other.Email,           StringComparison.Ordinal ) &&
+               string.Equals( _ext,            other.Ext,             StringComparison.Ordinal ) &&
+               string.Equals( _firstName,      other.FirstName,       StringComparison.Ordinal ) &&
+               string.Equals( _fullName,       other.FullName,        StringComparison.Ordinal ) &&
+               string.Equals( _lastName,       other.LastName,        StringComparison.Ordinal ) &&
+               string.Equals( _line1,          other.Line1,           StringComparison.Ordinal ) &&
+               string.Equals( _line2,          other.Line2,           StringComparison.Ordinal ) &&
+               string.Equals( _phoneNumber,    other.PhoneNumber,     StringComparison.Ordinal ) &&
+               string.Equals( _postalCode,     other.PostalCode,      StringComparison.Ordinal ) &&
+               string.Equals( StateOrProvince, other.StateOrProvince, StringComparison.Ordinal ) &&
+               string.Equals( _title,          other.Title,           StringComparison.Ordinal ) &&
+               string.Equals( _website,        other.Website,         StringComparison.Ordinal ) &&
+               _preferredLanguage == other.PreferredLanguage;
+    }
+    public int CompareTo( IUserData? other )
+    {
+        if ( other is null ) { return 1; }
+
+        if ( ReferenceEquals( this, other ) ) { return 0; }
+
+        int firstNameComparison = string.Compare( _firstName, other.FirstName, StringComparison.Ordinal );
+        if ( firstNameComparison != 0 ) { return firstNameComparison; }
+
+        int lastNameComparison = string.Compare( _lastName, other.LastName, StringComparison.Ordinal );
+        if ( lastNameComparison != 0 ) { return lastNameComparison; }
+
+        int fullNameComparison = string.Compare( _fullName, other.FullName, StringComparison.Ordinal );
+        if ( fullNameComparison != 0 ) { return fullNameComparison; }
+
+        int descriptionComparison = string.Compare( _description, other.Description, StringComparison.Ordinal );
+        if ( descriptionComparison != 0 ) { return descriptionComparison; }
+
+        int companyComparison = string.Compare( _company, other.Company, StringComparison.Ordinal );
+        if ( companyComparison != 0 ) { return companyComparison; }
+
+        int departmentComparison = string.Compare( _department, other.Department, StringComparison.Ordinal );
+        if ( departmentComparison != 0 ) { return departmentComparison; }
+
+        int titleComparison = string.Compare( _title, other.Title, StringComparison.Ordinal );
+        if ( titleComparison != 0 ) { return titleComparison; }
+
+        int emailComparison = string.Compare( _email, other.Email, StringComparison.Ordinal );
+        if ( emailComparison != 0 ) { return emailComparison; }
+
+        int phoneNumberComparison = string.Compare( _phoneNumber, other.PhoneNumber, StringComparison.Ordinal );
+        if ( phoneNumberComparison != 0 ) { return phoneNumberComparison; }
+
+        int extComparison = string.Compare( _ext, other.Ext, StringComparison.Ordinal );
+        if ( extComparison != 0 ) { return extComparison; }
+
+        int websiteComparison = string.Compare( _website, other.Website, StringComparison.Ordinal );
+        if ( websiteComparison != 0 ) { return websiteComparison; }
+
+        int cityComparison = string.Compare( _city, other.City, StringComparison.Ordinal );
+        if ( cityComparison != 0 ) { return cityComparison; }
+
+        int countryComparison = string.Compare( _country, other.Country, StringComparison.Ordinal );
+        if ( countryComparison != 0 ) { return countryComparison; }
+
+        int line1Comparison = string.Compare( _line1, other.Line1, StringComparison.Ordinal );
+        if ( line1Comparison != 0 ) { return line1Comparison; }
+
+        int line2Comparison = string.Compare( _line2, other.Line2, StringComparison.Ordinal );
+        if ( line2Comparison != 0 ) { return line2Comparison; }
+
+        int postalCodeComparison = string.Compare( _postalCode, other.PostalCode, StringComparison.Ordinal );
+        if ( postalCodeComparison != 0 ) { return postalCodeComparison; }
+
+        int stateComparison = string.Compare( StateOrProvince, other.StateOrProvince, StringComparison.Ordinal );
+        if ( stateComparison != 0 ) { return stateComparison; }
+
+        int addressComparison = string.Compare( _address, other.Address, StringComparison.Ordinal );
+        if ( addressComparison != 0 ) { return addressComparison; }
+
+        return ((int)PreferredLanguage).CompareTo( (int)other.PreferredLanguage );
+    }
+
+
 
     #region Passwords
 
