@@ -30,7 +30,10 @@ public partial class DbTable<TRecord>
         try
         {
             IEnumerable<TRecord> records = await connection.QueryAsync<TRecord>( sql, parameters, transaction );
-            return records.GetArray();
+
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+            var results = new List<TRecord>( records.Where( x => x is not null ) );
+            return results.GetArray();
         }
         catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
     }
@@ -39,8 +42,9 @@ public partial class DbTable<TRecord>
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual ValueTask<TRecord[]> Where<TValue>( DbConnection connection, DbTransaction? transaction, string columnName, TValue? value, CancellationToken token = default )
     {
-        string sql        = $"SELECT * FROM {SchemaTableName} WHERE {columnName} = @{nameof(value)}";
-        var    parameters = new DynamicParameters();
+        string sql = $"SELECT * FROM {SchemaTableName} WHERE {columnName} = @{nameof(value)}";
+
+        var parameters = new DynamicParameters();
         parameters.Add( nameof(value), value );
 
         return Where( connection, transaction, sql, parameters, token );

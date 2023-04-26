@@ -135,7 +135,7 @@ public abstract partial class Database
 
 
     public ValueTask<OneOf<Tokens, Error>> Refresh( string refreshToken, ClaimType types = default, CancellationToken token = default ) => this.TryCall( Refresh, refreshToken, types, token );
-    public async ValueTask<OneOf<Tokens, Error>> Refresh( DbConnection connection, DbTransaction transaction, string refreshToken, ClaimType types = default, CancellationToken token = default )
+    public virtual async ValueTask<OneOf<Tokens, Error>> Refresh( DbConnection connection, DbTransaction transaction, string refreshToken, ClaimType types = default, CancellationToken token = default )
     {
         LoginResult loginResult = await VerifyLogin( connection, transaction, refreshToken, types, token );
         if ( loginResult.GetResult( out Error? error, out UserRecord? record ) ) { return error.Value; }
@@ -167,7 +167,7 @@ public abstract partial class Database
 
 
     public ValueTask<OneOf<Tokens, Error>> Verify( string jwt, ClaimType types = default, CancellationToken token = default ) => this.TryCall( Verify, jwt, types, token );
-    public async ValueTask<OneOf<Tokens, Error>> Verify( DbConnection connection, DbTransaction transaction, string jwt, ClaimType types = default, CancellationToken token = default )
+    public virtual async ValueTask<OneOf<Tokens, Error>> Verify( DbConnection connection, DbTransaction transaction, string jwt, ClaimType types = default, CancellationToken token = default )
     {
         LoginResult loginResult = await VerifyLogin( connection, transaction, jwt, types, token );
 
@@ -178,7 +178,7 @@ public abstract partial class Database
 
 
     public ValueTask<LoginResult> VerifyLogin( string jwt, ClaimType types = default, CancellationToken token = default ) => this.TryCall( VerifyLogin, jwt, types, token );
-    protected async ValueTask<LoginResult> VerifyLogin( DbConnection connection, DbTransaction transaction, string jwt, ClaimType types = default, CancellationToken token = default )
+    protected virtual async ValueTask<LoginResult> VerifyLogin( DbConnection connection, DbTransaction transaction, string jwt, ClaimType types = default, CancellationToken token = default )
     {
         var                       handler              = new JwtSecurityTokenHandler();
         TokenValidationParameters validationParameters = await GetTokenValidationParameters( token );

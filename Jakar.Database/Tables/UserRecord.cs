@@ -67,15 +67,10 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, JsonModels.IJ
     public static DynamicParameters GetDynamicParameters( IUserData data )
     {
         var parameters = new DynamicParameters();
+        parameters.Add( nameof(Email),     data.Email );
         parameters.Add( nameof(FirstName), data.FirstName );
         parameters.Add( nameof(LastName),  data.LastName );
         parameters.Add( nameof(FullName),  data.FullName );
-        return parameters;
-    }
-    public static DynamicParameters GetDynamicParameters<T>( VerifyRequest<T> request ) where T : notnull
-    {
-        var parameters = new DynamicParameters();
-        parameters.Add( nameof(UserName), request.UserLogin );
         return parameters;
     }
     public static DynamicParameters GetDynamicParameters( ILoginRequest request )

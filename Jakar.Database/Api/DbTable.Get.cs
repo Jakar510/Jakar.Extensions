@@ -98,6 +98,7 @@ public partial class DbTable<TRecord>
         try
         {
             TRecord[] records = await Where( connection, transaction, matchAll, parameters, token );
+
             return records.Single();
         }
         catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }

@@ -12,9 +12,9 @@ public abstract partial class Database
         // if ( user.SubscriptionID is null || user.SubscriptionID.Value != Guid.Empty ) { return LoginResult.State.NoSubscription; }
         new(false);
 
-    protected async ValueTask<LoginResult> VerifyLogin( DbConnection connection, DbTransaction? transaction, VerifyRequest request, CancellationToken token = default )
+    protected virtual async ValueTask<LoginResult> VerifyLogin( DbConnection connection, DbTransaction? transaction, VerifyRequest request, CancellationToken token = default )
     {
-        UserRecord? record = await Users.Get( connection, transaction, nameof(UserRecord.UserName), request.UserLogin, token );
+        UserRecord? record = await Users.Get( connection, transaction, true, UserRecord.GetDynamicParameters( request ), token );
         if ( record is null ) { return LoginResult.State.NotFound; }
 
         try
