@@ -82,15 +82,44 @@ public readonly record struct WebResponse<T>
     {
         if ( string.IsNullOrWhiteSpace( error ) ) { return default; }
 
-        if ( error.StartsWith( ERROR_MESSAGE, StringComparison.OrdinalIgnoreCase ) ) { error = error[ERROR_MESSAGE.Length..]; }
-
         try
         {
-            // return JToken.Parse( error, JsonNet.LoadSettings );
+            error = error.Replace( "\\\"", @"""" );
+            if ( error.StartsWith( ERROR_MESSAGE ) ) { error = error[ERROR_MESSAGE.Length..]; }
+
             return error.FromJson();
         }
         catch ( Exception ) { return error; }
     }
+
+    /*
+    public static JToken? ParseError( ReadOnlySpan<char> error )
+    {
+        if ( error.IsNullOrWhiteSpace() ) { return default; }
+
+        try
+        {
+            try
+            {
+                Span<char> oldChars = stackalloc char[2];
+                oldChars[0] = '\\';
+                oldChars[1] = '"';
+                Span<char> newChars = stackalloc char[2];
+                newChars[0] = '"';
+
+                Span<char> buffer = stackalloc char[error.Length + 1];
+                Spans.Replace( error, oldChars, newChars, buffer, out int charWritten );
+                buffer = buffer[..charWritten];
+                if ( buffer.StartsWith( ERROR_MESSAGE ) ) { buffer = buffer[ERROR_MESSAGE.Length..]; }
+
+                return buffer.ToString()
+                             .FromJson();
+            }
+            catch ( Exception ) { return error.ToString(); }
+        }
+        catch ( Exception ) { return error.ToString(); }
+    }
+    */
 
 
     public static async ValueTask<WebResponse<T>> Create( WebHandler handler, Func<HttpResponseMessage, ValueTask<T>> func )

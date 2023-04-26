@@ -9,13 +9,13 @@ public static partial class Spans
     public static ReadOnlySpan<char> RemoveAll( this ReadOnlySpan<char> value, ReadOnlySpan<char> removed )
     {
         Span<char> buffer = stackalloc char[value.Length];
-        RemoveAll( value, ref buffer, out int charWritten, removed );
+        RemoveAll( value, buffer, out int charWritten, removed );
         return MemoryMarshal.CreateReadOnlySpan( ref buffer.GetPinnableReference(), charWritten );
     }
     public static ReadOnlySpan<T> RemoveAll<T>( this ReadOnlySpan<T> value, T c ) where T : unmanaged, IEquatable<T>
     {
         Span<T> buffer = stackalloc T[value.Length];
-        RemoveAll( value, c, ref buffer, out int charWritten );
+        RemoveAll( value, c, buffer, out int charWritten );
         return MemoryMarshal.CreateReadOnlySpan( ref buffer.GetPinnableReference(), charWritten );
     }
 
@@ -23,7 +23,7 @@ public static partial class Spans
     public static ReadOnlySpan<T> RemoveAll<T>( this ReadOnlySpan<T> value, ReadOnlySpan<T> removed ) where T : unmanaged, IEquatable<T>
     {
         Span<T> buffer = stackalloc T[value.Length];
-        RemoveAll( value, ref buffer, out int charWritten, removed );
+        RemoveAll( value, buffer, out int charWritten, removed );
         return MemoryMarshal.CreateReadOnlySpan( ref buffer.GetPinnableReference(), charWritten );
     }
 
@@ -31,7 +31,7 @@ public static partial class Spans
     public static ReadOnlySpan<T> Replace<T>( this ReadOnlySpan<T> value, ReadOnlySpan<T> oldValue, ReadOnlySpan<T> newValue ) where T : unmanaged, IEquatable<T>
     {
         Span<T> buffer = stackalloc T[value.Length + newValue.Length];
-        Replace( value, oldValue, newValue, ref buffer, out int charWritten );
+        Replace( value, oldValue, newValue, buffer, out int charWritten );
         return MemoryMarshal.CreateReadOnlySpan( ref buffer.GetPinnableReference(), charWritten );
     }
 
@@ -40,7 +40,7 @@ public static partial class Spans
     public static ReadOnlySpan<T> Replace<T>( this ReadOnlySpan<T> value, ReadOnlySpan<T> oldValue, ReadOnlySpan<T> newValue, T startValue, T endValue ) where T : unmanaged, IEquatable<T>
     {
         Span<T> buffer = stackalloc T[value.Length + newValue.Length + 1];
-        Replace( value, oldValue, newValue, startValue, endValue, ref buffer, out int charWritten );
+        Replace( value, oldValue, newValue, startValue, endValue, buffer, out int charWritten );
         return MemoryMarshal.CreateReadOnlySpan( ref buffer.GetPinnableReference(), charWritten );
     }
 
@@ -72,7 +72,7 @@ public static partial class Spans
     public static Span<char> RemoveAll( this Span<char> value, ReadOnlySpan<char> removed )
     {
         Span<char> buffer = stackalloc char[value.Length];
-        RemoveAll( value, ref buffer, out int charWritten, removed );
+        RemoveAll( value, buffer, out int charWritten, removed );
         return MemoryMarshal.CreateSpan( ref buffer.GetPinnableReference(), charWritten );
     }
 
@@ -80,7 +80,7 @@ public static partial class Spans
     public static Span<T> RemoveAll<T>( this Span<T> value, ReadOnlySpan<T> removed ) where T : unmanaged, IEquatable<T>
     {
         Span<T> buffer = stackalloc T[value.Length];
-        RemoveAll( value, ref buffer, out int charWritten, removed );
+        RemoveAll( value, buffer, out int charWritten, removed );
         return MemoryMarshal.CreateSpan( ref buffer.GetPinnableReference(), charWritten );
     }
 
@@ -88,7 +88,7 @@ public static partial class Spans
     public static Span<T> Replace<T>( this Span<T> value, ReadOnlySpan<T> oldValue, ReadOnlySpan<T> newValue ) where T : unmanaged, IEquatable<T>
     {
         Span<T> buffer = stackalloc T[value.Length + newValue.Length];
-        Replace( value, oldValue, newValue, ref buffer, out int charWritten );
+        Replace( value, oldValue, newValue, buffer, out int charWritten );
         return MemoryMarshal.CreateSpan( ref buffer.GetPinnableReference(), charWritten );
     }
 
@@ -96,12 +96,12 @@ public static partial class Spans
     public static Span<T> Replace<T>( this Span<T> value, ReadOnlySpan<T> oldValue, ReadOnlySpan<T> newValue, T startValue, T endValue ) where T : unmanaged, IEquatable<T>
     {
         Span<T> buffer = stackalloc T[value.Length + newValue.Length];
-        Replace( value, oldValue, newValue, startValue, endValue, ref buffer, out int charWritten );
+        Replace( value, oldValue, newValue, startValue, endValue, buffer, out int charWritten );
         return MemoryMarshal.CreateSpan( ref buffer.GetPinnableReference(), charWritten );
     }
 
 
-    public static void RemoveAll<T>( ReadOnlySpan<T> value, T c, ref Span<T> buffer, out int charWritten ) where T : unmanaged, IEquatable<T>
+    public static void RemoveAll<T>( ReadOnlySpan<T> value, T c, Span<T> buffer, out int charWritten ) where T : unmanaged, IEquatable<T>
     {
         Guard.IsInRangeFor( value.Length - 1, buffer, nameof(buffer) );
         int offset = 0;
@@ -122,7 +122,7 @@ public static partial class Spans
     }
 
 
-    public static void RemoveAll<T>( ReadOnlySpan<T> value, ref Span<T> buffer, out int charWritten, ReadOnlySpan<T> removed ) where T : unmanaged, IEquatable<T>
+    public static void RemoveAll<T>( ReadOnlySpan<T> value, Span<T> buffer, out int charWritten, ReadOnlySpan<T> removed ) where T : unmanaged, IEquatable<T>
     {
         Guard.IsInRangeFor( value.Length - 1, buffer, nameof(buffer) );
         int offset = 0;
@@ -149,7 +149,7 @@ public static partial class Spans
     }
 
 
-    public static void Replace<T>( ReadOnlySpan<T> value, ReadOnlySpan<T> oldValue, ReadOnlySpan<T> newValue, ref Span<T> buffer, out int charWritten ) where T : unmanaged, IEquatable<T>
+    public static void Replace<T>( ReadOnlySpan<T> value, ReadOnlySpan<T> oldValue, ReadOnlySpan<T> newValue, Span<T> buffer, out int charWritten ) where T : unmanaged, IEquatable<T>
     {
         Guard.IsInRangeFor( value.Length + newValue.Length - 1, buffer, nameof(buffer) );
 
@@ -160,9 +160,20 @@ public static partial class Spans
             return;
         }
 
-        int start = value.IndexOf( oldValue );
+        // charWritten = 0;
+        //
+        // for ( int i = 0; i < value.Length; i++ )
+        // {
+        //     if ( value.Slice( i, i + oldValue.Length )
+        //               .SequenceEqual( oldValue ) )
+        //     {
+        //
+        //     }
+        // }
 
-        int end = start + oldValue.Length;
+
+        int start = value.IndexOf( oldValue );
+        int end   = start + oldValue.Length;
 
 
         Guard.IsInRangeFor( start, value, nameof(value) );
@@ -176,7 +187,7 @@ public static partial class Spans
 
 
     // [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void Replace<T>( ReadOnlySpan<T> value, ReadOnlySpan<T> oldValue, ReadOnlySpan<T> newValue, T startValue, T endValue, ref Span<T> buffer, out int charWritten ) where T : unmanaged, IEquatable<T>
+    public static void Replace<T>( ReadOnlySpan<T> value, ReadOnlySpan<T> oldValue, ReadOnlySpan<T> newValue, T startValue, T endValue, Span<T> buffer, out int charWritten ) where T : unmanaged, IEquatable<T>
     {
         Guard.IsInRangeFor( value.Length + newValue.Length - 1, buffer, nameof(buffer) );
 
@@ -204,7 +215,7 @@ public static partial class Spans
     }
 
 
-    public static void Slice<T>( ReadOnlySpan<T> value, T startValue, T endValue, bool includeEnds, ref Span<T> buffer, out int charWritten ) where T : unmanaged, IEquatable<T>
+    public static void Slice<T>( ReadOnlySpan<T> value, T startValue, T endValue, bool includeEnds, Span<T> buffer, out int charWritten ) where T : unmanaged, IEquatable<T>
     {
         int start = value.IndexOf( startValue );
         int end   = value.IndexOf( endValue );

@@ -32,7 +32,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Jakar.Extensions" Version="6.7.21" />
+		<PackageReference Include="Jakar.Extensions" Version="6.7.22" />
 		<PackageReference Include="Jakar.Extensions.Hosting" Version="6.7.3" />
 		<PackageReference Include="FluentMigrator" Version="3.3.2" />
 		<PackageReference Include="FluentMigrator.Runner" Version="3.3.2" />
