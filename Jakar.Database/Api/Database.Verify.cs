@@ -20,20 +20,18 @@ public abstract partial class Database
         try
         {
             if ( !record.VerifyPassword( request.UserPassword ) ) { return LoginResult.State.BadCredentials; }
+
+            if ( !record.IsActive ) { return LoginResult.State.Inactive; }
+
+            if ( record.IsDisabled ) { return LoginResult.State.Disabled; }
+
+            if ( record.IsLocked ) { return LoginResult.State.Locked; }
+
+            if ( await ValidateSubscription( connection, transaction, record, token ) ) { return LoginResult.State.ExpiredSubscription; }
+
+            return record;
         }
         finally { await Users.Update( connection, transaction, record, token ); }
-
-
-        if ( !record.IsActive ) { return LoginResult.State.Inactive; }
-
-        if ( !record.IsDisabled ) { return LoginResult.State.Disabled; }
-
-        if ( !record.IsLocked ) { return LoginResult.State.Locked; }
-
-        if ( await ValidateSubscription( connection, transaction, record, token ) ) { return LoginResult.State.ExpiredSubscription; }
-
-
-        return record;
     }
 
 

@@ -6,13 +6,13 @@ namespace Jakar.Database;
 
 public partial class DbTable<TRecord>
 {
-    public ValueTask<TRecord[]> Where( bool           matchAll,   DynamicParameters  parameters, CancellationToken token = default ) => this.Call( Where, matchAll,   parameters, token );
-    public ValueTask<TRecord[]> Where( string         sql,        DynamicParameters? parameters, CancellationToken token = default ) => this.Call( Where, sql,        parameters, token );
-    public ValueTask<TRecord[]> Where<TValue>( string columnName, TValue?            value,      CancellationToken token = default ) => this.Call( Where, columnName, value,      token );
+    public ValueTask<IEnumerable<TRecord>> Where( bool           matchAll,   DynamicParameters  parameters, CancellationToken token = default ) => this.Call( Where, matchAll,   parameters, token );
+    public ValueTask<IEnumerable<TRecord>> Where( string         sql,        DynamicParameters? parameters, CancellationToken token = default ) => this.Call( Where, sql,        parameters, token );
+    public ValueTask<IEnumerable<TRecord>> Where<TValue>( string columnName, TValue?            value,      CancellationToken token = default ) => this.Call( Where, columnName, value,      token );
 
 
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
-    public virtual ValueTask<TRecord[]> Where( DbConnection connection, DbTransaction? transaction, bool matchAll, DynamicParameters parameters, CancellationToken token = default )
+    public virtual ValueTask<IEnumerable<TRecord>> Where( DbConnection connection, DbTransaction? transaction, bool matchAll, DynamicParameters parameters, CancellationToken token = default )
     {
         string sql = $"SELECT * FROM {SchemaTableName} WHERE {string.Join( matchAll
                                                                                ? "AND"
@@ -23,24 +23,21 @@ public partial class DbTable<TRecord>
     }
 
 
-    public virtual async ValueTask<TRecord[]> Where( DbConnection connection, DbTransaction? transaction, string sql, DynamicParameters? parameters, CancellationToken token = default )
+    public virtual async ValueTask<IEnumerable<TRecord>> Where( DbConnection connection, DbTransaction? transaction, string sql, DynamicParameters? parameters, CancellationToken token = default )
     {
         if ( token.IsCancellationRequested ) { return Empty; }
 
         try
         {
-            IEnumerable<TRecord> records = await connection.QueryAsync<TRecord>( sql, parameters, transaction );
-
-            // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
-            var results = new List<TRecord>( records.Where( x => x is not null ) );
-            return results.GetArray();
+            IEnumerable<TRecord?> records = await connection.QueryAsync<TRecord>( sql, parameters, transaction );
+            return records.WhereNotNull();
         }
         catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
     }
 
 
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
-    public virtual ValueTask<TRecord[]> Where<TValue>( DbConnection connection, DbTransaction? transaction, string columnName, TValue? value, CancellationToken token = default )
+    public virtual ValueTask<IEnumerable<TRecord>> Where<TValue>( DbConnection connection, DbTransaction? transaction, string columnName, TValue? value, CancellationToken token = default )
     {
         string sql = $"SELECT * FROM {SchemaTableName} WHERE {columnName} = @{nameof(value)}";
 

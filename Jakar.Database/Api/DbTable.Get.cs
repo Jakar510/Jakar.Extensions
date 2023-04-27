@@ -10,8 +10,8 @@ public partial class DbTable<TRecord>
     public ValueTask<bool> Exists( bool                     matchAll,   DynamicParameters  parameters, CancellationToken token ) => this.TryCall( Exists, matchAll, parameters, token );
     public ValueTask<Guid?> GetID( string                   sql,        DynamicParameters? parameters, CancellationToken token = default ) => this.Call( GetID, sql,        parameters, token );
     public ValueTask<Guid?> GetID( string                   columnName, object             value,      CancellationToken token = default ) => this.Call( GetID, columnName, value,      token );
-    public ValueTask<TRecord[]> Get( IEnumerable<Guid>      ids,        CancellationToken  token                               = default ) => this.Call( Get, ids,        token );
-    public ValueTask<TRecord[]> Get( IAsyncEnumerable<Guid> ids,        CancellationToken  token                               = default ) => this.Call( Get, ids,        token );
+    public ValueTask<IEnumerable<TRecord>> Get( IEnumerable<Guid>      ids,        CancellationToken  token                               = default ) => this.Call( Get, ids,        token );
+    public ValueTask<IEnumerable<TRecord>> Get( IAsyncEnumerable<Guid> ids,        CancellationToken  token                               = default ) => this.Call( Get, ids,        token );
     public ValueTask<TRecord?> Get( bool                    matchAll,   DynamicParameters  parameters, CancellationToken token = default ) => this.Call( Get, matchAll,   parameters, token );
     public ValueTask<TRecord?> Get( string                  columnName, object?            value,      CancellationToken token = default ) => this.Call( Get, columnName, value,      token );
     public ValueTask<TRecord?> Get( Guid                    id,         CancellationToken  token = default ) => this.Call( Get, id, token );
@@ -97,7 +97,7 @@ public partial class DbTable<TRecord>
 
         try
         {
-            TRecord[] records = await Where( connection, transaction, matchAll, parameters, token );
+            IEnumerable<TRecord> records = await Where( connection, transaction, matchAll, parameters, token );
 
             return records.Single();
         }
@@ -105,13 +105,13 @@ public partial class DbTable<TRecord>
     }
 
 
-    public virtual async ValueTask<TRecord[]> Get( DbConnection connection, DbTransaction? transaction, IAsyncEnumerable<Guid> ids, CancellationToken token = default )
+    public virtual async ValueTask<IEnumerable<TRecord>> Get( DbConnection connection, DbTransaction? transaction, IAsyncEnumerable<Guid> ids, CancellationToken token = default )
     {
         HashSet<Guid> set = await ids.ToHashSet( token );
         return await Get( connection, transaction, set, token );
     }
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
-    public virtual ValueTask<TRecord[]> Get( DbConnection connection, DbTransaction? transaction, IEnumerable<Guid> ids, CancellationToken token = default )
+    public virtual ValueTask<IEnumerable<TRecord>> Get( DbConnection connection, DbTransaction? transaction, IEnumerable<Guid> ids, CancellationToken token = default )
     {
         string sql = $"SELECT * FROM {SchemaTableName} WHERE {ID} in ( {string.Join( ',', ids.Select( x => $"'{x}'" ) )} )";
         return Where( connection, transaction, sql, default, token );

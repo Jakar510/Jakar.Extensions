@@ -7,7 +7,7 @@ namespace Jakar.Database;
 public partial class DbTable<TRecord>
 {
     public ValueTask<TRecord?> Random( CancellationToken token                                                   = default ) => this.Call( Random, token );
-    public ValueTask<TRecord[]> Random( int              count, CancellationToken token                          = default ) => this.Call( Random, count, token );
+    public ValueTask<IEnumerable<TRecord>> Random( int              count, CancellationToken token                          = default ) => this.Call( Random, count, token );
     public ValueTask<TRecord?> Random( UserRecord        user,  int               count, CancellationToken token = default ) => this.Call( Random, user,  count, token );
 
 
@@ -49,7 +49,7 @@ public partial class DbTable<TRecord>
 
 
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
-    public virtual ValueTask<TRecord[]> Random( DbConnection connection, DbTransaction? transaction, int count, CancellationToken token = default )
+    public virtual ValueTask<IEnumerable<TRecord>> Random( DbConnection connection, DbTransaction? transaction, int count, CancellationToken token = default )
     {
         string sql = Instance switch
                      {

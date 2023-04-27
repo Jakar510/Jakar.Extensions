@@ -157,7 +157,7 @@ public sealed class LoggerDB : Database.Database
     }
 
 
-    public ValueTask<LogRecord[]> GetLogs( CancellationToken token = default ) => Logs.Where( nameof(LogRecord.IsActive), true, token );
+    public ValueTask<IEnumerable<LogRecord>> GetLogs( CancellationToken token = default ) => Logs.Where( nameof(LogRecord.IsActive), true, token );
 
 
     public async ValueTask<UserRecord?> Verify( DbConnection connection, DbTransaction transaction, string appLoggerSecret, CancellationToken token )

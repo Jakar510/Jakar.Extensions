@@ -77,6 +77,5 @@ public sealed record RoleRecord : TableRecord<RoleRecord>, UserRights.IRights
     }
 
 
-    public async ValueTask<UserRecord[]> GetUsers( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) =>
-        await UserRoleRecord.Where( connection, transaction, db.UserRoles, db.Users, this, token );
+    public async ValueTask<IEnumerable<UserRecord>> GetUsers( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => await UserRoleRecord.Where( connection, transaction, db.UserRoles, db.Users, this, token );
 }

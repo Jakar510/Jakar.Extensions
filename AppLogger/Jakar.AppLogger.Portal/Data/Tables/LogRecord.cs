@@ -74,9 +74,9 @@ public sealed record LogRecord : LoggerTable<LogRecord>, IAppLog, ILogInfo
 
     public async ValueTask<AppLog> ToLog( DbConnection connection, DbTransaction transaction, LoggerDB db, CancellationToken token = default )
     {
-        AttachmentRecord[] records = await db.Attachments.Where( connection, transaction, true, AttachmentRecord.GetDynamicParameters( this ), token );
-        DeviceRecord       device  = await db.Devices.Get( connection, transaction, DeviceID, token ) ?? throw new RecordNotFoundException( DeviceID.ToString() );
-        ExceptionDetails?  details = GetExceptionDetails();
+        IEnumerable<AttachmentRecord> records = await db.Attachments.Where( connection, transaction, true, AttachmentRecord.GetDynamicParameters( this ), token );
+        DeviceRecord                  device  = await db.Devices.Get( connection, transaction, DeviceID, token ) ?? throw new RecordNotFoundException( DeviceID.ToString() );
+        ExceptionDetails?             details = GetExceptionDetails();
 
         return new AppLog( this, records.Select( x => x.ToAttachment() ), device.ToDeviceDescriptor(), details );
     }

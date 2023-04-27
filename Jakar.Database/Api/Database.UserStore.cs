@@ -24,7 +24,7 @@ public partial class Database
     public ValueTask<UserLoginInfo[]> GetLoginsAsync( UserRecord user, CancellationToken token ) => this.TryCall( GetLoginsAsync, user, token );
     public virtual async ValueTask<UserLoginInfo[]> GetLoginsAsync( DbConnection connection, DbTransaction transaction, UserRecord user, CancellationToken token )
     {
-        UserLoginInfoRecord[] records = await UserLogins.Where( connection, transaction, nameof(UserRecord.OwnerUserID), user.OwnerUserID, token );
+        IEnumerable<UserLoginInfoRecord> records = await UserLogins.Where( connection, transaction, nameof(UserRecord.OwnerUserID), user.OwnerUserID, token );
 
         return records.Select( x => x.ToUserLoginInfo() )
                       .ToArray();
@@ -62,7 +62,7 @@ public partial class Database
     public ValueTask RemoveLoginAsync( UserRecord user, string loginProvider, string providerKey, CancellationToken token ) => this.TryCall( RemoveLoginAsync, user, loginProvider, providerKey, token );
     public virtual async ValueTask RemoveLoginAsync( DbConnection connection, DbTransaction transaction, UserRecord user, string loginProvider, string providerKey, CancellationToken token )
     {
-        UserLoginInfoRecord[] records = await UserLogins.Where( connection, transaction, true, UserLoginInfoRecord.GetDynamicParameters( user, loginProvider, providerKey ), token );
+        IEnumerable<UserLoginInfoRecord> records = await UserLogins.Where( connection, transaction, true, UserLoginInfoRecord.GetDynamicParameters( user, loginProvider, providerKey ), token );
         foreach ( UserLoginInfoRecord record in records ) { await UserLogins.Delete( connection, transaction, record, token ); }
     }
 

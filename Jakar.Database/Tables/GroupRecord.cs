@@ -53,11 +53,8 @@ public sealed record GroupRecord : TableRecord<GroupRecord>, UserRights.IRights
     public override int GetHashCode() => HashCode.Combine( base.GetHashCode(), NameOfGroup, OwnerID, CustomerID );
 
 
-    public async ValueTask<UserRecord?> GetOwner( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => await db.Users.Get( connection, transaction, OwnerID, token );
-
-
-    public async ValueTask<UserRecord[]> GetUsers( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) =>
-        await UserGroupRecord.Where( connection, transaction, db.UserGroups, db.Users, this, token );
+    public async ValueTask<UserRecord?> GetOwner( DbConnection             connection, DbTransaction? transaction, Database db, CancellationToken token ) => await db.Users.Get( connection, transaction, OwnerID, token );
+    public async ValueTask<IEnumerable<UserRecord>> GetUsers( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => await UserGroupRecord.Where( connection, transaction, db.UserGroups, db.Users, this, token );
 
 
     public override bool Equals( GroupRecord? other )

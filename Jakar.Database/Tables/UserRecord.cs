@@ -58,7 +58,7 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, JsonModels.IJ
         UserRecord record = Create( request.Data, rights, caller );
         record.UserName = request.UserLogin;
         record.UpdatePassword( request.UserPassword );
-        return record;
+        return record.Enable();
     }
     public static UserRecord Create( IUserData value,    string rights,   UserRecord? caller                     = default ) => new(value, rights, caller);
     public static UserRecord Create( string    userName, string password, string      rights, UserRecord? caller = default ) => new(userName, password, rights, caller);
@@ -100,7 +100,7 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, JsonModels.IJ
     [RequiresPreviewFeatures]
     public async ValueTask<bool> RedeemCode( DbConnection connection, DbTransaction transaction, Database db, string code, CancellationToken token )
     {
-        UserRecoveryCodeRecord[] mappings = await UserRecoveryCodeRecord.Where( connection, transaction, db.UserRecoveryCodes, this, token );
+        IEnumerable<UserRecoveryCodeRecord> mappings = await UserRecoveryCodeRecord.Where( connection, transaction, db.UserRecoveryCodes, this, token );
 
         foreach ( UserRecoveryCodeRecord mapping in mappings )
         {
@@ -123,9 +123,9 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, JsonModels.IJ
     [RequiresPreviewFeatures]
     public async ValueTask<string[]> ReplaceCodes( DbConnection connection, DbTransaction transaction, Database db, int count = 10, CancellationToken token = default )
     {
-        RecoveryCodeRecord[]                            old        = await Codes( connection, transaction, db, token );
+        IEnumerable<RecoveryCodeRecord>                 old        = await Codes( connection, transaction, db, token );
         IReadOnlyDictionary<string, RecoveryCodeRecord> dictionary = RecoveryCodeRecord.Create( this, count );
-        string[]                                        codes      = dictionary.Keys.ToArray();
+        string[]                                        codes      = dictionary.Keys.GetArray();
 
 
         await db.RecoveryCodes.Delete( connection, transaction, old, token );
@@ -138,9 +138,9 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, JsonModels.IJ
     [RequiresPreviewFeatures]
     public async ValueTask<string[]> ReplaceCodes( DbConnection connection, DbTransaction transaction, Database db, IEnumerable<string> recoveryCodes, CancellationToken token = default )
     {
-        RecoveryCodeRecord[]                            old        = await Codes( connection, transaction, db, token );
+        IEnumerable<RecoveryCodeRecord>                 old        = await Codes( connection, transaction, db, token );
         IReadOnlyDictionary<string, RecoveryCodeRecord> dictionary = RecoveryCodeRecord.Create( this, recoveryCodes );
-        string[]                                        codes      = dictionary.Keys.ToArray();
+        string[]                                        codes      = dictionary.Keys.GetArray();
 
 
         await db.RecoveryCodes.Delete( connection, transaction, old, token );
@@ -149,9 +149,9 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, JsonModels.IJ
     }
 
 
-    [RequiresPreviewFeatures] public ValueTask<RecoveryCodeRecord[]> Codes( Database db, CancellationToken token ) => db.TryCall( Codes, db, token );
+    [RequiresPreviewFeatures] public ValueTask<IEnumerable<RecoveryCodeRecord>> Codes( Database db, CancellationToken token ) => db.TryCall( Codes, db, token );
     [RequiresPreviewFeatures]
-    public async ValueTask<RecoveryCodeRecord[]> Codes( DbConnection connection, DbTransaction transaction, Database db, CancellationToken token ) =>
+    public async ValueTask<IEnumerable<RecoveryCodeRecord>> Codes( DbConnection connection, DbTransaction transaction, Database db, CancellationToken token ) =>
         await UserRecoveryCodeRecord.Where( connection, transaction, db.UserRecoveryCodes, db.RecoveryCodes, this, token );
 
 
@@ -167,8 +167,8 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, JsonModels.IJ
 
     public async Task<UserRights> GetRights( DbConnection connection, DbTransaction transaction, Database db, int totalRightCount, CancellationToken token )
     {
-        GroupRecord[] groups = await GetGroups( connection, transaction, db, token );
-        RoleRecord[]  roles  = await GetRoles( connection, transaction, db, token );
+        GroupRecord[] groups = (await GetGroups( connection, transaction, db, token )).GetArray();
+        RoleRecord[]  roles  = (await GetRoles( connection, transaction, db, token )).GetArray();
         var           rights = new List<UserRights.IRights>( 1 + groups.Length + roles.Length );
 
         rights.AddRange( groups );
@@ -185,8 +185,7 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, JsonModels.IJ
 
         if ( ReferenceEquals( this, other ) ) { return true; }
 
-        return Equals( _additionalData, other.AdditionalData ) &&
-               string.Equals( _address,        other.Address,         StringComparison.Ordinal ) &&
+        return string.Equals( _address,        other.Address,         StringComparison.Ordinal ) &&
                string.Equals( _city,           other.City,            StringComparison.Ordinal ) &&
                string.Equals( _company,        other.Company,         StringComparison.Ordinal ) &&
                string.Equals( _country,        other.Country,         StringComparison.Ordinal ) &&
@@ -505,7 +504,7 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, JsonModels.IJ
     [RequiresPreviewFeatures]
     public async ValueTask<bool> TryAdd( DbConnection connection, DbTransaction transaction, Database db, RoleRecord value, CancellationToken token ) =>
         await UserRoleRecord.TryAdd( connection, transaction, db.UserRoles, this, value, token );
-    public async ValueTask<RoleRecord[]> GetRoles( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token = default ) =>
+    public async ValueTask<IEnumerable<RoleRecord>> GetRoles( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token = default ) =>
         await UserRoleRecord.Where( connection, transaction, db.UserRoles, db.Roles, this, token );
     public async ValueTask<bool> HasRole( DbConnection connection, DbTransaction transaction, Database db, RoleRecord value, CancellationToken token ) =>
         await UserRoleRecord.Exists( connection, transaction, db.UserRoles, this, value, token );
@@ -521,7 +520,7 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, JsonModels.IJ
     [RequiresPreviewFeatures]
     public async ValueTask<bool> TryAdd( DbConnection connection, DbTransaction transaction, Database db, GroupRecord value, CancellationToken token ) =>
         await UserGroupRecord.TryAdd( connection, transaction, db.UserGroups, this, value, token );
-    public async ValueTask<GroupRecord[]> GetGroups( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token = default ) =>
+    public async ValueTask<IEnumerable<GroupRecord>> GetGroups( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token = default ) =>
         await UserGroupRecord.Where( connection, transaction, db.UserGroups, db.Groups, this, token );
     public async ValueTask<bool> IsPartOfGroup( DbConnection connection, DbTransaction transaction, Database db, GroupRecord value, CancellationToken token ) =>
         await UserGroupRecord.Exists( connection, transaction, db.UserGroups, this, value, token );
@@ -560,9 +559,9 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, JsonModels.IJ
         RoleRecord[]  roles  = Array.Empty<RoleRecord>();
 
 
-        if ( types.HasFlag( ClaimType.GroupSid ) ) { groups = await GetGroups( connection, transaction, db, token ); }
+        if ( types.HasFlag( ClaimType.GroupSid ) ) { groups = (await GetGroups( connection, transaction, db, token )).GetArray(); }
 
-        if ( types.HasFlag( ClaimType.Role ) ) { roles = await GetRoles( connection, transaction, db, token ); }
+        if ( types.HasFlag( ClaimType.Role ) ) { roles = (await GetRoles( connection, transaction, db, token )).GetArray(); }
 
 
         var claims = new List<Claim>( 16 + groups.Length + roles.Length );
@@ -608,7 +607,7 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, JsonModels.IJ
     public static ValueTask<UserRecord?> TryFromClaims( DbConnection connection, DbTransaction transaction, Database db, HttpContext context, ClaimType types, CancellationToken token ) =>
         TryFromClaims( connection, transaction, db, context.User, types, token );
     public static ValueTask<UserRecord?> TryFromClaims( DbConnection connection, DbTransaction transaction, Database db, ClaimsPrincipal principal, ClaimType types, CancellationToken token ) =>
-        TryFromClaims( connection, transaction, db, principal.Claims.ToArray(), types, token );
+        TryFromClaims( connection, transaction, db, principal.Claims.GetArray(), types, token );
     public static async ValueTask<UserRecord?> TryFromClaims( DbConnection connection, DbTransaction transaction, Database db, Claim[] claims, ClaimType types, CancellationToken token )
     {
         Debug.Assert( types.HasFlag( ClaimType.UserID ) );

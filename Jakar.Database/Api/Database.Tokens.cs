@@ -186,7 +186,7 @@ public abstract partial class Database
         if ( validationResult.Exception is not null ) { return new LoginResult( validationResult.Exception ); }
 
 
-        Claim[]     claims = validationResult.ClaimsIdentity.Claims.ToArray();
+        Claim[]     claims = validationResult.ClaimsIdentity.Claims.GetArray();
         UserRecord? record = await UserRecord.TryFromClaims( connection, transaction, this, claims, types | DEFAULT_CLAIM_TYPES, token );
         if ( record is null ) { return new LoginResult( LoginResult.State.NotFound ); }
 

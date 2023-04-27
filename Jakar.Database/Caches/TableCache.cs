@@ -159,7 +159,7 @@ public sealed class TableCache<TRecord> : IHostedService, IReadOnlyCollection<TR
         if ( HasChanged )
         {
             await _table.Update( connection, transaction, RecordsChanged, token );
-            TRecord[] changed = await _table.Get( connection, transaction, Changed, token );
+            IEnumerable<TRecord> changed = await _table.Get( connection, transaction, Changed, token );
             AddOrUpdate( changed );
         }
     }

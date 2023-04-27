@@ -8,14 +8,14 @@ namespace Jakar.Database;
 
 
 
-[SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
+[SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global")]
 public partial class DbTable<TRecord> : ObservableClass, IConnectableDb, IAsyncDisposable where TRecord : TableRecord<TRecord>
 {
     protected readonly IConnectableDb                 _database;
     protected readonly TypePropertiesCache.Properties _propertiesCache;
 
 
-    protected internal static TRecord[]           Empty       => Array.Empty<TRecord>();
+    protected internal static IEnumerable<TRecord>           Empty       => Array.Empty<TRecord>();
     protected internal        IEnumerable<string> ColumnNames => Descriptors.Select( x => x.ColumnName );
 
     protected internal virtual string CreatedBy => Instance switch
@@ -101,9 +101,9 @@ public partial class DbTable<TRecord> : ObservableClass, IConnectableDb, IAsyncD
        .KeyValuePair;
 
 
-    public ValueTask<TRecord[]> All( CancellationToken token = default ) => this.Call( All, token );
+    public ValueTask<IEnumerable<TRecord>> All( CancellationToken token = default ) => this.Call( All, token );
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
-    public virtual async ValueTask<TRecord[]> All( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
+    public virtual async ValueTask<IEnumerable<TRecord>> All( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
         string sql = $"SELECT * FROM {SchemaTableName}";
 
