@@ -4,7 +4,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata>
 		<id>Jakar.Extensions</id>
-		<version>6.7.23</version>
+		<version>6.7.24</version>
 		<title>Extension Library</title>
 		<authors>Tyler Stegmaier</authors>
 		<owners>Jakar510/Jakar</owners>
@@ -29,7 +29,7 @@
 		<dependencies>
 			<group targetFramework="netstandard2.1">
 				<dependency id="CommunityToolkit.Diagnostics"
-							version="8.1.0" />
+							version="8.2.0" />
 				<dependency id="Dapper"
 							version="2.0.123" />
 				<dependency id="Dapper.Contrib"
@@ -66,6 +66,8 @@
 							version="7.0.2" />
 				<dependency id="System.Threading.Tasks"
 							version="4.3.0" />
+				<dependency id="System.Net.Http"
+							version="4.3.4" />
 				<dependency id="System.Threading.Tasks.Dataflow"
 							version="7.0.0" />
 				<dependency id="System.Threading.Tasks.Extensions"
@@ -88,7 +90,7 @@
 
 			<group targetFramework="net6.0">
 				<dependency id="CommunityToolkit.Diagnostics"
-							version="8.1.0" />
+							version="8.2.0" />
 				<dependency id="Dapper"
 							version="2.0.123" />
 				<dependency id="Dapper.Contrib"
@@ -125,6 +127,8 @@
 							version="7.0.2" />
 				<dependency id="System.Threading.Tasks"
 							version="4.3.0" />
+				<dependency id="System.Net.Http"
+							version="4.3.4" />
 				<dependency id="System.Threading.Tasks.Dataflow"
 							version="7.0.0" />
 				<dependency id="System.Threading.Tasks.Extensions"
@@ -147,7 +151,7 @@
 
 			<group targetFramework="net7.0">
 				<dependency id="CommunityToolkit.Diagnostics"
-							version="8.1.0" />
+							version="8.2.0" />
 				<dependency id="Dapper"
 							version="2.0.123" />
 				<dependency id="Dapper.Contrib"
@@ -184,6 +188,8 @@
 							version="7.0.2" />
 				<dependency id="System.Threading.Tasks"
 							version="4.3.0" />
+				<dependency id="System.Net.Http"
+							version="4.3.4" />
 				<dependency id="System.Threading.Tasks.Dataflow"
 							version="7.0.0" />
 				<dependency id="System.Threading.Tasks.Extensions"
