@@ -14,27 +14,33 @@ namespace Jakar.Database;
 
 public interface IOneTimePassword
 {
-    bool ValidateToken( string   token,  VerificationWindow? window = default );
-    string GetQrCode( UserRecord record, int                 width  = 256, int height = 256, BarcodeFormat? format = default );
+    bool ValidateToken( string          token, VerificationWindow? window = default );
+    public string GetContent( IUserName record );
+    public string GetQrCode( IUserName  record, int size,  BarcodeFormat format                       = BarcodeFormat.QR_CODE );
+    public string GetQrCode( IUserName  record, int width, int           height, BarcodeFormat format = BarcodeFormat.QR_CODE );
 }
 
 
 
-public sealed class OneTimePassword<T> : IOneTimePassword where T : IAppName
+public sealed class OneTimePassword : IOneTimePassword
 {
     private readonly string _secretKey;
-    private readonly string _issuer = typeof(T).Name;
+    private readonly string _issuer;
+    private readonly byte[] _key;
 
 
-    private OneTimePassword( Guid secretKey ) : this( secretKey.ToString() ) { }
-    private OneTimePassword( string secretKey )
+    private OneTimePassword( string secretKey, string issuer )
     {
         if ( !string.IsNullOrWhiteSpace( secretKey ) ) { throw new InvalidOperationException( $"{nameof(secretKey)} is not set" ); }
 
         _secretKey = secretKey;
+        _issuer    = issuer;
+        _key       = Base32Encoding.ToBytes( _secretKey );
     }
-    public static IOneTimePassword Create( Guid   secretKey ) => new OneTimePassword<T>( secretKey );
-    public static IOneTimePassword Create( string secretKey ) => new OneTimePassword<T>( secretKey );
+
+
+    public static IOneTimePassword Create( string    secretKey, string issuer ) => new OneTimePassword( secretKey, issuer );
+    public static IOneTimePassword Create<T>( string secretKey ) where T : IAppName => new OneTimePassword( secretKey, typeof(T).Name );
 
 
     public static string GenerateSecret()
@@ -47,16 +53,20 @@ public sealed class OneTimePassword<T> : IOneTimePassword where T : IAppName
 
     public bool ValidateToken( string token, VerificationWindow? window = default )
     {
-        var totp = new Totp( Base32Encoding.ToBytes( _secretKey ) );
+        var totp = new Totp( _key );
         return totp.VerifyTotp( token, out long _, window );
     }
 
 
-    public string GetQrCode( UserRecord record, int width = 256, int height = 256, BarcodeFormat? format = default )
+    public string GetContent( IUserName record ) => $"otpauth://totp/{record.UserName}?secret={_secretKey}&issuer={_issuer}";
+
+
+    public string GetQrCode( IUserName record, int size, BarcodeFormat format = BarcodeFormat.QR_CODE ) => GetQrCode( record, size, size, format );
+    public string GetQrCode( IUserName record, int width, int height, BarcodeFormat format = BarcodeFormat.QR_CODE )
     {
         var writer = new BarcodeWriterSvg
                      {
-                         Format = format ?? BarcodeFormat.QR_CODE,
+                         Format = format,
                          Options = new QrCodeEncodingOptions
                                    {
                                        DisableECI      = true,
@@ -68,7 +78,7 @@ public sealed class OneTimePassword<T> : IOneTimePassword where T : IAppName
                                    }
                      };
 
-        return writer.Write( $"otpauth://totp/{record.UserName}?secret={_secretKey}&issuer={_issuer}" )
+        return writer.Write( GetContent( record ) )
                      .ToString();
     }
 }

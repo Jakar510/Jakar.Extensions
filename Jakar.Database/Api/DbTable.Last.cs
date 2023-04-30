@@ -14,7 +14,7 @@ public partial class DbTable<TRecord>
     {
         if ( token.IsCancellationRequested ) { return default; }
 
-        string sql = $"SELECT * FROM {SchemaTableName} ORDER BY {ID} DESC LIMIT 1";
+        string sql = $"SELECT * FROM {SchemaTableName} ORDER BY {ID_ColumnName} DESC LIMIT 1";
 
         try { return await connection.QueryFirstAsync<TRecord>( sql, default, transaction ); }
         catch ( Exception e ) { throw new SqlException( sql, e ); }
@@ -29,7 +29,7 @@ public partial class DbTable<TRecord>
     {
         if ( token.IsCancellationRequested ) { return default; }
 
-        string sql = $"SELECT * FROM {SchemaTableName} ORDER BY {ID} DESC LIMIT 1";
+        string sql = $"SELECT * FROM {SchemaTableName} ORDER BY {ID_ColumnName} DESC LIMIT 1";
 
         try { return await connection.QueryFirstOrDefaultAsync<TRecord>( sql, default, transaction ); }
         catch ( Exception e ) { throw new SqlException( sql, e ); }

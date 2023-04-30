@@ -27,8 +27,8 @@ public partial class DbTable<TRecord>
     public virtual async ValueTask Update( DbConnection connection, DbTransaction? transaction, TRecord record, CancellationToken token = default )
     {
         Guid              id         = record.ID;
-        DynamicParameters parameters = GetParameters( id, record );
-        string            sql        = $"UPDATE {SchemaTableName} SET {string.Join( ',', KeyValuePairs )} WHERE {ID} = @{nameof(id)};";
+        DynamicParameters parameters = Database.GetParameters( id, record );
+        string            sql        = $"UPDATE {SchemaTableName} SET {string.Join( ',', KeyValuePairs )} WHERE {ID_ColumnName} = @{nameof(id)};";
 
         if ( token.IsCancellationRequested ) { return; }
 

@@ -4,6 +4,7 @@
 namespace Jakar.Database;
 
 
+[SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
 public partial class DbTable<TRecord>
 {
     public ValueTask<TRecord?> Single( string          id,  CancellationToken  token                               = default ) => this.Call( Single, id,  token );
@@ -15,9 +16,9 @@ public partial class DbTable<TRecord>
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask<TRecord?> Single( DbConnection connection, DbTransaction? transaction, string id, CancellationToken token = default )
     {
-        DynamicParameters parameters = GetParameters( id );
+        DynamicParameters parameters = Database.GetParameters( id );
 
-        string sql = $"SELECT * FROM {SchemaTableName} WHERE {ID} = @{nameof(id)}";
+        string sql = $"SELECT * FROM {SchemaTableName} WHERE {ID_ColumnName} = @{nameof(id)}";
 
         if ( token.IsCancellationRequested ) { return default; }
 
@@ -39,9 +40,9 @@ public partial class DbTable<TRecord>
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask<TRecord?> SingleOrDefault( DbConnection connection, DbTransaction? transaction, string id, CancellationToken token = default )
     {
-        DynamicParameters parameters = GetParameters( id );
+        DynamicParameters parameters = Database.GetParameters( id );
 
-        string sql = $"SELECT * FROM {SchemaTableName} WHERE {ID} = @{nameof(id)}";
+        string sql = $"SELECT * FROM {SchemaTableName} WHERE {ID_ColumnName} = @{nameof(id)}";
 
         if ( token.IsCancellationRequested ) { return default; }
 

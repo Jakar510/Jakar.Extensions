@@ -52,7 +52,7 @@ END
 
 ELSE 
 BEGIN 
-    SELECT {ID} = NULL 
+    SELECT {ID_ColumnName} = NULL 
 END",
                          DbInstance.Postgres => $@"IF NOT EXISTS(SELECT * FROM {SchemaTableName} WHERE {string.Join( matchAll
                                                                                                                          ? "AND"
@@ -64,7 +64,7 @@ END
 
 ELSE 
 BEGIN 
-    SELECT {ID} = NULL 
+    SELECT {ID_ColumnName} = NULL 
 END",
                          _ => throw new OutOfRangeException( nameof(Instance), Instance ),
                      };
@@ -98,12 +98,12 @@ END
 
 ELSE 
 BEGIN 
-    UPDATE {SchemaTableName} SET {string.Join( ',', KeyValuePairs )} WHERE {ID} = @{string.Join( matchAll
+    UPDATE {SchemaTableName} SET {string.Join( ',', KeyValuePairs )} WHERE {ID_ColumnName} = @{string.Join( matchAll
                                                                                                      ? "AND"
                                                                                                      : "OR",
                                                                                                  parameters.ParameterNames.Select( KeyValuePair ) )};
 
-    SELECT TOP 1 {ID} FROM {SchemaTableName} WHERE {string.Join( matchAll
+    SELECT TOP 1 {ID_ColumnName} FROM {SchemaTableName} WHERE {string.Join( matchAll
                                                                      ? "AND"
                                                                      : "OR",
                                                                  parameters.ParameterNames.Select( KeyValuePair ) )} 
@@ -118,12 +118,12 @@ END
 
 ELSE 
 BEGIN 
-    UPDATE {SchemaTableName} SET {string.Join( ',', KeyValuePairs )} WHERE {ID} = @{string.Join( matchAll
+    UPDATE {SchemaTableName} SET {string.Join( ',', KeyValuePairs )} WHERE {ID_ColumnName} = @{string.Join( matchAll
                                                                                                      ? "AND"
                                                                                                      : "OR",
                                                                                                  parameters.ParameterNames.Select( KeyValuePair ) )};
 
-    SELECT {ID} FROM {SchemaTableName} WHERE {string.Join( matchAll
+    SELECT {ID_ColumnName} FROM {SchemaTableName} WHERE {string.Join( matchAll
                                                                ? "AND"
                                                                : "OR",
                                                            parameters.ParameterNames.Select( KeyValuePair ) )} LIMIT 1

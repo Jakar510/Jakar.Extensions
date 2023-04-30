@@ -12,7 +12,7 @@ public partial class DbTable<TRecord>
 
     public virtual async ValueTask<TRecord?> First( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
-        string sql = $"SELECT * FROM {SchemaTableName} ORDER BY {ID} ASC LIMIT 1";
+        string sql = $"SELECT * FROM {SchemaTableName} ORDER BY {ID_ColumnName} ASC LIMIT 1";
 
         if ( token.IsCancellationRequested ) { return default; }
 
@@ -21,7 +21,7 @@ public partial class DbTable<TRecord>
     }
     public virtual async ValueTask<TRecord?> FirstOrDefault( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
-        string sql = $"SELECT * FROM {SchemaTableName} ORDER BY {ID} ASC LIMIT 1";
+        string sql = $"SELECT * FROM {SchemaTableName} ORDER BY {ID_ColumnName} ASC LIMIT 1";
 
         if ( token.IsCancellationRequested ) { return default; }
 

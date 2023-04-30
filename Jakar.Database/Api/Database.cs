@@ -161,4 +161,13 @@ public abstract partial class Database : Randoms, IConnectableDb, IAsyncDisposab
         record = await Users.Insert( connection, transaction, record, token );
         return await GetToken( connection, transaction, record, types, token );
     }
+
+
+    public static DynamicParameters GetParameters( object? value, object? template = default, [CallerArgumentExpression( "value" )] string? variableName = default )
+    {
+        ArgumentNullException.ThrowIfNull( variableName );
+        var parameters = new DynamicParameters( template );
+        parameters.Add( variableName, value );
+        return parameters;
+    }
 }

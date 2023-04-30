@@ -1,7 +1,14 @@
 ﻿namespace Jakar.Database;
 
 
-public interface IUserDataRecord : IUserData
+public interface IUserName
+{
+    public string UserName { get; }
+}
+
+
+
+public interface IUserDataRecord : IUserData, IUserName
 {
     public new UserRecord Update( IUserData model );
 }

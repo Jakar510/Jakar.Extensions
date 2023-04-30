@@ -4,7 +4,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata>
 		<id>Jakar.DataBase</id>
-		<version>6.7.23</version>
+		<version>6.7.24</version>
 		<title>Extension Library</title>
 		<authors>Tyler Stegmaier</authors>
 		<owners>Jakar510/Jakar</owners>
@@ -28,7 +28,7 @@
 		<dependencies>
 			<group targetFramework="net6.0">
 				<dependency id="Jakar.Extensions"
-							version="6.7.23" />
+							version="6.7.24" />
 				<dependency id="Jakar.Extensions.Hosting"
 							version="6.7.3" />
 				<dependency id="FluentMigrator"
@@ -42,16 +42,16 @@
 				<dependency id="Microsoft.Identity.Web"
 							version="2.9.0" />
 				<dependency id="Microsoft.IdentityModel.JsonWebTokens"
-							version="6.29.0" />
+							version="6.30.0" />
 				<dependency id="Microsoft.IdentityModel.Protocols.OpenIdConnect"
-							version="6.29.0" />
+							version="6.30.0" />
 				<dependency id="Microsoft.IdentityModel.Tokens"
-							version="6.29.0" />
+							version="6.30.0" />
 			</group>
 
 			<group targetFramework="net7.0">
 				<dependency id="Jakar.Extensions"
-							version="6.7.23" />
+							version="6.7.24" />
 				<dependency id="Jakar.Extensions.Hosting"
 							version="6.7.3" />
 				<dependency id="FluentMigrator"
@@ -65,11 +65,11 @@
 				<dependency id="Microsoft.Identity.Web"
 							version="2.9.0" />
 				<dependency id="Microsoft.IdentityModel.JsonWebTokens"
-							version="6.29.0" />
+							version="6.30.0" />
 				<dependency id="Microsoft.IdentityModel.Protocols.OpenIdConnect"
-							version="6.29.0" />
+							version="6.30.0" />
 				<dependency id="Microsoft.IdentityModel.Tokens"
-							version="6.29.0" />
+							version="6.30.0" />
 			</group>
 		</dependencies>
 	</metadata>

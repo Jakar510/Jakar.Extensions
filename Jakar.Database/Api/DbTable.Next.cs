@@ -18,7 +18,7 @@ public partial class DbTable<TRecord>
         parameters.Add( nameof(RecordPair.ID),          pair.ID );
         parameters.Add( nameof(RecordPair.DateCreated), pair.DateCreated );
 
-        string sql = @$"SELECT * FROM {SchemaTableName} WHERE ( id = IFNULL((SELECT MIN({ID}) FROM {SchemaTableName} WHERE {ID} > @{nameof(RecordPair.ID)}), 0) )";
+        string sql = @$"SELECT * FROM {SchemaTableName} WHERE ( id = IFNULL((SELECT MIN({ID_ColumnName}) FROM {SchemaTableName} WHERE {ID_ColumnName} > @{nameof(RecordPair.ID)}), 0) )";
         if ( token.IsCancellationRequested ) { return default; }
 
         try { return await connection.ExecuteScalarAsync<TRecord>( sql, parameters, transaction ); }
@@ -29,7 +29,7 @@ public partial class DbTable<TRecord>
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask<RecordPair[]> SortedIDs( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
-        string sql = @$"SELECT {ID}, {DateCreated} FROM {SchemaTableName} ORDER BY {DateCreated} DESC";
+        string sql = @$"SELECT {ID_ColumnName}, {DateCreated} FROM {SchemaTableName} ORDER BY {DateCreated} DESC";
 
 
         try
@@ -53,7 +53,7 @@ public partial class DbTable<TRecord>
         var parameters = new DynamicParameters();
         parameters.Add( nameof(id), id );
 
-        string sql = @$"SELECT {ID} FROM {SchemaTableName} WHERE ( id = IFNULL((SELECT MIN({ID}) FROM {SchemaTableName} WHERE {ID} > @{nameof(id)}), 0) )";
+        string sql = @$"SELECT {ID_ColumnName} FROM {SchemaTableName} WHERE ( id = IFNULL((SELECT MIN({ID_ColumnName}) FROM {SchemaTableName} WHERE {ID_ColumnName} > @{nameof(id)}), 0) )";
 
         try { return await connection.ExecuteScalarAsync<Guid>( sql, parameters, transaction ); }
         catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }

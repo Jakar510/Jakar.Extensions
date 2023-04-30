@@ -8,15 +8,15 @@ namespace Jakar.Database;
 
 
 
-[SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global")]
+[SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
 public partial class DbTable<TRecord> : ObservableClass, IConnectableDb, IAsyncDisposable where TRecord : TableRecord<TRecord>
 {
     protected readonly IConnectableDb                 _database;
     protected readonly TypePropertiesCache.Properties _propertiesCache;
 
 
-    protected internal static IEnumerable<TRecord>           Empty       => Array.Empty<TRecord>();
-    protected internal        IEnumerable<string> ColumnNames => Descriptors.Select( x => x.ColumnName );
+    protected internal static IEnumerable<TRecord> Empty       => Array.Empty<TRecord>();
+    protected internal        IEnumerable<string>  ColumnNames => Descriptors.Select( x => x.ColumnName );
 
     protected internal virtual string CreatedBy => Instance switch
                                                    {
@@ -36,12 +36,12 @@ public partial class DbTable<TRecord> : ObservableClass, IConnectableDb, IAsyncD
 
     protected internal virtual IEnumerable<Descriptor> Descriptors => _propertiesCache.GetValues( this );
 
-    protected internal virtual string ID => Instance switch
-                                            {
-                                                DbInstance.Postgres => $@"""{nameof(TableRecord<TRecord>.ID)}""",
-                                                DbInstance.MsSql    => nameof(TableRecord<TRecord>.ID),
-                                                _                   => throw new OutOfRangeException( nameof(Instance), Instance ),
-                                            };
+    protected internal virtual string ID_ColumnName => Instance switch
+                                                       {
+                                                           DbInstance.Postgres => $@"""{nameof(TableRecord<TRecord>.ID)}""",
+                                                           DbInstance.MsSql    => nameof(TableRecord<TRecord>.ID),
+                                                           _                   => throw new OutOfRangeException( nameof(Instance), Instance ),
+                                                       };
 
     public             DbInstance          Instance      => _database.Instance;
     protected internal IEnumerable<string> KeyValuePairs => Descriptors.Select( x => x.KeyValuePair );
@@ -156,14 +156,6 @@ public partial class DbTable<TRecord> : ObservableClass, IConnectableDb, IAsyncD
         catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
     }
 
-
-    protected static DynamicParameters GetParameters( object? value, object? template = default, [CallerArgumentExpression( "value" )] string? variableName = default )
-    {
-        ArgumentNullException.ThrowIfNull( variableName );
-        var parameters = new DynamicParameters( template );
-        parameters.Add( variableName, value );
-        return parameters;
-    }
 
 
     public async ValueTask Schema( Func<DataTable, CancellationToken, ValueTask> func, CancellationToken token = default )

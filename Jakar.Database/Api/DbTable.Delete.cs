@@ -29,7 +29,7 @@ public partial class DbTable<TRecord>
     }
     public virtual async ValueTask Delete( DbConnection connection, DbTransaction transaction, Guid id, CancellationToken token = default )
     {
-        string cmd = $"DELETE FROM {SchemaTableName} WHERE {ID} = {id};";
+        string cmd = $"DELETE FROM {SchemaTableName} WHERE {ID_ColumnName} = {id};";
 
         if ( token.IsCancellationRequested ) { return; }
 
@@ -38,7 +38,7 @@ public partial class DbTable<TRecord>
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask Delete( DbConnection connection, DbTransaction transaction, IEnumerable<Guid> ids, CancellationToken token = default )
     {
-        string sql = $"DELETE FROM {SchemaTableName} WHERE {ID} in ( {string.Join( ',', ids.Select( x => $"'{x}'" ) )} );";
+        string sql = $"DELETE FROM {SchemaTableName} WHERE {ID_ColumnName} in ( {string.Join( ',', ids.Select( x => $"'{x}'" ) )} );";
 
         if ( token.IsCancellationRequested ) { return; }
 
