@@ -1,15 +1,27 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 03/12/2023  1:56 PM
 
-using Microsoft.AspNetCore.Identity;
-
-
-
 namespace Jakar.Database;
 
 
 public abstract partial class Database
 {
+    private TimeSpan _accessTokenExpirationTime  = TimeSpan.FromMinutes( 15 );
+    private TimeSpan _refreshTokenExpirationTime = TimeSpan.FromDays( 90 );
+
+
+    public TimeSpan AccessTokenExpirationTime
+    {
+        get => _accessTokenExpirationTime;
+        set => SetProperty( ref _accessTokenExpirationTime, value );
+    }
+    public TimeSpan RefreshTokenExpirationTime
+    {
+        get => _refreshTokenExpirationTime;
+        set => SetProperty( ref _refreshTokenExpirationTime, value );
+    }
+
+
     public virtual ValueTask<SigningCredentials> GetSigningCredentials( CancellationToken               token ) => new(Configuration.GetSigningCredentials( Options ));
     public virtual ValueTask<TokenValidationParameters> GetTokenValidationParameters( CancellationToken token ) => new(Configuration.GetTokenValidationParameters( Options ));
 
@@ -24,8 +36,8 @@ public abstract partial class Database
 
     /// <summary> Only to be used for <see cref="ITokenService"/> </summary>
     /// <exception cref="ArgumentOutOfRangeException"> </exception>
-    public ValueTask<Tokens?> Authenticate( VerifyRequest request, ClaimType types = default, CancellationToken token = default ) => this.TryCall( Authenticate, request, types, token );
-    protected virtual async ValueTask<Tokens?> Authenticate( DbConnection connection, DbTransaction transaction, VerifyRequest request, ClaimType types = default, CancellationToken token = default )
+    public ValueTask<Tokens?> Authenticate( VerifyRequest request, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default ) => this.TryCall( Authenticate, request, types, token );
+    protected virtual async ValueTask<Tokens?> Authenticate( DbConnection connection, DbTransaction transaction, VerifyRequest request, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default )
     {
         UserRecord? user = await Users.Get( nameof(UserRecord.UserName), request.UserLogin, token );
         if ( user is null ) { return default; }
@@ -92,25 +104,23 @@ public abstract partial class Database
         return result.IsT0;
     }
     public Task<bool> CanGenerateTwoFactorTokenAsync( UserManager<UserRecord> manager, UserRecord user ) => Task.FromResult( true );
-
-
-    public ValueTask<Tokens> GetToken( UserRecord user, ClaimType types = default, CancellationToken token = default ) => this.TryCall( GetToken, user, types, token );
-    public virtual async ValueTask<Tokens> GetToken( DbConnection connection, DbTransaction transaction, UserRecord user, ClaimType types = default, CancellationToken token = default )
+    public ValueTask<Tokens> GetToken( UserRecord                             user,    ClaimType  types = default, CancellationToken token = default ) => this.TryCall( GetToken, user, types, token );
+    public virtual async ValueTask<Tokens> GetToken( DbConnection connection, DbTransaction transaction, UserRecord user, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default )
     {
-        Claim[] claims = await user.GetUserClaims( connection, transaction, this, types | DEFAULT_CLAIM_TYPES, token );
+        Claim[] claims = await user.GetUserClaims( connection, transaction, this, types, token );
 
-        var descriptor = new SecurityTokenDescriptor
-                         {
-                             Subject            = new ClaimsIdentity( claims ),
-                             Expires            = GetExpiration( user, TimeSpan.FromMinutes( 15 ) ),
-                             Issuer             = Options.TokenIssuer,
-                             Audience           = Options.TokenAudience,
-                             IssuedAt           = DateTime.UtcNow,
-                             SigningCredentials = await GetSigningCredentials( token ),
-                         };
+        var accessDescriptor = new SecurityTokenDescriptor
+                               {
+                                   Subject            = new ClaimsIdentity( claims ),
+                                   Expires            = GetExpiration( user, AccessTokenExpirationTime ),
+                                   Issuer             = Options.TokenIssuer,
+                                   Audience           = Options.TokenAudience,
+                                   IssuedAt           = DateTime.UtcNow,
+                                   SigningCredentials = await GetSigningCredentials( token )
+                               };
 
 
-        DateTime refreshExpires = GetExpiration( user, TimeSpan.FromDays( 90 ) );
+        DateTime refreshExpires = GetExpiration( user, RefreshTokenExpirationTime );
 
         var refreshDescriptor = new SecurityTokenDescriptor
                                 {
@@ -119,12 +129,12 @@ public abstract partial class Database
                                     Issuer             = Options.TokenIssuer,
                                     Audience           = Options.TokenAudience,
                                     IssuedAt           = DateTime.UtcNow,
-                                    SigningCredentials = await GetSigningCredentials( token ),
+                                    SigningCredentials = await GetSigningCredentials( token )
                                 };
 
 
         var    handler     = new JwtSecurityTokenHandler();
-        string accessToken = handler.WriteToken( handler.CreateToken( descriptor ) );
+        string accessToken = handler.WriteToken( handler.CreateToken( accessDescriptor ) );
         string refresh     = handler.WriteToken( handler.CreateToken( refreshDescriptor ) );
 
 
@@ -134,8 +144,8 @@ public abstract partial class Database
     }
 
 
-    public ValueTask<OneOf<Tokens, Error>> Refresh( string refreshToken, ClaimType types = default, CancellationToken token = default ) => this.TryCall( Refresh, refreshToken, types, token );
-    public virtual async ValueTask<OneOf<Tokens, Error>> Refresh( DbConnection connection, DbTransaction transaction, string refreshToken, ClaimType types = default, CancellationToken token = default )
+    public ValueTask<OneOf<Tokens, Error>> Refresh( string refreshToken, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default ) => this.TryCall( Refresh, refreshToken, types, token );
+    public virtual async ValueTask<OneOf<Tokens, Error>> Refresh( DbConnection connection, DbTransaction transaction, string refreshToken, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default )
     {
         LoginResult loginResult = await VerifyLogin( connection, transaction, refreshToken, types, token );
         if ( loginResult.GetResult( out Error? error, out UserRecord? record ) ) { return error.Value; }
@@ -157,7 +167,7 @@ public abstract partial class Database
                              Issuer             = Options.TokenIssuer,
                              Audience           = Options.TokenAudience,
                              IssuedAt           = DateTime.UtcNow,
-                             SigningCredentials = await GetSigningCredentials( token ),
+                             SigningCredentials = await GetSigningCredentials( token )
                          };
 
         var    handler     = new JwtSecurityTokenHandler();
@@ -166,8 +176,8 @@ public abstract partial class Database
     }
 
 
-    public ValueTask<OneOf<Tokens, Error>> Verify( string jwt, ClaimType types = default, CancellationToken token = default ) => this.TryCall( Verify, jwt, types, token );
-    public virtual async ValueTask<OneOf<Tokens, Error>> Verify( DbConnection connection, DbTransaction transaction, string jwt, ClaimType types = default, CancellationToken token = default )
+    public ValueTask<OneOf<Tokens, Error>> Verify( string jwt, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default ) => this.TryCall( Verify, jwt, types, token );
+    public virtual async ValueTask<OneOf<Tokens, Error>> Verify( DbConnection connection, DbTransaction transaction, string jwt, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default )
     {
         LoginResult loginResult = await VerifyLogin( connection, transaction, jwt, types, token );
 
@@ -177,8 +187,8 @@ public abstract partial class Database
     }
 
 
-    public ValueTask<LoginResult> VerifyLogin( string jwt, ClaimType types = default, CancellationToken token = default ) => this.TryCall( VerifyLogin, jwt, types, token );
-    protected virtual async ValueTask<LoginResult> VerifyLogin( DbConnection connection, DbTransaction transaction, string jwt, ClaimType types = default, CancellationToken token = default )
+    public ValueTask<LoginResult> VerifyLogin( string jwt, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default ) => this.TryCall( VerifyLogin, jwt, types, token );
+    protected virtual async ValueTask<LoginResult> VerifyLogin( DbConnection connection, DbTransaction transaction, string jwt, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default )
     {
         var                       handler              = new JwtSecurityTokenHandler();
         TokenValidationParameters validationParameters = await GetTokenValidationParameters( token );
