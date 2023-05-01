@@ -6,24 +6,30 @@ namespace Jakar.Extensions;
 
 public interface IDataProtector : IDisposable
 {
-    byte[] Encrypt( byte[]                    value );
-    string Encrypt( string                    value );
-    string Encrypt( string                    value, Encoding encoding );
-    void Encrypt( LocalFile                   file,  string   value );
-    void Encrypt( LocalFile                   file,  string   value, Encoding encoding );
-    void Encrypt( LocalFile                   file,  byte[]   value );
-    byte[] Decrypt( byte[]                    value );
-    string Decrypt( string                    value );
-    string Decrypt( string                    value, Encoding encoding );
-    byte[] Decrypt( LocalFile                 file );
-    string Decrypt( LocalFile                 file, Encoding                                                        encoding );
-    T Decrypt<T>( LocalFile                   file, Func<LocalFile.IReadHandler, IDataProtector, T>                 func );
-    ValueTask<byte[]> DecryptAsync( LocalFile file, CancellationToken                                               token = default );
-    ValueTask<string> DecryptAsync( LocalFile file, Encoding                                                        encoding );
-    ValueTask<T> DecryptAsync<T>( LocalFile   file, Func<LocalFile.IAsyncReadHandler, IDataProtector, ValueTask<T>> func );
-    ValueTask EncryptAsync( LocalFile         file, string                                                          value );
-    ValueTask EncryptAsync( LocalFile         file, string                                                          value, Encoding          encoding );
-    ValueTask EncryptAsync( LocalFile         file, byte[]                                                          value, CancellationToken token = default );
+    public byte[] Encrypt( byte[]                    value );
+    public string Encrypt( string                    value );
+    public string Encrypt( string                    value, Encoding encoding );
+    public void Encrypt( LocalFile                   file,  string   value );
+    public void Encrypt( LocalFile                   file,  string   value, Encoding encoding );
+    public void Encrypt( LocalFile                   file,  byte[]   value );
+    public byte[] Decrypt( byte[]                    value );
+    public string Decrypt( string                    value );
+    public string Decrypt( string                    value, Encoding encoding );
+    public byte[] Decrypt( LocalFile                 file );
+    public string Decrypt( LocalFile                 file,  Encoding                                                        encoding );
+    public T Decrypt<T>( LocalFile                   file,  Func<LocalFile.IReadHandler, IDataProtector, T>                 func );
+    public ValueTask<byte[]> DecryptAsync( LocalFile file,  CancellationToken                                               token = default );
+    public ValueTask<string> DecryptAsync( LocalFile file,  Encoding                                                        encoding );
+    public ValueTask<T> DecryptAsync<T>( LocalFile   file,  Func<LocalFile.IAsyncReadHandler, IDataProtector, ValueTask<T>> func );
+    public ValueTask DecryptAsync( LocalFile         value, LocalFile                                                       output, CancellationToken token = default );
+    public ValueTask DecryptAsync( LocalFile         value, LocalFile                                                       output, Encoding          encoding );
+    public ValueTask EncryptAsync( LocalFile         file,  string                                                          value );
+    public ValueTask EncryptAsync( LocalFile         file,  string                                                          value, Encoding          encoding );
+    public ValueTask EncryptAsync( LocalFile         file,  byte[]                                                          value, CancellationToken token = default );
+    public ValueTask<byte[]> EncryptAsync( LocalFile value, CancellationToken                                               token = default );
+    public ValueTask<string> EncryptAsync( LocalFile value, Encoding                                                        encoding );
+    public ValueTask EncryptAsync( LocalFile         value, LocalFile                                                       output, CancellationToken token = default );
+    public ValueTask EncryptAsync( LocalFile         value, LocalFile                                                       output, Encoding          encoding );
 }
 
 
@@ -166,6 +172,22 @@ public sealed class DataProtector : IDataProtector
         return result;
     }
     public async ValueTask<T> DecryptAsync<T>( LocalFile file, Func<LocalFile.IAsyncReadHandler, IDataProtector, ValueTask<T>> func ) => await func( file.ReadAsync(), this );
+    public async ValueTask DecryptAsync( LocalFile value, LocalFile output, CancellationToken token = default )
+    {
+        byte[] raw = await value.ReadAsync()
+                                .AsBytes( token );
+
+        byte[] result = Decrypt( raw );
+        await output.WriteAsync( result, token );
+    }
+    public async ValueTask DecryptAsync( LocalFile value, LocalFile output, Encoding encoding )
+    {
+        string raw = await value.ReadAsync()
+                                .AsString();
+
+        string result = Decrypt( raw, encoding );
+        await output.WriteAsync( result );
+    }
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
@@ -185,6 +207,38 @@ public sealed class DataProtector : IDataProtector
     public ValueTask EncryptAsync( LocalFile       file,  string   value ) => EncryptAsync( file, value, Encoding.Default );
     public async ValueTask EncryptAsync( LocalFile file,  string   value, Encoding          encoding ) => await file.WriteAsync( Encrypt( value, encoding ) );
     public async ValueTask EncryptAsync( LocalFile file,  byte[]   value, CancellationToken token = default ) => await file.WriteAsync( Encrypt( value ), token );
+    public async ValueTask<byte[]> EncryptAsync( LocalFile value, CancellationToken token = default )
+    {
+        byte[] raw = await value.ReadAsync()
+                                .AsBytes( token );
+
+        byte[] result = Encrypt( raw );
+        return result;
+    }
+    public async ValueTask<string> EncryptAsync( LocalFile value, Encoding encoding )
+    {
+        string raw = await value.ReadAsync()
+                                .AsString();
+
+        string result = Encrypt( raw, encoding );
+        return result;
+    }
+    public async ValueTask EncryptAsync( LocalFile value, LocalFile output, CancellationToken token = default )
+    {
+        byte[] raw = await value.ReadAsync()
+                                .AsBytes( token );
+
+        byte[] result = Encrypt( raw );
+        await output.WriteAsync( result, token );
+    }
+    public async ValueTask EncryptAsync( LocalFile value, LocalFile output, Encoding encoding )
+    {
+        string raw = await value.ReadAsync()
+                                .AsString();
+
+        string result = Encrypt( raw, encoding );
+        await output.WriteAsync( result );
+    }
 }
 
 
@@ -262,7 +316,7 @@ public static class PemEncoding
     public static bool TryFind( ReadOnlySpan<char> pemData, out PemFields fields )
     {
         // Check for the minimum possible encoded length of a PEM structure
-        // and exit early if there is no way the input could contain a well-formed
+        // and exit early if there is no way the value could contain a well-formed
         // PEM.
         if ( pemData.Length < PreEBPrefix.Length + Ending.Length * 2 + PostEBPrefix.Length )
         {
@@ -703,13 +757,13 @@ internal static class PemLabels
 [SuppressMessage( "ReSharper", "InconsistentNaming" )]
 internal static class PemKeyImportHelpers
 {
-    public static void ImportEncryptedPem<TPass>( ReadOnlySpan<char> input, ReadOnlySpan<TPass> password, ImportEncryptedKeyAction<TPass> importAction )
+    public static void ImportEncryptedPem<TPass>( ReadOnlySpan<char> value, ReadOnlySpan<TPass> password, ImportEncryptedKeyAction<TPass> importAction )
     {
         bool               foundEncryptedPem = false;
         PemFields          foundFields       = default;
         ReadOnlySpan<char> foundSlice        = default;
 
-        ReadOnlySpan<char> pem = input;
+        ReadOnlySpan<char> pem = value;
 
         while ( PemEncoding.TryFind( pem, out PemFields fields ) )
         {
@@ -717,7 +771,7 @@ internal static class PemKeyImportHelpers
 
             if ( label.SequenceEqual( PemLabels.EncryptedPkcs8PrivateKey ) )
             {
-                if ( foundEncryptedPem ) { throw new ArgumentException( "Pem Import Ambiguous Pem", nameof(input) ); }
+                if ( foundEncryptedPem ) { throw new ArgumentException( "Pem Import Ambiguous Pem", nameof(value) ); }
 
                 foundEncryptedPem = true;
                 foundFields       = fields;
@@ -728,7 +782,7 @@ internal static class PemKeyImportHelpers
             pem = pem[offset..];
         }
 
-        if ( !foundEncryptedPem ) { throw new ArgumentException( "Pem Import No Pem Found", nameof(input) ); }
+        if ( !foundEncryptedPem ) { throw new ArgumentException( "Pem Import No Pem Found", nameof(value) ); }
 
         ReadOnlySpan<char> base64Contents = foundSlice[foundFields.Base64Data];
         int                base64size     = foundFields.DecodedDataLength;
@@ -749,20 +803,20 @@ internal static class PemKeyImportHelpers
             Span<byte> decodedBase64 = decodeBuffer.AsSpan( 0, bytesWritten );
 
             // Don't need to check the bytesRead here. We're already operating
-            // on an input which is already a parsed subset of the input.
+            // on an value which is already a parsed subset of the value.
             importAction( password, decodedBase64, out _ );
         }
         finally { CryptoPool.Return( decodeBuffer, bytesWritten ); }
     }
 
-    public static void ImportPem( ReadOnlySpan<char> input, FindImportActionFunc callback )
+    public static void ImportPem( ReadOnlySpan<char> value, FindImportActionFunc callback )
     {
         ImportKeyAction?   importAction         = null;
         PemFields          foundFields          = default;
         ReadOnlySpan<char> foundSlice           = default;
         bool               containsEncryptedPem = false;
 
-        ReadOnlySpan<char> pem = input;
+        ReadOnlySpan<char> pem = value;
 
         while ( PemEncoding.TryFind( pem, out PemFields fields ) )
         {
@@ -777,7 +831,7 @@ internal static class PemKeyImportHelpers
                 // importable keys. Or, this contained an encrypted PEM.
                 // For purposes of encrypted PKCS8 with another actionable
                 // PEM, we will throw a duplicate exception.
-                if ( importAction != null || containsEncryptedPem ) { throw new ArgumentException( "Pem Import Ambiguous Pem", nameof(input) ); }
+                if ( importAction != null || containsEncryptedPem ) { throw new ArgumentException( "Pem Import Ambiguous Pem", nameof(value) ); }
 
                 importAction = action;
                 foundFields  = fields;
@@ -785,7 +839,7 @@ internal static class PemKeyImportHelpers
             }
             else if ( label.SequenceEqual( PemLabels.EncryptedPkcs8PrivateKey ) )
             {
-                if ( importAction != null || containsEncryptedPem ) { throw new ArgumentException( "Pem Import Ambiguous Pem", nameof(input) ); }
+                if ( importAction != null || containsEncryptedPem ) { throw new ArgumentException( "Pem Import Ambiguous Pem", nameof(value) ); }
 
                 containsEncryptedPem = true;
             }
@@ -797,10 +851,10 @@ internal static class PemKeyImportHelpers
         // The only PEM found that could potentially be used is encrypted PKCS8,
         // but we won't try to import it with a null or blank password, so
         // throw.
-        if ( containsEncryptedPem ) { throw new ArgumentException( "Pem Import Encrypted Pem", nameof(input) ); }
+        if ( containsEncryptedPem ) { throw new ArgumentException( "Pem Import Encrypted Pem", nameof(value) ); }
 
         // We went through the PEM and found nothing that could be handled.
-        if ( importAction is null ) { throw new ArgumentException( "Pem Import No Pem Found", nameof(input) ); }
+        if ( importAction is null ) { throw new ArgumentException( "Pem Import No Pem Found", nameof(value) ); }
 
         ReadOnlySpan<char> base64Contents = foundSlice[foundFields.Base64Data];
         int                base64size     = foundFields.DecodedDataLength;
@@ -821,7 +875,7 @@ internal static class PemKeyImportHelpers
             Span<byte> decodedBase64 = decodeBuffer.AsSpan( 0, bytesWritten );
 
             // Don't need to check the bytesRead here. We're already operating
-            // on an input which is already a parsed subset of the input.
+            // on an value which is already a parsed subset of the value.
             importAction( decodedBase64, out _ );
         }
         finally { CryptoPool.Return( decodeBuffer, bytesWritten ); }
