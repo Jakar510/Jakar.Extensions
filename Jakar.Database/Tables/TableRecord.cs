@@ -43,8 +43,8 @@ public abstract record TableRecord<TRecord> : ObservableRecord<TRecord>, ITableR
     {
         ID          = id;
         DateCreated = DateTimeOffset.UtcNow;
-        OwnerUserID = user?.OwnerUserID;
-        CreatedBy   = user?.CreatedBy;
+        OwnerUserID = user?.UserID;
+        CreatedBy   = user?.UserID;
     }
 
 
@@ -61,19 +61,24 @@ public abstract record TableRecord<TRecord> : ObservableRecord<TRecord>, ITableR
         parameters.Add( nameof(CreatedBy),   record.CreatedBy );
         return parameters;
     }
-    public override int GetHashCode() => HashCode.Combine( CreatedBy, LastModified, OwnerUserID, DateCreated );
 
 
     public async ValueTask<UserRecord?> GetUser( DbConnection           connection, DbTransaction? transaction, Database db, CancellationToken token ) => await db.Users.Get( connection, transaction, true,      GetDynamicParameters( this ), token );
     public async ValueTask<UserRecord?> GetUserWhoCreated( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => await db.Users.Get( connection, transaction, CreatedBy, token );
 
 
+    public TRecord WithOwner( Guid id ) => (TRecord)(this with
+                                                     {
+                                                         OwnerUserID = id
+                                                     });
     public TRecord NewID( Guid id ) => (TRecord)(this with
                                                  {
-                                                     ID = id,
+                                                     ID = id
                                                  });
-    public bool Owns( UserRecord       record ) => record.CreatedBy == record.ID;
-    public bool DoesNotOwn( UserRecord record ) => record.CreatedBy != record.ID;
+
+
+    public bool Owns( UserRecord       record ) => record.CreatedBy == record.UserID;
+    public bool DoesNotOwn( UserRecord record ) => record.CreatedBy != record.UserID;
 
 
     public override int CompareTo( TRecord? other )
@@ -93,7 +98,6 @@ public abstract record TableRecord<TRecord> : ObservableRecord<TRecord>, ITableR
 
         return DateCreated.CompareTo( other.DateCreated );
     }
-
     public override bool Equals( TRecord? other )
     {
         if ( other is null ) { return false; }
@@ -102,4 +106,5 @@ public abstract record TableRecord<TRecord> : ObservableRecord<TRecord>, ITableR
 
         return ID == other.ID && CreatedBy == other.CreatedBy && OwnerUserID.Equals( other.OwnerUserID ) && DateCreated.Equals( other.DateCreated );
     }
+    public override int GetHashCode() => HashCode.Combine( CreatedBy, LastModified, OwnerUserID, DateCreated );
 }

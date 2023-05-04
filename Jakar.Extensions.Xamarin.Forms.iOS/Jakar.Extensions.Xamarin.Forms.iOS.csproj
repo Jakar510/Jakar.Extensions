@@ -87,7 +87,7 @@
       <Version>7.2.0.564</Version>
     </PackageReference>
     <PackageReference Include="Jakar.Extensions">
-      <Version>6.7.24</Version>
+      <Version>6.7.27</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.AppCenter">
       <Version>5.0.1</Version>
@@ -114,10 +114,10 @@
       <Version>2.0.3</Version>
     </PackageReference>
     <PackageReference Include="Xamarin.CommunityToolkit">
-      <Version>2.0.5</Version>
+      <Version>2.0.6</Version>
     </PackageReference>
     <PackageReference Include="Xamarin.CommunityToolkit.Markup">
-      <Version>2.0.5</Version>
+      <Version>2.0.6</Version>
     </PackageReference>
     <PackageReference Include="Xamarin.Essentials">
       <Version>1.7.5</Version>
