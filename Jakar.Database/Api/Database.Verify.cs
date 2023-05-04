@@ -107,11 +107,11 @@ public abstract partial class Database
         UserRecord? record = await Users.Get( connection, transaction, true, UserRecord.GetDynamicParameters( request ), token );
         if ( record is not null ) { return new Error( Status.Conflict, $"{nameof(UserRecord.UserName)} is already taken. Chose another {nameof(request.UserLogin)}" ); }
 
-        record = CreateUser( request );
+        record = CreateNewUser( request );
         record = await Users.Insert( connection, transaction, record, token );
         return await GetToken( connection, transaction, record, DEFAULT_CLAIM_TYPES, token );
     }
-    protected virtual UserRecord CreateUser( VerifyRequest<UserData> request ) => UserRecord.Create( request, string.Empty );
+    protected virtual UserRecord CreateNewUser( VerifyRequest<UserData> request ) => UserRecord.Create( request, string.Empty );
 
 
     public ValueTask<OneOf<Tokens, Error>> Register( VerifyRequest<UserData> request, CancellationToken                            token                          = default ) => this.TryCall( Register, request, token );
