@@ -336,8 +336,8 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, JsonModels.IJ
                                                                                                                                                     : default;
 
 
-    public bool DoesNotOwn<TRecord>( TRecord record ) where TRecord : TableRecord<TRecord> => record.CreatedBy != ID;
-    public bool Owns<TRecord>( TRecord       record ) where TRecord : TableRecord<TRecord> => record.CreatedBy == ID;
+    public bool DoesNotOwn<TRecord>( TRecord record ) where TRecord : TableRecord<TRecord> => record.OwnerUserID != UserID;
+    public bool Owns<TRecord>( TRecord       record ) where TRecord : TableRecord<TRecord> => record.OwnerUserID == UserID;
 
     #endregion
 
@@ -714,3 +714,4 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, JsonModels.IJ
 
     #endregion
 }
+ 
