@@ -51,7 +51,7 @@ public abstract record TableRecord<TRecord> : ObservableRecord<TRecord>, ITableR
     public static DynamicParameters GetDynamicParameters( UserRecord record )
     {
         var parameters = new DynamicParameters();
-        parameters.Add( nameof(OwnerUserID), record.OwnerUserID );
+        parameters.Add( nameof(OwnerUserID), record.UserID );
         return parameters;
     }
     protected static DynamicParameters GetDynamicParameters( TableRecord<TRecord> record )

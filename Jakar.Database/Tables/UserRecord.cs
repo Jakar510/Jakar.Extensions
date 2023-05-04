@@ -13,6 +13,8 @@ namespace Jakar.Database;
 public sealed partial record UserRecord : TableRecord<UserRecord>, JsonModels.IJsonStringModel, IRefreshToken, IUserID, IUserDataRecord, IUserSubscription, UserRights.IRights
 {
     private static readonly PasswordHasher<UserRecord> _hasher = new();
+
+
     public UserRecord() { }
     public UserRecord( IUserData data, string? rights, UserRecord? caller = default ) : this( Guid.NewGuid(), caller )
     {
@@ -714,4 +716,3 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, JsonModels.IJ
 
     #endregion
 }
- 
