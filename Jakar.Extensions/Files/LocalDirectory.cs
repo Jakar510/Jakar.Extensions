@@ -516,8 +516,8 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     [Serializable]
     public class ConcurrentCollection : ConcurrentObservableCollection<LocalDirectory>
     {
-        public ConcurrentCollection() : base() { }
-        public ConcurrentCollection( IEnumerable<LocalDirectory> items ) : base( items ) { }
+        public ConcurrentCollection() : base( Sorter ) { }
+        public ConcurrentCollection( IEnumerable<LocalDirectory> items ) : base( items, Sorter ) { }
     }
 
 

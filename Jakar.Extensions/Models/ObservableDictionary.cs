@@ -3,7 +3,7 @@ namespace Jakar.Extensions;
 
 
 [SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
-public class ObservableDictionary<TKey, TValue> : CollectionAlerts<KeyValuePair<TKey, TValue?>>, IDictionary<TKey, TValue>, IReadOnlyDictionary<TKey, TValue> where TKey : notnull
+public class ObservableDictionary<TKey, TValue> : CollectionAlerts<KeyValuePair<TKey, TValue>>, IDictionary<TKey, TValue>, IReadOnlyDictionary<TKey, TValue> where TKey : notnull
 {
     protected readonly     Dictionary<TKey, TValue> _dictionary;
     public sealed override int                      Count      => _dictionary.Count;
@@ -23,8 +23,9 @@ public class ObservableDictionary<TKey, TValue> : CollectionAlerts<KeyValuePair<
 
             _dictionary[key] = value;
 
-            if ( exists ) { Replaced( new KeyValuePair<TKey, TValue?>( key, old ), new KeyValuePair<TKey, TValue?>( key, value ) ); }
-            else { Added( new KeyValuePair<TKey, TValue?>( key,             value ) ); }
+            // ReSharper disable once NullableWarningSuppressionIsUsed
+            if ( exists ) { Replaced( new KeyValuePair<TKey, TValue>( key, old! ), new KeyValuePair<TKey, TValue>( key, value ) ); }
+            else { Added( new KeyValuePair<TKey, TValue>( key,             value ) ); }
         }
     }
 
@@ -45,10 +46,18 @@ public class ObservableDictionary<TKey, TValue> : CollectionAlerts<KeyValuePair<
     public ObservableDictionary( int                                     capacity, IEqualityComparer<TKey> comparer ) : this( new Dictionary<TKey, TValue>( capacity, comparer ) ) { }
 
 
+    public static implicit operator ObservableDictionary<TKey, TValue>( List<KeyValuePair<TKey, TValue>>                 items ) => new(items);
+    public static implicit operator ObservableDictionary<TKey, TValue>( HashSet<KeyValuePair<TKey, TValue>>              items ) => new(items);
+    public static implicit operator ObservableDictionary<TKey, TValue>( ConcurrentBag<KeyValuePair<TKey, TValue>>        items ) => new(items);
+    public static implicit operator ObservableDictionary<TKey, TValue>( ObservableCollection<KeyValuePair<TKey, TValue>> items ) => new(items);
+    public static implicit operator ObservableDictionary<TKey, TValue>( Collection<KeyValuePair<TKey, TValue>>           items ) => new(items);
+    public static implicit operator ObservableDictionary<TKey, TValue>( KeyValuePair<TKey, TValue>[]                     items ) => new(items);
+
+
     public bool ContainsValue( TValue value ) => _dictionary.ContainsValue( value );
 
 
-    public bool TryGetValue( TKey                    key, [NotNullWhen( true )] out TValue value ) => _dictionary.TryGetValue( key, out value );
+    public bool TryGetValue( TKey                    key, [NotNullWhen( true )] out TValue? value ) => _dictionary.TryGetValue( key, out value );
     public bool ContainsKey( TKey                    key ) => _dictionary.ContainsKey( key );
     public bool Contains( KeyValuePair<TKey, TValue> item ) => ContainsKey( item.Key ) && ContainsValue( item.Value );
 
@@ -58,7 +67,7 @@ public class ObservableDictionary<TKey, TValue> : CollectionAlerts<KeyValuePair<
     {
         if ( !_dictionary.TryAdd( key, value ) ) { return; }
 
-        Added( new KeyValuePair<TKey, TValue?>( key, value ) );
+        Added( new KeyValuePair<TKey, TValue>( key, value ) );
     }
 
 
@@ -69,7 +78,7 @@ public class ObservableDictionary<TKey, TValue> : CollectionAlerts<KeyValuePair<
 
         TValue value = _dictionary[key];
         _dictionary.Remove( key );
-        Removed( new KeyValuePair<TKey, TValue?>( key, value ) );
+        Removed( new KeyValuePair<TKey, TValue>( key, value ) );
         return true;
     }
 
@@ -92,6 +101,10 @@ public class ObservableDictionary<TKey, TValue> : CollectionAlerts<KeyValuePair<
     }
 
 
-    public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator() => _dictionary.GetEnumerator();
+    public override IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
+    {
+        return _dictionary.Where( Filter )
+                          .GetEnumerator();
+    }
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }

@@ -38,7 +38,7 @@
 		<PackageReference Include="FluentMigrator.Runner" Version="3.3.2" />
 		<PackageReference Include="MailKit" Version="4.0.0" />
 		<PackageReference Include="Microsoft.Identity.Client" Version="4.53.0" />
-		<PackageReference Include="Microsoft.Identity.Web" Version="2.9.0" />
+		<PackageReference Include="Microsoft.Identity.Web" Version="2.10.0" />
 		<PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="6.30.0" />
 		<PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="6.30.0" />
 		<PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.30.0" />

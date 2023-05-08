@@ -42,8 +42,8 @@ public abstract class BaseCollections<T> : ObservableClass, IEquatable<T>, IComp
     [Serializable]
     public class ConcurrentCollection : ConcurrentObservableCollection<T>
     {
-        public ConcurrentCollection() : base() { }
-        public ConcurrentCollection( IEnumerable<T> items ) : base( items ) { }
+        public ConcurrentCollection() : base( Sorter ) { }
+        public ConcurrentCollection( IEnumerable<T> items ) : base( items, Sorter ) { }
     }
 
 

@@ -57,10 +57,10 @@
 							version="6.0.10" />
 				<dependency id="Microsoft.AspNetCore.Authentication.OpenIdConnect"
 							version="6.0.10" />
-				<dependency id="Microsoft.AspNetCore.Diagnostics.HealthChecks"
-							version="2.2.0" />
 				<dependency id="Microsoft.Extensions.Diagnostics.HealthChecks"
-							version="6.0.10" />
+							version="6.0.16" />
+				<dependency id="Microsoft.Extensions.Diagnostics.HealthChecks.Abstractions"
+							version="6.0.16" />
 				<dependency id="Microsoft.Extensions.Hosting.Systemd"
 							version="7.0.0" />
 				<dependency id="Microsoft.Extensions.Hosting.WindowsServices"
@@ -100,10 +100,10 @@
 							version="7.0.0" />
 				<dependency id="Microsoft.AspNetCore.Authentication.OpenIdConnect"
 							version="7.0.0" />
-				<dependency id="Microsoft.AspNetCore.Diagnostics.HealthChecks"
-							version="2.2.0" />
 				<dependency id="Microsoft.Extensions.Diagnostics.HealthChecks"
-							version="7.0.0" />
+							version="7.0.5" />
+				<dependency id="Microsoft.Extensions.Diagnostics.HealthChecks.Abstractions"
+							version="7.0.5" />
 				<dependency id="Microsoft.Extensions.Hosting.Systemd"
 							version="7.0.0" />
 				<dependency id="Microsoft.Extensions.Hosting.WindowsServices"

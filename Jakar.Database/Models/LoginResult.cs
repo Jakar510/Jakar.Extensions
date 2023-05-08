@@ -7,11 +7,27 @@ namespace Jakar.Database;
 [SuppressMessage( "ReSharper", "InconsistentNaming" )]
 public readonly struct LoginResult
 {
-    public readonly State                 Result    = default;
-    public readonly UserRecord?           User      = default;
-    public readonly Exception?            Exception = default;
-    public readonly ModelStateDictionary? Model     = default;
-    public          bool                  Succeeded => User is not null && Result == State.Success;
+    public State                 Result    { get; init; } = default;
+    public UserRecord?           User      { get; init; } = default;
+    public Exception?            Exception { get; init; } = default;
+    public ModelStateDictionary? Model     { get; init; } = default;
+
+
+    [MemberNotNullWhen( true,  nameof(User) )]
+    [MemberNotNullWhen( false, nameof(Exception) )]
+    public bool Succeeded
+    {
+        get
+        {
+            if ( User is null )
+            {
+                Debug.Assert( Exception is not null );
+                return false;
+            }
+
+            return User is not null && Result == State.Success;
+        }
+    }
 
 
     public LoginResult( ModelStateDictionary value ) : this( State.UnknownError ) => Model = value;

@@ -972,8 +972,8 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     [Serializable]
     public class ConcurrentCollection : ConcurrentObservableCollection<LocalFile>
     {
-        public ConcurrentCollection() : base() { }
-        public ConcurrentCollection( IEnumerable<LocalFile> items ) : base( items ) { }
+        public ConcurrentCollection() : base( Sorter ) { }
+        public ConcurrentCollection( IEnumerable<LocalFile> items ) : base( items, Sorter ) { }
     }
 
 
@@ -1114,9 +1114,10 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     public class Watcher : ConcurrentObservableCollection<LocalFile>, IDisposable
     {
         private readonly LocalDirectory.Watcher _watcher;
+        public event ErrorEventHandler?         Error;
 
 
-        public Watcher( LocalDirectory.Watcher watcher ) : base( watcher.Directory.GetFiles() )
+        public Watcher( LocalDirectory.Watcher watcher ) : base( watcher.Directory.GetFiles(), Sorter )
         {
             _watcher                     =  watcher;
             _watcher.Created             += OnCreated;
@@ -1126,7 +1127,6 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
             _watcher.Error               += OnError;
             _watcher.EnableRaisingEvents =  true;
         }
-        public event ErrorEventHandler? Error;
         private void OnChanged( object sender, FileSystemEventArgs e )
         {
             var file = new LocalFile( e.FullPath );
@@ -1135,8 +1135,6 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
         private void OnCreated( object sender, FileSystemEventArgs e ) => Add( e.FullPath );
         private void OnDeleted( object sender, FileSystemEventArgs e ) => Remove( e.FullPath );
         private void OnError( object   sender, ErrorEventArgs      e ) => Error?.Invoke( sender, e );
-
-
         private void OnRenamed( object sender, RenamedEventArgs e )
         {
             LocalFile? file = this.FirstOrDefault( x => x.FullPath == e.OldFullPath );
@@ -1157,6 +1155,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
             _watcher.Error   -= OnError;
 
             _watcher.Dispose();
+            GC.SuppressFinalize( this );
         }
     }
 
@@ -1180,7 +1179,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
         using ( hasher )
         {
             await using FileStream stream = OpenRead();
-            byte[]                 hash = await hasher.ComputeHashAsync( stream );
+            byte[]                 hash   = await hasher.ComputeHashAsync( stream );
 
             return BitConverter.ToString( hash );
         }

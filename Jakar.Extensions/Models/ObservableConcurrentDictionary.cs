@@ -5,7 +5,7 @@
 namespace Jakar.Extensions;
 
 
-public class ObservableConcurrentDictionary<TKey, TValue> : CollectionAlerts<KeyValuePair<TKey, TValue?>>, IDictionary<TKey, TValue>, IReadOnlyDictionary<TKey, TValue> where TKey : notnull
+public class ObservableConcurrentDictionary<TKey, TValue> : CollectionAlerts<KeyValuePair<TKey, TValue>>, IDictionary<TKey, TValue>, IReadOnlyDictionary<TKey, TValue> where TKey : notnull
 {
     protected readonly     ConcurrentDictionary<TKey, TValue> _dictionary;
     public sealed override int                                Count      => _dictionary.Count;
@@ -25,8 +25,9 @@ public class ObservableConcurrentDictionary<TKey, TValue> : CollectionAlerts<Key
 
             _dictionary[key] = value;
 
-            if ( exists ) { Replaced( new KeyValuePair<TKey, TValue?>( key, old ), new KeyValuePair<TKey, TValue?>( key, value ) ); }
-            else { Added( new KeyValuePair<TKey, TValue?>( key,             value ) ); }
+            // ReSharper disable once NullableWarningSuppressionIsUsed
+            if ( exists ) { Replaced( new KeyValuePair<TKey, TValue>( key, old! ), new KeyValuePair<TKey, TValue>( key, value ) ); }
+            else { Added( new KeyValuePair<TKey, TValue>( key,             value ) ); }
         }
     }
 
@@ -44,29 +45,17 @@ public class ObservableConcurrentDictionary<TKey, TValue> : CollectionAlerts<Key
     public ObservableConcurrentDictionary( IEnumerable<KeyValuePair<TKey, TValue>> collection ) : this( new ConcurrentDictionary<TKey, TValue>( collection ) ) { }
     public ObservableConcurrentDictionary( IEnumerable<KeyValuePair<TKey, TValue>> collection, IEqualityComparer<TKey> comparer ) : this( new ConcurrentDictionary<TKey, TValue>( collection, comparer ) ) { }
     public ObservableConcurrentDictionary( IEqualityComparer<TKey>                 comparer ) : this( new ConcurrentDictionary<TKey, TValue>( comparer ) ) { }
+    public ObservableConcurrentDictionary( int                                     concurrencyLevel, int capacity ) : this( new ConcurrentDictionary<TKey, TValue>( concurrencyLevel,                                   capacity ) ) { }
+    public ObservableConcurrentDictionary( int                                     concurrencyLevel, int capacity, IEqualityComparer<TKey> comparer ) : this( new ConcurrentDictionary<TKey, TValue>( concurrencyLevel, capacity, comparer ) ) { }
 
-    /// <summary>
-    ///     Initializes a new instance of the <see cref="ConcurrentDictionary{TKey,TValue}"/> class that is empty, has the specified concurrency level, has the specified initial capacity, and uses the specified
-    ///     <see
-    ///         cref="T:System.Collections.Generic.IEqualityComparer{TKey}"/>
-    ///     .
-    /// </summary>
-    /// <param name="concurrencyLevel"> The estimated number of threads that will update the <see cref="ConcurrentDictionary{TKey,TValue}"/> concurrently. </param>
-    /// <param name="capacity"> The initial number of elements that the <see cref="ConcurrentDictionary{TKey,TValue}"/> can contain. </param>
-    /// <exception cref="T:System.ArgumentOutOfRangeException"> <paramref name="concurrencyLevel"/> is less than 1. -or- <paramref name="capacity"/> is less than 0. </exception>
-    public ObservableConcurrentDictionary( int concurrencyLevel, int capacity ) : this( new ConcurrentDictionary<TKey, TValue>( concurrencyLevel, capacity ) ) { }
 
-    /// <summary>
-    ///     Initializes a new instance of the <see cref="ConcurrentDictionary{TKey,TValue}"/> class that is empty, has the specified concurrency level, has the specified initial capacity, and uses the specified
-    ///     <see
-    ///         cref="T:System.Collections.Generic.IEqualityComparer{TKey}"/>
-    ///     .
-    /// </summary>
-    /// <param name="concurrencyLevel"> The estimated number of threads that will update the <see cref="ConcurrentDictionary{TKey,TValue}"/> concurrently. </param>
-    /// <param name="capacity"> The initial number of elements that the <see cref="ConcurrentDictionary{TKey,TValue}"/> can contain. </param>
-    /// <param name="comparer"> The <see cref="T:System.Collections.Generic.IEqualityComparer{TKey}"/> implementation to use when comparing keys. </param>
-    /// <exception cref="T:System.ArgumentOutOfRangeException"> <paramref name="concurrencyLevel"/> is less than 1. -or- <paramref name="capacity"/> is less than 0. </exception>
-    public ObservableConcurrentDictionary( int concurrencyLevel, int capacity, IEqualityComparer<TKey> comparer ) : this( new ConcurrentDictionary<TKey, TValue>( concurrencyLevel, capacity, comparer ) ) { }
+    public static implicit operator ObservableConcurrentDictionary<TKey, TValue>( List<KeyValuePair<TKey, TValue>>                 items ) => new(items);
+    public static implicit operator ObservableConcurrentDictionary<TKey, TValue>( HashSet<KeyValuePair<TKey, TValue>>              items ) => new(items);
+    public static implicit operator ObservableConcurrentDictionary<TKey, TValue>( ConcurrentBag<KeyValuePair<TKey, TValue>>        items ) => new(items);
+    public static implicit operator ObservableConcurrentDictionary<TKey, TValue>( ObservableCollection<KeyValuePair<TKey, TValue>> items ) => new(items);
+    public static implicit operator ObservableConcurrentDictionary<TKey, TValue>( Collection<KeyValuePair<TKey, TValue>>           items ) => new(items);
+    public static implicit operator ObservableConcurrentDictionary<TKey, TValue>( KeyValuePair<TKey, TValue>[]                     items ) => new(items);
+
 
     public bool ContainsValue( TValue              value ) => _dictionary.Values.Contains( value );
     public bool TryAdd( KeyValuePair<TKey, TValue> pair ) => TryAdd( pair.Key, pair.Value );
@@ -74,7 +63,7 @@ public class ObservableConcurrentDictionary<TKey, TValue> : CollectionAlerts<Key
     {
         if ( !_dictionary.TryAdd( key, value ) ) { return false; }
 
-        Added( new KeyValuePair<TKey, TValue?>( key, value ) );
+        Added( new KeyValuePair<TKey, TValue>( key, value ) );
         return true;
     }
 
@@ -89,9 +78,7 @@ public class ObservableConcurrentDictionary<TKey, TValue> : CollectionAlerts<Key
     }
 
 
-#pragma warning disable CS8767
-    public bool TryGetValue( TKey key, out TValue? value ) => _dictionary.TryGetValue( key, out value );
-#pragma warning restore CS8767
+    public bool TryGetValue( TKey key, [NotNullWhen( true )] out TValue? value ) => _dictionary.TryGetValue( key, out value );
 
 
     public bool ContainsKey( TKey key ) => _dictionary.ContainsKey( key );
@@ -109,7 +96,7 @@ public class ObservableConcurrentDictionary<TKey, TValue> : CollectionAlerts<Key
 
         if ( !_dictionary.TryRemove( key, out TValue? value ) ) { return false; }
 
-        Removed( new KeyValuePair<TKey, TValue?>( key, value ) );
+        Removed( new KeyValuePair<TKey, TValue>( key, value ) );
         OnCountChanged();
         return true;
     }
@@ -133,6 +120,10 @@ public class ObservableConcurrentDictionary<TKey, TValue> : CollectionAlerts<Key
     }
 
 
-    public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator() => _dictionary.GetEnumerator();
+    public override IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
+    {
+        return _dictionary.Where( Filter )
+                          .GetEnumerator();
+    }
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }

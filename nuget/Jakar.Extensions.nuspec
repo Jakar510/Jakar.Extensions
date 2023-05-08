@@ -4,7 +4,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata>
 		<id>Jakar.Extensions</id>
-		<version>6.7.27</version>
+		<version>6.7.28</version>
 		<title>Extension Library</title>
 		<authors>Tyler Stegmaier</authors>
 		<owners>Jakar510/Jakar</owners>
@@ -64,6 +64,8 @@
 							version="7.0.0" />
 				<dependency id="System.Text.Json"
 							version="7.0.2" />
+				<dependency id="System.Text.RegularExpressions"
+							version="4.3.1" />
 				<dependency id="System.Threading.Tasks"
 							version="4.3.0" />
 				<dependency id="System.Net.Http"
@@ -125,6 +127,8 @@
 							version="7.0.0" />
 				<dependency id="System.Text.Json"
 							version="7.0.2" />
+				<dependency id="System.Text.RegularExpressions"
+							version="4.3.1" />
 				<dependency id="System.Threading.Tasks"
 							version="4.3.0" />
 				<dependency id="System.Net.Http"
@@ -186,6 +190,8 @@
 							version="7.0.0" />
 				<dependency id="System.Text.Json"
 							version="7.0.2" />
+				<dependency id="System.Text.RegularExpressions"
+							version="4.3.1" />
 				<dependency id="System.Threading.Tasks"
 							version="4.3.0" />
 				<dependency id="System.Net.Http"

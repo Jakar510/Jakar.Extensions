@@ -2,6 +2,10 @@
 // 04/12/2022  1:54 PM
 
 #nullable enable
+using Newtonsoft.Json.Linq;
+
+
+
 namespace Jakar.Extensions;
 
 
@@ -9,10 +13,12 @@ public interface ICollectionAlerts : INotifyCollectionChanged, INotifyPropertyCh
 
 
 
-public abstract class CollectionAlerts<T> : ObservableClass, ICollectionAlerts
+public abstract class CollectionAlerts<T> : ObservableClass, ICollectionAlerts, IEnumerable<T>
 {
     public abstract int Count { get; }
 
+
+    public event NotifyCollectionChangedEventHandler? CollectionChanged;
 
     protected CollectionAlerts() { }
 
@@ -35,7 +41,10 @@ public abstract class CollectionAlerts<T> : ObservableClass, ICollectionAlerts
     protected void Replaced( in T old, in T @new ) => OnChanged( new NotifyCollectionChangedEventArgs( NotifyCollectionChangedAction.Replace,               @new, old ) );
     protected void Replaced( in T old, in T @new, in int index ) => OnChanged( new NotifyCollectionChangedEventArgs( NotifyCollectionChangedAction.Replace, @new, old, index ) );
     protected void Reset() => OnChanged( new NotifyCollectionChangedEventArgs( NotifyCollectionChangedAction.Reset ) );
+    public virtual void Refresh() => Reset();
 
 
-    public event NotifyCollectionChangedEventHandler? CollectionChanged;
+    protected virtual bool Filter( T value ) => true;
+    public abstract IEnumerator<T> GetEnumerator();
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }

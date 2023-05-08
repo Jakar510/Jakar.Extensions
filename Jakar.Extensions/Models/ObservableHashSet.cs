@@ -5,50 +5,61 @@ namespace Jakar.Extensions;
 
 
 [SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
-public class ObservableHashSet<TElement> : CollectionAlerts<TElement>, ISet<TElement>, IReadOnlySet<TElement>, ISerializable, IDeserializationCallback
+public class ObservableHashSet<T> : CollectionAlerts<T>, ISet<T>, IReadOnlySet<T>, ISerializable, IDeserializationCallback
 {
-    private readonly       HashSet<TElement> _values;
-    public sealed override int               Count      => _values.Count;
-    bool ICollection<TElement>.              IsReadOnly => ((ICollection<TElement>)_values).IsReadOnly;
+    private readonly       HashSet<T> _values;
+    public sealed override int        Count      => _values.Count;
+    bool ICollection<T>.              IsReadOnly => ((ICollection<T>)_values).IsReadOnly;
 
 
-    public ObservableHashSet() : this( new HashSet<TElement>() ) { }
-    public ObservableHashSet( HashSet<TElement>              values ) => _values = values;
+    public ObservableHashSet() : this( new HashSet<T>() ) { }
+    public ObservableHashSet( int            capacity ) : this( new HashSet<T>( capacity ) ) { }
+    public ObservableHashSet( IEnumerable<T> enumerable ) : this( new HashSet<T>( enumerable ) ) { }
+    public ObservableHashSet( HashSet<T>     values ) => _values = values;
+
+
+    public static implicit operator ObservableHashSet<T>( List<T>                 items ) => new(items);
+    public static implicit operator ObservableHashSet<T>( HashSet<T>              items ) => new(items);
+    public static implicit operator ObservableHashSet<T>( ConcurrentBag<T>        items ) => new(items);
+    public static implicit operator ObservableHashSet<T>( ObservableCollection<T> items ) => new(items);
+    public static implicit operator ObservableHashSet<T>( Collection<T>           items ) => new(items);
+    public static implicit operator ObservableHashSet<T>( T[]                     items ) => new(items);
+
+
     void IDeserializationCallback.OnDeserialization( object? sender ) => _values.OnDeserialization( sender );
+    void ISerializable.GetObjectData( SerializationInfo      info, StreamingContext context ) => _values.GetObjectData( info, context );
 
-    void ISerializable.GetObjectData( SerializationInfo info, StreamingContext context ) => _values.GetObjectData( info, context );
 
-
-    public virtual bool IsProperSubsetOf( IEnumerable<TElement>   other ) => _values.IsProperSubsetOf( other );
-    public virtual bool IsProperSupersetOf( IEnumerable<TElement> other ) => _values.IsProperSupersetOf( other );
-    public virtual bool IsSubsetOf( IEnumerable<TElement>         other ) => _values.IsSubsetOf( other );
-    public virtual bool IsSupersetOf( IEnumerable<TElement>       other ) => _values.IsSupersetOf( other );
-    public virtual bool Overlaps( IEnumerable<TElement>           other ) => _values.Overlaps( other );
-    public virtual bool SetEquals( IEnumerable<TElement>          other ) => _values.SetEquals( other );
-    public virtual void ExceptWith( IEnumerable<TElement> other )
+    public virtual bool IsProperSubsetOf( IEnumerable<T>   other ) => _values.IsProperSubsetOf( other );
+    public virtual bool IsProperSupersetOf( IEnumerable<T> other ) => _values.IsProperSupersetOf( other );
+    public virtual bool IsSubsetOf( IEnumerable<T>         other ) => _values.IsSubsetOf( other );
+    public virtual bool IsSupersetOf( IEnumerable<T>       other ) => _values.IsSupersetOf( other );
+    public virtual bool Overlaps( IEnumerable<T>           other ) => _values.Overlaps( other );
+    public virtual bool SetEquals( IEnumerable<T>          other ) => _values.SetEquals( other );
+    public virtual void ExceptWith( IEnumerable<T> other )
     {
         _values.ExceptWith( other );
         Reset();
     }
-    public virtual void IntersectWith( IEnumerable<TElement> other )
+    public virtual void IntersectWith( IEnumerable<T> other )
     {
         _values.IntersectWith( other );
         Reset();
     }
-    public virtual void SymmetricExceptWith( IEnumerable<TElement> other )
+    public virtual void SymmetricExceptWith( IEnumerable<T> other )
     {
         _values.SymmetricExceptWith( other );
         Reset();
     }
-    public virtual void UnionWith( IEnumerable<TElement> other )
+    public virtual void UnionWith( IEnumerable<T> other )
     {
         _values.UnionWith( other );
         Reset();
     }
 
 
-    void ICollection<TElement>.Add( TElement item ) => Add( item );
-    public virtual bool Add( TElement item )
+    void ICollection<T>.Add( T item ) => Add( item );
+    public virtual bool Add( T item )
     {
         bool result = _values.Add( item );
         if ( result ) { Added( item ); }
@@ -57,7 +68,7 @@ public class ObservableHashSet<TElement> : CollectionAlerts<TElement>, ISet<TEle
     }
 
 
-    public virtual bool Remove( TElement item )
+    public virtual bool Remove( T item )
     {
         bool result = _values.Remove( item );
         if ( result ) { Removed( item ); }
@@ -66,16 +77,20 @@ public class ObservableHashSet<TElement> : CollectionAlerts<TElement>, ISet<TEle
     }
 
 
-    public virtual bool Contains( TElement item ) => _values.Contains( item );
+    public virtual bool Contains( T item ) => _values.Contains( item );
     public virtual void Clear()
     {
         _values.Clear();
         Reset();
     }
 
-    public void CopyTo( TElement[] array, int arrayIndex ) => _values.CopyTo( array, arrayIndex );
+    public void CopyTo( T[] array, int arrayIndex ) => _values.CopyTo( array, arrayIndex );
 
 
-    public IEnumerator<TElement> GetEnumerator() => _values.GetEnumerator();
+    public override IEnumerator<T> GetEnumerator()
+    {
+        return _values.Where( Filter )
+                      .GetEnumerator();
+    }
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }

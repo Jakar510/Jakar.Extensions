@@ -8,7 +8,7 @@ public sealed class LoggerDB : Database.Database
     public DbTable<AttachmentRecord>                    Attachments   { get; }
     public DbTable<DeviceRecord>                        Devices       { get; }
     public DbTable<LogRecord>                           Logs          { get; }
-    public ConcurrentObservableCollection<Notification> Notifications { get; } = new();
+    public ConcurrentObservableCollection<Notification> Notifications { get; } = new(Notification.Sorter);
     public DbTable<ScopeRecord>                         Scopes        { get; }
     public DbTable<SessionRecord>                       Sessions      { get; }
 

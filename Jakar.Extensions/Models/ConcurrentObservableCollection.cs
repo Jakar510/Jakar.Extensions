@@ -14,39 +14,37 @@ namespace Jakar.Extensions;
 [Serializable]
 public class ConcurrentObservableCollection<T> : CollectionAlerts<T>, IList<T>, IReadOnlyList<T>, IList
 {
-    protected readonly IComparer<T> _comparer;
-
-
-    protected readonly List<T> _items;
-    protected readonly object  _lock = new();
+    protected readonly List<T>      _values;
+    protected readonly object       _lock = new();
+    protected          IComparer<T> _comparer;
 
 
     public sealed override int Count
     {
         get
         {
-            lock (_lock) { return _items.Count; }
+            lock (_lock) { return _values.Count; }
         }
     }
     bool IList.IsFixedSize
     {
         get
         {
-            lock (_lock) { return ((IList)_items).IsFixedSize; }
+            lock (_lock) { return ((IList)_values).IsFixedSize; }
         }
     }
     bool IList.IsReadOnly
     {
         get
         {
-            lock (_lock) { return ((IList)_items).IsReadOnly; }
+            lock (_lock) { return ((IList)_values).IsReadOnly; }
         }
     }
     bool ICollection<T>.IsReadOnly
     {
         get
         {
-            lock (_lock) { return ((IList)_items).IsReadOnly; }
+            lock (_lock) { return ((IList)_values).IsReadOnly; }
         }
     }
 
@@ -54,7 +52,7 @@ public class ConcurrentObservableCollection<T> : CollectionAlerts<T>, IList<T>, 
     {
         get
         {
-            lock (_lock) { return ((IList)_items).IsSynchronized; }
+            lock (_lock) { return ((IList)_values).IsSynchronized; }
         }
     }
 
@@ -64,11 +62,11 @@ public class ConcurrentObservableCollection<T> : CollectionAlerts<T>, IList<T>, 
     {
         get
         {
-            lock (_lock) { return ((IList)_items)[index]; }
+            lock (_lock) { return ((IList)_values)[index]; }
         }
         set
         {
-            lock (_lock) { ((IList)_items)[index] = value; }
+            lock (_lock) { ((IList)_values)[index] = value; }
         }
     }
 
@@ -76,14 +74,14 @@ public class ConcurrentObservableCollection<T> : CollectionAlerts<T>, IList<T>, 
     {
         get
         {
-            lock (_lock) { return _items[index]; }
+            lock (_lock) { return _values[index]; }
         }
         set
         {
             lock (_lock)
             {
-                T old = _items[index];
-                _items[index] = value;
+                T old = _values[index];
+                _values[index] = value;
                 Replaced( old, value, index );
             }
         }
@@ -93,45 +91,45 @@ public class ConcurrentObservableCollection<T> : CollectionAlerts<T>, IList<T>, 
     {
         get
         {
-            lock (_lock) { return ((IList)_items).SyncRoot; }
+            lock (_lock) { return ((IList)_values).SyncRoot; }
         }
     }
 
 
-    public ConcurrentObservableCollection() : this( new List<T>() ) { }
-    protected ConcurrentObservableCollection( List<T> items ) : this( Comparer<T>.Default, items ) { }
-    protected ConcurrentObservableCollection( IComparer<T> comparer, List<T> items )
+    public ConcurrentObservableCollection() : this( Comparer<T>.Default ) { }
+    public ConcurrentObservableCollection( IComparer<T>   comparer ) : this( new List<T>(), comparer ) { }
+    public ConcurrentObservableCollection( int            capacity ) : this( capacity, Comparer<T>.Default ) { }
+    public ConcurrentObservableCollection( int            capacity, IComparer<T> comparer ) : this( new List<T>( capacity ), comparer ) { }
+    public ConcurrentObservableCollection( IEnumerable<T> values ) : this( values, Comparer<T>.Default ) { }
+    public ConcurrentObservableCollection( IEnumerable<T> values, IComparer<T> comparer ) : this( new List<T>( values ), comparer ) { }
+    private ConcurrentObservableCollection( List<T>       values ) : this( values, Comparer<T>.Default ) { }
+    protected ConcurrentObservableCollection( List<T> values, IComparer<T> comparer )
     {
         _comparer = comparer;
-        _items    = items;
+        _values   = values;
     }
-    public ConcurrentObservableCollection( IComparer<T>   comparer ) : this( comparer, new List<T>() ) { }
-    public ConcurrentObservableCollection( int            capacity ) : this( Comparer<T>.Default, new List<T>( capacity ) ) { }
-    public ConcurrentObservableCollection( int            capacity, IComparer<T> comparer ) : this( comparer, new List<T>( capacity ) ) { }
-    public ConcurrentObservableCollection( IEnumerable<T> items ) : this( new List<T>( items ) ) { }
-    public ConcurrentObservableCollection( IEnumerable<T> items, IComparer<T> comparer ) : this( comparer, new List<T>( items ) ) { }
 
 
-    public static implicit operator ConcurrentObservableCollection<T>( List<T>                 items ) => new(items);
-    public static implicit operator ConcurrentObservableCollection<T>( HashSet<T>              items ) => new(items);
-    public static implicit operator ConcurrentObservableCollection<T>( ConcurrentBag<T>        items ) => new(items);
-    public static implicit operator ConcurrentObservableCollection<T>( ObservableCollection<T> items ) => new(items);
-    public static implicit operator ConcurrentObservableCollection<T>( Collection<T>           items ) => new(items);
-    public static implicit operator ConcurrentObservableCollection<T>( T[]                     items ) => new(items);
+    public static implicit operator ConcurrentObservableCollection<T>( List<T>                 values ) => new(values);
+    public static implicit operator ConcurrentObservableCollection<T>( HashSet<T>              values ) => new(values);
+    public static implicit operator ConcurrentObservableCollection<T>( ConcurrentBag<T>        values ) => new(values);
+    public static implicit operator ConcurrentObservableCollection<T>( ObservableCollection<T> values ) => new(values);
+    public static implicit operator ConcurrentObservableCollection<T>( Collection<T>           values ) => new(values);
+    public static implicit operator ConcurrentObservableCollection<T>( T[]                     values ) => new(values);
 
 
     public bool Exists( Predicate<T> match )
     {
-        lock (_lock) { return _items.Exists( match ); }
+        lock (_lock) { return _values.Exists( match ); }
     }
 
     public virtual bool TryAdd( T item )
     {
         lock (_lock)
         {
-            if ( _items.Contains( item ) ) { return false; }
+            if ( _values.Contains( item ) ) { return false; }
 
-            _items.Add( item );
+            _values.Add( item );
             Added( item );
             return true;
         }
@@ -140,79 +138,79 @@ public class ConcurrentObservableCollection<T> : CollectionAlerts<T>, IList<T>, 
     {
         lock (_lock)
         {
-            Guard.IsInRangeFor( start, (ICollection<T>)_items, nameof(start) );
-            Guard.IsInRangeFor( count, (ICollection<T>)_items, nameof(count) );
-            return _items.FindIndex( start, count, match );
+            Guard.IsInRangeFor( start, (ICollection<T>)_values, nameof(start) );
+            Guard.IsInRangeFor( count, (ICollection<T>)_values, nameof(count) );
+            return _values.FindIndex( start, count, match );
         }
     }
     public int FindIndex( int start, Predicate<T> match )
     {
         lock (_lock)
         {
-            Guard.IsInRangeFor( start, (ICollection<T>)_items, nameof(start) );
-            return _items.FindIndex( start, match );
+            Guard.IsInRangeFor( start, (ICollection<T>)_values, nameof(start) );
+            return _values.FindIndex( start, match );
         }
     }
     public int FindIndex( Predicate<T> match )
     {
-        lock (_lock) { return _items.FindIndex( match ); }
+        lock (_lock) { return _values.FindIndex( match ); }
     }
     public int FindLastIndex( int start, int count, Predicate<T> match )
     {
         lock (_lock)
         {
-            Guard.IsInRangeFor( start, (ICollection<T>)_items, nameof(start) );
-            Guard.IsInRangeFor( count, (ICollection<T>)_items, nameof(count) );
-            return _items.FindLastIndex( start, count, match );
+            Guard.IsInRangeFor( start, (ICollection<T>)_values, nameof(start) );
+            Guard.IsInRangeFor( count, (ICollection<T>)_values, nameof(count) );
+            return _values.FindLastIndex( start, count, match );
         }
     }
     public int FindLastIndex( int start, Predicate<T> match )
     {
         lock (_lock)
         {
-            Guard.IsInRangeFor( start, (ICollection<T>)_items, nameof(start) );
-            return _items.FindLastIndex( start, match );
+            Guard.IsInRangeFor( start, (ICollection<T>)_values, nameof(start) );
+            return _values.FindLastIndex( start, match );
         }
     }
     public int FindLastIndex( Predicate<T> match )
     {
-        lock (_lock) { return _items.FindLastIndex( match ); }
+        lock (_lock) { return _values.FindLastIndex( match ); }
     }
     public int IndexOf( T value, int start )
     {
         lock (_lock)
         {
-            Guard.IsInRangeFor( start, (ICollection<T>)_items, nameof(start) );
-            return _items.IndexOf( value, start );
+            Guard.IsInRangeFor( start, (ICollection<T>)_values, nameof(start) );
+            return _values.IndexOf( value, start );
         }
     }
     public int IndexOf( T value, int start, int count )
     {
         lock (_lock)
         {
-            Guard.IsInRangeFor( start, (ICollection<T>)_items, nameof(start) );
-            return _items.IndexOf( value, start, count );
+            Guard.IsInRangeFor( start, (ICollection<T>)_values, nameof(start) );
+            return _values.IndexOf( value, start, count );
         }
     }
     public int LastIndexOf( T value )
     {
-        lock (_lock) { return _items.LastIndexOf( value ); }
+        lock (_lock) { return _values.LastIndexOf( value ); }
     }
     public int LastIndexOf( T value, int start )
     {
         lock (_lock)
         {
-            Guard.IsInRangeFor( start, (ICollection<T>)_items, nameof(start) );
-            return _items.LastIndexOf( value, start );
+            Guard.IsInRangeFor( start, (ICollection<T>)_values, nameof(start) );
+            return _values.LastIndexOf( value, start );
         }
     }
     public int LastIndexOf( T value, int start, int count )
     {
         lock (_lock)
         {
-            Guard.IsInRangeFor( start, (ICollection<T>)_items, nameof(start) );
-            Guard.IsInRangeFor( count, (ICollection<T>)_items, nameof(count) );
-            return _items.LastIndexOf( value, start, count );
+            Guard.IsInRangeFor( start, (ICollection<T>)_values, nameof(start) );
+            Guard.IsInRangeFor( count, (ICollection<T>)_values, nameof(count) );
+            return _values.LastIndexOf( value, start, count );
         }
     }
 
@@ -222,9 +220,9 @@ public class ConcurrentObservableCollection<T> : CollectionAlerts<T>, IList<T>, 
         {
             int results = 0;
 
-            foreach ( T item in _items.Where( item => match( item ) ) )
+            foreach ( T item in _values.Where( item => match( item ) ) )
             {
-                _items.Remove( item );
+                _values.Remove( item );
                 Removed( item );
                 results++;
             }
@@ -234,36 +232,36 @@ public class ConcurrentObservableCollection<T> : CollectionAlerts<T>, IList<T>, 
     }
     public List<T> FindAll( Predicate<T> match )
     {
-        lock (_lock) { return _items.FindAll( match ); }
+        lock (_lock) { return _values.FindAll( match ); }
     }
     public T? Find( Predicate<T> match )
     {
-        lock (_lock) { return _items.Find( match ); }
+        lock (_lock) { return _values.Find( match ); }
     }
     public T? FindLast( Predicate<T> match )
     {
-        lock (_lock) { return _items.FindLast( match ); }
+        lock (_lock) { return _values.FindLast( match ); }
     }
 
 
-    public virtual void Add( params T[] items )
+    public virtual void Add( params T[] values )
     {
         lock (_lock)
         {
-            foreach ( T item in items )
+            foreach ( T item in values )
             {
-                _items.Add( item );
+                _values.Add( item );
                 Added( item );
             }
         }
     }
-    public virtual void Add( IEnumerable<T> items )
+    public virtual void Add( IEnumerable<T> values )
     {
         lock (_lock)
         {
-            foreach ( T item in items )
+            foreach ( T item in values )
             {
-                _items.Add( item );
+                _values.Add( item );
                 Added( item );
             }
         }
@@ -272,7 +270,7 @@ public class ConcurrentObservableCollection<T> : CollectionAlerts<T>, IList<T>, 
 
     public void CopyTo( T[] array )
     {
-        lock (_lock) { _items.CopyTo( array, 0 ); }
+        lock (_lock) { _values.CopyTo( array, 0 ); }
     }
     public void InsertRange( int index, IEnumerable<T> collection )
     {
@@ -280,7 +278,7 @@ public class ConcurrentObservableCollection<T> : CollectionAlerts<T>, IList<T>, 
         {
             foreach ( (int i, T? item) in collection.Enumerate( index ) )
             {
-                _items.Insert( i, item );
+                _values.Insert( i, item );
                 Added( item, i );
             }
         }
@@ -291,7 +289,7 @@ public class ConcurrentObservableCollection<T> : CollectionAlerts<T>, IList<T>, 
         lock (_lock)
         {
             item = this[index];
-            _items.RemoveAt( index );
+            _values.RemoveAt( index );
             Removed( item, index );
         }
     }
@@ -299,12 +297,12 @@ public class ConcurrentObservableCollection<T> : CollectionAlerts<T>, IList<T>, 
     {
         lock (_lock)
         {
-            Guard.IsInRangeFor( start, (ICollection<T>)_items, nameof(start) );
-            Guard.IsInRangeFor( count, (ICollection<T>)_items, nameof(count) );
+            Guard.IsInRangeFor( start, (ICollection<T>)_values, nameof(start) );
+            Guard.IsInRangeFor( count, (ICollection<T>)_values, nameof(count) );
 
             for ( int x = start; x < start + count; x++ )
             {
-                _items.RemoveAt( x );
+                _values.RemoveAt( x );
                 Removed( x );
             }
         }
@@ -315,7 +313,7 @@ public class ConcurrentObservableCollection<T> : CollectionAlerts<T>, IList<T>, 
     {
         lock (_lock)
         {
-            _items.Reverse();
+            _values.Reverse();
             Reset();
         }
     }
@@ -323,7 +321,7 @@ public class ConcurrentObservableCollection<T> : CollectionAlerts<T>, IList<T>, 
     {
         lock (_lock)
         {
-            _items.Reverse( start, count );
+            _values.Reverse( start, count );
             Reset();
         }
     }
@@ -335,9 +333,9 @@ public class ConcurrentObservableCollection<T> : CollectionAlerts<T>, IList<T>, 
     {
         lock (_lock)
         {
-            if ( _items.Count == 0 ) { return; }
+            if ( _values.Count == 0 ) { return; }
 
-            _items.Sort( compare );
+            _values.Sort( compare );
             Reset();
         }
     }
@@ -346,9 +344,9 @@ public class ConcurrentObservableCollection<T> : CollectionAlerts<T>, IList<T>, 
     {
         lock (_lock)
         {
-            if ( _items.Count == 0 ) { return; }
+            if ( _values.Count == 0 ) { return; }
 
-            _items.Sort( start, count, comparer );
+            _values.Sort( start, count, comparer );
             Reset();
         }
     }
@@ -356,39 +354,39 @@ public class ConcurrentObservableCollection<T> : CollectionAlerts<T>, IList<T>, 
 
     void ICollection.CopyTo( Array array, int start )
     {
-        lock (_lock) { ((IList)_items).CopyTo( array, start ); }
+        lock (_lock) { ((IList)_values).CopyTo( array, start ); }
     }
     void IList.Remove( object? value )
     {
-        lock (_lock) { ((IList)_items).Remove( value ); }
+        lock (_lock) { ((IList)_values).Remove( value ); }
     }
     int IList.Add( object? value )
     {
-        lock (_lock) { return ((IList)_items).Add( value ); }
+        lock (_lock) { return ((IList)_values).Add( value ); }
     }
     bool IList.Contains( object? value )
     {
-        lock (_lock) { return ((IList)_items).Contains( value ); }
+        lock (_lock) { return ((IList)_values).Contains( value ); }
     }
     int IList.IndexOf( object? value )
     {
-        lock (_lock) { return ((IList)_items).IndexOf( value ); }
+        lock (_lock) { return ((IList)_values).IndexOf( value ); }
     }
     void IList.Insert( int index, object? value )
     {
-        lock (_lock) { ((IList)_items).Insert( index, value ); }
+        lock (_lock) { ((IList)_values).Insert( index, value ); }
     }
 
 
     public virtual bool Contains( T item )
     {
-        lock (_lock) { return _items.Contains( item ); }
+        lock (_lock) { return _values.Contains( item ); }
     }
     public virtual void Add( T item )
     {
         lock (_lock)
         {
-            _items.Add( item );
+            _values.Add( item );
             Added( item );
         }
     }
@@ -397,7 +395,7 @@ public class ConcurrentObservableCollection<T> : CollectionAlerts<T>, IList<T>, 
     {
         lock (_lock)
         {
-            _items.Clear();
+            _values.Clear();
             Reset();
         }
     }
@@ -406,7 +404,7 @@ public class ConcurrentObservableCollection<T> : CollectionAlerts<T>, IList<T>, 
     {
         lock (_lock)
         {
-            _items.Insert( index, item );
+            _values.Insert( index, item );
             Added( item );
         }
     }
@@ -415,7 +413,7 @@ public class ConcurrentObservableCollection<T> : CollectionAlerts<T>, IList<T>, 
     {
         lock (_lock)
         {
-            bool result = _items.Remove( item );
+            bool result = _values.Remove( item );
             if ( result ) { Removed( item ); }
 
             return result;
@@ -426,7 +424,7 @@ public class ConcurrentObservableCollection<T> : CollectionAlerts<T>, IList<T>, 
         lock (_lock)
         {
             T item = this[index];
-            _items.RemoveAt( index );
+            _values.RemoveAt( index );
             Removed( item, index );
         }
     }
@@ -434,17 +432,21 @@ public class ConcurrentObservableCollection<T> : CollectionAlerts<T>, IList<T>, 
 
     public void CopyTo( T[] array, int start )
     {
-        lock (_lock) { _items.CopyTo( array, start ); }
+        lock (_lock) { _values.CopyTo( array, start ); }
     }
     public int IndexOf( T value )
     {
-        lock (_lock) { return _items.IndexOf( value ); }
+        lock (_lock) { return _values.IndexOf( value ); }
     }
 
 
-    public IEnumerator<T> GetEnumerator()
+    public override IEnumerator<T> GetEnumerator()
     {
-        lock (_lock) { return _items.GetEnumerator(); }
+        lock (_lock)
+        {
+            return _values.Where( Filter )
+                          .GetEnumerator();
+        }
     }
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }
