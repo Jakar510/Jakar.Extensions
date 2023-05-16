@@ -4,15 +4,13 @@
 namespace Jakar.AppLogger.Portal.Data;
 
 
-public readonly record struct LoginResult
+public readonly record struct LoginResult( LoginResult.State Result, UserRecord? User )
 {
-    public State       Result    { get; init; } = default;
-    public UserRecord? User      { get; init; } = default;
-    public bool        Succeeded => User is not null && Result == State.Success;
+    public bool Succeeded => User is not null && Result == State.Success;
 
 
-    public LoginResult( State      result ) => Result = result;
-    public LoginResult( UserRecord user ) : this( State.Success ) => User = user;
+    public LoginResult( State      result ) : this( result, default ) => Result = result;
+    public LoginResult( UserRecord user ) : this( State.Success, user ) => User = user;
 
 
     public static implicit operator LoginResult( State      result ) => new(result);

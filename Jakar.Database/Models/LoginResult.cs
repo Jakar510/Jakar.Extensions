@@ -5,35 +5,18 @@ namespace Jakar.Database;
 
 
 [SuppressMessage( "ReSharper", "InconsistentNaming" )]
-public readonly record struct LoginResult
+public readonly record struct LoginResult( LoginResult.State Result, UserRecord? User = default, Exception? Exception = default, ModelStateDictionary? Model = default )
 {
-    public State                 Result    { get; init; } = default;
-    public UserRecord?           User      { get; init; } = default;
-    public Exception?            Exception { get; init; } = default;
-    public ModelStateDictionary? Model     { get; init; } = default;
-
-
     [MemberNotNullWhen( true,  nameof(User) )]
     [MemberNotNullWhen( false, nameof(Exception) )]
-    public bool Succeeded
-    {
-        get
-        {
-            if ( User is null )
-            {
-                Debug.Assert( Exception is not null );
-                return false;
-            }
-
-            return User is not null && Result == State.Success;
-        }
-    }
+    public bool Succeeded => User is not null
+                                 ? Result == State.Success
+                                 : Exception is null;
 
 
-    public LoginResult( ModelStateDictionary value ) : this( State.UnknownError ) => Model = value;
-    public LoginResult( Exception            value ) : this( State.UnknownError ) => Exception = value;
-    public LoginResult( UserRecord           value ) : this( State.Success ) => User = value;
-    public LoginResult( State                value ) => Result = value;
+    public LoginResult( ModelStateDictionary value ) : this( State.UnknownError, default, default, value ) { }
+    public LoginResult( Exception            value ) : this( State.UnknownError, default, value ) { }
+    public LoginResult( UserRecord           value ) : this( State.Success, value ) { }
 
 
     public static implicit operator LoginResult( State                result ) => new(result);
@@ -54,7 +37,7 @@ public readonly record struct LoginResult
                                                                             Status   = (int)Status.InternalServerError,
                                                                             Title    = Exception.MethodName(),
                                                                             Type = Exception.GetType()
-                                                                                            .Name,
+                                                                                            .Name
                                                                         } ),
             State.UnknownError when Model is not null => new Error( Status.InternalServerError, GetModelStateDictionary() ),
             State.UnknownError                        => new Error( Status.InternalServerError ),
@@ -65,7 +48,7 @@ public readonly record struct LoginResult
             State.ExpiredSubscription                 => new Error( Status.PaymentRequired ),
             State.NoSubscription                      => new Error( Status.PaymentRequired ),
             State.NotFound                            => new Error( Status.NotFound ),
-            _                                         => throw new OutOfRangeException( nameof(Result), Result ),
+            _                                         => throw new OutOfRangeException( nameof(Result), Result )
         };
     public bool GetResult( [NotNullWhen( false )] out UserRecord? caller )
     {
@@ -131,7 +114,7 @@ public readonly record struct LoginResult
                                      State.ExpiredSubscription => Status.PaymentRequired,
                                      State.NoSubscription      => Status.PaymentRequired,
                                      State.NotFound            => Status.NotFound,
-                                     _                         => throw new OutOfRangeException( nameof(Result), Result ),
+                                     _                         => throw new OutOfRangeException( nameof(Result), Result )
                                  };
 
 
@@ -146,6 +129,6 @@ public readonly record struct LoginResult
         Disabled,
         ExpiredSubscription,
         NoSubscription,
-        NotFound,
+        NotFound
     }
 }
