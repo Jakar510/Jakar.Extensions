@@ -5,7 +5,7 @@ namespace Jakar.Database;
 
 
 [SuppressMessage( "ReSharper", "MemberCanBePrivate.Local" )]
-public struct KeyGenerator : IEnumerator<Guid>, IEnumerable<Guid>
+public record struct KeyGenerator : IEnumerator<Guid>, IEnumerable<Guid>
 {
     private readonly ReadOnlyMemory<RecordPair> _pairs;
     private          int                        _index = -1;

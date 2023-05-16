@@ -27,9 +27,9 @@ public static partial class AsyncLinq
     }
 
 
-    public static async Task ForEachAsync<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, Task> action, CancellationToken token = default )
+    public static async Task ForEachAsync<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, Task> action )
     {
-        await foreach ( TElement item in source.WithCancellation( token ) ) { await action( item ); }
+        await foreach ( TElement item in source ) { await action( item ); }
     }
 
 
@@ -99,7 +99,7 @@ public static partial class AsyncLinq
     }
 
 
-    public static async Task ForEachParallelAsync<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, Task> action, CancellationToken token = default, int? maxDegreeOfParallelism = default, TaskScheduler? scheduler = default )
+    public static async Task ForEachParallelAsync<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, Task> action, int? maxDegreeOfParallelism = default, TaskScheduler? scheduler = default )
     {
         var options = new ExecutionDataflowBlockOptions
                       {
@@ -110,7 +110,7 @@ public static partial class AsyncLinq
 
         var block = new ActionBlock<TElement>( action, options );
 
-        await foreach ( TElement item in source.WithCancellation( token ) ) { block.Post( item ); }
+        await foreach ( TElement item in source ) { block.Post( item ); }
 
         block.Complete();
         await block.Completion;
@@ -174,7 +174,7 @@ public static partial class AsyncLinq
                                        .AsParallel()
                                        .Select( AwaitPartition ) );
     }
-    public static async Task ForEachParallelAsync( this IAsyncEnumerable<Task> source, CancellationToken token = default, int? maxDegreeOfParallelism = default, TaskScheduler? scheduler = default )
+    public static async Task ForEachParallelAsync( this IAsyncEnumerable<Task> source, int? maxDegreeOfParallelism = default, TaskScheduler? scheduler = default )
     {
         var options = new ExecutionDataflowBlockOptions
                       {
@@ -185,7 +185,7 @@ public static partial class AsyncLinq
 
 
         var block = new ActionBlock<Task>( x => x, options );
-        await foreach ( Task item in source.WithCancellation( token ) ) { block.Post( item ); }
+        await foreach ( Task item in source ) { block.Post( item ); }
 
         block.Complete();
         await block.Completion;
@@ -217,7 +217,7 @@ public static partial class AsyncLinq
         await tasks;
         return results;
     }
-    public static async Task<IReadOnlyCollection<TElement>> WhenAllParallelAsync<TElement>( this IAsyncEnumerable<Task<TElement>> source, CancellationToken token = default, int? maxDegreeOfParallelism = default, TaskScheduler? scheduler = default )
+    public static async Task<IReadOnlyCollection<TElement>> WhenAllParallelAsync<TElement>( this IAsyncEnumerable<Task<TElement>> source, int? maxDegreeOfParallelism = default, TaskScheduler? scheduler = default )
     {
         var results = new ConcurrentBag<TElement>();
 
@@ -235,7 +235,7 @@ public static partial class AsyncLinq
         if ( scheduler is not null ) { options.TaskScheduler = scheduler; }
 
         var block = new ActionBlock<Task<TElement>>( AwaitTask, options );
-        await foreach ( Task<TElement> item in source.WithCancellation( token ) ) { block.Post( item ); }
+        await foreach ( Task<TElement> item in source ) { block.Post( item ); }
 
         block.Complete();
         await block.Completion;
@@ -319,9 +319,9 @@ public static partial class AsyncLinq
     {
         foreach ( TKey key in dict.Keys ) { await action( key ); }
     }
-    public static async ValueTask ForEachAsync<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, ValueTask> action, CancellationToken token = default )
+    public static async ValueTask ForEachAsync<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, ValueTask> action )
     {
-        await foreach ( TElement item in source.WithCancellation( token ) ) { await action( item ); }
+        await foreach ( TElement item in source ) { await action( item ); }
     }
     /// <summary> If <paramref name="source"/> is an <see cref="List{TElement}"/> , items should not be added or removed while the calling. </summary>
     /// <typeparam name="TElement"> </typeparam>

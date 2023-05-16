@@ -213,8 +213,8 @@ public partial class WebRequester
             _retryPolicy = policy;
             return this;
         }
-        public Builder With_Retry( int      maxRetires ) => With_Retry( new RetryPolicy( true,                                 maxRetires ) );
-        public Builder With_Retry( TimeSpan delay, TimeSpan scale, int maxRetires = 3 ) => With_Retry( new RetryPolicy( delay, scale, maxRetires ) );
+        public Builder With_Retry( uint      maxRetires ) => With_Retry( new RetryPolicy( true,                                 maxRetires ) );
+        public Builder With_Retry( TimeSpan delay, TimeSpan scale, uint maxRetires = 3 ) => With_Retry( new RetryPolicy( delay, scale, maxRetires ) );
 
 
         public Builder With_Encoding( Encoding value )

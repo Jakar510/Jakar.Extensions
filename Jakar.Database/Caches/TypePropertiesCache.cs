@@ -66,6 +66,9 @@ public sealed class TypePropertiesCache : ConcurrentDictionary<Type, TypePropert
     [SuppressMessage( "ReSharper", "SuggestBaseTypeForParameter" )]
     public sealed class Properties : IReadOnlyDictionary<DbInstance, Properties.Descriptors>
     {
+        internal const BindingFlags ATTRIBUTES = BindingFlags.Instance | BindingFlags.Public | BindingFlags.SetProperty | BindingFlags.GetProperty;
+
+
         private readonly IReadOnlyDictionary<DbInstance, Descriptors> _dictionary;
         public int Count
         {
@@ -93,7 +96,12 @@ public sealed class TypePropertiesCache : ConcurrentDictionary<Type, TypePropert
 
         public Properties( Type type )
         {
-            PropertyInfo[] properties = type.GetProperties( BindingFlags.Instance | BindingFlags.Public | BindingFlags.SetProperty | BindingFlags.GetProperty );
+            PropertyInfo[] properties = type.GetProperties( ATTRIBUTES )
+                                            .Where( x => !x.HasAttribute<DataBaseIgnoreAttribute>() )
+                                            .ToArray();
+
+            Debug.Assert( properties.Length > 0 );
+            Debug.Assert( properties.Any( Descriptor.IsDbKey ) );
 
             _dictionary = new Dictionary<DbInstance, Descriptors>
                           {

@@ -36,14 +36,16 @@ public static class Tasks
 
     public static bool WaitSynchronously( this ValueTask task )
     {
-        task.GetAwaiter()
+        task.ConfigureAwait( false )
+            .GetAwaiter()
             .GetResult();
 
         return task.IsCompletedSuccessfully;
     }
     public static T WaitSynchronously<T>( this ValueTask<T> task )
     {
-        task.GetAwaiter()
+        task.ConfigureAwait( false )
+            .GetAwaiter()
             .GetResult();
 
         return task.Result;

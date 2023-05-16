@@ -4,7 +4,7 @@
 namespace Jakar.Database;
 
 
-public readonly struct Error
+public readonly record struct Error
 {
     public object?               Value   { get; }
     public ModelStateDictionary? State   { get; }

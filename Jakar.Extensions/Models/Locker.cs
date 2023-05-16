@@ -24,7 +24,7 @@ namespace Jakar.Extensions;
 ///     </para>
 /// </summary>
 [SuppressMessage( "ReSharper", "UnusedMethodReturnValue.Global" )]
-public sealed class Locker : IAsyncDisposable, IDisposable
+public sealed record Locker : IAsyncDisposable, IDisposable
 {
     private readonly object   _lock;
     public           TimeSpan TimeOut { get; init; }
@@ -132,24 +132,19 @@ public sealed class Locker : IAsyncDisposable, IDisposable
 
 
 
-public readonly struct Locker<T> : IEnumerator<T>, IAsyncEnumerator<T>
+public sealed record Locker<T> : IEnumerator<T>, IAsyncEnumerator<T>
 {
+    private readonly IAsyncEnumerator<T>? _asyncEnumerator;
+    private readonly IEnumerator<T>?      _enumerator;
     private readonly Locker               _locker;
-    private readonly IEnumerator<T>?      _enumerator      = default;
-    private readonly IAsyncEnumerator<T>? _asyncEnumerator = default;
 
 
-    public T Current
-    {
-        get
-        {
-            if ( _enumerator is not null ) { return _enumerator.Current; }
+    public T Current => _enumerator is not null
+                            ? _enumerator.Current
+                            : _asyncEnumerator is not null
+                                ? _asyncEnumerator.Current
+                                : throw new InvalidOperationException();
 
-            if ( _asyncEnumerator is not null ) { return _asyncEnumerator.Current; }
-
-            throw new InvalidOperationException();
-        }
-    }
     object? IEnumerator.Current => Current;
 
 
@@ -189,19 +184,21 @@ public readonly struct Locker<T> : IEnumerator<T>, IAsyncEnumerator<T>
     }
 
 
-    public void Enter( CancellationToken           token = default ) => _locker.Enter( token );
-    public ValueTask EnterAsync( CancellationToken token = default ) => _locker.EnterAsync( token );
+    public LockerContext Enter( CancellationToken token = default )
+    {
+        _locker.Enter( token );
+        return new LockerContext( this );
+    }
+    public async ValueTask<LockerContext> EnterAsync( CancellationToken token = default )
+    {
+        await _locker.EnterAsync( token );
+        return new LockerContext( this );
+    }
     public void Exit() => _locker.Exit();
 
 
-    public void Dispose()
-    {
-        _locker.Dispose();
-        _enumerator?.Dispose();
-
-        _asyncEnumerator?.DisposeAsync()
-                         .CallSynchronously();
-    }
+    public void Dispose() => DisposeAsync()
+       .WaitSynchronously();
     public async ValueTask DisposeAsync()
     {
         await _locker.DisposeAsync();
@@ -210,7 +207,25 @@ public readonly struct Locker<T> : IEnumerator<T>, IAsyncEnumerator<T>
     }
 
 
-    public bool MoveNext() => _enumerator?.MoveNext() ?? false;
-    public async ValueTask<bool> MoveNextAsync() => _asyncEnumerator is not null && await _asyncEnumerator.MoveNextAsync();
-    public void Reset() => _enumerator?.Reset();
+    public bool MoveNext()
+    {
+        Debug.Assert( _enumerator is not null );
+        return _enumerator.MoveNext();
+    }
+    public async ValueTask<bool> MoveNextAsync()
+    {
+        Debug.Assert( _asyncEnumerator is not null );
+        return await _asyncEnumerator.MoveNextAsync();
+    }
+    void IEnumerator.Reset() => _enumerator?.Reset();
+
+
+
+    public readonly struct LockerContext : IDisposable
+    {
+        private readonly Locker<T> _locker;
+        public LockerContext( Locker<T> locker ) => _locker = locker;
+
+        public void Dispose() => _locker.Exit();
+    }
 }

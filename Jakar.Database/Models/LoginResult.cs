@@ -5,7 +5,7 @@ namespace Jakar.Database;
 
 
 [SuppressMessage( "ReSharper", "InconsistentNaming" )]
-public readonly struct LoginResult
+public readonly record struct LoginResult
 {
     public State                 Result    { get; init; } = default;
     public UserRecord?           User      { get; init; } = default;

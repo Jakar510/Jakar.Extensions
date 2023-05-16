@@ -5,25 +5,25 @@
 
 public static partial class AsyncLinq
 {
-    public static async ValueTask Add<TElement>( this ConcurrentBag<TElement> collection, IAsyncEnumerable<TElement> items, CancellationToken token = default )
+    public static async ValueTask Add<TElement>( this ConcurrentBag<TElement> collection, IAsyncEnumerable<TElement> items )
     {
-        await foreach ( TElement value in items.WithCancellation( token ) ) { collection.Add( value ); }
+        await foreach ( TElement value in items ) { collection.Add( value ); }
     }
-    public static async ValueTask Add<TElement>( this ICollection<TElement> collection, IAsyncEnumerable<TElement> items, CancellationToken token = default )
+    public static async ValueTask Add<TElement>( this ICollection<TElement> collection, IAsyncEnumerable<TElement> items )
     {
-        await foreach ( TElement value in items.WithCancellation( token ) ) { collection.Add( value ); }
+        await foreach ( TElement value in items ) { collection.Add( value ); }
     }
-    public static async ValueTask AddOrUpdate<TElement>( this IList<TElement> collection, IAsyncEnumerable<TElement> value, CancellationToken token = default )
+    public static async ValueTask AddOrUpdate<TElement>( this IList<TElement> collection, IAsyncEnumerable<TElement> value )
     {
-        await foreach ( TElement element in value.WithCancellation( token ) ) { collection.AddOrUpdate( element ); }
+        await foreach ( TElement element in value ) { collection.AddOrUpdate( element ); }
     }
-    public static async ValueTask Remove<TElement>( this ICollection<TElement> collection, IAsyncEnumerable<TElement> items, CancellationToken token = default )
+    public static async ValueTask Remove<TElement>( this ICollection<TElement> collection, IAsyncEnumerable<TElement> items )
     {
-        await foreach ( TElement value in items.WithCancellation( token ) ) { collection.Remove( value ); }
+        await foreach ( TElement value in items ) { collection.Remove( value ); }
     }
-    public static async ValueTask TryAdd<TElement>( this ICollection<TElement> collection, IAsyncEnumerable<TElement> value, CancellationToken token = default )
+    public static async ValueTask TryAdd<TElement>( this ICollection<TElement> collection, IAsyncEnumerable<TElement> value )
     {
-        await foreach ( TElement element in value.WithCancellation( token ) ) { collection.TryAdd( element ); }
+        await foreach ( TElement element in value ) { collection.TryAdd( element ); }
     }
     public static void Add<TElement>( this ConcurrentBag<TElement> collection, params TElement[] items )
     {

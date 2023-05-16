@@ -3,22 +3,22 @@
 
 public static partial class AsyncLinq
 {
-    public static async IAsyncEnumerable<(int Index, TElement Value)> Enumerate<TElement>( this IAsyncEnumerable<TElement> source, int start = 0, [EnumeratorCancellation] CancellationToken token = default )
+    public static async IAsyncEnumerable<(int Index, TElement Value)> Enumerate<TElement>( this IAsyncEnumerable<TElement> source, int start = 0 )
     {
         int index = start;
 
-        await foreach ( TElement element in source.WithCancellation( token ) )
+        await foreach ( TElement element in source )
         {
             checked { index++; }
 
             yield return (index, element);
         }
     }
-    public static async IAsyncEnumerable<(long Index, TElement Value)> Enumerate<TElement>( this IAsyncEnumerable<TElement> source, long start = 0, [EnumeratorCancellation] CancellationToken token = default )
+    public static async IAsyncEnumerable<(long Index, TElement Value)> Enumerate<TElement>( this IAsyncEnumerable<TElement> source, long start = 0 )
     {
         long index = start;
 
-        await foreach ( TElement element in source.WithCancellation( token ) )
+        await foreach ( TElement element in source )
         {
             checked { index++; }
 

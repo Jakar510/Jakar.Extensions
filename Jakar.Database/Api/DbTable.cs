@@ -112,6 +112,8 @@ public partial class DbTable<TRecord> : ObservableClass, IConnectableDb, IAsyncD
 
         try
         {
+            var command = new CommandDefinition( sql, default, transaction, default, default, CommandFlags.None, token );
+
             IEnumerable<TRecord> records = await connection.QueryAsync<TRecord>( sql, default, transaction );
             return records.GetArray();
         }
@@ -155,7 +157,6 @@ public partial class DbTable<TRecord> : ObservableClass, IConnectableDb, IAsyncD
         }
         catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
     }
-
 
 
     public async ValueTask Schema( Func<DataTable, CancellationToken, ValueTask> func, CancellationToken token = default )

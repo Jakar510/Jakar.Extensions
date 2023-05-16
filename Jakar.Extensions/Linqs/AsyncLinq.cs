@@ -17,11 +17,11 @@ public static partial class AsyncLinq
 {
     public static AsyncEnumerator<TElement> AsAsyncEnumerable<TElement>( this IEnumerable<TElement> source, CancellationToken token = default ) => source.GetArray()
                                                                                                                                                          .AsAsyncEnumerable( token );
-    public static AsyncEnumerator<TElement> AsAsyncEnumerable<TElement>( this IReadOnlyList<TElement> source, CancellationToken token = default ) => new(source, token);
+    public static AsyncEnumerator<TElement> AsAsyncEnumerable<TElement>( this IReadOnlyList<TElement> source, CancellationToken token = default ) => new(source);
 
 
-    public static bool IsEmpty( this                                     ICollection        collection ) => collection.Count == 0;
-    public static ValueTask<HashSet<TElement>> ToHashSet<TElement>( this IAsyncEnumerable<TElement> source, CancellationToken token = default ) => source.ToHashSet( EqualityComparer<TElement>.Default, token );
+    public static bool IsEmpty( this                                     ICollection                collection ) => collection.Count == 0;
+    public static ValueTask<HashSet<TElement>> ToHashSet<TElement>( this IAsyncEnumerable<TElement> source, CancellationToken token = default ) => source.ToHashSet( EqualityComparer<TElement>.Default );
     public static async ValueTask<HashSet<TElement>> ToHashSet<TElement>( this IAsyncEnumerable<TElement> source, IEqualityComparer<TElement> comparer, CancellationToken token = default )
     {
         var list = new HashSet<TElement>( comparer );

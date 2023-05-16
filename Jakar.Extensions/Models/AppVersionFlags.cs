@@ -4,7 +4,7 @@
 namespace Jakar.Extensions;
 
 
-public readonly struct AppVersionFlags : IEquatable<AppVersionFlags>, IEquatable<AppVersionFlags?>, IComparable<AppVersionFlags>, IComparable<AppVersionFlags?>, IComparable, IFormattable
+public readonly record struct AppVersionFlags( string Flag, uint Iteration ) : IEquatable<AppVersionFlags?>, IComparable<AppVersionFlags>, IComparable<AppVersionFlags?>, IComparable, IFormattable
 {
     internal const char   SEPARATOR = '-';
     private const  string STABLE    = "";
@@ -13,26 +13,11 @@ public readonly struct AppVersionFlags : IEquatable<AppVersionFlags>, IEquatable
     private const  string BETA      = "beta";
 
 
-    public   string Flag       { get; init; }
-    public   uint   Iteration  { get; init; }
-    internal int    Length     => Flag.Length + 15;
-    public   bool   IsEmpty    => string.IsNullOrWhiteSpace( Flag );
-    public   bool   IsNotEmpty => !IsEmpty;
+    internal int  Length     => Flag.Length + 15;
+    public   bool IsEmpty    => string.IsNullOrWhiteSpace( Flag );
+    public   bool IsNotEmpty => !IsEmpty;
 
 
-    public AppVersionFlags( string flag, uint iteration )
-    {
-        Flag      = flag;
-        Iteration = iteration;
-    }
-
-
-    // public override string ToString()
-    // {
-    //     return Iteration > 0
-    //                ? $"-{Flag}{Iteration}"
-    //                : Flag;
-    // }
     public override string ToString() => AsSpan()
        .ToString();
     public string ToString( string? format, IFormatProvider? formatProvider ) => AsSpan( format, formatProvider )
@@ -45,13 +30,10 @@ public readonly struct AppVersionFlags : IEquatable<AppVersionFlags>, IEquatable
     {
         Span<char> buffer = stackalloc char[Length];
 
-        if ( TryFormat( buffer, out int charsWritten, format, provider ) )
-        {
-            buffer = buffer[..charsWritten];
-            return MemoryMarshal.CreateReadOnlySpan( ref buffer.GetPinnableReference(), buffer.Length );
-        }
+        if ( !TryFormat( buffer, out int charsWritten, format, provider ) ) { throw new InvalidOperationException( "Conversion failed" ); }
 
-        throw new InvalidOperationException( "Conversion failed" );
+        buffer = buffer[..charsWritten];
+        return MemoryMarshal.CreateReadOnlySpan( ref buffer.GetPinnableReference(), buffer.Length );
     }
 
 
@@ -233,18 +215,14 @@ public readonly struct AppVersionFlags : IEquatable<AppVersionFlags>, IEquatable
 
         return Equals( other.Value );
     }
-    public bool Equals( AppVersionFlags  other ) => string.Equals( Flag, other.Flag, StringComparison.OrdinalIgnoreCase ) && Iteration.Equals( other.Iteration );
-    public override bool Equals( object? obj ) => obj is AppVersionFlags other && Equals( other );
+    public bool Equals( AppVersionFlags other ) => string.Equals( Flag, other.Flag, StringComparison.OrdinalIgnoreCase ) && Iteration.Equals( other.Iteration );
     public override int GetHashCode() => Flag.GetHashCode();
 
 
-    public static bool operator <( AppVersionFlags  left, AppVersionFlags right ) => left.CompareTo( right ) < 0;
-    public static bool operator >( AppVersionFlags  left, AppVersionFlags right ) => left.CompareTo( right ) > 0;
-    public static bool operator <=( AppVersionFlags left, AppVersionFlags right ) => left.CompareTo( right ) <= 0;
-    public static bool operator >=( AppVersionFlags left, AppVersionFlags right ) => left.CompareTo( right ) >= 0;
-    public static bool operator ==( AppVersionFlags left, AppVersionFlags right ) => left.Equals( right );
-    public static bool operator !=( AppVersionFlags left, AppVersionFlags right ) => !left.Equals( right );
-
+    public static bool operator <( AppVersionFlags   left, AppVersionFlags  right ) => left.CompareTo( right ) < 0;
+    public static bool operator >( AppVersionFlags   left, AppVersionFlags  right ) => left.CompareTo( right ) > 0;
+    public static bool operator <=( AppVersionFlags  left, AppVersionFlags  right ) => left.CompareTo( right ) <= 0;
+    public static bool operator >=( AppVersionFlags  left, AppVersionFlags  right ) => left.CompareTo( right ) >= 0;
     public static bool operator <( AppVersionFlags?  left, AppVersionFlags? right ) => ValueSorter<AppVersionFlags>.Default.Compare( left, right ) < 0;
     public static bool operator >( AppVersionFlags?  left, AppVersionFlags? right ) => ValueSorter<AppVersionFlags>.Default.Compare( left, right ) > 0;
     public static bool operator <=( AppVersionFlags? left, AppVersionFlags? right ) => ValueSorter<AppVersionFlags>.Default.Compare( left, right ) <= 0;

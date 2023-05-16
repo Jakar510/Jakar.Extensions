@@ -6,7 +6,7 @@ using Jakar.Extensions;
 namespace Jakar.SqlBuilder;
 
 
-public struct EasySqlBuilder
+public record struct EasySqlBuilder
 {
     private readonly StringBuilder _sb;
     private          bool          _needToClose = false;

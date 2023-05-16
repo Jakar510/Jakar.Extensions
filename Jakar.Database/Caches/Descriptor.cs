@@ -4,55 +4,34 @@
 namespace Jakar.Database.Caches;
 
 
-public sealed record Descriptor
+public sealed record Descriptor( string Name, bool IsKey, string ColumnName, string VariableName, string KeyValuePair, Func<object, object> GetValue )
 {
-    public string               ColumnName   { get; }
-    public Func<object, object> GetValue     { get; }
-    public bool                 IsKey        { get; }
-    public string               KeyValuePair { get; }
-    public string               Name         { get; }
-    public string               VariableName { get; }
-
-
-    private Descriptor( PropertyInfo property, string name, string columnName, string variableName, string keyValuePair )
+    public static Func<object, object> GetTablePropertyValue( PropertyInfo property )
     {
         ArgumentNullException.ThrowIfNull( property.GetMethod );
         ArgumentNullException.ThrowIfNull( property.DeclaringType );
 
-        Name         = name;
-        ColumnName   = columnName;
-        VariableName = variableName;
-        KeyValuePair = keyValuePair;
-        IsKey        = IsDbKey( property );
-
-
-        Emit<Func<object, object>>? emit = Emit<Func<object, object>>.NewDynamicMethod( GetType(), "GetTablePropertyValue" )
+        Emit<Func<object, object>>? emit = Emit<Func<object, object>>.NewDynamicMethod( property.DeclaringType, nameof(GetTablePropertyValue) )
                                                                      .LoadArgument( 0 )
                                                                      .CastClass( property.DeclaringType )
                                                                      .Call( property.GetMethod );
 
         if ( property.PropertyType.IsValueType ) { emit = emit.Box( property.PropertyType ); }
 
-        GetValue = emit.Return()
-                       .CreateDelegate();
+        return emit.Return()
+                   .CreateDelegate();
     }
-    private static bool IsDbKey( MemberInfo property ) => property.GetCustomAttribute<KeyAttribute>() is not null || property.GetCustomAttribute<System.ComponentModel.DataAnnotations.KeyAttribute>() is not null;
-
-
-    public static Descriptor Create( PropertyInfo property ) => Create( property, property.Name );
-    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
-    public static Descriptor Create( PropertyInfo property, in string name ) =>
-        new(property, name, $" {name} ", $" @{name} ", $" {name} = @{name} ");
+    public static bool IsDbKey( MemberInfo property ) => property.GetCustomAttribute<KeyAttribute>() is not null || property.GetCustomAttribute<System.ComponentModel.DataAnnotations.KeyAttribute>() is not null;
 
 
     public static Descriptor MsSql( PropertyInfo property ) => MsSql( property, property.Name );
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public static Descriptor MsSql( PropertyInfo property, in string name ) =>
-        new(property, name, $" {name} ", $" @{name} ", $" {name} = @{name} ");
+        new(name, IsDbKey( property ), $" {name} ", $" @{name} ", $" {name} = @{name} ", GetTablePropertyValue( property ));
 
 
     public static Descriptor Postgres( PropertyInfo property ) => Postgres( property, property.Name );
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public static Descriptor Postgres( PropertyInfo property, in string name ) =>
-        new(property, name, $" \"{name}\" ", $" @{name} ", $" \"{name}\" = @{name} ");
+        new(name, IsDbKey( property ), $" \"{name}\" ", $" @{name} ", $" \"{name}\" = @{name} ", GetTablePropertyValue( property ));
 }

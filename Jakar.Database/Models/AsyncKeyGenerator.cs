@@ -7,7 +7,7 @@ namespace Jakar.Database;
 /// <summary>
 ///     <see href="https://stackoverflow.com/a/15992856/9530917"/>
 /// </summary>
-public struct AsyncKeyGenerator<TRecord> : IAsyncEnumerator<Guid>, IAsyncEnumerable<Guid> where TRecord : TableRecord<TRecord>
+public record struct AsyncKeyGenerator<TRecord> : IAsyncEnumerator<Guid>, IAsyncEnumerable<Guid> where TRecord : TableRecord<TRecord>
 {
     private readonly DbTable<TRecord>  _table;
     private readonly CancellationToken _token = default;

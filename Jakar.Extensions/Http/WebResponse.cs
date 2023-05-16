@@ -12,8 +12,10 @@ namespace Jakar.Extensions;
 [SuppressMessage( "ReSharper", "CollectionNeverQueried.Global" )]
 public readonly record struct WebResponse<T>
 {
-    public const        string          ERROR_MESSAGE = "Error Message: ";
-    public const        string          UNKNOWN_ERROR = "Unknown Error";
+    public const string ERROR_MESSAGE = "Error Message: ";
+    public const string UNKNOWN_ERROR = "Unknown Error";
+
+
     public              List<string>    Allow             { get; init; } = new();
     public              List<string>    ContentEncoding   { get; init; } = new();
     public              long?           ContentLength     { get; init; } = default;
@@ -177,8 +179,8 @@ public readonly record struct WebResponse<T>
 
     public static async ValueTask<WebResponse<T>> Create( HttpResponseMessage response, Func<HttpResponseMessage, ValueTask<T>> func, RetryPolicy policy, CancellationToken token )
     {
-        int count      = 0;
-        var exceptions = new Exception[policy.MaxRetires];
+        uint count      = 0;
+        var  exceptions = new Exception[policy.MaxRetires];
 
         while ( count < policy.MaxRetires )
         {
@@ -200,8 +202,8 @@ public readonly record struct WebResponse<T>
     }
     public static async ValueTask<WebResponse<T>> Create<TArg>( HttpResponseMessage response, TArg arg, Func<HttpResponseMessage, TArg, ValueTask<T>> func, RetryPolicy policy, CancellationToken token )
     {
-        int count      = 0;
-        var exceptions = new Exception[policy.MaxRetires];
+        uint count      = 0;
+        var  exceptions = new Exception[policy.MaxRetires];
 
         while ( count < policy.MaxRetires )
         {
