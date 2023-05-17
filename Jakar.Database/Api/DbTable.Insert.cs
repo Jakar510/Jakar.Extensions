@@ -30,6 +30,8 @@ public partial class DbTable<TRecord>
 
         try
         {
+            
+            var command = new CommandDefinition( sql, parameters, transaction, _commandTimeout, commandType, CommandFlags.None, token );
             var id = await connection.ExecuteScalarAsync<Guid>( sql, parameters, transaction );
             return record.NewID( id );
         }

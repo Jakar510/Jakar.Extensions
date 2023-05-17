@@ -1,6 +1,10 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 08/17/2022  8:48 PM
 
+using System.Collections.Immutable;
+
+
+
 namespace Jakar.Database.Caches;
 
 
@@ -105,8 +109,8 @@ public sealed class TypePropertiesCache : ConcurrentDictionary<Type, TypePropert
 
             _dictionary = new Dictionary<DbInstance, Descriptors>
                           {
-                              [DbInstance.Postgres] = properties.ToDictionary( x => x.Name, Descriptor.Postgres ),
-                              [DbInstance.MsSql]    = properties.ToDictionary( x => x.Name, Descriptor.MsSql ),
+                              [DbInstance.Postgres] = properties.ToImmutableDictionary( x => x.Name, Descriptor.Postgres ),
+                              [DbInstance.MsSql]    = properties.ToImmutableDictionary( x => x.Name, Descriptor.MsSql ),
                           };
         }
 
@@ -146,7 +150,7 @@ public sealed class TypePropertiesCache : ConcurrentDictionary<Type, TypePropert
 
         public sealed class Descriptors : IReadOnlyDictionary<string, Descriptor>
         {
-            private readonly IReadOnlyDictionary<string, Descriptor> _dictionary;
+            private readonly ImmutableDictionary<string, Descriptor> _dictionary;
             public           int                                     Count => _dictionary.Count;
 
 
@@ -155,10 +159,11 @@ public sealed class TypePropertiesCache : ConcurrentDictionary<Type, TypePropert
             public IEnumerable<Descriptor> Values => _dictionary.Values;
 
 
-            public Descriptors( Dictionary<string, Descriptor>                          dictionary ) => _dictionary = dictionary;
-            public static implicit operator Descriptors( Dictionary<string, Descriptor> dictionary ) => new(dictionary);
+            public Descriptors( ImmutableDictionary<string, Descriptor> dictionary ) => _dictionary = dictionary;
 
-
+            public static implicit operator Descriptors( Dictionary<string, Descriptor>          dictionary ) => new(dictionary.ToImmutableDictionary());
+            public static implicit operator Descriptors( ImmutableDictionary<string, Descriptor> dictionary ) => new(dictionary);
+            
             public IEnumerator<KeyValuePair<string, Descriptor>> GetEnumerator() => _dictionary.GetEnumerator();
             IEnumerator IEnumerable.GetEnumerator() => _dictionary.GetEnumerator();
 
