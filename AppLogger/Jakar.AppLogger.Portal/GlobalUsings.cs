@@ -22,7 +22,6 @@ global using Jakar.Database;
 global using Jakar.Database.DbMigrations;
 global using Jakar.Extensions;
 global using Jakar.Extensions.Blazor;
-global using Jakar.Extensions.Hosting;
 global using Microsoft.AspNetCore.Components;
 global using Microsoft.AspNetCore.Components.Server.Circuits;
 global using Microsoft.AspNetCore.Components.Web;

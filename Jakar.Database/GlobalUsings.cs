@@ -53,7 +53,6 @@ global using Jakar.Database;
 global using Jakar.Database.Caches;
 global using Jakar.Database.DbMigrations;
 global using Jakar.Extensions;
-global using Jakar.Extensions.Hosting;
 global using JetBrains.Annotations;
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.AspNetCore.Mvc.ModelBinding;

@@ -3,7 +3,7 @@
 		<TargetFrameworks>netstandard2.1</TargetFrameworks>
 		<LangVersion>latest</LangVersion>
 		<Nullable>enable</Nullable>
-		<NoWarn>$(NoWarn);1591</NoWarn>
+		<NoWarn>$(NoWarn);1591;IDE0079</NoWarn>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
 		<RepositoryUrl>https://github.com/Jakar510/Jakar.Extensions</RepositoryUrl>
@@ -44,7 +44,7 @@
 	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="Acr.UserDialogs" Version="7.2.0.564" />
-		<PackageReference Include="Jakar.Extensions" Version="6.7.27" />
+		<PackageReference Include="Jakar.Extensions" Version="6.7.29" />
 		<PackageReference Include="Microsoft.AppCenter" Version="5.0.1" />
 		<PackageReference Include="Microsoft.AppCenter.Analytics" Version="5.0.1" />
 		<PackageReference Include="Microsoft.AppCenter.Crashes" Version="5.0.1" />

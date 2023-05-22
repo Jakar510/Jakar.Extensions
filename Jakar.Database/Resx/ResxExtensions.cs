@@ -8,7 +8,7 @@ public static class ResxExtensions
 {
     public static WebApplicationBuilder AddResx( this WebApplicationBuilder builder )
     {
-        builder.AddSingleton<IResxCollection, ResxCollection>();
+        builder.Services.AddSingleton<IResxCollection, ResxCollection>();
         return builder;
     }
 }

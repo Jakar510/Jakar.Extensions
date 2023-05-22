@@ -15,7 +15,6 @@ global using Blazored.SessionStorage;
 global using Blazored.SessionStorage.StorageOptions;
 global using Blazored.Toast;
 global using Blazored.Toast.Services;
-global using Jakar.Extensions.Hosting;
 global using Microsoft.AspNetCore.Authentication;
 global using Microsoft.AspNetCore.Builder;
 global using Microsoft.AspNetCore.Components;

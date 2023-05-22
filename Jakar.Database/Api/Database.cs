@@ -17,7 +17,7 @@ public abstract partial class Database : Randoms, IConnectableDb, IAsyncDisposab
 
 
     public         IConfiguration Configuration    { get; }
-    public virtual string         ConnectionString => Configuration.ConnectionString();
+    public virtual string         ConnectionString => Configuration.GetConnectionString( "DEFAULT" ) ?? throw new KeyNotFoundException( "DEFAULT" );
     public string CurrentSchema
     {
         get => _currentSchema;

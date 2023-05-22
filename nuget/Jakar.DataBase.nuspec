@@ -4,7 +4,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata>
 		<id>Jakar.DataBase</id>
-		<version>6.7.28</version>
+		<version>6.8.0</version>
 		<title>Extension Library</title>
 		<authors>Tyler Stegmaier</authors>
 		<owners>Jakar510/Jakar</owners>
@@ -26,34 +26,47 @@
 					url="https://github.com/Jakar510/Jakar.Extensions"
 					branch="master" />
 		<dependencies>
-			<group targetFramework="net6.0">
-				<dependency id="Jakar.Extensions"
-							version="6.7.27" />
-				<dependency id="Jakar.Extensions.Hosting"
-							version="6.7.3" />
-				<dependency id="FluentMigrator"
-							version="3.3.2" />
-				<dependency id="FluentMigrator.Runner"
-							version="3.3.2" />
-				<dependency id="MailKit"
-							version="4.0.0" />
-				<dependency id="Microsoft.Identity.Client"
-							version="4.53.0" />
-				<dependency id="Microsoft.Identity.Web"
-							version="2.9.0" />
-				<dependency id="Microsoft.IdentityModel.JsonWebTokens"
-							version="6.30.0" />
-				<dependency id="Microsoft.IdentityModel.Protocols.OpenIdConnect"
-							version="6.30.0" />
-				<dependency id="Microsoft.IdentityModel.Tokens"
-							version="6.30.0" />
-			</group>
-
 			<group targetFramework="net7.0">
 				<dependency id="Jakar.Extensions"
-							version="6.7.27" />
-				<dependency id="Jakar.Extensions.Hosting"
-							version="6.7.3" />
+							version="6.7.29" />
+				<dependency id="Hardware.Info"
+							version="11.1.0" />
+				<dependency id="Microsoft.Extensions.Hosting"
+							version="7.0.1" />
+				<dependency id="Swashbuckle.AspNetCore"
+							version="6.5.0" />
+				<dependency id="Swashbuckle.AspNetCore.Annotations"
+							version="6.5.0" />
+				<dependency id="Swashbuckle.AspNetCore.Newtonsoft"
+							version="6.5.0" />
+				<dependency id="Microsoft.Extensions.Options.DataAnnotations"
+							version="7.0.0" />
+				<dependency id="Microsoft.Extensions.Options.ConfigurationExtensions"
+							version="7.0.0" />
+				<dependency id="Microsoft.AspNetCore.Authentication.Certificate"
+							version="7.0.0" />
+				<dependency id="Microsoft.AspNetCore.Authentication.Google"
+							version="7.0.0" />
+				<dependency id="Microsoft.AspNetCore.Authentication.OAuth"
+							version="2.2.0" />
+				<dependency id="Microsoft.AspNetCore.Authentication.Cookies"
+							version="2.2.0" />
+				<dependency id="Microsoft.AspNetCore.Authentication.MicrosoftAccount"
+							version="7.0.0" />
+				<dependency id="Microsoft.AspNetCore.Authentication.JwtBearer"
+							version="7.0.0" />
+				<dependency id="Microsoft.AspNetCore.Authentication.OpenIdConnect"
+							version="7.0.0" />
+				<dependency id="Microsoft.Extensions.Diagnostics.HealthChecks"
+							version="7.0.5" />
+				<dependency id="Microsoft.Extensions.Diagnostics.HealthChecks.Abstractions"
+							version="7.0.5" />
+				<dependency id="Microsoft.Extensions.Hosting.Systemd"
+							version="7.0.0" />
+				<dependency id="Microsoft.Extensions.Hosting.WindowsServices"
+							version="7.0.0" />
+				<dependency id="System.Security.Cryptography.Xml"
+							version="7.0.1" />
 				<dependency id="FluentMigrator"
 							version="3.3.2" />
 				<dependency id="FluentMigrator.Runner"
@@ -63,13 +76,13 @@
 				<dependency id="Microsoft.Identity.Client"
 							version="4.53.0" />
 				<dependency id="Microsoft.Identity.Web"
-							version="2.9.0" />
+							version="2.11.0" />
 				<dependency id="Microsoft.IdentityModel.JsonWebTokens"
-							version="6.30.0" />
+							version="6.30.1" />
 				<dependency id="Microsoft.IdentityModel.Protocols.OpenIdConnect"
-							version="6.30.0" />
+							version="6.30.1" />
 				<dependency id="Microsoft.IdentityModel.Tokens"
-							version="6.30.0" />
+							version="6.30.1" />
 			</group>
 		</dependencies>
 	</metadata>

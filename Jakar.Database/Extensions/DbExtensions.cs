@@ -18,7 +18,7 @@ namespace Jakar.Database;
 [SuppressMessage( "ReSharper", "UnusedMethodReturnValue.Global" )]
 public static partial class DbExtensions
 {
-    public static IHealthChecksBuilder AddHealthCheck<T>( this WebApplicationBuilder builder ) where T : IHealthCheck => builder.AddHealthCheck( WebBuilder.CreateHealthCheck<T>() );
+    public static IHealthChecksBuilder AddHealthCheck<T>( this WebApplicationBuilder builder ) where T : IHealthCheck => builder.AddHealthCheck( HealthCheckExtensions.CreateHealthCheck<T>() );
     public static IHealthChecksBuilder AddHealthCheck( this WebApplicationBuilder builder, HealthCheckRegistration registration ) =>
         builder.Services.AddHealthChecks()
                .Add( registration );
@@ -70,11 +70,11 @@ public static partial class DbExtensions
         builder.AddPasswordValidator( configurePasswordRequirements ?? (( PasswordRequirements options ) => { }) );
 
 
-        builder.AddOptions<IdentityOptions>()
+        builder.Services.AddOptions<IdentityOptions>()
                .Configure( setupAction ?? (( IdentityOptions options ) => { }) );
 
 
-        AuthenticationBuilder auth = builder.AddAuthentication( configureAuthentication )
+        AuthenticationBuilder auth = builder.Services.AddAuthentication( configureAuthentication )
                                             .AddCookie( IdentityConstants.ApplicationScheme, configureApplication )
                                             .AddCookie( IdentityConstants.ExternalScheme,    configureExternal );
 
@@ -90,7 +90,7 @@ public static partial class DbExtensions
 
         // .AddMicrosoftGraph( builder.Configuration.GetSection( "Graph" ) );
 
-        builder.AddAuthorization( options => options.AddPolicy( nameof(RequireMfa), policy => policy.Requirements.Add( new RequireMfa() ) ) );
+        builder.Services.AddAuthorization( options => options.AddPolicy( nameof(RequireMfa), policy => policy.Requirements.Add( new RequireMfa() ) ) );
 
 
         RoleStore.Register( builder );
@@ -113,9 +113,11 @@ public static partial class DbExtensions
 
     public static WebApplicationBuilder AddDatabase<T>( this WebApplicationBuilder builder, Action<DbOptions> configure ) where T : Database
     {
-        builder.AddOptions( configure );
-        builder.AddSingleton<T>();
-        builder.AddSingleton<Database>( provider => provider.GetRequiredService<T>() );
+        builder.Services.AddOptions<DbOptions>()
+               .Configure( configure );
+
+        builder.Services.AddSingleton<T>();
+        builder.Services.AddSingleton<Database>( provider => provider.GetRequiredService<T>() );
         builder.AddHealthCheck<T>();
         return builder;
     }
@@ -123,30 +125,37 @@ public static partial class DbExtensions
 
     public static WebApplicationBuilder AddEmailer( this WebApplicationBuilder builder )
     {
-        builder.AddOptions<Emailer.Options>();
-        return builder.AddScoped<Emailer>();
+        builder.Services.AddOptions<Emailer.Options>();
+        builder.Services.AddScoped<Emailer>();
+        return builder;
     }
     public static WebApplicationBuilder AddEmailer( this WebApplicationBuilder builder, Action<Emailer.Options> configure )
     {
-        builder.AddOptions<Emailer.Options>()
+        builder.Services.AddOptions<Emailer.Options>()
                .Configure( configure );
 
-        return builder.AddScoped<Emailer>();
+        builder.Services.AddScoped<Emailer>();
+        return builder;
     }
 
 
     public static WebApplicationBuilder AddPasswordValidator( this WebApplicationBuilder builder ) => builder.AddPasswordValidator( ( PasswordRequirements requirements ) => { } );
     public static WebApplicationBuilder AddPasswordValidator( this WebApplicationBuilder builder, Action<PasswordRequirements> configure )
     {
-        builder.AddOptions<PasswordRequirements>()
+        builder.Services.AddOptions<PasswordRequirements>()
                .Configure( configure );
 
-        return builder.AddScoped<IPasswordValidator<UserRecord>, UserPasswordValidator>();
+        builder.Services.AddScoped<IPasswordValidator<UserRecord>, UserPasswordValidator>();
+        return builder;
     }
 
 
-    public static WebApplicationBuilder AddTokenizer( this             WebApplicationBuilder builder ) => builder.AddTokenizer<Tokenizer>();
-    public static WebApplicationBuilder AddTokenizer<TTokenizer>( this WebApplicationBuilder builder ) where TTokenizer : Tokenizer => builder.AddScoped<ITokenService, TTokenizer>();
+    public static WebApplicationBuilder AddTokenizer( this WebApplicationBuilder builder ) => builder.AddTokenizer<Tokenizer>();
+    public static WebApplicationBuilder AddTokenizer<TTokenizer>( this WebApplicationBuilder builder ) where TTokenizer : Tokenizer
+    {
+        builder.Services.AddScoped<ITokenService, TTokenizer>();
+        return builder;
+    }
 }
 
 

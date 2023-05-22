@@ -5,15 +5,14 @@
 	  <ImplicitUsings>enable</ImplicitUsings>
 	  <LangVersion>preview</LangVersion>
 	  <Nullable>enable</Nullable>
-	  <NoWarn>$(NoWarn);1591</NoWarn>
+	  <NoWarn>$(NoWarn);1591;IDE0079</NoWarn>
 	  <EnablePreviewFeatures>true</EnablePreviewFeatures>
 	  <GenerateDocumentationFile>True</GenerateDocumentationFile>
 	  <OpenApiGenerateDocuments>false</OpenApiGenerateDocuments>
   </PropertyGroup>
 
   <ItemGroup>
-	  <PackageReference Include="Jakar.Extensions" Version="6.7.27" />
-	  <PackageReference Include="Jakar.Extensions.Hosting" Version="6.7.3" />
+	  <PackageReference Include="Jakar.Extensions" Version="6.7.29" />
   </ItemGroup>
 
   <ItemGroup>

@@ -6,16 +6,8 @@ namespace Jakar.Database;
 
 public class UserValidator : IUserValidator<UserRecord>
 {
-    public static WebApplicationBuilder Register( WebApplicationBuilder builder )
-    {
-        builder.AddScoped<IUserValidator<UserRecord>, UserValidator>();
-        return builder;
-    }
-    public static WebApplicationBuilder Register<T>( WebApplicationBuilder builder ) where T : UserValidator
-    {
-        builder.AddScoped<IUserValidator<UserRecord>, T>();
-        return builder;
-    }
+    public static void Register( WebApplicationBuilder    builder ) => builder.Services.AddScoped<IUserValidator<UserRecord>, UserValidator>();
+    public static void Register<T>( WebApplicationBuilder builder ) where T : UserValidator => builder.Services.AddScoped<IUserValidator<UserRecord>, T>();
 
 
     protected IdentityError[] Check( UserRecord user )

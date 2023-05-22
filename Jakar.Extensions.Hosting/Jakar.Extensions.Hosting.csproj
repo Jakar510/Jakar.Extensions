@@ -4,15 +4,15 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<LangVersion>latest</LangVersion>
 		<Nullable>enable</Nullable>
-		<NoWarn>$(NoWarn);1591</NoWarn>
+		<NoWarn>$(NoWarn);1591;IDE0079</NoWarn>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<OpenApiGenerateDocuments>false</OpenApiGenerateDocuments>
 		<!-- <UseBlazorWebAssembly>true</UseBlazorWebAssembly> -->
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Jakar.Extensions" Version="6.7.27" />
-		<PackageReference Include="Hardware.Info" Version="11.0.1" />
+		<PackageReference Include="Jakar.Extensions" Version="6.7.29" />
+		<PackageReference Include="Hardware.Info" Version="11.1.0" />
 		<PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.1" />
 		<PackageReference Include="Microsoft.NETCore.Platforms" Version="7.0.2" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />

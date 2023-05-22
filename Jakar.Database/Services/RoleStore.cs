@@ -9,7 +9,7 @@ public sealed class RoleStore : IRoleStore<RoleRecord>
     public RoleStore( Database dbContext ) => _dbContext = dbContext;
     public void Dispose() { }
 
-    public static WebApplicationBuilder Register( WebApplicationBuilder builder ) => builder.AddSingleton<IRoleStore<RoleRecord>, RoleStore>();
+    public static void Register( WebApplicationBuilder builder ) => builder.Services.AddSingleton<IRoleStore<RoleRecord>, RoleStore>();
 
 
     public async Task<IdentityResult> CreateAsync( RoleRecord role, CancellationToken token )

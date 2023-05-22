@@ -19,18 +19,18 @@ public sealed class UserStore : IUserLoginStore<UserRecord>,
     public UserStore( Database dbContext ) => _dbContext = dbContext;
 
 
-    public static WebApplicationBuilder Register( WebApplicationBuilder builder ) => builder.AddSingleton<UserStore>()
-                                                                                            .AddSingleton<IUserStore<UserRecord>>( provider => provider.GetRequiredService<UserStore>() )
-                                                                                            .AddSingleton<IUserLoginStore<UserRecord>>( provider => provider.GetRequiredService<UserStore>() )
-                                                                                            .AddSingleton<IUserClaimStore<UserRecord>>( provider => provider.GetRequiredService<UserStore>() )
-                                                                                            .AddSingleton<IUserPasswordStore<UserRecord>>( provider => provider.GetRequiredService<UserStore>() )
-                                                                                            .AddSingleton<IUserSecurityStampStore<UserRecord>>( provider => provider.GetRequiredService<UserStore>() )
-                                                                                            .AddSingleton<IUserTwoFactorStore<UserRecord>>( provider => provider.GetRequiredService<UserStore>() )
-                                                                                            .AddSingleton<IUserEmailStore<UserRecord>>( provider => provider.GetRequiredService<UserStore>() )
-                                                                                            .AddSingleton<IUserLockoutStore<UserRecord>>( provider => provider.GetRequiredService<UserStore>() )
-                                                                                            .AddSingleton<IUserAuthenticatorKeyStore<UserRecord>>( provider => provider.GetRequiredService<UserStore>() )
-                                                                                            .AddSingleton<IUserTwoFactorRecoveryCodeStore<UserRecord>>( provider => provider.GetRequiredService<UserStore>() )
-                                                                                            .AddSingleton<IUserPhoneNumberStore<UserRecord>>( provider => provider.GetRequiredService<UserStore>() );
+    public static void Register( WebApplicationBuilder builder ) => builder.Services.AddSingleton<UserStore>()
+                                                                           .AddSingleton<IUserStore<UserRecord>>( provider => provider.GetRequiredService<UserStore>() )
+                                                                           .AddSingleton<IUserLoginStore<UserRecord>>( provider => provider.GetRequiredService<UserStore>() )
+                                                                           .AddSingleton<IUserClaimStore<UserRecord>>( provider => provider.GetRequiredService<UserStore>() )
+                                                                           .AddSingleton<IUserPasswordStore<UserRecord>>( provider => provider.GetRequiredService<UserStore>() )
+                                                                           .AddSingleton<IUserSecurityStampStore<UserRecord>>( provider => provider.GetRequiredService<UserStore>() )
+                                                                           .AddSingleton<IUserTwoFactorStore<UserRecord>>( provider => provider.GetRequiredService<UserStore>() )
+                                                                           .AddSingleton<IUserEmailStore<UserRecord>>( provider => provider.GetRequiredService<UserStore>() )
+                                                                           .AddSingleton<IUserLockoutStore<UserRecord>>( provider => provider.GetRequiredService<UserStore>() )
+                                                                           .AddSingleton<IUserAuthenticatorKeyStore<UserRecord>>( provider => provider.GetRequiredService<UserStore>() )
+                                                                           .AddSingleton<IUserTwoFactorRecoveryCodeStore<UserRecord>>( provider => provider.GetRequiredService<UserStore>() )
+                                                                           .AddSingleton<IUserPhoneNumberStore<UserRecord>>( provider => provider.GetRequiredService<UserStore>() );
 
 
     public async Task<string?> GetAuthenticatorKeyAsync( UserRecord       user,  CancellationToken  token ) => await _dbContext.GetAuthenticatorKeyAsync( user, token );

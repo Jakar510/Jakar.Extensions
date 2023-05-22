@@ -134,7 +134,11 @@ public static class MigrationExtensions
     {
         if ( col.CreateColumn_Enum( propInfo, propertyType ) ) { return true; }
 
-        if ( propertyType == typeof(JObject) || propertyType == typeof(JToken) || propertyType == typeof(List<JObject>) || propertyType == typeof(List<JObject?>) || propertyType == typeof(IDictionary<string, JToken?>) ||
+        if ( propertyType == typeof(JObject) ||
+             propertyType == typeof(JToken) ||
+             propertyType == typeof(List<JObject>) ||
+             propertyType == typeof(List<JObject?>) ||
+             propertyType == typeof(IDictionary<string, JToken?>) ||
              propertyType == typeof(IDictionary<string, JToken>) )
         {
             return col.AsXml( int.MaxValue )
@@ -240,7 +244,8 @@ public static class MigrationExtensions
 
 
     public static string ColumnName( this PropertyInfo prop ) => prop.GetCustomAttribute<ColumnAttribute>()
-                                                                    ?.Name ?? prop.Name;
+                                                                    ?.Name ??
+                                                                 prop.Name;
 
 
     public static string GetMappingTableName( this Type parent, PropertyInfo propertyInfo )
@@ -269,7 +274,8 @@ public static class MigrationExtensions
         if ( propertyType.IsEqualType( typeof(string) ) )
         {
             return col.AsString( propInfo.GetCustomAttribute<MaxLengthAttribute>()
-                                        ?.Length ?? throw new InvalidOperationException( $"{propertyType.DeclaringType?.Name}.{propertyType.Name}.{propInfo.Name}" ) );
+                                        ?.Length ??
+                                 throw new InvalidOperationException( $"{propertyType.DeclaringType?.Name}.{propertyType.Name}.{propInfo.Name}" ) );
         }
 
 
@@ -408,7 +414,12 @@ public static class MigrationExtensions
 
         return builder;
     }
-    public static string GetConnectionString( IServiceProvider provider ) => provider.ConnectionString();
+    public static string GetConnectionString( IServiceProvider provider ) => GetConnectionString( provider, "DEFAULT" );
+    public static string GetConnectionString( IServiceProvider provider, string name ) => provider.GetRequiredService<IConfiguration>()
+                                                                                                  .GetConnectionString( name ) ??
+                                                                                          throw new KeyNotFoundException( name );
+
+
     public static IMigrationRunnerBuilder ConfigureScanIn( IMigrationRunnerBuilder runner ) =>
         runner.ScanIn( Assembly.GetEntryAssembly(), typeof(UserRecord).Assembly )
               .For.All();

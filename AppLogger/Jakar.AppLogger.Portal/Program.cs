@@ -11,7 +11,7 @@ using Newtonsoft.Json.Linq;
 string[] urls =
 {
     "https://localhost",
-    CommonUrl.Listen_443.OriginalString,
+    "https://0.0.0.0:443",
     "https://0.0.0.0:6969",
 };
 
@@ -28,18 +28,18 @@ builder.AddDefaultLogging<AppLoggerPortal>( true )
                                                                                                                } ) ) );
 
 
-builder.AddControllers()
+builder.Services.AddControllers()
        .UseNewtonsoftJson();
 
-builder.AddControllersWithViews()
+builder.Services.AddControllersWithViews()
        .UseNewtonsoftJson();
 
-builder.AddHttpClient();
-builder.AddHealthChecks();
-builder.AddRazorPages();
-builder.AddServerSideBlazor();
-builder.AddAuthorization();
-builder.AddAuthentication();
+builder.Services.AddHttpClient();
+builder.Services.AddHealthChecks();
+builder.Services.AddRazorPages();
+builder.Services.AddServerSideBlazor();
+builder.Services.AddAuthorization();
+builder.Services.AddAuthentication();
 builder.AddAppServices();
 
 builder.AddDatabase<LoggerDB>( options =>
@@ -50,11 +50,11 @@ builder.AddDatabase<LoggerDB>( options =>
                                    options.TokenIssuer   = nameof(AppLoggerPortal);
                                } );
 
-builder.AddScoped<CircuitHandler, ScriptManagerCircuitHandler>();
+builder.Services.AddScoped<CircuitHandler, ScriptManagerCircuitHandler>();
 builder.AddTokenizer();
 builder.AddEmailer();
-builder.AddWebEncoders();
-builder.AddEndpointsApiExplorer();
+builder.Services.AddWebEncoders();
+builder.Services.AddEndpointsApiExplorer();
 
 
 const string VERSION = "V1";
@@ -168,13 +168,13 @@ builder.AddFluentMigrator( configure =>
                                return configure;
                            } );
 
-builder.AddTransient<IMigrationContext>( provider =>
-                                         {
-                                             var     querySchema              = provider.GetRequiredService<IQuerySchema>();
-                                             var     connectionStringAccessor = provider.GetRequiredService<IConnectionStringAccessor>();
-                                             string? connectionString         = connectionStringAccessor.ConnectionString;
-                                             return new MigrationContext( querySchema, provider, provider.GetRequiredService<Database>(), connectionString );
-                                         } );
+builder.Services.AddTransient<IMigrationContext>( provider =>
+                                                  {
+                                                      var     querySchema              = provider.GetRequiredService<IQuerySchema>();
+                                                      var     connectionStringAccessor = provider.GetRequiredService<IConnectionStringAccessor>();
+                                                      string? connectionString         = connectionStringAccessor.ConnectionString;
+                                                      return new MigrationContext( querySchema, provider, provider.GetRequiredService<Database>(), connectionString );
+                                                  } );
 
 
 // builder.Services.AddHsts(options =>
