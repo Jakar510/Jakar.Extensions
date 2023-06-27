@@ -2,9 +2,9 @@
 namespace Jakar.Extensions;
 
 
-public interface IUniqueID<TID> where TID : IComparable<TID>, IEquatable<TID>
+public interface IUniqueID<out TID> where TID : IComparable<TID>, IEquatable<TID>
 {
-    public TID ID { get; init; }
+    public TID ID { get; }
 }
 
 

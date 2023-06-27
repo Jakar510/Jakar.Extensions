@@ -10,7 +10,7 @@ public abstract class BaseViewModel : ObservableClass
     private string? _title = string.Empty;
 
 
-    public bool IsBusy
+    public virtual bool IsBusy
     {
         get => _isBusy;
         set

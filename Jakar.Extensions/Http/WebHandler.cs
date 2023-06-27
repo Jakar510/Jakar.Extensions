@@ -26,6 +26,7 @@ public sealed class WebHandler : IDisposable
     public   HttpContentHeaders? ContentHeaders => _request.Content?.Headers;
     public   HttpRequestHeaders  Headers        => _request.Headers;
     internal RetryPolicy?        RetryPolicy    { get; }
+    public   Uri                 RequestUri     => _request.RequestUri ?? throw new NullReferenceException( nameof(_request.RequestUri) );
     public   string              Method         => _request.Method.Method;
 
 

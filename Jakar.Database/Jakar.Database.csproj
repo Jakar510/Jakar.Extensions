@@ -32,7 +32,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Jakar.Extensions" Version="6.7.29" />
+		<PackageReference Include="Jakar.Extensions" Version="6.8.0" />
 		<PackageReference Include="FluentMigrator" Version="3.3.2" />
 		<PackageReference Include="FluentMigrator.Runner" Version="3.3.2" />
 		<PackageReference Include="MailKit" Version="4.0.0" />
@@ -54,11 +54,12 @@
 		<PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="7.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="7.0.0" />
 		<PackageReference Include="System.Security.Cryptography.Xml" Version="7.0.1" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.Certificate" Version="7.0.0" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="7.0.0" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="7.0.0" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.0" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="7.0.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.Certificate" Version="7.0.5" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="7.0.5" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="7.0.5" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.5" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="7.0.5" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="7.0.5" />
 		<PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="7.0.5" />
 		<PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.Abstractions" Version="7.0.5" />
 		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="7.0.2" />

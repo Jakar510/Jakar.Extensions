@@ -142,8 +142,8 @@ public abstract class Prompts : IUserDialogs
 
     public IDisposable Confirm( ConfirmConfig?         config ) => _dialogs.Confirm( config );
     public Task<bool> ConfirmAsync( ConfirmConfig?     config, CancellationToken? token = null ) => _dialogs.ConfirmAsync( config, token );
-    public async ValueTask<bool> ConfirmAsync( string? title,  string?            message, CancellationToken? token ) => await ConfirmAsync( message, title, Yes, No, token );
-    public Task<bool> ConfirmAsync( string?            title,  string?            message, string?            yes, string? no, CancellationToken? token ) => _dialogs.ConfirmAsync( message, title, yes, no, token );
+    public async ValueTask<bool> ConfirmAsync( string? title,  string?            message, CancellationToken? token ) => await ConfirmAsync(title, message,  Yes, No, token );
+    public Task<bool> ConfirmAsync( string?            title,  string?            message, string?            yes, string? no, CancellationToken? token ) => _dialogs.ConfirmAsync( title, message, yes, no, token );
 
     #endregion
 

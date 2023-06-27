@@ -33,7 +33,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="CliWrap" Version="3.6.3" />
-		<PackageReference Include="Jakar.Extensions" Version="6.7.29" />
+		<PackageReference Include="Jakar.Extensions" Version="6.8.0" />
 		<PackageReference Include="Hardware.Info" Version="11.1.0" />
 		<PackageReference Condition="$([MSBuild]::IsOsPlatform('Windows'))" Include="Microsoft.Win32.Registry" Version="5.0.0" />
 	</ItemGroup>
