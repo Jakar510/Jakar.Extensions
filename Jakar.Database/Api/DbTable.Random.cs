@@ -4,18 +4,17 @@
 namespace Jakar.Database;
 
 
+[SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global")]
 public partial class DbTable<TRecord>
 {
     public ValueTask<TRecord?> Random( CancellationToken token                                                   = default ) => this.Call( Random, token );
-    public ValueTask<IEnumerable<TRecord>> Random( int              count, CancellationToken token                          = default ) => this.Call( Random, count, token );
+    public ValueTask<IEnumerable<TRecord>> Random( int   count, CancellationToken token                          = default ) => this.Call( Random, count, token );
     public ValueTask<TRecord?> Random( UserRecord        user,  int               count, CancellationToken token = default ) => this.Call( Random, user,  count, token );
 
 
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask<TRecord?> Random( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
-        if ( token.IsCancellationRequested ) { return default; }
-
         string sql = Instance switch
                      {
                          DbInstance.MsSql    => $"SELECT TOP 1 * FROM {SchemaTableName} ORDER BY {RandomMethod}",
@@ -23,7 +22,11 @@ public partial class DbTable<TRecord>
                          _                   => throw new OutOfRangeException( nameof(Instance), Instance ),
                      };
 
-        try { return await connection.QueryFirstAsync<TRecord>( sql, default, transaction ); }
+        try
+        {
+            CommandDefinition command = GetCommandDefinition( sql, default, transaction, token );
+            return await connection.QueryFirstAsync<TRecord>( command );
+        }
         catch ( Exception e ) { throw new SqlException( sql, e ); }
     }
 
@@ -31,10 +34,8 @@ public partial class DbTable<TRecord>
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask<TRecord?> Random( DbConnection connection, DbTransaction? transaction, UserRecord user, int count, CancellationToken token = default )
     {
-        if ( token.IsCancellationRequested ) { return default; }
-
-        var param = new DynamicParameters();
-        param.Add( OwnerUserID, user.OwnerUserID );
+        var parameters = new DynamicParameters();
+        parameters.Add( OwnerUserID, user.OwnerUserID );
 
         string sql = Instance switch
                      {
@@ -43,7 +44,9 @@ public partial class DbTable<TRecord>
                          _                   => throw new OutOfRangeException( nameof(Instance), Instance ),
                      };
 
-        try { return await connection.QueryFirstAsync<TRecord>( sql, param, transaction ); }
+        try {
+            CommandDefinition command = GetCommandDefinition( sql, parameters, transaction, token );
+            return await connection.QueryFirstAsync<TRecord>( command ); }
         catch ( Exception e ) { throw new SqlException( sql, e ); }
     }
 

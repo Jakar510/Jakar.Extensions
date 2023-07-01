@@ -4,6 +4,7 @@
 namespace Jakar.Database;
 
 
+[SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global")]
 public partial class DbTable<TRecord>
 {
     public ValueTask<TRecord?> Next( RecordPair                 pair, CancellationToken token = default ) => this.Call( Next,   pair, token );
@@ -19,9 +20,12 @@ public partial class DbTable<TRecord>
         parameters.Add( nameof(RecordPair.DateCreated), pair.DateCreated );
 
         string sql = @$"SELECT * FROM {SchemaTableName} WHERE ( id = IFNULL((SELECT MIN({ID_ColumnName}) FROM {SchemaTableName} WHERE {ID_ColumnName} > @{nameof(RecordPair.ID)}), 0) )";
-        if ( token.IsCancellationRequested ) { return default; }
-
-        try { return await connection.ExecuteScalarAsync<TRecord>( sql, parameters, transaction ); }
+        
+        try
+        {
+            CommandDefinition command = GetCommandDefinition( sql, parameters, transaction, token );
+            return await connection.ExecuteScalarAsync<TRecord>( command );
+        }
         catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
     }
 
@@ -30,13 +34,11 @@ public partial class DbTable<TRecord>
     public virtual async ValueTask<RecordPair[]> SortedIDs( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
         string sql = @$"SELECT {ID_ColumnName}, {DateCreated} FROM {SchemaTableName} ORDER BY {DateCreated} DESC";
-
-
+        
         try
         {
-            if ( token.IsCancellationRequested ) { return Array.Empty<RecordPair>(); }
-
-            IEnumerable<RecordPair> pairs = await connection.QueryAsync<RecordPair>( sql, default, transaction );
+            CommandDefinition       command = GetCommandDefinition( sql, default, transaction, token );
+            IEnumerable<RecordPair> pairs   = await connection.QueryAsync<RecordPair>( command );
             return pairs.GetArray();
         }
         catch ( Exception e ) { throw new SqlException( sql, e ); }
@@ -47,15 +49,17 @@ public partial class DbTable<TRecord>
     public virtual async ValueTask<Guid?> NextID( DbConnection connection, DbTransaction? transaction, Guid? id, CancellationToken token = default )
     {
         if ( id is null ) { return default; }
-
-        if ( token.IsCancellationRequested ) { return default; }
-
+        
         var parameters = new DynamicParameters();
         parameters.Add( nameof(id), id );
 
         string sql = @$"SELECT {ID_ColumnName} FROM {SchemaTableName} WHERE ( id = IFNULL((SELECT MIN({ID_ColumnName}) FROM {SchemaTableName} WHERE {ID_ColumnName} > @{nameof(id)}), 0) )";
 
-        try { return await connection.ExecuteScalarAsync<Guid>( sql, parameters, transaction ); }
+        try
+        {
+            CommandDefinition command = GetCommandDefinition( sql, parameters, transaction, token );
+            return await connection.ExecuteScalarAsync<Guid>( command );
+        }
         catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
     }
 }

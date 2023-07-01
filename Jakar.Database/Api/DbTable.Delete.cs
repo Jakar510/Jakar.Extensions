@@ -29,32 +29,32 @@ public partial class DbTable<TRecord>
     }
     public virtual async ValueTask Delete( DbConnection connection, DbTransaction transaction, Guid id, CancellationToken token = default )
     {
-        string cmd = $"DELETE FROM {SchemaTableName} WHERE {ID_ColumnName} = {id};";
+        string sql = $"DELETE FROM {SchemaTableName} WHERE {ID_ColumnName} = {id};";
 
         if ( token.IsCancellationRequested ) { return; }
-
-        await connection.ExecuteScalarAsync( cmd, default, transaction );
+        
+        CommandDefinition command = GetCommandDefinition( sql, default, transaction, token );
+        await connection.ExecuteScalarAsync( command );
     }
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask Delete( DbConnection connection, DbTransaction transaction, IEnumerable<Guid> ids, CancellationToken token = default )
     {
         string sql = $"DELETE FROM {SchemaTableName} WHERE {ID_ColumnName} in ( {string.Join( ',', ids.Select( x => $"'{x}'" ) )} );";
 
-        if ( token.IsCancellationRequested ) { return; }
-
-        try { await connection.ExecuteScalarAsync( sql, default, transaction ); }
+        try { 
+            CommandDefinition command = GetCommandDefinition( sql, default, transaction, token );
+            await connection.ExecuteScalarAsync(command); }
         catch ( Exception e ) { throw new SqlException( sql, e ); }
     }
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public async ValueTask Delete( DbConnection connection, DbTransaction transaction, bool matchAll, DynamicParameters parameters, CancellationToken token )
     {
-        string cmd = $"DELETE FROM {SchemaTableName} WHERE {string.Join( matchAll
+        string sql = $"DELETE FROM {SchemaTableName} WHERE {string.Join( matchAll
                                                                              ? "AND"
                                                                              : "OR",
                                                                          parameters.ParameterNames.Select( KeyValuePair ) )};";
 
-        if ( token.IsCancellationRequested ) { return; }
-
-        await connection.ExecuteScalarAsync( cmd, parameters, transaction );
+        CommandDefinition command = GetCommandDefinition( sql, parameters, transaction, token );
+        await connection.ExecuteScalarAsync( command );
     }
 }

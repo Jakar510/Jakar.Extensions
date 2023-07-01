@@ -1,9 +1,14 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 03/12/2023  1:09 PM
 
+using Dapper;
+
+
+
 namespace Jakar.Database;
 
 
+[SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
 public partial class DbTable<TRecord>
 {
     public IAsyncEnumerable<TRecord> Insert( IEnumerable<TRecord>      records, CancellationToken token = default ) => this.TryCall( Insert, records, token );
@@ -26,18 +31,14 @@ public partial class DbTable<TRecord>
 
         var parameters = new DynamicParameters( record );
 
-        if ( token.IsCancellationRequested ) { return record; }
-
         try
         {
-            
-            var command = new CommandDefinition( sql, parameters, transaction, _commandTimeout, commandType, CommandFlags.None, token );
-            var id = await connection.ExecuteScalarAsync<Guid>( sql, parameters, transaction );
+            CommandDefinition command = GetCommandDefinition( sql, parameters, transaction, token );
+            var               id      = await connection.ExecuteScalarAsync<Guid>( command );
             return record.NewID( id );
         }
         catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
     }
-
 
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask<TRecord?> TryInsert( DbConnection connection, DbTransaction transaction, TRecord record, bool matchAll, DynamicParameters parameters, CancellationToken token = default )
@@ -72,14 +73,14 @@ END",
                      };
 
 
-        if ( token.IsCancellationRequested ) { return default; }
-
         try
         {
-            var id = await connection.ExecuteScalarAsync<Guid?>( sql, parameters, transaction );
-            if ( id.HasValue ) { return record.NewID( id.Value ); }
+            CommandDefinition command = GetCommandDefinition( sql, parameters, transaction, token );
+            var               id      = await connection.ExecuteScalarAsync<Guid?>( command );
 
-            return default;
+            return id.HasValue
+                       ? record.NewID( id.Value )
+                       : default;
         }
         catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
     }
@@ -101,14 +102,14 @@ END
 ELSE 
 BEGIN 
     UPDATE {SchemaTableName} SET {string.Join( ',', KeyValuePairs )} WHERE {ID_ColumnName} = @{string.Join( matchAll
-                                                                                                     ? "AND"
-                                                                                                     : "OR",
-                                                                                                 parameters.ParameterNames.Select( KeyValuePair ) )};
+                                                                                                                ? "AND"
+                                                                                                                : "OR",
+                                                                                                            parameters.ParameterNames.Select( KeyValuePair ) )};
 
     SELECT TOP 1 {ID_ColumnName} FROM {SchemaTableName} WHERE {string.Join( matchAll
-                                                                     ? "AND"
-                                                                     : "OR",
-                                                                 parameters.ParameterNames.Select( KeyValuePair ) )} 
+                                                                                ? "AND"
+                                                                                : "OR",
+                                                                            parameters.ParameterNames.Select( KeyValuePair ) )} 
 END",
                          DbInstance.Postgres => $@"IF NOT EXISTS(SELECT * FROM {SchemaTableName} WHERE {string.Join( matchAll
                                                                                                                          ? "AND"
@@ -121,28 +122,27 @@ END
 ELSE 
 BEGIN 
     UPDATE {SchemaTableName} SET {string.Join( ',', KeyValuePairs )} WHERE {ID_ColumnName} = @{string.Join( matchAll
-                                                                                                     ? "AND"
-                                                                                                     : "OR",
-                                                                                                 parameters.ParameterNames.Select( KeyValuePair ) )};
+                                                                                                                ? "AND"
+                                                                                                                : "OR",
+                                                                                                            parameters.ParameterNames.Select( KeyValuePair ) )};
 
     SELECT {ID_ColumnName} FROM {SchemaTableName} WHERE {string.Join( matchAll
-                                                               ? "AND"
-                                                               : "OR",
-                                                           parameters.ParameterNames.Select( KeyValuePair ) )} LIMIT 1
+                                                                          ? "AND"
+                                                                          : "OR",
+                                                                      parameters.ParameterNames.Select( KeyValuePair ) )} LIMIT 1
 END",
                          _ => throw new OutOfRangeException( nameof(Instance), Instance ),
                      };
 
 
-        if ( token.IsCancellationRequested ) { return default; }
-
         try
         {
-            var id = await connection.ExecuteScalarAsync<Guid?>( sql, parameters, transaction );
+            CommandDefinition command = GetCommandDefinition( sql, parameters, transaction, token );
+            var               id      = await connection.ExecuteScalarAsync<Guid?>( command );
 
-            if ( id.HasValue ) { return record.NewID( id.Value ); }
-
-            return default;
+            return id.HasValue
+                       ? record.NewID( id.Value )
+                       : default;
         }
         catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
     }

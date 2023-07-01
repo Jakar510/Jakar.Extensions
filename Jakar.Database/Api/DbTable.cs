@@ -2,6 +2,10 @@
 // 10/16/2022  4:54 PM
 
 
+using System.Data;
+
+
+
 namespace Jakar.Database;
 // TrueLogic :: TrueLogic.Common
 // 04/11/2023  11:33 AM
@@ -43,8 +47,9 @@ public partial class DbTable<TRecord> : ObservableClass, IConnectableDb, IAsyncD
                                                            _                   => throw new OutOfRangeException( nameof(Instance), Instance ),
                                                        };
 
-    public             DbInstance          Instance      => _database.Instance;
-    protected internal IEnumerable<string> KeyValuePairs => Descriptors.Select( x => x.KeyValuePair );
+    public             DbInstance          Instance       => _database.Instance;
+    public             int                 CommandTimeout => _database.CommandTimeout;
+    protected internal IEnumerable<string> KeyValuePairs  => Descriptors.Select( x => x.KeyValuePair );
 
     protected internal virtual string LastModified => Instance switch
                                                       {
@@ -93,6 +98,10 @@ public partial class DbTable<TRecord> : ObservableClass, IConnectableDb, IAsyncD
         _database        = database;
         _propertiesCache = TypePropertiesCache.Current[typeof(TRecord)];
     }
+
+
+    protected virtual CommandDefinition GetCommandDefinition( string sql, DynamicParameters? parameters, DbTransaction? transaction, CancellationToken token, CommandType? commandType = default, CommandFlags flags = CommandFlags.None ) =>
+        new(sql, parameters, transaction, CommandTimeout, commandType, flags, token);
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )] protected internal Descriptor GetDescriptor( string columnName ) => _propertiesCache.Get( this, columnName );

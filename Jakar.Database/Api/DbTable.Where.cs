@@ -30,7 +30,8 @@ public partial class DbTable<TRecord>
 
         try
         {
-            IEnumerable<TRecord?> records = await connection.QueryAsync<TRecord>( sql, parameters, transaction );
+            CommandDefinition command = GetCommandDefinition( sql, parameters, transaction, token );
+            IEnumerable<TRecord?> records = await connection.QueryAsync<TRecord>( command );
             return records.WhereNotNull();
         }
         catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }

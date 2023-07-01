@@ -8,12 +8,28 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 namespace Jakar.Database;
 
 
-public sealed class DbOptions : IOptions<DbOptions>
+public sealed class DbOptions : IOptions<DbOptions>, IDbOptions
 {
-    public string               AuthenticationType   { get; set; } = JwtBearerDefaults.AuthenticationScheme;
-    public TimeSpan             ClockSkew            { get; set; } = TimeSpan.FromSeconds( 60 );
+    private string? _currentSchema;
+
+
+    public string   AuthenticationType { get; set; } = JwtBearerDefaults.AuthenticationScheme;
+    public TimeSpan ClockSkew          { get; set; } = TimeSpan.FromSeconds( 60 );
+    public int      CommandTimeout     { get; set; } = 300;
+    public string CurrentSchema
+    {
+        get => _currentSchema ??
+               DbType switch
+               {
+                   DbInstance.MsSql    => "dbo",
+                   DbInstance.Postgres => "public",
+                   _                   => throw new OutOfRangeException( nameof(DbType), DbType )
+               };
+        set => _currentSchema = value;
+    }
     public DbInstance           DbType               { get; set; } = DbInstance.MsSql;
     public Uri                  Domain               { get; set; } = new("https://localhost");
+    DbInstance IDbOptions.      Instance             => DbType;
     public string               JWTAlgorithm         { get; set; } = SecurityAlgorithms.HmacSha512Signature;
     public string               JWTKey               { get; set; } = "JWT";
     public PasswordRequirements PasswordRequirements { get; set; } = new();

@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 08/14/2022  8:39 PM
 
-using Microsoft.AspNetCore.Identity;
-
-
-
 namespace Jakar.Database;
 
 
@@ -13,16 +9,12 @@ public abstract partial class Database : Randoms, IConnectableDb, IAsyncDisposab
 {
     public const       ClaimType                       DEFAULT_CLAIM_TYPES = ClaimType.UserID | ClaimType.UserName | ClaimType.GroupSid | ClaimType.Role;
     protected readonly ConcurrentBag<IAsyncDisposable> _disposables        = new();
-    private            string                          _currentSchema      = string.Empty;
 
 
-    public         IConfiguration Configuration    { get; }
-    public virtual string         ConnectionString => Configuration.GetConnectionString( "DEFAULT" ) ?? throw new KeyNotFoundException( "DEFAULT" );
-    public string CurrentSchema
-    {
-        get => _currentSchema;
-        protected set => SetProperty( ref _currentSchema, value );
-    }
+    public             int                             CommandTimeout    => Options.CommandTimeout;
+    public             IConfiguration                  Configuration     { get; }
+    public virtual     string                          ConnectionString  => Configuration.GetConnectionString( "DEFAULT" ) ?? throw new KeyNotFoundException( "DEFAULT" );
+    public             string                          CurrentSchema     => Options.CurrentSchema;
     public             DbTable<GroupRecord>            Groups            { get; }
     public             DbInstance                      Instance          => Options.DbType;
     public             DbOptions                       Options           { get; }
@@ -61,13 +53,6 @@ public abstract partial class Database : Randoms, IConnectableDb, IAsyncDisposab
         RecoveryCodes     = Create<RecoveryCodeRecord>();
         UserLogins        = Create<UserLoginInfoRecord>();
         UserRecoveryCodes = Create<UserRecoveryCodeRecord>();
-
-        CurrentSchema = Instance switch
-                        {
-                            DbInstance.MsSql    => "dbo",
-                            DbInstance.Postgres => "public",
-                            _                   => throw new OutOfRangeException( nameof(Instance), Instance ),
-                        };
     }
 
 
@@ -121,7 +106,7 @@ public abstract partial class Database : Randoms, IConnectableDb, IAsyncDisposab
                        ConnectionState.Connecting => HealthCheckResult.Healthy(),
                        ConnectionState.Executing  => HealthCheckResult.Healthy(),
                        ConnectionState.Fetching   => HealthCheckResult.Healthy(),
-                       _                          => throw new OutOfRangeException( nameof(connection.State), connection.State ),
+                       _                          => throw new OutOfRangeException( nameof(connection.State), connection.State )
                    };
         }
         catch ( Exception e ) { return HealthCheckResult.Unhealthy( e.Message ); }

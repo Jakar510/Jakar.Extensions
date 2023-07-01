@@ -6,11 +6,15 @@ namespace Jakar.Database;
 
 public abstract partial class Database
 {
+    /// <summary> </summary>
+    /// <returns>
+    /// <see langword="true"/> is Subscription is valid; otherwise <see langword="false"/>
+    /// </returns>
     [SuppressMessage( "ReSharper", "UnusedParameter.Global" )]
     protected virtual ValueTask<bool> ValidateSubscription( DbConnection connection, DbTransaction? transaction, UserRecord record, CancellationToken token = default ) =>
 
-        // if ( user.SubscriptionID is null || user.SubscriptionID.Value != Guid.Empty ) { return LoginResult.State.NoSubscription; }
-        new(false);
+        // if ( user.SubscriptionID is null || user.SubscriptionID.Value != Guid.Empty ) { return true; }
+        new(true);
 
 
     protected virtual async ValueTask<LoginResult> VerifyLogin( DbConnection connection, DbTransaction? transaction, VerifyRequest request, CancellationToken token = default )
@@ -28,7 +32,7 @@ public abstract partial class Database
 
             if ( record.IsLocked ) { return LoginResult.State.Locked; }
 
-            if ( await ValidateSubscription( connection, transaction, record, token ) ) { return LoginResult.State.ExpiredSubscription; }
+            if ( !await ValidateSubscription( connection, transaction, record, token ) ) { return LoginResult.State.ExpiredSubscription; }
 
             return record;
         }

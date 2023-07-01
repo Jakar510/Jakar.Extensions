@@ -13,19 +13,23 @@ public partial class DbTable<TRecord>
     public virtual async ValueTask<TRecord?> First( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
         string sql = $"SELECT * FROM {SchemaTableName} ORDER BY {ID_ColumnName} ASC LIMIT 1";
-
-        if ( token.IsCancellationRequested ) { return default; }
-
-        try { return await connection.QueryFirstAsync<TRecord>( sql, default, transaction ); }
+        
+        try
+        {
+            CommandDefinition command = GetCommandDefinition( sql, default, transaction, token );
+            return await connection.QueryFirstAsync<TRecord>( command );
+        }
         catch ( Exception e ) { throw new SqlException( sql, e ); }
     }
     public virtual async ValueTask<TRecord?> FirstOrDefault( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
         string sql = $"SELECT * FROM {SchemaTableName} ORDER BY {ID_ColumnName} ASC LIMIT 1";
-
-        if ( token.IsCancellationRequested ) { return default; }
-
-        try { return await connection.QueryFirstOrDefaultAsync<TRecord>( sql, default, transaction ); }
+        
+        try
+        {
+            CommandDefinition command = GetCommandDefinition( sql, default, transaction, token );
+            return await connection.QueryFirstOrDefaultAsync<TRecord>( command );
+        }
         catch ( Exception e ) { throw new SqlException( sql, e ); }
     }
 }

@@ -22,7 +22,7 @@ public partial class DbTable<TRecord>
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask<long> Count( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
-        if ( token.IsCancellationRequested ) { return default; }
+        
 
         string sql = $"SELECT COUNT({ID_ColumnName}) FROM {SchemaTableName}";
 
@@ -59,7 +59,7 @@ public partial class DbTable<TRecord>
 
     public async ValueTask<Guid?> GetID( DbConnection connection, DbTransaction? transaction, string sql, DynamicParameters? parameters, CancellationToken token = default )
     {
-        if ( token.IsCancellationRequested ) { return default; }
+        
 
         try { return await connection.QuerySingleAsync<Guid?>( sql, parameters, transaction ); }
         catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
@@ -88,8 +88,6 @@ public partial class DbTable<TRecord>
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask<TRecord?> Get( DbConnection connection, DbTransaction? transaction, bool matchAll, DynamicParameters parameters, CancellationToken token = default )
     {
-        if ( token.IsCancellationRequested ) { return default; }
-
         string sql = $"SELECT * FROM {SchemaTableName} WHERE {string.Join( matchAll
                                                                                ? "AND"
                                                                                : "OR",
@@ -98,7 +96,8 @@ public partial class DbTable<TRecord>
 
         try
         {
-            IEnumerable<TRecord?> results = await connection.QueryAsync<TRecord>( sql, parameters, transaction );
+            CommandDefinition command = GetCommandDefinition( sql, parameters, transaction, token );
+            IEnumerable<TRecord?> results = await connection.QueryAsync<TRecord>( command );
             IEnumerable<TRecord>  records = results.WhereNotNull();
             TRecord?              result  = default;
             

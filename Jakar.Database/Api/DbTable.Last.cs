@@ -12,11 +12,13 @@ public partial class DbTable<TRecord>
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask<TRecord?> Last( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
-        if ( token.IsCancellationRequested ) { return default; }
-
         string sql = $"SELECT * FROM {SchemaTableName} ORDER BY {ID_ColumnName} DESC LIMIT 1";
 
-        try { return await connection.QueryFirstAsync<TRecord>( sql, default, transaction ); }
+        try
+        {
+            CommandDefinition command = GetCommandDefinition( sql, default, transaction, token );
+            return await connection.QueryFirstAsync<TRecord>( command );
+        }
         catch ( Exception e ) { throw new SqlException( sql, e ); }
     }
 
@@ -27,11 +29,13 @@ public partial class DbTable<TRecord>
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask<TRecord?> LastOrDefault( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
-        if ( token.IsCancellationRequested ) { return default; }
-
         string sql = $"SELECT * FROM {SchemaTableName} ORDER BY {ID_ColumnName} DESC LIMIT 1";
 
-        try { return await connection.QueryFirstOrDefaultAsync<TRecord>( sql, default, transaction ); }
+        try
+        {
+            CommandDefinition command = GetCommandDefinition( sql, default, transaction, token );
+            return await connection.QueryFirstOrDefaultAsync<TRecord>( command );
+        }
         catch ( Exception e ) { throw new SqlException( sql, e ); }
     }
 }

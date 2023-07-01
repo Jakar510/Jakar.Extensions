@@ -4,12 +4,17 @@
 namespace Jakar.Database;
 
 
-public interface IConnectableDb
+public interface IDbOptions
 {
-    public string     CurrentSchema { get; }
-    public DbInstance Instance      { get; }
+    public string     CurrentSchema  { get; }
+    public DbInstance Instance       { get; }
+    public int        CommandTimeout { get; }
+}
 
 
+
+public interface IConnectableDb : IDbOptions
+{
     public DbConnection Connect();
     public ValueTask<DbConnection> ConnectAsync( CancellationToken token );
 }

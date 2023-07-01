@@ -20,18 +20,18 @@ public partial class DbTable<TRecord>
 
         string sql = $"SELECT * FROM {SchemaTableName} WHERE {ID_ColumnName} = @{nameof(id)}";
 
-        if ( token.IsCancellationRequested ) { return default; }
 
-
-        try { return await connection.QuerySingleAsync<TRecord>( sql, parameters, transaction ); }
+        try
+        {
+            CommandDefinition command = GetCommandDefinition( sql, parameters, transaction, token );
+            return await connection.QuerySingleAsync<TRecord>( command );
+        }
         catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
     }
 
 
     public virtual async ValueTask<TRecord?> Single( DbConnection connection, DbTransaction? transaction, string sql, DynamicParameters? parameters, CancellationToken token = default )
     {
-        if ( token.IsCancellationRequested ) { return default; }
-
         try { return await connection.QuerySingleAsync<TRecord>( sql, parameters, transaction ); }
         catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
     }
@@ -44,18 +44,23 @@ public partial class DbTable<TRecord>
 
         string sql = $"SELECT * FROM {SchemaTableName} WHERE {ID_ColumnName} = @{nameof(id)}";
 
-        if ( token.IsCancellationRequested ) { return default; }
 
-        try { return await connection.QuerySingleOrDefaultAsync<TRecord>( sql, parameters, transaction ); }
+        try
+        {
+            CommandDefinition command = GetCommandDefinition( sql, parameters, transaction, token );
+            return await connection.QuerySingleOrDefaultAsync<TRecord>( command );
+        }
         catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
     }
 
 
     public virtual async ValueTask<TRecord?> SingleOrDefault( DbConnection connection, DbTransaction? transaction, string sql, DynamicParameters? parameters, CancellationToken token = default )
     {
-        if ( token.IsCancellationRequested ) { return default; }
-
-        try { return await connection.QuerySingleOrDefaultAsync<TRecord>( sql, parameters, transaction ); }
+        try
+        {
+            CommandDefinition command = GetCommandDefinition( sql, parameters, transaction, token );
+            return await connection.QuerySingleOrDefaultAsync<TRecord>( command );
+        }
         catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
     }
 }

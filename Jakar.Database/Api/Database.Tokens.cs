@@ -140,7 +140,7 @@ public abstract partial class Database
 
         user.SetHashedRefreshToken( refresh, refreshExpires );
         await Users.Update( connection, transaction, user, token );
-        return new Tokens( accessToken, refresh, Version, user.UserID, user.FullName );
+        return new Tokens( user.UserID, user.FullName, Version, accessToken, refresh );
     }
 
 
@@ -172,7 +172,7 @@ public abstract partial class Database
 
         var    handler     = new JwtSecurityTokenHandler();
         string accessToken = handler.WriteToken( handler.CreateToken( descriptor ) );
-        return new Tokens( accessToken, refreshToken, Version, record.UserID, record.FullName );
+        return new Tokens( record.UserID, record.FullName, Version, accessToken, refreshToken );
     }
 
 
