@@ -1,5 +1,5 @@
 ﻿#nullable enable
-using System.Globalization;
+using System.Runtime.InteropServices;
 
 
 
@@ -12,17 +12,26 @@ public ref struct JWriter
     public const string NULL = "null";
 
 
-    private readonly StringBuilder _sb = new();
-    private readonly bool          _shouldIndent;
-    private          int           _indentLevel = 0;
+    // private readonly StringBuilder      _stream;
+    // private readonly StringWriter       _writer;
+    private readonly ValueStringBuilder _sb;
+    private readonly bool               _shouldIndent;
+    private          int                _indentLevel = 0;
 
 
-    public JWriter() : this( Formatting.None ) { }
-    public JWriter( Formatting formatting ) => _shouldIndent = formatting is Formatting.Indented;
+    public JWriter() : this( 10_000, Formatting.Indented ) { }
+    public JWriter( int capacity, Formatting formatting )
+    {
+        _shouldIndent = formatting is Formatting.Indented;
+        _sb           = new ValueStringBuilder( capacity );
+
+        // _stream       = new StringBuilder( capacity );
+        // _writer       = new StringWriter( _stream );
+    }
 
 
-    [Pure] public JArray AddArray() => new(this, false);
-    [Pure] public JObject AddObject() => new(this, false);
+    [Pure] public readonly JArray AddArray() => new(this, _shouldIndent);
+    [Pure] public readonly JObject AddObject() => new(this, _shouldIndent);
 
 
     public JWriter StartBlock( char start, bool shouldIndent )
@@ -30,12 +39,10 @@ public ref struct JWriter
         Indent( shouldIndent )
            .Append( start );
 
-        if ( _shouldIndent )
-        {
-            _sb.Append( '\n' );
-            _indentLevel += 1;
-        }
+        if ( !_shouldIndent ) { return this; }
 
+        _sb.Append( '\n' );
+        _indentLevel += 1;
         return this;
     }
 
@@ -52,7 +59,7 @@ public ref struct JWriter
     }
 
 
-    public JWriter NewLine()
+    public readonly JWriter NewLine()
     {
         if ( _shouldIndent ) { _sb.Append( '\n' ); }
 
@@ -60,8 +67,8 @@ public ref struct JWriter
     }
 
 
-    public JWriter Indent() => Indent( _shouldIndent );
-    public JWriter Indent( bool shouldIndent )
+    public readonly JWriter Indent() => Indent( _shouldIndent );
+    public readonly JWriter Indent( bool shouldIndent )
     {
         if ( _indentLevel < 0 ) { throw new InvalidOperationException( $"{nameof(_indentLevel)} is negative" ); }
 
@@ -72,105 +79,83 @@ public ref struct JWriter
     }
 
 
-    public JWriter Next()
+    public readonly JWriter Next()
     {
         _sb.Append( ',' );
-        if ( _shouldIndent ) { NewLine(); }
-
-        return this;
+        return NewLine();
     }
 
 
-    public JWriter Null()
+    public readonly JWriter Null()
     {
         _sb.Append( NULL );
         return this;
     }
-    public JWriter Append( string value ) => Append( value.AsSpan() );
-    public JWriter Append( ReadOnlySpan<char> value )
+    public readonly JWriter Append( string value ) => Append( value.AsSpan() );
+    public readonly JWriter Append( ReadOnlySpan<char> value )
     {
         _sb.Append( value );
         return this;
     }
-    public JWriter Append( char value )
-    {
-        _sb.Append( value );
-        return this;
-    }
-
-
-    public JWriter Append( short value )
-    {
-        _sb.Append( value );
-        return this;
-    }
-    public JWriter Append( ushort value )
-    {
-        _sb.Append( value );
-        return this;
-    }
-    public JWriter Append( int value )
-    {
-        _sb.Append( value );
-        return this;
-    }
-    public JWriter Append( uint value )
-    {
-        _sb.Append( value );
-        return this;
-    }
-    public JWriter Append( long value )
-    {
-        _sb.Append( value );
-        return this;
-    }
-    public JWriter Append( ulong value )
-    {
-        _sb.Append( value );
-        return this;
-    }
-    public JWriter Append( float value )
-    {
-        _sb.Append( value );
-        return this;
-    }
-    public JWriter Append( double value )
-    {
-        _sb.Append( value );
-        return this;
-    }
-    public JWriter Append( decimal value )
+    public readonly JWriter Append( char value )
     {
         _sb.Append( value );
         return this;
     }
 
 
-    public JWriter Append( ISpanFormattable value, ReadOnlySpan<char> format, CultureInfo culture, int bufferSize )
+    public readonly JWriter Append<T>( T? value ) where T : ISpanFormattable => Append( value,                            CultureInfo.CurrentCulture );
+    public readonly JWriter Append<T>( T? value, IFormatProvider? provider ) where T : ISpanFormattable => Append( value, GetDefaultFormat<T>(), provider );
+    public readonly JWriter Append<T>( T? value, ReadOnlySpan<char> format, IFormatProvider? provider ) where T : ISpanFormattable
     {
+        if ( value is null ) { return Null(); }
+
+        _sb.AppendSpanFormattable( value, format, provider );
+        return this;
+    }
+    public readonly JWriter Append<T>( T? value, ReadOnlySpan<char> format, int bufferSize, IFormatProvider? provider = default ) where T : struct, ISpanFormattable
+    {
+        if ( !value.HasValue ) { return Null(); }
+
         Span<char> buffer = stackalloc char[bufferSize];
+        if ( !value.Value.TryFormat( buffer, out int charsWritten, format, provider ) ) { throw new InvalidOperationException( $"Can't format value: '{value}'" ); }
 
-        if ( !value.TryFormat( buffer, out int charsWritten, format, culture ) ) { throw new InvalidOperationException( $"Can't format value: '{value}'" ); }
-
-        _sb.Append( buffer[..charsWritten] );
+        buffer = buffer[..charsWritten];
+        _sb.Append( MemoryMarshal.CreateReadOnlySpan( ref buffer.GetPinnableReference(), buffer.Length ) );
         return this;
     }
-    public JWriter Append<T>( T? value, ReadOnlySpan<char> format, CultureInfo culture, int bufferSize ) where T : struct, ISpanFormattable
+
+    public static string? GetDefaultFormat<T>()
     {
-        if ( value.HasValue )
-        {
-            Span<char> buffer = stackalloc char[bufferSize];
+        Type type = typeof(T);
 
-            if ( !value.Value.TryFormat( buffer, out int charsWritten, format, culture ) ) { throw new InvalidOperationException( $"Can't format value: '{value}'" ); }
+        if ( type == typeof(short) ||
+             type == typeof(short?) ||
+             type == typeof(int) ||
+             type == typeof(int?) ||
+             type == typeof(long) ||
+             type == typeof(long?) ||
+             type == typeof(float) ||
+             type == typeof(float?) ||
+             type == typeof(double) ||
+             type == typeof(double?) ||
+             type == typeof(decimal) ||
+             type == typeof(decimal?) ) { return "g"; }
 
-            _sb.Append( buffer[..charsWritten] );
-        }
-        else { _sb.Append( NULL ); }
+        if ( type == typeof(DateTimeOffset) || type == typeof(DateTimeOffset?) ) { return "o"; }
 
-        return this;
+        if ( type == typeof(DateTime) || type == typeof(DateTime?) ) { return @"YYYY-MM-DDTHH:MM:SS"; }
+
+        if ( type == typeof(TimeSpan) || type == typeof(TimeSpan?) ) { return ""; }
+
+        if ( type == typeof(TimeOnly) || type == typeof(TimeOnly?) ) { return ""; }
+
+        if ( type == typeof(DateOnly) || type == typeof(DateOnly?) ) { return ""; }
+
+        return default;
     }
 
 
-    public override string ToString() => _sb.ToString();
-    public void Dispose() => _sb.Clear();
+    public readonly override string ToString() => _sb.ToString();
+    public readonly void Dispose() => _sb.Reset();
 }

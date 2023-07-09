@@ -2,10 +2,6 @@
 // 04/26/2022  10:37 AM
 
 #nullable enable
-using Jakar.Extensions;
-
-
-
 namespace Jakar.Json;
 
 
@@ -27,7 +23,7 @@ public static class Jsonizer
     // }
 
 
-    public static string ToJson( this IJsonizer value, Formatting formatting = Formatting.Indented ) => ToJson( value, new JWriter( formatting ) );
+    public static string ToJson( this IJsonizer value, Formatting formatting = Formatting.Indented ) => ToJson( value, new JWriter( value.JsonSize(), formatting ) );
     public static string ToJson( this IJsonizer value, in JWriter writer )
     {
         using ( writer )
