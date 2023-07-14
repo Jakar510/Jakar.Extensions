@@ -100,19 +100,19 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="7.0.1">
+		<PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="7.0.3">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="CommunityToolkit.Diagnostics" Version="8.2.0" />
-		<PackageReference Include="Dapper" Version="2.0.123" />
+		<PackageReference Include="CommunityToolkit.Diagnostics" Version="8.2.1" />
+		<PackageReference Include="Dapper" Version="2.0.143" />
 		<PackageReference Include="Dapper.Contrib" Version="2.0.78" />
-		<PackageReference Include="JetBrains.Annotations" Version="2022.3.1" />
+		<PackageReference Include="JetBrains.Annotations" Version="2023.2.0" />
 		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.6.0" />
 		<PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="7.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.1" />
 		<PackageReference Include="Microsoft.Extensions.Options" Version="7.0.1" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 		<PackageReference Include="Nito.Collections.Deque" Version="1.1.1" />
@@ -122,13 +122,13 @@
 		<PackageReference Include="System.Net.Http" Version="4.3.4" />
 		<PackageReference Include="System.Text.Encoding.CodePages" Version="7.0.0" />
 		<PackageReference Include="System.Text.Encodings.Web" Version="7.0.0" />
-		<PackageReference Include="System.Text.Json" Version="7.0.2" />
+		<PackageReference Include="System.Text.Json" Version="7.0.3" />
 		<PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
 		<PackageReference Include="System.Threading.Tasks" Version="4.3.0" />
 		<PackageReference Include="System.Threading.Tasks.Dataflow" Version="7.0.0" />
 		<PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.4" />
 		<PackageReference Include="System.Threading.Tasks.Parallel" Version="4.3.0" />
-		<PackageReference Include="OneOf" Version="3.0.243" />
+		<PackageReference Include="OneOf" Version="3.0.255" />
 		<PackageReference Include="System.Threading.ThreadPool" Version="4.3.0" />
 		<PackageReference Include="ValueOf" Version="2.0.31" />
 		<PackageReference Include="Sigil" Version="5.0.0" />

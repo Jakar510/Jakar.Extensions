@@ -2,7 +2,7 @@
 
 
 [Serializable]
-public sealed class RecordCollection<TRecord> : IReadOnlyList<TRecord> where TRecord : BaseRecord, IUniqueID<Guid>
+public sealed class RecordCollection<TRecord> : IReadOnlyList<TRecord> where TRecord : TableRecord<TRecord>
 {
     private readonly List<TRecord> _records = new();
     public           int           Count => _records.Count;
@@ -32,10 +32,7 @@ public sealed class RecordCollection<TRecord> : IReadOnlyList<TRecord> where TRe
         }
 
 
-        _records.Add( item with
-                      {
-                          ID = Guid.NewGuid(),
-                      } );
+        _records.Add( item.NewID( Guid.NewGuid() ) );
 
         return this;
     }

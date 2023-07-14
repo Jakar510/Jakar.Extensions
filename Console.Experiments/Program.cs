@@ -1,11 +1,15 @@
-﻿try
+﻿using System.IO;
+
+
+try
 {
     "Hello World!".WriteToConsole();
     Console.WriteLine();
 
     // Console.WriteLine( new SqlStatementBenchmarks().Test_Span() );
 
-    BenchmarkRunner.Run<SqlStatementBenchmarks>();
+    // BenchmarkRunner.Run<SqlStatementBenchmarks>();
+
 }
 catch ( Exception e ) { e.WriteToConsole(); }
 finally { "Bye".WriteToConsole(); }

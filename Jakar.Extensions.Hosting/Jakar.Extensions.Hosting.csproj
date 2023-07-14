@@ -11,17 +11,17 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Jakar.Extensions" Version="6.8.0" />
-		<PackageReference Include="Hardware.Info" Version="11.1.0" />
+		<PackageReference Include="Jakar.Extensions" Version="6.8.1" />
+		<PackageReference Include="Hardware.Info" Version="11.1.0.1" />
 		<PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.1" />
-		<PackageReference Include="Microsoft.NETCore.Platforms" Version="7.0.2" />
+		<PackageReference Include="Microsoft.NETCore.Platforms" Version="7.0.4" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
 		<PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.5.0" />
 		<PackageReference Include="Swashbuckle.AspNetCore.Newtonsoft" Version="6.5.0" />
 		<PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" Version="7.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="7.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="7.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="7.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="7.0.1" />
 		<PackageReference Include="System.Security.Cryptography.Xml" Version="7.0.1" />
 	</ItemGroup>
 
@@ -37,11 +37,11 @@
 	</ItemGroup>
 
 	<ItemGroup Condition="'$$(TargetFramework)'=='net7.0'">
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.Certificate" Version="7.0.0" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="7.0.0" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="7.0.0" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.0" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="7.0.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.Certificate" Version="7.0.9" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="7.0.9" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="7.0.9" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.9" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="7.0.9" />
 		<PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="7.0.5" />
 		<PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.Abstractions" Version="7.0.5" />
 		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="7.0.2" />

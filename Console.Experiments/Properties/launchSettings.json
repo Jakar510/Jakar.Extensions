@@ -1,6 +1,6 @@
 {
   "profiles": {
-    "Console.Experiments": {
+    "Experiments": {
       "commandName": "Project",
       "hotReloadEnabled": false
     }
