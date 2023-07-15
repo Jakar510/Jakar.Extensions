@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.InteropServices;
 using Jakar.Extensions;
 
 
@@ -15,60 +16,63 @@ namespace Jakar.Xml.Deserialization;
 [SuppressMessage( "ReSharper", "InconsistentNaming" )]
 public readonly ref struct XNode
 {
-    private readonly ReadOnlySpan<char> _xml;
-    public           bool               HasAttributes => !Attributes.IsEmpty;
+    private readonly ReadOnlyMemory<char> _xml;
 
-    public ReadOnlySpan<char> Name => _xml[1.._xml.IndexOf( '>' )]
+
+    public bool HasAttributes => !Attributes.IsEmpty;
+
+    public ReadOnlyMemory<char> Name => _xml[1.._xml.Span.IndexOf( '>' )]
        .Trim();
 
-    public ReadOnlySpan<char> Attributes => _xml[(Name.Length + 1).._xml.IndexOf( '>' )]
+    public ReadOnlyMemory<char> Attributes => _xml[(Name.Length + 1).._xml.Span.IndexOf( '>' )]
        .Trim();
 
-    public ReadOnlySpan<char> StartTag => _xml[..(_xml.IndexOf( '>' ) + 1)]
+    public ReadOnlyMemory<char> StartTag => _xml[..(_xml.Span.IndexOf( '>' ) + 1)]
        .Trim();
 
     public ReadOnlySpan<char> EndTag
     {
         get
         {
-            ReadOnlySpan<char> name   = Name;
+            ReadOnlySpan<char> name   = Name.Span;
             Span<char>         buffer = stackalloc char[name.Length + 3];
             buffer[0] = '<';
             buffer[1] = '/';
             for ( int i = 0; i < name.Length; i++ ) { buffer[i + 2] = name[i]; }
 
             buffer[^1] = '>';
-            return default;
+            return MemoryMarshal.CreateReadOnlySpan( ref buffer.GetPinnableReference(), buffer.Length );
         }
     }
 
-    public ReadOnlySpan<char> XMLS
+    public ReadOnlyMemory<char> XMLS
     {
         get
         {
-            ReadOnlySpan<char> attributes = Attributes;
+            var attributes = Attributes.Span;
             if ( !attributes.Contains( Constants.XMLS_TAG ) ) { return default; }
 
-            int                typeStart = attributes.IndexOf( Constants.XMLS_TAG ) + Constants.XMLS_TAG.Length;
-            ReadOnlySpan<char> temp      = attributes[typeStart..];
-            return temp[..temp.IndexOf( '"' )];
+            int typeStart = attributes.IndexOf( Constants.XMLS_TAG ) + Constants.XMLS_TAG.Length;
+            var temp      = attributes[typeStart..];
+            return Attributes[..temp.IndexOf( '"' )];
         }
     }
 
-    public ReadOnlySpan<char> Content => _xml.Slice( StartTag.Length, _xml.Length - EndTag.Length );
+    public ReadOnlyMemory<char> Content => _xml.Slice( StartTag.Length, _xml.Length - EndTag.Length );
 
 
-    public XNode( ReadOnlySpan<char> xml )
+    public XNode( ReadOnlyMemory<char> xml )
     {
+        var span = xml.Span;
         if ( xml.IsEmpty ) { throw new ArgumentNullException( nameof(xml) ); }
 
-        if ( !xml.StartsWith( '<' ) ) { throw new FormatException( "Must start with '<'" ); }
+        if ( !span.StartsWith( '<' ) ) { throw new FormatException( "Must start with '<'" ); }
 
-        if ( !xml.Contains( '>' ) ) { throw new FormatException( "Must contain '<'" ); }
+        if ( !span.Contains( '>' ) ) { throw new FormatException( "Must contain '<'" ); }
 
-        if ( !xml.Contains( "</" ) ) { throw new FormatException( "Must contain '</'" ); }
+        if ( !span.Contains( "</" ) ) { throw new FormatException( "Must contain '</'" ); }
 
-        if ( !xml.EndsWith( '>' ) ) { throw new FormatException( "Must End with '>'" ); }
+        if ( !span.EndsWith( '>' ) ) { throw new FormatException( "Must End with '>'" ); }
 
 
         _xml = xml;
@@ -96,13 +100,14 @@ public readonly ref struct XNode
 
     public ref struct AttributeEnumerator
     {
-        private readonly ReadOnlySpan<char> _xml;
-        private          ReadOnlySpan<char> _span;
-        public           JAttribute         Current { get; private set; } = default;
+        private readonly ReadOnlyMemory<char> _xml;
+        private          ReadOnlyMemory<char> _span;
+        public           JAttribute           Current { get; private set; } = default;
 
 
-        public AttributeEnumerator( ReadOnlySpan<char> span )
+        public AttributeEnumerator( ReadOnlyMemory<char> memory )
         {
+            var span = memory.Span;
             if ( span.IsEmpty ) { throw new ArgumentNullException( nameof(span) ); }
 
             if ( span.Contains( '<' ) ) { throw new FormatException( $"Cannot start with {'<'}" ); }
@@ -113,7 +118,7 @@ public readonly ref struct XNode
 
             if ( span.Contains( '>' ) ) { throw new FormatException( $"Cannot start with {'<'}" ); }
 
-            _xml = _span = span;
+            _xml = _span = memory;
         }
 
         public AttributeEnumerator GetEnumerator() => this;
@@ -122,16 +127,16 @@ public readonly ref struct XNode
 
         public bool MoveNext()
         {
-            if ( _span.IsNullOrWhiteSpace() )
+            if ( _span.Span.IsNullOrWhiteSpace() )
             {
                 Current = default;
                 return false;
             }
 
 
-            int                start = _span.IndexOf( ' ' );
-            ReadOnlySpan<char> temp  = _span[start..];
-            temp = temp[..temp.IndexOf( ' ' )];
+            int                  start = _span.Span.IndexOf( ' ' );
+            ReadOnlyMemory<char> temp  = _span[start..];
+            temp = temp[..temp.Span.IndexOf( ' ' )];
 
             Current = new JAttribute( temp );
             return true;
@@ -143,12 +148,12 @@ public readonly ref struct XNode
 
     public ref struct NodeEnumerator
     {
-        private readonly ReadOnlySpan<char> _xml;
-        private          ReadOnlySpan<char> _span;
-        public           XNode              Current { get; } = default;
+        private readonly ReadOnlyMemory<char> _xml;
+        private          ReadOnlyMemory<char> _span;
+        public           XNode                Current { get; } = default;
 
 
-        public NodeEnumerator( ReadOnlySpan<char> span ) => _xml = _span = span;
+        public NodeEnumerator( ReadOnlyMemory<char> span ) => _xml = _span = span;
         public NodeEnumerator GetEnumerator() => this;
         public void Reset() => _span = _xml;
 

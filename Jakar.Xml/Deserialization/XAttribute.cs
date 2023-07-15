@@ -15,14 +15,15 @@ namespace Jakar.Xml.Deserialization;
 [SuppressMessage( "ReSharper", "InconsistentNaming" )]
 public readonly ref struct JAttribute
 {
-    private readonly ReadOnlySpan<char> _span;
-    public readonly  ReadOnlySpan<char> Key;
-    public readonly  ReadOnlySpan<char> Value;
-    public readonly  bool               IsNameSpace;
+    private readonly ReadOnlyMemory<char> _span;
+    public readonly  ReadOnlyMemory<char> Key;
+    public readonly  ReadOnlyMemory<char> Value;
+    public readonly  bool                 IsNameSpace;
 
 
-    public JAttribute( ReadOnlySpan<char> span )
+    public JAttribute( ReadOnlyMemory<char> memory )
     {
+        var span = memory.Span;
         if ( span.StartsWith( '<' ) ) { throw new FormatException( $"Cannot start with {'<'}" ); }
 
         if ( span.Contains( '>' ) ) { throw new FormatException( $"Cannot start with {'<'}" ); }
@@ -32,10 +33,10 @@ public readonly ref struct JAttribute
         if ( span.EndsWith( '>' ) ) { throw new FormatException( $"Cannot start with {'<'}" ); }
 
 
-        _span       = span;
-        Key         = span;
-        Value       = span;
-        IsNameSpace = Key.Contains( Constants.XMLS, StringComparison.OrdinalIgnoreCase );
+        _span       = memory;
+        Key         = memory;
+        Value       = memory;
+        IsNameSpace = span.Contains( Constants.XMLS, StringComparison.OrdinalIgnoreCase );
     }
 
     public KeyValuePair<string, string> ToPair() => new(Key.ToString(), Value.ToString());

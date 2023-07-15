@@ -8,17 +8,18 @@ namespace Jakar.Json.Deserialization;
 
 public ref struct JReader
 {
-    private readonly ReadOnlySpan<char> _xml;
-    private          ReadOnlySpan<char> _span;
-    private          long               _startIndex = default;
-    private          long               _endIndex   = default;
-    public           JNode              Current { get; } = default;
+    private readonly ReadOnlyMemory<char> _json;
+    private          ReadOnlyMemory<char> _span;
+    private          long                 _startIndex = default;
+    private          long                 _endIndex   = default;
+    public           JNode                Current { get; private set; } = default;
 
-    public JReader( in ReadOnlySpan<char> xml )
+
+    public JReader( in ReadOnlyMemory<char> json )
     {
-        if ( xml.IsEmpty ) { throw new ArgumentNullException( nameof(xml) ); }
+        if ( json.IsEmpty ) { throw new ArgumentNullException( nameof(json) ); }
 
-        _span = _xml = xml.Trim();
+        _span = _json = json.Trim();
     }
 
 
@@ -56,7 +57,7 @@ public ref struct JReader
 }
      */
     public JReader GetEnumerator() => this;
-    public void Reset() => _span = _xml;
+    public void Reset() => _span = _json;
     public bool MoveNext() => false;
     public void Dispose() { }
 }
