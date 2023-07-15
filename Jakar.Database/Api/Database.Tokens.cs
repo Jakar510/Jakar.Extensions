@@ -100,11 +100,17 @@ public abstract partial class Database
     public async Task<bool> ValidateAsync( string purpose, string token, UserManager<UserRecord> manager, UserRecord user )
     {
         // IUserTwoFactorTokenProvider<UserRecord> provider = new AuthenticatorTokenProvider<UserRecord>()
-        OneOf<Tokens, Error> result = await Verify( token, default, CancellationToken.None );
+        OneOf<Tokens, Error> result = await Verify( token, DEFAULT_CLAIM_TYPES, CancellationToken.None );
         return result.IsT0;
     }
-    public Task<bool> CanGenerateTwoFactorTokenAsync( UserManager<UserRecord> manager, UserRecord user ) => Task.FromResult( true );
-    public ValueTask<Tokens> GetToken( UserRecord                             user,    ClaimType  types = default, CancellationToken token = default ) => this.TryCall( GetToken, user, types, token );
+    public async Task<bool> CanGenerateTwoFactorTokenAsync( UserManager<UserRecord> manager, UserRecord user )
+    {
+        if ( !user.IsValidID() || string.IsNullOrWhiteSpace( user.UserName ) ) { return false; }
+
+        IEnumerable<UserLoginInfoRecord> logins = await UserLogins.Where( true, UserLoginInfoRecord.GetDynamicParameters( user ) );
+        return logins.Any();
+    }
+    public ValueTask<Tokens> GetToken( UserRecord user, ClaimType types = default, CancellationToken token = default ) => this.TryCall( GetToken, user, types, token );
     public virtual async ValueTask<Tokens> GetToken( DbConnection connection, DbTransaction transaction, UserRecord user, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default )
     {
         Claim[] claims = await user.GetUserClaims( connection, transaction, this, types, token );
@@ -138,7 +144,7 @@ public abstract partial class Database
         string refresh     = handler.WriteToken( handler.CreateToken( refreshDescriptor ) );
 
 
-        user.SetHashedRefreshToken( refresh, refreshExpires );
+        user.SetRefreshToken( refresh, refreshExpires );
         await Users.Update( connection, transaction, user, token );
         return new Tokens( user.UserID, user.FullName, Version, accessToken, refresh );
     }

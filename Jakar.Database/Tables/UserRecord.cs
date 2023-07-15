@@ -465,7 +465,7 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, JsonModels.IJ
         RefreshTokenExpiryTime = default;
         return this;
     }
-    public bool IsHashedRefreshToken( string token )
+    public bool IsHashedRefreshToken( string? token )
     {
         // ReSharper disable once InvertIf
         if ( RefreshTokenExpiryTime.HasValue && DateTimeOffset.UtcNow > RefreshTokenExpiryTime.Value )
@@ -476,26 +476,40 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, JsonModels.IJ
 
 
         return string.Equals( RefreshToken,
-                              token.GetHashCode()
-                                   .ToString(),
+                              token?.GetHashCode()
+                                    .ToString(),
                               StringComparison.Ordinal );
     }
-    public UserRecord SetHashedRefreshToken( string token, DateTimeOffset date ) => SetRefreshToken( token.GetHashCode()
-                                                                                                          .ToString(),
-                                                                                                     date );
-    public UserRecord SetRefreshToken( string token, DateTimeOffset date )
+    public bool IsHashedRefreshToken( Tokens token ) => IsHashedRefreshToken( token.RefreshToken );
+    
+    public UserRecord SetRefreshToken( string? token, in DateTimeOffset date, in bool hashed = true )
     {
-        RefreshToken           = token;
+        if ( hashed )
+        {
+            token = token?.GetHashCode()
+                          .ToString();
+        }
+
+        RefreshToken           = token ?? string.Empty;
         RefreshTokenExpiryTime = date;
         return this;
     }
-    public UserRecord SetRefreshToken( string token, DateTimeOffset date, string securityStamp )
+    public UserRecord SetRefreshToken( string? token, in DateTimeOffset date, string securityStamp, in bool hashed = true )
     {
-        RefreshToken           = token;
+        if ( hashed )
+        {
+            token = token?.GetHashCode()
+                          .ToString();
+        }
+
+        RefreshToken           = token ?? string.Empty;
         RefreshTokenExpiryTime = date;
         SecurityStamp          = securityStamp;
         return this;
     }
+
+    public UserRecord SetRefreshToken( Tokens token, in DateTimeOffset date, in bool   hashed                     = true ) => SetRefreshToken( token.RefreshToken, date, hashed );
+    public UserRecord SetRefreshToken( Tokens token, in DateTimeOffset date, string securityStamp, in bool hashed = true ) => SetRefreshToken( token.RefreshToken, date, securityStamp, hashed );
 
     #endregion
 

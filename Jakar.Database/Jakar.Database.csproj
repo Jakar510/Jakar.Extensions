@@ -59,7 +59,6 @@
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="7.0.9" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.9" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="7.0.9" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="7.0.5" />
 		<PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="7.0.9" />
 		<PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.Abstractions" Version="7.0.9" />
 		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="7.0.9" />
