@@ -16,26 +16,55 @@ public class APIController : ControllerBase
 
 
     [HttpPost]
-    public async ValueTask<ActionResult<Tokens>> Register( VerifyRequest<UserData> request, CancellationToken token )
+    [Route( Routes.REGISTER )]
+    public async Task<ActionResult<Tokens>> Register( VerifyRequest<UserData> request, CancellationToken token )
     {
         OneOf<Tokens, Error> result = await _api.Register( request, string.Empty, default, token );
         return result.Match();
     }
+
+
     [HttpPost]
-    public async ValueTask<ActionResult<Tokens>> Verify( VerifyRequest request, CancellationToken token )
+    [Route( Routes.VERIFY )]
+    public async Task<ActionResult<Tokens>> Verify( VerifyRequest request, CancellationToken token )
     {
         OneOf<Tokens, Error> result = await _api.Verify( request, default, token );
         return result.Match();
     }
+
+
     [HttpPost]
-    public async ValueTask<ActionResult<Tokens>> Refresh( string refreshToken, CancellationToken token )
+    [Route( Routes.REFRESH )]
+    public async Task<ActionResult<Tokens>> Refresh( string refreshToken, CancellationToken token )
     {
         OneOf<Tokens, Error> result = await _api.Refresh( refreshToken, default, token );
         return result.Match();
     }
 
 
-    [HttpPost] public async ValueTask<ActionResult<Guid>> StartSession( StartSession session,   CancellationToken token ) => await _api.StartSession( this, session, token );
-    [HttpPost] public async ValueTask<ActionResult> EndSession( Guid                 sessionID, CancellationToken token ) => await _api.EndSession( this, sessionID, token );
-    [HttpPost] public async ValueTask<ActionResult<bool>> Log( IEnumerable<AppLog>      logs,      CancellationToken token ) => await _api.SendLog( this, logs, token );
+    [HttpPost]
+    [Route( Routes.LOG )]
+    public async Task<ActionResult<bool>> Log( IEnumerable<AppLog> logs, CancellationToken token )
+    {
+        OneOf<bool, Error> result = await _api.SendLog( this, logs, token );
+        return result.Match();
+    }
+
+
+    [HttpPost]
+    [Route( Routes.Sessions.START )]
+    public async Task<ActionResult<Guid>> StartSession( StartSession session, CancellationToken token )
+    {
+        OneOf<Guid, Error> result = await _api.StartSession( this, session, token );
+        return result.Match();
+    }
+
+
+    [HttpPost]
+    [Route( Routes.Sessions.END )]
+    public async Task<ActionResult<bool>> EndSession( Guid sessionID, CancellationToken token )
+    {
+        OneOf<bool, Error> result = await _api.EndSession( this, sessionID, token );
+        return result.Match();
+    }
 }

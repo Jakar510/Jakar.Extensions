@@ -1,4 +1,8 @@
-﻿namespace Jakar.AppLogger.Portal.Data;
+﻿using OneOf;
+
+
+
+namespace Jakar.AppLogger.Portal.Data;
 
 
 [SuppressMessage( "ReSharper", "SuggestBaseTypeForParameter" )]
@@ -34,27 +38,27 @@ public sealed class LoggerDB : Database.Database
 
 
     public event EventHandler<Notification>? NotificationReceived;
-    public async ValueTask<ActionResult<Guid>> StartSession( DbConnection connection, DbTransaction transaction, ControllerBase controller, StartSession session, CancellationToken token )
+    public async ValueTask<OneOf<Guid, Error>> StartSession( DbConnection connection, DbTransaction transaction, ControllerBase controller, StartSession session, CancellationToken token )
     {
-        if ( string.IsNullOrWhiteSpace( session.AppLoggerSecret ) ) { return controller.BadRequest( $"{nameof(session.AppLoggerSecret)} cannot be null, empty or white space." ); }
+        if ( string.IsNullOrWhiteSpace( session.AppLoggerSecret ) ) { return new Error( Status.BadRequest, $"{nameof(session.AppLoggerSecret)} cannot be null, empty or white space." ); }
 
         UserRecord? caller = await Verify( connection, transaction, session.AppLoggerSecret, token );
-        if ( caller is null ) { return controller.Unauthorized(); }
+        if ( caller is null ) { return new Error( Status.Unauthorized ); }
 
         DeviceRecord? device = await AddOrUpdate_Device( connection, transaction, controller, session.Device, caller, token );
-        if ( device is null ) { return controller.BadRequest( controller.ModelState ); }
+        if ( device is null ) { return new Error( Status.BadRequest, controller.ModelState ); }
 
         return Guid.Empty;
     }
 
 
-    public ValueTask<ActionResult<Guid>> StartSession( ControllerBase controller, StartSession session, CancellationToken token ) => this.TryCall( StartSession, controller, session, token );
-    public async ValueTask<ActionResult> EndSession( DbConnection connection, DbTransaction transaction, ControllerBase controller, Guid sessionID, CancellationToken token )
+    public ValueTask<OneOf<Guid, Error>> StartSession( ControllerBase controller, StartSession session, CancellationToken token ) => this.TryCall( StartSession, controller, session, token );
+    public async ValueTask<OneOf<bool, Error>> EndSession( DbConnection connection, DbTransaction transaction, ControllerBase controller, Guid sessionID, CancellationToken token )
     {
-        if ( !sessionID.IsValidID() ) { return controller.BadRequest( $"{nameof(sessionID)} cannot be empty." ); }
+        if ( !sessionID.IsValidID() ) { return new Error( Status.BadRequest, $"{nameof(sessionID)} cannot be empty." ); }
 
         SessionRecord? session = await Sessions.Get( connection, transaction, true, SessionRecord.GetDynamicParameters( sessionID ), token );
-        if ( session is null || !session.IsActive ) { return controller.NotFound( session ); }
+        if ( session is null || !session.IsActive ) { return new Error( Status.NotFound, session ); }
 
 
         await Sessions.Update( connection,
@@ -65,20 +69,19 @@ public sealed class LoggerDB : Database.Database
                                },
                                token );
 
-        return controller.Ok();
+        return true;
     }
 
 
-    public ValueTask<ActionResult> EndSession( ControllerBase controller, Guid sessionID, CancellationToken token ) => this.TryCall( EndSession, controller, sessionID, token );
-    public async ValueTask<ActionResult<bool>> SendLog( DbConnection connection, DbTransaction transaction, ControllerBase controller, IEnumerable<AppLog> logs, CancellationToken token )
+    public ValueTask<OneOf<bool, Error>> EndSession( ControllerBase controller, Guid sessionID, CancellationToken token ) => this.TryCall( EndSession, controller, sessionID, token );
+    public async ValueTask<OneOf<bool, Error>> SendLog( DbConnection connection, DbTransaction transaction, ControllerBase controller, IEnumerable<AppLog> logs, CancellationToken token )
     {
         foreach ( AppLog log in logs )
         {
             try
             {
-                ActionResult<bool> reply = await SendLog( connection, transaction, controller, log, token );
-
-                if ( !reply.Value ) { }
+                OneOf<bool, Error> result = await SendLog( connection, transaction, controller, log, token );
+                if ( result.IsT1 ) { return result.AsT1; }
             }
             catch ( Exception e )
             {
@@ -89,20 +92,20 @@ public sealed class LoggerDB : Database.Database
 
         return true;
     }
-    public async ValueTask<ActionResult<bool>> SendLog( DbConnection connection, DbTransaction transaction, ControllerBase controller, AppLog log, CancellationToken token )
+    public async ValueTask<OneOf<bool, Error>> SendLog( DbConnection connection, DbTransaction transaction, ControllerBase controller, AppLog log, CancellationToken token )
     {
         if ( !log.SessionID.IsValidID() )
         {
             controller.AddError( nameof(AppLog.SessionID), $"{nameof(AppLog.SessionID)} is null or empty" );
-            return controller.BadRequest( controller.ModelState );
+            return new Error( Status.BadRequest, controller.ModelState );
         }
 
 
         SessionRecord? session = await Sessions.Get( connection, transaction, true, SessionRecord.GetDynamicParameters( log.SessionID ), token );
-        if ( session is null || !session.IsActive ) { return controller.NotFound( log.SessionID ); }
+        if ( session is null || !session.IsActive ) { return new Error( Status.NotFound, log.SessionID ); }
 
         UserRecord? caller = await session.GetUserWhoCreated( connection, transaction, this, token );
-        if ( caller is null ) { return controller.Unauthorized(); }
+        if ( caller is null ) { return new Error( Status.Unauthorized ); }
 
         var record = new LogRecord( log, session, caller );
         record = await Logs.Insert( connection, transaction, record, token );
@@ -124,7 +127,7 @@ public sealed class LoggerDB : Database.Database
     }
 
 
-    public ValueTask<ActionResult<bool>> SendLog( ControllerBase controller, IEnumerable<AppLog> logs, CancellationToken token ) => this.TryCall( SendLog, controller, logs, token );
+    public ValueTask<OneOf<bool, Error>> SendLog( ControllerBase controller, IEnumerable<AppLog> logs, CancellationToken token ) => this.TryCall( SendLog, controller, logs, token );
 
 
     public async ValueTask<DeviceRecord?> AddOrUpdate_Device( DbConnection connection, DbTransaction transaction, ControllerBase controller, DeviceDescriptor device, UserRecord caller, CancellationToken token )
