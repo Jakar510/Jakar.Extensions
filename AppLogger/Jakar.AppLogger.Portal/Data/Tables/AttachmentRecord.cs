@@ -6,25 +6,25 @@ namespace Jakar.AppLogger.Portal.Data.Tables;
 
 [Serializable]
 [Table( "Attachments" )]
-public sealed record AttachmentRecord : LoggerTable<AttachmentRecord>, IAttachment, ILogInfo
+public sealed record LoggerAttachmentRecord : LoggerTable<LoggerAttachmentRecord>, ILoggerAttachment, ILogInfo
 {
-    public                                            Guid    AppID       { get; init; }
-    [MaxLength( Attachment.MAX_SIZE )]         public string  Content     { get; init; } = string.Empty;
-    [MaxLength( Attachment.DESCRIPTION_SIZE )] public string? Description { get; init; }
-    public                                            Guid    DeviceID    { get; init; }
-    [MaxLength( Attachment.FILE_NAME_SIZE )] public   string? FileName    { get; init; }
-    public                                            bool    IsBinary    { get; init; }
-    public                                            long    Length      { get; init; }
-    public                                            Guid    LogID       { get; init; }
-    public                                            Guid?   ScopeID     { get; init; }
-    public                                            Guid?   SessionID   { get; init; }
-    [MaxLength( Attachment.TYPE_SIZE )] public        string? Type        { get; init; }
+    public                                                  Guid    AppID       { get; init; }
+    [MaxLength( LoggerAttachment.MAX_SIZE )]         public string  Content     { get; init; } = string.Empty;
+    [MaxLength( LoggerAttachment.DESCRIPTION_SIZE )] public string? Description { get; init; }
+    public                                                  Guid    DeviceID    { get; init; }
+    [MaxLength( LoggerAttachment.FILE_NAME_SIZE )] public   string? FileName    { get; init; }
+    public                                                  bool    IsBinary    { get; init; }
+    public                                                  long    Length      { get; init; }
+    public                                                  Guid    LogID       { get; init; }
+    public                                                  Guid?   ScopeID     { get; init; }
+    public                                                  Guid?   SessionID   { get; init; }
+    [MaxLength( LoggerAttachment.TYPE_SIZE )] public        string? Type        { get; init; }
 
 
-    public AttachmentRecord() : base() { }
-    public AttachmentRecord( Attachment attachment, ILogInfo info, UserRecord? caller = default ) : base( Guid.NewGuid(), caller )
+    public LoggerAttachmentRecord() : base() { }
+    public LoggerAttachmentRecord( LoggerAttachment attachment, ILogInfo info, UserRecord? caller = default ) : base( Guid.NewGuid(), caller )
     {
-        if ( attachment.Length > Attachment.MAX_SIZE ) { Attachment.ThrowTooLong(); }
+        if ( attachment.Length > LoggerAttachment.MAX_SIZE ) { LoggerAttachment.ThrowTooLong( attachment.Length ); }
 
         Length      = attachment.Length;
         Content     = attachment.Content;
@@ -39,7 +39,7 @@ public sealed record AttachmentRecord : LoggerTable<AttachmentRecord>, IAttachme
         DeviceID    = info.DeviceID;
     }
 
-    public static DynamicParameters GetDynamicParameters( Attachment attachment )
+    public static DynamicParameters GetDynamicParameters( LoggerAttachment attachment )
     {
         var parameters = new DynamicParameters();
         parameters.Add( nameof(Content), attachment.Content );
@@ -60,19 +60,19 @@ public sealed record AttachmentRecord : LoggerTable<AttachmentRecord>, IAttachme
                                     ? Convert.FromBase64String( Content )
                                     : default;
 
-    public Attachment ToAttachment() => new(this);
-    public AttachmentRecord Update( Attachment attachment ) => this with
-                                                               {
-                                                                   Length = attachment.Length,
-                                                                   Content = attachment.Content,
-                                                                   Description = attachment.Description,
-                                                                   Type = attachment.Type,
-                                                                   FileName = attachment.FileName,
-                                                                   IsBinary = attachment.IsBinary,
-                                                               };
+    public LoggerAttachment ToLoggerAttachment() => new(this);
+    public LoggerAttachmentRecord Update( LoggerAttachment attachment ) => this with
+                                                                           {
+                                                                               Length = attachment.Length,
+                                                                               Content = attachment.Content,
+                                                                               Description = attachment.Description,
+                                                                               Type = attachment.Type,
+                                                                               FileName = attachment.FileName,
+                                                                               IsBinary = attachment.IsBinary,
+                                                                           };
 
 
-    public override bool Equals( AttachmentRecord? other )
+    public override bool Equals( LoggerAttachmentRecord? other )
     {
         if ( other is null ) { return false; }
 
@@ -80,6 +80,6 @@ public sealed record AttachmentRecord : LoggerTable<AttachmentRecord>, IAttachme
 
         return string.Equals( Content, other.Content, StringComparison.Ordinal );
     }
-    public override int CompareTo( AttachmentRecord? other ) => string.CompareOrdinal( Content, other?.Content );
+    public override int CompareTo( LoggerAttachmentRecord? other ) => string.CompareOrdinal( Content, other?.Content );
     public override int GetHashCode() => HashCode.Combine( Content, base.GetHashCode() );
 }

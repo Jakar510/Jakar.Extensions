@@ -4,7 +4,7 @@
 namespace Jakar.AppLogger.Common;
 
 
-public sealed class AppLoggerScope<TState> : IScope
+public sealed class AppLoggerScope<TState> : IScope<TState>
 {
     private readonly IScopeID _scope;
     public           TState   State { get; }

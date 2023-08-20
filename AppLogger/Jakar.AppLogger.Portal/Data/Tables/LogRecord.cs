@@ -1,6 +1,7 @@
 ﻿// Jakar.AppLogger :: Jakar.AppLogger.Portal
 // 09/12/2022  10:06 AM
 
+
 namespace Jakar.AppLogger.Portal.Data.Tables;
 
 
@@ -17,15 +18,15 @@ public sealed record LogRecord : LoggerTable<LogRecord>, IAppLog, ILogInfo, IApp
     public                                           Guid           DeviceID         { get; init; }
     public                                           int            EventID          { get; init; }
     [MaxLength( IAppLog.EVENT_NAME_LENGTH )] public  string?        EventName        { get; init; }
-    [MaxLength( Attachment.MAX_SIZE )]       public  string?        ExceptionDetails { get; init; }
+    [MaxLength( MAX_STRING_SIZE )]           public  string?        ExceptionDetails { get; init; }
     public                                           bool           IsError          { get; init; }
     public                                           bool           IsFatal          { get; init; }
     public                                           bool           IsValid          { get; init; }
     public                                           LogLevel       Level            { get; init; }
-    [MaxLength( Attachment.MAX_SIZE )] public        string         Message          { get; init; } = string.Empty;
+    [MaxLength( MAX_STRING_SIZE )] public            string         Message          { get; init; } = string.Empty;
     public                                           Guid?          ScopeID          { get; init; }
     public                                           Guid           SessionID        { get; init; }
-    [MaxLength( Attachment.MAX_SIZE )] public        string?        StackTrace       { get; init; }
+    [MaxLength( MAX_STRING_SIZE )] public            string?        StackTrace       { get; init; }
     public                                           DateTimeOffset Timestamp        { get; init; }
 
 
@@ -77,11 +78,11 @@ public sealed record LogRecord : LoggerTable<LogRecord>, IAppLog, ILogInfo, IApp
 
     public async ValueTask<AppLog> ToLog( DbConnection connection, DbTransaction transaction, LoggerDB db, CancellationToken token = default )
     {
-        IEnumerable<AttachmentRecord> records = await db.Attachments.Where( connection, transaction, true, AttachmentRecord.GetDynamicParameters( this ), token );
-        DeviceRecord                  device  = await db.Devices.Get( connection, transaction, DeviceID, token ) ?? throw new RecordNotFoundException( DeviceID.ToString() );
-        ExceptionDetails?             details = GetExceptionDetails();
+        IEnumerable<LoggerAttachmentRecord> records = await db.Attachments.Where( connection, transaction, true, LoggerAttachmentRecord.GetDynamicParameters( this ), token );
+        DeviceRecord                        device  = await db.Devices.Get( connection, transaction, DeviceID, token ) ?? throw new RecordNotFoundException( DeviceID.ToString() );
+        ExceptionDetails?                   details = GetExceptionDetails();
 
-        return new AppLog( this, records.Select( x => x.ToAttachment() ), device.ToDeviceDescriptor(), details );
+        return new AppLog( this, records.Select( x => x.ToLoggerAttachment() ), device.ToDeviceDescriptor(), details );
     }
 
 

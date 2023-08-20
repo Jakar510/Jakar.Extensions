@@ -9,7 +9,7 @@ namespace Jakar.AppLogger.Portal.Data;
 public sealed class LoggerDB : Database.Database
 {
     public DbTable<AppRecord>                           Apps          { get; }
-    public DbTable<AttachmentRecord>                    Attachments   { get; }
+    public DbTable<LoggerAttachmentRecord>                    Attachments   { get; }
     public DbTable<DeviceRecord>                        Devices       { get; }
     public DbTable<LogRecord>                           Logs          { get; }
     public ConcurrentObservableCollection<Notification> Notifications { get; } = new(Notification.Sorter);
@@ -26,7 +26,7 @@ public sealed class LoggerDB : Database.Database
     public LoggerDB( IConfiguration configuration, IOptions<DbOptions> options ) : base( configuration, options )
     {
         Logs        = Create<LogRecord>();
-        Attachments = Create<AttachmentRecord>();
+        Attachments = Create<LoggerAttachmentRecord>();
         Devices     = Create<DeviceRecord>();
         Apps        = Create<AppRecord>();
         Sessions    = Create<SessionRecord>();
@@ -111,13 +111,13 @@ public sealed class LoggerDB : Database.Database
         record = await Logs.Insert( connection, transaction, record, token );
 
 
-        foreach ( Attachment attachment in log.Attachments )
+        foreach ( LoggerAttachment attachment in log.Attachments )
         {
-            AttachmentRecord? attachmentRecord = await Attachments.Get( connection, transaction, true, AttachmentRecord.GetDynamicParameters( attachment ), token );
+            LoggerAttachmentRecord? attachmentRecord = await Attachments.Get( connection, transaction, true, LoggerAttachmentRecord.GetDynamicParameters( attachment ), token );
 
             if ( attachmentRecord is null )
             {
-                attachmentRecord = new AttachmentRecord( attachment, record, caller );
+                attachmentRecord = new LoggerAttachmentRecord( attachment, record, caller );
                 await Attachments.Insert( connection, transaction, attachmentRecord, token );
             }
             else { await Attachments.Update( connection, transaction, attachmentRecord.Update( attachment ), token ); }

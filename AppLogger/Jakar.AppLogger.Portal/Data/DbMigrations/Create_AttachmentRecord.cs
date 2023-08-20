@@ -9,7 +9,7 @@ namespace Jakar.AppLogger.Portal.Data.DbMigrations;
 [Migration( 104 )]
 
 // ReSharper disable once InconsistentNaming
-public sealed class Create_AttachmentRecord : LoggerMigration<AttachmentRecord>
+public sealed class Create_AttachmentRecord : LoggerMigration<LoggerAttachmentRecord>
 {
     public Create_AttachmentRecord() : base() { }
 
@@ -20,47 +20,47 @@ public sealed class Create_AttachmentRecord : LoggerMigration<AttachmentRecord>
         CheckSchema();
         ICreateTableWithColumnSyntax table = CreateTable();
 
-        table.WithColumn( nameof(AttachmentRecord.IsBinary) )
+        table.WithColumn( nameof(LoggerAttachmentRecord.IsBinary) )
              .AsBoolean()
              .NotNullable();
 
-        table.WithColumn( nameof(AttachmentRecord.SessionID) )
+        table.WithColumn( nameof(LoggerAttachmentRecord.SessionID) )
              .AsGuid()
              .NotNullable();
 
-        table.WithColumn( nameof(AttachmentRecord.ScopeID) )
+        table.WithColumn( nameof(LoggerAttachmentRecord.ScopeID) )
              .AsGuid()
              .Nullable();
 
-        table.WithColumn( nameof(AttachmentRecord.AppID) )
+        table.WithColumn( nameof(LoggerAttachmentRecord.AppID) )
              .AsInt64()
              .NotNullable();
 
-        table.WithColumn( nameof(AttachmentRecord.DeviceID) )
+        table.WithColumn( nameof(LoggerAttachmentRecord.DeviceID) )
              .AsInt64()
              .NotNullable();
 
-        table.WithColumn( nameof(AttachmentRecord.Length) )
+        table.WithColumn( nameof(LoggerAttachmentRecord.Length) )
              .AsInt64()
              .NotNullable();
 
-        table.WithColumn( nameof(AttachmentRecord.LogID) )
+        table.WithColumn( nameof(LoggerAttachmentRecord.LogID) )
              .AsInt64()
              .NotNullable();
 
-        table.WithColumn( nameof(AttachmentRecord.Content) )
+        table.WithColumn( nameof(LoggerAttachmentRecord.Content) )
              .AsString( 2 ^ 20 )
              .NotNullable();
 
-        table.WithColumn( nameof(AttachmentRecord.Description) )
+        table.WithColumn( nameof(LoggerAttachmentRecord.Description) )
              .AsString( 1024 )
              .Nullable();
 
-        table.WithColumn( nameof(AttachmentRecord.FileName) )
+        table.WithColumn( nameof(LoggerAttachmentRecord.FileName) )
              .AsString( 256 )
              .Nullable();
 
-        table.WithColumn( nameof(AttachmentRecord.Type) )
+        table.WithColumn( nameof(LoggerAttachmentRecord.Type) )
              .AsString( 256 )
              .Nullable();
     }

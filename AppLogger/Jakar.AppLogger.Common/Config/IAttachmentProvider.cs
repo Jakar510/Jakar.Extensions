@@ -4,7 +4,7 @@
 namespace Jakar.AppLogger.Common;
 
 
-public interface IAttachmentProvider : IAsyncDisposable
+public interface ILoggerAttachmentProvider : IAsyncDisposable
 {
-    public Attachment GetAttachment();
+    public LoggerAttachment GetLoggerAttachment();
 }

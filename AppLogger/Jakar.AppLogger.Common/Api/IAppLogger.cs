@@ -13,9 +13,9 @@ public interface IAppLogger : ILogger, ILoggerProvider, IHostedService, IAsyncDi
 
     public void TrackError( Exception e, EventID? eventId = default );
     public void TrackError( Exception e, EventID? eventId, IDictionary<string, JToken?>? eventDetails );
-    public void TrackError( Exception e, EventID? eventId, params Attachment[]           attachments );
-    public void TrackError( Exception e, EventID? eventId, IDictionary<string, JToken?>? eventDetails, params Attachment[]           attachments );
-    public void TrackError( Exception e, EventID  eventId, IEnumerable<Attachment>       attachments,  IDictionary<string, JToken?>? eventDetails = default );
+    public void TrackError( Exception e, EventID? eventId, params LoggerAttachment[]           attachments );
+    public void TrackError( Exception e, EventID? eventId, IDictionary<string, JToken?>? eventDetails, params LoggerAttachment[]           attachments );
+    public void TrackError( Exception e, EventID  eventId, IEnumerable<LoggerAttachment>       attachments,  IDictionary<string, JToken?>? eventDetails = default );
 
 
     public void TrackEvent<T>( LogLevel level = LogLevel.Trace, IDictionary<string, JToken?>? eventDetails = default, [CallerMemberName] string? caller = default );

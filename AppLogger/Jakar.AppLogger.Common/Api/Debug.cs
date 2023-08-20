@@ -1,5 +1,4 @@
-﻿#nullable enable
-namespace Jakar.AppLogger.Common;
+﻿namespace Jakar.AppLogger.Common;
 
 
 [SuppressMessage( "ReSharper", "MemberCanBeMadeStatic.Global" )]
@@ -35,6 +34,7 @@ public sealed class Debug : ObservableClass
         get => _screenShot;
         set => SetProperty( ref _screenShot, value );
     }
+    public Guid? SessionID => _logger.Config.Session?.SessionID;
 
 
     public Debug( BaseFileSystemApi api, IAppLogger logger )
@@ -80,46 +80,46 @@ public sealed class Debug : ObservableClass
     }
     public void TrackError( Exception ex, IDictionary<string, JToken?>? eventDetails, EventID? eventId = default )
     {
-        List<Attachment> attachments = GetAttachments( ex, eventDetails );
+        List<LoggerAttachment> attachments = GetLoggerAttachments( ex, eventDetails );
 
-        if ( FeedBack.Exists ) { attachments.Add( Attachment.Create( FeedBack ) ); }
+        if ( FeedBack.Exists ) { attachments.Add( LoggerAttachment.Create( FeedBack ) ); }
 
         _logger.TrackError( ex, eventId ?? new EventID( ex.Message.GetHashCode(), ex.Message ), attachments, eventDetails );
         ScreenShot = default;
     }
     public async ValueTask TrackErrorAsync( Exception ex, IDictionary<string, JToken?>? eventDetails, EventID? eventId = default )
     {
-        List<Attachment> attachments = GetAttachments( ex, eventDetails );
+        List<LoggerAttachment> attachments = GetLoggerAttachments( ex, eventDetails );
 
-        if ( FeedBack.Exists ) { attachments.Add( await Attachment.CreateAsync( FeedBack ) ); }
+        if ( FeedBack.Exists ) { attachments.Add( await LoggerAttachment.CreateAsync( FeedBack ) ); }
 
         _logger.TrackError( ex, eventId ?? new EventID( ex.Message.GetHashCode(), ex.Message ), attachments, eventDetails );
         ScreenShot = default;
     }
-    private List<Attachment> GetAttachments( Exception ex, IDictionary<string, JToken?>? eventDetails )
+    private List<LoggerAttachment> GetLoggerAttachments( Exception ex, IDictionary<string, JToken?>? eventDetails )
     {
-        var attachments = new List<Attachment>( 10 )
+        var attachments = new List<LoggerAttachment>( 10 )
                           {
-                              Attachment.Create( ex.ToString(),
+                              LoggerAttachment.Create( ex.ToString(),
                                                  ex.GetType()
-                                                   .FullName ),
+                                                   .FullName )
                           };
 
 
-        if ( _logger.Config.IncludeAppStateOnError && AppState is not null ) { attachments.Add( Attachment.Create( AppState.ToPrettyJson(), _fileSystemApi.AppStateFile.Name ) ); }
+        if ( _logger.Config.IncludeAppStateOnError && AppState is not null ) { attachments.Add( LoggerAttachment.Create( AppState.ToPrettyJson(), _fileSystemApi.AppStateFile.Name ) ); }
 
-        if ( _logger.Config.IncludeEventDetailsOnError && eventDetails is not null ) { attachments.Add( Attachment.Create( eventDetails.ToPrettyJson(), _fileSystemApi.DebugFile.Name ) ); }
+        if ( _logger.Config.IncludeEventDetailsOnError && eventDetails is not null ) { attachments.Add( LoggerAttachment.Create( eventDetails.ToPrettyJson(), _fileSystemApi.DebugFile.Name ) ); }
 
 
         if ( _logger.Config.IncludeRequestsOnError )
         {
-            if ( Incoming is not null ) { attachments.Add( Attachment.Create( Incoming.ToPrettyJson(), _fileSystemApi.IncomingFile.Name ) ); }
+            if ( Incoming is not null ) { attachments.Add( LoggerAttachment.Create( Incoming.ToPrettyJson(), _fileSystemApi.IncomingFile.Name ) ); }
 
-            if ( Outgoing is not null ) { attachments.Add( Attachment.Create( Outgoing.ToPrettyJson(), _fileSystemApi.OutgoingFile.Name ) ); }
+            if ( Outgoing is not null ) { attachments.Add( LoggerAttachment.Create( Outgoing.ToPrettyJson(), _fileSystemApi.OutgoingFile.Name ) ); }
         }
 
 
-        if ( _logger.Config.TakeScreenshotOnError && !ScreenShot.IsEmpty ) { attachments.Add( Attachment.Create( ScreenShot, "ScreenShot.jpeg", "image/jpeg" ) ); }
+        if ( _logger.Config.TakeScreenshotOnError && !ScreenShot.IsEmpty ) { attachments.Add( LoggerAttachment.Create( ScreenShot, "ScreenShot.jpeg", "image/jpeg" ) ); }
 
         return attachments;
     }

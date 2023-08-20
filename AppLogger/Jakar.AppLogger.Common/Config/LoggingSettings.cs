@@ -41,7 +41,7 @@ public abstract class LoggingSettings : ObservableClass, IScopeID, ISessionID, I
         get => _userID;
         set => SetProperty( ref _userID, value );
     }
-    [JsonIgnore] public ConcurrentBag<IAttachmentProvider> AttachmentProviders { get; init; } = new();
+    [JsonIgnore] public ConcurrentBag<ILoggerAttachmentProvider> LoggerAttachmentProviders { get; init; } = new();
     public              DeviceDescriptor                   Device              { get; init; }
     public bool EnableAnalytics
     {
@@ -184,7 +184,7 @@ public abstract class LoggingSettings : ObservableClass, IScopeID, ISessionID, I
     {
         _scope?.Dispose();
         _scope = default;
-        foreach ( IAttachmentProvider provider in AttachmentProviders ) { await provider.DisposeAsync(); }
+        foreach ( ILoggerAttachmentProvider provider in LoggerAttachmentProviders ) { await provider.DisposeAsync(); }
 
         GC.SuppressFinalize( this );
     }

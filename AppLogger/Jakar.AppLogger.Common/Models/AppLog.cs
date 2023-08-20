@@ -11,19 +11,18 @@ namespace Jakar.AppLogger.Common;
 [Serializable]
 public sealed record AppLog( [property: MaxLength( IAppLog.MESSAGE_LENGTH )] string Message, LogLevel Level, EventID EventID, DateTimeOffset TimeStamp, StartSessionReply Session, Guid? ScopeID ) : BaseJsonModelRecord, IAppLog, ILogDetails
 {
-    [MaxLength( IAppLog.APP_USER_ID_LENGTH )] public   string?             AppUserID    { get; init; }
-    public                                             HashSet<Attachment> Attachments  { get; init; } = new();
-    [MaxLength( IAppLog.BUILD_ID_LENGTH )]      public string?             BuildID      { get; init; }
-    [MaxLength( IAppLog.CATEGORY_NAME_LENGTH )] public string?             CategoryName { get; init; }
-    public                                             DeviceDescriptor?   Device       { get; init; }
-    public                                             long                DeviceID     { get; init; }
-    public                                             ExceptionDetails?   Exception    { get; init; }
-    public                                             Guid                ID           { get; init; }
-    [JsonIgnore] public                                bool                IsError      => Level > LogLevel.Error;
-    public                                             bool                IsFatal      { get; init; }
-    public                                             bool                IsValid      => !string.IsNullOrWhiteSpace( Message );
-    string? IAppLog.                                                       StackTrace   => GetStackTrace();
-    public int                                                             ThreadID     { get; init; } = Environment.CurrentManagedThreadId;
+    [MaxLength( IAppLog.APP_USER_ID_LENGTH )] public   string?                   AppUserID    { get; init; }
+    public                                             HashSet<LoggerAttachment> Attachments  { get; init; } = new();
+    [MaxLength( IAppLog.BUILD_ID_LENGTH )]      public string?                   BuildID      { get; init; }
+    [MaxLength( IAppLog.CATEGORY_NAME_LENGTH )] public string?                   CategoryName { get; init; }
+    public                                             DeviceDescriptor?         Device       { get; init; }
+    public                                             ExceptionDetails?         Exception    { get; init; }
+    public                                             Guid                      ID           { get; init; }
+    [JsonIgnore] public                                bool                      IsError      => Level > LogLevel.Error;
+    public                                             bool                      IsFatal      { get; init; }
+    public                                             bool                      IsValid      => !string.IsNullOrWhiteSpace( Message );
+    string? IAppLog.                                                             StackTrace   => GetStackTrace();
+    public int                                                                   ThreadID     { get; init; } = Environment.CurrentManagedThreadId;
 
 
     public AppLog( AppLog log ) : base( log )
@@ -41,9 +40,9 @@ public sealed record AppLog( [property: MaxLength( IAppLog.MESSAGE_LENGTH )] str
         Exception    = log.Exception;
         Device       = log.Device;
         CategoryName = log.CategoryName;
-        Attachments  = new HashSet<Attachment>( log.Attachments );
+        Attachments  = new HashSet<LoggerAttachment>( log.Attachments );
     }
-    public AppLog( IAppLog log, IEnumerable<Attachment> attachments, DeviceDescriptor device, ExceptionDetails? details ) : this( log.Message, log.Level, log.EventID, log.TimeStamp, log.Session, log.ScopeID )
+    public AppLog( IAppLog log, IEnumerable<LoggerAttachment> attachments, DeviceDescriptor device, ExceptionDetails? details ) : this( log.Message, log.Level, log.EventID, log.TimeStamp, log.Session, log.ScopeID )
     {
         ID           = log.ID;
         Message      = log.Message;
@@ -58,14 +57,14 @@ public sealed record AppLog( [property: MaxLength( IAppLog.MESSAGE_LENGTH )] str
         Device       = device;
         CategoryName = log.CategoryName;
         Exception    = details;
-        Attachments  = new HashSet<Attachment>( attachments );
+        Attachments  = new HashSet<LoggerAttachment>( attachments );
     }
-    public AppLog( AppLogger logger, LogLevel level, EventID eventID, string message, IEnumerable<Attachment>? attachments = default, IDictionary<string, JToken?>? eventDetails = default ) : this( message,
-                                                                                                                                                                                                     level,
-                                                                                                                                                                                                     eventID,
-                                                                                                                                                                                                     DateTimeOffset.UtcNow,
-                                                                                                                                                                                                     logger.Config.Session,
-                                                                                                                                                                                                     logger.Config.ScopeID )
+    public AppLog( AppLogger logger, LogLevel level, EventID eventID, string message, IEnumerable<LoggerAttachment>? attachments = default, IDictionary<string, JToken?>? eventDetails = default ) : this( message,
+                                                                                                                                                                                                           level,
+                                                                                                                                                                                                           eventID,
+                                                                                                                                                                                                           DateTimeOffset.UtcNow,
+                                                                                                                                                                                                           logger.Config.Session,
+                                                                                                                                                                                                           logger.Config.ScopeID )
     {
         AppUserID      = logger.Config.AppUserID;
         Session        = logger.Config.Session;
@@ -81,7 +80,7 @@ public sealed record AppLog( [property: MaxLength( IAppLog.MESSAGE_LENGTH )] str
     }
 
 
-    public static AppLog Create( AppLogger logger, LogLevel logLevel, EventID eventID, string? message, Exception? e, IEnumerable<Attachment>? attachments = default, IDictionary<string, JToken?>? eventDetails = default )
+    public static AppLog Create( AppLogger logger, LogLevel logLevel, EventID eventID, string? message, Exception? e, IEnumerable<LoggerAttachment>? attachments = default, IDictionary<string, JToken?>? eventDetails = default )
     {
         var log = new AppLog( logger, logLevel, eventID, message ?? e?.Message ?? string.Empty, attachments, eventDetails )
                   {
@@ -96,7 +95,7 @@ public sealed record AppLog( [property: MaxLength( IAppLog.MESSAGE_LENGTH )] str
                                          TState                           state,
                                          Exception?                       e,
                                          Func<TState, Exception?, string> formatter,
-                                         IEnumerable<Attachment>?         attachments  = default,
+                                         IEnumerable<LoggerAttachment>?   attachments  = default,
                                          IDictionary<string, JToken?>?    eventDetails = default
     )
     {

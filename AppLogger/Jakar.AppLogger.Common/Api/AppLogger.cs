@@ -17,7 +17,7 @@ public sealed class AppLogger : Service, IAppLogger
 
 
     internal        string                  ApiToken     => Options.APIToken;
-    internal        IEnumerable<Attachment> Attachments  => Config.AttachmentProviders.Select( x => x.GetAttachment() );
+    internal        IEnumerable<LoggerAttachment> LoggerAttachments  => Config.LoggerAttachmentProviders.Select( x => x.GetLoggerAttachment() );
     public          string                  CategoryName => _categoryName ?? Options.Config?.AppName ?? string.Empty;
     public          LoggingSettings         Config       => Options.Config ?? throw new InvalidOperationException( $"{nameof(AppLoggerOptions)}.{nameof(AppLoggerOptions.Config)} is not set" );
     public override bool                    IsValid      => Options.IsValid && base.IsValid;
@@ -183,24 +183,24 @@ public sealed class AppLogger : Service, IAppLogger
         if ( string.IsNullOrWhiteSpace( message ) ) { return; }
 
         var eventID = new EventID( message.GetHashCode(), message );
-        var log     = new AppLog( this, level, eventID, message, Attachments, eventDetails );
+        var log     = new AppLog( this, level, eventID, message, LoggerAttachments, eventDetails );
         Add( log );
     }
 
 
     public void TrackError( Exception e, EventID? eventId = default ) =>
-        TrackError( e, eventId, default, Attachment.Empty );
+        TrackError( e, eventId, default, LoggerAttachment.Empty );
     public void TrackError( Exception e, EventID? eventId, IDictionary<string, JToken?>? eventDetails ) =>
-        TrackError( e, eventId, eventDetails, Attachment.Empty );
-    public void TrackError( Exception e, EventID? eventId, params Attachment[] attachments ) =>
+        TrackError( e, eventId, eventDetails, LoggerAttachment.Empty );
+    public void TrackError( Exception e, EventID? eventId, params LoggerAttachment[] attachments ) =>
         TrackError( e, eventId, default, attachments );
-    public void TrackError( Exception e, EventID? eventId, IDictionary<string, JToken?>? eventDetails, params Attachment[] attachments ) =>
+    public void TrackError( Exception e, EventID? eventId, IDictionary<string, JToken?>? eventDetails, params LoggerAttachment[] attachments ) =>
         TrackError( e, eventId ?? new EventID( e.HResult, e.Source ), attachments, eventDetails );
-    public void TrackError( Exception e, EventID eventId, IEnumerable<Attachment> attachments, IDictionary<string, JToken?>? eventDetails = default )
+    public void TrackError( Exception e, EventID eventId, IEnumerable<LoggerAttachment> attachments, IDictionary<string, JToken?>? eventDetails = default )
     {
         if ( !IsEnabled( LogLevel.Error ) ) { return; }
 
-        AppLog log = AppLog.Create( this, LogLevel.Error, eventId, e.Message, e, Attachments.Concat( attachments ), eventDetails );
+        AppLog log = AppLog.Create( this, LogLevel.Error, eventId, e.Message, e, LoggerAttachments.Concat( attachments ), eventDetails );
         _logs.Add( log );
     }
 
@@ -209,7 +209,7 @@ public sealed class AppLogger : Service, IAppLogger
     {
         if ( !IsEnabled( level ) ) { return; }
 
-        AppLog log = AppLog.Create( this, level, eventId, state, e, formatter, Attachments );
+        AppLog log = AppLog.Create( this, level, eventId, state, e, formatter, LoggerAttachments );
         _logs.Add( log );
     }
     public bool IsEnabled( LogLevel level )
