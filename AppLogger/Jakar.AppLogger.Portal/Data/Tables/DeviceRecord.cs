@@ -14,6 +14,7 @@ public sealed record DeviceRecord : LoggerTable<DeviceRecord>, IDevice
     [MaxLength( 4096 )]                public string     DeviceID            { get; init; } = string.Empty;
     [MaxLength( Attachment.MAX_SIZE )] public string?    HardwareInfo        { get; init; }
     HwInfo? IDevice.                                     HwInfo              => HardwareInfo?.FromJson<HwInfo>();
+    AppVersion IDevice.                                  OsVersion           => OsVersion;
     [MaxLength( 256 )]  public string                    Locale              { get; init; } = string.Empty;
     [MaxLength( 4096 )] public string?                   Model               { get; init; }
     public                     int?                      OsApiLevel          { get; init; }
@@ -35,8 +36,7 @@ public sealed record DeviceRecord : LoggerTable<DeviceRecord>, IDevice
         SdkVersion          = device.SdkVersion;
         Model               = device.Model;
         OsName              = device.OsName;
-        OsVersion           = device.OsVersion;
-        OsBuild             = device.OsBuild;
+        OsVersion           = device.OsVersion.ToString();
         OsApiLevel          = device.OsApiLevel;
         Locale              = device.Locale;
         TimeZoneOffset      = device.TimeZoneOffset;
@@ -60,8 +60,7 @@ public sealed record DeviceRecord : LoggerTable<DeviceRecord>, IDevice
                    SdkVersion = device.SdkVersion,
                    Model = device.Model,
                    OsName = device.OsName,
-                   OsVersion = device.OsVersion,
-                   OsBuild = device.OsBuild,
+                   OsVersion = device.OsVersion.ToString(),
                    OsApiLevel = device.OsApiLevel,
                    Locale = device.Locale,
                    TimeZoneOffset = device.TimeZoneOffset,

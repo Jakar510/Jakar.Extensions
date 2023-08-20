@@ -33,15 +33,11 @@ public sealed class Create_LogRecord : LoggerMigration<LogRecord>
              .AsBoolean()
              .NotNullable();
 
-        table.WithColumn( nameof(LogRecord.AppErrorTime) )
-             .AsDateTime2()
-             .NotNullable();
-
-        table.WithColumn( nameof(LogRecord.AppLaunchTimestamp) )
-             .AsDateTime2()
-             .NotNullable();
-
         table.WithColumn( nameof(LogRecord.AppStartTime) )
+             .AsDateTime2()
+             .NotNullable();
+
+        table.WithColumn( nameof(LogRecord.TimeStamp) )
              .AsDateTime2()
              .NotNullable();
 

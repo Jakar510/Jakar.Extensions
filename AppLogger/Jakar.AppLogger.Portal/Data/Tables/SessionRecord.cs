@@ -1,16 +1,18 @@
 ﻿// Jakar.AppLogger :: Jakar.AppLogger.Portal
 // 09/21/2022  4:52 PM
 
+
 namespace Jakar.AppLogger.Portal.Data.Tables;
 
 
 [Serializable]
 [Table( "Sessions" )]
-public sealed record SessionRecord : LoggerTable<SessionRecord>, ISession
+public sealed record SessionRecord : LoggerTable<SessionRecord>, IStartSession
 {
-    public Guid AppID     { get; init; }
-    public Guid DeviceID  { get; init; }
-    public Guid SessionID { get; init; }
+    public Guid      AppID     { get; init; }
+    public Guid      DeviceID  { get; init; }
+    public Guid      SessionID { get; init; }
+    Guid? ISessionID.SessionID => SessionID;
 
 
     public SessionRecord() : base() { }
@@ -19,6 +21,7 @@ public sealed record SessionRecord : LoggerTable<SessionRecord>, ISession
         AppID    = app.ID;
         DeviceID = device.ID;
     }
+    public StartSessionReply ToStartSessionReply() => new(SessionID, AppID, DeviceID);
 
 
     public static DynamicParameters GetDynamicParameters( in Guid sessionID )

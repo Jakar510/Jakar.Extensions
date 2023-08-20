@@ -4,9 +4,13 @@
 namespace Jakar.AppLogger.Common;
 
 
+[Serializable] public sealed record StartSession( string AppLoggerSecret, DateTimeOffset AppStartTime, DeviceDescriptor Device ) : BaseRecord;
+
+
+
 [Serializable]
-public sealed class StartSession : BaseClass
+// ReSharper disable once InconsistentNaming
+public sealed record StartSessionReply( Guid SessionID, Guid AppID, Guid DeviceID ) : BaseRecord, IStartSession
 {
-    [JsonProperty( Required = Required.Always )] public string           AppLoggerSecret { get; init; } = string.Empty;
-    [JsonProperty( Required = Required.Always )] public DeviceDescriptor Device          { get; init; } = new();
+    Guid? ISessionID.SessionID => SessionID;
 }

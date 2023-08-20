@@ -1,7 +1,9 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 03/06/2023  12:59 AM
 
+
 namespace Jakar.Database;
+
 
 
 public readonly record struct Error( Status Status, ProblemDetails? Details = default, ModelStateDictionary? State = default, object? Value = default, string[]? Errors = default )

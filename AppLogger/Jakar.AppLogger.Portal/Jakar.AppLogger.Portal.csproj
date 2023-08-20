@@ -34,4 +34,8 @@
 		<ProjectReference Include="..\..\Jakar.Extensions.Blazor\Jakar.Extensions.Blazor.csproj" />
 		<ProjectReference Include="..\Jakar.AppLogger.Common\Jakar.AppLogger.Common.csproj" />
 	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Data\Interfaces\" />
+	</ItemGroup>
 </Project>

@@ -6,5 +6,21 @@ namespace Jakar.AppLogger.Common;
 
 public interface ISessionID
 {
-    public Guid SessionID { get; set; }
+    public Guid? SessionID { get; }
+}
+
+
+
+public interface IStartSession : ISessionID
+{
+    public Guid AppID    { get; }
+    public Guid DeviceID { get; }
+}
+
+
+
+public interface ILogInfo : IStartSession
+{
+    public Guid  LogID   { get; }
+    public Guid? ScopeID { get; }
 }

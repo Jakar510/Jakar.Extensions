@@ -11,14 +11,15 @@ public interface IAppLogger : ILogger, ILoggerProvider, IHostedService, IAsyncDi
     public AppLoggerOptions Options { get; }
 
 
-    public void TrackError( Exception e, EventId? eventId = default );
-    public void TrackError( Exception e, EventId? eventId, IDictionary<string, JToken?>? eventDetails );
-    public void TrackError( Exception e, EventId? eventId, params Attachment[]           attachments );
-    public void TrackError( Exception e, EventId? eventId, IDictionary<string, JToken?>? eventDetails, params Attachment[]           attachments );
-    public void TrackError( Exception e, EventId  eventId, IEnumerable<Attachment>       attachments,  IDictionary<string, JToken?>? eventDetails = default );
+    public void TrackError( Exception e, EventID? eventId = default );
+    public void TrackError( Exception e, EventID? eventId, IDictionary<string, JToken?>? eventDetails );
+    public void TrackError( Exception e, EventID? eventId, params Attachment[]           attachments );
+    public void TrackError( Exception e, EventID? eventId, IDictionary<string, JToken?>? eventDetails, params Attachment[]           attachments );
+    public void TrackError( Exception e, EventID  eventId, IEnumerable<Attachment>       attachments,  IDictionary<string, JToken?>? eventDetails = default );
 
 
     public void TrackEvent<T>( LogLevel level = LogLevel.Trace, IDictionary<string, JToken?>? eventDetails = default, [CallerMemberName] string? caller = default );
+
 
     public void TrackEvent<T>( T   _,      LogLevel level = LogLevel.Trace, IDictionary<string, JToken?>? eventDetails = default, [CallerMemberName] string? caller = default );
     public void TrackEvent( string source, LogLevel level = LogLevel.Trace, IDictionary<string, JToken?>? eventDetails = null );

@@ -13,9 +13,7 @@ public interface IAppLog : IUniqueID<Guid>, IValidator
     public const int MESSAGE_LENGTH       = 0x3FFFFFDF; // 1 GB
 
 
-    public DateTimeOffset AppErrorTime       { get; }
-    public DateTimeOffset AppLaunchTimestamp { get; }
-    public DateTimeOffset AppStartTime       { get; }
+    public DateTimeOffset TimeStamp { get; }
 
 
     /// <summary> An optional string used for associating logs with users. </summary>
@@ -26,16 +24,8 @@ public interface IAppLog : IUniqueID<Guid>, IValidator
     public string? BuildID { get; }
 
     public string? CategoryName { get; }
-
-
-    /// <summary> Gets the numeric identifier for this event. </summary>
-    public int EventID { get; }
-
-
-    /// <summary> Gets the name of this event. </summary>
-    public string? EventName { get; }
-
-    bool IsError { get; }
+    public EventID EventID      { get; }
+    bool           IsError      { get; }
 
 
     /// <summary> Gets or sets if true, this error report is an application crash. Corresponds to the number of milliseconds elapsed between the time the error occurred and the app was launched. </summary>
@@ -49,10 +39,9 @@ public interface IAppLog : IUniqueID<Guid>, IValidator
     /// <summary> Gets or sets when tracking an analytics session, logs can be part of the session by specifying this identifier.
     ///     <para> This attribute is optional, a missing value means the session tracking is disabled (like when using only error reporting feature). </para>
     /// </summary>
-    public Guid SessionID { get; }
+    public StartSessionReply Session { get; }
 
-    public string?        StackTrace { get; }
-    public DateTimeOffset Timestamp  { get; }
+    public string? StackTrace { get; }
 
 
     public ExceptionDetails? GetExceptionDetails();

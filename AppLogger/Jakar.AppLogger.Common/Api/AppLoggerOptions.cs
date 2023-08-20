@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.AppLogger.Common
 // 02/01/2023  12:21 PM
 
-using Microsoft.Extensions.Options;
-
-
-
 namespace Jakar.AppLogger.Common;
 
 

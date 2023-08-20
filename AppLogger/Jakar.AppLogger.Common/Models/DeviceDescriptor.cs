@@ -7,52 +7,45 @@ namespace Jakar.AppLogger.Common;
 
 
 /// <summary> Device class to help retrieve device information. </summary>
-public sealed record DeviceDescriptor : BaseRecord, IDevice
+public sealed record DeviceDescriptor( int?         AppBuild,
+                                       string?      AppNamespace,
+                                       AppVersion   AppVersion,
+                                       string       OsName,
+                                       int?         OsApiLevel,
+                                       AppVersion   OsVersion,
+                                       string       SdkName,
+                                       string       SdkVersion,
+                                       string       Locale,
+                                       string       DeviceID,
+                                       string?      Model,
+                                       PlatformID   Platform,
+                                       Architecture ProcessArchitecture,
+                                       TimeSpan     TimeZoneOffset,
+                                       HwInfo?      HwInfo = default
+) : BaseRecord, IDevice
 {
-    public const string UNKNOWN = "Unknown";
+    public const string  UNKNOWN = "Unknown";
+    public       HwInfo? HwInfo { get; set; } = HwInfo;
 
 
-    public int?         AppBuild            { get; init; }
-    public string?      AppNamespace        { get; init; }
-    public AppVersion   AppVersion          { get; init; } = new();
-    public string       DeviceID            { get; init; } = string.Empty;
-    public HwInfo?      HwInfo              { get; set; }
-    public string       Locale              { get; init; } = string.Empty;
-    public string?      Model               { get; init; }
-    public int?         OsApiLevel          { get; set; }
-    public string?      OsBuild             { get; init; }
-    public Architecture ProcessArchitecture { get; init; }
-    public string       OsName              { get; init; } = string.Empty;
-    public AppVersion   OsVersion           { get; init; } = new();
-    public PlatformID   Platform            { get; init; }
-    public string       SdkName             { get; init; } = string.Empty;
-    public string       SdkVersion          { get; init; } = string.Empty;
-    public TimeSpan     TimeZoneOffset      { get; init; }
-    string IDevice.     OsVersion           => OsVersion.ToString();
+    public DeviceDescriptor( IDevice device ) : this( device.AppBuild,
+                                                      device.AppNamespace,
+                                                      device.AppVersion,
+                                                      device.OsName,
+                                                      device.OsApiLevel,
+                                                      device.OsVersion,
+                                                      device.SdkName,
+                                                      device.SdkVersion,
+                                                      device.Locale,
+                                                      device.DeviceID,
+                                                      device.Model,
+                                                      device.Platform,
+                                                      device.ProcessArchitecture,
+                                                      device.TimeZoneOffset,
+                                                      device.HwInfo ) { }
 
 
-    public DeviceDescriptor() { }
-    public DeviceDescriptor( IDevice device )
-    {
-        DeviceID            = device.DeviceID;
-        SdkName             = device.SdkName;
-        SdkVersion          = device.SdkVersion;
-        Model               = device.Model;
-        OsName              = device.OsName;
-        OsVersion           = device.OsVersion;
-        OsBuild             = device.OsBuild;
-        OsApiLevel          = device.OsApiLevel;
-        Locale              = device.Locale;
-        TimeZoneOffset      = device.TimeZoneOffset;
-        AppVersion          = device.AppVersion;
-        AppBuild            = device.AppBuild;
-        AppNamespace        = device.AppNamespace;
-        HwInfo              = device.HwInfo;
-        ProcessArchitecture = device.ProcessArchitecture;
-    }
-
-
-    public static DeviceDescriptor Create( AppVersion version, string deviceID )
+    public static DeviceDescriptor Create( AppVersion appVersion, string deviceID, HwInfo? hwInfo = default, int? osApiLevel = default )
     {
         // #if __IOS__
         //     deviceID = UIDevice.CurrentDevice.IdentifierForVendor.AsString();
@@ -63,32 +56,26 @@ public sealed record DeviceDescriptor : BaseRecord, IDevice
         // #endif
 
 
-        OperatingSystem osVersion = Environment.OSVersion;
+        // string? sdkVersion = typeof(DeviceDescriptor).GetTypeInfo().Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
 
-        var device = new DeviceDescriptor
-                     {
-                         // DeviceID       = HardwareInfo.DeviceID,
-                         SdkName = RuntimeInformation.FrameworkDescription,
-                         SdkVersion = typeof(DeviceDescriptor).GetTypeInfo()
-                                                              .Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()
-                                                             ?.InformationalVersion ?? RuntimeEnvironment.GetSystemVersion(),
-                         ProcessArchitecture = RuntimeInformation.ProcessArchitecture,
-                         Model               = GetDeviceModel(),
-                         OsName              = osVersion.VersionString,
-                         OsVersion           = osVersion.Version,
-                         Platform            = osVersion.Platform,
-                         OsBuild             = GetOsBuild(),
-                         Locale              = CultureInfo.CurrentCulture.Name,
-                         TimeZoneOffset      = TimeZoneInfo.Local.BaseUtcOffset,
-                         AppVersion          = version,
-                         AppBuild = version.Build ?? GetFileVersion()
-                                       .Build,
-                         AppNamespace = Assembly.GetEntryAssembly()
-                                               ?.EntryPoint?.DeclaringType?.Namespace,
-                         DeviceID = deviceID,
-                     };
-
-        return device;
+        return new DeviceDescriptor( appVersion.Build ??
+                                     GetFileVersion()
+                                        .Build,
+                                     Assembly.GetEntryAssembly()
+                                            ?.EntryPoint?.DeclaringType?.Namespace,
+                                     appVersion,
+                                     Environment.OSVersion.VersionString,
+                                     osApiLevel,
+                                     OsVersion: Environment.OSVersion.Version,
+                                     RuntimeInformation.FrameworkDescription,
+                                     RuntimeEnvironment.GetSystemVersion(),
+                                     CultureInfo.CurrentCulture.Name,
+                                     deviceID,
+                                     GetDeviceModel(),
+                                     Environment.OSVersion.Platform,
+                                     RuntimeInformation.ProcessArchitecture,
+                                     TimeZoneInfo.Local.BaseUtcOffset,
+                                     hwInfo );
     }
 
 
@@ -100,7 +87,8 @@ public sealed record DeviceDescriptor : BaseRecord, IDevice
         if ( string.IsNullOrWhiteSpace( fileName ) ) { fileName = Environment.GetCommandLineArgs()[0]; }
 
         return FileVersionInfo.GetVersionInfo( fileName )
-                              .FileVersion ?? UNKNOWN;
+                              .FileVersion ??
+               UNKNOWN;
     }
 
 
@@ -129,17 +117,17 @@ public sealed record DeviceDescriptor : BaseRecord, IDevice
 
         if ( RuntimeInformation.IsOSPlatform( OSPlatform.Windows ) )
         {
-            var process = new Process();
+            Process process = new Process();
 
-            var processStartInfo = new ProcessStartInfo
-                                   {
-                                       WindowStyle            = ProcessWindowStyle.Hidden,
-                                       FileName               = "/bin/bash",
-                                       Arguments              = @"wmic computersystem get model",
-                                       RedirectStandardOutput = true,
-                                       RedirectStandardError  = true,
-                                       UseShellExecute        = false
-                                   };
+            ProcessStartInfo processStartInfo = new ProcessStartInfo
+                                                {
+                                                    WindowStyle            = ProcessWindowStyle.Hidden,
+                                                    FileName               = "/bin/bash",
+                                                    Arguments              = @"wmic computersystem get model",
+                                                    RedirectStandardOutput = true,
+                                                    RedirectStandardError  = true,
+                                                    UseShellExecute        = false
+                                                };
 
             process.StartInfo = processStartInfo;
             process.Start();
@@ -152,17 +140,17 @@ public sealed record DeviceDescriptor : BaseRecord, IDevice
 
         if ( RuntimeInformation.IsOSPlatform( OSPlatform.Linux ) )
         {
-            var process = new Process();
+            Process process = new Process();
 
-            var processStartInfo = new ProcessStartInfo
-                                   {
-                                       WindowStyle            = ProcessWindowStyle.Hidden,
-                                       FileName               = "/bin/bash",
-                                       Arguments              = @"sudo dmidecode | less | grep Version | sed -n '2p'",
-                                       RedirectStandardOutput = true,
-                                       RedirectStandardError  = true,
-                                       UseShellExecute        = false
-                                   };
+            ProcessStartInfo processStartInfo = new ProcessStartInfo
+                                                {
+                                                    WindowStyle            = ProcessWindowStyle.Hidden,
+                                                    FileName               = "/bin/bash",
+                                                    Arguments              = @"sudo dmidecode | less | grep Version | sed -n '2p'",
+                                                    RedirectStandardOutput = true,
+                                                    RedirectStandardError  = true,
+                                                    UseShellExecute        = false
+                                                };
 
             process.StartInfo = processStartInfo;
             process.Start();
@@ -173,17 +161,17 @@ public sealed record DeviceDescriptor : BaseRecord, IDevice
 
         if ( RuntimeInformation.IsOSPlatform( OSPlatform.OSX ) )
         {
-            var process = new Process();
+            Process process = new Process();
 
-            var processStartInfo = new ProcessStartInfo
-                                   {
-                                       WindowStyle            = ProcessWindowStyle.Hidden,
-                                       FileName               = "/bin/bash",
-                                       Arguments              = @"sysctl hw.model",
-                                       RedirectStandardOutput = true,
-                                       RedirectStandardError  = true,
-                                       UseShellExecute        = false
-                                   };
+            ProcessStartInfo processStartInfo = new ProcessStartInfo
+                                                {
+                                                    WindowStyle            = ProcessWindowStyle.Hidden,
+                                                    FileName               = "/bin/bash",
+                                                    Arguments              = @"sysctl hw.model",
+                                                    RedirectStandardOutput = true,
+                                                    RedirectStandardError  = true,
+                                                    UseShellExecute        = false
+                                                };
 
             process.StartInfo = processStartInfo;
             process.Start();
@@ -196,7 +184,7 @@ public sealed record DeviceDescriptor : BaseRecord, IDevice
     }
 
 
-    public static string? GetOsBuild() // TODO: GetOsBuild other than windows
+    public static AppVersion? GetOsBuild() // TODO: GetOsBuild other than windows
     {
         if ( RuntimeInformation.IsOSPlatform( OSPlatform.Windows ) )
         {
@@ -230,18 +218,18 @@ public sealed record DeviceDescriptor : BaseRecord, IDevice
 
 
         /*
-    
+
         #if !NETSTANDARD2_1
             if ( OperatingSystem.IsAndroid() ) { }
-    
+
             if ( OperatingSystem.IsIOS() ) { }
-    
+
             if ( OperatingSystem.IsBrowser() ) { }
-    
+
             if ( OperatingSystem.IsFreeBSD() ) { }
-    
+
             if ( OperatingSystem.IsWatchOS() ) { }
-    
+
             if ( OperatingSystem.IsTvOS() ) { }
         #endif
 
@@ -252,8 +240,8 @@ public sealed record DeviceDescriptor : BaseRecord, IDevice
             if ( OperatingSystem.IsLinux() )
         #endif
             { }
-    
-    
+
+
         #if NETSTANDARD2_1
             if ( RuntimeInformation.IsOSPlatform( OSPlatform.OSX ) )
         #else
@@ -261,7 +249,7 @@ public sealed record DeviceDescriptor : BaseRecord, IDevice
                 if ( OperatingSystem.IsMacOS() )
         #endif
             { }
-    
+
         */
 
 

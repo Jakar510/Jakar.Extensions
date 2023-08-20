@@ -19,9 +19,12 @@ public interface IAttachment
 
 
 [Serializable]
-public sealed class Attachment : BaseClass
+public sealed record Attachment : BaseRecord
 {
-    public const int MAX_SIZE = 0x3FFFFFDF; // 1GB
+    public const int MAX_SIZE         = 2 ^ 28; // ~ 268.4 MB
+    public const int DESCRIPTION_SIZE = 1024;
+    public const int FILE_NAME_SIZE   = 256;
+    public const int TYPE_SIZE        = 256;
 
 
     public static Attachment   Default     { get; }       = new();
@@ -44,11 +47,7 @@ public sealed class Attachment : BaseClass
         FileName    = attachment.FileName;
         IsBinary    = attachment.IsBinary;
     }
-    public Attachment( MemoryStream content, string? fileName, string? description = default, string? type = default ) : this( content.GetBuffer()
-                                                                                                                                      .AsSpan(),
-                                                                                                                               fileName,
-                                                                                                                               description,
-                                                                                                                               type ) { }
+    public Attachment( MemoryStream         content, string? fileName, string? description = default, string? type = default ) : this( content.ToArray(), fileName, description, type ) { }
     public Attachment( ReadOnlyMemory<byte> content, string? fileName, string? description = default, string? type = default ) : this( content.Span, fileName, description, type ) { }
     public Attachment( ReadOnlySpan<byte> content, string? fileName, string? description = default, string? type = default ) :
         this( Convert.ToBase64String( content ), content.Length, fileName, description, type, !string.IsNullOrEmpty( fileName ) ) { }
@@ -56,6 +55,10 @@ public sealed class Attachment : BaseClass
     public Attachment( string content, string? description = default, string? type        = default ) : this( content, content.Length, default, description, type, false ) { }
     private Attachment( string content, long length, string? fileName, string? description, string? type, bool isBinary )
     {
+        System.Diagnostics.Debug.Assert( isBinary
+                                             ? content.Length > length
+                                             : content.Length == length );
+
         if ( length > MAX_SIZE ) { ThrowTooLong(); }
 
         Length      = length;
@@ -81,7 +84,7 @@ public sealed class Attachment : BaseClass
         using var ms = new MemoryStream();
         stream.CopyTo( ms );
 
-        return new Attachment( ms, fileName, description, type );
+        return new Attachment( ms.ToArray(), fileName, description, type );
     }
     public static async ValueTask<Attachment> CreateAsync( Stream stream, string? fileName, string? description = default, string? type = default, CancellationToken token = default )
     {

@@ -26,15 +26,8 @@ public class ResourceException<T> : ResourceException
 
 public class EmbeddedResources<T>
 {
-    private readonly Assembly _assembly;
-    public           string   Namespace { get; }
-
-
-    public EmbeddedResources()
-    {
-        _assembly = typeof(T).Assembly;
-        Namespace = typeof(T).Namespace ?? throw new NullReferenceException( nameof(Type.Namespace) );
-    }
+    private readonly Assembly _assembly = typeof(T).Assembly;
+    public           string   Namespace { get; } = typeof(T).Namespace ?? throw new NullReferenceException( nameof(Type.Namespace) );
 
 
     public Stream GetResourceStream( string fileName )

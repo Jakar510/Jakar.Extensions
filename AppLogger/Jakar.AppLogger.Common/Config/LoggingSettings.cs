@@ -11,26 +11,26 @@ public abstract class LoggingSettings : ObservableClass, IScopeID, ISessionID, I
     public static readonly string EmptyGuid               = Guid.Empty.ToString();
 
 
-    private bool     _enableAnalytics;
-    private bool     _enableApi;
-    private bool     _enableCrashes;
-    private bool     _includeAppStateOnError;
-    private bool     _includeDeviceInfoOnError;
-    private bool     _includeEventDetailsOnError;
-    private bool     _includeHwInfo;
-    private bool     _includeRequestsOnError;
-    private bool     _includeUserIDOnError;
-    private bool     _takeScreenshotOnError;
-    private Guid     _installID;
-    private Guid     _sessionID;
-    private Guid?    _scopeID;
-    private IScope?  _scope;
-    private LogLevel _logLevel;
-    private string   _appName = string.Empty;
-    private string?  _userID;
+    private bool               _enableAnalytics;
+    private bool               _enableApi;
+    private bool               _enableCrashes;
+    private bool               _includeAppStateOnError;
+    private bool               _includeDeviceInfoOnError;
+    private bool               _includeEventDetailsOnError;
+    private bool               _includeHwInfo;
+    private bool               _includeRequestsOnError;
+    private bool               _includeUserIDOnError;
+    private bool               _takeScreenshotOnError;
+    private Guid               _installID;
+    private StartSessionReply? _session;
+    private Guid?              _scopeID;
+    private IScope?            _scope;
+    private LogLevel           _logLevel;
+    private string             _appName = string.Empty;
+    private string?            _userID;
 
 
-    public DateTimeOffset AppLaunchTimestamp { get; init; } = DateTimeOffset.UtcNow;
+    public DateTimeOffset AppLaunchTimeStamp { get; init; } = DateTimeOffset.UtcNow;
     public string AppName
     {
         get => _appName;
@@ -103,10 +103,10 @@ public abstract class LoggingSettings : ObservableClass, IScopeID, ISessionID, I
         get => _scopeID;
         set => SetProperty( ref _scopeID, value );
     }
-    public Guid SessionID
+    public StartSessionReply? Session
     {
-        get => _sessionID;
-        set => SetProperty( ref _sessionID, value );
+        get => _session;
+        set => SetProperty( ref _session, value );
     }
     public bool TakeScreenshotOnError
     {
@@ -115,7 +115,8 @@ public abstract class LoggingSettings : ObservableClass, IScopeID, ISessionID, I
     }
 
 
-    public AppVersion Version { get; init; }
+    public AppVersion Version   { get; init; }
+    Guid? ISessionID. SessionID => Session?.SessionID;
 
 
     protected LoggingSettings( AppVersion version, DeviceDescriptor device )

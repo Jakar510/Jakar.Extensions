@@ -2,6 +2,10 @@
 // 04/15/2022  5:45 PM
 
 #nullable enable
+using OneOf.Types;
+
+
+
 namespace Jakar.Extensions;
 
 
@@ -14,6 +18,8 @@ public static class GuidExtensions
     private const char SLASH      = '/';
     private const byte SLASH_BYTE = (byte)'/';
     private const char UNDERSCORE = '_';
+
+
     public static bool TryAsGuid( this Span<char> value, [NotNullWhen( true )] out Guid? result )
     {
         result = AsGuid( value );

@@ -63,7 +63,7 @@ public sealed class Debug : ObservableClass
     public async Task SaveFeedBack( ReadOnlyMemory<byte> feedback, CancellationToken token ) => await FeedBack.WriteAsync( feedback, token );
 
 
-    public void TrackError( Exception e, EventId? eventId = default )
+    public void TrackError( Exception e, EventID? eventId = default )
     {
         if ( !_logger.Config.IncludeAppStateOnError )
         {
@@ -78,22 +78,22 @@ public sealed class Debug : ObservableClass
 
         TrackError( e, eventDetails, eventId );
     }
-    public void TrackError( Exception ex, IDictionary<string, JToken?>? eventDetails, EventId? eventId = default )
+    public void TrackError( Exception ex, IDictionary<string, JToken?>? eventDetails, EventID? eventId = default )
     {
         List<Attachment> attachments = GetAttachments( ex, eventDetails );
 
         if ( FeedBack.Exists ) { attachments.Add( Attachment.Create( FeedBack ) ); }
 
-        _logger.TrackError( ex, eventId ?? new EventId( ex.Message.GetHashCode(), ex.Message ), attachments, eventDetails );
+        _logger.TrackError( ex, eventId ?? new EventID( ex.Message.GetHashCode(), ex.Message ), attachments, eventDetails );
         ScreenShot = default;
     }
-    public async ValueTask TrackErrorAsync( Exception ex, IDictionary<string, JToken?>? eventDetails, EventId? eventId = default )
+    public async ValueTask TrackErrorAsync( Exception ex, IDictionary<string, JToken?>? eventDetails, EventID? eventId = default )
     {
         List<Attachment> attachments = GetAttachments( ex, eventDetails );
 
         if ( FeedBack.Exists ) { attachments.Add( await Attachment.CreateAsync( FeedBack ) ); }
 
-        _logger.TrackError( ex, eventId ?? new EventId( ex.Message.GetHashCode(), ex.Message ), attachments, eventDetails );
+        _logger.TrackError( ex, eventId ?? new EventID( ex.Message.GetHashCode(), ex.Message ), attachments, eventDetails );
         ScreenShot = default;
     }
     private List<Attachment> GetAttachments( Exception ex, IDictionary<string, JToken?>? eventDetails )

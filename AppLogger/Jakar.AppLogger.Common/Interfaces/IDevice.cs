@@ -34,17 +34,13 @@ public interface IDevice
     /// <value> API level when applicable like in Android (example: 15). </value>
     int? OsApiLevel { get; }
 
-    /// <summary> Gets the OS build </summary>
-    /// <value> OS build code (example: LMY47X). </value>
-    string? OsBuild { get; }
-
     /// <summary> Gets the name of the OS. </summary>
     /// <value> OS name (example: iOS). </value>
     string OsName { get; }
 
     /// <summary> Gets the OS version. </summary>
     /// <value> OS version (example: 9.3.0). </value>
-    string OsVersion { get; }
+    AppVersion OsVersion { get; }
 
     public PlatformID Platform { get; init; }
 
@@ -55,7 +51,6 @@ public interface IDevice
     /// <summary> Gets the SDK version. </summary>
     /// <value> Version of the SDK in semver format, e.g. "1.2.0" or "0.12.3-alpha.1". </value>
     string SdkVersion { get; }
-
     /// <summary> Gets the time zone offset. </summary>
     /// <value> The offset in minutes from UTC for the device time zone, including daylight savings time. </value>
     TimeSpan TimeZoneOffset { get; }

@@ -9,7 +9,6 @@ public sealed class AppLoggerConfig : LoggingSettings
     public override ValueTask InitAsync()
     {
         InstallID                  = Guid.Parse( Preferences.Get( nameof(InstallID), EmptyGuid ) );
-        SessionID                  = Guid.Parse( Preferences.Get( nameof(SessionID), EmptyGuid ) );
         LogLevel                   = (LogLevel)Preferences.Get( nameof(LogLevel), LogLevel.Debug.AsInt() );
         AppName                    = Preferences.Get( nameof(AppName),                    string.Empty );
         AppUserID                  = Preferences.Get( nameof(AppUserID),                  string.Empty );

@@ -133,14 +133,7 @@ public sealed class AppLoggerIni : LoggingSettings
                     break;
                 }
 
-                case nameof(SessionID):
-                {
-                    SessionID = Guid.TryParse( value, out Guid id )
-                                    ? id
-                                    : default;
-
-                    break;
-                }
+                case nameof(Session): { break; }
 
                 case nameof(AppUserID):
                 {

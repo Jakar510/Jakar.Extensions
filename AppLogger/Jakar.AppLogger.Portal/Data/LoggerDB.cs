@@ -94,15 +94,15 @@ public sealed class LoggerDB : Database.Database
     }
     public async ValueTask<OneOf<bool, Error>> SendLog( DbConnection connection, DbTransaction transaction, ControllerBase controller, AppLog log, CancellationToken token )
     {
-        if ( !log.SessionID.IsValidID() )
+        if ( log.Session.SessionID.IsValidID() is not true )
         {
-            controller.AddError( nameof(AppLog.SessionID), $"{nameof(AppLog.SessionID)} is null or empty" );
+            controller.AddError( nameof(AppLog.Session), $"{nameof(AppLog.Session)} is null or empty" );
             return new Error( Status.BadRequest, controller.ModelState );
         }
 
 
-        SessionRecord? session = await Sessions.Get( connection, transaction, true, SessionRecord.GetDynamicParameters( log.SessionID ), token );
-        if ( session is null || !session.IsActive ) { return new Error( Status.NotFound, log.SessionID ); }
+        SessionRecord? session = await Sessions.Get( connection, transaction, true, SessionRecord.GetDynamicParameters( log.Session.SessionID ), token );
+        if ( session is null || !session.IsActive ) { return new Error( Status.NotFound, log.Session ); }
 
         UserRecord? caller = await session.GetUserWhoCreated( connection, transaction, this, token );
         if ( caller is null ) { return new Error( Status.Unauthorized ); }

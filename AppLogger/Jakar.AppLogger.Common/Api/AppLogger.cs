@@ -1,18 +1,13 @@
 ﻿// Jakar.AppLogger :: Jakar.AppLogger.Client
 // 09/08/2022  1:54 PM
 
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-
-
-
 namespace Jakar.AppLogger.Common;
 
 
 [SuppressMessage( "ReSharper", "SuggestBaseTypeForParameter" )]
 public sealed class AppLogger : Service, IAppLogger
 {
-    public static readonly EventId               EventID = new(1, nameof(AppLogger));
+    public static readonly EventID               EventID = new(1, nameof(AppLogger));
     private readonly       ConcurrentBag<AppLog> _logs   = new();
     private readonly       ILogger               _logger;
     private readonly       ILoggerFactory        _factory;
@@ -77,36 +72,29 @@ public sealed class AppLogger : Service, IAppLogger
     {
         if ( _disposed ) { ThrowDisposed(); }
 
-        using var source = new CancellationTokenSource( Options.TimeOut );
-
-        var session = new StartSession
-                      {
-                          AppLoggerSecret = ApiToken,
-                          Device          = Config.Device,
-                      };
+        using var source  = new CancellationTokenSource( Options.TimeOut );
+        var       session = new StartSession( ApiToken, Config.AppLaunchTimeStamp, Config.Device );
 
         await using ( token.Register( source.Cancel ) )
         {
             while ( token.ShouldContinue() )
             {
-                WebResponse<string> reply = await _requester.Post( "/Api/StartSession", session, token )
-                                                            .AsString();
+                WebResponse<StartSessionReply> reply = await _requester.Post( "/Api/StartSession", session, token )
+                                                                       .AsJson<StartSessionReply>();
 
-                if ( Guid.TryParse( reply.GetPayload(), out Guid result ) )
-                {
-                    Config.SessionID = result;
-                    break;
-                }
+                Config.Session = reply.GetPayload();
             }
 
-            if ( !Config.SessionID.IsValidID() ) { throw new ApiDisabledException( $"{nameof(LoggingSettings.SessionID)} is not set." ); }
+            if ( Config.Session?.SessionID.IsValidID() is not true ) { throw new ApiDisabledException( $"{nameof(LoggingSettings.Session)} is not set." ); }
         }
     }
     private async ValueTask EndSession( CancellationToken token )
     {
         if ( _disposed ) { ThrowDisposed(); }
 
-        WebResponse<string> reply = await _requester.Post( $"/Api/{nameof(EndSession)}", Config.SessionID.ToString(), token )
+        if ( Config.Session is null ) { return; }
+
+        WebResponse<string> reply = await _requester.Post( $"/Api/{nameof(EndSession)}", Config.Session, token )
                                                     .AsString();
 
         reply.GetPayload();
@@ -194,21 +182,21 @@ public sealed class AppLogger : Service, IAppLogger
 
         if ( string.IsNullOrWhiteSpace( message ) ) { return; }
 
-        var eventID = new EventId( message.GetHashCode(), message );
+        var eventID = new EventID( message.GetHashCode(), message );
         var log     = new AppLog( this, level, eventID, message, Attachments, eventDetails );
         Add( log );
     }
 
 
-    public void TrackError( Exception e, EventId? eventId = default ) =>
+    public void TrackError( Exception e, EventID? eventId = default ) =>
         TrackError( e, eventId, default, Attachment.Empty );
-    public void TrackError( Exception e, EventId? eventId, IDictionary<string, JToken?>? eventDetails ) =>
+    public void TrackError( Exception e, EventID? eventId, IDictionary<string, JToken?>? eventDetails ) =>
         TrackError( e, eventId, eventDetails, Attachment.Empty );
-    public void TrackError( Exception e, EventId? eventId, params Attachment[] attachments ) =>
+    public void TrackError( Exception e, EventID? eventId, params Attachment[] attachments ) =>
         TrackError( e, eventId, default, attachments );
-    public void TrackError( Exception e, EventId? eventId, IDictionary<string, JToken?>? eventDetails, params Attachment[] attachments ) =>
-        TrackError( e, eventId ?? new EventId( e.HResult, e.Source ), attachments, eventDetails );
-    public void TrackError( Exception e, EventId eventId, IEnumerable<Attachment> attachments, IDictionary<string, JToken?>? eventDetails = default )
+    public void TrackError( Exception e, EventID? eventId, IDictionary<string, JToken?>? eventDetails, params Attachment[] attachments ) =>
+        TrackError( e, eventId ?? new EventID( e.HResult, e.Source ), attachments, eventDetails );
+    public void TrackError( Exception e, EventID eventId, IEnumerable<Attachment> attachments, IDictionary<string, JToken?>? eventDetails = default )
     {
         if ( !IsEnabled( LogLevel.Error ) ) { return; }
 
@@ -217,7 +205,7 @@ public sealed class AppLogger : Service, IAppLogger
     }
 
 
-    public void Log<TState>( LogLevel level, EventId eventId, TState state, Exception? e, Func<TState, Exception?, string> formatter )
+    public void Log<TState>( LogLevel level, EventID eventId, TState state, Exception? e, Func<TState, Exception?, string> formatter )
     {
         if ( !IsEnabled( level ) ) { return; }
 
@@ -234,7 +222,8 @@ public sealed class AppLogger : Service, IAppLogger
     }
 
 
-    public IDisposable BeginScope<TState>( TState state ) where TState : notnull => Config.CreateScope(state);
+    public IDisposable BeginScope<TState>( TState state ) where TState : notnull => Config.CreateScope( state );
     public AppLogger CreateLogger( string         categoryName ) => new(this, categoryName);
     ILogger ILoggerProvider.CreateLogger( string  categoryName ) => CreateLogger( categoryName );
+    public void Log<TState>( LogLevel             logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter ) => throw new NotImplementedException();
 }

@@ -8,14 +8,24 @@ namespace Jakar.Extensions;
 
 
 
+public interface IDataProtectorProvider
+{
+    public IDataProtector GetProtector();
+    public ValueTask<IDataProtector> GetProtectorAsync();
+}
+
+
+
 public interface IDataProtector : IDisposable
 {
+    public bool TryEncrypt( in ReadOnlySpan<byte>    value, Span<byte> destination, out int bytesWritten );
     public byte[] Encrypt( byte[]                    value );
     public string Encrypt( string                    value );
-    public string Encrypt( string                    value, Encoding encoding );
-    public void Encrypt( LocalFile                   file,  string   value );
-    public void Encrypt( LocalFile                   file,  string   value, Encoding encoding );
-    public void Encrypt( LocalFile                   file,  byte[]   value );
+    public string Encrypt( string                    value, Encoding   encoding );
+    public void Encrypt( LocalFile                   file,  string     value );
+    public void Encrypt( LocalFile                   file,  string     value, Encoding encoding );
+    public void Encrypt( LocalFile                   file,  byte[]     value );
+    public bool TryDecrypt( in ReadOnlySpan<byte>    value, Span<byte> destination, out int bytesWritten );
     public byte[] Decrypt( byte[]                    value );
     public string Decrypt( string                    value );
     public string Decrypt( string                    value, Encoding encoding );
@@ -25,21 +35,23 @@ public interface IDataProtector : IDisposable
     public ValueTask<byte[]> DecryptAsync( LocalFile file,  CancellationToken                                               token = default );
     public ValueTask<string> DecryptAsync( LocalFile file,  Encoding                                                        encoding );
     public ValueTask<T> DecryptAsync<T>( LocalFile   file,  Func<LocalFile.IAsyncReadHandler, IDataProtector, ValueTask<T>> func );
-    public ValueTask DecryptAsync( LocalFile         value, LocalFile                                                       output, CancellationToken token = default );
-    public ValueTask DecryptAsync( LocalFile         value, LocalFile                                                       output, Encoding          encoding );
+    public ValueTask DecryptAsync( LocalFile         input, LocalFile                                                       output, CancellationToken token = default );
+    public ValueTask DecryptAsync( LocalFile         input, LocalFile                                                       output, Encoding          encoding );
     public ValueTask EncryptAsync( LocalFile         file,  string                                                          value );
     public ValueTask EncryptAsync( LocalFile         file,  string                                                          value, Encoding          encoding );
     public ValueTask EncryptAsync( LocalFile         file,  byte[]                                                          value, CancellationToken token = default );
     public ValueTask<byte[]> EncryptAsync( LocalFile value, CancellationToken                                               token = default );
     public ValueTask<string> EncryptAsync( LocalFile value, Encoding                                                        encoding );
-    public ValueTask EncryptAsync( LocalFile         value, LocalFile                                                       output, CancellationToken token = default );
-    public ValueTask EncryptAsync( LocalFile         value, LocalFile                                                       output, Encoding          encoding );
+    public ValueTask EncryptAsync( LocalFile         input, LocalFile                                                       output, CancellationToken token = default );
+    public ValueTask EncryptAsync( LocalFile         input, LocalFile                                                       output, Encoding          encoding );
 }
 
 
 
 public sealed class DataProtector : IDataProtector
 {
+    private const    int                  BLOCK = 512;
+    private const    int                  DATA  = 254;
     private readonly RSA                  _rsa;
     private readonly RSAEncryptionPadding _padding;
     private          bool                 _disposed;
@@ -103,13 +115,41 @@ public sealed class DataProtector : IDataProtector
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public byte[] Decrypt( byte[] value )
+    public bool TryDecrypt( in ReadOnlySpan<byte> value, Span<byte> destination, out int bytesWritten )
     {
         if ( _disposed ) { throw new ObjectDisposedException( nameof(DataProtector) ); }
 
         if ( !_keyIsSet ) { throw new InvalidOperationException( $"Must call {nameof(WithKey)} or {nameof(WithKeyAsync)}  first" ); }
 
-        return _rsa.Decrypt( value, _padding );
+        return _rsa.TryDecrypt( value, destination, _padding, out bytesWritten );
+    }
+
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public byte[] Decrypt( byte[] encrypted )
+    {
+        if ( _disposed ) { throw new ObjectDisposedException( nameof(DataProtector) ); }
+
+        if ( !_keyIsSet ) { throw new InvalidOperationException( $"Must call {nameof(WithKey)} or {nameof(WithKeyAsync)}  first" ); }
+
+        Debug.Assert( encrypted.Length % BLOCK == 0 );
+        if ( encrypted.Length <= BLOCK ) { return _rsa.Decrypt( encrypted, _padding ); }
+
+
+        using var stream = new MemoryStream( encrypted.Length );
+
+        for ( int i = 0; i <= encrypted.Length / BLOCK; i++ )
+        {
+            int                size  = Math.Min( BLOCK, encrypted.Length - i * BLOCK );
+            ReadOnlySpan<byte> block = encrypted.AsSpan( i * BLOCK, size );
+            if ( block.IsEmpty ) { continue; }
+
+            Debug.Assert( block.Length == BLOCK );
+            byte[] partition = _rsa.Decrypt( block.ToArray(), _padding );
+            Debug.Assert( partition.Length <= DATA );
+            stream.Write( partition );
+        }
+
+        return stream.ToArray();
     }
     public string Decrypt( string value ) => Decrypt( value, Encoding.Default );
     public string Decrypt( string value, Encoding encoding ) => encoding.GetString( Decrypt( GetBytes( value, encoding ) ) );
@@ -147,17 +187,17 @@ public sealed class DataProtector : IDataProtector
         return result;
     }
     public async ValueTask<T> DecryptAsync<T>( LocalFile file, Func<LocalFile.IAsyncReadHandler, IDataProtector, ValueTask<T>> func ) => await func( file.ReadAsync(), this );
-    public async ValueTask DecryptAsync( LocalFile value, LocalFile output, CancellationToken token = default )
+    public async ValueTask DecryptAsync( LocalFile input, LocalFile output, CancellationToken token = default )
     {
-        byte[] raw = await value.ReadAsync()
+        byte[] raw = await input.ReadAsync()
                                 .AsBytes( token );
 
         byte[] result = Decrypt( raw );
         await output.WriteAsync( result, token );
     }
-    public async ValueTask DecryptAsync( LocalFile value, LocalFile output, Encoding encoding )
+    public async ValueTask DecryptAsync( LocalFile input, LocalFile output, Encoding encoding )
     {
-        string raw = await value.ReadAsync()
+        string raw = await input.ReadAsync()
                                 .AsString();
 
         string result = Decrypt( raw, encoding );
@@ -166,14 +206,43 @@ public sealed class DataProtector : IDataProtector
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public bool TryEncrypt( in ReadOnlySpan<byte> value, Span<byte> destination, out int bytesWritten )
+    {
+        if ( _disposed ) { throw new ObjectDisposedException( nameof(DataProtector) ); }
+
+        if ( !_keyIsSet ) { throw new InvalidOperationException( $"Must call {nameof(WithKey)} or {nameof(WithKeyAsync)}  first" ); }
+
+        return _rsa.TryEncrypt( value, destination, _padding, out bytesWritten );
+    }
+
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public byte[] Encrypt( byte[] value )
     {
         if ( _disposed ) { throw new ObjectDisposedException( nameof(DataProtector) ); }
 
         if ( !_keyIsSet ) { throw new InvalidOperationException( $"Must call {nameof(WithKey)} or {nameof(WithKeyAsync)}  first" ); }
 
-        return _rsa.Encrypt( value, _padding );
+        if ( value.Length <= DATA ) { return _rsa.Encrypt( value, _padding ); }
+
+
+        using var stream = new MemoryStream( value.Length * 2 );
+
+        for ( int i = 0; i <= value.Length / DATA; i++ )
+        {
+            int                size  = Math.Min( DATA, value.Length - i * DATA );
+            ReadOnlySpan<byte> block = value.AsSpan( i * DATA, size );
+            if ( block.IsEmpty ) { continue; }
+
+            Debug.Assert( block.Length == size );
+            Debug.Assert( block.Length <= DATA );
+            byte[] partition = _rsa.Encrypt( block.ToArray(), _padding );
+            Debug.Assert( partition.Length == BLOCK );
+            stream.Write( partition );
+        }
+
+        return stream.ToArray();
     }
+
     public string Encrypt( string                  value ) => Encrypt( value, Encoding.Default );
     public string Encrypt( string                  value, Encoding encoding ) => Convert.ToBase64String( Encrypt( GetBytes( value, encoding ) ) );
     public void Encrypt( LocalFile                 file,  string   value ) => Encrypt( file, value, Encoding.Default );
@@ -198,17 +267,17 @@ public sealed class DataProtector : IDataProtector
         string result = Encrypt( raw, encoding );
         return result;
     }
-    public async ValueTask EncryptAsync( LocalFile value, LocalFile output, CancellationToken token = default )
+    public async ValueTask EncryptAsync( LocalFile input, LocalFile output, CancellationToken token = default )
     {
-        byte[] raw = await value.ReadAsync()
+        byte[] raw = await input.ReadAsync()
                                 .AsBytes( token );
 
         byte[] result = Encrypt( raw );
         await output.WriteAsync( result, token );
     }
-    public async ValueTask EncryptAsync( LocalFile value, LocalFile output, Encoding encoding )
+    public async ValueTask EncryptAsync( LocalFile input, LocalFile output, Encoding encoding )
     {
-        string raw = await value.ReadAsync()
+        string raw = await input.ReadAsync()
                                 .AsString();
 
         string result = Encrypt( raw, encoding );

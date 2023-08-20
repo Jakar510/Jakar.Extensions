@@ -8,17 +8,17 @@ namespace Jakar.AppLogger.Portal.Data.Tables;
 [Table( "Attachments" )]
 public sealed record AttachmentRecord : LoggerTable<AttachmentRecord>, IAttachment, ILogInfo
 {
-    public                       Guid    AppID       { get; init; }
-    [MaxLength( 2 ^ 20 )] public string  Content     { get; init; } = string.Empty;
-    [MaxLength( 1024 )]   public string? Description { get; init; }
-    public                       Guid    DeviceID    { get; init; }
-    [MaxLength( 256 )] public    string? FileName    { get; init; }
-    public                       bool    IsBinary    { get; init; }
-    public                       long    Length      { get; init; }
-    public                       Guid    LogID       { get; init; }
-    public                       Guid?   ScopeID     { get; init; }
-    public                       Guid    SessionID   { get; init; }
-    [MaxLength( 256 )] public    string? Type        { get; init; }
+    public                                            Guid    AppID       { get; init; }
+    [MaxLength( Attachment.MAX_SIZE )]         public string  Content     { get; init; } = string.Empty;
+    [MaxLength( Attachment.DESCRIPTION_SIZE )] public string? Description { get; init; }
+    public                                            Guid    DeviceID    { get; init; }
+    [MaxLength( Attachment.FILE_NAME_SIZE )] public   string? FileName    { get; init; }
+    public                                            bool    IsBinary    { get; init; }
+    public                                            long    Length      { get; init; }
+    public                                            Guid    LogID       { get; init; }
+    public                                            Guid?   ScopeID     { get; init; }
+    public                                            Guid?   SessionID   { get; init; }
+    [MaxLength( Attachment.TYPE_SIZE )] public        string? Type        { get; init; }
 
 
     public AttachmentRecord() : base() { }
