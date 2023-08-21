@@ -18,14 +18,14 @@ public interface IDataProtectorProvider
 
 public interface IDataProtector : IDisposable
 {
-    public bool TryEncrypt( in ReadOnlySpan<byte>    value, Span<byte> destination, out int bytesWritten );
+    public bool TryEncrypt( ReadOnlySpan<byte>    value, Span<byte> destination, out int bytesWritten );
     public byte[] Encrypt( byte[]                    value );
     public string Encrypt( string                    value );
     public string Encrypt( string                    value, Encoding   encoding );
     public void Encrypt( LocalFile                   file,  string     value );
     public void Encrypt( LocalFile                   file,  string     value, Encoding encoding );
     public void Encrypt( LocalFile                   file,  byte[]     value );
-    public bool TryDecrypt( in ReadOnlySpan<byte>    value, Span<byte> destination, out int bytesWritten );
+    public bool TryDecrypt( ReadOnlySpan<byte>    value, Span<byte> destination, out int bytesWritten );
     public byte[] Decrypt( byte[]                    value );
     public string Decrypt( string                    value );
     public string Decrypt( string                    value, Encoding encoding );
@@ -115,7 +115,7 @@ public sealed class DataProtector : IDataProtector
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public bool TryDecrypt( in ReadOnlySpan<byte> value, Span<byte> destination, out int bytesWritten )
+    public bool TryDecrypt( ReadOnlySpan<byte> value, Span<byte> destination, out int bytesWritten )
     {
         if ( _disposed ) { throw new ObjectDisposedException( nameof(DataProtector) ); }
 
@@ -206,7 +206,7 @@ public sealed class DataProtector : IDataProtector
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public bool TryEncrypt( in ReadOnlySpan<byte> value, Span<byte> destination, out int bytesWritten )
+    public bool TryEncrypt( ReadOnlySpan<byte> value, Span<byte> destination, out int bytesWritten )
     {
         if ( _disposed ) { throw new ObjectDisposedException( nameof(DataProtector) ); }
 

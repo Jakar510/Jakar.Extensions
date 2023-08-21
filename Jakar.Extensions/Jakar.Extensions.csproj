@@ -129,6 +129,8 @@
 		<PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.4" />
 		<PackageReference Include="System.Threading.Tasks.Parallel" Version="4.3.0" />
 		<PackageReference Include="OneOf" Version="3.0.255" />
+		<PackageReference Include="OneOf.Extended" Version="3.0.255" />
+		<PackageReference Include="OneOf.SourceGenerator" Version="3.0.255" />
 		<PackageReference Include="System.Threading.ThreadPool" Version="4.3.0" />
 		<PackageReference Include="ValueOf" Version="2.0.31" />
 		<PackageReference Include="Sigil" Version="5.0.0" />

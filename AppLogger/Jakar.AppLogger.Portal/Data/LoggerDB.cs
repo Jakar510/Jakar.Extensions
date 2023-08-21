@@ -1,26 +1,6 @@
 ﻿namespace Jakar.AppLogger.Portal.Data;
 
 
-public readonly record struct AppLoggerSecret( Guid UserID, Guid AppID )
-{
-    public static string Create( IDataProtectorProvider dataProtectorProvider, UserRecord user, AppRecord app )
-    {
-        string json = new AppLoggerSecret( user.ID.Value, app.ID.Value ).ToJson();
-        return dataProtectorProvider.Encrypt( json );
-    }
-    public static OneOf<AppLoggerSecret, Error> Parse( IDataProtectorProvider dataProtectorProvider, in string value )
-    {
-        try
-        {
-            string json = dataProtectorProvider.Decrypt( value );
-            return json.FromJson<AppLoggerSecret>();
-        }
-        catch ( Exception e ) { return new Error( Status.Unauthorized ); }
-    }
-}
-
-
-
 [SuppressMessage( "ReSharper", "SuggestBaseTypeForParameter" )]
 public sealed class LoggerDB : Database.Database
 {
@@ -64,7 +44,7 @@ public sealed class LoggerDB : Database.Database
     {
         if ( string.IsNullOrWhiteSpace( start.AppLoggerSecret ) ) { return new Error( Status.BadRequest, $"{nameof(start.AppLoggerSecret)} cannot be null, empty or white space." ); }
 
-        OneOf<AppLoggerSecret, Error> check = AppLoggerSecret.Parse( _dataProtectorProvider, start.AppLoggerSecret );
+        OneOf<AppLoggerSecret, Error> check = await AppLoggerSecret.ParseAsync( _dataProtectorProvider, start.AppLoggerSecret );
         if ( check.IsT1 ) { return check.AsT1; }
 
         AppLoggerSecret secret = check.AsT0;

@@ -4,7 +4,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata>
 		<id>Jakar.Extensions</id>
-		<version>6.8.1</version>
+		<version>6.8.2</version>
 		<title>Extension Library</title>
 		<authors>Tyler Stegmaier</authors>
 		<owners>Jakar510/Jakar</owners>
@@ -31,7 +31,7 @@
 				<dependency id="CommunityToolkit.Diagnostics"
 							version="8.2.1" />
 				<dependency id="Dapper"
-							version="2.0.143" />
+							version="2.0.151" />
 				<dependency id="Dapper.Contrib"
 							version="2.0.78" />
 				<dependency id="JetBrains.Annotations"
@@ -79,9 +79,9 @@
 				<dependency id="OneOf"
 							version="3.0.255" />
 				<dependency id="OneOf.Extended"
-							version="3.0.243" />
+							version="3.0.255" />
 				<dependency id="OneOf.SourceGenerator"
-							version="3.0.243" />
+							version="3.0.255" />
 				<dependency id="System.Threading.ThreadPool"
 							version="4.3.0" />
 				<dependency id="ValueOf"
@@ -94,7 +94,7 @@
 				<dependency id="CommunityToolkit.Diagnostics"
 							version="8.2.1" />
 				<dependency id="Dapper"
-							version="2.0.143" />
+							version="2.0.151" />
 				<dependency id="Dapper.Contrib"
 							version="2.0.78" />
 				<dependency id="JetBrains.Annotations"
@@ -142,9 +142,9 @@
 				<dependency id="OneOf"
 							version="3.0.255" />
 				<dependency id="OneOf.Extended"
-							version="3.0.243" />
+							version="3.0.255" />
 				<dependency id="OneOf.SourceGenerator"
-							version="3.0.243" />
+							version="3.0.255" />
 				<dependency id="System.Threading.ThreadPool"
 							version="4.3.0" />
 				<dependency id="ValueOf"
@@ -157,7 +157,7 @@
 				<dependency id="CommunityToolkit.Diagnostics"
 							version="8.2.1" />
 				<dependency id="Dapper"
-							version="2.0.143" />
+							version="2.0.151" />
 				<dependency id="Dapper.Contrib"
 							version="2.0.78" />
 				<dependency id="JetBrains.Annotations"
@@ -205,9 +205,9 @@
 				<dependency id="OneOf"
 							version="3.0.255" />
 				<dependency id="OneOf.Extended"
-							version="3.0.243" />
+							version="3.0.255" />
 				<dependency id="OneOf.SourceGenerator"
-							version="3.0.243" />
+							version="3.0.255" />
 				<dependency id="System.Threading.ThreadPool"
 							version="4.3.0" />
 				<dependency id="ValueOf"
