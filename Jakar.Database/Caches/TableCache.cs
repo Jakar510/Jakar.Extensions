@@ -12,7 +12,7 @@ public sealed class TableCache<TRecord> : IHostedService, IReadOnlyCollection<TR
     private readonly List<Guid>                                      _keys = new();
     private readonly TableCacheOptions                               _options;
     private          int                                             _index = -1;
-    public           IEnumerable<Guid>                               Changed => from entry in _records.Values where entry.HasChanged select entry.ID;
+    public           IEnumerable<Guid>                               Changed => from entry in _records.Values where entry.HasChanged select entry.ID.Value;
     public           int                                             Count   => _records.Count;
 
 
@@ -59,7 +59,7 @@ public sealed class TableCache<TRecord> : IHostedService, IReadOnlyCollection<TR
         _keys.Clear();
     }
     public bool Contains( Guid    key ) => _records.ContainsKey( key );
-    public bool Contains( TRecord record ) => _records.ContainsKey( record.ID );
+    public bool Contains( TRecord record ) => _records.ContainsKey( record.ID.Value );
 
 
     public async ValueTask AddOrUpdate( IAsyncEnumerable<TRecord?> records )
@@ -88,13 +88,13 @@ public sealed class TableCache<TRecord> : IHostedService, IReadOnlyCollection<TR
     {
         if ( _keys.Any() ) { Reset(); }
 
-        if ( _records.TryGetValue( record.ID, out CacheEntry<TRecord>? entry ) )
+        if ( _records.TryGetValue( record.ID.Value, out CacheEntry<TRecord>? entry ) )
         {
             entry.Value = record;
             return;
         }
 
-        _records[record.ID] = new CacheEntry<TRecord>( record );
+        _records[record.ID.Value] = new CacheEntry<TRecord>( record );
     }
 
 
@@ -111,8 +111,8 @@ public sealed class TableCache<TRecord> : IHostedService, IReadOnlyCollection<TR
     }
 
 
-    public bool TryRemove( TRecord pair ) => _records.TryRemove( pair.ID, out _ );
-    public bool TryRemove( TRecord pair, [NotNullWhen( true )] out TRecord? value ) => TryRemove( pair.ID, out value );
+    public bool TryRemove( TRecord pair ) => _records.TryRemove( pair.ID.Value, out _ );
+    public bool TryRemove( TRecord pair, [NotNullWhen( true )] out TRecord? value ) => TryRemove( pair.ID.Value, out value );
     public bool TryRemove( Guid    key ) => _records.TryRemove( key, out _ );
     public bool TryRemove( Guid key, [NotNullWhen( true )] out TRecord? value )
     {
@@ -132,7 +132,7 @@ public sealed class TableCache<TRecord> : IHostedService, IReadOnlyCollection<TR
     public void Reset()
     {
         var dictionary = new SortedDictionary<DateTimeOffset, Guid>( ValueSorter<DateTimeOffset>.Default );
-        foreach ( CacheEntry<TRecord> value in _records.Values ) { dictionary.Add( value.DateCreated, value.ID ); }
+        foreach ( CacheEntry<TRecord> value in _records.Values ) { dictionary.Add( value.DateCreated, value.ID.Value ); }
 
         _keys.AddRange( dictionary.Values );
         _index = -1;

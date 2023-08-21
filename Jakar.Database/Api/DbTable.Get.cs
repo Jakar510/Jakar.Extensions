@@ -22,8 +22,6 @@ public partial class DbTable<TRecord>
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask<long> Count( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
-        
-
         string sql = $"SELECT COUNT({ID_ColumnName}) FROM {SchemaTableName}";
 
         try { return await connection.QueryFirstAsync<long>( sql, default, transaction ); }
@@ -36,13 +34,13 @@ public partial class DbTable<TRecord>
         string sql = Instance switch
                      {
                          DbInstance.MsSql => $"SELECT TOP 1 {ID_ColumnName} FROM {SchemaTableName} WHERE {string.Join( matchAll
-                                                                                                                ? "AND"
-                                                                                                                : "OR",
-                                                                                                            parameters.ParameterNames.Select( KeyValuePair ) )}",
+                                                                                                                           ? "AND"
+                                                                                                                           : "OR",
+                                                                                                                       parameters.ParameterNames.Select( KeyValuePair ) )}",
                          DbInstance.Postgres => $"SELECT {ID_ColumnName} FROM {SchemaTableName} WHERE {string.Join( matchAll
-                                                                                                             ? "AND"
-                                                                                                             : "OR",
-                                                                                                         parameters.ParameterNames.Select( KeyValuePair ) )} LIMIT 1",
+                                                                                                                        ? "AND"
+                                                                                                                        : "OR",
+                                                                                                                    parameters.ParameterNames.Select( KeyValuePair ) )} LIMIT 1",
                          _ => throw new OutOfRangeException( nameof(Instance), Instance ),
                      };
 
@@ -59,8 +57,6 @@ public partial class DbTable<TRecord>
 
     public async ValueTask<Guid?> GetID( DbConnection connection, DbTransaction? transaction, string sql, DynamicParameters? parameters, CancellationToken token = default )
     {
-        
-
         try { return await connection.QuerySingleAsync<Guid?>( sql, parameters, transaction ); }
         catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
     }
@@ -81,6 +77,10 @@ public partial class DbTable<TRecord>
         await Get( connection, transaction, ID_ColumnName, id, token );
 
 
+    public async ValueTask<TRecord?> Get( DbConnection connection, DbTransaction? transaction, RecordID<TRecord>? id, CancellationToken token = default ) => await Get( connection, transaction, ID_ColumnName, id?.Value, token );
+    public async ValueTask<TRecord?> Get( DbConnection connection, DbTransaction? transaction, RecordID<TRecord>  id, CancellationToken token = default ) => await Get( connection, transaction, ID_ColumnName, id.Value,  token );
+
+
     public virtual async ValueTask<TRecord?> Get( DbConnection connection, DbTransaction? transaction, string columnName, object? value, CancellationToken token = default ) =>
         await Get( connection, transaction, true, Database.GetParameters( value, default, columnName ), token );
 
@@ -96,11 +96,11 @@ public partial class DbTable<TRecord>
 
         try
         {
-            CommandDefinition command = GetCommandDefinition( sql, parameters, transaction, token );
+            CommandDefinition     command = GetCommandDefinition( sql, parameters, transaction, token );
             IEnumerable<TRecord?> results = await connection.QueryAsync<TRecord>( command );
             IEnumerable<TRecord>  records = results.WhereNotNull();
             TRecord?              result  = default;
-            
+
             // ReSharper disable once PossibleMultipleEnumeration
             foreach ( TRecord record in records )
             {

@@ -46,7 +46,7 @@ public sealed record UserLoginInfoRecord : TableRecord<UserLoginInfoRecord>
 
     public UserLoginInfoRecord() { }
     public UserLoginInfoRecord( UserRecord user, UserLoginInfo info ) : this( user, info.LoginProvider, info.ProviderKey, info.ProviderDisplayName ) { }
-    public UserLoginInfoRecord( UserRecord user, string loginProvider, string providerKey, string? providerDisplayName ) : base( Guid.NewGuid(), user )
+    public UserLoginInfoRecord( UserRecord user, string loginProvider, string providerKey, string? providerDisplayName ) : base( user )
     {
         LoginProvider       = loginProvider;
         ProviderKey         = providerKey;
@@ -79,7 +79,7 @@ public sealed record UserLoginInfoRecord : TableRecord<UserLoginInfoRecord>
                                                                                               };
     public static implicit operator IdentityUserToken<Guid>( UserLoginInfoRecord value ) => new()
                                                                                             {
-                                                                                                UserId        = value.OwnerUserID ?? throw new NullReferenceException( nameof(value.OwnerUserID) ),
+                                                                                                UserId        = value.OwnerUserID?.Value ?? throw new NullReferenceException( nameof(value.OwnerUserID) ),
                                                                                                 LoginProvider = value.LoginProvider,
                                                                                                 Name          = value.ProviderDisplayName ?? string.Empty,
                                                                                                 Value         = value.ProviderKey,

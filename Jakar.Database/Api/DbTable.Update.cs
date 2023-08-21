@@ -4,7 +4,7 @@
 namespace Jakar.Database;
 
 
-[SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global")]
+[SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
 public partial class DbTable<TRecord>
 {
     public ValueTask Update( TRecord                   record,  CancellationToken token = default ) => this.TryCall( Update, record,  token );
@@ -27,7 +27,7 @@ public partial class DbTable<TRecord>
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask Update( DbConnection connection, DbTransaction? transaction, TRecord record, CancellationToken token = default )
     {
-        Guid              id         = record.ID;
+        Guid              id         = record.ID.Value;
         DynamicParameters parameters = Database.GetParameters( id, record );
         string            sql        = $"UPDATE {SchemaTableName} SET {string.Join( ',', KeyValuePairs )} WHERE {ID_ColumnName} = @{nameof(id)};";
 

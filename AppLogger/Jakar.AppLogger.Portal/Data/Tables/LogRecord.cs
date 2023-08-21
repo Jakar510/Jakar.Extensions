@@ -2,6 +2,10 @@
 // 09/12/2022  10:06 AM
 
 
+using Debug = Jakar.AppLogger.Common.Debug;
+
+
+
 namespace Jakar.AppLogger.Portal.Data.Tables;
 
 
@@ -9,36 +13,42 @@ namespace Jakar.AppLogger.Portal.Data.Tables;
 [Table( "Logs" )]
 public sealed record LogRecord : LoggerTable<LogRecord>, IAppLog, ILogInfo, IAppStartTime
 {
-    public                                           DateTimeOffset TimeStamp        { get; init; }
-    public                                           Guid           AppID            { get; init; }
-    public                                           DateTimeOffset AppStartTime     { get; init; }
-    [MaxLength( IAppLog.APP_USER_ID_LENGTH )] public string?        AppUserID        { get; init; }
-    [MaxLength( IAppLog.BUILD_ID_LENGTH )]    public string?        BuildID          { get; init; }
-    public                                           string?        CategoryName     { get; init; }
-    public                                           Guid           DeviceID         { get; init; }
-    public                                           int            EventID          { get; init; }
-    [MaxLength( IAppLog.EVENT_NAME_LENGTH )] public  string?        EventName        { get; init; }
-    [MaxLength( MAX_STRING_SIZE )]           public  string?        ExceptionDetails { get; init; }
-    public                                           bool           IsError          { get; init; }
-    public                                           bool           IsFatal          { get; init; }
-    public                                           bool           IsValid          { get; init; }
-    public                                           LogLevel       Level            { get; init; }
-    [MaxLength( MAX_STRING_SIZE )] public            string         Message          { get; init; } = string.Empty;
-    public                                           Guid?          ScopeID          { get; init; }
-    public                                           Guid           SessionID        { get; init; }
-    [MaxLength( MAX_STRING_SIZE )] public            string?        StackTrace       { get; init; }
-    public                                           DateTimeOffset Timestamp        { get; init; }
+    public                                           DateTimeOffset          TimeStamp        { get; init; }
+    public                                           RecordID<AppRecord>     AppID            { get; init; }
+    public                                           DateTimeOffset          AppStartTime     { get; init; }
+    [MaxLength( IAppLog.APP_USER_ID_LENGTH )] public string?                 AppUserID        { get; init; }
+    [MaxLength( IAppLog.BUILD_ID_LENGTH )]    public string?                 BuildID          { get; init; }
+    public                                           string?                 CategoryName     { get; init; }
+    public                                           RecordID<DeviceRecord>  DeviceID         { get; init; }
+    public                                           int                     EventID          { get; init; }
+    [MaxLength( IAppLog.EVENT_NAME_LENGTH )] public  string?                 EventName        { get; init; }
+    [MaxLength( MAX_STRING_SIZE )]           public  string?                 ExceptionDetails { get; init; }
+    public                                           bool                    IsError          { get; init; }
+    public                                           bool                    IsFatal          { get; init; }
+    public                                           bool                    IsValid          { get; init; }
+    public                                           LogLevel                Level            { get; init; }
+    [MaxLength( MAX_STRING_SIZE )] public            string                  Message          { get; init; } = string.Empty;
+    public                                           RecordID<ScopeRecord>?  ScopeID          { get; init; }
+    public                                           RecordID<SessionRecord> SessionID        { get; init; }
+    [MaxLength( MAX_STRING_SIZE )] public            string?                 StackTrace       { get; init; }
+    public                                           DateTimeOffset          Timestamp        { get; init; }
 
 
-    StartSessionReply IAppLog.Session   => new(SessionID, DeviceID, AppID);
+    StartSessionReply IAppLog.Session   => new(SessionID.Value, DeviceID.Value, AppID.Value);
     EventID IAppLog.          EventID   => new(EventID, EventName);
-    Guid? ISessionID.         SessionID => SessionID;
-    Guid ILogInfo.            LogID     => ID;
+    Guid? ISessionID.         SessionID => SessionID.Value;
+    Guid ILogInfo.            LogID     => ID.Value;
+    Guid? ILogInfo.           ScopeID   => ScopeID?.Value;
+    Guid IStartSession.       DeviceID  => DeviceID.Value;
+    Guid IStartSession.       AppID     => AppID.Value;
 
 
     public LogRecord() : base() { }
-    public LogRecord( AppLog log, SessionRecord session, UserRecord? caller = default ) : base( log.ID, caller )
+    public LogRecord( AppLog log, SessionRecord session, ScopeRecord scope, UserRecord? caller = default ) : base( caller )
     {
+        System.Diagnostics.Debug.Assert( scope.ID.Value == log.ScopeID );
+        System.Diagnostics.Debug.Assert( session.ID.Value == log.Session.SessionID );
+
         IsValid          = log.IsValid;
         IsError          = log.IsError;
         IsFatal          = log.IsFatal;
@@ -46,8 +56,8 @@ public sealed record LogRecord : LoggerTable<LogRecord>, IAppLog, ILogInfo, IApp
         Level            = log.Level;
         Timestamp        = log.TimeStamp;
         AppStartTime     = session.DateCreated;
-        SessionID        = log.Session.SessionID;
-        ScopeID          = log.ScopeID;
+        SessionID        = session.ID;
+        ScopeID          = scope.ID;
         AppUserID        = log.AppUserID;
         StackTrace       = log.GetStackTrace();
         EventID          = log.EventID.ID;

@@ -9,7 +9,6 @@ using Xamarin.Forms.Platform.Android;
 using Platform = Xamarin.Essentials.Platform;
 
 
-
 namespace Jakar.Extensions.Xamarin.Forms.Droid;
 
 

@@ -37,3 +37,8 @@ public class GuidBenchmarks
     [Benchmark] public string AsBase64() => _guid.ToBase64();
     [Benchmark] public new string? ToString() => _guid.ToString();
 }
+
+
+/*
+
+ */

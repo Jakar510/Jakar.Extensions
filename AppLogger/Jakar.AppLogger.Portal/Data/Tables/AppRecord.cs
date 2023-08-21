@@ -10,7 +10,7 @@ public sealed record AppRecord : LoggerTable<AppRecord>
 
 
     public AppRecord() : base() { }
-    public AppRecord( string appName, string secret, UserRecord? caller = default ) : base( Guid.NewGuid(), caller )
+    public AppRecord( string appName, string secret, UserRecord? caller = default ) : base( caller )
     {
         AppName = appName;
         Secret  = secret;

@@ -4,7 +4,7 @@
 namespace Jakar.AppLogger.Common;
 
 
-public interface IAppLog : IUniqueID<Guid>, IValidator
+public interface IAppLog : IUniqueID<Guid>, IValidator, ILogInfo
 {
     public const int APP_USER_ID_LENGTH   = 1024;
     public const int BUILD_ID_LENGTH      = 1024;
@@ -33,7 +33,6 @@ public interface IAppLog : IUniqueID<Guid>, IValidator
 
     public LogLevel Level   { get; }
     public string   Message { get; }
-    public Guid?    ScopeID { get; }
 
 
     /// <summary> Gets or sets when tracking an analytics session, logs can be part of the session by specifying this identifier.

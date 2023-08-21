@@ -20,11 +20,6 @@ public sealed class Create_SessionRecord : LoggerMigration<SessionRecord>
         CheckSchema();
         ICreateTableWithColumnSyntax table = CreateTable();
 
-
-        table.WithColumn( nameof(SessionRecord.SessionID) )
-             .AsGuid()
-             .NotNullable();
-
         table.WithColumn( nameof(SessionRecord.AppID) )
              .AsInt64()
              .NotNullable();

@@ -1,20 +1,37 @@
-﻿using OneOf;
+﻿namespace Jakar.AppLogger.Portal.Data;
 
 
+public readonly record struct AppLoggerSecret( Guid UserID, Guid AppID )
+{
+    public static string Create( IDataProtectorProvider dataProtectorProvider, UserRecord user, AppRecord app )
+    {
+        string json = new AppLoggerSecret( user.ID.Value, app.ID.Value ).ToJson();
+        return dataProtectorProvider.Encrypt( json );
+    }
+    public static OneOf<AppLoggerSecret, Error> Parse( IDataProtectorProvider dataProtectorProvider, in string value )
+    {
+        try
+        {
+            string json = dataProtectorProvider.Decrypt( value );
+            return json.FromJson<AppLoggerSecret>();
+        }
+        catch ( Exception e ) { return new Error( Status.Unauthorized ); }
+    }
+}
 
-namespace Jakar.AppLogger.Portal.Data;
 
 
 [SuppressMessage( "ReSharper", "SuggestBaseTypeForParameter" )]
 public sealed class LoggerDB : Database.Database
 {
-    public DbTable<AppRecord>                           Apps          { get; }
-    public DbTable<LoggerAttachmentRecord>                    Attachments   { get; }
-    public DbTable<DeviceRecord>                        Devices       { get; }
-    public DbTable<LogRecord>                           Logs          { get; }
-    public ConcurrentObservableCollection<Notification> Notifications { get; } = new(Notification.Sorter);
-    public DbTable<ScopeRecord>                         Scopes        { get; }
-    public DbTable<SessionRecord>                       Sessions      { get; }
+    private readonly IDataProtectorProvider                       _dataProtectorProvider;
+    public           DbTable<AppRecord>                           Apps          { get; }
+    public           DbTable<LoggerAttachmentRecord>              Attachments   { get; }
+    public           DbTable<DeviceRecord>                        Devices       { get; }
+    public           DbTable<LogRecord>                           Logs          { get; }
+    public           ConcurrentObservableCollection<Notification> Notifications { get; } = new(Notification.Sorter);
+    public           DbTable<ScopeRecord>                         Scopes        { get; }
+    public           DbTable<SessionRecord>                       Sessions      { get; }
 
 
     static LoggerDB()
@@ -23,14 +40,16 @@ public sealed class LoggerDB : Database.Database
         EnumSqlHandler<Architecture>.Register();
         EnumSqlHandler<LogLevel>.Register();
     }
-    public LoggerDB( IConfiguration configuration, IOptions<DbOptions> options ) : base( configuration, options )
+
+    public LoggerDB( IConfiguration configuration, IDataProtectorProvider dataProtectorProvider, IOptions<DbOptions> options ) : base( configuration, options )
     {
-        Logs        = Create<LogRecord>();
-        Attachments = Create<LoggerAttachmentRecord>();
-        Devices     = Create<DeviceRecord>();
-        Apps        = Create<AppRecord>();
-        Sessions    = Create<SessionRecord>();
-        Scopes      = Create<ScopeRecord>();
+        _dataProtectorProvider = dataProtectorProvider;
+        Logs                   = Create<LogRecord>();
+        Attachments            = Create<LoggerAttachmentRecord>();
+        Devices                = Create<DeviceRecord>();
+        Apps                   = Create<AppRecord>();
+        Sessions               = Create<SessionRecord>();
+        Scopes                 = Create<ScopeRecord>();
     }
 
 
@@ -38,22 +57,35 @@ public sealed class LoggerDB : Database.Database
 
 
     public event EventHandler<Notification>? NotificationReceived;
-    public async ValueTask<OneOf<Guid, Error>> StartSession( DbConnection connection, DbTransaction transaction, ControllerBase controller, StartSession session, CancellationToken token )
-    {
-        if ( string.IsNullOrWhiteSpace( session.AppLoggerSecret ) ) { return new Error( Status.BadRequest, $"{nameof(session.AppLoggerSecret)} cannot be null, empty or white space." ); }
 
-        UserRecord? caller = await Verify( connection, transaction, session.AppLoggerSecret, token );
+
+    public ValueTask<OneOf<StartSessionReply, Error>> StartSession( StartSession session, CancellationToken token ) => this.TryCall( StartSession, session, token );
+    public async ValueTask<OneOf<StartSessionReply, Error>> StartSession( DbConnection connection, DbTransaction transaction, StartSession start, CancellationToken token )
+    {
+        if ( string.IsNullOrWhiteSpace( start.AppLoggerSecret ) ) { return new Error( Status.BadRequest, $"{nameof(start.AppLoggerSecret)} cannot be null, empty or white space." ); }
+
+        OneOf<AppLoggerSecret, Error> check = AppLoggerSecret.Parse( _dataProtectorProvider, start.AppLoggerSecret );
+        if ( check.IsT1 ) { return check.AsT1; }
+
+        AppLoggerSecret secret = check.AsT0;
+
+        UserRecord? caller = await Users.Get( connection, transaction, secret.UserID, token );
         if ( caller is null ) { return new Error( Status.Unauthorized ); }
 
-        DeviceRecord? device = await AddOrUpdate_Device( connection, transaction, controller, session.Device, caller, token );
-        if ( device is null ) { return new Error( Status.BadRequest, controller.ModelState ); }
+        AppRecord? app = await Apps.Get( connection, transaction, secret.AppID, token );
+        if ( app is null || !app.IsActive ) { return new Error( Status.NotFound, "App not found" ); }
 
-        return Guid.Empty;
+        OneOf<DeviceRecord, Error> device = await AddOrUpdate_Device( connection, transaction, start.Device, caller, token );
+        if ( device.IsT1 ) { return device.AsT1; }
+
+        var session = new SessionRecord( start, app, device.AsT0, caller );
+        session = await Sessions.Insert( connection, transaction, session, token );
+
+        return new StartSessionReply( session.ID.Value, app.ID.Value, device.AsT0.ID.Value );
     }
 
 
-    public ValueTask<OneOf<Guid, Error>> StartSession( ControllerBase controller, StartSession session, CancellationToken token ) => this.TryCall( StartSession, controller, session, token );
-    public async ValueTask<OneOf<bool, Error>> EndSession( DbConnection connection, DbTransaction transaction, ControllerBase controller, Guid sessionID, CancellationToken token )
+    public async ValueTask<OneOf<bool, Error>> EndSession( DbConnection connection, DbTransaction transaction, Guid sessionID, CancellationToken token )
     {
         if ( !sessionID.IsValidID() ) { return new Error( Status.BadRequest, $"{nameof(sessionID)} cannot be empty." ); }
 
@@ -73,14 +105,14 @@ public sealed class LoggerDB : Database.Database
     }
 
 
-    public ValueTask<OneOf<bool, Error>> EndSession( ControllerBase controller, Guid sessionID, CancellationToken token ) => this.TryCall( EndSession, controller, sessionID, token );
-    public async ValueTask<OneOf<bool, Error>> SendLog( DbConnection connection, DbTransaction transaction, ControllerBase controller, IEnumerable<AppLog> logs, CancellationToken token )
+    public ValueTask<OneOf<bool, Error>> EndSession( Guid sessionID, CancellationToken token ) => this.TryCall( EndSession, sessionID, token );
+    public async ValueTask<OneOf<bool, Error>> SendLog( DbConnection connection, DbTransaction transaction, IEnumerable<AppLog> logs, CancellationToken token )
     {
         foreach ( AppLog log in logs )
         {
             try
             {
-                OneOf<bool, Error> result = await SendLog( connection, transaction, controller, log, token );
+                OneOf<bool, Error> result = await SendLog( connection, transaction, log, token );
                 if ( result.IsT1 ) { return result.AsT1; }
             }
             catch ( Exception e )
@@ -92,22 +124,35 @@ public sealed class LoggerDB : Database.Database
 
         return true;
     }
-    public async ValueTask<OneOf<bool, Error>> SendLog( DbConnection connection, DbTransaction transaction, ControllerBase controller, AppLog log, CancellationToken token )
+    public async ValueTask<OneOf<bool, Error>> SendLog( DbConnection connection, DbTransaction transaction, AppLog log, CancellationToken token )
     {
-        if ( log.Session.SessionID.IsValidID() is not true )
-        {
-            controller.AddError( nameof(AppLog.Session), $"{nameof(AppLog.Session)} is null or empty" );
-            return new Error( Status.BadRequest, controller.ModelState );
-        }
-
-
         SessionRecord? session = await Sessions.Get( connection, transaction, true, SessionRecord.GetDynamicParameters( log.Session.SessionID ), token );
-        if ( session is null || !session.IsActive ) { return new Error( Status.NotFound, log.Session ); }
+        if ( session is null || !session.IsActive ) { return new Error( Status.NotFound, log.Session.SessionID.ToString() ); }
 
         UserRecord? caller = await session.GetUserWhoCreated( connection, transaction, this, token );
         if ( caller is null ) { return new Error( Status.Unauthorized ); }
 
-        var record = new LogRecord( log, session, caller );
+        AppRecord? app = await Apps.Get( connection, transaction, log.Session.AppID, token );
+        if ( app is null || !app.IsActive ) { return new Error( Status.NotFound, log.Session.AppID.ToString() ); }
+
+        OneOf<DeviceRecord, Error> device = await AddOrUpdate_Device( connection, transaction, log.Device, caller, token );
+
+        if ( device.IsT1 )
+        {
+            if ( log.Device is null ) { return new Error( Status.BadRequest, log.Session.DeviceID.ToString() ); }
+
+            return device.AsT1;
+        }
+
+        ScopeRecord? scope = await Scopes.Get( connection, transaction, log.ScopeID, token );
+
+        if ( scope is null )
+        {
+            scope = new ScopeRecord( log, app, device.AsT0, session, caller );
+            scope = await Scopes.Insert( connection, transaction, scope, token );
+        }
+
+        var record = new LogRecord( log, session, scope, caller );
         record = await Logs.Insert( connection, transaction, record, token );
 
 
@@ -127,11 +172,13 @@ public sealed class LoggerDB : Database.Database
     }
 
 
-    public ValueTask<OneOf<bool, Error>> SendLog( ControllerBase controller, IEnumerable<AppLog> logs, CancellationToken token ) => this.TryCall( SendLog, controller, logs, token );
+    public ValueTask<OneOf<bool, Error>> SendLog( IEnumerable<AppLog> logs, CancellationToken token ) => this.TryCall( SendLog, logs, token );
 
 
-    public async ValueTask<DeviceRecord?> AddOrUpdate_Device( DbConnection connection, DbTransaction transaction, ControllerBase controller, DeviceDescriptor device, UserRecord caller, CancellationToken token )
+    public async ValueTask<OneOf<DeviceRecord, Error>> AddOrUpdate_Device( DbConnection connection, DbTransaction transaction, DeviceDescriptor? device, UserRecord caller, CancellationToken token )
     {
+        if ( device is null ) { return new Error( Status.BadRequest, $"{nameof(device)} is null" ); }
+
         DeviceRecord? record = default;
 
         foreach ( DeviceRecord deviceRecord in await Devices.Where( connection, transaction, true, DeviceRecord.GetDynamicParameters( device, caller ), token ) )
@@ -140,8 +187,7 @@ public sealed class LoggerDB : Database.Database
             else
             {
                 // throw new InvalidOperationException($"Multiple records exist for '{device.DeviceID}'");
-                controller.AddError( "ERROR", $"Multiple records exist for '{device.DeviceID}'" );
-                return default;
+                return new Error( Status.Conflict, $"Multiple records exist for '{device.DeviceID}'" );
             }
         }
 

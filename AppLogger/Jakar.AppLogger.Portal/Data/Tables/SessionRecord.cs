@@ -2,6 +2,10 @@
 // 09/21/2022  4:52 PM
 
 
+using Jakar.Database;
+
+
+
 namespace Jakar.AppLogger.Portal.Data.Tables;
 
 
@@ -9,25 +13,28 @@ namespace Jakar.AppLogger.Portal.Data.Tables;
 [Table( "Sessions" )]
 public sealed record SessionRecord : LoggerTable<SessionRecord>, IStartSession
 {
-    public Guid      AppID     { get; init; }
-    public Guid      DeviceID  { get; init; }
-    public Guid      SessionID { get; init; }
-    Guid? ISessionID.SessionID => SessionID;
+    public DateTimeOffset         AppStartTime { get; init; }
+    public RecordID<AppRecord>    AppID        { get; init; }
+    public RecordID<DeviceRecord> DeviceID     { get; init; }
+    Guid IStartSession.           AppID        => AppID.Value;
+    Guid IStartSession.           DeviceID     => DeviceID.Value;
+    Guid? ISessionID.             SessionID    => ID.Value;
 
 
     public SessionRecord() : base() { }
-    public SessionRecord( AppRecord app, DeviceRecord device, UserRecord? caller = default ) : base( Guid.NewGuid(), caller )
+    public SessionRecord( StartSession start, AppRecord app, DeviceRecord device, UserRecord? caller = default ) : base( caller )
     {
-        AppID    = app.ID;
-        DeviceID = device.ID;
+        AppStartTime = start.AppStartTime;
+        AppID        = app.ID;
+        DeviceID     = device.ID;
     }
-    public StartSessionReply ToStartSessionReply() => new(SessionID, AppID, DeviceID);
+    public StartSessionReply ToStartSessionReply() => new(ID.Value, AppID.Value, DeviceID.Value);
 
 
     public static DynamicParameters GetDynamicParameters( in Guid sessionID )
     {
         var parameters = new DynamicParameters();
-        parameters.Add( nameof(SessionID), sessionID );
+        parameters.Add( nameof(ID), sessionID );
         return parameters;
     }
 

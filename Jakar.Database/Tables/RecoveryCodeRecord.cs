@@ -21,7 +21,7 @@ public sealed record RecoveryCodeRecord : TableRecord<RecoveryCodeRecord>
 
 
     public RecoveryCodeRecord() { }
-    private RecoveryCodeRecord( string code, UserRecord caller ) : base( Guid.NewGuid(), caller ) => Code = _hasher.HashPassword( this, code );
+    private RecoveryCodeRecord( string code, UserRecord caller ) : base( caller ) => Code = _hasher.HashPassword( this, code );
 
 
     public static IReadOnlyDictionary<string, RecoveryCodeRecord> Create( UserRecord user, IEnumerable<string> recoveryCodes )

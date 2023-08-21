@@ -6,10 +6,9 @@ try
     "Hello World!".WriteToConsole();
     Console.WriteLine();
 
-    // Console.WriteLine( new SqlStatementBenchmarks().Test_Span() );
+    BenchmarkRunner.Run<HashBenchmarks>();
 
-    // BenchmarkRunner.Run<SqlStatementBenchmarks>();
-
+    // new HashBenchmarks().GetHash().WriteToConsole();
 }
 catch ( Exception e ) { e.WriteToConsole(); }
 finally { "Bye".WriteToConsole(); }

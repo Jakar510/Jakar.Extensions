@@ -16,7 +16,7 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, JsonModels.IJ
 
 
     public UserRecord() { }
-    public UserRecord( IUserData data, string? rights, UserRecord? caller = default ) : this( Guid.NewGuid(), caller )
+    public UserRecord( IUserData data, string? rights, UserRecord? caller = default ) : this( caller )
     {
         ArgumentNullException.ThrowIfNull( data );
         FirstName         = data.FirstName;
@@ -40,8 +40,8 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, JsonModels.IJ
         PreferredLanguage = data.PreferredLanguage;
         Rights            = rights ?? string.Empty;
     }
-    public UserRecord( Guid id, UserRecord? caller = default ) : base( id, caller ) => UserID = Guid.NewGuid();
-    public UserRecord( string userName, string password, string rights, UserRecord? caller = default ) : base( Guid.NewGuid(), caller )
+    public UserRecord( Guid id, UserRecord? caller = default ) : base( new RecordID<UserRecord>( id ), caller ) => UserID = Guid.NewGuid();
+    public UserRecord( string userName, string password, string rights, UserRecord? caller = default ) : base( caller )
     {
         ArgumentNullException.ThrowIfNull( userName );
         ArgumentNullException.ThrowIfNull( password );
@@ -338,8 +338,8 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, JsonModels.IJ
                                                                                                                                                     : default;
 
 
-    public bool DoesNotOwn<TRecord>( TRecord record ) where TRecord : TableRecord<TRecord> => record.OwnerUserID != UserID;
-    public bool Owns<TRecord>( TRecord       record ) where TRecord : TableRecord<TRecord> => record.OwnerUserID == UserID;
+    public bool DoesNotOwn<TRecord>( TRecord record ) where TRecord : TableRecord<TRecord> => record.OwnerUserID != ID;
+    public bool Owns<TRecord>( TRecord       record ) where TRecord : TableRecord<TRecord> => record.OwnerUserID == ID;
 
     #endregion
 
@@ -481,7 +481,7 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, JsonModels.IJ
                               StringComparison.Ordinal );
     }
     public bool IsHashedRefreshToken( Tokens token ) => IsHashedRefreshToken( token.RefreshToken );
-    
+
     public UserRecord SetRefreshToken( string? token, in DateTimeOffset date, in bool hashed = true )
     {
         if ( hashed )
@@ -508,8 +508,8 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, JsonModels.IJ
         return this;
     }
 
-    public UserRecord SetRefreshToken( Tokens token, in DateTimeOffset date, in bool   hashed                     = true ) => SetRefreshToken( token.RefreshToken, date, hashed );
-    public UserRecord SetRefreshToken( Tokens token, in DateTimeOffset date, string securityStamp, in bool hashed = true ) => SetRefreshToken( token.RefreshToken, date, securityStamp, hashed );
+    public UserRecord SetRefreshToken( Tokens token, in DateTimeOffset date, in bool hashed                        = true ) => SetRefreshToken( token.RefreshToken, date, hashed );
+    public UserRecord SetRefreshToken( Tokens token, in DateTimeOffset date, string  securityStamp, in bool hashed = true ) => SetRefreshToken( token.RefreshToken, date, securityStamp, hashed );
 
     #endregion
 
@@ -561,8 +561,8 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, JsonModels.IJ
         Rights        = rights.ToString();
     }
     public void InitRights( int length, char right = '-' ) => Rights = new string( right, length );
-   
-    #endregion 
+
+    #endregion
     */
 
 

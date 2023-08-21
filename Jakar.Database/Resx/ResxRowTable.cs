@@ -25,7 +25,7 @@ public sealed record ResxRowTable : TableRecord<ResxRowTable>
 
 
     public ResxRowTable() { }
-    public ResxRowTable( string key, long keyID, UserRecord? caller = default ) : base( Guid.NewGuid(), caller )
+    public ResxRowTable( string key, long keyID, UserRecord? caller = default ) : base( caller )
     {
         Key   = key;
         KeyID = keyID;

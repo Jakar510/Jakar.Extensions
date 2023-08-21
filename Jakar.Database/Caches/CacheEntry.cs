@@ -10,13 +10,14 @@ public sealed class CacheEntry<TRecord> : ObservableClass, IRecordPair, IEquatab
     private DateTimeOffset _lastTime;
     private int            _hash;
     private TRecord?       _value;
-    public  Guid?          CreatedBy   => _value?.CreatedBy;
+    public  Guid?          CreatedBy   => _value?.CreatedBy?.Value;
     public  DateTimeOffset DateCreated => _value?.DateCreated ?? default;
 
 
-    public bool            HasChanged   => Value.GetHashCode() != _hash;
-    public Guid            ID           { get; init; }
-    public DateTimeOffset? LastModified => _value?.LastModified;
+    public bool              HasChanged   => Value.GetHashCode() != _hash;
+    public RecordID<TRecord> ID           { get; init; }
+    public DateTimeOffset?   LastModified => _value?.LastModified;
+    Guid IUniqueID<Guid>.ID => ID.Value;
 
 
     public TRecord Value

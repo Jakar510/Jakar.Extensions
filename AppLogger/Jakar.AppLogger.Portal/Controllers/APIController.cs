@@ -1,8 +1,4 @@
-﻿using OneOf;
-
-
-
-namespace Jakar.AppLogger.Portal.Controllers;
+﻿namespace Jakar.AppLogger.Portal.Controllers;
 
 
 [ApiController]
@@ -46,16 +42,16 @@ public class APIController : ControllerBase
     [Route( Routes.LOG )]
     public async Task<ActionResult<bool>> Log( IEnumerable<AppLog> logs, CancellationToken token )
     {
-        OneOf<bool, Error> result = await _api.SendLog( this, logs, token );
+        OneOf<bool, Error> result = await _api.SendLog( logs, token );
         return result.Match();
     }
 
 
     [HttpPost]
     [Route( Routes.Sessions.START )]
-    public async Task<ActionResult<Guid>> StartSession( StartSession session, CancellationToken token )
+    public async Task<ActionResult<StartSessionReply>> StartSession( StartSession session, CancellationToken token )
     {
-        OneOf<Guid, Error> result = await _api.StartSession( this, session, token );
+        OneOf<StartSessionReply, Error> result = await _api.StartSession( session, token );
         return result.Match();
     }
 
@@ -64,7 +60,7 @@ public class APIController : ControllerBase
     [Route( Routes.Sessions.END )]
     public async Task<ActionResult<bool>> EndSession( Guid sessionID, CancellationToken token )
     {
-        OneOf<bool, Error> result = await _api.EndSession( this, sessionID, token );
+        OneOf<bool, Error> result = await _api.EndSession( sessionID, token );
         return result.Match();
     }
 }

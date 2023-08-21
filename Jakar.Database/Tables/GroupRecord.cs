@@ -5,10 +5,10 @@
 [Table( "Groups" )]
 public sealed record GroupRecord : TableRecord<GroupRecord>, UserRights.IRights
 {
-    private Guid    _ownerID;
-    private string  _nameOfGroup = string.Empty;
-    private string  _rights      = string.Empty;
-    private string? _customerID;
+    private RecordID<UserRecord> _ownerID;
+    private string               _nameOfGroup = string.Empty;
+    private string               _rights      = string.Empty;
+    private string?              _customerID;
 
 
     [MaxLength( 256 )]
@@ -28,7 +28,7 @@ public sealed record GroupRecord : TableRecord<GroupRecord>, UserRights.IRights
 
 
     [MaxLength( 256 )]
-    public Guid OwnerID
+    public RecordID<UserRecord> OwnerID
     {
         get => _ownerID;
         init => SetProperty( ref _ownerID, value );
@@ -44,7 +44,7 @@ public sealed record GroupRecord : TableRecord<GroupRecord>, UserRights.IRights
 
 
     public GroupRecord() { }
-    public GroupRecord( UserRecord owner, string nameOfGroup, string? customerID, UserRecord? caller = default ) : base( Guid.NewGuid(), caller )
+    public GroupRecord( UserRecord owner, string nameOfGroup, string? customerID, UserRecord? caller = default ) : base( caller )
     {
         OwnerID     = owner.ID;
         NameOfGroup = nameOfGroup;

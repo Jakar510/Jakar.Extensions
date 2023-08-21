@@ -18,6 +18,10 @@ namespace Jakar.Database;
 [SuppressMessage( "ReSharper", "UnusedMethodReturnValue.Global" )]
 public static partial class DbExtensions
 {
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsValid<TRecord>( this    RecordID<TRecord>? value ) where TRecord : TableRecord<TRecord> => value.HasValue && value.Value.IsValid();
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsNotValid<TRecord>( this RecordID<TRecord>? value ) where TRecord : TableRecord<TRecord> => value is null || !value.Value.IsValid();
+
+
     public static IHealthChecksBuilder AddHealthCheck<T>( this WebApplicationBuilder builder ) where T : IHealthCheck => builder.AddHealthCheck( HealthCheckExtensions.CreateHealthCheck<T>() );
     public static IHealthChecksBuilder AddHealthCheck( this WebApplicationBuilder builder, HealthCheckRegistration registration ) =>
         builder.Services.AddHealthChecks()

@@ -22,5 +22,6 @@ public abstract record LoggerTable<TRecord> : TableRecord<TRecord>, JsonModels.I
 
 
     protected LoggerTable() : base() { }
-    protected LoggerTable( Guid id, UserRecord? caller = default ) : base( id, caller ) { }
+    protected LoggerTable( UserRecord?       caller ) : base( caller ) { }
+    protected LoggerTable( RecordID<TRecord> id, UserRecord? caller = default ) : base( id, caller ) { }
 }

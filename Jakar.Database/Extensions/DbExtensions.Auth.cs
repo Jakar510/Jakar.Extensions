@@ -13,7 +13,7 @@ public static partial class DbExtensions
     public static WebApplicationBuilder AddAuth( this WebApplicationBuilder builder )
     {
         builder.Services.AddHttpContextAccessor();
-        builder.AddTransient<IAuthorizationService, AuthorizationService>();
+        builder.Services.AddTransient<IAuthorizationService, AuthorizationService>();
         return builder;
     }
 }

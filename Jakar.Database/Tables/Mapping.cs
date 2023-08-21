@@ -19,12 +19,12 @@ public abstract record Mapping<TSelf, TKey, TValue> : TableRecord<TSelf> where T
     private WeakReference<TValue>? _value;
 
 
-    public Guid KeyID   { get; init; }
-    public Guid ValueID { get; init; }
+    public RecordID<TKey>   KeyID   { get; init; }
+    public RecordID<TValue> ValueID { get; init; }
 
 
     protected Mapping() { }
-    protected Mapping( TKey key, TValue value ) : base( Guid.NewGuid() )
+    protected Mapping( TKey key, TValue value ) : base( RecordID<TSelf>.New() )
     {
         _owner  = new WeakReference<TKey>( key );
         _value  = new WeakReference<TValue>( value );
@@ -89,7 +89,7 @@ public abstract record Mapping<TSelf, TKey, TValue> : TableRecord<TSelf> where T
     {
         if ( other is null ) { return false; }
 
-        return ReferenceEquals( this, other ) || ValueID == other.ValueID && KeyID == other.ValueID;
+        return ReferenceEquals( this, other ) || ValueID == other.ValueID && KeyID == other.KeyID;
     }
     public override int GetHashCode() => HashCode.Combine( KeyID, ValueID );
 

@@ -23,6 +23,10 @@ public sealed record AppLog( [property: MaxLength( IAppLog.MESSAGE_LENGTH )] str
     public                                             bool                      IsValid      => !string.IsNullOrWhiteSpace( Message );
     string? IAppLog.                                                             StackTrace   => GetStackTrace();
     public int                                                                   ThreadID     { get; init; } = Environment.CurrentManagedThreadId;
+    Guid? ISessionID.                                                            SessionID    => Session.SessionID;
+    Guid ILogInfo.                                                               LogID        => ID;
+    Guid IStartSession.                                                          DeviceID     => Session.DeviceID;
+    Guid IStartSession.                                                          AppID        => Session.AppID;
 
 
     public AppLog( AppLog log ) : base( log )

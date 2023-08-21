@@ -14,11 +14,11 @@ public class UserValidator : IUserValidator<UserRecord>
     {
         var errors = new List<IdentityError>( 5 );
         Check( errors, user );
-        return errors.ToArray();
+        return errors.GetInternalArray();
     }
     protected virtual void Check( in ICollection<IdentityError> errors, UserRecord user )
     {
-        if ( !user.OwnerUserID.IsValidID() )
+        if ( user.OwnerUserID.IsNotValid() )
         {
             errors.Add( new IdentityError
                         {

@@ -20,11 +20,6 @@ public sealed class Create_ScopeRecord : LoggerMigration<ScopeRecord>
         CheckSchema();
         ICreateTableWithColumnSyntax table = CreateTable();
 
-
-        table.WithColumn( nameof(ScopeRecord.ScopeID) )
-             .AsGuid()
-             .NotNullable();
-
         table.WithColumn( nameof(ScopeRecord.SessionID) )
              .AsGuid()
              .NotNullable();

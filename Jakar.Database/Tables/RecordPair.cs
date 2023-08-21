@@ -15,11 +15,13 @@ public readonly record struct RecordPair( Guid ID, DateTimeOffset DateCreated ) 
 
 
 
-// public sealed class RecordPairMapper : SqlMapper.ITypeHandler
-// {
-//     static RecordPairMapper() => SqlMapper.AddTypeHandler( typeof(RecordPair), new RecordPairMapper() );
-//
-//
-//     public void SetValue( IDbDataParameter parameter,       object value ) { }
-//     public object Parse( Type              destinationType, object value ) => null;
-// }
+public readonly record struct RecordPair<TRecord>( RecordID<TRecord> ID, DateTimeOffset DateCreated ) : IComparable<RecordPair<TRecord>>, IRecordPair where TRecord : TableRecord<TRecord>
+{
+    Guid IUniqueID<Guid>.ID => ID.Value;
+
+    public int CompareTo( RecordPair<TRecord> other ) => DateCreated.CompareTo( other.DateCreated );
+
+
+    public static implicit operator RecordPair<TRecord>( (RecordID<TRecord> ID, DateTimeOffset DateCreated) value ) => new(value.ID, value.DateCreated);
+    public static implicit operator KeyValuePair<Guid, DateTimeOffset>( RecordPair<TRecord>                 value ) => new(value.ID.Value, value.DateCreated);
+}

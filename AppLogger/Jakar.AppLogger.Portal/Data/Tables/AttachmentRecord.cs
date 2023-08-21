@@ -22,7 +22,7 @@ public sealed record LoggerAttachmentRecord : LoggerTable<LoggerAttachmentRecord
 
 
     public LoggerAttachmentRecord() : base() { }
-    public LoggerAttachmentRecord( LoggerAttachment attachment, ILogInfo info, UserRecord? caller = default ) : base( Guid.NewGuid(), caller )
+    public LoggerAttachmentRecord( LoggerAttachment attachment, ILogInfo info, UserRecord? caller = default ) : base( caller )
     {
         if ( attachment.Length > LoggerAttachment.MAX_SIZE ) { LoggerAttachment.ThrowTooLong( attachment.Length ); }
 

@@ -13,9 +13,9 @@ public interface IRecordPair : IUniqueID<Guid> // where TID : IComparable<TID>, 
 
 public interface ITableRecord : IRecordPair
 {
-    public Guid?           CreatedBy    { get; }
-    public DateTimeOffset? LastModified { get; }
-    public Guid?           OwnerUserID  { get; }
+    public RecordID<UserRecord>? CreatedBy    { get; }
+    public DateTimeOffset?       LastModified { get; }
+    public RecordID<UserRecord>? OwnerUserID  { get; }
 }
 
 
@@ -26,25 +26,27 @@ public abstract record TableRecord<TRecord> : ObservableRecord<TRecord>, ITableR
     private DateTimeOffset? _lastModified;
 
 
-    public static string         TableName   { get; } = typeof(TRecord).GetTableName();
-    public        Guid?          CreatedBy   { get; init; }
-    public        DateTimeOffset DateCreated { get; init; }
-    [Key] public  Guid           ID          { get; init; }
+    public static string                TableName   { get; } = typeof(TRecord).GetTableName();
+    public        RecordID<UserRecord>? CreatedBy   { get; init; }
+    public        DateTimeOffset        DateCreated { get; init; }
+    [Key] public  RecordID<TRecord>     ID          { get; init; }
     public DateTimeOffset? LastModified
     {
         get => _lastModified;
         set => SetProperty( ref _lastModified, value );
     }
-    public Guid? OwnerUserID { get; init; }
+    public RecordID<UserRecord>? OwnerUserID { get; init; }
+    Guid IUniqueID<Guid>.        ID          => ID.Value;
 
 
     protected TableRecord() : base() { }
-    protected TableRecord( Guid id, UserRecord? user = default )
+    protected TableRecord( UserRecord? owner, UserRecord? creator = default ) : this( RecordID<TRecord>.New(), owner, creator ) { }
+    protected TableRecord( RecordID<TRecord> id, UserRecord? owner = default, UserRecord? creator = default )
     {
         ID          = id;
         DateCreated = DateTimeOffset.UtcNow;
-        OwnerUserID = user?.UserID;
-        CreatedBy   = user?.UserID;
+        OwnerUserID = owner?.ID;
+        CreatedBy   = creator?.ID ?? owner?.ID;
     }
 
 
@@ -63,22 +65,23 @@ public abstract record TableRecord<TRecord> : ObservableRecord<TRecord>, ITableR
     }
 
 
-    public async ValueTask<UserRecord?> GetUser( DbConnection           connection, DbTransaction? transaction, Database db, CancellationToken token ) => await db.Users.Get( connection, transaction, true,      GetDynamicParameters( this ), token );
-    public async ValueTask<UserRecord?> GetUserWhoCreated( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => await db.Users.Get( connection, transaction, CreatedBy, token );
+    public async ValueTask<UserRecord?> GetUser( DbConnection           connection, DbTransaction? transaction, Database db, CancellationToken token ) => await db.Users.Get( connection, transaction, true, GetDynamicParameters( this ), token );
+    public async ValueTask<UserRecord?> GetUserWhoCreated( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => await db.Users.Get( connection, transaction, CreatedBy?.Value, token );
 
 
-    public TRecord WithOwner( Guid id ) => (TRecord)(this with
-                                                     {
-                                                         OwnerUserID = id
-                                                     });
-    public TRecord NewID( Guid id ) => (TRecord)(this with
-                                                 {
-                                                     ID = id
-                                                 });
+    public TRecord WithOwner( RecordID<UserRecord> id ) => (TRecord)(this with
+                                                                     {
+                                                                         OwnerUserID = id
+                                                                     });
+    internal TRecord NewID( Guid id ) => NewID( new RecordID<TRecord>( id ) );
+    public TRecord NewID( RecordID<TRecord> id ) => (TRecord)(this with
+                                                              {
+                                                                  ID = id
+                                                              });
 
 
-    public bool Owns( UserRecord       record ) => record.CreatedBy == record.UserID;
-    public bool DoesNotOwn( UserRecord record ) => record.CreatedBy != record.UserID;
+    public bool Owns( UserRecord       record ) => record.CreatedBy == record.ID;
+    public bool DoesNotOwn( UserRecord record ) => record.CreatedBy != record.ID;
 
 
     public override int CompareTo( TRecord? other )

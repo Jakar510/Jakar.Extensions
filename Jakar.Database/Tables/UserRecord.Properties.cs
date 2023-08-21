@@ -6,50 +6,50 @@ namespace Jakar.Database;
 
 public sealed partial record UserRecord
 {
-    private bool              _isActive;
-    private bool              _isDisabled;
-    private bool              _isEmailConfirmed;
-    private bool              _isLocked;
-    private bool              _isPhoneNumberConfirmed;
-    private bool              _isTwoFactorEnabled;
-    private DateTimeOffset?   _lastActive;
-    private DateTimeOffset?   _lastBadAttempt;
-    private DateTimeOffset?   _lockDate;
-    private DateTimeOffset?   _lockEnd;
-    private DateTimeOffset?   _refreshTokenExpiryTime;
-    private DateTimeOffset?   _subscriptionExpires;
-    private DateTimeOffset?   _tokenExpiration;
-    private Guid?             _escalateTo;
-    private Guid?             _sessionID;
-    private Guid?             _subscriptionID;
-    private int               _badLogins;
-    private string            _address          = string.Empty;
-    private string            _city             = string.Empty;
-    private string            _company          = string.Empty;
-    private string            _concurrencyStamp = string.Empty;
-    private string            _country          = string.Empty;
-    private string            _department       = string.Empty;
-    private string            _description      = string.Empty;
-    private string            _email            = string.Empty;
-    private string            _ext              = string.Empty;
-    private string            _firstName        = string.Empty;
-    private string            _fullName         = string.Empty;
-    private string            _gender           = string.Empty;
-    private string            _lastName         = string.Empty;
-    private string            _line1            = string.Empty;
-    private string            _line2            = string.Empty;
-    private string            _passwordHash     = string.Empty;
-    private string            _phoneNumber      = string.Empty;
-    private string            _postalCode       = string.Empty;
-    private string            _refreshToken     = string.Empty;
-    private string            _rights           = string.Empty;
-    private string            _securityStamp    = string.Empty;
-    private string            _stateOrProvince  = string.Empty;
-    private string            _title            = string.Empty;
-    private string            _userName         = string.Empty;
-    private string            _website          = string.Empty;
-    private string?           _additionalData;
-    private SupportedLanguage _preferredLanguage;
+    private bool                  _isActive;
+    private bool                  _isDisabled;
+    private bool                  _isEmailConfirmed;
+    private bool                  _isLocked;
+    private bool                  _isPhoneNumberConfirmed;
+    private bool                  _isTwoFactorEnabled;
+    private DateTimeOffset?       _lastActive;
+    private DateTimeOffset?       _lastBadAttempt;
+    private DateTimeOffset?       _lockDate;
+    private DateTimeOffset?       _lockEnd;
+    private DateTimeOffset?       _refreshTokenExpiryTime;
+    private DateTimeOffset?       _subscriptionExpires;
+    private DateTimeOffset?       _tokenExpiration;
+    private RecordID<UserRecord>? _escalateTo;
+    private Guid?                 _sessionID;
+    private Guid?                 _subscriptionID;
+    private int                   _badLogins;
+    private string                _address          = string.Empty;
+    private string                _city             = string.Empty;
+    private string                _company          = string.Empty;
+    private string                _concurrencyStamp = string.Empty;
+    private string                _country          = string.Empty;
+    private string                _department       = string.Empty;
+    private string                _description      = string.Empty;
+    private string                _email            = string.Empty;
+    private string                _ext              = string.Empty;
+    private string                _firstName        = string.Empty;
+    private string                _fullName         = string.Empty;
+    private string                _gender           = string.Empty;
+    private string                _lastName         = string.Empty;
+    private string                _line1            = string.Empty;
+    private string                _line2            = string.Empty;
+    private string                _passwordHash     = string.Empty;
+    private string                _phoneNumber      = string.Empty;
+    private string                _postalCode       = string.Empty;
+    private string                _refreshToken     = string.Empty;
+    private string                _rights           = string.Empty;
+    private string                _securityStamp    = string.Empty;
+    private string                _stateOrProvince  = string.Empty;
+    private string                _title            = string.Empty;
+    private string                _userName         = string.Empty;
+    private string                _website          = string.Empty;
+    private string?               _additionalData;
+    private SupportedLanguage     _preferredLanguage;
 
 
     IDictionary<string, JToken?>? JsonModels.IJsonModel.AdditionalData
@@ -145,7 +145,7 @@ public sealed partial record UserRecord
         set => SetProperty( ref _email, value );
     }
     [MaxLength( 256 )]
-    public Guid? EscalateTo
+    public RecordID<UserRecord>? EscalateTo
     {
         get => _escalateTo;
         set => SetProperty( ref _escalateTo, value );
@@ -487,8 +487,25 @@ public sealed partial record UserRecord
 
         if ( ReferenceEquals( this, other ) ) { return true; }
 
-        return base.Equals( other ) && UserName == other.UserName && FirstName == other.FirstName && LastName == other.LastName && FullName == other.FullName && Description == other.Description && Address == other.Address && Line1 == other.Line1 &&
-               Line2 == other.Line2 && City == other.City && StateOrProvince == other.StateOrProvince && Country == other.Country && PostalCode == other.PostalCode && Website == other.Website && Email == other.Email &&
-               PhoneNumber == other.PhoneNumber && Ext == other.Ext && Title == other.Title && Department == other.Department && Company == other.Company;
+        return base.Equals( other ) &&
+               UserName == other.UserName &&
+               FirstName == other.FirstName &&
+               LastName == other.LastName &&
+               FullName == other.FullName &&
+               Description == other.Description &&
+               Address == other.Address &&
+               Line1 == other.Line1 &&
+               Line2 == other.Line2 &&
+               City == other.City &&
+               StateOrProvince == other.StateOrProvince &&
+               Country == other.Country &&
+               PostalCode == other.PostalCode &&
+               Website == other.Website &&
+               Email == other.Email &&
+               PhoneNumber == other.PhoneNumber &&
+               Ext == other.Ext &&
+               Title == other.Title &&
+               Department == other.Department &&
+               Company == other.Company;
     }
 }
