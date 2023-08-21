@@ -17,7 +17,7 @@ public abstract record LoggerTable<TRecord> : TableRecord<TRecord>, JsonModels.I
     }
 
 
-    public   bool IsActive    { get; init; } = true;
+    public   bool IsActive    { get; set; } = true;
     internal bool IsNotActive => !IsActive;
 
 

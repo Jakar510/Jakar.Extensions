@@ -72,15 +72,8 @@ public sealed class LoggerDB : Database.Database
         SessionRecord? session = await Sessions.Get( connection, transaction, true, SessionRecord.GetDynamicParameters( sessionID ), token );
         if ( session is null || !session.IsActive ) { return new Error( Status.NotFound, session ); }
 
-
-        await Sessions.Update( connection,
-                               transaction,
-                               session with
-                               {
-                                   IsActive = false,
-                               },
-                               token );
-
+        session.IsActive = true;
+        await Sessions.Update( connection, transaction, session, token );
         return true;
     }
 
@@ -90,16 +83,8 @@ public sealed class LoggerDB : Database.Database
     {
         foreach ( AppLog log in logs )
         {
-            try
-            {
-                OneOf<bool, Error> result = await SendLog( connection, transaction, log, token );
-                if ( result.IsT1 ) { return result.AsT1; }
-            }
-            catch ( Exception e )
-            {
-                Console.WriteLine( e );
-                throw;
-            }
+            OneOf<bool, Error> result = await SendLog( connection, transaction, log, token );
+            if ( result.IsT1 ) { return result.AsT1; }
         }
 
         return true;

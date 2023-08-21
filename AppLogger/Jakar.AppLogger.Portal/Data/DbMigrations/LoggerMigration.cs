@@ -21,7 +21,7 @@ public abstract class LoggerMigration<TRecord> : Migration<TRecord> where TRecor
              .Nullable();
 
         table.WithColumn( nameof(AppRecord.AdditionalData) )
-             .AsString( int.MaxValue )
+             .AsString( BaseRecord.MAX_STRING_SIZE )
              .Nullable();
 
         return table;
