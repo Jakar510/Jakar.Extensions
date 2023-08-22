@@ -4,13 +4,17 @@
 [SuppressMessage( "ReSharper", "SuggestBaseTypeForParameter" )]
 public sealed class LoggerDB : Database.Database
 {
-    private readonly IDataProtectorProvider          _dataProtectorProvider;
-    public           DbTable<AppRecord>              Apps        { get; }
-    public           DbTable<LoggerAttachmentRecord> Attachments { get; }
-    public           DbTable<DeviceRecord>           Devices     { get; }
-    public           DbTable<LogRecord>              Logs        { get; }
-    public           DbTable<ScopeRecord>            Scopes      { get; }
-    public           DbTable<SessionRecord>          Sessions    { get; }
+    private readonly IDataProtectorProvider                 _dataProtectorProvider;
+    public           DbTable<AppRecord>                     Apps           { get; }
+    public           DbTable<LoggerAttachmentRecord>        Attachments    { get; }
+    public           DbTable<LoggerAttachmentMappingRecord> LogAttachments { get; }
+    public           DbTable<DeviceRecord>                  Devices        { get; }
+    public           DbTable<AppDeviceRecord>               AppDevices     { get; }
+    public           DbTable<LogRecord>                     Logs           { get; }
+    public           DbTable<LogScopeRecord>                LogScopes      { get; }
+    public           DbTable<ScopeRecord>                   Scopes         { get; }
+    public           DbTable<SessionRecord>                 Sessions       { get; }
+
 
     public event EventHandler<Notification>? NotificationReceived;
 
@@ -31,9 +35,12 @@ public sealed class LoggerDB : Database.Database
     {
         _dataProtectorProvider = dataProtectorProvider;
         Logs                   = Create<LogRecord>();
+        LogScopes              = Create<LogScopeRecord>();
         Attachments            = Create<LoggerAttachmentRecord>();
+        LogAttachments         = Create<LoggerAttachmentMappingRecord>();
         Devices                = Create<DeviceRecord>();
         Apps                   = Create<AppRecord>();
+        AppDevices             = Create<AppDeviceRecord>();
         Sessions               = Create<SessionRecord>();
         Scopes                 = Create<ScopeRecord>();
     }
@@ -103,38 +110,17 @@ public sealed class LoggerDB : Database.Database
         AppRecord? app = await Apps.Get( connection, transaction, log.Session.AppID, token );
         if ( app is null || !app.IsActive ) { return new Error( Status.NotFound, log.Session.AppID.ToString() ); }
 
-        OneOf<DeviceRecord, Error> device = await AddOrUpdate_Device( connection, transaction, log.Device, caller, token );
+        OneOf<DeviceRecord, Error> device = await AddOrUpdate_Device( connection, transaction, app, log, caller, token );
+        if ( device.IsT1 ) { return device.AsT1; }
 
-        if ( device.IsT1 )
-        {
-            if ( log.Device is null ) { return new Error( Status.BadRequest, log.Session.DeviceID.ToString() ); }
-
-            return device.AsT1;
-        }
-
-        ScopeRecord? scope = await Scopes.Get( connection, transaction, log.ScopeID, token );
-
-        if ( scope is null )
-        {
-            scope = new ScopeRecord( log, app, device.AsT0, session, caller );
-            scope = await Scopes.Insert( connection, transaction, scope, token );
-        }
-
-        var record = new LogRecord( log, session, scope, caller );
+        var record = new LogRecord( log, session, caller );
         record = await Logs.Insert( connection, transaction, record, token );
 
+        IEnumerable<ScopeRecord> scopes = ScopeRecord.Create( log, app, device.AsT0, session, caller );
+        await LogScopeRecord.TryAdd( connection, transaction, LogScopes, record, scopes, token );
 
-        foreach ( LoggerAttachment attachment in log.Attachments )
-        {
-            LoggerAttachmentRecord? attachmentRecord = await Attachments.Get( connection, transaction, true, LoggerAttachmentRecord.GetDynamicParameters( attachment ), token );
-
-            if ( attachmentRecord is null )
-            {
-                attachmentRecord = new LoggerAttachmentRecord( attachment, record, caller );
-                await Attachments.Insert( connection, transaction, attachmentRecord, token );
-            }
-            else { await Attachments.Update( connection, transaction, attachmentRecord.Update( attachment ), token ); }
-        }
+        IEnumerable<LoggerAttachmentRecord> attachments = LoggerAttachmentRecord.Create( record, log, caller );
+        await LoggerAttachmentMappingRecord.TryAdd( connection, transaction, LogAttachments, record, attachments, token );
 
         return true;
     }
@@ -143,10 +129,16 @@ public sealed class LoggerDB : Database.Database
     public ValueTask<OneOf<bool, Error>> SendLog( IEnumerable<AppLog> logs, CancellationToken token ) => this.TryCall( SendLog, logs, token );
 
 
-    public async ValueTask<OneOf<DeviceRecord, Error>> AddOrUpdate_Device( DbConnection connection, DbTransaction transaction, DeviceDescriptor? device, UserRecord caller, CancellationToken token )
+    public async ValueTask<OneOf<DeviceRecord, Error>> AddOrUpdate_Device( DbConnection connection, DbTransaction transaction, AppRecord app, AppLog log, UserRecord caller, CancellationToken token )
     {
-        if ( device is null ) { return new Error( Status.BadRequest, $"{nameof(device)} is null" ); }
+        OneOf<DeviceRecord, Error> device = await AddOrUpdate_Device( connection, transaction, log.Device, caller, token );
+        if ( device.IsT1 ) { return device.AsT1; }
 
+        await AppDeviceRecord.TryAdd( connection, transaction, AppDevices, app, device.AsT0, token );
+        return await AddOrUpdate_Device( connection, transaction, log.Device, caller, token );
+    }
+    public async ValueTask<OneOf<DeviceRecord, Error>> AddOrUpdate_Device( DbConnection connection, DbTransaction transaction, DeviceDescriptor device, UserRecord caller, CancellationToken token )
+    {
         DeviceRecord? record = default;
 
         foreach ( DeviceRecord deviceRecord in await Devices.Where( connection, transaction, true, DeviceRecord.GetDynamicParameters( device, caller ), token ) )

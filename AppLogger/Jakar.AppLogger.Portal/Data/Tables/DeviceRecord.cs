@@ -4,8 +4,7 @@
 namespace Jakar.AppLogger.Portal.Data.Tables;
 
 
-[Serializable]
-[Table( "Devices" )]
+[Serializable, Table( "Devices" )]
 public sealed record DeviceRecord : LoggerTable<DeviceRecord>, IDevice
 {
     public                                int?       AppBuild            { get; init; }
@@ -95,4 +94,13 @@ public sealed record DeviceRecord : LoggerTable<DeviceRecord>, IDevice
 
         return string.Equals( DeviceID, other.DeviceID, StringComparison.Ordinal );
     }
+}
+
+
+
+[Serializable, Table( "Devices" )]
+public sealed record AppDeviceRecord : Mapping<AppDeviceRecord, AppRecord, DeviceRecord>, ICreateMapping<AppDeviceRecord, AppRecord, DeviceRecord>
+{
+    public AppDeviceRecord( AppRecord               key, DeviceRecord value ) : base( key, value ) { }
+    public static AppDeviceRecord Create( AppRecord key, DeviceRecord value ) => new(key, value);
 }

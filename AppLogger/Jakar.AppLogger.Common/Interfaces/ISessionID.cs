@@ -21,6 +21,12 @@ public interface IStartSession : ISessionID
 
 public interface ILogInfo : IStartSession
 {
-    public Guid  LogID   { get; }
-    public Guid? ScopeID { get; }
+    public Guid LogID { get; }
+}
+
+
+
+public interface ILogScopes
+{
+    public HashSet<Guid> ScopeIDs { get; }
 }

@@ -1,10 +1,6 @@
 ﻿// Jakar.AppLogger :: Jakar.AppLogger.Portal
 // 09/21/2022  4:59 PM
 
-using Jakar.Database;
-
-
-
 namespace Jakar.AppLogger.Portal.Data.Tables;
 
 
@@ -18,11 +14,16 @@ public sealed record ScopeRecord : LoggerTable<ScopeRecord>
 
 
     public ScopeRecord() : base() { }
-    public ScopeRecord( AppLog log, AppRecord app, DeviceRecord device, SessionRecord session, UserRecord? caller = default ) : base( new RecordID<ScopeRecord>( log.ScopeID ?? throw new ArgumentNullException( nameof(log.ScopeID) ) ), caller )
+    private ScopeRecord( Guid scopeID, AppRecord app, DeviceRecord device, SessionRecord session, UserRecord? caller = default ) : base( new RecordID<ScopeRecord>( scopeID ), caller )
     {
         AppID     = app.ID;
         DeviceID  = device.ID;
         SessionID = session.ID;
+    }
+    public static IEnumerable<ScopeRecord> Create( AppLog log, AppRecord app, DeviceRecord device, SessionRecord session, UserRecord? caller = default )
+    {
+        // ReSharper disable once ForeachCanBeConvertedToQueryUsingAnotherGetEnumerator
+        foreach ( Guid scopeID in log.ScopeIDs ) { yield return new ScopeRecord( scopeID, app, device, session, caller ); }
     }
 
 
@@ -34,6 +35,18 @@ public sealed record ScopeRecord : LoggerTable<ScopeRecord>
 
         if ( ReferenceEquals( this, other ) ) { return true; }
 
-        return AppID == other.AppID && DeviceID == other.DeviceID;
+        return AppID == other.AppID && DeviceID == other.DeviceID && SessionID == other.SessionID;
     }
+}
+
+
+
+[Serializable, Table( "LogScopes" )]
+public sealed record LogScopeRecord : Mapping<LogScopeRecord, LogRecord, ScopeRecord>, ICreateMapping<LogScopeRecord, LogRecord, ScopeRecord>
+{
+    public LogScopeRecord() : base() { }
+    public LogScopeRecord( LogRecord key, ScopeRecord value ) : base( key, value ) { }
+
+
+    public static LogScopeRecord Create( LogRecord key, ScopeRecord value ) => new(key, value);
 }

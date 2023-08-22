@@ -49,10 +49,6 @@ public sealed class Create_LogRecord : LoggerMigration<LogRecord>
              .AsGuid()
              .NotNullable();
 
-        table.WithColumn( nameof(LogRecord.ScopeID) )
-             .AsGuid()
-             .NotNullable();
-
         table.WithColumn( nameof(LogRecord.EventID) )
              .AsInt32()
              .NotNullable();

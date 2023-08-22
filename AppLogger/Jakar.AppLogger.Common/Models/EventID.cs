@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.AppLogger.Common
 // 08/19/2023  9:24 PM
 
-using System.ComponentModel.DataAnnotations;
-
-
-
 namespace Jakar.AppLogger.Common;
 
 

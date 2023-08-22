@@ -6,5 +6,5 @@ namespace Jakar.AppLogger.Common;
 
 public interface IScopeID
 {
-    public Guid? ScopeID { get; set; }
+    public Guid ScopeID { get; }
 }

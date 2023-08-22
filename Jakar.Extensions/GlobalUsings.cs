@@ -35,6 +35,7 @@ global using System.IO.Compression;
 global using System.Net.Http;
 global using System.Net.Http.Headers;
 global using System.Net.Security;
+global using System.Numerics;
 global using System.Runtime.InteropServices;
 global using System.Runtime.Versioning;
 global using System.Security;

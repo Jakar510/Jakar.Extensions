@@ -1,98 +1,67 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions.AppCenter
 // 07/06/2022  8:55 AM
 
-using System.ComponentModel.DataAnnotations;
-
-
-
 namespace Jakar.AppLogger.Common;
 
 
 [Serializable]
-public sealed record AppLog( [property: MaxLength( IAppLog.MESSAGE_LENGTH )] string Message, LogLevel Level, EventID EventID, DateTimeOffset TimeStamp, StartSessionReply Session, Guid? ScopeID ) : BaseJsonModelRecord, IAppLog, ILogDetails
+public sealed record AppLog
+    ( [property: MaxLength( IAppLog.MESSAGE_LENGTH )] string Message, LogLevel Level, EventID EventID, DateTimeOffset TimeStamp, StartSessionReply Session, DeviceDescriptor Device ) : BaseJsonModelRecord, IAppLog, ILogDetails, ILogScopes
 {
+    Guid IStartSession.                                                          AppID        => Session.AppID;
     [MaxLength( IAppLog.APP_USER_ID_LENGTH )] public   string?                   AppUserID    { get; init; }
     public                                             HashSet<LoggerAttachment> Attachments  { get; init; } = new();
     [MaxLength( IAppLog.BUILD_ID_LENGTH )]      public string?                   BuildID      { get; init; }
     [MaxLength( IAppLog.CATEGORY_NAME_LENGTH )] public string?                   CategoryName { get; init; }
-    public                                             DeviceDescriptor?         Device       { get; init; }
-    public                                             ExceptionDetails?         Exception    { get; init; }
-    public                                             Guid                      ID           { get; init; }
-    [JsonIgnore] public                                bool                      IsError      => Level > LogLevel.Error;
-    public                                             bool                      IsFatal      { get; init; }
-    public                                             bool                      IsValid      => !string.IsNullOrWhiteSpace( Message );
+    Guid IStartSession.                                                          DeviceID     => Session.DeviceID;
+    public              ExceptionDetails?                                        Exception    { get; init; }
+    public              Guid                                                     ID           { get; init; }
+    [JsonIgnore] public bool                                                     IsError      => Level > LogLevel.Error;
+    public              bool                                                     IsFatal      { get; init; }
+    public              bool                                                     IsValid      => !string.IsNullOrWhiteSpace( Message );
+    Guid ILogInfo.                                                               LogID        => ID;
+    public HashSet<Guid>                                                         ScopeIDs     { get; init; } = new();
+    Guid? ISessionID.                                                            SessionID    => Session.SessionID;
     string? IAppLog.                                                             StackTrace   => GetStackTrace();
     public int                                                                   ThreadID     { get; init; } = Environment.CurrentManagedThreadId;
-    Guid? ISessionID.                                                            SessionID    => Session.SessionID;
-    Guid ILogInfo.                                                               LogID        => ID;
-    Guid IStartSession.                                                          DeviceID     => Session.DeviceID;
-    Guid IStartSession.                                                          AppID        => Session.AppID;
 
 
-    public AppLog( AppLog log ) : base( log )
+    public AppLog( IAppLog log, IEnumerable<LoggerAttachment> attachments, IEnumerable<Guid> scopeIDs, DeviceDescriptor device, ExceptionDetails? details ) : this( log.Message, log.Level, log.EventID, log.TimeStamp, log.Session, device )
     {
         ID           = log.ID;
         Message      = log.Message;
         Level        = log.Level;
         TimeStamp    = log.TimeStamp;
         Session      = log.Session;
-        ScopeID      = log.ScopeID;
         AppUserID    = log.AppUserID;
         EventID      = log.EventID;
         BuildID      = log.BuildID;
         IsFatal      = log.IsFatal;
-        Exception    = log.Exception;
-        Device       = log.Device;
-        CategoryName = log.CategoryName;
-        Attachments  = new HashSet<LoggerAttachment>( log.Attachments );
-    }
-    public AppLog( IAppLog log, IEnumerable<LoggerAttachment> attachments, DeviceDescriptor device, ExceptionDetails? details ) : this( log.Message, log.Level, log.EventID, log.TimeStamp, log.Session, log.ScopeID )
-    {
-        ID           = log.ID;
-        Message      = log.Message;
-        Level        = log.Level;
-        TimeStamp    = log.TimeStamp;
-        Session      = log.Session;
-        ScopeID      = log.ScopeID;
-        AppUserID    = log.AppUserID;
-        EventID      = log.EventID;
-        BuildID      = log.BuildID;
-        IsFatal      = log.IsFatal;
-        Device       = device;
         CategoryName = log.CategoryName;
         Exception    = details;
+        ScopeIDs     = new HashSet<Guid>( scopeIDs );
         Attachments  = new HashSet<LoggerAttachment>( attachments );
     }
-    public AppLog( AppLogger logger, LogLevel level, EventID eventID, string message, IEnumerable<LoggerAttachment>? attachments = default, IDictionary<string, JToken?>? eventDetails = default ) : this( message,
-                                                                                                                                                                                                           level,
-                                                                                                                                                                                                           eventID,
-                                                                                                                                                                                                           DateTimeOffset.UtcNow,
-                                                                                                                                                                                                           logger.Config.Session,
-                                                                                                                                                                                                           logger.Config.ScopeID )
-    {
-        AppUserID      = logger.Config.AppUserID;
-        Session        = logger.Config.Session;
-        ScopeID        = logger.Config.ScopeID;
-        Device         = logger.Config.Device;
-        CategoryName   = logger.CategoryName;
-        EventID        = eventID;
-        Level          = level;
-        ID             = Guid.NewGuid();
-        Message        = message;
-        AdditionalData = eventDetails;
-        if ( attachments is not null ) { Attachments.Add( attachments ); }
-    }
+    public static AppLog Create( AppLogger logger, LogLevel level, EventID eventID, string message, IEnumerable<LoggerAttachment>? attachments = default, IDictionary<string, JToken?>? eventDetails = default, ExceptionDetails? exception = default ) =>
+        new(message, level, eventID, DateTimeOffset.UtcNow, logger.Config.Session ?? throw new ApiDisabledException( nameof(AppLoggerOptions.Config) ), logger.Config.Device)
+        {
+            AppUserID      = logger.Config.AppUserID,
+            Device         = logger.Config.Device,
+            CategoryName   = logger.CategoryName,
+            EventID        = eventID,
+            Level          = level,
+            ID             = Guid.NewGuid(),
+            Message        = message,
+            AdditionalData = eventDetails,
+            Exception      = exception,
+            ScopeIDs       = new HashSet<Guid>( logger.Config.ScopeIDs ),
+            Attachments    = new HashSet<LoggerAttachment>( attachments ?? Array.Empty<LoggerAttachment>() )
+        };
 
 
-    public static AppLog Create( AppLogger logger, LogLevel logLevel, EventID eventID, string? message, Exception? e, IEnumerable<LoggerAttachment>? attachments = default, IDictionary<string, JToken?>? eventDetails = default )
-    {
-        var log = new AppLog( logger, logLevel, eventID, message ?? e?.Message ?? string.Empty, attachments, eventDetails )
-                  {
-                      Exception = e?.Details()
-                  };
+    public static AppLog Create( AppLogger logger, LogLevel logLevel, EventID eventID, string? message, Exception? e, IEnumerable<LoggerAttachment>? attachments = default, IDictionary<string, JToken?>? eventDetails = default ) =>
+        Create( logger, logLevel, eventID, message ?? e?.Message ?? string.Empty, attachments, eventDetails, e?.Details() );
 
-        return log;
-    }
     public static AppLog Create<TState>( AppLogger                        logger,
                                          LogLevel                         logLevel,
                                          EventID                          eventId,
@@ -101,18 +70,11 @@ public sealed record AppLog( [property: MaxLength( IAppLog.MESSAGE_LENGTH )] str
                                          Func<TState, Exception?, string> formatter,
                                          IEnumerable<LoggerAttachment>?   attachments  = default,
                                          IDictionary<string, JToken?>?    eventDetails = default
-    )
-    {
-        var log = new AppLog( logger, logLevel, eventId, formatter( state, e ), attachments, eventDetails )
-                  {
-                      Exception = e?.Details()
-                  };
-
-        return log;
-    }
+    ) => Create( logger, logLevel, eventId, formatter( state, e ), attachments, eventDetails, e?.Details() );
 
 
     public ExceptionDetails? GetExceptionDetails() => Exception;
+
     public string? GetStackTrace() => Exception?.StackTrace is not null
                                           ? string.Join( '\n', Exception.StackTrace )
                                           : default;
@@ -120,10 +82,12 @@ public sealed record AppLog( [property: MaxLength( IAppLog.MESSAGE_LENGTH )] str
 
     public AppLog Update( LogLevel level ) => this with
                                               {
-                                                  Level = level,
+                                                  Level = level
                                               };
-    public AppLog Update( IScopeID scope ) => this with
-                                              {
-                                                  ScopeID = scope.ScopeID,
-                                              };
+
+    public AppLog Update( LoggingSettings settings )
+    {
+        ScopeIDs.Add( settings.ScopeIDs );
+        return this;
+    }
 }

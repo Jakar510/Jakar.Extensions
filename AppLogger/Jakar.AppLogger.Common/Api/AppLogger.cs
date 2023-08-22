@@ -16,12 +16,12 @@ public sealed class AppLogger : Service, IAppLogger
     private                bool                  _disposed;
 
 
-    internal        string                  ApiToken     => Options.APIToken;
-    internal        IEnumerable<LoggerAttachment> LoggerAttachments  => Config.LoggerAttachmentProviders.Select( x => x.GetLoggerAttachment() );
-    public          string                  CategoryName => _categoryName ?? Options.Config?.AppName ?? string.Empty;
-    public          LoggingSettings         Config       => Options.Config ?? throw new InvalidOperationException( $"{nameof(AppLoggerOptions)}.{nameof(AppLoggerOptions.Config)} is not set" );
-    public override bool                    IsValid      => Options.IsValid && base.IsValid;
-    public          AppLoggerOptions        Options      { get; }
+    internal        string                        ApiToken          => Options.APIToken;
+    internal        IEnumerable<LoggerAttachment> LoggerAttachments => Config.LoggerAttachmentProviders.Select( x => x.GetLoggerAttachment() );
+    public          string                        CategoryName      => _categoryName ?? Options.Config?.AppName ?? string.Empty;
+    public          LoggingSettings               Config            => Options.Config ?? throw new InvalidOperationException( $"{nameof(AppLoggerOptions)}.{nameof(AppLoggerOptions.Config)} is not set" );
+    public override bool                          IsValid           => Options.IsValid && base.IsValid;
+    public          AppLoggerOptions              Options           { get; }
 
 
     public AppLogger( IOptions<AppLoggerOptions> options, ILoggerFactory factory ) : this( options.Value, factory ) { }
@@ -183,7 +183,7 @@ public sealed class AppLogger : Service, IAppLogger
         if ( string.IsNullOrWhiteSpace( message ) ) { return; }
 
         var eventID = new EventID( message.GetHashCode(), message );
-        var log     = new AppLog( this, level, eventID, message, LoggerAttachments, eventDetails );
+        var log     = AppLog.Create( this, level, eventID, message, LoggerAttachments, eventDetails );
         Add( log );
     }
 

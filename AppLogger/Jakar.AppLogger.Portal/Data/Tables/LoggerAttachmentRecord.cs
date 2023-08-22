@@ -4,8 +4,7 @@
 namespace Jakar.AppLogger.Portal.Data.Tables;
 
 
-[Serializable]
-[Table( "Attachments" )]
+[Serializable, Table( "Attachments" )]
 public sealed record LoggerAttachmentRecord : LoggerTable<LoggerAttachmentRecord>, ILoggerAttachment, ILogInfo
 {
     public                                                  Guid    AppID       { get; init; }
@@ -16,7 +15,7 @@ public sealed record LoggerAttachmentRecord : LoggerTable<LoggerAttachmentRecord
     public                                                  bool    IsBinary    { get; init; }
     public                                                  long    Length      { get; init; }
     public                                                  Guid    LogID       { get; init; }
-    public                                                  Guid?   ScopeID     { get; init; }
+    public                                                  Guid    ScopeID     { get; init; }
     public                                                  Guid?   SessionID   { get; init; }
     [MaxLength( LoggerAttachment.TYPE_SIZE )] public        string? Type        { get; init; }
 
@@ -35,9 +34,18 @@ public sealed record LoggerAttachmentRecord : LoggerTable<LoggerAttachmentRecord
         LogID       = info.LogID;
         AppID       = info.AppID;
         SessionID   = info.SessionID;
-        ScopeID     = info.ScopeID;
         DeviceID    = info.DeviceID;
+
+        // ScopeIDs = info.ScopeIDs;
     }
+
+
+    public static IEnumerable<LoggerAttachmentRecord> Create( LogRecord record, AppLog log, UserRecord caller )
+    {
+        // ReSharper disable once ForeachCanBeConvertedToQueryUsingAnotherGetEnumerator
+        foreach ( LoggerAttachment attachment in log.Attachments ) { yield return new LoggerAttachmentRecord( attachment, record, caller ); }
+    }
+
 
     public static DynamicParameters GetDynamicParameters( LoggerAttachment attachment )
     {
@@ -51,7 +59,6 @@ public sealed record LoggerAttachmentRecord : LoggerTable<LoggerAttachmentRecord
         parameters.Add( nameof(LogID),     info.LogID );
         parameters.Add( nameof(AppID),     info.AppID );
         parameters.Add( nameof(SessionID), info.SessionID );
-        parameters.Add( nameof(ScopeID),   info.ScopeID );
         return parameters;
     }
 
@@ -82,4 +89,13 @@ public sealed record LoggerAttachmentRecord : LoggerTable<LoggerAttachmentRecord
     }
     public override int CompareTo( LoggerAttachmentRecord? other ) => string.CompareOrdinal( Content, other?.Content );
     public override int GetHashCode() => HashCode.Combine( Content, base.GetHashCode() );
+}
+
+
+
+[Serializable, Table( "LogAttachments" )]
+public sealed record LoggerAttachmentMappingRecord : Mapping<LoggerAttachmentMappingRecord, LogRecord, LoggerAttachmentRecord>, ICreateMapping<LoggerAttachmentMappingRecord, LogRecord, LoggerAttachmentRecord>
+{
+    public LoggerAttachmentMappingRecord( LogRecord               key, LoggerAttachmentRecord value ) : base( key, value ) { }
+    public static LoggerAttachmentMappingRecord Create( LogRecord key, LoggerAttachmentRecord value ) => new(key, value);
 }

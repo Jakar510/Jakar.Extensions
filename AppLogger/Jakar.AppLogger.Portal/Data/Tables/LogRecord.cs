@@ -28,7 +28,6 @@ public sealed record LogRecord : LoggerTable<LogRecord>, IAppLog, ILogInfo, IApp
     public                                           bool                    IsValid          { get; init; }
     public                                           LogLevel                Level            { get; init; }
     [MaxLength( MAX_STRING_SIZE )] public            string                  Message          { get; init; } = string.Empty;
-    public                                           RecordID<ScopeRecord>?  ScopeID          { get; init; }
     public                                           RecordID<SessionRecord> SessionID        { get; init; }
     [MaxLength( MAX_STRING_SIZE )] public            string?                 StackTrace       { get; init; }
     public                                           DateTimeOffset          Timestamp        { get; init; }
@@ -38,15 +37,13 @@ public sealed record LogRecord : LoggerTable<LogRecord>, IAppLog, ILogInfo, IApp
     EventID IAppLog.          EventID   => new(EventID, EventName);
     Guid? ISessionID.         SessionID => SessionID.Value;
     Guid ILogInfo.            LogID     => ID.Value;
-    Guid? ILogInfo.           ScopeID   => ScopeID?.Value;
     Guid IStartSession.       DeviceID  => DeviceID.Value;
     Guid IStartSession.       AppID     => AppID.Value;
 
 
     public LogRecord() : base() { }
-    public LogRecord( AppLog log, SessionRecord session, ScopeRecord scope, UserRecord? caller = default ) : base( caller )
+    public LogRecord( AppLog log, SessionRecord session, UserRecord? caller = default ) : base( caller )
     {
-        System.Diagnostics.Debug.Assert( scope.ID.Value == log.ScopeID );
         System.Diagnostics.Debug.Assert( session.ID.Value == log.Session.SessionID );
 
         IsValid          = log.IsValid;
@@ -57,7 +54,6 @@ public sealed record LogRecord : LoggerTable<LogRecord>, IAppLog, ILogInfo, IApp
         Timestamp        = log.TimeStamp;
         AppStartTime     = session.DateCreated;
         SessionID        = session.ID;
-        ScopeID          = scope.ID;
         AppUserID        = log.AppUserID;
         StackTrace       = log.GetStackTrace();
         EventID          = log.EventID.ID;
@@ -81,7 +77,6 @@ public sealed record LogRecord : LoggerTable<LogRecord>, IAppLog, ILogInfo, IApp
         parameters.Add( nameof(SessionID), log.Session.SessionID );
         parameters.Add( nameof(DeviceID),  log.Session.DeviceID );
         parameters.Add( nameof(AppID),     log.Session.AppID );
-        parameters.Add( nameof(ScopeID),   log.ScopeID );
         return parameters;
     }
 
@@ -92,7 +87,9 @@ public sealed record LogRecord : LoggerTable<LogRecord>, IAppLog, ILogInfo, IApp
         DeviceRecord                        device  = await db.Devices.Get( connection, transaction, DeviceID, token ) ?? throw new RecordNotFoundException( DeviceID.ToString() );
         ExceptionDetails?                   details = GetExceptionDetails();
 
-        return new AppLog( this, records.Select( x => x.ToLoggerAttachment() ), device.ToDeviceDescriptor(), details );
+        IEnumerable<Guid> scopeIDs = Array.Empty<Guid>();
+
+        return new AppLog( this, records.Select( x => x.ToLoggerAttachment() ), scopeIDs, device.ToDeviceDescriptor(), details );
     }
 
 

@@ -5,10 +5,11 @@ namespace Jakar.AppLogger.Common;
 
 
 [SuppressMessage( "ReSharper", "CollectionNeverUpdated.Global" )]
-public abstract class LoggingSettings : ObservableClass, IScopeID, ISessionID, IAsyncDisposable
+public abstract class LoggingSettings : ObservableClass, ISessionID, IAsyncDisposable
 {
-    public const           string DEFAULT_OUTPUT_TEMPLATE = "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}";
-    public static readonly string EmptyGuid               = Guid.Empty.ToString();
+    public const           string                             DEFAULT_OUTPUT_TEMPLATE = "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}";
+    public static readonly string                             EmptyGuid               = Guid.Empty.ToString();
+    private readonly       ConcurrentDictionary<Guid, IScope> _scopes                 = new();
 
 
     private bool               _enableAnalytics;
@@ -22,10 +23,8 @@ public abstract class LoggingSettings : ObservableClass, IScopeID, ISessionID, I
     private bool               _includeUserIDOnError;
     private bool               _takeScreenshotOnError;
     private Guid               _installID;
-    private StartSessionReply? _session;
-    private Guid?              _scopeID;
-    private IScope?            _scope;
     private LogLevel           _logLevel;
+    private StartSessionReply? _session;
     private string             _appName = string.Empty;
     private string?            _userID;
 
@@ -41,8 +40,7 @@ public abstract class LoggingSettings : ObservableClass, IScopeID, ISessionID, I
         get => _userID;
         set => SetProperty( ref _userID, value );
     }
-    [JsonIgnore] public ConcurrentBag<ILoggerAttachmentProvider> LoggerAttachmentProviders { get; init; } = new();
-    public              DeviceDescriptor                   Device              { get; init; }
+    public DeviceDescriptor Device { get; init; }
     public bool EnableAnalytics
     {
         get => _enableAnalytics;
@@ -93,21 +91,19 @@ public abstract class LoggingSettings : ObservableClass, IScopeID, ISessionID, I
         get => _installID;
         set => SetProperty( ref _installID, value );
     }
+    [JsonIgnore] public ConcurrentBag<ILoggerAttachmentProvider> LoggerAttachmentProviders { get; init; } = new();
     public LogLevel LogLevel
     {
         get => _logLevel;
         set => SetProperty( ref _logLevel, value );
     }
-    public Guid? ScopeID
-    {
-        get => _scopeID;
-        set => SetProperty( ref _scopeID, value );
-    }
+    public HashSet<Guid> ScopeIDs { get; init; } = new();
     public StartSessionReply? Session
     {
         get => _session;
         set => SetProperty( ref _session, value );
     }
+    Guid? ISessionID.SessionID => Session?.SessionID;
     public bool TakeScreenshotOnError
     {
         get => _takeScreenshotOnError;
@@ -115,8 +111,7 @@ public abstract class LoggingSettings : ObservableClass, IScopeID, ISessionID, I
     }
 
 
-    public AppVersion Version   { get; init; }
-    Guid? ISessionID. SessionID => Session?.SessionID;
+    public AppVersion Version { get; init; }
 
 
     protected LoggingSettings( AppVersion version, DeviceDescriptor device )
@@ -129,14 +124,7 @@ public abstract class LoggingSettings : ObservableClass, IScopeID, ISessionID, I
     /// <summary>
     ///     Must initialize the following:
     ///     <para>
-    ///         <list type="bullet">
-    ///             <item>
-    ///                 <see cref="InstallID"/>
-    ///             </item>
-    ///             <item>
-    ///                 <see cref="Device"/>
-    ///             </item>
-    ///         </list>
+    ///         <list type="bullet"> <item> <see cref="InstallID"/> </item> <item> <see cref="Device"/> </item> </list>
     ///     </para>
     /// </summary>
     public abstract ValueTask InitAsync();
@@ -162,28 +150,24 @@ public abstract class LoggingSettings : ObservableClass, IScopeID, ISessionID, I
                                                                             [nameof(IDevice.DeviceID)]             = Device.DeviceID,
                                                                             [nameof(AppVersion)]                   = Device.AppVersion.ToString(),
                                                                             [nameof(LanguageApi.SelectedLanguage)] = CultureInfo.CurrentCulture.DisplayName,
-                                                                            [nameof(DateTime)]                     = DateTimeOffset.UtcNow,
+                                                                            [nameof(DateTime)]                     = DateTimeOffset.UtcNow
                                                                         }
                                                                       : default;
     public abstract ValueTask<byte[]?> TakeScreenshot();
 
 
-    protected internal LoggingSettings SetScope( IScope scope )
+    public T AddScope<T>( in T scope ) where T : IScope
     {
-        _scope?.Dispose();
-        _scope = scope;
-        return this;
-    }
-    public AppLoggerScope<TState> CreateScope<TState>( TState state )
-    {
-        var scope = new AppLoggerScope<TState>( this, state );
-        SetScope( scope );
+        _scopes.TryAdd( scope.ScopeID, scope );
         return scope;
     }
+    public bool RemoveScope<T>( in T                          scope ) where T : IScope => _scopes.TryRemove( scope.ScopeID, out _ );
+    public AppLoggerScope<TState> CreateScope<TState>( TState state ) => AddScope( new AppLoggerScope<TState>( this, state ) );
     public virtual async ValueTask DisposeAsync()
     {
-        _scope?.Dispose();
-        _scope = default;
+        foreach ( IScope? scope in _scopes.Values ) { scope.Dispose(); }
+
+        _scopes.Clear();
         foreach ( ILoggerAttachmentProvider provider in LoggerAttachmentProviders ) { await provider.DisposeAsync(); }
 
         GC.SuppressFinalize( this );
