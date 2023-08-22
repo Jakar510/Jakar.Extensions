@@ -4,14 +4,15 @@
 [SuppressMessage( "ReSharper", "SuggestBaseTypeForParameter" )]
 public sealed class LoggerDB : Database.Database
 {
-    private readonly IDataProtectorProvider                       _dataProtectorProvider;
-    public           DbTable<AppRecord>                           Apps          { get; }
-    public           DbTable<LoggerAttachmentRecord>              Attachments   { get; }
-    public           DbTable<DeviceRecord>                        Devices       { get; }
-    public           DbTable<LogRecord>                           Logs          { get; }
-    public           ConcurrentObservableCollection<Notification> Notifications { get; } = new(Notification.Sorter);
-    public           DbTable<ScopeRecord>                         Scopes        { get; }
-    public           DbTable<SessionRecord>                       Sessions      { get; }
+    private readonly IDataProtectorProvider          _dataProtectorProvider;
+    public           DbTable<AppRecord>              Apps        { get; }
+    public           DbTable<LoggerAttachmentRecord> Attachments { get; }
+    public           DbTable<DeviceRecord>           Devices     { get; }
+    public           DbTable<LogRecord>              Logs        { get; }
+    public           DbTable<ScopeRecord>            Scopes      { get; }
+    public           DbTable<SessionRecord>          Sessions    { get; }
+
+    public event EventHandler<Notification>? NotificationReceived;
 
 
     static LoggerDB()
@@ -19,8 +20,13 @@ public sealed class LoggerDB : Database.Database
         EnumSqlHandler<PlatformID>.Register();
         EnumSqlHandler<Architecture>.Register();
         EnumSqlHandler<LogLevel>.Register();
+        RecordID<AppRecord>.DapperTypeHandler.Register();
+        RecordID<LoggerAttachmentRecord>.DapperTypeHandler.Register();
+        RecordID<DeviceRecord>.DapperTypeHandler.Register();
+        RecordID<LogRecord>.DapperTypeHandler.Register();
+        RecordID<ScopeRecord>.DapperTypeHandler.Register();
+        RecordID<SessionRecord>.DapperTypeHandler.Register();
     }
-
     public LoggerDB( IConfiguration configuration, IDataProtectorProvider dataProtectorProvider, IOptions<DbOptions> options ) : base( configuration, options )
     {
         _dataProtectorProvider = dataProtectorProvider;
@@ -34,9 +40,6 @@ public sealed class LoggerDB : Database.Database
 
 
     protected override DbConnection CreateConnection() => new NpgsqlConnection( ConnectionString );
-
-
-    public event EventHandler<Notification>? NotificationReceived;
 
 
     public ValueTask<OneOf<StartSessionReply, Error>> StartSession( StartSession session, CancellationToken token ) => this.TryCall( StartSession, session, token );
@@ -186,7 +189,6 @@ public sealed class LoggerDB : Database.Database
 
     public void SendNotification( Notification notification )
     {
-        Notifications.Add( notification );
         NotificationReceived?.Invoke( this, notification );
         notification.WriteToDebug();
     }

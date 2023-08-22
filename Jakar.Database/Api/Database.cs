@@ -40,6 +40,14 @@ public abstract partial class Database : Randoms, IConnectableDb, IAsyncDisposab
         DateOnlyHandler.Register();
         TimeOnlyHandler.Register();
         AppVersionHandler.Register();
+        RecordID<GroupRecord>.DapperTypeHandler.Register();
+        RecordID<RecoveryCodeRecord>.DapperTypeHandler.Register();
+        RecordID<RoleRecord>.DapperTypeHandler.Register();
+        RecordID<UserGroupRecord>.DapperTypeHandler.Register();
+        RecordID<UserLoginInfoRecord>.DapperTypeHandler.Register();
+        RecordID<UserRecoveryCodeRecord>.DapperTypeHandler.Register();
+        RecordID<UserRoleRecord>.DapperTypeHandler.Register();
+        RecordID<UserRecord>.DapperTypeHandler.Register();
     }
     protected Database( IConfiguration configuration, IOptions<DbOptions> options ) : base()
     {

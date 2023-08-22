@@ -2,6 +2,7 @@
 // 09/12/2022  9:35 AM
 
 global using System.Collections.ObjectModel;
+global using System.Collections.Specialized;
 global using System.ComponentModel.DataAnnotations;
 global using System.Data.Common;
 global using System.Diagnostics;

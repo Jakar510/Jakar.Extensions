@@ -3,13 +3,15 @@
 
 public partial class TopBar : ControlBase
 {
-    private string? _notifyCount;
+    private          string?                            _notifyCount;
+    private readonly ObservableCollection<Notification> _notifications = new();
+    [Inject] public  ILogger<TopBar>                    Logger { get; set; } = default!;
 
 
     protected override void OnInitialized()
     {
         base.OnInitialized();
-        _notifyCount             =  Api.Notifications.Count.ToString();
+        _notifyCount             =  _notifications.Count.ToString();
         Api.NotificationReceived += ApiOnNotificationReceived;
     }
     ~TopBar() => Api.NotificationReceived -= ApiOnNotificationReceived;
@@ -18,9 +20,15 @@ public partial class TopBar : ControlBase
     private void Callback( MouseEventArgs args ) => Services.NavigateTo( "/Notifications" );
 
 
-    private async void ApiOnNotificationReceived( object? sender, Notification e )
+    private async void ApiOnNotificationReceived( object? sender, Notification notification )
     {
-        _notifyCount = Api.Notifications.Count.ToString();
+        try { await ApiOnNotificationReceivedAsync( notification ); }
+        catch ( Exception e ) { Logger.LogError( e, "{Caller}", nameof(ApiOnNotificationReceived) ); }
+    }
+    private async ValueTask ApiOnNotificationReceivedAsync( Notification notification )
+    {
+        _notifyCount = _notifications.Count.ToString();
+        _notifications.Add( notification );
         await StateHasChangedAsync();
     }
 }
