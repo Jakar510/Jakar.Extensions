@@ -1,8 +1,7 @@
-﻿#nullable enable
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
 
 
-public static class Tasks
+public static partial class Tasks
 {
     /// <summary> Creates a cancellable delay from the given <paramref name="delay"/> </summary>
     public static Task Delay( this TimeSpan delay, CancellationToken token = default ) => Task.Delay( delay, token );
@@ -52,27 +51,25 @@ public static class Tasks
     }
 
 
-    public static Task Run( this       Func<Task>                            func, CancellationToken token = default ) => Task.Run( async () => await func(),        token );
-    public static Task Run( this       Func<ValueTask>                       func, CancellationToken token = default ) => Task.Run( async () => await func(),        token );
-    public static Task<T> Run<T>( this Func<Task<T>>                         func, CancellationToken token = default ) => Task.Run( async () => await func(),        token );
-    public static Task<T> Run<T>( this Func<ValueTask<T>>                    func, CancellationToken token = default ) => Task.Run( async () => await func(),        token );
-    public static Task Run( this       Func<CancellationToken, Task>         func, CancellationToken token = default ) => Task.Run( async () => await func( token ), token );
-    public static Task Run( this       Func<CancellationToken, ValueTask>    func, CancellationToken token = default ) => Task.Run( async () => await func( token ), token );
-    public static Task<T> Run<T>( this Func<CancellationToken, Task<T>>      func, CancellationToken token = default ) => Task.Run( async () => await func( token ), token );
-    public static Task<T> Run<T>( this Func<CancellationToken, ValueTask<T>> func, CancellationToken token = default ) => Task.Run( async () => await func( token ), token );
+    public static Task Run( this       Func<Task>                            func, CancellationToken token = default ) => Task.Run( func,                                 token );
+    public static Task Run( this       Func<ValueTask>                       func, CancellationToken token = default ) => Task.Run( async () => await func(),             token );
+    public static Task<T> Run<T>( this Func<Task<T>>                         func, CancellationToken token = default ) => Task.Run( async () => await func(),             token );
+    public static Task<T> Run<T>( this Func<ValueTask<T>>                    func, CancellationToken token = default ) => Task.Run( async () => await func(),             token );
+    public static Task Run( this       Func<CancellationToken, Task>         func, CancellationToken token = default ) => Task.Run( new Caller( func, token ).Execute,    token );
+    public static Task Run( this       Func<CancellationToken, ValueTask>    func, CancellationToken token = default ) => Task.Run( new Caller( func, token ).Execute,    token );
+    public static Task<T> Run<T>( this Func<CancellationToken, Task<T>>      func, CancellationToken token = default ) => Task.Run( new Caller<T>( func, token ).Execute, token );
+    public static Task<T> Run<T>( this Func<CancellationToken, ValueTask<T>> func, CancellationToken token = default ) => Task.Run( new Caller<T>( func, token ).Execute, token );
 
 
     public static Task WhenAny( this                         IEnumerable<Task>          tasks ) => Task.WhenAny( tasks );
     public static Task<Task<TResult>> WhenAny<TResult>( this IEnumerable<Task<TResult>> tasks ) => Task.WhenAny( tasks );
     public static Task WhenAll( this                         IEnumerable<Task>          tasks ) => Task.WhenAll( tasks );
     public static Task<TResult[]> WhenAll<TResult>( this     IEnumerable<Task<TResult>> tasks ) => Task.WhenAll( tasks );
-    public static void WaitAll( this                         IEnumerable<Task>          tasks, CancellationToken token = default ) => Task.WaitAll( tasks.ToArray(), token );
-    public static int WaitAny( this                          IEnumerable<Task>          tasks, CancellationToken token = default ) => Task.WaitAny( tasks.ToArray(), token );
+    public static void WaitAll( this                         IEnumerable<Task>          tasks, CancellationToken token = default ) => Task.WaitAll( tasks.GetArray(), token );
+    public static int WaitAny( this                          IEnumerable<Task>          tasks, CancellationToken token = default ) => Task.WaitAny( tasks.GetArray(), token );
 
 
-    /// <summary>
-    ///     <see href="https://stackoverflow.com/a/63141544/9530917"/>
-    /// </summary>
+    /// <summary> <see href="https://stackoverflow.com/a/63141544/9530917"/> </summary>
     /// <exception cref="AggregateException"> </exception>
     public static async ValueTask WhenAll( this IEnumerable<ValueTask> tasks, List<Exception>? exceptions = default )
     {
@@ -88,9 +85,7 @@ public static class Tasks
 
         if ( exceptions is not null ) { throw new AggregateException( exceptions ); }
     }
-    /// <summary>
-    ///     <see href="https://stackoverflow.com/a/63141544/9530917"/>
-    /// </summary>
+    /// <summary> <see href="https://stackoverflow.com/a/63141544/9530917"/> </summary>
     /// <exception cref="AggregateException"> </exception>
     public static async ValueTask<List<TResult>> WhenAll<TResult>( this IEnumerable<ValueTask<TResult>> tasks, List<Exception>? exceptions = default )
     {
