@@ -72,11 +72,12 @@ public sealed record DeviceRecord : LoggerTable<DeviceRecord>, IDevice
     }
 
 
-    public static DynamicParameters GetDynamicParameters( DeviceDescriptor device, UserRecord caller )
+    public static DynamicParameters GetDynamicParameters( DeviceDescriptor device, UserRecord caller ) => GetDynamicParameters( device, caller.ID );
+    public static DynamicParameters GetDynamicParameters( DeviceDescriptor device, RecordID<UserRecord> caller )
     {
         var parameters = new DynamicParameters();
         parameters.Add( nameof(DeviceID),  device.DeviceID );
-        parameters.Add( nameof(CreatedBy), caller.ID );
+        parameters.Add( nameof(CreatedBy), caller.Value );
         return parameters;
     }
 

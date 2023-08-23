@@ -15,51 +15,51 @@ public partial class DbTable<TRecord> : ObservableClass, IConnectableDb, IAsyncD
     protected readonly TypePropertiesCache.Properties _propertiesCache;
 
 
-    protected internal static IEnumerable<TRecord> Empty       => Array.Empty<TRecord>();
-    protected internal        IEnumerable<string>  ColumnNames => Descriptors.Select( x => x.ColumnName );
+    public static IEnumerable<TRecord> Empty       => Array.Empty<TRecord>();
+    public        IEnumerable<string>  ColumnNames => Descriptors.Select( x => x.ColumnName );
 
-    protected internal virtual string CreatedBy => Instance switch
-                                                   {
-                                                       DbInstance.Postgres => $@"""{nameof(TableRecord<TRecord>.CreatedBy)}""",
-                                                       DbInstance.MsSql    => nameof(TableRecord<TRecord>.CreatedBy),
-                                                       _                   => throw new OutOfRangeException( nameof(Instance), Instance ),
-                                                   };
+    public virtual string CreatedBy => Instance switch
+                                       {
+                                           DbInstance.Postgres => $@"""{nameof(TableRecord<TRecord>.CreatedBy)}""",
+                                           DbInstance.MsSql    => nameof(TableRecord<TRecord>.CreatedBy),
+                                           _                   => throw new OutOfRangeException( nameof(Instance), Instance ),
+                                       };
 
     public string CurrentSchema => _database.CurrentSchema;
 
-    protected internal virtual string DateCreated => Instance switch
-                                                     {
-                                                         DbInstance.Postgres => $@"""{nameof(TableRecord<TRecord>.DateCreated)}""",
-                                                         DbInstance.MsSql    => nameof(TableRecord<TRecord>.DateCreated),
-                                                         _                   => throw new OutOfRangeException( nameof(Instance), Instance ),
-                                                     };
+    public virtual string DateCreated => Instance switch
+                                         {
+                                             DbInstance.Postgres => $@"""{nameof(TableRecord<TRecord>.DateCreated)}""",
+                                             DbInstance.MsSql    => nameof(TableRecord<TRecord>.DateCreated),
+                                             _                   => throw new OutOfRangeException( nameof(Instance), Instance ),
+                                         };
 
-    protected internal virtual IEnumerable<Descriptor> Descriptors => _propertiesCache.GetValues( this );
+    public virtual IEnumerable<Descriptor> Descriptors => _propertiesCache.GetValues( this );
 
-    protected internal virtual string ID_ColumnName => Instance switch
-                                                       {
-                                                           DbInstance.Postgres => $@"""{nameof(TableRecord<TRecord>.ID)}""",
-                                                           DbInstance.MsSql    => nameof(TableRecord<TRecord>.ID),
-                                                           _                   => throw new OutOfRangeException( nameof(Instance), Instance ),
-                                                       };
+    public virtual string ID_ColumnName => Instance switch
+                                           {
+                                               DbInstance.Postgres => $@"""{nameof(TableRecord<TRecord>.ID)}""",
+                                               DbInstance.MsSql    => nameof(TableRecord<TRecord>.ID),
+                                               _                   => throw new OutOfRangeException( nameof(Instance), Instance ),
+                                           };
 
-    public             DbInstance          Instance       => _database.Instance;
-    public             int                 CommandTimeout => _database.CommandTimeout;
-    protected internal IEnumerable<string> KeyValuePairs  => Descriptors.Select( x => x.KeyValuePair );
+    public DbInstance          Instance       => _database.Instance;
+    public int                 CommandTimeout => _database.CommandTimeout;
+    public IEnumerable<string> KeyValuePairs  => Descriptors.Select( x => x.KeyValuePair );
 
-    protected internal virtual string LastModified => Instance switch
-                                                      {
-                                                          DbInstance.Postgres => $@"""{nameof(TableRecord<TRecord>.LastModified)}""",
-                                                          DbInstance.MsSql    => nameof(TableRecord<TRecord>.LastModified),
-                                                          _                   => throw new OutOfRangeException( nameof(Instance), Instance ),
-                                                      };
+    public virtual string LastModified => Instance switch
+                                          {
+                                              DbInstance.Postgres => $@"""{nameof(TableRecord<TRecord>.LastModified)}""",
+                                              DbInstance.MsSql    => nameof(TableRecord<TRecord>.LastModified),
+                                              _                   => throw new OutOfRangeException( nameof(Instance), Instance ),
+                                          };
 
-    protected internal virtual string OwnerUserID => Instance switch
-                                                     {
-                                                         DbInstance.Postgres => $@"""{nameof(TableRecord<TRecord>.OwnerUserID)}""",
-                                                         DbInstance.MsSql    => nameof(TableRecord<TRecord>.OwnerUserID),
-                                                         _                   => throw new OutOfRangeException( nameof(Instance), Instance ),
-                                                     };
+    public virtual string OwnerUserID => Instance switch
+                                         {
+                                             DbInstance.Postgres => $@"""{nameof(TableRecord<TRecord>.OwnerUserID)}""",
+                                             DbInstance.MsSql    => nameof(TableRecord<TRecord>.OwnerUserID),
+                                             _                   => throw new OutOfRangeException( nameof(Instance), Instance ),
+                                         };
 
     public string RandomMethod
     {
@@ -86,7 +86,7 @@ public partial class DbTable<TRecord> : ObservableClass, IConnectableDb, IAsyncD
                    _                   => typeof(TRecord).GetTableName(),
                };
     }
-    protected internal IEnumerable<string> VariableNames => Descriptors.Select( x => x.VariableName );
+    public IEnumerable<string> VariableNames => Descriptors.Select( x => x.VariableName );
 
 
     public DbTable( IConnectableDb database )
@@ -100,9 +100,9 @@ public partial class DbTable<TRecord> : ObservableClass, IConnectableDb, IAsyncD
         new(sql, parameters, transaction, CommandTimeout, commandType, flags, token);
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] protected internal Descriptor GetDescriptor( string columnName ) => _propertiesCache.Get( this, columnName );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public Descriptor GetDescriptor( string columnName ) => _propertiesCache.Get( this, columnName );
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    protected internal string KeyValuePair( string columnName ) => GetDescriptor( columnName )
+    public string KeyValuePair( string columnName ) => GetDescriptor( columnName )
        .KeyValuePair;
 
 

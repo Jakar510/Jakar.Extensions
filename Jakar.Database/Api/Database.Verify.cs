@@ -17,26 +17,50 @@ public abstract partial class Database
         new(true);
 
 
-    protected virtual async ValueTask<LoginResult> VerifyLogin( DbConnection connection, DbTransaction? transaction, VerifyRequest request, CancellationToken token = default )
+    protected virtual async ValueTask<LoginResult> VerifyLogin( DbConnection connection, DbTransaction transaction, VerifyRequest request, CancellationToken token = default )
     {
         UserRecord? record = await Users.Get( connection, transaction, true, UserRecord.GetDynamicParameters( request ), token );
         if ( record is null ) { return LoginResult.State.NotFound; }
 
         try
         {
-            if ( !record.VerifyPassword( request.UserPassword ) ) { return LoginResult.State.BadCredentials; }
+            if ( !record.VerifyPassword( request.UserPassword ) )
+            {
+                record.MarkBadLogin();
+                return LoginResult.State.BadCredentials;
+            }
 
-            if ( !record.IsActive ) { return LoginResult.State.Inactive; }
+            if ( !record.IsActive )
+            {
+                record.MarkBadLogin();
+                return LoginResult.State.Inactive;
+            }
 
-            if ( record.IsDisabled ) { return LoginResult.State.Disabled; }
+            if ( record.IsDisabled )
+            {
+                record.MarkBadLogin();
+                return LoginResult.State.Disabled;
+            }
 
-            if ( record.IsLocked ) { return LoginResult.State.Locked; }
+            if ( record.IsLocked )
+            {
+                record.MarkBadLogin();
+                return LoginResult.State.Locked;
+            }
 
-            if ( !await ValidateSubscription( connection, transaction, record, token ) ) { return LoginResult.State.ExpiredSubscription; }
+            if ( !await ValidateSubscription( connection, transaction, record, token ) )
+            {
+                record.MarkBadLogin();
+                return LoginResult.State.ExpiredSubscription;
+            }
 
             return record;
         }
-        finally { await Users.Update( connection, transaction, record, token ); }
+        finally
+        {
+            record.SetActive( true );
+            await Users.Update( connection, transaction, record, token );
+        }
     }
 
 

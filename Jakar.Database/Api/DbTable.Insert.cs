@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 03/12/2023  1:09 PM
 
-using Dapper;
-
-
-
 namespace Jakar.Database;
 
 

@@ -1,4 +1,9 @@
-﻿namespace Jakar.AppLogger.Portal.Data;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
+using Debug = Jakar.AppLogger.Common.Debug;
+
+
+
+namespace Jakar.AppLogger.Portal.Data;
 
 
 [SuppressMessage( "ReSharper", "SuggestBaseTypeForParameter" )]
@@ -59,6 +64,36 @@ public sealed class LoggerDB : Database.Database
 
         AppLoggerSecret secret = check.AsT0;
 
+        /*
+        Guid            appID     = secret.AppID;
+        Guid            createdBy = secret.UserID;
+        string          deviceID  = start.Device.DeviceID;
+
+        var parameters = new DynamicParameters( start.Device );
+        parameters.Add( nameof(appID),     appID );
+        parameters.Add( nameof(deviceID),  deviceID );
+        parameters.Add( nameof(createdBy), createdBy );
+
+
+        string sql = @$"
+DECLARE {nameof(deviceID)} unique_id = NULL
+IF NOT EXISTS( SELECT * FROM {Devices.TableName} WHERE {nameof(deviceID)} = @{nameof(deviceID)} and {nameof(createdBy)} = @{nameof(createdBy)}  )
+BEGIN
+    SET NOCOUNT ON INSERT INTO {Devices.SchemaTableName} ({string.Join( ',', Devices.ColumnNames )}) values ({string.Join( ',', Devices.VariableNames )});
+END;
+
+
+set {nameof(deviceID)} = ( SELECT {nameof(DeviceRecord.ID)} FROM {Devices.TableName} WHERE {nameof(deviceID)} = @{nameof(deviceID)} and {nameof(createdBy)} = @{nameof(createdBy)} );
+
+IF {nameof(deviceID)} IS NOT NULL
+BEGIN
+    SELECT {nameof(SessionRecord.ID)} as {nameof(StartSessionReply.SessionID)}, app.{nameof(AppRecord.ID)} as {nameof(StartSessionReply.AppID)}, {nameof(DeviceRecord.ID)} as {nameof(StartSessionReply.DeviceID)} FROM {Sessions.TableName}
+    INNER JOIN {Apps.TableName} app WHERE {nameof(AppRecord.ID)} = @{appID}
+    INNER JOIN {Devices.TableName} device WHERE {nameof(DeviceRecord.ID)} = {nameof(deviceID)}
+END";
+*/
+
+
         UserRecord? caller = await Users.Get( connection, transaction, secret.UserID, token );
         if ( caller is null ) { return new Error( Status.Unauthorized ); }
 
@@ -75,6 +110,7 @@ public sealed class LoggerDB : Database.Database
     }
 
 
+    public ValueTask<OneOf<bool, Error>> EndSession( Guid sessionID, CancellationToken token ) => this.TryCall( EndSession, sessionID, token );
     public async ValueTask<OneOf<bool, Error>> EndSession( DbConnection connection, DbTransaction transaction, Guid sessionID, CancellationToken token )
     {
         if ( !sessionID.IsValidID() ) { return new Error( Status.BadRequest, $"{nameof(sessionID)} cannot be empty." ); }
@@ -88,18 +124,18 @@ public sealed class LoggerDB : Database.Database
     }
 
 
-    public ValueTask<OneOf<bool, Error>> EndSession( Guid sessionID, CancellationToken token ) => this.TryCall( EndSession, sessionID, token );
     public async ValueTask<OneOf<bool, Error>> SendLog( DbConnection connection, DbTransaction transaction, IEnumerable<AppLog> logs, CancellationToken token )
     {
         foreach ( AppLog log in logs )
         {
-            OneOf<bool, Error> result = await SendLog( connection, transaction, log, token );
+            OneOf<LogRecord, Error> result = await SendLog( connection, transaction, log, token );
             if ( result.IsT1 ) { return result.AsT1; }
         }
 
         return true;
     }
-    public async ValueTask<OneOf<bool, Error>> SendLog( DbConnection connection, DbTransaction transaction, AppLog log, CancellationToken token )
+    public ValueTask<OneOf<bool, Error>> SendLog( IEnumerable<AppLog> logs, CancellationToken token ) => this.TryCall( SendLog, logs, token );
+    public async ValueTask<OneOf<LogRecord, Error>> SendLog( DbConnection connection, DbTransaction transaction, AppLog log, CancellationToken token )
     {
         SessionRecord? session = await Sessions.Get( connection, transaction, true, SessionRecord.GetDynamicParameters( log.Session.SessionID ), token );
         if ( session is null || !session.IsActive ) { return new Error( Status.NotFound, log.Session.SessionID.ToString() ); }
@@ -110,7 +146,7 @@ public sealed class LoggerDB : Database.Database
         AppRecord? app = await Apps.Get( connection, transaction, log.Session.AppID, token );
         if ( app is null || !app.IsActive ) { return new Error( Status.NotFound, log.Session.AppID.ToString() ); }
 
-        OneOf<DeviceRecord, Error> device = await AddOrUpdate_Device( connection, transaction, app, log, caller, token );
+        OneOf<DeviceRecord, Error> device = await AddOrUpdate_Device( connection, transaction, app, log.Device, caller, token );
         if ( device.IsT1 ) { return device.AsT1; }
 
         var record = new LogRecord( log, session, caller );
@@ -122,20 +158,16 @@ public sealed class LoggerDB : Database.Database
         IEnumerable<LoggerAttachmentRecord> attachments = LoggerAttachmentRecord.Create( record, log, caller );
         await LoggerAttachmentMappingRecord.TryAdd( connection, transaction, LogAttachments, record, attachments, token );
 
-        return true;
+        return record;
     }
-
-
-    public ValueTask<OneOf<bool, Error>> SendLog( IEnumerable<AppLog> logs, CancellationToken token ) => this.TryCall( SendLog, logs, token );
-
-
-    public async ValueTask<OneOf<DeviceRecord, Error>> AddOrUpdate_Device( DbConnection connection, DbTransaction transaction, AppRecord app, AppLog log, UserRecord caller, CancellationToken token )
+    public async ValueTask<OneOf<DeviceRecord, Error>> AddOrUpdate_Device( DbConnection connection, DbTransaction transaction, AppRecord app, DeviceDescriptor device, UserRecord caller, CancellationToken token )
     {
-        OneOf<DeviceRecord, Error> device = await AddOrUpdate_Device( connection, transaction, log.Device, caller, token );
-        if ( device.IsT1 ) { return device.AsT1; }
+        OneOf<DeviceRecord, Error> check = await AddOrUpdate_Device( connection, transaction, device, caller, token );
+        if ( check.IsT1 ) { return check.AsT1; }
 
-        await AppDeviceRecord.TryAdd( connection, transaction, AppDevices, app, device.AsT0, token );
-        return await AddOrUpdate_Device( connection, transaction, log.Device, caller, token );
+        DeviceRecord record = check.AsT0;
+        await AppDeviceRecord.TryAdd( connection, transaction, AppDevices, app, record, token );
+        return record;
     }
     public async ValueTask<OneOf<DeviceRecord, Error>> AddOrUpdate_Device( DbConnection connection, DbTransaction transaction, DeviceDescriptor device, UserRecord caller, CancellationToken token )
     {
@@ -166,7 +198,19 @@ public sealed class LoggerDB : Database.Database
     }
 
 
-    public ValueTask<IEnumerable<LogRecord>> GetLogs( CancellationToken token = default ) => Logs.Where( nameof(LogRecord.IsActive), true, token );
+    public ValueTask<IEnumerable<LogRecord>> GetLogs( CancellationToken token = default )
+    {
+        var parameters = new DynamicParameters();
+        parameters.Add( nameof(LogRecord.IsActive), true );
+        return Logs.Where( true, parameters, token );
+    }
+    public ValueTask<IEnumerable<LogRecord>> GetLogs( AppRecord app, CancellationToken token = default )
+    {
+        var parameters = new DynamicParameters();
+        parameters.Add( nameof(LogRecord.IsActive), true );
+        parameters.Add( nameof(LogRecord.AppID),    app.ID );
+        return Logs.Where( true, parameters, token );
+    }
 
 
     public async ValueTask<UserRecord?> Verify( DbConnection connection, DbTransaction transaction, string appLoggerSecret, CancellationToken token )
