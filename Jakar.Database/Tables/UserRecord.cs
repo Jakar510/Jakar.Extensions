@@ -39,14 +39,14 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, JsonModels.IJ
         Company           = data.Company;
         PreferredLanguage = data.PreferredLanguage;
         Rights            = rights ?? string.Empty;
-        UserID            = RecordID<UserRecord>.New();
+        UserID            = Guid.NewGuid();
     }
-    public UserRecord( Guid id, UserRecord? caller = default ) : base( new RecordID<UserRecord>( id ), caller ) => UserID = RecordID<UserRecord>.New();
+    public UserRecord( Guid id, UserRecord? caller = default ) : base( new RecordID<UserRecord>( id ), caller ) => UserID = Guid.NewGuid();
     public UserRecord( string userName, string password, string rights, UserRecord? caller = default ) : base( caller )
     {
         ArgumentNullException.ThrowIfNull( userName );
         ArgumentNullException.ThrowIfNull( password );
-        UserID   = RecordID<UserRecord>.New();
+        UserID   = Guid.NewGuid();
         UserName = userName;
         Rights   = rights;
         UpdatePassword( password );
@@ -339,8 +339,8 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, JsonModels.IJ
                                                                                                                                                     : default;
 
 
-    public bool DoesNotOwn<TRecord>( TRecord record ) where TRecord : TableRecord<TRecord> => record.OwnerUserID != ID;
-    public bool Owns<TRecord>( TRecord       record ) where TRecord : TableRecord<TRecord> => record.OwnerUserID == ID;
+    public bool DoesNotOwn<TRecord>( TRecord record ) where TRecord : TableRecord<TRecord> => record.OwnerUserID != UserID;
+    public bool Owns<TRecord>( TRecord       record ) where TRecord : TableRecord<TRecord> => record.OwnerUserID == UserID;
 
     #endregion
 

@@ -77,7 +77,7 @@ public sealed record UserLoginInfoRecord : TableRecord<UserLoginInfoRecord>
                                                                                               };
     public static implicit operator IdentityUserToken<Guid>( UserLoginInfoRecord value ) => new()
                                                                                             {
-                                                                                                UserId        = value.OwnerUserID?.Value ?? throw new NullReferenceException( nameof(value.OwnerUserID) ),
+                                                                                                UserId        = value.OwnerUserID ?? Guid.Empty,
                                                                                                 LoginProvider = value.LoginProvider,
                                                                                                 Name          = value.ProviderDisplayName ?? string.Empty,
                                                                                                 Value         = value.ProviderKey,

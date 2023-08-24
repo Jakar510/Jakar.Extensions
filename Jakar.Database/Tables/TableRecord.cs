@@ -15,7 +15,7 @@ public interface ITableRecord : IRecordPair
 {
     public RecordID<UserRecord>? CreatedBy    { get; }
     public DateTimeOffset?       LastModified { get; }
-    public RecordID<UserRecord>? OwnerUserID  { get; }
+    public Guid?                 OwnerUserID  { get; }
 }
 
 
@@ -35,8 +35,8 @@ public abstract record TableRecord<TRecord> : ObservableRecord<TRecord>, ITableR
         get => _lastModified;
         set => SetProperty( ref _lastModified, value );
     }
-    public RecordID<UserRecord>? OwnerUserID { get; init; }
-    Guid IUniqueID<Guid>.        ID          => ID.Value;
+    public Guid?         OwnerUserID { get; init; }
+    Guid IUniqueID<Guid>.ID          => ID.Value;
 
 
     protected TableRecord() : base() { }
@@ -70,10 +70,10 @@ public abstract record TableRecord<TRecord> : ObservableRecord<TRecord>, ITableR
     public async ValueTask<UserRecord?> GetUserWhoCreated( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => await db.Users.Get( connection, transaction, CreatedBy?.Value, token );
 
 
-    public TRecord WithOwner( RecordID<UserRecord> id ) => (TRecord)(this with
-                                                                     {
-                                                                         OwnerUserID = id
-                                                                     });
+    public TRecord WithOwner( UserRecord user ) => (TRecord)(this with
+                                                             {
+                                                                 OwnerUserID = user.UserID
+                                                             });
     internal TRecord NewID( Guid id ) => NewID( new RecordID<TRecord>( id ) );
     public TRecord NewID( RecordID<TRecord> id ) => (TRecord)(this with
                                                               {

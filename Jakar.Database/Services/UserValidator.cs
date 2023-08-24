@@ -18,7 +18,7 @@ public class UserValidator : IUserValidator<UserRecord>
     }
     protected virtual void Check( in ICollection<IdentityError> errors, UserRecord user )
     {
-        if ( user.OwnerUserID.IsNotValid() )
+        if ( user.OwnerUserID.IsValidID() )
         {
             errors.Add( new IdentityError
                         {
