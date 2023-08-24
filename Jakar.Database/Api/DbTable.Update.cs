@@ -7,6 +7,8 @@ namespace Jakar.Database;
 [SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
 public partial class DbTable<TRecord>
 {
+    private string? _update;
+
     public ValueTask Update( TRecord                   record,  CancellationToken token = default ) => this.TryCall( Update, record,  token );
     public ValueTask Update( IEnumerable<TRecord>      records, CancellationToken token = default ) => this.TryCall( Update, records, token );
     public ValueTask Update( IAsyncEnumerable<TRecord> records, CancellationToken token = default ) => this.TryCall( Update, records, token );
@@ -29,13 +31,13 @@ public partial class DbTable<TRecord>
     {
         Guid              id         = record.ID.Value;
         DynamicParameters parameters = Database.GetParameters( id, record );
-        string            sql        = $"UPDATE {SchemaTableName} SET {string.Join( ',', KeyValuePairs )} WHERE {ID_ColumnName} = @{nameof(id)};";
+        _update ??= $"UPDATE {SchemaTableName} SET {string.Join( ',', KeyValuePairs )} WHERE {ID_ColumnName} = @{nameof(id)};";
 
         try
         {
-            CommandDefinition command = GetCommandDefinition( sql, parameters, transaction, token );
+            CommandDefinition command = GetCommandDefinition( _update, parameters, transaction, token );
             await connection.ExecuteScalarAsync( command );
         }
-        catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
+        catch ( Exception e ) { throw new SqlException( _update, parameters, e ); }
     }
 }

@@ -7,9 +7,18 @@ namespace Jakar.Database;
 [SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
 public partial class DbTable<TRecord>
 {
+    private string? _singleInsert;
+    private string? _insertOrUpdatePostgres;
+    private string? _insertOrUpdateMsSql;
+    private string? _tryInsertPostgres;
+    private string? _tryInsertMsSql;
+
+
     public IAsyncEnumerable<TRecord> Insert( IEnumerable<TRecord>      records, CancellationToken token = default ) => this.TryCall( Insert, records, token );
     public IAsyncEnumerable<TRecord> Insert( IAsyncEnumerable<TRecord> records, CancellationToken token = default ) => this.TryCall( Insert, records, token );
     public ValueTask<TRecord> Insert( TRecord                          record,  CancellationToken token = default ) => this.TryCall( Insert, record,  token );
+
+
     public virtual async IAsyncEnumerable<TRecord> Insert( DbConnection connection, DbTransaction transaction, IEnumerable<TRecord> records, [EnumeratorCancellation] CancellationToken token = default )
     {
         foreach ( TRecord record in records ) { yield return await Insert( connection, transaction, record, token ); }
@@ -23,17 +32,17 @@ public partial class DbTable<TRecord>
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask<TRecord> Insert( DbConnection connection, DbTransaction transaction, TRecord record, CancellationToken token = default )
     {
-        string sql = $@"SET NOCOUNT ON INSERT INTO {SchemaTableName} ({string.Join( ',', ColumnNames )}) OUTPUT INSERTED.ID values ({string.Join( ',', VariableNames )});";
+        _singleInsert ??= $"SET NOCOUNT ON INSERT INTO {SchemaTableName} ({string.Join( ',', ColumnNames )}) OUTPUT INSERTED.ID values ({string.Join( ',', VariableNames )});";
 
         var parameters = new DynamicParameters( record );
 
         try
         {
-            CommandDefinition command = GetCommandDefinition( sql, parameters, transaction, token );
+            CommandDefinition command = GetCommandDefinition( _singleInsert, parameters, transaction, token );
             var               id      = await connection.ExecuteScalarAsync<Guid>( command );
             return record.NewID( id );
         }
-        catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
+        catch ( Exception e ) { throw new SqlException( _singleInsert, parameters, e ); }
     }
 
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
@@ -41,10 +50,10 @@ public partial class DbTable<TRecord>
     {
         string sql = Instance switch
                      {
-                         DbInstance.MsSql => $@"IF NOT EXISTS(SELECT * FROM {SchemaTableName} WHERE {string.Join( matchAll
-                                                                                                                      ? "AND"
-                                                                                                                      : "OR",
-                                                                                                                  parameters.ParameterNames.Select( KeyValuePair ) )})
+                         DbInstance.MsSql => _tryInsertMsSql ??= $@"IF NOT EXISTS(SELECT * FROM {SchemaTableName} WHERE {string.Join( matchAll
+                                                                                                                                          ? "AND"
+                                                                                                                                          : "OR",
+                                                                                                                                      parameters.ParameterNames.Select( KeyValuePair ) )})
 BEGIN
     SET NOCOUNT ON INSERT INTO {SchemaTableName} ({string.Join( ',', ColumnNames )}) OUTPUT INSERTED.ID values ({string.Join( ',', VariableNames )})
 END
@@ -53,10 +62,10 @@ ELSE
 BEGIN 
     SELECT {ID_ColumnName} = NULL 
 END",
-                         DbInstance.Postgres => $@"IF NOT EXISTS(SELECT * FROM {SchemaTableName} WHERE {string.Join( matchAll
-                                                                                                                         ? "AND"
-                                                                                                                         : "OR",
-                                                                                                                     parameters.ParameterNames.Select( KeyValuePair ) )})
+                         DbInstance.Postgres => _tryInsertPostgres ??= $@"IF NOT EXISTS(SELECT * FROM {SchemaTableName} WHERE {string.Join( matchAll
+                                                                                                                                                ? "AND"
+                                                                                                                                                : "OR",
+                                                                                                                                            parameters.ParameterNames.Select( KeyValuePair ) )})
 BEGIN
     SET NOCOUNT ON INSERT INTO {SchemaTableName} ({string.Join( ',', ColumnNames )}) OUTPUT INSERTED.ID values ({string.Join( ',', VariableNames )})
 END
@@ -87,10 +96,10 @@ END",
     {
         string sql = Instance switch
                      {
-                         DbInstance.MsSql => $@"IF NOT EXISTS(SELECT * FROM {SchemaTableName} WHERE {string.Join( matchAll
-                                                                                                                      ? "AND"
-                                                                                                                      : "OR",
-                                                                                                                  parameters.ParameterNames.Select( KeyValuePair ) )})
+                         DbInstance.MsSql => _insertOrUpdateMsSql ??= $@"IF NOT EXISTS(SELECT * FROM {SchemaTableName} WHERE {string.Join( matchAll
+                                                                                                                                               ? "AND"
+                                                                                                                                               : "OR",
+                                                                                                                                           parameters.ParameterNames.Select( KeyValuePair ) )})
 BEGIN
     SET NOCOUNT ON INSERT INTO {SchemaTableName} ({string.Join( ',', ColumnNames )}) OUTPUT INSERTED.ID values ({string.Join( ',', VariableNames )})
 END
@@ -107,10 +116,10 @@ BEGIN
                                                                                 : "OR",
                                                                             parameters.ParameterNames.Select( KeyValuePair ) )} 
 END",
-                         DbInstance.Postgres => $@"IF NOT EXISTS(SELECT * FROM {SchemaTableName} WHERE {string.Join( matchAll
-                                                                                                                         ? "AND"
-                                                                                                                         : "OR",
-                                                                                                                     parameters.ParameterNames.Select( KeyValuePair ) )})
+                         DbInstance.Postgres => _insertOrUpdatePostgres ??= $@"IF NOT EXISTS(SELECT * FROM {SchemaTableName} WHERE {string.Join( matchAll
+                                                                                                                                                     ? "AND"
+                                                                                                                                                     : "OR",
+                                                                                                                                                 parameters.ParameterNames.Select( KeyValuePair ) )})
 BEGIN
     SET NOCOUNT ON INSERT INTO {SchemaTableName} ({string.Join( ',', ColumnNames )}) OUTPUT INSERTED.ID values ({string.Join( ',', VariableNames )})
 END

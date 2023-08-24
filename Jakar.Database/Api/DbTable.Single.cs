@@ -7,6 +7,9 @@ namespace Jakar.Database;
 [SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
 public partial class DbTable<TRecord>
 {
+    private string? _single;
+
+
     public ValueTask<TRecord?> Single( string          id,  CancellationToken  token                               = default ) => this.Call( Single, id,  token );
     public ValueTask<TRecord?> Single( string          sql, DynamicParameters? parameters, CancellationToken token = default ) => this.Call( Single, sql, parameters, token );
     public ValueTask<TRecord?> SingleOrDefault( string id,  CancellationToken  token                               = default ) => this.Call( SingleOrDefault, id,  token );
@@ -17,16 +20,14 @@ public partial class DbTable<TRecord>
     public virtual async ValueTask<TRecord?> Single( DbConnection connection, DbTransaction? transaction, string id, CancellationToken token = default )
     {
         DynamicParameters parameters = Database.GetParameters( id );
-
-        string sql = $"SELECT * FROM {SchemaTableName} WHERE {ID_ColumnName} = @{nameof(id)}";
-
+        _single ??= $"SELECT * FROM {SchemaTableName} WHERE {ID_ColumnName} = @{nameof(id)}";
 
         try
         {
-            CommandDefinition command = GetCommandDefinition( sql, parameters, transaction, token );
+            CommandDefinition command = GetCommandDefinition( _single, parameters, transaction, token );
             return await connection.QuerySingleAsync<TRecord>( command );
         }
-        catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
+        catch ( Exception e ) { throw new SqlException( _single, parameters, e ); }
     }
 
 
@@ -41,16 +42,14 @@ public partial class DbTable<TRecord>
     public virtual async ValueTask<TRecord?> SingleOrDefault( DbConnection connection, DbTransaction? transaction, string id, CancellationToken token = default )
     {
         DynamicParameters parameters = Database.GetParameters( id );
-
-        string sql = $"SELECT * FROM {SchemaTableName} WHERE {ID_ColumnName} = @{nameof(id)}";
-
+        _single ??= $"SELECT * FROM {SchemaTableName} WHERE {ID_ColumnName} = @{nameof(id)}";
 
         try
         {
-            CommandDefinition command = GetCommandDefinition( sql, parameters, transaction, token );
+            CommandDefinition command = GetCommandDefinition( _single, parameters, transaction, token );
             return await connection.QuerySingleOrDefaultAsync<TRecord>( command );
         }
-        catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
+        catch ( Exception e ) { throw new SqlException( _single, parameters, e ); }
     }
 
 

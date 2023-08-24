@@ -6,6 +6,10 @@ namespace Jakar.Database;
 
 public partial class DbTable<TRecord>
 {
+    private readonly ConcurrentDictionary<int, string> _deleteGuids = new();
+    private          string?                           _delete;
+
+
     public ValueTask Delete( TRecord                             record,   CancellationToken token                               = default ) => this.TryCall( Delete, record,   token );
     public ValueTask Delete( IEnumerable<TRecord>                records,  CancellationToken token                               = default ) => this.TryCall( Delete, records,  token );
     public ValueTask Delete( IAsyncEnumerable<TRecord>           records,  CancellationToken token                               = default ) => this.TryCall( Delete, records,  token );
@@ -16,7 +20,6 @@ public partial class DbTable<TRecord>
     public ValueTask Delete( IEnumerable<RecordID<TRecord>>      ids,      CancellationToken token                               = default ) => this.TryCall( Delete, ids,      token );
     public ValueTask Delete( IAsyncEnumerable<RecordID<TRecord>> ids,      CancellationToken token                               = default ) => this.TryCall( Delete, ids,      token );
     public ValueTask Delete( bool                                matchAll, DynamicParameters parameters, CancellationToken token = default ) => this.TryCall( Delete, matchAll, parameters, token );
-
 
     public virtual ValueTask Delete( DbConnection connection, DbTransaction transaction, TRecord              record,  CancellationToken token = default ) => Delete( connection, transaction, record.ID,                   token );
     public virtual ValueTask Delete( DbConnection connection, DbTransaction transaction, IEnumerable<TRecord> records, CancellationToken token = default ) => Delete( connection, transaction, records.Select( x => x.ID ), token );
@@ -32,25 +35,16 @@ public partial class DbTable<TRecord>
     }
     public virtual async ValueTask Delete( DbConnection connection, DbTransaction transaction, RecordID<TRecord> id, CancellationToken token = default )
     {
-        string sql = $"DELETE FROM {SchemaTableName} WHERE {ID_ColumnName} = {id};";
+        var parameters = new DynamicParameters();
+        parameters.Add( nameof(id), id );
 
-        if ( token.IsCancellationRequested ) { return; }
+        _delete ??= $"DELETE FROM {SchemaTableName} WHERE {ID_ColumnName} = @{nameof(id)};";
 
-        CommandDefinition command = GetCommandDefinition( sql, default, transaction, token );
+        CommandDefinition command = GetCommandDefinition( _delete, parameters, transaction, token );
         await connection.ExecuteScalarAsync( command );
     }
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
-    public virtual async ValueTask Delete( DbConnection connection, DbTransaction transaction, IEnumerable<RecordID<TRecord>> ids, CancellationToken token = default )
-    {
-        string sql = $"DELETE FROM {SchemaTableName} WHERE {ID_ColumnName} in ( {string.Join( ',', ids.Select( x => $"'{x}'" ) )} );";
-
-        try
-        {
-            CommandDefinition command = GetCommandDefinition( sql, default, transaction, token );
-            await connection.ExecuteScalarAsync( command );
-        }
-        catch ( Exception e ) { throw new SqlException( sql, e ); }
-    }
+    public virtual async ValueTask Delete( DbConnection connection, DbTransaction transaction, IEnumerable<RecordID<TRecord>> ids, CancellationToken token = default ) => await Delete( connection, transaction, ids.Select( x => x.Value ), token );
     public virtual async ValueTask Delete( DbConnection connection, DbTransaction transaction, IAsyncEnumerable<Guid> ids, CancellationToken token = default )
     {
         HashSet<Guid> records = await ids.ToHashSet( token );
@@ -58,13 +52,15 @@ public partial class DbTable<TRecord>
     }
     public virtual async ValueTask Delete( DbConnection connection, DbTransaction transaction, Guid id, CancellationToken token = default )
     {
-        string sql = $"DELETE FROM {SchemaTableName} WHERE {ID_ColumnName} = {id};";
+        var parameters = new DynamicParameters();
+        parameters.Add( nameof(id), id );
 
-        if ( token.IsCancellationRequested ) { return; }
+        _delete ??= $"DELETE FROM {SchemaTableName} WHERE {ID_ColumnName} = @{nameof(id)};";
 
-        CommandDefinition command = GetCommandDefinition( sql, default, transaction, token );
+        CommandDefinition command = GetCommandDefinition( _delete, parameters, transaction, token );
         await connection.ExecuteScalarAsync( command );
     }
+
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask Delete( DbConnection connection, DbTransaction transaction, IEnumerable<Guid> ids, CancellationToken token = default )
     {
@@ -80,12 +76,20 @@ public partial class DbTable<TRecord>
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public async ValueTask Delete( DbConnection connection, DbTransaction transaction, bool matchAll, DynamicParameters parameters, CancellationToken token )
     {
-        string sql = $"DELETE FROM {SchemaTableName} WHERE {string.Join( matchAll
-                                                                             ? "AND"
-                                                                             : "OR",
-                                                                         parameters.ParameterNames.Select( KeyValuePair ) )};";
+        int     hash = GetHash( parameters );
+        string? sql  = default;
+        if ( hash > 0 && !_deleteGuids.TryGetValue( hash, out sql ) ) { _deleteGuids[hash] = sql = GetDeleteSql( matchAll, parameters ); }
+
+        sql ??= GetDeleteSql( matchAll, parameters );
 
         CommandDefinition command = GetCommandDefinition( sql, parameters, transaction, token );
         await connection.ExecuteScalarAsync( command );
     }
+
+
+    private string GetDeleteSql( bool matchAll, DynamicParameters parameters ) =>
+        $"DELETE FROM {SchemaTableName} WHERE {string.Join( matchAll
+                                                                ? "AND"
+                                                                : "OR",
+                                                            parameters.ParameterNames.Select( KeyValuePair ) )};";
 }

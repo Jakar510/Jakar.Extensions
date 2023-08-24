@@ -156,7 +156,7 @@ public abstract partial class Database : Randoms, IConnectableDb, IAsyncDisposab
     }
 
 
-    public static DynamicParameters GetParameters( object? value, object? template = default, [CallerArgumentExpression( "value" )] string? variableName = default )
+    public static DynamicParameters GetParameters( object? value, object? template = default, [CallerArgumentExpression( nameof( value ) )] string? variableName = default )
     {
         ArgumentNullException.ThrowIfNull( variableName );
         var parameters = new DynamicParameters( template );

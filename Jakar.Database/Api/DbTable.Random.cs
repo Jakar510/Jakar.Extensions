@@ -4,9 +4,17 @@
 namespace Jakar.Database;
 
 
-[SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global")]
+[SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
 public partial class DbTable<TRecord>
 {
+    private string? _randomMsSql;
+    private string? _randomPostgres;
+    private string? _randomCountMsSql;
+    private string? _randomCountPostgres;
+    private string? _randomUserCountMsSql;
+    private string? _randomUserCountPostgres;
+
+
     public ValueTask<TRecord?> Random( CancellationToken token                                                   = default ) => this.Call( Random, token );
     public ValueTask<IEnumerable<TRecord>> Random( int   count, CancellationToken token                          = default ) => this.Call( Random, count, token );
     public ValueTask<TRecord?> Random( UserRecord        user,  int               count, CancellationToken token = default ) => this.Call( Random, user,  count, token );
@@ -17,8 +25,8 @@ public partial class DbTable<TRecord>
     {
         string sql = Instance switch
                      {
-                         DbInstance.MsSql    => $"SELECT TOP 1 * FROM {SchemaTableName} ORDER BY {RandomMethod}",
-                         DbInstance.Postgres => $"SELECT * FROM {SchemaTableName} ORDER BY {RandomMethod} LIMIT 1",
+                         DbInstance.MsSql    => _randomMsSql ??= $"SELECT TOP 1 * FROM {SchemaTableName} ORDER BY {RandomMethod}",
+                         DbInstance.Postgres => _randomPostgres ??= $"SELECT * FROM {SchemaTableName} ORDER BY {RandomMethod} LIMIT 1",
                          _                   => throw new OutOfRangeException( nameof(Instance), Instance ),
                      };
 
@@ -39,14 +47,16 @@ public partial class DbTable<TRecord>
 
         string sql = Instance switch
                      {
-                         DbInstance.MsSql    => $"SELECT TOP {count} * FROM {SchemaTableName} WHERE {OwnerUserID} = @{OwnerUserID} ORDER BY {RandomMethod}",
-                         DbInstance.Postgres => $"SELECT * FROM {SchemaTableName} WHERE {OwnerUserID} = @{OwnerUserID} ORDER BY {RandomMethod} LIMIT {count}",
+                         DbInstance.MsSql    => _randomUserCountMsSql ??= $"SELECT TOP {count} * FROM {SchemaTableName} WHERE {OwnerUserID} = @{OwnerUserID} ORDER BY {RandomMethod}",
+                         DbInstance.Postgres => _randomUserCountPostgres ??= $"SELECT * FROM {SchemaTableName} WHERE {OwnerUserID} = @{OwnerUserID} ORDER BY {RandomMethod} LIMIT {count}",
                          _                   => throw new OutOfRangeException( nameof(Instance), Instance ),
                      };
 
-        try {
+        try
+        {
             CommandDefinition command = GetCommandDefinition( sql, parameters, transaction, token );
-            return await connection.QueryFirstAsync<TRecord>( command ); }
+            return await connection.QueryFirstAsync<TRecord>( command );
+        }
         catch ( Exception e ) { throw new SqlException( sql, e ); }
     }
 
@@ -56,8 +66,8 @@ public partial class DbTable<TRecord>
     {
         string sql = Instance switch
                      {
-                         DbInstance.MsSql    => $"SELECT TOP {count} * FROM {SchemaTableName} ORDER BY {RandomMethod}",
-                         DbInstance.Postgres => $"SELECT * FROM {SchemaTableName} ORDER BY {RandomMethod} LIMIT {count}",
+                         DbInstance.MsSql    => _randomCountMsSql ??= $"SELECT TOP {count} * FROM {SchemaTableName} ORDER BY {RandomMethod}",
+                         DbInstance.Postgres => _randomCountPostgres ??= $"SELECT * FROM {SchemaTableName} ORDER BY {RandomMethod} LIMIT {count}",
                          _                   => throw new OutOfRangeException( nameof(Instance), Instance ),
                      };
 
