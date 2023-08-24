@@ -367,8 +367,8 @@ public sealed partial record UserRecord
         get => _tokenExpiration;
         set => SetProperty( ref _tokenExpiration, value );
     }
-    public Guid UserID { get; init; }
-
+    public RecordID<UserRecord> UserID { get; init; }
+    Guid IUserID.               UserID => UserID.Value;
 
     [ProtectedPersonalData]
     [MaxLength( 256 )]

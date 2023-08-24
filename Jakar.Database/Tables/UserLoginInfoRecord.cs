@@ -57,11 +57,9 @@ public sealed record UserLoginInfoRecord : TableRecord<UserLoginInfoRecord>
     public static DynamicParameters GetDynamicParameters( UserRecord user, UserLoginInfo info ) => GetDynamicParameters( user, info.LoginProvider, info.ProviderKey );
     public static DynamicParameters GetDynamicParameters( UserRecord user, string loginProvider, string providerKey )
     {
-        var parameters = new DynamicParameters();
-        parameters.Add( nameof(UserRecord.CreatedBy),   user.CreatedBy );
-        parameters.Add( nameof(UserRecord.OwnerUserID), user.OwnerUserID );
-        parameters.Add( nameof(ProviderKey),            providerKey );
-        parameters.Add( nameof(LoginProvider),          loginProvider );
+        DynamicParameters parameters = GetDynamicParameters( user );
+        parameters.Add( nameof(ProviderKey),   providerKey );
+        parameters.Add( nameof(LoginProvider), loginProvider );
         return parameters;
     }
 

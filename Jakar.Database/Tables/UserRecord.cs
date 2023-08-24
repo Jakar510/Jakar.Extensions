@@ -16,7 +16,7 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, JsonModels.IJ
 
 
     public UserRecord() { }
-    public UserRecord( IUserData data, string? rights, UserRecord? caller = default ) : this( caller )
+    public UserRecord( IUserData data, string? rights, UserRecord? caller = default ) : base( caller )
     {
         ArgumentNullException.ThrowIfNull( data );
         FirstName         = data.FirstName;
@@ -39,13 +39,14 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, JsonModels.IJ
         Company           = data.Company;
         PreferredLanguage = data.PreferredLanguage;
         Rights            = rights ?? string.Empty;
+        UserID            = RecordID<UserRecord>.New();
     }
-    public UserRecord( Guid id, UserRecord? caller = default ) : base( new RecordID<UserRecord>( id ), caller ) => UserID = Guid.NewGuid();
+    public UserRecord( Guid id, UserRecord? caller = default ) : base( new RecordID<UserRecord>( id ), caller ) => UserID = RecordID<UserRecord>.New();
     public UserRecord( string userName, string password, string rights, UserRecord? caller = default ) : base( caller )
     {
         ArgumentNullException.ThrowIfNull( userName );
         ArgumentNullException.ThrowIfNull( password );
-        UserID   = Guid.NewGuid();
+        UserID   = RecordID<UserRecord>.New();
         UserName = userName;
         Rights   = rights;
         UpdatePassword( password );
@@ -618,7 +619,7 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, JsonModels.IJ
 
         if ( types.HasFlag( ClaimType.Role ) ) { claims.AddRange( from record in roles select new Claim( ClaimTypes.Role, record.Name, ClaimValueTypes.String ) ); }
 
-        return claims.GetInternalArray();
+        return claims.GetArray();
     }
     public static ValueTask<UserRecord?> TryFromClaims( DbConnection connection, DbTransaction transaction, Database db, HttpContext context, ClaimType types, CancellationToken token ) =>
         TryFromClaims( connection, transaction, db, context.User, types, token );
@@ -726,6 +727,72 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, JsonModels.IJ
         }
 
         return await db.Users.Get( connection, transaction, true, parameters, token );
+    }
+    public static async ValueTask<IEnumerable<UserRecord>> TryFromClaims( DbConnection connection, DbTransaction transaction, Database db, Claim claim, CancellationToken token )
+    {
+        var parameters = new DynamicParameters();
+
+        switch ( claim.Type )
+        {
+            case ClaimTypes.NameIdentifier:
+                parameters.Add( nameof(UserName), claim.Value );
+                break;
+
+            case ClaimTypes.Sid:
+                parameters.Add( nameof(UserID), Guid.Parse( claim.Value ) );
+                break;
+
+            case ClaimTypes.GivenName:
+                parameters.Add( nameof(FirstName), claim.Value );
+                break;
+
+            case ClaimTypes.Surname:
+                parameters.Add( nameof(LastName), claim.Value );
+                break;
+
+            case ClaimTypes.Name:
+                parameters.Add( nameof(FullName), claim.Value );
+                break;
+
+            case ClaimTypes.Expiration:
+                parameters.Add( nameof(SubscriptionExpires), claim.Value );
+                break;
+
+            case ClaimTypes.Email:
+                parameters.Add( nameof(Email), claim.Value );
+                break;
+
+            case ClaimTypes.MobilePhone:
+                parameters.Add( nameof(PhoneNumber), claim.Value );
+                break;
+
+            case ClaimTypes.StreetAddress:
+                parameters.Add( nameof(Line1), claim.Value );
+                break;
+
+            case ClaimTypes.Locality:
+                parameters.Add( nameof(Line2), claim.Value );
+                break;
+
+            case ClaimTypes.StateOrProvince:
+                parameters.Add( nameof(StateOrProvince), claim.Value );
+                break;
+
+            case ClaimTypes.Country:
+                parameters.Add( nameof(Country), claim.Value );
+                break;
+
+            case ClaimTypes.PostalCode:
+                parameters.Add( nameof(PostalCode), claim.Value );
+                break;
+
+            case ClaimTypes.Webpage:
+                parameters.Add( nameof(Website), claim.Value );
+                break;
+        }
+
+
+        return await db.Users.Where( connection, transaction, true, parameters, token );
     }
 
     #endregion

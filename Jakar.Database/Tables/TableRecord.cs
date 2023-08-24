@@ -40,20 +40,21 @@ public abstract record TableRecord<TRecord> : ObservableRecord<TRecord>, ITableR
 
 
     protected TableRecord() : base() { }
-    protected TableRecord( UserRecord? owner, UserRecord? creator = default ) : this( RecordID<TRecord>.New(), owner, creator ) { }
-    protected TableRecord( RecordID<TRecord> id, UserRecord? owner = default, UserRecord? creator = default )
+    protected TableRecord( UserRecord? owner ) : this( RecordID<TRecord>.New(), owner ) { }
+    protected TableRecord( RecordID<TRecord> id, UserRecord? owner = default )
     {
         ID          = id;
+        CreatedBy   = owner?.ID;
+        OwnerUserID = owner?.UserID;
         DateCreated = DateTimeOffset.UtcNow;
-        OwnerUserID = owner?.ID;
-        CreatedBy   = creator?.ID ?? owner?.ID;
     }
 
 
-    public static DynamicParameters GetDynamicParameters( UserRecord record )
+    public static DynamicParameters GetDynamicParameters( UserRecord user )
     {
         var parameters = new DynamicParameters();
-        parameters.Add( nameof(OwnerUserID), record.UserID );
+        parameters.Add( nameof(CreatedBy),   user.ID );
+        parameters.Add( nameof(OwnerUserID), user.UserID );
         return parameters;
     }
     protected static DynamicParameters GetDynamicParameters( TableRecord<TRecord> record )

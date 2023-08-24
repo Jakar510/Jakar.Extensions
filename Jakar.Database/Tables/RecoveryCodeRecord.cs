@@ -68,3 +68,14 @@ public sealed record RecoveryCodeRecord : TableRecord<RecoveryCodeRecord>
         }
     }
 }
+
+
+
+[Serializable]
+[Table( "UserRecoveryCodes" )]
+public sealed record UserRecoveryCodeRecord : Mapping<UserRecoveryCodeRecord, UserRecord, RecoveryCodeRecord>, ICreateMapping<UserRecoveryCodeRecord, UserRecord, RecoveryCodeRecord>
+{
+    public UserRecoveryCodeRecord() : base() { }
+    public UserRecoveryCodeRecord( UserRecord                                         owner, RecoveryCodeRecord value ) : base( owner, value ) { }
+    [RequiresPreviewFeatures] public static UserRecoveryCodeRecord Create( UserRecord owner, RecoveryCodeRecord value ) => new(owner, value);
+}

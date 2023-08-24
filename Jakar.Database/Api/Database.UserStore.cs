@@ -2,11 +2,15 @@
 #pragma warning disable CA1822
 
 
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+
+
 
 namespace Jakar.Database;
 
 
 [SuppressMessage( "ReSharper", "UnusedParameter.Global" )]
+[SuppressMessage( "ReSharper", "MemberCanBeMadeStatic.Global" )]
 public partial class Database
 {
     public virtual ValueTask<string?> GetSecurityStampAsync( UserRecord user, CancellationToken token = default ) => new(user.SecurityStamp);
@@ -31,15 +35,18 @@ public partial class Database
     }
 
 
-    public ValueTask<UserLoginInfoRecord> AddLoginAsync( UserRecord user, UserLoginInfo login, CancellationToken token ) => this.TryCall( AddLoginAsync, user, login, token );
-    public virtual async ValueTask<UserLoginInfoRecord> AddLoginAsync( DbConnection connection, DbTransaction transaction, UserRecord user, UserLoginInfo login, CancellationToken token )
+    public ValueTask<OneOf<UserLoginInfoRecord, Error>> AddLoginAsync( UserRecord user, UserLoginInfo login, CancellationToken token ) => this.TryCall( AddLoginAsync, user, login, token );
+    public virtual async ValueTask<OneOf<UserLoginInfoRecord, Error>> AddLoginAsync( DbConnection connection, DbTransaction transaction, UserRecord user, UserLoginInfo login, CancellationToken token )
     {
         UserLoginInfoRecord? record = await UserLogins.Get( connection, transaction, true, UserLoginInfoRecord.GetDynamicParameters( user, login ), token );
 
         if ( record is not null )
         {
-            string message = $"[ {nameof(login.LoginProvider)}: {login.LoginProvider}  |  {nameof(login.ProviderKey)}: {login.ProviderKey} ] already exists for {nameof(UserRecord.OwnerUserID)}: {user.OwnerUserID}";
-            throw new DuplicateRecordException( message );
+            var state = new ModelStateDictionary();
+            state.AddModelError( nameof(login.LoginProvider), login.LoginProvider );
+            state.AddModelError( nameof(login.ProviderKey),   login.ProviderKey );
+            state.AddModelError( nameof(UserRecord.UserID),   user.UserID.ToString() );
+            return new Error( Status.Conflict, state );
         }
 
         record = new UserLoginInfoRecord( user, login );
@@ -62,7 +69,8 @@ public partial class Database
     public ValueTask RemoveLoginAsync( UserRecord user, string loginProvider, string providerKey, CancellationToken token ) => this.TryCall( RemoveLoginAsync, user, loginProvider, providerKey, token );
     public virtual async ValueTask RemoveLoginAsync( DbConnection connection, DbTransaction transaction, UserRecord user, string loginProvider, string providerKey, CancellationToken token )
     {
-        IEnumerable<UserLoginInfoRecord> records = await UserLogins.Where( connection, transaction, true, UserLoginInfoRecord.GetDynamicParameters( user, loginProvider, providerKey ), token );
+        DynamicParameters                parameters = UserLoginInfoRecord.GetDynamicParameters( user, loginProvider, providerKey );
+        IEnumerable<UserLoginInfoRecord> records    = await UserLogins.Where( connection, transaction, true, parameters, token );
         foreach ( UserLoginInfoRecord record in records ) { await UserLogins.Delete( connection, transaction, record, token ); }
     }
 
@@ -221,9 +229,8 @@ public partial class Database
         await Users.Get( connection, transaction, nameof(UserRecord.UserName), normalizedUserName, token ) ?? await Users.Get( connection, transaction, nameof(UserRecord.FullName), normalizedUserName, token );
 
 
-    public ValueTask<UserRecord?> FindByEmailAsync( string email, CancellationToken token ) => this.TryCall( FindByEmailAsync, email, token );
-    public async ValueTask<UserRecord?> FindByEmailAsync( DbConnection connection, DbTransaction transaction, string email, CancellationToken token ) =>
-        await Users.Get( connection, transaction, nameof(UserRecord.Email), email, token );
+    public ValueTask<UserRecord?> FindByEmailAsync( string             email,      CancellationToken token ) => this.TryCall( FindByEmailAsync, email, token );
+    public async ValueTask<UserRecord?> FindByEmailAsync( DbConnection connection, DbTransaction     transaction, string email, CancellationToken token ) => await Users.Get( connection, transaction, nameof(UserRecord.Email), email, token );
 
     #endregion
 
@@ -324,8 +331,12 @@ public partial class Database
         await user.GetUserClaims( connection, transaction, this, types, token );
 
 
-    public ValueTask<IList<UserRecord>> GetUsersForClaimAsync( Claim                claim,      CancellationToken token ) => this.TryCall( GetUsersForClaimAsync, claim, token );
-    public virtual ValueTask<IList<UserRecord>> GetUsersForClaimAsync( DbConnection connection, DbTransaction     transaction, Claim claim, CancellationToken token ) => new(new List<UserRecord>());
+    public ValueTask<IList<UserRecord>> GetUsersForClaimAsync( Claim claim, CancellationToken token ) => this.TryCall( GetUsersForClaimAsync, claim, token );
+    public virtual async ValueTask<IList<UserRecord>> GetUsersForClaimAsync( DbConnection connection, DbTransaction transaction, Claim claim, CancellationToken token )
+    {
+        IEnumerable<UserRecord> users = await UserRecord.TryFromClaims( connection, transaction, this, claim, token );
+        return users.GetArray();
+    }
 
 
     public ValueTask RemoveClaimsAsync( UserRecord           user,       IEnumerable<Claim> claims,      CancellationToken token ) => this.TryCall( AddClaimsAsync, user, claims, token );
