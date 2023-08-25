@@ -4,15 +4,80 @@
 namespace Jakar.AppLogger.Common;
 
 
-/// <summary> Formatter to convert the named format items like {NamedformatItem} to <see cref="string.Format(IFormatProvider, string, object)"/> format. </summary>
-public readonly ref struct LogValuesFormatter
+/// <summary> LogValues to enable formatting options supported by <see cref="string.Format(IFormatProvider, string, object?)"/>. This also enables using {NamedformatItem} in the format string. </summary>
+internal readonly record struct FormattedLogValues : IReadOnlyList<KeyValuePair<string, object?>>
 {
-    private const string NullValue = "(null)";
-    private static readonly char[] FormatDelimiters =
+    private static          int                                              _count;
+    private static readonly ConcurrentDictionary<string, LogValuesFormatter> _formatters           = new();
+    internal const          int                                              MAX_CACHED_FORMATTERS = 1024;
+    private const           string                                           NULL_FORMAT           = "[null]";
+    private readonly        LogValuesFormatter?                              _formatter;
+    private readonly        object?[]?                                       _values;
+    private readonly        string                                           _originalMessage;
+
+    public int Count => _formatter is null
+                            ? 1
+                            : _formatter?.ValueNames.Count + 1 ?? 0;
+
+    public KeyValuePair<string, object?> this[ int index ]
+    {
+        get
+        {
+            if ( index < 0 || index >= Count ) { throw new IndexOutOfRangeException( nameof(index) ); }
+
+            return index == Count - 1
+                       ? new KeyValuePair<string, object?>( "{OriginalFormat}", _originalMessage )
+                       : _formatter?.GetValue( _values!, index ) ?? default;
+        }
+    }
+
+    public FormattedLogValues( string? format, params object?[]? values )
+    {
+        _formatter = values != null && values.Length != 0 && format != null
+                         ? _count >= MAX_CACHED_FORMATTERS
+                               ? _formatters.TryGetValue( format, out LogValuesFormatter result )
+                                     ? result
+                                     : new LogValuesFormatter( format )
+                               : _formatters.GetOrAdd( format, ValueFactory )
+                         : null;
+
+        _originalMessage = format ?? NULL_FORMAT;
+        _values          = values;
+        return;
+
+        static LogValuesFormatter ValueFactory( string value )
+        {
+            Interlocked.Increment( ref _count );
+            return new LogValuesFormatter( value );
+        }
+    }
+
+    public IEnumerator<KeyValuePair<string, object?>> GetEnumerator()
+    {
+        for ( int i = 0; i < Count; ++i ) { yield return this[i]; }
+    }
+
+    public override string ToString()
+    {
+        if ( _formatter == null ) { return _originalMessage; }
+
+        return _formatter?.Format( _values ) ?? string.Empty;
+    }
+
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+}
+
+
+
+/// <summary> Formatter to convert the named format items like {NamedFormatItem} to <see cref="string.Format(IFormatProvider, string, object)"/> format. </summary>
+public readonly record struct LogValuesFormatter
+{
+    private static readonly char[] _formatDelimiters =
     {
         ',',
         ':'
     };
+    private const string NULL_VALUE = "(null)";
 
 
     private readonly string       _format;
@@ -50,7 +115,7 @@ public readonly ref struct LogValuesFormatter
             {
                 // Format item syntax : { index[,alignment][ :formatString] }.
                 int formatDelimiterIndex = format[openBraceIndex..closeBraceIndex]
-                   .IndexOfAny( FormatDelimiters );
+                   .IndexOfAny( _formatDelimiters );
 
                 if ( formatDelimiterIndex < 0 ) { formatDelimiterIndex = closeBraceIndex; }
 
@@ -184,7 +249,7 @@ public readonly ref struct LogValuesFormatter
 
     private object FormatArgument( object? value )
     {
-        if ( value is null ) { return NullValue; }
+        if ( value is null ) { return NULL_VALUE; }
 
         // since 'string' implements IEnumerable, special case it
         if ( value is string ) { return value; }
@@ -201,7 +266,7 @@ public readonly ref struct LogValuesFormatter
 
             vsb.Append( e != null
                             ? e.ToString()
-                            : NullValue );
+                            : NULL_VALUE );
 
             first = false;
         }

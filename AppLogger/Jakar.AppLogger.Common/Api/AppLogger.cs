@@ -117,12 +117,12 @@ public sealed class AppLogger : Service, IAppLogger
             await Config.InitAsync();
             await StartSession( token );
 
-        #if !NETSTANDARD2_1
+        #if NET6_0_OR_GREATER
             using var timer = new PeriodicTimer( TimeSpan.FromMilliseconds( 50 ) );
         #endif
-            while ( !token.IsCancellationRequested )
+            while ( token.IsCancellationRequested is false )
             {
-            #if !NETSTANDARD2_1
+            #if NET6_0_OR_GREATER
                 await timer.WaitForNextTickAsync( token );
             #else
                 await TimeSpan.FromMilliseconds( 50 )
@@ -131,7 +131,7 @@ public sealed class AppLogger : Service, IAppLogger
 
                 try
                 {
-                    var logs = new HashSet<AppLog>( _logs.Count );
+                    var logs = new List<AppLog>( _logs.Count );
                     while ( _logs.TryTake( out AppLog? log ) ) { logs.Add( log ); }
 
                     using var source = new CancellationTokenSource( Options.TimeOut );
