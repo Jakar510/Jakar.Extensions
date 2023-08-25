@@ -205,6 +205,11 @@ public sealed class AppLogger : Service, IAppLogger
     }
 
 
+    void ILogger.Log<TState>( LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter )
+    {
+        EventID id = eventId;
+        Log( logLevel, id, state, exception, formatter );
+    }
     public void Log<TState>( LogLevel level, EventID eventId, TState state, Exception? e, Func<TState, Exception?, string> formatter )
     {
         if ( !IsEnabled( level ) ) { return; }
@@ -225,5 +230,4 @@ public sealed class AppLogger : Service, IAppLogger
     public IDisposable BeginScope<TState>( TState state ) where TState : notnull => Config.CreateScope( state );
     public AppLogger CreateLogger( string         categoryName ) => new(this, categoryName);
     ILogger ILoggerProvider.CreateLogger( string  categoryName ) => CreateLogger( categoryName );
-    public void Log<TState>( LogLevel             logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter ) => throw new NotImplementedException();
 }

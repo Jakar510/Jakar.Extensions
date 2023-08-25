@@ -1,12 +1,9 @@
-﻿using System.IO;
-
-
-try
+﻿try
 {
     "Hello World!".WriteToConsole();
     Console.WriteLine();
 
-    BenchmarkRunner.Run<HashBenchmarks>();
+    BenchmarkRunner.Run<ParameterBenchmarks>();
 
     // new HashBenchmarks().GetHash().WriteToConsole();
 }

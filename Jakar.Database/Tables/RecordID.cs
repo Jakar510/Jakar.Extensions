@@ -32,6 +32,10 @@ public readonly record struct RecordID<TRecord>( Guid Value ) : IComparable<Reco
     public bool TryFormat( Span<char> destination, out int          charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider ) => Value.TryFormat( destination, out charsWritten, format );
 
 
+    public static bool operator true( RecordID<TRecord>  recordID ) => recordID.IsValid();
+    public static bool operator false( RecordID<TRecord> recordID ) => recordID.IsNotValid();
+    
+
     public bool Equals( RecordID<TRecord>   other ) => Value.Equals( other.Value );
     public int CompareTo( RecordID<TRecord> other ) => Value.CompareTo( other.Value );
     public override int GetHashCode() => Value.GetHashCode();

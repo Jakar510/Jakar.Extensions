@@ -27,7 +27,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Jakar.Extensions\Jakar.Extensions.csproj" />
+    <ProjectReference Include="..\AppLogger\Jakar.AppLogger.Common\Jakar.AppLogger.Common.csproj" />
   </ItemGroup>
 
 </Project>
