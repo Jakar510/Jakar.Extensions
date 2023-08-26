@@ -1,26 +1,31 @@
 ﻿// Jakar.AppLogger :: Jakar.AppLogger.Client
 // 09/08/2022  1:54 PM
 
+using System.Collections.Immutable;
+
+
+
 namespace Jakar.AppLogger.Common;
 
 
 [SuppressMessage( "ReSharper", "SuggestBaseTypeForParameter" )]
 public sealed class AppLogger : Service, IAppLogger
 {
-    public static readonly EventID               EventID = new(1, nameof(AppLogger));
-    private readonly       ConcurrentBag<AppLog> _logs   = new();
-    private readonly       ILogger               _logger;
-    private readonly       ILoggerFactory        _factory;
-    private readonly       string?               _categoryName;
-    private readonly       WebRequester          _requester;
-    private                bool                  _disposed;
+    private static readonly TimeSpan              _delay  = TimeSpan.FromMilliseconds( 50 );
+    public static readonly  EventID               EventID = new(510, nameof(AppLogger));
+    private readonly        ConcurrentBag<AppLog> _logs   = new();
+    private readonly        ILogger               _logger;
+    private readonly        ILoggerFactory        _factory;
+    private readonly        string?               _categoryName;
+    private readonly        WebRequester          _requester;
+    private                 bool                  _disposed;
 
 
     internal        string                        ApiToken          => Options.APIToken;
-    internal        IEnumerable<LoggerAttachment> LoggerAttachments => Config.LoggerAttachmentProviders.Select( x => x.GetLoggerAttachment() );
     public          string                        CategoryName      => _categoryName ?? Options.Config?.AppName ?? string.Empty;
     public          LoggingSettings               Config            => Options.Config ?? throw new InvalidOperationException( $"{nameof(AppLoggerOptions)}.{nameof(AppLoggerOptions.Config)} is not set" );
     public override bool                          IsValid           => Options.IsValid && base.IsValid;
+    internal        IEnumerable<LoggerAttachment> LoggerAttachments => Config.LoggerAttachmentProviders.Select( x => x.GetLoggerAttachment() );
     public          AppLoggerOptions              Options           { get; }
 
 
@@ -36,9 +41,9 @@ public sealed class AppLogger : Service, IAppLogger
     {
         _categoryName = categoryName;
         _factory      = logger._factory;
+        _requester    = logger._requester;
         Options       = logger.Options;
         _logger       = _factory.CreateLogger( categoryName );
-        _requester    = logger._requester;
     }
     public override async ValueTask DisposeAsync()
     {
@@ -101,6 +106,12 @@ public sealed class AppLogger : Service, IAppLogger
     }
 
 
+    private ImmutableArray<AppLog> GetLogs() => _logs.ToImmutableArray();
+    private void ClearLogs( in ImmutableArray<AppLog> logs )
+    {
+        int count = 0;
+        while ( count < logs.Length && _logs.TryTake( out AppLog? _ ) ) { count++; }
+    }
     public async Task StartAsync( CancellationToken token )
     {
         if ( _disposed ) { ThrowDisposed(); }
@@ -118,46 +129,46 @@ public sealed class AppLogger : Service, IAppLogger
             await StartSession( token );
 
         #if NET6_0_OR_GREATER
-            using var timer = new PeriodicTimer( TimeSpan.FromMilliseconds( 50 ) );
+            using var timer = new PeriodicTimer( _delay );
         #endif
             while ( token.IsCancellationRequested is false )
             {
             #if NET6_0_OR_GREATER
                 await timer.WaitForNextTickAsync( token );
             #else
-                await TimeSpan.FromMilliseconds( 50 )
-                              .Delay( token );
+                await _delay.Delay( token );
             #endif
 
                 try
                 {
-                    var logs = new List<AppLog>( _logs.Count );
-                    while ( _logs.TryTake( out AppLog? log ) ) { logs.Add( log ); }
-
-                    using var source = new CancellationTokenSource( Options.TimeOut );
+                    ImmutableArray<AppLog> logs   = GetLogs();
+                    using var              source = new CancellationTokenSource( Options.TimeOut );
                     await using ( token.Register( source.Cancel ) ) { await SendLog( logs, source.Token ); }
+
+                    ClearLogs( logs );
                 }
                 catch ( Exception ex ) { _logger.LogCritical( EventID, ex, "{Caller}", nameof(StartAsync) ); }
             }
         }
         finally { IsAlive = false; }
     }
-    private async ValueTask<bool> SendLog( IEnumerable<AppLog> log, CancellationToken token )
-    {
-        if ( !IsValid ) { throw new ApiDisabledException(); }
-
-        WebResponse<bool> reply = await _requester.Post( "/Api/Log", log, token )
-                                                  .AsBool();
-
-        return reply.GetPayload();
-    }
     public async Task StopAsync( CancellationToken token )
     {
         if ( _disposed ) { ThrowDisposed(); }
 
-        var logs = new HashSet<AppLog>( _logs.Select( x => x.Update( Config ) ) );
+        ImmutableArray<AppLog> logs = GetLogs();
         await SendLog( logs, token );
         await EndSession( token );
+        ClearLogs( logs );
+    }
+    private async ValueTask<bool> SendLog( ImmutableArray<AppLog> logs, CancellationToken token )
+    {
+        if ( !IsValid ) { throw new ApiDisabledException(); }
+
+        WebResponse<bool> reply = await _requester.Post( "/Api/Log", logs, token )
+                                                  .AsBool();
+
+        return reply.GetPayload();
     }
 
 
@@ -200,7 +211,7 @@ public sealed class AppLogger : Service, IAppLogger
     {
         if ( !IsEnabled( LogLevel.Error ) ) { return; }
 
-        AppLog log = AppLog.Create( this, LogLevel.Error, eventId, e.Message, e, LoggerAttachments.Concat( attachments ), eventDetails );
+        var log = AppLog.Create( this, LogLevel.Error, eventId, e.Message, e, LoggerAttachments.Concat( attachments ), eventDetails );
         _logs.Add( log );
     }
 
@@ -214,7 +225,7 @@ public sealed class AppLogger : Service, IAppLogger
     {
         if ( !IsEnabled( level ) ) { return; }
 
-        AppLog log = AppLog.Create( this, level, eventId, state, e, formatter, LoggerAttachments );
+        var log = AppLog.Create( this, level, eventId, state, e, formatter, LoggerAttachments );
         _logs.Add( log );
     }
     public bool IsEnabled( LogLevel level )
@@ -230,4 +241,47 @@ public sealed class AppLogger : Service, IAppLogger
     public IDisposable BeginScope<TState>( TState state ) where TState : notnull => Config.CreateScope( state );
     public AppLogger CreateLogger( string         categoryName ) => new(this, categoryName);
     ILogger ILoggerProvider.CreateLogger( string  categoryName ) => CreateLogger( categoryName );
+
+
+    private void Log( LogLevel logLevel, string? message, params object?[] args ) => Log( logLevel, 0, null, message, args );
+    private void Log( LogLevel logLevel, EventID eventID, string? message, params object?[] args ) => Log( logLevel, eventID, null, message, args );
+    private void Log( LogLevel logLevel, Exception? exception, string? message, params object?[] args ) => Log( logLevel, 0, exception, message, args );
+    private void Log( LogLevel logLevel, EventID eventID, Exception? exception, string? message, params object?[] args ) => Log( logLevel, eventID, new FormattedLogValues( message, args ), exception, MessageFormatter );
+    internal static string MessageFormatter( FormattedLogValues log, Exception? exception ) => log.ToString();
+
+
+    public void Debug( EventID    eventID,   Exception?       exception, string?          message, params object?[] args ) => Log( LogLevel.Debug, eventID, exception, message, args );
+    public void Debug( EventID    eventID,   string?          message,   params object?[] args ) => Log( LogLevel.Debug, eventID,   message, args );
+    public void Debug( Exception? exception, string?          message,   params object?[] args ) => Log( LogLevel.Debug, exception, message, args );
+    public void Debug( string?    message,   params object?[] args ) => Log( LogLevel.Debug, message, args );
+
+
+    public void Trace( EventID    eventID,   Exception?       exception, string?          message, params object?[] args ) => Log( LogLevel.Trace, eventID, exception, message, args );
+    public void Trace( EventID    eventID,   string?          message,   params object?[] args ) => Log( LogLevel.Trace, eventID,   message, args );
+    public void Trace( Exception? exception, string?          message,   params object?[] args ) => Log( LogLevel.Trace, exception, message, args );
+    public void Trace( string?    message,   params object?[] args ) => Log( LogLevel.Trace, message, args );
+
+
+    public void Information( EventID    eventID,   Exception?       exception, string?          message, params object?[] args ) => Log( LogLevel.Information, eventID, exception, message, args );
+    public void Information( EventID    eventID,   string?          message,   params object?[] args ) => Log( LogLevel.Information, eventID,   message, args );
+    public void Information( Exception? exception, string?          message,   params object?[] args ) => Log( LogLevel.Information, exception, message, args );
+    public void Information( string?    message,   params object?[] args ) => Log( LogLevel.Information, message, args );
+
+
+    public void Warning( EventID    eventID,   Exception?       exception, string?          message, params object?[] args ) => Log( LogLevel.Warning, eventID, exception, message, args );
+    public void Warning( EventID    eventID,   string?          message,   params object?[] args ) => Log( LogLevel.Warning, eventID,   message, args );
+    public void Warning( Exception? exception, string?          message,   params object?[] args ) => Log( LogLevel.Warning, exception, message, args );
+    public void Warning( string?    message,   params object?[] args ) => Log( LogLevel.Warning, message, args );
+
+
+    public void Error( EventID    eventID,   Exception?       exception, string?          message, params object?[] args ) => Log( LogLevel.Error, eventID, exception, message, args );
+    public void Error( EventID    eventID,   string?          message,   params object?[] args ) => Log( LogLevel.Error, eventID,   message, args );
+    public void Error( Exception? exception, string?          message,   params object?[] args ) => Log( LogLevel.Error, exception, message, args );
+    public void Error( string?    message,   params object?[] args ) => Log( LogLevel.Error, message, args );
+
+
+    public void Critical( EventID    eventID,   Exception?       exception, string?          message, params object?[] args ) => Log( LogLevel.Critical, eventID, exception, message, args );
+    public void Critical( EventID    eventID,   string?          message,   params object?[] args ) => Log( LogLevel.Critical, eventID,   message, args );
+    public void Critical( Exception? exception, string?          message,   params object?[] args ) => Log( LogLevel.Critical, exception, message, args );
+    public void Critical( string?    message,   params object?[] args ) => Log( LogLevel.Critical, message, args );
 }
