@@ -14,12 +14,17 @@ public partial class DbTable<TRecord>
     private string? _tryInsertMsSql;
 
 
+    public IAsyncEnumerable<TRecord> Insert( ImmutableArray<TRecord>   records, CancellationToken token = default ) => this.TryCall( Insert, records, token );
     public IAsyncEnumerable<TRecord> Insert( IEnumerable<TRecord>      records, CancellationToken token = default ) => this.TryCall( Insert, records, token );
     public IAsyncEnumerable<TRecord> Insert( IAsyncEnumerable<TRecord> records, CancellationToken token = default ) => this.TryCall( Insert, records, token );
     public ValueTask<TRecord> Insert( TRecord                          record,  CancellationToken token = default ) => this.TryCall( Insert, record,  token );
 
 
     public virtual async IAsyncEnumerable<TRecord> Insert( DbConnection connection, DbTransaction transaction, IEnumerable<TRecord> records, [EnumeratorCancellation] CancellationToken token = default )
+    {
+        foreach ( TRecord record in records ) { yield return await Insert( connection, transaction, record, token ); }
+    }
+    public virtual async IAsyncEnumerable<TRecord> Insert( DbConnection connection, DbTransaction transaction, ImmutableArray<TRecord> records, [EnumeratorCancellation] CancellationToken token = default )
     {
         foreach ( TRecord record in records ) { yield return await Insert( connection, transaction, record, token ); }
     }

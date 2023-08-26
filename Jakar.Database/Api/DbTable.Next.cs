@@ -12,19 +12,19 @@ public partial class DbTable<TRecord>
     private string? _nextID;
 
 
-    public ValueTask<TRecord?> Next( RecordPair                 pair, CancellationToken token = default ) => this.Call( Next,   pair, token );
-    public ValueTask<Guid?> NextID( Guid?                       id,   CancellationToken token = default ) => this.Call( NextID, id,   token );
-    public ValueTask<RecordPair[]> SortedIDs( CancellationToken token = default ) => this.Call( SortedIDs, token );
+    public ValueTask<TRecord?> Next( RecordPair<TRecord>                            pair, CancellationToken token = default ) => this.Call( Next,   pair, token );
+    public ValueTask<Guid?> NextID( Guid?                                           id,   CancellationToken token = default ) => this.Call( NextID, id,   token );
+    public ValueTask<IEnumerable<RecordPair<TRecord>>> SortedIDs( CancellationToken token = default ) => this.Call( SortedIDs, token );
 
 
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
-    public virtual async ValueTask<TRecord?> Next( DbConnection connection, DbTransaction? transaction, RecordPair pair, CancellationToken token = default )
+    public virtual async ValueTask<TRecord?> Next( DbConnection connection, DbTransaction? transaction, RecordPair<TRecord> pair, CancellationToken token = default )
     {
         var parameters = new DynamicParameters();
-        parameters.Add( nameof(RecordPair.ID),          pair.ID );
-        parameters.Add( nameof(RecordPair.DateCreated), pair.DateCreated );
+        parameters.Add( nameof(RecordPair<TRecord>.ID),          pair.ID );
+        parameters.Add( nameof(RecordPair<TRecord>.DateCreated), pair.DateCreated );
 
-        _next ??= @$"SELECT * FROM {SchemaTableName} WHERE ( id = IFNULL((SELECT MIN({ID_ColumnName}) FROM {SchemaTableName} WHERE {ID_ColumnName} > @{nameof(RecordPair.ID)}), 0) )";
+        _next ??= @$"SELECT * FROM {SchemaTableName} WHERE ( id = IFNULL((SELECT MIN({ID_ColumnName}) FROM {SchemaTableName} WHERE {ID_ColumnName} > @{nameof(RecordPair<TRecord>.ID)}), 0) )";
 
         try
         {
@@ -36,15 +36,15 @@ public partial class DbTable<TRecord>
 
 
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
-    public virtual async ValueTask<RecordPair[]> SortedIDs( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
+    public virtual async ValueTask<IEnumerable<RecordPair<TRecord>>> SortedIDs( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
         _sortedIDs ??= @$"SELECT {ID_ColumnName}, {DateCreated} FROM {SchemaTableName} ORDER BY {DateCreated} DESC";
 
         try
         {
-            CommandDefinition       command = GetCommandDefinition( _sortedIDs, default, transaction, token );
-            IEnumerable<RecordPair> pairs   = await connection.QueryAsync<RecordPair>( command );
-            return pairs.GetArray();
+            CommandDefinition                command = GetCommandDefinition( _sortedIDs, default, transaction, token );
+            IEnumerable<RecordPair<TRecord>> pairs   = await connection.QueryAsync<RecordPair<TRecord>>( command );
+            return pairs;
         }
         catch ( Exception e ) { throw new SqlException( _sortedIDs, e ); }
     }

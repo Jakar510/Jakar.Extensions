@@ -48,7 +48,7 @@ public partial class DbTable<TRecord>
 
     public virtual async ValueTask<IEnumerable<TRecord>> Where( DbConnection connection, DbTransaction? transaction, string sql, DynamicParameters? parameters, CancellationToken token = default )
     {
-        if ( token.IsCancellationRequested ) { return Empty; }
+        if ( token.IsCancellationRequested ) { return EmptyList; }
 
         try
         {

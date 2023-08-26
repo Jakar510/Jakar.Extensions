@@ -15,8 +15,9 @@ public partial class DbTable<TRecord> : ObservableClass, IConnectableDb, IAsyncD
     protected readonly TypePropertiesCache.Properties _propertiesCache;
 
 
-    [SuppressMessage( "ReSharper", "ReturnTypeCanBeEnumerable.Global" )] public static TRecord[]           Empty       => Array.Empty<TRecord>();
-    public                                                                             IEnumerable<string> ColumnNames => Descriptors.Select( x => x.ColumnName );
+    [SuppressMessage( "ReSharper", "ReturnTypeCanBeEnumerable.Global" )] public static ImmutableArray<TRecord> Empty       => ImmutableArray<TRecord>.Empty;
+    [SuppressMessage( "ReSharper", "ReturnTypeCanBeEnumerable.Global" )] public static ImmutableList<TRecord>  EmptyList   => ImmutableList<TRecord>.Empty;
+    public                                                                             IEnumerable<string>     ColumnNames => Descriptors.Select( x => x.ColumnName );
 
     public virtual string CreatedBy => Instance switch
                                        {

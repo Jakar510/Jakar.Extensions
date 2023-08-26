@@ -5,32 +5,29 @@ namespace Jakar.Database;
 
 
 [SuppressMessage( "ReSharper", "MemberCanBePrivate.Local" )]
-public record struct KeyGenerator : IEnumerator<Guid>, IEnumerable<Guid>
+public record struct KeyGenerator<TRecord> : IEnumerator<RecordID<TRecord>>, IEnumerable<RecordID<TRecord>> where TRecord : TableRecord<TRecord>
 {
-    private readonly ReadOnlyMemory<RecordPair> _pairs;
-    private          int                        _index = -1;
+    private readonly ReadOnlyMemory<RecordPair<TRecord>> _pairs;
+    private          int                                 _index = -1;
+    public readonly  RecordID<TRecord>                   Current => _pairs.Span[_index].ID;
+    readonly         object IEnumerator.                 Current => Current;
 
 
-    public bool IsEmpty => _pairs.IsEmpty;
-
-    public Guid Current => _pairs.Span[_index]
-                                 .ID;
-
-    object IEnumerator.Current => Current;
+    public readonly bool IsEmpty => _pairs.IsEmpty;
 
 
-    public KeyGenerator( ReadOnlyMemory<RecordPair>            pairs ) => _pairs = pairs;
-    public static implicit operator KeyGenerator( RecordPair[] pairs ) => new(pairs);
+    public KeyGenerator( ReadOnlyMemory<RecordPair<TRecord>>                     pairs ) => _pairs = pairs;
+    public static implicit operator KeyGenerator<TRecord>( RecordPair<TRecord>[] pairs ) => new(pairs);
 
 
     public void Dispose() => this = default;
     public void Reset() => _index = -1;
     public bool MoveNext() => !_pairs.IsEmpty && ++_index < _pairs.Length;
-    IEnumerator<Guid> IEnumerable<Guid>.GetEnumerator() => this;
-    IEnumerator IEnumerable.GetEnumerator() => this;
+    readonly IEnumerator<RecordID<TRecord>> IEnumerable<RecordID<TRecord>>.GetEnumerator() => this;
+    readonly IEnumerator IEnumerable.GetEnumerator() => this;
 
 
-    public static KeyGenerator Create<TValue>( IEnumerable<TValue> records ) where TValue : IRecordPair =>
-        new(records.Select( x => new RecordPair( x.ID, x.DateCreated ) )
-                   .ToArray());
+    public static KeyGenerator<TRecord> Create( RecordPair<TRecord>[]            records ) => new(records.Sorted());
+    public static KeyGenerator<TRecord> Create( IEnumerable<RecordPair<TRecord>> records ) => Create( records.ToArray() );
+    public static KeyGenerator<TRecord> Create( IEnumerable<TRecord>             records ) => Create( records.Select( x => new RecordPair<TRecord>( x.ID, x.DateCreated ) ) );
 }

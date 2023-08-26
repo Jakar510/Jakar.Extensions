@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 08/17/2022  8:48 PM
 
-using System.Collections.Immutable;
-
-
-
 namespace Jakar.Database.Caches;
 
 
@@ -119,12 +115,8 @@ public sealed class TypePropertiesCache : ConcurrentDictionary<Type, TypePropert
         public bool ContainsKey( IConnectableDb value ) => ContainsKey( value.Instance );
 
 
-        [MethodImpl( MethodImplOptions.AggressiveInlining )]
-        public IEnumerable<Descriptor> GetValues( DbInstance value ) => _dictionary[value]
-           .Values;
-        [MethodImpl( MethodImplOptions.AggressiveInlining )]
-        public IEnumerable<Descriptor> GetValues( IConnectableDb value ) => _dictionary[value.Instance]
-           .Values;
+        [MethodImpl( MethodImplOptions.AggressiveInlining )] public IEnumerable<Descriptor> GetValues( DbInstance     value ) => _dictionary[value].Values;
+        [MethodImpl( MethodImplOptions.AggressiveInlining )] public IEnumerable<Descriptor> GetValues( IConnectableDb value ) => _dictionary[value.Instance].Values;
 
 
         [MethodImpl( MethodImplOptions.AggressiveInlining )]
@@ -163,7 +155,7 @@ public sealed class TypePropertiesCache : ConcurrentDictionary<Type, TypePropert
 
             public static implicit operator Descriptors( Dictionary<string, Descriptor>          dictionary ) => new(dictionary.ToImmutableDictionary());
             public static implicit operator Descriptors( ImmutableDictionary<string, Descriptor> dictionary ) => new(dictionary);
-            
+
             public IEnumerator<KeyValuePair<string, Descriptor>> GetEnumerator() => _dictionary.GetEnumerator();
             IEnumerator IEnumerable.GetEnumerator() => _dictionary.GetEnumerator();
 

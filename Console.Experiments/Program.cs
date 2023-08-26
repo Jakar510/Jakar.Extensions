@@ -3,7 +3,7 @@
     "Hello World!".WriteToConsole();
     Console.WriteLine();
 
-    BenchmarkRunner.Run<ParameterBenchmarks>();
+    BenchmarkRunner.Run<ImmutableArrayBenchmarks>();
 
     // new HashBenchmarks().GetHash().WriteToConsole();
 }

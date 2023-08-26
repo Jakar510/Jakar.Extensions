@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
+﻿using System.Collections.Immutable;
+
+using Microsoft.AspNetCore.Http.HttpResults;
 using Debug = Jakar.AppLogger.Common.Debug;
 
 

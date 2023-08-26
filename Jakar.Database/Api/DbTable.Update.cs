@@ -11,9 +11,14 @@ public partial class DbTable<TRecord>
 
     public ValueTask Update( TRecord                   record,  CancellationToken token = default ) => this.TryCall( Update, record,  token );
     public ValueTask Update( IEnumerable<TRecord>      records, CancellationToken token = default ) => this.TryCall( Update, records, token );
+    public ValueTask Update( ImmutableArray<TRecord>   records, CancellationToken token = default ) => this.TryCall( Update, records, token );
     public ValueTask Update( IAsyncEnumerable<TRecord> records, CancellationToken token = default ) => this.TryCall( Update, records, token );
 
 
+    public virtual async ValueTask Update( DbConnection connection, DbTransaction? transaction, ImmutableArray<TRecord> records, CancellationToken token = default )
+    {
+        foreach ( TRecord record in records ) { await Update( connection, transaction, record, token ); }
+    }
     public virtual async ValueTask Update( DbConnection connection, DbTransaction? transaction, IEnumerable<TRecord> records, CancellationToken token = default )
     {
         foreach ( TRecord record in records ) { await Update( connection, transaction, record, token ); }

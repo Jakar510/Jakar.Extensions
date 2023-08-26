@@ -4,15 +4,15 @@
 namespace Jakar.Extensions;
 
 
-public ref struct Buffer<T> where T : unmanaged, IEquatable<T>
+public ref struct Buffer<T> where T : IEquatable<T>
 {
     private T[]?    _arrayToReturnToPool = default;
     private Span<T> _span                = default;
     private int     _index               = 0;
 
 
-    public          bool    IsEmpty    => Length == 0;
-    public          bool    IsNotEmpty => Length > 0;
+    public readonly bool    IsEmpty    => Length == 0;
+    public readonly bool    IsNotEmpty => Length > 0;
     public readonly int     Capacity   => _span.Length;
     public readonly int     Length     => _index;
     public readonly Span<T> Next       => _span[_index..];
@@ -54,11 +54,11 @@ public ref struct Buffer<T> where T : unmanaged, IEquatable<T>
     }
 
 
-    public override string ToString() => $"{nameof(Buffer<T>)} ( {nameof(Capacity)}: {Capacity}, {nameof(_index)}: {_index}, {nameof(IsReadOnly)}: {IsReadOnly} )";
+    public readonly override string ToString() => $"{nameof(Buffer<T>)} ( {nameof(Capacity)}: {Capacity}, {nameof(_index)}: {_index}, {nameof(IsReadOnly)}: {IsReadOnly} )";
     public readonly Enumerator GetEnumerator() => new(this);
 
 
-    private void ThrowIfReadOnly()
+    private readonly void ThrowIfReadOnly()
     {
         if ( IsReadOnly ) { throw new InvalidOperationException( $"{nameof(Buffer<T>)} is read only" ); }
     }
@@ -91,7 +91,7 @@ public ref struct Buffer<T> where T : unmanaged, IEquatable<T>
 
 
     /// <summary> Get a pinnable reference to the builder. Does not ensure there is a null T after <see cref="Index"/> . This overload is pattern matched in the C# 7.3+ compiler so you can omit the explicit method call, and write eg "fixed (T* c = builder)" </summary>
-    public ref T GetPinnableReference() => ref _span.GetPinnableReference();
+    public readonly ref T GetPinnableReference() => ref _span.GetPinnableReference();
 
     /// <summary> Get a pinnable reference to the builder. Ensures that the builder has a <paramref name="terminate"/> value after <see cref="Index"/> </summary>
     /// <param name="terminate"> </param>
@@ -122,21 +122,21 @@ public ref struct Buffer<T> where T : unmanaged, IEquatable<T>
         if ( terminate is null ) { return _span[.._index]; }
 
         EnsureCapacity( ++_index );
-        _span[_index] = terminate.Value;
+        _span[_index] = terminate;
         return Span;
     }
     [Pure] public readonly ReadOnlySpan<T> Slice( int start ) => _span.Slice( start,             _index - start );
     [Pure] public readonly ReadOnlySpan<T> Slice( int start, int length ) => _span.Slice( start, length );
-    public int IndexOf( T                             value ) => Next.IndexOf( value );
-    public int LastIndexOf( T                         value, int end ) => Next.LastIndexOf( value, end );
+    public readonly int IndexOf( T                    value ) => Next.IndexOf( value );
+    public readonly int LastIndexOf( T                value, int end ) => Next.LastIndexOf( value, end );
 
 
-    public bool Contains( T               value ) => _span.Contains( value );
-    public bool Contains( Span<T>         value ) => _span.Contains( value );
-    public bool Contains( ReadOnlySpan<T> value ) => _span.Contains( value );
+    public readonly bool Contains( T               value ) => _span.Contains( value );
+    public readonly bool Contains( Span<T>         value ) => _span.Contains( value );
+    public readonly bool Contains( ReadOnlySpan<T> value ) => _span.Contains( value );
 
 
-    public bool TryCopyTo( Span<T> destination, out int charsWritten )
+    public readonly bool TryCopyTo( Span<T> destination, out int charsWritten )
     {
         if ( Span.TryCopyTo( destination ) )
         {
@@ -284,9 +284,7 @@ public ref struct Buffer<T> where T : unmanaged, IEquatable<T>
         private             int       _index = 0;
         public readonly ref T         Current => ref _buffer[_index];
 
-
         internal Enumerator( Buffer<T> buffer ) => _buffer = buffer;
-
 
         public void Reset() => _index = 0;
         public bool MoveNext() => ++_index < _buffer._index;
