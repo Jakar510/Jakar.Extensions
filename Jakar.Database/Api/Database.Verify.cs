@@ -64,7 +64,7 @@ public abstract partial class Database
     }
 
 
-    public virtual async ValueTask<OneOf<T, Error>> Verify<T>( DbConnection connection, DbTransaction? transaction, VerifyRequest request, Func<UserRecord, T> func, CancellationToken token = default )
+    public virtual async ValueTask<OneOf<T, Error>> Verify<T>( DbConnection connection, DbTransaction transaction, VerifyRequest request, Func<UserRecord, T> func, CancellationToken token = default )
     {
         LoginResult loginResult = await VerifyLogin( connection, transaction, request, token );
 
