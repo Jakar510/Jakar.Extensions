@@ -1,14 +1,19 @@
-﻿// Jakar.Extensions :: Jakar.Extensions
+﻿/*
+// Jakar.Extensions :: Jakar.Extensions
 // 08/28/2023  9:54 PM
 
 namespace Jakar.Extensions;
 
 
-/*
 public ref struct LinqSpan<T>
 {
-    private readonly Span<T> _span;
-    public readonly  int     Length => _span.Length;
+    private readonly Span<T>       _span;
+    private          Span<Handler> _handlers = default;
+
+
+    public readonly int Length => _span.Length;
+
+
     public LinqSpan( Span<T> span ) => _span = span;
 
 
@@ -16,10 +21,7 @@ public ref struct LinqSpan<T>
 
 
 
-    public ref struct Handler
-    {
-        public bool Check() => true;
-    }
+    public readonly record struct Handler( Func<T, bool> Check ) { }
 
 
 

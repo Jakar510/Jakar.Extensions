@@ -14,18 +14,23 @@ public sealed class AppVersion : IComparable,
                                  IFormattable
                              #else
                                  ISpanFormattable
+                             #endif
+                             #if NET7_0_OR_GREATER
+                                 ,
+                                 IParsable<AppVersion>,
+                                 ISpanParsable<AppVersion>
 #endif
 {
-    public static AppVersion Default { get; } = new();
-    public Format          Scheme        { get; init; }
-    public int             Major         { get; init; }
-    public int?            Minor         { get; init; }
-    public int?            Maintenance   { get; init; }
-    public int?            MajorRevision { get; init; }
-    public int?            MinorRevision { get; init; }
-    public int?            Build         { get; init; }
-    public AppVersionFlags Flags         { get; init; }
-    public int             Length        => Flags.Length + 65;
+    public static AppVersion      Default       { get; } = new();
+    public        Format          Scheme        { get; init; }
+    public        int             Major         { get; init; }
+    public        int?            Minor         { get; init; }
+    public        int?            Maintenance   { get; init; }
+    public        int?            MajorRevision { get; init; }
+    public        int?            MinorRevision { get; init; }
+    public        int?            Build         { get; init; }
+    public        AppVersionFlags Flags         { get; init; }
+    public        int             Length        => Flags.Length + 65;
 
 
     public AppVersion() : this( 0, default, default, default, default, default, AppVersionFlags.Stable ) { }
@@ -178,7 +183,7 @@ public sealed class AppVersion : IComparable,
     /// <param name="version"> </param>
     /// <returns> <see langword="true"/> Parse was successful. <br/> <see langword="false"/> otherwise. </returns>
     public static bool TryParse( ReadOnlySpan<char> value, [NotNullWhen( true )] out AppVersion? version ) => TryParse( value, CultureInfo.CurrentCulture, out version );
-    public static bool TryParse( ReadOnlySpan<char> value, IFormatProvider provider, [NotNullWhen( true )] out AppVersion? version )
+    public static bool TryParse( ReadOnlySpan<char> value, IFormatProvider? provider, [NotNullWhen( true )] out AppVersion? version )
     {
         if ( !value.IsEmpty )
         {
@@ -194,20 +199,9 @@ public sealed class AppVersion : IComparable,
         version = default;
         return false;
     }
-
-
-    /// <summary> </summary>
-    /// <param name="value"> </param>
-    /// <exception cref="FormatException"> </exception>
-    /// <exception cref="ArgumentNullException"> </exception>
-    /// <exception cref="OverflowException"> </exception>
-    /// <exception cref="ArgumentOutOfRangeException"> </exception>
-    /// <returns>
-    ///     <see cref="AppVersion"/>
-    /// </returns>
-    public static AppVersion Parse( ReadOnlySpan<char> value ) => Parse( value, CultureInfo.CurrentCulture );
-    public static AppVersion Parse( ReadOnlySpan<char> value, IFormatProvider provider ) => Parse( value, value, provider );
-    private static AppVersion Parse( ReadOnlySpan<char> value, in ReadOnlySpan<char> original, IFormatProvider provider )
+    public static AppVersion Parse( ReadOnlySpan<char> value ) => Parse( value,                            CultureInfo.CurrentCulture );
+    public static AppVersion Parse( ReadOnlySpan<char> value, IFormatProvider? provider ) => Parse( value, value, provider );
+    private static AppVersion Parse( ReadOnlySpan<char> value, in ReadOnlySpan<char> original, IFormatProvider? provider )
     {
         try
         {
@@ -245,6 +239,18 @@ public sealed class AppVersion : IComparable,
             return new AppVersion( result, flags );
         }
         catch ( Exception e ) { throw new ArgumentException( $"Cannot convert '{original.ToString()}' into {nameof(AppVersion)}", nameof(value), e ); }
+    }
+    public static AppVersion Parse( string s, IFormatProvider? provider ) => Parse( s.AsSpan() );
+    public static bool TryParse( string? s, IFormatProvider? provider, [NotNullWhen( true )] out AppVersion? result )
+    {
+        if ( string.IsNullOrEmpty( s ) )
+        {
+            result = default;
+            return false;
+        }
+
+        result = Parse( s, provider );
+        return true;
     }
 
 
@@ -469,8 +475,12 @@ public sealed class AppVersion : IComparable,
 
         AssertFormat( other );
 
-        bool result = Major.Equals( other.Major ) && Nullable.Compare( other.Minor, Minor ) == 0 && Nullable.Compare( other.Maintenance,   Maintenance ) >= 0 && Nullable.Compare( other.MajorRevision, MajorRevision ) >= 0 &&
-                      Nullable.Compare( other.MinorRevision,                        MinorRevision ) >= 0 && Nullable.Compare( other.Build, Build ) >= 0;
+        bool result = Major.Equals( other.Major ) &&
+                      Nullable.Compare( other.Minor,         Minor ) == 0 &&
+                      Nullable.Compare( other.Maintenance,   Maintenance ) >= 0 &&
+                      Nullable.Compare( other.MajorRevision, MajorRevision ) >= 0 &&
+                      Nullable.Compare( other.MinorRevision, MinorRevision ) >= 0 &&
+                      Nullable.Compare( other.Build,         Build ) >= 0;
 
         return result;
     }
@@ -482,8 +492,13 @@ public sealed class AppVersion : IComparable,
 
         AssertFormat( other );
 
-        return Major == other.Major && Nullable.Equals( Minor, other.Minor ) && Nullable.Equals( Maintenance, other.Maintenance ) && Nullable.Equals( MajorRevision, other.MajorRevision ) && Nullable.Equals( MinorRevision, other.MinorRevision ) &&
-               Nullable.Equals( Build,                         other.Build ) && Flags.Equals( other.Flags );
+        return Major == other.Major &&
+               Nullable.Equals( Minor,         other.Minor ) &&
+               Nullable.Equals( Maintenance,   other.Maintenance ) &&
+               Nullable.Equals( MajorRevision, other.MajorRevision ) &&
+               Nullable.Equals( MinorRevision, other.MinorRevision ) &&
+               Nullable.Equals( Build,         other.Build ) &&
+               Flags.Equals( other.Flags );
     }
     public override bool Equals( object? obj ) => obj is AppVersion version && Equals( version );
     public override int GetHashCode() => HashCode.Combine( Scheme, Major, Minor, Maintenance, MajorRevision, MinorRevision, Build, Flags );

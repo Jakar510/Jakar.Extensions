@@ -4,18 +4,31 @@
 namespace Jakar.Extensions;
 
 
-public readonly record struct AppVersionFlags( string Flag, uint Iteration ) : IEquatable<AppVersionFlags?>, IComparable<AppVersionFlags>, IComparable<AppVersionFlags?>, IComparable, IFormattable
+public readonly record struct AppVersionFlags( string Flag, uint Iteration ) : IEquatable<AppVersionFlags?>,
+                                                                               IComparable<AppVersionFlags>,
+                                                                               IComparable<AppVersionFlags?>,
+                                                                               IComparable,
+                                                                               IFormattable
+                                                                           #if NET7_0_OR_GREATER
+                                                                               ,
+                                                                               IParsable<AppVersionFlags>,
+                                                                               ISpanParsable<AppVersionFlags>
+#endif
 {
-    internal const char   SEPARATOR = '-';
-    private const  string STABLE    = "";
-    private const  string RC        = "rc";
     private const  string ALPHA     = "alpha";
     private const  string BETA      = "beta";
+    private const  string RC        = "rc";
+    internal const char   SEPARATOR = '-';
+    private const  string STABLE    = "";
 
 
-    internal int  Length     => Flag.Length + 15;
-    public   bool IsEmpty    => string.IsNullOrWhiteSpace( Flag );
-    public   bool IsNotEmpty => !IsEmpty;
+    public static AppVersionFlags Default    => Stable;
+    public static AppVersionFlags Stable     => new(STABLE, 0);
+    public        bool            IsEmpty    => string.IsNullOrWhiteSpace( Flag );
+    public        bool            IsNotEmpty => !IsEmpty;
+
+
+    internal int Length => Flag.Length + 15;
 
 
     public override string ToString() => AsSpan()
@@ -60,10 +73,6 @@ public readonly record struct AppVersionFlags( string Flag, uint Iteration ) : I
         span.WriteToDebug();
         return true;
     }
-
-
-    public static AppVersionFlags Default => Stable;
-    public static AppVersionFlags Stable  => new(STABLE, 0);
     public static AppVersionFlags ReleaseCandidate( uint iteration = 0 ) => new(RC, iteration);
     public static AppVersionFlags Alpha( uint            iteration = 0 ) => new(ALPHA, iteration);
     public static AppVersionFlags Beta( uint             iteration = 0 ) => new(BETA, iteration);
@@ -150,6 +159,28 @@ public readonly record struct AppVersionFlags( string Flag, uint Iteration ) : I
 
 
         return Stable;
+    }
+    public static AppVersionFlags Parse( string s, IFormatProvider? provider )
+    {
+        ReadOnlySpan<char> span = s;
+        return Parse( ref span );
+    }
+    public static bool TryParse( string? s, IFormatProvider? provider, out AppVersionFlags result )
+    {
+        if ( string.IsNullOrEmpty( s ) )
+        {
+            result = default;
+            return false;
+        }
+
+        result = Parse( s, provider );
+        return true;
+    }
+    public static AppVersionFlags Parse( ReadOnlySpan<char> s, IFormatProvider? provider ) => Parse( ref s );
+    public static bool TryParse( ReadOnlySpan<char> s, IFormatProvider? provider, out AppVersionFlags result )
+    {
+        result = Parse( s, provider );
+        return true;
     }
 
 
