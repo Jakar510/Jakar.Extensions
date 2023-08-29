@@ -177,11 +177,11 @@ public static partial class Spans
 
 
         Guard.IsInRangeFor( start, value, nameof(value) );
-        Join( value[..start], newValue, buffer, out int first );
+        Join( value[..start], newValue, ref buffer, out int first );
         ReadOnlySpan<T> temp = buffer[..first];
 
         Guard.IsInRangeFor( end, value, nameof(value) );
-        Join( temp, value[end..], buffer, out int second );
+        Join( temp, value[end..], ref buffer, out int second );
         charWritten = first + second;
     }
 
@@ -207,10 +207,10 @@ public static partial class Spans
         if ( !oldValue.EndsWith( endValue ) ) { end++; }
 
         Guard.IsInRangeFor( start, value, nameof(value) );
-        Join( value[..start], newValue, buffer, out int first );
+        Join( value[..start], newValue, ref buffer, out int first );
 
         Guard.IsInRangeFor( end, value, nameof(value) );
-        Join( buffer[..first], value[end..], buffer, out int second );
+        Join( buffer[..first], value[end..], ref buffer, out int second );
         charWritten = first + second;
     }
 

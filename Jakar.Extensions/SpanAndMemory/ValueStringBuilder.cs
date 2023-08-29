@@ -1,8 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 06/07/2022  3:25 PM
 
-#nullable enable
-
 
 namespace Jakar.Extensions;
 
@@ -52,6 +50,16 @@ public ref struct ValueStringBuilder
     public readonly Buffer<char>.Enumerator GetEnumerator() => _chars.GetEnumerator();
 
 
+    public void EnsureCapacity<T>( in ReadOnlySpan<char> format )
+    {
+        int capacity = Sizes.GetBufferSize<T>();
+
+        if ( typeof(T) == typeof(DateTime) ) { capacity            = Math.Max( format.Length, capacity ); }
+        else if ( typeof(T) == typeof(DateTimeOffset) ) { capacity = Math.Max( format.Length, capacity ); }
+        else if ( typeof(T) == typeof(TimeSpan) ) { capacity       = Math.Max( format.Length, capacity ); }
+
+        _chars.EnsureCapacity( capacity );
+    }
     public void EnsureCapacity( int capacity ) => _chars.EnsureCapacity( capacity );
 
 
@@ -375,7 +383,8 @@ public ref struct ValueStringBuilder
 
         while ( shouldContinue )
         {
-            AppendSpanFormattable( enumerator.Current, format, provider );
+            if ( enumerator.Current is not null ) { AppendSpanFormattable( enumerator.Current, format, provider ); }
+
             shouldContinue = enumerator.MoveNext();
 
             if ( shouldContinue ) { _chars.Append( separator ); }
@@ -394,7 +403,8 @@ public ref struct ValueStringBuilder
 
         while ( shouldContinue )
         {
-            AppendSpanFormattable( enumerator.Current, format, provider );
+            if ( enumerator.Current is not null ) { AppendSpanFormattable( enumerator.Current, format, provider ); }
+
             shouldContinue = enumerator.MoveNext();
 
             if ( shouldContinue ) { _chars.Append( separator ); }
@@ -409,20 +419,7 @@ public ref struct ValueStringBuilder
 #endif
     public ValueStringBuilder AppendSpanFormattable<T>( T value, in ReadOnlySpan<char> format, IFormatProvider? provider = default ) where T : ISpanFormattable
     {
-        if ( typeof(T) == typeof(DateTime) ) { EnsureCapacity( Math.Max( format.Length,            25 ) ); }
-        else if ( typeof(T) == typeof(DateTimeOffset) ) { EnsureCapacity( Math.Max( format.Length, 35 ) ); }
-        else if ( typeof(T) == typeof(TimeSpan) ) { EnsureCapacity( Math.Max( format.Length,       25 ) ); }
-        else if ( typeof(T) == typeof(short) ) { EnsureCapacity( 10 ); }
-        else if ( typeof(T) == typeof(ushort) ) { EnsureCapacity( 10 ); }
-        else if ( typeof(T) == typeof(int) ) { EnsureCapacity( 15 ); }
-        else if ( typeof(T) == typeof(uint) ) { EnsureCapacity( 15 ); }
-        else if ( typeof(T) == typeof(long) ) { EnsureCapacity( 30 ); }
-        else if ( typeof(T) == typeof(ulong) ) { EnsureCapacity( 30 ); }
-        else if ( typeof(T) == typeof(float) ) { EnsureCapacity( 40 ); }
-        else if ( typeof(T) == typeof(double) ) { EnsureCapacity( 75 ); }
-        else if ( typeof(T) == typeof(decimal) ) { EnsureCapacity( 100 ); }
-        else { EnsureCapacity( 500 ); } // Last resort guess...?
-
+        EnsureCapacity<T>( format );
 
         if ( value.TryFormat( Next, out int charsWritten, format, provider ) ) { _chars.Index += charsWritten; }
 

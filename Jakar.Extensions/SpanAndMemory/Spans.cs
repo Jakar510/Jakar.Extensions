@@ -76,7 +76,7 @@ public static partial class Spans
     {
         int     size   = value.Length + other.Length;
         Span<T> buffer = stackalloc T[size];
-        Join( value, other, buffer, out int charWritten );
+        Join( value, other, ref buffer, out int charWritten );
         return MemoryMarshal.CreateReadOnlySpan( ref buffer.GetPinnableReference(), charWritten );
     }
     [Pure] public static Span<T> AsSpan<T>( this ReadOnlySpan<T> span ) => MemoryMarshal.CreateSpan( ref MemoryMarshal.GetReference( span ), span.Length );
@@ -100,7 +100,7 @@ public static partial class Spans
     {
         int     size   = value.Length + other.Length;
         Span<T> buffer = stackalloc T[size];
-        Join( value, other, buffer, out int charWritten );
+        Join( value, other, ref buffer, out int charWritten );
         return MemoryMarshal.CreateSpan( ref buffer.GetPinnableReference(), charWritten );
     }
 
@@ -109,35 +109,53 @@ public static partial class Spans
     {
         int     size   = value.Length + other.Length;
         Span<T> buffer = stackalloc T[size];
-        Join( value, other, buffer, out int charWritten );
+        Join( value, other, ref buffer, out int charWritten );
         return MemoryMarshal.CreateSpan( ref buffer.GetPinnableReference(), charWritten );
     }
-
-
-    public static void CopyTo<T>( this ReadOnlySpan<T> value, Span<T> buffer ) where T : IEquatable<T>
-    {
-        Guard.IsInRangeFor( value.Length - 1, buffer, nameof(buffer) );
-
-        for ( int i = 0; i < value.Length; i++ ) { buffer[i] = value[i]; }
-    }
-
-    public static void CopyTo<T>( this ReadOnlySpan<T> value, Span<T> buffer, T defaultValue ) where T : IEquatable<T>
-    {
-        Guard.IsInRangeFor( value.Length - 1, buffer, nameof(buffer) );
-
-        for ( int i = 0; i < value.Length; i++ ) { buffer[i] = value[i]; }
-
-        for ( int i = value.Length; i < buffer.Length; i++ ) { buffer[i] = defaultValue; }
-    }
-
-
-    public static void Join<T>( ReadOnlySpan<T> first, ReadOnlySpan<T> last, Span<T> buffer, out int charWritten ) where T : IEquatable<T>
+    public static bool Join<T>( ReadOnlySpan<T> first, ReadOnlySpan<T> last, ref Span<T> buffer, out int charWritten )
     {
         charWritten = first.Length + last.Length;
         Guard.IsInRangeFor( charWritten - 1, buffer, nameof(buffer) );
+        return first.TryCopyTo( buffer[..first.Length] ) && last.TryCopyTo( buffer[first.Length..] );
+    }
 
-        for ( int i = 0; i < first.Length; i++ ) { buffer[i] = first[i]; }
 
-        for ( int i = 0; i < last.Length; i++ ) { buffer[i + first.Length] = last[i]; }
+    public static void CopyTo<T>( this ReadOnlySpan<T> value, ref Span<T> buffer )
+    {
+        Guard.IsInRangeFor( value.Length - 1, buffer, nameof(buffer) );
+        value.CopyTo( buffer );
+    }
+    public static void CopyTo<T>( this ReadOnlySpan<T> value, ref Span<T> buffer, T defaultValue )
+    {
+        Guard.IsInRangeFor( value.Length - 1, buffer, nameof(buffer) );
+        value.CopyTo( buffer );
+
+        buffer[value.Length..]
+           .Fill( defaultValue );
+
+        // for ( int i = value.Length; i < buffer.Length; i++ ) { buffer[i] = defaultValue; }
+    }
+
+
+    public static bool TryCopyTo<T>( this ReadOnlySpan<T> value, ref Span<T> buffer )
+    {
+        Guard.IsInRangeFor( value.Length - 1, buffer, nameof(buffer) );
+        return value.TryCopyTo( buffer );
+    }
+    public static bool TryCopyTo<T>( this ReadOnlySpan<T> value, ref Span<T> buffer, T defaultValue )
+    {
+        Guard.IsInRangeFor( value.Length - 1, buffer, nameof(buffer) );
+
+        if ( !value.TryCopyTo( buffer ) ) { return false; }
+
+        if ( buffer.Length > value.Length )
+        {
+            buffer[value.Length..]
+               .Fill( defaultValue );
+        }
+
+        return true;
     }
 }
+
+
