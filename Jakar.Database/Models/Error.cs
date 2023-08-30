@@ -5,7 +5,6 @@
 namespace Jakar.Database;
 
 
-
 public readonly record struct Error( Status Status, ProblemDetails? Details = default, ModelStateDictionary? State = default, object? Value = default, string[]? Errors = default )
 {
     public Error( Status status, object?              value ) : this( status, Value: value ) { }
@@ -33,5 +32,36 @@ public readonly record struct Error( Status Status, ProblemDetails? Details = de
 
 public static class ErrorExtensions
 {
-    public static ActionResult<T> Match<T>( this OneOf<T, Error> value ) => value.Match<ActionResult<T>>( x => x, x => x.ToActionResult() );
+    public static async Task<ActionResult<T>> Match<T>( this      Task<OneOf<T, Error>>      value ) => (await value).Match();
+    public static async ValueTask<ActionResult<T>> Match<T>( this ValueTask<OneOf<T, Error>> value ) => (await value).Match();
+    public static ActionResult<T> Match<T>( this                  OneOf<T, Error>            value ) => value.Match<ActionResult<T>>( x => x, x => x.ToActionResult() );
+    public static ActionResult Match( this                        OneOf<ActionResult, Error> value ) => value.Match<ActionResult>( x => x, x => x.ToActionResult() );
+
+
+    public static async Task<ActionResult<T>> Match<T>( this      Task<OneOf<T, List<T>, Error>>      value ) => (await value).Match();
+    public static async ValueTask<ActionResult<T>> Match<T>( this ValueTask<OneOf<T, List<T>, Error>> value ) => (await value).Match();
+    public static ActionResult Match<T>( this OneOf<T, List<T>, Error> value ) =>
+        value.Match( x => new ObjectResult( x )
+                          {
+                              StatusCode = (int)Status.Created
+                          },
+                     x => new ObjectResult( x )
+                          {
+                              StatusCode = (int)Status.Created
+                          },
+                     x => x.ToActionResult() );
+
+
+    public static async Task<ActionResult<T>> Match<T>( this      Task<OneOf<T, T[], Error>>      value ) => (await value).Match();
+    public static async ValueTask<ActionResult<T>> Match<T>( this ValueTask<OneOf<T, T[], Error>> value ) => (await value).Match();
+    public static ActionResult Match<T>( this OneOf<T, T[], Error> value ) =>
+        value.Match( x => new ObjectResult( x )
+                          {
+                              StatusCode = (int)Status.Created
+                          },
+                     x => new ObjectResult( x )
+                          {
+                              StatusCode = (int)Status.Created
+                          },
+                     x => x.ToActionResult() );
 }
