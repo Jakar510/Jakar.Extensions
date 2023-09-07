@@ -13,7 +13,7 @@ public interface IRecordPair : IUniqueID<Guid> // where TID : IComparable<TID>, 
 
 public interface ITableRecord<TRecord> : IRecordPair where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
-    public                 RecordID<TRecord>     ID           { get; }
+    public new             RecordID<TRecord>     ID           { get; }
     public                 RecordID<UserRecord>? CreatedBy    { get; }
     public                 DateTimeOffset?       LastModified { get; }
     public                 Guid?                 OwnerUserID  { get; }
