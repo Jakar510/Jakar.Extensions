@@ -10,7 +10,7 @@ namespace Jakar.Database;
 
 [Serializable]
 [Table( "Users" )]
-public sealed partial record UserRecord : TableRecord<UserRecord>, JsonModels.IJsonStringModel, IRefreshToken, IUserID, IUserDataRecord, IUserSubscription, UserRights.IRights
+public sealed partial record UserRecord : TableRecord<UserRecord>, IDbReaderMapping<UserRecord>, JsonModels.IJsonStringModel, IRefreshToken, IUserID, IUserDataRecord, IUserSubscription, UserRights.IRights
 {
     private static readonly PasswordHasher<UserRecord> _hasher = new();
 
@@ -50,6 +50,42 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, JsonModels.IJ
         UserName = userName;
         Rights   = rights;
         UpdatePassword( password );
+    }
+
+    public static UserRecord Create( DbDataReader reader )
+    {
+        return new UserRecord
+               {
+                   UserID                 = reader.GetFieldValue<Guid>( nameof(IsEmailConfirmed) ),
+                   UserName               = reader.GetString( nameof(UserName) ),
+                   FullName               = reader.GetString( nameof(FullName) ),
+                   FirstName              = reader.GetString( nameof(FirstName) ),
+                   LastName               = reader.GetString( nameof(LastName) ),
+                   Line1                  = reader.GetString( nameof(Line1) ),
+                   Line2                  = reader.GetString( nameof(Line2) ),
+                   City                   = reader.GetString( nameof(City) ),
+                   Country                = reader.GetString( nameof(Country) ),
+                   PostalCode             = reader.GetString( nameof(PostalCode) ),
+                   PhoneNumber            = reader.GetString( nameof(PhoneNumber) ),
+                   Address                = reader.GetString( nameof(Address) ),
+                   IsPhoneNumberConfirmed = reader.GetFieldValue<bool>( nameof(IsPhoneNumberConfirmed) ),
+                   Email                  = reader.GetString( nameof(Email) ),
+                   IsEmailConfirmed       = reader.GetFieldValue<bool>( nameof(IsEmailConfirmed) ),
+                   BadLogins              = reader.GetFieldValue<int>( nameof(BadLogins) ),
+                   LastBadAttempt         = reader.GetFieldValue<DateTimeOffset>( nameof(LastBadAttempt) ),
+                   Company                = reader.GetString( nameof(Company) ),
+                   Department             = reader.GetString( nameof(Department) ),
+                   Title                  = reader.GetString( nameof(Title) ),
+                   DateCreated            = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) ),
+                   LastModified           = reader.GetFieldValue<DateTimeOffset>( nameof(LastModified) ),
+                   OwnerUserID            = reader.GetFieldValue<Guid?>( nameof(OwnerUserID) ),
+                   CreatedBy              = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(CreatedBy) ) ),
+                   ID                     = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) ),
+               };
+    }
+    public static async IAsyncEnumerable<UserRecord> CreateAsync( DbDataReader reader, [EnumeratorCancellation] CancellationToken token = default )
+    {
+        while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
     }
 
 

@@ -6,7 +6,7 @@ namespace Jakar.Database;
 
 [Serializable]
 [Table( "UserLoginInfo" )]
-public sealed record UserLoginInfoRecord : TableRecord<UserLoginInfoRecord>
+public sealed record UserLoginInfoRecord : TableRecord<UserLoginInfoRecord>, IDbReaderMapping<UserLoginInfoRecord>
 {
     private string  _loginProvider = string.Empty;
     private string  _providerKey   = string.Empty;
@@ -51,6 +51,27 @@ public sealed record UserLoginInfoRecord : TableRecord<UserLoginInfoRecord>
         LoginProvider       = loginProvider;
         ProviderKey         = providerKey;
         ProviderDisplayName = providerDisplayName;
+    }
+
+
+    public static UserLoginInfoRecord Create( DbDataReader reader )
+    {
+        return new UserLoginInfoRecord
+               {
+                   LoginProvider       = reader.GetString( nameof(LoginProvider) ),
+                   ProviderDisplayName = reader.GetString( nameof(ProviderDisplayName) ),
+                   ProviderKey         = reader.GetString( nameof(ProviderKey) ),
+                   Value               = reader.GetString( nameof(Value) ),
+                   DateCreated         = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) ),
+                   LastModified        = reader.GetFieldValue<DateTimeOffset>( nameof(LastModified) ),
+                   OwnerUserID         = reader.GetFieldValue<Guid>( nameof(OwnerUserID) ),
+                   CreatedBy           = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(CreatedBy) ) ),
+                   ID                  = new RecordID<UserLoginInfoRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) ),
+               };
+    }
+    public static async IAsyncEnumerable<UserLoginInfoRecord> CreateAsync( DbDataReader reader, [EnumeratorCancellation] CancellationToken token = default )
+    {
+        while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
     }
 
 

@@ -11,51 +11,35 @@ public interface IRecordPair : IUniqueID<Guid> // where TID : IComparable<TID>, 
 
 
 
-public interface ITableRecord : IRecordPair
+public interface ITableRecord<TRecord> : IRecordPair where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
-    public RecordID<UserRecord>? CreatedBy    { get; }
-    public DateTimeOffset?       LastModified { get; }
-    public Guid?                 OwnerUserID  { get; }
+    public                 RecordID<TRecord>     ID           { get; }
+    public                 RecordID<UserRecord>? CreatedBy    { get; }
+    public                 DateTimeOffset?       LastModified { get; }
+    public                 Guid?                 OwnerUserID  { get; }
+    public abstract static string                TableName    { get; }
+    Guid IUniqueID<Guid>.                        ID           => ID.Value;
 }
 
 
 
-public interface IDbReaderMapping<out T> where T : TableRecord<T>
+public interface IDbReaderMapping<out TRecord> where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
-    public abstract static T Create( DbDataReader                        reader );
-    public abstract static IAsyncEnumerable<T> CreateAsync( DbDataReader reader, [EnumeratorCancellation] CancellationToken token = default );
+    public abstract static TRecord Create( DbDataReader                        reader );
+    public abstract static IAsyncEnumerable<TRecord> CreateAsync( DbDataReader reader, [EnumeratorCancellation] CancellationToken token = default );
 }
 
 
 
 [Serializable]
-public abstract record TableRecord<TRecord> : ObservableRecord<TRecord>, ITableRecord where TRecord : TableRecord<TRecord>
+public abstract record TableRecord<TRecord>( [property: Key] RecordID<TRecord> ID, RecordID<UserRecord>? CreatedBy, Guid? OwnerUserID, DateTimeOffset DateCreated, DateTimeOffset? LastModified ) : ITableRecord<TRecord>
+    where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
-    private DateTimeOffset? _lastModified;
+    public static string TableName { get; } = typeof(TRecord).GetTableName();
 
 
-    public static string                TableName   { get; } = typeof(TRecord).GetTableName();
-    public        RecordID<UserRecord>? CreatedBy   { get; init; }
-    public        DateTimeOffset        DateCreated { get; init; }
-    [Key] public  RecordID<TRecord>     ID          { get; init; }
-    public DateTimeOffset? LastModified
-    {
-        get => _lastModified;
-        set => SetProperty( ref _lastModified, value );
-    }
-    public Guid?         OwnerUserID { get; init; }
-    Guid IUniqueID<Guid>.ID          => ID.Value;
-
-
-    protected TableRecord() : base() { }
-    protected TableRecord( UserRecord? owner ) : this( RecordID<TRecord>.New(), owner ) { }
-    protected TableRecord( RecordID<TRecord> id, UserRecord? owner = default )
-    {
-        ID          = id;
-        CreatedBy   = owner?.ID;
-        OwnerUserID = owner?.UserID;
-        DateCreated = DateTimeOffset.UtcNow;
-    }
+    protected TableRecord( UserRecord?       owner ) : this( RecordID<TRecord>.New(), owner ) { }
+    protected TableRecord( RecordID<TRecord> id, UserRecord? owner = default ) : this( id, owner?.ID, owner?.UserID, DateTimeOffset.UtcNow, default ) { }
 
 
     public static DynamicParameters GetDynamicParameters( UserRecord user )
@@ -93,13 +77,13 @@ public abstract record TableRecord<TRecord> : ObservableRecord<TRecord>, ITableR
     public bool DoesNotOwn( UserRecord record ) => record.CreatedBy != record.ID;
 
 
-    public override int CompareTo( TRecord? other )
+    public virtual int CompareTo( TRecord? other )
     {
         if ( other is null ) { return 1; }
 
         if ( ReferenceEquals( this, other ) ) { return 0; }
 
-        int lastModifiedComparison = Nullable.Compare( _lastModified, other._lastModified );
+        int lastModifiedComparison = Nullable.Compare( LastModified, other.LastModified );
         if ( lastModifiedComparison != 0 ) { return lastModifiedComparison; }
 
         int createdByComparison = Nullable.Compare( CreatedBy, other.CreatedBy );
@@ -110,13 +94,4 @@ public abstract record TableRecord<TRecord> : ObservableRecord<TRecord>, ITableR
 
         return DateCreated.CompareTo( other.DateCreated );
     }
-    public override bool Equals( TRecord? other )
-    {
-        if ( other is null ) { return false; }
-
-        if ( ReferenceEquals( this, other ) ) { return true; }
-
-        return ID == other.ID && CreatedBy == other.CreatedBy && OwnerUserID.Equals( other.OwnerUserID ) && DateCreated.Equals( other.DateCreated );
-    }
-    public override int GetHashCode() => HashCode.Combine( CreatedBy, LastModified, OwnerUserID, DateCreated );
 }

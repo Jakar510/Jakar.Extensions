@@ -9,7 +9,7 @@ namespace Jakar.Database;
 
 
 [SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
-public partial class DbTable<TRecord> : ObservableClass, IConnectableDb, IAsyncDisposable where TRecord : TableRecord<TRecord>
+public partial class DbTable<TRecord> : ObservableClass, IConnectableDb, IAsyncDisposable where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
     protected readonly IConnectableDb                 _database;
     protected readonly TypePropertiesCache.Properties _propertiesCache;

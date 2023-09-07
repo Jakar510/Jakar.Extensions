@@ -6,7 +6,7 @@ namespace Jakar.Database;
 
 [Serializable]
 [Table( "Roles" )]
-public sealed record RoleRecord : TableRecord<RoleRecord>, UserRights.IRights
+public sealed record RoleRecord : TableRecord<RoleRecord>, IDbReaderMapping<RoleRecord>, UserRights.IRights
 {
     private string _rights = string.Empty;
 
@@ -59,7 +59,7 @@ public sealed record RoleRecord : TableRecord<RoleRecord>, UserRights.IRights
     }
     public static async IAsyncEnumerable<RoleRecord> CreateAsync( DbDataReader reader, [EnumeratorCancellation] CancellationToken token = default )
     {
-        do { yield return Create( reader ); } while ( await reader.ReadAsync( token ) );
+        while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
     }
 
 
