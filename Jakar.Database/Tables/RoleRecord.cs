@@ -43,6 +43,26 @@ public sealed record RoleRecord : TableRecord<RoleRecord>, UserRights.IRights
     }
 
 
+    public static RoleRecord Create( DbDataReader reader )
+    {
+        return new RoleRecord
+               {
+                   Rights           = reader.GetString( nameof(Rights) ),
+                   NormalizedName   = reader.GetString( nameof(NormalizedName) ),
+                   ConcurrencyStamp = reader.GetString( nameof(ConcurrencyStamp) ),
+                   DateCreated      = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) ),
+                   LastModified     = reader.GetFieldValue<DateTimeOffset>( nameof(LastModified) ),
+                   OwnerUserID      = reader.GetFieldValue<Guid>( nameof(OwnerUserID) ),
+                   CreatedBy        = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(CreatedBy) ) ),
+                   ID               = new RecordID<RoleRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) ),
+               };
+    }
+    public static async IAsyncEnumerable<RoleRecord> CreateAsync( DbDataReader reader, [EnumeratorCancellation] CancellationToken token = default )
+    {
+        do { yield return Create( reader ); } while ( await reader.ReadAsync( token ) );
+    }
+
+
     public IdentityRole ToIdentityRole() => new()
                                             {
                                                 Name             = Name,

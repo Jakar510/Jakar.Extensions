@@ -20,6 +20,14 @@ public interface ITableRecord : IRecordPair
 
 
 
+public interface IDbReaderMapping<out T> where T : TableRecord<T>
+{
+    public abstract static T Create( DbDataReader                        reader );
+    public abstract static IAsyncEnumerable<T> CreateAsync( DbDataReader reader, [EnumeratorCancellation] CancellationToken token = default );
+}
+
+
+
 [Serializable]
 public abstract record TableRecord<TRecord> : ObservableRecord<TRecord>, ITableRecord where TRecord : TableRecord<TRecord>
 {

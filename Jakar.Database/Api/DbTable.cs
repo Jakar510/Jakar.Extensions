@@ -158,7 +158,8 @@ public partial class DbTable<TRecord> : ObservableClass, IConnectableDb, IAsyncD
     {
         try
         {
-            await using DbDataReader reader = await connection.ExecuteReaderAsync( sql, parameters, transaction );
+            CommandDefinition command = GetCommandDefinition( sql, parameters, transaction, token );
+            await using DbDataReader reader = await connection.ExecuteReaderAsync( command );
             return await func( reader, token );
         }
         catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
