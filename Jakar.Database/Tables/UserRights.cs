@@ -12,7 +12,7 @@ public struct UserRights : IEnumerator<(int Index, bool Value)>, IEnumerable<(in
 {
     public interface IRights
     {
-        [MaxLength( TokenValidationParameters.DefaultMaximumTokenSizeInBytes )] public string Rights { get; set; }
+        [MaxLength( TokenValidationParameters.DefaultMaximumTokenSizeInBytes )] public string Rights { get; }
     }
 
 
@@ -25,10 +25,10 @@ public struct UserRights : IEnumerator<(int Index, bool Value)>, IEnumerable<(in
     private                 int                _index = 0;
 
 
-    public int                     Length  => _rights.Length;
-    public (int Index, bool Value) Current => (_index, Has( _index ));
-    object IEnumerator.            Current => Current;
-    internal Span<byte>            Span    => _rights.Span;
+    public readonly int                     Length  => _rights.Length;
+    public          (int Index, bool Value) Current => (_index, Has( _index ));
+    object IEnumerator.                     Current => Current;
+    internal readonly Span<byte>            Span    => _rights.Span;
 
 
     public UserRights( int length )
