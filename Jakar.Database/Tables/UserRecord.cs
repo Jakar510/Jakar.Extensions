@@ -83,10 +83,6 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, IDbReaderMapp
                    ID                     = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) ),
                };
     }
-    public static async IAsyncEnumerable<UserRecord> CreateAsync( DbDataReader reader, [EnumeratorCancellation] CancellationToken token = default )
-    {
-        while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
-    }
 
 
     public static UserRecord Create<TUser>( VerifyRequest<TUser> request, string rights, UserRecord? caller = default ) where TUser : IUserData

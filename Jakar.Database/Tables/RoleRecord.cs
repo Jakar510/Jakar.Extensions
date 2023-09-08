@@ -31,7 +31,6 @@ public sealed record RoleRecord( [property: MaxLength( 1024 )]                  
                                                                                                                            caller?.UserID,
                                                                                                                            DateTimeOffset.UtcNow,
                                                                                                                            default ) { }
-
     public RoleRecord( string name, string normalizedName, string concurrencyStamp, in UserRights rights, UserRecord? caller = default ) : this( name,
                                                                                                                                                  normalizedName,
                                                                                                                                                  concurrencyStamp,
@@ -42,7 +41,7 @@ public sealed record RoleRecord( [property: MaxLength( 1024 )]                  
                                                                                                                                                  DateTimeOffset.UtcNow,
                                                                                                                                                  default ) { }
 
-
+    // [DbReaderMapping]
     public static RoleRecord Create( DbDataReader reader )
     {
         string               rights           = reader.GetString( nameof(Rights) );

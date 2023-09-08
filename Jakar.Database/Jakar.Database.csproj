@@ -9,6 +9,8 @@
 		<EnablePreviewFeatures>true</EnablePreviewFeatures>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<OpenApiGenerateDocuments>false</OpenApiGenerateDocuments>
+		<EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
 		<Version>6.3.0</Version>
 		<PackageId>Jakar.Database</PackageId>
 		<Company></Company>

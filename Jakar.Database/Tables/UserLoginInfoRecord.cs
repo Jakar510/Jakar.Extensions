@@ -44,7 +44,6 @@ public sealed record UserLoginInfoRecord : TableRecord<UserLoginInfoRecord>, IDb
     }
 
 
-    public UserLoginInfoRecord() { }
     public UserLoginInfoRecord( UserRecord user, UserLoginInfo info ) : this( user, info.LoginProvider, info.ProviderKey, info.ProviderDisplayName ) { }
     public UserLoginInfoRecord( UserRecord user, string loginProvider, string providerKey, string? providerDisplayName ) : base( user )
     {
@@ -68,10 +67,6 @@ public sealed record UserLoginInfoRecord : TableRecord<UserLoginInfoRecord>, IDb
                    CreatedBy           = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(CreatedBy) ) ),
                    ID                  = new RecordID<UserLoginInfoRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) ),
                };
-    }
-    public static async IAsyncEnumerable<UserLoginInfoRecord> CreateAsync( DbDataReader reader, [EnumeratorCancellation] CancellationToken token = default )
-    {
-        while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
     }
 
 

@@ -223,7 +223,7 @@ public static class StringExtensions
         if ( string.IsNullOrWhiteSpace( value ) ) { return value; }
 
 
-        var              builder          = new StringBuilder( value.Length + Math.Max( 2, value.Length / 5 ) );
+        using var        builder          = new ValueStringBuilder( value.Length + Math.Max( 2, value.Length / 5 ) );
         UnicodeCategory? previousCategory = default;
 
         for ( int currentIndex = 0; currentIndex < value.Length; currentIndex++ )
@@ -250,8 +250,8 @@ public static class StringExtensions
             {
                 case UnicodeCategory.UppercaseLetter:
                 case UnicodeCategory.TitlecaseLetter:
-                    if ( previousCategory is UnicodeCategory.SpaceSeparator or UnicodeCategory.LowercaseLetter || previousCategory is not UnicodeCategory.DecimalDigitNumber && previousCategory is not null && currentIndex > 0 &&
-                         currentIndex + 1 < value.Length && char.IsLower( value[currentIndex + 1] ) ) { builder.Append( '_' ); }
+                    if ( previousCategory is UnicodeCategory.SpaceSeparator or UnicodeCategory.LowercaseLetter ||
+                         previousCategory is not UnicodeCategory.DecimalDigitNumber && previousCategory is not null && currentIndex > 0 && currentIndex + 1 < value.Length && char.IsLower( value[currentIndex + 1] ) ) { builder.Append( '_' ); }
 
                     currentChar = char.ToLower( currentChar, cultureInfo );
                     break;

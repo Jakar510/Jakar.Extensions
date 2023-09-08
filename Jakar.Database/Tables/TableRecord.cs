@@ -11,6 +11,14 @@ public interface IRecordPair : IUniqueID<Guid> // where TID : IComparable<TID>, 
 
 
 
+public interface IDbReaderMapping<out TRecord> where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>
+{
+    public abstract static TRecord Create( DbDataReader                        reader );
+    public abstract static IAsyncEnumerable<TRecord> CreateAsync( DbDataReader reader, [EnumeratorCancellation] CancellationToken token = default );
+}
+
+
+
 public interface ITableRecord<TRecord> : IRecordPair where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
     public new             RecordID<TRecord>     ID           { get; }
@@ -19,14 +27,6 @@ public interface ITableRecord<TRecord> : IRecordPair where TRecord : TableRecord
     public                 Guid?                 OwnerUserID  { get; }
     public abstract static string                TableName    { get; }
     Guid IUniqueID<Guid>.                        ID           => ID.Value;
-}
-
-
-
-public interface IDbReaderMapping<out TRecord> where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>
-{
-    public abstract static TRecord Create( DbDataReader                        reader );
-    public abstract static IAsyncEnumerable<TRecord> CreateAsync( DbDataReader reader, [EnumeratorCancellation] CancellationToken token = default );
 }
 
 
@@ -40,6 +40,7 @@ public abstract record TableRecord<TRecord>( [property: Key] RecordID<TRecord> I
 
     protected TableRecord( UserRecord?       owner ) : this( RecordID<TRecord>.New(), owner ) { }
     protected TableRecord( RecordID<TRecord> id, UserRecord? owner = default ) : this( id, owner?.ID, owner?.UserID, DateTimeOffset.UtcNow, default ) { }
+
 
 
     public static DynamicParameters GetDynamicParameters( UserRecord user )
