@@ -11,15 +11,15 @@ public interface IRecordPair : IUniqueID<Guid> // where TID : IComparable<TID>, 
 
 
 
-public interface IDbReaderMapping<out TRecord> where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>
+public interface IDbReaderMapping<out TRecord> where TRecord : IDbReaderMapping<TRecord>
 {
     public abstract static TRecord Create( DbDataReader                        reader );
-    public abstract static IAsyncEnumerable<TRecord> CreateAsync( DbDataReader reader, [EnumeratorCancellation] CancellationToken token = default );
+    public abstract static IAsyncEnumerable<TRecord> CreateAsync( DbDataReader reader, [ EnumeratorCancellation ] CancellationToken token = default );
 }
 
 
 
-public interface ITableRecord<TRecord> : IRecordPair where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>
+public interface ITableRecord<TRecord> : IRecordPair where TRecord : TableRecord<TRecord>
 {
     public new             RecordID<TRecord>     ID           { get; }
     public                 RecordID<UserRecord>? CreatedBy    { get; }
@@ -31,15 +31,15 @@ public interface ITableRecord<TRecord> : IRecordPair where TRecord : TableRecord
 
 
 
-[Serializable]
-public abstract record TableRecord<TRecord>( [property: Key] RecordID<TRecord> ID, RecordID<UserRecord>? CreatedBy, Guid? OwnerUserID, DateTimeOffset DateCreated, DateTimeOffset? LastModified ) : ITableRecord<TRecord>, IComparable<TRecord>
-    where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>
+[ Serializable ]
+public abstract record TableRecord<TRecord>( [ property: Key ] RecordID<TRecord> ID, RecordID<UserRecord>? CreatedBy, Guid? OwnerUserID, DateTimeOffset DateCreated, DateTimeOffset? LastModified ) : ITableRecord<TRecord>, IComparable<TRecord>
+    where TRecord : TableRecord<TRecord>
 {
     public static string TableName { get; } = typeof(TRecord).GetTableName();
 
 
     protected TableRecord( UserRecord?       owner ) : this( RecordID<TRecord>.New(), owner ) { }
-    protected TableRecord( RecordID<TRecord> id, UserRecord? owner = default ) : this( id, owner?.ID, owner?.UserID, DateTimeOffset.UtcNow, default ) { }
+    protected TableRecord( RecordID<TRecord> id, UserRecord? owner = default ) : this( id, owner?.ID, owner?.UserID, DateTimeOffset.UtcNow, null ) { }
 
 
     public static DynamicParameters GetDynamicParameters( UserRecord user )

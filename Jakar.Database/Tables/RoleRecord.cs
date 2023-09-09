@@ -1,8 +1,7 @@
 ﻿namespace Jakar.Database;
 
 
-[Serializable]
-[Table( "Roles" )]
+[Serializable,Table( "Roles" )]
 public sealed record RoleRecord( [property: MaxLength( 1024 )]                                                     string Name,
                                  [property: MaxLength( 1024 )]                                                     string NormalizedName,
                                  [property: MaxLength( 4096 )]                                                     string ConcurrencyStamp,
@@ -11,17 +10,13 @@ public sealed record RoleRecord( [property: MaxLength( 1024 )]                  
                                  RecordID<UserRecord>?                                                                    CreatedBy,
                                  Guid?                                                                                    OwnerUserID,
                                  DateTimeOffset                                                                           DateCreated,
-                                 DateTimeOffset?                                                                          LastModified
+                                 DateTimeOffset?                                                                          LastModified = default
 ) : TableRecord<RoleRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<RoleRecord>, UserRights.IRights
 {
     public RoleRecord( IdentityRole role, UserRecord?   caller                     = default ) : this( role.Name ?? string.Empty, role.NormalizedName ?? string.Empty, role.ConcurrencyStamp ?? string.Empty, caller ) { }
     public RoleRecord( IdentityRole role, in UserRights rights, UserRecord? caller = default ) : this( role.Name ?? string.Empty, role.NormalizedName ?? string.Empty, role.ConcurrencyStamp ?? string.Empty, rights, caller ) { }
-    public RoleRecord( string name, UserRecord? caller = default ) : this( name, name, caller )
-    {
-        Name           = name;
-        NormalizedName = name;
-    }
-    public RoleRecord( string name, string normalizedName, UserRecord? caller = default ) : this( name, normalizedName, string.Empty, string.Empty, RecordID<RoleRecord>.New(), caller?.ID, caller?.UserID, DateTimeOffset.UtcNow, default ) { }
+    public RoleRecord( string       name, UserRecord?   caller                             = default ) : this( name, name, caller ) { }
+    public RoleRecord( string       name, string        normalizedName, UserRecord? caller = default ) : this( name, normalizedName, string.Empty, string.Empty, RecordID<RoleRecord>.New(), caller?.ID, caller?.UserID, DateTimeOffset.UtcNow ) { }
     public RoleRecord( string name, string normalizedName, string concurrencyStamp, UserRecord? caller = default ) : this( name,
                                                                                                                            normalizedName,
                                                                                                                            concurrencyStamp,
@@ -29,8 +24,7 @@ public sealed record RoleRecord( [property: MaxLength( 1024 )]                  
                                                                                                                            RecordID<RoleRecord>.New(),
                                                                                                                            caller?.ID,
                                                                                                                            caller?.UserID,
-                                                                                                                           DateTimeOffset.UtcNow,
-                                                                                                                           default ) { }
+                                                                                                                           DateTimeOffset.UtcNow ) { }
     public RoleRecord( string name, string normalizedName, string concurrencyStamp, in UserRights rights, UserRecord? caller = default ) : this( name,
                                                                                                                                                  normalizedName,
                                                                                                                                                  concurrencyStamp,
@@ -40,6 +34,7 @@ public sealed record RoleRecord( [property: MaxLength( 1024 )]                  
                                                                                                                                                  caller?.UserID,
                                                                                                                                                  DateTimeOffset.UtcNow,
                                                                                                                                                  default ) { }
+
 
     // [DbReaderMapping]
     public static RoleRecord Create( DbDataReader reader )

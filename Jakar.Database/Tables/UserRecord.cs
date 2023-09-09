@@ -8,15 +8,21 @@ using Microsoft.AspNetCore.Http;
 namespace Jakar.Database;
 
 
-[Serializable]
-[Table( "Users" )]
-public sealed partial record UserRecord : TableRecord<UserRecord>, IDbReaderMapping<UserRecord>, JsonModels.IJsonStringModel, IRefreshToken, IUserID, IUserDataRecord, IUserSubscription, UserRights.IRights
+[ Serializable, Table( "Users" ) ]
+public sealed partial record UserRecord( RecordID<UserRecord> ID, RecordID<UserRecord>? CreatedBy, Guid? OwnerUserID, DateTimeOffset DateCreated, DateTimeOffset? LastModified = default ) :
+    TableRecord<UserRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ),
+    IDbReaderMapping<UserRecord>,
+    JsonModels.IJsonStringModel,
+    IRefreshToken,
+    IUserID,
+    IUserDataRecord,
+    IUserSubscription,
+    UserRights.IRights
 {
     private static readonly PasswordHasher<UserRecord> _hasher = new();
 
 
-    public UserRecord() { }
-    public UserRecord( IUserData data, string? rights, UserRecord? caller = default ) : base( caller )
+    public UserRecord( IUserData data, string? rights, UserRecord? caller = default ) : this( caller )
     {
         ArgumentNullException.ThrowIfNull( data );
         FirstName         = data.FirstName;
@@ -41,8 +47,8 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, IDbReaderMapp
         Rights            = rights ?? string.Empty;
         UserID            = Guid.NewGuid();
     }
-    public UserRecord( Guid id, UserRecord? caller = default ) : base( new RecordID<UserRecord>( id ), caller ) => UserID = Guid.NewGuid();
-    public UserRecord( string userName, string password, string rights, UserRecord? caller = default ) : base( caller )
+    public UserRecord( Guid id, UserRecord? caller = default ) : this( new RecordID<UserRecord>( id ), caller ) => UserID = Guid.NewGuid();
+    public UserRecord( string userName, string password, string rights, UserRecord? caller = default ) : this( caller )
     {
         ArgumentNullException.ThrowIfNull( userName );
         ArgumentNullException.ThrowIfNull( password );
@@ -52,36 +58,40 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, IDbReaderMapp
         UpdatePassword( password );
     }
 
+
+    // [DbReaderMapping]
     public static UserRecord Create( DbDataReader reader )
     {
-        return new UserRecord
-               {
-                   UserID                 = reader.GetFieldValue<Guid>( nameof(IsEmailConfirmed) ),
-                   UserName               = reader.GetString( nameof(UserName) ),
-                   FullName               = reader.GetString( nameof(FullName) ),
-                   FirstName              = reader.GetString( nameof(FirstName) ),
-                   LastName               = reader.GetString( nameof(LastName) ),
-                   Line1                  = reader.GetString( nameof(Line1) ),
-                   Line2                  = reader.GetString( nameof(Line2) ),
-                   City                   = reader.GetString( nameof(City) ),
-                   Country                = reader.GetString( nameof(Country) ),
-                   PostalCode             = reader.GetString( nameof(PostalCode) ),
-                   PhoneNumber            = reader.GetString( nameof(PhoneNumber) ),
-                   Address                = reader.GetString( nameof(Address) ),
-                   IsPhoneNumberConfirmed = reader.GetFieldValue<bool>( nameof(IsPhoneNumberConfirmed) ),
-                   Email                  = reader.GetString( nameof(Email) ),
-                   IsEmailConfirmed       = reader.GetFieldValue<bool>( nameof(IsEmailConfirmed) ),
-                   BadLogins              = reader.GetFieldValue<int>( nameof(BadLogins) ),
-                   LastBadAttempt         = reader.GetFieldValue<DateTimeOffset>( nameof(LastBadAttempt) ),
-                   Company                = reader.GetString( nameof(Company) ),
-                   Department             = reader.GetString( nameof(Department) ),
-                   Title                  = reader.GetString( nameof(Title) ),
-                   DateCreated            = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) ),
-                   LastModified           = reader.GetFieldValue<DateTimeOffset>( nameof(LastModified) ),
-                   OwnerUserID            = reader.GetFieldValue<Guid?>( nameof(OwnerUserID) ),
-                   CreatedBy              = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(CreatedBy) ) ),
-                   ID                     = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) ),
-               };
+        var userID                 = reader.GetFieldValue<Guid>( nameof(IsEmailConfirmed) );
+        var userName               = reader.GetString( nameof(UserName) );
+        var fullName               = reader.GetString( nameof(FullName) );
+        var firstName              = reader.GetString( nameof(FirstName) );
+        var lastName               = reader.GetString( nameof(LastName) );
+        var line1                  = reader.GetString( nameof(Line1) );
+        var line2                  = reader.GetString( nameof(Line2) );
+        var city                   = reader.GetString( nameof(City) );
+        var country                = reader.GetString( nameof(Country) );
+        var postalCode             = reader.GetString( nameof(PostalCode) );
+        var phoneNumber            = reader.GetString( nameof(PhoneNumber) );
+        var address                = reader.GetString( nameof(Address) );
+        var isPhoneNumberConfirmed = reader.GetFieldValue<bool>( nameof(IsPhoneNumberConfirmed) );
+        var email                  = reader.GetString( nameof(Email) );
+        var isEmailConfirmed       = reader.GetFieldValue<bool>( nameof(IsEmailConfirmed) );
+        var badLogins              = reader.GetFieldValue<int>( nameof(BadLogins) );
+        var lastBadAttempt         = reader.GetFieldValue<DateTimeOffset>( nameof(LastBadAttempt) );
+        var company                = reader.GetString( nameof(Company) );
+        var department             = reader.GetString( nameof(Department) );
+        var title                  = reader.GetString( nameof(Title) );
+        var dateCreated            = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
+        var lastModified           = reader.GetFieldValue<DateTimeOffset>( nameof(LastModified) );
+        var ownerUserID            = reader.GetFieldValue<Guid?>( nameof(OwnerUserID) );
+        var createdBy              = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(CreatedBy) ) );
+        var id                     = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) );
+        return new UserRecord( id, createdBy, ownerUserID, dateCreated, lastModified );
+    }
+    public static async IAsyncEnumerable<UserRecord> CreateAsync( DbDataReader reader, [ EnumeratorCancellation ] CancellationToken token = default )
+    {
+        while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
     }
 
 
@@ -89,7 +99,6 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, IDbReaderMapp
 
     {
         ArgumentNullException.ThrowIfNull( request.Data );
-
         UserRecord record = Create( request.Data, rights, caller );
         record.UserName = request.UserLogin;
         record.UpdatePassword( request.UserPassword );
@@ -131,8 +140,8 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, IDbReaderMapp
     }
 
 
-    [RequiresPreviewFeatures] public ValueTask<bool> RedeemCode( Database db, string code, CancellationToken token ) => db.TryCall( RedeemCode, db, code, token );
-    [RequiresPreviewFeatures]
+    [ RequiresPreviewFeatures ] public ValueTask<bool> RedeemCode( Database db, string code, CancellationToken token ) => db.TryCall( RedeemCode, db, code, token );
+    [ RequiresPreviewFeatures ]
     public async ValueTask<bool> RedeemCode( DbConnection connection, DbTransaction transaction, Database db, string code, CancellationToken token )
     {
         IEnumerable<UserRecoveryCodeRecord> mappings = await UserRecoveryCodeRecord.Where( connection, transaction, db.UserRecoveryCodes, this, token );
@@ -154,8 +163,8 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, IDbReaderMapp
     }
 
 
-    [RequiresPreviewFeatures] public ValueTask<string[]> ReplaceCodes( Database db, int count = 10, CancellationToken token = default ) => db.TryCall( ReplaceCodes, db, count, token );
-    [RequiresPreviewFeatures]
+    [ RequiresPreviewFeatures ] public ValueTask<string[]> ReplaceCodes( Database db, int count = 10, CancellationToken token = default ) => db.TryCall( ReplaceCodes, db, count, token );
+    [ RequiresPreviewFeatures ]
     public async ValueTask<string[]> ReplaceCodes( DbConnection connection, DbTransaction transaction, Database db, int count = 10, CancellationToken token = default )
     {
         IEnumerable<RecoveryCodeRecord>                 old        = await Codes( connection, transaction, db, token );
@@ -169,8 +178,8 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, IDbReaderMapp
     }
 
 
-    [RequiresPreviewFeatures] public ValueTask<string[]> ReplaceCodes( Database db, IEnumerable<string> recoveryCodes, CancellationToken token = default ) => db.TryCall( ReplaceCodes, db, recoveryCodes, token );
-    [RequiresPreviewFeatures]
+    [ RequiresPreviewFeatures ] public ValueTask<string[]> ReplaceCodes( Database db, IEnumerable<string> recoveryCodes, CancellationToken token = default ) => db.TryCall( ReplaceCodes, db, recoveryCodes, token );
+    [ RequiresPreviewFeatures ]
     public async ValueTask<string[]> ReplaceCodes( DbConnection connection, DbTransaction transaction, Database db, IEnumerable<string> recoveryCodes, CancellationToken token = default )
     {
         IEnumerable<RecoveryCodeRecord>                 old        = await Codes( connection, transaction, db, token );
@@ -184,8 +193,8 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, IDbReaderMapp
     }
 
 
-    [RequiresPreviewFeatures] public ValueTask<IEnumerable<RecoveryCodeRecord>> Codes( Database db, CancellationToken token ) => db.TryCall( Codes, db, token );
-    [RequiresPreviewFeatures]
+    [ RequiresPreviewFeatures ] public ValueTask<IEnumerable<RecoveryCodeRecord>> Codes( Database db, CancellationToken token ) => db.TryCall( Codes, db, token );
+    [ RequiresPreviewFeatures ]
     public async ValueTask<IEnumerable<RecoveryCodeRecord>> Codes( DbConnection connection, DbTransaction transaction, Database db, CancellationToken token ) =>
         await UserRecoveryCodeRecord.Where( connection, transaction, db.UserRecoveryCodes, db.RecoveryCodes, this, token );
 
@@ -196,7 +205,7 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, IDbReaderMapp
         SubscriptionID      = record.SubscriptionID;
         return this;
     }
-    public async ValueTask<TRecord?> GetSubscription<TRecord>( DbConnection connection, DbTransaction transaction, DbTable<TRecord> table, CancellationToken token ) where TRecord : TableRecord<TRecord>, IUserSubscription =>
+    public async ValueTask<TRecord?> GetSubscription<TRecord>( DbConnection connection, DbTransaction transaction, DbTable<TRecord> table, CancellationToken token ) where TRecord : TableRecord<TRecord>, IUserSubscription, IDbReaderMapping<TRecord> =>
         await table.Get( connection, transaction, SubscriptionID, token );
 
 
@@ -220,25 +229,25 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, IDbReaderMapp
 
         if ( ReferenceEquals( this, other ) ) { return true; }
 
-        return string.Equals( _address,        other.Address,         StringComparison.Ordinal ) &&
-               string.Equals( _city,           other.City,            StringComparison.Ordinal ) &&
-               string.Equals( _company,        other.Company,         StringComparison.Ordinal ) &&
-               string.Equals( _country,        other.Country,         StringComparison.Ordinal ) &&
-               string.Equals( _department,     other.Department,      StringComparison.Ordinal ) &&
-               string.Equals( _description,    other.Description,     StringComparison.Ordinal ) &&
-               string.Equals( _email,          other.Email,           StringComparison.Ordinal ) &&
-               string.Equals( _ext,            other.Ext,             StringComparison.Ordinal ) &&
-               string.Equals( _firstName,      other.FirstName,       StringComparison.Ordinal ) &&
-               string.Equals( _fullName,       other.FullName,        StringComparison.Ordinal ) &&
-               string.Equals( _lastName,       other.LastName,        StringComparison.Ordinal ) &&
-               string.Equals( _line1,          other.Line1,           StringComparison.Ordinal ) &&
-               string.Equals( _line2,          other.Line2,           StringComparison.Ordinal ) &&
-               string.Equals( _phoneNumber,    other.PhoneNumber,     StringComparison.Ordinal ) &&
-               string.Equals( _postalCode,     other.PostalCode,      StringComparison.Ordinal ) &&
+        return string.Equals( Address,         other.Address,         StringComparison.Ordinal ) &&
+               string.Equals( City,            other.City,            StringComparison.Ordinal ) &&
+               string.Equals( Company,         other.Company,         StringComparison.Ordinal ) &&
+               string.Equals( Country,         other.Country,         StringComparison.Ordinal ) &&
+               string.Equals( Department,      other.Department,      StringComparison.Ordinal ) &&
+               string.Equals( Description,     other.Description,     StringComparison.Ordinal ) &&
+               string.Equals( Email,           other.Email,           StringComparison.Ordinal ) &&
+               string.Equals( Ext,             other.Ext,             StringComparison.Ordinal ) &&
+               string.Equals( FirstName,       other.FirstName,       StringComparison.Ordinal ) &&
+               string.Equals( FullName,        other.FullName,        StringComparison.Ordinal ) &&
+               string.Equals( LastName,        other.LastName,        StringComparison.Ordinal ) &&
+               string.Equals( Line1,           other.Line1,           StringComparison.Ordinal ) &&
+               string.Equals( Line2,           other.Line2,           StringComparison.Ordinal ) &&
+               string.Equals( PhoneNumber,     other.PhoneNumber,     StringComparison.Ordinal ) &&
+               string.Equals( PostalCode,      other.PostalCode,      StringComparison.Ordinal ) &&
                string.Equals( StateOrProvince, other.StateOrProvince, StringComparison.Ordinal ) &&
-               string.Equals( _title,          other.Title,           StringComparison.Ordinal ) &&
-               string.Equals( _website,        other.Website,         StringComparison.Ordinal ) &&
-               _preferredLanguage == other.PreferredLanguage;
+               string.Equals( Title,           other.Title,           StringComparison.Ordinal ) &&
+               string.Equals( Website,         other.Website,         StringComparison.Ordinal ) &&
+               PreferredLanguage == other.PreferredLanguage;
     }
     public int CompareTo( IUserData? other )
     {
@@ -246,61 +255,61 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, IDbReaderMapp
 
         if ( ReferenceEquals( this, other ) ) { return 0; }
 
-        int firstNameComparison = string.Compare( _firstName, other.FirstName, StringComparison.Ordinal );
+        int firstNameComparison = string.Compare( FirstName, other.FirstName, StringComparison.Ordinal );
         if ( firstNameComparison != 0 ) { return firstNameComparison; }
 
-        int lastNameComparison = string.Compare( _lastName, other.LastName, StringComparison.Ordinal );
+        int lastNameComparison = string.Compare( LastName, other.LastName, StringComparison.Ordinal );
         if ( lastNameComparison != 0 ) { return lastNameComparison; }
 
-        int fullNameComparison = string.Compare( _fullName, other.FullName, StringComparison.Ordinal );
+        int fullNameComparison = string.Compare( FullName, other.FullName, StringComparison.Ordinal );
         if ( fullNameComparison != 0 ) { return fullNameComparison; }
 
-        int descriptionComparison = string.Compare( _description, other.Description, StringComparison.Ordinal );
+        int descriptionComparison = string.Compare( Description, other.Description, StringComparison.Ordinal );
         if ( descriptionComparison != 0 ) { return descriptionComparison; }
 
-        int companyComparison = string.Compare( _company, other.Company, StringComparison.Ordinal );
+        int companyComparison = string.Compare( Company, other.Company, StringComparison.Ordinal );
         if ( companyComparison != 0 ) { return companyComparison; }
 
-        int departmentComparison = string.Compare( _department, other.Department, StringComparison.Ordinal );
+        int departmentComparison = string.Compare( Department, other.Department, StringComparison.Ordinal );
         if ( departmentComparison != 0 ) { return departmentComparison; }
 
-        int titleComparison = string.Compare( _title, other.Title, StringComparison.Ordinal );
+        int titleComparison = string.Compare( Title, other.Title, StringComparison.Ordinal );
         if ( titleComparison != 0 ) { return titleComparison; }
 
-        int emailComparison = string.Compare( _email, other.Email, StringComparison.Ordinal );
+        int emailComparison = string.Compare( Email, other.Email, StringComparison.Ordinal );
         if ( emailComparison != 0 ) { return emailComparison; }
 
-        int phoneNumberComparison = string.Compare( _phoneNumber, other.PhoneNumber, StringComparison.Ordinal );
+        int phoneNumberComparison = string.Compare( PhoneNumber, other.PhoneNumber, StringComparison.Ordinal );
         if ( phoneNumberComparison != 0 ) { return phoneNumberComparison; }
 
-        int extComparison = string.Compare( _ext, other.Ext, StringComparison.Ordinal );
+        int extComparison = string.Compare( Ext, other.Ext, StringComparison.Ordinal );
         if ( extComparison != 0 ) { return extComparison; }
 
-        int websiteComparison = string.Compare( _website, other.Website, StringComparison.Ordinal );
+        int websiteComparison = string.Compare( Website, other.Website, StringComparison.Ordinal );
         if ( websiteComparison != 0 ) { return websiteComparison; }
 
-        int cityComparison = string.Compare( _city, other.City, StringComparison.Ordinal );
+        int cityComparison = string.Compare( City, other.City, StringComparison.Ordinal );
         if ( cityComparison != 0 ) { return cityComparison; }
 
-        int countryComparison = string.Compare( _country, other.Country, StringComparison.Ordinal );
+        int countryComparison = string.Compare( Country, other.Country, StringComparison.Ordinal );
         if ( countryComparison != 0 ) { return countryComparison; }
 
-        int line1Comparison = string.Compare( _line1, other.Line1, StringComparison.Ordinal );
+        int line1Comparison = string.Compare( Line1, other.Line1, StringComparison.Ordinal );
         if ( line1Comparison != 0 ) { return line1Comparison; }
 
-        int line2Comparison = string.Compare( _line2, other.Line2, StringComparison.Ordinal );
+        int line2Comparison = string.Compare( Line2, other.Line2, StringComparison.Ordinal );
         if ( line2Comparison != 0 ) { return line2Comparison; }
 
-        int postalCodeComparison = string.Compare( _postalCode, other.PostalCode, StringComparison.Ordinal );
+        int postalCodeComparison = string.Compare( PostalCode, other.PostalCode, StringComparison.Ordinal );
         if ( postalCodeComparison != 0 ) { return postalCodeComparison; }
 
         int stateComparison = string.Compare( StateOrProvince, other.StateOrProvince, StringComparison.Ordinal );
         if ( stateComparison != 0 ) { return stateComparison; }
 
-        int addressComparison = string.Compare( _address, other.Address, StringComparison.Ordinal );
+        int addressComparison = string.Compare( Address, other.Address, StringComparison.Ordinal );
         if ( addressComparison != 0 ) { return addressComparison; }
 
-        return ((int)PreferredLanguage).CompareTo( (int)other.PreferredLanguage );
+        return PreferredLanguage.CompareTo( other.PreferredLanguage );
     }
 
 
@@ -550,7 +559,7 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, IDbReaderMapp
 
     #region Roles
 
-    [RequiresPreviewFeatures]
+    [ RequiresPreviewFeatures ]
     public async ValueTask<bool> TryAdd( DbConnection connection, DbTransaction transaction, Database db, RoleRecord value, CancellationToken token ) =>
         await UserRoleRecord.TryAdd( connection, transaction, db.UserRoles, this, value, token );
     public async ValueTask<IEnumerable<RoleRecord>> GetRoles( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token = default ) =>
@@ -566,7 +575,7 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, IDbReaderMapp
 
     #region Groups
 
-    [RequiresPreviewFeatures]
+    [ RequiresPreviewFeatures ]
     public async ValueTask<bool> TryAdd( DbConnection connection, DbTransaction transaction, Database db, GroupRecord value, CancellationToken token ) =>
         await UserGroupRecord.TryAdd( connection, transaction, db.UserGroups, this, value, token );
     public async ValueTask<IEnumerable<GroupRecord>> GetGroups( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token = default ) =>
@@ -577,26 +586,6 @@ public sealed partial record UserRecord : TableRecord<UserRecord>, IDbReaderMapp
         await UserGroupRecord.Delete( connection, transaction, db.UserGroups, this, value, token );
 
     #endregion
-
-
-
-    /*
-    #region Rights
-
-    public void RemoveRight( int index, char right = '-' ) => SetRight( index, right );
-    public bool HasRight( int    index, char right = '+' ) => Rights[index] == right;
-    public void AddRight( int    index, char right = '+' ) => SetRight( index, right );
-    public void SetRight( int index, char right )
-    {
-        Span<char> rights = stackalloc char[Rights.Length];
-        Rights.CopyTo( rights );
-        rights[index] = right;
-        Rights        = rights.ToString();
-    }
-    public void InitRights( int length, char right = '-' ) => Rights = new string( right, length );
-
-    #endregion
-    */
 
 
 

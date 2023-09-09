@@ -16,10 +16,9 @@ public readonly record struct RecordID<TRecord>( Guid Value ) : IComparable<Reco
 {
     public static readonly RecordID<TRecord> Empty = new(Guid.Empty);
     public static RecordID<TRecord> New() => new(Guid.NewGuid());
+    public static RecordID<TRecord> FromString( string guid ) => new(Guid.Parse( guid ));
 
 
-    // public static implicit operator RecordID<TRecord>( Guid    value ) => new(value);
-    // public static implicit operator Guid( RecordID<TRecord>    recordID ) => recordID.Value;
     public static implicit operator RecordID<TRecord>( TRecord record ) => new(record.ID.Value);
 
 
@@ -34,7 +33,7 @@ public readonly record struct RecordID<TRecord>( Guid Value ) : IComparable<Reco
 
     public static bool operator true( RecordID<TRecord>  recordID ) => recordID.IsValid();
     public static bool operator false( RecordID<TRecord> recordID ) => recordID.IsNotValid();
-    
+
 
     public bool Equals( RecordID<TRecord>   other ) => Value.Equals( other.Value );
     public int CompareTo( RecordID<TRecord> other ) => Value.CompareTo( other.Value );

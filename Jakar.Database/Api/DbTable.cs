@@ -8,16 +8,16 @@ namespace Jakar.Database;
 
 
 
-[SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
+[ SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" ) ]
 public partial class DbTable<TRecord> : ObservableClass, IConnectableDb, IAsyncDisposable where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
     protected readonly IConnectableDb                 _database;
     protected readonly TypePropertiesCache.Properties _propertiesCache;
 
 
-    [SuppressMessage( "ReSharper", "ReturnTypeCanBeEnumerable.Global" )] public static ImmutableArray<TRecord> Empty       => ImmutableArray<TRecord>.Empty;
-    [SuppressMessage( "ReSharper", "ReturnTypeCanBeEnumerable.Global" )] public static ImmutableList<TRecord>  EmptyList   => ImmutableList<TRecord>.Empty;
-    public                                                                             IEnumerable<string>     ColumnNames => Descriptors.Select( x => x.ColumnName );
+    [ SuppressMessage( "ReSharper", "ReturnTypeCanBeEnumerable.Global" ) ] public static ImmutableArray<TRecord> Empty       => ImmutableArray<TRecord>.Empty;
+    [ SuppressMessage( "ReSharper", "ReturnTypeCanBeEnumerable.Global" ) ] public static ImmutableList<TRecord>  EmptyList   => ImmutableList<TRecord>.Empty;
+    public                                                                               IEnumerable<string>     ColumnNames => Descriptors.Select( x => x.ColumnName );
 
     public virtual string CreatedBy => Instance switch
                                        {
@@ -64,7 +64,7 @@ public partial class DbTable<TRecord> : ObservableClass, IConnectableDb, IAsyncD
 
     public string RandomMethod
     {
-        [MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization )]
+        [ MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization ) ]
         get => Instance switch
                {
                    DbInstance.MsSql    => "NEWID()",
@@ -75,11 +75,11 @@ public partial class DbTable<TRecord> : ObservableClass, IConnectableDb, IAsyncD
     public RecordGenerator<TRecord> Records => new(this);
     public virtual string SchemaTableName
     {
-        [MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization )] get => $"{CurrentSchema}.{TableName}";
+        [ MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization ) ] get => $"{CurrentSchema}.{TableName}";
     }
     public virtual string TableName
     {
-        [MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization )]
+        [ MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization ) ]
         get => Instance switch
                {
                    DbInstance.Postgres => $"\"{typeof(TRecord).GetTableName()}\"",
@@ -101,14 +101,14 @@ public partial class DbTable<TRecord> : ObservableClass, IConnectableDb, IAsyncD
         new(sql, parameters, transaction, CommandTimeout, commandType, flags, token);
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public Descriptor GetDescriptor( string columnName ) => _propertiesCache.Get( this, columnName );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public Descriptor GetDescriptor( string columnName ) => _propertiesCache.Get( this, columnName );
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
     public string KeyValuePair( string columnName ) => GetDescriptor( columnName )
        .KeyValuePair;
 
 
     public ValueTask<IEnumerable<TRecord>> All( CancellationToken token = default ) => this.Call( All, token );
-    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
+    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public virtual async ValueTask<IEnumerable<TRecord>> All( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
         string sql = $"SELECT * FROM {SchemaTableName}";
@@ -118,9 +118,8 @@ public partial class DbTable<TRecord> : ObservableClass, IConnectableDb, IAsyncD
 
         try
         {
-            var command = new CommandDefinition( sql, default, transaction, default, default, CommandFlags.None, token );
-
-            IEnumerable<TRecord> records = await connection.QueryAsync<TRecord>( sql, default, transaction );
+            var                  command = new CommandDefinition( sql, default, transaction, default, default, CommandFlags.None, token );
+            IEnumerable<TRecord> records = await connection.QueryAsync<TRecord>( command );
             return records.GetArray();
         }
         catch ( Exception e ) { throw new SqlException( sql, e ); }
@@ -139,7 +138,7 @@ public partial class DbTable<TRecord> : ObservableClass, IConnectableDb, IAsyncD
     {
         try
         {
-            using SqlMapper.GridReader reader = await connection.QueryMultipleAsync( sql, parameters, transaction );
+            await using SqlMapper.GridReader reader = await connection.QueryMultipleAsync( sql, parameters, transaction );
             return await func( reader, token );
         }
         catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
@@ -158,8 +157,8 @@ public partial class DbTable<TRecord> : ObservableClass, IConnectableDb, IAsyncD
     {
         try
         {
-            CommandDefinition command = GetCommandDefinition( sql, parameters, transaction, token );
-            await using DbDataReader reader = await connection.ExecuteReaderAsync( command );
+            CommandDefinition        command = GetCommandDefinition( sql, parameters, transaction, token );
+            await using DbDataReader reader  = await connection.ExecuteReaderAsync( command );
             return await func( reader, token );
         }
         catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
