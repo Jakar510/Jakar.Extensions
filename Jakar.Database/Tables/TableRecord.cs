@@ -32,7 +32,7 @@ public interface ITableRecord<TRecord> : IRecordPair where TRecord : TableRecord
 
 
 [Serializable]
-public abstract record TableRecord<TRecord>( [property: Key] RecordID<TRecord> ID, RecordID<UserRecord>? CreatedBy, Guid? OwnerUserID, DateTimeOffset DateCreated, DateTimeOffset? LastModified ) : ITableRecord<TRecord>
+public abstract record TableRecord<TRecord>( [property: Key] RecordID<TRecord> ID, RecordID<UserRecord>? CreatedBy, Guid? OwnerUserID, DateTimeOffset DateCreated, DateTimeOffset? LastModified ) : ITableRecord<TRecord>, IComparable<TRecord>
     where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
     public static string TableName { get; } = typeof(TRecord).GetTableName();
@@ -40,7 +40,6 @@ public abstract record TableRecord<TRecord>( [property: Key] RecordID<TRecord> I
 
     protected TableRecord( UserRecord?       owner ) : this( RecordID<TRecord>.New(), owner ) { }
     protected TableRecord( RecordID<TRecord> id, UserRecord? owner = default ) : this( id, owner?.ID, owner?.UserID, DateTimeOffset.UtcNow, default ) { }
-
 
 
     public static DynamicParameters GetDynamicParameters( UserRecord user )
