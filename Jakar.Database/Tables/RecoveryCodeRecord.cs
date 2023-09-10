@@ -4,8 +4,7 @@
 namespace Jakar.Database;
 
 
-[Serializable]
-[Table( "Codes" )]
+[Serializable,Table( "Codes" )]
 public sealed record RecoveryCodeRecord : TableRecord<RecoveryCodeRecord>
 {
     private static readonly PasswordHasher<RecoveryCodeRecord> _hasher = new();
@@ -20,7 +19,6 @@ public sealed record RecoveryCodeRecord : TableRecord<RecoveryCodeRecord>
     }
 
 
-    public RecoveryCodeRecord() { }
     private RecoveryCodeRecord( string code, UserRecord caller ) : base( caller ) => Code = _hasher.HashPassword( this, code );
 
 
@@ -71,8 +69,7 @@ public sealed record RecoveryCodeRecord : TableRecord<RecoveryCodeRecord>
 
 
 
-[Serializable]
-[Table( "UserRecoveryCodes" )]
+[Serializable,Table( "UserRecoveryCodes" )]
 public sealed record UserRecoveryCodeRecord : Mapping<UserRecoveryCodeRecord, UserRecord, RecoveryCodeRecord>, ICreateMapping<UserRecoveryCodeRecord, UserRecord, RecoveryCodeRecord>
 {
     public UserRecoveryCodeRecord() : base() { }

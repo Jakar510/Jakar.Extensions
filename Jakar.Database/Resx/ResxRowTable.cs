@@ -1,36 +1,50 @@
 ﻿namespace Jakar.Database.Resx;
 
 
-[Serializable]
-[Table( "Resx" )]
-public sealed record ResxRowTable : TableRecord<ResxRowTable>
+[ Serializable, Table( "Resx" ) ]
+public sealed record ResxRowTable( long                   KeyID,
+                                   string                 Key,
+                                   string                 Neutral,
+                                   string?                Arabic,
+                                   string?                Chinese,
+                                   string?                Czech,
+                                   string?                Dutch,
+                                   string?                English,
+                                   string?                French,
+                                   string?                German,
+                                   string?                Japanese,
+                                   string?                Korean,
+                                   string?                Polish,
+                                   string?                Portuguese,
+                                   string?                Spanish,
+                                   string?                Swedish,
+                                   string?                Thai,
+                                   RecordID<ResxRowTable> ID,
+                                   RecordID<UserRecord>?  CreatedBy,
+                                   Guid?                  OwnerUserID,
+                                   DateTimeOffset         DateCreated,
+                                   DateTimeOffset?        LastModified = default
+) : TableRecord<ResxRowTable>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified )
 {
-    public string? Arabic     { get; init; }
-    public string? Chinese    { get; init; }
-    public string? Czech      { get; init; }
-    public string? Dutch      { get; init; }
-    public string? English    { get; init; }
-    public string? French     { get; init; }
-    public string? German     { get; init; }
-    public string? Japanese   { get; init; }
-    public string  Key        { get; init; } = string.Empty;
-    public long    KeyID      { get; init; }
-    public string? Korean     { get; init; }
-    public string  Neutral    { get; init; } = string.Empty;
-    public string? Polish     { get; init; }
-    public string? Portuguese { get; init; }
-    public string? Spanish    { get; init; }
-    public string? Swedish    { get; init; }
-    public string? Thai       { get; init; }
-
-
-    public ResxRowTable() { }
-    public ResxRowTable( string key, long keyID, UserRecord? caller = default ) : base( caller )
-    {
-        Key   = key;
-        KeyID = keyID;
-    }
-    public ResxRowTable( string key, long keyID, string neutral, UserRecord? caller = default ) : this( key, keyID, caller ) => Neutral = neutral;
+    public ResxRowTable( string key, long keyID, UserRecord? caller = default ) : this( key, keyID, string.Empty, caller ) { }
+    public ResxRowTable( string key, long keyID, string neutral, UserRecord? caller = default ) : this( key,
+                                                                                                        keyID,
+                                                                                                        neutral,
+                                                                                                        string.Empty,
+                                                                                                        string.Empty,
+                                                                                                        string.Empty,
+                                                                                                        string.Empty,
+                                                                                                        string.Empty,
+                                                                                                        string.Empty,
+                                                                                                        string.Empty,
+                                                                                                        string.Empty,
+                                                                                                        string.Empty,
+                                                                                                        string.Empty,
+                                                                                                        string.Empty,
+                                                                                                        string.Empty,
+                                                                                                        string.Empty,
+                                                                                                        string.Empty,
+                                                                                                        caller ) { }
     public ResxRowTable( string      key,
                          long        keyID,
                          string      neutral,
@@ -49,23 +63,27 @@ public sealed record ResxRowTable : TableRecord<ResxRowTable>
                          string      korean,
                          string      arabic,
                          UserRecord? caller = default
-    ) : this( key, keyID, neutral, caller )
-    {
-        English    = english;
-        Spanish    = spanish;
-        French     = french;
-        Swedish    = swedish;
-        German     = german;
-        Chinese    = chinese;
-        Polish     = polish;
-        Thai       = thai;
-        Japanese   = japanese;
-        Czech      = czech;
-        Portuguese = portuguese;
-        Dutch      = dutch;
-        Korean     = korean;
-        Arabic     = arabic;
-    }
+    ) : this( keyID,
+              key,
+              neutral,
+              arabic,
+              chinese,
+              czech,
+              dutch,
+              english,
+              french,
+              german,
+              japanese,
+              korean,
+              polish,
+              portuguese,
+              spanish,
+              swedish,
+              thai,
+              RecordID<ResxRowTable>.New(),
+              caller?.ID,
+              caller?.UserID,
+              DateTimeOffset.UtcNow ) { }
 
 
     public override int CompareTo( ResxRowTable? other )
@@ -151,7 +169,8 @@ public sealed record ResxRowTable : TableRecord<ResxRowTable>
                                                                    SupportedLanguage.Arabic      => Arabic,
                                                                    SupportedLanguage.Unspecified => throw new OutOfRangeException( nameof(language), language ),
                                                                    _                             => throw new OutOfRangeException( nameof(language), language ),
-                                                               } ?? Neutral;
+                                                               } ??
+                                                               Neutral;
     public override bool Equals( ResxRowTable? other )
     {
         if ( other is null ) { return false; }

@@ -23,7 +23,6 @@ public abstract record Mapping<TSelf, TKey, TValue> : TableRecord<TSelf> where T
     public RecordID<TValue> ValueID { get; init; }
 
 
-    protected Mapping() { }
     protected Mapping( TKey key, TValue value ) : base( RecordID<TSelf>.New() )
     {
         _owner  = new WeakReference<TKey>( key );
@@ -112,8 +111,7 @@ public abstract record Mapping<TSelf, TKey, TValue> : TableRecord<TSelf> where T
     }
 
 
-    [RequiresPreviewFeatures]
-    [MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization )]
+    [RequiresPreviewFeatures,MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization )]
     private static IEnumerable<TSelf> FilterExisting( TSelf[] records, TKey key, IEnumerable<TValue> values )
     {
         // ReSharper disable once LoopCanBeConvertedToQuery

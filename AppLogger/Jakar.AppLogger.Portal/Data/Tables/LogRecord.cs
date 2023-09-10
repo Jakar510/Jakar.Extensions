@@ -9,8 +9,7 @@ using Debug = Jakar.AppLogger.Common.Debug;
 namespace Jakar.AppLogger.Portal.Data.Tables;
 
 
-[Serializable]
-[Table( "Logs" )]
+[Serializable,Table( "Logs" )]
 public sealed record LogRecord : LoggerTable<LogRecord>, IAppLog, ILogInfo, IAppStartTime
 {
     public                                           DateTimeOffset          TimeStamp        { get; init; }

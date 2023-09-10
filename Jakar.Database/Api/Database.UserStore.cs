@@ -9,8 +9,7 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 namespace Jakar.Database;
 
 
-[SuppressMessage( "ReSharper", "UnusedParameter.Global" )]
-[SuppressMessage( "ReSharper", "MemberCanBeMadeStatic.Global" )]
+[SuppressMessage( "ReSharper", "UnusedParameter.Global" ),SuppressMessage( "ReSharper", "MemberCanBeMadeStatic.Global" )]
 public partial class Database
 {
     public virtual ValueTask<string?> GetSecurityStampAsync( UserRecord user, CancellationToken token = default ) => new(user.SecurityStamp);

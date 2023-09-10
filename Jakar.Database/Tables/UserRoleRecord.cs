@@ -4,8 +4,7 @@
 namespace Jakar.Database;
 
 
-[Serializable]
-[Table( "UserRoles" )]
+[Serializable,Table( "UserRoles" )]
 public sealed record UserRoleRecord : Mapping<UserRoleRecord, UserRecord, RoleRecord>, ICreateMapping<UserRoleRecord, UserRecord, RoleRecord>
 {
     public UserRoleRecord() : base() { }

@@ -1,68 +1,37 @@
 ﻿namespace Jakar.Database;
 
 
-[Serializable]
-[Table( "Groups" )]
-public sealed record GroupRecord : TableRecord<GroupRecord>, UserRights.IRights
+[ Serializable, Table( "Groups" ) ]
+public sealed record GroupRecord( [ MaxLength( 256 ) ]                                                      string?              CustomerID,
+                                  [ MaxLength( 1024 ) ]                                                     string               NameOfGroup,
+                                  [ MaxLength( 256 ) ]                                                      RecordID<UserRecord> OwnerID,
+                                  [ MaxLength( TokenValidationParameters.DefaultMaximumTokenSizeInBytes ) ] string               Rights,
+                                  RecordID<GroupRecord>                                                                          ID,
+                                  RecordID<UserRecord>?                                                                          CreatedBy,
+                                  Guid?                                                                                          OwnerUserID,
+                                  DateTimeOffset                                                                                 DateCreated,
+                                  DateTimeOffset?                                                                                LastModified = default
+) : TableRecord<GroupRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), UserRights.IRights
 {
-    private RecordID<UserRecord> _ownerID;
-    private string               _nameOfGroup = string.Empty;
-    private string               _rights      = string.Empty;
-    private string?              _customerID;
+    public GroupRecord( UserRecord owner, string nameOfGroup, string? customerID, UserRecord? caller = default ) : this( customerID,
+                                                                                                                         nameOfGroup,
+                                                                                                                         owner.ID,
+                                                                                                                         string.Empty,
+                                                                                                                         RecordID<GroupRecord>.New(),
+                                                                                                                         caller?.ID,
+                                                                                                                         caller?.UserID,
+                                                                                                                         DateTimeOffset.UtcNow ) { }
+    public GroupRecord( UserRecord owner, string nameOfGroup, string? customerID, UserRights rights, UserRecord? caller = default ) : this( customerID,
+                                                                                                                                            nameOfGroup,
+                                                                                                                                            owner.ID,
+                                                                                                                                            rights.ToString(),
+                                                                                                                                            RecordID<GroupRecord>.New(),
+                                                                                                                                            caller?.ID,
+                                                                                                                                            caller?.UserID,
+                                                                                                                                            DateTimeOffset.UtcNow ) { }
 
 
-    [MaxLength( 256 )]
-    public string? CustomerID
-    {
-        get => _customerID;
-        init => SetProperty( ref _customerID, value );
-    }
-
-
-    [MaxLength( 1024 )]
-    public string NameOfGroup
-    {
-        get => _nameOfGroup;
-        set => SetProperty( ref _nameOfGroup, value );
-    }
-
-
-    [MaxLength( 256 )]
-    public RecordID<UserRecord> OwnerID
-    {
-        get => _ownerID;
-        init => SetProperty( ref _ownerID, value );
-    }
-
-
-    [MaxLength( TokenValidationParameters.DefaultMaximumTokenSizeInBytes )]
-    public string Rights
-    {
-        get => _rights;
-        set => SetProperty( ref _rights, value );
-    }
-
-
-    public GroupRecord() { }
-    public GroupRecord( UserRecord owner, string nameOfGroup, string? customerID, UserRecord? caller = default ) : base( caller )
-    {
-        OwnerID     = owner.ID;
-        NameOfGroup = nameOfGroup;
-        CustomerID  = customerID;
-    }
-    public override int GetHashCode() => HashCode.Combine( base.GetHashCode(), NameOfGroup, OwnerID, CustomerID );
-
-
+    public UserRights GetRights() => new(this);
     public async ValueTask<UserRecord?> GetOwner( DbConnection             connection, DbTransaction? transaction, Database db, CancellationToken token ) => await db.Users.Get( connection, transaction, OwnerID, token );
     public async ValueTask<IEnumerable<UserRecord>> GetUsers( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => await UserGroupRecord.Where( connection, transaction, db.UserGroups, db.Users, this, token );
-
-
-    public override bool Equals( GroupRecord? other )
-    {
-        if ( other is null ) { return false; }
-
-        if ( ReferenceEquals( this, other ) ) { return true; }
-
-        return base.Equals( other ) && _nameOfGroup == other._nameOfGroup && _ownerID == other._ownerID && _customerID == other._customerID;
-    }
 }

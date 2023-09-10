@@ -1,15 +1,13 @@
 ﻿namespace Jakar.AppLogger.Portal.Data.Tables;
 
 
-[Serializable]
-[Table( "Apps" )]
+[Serializable,Table( "Apps" )]
 public sealed record AppRecord : LoggerTable<AppRecord>
 {
     [MaxLength( 1024 )]  public string AppName { get; init; } = string.Empty;
     [MaxLength( 10240 )] public string Secret  { get; init; } = string.Empty;
 
 
-    public AppRecord() : base() { }
     public AppRecord( string appName, string secret, UserRecord? caller = default ) : base( caller )
     {
         AppName = appName;

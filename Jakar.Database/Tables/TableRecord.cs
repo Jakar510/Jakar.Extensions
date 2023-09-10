@@ -32,7 +32,7 @@ public interface ITableRecord<TRecord> : IRecordPair where TRecord : TableRecord
 
 
 [ Serializable ]
-public abstract record TableRecord<TRecord>( [ property: Key ] RecordID<TRecord> ID, RecordID<UserRecord>? CreatedBy, Guid? OwnerUserID, DateTimeOffset DateCreated, DateTimeOffset? LastModified ) : ITableRecord<TRecord>, IComparable<TRecord>
+public abstract record TableRecord<TRecord>( [ property: Key ] RecordID<TRecord> ID, RecordID<UserRecord>? CreatedBy, Guid? OwnerUserID, DateTimeOffset DateCreated, DateTimeOffset? LastModified ) : BaseRecord, ITableRecord<TRecord>, IComparable<TRecord>
     where TRecord : TableRecord<TRecord>
 {
     public static string TableName { get; } = typeof(TRecord).GetTableName();

@@ -4,32 +4,32 @@
 namespace Jakar.Extensions;
 
 
-[SuppressMessage( "ReSharper", "UnusedMemberInSuper.Global" )]
+[ SuppressMessage( "ReSharper", "UnusedMemberInSuper.Global" ) ]
 public interface IUserData : JsonModels.IJsonModel, IEquatable<IUserData>, IComparable<IUserData>
 {
     public static Equalizer<IUserData> Equalizer => Equalizer<IUserData>.Default;
     public static Sorter<IUserData>    Sorter    => Sorter<IUserData>.Default;
 
 
-    [MaxLength( 4096 )]                public string            Address           { get; set; }
-    [MaxLength( 256 )]                 public string            City              { get; set; }
-    [MaxLength( 256 )]                 public string            Company           { get; set; }
-    [MaxLength( 256 )]                 public string            Country           { get; set; }
-    [MaxLength( 256 )]                 public string            Department        { get; set; }
-    [MaxLength( 256 )]                 public string            Description       { get; set; }
-    [MaxLength( 1024 )] [EmailAddress] public string            Email             { get; set; }
-    [MaxLength( 256 )]                 public string            Ext               { get; set; }
-    [MaxLength( 256 )] [Required]      public string            FirstName         { get; set; }
-    [MaxLength( 512 )]                 public string            FullName          { get; set; }
-    [MaxLength( 256 )] [Required]      public string            LastName          { get; set; }
-    [MaxLength( 512 )]                 public string            Line1             { get; set; }
-    [MaxLength( 256 )]                 public string            Line2             { get; set; }
-    [MaxLength( 256 )] [Phone]         public string            PhoneNumber       { get; set; }
-    [MaxLength( 256 )] [Required]      public string            PostalCode        { get; set; }
-    [Required]                         public SupportedLanguage PreferredLanguage { get; set; }
-    [MaxLength( 256 )]                 public string            StateOrProvince   { get; set; }
-    [MaxLength( 256 )]                 public string            Title             { get; set; }
-    [MaxLength( 4096 )] [Url]          public string            Website           { get; set; }
+    [ MaxLength( 4096 ) ]                public string            Address           { get; }
+    [ MaxLength( 256 ) ]                 public string            City              { get; }
+    [ MaxLength( 256 ) ]                 public string            Company           { get; }
+    [ MaxLength( 256 ) ]                 public string            Country           { get; }
+    [ MaxLength( 256 ) ]                 public string            Department        { get; }
+    [ MaxLength( 256 ) ]                 public string            Description       { get; }
+    [ MaxLength( 1024 ), EmailAddress ]  public string            Email             { get; }
+    [ MaxLength( 256 ) ]                 public string            Ext               { get; }
+    [ MaxLength( 256 ), Required ]       public string            FirstName         { get; }
+    [ MaxLength( 512 ) ]                 public string            FullName          { get; }
+    [ MaxLength( 256 ), Required ]       public string            LastName          { get; }
+    [ MaxLength( 512 ) ]                 public string            Line1             { get; }
+    [ MaxLength( 256 ) ]                 public string            Line2             { get; }
+    [ MaxLength( 256 ), Phone ]          public string            PhoneNumber       { get; }
+    [ MaxLength( 256 ), Required ]       public string            PostalCode        { get; }
+    [ Required ]                         public SupportedLanguage PreferredLanguage { get; }
+    [ MaxLength( 256 ) ]                 public string            StateOrProvince   { get; }
+    [ MaxLength( 256 ) ]                 public string            Title             { get; }
+    [ MaxLength( 4096 ), Url ]           public string            Website           { get; }
 
 
     public void Update( IUserData value );
@@ -37,7 +37,7 @@ public interface IUserData : JsonModels.IJsonModel, IEquatable<IUserData>, IComp
 
 
 
-[Serializable]
+[ Serializable ]
 public class UserData : ObservableClass, IUserData
 {
     public const string                        EMPTY_PHONE_NUMBER = "(000) 000-0000";
@@ -63,7 +63,7 @@ public class UserData : ObservableClass, IUserData
     private      SupportedLanguage             _preferredLanguage = SupportedLanguage.English;
 
 
-    [JsonExtensionData]
+    [ JsonExtensionData ]
     public IDictionary<string, JToken?>? AdditionalData
     {
         get => _additionalData;
@@ -71,14 +71,14 @@ public class UserData : ObservableClass, IUserData
     }
 
 
-    [MaxLength( 4096 )]
+    [ MaxLength( 4096 ) ]
     public string Address
     {
         get => _address ??= $"{Line1} {Line2} {City}, {StateOrProvince} {Country} {PostalCode}";
         set => SetProperty( ref _address, value );
     }
 
-    [MaxLength( 256 )]
+    [ MaxLength( 256 ) ]
     public string City
     {
         get => _city;
@@ -91,7 +91,7 @@ public class UserData : ObservableClass, IUserData
         }
     }
 
-    [MaxLength( 256 )]
+    [ MaxLength( 256 ) ]
     public string Company
     {
         get => _company;
@@ -104,7 +104,7 @@ public class UserData : ObservableClass, IUserData
         }
     }
 
-    [MaxLength( 256 )]
+    [ MaxLength( 256 ) ]
     public string Country
     {
         get => _country;
@@ -117,7 +117,7 @@ public class UserData : ObservableClass, IUserData
         }
     }
 
-    [MaxLength( 256 )]
+    [ MaxLength( 256 ) ]
     public string Department
     {
         get => _department;
@@ -130,30 +130,28 @@ public class UserData : ObservableClass, IUserData
         }
     }
 
-    [MaxLength( 256 )]
+    [ MaxLength( 256 ) ]
     public string Description
     {
         get => _description ??= $"{Department}, {Title} at {Company}";
         set => SetProperty( ref _description, value );
     }
 
-    [EmailAddress]
-    [MaxLength( 1024 )]
+    [ EmailAddress, MaxLength( 1024 ) ]
     public string Email
     {
         get => _email;
         set => SetProperty( ref _email, value );
     }
 
-    [MaxLength( 256 )]
+    [ MaxLength( 256 ) ]
     public string Ext
     {
         get => _ext;
         set => SetProperty( ref _ext, value );
     }
 
-    [Required]
-    [MaxLength( 256 )]
+    [ Required, MaxLength( 256 ) ]
     public string FirstName
     {
         get => _firstName;
@@ -166,19 +164,19 @@ public class UserData : ObservableClass, IUserData
         }
     }
 
-    [MaxLength( 512 )]
+    [ MaxLength( 512 ) ]
     public string FullName
     {
         get => _fullName ??= $"{FirstName} {LastName}";
         set => SetProperty( ref _fullName, value );
     }
 
-    [JsonIgnore] public bool IsValidWebsite     => Uri.TryCreate( Website, UriKind.RelativeOrAbsolute, out _ );
-    [JsonIgnore] public bool IsValidName        => !string.IsNullOrEmpty( FullName );
-    [JsonIgnore] public bool IsValidEmail       => !string.IsNullOrEmpty( Email );
-    [JsonIgnore] public bool IsValidPhoneNumber => !string.IsNullOrEmpty( PhoneNumber );
+    [ JsonIgnore ] public bool IsValidWebsite     => Uri.TryCreate( Website, UriKind.RelativeOrAbsolute, out _ );
+    [ JsonIgnore ] public bool IsValidName        => !string.IsNullOrEmpty( FullName );
+    [ JsonIgnore ] public bool IsValidEmail       => !string.IsNullOrEmpty( Email );
+    [ JsonIgnore ] public bool IsValidPhoneNumber => !string.IsNullOrEmpty( PhoneNumber );
 
-    [JsonIgnore]
+    [ JsonIgnore ]
     public bool IsValidAddress
     {
         get
@@ -199,8 +197,7 @@ public class UserData : ObservableClass, IUserData
         }
     }
 
-    [Required]
-    [MaxLength( 256 )]
+    [ Required, MaxLength( 256 ) ]
     public string LastName
     {
         get => _lastName;
@@ -213,7 +210,7 @@ public class UserData : ObservableClass, IUserData
         }
     }
 
-    [MaxLength( 512 )]
+    [ MaxLength( 512 ) ]
     public string Line1
     {
         get => _line1;
@@ -226,7 +223,7 @@ public class UserData : ObservableClass, IUserData
         }
     }
 
-    [MaxLength( 256 )]
+    [ MaxLength( 256 ) ]
     public string Line2
     {
         get => _line2;
@@ -239,15 +236,14 @@ public class UserData : ObservableClass, IUserData
         }
     }
 
-    [Phone]
-    [MaxLength( 256 )]
+    [ Phone, MaxLength( 256 ) ]
     public string PhoneNumber
     {
         get => _phoneNumber;
         set => SetProperty( ref _phoneNumber, value );
     }
 
-    [MaxLength( 256 )]
+    [ MaxLength( 256 ) ]
     public string PostalCode
     {
         get => _postalCode;
@@ -260,14 +256,14 @@ public class UserData : ObservableClass, IUserData
         }
     }
 
-    [Required]
+    [ Required ]
     public SupportedLanguage PreferredLanguage
     {
         get => _preferredLanguage;
         set => SetProperty( ref _preferredLanguage, value );
     }
 
-    [MaxLength( 256 )]
+    [ MaxLength( 256 ) ]
     public string StateOrProvince
     {
         get => _state;
@@ -280,7 +276,7 @@ public class UserData : ObservableClass, IUserData
         }
     }
 
-    [MaxLength( 256 )]
+    [ MaxLength( 256 ) ]
     public string Title
     {
         get => _title;
@@ -293,8 +289,7 @@ public class UserData : ObservableClass, IUserData
         }
     }
 
-    [Url]
-    [MaxLength( 4096 )]
+    [ Url, MaxLength( 4096 ) ]
     public string Website
     {
         get => _website;

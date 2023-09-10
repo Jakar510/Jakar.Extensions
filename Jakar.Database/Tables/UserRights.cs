@@ -8,27 +8,31 @@ using System.Buffers;
 namespace Jakar.Database;
 
 
+[ SuppressMessage( "ReSharper", "FieldCanBeMadeReadOnly.Local" ) ]
 public struct UserRights : IEnumerator<(int Index, bool Value)>, IEnumerable<(int Index, bool Value)>
 {
     public interface IRights
     {
-        [MaxLength( TokenValidationParameters.DefaultMaximumTokenSizeInBytes )] public string Rights { get; }
+        [ MaxLength( TokenValidationParameters.DefaultMaximumTokenSizeInBytes ) ] public string Rights { get; }
+
+        public UserRights GetRights();
     }
 
 
 
-    private static readonly MemoryPool<byte>   _pool   = MemoryPool<byte>.Shared;
-    public const            byte               VALID   = 1;
-    public const            byte               INVALID = 0;
-    private readonly        Memory<byte>       _rights;
-    private readonly        IMemoryOwner<byte> _owner;
-    private                 int                _index = 0;
+    public static           UserRights          Default => new(0);
+    private static readonly MemoryPool<byte>    _pool   = MemoryPool<byte>.Shared;
+    public const            byte                VALID   = 1;
+    public const            byte                INVALID = 0;
+    private                 Memory<byte>        _rights;
+    private                 IMemoryOwner<byte>? _owner;
+    private                 int                 _index = 0;
 
 
-    public readonly int                     Length  => _rights.Length;
-    public          (int Index, bool Value) Current => (_index, Has( _index ));
-    object IEnumerator.                     Current => Current;
-    internal readonly Span<byte>            Span    => _rights.Span;
+    public readonly   int                     Length  => _rights.Length;
+    public readonly   (int Index, bool Value) Current => (_index, Has( _index ));
+    readonly          object IEnumerator.     Current => Current;
+    internal readonly Span<byte>              Span    => _rights.Span;
 
 
     public UserRights( int length )
@@ -42,7 +46,8 @@ public struct UserRights : IEnumerator<(int Index, bool Value)>, IEnumerable<(in
     public UserRights( IRights rights ) : this( rights.Rights ) { }
     private UserRights( string rights )
     {
-        Span<byte> span = stackalloc byte[rights.Length];
+        using IMemoryOwner<byte> buffer = _pool.Rent( rights.Length );
+        Span<byte>               span   = buffer.Memory.Span;
         Convert.TryFromBase64String( rights, span, out int length );
         span = span[..length];
 
@@ -52,7 +57,7 @@ public struct UserRights : IEnumerator<(int Index, bool Value)>, IEnumerable<(in
     }
     public void Dispose()
     {
-        _owner.Dispose();
+        _owner?.Dispose();
         this = default;
     }
 
@@ -67,14 +72,15 @@ public struct UserRights : IEnumerator<(int Index, bool Value)>, IEnumerable<(in
     }
     public static UserRights Merge( int                  totalRightCount, params IEnumerable<IRights>[] values ) => Merge( values.SelectMany( x => x ), totalRightCount );
     public static UserRights Merge( IEnumerable<IRights> values,          int                           totalRightCount ) => values.Aggregate( new UserRights( totalRightCount ), ( current, value ) => current.With( value ) );
+    public static UserRights Empty( int                  length ) => new(length);
 
 
     public bool MoveNext() => ++_index < Length;
     public void Reset() => _index = -1;
 
 
-    public bool Has( int  index ) => Span[index] == VALID;
-    public bool Has<T>( T index ) where T : struct, Enum => Has( index.AsInt() );
+    public readonly bool Has( int index ) => Span[index] == VALID;
+    public bool Has<T>( T         index ) where T : struct, Enum => Has( index.AsInt() );
 
 
     public void Remove( int  index ) => Set( index, INVALID );
@@ -94,7 +100,12 @@ public struct UserRights : IEnumerator<(int Index, bool Value)>, IEnumerable<(in
     }
 
 
-    public override string ToString() => Convert.ToBase64String( Span );
-    public IEnumerator<(int Index, bool Value)> GetEnumerator() => this;
-    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+    public override string ToString()
+    {
+        string result = Convert.ToBase64String( Span );
+        Dispose();
+        return result;
+    }
+    public readonly IEnumerator<(int Index, bool Value)> GetEnumerator() => this;
+    readonly IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }

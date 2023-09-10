@@ -34,4 +34,5 @@ global using Npgsql;
 global using OneOf;
 global using Radzen;
 global using Radzen.Blazor;
+global using Key = Dapper.Contrib.Extensions.KeyAttribute;
 global using RouteAttribute = Microsoft.AspNetCore.Mvc.RouteAttribute;

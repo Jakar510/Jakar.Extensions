@@ -4,8 +4,7 @@
 namespace Jakar.Database;
 
 
-[Serializable]
-[Table( "UserLoginInfo" )]
+[Serializable,Table( "UserLoginInfo" )]
 public sealed record UserLoginInfoRecord( [property: MaxLength(                        int.MaxValue )] string  LoginProvider,
                                           [property: MaxLength(                        int.MaxValue )] string? ProviderDisplayName,
                                           [property: ProtectedPersonalData, MaxLength( int.MaxValue )] string  ProviderKey,

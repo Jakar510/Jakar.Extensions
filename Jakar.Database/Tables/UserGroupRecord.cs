@@ -4,8 +4,7 @@
 namespace Jakar.Database;
 
 
-[Serializable]
-[Table( "UserGroups" )]
+[Serializable,Table( "UserGroups" )]
 public sealed record UserGroupRecord : Mapping<UserGroupRecord, UserRecord, GroupRecord>, ICreateMapping<UserGroupRecord, UserRecord, GroupRecord>
 {
     public UserGroupRecord() : base() { }

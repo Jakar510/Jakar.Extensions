@@ -4,8 +4,7 @@
 namespace Jakar.AppLogger.Portal.Data.Tables;
 
 
-[Serializable]
-[Table( "Scopes" )]
+[ Serializable, Table( "Scopes" ) ]
 public sealed record ScopeRecord : LoggerTable<ScopeRecord>
 {
     public RecordID<AppRecord>     AppID     { get; init; }
@@ -13,7 +12,6 @@ public sealed record ScopeRecord : LoggerTable<ScopeRecord>
     public RecordID<SessionRecord> SessionID { get; init; }
 
 
-    public ScopeRecord() : base() { }
     private ScopeRecord( Guid scopeID, AppRecord app, DeviceRecord device, SessionRecord session, UserRecord? caller = default ) : base( new RecordID<ScopeRecord>( scopeID ), caller )
     {
         AppID     = app.ID;
@@ -29,19 +27,11 @@ public sealed record ScopeRecord : LoggerTable<ScopeRecord>
 
     public override int CompareTo( ScopeRecord? other ) => Nullable.Compare( AppID, other?.AppID );
     public override int GetHashCode() => HashCode.Combine( AppID, DeviceID, SessionID, base.GetHashCode() );
-    public override bool Equals( ScopeRecord? other )
-    {
-        if ( other is null ) { return false; }
-
-        if ( ReferenceEquals( this, other ) ) { return true; }
-
-        return AppID == other.AppID && DeviceID == other.DeviceID && SessionID == other.SessionID;
-    }
 }
 
 
 
-[Serializable, Table( "LogScopes" )]
+[ Serializable, Table( "LogScopes" ) ]
 public sealed record LogScopeRecord : Mapping<LogScopeRecord, LogRecord, ScopeRecord>, ICreateMapping<LogScopeRecord, LogRecord, ScopeRecord>
 {
     public LogScopeRecord() : base() { }

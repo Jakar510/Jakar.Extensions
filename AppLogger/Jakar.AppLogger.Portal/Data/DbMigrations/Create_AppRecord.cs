@@ -6,8 +6,7 @@ using FluentMigrator.Builders.Create.Table;
 namespace Jakar.AppLogger.Portal.Data.DbMigrations;
 
 
-[Migration( 103 )]
-[SuppressMessage( "ReSharper", "InconsistentNaming" )]
+[Migration( 103 ),SuppressMessage( "ReSharper", "InconsistentNaming" )]
 public sealed class Create_AppRecord : LoggerMigration<AppRecord>
 {
     public Create_AppRecord() : base() { }

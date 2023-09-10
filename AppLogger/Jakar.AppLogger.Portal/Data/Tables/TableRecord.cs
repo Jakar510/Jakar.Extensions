@@ -4,24 +4,18 @@
 namespace Jakar.AppLogger.Portal.Data.Tables;
 
 
-public abstract record LoggerTable<TRecord> : TableRecord<TRecord>, JsonModels.IJsonStringModel where TRecord : LoggerTable<TRecord>
+public abstract record LoggerTable<TRecord>
+    ( RecordID<TRecord> ID, RecordID<UserRecord>? CreatedBy, Guid? OwnerUserID, DateTimeOffset DateCreated, DateTimeOffset? LastModified ) : TableRecord<TRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ),
+                                                                                                                                                               JsonModels.IJsonStringModel where TRecord : LoggerTable<TRecord>
 {
-    private string? _additionalData;
-
-
-    [MaxLength( int.MaxValue )]
-    public string? AdditionalData
-    {
-        get => _additionalData;
-        set => SetProperty( ref _additionalData, value );
-    }
+    [ MaxLength( int.MaxValue ) ] public string? AdditionalData { get; set; }
 
 
     public   bool IsActive    { get; set; } = true;
     internal bool IsNotActive => !IsActive;
 
+    
+    protected LoggerTable( UserRecord?       owner ) : this( RecordID<TRecord>.New(), owner ) { }
+    protected LoggerTable( RecordID<TRecord> id, UserRecord? owner = default ) : this( id, owner?.ID, owner?.UserID, DateTimeOffset.UtcNow, null ) { }
 
-    protected LoggerTable() : base() { }
-    protected LoggerTable( UserRecord?       caller ) : base( caller ) { }
-    protected LoggerTable( RecordID<TRecord> id, UserRecord? caller = default ) : base( id, caller ) { }
 }

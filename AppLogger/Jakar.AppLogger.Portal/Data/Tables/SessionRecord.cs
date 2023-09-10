@@ -9,8 +9,7 @@ using Jakar.Database;
 namespace Jakar.AppLogger.Portal.Data.Tables;
 
 
-[Serializable]
-[Table( "Sessions" )]
+[Serializable,Table( "Sessions" )]
 public sealed record SessionRecord : LoggerTable<SessionRecord>, IStartSession
 {
     public DateTimeOffset         AppStartTime { get; init; }
@@ -21,7 +20,6 @@ public sealed record SessionRecord : LoggerTable<SessionRecord>, IStartSession
     Guid? ISessionID.             SessionID    => ID.Value;
 
 
-    public SessionRecord() : base() { }
     public SessionRecord( StartSession start, AppRecord app, DeviceRecord device, UserRecord? caller = default ) : base( caller )
     {
         AppStartTime = start.AppStartTime;
