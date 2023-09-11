@@ -4,7 +4,7 @@
 namespace Jakar.Database;
 
 
-[SuppressMessage( "ReSharper", "SuggestBaseTypeForParameter" )]
+[ SuppressMessage( "ReSharper", "SuggestBaseTypeForParameter" ) ]
 public abstract partial class Database : Randoms, IConnectableDb, IAsyncDisposable, IHealthCheck, IUserTwoFactorTokenProvider<UserRecord>
 {
     public const       ClaimType                       DEFAULT_CLAIM_TYPES = ClaimType.UserID | ClaimType.UserName | ClaimType.GroupSid | ClaimType.Role;
@@ -71,7 +71,7 @@ public abstract partial class Database : Randoms, IConnectableDb, IAsyncDisposab
     }
 
 
-    protected virtual DbTable<TRecord> Create<TRecord>() where TRecord : TableRecord<TRecord>
+    protected virtual DbTable<TRecord> Create<TRecord>() where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>
     {
         var table = new DbTable<TRecord>( this );
         return AddDisposable( table );
@@ -156,7 +156,7 @@ public abstract partial class Database : Randoms, IConnectableDb, IAsyncDisposab
     }
 
 
-    public static DynamicParameters GetParameters( object? value, object? template = default, [CallerArgumentExpression( nameof( value ) )] string? variableName = default )
+    public static DynamicParameters GetParameters( object? value, object? template = default, [ CallerArgumentExpression( nameof(value) ) ] string? variableName = default )
     {
         ArgumentNullException.ThrowIfNull( variableName );
         var parameters = new DynamicParameters( template );

@@ -4,10 +4,24 @@
 namespace Jakar.Database;
 
 
-[Serializable,Table( "UserGroups" )]
-public sealed record UserGroupRecord : Mapping<UserGroupRecord, UserRecord, GroupRecord>, ICreateMapping<UserGroupRecord, UserRecord, GroupRecord>
+[ Serializable, Table( "UserGroups" ) ]
+public sealed record UserGroupRecord : Mapping<UserGroupRecord, UserRecord, GroupRecord>, ICreateMapping<UserGroupRecord, UserRecord, GroupRecord>, IDbReaderMapping<UserGroupRecord>
 {
-    public UserGroupRecord() : base() { }
-    public UserGroupRecord( UserRecord                                         owner, GroupRecord value ) : base( owner, value ) { }
-    [RequiresPreviewFeatures] public static UserGroupRecord Create( UserRecord owner, GroupRecord value ) => new(owner, value);
+    public UserGroupRecord( UserRecord                                           owner, GroupRecord value ) : base( owner, value ) { }
+    [ RequiresPreviewFeatures ] public static UserGroupRecord Create( UserRecord owner, GroupRecord value ) => new(owner, value);
+
+
+    public static UserGroupRecord Create( DbDataReader reader )
+    {
+        DateTimeOffset            dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
+        DateTimeOffset            lastModified = reader.GetFieldValue<DateTimeOffset>( nameof(LastModified) );
+        Guid                      ownerUserID  = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
+        RecordID<UserRecord>      createdBy    = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(CreatedBy) ) );
+        RecordID<UserGroupRecord> id           = new RecordID<UserGroupRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) );
+        return new UserGroupRecord( id, createdBy, ownerUserID, dateCreated, lastModified );
+    }
+    public static async IAsyncEnumerable<UserGroupRecord> CreateAsync( DbDataReader reader, [ EnumeratorCancellation ] CancellationToken token = default )
+    {
+        while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
+    }
 }

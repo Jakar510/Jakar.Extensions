@@ -2,67 +2,67 @@
 
 
 [ Serializable, Table( "Resx" ) ]
-public sealed record ResxRowTable( long                   KeyID,
-                                   string                 Key,
-                                   string                 Neutral,
-                                   string?                Arabic,
-                                   string?                Chinese,
-                                   string?                Czech,
-                                   string?                Dutch,
-                                   string?                English,
-                                   string?                French,
-                                   string?                German,
-                                   string?                Japanese,
-                                   string?                Korean,
-                                   string?                Polish,
-                                   string?                Portuguese,
-                                   string?                Spanish,
-                                   string?                Swedish,
-                                   string?                Thai,
-                                   RecordID<ResxRowTable> ID,
-                                   RecordID<UserRecord>?  CreatedBy,
-                                   Guid?                  OwnerUserID,
-                                   DateTimeOffset         DateCreated,
-                                   DateTimeOffset?        LastModified = default
-) : TableRecord<ResxRowTable>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified )
+public sealed record ResxRowRecord( long                    KeyID,
+                                    string                  Key,
+                                    string                  Neutral,
+                                    string?                 Arabic,
+                                    string?                 Chinese,
+                                    string?                 Czech,
+                                    string?                 Dutch,
+                                    string?                 English,
+                                    string?                 French,
+                                    string?                 German,
+                                    string?                 Japanese,
+                                    string?                 Korean,
+                                    string?                 Polish,
+                                    string?                 Portuguese,
+                                    string?                 Spanish,
+                                    string?                 Swedish,
+                                    string?                 Thai,
+                                    RecordID<ResxRowRecord> ID,
+                                    RecordID<UserRecord>?   CreatedBy,
+                                    Guid?                   OwnerUserID,
+                                    DateTimeOffset          DateCreated,
+                                    DateTimeOffset?         LastModified = default
+) : TableRecord<ResxRowRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<ResxRowRecord>
 {
-    public ResxRowTable( string key, long keyID, UserRecord? caller = default ) : this( key, keyID, string.Empty, caller ) { }
-    public ResxRowTable( string key, long keyID, string neutral, UserRecord? caller = default ) : this( key,
-                                                                                                        keyID,
-                                                                                                        neutral,
-                                                                                                        string.Empty,
-                                                                                                        string.Empty,
-                                                                                                        string.Empty,
-                                                                                                        string.Empty,
-                                                                                                        string.Empty,
-                                                                                                        string.Empty,
-                                                                                                        string.Empty,
-                                                                                                        string.Empty,
-                                                                                                        string.Empty,
-                                                                                                        string.Empty,
-                                                                                                        string.Empty,
-                                                                                                        string.Empty,
-                                                                                                        string.Empty,
-                                                                                                        string.Empty,
-                                                                                                        caller ) { }
-    public ResxRowTable( string      key,
-                         long        keyID,
-                         string      neutral,
-                         string      english,
-                         string      spanish,
-                         string      french,
-                         string      swedish,
-                         string      german,
-                         string      chinese,
-                         string      polish,
-                         string      thai,
-                         string      japanese,
-                         string      czech,
-                         string      portuguese,
-                         string      dutch,
-                         string      korean,
-                         string      arabic,
-                         UserRecord? caller = default
+    public ResxRowRecord( string key, long keyID, UserRecord? caller = default ) : this( key, keyID, string.Empty, caller ) { }
+    public ResxRowRecord( string key, long keyID, string neutral, UserRecord? caller = default ) : this( key,
+                                                                                                         keyID,
+                                                                                                         neutral,
+                                                                                                         string.Empty,
+                                                                                                         string.Empty,
+                                                                                                         string.Empty,
+                                                                                                         string.Empty,
+                                                                                                         string.Empty,
+                                                                                                         string.Empty,
+                                                                                                         string.Empty,
+                                                                                                         string.Empty,
+                                                                                                         string.Empty,
+                                                                                                         string.Empty,
+                                                                                                         string.Empty,
+                                                                                                         string.Empty,
+                                                                                                         string.Empty,
+                                                                                                         string.Empty,
+                                                                                                         caller ) { }
+    public ResxRowRecord( string      key,
+                          long        keyID,
+                          string      neutral,
+                          string      english,
+                          string      spanish,
+                          string      french,
+                          string      swedish,
+                          string      german,
+                          string      chinese,
+                          string      polish,
+                          string      thai,
+                          string      japanese,
+                          string      czech,
+                          string      portuguese,
+                          string      dutch,
+                          string      korean,
+                          string      arabic,
+                          UserRecord? caller = default
     ) : this( keyID,
               key,
               neutral,
@@ -80,13 +80,26 @@ public sealed record ResxRowTable( long                   KeyID,
               spanish,
               swedish,
               thai,
-              RecordID<ResxRowTable>.New(),
+              RecordID<ResxRowRecord>.New(),
               caller?.ID,
               caller?.UserID,
               DateTimeOffset.UtcNow ) { }
 
+    public static ResxRowRecord Create( DbDataReader reader )
+    {
+        DateTimeOffset       dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
+        DateTimeOffset       lastModified = reader.GetFieldValue<DateTimeOffset>( nameof(LastModified) );
+        Guid                 ownerUserID  = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
+        RecordID<UserRecord> createdBy    = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(CreatedBy) ) );
+        RecordID<RoleRecord> id           = new RecordID<RoleRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) );
+        return new ResxRowRecord( id, createdBy, ownerUserID, dateCreated, lastModified );
+    }
+    public static async IAsyncEnumerable<ResxRowRecord> CreateAsync( DbDataReader reader, [ EnumeratorCancellation ] CancellationToken token = default )
+    {
+        while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
+    }
 
-    public override int CompareTo( ResxRowTable? other )
+    public override int CompareTo( ResxRowRecord? other )
     {
         if ( other is null ) { return 1; }
 
@@ -116,39 +129,39 @@ public sealed record ResxRowTable( long                   KeyID,
         return hashCode.ToHashCode();
     }
 
-    public ResxRowTable Update( string english,
-                                string spanish,
-                                string french,
-                                string swedish,
-                                string german,
-                                string chinese,
-                                string polish,
-                                string thai,
-                                string japanese,
-                                string czech,
-                                string portuguese,
-                                string dutch,
-                                string korean,
-                                string arabic
-    ) =>
-        this with
-        {
-            English = english,
-            Spanish = spanish,
-            French = french,
-            Swedish = swedish,
-            German = german,
-            Chinese = chinese,
-            Polish = polish,
-            Thai = thai,
-            Japanese = japanese,
-            Czech = czech,
-            Portuguese = portuguese,
-            Dutch = dutch,
-            Korean = korean,
-            Arabic = arabic,
-            LastModified = DateTimeOffset.UtcNow,
-        };
+
+    public ResxRowRecord Update( string english,
+                                 string spanish,
+                                 string french,
+                                 string swedish,
+                                 string german,
+                                 string chinese,
+                                 string polish,
+                                 string thai,
+                                 string japanese,
+                                 string czech,
+                                 string portuguese,
+                                 string dutch,
+                                 string korean,
+                                 string arabic
+    ) => this with
+         {
+             English = english,
+             Spanish = spanish,
+             French = french,
+             Swedish = swedish,
+             German = german,
+             Chinese = chinese,
+             Polish = polish,
+             Thai = thai,
+             Japanese = japanese,
+             Czech = czech,
+             Portuguese = portuguese,
+             Dutch = dutch,
+             Korean = korean,
+             Arabic = arabic,
+             LastModified = DateTimeOffset.UtcNow,
+         };
 
 
     public string GetValue( in SupportedLanguage language ) => language switch
@@ -171,12 +184,12 @@ public sealed record ResxRowTable( long                   KeyID,
                                                                    _                             => throw new OutOfRangeException( nameof(language), language ),
                                                                } ??
                                                                Neutral;
-    public override bool Equals( ResxRowTable? other )
+    public bool Equals( ResxRowRecord? other )
     {
         if ( other is null ) { return false; }
 
         if ( ReferenceEquals( this, other ) ) { return true; }
 
-        return Neutral == other.Neutral;
+        return Neutral == other.Neutral || ID == other.ID;
     }
 }

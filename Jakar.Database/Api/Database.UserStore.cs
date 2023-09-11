@@ -9,14 +9,18 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 namespace Jakar.Database;
 
 
-[SuppressMessage( "ReSharper", "UnusedParameter.Global" ),SuppressMessage( "ReSharper", "MemberCanBeMadeStatic.Global" )]
+[ SuppressMessage( "ReSharper", "UnusedParameter.Global" ), SuppressMessage( "ReSharper", "MemberCanBeMadeStatic.Global" ) ]
 public partial class Database
 {
     public virtual ValueTask<string?> GetSecurityStampAsync( UserRecord user, CancellationToken token = default ) => new(user.SecurityStamp);
     public ValueTask SetSecurityStampAsync( UserRecord                  user, string            stamp, CancellationToken token ) => this.TryCall( SetSecurityStampAsync, user, stamp, token );
     public async ValueTask SetSecurityStampAsync( DbConnection connection, DbTransaction transaction, UserRecord user, string stamp, CancellationToken token )
     {
-        user.SecurityStamp = stamp;
+        user = user with
+               {
+                   SecurityStamp = stamp
+               };
+
         await Users.Update( user, token );
     }
 
@@ -75,13 +79,17 @@ public partial class Database
 
 
     public ValueTask<string?> GetAuthenticatorKeyAsync( UserRecord           user,       CancellationToken token ) => this.TryCall( GetAuthenticatorKeyAsync, user, token );
-    public virtual ValueTask<string?> GetAuthenticatorKeyAsync( DbConnection connection, DbTransaction     transaction, UserRecord user, CancellationToken token ) => new(user.SecurityStamp);
+    public virtual ValueTask<string?> GetAuthenticatorKeyAsync( DbConnection connection, DbTransaction     transaction, UserRecord user, CancellationToken token ) => new(user.AuthenticatorKey);
 
 
     public ValueTask SetAuthenticatorKeyAsync( UserRecord user, string key, CancellationToken token ) => this.TryCall( SetAuthenticatorKeyAsync, user, key, token );
     public virtual async ValueTask SetAuthenticatorKeyAsync( DbConnection connection, DbTransaction transaction, UserRecord user, string key, CancellationToken token )
     {
-        user.SecurityStamp = key;
+        user = user with
+               {
+                   AuthenticatorKey = key
+               };
+
         await Users.Update( connection, transaction, user, token );
     }
 
@@ -90,7 +98,11 @@ public partial class Database
     public ValueTask SetTwoFactorEnabledAsync( UserRecord               user, bool              enabled, CancellationToken token ) => this.TryCall( SetTwoFactorEnabledAsync, user, enabled, token );
     public virtual async ValueTask SetTwoFactorEnabledAsync( DbConnection connection, DbTransaction transaction, UserRecord user, bool enabled, CancellationToken token )
     {
-        user.IsTwoFactorEnabled = enabled;
+        user = user with
+               {
+                   IsTwoFactorEnabled = enabled
+               };
+
         await Users.Update( connection, transaction, user, token );
     }
 
@@ -103,8 +115,12 @@ public partial class Database
     public Task<bool> HasPasswordAsync( UserRecord        user, CancellationToken token ) => Task.FromResult( user.HasPassword() );
     public async Task SetPasswordHashAsync( UserRecord user, string? passwordHash, CancellationToken token )
     {
-        // user.UpdatePassword(passwordHash);
-        user.PasswordHash = passwordHash ?? string.Empty;
+        // user = user.UpdatePassword(passwordHash);
+        user = user with
+               {
+                   PasswordHash = passwordHash ?? string.Empty
+               };
+
         await Users.Update( user, token );
     }
 
@@ -120,7 +136,11 @@ public partial class Database
     public ValueTask SetEmailAsync( UserRecord user, string? email, CancellationToken token ) => this.TryCall( SetEmailAsync, user, email, token );
     public async ValueTask SetEmailAsync( DbConnection connection, DbTransaction transaction, UserRecord user, string? email, CancellationToken token )
     {
-        user.Email = email ?? string.Empty;
+        user = user with
+               {
+                   Email = email ?? string.Empty
+               };
+
         await Users.Update( connection, transaction, user, token );
     }
 
@@ -128,7 +148,11 @@ public partial class Database
     public ValueTask SetEmailConfirmedAsync( UserRecord user, bool confirmed, CancellationToken token ) => this.TryCall( SetEmailConfirmedAsync, user, confirmed, token );
     public async ValueTask SetEmailConfirmedAsync( DbConnection connection, DbTransaction transaction, UserRecord user, bool confirmed, CancellationToken token )
     {
-        user.IsEmailConfirmed = confirmed;
+        user = user with
+               {
+                   IsEmailConfirmed = confirmed
+               };
+
         await Users.Update( connection, transaction, user, token );
     }
 
@@ -136,7 +160,11 @@ public partial class Database
     public ValueTask SetNormalizedEmailAsync( UserRecord user, string? normalizedEmail, CancellationToken token ) => this.TryCall( SetNormalizedEmailAsync, user, normalizedEmail, token );
     public async ValueTask SetNormalizedEmailAsync( DbConnection connection, DbTransaction transaction, UserRecord user, string? normalizedEmail, CancellationToken token )
     {
-        user.Email = normalizedEmail ?? string.Empty;
+        user = user with
+               {
+                   Email = normalizedEmail ?? string.Empty
+               };
+
         await Users.Update( connection, transaction, user, token );
     }
 
@@ -158,7 +186,11 @@ public partial class Database
     public ValueTask SetPhoneNumberAsync( UserRecord user, string? phoneNumber, CancellationToken token ) => this.TryCall( SetPhoneNumberAsync, user, phoneNumber, token );
     public virtual async ValueTask SetPhoneNumberAsync( DbConnection connection, DbTransaction transaction, UserRecord user, string? phoneNumber, CancellationToken token )
     {
-        user.PhoneNumber = phoneNumber ?? string.Empty;
+        user = user with
+               {
+                   PhoneNumber = phoneNumber ?? string.Empty
+               };
+
         await Users.Update( user, token );
     }
 
@@ -166,7 +198,11 @@ public partial class Database
     public ValueTask SetPhoneNumberConfirmedAsync( UserRecord user, bool confirmed, CancellationToken token ) => this.TryCall( SetPhoneNumberConfirmedAsync, user, confirmed, token );
     public virtual async ValueTask SetPhoneNumberConfirmedAsync( DbConnection connection, DbTransaction transaction, UserRecord user, bool confirmed, CancellationToken token )
     {
-        user.IsPhoneNumberConfirmed = confirmed;
+        user = user with
+               {
+                   IsPhoneNumberConfirmed = confirmed
+               };
+
         await Users.Update( user, token );
     }
 
@@ -206,7 +242,11 @@ public partial class Database
     public ValueTask SetLockoutEndDateAsync( UserRecord user, DateTimeOffset? lockoutEnd, CancellationToken token ) => this.TryCall( SetLockoutEndDateAsync, user, lockoutEnd, token );
     public virtual async ValueTask SetLockoutEndDateAsync( DbConnection connection, DbTransaction transaction, UserRecord user, DateTimeOffset? lockoutEnd, CancellationToken token )
     {
-        user.LockoutEnd = lockoutEnd;
+        user = user with
+               {
+                   LockoutEnd = lockoutEnd
+               };
+
         await Users.Update( connection, transaction, user, token );
     }
 
@@ -303,7 +343,11 @@ public partial class Database
     public ValueTask SetNormalizedUserNameAsync( UserRecord user, string? fullName, CancellationToken token ) => this.TryCall( SetNormalizedUserNameAsync, user, fullName, token );
     public virtual async ValueTask SetNormalizedUserNameAsync( DbConnection connection, DbTransaction transaction, UserRecord user, string? fullName, CancellationToken token )
     {
-        user.FullName = fullName ?? string.Empty;
+        user = user with
+               {
+                   FullName = fullName ?? string.Empty
+               };
+
         await Users.Update( connection, transaction, user, token );
     }
 
@@ -311,7 +355,11 @@ public partial class Database
     public ValueTask SetUserNameAsync( UserRecord user, string? userName, CancellationToken token ) => this.TryCall( SetUserNameAsync, user, userName, token );
     public virtual async ValueTask SetUserNameAsync( DbConnection connection, DbTransaction transaction, UserRecord user, string? userName, CancellationToken token )
     {
-        user.UserName = userName ?? string.Empty;
+        user = user with
+               {
+                   UserName = userName ?? string.Empty
+               };
+
         await Users.Update( connection, transaction, user, token );
     }
 

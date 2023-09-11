@@ -106,14 +106,6 @@ public abstract class MigrateUserTable : Migration<UserRecord>
              .AsString( 256 )
              .NotNullable();
 
-        table.WithColumn( nameof(UserRecord.SubscriptionExpires) )
-             .AsDateTimeOffset()
-             .Nullable();
-
-        table.WithColumn( nameof(UserRecord.SubscriptionID) )
-             .AsGuid()
-             .Nullable();
-
         table.WithColumn( nameof(UserRecord.EscalateTo) )
              .AsGuid()
              .Nullable();
@@ -158,8 +150,8 @@ public abstract class MigrateUserTable : Migration<UserRecord>
              .AsDateTimeOffset()
              .Nullable();
 
-        table.WithColumn( nameof(UserRecord.TokenExpiration) )
-             .AsDateTimeOffset()
+        table.WithColumn( nameof(UserRecord.AuthenticatorKey) )
+             .AsString( TokenValidationParameters.DefaultMaximumTokenSizeInBytes )
              .Nullable();
 
         table.WithColumn( nameof(UserRecord.IsEmailConfirmed) )

@@ -11,28 +11,28 @@ public interface IUserData : JsonModels.IJsonModel, IEquatable<IUserData>, IComp
     public static Sorter<IUserData>    Sorter    => Sorter<IUserData>.Default;
 
 
-    [ MaxLength( 4096 ) ]                public string            Address           { get; }
-    [ MaxLength( 256 ) ]                 public string            City              { get; }
-    [ MaxLength( 256 ) ]                 public string            Company           { get; }
-    [ MaxLength( 256 ) ]                 public string            Country           { get; }
-    [ MaxLength( 256 ) ]                 public string            Department        { get; }
-    [ MaxLength( 256 ) ]                 public string            Description       { get; }
-    [ MaxLength( 1024 ), EmailAddress ]  public string            Email             { get; }
-    [ MaxLength( 256 ) ]                 public string            Ext               { get; }
-    [ MaxLength( 256 ), Required ]       public string            FirstName         { get; }
-    [ MaxLength( 512 ) ]                 public string            FullName          { get; }
-    [ MaxLength( 256 ), Required ]       public string            LastName          { get; }
-    [ MaxLength( 512 ) ]                 public string            Line1             { get; }
-    [ MaxLength( 256 ) ]                 public string            Line2             { get; }
-    [ MaxLength( 256 ), Phone ]          public string            PhoneNumber       { get; }
-    [ MaxLength( 256 ), Required ]       public string            PostalCode        { get; }
-    [ Required ]                         public SupportedLanguage PreferredLanguage { get; }
-    [ MaxLength( 256 ) ]                 public string            StateOrProvince   { get; }
-    [ MaxLength( 256 ) ]                 public string            Title             { get; }
-    [ MaxLength( 4096 ), Url ]           public string            Website           { get; }
+    [ MaxLength( 4096 ) ]               public string            Address           { get; }
+    [ MaxLength( 256 ) ]                public string            City              { get; }
+    [ MaxLength( 256 ) ]                public string            Company           { get; }
+    [ MaxLength( 256 ) ]                public string            Country           { get; }
+    [ MaxLength( 256 ) ]                public string            Department        { get; }
+    [ MaxLength( 256 ) ]                public string            Description       { get; }
+    [ MaxLength( 1024 ), EmailAddress ] public string            Email             { get; }
+    [ MaxLength( 256 ) ]                public string            Ext               { get; }
+    [ MaxLength( 256 ), Required ]      public string            FirstName         { get; }
+    [ MaxLength( 512 ) ]                public string            FullName          { get; }
+    [ MaxLength( 256 ), Required ]      public string            LastName          { get; }
+    [ MaxLength( 512 ) ]                public string            Line1             { get; }
+    [ MaxLength( 256 ) ]                public string            Line2             { get; }
+    [ MaxLength( 256 ), Phone ]         public string            PhoneNumber       { get; }
+    [ MaxLength( 256 ), Required ]      public string            PostalCode        { get; }
+    [ Required ]                        public SupportedLanguage PreferredLanguage { get; }
+    [ MaxLength( 256 ) ]                public string            StateOrProvince   { get; }
+    [ MaxLength( 256 ) ]                public string            Title             { get; }
+    [ MaxLength( 4096 ), Url ]          public string            Website           { get; }
 
 
-    public void Update( IUserData value );
+    public IUserData WithUserData( IUserData value );
 }
 
 
@@ -298,7 +298,7 @@ public class UserData : ObservableClass, IUserData
 
 
     public UserData() { }
-    public UserData( IUserData value ) => Update( value );
+    public UserData( IUserData value ) => WithUserData( value );
     public UserData( string firstName, string lastName )
     {
         _firstName = firstName;
@@ -306,7 +306,7 @@ public class UserData : ObservableClass, IUserData
     }
 
 
-    public void Update( IUserData value )
+    public IUserData WithUserData( IUserData value )
     {
         FirstName         = value.FirstName;
         LastName          = value.LastName;
@@ -328,10 +328,12 @@ public class UserData : ObservableClass, IUserData
         Company           = value.Company;
         PreferredLanguage = value.PreferredLanguage;
 
-        if ( value.AdditionalData is null ) { return; }
+        if ( value.AdditionalData is null ) { return this; }
 
         AdditionalData ??= new Dictionary<string, JToken?>();
         foreach ( (string key, JToken? jToken) in value.AdditionalData ) { AdditionalData[key] = jToken; }
+
+        return this;
     }
 
 

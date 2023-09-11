@@ -1,19 +1,18 @@
 ﻿namespace Jakar.Database;
 
-
-public interface ICreateMapping<out TSelf, in TKey, in TValue> where TValue : TableRecord<TValue>
-                                                               where TKey : TableRecord<TKey>
-                                                               where TSelf : Mapping<TSelf, TKey, TValue>, ICreateMapping<TSelf, TKey, TValue>
+public interface ICreateMapping<out TSelf, in TKey, in TValue> where TValue : TableRecord<TValue>, IDbReaderMapping<TValue>
+                                                               where TKey : TableRecord<TKey>, IDbReaderMapping<TKey>
+                                                               where TSelf : Mapping<TSelf, TKey, TValue>, ICreateMapping<TSelf, TKey, TValue>, IDbReaderMapping<TSelf>
 {
-    [RequiresPreviewFeatures] public abstract static TSelf Create( TKey key, TValue value );
+    [ RequiresPreviewFeatures ] public abstract static TSelf Create( TKey key, TValue value );
 }
 
 
 
-[Serializable]
-public abstract record Mapping<TSelf, TKey, TValue> : TableRecord<TSelf> where TValue : TableRecord<TValue>
-                                                                         where TKey : TableRecord<TKey>
-                                                                         where TSelf : Mapping<TSelf, TKey, TValue>, ICreateMapping<TSelf, TKey, TValue>
+[ Serializable ]
+public abstract record Mapping<TSelf, TKey, TValue> : TableRecord<TSelf> where TValue : TableRecord<TValue>, IDbReaderMapping<TValue>
+                                                                         where TKey : TableRecord<TKey>, IDbReaderMapping<TKey>
+                                                                         where TSelf : Mapping<TSelf, TKey, TValue>, ICreateMapping<TSelf, TKey, TValue>, IDbReaderMapping<TSelf>
 {
     private WeakReference<TKey>?   _owner;
     private WeakReference<TValue>? _value;
@@ -84,16 +83,10 @@ public abstract record Mapping<TSelf, TKey, TValue> : TableRecord<TSelf> where T
 
         return ValueID.CompareTo( other.ValueID );
     }
-    public override bool Equals( TSelf? other )
-    {
-        if ( other is null ) { return false; }
-
-        return ReferenceEquals( this, other ) || ValueID == other.ValueID && KeyID == other.KeyID;
-    }
     public override int GetHashCode() => HashCode.Combine( KeyID, ValueID );
 
 
-    [RequiresPreviewFeatures]
+    [ RequiresPreviewFeatures ]
     public static async ValueTask<bool> TryAdd( DbConnection connection, DbTransaction transaction, DbTable<TSelf> selfTable, TKey key, TValue value, CancellationToken token )
     {
         if ( await Exists( connection, transaction, selfTable, key, value, token ) ) { return false; }
@@ -102,7 +95,7 @@ public abstract record Mapping<TSelf, TKey, TValue> : TableRecord<TSelf> where T
         TSelf self   = await selfTable.Insert( connection, transaction, record, token );
         return self.IsValidID();
     }
-    [RequiresPreviewFeatures]
+    [ RequiresPreviewFeatures ]
     public static async ValueTask TryAdd( DbConnection connection, DbTransaction transaction, DbTable<TSelf> selfTable, TKey key, IEnumerable<TValue> values, CancellationToken token )
     {
         IEnumerable<TSelf> records = await Where( connection, transaction, selfTable, key, token );
@@ -111,7 +104,7 @@ public abstract record Mapping<TSelf, TKey, TValue> : TableRecord<TSelf> where T
     }
 
 
-    [RequiresPreviewFeatures,MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization )]
+    [ RequiresPreviewFeatures, MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization ) ]
     private static IEnumerable<TSelf> FilterExisting( TSelf[] records, TKey key, IEnumerable<TValue> values )
     {
         // ReSharper disable once LoopCanBeConvertedToQuery
@@ -123,7 +116,7 @@ public abstract record Mapping<TSelf, TKey, TValue> : TableRecord<TSelf> where T
         }
     }
 
-    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
+    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     private static bool Exists( ReadOnlySpan<TSelf> existing, TValue value )
     {
         // ReSharper disable once LoopCanBeConvertedToQuery
@@ -144,7 +137,7 @@ public abstract record Mapping<TSelf, TKey, TValue> : TableRecord<TSelf> where T
         await selfTable.Where( connection, transaction, true, GetDynamicParameters( key ), token );
     public static async ValueTask<IEnumerable<TSelf>> Where( DbConnection connection, DbTransaction? transaction, DbTable<TSelf> selfTable, TValue value, CancellationToken token ) =>
         await selfTable.Where( connection, transaction, true, GetDynamicParameters( value ), token );
-    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
+    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public static async ValueTask<IEnumerable<TValue>> Where( DbConnection connection, DbTransaction? transaction, DbTable<TSelf> selfTable, DbTable<TValue> valueTable, TKey key, CancellationToken token )
     {
         string selfTableName  = selfTable.TableName;
@@ -157,7 +150,7 @@ WHERE {selfTableName}.{nameof(KeyID)} = @{nameof(KeyID)}";
         token.ThrowIfCancellationRequested();
         return await valueTable.Where( connection, transaction, sql, GetDynamicParameters( key ), token );
     }
-    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
+    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public static async ValueTask<IEnumerable<TKey>> Where( DbConnection connection, DbTransaction? transaction, DbTable<TSelf> selfTable, DbTable<TKey> keyTable, TValue value, CancellationToken token )
     {
         string selfTableName = selfTable.TableName;
@@ -172,7 +165,7 @@ WHERE {selfTableName}.{nameof(ValueID)} = @{nameof(ValueID)}";
     }
 
 
-    [RequiresPreviewFeatures]
+    [ RequiresPreviewFeatures ]
     public static async ValueTask Replace( DbConnection connection, DbTransaction transaction, DbTable<TSelf> selfTable, TKey key, IEnumerable<TValue> values, CancellationToken token )
     {
         await Delete( connection, transaction, selfTable, key, token );
@@ -190,7 +183,7 @@ WHERE {selfTableName}.{nameof(ValueID)} = @{nameof(ValueID)}";
         IEnumerable<TSelf> records = await Where( connection, transaction, selfTable, key, token );
         foreach ( TSelf mapping in records ) { await selfTable.Delete( connection, transaction, mapping.ID, token ); }
     }
-    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
+    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public static async ValueTask Delete( DbConnection connection, DbTransaction transaction, DbTable<TSelf> selfTable, TKey key, IEnumerable<TValue> values, CancellationToken token )
     {
         string sql = $"SELECT {nameof(ID)} FROM {selfTable.TableName} WHERE {nameof(ValueID)} IN ( {string.Join( ',', values.Select( x => x.ID ) )} ) AND {nameof(KeyID)} = @{nameof(key)}";

@@ -4,10 +4,12 @@
 global using System.Collections.ObjectModel;
 global using System.Collections.Specialized;
 global using System.ComponentModel.DataAnnotations;
+global using System.Data;
 global using System.Data.Common;
 global using System.Diagnostics;
 global using System.Diagnostics.CodeAnalysis;
 global using System.Reflection;
+global using System.Runtime.CompilerServices;
 global using System.Runtime.InteropServices;
 global using System.Runtime.Versioning;
 global using System.Web.Hosting;

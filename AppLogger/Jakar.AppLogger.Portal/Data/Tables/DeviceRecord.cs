@@ -4,30 +4,29 @@
 namespace Jakar.AppLogger.Portal.Data.Tables;
 
 
-[Serializable, Table( "Devices" )]
-public sealed record DeviceRecord : LoggerTable<DeviceRecord>, IDevice
+[ Serializable, Table( "Devices" ) ]
+public sealed record DeviceRecord : LoggerTable<DeviceRecord>, IDbReaderMapping<DeviceRecord>, IDevice
 {
-    public                                int?       AppBuild            { get; init; }
-    [MaxLength( 4096 )] public            string?    AppNamespace        { get; init; }
-    public                                AppVersion AppVersion          { get; init; } = new();
-    [MaxLength( 4096 )]            public string     DeviceID            { get; init; } = string.Empty;
-    [MaxLength( MAX_STRING_SIZE )] public string?    HardwareInfo        { get; init; }
-    HwInfo? IDevice.                                 HwInfo              => HardwareInfo?.FromJson<HwInfo>();
-    AppVersion IDevice.                              OsVersion           => OsVersion;
-    [MaxLength( 256 )]  public string                Locale              { get; init; } = string.Empty;
-    [MaxLength( 4096 )] public string?               Model               { get; init; }
-    public                     int?                  OsApiLevel          { get; init; }
-    [MaxLength( 256 )] public  string?               OsBuild             { get; init; }
-    public                     Architecture          ProcessArchitecture { get; init; }
-    [MaxLength( 256 )] public  string                OsName              { get; init; } = string.Empty;
-    [MaxLength( 256 )] public  string                OsVersion           { get; init; } = string.Empty;
-    public                     PlatformID            Platform            { get; init; }
-    [MaxLength( 256 )] public  string                SdkName             { get; init; } = string.Empty;
-    [MaxLength( 256 )] public  string                SdkVersion          { get; init; } = string.Empty;
-    public                     TimeSpan              TimeZoneOffset      { get; init; }
+    public                                  int?       AppBuild            { get; init; }
+    [ MaxLength( 4096 ) ] public            string?    AppNamespace        { get; init; }
+    public                                  AppVersion AppVersion          { get; init; } = new();
+    [ MaxLength( 4096 ) ]            public string     DeviceID            { get; init; } = string.Empty;
+    [ MaxLength( MAX_STRING_SIZE ) ] public string?    HardwareInfo        { get; init; }
+    HwInfo? IDevice.                                   HwInfo              => HardwareInfo?.FromJson<HwInfo>();
+    AppVersion IDevice.                                OsVersion           => OsVersion;
+    [ MaxLength( 256 ) ]  public string                Locale              { get; init; } = string.Empty;
+    [ MaxLength( 4096 ) ] public string?               Model               { get; init; }
+    public                       int?                  OsApiLevel          { get; init; }
+    [ MaxLength( 256 ) ] public  string?               OsBuild             { get; init; }
+    public                       Architecture          ProcessArchitecture { get; init; }
+    [ MaxLength( 256 ) ] public  string                OsName              { get; init; } = string.Empty;
+    [ MaxLength( 256 ) ] public  string                OsVersion           { get; init; } = string.Empty;
+    public                       PlatformID            Platform            { get; init; }
+    [ MaxLength( 256 ) ] public  string                SdkName             { get; init; } = string.Empty;
+    [ MaxLength( 256 ) ] public  string                SdkVersion          { get; init; } = string.Empty;
+    public                       TimeSpan              TimeZoneOffset      { get; init; }
 
 
-    public DeviceRecord() : base() { }
     public DeviceRecord( IDevice device, UserRecord? caller = default ) : base( caller )
     {
         DeviceID            = device.DeviceID;
@@ -46,6 +45,19 @@ public sealed record DeviceRecord : LoggerTable<DeviceRecord>, IDevice
         HardwareInfo        = device.HwInfo?.ToJson();
     }
 
+    public static DeviceRecord Create( DbDataReader reader )
+    {
+        DateTimeOffset       dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
+        DateTimeOffset       lastModified = reader.GetFieldValue<DateTimeOffset>( nameof(LastModified) );
+        Guid                 ownerUserID  = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
+        RecordID<UserRecord> createdBy    = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(CreatedBy) ) );
+        RecordID<RoleRecord> id           = new RecordID<RoleRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) );
+        return new DeviceRecord( id, createdBy, ownerUserID, dateCreated, lastModified );
+    }
+    public static async IAsyncEnumerable<DeviceRecord> CreateAsync( DbDataReader reader, [ EnumeratorCancellation ] CancellationToken token = default )
+    {
+        while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
+    }
 
     // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Global
     public DeviceRecord Update( IDevice device, UserRecord caller )
@@ -87,21 +99,26 @@ public sealed record DeviceRecord : LoggerTable<DeviceRecord>, IDevice
 
     public override int CompareTo( DeviceRecord? other ) => string.CompareOrdinal( DeviceID, other?.DeviceID );
     public override int GetHashCode() => HashCode.Combine( DeviceID, base.GetHashCode() );
-    public override bool Equals( DeviceRecord? other )
-    {
-        if ( other is null ) { return false; }
-
-        if ( ReferenceEquals( this, other ) ) { return true; }
-
-        return string.Equals( DeviceID, other.DeviceID, StringComparison.Ordinal );
-    }
 }
 
 
 
-[Serializable, Table( "Devices" )]
-public sealed record AppDeviceRecord : Mapping<AppDeviceRecord, AppRecord, DeviceRecord>, ICreateMapping<AppDeviceRecord, AppRecord, DeviceRecord>
+[ Serializable, Table( "Devices" ) ]
+public sealed record AppDeviceRecord : Mapping<AppDeviceRecord, AppRecord, DeviceRecord>, ICreateMapping<AppDeviceRecord, AppRecord, DeviceRecord>, IDbReaderMapping<AppDeviceRecord>
 {
     public AppDeviceRecord( AppRecord               key, DeviceRecord value ) : base( key, value ) { }
     public static AppDeviceRecord Create( AppRecord key, DeviceRecord value ) => new(key, value);
+    public static AppDeviceRecord Create( DbDataReader reader )
+    {
+        DateTimeOffset       dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
+        DateTimeOffset       lastModified = reader.GetFieldValue<DateTimeOffset>( nameof(LastModified) );
+        Guid                 ownerUserID  = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
+        RecordID<UserRecord> createdBy    = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(CreatedBy) ) );
+        RecordID<RoleRecord> id           = new RecordID<RoleRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) );
+        return new AppDeviceRecord( id, createdBy, ownerUserID, dateCreated, lastModified );
+    }
+    public static async IAsyncEnumerable<AppDeviceRecord> CreateAsync( DbDataReader reader, [ EnumeratorCancellation ] CancellationToken token = default )
+    {
+        while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
+    }
 }

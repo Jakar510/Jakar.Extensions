@@ -1,16 +1,16 @@
 ﻿namespace Jakar.Database;
 
 
-[Serializable,Table( "Roles" )]
-public sealed record RoleRecord( [property: MaxLength( 1024 )]                                                     string Name,
-                                 [property: MaxLength( 1024 )]                                                     string NormalizedName,
-                                 [property: MaxLength( 4096 )]                                                     string ConcurrencyStamp,
-                                 [property: MaxLength( TokenValidationParameters.DefaultMaximumTokenSizeInBytes )] string Rights,
-                                 RecordID<RoleRecord>                                                                     ID,
-                                 RecordID<UserRecord>?                                                                    CreatedBy,
-                                 Guid?                                                                                    OwnerUserID,
-                                 DateTimeOffset                                                                           DateCreated,
-                                 DateTimeOffset?                                                                          LastModified = default
+[ Serializable, Table( "Roles" ) ]
+public sealed record RoleRecord( [ property: MaxLength( 1024 ) ]                                                     string Name,
+                                 [ property: MaxLength( 1024 ) ]                                                     string NormalizedName,
+                                 [ property: MaxLength( 4096 ) ]                                                     string ConcurrencyStamp,
+                                 [ property: MaxLength( TokenValidationParameters.DefaultMaximumTokenSizeInBytes ) ] string Rights,
+                                 RecordID<RoleRecord>                                                                       ID,
+                                 RecordID<UserRecord>?                                                                      CreatedBy,
+                                 Guid?                                                                                      OwnerUserID,
+                                 DateTimeOffset                                                                             DateCreated,
+                                 DateTimeOffset?                                                                            LastModified = default
 ) : TableRecord<RoleRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<RoleRecord>, UserRights.IRights
 {
     public RoleRecord( IdentityRole role, UserRecord?   caller                     = default ) : this( role.Name ?? string.Empty, role.NormalizedName ?? string.Empty, role.ConcurrencyStamp ?? string.Empty, caller ) { }
@@ -50,7 +50,7 @@ public sealed record RoleRecord( [property: MaxLength( 1024 )]                  
         RecordID<RoleRecord> id               = new RecordID<RoleRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) );
         return new RoleRecord( name, normalizedName, concurrencyStamp, rights, id, createdBy, ownerUserID, dateCreated, lastModified );
     }
-    public static async IAsyncEnumerable<RoleRecord> CreateAsync( DbDataReader reader, [EnumeratorCancellation] CancellationToken token = default )
+    public static async IAsyncEnumerable<RoleRecord> CreateAsync( DbDataReader reader, [ EnumeratorCancellation ] CancellationToken token = default )
     {
         while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
     }
@@ -82,6 +82,6 @@ public sealed record RoleRecord( [property: MaxLength( 1024 )]                  
         return base.CompareTo( other );
     }
 
-
+    public UserRights GetRights() => new(this);
     public async ValueTask<IEnumerable<UserRecord>> GetUsers( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => await UserRoleRecord.Where( connection, transaction, db.UserRoles, db.Users, this, token );
 }

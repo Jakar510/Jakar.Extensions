@@ -6,19 +6,27 @@ namespace Jakar.Database;
 
 public abstract partial class Database
 {
-    private TimeSpan _accessTokenExpirationTime  = TimeSpan.FromMinutes( 15 );
-    private TimeSpan _refreshTokenExpirationTime = TimeSpan.FromDays( 90 );
+    private readonly Synchronized<TimeSpan> _accessTokenExpirationTime  = new(TimeSpan.FromMinutes( 15 ));
+    private readonly Synchronized<TimeSpan> _refreshTokenExpirationTime = new(TimeSpan.FromDays( 90 ));
 
 
     public TimeSpan AccessTokenExpirationTime
     {
         get => _accessTokenExpirationTime;
-        set => SetProperty( ref _accessTokenExpirationTime, value );
+        set
+        {
+            _accessTokenExpirationTime.Value = value;
+            OnPropertyChanged();
+        }
     }
     public TimeSpan RefreshTokenExpirationTime
     {
         get => _refreshTokenExpirationTime;
-        set => SetProperty( ref _refreshTokenExpirationTime, value );
+        set
+        {
+            _refreshTokenExpirationTime.Value = value;
+            OnPropertyChanged();
+        }
     }
 
 
@@ -42,20 +50,11 @@ public abstract partial class Database
         UserRecord? user = await Users.Get( nameof(UserRecord.UserName), request.UserLogin, token );
         if ( user is null ) { return default; }
 
-        if ( user.SubscriptionExpires.HasValue )
-        {
-            if ( user.SubscriptionExpires.Value < DateTimeOffset.UtcNow )
-            {
-                user.LastBadAttempt = DateTimeOffset.UtcNow;
-                await Users.Update( connection, transaction, user, token );
-
-                return default;
-            }
-        }
+        if ( !await ValidateSubscription( connection, transaction, user, token ) ) { return default; }
 
         if ( user.IsDisabled )
         {
-            user.LastBadAttempt = DateTimeOffset.UtcNow;
+            user = user.MarkBadLogin();
             await Users.Update( connection, transaction, user, token );
 
             return default;
@@ -63,7 +62,7 @@ public abstract partial class Database
 
         if ( user.IsLocked )
         {
-            user.LastBadAttempt = DateTimeOffset.UtcNow;
+            user = user.MarkBadLogin();
             await Users.Update( connection, transaction, user, token );
 
             return default;
@@ -77,14 +76,13 @@ public abstract partial class Database
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization )]
-    protected static DateTime GetExpiration( UserRecord record, TimeSpan offset )
+    [ MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization ) ]
+    protected static DateTime GetExpiration( in DateTimeOffset? recordExpiration, in TimeSpan offset )
     {
         DateTime expires = DateTime.UtcNow + offset;
+        if ( recordExpiration is null ) { return expires; }
 
-        if ( record.SubscriptionExpires is null ) { return expires; }
-
-        DateTime date = record.SubscriptionExpires.Value.LocalDateTime;
+        DateTime date = recordExpiration.Value.LocalDateTime;
         if ( expires > date ) { expires = date; }
 
         return expires;
@@ -111,14 +109,15 @@ public abstract partial class Database
         return logins.Any();
     }
     public ValueTask<Tokens> GetToken( UserRecord user, ClaimType types = default, CancellationToken token = default ) => this.TryCall( GetToken, user, types, token );
-    public virtual async ValueTask<Tokens> GetToken( DbConnection connection, DbTransaction transaction, UserRecord user, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default )
+    public virtual async ValueTask<Tokens> GetToken( DbConnection connection, DbTransaction transaction, UserRecord record, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default )
     {
-        Claim[] claims = await user.GetUserClaims( connection, transaction, this, types, token );
+        Claim[]         claims  = await record.GetUserClaims( connection, transaction, this, types, token );
+        DateTimeOffset? expires = await GetSubscriptionExpiration( connection, transaction, record, token );
 
         var accessDescriptor = new SecurityTokenDescriptor
                                {
                                    Subject            = new ClaimsIdentity( claims ),
-                                   Expires            = GetExpiration( user, AccessTokenExpirationTime ),
+                                   Expires            = GetExpiration( expires, AccessTokenExpirationTime ),
                                    Issuer             = Options.TokenIssuer,
                                    Audience           = Options.TokenAudience,
                                    IssuedAt           = DateTime.UtcNow,
@@ -126,7 +125,7 @@ public abstract partial class Database
                                };
 
 
-        DateTime refreshExpires = GetExpiration( user, RefreshTokenExpirationTime );
+        DateTime refreshExpires = GetExpiration( expires, RefreshTokenExpirationTime );
 
         var refreshDescriptor = new SecurityTokenDescriptor
                                 {
@@ -144,9 +143,9 @@ public abstract partial class Database
         string refresh     = handler.WriteToken( handler.CreateToken( refreshDescriptor ) );
 
 
-        user.SetRefreshToken( refresh, refreshExpires );
-        await Users.Update( connection, transaction, user, token );
-        return new Tokens( user.UserID, user.FullName, Version, accessToken, refresh );
+        record.WithRefreshToken( refresh, refreshExpires );
+        await Users.Update( connection, transaction, record, token );
+        return new Tokens( record.UserID, record.FullName, Version, accessToken, refresh );
     }
 
 
@@ -156,7 +155,9 @@ public abstract partial class Database
         LoginResult loginResult = await VerifyLogin( connection, transaction, refreshToken, types, token );
         if ( loginResult.GetResult( out Error? error, out UserRecord? record ) ) { return error.Value; }
 
-        if ( !record.IsHashedRefreshToken( refreshToken ) )
+        DateTimeOffset? expires = await GetSubscriptionExpiration( connection, transaction, record, token );
+
+        if ( !UserRecord.IsHashedRefreshToken( refreshToken, ref record ) )
         {
             record.MarkBadLogin();
             await Users.Update( connection, transaction, record, token );
@@ -169,7 +170,7 @@ public abstract partial class Database
         var descriptor = new SecurityTokenDescriptor
                          {
                              Subject            = new ClaimsIdentity( claims ),
-                             Expires            = GetExpiration( record, TimeSpan.FromMinutes( 15 ) ),
+                             Expires            = GetExpiration( expires, TimeSpan.FromMinutes( 15 ) ),
                              Issuer             = Options.TokenIssuer,
                              Audience           = Options.TokenAudience,
                              IssuedAt           = DateTime.UtcNow,

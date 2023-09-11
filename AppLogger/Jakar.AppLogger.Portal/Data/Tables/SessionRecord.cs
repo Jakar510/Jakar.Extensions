@@ -2,15 +2,11 @@
 // 09/21/2022  4:52 PM
 
 
-using Jakar.Database;
-
-
-
 namespace Jakar.AppLogger.Portal.Data.Tables;
 
 
-[Serializable,Table( "Sessions" )]
-public sealed record SessionRecord : LoggerTable<SessionRecord>, IStartSession
+[ Serializable, Table( "Sessions" ) ]
+public sealed record SessionRecord : LoggerTable<SessionRecord>, IDbReaderMapping<SessionRecord>, IStartSession
 {
     public DateTimeOffset         AppStartTime { get; init; }
     public RecordID<AppRecord>    AppID        { get; init; }
@@ -26,6 +22,19 @@ public sealed record SessionRecord : LoggerTable<SessionRecord>, IStartSession
         AppID        = app.ID;
         DeviceID     = device.ID;
     }
+    public static SessionRecord Create( DbDataReader reader )
+    {
+        DateTimeOffset           dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
+        DateTimeOffset           lastModified = reader.GetFieldValue<DateTimeOffset>( nameof(LastModified) );
+        Guid                     ownerUserID  = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
+        RecordID<UserRecord>     createdBy    = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(CreatedBy) ) );
+        RecordID<LogScopeRecord> id           = new RecordID<LogScopeRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) );
+        return new SessionRecord( id, createdBy, ownerUserID, dateCreated, lastModified );
+    }
+    public static async IAsyncEnumerable<SessionRecord> CreateAsync( DbDataReader reader, [ EnumeratorCancellation ] CancellationToken token = default )
+    {
+        while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
+    }
     public StartSessionReply ToStartSessionReply() => new(ID.Value, AppID.Value, DeviceID.Value);
 
 
@@ -37,14 +46,16 @@ public sealed record SessionRecord : LoggerTable<SessionRecord>, IStartSession
     }
 
 
-    public override int CompareTo( SessionRecord? other ) => Nullable.Compare( AppID, other?.AppID );
-    public override int GetHashCode() => HashCode.Combine( AppID, DeviceID, base.GetHashCode() );
-    public override bool Equals( SessionRecord? other )
+    public override int CompareTo( SessionRecord? other )
     {
-        if ( other is null ) { return false; }
+        if ( other == null ) { return 1; }
 
-        if ( ReferenceEquals( this, other ) ) { return true; }
+        if ( ReferenceEquals( this, other ) ) { return 0; }
 
-        return AppID == other.AppID && DeviceID == other.DeviceID;
+        var appCompare = AppID.CompareTo( other.AppID );
+        if ( appCompare != 0 ) { return appCompare; }
+
+        return DeviceID.CompareTo( other.DeviceID );
     }
+    public override int GetHashCode() => HashCode.Combine( AppID, DeviceID, base.GetHashCode() );
 }

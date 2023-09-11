@@ -9,59 +9,68 @@ namespace Jakar.Database;
 
 
 [ Serializable, Table( "Users" ) ]
-public sealed partial record UserRecord( [ property: ProtectedPersonalData, MaxLength( int.MaxValue ) ] string?                                                           AdditionalData,
-                                         [ property: ProtectedPersonalData, MaxLength( 4096 ) ]         string                                                            Address,
-                                         int                                                                                                                              BadLogins,
-                                         [ property: ProtectedPersonalData, MaxLength( 256 ) ]                                                      string                City,
-                                         [ property: ProtectedPersonalData, MaxLength( 256 ) ]                                                      string                Company,
-                                         [ property: MaxLength(                        TokenValidationParameters.DefaultMaximumTokenSizeInBytes ) ] string                ConcurrencyStamp,
-                                         [ property: ProtectedPersonalData, MaxLength( 256 ) ]                                                      string                Country,
-                                         [ property: ProtectedPersonalData, MaxLength( 256 ) ]                                                      string                Department,
-                                         [ property: ProtectedPersonalData, MaxLength( 256 ) ]                                                      string                Description,
-                                         [ property: ProtectedPersonalData, MaxLength( 1024 ) ]                                                     string                Email,
-                                         [ property: MaxLength(                        256 ) ]                                                      RecordID<UserRecord>? EscalateTo,
-                                         [ property: ProtectedPersonalData, MaxLength( 256 ) ]                                                      string                Ext,
-                                         [ property: ProtectedPersonalData, MaxLength( 256 ) ]                                                      string                FirstName,
-                                         [ property: ProtectedPersonalData, MaxLength( 512 ) ]                                                      string                FullName,
-                                         [ property: MaxLength(                        256 ) ]                                                      string                Gender,
-                                         bool                                                                                                                             IsActive,
-                                         bool                                                                                                                             IsDisabled,
-                                         bool                                                                                                                             IsEmailConfirmed,
-                                         bool                                                                                                                             IsLocked,
-                                         bool                                                                                                                             IsPhoneNumberConfirmed,
-                                         bool                                                                                                                             IsTwoFactorEnabled,
-                                         DateTimeOffset?                                                                                                                  LastBadAttempt,
-                                         DateTimeOffset?                                                                                                                  LastLogin,
-                                         [ property: ProtectedPersonalData, MaxLength( 256 ) ] string                                                                     LastName,
-                                         [ property: ProtectedPersonalData, MaxLength( 512 ) ] string                                                                     Line1,
-                                         [ property: ProtectedPersonalData, MaxLength( 256 ) ] string                                                                     Line2,
-                                         DateTimeOffset?                                                                                                                  LockDate,
-                                         DateTimeOffset?                                                                                                                  LockoutEnd,
-                                         [ property: MaxLength(                        TokenValidationParameters.DefaultMaximumTokenSizeInBytes ) ] string                PasswordHash,
-                                         [ property: ProtectedPersonalData, MaxLength( 256 ) ]                                                      string                PhoneNumber,
-                                         [ property: ProtectedPersonalData, MaxLength( 256 ) ]                                                      string                PostalCode,
-                                         SupportedLanguage                                                                                                                PreferredLanguage,
-                                         [ property: MaxLength( TokenValidationParameters.DefaultMaximumTokenSizeInBytes ) ] string                                       RefreshToken,
-                                         DateTimeOffset?                                                                                                                  RefreshTokenExpiryTime,
-                                         [ property: MaxLength( TokenValidationParameters.DefaultMaximumTokenSizeInBytes ) ] string                                       Rights,
-                                         [ property: MaxLength( TokenValidationParameters.DefaultMaximumTokenSizeInBytes ) ] string                                       SecurityStamp,
-                                         Guid?                                                                                                                            SessionID,
-                                         [ property: ProtectedPersonalData, MaxLength( 256 ) ] string                                                                     StateOrProvince,
-                                         DateTimeOffset?                                                                                                                  SubscriptionExpires,
-                                         [ property: MaxLength(                        256 ) ] Guid?                                                                      SubscriptionID,
-                                         [ property: ProtectedPersonalData, MaxLength( 256 ) ] string                                                                     Title,
-                                         DateTimeOffset?                                                                                                                  TokenExpiration,
-                                         Guid                                                                                                                             UserID,
-                                         [ property: ProtectedPersonalData, MaxLength( 256 ) ]  string                                                                    UserName,
-                                         [ property: ProtectedPersonalData, MaxLength( 4096 ) ] string                                                                    Website,
-                                         RecordID<UserRecord>                                                                                                             ID,
-                                         RecordID<UserRecord>?                                                                                                            CreatedBy,
-                                         Guid?                                                                                                                            OwnerUserID,
-                                         DateTimeOffset                                                                                                                   DateCreated,
-                                         DateTimeOffset?                                                                                                                  LastModified = default
-) : TableRecord<UserRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<UserRecord>, JsonModels.IJsonStringModel, IRefreshToken, IUserID, IUserDataRecord, IUserSubscription, UserRights.IRights
+public sealed record UserRecord( Guid                                                                                                                                     UserID,
+                                 [ property: ProtectedPersonalData, MaxLength( 256 ) ]                                                      string                        UserName,
+                                 [ property: ProtectedPersonalData, MaxLength( 256 ) ]                                                      string                        FirstName,
+                                 [ property: ProtectedPersonalData, MaxLength( 256 ) ]                                                      string                        LastName,
+                                 [ property: ProtectedPersonalData, MaxLength( 512 ) ]                                                      string                        FullName,
+                                 [ property: MaxLength(                        TokenValidationParameters.DefaultMaximumTokenSizeInBytes ) ] string                        Rights,
+                                 [ property: MaxLength(                        256 ) ]                                                      string                        Gender,
+                                 [ property: ProtectedPersonalData, MaxLength( 4096 ) ]                                                     string                        Address,
+                                 int                                                                                                                                      BadLogins,
+                                 [ property: ProtectedPersonalData, MaxLength( 256 ) ]  string                                                                            City,
+                                 [ property: ProtectedPersonalData, MaxLength( 256 ) ]  string                                                                            Company,
+                                 [ property: ProtectedPersonalData, MaxLength( 256 ) ]  string                                                                            Description,
+                                 [ property: ProtectedPersonalData, MaxLength( 256 ) ]  string                                                                            Country,
+                                 [ property: ProtectedPersonalData, MaxLength( 256 ) ]  string                                                                            Department,
+                                 [ property: ProtectedPersonalData, MaxLength( 256 ) ]  string                                                                            Title,
+                                 [ property: ProtectedPersonalData, MaxLength( 4096 ) ] string                                                                            Website,
+                                 SupportedLanguage                                                                                                                        PreferredLanguage,
+                                 [ property: ProtectedPersonalData, MaxLength( 1024 ) ] string                                                                            Email,
+                                 bool                                                                                                                                     IsEmailConfirmed,
+                                 [ property: ProtectedPersonalData, MaxLength( 256 ) ] string                                                                             PhoneNumber,
+                                 [ property: ProtectedPersonalData, MaxLength( 256 ) ] string                                                                             Ext,
+                                 bool                                                                                                                                     IsPhoneNumberConfirmed,
+                                 bool                                                                                                                                     IsTwoFactorEnabled,
+                                 DateTimeOffset?                                                                                                                          LastBadAttempt,
+                                 DateTimeOffset?                                                                                                                          LastLogin,
+                                 [ property: ProtectedPersonalData, MaxLength( 512 ) ] string                                                                             Line1,
+                                 [ property: ProtectedPersonalData, MaxLength( 256 ) ] string                                                                             Line2,
+                                 [ property: ProtectedPersonalData, MaxLength( 256 ) ] string                                                                             StateOrProvince,
+                                 [ property: ProtectedPersonalData, MaxLength( 256 ) ] string                                                                             PostalCode,
+                                 bool                                                                                                                                     IsLocked,
+                                 DateTimeOffset?                                                                                                                          LockDate,
+                                 DateTimeOffset?                                                                                                                          LockoutEnd,
+                                 [ property: MaxLength( TokenValidationParameters.DefaultMaximumTokenSizeInBytes ) ] string                                               PasswordHash,
+                                 [ property: MaxLength( TokenValidationParameters.DefaultMaximumTokenSizeInBytes ) ] string                                               RefreshToken,
+                                 DateTimeOffset?                                                                                                                          RefreshTokenExpiryTime,
+                                 Guid?                                                                                                                                    SessionID,
+                                 bool                                                                                                                                     IsActive,
+                                 bool                                                                                                                                     IsDisabled,
+                                 [ property: MaxLength(                        TokenValidationParameters.DefaultMaximumTokenSizeInBytes ) ] string                        SecurityStamp,
+                                 [ property: MaxLength(                        TokenValidationParameters.DefaultMaximumTokenSizeInBytes ) ] string                        AuthenticatorKey,
+                                 [ property: MaxLength(                        TokenValidationParameters.DefaultMaximumTokenSizeInBytes ) ] string                        ConcurrencyStamp,
+                                 [ property: MaxLength(                        256 ) ]                                                      RecordID<UserRecord>?         EscalateTo,
+                                 [ property: ProtectedPersonalData, MaxLength( int.MaxValue ) ]                                             IDictionary<string, JToken?>? AdditionalData,
+                                 RecordID<UserRecord>                                                                                                                     ID,
+                                 RecordID<UserRecord>?                                                                                                                    CreatedBy,
+                                 Guid?                                                                                                                                    OwnerUserID,
+                                 DateTimeOffset                                                                                                                           DateCreated,
+                                 DateTimeOffset?                                                                                                                          LastModified = default
+) : TableRecord<UserRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<UserRecord>, IRefreshToken, IUserID, IUserDataRecord, UserRights.IRights
 {
-    private static readonly PasswordHasher<UserRecord> _hasher = new();
+    private static readonly PasswordHasher<UserRecord>    _hasher         = new();
+    private                 IDictionary<string, JToken?>? _additionalData = AdditionalData;
+    public IDictionary<string, JToken?>? AdditionalData
+    {
+        get => _additionalData;
+        set => _additionalData = value;
+    }
+
+
+    public DateTimeOffset? LastLogin { get; set; } = LastLogin;
+
+    Guid IUserID.UserID => UserID;
 
 
     public UserRecord( IUserData data, string? rights, UserRecord? caller = default ) : this( caller )
@@ -97,38 +106,38 @@ public sealed partial record UserRecord( [ property: ProtectedPersonalData, MaxL
         UserID   = Guid.NewGuid();
         UserName = userName;
         Rights   = rights;
-        UpdatePassword( password );
+        WithPassword( password );
     }
 
 
     // [DbReaderMapping]
     public static UserRecord Create( DbDataReader reader )
     {
-        var userID                 = reader.GetFieldValue<Guid>( nameof(IsEmailConfirmed) );
-        var userName               = reader.GetString( nameof(UserName) );
-        var fullName               = reader.GetString( nameof(FullName) );
-        var firstName              = reader.GetString( nameof(FirstName) );
-        var lastName               = reader.GetString( nameof(LastName) );
-        var line1                  = reader.GetString( nameof(Line1) );
-        var line2                  = reader.GetString( nameof(Line2) );
-        var city                   = reader.GetString( nameof(City) );
-        var country                = reader.GetString( nameof(Country) );
-        var postalCode             = reader.GetString( nameof(PostalCode) );
-        var phoneNumber            = reader.GetString( nameof(PhoneNumber) );
-        var address                = reader.GetString( nameof(Address) );
-        var isPhoneNumberConfirmed = reader.GetFieldValue<bool>( nameof(IsPhoneNumberConfirmed) );
-        var email                  = reader.GetString( nameof(Email) );
-        var isEmailConfirmed       = reader.GetFieldValue<bool>( nameof(IsEmailConfirmed) );
-        var badLogins              = reader.GetFieldValue<int>( nameof(BadLogins) );
-        var lastBadAttempt         = reader.GetFieldValue<DateTimeOffset>( nameof(LastBadAttempt) );
-        var company                = reader.GetString( nameof(Company) );
-        var department             = reader.GetString( nameof(Department) );
-        var title                  = reader.GetString( nameof(Title) );
-        var dateCreated            = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
-        var lastModified           = reader.GetFieldValue<DateTimeOffset>( nameof(LastModified) );
-        var ownerUserID            = reader.GetFieldValue<Guid?>( nameof(OwnerUserID) );
-        var createdBy              = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(CreatedBy) ) );
-        var id                     = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) );
+        var    userID                 = reader.GetFieldValue<Guid>( nameof(IsEmailConfirmed) );
+        string userName               = reader.GetString( nameof(UserName) );
+        string fullName               = reader.GetString( nameof(FullName) );
+        string firstName              = reader.GetString( nameof(FirstName) );
+        string lastName               = reader.GetString( nameof(LastName) );
+        string line1                  = reader.GetString( nameof(Line1) );
+        string line2                  = reader.GetString( nameof(Line2) );
+        string city                   = reader.GetString( nameof(City) );
+        string country                = reader.GetString( nameof(Country) );
+        string postalCode             = reader.GetString( nameof(PostalCode) );
+        string phoneNumber            = reader.GetString( nameof(PhoneNumber) );
+        string address                = reader.GetString( nameof(Address) );
+        bool   isPhoneNumberConfirmed = reader.GetFieldValue<bool>( nameof(IsPhoneNumberConfirmed) );
+        string email                  = reader.GetString( nameof(Email) );
+        bool   isEmailConfirmed       = reader.GetFieldValue<bool>( nameof(IsEmailConfirmed) );
+        int    badLogins              = reader.GetFieldValue<int>( nameof(BadLogins) );
+        var    lastBadAttempt         = reader.GetFieldValue<DateTimeOffset>( nameof(LastBadAttempt) );
+        string company                = reader.GetString( nameof(Company) );
+        string department             = reader.GetString( nameof(Department) );
+        string title                  = reader.GetString( nameof(Title) );
+        var    dateCreated            = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
+        var    lastModified           = reader.GetFieldValue<DateTimeOffset>( nameof(LastModified) );
+        var    ownerUserID            = reader.GetFieldValue<Guid?>( nameof(OwnerUserID) );
+        var    createdBy              = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(CreatedBy) ) );
+        var    id                     = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) );
         return new UserRecord( id, createdBy, ownerUserID, dateCreated, lastModified );
     }
     public static async IAsyncEnumerable<UserRecord> CreateAsync( DbDataReader reader, [ EnumeratorCancellation ] CancellationToken token = default )
@@ -142,9 +151,14 @@ public sealed partial record UserRecord( [ property: ProtectedPersonalData, MaxL
     {
         ArgumentNullException.ThrowIfNull( request.Data );
         UserRecord record = Create( request.Data, rights, caller );
-        record.UserName = request.UserLogin;
-        record.UpdatePassword( request.UserPassword );
-        return record.Enable();
+
+        record = record with
+                 {
+                     UserName = request.UserLogin
+                 };
+
+        return record.WithPassword( request.UserPassword )
+                     .Enable();
     }
     public static UserRecord Create( IUserData value,    string rights,   UserRecord? caller                     = default ) => new(value, rights, caller);
     public static UserRecord Create( string    userName, string password, string      rights, UserRecord? caller = default ) => new(userName, password, rights, caller);
@@ -173,13 +187,12 @@ public sealed partial record UserRecord( [ property: ProtectedPersonalData, MaxL
     }
 
 
-    public UserRecord ClearRefreshToken( string securityStamp )
-    {
-        RefreshToken           = string.Empty;
-        RefreshTokenExpiryTime = default;
-        SecurityStamp          = securityStamp;
-        return this;
-    }
+    public UserRecord ClearRefreshToken( string securityStamp ) => this with
+                                                                   {
+                                                                       RefreshToken = string.Empty,
+                                                                       RefreshTokenExpiryTime = default,
+                                                                       SecurityStamp = securityStamp
+                                                                   };
 
 
     [ RequiresPreviewFeatures ] public ValueTask<bool> RedeemCode( Database db, string code, CancellationToken token ) => db.TryCall( RedeemCode, db, code, token );
@@ -241,16 +254,7 @@ public sealed partial record UserRecord( [ property: ProtectedPersonalData, MaxL
         await UserRecoveryCodeRecord.Where( connection, transaction, db.UserRecoveryCodes, db.RecoveryCodes, this, token );
 
 
-    public UserRecord SetSubscription<TRecord>( TRecord record ) where TRecord : TableRecord<TRecord>, IUserSubscription
-    {
-        SubscriptionExpires = record.SubscriptionExpires;
-        SubscriptionID      = record.SubscriptionID;
-        return this;
-    }
-    public async ValueTask<TRecord?> GetSubscription<TRecord>( DbConnection connection, DbTransaction transaction, DbTable<TRecord> table, CancellationToken token ) where TRecord : TableRecord<TRecord>, IUserSubscription, IDbReaderMapping<TRecord> =>
-        await table.Get( connection, transaction, SubscriptionID, token );
-
-
+    public UserRights GetRights() => new(this);
     public async Task<UserRights> GetRights( DbConnection connection, DbTransaction transaction, Database db, int totalRightCount, CancellationToken token )
     {
         GroupRecord[] groups = (await GetGroups( connection, transaction, db, token )).GetArray();
@@ -353,6 +357,72 @@ public sealed partial record UserRecord( [ property: ProtectedPersonalData, MaxL
 
         return PreferredLanguage.CompareTo( other.PreferredLanguage );
     }
+    public override int CompareTo( UserRecord? other )
+    {
+        if ( other is null ) { return 1; }
+
+        if ( ReferenceEquals( this, other ) ) { return 0; }
+
+
+        int userNameComparison = string.Compare( UserName, other.UserName, StringComparison.Ordinal );
+        if ( userNameComparison != 0 ) { return userNameComparison; }
+
+        int firstNameComparison = string.Compare( FirstName, other.FirstName, StringComparison.Ordinal );
+        if ( firstNameComparison != 0 ) { return firstNameComparison; }
+
+        int lastNameComparison = string.Compare( LastName, other.LastName, StringComparison.Ordinal );
+        if ( lastNameComparison != 0 ) { return lastNameComparison; }
+
+        int fullNameComparison = string.Compare( FullName, other.FullName, StringComparison.Ordinal );
+        if ( fullNameComparison != 0 ) { return fullNameComparison; }
+
+        int descriptionComparison = string.Compare( Description, other.Description, StringComparison.Ordinal );
+        if ( descriptionComparison != 0 ) { return descriptionComparison; }
+
+        int sessionIDComparison = Nullable.Compare( SessionID, other.SessionID );
+        if ( sessionIDComparison != 0 ) { return sessionIDComparison; }
+
+        int addressComparison = string.Compare( Address, other.Address, StringComparison.Ordinal );
+        if ( addressComparison != 0 ) { return addressComparison; }
+
+        int line1Comparison = string.Compare( Line1, other.Line1, StringComparison.Ordinal );
+        if ( line1Comparison != 0 ) { return line1Comparison; }
+
+        int line2Comparison = string.Compare( Line2, other.Line2, StringComparison.Ordinal );
+        if ( line2Comparison != 0 ) { return line2Comparison; }
+
+        int cityComparison = string.Compare( City, other.City, StringComparison.Ordinal );
+        if ( cityComparison != 0 ) { return cityComparison; }
+
+        int stateComparison = string.Compare( StateOrProvince, other.StateOrProvince, StringComparison.Ordinal );
+        if ( stateComparison != 0 ) { return stateComparison; }
+
+        int countryComparison = string.Compare( Country, other.Country, StringComparison.Ordinal );
+        if ( countryComparison != 0 ) { return countryComparison; }
+
+        int postalCodeComparison = string.Compare( PostalCode, other.PostalCode, StringComparison.Ordinal );
+        if ( postalCodeComparison != 0 ) { return postalCodeComparison; }
+
+        int websiteComparison = string.Compare( Website, other.Website, StringComparison.Ordinal );
+        if ( websiteComparison != 0 ) { return websiteComparison; }
+
+        int emailComparison = string.Compare( Email, other.Email, StringComparison.Ordinal );
+        if ( emailComparison != 0 ) { return emailComparison; }
+
+        int phoneNumberComparison = string.Compare( PhoneNumber, other.PhoneNumber, StringComparison.Ordinal );
+        if ( phoneNumberComparison != 0 ) { return phoneNumberComparison; }
+
+        int extComparison = string.Compare( Ext, other.Ext, StringComparison.Ordinal );
+        if ( extComparison != 0 ) { return extComparison; }
+
+        int titleComparison = string.Compare( Title, other.Title, StringComparison.Ordinal );
+        if ( titleComparison != 0 ) { return titleComparison; }
+
+        int departmentComparison = string.Compare( Department, other.Department, StringComparison.Ordinal );
+        if ( departmentComparison != 0 ) { return departmentComparison; }
+
+        return string.Compare( Company, other.Company, StringComparison.Ordinal );
+    }
 
 
 
@@ -360,26 +430,18 @@ public sealed partial record UserRecord( [ property: ProtectedPersonalData, MaxL
 
     public bool HasPassword() => !string.IsNullOrWhiteSpace( PasswordHash );
     /// <summary>
-    ///     <para>
-    ///         <see href="https://stackoverflow.com/a/63733365/9530917"/>
-    ///     </para>
-    ///     <para>
-    ///         <see href="https://stackoverflow.com/questions/10520048/calculate-md5-checksum-for-a-file"/>
-    ///     </para>
+    ///     <para> <see href="https://stackoverflow.com/a/63733365/9530917"/> </para>
+    ///     <para> <see href="https://stackoverflow.com/questions/10520048/calculate-md5-checksum-for-a-file"/> </para>
     ///     <see cref="PasswordHasher{TRecord}"/>
     /// </summary>
-    public UserRecord UpdatePassword( string password )
-    {
-        PasswordHash = _hasher.HashPassword( this, password );
-        return this;
-    }
+    public UserRecord WithPassword( string password ) =>
+        this with
+        {
+            PasswordHash = _hasher.HashPassword( this, password )
+        };
     /// <summary>
-    ///     <para>
-    ///         <see href="https://stackoverflow.com/a/63733365/9530917"/>
-    ///     </para>
-    ///     <para>
-    ///         <see href="https://stackoverflow.com/questions/10520048/calculate-md5-checksum-for-a-file"/>
-    ///     </para>
+    ///     <para> <see href="https://stackoverflow.com/a/63733365/9530917"/> </para>
+    ///     <para> <see href="https://stackoverflow.com/questions/10520048/calculate-md5-checksum-for-a-file"/> </para>
     ///     <see cref="PasswordHasher{TRecord}"/>
     /// </summary>
     public bool VerifyPassword( string password )
@@ -402,7 +464,7 @@ public sealed partial record UserRecord( [ property: ProtectedPersonalData, MaxL
 
             case PasswordVerificationResult.SuccessRehashNeeded:
             {
-                UpdatePassword( password );
+                WithPassword( password );
                 LastLogin = DateTimeOffset.UtcNow;
                 return true;
             }
@@ -433,20 +495,25 @@ public sealed partial record UserRecord( [ property: ProtectedPersonalData, MaxL
 
     public UserRecord MarkBadLogin()
     {
-        BadLogins      += 1;
-        IsDisabled     =  BadLogins > 5;
-        LastBadAttempt =  DateTimeOffset.UtcNow;
+        int badLogins = BadLogins + 1;
 
-        return IsDisabled
-                   ? Lock()
-                   : Unlock();
-    }
-    public UserRecord SetActive( bool? isActive = default )
-    {
-        if ( isActive is not null ) { IsActive = isActive.Value; }
+        UserRecord user = this with
+                          {
+                              BadLogins = badLogins,
+                              IsDisabled = badLogins > 5,
+                              LastBadAttempt = DateTimeOffset.UtcNow
+                          };
 
-        return this;
+        return user.IsDisabled
+                   ? user.Lock()
+                   : user.Unlock();
     }
+    public UserRecord SetActive( bool? isActive = default ) => isActive.HasValue
+                                                                   ? this with
+                                                                     {
+                                                                         IsActive = isActive.Value
+                                                                     }
+                                                                   : this;
 
 
     public bool TryEnable()
@@ -455,45 +522,42 @@ public sealed partial record UserRecord( [ property: ProtectedPersonalData, MaxL
 
         return !IsDisabled && IsActive;
     }
-    public UserRecord Disable()
-    {
-        IsActive   = false;
-        IsDisabled = true;
-        return this;
-    }
-    public UserRecord Enable()
-    {
-        IsDisabled = false;
-        IsActive   = true;
-        return this;
-    }
+    public UserRecord Disable() => this with
+                                   {
+                                       IsActive = false,
+                                       IsDisabled = true
+                                   };
+    public UserRecord Enable() => this with
+                                  {
+                                      IsDisabled = false,
+                                      IsActive = true
+                                  };
 
 
-    public UserRecord Reset()
-    {
-        BadLogins = 0;
+    public UserRecord Reset() => this with
+                                 {
+                                     IsLocked = false,
+                                     LockDate = default,
+                                     LockoutEnd = default,
+                                     BadLogins = 0,
+                                     IsDisabled = false,
+                                     IsActive = true
+                                 };
 
-        return Unlock()
-              .Enable()
-              .SetActive( true );
-    }
 
-
-    public UserRecord Unlock()
-    {
-        IsLocked   = false;
-        LockDate   = default;
-        LockoutEnd = default;
-        return this;
-    }
+    public UserRecord Unlock() => this with
+                                  {
+                                      IsLocked = false,
+                                      LockDate = default,
+                                      LockoutEnd = default
+                                  };
     public UserRecord Lock() => Lock( TimeSpan.FromHours( 6 ) );
-    public UserRecord Lock( in TimeSpan offset )
-    {
-        IsLocked   = true;
-        LockDate   = DateTimeOffset.UtcNow;
-        LockoutEnd = LockDate + offset;
-        return this;
-    }
+    public UserRecord Lock( in TimeSpan offset ) => this with
+                                                    {
+                                                        IsLocked = true,
+                                                        LockDate = DateTimeOffset.UtcNow,
+                                                        LockoutEnd = LockDate + offset
+                                                    };
 
     #endregion
 
@@ -501,41 +565,46 @@ public sealed partial record UserRecord( [ property: ProtectedPersonalData, MaxL
 
     #region Updaters
 
-    public UserRecord Update( IDictionary<string, JToken?>? value )
+    public UserRecord WithAdditionalData( IDictionary<string, JToken?>? value )
     {
         if ( value is null ) { return this; }
 
-        JsonModels.IJsonStringModel  model = this;
-        IDictionary<string, JToken?> data  = model.GetData();
+        IDictionary<string, JToken?> data = this.GetData();
         foreach ( (string? key, JToken? jToken) in value ) { data[key] = jToken; }
 
-        model.SetAdditionalData( data );
-        return this;
+        return this with
+               {
+                   AdditionalData = data
+               };
     }
-    public UserRecord Update( IUserData value )
+    public UserRecord WithUserData( IUserData value )
     {
-        FirstName         = value.FirstName;
-        LastName          = value.LastName;
-        FullName          = value.FullName;
-        Address           = value.Address;
-        Line1             = value.Line1;
-        Line2             = value.Line2;
-        City              = value.City;
-        StateOrProvince   = value.StateOrProvince;
-        Country           = value.Country;
-        PostalCode        = value.PostalCode;
-        Description       = value.Description;
-        Website           = value.Website;
-        Email             = value.Email;
-        PhoneNumber       = value.PhoneNumber;
-        Ext               = value.Ext;
-        Title             = value.Title;
-        Department        = value.Department;
-        Company           = value.Company;
-        PreferredLanguage = value.PreferredLanguage;
-        return Update( value.AdditionalData );
+        UserRecord user = this with
+                          {
+                              FirstName = value.FirstName,
+                              LastName = value.LastName,
+                              FullName = value.FullName,
+                              Address = value.Address,
+                              Line1 = value.Line1,
+                              Line2 = value.Line2,
+                              City = value.City,
+                              StateOrProvince = value.StateOrProvince,
+                              Country = value.Country,
+                              PostalCode = value.PostalCode,
+                              Description = value.Description,
+                              Website = value.Website,
+                              Email = value.Email,
+                              PhoneNumber = value.PhoneNumber,
+                              Ext = value.Ext,
+                              Title = value.Title,
+                              Department = value.Department,
+                              Company = value.Company,
+                              PreferredLanguage = value.PreferredLanguage
+                          };
+
+        return user.WithAdditionalData( value.AdditionalData );
     }
-    void IUserData.Update( IUserData data ) => Update( data );
+    IUserData IUserData.WithUserData( IUserData data ) => WithUserData( data );
 
     #endregion
 
@@ -543,30 +612,26 @@ public sealed partial record UserRecord( [ property: ProtectedPersonalData, MaxL
 
     #region Tokens
 
-    public UserRecord ClearRefreshToken()
-    {
-        RefreshToken           = string.Empty;
-        RefreshTokenExpiryTime = default;
-        return this;
-    }
-    public bool IsHashedRefreshToken( string? token )
+    public static bool IsHashedRefreshToken( string? token, ref UserRecord record )
     {
         // ReSharper disable once InvertIf
-        if ( RefreshTokenExpiryTime.HasValue && DateTimeOffset.UtcNow > RefreshTokenExpiryTime.Value )
+        if ( record.RefreshTokenExpiryTime.HasValue && DateTimeOffset.UtcNow > record.RefreshTokenExpiryTime.Value )
         {
-            ClearRefreshToken();
-            return false;
+            record = record.WithNoRefreshToken();
+            return true;
         }
 
 
-        return string.Equals( RefreshToken,
+        return string.Equals( record.RefreshToken,
                               token?.GetHashCode()
                                     .ToString(),
                               StringComparison.Ordinal );
     }
-    public bool IsHashedRefreshToken( Tokens token ) => IsHashedRefreshToken( token.RefreshToken );
+    public static bool IsHashedRefreshToken( Tokens token, ref UserRecord record ) => IsHashedRefreshToken( token.RefreshToken, ref record );
 
-    public UserRecord SetRefreshToken( string? token, in DateTimeOffset date, in bool hashed = true )
+
+    public UserRecord WithNoRefreshToken() => WithRefreshToken( default, default );
+    public UserRecord WithRefreshToken( string? token, in DateTimeOffset? date, in bool hashed = true )
     {
         if ( hashed )
         {
@@ -574,11 +639,13 @@ public sealed partial record UserRecord( [ property: ProtectedPersonalData, MaxL
                           .ToString();
         }
 
-        RefreshToken           = token ?? string.Empty;
-        RefreshTokenExpiryTime = date;
-        return this;
+        return this with
+               {
+                   RefreshToken = token ?? string.Empty,
+                   RefreshTokenExpiryTime = date
+               };
     }
-    public UserRecord SetRefreshToken( string? token, in DateTimeOffset date, string securityStamp, in bool hashed = true )
+    public UserRecord WithRefreshToken( string? token, in DateTimeOffset? date, string securityStamp, in bool hashed = true )
     {
         if ( hashed )
         {
@@ -586,14 +653,16 @@ public sealed partial record UserRecord( [ property: ProtectedPersonalData, MaxL
                           .ToString();
         }
 
-        RefreshToken           = token ?? string.Empty;
-        RefreshTokenExpiryTime = date;
-        SecurityStamp          = securityStamp;
-        return this;
+        return this with
+               {
+                   RefreshToken = token ?? string.Empty,
+                   RefreshTokenExpiryTime = date,
+                   SecurityStamp = securityStamp
+               };
     }
 
-    public UserRecord SetRefreshToken( Tokens token, in DateTimeOffset date, in bool hashed                        = true ) => SetRefreshToken( token.RefreshToken, date, hashed );
-    public UserRecord SetRefreshToken( Tokens token, in DateTimeOffset date, string  securityStamp, in bool hashed = true ) => SetRefreshToken( token.RefreshToken, date, securityStamp, hashed );
+    public UserRecord SetRefreshToken( Tokens token, in DateTimeOffset? date, in bool hashed                        = true ) => WithRefreshToken( token.RefreshToken, date, hashed );
+    public UserRecord SetRefreshToken( Tokens token, in DateTimeOffset? date, string  securityStamp, in bool hashed = true ) => WithRefreshToken( token.RefreshToken, date, securityStamp, hashed );
 
     #endregion
 
@@ -658,9 +727,22 @@ public sealed partial record UserRecord( [ property: ProtectedPersonalData, MaxL
 
         if ( types.HasFlag( ClaimType.Gender ) ) { claims.Add( new Claim( ClaimTypes.Gender, Gender, ClaimValueTypes.String ) ); }
 
-        if ( types.HasFlag( ClaimType.SubscriptionExpiration ) ) { claims.Add( new Claim( ClaimTypes.Expiration, SubscriptionExpires?.ToString() ?? string.Empty, ClaimValueTypes.DateTime ) ); }
-
-        if ( types.HasFlag( ClaimType.Expired ) ) { claims.Add( new Claim( ClaimTypes.Expired, (SubscriptionExpires > DateTimeOffset.UtcNow).ToString(), ClaimValueTypes.Boolean ) ); }
+        if ( types.HasFlag( ClaimType.SubscriptionExpiration ) && types.HasFlag( ClaimType.Expired ) )
+        {
+            DateTimeOffset? expires = await db.GetSubscriptionExpiration( connection, transaction, this, token );
+            claims.Add( new Claim( ClaimTypes.Expiration, expires?.ToString() ?? string.Empty,          ClaimValueTypes.DateTime ) );
+            claims.Add( new Claim( ClaimTypes.Expired,    (expires > DateTimeOffset.UtcNow).ToString(), ClaimValueTypes.Boolean ) );
+        }
+        else if ( types.HasFlag( ClaimType.SubscriptionExpiration ) && !types.HasFlag( ClaimType.Expired ) )
+        {
+            DateTimeOffset? expires = await db.GetSubscriptionExpiration( connection, transaction, this, token );
+            claims.Add( new Claim( ClaimTypes.Expiration, expires?.ToString() ?? string.Empty, ClaimValueTypes.DateTime ) );
+        }
+        else if ( types.HasFlag( ClaimType.Expired ) && !types.HasFlag( ClaimType.SubscriptionExpiration ) )
+        {
+            DateTimeOffset? expires = await db.GetSubscriptionExpiration( connection, transaction, this, token );
+            claims.Add( new Claim( ClaimTypes.Expired, (expires > DateTimeOffset.UtcNow).ToString(), ClaimValueTypes.Boolean ) );
+        }
 
         if ( types.HasFlag( ClaimType.Email ) ) { claims.Add( new Claim( ClaimTypes.Email, Email, ClaimValueTypes.String ) ); }
 
@@ -723,13 +805,6 @@ public sealed partial record UserRecord( [ property: ProtectedPersonalData, MaxL
         {
             parameters.Add( nameof(FullName),
                             claims.Single( x => x.Type == ClaimTypes.Name )
-                                  .Value );
-        }
-
-        if ( types.HasFlag( ClaimType.SubscriptionExpiration ) )
-        {
-            parameters.Add( nameof(SubscriptionExpires),
-                            claims.Single( x => x.Type == ClaimTypes.Expiration )
                                   .Value );
         }
 
@@ -815,10 +890,6 @@ public sealed partial record UserRecord( [ property: ProtectedPersonalData, MaxL
 
             case ClaimTypes.Name:
                 parameters.Add( nameof(FullName), claim.Value );
-                break;
-
-            case ClaimTypes.Expiration:
-                parameters.Add( nameof(SubscriptionExpires), claim.Value );
                 break;
 
             case ClaimTypes.Email:

@@ -6,15 +6,16 @@ namespace Jakar.Database;
 
 public abstract partial class Database
 {
+    [ SuppressMessage( "ReSharper", "UnusedParameter.Global" ) ]
+    public virtual ValueTask<DateTimeOffset?> GetSubscriptionExpiration( DbConnection connection, DbTransaction? transaction, UserRecord record, CancellationToken token = default ) => new(default(DateTimeOffset?));
+    public virtual ValueTask<TRecord> GetSubscription<TRecord>( DbConnection connection, DbTransaction? transaction, UserRecord record, CancellationToken token = default ) where TRecord : UserSubscription<TRecord> => default;
+
     /// <summary> </summary>
     /// <returns>
     /// <see langword="true"/> is Subscription is valid; otherwise <see langword="false"/>
     /// </returns>
-    [SuppressMessage( "ReSharper", "UnusedParameter.Global" )]
-    protected virtual ValueTask<bool> ValidateSubscription( DbConnection connection, DbTransaction? transaction, UserRecord record, CancellationToken token = default ) =>
-
-        // if ( user.SubscriptionID is null || user.SubscriptionID.Value != Guid.Empty ) { return true; }
-        new(true);
+    [ SuppressMessage( "ReSharper", "UnusedParameter.Global" ) ]
+    public virtual ValueTask<bool> ValidateSubscription( DbConnection connection, DbTransaction? transaction, UserRecord record, CancellationToken token = default ) => new(true);
 
 
     protected virtual async ValueTask<LoginResult> VerifyLogin( DbConnection connection, DbTransaction transaction, VerifyRequest request, CancellationToken token = default )

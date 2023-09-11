@@ -4,7 +4,7 @@
 namespace Jakar.Database.Caches;
 
 
-public sealed class TableCache<TRecord> : IHostedService, IReadOnlyCollection<TRecord>, IAsyncEnumerator<TRecord?> where TRecord : TableRecord<TRecord>
+public sealed class TableCache<TRecord> : IHostedService, IReadOnlyCollection<TRecord>, IAsyncEnumerator<TRecord?> where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
     private readonly ConcurrentDictionary<Guid, CacheEntry<TRecord>> _records = new();
     private readonly DbTable<TRecord>                                _table;
@@ -98,7 +98,7 @@ public sealed class TableCache<TRecord> : IHostedService, IReadOnlyCollection<TR
     }
 
 
-    public bool TryGetValue( Guid key, [NotNullWhen( true )] out TRecord? value )
+    public bool TryGetValue( Guid key, [ NotNullWhen( true ) ] out TRecord? value )
     {
         if ( _records.TryGetValue( key, out CacheEntry<TRecord>? entry ) )
         {
@@ -112,9 +112,9 @@ public sealed class TableCache<TRecord> : IHostedService, IReadOnlyCollection<TR
 
 
     public bool TryRemove( TRecord pair ) => _records.TryRemove( pair.ID.Value, out _ );
-    public bool TryRemove( TRecord pair, [NotNullWhen( true )] out TRecord? value ) => TryRemove( pair.ID.Value, out value );
+    public bool TryRemove( TRecord pair, [ NotNullWhen( true ) ] out TRecord? value ) => TryRemove( pair.ID.Value, out value );
     public bool TryRemove( Guid    key ) => _records.TryRemove( key, out _ );
-    public bool TryRemove( Guid key, [NotNullWhen( true )] out TRecord? value )
+    public bool TryRemove( Guid key, [ NotNullWhen( true ) ] out TRecord? value )
     {
         if ( _keys.Any() ) { Reset(); }
 

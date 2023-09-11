@@ -6,5 +6,5 @@ namespace Jakar.Database.Resx;
 
 public interface IResxProvider : IConnectableDb
 {
-    public DbTable<ResxRowTable> Resx { get; }
+    public DbTable<ResxRowRecord> Resx { get; }
 }

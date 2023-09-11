@@ -4,23 +4,22 @@
 namespace Jakar.AppLogger.Portal.Data.Tables;
 
 
-[Serializable, Table( "Attachments" )]
-public sealed record LoggerAttachmentRecord : LoggerTable<LoggerAttachmentRecord>, ILoggerAttachment, ILogInfo
+[ Serializable, Table( "Attachments" ) ]
+public sealed record LoggerAttachmentRecord : LoggerTable<LoggerAttachmentRecord>, IDbReaderMapping<LoggerAttachmentRecord>, ILoggerAttachment, ILogInfo
 {
-    public                                                  Guid    AppID       { get; init; }
-    [MaxLength( LoggerAttachment.MAX_SIZE )]         public string  Content     { get; init; } = string.Empty;
-    [MaxLength( LoggerAttachment.DESCRIPTION_SIZE )] public string? Description { get; init; }
-    public                                                  Guid    DeviceID    { get; init; }
-    [MaxLength( LoggerAttachment.FILE_NAME_SIZE )] public   string? FileName    { get; init; }
-    public                                                  bool    IsBinary    { get; init; }
-    public                                                  long    Length      { get; init; }
-    public                                                  Guid    LogID       { get; init; }
-    public                                                  Guid    ScopeID     { get; init; }
-    public                                                  Guid?   SessionID   { get; init; }
-    [MaxLength( LoggerAttachment.TYPE_SIZE )] public        string? Type        { get; init; }
+    public                                                    Guid    AppID       { get; init; }
+    [ MaxLength( LoggerAttachment.MAX_SIZE ) ]         public string  Content     { get; init; } = string.Empty;
+    [ MaxLength( LoggerAttachment.DESCRIPTION_SIZE ) ] public string? Description { get; init; }
+    public                                                    Guid    DeviceID    { get; init; }
+    [ MaxLength( LoggerAttachment.FILE_NAME_SIZE ) ] public   string? FileName    { get; init; }
+    public                                                    bool    IsBinary    { get; init; }
+    public                                                    long    Length      { get; init; }
+    public                                                    Guid    LogID       { get; init; }
+    public                                                    Guid    ScopeID     { get; init; }
+    public                                                    Guid?   SessionID   { get; init; }
+    [ MaxLength( LoggerAttachment.TYPE_SIZE ) ] public        string? Type        { get; init; }
 
 
-    public LoggerAttachmentRecord() : base() { }
     public LoggerAttachmentRecord( LoggerAttachment attachment, ILogInfo info, UserRecord? caller = default ) : base( caller )
     {
         if ( attachment.Length > LoggerAttachment.MAX_SIZE ) { LoggerAttachment.ThrowTooLong( attachment.Length ); }
@@ -39,6 +38,12 @@ public sealed record LoggerAttachmentRecord : LoggerTable<LoggerAttachmentRecord
         // ScopeIDs = info.ScopeIDs;
     }
 
+
+    public static LoggerAttachmentRecord Create( DbDataReader reader ) => null;
+    public static async IAsyncEnumerable<LoggerAttachmentRecord> CreateAsync( DbDataReader reader, [ EnumeratorCancellation ] CancellationToken token = default )
+    {
+        while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
+    }
 
     public static IEnumerable<LoggerAttachmentRecord> Create( LogRecord record, AppLog log, UserRecord caller )
     {
@@ -79,23 +84,24 @@ public sealed record LoggerAttachmentRecord : LoggerTable<LoggerAttachmentRecord
                                                                            };
 
 
-    public override bool Equals( LoggerAttachmentRecord? other )
-    {
-        if ( other is null ) { return false; }
-
-        if ( ReferenceEquals( this, other ) ) { return true; }
-
-        return string.Equals( Content, other.Content, StringComparison.Ordinal );
-    }
     public override int CompareTo( LoggerAttachmentRecord? other ) => string.CompareOrdinal( Content, other?.Content );
     public override int GetHashCode() => HashCode.Combine( Content, base.GetHashCode() );
 }
 
 
 
-[Serializable, Table( "LogAttachments" )]
-public sealed record LoggerAttachmentMappingRecord : Mapping<LoggerAttachmentMappingRecord, LogRecord, LoggerAttachmentRecord>, ICreateMapping<LoggerAttachmentMappingRecord, LogRecord, LoggerAttachmentRecord>
+[ Serializable, Table( "LogAttachments" ) ]
+public sealed record LoggerAttachmentMappingRecord : Mapping<LoggerAttachmentMappingRecord, LogRecord, LoggerAttachmentRecord>,
+                                                     ICreateMapping<LoggerAttachmentMappingRecord, LogRecord, LoggerAttachmentRecord>,
+                                                     IDbReaderMapping<LoggerAttachmentMappingRecord>
 {
     public LoggerAttachmentMappingRecord( LogRecord               key, LoggerAttachmentRecord value ) : base( key, value ) { }
     public static LoggerAttachmentMappingRecord Create( LogRecord key, LoggerAttachmentRecord value ) => new(key, value);
+
+
+    public static LoggerAttachmentMappingRecord Create( DbDataReader reader ) => null;
+    public static async IAsyncEnumerable<LoggerAttachmentMappingRecord> CreateAsync( DbDataReader reader, [ EnumeratorCancellation ] CancellationToken token = default )
+    {
+        while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
+    }
 }
