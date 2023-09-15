@@ -268,6 +268,24 @@ public static partial class AsyncLinq
     }
 
 
+    public static IEnumerable<string> WhereNotNull( this IEnumerable<string?> values )
+    {
+        // ReSharper disable once LoopCanBeConvertedToQuery
+        foreach ( string? element in values )
+        {
+            if ( !string.IsNullOrEmpty(element) ) { yield return element; }
+        }
+    }
+    public static async IAsyncEnumerable<string> WhereNotNull( this IAsyncEnumerable<string?> values )
+    {
+        // ReSharper disable once LoopCanBeConvertedToQuery
+        await foreach ( string? element in values )
+        {
+            if ( !string.IsNullOrEmpty(element) ) { yield return element; }
+        }
+    }
+
+
     public static IEnumerable<TElement> WhereNotNull<TElement>( this IEnumerable<TElement?> values )
     {
         // ReSharper disable once LoopCanBeConvertedToQuery
