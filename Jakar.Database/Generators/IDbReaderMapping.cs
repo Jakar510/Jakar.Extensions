@@ -1,12 +1,9 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 09/07/2023  10:04 PM
 
-using System.Xml.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Text;
-using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 
 
@@ -20,13 +17,6 @@ namespace Jakar.Database;
 [ Generator ]
 public sealed class DbReaderMappingGenerator : IIncrementalGenerator
 {
-    public void Initialize( GeneratorInitializationContext generator ) => generator.RegisterForSyntaxNotifications( MainSyntaxReceiver.Create );
-    public void Execute( GeneratorExecutionContext generator )
-    {
-        if ( generator.SyntaxReceiver is not MainSyntaxReceiver main ) { return; }
-
-        foreach ( MainSyntaxReceiver.Capture capture in main.Captures ) { capture.Execute( ref generator ); }
-    }
     public void Initialize( IncrementalGeneratorInitializationContext context )
     {
         IncrementalValueProvider<ImmutableArray<ClassDeclarationSyntax>> declarations = context.SyntaxProvider.CreateSyntaxProvider( IsSyntaxTargetForGeneration, GetSemanticTargetForGeneration )
@@ -36,7 +26,7 @@ public sealed class DbReaderMappingGenerator : IIncrementalGenerator
         IncrementalValueProvider<(Compilation Left, ImmutableArray<ClassDeclarationSyntax> Right)> values = context.CompilationProvider.Combine( declarations );
         context.RegisterSourceOutput( values, ExecuteHandler );
     }
-    private static void ExecuteHandler( SourceProductionContext spc,  (Compilation Compilation, ImmutableArray<ClassDeclarationSyntax> Declaration) source ) { Execute( source.Compilation, source.Declaration, spc ); }
+    private static void ExecuteHandler( SourceProductionContext spc,  (Compilation Compilation, ImmutableArray<ClassDeclarationSyntax> Declaration) source ) => Execute( source.Compilation, source.Declaration, spc );
     private static bool IsSyntaxTargetForGeneration( SyntaxNode node, CancellationToken                                                             token ) => node is MethodDeclarationSyntax { AttributeLists.Count: > 0 };
     private static ClassDeclarationSyntax? GetSemanticTargetForGeneration( GeneratorSyntaxContext context, CancellationToken token )
     {
@@ -75,15 +65,15 @@ public sealed class DbReaderMappingGenerator : IIncrementalGenerator
     {
         if ( array.IsDefaultOrEmpty ) { return; }
 
-        IEnumerable<ClassDeclarationSyntax> distinctClasses = array.Distinct();
-        var                                 p               = new Parser( compilation, context.ReportDiagnostic, context.CancellationToken );
+        IEnumerable<ClassDeclarationSyntax> declarations = array.Distinct();
+        var                                 parser       = new Parser( compilation, context.ReportDiagnostic, context.CancellationToken );
 
-        IReadOnlyList<TableClass> logClasses = p.GetLogClasses( distinctClasses );
-        if ( logClasses.Count <= 0 ) { return; }
+        ImmutableArray<DbRecordClassDescription> dbRecords = parser.GetLogClasses( declarations )
+                                                                   .ToImmutableArray();
 
-        var    e      = new Emitter();
-        string result = e.Emit( logClasses, context.CancellationToken );
-        context.AddSource( "LoggerMessage.g.cs", SourceText.From( result, Encoding.UTF8 ) );
+        if ( dbRecords.Length <= 0 ) { return; }
+
+        foreach ( DbRecordClassDescription description in dbRecords ) { description.Emit( context ); }
     }
 }
 
@@ -91,31 +81,41 @@ public sealed class DbReaderMappingGenerator : IIncrementalGenerator
 
 internal class Parser
 {
-    private readonly Compilation        _compilation;
     private readonly Action<Diagnostic> _reportDiagnostic;
     private readonly CancellationToken  _token;
+    private readonly Compilation        _compilation;
+
+
     public Parser( Compilation compilation, Action<Diagnostic> reportDiagnostic, CancellationToken token )
     {
         _compilation      = compilation;
         _reportDiagnostic = reportDiagnostic;
         _token            = token;
     }
-    public IReadOnlyList<TableClass> GetLogClasses( IEnumerable<ClassDeclarationSyntax> distinctClasses ) { return Array.Empty<TableClass>(); }
+    public IEnumerable<DbRecordClassDescription> GetLogClasses( IEnumerable<ClassDeclarationSyntax> declarations )
+    {
+        foreach ( ClassDeclarationSyntax declaration in declarations )
+        {
+            if ( DbRecordClassDescription.TryCreate( declaration, out DbRecordClassDescription? result ) )
+            {
+                _reportDiagnostic.Invoke( Found( declaration, result ) );
+                yield return result;
+            }
+        }
+    }
+    private static Diagnostic Found( BaseTypeDeclarationSyntax declaration, DbRecordClassDescription description )
+    {
+        const string ID         = $"{nameof(DbReaderMappingGenerator)}.{nameof(Parser)}.{nameof(Found)}";
+        var          descriptor = new DiagnosticDescriptor( ID, $"Found method '{description.MethodName}' in {declaration.Identifier.ValueText}", string.Empty, nameof(DbReaderMappingGenerator), DiagnosticSeverity.Info, true );
+        var          location   = Location.Create( declaration.SyntaxTree, default );
+
+        return Diagnostic.Create( descriptor, location );
+    }
 }
 
 
 
-internal class TableClass { }
-
-
-
-internal class Emitter
-{
-    public string Emit( IReadOnlyList<TableClass> logClasses, CancellationToken token ) { return null; }
-}
-
-
-
+/*
 public sealed class MainSyntaxReceiver : ISyntaxReceiver
 {
     public List<Capture> Captures { get; } = new();
@@ -240,3 +240,4 @@ public sealed class MainSyntaxReceiver : ISyntaxReceiver
                                                              .WithTypeArgumentList( TypeArgumentList( SingletonSeparatedList<TypeSyntax>( IdentifierName( type ) ) ) ) ) );
     }
 }
+*/
