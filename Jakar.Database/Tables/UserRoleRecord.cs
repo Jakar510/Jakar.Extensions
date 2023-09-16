@@ -10,6 +10,7 @@ public sealed record UserRoleRecord : Mapping<UserRoleRecord, UserRecord, RoleRe
     public UserRoleRecord( UserRecord                                           owner, RoleRecord value ) : base( owner, value ) { }
     [ RequiresPreviewFeatures ] public static UserRoleRecord Create( UserRecord owner, RoleRecord value ) => new(owner, value);
 
+
     public static UserRoleRecord Create( DbDataReader reader )
     {
         DateTimeOffset           dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );

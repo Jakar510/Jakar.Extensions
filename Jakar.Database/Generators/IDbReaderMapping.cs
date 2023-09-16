@@ -19,93 +19,67 @@ public sealed class DbReaderMappingGenerator : IIncrementalGenerator
 {
     public void Initialize( IncrementalGeneratorInitializationContext context )
     {
-        IncrementalValueProvider<ImmutableArray<ClassDeclarationSyntax>> declarations = context.SyntaxProvider.CreateSyntaxProvider( IsSyntaxTargetForGeneration, GetSemanticTargetForGeneration )
-                                                                                               .Where( static m => m is not null )
-                                                                                               .Collect()!;
-
-        IncrementalValueProvider<(Compilation Left, ImmutableArray<ClassDeclarationSyntax> Right)> values = context.CompilationProvider.Combine( declarations );
-        context.RegisterSourceOutput( values, ExecuteHandler );
+        // ReSharper disable once NullableWarningSuppressionIsUsed
+        context.RegisterSourceOutput( context.CompilationProvider.Combine( context.SyntaxProvider.CreateSyntaxProvider( IsSyntaxTargetForGeneration, GetSemanticTargetForGeneration )
+                                                                                  .Where( static m => m is not null )
+                                                                                  .Collect() ),
+                                      ExecuteHandler );
     }
-    private static void ExecuteHandler( SourceProductionContext spc,  (Compilation Compilation, ImmutableArray<ClassDeclarationSyntax> Declaration) source ) => Execute( source.Compilation, source.Declaration, spc );
-    private static bool IsSyntaxTargetForGeneration( SyntaxNode node, CancellationToken                                                             token ) => node is MethodDeclarationSyntax { AttributeLists.Count: > 0 };
+    private static void ExecuteHandler( SourceProductionContext context, (Compilation Compilation, ImmutableArray<ClassDeclarationSyntax?> Declaration) source ) => Execute( source.Compilation, source.Declaration, context );
+
+
+    private static bool IsSyntaxTargetForGeneration( SyntaxNode node, CancellationToken token ) => node is MethodDeclarationSyntax { AttributeLists.Count: > 0 };
+
+
     private static ClassDeclarationSyntax? GetSemanticTargetForGeneration( GeneratorSyntaxContext context, CancellationToken token )
     {
-        // we know the node is a MethodDeclarationSyntax thanks to IsSyntaxTargetForGeneration
-        var methodDeclarationSyntax = (MethodDeclarationSyntax)context.Node;
+        if ( context.Node is not MethodDeclarationSyntax declaration ) { throw new ExpectedValueTypeException( $"{nameof(context)}.{nameof(GeneratorSyntaxContext.Node)}", context.Node, typeof(MethodDeclarationSyntax) ); }
 
-        // loop through all the attributes on the method
-        foreach ( AttributeListSyntax attributeListSyntax in methodDeclarationSyntax.AttributeLists )
+        foreach ( AttributeSyntax attributeSyntax in declaration.AttributeLists.SelectMany( attributeListSyntax => attributeListSyntax.Attributes ) )
         {
-            foreach ( AttributeSyntax attributeSyntax in attributeListSyntax.Attributes )
+            if ( context.SemanticModel.GetSymbolInfo( attributeSyntax, token )
+                        .Symbol is IMethodSymbol attributeSymbol &&
+                 attributeSymbol.ContainingType.ToDisplayString() == nameof(DbReaderMapping) ) // Is the attribute the [DbReaderMapping] attribute?
             {
-                if ( context.SemanticModel.GetSymbolInfo( attributeSyntax )
-                            .Symbol is not IMethodSymbol attributeSymbol )
-                {
-                    // weird, we couldn't get the symbol, ignore it
-                    continue;
-                }
-
-                INamedTypeSymbol attributeContainingTypeSymbol = attributeSymbol.ContainingType;
-                string           fullName                      = attributeContainingTypeSymbol.ToDisplayString();
-
-                if ( fullName == nameof(LoggerMessageAttribute) ) // Is the attribute the [LoggerMessage] attribute?
-                {
-                    return methodDeclarationSyntax.Parent as ClassDeclarationSyntax; // return the parent class of the method
-                }
+                return declaration.Parent as ClassDeclarationSyntax; // return the parent class of the method
             }
         }
 
-        // we didn't find the attribute we were looking for
-        return null;
+        return default;
     }
 
 
     // https://andrewlock.net/exploring-dotnet-6-part-9-source-generator-updates-incremental-generators/
-    private static void Execute( Compilation compilation, ImmutableArray<ClassDeclarationSyntax> array, SourceProductionContext context )
+    private static void Execute( Compilation compilation, ImmutableArray<ClassDeclarationSyntax?> array, SourceProductionContext context )
     {
         if ( array.IsDefaultOrEmpty ) { return; }
 
-        IEnumerable<ClassDeclarationSyntax> declarations = array.Distinct();
-        var                                 parser       = new Parser( compilation, context.ReportDiagnostic, context.CancellationToken );
-
-        ImmutableArray<DbRecordClassDescription> dbRecords = parser.GetLogClasses( declarations )
-                                                                   .ToImmutableArray();
+        ImmutableArray<DbRecordClassDescription> dbRecords = GetClasses( context, array );
 
         if ( dbRecords.Length <= 0 ) { return; }
 
         foreach ( DbRecordClassDescription description in dbRecords ) { description.Emit( context ); }
     }
-}
 
-
-
-internal class Parser
-{
-    private readonly Action<Diagnostic> _reportDiagnostic;
-    private readonly CancellationToken  _token;
-    private readonly Compilation        _compilation;
-
-
-    public Parser( Compilation compilation, Action<Diagnostic> reportDiagnostic, CancellationToken token )
+    private static ImmutableArray<DbRecordClassDescription> GetClasses( in SourceProductionContext context, ImmutableArray<ClassDeclarationSyntax?> declarations )
     {
-        _compilation      = compilation;
-        _reportDiagnostic = reportDiagnostic;
-        _token            = token;
-    }
-    public IEnumerable<DbRecordClassDescription> GetLogClasses( IEnumerable<ClassDeclarationSyntax> declarations )
-    {
-        foreach ( ClassDeclarationSyntax declaration in declarations )
+        var list = new List<DbRecordClassDescription>();
+
+        foreach ( ClassDeclarationSyntax? declaration in declarations )
         {
-            if ( DbRecordClassDescription.TryCreate( declaration, out DbRecordClassDescription? result ) )
-            {
-                _reportDiagnostic.Invoke( Found( declaration, result ) );
-                yield return result;
-            }
+            if ( context.CancellationToken.IsCancellationRequested ) { return default; }
+
+            if ( DbRecordClassDescription.TryCreate( declaration, out DbRecordClassDescription? result ) is false ) { continue; }
+
+            context.ReportDiagnostic( Found( declaration, result ) );
+            list.Add( result );
         }
+
+        return list.ToImmutableArray();
     }
     private static Diagnostic Found( BaseTypeDeclarationSyntax declaration, DbRecordClassDescription description )
     {
-        const string ID         = $"{nameof(DbReaderMappingGenerator)}.{nameof(Parser)}.{nameof(Found)}";
+        const string ID         = $"{nameof(DbReaderMappingGenerator)}.{nameof(Found)}";
         var          descriptor = new DiagnosticDescriptor( ID, $"Found method '{description.MethodName}' in {declaration.Identifier.ValueText}", string.Empty, nameof(DbReaderMappingGenerator), DiagnosticSeverity.Info, true );
         var          location   = Location.Create( declaration.SyntaxTree, default );
 

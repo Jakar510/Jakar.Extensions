@@ -28,13 +28,13 @@ internal record DbRecordClassDescription
         _properties  = properties;
         _className   = declaration.Identifier.ValueText;
     }
-    public static bool TryCreate( ClassDeclarationSyntax declaration, [ NotNullWhen( true ) ] out DbRecordClassDescription? result )
+    public static bool TryCreate( [ NotNullWhen( true ) ] ClassDeclarationSyntax? declaration, [ NotNullWhen( true ) ] out DbRecordClassDescription? result )
     {
         result = TryCreate( declaration );
         return result is not null;
     }
     [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
-    public static DbRecordClassDescription? TryCreate( ClassDeclarationSyntax declaration )
+    public static DbRecordClassDescription? TryCreate( [ NotNullIfNotNull( nameof(declaration) ) ] ClassDeclarationSyntax? declaration )
     {
         return Method.TryCreate( declaration, out Method? method )
                    ? new DbRecordClassDescription( declaration, method.Value )
@@ -89,8 +89,14 @@ internal record DbRecordClassDescription
 
         public static Method Create( ClassDeclarationSyntax declaration ) => Create( (AttributeSyntax)declaration.DescendantNodes( Check )
                                                                                                                  .Single() );
-        public static bool TryCreate( ClassDeclarationSyntax declaration, [ NotNullWhen( true ) ] out Method? result )
+        public static bool TryCreate( [ NotNullWhen( true ) ] ClassDeclarationSyntax? declaration, [ NotNullWhen( true ) ] out Method? result )
         {
+            if ( declaration is null )
+            {
+                result = default;
+                return false;
+            }
+
             ImmutableArray<SyntaxNode> nodes = declaration.DescendantNodes( Check )
                                                           .ToImmutableArray();
 
@@ -109,7 +115,7 @@ internal record DbRecordClassDescription
         }
 
 
-        public static bool TryCreate( SyntaxNode node, [ NotNullWhen( true ) ] out Method? result )
+        public static bool TryCreate( [ NotNullWhen( true ) ] SyntaxNode? node, [ NotNullWhen( true ) ] out Method? result )
         {
             if ( node is not AttributeSyntax { Name: IdentifierNameSyntax { Identifier.Text: nameof(DbReaderMapping) } } attribute )
             {
