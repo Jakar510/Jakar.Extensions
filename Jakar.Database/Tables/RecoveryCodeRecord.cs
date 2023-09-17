@@ -5,7 +5,7 @@ namespace Jakar.Database;
 
 
 [ Serializable, Table( "Codes" ) ]
-public sealed record RecoveryCodeRecord
+public sealed partial record RecoveryCodeRecord
     ( [ MaxLength( 1024 ) ] string Code, RecordID<RecoveryCodeRecord> ID, RecordID<UserRecord>? CreatedBy, Guid? OwnerUserID, DateTimeOffset DateCreated, DateTimeOffset? LastModified = default ) : TableRecord<RecoveryCodeRecord>( ID,
                                                                                                                                                                                                                                       CreatedBy,
                                                                                                                                                                                                                                       OwnerUserID,
@@ -18,6 +18,9 @@ public sealed record RecoveryCodeRecord
 
     private RecoveryCodeRecord( string code, UserRecord caller ) : this( code, RecordID<RecoveryCodeRecord>.New(), caller.ID, caller.UserID, DateTimeOffset.UtcNow ) => Code = _hasher.HashPassword( this, code );
 
+    [ DbReaderMapping ] public static partial RecoveryCodeRecord Create( DbDataReader reader );
+
+    /*
     public static RecoveryCodeRecord Create( DbDataReader reader )
     {
         DateTimeOffset        dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
@@ -31,6 +34,7 @@ public sealed record RecoveryCodeRecord
     {
         while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
     }
+    */
 
     public static IReadOnlyDictionary<string, RecoveryCodeRecord> Create( UserRecord user, IEnumerable<string> recoveryCodes )
     {
@@ -84,12 +88,14 @@ public sealed record RecoveryCodeRecord
 
 
 [ Serializable, Table( "UserRecoveryCodes" ) ]
-public sealed record UserRecoveryCodeRecord : Mapping<UserRecoveryCodeRecord, UserRecord, RecoveryCodeRecord>, ICreateMapping<UserRecoveryCodeRecord, UserRecord, RecoveryCodeRecord>, IDbReaderMapping<UserRecoveryCodeRecord>
+public sealed partial record UserRecoveryCodeRecord : Mapping<UserRecoveryCodeRecord, UserRecord, RecoveryCodeRecord>, ICreateMapping<UserRecoveryCodeRecord, UserRecord, RecoveryCodeRecord>, IDbReaderMapping<UserRecoveryCodeRecord>
 {
     public UserRecoveryCodeRecord( UserRecord                                           owner, RecoveryCodeRecord value ) : base( owner, value ) { }
     [ RequiresPreviewFeatures ] public static UserRecoveryCodeRecord Create( UserRecord owner, RecoveryCodeRecord value ) => new(owner, value);
 
+    [ DbReaderMapping ] public static partial UserRecoveryCodeRecord Create( DbDataReader reader );
 
+    /*
     public static UserRecoveryCodeRecord Create( DbDataReader reader )
     {
         DateTimeOffset        dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
@@ -103,4 +109,5 @@ public sealed record UserRecoveryCodeRecord : Mapping<UserRecoveryCodeRecord, Us
     {
         while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
     }
+    */
 }

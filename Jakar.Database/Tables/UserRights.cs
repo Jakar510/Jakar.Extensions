@@ -44,7 +44,7 @@ public struct UserRights : IEnumerator<(int Index, bool Value)>, IEnumerable<(in
         for ( int i = 0; i < Length; i++ ) { Span[i] = INVALID; }
     }
     public UserRights( IRights rights ) : this( rights.Rights ) { }
-    private UserRights( string rights )
+    public UserRights( string rights )
     {
         using IMemoryOwner<byte> buffer = _pool.Rent( rights.Length );
         Span<byte>               span   = buffer.Memory.Span;

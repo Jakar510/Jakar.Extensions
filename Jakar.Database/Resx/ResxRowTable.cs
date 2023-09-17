@@ -1,29 +1,30 @@
 ﻿namespace Jakar.Database.Resx;
 
 
+/// <see cref="LocalizableString"/>
 [ Serializable, Table( "Resx" ) ]
-public sealed record ResxRowRecord( long                    KeyID,
-                                    string                  Key,
-                                    string                  Neutral,
-                                    string?                 Arabic,
-                                    string?                 Chinese,
-                                    string?                 Czech,
-                                    string?                 Dutch,
-                                    string?                 English,
-                                    string?                 French,
-                                    string?                 German,
-                                    string?                 Japanese,
-                                    string?                 Korean,
-                                    string?                 Polish,
-                                    string?                 Portuguese,
-                                    string?                 Spanish,
-                                    string?                 Swedish,
-                                    string?                 Thai,
-                                    RecordID<ResxRowRecord> ID,
-                                    RecordID<UserRecord>?   CreatedBy,
-                                    Guid?                   OwnerUserID,
-                                    DateTimeOffset          DateCreated,
-                                    DateTimeOffset?         LastModified = default
+public sealed partial record ResxRowRecord( long                    KeyID,
+                                            string                  Key,
+                                            string                  Neutral,
+                                            string?                 Arabic,
+                                            string?                 Chinese,
+                                            string?                 Czech,
+                                            string?                 Dutch,
+                                            string?                 English,
+                                            string?                 French,
+                                            string?                 German,
+                                            string?                 Japanese,
+                                            string?                 Korean,
+                                            string?                 Polish,
+                                            string?                 Portuguese,
+                                            string?                 Spanish,
+                                            string?                 Swedish,
+                                            string?                 Thai,
+                                            RecordID<ResxRowRecord> ID,
+                                            RecordID<UserRecord>?   CreatedBy,
+                                            Guid?                   OwnerUserID,
+                                            DateTimeOffset          DateCreated,
+                                            DateTimeOffset?         LastModified = default
 ) : TableRecord<ResxRowRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<ResxRowRecord>
 {
     public ResxRowRecord( string key, long keyID, UserRecord? caller = default ) : this( key, keyID, string.Empty, caller ) { }
@@ -84,7 +85,9 @@ public sealed record ResxRowRecord( long                    KeyID,
               caller?.ID,
               caller?.UserID,
               DateTimeOffset.UtcNow ) { }
+    [ DbReaderMapping ] public static partial ResxRowRecord Create( DbDataReader reader );
 
+    /*
     public static ResxRowRecord Create( DbDataReader reader )
     {
         DateTimeOffset       dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
@@ -98,6 +101,7 @@ public sealed record ResxRowRecord( long                    KeyID,
     {
         while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
     }
+    */
 
     public override int CompareTo( ResxRowRecord? other )
     {

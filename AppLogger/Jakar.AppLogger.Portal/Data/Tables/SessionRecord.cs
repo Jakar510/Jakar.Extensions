@@ -2,11 +2,15 @@
 // 09/21/2022  4:52 PM
 
 
+using Jakar.Database.Generators;
+
+
+
 namespace Jakar.AppLogger.Portal.Data.Tables;
 
 
 [ Serializable, Table( "Sessions" ) ]
-public sealed record SessionRecord : LoggerTable<SessionRecord>, IDbReaderMapping<SessionRecord>, IStartSession
+public sealed partial record SessionRecord : LoggerTable<SessionRecord>, IDbReaderMapping<SessionRecord>, IStartSession
 {
     public DateTimeOffset         AppStartTime { get; init; }
     public RecordID<AppRecord>    AppID        { get; init; }
@@ -22,6 +26,8 @@ public sealed record SessionRecord : LoggerTable<SessionRecord>, IDbReaderMappin
         AppID        = app.ID;
         DeviceID     = device.ID;
     }
+    [ DbReaderMapping ] public static partial SessionRecord Create( DbDataReader reader );
+    /*
     public static SessionRecord Create( DbDataReader reader )
     {
         DateTimeOffset           dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
@@ -35,6 +41,8 @@ public sealed record SessionRecord : LoggerTable<SessionRecord>, IDbReaderMappin
     {
         while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
     }
+    */
+
     public StartSessionReply ToStartSessionReply() => new(ID.Value, AppID.Value, DeviceID.Value);
 
 

@@ -2,15 +2,15 @@
 
 
 [ Serializable, Table( "Groups" ) ]
-public sealed record GroupRecord( [ MaxLength( 256 ) ]                                                      string?              CustomerID,
-                                  [ MaxLength( 1024 ) ]                                                     string               NameOfGroup,
-                                  [ MaxLength( 256 ) ]                                                      RecordID<UserRecord> OwnerID,
-                                  [ MaxLength( TokenValidationParameters.DefaultMaximumTokenSizeInBytes ) ] string               Rights,
-                                  RecordID<GroupRecord>                                                                          ID,
-                                  RecordID<UserRecord>?                                                                          CreatedBy,
-                                  Guid?                                                                                          OwnerUserID,
-                                  DateTimeOffset                                                                                 DateCreated,
-                                  DateTimeOffset?                                                                                LastModified = default
+public sealed partial record GroupRecord( [ MaxLength( 256 ) ]                                                      string?              CustomerID,
+                                          [ MaxLength( 1024 ) ]                                                     string               NameOfGroup,
+                                          [ MaxLength( 256 ) ]                                                      RecordID<UserRecord> OwnerID,
+                                          [ MaxLength( TokenValidationParameters.DefaultMaximumTokenSizeInBytes ) ] string               Rights,
+                                          RecordID<GroupRecord>                                                                          ID,
+                                          RecordID<UserRecord>?                                                                          CreatedBy,
+                                          Guid?                                                                                          OwnerUserID,
+                                          DateTimeOffset                                                                                 DateCreated,
+                                          DateTimeOffset?                                                                                LastModified = default
 ) : TableRecord<GroupRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<GroupRecord>, UserRights.IRights
 {
     public GroupRecord( UserRecord owner, string nameOfGroup, string? customerID, UserRecord? caller = default ) : this( customerID,
@@ -30,7 +30,9 @@ public sealed record GroupRecord( [ MaxLength( 256 ) ]                          
                                                                                                                                             caller?.UserID,
                                                                                                                                             DateTimeOffset.UtcNow ) { }
 
-    
+    [ DbReaderMapping ] public static partial GroupRecord Create( DbDataReader reader );
+
+    /*
     public static GroupRecord Create( DbDataReader reader )
     {
         DateTimeOffset           dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
@@ -44,6 +46,7 @@ public sealed record GroupRecord( [ MaxLength( 256 ) ]                          
     {
         while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
     }
+    */
 
 
     public UserRights GetRights() => new(this);

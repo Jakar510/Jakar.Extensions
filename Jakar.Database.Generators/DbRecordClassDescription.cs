@@ -1,13 +1,7 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 09/16/2023  12:08 PM
 
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Text;
-
-
-
-namespace Jakar.Database;
+namespace Jakar.Database.Generators;
 
 
 internal record DbRecordClassDescription
@@ -45,7 +39,13 @@ internal record DbRecordClassDescription
     public void Emit( in SourceProductionContext context ) => Emit( context, context.CancellationToken );
     public void Emit( in SourceProductionContext context, CancellationToken token )
     {
-        using var result = new ValueStringBuilder();
+        using var builder = new ValueStringBuilder( 1000 );
+
+        builder.Append( @$"
+
+    public static {_className} Create( DbDataReader reader )
+    {{
+" );
 
         foreach ( Property property in _properties )
         {
@@ -55,19 +55,30 @@ internal record DbRecordClassDescription
 
         if ( token.IsCancellationRequested ) { return; }
 
-        context.AddSource( $"{_className}.g.cs", SourceText.From( result.ToString(), Encoding.UTF8 ) );
+        builder.Append( @$"
+
+        return new {_className}( {string.Join( ',', _properties.Select( x => x.Variable ) )} );
+    }}
+    public static async IAsyncEnumerable<{_className}> CreateAsync( DbDataReader reader, [ EnumeratorCancellation ] CancellationToken token = default )
+    {{
+        while ( await reader.ReadAsync( token ) ) {{ yield return Create( reader ); }}
+    }}
+" );
+
+        context.AddSource( $"{_className}.g.cs", builder.ToString() );
     }
 
 
 
-    public readonly record struct Property( PropertyDeclarationSyntax Declaration, string Name, string Variable )
+    public readonly record struct Property( PropertyDeclarationSyntax Declaration, string Name, string Variable, string TypeName )
     {
+        public TypeSyntax Type => Declaration.Type;
         public static Property Create( PropertyDeclarationSyntax declaration )
         {
             ArgumentNullException.ThrowIfNull( declaration );
+            string typeName = declaration.Type.ToString();
             string name     = declaration.Identifier.ValueText;
-            string variable = name.ToSnakeCase();
-            return new Property( declaration, name, variable );
+            return new Property( declaration, name, name.ToSnakeCase(), typeName );
         }
         public static ImmutableArray<Property> Create( ClassDeclarationSyntax declaration )
         {
@@ -77,6 +88,27 @@ internal record DbRecordClassDescription
                               .OfType<PropertyDeclarationSyntax>()
                               .Select( Create )
                               .ToImmutableArray();
+        }
+
+
+        public void Handle( ref ValueStringBuilder builder, in string className )
+        {
+            // if ( Type.IsUnmanaged ) { }
+
+            if ( Type is GenericNameSyntax generic &&
+                 generic.ToString()
+                        .Contains( "RecordID" ) )
+            {
+                // string arg = generic.TypeArgumentList.Arguments.Single().ToString();
+
+                builder.Append( @$"
+        var {Variable} = new RecordID<{className}>( reader.GetFieldValue<Guid>( ""{Name}"" ) );" );
+            }
+            else
+            {
+                builder.Append( @$"
+        var {Variable} = ({TypeName})reader.GetValue( ""{Name}"" );" );
+            }
         }
     }
 

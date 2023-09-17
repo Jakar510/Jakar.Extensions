@@ -1,11 +1,15 @@
 ﻿// Jakar.AppLogger :: Jakar.AppLogger.Portal
 // 09/21/2022  4:59 PM
 
+using Jakar.Database.Generators;
+
+
+
 namespace Jakar.AppLogger.Portal.Data.Tables;
 
 
 [ Serializable, Table( "Scopes" ) ]
-public sealed record ScopeRecord : LoggerTable<ScopeRecord>, IDbReaderMapping<ScopeRecord>
+public sealed partial record ScopeRecord : LoggerTable<ScopeRecord>, IDbReaderMapping<ScopeRecord>
 {
     public RecordID<AppRecord>     AppID     { get; init; }
     public RecordID<DeviceRecord>  DeviceID  { get; init; }
@@ -18,6 +22,9 @@ public sealed record ScopeRecord : LoggerTable<ScopeRecord>, IDbReaderMapping<Sc
         DeviceID  = device.ID;
         SessionID = session.ID;
     }
+    [ DbReaderMapping ] public static partial ScopeRecord Create( DbDataReader reader );
+
+    /*
     public static ScopeRecord Create( DbDataReader reader )
     {
         DateTimeOffset        dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
@@ -31,6 +38,8 @@ public sealed record ScopeRecord : LoggerTable<ScopeRecord>, IDbReaderMapping<Sc
     {
         while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
     }
+    */
+
     public static IEnumerable<ScopeRecord> Create( AppLog log, AppRecord app, DeviceRecord device, SessionRecord session, UserRecord? caller = default )
     {
         // ReSharper disable once ForeachCanBeConvertedToQueryUsingAnotherGetEnumerator

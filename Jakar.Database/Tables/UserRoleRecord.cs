@@ -5,12 +5,14 @@ namespace Jakar.Database;
 
 
 [ Serializable, Table( "UserRoles" ) ]
-public sealed record UserRoleRecord : Mapping<UserRoleRecord, UserRecord, RoleRecord>, ICreateMapping<UserRoleRecord, UserRecord, RoleRecord>, IDbReaderMapping<UserRoleRecord>
+public sealed partial record UserRoleRecord : Mapping<UserRoleRecord, UserRecord, RoleRecord>, ICreateMapping<UserRoleRecord, UserRecord, RoleRecord>, IDbReaderMapping<UserRoleRecord>
 {
     public UserRoleRecord( UserRecord                                           owner, RoleRecord value ) : base( owner, value ) { }
     [ RequiresPreviewFeatures ] public static UserRoleRecord Create( UserRecord owner, RoleRecord value ) => new(owner, value);
 
+    [ DbReaderMapping ] public static partial UserRoleRecord Create( DbDataReader reader );
 
+    /*
     public static UserRoleRecord Create( DbDataReader reader )
     {
         DateTimeOffset           dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
@@ -24,4 +26,5 @@ public sealed record UserRoleRecord : Mapping<UserRoleRecord, UserRecord, RoleRe
     {
         while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
     }
+    */
 }

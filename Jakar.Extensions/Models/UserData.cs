@@ -21,6 +21,7 @@ public interface IUserData : JsonModels.IJsonModel, IEquatable<IUserData>, IComp
     [ MaxLength( 256 ) ]                public string            Ext               { get; }
     [ MaxLength( 256 ), Required ]      public string            FirstName         { get; }
     [ MaxLength( 512 ) ]                public string            FullName          { get; }
+    [ MaxLength( 256 ) ]                public string            Gender            { get; }
     [ MaxLength( 256 ), Required ]      public string            LastName          { get; }
     [ MaxLength( 512 ) ]                public string            Line1             { get; }
     [ MaxLength( 256 ) ]                public string            Line2             { get; }
@@ -30,9 +31,13 @@ public interface IUserData : JsonModels.IJsonModel, IEquatable<IUserData>, IComp
     [ MaxLength( 256 ) ]                public string            StateOrProvince   { get; }
     [ MaxLength( 256 ) ]                public string            Title             { get; }
     [ MaxLength( 4096 ), Url ]          public string            Website           { get; }
+}
 
 
-    public IUserData WithUserData( IUserData value );
+
+public interface IUserData<out T> : IUserData where T : IUserData<T>
+{
+    public T WithUserData( IUserData value );
 }
 
 
@@ -42,14 +47,14 @@ public class UserData : ObservableClass, IUserData
 {
     public const string                        EMPTY_PHONE_NUMBER = "(000) 000-0000";
     private      IDictionary<string, JToken?>? _additionalData;
-    private      string                        _city       = string.Empty;
-    private      string                        _company    = string.Empty;
-    private      string                        _country    = string.Empty;
-    private      string                        _department = string.Empty;
-    private      string?                       _description;
+    private      string                        _city        = string.Empty;
+    private      string                        _company     = string.Empty;
+    private      string                        _country     = string.Empty;
+    private      string                        _department  = string.Empty;
     private      string                        _email       = string.Empty;
     private      string                        _ext         = string.Empty;
     private      string                        _firstName   = string.Empty;
+    private      string                        _gender      = string.Empty;
     private      string                        _lastName    = string.Empty;
     private      string                        _line1       = string.Empty;
     private      string                        _line2       = string.Empty;
@@ -59,6 +64,7 @@ public class UserData : ObservableClass, IUserData
     private      string                        _title       = string.Empty;
     private      string                        _website     = string.Empty;
     private      string?                       _address;
+    private      string?                       _description;
     private      string?                       _fullName;
     private      SupportedLanguage             _preferredLanguage = SupportedLanguage.English;
 
@@ -171,10 +177,12 @@ public class UserData : ObservableClass, IUserData
         set => SetProperty( ref _fullName, value );
     }
 
-    [ JsonIgnore ] public bool IsValidWebsite     => Uri.TryCreate( Website, UriKind.RelativeOrAbsolute, out _ );
-    [ JsonIgnore ] public bool IsValidName        => !string.IsNullOrEmpty( FullName );
-    [ JsonIgnore ] public bool IsValidEmail       => !string.IsNullOrEmpty( Email );
-    [ JsonIgnore ] public bool IsValidPhoneNumber => !string.IsNullOrEmpty( PhoneNumber );
+    [ MaxLength( 256 ) ]
+    public string Gender
+    {
+        get => _gender;
+        set => SetProperty( ref _gender, value );
+    }
 
     [ JsonIgnore ]
     public bool IsValidAddress
@@ -196,6 +204,11 @@ public class UserData : ObservableClass, IUserData
             return span.IsNullOrWhiteSpace();
         }
     }
+    [ JsonIgnore ] public bool IsValidEmail       => !string.IsNullOrEmpty( Email );
+    [ JsonIgnore ] public bool IsValidName        => !string.IsNullOrEmpty( FullName );
+    [ JsonIgnore ] public bool IsValidPhoneNumber => !string.IsNullOrEmpty( PhoneNumber );
+
+    [ JsonIgnore ] public bool IsValidWebsite => Uri.TryCreate( Website, UriKind.RelativeOrAbsolute, out _ );
 
     [ Required, MaxLength( 256 ) ]
     public string LastName

@@ -5,12 +5,14 @@ namespace Jakar.Database;
 
 
 [ Serializable, Table( "UserGroups" ) ]
-public sealed record UserGroupRecord : Mapping<UserGroupRecord, UserRecord, GroupRecord>, ICreateMapping<UserGroupRecord, UserRecord, GroupRecord>, IDbReaderMapping<UserGroupRecord>
+public sealed partial record UserGroupRecord : Mapping<UserGroupRecord, UserRecord, GroupRecord>, ICreateMapping<UserGroupRecord, UserRecord, GroupRecord>, IDbReaderMapping<UserGroupRecord>
 {
     public UserGroupRecord( UserRecord                                           owner, GroupRecord value ) : base( owner, value ) { }
     [ RequiresPreviewFeatures ] public static UserGroupRecord Create( UserRecord owner, GroupRecord value ) => new(owner, value);
 
+    [ DbReaderMapping ] public static partial UserGroupRecord Create( DbDataReader reader );
 
+    /*
     public static UserGroupRecord Create( DbDataReader reader )
     {
         DateTimeOffset            dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
@@ -24,4 +26,6 @@ public sealed record UserGroupRecord : Mapping<UserGroupRecord, UserRecord, Grou
     {
         while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
     }
+    */
+
 }

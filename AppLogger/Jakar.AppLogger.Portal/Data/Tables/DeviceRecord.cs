@@ -1,11 +1,15 @@
 ﻿// Jakar.AppLogger :: Jakar.AppLogger.Portal
 // 09/12/2022  10:06 AM
 
+using Jakar.Database.Generators;
+
+
+
 namespace Jakar.AppLogger.Portal.Data.Tables;
 
 
 [ Serializable, Table( "Devices" ) ]
-public sealed record DeviceRecord : LoggerTable<DeviceRecord>, IDbReaderMapping<DeviceRecord>, IDevice
+public sealed partial record DeviceRecord : LoggerTable<DeviceRecord>, IDbReaderMapping<DeviceRecord>, IDevice
 {
     public                                  int?       AppBuild            { get; init; }
     [ MaxLength( 4096 ) ] public            string?    AppNamespace        { get; init; }
@@ -45,6 +49,9 @@ public sealed record DeviceRecord : LoggerTable<DeviceRecord>, IDbReaderMapping<
         HardwareInfo        = device.HwInfo?.ToJson();
     }
 
+
+    [ DbReaderMapping ] public static partial DeviceRecord Create( DbDataReader reader );
+    /*
     public static DeviceRecord Create( DbDataReader reader )
     {
         DateTimeOffset       dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
@@ -57,7 +64,7 @@ public sealed record DeviceRecord : LoggerTable<DeviceRecord>, IDbReaderMapping<
     public static async IAsyncEnumerable<DeviceRecord> CreateAsync( DbDataReader reader, [ EnumeratorCancellation ] CancellationToken token = default )
     {
         while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
-    }
+    }*/
 
     // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Global
     public DeviceRecord Update( IDevice device, UserRecord caller )
