@@ -1,105 +1,202 @@
 ﻿// ToothFairyDispatch :: ToothFairyDispatch.Cloud
 // 08/29/2022  9:55 PM
 
-using Microsoft.AspNetCore.Http;
-
-
 
 namespace Jakar.Database;
 
 
 [ Serializable, Table( "Users" ) ]
-public sealed partial record UserRecord( Guid                                                                                                      UserID,
-                                         [ property: ProtectedPersonalData, MaxLength( 256 ) ] string                                              UserName,
-                                         string                                                                                                    FirstName,
-                                         string                                                                                                    LastName,
-                                         string                                                                                                    FullName,
-                                         [ property: MaxLength( TokenValidationParameters.DefaultMaximumTokenSizeInBytes ) ] string                Rights,
-                                         [ property: MaxLength( 256 ) ]                                                      string                Gender,
-                                         string                                                                                                    Address,
-                                         int                                                                                                       BadLogins,
-                                         string                                                                                                    City,
-                                         string                                                                                                    Company,
-                                         string                                                                                                    Description,
-                                         string                                                                                                    Country,
-                                         string                                                                                                    Department,
-                                         string                                                                                                    Title,
-                                         string                                                                                                    Website,
-                                         SupportedLanguage                                                                                         PreferredLanguage,
-                                         string                                                                                                    Email,
-                                         bool                                                                                                      IsEmailConfirmed,
-                                         string                                                                                                    PhoneNumber,
-                                         string                                                                                                    Ext,
-                                         bool                                                                                                      IsPhoneNumberConfirmed,
-                                         bool                                                                                                      IsTwoFactorEnabled,
-                                         DateTimeOffset?                                                                                           LastBadAttempt,
-                                         DateTimeOffset?                                                                                           LastLogin,
-                                         string                                                                                                    Line1,
-                                         string                                                                                                    Line2,
-                                         string                                                                                                    StateOrProvince,
-                                         string                                                                                                    PostalCode,
-                                         bool                                                                                                      IsLocked,
-                                         DateTimeOffset?                                                                                           LockDate,
-                                         DateTimeOffset?                                                                                           LockoutEnd,
-                                         [ property: MaxLength( TokenValidationParameters.DefaultMaximumTokenSizeInBytes ) ] string                PasswordHash,
-                                         [ property: MaxLength( TokenValidationParameters.DefaultMaximumTokenSizeInBytes ) ] string                RefreshToken,
-                                         DateTimeOffset?                                                                                           RefreshTokenExpiryTime,
-                                         Guid?                                                                                                     SessionID,
-                                         bool                                                                                                      IsActive,
-                                         bool                                                                                                      IsDisabled,
-                                         [ property: MaxLength( TokenValidationParameters.DefaultMaximumTokenSizeInBytes ) ] string                SecurityStamp,
-                                         [ property: MaxLength( TokenValidationParameters.DefaultMaximumTokenSizeInBytes ) ] string                AuthenticatorKey,
-                                         [ property: MaxLength( TokenValidationParameters.DefaultMaximumTokenSizeInBytes ) ] string                ConcurrencyStamp,
-                                         [ property: MaxLength( 256 ) ]                                                      RecordID<UserRecord>? EscalateTo,
-                                         IDictionary<string, JToken?>?                                                                             AdditionalData,
-                                         RecordID<UserRecord>                                                                                      ID,
-                                         RecordID<UserRecord>?                                                                                     CreatedBy,
-                                         Guid?                                                                                                     OwnerUserID,
-                                         DateTimeOffset                                                                                            DateCreated,
-                                         DateTimeOffset?                                                                                           LastModified = default
+public sealed record UserRecord( Guid                                                                                                      UserID,
+                                 [ property: ProtectedPersonalData, MaxLength( 256 ) ] string                                              UserName,
+                                 string                                                                                                    FirstName,
+                                 string                                                                                                    LastName,
+                                 string                                                                                                    FullName,
+                                 [ property: MaxLength( TokenValidationParameters.DefaultMaximumTokenSizeInBytes ) ] string                Rights,
+                                 [ property: MaxLength( 256 ) ]                                                      string                Gender,
+                                 string                                                                                                    Address,
+                                 string                                                                                                    Company,
+                                 string                                                                                                    Description,
+                                 string                                                                                                    Line1,
+                                 string                                                                                                    Line2,
+                                 string                                                                                                    City,
+                                 string                                                                                                    StateOrProvince,
+                                 string                                                                                                    Country,
+                                 string                                                                                                    PostalCode,
+                                 string                                                                                                    Department,
+                                 string                                                                                                    Title,
+                                 string                                                                                                    Website,
+                                 SupportedLanguage                                                                                         PreferredLanguage,
+                                 string                                                                                                    Email,
+                                 bool                                                                                                      IsEmailConfirmed,
+                                 string                                                                                                    PhoneNumber,
+                                 string                                                                                                    Ext,
+                                 bool                                                                                                      IsPhoneNumberConfirmed,
+                                 bool                                                                                                      IsTwoFactorEnabled,
+                                 DateTimeOffset?                                                                                           LastBadAttempt,
+                                 DateTimeOffset?                                                                                           LastLogin,
+                                 int                                                                                                       BadLogins,
+                                 bool                                                                                                      IsLocked,
+                                 DateTimeOffset?                                                                                           LockDate,
+                                 DateTimeOffset?                                                                                           LockoutEnd,
+                                 [ property: MaxLength( TokenValidationParameters.DefaultMaximumTokenSizeInBytes ) ] string                PasswordHash,
+                                 [ property: MaxLength( TokenValidationParameters.DefaultMaximumTokenSizeInBytes ) ] string                RefreshToken,
+                                 DateTimeOffset?                                                                                           RefreshTokenExpiryTime,
+                                 Guid?                                                                                                     SessionID,
+                                 bool                                                                                                      IsActive,
+                                 bool                                                                                                      IsDisabled,
+                                 [ property: MaxLength( TokenValidationParameters.DefaultMaximumTokenSizeInBytes ) ] string                SecurityStamp,
+                                 [ property: MaxLength( TokenValidationParameters.DefaultMaximumTokenSizeInBytes ) ] string                AuthenticatorKey,
+                                 [ property: MaxLength( TokenValidationParameters.DefaultMaximumTokenSizeInBytes ) ] string                ConcurrencyStamp,
+                                 [ property: MaxLength( 256 ) ]                                                      RecordID<UserRecord>? EscalateTo,
+                                 IDictionary<string, JToken?>?                                                                             AdditionalData,
+                                 RecordID<UserRecord>                                                                                      ID,
+                                 RecordID<UserRecord>?                                                                                     CreatedBy,
+                                 Guid?                                                                                                     OwnerUserID,
+                                 DateTimeOffset                                                                                            DateCreated,
+                                 DateTimeOffset?                                                                                           LastModified = default
 ) : TableRecord<UserRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<UserRecord>, IUserData<UserRecord>, IRefreshToken, IUserID, IUserDataRecord, UserRights.IRights
 {
     private static readonly PasswordHasher<UserRecord>    _hasher         = new();
     private                 IDictionary<string, JToken?>? _additionalData = AdditionalData;
-    
+
     [ ProtectedPersonalData, MaxLength( int.MaxValue ) ]
     public IDictionary<string, JToken?>? AdditionalData
     {
         get => _additionalData;
         set => _additionalData = value;
     }
-    [ ProtectedPersonalData, MaxLength( 4096 ) ] public string Address     { get; set; } = Address;
-    [ ProtectedPersonalData, MaxLength( 256 ) ]  public string City        { get; set; } = City;
-    [ ProtectedPersonalData, MaxLength( 256 ) ]  public string Company     { get; set; } = Company;
-    [ ProtectedPersonalData, MaxLength( 256 ) ]  public string Country     { get; set; } = Country;
-    [ ProtectedPersonalData, MaxLength( 256 ) ]  public string Department  { get; set; } = Department;
-    [ ProtectedPersonalData, MaxLength( 256 ) ]  public string Description { get; set; } = Description;
-    [ ProtectedPersonalData, MaxLength( 1024 ) ] public string Email       { get; set; } = Email;
-    [ ProtectedPersonalData, MaxLength( 256 ) ]  public string Ext         { get; set; } = Ext;
-    [ ProtectedPersonalData, MaxLength( 256 ) ]  public string FirstName   { get; set; } = FirstName;
-    [ ProtectedPersonalData, MaxLength( 512 ) ]  public string FullName    { get; set; } = FullName;
+    [ ProtectedPersonalData, MaxLength( 4096 ) ] public string            Address           { get; set; } = Address;
+    [ ProtectedPersonalData, MaxLength( 256 ) ]  public string            City              { get; set; } = City;
+    [ ProtectedPersonalData, MaxLength( 256 ) ]  public string            Company           { get; set; } = Company;
+    [ ProtectedPersonalData, MaxLength( 256 ) ]  public string            Country           { get; set; } = Country;
+    [ ProtectedPersonalData, MaxLength( 256 ) ]  public string            Department        { get; set; } = Department;
+    [ ProtectedPersonalData, MaxLength( 256 ) ]  public string            Description       { get; set; } = Description;
+    [ ProtectedPersonalData, MaxLength( 1024 ) ] public string            Email             { get; set; } = Email;
+    [ ProtectedPersonalData, MaxLength( 256 ) ]  public string            Ext               { get; set; } = Ext;
+    [ ProtectedPersonalData, MaxLength( 256 ) ]  public string            FirstName         { get; set; } = FirstName;
+    [ ProtectedPersonalData, MaxLength( 512 ) ]  public string            FullName          { get; set; } = FullName;
+    public                                              DateTimeOffset?   LastLogin         { get; set; } = LastLogin;
+    [ ProtectedPersonalData, MaxLength( 256 ) ] public  string            LastName          { get; set; } = LastName;
+    [ ProtectedPersonalData, MaxLength( 512 ) ] public  string            Line1             { get; set; } = Line1;
+    [ ProtectedPersonalData, MaxLength( 256 ) ] public  string            Line2             { get; set; } = Line2;
+    [ ProtectedPersonalData, MaxLength( 256 ) ] public  string            PhoneNumber       { get; set; } = PhoneNumber;
+    [ ProtectedPersonalData, MaxLength( 256 ) ] public  string            PostalCode        { get; set; } = PostalCode;
+    public                                              SupportedLanguage PreferredLanguage { get; set; } = PreferredLanguage;
+    [ ProtectedPersonalData, MaxLength( 256 ) ] public  string            StateOrProvince   { get; set; } = StateOrProvince;
+    [ ProtectedPersonalData, MaxLength( 256 ) ] public  string            Title             { get; set; } = Title;
+    Guid IUserID.                                                         UserID            => UserID;
+    [ ProtectedPersonalData, MaxLength( 4096 ) ] public string            Website           { get; set; } = Website;
 
 
-    public                                             DateTimeOffset?   LastLogin         { get; set; } = LastLogin;
-    [ ProtectedPersonalData, MaxLength( 256 ) ] public string            LastName          { get; set; } = LastName;
-    [ ProtectedPersonalData, MaxLength( 512 ) ] public string            Line1             { get; set; } = Line1;
-    [ ProtectedPersonalData, MaxLength( 256 ) ] public string            Line2             { get; set; } = Line2;
-    [ ProtectedPersonalData, MaxLength( 256 ) ] public string            PhoneNumber       { get; set; } = PhoneNumber;
-    [ ProtectedPersonalData, MaxLength( 256 ) ] public string            PostalCode        { get; set; } = PostalCode;
-    public                                             SupportedLanguage PreferredLanguage { get; set; } = PreferredLanguage;
-    [ ProtectedPersonalData, MaxLength( 256 ) ] public string            StateOrProvince   { get; set; } = StateOrProvince;
-    [ ProtectedPersonalData, MaxLength( 256 ) ] public string            Title             { get; set; } = Title;
+    public static UserRecord Create( DbDataReader reader )
+    {
+        Guid              userID                 = reader.GetGuid( nameof(UserID) );
+        string            userName               = reader.GetString( nameof(UserName) );
+        string            firstName              = reader.GetString( nameof(FirstName) );
+        string            lastName               = reader.GetString( nameof(LastName) );
+        string            fullName               = reader.GetString( nameof(FullName) );
+        string            rights                 = reader.GetString( nameof(Rights) );
+        string            gender                 = reader.GetString( nameof(Gender) );
+        string            address                = reader.GetString( nameof(Address) );
+        string            company                = reader.GetString( nameof(Company) );
+        string            description            = reader.GetString( nameof(Description) );
+        string            line1                  = reader.GetString( nameof(Line1) );
+        string            line2                  = reader.GetString( nameof(Line2) );
+        string            city                   = reader.GetString( nameof(City) );
+        string            stateOrProvince        = reader.GetString( nameof(StateOrProvince) );
+        string            country                = reader.GetString( nameof(Country) );
+        string            postalCode             = reader.GetString( nameof(PostalCode) );
+        string            department             = reader.GetString( nameof(Department) );
+        string            title                  = reader.GetString( nameof(Title) );
+        string            website                = reader.GetString( nameof(Website) );
+        SupportedLanguage preferredLanguage      = (SupportedLanguage)reader.GetFieldValue<long>( nameof(PreferredLanguage) );
+        string            email                  = reader.GetString( nameof(Email) );
+        bool              isEmailConfirmed       = reader.GetFieldValue<bool>( nameof(IsEmailConfirmed) );
+        string            phoneNumber            = reader.GetString( nameof(PhoneNumber) );
+        string            ext                    = reader.GetString( nameof(Ext) );
+        bool              isPhoneNumberConfirmed = reader.GetFieldValue<bool>( nameof(IsPhoneNumberConfirmed) );
+        bool              isTwoFactorEnabled     = reader.GetFieldValue<bool>( nameof(IsTwoFactorEnabled) );
+        DateTimeOffset?   lastBadAttempt         = reader.GetFieldValue<DateTimeOffset?>( nameof(LastBadAttempt) );
+        DateTimeOffset?   lastLogin              = reader.GetFieldValue<DateTimeOffset?>( nameof(LastLogin) );
+        int               badLogins              = reader.GetFieldValue<int>( nameof(BadLogins) );
+        bool              isLocked               = reader.GetFieldValue<bool>( nameof(IsLocked) );
+        DateTimeOffset?   lockDate               = reader.GetFieldValue<DateTimeOffset?>( nameof(LockDate) );
+        DateTimeOffset?   lockoutEnd             = reader.GetFieldValue<DateTimeOffset?>( nameof(LockoutEnd) );
+        string            passwordHash           = reader.GetString( nameof(PasswordHash) );
+        string            refreshToken           = reader.GetString( nameof(RefreshToken) );
+        DateTimeOffset?   refreshTokenExpiryTime = reader.GetFieldValue<DateTimeOffset?>( nameof(RefreshTokenExpiryTime) );
+        Guid?             sessionID              = reader.GetFieldValue<Guid?>( nameof(SessionID) );
+        bool              isActive               = reader.GetFieldValue<bool>( nameof(IsActive) );
+        bool              isDisabled             = reader.GetFieldValue<bool>( nameof(IsDisabled) );
+        string            securityStamp          = reader.GetString( nameof(SecurityStamp) );
+        string            authenticatorKey       = reader.GetString( nameof(AuthenticatorKey) );
+        string            concurrencyStamp       = reader.GetString( nameof(AuthenticatorKey) );
+        var               escalateTo             = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(EscalateTo) ) );
 
-    Guid IUserID.                                              UserID  => UserID;
-    [ ProtectedPersonalData, MaxLength( 4096 ) ] public string Website { get; set; } = Website;
+        IDictionary<string, JToken?>? additionalData = reader.GetFieldValue<string?>( nameof(AdditionalData) )
+                                                            ?.FromJson<Dictionary<string, JToken?>>();
+
+        var id           = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) );
+        var dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
+        var lastModified = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
+        var ownerUserID  = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
+        var createdBy    = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(CreatedBy) ) );
 
 
-    [ DbReaderMapping ] public static partial UserRecord Create( DbDataReader reader );
+        return new UserRecord( userID,
+                               userName,
+                               firstName,
+                               lastName,
+                               fullName,
+                               rights,
+                               gender,
+                               address,
+                               company,
+                               description,
+                               line1,
+                               line2,
+                               city,
+                               stateOrProvince,
+                               country,
+                               postalCode,
+                               department,
+                               title,
+                               website,
+                               preferredLanguage,
+                               email,
+                               isEmailConfirmed,
+                               phoneNumber,
+                               ext,
+                               isPhoneNumberConfirmed,
+                               isTwoFactorEnabled,
+                               lastBadAttempt,
+                               lastLogin,
+                               badLogins,
+                               isLocked,
+                               lockDate,
+                               lockoutEnd,
+                               passwordHash,
+                               refreshToken,
+                               refreshTokenExpiryTime,
+                               sessionID,
+                               isActive,
+                               isDisabled,
+                               securityStamp,
+                               authenticatorKey,
+                               concurrencyStamp,
+                               escalateTo,
+                               additionalData,
+                               id,
+                               createdBy,
+                               ownerUserID,
+                               dateCreated,
+                               lastModified );
+    }
 
-    // public static async IAsyncEnumerable<UserRecord> CreateAsync( DbDataReader reader, [ EnumeratorCancellation ] CancellationToken token = default )
-    // {
-    //     while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
-    // }
+    public static async IAsyncEnumerable<UserRecord> CreateAsync( DbDataReader reader, [ EnumeratorCancellation ] CancellationToken token = default )
+    {
+        while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
+    }
 
 
     public static UserRecord Create<TUser>( VerifyRequest<TUser> request, UserRights rights, UserRecord? caller = default ) where TUser : IUserData => Create( request, rights.ToString(), caller );
@@ -122,13 +219,16 @@ public sealed partial record UserRecord( Guid                                   
                                                                                                                            data.LastName,
                                                                                                                            data.FullName,
                                                                                                                            rights,
-                                                                                                                           string.Empty, // TODO: data.Gender,
+                                                                                                                           data.Gender,
                                                                                                                            data.Address,
-                                                                                                                           0,
-                                                                                                                           data.City,
                                                                                                                            data.Company,
                                                                                                                            data.Description,
+                                                                                                                           data.Line1,
+                                                                                                                           data.Line2,
+                                                                                                                           data.City,
+                                                                                                                           data.StateOrProvince,
                                                                                                                            data.Country,
+                                                                                                                           data.PostalCode,
                                                                                                                            data.Department,
                                                                                                                            data.Title,
                                                                                                                            data.Website,
@@ -141,10 +241,7 @@ public sealed partial record UserRecord( Guid                                   
                                                                                                                            false,
                                                                                                                            null,
                                                                                                                            null,
-                                                                                                                           data.Line1,
-                                                                                                                           data.Line2,
-                                                                                                                           data.StateOrProvince,
-                                                                                                                           data.PostalCode,
+                                                                                                                           0,
                                                                                                                            false,
                                                                                                                            null,
                                                                                                                            null,
@@ -171,10 +268,13 @@ public sealed partial record UserRecord( Guid                                   
                                string.Empty,
                                string.Empty,
                                string.Empty,
-                               rights.ToString(),
+                               rights,
                                string.Empty, // TODO: data.Gender,
                                string.Empty,
-                               0,
+                               string.Empty,
+                               string.Empty,
+                               string.Empty,
+                               string.Empty,
                                string.Empty,
                                string.Empty,
                                string.Empty,
@@ -191,10 +291,7 @@ public sealed partial record UserRecord( Guid                                   
                                false,
                                null,
                                null,
-                               string.Empty,
-                               string.Empty,
-                               string.Empty,
-                               string.Empty,
+                               0,
                                false,
                                null,
                                null,
@@ -307,7 +404,15 @@ public sealed partial record UserRecord( Guid                                   
 
 
     public UserRights GetRights() => new(this);
-    public async Task<UserRights> GetRights( DbConnection connection, DbTransaction transaction, Database db, int totalRightCount, CancellationToken token )
+    public async ValueTask<UserRights> GetRights<T>( DbConnection connection, DbTransaction transaction, Database db, CancellationToken token ) where T : struct, Enum
+    {
+        int totalRightCount = Enum.GetValues<T>()
+                                  .Length;
+
+        return await GetRights( connection, transaction, db, totalRightCount, token );
+    }
+
+    public async ValueTask<UserRights> GetRights( DbConnection connection, DbTransaction transaction, Database db, int totalRightCount, CancellationToken token )
     {
         GroupRecord[] groups = (await GetGroups( connection, transaction, db, token )).GetArray();
         RoleRecord[]  roles  = (await GetRoles( connection, transaction, db, token )).GetArray();

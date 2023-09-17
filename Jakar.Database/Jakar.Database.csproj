@@ -67,10 +67,12 @@
 		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="7.0.11" />
 	</ItemGroup>
 
+	<!--
 	<ItemGroup>
 	  <ProjectReference Include="..\Jakar.Database.Generators\Jakar.Database.Generators.csproj"
 						OutputItemType="Analyzer"
 						ReferenceOutputAssembly="true" />
 	</ItemGroup>
+	-->
 
 </Project>

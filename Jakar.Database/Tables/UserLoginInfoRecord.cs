@@ -4,16 +4,16 @@
 namespace Jakar.Database;
 
 
-[Serializable,Table( "UserLoginInfo" )]
-public sealed record UserLoginInfoRecord( [property: MaxLength(                        int.MaxValue )] string  LoginProvider,
-                                          [property: MaxLength(                        int.MaxValue )] string? ProviderDisplayName,
-                                          [property: ProtectedPersonalData, MaxLength( int.MaxValue )] string  ProviderKey,
-                                          [property: ProtectedPersonalData]                            string? Value,
-                                          RecordID<UserLoginInfoRecord>                                        ID,
-                                          RecordID<UserRecord>?                                                CreatedBy,
-                                          Guid?                                                                OwnerUserID,
-                                          DateTimeOffset                                                       DateCreated,
-                                          DateTimeOffset?                                                      LastModified = default
+[ Serializable, Table( "UserLoginInfo" ) ]
+public sealed record UserLoginInfoRecord( [ property: MaxLength(                        int.MaxValue ) ] string  LoginProvider,
+                                          [ property: MaxLength(                        int.MaxValue ) ] string? ProviderDisplayName,
+                                          [ property: ProtectedPersonalData, MaxLength( int.MaxValue ) ] string  ProviderKey,
+                                          [ property: ProtectedPersonalData ]                            string? Value,
+                                          RecordID<UserLoginInfoRecord>                                          ID,
+                                          RecordID<UserRecord>?                                                  CreatedBy,
+                                          Guid?                                                                  OwnerUserID,
+                                          DateTimeOffset                                                         DateCreated,
+                                          DateTimeOffset?                                                        LastModified = default
 ) : TableRecord<UserLoginInfoRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<UserLoginInfoRecord>
 {
     public UserLoginInfoRecord( UserRecord user, UserLoginInfo info ) : this( user, info.LoginProvider, info.ProviderKey, info.ProviderDisplayName ) { }
@@ -34,14 +34,14 @@ public sealed record UserLoginInfoRecord( [property: MaxLength(                 
         var providerKey         = reader.GetString( nameof(ProviderKey) );
         var value               = reader.GetString( nameof(Value) );
         var dateCreated         = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
-        var lastModified        = reader.GetFieldValue<DateTimeOffset>( nameof(LastModified) );
+        var lastModified        = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
         var ownerUserID         = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
         var createdBy           = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(CreatedBy) ) );
         var id                  = new RecordID<UserLoginInfoRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) );
 
         return new UserLoginInfoRecord( loginProvider, providerDisplayName, providerKey, value, id, createdBy, ownerUserID, dateCreated, lastModified );
     }
-    public static async IAsyncEnumerable<UserLoginInfoRecord> CreateAsync( DbDataReader reader, [EnumeratorCancellation] CancellationToken token = default )
+    public static async IAsyncEnumerable<UserLoginInfoRecord> CreateAsync( DbDataReader reader, [ EnumeratorCancellation ] CancellationToken token = default )
     {
         while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
     }

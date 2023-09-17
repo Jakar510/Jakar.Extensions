@@ -1,5 +1,4 @@
 ﻿using System.Collections.Immutable;
-
 using Microsoft.AspNetCore.Http.HttpResults;
 using Debug = Jakar.AppLogger.Common.Debug;
 
@@ -8,7 +7,7 @@ using Debug = Jakar.AppLogger.Common.Debug;
 namespace Jakar.AppLogger.Portal.Data;
 
 
-[SuppressMessage( "ReSharper", "SuggestBaseTypeForParameter" )]
+[ SuppressMessage( "ReSharper", "SuggestBaseTypeForParameter" ) ]
 public sealed class LoggerDB : Database.Database
 {
     private readonly IDataProtectorProvider                 _dataProtectorProvider;
@@ -155,10 +154,10 @@ END";
         record = await Logs.Insert( connection, transaction, record, token );
 
         IEnumerable<ScopeRecord> scopes = ScopeRecord.Create( log, app, device.AsT0, session, caller );
-        await LogScopeRecord.TryAdd( connection, transaction, LogScopes, record, scopes, token );
+        await LogScopeRecord.TryAdd( connection, transaction, LogScopes, record, scopes, caller, token );
 
         IEnumerable<LoggerAttachmentRecord> attachments = LoggerAttachmentRecord.Create( record, log, caller );
-        await LoggerAttachmentMappingRecord.TryAdd( connection, transaction, LogAttachments, record, attachments, token );
+        await LoggerAttachmentMappingRecord.TryAdd( connection, transaction, LogAttachments, record, attachments, caller, token );
 
         return record;
     }

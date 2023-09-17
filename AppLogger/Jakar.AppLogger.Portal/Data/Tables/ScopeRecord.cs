@@ -9,36 +9,41 @@ namespace Jakar.AppLogger.Portal.Data.Tables;
 
 
 [ Serializable, Table( "Scopes" ) ]
-public sealed partial record ScopeRecord : LoggerTable<ScopeRecord>, IDbReaderMapping<ScopeRecord>
+public sealed record ScopeRecord( RecordID<AppRecord>     AppID,
+                                  RecordID<DeviceRecord>  DeviceID,
+                                  RecordID<SessionRecord> SessionID,
+                                  RecordID<ScopeRecord>   ID,
+                                  RecordID<UserRecord>?   CreatedBy,
+                                  Guid?                   OwnerUserID,
+                                  DateTimeOffset          DateCreated,
+                                  DateTimeOffset?         LastModified = default
+) : LoggerTable<ScopeRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<ScopeRecord>
 {
-    public RecordID<AppRecord>     AppID     { get; init; }
-    public RecordID<DeviceRecord>  DeviceID  { get; init; }
-    public RecordID<SessionRecord> SessionID { get; init; }
-
-
     private ScopeRecord( Guid scopeID, AppRecord app, DeviceRecord device, SessionRecord session, UserRecord? caller = default ) : base( new RecordID<ScopeRecord>( scopeID ), caller )
     {
         AppID     = app.ID;
         DeviceID  = device.ID;
         SessionID = session.ID;
     }
-    [ DbReaderMapping ] public static partial ScopeRecord Create( DbDataReader reader );
 
-    /*
+
     public static ScopeRecord Create( DbDataReader reader )
     {
+        var                   appID        = new RecordID<AppRecord>( reader.GetFieldValue<Guid>( nameof(CreatedBy) ) );
+        var                   deviceID     = new RecordID<DeviceRecord>( reader.GetFieldValue<Guid>( nameof(CreatedBy) ) );
+        var                   sessionID    = new RecordID<SessionRecord>( reader.GetFieldValue<Guid>( nameof(CreatedBy) ) );
         DateTimeOffset        dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
-        DateTimeOffset        lastModified = reader.GetFieldValue<DateTimeOffset>( nameof(LastModified) );
+        DateTimeOffset?       lastModified = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
         Guid                  ownerUserID  = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
         RecordID<UserRecord>  createdBy    = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(CreatedBy) ) );
         RecordID<ScopeRecord> id           = new RecordID<ScopeRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) );
-        return new ScopeRecord( id, createdBy, ownerUserID, dateCreated, lastModified );
+        return new ScopeRecord( appID, deviceID, sessionID, id, createdBy, ownerUserID, dateCreated, lastModified );
     }
     public static async IAsyncEnumerable<ScopeRecord> CreateAsync( DbDataReader reader, [ EnumeratorCancellation ] CancellationToken token = default )
     {
         while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
     }
-    */
+
 
     public static IEnumerable<ScopeRecord> Create( AppLog log, AppRecord app, DeviceRecord device, SessionRecord session, UserRecord? caller = default )
     {
@@ -55,18 +60,22 @@ public sealed partial record ScopeRecord : LoggerTable<ScopeRecord>, IDbReaderMa
 [ Serializable, Table( "LogScopes" ) ]
 public sealed record LogScopeRecord : Mapping<LogScopeRecord, LogRecord, ScopeRecord>, ICreateMapping<LogScopeRecord, LogRecord, ScopeRecord>, IDbReaderMapping<LogScopeRecord>
 {
-    public LogScopeRecord( LogRecord key, ScopeRecord value ) : base( key, value ) { }
+    public LogScopeRecord( LogRecord key, ScopeRecord value, UserRecord? caller = default ) : base( key, value, caller ) { }
+    private LogScopeRecord( RecordID<LogRecord> key, RecordID<ScopeRecord> value, RecordID<LogScopeRecord> id, RecordID<UserRecord> createdBy, Guid ownerUserID, DateTimeOffset dateCreated, DateTimeOffset? lastModified ) :
+        base( key, value, id, createdBy, ownerUserID, dateCreated, lastModified ) { }
 
 
-    public static LogScopeRecord Create( LogRecord key, ScopeRecord value ) => new(key, value);
+    public static LogScopeRecord Create( LogRecord key, ScopeRecord value, UserRecord? caller = default ) => new(key, value, caller);
     public static LogScopeRecord Create( DbDataReader reader )
     {
+        var                      key          = new RecordID<LogRecord>( reader.GetFieldValue<Guid>( nameof(CreatedBy) ) );
+        var                      value        = new RecordID<ScopeRecord>( reader.GetFieldValue<Guid>( nameof(CreatedBy) ) );
         DateTimeOffset           dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
-        DateTimeOffset           lastModified = reader.GetFieldValue<DateTimeOffset>( nameof(LastModified) );
+        DateTimeOffset?          lastModified = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
         Guid                     ownerUserID  = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
         RecordID<UserRecord>     createdBy    = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(CreatedBy) ) );
         RecordID<LogScopeRecord> id           = new RecordID<LogScopeRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) );
-        return new LogScopeRecord( id, createdBy, ownerUserID, dateCreated, lastModified );
+        return new LogScopeRecord( key, value, id, createdBy, ownerUserID, dateCreated, lastModified );
     }
     public static async IAsyncEnumerable<LogScopeRecord> CreateAsync( DbDataReader reader, [ EnumeratorCancellation ] CancellationToken token = default )
     {

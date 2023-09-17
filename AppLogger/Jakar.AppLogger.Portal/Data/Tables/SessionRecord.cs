@@ -26,12 +26,10 @@ public sealed partial record SessionRecord : LoggerTable<SessionRecord>, IDbRead
         AppID        = app.ID;
         DeviceID     = device.ID;
     }
-    [ DbReaderMapping ] public static partial SessionRecord Create( DbDataReader reader );
-    /*
     public static SessionRecord Create( DbDataReader reader )
     {
         DateTimeOffset           dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
-        DateTimeOffset           lastModified = reader.GetFieldValue<DateTimeOffset>( nameof(LastModified) );
+        DateTimeOffset?           lastModified = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
         Guid                     ownerUserID  = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
         RecordID<UserRecord>     createdBy    = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(CreatedBy) ) );
         RecordID<LogScopeRecord> id           = new RecordID<LogScopeRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) );
@@ -41,7 +39,6 @@ public sealed partial record SessionRecord : LoggerTable<SessionRecord>, IDbRead
     {
         while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
     }
-    */
 
     public StartSessionReply ToStartSessionReply() => new(ID.Value, AppID.Value, DeviceID.Value);
 
