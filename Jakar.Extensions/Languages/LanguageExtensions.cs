@@ -6,7 +6,7 @@
 namespace Jakar.Extensions;
 
 
-[SuppressMessage( "ReSharper", "StringLiteralTypo" )]
+[ SuppressMessage( "ReSharper", "StringLiteralTypo" ) ]
 public static class LanguageExtensions
 {
     private static readonly IReadOnlyDictionary<string, SupportedLanguage> _languages = Enum.GetValues( typeof(SupportedLanguage) )
@@ -59,6 +59,20 @@ public static class LanguageExtensions
     public static SupportedLanguage? GetSupportedLanguage( this CultureInfo culture )
     {
         string name = culture.DisplayName;
+
+        foreach ( (string? key, SupportedLanguage value) in _languages )
+        {
+            if ( name.Contains( key, StringComparison.OrdinalIgnoreCase ) ) { return value; }
+        }
+
+        return null;
+    }
+    public static SupportedLanguage? GetSupportedLanguage( this IFormatProvider culture )
+    {
+        if ( culture is CultureInfo info ) { return info.GetSupportedLanguage(); }
+
+        string? name = culture.ToString();
+        if ( string.IsNullOrEmpty( name ) ) { return null; }
 
         foreach ( (string? key, SupportedLanguage value) in _languages )
         {
