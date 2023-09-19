@@ -4,9 +4,10 @@
 namespace Jakar.Extensions;
 
 
-[SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
+[ SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" ) ]
 public sealed partial class WebRequester : IDisposable
 {
+    private readonly ILogger?           _logger;
     private readonly HttpClient         _client;
     private readonly IHostInfo          _host;
     private readonly RetryPolicy?       _retryPolicy;
@@ -21,9 +22,10 @@ public sealed partial class WebRequester : IDisposable
     }
 
 
-    public WebRequester( HttpClient client, IHostInfo host, RetryPolicy? retryPolicy = default ) : this( client, host, retryPolicy, Encoding.Default ) { }
-    public WebRequester( HttpClient client, IHostInfo host, RetryPolicy? retryPolicy, Encoding encoding )
+    public WebRequester( ILogger? logger, HttpClient client, IHostInfo host, RetryPolicy? retryPolicy = default ) : this( logger, client, host, retryPolicy, Encoding.Default ) { }
+    public WebRequester( ILogger? logger, HttpClient client, IHostInfo host, RetryPolicy? retryPolicy, Encoding encoding )
     {
+        _logger      = logger;
         _client      = client;
         _host        = host;
         _retryPolicy = retryPolicy;
@@ -31,32 +33,37 @@ public sealed partial class WebRequester : IDisposable
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] private Uri CreateUrl( string         relativePath ) => new(_host.HostInfo, relativePath);
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] private WebHandler CreateHandler( Uri url, HttpMethod method, CancellationToken token ) => CreateHandler( new HttpRequestMessage( method, url ), token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    private WebHandler CreateHandler( Uri url, HttpMethod method, HttpContent value, CancellationToken token ) => CreateHandler( new HttpRequestMessage( method, url )
-                                                                                                                                 {
-                                                                                                                                     Content = value,
-                                                                                                                                 },
-                                                                                                                                 token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] private WebHandler CreateHandler( HttpRequestMessage request, CancellationToken token ) => new(_client, request, Encoding, _retryPolicy, token);
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] private Uri        CreateUrl( string  relativePath )                                    => new(_host.HostInfo, relativePath);
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] private WebHandler CreateHandler( Uri url, HttpMethod method, CancellationToken token ) => CreateHandler( new HttpRequestMessage( method, url ), token );
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    private WebHandler CreateHandler( Uri url, HttpMethod method, HttpContent value, CancellationToken token )
+    {
+        _logger?.LogDebug( "Starting a {Method} request to {Uri}", method.Method, url.ToString() );
+
+        return CreateHandler( new HttpRequestMessage( method, url )
+                              {
+                                  Content = value,
+                              },
+                              token );
+    }
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] private WebHandler CreateHandler( HttpRequestMessage request, CancellationToken token ) => new(_logger, _client, request, Encoding, _retryPolicy, token);
 
 
     public WebHandler Delete( string    relativePath, HttpContent                 value, CancellationToken token ) => Delete( CreateUrl( relativePath ), value, token );
     public WebHandler Delete( Uri       url,          HttpContent                 value, CancellationToken token ) => CreateHandler( url, HttpMethod.Delete, value, token );
-    public WebHandler Delete( Uri       url,          CancellationToken           token ) => CreateHandler( url, HttpMethod.Delete, token );
-    public WebHandler Delete( string    relativePath, CancellationToken           token ) => Delete( CreateUrl( relativePath ),               token );
-    public WebHandler Delete( string    relativePath, byte[]                      value,   CancellationToken token ) => Delete( relativePath, new ByteArrayContent( value ),                       token );
-    public WebHandler Delete( string    relativePath, ReadOnlyMemory<byte>        value,   CancellationToken token ) => Delete( relativePath, new ReadOnlyMemoryContent( value ),                  token );
-    public WebHandler Delete( string    relativePath, IDictionary<string, string> value,   CancellationToken token ) => Delete( relativePath, new FormUrlEncodedContent( value ),                  token );
-    public WebHandler Delete( string    relativePath, Stream                      value,   CancellationToken token ) => Delete( relativePath, new StreamContent( value ),                          token );
-    public WebHandler Delete( string    relativePath, MultipartContent            content, CancellationToken token ) => Delete( relativePath, (HttpContent)content,                                token );
-    public WebHandler Delete( string    relativePath, string                      value,   CancellationToken token ) => Delete( relativePath, new StringContent( value.ToPrettyJson(), Encoding ), token );
-    public WebHandler Delete( string    relativePath, BaseClass                   value,   CancellationToken token ) => Delete( relativePath, new JsonContent( value.ToPrettyJson(), Encoding ),   token );
-    public WebHandler Delete( string    relativePath, BaseRecord                  value,   CancellationToken token ) => Delete( relativePath, new JsonContent( value.ToPrettyJson(), Encoding ),   token );
-    public WebHandler Delete( string    relativePath, IEnumerable<BaseRecord>     value,   CancellationToken token ) => Delete( relativePath, new JsonContent( value.ToPrettyJson(), Encoding ),   token );
-    public WebHandler Delete( string    relativePath, IEnumerable<BaseClass>      value,   CancellationToken token ) => Delete( relativePath, new JsonContent( value.ToPrettyJson(), Encoding ),   token );
-    public WebHandler Delete<T>( string relativePath, ImmutableArray<T>           value,   CancellationToken token ) => Delete( relativePath, new JsonContent( value.ToPrettyJson(), Encoding ),   token );
+    public WebHandler Delete( Uri       url,          CancellationToken           token )                            => CreateHandler( url, HttpMethod.Delete, token );
+    public WebHandler Delete( string    relativePath, CancellationToken           token )                            => Delete( CreateUrl( relativePath ), token );
+    public WebHandler Delete( string    relativePath, byte[]                      value,   CancellationToken token ) => Delete( relativePath,              new ByteArrayContent( value ),                       token );
+    public WebHandler Delete( string    relativePath, ReadOnlyMemory<byte>        value,   CancellationToken token ) => Delete( relativePath,              new ReadOnlyMemoryContent( value ),                  token );
+    public WebHandler Delete( string    relativePath, IDictionary<string, string> value,   CancellationToken token ) => Delete( relativePath,              new FormUrlEncodedContent( value ),                  token );
+    public WebHandler Delete( string    relativePath, Stream                      value,   CancellationToken token ) => Delete( relativePath,              new StreamContent( value ),                          token );
+    public WebHandler Delete( string    relativePath, MultipartContent            content, CancellationToken token ) => Delete( relativePath,              (HttpContent)content,                                token );
+    public WebHandler Delete( string    relativePath, string                      value,   CancellationToken token ) => Delete( relativePath,              new StringContent( value.ToPrettyJson(), Encoding ), token );
+    public WebHandler Delete( string    relativePath, BaseClass                   value,   CancellationToken token ) => Delete( relativePath,              new JsonContent( value.ToPrettyJson(), Encoding ),   token );
+    public WebHandler Delete( string    relativePath, BaseRecord                  value,   CancellationToken token ) => Delete( relativePath,              new JsonContent( value.ToPrettyJson(), Encoding ),   token );
+    public WebHandler Delete( string    relativePath, IEnumerable<BaseRecord>     value,   CancellationToken token ) => Delete( relativePath,              new JsonContent( value.ToPrettyJson(), Encoding ),   token );
+    public WebHandler Delete( string    relativePath, IEnumerable<BaseClass>      value,   CancellationToken token ) => Delete( relativePath,              new JsonContent( value.ToPrettyJson(), Encoding ),   token );
+    public WebHandler Delete<T>( string relativePath, ImmutableArray<T>           value,   CancellationToken token ) => Delete( relativePath,              new JsonContent( value.ToPrettyJson(), Encoding ),   token );
 
 
     public WebHandler Get( Uri    url,          CancellationToken token ) => CreateHandler( url, HttpMethod.Get, token );

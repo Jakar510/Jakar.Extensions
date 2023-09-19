@@ -8,40 +8,32 @@ using static Jakar.Extensions.WebRequester;
 namespace Jakar.Extensions;
 
 
-[SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
-public sealed class WebHandler : IDisposable
+[ SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" ) ]
+public readonly record struct WebHandler : IDisposable
 {
-    public const     string             FILE_NAME = "FileName";
-    private readonly HttpClient         _client;
-    private readonly HttpRequestMessage _request;
+    public static readonly EventId            EventId = new(69420, nameof(SendAsync));
+    private readonly       HttpClient         _client;
+    private readonly       HttpRequestMessage _request;
+    private readonly       ILogger?           _logger;
 
 
+    public   HttpContentHeaders? ContentHeaders => _request.Content?.Headers;
+    internal Encoding            Encoding       { get; }
+    public   HttpRequestHeaders  Headers        => _request.Headers;
+    public   string              Method         => _request.Method.Method;
+    public   Uri                 RequestUri     => _request.RequestUri ?? throw new NullReferenceException( nameof(_request.RequestUri) );
+    internal RetryPolicy?        RetryPolicy    { get; }
+    internal CancellationToken   Token          { get; }
     public AppVersion Version
     {
         get => _request.Version;
         set => _request.Version = value.ToVersion();
     }
-    internal CancellationToken   Token          { get; }
-    internal Encoding            Encoding       { get; }
-    public   HttpContentHeaders? ContentHeaders => _request.Content?.Headers;
-    public   HttpRequestHeaders  Headers        => _request.Headers;
-    internal RetryPolicy?        RetryPolicy    { get; }
-    public   Uri                 RequestUri     => _request.RequestUri ?? throw new NullReferenceException( nameof(_request.RequestUri) );
-    public   string              Method         => _request.Method.Method;
 
 
-#if NET6_0_OR_GREATER
-    public HttpVersionPolicy VersionPolicy
+    public WebHandler( ILogger? logger, HttpClient client, HttpRequestMessage request, Encoding encoding, RetryPolicy? retryPolicy, CancellationToken token )
     {
-        get => _request.VersionPolicy;
-        set => _request.VersionPolicy = value;
-    }
-    public HttpRequestOptions Options => _request.Options;
-#endif
-
-
-    public WebHandler( HttpClient client, HttpRequestMessage request, Encoding encoding, RetryPolicy? retryPolicy, CancellationToken token )
-    {
+        _logger     = logger;
         _request    = request;
         _client     = client;
         Encoding    = encoding;
@@ -50,15 +42,19 @@ public sealed class WebHandler : IDisposable
     }
 
 
-    public TaskAwaiter<HttpResponseMessage> GetAwaiter() => _client.SendAsync( _request, Token )
-                                                                   .GetAwaiter();
+    public async ValueTask<HttpResponseMessage> SendAsync()
+    {
+        var response = await _client.SendAsync( _request, Token );
+        _logger?.LogDebug( EventId, "Response StatusCode: {StatusCode} for {Uri}", response.StatusCode, _request.RequestUri?.OriginalString );
+        return response;
+    }
 
 
     public async ValueTask NoResponse()
     {
         using ( this )
         {
-            using HttpResponseMessage response = await this;
+            using HttpResponseMessage response = await SendAsync();
             response.EnsureSuccessStatusCode();
         }
     }
@@ -84,7 +80,11 @@ public sealed class WebHandler : IDisposable
     {
         await using MemoryStream stream = await AsStream( response );
         using var                sr     = new StreamReader( stream, Encoding );
-        using JsonReader         reader = new JsonTextReader( sr );
+    #if NET6_0_OR_GREATER
+        await
+        #endif
+            using JsonReader reader = new JsonTextReader( sr );
+
         return await JToken.ReadFromAsync( reader, settings, Token );
     }
     public async ValueTask<LocalFile> AsFile( HttpResponseMessage response )
@@ -174,29 +174,42 @@ public sealed class WebHandler : IDisposable
     {
         await using MemoryStream stream = await AsStream( response );
         using var                sr     = new StreamReader( stream, Encoding );
-        using JsonReader         reader = new JsonTextReader( sr );
+    #if NET6_0_OR_GREATER
+        await
+        #endif
+            using JsonReader reader = new JsonTextReader( sr );
 
         return serializer.Deserialize<TResult>( reader ) ?? throw new NullReferenceException( nameof(JsonConvert.DeserializeObject) );
     }
 
 
-    public ValueTask<WebResponse<bool>> AsBool() => WebResponse<bool>.Create( this, AsBool );
-    public ValueTask<WebResponse<byte[]>> AsBytes() => WebResponse<byte[]>.Create( this, AsBytes );
-    public ValueTask<WebResponse<JToken>> AsJson() => AsJson( JsonNet.LoadSettings );
-    public async ValueTask<WebResponse<JToken>> AsJson( JsonLoadSettings settings ) => await WebResponse<JToken>.Create( this, settings, AsJson );
-    public ValueTask<WebResponse<LocalFile>> AsFile() => WebResponse<LocalFile>.Create( this,                           AsFile );
-    public ValueTask<WebResponse<LocalFile>> AsFile( string    fileNameHeader ) => WebResponse<LocalFile>.Create( this, fileNameHeader, AsFile );
-    public ValueTask<WebResponse<LocalFile>> AsFile( FileInfo  path ) => WebResponse<LocalFile>.Create( this,           path,           AsFile );
-    public ValueTask<WebResponse<LocalFile>> AsFile( LocalFile file ) => WebResponse<LocalFile>.Create( this,           file,           AsFile );
-    public ValueTask<WebResponse<LocalFile>> AsFile( MimeType  type ) => WebResponse<LocalFile>.Create( this,           type,           AsFile );
-    public ValueTask<WebResponse<MemoryStream>> AsStream() => WebResponse<MemoryStream>.Create( this, AsStream );
-    public ValueTask<WebResponse<ReadOnlyMemory<byte>>> AsMemory() => WebResponse<ReadOnlyMemory<byte>>.Create( this, AsMemory );
-    public ValueTask<WebResponse<string>> AsString() => WebResponse<string>.Create( this, AsString );
+    public       ValueTask<WebResponse<bool>>                 AsBool()                            => WebResponse<bool>.Create( this, AsBool );
+    public       ValueTask<WebResponse<byte[]>>               AsBytes()                           => WebResponse<byte[]>.Create( this, AsBytes );
+    public       ValueTask<WebResponse<JToken>>               AsJson()                            => AsJson( JsonNet.LoadSettings );
+    public async ValueTask<WebResponse<JToken>>               AsJson( JsonLoadSettings settings ) => await WebResponse<JToken>.Create( this, settings, AsJson );
+    public       ValueTask<WebResponse<LocalFile>>            AsFile()                            => WebResponse<LocalFile>.Create( this, AsFile );
+    public       ValueTask<WebResponse<LocalFile>>            AsFile( string    fileNameHeader )  => WebResponse<LocalFile>.Create( this, fileNameHeader, AsFile );
+    public       ValueTask<WebResponse<LocalFile>>            AsFile( FileInfo  path )            => WebResponse<LocalFile>.Create( this, path,           AsFile );
+    public       ValueTask<WebResponse<LocalFile>>            AsFile( LocalFile file )            => WebResponse<LocalFile>.Create( this, file,           AsFile );
+    public       ValueTask<WebResponse<LocalFile>>            AsFile( MimeType  type )            => WebResponse<LocalFile>.Create( this, type,           AsFile );
+    public       ValueTask<WebResponse<MemoryStream>>         AsStream()                          => WebResponse<MemoryStream>.Create( this, AsStream );
+    public       ValueTask<WebResponse<ReadOnlyMemory<byte>>> AsMemory()                          => WebResponse<ReadOnlyMemory<byte>>.Create( this, AsMemory );
+    public       ValueTask<WebResponse<string>>               AsString()                          => WebResponse<string>.Create( this, AsString );
 
 
-    public ValueTask<WebResponse<TResult>> AsJson<TResult>() => AsJson<TResult>( JsonNet.Serializer );
+    public ValueTask<WebResponse<TResult>> AsJson<TResult>()                            => AsJson<TResult>( JsonNet.Serializer );
     public ValueTask<WebResponse<TResult>> AsJson<TResult>( JsonSerializer serializer ) => WebResponse<TResult>.Create( this, serializer, AsJson<TResult> );
 
 
     public void Dispose() => _request.Dispose();
+
+
+#if NET6_0_OR_GREATER
+    public HttpVersionPolicy VersionPolicy
+    {
+        get => _request.VersionPolicy;
+        set => _request.VersionPolicy = value;
+    }
+    public HttpRequestOptions Options => _request.Options;
+#endif
 }

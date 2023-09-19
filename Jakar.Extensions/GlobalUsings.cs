@@ -48,6 +48,7 @@ global using JetBrains.Annotations;
 global using ValueOf;
 global using CommunityToolkit.Diagnostics;
 global using Microsoft.Extensions.Configuration;
+global using Microsoft.Extensions.Logging;
 global using Newtonsoft.Json.Serialization;
 global using PureAttribute = JetBrains.Annotations.PureAttribute;
 global using KeyAttribute = Dapper.Contrib.Extensions.KeyAttribute;
