@@ -93,6 +93,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorWASM", "AppLogger\Exa
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AppLogger", "AppLogger", "{16A01E75-3A4D-4001-826A-2786C0B4B14E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jakar.Database.Generators", "Jakar.Database.Generators\Jakar.Database.Generators.csproj", "{D2BCCEFD-CFE2-4711-A2B2-64918161E7D0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -486,6 +488,18 @@ Global
 		{FEF0E90D-C2B7-4886-8C71-A7CDFF7106FE}.Release|iPhone.Build.0 = Release|Any CPU
 		{FEF0E90D-C2B7-4886-8C71-A7CDFF7106FE}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
 		{FEF0E90D-C2B7-4886-8C71-A7CDFF7106FE}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
+		{D2BCCEFD-CFE2-4711-A2B2-64918161E7D0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D2BCCEFD-CFE2-4711-A2B2-64918161E7D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D2BCCEFD-CFE2-4711-A2B2-64918161E7D0}.Debug|iPhone.ActiveCfg = Debug|Any CPU
+		{D2BCCEFD-CFE2-4711-A2B2-64918161E7D0}.Debug|iPhone.Build.0 = Debug|Any CPU
+		{D2BCCEFD-CFE2-4711-A2B2-64918161E7D0}.Debug|iPhoneSimulator.ActiveCfg = Debug|Any CPU
+		{D2BCCEFD-CFE2-4711-A2B2-64918161E7D0}.Debug|iPhoneSimulator.Build.0 = Debug|Any CPU
+		{D2BCCEFD-CFE2-4711-A2B2-64918161E7D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D2BCCEFD-CFE2-4711-A2B2-64918161E7D0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D2BCCEFD-CFE2-4711-A2B2-64918161E7D0}.Release|iPhone.ActiveCfg = Release|Any CPU
+		{D2BCCEFD-CFE2-4711-A2B2-64918161E7D0}.Release|iPhone.Build.0 = Release|Any CPU
+		{D2BCCEFD-CFE2-4711-A2B2-64918161E7D0}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
+		{D2BCCEFD-CFE2-4711-A2B2-64918161E7D0}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

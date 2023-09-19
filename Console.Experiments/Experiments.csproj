@@ -22,7 +22,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="BenchmarkDotNet" Version="0.13.7" />
+    <PackageReference Include="BenchmarkDotNet" Version="0.13.8" />
     <PackageReference Include="Hashids.net" Version="1.7.0" />
   </ItemGroup>
 

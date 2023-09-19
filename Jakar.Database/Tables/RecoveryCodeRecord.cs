@@ -15,22 +15,23 @@ public sealed record RecoveryCodeRecord
 {
     private static readonly PasswordHasher<RecoveryCodeRecord> _hasher = new();
 
-
-    private RecoveryCodeRecord( string code, UserRecord caller ) : this( code, RecordID<RecoveryCodeRecord>.New(), caller.ID, caller.UserID, DateTimeOffset.UtcNow ) => Code = _hasher.HashPassword( this, code );
+    public RecoveryCodeRecord( string code, UserRecord user ) : this( code, RecordID<RecoveryCodeRecord>.New(), user.ID, user.UserID, DateTimeOffset.UtcNow ) { }
 
     public static RecoveryCodeRecord Create( DbDataReader reader )
     {
-        DateTimeOffset        dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
-        DateTimeOffset        lastModified = reader.GetFieldValue<DateTimeOffset>( nameof(LastModified) );
-        Guid                  ownerUserID  = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
-        RecordID<UserRecord>  createdBy    = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(CreatedBy) ) );
-        RecordID<GroupRecord> id           = new RecordID<GroupRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) );
-        return new RecoveryCodeRecord( id, createdBy, ownerUserID, dateCreated, lastModified );
+        string                       code         = reader.GetString( nameof(Code) );
+        DateTimeOffset               dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
+        DateTimeOffset  ?             lastModified = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
+        Guid                         ownerUserID  = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
+        RecordID<UserRecord>         createdBy    = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(CreatedBy) ) );
+        RecordID<RecoveryCodeRecord> id           = new RecordID<RecoveryCodeRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) );
+        return new RecoveryCodeRecord( code, id, createdBy, ownerUserID, dateCreated, lastModified );
     }
     public static async IAsyncEnumerable<RecoveryCodeRecord> CreateAsync( DbDataReader reader, [ EnumeratorCancellation ] CancellationToken token = default )
     {
         while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
     }
+
 
     public static IReadOnlyDictionary<string, RecoveryCodeRecord> Create( UserRecord user, IEnumerable<string> recoveryCodes )
     {
@@ -86,18 +87,28 @@ public sealed record RecoveryCodeRecord
 [ Serializable, Table( "UserRecoveryCodes" ) ]
 public sealed record UserRecoveryCodeRecord : Mapping<UserRecoveryCodeRecord, UserRecord, RecoveryCodeRecord>, ICreateMapping<UserRecoveryCodeRecord, UserRecord, RecoveryCodeRecord>, IDbReaderMapping<UserRecoveryCodeRecord>
 {
-    public UserRecoveryCodeRecord( UserRecord                                           owner, RecoveryCodeRecord value ) : base( owner, value ) { }
-    [ RequiresPreviewFeatures ] public static UserRecoveryCodeRecord Create( UserRecord owner, RecoveryCodeRecord value ) => new(owner, value);
+    public UserRecoveryCodeRecord( UserRecord owner, RecoveryCodeRecord value, UserRecord? caller = default ) : base( owner, value, caller ) { }
+    public UserRecoveryCodeRecord( RecordID<UserRecord>             key,
+                                   RecordID<RecoveryCodeRecord>     value,
+                                   RecordID<UserRecoveryCodeRecord> id,
+                                   RecordID<UserRecord>             createdBy,
+                                   Guid                             ownerUserID,
+                                   DateTimeOffset                   dateCreated,
+                                   DateTimeOffset?                  lastModified = default
+    ) : base( key, value, id, createdBy, ownerUserID, dateCreated, lastModified ) { }
+    public static UserRecoveryCodeRecord Create( UserRecord owner, RecoveryCodeRecord value, UserRecord? caller = default ) => new(owner, value, caller);
 
 
     public static UserRecoveryCodeRecord Create( DbDataReader reader )
     {
-        DateTimeOffset        dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
-        DateTimeOffset        lastModified = reader.GetFieldValue<DateTimeOffset>( nameof(LastModified) );
-        Guid                  ownerUserID  = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
-        RecordID<UserRecord>  createdBy    = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(CreatedBy) ) );
-        RecordID<GroupRecord> id           = new RecordID<GroupRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) );
-        return new UserRecoveryCodeRecord( id, createdBy, ownerUserID, dateCreated, lastModified );
+        var                              key          = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(KeyID) ) );
+        var                              value        = new RecordID<RecoveryCodeRecord>( reader.GetFieldValue<Guid>( nameof(KeyID) ) );
+        DateTimeOffset                   dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
+        DateTimeOffset?                  lastModified = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
+        Guid                             ownerUserID  = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
+        RecordID<UserRecord>             createdBy    = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(CreatedBy) ) );
+        RecordID<UserRecoveryCodeRecord> id           = new RecordID<UserRecoveryCodeRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) );
+        return new UserRecoveryCodeRecord( key, value, id, createdBy, ownerUserID, dateCreated, lastModified );
     }
     public static async IAsyncEnumerable<UserRecoveryCodeRecord> CreateAsync( DbDataReader reader, [ EnumeratorCancellation ] CancellationToken token = default )
     {

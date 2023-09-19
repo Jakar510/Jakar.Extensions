@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Jakar.Extensions" Version="6.8.4" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="4.7.0" />
+  </ItemGroup>
+
+</Project>

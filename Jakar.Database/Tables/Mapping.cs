@@ -1,33 +1,33 @@
 ﻿namespace Jakar.Database;
 
+
 public interface ICreateMapping<out TSelf, in TKey, in TValue> where TValue : TableRecord<TValue>, IDbReaderMapping<TValue>
                                                                where TKey : TableRecord<TKey>, IDbReaderMapping<TKey>
                                                                where TSelf : Mapping<TSelf, TKey, TValue>, ICreateMapping<TSelf, TKey, TValue>, IDbReaderMapping<TSelf>
 {
-    [ RequiresPreviewFeatures ] public abstract static TSelf Create( TKey key, TValue value );
+    public abstract static TSelf Create( TKey key, TValue value, UserRecord? caller = default );
 }
 
 
 
 [ Serializable ]
-public abstract record Mapping<TSelf, TKey, TValue> : TableRecord<TSelf> where TValue : TableRecord<TValue>, IDbReaderMapping<TValue>
-                                                                         where TKey : TableRecord<TKey>, IDbReaderMapping<TKey>
-                                                                         where TSelf : Mapping<TSelf, TKey, TValue>, ICreateMapping<TSelf, TKey, TValue>, IDbReaderMapping<TSelf>
+public abstract record Mapping<TSelf, TKey, TValue>
+    ( RecordID<TKey> KeyID, RecordID<TValue> ValueID, RecordID<TSelf> ID, RecordID<UserRecord>? CreatedBy, Guid? OwnerUserID, DateTimeOffset DateCreated, DateTimeOffset? LastModified = default ) : TableRecord<TSelf>( ID,
+                                                                                                                                                                                                                         CreatedBy,
+                                                                                                                                                                                                                         OwnerUserID,
+                                                                                                                                                                                                                         DateCreated,
+                                                                                                                                                                                                                         LastModified )
+    where TValue : TableRecord<TValue>, IDbReaderMapping<TValue>
+    where TKey : TableRecord<TKey>, IDbReaderMapping<TKey>
+    where TSelf : Mapping<TSelf, TKey, TValue>, ICreateMapping<TSelf, TKey, TValue>, IDbReaderMapping<TSelf>
 {
     private WeakReference<TKey>?   _owner;
     private WeakReference<TValue>? _value;
 
-
-    public RecordID<TKey>   KeyID   { get; init; }
-    public RecordID<TValue> ValueID { get; init; }
-
-
-    protected Mapping( TKey key, TValue value ) : base( RecordID<TSelf>.New() )
+    protected Mapping( TKey key, TValue value, UserRecord? caller ) : this( key.ID, value.ID, RecordID<TSelf>.New(), caller?.ID, caller?.UserID, DateTimeOffset.UtcNow )
     {
-        _owner  = new WeakReference<TKey>( key );
-        _value  = new WeakReference<TValue>( value );
-        KeyID   = key.ID;
-        ValueID = value.ID;
+        _owner = new WeakReference<TKey>( key );
+        _value = new WeakReference<TValue>( value );
     }
 
 
@@ -86,7 +86,6 @@ public abstract record Mapping<TSelf, TKey, TValue> : TableRecord<TSelf> where T
     public override int GetHashCode() => HashCode.Combine( KeyID, ValueID );
 
 
-    [ RequiresPreviewFeatures ]
     public static async ValueTask<bool> TryAdd( DbConnection connection, DbTransaction transaction, DbTable<TSelf> selfTable, TKey key, TValue value, CancellationToken token )
     {
         if ( await Exists( connection, transaction, selfTable, key, value, token ) ) { return false; }
@@ -95,24 +94,31 @@ public abstract record Mapping<TSelf, TKey, TValue> : TableRecord<TSelf> where T
         TSelf self   = await selfTable.Insert( connection, transaction, record, token );
         return self.IsValidID();
     }
-    [ RequiresPreviewFeatures ]
-    public static async ValueTask TryAdd( DbConnection connection, DbTransaction transaction, DbTable<TSelf> selfTable, TKey key, IEnumerable<TValue> values, CancellationToken token )
+    public static async ValueTask<bool> TryAdd( DbConnection connection, DbTransaction transaction, DbTable<TSelf> selfTable, TKey key, TValue value, UserRecord? caller, CancellationToken token )
+    {
+        if ( await Exists( connection, transaction, selfTable, key, value, token ) ) { return false; }
+
+        var   record = TSelf.Create( key, value, caller );
+        TSelf self   = await selfTable.Insert( connection, transaction, record, token );
+        return self.IsValidID();
+    }
+    public static async ValueTask TryAdd( DbConnection connection, DbTransaction transaction, DbTable<TSelf> selfTable, TKey key, IEnumerable<TValue> values, UserRecord? caller, CancellationToken token )
     {
         IEnumerable<TSelf> records = await Where( connection, transaction, selfTable, key, token );
 
-        foreach ( TSelf self in FilterExisting( records.GetArray(), key, values ) ) { await selfTable.Insert( connection, transaction, self, token ); }
+        foreach ( TSelf self in FilterExisting( records.GetArray(), key, values, caller ) ) { await selfTable.Insert( connection, transaction, self, token ); }
     }
 
 
     [ RequiresPreviewFeatures, MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization ) ]
-    private static IEnumerable<TSelf> FilterExisting( TSelf[] records, TKey key, IEnumerable<TValue> values )
+    private static IEnumerable<TSelf> FilterExisting( TSelf[] records, TKey key, IEnumerable<TValue> values, UserRecord? caller )
     {
         // ReSharper disable once LoopCanBeConvertedToQuery
         foreach ( TValue value in values )
         {
             if ( Exists( records, value ) ) { continue; }
 
-            yield return TSelf.Create( key, value );
+            yield return TSelf.Create( key, value, caller );
         }
     }
 
@@ -165,7 +171,6 @@ WHERE {selfTableName}.{nameof(ValueID)} = @{nameof(ValueID)}";
     }
 
 
-    [ RequiresPreviewFeatures ]
     public static async ValueTask Replace( DbConnection connection, DbTransaction transaction, DbTable<TSelf> selfTable, TKey key, IEnumerable<TValue> values, CancellationToken token )
     {
         await Delete( connection, transaction, selfTable, key, token );

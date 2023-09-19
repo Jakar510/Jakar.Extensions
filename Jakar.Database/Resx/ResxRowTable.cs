@@ -1,29 +1,30 @@
 ﻿namespace Jakar.Database.Resx;
 
 
+/// <see cref="LocalizableString"/>
 [ Serializable, Table( "Resx" ) ]
-public sealed record ResxRowRecord( long                    KeyID,
-                                    string                  Key,
-                                    string                  Neutral,
-                                    string?                 Arabic,
-                                    string?                 Chinese,
-                                    string?                 Czech,
-                                    string?                 Dutch,
-                                    string?                 English,
-                                    string?                 French,
-                                    string?                 German,
-                                    string?                 Japanese,
-                                    string?                 Korean,
-                                    string?                 Polish,
-                                    string?                 Portuguese,
-                                    string?                 Spanish,
-                                    string?                 Swedish,
-                                    string?                 Thai,
-                                    RecordID<ResxRowRecord> ID,
-                                    RecordID<UserRecord>?   CreatedBy,
-                                    Guid?                   OwnerUserID,
-                                    DateTimeOffset          DateCreated,
-                                    DateTimeOffset?         LastModified = default
+public sealed partial record ResxRowRecord( long                    KeyID,
+                                            string                  Key,
+                                            string                  Neutral,
+                                            string?                 Arabic,
+                                            string?                 Chinese,
+                                            string?                 Czech,
+                                            string?                 Dutch,
+                                            string?                 English,
+                                            string?                 French,
+                                            string?                 German,
+                                            string?                 Japanese,
+                                            string?                 Korean,
+                                            string?                 Polish,
+                                            string?                 Portuguese,
+                                            string?                 Spanish,
+                                            string?                 Swedish,
+                                            string?                 Thai,
+                                            RecordID<ResxRowRecord> ID,
+                                            RecordID<UserRecord>?   CreatedBy,
+                                            Guid?                   OwnerUserID,
+                                            DateTimeOffset          DateCreated,
+                                            DateTimeOffset?         LastModified = default
 ) : TableRecord<ResxRowRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<ResxRowRecord>
 {
     public ResxRowRecord( string key, long keyID, UserRecord? caller = default ) : this( key, keyID, string.Empty, caller ) { }
@@ -87,17 +88,57 @@ public sealed record ResxRowRecord( long                    KeyID,
 
     public static ResxRowRecord Create( DbDataReader reader )
     {
-        DateTimeOffset       dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
-        DateTimeOffset       lastModified = reader.GetFieldValue<DateTimeOffset>( nameof(LastModified) );
-        Guid                 ownerUserID  = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
-        RecordID<UserRecord> createdBy    = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(CreatedBy) ) );
-        RecordID<RoleRecord> id           = new RecordID<RoleRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) );
-        return new ResxRowRecord( id, createdBy, ownerUserID, dateCreated, lastModified );
+        var keyID        = reader.GetFieldValue<long>( nameof(KeyID) );
+        var key          = reader.GetString( nameof(Key) );
+        var neutral      = reader.GetString( nameof(Neutral) );
+        var english      = reader.GetString( nameof(English) );
+        var spanish      = reader.GetString( nameof(Spanish) );
+        var french       = reader.GetString( nameof(French) );
+        var swedish      = reader.GetString( nameof(Swedish) );
+        var german       = reader.GetString( nameof(German) );
+        var chinese      = reader.GetString( nameof(Chinese) );
+        var polish       = reader.GetString( nameof(Polish) );
+        var thai         = reader.GetString( nameof(Thai) );
+        var japanese     = reader.GetString( nameof(Japanese) );
+        var czech        = reader.GetString( nameof(Czech) );
+        var portuguese   = reader.GetString( nameof(Portuguese) );
+        var dutch        = reader.GetString( nameof(Dutch) );
+        var korean       = reader.GetString( nameof(Korean) );
+        var arabic       = reader.GetString( nameof(Arabic) );
+        var dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
+        var lastModified = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
+        var ownerUserID  = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
+        var createdBy    = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(CreatedBy) ) );
+        var id           = new RecordID<ResxRowRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) );
+
+        return new ResxRowRecord( keyID,
+                                  key,
+                                  neutral,
+                                  english,
+                                  spanish,
+                                  french,
+                                  swedish,
+                                  german,
+                                  chinese,
+                                  polish,
+                                  thai,
+                                  japanese,
+                                  czech,
+                                  portuguese,
+                                  dutch,
+                                  korean,
+                                  arabic,
+                                  id,
+                                  createdBy,
+                                  ownerUserID,
+                                  dateCreated,
+                                  lastModified );
     }
     public static async IAsyncEnumerable<ResxRowRecord> CreateAsync( DbDataReader reader, [ EnumeratorCancellation ] CancellationToken token = default )
     {
         while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
     }
+
 
     public override int CompareTo( ResxRowRecord? other )
     {

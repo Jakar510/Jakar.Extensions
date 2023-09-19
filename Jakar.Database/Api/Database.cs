@@ -48,6 +48,8 @@ public abstract partial class Database : Randoms, IConnectableDb, IAsyncDisposab
         RecordID<UserRecoveryCodeRecord>.DapperTypeHandler.Register();
         RecordID<UserRoleRecord>.DapperTypeHandler.Register();
         RecordID<UserRecord>.DapperTypeHandler.Register();
+        UserRights.DapperTypeHandler.Register();
+        UserRights.DapperTypeHandlerNullable.Register();
     }
     protected Database( IConfiguration configuration, IOptions<DbOptions> options ) : base()
     {

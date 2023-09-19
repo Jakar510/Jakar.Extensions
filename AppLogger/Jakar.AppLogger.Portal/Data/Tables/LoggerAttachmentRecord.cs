@@ -39,7 +39,7 @@ public sealed record LoggerAttachmentRecord : LoggerTable<LoggerAttachmentRecord
     }
 
 
-    public static LoggerAttachmentRecord Create( DbDataReader reader ) => null;
+    public static LoggerAttachmentRecord Create( DbDataReader reader ) => new();
     public static async IAsyncEnumerable<LoggerAttachmentRecord> CreateAsync( DbDataReader reader, [ EnumeratorCancellation ] CancellationToken token = default )
     {
         while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
@@ -96,7 +96,7 @@ public sealed record LoggerAttachmentMappingRecord : Mapping<LoggerAttachmentMap
                                                      IDbReaderMapping<LoggerAttachmentMappingRecord>
 {
     public LoggerAttachmentMappingRecord( LogRecord               key, LoggerAttachmentRecord value ) : base( key, value ) { }
-    public static LoggerAttachmentMappingRecord Create( LogRecord key, LoggerAttachmentRecord value ) => new(key, value);
+    public static LoggerAttachmentMappingRecord Create( LogRecord key, LoggerAttachmentRecord value, UserRecord? caller = TODO ) => new(key, value);
 
 
     public static LoggerAttachmentMappingRecord Create( DbDataReader reader ) => null;

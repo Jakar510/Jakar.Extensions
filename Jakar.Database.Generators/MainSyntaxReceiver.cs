@@ -1,43 +1,20 @@
 ﻿/*
 // Jakar.Extensions :: Jakar.Database
-// 09/07/2023  10:04 PM
+// 09/17/2023  6:55 AM
 
-using System.Linq.Expressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using ZXing.Common.ReedSolomon;
-using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 
 
 namespace Jakar.Database;
 
 
-[AttributeUsage( AttributeTargets.Method )] public sealed class DbReaderMapping : Attribute { }
-
-
-
-[Generator]
-public sealed class DbReaderMappingGenerator : ISourceGenerator
-{
-    public void Initialize( GeneratorInitializationContext generator ) => generator.RegisterForSyntaxNotifications( MainSyntaxReceiver.Create );
-    public void Execute( GeneratorExecutionContext generator )
-    {
-        if ( generator.SyntaxReceiver is not MainSyntaxReceiver main ) { return; }
-
-        foreach ( MainSyntaxReceiver.Capture capture in main.Captures ) { capture.Execute( ref generator ); }
-    }
-}
-
-
-
 public sealed class MainSyntaxReceiver : ISyntaxReceiver
 {
-    public static MainSyntaxReceiver Create() => new();
-
-
     public List<Capture> Captures { get; } = new();
+    public static MainSyntaxReceiver Create() => new();
     public void OnVisitSyntaxNode( SyntaxNode syntaxNode )
     {
         if ( syntaxNode is not AttributeSyntax { Name: IdentifierNameSyntax { Identifier.Text: nameof(DbReaderMapping) } } attribute ) { return; }
@@ -73,9 +50,9 @@ public sealed class MainSyntaxReceiver : ISyntaxReceiver
                 string name     = property.Identifier.ValueText;
                 string variable = name.ToSnakeCase();
 
-                var statement = LocalDeclarationStatement( VariableDeclaration( PredefinedType( Token( SyntaxKind.StringKeyword ) ) )
-                                                              .WithVariables( SingletonSeparatedList( VariableDeclarator( Identifier( variable ) )
-                                                                                                         .WithInitializer( EqualsValueClause( GetFromReader( property.Type, name ) ) ) ) ) );
+                LocalDeclarationStatementSyntax statement = LocalDeclarationStatement( VariableDeclaration( PredefinedType( Token( SyntaxKind.StringKeyword ) ) )
+                                                                                          .WithVariables( SingletonSeparatedList( VariableDeclarator( Identifier( variable ) )
+                                                                                                                                     .WithInitializer( EqualsValueClause( GetFromReader( property.Type, name ) ) ) ) ) );
 
 
                 // var getFieldValue = InvocationExpression( MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression,
@@ -109,13 +86,13 @@ public sealed class MainSyntaxReceiver : ISyntaxReceiver
 
             if ( syntax is GenericNameSyntax generic )
             {
-                var arg = generic.TypeArgumentList.Arguments.Single()
-                                 .ToString();
+                string arg = generic.TypeArgumentList.Arguments.Single()
+                                    .ToString();
 
                 return GetFromReader_ValueType( arg, name );
             }
 
-            var type = syntax.ToString();
+            string type = syntax.ToString();
 
         #pragma warning disable IDE0066
             switch ( type )
@@ -148,18 +125,14 @@ public sealed class MainSyntaxReceiver : ISyntaxReceiver
                                                 .WithTypeArgumentList( TypeArgumentList( syntax.TypeArgumentList.Arguments ) ) )
                .WithArgumentList( ArgumentList() );
         }
-        private static InvocationExpressionSyntax GetFromReader_String( in string name )
-        {
-            return InvocationExpression( MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, IdentifierName( READER ), IdentifierName( nameof(DbDataReader.GetString) ) ) )
+        private static InvocationExpressionSyntax GetFromReader_String( in string name ) =>
+            InvocationExpression( MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, IdentifierName( READER ), IdentifierName( nameof(DbDataReader.GetString) ) ) )
                .WithArgumentList( ArgumentList( SingletonSeparatedList( Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( name ) ) ) ) ) );
-        }
-        private static InvocationExpressionSyntax GetFromReader_ValueType( in string type, in string name )
-        {
-            return InvocationExpression( MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression,
-                                                                 IdentifierName( READER ),
-                                                                 GenericName( Identifier( nameof(DbDataReader.GetFieldValue) ) )
-                                                                    .WithTypeArgumentList( TypeArgumentList( SingletonSeparatedList<TypeSyntax>( IdentifierName( type ) ) ) ) ) );
-        }
+        private static InvocationExpressionSyntax GetFromReader_ValueType( in string type, in string name ) =>
+            InvocationExpression( MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression,
+                                                          IdentifierName( READER ),
+                                                          GenericName( Identifier( nameof(DbDataReader.GetFieldValue) ) )
+                                                             .WithTypeArgumentList( TypeArgumentList( SingletonSeparatedList<TypeSyntax>( IdentifierName( type ) ) ) ) ) );
     }
 }
 */

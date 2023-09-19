@@ -5,7 +5,7 @@ namespace Jakar.AppLogger.Portal.Data.Tables;
 
 
 [ Serializable, Table( "Devices" ) ]
-public sealed record DeviceRecord : LoggerTable<DeviceRecord>, IDbReaderMapping<DeviceRecord>, IDevice
+public sealed partial record DeviceRecord : LoggerTable<DeviceRecord>, IDbReaderMapping<DeviceRecord>, IDevice
 {
     public                                  int?       AppBuild            { get; init; }
     [ MaxLength( 4096 ) ] public            string?    AppNamespace        { get; init; }
@@ -45,10 +45,11 @@ public sealed record DeviceRecord : LoggerTable<DeviceRecord>, IDbReaderMapping<
         HardwareInfo        = device.HwInfo?.ToJson();
     }
 
+
     public static DeviceRecord Create( DbDataReader reader )
     {
         DateTimeOffset       dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
-        DateTimeOffset       lastModified = reader.GetFieldValue<DateTimeOffset>( nameof(LastModified) );
+        DateTimeOffset?      lastModified = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
         Guid                 ownerUserID  = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
         RecordID<UserRecord> createdBy    = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(CreatedBy) ) );
         RecordID<RoleRecord> id           = new RecordID<RoleRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) );
@@ -58,6 +59,7 @@ public sealed record DeviceRecord : LoggerTable<DeviceRecord>, IDbReaderMapping<
     {
         while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
     }
+
 
     // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Global
     public DeviceRecord Update( IDevice device, UserRecord caller )
@@ -106,16 +108,20 @@ public sealed record DeviceRecord : LoggerTable<DeviceRecord>, IDbReaderMapping<
 [ Serializable, Table( "Devices" ) ]
 public sealed record AppDeviceRecord : Mapping<AppDeviceRecord, AppRecord, DeviceRecord>, ICreateMapping<AppDeviceRecord, AppRecord, DeviceRecord>, IDbReaderMapping<AppDeviceRecord>
 {
-    public AppDeviceRecord( AppRecord               key, DeviceRecord value ) : base( key, value ) { }
-    public static AppDeviceRecord Create( AppRecord key, DeviceRecord value ) => new(key, value);
+    public AppDeviceRecord( AppRecord key, DeviceRecord value, UserRecord? caller = default ) : base( key, value, caller ) { }
+    private AppDeviceRecord( RecordID<AppRecord> key, RecordID<DeviceRecord> value, RecordID<AppDeviceRecord> id, RecordID<UserRecord> createdBy, Guid ownerUserID, DateTimeOffset dateCreated, DateTimeOffset? lastModified ) :
+        base( key, value, id, createdBy, ownerUserID, dateCreated, lastModified ) { }
+    public static AppDeviceRecord Create( AppRecord key, DeviceRecord value, UserRecord? caller = default ) => new(key, value, caller);
     public static AppDeviceRecord Create( DbDataReader reader )
     {
-        DateTimeOffset       dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
-        DateTimeOffset       lastModified = reader.GetFieldValue<DateTimeOffset>( nameof(LastModified) );
-        Guid                 ownerUserID  = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
-        RecordID<UserRecord> createdBy    = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(CreatedBy) ) );
-        RecordID<RoleRecord> id           = new RecordID<RoleRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) );
-        return new AppDeviceRecord( id, createdBy, ownerUserID, dateCreated, lastModified );
+        var             key          = new RecordID<AppRecord>( reader.GetFieldValue<Guid>( nameof(KeyID) ) );
+        var             value        = new RecordID<DeviceRecord>( reader.GetFieldValue<Guid>( nameof(KeyID) ) );
+        DateTimeOffset  dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
+        DateTimeOffset? lastModified = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
+        Guid            ownerUserID  = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
+        var             createdBy    = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(CreatedBy) ) );
+        var             id           = new RecordID<AppDeviceRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) );
+        return new AppDeviceRecord( key, value, id, createdBy, ownerUserID, dateCreated, lastModified );
     }
     public static async IAsyncEnumerable<AppDeviceRecord> CreateAsync( DbDataReader reader, [ EnumeratorCancellation ] CancellationToken token = default )
     {

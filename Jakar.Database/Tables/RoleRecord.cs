@@ -44,7 +44,7 @@ public sealed record RoleRecord( [ property: MaxLength( 1024 ) ]                
         string               normalizedName   = reader.GetString( nameof(NormalizedName) );
         string               concurrencyStamp = reader.GetString( nameof(ConcurrencyStamp) );
         DateTimeOffset       dateCreated      = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
-        DateTimeOffset       lastModified     = reader.GetFieldValue<DateTimeOffset>( nameof(LastModified) );
+        DateTimeOffset?      lastModified     = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
         Guid                 ownerUserID      = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
         RecordID<UserRecord> createdBy        = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(CreatedBy) ) );
         RecordID<RoleRecord> id               = new RecordID<RoleRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) );
@@ -82,6 +82,6 @@ public sealed record RoleRecord( [ property: MaxLength( 1024 ) ]                
         return base.CompareTo( other );
     }
 
-    public UserRights GetRights() => new(this);
     public async ValueTask<IEnumerable<UserRecord>> GetUsers( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => await UserRoleRecord.Where( connection, transaction, db.UserRoles, db.Users, this, token );
+    public UserRights GetRights() => new(this);
 }
