@@ -6,8 +6,8 @@ namespace Jakar.Database;
 
 public interface ITokenService
 {
-    public ValueTask<string> CreateContent( string        header, UserRecord user,  ClaimType         types, CancellationToken token = default );
-    public ValueTask<string> CreateHTMLContent( string    header, UserRecord user,  ClaimType         types, CancellationToken token = default );
+    public ValueTask<string>  CreateContent( string       header, UserRecord user,  ClaimType         types, CancellationToken token = default );
+    public ValueTask<string>  CreateHTMLContent( string   header, UserRecord user,  ClaimType         types, CancellationToken token = default );
     public ValueTask<Tokens?> Authenticate( VerifyRequest users,  ClaimType  types, CancellationToken token = default );
 }
 

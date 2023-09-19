@@ -98,7 +98,9 @@ public static class LoggingExtensions
 
     public static string GetMachineName()
     {
+    #pragma warning disable RS1035
         try { return Environment.MachineName; }
         catch ( InvalidOperationException ) { return Dns.GetHostName(); }
+    #pragma warning restore RS1035
     }
 }

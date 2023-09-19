@@ -6,8 +6,8 @@ namespace Jakar.Database;
 
 public static class JwtExtensions
 {
-    [Pure] public static DateTimeOffset TokenExpiration( this IConfiguration configuration ) => configuration.TokenExpiration( TimeSpan.FromMinutes( 30 ) );
-    [Pure]
+    [ Pure ] public static DateTimeOffset TokenExpiration( this IConfiguration configuration ) => configuration.TokenExpiration( TimeSpan.FromMinutes( 30 ) );
+    [ Pure ]
     public static DateTimeOffset TokenExpiration( this IConfiguration configuration, TimeSpan defaultValue )
     {
         TimeSpan offset = configuration.TokenValidation()
@@ -18,9 +18,9 @@ public static class JwtExtensions
     public static IConfigurationSection TokenValidation( this IConfiguration configuration ) => configuration.GetSection( nameof(TokenValidation) );
 
 
-    public static byte[] GetJWTKey( this                             IConfiguration configuration, DbOptions options ) => Encoding.UTF8.GetBytes( configuration[options.JWTKey] ?? string.Empty );
-    public static SymmetricSecurityKey GetSymmetricSecurityKey( this IConfiguration configuration, DbOptions options ) => new(configuration.GetJWTKey( options ));
-    public static SigningCredentials GetSigningCredentials( this     IConfiguration configuration, DbOptions options ) => new(configuration.GetSymmetricSecurityKey( options ), options.JWTAlgorithm);
+    public static byte[]               GetJWTKey( this               IConfiguration configuration, DbOptions options ) => Encoding.UTF8.GetBytes( configuration[options.JWTKey] ?? string.Empty );
+    public static SymmetricSecurityKey GetSymmetricSecurityKey( this IConfiguration configuration, DbOptions options ) => new SymmetricSecurityKey( configuration.GetJWTKey( options ) );
+    public static SigningCredentials   GetSigningCredentials( this   IConfiguration configuration, DbOptions options ) => new SigningCredentials( configuration.GetSymmetricSecurityKey( options ), options.JWTAlgorithm );
 
 
     public static TokenValidationParameters GetTokenValidationParameters( this IConfiguration configuration, DbOptions options )
