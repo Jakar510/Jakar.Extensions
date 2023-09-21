@@ -4,12 +4,12 @@
 namespace Jakar.Extensions;
 
 
-public ref struct Buffer<T> where T : IEquatable<T>
+public ref struct Buffer<T>
 {
-    private T[]?    _arrayToReturnToPool = default;
-    private Span<T> _span                = default;
-    private int     _index               = 0;
-
+    private T[]?                  _arrayToReturnToPool = default;
+    private Span<T>               _span                = default;
+    private int                   _index               = 0;
+    private IEqualityComparer<T>? _comparer;
 
     public readonly bool    IsEmpty    => Length == 0;
     public readonly bool    IsNotEmpty => Length > 0;
@@ -17,7 +17,7 @@ public ref struct Buffer<T> where T : IEquatable<T>
     public readonly int     Length     => _index;
     public readonly Span<T> Next       => _span[_index..];
     public readonly Span<T> Span       => _span[.._index];
-    public          bool    IsReadOnly { get; init; }
+    public          bool    IsReadOnly { get; init; } = false;
     public int Index
     {
         readonly get => _index;
@@ -25,39 +25,37 @@ public ref struct Buffer<T> where T : IEquatable<T>
     }
 
 
+    public ref T this[ int              index ] => ref _span[index];
+    public ref T this[ Index            index ] => ref _span[index];
     public readonly Span<T> this[ Range range ] => _span[range];
-    public ref T this[ int index ]
-    {
-        get
-        {
-            Debug.Assert( index < Index );
-            return ref _span[index];
-        }
-    }
+    public readonly Span<T> this[ int   start, int length ] => _span.Slice( start, length );
 
 
     public Buffer() : this( 64 ) { }
-    public Buffer( int initialCapacity )
+    public Buffer( int initialCapacity ) : this( initialCapacity, EqualityComparer<T>.Default ) { }
+    public Buffer( int initialCapacity, IEqualityComparer<T> comparer )
     {
-        // var sb = new StringBuilder( "", 0, 0, initialCapacity );
-        // GC.AllocateUninitializedArray<T>( initialCapacity );
-
-        _span      = _arrayToReturnToPool = ArrayPool<T>.Shared.Rent( initialCapacity );
-        IsReadOnly = false;
+        _comparer = comparer;
+        _span     = _arrayToReturnToPool = ArrayPool<T>.Shared.Rent( initialCapacity );
     }
-    public Buffer( ReadOnlySpan<T> span ) : this( span.Length ) => Append( span );
+    public Buffer( ReadOnlySpan<T> span ) : this( span, EqualityComparer<T>.Default ) => Append( span );
+    public Buffer( ReadOnlySpan<T> span, IEqualityComparer<T> comparer ) : this( span.Length, comparer ) => Append( span );
+
+
     public void Dispose()
     {
         T[]? toReturn = _arrayToReturnToPool;
-        this = default; // For safety, to avoid using pooled array if this instance is erroneously appended to again
+        _comparer = default;
+        this      = default; // For safety, to avoid using pooled array if this instance is erroneously appended to again
         if ( toReturn is not null ) { ArrayPool<T>.Shared.Return( toReturn ); }
     }
 
 
-    public readonly override string ToString() => $"{nameof(Buffer<T>)} ( {nameof(Capacity)}: {Capacity}, {nameof(_index)}: {_index}, {nameof(IsReadOnly)}: {IsReadOnly} )";
-    public readonly Enumerator GetEnumerator() => new(this);
+    public readonly override string     ToString()      => $"{nameof(Buffer<T>)} ( {nameof(Capacity)}: {Capacity}, {nameof(_index)}: {_index}, {nameof(IsReadOnly)}: {IsReadOnly} )";
+    public readonly          Enumerator GetEnumerator() => new(this);
 
 
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
     private readonly void ThrowIfReadOnly()
     {
         if ( IsReadOnly ) { throw new InvalidOperationException( $"{nameof(Buffer<T>)} is read only" ); }
@@ -66,10 +64,10 @@ public ref struct Buffer<T> where T : IEquatable<T>
 
     /// <summary> Resize the internal buffer either by doubling current buffer size or by adding <paramref name="additionalCapacityBeyondPos"/> to <see cref="_index"/> whichever is greater. </summary>
     /// <param name="additionalCapacityBeyondPos"> Number of chars requested beyond current position. </param>
-    private void Grow( int additionalCapacityBeyondPos )
+    private void Grow( in int additionalCapacityBeyondPos )
     {
         ThrowIfReadOnly();
-        Debug.Assert( additionalCapacityBeyondPos > 0 );
+        Debug.Assert( additionalCapacityBeyondPos          > 0 );
         Debug.Assert( _index + additionalCapacityBeyondPos >= Capacity, "Grow called incorrectly, no resize is needed." );
 
         T[] poolArray = ArrayPool<T>.Shared.Rent( Math.Max( _index + additionalCapacityBeyondPos, Capacity * 2 ) );
@@ -84,17 +82,13 @@ public ref struct Buffer<T> where T : IEquatable<T>
         Grow( 1 );
         Append( c );
     }
-    public void EnsureCapacity( int capacity )
+    public void EnsureCapacity( in int capacity )
     {
         if ( _index + capacity > Capacity ) { Grow( capacity ); }
     }
 
 
-    /// <summary> Get a pinnable reference to the builder. Does not ensure there is a null T after <see cref="Index"/> . This overload is pattern matched in the C# 7.3+ compiler so you can omit the explicit method call, and write eg "fixed (T* c = builder)" </summary>
     public readonly ref T GetPinnableReference() => ref _span.GetPinnableReference();
-
-    /// <summary> Get a pinnable reference to the builder. Ensures that the builder has a <paramref name="terminate"/> value after <see cref="Index"/> </summary>
-    /// <param name="terminate"> </param>
     public ref T GetPinnableReference( T terminate )
     {
         Append( terminate );
@@ -116,7 +110,7 @@ public ref struct Buffer<T> where T : IEquatable<T>
     }
 
 
-    [Pure]
+    [ Pure ]
     public ReadOnlySpan<T> AsSpan( T? terminate )
     {
         if ( terminate is null ) { return _span[.._index]; }
@@ -125,15 +119,68 @@ public ref struct Buffer<T> where T : IEquatable<T>
         _span[_index] = terminate;
         return Span;
     }
-    [Pure] public readonly ReadOnlySpan<T> Slice( int start ) => _span.Slice( start,             _index - start );
-    [Pure] public readonly ReadOnlySpan<T> Slice( int start, int length ) => _span.Slice( start, length );
-    public readonly int IndexOf( T                    value ) => Next.IndexOf( value );
-    public readonly int LastIndexOf( T                value, int end ) => Next.LastIndexOf( value, end );
+    [ Pure ] public readonly ReadOnlySpan<T> Slice( int start )             => Span[start..];
+    [ Pure ] public readonly ReadOnlySpan<T> Slice( int start, int length ) => Span.Slice( start, length );
+    public readonly int IndexOf( T value )
+    {
+        Debug.Assert( _comparer is not null );
+
+        for ( int i = 0; i < _span.Length; i++ )
+        {
+            if ( _comparer.Equals( _span[i], value ) ) { return i; }
+        }
+
+        return -1;
+    }
+    public readonly int LastIndexOf( T value, int end = 0 )
+    {
+        Debug.Assert( _comparer is not null );
+
+        for ( int i = Length; i < end; i-- )
+        {
+            if ( _comparer.Equals( _span[i], value ) ) { return i; }
+        }
+
+        return -1;
+    }
 
 
-    public readonly bool Contains( T               value ) => _span.Contains( value );
-    public readonly bool Contains( Span<T>         value ) => _span.Contains( value );
-    public readonly bool Contains( ReadOnlySpan<T> value ) => _span.Contains( value );
+    public readonly bool Contains( T value )
+    {
+        Debug.Assert( _comparer is not null );
+
+        foreach ( T x in _span )
+        {
+            if ( _comparer.Equals( x, value ) ) { return true; }
+        }
+
+        return false;
+    }
+    public readonly bool Contains( ReadOnlySpan<T> value )
+    {
+        Debug.Assert( _comparer is not null );
+        if ( value.Length > _span.Length ) { return false; }
+    #if NET6_0_OR_GREATER
+        if ( value.Length == _span.Length ) { return _span.SequenceEqual( value, _comparer ); }
+    #endif
+
+        for ( int i = 0; i < _span.Length || i + value.Length < _span.Length; i++ )
+        {
+            ReadOnlySpan<T> span = _span.Slice( i, value.Length );
+
+        #if NET6_0_OR_GREATER
+            if ( span.SequenceEqual( value, _comparer ) ) { return true; }
+        #else
+            for ( int j = 0; j < span.Length; j++ )
+            {
+                if ( _comparer.Equals( span[j], value[j] ) ) { return true; }
+            }
+
+        #endif
+        }
+
+        return false;
+    }
 
 
     public readonly bool TryCopyTo( Span<T> destination, out int charsWritten )
@@ -149,8 +196,7 @@ public ref struct Buffer<T> where T : IEquatable<T>
     }
 
 
-    public Buffer<T> Replace( int index, T value ) => Replace( index, value, 1 );
-    public Buffer<T> Replace( int index, T value, int count )
+    public Buffer<T> Replace( int index, T value, int count = 1 )
     {
         ThrowIfReadOnly();
         if ( _index + count > _span.Length ) { Grow( count ); }
@@ -170,8 +216,7 @@ public ref struct Buffer<T> where T : IEquatable<T>
     }
 
 
-    public Buffer<T> Insert( int index, T value ) => Insert( index, value, 1 );
-    public Buffer<T> Insert( int index, T value, int count )
+    public Buffer<T> Insert( int index, T value, int count = 1 )
     {
         ThrowIfReadOnly();
         if ( _index + count > _span.Length ) { Grow( count ); }
@@ -255,28 +300,6 @@ public ref struct Buffer<T> where T : IEquatable<T>
     }
 
 
-    // public Span<T> AppendSpan( int length )
-    // {
-    //     int origPos = Index;
-    //     if ( origPos > Capacity - length ) { Grow(length); }
-    //
-    //     Index = origPos + length;
-    //     return _span.Slice(origPos, length);
-    // }
-
-
-    // public unsafe void Append( T* value, int length )
-    // {
-    //     int pos = _pos;
-    //     if ( pos > _chars.Length - length ) { Grow(length); }
-    //
-    //     Span<T> dst = _chars.Slice(_pos, length);
-    //     for ( var i = 0; i < dst.Length; i++ ) { dst[i] = *value++; }
-    //
-    //     _pos += length;
-    // }
-
-
 
     public ref struct Enumerator
     {
@@ -286,7 +309,7 @@ public ref struct Buffer<T> where T : IEquatable<T>
 
         internal Enumerator( Buffer<T> buffer ) => _buffer = buffer;
 
-        public void Reset() => _index = 0;
+        public void Reset()    => _index = 0;
         public bool MoveNext() => ++_index < _buffer._index;
     }
 }
