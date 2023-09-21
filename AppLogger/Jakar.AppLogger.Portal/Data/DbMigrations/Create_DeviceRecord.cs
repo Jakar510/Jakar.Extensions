@@ -61,10 +61,6 @@ public sealed class Create_DeviceRecord : LoggerMigration<DeviceRecord>
              .AsString( 256 )
              .NotNullable();
 
-        table.WithColumn( nameof(DeviceRecord.OsBuild) )
-             .AsString( 256 )
-             .Nullable();
-
         table.WithColumn( nameof(DeviceRecord.OsVersion) )
              .AsString( 256 )
              .Nullable();
