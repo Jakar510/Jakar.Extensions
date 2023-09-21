@@ -13,7 +13,7 @@ public interface IRecordPair : IUniqueID<Guid> // where TID : IComparable<TID>, 
 
 public interface IDbReaderMapping<out TRecord> where TRecord : IDbReaderMapping<TRecord>
 {
-    public abstract static TRecord Create( DbDataReader                        reader );
+    public abstract static TRecord                   Create( DbDataReader      reader );
     public abstract static IAsyncEnumerable<TRecord> CreateAsync( DbDataReader reader, [ EnumeratorCancellation ] CancellationToken token = default );
 }
 
@@ -32,7 +32,8 @@ public interface ITableRecord<TRecord> : IRecordPair where TRecord : TableRecord
 
 
 [ Serializable ]
-public abstract record TableRecord<TRecord>( [ property: Key ] RecordID<TRecord> ID, RecordID<UserRecord>? CreatedBy, Guid? OwnerUserID, DateTimeOffset DateCreated, DateTimeOffset? LastModified ) : BaseRecord, ITableRecord<TRecord>, IComparable<TRecord>
+public abstract record TableRecord<TRecord>
+    ( [ property: Key ] RecordID<TRecord> ID, RecordID<UserRecord>? CreatedBy, Guid? OwnerUserID, DateTimeOffset DateCreated, DateTimeOffset? LastModified ) : BaseRecord, ITableRecord<TRecord>, IComparable<TRecord>
     where TRecord : TableRecord<TRecord>
 {
     public static string TableName { get; } = typeof(TRecord).GetTableName();
@@ -62,19 +63,21 @@ public abstract record TableRecord<TRecord>( [ property: Key ] RecordID<TRecord>
     public async ValueTask<UserRecord?> GetUserWhoCreated( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => await db.Users.Get( connection, transaction, CreatedBy?.Value, token );
 
 
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
     public TRecord WithOwner( UserRecord user ) => (TRecord)(this with
                                                              {
                                                                  OwnerUserID = user.UserID
                                                              });
-    internal TRecord NewID( Guid id ) => NewID( new RecordID<TRecord>( id ) );
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] internal TRecord NewID( Guid id ) => NewID( new RecordID<TRecord>( id ) );
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
     public TRecord NewID( RecordID<TRecord> id ) => (TRecord)(this with
                                                               {
                                                                   ID = id
                                                               });
 
 
-    public bool Owns( UserRecord       record ) => record.CreatedBy == record.ID;
-    public bool DoesNotOwn( UserRecord record ) => record.CreatedBy != record.ID;
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public bool Owns( UserRecord       record ) => CreatedBy == record.ID;
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public bool DoesNotOwn( UserRecord record ) => CreatedBy != record.ID;
 
 
     public virtual int CompareTo( TRecord? other )

@@ -85,7 +85,7 @@ public sealed record LoggerAttachmentRecord : LoggerTable<LoggerAttachmentRecord
 
 
     public override int CompareTo( LoggerAttachmentRecord? other ) => string.CompareOrdinal( Content, other?.Content );
-    public override int GetHashCode() => HashCode.Combine( Content, base.GetHashCode() );
+    public override int GetHashCode()                              => HashCode.Combine( Content, base.GetHashCode() );
 }
 
 
@@ -95,8 +95,8 @@ public sealed record LoggerAttachmentMappingRecord : Mapping<LoggerAttachmentMap
                                                      ICreateMapping<LoggerAttachmentMappingRecord, LogRecord, LoggerAttachmentRecord>,
                                                      IDbReaderMapping<LoggerAttachmentMappingRecord>
 {
-    public LoggerAttachmentMappingRecord( LogRecord               key, LoggerAttachmentRecord value ) : base( key, value ) { }
-    public static LoggerAttachmentMappingRecord Create( LogRecord key, LoggerAttachmentRecord value, UserRecord? caller = TODO ) => new(key, value);
+    public LoggerAttachmentMappingRecord( LogRecord               key, LoggerAttachmentRecord value, UserRecord? caller = default ) : base( key, value, caller ) { }
+    public static LoggerAttachmentMappingRecord Create( LogRecord key, LoggerAttachmentRecord value, UserRecord? caller = default ) => new(key, value, caller);
 
 
     public static LoggerAttachmentMappingRecord Create( DbDataReader reader ) => null;

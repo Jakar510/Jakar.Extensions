@@ -334,6 +334,12 @@ public sealed record UserRecord( Guid                                           
         parameters.Add( nameof(UserName), userName );
         return parameters;
     }
+    public static DynamicParameters GetDynamicParameters( Guid userID )
+    {
+        var parameters = new DynamicParameters();
+        parameters.Add( nameof(UserID), userID );
+        return parameters;
+    }
 
 
     public UserRecord ClearRefreshToken( string securityStamp ) => this with
