@@ -77,7 +77,7 @@ public sealed class Create_DeviceRecord : LoggerMigration<DeviceRecord>
              .AsString( 4096 )
              .Nullable();
 
-        table.WithColumn( nameof(DeviceRecord.HardwareInfo) )
+        table.WithColumn( nameof(DeviceRecord.HwInfo) )
              .AsString( BaseRecord.MAX_STRING_SIZE )
              .Nullable();
     }
