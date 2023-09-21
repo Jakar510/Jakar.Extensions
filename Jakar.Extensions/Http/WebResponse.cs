@@ -10,8 +10,7 @@ using static Jakar.Extensions.WebRequester;
 namespace Jakar.Extensions;
 
 
-[SuppressMessage( "ReSharper", "UnusedParameter.Global" )]
-[SuppressMessage( "ReSharper", "CollectionNeverQueried.Global" )]
+[ SuppressMessage( "ReSharper", "UnusedParameter.Global" ), SuppressMessage( "ReSharper", "CollectionNeverQueried.Global" ) ]
 public readonly record struct WebResponse<T>
 {
     public const string ERROR_MESSAGE = "Error Message: ";
@@ -19,23 +18,23 @@ public readonly record struct WebResponse<T>
     public const string NO_RESPONSE   = "NO RESPONSE";
 
 
-    public              List<string>                Allow             { get; init; } = new();
-    public              List<string>                ContentEncoding   { get; init; } = new();
-    public              long?                       ContentLength     { get; init; } = default;
-    public              string?                     ContentType       { get; init; } = default;
-    public              string?                     ErrorMessage      => Error.Match<string?>( x => x.ToString( Formatting.Indented ), x => x, x => default );
-    [JsonIgnore] public OneOf<JToken, string, None> Error             { get; init; } = new None();
-    [JsonIgnore] public Exception?                  Exception         { get; init; } = default;
-    public              DateTimeOffset?             Expires           { get; init; } = default;
-    public              DateTimeOffset?             LastModified      { get; init; } = default;
-    public              Uri?                        Location          { get; init; } = default;
-    public              string?                     Method            { get; init; } = default;
-    public              T?                          Payload           { get; init; } = default;
-    public              string?                     Sender            { get; init; } = default;
-    public              string?                     Server            { get; init; } = default;
-    public              Status                      StatusCode        { get; init; } = Status.NotSet;
-    public              string?                     StatusDescription { get; init; } = default;
-    public              Uri?                        URL               { get; init; } = default;
+    public                List<string>                Allow             { get; init; } = new();
+    public                List<string>                ContentEncoding   { get; init; } = new();
+    public                long?                       ContentLength     { get; init; } = default;
+    public                string?                     ContentType       { get; init; } = default;
+    public                string?                     ErrorMessage      => Error.Match<string?>( x => x.ToString( Formatting.Indented ), x => x, x => default );
+    [ JsonIgnore ] public OneOf<JToken, string, None> Error             { get; init; } = new None();
+    [ JsonIgnore ] public Exception?                  Exception         { get; init; } = default;
+    public                DateTimeOffset?             Expires           { get; init; } = default;
+    public                DateTimeOffset?             LastModified      { get; init; } = default;
+    public                Uri?                        Location          { get; init; } = default;
+    public                string?                     Method            { get; init; } = default;
+    public                T?                          Payload           { get; init; } = default;
+    public                string?                     Sender            { get; init; } = default;
+    public                string?                     Server            { get; init; } = default;
+    public                Status                      StatusCode        { get; init; } = Status.NotSet;
+    public                string?                     StatusDescription { get; init; } = default;
+    public                Uri?                        URL               { get; init; } = default;
 
 
     public WebResponse( HttpResponseMessage response, in string error ) : this( response, default, default, error ) { }
@@ -82,7 +81,7 @@ public readonly record struct WebResponse<T>
     public override string ToString() => this.ToJson( Formatting.Indented );
 
 
-    internal static WebResponse<T> None( HttpResponseMessage response ) => new(response, NO_RESPONSE);
+    internal static WebResponse<T> None( HttpResponseMessage response )              => new(response, NO_RESPONSE);
     internal static WebResponse<T> None( HttpResponseMessage response, Exception e ) => new(response, e, NO_RESPONSE);
     public static OneOf<JToken, string, None> ParseError( in string? error )
     {
@@ -130,7 +129,7 @@ public readonly record struct WebResponse<T>
     {
         using ( handler )
         {
-            using HttpResponseMessage response = await handler;
+            using HttpResponseMessage response = await handler.SendAsync();
 
             return handler.RetryPolicy?.AllowRetries is true
                        ? await Create( response, func, handler.RetryPolicy.Value, handler.Token )
@@ -141,7 +140,7 @@ public readonly record struct WebResponse<T>
     {
         using ( handler )
         {
-            using HttpResponseMessage response = await handler;
+            using HttpResponseMessage response = await handler.SendAsync();
 
             try
             {
@@ -268,7 +267,7 @@ public readonly record struct WebResponse<T>
             using var reader = new StreamReader( stream );
 
         #if NET7_0_OR_GREATER
-               string errorMessage = await reader.ReadToEndAsync(token);
+            string errorMessage = await reader.ReadToEndAsync( token );
         #else
             string errorMessage = await reader.ReadToEndAsync();
         #endif
