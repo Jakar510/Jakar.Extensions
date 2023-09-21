@@ -3,9 +3,14 @@
     "Hello World!".WriteToConsole();
     Console.WriteLine();
 
-    BenchmarkRunner.Run<ImmutableArrayBenchmarks>();
+    // BenchmarkRunner.Run<ImmutableArrayBenchmarks>();
 
     // new HashBenchmarks().GetHash().WriteToConsole();
+
+    using var requester = WebRequester.Builder.Create( new Uri( "http://google.com" ) )
+                                      .Build();
+
+    await requester.Get( "", CancellationToken.None );
 }
 catch ( Exception e ) { e.WriteToConsole(); }
 finally { "Bye".WriteToConsole(); }

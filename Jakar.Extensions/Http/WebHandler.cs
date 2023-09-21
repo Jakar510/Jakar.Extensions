@@ -48,13 +48,15 @@ public readonly record struct WebHandler : IDisposable
         _logger?.LogDebug( EventId, "Response StatusCode: {StatusCode} for {Uri}", response.StatusCode, _request.RequestUri?.OriginalString );
         return response;
     }
+    public ValueTaskAwaiter<HttpResponseMessage> GetAwaiter() => SendAsync()
+       .GetAwaiter();
 
 
     public async ValueTask NoResponse()
     {
         using ( this )
         {
-            using HttpResponseMessage response = await SendAsync();
+            using HttpResponseMessage response = await this;
             response.EnsureSuccessStatusCode();
         }
     }

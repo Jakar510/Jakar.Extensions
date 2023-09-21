@@ -129,7 +129,7 @@ public readonly record struct WebResponse<T>
     {
         using ( handler )
         {
-            using HttpResponseMessage response = await handler.SendAsync();
+            using HttpResponseMessage response = await handler;
 
             return handler.RetryPolicy?.AllowRetries is true
                        ? await Create( response, func, handler.RetryPolicy.Value, handler.Token )
@@ -140,7 +140,7 @@ public readonly record struct WebResponse<T>
     {
         using ( handler )
         {
-            using HttpResponseMessage response = await handler.SendAsync();
+            using HttpResponseMessage response = await handler;
 
             try
             {
