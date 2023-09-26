@@ -15,29 +15,30 @@ namespace Jakar.Database;
 public readonly record struct RecordID<TRecord>( Guid Value ) : IComparable<RecordID<TRecord>>, ISpanFormattable where TRecord : TableRecord<TRecord>
 {
     public static readonly RecordID<TRecord> Empty = new(Guid.Empty);
-    public static RecordID<TRecord> New() => new(Guid.NewGuid());
-    public static RecordID<TRecord> FromString( string guid ) => new(Guid.Parse( guid ));
+    public static          RecordID<TRecord> New()                     => new(Guid.NewGuid());
+    public static          RecordID<TRecord> New( Guid          id )   => new(id);
+    public static          RecordID<TRecord> FromString( string guid ) => new(Guid.Parse( guid ));
 
 
     public static implicit operator RecordID<TRecord>( TRecord record ) => new(record.ID.Value);
 
 
-    public bool IsValid() => Guid.Empty.Equals( Value ) is false;
+    public bool IsValid()    => Guid.Empty.Equals( Value ) is false;
     public bool IsNotValid() => Guid.Empty.Equals( Value );
 
 
-    public override string ToString() => Value.ToString();
-    public string ToString( string?   format,      IFormatProvider? formatProvider ) => Value.ToString( format, formatProvider );
-    public bool TryFormat( Span<char> destination, out int          charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider ) => Value.TryFormat( destination, out charsWritten, format );
+    public override string ToString()                                                                                                               => Value.ToString();
+    public          string ToString( string?     format,      IFormatProvider? formatProvider )                                                     => Value.ToString( format, formatProvider );
+    public          bool   TryFormat( Span<char> destination, out int          charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider ) => Value.TryFormat( destination, out charsWritten, format );
 
 
     public static bool operator true( RecordID<TRecord>  recordID ) => recordID.IsValid();
     public static bool operator false( RecordID<TRecord> recordID ) => recordID.IsNotValid();
 
 
-    public bool Equals( RecordID<TRecord>   other ) => Value.Equals( other.Value );
-    public int CompareTo( RecordID<TRecord> other ) => Value.CompareTo( other.Value );
-    public override int GetHashCode() => Value.GetHashCode();
+    public          bool Equals( RecordID<TRecord>    other ) => Value.Equals( other.Value );
+    public          int  CompareTo( RecordID<TRecord> other ) => Value.CompareTo( other.Value );
+    public override int  GetHashCode()                        => Value.GetHashCode();
 
 
 

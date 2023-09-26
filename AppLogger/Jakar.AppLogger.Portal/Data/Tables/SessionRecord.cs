@@ -6,17 +6,22 @@ namespace Jakar.AppLogger.Portal.Data.Tables;
 
 
 [ Serializable, Table( "Sessions" ) ]
-public sealed partial record SessionRecord : LoggerTable<SessionRecord>, IDbReaderMapping<SessionRecord>, IStartSession
+public sealed partial record SessionRecord( DateTimeOffset          AppStartTime,
+                                            RecordID<AppRecord>     AppID,
+                                            RecordID<DeviceRecord>  DeviceID,
+                                            RecordID<SessionRecord> ID,
+                                            RecordID<UserRecord>?   CreatedBy,
+                                            Guid?                   OwnerUserID,
+                                            DateTimeOffset          DateCreated,
+                                            DateTimeOffset?         LastModified = default
+) : LoggerTable<SessionRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<SessionRecord>, IStartSession
 {
-    public DateTimeOffset         AppStartTime { get; init; }
-    public RecordID<AppRecord>    AppID        { get; init; }
-    public RecordID<DeviceRecord> DeviceID     { get; init; }
-    Guid IStartSession.           AppID        => AppID.Value;
-    Guid IStartSession.           DeviceID     => DeviceID.Value;
-    Guid? ISessionID.             SessionID    => ID.Value;
+    Guid IStartSession.AppID     => AppID.Value;
+    Guid IStartSession.DeviceID  => DeviceID.Value;
+    Guid? ISessionID.  SessionID => ID.Value;
 
 
-    public SessionRecord( StartSession start, AppRecord app, DeviceRecord device, UserRecord? caller = default ) : base( caller )
+    public SessionRecord( StartSession start, AppRecord app, DeviceRecord device, UserRecord? caller = default ) : this( start.AppStartTime, app.ID, device.ID, RecordID<SessionRecord>.New(), caller?.ID, caller?.UserID, DateTimeOffset.UtcNow )
     {
         AppStartTime = start.AppStartTime;
         AppID        = app.ID;
@@ -24,12 +29,15 @@ public sealed partial record SessionRecord : LoggerTable<SessionRecord>, IDbRead
     }
     public static SessionRecord Create( DbDataReader reader )
     {
-        DateTimeOffset           dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
-        DateTimeOffset?          lastModified = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
-        Guid                     ownerUserID  = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
-        RecordID<UserRecord>     createdBy    = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(CreatedBy) ) );
-        RecordID<LogScopeRecord> id           = new RecordID<LogScopeRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) );
-        return new SessionRecord( id, createdBy, ownerUserID, dateCreated, lastModified );
+        var appStartTime = reader.GetFieldValue<DateTimeOffset>( nameof(AppStartTime) );
+        var appID        = new RecordID<AppRecord>( reader.GetFieldValue<Guid>( nameof(AppID) ) );
+        var deviceID     = new RecordID<DeviceRecord>( reader.GetFieldValue<Guid>( nameof(DeviceID) ) );
+        var dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
+        var lastModified = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
+        var ownerUserID  = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
+        var createdBy    = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(CreatedBy) ) );
+        var id           = new RecordID<SessionRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) );
+        return new SessionRecord( appStartTime, appID, deviceID, id, createdBy, ownerUserID, dateCreated, lastModified );
     }
     public static async IAsyncEnumerable<SessionRecord> CreateAsync( DbDataReader reader, [ EnumeratorCancellation ] CancellationToken token = default )
     {

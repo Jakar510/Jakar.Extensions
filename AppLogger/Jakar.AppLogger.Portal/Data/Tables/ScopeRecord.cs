@@ -16,12 +16,13 @@ public sealed record ScopeRecord( RecordID<AppRecord>     AppID,
                                   DateTimeOffset?         LastModified = default
 ) : LoggerTable<ScopeRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<ScopeRecord>
 {
-    private ScopeRecord( Guid scopeID, AppRecord app, DeviceRecord device, SessionRecord session, UserRecord? caller = default ) : this( new RecordID<ScopeRecord>( scopeID ), caller )
-    {
-        AppID     = app.ID;
-        DeviceID  = device.ID;
-        SessionID = session.ID;
-    }
+    private ScopeRecord( Guid scopeID, AppRecord app, DeviceRecord device, SessionRecord session, UserRecord? caller = default ) : this( app.ID,
+                                                                                                                                         device.ID,
+                                                                                                                                         session.ID,
+                                                                                                                                         new RecordID<ScopeRecord>( scopeID ),
+                                                                                                                                         caller?.ID,
+                                                                                                                                         caller?.UserID,
+                                                                                                                                         DateTimeOffset.UtcNow ) { }
 
 
     public static ScopeRecord Create( DbDataReader reader )

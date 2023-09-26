@@ -156,7 +156,7 @@ END";
         IEnumerable<ScopeRecord> scopes = ScopeRecord.Create( log, app, device.AsT0, session, caller );
         await LogScopeRecord.TryAdd( connection, transaction, LogScopes, record, scopes, caller, token );
 
-        IEnumerable<LoggerAttachmentRecord> attachments = LoggerAttachmentRecord.Create( record, log, caller );
+        IEnumerable<LoggerAttachmentRecord> attachments = LoggerAttachmentRecord.Create( log, app, device.AsT0, record, session, caller );
         await LoggerAttachmentMappingRecord.TryAdd( connection, transaction, LogAttachments, record, attachments, caller, token );
 
         return record;
