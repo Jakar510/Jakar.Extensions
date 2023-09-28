@@ -88,6 +88,10 @@ public sealed record UserRecord( Guid                                           
     [ ProtectedPersonalData, MaxLength( 4096 ) ] public string            Website           { get; set; } = Website;
 
 
+    public static T TryGet<T>( DbDataReader reader, in string key ) where T : struct
+    {
+        int index = reader.GetOrdinal( key );
+    }
     public static UserRecord Create( DbDataReader reader )
     {
         Guid              userID                 = reader.GetGuid( nameof(UserID) );
@@ -109,29 +113,30 @@ public sealed record UserRecord( Guid                                           
         string            department             = reader.GetString( nameof(Department) );
         string            title                  = reader.GetString( nameof(Title) );
         string            website                = reader.GetString( nameof(Website) );
-        SupportedLanguage preferredLanguage      = (SupportedLanguage)reader.GetFieldValue<long>( nameof(PreferredLanguage) );
+        SupportedLanguage preferredLanguage      = EnumSqlHandler<SupportedLanguage>.Instance.Parse( reader.GetValue( nameof(PreferredLanguage) ) );
         string            email                  = reader.GetString( nameof(Email) );
         bool              isEmailConfirmed       = reader.GetFieldValue<bool>( nameof(IsEmailConfirmed) );
         string            phoneNumber            = reader.GetString( nameof(PhoneNumber) );
         string            ext                    = reader.GetString( nameof(Ext) );
         bool              isPhoneNumberConfirmed = reader.GetFieldValue<bool>( nameof(IsPhoneNumberConfirmed) );
         bool              isTwoFactorEnabled     = reader.GetFieldValue<bool>( nameof(IsTwoFactorEnabled) );
-        DateTimeOffset?   lastBadAttempt         = reader.GetFieldValue<DateTimeOffset?>( nameof(LastBadAttempt) );
-        DateTimeOffset?   lastLogin              = reader.GetFieldValue<DateTimeOffset?>( nameof(LastLogin) );
-        int               badLogins              = reader.GetFieldValue<int>( nameof(BadLogins) );
-        bool              isLocked               = reader.GetFieldValue<bool>( nameof(IsLocked) );
-        DateTimeOffset?   lockDate               = reader.GetFieldValue<DateTimeOffset?>( nameof(LockDate) );
-        DateTimeOffset?   lockoutEnd             = reader.GetFieldValue<DateTimeOffset?>( nameof(LockoutEnd) );
-        string            passwordHash           = reader.GetString( nameof(PasswordHash) );
-        string            refreshToken           = reader.GetString( nameof(RefreshToken) );
-        DateTimeOffset?   refreshTokenExpiryTime = reader.GetFieldValue<DateTimeOffset?>( nameof(RefreshTokenExpiryTime) );
-        Guid?             sessionID              = reader.GetFieldValue<Guid?>( nameof(SessionID) );
-        bool              isActive               = reader.GetFieldValue<bool>( nameof(IsActive) );
-        bool              isDisabled             = reader.GetFieldValue<bool>( nameof(IsDisabled) );
-        string            securityStamp          = reader.GetString( nameof(SecurityStamp) );
-        string            authenticatorKey       = reader.GetString( nameof(AuthenticatorKey) );
-        string            concurrencyStamp       = reader.GetString( nameof(AuthenticatorKey) );
-        var               escalateTo             = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(EscalateTo) ) );
+
+        DateTimeOffset? lastBadAttempt         = reader.GetFieldValue<DateTimeOffset?>( nameof(LastBadAttempt) );
+        DateTimeOffset? lastLogin              = reader.GetFieldValue<DateTimeOffset?>( nameof(LastLogin) );
+        int             badLogins              = reader.GetFieldValue<int>( nameof(BadLogins) );
+        bool            isLocked               = reader.GetFieldValue<bool>( nameof(IsLocked) );
+        DateTimeOffset? lockDate               = reader.GetFieldValue<DateTimeOffset?>( nameof(LockDate) );
+        DateTimeOffset? lockoutEnd             = reader.GetFieldValue<DateTimeOffset?>( nameof(LockoutEnd) );
+        string          passwordHash           = reader.GetString( nameof(PasswordHash) );
+        string          refreshToken           = reader.GetString( nameof(RefreshToken) );
+        DateTimeOffset? refreshTokenExpiryTime = reader.GetFieldValue<DateTimeOffset?>( nameof(RefreshTokenExpiryTime) );
+        Guid?           sessionID              = reader.GetFieldValue<Guid?>( nameof(SessionID) );
+        bool            isActive               = reader.GetFieldValue<bool>( nameof(IsActive) );
+        bool            isDisabled             = reader.GetFieldValue<bool>( nameof(IsDisabled) );
+        string          securityStamp          = reader.GetString( nameof(SecurityStamp) );
+        string          authenticatorKey       = reader.GetString( nameof(AuthenticatorKey) );
+        string          concurrencyStamp       = reader.GetString( nameof(AuthenticatorKey) );
+        var             escalateTo             = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(EscalateTo) ) );
 
         IDictionary<string, JToken?>? additionalData = reader.GetFieldValue<string?>( nameof(AdditionalData) )
                                                             ?.FromJson<Dictionary<string, JToken?>>();

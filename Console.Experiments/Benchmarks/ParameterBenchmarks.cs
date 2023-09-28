@@ -2,7 +2,7 @@
 // 08/24/2023  8:37 PM
 
 using BenchmarkDotNet.Engines;
-using Jakar.AppLogger.Common;
+// using Jakar.AppLogger.Common;
 
 
 
@@ -15,6 +15,7 @@ namespace Experiments.Benchmarks;
 
 
 
+/*
 [SimpleJob( RuntimeMoniker.HostProcess )]
 [Orderer( SummaryOrderPolicy.FastestToSlowest )]
 [RankColumn]
@@ -41,3 +42,4 @@ public class ParameterBenchmarks
     [Benchmark] public string GetString() => _parameters.ToString( ", ", CultureInfo.CurrentCulture );
     [Benchmark] public Parameters<Guid, long, double, DateTimeOffset> GetParameters() => new(Guid.Empty, 1, 2.0, DateTimeOffset.UtcNow);
 }
+*/

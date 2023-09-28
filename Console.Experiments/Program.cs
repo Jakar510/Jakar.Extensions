@@ -7,10 +7,7 @@
 
     // new HashBenchmarks().GetHash().WriteToConsole();
 
-    using var requester = WebRequester.Builder.Create( new Uri( "http://google.com" ) )
-                                      .Build();
-
-    await requester.Get( "", CancellationToken.None );
+    await TestDatabase.Test();
 }
 catch ( Exception e ) { e.WriteToConsole(); }
 finally { "Bye".WriteToConsole(); }

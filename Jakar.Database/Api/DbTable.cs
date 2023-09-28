@@ -107,22 +107,27 @@ public partial class DbTable<TRecord> : ObservableClass, IConnectableDb, IAsyncD
        .KeyValuePair;
 
 
-    public ValueTask<IEnumerable<TRecord>> All( CancellationToken token = default ) => this.Call( All, token );
+    public IAsyncEnumerable<TRecord> All( CancellationToken token = default ) => this.Call( All, token );
     [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
-    public virtual async ValueTask<IEnumerable<TRecord>> All( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
+    public virtual async IAsyncEnumerable<TRecord> All( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
         string sql = $"SELECT * FROM {SchemaTableName}";
 
-        if ( token.IsCancellationRequested ) { return Empty; }
+        if ( token.IsCancellationRequested ) { yield break; }
 
+        DbDataReader reader;
 
         try
         {
-            var                  command = new CommandDefinition( sql, default, transaction, default, default, CommandFlags.None, token );
-            IEnumerable<TRecord> records = await connection.QueryAsync<TRecord>( command );
-            return records.GetArray();
+            var command = new CommandDefinition( sql, default, transaction, default, default, CommandFlags.None, token );
+            reader = await connection.ExecuteReaderAsync( command );
         }
         catch ( Exception e ) { throw new SqlException( sql, e ); }
+
+        await using ( reader )
+        {
+            await foreach ( var record in TRecord.CreateAsync( reader, token ) ) { yield return record; }
+        }
     }
 
 
@@ -217,7 +222,7 @@ public partial class DbTable<TRecord> : ObservableClass, IConnectableDb, IAsyncD
     }
 
 
-    public virtual ValueTask DisposeAsync() => default;
-    public DbConnection Connect() => _database.Connect();
-    public ValueTask<DbConnection> ConnectAsync( CancellationToken token = default ) => _database.ConnectAsync( token );
+    public virtual ValueTask               DisposeAsync()                                    => default;
+    public         DbConnection            Connect()                                         => _database.Connect();
+    public         ValueTask<DbConnection> ConnectAsync( CancellationToken token = default ) => _database.ConnectAsync( token );
 }

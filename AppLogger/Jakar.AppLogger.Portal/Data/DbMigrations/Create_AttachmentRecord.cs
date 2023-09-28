@@ -27,11 +27,7 @@ public sealed class Create_AttachmentRecord : LoggerMigration<LoggerAttachmentRe
         table.WithColumn( nameof(LoggerAttachmentRecord.SessionID) )
              .AsGuid()
              .NotNullable();
-
-        table.WithColumn( nameof(LoggerAttachmentRecord.ScopeID) )
-             .AsGuid()
-             .Nullable();
-
+        
         table.WithColumn( nameof(LoggerAttachmentRecord.AppID) )
              .AsInt64()
              .NotNullable();

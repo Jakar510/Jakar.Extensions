@@ -58,7 +58,7 @@ public sealed class TableCache<TRecord> : IHostedService, IReadOnlyCollection<TR
         _records.Clear();
         _keys.Clear();
     }
-    public bool Contains( Guid    key ) => _records.ContainsKey( key );
+    public bool Contains( Guid    key )    => _records.ContainsKey( key );
     public bool Contains( TRecord record ) => _records.ContainsKey( record.ID.Value );
 
 
@@ -111,7 +111,7 @@ public sealed class TableCache<TRecord> : IHostedService, IReadOnlyCollection<TR
     }
 
 
-    public bool TryRemove( TRecord pair ) => _records.TryRemove( pair.ID.Value, out _ );
+    public bool TryRemove( TRecord pair )                                             => _records.TryRemove( pair.ID.Value, out _ );
     public bool TryRemove( TRecord pair, [ NotNullWhen( true ) ] out TRecord? value ) => TryRemove( pair.ID.Value, out value );
     public bool TryRemove( Guid    key ) => _records.TryRemove( key, out _ );
     public bool TryRemove( Guid key, [ NotNullWhen( true ) ] out TRecord? value )
@@ -151,7 +151,7 @@ public sealed class TableCache<TRecord> : IHostedService, IReadOnlyCollection<TR
     {
         if ( _records.IsEmpty )
         {
-            AddOrUpdate( await _table.All( connection, transaction, token ) );
+            await AddOrUpdate( _table.All( connection, transaction, token ), token );
             return;
         }
 
@@ -181,5 +181,5 @@ public sealed class TableCache<TRecord> : IHostedService, IReadOnlyCollection<TR
 
 
     public IEnumerator<TRecord> GetEnumerator() => Records.GetEnumerator();
-    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+    IEnumerator IEnumerable.    GetEnumerator() => GetEnumerator();
 }
