@@ -50,30 +50,6 @@ public abstract class MigrateUserTable : Migration<UserRecord>
              .AsString( 4096 )
              .NotNullable();
 
-        table.WithColumn( nameof(UserRecord.Line1) )
-             .AsString( 512 )
-             .NotNullable();
-
-        table.WithColumn( nameof(UserRecord.Line2) )
-             .AsString( 256 )
-             .NotNullable();
-
-        table.WithColumn( nameof(UserRecord.City) )
-             .AsString( 256 )
-             .NotNullable();
-
-        table.WithColumn( nameof(UserRecord.StateOrProvince) )
-             .AsString( 256 )
-             .NotNullable();
-
-        table.WithColumn( nameof(UserRecord.Country) )
-             .AsString( 256 )
-             .NotNullable();
-
-        table.WithColumn( nameof(UserRecord.PostalCode) )
-             .AsString( 256 )
-             .NotNullable();
-
         table.WithColumn( nameof(UserRecord.Website) )
              .AsString( 4096 )
              .NotNullable();

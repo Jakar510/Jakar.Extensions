@@ -8,7 +8,9 @@ public abstract partial class Database
 {
     [ SuppressMessage( "ReSharper", "UnusedParameter.Global" ) ]
     public virtual ValueTask<DateTimeOffset?> GetSubscriptionExpiration( DbConnection connection, DbTransaction? transaction, UserRecord record, CancellationToken token = default ) => new(default(DateTimeOffset?));
-    public virtual ValueTask<TRecord> GetSubscription<TRecord>( DbConnection connection, DbTransaction? transaction, UserRecord record, CancellationToken token = default ) where TRecord : UserSubscription<TRecord> => default;
+    public virtual ValueTask<TRecord> GetSubscription<TRecord>( DbConnection connection, DbTransaction? transaction, UserRecord record, CancellationToken token = default ) where TRecord : UserSubscription<TRecord>, IDbReaderMapping<TRecord> =>
+        default;
+
 
     /// <summary> </summary>
     /// <returns>
@@ -27,31 +29,31 @@ public abstract partial class Database
         {
             if ( !record.VerifyPassword( request.UserPassword ) )
             {
-                record.MarkBadLogin();
+                record = record.MarkBadLogin();
                 return LoginResult.State.BadCredentials;
             }
 
             if ( !record.IsActive )
             {
-                record.MarkBadLogin();
+                record = record.MarkBadLogin();
                 return LoginResult.State.Inactive;
             }
 
             if ( record.IsDisabled )
             {
-                record.MarkBadLogin();
+                record = record.MarkBadLogin();
                 return LoginResult.State.Disabled;
             }
 
             if ( record.IsLocked )
             {
-                record.MarkBadLogin();
+                record = record.MarkBadLogin();
                 return LoginResult.State.Locked;
             }
 
             if ( !await ValidateSubscription( connection, transaction, record, token ) )
             {
-                record.MarkBadLogin();
+                record = record.MarkBadLogin();
                 return LoginResult.State.ExpiredSubscription;
             }
 
@@ -59,7 +61,7 @@ public abstract partial class Database
         }
         finally
         {
-            record.SetActive( true );
+            record = record.SetActive( true );
             await Users.Update( connection, transaction, record, token );
         }
     }
@@ -144,11 +146,11 @@ public abstract partial class Database
 
 
     public ValueTask<OneOf<Tokens, Error>> Register( VerifyRequest<UserData> request, CancellationToken                            token                          = default ) => this.TryCall( Register, request, token );
-    public ValueTask<OneOf<T, Error>> Verify<T>( VerifyRequest               request, Func<UserRecord, T>                          func,  CancellationToken token = default ) => this.TryCall( Verify,   request, func,  token );
-    public ValueTask<OneOf<T, Error>> Verify<T>( VerifyRequest               request, Func<UserRecord, ValueTask<T>>               func,  CancellationToken token = default ) => this.TryCall( Verify,   request, func,  token );
-    public ValueTask<OneOf<T, Error>> Verify<T>( VerifyRequest               request, Func<UserRecord, Task<T>>                    func,  CancellationToken token = default ) => this.TryCall( Verify,   request, func,  token );
+    public ValueTask<OneOf<T, Error>>      Verify<T>( VerifyRequest          request, Func<UserRecord, T>                          func,  CancellationToken token = default ) => this.TryCall( Verify,   request, func,  token );
+    public ValueTask<OneOf<T, Error>>      Verify<T>( VerifyRequest          request, Func<UserRecord, ValueTask<T>>               func,  CancellationToken token = default ) => this.TryCall( Verify,   request, func,  token );
+    public ValueTask<OneOf<T, Error>>      Verify<T>( VerifyRequest          request, Func<UserRecord, Task<T>>                    func,  CancellationToken token = default ) => this.TryCall( Verify,   request, func,  token );
     public ValueTask<OneOf<Tokens, Error>> Verify( VerifyRequest             request, ClaimType                                    types, CancellationToken token = default ) => this.TryCall( Verify,   request, types, token );
-    public ValueTask<ActionResult<T>> Verify<T>( VerifyRequest               request, Func<UserRecord, ActionResult<T>>            func,  CancellationToken token = default ) => this.TryCall( Verify,   request, func,  token );
-    public ValueTask<ActionResult<T>> Verify<T>( VerifyRequest               request, Func<UserRecord, ValueTask<ActionResult<T>>> func,  CancellationToken token = default ) => this.TryCall( Verify,   request, func,  token );
-    public ValueTask<ActionResult<T>> Verify<T>( VerifyRequest               request, Func<UserRecord, Task<ActionResult<T>>>      func,  CancellationToken token = default ) => this.TryCall( Verify,   request, func,  token );
+    public ValueTask<ActionResult<T>>      Verify<T>( VerifyRequest          request, Func<UserRecord, ActionResult<T>>            func,  CancellationToken token = default ) => this.TryCall( Verify,   request, func,  token );
+    public ValueTask<ActionResult<T>>      Verify<T>( VerifyRequest          request, Func<UserRecord, ValueTask<ActionResult<T>>> func,  CancellationToken token = default ) => this.TryCall( Verify,   request, func,  token );
+    public ValueTask<ActionResult<T>>      Verify<T>( VerifyRequest          request, Func<UserRecord, Task<ActionResult<T>>>      func,  CancellationToken token = default ) => this.TryCall( Verify,   request, func,  token );
 }

@@ -1,6 +1,5 @@
 ﻿using System.Collections.Immutable;
 using Microsoft.AspNetCore.Http.HttpResults;
-using Debug = Jakar.AppLogger.Common.Debug;
 
 
 
@@ -104,7 +103,7 @@ END";
         OneOf<DeviceRecord, Error> device = await AddOrUpdate_Device( connection, transaction, start.Device, caller, token );
         if ( device.IsT1 ) { return device.AsT1; }
 
-        var session = new SessionRecord( start, app, device.AsT0, caller );
+        var session = new SessionRecord( start, app, device.AsT0 );
         session = await Sessions.Insert( connection, transaction, session, token );
 
         return new StartSessionReply( session.ID.Value, app.ID.Value, device.AsT0.ID.Value );
@@ -141,22 +140,22 @@ END";
         SessionRecord? session = await Sessions.Get( connection, transaction, true, SessionRecord.GetDynamicParameters( log.Session.SessionID ), token );
         if ( session is null || !session.IsActive ) { return new Error( Status.NotFound, log.Session.SessionID.ToString() ); }
 
-        UserRecord? caller = await session.GetUserWhoCreated( connection, transaction, this, token );
-        if ( caller is null ) { return new Error( Status.Unauthorized ); }
-
         AppRecord? app = await Apps.Get( connection, transaction, log.Session.AppID, token );
         if ( app is null || !app.IsActive ) { return new Error( Status.NotFound, log.Session.AppID.ToString() ); }
+
+        UserRecord? caller = await app.GetUserWhoCreated( connection, transaction, this, token );
+        if ( caller is null ) { return new Error( Status.Unauthorized ); }
 
         OneOf<DeviceRecord, Error> device = await AddOrUpdate_Device( connection, transaction, app, log.Device, caller, token );
         if ( device.IsT1 ) { return device.AsT1; }
 
-        var record = new LogRecord( log, session, caller );
+        var record = new LogRecord( log, session );
         record = await Logs.Insert( connection, transaction, record, token );
 
-        IEnumerable<ScopeRecord> scopes = ScopeRecord.Create( log, app, device.AsT0, session, caller );
+        IEnumerable<ScopeRecord> scopes = ScopeRecord.Create( log, app, device.AsT0, session );
         await LogScopeRecord.TryAdd( connection, transaction, LogScopes, record, scopes, caller, token );
 
-        IEnumerable<LoggerAttachmentRecord> attachments = LoggerAttachmentRecord.Create( log, app, device.AsT0, record, session, caller );
+        IEnumerable<LoggerAttachmentRecord> attachments = LoggerAttachmentRecord.Create( log, app, device.AsT0, record, session );
         await LoggerAttachmentMappingRecord.TryAdd( connection, transaction, LogAttachments, record, attachments, caller, token );
 
         return record;
@@ -174,7 +173,7 @@ END";
     {
         DeviceRecord? record = default;
 
-        foreach ( DeviceRecord deviceRecord in await Devices.Where( connection, transaction, true, DeviceRecord.GetDynamicParameters( device, caller ), token ) )
+        foreach ( DeviceRecord deviceRecord in await Devices.Where( connection, transaction, true, DeviceRecord.GetDynamicParameters( device ), token ) )
         {
             if ( record is null ) { record = deviceRecord; }
             else
@@ -186,12 +185,12 @@ END";
 
         if ( record is null )
         {
-            record = new DeviceRecord( device, caller );
+            record = new DeviceRecord( device );
             record = await Devices.Insert( connection, transaction, record, token );
         }
         else
         {
-            record = record.Update( device, caller );
+            record = record.Update( device );
             await Devices.Update( connection, transaction, record, token );
         }
 

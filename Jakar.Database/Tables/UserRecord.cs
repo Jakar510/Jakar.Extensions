@@ -13,15 +13,8 @@ public sealed record UserRecord( Guid                                           
                                  string                                                                                                    FullName,
                                  [ property: MaxLength( TokenValidationParameters.DefaultMaximumTokenSizeInBytes ) ] string                Rights,
                                  [ property: MaxLength( 256 ) ]                                                      string                Gender,
-                                 string                                                                                                    Address,
                                  string                                                                                                    Company,
                                  string                                                                                                    Description,
-                                 string                                                                                                    Line1,
-                                 string                                                                                                    Line2,
-                                 string                                                                                                    City,
-                                 string                                                                                                    StateOrProvince,
-                                 string                                                                                                    Country,
-                                 string                                                                                                    PostalCode,
                                  string                                                                                                    Department,
                                  string                                                                                                    Title,
                                  string                                                                                                    Website,
@@ -54,7 +47,7 @@ public sealed record UserRecord( Guid                                           
                                  Guid?                                                                                                     OwnerUserID,
                                  DateTimeOffset                                                                                            DateCreated,
                                  DateTimeOffset?                                                                                           LastModified = default
-) : TableRecord<UserRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<UserRecord>, IUserData<UserRecord>, IRefreshToken, IUserID, IUserDataRecord, UserRights.IRights
+) : OwnedTableRecord<UserRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<UserRecord>, IUserData<UserRecord>, IRefreshToken, IUserID, IUserDataRecord, UserRights.IRights
 {
     private static readonly PasswordHasher<UserRecord>    _hasher         = new();
     private                 IDictionary<string, JToken?>? _additionalData = AdditionalData;
@@ -65,10 +58,7 @@ public sealed record UserRecord( Guid                                           
         get => _additionalData;
         set => _additionalData = value;
     }
-    [ ProtectedPersonalData, MaxLength( 4096 ) ] public string            Address           { get; set; } = Address;
-    [ ProtectedPersonalData, MaxLength( 256 ) ]  public string            City              { get; set; } = City;
     [ ProtectedPersonalData, MaxLength( 256 ) ]  public string            Company           { get; set; } = Company;
-    [ ProtectedPersonalData, MaxLength( 256 ) ]  public string            Country           { get; set; } = Country;
     [ ProtectedPersonalData, MaxLength( 256 ) ]  public string            Department        { get; set; } = Department;
     [ ProtectedPersonalData, MaxLength( 256 ) ]  public string            Description       { get; set; } = Description;
     [ ProtectedPersonalData, MaxLength( 1024 ) ] public string            Email             { get; set; } = Email;
@@ -77,75 +67,59 @@ public sealed record UserRecord( Guid                                           
     [ ProtectedPersonalData, MaxLength( 512 ) ]  public string            FullName          { get; set; } = FullName;
     public                                              DateTimeOffset?   LastLogin         { get; set; } = LastLogin;
     [ ProtectedPersonalData, MaxLength( 256 ) ] public  string            LastName          { get; set; } = LastName;
-    [ ProtectedPersonalData, MaxLength( 512 ) ] public  string            Line1             { get; set; } = Line1;
-    [ ProtectedPersonalData, MaxLength( 256 ) ] public  string            Line2             { get; set; } = Line2;
     [ ProtectedPersonalData, MaxLength( 256 ) ] public  string            PhoneNumber       { get; set; } = PhoneNumber;
-    [ ProtectedPersonalData, MaxLength( 256 ) ] public  string            PostalCode        { get; set; } = PostalCode;
     public                                              SupportedLanguage PreferredLanguage { get; set; } = PreferredLanguage;
-    [ ProtectedPersonalData, MaxLength( 256 ) ] public  string            StateOrProvince   { get; set; } = StateOrProvince;
     [ ProtectedPersonalData, MaxLength( 256 ) ] public  string            Title             { get; set; } = Title;
     Guid IUserID.                                                         UserID            => UserID;
     [ ProtectedPersonalData, MaxLength( 4096 ) ] public string            Website           { get; set; } = Website;
 
 
-    public static T TryGet<T>( DbDataReader reader, in string key ) where T : struct
-    {
-        int index = reader.GetOrdinal( key );
-    }
     public static UserRecord Create( DbDataReader reader )
     {
-        Guid              userID                 = reader.GetGuid( nameof(UserID) );
-        string            userName               = reader.GetString( nameof(UserName) );
-        string            firstName              = reader.GetString( nameof(FirstName) );
-        string            lastName               = reader.GetString( nameof(LastName) );
-        string            fullName               = reader.GetString( nameof(FullName) );
-        string            rights                 = reader.GetString( nameof(Rights) );
-        string            gender                 = reader.GetString( nameof(Gender) );
-        string            address                = reader.GetString( nameof(Address) );
-        string            company                = reader.GetString( nameof(Company) );
-        string            description            = reader.GetString( nameof(Description) );
-        string            line1                  = reader.GetString( nameof(Line1) );
-        string            line2                  = reader.GetString( nameof(Line2) );
-        string            city                   = reader.GetString( nameof(City) );
-        string            stateOrProvince        = reader.GetString( nameof(StateOrProvince) );
-        string            country                = reader.GetString( nameof(Country) );
-        string            postalCode             = reader.GetString( nameof(PostalCode) );
-        string            department             = reader.GetString( nameof(Department) );
-        string            title                  = reader.GetString( nameof(Title) );
-        string            website                = reader.GetString( nameof(Website) );
-        SupportedLanguage preferredLanguage      = EnumSqlHandler<SupportedLanguage>.Instance.Parse( reader.GetValue( nameof(PreferredLanguage) ) );
-        string            email                  = reader.GetString( nameof(Email) );
-        bool              isEmailConfirmed       = reader.GetFieldValue<bool>( nameof(IsEmailConfirmed) );
-        string            phoneNumber            = reader.GetString( nameof(PhoneNumber) );
-        string            ext                    = reader.GetString( nameof(Ext) );
-        bool              isPhoneNumberConfirmed = reader.GetFieldValue<bool>( nameof(IsPhoneNumberConfirmed) );
-        bool              isTwoFactorEnabled     = reader.GetFieldValue<bool>( nameof(IsTwoFactorEnabled) );
-
-        DateTimeOffset? lastBadAttempt         = reader.GetFieldValue<DateTimeOffset?>( nameof(LastBadAttempt) );
-        DateTimeOffset? lastLogin              = reader.GetFieldValue<DateTimeOffset?>( nameof(LastLogin) );
-        int             badLogins              = reader.GetFieldValue<int>( nameof(BadLogins) );
-        bool            isLocked               = reader.GetFieldValue<bool>( nameof(IsLocked) );
-        DateTimeOffset? lockDate               = reader.GetFieldValue<DateTimeOffset?>( nameof(LockDate) );
-        DateTimeOffset? lockoutEnd             = reader.GetFieldValue<DateTimeOffset?>( nameof(LockoutEnd) );
-        string          passwordHash           = reader.GetString( nameof(PasswordHash) );
-        string          refreshToken           = reader.GetString( nameof(RefreshToken) );
-        DateTimeOffset? refreshTokenExpiryTime = reader.GetFieldValue<DateTimeOffset?>( nameof(RefreshTokenExpiryTime) );
-        Guid?           sessionID              = reader.GetFieldValue<Guid?>( nameof(SessionID) );
-        bool            isActive               = reader.GetFieldValue<bool>( nameof(IsActive) );
-        bool            isDisabled             = reader.GetFieldValue<bool>( nameof(IsDisabled) );
-        string          securityStamp          = reader.GetString( nameof(SecurityStamp) );
-        string          authenticatorKey       = reader.GetString( nameof(AuthenticatorKey) );
-        string          concurrencyStamp       = reader.GetString( nameof(AuthenticatorKey) );
-        var             escalateTo             = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(EscalateTo) ) );
+        Guid   userID                 = reader.GetGuid( nameof(UserID) );
+        string userName               = reader.GetString( nameof(UserName) );
+        string firstName              = reader.GetString( nameof(FirstName) );
+        string lastName               = reader.GetString( nameof(LastName) );
+        string fullName               = reader.GetString( nameof(FullName) );
+        string rights                 = reader.GetString( nameof(Rights) );
+        string gender                 = reader.GetString( nameof(Gender) );
+        string company                = reader.GetString( nameof(Company) );
+        string description            = reader.GetString( nameof(Description) );
+        string department             = reader.GetString( nameof(Department) );
+        string title                  = reader.GetString( nameof(Title) );
+        string website                = reader.GetString( nameof(Website) );
+        var    preferredLanguage      = EnumSqlHandler<SupportedLanguage>.Instance.Parse( reader.GetValue( nameof(PreferredLanguage) ) );
+        string email                  = reader.GetString( nameof(Email) );
+        bool   isEmailConfirmed       = reader.GetBoolean( nameof(IsEmailConfirmed) );
+        string phoneNumber            = reader.GetString( nameof(PhoneNumber) );
+        string ext                    = reader.GetString( nameof(Ext) );
+        bool   isPhoneNumberConfirmed = reader.GetBoolean( nameof(IsPhoneNumberConfirmed) );
+        bool   isTwoFactorEnabled     = reader.GetBoolean( nameof(IsTwoFactorEnabled) );
+        var    lastBadAttempt         = reader.GetFieldValue<DateTimeOffset?>( nameof(LastBadAttempt) );
+        var    lastLogin              = reader.GetFieldValue<DateTimeOffset?>( nameof(LastLogin) );
+        int    badLogins              = reader.GetFieldValue<int>( nameof(BadLogins) );
+        bool   isLocked               = reader.GetBoolean( nameof(IsLocked) );
+        var    lockDate               = reader.GetFieldValue<DateTimeOffset?>( nameof(LockDate) );
+        var    lockoutEnd             = reader.GetFieldValue<DateTimeOffset?>( nameof(LockoutEnd) );
+        string passwordHash           = reader.GetString( nameof(PasswordHash) );
+        string refreshToken           = reader.GetString( nameof(RefreshToken) );
+        var    refreshTokenExpiryTime = reader.GetFieldValue<DateTimeOffset?>( nameof(RefreshTokenExpiryTime) );
+        var    sessionID              = reader.GetFieldValue<Guid?>( nameof(SessionID) );
+        bool   isActive               = reader.GetBoolean( nameof(IsActive) );
+        bool   isDisabled             = reader.GetBoolean( nameof(IsDisabled) );
+        string securityStamp          = reader.GetString( nameof(SecurityStamp) );
+        string authenticatorKey       = reader.GetString( nameof(AuthenticatorKey) );
+        string concurrencyStamp       = reader.GetString( nameof(AuthenticatorKey) );
+        var    escalateTo             = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(EscalateTo) ) );
 
         IDictionary<string, JToken?>? additionalData = reader.GetFieldValue<string?>( nameof(AdditionalData) )
                                                             ?.FromJson<Dictionary<string, JToken?>>();
 
-        var id           = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) );
+        var id           = RecordID<UserRecord>.ID( reader );
+        var createdBy    = RecordID<UserRecord>.CreatedBy( reader );
+        var ownerUserID  = reader.GetFieldValue<Guid?>( nameof(OwnerUserID) );
         var dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
         var lastModified = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
-        var ownerUserID  = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
-        var createdBy    = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(CreatedBy) ) );
 
 
         return new UserRecord( userID,
@@ -155,15 +129,8 @@ public sealed record UserRecord( Guid                                           
                                fullName,
                                rights,
                                gender,
-                               address,
                                company,
                                description,
-                               line1,
-                               line2,
-                               city,
-                               stateOrProvince,
-                               country,
-                               postalCode,
                                department,
                                title,
                                website,
@@ -225,15 +192,8 @@ public sealed record UserRecord( Guid                                           
                                                                                                                            data.FullName,
                                                                                                                            rights,
                                                                                                                            data.Gender,
-                                                                                                                           data.Address,
                                                                                                                            data.Company,
                                                                                                                            data.Description,
-                                                                                                                           data.Line1,
-                                                                                                                           data.Line2,
-                                                                                                                           data.City,
-                                                                                                                           data.StateOrProvince,
-                                                                                                                           data.Country,
-                                                                                                                           data.PostalCode,
                                                                                                                            data.Department,
                                                                                                                            data.Title,
                                                                                                                            data.Website,
@@ -274,13 +234,6 @@ public sealed record UserRecord( Guid                                           
                                string.Empty,
                                string.Empty,
                                rights,
-                               string.Empty, // TODO: data.Gender,
-                               string.Empty,
-                               string.Empty,
-                               string.Empty,
-                               string.Empty,
-                               string.Empty,
-                               string.Empty,
                                string.Empty,
                                string.Empty,
                                string.Empty,
@@ -443,24 +396,17 @@ public sealed record UserRecord( Guid                                           
 
         if ( ReferenceEquals( this, other ) ) { return true; }
 
-        return string.Equals( Address,         other.Address,         StringComparison.Ordinal ) &&
-               string.Equals( City,            other.City,            StringComparison.Ordinal ) &&
-               string.Equals( Company,         other.Company,         StringComparison.Ordinal ) &&
-               string.Equals( Country,         other.Country,         StringComparison.Ordinal ) &&
-               string.Equals( Department,      other.Department,      StringComparison.Ordinal ) &&
-               string.Equals( Description,     other.Description,     StringComparison.Ordinal ) &&
-               string.Equals( Email,           other.Email,           StringComparison.Ordinal ) &&
-               string.Equals( Ext,             other.Ext,             StringComparison.Ordinal ) &&
-               string.Equals( FirstName,       other.FirstName,       StringComparison.Ordinal ) &&
-               string.Equals( FullName,        other.FullName,        StringComparison.Ordinal ) &&
-               string.Equals( LastName,        other.LastName,        StringComparison.Ordinal ) &&
-               string.Equals( Line1,           other.Line1,           StringComparison.Ordinal ) &&
-               string.Equals( Line2,           other.Line2,           StringComparison.Ordinal ) &&
-               string.Equals( PhoneNumber,     other.PhoneNumber,     StringComparison.Ordinal ) &&
-               string.Equals( PostalCode,      other.PostalCode,      StringComparison.Ordinal ) &&
-               string.Equals( StateOrProvince, other.StateOrProvince, StringComparison.Ordinal ) &&
-               string.Equals( Title,           other.Title,           StringComparison.Ordinal ) &&
-               string.Equals( Website,         other.Website,         StringComparison.Ordinal ) &&
+        return string.Equals( Company,     other.Company,     StringComparison.Ordinal ) &&
+               string.Equals( Department,  other.Department,  StringComparison.Ordinal ) &&
+               string.Equals( Description, other.Description, StringComparison.Ordinal ) &&
+               string.Equals( Email,       other.Email,       StringComparison.Ordinal ) &&
+               string.Equals( Ext,         other.Ext,         StringComparison.Ordinal ) &&
+               string.Equals( FirstName,   other.FirstName,   StringComparison.Ordinal ) &&
+               string.Equals( FullName,    other.FullName,    StringComparison.Ordinal ) &&
+               string.Equals( LastName,    other.LastName,    StringComparison.Ordinal ) &&
+               string.Equals( PhoneNumber, other.PhoneNumber, StringComparison.Ordinal ) &&
+               string.Equals( Title,       other.Title,       StringComparison.Ordinal ) &&
+               string.Equals( Website,     other.Website,     StringComparison.Ordinal ) &&
                PreferredLanguage == other.PreferredLanguage;
     }
     public int CompareTo( IUserData? other )
@@ -502,27 +448,6 @@ public sealed record UserRecord( Guid                                           
         int websiteComparison = string.Compare( Website, other.Website, StringComparison.Ordinal );
         if ( websiteComparison != 0 ) { return websiteComparison; }
 
-        int cityComparison = string.Compare( City, other.City, StringComparison.Ordinal );
-        if ( cityComparison != 0 ) { return cityComparison; }
-
-        int countryComparison = string.Compare( Country, other.Country, StringComparison.Ordinal );
-        if ( countryComparison != 0 ) { return countryComparison; }
-
-        int line1Comparison = string.Compare( Line1, other.Line1, StringComparison.Ordinal );
-        if ( line1Comparison != 0 ) { return line1Comparison; }
-
-        int line2Comparison = string.Compare( Line2, other.Line2, StringComparison.Ordinal );
-        if ( line2Comparison != 0 ) { return line2Comparison; }
-
-        int postalCodeComparison = string.Compare( PostalCode, other.PostalCode, StringComparison.Ordinal );
-        if ( postalCodeComparison != 0 ) { return postalCodeComparison; }
-
-        int stateComparison = string.Compare( StateOrProvince, other.StateOrProvince, StringComparison.Ordinal );
-        if ( stateComparison != 0 ) { return stateComparison; }
-
-        int addressComparison = string.Compare( Address, other.Address, StringComparison.Ordinal );
-        if ( addressComparison != 0 ) { return addressComparison; }
-
         return PreferredLanguage.CompareTo( other.PreferredLanguage );
     }
     public override int CompareTo( UserRecord? other )
@@ -549,27 +474,6 @@ public sealed record UserRecord( Guid                                           
 
         int sessionIDComparison = Nullable.Compare( SessionID, other.SessionID );
         if ( sessionIDComparison != 0 ) { return sessionIDComparison; }
-
-        int addressComparison = string.Compare( Address, other.Address, StringComparison.Ordinal );
-        if ( addressComparison != 0 ) { return addressComparison; }
-
-        int line1Comparison = string.Compare( Line1, other.Line1, StringComparison.Ordinal );
-        if ( line1Comparison != 0 ) { return line1Comparison; }
-
-        int line2Comparison = string.Compare( Line2, other.Line2, StringComparison.Ordinal );
-        if ( line2Comparison != 0 ) { return line2Comparison; }
-
-        int cityComparison = string.Compare( City, other.City, StringComparison.Ordinal );
-        if ( cityComparison != 0 ) { return cityComparison; }
-
-        int stateComparison = string.Compare( StateOrProvince, other.StateOrProvince, StringComparison.Ordinal );
-        if ( stateComparison != 0 ) { return stateComparison; }
-
-        int countryComparison = string.Compare( Country, other.Country, StringComparison.Ordinal );
-        if ( countryComparison != 0 ) { return countryComparison; }
-
-        int postalCodeComparison = string.Compare( PostalCode, other.PostalCode, StringComparison.Ordinal );
-        if ( postalCodeComparison != 0 ) { return postalCodeComparison; }
 
         int websiteComparison = string.Compare( Website, other.Website, StringComparison.Ordinal );
         if ( websiteComparison != 0 ) { return websiteComparison; }
@@ -647,13 +551,14 @@ public sealed record UserRecord( Guid                                           
 
     #region Owners
 
-    public async ValueTask<UserRecord?> GetBoss( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => EscalateTo.HasValue
-                                                                                                                                                    ? await db.Users.Get( connection, transaction, EscalateTo.Value, token )
-                                                                                                                                                    : default;
+    public async ValueTask<UserRecord?> GetBoss( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) =>
+        EscalateTo.HasValue
+            ? await db.Users.Get( connection, transaction, EscalateTo.Value, token )
+            : default;
 
 
-    public bool DoesNotOwn<TRecord>( TRecord record ) where TRecord : TableRecord<TRecord> => record.OwnerUserID != UserID;
-    public bool Owns<TRecord>( TRecord       record ) where TRecord : TableRecord<TRecord> => record.OwnerUserID == UserID;
+    public bool DoesNotOwn<TRecord>( TRecord record ) where TRecord : OwnedTableRecord<TRecord>, IDbReaderMapping<TRecord> => record.OwnerUserID != UserID;
+    public bool Owns<TRecord>( TRecord       record ) where TRecord : OwnedTableRecord<TRecord>, IDbReaderMapping<TRecord> => record.OwnerUserID == UserID;
 
     #endregion
 
@@ -752,13 +657,6 @@ public sealed record UserRecord( Guid                                           
                               FirstName = value.FirstName,
                               LastName = value.LastName,
                               FullName = value.FullName,
-                              Address = value.Address,
-                              Line1 = value.Line1,
-                              Line2 = value.Line2,
-                              City = value.City,
-                              StateOrProvince = value.StateOrProvince,
-                              Country = value.Country,
-                              PostalCode = value.PostalCode,
                               Description = value.Description,
                               Website = value.Website,
                               Email = value.Email,
@@ -915,16 +813,6 @@ public sealed record UserRecord( Guid                                           
 
         if ( types.HasFlag( ClaimType.MobilePhone ) ) { claims.Add( new Claim( ClaimTypes.MobilePhone, PhoneNumber, ClaimValueTypes.String ) ); }
 
-        if ( types.HasFlag( ClaimType.StreetAddressLine1 ) ) { claims.Add( new Claim( ClaimTypes.StreetAddress, Line1, ClaimValueTypes.String ) ); }
-
-        if ( types.HasFlag( ClaimType.StreetAddressLine2 ) ) { claims.Add( new Claim( ClaimTypes.Locality, Line2, ClaimValueTypes.String ) ); }
-
-        if ( types.HasFlag( ClaimType.StateOrProvince ) ) { claims.Add( new Claim( ClaimTypes.Country, StateOrProvince, ClaimValueTypes.String ) ); }
-
-        if ( types.HasFlag( ClaimType.Country ) ) { claims.Add( new Claim( ClaimTypes.Country, Country, ClaimValueTypes.String ) ); }
-
-        if ( types.HasFlag( ClaimType.PostalCode ) ) { claims.Add( new Claim( ClaimTypes.PostalCode, PostalCode, ClaimValueTypes.String ) ); }
-
         if ( types.HasFlag( ClaimType.WebSite ) ) { claims.Add( new Claim( ClaimTypes.Webpage, Website, ClaimValueTypes.String ) ); }
 
         if ( types.HasFlag( ClaimType.GroupSid ) ) { claims.AddRange( from record in groups select new Claim( ClaimTypes.GroupSid, record.NameOfGroup, ClaimValueTypes.String ) ); }
@@ -937,6 +825,7 @@ public sealed record UserRecord( Guid                                           
         TryFromClaims( connection, transaction, db, context.User, types, token );
     public static ValueTask<UserRecord?> TryFromClaims( DbConnection connection, DbTransaction transaction, Database db, ClaimsPrincipal principal, ClaimType types, CancellationToken token ) =>
         TryFromClaims( connection, transaction, db, principal.Claims.GetArray(), types, token );
+
     public static async ValueTask<UserRecord?> TryFromClaims( DbConnection connection, DbTransaction transaction, Database db, Claim[] claims, ClaimType types, CancellationToken token )
     {
         Debug.Assert( types.HasFlag( ClaimType.UserID ) );
@@ -989,41 +878,6 @@ public sealed record UserRecord( Guid                                           
                                   .Value );
         }
 
-        if ( types.HasFlag( ClaimType.StreetAddressLine1 ) )
-        {
-            parameters.Add( nameof(Line1),
-                            claims.Single( x => x.Type == ClaimTypes.StreetAddress )
-                                  .Value );
-        }
-
-        if ( types.HasFlag( ClaimType.StreetAddressLine2 ) )
-        {
-            parameters.Add( nameof(Line2),
-                            claims.Single( x => x.Type == ClaimTypes.Locality )
-                                  .Value );
-        }
-
-        if ( types.HasFlag( ClaimType.StateOrProvince ) )
-        {
-            parameters.Add( nameof(StateOrProvince),
-                            claims.Single( x => x.Type == ClaimTypes.StateOrProvince )
-                                  .Value );
-        }
-
-        if ( types.HasFlag( ClaimType.Country ) )
-        {
-            parameters.Add( nameof(Country),
-                            claims.Single( x => x.Type == ClaimTypes.Country )
-                                  .Value );
-        }
-
-        if ( types.HasFlag( ClaimType.PostalCode ) )
-        {
-            parameters.Add( nameof(PostalCode),
-                            claims.Single( x => x.Type == ClaimTypes.PostalCode )
-                                  .Value );
-        }
-
         if ( types.HasFlag( ClaimType.WebSite ) )
         {
             parameters.Add( nameof(Website),
@@ -1065,26 +919,6 @@ public sealed record UserRecord( Guid                                           
 
             case ClaimTypes.MobilePhone:
                 parameters.Add( nameof(PhoneNumber), claim.Value );
-                break;
-
-            case ClaimTypes.StreetAddress:
-                parameters.Add( nameof(Line1), claim.Value );
-                break;
-
-            case ClaimTypes.Locality:
-                parameters.Add( nameof(Line2), claim.Value );
-                break;
-
-            case ClaimTypes.StateOrProvince:
-                parameters.Add( nameof(StateOrProvince), claim.Value );
-                break;
-
-            case ClaimTypes.Country:
-                parameters.Add( nameof(Country), claim.Value );
-                break;
-
-            case ClaimTypes.PostalCode:
-                parameters.Add( nameof(PostalCode), claim.Value );
                 break;
 
             case ClaimTypes.Webpage:

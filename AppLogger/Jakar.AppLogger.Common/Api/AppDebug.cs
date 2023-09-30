@@ -2,7 +2,7 @@
 
 
 [SuppressMessage( "ReSharper", "MemberCanBeMadeStatic.Global" )]
-public sealed class Debug : ObservableClass
+public sealed class AppDebug : ObservableClass
 {
     private readonly BaseFileSystemApi    _fileSystemApi;
     private readonly IAppLogger           _logger;
@@ -37,7 +37,7 @@ public sealed class Debug : ObservableClass
     public Guid? SessionID => _logger.Config.Session?.SessionID;
 
 
-    public Debug( BaseFileSystemApi api, IAppLogger logger )
+    public AppDebug( BaseFileSystemApi api, IAppLogger logger )
     {
         _fileSystemApi = api;
         _logger        = logger;

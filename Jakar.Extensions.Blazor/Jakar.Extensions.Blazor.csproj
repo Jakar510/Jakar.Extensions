@@ -35,10 +35,10 @@
 		<PackageReference Include="Blazored.Video" Version="1.0.1" />
 		<PackageReference Include="BlazorComponentUtilities" Version="1.8.0" />
 		<PackageReference Include="BlazorPro.BlazorSize" Version="6.2.2" />
-		<PackageReference Include="PanoramicData.Blazor" Version="3.1.60" />
-		<PackageReference Include="Radzen.Blazor" Version="4.15.14" />
-		<PackageReference Include="Jakar.Extensions" Version="6.8.4" />
-		<PackageReference Include="Hardware.Info" Version="11.1.1.1" />
+		<PackageReference Include="PanoramicData.Blazor" Version="3.1.65" />
+		<PackageReference Include="Radzen.Blazor" Version="4.16.3" />
+		<PackageReference Include="Jakar.Extensions" Version="6.8.6" />
+		<PackageReference Include="Hardware.Info" Version="100.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.1" />
 		<PackageReference Include="Microsoft.NETCore.Platforms" Version="7.0.4" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />

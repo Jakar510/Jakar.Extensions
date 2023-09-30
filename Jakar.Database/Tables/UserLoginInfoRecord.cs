@@ -14,7 +14,7 @@ public sealed record UserLoginInfoRecord( [ property: MaxLength(                
                                           Guid?                                                                  OwnerUserID,
                                           DateTimeOffset                                                         DateCreated,
                                           DateTimeOffset?                                                        LastModified = default
-) : TableRecord<UserLoginInfoRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<UserLoginInfoRecord>
+) : OwnedTableRecord<UserLoginInfoRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<UserLoginInfoRecord>
 {
     public UserLoginInfoRecord( UserRecord user, UserLoginInfo info ) : this( user, info.LoginProvider, info.ProviderKey, info.ProviderDisplayName ) { }
     public UserLoginInfoRecord( UserRecord user, string loginProvider, string providerKey, string? providerDisplayName ) : this( loginProvider,
@@ -36,8 +36,8 @@ public sealed record UserLoginInfoRecord( [ property: MaxLength(                
         var dateCreated         = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
         var lastModified        = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
         var ownerUserID         = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
-        var createdBy           = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(CreatedBy) ) );
-        var id                  = new RecordID<UserLoginInfoRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) );
+        var createdBy           = RecordID<UserRecord>.CreatedBy( reader );
+        var id                  = RecordID<UserLoginInfoRecord>.ID( reader );
 
         return new UserLoginInfoRecord( loginProvider, providerDisplayName, providerKey, value, id, createdBy, ownerUserID, dateCreated, lastModified );
     }

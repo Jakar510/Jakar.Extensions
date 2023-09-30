@@ -8,7 +8,7 @@ using FluentMigrator.Builders.Create.Table;
 namespace Jakar.AppLogger.Portal.Data.DbMigrations;
 
 
-public abstract class LoggerMigration<TRecord> : Migration<TRecord> where TRecord : TableRecord<TRecord>
+public abstract class LoggerMigration<TRecord> : Migration<TRecord> where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
     protected LoggerMigration() : base() { }
 

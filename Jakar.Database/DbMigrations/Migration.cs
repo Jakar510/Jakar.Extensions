@@ -9,7 +9,7 @@ namespace Jakar.Database.DbMigrations;
 ///         <see href="https://fluentmigrator.github.io/articles/fluent-interface.html"/>
 ///     </para>
 /// </summary>
-public abstract class Migration<TRecord> : Migration where TRecord : TableRecord<TRecord>
+public abstract class Migration<TRecord> : Migration where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
     private        Database? _dbContext;
     public virtual string    CurrentScheme => _dbContext?.CurrentSchema ?? throw new NullReferenceException( nameof(_dbContext) );
@@ -52,14 +52,6 @@ public abstract class Migration<TRecord> : Migration where TRecord : TableRecord
 
         table.WithColumn( nameof(TableRecord<TRecord>.LastModified) )
              .AsDateTimeOffset()
-             .Nullable();
-
-        table.WithColumn( nameof(TableRecord<TRecord>.OwnerUserID) )
-             .AsGuid()
-             .Nullable();
-
-        table.WithColumn( nameof(TableRecord<TRecord>.CreatedBy) )
-             .AsGuid()
              .Nullable();
 
         return table;
@@ -116,4 +108,24 @@ public abstract class Migration<TRecord> : Migration where TRecord : TableRecord
                                                                                           .OnTable( TableName )
                                                                                           .WithSchema( CurrentScheme )
                                                                                           .Columns( columnNames );
+}
+
+
+
+public abstract class OwnedMigration<TRecord> : Migration<TRecord> where TRecord : OwnedTableRecord<TRecord>, IDbReaderMapping<TRecord>
+{
+    protected override ICreateTableWithColumnSyntax CreateTable()
+    {
+        var table = base.CreateTable();
+
+        table.WithColumn( nameof(OwnedTableRecord<TRecord>.OwnerUserID) )
+             .AsGuid()
+             .Nullable();
+
+        table.WithColumn( nameof(OwnedTableRecord<TRecord>.CreatedBy) )
+             .AsGuid()
+             .Nullable();
+
+        return table;
+    }
 }

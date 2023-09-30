@@ -5,18 +5,13 @@ public interface ICreateMapping<out TSelf, in TKey, in TValue> where TValue : Ta
                                                                where TKey : TableRecord<TKey>, IDbReaderMapping<TKey>
                                                                where TSelf : Mapping<TSelf, TKey, TValue>, ICreateMapping<TSelf, TKey, TValue>, IDbReaderMapping<TSelf>
 {
-    public abstract static TSelf Create( TKey key, TValue value, UserRecord? caller = default );
+    public abstract static TSelf Create( TKey key, TValue value );
 }
 
 
 
 [ Serializable ]
-public abstract record Mapping<TSelf, TKey, TValue>
-    ( RecordID<TKey> KeyID, RecordID<TValue> ValueID, RecordID<TSelf> ID, RecordID<UserRecord>? CreatedBy, Guid? OwnerUserID, DateTimeOffset DateCreated, DateTimeOffset? LastModified = default ) : TableRecord<TSelf>( ID,
-                                                                                                                                                                                                                         CreatedBy,
-                                                                                                                                                                                                                         OwnerUserID,
-                                                                                                                                                                                                                         DateCreated,
-                                                                                                                                                                                                                         LastModified )
+public abstract record Mapping<TSelf, TKey, TValue>( RecordID<TKey> KeyID, RecordID<TValue> ValueID, RecordID<TSelf> ID, DateTimeOffset DateCreated, DateTimeOffset? LastModified = default ) : TableRecord<TSelf>( ID, DateCreated, LastModified )
     where TValue : TableRecord<TValue>, IDbReaderMapping<TValue>
     where TKey : TableRecord<TKey>, IDbReaderMapping<TKey>
     where TSelf : Mapping<TSelf, TKey, TValue>, ICreateMapping<TSelf, TKey, TValue>, IDbReaderMapping<TSelf>
@@ -24,7 +19,7 @@ public abstract record Mapping<TSelf, TKey, TValue>
     private WeakReference<TKey>?   _owner;
     private WeakReference<TValue>? _value;
 
-    protected Mapping( TKey key, TValue value, UserRecord? caller ) : this( key.ID, value.ID, RecordID<TSelf>.New(), caller?.ID, caller?.UserID, DateTimeOffset.UtcNow )
+    protected Mapping( TKey key, TValue value ) : this( key.ID, value.ID, RecordID<TSelf>.New(), DateTimeOffset.UtcNow )
     {
         _owner = new WeakReference<TKey>( key );
         _value = new WeakReference<TValue>( value );
@@ -98,7 +93,7 @@ public abstract record Mapping<TSelf, TKey, TValue>
     {
         if ( await Exists( connection, transaction, selfTable, key, value, token ) ) { return false; }
 
-        var   record = TSelf.Create( key, value, caller );
+        var   record = TSelf.Create( key, value );
         TSelf self   = await selfTable.Insert( connection, transaction, record, token );
         return self.IsValidID();
     }
@@ -118,7 +113,7 @@ public abstract record Mapping<TSelf, TKey, TValue>
         {
             if ( Exists( records, value ) ) { continue; }
 
-            yield return TSelf.Create( key, value, caller );
+            yield return TSelf.Create( key, value );
         }
     }
 

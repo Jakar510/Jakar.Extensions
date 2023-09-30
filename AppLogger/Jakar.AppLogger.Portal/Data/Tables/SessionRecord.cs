@@ -10,18 +10,16 @@ public sealed partial record SessionRecord( DateTimeOffset          AppStartTime
                                             RecordID<AppRecord>     AppID,
                                             RecordID<DeviceRecord>  DeviceID,
                                             RecordID<SessionRecord> ID,
-                                            RecordID<UserRecord>?   CreatedBy,
-                                            Guid?                   OwnerUserID,
                                             DateTimeOffset          DateCreated,
                                             DateTimeOffset?         LastModified = default
-) : LoggerTable<SessionRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<SessionRecord>, IStartSession
+) : LoggerTable<SessionRecord>( ID, DateCreated, LastModified ), IDbReaderMapping<SessionRecord>, IStartSession
 {
     Guid IStartSession.AppID     => AppID.Value;
     Guid IStartSession.DeviceID  => DeviceID.Value;
     Guid? ISessionID.  SessionID => ID.Value;
 
 
-    public SessionRecord( StartSession start, AppRecord app, DeviceRecord device, UserRecord? caller = default ) : this( start.AppStartTime, app.ID, device.ID, RecordID<SessionRecord>.New(), caller?.ID, caller?.UserID, DateTimeOffset.UtcNow )
+    public SessionRecord( StartSession start, AppRecord app, DeviceRecord device ) : this( start.AppStartTime, app.ID, device.ID, RecordID<SessionRecord>.New(), DateTimeOffset.UtcNow )
     {
         AppStartTime = start.AppStartTime;
         AppID        = app.ID;
@@ -34,10 +32,8 @@ public sealed partial record SessionRecord( DateTimeOffset          AppStartTime
         var deviceID     = new RecordID<DeviceRecord>( reader.GetFieldValue<Guid>( nameof(DeviceID) ) );
         var dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
         var lastModified = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
-        var ownerUserID  = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
-        var createdBy    = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(CreatedBy) ) );
         var id           = new RecordID<SessionRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) );
-        return new SessionRecord( appStartTime, appID, deviceID, id, createdBy, ownerUserID, dateCreated, lastModified );
+        return new SessionRecord( appStartTime, appID, deviceID, id, dateCreated, lastModified );
     }
     public static async IAsyncEnumerable<SessionRecord> CreateAsync( DbDataReader reader, [ EnumeratorCancellation ] CancellationToken token = default )
     {

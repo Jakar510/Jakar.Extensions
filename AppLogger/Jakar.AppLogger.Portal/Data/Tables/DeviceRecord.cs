@@ -21,33 +21,29 @@ public sealed record DeviceRecord( int?                                         
                                    [ property: MaxLength( 256 ) ] string                         SdkVersion,
                                    TimeSpan                                                      TimeZoneOffset,
                                    RecordID<DeviceRecord>                                        ID,
-                                   RecordID<UserRecord>?                                         CreatedBy,
-                                   Guid?                                                         OwnerUserID,
                                    DateTimeOffset                                                DateCreated,
                                    DateTimeOffset?                                               LastModified = default
-) : LoggerTable<DeviceRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<DeviceRecord>, IDevice
+) : LoggerTable<DeviceRecord>( ID, DateCreated, LastModified ), IDbReaderMapping<DeviceRecord>, IDevice
 {
     AppVersion IDevice.OsVersion => OsVersion;
 
-    public DeviceRecord( IDevice device, UserRecord? caller = default ) : this( device.AppBuild,
-                                                                                device.AppNamespace,
-                                                                                device.AppVersion,
-                                                                                device.DeviceID,
-                                                                                device.HwInfo,
-                                                                                device.Locale,
-                                                                                device.Model,
-                                                                                device.OsApiLevel,
-                                                                                device.ProcessArchitecture,
-                                                                                device.OsName,
-                                                                                device.OsVersion,
-                                                                                device.Platform,
-                                                                                device.SdkName,
-                                                                                device.SdkVersion,
-                                                                                device.TimeZoneOffset,
-                                                                                RecordID<DeviceRecord>.New(),
-                                                                                caller?.ID,
-                                                                                caller?.UserID,
-                                                                                DateTimeOffset.UtcNow ) { }
+    public DeviceRecord( IDevice device ) : this( device.AppBuild,
+                                                  device.AppNamespace,
+                                                  device.AppVersion,
+                                                  device.DeviceID,
+                                                  device.HwInfo,
+                                                  device.Locale,
+                                                  device.Model,
+                                                  device.OsApiLevel,
+                                                  device.ProcessArchitecture,
+                                                  device.OsName,
+                                                  device.OsVersion,
+                                                  device.Platform,
+                                                  device.SdkName,
+                                                  device.SdkVersion,
+                                                  device.TimeZoneOffset,
+                                                  RecordID<DeviceRecord>.New(),
+                                                  DateTimeOffset.UtcNow ) { }
 
 
     public static DeviceRecord Create( DbDataReader reader )
@@ -72,8 +68,6 @@ public sealed record DeviceRecord( int?                                         
         var timeZoneOffset      = reader.GetFieldValue<TimeSpan>( nameof(TimeZoneOffset) );
         var dateCreated         = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
         var lastModified        = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
-        var ownerUserID         = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
-        var createdBy           = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(CreatedBy) ) );
         var id                  = new RecordID<DeviceRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) );
 
         return new DeviceRecord( appBuild,
@@ -92,8 +86,6 @@ public sealed record DeviceRecord( int?                                         
                                  sdkVersion,
                                  timeZoneOffset,
                                  id,
-                                 createdBy,
-                                 ownerUserID,
                                  dateCreated,
                                  lastModified );
     }
@@ -104,10 +96,8 @@ public sealed record DeviceRecord( int?                                         
 
 
     // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Global
-    public DeviceRecord Update( IDevice device, UserRecord caller )
+    public DeviceRecord Update( IDevice device )
     {
-        if ( CreatedBy != caller.ID ) { throw new ArgumentException( $"{nameof(caller)} doesn't own this {nameof(device)}", nameof(caller) ); }
-
         return this with
                {
                    DeviceID = device.DeviceID,
@@ -128,12 +118,10 @@ public sealed record DeviceRecord( int?                                         
     }
 
 
-    public static DynamicParameters GetDynamicParameters( DeviceDescriptor device, UserRecord caller ) => GetDynamicParameters( device, caller.ID );
-    public static DynamicParameters GetDynamicParameters( DeviceDescriptor device, RecordID<UserRecord> caller )
+    public static DynamicParameters GetDynamicParameters( DeviceDescriptor device )
     {
         var parameters = new DynamicParameters();
-        parameters.Add( nameof(DeviceID),  device.DeviceID );
-        parameters.Add( nameof(CreatedBy), caller.Value );
+        parameters.Add( nameof(DeviceID), device.DeviceID );
         return parameters;
     }
 
@@ -150,20 +138,19 @@ public sealed record DeviceRecord( int?                                         
 [ Serializable, Table( "Devices" ) ]
 public sealed record AppDeviceRecord : Mapping<AppDeviceRecord, AppRecord, DeviceRecord>, ICreateMapping<AppDeviceRecord, AppRecord, DeviceRecord>, IDbReaderMapping<AppDeviceRecord>
 {
-    public AppDeviceRecord( AppRecord key, DeviceRecord value, UserRecord? caller = default ) : base( key, value, caller ) { }
-    private AppDeviceRecord( RecordID<AppRecord> key, RecordID<DeviceRecord> value, RecordID<AppDeviceRecord> id, RecordID<UserRecord> createdBy, Guid ownerUserID, DateTimeOffset dateCreated, DateTimeOffset? lastModified ) :
-        base( key, value, id, createdBy, ownerUserID, dateCreated, lastModified ) { }
-    public static AppDeviceRecord Create( AppRecord key, DeviceRecord value, UserRecord? caller = default ) => new(key, value, caller);
+    public AppDeviceRecord( AppRecord            key, DeviceRecord           value ) : base( key, value ) { }
+    private AppDeviceRecord( RecordID<AppRecord> key, RecordID<DeviceRecord> value, RecordID<AppDeviceRecord> id, DateTimeOffset dateCreated, DateTimeOffset? lastModified ) : base( key, value, id, dateCreated, lastModified ) { }
+
+
+    public static AppDeviceRecord Create( AppRecord key, DeviceRecord value ) => new(key, value);
     public static AppDeviceRecord Create( DbDataReader reader )
     {
         var             key          = new RecordID<AppRecord>( reader.GetFieldValue<Guid>( nameof(KeyID) ) );
         var             value        = new RecordID<DeviceRecord>( reader.GetFieldValue<Guid>( nameof(KeyID) ) );
         DateTimeOffset  dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
         DateTimeOffset? lastModified = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
-        Guid            ownerUserID  = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
-        var             createdBy    = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(CreatedBy) ) );
         var             id           = new RecordID<AppDeviceRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) );
-        return new AppDeviceRecord( key, value, id, createdBy, ownerUserID, dateCreated, lastModified );
+        return new AppDeviceRecord( key, value, id, dateCreated, lastModified );
     }
     public static async IAsyncEnumerable<AppDeviceRecord> CreateAsync( DbDataReader reader, [ EnumeratorCancellation ] CancellationToken token = default )
     {

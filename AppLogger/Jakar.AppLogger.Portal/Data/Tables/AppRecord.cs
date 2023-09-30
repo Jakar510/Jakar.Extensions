@@ -2,13 +2,13 @@
 
 
 [ Serializable, Table( "Apps" ) ]
-public sealed record AppRecord : LoggerTable<AppRecord>, IDbReaderMapping<AppRecord>
+public sealed record AppRecord : OwnedLoggerTable<AppRecord>, IDbReaderMapping<AppRecord>
 {
     [ MaxLength( 1024 ) ]  public string AppName { get; init; } = string.Empty;
     [ MaxLength( 10240 ) ] public string Secret  { get; init; } = string.Empty;
 
 
-    public AppRecord( string appName, string secret, UserRecord? caller = default ) : base( caller )
+    public AppRecord( string appName, string secret, UserRecord caller ) : base( caller )
     {
         AppName = appName;
         Secret  = secret;
@@ -29,5 +29,5 @@ public sealed record AppRecord : LoggerTable<AppRecord>, IDbReaderMapping<AppRec
 
 
     public override int CompareTo( AppRecord? other ) => string.CompareOrdinal( AppName, other?.AppName );
-    public override int GetHashCode() => HashCode.Combine( AppName, base.GetHashCode() );
+    public override int GetHashCode()                 => HashCode.Combine( AppName, base.GetHashCode() );
 }

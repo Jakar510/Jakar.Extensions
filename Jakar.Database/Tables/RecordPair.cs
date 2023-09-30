@@ -4,7 +4,7 @@
 namespace Jakar.Database;
 
 
-public readonly record struct RecordPair<TRecord>( RecordID<TRecord> ID, DateTimeOffset DateCreated ) : IComparable<RecordPair<TRecord>>, IRecordPair where TRecord : TableRecord<TRecord>
+public readonly record struct RecordPair<TRecord>( RecordID<TRecord> ID, DateTimeOffset DateCreated ) : IComparable<RecordPair<TRecord>>, IRecordPair where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
     Guid IUniqueID<Guid>.ID => ID.Value;
 

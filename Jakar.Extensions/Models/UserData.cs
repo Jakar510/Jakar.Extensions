@@ -4,17 +4,13 @@
 namespace Jakar.Extensions;
 
 
-[ SuppressMessage( "ReSharper", "UnusedMemberInSuper.Global" ) ]
 public interface IUserData : JsonModels.IJsonModel, IEquatable<IUserData>, IComparable<IUserData>
 {
     public static Equalizer<IUserData> Equalizer => Equalizer<IUserData>.Default;
     public static Sorter<IUserData>    Sorter    => Sorter<IUserData>.Default;
 
 
-    [ MaxLength( 4096 ) ]               public string            Address           { get; }
-    [ MaxLength( 256 ) ]                public string            City              { get; }
     [ MaxLength( 256 ) ]                public string            Company           { get; }
-    [ MaxLength( 256 ) ]                public string            Country           { get; }
     [ MaxLength( 256 ) ]                public string            Department        { get; }
     [ MaxLength( 256 ) ]                public string            Description       { get; }
     [ MaxLength( 1024 ), EmailAddress ] public string            Email             { get; }
@@ -23,12 +19,8 @@ public interface IUserData : JsonModels.IJsonModel, IEquatable<IUserData>, IComp
     [ MaxLength( 512 ) ]                public string            FullName          { get; }
     [ MaxLength( 256 ) ]                public string            Gender            { get; }
     [ MaxLength( 256 ), Required ]      public string            LastName          { get; }
-    [ MaxLength( 512 ) ]                public string            Line1             { get; }
-    [ MaxLength( 256 ) ]                public string            Line2             { get; }
     [ MaxLength( 256 ), Phone ]         public string            PhoneNumber       { get; }
-    [ MaxLength( 256 ), Required ]      public string            PostalCode        { get; }
     [ Required ]                        public SupportedLanguage PreferredLanguage { get; }
-    [ MaxLength( 256 ) ]                public string            StateOrProvince   { get; }
     [ MaxLength( 256 ) ]                public string            Title             { get; }
     [ MaxLength( 4096 ), Url ]          public string            Website           { get; }
 }
@@ -47,23 +39,16 @@ public class UserData : ObservableClass, IUserData
 {
     public const string                        EMPTY_PHONE_NUMBER = "(000) 000-0000";
     private      IDictionary<string, JToken?>? _additionalData;
-    private      string                        _city        = string.Empty;
     private      string                        _company     = string.Empty;
-    private      string                        _country     = string.Empty;
     private      string                        _department  = string.Empty;
     private      string                        _email       = string.Empty;
     private      string                        _ext         = string.Empty;
     private      string                        _firstName   = string.Empty;
     private      string                        _gender      = string.Empty;
     private      string                        _lastName    = string.Empty;
-    private      string                        _line1       = string.Empty;
-    private      string                        _line2       = string.Empty;
     private      string                        _phoneNumber = string.Empty;
-    private      string                        _postalCode  = string.Empty;
-    private      string                        _state       = string.Empty;
     private      string                        _title       = string.Empty;
     private      string                        _website     = string.Empty;
-    private      string?                       _address;
     private      string?                       _description;
     private      string?                       _fullName;
     private      SupportedLanguage             _preferredLanguage = SupportedLanguage.English;
@@ -76,27 +61,6 @@ public class UserData : ObservableClass, IUserData
         set => SetProperty( ref _additionalData, value );
     }
 
-
-    [ MaxLength( 4096 ) ]
-    public string Address
-    {
-        get => _address ??= $"{Line1} {Line2} {City}, {StateOrProvince} {Country} {PostalCode}";
-        set => SetProperty( ref _address, value );
-    }
-
-    [ MaxLength( 256 ) ]
-    public string City
-    {
-        get => _city;
-        set
-        {
-            if ( !SetProperty( ref _city, value ) ) { return; }
-
-            _address = default;
-            OnPropertyChanged( nameof(Address) );
-        }
-    }
-
     [ MaxLength( 256 ) ]
     public string Company
     {
@@ -107,19 +71,6 @@ public class UserData : ObservableClass, IUserData
 
             _description = default;
             OnPropertyChanged( nameof(Description) );
-        }
-    }
-
-    [ MaxLength( 256 ) ]
-    public string Country
-    {
-        get => _country;
-        set
-        {
-            if ( !SetProperty( ref _country, value ) ) { return; }
-
-            _address = default;
-            OnPropertyChanged( nameof(Address) );
         }
     }
 
@@ -184,31 +135,10 @@ public class UserData : ObservableClass, IUserData
         set => SetProperty( ref _gender, value );
     }
 
-    [ JsonIgnore ]
-    public bool IsValidAddress
-    {
-        get
-        {
-            Span<char> span = stackalloc char[Address.Length];
-
-            Address.AsSpan()
-                   .CopyTo( span );
-
-            for ( int i = 0; i < span.Length; i++ )
-            {
-                if ( char.IsLetterOrDigit( span[i] ) ) { continue; }
-
-                span[i] = ' ';
-            }
-
-            return span.IsNullOrWhiteSpace();
-        }
-    }
     [ JsonIgnore ] public bool IsValidEmail       => !string.IsNullOrEmpty( Email );
     [ JsonIgnore ] public bool IsValidName        => !string.IsNullOrEmpty( FullName );
     [ JsonIgnore ] public bool IsValidPhoneNumber => !string.IsNullOrEmpty( PhoneNumber );
-
-    [ JsonIgnore ] public bool IsValidWebsite => Uri.TryCreate( Website, UriKind.RelativeOrAbsolute, out _ );
+    [ JsonIgnore ] public bool IsValidWebsite     => Uri.TryCreate( Website, UriKind.RelativeOrAbsolute, out _ );
 
     [ Required, MaxLength( 256 ) ]
     public string LastName
@@ -223,32 +153,6 @@ public class UserData : ObservableClass, IUserData
         }
     }
 
-    [ MaxLength( 512 ) ]
-    public string Line1
-    {
-        get => _line1;
-        set
-        {
-            if ( !SetProperty( ref _line1, value ) ) { return; }
-
-            _address = default;
-            OnPropertyChanged( nameof(Address) );
-        }
-    }
-
-    [ MaxLength( 256 ) ]
-    public string Line2
-    {
-        get => _line2;
-        set
-        {
-            if ( !SetProperty( ref _line2, value ) ) { return; }
-
-            _address = default;
-            OnPropertyChanged( nameof(Address) );
-        }
-    }
-
     [ Phone, MaxLength( 256 ) ]
     public string PhoneNumber
     {
@@ -256,37 +160,11 @@ public class UserData : ObservableClass, IUserData
         set => SetProperty( ref _phoneNumber, value );
     }
 
-    [ MaxLength( 256 ) ]
-    public string PostalCode
-    {
-        get => _postalCode;
-        set
-        {
-            if ( !SetProperty( ref _postalCode, value ) ) { return; }
-
-            _address = default;
-            OnPropertyChanged( nameof(Address) );
-        }
-    }
-
     [ Required ]
     public SupportedLanguage PreferredLanguage
     {
         get => _preferredLanguage;
         set => SetProperty( ref _preferredLanguage, value );
-    }
-
-    [ MaxLength( 256 ) ]
-    public string StateOrProvince
-    {
-        get => _state;
-        set
-        {
-            if ( !SetProperty( ref _state, value ) ) { return; }
-
-            _address = default;
-            OnPropertyChanged( nameof(Address) );
-        }
     }
 
     [ MaxLength( 256 ) ]
@@ -324,13 +202,6 @@ public class UserData : ObservableClass, IUserData
         FirstName         = value.FirstName;
         LastName          = value.LastName;
         FullName          = value.FullName;
-        Address           = value.Address;
-        Line1             = value.Line1;
-        Line2             = value.Line2;
-        City              = value.City;
-        StateOrProvince   = value.StateOrProvince;
-        Country           = value.Country;
-        PostalCode        = value.PostalCode;
         Description       = value.Description;
         Website           = value.Website;
         Email             = value.Email;
@@ -356,25 +227,18 @@ public class UserData : ObservableClass, IUserData
 
         if ( ReferenceEquals( this, other ) ) { return true; }
 
-        return Equals( _additionalData, other.AdditionalData ) &&
-               string.Equals( _address,     other.Address,         StringComparison.Ordinal ) &&
-               string.Equals( _city,        other.City,            StringComparison.Ordinal ) &&
-               string.Equals( _company,     other.Company,         StringComparison.Ordinal ) &&
-               string.Equals( _country,     other.Country,         StringComparison.Ordinal ) &&
-               string.Equals( _department,  other.Department,      StringComparison.Ordinal ) &&
-               string.Equals( _description, other.Description,     StringComparison.Ordinal ) &&
-               string.Equals( _email,       other.Email,           StringComparison.Ordinal ) &&
-               string.Equals( _ext,         other.Ext,             StringComparison.Ordinal ) &&
-               string.Equals( _firstName,   other.FirstName,       StringComparison.Ordinal ) &&
-               string.Equals( _fullName,    other.FullName,        StringComparison.Ordinal ) &&
-               string.Equals( _lastName,    other.LastName,        StringComparison.Ordinal ) &&
-               string.Equals( _line1,       other.Line1,           StringComparison.Ordinal ) &&
-               string.Equals( _line2,       other.Line2,           StringComparison.Ordinal ) &&
-               string.Equals( _phoneNumber, other.PhoneNumber,     StringComparison.Ordinal ) &&
-               string.Equals( _postalCode,  other.PostalCode,      StringComparison.Ordinal ) &&
-               string.Equals( _state,       other.StateOrProvince, StringComparison.Ordinal ) &&
-               string.Equals( _title,       other.Title,           StringComparison.Ordinal ) &&
-               string.Equals( _website,     other.Website,         StringComparison.Ordinal ) &&
+        return Equals( _additionalData, other.AdditionalData )                            &&
+               string.Equals( _company,     other.Company,     StringComparison.Ordinal ) &&
+               string.Equals( _department,  other.Department,  StringComparison.Ordinal ) &&
+               string.Equals( _description, other.Description, StringComparison.Ordinal ) &&
+               string.Equals( _email,       other.Email,       StringComparison.Ordinal ) &&
+               string.Equals( _ext,         other.Ext,         StringComparison.Ordinal ) &&
+               string.Equals( _firstName,   other.FirstName,   StringComparison.Ordinal ) &&
+               string.Equals( _fullName,    other.FullName,    StringComparison.Ordinal ) &&
+               string.Equals( _lastName,    other.LastName,    StringComparison.Ordinal ) &&
+               string.Equals( _phoneNumber, other.PhoneNumber, StringComparison.Ordinal ) &&
+               string.Equals( _title,       other.Title,       StringComparison.Ordinal ) &&
+               string.Equals( _website,     other.Website,     StringComparison.Ordinal ) &&
                _preferredLanguage == other.PreferredLanguage;
     }
     public override bool Equals( object? other )
@@ -389,10 +253,7 @@ public class UserData : ObservableClass, IUserData
     {
         var hashCode = new HashCode();
         hashCode.Add( AdditionalData );
-        hashCode.Add( Address );
-        hashCode.Add( City );
         hashCode.Add( Company );
-        hashCode.Add( Country );
         hashCode.Add( Department );
         hashCode.Add( Description );
         hashCode.Add( Email );
@@ -400,11 +261,7 @@ public class UserData : ObservableClass, IUserData
         hashCode.Add( FirstName );
         hashCode.Add( FullName );
         hashCode.Add( LastName );
-        hashCode.Add( Line1 );
-        hashCode.Add( Line2 );
         hashCode.Add( PhoneNumber );
-        hashCode.Add( PostalCode );
-        hashCode.Add( StateOrProvince );
         hashCode.Add( Title );
         hashCode.Add( Website );
         hashCode.Add( PreferredLanguage );
@@ -448,27 +305,6 @@ public class UserData : ObservableClass, IUserData
 
         int websiteComparison = string.Compare( _website, other.Website, StringComparison.Ordinal );
         if ( websiteComparison != 0 ) { return websiteComparison; }
-
-        int cityComparison = string.Compare( _city, other.City, StringComparison.Ordinal );
-        if ( cityComparison != 0 ) { return cityComparison; }
-
-        int countryComparison = string.Compare( _country, other.Country, StringComparison.Ordinal );
-        if ( countryComparison != 0 ) { return countryComparison; }
-
-        int line1Comparison = string.Compare( _line1, other.Line1, StringComparison.Ordinal );
-        if ( line1Comparison != 0 ) { return line1Comparison; }
-
-        int line2Comparison = string.Compare( _line2, other.Line2, StringComparison.Ordinal );
-        if ( line2Comparison != 0 ) { return line2Comparison; }
-
-        int postalCodeComparison = string.Compare( _postalCode, other.PostalCode, StringComparison.Ordinal );
-        if ( postalCodeComparison != 0 ) { return postalCodeComparison; }
-
-        int stateComparison = string.Compare( _state, other.StateOrProvince, StringComparison.Ordinal );
-        if ( stateComparison != 0 ) { return stateComparison; }
-
-        int addressComparison = string.Compare( _address, other.Address, StringComparison.Ordinal );
-        if ( addressComparison != 0 ) { return addressComparison; }
 
         return ((int)PreferredLanguage).CompareTo( (int)other.PreferredLanguage );
     }

@@ -21,8 +21,8 @@ public partial class DbTable<TRecord> : ObservableClass, IConnectableDb, IAsyncD
 
     public virtual string CreatedBy => Instance switch
                                        {
-                                           DbInstance.Postgres => $@"""{nameof(TableRecord<TRecord>.CreatedBy)}""",
-                                           DbInstance.MsSql    => nameof(TableRecord<TRecord>.CreatedBy),
+                                           DbInstance.Postgres => $@"""{nameof(IOwnedTableRecord.CreatedBy)}""",
+                                           DbInstance.MsSql    => nameof(IOwnedTableRecord.CreatedBy),
                                            _                   => throw new OutOfRangeException( nameof(Instance), Instance ),
                                        };
 
@@ -57,8 +57,8 @@ public partial class DbTable<TRecord> : ObservableClass, IConnectableDb, IAsyncD
 
     public virtual string OwnerUserID => Instance switch
                                          {
-                                             DbInstance.Postgres => $@"""{nameof(TableRecord<TRecord>.OwnerUserID)}""",
-                                             DbInstance.MsSql    => nameof(TableRecord<TRecord>.OwnerUserID),
+                                             DbInstance.Postgres => $@"""{nameof(IOwnedTableRecord.OwnerUserID)}""",
+                                             DbInstance.MsSql    => nameof(IOwnedTableRecord.OwnerUserID),
                                              _                   => throw new OutOfRangeException( nameof(Instance), Instance ),
                                          };
 

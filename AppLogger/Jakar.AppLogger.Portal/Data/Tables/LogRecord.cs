@@ -2,7 +2,7 @@
 // 09/12/2022  10:06 AM
 
 
-using Debug = Jakar.AppLogger.Common.Debug;
+using Newtonsoft.Json.Linq;
 
 
 
@@ -30,17 +30,15 @@ public sealed record LogRecord : LoggerTable<LogRecord>, IDbReaderMapping<LogRec
     public                                             RecordID<SessionRecord> SessionID        { get; init; }
     [ MaxLength( MAX_STRING_SIZE ) ] public            string?                 StackTrace       { get; init; }
     public                                             DateTimeOffset          Timestamp        { get; init; }
+    StartSessionReply IAppLog.                                                 Session          => new(SessionID.Value, DeviceID.Value, AppID.Value);
+    EventID IAppLog.                                                           EventID          => new(EventID, EventName);
+    Guid? ISessionID.                                                          SessionID        => SessionID.Value;
+    Guid ILogInfo.                                                             LogID            => ID.Value;
+    Guid IStartSession.                                                        DeviceID         => DeviceID.Value;
+    Guid IStartSession.                                                        AppID            => AppID.Value;
 
 
-    StartSessionReply IAppLog.Session   => new(SessionID.Value, DeviceID.Value, AppID.Value);
-    EventID IAppLog.          EventID   => new(EventID, EventName);
-    Guid? ISessionID.         SessionID => SessionID.Value;
-    Guid ILogInfo.            LogID     => ID.Value;
-    Guid IStartSession.       DeviceID  => DeviceID.Value;
-    Guid IStartSession.       AppID     => AppID.Value;
-
-
-    public LogRecord( AppLog log, SessionRecord session, UserRecord? caller = default ) : base( caller )
+    public LogRecord( AppLog log, SessionRecord session ) : base( RecordID<LogRecord>.New() )
     {
         System.Diagnostics.Debug.Assert( session.ID.Value == log.Session.SessionID );
 
@@ -57,10 +55,10 @@ public sealed record LogRecord : LoggerTable<LogRecord>, IDbReaderMapping<LogRec
         EventID          = log.EventID.ID;
         EventName        = log.EventID.Name;
         BuildID          = log.BuildID;
-        AdditionalData   = log.AdditionalData?.ToPrettyJson();
         ExceptionDetails = log.Exception?.ToPrettyJson();
         AppID            = session.AppID;
         DeviceID         = session.DeviceID;
+        AdditionalData   = log.AdditionalData;
     }
 
     public static DynamicParameters GetDynamicParameters( AppLog log )
@@ -98,9 +96,9 @@ public sealed record LogRecord : LoggerTable<LogRecord>, IDbReaderMapping<LogRec
 
 
     public ExceptionDetails? GetExceptionDetails() => ExceptionDetails?.FromJson<ExceptionDetails>();
-    public string? GetStackTrace() => StackTrace;
+    public string?           GetStackTrace()       => StackTrace;
 
 
     public override int CompareTo( LogRecord? other ) => string.CompareOrdinal( Message, other?.Message );
-    public override int GetHashCode() => HashCode.Combine( Message, base.GetHashCode() );
+    public override int GetHashCode()                 => HashCode.Combine( Message, base.GetHashCode() );
 }

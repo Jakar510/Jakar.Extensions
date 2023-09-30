@@ -11,7 +11,7 @@ public sealed record RoleRecord( [ property: MaxLength( 1024 ) ]                
                                  Guid?                                                                                      OwnerUserID,
                                  DateTimeOffset                                                                             DateCreated,
                                  DateTimeOffset?                                                                            LastModified = default
-) : TableRecord<RoleRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<RoleRecord>, UserRights.IRights
+) : OwnedTableRecord<RoleRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<RoleRecord>, UserRights.IRights
 {
     public RoleRecord( IdentityRole role, UserRecord?   caller                     = default ) : this( role.Name ?? string.Empty, role.NormalizedName ?? string.Empty, role.ConcurrencyStamp ?? string.Empty, caller ) { }
     public RoleRecord( IdentityRole role, in UserRights rights, UserRecord? caller = default ) : this( role.Name ?? string.Empty, role.NormalizedName ?? string.Empty, role.ConcurrencyStamp ?? string.Empty, rights, caller ) { }
@@ -39,15 +39,15 @@ public sealed record RoleRecord( [ property: MaxLength( 1024 ) ]                
     // [DbReaderMapping]
     public static RoleRecord Create( DbDataReader reader )
     {
-        string               rights           = reader.GetString( nameof(Rights) );
-        string               name             = reader.GetString( nameof(Name) );
-        string               normalizedName   = reader.GetString( nameof(NormalizedName) );
-        string               concurrencyStamp = reader.GetString( nameof(ConcurrencyStamp) );
-        DateTimeOffset       dateCreated      = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
-        DateTimeOffset?      lastModified     = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
-        Guid                 ownerUserID      = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
-        RecordID<UserRecord> createdBy        = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(CreatedBy) ) );
-        RecordID<RoleRecord> id               = new RecordID<RoleRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) );
+        var rights           = reader.GetString( nameof(Rights) );
+        var name             = reader.GetString( nameof(Name) );
+        var normalizedName   = reader.GetString( nameof(NormalizedName) );
+        var concurrencyStamp = reader.GetString( nameof(ConcurrencyStamp) );
+        var dateCreated      = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
+        var lastModified     = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
+        var ownerUserID      = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
+        var createdBy = RecordID<UserRecord>.CreatedBy( reader );
+        var id               = RecordID<RoleRecord>.ID( reader );
         return new RoleRecord( name, normalizedName, concurrencyStamp, rights, id, createdBy, ownerUserID, dateCreated, lastModified );
     }
     public static async IAsyncEnumerable<RoleRecord> CreateAsync( DbDataReader reader, [ EnumeratorCancellation ] CancellationToken token = default )
@@ -83,5 +83,5 @@ public sealed record RoleRecord( [ property: MaxLength( 1024 ) ]                
     }
 
     public async ValueTask<IEnumerable<UserRecord>> GetUsers( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => await UserRoleRecord.Where( connection, transaction, db.UserRoles, db.Users, this, token );
-    public UserRights GetRights() => new(this);
+    public       UserRights                         GetRights() => new(this);
 }

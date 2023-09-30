@@ -16,11 +16,9 @@ public sealed record LoggerAttachmentRecord( [ property: MaxLength( LoggerAttach
                                              RecordID<LogRecord>                                                  LogID,
                                              RecordID<SessionRecord>?                                             SessionID,
                                              RecordID<LoggerAttachmentRecord>                                     ID,
-                                             RecordID<UserRecord>?                                                CreatedBy,
-                                             Guid?                                                                OwnerUserID,
                                              DateTimeOffset                                                       DateCreated,
                                              DateTimeOffset?                                                      LastModified = default
-) : LoggerTable<LoggerAttachmentRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<LoggerAttachmentRecord>, ILoggerAttachment, ILogInfo
+) : LoggerTable<LoggerAttachmentRecord>( ID, DateCreated, LastModified ), IDbReaderMapping<LoggerAttachmentRecord>, ILoggerAttachment, ILogInfo
 {
     Guid IStartSession.AppID     => AppID.Value;
     Guid IStartSession.DeviceID  => DeviceID.Value;
@@ -28,39 +26,35 @@ public sealed record LoggerAttachmentRecord( [ property: MaxLength( LoggerAttach
     Guid ILogInfo.     LogID     => LogID.Value;
 
 
-    public LoggerAttachmentRecord( LoggerAttachment attachment, ILogInfo info, RecordID<ScopeRecord>? scope, UserRecord? caller = default ) : this( attachment.Content,
+    public LoggerAttachmentRecord( LoggerAttachment attachment, ILogInfo info, RecordID<ScopeRecord>? scope ) : this( attachment.Content,
+                                                                                                                      attachment.Description,
+                                                                                                                      attachment.FileName,
+                                                                                                                      attachment.Length,
+                                                                                                                      attachment.Type,
+                                                                                                                      attachment.IsBinary,
+                                                                                                                      RecordID<AppRecord>.New( info.AppID ),
+                                                                                                                      RecordID<DeviceRecord>.New( info.DeviceID ),
+                                                                                                                      RecordID<LogRecord>.New( info.LogID ),
+                                                                                                                      info.SessionID.HasValue
+                                                                                                                          ? RecordID<SessionRecord>.New( info.SessionID.Value )
+                                                                                                                          : default,
+                                                                                                                      RecordID<LoggerAttachmentRecord>.New(),
+                                                                                                                      DateTimeOffset.UtcNow )
+    {
+        if ( attachment.Length > LoggerAttachment.MAX_SIZE ) { LoggerAttachment.ThrowTooLong( attachment.Length ); }
+    }
+    public LoggerAttachmentRecord( LoggerAttachment attachment, AppRecord app, DeviceRecord device, LogRecord log, SessionRecord? session ) : this( attachment.Content,
                                                                                                                                                     attachment.Description,
                                                                                                                                                     attachment.FileName,
                                                                                                                                                     attachment.Length,
                                                                                                                                                     attachment.Type,
                                                                                                                                                     attachment.IsBinary,
-                                                                                                                                                    RecordID<AppRecord>.New( info.AppID ),
-                                                                                                                                                    RecordID<DeviceRecord>.New( info.DeviceID ),
-                                                                                                                                                    RecordID<LogRecord>.New( info.LogID ),
-                                                                                                                                                    info.SessionID.HasValue
-                                                                                                                                                        ? RecordID<SessionRecord>.New( info.SessionID.Value )
-                                                                                                                                                        : default,
+                                                                                                                                                    app.ID,
+                                                                                                                                                    device.ID,
+                                                                                                                                                    log.ID,
+                                                                                                                                                    session?.ID,
                                                                                                                                                     RecordID<LoggerAttachmentRecord>.New(),
-                                                                                                                                                    caller?.ID,
-                                                                                                                                                    caller?.UserID,
                                                                                                                                                     DateTimeOffset.UtcNow )
-    {
-        if ( attachment.Length > LoggerAttachment.MAX_SIZE ) { LoggerAttachment.ThrowTooLong( attachment.Length ); }
-    }
-    public LoggerAttachmentRecord( LoggerAttachment attachment, AppRecord app, DeviceRecord device, LogRecord log, SessionRecord? session, UserRecord? caller = default ) : this( attachment.Content,
-                                                                                                                                                                                  attachment.Description,
-                                                                                                                                                                                  attachment.FileName,
-                                                                                                                                                                                  attachment.Length,
-                                                                                                                                                                                  attachment.Type,
-                                                                                                                                                                                  attachment.IsBinary,
-                                                                                                                                                                                  app.ID,
-                                                                                                                                                                                  device.ID,
-                                                                                                                                                                                  log.ID,
-                                                                                                                                                                                  session?.ID,
-                                                                                                                                                                                  RecordID<LoggerAttachmentRecord>.New(),
-                                                                                                                                                                                  caller?.ID,
-                                                                                                                                                                                  caller?.UserID,
-                                                                                                                                                                                  DateTimeOffset.UtcNow )
     {
         if ( attachment.Length > LoggerAttachment.MAX_SIZE ) { LoggerAttachment.ThrowTooLong( attachment.Length ); }
     }
@@ -80,8 +74,6 @@ public sealed record LoggerAttachmentRecord( [ property: MaxLength( LoggerAttach
         var sessionID    = new RecordID<SessionRecord>( reader.GetFieldValue<Guid>( nameof(SessionID) ) );
         var dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
         var lastModified = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
-        var ownerUserID  = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
-        var createdBy    = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(CreatedBy) ) );
         var id           = new RecordID<LoggerAttachmentRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) );
 
         return new LoggerAttachmentRecord( content,
@@ -95,8 +87,6 @@ public sealed record LoggerAttachmentRecord( [ property: MaxLength( LoggerAttach
                                            logID,
                                            sessionID,
                                            id,
-                                           createdBy,
-                                           ownerUserID,
                                            dateCreated,
                                            lastModified );
     }
@@ -105,10 +95,10 @@ public sealed record LoggerAttachmentRecord( [ property: MaxLength( LoggerAttach
         while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
     }
 
-    public static IEnumerable<LoggerAttachmentRecord> Create( AppLog log, AppRecord app, DeviceRecord device, LogRecord record, SessionRecord? session, UserRecord caller )
+    public static IEnumerable<LoggerAttachmentRecord> Create( AppLog log, AppRecord app, DeviceRecord device, LogRecord record, SessionRecord? session )
     {
         // ReSharper disable once ForeachCanBeConvertedToQueryUsingAnotherGetEnumerator
-        foreach ( LoggerAttachment attachment in log.Attachments ) { yield return new LoggerAttachmentRecord( attachment, app, device, record, session, caller ); }
+        foreach ( LoggerAttachment attachment in log.Attachments ) { yield return new LoggerAttachmentRecord( attachment, app, device, record, session ); }
     }
 
 
@@ -155,11 +145,21 @@ public sealed record LoggerAttachmentMappingRecord : Mapping<LoggerAttachmentMap
                                                      ICreateMapping<LoggerAttachmentMappingRecord, LogRecord, LoggerAttachmentRecord>,
                                                      IDbReaderMapping<LoggerAttachmentMappingRecord>
 {
-    public LoggerAttachmentMappingRecord( LogRecord               key, LoggerAttachmentRecord value, UserRecord? caller = default ) : base( key, value, caller ) { }
-    public static LoggerAttachmentMappingRecord Create( LogRecord key, LoggerAttachmentRecord value, UserRecord? caller = default ) => new(key, value, caller);
+    public LoggerAttachmentMappingRecord( LogRecord key, LoggerAttachmentRecord value ) : base( key, value ) { }
+    private LoggerAttachmentMappingRecord( RecordID<LogRecord> key, RecordID<LoggerAttachmentRecord> value, RecordID<LoggerAttachmentMappingRecord> id, DateTimeOffset dateCreated, DateTimeOffset? lastModified ) :
+        base( key, value, id, dateCreated, lastModified ) { }
 
 
-    public static LoggerAttachmentMappingRecord Create( DbDataReader reader ) => null;
+    public static LoggerAttachmentMappingRecord Create( LogRecord key, LoggerAttachmentRecord value ) => new(key, value);
+    public static LoggerAttachmentMappingRecord Create( DbDataReader reader )
+    {
+        var key          = new RecordID<LogRecord>( reader.GetFieldValue<Guid>( nameof(KeyID) ) );
+        var value        = new RecordID<LoggerAttachmentRecord>( reader.GetFieldValue<Guid>( nameof(ValueID) ) );
+        var dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
+        var lastModified = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
+        var id           = new RecordID<LoggerAttachmentMappingRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) );
+        return new LoggerAttachmentMappingRecord( key, value, id, dateCreated, lastModified );
+    }
     public static async IAsyncEnumerable<LoggerAttachmentMappingRecord> CreateAsync( DbDataReader reader, [ EnumeratorCancellation ] CancellationToken token = default )
     {
         while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
@@ -173,28 +173,20 @@ public sealed record LoggerScopeAttachmentMappingRecord : Mapping<LoggerScopeAtt
                                                           ICreateMapping<LoggerScopeAttachmentMappingRecord, LoggerAttachmentRecord, ScopeRecord>,
                                                           IDbReaderMapping<LoggerScopeAttachmentMappingRecord>
 {
-    public LoggerScopeAttachmentMappingRecord( LoggerAttachmentRecord key, ScopeRecord value, UserRecord? caller = default ) : base( key, value, caller ) { }
-    private LoggerScopeAttachmentMappingRecord( RecordID<LoggerAttachmentRecord>             key,
-                                                RecordID<ScopeRecord>                        value,
-                                                RecordID<LoggerScopeAttachmentMappingRecord> id,
-                                                RecordID<UserRecord>                         createdBy,
-                                                Guid                                         ownerUserID,
-                                                DateTimeOffset                               dateCreated,
-                                                DateTimeOffset?                              lastModified
-    ) : base( key, value, id, createdBy, ownerUserID, dateCreated, lastModified ) { }
+    public LoggerScopeAttachmentMappingRecord( LoggerAttachmentRecord key, ScopeRecord value ) : base( key, value ) { }
+    private LoggerScopeAttachmentMappingRecord( RecordID<LoggerAttachmentRecord> key, RecordID<ScopeRecord> value, RecordID<LoggerScopeAttachmentMappingRecord> id, DateTimeOffset dateCreated, DateTimeOffset? lastModified ) :
+        base( key, value, id, dateCreated, lastModified ) { }
 
 
-    public static LoggerScopeAttachmentMappingRecord Create( LoggerAttachmentRecord key, ScopeRecord value, UserRecord? caller = default ) => new(key, value, caller);
+    public static LoggerScopeAttachmentMappingRecord Create( LoggerAttachmentRecord key, ScopeRecord value ) => new(key, value);
     public static LoggerScopeAttachmentMappingRecord Create( DbDataReader reader )
     {
-        var key          = new RecordID<LoggerAttachmentRecord>( reader.GetFieldValue<Guid>( nameof(CreatedBy) ) );
-        var value        = new RecordID<ScopeRecord>( reader.GetFieldValue<Guid>( nameof(CreatedBy) ) );
+        var key          = new RecordID<LoggerAttachmentRecord>( reader.GetFieldValue<Guid>( nameof(KeyID) ) );
+        var value        = new RecordID<ScopeRecord>( reader.GetFieldValue<Guid>( nameof(ValueID) ) );
         var dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
         var lastModified = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
-        var ownerUserID  = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
-        var createdBy    = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(CreatedBy) ) );
         var id           = new RecordID<LoggerScopeAttachmentMappingRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) );
-        return new LoggerScopeAttachmentMappingRecord( key, value, id, createdBy, ownerUserID, dateCreated, lastModified );
+        return new LoggerScopeAttachmentMappingRecord( key, value, id, dateCreated, lastModified );
     }
     public static async IAsyncEnumerable<LoggerScopeAttachmentMappingRecord> CreateAsync( DbDataReader reader, [ EnumeratorCancellation ] CancellationToken token = default )
     {

@@ -15,11 +15,11 @@ using Microsoft.Identity.Web;
 namespace Jakar.Database;
 
 
-[SuppressMessage( "ReSharper", "UnusedMethodReturnValue.Global" )]
+[ SuppressMessage( "ReSharper", "UnusedMethodReturnValue.Global" ) ]
 public static partial class DbExtensions
 {
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsValid<TRecord>( this    RecordID<TRecord>? value ) where TRecord : TableRecord<TRecord> => value.HasValue && value.Value.IsValid();
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsNotValid<TRecord>( this RecordID<TRecord>? value ) where TRecord : TableRecord<TRecord> => value is null || !value.Value.IsValid();
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static bool IsValid<TRecord>( this    RecordID<TRecord>? value ) where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord> => value.HasValue && value.Value.IsValid();
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static bool IsNotValid<TRecord>( this RecordID<TRecord>? value ) where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord> => value is null || !value.Value.IsValid();
 
 
     public static IHealthChecksBuilder AddHealthCheck<T>( this WebApplicationBuilder builder ) where T : IHealthCheck => builder.AddHealthCheck( HealthCheckExtensions.CreateHealthCheck<T>() );
@@ -164,4 +164,4 @@ public static partial class DbExtensions
 
 
 
-public sealed class RequireMfa : IAuthorizationRequirement { }
+public sealed class RequireMfa : IAuthorizationRequirement;

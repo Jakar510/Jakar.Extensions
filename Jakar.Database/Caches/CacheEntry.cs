@@ -4,20 +4,20 @@
 namespace Jakar.Database.Caches;
 
 
-public sealed class CacheEntry<TRecord> : ObservableClass, IRecordPair, IEquatable<TRecord>, IComparable<TRecord>, IEquatable<CacheEntry<TRecord>>, IComparable<CacheEntry<TRecord>>, IComparable where TRecord : TableRecord<TRecord>
+public sealed class CacheEntry<TRecord> : ObservableClass, IRecordPair, IEquatable<TRecord>, IComparable<TRecord>, IEquatable<CacheEntry<TRecord>>, IComparable<CacheEntry<TRecord>>, IComparable
+    where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>
 
 {
     private DateTimeOffset _lastTime;
     private int            _hash;
     private TRecord?       _value;
-    public  Guid?          CreatedBy   => _value?.CreatedBy?.Value;
-    public  DateTimeOffset DateCreated => _value?.DateCreated ?? default;
 
 
+    public DateTimeOffset    DateCreated  => _value?.DateCreated ?? default;
     public bool              HasChanged   => Value.GetHashCode() != _hash;
     public RecordID<TRecord> ID           { get; init; }
     public DateTimeOffset?   LastModified => _value?.LastModified;
-    Guid IUniqueID<Guid>.ID => ID.Value;
+    Guid IUniqueID<Guid>.    ID           => ID.Value;
 
 
     public TRecord Value
@@ -73,9 +73,9 @@ public sealed class CacheEntry<TRecord> : ObservableClass, IRecordPair, IEquatab
 
         return Value.Equals( other.Value );
     }
-    public bool Equals( TRecord?         other ) => Value.Equals( other );
-    public override bool Equals( object? obj ) => ReferenceEquals( this, obj ) || obj is CacheEntry<TRecord> other && Equals( other );
-    public override int GetHashCode() => Value.GetHashCode();
+    public          bool Equals( TRecord? other ) => Value.Equals( other );
+    public override bool Equals( object?  obj )   => ReferenceEquals( this, obj ) || obj is CacheEntry<TRecord> other && Equals( other );
+    public override int  GetHashCode()            => Value.GetHashCode();
 
 
     public static bool operator ==( CacheEntry<TRecord>? left, CacheEntry<TRecord>? right ) => Equalizer<CacheEntry<TRecord>>.Default.Equals( left, right );

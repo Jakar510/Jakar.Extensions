@@ -26,6 +26,7 @@ public abstract partial class Database : Randoms, IConnectableDb, IAsyncDisposab
     public             DbTable<UserRecoveryCodeRecord> UserRecoveryCodes { get; }
     public             DbTable<UserRoleRecord>         UserRoles         { get; }
     public             DbTable<UserRecord>             Users             { get; }
+    public             DbTable<AddressRecord>          Addresses         { get; }
     public             AppVersion                      Version           => Options.Version;
 
 
@@ -63,6 +64,7 @@ public abstract partial class Database : Randoms, IConnectableDb, IAsyncDisposab
         RecoveryCodes     = Create<RecoveryCodeRecord>();
         UserLogins        = Create<UserLoginInfoRecord>();
         UserRecoveryCodes = Create<UserRecoveryCodeRecord>();
+        Addresses         = Create<AddressRecord>();
     }
 
 
