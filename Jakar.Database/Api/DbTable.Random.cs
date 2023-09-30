@@ -4,7 +4,7 @@
 namespace Jakar.Database;
 
 
-[SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
+[ SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" ) ]
 public partial class DbTable<TRecord>
 {
     private string? _randomMsSql;
@@ -15,12 +15,13 @@ public partial class DbTable<TRecord>
     private string? _randomUserCountPostgres;
 
 
-    public ValueTask<TRecord?> Random( CancellationToken token                                                   = default ) => this.Call( Random, token );
-    public ValueTask<IEnumerable<TRecord>> Random( int   count, CancellationToken token                          = default ) => this.Call( Random, count, token );
-    public ValueTask<TRecord?> Random( UserRecord        user,  int               count, CancellationToken token = default ) => this.Call( Random, user,  count, token );
+    public ValueTask<TRecord?>       Random( CancellationToken token                                                     = default ) => this.Call( Random, token );
+    public IAsyncEnumerable<TRecord> Random( int               count, [ EnumeratorCancellation ] CancellationToken token = default ) => this.Call( Random, count, token );
+
+    public IAsyncEnumerable<TRecord> Random( UserRecord user, int count, [ EnumeratorCancellation ] CancellationToken token = default ) => this.Call( Random, user, count, token );
 
 
-    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
+    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public virtual async ValueTask<TRecord?> Random( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
         string sql = Instance switch
@@ -39,8 +40,8 @@ public partial class DbTable<TRecord>
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
-    public virtual async ValueTask<TRecord?> Random( DbConnection connection, DbTransaction? transaction, UserRecord user, int count, CancellationToken token = default )
+    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
+    public virtual async IAsyncEnumerable<TRecord> Random( DbConnection connection, DbTransaction? transaction, UserRecord user, int count, [ EnumeratorCancellation ] CancellationToken token = default )
     {
         var parameters = new DynamicParameters();
         parameters.Add( OwnerUserID, user.OwnerUserID );
@@ -52,17 +53,12 @@ public partial class DbTable<TRecord>
                          _                   => throw new OutOfRangeException( nameof(Instance), Instance ),
                      };
 
-        try
-        {
-            CommandDefinition command = GetCommandDefinition( sql, parameters, transaction, token );
-            return await connection.QueryFirstAsync<TRecord>( command );
-        }
-        catch ( Exception e ) { throw new SqlException( sql, e ); }
+        await foreach ( var record in Where( connection, transaction, sql, parameters, token ) ) { yield return record; }
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
-    public virtual ValueTask<IEnumerable<TRecord>> Random( DbConnection connection, DbTransaction? transaction, int count, CancellationToken token = default )
+    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
+    public virtual IAsyncEnumerable<TRecord> Random( DbConnection connection, DbTransaction? transaction, int count, [ EnumeratorCancellation ] CancellationToken token = default )
     {
         string sql = Instance switch
                      {

@@ -16,6 +16,8 @@ public sealed record UserLoginInfoRecord( [ property: MaxLength(                
                                           DateTimeOffset?                                                        LastModified = default
 ) : OwnedTableRecord<UserLoginInfoRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<UserLoginInfoRecord>
 {
+    public static string TableName { get; } = typeof(UserLoginInfoRecord).GetTableName();
+
     public UserLoginInfoRecord( UserRecord user, UserLoginInfo info ) : this( user, info.LoginProvider, info.ProviderKey, info.ProviderDisplayName ) { }
     public UserLoginInfoRecord( UserRecord user, string loginProvider, string providerKey, string? providerDisplayName ) : this( loginProvider,
                                                                                                                                  providerDisplayName,

@@ -15,6 +15,9 @@ public sealed record RecoveryCodeRecord
 {
     private static readonly PasswordHasher<RecoveryCodeRecord> _hasher = new();
 
+    public static string TableName { get; } = typeof(RecoveryCodeRecord).GetTableName();
+
+
     public RecoveryCodeRecord( string code, UserRecord user ) : this( code, RecordID<RecoveryCodeRecord>.New(), user.ID, user.UserID, DateTimeOffset.UtcNow ) { }
 
 
@@ -39,6 +42,18 @@ public sealed record RecoveryCodeRecord
         var codes = new Dictionary<string, RecoveryCodeRecord>( StringComparer.Ordinal );
 
         foreach ( string recoveryCode in recoveryCodes )
+        {
+            (string code, RecoveryCodeRecord record) = Create( user, recoveryCode );
+            codes[code]                              = record;
+        }
+
+        return codes;
+    }
+    public static async ValueTask<IReadOnlyDictionary<string, RecoveryCodeRecord>> Create( UserRecord user, IAsyncEnumerable<string> recoveryCodes )
+    {
+        var codes = new Dictionary<string, RecoveryCodeRecord>( StringComparer.Ordinal );
+
+        await foreach ( string recoveryCode in recoveryCodes )
         {
             (string code, RecoveryCodeRecord record) = Create( user, recoveryCode );
             codes[code]                              = record;
@@ -88,6 +103,8 @@ public sealed record RecoveryCodeRecord
 [ Serializable, Table( "UserRecoveryCodes" ) ]
 public sealed record UserRecoveryCodeRecord : Mapping<UserRecoveryCodeRecord, UserRecord, RecoveryCodeRecord>, ICreateMapping<UserRecoveryCodeRecord, UserRecord, RecoveryCodeRecord>, IDbReaderMapping<UserRecoveryCodeRecord>
 {
+    public static string TableName { get; } = typeof(UserRecoveryCodeRecord).GetTableName();
+
     public UserRecoveryCodeRecord( UserRecord owner, RecoveryCodeRecord value ) : base( owner, value ) { }
     public UserRecoveryCodeRecord( RecordID<UserRecord> key, RecordID<RecoveryCodeRecord> value, RecordID<UserRecoveryCodeRecord> id, DateTimeOffset dateCreated, DateTimeOffset? lastModified = default ) :
         base( key, value, id, dateCreated, lastModified ) { }

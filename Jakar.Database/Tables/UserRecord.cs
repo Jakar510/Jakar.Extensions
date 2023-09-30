@@ -2,6 +2,10 @@
 // 08/29/2022  9:55 PM
 
 
+using Org.BouncyCastle.Tls;
+
+
+
 namespace Jakar.Database;
 
 
@@ -52,6 +56,10 @@ public sealed record UserRecord( Guid                                           
     private static readonly PasswordHasher<UserRecord>    _hasher         = new();
     private                 IDictionary<string, JToken?>? _additionalData = AdditionalData;
 
+
+    public static string TableName { get; } = typeof(UserRecord).GetTableName();
+
+
     [ ProtectedPersonalData, MaxLength( int.MaxValue ) ]
     public IDictionary<string, JToken?>? AdditionalData
     {
@@ -76,50 +84,50 @@ public sealed record UserRecord( Guid                                           
 
     public static UserRecord Create( DbDataReader reader )
     {
-        Guid   userID                 = reader.GetGuid( nameof(UserID) );
-        string userName               = reader.GetString( nameof(UserName) );
-        string firstName              = reader.GetString( nameof(FirstName) );
-        string lastName               = reader.GetString( nameof(LastName) );
-        string fullName               = reader.GetString( nameof(FullName) );
-        string rights                 = reader.GetString( nameof(Rights) );
-        string gender                 = reader.GetString( nameof(Gender) );
-        string company                = reader.GetString( nameof(Company) );
-        string description            = reader.GetString( nameof(Description) );
-        string department             = reader.GetString( nameof(Department) );
-        string title                  = reader.GetString( nameof(Title) );
-        string website                = reader.GetString( nameof(Website) );
-        var    preferredLanguage      = EnumSqlHandler<SupportedLanguage>.Instance.Parse( reader.GetValue( nameof(PreferredLanguage) ) );
-        string email                  = reader.GetString( nameof(Email) );
-        bool   isEmailConfirmed       = reader.GetBoolean( nameof(IsEmailConfirmed) );
-        string phoneNumber            = reader.GetString( nameof(PhoneNumber) );
-        string ext                    = reader.GetString( nameof(Ext) );
-        bool   isPhoneNumberConfirmed = reader.GetBoolean( nameof(IsPhoneNumberConfirmed) );
-        bool   isTwoFactorEnabled     = reader.GetBoolean( nameof(IsTwoFactorEnabled) );
-        var    lastBadAttempt         = reader.GetFieldValue<DateTimeOffset?>( nameof(LastBadAttempt) );
-        var    lastLogin              = reader.GetFieldValue<DateTimeOffset?>( nameof(LastLogin) );
-        int    badLogins              = reader.GetFieldValue<int>( nameof(BadLogins) );
-        bool   isLocked               = reader.GetBoolean( nameof(IsLocked) );
-        var    lockDate               = reader.GetFieldValue<DateTimeOffset?>( nameof(LockDate) );
-        var    lockoutEnd             = reader.GetFieldValue<DateTimeOffset?>( nameof(LockoutEnd) );
-        string passwordHash           = reader.GetString( nameof(PasswordHash) );
-        string refreshToken           = reader.GetString( nameof(RefreshToken) );
-        var    refreshTokenExpiryTime = reader.GetFieldValue<DateTimeOffset?>( nameof(RefreshTokenExpiryTime) );
-        var    sessionID              = reader.GetFieldValue<Guid?>( nameof(SessionID) );
-        bool   isActive               = reader.GetBoolean( nameof(IsActive) );
-        bool   isDisabled             = reader.GetBoolean( nameof(IsDisabled) );
-        string securityStamp          = reader.GetString( nameof(SecurityStamp) );
-        string authenticatorKey       = reader.GetString( nameof(AuthenticatorKey) );
-        string concurrencyStamp       = reader.GetString( nameof(AuthenticatorKey) );
-        var    escalateTo             = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(EscalateTo) ) );
+        Guid              userID                 = reader.GetGuid( nameof(UserID) );
+        string            userName               = reader.GetString( nameof(UserName) );
+        string            firstName              = reader.GetString( nameof(FirstName) );
+        string            lastName               = reader.GetString( nameof(LastName) );
+        string            fullName               = reader.GetString( nameof(FullName) );
+        string            rights                 = reader.GetString( nameof(Rights) );
+        string            gender                 = reader.GetString( nameof(Gender) );
+        string            company                = reader.GetString( nameof(Company) );
+        string            description            = reader.GetString( nameof(Description) );
+        string            department             = reader.GetString( nameof(Department) );
+        string            title                  = reader.GetString( nameof(Title) );
+        string            website                = reader.GetString( nameof(Website) );
+        SupportedLanguage preferredLanguage      = EnumSqlHandler<SupportedLanguage>.Instance.Parse( reader.GetValue( nameof(PreferredLanguage) ) );
+        string            email                  = reader.GetString( nameof(Email) );
+        bool              isEmailConfirmed       = reader.GetBoolean( nameof(IsEmailConfirmed) );
+        string            phoneNumber            = reader.GetString( nameof(PhoneNumber) );
+        string            ext                    = reader.GetString( nameof(Ext) );
+        bool              isPhoneNumberConfirmed = reader.GetBoolean( nameof(IsPhoneNumberConfirmed) );
+        bool              isTwoFactorEnabled     = reader.GetBoolean( nameof(IsTwoFactorEnabled) );
+        var               lastBadAttempt         = reader.GetFieldValue<DateTimeOffset?>( nameof(LastBadAttempt) );
+        var               lastLogin              = reader.GetFieldValue<DateTimeOffset?>( nameof(LastLogin) );
+        int               badLogins              = reader.GetFieldValue<int>( nameof(BadLogins) );
+        bool              isLocked               = reader.GetBoolean( nameof(IsLocked) );
+        var               lockDate               = reader.GetFieldValue<DateTimeOffset?>( nameof(LockDate) );
+        var               lockoutEnd             = reader.GetFieldValue<DateTimeOffset?>( nameof(LockoutEnd) );
+        string            passwordHash           = reader.GetString( nameof(PasswordHash) );
+        string            refreshToken           = reader.GetString( nameof(RefreshToken) );
+        var               refreshTokenExpiryTime = reader.GetFieldValue<DateTimeOffset?>( nameof(RefreshTokenExpiryTime) );
+        var               sessionID              = reader.GetFieldValue<Guid?>( nameof(SessionID) );
+        bool              isActive               = reader.GetBoolean( nameof(IsActive) );
+        bool              isDisabled             = reader.GetBoolean( nameof(IsDisabled) );
+        string            securityStamp          = reader.GetString( nameof(SecurityStamp) );
+        string            authenticatorKey       = reader.GetString( nameof(AuthenticatorKey) );
+        string            concurrencyStamp       = reader.GetString( nameof(AuthenticatorKey) );
+        var               escalateTo             = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(EscalateTo) ) );
 
         IDictionary<string, JToken?>? additionalData = reader.GetFieldValue<string?>( nameof(AdditionalData) )
                                                             ?.FromJson<Dictionary<string, JToken?>>();
 
-        var id           = RecordID<UserRecord>.ID( reader );
-        var createdBy    = RecordID<UserRecord>.CreatedBy( reader );
-        var ownerUserID  = reader.GetFieldValue<Guid?>( nameof(OwnerUserID) );
-        var dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
-        var lastModified = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
+        RecordID<UserRecord>  id           = RecordID<UserRecord>.ID( reader );
+        RecordID<UserRecord>? createdBy    = RecordID<UserRecord>.CreatedBy( reader );
+        var                   ownerUserID  = reader.GetFieldValue<Guid?>( nameof(OwnerUserID) );
+        var                   dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
+        var                   lastModified = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
 
 
         return new UserRecord( userID,
@@ -226,49 +234,47 @@ public sealed record UserRecord( Guid                                           
                                                                                                                            caller?.UserID,
                                                                                                                            DateTimeOffset.UtcNow);
     public static UserRecord Create( string userName, string password, UserRights rights, UserRecord? caller = default ) => Create( userName, password, rights.ToString(), caller );
-    public static UserRecord Create( string userName, string password, string rights, UserRecord? caller = default )
-    {
-        return new UserRecord( Guid.NewGuid(),
-                               userName,
-                               string.Empty,
-                               string.Empty,
-                               string.Empty,
-                               rights,
-                               string.Empty,
-                               string.Empty,
-                               string.Empty,
-                               string.Empty,
-                               string.Empty,
-                               string.Empty,
-                               SupportedLanguage.English,
-                               string.Empty,
-                               false,
-                               string.Empty,
-                               string.Empty,
-                               false,
-                               false,
-                               null,
-                               null,
-                               0,
-                               false,
-                               null,
-                               null,
-                               string.Empty,
-                               string.Empty,
-                               null,
-                               null,
-                               true,
-                               false,
-                               string.Empty,
-                               string.Empty,
-                               string.Empty,
-                               null,
-                               null,
-                               RecordID<UserRecord>.New(),
-                               caller?.ID,
-                               caller?.UserID,
-                               DateTimeOffset.UtcNow ).WithPassword( password );
-    }
+    public static UserRecord Create( string userName, string password, string rights, UserRecord? caller = default ) =>
+        new UserRecord( Guid.NewGuid(),
+                        userName,
+                        string.Empty,
+                        string.Empty,
+                        string.Empty,
+                        rights,
+                        string.Empty,
+                        string.Empty,
+                        string.Empty,
+                        string.Empty,
+                        string.Empty,
+                        string.Empty,
+                        SupportedLanguage.English,
+                        string.Empty,
+                        false,
+                        string.Empty,
+                        string.Empty,
+                        false,
+                        false,
+                        null,
+                        null,
+                        0,
+                        false,
+                        null,
+                        null,
+                        string.Empty,
+                        string.Empty,
+                        null,
+                        null,
+                        true,
+                        false,
+                        string.Empty,
+                        string.Empty,
+                        string.Empty,
+                        null,
+                        null,
+                        RecordID<UserRecord>.New(),
+                        caller?.ID,
+                        caller?.UserID,
+                        DateTimeOffset.UtcNow ).WithPassword( password );
 
 
     public static DynamicParameters GetDynamicParameters( IUserData data )
@@ -312,9 +318,7 @@ public sealed record UserRecord( Guid                                           
     [ RequiresPreviewFeatures ]
     public async ValueTask<bool> RedeemCode( DbConnection connection, DbTransaction transaction, Database db, string code, CancellationToken token )
     {
-        IEnumerable<UserRecoveryCodeRecord> mappings = await UserRecoveryCodeRecord.Where( connection, transaction, db.UserRecoveryCodes, this, token );
-
-        foreach ( UserRecoveryCodeRecord mapping in mappings )
+        await foreach ( UserRecoveryCodeRecord mapping in UserRecoveryCodeRecord.Where( connection, transaction, db.UserRecoveryCodes, this, token ) )
         {
             RecoveryCodeRecord? record = await mapping.Get( connection, transaction, db.RecoveryCodes, token );
 
@@ -335,7 +339,7 @@ public sealed record UserRecord( Guid                                           
     [ RequiresPreviewFeatures ]
     public async ValueTask<string[]> ReplaceCodes( DbConnection connection, DbTransaction transaction, Database db, int count = 10, CancellationToken token = default )
     {
-        IEnumerable<RecoveryCodeRecord>                 old        = await Codes( connection, transaction, db, token );
+        IAsyncEnumerable<RecoveryCodeRecord>            old        = Codes( connection, transaction, db, token );
         IReadOnlyDictionary<string, RecoveryCodeRecord> dictionary = RecoveryCodeRecord.Create( this, count );
         string[]                                        codes      = dictionary.Keys.GetArray();
 
@@ -350,7 +354,7 @@ public sealed record UserRecord( Guid                                           
     [ RequiresPreviewFeatures ]
     public async ValueTask<string[]> ReplaceCodes( DbConnection connection, DbTransaction transaction, Database db, IEnumerable<string> recoveryCodes, CancellationToken token = default )
     {
-        IEnumerable<RecoveryCodeRecord>                 old        = await Codes( connection, transaction, db, token );
+        IAsyncEnumerable<RecoveryCodeRecord>            old        = Codes( connection, transaction, db, token );
         IReadOnlyDictionary<string, RecoveryCodeRecord> dictionary = RecoveryCodeRecord.Create( this, recoveryCodes );
         string[]                                        codes      = dictionary.Keys.GetArray();
 
@@ -361,10 +365,10 @@ public sealed record UserRecord( Guid                                           
     }
 
 
-    [ RequiresPreviewFeatures ] public ValueTask<IEnumerable<RecoveryCodeRecord>> Codes( Database db, CancellationToken token ) => db.TryCall( Codes, db, token );
+    [ RequiresPreviewFeatures ] public IAsyncEnumerable<RecoveryCodeRecord> Codes( Database db, CancellationToken token ) => db.TryCall( Codes, db, token );
     [ RequiresPreviewFeatures ]
-    public async ValueTask<IEnumerable<RecoveryCodeRecord>> Codes( DbConnection connection, DbTransaction transaction, Database db, CancellationToken token ) =>
-        await UserRecoveryCodeRecord.Where( connection, transaction, db.UserRecoveryCodes, db.RecoveryCodes, this, token );
+    public IAsyncEnumerable<RecoveryCodeRecord> Codes( DbConnection connection, DbTransaction transaction, Database db, CancellationToken token ) =>
+        UserRecoveryCodeRecord.Where( connection, transaction, db.UserRecoveryCodes, db.RecoveryCodes, this, token );
 
 
     public UserRights GetRights() => new(this);
@@ -378,9 +382,13 @@ public sealed record UserRecord( Guid                                           
 
     public async ValueTask<UserRights> GetRights( DbConnection connection, DbTransaction transaction, Database db, int totalRightCount, CancellationToken token )
     {
-        GroupRecord[] groups = (await GetGroups( connection, transaction, db, token )).GetArray();
-        RoleRecord[]  roles  = (await GetRoles( connection, transaction, db, token )).GetArray();
-        var           rights = new List<UserRights.IRights>( 1 + groups.Length + roles.Length );
+        List<GroupRecord> groups = await GetGroups( connection, transaction, db, token )
+                                      .ToList( token );
+
+        List<RoleRecord> roles = await GetRoles( connection, transaction, db, token )
+                                    .ToList( token );
+
+        var rights = new List<UserRights.IRights>( 1 + groups.Count + roles.Count );
 
         rights.AddRange( groups );
         rights.AddRange( roles );
@@ -738,8 +746,8 @@ public sealed record UserRecord( Guid                                           
     [ RequiresPreviewFeatures ]
     public async ValueTask<bool> TryAdd( DbConnection connection, DbTransaction transaction, Database db, RoleRecord value, CancellationToken token ) =>
         await UserRoleRecord.TryAdd( connection, transaction, db.UserRoles, this, value, token );
-    public async ValueTask<IEnumerable<RoleRecord>> GetRoles( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token = default ) =>
-        await UserRoleRecord.Where( connection, transaction, db.UserRoles, db.Roles, this, token );
+    public IAsyncEnumerable<RoleRecord> GetRoles( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token = default ) =>
+        UserRoleRecord.Where( connection, transaction, db.UserRoles, db.Roles, this, token );
     public async ValueTask<bool> HasRole( DbConnection connection, DbTransaction transaction, Database db, RoleRecord value, CancellationToken token ) =>
         await UserRoleRecord.Exists( connection, transaction, db.UserRoles, this, value, token );
     public async ValueTask Remove( DbConnection connection, DbTransaction transaction, Database db, RoleRecord value, CancellationToken token ) =>
@@ -754,8 +762,8 @@ public sealed record UserRecord( Guid                                           
     [ RequiresPreviewFeatures ]
     public async ValueTask<bool> TryAdd( DbConnection connection, DbTransaction transaction, Database db, GroupRecord value, CancellationToken token ) =>
         await UserGroupRecord.TryAdd( connection, transaction, db.UserGroups, this, value, token );
-    public async ValueTask<IEnumerable<GroupRecord>> GetGroups( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token = default ) =>
-        await UserGroupRecord.Where( connection, transaction, db.UserGroups, db.Groups, this, token );
+    public IAsyncEnumerable<GroupRecord> GetGroups( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token = default ) =>
+        UserGroupRecord.Where( connection, transaction, db.UserGroups, db.Groups, this, token );
     public async ValueTask<bool> IsPartOfGroup( DbConnection connection, DbTransaction transaction, Database db, GroupRecord value, CancellationToken token ) =>
         await UserGroupRecord.Exists( connection, transaction, db.UserGroups, this, value, token );
     public async ValueTask Remove( DbConnection connection, DbTransaction transaction, Database db, GroupRecord value, CancellationToken token ) =>
@@ -769,16 +777,21 @@ public sealed record UserRecord( Guid                                           
 
     public async ValueTask<Claim[]> GetUserClaims( DbConnection connection, DbTransaction? transaction, Database db, ClaimType types, CancellationToken token )
     {
-        GroupRecord[] groups = Array.Empty<GroupRecord>();
-        RoleRecord[]  roles  = Array.Empty<RoleRecord>();
+        var groups = new List<string>();
+        var roles  = new List<string>();
+
+        if ( types.HasFlag( ClaimType.GroupSid ) )
+        {
+            await foreach ( GroupRecord record in GetGroups( connection, transaction, db, token ) ) { groups.Add( record.NameOfGroup ); }
+        }
+
+        if ( types.HasFlag( ClaimType.Role ) )
+        {
+            await foreach ( RoleRecord record in GetRoles( connection, transaction, db, token ) ) { roles.Add( record.Name ); }
+        }
 
 
-        if ( types.HasFlag( ClaimType.GroupSid ) ) { groups = (await GetGroups( connection, transaction, db, token )).GetArray(); }
-
-        if ( types.HasFlag( ClaimType.Role ) ) { roles = (await GetRoles( connection, transaction, db, token )).GetArray(); }
-
-
-        var claims = new List<Claim>( 16 + groups.Length + roles.Length );
+        var claims = new List<Claim>( 16 + groups.Count + roles.Count );
 
         if ( types.HasFlag( ClaimType.UserID ) ) { claims.Add( new Claim( ClaimTypes.Sid, UserID.ToString(), ClaimValueTypes.String ) ); }
 
@@ -815,9 +828,9 @@ public sealed record UserRecord( Guid                                           
 
         if ( types.HasFlag( ClaimType.WebSite ) ) { claims.Add( new Claim( ClaimTypes.Webpage, Website, ClaimValueTypes.String ) ); }
 
-        if ( types.HasFlag( ClaimType.GroupSid ) ) { claims.AddRange( from record in groups select new Claim( ClaimTypes.GroupSid, record.NameOfGroup, ClaimValueTypes.String ) ); }
+        if ( types.HasFlag( ClaimType.GroupSid ) ) { claims.AddRange( from nameOfGroup in groups select new Claim( ClaimTypes.GroupSid, nameOfGroup, ClaimValueTypes.String ) ); }
 
-        if ( types.HasFlag( ClaimType.Role ) ) { claims.AddRange( from record in roles select new Claim( ClaimTypes.Role, record.Name, ClaimValueTypes.String ) ); }
+        if ( types.HasFlag( ClaimType.Role ) ) { claims.AddRange( from role in roles select new Claim( ClaimTypes.Role, role, ClaimValueTypes.String ) ); }
 
         return claims.GetArray();
     }
@@ -887,7 +900,7 @@ public sealed record UserRecord( Guid                                           
 
         return await db.Users.Get( connection, transaction, true, parameters, token );
     }
-    public static async ValueTask<IEnumerable<UserRecord>> TryFromClaims( DbConnection connection, DbTransaction transaction, Database db, Claim claim, CancellationToken token )
+    public static async IAsyncEnumerable<UserRecord> TryFromClaims( DbConnection connection, DbTransaction transaction, Database db, Claim claim, [ EnumeratorCancellation ] CancellationToken token = default )
     {
         var parameters = new DynamicParameters();
 
@@ -926,8 +939,7 @@ public sealed record UserRecord( Guid                                           
                 break;
         }
 
-
-        return await db.Users.Where( connection, transaction, true, parameters, token );
+        await foreach ( UserRecord record in db.Users.Where( connection, transaction, true, parameters, token ) ) { yield return record; }
     }
 
     #endregion

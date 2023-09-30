@@ -13,6 +13,7 @@ public interface IRecordPair : IUniqueID<Guid> // where TID : IComparable<TID>, 
 
 public interface IDbReaderMapping<out TRecord> where TRecord : IDbReaderMapping<TRecord>
 {
+    public abstract static string                    TableName { get; }
     public abstract static TRecord                   Create( DbDataReader      reader );
     public abstract static IAsyncEnumerable<TRecord> CreateAsync( DbDataReader reader, [ EnumeratorCancellation ] CancellationToken token = default );
 }
@@ -21,10 +22,9 @@ public interface IDbReaderMapping<out TRecord> where TRecord : IDbReaderMapping<
 
 public interface ITableRecord<TRecord> : IRecordPair where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
-    public abstract static string            TableName    { get; }
-    public new             RecordID<TRecord> ID           { get; }
-    Guid IUniqueID<Guid>.                    ID           => ID.Value;
-    public DateTimeOffset?                   LastModified { get; }
+    public new RecordID<TRecord> ID           { get; }
+    Guid IUniqueID<Guid>.        ID           => ID.Value;
+    public DateTimeOffset?       LastModified { get; }
 }
 
 
@@ -41,9 +41,6 @@ public interface IOwnedTableRecord
 public abstract record TableRecord<TRecord>( [ property: Key ] RecordID<TRecord> ID, DateTimeOffset DateCreated, DateTimeOffset? LastModified ) : BaseRecord, ITableRecord<TRecord>, IComparable<TRecord>
     where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
-    public static string TableName { get; } = typeof(TRecord).GetTableName();
-
-
     protected TableRecord( RecordID<TRecord> id ) : this( id, DateTimeOffset.UtcNow, null ) { }
 
 

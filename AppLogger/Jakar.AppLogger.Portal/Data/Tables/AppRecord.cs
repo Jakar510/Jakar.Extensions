@@ -4,6 +4,9 @@
 [ Serializable, Table( "Apps" ) ]
 public sealed record AppRecord : OwnedLoggerTable<AppRecord>, IDbReaderMapping<AppRecord>
 {
+    public static string TableName { get; } = typeof(AppRecord).GetTableName();
+
+
     [ MaxLength( 1024 ) ]  public string AppName { get; init; } = string.Empty;
     [ MaxLength( 10240 ) ] public string Secret  { get; init; } = string.Empty;
 

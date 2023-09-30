@@ -11,6 +11,7 @@ namespace Jakar.Database;
 [ SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" ) ]
 public partial class DbTable<TRecord> : ObservableClass, IConnectableDb, IAsyncDisposable where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
+    protected const    char                           QUOTE = '"';
     protected readonly IConnectableDb                 _database;
     protected readonly TypePropertiesCache.Properties _propertiesCache;
 
@@ -21,7 +22,7 @@ public partial class DbTable<TRecord> : ObservableClass, IConnectableDb, IAsyncD
 
     public virtual string CreatedBy => Instance switch
                                        {
-                                           DbInstance.Postgres => $@"""{nameof(IOwnedTableRecord.CreatedBy)}""",
+                                           DbInstance.Postgres => $"{QUOTE}{nameof(IOwnedTableRecord.CreatedBy)}{QUOTE}",
                                            DbInstance.MsSql    => nameof(IOwnedTableRecord.CreatedBy),
                                            _                   => throw new OutOfRangeException( nameof(Instance), Instance ),
                                        };
@@ -57,7 +58,7 @@ public partial class DbTable<TRecord> : ObservableClass, IConnectableDb, IAsyncD
 
     public virtual string OwnerUserID => Instance switch
                                          {
-                                             DbInstance.Postgres => $@"""{nameof(IOwnedTableRecord.OwnerUserID)}""",
+                                             DbInstance.Postgres => $"{QUOTE}{nameof(IOwnedTableRecord.OwnerUserID)}{QUOTE}",
                                              DbInstance.MsSql    => nameof(IOwnedTableRecord.OwnerUserID),
                                              _                   => throw new OutOfRangeException( nameof(Instance), Instance ),
                                          };
@@ -82,9 +83,9 @@ public partial class DbTable<TRecord> : ObservableClass, IConnectableDb, IAsyncD
         [ MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization ) ]
         get => Instance switch
                {
-                   DbInstance.Postgres => $"\"{typeof(TRecord).GetTableName()}\"",
-                   DbInstance.MsSql    => typeof(TRecord).GetTableName(),
-                   _                   => typeof(TRecord).GetTableName(),
+                   DbInstance.Postgres => $"{QUOTE}{TRecord.TableName}{QUOTE}",
+                   DbInstance.MsSql    => TRecord.TableName,
+                   _                   => TRecord.TableName,
                };
     }
     public IEnumerable<string> VariableNames => Descriptors.Select( x => x.VariableName );
@@ -94,6 +95,8 @@ public partial class DbTable<TRecord> : ObservableClass, IConnectableDb, IAsyncD
     {
         _database        = database;
         _propertiesCache = TypePropertiesCache.Current[typeof(TRecord)];
+
+        if ( TRecord.TableName != typeof(TRecord).GetTableName() ) { throw new InvalidOperationException( $"{TRecord.TableName} != {typeof(TRecord).GetTableName()}" ); }
     }
 
 
@@ -109,7 +112,7 @@ public partial class DbTable<TRecord> : ObservableClass, IConnectableDb, IAsyncD
 
     public IAsyncEnumerable<TRecord> All( CancellationToken token = default ) => this.Call( All, token );
     [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
-    public virtual async IAsyncEnumerable<TRecord> All( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
+    public virtual async IAsyncEnumerable<TRecord> All( DbConnection connection, DbTransaction? transaction, [ EnumeratorCancellation ] CancellationToken token = default )
     {
         string sql = $"SELECT * FROM {SchemaTableName}";
 

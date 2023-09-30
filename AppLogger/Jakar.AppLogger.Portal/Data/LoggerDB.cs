@@ -100,7 +100,7 @@ END";
         AppRecord? app = await Apps.Get( connection, transaction, secret.AppID, token );
         if ( app is null || !app.IsActive ) { return new Error( Status.NotFound, "App not found" ); }
 
-        OneOf<DeviceRecord, Error> device = await AddOrUpdate_Device( connection, transaction, start.Device, caller, token );
+        OneOf<DeviceRecord, Error> device = await AddOrUpdate_Device( connection, transaction, app, start.Device, token );
         if ( device.IsT1 ) { return device.AsT1; }
 
         var session = new SessionRecord( start, app, device.AsT0 );
@@ -146,34 +146,34 @@ END";
         UserRecord? caller = await app.GetUserWhoCreated( connection, transaction, this, token );
         if ( caller is null ) { return new Error( Status.Unauthorized ); }
 
-        OneOf<DeviceRecord, Error> device = await AddOrUpdate_Device( connection, transaction, app, log.Device, caller, token );
+        OneOf<DeviceRecord, Error> device = await AddOrUpdate_Device( connection, transaction, app, log.Device, token );
         if ( device.IsT1 ) { return device.AsT1; }
 
         var record = new LogRecord( log, session );
         record = await Logs.Insert( connection, transaction, record, token );
 
-        IEnumerable<ScopeRecord> scopes = ScopeRecord.Create( log, app, device.AsT0, session );
-        await LogScopeRecord.TryAdd( connection, transaction, LogScopes, record, scopes, caller, token );
+        ImmutableArray<ScopeRecord> scopes = ScopeRecord.CreateArray( log, app, device.AsT0, session );
+        await LogScopeRecord.TryAdd( connection, transaction, LogScopes, Scopes, record, scopes, token );
 
-        IEnumerable<LoggerAttachmentRecord> attachments = LoggerAttachmentRecord.Create( log, app, device.AsT0, record, session );
-        await LoggerAttachmentMappingRecord.TryAdd( connection, transaction, LogAttachments, record, attachments, caller, token );
+        ImmutableArray<LoggerAttachmentRecord> attachments = LoggerAttachmentRecord.CreateArray( log, app, device.AsT0, record, session );
+        await LoggerAttachmentMappingRecord.TryAdd( connection, transaction, LogAttachments, Attachments, record, attachments, token );
 
         return record;
     }
-    public async ValueTask<OneOf<DeviceRecord, Error>> AddOrUpdate_Device( DbConnection connection, DbTransaction transaction, AppRecord app, DeviceDescriptor device, UserRecord caller, CancellationToken token )
+    public async ValueTask<OneOf<DeviceRecord, Error>> AddOrUpdate_Device( DbConnection connection, DbTransaction transaction, AppRecord app, DeviceDescriptor device, CancellationToken token )
     {
-        OneOf<DeviceRecord, Error> check = await AddOrUpdate_Device( connection, transaction, device, caller, token );
+        OneOf<DeviceRecord, Error> check = await AddOrUpdate_Device( connection, transaction, device, token );
         if ( check.IsT1 ) { return check.AsT1; }
 
         DeviceRecord record = check.AsT0;
         await AppDeviceRecord.TryAdd( connection, transaction, AppDevices, app, record, token );
         return record;
     }
-    public async ValueTask<OneOf<DeviceRecord, Error>> AddOrUpdate_Device( DbConnection connection, DbTransaction transaction, DeviceDescriptor device, UserRecord caller, CancellationToken token )
+    public async ValueTask<OneOf<DeviceRecord, Error>> AddOrUpdate_Device( DbConnection connection, DbTransaction transaction, DeviceDescriptor device, CancellationToken token )
     {
         DeviceRecord? record = default;
 
-        foreach ( DeviceRecord deviceRecord in await Devices.Where( connection, transaction, true, DeviceRecord.GetDynamicParameters( device ), token ) )
+        await foreach ( DeviceRecord deviceRecord in Devices.Where( connection, transaction, true, DeviceRecord.GetDynamicParameters( device ), token ) )
         {
             if ( record is null ) { record = deviceRecord; }
             else
@@ -198,13 +198,13 @@ END";
     }
 
 
-    public ValueTask<IEnumerable<LogRecord>> GetLogs( CancellationToken token = default )
+    public IAsyncEnumerable<LogRecord> GetLogs( CancellationToken token = default )
     {
         var parameters = new DynamicParameters();
         parameters.Add( nameof(LogRecord.IsActive), true );
         return Logs.Where( true, parameters, token );
     }
-    public ValueTask<IEnumerable<LogRecord>> GetLogs( AppRecord app, CancellationToken token = default )
+    public IAsyncEnumerable<LogRecord> GetLogs( AppRecord app, CancellationToken token = default )
     {
         var parameters = new DynamicParameters();
         parameters.Add( nameof(LogRecord.IsActive), true );

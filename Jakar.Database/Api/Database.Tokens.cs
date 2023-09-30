@@ -30,7 +30,7 @@ public abstract partial class Database
     }
 
 
-    public virtual ValueTask<SigningCredentials> GetSigningCredentials( CancellationToken               token ) => new(Configuration.GetSigningCredentials( Options ));
+    public virtual ValueTask<SigningCredentials>        GetSigningCredentials( CancellationToken        token ) => new(Configuration.GetSigningCredentials( Options ));
     public virtual ValueTask<TokenValidationParameters> GetTokenValidationParameters( CancellationToken token ) => new(Configuration.GetTokenValidationParameters( Options ));
 
 
@@ -105,8 +105,8 @@ public abstract partial class Database
     {
         if ( !user.IsValidID() || string.IsNullOrWhiteSpace( user.UserName ) ) { return false; }
 
-        IEnumerable<UserLoginInfoRecord> logins = await UserLogins.Where( true, UserLoginInfoRecord.GetDynamicParameters( user ) );
-        return logins.Any();
+        IAsyncEnumerable<UserLoginInfoRecord> logins = UserLogins.Where( true, UserLoginInfoRecord.GetDynamicParameters( user ) );
+        return await logins.Any();
     }
     public ValueTask<Tokens> GetToken( UserRecord user, ClaimType types = default, CancellationToken token = default ) => this.TryCall( GetToken, user, types, token );
     public virtual async ValueTask<Tokens> GetToken( DbConnection connection, DbTransaction transaction, UserRecord record, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default )

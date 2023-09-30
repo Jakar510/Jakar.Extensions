@@ -22,6 +22,9 @@ public sealed record AddressRecord( string                  Line1,
                                     DateTimeOffset?         LastModified = default
 ) : OwnedTableRecord<AddressRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IEquatable<IAddress>, IDbReaderMapping<AddressRecord>
 {
+    public static string TableName { get; } = typeof(AddressRecord).GetTableName();
+
+
     [ ProtectedPersonalData, MaxLength( 512 ) ]  public string Line1           { get; set; } = Line1;
     [ ProtectedPersonalData, MaxLength( 256 ) ]  public string Line2           { get; set; } = Line2;
     [ ProtectedPersonalData, MaxLength( 256 ) ]  public string City            { get; set; } = City;
@@ -109,7 +112,7 @@ public sealed record AddressRecord( string                  Line1,
 
         return await db.Addresses.Get( connection, transaction, true, parameters, token );
     }
-    public static async ValueTask<IEnumerable<AddressRecord>> TryFromClaims( DbConnection connection, DbTransaction transaction, Database db, Claim claim, CancellationToken token )
+    public static async IAsyncEnumerable<AddressRecord> TryFromClaims( DbConnection connection, DbTransaction transaction, Database db, Claim claim, [ EnumeratorCancellation ] CancellationToken token )
     {
         var parameters = new DynamicParameters();
 
@@ -136,8 +139,7 @@ public sealed record AddressRecord( string                  Line1,
                 break;
         }
 
-
-        return await db.Addresses.Where( connection, transaction, true, parameters, token );
+        await foreach ( AddressRecord record in db.Addresses.Where( connection, transaction, true, parameters, token ) ) { yield return record; }
     }
 
 

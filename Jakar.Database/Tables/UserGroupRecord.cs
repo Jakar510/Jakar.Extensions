@@ -7,6 +7,8 @@ namespace Jakar.Database;
 [ Serializable, Table( "UserGroups" ) ]
 public sealed record UserGroupRecord : Mapping<UserGroupRecord, UserRecord, GroupRecord>, ICreateMapping<UserGroupRecord, UserRecord, GroupRecord>, IDbReaderMapping<UserGroupRecord>
 {
+    public static string TableName { get; } = typeof(UserGroupRecord).GetTableName();
+
     public UserGroupRecord( UserRecord            owner, GroupRecord           value ) : base( owner, value ) { }
     private UserGroupRecord( RecordID<UserRecord> key,   RecordID<GroupRecord> value, RecordID<UserGroupRecord> id, DateTimeOffset dateCreated, DateTimeOffset? lastModified ) : base( key, value, id, dateCreated, lastModified ) { }
 

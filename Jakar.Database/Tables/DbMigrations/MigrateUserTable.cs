@@ -46,10 +46,6 @@ public abstract class MigrateUserTable : Migration<UserRecord>
              .AsString( 256 )
              .Nullable();
 
-        table.WithColumn( nameof(UserRecord.Address) )
-             .AsString( 4096 )
-             .NotNullable();
-
         table.WithColumn( nameof(UserRecord.Website) )
              .AsString( 4096 )
              .NotNullable();

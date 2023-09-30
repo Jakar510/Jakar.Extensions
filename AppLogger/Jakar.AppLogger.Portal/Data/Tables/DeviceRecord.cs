@@ -25,6 +25,9 @@ public sealed record DeviceRecord( int?                                         
                                    DateTimeOffset?                                               LastModified = default
 ) : LoggerTable<DeviceRecord>( ID, DateCreated, LastModified ), IDbReaderMapping<DeviceRecord>, IDevice
 {
+    public static string TableName { get; } = typeof(DeviceRecord).GetTableName();
+
+
     AppVersion IDevice.OsVersion => OsVersion;
 
     public DeviceRecord( IDevice device ) : this( device.AppBuild,
@@ -138,6 +141,9 @@ public sealed record DeviceRecord( int?                                         
 [ Serializable, Table( "Devices" ) ]
 public sealed record AppDeviceRecord : Mapping<AppDeviceRecord, AppRecord, DeviceRecord>, ICreateMapping<AppDeviceRecord, AppRecord, DeviceRecord>, IDbReaderMapping<AppDeviceRecord>
 {
+    public static string TableName { get; } = typeof(AppDeviceRecord).GetTableName();
+
+
     public AppDeviceRecord( AppRecord            key, DeviceRecord           value ) : base( key, value ) { }
     private AppDeviceRecord( RecordID<AppRecord> key, RecordID<DeviceRecord> value, RecordID<AppDeviceRecord> id, DateTimeOffset dateCreated, DateTimeOffset? lastModified ) : base( key, value, id, dateCreated, lastModified ) { }
 

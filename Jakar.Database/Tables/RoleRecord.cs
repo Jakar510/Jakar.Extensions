@@ -13,6 +13,8 @@ public sealed record RoleRecord( [ property: MaxLength( 1024 ) ]                
                                  DateTimeOffset?                                                                            LastModified = default
 ) : OwnedTableRecord<RoleRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<RoleRecord>, UserRights.IRights
 {
+    public static string TableName { get; } = typeof(RoleRecord).GetTableName();
+
     public RoleRecord( IdentityRole role, UserRecord?   caller                     = default ) : this( role.Name ?? string.Empty, role.NormalizedName ?? string.Empty, role.ConcurrencyStamp ?? string.Empty, caller ) { }
     public RoleRecord( IdentityRole role, in UserRights rights, UserRecord? caller = default ) : this( role.Name ?? string.Empty, role.NormalizedName ?? string.Empty, role.ConcurrencyStamp ?? string.Empty, rights, caller ) { }
     public RoleRecord( string       name, UserRecord?   caller                             = default ) : this( name, name, caller ) { }
@@ -46,7 +48,7 @@ public sealed record RoleRecord( [ property: MaxLength( 1024 ) ]                
         var dateCreated      = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
         var lastModified     = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
         var ownerUserID      = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
-        var createdBy = RecordID<UserRecord>.CreatedBy( reader );
+        var createdBy        = RecordID<UserRecord>.CreatedBy( reader );
         var id               = RecordID<RoleRecord>.ID( reader );
         return new RoleRecord( name, normalizedName, concurrencyStamp, rights, id, createdBy, ownerUserID, dateCreated, lastModified );
     }
@@ -82,6 +84,6 @@ public sealed record RoleRecord( [ property: MaxLength( 1024 ) ]                
         return base.CompareTo( other );
     }
 
-    public async ValueTask<IEnumerable<UserRecord>> GetUsers( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => await UserRoleRecord.Where( connection, transaction, db.UserRoles, db.Users, this, token );
-    public       UserRights                         GetRights() => new(this);
+    public IAsyncEnumerable<UserRecord> GetUsers( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => UserRoleRecord.Where( connection, transaction, db.UserRoles, db.Users, this, token );
+    public UserRights                   GetRights() => new(this);
 }

@@ -12,8 +12,8 @@ namespace Jakar.Database;
 [ SuppressMessage( "ReSharper", "UnusedParameter.Global" ), SuppressMessage( "ReSharper", "MemberCanBeMadeStatic.Global" ) ]
 public partial class Database
 {
-    public virtual ValueTask<string?> GetSecurityStampAsync( UserRecord user, CancellationToken token = default ) => new(user.SecurityStamp);
-    public ValueTask SetSecurityStampAsync( UserRecord                  user, string            stamp, CancellationToken token ) => this.TryCall( SetSecurityStampAsync, user, stamp, token );
+    public virtual ValueTask<string?> GetSecurityStampAsync( UserRecord user, CancellationToken token = default )                => new(user.SecurityStamp);
+    public         ValueTask          SetSecurityStampAsync( UserRecord user, string            stamp, CancellationToken token ) => this.TryCall( SetSecurityStampAsync, user, stamp, token );
     public async ValueTask SetSecurityStampAsync( DbConnection connection, DbTransaction transaction, UserRecord user, string stamp, CancellationToken token )
     {
         user = user with
@@ -28,13 +28,12 @@ public partial class Database
 
     #region User Auth Providers
 
-    public ValueTask<UserLoginInfo[]> GetLoginsAsync( UserRecord user, CancellationToken token ) => this.TryCall( GetLoginsAsync, user, token );
-    public virtual async ValueTask<UserLoginInfo[]> GetLoginsAsync( DbConnection connection, DbTransaction transaction, UserRecord user, CancellationToken token )
+    public IAsyncEnumerable<UserLoginInfo> GetLoginsAsync( UserRecord user, [ EnumeratorCancellation ] CancellationToken token ) => this.TryCall( GetLoginsAsync, user, token );
+    public virtual async IAsyncEnumerable<UserLoginInfo> GetLoginsAsync( DbConnection connection, DbTransaction transaction, UserRecord user, [ EnumeratorCancellation ] CancellationToken token )
     {
-        IEnumerable<UserLoginInfoRecord> records = await UserLogins.Where( connection, transaction, nameof(UserRecord.OwnerUserID), user.OwnerUserID, token );
+        IAsyncEnumerable<UserLoginInfoRecord> records = UserLogins.Where( connection, transaction, nameof(UserRecord.OwnerUserID), user.OwnerUserID, token );
 
-        return records.Select( x => x.ToUserLoginInfo() )
-                      .ToArray();
+        await foreach ( UserLoginInfoRecord record in records ) { yield return record.ToUserLoginInfo(); }
     }
 
 
@@ -72,13 +71,13 @@ public partial class Database
     public ValueTask RemoveLoginAsync( UserRecord user, string loginProvider, string providerKey, CancellationToken token ) => this.TryCall( RemoveLoginAsync, user, loginProvider, providerKey, token );
     public virtual async ValueTask RemoveLoginAsync( DbConnection connection, DbTransaction transaction, UserRecord user, string loginProvider, string providerKey, CancellationToken token )
     {
-        DynamicParameters                parameters = UserLoginInfoRecord.GetDynamicParameters( user, loginProvider, providerKey );
-        IEnumerable<UserLoginInfoRecord> records    = await UserLogins.Where( connection, transaction, true, parameters, token );
-        foreach ( UserLoginInfoRecord record in records ) { await UserLogins.Delete( connection, transaction, record, token ); }
+        DynamicParameters                     parameters = UserLoginInfoRecord.GetDynamicParameters( user, loginProvider, providerKey );
+        IAsyncEnumerable<UserLoginInfoRecord> records    = UserLogins.Where( connection, transaction, true, parameters, token );
+        await foreach ( UserLoginInfoRecord record in records ) { await UserLogins.Delete( connection, transaction, record, token ); }
     }
 
 
-    public ValueTask<string?> GetAuthenticatorKeyAsync( UserRecord           user,       CancellationToken token ) => this.TryCall( GetAuthenticatorKeyAsync, user, token );
+    public         ValueTask<string?> GetAuthenticatorKeyAsync( UserRecord   user,       CancellationToken token )                                                 => this.TryCall( GetAuthenticatorKeyAsync, user, token );
     public virtual ValueTask<string?> GetAuthenticatorKeyAsync( DbConnection connection, DbTransaction     transaction, UserRecord user, CancellationToken token ) => new(user.AuthenticatorKey);
 
 
@@ -94,8 +93,8 @@ public partial class Database
     }
 
 
-    public virtual ValueTask<bool> GetTwoFactorEnabledAsync( UserRecord user, CancellationToken token ) => new(user.IsTwoFactorEnabled);
-    public ValueTask SetTwoFactorEnabledAsync( UserRecord               user, bool              enabled, CancellationToken token ) => this.TryCall( SetTwoFactorEnabledAsync, user, enabled, token );
+    public virtual ValueTask<bool> GetTwoFactorEnabledAsync( UserRecord user, CancellationToken token )                            => new(user.IsTwoFactorEnabled);
+    public         ValueTask       SetTwoFactorEnabledAsync( UserRecord user, bool              enabled, CancellationToken token ) => this.TryCall( SetTwoFactorEnabledAsync, user, enabled, token );
     public virtual async ValueTask SetTwoFactorEnabledAsync( DbConnection connection, DbTransaction transaction, UserRecord user, bool enabled, CancellationToken token )
     {
         user = user with
@@ -112,7 +111,7 @@ public partial class Database
 
     // ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
     public Task<string?> GetPasswordHashAsync( UserRecord user, CancellationToken token ) => Task.FromResult( user?.PasswordHash );
-    public Task<bool> HasPasswordAsync( UserRecord        user, CancellationToken token ) => Task.FromResult( user.HasPassword() );
+    public Task<bool>    HasPasswordAsync( UserRecord     user, CancellationToken token ) => Task.FromResult( user.HasPassword() );
     public async Task SetPasswordHashAsync( UserRecord user, string? passwordHash, CancellationToken token )
     {
         // user = user.UpdatePassword(passwordHash);
@@ -130,7 +129,7 @@ public partial class Database
 
     public ValueTask<string?> GetEmailAsync( UserRecord           user, CancellationToken token = default ) => new(user.Email);
     public ValueTask<string?> GetNormalizedEmailAsync( UserRecord user, CancellationToken token = default ) => new(user.Email);
-    public ValueTask<bool> GetEmailConfirmedAsync( UserRecord     user, CancellationToken token = default ) => new(user.IsEmailConfirmed);
+    public ValueTask<bool>    GetEmailConfirmedAsync( UserRecord  user, CancellationToken token = default ) => new(user.IsEmailConfirmed);
 
 
     public ValueTask SetEmailAsync( UserRecord user, string? email, CancellationToken token ) => this.TryCall( SetEmailAsync, user, email, token );
@@ -169,9 +168,9 @@ public partial class Database
     }
 
 
-    public ValueTask<int> GetAccessFailedCountAsync( UserRecord          user, CancellationToken token = default ) => new(user.BadLogins);
-    public ValueTask<bool> GetLockoutEnabledAsync( UserRecord            user, CancellationToken token = default ) => new(user.IsLocked);
-    public ValueTask<DateTimeOffset?> GetLockoutEndDateAsync( UserRecord user, CancellationToken token = default ) => new(user.LockoutEnd);
+    public ValueTask<int>             GetAccessFailedCountAsync( UserRecord user, CancellationToken token = default ) => new(user.BadLogins);
+    public ValueTask<bool>            GetLockoutEnabledAsync( UserRecord    user, CancellationToken token = default ) => new(user.IsLocked);
+    public ValueTask<DateTimeOffset?> GetLockoutEndDateAsync( UserRecord    user, CancellationToken token = default ) => new(user.LockoutEnd);
 
     #endregion
 
@@ -179,8 +178,8 @@ public partial class Database
 
     #region User Phone Number
 
-    public virtual ValueTask<string?> GetPhoneNumberAsync( UserRecord       user, CancellationToken token = default ) => new(user.PhoneNumber);
-    public virtual ValueTask<bool> GetPhoneNumberConfirmedAsync( UserRecord user, CancellationToken token = default ) => new(user.IsPhoneNumberConfirmed);
+    public virtual ValueTask<string?> GetPhoneNumberAsync( UserRecord          user, CancellationToken token = default ) => new(user.PhoneNumber);
+    public virtual ValueTask<bool>    GetPhoneNumberConfirmedAsync( UserRecord user, CancellationToken token = default ) => new(user.IsPhoneNumberConfirmed);
 
 
     public ValueTask SetPhoneNumberAsync( UserRecord user, string? phoneNumber, CancellationToken token ) => this.TryCall( SetPhoneNumberAsync, user, phoneNumber, token );
@@ -268,7 +267,7 @@ public partial class Database
         await Users.Get( connection, transaction, nameof(UserRecord.UserName), normalizedUserName, token ) ?? await Users.Get( connection, transaction, nameof(UserRecord.FullName), normalizedUserName, token );
 
 
-    public ValueTask<UserRecord?> FindByEmailAsync( string             email,      CancellationToken token ) => this.TryCall( FindByEmailAsync, email, token );
+    public       ValueTask<UserRecord?> FindByEmailAsync( string       email,      CancellationToken token )                                              => this.TryCall( FindByEmailAsync, email, token );
     public async ValueTask<UserRecord?> FindByEmailAsync( DbConnection connection, DbTransaction     transaction, string email, CancellationToken token ) => await Users.Get( connection, transaction, nameof(UserRecord.Email), email, token );
 
     #endregion
@@ -369,7 +368,7 @@ public partial class Database
 
     #region Claims
 
-    public ValueTask AddClaimsAsync( UserRecord           user,       IEnumerable<Claim> claims,      CancellationToken token ) => this.TryCall( AddClaimsAsync, user, claims, token );
+    public         ValueTask AddClaimsAsync( UserRecord   user,       IEnumerable<Claim> claims,      CancellationToken token )                                                    => this.TryCall( AddClaimsAsync, user, claims, token );
     public virtual ValueTask AddClaimsAsync( DbConnection connection, DbTransaction      transaction, UserRecord        user, IEnumerable<Claim> claims, CancellationToken token ) => ValueTask.CompletedTask;
 
 
@@ -378,19 +377,18 @@ public partial class Database
         await user.GetUserClaims( connection, transaction, this, types, token );
 
 
-    public ValueTask<IList<UserRecord>> GetUsersForClaimAsync( Claim claim, CancellationToken token ) => this.TryCall( GetUsersForClaimAsync, claim, token );
-    public virtual async ValueTask<IList<UserRecord>> GetUsersForClaimAsync( DbConnection connection, DbTransaction transaction, Claim claim, CancellationToken token )
+    public IAsyncEnumerable<UserRecord> GetUsersForClaimAsync( Claim claim, [ EnumeratorCancellation ] CancellationToken token ) => this.TryCall( GetUsersForClaimAsync, claim, token );
+    public virtual async IAsyncEnumerable<UserRecord> GetUsersForClaimAsync( DbConnection connection, DbTransaction transaction, Claim claim, [ EnumeratorCancellation ] CancellationToken token )
     {
-        IEnumerable<UserRecord> users = await UserRecord.TryFromClaims( connection, transaction, this, claim, token );
-        return users.GetArray();
+        await foreach ( UserRecord record in UserRecord.TryFromClaims( connection, transaction, this, claim, token ) ) { yield return record; }
     }
 
 
-    public ValueTask RemoveClaimsAsync( UserRecord           user,       IEnumerable<Claim> claims,      CancellationToken token ) => this.TryCall( AddClaimsAsync, user, claims, token );
+    public         ValueTask RemoveClaimsAsync( UserRecord   user,       IEnumerable<Claim> claims,      CancellationToken token )                                                    => this.TryCall( AddClaimsAsync, user, claims, token );
     public virtual ValueTask RemoveClaimsAsync( DbConnection connection, DbTransaction      transaction, UserRecord        user, IEnumerable<Claim> claims, CancellationToken token ) => ValueTask.CompletedTask;
 
 
-    public ValueTask ReplaceClaimAsync( UserRecord           user,       Claim         claim,       Claim      newClaim, CancellationToken token ) => this.TryCall( ReplaceClaimAsync, user, claim, newClaim, token );
+    public         ValueTask ReplaceClaimAsync( UserRecord   user,       Claim         claim,       Claim      newClaim, CancellationToken token ) => this.TryCall( ReplaceClaimAsync, user, claim, newClaim, token );
     public virtual ValueTask ReplaceClaimAsync( DbConnection connection, DbTransaction transaction, UserRecord user,     Claim             claim, Claim newClaim, CancellationToken token ) => ValueTask.CompletedTask;
 
     #endregion

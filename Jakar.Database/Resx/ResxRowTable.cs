@@ -25,6 +25,9 @@ public sealed partial record ResxRowRecord( long                    KeyID,
                                             DateTimeOffset?         LastModified = default
 ) : TableRecord<ResxRowRecord>( ID, DateCreated, LastModified ), IDbReaderMapping<ResxRowRecord>
 {
+    public static string TableName { get; } = typeof(ResxRowRecord).GetTableName();
+
+
     public ResxRowRecord( string key, long keyID ) : this( key, keyID, string.Empty ) { }
     public ResxRowRecord( string key, long keyID, string neutral ) : this( key,
                                                                            keyID,

@@ -2,6 +2,10 @@
 // 09/21/2022  4:59 PM
 
 
+using System.Collections.Immutable;
+
+
+
 namespace Jakar.AppLogger.Portal.Data.Tables;
 
 
@@ -14,6 +18,9 @@ public sealed record ScopeRecord( RecordID<AppRecord>     AppID,
                                   DateTimeOffset?         LastModified = default
 ) : LoggerTable<ScopeRecord>( ID, DateCreated, LastModified ), IDbReaderMapping<ScopeRecord>
 {
+    public static string TableName { get; } = typeof(ScopeRecord).GetTableName();
+
+
     private ScopeRecord( Guid scopeID, AppRecord app, DeviceRecord device, SessionRecord session ) : this( app.ID, device.ID, session.ID, new RecordID<ScopeRecord>( scopeID ), DateTimeOffset.UtcNow ) { }
 
 
@@ -36,6 +43,7 @@ public sealed record ScopeRecord( RecordID<AppRecord>     AppID,
         // ReSharper disable once ForeachCanBeConvertedToQueryUsingAnotherGetEnumerator
         foreach ( Guid scopeID in log.ScopeIDs ) { yield return new ScopeRecord( scopeID, app, device, session ); }
     }
+    public static ImmutableArray<ScopeRecord> CreateArray( AppLog log, AppRecord app, DeviceRecord device, SessionRecord session ) => ImmutableArray.CreateRange( Create( log, app, device, session ) );
 
 
     public override int CompareTo( ScopeRecord? other ) => Nullable.Compare( AppID, other?.AppID );
@@ -46,6 +54,9 @@ public sealed record ScopeRecord( RecordID<AppRecord>     AppID,
 [ Serializable, Table( "LogScopes" ) ]
 public sealed record LogScopeRecord : Mapping<LogScopeRecord, LogRecord, ScopeRecord>, ICreateMapping<LogScopeRecord, LogRecord, ScopeRecord>, IDbReaderMapping<LogScopeRecord>
 {
+    public static string TableName { get; } = typeof(LogScopeRecord).GetTableName();
+
+
     public LogScopeRecord( LogRecord            key, ScopeRecord           value ) : base( key, value ) { }
     private LogScopeRecord( RecordID<LogRecord> key, RecordID<ScopeRecord> value, RecordID<LogScopeRecord> id, DateTimeOffset dateCreated, DateTimeOffset? lastModified ) : base( key, value, id, dateCreated, lastModified ) { }
 

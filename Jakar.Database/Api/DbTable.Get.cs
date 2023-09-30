@@ -4,7 +4,7 @@
 namespace Jakar.Database;
 
 
-[SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
+[ SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" ) ]
 public partial class DbTable<TRecord>
 {
     private readonly ConcurrentDictionary<int, string>    _existsMsSql    = new();
@@ -15,19 +15,19 @@ public partial class DbTable<TRecord>
     private          string?                              _count;
 
 
-    public ValueTask<long> Count( CancellationToken                    token = default ) => this.Call( Count, token );
-    public ValueTask<bool> Exists( bool                                matchAll,   DynamicParameters  parameters, CancellationToken token ) => this.TryCall( Exists, matchAll, parameters, token );
-    public ValueTask<Guid?> GetID( string                              sql,        DynamicParameters? parameters, CancellationToken token = default ) => this.Call( GetID, sql,        parameters, token );
-    public ValueTask<Guid?> GetID( string                              columnName, object             value,      CancellationToken token = default ) => this.Call( GetID, columnName, value,      token );
-    public ValueTask<IEnumerable<TRecord>> Get( IEnumerable<Guid>      ids,        CancellationToken  token                               = default ) => this.Call( Get, ids,        token );
-    public ValueTask<IEnumerable<TRecord>> Get( IAsyncEnumerable<Guid> ids,        CancellationToken  token                               = default ) => this.Call( Get, ids,        token );
-    public ValueTask<TRecord?> Get( bool                               matchAll,   DynamicParameters  parameters, CancellationToken token = default ) => this.Call( Get, matchAll,   parameters, token );
-    public ValueTask<TRecord?> Get( string                             columnName, object?            value,      CancellationToken token = default ) => this.Call( Get, columnName, value,      token );
-    public ValueTask<TRecord?> Get( Guid                               id,         CancellationToken  token = default ) => this.Call( Get, id, token );
-    public ValueTask<TRecord?> Get( Guid?                              id,         CancellationToken  token = default ) => this.Call( Get, id, token );
+    public ValueTask<long>           Count( CancellationToken    token = default )                                                              => this.Call( Count, token );
+    public ValueTask<bool>           Exists( bool                matchAll,   DynamicParameters  parameters, CancellationToken token )           => this.TryCall( Exists, matchAll, parameters, token );
+    public ValueTask<Guid?>          GetID( string               sql,        DynamicParameters? parameters, CancellationToken token = default ) => this.Call( GetID, sql,        parameters, token );
+    public ValueTask<Guid?>          GetID( string               columnName, object             value,      CancellationToken token = default ) => this.Call( GetID, columnName, value,      token );
+    public IAsyncEnumerable<TRecord> Get( IEnumerable<Guid>      ids,        CancellationToken  token                               = default ) => this.Call( Get, ids,        token );
+    public IAsyncEnumerable<TRecord> Get( IAsyncEnumerable<Guid> ids,        CancellationToken  token                               = default ) => this.Call( Get, ids,        token );
+    public ValueTask<TRecord?>       Get( bool                   matchAll,   DynamicParameters  parameters, CancellationToken token = default ) => this.Call( Get, matchAll,   parameters, token );
+    public ValueTask<TRecord?>       Get( string                 columnName, object?            value,      CancellationToken token = default ) => this.Call( Get, columnName, value,      token );
+    public ValueTask<TRecord?>       Get( Guid                   id,         CancellationToken  token = default ) => this.Call( Get, id, token );
+    public ValueTask<TRecord?>       Get( Guid?                  id,         CancellationToken  token = default ) => this.Call( Get, id, token );
 
 
-    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
+    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public virtual async ValueTask<long> Count( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
         _count ??= $"SELECT COUNT({ID_ColumnName}) FROM {SchemaTableName}";
@@ -36,7 +36,7 @@ public partial class DbTable<TRecord>
         catch ( Exception e ) { throw new SqlException( _count, e ); }
     }
 
-    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
+    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public virtual async ValueTask<bool> Exists( DbConnection connection, DbTransaction transaction, bool matchAll, DynamicParameters parameters, CancellationToken token )
     {
         int     hash = GetHash( parameters );
@@ -81,7 +81,7 @@ public partial class DbTable<TRecord>
         catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
     }
 
-    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
+    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public virtual async ValueTask<Guid?> GetID( DbConnection connection, DbTransaction? transaction, string columnName, object value, CancellationToken token = default )
     {
         if ( !_getID.TryGetValue( columnName, out string? sql ) ) { _getID[columnName] = sql = $"SELECT {ID_ColumnName} FROM {SchemaTableName} WHERE {columnName} = @{nameof(value)}"; }
@@ -106,7 +106,7 @@ public partial class DbTable<TRecord>
         await Get( connection, transaction, true, Database.GetParameters( value, default, columnName ), token );
 
 
-    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
+    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public virtual async ValueTask<TRecord?> Get( DbConnection connection, DbTransaction? transaction, bool matchAll, DynamicParameters parameters, CancellationToken token = default )
     {
         int hash = GetHash( parameters );
@@ -141,13 +141,15 @@ public partial class DbTable<TRecord>
     }
 
 
-    public virtual async ValueTask<IEnumerable<TRecord>> Get( DbConnection connection, DbTransaction? transaction, IAsyncEnumerable<Guid> ids, CancellationToken token = default )
+    public virtual async IAsyncEnumerable<TRecord> Get( DbConnection connection, DbTransaction? transaction, IAsyncEnumerable<Guid> ids, [ EnumeratorCancellation ] CancellationToken token = default )
     {
         HashSet<Guid> set = await ids.ToHashSet( token );
-        return await Get( connection, transaction, set, token );
+        await foreach ( TRecord record in Get( connection, transaction, set, token ) ) { yield return record; }
     }
-    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
-    public virtual ValueTask<IEnumerable<TRecord>> Get( DbConnection connection, DbTransaction? transaction, IEnumerable<Guid> ids, CancellationToken token = default )
+
+
+    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
+    public virtual IAsyncEnumerable<TRecord> Get( DbConnection connection, DbTransaction? transaction, IEnumerable<Guid> ids, [ EnumeratorCancellation ] CancellationToken token = default )
     {
         string sql = $"SELECT * FROM {SchemaTableName} WHERE {ID_ColumnName} in ( {string.Join( ',', ids.Select( x => $"'{x}'" ) )} )";
 

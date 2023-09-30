@@ -13,6 +13,9 @@ public sealed record GroupRecord( [ MaxLength( 256 ) ]                          
                                   DateTimeOffset?                                                                                LastModified = default
 ) : OwnedTableRecord<GroupRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<GroupRecord>, UserRights.IRights
 {
+    public static string TableName { get; } = typeof(GroupRecord).GetTableName();
+
+
     public GroupRecord( UserRecord owner, string nameOfGroup, string? customerID, UserRecord? caller = default ) : this( customerID,
                                                                                                                          nameOfGroup,
                                                                                                                          owner.ID,
@@ -50,7 +53,7 @@ public sealed record GroupRecord( [ MaxLength( 256 ) ]                          
     }
 
 
-    public async ValueTask<UserRecord?>             GetOwner( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => await db.Users.Get( connection, transaction, OwnerID, token );
-    public async ValueTask<IEnumerable<UserRecord>> GetUsers( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => await UserGroupRecord.Where( connection, transaction, db.UserGroups, db.Users, this, token );
-    public       UserRights                         GetRights() => new(this);
+    public async ValueTask<UserRecord?>       GetOwner( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => await db.Users.Get( connection, transaction, OwnerID, token );
+    public       IAsyncEnumerable<UserRecord> GetUsers( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => UserGroupRecord.Where( connection, transaction, db.UserGroups, db.Users, this, token );
+    public       UserRights                   GetRights() => new(this);
 }

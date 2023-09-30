@@ -12,6 +12,9 @@ namespace Jakar.AppLogger.Portal.Data.Tables;
 [ Serializable, Table( "Logs" ) ]
 public sealed record LogRecord : LoggerTable<LogRecord>, IDbReaderMapping<LogRecord>, IAppLog, ILogInfo, IAppStartTime
 {
+    public static string TableName { get; } = typeof(LogRecord).GetTableName();
+
+
     public                                             DateTimeOffset          TimeStamp        { get; init; }
     public                                             RecordID<AppRecord>     AppID            { get; init; }
     public                                             DateTimeOffset          AppStartTime     { get; init; }
@@ -85,9 +88,11 @@ public sealed record LogRecord : LoggerTable<LogRecord>, IDbReaderMapping<LogRec
 
     public async ValueTask<AppLog> ToLog( DbConnection connection, DbTransaction transaction, LoggerDB db, CancellationToken token = default )
     {
-        IEnumerable<LoggerAttachmentRecord> records = await db.Attachments.Where( connection, transaction, true, LoggerAttachmentRecord.GetDynamicParameters( this ), token );
-        DeviceRecord                        device  = await db.Devices.Get( connection, transaction, DeviceID, token ) ?? throw new RecordNotFoundException( DeviceID.ToString() );
-        ExceptionDetails?                   details = GetExceptionDetails();
+        List<LoggerAttachmentRecord> records = await db.Attachments.Where( connection, transaction, true, LoggerAttachmentRecord.GetDynamicParameters( this ), token )
+                                                       .ToList( token );
+
+        DeviceRecord      device  = await db.Devices.Get( connection, transaction, DeviceID, token ) ?? throw new RecordNotFoundException( DeviceID.ToString() );
+        ExceptionDetails? details = GetExceptionDetails();
 
         IEnumerable<Guid> scopeIDs = Array.Empty<Guid>();
 

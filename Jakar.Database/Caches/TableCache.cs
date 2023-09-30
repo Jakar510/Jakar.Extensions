@@ -62,28 +62,6 @@ public sealed class TableCache<TRecord> : IHostedService, IReadOnlyCollection<TR
     public bool Contains( TRecord record ) => _records.ContainsKey( record.ID.Value );
 
 
-    public async ValueTask AddOrUpdate( IAsyncEnumerable<TRecord?> records )
-    {
-        await foreach ( TRecord? record in records )
-        {
-            if ( record is null ) { continue; }
-
-            AddOrUpdate( record );
-        }
-    }
-    public async ValueTask AddOrUpdate( IAsyncEnumerable<TRecord?> records, CancellationToken token )
-    {
-        await foreach ( TRecord? record in records.WithCancellation( token ) )
-        {
-            if ( record is null ) { continue; }
-
-            AddOrUpdate( record );
-        }
-    }
-    public void AddOrUpdate( IEnumerable<TRecord> records )
-    {
-        foreach ( TRecord record in records ) { AddOrUpdate( record ); }
-    }
     public void AddOrUpdate( TRecord record )
     {
         if ( _keys.Any() ) { Reset(); }
@@ -151,7 +129,8 @@ public sealed class TableCache<TRecord> : IHostedService, IReadOnlyCollection<TR
     {
         if ( _records.IsEmpty )
         {
-            await AddOrUpdate( _table.All( connection, transaction, token ), token );
+            await foreach ( TRecord record in _table.All( connection, transaction, token ) ) { AddOrUpdate( record ); }
+
             return;
         }
 
@@ -159,8 +138,7 @@ public sealed class TableCache<TRecord> : IHostedService, IReadOnlyCollection<TR
         if ( HasChanged )
         {
             await _table.Update( connection, transaction, RecordsChanged, token );
-            IEnumerable<TRecord> changed = await _table.Get( connection, transaction, Changed, token );
-            AddOrUpdate( changed );
+            await foreach ( TRecord record in _table.Get( connection, transaction, Changed, token ) ) { AddOrUpdate( record ); }
         }
     }
     public async Task StartAsync( CancellationToken token )

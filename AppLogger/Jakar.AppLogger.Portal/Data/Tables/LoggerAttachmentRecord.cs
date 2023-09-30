@@ -1,6 +1,10 @@
 ﻿// Jakar.AppLogger :: Jakar.AppLogger.Portal
 // 10/04/2022  5:57 PM
 
+using System.Collections.Immutable;
+
+
+
 namespace Jakar.AppLogger.Portal.Data.Tables;
 
 
@@ -20,6 +24,9 @@ public sealed record LoggerAttachmentRecord( [ property: MaxLength( LoggerAttach
                                              DateTimeOffset?                                                      LastModified = default
 ) : LoggerTable<LoggerAttachmentRecord>( ID, DateCreated, LastModified ), IDbReaderMapping<LoggerAttachmentRecord>, ILoggerAttachment, ILogInfo
 {
+    public static string TableName { get; } = typeof(LoggerAttachmentRecord).GetTableName();
+
+
     Guid IStartSession.AppID     => AppID.Value;
     Guid IStartSession.DeviceID  => DeviceID.Value;
     Guid? ISessionID.  SessionID => SessionID?.Value;
@@ -94,12 +101,12 @@ public sealed record LoggerAttachmentRecord( [ property: MaxLength( LoggerAttach
     {
         while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
     }
-
     public static IEnumerable<LoggerAttachmentRecord> Create( AppLog log, AppRecord app, DeviceRecord device, LogRecord record, SessionRecord? session )
     {
         // ReSharper disable once ForeachCanBeConvertedToQueryUsingAnotherGetEnumerator
         foreach ( LoggerAttachment attachment in log.Attachments ) { yield return new LoggerAttachmentRecord( attachment, app, device, record, session ); }
     }
+    public static ImmutableArray<LoggerAttachmentRecord> CreateArray( AppLog log, AppRecord app, DeviceRecord device, LogRecord record, SessionRecord? session ) => ImmutableArray.CreateRange( Create( log, app, device, record, session ) );
 
 
     public static DynamicParameters GetDynamicParameters( LoggerAttachment attachment )
@@ -145,6 +152,9 @@ public sealed record LoggerAttachmentMappingRecord : Mapping<LoggerAttachmentMap
                                                      ICreateMapping<LoggerAttachmentMappingRecord, LogRecord, LoggerAttachmentRecord>,
                                                      IDbReaderMapping<LoggerAttachmentMappingRecord>
 {
+    public static string TableName { get; } = typeof(LoggerAttachmentRecord).GetTableName();
+
+
     public LoggerAttachmentMappingRecord( LogRecord key, LoggerAttachmentRecord value ) : base( key, value ) { }
     private LoggerAttachmentMappingRecord( RecordID<LogRecord> key, RecordID<LoggerAttachmentRecord> value, RecordID<LoggerAttachmentMappingRecord> id, DateTimeOffset dateCreated, DateTimeOffset? lastModified ) :
         base( key, value, id, dateCreated, lastModified ) { }
@@ -173,6 +183,9 @@ public sealed record LoggerScopeAttachmentMappingRecord : Mapping<LoggerScopeAtt
                                                           ICreateMapping<LoggerScopeAttachmentMappingRecord, LoggerAttachmentRecord, ScopeRecord>,
                                                           IDbReaderMapping<LoggerScopeAttachmentMappingRecord>
 {
+    public static string TableName { get; } = typeof(LoggerScopeAttachmentMappingRecord).GetTableName();
+
+
     public LoggerScopeAttachmentMappingRecord( LoggerAttachmentRecord key, ScopeRecord value ) : base( key, value ) { }
     private LoggerScopeAttachmentMappingRecord( RecordID<LoggerAttachmentRecord> key, RecordID<ScopeRecord> value, RecordID<LoggerScopeAttachmentMappingRecord> id, DateTimeOffset dateCreated, DateTimeOffset? lastModified ) :
         base( key, value, id, dateCreated, lastModified ) { }

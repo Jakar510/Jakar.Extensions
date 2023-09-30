@@ -89,24 +89,31 @@ public abstract record Mapping<TSelf, TKey, TValue>( RecordID<TKey> KeyID, Recor
         TSelf self   = await selfTable.Insert( connection, transaction, record, token );
         return self.IsValidID();
     }
-    public static async ValueTask<bool> TryAdd( DbConnection connection, DbTransaction transaction, DbTable<TSelf> selfTable, TKey key, TValue value, UserRecord? caller, CancellationToken token )
+    public static async ValueTask TryAdd( DbConnection connection, DbTransaction transaction, DbTable<TSelf> selfTable, DbTable<TValue> valueTable, TKey key, ImmutableArray<TValue> values, CancellationToken token )
     {
-        if ( await Exists( connection, transaction, selfTable, key, value, token ) ) { return false; }
+        // TODO: finish implementation
 
-        var   record = TSelf.Create( key, value );
-        TSelf self   = await selfTable.Insert( connection, transaction, record, token );
-        return self.IsValidID();
+        var    parameters = GetDynamicParameters( key );
+        string ids        = string.Join( ", ", values.Select( x => x.ID.Value ) );
+
+        string sql = @$"SELECT * FROM {valueTable.TableName} 
+INNER JOIN {selfTable.TableName} 
+WHERE {selfTable.TableName}.{nameof(ValueID)} IN ( {ids} ) AND {selfTable.TableName}.{nameof(KeyID)} = @{nameof(KeyID)}";
+
+
+        await foreach ( TValue value in valueTable.Where( connection, transaction, sql, parameters, token ) )
+        {
+            var self = TSelf.Create( key, value );
+            await selfTable.Insert( connection, transaction, self, token );
+        }
+
+        // foreach ( TSelf self in FilterExisting( records.GetArray(), key, values, caller ) ) { }
     }
-    public static async ValueTask TryAdd( DbConnection connection, DbTransaction transaction, DbTable<TSelf> selfTable, TKey key, IEnumerable<TValue> values, UserRecord? caller, CancellationToken token )
-    {
-        IEnumerable<TSelf> records = await Where( connection, transaction, selfTable, key, token );
-
-        foreach ( TSelf self in FilterExisting( records.GetArray(), key, values, caller ) ) { await selfTable.Insert( connection, transaction, self, token ); }
-    }
 
 
+    /*
     [ RequiresPreviewFeatures, MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization ) ]
-    private static IEnumerable<TSelf> FilterExisting( TSelf[] records, TKey key, IEnumerable<TValue> values, UserRecord? caller )
+    private static IEnumerable<TSelf> FilterExisting( TSelf[] records, TKey key, IEnumerable<TValue> values )
     {
         // ReSharper disable once LoopCanBeConvertedToQuery
         foreach ( TValue value in values )
@@ -117,8 +124,20 @@ public abstract record Mapping<TSelf, TKey, TValue>( RecordID<TKey> KeyID, Recor
         }
     }
 
+    [ RequiresPreviewFeatures, MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization ) ]
+    private static TSelf? FilterExisting( in ReadOnlyMemory<TSelf> records, TKey key, IEnumerable<TValue> values )
+    {
+        foreach ( TValue value in values )
+        {
+            if ( Exists( records, value ) ) { continue; }
+
+            return TSelf.Create( key, value );
+        }
+    }
+    */
+
     [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
-    private static bool Exists( ReadOnlySpan<TSelf> existing, TValue value )
+    private static bool Exists( ImmutableArray<TSelf> existing, TValue value )
     {
         // ReSharper disable once LoopCanBeConvertedToQuery
         foreach ( TSelf self in existing )
@@ -129,17 +148,29 @@ public abstract record Mapping<TSelf, TKey, TValue>( RecordID<TKey> KeyID, Recor
         return false;
     }
 
+    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
+    private static bool Exists( ImmutableArray<TValue> existing, TSelf self )
+    {
+        // ReSharper disable once LoopCanBeConvertedToQuery
+        foreach ( TValue value in existing )
+        {
+            if ( value.ID == self.ValueID ) { return true; }
+        }
+
+        return false;
+    }
+
 
     public static async ValueTask<bool> Exists( DbConnection connection, DbTransaction transaction, DbTable<TSelf> selfTable, TKey key, TValue value, CancellationToken token ) =>
         await selfTable.Exists( connection, transaction, true, GetDynamicParameters( key, value ), token );
 
 
-    public static async ValueTask<IEnumerable<TSelf>> Where( DbConnection connection, DbTransaction? transaction, DbTable<TSelf> selfTable, TKey key, CancellationToken token ) =>
-        await selfTable.Where( connection, transaction, true, GetDynamicParameters( key ), token );
-    public static async ValueTask<IEnumerable<TSelf>> Where( DbConnection connection, DbTransaction? transaction, DbTable<TSelf> selfTable, TValue value, CancellationToken token ) =>
-        await selfTable.Where( connection, transaction, true, GetDynamicParameters( value ), token );
+    public static IAsyncEnumerable<TSelf> Where( DbConnection connection, DbTransaction? transaction, DbTable<TSelf> selfTable, TKey key, CancellationToken token ) =>
+        selfTable.Where( connection, transaction, true, GetDynamicParameters( key ), token );
+    public static IAsyncEnumerable<TSelf> Where( DbConnection connection, DbTransaction? transaction, DbTable<TSelf> selfTable, TValue value, CancellationToken token ) =>
+        selfTable.Where( connection, transaction, true, GetDynamicParameters( value ), token );
     [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
-    public static async ValueTask<IEnumerable<TValue>> Where( DbConnection connection, DbTransaction? transaction, DbTable<TSelf> selfTable, DbTable<TValue> valueTable, TKey key, CancellationToken token )
+    public static IAsyncEnumerable<TValue> Where( DbConnection connection, DbTransaction? transaction, DbTable<TSelf> selfTable, DbTable<TValue> valueTable, TKey key, CancellationToken token )
     {
         string selfTableName  = selfTable.TableName;
         string valueTableName = valueTable.TableName;
@@ -149,10 +180,10 @@ INNER JOIN {selfTableName} ON {selfTableName}.{nameof(ValueID)} = {valueTableNam
 WHERE {selfTableName}.{nameof(KeyID)} = @{nameof(KeyID)}";
 
         token.ThrowIfCancellationRequested();
-        return await valueTable.Where( connection, transaction, sql, GetDynamicParameters( key ), token );
+        return valueTable.Where( connection, transaction, sql, GetDynamicParameters( key ), token );
     }
     [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
-    public static async ValueTask<IEnumerable<TKey>> Where( DbConnection connection, DbTransaction? transaction, DbTable<TSelf> selfTable, DbTable<TKey> keyTable, TValue value, CancellationToken token )
+    public static IAsyncEnumerable<TKey> Where( DbConnection connection, DbTransaction? transaction, DbTable<TSelf> selfTable, DbTable<TKey> keyTable, TValue value, CancellationToken token )
     {
         string selfTableName = selfTable.TableName;
         string keyTableName  = keyTable.TableName;
@@ -162,7 +193,7 @@ INNER JOIN {selfTableName} ON {selfTableName}.{nameof(KeyID)} = {keyTableName}.{
 WHERE {selfTableName}.{nameof(ValueID)} = @{nameof(ValueID)}";
 
         token.ThrowIfCancellationRequested();
-        return await keyTable.Where( connection, transaction, sql, GetDynamicParameters( value ), token );
+        return keyTable.Where( connection, transaction, sql, GetDynamicParameters( value ), token );
     }
 
 
@@ -180,16 +211,14 @@ WHERE {selfTableName}.{nameof(ValueID)} = @{nameof(ValueID)}";
 
     public static async ValueTask Delete( DbConnection connection, DbTransaction transaction, DbTable<TSelf> selfTable, TKey key, CancellationToken token )
     {
-        IEnumerable<TSelf> records = await Where( connection, transaction, selfTable, key, token );
-        foreach ( TSelf mapping in records ) { await selfTable.Delete( connection, transaction, mapping.ID, token ); }
+        await foreach ( TSelf record in Where( connection, transaction, selfTable, key, token ) ) { await selfTable.Delete( connection, transaction, record.ID, token ); }
     }
     [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public static async ValueTask Delete( DbConnection connection, DbTransaction transaction, DbTable<TSelf> selfTable, TKey key, IEnumerable<TValue> values, CancellationToken token )
     {
-        string sql = $"SELECT {nameof(ID)} FROM {selfTable.TableName} WHERE {nameof(ValueID)} IN ( {string.Join( ',', values.Select( x => x.ID ) )} ) AND {nameof(KeyID)} = @{nameof(key)}";
+        string sql = $"SELECT * FROM {selfTable.TableName} WHERE {nameof(ValueID)} IN ( {string.Join( ',', values.Select( x => x.ID ) )} ) AND {nameof(KeyID)} = @{nameof(KeyID)}";
 
-        IEnumerable<TSelf> records = await selfTable.Where( connection, transaction, sql, GetDynamicParameters( key ), token );
-        await selfTable.Delete( connection, transaction, records.Select( x => x.ID ), token );
+        await foreach ( TSelf record in selfTable.Where( connection, transaction, sql, GetDynamicParameters( key ), token ) ) { await selfTable.Delete( connection, transaction, record.ID, token ); }
     }
     public static async ValueTask Delete( DbConnection connection, DbTransaction transaction, DbTable<TSelf> selfTable, TKey key, TValue value, CancellationToken token ) =>
         await selfTable.Delete( connection, transaction, true, GetDynamicParameters( key, value ), token );

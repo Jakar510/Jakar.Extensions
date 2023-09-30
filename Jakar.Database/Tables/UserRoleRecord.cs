@@ -7,6 +7,9 @@ namespace Jakar.Database;
 [ Serializable, Table( "UserRoles" ) ]
 public sealed record UserRoleRecord : Mapping<UserRoleRecord, UserRecord, RoleRecord>, ICreateMapping<UserRoleRecord, UserRecord, RoleRecord>, IDbReaderMapping<UserRoleRecord>
 {
+    public static string TableName { get; } = typeof(UserRoleRecord).GetTableName();
+
+
     public UserRoleRecord( UserRecord            owner, RoleRecord           value ) : base( owner, value ) { }
     private UserRoleRecord( RecordID<UserRecord> key,   RecordID<RoleRecord> value, RecordID<UserRoleRecord> id, DateTimeOffset dateCreated, DateTimeOffset? lastModified ) : base( key, value, id, dateCreated, lastModified ) { }
 

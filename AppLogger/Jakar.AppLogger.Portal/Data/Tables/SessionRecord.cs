@@ -6,7 +6,7 @@ namespace Jakar.AppLogger.Portal.Data.Tables;
 
 
 [ Serializable, Table( "Sessions" ) ]
-public sealed partial record SessionRecord( DateTimeOffset          AppStartTime,
+public sealed record SessionRecord( DateTimeOffset          AppStartTime,
                                             RecordID<AppRecord>     AppID,
                                             RecordID<DeviceRecord>  DeviceID,
                                             RecordID<SessionRecord> ID,
@@ -14,6 +14,9 @@ public sealed partial record SessionRecord( DateTimeOffset          AppStartTime
                                             DateTimeOffset?         LastModified = default
 ) : LoggerTable<SessionRecord>( ID, DateCreated, LastModified ), IDbReaderMapping<SessionRecord>, IStartSession
 {
+    public static string TableName { get; } = typeof(SessionRecord).GetTableName();
+
+
     Guid IStartSession.AppID     => AppID.Value;
     Guid IStartSession.DeviceID  => DeviceID.Value;
     Guid? ISessionID.  SessionID => ID.Value;
