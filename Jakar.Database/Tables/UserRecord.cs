@@ -368,7 +368,7 @@ public sealed record UserRecord( Guid                                           
     [ RequiresPreviewFeatures ] public IAsyncEnumerable<RecoveryCodeRecord> Codes( Database db, CancellationToken token ) => db.TryCall( Codes, db, token );
     [ RequiresPreviewFeatures ]
     public IAsyncEnumerable<RecoveryCodeRecord> Codes( DbConnection connection, DbTransaction transaction, Database db, CancellationToken token ) =>
-        UserRecoveryCodeRecord.Where( connection, transaction, db.UserRecoveryCodes, db.RecoveryCodes, this, token );
+        UserRecoveryCodeRecord.Where( connection, transaction, db.RecoveryCodes, this, token );
 
 
     public UserRights GetRights() => new(this);
@@ -747,7 +747,7 @@ public sealed record UserRecord( Guid                                           
     public async ValueTask<bool> TryAdd( DbConnection connection, DbTransaction transaction, Database db, RoleRecord value, CancellationToken token ) =>
         await UserRoleRecord.TryAdd( connection, transaction, db.UserRoles, this, value, token );
     public IAsyncEnumerable<RoleRecord> GetRoles( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token = default ) =>
-        UserRoleRecord.Where( connection, transaction, db.UserRoles, db.Roles, this, token );
+        UserRoleRecord.Where( connection, transaction, db.Roles, this, token );
     public async ValueTask<bool> HasRole( DbConnection connection, DbTransaction transaction, Database db, RoleRecord value, CancellationToken token ) =>
         await UserRoleRecord.Exists( connection, transaction, db.UserRoles, this, value, token );
     public async ValueTask Remove( DbConnection connection, DbTransaction transaction, Database db, RoleRecord value, CancellationToken token ) =>
@@ -763,7 +763,7 @@ public sealed record UserRecord( Guid                                           
     public async ValueTask<bool> TryAdd( DbConnection connection, DbTransaction transaction, Database db, GroupRecord value, CancellationToken token ) =>
         await UserGroupRecord.TryAdd( connection, transaction, db.UserGroups, this, value, token );
     public IAsyncEnumerable<GroupRecord> GetGroups( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token = default ) =>
-        UserGroupRecord.Where( connection, transaction, db.UserGroups, db.Groups, this, token );
+        UserGroupRecord.Where( connection, transaction, db.Groups, this, token );
     public async ValueTask<bool> IsPartOfGroup( DbConnection connection, DbTransaction transaction, Database db, GroupRecord value, CancellationToken token ) =>
         await UserGroupRecord.Exists( connection, transaction, db.UserGroups, this, value, token );
     public async ValueTask Remove( DbConnection connection, DbTransaction transaction, Database db, GroupRecord value, CancellationToken token ) =>

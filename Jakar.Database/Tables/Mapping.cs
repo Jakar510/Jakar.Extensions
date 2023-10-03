@@ -89,16 +89,21 @@ public abstract record Mapping<TSelf, TKey, TValue>( RecordID<TKey> KeyID, Recor
         TSelf self   = await selfTable.Insert( connection, transaction, record, token );
         return self.IsValidID();
     }
-    public static async ValueTask TryAdd( DbConnection connection, DbTransaction transaction, Database db, DbTable<TSelf> selfTable, DbTable<TValue> valueTable, TKey key, ImmutableArray<TValue> values, CancellationToken token )
+    public static async ValueTask TryAdd( DbConnection connection, DbTransaction transaction, DbTable<TSelf> selfTable, DbTable<TValue> valueTable, TKey key, ImmutableArray<TValue> values, CancellationToken token )
     {
         // TODO: finish implementation
 
         var    parameters = GetDynamicParameters( key );
         string ids        = string.Join( ", ", values.Select( x => x.ID.Value ) );
 
-        string sql = @$"SELECT * FROM {valueTable.TableName} 
-INNER JOIN {selfTable.TableName} 
-WHERE {selfTable.TableName}.{nameof(ValueID)} IN ( {ids} ) AND {selfTable.TableName}.{nameof(KeyID)} = @{nameof(KeyID)}";
+        string sql = @$"
+SELECT * FROM {TValue.TableName}
+LEFT JOIN {TSelf.TableName}
+WHERE 
+    {TValue.TableName}.{nameof(ID)} != {TSelf.TableName}.{nameof(ValueID)} 
+    AND {TValue.TableName}.{nameof(ID)} IN ( {ids} )
+    AND {TSelf.TableName}.{nameof(ValueID)} NOT IN ( {ids} ) 
+    AND {TSelf.TableName}.{nameof(KeyID)} = @{nameof(KeyID)}";
 
 
         await foreach ( TValue value in valueTable.Where( connection, transaction, sql, parameters, token ) )
@@ -170,29 +175,22 @@ WHERE {selfTable.TableName}.{nameof(ValueID)} IN ( {ids} ) AND {selfTable.TableN
     public static IAsyncEnumerable<TSelf> Where( DbConnection connection, DbTransaction? transaction, DbTable<TSelf> selfTable, TValue value, CancellationToken token ) =>
         selfTable.Where( connection, transaction, true, GetDynamicParameters( value ), token );
     [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
-    public static IAsyncEnumerable<TValue> Where( DbConnection connection, DbTransaction? transaction, DbTable<TSelf> selfTable, DbTable<TValue> valueTable, TKey key, CancellationToken token )
+    public static IAsyncEnumerable<TValue> Where( DbConnection connection, DbTransaction? transaction, DbTable<TValue> valueTable, TKey key, CancellationToken token )
     {
-        string selfTableName  = selfTable.TableName;
-        string valueTableName = valueTable.TableName;
-
-        string sql = $@"SELECT * FROM {valueTableName}
-INNER JOIN {selfTableName} ON {selfTableName}.{nameof(ValueID)} = {valueTableName}.{nameof(ID)} 
-WHERE {selfTableName}.{nameof(KeyID)} = @{nameof(KeyID)}";
+        string sql = $@"SELECT * FROM {TValue.TableName}
+INNER JOIN {TSelf.TableName} ON {TSelf.TableName}.{nameof(ValueID)} = {TValue.TableName}.{nameof(ID)} 
+WHERE {TSelf.TableName}.{nameof(KeyID)} = @{nameof(KeyID)}";
 
         token.ThrowIfCancellationRequested();
         return valueTable.Where( connection, transaction, sql, GetDynamicParameters( key ), token );
     }
     [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
-    public static IAsyncEnumerable<TKey> Where( DbConnection connection, DbTransaction? transaction, DbTable<TSelf> selfTable, DbTable<TKey> keyTable, TValue value, CancellationToken token )
+    public static IAsyncEnumerable<TKey> Where( DbConnection connection, DbTransaction? transaction, DbTable<TKey> keyTable, TValue value, CancellationToken token )
     {
-        string selfTableName = selfTable.TableName;
-        string keyTableName  = keyTable.TableName;
+        string sql = $@"SELECT * FROM {TKey.TableName}
+INNER JOIN {TSelf.TableName} ON {TSelf.TableName}.{nameof(KeyID)} = {TKey.TableName}.{nameof(ID)} 
+WHERE {TSelf.TableName}.{nameof(ValueID)} = @{nameof(ValueID)}";
 
-        string sql = $@"SELECT * FROM {keyTableName}
-INNER JOIN {selfTableName} ON {selfTableName}.{nameof(KeyID)} = {keyTableName}.{nameof(ID)} 
-WHERE {selfTableName}.{nameof(ValueID)} = @{nameof(ValueID)}";
-
-        token.ThrowIfCancellationRequested();
         return keyTable.Where( connection, transaction, sql, GetDynamicParameters( value ), token );
     }
 
@@ -216,7 +214,7 @@ WHERE {selfTableName}.{nameof(ValueID)} = @{nameof(ValueID)}";
     [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public static async ValueTask Delete( DbConnection connection, DbTransaction transaction, DbTable<TSelf> selfTable, TKey key, IEnumerable<TValue> values, CancellationToken token )
     {
-        string sql = $"SELECT * FROM {selfTable.TableName} WHERE {nameof(ValueID)} IN ( {string.Join( ',', values.Select( x => x.ID ) )} ) AND {nameof(KeyID)} = @{nameof(KeyID)}";
+        string sql = $"SELECT * FROM {TSelf.TableName} WHERE {nameof(ValueID)} IN ( {string.Join( ',', values.Select( x => x.ID ) )} ) AND {nameof(KeyID)} = @{nameof(KeyID)}";
 
         await foreach ( TSelf record in selfTable.Where( connection, transaction, sql, GetDynamicParameters( key ), token ) ) { await selfTable.Delete( connection, transaction, record.ID, token ); }
     }
