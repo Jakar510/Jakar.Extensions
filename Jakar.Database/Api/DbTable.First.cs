@@ -20,7 +20,7 @@ public partial class DbTable<TRecord>
 
         try
         {
-            CommandDefinition command = GetCommandDefinition( _first, default, transaction, token );
+            CommandDefinition command = _database.GetCommandDefinition( _first, default, transaction, token );
             return await connection.QueryFirstAsync<TRecord>( command );
         }
         catch ( Exception e ) { throw new SqlException( _first, e ); }
@@ -31,7 +31,7 @@ public partial class DbTable<TRecord>
 
         try
         {
-            CommandDefinition command = GetCommandDefinition( _firstOrDefault, default, transaction, token );
+            CommandDefinition command = _database.GetCommandDefinition( _firstOrDefault, default, transaction, token );
             return await connection.QueryFirstOrDefaultAsync<TRecord>( command );
         }
         catch ( Exception e ) { throw new SqlException( _firstOrDefault, e ); }

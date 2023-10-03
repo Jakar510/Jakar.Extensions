@@ -50,7 +50,7 @@ public partial class DbTable<TRecord>
 
         try
         {
-            CommandDefinition   command = GetCommandDefinition( sql, parameters, transaction, token );
+            CommandDefinition   command = _database.GetCommandDefinition( sql, parameters, transaction, token );
             IEnumerable<string> results = await connection.QueryAsync<string>( command );
             return results.Any();
         }
@@ -75,7 +75,7 @@ public partial class DbTable<TRecord>
     {
         try
         {
-            CommandDefinition command = GetCommandDefinition( sql, parameters, transaction, token );
+            CommandDefinition command = _database.GetCommandDefinition( sql, parameters, transaction, token );
             return await connection.QuerySingleAsync<Guid?>( command );
         }
         catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
@@ -121,7 +121,7 @@ public partial class DbTable<TRecord>
 
         try
         {
-            CommandDefinition     command = GetCommandDefinition( sql, parameters, transaction, token );
+            CommandDefinition     command = _database.GetCommandDefinition( sql, parameters, transaction, token );
             IEnumerable<TRecord?> results = await connection.QueryAsync<TRecord>( command );
             IEnumerable<TRecord>  records = results.WhereNotNull();
             TRecord?              result  = default;

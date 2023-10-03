@@ -33,7 +33,7 @@ public partial class DbTable<TRecord>
 
         try
         {
-            CommandDefinition command = GetCommandDefinition( sql, default, transaction, token );
+            CommandDefinition command = _database.GetCommandDefinition( sql, default, transaction, token );
             return await connection.QueryFirstAsync<TRecord>( command );
         }
         catch ( Exception e ) { throw new SqlException( sql, e ); }

@@ -24,7 +24,7 @@ public partial class DbTable<TRecord>
 
         try
         {
-            CommandDefinition command = GetCommandDefinition( _single, parameters, transaction, token );
+            CommandDefinition command = _database.GetCommandDefinition( _single, parameters, transaction, token );
             return await connection.QuerySingleAsync<TRecord>( command );
         }
         catch ( Exception e ) { throw new SqlException( _single, parameters, e ); }
@@ -46,7 +46,7 @@ public partial class DbTable<TRecord>
 
         try
         {
-            CommandDefinition command = GetCommandDefinition( _single, parameters, transaction, token );
+            CommandDefinition command = _database.GetCommandDefinition( _single, parameters, transaction, token );
             return await connection.QuerySingleOrDefaultAsync<TRecord>( command );
         }
         catch ( Exception e ) { throw new SqlException( _single, parameters, e ); }
@@ -57,7 +57,7 @@ public partial class DbTable<TRecord>
     {
         try
         {
-            CommandDefinition command = GetCommandDefinition( sql, parameters, transaction, token );
+            CommandDefinition command = _database.GetCommandDefinition( sql, parameters, transaction, token );
             return await connection.QuerySingleOrDefaultAsync<TRecord>( command );
         }
         catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }

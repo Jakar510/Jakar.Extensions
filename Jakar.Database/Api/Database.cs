@@ -5,7 +5,7 @@ namespace Jakar.Database;
 
 
 [ SuppressMessage( "ReSharper", "SuggestBaseTypeForParameter" ) ]
-public abstract partial class Database : Randoms, IConnectableDb, IAsyncDisposable, IHealthCheck, IUserTwoFactorTokenProvider<UserRecord>
+public abstract partial class Database : Randoms, IConnectableDbRoot, IAsyncDisposable, IHealthCheck, IUserTwoFactorTokenProvider<UserRecord>
 {
     public const       ClaimType                       DEFAULT_CLAIM_TYPES = ClaimType.UserID | ClaimType.UserName | ClaimType.GroupSid | ClaimType.Role;
     protected readonly ConcurrentBag<IAsyncDisposable> _disposables        = new();
@@ -73,6 +73,10 @@ public abstract partial class Database : Randoms, IConnectableDb, IAsyncDisposab
         _disposables.Add( value );
         return value;
     }
+
+
+    public CommandDefinition GetCommandDefinition( string sql, DynamicParameters? parameters, DbTransaction? transaction, CancellationToken token, CommandType? commandType = default, CommandFlags flags = CommandFlags.None ) =>
+        new(sql, parameters, transaction, CommandTimeout, commandType, flags, token);
 
 
     protected virtual DbTable<TRecord> Create<TRecord>() where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>
@@ -166,5 +170,34 @@ public abstract partial class Database : Randoms, IConnectableDb, IAsyncDisposab
         var parameters = new DynamicParameters( template );
         parameters.Add( variableName, value );
         return parameters;
+    }
+
+
+    public virtual async IAsyncEnumerable<T> Where<T>( DbConnection connection, DbTransaction? transaction, string sql, DynamicParameters? parameters, [ EnumeratorCancellation ] CancellationToken token = default ) where T : IDbReaderMapping<T>
+    {
+        DbDataReader reader;
+
+        try
+        {
+            CommandDefinition command = GetCommandDefinition( sql, parameters, transaction, token );
+            reader = await connection.ExecuteReaderAsync( command );
+        }
+        catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
+
+        await foreach ( T record in T.CreateAsync( reader, token ) ) { yield return record; }
+    }
+    public virtual async IAsyncEnumerable<T> WhereValue<T>( DbConnection connection, DbTransaction? transaction, string sql, DynamicParameters? parameters, [ EnumeratorCancellation ] CancellationToken token = default ) where T : struct
+    {
+        DbDataReader reader;
+        try
+        {
+            CommandDefinition command = GetCommandDefinition( sql, parameters, transaction, token );
+            await connection.QueryAsync<T>( command );
+
+        reader = await connection.ExecuteReaderAsync( command );
+        }
+        catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
+
+        while ( await reader.ReadAsync( token ) ) { yield return reader.GetFieldValue<T>( 0 ); }
     }
 }

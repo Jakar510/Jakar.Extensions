@@ -12,7 +12,7 @@ namespace Jakar.Database;
 public partial class DbTable<TRecord> : ObservableClass, IConnectableDb, IAsyncDisposable where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
     protected const    char                           QUOTE = '"';
-    protected readonly IConnectableDb                 _database;
+    protected readonly IConnectableDbRoot             _database;
     protected readonly TypePropertiesCache.Properties _propertiesCache;
 
 
@@ -91,17 +91,13 @@ public partial class DbTable<TRecord> : ObservableClass, IConnectableDb, IAsyncD
     public IEnumerable<string> VariableNames => Descriptors.Select( x => x.VariableName );
 
 
-    public DbTable( IConnectableDb database )
+    public DbTable( IConnectableDbRoot database )
     {
         _database        = database;
         _propertiesCache = TypePropertiesCache.Current[typeof(TRecord)];
 
         if ( TRecord.TableName != typeof(TRecord).GetTableName() ) { throw new InvalidOperationException( $"{TRecord.TableName} != {typeof(TRecord).GetTableName()}" ); }
     }
-
-
-    protected virtual CommandDefinition GetCommandDefinition( string sql, DynamicParameters? parameters, DbTransaction? transaction, CancellationToken token, CommandType? commandType = default, CommandFlags flags = CommandFlags.None ) =>
-        new(sql, parameters, transaction, CommandTimeout, commandType, flags, token);
 
 
     [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public Descriptor GetDescriptor( string columnName ) => _propertiesCache.Get( this, columnName );
@@ -165,7 +161,7 @@ public partial class DbTable<TRecord> : ObservableClass, IConnectableDb, IAsyncD
     {
         try
         {
-            CommandDefinition        command = GetCommandDefinition( sql, parameters, transaction, token );
+            CommandDefinition        command = _database.GetCommandDefinition( sql, parameters, transaction, token );
             await using DbDataReader reader  = await connection.ExecuteReaderAsync( command );
             return await func( reader, token );
         }

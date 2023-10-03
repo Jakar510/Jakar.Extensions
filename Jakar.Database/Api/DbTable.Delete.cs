@@ -40,7 +40,7 @@ public partial class DbTable<TRecord>
 
         _delete ??= $"DELETE FROM {SchemaTableName} WHERE {ID_ColumnName} = @{nameof(id)};";
 
-        CommandDefinition command = GetCommandDefinition( _delete, parameters, transaction, token );
+        CommandDefinition command = _database.GetCommandDefinition( _delete, parameters, transaction, token );
         await connection.ExecuteScalarAsync( command );
     }
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
@@ -57,7 +57,7 @@ public partial class DbTable<TRecord>
 
         _delete ??= $"DELETE FROM {SchemaTableName} WHERE {ID_ColumnName} = @{nameof(id)};";
 
-        CommandDefinition command = GetCommandDefinition( _delete, parameters, transaction, token );
+        CommandDefinition command = _database.GetCommandDefinition( _delete, parameters, transaction, token );
         await connection.ExecuteScalarAsync( command );
     }
 
@@ -68,7 +68,7 @@ public partial class DbTable<TRecord>
 
         try
         {
-            CommandDefinition command = GetCommandDefinition( sql, default, transaction, token );
+            CommandDefinition command = _database.GetCommandDefinition( sql, default, transaction, token );
             await connection.ExecuteScalarAsync( command );
         }
         catch ( Exception e ) { throw new SqlException( sql, e ); }
@@ -82,7 +82,7 @@ public partial class DbTable<TRecord>
 
         sql ??= GetDeleteSql( matchAll, parameters );
 
-        CommandDefinition command = GetCommandDefinition( sql, parameters, transaction, token );
+        CommandDefinition command = _database.GetCommandDefinition( sql, parameters, transaction, token );
         await connection.ExecuteScalarAsync( command );
     }
 

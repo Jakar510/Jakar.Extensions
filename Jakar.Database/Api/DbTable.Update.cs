@@ -40,7 +40,7 @@ public partial class DbTable<TRecord>
 
         try
         {
-            CommandDefinition command = GetCommandDefinition( _update, parameters, transaction, token );
+            CommandDefinition command = _database.GetCommandDefinition( _update, parameters, transaction, token );
             await connection.ExecuteScalarAsync( command );
         }
         catch ( Exception e ) { throw new SqlException( _update, parameters, e ); }

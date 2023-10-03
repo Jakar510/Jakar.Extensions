@@ -52,7 +52,7 @@ public partial class DbTable<TRecord>
 
         try
         {
-            CommandDefinition command = GetCommandDefinition( sql, parameters, transaction, token );
+            CommandDefinition command = _database.GetCommandDefinition( sql, parameters, transaction, token );
             reader = await connection.ExecuteReaderAsync( command );
         }
         catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }

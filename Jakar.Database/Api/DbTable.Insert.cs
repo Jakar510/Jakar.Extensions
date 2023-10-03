@@ -43,7 +43,7 @@ public partial class DbTable<TRecord>
 
         try
         {
-            CommandDefinition command = GetCommandDefinition( _singleInsert, parameters, transaction, token );
+            CommandDefinition command = _database.GetCommandDefinition( _singleInsert, parameters, transaction, token );
             var               id      = await connection.ExecuteScalarAsync<Guid>( command );
             return record.NewID( id );
         }
@@ -85,7 +85,7 @@ END",
 
         try
         {
-            CommandDefinition command = GetCommandDefinition( sql, parameters, transaction, token );
+            CommandDefinition command = _database.GetCommandDefinition( sql, parameters, transaction, token );
             var               id      = await connection.ExecuteScalarAsync<Guid?>( command );
 
             return id.HasValue
@@ -147,7 +147,7 @@ END",
 
         try
         {
-            CommandDefinition command = GetCommandDefinition( sql, parameters, transaction, token );
+            CommandDefinition command = _database.GetCommandDefinition( sql, parameters, transaction, token );
             var               id      = await connection.ExecuteScalarAsync<Guid?>( command );
 
             return id.HasValue
