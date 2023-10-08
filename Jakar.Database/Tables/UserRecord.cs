@@ -371,7 +371,7 @@ public sealed record UserRecord( Guid                                           
         UserRecoveryCodeRecord.Where( connection, transaction, db.UserRecoveryCodes, db.RecoveryCodes, this, token );
 
 
-    public UserRights GetRights() => new(this);
+    public UserRights GetRights() => UserRights.Create( this );
     public async ValueTask<UserRights> GetRights<T>( DbConnection connection, DbTransaction transaction, Database db, CancellationToken token ) where T : struct, Enum
     {
         int totalRightCount = Enum.GetValues<T>()

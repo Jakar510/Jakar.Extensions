@@ -44,7 +44,6 @@ public struct UserRights : IEnumerator<(int Index, bool Value)>, IEnumerable<(in
         _rights = _owner.Memory;
         for ( int i = 0; i < Length; i++ ) { Span[i] = INVALID; }
     }
-    public UserRights( IRights rights ) : this( rights.Rights ) { }
     public UserRights( string rights )
     {
         // using IMemoryOwner<char> buffer = _pool.Rent( rights.Length );
@@ -62,9 +61,10 @@ public struct UserRights : IEnumerator<(int Index, bool Value)>, IEnumerable<(in
     }
 
 
+    public static UserRights Create<T>( T rights ) where T : IRights => new(rights.Rights);
     public readonly UserRights With<T>( T rights ) where T : IRights
     {
-        using var other = new UserRights( rights );
+        using var other = new UserRights( rights.Rights );
         Trace.Assert( Length == other.Length, $"{typeof(T).Name}.{nameof(IRights.Rights)} should be {Length} long" );
         int end = Math.Min( Length, other.Length );
 
@@ -77,7 +77,7 @@ public struct UserRights : IEnumerator<(int Index, bool Value)>, IEnumerable<(in
 
         return this;
     }
-    public static UserRights Merge( int                  totalRightCount, params IEnumerable<IRights>[] values ) => Merge( values.SelectMany( x => x ), totalRightCount );
+    public static UserRights Merge( int                  totalRightCount, params IEnumerable<IRights>[] values )          => Merge( values.SelectMany( x => x ), totalRightCount );
     public static UserRights Merge( IEnumerable<IRights> values,          int                           totalRightCount ) => values.Aggregate( new UserRights( totalRightCount ), ( current, value ) => current.With( value ) );
     public static UserRights Create( int                 length ) => new(length);
     public static UserRights Create<T>() where T : struct, Enum => new(Enum.GetValues<T>()
@@ -85,26 +85,26 @@ public struct UserRights : IEnumerator<(int Index, bool Value)>, IEnumerable<(in
 
 
     public bool MoveNext() => ++_index < Length;
-    public void Reset() => _index = -1;
+    public void Reset()    => _index = -1;
 
 
-    public readonly bool Has( int  index ) => Span[index] == VALID;
+    public readonly bool Has( int  index )                        => Span[index] == VALID;
     public readonly bool Has<T>( T index ) where T : struct, Enum => Has( index.AsInt() );
 
 
-    public readonly UserRights Remove( int  index ) => Set( index, INVALID );
+    public readonly UserRights Remove( int  index )                        => Set( index, INVALID );
     public readonly UserRights Remove<T>( T index ) where T : struct, Enum => Remove( index.AsInt() );
 
 
-    public readonly UserRights Add( int  index ) => Set( index, VALID );
+    public readonly UserRights Add( int  index )                        => Set( index, VALID );
     public readonly UserRights Add<T>( T index ) where T : struct, Enum => Add( index.AsInt() );
 
 
     public readonly UserRights Set( int index, char value )
     {
-        Debug.Assert( index >= 0 );
-        Debug.Assert( index < Length );
-        Debug.Assert( value is VALID or INVALID );
+        Trace.Assert( index >= 0 );
+        Trace.Assert( index < Length );
+        Trace.Assert( value is VALID or INVALID );
         Span[index] = value;
         return this;
     }
@@ -117,7 +117,7 @@ public struct UserRights : IEnumerator<(int Index, bool Value)>, IEnumerable<(in
         return result;
     }
     public readonly IEnumerator<(int Index, bool Value)> GetEnumerator() => this;
-    readonly IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+    readonly        IEnumerator IEnumerable.             GetEnumerator() => GetEnumerator();
 
 
 

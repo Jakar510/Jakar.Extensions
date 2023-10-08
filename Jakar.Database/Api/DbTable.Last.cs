@@ -4,10 +4,11 @@
 namespace Jakar.Database;
 
 
+[ SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" ) ]
 public partial class DbTable<TRecord>
 {
-    private string? _last;
-    private string? _lastOrDefault;
+    protected string? _last;
+    protected string? _lastOrDefault;
 
 
     public ValueTask<TRecord?> Last( CancellationToken token = default ) => this.Call( Last, token );

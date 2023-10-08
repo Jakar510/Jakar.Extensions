@@ -4,10 +4,11 @@
 namespace Jakar.Database;
 
 
+[ SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" ) ]
 public partial class DbTable<TRecord>
 {
-    private readonly ConcurrentDictionary<int, string> _deleteGuids = new();
-    private          string?                           _delete;
+    protected readonly ConcurrentDictionary<int, string> _deleteGuids = new();
+    protected string?                           _delete;
 
 
     public ValueTask Delete( TRecord                             record,   CancellationToken token                               = default ) => this.TryCall( Delete, record,   token );

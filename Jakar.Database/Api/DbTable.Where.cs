@@ -8,8 +8,8 @@ namespace Jakar.Database;
 [ SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" ) ]
 public partial class DbTable<TRecord>
 {
-    private readonly ConcurrentDictionary<string, string> _where           = new();
-    private readonly ConcurrentDictionary<int, string>    _whereParameters = new();
+    protected readonly ConcurrentDictionary<string, string> _where           = new();
+    protected readonly ConcurrentDictionary<int, string>    _whereParameters = new();
 
 
     protected static int GetHash( DynamicParameters parameters ) => GetHash( parameters.ParameterNames );
@@ -32,7 +32,7 @@ public partial class DbTable<TRecord>
     {
         int     hash = GetHash( parameters );
         string? sql  = default;
-        if ( hash > 0 && !_whereParameters.TryGetValue( hash, out sql ) ) { _whereParameters[hash] = sql = GetWhereSql( matchAll, parameters ); }
+        if ( hash != 0 && !_whereParameters.TryGetValue( hash, out sql ) ) { _whereParameters[hash] = sql = GetWhereSql( matchAll, parameters ); }
 
         sql ??= GetWhereSql( matchAll, parameters );
         return Where( connection, transaction, sql, parameters, token );

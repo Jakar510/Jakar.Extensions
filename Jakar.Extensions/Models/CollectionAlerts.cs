@@ -23,7 +23,7 @@ public abstract class CollectionAlerts<T> : ObservableClass, ICollectionAlerts, 
     protected CollectionAlerts() { }
 
 
-    protected void Added( IList<T> items ) => OnChanged( new NotifyCollectionChangedEventArgs( NotifyCollectionChangedAction.Add,                                items ) );
+    protected void Added( List<T> items ) => OnChanged( new NotifyCollectionChangedEventArgs( NotifyCollectionChangedAction.Add,                                items ) );
     protected void Added( in T     item ) => OnChanged( new NotifyCollectionChangedEventArgs( NotifyCollectionChangedAction.Add,                                 item ) );
     protected void Added( in T     item, in int index ) => OnChanged( new NotifyCollectionChangedEventArgs( NotifyCollectionChangedAction.Add,                   item, index ) );
     protected void Moved( in T     item, in int index, in int oldIndex ) => OnChanged( new NotifyCollectionChangedEventArgs( NotifyCollectionChangedAction.Move, item, index, oldIndex ) );

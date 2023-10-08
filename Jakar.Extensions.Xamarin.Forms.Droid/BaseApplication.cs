@@ -15,11 +15,11 @@ namespace Jakar.Extensions.Xamarin.Forms.Droid;
 public abstract class BaseApplication : FormsAppCompatActivity
 {
 #pragma warning disable 8618
-    public static BaseApplication Instance { get; protected set; }
+    public static FormsAppCompatActivity Instance { get; protected set; }
 #pragma warning restore 8618
 
 
-    protected void Init( Bundle savedInstanceState, params string[] flags )
+    protected void Init( Bundle? savedInstanceState, params string[] flags )
     {
         global::Xamarin.Forms.Forms.SetFlags( flags );
         global::Xamarin.Forms.Forms.Init( this, savedInstanceState );

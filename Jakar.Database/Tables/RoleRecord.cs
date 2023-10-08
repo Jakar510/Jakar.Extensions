@@ -85,5 +85,5 @@ public sealed record RoleRecord( [ property: MaxLength( 1024 ) ]                
     }
 
     public IAsyncEnumerable<UserRecord> GetUsers( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => UserRoleRecord.Where( connection, transaction, db.UserRoles, db.Users, this, token );
-    public UserRights                   GetRights() => new(this);
+    public UserRights                   GetRights() => UserRights.Create( this );
 }

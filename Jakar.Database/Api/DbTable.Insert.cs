@@ -7,11 +7,11 @@ namespace Jakar.Database;
 [SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
 public partial class DbTable<TRecord>
 {
-    private string? _singleInsert;
-    private string? _insertOrUpdatePostgres;
-    private string? _insertOrUpdateMsSql;
-    private string? _tryInsertPostgres;
-    private string? _tryInsertMsSql;
+    protected string? _singleInsert;
+    protected string? _insertOrUpdatePostgres;
+    protected string? _insertOrUpdateMsSql;
+    protected string? _tryInsertPostgres;
+    protected string? _tryInsertMsSql;
 
 
     public IAsyncEnumerable<TRecord> Insert( ImmutableArray<TRecord>   records, CancellationToken token = default ) => this.TryCall( Insert, records, token );

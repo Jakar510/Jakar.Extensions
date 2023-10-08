@@ -7,7 +7,7 @@ namespace Jakar.Database;
 [SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
 public partial class DbTable<TRecord>
 {
-    private string? _single;
+    protected string? _single;
 
 
     public ValueTask<TRecord?> Single( string          id,  CancellationToken  token                               = default ) => this.Call( Single, id,  token );

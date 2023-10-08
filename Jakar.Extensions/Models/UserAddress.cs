@@ -7,19 +7,23 @@ namespace Jakar.Extensions;
 [ SuppressMessage( "ReSharper", "UnusedMemberInSuper.Global" ) ]
 public interface IAddress : JsonModels.IJsonModel
 {
-    [ MaxLength( 4096 ) ]          public string Address         { get; }
-    [ MaxLength( 256 ) ]           public string City            { get; }
-    [ MaxLength( 256 ) ]           public string Country         { get; }
-    [ MaxLength( 512 ) ]           public string Line1           { get; }
-    [ MaxLength( 256 ) ]           public string Line2           { get; }
-    [ MaxLength( 256 ), Required ] public string PostalCode      { get; }
-    [ MaxLength( 256 ) ]           public string StateOrProvince { get; }
+    [ MaxLength( 4096 ) ] public          string? Address         { get; }
+    [ MaxLength( 256 ) ]  public          string  City            { get; }
+    [ MaxLength( 256 ) ]  public          string  Country         { get; }
+    public                                bool    IsPrimary       { get; }
+    [ MaxLength( 512 ) ]           public string  Line1           { get; }
+    [ MaxLength( 256 ) ]           public string  Line2           { get; }
+    [ MaxLength( 256 ), Required ] public string  PostalCode      { get; }
+    [ MaxLength( 256 ) ]           public string  StateOrProvince { get; }
+    public                                Guid?   UserID          { get; }
 }
 
 
 
 public record UserAddress : ObservableRecord, IAddress, IComparable<UserAddress>, IComparable
 {
+    private bool                          _isPrimary;
+    private Guid?                         _userID;
     private IDictionary<string, JToken?>? _additionalData;
     private string                        _city            = string.Empty;
     private string                        _country         = string.Empty;
@@ -31,6 +35,7 @@ public record UserAddress : ObservableRecord, IAddress, IComparable<UserAddress>
 
     public static Sorter<UserAddress> Sorter => Sorter<UserAddress>.Default;
 
+
     [ JsonExtensionData ]
     public IDictionary<string, JToken?>? AdditionalData
     {
@@ -38,8 +43,9 @@ public record UserAddress : ObservableRecord, IAddress, IComparable<UserAddress>
         set => SetProperty( ref _additionalData, value );
     }
 
+
     [ MaxLength( 4096 ) ]
-    public string Address
+    public string? Address
     {
         get => _address ??= ToString();
         set => SetProperty( ref _address, value );
@@ -49,14 +55,26 @@ public record UserAddress : ObservableRecord, IAddress, IComparable<UserAddress>
     public string City
     {
         get => _city;
-        set => SetProperty( ref _city, value );
+        set
+        {
+            if ( SetProperty( ref _city, value ) ) { Address = null; }
+        }
     }
 
     [ MaxLength( 256 ) ]
     public string Country
     {
         get => _country;
-        set => SetProperty( ref _country, value );
+        set
+        {
+            if ( SetProperty( ref _country, value ) ) { Address = null; }
+        }
+    }
+
+    public bool IsPrimary
+    {
+        get => _isPrimary;
+        set => SetProperty( ref _isPrimary, value );
     }
 
     [ JsonIgnore ]
@@ -64,7 +82,7 @@ public record UserAddress : ObservableRecord, IAddress, IComparable<UserAddress>
     {
         get
         {
-            Span<char> span = stackalloc char[Address.Length];
+            Span<char> span = stackalloc char[Address?.Length ?? 0];
 
             Address.AsSpan()
                    .CopyTo( span );
@@ -84,29 +102,48 @@ public record UserAddress : ObservableRecord, IAddress, IComparable<UserAddress>
     public string Line1
     {
         get => _line1;
-        set => SetProperty( ref _line1, value );
+        set
+        {
+            if ( SetProperty( ref _line1, value ) ) { Address = null; }
+        }
     }
 
     [ MaxLength( 256 ) ]
     public string Line2
     {
         get => _line2;
-        set => SetProperty( ref _line2, value );
+        set
+        {
+            if ( SetProperty( ref _line2, value ) ) { Address = null; }
+        }
     }
 
     [ MaxLength( 256 ), Required ]
     public string PostalCode
     {
         get => _postalCode;
-        set => SetProperty( ref _postalCode, value );
+        set
+        {
+            if ( SetProperty( ref _postalCode, value ) ) { Address = null; }
+        }
     }
 
     [ MaxLength( 256 ) ]
     public string StateOrProvince
     {
         get => _stateOrProvince;
-        set => SetProperty( ref _stateOrProvince, value );
+        set
+        {
+            if ( SetProperty( ref _stateOrProvince, value ) ) { Address = null; }
+        }
     }
+
+    public Guid? UserID
+    {
+        get => _userID;
+        set => SetProperty( ref _userID, value );
+    }
+
 
     public UserAddress() { }
     public UserAddress( IAddress address )
@@ -118,16 +155,23 @@ public record UserAddress : ObservableRecord, IAddress, IComparable<UserAddress>
         StateOrProvince = address.StateOrProvince;
         Country         = address.Country;
         PostalCode      = address.PostalCode;
+        IsPrimary       = address.IsPrimary;
+        UserID          = address.UserID;
     }
 
 
-    public override string ToString() => $"{Line1} {Line2} {City}, {StateOrProvince} {Country} {PostalCode}";
+    public override string ToString() => string.IsNullOrWhiteSpace( Line2 )
+                                             ? $"{Line1}. {City}, {StateOrProvince}. {Country}. {PostalCode}"
+                                             : $"{Line1} {Line2}. {City}, {StateOrProvince}. {Country}. {PostalCode}";
 
     public int CompareTo( UserAddress? other )
     {
         if ( other is null ) { return 1; }
 
         if ( ReferenceEquals( this, other ) ) { return 0; }
+
+        int userIDCompare = Nullable.Compare( UserID, other.UserID );
+        if ( userIDCompare != 0 ) { return userIDCompare; }
 
         int addressComparison = string.Compare( _address, other._address, StringComparison.Ordinal );
         if ( addressComparison != 0 ) { return addressComparison; }

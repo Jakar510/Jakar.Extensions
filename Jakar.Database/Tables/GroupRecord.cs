@@ -55,5 +55,5 @@ public sealed record GroupRecord( [ MaxLength( 256 ) ]                          
 
     public async ValueTask<UserRecord?>       GetOwner( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => await db.Users.Get( connection, transaction, OwnerID, token );
     public       IAsyncEnumerable<UserRecord> GetUsers( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => UserGroupRecord.Where( connection, transaction, db.UserGroups, db.Users, this, token );
-    public       UserRights                   GetRights() => new(this);
+    public       UserRights                   GetRights() => UserRights.Create( this );
 }

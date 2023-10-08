@@ -7,12 +7,12 @@ namespace Jakar.Database;
 [ SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" ) ]
 public partial class DbTable<TRecord>
 {
-    private string? _randomMsSql;
-    private string? _randomPostgres;
-    private string? _randomCountMsSql;
-    private string? _randomCountPostgres;
-    private string? _randomUserCountMsSql;
-    private string? _randomUserCountPostgres;
+    protected string? _randomMsSql;
+    protected string? _randomPostgres;
+    protected string? _randomCountMsSql;
+    protected string? _randomCountPostgres;
+    protected string? _randomUserCountMsSql;
+    protected string? _randomUserCountPostgres;
 
 
     public ValueTask<TRecord?>       Random( CancellationToken token                                                     = default ) => this.Call( Random, token );

@@ -7,9 +7,9 @@ namespace Jakar.Database;
 [SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
 public partial class DbTable<TRecord>
 {
-    private string? _next;
-    private string? _sortedIDs;
-    private string? _nextID;
+    protected string? _next;
+    protected string? _sortedIDs;
+    protected string? _nextID;
 
 
     public ValueTask<TRecord?> Next( RecordPair<TRecord>                            pair, CancellationToken token = default ) => this.Call( Next,   pair, token );
