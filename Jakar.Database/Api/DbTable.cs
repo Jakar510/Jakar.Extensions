@@ -3,23 +3,45 @@
 
 
 namespace Jakar.Database;
-// TrueLogic :: TrueLogic.Common
-// 04/11/2023  11:33 AM
-
 
 
 [ SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" ) ]
-public partial class DbTable<TRecord> : ObservableClass, IConnectableDb, IAsyncDisposable where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>
+public partial class DbTable<TRecord> : ObservableClass, IConnectableDb where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
-    protected static readonly TypePropertiesCache.Properties _propertiesCache = TypePropertiesCache.Current.Register<TRecord>();
-    protected const           char                           QUOTE            = '"';
-    protected readonly        IConnectableDbRoot             _database;
+    protected static readonly TypePropertiesCache.Properties       _propertiesCache = TypePropertiesCache.Current.Register<TRecord>();
+    protected const           char                                 QUOTE            = '"';
+    protected readonly        ConcurrentDictionary<int, string>    _deleteGuids     = new();
+    protected readonly        ConcurrentDictionary<int, string>    _whereParameters = new();
+    protected readonly        ConcurrentDictionary<string, string> _where           = new();
+    protected readonly        IConnectableDbRoot                   _database;
+    private                   SqlCommand?                          _all;
+    protected                 SqlCommand?                          _first;
+    protected                 SqlCommand?                          _firstOrDefault;
+    protected                 SqlCommand?                          _last;
+    protected                 SqlCommand?                          _lastOrDefault;
+    protected                 SqlCommand?                          _sortedIDs;
+    protected                 string?                              _delete;
+    protected                 string?                              _insertOrUpdateMsSql;
+    protected                 string?                              _insertOrUpdatePostgres;
+    protected                 string?                              _next;
+    protected                 string?                              _nextID;
+    protected                 string?                              _randomCountMsSql;
+    protected                 string?                              _randomCountPostgres;
+    protected                 string?                              _randomMsSql;
+    protected                 string?                              _randomPostgres;
+    protected                 string?                              _randomUserCountMsSql;
+    protected                 string?                              _randomUserCountPostgres;
+    protected                 string?                              _single;
+    protected                 string?                              _singleInsert;
+    protected                 string?                              _tryInsertMsSql;
+    protected                 string?                              _tryInsertPostgres;
+    protected                 string?                              _update;
 
 
-    [ SuppressMessage( "ReSharper", "ReturnTypeCanBeEnumerable.Global" ) ] public static ImmutableArray<TRecord> Empty          => ImmutableArray<TRecord>.Empty;
-    [ SuppressMessage( "ReSharper", "ReturnTypeCanBeEnumerable.Global" ) ] public static ImmutableList<TRecord>  EmptyList      => ImmutableList<TRecord>.Empty;
-    public                                                                               IEnumerable<string>     ColumnNames    => Descriptors.Select( x => x.ColumnName );
-    public                                                                               int                     CommandTimeout => _database.CommandTimeout;
+    public static ImmutableArray<TRecord> Empty          => ImmutableArray<TRecord>.Empty;
+    public static ImmutableList<TRecord>  EmptyList      => ImmutableList<TRecord>.Empty;
+    public        IEnumerable<string>     ColumnNames    => Descriptors.Select( x => x.ColumnName );
+    public        int?                    CommandTimeout => _database.CommandTimeout;
 
     public virtual string CreatedBy => Instance switch
                                        {
@@ -32,18 +54,22 @@ public partial class DbTable<TRecord> : ObservableClass, IConnectableDb, IAsyncD
 
     public virtual string DateCreated => Instance switch
                                          {
-                                             DbInstance.Postgres => $@"""{nameof(TableRecord<TRecord>.DateCreated)}""",
-                                             DbInstance.MsSql    => nameof(TableRecord<TRecord>.DateCreated),
-                                             _                   => throw new OutOfRangeException( nameof(Instance), Instance )
+                                             DbInstance.Postgres => $"""
+                                                                     "{nameof(TableRecord<TRecord>.DateCreated)}"
+                                                                     """,
+                                             DbInstance.MsSql => nameof(TableRecord<TRecord>.DateCreated),
+                                             _                => throw new OutOfRangeException( nameof(Instance), Instance )
                                          };
 
     public virtual IEnumerable<Descriptor> Descriptors => _propertiesCache.GetValues( this );
 
     public virtual string ID_ColumnName => Instance switch
                                            {
-                                               DbInstance.Postgres => $@"""{nameof(TableRecord<TRecord>.ID)}""",
-                                               DbInstance.MsSql    => nameof(TableRecord<TRecord>.ID),
-                                               _                   => throw new OutOfRangeException( nameof(Instance), Instance )
+                                               DbInstance.Postgres => $"""
+                                                                       "{nameof(TableRecord<TRecord>.ID)}"
+                                                                       """,
+                                               DbInstance.MsSql => nameof(TableRecord<TRecord>.ID),
+                                               _                => throw new OutOfRangeException( nameof(Instance), Instance )
                                            };
 
     public DbInstance          Instance      => _database.Instance;
@@ -51,9 +77,11 @@ public partial class DbTable<TRecord> : ObservableClass, IConnectableDb, IAsyncD
 
     public virtual string LastModified => Instance switch
                                           {
-                                              DbInstance.Postgres => $@"""{nameof(TableRecord<TRecord>.LastModified)}""",
-                                              DbInstance.MsSql    => nameof(TableRecord<TRecord>.LastModified),
-                                              _                   => throw new OutOfRangeException( nameof(Instance), Instance )
+                                              DbInstance.Postgres => $"""
+                                                                      "{nameof(TableRecord<TRecord>.LastModified)}"
+                                                                      """,
+                                              DbInstance.MsSql => nameof(TableRecord<TRecord>.LastModified),
+                                              _                => throw new OutOfRangeException( nameof(Instance), Instance )
                                           };
 
     public virtual string OwnerUserID => Instance switch
@@ -63,7 +91,7 @@ public partial class DbTable<TRecord> : ObservableClass, IConnectableDb, IAsyncD
                                              _                   => throw new OutOfRangeException( nameof(Instance), Instance )
                                          };
 
-    public string RandomMethod
+    public virtual string RandomMethod
     {
         [ MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization ) ]
         get => Instance switch
@@ -102,8 +130,34 @@ public partial class DbTable<TRecord> : ObservableClass, IConnectableDb, IAsyncD
         GC.SuppressFinalize( this );
         return default;
     }
-    public DbConnection            Connect()                                         => _database.Connect();
     public ValueTask<DbConnection> ConnectAsync( CancellationToken token = default ) => _database.ConnectAsync( token );
+
+
+    void IDbTable.ResetSqlCaches()
+    {
+        _all                     = null;
+        _first                   = null;
+        _firstOrDefault          = null;
+        _last                    = null;
+        _lastOrDefault           = null;
+        _sortedIDs               = null;
+        _delete                  = null;
+        _insertOrUpdateMsSql     = null;
+        _insertOrUpdatePostgres  = null;
+        _next                    = null;
+        _nextID                  = null;
+        _randomCountMsSql        = null;
+        _randomCountPostgres     = null;
+        _randomMsSql             = null;
+        _randomPostgres          = null;
+        _randomUserCountMsSql    = null;
+        _randomUserCountPostgres = null;
+        _single                  = null;
+        _singleInsert            = null;
+        _tryInsertMsSql          = null;
+        _tryInsertPostgres       = null;
+        _update                  = null;
+    }
 
 
     [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public Descriptor GetDescriptor( string columnName ) => _propertiesCache.Get( this, columnName );
@@ -111,28 +165,14 @@ public partial class DbTable<TRecord> : ObservableClass, IConnectableDb, IAsyncD
     public string KeyValuePair( string columnName ) => GetDescriptor( columnName )
        .KeyValuePair;
 
-
     public IAsyncEnumerable<TRecord> All( CancellationToken token = default ) => this.Call( All, token );
+
     [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public virtual async IAsyncEnumerable<TRecord> All( DbConnection connection, DbTransaction? transaction, [ EnumeratorCancellation ] CancellationToken token = default )
     {
-        string sql = $"SELECT * FROM {SchemaTableName}";
-
-        if ( token.IsCancellationRequested ) { yield break; }
-
-        DbDataReader reader;
-
-        try
-        {
-            var command = new CommandDefinition( sql, default, transaction, default, default, CommandFlags.None, token );
-            reader = await connection.ExecuteReaderAsync( command );
-        }
-        catch ( Exception e ) { throw new SqlException( sql, e ); }
-
-        await using ( reader )
-        {
-            await foreach ( TRecord record in TRecord.CreateAsync( reader, token ) ) { yield return record; }
-        }
+        _all ??= $"SELECT * FROM {SchemaTableName}";
+        await using DbDataReader reader = await _database.ExecuteReaderAsync( connection, transaction, _all.Value, token );
+        await foreach ( TRecord record in TRecord.CreateAsync( reader, token ) ) { yield return record; }
     }
 
 
@@ -155,22 +195,15 @@ public partial class DbTable<TRecord> : ObservableClass, IConnectableDb, IAsyncD
     }
 
 
-    public ValueTask<TResult> Call<TResult>( string sql, DynamicParameters? parameters, Func<DbDataReader, CancellationToken, ValueTask<TResult>> func, CancellationToken token = default ) => this.TryCall( Call, sql, parameters, func, token );
-    public virtual async ValueTask<TResult> Call<TResult>( DbConnection                                              connection,
-                                                           DbTransaction                                             transaction,
-                                                           string                                                    sql,
-                                                           DynamicParameters?                                        parameters,
-                                                           Func<DbDataReader, CancellationToken, ValueTask<TResult>> func,
-                                                           CancellationToken                                         token = default
-    )
+    public ValueTask<TResult> Call<TResult>( SqlCommand sql, Func<DbDataReader, CancellationToken, ValueTask<TResult>> func, CancellationToken token = default ) => this.TryCall( Call, sql, func, token );
+    public virtual async ValueTask<TResult> Call<TResult>( DbConnection connection, DbTransaction transaction, SqlCommand sql, Func<DbDataReader, CancellationToken, ValueTask<TResult>> func, CancellationToken token = default )
     {
         try
         {
-            CommandDefinition        command = _database.GetCommandDefinition( sql, parameters, transaction, token );
-            await using DbDataReader reader  = await connection.ExecuteReaderAsync( command );
+            await using DbDataReader reader = await _database.ExecuteReaderAsync( connection, transaction, sql, token );
             return await func( reader, token );
         }
-        catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
+        catch ( Exception e ) { throw new SqlException( sql.SQL, sql.Parameters, e ); }
     }
 
 
@@ -224,6 +257,4 @@ public partial class DbTable<TRecord> : ObservableClass, IConnectableDb, IAsyncD
         await using DbConnection connection = await ConnectAsync( token );
         return connection.ServerVersion;
     }
-
-
 }

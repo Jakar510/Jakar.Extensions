@@ -3,6 +3,7 @@
 
 using System.Collections.Immutable;
 using System.Data.Common;
+using System.Security;
 using FluentMigrator.Runner;
 using Jakar.Database;
 using Jakar.Database.DbMigrations;
@@ -17,12 +18,12 @@ using Microsoft.Extensions.Options;
 namespace Experiments;
 
 
-public sealed class TestDatabase( IConfiguration configuration, IOptions<DbOptions> options ) : Database( configuration, options )
+public sealed class TestDatabase : Database
 {
-    private const   string CONNECTION_STRING = "Server=localhost;Database=Experiments;User Id=tester;Password=tester;Encrypt=True;TrustServerCertificate=True";
-    public override string ConnectionString { get; } = CONNECTION_STRING;
+    private const string CONNECTION_STRING = "Server=localhost;Database=Experiments;User Id=tester;Password=tester;Encrypt=True;TrustServerCertificate=True";
 
-    protected override DbConnection CreateConnection() => new SqlConnection( ConnectionString );
+    public TestDatabase( IConfiguration                            configuration, IOptions<DbOptions> options ) : base( configuration, options ) => ConnectionString = CONNECTION_STRING.ToSecureString();
+    protected override DbConnection CreateConnection( in SecureString secure ) => new SqlConnection( secure.GetValue() );
 
 
     public static async Task Test()
@@ -42,7 +43,7 @@ public sealed class TestDatabase( IConfiguration configuration, IOptions<DbOptio
                                  {
                                      // configure.AddPostgres();
                                      configure.AddSqlServer2016();
-                                     configure.WithGlobalConnectionString( CONNECTION_STRING );
+                                     DbOptions.GetConnectionString( configure );
 
                                      configure.ScanIn( typeof(Database).Assembly, typeof(Program).Assembly )
                                               .For.All();

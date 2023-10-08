@@ -7,10 +7,6 @@ namespace Jakar.Database;
 [ SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" ) ]
 public partial class DbTable<TRecord>
 {
-    protected string? _first;
-    protected string? _firstOrDefault;
-
-
     public ValueTask<TRecord?> First( CancellationToken          token = default ) => this.Call( First,          token );
     public ValueTask<TRecord?> FirstOrDefault( CancellationToken token = default ) => this.Call( FirstOrDefault, token );
 
@@ -21,10 +17,10 @@ public partial class DbTable<TRecord>
 
         try
         {
-            CommandDefinition command = _database.GetCommandDefinition( _first, default, transaction, token );
+            CommandDefinition command = _database.GetCommandDefinition( transaction, _first.Value, token );
             return await connection.QueryFirstAsync<TRecord>( command );
         }
-        catch ( Exception e ) { throw new SqlException( _first, e ); }
+        catch ( Exception e ) { throw new SqlException( _first.Value.SQL, e ); }
     }
     public virtual async ValueTask<TRecord?> FirstOrDefault( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
@@ -32,9 +28,9 @@ public partial class DbTable<TRecord>
 
         try
         {
-            CommandDefinition command = _database.GetCommandDefinition( _firstOrDefault, default, transaction, token );
+            CommandDefinition command = _database.GetCommandDefinition( transaction, _firstOrDefault.Value, token );
             return await connection.QueryFirstOrDefaultAsync<TRecord>( command );
         }
-        catch ( Exception e ) { throw new SqlException( _firstOrDefault, e ); }
+        catch ( Exception e ) { throw new SqlException( _firstOrDefault.Value.SQL, e ); }
     }
 }

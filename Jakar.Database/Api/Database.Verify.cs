@@ -13,9 +13,7 @@ public abstract partial class Database
 
 
     /// <summary> </summary>
-    /// <returns>
-    /// <see langword="true"/> is Subscription is valid; otherwise <see langword="false"/>
-    /// </returns>
+    /// <returns> <see langword="true"/> is Subscription is valid; otherwise <see langword="false"/> </returns>
     [ SuppressMessage( "ReSharper", "UnusedParameter.Global" ) ]
     public virtual ValueTask<bool> ValidateSubscription( DbConnection connection, DbTransaction? transaction, UserRecord record, CancellationToken token = default ) => new(true);
 

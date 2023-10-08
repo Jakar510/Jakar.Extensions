@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using System.Security;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 
@@ -51,7 +52,7 @@ public sealed class LoggerDB : Database.Database
     }
 
 
-    protected override DbConnection CreateConnection() => new NpgsqlConnection( ConnectionString );
+    protected override DbConnection CreateConnection( in SecureString secure ) => new NpgsqlConnection( secure.GetValue() );
 
 
     public ValueTask<OneOf<StartSessionReply, Error>> StartSession( StartSession session, CancellationToken token ) => this.TryCall( StartSession, session, token );

@@ -1,4 +1,4 @@
-﻿// TrueLogic :: TrueKeep.Cloud
+﻿// Jakar :: Jakar.Database
 // 04/22/2022  11:10 AM
 
 namespace Jakar.Database;

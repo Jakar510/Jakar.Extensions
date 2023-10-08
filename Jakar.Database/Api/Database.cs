@@ -1,19 +1,24 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 08/14/2022  8:39 PM
 
+using System.Security;
+
+
+
 namespace Jakar.Database;
 
 
 [ SuppressMessage( "ReSharper", "SuggestBaseTypeForParameter" ) ]
-public abstract partial class Database : Randoms, IConnectableDbRoot, IAsyncDisposable, IHealthCheck, IUserTwoFactorTokenProvider<UserRecord>
+public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthCheck, IUserTwoFactorTokenProvider<UserRecord>
 {
-    public const       ClaimType                       DEFAULT_CLAIM_TYPES = ClaimType.UserID | ClaimType.UserName | ClaimType.GroupSid | ClaimType.Role;
-    protected readonly ConcurrentBag<IAsyncDisposable> _disposables        = new();
+    public const ClaimType DEFAULT_CLAIM_TYPES = ClaimType.UserID | ClaimType.UserName | ClaimType.GroupSid | ClaimType.Role;
 
 
-    public             int                             CommandTimeout    => Options.CommandTimeout;
+    protected readonly ConcurrentBag<IDbTable>         _tables = new();
+    public             DbTable<AddressRecord>          Addresses         { get; }
+    public             int?                            CommandTimeout    => Options.CommandTimeout;
     public             IConfiguration                  Configuration     { get; }
-    public virtual     string                          ConnectionString  => Configuration.GetConnectionString( "DEFAULT" ) ?? throw new KeyNotFoundException( "DEFAULT" );
+    protected internal SecureString?                   ConnectionString  { get; set; }
     public             string                          CurrentSchema     => Options.CurrentSchema;
     public             DbTable<GroupRecord>            Groups            { get; }
     public             DbInstance                      Instance          => Options.DbType;
@@ -26,7 +31,6 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IAsyncDisp
     public             DbTable<UserRecoveryCodeRecord> UserRecoveryCodes { get; }
     public             DbTable<UserRoleRecord>         UserRoles         { get; }
     public             DbTable<UserRecord>             Users             { get; }
-    public             DbTable<AddressRecord>          Addresses         { get; }
     public             AppVersion                      Version           => Options.Version;
 
 
@@ -66,48 +70,71 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IAsyncDisp
         UserRecoveryCodes = Create<UserRecoveryCodeRecord>();
         Addresses         = Create<AddressRecord>();
     }
-
-
-    protected TValue AddDisposable<TValue>( TValue value ) where TValue : IAsyncDisposable
-    {
-        _disposables.Add( value );
-        return value;
-    }
-
-
-    public CommandDefinition GetCommandDefinition( string sql, DynamicParameters? parameters, DbTransaction? transaction, CancellationToken token, CommandType? commandType = default, CommandFlags flags = CommandFlags.None ) =>
-        new(sql, parameters, transaction, CommandTimeout, commandType, flags, token);
-
-
-    protected virtual DbTable<TRecord> Create<TRecord>() where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>
-    {
-        var table = new DbTable<TRecord>( this );
-        return AddDisposable( table );
-    }
-
-
-    protected abstract DbConnection CreateConnection();
     public virtual async ValueTask DisposeAsync()
     {
-        foreach ( IAsyncDisposable disposable in _disposables ) { await disposable.DisposeAsync(); }
+        foreach ( IDbTable disposable in _tables ) { await disposable.DisposeAsync(); }
 
-        _disposables.Clear();
+        _tables.Clear();
+        ConnectionString?.Dispose();
+        ConnectionString = null;
         GC.SuppressFinalize( this );
     }
 
 
-    public DbConnection Connect()
-    {
-        DbConnection connection = CreateConnection();
-        connection.Open();
-        return connection;
-    }
+    protected abstract DbConnection CreateConnection( in SecureString secure );
     public async ValueTask<DbConnection> ConnectAsync( CancellationToken token )
     {
-        DbConnection connection = CreateConnection();
+        ConnectionString ??= await Options.GetConnectionStringAsync( Configuration, token );
+        DbConnection connection = CreateConnection( ConnectionString );
         await connection.OpenAsync( token );
         return connection;
     }
+
+
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    protected DbTable<TRecord> Create<TRecord>() where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>
+    {
+        var table = new DbTable<TRecord>( this );
+        return AddDisposable( table );
+    }
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    protected TValue AddDisposable<TValue>( TValue value ) where TValue : IDbTable
+    {
+        _tables.Add( value );
+        return value;
+    }
+    public void ResetSqlCaches()
+    {
+        foreach ( IDbTable table in _tables ) { table.ResetSqlCaches(); }
+    }
+
+
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public CommandDefinition GetCommandDefinition( DbTransaction? transaction, in SqlCommand sql, CancellationToken token ) => sql.ToCommandDefinition( transaction, CommandTimeout, token );
+    public async ValueTask<DbDataReader> ExecuteReaderAsync( DbConnection connection, DbTransaction? transaction, SqlCommand sql, CancellationToken token )
+    {
+        try
+        {
+            // DbCommand dbCommand = connection.CreateCommand();
+            // dbCommand.CommandTimeout = CommandTimeout;
+            // if ( commandType.HasValue ) { dbCommand.CommandType = commandType.Value; }
+            //
+            // // BindByName - bool
+            // // InitialLONGFetchSize - int
+            // // FetchSize - long
+            // if ( dbCommand is SqlCommand msSql ) { }
+            //
+            // else if ( dbCommand is not NpgsqlCommand postgres ) { }
+            //
+            // DbDataReader temp = await dbCommand.ExecuteReaderAsync( CommandBehavior.SequentialAccess, token );
+
+            CommandDefinition command = GetCommandDefinition( transaction, sql, token );
+            DbDataReader      reader  = await connection.ExecuteReaderAsync( command );
+            return reader;
+        }
+        catch ( Exception e ) { throw new SqlException( sql.SQL, e ); }
+    }
+
+
     public virtual async Task<HealthCheckResult> CheckHealthAsync( HealthCheckContext context, CancellationToken token = default )
     {
         try
@@ -179,7 +206,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IAsyncDisp
 
         try
         {
-            CommandDefinition command = GetCommandDefinition( sql, parameters, transaction, token );
+            CommandDefinition command = GetCommandDefinition( transaction, new SqlCommand( sql, parameters ), token );
             reader = await connection.ExecuteReaderAsync( command );
         }
         catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
@@ -189,12 +216,13 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IAsyncDisp
     public virtual async IAsyncEnumerable<T> WhereValue<T>( DbConnection connection, DbTransaction? transaction, string sql, DynamicParameters? parameters, [ EnumeratorCancellation ] CancellationToken token = default ) where T : struct
     {
         DbDataReader reader;
+
         try
         {
-            CommandDefinition command = GetCommandDefinition( sql, parameters, transaction, token );
+            CommandDefinition command = GetCommandDefinition( transaction, new SqlCommand( sql, parameters ), token );
             await connection.QueryAsync<T>( command );
 
-        reader = await connection.ExecuteReaderAsync( command );
+            reader = await connection.ExecuteReaderAsync( command );
         }
         catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
 

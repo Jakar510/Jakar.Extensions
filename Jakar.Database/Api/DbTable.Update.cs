@@ -4,12 +4,9 @@
 namespace Jakar.Database;
 
 
-[SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
+[ SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" ) ]
 public partial class DbTable<TRecord>
 {
-    protected string? _update;
-
-
     public ValueTask Update( TRecord                   record,  CancellationToken token = default ) => this.TryCall( Update, record,  token );
     public ValueTask Update( IEnumerable<TRecord>      records, CancellationToken token = default ) => this.TryCall( Update, records, token );
     public ValueTask Update( ImmutableArray<TRecord>   records, CancellationToken token = default ) => this.TryCall( Update, records, token );
@@ -32,7 +29,7 @@ public partial class DbTable<TRecord>
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
+    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public virtual async ValueTask Update( DbConnection connection, DbTransaction? transaction, TRecord record, CancellationToken token = default )
     {
         Guid              id         = record.ID.Value;
@@ -41,7 +38,7 @@ public partial class DbTable<TRecord>
 
         try
         {
-            CommandDefinition command = _database.GetCommandDefinition( _update, parameters, transaction, token );
+            CommandDefinition command = _database.GetCommandDefinition( transaction, new SqlCommand( _update, parameters ), token );
             await connection.ExecuteScalarAsync( command );
         }
         catch ( Exception e ) { throw new SqlException( _update, parameters, e ); }

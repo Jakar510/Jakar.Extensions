@@ -50,7 +50,7 @@ public partial class DbTable<TRecord>
 
         try
         {
-            CommandDefinition   command = _database.GetCommandDefinition( sql, parameters, transaction, token );
+            CommandDefinition   command = _database.GetCommandDefinition( transaction, new SqlCommand( sql, parameters ), token );
             IEnumerable<string> results = await connection.QueryAsync<string>( command );
             return results.Any();
         }
@@ -75,7 +75,7 @@ public partial class DbTable<TRecord>
     {
         try
         {
-            CommandDefinition command = _database.GetCommandDefinition( sql, parameters, transaction, token );
+            CommandDefinition command = _database.GetCommandDefinition( transaction, new SqlCommand( sql, parameters ), token );
             return await connection.QuerySingleAsync<Guid?>( command );
         }
         catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
@@ -121,7 +121,7 @@ public partial class DbTable<TRecord>
 
         try
         {
-            CommandDefinition     command = _database.GetCommandDefinition( sql, parameters, transaction, token );
+            CommandDefinition     command = _database.GetCommandDefinition( transaction, new SqlCommand( sql, parameters ), token );
             IEnumerable<TRecord?> results = await connection.QueryAsync<TRecord>( command );
             IEnumerable<TRecord>  records = results.WhereNotNull();
             TRecord?              result  = default;
@@ -153,6 +153,6 @@ public partial class DbTable<TRecord>
     {
         string sql = $"SELECT * FROM {SchemaTableName} WHERE {ID_ColumnName} in ( {string.Join( ',', ids.Select( x => $"'{x}'" ) )} )";
 
-        return Where( connection, transaction, sql, default, token );
+        return Where( connection, transaction, new SqlCommand( sql ), token );
     }
 }

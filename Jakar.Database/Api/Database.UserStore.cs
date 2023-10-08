@@ -2,10 +2,6 @@
 #pragma warning disable CA1822
 
 
-using Microsoft.AspNetCore.Mvc.ModelBinding;
-
-
-
 namespace Jakar.Database;
 
 
@@ -19,6 +15,21 @@ public partial class Database
         user = user with
                {
                    SecurityStamp = stamp
+               };
+
+        await Users.Update( user, token );
+    }
+
+
+    // ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
+    public Task<string?> GetPasswordHashAsync( UserRecord user, CancellationToken token ) => Task.FromResult( user?.PasswordHash );
+    public Task<bool>    HasPasswordAsync( UserRecord     user, CancellationToken token ) => Task.FromResult( user.HasPassword() );
+    public async Task SetPasswordHashAsync( UserRecord user, string? passwordHash, CancellationToken token )
+    {
+        // user = user.UpdatePassword(passwordHash);
+        user = user with
+               {
+                   PasswordHash = passwordHash ?? string.Empty
                };
 
         await Users.Update( user, token );
@@ -106,22 +117,6 @@ public partial class Database
     }
 
     #endregion
-
-
-
-    // ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
-    public Task<string?> GetPasswordHashAsync( UserRecord user, CancellationToken token ) => Task.FromResult( user?.PasswordHash );
-    public Task<bool>    HasPasswordAsync( UserRecord     user, CancellationToken token ) => Task.FromResult( user.HasPassword() );
-    public async Task SetPasswordHashAsync( UserRecord user, string? passwordHash, CancellationToken token )
-    {
-        // user = user.UpdatePassword(passwordHash);
-        user = user with
-               {
-                   PasswordHash = passwordHash ?? string.Empty
-               };
-
-        await Users.Update( user, token );
-    }
 
 
 
@@ -283,7 +278,7 @@ public partial class Database
         {
             return IdentityResult.Failed( new IdentityError
                                           {
-                                              Description = Options.UserExists,
+                                              Description = Options.UserExists
                                           } );
         }
 
@@ -305,7 +300,7 @@ public partial class Database
         {
             return IdentityResult.Failed( new IdentityError
                                           {
-                                              Description = e.Message,
+                                              Description = e.Message
                                           } );
         }
     }
@@ -323,7 +318,7 @@ public partial class Database
         {
             return IdentityResult.Failed( new IdentityError
                                           {
-                                              Description = e.Message,
+                                              Description = e.Message
                                           } );
         }
     }

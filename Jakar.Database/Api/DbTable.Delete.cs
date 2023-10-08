@@ -7,10 +7,6 @@ namespace Jakar.Database;
 [ SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" ) ]
 public partial class DbTable<TRecord>
 {
-    protected readonly ConcurrentDictionary<int, string> _deleteGuids = new();
-    protected string?                           _delete;
-
-
     public ValueTask Delete( TRecord                             record,   CancellationToken token                               = default ) => this.TryCall( Delete, record,   token );
     public ValueTask Delete( IEnumerable<TRecord>                records,  CancellationToken token                               = default ) => this.TryCall( Delete, records,  token );
     public ValueTask Delete( IAsyncEnumerable<TRecord>           records,  CancellationToken token                               = default ) => this.TryCall( Delete, records,  token );
@@ -41,10 +37,10 @@ public partial class DbTable<TRecord>
 
         _delete ??= $"DELETE FROM {SchemaTableName} WHERE {ID_ColumnName} = @{nameof(id)};";
 
-        CommandDefinition command = _database.GetCommandDefinition( _delete, parameters, transaction, token );
+        CommandDefinition command = _database.GetCommandDefinition( transaction, new SqlCommand( _delete, parameters ), token );
         await connection.ExecuteScalarAsync( command );
     }
-    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
+    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public virtual async ValueTask Delete( DbConnection connection, DbTransaction transaction, IEnumerable<RecordID<TRecord>> ids, CancellationToken token = default ) => await Delete( connection, transaction, ids.Select( x => x.Value ), token );
     public virtual async ValueTask Delete( DbConnection connection, DbTransaction transaction, IAsyncEnumerable<Guid> ids, CancellationToken token = default )
     {
@@ -58,23 +54,23 @@ public partial class DbTable<TRecord>
 
         _delete ??= $"DELETE FROM {SchemaTableName} WHERE {ID_ColumnName} = @{nameof(id)};";
 
-        CommandDefinition command = _database.GetCommandDefinition( _delete, parameters, transaction, token );
+        CommandDefinition command = _database.GetCommandDefinition( transaction, new SqlCommand( _delete, parameters ), token );
         await connection.ExecuteScalarAsync( command );
     }
 
-    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
+    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public virtual async ValueTask Delete( DbConnection connection, DbTransaction transaction, IEnumerable<Guid> ids, CancellationToken token = default )
     {
-        string sql = $"DELETE FROM {SchemaTableName} WHERE {ID_ColumnName} in ( {string.Join( ',', ids.Select( x => $"'{x}'" ) )} );";
+        SqlCommand sql = $"DELETE FROM {SchemaTableName} WHERE {ID_ColumnName} in ( {string.Join( ',', ids.Select( x => $"'{x}'" ) )} );";
 
         try
         {
-            CommandDefinition command = _database.GetCommandDefinition( sql, default, transaction, token );
+            CommandDefinition command = _database.GetCommandDefinition( transaction, sql, token );
             await connection.ExecuteScalarAsync( command );
         }
-        catch ( Exception e ) { throw new SqlException( sql, e ); }
+        catch ( Exception e ) { throw new SqlException( sql.SQL, e ); }
     }
-    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
+    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public async ValueTask Delete( DbConnection connection, DbTransaction transaction, bool matchAll, DynamicParameters parameters, CancellationToken token )
     {
         int     hash = GetHash( parameters );
@@ -83,7 +79,7 @@ public partial class DbTable<TRecord>
 
         sql ??= GetDeleteSql( matchAll, parameters );
 
-        CommandDefinition command = _database.GetCommandDefinition( sql, parameters, transaction, token );
+        CommandDefinition command = _database.GetCommandDefinition( transaction, new SqlCommand( sql ), token );
         await connection.ExecuteScalarAsync( command );
     }
 

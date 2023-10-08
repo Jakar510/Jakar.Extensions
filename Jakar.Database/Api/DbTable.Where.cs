@@ -8,10 +8,6 @@ namespace Jakar.Database;
 [ SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" ) ]
 public partial class DbTable<TRecord>
 {
-    protected readonly ConcurrentDictionary<string, string> _where           = new();
-    protected readonly ConcurrentDictionary<int, string>    _whereParameters = new();
-
-
     protected static int GetHash( DynamicParameters parameters ) => GetHash( parameters.ParameterNames );
     protected static int GetHash<T>( IEnumerable<T> values )
     {
@@ -35,28 +31,20 @@ public partial class DbTable<TRecord>
         if ( hash != 0 && !_whereParameters.TryGetValue( hash, out sql ) ) { _whereParameters[hash] = sql = GetWhereSql( matchAll, parameters ); }
 
         sql ??= GetWhereSql( matchAll, parameters );
-        return Where( connection, transaction, sql, parameters, token );
-    }
-    private string GetWhereSql( bool matchAll, DynamicParameters parameters )
-    {
-        return $"SELECT * FROM {SchemaTableName} WHERE {string.Join( matchAll
-                                                                         ? "AND"
-                                                                         : "OR",
-                                                                     parameters.ParameterNames.Select( KeyValuePair ) )}";
+        return Where( connection, transaction, new SqlCommand( sql, parameters ), token );
     }
 
+    [ MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization ) ]
+    private string GetWhereSql( bool matchAll, DynamicParameters parameters ) =>
+        $"SELECT * FROM {SchemaTableName} WHERE {string.Join( matchAll
+                                                                  ? "AND"
+                                                                  : "OR",
+                                                              parameters.ParameterNames.Select( KeyValuePair ) )}";
 
-    public virtual async IAsyncEnumerable<TRecord> Where( DbConnection connection, DbTransaction? transaction, string sql, DynamicParameters? parameters, [ EnumeratorCancellation ] CancellationToken token = default )
+
+    public virtual async IAsyncEnumerable<TRecord> Where( DbConnection connection, DbTransaction? transaction, SqlCommand sql, [ EnumeratorCancellation ] CancellationToken token = default )
     {
-        DbDataReader reader;
-
-        try
-        {
-            CommandDefinition command = _database.GetCommandDefinition( sql, parameters, transaction, token );
-            reader = await connection.ExecuteReaderAsync( command );
-        }
-        catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
-
+        await using DbDataReader reader = await _database.ExecuteReaderAsync( connection, transaction, sql, token );
         await foreach ( TRecord record in TRecord.CreateAsync( reader, token ) ) { yield return record; }
     }
 
@@ -69,6 +57,6 @@ public partial class DbTable<TRecord>
 
         if ( !_where.TryGetValue( columnName, out string? sql ) ) { _where[columnName] = sql = $"SELECT * FROM {SchemaTableName} WHERE {columnName} = @{nameof(value)}"; }
 
-        return Where( connection, transaction, sql, parameters, token );
+        return Where( connection, transaction, new SqlCommand( sql, parameters ), token );
     }
 }
