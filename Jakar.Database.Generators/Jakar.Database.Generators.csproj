@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Jakar.Extensions" Version="6.8.6" />
+    <PackageReference Include="Jakar.Extensions" Version="6.8.7" />
     <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="4.7.0" />
   </ItemGroup>
 

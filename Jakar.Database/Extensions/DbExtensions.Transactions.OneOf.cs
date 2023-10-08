@@ -1,4 +1,6 @@
-﻿namespace Jakar.Database;
+﻿
+
+namespace Jakar.Database;
 
 
 public static partial class DbExtensions

@@ -35,7 +35,7 @@ public interface IUserData<out T> : IUserData where T : IUserData<T>
 
 
 [ Serializable ]
-public class UserData : ObservableClass, IUserData
+public class UserData : ObservableClass, IUserData<UserData>
 {
     public const string                        EMPTY_PHONE_NUMBER = "(000) 000-0000";
     private      IDictionary<string, JToken?>? _additionalData;
@@ -187,9 +187,13 @@ public class UserData : ObservableClass, IUserData
         set => SetProperty( ref _website, value );
     }
 
+    public ObservableCollection<UserAddress> Addresses { get; init; } = new();
+
 
     public UserData() { }
     public UserData( IUserData value ) => WithUserData( value );
+    public UserData( IUserData value, IEnumerable<IAddress>    addresses ) : this( value ) => WithAddresses( addresses );
+    public UserData( IUserData value, IEnumerable<UserAddress> addresses ) : this( value ) => WithAddresses( addresses );
     public UserData( string firstName, string lastName )
     {
         _firstName = firstName;
@@ -197,7 +201,13 @@ public class UserData : ObservableClass, IUserData
     }
 
 
-    public IUserData WithUserData( IUserData value )
+    public UserData WithAddresses( IEnumerable<IAddress> addresses ) => WithAddresses( addresses.Select( x => new UserAddress( x ) ) );
+    public UserData WithAddresses( IEnumerable<UserAddress> addresses )
+    {
+        Addresses.Add( addresses );
+        return this;
+    }
+    public UserData WithUserData( IUserData value )
     {
         FirstName         = value.FirstName;
         LastName          = value.LastName;

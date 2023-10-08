@@ -153,10 +153,10 @@ END";
         record = await Logs.Insert( connection, transaction, record, token );
 
         ImmutableArray<ScopeRecord> scopes = ScopeRecord.CreateArray( log, app, device.AsT0, session );
-        await LogScopeRecord.TryAdd( connection, transaction, this, LogScopes, Scopes, record, scopes, token );
+        await LogScopeRecord.TryAdd( connection, transaction, LogScopes, Scopes, record, scopes, token );
 
         ImmutableArray<LoggerAttachmentRecord> attachments = LoggerAttachmentRecord.CreateArray( log, app, device.AsT0, record, session );
-        await LoggerAttachmentMappingRecord.TryAdd( connection, transaction, this, LogAttachments, Attachments, record, attachments, token );
+        await LoggerAttachmentMappingRecord.TryAdd( connection, transaction, LogAttachments, Attachments, record, attachments, token );
 
         return record;
     }

@@ -11,20 +11,21 @@ namespace Jakar.Database;
 [ SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" ) ]
 public partial class DbTable<TRecord> : ObservableClass, IConnectableDb, IAsyncDisposable where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
-    protected const    char                           QUOTE = '"';
-    protected readonly IConnectableDbRoot             _database;
-    protected readonly TypePropertiesCache.Properties _propertiesCache;
+    protected static readonly TypePropertiesCache.Properties _propertiesCache = TypePropertiesCache.Current.Register<TRecord>();
+    protected const           char                           QUOTE            = '"';
+    protected readonly        IConnectableDbRoot             _database;
 
 
-    [ SuppressMessage( "ReSharper", "ReturnTypeCanBeEnumerable.Global" ) ] public static ImmutableArray<TRecord> Empty       => ImmutableArray<TRecord>.Empty;
-    [ SuppressMessage( "ReSharper", "ReturnTypeCanBeEnumerable.Global" ) ] public static ImmutableList<TRecord>  EmptyList   => ImmutableList<TRecord>.Empty;
-    public                                                                               IEnumerable<string>     ColumnNames => Descriptors.Select( x => x.ColumnName );
+    [ SuppressMessage( "ReSharper", "ReturnTypeCanBeEnumerable.Global" ) ] public static ImmutableArray<TRecord> Empty          => ImmutableArray<TRecord>.Empty;
+    [ SuppressMessage( "ReSharper", "ReturnTypeCanBeEnumerable.Global" ) ] public static ImmutableList<TRecord>  EmptyList      => ImmutableList<TRecord>.Empty;
+    public                                                                               IEnumerable<string>     ColumnNames    => Descriptors.Select( x => x.ColumnName );
+    public                                                                               int                     CommandTimeout => _database.CommandTimeout;
 
     public virtual string CreatedBy => Instance switch
                                        {
                                            DbInstance.Postgres => $"{QUOTE}{nameof(IOwnedTableRecord.CreatedBy)}{QUOTE}",
                                            DbInstance.MsSql    => nameof(IOwnedTableRecord.CreatedBy),
-                                           _                   => throw new OutOfRangeException( nameof(Instance), Instance ),
+                                           _                   => throw new OutOfRangeException( nameof(Instance), Instance )
                                        };
 
     public string CurrentSchema => _database.CurrentSchema;
@@ -33,7 +34,7 @@ public partial class DbTable<TRecord> : ObservableClass, IConnectableDb, IAsyncD
                                          {
                                              DbInstance.Postgres => $@"""{nameof(TableRecord<TRecord>.DateCreated)}""",
                                              DbInstance.MsSql    => nameof(TableRecord<TRecord>.DateCreated),
-                                             _                   => throw new OutOfRangeException( nameof(Instance), Instance ),
+                                             _                   => throw new OutOfRangeException( nameof(Instance), Instance )
                                          };
 
     public virtual IEnumerable<Descriptor> Descriptors => _propertiesCache.GetValues( this );
@@ -42,25 +43,24 @@ public partial class DbTable<TRecord> : ObservableClass, IConnectableDb, IAsyncD
                                            {
                                                DbInstance.Postgres => $@"""{nameof(TableRecord<TRecord>.ID)}""",
                                                DbInstance.MsSql    => nameof(TableRecord<TRecord>.ID),
-                                               _                   => throw new OutOfRangeException( nameof(Instance), Instance ),
+                                               _                   => throw new OutOfRangeException( nameof(Instance), Instance )
                                            };
 
-    public DbInstance          Instance       => _database.Instance;
-    public int                 CommandTimeout => _database.CommandTimeout;
-    public IEnumerable<string> KeyValuePairs  => Descriptors.Select( x => x.KeyValuePair );
+    public DbInstance          Instance      => _database.Instance;
+    public IEnumerable<string> KeyValuePairs => Descriptors.Select( x => x.KeyValuePair );
 
     public virtual string LastModified => Instance switch
                                           {
                                               DbInstance.Postgres => $@"""{nameof(TableRecord<TRecord>.LastModified)}""",
                                               DbInstance.MsSql    => nameof(TableRecord<TRecord>.LastModified),
-                                              _                   => throw new OutOfRangeException( nameof(Instance), Instance ),
+                                              _                   => throw new OutOfRangeException( nameof(Instance), Instance )
                                           };
 
     public virtual string OwnerUserID => Instance switch
                                          {
                                              DbInstance.Postgres => $"{QUOTE}{nameof(IOwnedTableRecord.OwnerUserID)}{QUOTE}",
                                              DbInstance.MsSql    => nameof(IOwnedTableRecord.OwnerUserID),
-                                             _                   => throw new OutOfRangeException( nameof(Instance), Instance ),
+                                             _                   => throw new OutOfRangeException( nameof(Instance), Instance )
                                          };
 
     public string RandomMethod
@@ -70,7 +70,7 @@ public partial class DbTable<TRecord> : ObservableClass, IConnectableDb, IAsyncD
                {
                    DbInstance.MsSql    => "NEWID()",
                    DbInstance.Postgres => "RANDOM()",
-                   _                   => throw new OutOfRangeException( nameof(Instance), Instance ),
+                   _                   => throw new OutOfRangeException( nameof(Instance), Instance )
                };
     }
     public RecordGenerator<TRecord> Records => new(this);
@@ -85,7 +85,7 @@ public partial class DbTable<TRecord> : ObservableClass, IConnectableDb, IAsyncD
                {
                    DbInstance.Postgres => $"{QUOTE}{TRecord.TableName}{QUOTE}",
                    DbInstance.MsSql    => TRecord.TableName,
-                   _                   => TRecord.TableName,
+                   _                   => TRecord.TableName
                };
     }
     public IEnumerable<string> VariableNames => Descriptors.Select( x => x.VariableName );
@@ -93,8 +93,7 @@ public partial class DbTable<TRecord> : ObservableClass, IConnectableDb, IAsyncD
 
     public DbTable( IConnectableDbRoot database )
     {
-        _database        = database;
-        _propertiesCache = TypePropertiesCache.Current[typeof(TRecord)];
+        _database = database;
 
         if ( TRecord.TableName != typeof(TRecord).GetTableName() ) { throw new InvalidOperationException( $"{TRecord.TableName} != {typeof(TRecord).GetTableName()}" ); }
     }
@@ -132,7 +131,7 @@ public partial class DbTable<TRecord> : ObservableClass, IConnectableDb, IAsyncD
 
         await using ( reader )
         {
-            await foreach ( var record in TRecord.CreateAsync( reader, token ) ) { yield return record; }
+            await foreach ( TRecord record in TRecord.CreateAsync( reader, token ) ) { yield return record; }
         }
     }
 
