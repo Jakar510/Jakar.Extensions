@@ -114,18 +114,20 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     {
         try
         {
-            // DbCommand dbCommand = connection.CreateCommand();
-            // dbCommand.CommandTimeout = CommandTimeout;
-            // if ( commandType.HasValue ) { dbCommand.CommandType = commandType.Value; }
-            //
-            // // BindByName - bool
-            // // InitialLONGFetchSize - int
-            // // FetchSize - long
-            // if ( dbCommand is SqlCommand msSql ) { }
-            //
-            // else if ( dbCommand is not NpgsqlCommand postgres ) { }
-            //
-            // DbDataReader temp = await dbCommand.ExecuteReaderAsync( CommandBehavior.SequentialAccess, token );
+            /*
+            DbCommand dbCommand = connection.CreateCommand();
+            dbCommand.CommandTimeout = CommandTimeout;
+            if ( commandType.HasValue ) { dbCommand.CommandType = commandType.Value; }
+
+            // BindByName - bool
+            // InitialLONGFetchSize - int
+            // FetchSize - long
+            if ( dbCommand is SqlCommand msSql ) { }
+
+            else if ( dbCommand is not NpgsqlCommand postgres ) { }
+
+            DbDataReader temp = await dbCommand.ExecuteReaderAsync( CommandBehavior.SequentialAccess, token );
+            */
 
             CommandDefinition command = GetCommandDefinition( transaction, sql, token );
             DbDataReader      reader  = await connection.ExecuteReaderAsync( command );
@@ -152,7 +154,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
                        _                          => throw new OutOfRangeException( nameof(connection.State), connection.State )
                    };
         }
-        catch ( Exception e ) { return HealthCheckResult.Unhealthy( e.Message ); }
+        catch ( Exception e ) { return HealthCheckResult.Unhealthy( e.Message, e ); }
     }
 
 
