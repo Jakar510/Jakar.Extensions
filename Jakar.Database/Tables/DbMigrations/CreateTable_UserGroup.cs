@@ -4,16 +4,12 @@
 namespace Jakar.Database.DbMigrations;
 
 
-[Migration( 5 )]
+[ Migration( 5 ) ]
 
 // ReSharper disable once InconsistentNaming
 public sealed class CreateTable_UserGroup : MigrateUserGroupRecord
 {
     public CreateTable_UserGroup() : base() { }
-    public override void Up()
-    {
-        CheckSchema();
-        CreateTable();
-    }
+    public override void Up()   => CreateTable();
     public override void Down() => DeleteTable();
 }

@@ -3,9 +3,9 @@
 
 public partial class TopBar : ControlBase
 {
-    private          string?                            _notifyCount;
-    private readonly ObservableCollection<Notification> _notifications = new();
-    [Inject] public  ILogger<TopBar>                    Logger { get; set; } = default!;
+    private readonly  ObservableCollection<Notification> _notifications = new();
+    private           string?                            _notifyCount;
+    [ Inject ] public ILogger<TopBar>                    Logger { get; set; } = default!;
 
 
     protected override void OnInitialized()

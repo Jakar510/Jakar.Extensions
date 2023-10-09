@@ -6,7 +6,7 @@ namespace Jakar.Database;
 
 [ Serializable, Table( "Codes" ) ]
 public sealed record RecoveryCodeRecord
-    ( [ MaxLength( 1024 ) ] string Code, RecordID<RecoveryCodeRecord> ID, RecordID<UserRecord>? CreatedBy, Guid? OwnerUserID, DateTimeOffset DateCreated, DateTimeOffset? LastModified = default ) : OwnedTableRecord<RecoveryCodeRecord>( ID,
+    ( [ MaxLength( 10240 ) ] string Code, RecordID<RecoveryCodeRecord> ID, RecordID<UserRecord>? CreatedBy, Guid? OwnerUserID, DateTimeOffset DateCreated, DateTimeOffset? LastModified = default ) : OwnedTableRecord<RecoveryCodeRecord>( ID,
                                                                                                                                                                                                                                            CreatedBy,
                                                                                                                                                                                                                                            OwnerUserID,
                                                                                                                                                                                                                                            DateCreated,

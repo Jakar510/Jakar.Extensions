@@ -34,6 +34,11 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <Compile Remove="DbMigrations\CustomPostgresProcessor.cs" />
+	  <Compile Remove="DbMigrations\CustomPostgresQuoter.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="Jakar.Extensions" Version="6.8.7" />
 		<PackageReference Include="FluentMigrator" Version="3.3.2" />
 		<PackageReference Include="FluentMigrator.Runner" Version="3.3.2" />

@@ -6,7 +6,7 @@ using FluentMigrator.Builders.Create.Table;
 namespace Jakar.AppLogger.Portal.Data.DbMigrations;
 
 
-[Migration( 105 )]
+[ Migration( 105 ) ]
 
 // ReSharper disable once InconsistentNaming
 public sealed class Create_DeviceRecord : LoggerMigration<DeviceRecord>
@@ -17,7 +17,6 @@ public sealed class Create_DeviceRecord : LoggerMigration<DeviceRecord>
     public override void Down() => DeleteTable();
     public override void Up()
     {
-        CheckSchema();
         ICreateTableWithColumnSyntax table = CreateTable();
 
 

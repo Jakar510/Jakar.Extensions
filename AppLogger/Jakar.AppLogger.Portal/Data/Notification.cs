@@ -6,8 +6,8 @@ namespace Jakar.AppLogger.Portal.Data;
 
 public sealed record Notification( string Message, string Type ) : IComparable<Notification>, IComparable
 {
-    public static Sorter<Notification>    Sorter    => Sorter<Notification>.Default;
     public static Equalizer<Notification> Equalizer => Equalizer<Notification>.Default;
+    public static Sorter<Notification>    Sorter    => Sorter<Notification>.Default;
 
 
     public int CompareTo( Notification? other )

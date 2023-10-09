@@ -62,14 +62,10 @@ global using Microsoft.CodeAnalysis;
 global using Microsoft.IdentityModel.Tokens;
 global using OneOf;
 global using ConnectionStringOptions =
-    OneOf.OneOf<System.Security.SecureString, 
-        System.Func<System.Security.SecureString>,
-        System.Func<System.Threading.CancellationToken, System.Threading.Tasks.Task<System.Security.SecureString>>,
-        System.Func<System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<System.Security.SecureString>>,
-        System.Func<Microsoft.Extensions.Configuration.IConfiguration, System.Security.SecureString>,
-        System.Func<Microsoft.Extensions.Configuration.IConfiguration, System.Threading.CancellationToken, System.Security.SecureString>,
-        System.Func<Microsoft.Extensions.Configuration.IConfiguration, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<System.Security.SecureString>>,
-        System.Func<Microsoft.Extensions.Configuration.IConfiguration, System.Threading.CancellationToken, System.Threading.Tasks.Task<System.Security.SecureString>>
-    >;
+    OneOf.OneOf<Jakar.Database.SecuredString, System.Func<Jakar.Database.SecuredString>, System.Func<System.Threading.CancellationToken, System.Threading.Tasks.Task<Jakar.Database.SecuredString>>,
+        System.Func<System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<Jakar.Database.SecuredString>>, System.Func<Microsoft.Extensions.Configuration.IConfiguration, Jakar.Database.SecuredString>,
+        System.Func<Microsoft.Extensions.Configuration.IConfiguration, System.Threading.CancellationToken, Jakar.Database.SecuredString>,
+        System.Func<Microsoft.Extensions.Configuration.IConfiguration, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<Jakar.Database.SecuredString>>,
+        System.Func<Microsoft.Extensions.Configuration.IConfiguration, System.Threading.CancellationToken, System.Threading.Tasks.Task<Jakar.Database.SecuredString>>>;
 global using KeyAttribute = Dapper.Contrib.Extensions.KeyAttribute;
 global using TableAttribute = Dapper.Contrib.Extensions.TableAttribute;

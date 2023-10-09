@@ -2,48 +2,44 @@
 // 09/12/2022  10:06 AM
 
 
-using Newtonsoft.Json.Linq;
-
-
-
 namespace Jakar.AppLogger.Portal.Data.Tables;
 
 
 [ Serializable, Table( "Logs" ) ]
 public sealed record LogRecord : LoggerTable<LogRecord>, IDbReaderMapping<LogRecord>, IAppLog, ILogInfo, IAppStartTime
 {
-    public static string TableName { get; } = typeof(LogRecord).GetTableName();
+    public static string                                                      TableName        { get; } = typeof(LogRecord).GetTableName();
+    public        RecordID<AppRecord>                                         AppID            { get; init; }
+    Guid IStartSession.                                                       AppID            => AppID.Value;
+    public                                             DateTimeOffset         AppStartTime     { get; init; }
+    [ MaxLength( IAppLog.APP_USER_ID_LENGTH ) ] public string?                AppUserID        { get; init; }
+    [ MaxLength( IAppLog.BUILD_ID_LENGTH ) ]    public string?                BuildID          { get; init; }
+    public                                             string?                CategoryName     { get; init; }
+    public                                             RecordID<DeviceRecord> DeviceID         { get; init; }
+    Guid IStartSession.                                                       DeviceID         => DeviceID.Value;
+    public int                                                                EventID          { get; init; }
+    EventID IAppLog.                                                          EventID          => new(EventID, EventName);
+    [ MaxLength( IAppLog.EVENT_NAME_LENGTH ) ] public string?                 EventName        { get; init; }
+    [ MaxLength( MAX_STRING_SIZE ) ]           public string?                 ExceptionDetails { get; init; }
+    public                                            bool                    IsError          { get; init; }
+    public                                            bool                    IsFatal          { get; init; }
+    public                                            bool                    IsValid          { get; init; }
+    public                                            LogLevel                Level            { get; init; }
+    Guid ILogInfo.                                                            LogID            => ID.Value;
+    [ MaxLength( MAX_STRING_SIZE ) ] public string                            Message          { get; init; } = string.Empty;
+    StartSessionReply IAppLog.                                                Session          => new(SessionID.Value, DeviceID.Value, AppID.Value);
+    public RecordID<SessionRecord>                                            SessionID        { get; init; }
+    Guid? ISessionID.                                                         SessionID        => SessionID.Value;
+    [ MaxLength( MAX_STRING_SIZE ) ] public string?                           StackTrace       { get; init; }
+    public                                  DateTimeOffset                    Timestamp        { get; init; }
 
 
-    public                                             DateTimeOffset          TimeStamp        { get; init; }
-    public                                             RecordID<AppRecord>     AppID            { get; init; }
-    public                                             DateTimeOffset          AppStartTime     { get; init; }
-    [ MaxLength( IAppLog.APP_USER_ID_LENGTH ) ] public string?                 AppUserID        { get; init; }
-    [ MaxLength( IAppLog.BUILD_ID_LENGTH ) ]    public string?                 BuildID          { get; init; }
-    public                                             string?                 CategoryName     { get; init; }
-    public                                             RecordID<DeviceRecord>  DeviceID         { get; init; }
-    public                                             int                     EventID          { get; init; }
-    [ MaxLength( IAppLog.EVENT_NAME_LENGTH ) ] public  string?                 EventName        { get; init; }
-    [ MaxLength( MAX_STRING_SIZE ) ]           public  string?                 ExceptionDetails { get; init; }
-    public                                             bool                    IsError          { get; init; }
-    public                                             bool                    IsFatal          { get; init; }
-    public                                             bool                    IsValid          { get; init; }
-    public                                             LogLevel                Level            { get; init; }
-    [ MaxLength( MAX_STRING_SIZE ) ] public            string                  Message          { get; init; } = string.Empty;
-    public                                             RecordID<SessionRecord> SessionID        { get; init; }
-    [ MaxLength( MAX_STRING_SIZE ) ] public            string?                 StackTrace       { get; init; }
-    public                                             DateTimeOffset          Timestamp        { get; init; }
-    StartSessionReply IAppLog.                                                 Session          => new(SessionID.Value, DeviceID.Value, AppID.Value);
-    EventID IAppLog.                                                           EventID          => new(EventID, EventName);
-    Guid? ISessionID.                                                          SessionID        => SessionID.Value;
-    Guid ILogInfo.                                                             LogID            => ID.Value;
-    Guid IStartSession.                                                        DeviceID         => DeviceID.Value;
-    Guid IStartSession.                                                        AppID            => AppID.Value;
+    public DateTimeOffset TimeStamp { get; init; }
 
 
     public LogRecord( AppLog log, SessionRecord session ) : base( RecordID<LogRecord>.New() )
     {
-        System.Diagnostics.Debug.Assert( session.ID.Value == log.Session.SessionID );
+        Debug.Assert( session.ID.Value == log.Session.SessionID );
 
         IsValid          = log.IsValid;
         IsError          = log.IsError;

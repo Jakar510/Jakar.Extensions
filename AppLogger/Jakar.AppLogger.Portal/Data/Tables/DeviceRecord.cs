@@ -51,27 +51,27 @@ public sealed record DeviceRecord( int?                                         
 
     public static DeviceRecord Create( DbDataReader reader )
     {
-        var appBuild     = reader.GetFieldValue<int>( nameof(AppBuild) );
-        var appNamespace = reader.GetString( nameof(AppNamespace) );
-        var appVersion   = AppVersion.Parse( reader.GetString( nameof(AppVersion) ) );
-        var deviceID     = reader.GetString( nameof(DeviceID) );
+        int        appBuild     = reader.GetFieldValue<int>( nameof(AppBuild) );
+        string     appNamespace = reader.GetString( nameof(AppNamespace) );
+        AppVersion appVersion   = AppVersion.Parse( reader.GetString( nameof(AppVersion) ) );
+        string     deviceID     = reader.GetString( nameof(DeviceID) );
 
         var hardwareInfo = reader.GetFieldValue<string?>( nameof(HwInfo) )
                                 ?.FromJson<HwInfo>();
 
-        var locale              = reader.GetString( nameof(Locale) );
-        var model               = reader.GetString( nameof(Model) );
-        var osApiLevel          = reader.GetFieldValue<int?>( nameof(OsApiLevel) );
-        var processArchitecture = (Architecture)reader.GetFieldValue<long>( nameof(ProcessArchitecture) );
-        var osName              = reader.GetString( nameof(OsName) );
-        var osVersion           = reader.GetString( nameof(OsVersion) );
-        var platform            = (PlatformID)reader.GetFieldValue<long>( nameof(Platform) );
-        var sdkName             = reader.GetString( nameof(SdkName) );
-        var sdkVersion          = reader.GetString( nameof(SdkVersion) );
-        var timeZoneOffset      = reader.GetFieldValue<TimeSpan>( nameof(TimeZoneOffset) );
-        var dateCreated         = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
-        var lastModified        = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
-        var id                  = new RecordID<DeviceRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) );
+        string locale              = reader.GetString( nameof(Locale) );
+        string model               = reader.GetString( nameof(Model) );
+        int?   osApiLevel          = reader.GetFieldValue<int?>( nameof(OsApiLevel) );
+        var    processArchitecture = (Architecture)reader.GetFieldValue<long>( nameof(ProcessArchitecture) );
+        string osName              = reader.GetString( nameof(OsName) );
+        string osVersion           = reader.GetString( nameof(OsVersion) );
+        var    platform            = (PlatformID)reader.GetFieldValue<long>( nameof(Platform) );
+        string sdkName             = reader.GetString( nameof(SdkName) );
+        string sdkVersion          = reader.GetString( nameof(SdkVersion) );
+        var    timeZoneOffset      = reader.GetFieldValue<TimeSpan>( nameof(TimeZoneOffset) );
+        var    dateCreated         = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
+        var    lastModified        = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
+        var    id                  = new RecordID<DeviceRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) );
 
         return new DeviceRecord( appBuild,
                                  appNamespace,
@@ -99,26 +99,24 @@ public sealed record DeviceRecord( int?                                         
 
 
     // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Global
-    public DeviceRecord Update( IDevice device )
-    {
-        return this with
-               {
-                   DeviceID = device.DeviceID,
-                   SdkName = device.SdkName,
-                   SdkVersion = device.SdkVersion,
-                   Model = device.Model,
-                   OsName = device.OsName,
-                   OsVersion = device.OsVersion.ToString(),
-                   OsApiLevel = device.OsApiLevel,
-                   Locale = device.Locale,
-                   TimeZoneOffset = device.TimeZoneOffset,
-                   AppVersion = device.AppVersion,
-                   AppBuild = device.AppBuild,
-                   AppNamespace = device.AppNamespace,
-                   ProcessArchitecture = device.ProcessArchitecture,
-                   HwInfo = device.HwInfo
-               };
-    }
+    public DeviceRecord Update( IDevice device ) =>
+        this with
+        {
+            DeviceID = device.DeviceID,
+            SdkName = device.SdkName,
+            SdkVersion = device.SdkVersion,
+            Model = device.Model,
+            OsName = device.OsName,
+            OsVersion = device.OsVersion.ToString(),
+            OsApiLevel = device.OsApiLevel,
+            Locale = device.Locale,
+            TimeZoneOffset = device.TimeZoneOffset,
+            AppVersion = device.AppVersion,
+            AppBuild = device.AppBuild,
+            AppNamespace = device.AppNamespace,
+            ProcessArchitecture = device.ProcessArchitecture,
+            HwInfo = device.HwInfo
+        };
 
 
     public static DynamicParameters GetDynamicParameters( DeviceDescriptor device )
@@ -151,11 +149,11 @@ public sealed record AppDeviceRecord : Mapping<AppDeviceRecord, AppRecord, Devic
     public static AppDeviceRecord Create( AppRecord key, DeviceRecord value ) => new(key, value);
     public static AppDeviceRecord Create( DbDataReader reader )
     {
-        var             key          = new RecordID<AppRecord>( reader.GetFieldValue<Guid>( nameof(KeyID) ) );
-        var             value        = new RecordID<DeviceRecord>( reader.GetFieldValue<Guid>( nameof(KeyID) ) );
-        DateTimeOffset  dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
-        DateTimeOffset? lastModified = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
-        var             id           = new RecordID<AppDeviceRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) );
+        var key          = new RecordID<AppRecord>( reader.GetFieldValue<Guid>( nameof(KeyID) ) );
+        var value        = new RecordID<DeviceRecord>( reader.GetFieldValue<Guid>( nameof(KeyID) ) );
+        var dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
+        var lastModified = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
+        var id           = new RecordID<AppDeviceRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) );
         return new AppDeviceRecord( key, value, id, dateCreated, lastModified );
     }
     public static async IAsyncEnumerable<AppDeviceRecord> CreateAsync( DbDataReader reader, [ EnumeratorCancellation ] CancellationToken token = default )

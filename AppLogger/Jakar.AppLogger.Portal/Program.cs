@@ -12,7 +12,7 @@ string[] urls =
 {
     "https://localhost",
     "https://0.0.0.0:443",
-    "https://0.0.0.0:6969",
+    "https://0.0.0.0:6969"
 };
 
 
@@ -24,7 +24,7 @@ builder.AddDefaultLogging<AppLoggerPortal>( true )
        .AddProvider( new FluentMigratorConsoleLoggerProvider( new OptionsWrapper<FluentMigratorLoggerOptions>( new FluentMigratorLoggerOptions
                                                                                                                {
                                                                                                                    ShowElapsedTime = true,
-                                                                                                                   ShowSql         = true,
+                                                                                                                   ShowSql         = true
                                                                                                                } ) ) );
 
 
@@ -71,13 +71,13 @@ builder.Services.AddSwaggerGen( swagger =>
                                                             Contact = new OpenApiContact
                                                                       {
                                                                           Url  = new Uri( "https://github.com/Jakar510/Jakar.AppLogger" ),
-                                                                          Name = "Jakar.AppLogger",
+                                                                          Name = "Jakar.AppLogger"
                                                                       },
                                                             License = new OpenApiLicense
                                                                       {
                                                                           Url  = new Uri( "https://www.gnu.org/licenses/gpl-3.0.en.html" ),
-                                                                          Name = "GNU General Public License v3.0",
-                                                                      },
+                                                                          Name = "GNU General Public License v3.0"
+                                                                      }
                                                         } );
 
 
@@ -206,7 +206,7 @@ builder.WebHost.UseKestrel( options =>
                                                                     listenOptions.ServerCertificate          = new X509Certificate2( FILE );
                                                                     listenOptions.CheckCertificateRevocation = true;
                                                                 } );
-                                
+
                                 options.Listen( IPAddress.Any, 443, listenOptions => { listenOptions.UseHttps( FILE, default ); } );
                             } );
 */

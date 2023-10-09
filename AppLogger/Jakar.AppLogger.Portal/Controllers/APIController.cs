@@ -1,8 +1,7 @@
 ﻿namespace Jakar.AppLogger.Portal.Controllers;
 
 
-[ApiController]
-[RouteAttribute( "[Controller]/[Action]" )]
+[ ApiController, RouteAttribute( "[Controller]/[Action]" ) ]
 public class APIController : ControllerBase
 {
     private readonly LoggerDB _api;
@@ -11,8 +10,7 @@ public class APIController : ControllerBase
     public APIController( LoggerDB api ) => _api = api;
 
 
-    [HttpPost]
-    [Route( Routes.REGISTER )]
+    [ HttpPost, Route( Routes.REGISTER ) ]
     public async Task<ActionResult<Tokens>> Register( VerifyRequest<UserData> request, CancellationToken token )
     {
         OneOf<Tokens, Error> result = await _api.Register( request, string.Empty, default, token );
@@ -20,8 +18,7 @@ public class APIController : ControllerBase
     }
 
 
-    [HttpPost]
-    [Route( Routes.VERIFY )]
+    [ HttpPost, Route( Routes.VERIFY ) ]
     public async Task<ActionResult<Tokens>> Verify( VerifyRequest request, CancellationToken token )
     {
         OneOf<Tokens, Error> result = await _api.Verify( request, default, token );
@@ -29,8 +26,7 @@ public class APIController : ControllerBase
     }
 
 
-    [HttpPost]
-    [Route( Routes.REFRESH )]
+    [ HttpPost, Route( Routes.REFRESH ) ]
     public async Task<ActionResult<Tokens>> Refresh( string refreshToken, CancellationToken token )
     {
         OneOf<Tokens, Error> result = await _api.Refresh( refreshToken, default, token );
@@ -38,8 +34,7 @@ public class APIController : ControllerBase
     }
 
 
-    [HttpPost]
-    [Route( Routes.LOG )]
+    [ HttpPost, Route( Routes.LOG ) ]
     public async Task<ActionResult<bool>> Log( IEnumerable<AppLog> logs, CancellationToken token )
     {
         OneOf<bool, Error> result = await _api.SendLog( logs, token );
@@ -47,8 +42,7 @@ public class APIController : ControllerBase
     }
 
 
-    [HttpPost]
-    [Route( Routes.Sessions.START )]
+    [ HttpPost, Route( Routes.Sessions.START ) ]
     public async Task<ActionResult<StartSessionReply>> StartSession( StartSession session, CancellationToken token )
     {
         OneOf<StartSessionReply, Error> result = await _api.StartSession( session, token );
@@ -56,8 +50,7 @@ public class APIController : ControllerBase
     }
 
 
-    [HttpPost]
-    [Route( Routes.Sessions.END )]
+    [ HttpPost, Route( Routes.Sessions.END ) ]
     public async Task<ActionResult<bool>> EndSession( Guid sessionID, CancellationToken token )
     {
         OneOf<bool, Error> result = await _api.EndSession( sessionID, token );

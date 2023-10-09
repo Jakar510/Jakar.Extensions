@@ -7,11 +7,11 @@ namespace Jakar.AppLogger.Portal.Data.Tables;
 
 [ Serializable, Table( "Sessions" ) ]
 public sealed record SessionRecord( DateTimeOffset          AppStartTime,
-                                            RecordID<AppRecord>     AppID,
-                                            RecordID<DeviceRecord>  DeviceID,
-                                            RecordID<SessionRecord> ID,
-                                            DateTimeOffset          DateCreated,
-                                            DateTimeOffset?         LastModified = default
+                                    RecordID<AppRecord>     AppID,
+                                    RecordID<DeviceRecord>  DeviceID,
+                                    RecordID<SessionRecord> ID,
+                                    DateTimeOffset          DateCreated,
+                                    DateTimeOffset?         LastModified = default
 ) : LoggerTable<SessionRecord>( ID, DateCreated, LastModified ), IDbReaderMapping<SessionRecord>, IStartSession
 {
     public static string TableName { get; } = typeof(SessionRecord).GetTableName();
@@ -60,7 +60,7 @@ public sealed record SessionRecord( DateTimeOffset          AppStartTime,
 
         if ( ReferenceEquals( this, other ) ) { return 0; }
 
-        var appCompare = AppID.CompareTo( other.AppID );
+        int appCompare = AppID.CompareTo( other.AppID );
         if ( appCompare != 0 ) { return appCompare; }
 
         return DeviceID.CompareTo( other.DeviceID );

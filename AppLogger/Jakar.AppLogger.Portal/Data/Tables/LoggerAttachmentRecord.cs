@@ -29,8 +29,8 @@ public sealed record LoggerAttachmentRecord( [ property: MaxLength( LoggerAttach
 
     Guid IStartSession.AppID     => AppID.Value;
     Guid IStartSession.DeviceID  => DeviceID.Value;
-    Guid? ISessionID.  SessionID => SessionID?.Value;
     Guid ILogInfo.     LogID     => LogID.Value;
+    Guid? ISessionID.  SessionID => SessionID?.Value;
 
 
     public LoggerAttachmentRecord( LoggerAttachment attachment, ILogInfo info, RecordID<ScopeRecord>? scope ) : this( attachment.Content,
@@ -69,19 +69,19 @@ public sealed record LoggerAttachmentRecord( [ property: MaxLength( LoggerAttach
 
     public static LoggerAttachmentRecord Create( DbDataReader reader )
     {
-        var content      = reader.GetString( nameof(Content) );
-        var description  = reader.GetString( nameof(Description) );
-        var fileName     = reader.GetString( nameof(FileName) );
-        var length       = reader.GetFieldValue<long>( nameof(LogID) );
-        var type         = reader.GetString( nameof(Type) );
-        var isBinary     = reader.GetFieldValue<bool>( nameof(Type) );
-        var appID        = new RecordID<AppRecord>( reader.GetFieldValue<Guid>( nameof(AppID) ) );
-        var deviceID     = new RecordID<DeviceRecord>( reader.GetFieldValue<Guid>( nameof(DeviceID) ) );
-        var logID        = new RecordID<LogRecord>( reader.GetFieldValue<Guid>( nameof(LogID) ) );
-        var sessionID    = new RecordID<SessionRecord>( reader.GetFieldValue<Guid>( nameof(SessionID) ) );
-        var dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
-        var lastModified = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
-        var id           = new RecordID<LoggerAttachmentRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) );
+        string content      = reader.GetString( nameof(Content) );
+        string description  = reader.GetString( nameof(Description) );
+        string fileName     = reader.GetString( nameof(FileName) );
+        long   length       = reader.GetFieldValue<long>( nameof(LogID) );
+        string type         = reader.GetString( nameof(Type) );
+        bool   isBinary     = reader.GetFieldValue<bool>( nameof(Type) );
+        var    appID        = new RecordID<AppRecord>( reader.GetFieldValue<Guid>( nameof(AppID) ) );
+        var    deviceID     = new RecordID<DeviceRecord>( reader.GetFieldValue<Guid>( nameof(DeviceID) ) );
+        var    logID        = new RecordID<LogRecord>( reader.GetFieldValue<Guid>( nameof(LogID) ) );
+        var    sessionID    = new RecordID<SessionRecord>( reader.GetFieldValue<Guid>( nameof(SessionID) ) );
+        var    dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
+        var    lastModified = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
+        var    id           = new RecordID<LoggerAttachmentRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) );
 
         return new LoggerAttachmentRecord( content,
                                            description,
@@ -137,7 +137,7 @@ public sealed record LoggerAttachmentRecord( [ property: MaxLength( LoggerAttach
                                                                                Description = attachment.Description,
                                                                                Type = attachment.Type,
                                                                                FileName = attachment.FileName,
-                                                                               IsBinary = attachment.IsBinary,
+                                                                               IsBinary = attachment.IsBinary
                                                                            };
 
 

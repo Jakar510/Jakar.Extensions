@@ -10,7 +10,7 @@ public abstract class MigrateAddress : Migration<AddressRecord>
 
     protected override ICreateTableWithColumnSyntax CreateTable()
     {
-        var table = base.CreateTable();
+        ICreateTableWithColumnSyntax table = base.CreateTable();
 
         table.WithColumn( nameof(AddressRecord.Line1) )
              .AsString( 512 )

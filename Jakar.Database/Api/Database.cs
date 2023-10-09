@@ -18,7 +18,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     public             DbTable<AddressRecord>          Addresses         { get; }
     public             int?                            CommandTimeout    => Options.CommandTimeout;
     public             IConfiguration                  Configuration     { get; }
-    protected internal SecureString?                   ConnectionString  { get; set; }
+    protected internal SecuredString?                  ConnectionString  { get; set; }
     public             string                          CurrentSchema     => Options.CurrentSchema;
     public             DbTable<GroupRecord>            Groups            { get; }
     public             DbInstance                      Instance          => Options.DbType;
@@ -81,7 +81,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     }
 
 
-    protected abstract DbConnection CreateConnection( in SecureString secure );
+    protected abstract DbConnection CreateConnection( in SecuredString secure );
     public async ValueTask<DbConnection> ConnectAsync( CancellationToken token )
     {
         ConnectionString ??= await Options.GetConnectionStringAsync( Configuration, token );

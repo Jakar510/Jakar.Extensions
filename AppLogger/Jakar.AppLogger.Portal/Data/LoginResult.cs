@@ -16,7 +16,7 @@ public readonly record struct LoginResult( LoginResult.State Result, UserRecord?
     public static implicit operator LoginResult( State      result ) => new(result);
     public static implicit operator LoginResult( UserRecord result ) => new(result);
 
-    public bool GetResult( ControllerBase controller, [NotNullWhen( true )] out ActionResult? actionResult, [NotNullWhen( false )] out UserRecord? user )
+    public bool GetResult( ControllerBase controller, [ NotNullWhen( true ) ] out ActionResult? actionResult, [ NotNullWhen( false ) ] out UserRecord? user )
     {
         user = User;
 
@@ -30,7 +30,7 @@ public readonly record struct LoginResult( LoginResult.State Result, UserRecord?
                            State.Disabled            => controller.Unauthorized(),
                            State.ExpiredSubscription => controller.BadRequest(),
                            State.NoSubscription      => controller.BadRequest(),
-                           _                         => throw new OutOfRangeException( nameof(Result), Result ),
+                           _                         => throw new OutOfRangeException( nameof(Result), Result )
                        };
 
         return actionResult is not null && user is null;
@@ -47,6 +47,6 @@ public readonly record struct LoginResult( LoginResult.State Result, UserRecord?
         Locked,
         Disabled,
         ExpiredSubscription,
-        NoSubscription,
+        NoSubscription
     }
 }

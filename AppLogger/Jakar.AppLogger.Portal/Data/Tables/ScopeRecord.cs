@@ -26,12 +26,12 @@ public sealed record ScopeRecord( RecordID<AppRecord>     AppID,
 
     public static ScopeRecord Create( DbDataReader reader )
     {
-        var                   appID        = new RecordID<AppRecord>( reader.GetFieldValue<Guid>( nameof(AppID) ) );
-        var                   deviceID     = new RecordID<DeviceRecord>( reader.GetFieldValue<Guid>( nameof(DeviceID) ) );
-        var                   sessionID    = new RecordID<SessionRecord>( reader.GetFieldValue<Guid>( nameof(SessionID) ) );
-        DateTimeOffset        dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
-        DateTimeOffset?       lastModified = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
-        RecordID<ScopeRecord> id           = new RecordID<ScopeRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) );
+        var appID        = new RecordID<AppRecord>( reader.GetFieldValue<Guid>( nameof(AppID) ) );
+        var deviceID     = new RecordID<DeviceRecord>( reader.GetFieldValue<Guid>( nameof(DeviceID) ) );
+        var sessionID    = new RecordID<SessionRecord>( reader.GetFieldValue<Guid>( nameof(SessionID) ) );
+        var dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
+        var lastModified = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
+        var id           = new RecordID<ScopeRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) );
         return new ScopeRecord( appID, deviceID, sessionID, id, dateCreated, lastModified );
     }
     public static async IAsyncEnumerable<ScopeRecord> CreateAsync( DbDataReader reader, [ EnumeratorCancellation ] CancellationToken token = default )

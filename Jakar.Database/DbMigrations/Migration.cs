@@ -36,19 +36,21 @@ public abstract class Migration<TRecord> : Migration where TRecord : TableRecord
 
     protected virtual ICreateTableWithColumnSyntax CreateTable()
     {
+        if ( Schema.Schema( CurrentScheme )
+                   .Exists() is false ) { Create.Schema( CurrentScheme ); }
+
         ICreateTableWithColumnSyntax? table = Create.Table( TableName )
                                                     .InSchema( CurrentScheme );
 
 
         table.WithColumn( nameof(TableRecord<TRecord>.ID) )
              .AsGuid()
-             .PrimaryKey()
-             .WithDefaultValue( SystemMethods.NewGuid );
+             .PrimaryKey();
 
         table.WithColumn( nameof(TableRecord<TRecord>.DateCreated) )
              .AsDateTimeOffset()
              .NotNullable()
-             .WithDefaultValue( SystemMethods.CurrentDateTimeOffset );
+             .WithDefaultValue( SystemMethods.CurrentUTCDateTime );
 
         table.WithColumn( nameof(TableRecord<TRecord>.LastModified) )
              .AsDateTimeOffset()
@@ -61,17 +63,17 @@ public abstract class Migration<TRecord> : Migration where TRecord : TableRecord
     protected IInsertDataSyntax StartInsert() => Insert.IntoTable( TableName );
 
 
-    protected ISchemaSchemaSyntax CheckSchema()
+    protected ISchemaSchemaSyntax _CheckSchema
     {
-        ISchemaSchemaSyntax schema = Schema.Schema( CurrentScheme );
-        if ( !schema.Exists() ) { Create.Schema( CurrentScheme ); }
+        get
+        {
+            ISchemaSchemaSyntax schema = Schema.Schema( CurrentScheme );
+            if ( !schema.Exists() ) { _ = Create.Schema( CurrentScheme ); }
 
-        return schema;
+            return schema;
+        }
     }
-
-
-    protected ISchemaTableSyntax CheckTableSchema() => CheckSchema()
-       .Table( TableName );
+    protected ISchemaTableSyntax CheckTableSchema() => _CheckSchema.Table( TableName );
 
 
     /// <param name="dataAsAnonymousType"> The columns and values to be used set </param>

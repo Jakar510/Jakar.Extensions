@@ -1,6 +1,4 @@
 ﻿using System.Collections.Immutable;
-using System.Security;
-using Microsoft.AspNetCore.Http.HttpResults;
 
 
 
@@ -11,11 +9,11 @@ namespace Jakar.AppLogger.Portal.Data;
 public sealed class LoggerDB : Database.Database
 {
     private readonly IDataProtectorProvider                 _dataProtectorProvider;
+    public           DbTable<AppDeviceRecord>               AppDevices     { get; }
     public           DbTable<AppRecord>                     Apps           { get; }
     public           DbTable<LoggerAttachmentRecord>        Attachments    { get; }
-    public           DbTable<LoggerAttachmentMappingRecord> LogAttachments { get; }
     public           DbTable<DeviceRecord>                  Devices        { get; }
-    public           DbTable<AppDeviceRecord>               AppDevices     { get; }
+    public           DbTable<LoggerAttachmentMappingRecord> LogAttachments { get; }
     public           DbTable<LogRecord>                     Logs           { get; }
     public           DbTable<LogScopeRecord>                LogScopes      { get; }
     public           DbTable<ScopeRecord>                   Scopes         { get; }
@@ -52,7 +50,7 @@ public sealed class LoggerDB : Database.Database
     }
 
 
-    protected override DbConnection CreateConnection( in SecureString secure ) => new NpgsqlConnection( secure.GetValue() );
+    protected override DbConnection CreateConnection( in SecuredString secure ) => new NpgsqlConnection( secure );
 
 
     public ValueTask<OneOf<StartSessionReply, Error>> StartSession( StartSession session, CancellationToken token ) => this.TryCall( StartSession, session, token );

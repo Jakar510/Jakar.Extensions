@@ -6,7 +6,7 @@ using FluentMigrator.Builders.Create.Table;
 namespace Jakar.AppLogger.Portal.Data.DbMigrations;
 
 
-[Migration( 107 )]
+[ Migration( 107 ) ]
 
 // ReSharper disable once InconsistentNaming
 public sealed class Create_ScopeRecord : LoggerMigration<ScopeRecord>
@@ -17,7 +17,6 @@ public sealed class Create_ScopeRecord : LoggerMigration<ScopeRecord>
     public override void Down() => DeleteTable();
     public override void Up()
     {
-        CheckSchema();
         ICreateTableWithColumnSyntax table = CreateTable();
 
         table.WithColumn( nameof(ScopeRecord.SessionID) )
