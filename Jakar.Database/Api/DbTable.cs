@@ -14,28 +14,30 @@ public partial class DbTable<TRecord> : ObservableClass, IConnectableDb where TR
     protected readonly        ConcurrentDictionary<int, string>    _whereParameters = new();
     protected readonly        ConcurrentDictionary<string, string> _where           = new();
     protected readonly        IConnectableDbRoot                   _database;
-    private                   SqlCommand?                          _all;
-    protected                 SqlCommand?                          _first;
-    protected                 SqlCommand?                          _firstOrDefault;
-    protected                 SqlCommand?                          _last;
-    protected                 SqlCommand?                          _lastOrDefault;
-    protected                 SqlCommand?                          _sortedIDs;
-    protected                 string?                              _delete;
-    protected                 string?                              _insertOrUpdateMsSql;
-    protected                 string?                              _insertOrUpdatePostgres;
-    protected                 string?                              _next;
-    protected                 string?                              _nextID;
-    protected                 string?                              _randomCountMsSql;
-    protected                 string?                              _randomCountPostgres;
-    protected                 string?                              _randomMsSql;
-    protected                 string?                              _randomPostgres;
-    protected                 string?                              _randomUserCountMsSql;
-    protected                 string?                              _randomUserCountPostgres;
-    protected                 string?                              _single;
-    protected                 string?                              _singleInsert;
-    protected                 string?                              _tryInsertMsSql;
-    protected                 string?                              _tryInsertPostgres;
-    protected                 string?                              _update;
+    protected readonly        SqlCache                             _cache;
+
+    // private                   SqlCommand?                          _all;
+    // protected                 SqlCommand?                          _first;
+    // protected                 SqlCommand?                          _firstOrDefault;
+    // protected                 SqlCommand?                          _last;
+    // protected                 SqlCommand?                          _lastOrDefault;
+    // protected                 SqlCommand?                          _sortedIDs;
+    // protected                 string?                              _delete;
+    // protected                 string?                              _insertOrUpdateMsSql;
+    // protected                 string?                              _insertOrUpdatePostgres;
+    // protected                 string?                              _next;
+    // protected                 string?                              _nextID;
+    // protected                 string?                              _randomCountMsSql;
+    // protected                 string?                              _randomCountPostgres;
+    // protected                 string?                              _randomMsSql;
+    // protected                 string?                              _randomPostgres;
+    // protected                 string?                              _randomUserCountMsSql;
+    // protected                 string?                              _randomUserCountPostgres;
+    // protected                 string?                              _single;
+    // protected                 string?                              _singleInsert;
+    // protected                 string?                              _tryInsertMsSql;
+    // protected                 string?                              _tryInsertPostgres;
+    // protected                 string?                              _update;
 
 
     public static ImmutableArray<TRecord> Empty          => ImmutableArray<TRecord>.Empty;
@@ -122,7 +124,7 @@ public partial class DbTable<TRecord> : ObservableClass, IConnectableDb where TR
     public DbTable( IConnectableDbRoot database )
     {
         _database = database;
-
+        _cache    = new SqlCache( database );
         if ( TRecord.TableName != typeof(TRecord).GetTableName() ) { throw new InvalidOperationException( $"{TRecord.TableName} != {typeof(TRecord).GetTableName()}" ); }
     }
     public virtual ValueTask DisposeAsync()
@@ -135,28 +137,30 @@ public partial class DbTable<TRecord> : ObservableClass, IConnectableDb where TR
 
     void IDbTable.ResetSqlCaches()
     {
-        _all                     = null;
-        _first                   = null;
-        _firstOrDefault          = null;
-        _last                    = null;
-        _lastOrDefault           = null;
-        _sortedIDs               = null;
-        _delete                  = null;
-        _insertOrUpdateMsSql     = null;
-        _insertOrUpdatePostgres  = null;
-        _next                    = null;
-        _nextID                  = null;
-        _randomCountMsSql        = null;
-        _randomCountPostgres     = null;
-        _randomMsSql             = null;
-        _randomPostgres          = null;
-        _randomUserCountMsSql    = null;
-        _randomUserCountPostgres = null;
-        _single                  = null;
-        _singleInsert            = null;
-        _tryInsertMsSql          = null;
-        _tryInsertPostgres       = null;
-        _update                  = null;
+        _cache.Clear();
+
+        // _all                     = null;
+        // _first                   = null;
+        // _firstOrDefault          = null;
+        // _last                    = null;
+        // _lastOrDefault           = null;
+        // _sortedIDs               = null;
+        // _delete                  = null;
+        // _insertOrUpdateMsSql     = null;
+        // _insertOrUpdatePostgres  = null;
+        // _next                    = null;
+        // _nextID                  = null;
+        // _randomCountMsSql        = null;
+        // _randomCountPostgres     = null;
+        // _randomMsSql             = null;
+        // _randomPostgres          = null;
+        // _randomUserCountMsSql    = null;
+        // _randomUserCountPostgres = null;
+        // _single                  = null;
+        // _singleInsert            = null;
+        // _tryInsertMsSql          = null;
+        // _tryInsertPostgres       = null;
+        // _update                  = null;
     }
 
 
@@ -170,8 +174,8 @@ public partial class DbTable<TRecord> : ObservableClass, IConnectableDb where TR
     [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public virtual async IAsyncEnumerable<TRecord> All( DbConnection connection, DbTransaction? transaction, [ EnumeratorCancellation ] CancellationToken token = default )
     {
-        _all ??= $"SELECT * FROM {SchemaTableName}";
-        await using DbDataReader reader = await _database.ExecuteReaderAsync( connection, transaction, _all.Value, token );
+        string                   sql    = _cache[_database.Instance, SqlStatement.All] ??= $"SELECT * FROM {SchemaTableName}";
+        await using DbDataReader reader = await _database.ExecuteReaderAsync( connection, transaction, sql, token );
         await foreach ( TRecord record in TRecord.CreateAsync( reader, token ) ) { yield return record; }
     }
 
