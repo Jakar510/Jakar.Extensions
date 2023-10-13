@@ -32,9 +32,10 @@ public partial class DbTable<TRecord>
     [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public virtual async ValueTask Update( DbConnection connection, DbTransaction? transaction, TRecord record, CancellationToken token = default )
     {
-        Guid              id         = record.ID.Value;
-        DynamicParameters parameters = Database.GetParameters( id, record );
-        string sql = _cache[Instance, SqlStatement.Update];
+        var parameters = new DynamicParameters( record );
+        parameters.Add( ID, record.ID.Value );
+
+        string sql = _cache[Instance][SqlStatement.Update];
 
         try
         {

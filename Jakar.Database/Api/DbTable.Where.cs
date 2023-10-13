@@ -35,11 +35,17 @@ public partial class DbTable<TRecord>
     }
 
     [ MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization ) ]
-    private string GetWhereSql( bool matchAll, DynamicParameters parameters ) =>
-        $"SELECT * FROM {SchemaTableName} WHERE {string.Join( matchAll
-                                                                  ? "AND"
-                                                                  : "OR",
-                                                              parameters.ParameterNames.Select( KeyValuePair ) )}";
+    private string GetWhereSql( bool matchAll, DynamicParameters parameters )
+    {
+        using var buffer = new ValueStringBuilder( parameters.ParameterNames.Sum( x => x.Length ) * 2 );
+
+        buffer.AppendJoin( matchAll
+                               ? "AND"
+                               : "OR",
+                           parameters.ParameterNames.Select( KeyValuePair ) );
+
+        return $"SELECT * FROM {SchemaTableName} WHERE {buffer.Span}";
+    }
 
 
     public virtual async IAsyncEnumerable<TRecord> Where( DbConnection connection, DbTransaction? transaction, SqlCommand sql, [ EnumeratorCancellation ] CancellationToken token = default )

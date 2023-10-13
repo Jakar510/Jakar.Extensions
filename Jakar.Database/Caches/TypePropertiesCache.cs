@@ -2,6 +2,7 @@
 // 08/17/2022  8:48 PM
 
 using static Jakar.Database.Caches.TypePropertiesCache.Properties;
+using TypeInfo = System.Reflection.TypeInfo;
 
 
 
@@ -38,12 +39,18 @@ public sealed class TypePropertiesCache
     public Properties Register( Type type ) => _dictionary.TryGetValue( type, out Properties? result )
                                                    ? result
                                                    : _dictionary[type] = new Properties( type );
-    [ MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization ) ] public Properties Register<T>() where T : TableRecord<T>, IDbReaderMapping<T> => Register( typeof(T) );
+
+    [ MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization ) ]
+    public Properties Register<T>() where T : TableRecord<T>, IDbReaderMapping<T> =>
+        Register( typeof(T) );
 
 
-    public void Register( Assembly assembly ) => Register( assembly.DefinedTypes.Where( x => x.GetCustomAttribute<TableAttribute>( true ) is not null ) );
-    public void Register( params Assembly[] assemblies ) => Register( assemblies.SelectMany( x => x.DefinedTypes )
-                                                                                .Where( x => x.GetCustomAttribute<TableAttribute>( true ) is not null ) );
+    public void Register( Assembly assembly ) =>
+        Register( assembly.DefinedTypes.Where( Predicate ) );
+    public void Register( params Assembly[] assemblies ) =>
+        Register( assemblies.SelectMany( x => x.DefinedTypes )
+                            .Where( Predicate ) );
+
     public void Register( IEnumerable<Type> types )
     {
         foreach ( Type type in types ) { Register( type ); }
@@ -52,6 +59,8 @@ public sealed class TypePropertiesCache
     {
         foreach ( Type type in types ) { Register( type ); }
     }
+
+    private static bool Predicate( TypeInfo x ) => x.GetCustomAttribute<TableAttribute>( true ) is not null;
 
 
 
@@ -107,51 +116,64 @@ public sealed class TypePropertiesCache
         public bool ContainsKey( IConnectableDb value ) => ContainsKey( value.Instance );
 
 
-        [ MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization ) ] public IEnumerable<Descriptor> GetValues( DbInstance     value ) => _dictionary[value].Values;
-        [ MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization ) ] public IEnumerable<Descriptor> GetValues( IConnectableDb value ) => _dictionary[value.Instance].Values;
+        [ MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization ) ]
+        public IEnumerable<Descriptor> GetValues( DbInstance value ) =>
+            _dictionary[value].Values;
+
+        [ MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization ) ]
+        public IEnumerable<Descriptor> GetValues( IConnectableDb value ) =>
+            _dictionary[value.Instance].Values;
 
 
         [ MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization ) ]
         public IEnumerable<Descriptor> NotKeys( DbInstance value ) => _dictionary[value]
                                                                      .Values.Where( x => !x.IsKey );
-        [ MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization ) ] public IEnumerable<Descriptor> NotKeys( IConnectableDb value ) => NotKeys( value.Instance );
+
+        [ MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization ) ]
+        public IEnumerable<Descriptor> NotKeys( IConnectableDb value ) =>
+            NotKeys( value.Instance );
 
 
-        public bool TryGetValue( IConnectableDb key, [ NotNullWhen( true ) ] out Descriptors? value ) => TryGetValue( key.Instance, out value );
-        public bool TryGetValue( DbInstance     key, [ NotNullWhen( true ) ] out Descriptors? value ) => _dictionary.TryGetValue( key, out value );
+        public bool TryGetValue( IConnectableDb key, [ NotNullWhen( true ) ] out Descriptors? value ) =>
+            TryGetValue( key.Instance, out value );
+        public bool TryGetValue( DbInstance key, [ NotNullWhen( true ) ] out Descriptors? value ) =>
+            _dictionary.TryGetValue( key, out value );
 
 
         public IEnumerator<KeyValuePair<DbInstance, Descriptors>> GetEnumerator() => _dictionary.GetEnumerator();
         IEnumerator IEnumerable.                                  GetEnumerator() => _dictionary.GetEnumerator();
 
 
-        [ MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization ) ] public Descriptor Get( DbInstance     table, string columnName ) => _dictionary[table][columnName];
-        [ MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization ) ] public Descriptor Get( IConnectableDb table, string columnName ) => Get( table.Instance, columnName );
+        [ MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization ) ]
+        public Descriptor Get( DbInstance table, string columnName ) =>
+            _dictionary[table][columnName];
+
+        [ MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization ) ]
+        public Descriptor Get( IConnectableDb table, string columnName ) =>
+            Get( table.Instance, columnName );
 
 
 
-        public sealed class Descriptors : IReadOnlyDictionary<string, Descriptor>
+        public sealed class Descriptors( ImmutableDictionary<string, Descriptor> dictionary ) : IReadOnlyDictionary<string, Descriptor>
         {
-            private readonly ImmutableDictionary<string, Descriptor> _dictionary;
-            public           int                                     Count => _dictionary.Count;
+            public int Count => dictionary.Count;
 
 
-            public Descriptor this[ string key ] => _dictionary[key];
-            public IEnumerable<string>     Keys   => _dictionary.Keys;
-            public IEnumerable<Descriptor> Values => _dictionary.Values;
+            public Descriptor this[ string key ] => dictionary[key];
+            public IEnumerable<string>     Keys   => dictionary.Keys;
+            public IEnumerable<Descriptor> Values => dictionary.Values;
 
 
-            public Descriptors( ImmutableDictionary<string, Descriptor> dictionary ) => _dictionary = dictionary;
+            public static implicit operator Descriptors( Dictionary<string, Descriptor>           d ) => new(d.ToImmutableDictionary());
+            public static implicit operator Descriptors( ConcurrentDictionary<string, Descriptor> d ) => new(d.ToImmutableDictionary());
+            public static implicit operator Descriptors( ImmutableDictionary<string, Descriptor>  d ) => new(d);
 
-            public static implicit operator Descriptors( Dictionary<string, Descriptor>          dictionary ) => new(dictionary.ToImmutableDictionary());
-            public static implicit operator Descriptors( ImmutableDictionary<string, Descriptor> dictionary ) => new(dictionary);
-
-            public IEnumerator<KeyValuePair<string, Descriptor>> GetEnumerator() => _dictionary.GetEnumerator();
-            IEnumerator IEnumerable.                             GetEnumerator() => _dictionary.GetEnumerator();
+            public IEnumerator<KeyValuePair<string, Descriptor>> GetEnumerator() => dictionary.GetEnumerator();
+            IEnumerator IEnumerable.                             GetEnumerator() => dictionary.GetEnumerator();
 
 
-            public bool ContainsKey( string key )                                                => _dictionary.ContainsKey( key );
-            public bool TryGetValue( string key, [ NotNullWhen( true ) ] out Descriptor? value ) => _dictionary.TryGetValue( key, out value );
+            public bool ContainsKey( string key )                                                => dictionary.ContainsKey( key );
+            public bool TryGetValue( string key, [ NotNullWhen( true ) ] out Descriptor? value ) => dictionary.TryGetValue( key, out value );
         }
     }
 }

@@ -33,11 +33,11 @@ public partial class DbTable<TRecord>
     public virtual async ValueTask Delete( DbConnection connection, DbTransaction transaction, RecordID<TRecord> id, CancellationToken token = default )
     {
         var parameters = new DynamicParameters();
-        parameters.Add( nameof(id), id );
+        parameters.Add( ID, id );
 
-        _delete ??= $"DELETE FROM {SchemaTableName} WHERE {ID_ColumnName} = @{nameof(id)};";
+        string sql = _cache[Instance][SqlStatement.Delete];
 
-        CommandDefinition command = _database.GetCommandDefinition( transaction, new SqlCommand( _delete, parameters ), token );
+        CommandDefinition command = _database.GetCommandDefinition( transaction, new SqlCommand( sql, parameters ), token );
         await connection.ExecuteScalarAsync( command );
     }
     [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
@@ -50,11 +50,11 @@ public partial class DbTable<TRecord>
     public virtual async ValueTask Delete( DbConnection connection, DbTransaction transaction, Guid id, CancellationToken token = default )
     {
         var parameters = new DynamicParameters();
-        parameters.Add( nameof(id), id );
+        parameters.Add( ID, id );
 
-        _delete ??= $"DELETE FROM {SchemaTableName} WHERE {ID_ColumnName} = @{nameof(id)};";
+        string sql = _cache[Instance][SqlStatement.Delete];
 
-        CommandDefinition command = _database.GetCommandDefinition( transaction, new SqlCommand( _delete, parameters ), token );
+        CommandDefinition command = _database.GetCommandDefinition( transaction, new SqlCommand( sql, parameters ), token );
         await connection.ExecuteScalarAsync( command );
     }
 
@@ -78,15 +78,19 @@ public partial class DbTable<TRecord>
         if ( hash > 0 && !_deleteGuids.TryGetValue( hash, out sql ) ) { _deleteGuids[hash] = sql = GetDeleteSql( matchAll, parameters ); }
 
         sql ??= GetDeleteSql( matchAll, parameters );
-
         CommandDefinition command = _database.GetCommandDefinition( transaction, new SqlCommand( sql ), token );
         await connection.ExecuteScalarAsync( command );
     }
+    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
+    private string GetDeleteSql( bool matchAll, DynamicParameters parameters )
+    {
+        using var buffer = new ValueStringBuilder();
 
+        buffer.AppendJoin( matchAll
+                               ? "AND"
+                               : "OR",
+                           parameters.ParameterNames.Select( KeyValuePair ) );
 
-    private string GetDeleteSql( bool matchAll, DynamicParameters parameters ) =>
-        $"DELETE FROM {SchemaTableName} WHERE {string.Join( matchAll
-                                                                ? "AND"
-                                                                : "OR",
-                                                            parameters.ParameterNames.Select( KeyValuePair ) )};";
+        return $"DELETE FROM {SchemaTableName} WHERE {buffer.Span};";
+    }
 }

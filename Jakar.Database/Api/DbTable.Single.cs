@@ -17,7 +17,7 @@ public partial class DbTable<TRecord>
     public virtual async ValueTask<TRecord?> Single( DbConnection connection, DbTransaction? transaction, string id, CancellationToken token = default )
     {
         DynamicParameters parameters = Database.GetParameters( id, variableName: nameof(TableRecord<TRecord>.ID) );
-        string            sql        = _cache[Instance, SqlStatement.Single];
+        string            sql        = _cache[Instance][SqlStatement.Single];
 
         try
         {
@@ -39,7 +39,7 @@ public partial class DbTable<TRecord>
     public virtual async ValueTask<TRecord?> SingleOrDefault( DbConnection connection, DbTransaction? transaction, string id, CancellationToken token = default )
     {
         DynamicParameters parameters = Database.GetParameters( id, variableName: ID );
-        string            sql        = _cache[Instance, SqlStatement.Single];
+        string            sql        = _cache[Instance][SqlStatement.Single];
 
         try
         {

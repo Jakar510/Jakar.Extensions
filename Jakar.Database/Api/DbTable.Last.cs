@@ -13,14 +13,14 @@ public partial class DbTable<TRecord>
     [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public virtual async ValueTask<TRecord?> Last( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
-        _last ??= $"SELECT * FROM {SchemaTableName} ORDER BY {ID_ColumnName} DESC LIMIT 1";
+        string sql = _cache[Instance][SqlStatement.Last];
 
         try
         {
-            CommandDefinition command = _database.GetCommandDefinition( transaction, _last.Value, token );
+            CommandDefinition command = _database.GetCommandDefinition( transaction, sql, token );
             return await connection.QueryFirstAsync<TRecord>( command );
         }
-        catch ( Exception e ) { throw new SqlException( _last.Value.SQL, e ); }
+        catch ( Exception e ) { throw new SqlException( sql, e ); }
     }
 
 
@@ -30,13 +30,13 @@ public partial class DbTable<TRecord>
     [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public virtual async ValueTask<TRecord?> LastOrDefault( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
-        _lastOrDefault ??= $"SELECT * FROM {SchemaTableName} ORDER BY {ID_ColumnName} DESC LIMIT 1";
+        string sql = _cache[Instance][SqlStatement.Last];
 
         try
         {
-            CommandDefinition command = _database.GetCommandDefinition( transaction, _lastOrDefault.Value, token );
+            CommandDefinition command = _database.GetCommandDefinition( transaction, sql, token );
             return await connection.QueryFirstOrDefaultAsync<TRecord>( command );
         }
-        catch ( Exception e ) { throw new SqlException( _lastOrDefault.Value.SQL, e ); }
+        catch ( Exception e ) { throw new SqlException( sql, e ); }
     }
 }

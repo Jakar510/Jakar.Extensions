@@ -30,50 +30,31 @@ public partial class DbTable<TRecord>
     [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public virtual async ValueTask<TRecord> Insert( DbConnection connection, DbTransaction transaction, TRecord record, CancellationToken token = default )
     {
-        string sql = _cache[_database.Instance, SqlStatement.SingleInsert] ??= $"SET NOCOUNT ON INSERT INTO {SchemaTableName} ({string.Join( ',', ColumnNames )}) OUTPUT INSERTED.ID values ({string.Join( ',', VariableNames )});";
+        string sql = _cache[_database.Instance][SqlStatement.SingleInsert];
 
         var parameters = new DynamicParameters( record );
 
         try
         {
-            CommandDefinition command = _database.GetCommandDefinition( transaction, new SqlCommand( _singleInsert, parameters ), token );
+            CommandDefinition command = _database.GetCommandDefinition( transaction, new SqlCommand( sql, parameters ), token );
             var               id      = await connection.ExecuteScalarAsync<Guid>( command );
             return record.NewID( id );
         }
-        catch ( Exception e ) { throw new SqlException( _singleInsert, parameters, e ); }
+        catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
     }
 
     [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public virtual async ValueTask<TRecord?> TryInsert( DbConnection connection, DbTransaction transaction, TRecord record, bool matchAll, DynamicParameters parameters, CancellationToken token = default )
     {
-        string sql = Instance switch
-                     {
-                         DbInstance.MsSql => _tryInsertMsSql ??= $@"IF NOT EXISTS(SELECT * FROM {SchemaTableName} WHERE {string.Join( matchAll
-                                                                                                                                          ? "AND"
-                                                                                                                                          : "OR",
-                                                                                                                                      parameters.ParameterNames.Select( KeyValuePair ) )})
-BEGIN
-    SET NOCOUNT ON INSERT INTO {SchemaTableName} ({string.Join( ',', ColumnNames )}) OUTPUT INSERTED.ID values ({string.Join( ',', VariableNames )})
-END
+        string where = string.Join( matchAll
+                                        ? "AND"
+                                        : "OR",
+                                    parameters.ParameterNames.Select( KeyValuePair ) );
 
-ELSE 
-BEGIN 
-    SELECT {ID_ColumnName} = NULL 
-END",
-                         DbInstance.Postgres => _tryInsertPostgres ??= $@"IF NOT EXISTS(SELECT * FROM {SchemaTableName} WHERE {string.Join( matchAll
-                                                                                                                                                ? "AND"
-                                                                                                                                                : "OR",
-                                                                                                                                            parameters.ParameterNames.Select( KeyValuePair ) )})
-BEGIN
-    SET NOCOUNT ON INSERT INTO {SchemaTableName} ({string.Join( ',', ColumnNames )}) OUTPUT INSERTED.ID values ({string.Join( ',', VariableNames )})
-END
+        var p = new DynamicParameters( parameters );
+        p.Add( nameof(where), where );
 
-ELSE 
-BEGIN 
-    SELECT {ID_ColumnName} = NULL 
-END",
-                         _ => throw new OutOfRangeException( nameof(Instance), Instance )
-                     };
+        string sql = _cache[_database.Instance][SqlStatement.TryInsert];
 
 
         try
@@ -92,51 +73,16 @@ END",
     [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public virtual async ValueTask<TRecord?> InsertOrUpdate( DbConnection connection, DbTransaction transaction, TRecord record, bool matchAll, DynamicParameters parameters, CancellationToken token = default )
     {
-        string sql = Instance switch
-                     {
-                         DbInstance.MsSql => _insertOrUpdateMsSql ??= $@"IF NOT EXISTS(SELECT * FROM {SchemaTableName} WHERE {string.Join( matchAll
-                                                                                                                                               ? "AND"
-                                                                                                                                               : "OR",
-                                                                                                                                           parameters.ParameterNames.Select( KeyValuePair ) )})
-BEGIN
-    SET NOCOUNT ON INSERT INTO {SchemaTableName} ({string.Join( ',', ColumnNames )}) OUTPUT INSERTED.ID values ({string.Join( ',', VariableNames )})
-END
+        string where = string.Join( matchAll
+                                        ? "AND"
+                                        : "OR",
+                                    parameters.ParameterNames.Select( KeyValuePair ) );
 
-ELSE 
-BEGIN 
-    UPDATE {SchemaTableName} SET {string.Join( ',', KeyValuePairs )} WHERE {ID_ColumnName} = @{string.Join( matchAll
-                                                                                                                ? "AND"
-                                                                                                                : "OR",
-                                                                                                            parameters.ParameterNames.Select( KeyValuePair ) )};
+        var p = new DynamicParameters( parameters );
+        p.Add( nameof(where), where );
+        p.Add( ID,            record.ID.Value );
 
-    SELECT TOP 1 {ID_ColumnName} FROM {SchemaTableName} WHERE {string.Join( matchAll
-                                                                                ? "AND"
-                                                                                : "OR",
-                                                                            parameters.ParameterNames.Select( KeyValuePair ) )} 
-END",
-                         DbInstance.Postgres => _insertOrUpdatePostgres ??= $@"IF NOT EXISTS(SELECT * FROM {SchemaTableName} WHERE {string.Join( matchAll
-                                                                                                                                                     ? "AND"
-                                                                                                                                                     : "OR",
-                                                                                                                                                 parameters.ParameterNames.Select( KeyValuePair ) )})
-BEGIN
-    SET NOCOUNT ON INSERT INTO {SchemaTableName} ({string.Join( ',', ColumnNames )}) OUTPUT INSERTED.ID values ({string.Join( ',', VariableNames )})
-END
-
-ELSE 
-BEGIN 
-    UPDATE {SchemaTableName} SET {string.Join( ',', KeyValuePairs )} WHERE {ID_ColumnName} = @{string.Join( matchAll
-                                                                                                                ? "AND"
-                                                                                                                : "OR",
-                                                                                                            parameters.ParameterNames.Select( KeyValuePair ) )};
-
-    SELECT {ID_ColumnName} FROM {SchemaTableName} WHERE {string.Join( matchAll
-                                                                          ? "AND"
-                                                                          : "OR",
-                                                                      parameters.ParameterNames.Select( KeyValuePair ) )} LIMIT 1
-END",
-                         _ => throw new OutOfRangeException( nameof(Instance), Instance )
-                     };
-
+        string sql = _cache[_database.Instance][SqlStatement.InsertOrUpdate];
 
         try
         {

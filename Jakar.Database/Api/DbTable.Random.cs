@@ -16,44 +16,36 @@ public partial class DbTable<TRecord>
     [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public virtual async ValueTask<TRecord?> Random( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
-        SqlCommand sql = _cache[Instance, SqlStatement.Single];
+        string sql = _cache[Instance][SqlStatement.Single];
 
         try
         {
             CommandDefinition command = _database.GetCommandDefinition( transaction, sql, token );
             return await connection.QueryFirstAsync<TRecord>( command );
         }
-        catch ( Exception e ) { throw new SqlException( sql.SQL, e ); }
+        catch ( Exception e ) { throw new SqlException( sql, e ); }
     }
 
 
     [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
-    public virtual async IAsyncEnumerable<TRecord> Random( DbConnection connection, DbTransaction? transaction, UserRecord user, int count, [ EnumeratorCancellation ] CancellationToken token = default )
+    public virtual IAsyncEnumerable<TRecord> Random( DbConnection connection, DbTransaction? transaction, UserRecord user, int count, [ EnumeratorCancellation ] CancellationToken token = default )
     {
         var parameters = new DynamicParameters();
-        parameters.Add( OwnerUserID, user.OwnerUserID );
+        parameters.Add( COUNT,         count );
+        parameters.Add( OWNER_USER_ID, user.OwnerUserID );
 
-        string sql = Instance switch
-                     {
-                         DbInstance.MsSql    => _randomUserCountMsSql ??= $"SELECT TOP {count} * FROM {SchemaTableName} WHERE {OwnerUserID} = @{OwnerUserID} ORDER BY {RandomMethod}",
-                         DbInstance.Postgres => _randomUserCountPostgres ??= $"SELECT * FROM {SchemaTableName} WHERE {OwnerUserID} = @{OwnerUserID} ORDER BY {RandomMethod} LIMIT {count}",
-                         _                   => throw new OutOfRangeException( nameof(Instance), Instance )
-                     };
-
-        await foreach ( TRecord record in Where( connection, transaction, new SqlCommand( sql, parameters ), token ) ) { yield return record; }
+        string sql = _cache[Instance][SqlStatement.RandomUserCount];
+        return Where( connection, transaction, new SqlCommand( sql, parameters ), token );
     }
 
 
     [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public virtual IAsyncEnumerable<TRecord> Random( DbConnection connection, DbTransaction? transaction, int count, [ EnumeratorCancellation ] CancellationToken token = default )
     {
-        SqlCommand sql = Instance switch
-                         {
-                             DbInstance.MsSql    => _randomCountMsSql ??= $"SELECT TOP {count} * FROM {SchemaTableName} ORDER BY {RandomMethod}",
-                             DbInstance.Postgres => _randomCountPostgres ??= $"SELECT * FROM {SchemaTableName} ORDER BY {RandomMethod} LIMIT {count}",
-                             _                   => throw new OutOfRangeException( nameof(Instance), Instance )
-                         };
+        var parameters = new DynamicParameters();
+        parameters.Add( COUNT, count );
 
-        return Where( connection, transaction, sql, token );
+        string sql = _cache[Instance][SqlStatement.RandomCount];
+        return Where( connection, transaction, new SqlCommand( sql, parameters ), token );
     }
 }

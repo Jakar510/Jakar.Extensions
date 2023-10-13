@@ -19,29 +19,29 @@ public partial class DbTable<TRecord>
         parameters.Add( nameof(RecordPair<TRecord>.ID),          pair.ID );
         parameters.Add( nameof(RecordPair<TRecord>.DateCreated), pair.DateCreated );
 
-        _next ??= @$"SELECT * FROM {SchemaTableName} WHERE ( id = IFNULL((SELECT MIN({ID_ColumnName}) FROM {SchemaTableName} WHERE {ID_ColumnName} > @{nameof(RecordPair<TRecord>.ID)}), 0) )";
+        string sql = _cache[Instance][SqlStatement.Next];
 
         try
         {
-            CommandDefinition command = _database.GetCommandDefinition( transaction, new SqlCommand( _next, parameters ), token );
+            CommandDefinition command = _database.GetCommandDefinition( transaction, new SqlCommand( sql, parameters ), token );
             return await connection.ExecuteScalarAsync<TRecord>( command );
         }
-        catch ( Exception e ) { throw new SqlException( _next, parameters, e ); }
+        catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
     }
 
 
     [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public virtual async ValueTask<IEnumerable<RecordPair<TRecord>>> SortedIDs( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
-        _sortedIDs ??= @$"SELECT {ID_ColumnName}, {DateCreated} FROM {SchemaTableName} ORDER BY {DateCreated} DESC";
+        string sql = _cache[Instance][SqlStatement.SortedIDs];
 
         try
         {
-            CommandDefinition                command = _database.GetCommandDefinition( transaction, _sortedIDs.Value, token );
+            CommandDefinition                command = _database.GetCommandDefinition( transaction, sql, token );
             IEnumerable<RecordPair<TRecord>> pairs   = await connection.QueryAsync<RecordPair<TRecord>>( command );
             return pairs;
         }
-        catch ( Exception e ) { throw new SqlException( _sortedIDs.Value.SQL, e ); }
+        catch ( Exception e ) { throw new SqlException( sql, e ); }
     }
 
 
@@ -51,15 +51,15 @@ public partial class DbTable<TRecord>
         if ( id is null ) { return default; }
 
         var parameters = new DynamicParameters();
-        parameters.Add( nameof(id), id.Value );
+        parameters.Add( ID, id.Value );
 
-        _nextID ??= @$"SELECT {ID_ColumnName} FROM {SchemaTableName} WHERE ( id = IFNULL((SELECT MIN({ID_ColumnName}) FROM {SchemaTableName} WHERE {ID_ColumnName} > @{nameof(id)}), 0) )";
+        string sql = _cache[Instance][SqlStatement.NextID];
 
         try
         {
-            CommandDefinition command = _database.GetCommandDefinition( transaction, new SqlCommand( _nextID, parameters ), token );
+            CommandDefinition command = _database.GetCommandDefinition( transaction, new SqlCommand( sql, parameters ), token );
             return await connection.ExecuteScalarAsync<Guid>( command );
         }
-        catch ( Exception e ) { throw new SqlException( _nextID, parameters, e ); }
+        catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
     }
 }

@@ -46,7 +46,7 @@ public ref struct ValueStringBuilder
     // public ValueStringBuilder(  Buffer<char>       buffer ) => _chars = buffer;
 
 
-    public void Dispose() => _chars.Dispose();
+    public          void                    Dispose()       => _chars.Dispose();
     public readonly Buffer<char>.Enumerator GetEnumerator() => _chars.GetEnumerator();
 
 
@@ -54,7 +54,7 @@ public ref struct ValueStringBuilder
     {
         int capacity = Sizes.GetBufferSize<T>();
 
-        if ( typeof(T) == typeof(DateTime) ) { capacity            = Math.Max( format.Length, capacity ); }
+        if ( typeof(T)      == typeof(DateTime) ) { capacity       = Math.Max( format.Length, capacity ); }
         else if ( typeof(T) == typeof(DateTimeOffset) ) { capacity = Math.Max( format.Length, capacity ); }
         else if ( typeof(T) == typeof(TimeSpan) ) { capacity       = Math.Max( format.Length, capacity ); }
 
@@ -101,17 +101,17 @@ public ref struct ValueStringBuilder
     /// <summary> Returns the underlying storage of the builder. </summary>
     /// <summary> Returns a span around the contents of the builder. </summary>
     /// <param name="terminate"> Ensures that the builder has a null char after <see cref="Length"/> </param>
-    [Pure]
+    [ Pure ]
     public ReadOnlySpan<char> AsSpan( bool terminate ) => _chars.AsSpan( terminate
                                                                              ? '\0'
                                                                              : default );
-    [Pure]
+    [ Pure ]
     public readonly ReadOnlySpan<char> Slice( int start )
     {
         Span<char> span = _chars[start..];
         return MemoryMarshal.CreateSpan( ref MemoryMarshal.GetReference( span ), span.Length );
     }
-    [Pure] public readonly ReadOnlySpan<char> Slice( int start, int length ) => _chars.Slice( start, length );
+    [ Pure ] public readonly ReadOnlySpan<char> Slice( int start, int length ) => _chars.Slice( start, length );
     public ValueStringBuilder Reset()
     {
         _chars.Reset( '\0' );
@@ -304,9 +304,6 @@ public ref struct ValueStringBuilder
 
         do
         {
-            // ReadOnlySpan<char> current = enumerator.Current;
-            // if ( current.TryCopyTo( Next ) ) { _chars.Index += current.Length; }
-
             _chars.Append( enumerator.Current );
             _chars.Append( separator );
         } while ( enumerator.MoveNext() );
@@ -908,5 +905,5 @@ public ref struct ValueStringBuilder
     }
 
 
-    [DoesNotReturn] private static void ThrowFormatError() => throw new FormatException( "Invalid Format String" );
+    [ DoesNotReturn ] private static void ThrowFormatError() => throw new FormatException( "Invalid Format String" );
 }

@@ -6,32 +6,13 @@ namespace Jakar.Database;
 
 
 [ SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" ) ]
-public partial class DbTable<TRecord> : ObservableClass, IConnectableDb where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>
+public partial class DbTable<TRecord>( IConnectableDbRoot database ) : SqlCache<TRecord>( database ), IConnectableDb where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
-    protected internal static readonly ReadOnlyMemory<DbInstance>           _instances       = Enum.GetValues<DbInstance>();
-    protected internal static readonly ReadOnlyMemory<SqlStatement>         _statements      = Enum.GetValues<SqlStatement>();
-    public const                       string                               CREATED_BY       = nameof(IOwnedTableRecord.CreatedBy);
-    public const                       string                               DATE_CREATED     = nameof(TableRecord<TRecord>.DateCreated);
-    public const                       string                               ID               = nameof(TableRecord<TRecord>.ID);
-    public const                       string                               LAST_MODIFIED    = nameof(TableRecord<TRecord>.LastModified);
-    public const                       string                               OWNER_USER_ID    = nameof(IOwnedTableRecord.OwnerUserID);
-    protected static readonly          TypePropertiesCache.Properties       _propertiesCache = TypePropertiesCache.Current.Register<TRecord>();
-    protected const                    char                                 QUOTE            = '"';
-    protected readonly                 ConcurrentDictionary<int, string>    _deleteGuids     = new();
-    protected readonly                 ConcurrentDictionary<int, string>    _whereParameters = new();
-    protected readonly                 ConcurrentDictionary<string, string> _where           = new();
-    protected readonly                 SqlCache                             _cache;
-    protected readonly                 IConnectableDbRoot                   _database;
+    protected readonly ConcurrentDictionary<int, string>    _deleteGuids     = new();
+    protected readonly ConcurrentDictionary<int, string>    _whereParameters = new();
+    protected readonly ConcurrentDictionary<string, string> _where           = new();
 
 
-    public static ImmutableArray<TRecord> Empty
-    {
-        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => ImmutableArray<TRecord>.Empty;
-    }
-    public static ImmutableList<TRecord> EmptyList
-    {
-        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => ImmutableList<TRecord>.Empty;
-    }
     public int? CommandTimeout
     {
         [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => _database.CommandTimeout;
@@ -40,10 +21,6 @@ public partial class DbTable<TRecord> : ObservableClass, IConnectableDb where TR
     {
         [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => _database.CurrentSchema;
     }
-    public virtual IEnumerable<Descriptor> Descriptors
-    {
-        [ MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization ) ] get => _propertiesCache.GetValues( this );
-    }
     public DbInstance Instance
     {
         [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => _database.Instance;
@@ -51,12 +28,6 @@ public partial class DbTable<TRecord> : ObservableClass, IConnectableDb where TR
     public RecordGenerator<TRecord> Records => new(this);
 
 
-    public DbTable( IConnectableDbRoot database )
-    {
-        _database = database;
-        _cache    = new SqlCache( this );
-        if ( TRecord.TableName != typeof(TRecord).GetTableName() ) { throw new InvalidOperationException( $"{TRecord.TableName} != {typeof(TRecord).GetTableName()}" ); }
-    }
     public virtual ValueTask DisposeAsync()
     {
         GC.SuppressFinalize( this );
@@ -65,7 +36,7 @@ public partial class DbTable<TRecord> : ObservableClass, IConnectableDb where TR
     public ValueTask<DbConnection> ConnectAsync( CancellationToken token = default ) => _database.ConnectAsync( token );
 
 
-    void IDbTable.ResetSqlCaches() => _cache.Reset();
+    void IDbTable.ResetSqlCaches() => Reset();
 
 
     [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public Descriptor GetDescriptor( string columnName ) => _propertiesCache.Get( this, columnName );
@@ -78,7 +49,7 @@ public partial class DbTable<TRecord> : ObservableClass, IConnectableDb where TR
     [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public virtual async IAsyncEnumerable<TRecord> All( DbConnection connection, DbTransaction? transaction, [ EnumeratorCancellation ] CancellationToken token = default )
     {
-        string                   sql    = _cache[_database.Instance, SqlStatement.All];
+        string                   sql    = _cache[_database.Instance][SqlStatement.All];
         await using DbDataReader reader = await _database.ExecuteReaderAsync( connection, transaction, sql, token );
         await foreach ( TRecord record in TRecord.CreateAsync( reader, token ) ) { yield return record; }
     }
