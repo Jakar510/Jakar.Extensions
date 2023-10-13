@@ -19,7 +19,7 @@ public sealed class TypePropertiesCache
 
     public Descriptors this[ Type type, IConnectableDb value ]
     {
-        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => Register( type )[value];
+        [ MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization ) ] get => Register( type )[value];
     }
 
 
@@ -34,11 +34,11 @@ public sealed class TypePropertiesCache
     internal TypePropertiesCache() { }
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    [ MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization ) ]
     public Properties Register( Type type ) => _dictionary.TryGetValue( type, out Properties? result )
                                                    ? result
                                                    : _dictionary[type] = new Properties( type );
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public Properties Register<T>() where T : TableRecord<T>, IDbReaderMapping<T> => Register( typeof(T) );
+    [ MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization ) ] public Properties Register<T>() where T : TableRecord<T>, IDbReaderMapping<T> => Register( typeof(T) );
 
 
     public void Register( Assembly assembly ) => Register( assembly.DefinedTypes.Where( x => x.GetCustomAttribute<TableAttribute>( true ) is not null ) );
@@ -62,27 +62,27 @@ public sealed class TypePropertiesCache
 
 
         private readonly IReadOnlyDictionary<DbInstance, Descriptors> _dictionary;
+
+
         public int Count
         {
-            [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => _dictionary.Count;
+            [ MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization ) ] get => _dictionary.Count;
         }
-
-
         public Descriptors this[ IConnectableDb value ]
         {
-            [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => _dictionary[value.Instance];
+            [ MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization ) ] get => _dictionary[value.Instance];
         }
         public Descriptors this[ DbInstance value ]
         {
-            [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => _dictionary[value];
+            [ MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization ) ] get => _dictionary[value];
         }
         public IEnumerable<DbInstance> Keys
         {
-            [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => _dictionary.Keys;
+            [ MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization ) ] get => _dictionary.Keys;
         }
         public IEnumerable<Descriptors> Values
         {
-            [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => _dictionary.Values;
+            [ MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization ) ] get => _dictionary.Values;
         }
 
 
@@ -107,14 +107,14 @@ public sealed class TypePropertiesCache
         public bool ContainsKey( IConnectableDb value ) => ContainsKey( value.Instance );
 
 
-        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public IEnumerable<Descriptor> GetValues( DbInstance     value ) => _dictionary[value].Values;
-        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public IEnumerable<Descriptor> GetValues( IConnectableDb value ) => _dictionary[value.Instance].Values;
+        [ MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization ) ] public IEnumerable<Descriptor> GetValues( DbInstance     value ) => _dictionary[value].Values;
+        [ MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization ) ] public IEnumerable<Descriptor> GetValues( IConnectableDb value ) => _dictionary[value.Instance].Values;
 
 
-        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+        [ MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization ) ]
         public IEnumerable<Descriptor> NotKeys( DbInstance value ) => _dictionary[value]
                                                                      .Values.Where( x => !x.IsKey );
-        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public IEnumerable<Descriptor> NotKeys( IConnectableDb value ) => NotKeys( value.Instance );
+        [ MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization ) ] public IEnumerable<Descriptor> NotKeys( IConnectableDb value ) => NotKeys( value.Instance );
 
 
         public bool TryGetValue( IConnectableDb key, [ NotNullWhen( true ) ] out Descriptors? value ) => TryGetValue( key.Instance, out value );
@@ -125,8 +125,8 @@ public sealed class TypePropertiesCache
         IEnumerator IEnumerable.                                  GetEnumerator() => _dictionary.GetEnumerator();
 
 
-        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public Descriptor Get( DbInstance     table, string columnName ) => _dictionary[table][columnName];
-        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public Descriptor Get( IConnectableDb table, string columnName ) => Get( table.Instance, columnName );
+        [ MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization ) ] public Descriptor Get( DbInstance     table, string columnName ) => _dictionary[table][columnName];
+        [ MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization ) ] public Descriptor Get( IConnectableDb table, string columnName ) => Get( table.Instance, columnName );
 
 
 

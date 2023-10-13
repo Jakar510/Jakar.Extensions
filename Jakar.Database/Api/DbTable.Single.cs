@@ -16,15 +16,15 @@ public partial class DbTable<TRecord>
     [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public virtual async ValueTask<TRecord?> Single( DbConnection connection, DbTransaction? transaction, string id, CancellationToken token = default )
     {
-        DynamicParameters parameters = Database.GetParameters( id );
-        _single ??= $"SELECT * FROM {SchemaTableName} WHERE {ID_ColumnName} = @{nameof(id)}";
+        DynamicParameters parameters = Database.GetParameters( id, variableName: nameof(TableRecord<TRecord>.ID) );
+        string            sql        = _cache[Instance, SqlStatement.Single];
 
         try
         {
-            CommandDefinition command = _database.GetCommandDefinition( transaction, new SqlCommand( _single, parameters ), token );
+            CommandDefinition command = _database.GetCommandDefinition( transaction, new SqlCommand( sql, parameters ), token );
             return await connection.QuerySingleAsync<TRecord>( command );
         }
-        catch ( Exception e ) { throw new SqlException( _single, parameters, e ); }
+        catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
     }
 
 
@@ -38,15 +38,15 @@ public partial class DbTable<TRecord>
     [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public virtual async ValueTask<TRecord?> SingleOrDefault( DbConnection connection, DbTransaction? transaction, string id, CancellationToken token = default )
     {
-        DynamicParameters parameters = Database.GetParameters( id );
-        _single ??= $"SELECT * FROM {SchemaTableName} WHERE {ID_ColumnName} = @{nameof(id)}";
+        DynamicParameters parameters = Database.GetParameters( id, variableName: ID );
+        string            sql        = _cache[Instance, SqlStatement.Single];
 
         try
         {
-            CommandDefinition command = _database.GetCommandDefinition( transaction, new SqlCommand( _single, parameters ), token );
+            CommandDefinition command = _database.GetCommandDefinition( transaction, new SqlCommand( sql, parameters ), token );
             return await connection.QuerySingleOrDefaultAsync<TRecord>( command );
         }
-        catch ( Exception e ) { throw new SqlException( _single, parameters, e ); }
+        catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
     }
 
 

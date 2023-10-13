@@ -34,13 +34,13 @@ public partial class DbTable<TRecord>
     {
         Guid              id         = record.ID.Value;
         DynamicParameters parameters = Database.GetParameters( id, record );
-        _update ??= $"UPDATE {SchemaTableName} SET {string.Join( ',', KeyValuePairs )} WHERE {ID_ColumnName} = @{nameof(id)};";
+        string sql = _cache[Instance, SqlStatement.Update];
 
         try
         {
-            CommandDefinition command = _database.GetCommandDefinition( transaction, new SqlCommand( _update, parameters ), token );
+            CommandDefinition command = _database.GetCommandDefinition( transaction, new SqlCommand( sql, parameters ), token );
             await connection.ExecuteScalarAsync( command );
         }
-        catch ( Exception e ) { throw new SqlException( _update, parameters, e ); }
+        catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
     }
 }

@@ -8,123 +8,53 @@ namespace Jakar.Database;
 [ SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" ) ]
 public partial class DbTable<TRecord> : ObservableClass, IConnectableDb where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
-    protected static readonly TypePropertiesCache.Properties       _propertiesCache = TypePropertiesCache.Current.Register<TRecord>();
-    protected const           char                                 QUOTE            = '"';
-    protected readonly        ConcurrentDictionary<int, string>    _deleteGuids     = new();
-    protected readonly        ConcurrentDictionary<int, string>    _whereParameters = new();
-    protected readonly        ConcurrentDictionary<string, string> _where           = new();
-    protected readonly        IConnectableDbRoot                   _database;
-    protected readonly        SqlCache                             _cache;
-
-    // private                   SqlCommand?                          _all;
-    // protected                 SqlCommand?                          _first;
-    // protected                 SqlCommand?                          _firstOrDefault;
-    // protected                 SqlCommand?                          _last;
-    // protected                 SqlCommand?                          _lastOrDefault;
-    // protected                 SqlCommand?                          _sortedIDs;
-    // protected                 string?                              _delete;
-    // protected                 string?                              _insertOrUpdateMsSql;
-    // protected                 string?                              _insertOrUpdatePostgres;
-    // protected                 string?                              _next;
-    // protected                 string?                              _nextID;
-    // protected                 string?                              _randomCountMsSql;
-    // protected                 string?                              _randomCountPostgres;
-    // protected                 string?                              _randomMsSql;
-    // protected                 string?                              _randomPostgres;
-    // protected                 string?                              _randomUserCountMsSql;
-    // protected                 string?                              _randomUserCountPostgres;
-    // protected                 string?                              _single;
-    // protected                 string?                              _singleInsert;
-    // protected                 string?                              _tryInsertMsSql;
-    // protected                 string?                              _tryInsertPostgres;
-    // protected                 string?                              _update;
+    protected internal static readonly ReadOnlyMemory<DbInstance>           _instances       = Enum.GetValues<DbInstance>();
+    protected internal static readonly ReadOnlyMemory<SqlStatement>         _statements      = Enum.GetValues<SqlStatement>();
+    public const                       string                               CREATED_BY       = nameof(IOwnedTableRecord.CreatedBy);
+    public const                       string                               DATE_CREATED     = nameof(TableRecord<TRecord>.DateCreated);
+    public const                       string                               ID               = nameof(TableRecord<TRecord>.ID);
+    public const                       string                               LAST_MODIFIED    = nameof(TableRecord<TRecord>.LastModified);
+    public const                       string                               OWNER_USER_ID    = nameof(IOwnedTableRecord.OwnerUserID);
+    protected static readonly          TypePropertiesCache.Properties       _propertiesCache = TypePropertiesCache.Current.Register<TRecord>();
+    protected const                    char                                 QUOTE            = '"';
+    protected readonly                 ConcurrentDictionary<int, string>    _deleteGuids     = new();
+    protected readonly                 ConcurrentDictionary<int, string>    _whereParameters = new();
+    protected readonly                 ConcurrentDictionary<string, string> _where           = new();
+    protected readonly                 SqlCache                             _cache;
+    protected readonly                 IConnectableDbRoot                   _database;
 
 
-    public static ImmutableArray<TRecord> Empty          => ImmutableArray<TRecord>.Empty;
-    public static ImmutableList<TRecord>  EmptyList      => ImmutableList<TRecord>.Empty;
-    public        IEnumerable<string>     ColumnNames    => Descriptors.Select( x => x.ColumnName );
-    public        int?                    CommandTimeout => _database.CommandTimeout;
-
-    public virtual string CreatedBy => Instance switch
-                                       {
-                                           DbInstance.Postgres => $"{QUOTE}{nameof(IOwnedTableRecord.CreatedBy)}{QUOTE}",
-                                           DbInstance.MsSql    => nameof(IOwnedTableRecord.CreatedBy),
-                                           _                   => throw new OutOfRangeException( nameof(Instance), Instance )
-                                       };
-
-    public string CurrentSchema => _database.CurrentSchema;
-
-    public virtual string DateCreated => Instance switch
-                                         {
-                                             DbInstance.Postgres => $"""
-                                                                     "{nameof(TableRecord<TRecord>.DateCreated)}"
-                                                                     """,
-                                             DbInstance.MsSql => nameof(TableRecord<TRecord>.DateCreated),
-                                             _                => throw new OutOfRangeException( nameof(Instance), Instance )
-                                         };
-
-    public virtual IEnumerable<Descriptor> Descriptors => _propertiesCache.GetValues( this );
-
-    public virtual string ID_ColumnName => Instance switch
-                                           {
-                                               DbInstance.Postgres => $"""
-                                                                       "{nameof(TableRecord<TRecord>.ID)}"
-                                                                       """,
-                                               DbInstance.MsSql => nameof(TableRecord<TRecord>.ID),
-                                               _                => throw new OutOfRangeException( nameof(Instance), Instance )
-                                           };
-
-    public DbInstance          Instance      => _database.Instance;
-    public IEnumerable<string> KeyValuePairs => Descriptors.Select( x => x.KeyValuePair );
-
-    public virtual string LastModified => Instance switch
-                                          {
-                                              DbInstance.Postgres => $"""
-                                                                      "{nameof(TableRecord<TRecord>.LastModified)}"
-                                                                      """,
-                                              DbInstance.MsSql => nameof(TableRecord<TRecord>.LastModified),
-                                              _                => throw new OutOfRangeException( nameof(Instance), Instance )
-                                          };
-
-    public virtual string OwnerUserID => Instance switch
-                                         {
-                                             DbInstance.Postgres => $"{QUOTE}{nameof(IOwnedTableRecord.OwnerUserID)}{QUOTE}",
-                                             DbInstance.MsSql    => nameof(IOwnedTableRecord.OwnerUserID),
-                                             _                   => throw new OutOfRangeException( nameof(Instance), Instance )
-                                         };
-
-    public virtual string RandomMethod
+    public static ImmutableArray<TRecord> Empty
     {
-        [ MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization ) ]
-        get => Instance switch
-               {
-                   DbInstance.MsSql    => "NEWID()",
-                   DbInstance.Postgres => "RANDOM()",
-                   _                   => throw new OutOfRangeException( nameof(Instance), Instance )
-               };
+        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => ImmutableArray<TRecord>.Empty;
+    }
+    public static ImmutableList<TRecord> EmptyList
+    {
+        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => ImmutableList<TRecord>.Empty;
+    }
+    public int? CommandTimeout
+    {
+        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => _database.CommandTimeout;
+    }
+    public string CurrentSchema
+    {
+        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => _database.CurrentSchema;
+    }
+    public virtual IEnumerable<Descriptor> Descriptors
+    {
+        [ MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization ) ] get => _propertiesCache.GetValues( this );
+    }
+    public DbInstance Instance
+    {
+        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => _database.Instance;
     }
     public RecordGenerator<TRecord> Records => new(this);
-    public virtual string SchemaTableName
-    {
-        [ MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization ) ] get => $"{CurrentSchema}.{TableName}";
-    }
-    public virtual string TableName
-    {
-        [ MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization ) ]
-        get => Instance switch
-               {
-                   DbInstance.Postgres => $"{QUOTE}{TRecord.TableName}{QUOTE}",
-                   DbInstance.MsSql    => TRecord.TableName,
-                   _                   => TRecord.TableName
-               };
-    }
-    public IEnumerable<string> VariableNames => Descriptors.Select( x => x.VariableName );
 
 
     public DbTable( IConnectableDbRoot database )
     {
         _database = database;
-        _cache    = new SqlCache( database );
+        _cache    = new SqlCache( this );
         if ( TRecord.TableName != typeof(TRecord).GetTableName() ) { throw new InvalidOperationException( $"{TRecord.TableName} != {typeof(TRecord).GetTableName()}" ); }
     }
     public virtual ValueTask DisposeAsync()
@@ -135,33 +65,7 @@ public partial class DbTable<TRecord> : ObservableClass, IConnectableDb where TR
     public ValueTask<DbConnection> ConnectAsync( CancellationToken token = default ) => _database.ConnectAsync( token );
 
 
-    void IDbTable.ResetSqlCaches()
-    {
-        _cache.Clear();
-
-        // _all                     = null;
-        // _first                   = null;
-        // _firstOrDefault          = null;
-        // _last                    = null;
-        // _lastOrDefault           = null;
-        // _sortedIDs               = null;
-        // _delete                  = null;
-        // _insertOrUpdateMsSql     = null;
-        // _insertOrUpdatePostgres  = null;
-        // _next                    = null;
-        // _nextID                  = null;
-        // _randomCountMsSql        = null;
-        // _randomCountPostgres     = null;
-        // _randomMsSql             = null;
-        // _randomPostgres          = null;
-        // _randomUserCountMsSql    = null;
-        // _randomUserCountPostgres = null;
-        // _single                  = null;
-        // _singleInsert            = null;
-        // _tryInsertMsSql          = null;
-        // _tryInsertPostgres       = null;
-        // _update                  = null;
-    }
+    void IDbTable.ResetSqlCaches() => _cache.Reset();
 
 
     [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public Descriptor GetDescriptor( string columnName ) => _propertiesCache.Get( this, columnName );
@@ -174,7 +78,7 @@ public partial class DbTable<TRecord> : ObservableClass, IConnectableDb where TR
     [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public virtual async IAsyncEnumerable<TRecord> All( DbConnection connection, DbTransaction? transaction, [ EnumeratorCancellation ] CancellationToken token = default )
     {
-        string                   sql    = _cache[_database.Instance, SqlStatement.All] ??= $"SELECT * FROM {SchemaTableName}";
+        string                   sql    = _cache[_database.Instance, SqlStatement.All];
         await using DbDataReader reader = await _database.ExecuteReaderAsync( connection, transaction, sql, token );
         await foreach ( TRecord record in TRecord.CreateAsync( reader, token ) ) { yield return record; }
     }

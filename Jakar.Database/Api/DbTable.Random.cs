@@ -16,12 +16,7 @@ public partial class DbTable<TRecord>
     [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public virtual async ValueTask<TRecord?> Random( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
-        SqlCommand sql = Instance switch
-                         {
-                             DbInstance.MsSql    => _randomMsSql ??= $"SELECT TOP 1 * FROM {SchemaTableName} ORDER BY {RandomMethod}",
-                             DbInstance.Postgres => _randomPostgres ??= $"SELECT * FROM {SchemaTableName} ORDER BY {RandomMethod} LIMIT 1",
-                             _                   => throw new OutOfRangeException( nameof(Instance), Instance )
-                         };
+        SqlCommand sql = _cache[Instance, SqlStatement.Single];
 
         try
         {

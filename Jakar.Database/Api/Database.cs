@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 08/14/2022  8:39 PM
 
-using System.Security;
-
-
-
 namespace Jakar.Database;
 
 
@@ -14,24 +10,39 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     public const ClaimType DEFAULT_CLAIM_TYPES = ClaimType.UserID | ClaimType.UserName | ClaimType.GroupSid | ClaimType.Role;
 
 
-    protected readonly ConcurrentBag<IDbTable>         _tables = new();
-    public             DbTable<AddressRecord>          Addresses         { get; }
-    public             int?                            CommandTimeout    => Options.CommandTimeout;
-    public             IConfiguration                  Configuration     { get; }
-    protected internal SecuredString?                  ConnectionString  { get; set; }
-    public             string                          CurrentSchema     => Options.CurrentSchema;
-    public             DbTable<GroupRecord>            Groups            { get; }
-    public             DbInstance                      Instance          => Options.DbType;
-    public             DbOptions                       Options           { get; }
-    protected internal PasswordValidator               PasswordValidator => new(Options.PasswordRequirements);
-    public             DbTable<RecoveryCodeRecord>     RecoveryCodes     { get; }
-    public             DbTable<RoleRecord>             Roles             { get; }
-    public             DbTable<UserGroupRecord>        UserGroups        { get; }
-    public             DbTable<UserLoginInfoRecord>    UserLogins        { get; }
-    public             DbTable<UserRecoveryCodeRecord> UserRecoveryCodes { get; }
-    public             DbTable<UserRoleRecord>         UserRoles         { get; }
-    public             DbTable<UserRecord>             Users             { get; }
-    public             AppVersion                      Version           => Options.Version;
+    protected readonly ConcurrentBag<IDbTable> _tables = new();
+    public             DbTable<AddressRecord>  Addresses { get; }
+    public int? CommandTimeout
+    {
+        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => Options.CommandTimeout;
+    }
+    public             IConfiguration Configuration    { get; }
+    protected internal SecuredString? ConnectionString { get; set; }
+    public string CurrentSchema
+    {
+        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => Options.CurrentSchema;
+    }
+    public DbTable<GroupRecord> Groups { get; }
+    public DbInstance Instance
+    {
+        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => Options.DbType;
+    }
+    public DbOptions Options { get; }
+    protected internal PasswordValidator PasswordValidator
+    {
+        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => new(Options.PasswordRequirements);
+    }
+    public DbTable<RecoveryCodeRecord>     RecoveryCodes     { get; }
+    public DbTable<RoleRecord>             Roles             { get; }
+    public DbTable<UserGroupRecord>        UserGroups        { get; }
+    public DbTable<UserLoginInfoRecord>    UserLogins        { get; }
+    public DbTable<UserRecoveryCodeRecord> UserRecoveryCodes { get; }
+    public DbTable<UserRoleRecord>         UserRoles         { get; }
+    public DbTable<UserRecord>             Users             { get; }
+    public AppVersion Version
+    {
+        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => Options.Version;
+    }
 
 
     static Database()
