@@ -1,11 +1,7 @@
-﻿// Jakar.Extensions :: Jakar.Database
-// 10/08/2023  10:41 PM
+﻿// Jakar.Extensions :: Jakar.Extensions
+// 10/10/2023  10:04 AM
 
-using System.Security;
-
-
-
-namespace Jakar.Database;
+namespace Jakar.Extensions;
 
 
 public sealed record SecuredString( SecureString Value ) : IDisposable

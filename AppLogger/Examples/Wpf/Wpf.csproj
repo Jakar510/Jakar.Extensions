@@ -10,7 +10,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.AspNetCore.Components.WebView.Wpf" Version="7.0.92" />
+        <PackageReference Include="Microsoft.AspNetCore.Components.WebView.Wpf" Version="7.0.96" />
         <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.1" />
     </ItemGroup>
 
