@@ -6,6 +6,9 @@ namespace Jakar.Extensions;
 public abstract class ObservableClass : BaseClass, INotifyPropertyChanged, INotifyPropertyChanging // IDataBaseID
 {
     public static readonly DateTime sqlMinDate = DateTime.Parse( "1/1/1753 12:00:00 AM", CultureInfo.InvariantCulture );
+    
+    public event PropertyChangedEventHandler?  PropertyChanged;
+    public event PropertyChangingEventHandler? PropertyChanging;
 
 
     /// <summary>
@@ -227,6 +230,4 @@ public abstract class ObservableClass : BaseClass, INotifyPropertyChanged, INoti
 
         onChanged( value );
     }
-    public event PropertyChangedEventHandler?  PropertyChanged;
-    public event PropertyChangingEventHandler? PropertyChanging;
 }

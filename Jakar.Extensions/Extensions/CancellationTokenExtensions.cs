@@ -3,5 +3,5 @@
 
 public static class CancellationTokenExtensions
 {
-    public static bool ShouldContinue( this CancellationToken token ) => !token.IsCancellationRequested;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool ShouldContinue( this CancellationToken token ) => token.IsCancellationRequested is false;
 }
