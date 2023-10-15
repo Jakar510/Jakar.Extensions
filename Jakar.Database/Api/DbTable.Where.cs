@@ -8,16 +8,6 @@ namespace Jakar.Database;
 [ SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" ) ]
 public partial class DbTable<TRecord>
 {
-    protected static int GetHash( DynamicParameters parameters ) => GetHash( parameters.ParameterNames );
-    protected static int GetHash<T>( IEnumerable<T> values )
-    {
-        var hash = new HashCode();
-        foreach ( T value in values ) { hash.Add( value ); }
-
-        return hash.ToHashCode();
-    }
-
-
     public IAsyncEnumerable<TRecord> Where( bool           matchAll,   DynamicParameters  parameters, [ EnumeratorCancellation ] CancellationToken token = default ) => this.Call( Where, matchAll,   parameters, token );
     public IAsyncEnumerable<TRecord> Where( string         sql,        DynamicParameters? parameters, [ EnumeratorCancellation ] CancellationToken token = default ) => this.Call( Where, sql,        parameters, token );
     public IAsyncEnumerable<TRecord> Where<TValue>( string columnName, TValue?            value,      [ EnumeratorCancellation ] CancellationToken token = default ) => this.Call( Where, columnName, value,      token );
@@ -26,25 +16,8 @@ public partial class DbTable<TRecord>
     [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public virtual IAsyncEnumerable<TRecord> Where( DbConnection connection, DbTransaction? transaction, bool matchAll, DynamicParameters parameters, [ EnumeratorCancellation ] CancellationToken token = default )
     {
-        int     hash = GetHash( parameters );
-        string? sql  = default;
-        if ( hash != 0 && !_whereParameters.TryGetValue( hash, out sql ) ) { _whereParameters[hash] = sql = GetWhereSql( matchAll, parameters ); }
-
-        sql ??= GetWhereSql( matchAll, parameters );
-        return Where( connection, transaction, new SqlCommand( sql, parameters ), token );
-    }
-
-    [ MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization ) ]
-    private string GetWhereSql( bool matchAll, DynamicParameters parameters )
-    {
-        using var buffer = new ValueStringBuilder( parameters.ParameterNames.Sum( x => x.Length ) * 2 );
-
-        buffer.AppendJoin( matchAll
-                               ? "AND"
-                               : "OR",
-                           parameters.ParameterNames.Select( KeyValuePair ) );
-
-        return $"SELECT * FROM {SchemaTableName} WHERE {buffer.Span}";
+        SqlCommand sql = GetWhereSql( matchAll, parameters );
+        return Where( connection, transaction, sql, token );
     }
 
 
@@ -58,11 +31,7 @@ public partial class DbTable<TRecord>
     [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public virtual IAsyncEnumerable<TRecord> Where<TValue>( DbConnection connection, DbTransaction? transaction, string columnName, TValue? value, [ EnumeratorCancellation ] CancellationToken token = default )
     {
-        var parameters = new DynamicParameters();
-        parameters.Add( nameof(value), value );
-
-        if ( !_where.TryGetValue( columnName, out string? sql ) ) { _where[columnName] = sql = $"SELECT * FROM {SchemaTableName} WHERE {columnName} = @{nameof(value)}"; }
-
-        return Where( connection, transaction, new SqlCommand( sql, parameters ), token );
+        SqlCommand sql = GetWhereSql( columnName, value );
+        return Where( connection, transaction, sql, token );
     }
 }

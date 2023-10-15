@@ -1,8 +1,7 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 03/12/2023  1:07 PM
 
-using System.Linq;
-using System;
+using Newtonsoft.Json.Linq;
 
 
 
@@ -12,14 +11,6 @@ namespace Jakar.Database;
 [ SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" ) ]
 public partial class DbTable<TRecord>
 {
-    private readonly ConcurrentDictionary<int, string>    _existsMsSql    = new();
-    private readonly ConcurrentDictionary<int, string>    _existsPostgres = new();
-    private readonly ConcurrentDictionary<int, string>    _get            = new();
-    private readonly ConcurrentDictionary<int, string>    _getGuid        = new();
-    private readonly ConcurrentDictionary<string, string> _getID          = new();
-    private          string?                              _count;
-
-
     public ValueTask<long>           Count( CancellationToken    token = default )                                                              => this.Call( Count, token );
     public ValueTask<bool>           Exists( bool                matchAll,   DynamicParameters  parameters, CancellationToken token )           => this.TryCall( Exists, matchAll, parameters, token );
     public ValueTask<Guid?>          GetID( string               sql,        DynamicParameters? parameters, CancellationToken token = default ) => this.Call( GetID, sql,        parameters, token );
@@ -44,40 +35,16 @@ public partial class DbTable<TRecord>
     [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public virtual async ValueTask<bool> Exists( DbConnection connection, DbTransaction transaction, bool matchAll, DynamicParameters parameters, CancellationToken token )
     {
-        int     hash = GetHash( parameters );
-        string? sql  = default;
-
-        if ( hash > 0 && !_existsMsSql.TryGetValue( hash, out sql ) ) { _existsMsSql[hash] = sql = GetExistsSql( matchAll, parameters ); }
-
-        if ( hash > 0 && !_existsPostgres.TryGetValue( hash, out sql ) ) { _existsPostgres[hash] = sql = GetExistsSql( matchAll, parameters ); }
-
-        sql ??= GetExistsSql( matchAll, parameters );
+        SqlCommand sql = GetExistsSql( matchAll, parameters );
 
         try
         {
-            CommandDefinition   command = _database.GetCommandDefinition( transaction, new SqlCommand( sql, parameters ), token );
+            CommandDefinition   command = _database.GetCommandDefinition( transaction, sql, token );
             IEnumerable<string> results = await connection.QueryAsync<string>( command );
             return results.Any();
         }
-        catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
+        catch ( Exception e ) { throw new SqlException( sql.SQL, parameters, e ); }
     }
-    private string GetExistsSql( bool matchAll, DynamicParameters parameters )
-    {
-        using var buffer = new ValueStringBuilder();
-
-        buffer.AppendJoin( matchAll
-                               ? "AND"
-                               : "OR",
-                           parameters.ParameterNames.Select( KeyValuePair ) );
-
-        return Instance switch
-               {
-                   DbInstance.MsSql    => $"SELECT TOP 1 {ID_ColumnName} FROM {SchemaTableName} WHERE {buffer.Span}",
-                   DbInstance.Postgres => $"SELECT {ID_ColumnName} FROM {SchemaTableName} WHERE {buffer.Span} LIMIT 1",
-                   _                   => throw new OutOfRangeException( nameof(Instance), Instance )
-               };
-    }
-
 
     public async ValueTask<Guid?> GetID( DbConnection connection, DbTransaction? transaction, string sql, DynamicParameters? parameters, CancellationToken token = default )
     {
@@ -90,11 +57,16 @@ public partial class DbTable<TRecord>
     }
 
     [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
-    public virtual async ValueTask<Guid?> GetID( DbConnection connection, DbTransaction? transaction, string columnName, object value, CancellationToken token = default )
+    public virtual async ValueTask<Guid?> GetID<TValue>( DbConnection connection, DbTransaction? transaction, string columnName, TValue? value, CancellationToken token = default )
     {
-        if ( !_getID.TryGetValue( columnName, out string? sql ) ) { _getID[columnName] = sql = $"SELECT {ID_ColumnName} FROM {SchemaTableName} WHERE {columnName} = @{nameof(value)}"; }
+        SqlCommand sql = GetWhereIDSql( columnName, value );
 
-        return await GetID( connection, transaction, sql, Database.GetParameters( value ), token );
+        try
+        {
+            CommandDefinition command = _database.GetCommandDefinition( transaction, sql, token );
+            return await connection.QuerySingleAsync<Guid?>( command );
+        }
+        catch ( Exception e ) { throw new SqlException( sql, e ); }
     }
 
 
@@ -117,12 +89,11 @@ public partial class DbTable<TRecord>
     [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public virtual async ValueTask<TRecord?> Get( DbConnection connection, DbTransaction? transaction, bool matchAll, DynamicParameters parameters, CancellationToken token = default )
     {
-        int hash = GetHash( parameters );
-        if ( !_get.TryGetValue( hash, out string? sql ) ) { _get[hash] = sql = Get_GetSql( matchAll, parameters ); }
+        SqlCommand sql = Get_GetSql( matchAll, parameters );
 
         try
         {
-            CommandDefinition     command = _database.GetCommandDefinition( transaction, new SqlCommand( sql, parameters ), token );
+            CommandDefinition     command = _database.GetCommandDefinition( transaction, sql, token );
             IEnumerable<TRecord?> results = await connection.QueryAsync<TRecord>( command );
             IEnumerable<TRecord>  records = results.WhereNotNull();
             TRecord?              result  = default;
@@ -138,19 +109,7 @@ public partial class DbTable<TRecord>
 
             return result;
         }
-        catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
-    }
-    private string Get_GetSql( in bool matchAll, in DynamicParameters parameters )
-    {
-        using var buffer = new ValueStringBuilder();
-
-        buffer.AppendJoin( matchAll
-                               ? "AND"
-                               : "OR",
-                           parameters.ParameterNames.Select( x => GetDescriptor( x )
-                                                                .KeyValuePair ) );
-
-        return $"SELECT * FROM {SchemaTableName} WHERE {buffer.Span}";
+        catch ( Exception e ) { throw new SqlException( sql, e ); }
     }
 
 
@@ -164,21 +123,7 @@ public partial class DbTable<TRecord>
     [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public virtual IAsyncEnumerable<TRecord> Get( DbConnection connection, DbTransaction? transaction, IEnumerable<Guid> ids, [ EnumeratorCancellation ] CancellationToken token = default )
     {
-        ReadOnlySpan<Guid> span = ids.Distinct()
-                                     .GetArray();
-
-        using var                     buffer     = new ValueStringBuilder( span.Sum( x => 36 ) + span.Length * 2 + 1 );
-        ReadOnlySpan<Guid>.Enumerator enumerator = span.GetEnumerator();
-
-        while ( enumerator.MoveNext() )
-        {
-            buffer.Append( '\'' );
-            buffer.AppendSpanFormattable( enumerator.Current, ReadOnlySpan<char>.Empty );
-            buffer.Append( '\'' );
-            buffer.Append( ',' );
-        }
-
-        string sql = $"SELECT * FROM {SchemaTableName} WHERE {ID_ColumnName} in ( {buffer.Span} )";
-        return Where( connection, transaction, new SqlCommand( sql ), token );
+        SqlCommand sql = Get_GetSql( ids );
+        return Where( connection, transaction, sql, token );
     }
 }

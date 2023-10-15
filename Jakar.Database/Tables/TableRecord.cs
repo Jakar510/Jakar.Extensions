@@ -52,6 +52,14 @@ public abstract record TableRecord<TRecord>( [ property: Key ] RecordID<TRecord>
         return parameters;
     }
 
+    public virtual DynamicParameters ToDynamicParameters()
+    {
+        var parameters = new DynamicParameters();
+        parameters.Add( nameof(ID),           ID );
+        parameters.Add( nameof(DateCreated),  DateCreated );
+        parameters.Add( nameof(LastModified), LastModified );
+        return parameters;
+    }
 
     protected static T TryGet<T>( DbDataReader reader, in string key )
     {
@@ -109,6 +117,13 @@ public abstract record OwnedTableRecord<TRecord>
         return parameters;
     }
 
+    public override DynamicParameters ToDynamicParameters()
+    {
+        DynamicParameters parameters = base.ToDynamicParameters();
+        parameters.Add( nameof(CreatedBy),   CreatedBy );
+        parameters.Add( nameof(OwnerUserID), OwnerUserID );
+        return parameters;
+    }
 
     public async ValueTask<UserRecord?> GetUser( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) =>
         await db.Users.Get( connection, transaction, true, GetDynamicParameters( this ), token );

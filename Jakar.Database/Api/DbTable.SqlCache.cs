@@ -2,6 +2,10 @@
 // 10/10/2023  10:37 AM
 
 
+using Org.BouncyCastle.Crypto;
+
+
+
 namespace Jakar.Database;
 
 
@@ -15,18 +19,35 @@ public abstract class SqlCache<TRecord> : ObservableClass where TRecord : TableR
     public const              string                         CREATED_BY       = nameof(IOwnedTableRecord.CreatedBy);
     public const              string                         DATE_CREATED     = nameof(TableRecord<TRecord>.DateCreated);
     public const              string                         ID               = nameof(TableRecord<TRecord>.ID);
+    public const              string                         IDS              = "ids";
     public const              string                         LAST_MODIFIED    = nameof(TableRecord<TRecord>.LastModified);
     public const              string                         OWNER_USER_ID    = nameof(IOwnedTableRecord.OwnerUserID);
-    protected const           char                           QUOTE            = '"';
+    public const              char                           QUOTE            = '"';
+    public const              string                         LIST_SEPARATOR   = ", ";
+    public const              string                         GUID_FORMAT      = "D";
+    public const              string                         AND              = "AND";
+    public const              string                         OR               = "OR";
 
 
     protected readonly ConcurrentDictionary<DbInstance, ImmutableDictionary<SqlStatement, string>> _cache           = new();
-    protected readonly ConcurrentDictionary<int, string>                                           _deleteGuids     = new();
-    protected readonly ConcurrentDictionary<int, string>                                           _whereParameters = new();
-    protected readonly ConcurrentDictionary<string, string>                                        _where           = new();
+    protected readonly ConcurrentDictionary<DbInstance, ConcurrentDictionary<int, string>>         _deleteIDs       = new();
+    protected readonly ConcurrentDictionary<DbInstance, ConcurrentDictionary<int, string>>         _whereParameters = new();
+    protected readonly ConcurrentDictionary<DbInstance, ConcurrentDictionary<string, string>>      _whereColumnSql  = new();
+    protected readonly ConcurrentDictionary<DbInstance, ConcurrentDictionary<int, string>>         _existsSql       = new();
+    protected readonly ConcurrentDictionary<DbInstance, ConcurrentDictionary<int, string>>         _deleteSql       = new();
+    protected readonly ConcurrentDictionary<DbInstance, ConcurrentDictionary<int, string>>         _getSql          = new();
+    protected readonly ConcurrentDictionary<DbInstance, ConcurrentDictionary<string, string>>      _getID           = new();
     protected readonly IConnectableDbRoot                                                          _database;
 
 
+    public int? CommandTimeout
+    {
+        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => _database.CommandTimeout;
+    }
+    public DbInstance Instance
+    {
+        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => _database.Instance;
+    }
     public static ImmutableArray<TRecord> Empty
     {
         [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => ImmutableArray<TRecord>.Empty;
@@ -39,17 +60,13 @@ public abstract class SqlCache<TRecord> : ObservableClass where TRecord : TableR
     {
         [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => Descriptors.Select( x => x.ColumnName );
     }
-    public int Count
-    {
-        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => _cache.Count;
-    }
     public string CreatedBy
     {
-        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => GetCreatedBy( _database.Instance );
+        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => GetCreatedBy( Instance );
     }
     public string DateCreated
     {
-        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => GetDateCreated( _database.Instance );
+        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => GetDateCreated( Instance );
     }
     public virtual IEnumerable<Descriptor> Descriptors
     {
@@ -57,7 +74,7 @@ public abstract class SqlCache<TRecord> : ObservableClass where TRecord : TableR
     }
     public string ID_ColumnName
     {
-        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => GetID_ColumnName( _database.Instance );
+        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => GetID_ColumnName( Instance );
     }
     public ImmutableDictionary<SqlStatement, string> this[ DbInstance key ]
     {
@@ -73,23 +90,27 @@ public abstract class SqlCache<TRecord> : ObservableClass where TRecord : TableR
     }
     public string LastModified
     {
-        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => GetLastModified( _database.Instance );
+        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => GetLastModified( Instance );
     }
     public string OwnerUserID
     {
-        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => GetOwnerUserID( _database.Instance );
+        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => GetOwnerUserID( Instance );
     }
     public string RandomMethod
     {
-        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => GetRandomMethod( _database.Instance );
+        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => GetRandomMethod( Instance );
     }
     public string SchemaTableName
     {
-        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => $"{_database.CurrentSchema}.{TableName}";
+        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => $"{CurrentSchema}.{TableName}";
+    }
+    public string CurrentSchema
+    {
+        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => _database.CurrentSchema;
     }
     public string TableName
     {
-        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => GetTableName( _database.Instance );
+        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => GetTableName( Instance );
     }
     public IEnumerable<string> VariableNames
     {
@@ -242,6 +263,236 @@ public abstract class SqlCache<TRecord> : ObservableClass where TRecord : TableR
                    };
 
         return dict.ToImmutableDictionary();
+    }
+
+
+    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
+    protected virtual SqlCommand GetDeleteSql( in IEnumerable<RecordID<TRecord>> ids )
+    {
+        if ( _deleteIDs.TryGetValue( Instance, out var dictionary ) is false ) { _deleteIDs[Instance] = dictionary = new ConcurrentDictionary<int, string>(); }
+
+        int hash = GetHash( ids );
+
+        if ( hash > 0 && dictionary.TryGetValue( hash, out string? sql ) )
+        {
+            Debug.Assert( sql is not null );
+            return new SqlCommand( sql );
+        }
+
+        using var buffer = new ValueStringBuilder( 1000 );
+        buffer.AppendJoin( LIST_SEPARATOR, ids, GUID_FORMAT );
+
+        dictionary[hash] = sql = $"DELETE FROM {SchemaTableName} WHERE {ID_ColumnName} in ( {buffer.Span} );";
+        return new SqlCommand( sql );
+    }
+
+    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
+    protected virtual SqlCommand GetDeleteSql( in IEnumerable<Guid> ids )
+    {
+        if ( _deleteSql.TryGetValue( Instance, out var dictionary ) is false ) { _deleteSql[Instance] = dictionary = new ConcurrentDictionary<int, string>(); }
+
+        int hash = GetHash( ids );
+
+        if ( hash > 0 && dictionary.TryGetValue( hash, out string? sql ) )
+        {
+            Debug.Assert( sql is not null );
+            return sql;
+        }
+
+        using var buffer = new ValueStringBuilder( 1000 );
+        buffer.AppendJoin( LIST_SEPARATOR, ids, GUID_FORMAT );
+
+        return dictionary[hash] = $"DELETE FROM {SchemaTableName} WHERE {ID_ColumnName} in ( {buffer.Span} );";
+    }
+
+    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
+    protected virtual SqlCommand GetDeleteSql( in bool matchAll, in DynamicParameters parameters )
+    {
+        if ( _deleteSql.TryGetValue( Instance, out var dictionary ) is false ) { _deleteSql[Instance] = dictionary = new ConcurrentDictionary<int, string>(); }
+
+        int hash = GetHash( parameters );
+
+        if ( hash > 0 && dictionary.TryGetValue( hash, out string? sql ) )
+        {
+            Debug.Assert( sql is not null );
+            return new SqlCommand( sql, parameters );
+        }
+
+        using var buffer = new ValueStringBuilder( 1000 );
+        buffer.AppendJoin( GetAndOr( matchAll ), GetKeyValuePairs( parameters ) );
+
+        dictionary[hash] = sql = $"DELETE FROM {SchemaTableName} WHERE {buffer.Span};";
+        return new SqlCommand( sql, parameters );
+    }
+
+
+    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
+    public virtual SqlCommand GetWhereSql<TValue>( string columnName, TValue? value )
+    {
+        if ( _whereColumnSql.TryGetValue( Instance, out ConcurrentDictionary<string, string>? dictionary ) is false ) { _whereColumnSql[Instance] = dictionary = new ConcurrentDictionary<string, string>(); }
+
+        var parameters = new DynamicParameters();
+        parameters.Add( nameof(value), value );
+
+        if ( dictionary.TryGetValue( columnName, out string? sql ) )
+        {
+            Debug.Assert( sql is not null );
+            return new SqlCommand( sql, parameters );
+        }
+
+        dictionary[columnName] = sql = $"SELECT * FROM {SchemaTableName} WHERE {columnName} = @{nameof(value)}";
+        return new SqlCommand( sql, parameters );
+    }
+
+    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
+    protected virtual SqlCommand GetWhereSql( in bool matchAll, in DynamicParameters parameters )
+    {
+        if ( _whereParameters.TryGetValue( Instance, out var dictionary ) is false ) { _whereParameters[Instance] = dictionary = new ConcurrentDictionary<int, string>(); }
+
+        int hash = GetHash( parameters );
+
+        if ( hash > 0 && dictionary.TryGetValue( hash, out string? sql ) )
+        {
+            Debug.Assert( sql is not null );
+            return new SqlCommand( sql, parameters );
+        }
+
+        using var buffer = new ValueStringBuilder( parameters.ParameterNames.Sum( x => x.Length ) * 2 );
+
+        buffer.AppendJoin( GetAndOr( matchAll ), GetKeyValuePairs( parameters ) );
+
+        dictionary[hash] = sql = $"SELECT * FROM {SchemaTableName} WHERE {buffer.Span}";
+        return new SqlCommand( sql, parameters );
+    }
+
+    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
+    public virtual SqlCommand GetWhereIDSql<TValue>( string columnName, TValue? value )
+    {
+        if ( _whereColumnSql.TryGetValue( Instance, out ConcurrentDictionary<string, string>? dictionary ) is false ) { _whereColumnSql[Instance] = dictionary = new ConcurrentDictionary<string, string>(); }
+
+        var parameters = new DynamicParameters();
+        parameters.Add( nameof(value), value );
+
+        if ( dictionary.TryGetValue( columnName, out string? sql ) )
+        {
+            Debug.Assert( sql is not null );
+            return new SqlCommand( sql, parameters );
+        }
+
+        dictionary[columnName] = sql = $"SELECT {ID_ColumnName} FROM {SchemaTableName} WHERE {columnName} = @{nameof(value)}";
+        return new SqlCommand( sql, parameters );
+    }
+
+
+    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
+    protected virtual SqlCommand GetExistsSql( in bool matchAll, in DynamicParameters parameters )
+    {
+        if ( _existsSql.TryGetValue( Instance, out var dictionary ) is false ) { _existsSql[Instance] = dictionary = new ConcurrentDictionary<int, string>(); }
+
+        int hash = GetHash( parameters );
+
+        if ( hash > 0 && dictionary.TryGetValue( hash, out string? sql ) )
+        {
+            Debug.Assert( sql is not null );
+            return new SqlCommand( sql, parameters );
+        }
+
+        using var buffer = new ValueStringBuilder( parameters.ParameterNames.Sum( x => x.Length ) * 2 );
+        buffer.AppendJoin( GetAndOr( matchAll ), GetKeyValuePairs( parameters ) );
+
+        dictionary[hash] = sql = Instance switch
+                                 {
+                                     DbInstance.MsSql    => $"SELECT TOP 1 {ID_ColumnName} FROM {SchemaTableName} WHERE {buffer.Span}",
+                                     DbInstance.Postgres => $"SELECT {ID_ColumnName} FROM {SchemaTableName} WHERE {buffer.Span} LIMIT 1",
+                                     _                   => throw new OutOfRangeException( nameof(Instance), Instance )
+                                 };
+
+        return new SqlCommand( sql, parameters );
+    }
+
+
+    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
+    protected virtual SqlCommand Get_GetSql( in bool matchAll, in DynamicParameters parameters )
+    {
+        if ( _getSql.TryGetValue( Instance, out var dictionary ) is false ) { _getSql[Instance] = dictionary = new ConcurrentDictionary<int, string>(); }
+
+        int hash = GetHash( parameters );
+
+        if ( hash > 0 && dictionary.TryGetValue( hash, out string? sql ) )
+        {
+            Debug.Assert( sql is not null );
+            return new SqlCommand( sql, parameters );
+        }
+
+        using var buffer = new ValueStringBuilder( parameters.ParameterNames.Sum( x => x.Length ) * 2 );
+
+        buffer.AppendJoin( GetAndOr( matchAll ), GetDescriptors( parameters ) );
+
+        dictionary[hash] = sql = $"SELECT * FROM {SchemaTableName} WHERE {buffer.Span}";
+        return new SqlCommand( sql, parameters );
+    }
+
+    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
+    protected virtual SqlCommand Get_GetSql( in IEnumerable<Guid> ids )
+    {
+        if ( _getSql.TryGetValue( Instance, out var dictionary ) is false ) { _getSql[Instance] = dictionary = new ConcurrentDictionary<int, string>(); }
+
+        int hash = GetHash( ids );
+
+        if ( hash > 0 && dictionary.TryGetValue( hash, out string? sql ) )
+        {
+            Debug.Assert( sql is not null );
+            return new SqlCommand( sql );
+        }
+
+        using var buffer = new ValueStringBuilder( 1000 );
+        buffer.AppendJoin( LIST_SEPARATOR, ids, GUID_FORMAT );
+
+        dictionary[hash] = sql = $"SELECT * FROM {SchemaTableName} WHERE {ID_ColumnName} in ( {buffer.Span} )";
+        return new SqlCommand( sql );
+    }
+
+
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    protected static string GetAndOr( in bool matchAll ) => matchAll
+                                                                ? AND
+                                                                : OR;
+
+    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
+    protected IEnumerable<string> GetDescriptors( DynamicParameters parameters )
+    {
+        // ReSharper disable once LoopCanBeConvertedToQuery
+        foreach ( string name in parameters.ParameterNames )
+        {
+            yield return GetDescriptor( name )
+               .KeyValuePair;
+        }
+    }
+
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    protected Descriptor GetDescriptor( string columnName ) =>
+        _propertiesCache.Get( _database, columnName );
+
+
+    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
+    protected IEnumerable<string> GetKeyValuePairs( DynamicParameters parameters ) =>
+        parameters.ParameterNames.Select( KeyValuePair );
+
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    protected string KeyValuePair( string columnName ) =>
+        GetDescriptor( columnName )
+           .KeyValuePair;
+
+
+    [ MethodImpl( MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining ) ] protected static int GetHash( in DynamicParameters parameters ) => GetHash( parameters.ParameterNames );
+
+    [ MethodImpl( MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining ) ]
+    protected static int GetHash<T>( in IEnumerable<T> values )
+    {
+        var hash = new HashCode();
+        foreach ( T value in values ) { hash.Add( value ); }
+
+        return hash.ToHashCode();
     }
 
 

@@ -8,23 +8,6 @@ namespace Jakar.Database;
 [ SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" ) ]
 public partial class DbTable<TRecord>( IConnectableDbRoot database ) : SqlCache<TRecord>( database ), IConnectableDb where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
-    protected readonly ConcurrentDictionary<int, string>    _deleteGuids     = new();
-    protected readonly ConcurrentDictionary<int, string>    _whereParameters = new();
-    protected readonly ConcurrentDictionary<string, string> _where           = new();
-
-
-    public int? CommandTimeout
-    {
-        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => _database.CommandTimeout;
-    }
-    public string CurrentSchema
-    {
-        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => _database.CurrentSchema;
-    }
-    public DbInstance Instance
-    {
-        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => _database.Instance;
-    }
     public RecordGenerator<TRecord> Records => new(this);
 
 
@@ -38,11 +21,6 @@ public partial class DbTable<TRecord>( IConnectableDbRoot database ) : SqlCache<
 
     void IDbTable.ResetSqlCaches() => Reset();
 
-
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public Descriptor GetDescriptor( string columnName ) => _propertiesCache.Get( this, columnName );
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
-    public string KeyValuePair( string columnName ) => GetDescriptor( columnName )
-       .KeyValuePair;
 
     public IAsyncEnumerable<TRecord> All( CancellationToken token = default ) => this.Call( All, token );
 

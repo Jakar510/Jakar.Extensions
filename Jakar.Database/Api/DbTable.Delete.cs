@@ -61,36 +61,23 @@ public partial class DbTable<TRecord>
     [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public virtual async ValueTask Delete( DbConnection connection, DbTransaction transaction, IEnumerable<Guid> ids, CancellationToken token = default )
     {
-        SqlCommand sql = $"DELETE FROM {SchemaTableName} WHERE {ID_ColumnName} in ( {string.Join( ',', ids.Select( x => $"'{x}'" ) )} );";
+        var parameters = new DynamicParameters();
+        parameters.Add( IDS, string.Join( ',', ids.Select( x => $"'{x}'" ) ) );
+
+        string sql = _cache[Instance][SqlStatement.Delete];
 
         try
         {
-            CommandDefinition command = _database.GetCommandDefinition( transaction, sql, token );
+            CommandDefinition command = _database.GetCommandDefinition( transaction, new SqlCommand( sql, parameters ), token );
             await connection.ExecuteScalarAsync( command );
         }
-        catch ( Exception e ) { throw new SqlException( sql.SQL, e ); }
+        catch ( Exception e ) { throw new SqlException( sql, e ); }
     }
     [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public async ValueTask Delete( DbConnection connection, DbTransaction transaction, bool matchAll, DynamicParameters parameters, CancellationToken token )
     {
-        int     hash = GetHash( parameters );
-        string? sql  = default;
-        if ( hash > 0 && !_deleteGuids.TryGetValue( hash, out sql ) ) { _deleteGuids[hash] = sql = GetDeleteSql( matchAll, parameters ); }
-
-        sql ??= GetDeleteSql( matchAll, parameters );
-        CommandDefinition command = _database.GetCommandDefinition( transaction, new SqlCommand( sql ), token );
+        SqlCommand sql = GetDeleteSql( matchAll, parameters );
+        CommandDefinition command = _database.GetCommandDefinition( transaction, sql, token );
         await connection.ExecuteScalarAsync( command );
-    }
-    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
-    private string GetDeleteSql( bool matchAll, DynamicParameters parameters )
-    {
-        using var buffer = new ValueStringBuilder();
-
-        buffer.AppendJoin( matchAll
-                               ? "AND"
-                               : "OR",
-                           parameters.ParameterNames.Select( KeyValuePair ) );
-
-        return $"DELETE FROM {SchemaTableName} WHERE {buffer.Span};";
     }
 }
