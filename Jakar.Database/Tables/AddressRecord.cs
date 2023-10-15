@@ -8,62 +8,74 @@ using System.Security.Claims;
 namespace Jakar.Database;
 
 
-public sealed record AddressRecord( string                  Line1,
-                                    string                  Line2,
-                                    string                  City,
-                                    string                  StateOrProvince,
-                                    string                  Country,
-                                    string                  PostalCode,
-                                    string                  Address,
-                                    RecordID<AddressRecord> ID,
-                                    RecordID<UserRecord>?   CreatedBy,
-                                    Guid?                   OwnerUserID,
-                                    DateTimeOffset          DateCreated,
-                                    DateTimeOffset?         LastModified = default
-) : OwnedTableRecord<AddressRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IEquatable<IAddress>, IDbReaderMapping<AddressRecord>
+public sealed record AddressRecord( [ property: ProtectedPersonalData, MaxLength( 512 ) ]  string Line1,
+                                    [ property: ProtectedPersonalData, MaxLength( 512 ) ]  string Line2,
+                                    [ property: ProtectedPersonalData, MaxLength( 256 ) ]  string City,
+                                    [ property: ProtectedPersonalData, MaxLength( 256 ) ]  string StateOrProvince,
+                                    [ property: ProtectedPersonalData, MaxLength( 256 ) ]  string Country,
+                                    [ property: ProtectedPersonalData, MaxLength( 256 ) ]  string PostalCode,
+                                    [ property: ProtectedPersonalData, MaxLength( 4096 ) ] string Address,
+                                    bool                                                          IsPrimary,
+                                    IDictionary<string, JToken?>?                                 AdditionalData,
+                                    RecordID<AddressRecord>                                       ID,
+                                    RecordID<UserRecord>?                                         CreatedBy,
+                                    Guid?                                                         OwnerUserID,
+                                    DateTimeOffset                                                DateCreated,
+                                    DateTimeOffset?                                               LastModified = default
+) : OwnedTableRecord<AddressRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IAddress, IEquatable<IAddress>, IDbReaderMapping<AddressRecord>
 {
-    public static string TableName { get; } = typeof(AddressRecord).GetTableName();
+    public static string                        TableName      { get; }      = typeof(AddressRecord).GetTableName();
+    public        IDictionary<string, JToken?>? AdditionalData { get; set; } = AdditionalData;
+    Guid? IAddress.                             UserID         => OwnerUserID;
 
 
-    [ ProtectedPersonalData, MaxLength( 512 ) ]  public string Line1           { get; set; } = Line1;
-    [ ProtectedPersonalData, MaxLength( 256 ) ]  public string Line2           { get; set; } = Line2;
-    [ ProtectedPersonalData, MaxLength( 256 ) ]  public string City            { get; set; } = City;
-    [ ProtectedPersonalData, MaxLength( 256 ) ]  public string PostalCode      { get; set; } = PostalCode;
-    [ ProtectedPersonalData, MaxLength( 256 ) ]  public string StateOrProvince { get; set; } = StateOrProvince;
-    [ ProtectedPersonalData, MaxLength( 256 ) ]  public string Country         { get; set; } = Country;
-    [ ProtectedPersonalData, MaxLength( 4096 ) ] public string Address         { get; set; } = Address;
-
-
-    // public AddressRecord( IUserData data ) { }
-
+    public override DynamicParameters ToDynamicParameters()
+    {
+        DynamicParameters parameters = base.ToDynamicParameters();
+        parameters.Add( nameof(Line1),           Line1 );
+        parameters.Add( nameof(Line2),           Line2 );
+        parameters.Add( nameof(City),            City );
+        parameters.Add( nameof(PostalCode),      PostalCode );
+        parameters.Add( nameof(StateOrProvince), StateOrProvince );
+        parameters.Add( nameof(Country),         Country );
+        parameters.Add( nameof(Address),         Address );
+        return parameters;
+    }
 
     public static AddressRecord Create( DbDataReader reader )
     {
-        string line1           = reader.GetString( nameof(Line1) );
-        string line2           = reader.GetString( nameof(Line2) );
-        string city            = reader.GetString( nameof(City) );
-        string stateOrProvince = reader.GetString( nameof(StateOrProvince) );
-        string country         = reader.GetString( nameof(Country) );
-        string postalCode      = reader.GetString( nameof(PostalCode) );
-        string address         = reader.GetString( nameof(Address) );
-        var    id              = RecordID<AddressRecord>.ID( reader );
-        var    createdBy       = RecordID<UserRecord>.CreatedBy( reader );
-        var    ownerUserID     = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
-        var    dateCreated     = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
-        var    lastModified    = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
+        var line1           = reader.GetString( nameof(Line1) );
+        var line2           = reader.GetString( nameof(Line2) );
+        var city            = reader.GetString( nameof(City) );
+        var stateOrProvince = reader.GetString( nameof(StateOrProvince) );
+        var country         = reader.GetString( nameof(Country) );
+        var postalCode      = reader.GetString( nameof(PostalCode) );
+        var address         = reader.GetString( nameof(Address) );
+        var additionalData  = JsonConvert.DeserializeObject<Dictionary<string, JToken?>>( reader.GetString( nameof(AdditionalData) ) );
+        var isPrimary       = reader.GetFieldValue<bool>( nameof(IsPrimary) );
+        var id              = RecordID<AddressRecord>.ID( reader );
+        var createdBy       = RecordID<UserRecord>.CreatedBy( reader );
+        var ownerUserID     = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
+        var dateCreated     = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
+        var lastModified    = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
 
-        return new AddressRecord( line1,
-                                  line2,
-                                  city,
-                                  stateOrProvince,
-                                  country,
-                                  postalCode,
-                                  address,
-                                  id,
-                                  createdBy,
-                                  ownerUserID,
-                                  dateCreated,
-                                  lastModified );
+        var record = new AddressRecord( line1,
+                                        line2,
+                                        city,
+                                        stateOrProvince,
+                                        country,
+                                        postalCode,
+                                        address,
+                                        isPrimary,
+                                        additionalData,
+                                        id,
+                                        createdBy,
+                                        ownerUserID,
+                                        dateCreated,
+                                        lastModified );
+
+        record.Validate();
+        return record;
     }
     public static async IAsyncEnumerable<AddressRecord> CreateAsync( DbDataReader reader, [ EnumeratorCancellation ] CancellationToken token = default )
     {

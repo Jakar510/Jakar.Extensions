@@ -18,4 +18,12 @@ public abstract record UserSubscription<TRecord>
                                                                                                                                                                                                                        DateCreated,
                                                                                                                                                                                                                        LastModified ),
                                                                                                                                                                                             IUserSubscription
-    where TRecord : UserSubscription<TRecord>, IDbReaderMapping<TRecord> { }
+    where TRecord : UserSubscription<TRecord>, IDbReaderMapping<TRecord>
+{
+    public override DynamicParameters ToDynamicParameters()
+    {
+        DynamicParameters parameters = base.ToDynamicParameters();
+        parameters.Add( nameof(SubscriptionExpires), SubscriptionExpires );
+        return parameters;
+    }
+}

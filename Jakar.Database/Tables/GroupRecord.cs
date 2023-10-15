@@ -33,6 +33,15 @@ public sealed record GroupRecord( [ MaxLength( 256 ) ]                          
                                                                                                                                             caller?.UserID,
                                                                                                                                             DateTimeOffset.UtcNow ) { }
 
+    public override DynamicParameters ToDynamicParameters()
+    {
+        DynamicParameters parameters = base.ToDynamicParameters();
+        parameters.Add( nameof(CustomerID),  CustomerID );
+        parameters.Add( nameof(NameOfGroup), NameOfGroup );
+        parameters.Add( nameof(OwnerID),     OwnerID );
+        parameters.Add( nameof(Rights),      Rights );
+        return parameters;
+    }
 
     public static GroupRecord Create( DbDataReader reader )
     {
@@ -45,7 +54,9 @@ public sealed record GroupRecord( [ MaxLength( 256 ) ]                          
         var ownerUserID  = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
         var createdBy    = RecordID<UserRecord>.CreatedBy( reader );
         var id           = RecordID<GroupRecord>.ID( reader );
-        return new GroupRecord( customerID, nameOfGroup, ownerID, rights, id, createdBy, ownerUserID, dateCreated, lastModified );
+        var record       = new GroupRecord( customerID, nameOfGroup, ownerID, rights, id, createdBy, ownerUserID, dateCreated, lastModified );
+        record.Validate();
+        return record;
     }
     public static async IAsyncEnumerable<GroupRecord> CreateAsync( DbDataReader reader, [ EnumeratorCancellation ] CancellationToken token = default )
     {

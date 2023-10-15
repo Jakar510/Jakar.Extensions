@@ -1,12 +1,4 @@
-﻿// ToothFairyDispatch :: ToothFairyDispatch.Cloud
-// 08/29/2022  9:55 PM
-
-
-using Org.BouncyCastle.Tls;
-
-
-
-namespace Jakar.Database;
+﻿namespace Jakar.Database;
 
 
 [ Serializable, Table( "Users" ) ]
@@ -82,6 +74,47 @@ public sealed record UserRecord( Guid                                           
     [ ProtectedPersonalData, MaxLength( 4096 ) ] public string            Website           { get; set; } = Website;
 
 
+    public override DynamicParameters ToDynamicParameters()
+    {
+        DynamicParameters parameters = base.ToDynamicParameters();
+        parameters.Add( nameof(UserID),                 UserID );
+        parameters.Add( nameof(UserName),               UserName );
+        parameters.Add( nameof(FirstName),              FirstName );
+        parameters.Add( nameof(LastName),               LastName );
+        parameters.Add( nameof(FullName),               FullName );
+        parameters.Add( nameof(Rights),                 Rights );
+        parameters.Add( nameof(Gender),                 Gender );
+        parameters.Add( nameof(Company),                Company );
+        parameters.Add( nameof(Description),            Description );
+        parameters.Add( nameof(Title),                  Title );
+        parameters.Add( nameof(Website),                Website );
+        parameters.Add( nameof(PreferredLanguage),      PreferredLanguage );
+        parameters.Add( nameof(Email),                  Email );
+        parameters.Add( nameof(IsEmailConfirmed),       IsEmailConfirmed );
+        parameters.Add( nameof(PhoneNumber),            PhoneNumber );
+        parameters.Add( nameof(Ext),                    Ext );
+        parameters.Add( nameof(IsPhoneNumberConfirmed), IsPhoneNumberConfirmed );
+        parameters.Add( nameof(IsTwoFactorEnabled),     IsTwoFactorEnabled );
+        parameters.Add( nameof(LastBadAttempt),         LastBadAttempt );
+        parameters.Add( nameof(LastLogin),              LastLogin );
+        parameters.Add( nameof(BadLogins),              BadLogins );
+        parameters.Add( nameof(IsLocked),               IsLocked );
+        parameters.Add( nameof(LockDate),               LockDate );
+        parameters.Add( nameof(LockoutEnd),             LockoutEnd );
+        parameters.Add( nameof(PasswordHash),           PasswordHash );
+        parameters.Add( nameof(RefreshToken),           RefreshToken );
+        parameters.Add( nameof(RefreshTokenExpiryTime), RefreshTokenExpiryTime );
+        parameters.Add( nameof(SessionID),              SessionID );
+        parameters.Add( nameof(IsActive),               IsActive );
+        parameters.Add( nameof(IsDisabled),             IsDisabled );
+        parameters.Add( nameof(SecurityStamp),          SecurityStamp );
+        parameters.Add( nameof(AuthenticatorKey),       AuthenticatorKey );
+        parameters.Add( nameof(ConcurrencyStamp),       ConcurrencyStamp );
+        parameters.Add( nameof(EscalateTo),             EscalateTo );
+        parameters.Add( nameof(AdditionalData),         AdditionalData );
+        return parameters;
+    }
+
     public static UserRecord Create( DbDataReader reader )
     {
         Guid              userID                 = reader.GetGuid( nameof(UserID) );
@@ -119,60 +152,59 @@ public sealed record UserRecord( Guid                                           
         string            authenticatorKey       = reader.GetString( nameof(AuthenticatorKey) );
         string            concurrencyStamp       = reader.GetString( nameof(AuthenticatorKey) );
         var               escalateTo             = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(EscalateTo) ) );
-
-        IDictionary<string, JToken?>? additionalData = reader.GetFieldValue<string?>( nameof(AdditionalData) )
-                                                            ?.FromJson<Dictionary<string, JToken?>>();
-
-        RecordID<UserRecord>  id           = RecordID<UserRecord>.ID( reader );
-        RecordID<UserRecord>? createdBy    = RecordID<UserRecord>.CreatedBy( reader );
-        var                   ownerUserID  = reader.GetFieldValue<Guid?>( nameof(OwnerUserID) );
-        var                   dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
-        var                   lastModified = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
+        var               additionalData         = JsonConvert.DeserializeObject<Dictionary<string, JToken?>>( reader.GetString( nameof(AdditionalData) ) );
+        var               id                     = RecordID<UserRecord>.ID( reader );
+        var               createdBy              = RecordID<UserRecord>.CreatedBy( reader );
+        var               ownerUserID            = reader.GetFieldValue<Guid?>( nameof(OwnerUserID) );
+        var               dateCreated            = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
+        var               lastModified           = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
 
 
-        return new UserRecord( userID,
-                               userName,
-                               firstName,
-                               lastName,
-                               fullName,
-                               rights,
-                               gender,
-                               company,
-                               description,
-                               department,
-                               title,
-                               website,
-                               preferredLanguage,
-                               email,
-                               isEmailConfirmed,
-                               phoneNumber,
-                               ext,
-                               isPhoneNumberConfirmed,
-                               isTwoFactorEnabled,
-                               lastBadAttempt,
-                               lastLogin,
-                               badLogins,
-                               isLocked,
-                               lockDate,
-                               lockoutEnd,
-                               passwordHash,
-                               refreshToken,
-                               refreshTokenExpiryTime,
-                               sessionID,
-                               isActive,
-                               isDisabled,
-                               securityStamp,
-                               authenticatorKey,
-                               concurrencyStamp,
-                               escalateTo,
-                               additionalData,
-                               id,
-                               createdBy,
-                               ownerUserID,
-                               dateCreated,
-                               lastModified );
+        var record = new UserRecord( userID,
+                                     userName,
+                                     firstName,
+                                     lastName,
+                                     fullName,
+                                     rights,
+                                     gender,
+                                     company,
+                                     description,
+                                     department,
+                                     title,
+                                     website,
+                                     preferredLanguage,
+                                     email,
+                                     isEmailConfirmed,
+                                     phoneNumber,
+                                     ext,
+                                     isPhoneNumberConfirmed,
+                                     isTwoFactorEnabled,
+                                     lastBadAttempt,
+                                     lastLogin,
+                                     badLogins,
+                                     isLocked,
+                                     lockDate,
+                                     lockoutEnd,
+                                     passwordHash,
+                                     refreshToken,
+                                     refreshTokenExpiryTime,
+                                     sessionID,
+                                     isActive,
+                                     isDisabled,
+                                     securityStamp,
+                                     authenticatorKey,
+                                     concurrencyStamp,
+                                     escalateTo,
+                                     additionalData,
+                                     id,
+                                     createdBy,
+                                     ownerUserID,
+                                     dateCreated,
+                                     lastModified );
+
+        record.Validate();
+        return record;
     }
-
     public static async IAsyncEnumerable<UserRecord> CreateAsync( DbDataReader reader, [ EnumeratorCancellation ] CancellationToken token = default )
     {
         while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
@@ -379,7 +411,6 @@ public sealed record UserRecord( Guid                                           
 
         return await GetRights( connection, transaction, db, totalRightCount, token );
     }
-
     public async ValueTask<UserRights> GetRights( DbConnection connection, DbTransaction transaction, Database db, int totalRightCount, CancellationToken token )
     {
         List<GroupRecord> groups = await GetGroups( connection, transaction, db, token )

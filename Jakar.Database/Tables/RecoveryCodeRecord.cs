@@ -7,11 +7,11 @@ namespace Jakar.Database;
 [ Serializable, Table( "Codes" ) ]
 public sealed record RecoveryCodeRecord
     ( [ MaxLength( 10240 ) ] string Code, RecordID<RecoveryCodeRecord> ID, RecordID<UserRecord>? CreatedBy, Guid? OwnerUserID, DateTimeOffset DateCreated, DateTimeOffset? LastModified = default ) : OwnedTableRecord<RecoveryCodeRecord>( ID,
-                                                                                                                                                                                                                                           CreatedBy,
-                                                                                                                                                                                                                                           OwnerUserID,
-                                                                                                                                                                                                                                           DateCreated,
-                                                                                                                                                                                                                                           LastModified ),
-                                                                                                                                                                                                     IDbReaderMapping<RecoveryCodeRecord>
+                                                                                                                                                                                                                                            CreatedBy,
+                                                                                                                                                                                                                                            OwnerUserID,
+                                                                                                                                                                                                                                            DateCreated,
+                                                                                                                                                                                                                                            LastModified ),
+                                                                                                                                                                                                      IDbReaderMapping<RecoveryCodeRecord>
 {
     private static readonly PasswordHasher<RecoveryCodeRecord> _hasher = new();
 
@@ -20,6 +20,12 @@ public sealed record RecoveryCodeRecord
 
     public RecoveryCodeRecord( string code, UserRecord user ) : this( code, RecordID<RecoveryCodeRecord>.New(), user.ID, user.UserID, DateTimeOffset.UtcNow ) { }
 
+    public override DynamicParameters ToDynamicParameters()
+    {
+        DynamicParameters parameters = base.ToDynamicParameters();
+        parameters.Add( nameof(Code), Code );
+        return parameters;
+    }
 
     public static RecoveryCodeRecord Create( DbDataReader reader )
     {
@@ -29,7 +35,9 @@ public sealed record RecoveryCodeRecord
         var ownerUserID  = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
         var createdBy    = RecordID<UserRecord>.CreatedBy( reader );
         var id           = RecordID<RecoveryCodeRecord>.ID( reader );
-        return new RecoveryCodeRecord( code, id, createdBy, ownerUserID, dateCreated, lastModified );
+        var record       = new RecoveryCodeRecord( code, id, createdBy, ownerUserID, dateCreated, lastModified );
+        record.Validate();
+        return record;
     }
     public static async IAsyncEnumerable<RecoveryCodeRecord> CreateAsync( DbDataReader reader, [ EnumeratorCancellation ] CancellationToken token = default )
     {

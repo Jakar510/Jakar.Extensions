@@ -9,6 +9,7 @@ public sealed record UserGroupRecord : Mapping<UserGroupRecord, UserRecord, Grou
 {
     public static string TableName { get; } = typeof(UserGroupRecord).GetTableName();
 
+
     public UserGroupRecord( UserRecord            owner, GroupRecord           value ) : base( owner, value ) { }
     private UserGroupRecord( RecordID<UserRecord> key,   RecordID<GroupRecord> value, RecordID<UserGroupRecord> id, DateTimeOffset dateCreated, DateTimeOffset? lastModified ) : base( key, value, id, dateCreated, lastModified ) { }
 
@@ -21,7 +22,9 @@ public sealed record UserGroupRecord : Mapping<UserGroupRecord, UserRecord, Grou
         DateTimeOffset            dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
         DateTimeOffset?           lastModified = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
         RecordID<UserGroupRecord> id           = new RecordID<UserGroupRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) );
-        return new UserGroupRecord( key, value, id, dateCreated, lastModified );
+        var                       record       = new UserGroupRecord( key, value, id, dateCreated, lastModified );
+        record.Validate();
+        return record;
     }
     public static async IAsyncEnumerable<UserGroupRecord> CreateAsync( DbDataReader reader, [ EnumeratorCancellation ] CancellationToken token = default )
     {

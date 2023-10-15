@@ -26,6 +26,13 @@ public abstract record Mapping<TSelf, TKey, TValue>( RecordID<TKey> KeyID, Recor
         _value = new WeakReference<TValue>( value );
     }
 
+    public override DynamicParameters ToDynamicParameters()
+    {
+        DynamicParameters parameters = base.ToDynamicParameters();
+        parameters.Add( nameof(KeyID),   KeyID );
+        parameters.Add( nameof(ValueID), ValueID );
+        return parameters;
+    }
 
     public static DynamicParameters GetDynamicParameters( TValue record )
     {

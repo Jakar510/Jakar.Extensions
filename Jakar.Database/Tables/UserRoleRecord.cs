@@ -22,7 +22,9 @@ public sealed record UserRoleRecord : Mapping<UserRoleRecord, UserRecord, RoleRe
         DateTimeOffset  dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
         DateTimeOffset? lastModified = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
         var             id           = new RecordID<UserRoleRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) );
-        return new UserRoleRecord( key, value, id, dateCreated, lastModified );
+        var             record       = new UserRoleRecord( key, value, id, dateCreated, lastModified );
+        record.Validate();
+        return record;
     }
     public static async IAsyncEnumerable<UserRoleRecord> CreateAsync( DbDataReader reader, [ EnumeratorCancellation ] CancellationToken token = default )
     {

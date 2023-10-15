@@ -30,6 +30,13 @@ public readonly record struct RecordID<TRecord>( Guid Value ) : IComparable<Reco
 
     public static implicit operator RecordID<TRecord>( TRecord record ) => new(record.ID.Value);
 
+    public DynamicParameters ToDynamicParameters()
+    {
+        DynamicParameters parameters = new();
+        parameters.Add( SqlCache<TRecord>.ID, Value );
+        return parameters;
+    }
+
 
     public bool IsValid()    => Guid.Empty.Equals( Value ) is false;
     public bool IsNotValid() => Guid.Empty.Equals( Value );

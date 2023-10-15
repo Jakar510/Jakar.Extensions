@@ -16,6 +16,9 @@ public interface IDbReaderMapping<out TRecord> where TRecord : IDbReaderMapping<
     public abstract static string                    TableName { get; }
     public abstract static TRecord                   Create( DbDataReader      reader );
     public abstract static IAsyncEnumerable<TRecord> CreateAsync( DbDataReader reader, [ EnumeratorCancellation ] CancellationToken token = default );
+
+
+    public DynamicParameters ToDynamicParameters();
 }
 
 
@@ -42,6 +45,19 @@ public abstract record TableRecord<TRecord>( [ property: Key ] RecordID<TRecord>
     where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
     protected TableRecord( RecordID<TRecord> id ) : this( id, DateTimeOffset.UtcNow, null ) { }
+
+
+    [ Conditional( "DEBUG" ) ]
+    public void Validate()
+    {
+        PropertyInfo[]    properties = typeof(TRecord).GetProperties();
+        DynamicParameters parameters = ToDynamicParameters();
+        int               length     = parameters.ParameterNames.Count();
+        if ( length == properties.Length ) { return; }
+
+        var message = $"{typeof(TRecord).Name}: {nameof(ToDynamicParameters)}.Length ({length}) != {nameof(properties)}.Length ({properties.Length})";
+        throw new InvalidOperationException( message );
+    }
 
 
     public static DynamicParameters GetDynamicParameters( TRecord record ) => GetDynamicParameters( record.ID );

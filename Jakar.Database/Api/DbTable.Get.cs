@@ -46,15 +46,6 @@ public partial class DbTable<TRecord>
         catch ( Exception e ) { throw new SqlException( sql.SQL, parameters, e ); }
     }
 
-    public async ValueTask<Guid?> GetID( DbConnection connection, DbTransaction? transaction, string sql, DynamicParameters? parameters, CancellationToken token = default )
-    {
-        try
-        {
-            CommandDefinition command = _database.GetCommandDefinition( transaction, new SqlCommand( sql, parameters ), token );
-            return await connection.QuerySingleAsync<Guid?>( command );
-        }
-        catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
-    }
 
     [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public virtual async ValueTask<Guid?> GetID<TValue>( DbConnection connection, DbTransaction? transaction, string columnName, TValue? value, CancellationToken token = default )
@@ -77,14 +68,25 @@ public partial class DbTable<TRecord>
     public async ValueTask<TRecord?> Get( DbConnection connection, DbTransaction? transaction, Guid id, CancellationToken token = default ) =>
         await Get( connection, transaction, ID_ColumnName, id, token );
 
+    public virtual async IAsyncEnumerable<TRecord> Get( DbConnection connection, DbTransaction? transaction, IAsyncEnumerable<Guid> ids, [ EnumeratorCancellation ] CancellationToken token = default )
+    {
+        HashSet<Guid> set = await ids.ToHashSet( token );
+        await foreach ( TRecord record in Get( connection, transaction, set, token ) ) { yield return record; }
+    }
+
+    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
+    public virtual IAsyncEnumerable<TRecord> Get( DbConnection connection, DbTransaction? transaction, IEnumerable<Guid> ids, [ EnumeratorCancellation ] CancellationToken token = default )
+    {
+        SqlCommand sql = Get_GetSql( ids );
+        return Where( connection, transaction, sql, token );
+    }
+
 
     public async ValueTask<TRecord?> Get( DbConnection connection, DbTransaction? transaction, RecordID<TRecord>? id, CancellationToken token = default ) => await Get( connection, transaction, ID_ColumnName, id?.Value, token );
     public async ValueTask<TRecord?> Get( DbConnection connection, DbTransaction? transaction, RecordID<TRecord>  id, CancellationToken token = default ) => await Get( connection, transaction, ID_ColumnName, id.Value,  token );
 
-
     public virtual async ValueTask<TRecord?> Get( DbConnection connection, DbTransaction? transaction, string columnName, object? value, CancellationToken token = default ) =>
         await Get( connection, transaction, true, Database.GetParameters( value, default, columnName ), token );
-
 
     [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public virtual async ValueTask<TRecord?> Get( DbConnection connection, DbTransaction? transaction, bool matchAll, DynamicParameters parameters, CancellationToken token = default )
@@ -110,20 +112,5 @@ public partial class DbTable<TRecord>
             return result;
         }
         catch ( Exception e ) { throw new SqlException( sql, e ); }
-    }
-
-
-    public virtual async IAsyncEnumerable<TRecord> Get( DbConnection connection, DbTransaction? transaction, IAsyncEnumerable<Guid> ids, [ EnumeratorCancellation ] CancellationToken token = default )
-    {
-        HashSet<Guid> set = await ids.ToHashSet( token );
-        await foreach ( TRecord record in Get( connection, transaction, set, token ) ) { yield return record; }
-    }
-
-
-    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
-    public virtual IAsyncEnumerable<TRecord> Get( DbConnection connection, DbTransaction? transaction, IEnumerable<Guid> ids, [ EnumeratorCancellation ] CancellationToken token = default )
-    {
-        SqlCommand sql = Get_GetSql( ids );
-        return Where( connection, transaction, sql, token );
     }
 }

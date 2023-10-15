@@ -18,6 +18,7 @@ public sealed record UserLoginInfoRecord( [ property: MaxLength(                
 {
     public static string TableName { get; } = typeof(UserLoginInfoRecord).GetTableName();
 
+
     public UserLoginInfoRecord( UserRecord user, UserLoginInfo info ) : this( user, info.LoginProvider, info.ProviderKey, info.ProviderDisplayName ) { }
     public UserLoginInfoRecord( UserRecord user, string loginProvider, string providerKey, string? providerDisplayName ) : this( loginProvider,
                                                                                                                                  providerDisplayName,
@@ -28,6 +29,15 @@ public sealed record UserLoginInfoRecord( [ property: MaxLength(                
                                                                                                                                  user.UserID,
                                                                                                                                  DateTimeOffset.UtcNow ) { }
 
+    public override DynamicParameters ToDynamicParameters()
+    {
+        DynamicParameters parameters = base.ToDynamicParameters();
+        parameters.Add( nameof(LoginProvider),       LoginProvider );
+        parameters.Add( nameof(ProviderDisplayName), ProviderDisplayName );
+        parameters.Add( nameof(ProviderKey),         ProviderKey );
+        parameters.Add( nameof(Value),               Value );
+        return parameters;
+    }
 
     public static UserLoginInfoRecord Create( DbDataReader reader )
     {
@@ -40,8 +50,9 @@ public sealed record UserLoginInfoRecord( [ property: MaxLength(                
         var ownerUserID         = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
         var createdBy           = RecordID<UserRecord>.CreatedBy( reader );
         var id                  = RecordID<UserLoginInfoRecord>.ID( reader );
-
-        return new UserLoginInfoRecord( loginProvider, providerDisplayName, providerKey, value, id, createdBy, ownerUserID, dateCreated, lastModified );
+        var record              = new UserLoginInfoRecord( loginProvider, providerDisplayName, providerKey, value, id, createdBy, ownerUserID, dateCreated, lastModified );
+        record.Validate();
+        return record;
     }
     public static async IAsyncEnumerable<UserLoginInfoRecord> CreateAsync( DbDataReader reader, [ EnumeratorCancellation ] CancellationToken token = default )
     {

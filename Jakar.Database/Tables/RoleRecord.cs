@@ -15,6 +15,7 @@ public sealed record RoleRecord( [ property: MaxLength( 1024 ) ]                
 {
     public static string TableName { get; } = typeof(RoleRecord).GetTableName();
 
+
     public RoleRecord( IdentityRole role, UserRecord?   caller                     = default ) : this( role.Name ?? string.Empty, role.NormalizedName ?? string.Empty, role.ConcurrencyStamp ?? string.Empty, caller ) { }
     public RoleRecord( IdentityRole role, in UserRights rights, UserRecord? caller = default ) : this( role.Name ?? string.Empty, role.NormalizedName ?? string.Empty, role.ConcurrencyStamp ?? string.Empty, rights, caller ) { }
     public RoleRecord( string       name, UserRecord?   caller                             = default ) : this( name, name, caller ) { }
@@ -37,6 +38,15 @@ public sealed record RoleRecord( [ property: MaxLength( 1024 ) ]                
                                                                                                                                                  DateTimeOffset.UtcNow,
                                                                                                                                                  default ) { }
 
+    public override DynamicParameters ToDynamicParameters()
+    {
+        DynamicParameters parameters = base.ToDynamicParameters();
+        parameters.Add( nameof(Name),             Name );
+        parameters.Add( nameof(NormalizedName),   NormalizedName );
+        parameters.Add( nameof(ConcurrencyStamp), ConcurrencyStamp );
+        parameters.Add( nameof(Rights),           Rights );
+        return parameters;
+    }
 
     // [DbReaderMapping]
     public static RoleRecord Create( DbDataReader reader )
@@ -50,7 +60,9 @@ public sealed record RoleRecord( [ property: MaxLength( 1024 ) ]                
         var ownerUserID      = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
         var createdBy        = RecordID<UserRecord>.CreatedBy( reader );
         var id               = RecordID<RoleRecord>.ID( reader );
-        return new RoleRecord( name, normalizedName, concurrencyStamp, rights, id, createdBy, ownerUserID, dateCreated, lastModified );
+        var record           = new RoleRecord( name, normalizedName, concurrencyStamp, rights, id, createdBy, ownerUserID, dateCreated, lastModified );
+        record.Validate();
+        return record;
     }
     public static async IAsyncEnumerable<RoleRecord> CreateAsync( DbDataReader reader, [ EnumeratorCancellation ] CancellationToken token = default )
     {
