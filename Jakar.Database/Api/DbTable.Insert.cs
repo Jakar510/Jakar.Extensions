@@ -30,69 +30,49 @@ public partial class DbTable<TRecord>
     [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public virtual async ValueTask<TRecord> Insert( DbConnection connection, DbTransaction transaction, TRecord record, CancellationToken token = default )
     {
-        string sql = _cache[_database.Instance][SqlStatement.SingleInsert];
-
-        var parameters = new DynamicParameters( record );
+        SqlCommand sql = Cache.Insert( record );
 
         try
         {
-            CommandDefinition command = _database.GetCommandDefinition( transaction, new SqlCommand( sql, parameters ), token );
+            CommandDefinition command = _database.GetCommandDefinition( transaction, sql, token );
             var               id      = await connection.ExecuteScalarAsync<Guid>( command );
             return record.NewID( id );
         }
-        catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
+        catch ( Exception e ) { throw new SqlException( sql, e ); }
     }
 
     [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public virtual async ValueTask<TRecord?> TryInsert( DbConnection connection, DbTransaction transaction, TRecord record, bool matchAll, DynamicParameters parameters, CancellationToken token = default )
     {
-        string where = string.Join( matchAll
-                                        ? "AND"
-                                        : "OR",
-                                    parameters.ParameterNames.Select( KeyValuePair ) );
-
-        var p = new DynamicParameters( parameters );
-        p.Add( nameof(where), where );
-
-        string sql = _cache[_database.Instance][SqlStatement.TryInsert];
-
+        SqlCommand sql = Cache.TryInsert( record, matchAll, parameters );
 
         try
         {
-            CommandDefinition command = _database.GetCommandDefinition( transaction, new SqlCommand( sql, parameters ), token );
+            CommandDefinition command = _database.GetCommandDefinition( transaction, sql, token );
             var               id      = await connection.ExecuteScalarAsync<Guid?>( command );
 
             return id.HasValue
                        ? record.NewID( id.Value )
                        : default;
         }
-        catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
+        catch ( Exception e ) { throw new SqlException( sql, e ); }
     }
 
 
     [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public virtual async ValueTask<TRecord?> InsertOrUpdate( DbConnection connection, DbTransaction transaction, TRecord record, bool matchAll, DynamicParameters parameters, CancellationToken token = default )
     {
-        string where = string.Join( matchAll
-                                        ? "AND"
-                                        : "OR",
-                                    parameters.ParameterNames.Select( KeyValuePair ) );
-
-        var p = new DynamicParameters( parameters );
-        p.Add( nameof(where), where );
-        p.Add( ID,            record.ID.Value );
-
-        string sql = _cache[_database.Instance][SqlStatement.InsertOrUpdate];
+        SqlCommand sql = Cache.InsertOrUpdate( record, matchAll, parameters );
 
         try
         {
-            CommandDefinition command = _database.GetCommandDefinition( transaction, new SqlCommand( sql, parameters ), token );
+            CommandDefinition command = _database.GetCommandDefinition( transaction, sql, token );
             var               id      = await connection.ExecuteScalarAsync<Guid?>( command );
 
             return id.HasValue
                        ? record.NewID( id.Value )
                        : default;
         }
-        catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
+        catch ( Exception e ) { throw new SqlException( sql, e ); }
     }
 }

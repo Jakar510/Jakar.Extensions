@@ -8,32 +8,28 @@ namespace Jakar.Database;
 public partial class DbTable<TRecord>
 {
     public ValueTask<TRecord?>                         Next( RecordPair<TRecord>    pair, CancellationToken token = default ) => this.Call( Next,   pair, token );
-    public ValueTask<Guid?>                            NextID( Guid?                id,   CancellationToken token = default ) => this.Call( NextID, id,   token );
+    public ValueTask<Guid?>                            NextID( RecordPair<TRecord>  pair, CancellationToken token = default ) => this.Call( NextID, pair, token );
     public ValueTask<IEnumerable<RecordPair<TRecord>>> SortedIDs( CancellationToken token = default ) => this.Call( SortedIDs, token );
 
 
     [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public virtual async ValueTask<TRecord?> Next( DbConnection connection, DbTransaction? transaction, RecordPair<TRecord> pair, CancellationToken token = default )
     {
-        var parameters = new DynamicParameters();
-        parameters.Add( nameof(RecordPair<TRecord>.ID),          pair.ID );
-        parameters.Add( nameof(RecordPair<TRecord>.DateCreated), pair.DateCreated );
-
-        string sql = _cache[Instance][SqlStatement.Next];
+        SqlCommand sql = Cache.Next( pair );
 
         try
         {
-            CommandDefinition command = _database.GetCommandDefinition( transaction, new SqlCommand( sql, parameters ), token );
+            CommandDefinition command = _database.GetCommandDefinition( transaction, sql, token );
             return await connection.ExecuteScalarAsync<TRecord>( command );
         }
-        catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
+        catch ( Exception e ) { throw new SqlException( sql, e ); }
     }
 
 
     [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public virtual async ValueTask<IEnumerable<RecordPair<TRecord>>> SortedIDs( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
-        string sql = _cache[Instance][SqlStatement.SortedIDs];
+        SqlCommand sql = Cache.SortedIDs();
 
         try
         {
@@ -46,20 +42,15 @@ public partial class DbTable<TRecord>
 
 
     [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
-    public virtual async ValueTask<Guid?> NextID( DbConnection connection, DbTransaction? transaction, Guid? id, CancellationToken token = default )
+    public virtual async ValueTask<Guid?> NextID( DbConnection connection, DbTransaction? transaction, RecordPair<TRecord> pair, CancellationToken token = default )
     {
-        if ( id is null ) { return default; }
-
-        var parameters = new DynamicParameters();
-        parameters.Add( ID, id.Value );
-
-        string sql = _cache[Instance][SqlStatement.NextID];
+        SqlCommand sql = Cache.NextID( pair );
 
         try
         {
-            CommandDefinition command = _database.GetCommandDefinition( transaction, new SqlCommand( sql, parameters ), token );
+            CommandDefinition command = _database.GetCommandDefinition( transaction, sql, token );
             return await connection.ExecuteScalarAsync<Guid>( command );
         }
-        catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
+        catch ( Exception e ) { throw new SqlException( sql, e ); }
     }
 }

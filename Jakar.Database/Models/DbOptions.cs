@@ -16,6 +16,9 @@ public sealed class DbOptions : IOptions<DbOptions>, IDbOptions
     private      string? _currentSchema;
 
 
+    public static readonly ImmutableArray<DbInstance> Instances = ImmutableArray.Create( Enum.GetValues<DbInstance>() );
+
+
     public string   AuthenticationType { get; set; } = JwtBearerDefaults.AuthenticationScheme;
     public TimeSpan ClockSkew          { get; set; } = TimeSpan.FromSeconds( 60 );
     public int?     CommandTimeout     { get; set; } = 300;

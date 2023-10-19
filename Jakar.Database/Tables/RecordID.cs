@@ -33,7 +33,7 @@ public readonly record struct RecordID<TRecord>( Guid Value ) : IComparable<Reco
     public DynamicParameters ToDynamicParameters()
     {
         DynamicParameters parameters = new();
-        parameters.Add( SqlCache<TRecord>.ID, Value );
+        parameters.Add( SQL.ID, Value );
         return parameters;
     }
 

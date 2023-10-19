@@ -13,7 +13,7 @@ public partial class DbTable<TRecord>
 
     public virtual async ValueTask<TRecord?> First( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
-        string sql = _cache[_database.Instance][SqlStatement.First];
+        SqlCommand sql = Cache.First();
 
         try
         {
@@ -24,7 +24,7 @@ public partial class DbTable<TRecord>
     }
     public virtual async ValueTask<TRecord?> FirstOrDefault( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
-        string sql = _cache[_database.Instance][SqlStatement.First];
+        SqlCommand sql = Cache.First();
 
         try
         {

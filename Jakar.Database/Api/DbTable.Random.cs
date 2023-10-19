@@ -16,7 +16,7 @@ public partial class DbTable<TRecord>
     [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public virtual async ValueTask<TRecord?> Random( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
-        string sql = _cache[Instance][SqlStatement.Single];
+        SqlCommand sql = Cache.Random();
 
         try
         {
@@ -30,22 +30,15 @@ public partial class DbTable<TRecord>
     [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public virtual IAsyncEnumerable<TRecord> Random( DbConnection connection, DbTransaction? transaction, UserRecord user, int count, [ EnumeratorCancellation ] CancellationToken token = default )
     {
-        var parameters = new DynamicParameters();
-        parameters.Add( COUNT,         count );
-        parameters.Add( OWNER_USER_ID, user.OwnerUserID );
-
-        string sql = _cache[Instance][SqlStatement.RandomUserCount];
-        return Where( connection, transaction, new SqlCommand( sql, parameters ), token );
+        SqlCommand sql = Cache.Random( user.OwnerUserID, count );
+        return Where( connection, transaction, sql, token );
     }
 
 
     [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public virtual IAsyncEnumerable<TRecord> Random( DbConnection connection, DbTransaction? transaction, int count, [ EnumeratorCancellation ] CancellationToken token = default )
     {
-        var parameters = new DynamicParameters();
-        parameters.Add( COUNT, count );
-
-        string sql = _cache[Instance][SqlStatement.RandomCount];
-        return Where( connection, transaction, new SqlCommand( sql, parameters ), token );
+        SqlCommand sql = Cache.Random( count );
+        return Where( connection, transaction, sql, token );
     }
 }

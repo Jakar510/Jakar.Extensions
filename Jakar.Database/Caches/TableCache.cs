@@ -12,7 +12,7 @@ public sealed class TableCache<TRecord> : IHostedService, IReadOnlyCollection<TR
     private readonly List<Guid>                                      _keys = new();
     private readonly TableCacheOptions                               _options;
     private          int                                             _index = -1;
-    public           IEnumerable<Guid>                               Changed => from entry in _records.Values where entry.HasChanged select entry.ID.Value;
+    public           IEnumerable<RecordID<TRecord>>                  Changed => from entry in _records.Values where entry.HasChanged select entry.ID;
     public           int                                             Count   => _records.Count;
 
 

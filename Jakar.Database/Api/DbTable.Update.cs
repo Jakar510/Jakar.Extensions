@@ -32,16 +32,13 @@ public partial class DbTable<TRecord>
     [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public virtual async ValueTask Update( DbConnection connection, DbTransaction? transaction, TRecord record, CancellationToken token = default )
     {
-        var parameters = new DynamicParameters( record );
-        parameters.Add( ID, record.ID.Value );
-
-        string sql = _cache[Instance][SqlStatement.Update];
+        SqlCommand sql = Cache.Update( record );
 
         try
         {
-            CommandDefinition command = _database.GetCommandDefinition( transaction, new SqlCommand( sql, parameters ), token );
+            CommandDefinition command = _database.GetCommandDefinition( transaction, sql, token );
             await connection.ExecuteScalarAsync( command );
         }
-        catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
+        catch ( Exception e ) { throw new SqlException( sql, e ); }
     }
 }
