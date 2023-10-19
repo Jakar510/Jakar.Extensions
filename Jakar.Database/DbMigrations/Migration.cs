@@ -11,9 +11,7 @@ namespace Jakar.Database.DbMigrations;
 /// </summary>
 public abstract class Migration<TRecord> : Migration where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
-    private        Database? _dbContext;
-    public virtual string    CurrentScheme => _dbContext?.CurrentSchema ?? throw new NullReferenceException( nameof(_dbContext) );
-    public         string    TableName     { get; } = typeof(TRecord).GetTableName();
+    public string TableName { get; } = typeof(TRecord).GetTableName();
 
 
     protected Migration() : base() { }
@@ -21,12 +19,12 @@ public abstract class Migration<TRecord> : Migration where TRecord : TableRecord
 
     public override void GetUpExpressions( IMigrationContext context )
     {
-        _dbContext = context.ServiceProvider.GetRequiredService<Database>();
+        // _dbContext = context.ServiceProvider.GetRequiredService<Database>();
         base.GetUpExpressions( context );
     }
     public override void GetDownExpressions( IMigrationContext context )
     {
-        _dbContext = context.ServiceProvider.GetRequiredService<Database>();
+        // _dbContext = context.ServiceProvider.GetRequiredService<Database>();
         base.GetDownExpressions( context );
     }
 
@@ -36,12 +34,7 @@ public abstract class Migration<TRecord> : Migration where TRecord : TableRecord
 
     protected virtual ICreateTableWithColumnSyntax CreateTable()
     {
-        if ( Schema.Schema( CurrentScheme )
-                   .Exists() is false ) { Create.Schema( CurrentScheme ); }
-
-        ICreateTableWithColumnSyntax? table = Create.Table( TableName )
-                                                    .InSchema( CurrentScheme );
-
+        ICreateTableWithColumnSyntax? table = Create.Table( TableName );
 
         table.WithColumn( nameof(TableRecord<TRecord>.ID) )
              .AsGuid()
@@ -63,52 +56,31 @@ public abstract class Migration<TRecord> : Migration where TRecord : TableRecord
     protected IInsertDataSyntax StartInsert() => Insert.IntoTable( TableName );
 
 
-    protected ISchemaSchemaSyntax _CheckSchema
-    {
-        get
-        {
-            ISchemaSchemaSyntax schema = Schema.Schema( CurrentScheme );
-            if ( !schema.Exists() ) { _ = Create.Schema( CurrentScheme ); }
-
-            return schema;
-        }
-    }
-    protected ISchemaTableSyntax CheckTableSchema() => _CheckSchema.Table( TableName );
-
-
     /// <param name="dataAsAnonymousType"> The columns and values to be used set </param>
     protected IUpdateWhereSyntax UpdateTable( object dataAsAnonymousType ) => Update.Table( TableName )
-                                                                                    .InSchema( CurrentScheme )
                                                                                     .Set( dataAsAnonymousType );
 
 
-    protected void DeleteTable() => Delete.Table( TableName )
-                                          .InSchema( CurrentScheme );
+    protected void DeleteTable() => Delete.Table( TableName );
 
 
     protected void RenameTable( string name ) => Rename.Table( TableName )
-                                                       .InSchema( CurrentScheme )
-                                                       .To( name )
-                                                       .InSchema( CurrentScheme );
+                                                       .To( name );
 
 
     protected void UniqueConstraint( string columnName ) => Create.UniqueConstraint()
                                                                   .OnTable( TableName )
-                                                                  .WithSchema( CurrentScheme )
                                                                   .Column( columnName );
     protected void UniqueConstraint( string name, string columnName ) => Create.UniqueConstraint( name )
                                                                                .OnTable( TableName )
-                                                                               .WithSchema( CurrentScheme )
                                                                                .Column( columnName );
 
 
     protected void UniqueConstraints( params string[] columnNames ) => Create.UniqueConstraint()
                                                                              .OnTable( TableName )
-                                                                             .WithSchema( CurrentScheme )
                                                                              .Columns( columnNames );
     protected void UniqueConstraints( string name, params string[] columnNames ) => Create.UniqueConstraint( name )
                                                                                           .OnTable( TableName )
-                                                                                          .WithSchema( CurrentScheme )
                                                                                           .Columns( columnNames );
 }
 

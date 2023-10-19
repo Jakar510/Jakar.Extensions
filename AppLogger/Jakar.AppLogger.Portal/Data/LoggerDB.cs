@@ -35,7 +35,7 @@ public sealed class LoggerDB : Database.Database
         RecordID<ScopeRecord>.DapperTypeHandler.Register();
         RecordID<SessionRecord>.DapperTypeHandler.Register();
     }
-    public LoggerDB( IConfiguration configuration, IDataProtectorProvider dataProtectorProvider, IOptions<DbOptions> options ) : base( configuration, options )
+    public LoggerDB( IConfiguration configuration, IDataProtectorProvider dataProtectorProvider, ISqlCacheFactory sqlCacheFactory, IOptions<DbOptions> options ) : base( configuration, sqlCacheFactory, options )
     {
         _dataProtectorProvider = dataProtectorProvider;
         Logs                   = Create<LogRecord>();

@@ -7,22 +7,17 @@ namespace Jakar.Database;
 [ SuppressMessage( "ReSharper", "SuggestBaseTypeForParameter" ) ]
 public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthCheck, IUserTwoFactorTokenProvider<UserRecord>
 {
-    public const ClaimType DEFAULT_CLAIM_TYPES = ClaimType.UserID | ClaimType.UserName | ClaimType.GroupSid | ClaimType.Role;
-
-
+    public const       ClaimType               DEFAULT_CLAIM_TYPES = ClaimType.UserID | ClaimType.UserName | ClaimType.GroupSid | ClaimType.Role;
+    protected readonly ISqlCacheFactory        _sqlCacheFactory;
     protected readonly ConcurrentBag<IDbTable> _tables = new();
     public             DbTable<AddressRecord>  Addresses { get; }
     public int? CommandTimeout
     {
         [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => Options.CommandTimeout;
     }
-    public             IConfiguration Configuration    { get; }
-    protected internal SecuredString? ConnectionString { get; set; }
-    public string CurrentSchema
-    {
-        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => Options.CurrentSchema;
-    }
-    public DbTable<GroupRecord> Groups { get; }
+    public             IConfiguration       Configuration    { get; }
+    protected internal SecuredString?       ConnectionString { get; set; }
+    public             DbTable<GroupRecord> Groups           { get; }
     public DbInstance Instance
     {
         [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => Options.DbType;
@@ -67,8 +62,9 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
         UserRights.DapperTypeHandler.Register();
         UserRights.DapperTypeHandlerNullable.Register();
     }
-    protected Database( IConfiguration configuration, IOptions<DbOptions> options ) : base()
+    protected Database( IConfiguration configuration, ISqlCacheFactory sqlCacheFactory, IOptions<DbOptions> options ) : base()
     {
+        _sqlCacheFactory  = sqlCacheFactory;
         Configuration     = configuration;
         Options           = options.Value;
         Users             = Create<UserRecord>();
@@ -103,9 +99,9 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
 
 
     [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
-    protected DbTable<TRecord> Create<TRecord>() where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>
+    protected virtual DbTable<TRecord> Create<TRecord>() where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>
     {
-        var table = new DbTable<TRecord>( this );
+        var table = new DbTable<TRecord>( this, _sqlCacheFactory );
         return AddDisposable( table );
     }
     [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]

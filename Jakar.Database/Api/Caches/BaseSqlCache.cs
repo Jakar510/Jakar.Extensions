@@ -19,26 +19,25 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord> where TRecord :
     protected readonly     DbOptions                                                                _dbOptions;
 
 
-    public          string     CreatedBy       { get; init; }
-    public          string     DateCreated     { get; init; }
-    public          string     IdColumnName    { get; init; }
-    public abstract DbInstance Instance        { get; }
-    public          string     LastModified    { get; init; }
-    public          string     OwnerUserID     { get; init; }
-    public          string     RandomMethod    { get; init; }
-    public          string     SchemaTableName { get; protected set; }
+    public          string     CreatedBy    { get; init; }
+    public          string     DateCreated  { get; init; }
+    public          string     IdColumnName { get; init; }
+    public abstract DbInstance Instance     { get; }
+    public          string     LastModified { get; init; }
+    public          string     OwnerUserID  { get; init; }
+    public          string     RandomMethod { get; init; }
+    public          string     TableName    => TRecord.TableName;
 
 
     protected BaseSqlCache( IOptions<DbOptions> dbOptions )
     {
-        _dbOptions      = dbOptions.Value;
-        SchemaTableName = $"{_dbOptions.CurrentSchema}.{TRecord.TableName}";
-        RandomMethod    = Instance.GetRandomMethod();
-        CreatedBy       = Instance.GetCreatedBy();
-        DateCreated     = Instance.GetDateCreated();
-        IdColumnName    = Instance.GetID_ColumnName();
-        LastModified    = Instance.GetLastModified();
-        OwnerUserID     = Instance.GetOwnerUserID();
+        _dbOptions   = dbOptions.Value;
+        RandomMethod = Instance.GetRandomMethod();
+        CreatedBy    = Instance.GetCreatedBy();
+        DateCreated  = Instance.GetDateCreated();
+        IdColumnName = Instance.GetID_ColumnName();
+        LastModified = Instance.GetLastModified();
+        OwnerUserID  = Instance.GetOwnerUserID();
     }
 
 
@@ -47,7 +46,7 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord> where TRecord :
     [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] protected string              KeyValuePair( string                columnName ) => SqlProperties[Instance][columnName].KeyValuePair;
 
 
-    public virtual SqlCommand All() => $"SELECT * FROM {SchemaTableName}";
+    public virtual SqlCommand All() => $"SELECT * FROM {TableName}";
 
 
     public virtual SqlCommand Delete( in IEnumerable<RecordID<TRecord>> ids )
@@ -64,7 +63,7 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord> where TRecord :
         using var buffer = new ValueStringBuilder( 1000 );
         buffer.AppendJoin( SQL.LIST_SEPARATOR, ids, SQL.GUID_FORMAT );
 
-        dictionary[hash] = sql = $"DELETE FROM {SchemaTableName} WHERE {IdColumnName} in ( {buffer.Span} );";
+        dictionary[hash] = sql = $"DELETE FROM {TableName} WHERE {IdColumnName} in ( {buffer.Span} );";
         return new SqlCommand( sql );
     }
 
@@ -84,7 +83,7 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord> where TRecord :
         using var buffer = new ValueStringBuilder( 1000 );
         buffer.AppendJoin( SQL.LIST_SEPARATOR, ids, SQL.GUID_FORMAT );
 
-        return dictionary[hash] = $"DELETE FROM {SchemaTableName} WHERE {IdColumnName} in ( {buffer.Span} );";
+        return dictionary[hash] = $"DELETE FROM {TableName} WHERE {IdColumnName} in ( {buffer.Span} );";
     }
 
 
@@ -103,7 +102,7 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord> where TRecord :
         using var buffer = new ValueStringBuilder( 1000 );
         buffer.AppendJoin( matchAll.GetAndOr(), GetKeyValuePairs( parameters ) );
 
-        dictionary[hash] = sql = $"DELETE FROM {SchemaTableName} WHERE {buffer.Span};";
+        dictionary[hash] = sql = $"DELETE FROM {TableName} WHERE {buffer.Span};";
         return new SqlCommand( sql, parameters );
     }
 
@@ -121,7 +120,7 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord> where TRecord :
             return new SqlCommand( sql, parameters );
         }
 
-        dictionary[columnName] = sql = $"SELECT * FROM {SchemaTableName} WHERE {columnName} = @{nameof(value)}";
+        dictionary[columnName] = sql = $"SELECT * FROM {TableName} WHERE {columnName} = @{nameof(value)}";
         return new SqlCommand( sql, parameters );
     }
 
@@ -142,7 +141,7 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord> where TRecord :
 
         buffer.AppendJoin( matchAll.GetAndOr(), GetKeyValuePairs( parameters ) );
 
-        dictionary[hash] = sql = $"SELECT * FROM {SchemaTableName} WHERE {buffer.Span}";
+        dictionary[hash] = sql = $"SELECT * FROM {TableName} WHERE {buffer.Span}";
         return new SqlCommand( sql, parameters );
     }
 
@@ -160,7 +159,7 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord> where TRecord :
             return new SqlCommand( sql, parameters );
         }
 
-        dictionary[columnName] = sql = $"SELECT {IdColumnName} FROM {SchemaTableName} WHERE {columnName} = @{nameof(value)}";
+        dictionary[columnName] = sql = $"SELECT {IdColumnName} FROM {TableName} WHERE {columnName} = @{nameof(value)}";
         return new SqlCommand( sql, parameters );
     }
 
@@ -182,8 +181,8 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord> where TRecord :
 
         dictionary[hash] = sql = Instance switch
                                  {
-                                     DbInstance.MsSql    => $"SELECT TOP 1 {IdColumnName} FROM {SchemaTableName} WHERE {buffer.Span}",
-                                     DbInstance.Postgres => $"SELECT {IdColumnName} FROM {SchemaTableName} WHERE {buffer.Span} LIMIT 1",
+                                     DbInstance.MsSql    => $"SELECT TOP 1 {IdColumnName} FROM {TableName} WHERE {buffer.Span}",
+                                     DbInstance.Postgres => $"SELECT {IdColumnName} FROM {TableName} WHERE {buffer.Span} LIMIT 1",
                                      _                   => throw new OutOfRangeException( nameof(Instance), Instance )
                                  };
 
@@ -207,7 +206,7 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord> where TRecord :
 
         buffer.AppendJoin( matchAll.GetAndOr(), GetDescriptors( parameters ) );
 
-        dictionary[hash] = sql = $"SELECT * FROM {SchemaTableName} WHERE {buffer.Span}";
+        dictionary[hash] = sql = $"SELECT * FROM {TableName} WHERE {buffer.Span}";
         return new SqlCommand( sql, parameters );
     }
 
@@ -227,7 +226,7 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord> where TRecord :
         using var buffer = new ValueStringBuilder( 1000 );
         buffer.AppendJoin( SQL.LIST_SEPARATOR, ids, SQL.GUID_FORMAT );
 
-        dictionary[hash] = sql = $"SELECT * FROM {SchemaTableName} WHERE {IdColumnName} in ( {buffer.Span} )";
+        dictionary[hash] = sql = $"SELECT * FROM {TableName} WHERE {IdColumnName} in ( {buffer.Span} )";
         return new SqlCommand( sql );
     }
 }

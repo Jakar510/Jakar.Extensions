@@ -7,7 +7,6 @@ namespace Jakar.Database;
 public interface IDbOptions
 {
     public int?       CommandTimeout { get; }
-    public string     CurrentSchema  { get; }
     public DbInstance Instance       { get; }
 }
 

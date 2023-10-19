@@ -18,7 +18,6 @@ public partial class DbTable<TRecord> : IConnectableDb where TRecord : TableReco
     public        RecordGenerator<TRecord> Records        => new(this);
     public        ISqlCache<TRecord>       Cache          => _cache ??= _sqlCacheFactory.GetSqlCache<TRecord>( _database );
     public        int?                     CommandTimeout => _database.CommandTimeout;
-    public        string                   CurrentSchema  => _database.CurrentSchema;
     public        DbInstance               Instance       => _database.Instance;
 
 

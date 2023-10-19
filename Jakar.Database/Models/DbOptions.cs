@@ -13,25 +13,14 @@ namespace Jakar.Database;
 public sealed class DbOptions : IOptions<DbOptions>, IDbOptions
 {
     public const string  DEFAULT_SQL_CONNECTION_STRING_KEY = "DEFAULT";
-    private      string? _currentSchema;
 
 
     public static readonly ImmutableArray<DbInstance> Instances = ImmutableArray.Create( Enum.GetValues<DbInstance>() );
 
 
-    public string   AuthenticationType { get; set; } = JwtBearerDefaults.AuthenticationScheme;
-    public TimeSpan ClockSkew          { get; set; } = TimeSpan.FromSeconds( 60 );
-    public int?     CommandTimeout     { get; set; } = 300;
-    public string CurrentSchema
-    {
-        get => _currentSchema ??= DbType switch
-                                  {
-                                      DbInstance.MsSql    => "dbo",
-                                      DbInstance.Postgres => "public",
-                                      _                   => throw new OutOfRangeException( nameof(DbType), DbType )
-                                  };
-        set => _currentSchema = value;
-    }
+    public string                  AuthenticationType   { get; set; } = JwtBearerDefaults.AuthenticationScheme;
+    public TimeSpan                ClockSkew            { get; set; } = TimeSpan.FromSeconds( 60 );
+    public int?                    CommandTimeout       { get; set; } = 300;
     public DbInstance              DbType               { get; set; } = DbInstance.Postgres;
     public Uri                     Domain               { get; set; } = new("https://localhost");
     DbInstance IDbOptions.         Instance             => DbType;

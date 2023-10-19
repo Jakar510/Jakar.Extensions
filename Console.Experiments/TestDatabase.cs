@@ -29,7 +29,7 @@ public sealed class TestDatabase : Database
     private const string CONNECTION_STRING = "User ID=dev;Password=jetson;Host=localhost;Port=5432;Database=Experiments";
 
 
-    public TestDatabase( IConfiguration                                configuration, IOptions<DbOptions> options ) : base( configuration, options ) => ConnectionString = CONNECTION_STRING;
+    public TestDatabase( IConfiguration                                configuration, ISqlCacheFactory sqlCacheFactory, IOptions<DbOptions> options ) : base( configuration, sqlCacheFactory, options ) => ConnectionString = CONNECTION_STRING;
     protected override DbConnection CreateConnection( in SecuredString secure ) => new NpgsqlConnection( secure );
 
 
@@ -41,7 +41,6 @@ public sealed class TestDatabase : Database
         builder.Services.AddOptions<DbOptions>()
                .Configure( db =>
                            {
-                               db.CurrentSchema    = "public";
                                db.DbType           = DbInstance.Postgres;
                                db.ConnectionString = new SecuredString( CONNECTION_STRING.ToSecureString() );
                                db.TokenAudience    = nameof(TestDatabase);
