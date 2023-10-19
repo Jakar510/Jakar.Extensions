@@ -3,11 +3,11 @@
     "Hello World!".WriteToConsole();
     Console.WriteLine();
 
-    // BenchmarkRunner.Run<ImmutableArrayBenchmarks>();
+    // await TestDatabase.Test();
 
-    // new HashBenchmarks().GetHash().WriteToConsole();
 
-    await TestDatabase.Test();
+    ULongHashTests.Run( 100_000_000 )
+                  .WriteToDebug();
 }
 catch ( Exception e ) { e.WriteToConsole(); }
 finally { "Bye".WriteToConsole(); }

@@ -23,6 +23,50 @@ using Npgsql;
 namespace Experiments;
 
 
+public static class ULongHashTests
+{
+    private static readonly Random _random      = Random.Shared;
+    private const           string ALPHANUMERIC = @"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+
+    private static IEnumerable<string> GetRandomStrings( int count, int length )
+    {
+        for ( var i = 0; i < count; i++ ) { yield return GetRandomString( length ); }
+    }
+    private static string GetRandomString( int length )
+    {
+        Span<char> span = stackalloc char[length];
+
+        for ( int i = 0; i < length; i++ )
+        {
+            char c = ALPHANUMERIC[_random.Next( ALPHANUMERIC.Length )];
+            span[i] = c;
+        }
+
+        return span.ToString();
+    }
+    public static int Run( in int max_tries )
+    {
+        var hashes = new HashSet<int>( max_tries );
+
+        for ( int i = 0; i < max_tries; i++ )
+        {
+            var count = _random.Next( ALPHANUMERIC.Length / 4 );
+            var size  = _random.Next( count );
+
+            int hash = GetRandomStrings( count, size )
+               .GetHash();
+
+            bool added = hashes.Add( hash );
+            if ( added is false && hashes.Count > 0 ) { return i; }
+        }
+
+        return hashes.Count;
+    }
+}
+
+
+
 public sealed class TestDatabase : Database
 {
     // private const string CONNECTION_STRING = "Server=localhost;Database=Experiments;User Id=tester;Password=tester;Encrypt=True;TrustServerCertificate=True";

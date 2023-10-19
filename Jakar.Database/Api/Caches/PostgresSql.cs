@@ -1,16 +1,13 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 10/15/2023  1:20 PM
 
-using Org.BouncyCastle.Asn1.X509.Qualified;
-using System.Collections.Generic;
-
-
-
 namespace Jakar.Database;
 
 
 public sealed class PostgresSql<TRecord> : BaseSqlCache<TRecord> where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
+    public override DbInstance Instance { get; } = DbInstance.Postgres;
+
     /*
     protected virtual ImmutableDictionary<SqlStatement, string> Get_PostgresSql()
     {
@@ -67,12 +64,16 @@ public sealed class PostgresSql<TRecord> : BaseSqlCache<TRecord> where TRecord :
         return dict.ToImmutableDictionary();
     }
     */
+
+    public PostgresSql( IOptions<DbOptions> dbOptions ) : base( dbOptions ) { }
 }
 
 
 
 public sealed class MsSqlServer<TRecord> : BaseSqlCache<TRecord> where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
+    public override DbInstance Instance { get; } = DbInstance.MsSql;
+
     /*
     protected virtual ImmutableDictionary<SqlStatement, string> Get_MsSql()
     {
@@ -129,4 +130,6 @@ public sealed class MsSqlServer<TRecord> : BaseSqlCache<TRecord> where TRecord :
         return dict.ToImmutableDictionary();
     }
     */
+
+    public MsSqlServer( IOptions<DbOptions> dbOptions ) : base( dbOptions ) { }
 }

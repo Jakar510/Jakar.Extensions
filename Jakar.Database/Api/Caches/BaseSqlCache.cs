@@ -41,12 +41,16 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord> where TRecord :
     }
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] protected IEnumerable<string> GetDescriptors( DynamicParameters   parameters ) => parameters.ParameterNames.Select( name => SqlProperties[Instance][name].KeyValuePair );
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] protected IEnumerable<string> GetKeyValuePairs( DynamicParameters parameters ) => parameters.ParameterNames.Select( KeyValuePair );
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] protected string              KeyValuePair( string                columnName ) => SqlProperties[Instance][columnName].KeyValuePair;
+    [ Pure, MethodImpl( MethodImplOptions.AggressiveInlining ) ] protected IEnumerable<string> GetDescriptors( DynamicParameters   parameters ) => parameters.ParameterNames.Select( name => SqlProperties[Instance][name].KeyValuePair );
+    [ Pure, MethodImpl( MethodImplOptions.AggressiveInlining ) ] protected IEnumerable<string> GetKeyValuePairs( DynamicParameters parameters ) => parameters.ParameterNames.Select( KeyValuePair );
+    [ Pure, MethodImpl( MethodImplOptions.AggressiveInlining ) ] protected string              KeyValuePair( string                columnName ) => SqlProperties[Instance][columnName].KeyValuePair;
 
 
-    public virtual SqlCommand All() => $"SELECT * FROM {TableName}";
+    public virtual SqlCommand All()                             => $"SELECT * FROM {TableName}";
+    public         SqlCommand First()                           => default;
+    public         SqlCommand Last()                            => default;
+    public         SqlCommand SortedIDs()                       => default;
+    public         SqlCommand Delete( in RecordID<TRecord> id ) => default;
 
 
     public virtual SqlCommand Delete( in IEnumerable<RecordID<TRecord>> ids )
@@ -71,8 +75,7 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord> where TRecord :
     public virtual SqlCommand Delete( in IEnumerable<Guid> ids )
     {
         ConcurrentDictionary<int, string> dictionary = _delete;
-
-        int hash = ids.GetHash();
+        int                               hash       = ids.GetHash();
 
         if ( hash > 0 && dictionary.TryGetValue( hash, out string? sql ) )
         {
@@ -105,6 +108,21 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord> where TRecord :
         dictionary[hash] = sql = $"DELETE FROM {TableName} WHERE {buffer.Span};";
         return new SqlCommand( sql, parameters );
     }
+    public SqlCommand Next( in   RecordPair<TRecord> pair )                              => default;
+    public SqlCommand Next( in   RecordID<TRecord>   id, in DateTimeOffset dateCreated ) => default;
+    public SqlCommand NextID( in RecordPair<TRecord> pair )                              => default;
+    public SqlCommand NextID( in RecordID<TRecord>   id, in DateTimeOffset dateCreated ) => default;
+    public SqlCommand Count()                                                => default;
+    public SqlCommand Random()                                               => default;
+    public SqlCommand Random( in int                  count )                => default;
+    public SqlCommand Random( in Guid?                userID, in int count ) => default;
+    public SqlCommand Random( in RecordID<UserRecord> id,     in int count ) => default;
+    public SqlCommand Single()                                                                               => default;
+    public SqlCommand Insert( in         TRecord record )                                                    => default;
+    public SqlCommand TryInsert( in      TRecord record, in bool matchAll, in DynamicParameters parameters ) => default;
+    public SqlCommand InsertOrUpdate( in TRecord record, in bool matchAll, in DynamicParameters parameters ) => default;
+    public SqlCommand Update( in         TRecord record )                       => default;
+    public SqlCommand Where<TValue>( in  string  columnName, in TValue? value ) => default;
 
 
     public virtual SqlCommand Where<TValue>( string columnName, TValue? value )
@@ -144,7 +162,7 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord> where TRecord :
         dictionary[hash] = sql = $"SELECT * FROM {TableName} WHERE {buffer.Span}";
         return new SqlCommand( sql, parameters );
     }
-
+    public SqlCommand WhereID<TValue>( in string columnName, in TValue? value ) => default;
 
     public virtual SqlCommand WhereID<TValue>( string columnName, TValue? value )
     {
@@ -162,8 +180,7 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord> where TRecord :
         dictionary[columnName] = sql = $"SELECT {IdColumnName} FROM {TableName} WHERE {columnName} = @{nameof(value)}";
         return new SqlCommand( sql, parameters );
     }
-
-
+    public SqlCommand Exists( in bool matchAll, in DynamicParameters parameters ) => default;
     public virtual SqlCommand GetExists( in bool matchAll, in DynamicParameters parameters )
     {
         ConcurrentDictionary<int, string> dictionary = _exists;
@@ -209,13 +226,14 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord> where TRecord :
         dictionary[hash] = sql = $"SELECT * FROM {TableName} WHERE {buffer.Span}";
         return new SqlCommand( sql, parameters );
     }
+    public SqlCommand Get( in RecordID<TRecord>              id )  => default;
+    public SqlCommand Get( in IEnumerable<RecordID<TRecord>> ids ) => default;
 
 
     public virtual SqlCommand Get( in IEnumerable<Guid> ids )
     {
         ConcurrentDictionary<int, string> dictionary = _get;
-
-        int hash = ids.GetHash();
+        int                               hash       = ids.GetHash();
 
         if ( hash > 0 && dictionary.TryGetValue( hash, out string? sql ) )
         {

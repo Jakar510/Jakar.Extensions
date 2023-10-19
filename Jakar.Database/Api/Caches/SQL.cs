@@ -10,19 +10,20 @@ namespace Jakar.Database;
 
 public static class SQL
 {
-    public const char   QUOTE          = '"';
-    public const string COUNT          = "count";
-    public const string CREATED_BY     = nameof(IOwnedTableRecord.CreatedBy);
-    public const string DATE_CREATED   = nameof(IRecordPair.DateCreated);
-    public const string ID             = nameof(IRecordPair.ID);
-    public const string IDS            = "ids";
-    public const string LAST_MODIFIED  = nameof(ITableRecord.LastModified);
-    public const string OWNER_USER_ID  = nameof(IOwnedTableRecord.OwnerUserID);
-    public const string LIST_SEPARATOR = ", ";
-    public const string GUID_FORMAT    = "D";
-    public const string AND            = "AND";
-    public const string OR             = "OR";
-
+    public const  char   QUOTE          = '"';
+    public const  string COUNT          = "count";
+    public const  string CREATED_BY     = nameof(IOwnedTableRecord.CreatedBy);
+    public const  string DATE_CREATED   = nameof(IRecordPair.DateCreated);
+    public const  string ID             = nameof(IRecordPair.ID);
+    public const  string IDS            = "ids";
+    public const  string LAST_MODIFIED  = nameof(ITableRecord.LastModified);
+    public const  string OWNER_USER_ID  = nameof(IOwnedTableRecord.OwnerUserID);
+    public const  string LIST_SEPARATOR = ", ";
+    public const  string GUID_FORMAT    = "D";
+    public const  string AND            = "AND";
+    public const  string OR             = "OR";
+    private const ulong  OFFSET_BASIS   = 14695981039346656037ul;
+    private const ulong  PRIME          = 1099511628211ul;
 
 
     [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
@@ -30,12 +31,48 @@ public static class SQL
                                                                ? AND
                                                                : OR;
 
-    [ MethodImpl( MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining ) ]
-    public static int GetHash( this DynamicParameters parameters ) =>
-        GetHash( parameters.ParameterNames );
+
+    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ] public static int GetHash( this DynamicParameters parameters ) => parameters.ParameterNames.GetHash();
+
+    /*
+    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
+    public static ulong GetHash( this IEnumerable<string> parameters )
+    {
+        using var sb = new ValueStringBuilder( 1000 );
+        sb.Append( parameters );
+        ReadOnlySpan<char> span = sb.Span;
+        ulong              hash = OFFSET_BASIS;
+
+        foreach ( char c in span )
+        {
+            hash ^= c;
+            hash *= PRIME;
+        }
+
+        return hash;
+    }
+
+   [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
+   public static ulong GetLongHash<T>( this IEnumerable<T> values )
+   {
+       ulong hash = OFFSET_BASIS;
+       
+       foreach ( var value in values )
+       {
+           int valueHash = value?.GetHashCode() ?? 0;
+           
+           hash ^= (ulong)valueHash;
+           hash *= PRIME;
+       }
+   
+   return hash;
+   }
+    */
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining ) ]
+
+
+    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public static int GetHash<T>( this IEnumerable<T> values )
     {
         var hash = new HashCode();
@@ -45,7 +82,7 @@ public static class SQL
     }
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization ) ]
+    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public static string GetCreatedBy( this DbInstance instance ) =>
         instance switch
         {
@@ -55,7 +92,7 @@ public static class SQL
         };
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization ) ]
+    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public static string GetID_ColumnName( this DbInstance instance ) =>
         instance switch
         {
@@ -65,7 +102,7 @@ public static class SQL
         };
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization ) ]
+    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public static string GetLastModified( this DbInstance instance ) =>
         instance switch
         {
@@ -75,7 +112,7 @@ public static class SQL
         };
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization ) ]
+    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public static string GetOwnerUserID( this DbInstance instance ) =>
         instance switch
         {
@@ -85,7 +122,7 @@ public static class SQL
         };
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization ) ]
+    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public static string GetTableName<TRecord>( this DbInstance instance ) where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord> =>
         instance switch
         {
@@ -95,7 +132,7 @@ public static class SQL
         };
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization ) ]
+    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public static string GetRandomMethod( this DbInstance instance ) =>
         instance switch
         {
@@ -105,7 +142,7 @@ public static class SQL
         };
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization ) ]
+    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public static string GetDateCreated( this DbInstance instance ) =>
         instance switch
         {
