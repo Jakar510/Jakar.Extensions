@@ -26,7 +26,7 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord> where TRecord :
     public          string     LastModified { get; init; }
     public          string     OwnerUserID  { get; init; }
     public          string     RandomMethod { get; init; }
-    public          string     TableName    => TRecord.TableName;
+    public virtual  string     TableName    => TRecord.TableName;
 
 
     protected BaseSqlCache( IOptions<DbOptions> dbOptions )
