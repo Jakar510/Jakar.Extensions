@@ -56,20 +56,18 @@ public static class SQL
    public static ulong GetLongHash<T>( this IEnumerable<T> values )
    {
        ulong hash = OFFSET_BASIS;
-       
+
        foreach ( var value in values )
        {
            int valueHash = value?.GetHashCode() ?? 0;
-           
+
            hash ^= (ulong)valueHash;
            hash *= PRIME;
        }
-   
+
    return hash;
    }
     */
-
-
 
 
     [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
@@ -172,7 +170,7 @@ public static class SQL
     }
 
     [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
-    public static ImmutableDictionary<DbInstance, ImmutableDictionary<string, Descriptor>> CreateDescriptorMapping<TRecord>() where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>
+    public static ImmutableDictionary<DbInstance, ImmutableDictionary<string, Descriptor>> CreateDescriptorMapping<TRecord>() where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
     {
         const BindingFlags ATTRIBUTES = BindingFlags.Instance | BindingFlags.Public | BindingFlags.SetProperty | BindingFlags.GetProperty;
 

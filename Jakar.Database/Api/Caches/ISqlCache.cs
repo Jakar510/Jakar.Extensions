@@ -4,7 +4,33 @@
 namespace Jakar.Database;
 
 
-public interface ISqlCache<TRecord> where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>
+public enum SqlCacheType
+{
+    All,
+    First,
+    Last,
+    SortedIDs,
+    DeleteRecord,
+    DeleteRecords,
+    Next,
+    NextID,
+    Count,
+    Random,
+    RandomCount,
+    RandomUserIDCount,
+    RandomUserCount,
+    Single,
+    Insert,
+    TryInsert,
+    InsertOrUpdate,
+    Update,
+    GetID,
+    GetIDs
+}
+
+
+
+public interface ISqlCache<TRecord> where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
     SqlCommand All();
     SqlCommand First();
@@ -23,17 +49,15 @@ public interface ISqlCache<TRecord> where TRecord : TableRecord<TRecord>, IDbRea
     SqlCommand Random( in Guid?                userID, in int count );
     SqlCommand Random( in RecordID<UserRecord> id,     in int count );
     SqlCommand Single();
-    SqlCommand Insert( in         TRecord                record );
-    SqlCommand TryInsert( in      TRecord                record, in bool matchAll, in DynamicParameters parameters );
-    SqlCommand InsertOrUpdate( in TRecord                record, in bool matchAll, in DynamicParameters parameters );
-    SqlCommand Update( in         TRecord                record );
-    SqlCommand Where<TValue>( in  string                 columnName, in TValue?           value );
-    SqlCommand Where<TValue>( string                     columnName, TValue?              value );
-    SqlCommand Where( in           bool                  matchAll,   in DynamicParameters parameters );
-    SqlCommand WhereID<TValue>( in string                columnName, in TValue?           value );
-    SqlCommand WhereID<TValue>( string                   columnName, TValue?              value );
-    SqlCommand Exists( in bool                           matchAll,   in DynamicParameters parameters );
-    SqlCommand Get( in    bool                           matchAll,   in DynamicParameters parameters );
-    SqlCommand Get( in    RecordID<TRecord>              id );
-    SqlCommand Get( in    IEnumerable<RecordID<TRecord>> ids );
+    SqlCommand Insert( in          TRecord                        record );
+    SqlCommand TryInsert( in       TRecord                        record, in bool matchAll, in DynamicParameters parameters );
+    SqlCommand InsertOrUpdate( in  TRecord                        record, in bool matchAll, in DynamicParameters parameters );
+    SqlCommand Update( in          TRecord                        record );
+    SqlCommand Where<TValue>( in   string                         columnName, in TValue?           value );
+    SqlCommand Where( in           bool                           matchAll,   in DynamicParameters parameters );
+    SqlCommand WhereID<TValue>( in string                         columnName, in TValue?           value );
+    SqlCommand Exists( in          bool                           matchAll,   in DynamicParameters parameters );
+    SqlCommand Get( in             bool                           matchAll,   in DynamicParameters parameters );
+    SqlCommand Get( in             RecordID<TRecord>              id );
+    SqlCommand Get( in             IEnumerable<RecordID<TRecord>> ids );
 }

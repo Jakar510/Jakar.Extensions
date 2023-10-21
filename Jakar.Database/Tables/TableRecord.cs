@@ -29,7 +29,7 @@ public interface ITableRecord : IRecordPair
 }
 
 
-public interface ITableRecord<TRecord> : ITableRecord where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>
+public interface ITableRecord<TRecord> : ITableRecord where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
     public new RecordID<TRecord> ID           { get; }
     Guid IUniqueID<Guid>.        ID           => ID.Value;

@@ -13,7 +13,7 @@ namespace Jakar.Database;
 // [System.Text.Json.Serialization.JsonConverter( typeof(RecordIDSystemTextJsonConverter) )]
 // [TypeConverter( typeof(RecordIDTypeConverter) )]
 // [JsonConverter( typeof(RecordIDJsonNetConverter) )]
-public readonly record struct RecordID<TRecord>( Guid Value ) : IComparable<RecordID<TRecord>>, ISpanFormattable where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>
+public readonly record struct RecordID<TRecord>( Guid Value ) : IComparable<RecordID<TRecord>>, ISpanFormattable where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
     public static readonly RecordID<TRecord> Empty = new(Guid.Empty);
     public static          RecordID<TRecord> New()                     => new(Guid.NewGuid());
@@ -21,7 +21,7 @@ public readonly record struct RecordID<TRecord>( Guid Value ) : IComparable<Reco
     public static          RecordID<TRecord> FromString( string guid ) => new(Guid.Parse( guid ));
 
 
-    public static RecordID<TRecord>  ID( DbDataReader        reader ) => new(reader.GetFieldValue<Guid>( nameof(TableRecord<TRecord>.ID) ));
+    public static RecordID<TRecord>  ID( DbDataReader        reader ) => new(reader.GetFieldValue<Guid>( nameof(IUniqueID<Guid>.ID) ));
     public static RecordID<TRecord>? CreatedBy( DbDataReader reader ) => TryCreate( reader.GetFieldValue<Guid?>( nameof(IOwnedTableRecord.CreatedBy) ) );
     public static RecordID<TRecord>? TryCreate( [ NotNullIfNotNull( nameof(id) ) ] Guid? id ) => id.HasValue
                                                                                                      ? new RecordID<TRecord>( id.Value )

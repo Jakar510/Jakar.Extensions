@@ -6,7 +6,7 @@ namespace Jakar.Database;
 
 // ReSharper disable once InconsistentNaming
 public readonly record struct RecordPair<TRecord>( RecordID<TRecord> ID, DateTimeOffset DateCreated ) : IComparable<RecordPair<TRecord>>, IRecordPair, IDbReaderMapping<RecordPair<TRecord>>
-    where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>
+    where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
     Guid IUniqueID<Guid>.ID        => ID.Value;
     public static string TableName => TRecord.TableName;
