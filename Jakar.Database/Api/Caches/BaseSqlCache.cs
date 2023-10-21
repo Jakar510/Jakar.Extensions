@@ -5,7 +5,7 @@
 namespace Jakar.Database;
 
 
-[ SuppressMessage( "ReSharper", "StaticMemberInGenericType" ) ]
+[ SuppressMessage( "ReSharper", "StaticMemberInGenericType" ), SuppressMessage( "ReSharper", "RedundantVerbatimStringPrefix" ) ]
 public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord> where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
     public static readonly ImmutableDictionary<DbInstance, ImmutableDictionary<string, Descriptor>> SqlProperties     = SQL.CreateDescriptorMapping<TRecord>();
@@ -20,15 +20,23 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord> where TRecord :
     protected readonly     ConcurrentDictionary<string, string>                                     _whereIDColumn    = new();
 
 
-    public          string     CreatedBy    { get; init; }
-    public          string     DateCreated  { get; init; }
+    public string CreatedBy   { get; init; }
+    public string DateCreated { get; init; }
+
+    protected IEnumerable<Descriptor> _Descriptors
+    {
+        [ Pure, MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => SqlProperties[Instance].Values;
+    }
     public          string     IdColumnName { get; init; }
     public abstract DbInstance Instance     { get; }
-    public          string     LastModified { get; init; }
-    public          string     OwnerUserID  { get; init; }
-    public          string     RandomMethod { get; init; }
-    public virtual  string     TableName    => TRecord.TableName;
-
+    protected IEnumerable<string> _KeyValuePairs
+    {
+        [ Pure, MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => _Descriptors.Select( x => x.KeyValuePair );
+    }
+    public         string LastModified { get; init; }
+    public         string OwnerUserID  { get; init; }
+    public         string RandomMethod { get; init; }
+    public virtual string TableName    => TRecord.TableName;
 
     protected BaseSqlCache()
     {
@@ -46,10 +54,20 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord> where TRecord :
     [ Pure, MethodImpl( MethodImplOptions.AggressiveInlining ) ] protected string              KeyValuePair( string                columnName ) => SqlProperties[Instance][columnName].KeyValuePair;
 
 
-    public virtual SqlCommand All()       => $"SELECT * FROM {TableName}";
-    public         SqlCommand First()     => default;
-    public         SqlCommand Last()      => default;
-    public         SqlCommand SortedIDs() => default;
+    public virtual SqlCommand All()
+    {
+        if ( _sql.TryGetValue( SqlCacheType.All, out string? sql ) is false ) { _sql[SqlCacheType.All] = sql = $"SELECT * FROM {TableName}"; }
+
+        return sql;
+    }
+    public abstract SqlCommand First();
+    public abstract SqlCommand Last();
+    public SqlCommand SortedIDs()
+    {
+        if ( _sql.TryGetValue( SqlCacheType.SortedIDs, out string? sql ) is false ) { _sql[SqlCacheType.SortedIDs] = sql = @$"SELECT {IdColumnName}, {DateCreated} FROM {TableName} ORDER BY {DateCreated} DESC"; }
+
+        return sql;
+    }
 
 
     public SqlCommand Delete( in RecordID<TRecord> id )
@@ -57,7 +75,8 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord> where TRecord :
         var parameters = new DynamicParameters();
         parameters.Add( nameof(id), id );
 
-        string sql = $"DELETE FROM {TableName} WHERE {IdColumnName} in @{nameof(id)}";
+        if ( _sql.TryGetValue( SqlCacheType.DeleteRecord, out string? sql ) is false ) { _sql[SqlCacheType.DeleteRecord] = sql = $"DELETE FROM {TableName} WHERE {IdColumnName} in @{nameof(id)}"; }
+
         return new SqlCommand( sql, parameters );
     }
     public virtual SqlCommand Delete( in IEnumerable<RecordID<TRecord>> ids )
@@ -65,35 +84,80 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord> where TRecord :
         var parameters = new DynamicParameters();
         parameters.Add( nameof(ids), ids.Select( x => x.Value ) );
 
-        string sql = $"DELETE FROM {TableName} WHERE {IdColumnName} in @{nameof(ids)}";
+        if ( _sql.TryGetValue( SqlCacheType.DeleteRecords, out string? sql ) is false ) { _sql[SqlCacheType.DeleteRecords] = sql = $"DELETE FROM {TableName} WHERE {IdColumnName} in @{nameof(ids)}"; }
+
         return new SqlCommand( sql, parameters );
     }
     public virtual SqlCommand Delete( in bool matchAll, in DynamicParameters parameters )
     {
+        Key key = Key.Create( matchAll, parameters );
+        if ( _deleteParameters.TryGetValue( key, out string? sql ) ) { return new SqlCommand( sql, parameters ); }
+
         using var buffer = new ValueStringBuilder( 1000 );
         buffer.AppendJoin( matchAll.GetAndOr(), GetKeyValuePairs( parameters ) );
 
-        string sql = $"DELETE FROM {TableName} WHERE {buffer.Span};";
+        _deleteParameters[key] = sql = $"DELETE FROM {TableName} WHERE {buffer.Span};";
         return new SqlCommand( sql, parameters );
     }
 
 
-    public SqlCommand Next( in   RecordPair<TRecord> pair )                              => default;
-    public SqlCommand Next( in   RecordID<TRecord>   id, in DateTimeOffset dateCreated ) => default;
-    public SqlCommand NextID( in RecordPair<TRecord> pair )                              => default;
-    public SqlCommand NextID( in RecordID<TRecord>   id, in DateTimeOffset dateCreated ) => default;
+    public SqlCommand Next( in RecordPair<TRecord> pair ) => Next( pair.ID, pair.DateCreated );
+    public SqlCommand Next( in RecordID<TRecord> id, in DateTimeOffset dateCreated )
+    {
+        var parameters = new DynamicParameters();
+        parameters.Add( nameof(id),          id );
+        parameters.Add( nameof(dateCreated), dateCreated );
+
+        if ( _sql.TryGetValue( SqlCacheType.NextID, out string? sql ) is false )
+        {
+            _sql[SqlCacheType.NextID] = sql = @$"SELECT * FROM {TableName} WHERE ( id = IFNULL((SELECT MIN({IdColumnName}) FROM {TableName} WHERE {DateCreated} > @{nameof(dateCreated)}), 0) )";
+        }
+
+        return new SqlCommand( sql, parameters );
+    }
+    public SqlCommand NextID( in RecordPair<TRecord> pair ) => NextID( pair.ID, pair.DateCreated );
+    public SqlCommand NextID( in RecordID<TRecord> id, in DateTimeOffset dateCreated )
+    {
+        var parameters = new DynamicParameters();
+        parameters.Add( nameof(id),          id );
+        parameters.Add( nameof(dateCreated), dateCreated );
+
+        if ( _sql.TryGetValue( SqlCacheType.NextID, out string? sql ) is false )
+        {
+            _sql[SqlCacheType.NextID] = sql = @$"SELECT {IdColumnName} FROM {TableName} WHERE ( id = IFNULL((SELECT MIN({IdColumnName}) FROM {TableName} WHERE {DateCreated} > @{nameof(dateCreated)}), 0) )";
+        }
+
+        return new SqlCommand( sql, parameters );
+    }
 
 
-    public          SqlCommand Count()                                                => default;
-    public          SqlCommand Random()                                               => default;
-    public          SqlCommand Random( in int                  count )                => default;
-    public          SqlCommand Random( in Guid?                userID, in int count ) => default;
-    public          SqlCommand Random( in RecordID<UserRecord> id,     in int count ) => default;
-    public          SqlCommand Single() => default;
+    public SqlCommand Count()
+    {
+        if ( _sql.TryGetValue( SqlCacheType.Count, out string? sql ) is false ) { _sql[SqlCacheType.Count] = sql = @$"SELECT COUNT(*) FROM {TableName};"; }
+
+        return sql;
+    }
+    public SqlCommand Random()
+    {
+        if ( _sql.TryGetValue( SqlCacheType.Random, out string? sql ) is false ) { _sql[SqlCacheType.Random] = sql = $"SELECT * FROM {TableName} ORDER BY {RandomMethod} LIMIT 1"; }
+
+        return sql;
+    }
+    public abstract SqlCommand Random( in int                  count );
+    public abstract SqlCommand Random( in Guid?                userID, in int count );
+    public abstract SqlCommand Random( in RecordID<UserRecord> id,     in int count );
+    public abstract SqlCommand Single();
     public abstract SqlCommand Insert( in         TRecord record );
     public abstract SqlCommand TryInsert( in      TRecord record, in bool matchAll, in DynamicParameters parameters );
     public abstract SqlCommand InsertOrUpdate( in TRecord record, in bool matchAll, in DynamicParameters parameters );
-    public          SqlCommand Update( in         TRecord record ) => default;
+    public SqlCommand Update( in TRecord record )
+    {
+        DynamicParameters parameters = record.ToDynamicParameters();
+
+        if ( _sql.TryGetValue( SqlCacheType.Random, out string? sql ) is false ) { _sql[SqlCacheType.Random] = sql = $"UPDATE {TableName} SET {_KeyValuePairs} WHERE {IdColumnName} = @{SQL.ID};"; }
+
+        return new SqlCommand( sql, parameters );
+    }
 
 
     public virtual SqlCommand Where<TValue>( in string columnName, in TValue? value )
@@ -107,7 +171,7 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord> where TRecord :
     }
     public virtual SqlCommand Where( in bool matchAll, in DynamicParameters parameters )
     {
-        var key = Key.Create( matchAll, parameters );
+        Key key = Key.Create( matchAll, parameters );
         if ( _whereParameters.TryGetValue( key, out string? sql ) ) { return new SqlCommand( sql, parameters ); }
 
         using var buffer = new ValueStringBuilder( parameters.ParameterNames.Sum( x => x.Length ) * 2 );
@@ -129,7 +193,7 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord> where TRecord :
     }
     public SqlCommand Exists( in bool matchAll, in DynamicParameters parameters )
     {
-        var key = Key.Create( matchAll, parameters );
+        Key key = Key.Create( matchAll, parameters );
         if ( _existParameters.TryGetValue( key, out string? sql ) ) { return new SqlCommand( sql, parameters ); }
 
         using var buffer = new ValueStringBuilder( parameters.ParameterNames.Sum( x => x.Length ) * 2 );
@@ -142,7 +206,7 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord> where TRecord :
 
     public virtual SqlCommand Get( in bool matchAll, in DynamicParameters parameters )
     {
-        var key = Key.Create( matchAll, parameters );
+        Key key = Key.Create( matchAll, parameters );
         if ( _getParameters.TryGetValue( key, out string? sql ) ) { return new SqlCommand( sql, parameters ); }
 
         using var buffer = new ValueStringBuilder( parameters.ParameterNames.Sum( x => x.Length ) * 2 );
