@@ -6,7 +6,7 @@ namespace Jakar.Database;
 
 
 [ SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" ) ]
-public partial class DbTable<TRecord> : IConnectableDb where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>
+public partial class DbTable<TRecord> : IConnectableDb where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
     protected readonly IConnectableDbRoot  _database;
     protected readonly ISqlCacheFactory    _sqlCacheFactory;

@@ -23,16 +23,18 @@ public interface IDbReaderMapping<out TRecord> where TRecord : IDbReaderMapping<
 
 
 
-public interface ITableRecord : IRecordPair 
+public interface ITableRecord : IRecordPair
 {
     public DateTimeOffset? LastModified { get; }
 }
 
 
+
 public interface ITableRecord<TRecord> : ITableRecord where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
-    public new RecordID<TRecord> ID           { get; }
-    Guid IUniqueID<Guid>.        ID           => ID.Value;
+    public new RecordID<TRecord> ID { get; }
+    Guid IUniqueID<Guid>.        ID => ID.Value;
+    public TRecord               NewID( RecordID<TRecord> id );
 }
 
 
