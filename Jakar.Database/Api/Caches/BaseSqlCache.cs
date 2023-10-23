@@ -9,34 +9,35 @@ namespace Jakar.Database;
 public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord> where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
     public static readonly ImmutableDictionary<DbInstance, ImmutableDictionary<string, Descriptor>> SqlProperties     = SQL.CreateDescriptorMapping<TRecord>();
-    protected readonly     ConcurrentDictionary<Key, string>                                        _deleteParameters = new();
-    protected readonly     ConcurrentDictionary<Key, string>                                        _existParameters  = new();
-    protected readonly     ConcurrentDictionary<Key, string>                                        _getParameters    = new();
-    protected readonly     ConcurrentDictionary<Key, string>                                        _insertOrUpdate   = new();
-    protected readonly     ConcurrentDictionary<Key, string>                                        _tryInsert        = new();
-    protected readonly     ConcurrentDictionary<Key, string>                                        _whereParameters  = new();
+    protected readonly     ConcurrentDictionary<Key, string>                                        _deleteParameters = new(Key.Equalizer);
+    protected readonly     ConcurrentDictionary<Key, string>                                        _existParameters  = new(Key.Equalizer);
+    protected readonly     ConcurrentDictionary<Key, string>                                        _getParameters    = new(Key.Equalizer);
+    protected readonly     ConcurrentDictionary<Key, string>                                        _insertOrUpdate   = new(Key.Equalizer);
+    protected readonly     ConcurrentDictionary<Key, string>                                        _tryInsert        = new(Key.Equalizer);
+    protected readonly     ConcurrentDictionary<Key, string>                                        _whereParameters  = new(Key.Equalizer);
     protected readonly     ConcurrentDictionary<SqlCacheType, string>                               _sql              = new();
     protected readonly     ConcurrentDictionary<string, string>                                     _whereColumn      = new();
     protected readonly     ConcurrentDictionary<string, string>                                     _whereIDColumn    = new();
 
 
-    public string CreatedBy   { get; init; }
-    public string DateCreated { get; init; }
-
     protected IEnumerable<Descriptor> _Descriptors
     {
         [ Pure, MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => SqlProperties[Instance].Values;
     }
-    public          string     IdColumnName { get; init; }
-    public abstract DbInstance Instance     { get; }
     protected IEnumerable<string> _KeyValuePairs
     {
         [ Pure, MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => _Descriptors.Select( x => x.KeyValuePair );
     }
-    public         string LastModified { get; init; }
-    public         string OwnerUserID  { get; init; }
-    public         string RandomMethod { get; init; }
-    public virtual string TableName    => TRecord.TableName;
+
+
+    public          string     CreatedBy    { get; init; }
+    public          string     DateCreated  { get; init; }
+    public          string     IdColumnName { get; init; }
+    public abstract DbInstance Instance     { get; }
+    public          string     LastModified { get; init; }
+    public          string     OwnerUserID  { get; init; }
+    public          string     RandomMethod { get; init; }
+    public virtual  string     TableName    => TRecord.TableName;
 
     protected BaseSqlCache()
     {
@@ -152,7 +153,7 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord> where TRecord :
     public abstract SqlCommand InsertOrUpdate( in TRecord record, in bool matchAll, in DynamicParameters parameters );
     public SqlCommand Update( in TRecord record )
     {
-        DynamicParameters parameters = record.ToDynamicParameters();
+        var parameters = record.ToDynamicParameters();
 
         if ( _sql.TryGetValue( SqlCacheType.Random, out string? sql ) is false ) { _sql[SqlCacheType.Random] = sql = $"UPDATE {TableName} SET {_KeyValuePairs} WHERE {IdColumnName} = @{SQL.ID};"; }
 
@@ -236,24 +237,37 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord> where TRecord :
 
 
 
-    protected readonly struct Key( bool matchAll, ImmutableArray<string> parameters ) : IEquatable<Key>
+    protected readonly struct Key( in bool matchAll, in ImmutableArray<string> parameters ) : IEquatable<Key>
     {
-        private readonly int                    _hash = HashCode.Combine( matchAll, parameters );
-        public           bool                   MatchAll   { get; } = matchAll;
-        public           ImmutableArray<string> Parameters { get; } = parameters;
+        private readonly int                    _hash       = HashCode.Combine( matchAll, parameters );
+        private readonly bool                   _matchAll   = matchAll;
+        private readonly ImmutableArray<string> _parameters = parameters;
 
+        public static ValueEqualizer<Key> Equalizer => ValueEqualizer<Key>.Default;
 
         public override bool Equals( object? other ) => other is Key key && Equals( key );
         public bool Equals( Key other )
         {
-            if ( other._hash != _hash ) { return false; }
+            if ( _hash != other._hash ) { return false; }
 
-            return MatchAll == other.MatchAll && Parameters.All( other.Parameters.Contains );
+            if ( _matchAll != other._matchAll ) { return false; }
+
+            if ( _parameters.Length != other._parameters.Length ) { return false; }
+
+            foreach ( ReadOnlySpan<char> parameter in _parameters.AsSpan() )
+            {
+                foreach ( ReadOnlySpan<char> otherParameter in other._parameters.AsSpan() )
+                {
+                    if ( parameter.SequenceEqual( otherParameter ) is false ) { return false; }
+                }
+            }
+
+            return true;
         }
         public override int GetHashCode() => _hash;
 
 
-        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static Key Create( in bool matchAll, in DynamicParameters parameters ) => new(matchAll, ImmutableArray.CreateRange( parameters.ParameterNames ));
+        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static Key Create( in bool matchAll, in DynamicParameters parameters ) => new(matchAll, parameters.ParameterNames.ToImmutableArray());
 
 
         public static bool operator ==( Key left, Key right ) => left.Equals( right );

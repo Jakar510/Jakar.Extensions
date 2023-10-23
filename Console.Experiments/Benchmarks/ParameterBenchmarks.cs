@@ -1,18 +1,7 @@
 ﻿// Jakar.Extensions :: Experiments
-// 08/24/2023  8:37 PM
-
-using BenchmarkDotNet.Engines;
-// using Jakar.AppLogger.Common;
-
-
+// 10/23/2023  6:06 PM
 
 namespace Experiments.Benchmarks;
-
-
-/*
-
-*/
-
 
 
 /*
@@ -39,7 +28,7 @@ public class ParameterBenchmarks
         builder.Append( format );
         builder.AppendSpanFormattable( DateTimeOffset.UtcNow, default, provider );
     }
-    [Benchmark] public string GetString() => _parameters.ToString( ", ", CultureInfo.CurrentCulture );
+    [Benchmark] public string                                         GetString()     => _parameters.ToString( ", ", CultureInfo.CurrentCulture );
     [Benchmark] public Parameters<Guid, long, double, DateTimeOffset> GetParameters() => new(Guid.Empty, 1, 2.0, DateTimeOffset.UtcNow);
 }
 */

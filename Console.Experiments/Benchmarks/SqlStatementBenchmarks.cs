@@ -2,11 +2,8 @@
 // 03/29/2023  5:39 PM
 
 
-
-
 // using CommunityToolkit.HighPerformance;
 // using CommunityToolkit.HighPerformance.Enumerables;
-
 
 
 namespace Experiments.Benchmarks;
@@ -33,10 +30,7 @@ AMD Ryzen 9 3900X, 1 CPU, 24 logical and 12 physical cores
 
 
 
-[SimpleJob( RuntimeMoniker.HostProcess )]
-[Orderer( SummaryOrderPolicy.FastestToSlowest )]
-[RankColumn]
-[MemoryDiagnoser]
+[ SimpleJob( RuntimeMoniker.HostProcess ), Orderer( SummaryOrderPolicy.FastestToSlowest ), RankColumn, MemoryDiagnoser ]
 public class SqlStatementBenchmarks
 {
     public IEnumerable<long> ids
@@ -50,14 +44,14 @@ public class SqlStatementBenchmarks
     public string TableName { get; set; } = nameof(TableName);
 
 
-    [Benchmark]
+    [ Benchmark ]
     public void Test_ValueStringBuilder()
     {
         using var sb = new ValueStringBuilder();
     }
 
 
-    [Benchmark]
+    [ Benchmark ]
     public void Test_Join()
     {
         using var sb = new ValueStringBuilder();
@@ -65,14 +59,14 @@ public class SqlStatementBenchmarks
     }
 
 
-    [Benchmark]
+    [ Benchmark ]
     public void Test_GetEnumerator()
     {
         using IEnumerator<long> sb = ids.GetEnumerator();
     }
 
 
-    [Benchmark]
+    [ Benchmark ]
     public ReadOnlySpan<char> Test_VSB()
     {
         using var sb = new ValueStringBuilder( "DELETE FROM " );
@@ -84,15 +78,15 @@ public class SqlStatementBenchmarks
     }
 
 
-    [Benchmark]
+    [ Benchmark ]
     public string Test_Span() => Test_VSB()
        .ToString();
 
 
-    [Benchmark] public string Test_Interpolated() => $"DELETE FROM {TableName} WHERE ID in ( {string.Join( ',', ids )} )";
+    [ Benchmark ] public string Test_Interpolated() => $"DELETE FROM {TableName} WHERE ID in ( {string.Join( ',', ids )} )";
 
 
-    [Benchmark]
+    [ Benchmark ]
     public string Test_StringBuilder()
     {
         var sb = new StringBuilder( $"DELETE FROM {TableName} WHERE ID in ( " );

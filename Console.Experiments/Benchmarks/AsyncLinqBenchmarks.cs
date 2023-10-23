@@ -17,10 +17,7 @@ namespace Experiments.Benchmarks;
 
 
 
-[SimpleJob( RuntimeMoniker.HostProcess )]
-[Orderer( SummaryOrderPolicy.FastestToSlowest )]
-[RankColumn]
-[MemoryDiagnoser]
+[ SimpleJob( RuntimeMoniker.HostProcess ), Orderer( SummaryOrderPolicy.FastestToSlowest ), RankColumn, MemoryDiagnoser ]
 public class AsyncLinqBenchmarks
 {
     // private readonly Dictionary<long, Guid> _dict = new();
@@ -38,13 +35,13 @@ public class AsyncLinqBenchmarks
     //     results.Count.WriteToConsole();
     //     return results;
     // }
-    [Benchmark]
-    public ValueTask<List<long>> WhereValueTask() => _data.Where( x => x > 0 )
+    [ Benchmark ]
+    public ValueTask<List<long>> WhereValueTask() => _data.Where( x => x     > 0 )
                                                           .Where( x => x % 5 == 0 )
                                                           .ToList();
 
 
-    [GlobalSetup]
+    [ GlobalSetup ]
     public void Setup()
     {
         // for ( long i = 0; i < 10_000; i++ ) { _dict[i] = Guid.NewGuid(); }

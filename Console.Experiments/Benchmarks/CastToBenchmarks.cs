@@ -81,10 +81,7 @@ AMD Ryzen 9 3900X, 1 CPU, 24 logical and 12 physical cores
 |    Convert_Cast_Long | 17.3874 ns | 0.2886 ns | 0.2559 ns | 17.3700 ns |    9 | 0.0057 |      48 B |
 |    Convert_Cast_Byte | 23.3791 ns | 0.3680 ns | 0.3443 ns | 23.4378 ns |   10 | 0.0057 |      48 B |
 */
-[SimpleJob( RuntimeMoniker.HostProcess )]
-[Orderer( SummaryOrderPolicy.FastestToSlowest )]
-[RankColumn]
-[MemoryDiagnoser]
+[ SimpleJob( RuntimeMoniker.HostProcess ), Orderer( SummaryOrderPolicy.FastestToSlowest ), RankColumn, MemoryDiagnoser ]
 public class CastToBenchmarks
 {
     // ReSharper disable once ConvertToConstant.Global
@@ -92,41 +89,41 @@ public class CastToBenchmarks
     public static SupportedLanguage Value => SupportedLanguage.English;
 
 
-    [Benchmark] public byte Convert_Cast_Byte() => Convert.ToByte( Value );
-    [Benchmark] public sbyte Convert_Cast_SByte() => Convert.ToSByte( Value );
-    [Benchmark] public short Convert_Cast_Short() => Convert.ToInt16( Value );
-    [Benchmark] public ushort Convert_Cast_UShort() => Convert.ToUInt16( Value );
-    [Benchmark] public int Convert_Cast_Int() => Convert.ToInt32( Value );
-    [Benchmark] public uint Convert_Cast_UInt() => Convert.ToUInt32( Value );
-    [Benchmark] public long Convert_Cast_Long() => Convert.ToInt32( Value );
-    [Benchmark] public ulong Convert_Cast_ULong() => Convert.ToUInt64( Value );
-    [Benchmark] public float Convert_Cast_Float() => Convert.ToSingle( Value );
-    [Benchmark] public double Convert_Cast_Double() => Convert.ToDouble( Value );
-    [Benchmark] public decimal Convert_Cast_Decimal() => Convert.ToDecimal( Value );
+    [ Benchmark ] public byte    Convert_Cast_Byte()    => Convert.ToByte( Value );
+    [ Benchmark ] public sbyte   Convert_Cast_SByte()   => Convert.ToSByte( Value );
+    [ Benchmark ] public short   Convert_Cast_Short()   => Convert.ToInt16( Value );
+    [ Benchmark ] public ushort  Convert_Cast_UShort()  => Convert.ToUInt16( Value );
+    [ Benchmark ] public int     Convert_Cast_Int()     => Convert.ToInt32( Value );
+    [ Benchmark ] public uint    Convert_Cast_UInt()    => Convert.ToUInt32( Value );
+    [ Benchmark ] public long    Convert_Cast_Long()    => Convert.ToInt32( Value );
+    [ Benchmark ] public ulong   Convert_Cast_ULong()   => Convert.ToUInt64( Value );
+    [ Benchmark ] public float   Convert_Cast_Float()   => Convert.ToSingle( Value );
+    [ Benchmark ] public double  Convert_Cast_Double()  => Convert.ToDouble( Value );
+    [ Benchmark ] public decimal Convert_Cast_Decimal() => Convert.ToDecimal( Value );
 
 
-    [Benchmark] public byte Cast_Byte() => Value.AsByte();
-    [Benchmark] public sbyte Cast_SByte() => Value.AsSByte();
-    [Benchmark] public short Cast_Short() => Value.AsShort();
-    [Benchmark] public ushort Cast_UShort() => Value.AsUShort();
-    [Benchmark] public int Cast_Int() => Value.AsInt();
-    [Benchmark] public uint Cast_UInt() => Value.AsUInt();
-    [Benchmark] public long Cast_Long() => Value.AsLong();
-    [Benchmark] public ulong Cast_ULong() => Value.AsULong();
-    [Benchmark] public float Cast_Float() => Value.AsFloat();
-    [Benchmark] public double Cast_Double() => Value.AsDouble();
-    [Benchmark] public decimal Cast_Decimal() => Value.AsDecimal();
+    [ Benchmark ] public byte    Cast_Byte()    => Value.AsByte();
+    [ Benchmark ] public sbyte   Cast_SByte()   => Value.AsSByte();
+    [ Benchmark ] public short   Cast_Short()   => Value.AsShort();
+    [ Benchmark ] public ushort  Cast_UShort()  => Value.AsUShort();
+    [ Benchmark ] public int     Cast_Int()     => Value.AsInt();
+    [ Benchmark ] public uint    Cast_UInt()    => Value.AsUInt();
+    [ Benchmark ] public long    Cast_Long()    => Value.AsLong();
+    [ Benchmark ] public ulong   Cast_ULong()   => Value.AsULong();
+    [ Benchmark ] public float   Cast_Float()   => Value.AsFloat();
+    [ Benchmark ] public double  Cast_Double()  => Value.AsDouble();
+    [ Benchmark ] public decimal Cast_Decimal() => Value.AsDecimal();
 
 
-    [Benchmark] public byte Direct_Cast_Byte() => (byte)Value;
-    [Benchmark] public sbyte Direct_Cast_SByte() => (sbyte)Value;
-    [Benchmark] public short Direct_Cast_Short() => (short)Value;
-    [Benchmark] public ushort Direct_Cast_UShort() => (ushort)Value;
-    [Benchmark] public int Direct_Cast_Int() => (int)Value;
-    [Benchmark] public uint Direct_Cast_UInt() => (uint)Value;
-    [Benchmark] public long Direct_Cast_Long() => (long)Value;
-    [Benchmark] public ulong Direct_Cast_ULong() => (ulong)Value;
-    [Benchmark] public float Direct_Cast_Float() => (float)Value;
-    [Benchmark] public double Direct_Cast_Double() => (double)Value;
-    [Benchmark] public decimal Direct_Cast_Decimal() => (decimal)Value;
+    [ Benchmark ] public byte    Direct_Cast_Byte()    => (byte)Value;
+    [ Benchmark ] public sbyte   Direct_Cast_SByte()   => (sbyte)Value;
+    [ Benchmark ] public short   Direct_Cast_Short()   => (short)Value;
+    [ Benchmark ] public ushort  Direct_Cast_UShort()  => (ushort)Value;
+    [ Benchmark ] public int     Direct_Cast_Int()     => (int)Value;
+    [ Benchmark ] public uint    Direct_Cast_UInt()    => (uint)Value;
+    [ Benchmark ] public long    Direct_Cast_Long()    => (long)Value;
+    [ Benchmark ] public ulong   Direct_Cast_ULong()   => (ulong)Value;
+    [ Benchmark ] public float   Direct_Cast_Float()   => (float)Value;
+    [ Benchmark ] public double  Direct_Cast_Double()  => (double)Value;
+    [ Benchmark ] public decimal Direct_Cast_Decimal() => (decimal)Value;
 }

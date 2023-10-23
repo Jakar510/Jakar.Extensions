@@ -1,7 +1,6 @@
 ﻿// Jakar.Extensions :: Experiments
 // 08/26/2023  2:02 PM
 
-using System.Collections.Immutable;
 using BenchmarkDotNet.Engines;
 
 
@@ -15,8 +14,8 @@ namespace Experiments.Benchmarks;
    .NET SDK 7.0.400
    [Host]     : .NET 7.0.10 (7.0.1023.36312), X64 RyuJIT AVX2
    DefaultJob : .NET 7.0.10 (7.0.1023.36312), X64 RyuJIT AVX2
-   
-   
+
+
 |       Method |  Size |           Mean |         Error |        StdDev |    Gen0 |    Gen1 | Allocated |
 |------------- |------ |---------------:|--------------:|--------------:|--------:|--------:|----------:|
 | ForEachArray |    10 |       7.918 ns |     0.0661 ns |     0.0552 ns |       - |       - |         - |
@@ -47,11 +46,9 @@ namespace Experiments.Benchmarks;
 
 
 
-[SimpleJob( RuntimeMoniker.HostProcess )]
-[Orderer( SummaryOrderPolicy.FastestToSlowest )]
+[ SimpleJob( RuntimeMoniker.HostProcess ), Orderer( SummaryOrderPolicy.FastestToSlowest ), MemoryDiagnoser ]
 
 // [RankColumn]
-[MemoryDiagnoser]
 public class ImmutableArrayBenchmarks
 {
     private static readonly Random _random = new(69);
@@ -61,7 +58,6 @@ public class ImmutableArrayBenchmarks
                                                                                  GetArray( 1000 ),
                                                                                  GetArray( 10_000 )
                                                                              };
-
     private static readonly Dictionary<int, ImmutableList<double>> _list = new()
                                                                            {
                                                                                GetList( 10 ),
@@ -71,7 +67,7 @@ public class ImmutableArrayBenchmarks
     private static readonly Consumer _consumer = new();
 
 
-    [Params( 10, 1000, 10_000 )] public int Size { get; set; }
+    [ Params( 10, 1000, 10_000 ) ] public int Size { get; set; }
 
     private static KeyValuePair<int, ImmutableArray<double>> GetArray( int size )
     {
@@ -89,16 +85,16 @@ public class ImmutableArrayBenchmarks
     }
 
 
-    [Benchmark]
+    [ Benchmark ]
     public ImmutableArray<double> GetNewArray() => ImmutableArray.CreateRange( Enumerable.Range( 0, Size )
                                                                                          .Select( i => _random.NextDouble() ) );
 
-    [Benchmark]
+    [ Benchmark ]
     public ImmutableList<double> GetNewList() => ImmutableList.CreateRange( Enumerable.Range( 0, Size )
                                                                                       .Select( i => _random.NextDouble() ) );
 
 
-    [Benchmark]
+    [ Benchmark ]
     public void ForArray()
     {
         ImmutableArray<double> array = _array[Size];
@@ -106,7 +102,7 @@ public class ImmutableArrayBenchmarks
         // ReSharper disable once ForCanBeConvertedToForeach
         for ( int i = 0; i < array.Length; i++ ) { _ = array[i]; }
     }
-    [Benchmark]
+    [ Benchmark ]
     public void ForEachArray()
     {
         ImmutableArray<double> array = _array[Size];
@@ -115,7 +111,7 @@ public class ImmutableArrayBenchmarks
     }
 
 
-    [Benchmark]
+    [ Benchmark ]
     public void ForList()
     {
         ImmutableList<double> array = _list[Size];
@@ -123,7 +119,7 @@ public class ImmutableArrayBenchmarks
         // ReSharper disable once ForCanBeConvertedToForeach
         for ( int i = 0; i < array.Count; i++ ) { _ = array[i]; }
     }
-    [Benchmark]
+    [ Benchmark ]
     public void ForEachList()
     {
         ImmutableList<double> array = _list[Size];
@@ -131,7 +127,7 @@ public class ImmutableArrayBenchmarks
     }
 
 
-    [Benchmark]
+    [ Benchmark ]
     public void SelectArray()
     {
         ImmutableArray<double> array = _array[Size];
@@ -139,7 +135,7 @@ public class ImmutableArrayBenchmarks
         array.Select( i => i )
              .Consume( _consumer );
     }
-    [Benchmark]
+    [ Benchmark ]
     public void SelectList()
     {
         ImmutableList<double> array = _list[Size];

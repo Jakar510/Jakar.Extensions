@@ -3,11 +3,12 @@
     "Hello World!".WriteToConsole();
     Console.WriteLine();
 
+    // BenchmarkRunner.Run<StringCollectionBenchmarks>();
+
     // await TestDatabase.Test();
 
-
-    ULongHashTests.Run( 100_000_000 )
-                  .WriteToDebug();
+    // ULongHashTests.Run( 100_000_000 )
+    //               .WriteToDebug();
 }
 catch ( Exception e ) { e.WriteToConsole(); }
 finally { "Bye".WriteToConsole(); }

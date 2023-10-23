@@ -65,7 +65,9 @@ public sealed class MsSqlServer<TRecord> : BaseSqlCache<TRecord> where TRecord :
     }
     */
 
-    
+
+    public override SqlCommand First() => default;
+    public override SqlCommand Last() => default;
     public override SqlCommand Random( in int count )
     {
         var parameters = new DynamicParameters();
@@ -98,4 +100,8 @@ public sealed class MsSqlServer<TRecord> : BaseSqlCache<TRecord> where TRecord :
 
         return new SqlCommand( sql, parameters );
     }
+    public override SqlCommand Single() => default;
+    public override SqlCommand Insert( in TRecord record ) => default;
+    public override SqlCommand TryInsert( in TRecord record, in bool matchAll, in DynamicParameters parameters ) => default;
+    public override SqlCommand InsertOrUpdate( in TRecord record, in bool matchAll, in DynamicParameters parameters ) => default;
 }

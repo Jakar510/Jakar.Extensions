@@ -7,6 +7,7 @@ using HashidsNet;
 
 namespace Experiments.Benchmarks;
 
+
 /*
 |  Method |       Mean |   Error |  StdDev | Rank |   Gen0 | Allocated |
 |-------- |-----------:|--------:|--------:|-----:|-------:|----------:|
@@ -14,17 +15,16 @@ namespace Experiments.Benchmarks;
 | GetLong | 1,307.2 ns | 7.26 ns | 6.06 ns |    2 | 0.0172 |     152 B |
 */
 
-[SimpleJob( RuntimeMoniker.HostProcess )]
-[Orderer( SummaryOrderPolicy.FastestToSlowest )]
-[RankColumn]
-[MemoryDiagnoser]
+
+
+[ SimpleJob( RuntimeMoniker.HostProcess ), Orderer( SummaryOrderPolicy.FastestToSlowest ), RankColumn, MemoryDiagnoser ]
 public class HashBenchmarks
 {
-    private readonly Hashids _hasher = new("49C7BCFE-D7B4-46FA-BF33-5B1D1032339A", 12);
-    private const    long    VALUE   = 69;
     private const    string  HASH    = "xOEDj6A8g15z";
+    private const    long    VALUE   = 69;
+    private readonly Hashids _hasher = new("49C7BCFE-D7B4-46FA-BF33-5B1D1032339A", 12);
 
 
-    [Benchmark] public long GetLong() => _hasher.DecodeSingleLong( HASH );
-    [Benchmark] public string GetHash() => _hasher.EncodeLong( VALUE );
+    [ Benchmark ] public long   GetLong() => _hasher.DecodeSingleLong( HASH );
+    [ Benchmark ] public string GetHash() => _hasher.EncodeLong( VALUE );
 }
