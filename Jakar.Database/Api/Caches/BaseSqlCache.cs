@@ -20,13 +20,13 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord> where TRecord :
     protected readonly     ConcurrentDictionary<string, string>                                     _whereIDColumn    = new();
 
 
-    protected IEnumerable<Descriptor> _Descriptors
+    protected ImmutableDictionary<string, Descriptor> _Properties
     {
-        [ Pure, MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => SqlProperties[Instance].Values;
+        [ Pure, MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => SqlProperties[Instance];
     }
     protected IEnumerable<string> _KeyValuePairs
     {
-        [ Pure, MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => _Descriptors.Select( x => x.KeyValuePair );
+        [ Pure, MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => _Properties.Values.Select( x => x.KeyValuePair );
     }
 
 
@@ -153,9 +153,13 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord> where TRecord :
     public abstract SqlCommand InsertOrUpdate( in TRecord record, in bool matchAll, in DynamicParameters parameters );
     public SqlCommand Update( in TRecord record )
     {
-        var parameters = record.ToDynamicParameters();
+        DynamicParameters parameters = record.ToDynamicParameters();
 
-        if ( _sql.TryGetValue( SqlCacheType.Random, out string? sql ) is false ) { _sql[SqlCacheType.Random] = sql = $"UPDATE {TableName} SET {_KeyValuePairs} WHERE {IdColumnName} = @{SQL.ID};"; }
+        if ( _sql.TryGetValue( SqlCacheType.Random, out string? sql ) is false )
+        {
+            sql                       = $"UPDATE {TableName} SET {_KeyValuePairs} WHERE {IdColumnName} = @{SQL.ID};";
+            _sql[SqlCacheType.Random] = sql;
+        }
 
         return new SqlCommand( sql, parameters );
     }
@@ -163,10 +167,16 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord> where TRecord :
 
     public virtual SqlCommand Where<TValue>( in string columnName, in TValue? value )
     {
+        if ( _Properties.ContainsKey( columnName ) ) { throw new ArgumentException( $"'{columnName}' is not a valid column: {_Properties.Keys.ToJson()}" ); }
+
         var parameters = new DynamicParameters();
         parameters.Add( nameof(value), value );
 
-        if ( _whereColumn.TryGetValue( columnName, out string? sql ) is false ) { _whereColumn[columnName] = sql = $"SELECT * FROM {TableName} WHERE {columnName} = @{nameof(value)}"; }
+        if ( _whereColumn.TryGetValue( columnName, out string? sql ) is false )
+        {
+            sql                      = $"SELECT * FROM {TableName} WHERE {columnName} = @{nameof(value)}";
+            _whereColumn[columnName] = sql;
+        }
 
         return new SqlCommand( sql, parameters );
     }
@@ -185,13 +195,21 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord> where TRecord :
 
     public SqlCommand WhereID<TValue>( in string columnName, in TValue? value )
     {
+        if ( _Properties.ContainsKey( columnName ) ) { throw new ArgumentException( $"'{columnName}' is not a valid column: {_Properties.Keys.ToJson()}" ); }
+
         var parameters = new DynamicParameters();
         parameters.Add( nameof(value), value );
 
-        if ( _whereIDColumn.TryGetValue( columnName, out string? sql ) is false ) { _whereIDColumn[columnName] = sql = $"SELECT {IdColumnName} FROM {TableName} WHERE {columnName} = @{nameof(value)}"; }
+        if ( _whereIDColumn.TryGetValue( columnName, out string? sql ) is false )
+        {
+            sql                        = $"SELECT {IdColumnName} FROM {TableName} WHERE {columnName} = @{nameof(value)}";
+            _whereIDColumn[columnName] = sql;
+        }
 
         return new SqlCommand( sql, parameters );
     }
+
+
     public SqlCommand Exists( in bool matchAll, in DynamicParameters parameters )
     {
         Key key = Key.Create( matchAll, parameters );
@@ -203,8 +221,6 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord> where TRecord :
         _existParameters[key] = sql = $"EXISTS( SELECT {IdColumnName} FROM {TableName} WHERE {buffer.Span} )";
         return new SqlCommand( sql, parameters );
     }
-
-
     public virtual SqlCommand Get( in bool matchAll, in DynamicParameters parameters )
     {
         Key key = Key.Create( matchAll, parameters );
@@ -216,21 +232,31 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord> where TRecord :
         _getParameters[key] = sql = $"SELECT * FROM {TableName} WHERE {buffer.Span}";
         return new SqlCommand( sql, parameters );
     }
+
     public SqlCommand Get( in RecordID<TRecord> id )
     {
         var parameters = new DynamicParameters();
         parameters.Add( nameof(id), id.Value );
 
-        if ( _sql.TryGetValue( SqlCacheType.GetIDs, out string? sql ) is false ) { _sql[SqlCacheType.GetIDs] = sql = $"SELECT * FROM {TableName} WHERE {IdColumnName} = @{nameof(id)}"; }
+        if ( _sql.TryGetValue( SqlCacheType.GetIDs, out string? sql ) is false )
+        {
+            sql                       = $"SELECT * FROM {TableName} WHERE {IdColumnName} = @{nameof(id)}";
+            _sql[SqlCacheType.GetIDs] = sql;
+        }
 
         return new SqlCommand( sql, parameters );
     }
+
     public SqlCommand Get( in IEnumerable<RecordID<TRecord>> ids )
     {
         var parameters = new DynamicParameters();
         parameters.Add( nameof(ids), ids.Select( x => x.Value ) );
 
-        if ( _sql.TryGetValue( SqlCacheType.GetIDs, out string? sql ) is false ) { _sql[SqlCacheType.GetIDs] = sql = $"SELECT * FROM {TableName} WHERE {IdColumnName} in @{nameof(ids)}"; }
+        if ( _sql.TryGetValue( SqlCacheType.GetIDs, out string? sql ) is false )
+        {
+            sql                       = $"SELECT * FROM {TableName} WHERE {IdColumnName} in @{nameof(ids)}";
+            _sql[SqlCacheType.GetIDs] = sql;
+        }
 
         return new SqlCommand( sql, parameters );
     }
