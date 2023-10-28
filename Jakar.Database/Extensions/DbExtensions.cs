@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.MicrosoftAccount;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Identity.Web;
 
 
@@ -48,8 +47,8 @@ public static partial class DbExtensions
     }
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static bool IsValid<TRecord>( this    RecordID<TRecord>? value ) where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord> => value.HasValue && value.Value.IsValid();
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static bool IsNotValid<TRecord>( this RecordID<TRecord>? value ) where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord> => value is null || !value.Value.IsValid();
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static bool IsValid<TRecord>( this    TRecord value ) where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord> => value.ID.IsValid();
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static bool IsNotValid<TRecord>( this TRecord value ) where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord> => value.IsValid() is false;
 
 
     public static IHealthChecksBuilder AddHealthCheck<T>( this WebApplicationBuilder builder ) where T : IHealthCheck => builder.AddHealthCheck( HealthCheckExtensions.CreateHealthCheck<T>() );

@@ -67,7 +67,14 @@ public sealed class PostgresSql<TRecord> : BaseSqlCache<TRecord> where TRecord :
 
 
     public override SqlCommand First() => default;
-    public override SqlCommand Last() => default;
+    public override SqlCommand Last()  => default;
+    public override SqlCommand Random()
+    {
+        if ( _sql.TryGetValue( SqlCacheType.Random, out string? sql ) ) { return sql; }
+
+        _sql[SqlCacheType.Random] = sql = $"SELECT TOP 1 * FROM {TableName} ORDER BY {RandomMethod}";
+        return sql;
+    }
     public override SqlCommand Random( in int count )
     {
         var parameters = new DynamicParameters();
@@ -100,8 +107,8 @@ public sealed class PostgresSql<TRecord> : BaseSqlCache<TRecord> where TRecord :
 
         return new SqlCommand( sql, parameters );
     }
-    public override SqlCommand Single() => default;
-    public override SqlCommand Insert( in TRecord record ) => default;
-    public override SqlCommand TryInsert( in TRecord record, in bool matchAll, in DynamicParameters parameters ) => default;
+    public override SqlCommand Single()                                                                               => default;
+    public override SqlCommand Insert( in         TRecord record )                                                    => default;
+    public override SqlCommand TryInsert( in      TRecord record, in bool matchAll, in DynamicParameters parameters ) => default;
     public override SqlCommand InsertOrUpdate( in TRecord record, in bool matchAll, in DynamicParameters parameters ) => default;
 }

@@ -18,12 +18,12 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord> where TRecord :
     protected readonly     ConcurrentDictionary<SqlCacheType, string>                               _sql              = new();
     protected readonly     ConcurrentDictionary<string, string>                                     _whereColumn      = new();
     protected readonly     ConcurrentDictionary<string, string>                                     _whereIDColumn    = new();
+
+
     protected IEnumerable<string> _KeyValuePairs
     {
         [ Pure, MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => _Properties.Values.Select( x => x.KeyValuePair );
     }
-
-
     protected ImmutableDictionary<string, Descriptor> _Properties
     {
         [ Pure, MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => SqlProperties[Instance];
@@ -50,17 +50,16 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord> where TRecord :
     }
 
 
-    [ Pure, MethodImpl( MethodImplOptions.AggressiveInlining ) ] protected IEnumerable<string> GetDescriptors( DynamicParameters   parameters ) => parameters.ParameterNames.Select( name => SqlProperties[Instance][name].KeyValuePair );
+    [ Pure, MethodImpl( MethodImplOptions.AggressiveInlining ) ] protected IEnumerable<string> GetDescriptors( DynamicParameters   parameters ) => parameters.ParameterNames.Select( name => _Properties[name].KeyValuePair );
     [ Pure, MethodImpl( MethodImplOptions.AggressiveInlining ) ] protected IEnumerable<string> GetKeyValuePairs( DynamicParameters parameters ) => parameters.ParameterNames.Select( KeyValuePair );
-    [ Pure, MethodImpl( MethodImplOptions.AggressiveInlining ) ] protected string              KeyValuePair( string                columnName ) => SqlProperties[Instance][columnName].KeyValuePair;
+    [ Pure, MethodImpl( MethodImplOptions.AggressiveInlining ) ] protected string              KeyValuePair( string                columnName ) => _Properties[columnName].KeyValuePair;
 
 
     public virtual SqlCommand All()
     {
         if ( _sql.TryGetValue( SqlCacheType.All, out string? sql ) ) { return sql; }
 
-        sql                    = $"SELECT * FROM {TableName}";
-        _sql[SqlCacheType.All] = sql;
+        _sql[SqlCacheType.All] = sql = $"SELECT * FROM {TableName}";
         return sql;
     }
     public abstract SqlCommand First();
@@ -69,8 +68,7 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord> where TRecord :
     {
         if ( _sql.TryGetValue( SqlCacheType.SortedIDs, out string? sql ) ) { return sql; }
 
-        sql                          = @$"SELECT {IdColumnName}, {DateCreated} FROM {TableName} ORDER BY {DateCreated} DESC";
-        _sql[SqlCacheType.SortedIDs] = sql;
+        _sql[SqlCacheType.SortedIDs] = sql = @$"SELECT {IdColumnName}, {DateCreated} FROM {TableName} ORDER BY {DateCreated} DESC";
         return sql;
     }
 
@@ -82,8 +80,7 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord> where TRecord :
 
         if ( _sql.TryGetValue( SqlCacheType.DeleteRecord, out string? sql ) ) { return new SqlCommand( sql, parameters ); }
 
-        sql                             = $"DELETE FROM {TableName} WHERE {IdColumnName} in @{nameof(id)}";
-        _sql[SqlCacheType.DeleteRecord] = sql;
+        _sql[SqlCacheType.DeleteRecord] = sql = $"DELETE FROM {TableName} WHERE {IdColumnName} in @{nameof(id)}";
         return new SqlCommand( sql, parameters );
     }
     public virtual SqlCommand Delete( in IEnumerable<RecordID<TRecord>> ids )
@@ -142,13 +139,7 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord> where TRecord :
         _sql[SqlCacheType.Count] = sql = @$"SELECT COUNT(*) FROM {TableName};";
         return sql;
     }
-    public SqlCommand Random()
-    {
-        if ( _sql.TryGetValue( SqlCacheType.Random, out string? sql ) ) { return sql; }
-
-        _sql[SqlCacheType.Random] = sql = $"SELECT * FROM {TableName} ORDER BY {RandomMethod} LIMIT 1";
-        return sql;
-    }
+    public abstract SqlCommand Random();
     public abstract SqlCommand Random( in int                  count );
     public abstract SqlCommand Random( in Guid?                userID, in int count );
     public abstract SqlCommand Random( in RecordID<UserRecord> id,     in int count );
@@ -252,8 +243,6 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord> where TRecord :
 
 
 
-
-
     protected readonly struct Key( in bool matchAll, in ImmutableArray<string> parameters ) : IEquatable<Key>
     {
         private readonly int                    _hash       = HashCode.Combine( matchAll, parameters );
@@ -269,7 +258,7 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord> where TRecord :
 
             if ( _matchAll != other._matchAll ) { return false; }
 
-            return _parameters.SequenceEquals(  other._parameters.AsSpan() );
+            return _parameters.SequenceEquals( other._parameters.AsSpan() );
         }
         public          bool Equals( in DynamicParameters other ) => _parameters.SequenceEquals( other.ParameterNames.ToArray() );
         public override int  GetHashCode()                        => _hash;

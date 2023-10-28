@@ -68,6 +68,13 @@ public sealed class MsSqlServer<TRecord> : BaseSqlCache<TRecord> where TRecord :
 
     public override SqlCommand First() => default;
     public override SqlCommand Last() => default;
+    public override SqlCommand Random()
+    {
+        if ( _sql.TryGetValue( SqlCacheType.Random, out string? sql ) ) { return sql; }
+
+        _sql[SqlCacheType.Random] = sql = $"SELECT * FROM {TableName} ORDER BY {RandomMethod} LIMIT 1";
+        return sql;
+    }
     public override SqlCommand Random( in int count )
     {
         var parameters = new DynamicParameters();
