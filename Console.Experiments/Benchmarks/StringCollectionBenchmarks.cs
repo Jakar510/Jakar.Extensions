@@ -1,6 +1,10 @@
 ﻿// Jakar.Extensions :: Experiments
 // 08/24/2023  8:37 PM
 
+using System.Runtime.CompilerServices;
+
+
+
 namespace Experiments.Benchmarks;
 
 
@@ -10,8 +14,8 @@ namespace Experiments.Benchmarks;
    .NET SDK 7.0.402
    [Host]     : .NET 7.0.12 (7.0.1223.47720), X64 RyuJIT AVX2
    DefaultJob : .NET 7.0.12 (7.0.1223.47720), X64 RyuJIT AVX2
-   
-   
+
+
    | Method                    | Count  | Mean      | Error     | StdDev    | Rank | Allocated |
    |-------------------------- |------- |----------:|----------:|----------:|-----:|----------:|
    | CheckImmutableArraySpan   | 10     |  4.869 ns | 0.0593 ns | 0.0526 ns |    1 |         - |
@@ -38,7 +42,7 @@ namespace Experiments.Benchmarks;
    | CheckMemoryString         | 10     |  9.412 ns | 0.2175 ns | 0.2750 ns |    8 |         - |
    | CheckMemoryString         | 100000 | 10.125 ns | 0.1824 ns | 0.1523 ns |    9 |         - |
    | CheckMemoryString         | 10000  | 10.276 ns | 0.2321 ns | 0.3177 ns |    9 |         - |
-   
+
 */
 
 

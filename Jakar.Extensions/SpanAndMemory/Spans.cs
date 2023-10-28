@@ -2,7 +2,7 @@
 namespace Jakar.Extensions;
 
 
-[SuppressMessage( "ReSharper", "OutParameterValueIsAlwaysDiscarded.Global" )]
+[ SuppressMessage( "ReSharper", "OutParameterValueIsAlwaysDiscarded.Global" ) ]
 public static partial class Spans
 {
     public static bool IsNullOrWhiteSpace( this Span<char> span )
@@ -54,6 +54,36 @@ public static partial class Spans
     }
 
 
+    public static bool SequenceEquals( this ReadOnlySpan<string> left, ReadOnlySpan<string> right )
+    {
+        if ( left.Length != right.Length ) { return false; }
+
+        foreach ( ReadOnlySpan<char> parameter in left )
+        {
+            foreach ( ReadOnlySpan<char> otherParameter in right )
+            {
+                if ( parameter.SequenceEqual( otherParameter ) is false ) { return false; }
+            }
+        }
+
+        return true;
+    }
+    public static bool SequenceEquals( this ImmutableArray<string> left, ReadOnlySpan<string> right )
+    {
+        if ( left.Length != right.Length ) { return false; }
+
+        foreach ( ReadOnlySpan<char> parameter in left.AsSpan() )
+        {
+            foreach ( ReadOnlySpan<char> otherParameter in right )
+            {
+                if ( parameter.SequenceEqual( otherParameter ) is false ) { return false; }
+            }
+        }
+
+        return true;
+    }
+
+
     public static int LastIndexOf<T>( this Span<T> value, T c, int endIndex ) where T : IEquatable<T>
     {
         Guard.IsInRangeFor( endIndex, value, nameof(value) );
@@ -69,9 +99,9 @@ public static partial class Spans
         return value[..endIndex]
            .LastIndexOf( c );
     }
-    [Pure] public static Memory<T> AsMemory<T>( this T[] span ) => MemoryMarshal.CreateFromPinnedArray( span, 0, span.Length );
+    [ Pure ] public static Memory<T> AsMemory<T>( this T[] span ) => MemoryMarshal.CreateFromPinnedArray( span, 0, span.Length );
 
-    [Pure]
+    [ Pure ]
     public static ReadOnlySpan<T> Join<T>( this ReadOnlySpan<T> value, ReadOnlySpan<T> other ) where T : unmanaged, IEquatable<T>
     {
         int     size   = value.Length + other.Length;
@@ -79,15 +109,15 @@ public static partial class Spans
         Join( value, other, ref buffer, out int charWritten );
         return MemoryMarshal.CreateReadOnlySpan( ref buffer.GetPinnableReference(), charWritten );
     }
-    [Pure] public static Span<T> AsSpan<T>( this ReadOnlySpan<T> span ) => MemoryMarshal.CreateSpan( ref MemoryMarshal.GetReference( span ), span.Length );
-    [Pure]
+    [ Pure ] public static Span<T> AsSpan<T>( this ReadOnlySpan<T> span ) => MemoryMarshal.CreateSpan( ref MemoryMarshal.GetReference( span ), span.Length );
+    [ Pure ]
     public static Span<T> AsSpan<T>( this ReadOnlySpan<T> span, int length )
     {
         Guard.IsLessThanOrEqualTo( length, span.Length, nameof(length) );
         return MemoryMarshal.CreateSpan( ref MemoryMarshal.GetReference( span ), length );
     }
-    [Pure] public static Span<T> AsSpan<T>( this Span<T> span ) => MemoryMarshal.CreateSpan( ref span.GetPinnableReference(), span.Length );
-    [Pure]
+    [ Pure ] public static Span<T> AsSpan<T>( this Span<T> span ) => MemoryMarshal.CreateSpan( ref span.GetPinnableReference(), span.Length );
+    [ Pure ]
     public static Span<T> AsSpan<T>( this Span<T> span, int length )
     {
         Guard.IsLessThanOrEqualTo( length, span.Length, nameof(length) );
@@ -95,7 +125,7 @@ public static partial class Spans
     }
 
 
-    [Pure]
+    [ Pure ]
     public static Span<T> Join<T>( this Span<T> value, Span<T> other ) where T : unmanaged, IEquatable<T>
     {
         int     size   = value.Length + other.Length;
@@ -104,7 +134,7 @@ public static partial class Spans
         return MemoryMarshal.CreateSpan( ref buffer.GetPinnableReference(), charWritten );
     }
 
-    [Pure]
+    [ Pure ]
     public static Span<T> Join<T>( this Span<T> value, ReadOnlySpan<T> other ) where T : unmanaged, IEquatable<T>
     {
         int     size   = value.Length + other.Length;
@@ -157,5 +187,3 @@ public static partial class Spans
         return true;
     }
 }
-
-

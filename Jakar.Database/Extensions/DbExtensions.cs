@@ -18,6 +18,36 @@ namespace Jakar.Database;
 [ SuppressMessage( "ReSharper", "UnusedMethodReturnValue.Global" ) ]
 public static partial class DbExtensions
 {
+    public static bool SequenceEquals( this ReadOnlySpan<string> left, ReadOnlySpan<string> right )
+    {
+        if ( left.Length != right.Length ) { return false; }
+
+        foreach ( ReadOnlySpan<char> parameter in left )
+        {
+            foreach ( ReadOnlySpan<char> otherParameter in right )
+            {
+                if ( parameter.SequenceEqual( otherParameter ) is false ) { return false; }
+            }
+        }
+
+        return true;
+    }
+    public static bool SequenceEquals( this ImmutableArray<string> left, ReadOnlySpan<string> right )
+    {
+        if ( left.Length != right.Length ) { return false; }
+
+        foreach ( ReadOnlySpan<char> parameter in left.AsSpan() )
+        {
+            foreach ( ReadOnlySpan<char> otherParameter in right )
+            {
+                if ( parameter.SequenceEqual( otherParameter ) is false ) { return false; }
+            }
+        }
+
+        return true;
+    }
+
+
     [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static bool IsValid<TRecord>( this    RecordID<TRecord>? value ) where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord> => value.HasValue && value.Value.IsValid();
     [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static bool IsNotValid<TRecord>( this RecordID<TRecord>? value ) where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord> => value is null || !value.Value.IsValid();
 
