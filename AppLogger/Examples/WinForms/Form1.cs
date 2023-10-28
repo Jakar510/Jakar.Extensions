@@ -15,7 +15,7 @@ public partial class Form1 : Form
                      {
                          Dock     = DockStyle.Fill,
                          HostPage = "wwwroot/index.html",
-                         Services = Startup.Services,
+                         Services = Startup.Services
                      };
 
         blazor.RootComponents.Add<App>( "#app" );

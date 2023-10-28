@@ -1,10 +1,9 @@
-﻿#nullable enable
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
 
 
 public static partial class Validate
 {
-    [SuppressMessage( "ReSharper", "PartialTypeWithSinglePart" )]
+    [ SuppressMessage( "ReSharper", "PartialTypeWithSinglePart" ) ]
     public static partial class Re
     {
         private static          Regex?       _email;
@@ -59,8 +58,7 @@ public static partial class Validate
         private static partial Regex GetUrl();
     #else
 
-        /// <summary>
-        ///     General Email Regex (RFC 5322 Official Standard)
+        /// <summary> General Email Regex (RFC 5322 Official Standard)
         ///     <para> <see href="https://emailregex.com/"/> </para>
         /// </summary>
         public static Regex Email =>
@@ -94,8 +92,7 @@ public static partial class Validate
 
 
 
-        [SuppressMessage( "ReSharper", "PartialTypeWithSinglePart" )]
-        [SuppressMessage( "ReSharper", "InconsistentNaming" )]
+        [ SuppressMessage( "ReSharper", "PartialTypeWithSinglePart" ), SuppressMessage( "ReSharper", "InconsistentNaming" ) ]
         public static partial class PhoneNumbers
         {
             private static Regex? _brazil;

@@ -1,8 +1,7 @@
-﻿#nullable enable
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
 
 
-[AttributeUsage( AttributeTargets.Property | AttributeTargets.Class | AttributeTargets.Struct )]
+[ AttributeUsage( AttributeTargets.Property | AttributeTargets.Class | AttributeTargets.Struct ) ]
 public sealed class DataBaseTypeAttribute : Attribute
 {
     public DbType Type { get; init; }

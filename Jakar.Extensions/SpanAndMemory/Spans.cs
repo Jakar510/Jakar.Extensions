@@ -1,5 +1,4 @@
-﻿#nullable enable
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
 
 
 [ SuppressMessage( "ReSharper", "OutParameterValueIsAlwaysDiscarded.Global" ) ]
@@ -88,16 +87,14 @@ public static partial class Spans
     {
         Guard.IsInRangeFor( endIndex, value, nameof(value) );
 
-        return value[..endIndex]
-           .LastIndexOf( c );
+        return value[..endIndex].LastIndexOf( c );
     }
 
     public static int LastIndexOf<T>( this ReadOnlySpan<T> value, T c, int endIndex ) where T : IEquatable<T>
     {
         Guard.IsInRangeFor( endIndex, value, nameof(value) );
 
-        return value[..endIndex]
-           .LastIndexOf( c );
+        return value[..endIndex].LastIndexOf( c );
     }
     [ Pure ] public static Memory<T> AsMemory<T>( this T[] span ) => MemoryMarshal.CreateFromPinnedArray( span, 0, span.Length );
 
@@ -160,8 +157,7 @@ public static partial class Spans
         Guard.IsInRangeFor( value.Length - 1, buffer, nameof(buffer) );
         value.CopyTo( buffer );
 
-        buffer[value.Length..]
-           .Fill( defaultValue );
+        buffer[value.Length..].Fill( defaultValue );
 
         // for ( int i = value.Length; i < buffer.Length; i++ ) { buffer[i] = defaultValue; }
     }
@@ -178,11 +174,7 @@ public static partial class Spans
 
         if ( !value.TryCopyTo( buffer ) ) { return false; }
 
-        if ( buffer.Length > value.Length )
-        {
-            buffer[value.Length..]
-               .Fill( defaultValue );
-        }
+        if ( buffer.Length > value.Length ) { buffer[value.Length..].Fill( defaultValue ); }
 
         return true;
     }

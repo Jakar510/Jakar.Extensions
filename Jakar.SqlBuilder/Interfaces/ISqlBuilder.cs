@@ -1,5 +1,4 @@
-﻿#nullable enable
-namespace Jakar.SqlBuilder.Interfaces;
+﻿namespace Jakar.SqlBuilder.Interfaces;
 
 
 // ReSharper disable once PossibleInterfaceMemberAmbiguity
@@ -41,15 +40,15 @@ public interface ISelectorSyntax : ISelector { }
 
 public interface ISqlBuilderRoot
 {
-    public string Result { get; }
-    public IDelete Delete();
-    public IGroupBy Group();
+    public string      Result { get; }
+    public IDelete     Delete();
+    public IGroupBy    Group();
     public IInsertInto Insert();
-    public IJoin Join();
-    public IOrderBy Order();
-    public ISelector Select();
-    public ISelector Union();
-    public ISelector UnionAll();
-    public IUpdate Update();
-    public IWhere Where();
+    public IJoin       Join();
+    public IOrderBy    Order();
+    public ISelector   Select();
+    public ISelector   Union();
+    public ISelector   UnionAll();
+    public IUpdate     Update();
+    public IWhere      Where();
 }

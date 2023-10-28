@@ -10,8 +10,7 @@ public static class JwtExtensions
     [ Pure ]
     public static DateTimeOffset TokenExpiration( this IConfiguration configuration, TimeSpan defaultValue )
     {
-        TimeSpan offset = configuration.TokenValidation()
-                                       .GetValue( nameof(TokenExpiration), defaultValue );
+        TimeSpan offset = configuration.TokenValidation().GetValue( nameof(TokenExpiration), defaultValue );
 
         return DateTimeOffset.UtcNow + offset;
     }
@@ -19,8 +18,8 @@ public static class JwtExtensions
 
 
     public static byte[]               GetJWTKey( this               IConfiguration configuration, DbOptions options ) => Encoding.UTF8.GetBytes( configuration[options.JWTKey] ?? string.Empty );
-    public static SymmetricSecurityKey GetSymmetricSecurityKey( this IConfiguration configuration, DbOptions options ) => new SymmetricSecurityKey( configuration.GetJWTKey( options ) );
-    public static SigningCredentials   GetSigningCredentials( this   IConfiguration configuration, DbOptions options ) => new SigningCredentials( configuration.GetSymmetricSecurityKey( options ), options.JWTAlgorithm );
+    public static SymmetricSecurityKey GetSymmetricSecurityKey( this IConfiguration configuration, DbOptions options ) => new(configuration.GetJWTKey( options ));
+    public static SigningCredentials   GetSigningCredentials( this   IConfiguration configuration, DbOptions options ) => new(configuration.GetSymmetricSecurityKey( options ), options.JWTAlgorithm);
 
 
     public static TokenValidationParameters GetTokenValidationParameters( this IConfiguration configuration, DbOptions options )
@@ -48,6 +47,6 @@ public static class JwtExtensions
             ValidateTokenReplay                       = section.GetValue( nameof(TokenValidationParameters.ValidateTokenReplay),                       false ),
             ClockSkew                                 = section.GetValue( nameof(TokenValidationParameters.ClockSkew),                                 options.ClockSkew ),
             ValidIssuer                               = section.GetValue( nameof(TokenValidationParameters.ValidIssuer),                               options.TokenIssuer ),
-            ValidAudience                             = section.GetValue( nameof(TokenValidationParameters.ValidAudience),                             options.TokenAudience ),
+            ValidAudience                             = section.GetValue( nameof(TokenValidationParameters.ValidAudience),                             options.TokenAudience )
         };
 }

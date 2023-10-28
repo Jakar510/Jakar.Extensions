@@ -1,7 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Xml
 // 04/27/2022  11:38 AM
 
-#nullable enable
 using System;
 using System.Text;
 
@@ -21,12 +20,7 @@ public readonly ref struct XAttributeBuilder
 
     public XAttributeBuilder With( ReadOnlySpan<char> key, ReadOnlySpan<char> value )
     {
-        sb.Append( ' ' )
-          .Append( key )
-          .Append( '=' )
-          .Append( '"' )
-          .Append( value )
-          .Append( '"' );
+        sb.Append( ' ' ).Append( key ).Append( '=' ).Append( '"' ).Append( value ).Append( '"' );
 
         return this;
     }

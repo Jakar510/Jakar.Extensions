@@ -2,11 +2,10 @@
 // 04/15/2022  4:46 PM
 
 
-#nullable enable
 namespace Jakar.Extensions;
 
 
-[SuppressMessage( "ReSharper", "OutParameterValueIsAlwaysDiscarded.Global" )]
+[ SuppressMessage( "ReSharper", "OutParameterValueIsAlwaysDiscarded.Global" ) ]
 public static partial class Spans
 {
     public static bool AsMemory( this Span<char>         value, out Memory<char> result ) => MemoryMarshal.TryRead( MemoryMarshal.AsBytes( value ), out result );
@@ -27,8 +26,8 @@ public static partial class Spans
 
     public static ReadOnlySpan<T> AsReadOnlySpan<T>( this Memory<T>         value ) => value.Span;
     public static ReadOnlySpan<T> AsReadOnlySpan<T>( this ReadOnlyMemory<T> value ) => value.Span;
-    public static Span<T> AsSpan<T>( this                 ReadOnlyMemory<T> value ) => value.Span.AsSpan();
-    public static Span<T> AsSpan<T>( this                 Memory<T>         value ) => value.Span;
+    public static Span<T>         AsSpan<T>( this         ReadOnlyMemory<T> value ) => value.Span.AsSpan();
+    public static Span<T>         AsSpan<T>( this         Memory<T>         value ) => value.Span;
 
 
     public static string? ConvertToString( this Memory<char> value ) => MemoryMarshal.TryGetString( value, out string? result, out _, out _ )

@@ -8,7 +8,7 @@ using System.Collections.Immutable;
 namespace Jakar.AppLogger.Common;
 
 
-[SuppressMessage( "ReSharper", "SuggestBaseTypeForParameter" )]
+[ SuppressMessage( "ReSharper", "SuggestBaseTypeForParameter" ) ]
 public sealed class AppLogger : Service, IAppLogger
 {
     private static readonly TimeSpan              _delay  = TimeSpan.FromMilliseconds( 50 );
@@ -22,7 +22,7 @@ public sealed class AppLogger : Service, IAppLogger
 
 
     internal        string                        ApiToken          => Options.APIToken;
-    public          string                        CategoryName      => _categoryName ?? Options.Config?.AppName ?? string.Empty;
+    public          string                        CategoryName      => _categoryName  ?? Options.Config?.AppName ?? string.Empty;
     public          LoggingSettings               Config            => Options.Config ?? throw new InvalidOperationException( $"{nameof(AppLoggerOptions)}.{nameof(AppLoggerOptions.Config)} is not set" );
     public override bool                          IsValid           => Options.IsValid && base.IsValid;
     internal        IEnumerable<LoggerAttachment> LoggerAttachments => Config.LoggerAttachmentProviders.Select( x => x.GetLoggerAttachment() );
@@ -53,8 +53,7 @@ public sealed class AppLogger : Service, IAppLogger
         await Config.DisposeAsync();
         _disposed = true;
     }
-    public void Dispose() => DisposeAsync()
-       .CallSynchronously();
+    public void Dispose() => DisposeAsync().CallSynchronously();
 
 
     public void Add( AppLog log )
@@ -84,8 +83,7 @@ public sealed class AppLogger : Service, IAppLogger
         {
             while ( token.ShouldContinue() )
             {
-                WebResponse<StartSessionReply> reply = await _requester.Post( "/Api/StartSession", session, token )
-                                                                       .AsJson<StartSessionReply>();
+                WebResponse<StartSessionReply> reply = await _requester.Post( "/Api/StartSession", session, token ).AsJson<StartSessionReply>();
 
                 Config.Session = reply.GetPayload();
             }
@@ -99,8 +97,7 @@ public sealed class AppLogger : Service, IAppLogger
 
         if ( Config.Session is null ) { return; }
 
-        WebResponse<string> reply = await _requester.Post( $"/Api/{nameof(EndSession)}", Config.Session, token )
-                                                    .AsString();
+        WebResponse<string> reply = await _requester.Post( $"/Api/{nameof(EndSession)}", Config.Session, token ).AsString();
 
         reply.GetPayload();
     }
@@ -165,8 +162,7 @@ public sealed class AppLogger : Service, IAppLogger
     {
         if ( !IsValid ) { throw new ApiDisabledException(); }
 
-        WebResponse<bool> reply = await _requester.Post( "/Api/Log", logs, token )
-                                                  .AsBool();
+        WebResponse<bool> reply = await _requester.Post( "/Api/Log", logs, token ).AsBool();
 
         return reply.GetPayload();
     }
@@ -183,9 +179,9 @@ public sealed class AppLogger : Service, IAppLogger
     }
 
 
-    public void TrackEvent<T>( LogLevel level = LogLevel.Trace, IDictionary<string, JToken?>? eventDetails = null, [CallerMemberName] string? caller = null ) =>
+    public void TrackEvent<T>( LogLevel level = LogLevel.Trace, IDictionary<string, JToken?>? eventDetails = null, [ CallerMemberName ] string? caller = null ) =>
         TrackEvent( $"{typeof(T).Name}.{caller}", level, eventDetails );
-    public void TrackEvent<T>( T _, LogLevel level = LogLevel.Trace, IDictionary<string, JToken?>? eventDetails = null, [CallerMemberName] string? caller = null ) =>
+    public void TrackEvent<T>( T _, LogLevel level = LogLevel.Trace, IDictionary<string, JToken?>? eventDetails = null, [ CallerMemberName ] string? caller = null ) =>
         TrackEvent( $"{typeof(T).Name}.{caller}", level, eventDetails );
     public void TrackEvent( string message, LogLevel level = LogLevel.Trace, IDictionary<string, JToken?>? eventDetails = default )
     {
@@ -238,15 +234,15 @@ public sealed class AppLogger : Service, IAppLogger
     }
 
 
-    public IDisposable BeginScope<TState>( TState state ) where TState : notnull => Config.CreateScope( state );
-    public AppLogger CreateLogger( string         categoryName ) => new(this, categoryName);
-    ILogger ILoggerProvider.CreateLogger( string  categoryName ) => CreateLogger( categoryName );
+    public IDisposable      BeginScope<TState>( TState state ) where TState : notnull => Config.CreateScope( state );
+    public AppLogger        CreateLogger( string       categoryName )                 => new(this, categoryName);
+    ILogger ILoggerProvider.CreateLogger( string       categoryName )                 => CreateLogger( categoryName );
 
 
-    private void Log( LogLevel logLevel, string? message, params object?[] args ) => Log( logLevel, 0, null, message, args );
-    private void Log( LogLevel logLevel, EventID eventID, string? message, params object?[] args ) => Log( logLevel, eventID, null, message, args );
-    private void Log( LogLevel logLevel, Exception? exception, string? message, params object?[] args ) => Log( logLevel, 0, exception, message, args );
-    private void Log( LogLevel logLevel, EventID eventID, Exception? exception, string? message, params object?[] args ) => Log( logLevel, eventID, new FormattedLogValues( message, args ), exception, MessageFormatter );
+    private         void   Log( LogLevel logLevel, string? message, params object?[] args ) => Log( logLevel, 0, null, message, args );
+    private         void   Log( LogLevel logLevel, EventID eventID, string? message, params object?[] args ) => Log( logLevel, eventID, null, message, args );
+    private         void   Log( LogLevel logLevel, Exception? exception, string? message, params object?[] args ) => Log( logLevel, 0, exception, message, args );
+    private         void   Log( LogLevel logLevel, EventID eventID, Exception? exception, string? message, params object?[] args ) => Log( logLevel, eventID, new FormattedLogValues( message, args ), exception, MessageFormatter );
     internal static string MessageFormatter( FormattedLogValues log, Exception? exception ) => log.ToString();
 
 

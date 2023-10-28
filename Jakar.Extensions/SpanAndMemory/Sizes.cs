@@ -3,7 +3,6 @@
 
 public static class Sizes
 {
-    private const int DEFAULT_SIZE = 500;
     private static readonly ConcurrentDictionary<Type, int> _sizes = new()
                                                                      {
                                                                          [typeof(byte)]            = 3,
@@ -34,16 +33,17 @@ public static class Sizes
                                                                          [typeof(DateTime?)]       = 50,
                                                                          [typeof(DateTimeOffset)]  = 75,
                                                                          [typeof(DateTimeOffset?)] = 75,
-                                                                         [typeof(AppVersion)]      = 200,
+                                                                         [typeof(AppVersion)]      = 200
                                                                      };
+    private const int DEFAULT_SIZE = 500;
 
 
     public static bool Register( Type type, int size ) => _sizes.TryAdd( type, size );
 
 
     public static int GetBufferSize<T>( int defaultSize = DEFAULT_SIZE ) => _sizes.TryGetValue( typeof(T), out int value )
-                                                                          ? value
-                                                                          : defaultSize;
+                                                                                ? value
+                                                                                : defaultSize;
     public static int GetBufferSize<T>( this T _, int defaultSize = DEFAULT_SIZE ) => _sizes.TryGetValue( typeof(T), out int value )
                                                                                           ? value
                                                                                           : defaultSize;

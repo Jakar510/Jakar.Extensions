@@ -14,16 +14,16 @@ namespace Jakar.Extensions;
 public readonly record struct WebResponse<T>
 {
     public const string ERROR_MESSAGE = "Error Message: ";
-    public const string UNKNOWN_ERROR = "Unknown Error";
     public const string NO_RESPONSE   = "NO RESPONSE";
+    public const string UNKNOWN_ERROR = "Unknown Error";
 
 
     public                List<string>                Allow             { get; init; } = new();
     public                List<string>                ContentEncoding   { get; init; } = new();
     public                long?                       ContentLength     { get; init; } = default;
     public                string?                     ContentType       { get; init; } = default;
-    public                string?                     ErrorMessage      => Error.Match<string?>( x => x.ToString( Formatting.Indented ), x => x, x => default );
     [ JsonIgnore ] public OneOf<JToken, string, None> Error             { get; init; } = new None();
+    public                string?                     ErrorMessage      => Error.Match<string?>( x => x.ToString( Formatting.Indented ), x => x, x => default );
     [ JsonIgnore ] public Exception?                  Exception         { get; init; } = default;
     public                DateTimeOffset?             Expires           { get; init; } = default;
     public                DateTimeOffset?             LastModified      { get; init; } = default;
@@ -87,11 +87,7 @@ public readonly record struct WebResponse<T>
     {
         if ( string.IsNullOrWhiteSpace( error ) ) { return new None(); }
 
-        try
-        {
-            return error.Replace( @"\""", @"""" )
-                        .FromJson();
-        }
+        try { return error.Replace( @"\""", @"""" ).FromJson(); }
         catch ( Exception ) { return error; }
     }
 

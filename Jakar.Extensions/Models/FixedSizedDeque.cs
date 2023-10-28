@@ -1,10 +1,7 @@
-﻿#nullable enable
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
 
 
-/// <summary>
-///     <seealso href="https://stackoverflow.com/a/5852926/9530917"/>
-/// </summary>
+/// <summary> <seealso href="https://stackoverflow.com/a/5852926/9530917"/> </summary>
 /// <typeparam name="T"> </typeparam>
 public class FixedSizedDeque<T>
 {

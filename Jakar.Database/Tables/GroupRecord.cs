@@ -35,7 +35,7 @@ public sealed record GroupRecord( [ MaxLength( 256 ) ]                          
 
     public override DynamicParameters ToDynamicParameters()
     {
-        DynamicParameters parameters = base.ToDynamicParameters();
+        var parameters = base.ToDynamicParameters();
         parameters.Add( nameof(CustomerID),  CustomerID );
         parameters.Add( nameof(NameOfGroup), NameOfGroup );
         parameters.Add( nameof(OwnerID),     OwnerID );
@@ -45,16 +45,16 @@ public sealed record GroupRecord( [ MaxLength( 256 ) ]                          
 
     public static GroupRecord Create( DbDataReader reader )
     {
-        var customerID   = reader.GetString( nameof(CustomerID) );
-        var nameOfGroup  = reader.GetString( nameof(NameOfGroup) );
-        var ownerID      = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(OwnerID) ) );
-        var rights       = reader.GetString( nameof(Rights) );
-        var dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
-        var lastModified = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
-        var ownerUserID  = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
-        var createdBy    = RecordID<UserRecord>.CreatedBy( reader );
-        var id           = RecordID<GroupRecord>.ID( reader );
-        var record       = new GroupRecord( customerID, nameOfGroup, ownerID, rights, id, createdBy, ownerUserID, dateCreated, lastModified );
+        string                customerID   = reader.GetString( nameof(CustomerID) );
+        string                nameOfGroup  = reader.GetString( nameof(NameOfGroup) );
+        var                   ownerID      = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(OwnerID) ) );
+        string                rights       = reader.GetString( nameof(Rights) );
+        var                   dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
+        var                   lastModified = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
+        var                   ownerUserID  = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
+        RecordID<UserRecord>? createdBy    = RecordID<UserRecord>.CreatedBy( reader );
+        RecordID<GroupRecord> id           = RecordID<GroupRecord>.ID( reader );
+        var                   record       = new GroupRecord( customerID, nameOfGroup, ownerID, rights, id, createdBy, ownerUserID, dateCreated, lastModified );
         record.Validate();
         return record;
     }

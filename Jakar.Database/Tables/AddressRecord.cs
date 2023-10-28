@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 09/29/2023  9:25 PM
 
-using System.Security.Claims;
-
-
-
 namespace Jakar.Database;
 
 
@@ -31,7 +27,7 @@ public sealed record AddressRecord( [ property: ProtectedPersonalData, MaxLength
 
     public override DynamicParameters ToDynamicParameters()
     {
-        DynamicParameters parameters = base.ToDynamicParameters();
+        var parameters = base.ToDynamicParameters();
         parameters.Add( nameof(Line1),           Line1 );
         parameters.Add( nameof(Line2),           Line2 );
         parameters.Add( nameof(City),            City );
@@ -44,20 +40,20 @@ public sealed record AddressRecord( [ property: ProtectedPersonalData, MaxLength
 
     public static AddressRecord Create( DbDataReader reader )
     {
-        var line1           = reader.GetString( nameof(Line1) );
-        var line2           = reader.GetString( nameof(Line2) );
-        var city            = reader.GetString( nameof(City) );
-        var stateOrProvince = reader.GetString( nameof(StateOrProvince) );
-        var country         = reader.GetString( nameof(Country) );
-        var postalCode      = reader.GetString( nameof(PostalCode) );
-        var address         = reader.GetString( nameof(Address) );
-        var additionalData  = JsonConvert.DeserializeObject<Dictionary<string, JToken?>>( reader.GetString( nameof(AdditionalData) ) );
-        var isPrimary       = reader.GetFieldValue<bool>( nameof(IsPrimary) );
-        var id              = RecordID<AddressRecord>.ID( reader );
-        var createdBy       = RecordID<UserRecord>.CreatedBy( reader );
-        var ownerUserID     = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
-        var dateCreated     = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
-        var lastModified    = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
+        string                  line1           = reader.GetString( nameof(Line1) );
+        string                  line2           = reader.GetString( nameof(Line2) );
+        string                  city            = reader.GetString( nameof(City) );
+        string                  stateOrProvince = reader.GetString( nameof(StateOrProvince) );
+        string                  country         = reader.GetString( nameof(Country) );
+        string                  postalCode      = reader.GetString( nameof(PostalCode) );
+        string                  address         = reader.GetString( nameof(Address) );
+        var                     additionalData  = JsonConvert.DeserializeObject<Dictionary<string, JToken?>>( reader.GetString( nameof(AdditionalData) ) );
+        bool                    isPrimary       = reader.GetFieldValue<bool>( nameof(IsPrimary) );
+        RecordID<AddressRecord> id              = RecordID<AddressRecord>.ID( reader );
+        RecordID<UserRecord>?   createdBy       = RecordID<UserRecord>.CreatedBy( reader );
+        var                     ownerUserID     = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
+        var                     dateCreated     = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
+        var                     lastModified    = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
 
         var record = new AddressRecord( line1,
                                         line2,
@@ -87,40 +83,15 @@ public sealed record AddressRecord( [ property: ProtectedPersonalData, MaxLength
     {
         var parameters = new DynamicParameters();
 
-        if ( types.HasFlag( ClaimType.StreetAddressLine1 ) )
-        {
-            parameters.Add( nameof(Line1),
-                            claims.Single( x => x.Type == ClaimTypes.StreetAddress )
-                                  .Value );
-        }
+        if ( types.HasFlag( ClaimType.StreetAddressLine1 ) ) { parameters.Add( nameof(Line1), claims.Single( x => x.Type == ClaimTypes.StreetAddress ).Value ); }
 
-        if ( types.HasFlag( ClaimType.StreetAddressLine2 ) )
-        {
-            parameters.Add( nameof(Line2),
-                            claims.Single( x => x.Type == ClaimTypes.Locality )
-                                  .Value );
-        }
+        if ( types.HasFlag( ClaimType.StreetAddressLine2 ) ) { parameters.Add( nameof(Line2), claims.Single( x => x.Type == ClaimTypes.Locality ).Value ); }
 
-        if ( types.HasFlag( ClaimType.StateOrProvince ) )
-        {
-            parameters.Add( nameof(StateOrProvince),
-                            claims.Single( x => x.Type == ClaimTypes.StateOrProvince )
-                                  .Value );
-        }
+        if ( types.HasFlag( ClaimType.StateOrProvince ) ) { parameters.Add( nameof(StateOrProvince), claims.Single( x => x.Type == ClaimTypes.StateOrProvince ).Value ); }
 
-        if ( types.HasFlag( ClaimType.Country ) )
-        {
-            parameters.Add( nameof(Country),
-                            claims.Single( x => x.Type == ClaimTypes.Country )
-                                  .Value );
-        }
+        if ( types.HasFlag( ClaimType.Country ) ) { parameters.Add( nameof(Country), claims.Single( x => x.Type == ClaimTypes.Country ).Value ); }
 
-        if ( types.HasFlag( ClaimType.PostalCode ) )
-        {
-            parameters.Add( nameof(PostalCode),
-                            claims.Single( x => x.Type == ClaimTypes.PostalCode )
-                                  .Value );
-        }
+        if ( types.HasFlag( ClaimType.PostalCode ) ) { parameters.Add( nameof(PostalCode), claims.Single( x => x.Type == ClaimTypes.PostalCode ).Value ); }
 
         return await db.Addresses.Get( connection, transaction, true, parameters, token );
     }
@@ -170,18 +141,16 @@ public sealed record AddressRecord( [ property: ProtectedPersonalData, MaxLength
     }
 
 
-    public AddressRecord WithUserData( IAddress value )
-    {
-        return this with
-               {
-                   Line1 = value.Line1,
-                   Line2 = value.Line2,
-                   City = value.City,
-                   StateOrProvince = value.StateOrProvince,
-                   Country = value.Country,
-                   PostalCode = value.PostalCode
-               };
-    }
+    public AddressRecord WithUserData( IAddress value ) =>
+        this with
+        {
+            Line1 = value.Line1,
+            Line2 = value.Line2,
+            City = value.City,
+            StateOrProvince = value.StateOrProvince,
+            Country = value.Country,
+            PostalCode = value.PostalCode
+        };
     public bool Equals( IAddress? other )
     {
         if ( other is null ) { return false; }

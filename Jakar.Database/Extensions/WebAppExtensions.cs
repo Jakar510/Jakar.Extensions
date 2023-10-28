@@ -18,11 +18,10 @@ public static class WebAppExtensions
     {
         JsonConvert.DefaultSettings = () => new JsonSerializerSettings
                                             {
-                                                ContractResolver = new DefaultContractResolver(),
+                                                ContractResolver = new DefaultContractResolver()
                                             };
 
-        return services.AddJsonOptions( options => options.JsonSerializerOptions.PropertyNamingPolicy = null )
-                       .AddNewtonsoftJson( options => options.SerializerSettings.ContractResolver = new DefaultContractResolver() );
+        return services.AddJsonOptions( options => options.JsonSerializerOptions.PropertyNamingPolicy = null ).AddNewtonsoftJson( options => options.SerializerSettings.ContractResolver = new DefaultContractResolver() );
     }
     public static WebApplication UseUrls( this WebApplication app, params string[] urls )
     {

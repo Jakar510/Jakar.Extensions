@@ -53,22 +53,20 @@ public static partial class DbExtensions
 
     public static IHealthChecksBuilder AddHealthCheck<T>( this WebApplicationBuilder builder ) where T : IHealthCheck => builder.AddHealthCheck( HealthCheckExtensions.CreateHealthCheck<T>() );
     public static IHealthChecksBuilder AddHealthCheck( this WebApplicationBuilder builder, HealthCheckRegistration registration ) =>
-        builder.Services.AddHealthChecks()
-               .Add( registration );
+        builder.Services.AddHealthChecks().Add( registration );
 
 
     public static ILoggingBuilder AddFluentMigratorLogger( this ILoggingBuilder builder, bool showSql = true, bool showElapsedTime = true ) =>
         builder.AddProvider( new FluentMigratorConsoleLoggerProvider( new OptionsWrapper<FluentMigratorLoggerOptions>( new FluentMigratorLoggerOptions
                                                                                                                        {
                                                                                                                            ShowElapsedTime = showElapsedTime,
-                                                                                                                           ShowSql         = showSql,
+                                                                                                                           ShowSql         = showSql
                                                                                                                        } ) ) );
 
 
-    /// <summary>
-    ///     <see href="https://stackoverflow.com/a/46775832/9530917"> Using ASP.NET Identity in an ASP.NET Core MVC application without Entity Framework and Migrations </see>
-    /// <para><see cref="AuthenticationScheme"/></para>
-    /// </summary> 
+    /// <summary> <see href="https://stackoverflow.com/a/46775832/9530917"> Using ASP.NET Identity in an ASP.NET Core MVC application without Entity Framework and Migrations </see>
+    ///     <para> <see cref="AuthenticationScheme"/> </para>
+    /// </summary>
     /// <returns> </returns>
     public static IdentityBuilder AddIdentity( this WebApplicationBuilder          builder,
                                                Action<AuthenticationOptions>       configureAuthentication,
@@ -103,13 +101,10 @@ public static partial class DbExtensions
         builder.AddPasswordValidator( configurePasswordRequirements ?? (( PasswordRequirements options ) => { }) );
 
 
-        builder.Services.AddOptions<IdentityOptions>()
-               .Configure( setupAction ?? (( IdentityOptions options ) => { }) );
+        builder.Services.AddOptions<IdentityOptions>().Configure( setupAction ?? (( IdentityOptions options ) => { }) );
 
 
-        AuthenticationBuilder auth = builder.Services.AddAuthentication( configureAuthentication )
-                                            .AddCookie( IdentityConstants.ApplicationScheme, configureApplication )
-                                            .AddCookie( IdentityConstants.ExternalScheme,    configureExternal );
+        AuthenticationBuilder auth = builder.Services.AddAuthentication( configureAuthentication ).AddCookie( IdentityConstants.ApplicationScheme, configureApplication ).AddCookie( IdentityConstants.ExternalScheme, configureExternal );
 
         if ( configureMicrosoftAccount is not null ) { auth.AddMicrosoftAccount( configureMicrosoftAccount ); }
 
@@ -117,9 +112,7 @@ public static partial class DbExtensions
 
         if ( configureOpenIdConnect is not null ) { auth.AddOpenIdConnect( configureOpenIdConnect ); }
 
-        auth.AddMicrosoftIdentityWebApi( builder.Configuration.GetSection( "AzureAd" ) )
-            .EnableTokenAcquisitionToCallDownstreamApi()
-            .AddInMemoryTokenCaches();
+        auth.AddMicrosoftIdentityWebApi( builder.Configuration.GetSection( "AzureAd" ) ).EnableTokenAcquisitionToCallDownstreamApi().AddInMemoryTokenCaches();
 
         // .AddMicrosoftGraph( builder.Configuration.GetSection( "Graph" ) );
 
@@ -146,8 +139,7 @@ public static partial class DbExtensions
 
     public static WebApplicationBuilder AddDatabase<T>( this WebApplicationBuilder builder, Action<DbOptions> configure ) where T : Database
     {
-        builder.Services.AddOptions<DbOptions>()
-               .Configure( configure );
+        builder.Services.AddOptions<DbOptions>().Configure( configure );
 
         builder.Services.AddSingleton<T>();
         builder.Services.AddSingleton<Database>( provider => provider.GetRequiredService<T>() );
@@ -164,19 +156,17 @@ public static partial class DbExtensions
     }
     public static WebApplicationBuilder AddEmailer( this WebApplicationBuilder builder, Action<Emailer.Options> configure )
     {
-        builder.Services.AddOptions<Emailer.Options>()
-               .Configure( configure );
+        builder.Services.AddOptions<Emailer.Options>().Configure( configure );
 
         builder.Services.AddScoped<Emailer>();
         return builder;
     }
 
 
-    public static WebApplicationBuilder AddPasswordValidator( this WebApplicationBuilder builder ) => builder.AddPasswordValidator( ( PasswordRequirements requirements ) => { } );
+    public static WebApplicationBuilder AddPasswordValidator( this WebApplicationBuilder builder ) => builder.AddPasswordValidator( requirements => { } );
     public static WebApplicationBuilder AddPasswordValidator( this WebApplicationBuilder builder, Action<PasswordRequirements> configure )
     {
-        builder.Services.AddOptions<PasswordRequirements>()
-               .Configure( configure );
+        builder.Services.AddOptions<PasswordRequirements>().Configure( configure );
 
         builder.Services.AddScoped<IPasswordValidator<UserRecord>, UserPasswordValidator>();
         return builder;

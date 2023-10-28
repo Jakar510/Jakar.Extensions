@@ -61,6 +61,8 @@ public class UserData : ObservableClass, IUserData<UserData>
         set => SetProperty( ref _additionalData, value );
     }
 
+    public ObservableCollection<UserAddress> Addresses { get; init; } = new();
+
     [ MaxLength( 256 ) ]
     public string Company
     {
@@ -186,8 +188,6 @@ public class UserData : ObservableClass, IUserData<UserData>
         get => _website;
         set => SetProperty( ref _website, value );
     }
-
-    public ObservableCollection<UserAddress> Addresses { get; init; } = new();
 
 
     public UserData() { }

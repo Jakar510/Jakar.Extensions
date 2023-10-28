@@ -53,8 +53,7 @@ public class SpansBenchmarks
     [ Benchmark ]
     public ReadOnlySpan<char> RemoveAll_Params()
     {
-        Span<char> span = Value.AsSpan()
-                               .AsSpan();
+        Span<char> span = Value.AsSpan().AsSpan();
 
         Span<char> buffer = stackalloc char[4];
         buffer[0] = '1';

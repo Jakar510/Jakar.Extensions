@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Experiments
 // 08/24/2023  8:37 PM
 
-using System.Runtime.CompilerServices;
-
-
-
 namespace Experiments.Benchmarks;
 
 
@@ -50,10 +46,10 @@ namespace Experiments.Benchmarks;
 [ SimpleJob( RuntimeMoniker.HostProcess ), Orderer( SummaryOrderPolicy.FastestToSlowest ), RankColumn, MemoryDiagnoser ]
 public class StringCollectionBenchmarks
 {
-    private string[]               _values = GetArray( 10 );
     private ImmutableArray<string> _array;
-    private ReadOnlyMemory<string> _memory;
     private int                    _count;
+    private ReadOnlyMemory<string> _memory;
+    private string[]               _values = GetArray( 10 );
 
 
     [ Params( 10, 1000, 10_000, 100_000 ) ]
@@ -164,8 +160,7 @@ public class StringCollectionBenchmarks
     }
 
 
-    private static string[] GetArray( int count ) => GetValues( count )
-       .ToArray( count );
+    private static string[] GetArray( int count ) => GetValues( count ).ToArray( count );
     private static IEnumerable<string> GetValues( int count )
     {
         for ( int i = 0; i < count; i++ ) { yield return Randoms.RandomString( Random.Shared.Next( 10, 50 ) ); }

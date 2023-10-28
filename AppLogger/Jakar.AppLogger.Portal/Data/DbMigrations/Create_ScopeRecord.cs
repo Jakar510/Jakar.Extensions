@@ -19,16 +19,10 @@ public sealed class Create_ScopeRecord : LoggerMigration<ScopeRecord>
     {
         ICreateTableWithColumnSyntax table = CreateTable();
 
-        table.WithColumn( nameof(ScopeRecord.SessionID) )
-             .AsGuid()
-             .NotNullable();
+        table.WithColumn( nameof(ScopeRecord.SessionID) ).AsGuid().NotNullable();
 
-        table.WithColumn( nameof(ScopeRecord.AppID) )
-             .AsInt64()
-             .NotNullable();
+        table.WithColumn( nameof(ScopeRecord.AppID) ).AsInt64().NotNullable();
 
-        table.WithColumn( nameof(ScopeRecord.DeviceID) )
-             .AsInt64()
-             .NotNullable();
+        table.WithColumn( nameof(ScopeRecord.DeviceID) ).AsInt64().NotNullable();
     }
 }

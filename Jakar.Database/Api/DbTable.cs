@@ -15,10 +15,10 @@ public partial class DbTable<TRecord> : IConnectableDb where TRecord : ITableRec
 
     public static ImmutableArray<TRecord>  Empty          => ImmutableArray<TRecord>.Empty;
     public static ImmutableList<TRecord>   EmptyList      => ImmutableList<TRecord>.Empty;
-    public        RecordGenerator<TRecord> Records        => new(this);
     public        ISqlCache<TRecord>       Cache          => _cache ??= _sqlCacheFactory.GetSqlCache<TRecord>( _database );
     public        int?                     CommandTimeout => _database.CommandTimeout;
     public        DbInstance               Instance       => _database.Instance;
+    public        RecordGenerator<TRecord> Records        => new(this);
 
 
     public DbTable( IConnectableDbRoot database, ISqlCacheFactory sqlCacheFactory )

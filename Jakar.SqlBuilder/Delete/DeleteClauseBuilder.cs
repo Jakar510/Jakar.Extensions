@@ -1,5 +1,4 @@
-﻿#nullable enable
-using Jakar.Extensions;
+﻿using Jakar.Extensions;
 
 
 
@@ -46,9 +45,7 @@ public struct DeleteClauseBuilder
     }
 
 
-    public WhereClauseBuilder<DeleteClauseBuilder> Where() => _builder.Add( KeyWords.WHERE )
-                                                                      .Begin()
-                                                                      .Where( in this );
+    public WhereClauseBuilder<DeleteClauseBuilder> Where() => _builder.Add( KeyWords.WHERE ).Begin().Where( in this );
 
     public EasySqlBuilder Done()
     {

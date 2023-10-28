@@ -88,8 +88,7 @@ public static partial class AsyncLinq
 
         await foreach ( TElement element in source )
         {
-            if ( set.Add( await keySelector( element )
-                             .ConfigureAwait( false ) ) ) { yield return element; }
+            if ( set.Add( await keySelector( element ).ConfigureAwait( false ) ) ) { yield return element; }
         }
     }
 
@@ -101,7 +100,7 @@ public static partial class AsyncLinq
             if ( index >= count ) { yield return value; }
         }
     }
-    public static async IAsyncEnumerable<TElement> SkipLast<TElement>( this IAsyncEnumerable<TElement> source, int count, [EnumeratorCancellation] CancellationToken token = default )
+    public static async IAsyncEnumerable<TElement> SkipLast<TElement>( this IAsyncEnumerable<TElement> source, int count, [ EnumeratorCancellation ] CancellationToken token = default )
     {
         List<TElement> list = await source.ToList( token );
 
@@ -228,12 +227,11 @@ public static partial class AsyncLinq
             await foreach ( TElement item in element ) { yield return item; }
         }
     }
-    public static async IAsyncEnumerable<TElement> ConsolidateUnique<TElement>( this IAsyncEnumerable<IAsyncEnumerable<TElement>> values, [EnumeratorCancellation] CancellationToken token = default )
+    public static async IAsyncEnumerable<TElement> ConsolidateUnique<TElement>( this IAsyncEnumerable<IAsyncEnumerable<TElement>> values, [ EnumeratorCancellation ] CancellationToken token = default )
     {
         var results = new HashSet<TElement>();
 
-        await foreach ( TElement element in values.Consolidate()
-                                                  .WithCancellation( token ) ) { results.Add( element ); }
+        await foreach ( TElement element in values.Consolidate().WithCancellation( token ) ) { results.Add( element ); }
 
         // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
         foreach ( TElement element in results )
@@ -251,12 +249,11 @@ public static partial class AsyncLinq
             foreach ( TElement item in element ) { yield return item; }
         }
     }
-    public static async IAsyncEnumerable<TElement> ConsolidateUnique<TElement>( this IAsyncEnumerable<IEnumerable<TElement>> values, [EnumeratorCancellation] CancellationToken token = default )
+    public static async IAsyncEnumerable<TElement> ConsolidateUnique<TElement>( this IAsyncEnumerable<IEnumerable<TElement>> values, [ EnumeratorCancellation ] CancellationToken token = default )
     {
         var results = new HashSet<TElement>();
 
-        await foreach ( TElement element in values.Consolidate()
-                                                  .WithCancellation( token ) ) { results.Add( element ); }
+        await foreach ( TElement element in values.Consolidate().WithCancellation( token ) ) { results.Add( element ); }
 
         // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
         foreach ( TElement element in results )
@@ -273,7 +270,7 @@ public static partial class AsyncLinq
         // ReSharper disable once LoopCanBeConvertedToQuery
         foreach ( string? element in values )
         {
-            if ( !string.IsNullOrEmpty(element) ) { yield return element; }
+            if ( !string.IsNullOrEmpty( element ) ) { yield return element; }
         }
     }
     public static async IAsyncEnumerable<string> WhereNotNull( this IAsyncEnumerable<string?> values )
@@ -281,7 +278,7 @@ public static partial class AsyncLinq
         // ReSharper disable once LoopCanBeConvertedToQuery
         await foreach ( string? element in values )
         {
-            if ( !string.IsNullOrEmpty(element) ) { yield return element; }
+            if ( !string.IsNullOrEmpty( element ) ) { yield return element; }
         }
     }
 

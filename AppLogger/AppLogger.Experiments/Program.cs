@@ -6,7 +6,7 @@ using Jakar.Extensions;
 // using Jakar.Xml.Deserialization;
 
 
-#nullable enable
+
 namespace AppLogger.Experiments;
 
 
@@ -14,7 +14,7 @@ public enum Page
 {
     Home,
     Master,
-    Detail,
+    Detail
 }
 
 

@@ -7,30 +7,14 @@ namespace Jakar.Database.DbMigrations;
 
 /// <summary>
 ///     Add DB implementation support to FluentMigrator, Set the connection string, and Define the assembly containing the migrations
-///     <para>
-///         <see href="https://fluentmigrator.github.io/articles/migration-runners.html?tabs=vs-pkg-manager-console"/>
-///     </para>
-///     <para>
-///         <see cref="PostgresRunnerBuilderExtensions.AddPostgres"/>
-///     </para>
-///     <para>
-///         <see cref="SQLiteRunnerBuilderExtensions.AddSQLite"/>
-///     </para>
-///     <para>
-///         <see cref="SqlServerRunnerBuilderExtensions.AddSqlServer2008"/>
-///     </para>
-///     <para>
-///         <see cref="SqlServerRunnerBuilderExtensions.AddSqlServer2012"/>
-///     </para>
-///     <para>
-///         <see cref="SqlServerRunnerBuilderExtensions.AddSqlServer2014"/>
-///     </para>
-///     <para>
-///         <see cref="SqlServerRunnerBuilderExtensions.AddSqlServer2016"/>
-///     </para>
-///     <para>
-///         <see cref="Db2RunnerBuilderExtensions.AddDb2"/>
-///     </para>
+///     <para> <see href="https://fluentmigrator.github.io/articles/migration-runners.html?tabs=vs-pkg-manager-console"/> </para>
+///     <para> <see cref="PostgresRunnerBuilderExtensions.AddPostgres"/> </para>
+///     <para> <see cref="SQLiteRunnerBuilderExtensions.AddSQLite"/> </para>
+///     <para> <see cref="SqlServerRunnerBuilderExtensions.AddSqlServer2008"/> </para>
+///     <para> <see cref="SqlServerRunnerBuilderExtensions.AddSqlServer2012"/> </para>
+///     <para> <see cref="SqlServerRunnerBuilderExtensions.AddSqlServer2014"/> </para>
+///     <para> <see cref="SqlServerRunnerBuilderExtensions.AddSqlServer2016"/> </para>
+///     <para> <see cref="Db2RunnerBuilderExtensions.AddDb2"/> </para>
 /// </summary>
 public static class Migrator
 {
@@ -38,19 +22,13 @@ public static class Migrator
     {
         Guard.HasSizeGreaterThan( assemblies, 0, nameof(assemblies) );
 
-        return collection.AddFluentMigratorCore()
-                         .ConfigureRunner( configure => addDbType( configure )
-                                                       .WithGlobalConnectionString( connectionString )
-                                                       .ScanIn( assemblies )
-                                                       .For.All() )
-                         .AddLogging( builder => builder.AddFluentMigratorConsole() );
+        return collection.AddFluentMigratorCore().ConfigureRunner( configure => addDbType( configure ).WithGlobalConnectionString( connectionString ).ScanIn( assemblies ).For.All() ).AddLogging( builder => builder.AddFluentMigratorConsole() );
     }
 
 
     public static void UpdateDatabase( Func<IMigrationRunnerBuilder, IMigrationRunnerBuilder> addDbType, string connectionString, params Assembly[] assemblies )
     {
-        using ServiceProvider serviceProvider = new ServiceCollection().AddFluentMigrator( addDbType, connectionString, assemblies )
-                                                                       .BuildServiceProvider( true );
+        using ServiceProvider serviceProvider = new ServiceCollection().AddFluentMigrator( addDbType, connectionString, assemblies ).BuildServiceProvider( true );
 
         serviceProvider.UpdateDatabase();
     }
@@ -64,8 +42,7 @@ public static class Migrator
     {
         using IServiceScope scope = provider.CreateScope();
 
-        scope.ServiceProvider.GetRequiredService<IMigrationRunner>()
-             .UpdateDatabase();
+        scope.ServiceProvider.GetRequiredService<IMigrationRunner>().UpdateDatabase();
     }
 
 

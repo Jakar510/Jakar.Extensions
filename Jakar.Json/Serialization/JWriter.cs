@@ -1,5 +1,4 @@
 ﻿using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 
 
 
@@ -119,18 +118,14 @@ public ref struct JWriter
 
     public readonly JWriter AppendValue<T>( T? value ) where T : struct, ISpanFormattable                            => AppendValue( value, CultureInfo.CurrentCulture );
     public readonly JWriter AppendValue<T>( T? value, IFormatProvider? provider ) where T : struct, ISpanFormattable => AppendValue( value, GetDefaultFormat<T>(), provider );
-    public readonly JWriter AppendValue<T>( T? value, ReadOnlySpan<char> format, IFormatProvider? provider ) where T : struct, ISpanFormattable
-    {
-        return value is null
-                   ? Null()
-                   : AppendValue( value.Value, format, provider );
-    }
-    public readonly JWriter AppendValue<T>( T? value, ReadOnlySpan<char> format, int bufferSize, IFormatProvider? provider = default ) where T : struct, ISpanFormattable
-    {
-        return value is null
-                   ? Null()
-                   : AppendValue( value.Value, format, bufferSize, provider );
-    }
+    public readonly JWriter AppendValue<T>( T? value, ReadOnlySpan<char> format, IFormatProvider? provider ) where T : struct, ISpanFormattable =>
+        value is null
+            ? Null()
+            : AppendValue( value.Value, format, provider );
+    public readonly JWriter AppendValue<T>( T? value, ReadOnlySpan<char> format, int bufferSize, IFormatProvider? provider = default ) where T : struct, ISpanFormattable =>
+        value is null
+            ? Null()
+            : AppendValue( value.Value, format, bufferSize, provider );
 
 
     public readonly JWriter AppendValue<T>( T value ) where T : struct, ISpanFormattable                            => AppendValue( value, CultureInfo.CurrentCulture );

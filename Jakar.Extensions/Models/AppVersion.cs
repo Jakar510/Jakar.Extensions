@@ -1,10 +1,9 @@
-﻿#nullable enable
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
 
 
 /// <summary> See <see cref="Format"/> for formatting details. </summary>
-[Serializable]
-[JsonConverter( typeof(AppVersionConverter) )] // AppVersionNullableConverter
+[ Serializable, JsonConverter( typeof(AppVersionConverter) ) ]
+ // AppVersionNullableConverter
 public sealed class AppVersion : IComparable,
                                  IComparable<AppVersion>,
                                  IFuzzyEquals<AppVersion>,
@@ -12,10 +11,10 @@ public sealed class AppVersion : IComparable,
                                  ICloneable,
                              #if NETSTANDARD2_1
                                  IFormattable
-                             #else
+#else
                                  ISpanFormattable
-                             #endif
-                             #if NET7_0_OR_GREATER
+#endif
+#if NET7_0_OR_GREATER
                                  ,
                                  IParsable<AppVersion>,
                                  ISpanParsable<AppVersion>
@@ -118,7 +117,7 @@ public sealed class AppVersion : IComparable,
     {
         if ( items is null ) { throw new ArgumentNullException( nameof(items) ); }
 
-        Flags = flags;
+        Flags  = flags;
         Scheme = (Format)items.Count;
 
         switch ( Scheme )
@@ -139,27 +138,27 @@ public sealed class AppVersion : IComparable,
                 return;
 
             case Format.Detailed:
-                Major = items[0];
-                Minor = items[1];
+                Major       = items[0];
+                Minor       = items[1];
                 Maintenance = items[2];
-                Build = items[3];
+                Build       = items[3];
                 return;
 
             case Format.DetailedRevisions:
-                Major = items[0];
-                Minor = items[1];
-                Maintenance = items[2];
+                Major         = items[0];
+                Minor         = items[1];
+                Maintenance   = items[2];
                 MajorRevision = items[3];
-                Build = items[4];
+                Build         = items[4];
                 return;
 
             case Format.Complete:
-                Major = items[0];
-                Minor = items[1];
-                Maintenance = items[2];
+                Major         = items[0];
+                Minor         = items[1];
+                Maintenance   = items[2];
                 MajorRevision = items[3];
                 MinorRevision = items[4];
-                Build = items[5];
+                Build         = items[5];
                 return;
 
             default: throw new ArgumentOutOfRangeException( nameof(items), items.Count, @"value doesn't contain the correct amount of items." );
@@ -182,8 +181,8 @@ public sealed class AppVersion : IComparable,
     /// <param name="value"> </param>
     /// <param name="version"> </param>
     /// <returns> <see langword="true"/> Parse was successful. <br/> <see langword="false"/> otherwise. </returns>
-    public static bool TryParse( ReadOnlySpan<char> value, [NotNullWhen( true )] out AppVersion? version ) => TryParse( value, CultureInfo.CurrentCulture, out version );
-    public static bool TryParse( ReadOnlySpan<char> value, IFormatProvider? provider, [NotNullWhen( true )] out AppVersion? version )
+    public static bool TryParse( ReadOnlySpan<char> value, [ NotNullWhen( true ) ] out AppVersion? version ) => TryParse( value, CultureInfo.CurrentCulture, out version );
+    public static bool TryParse( ReadOnlySpan<char> value, IFormatProvider? provider, [ NotNullWhen( true ) ] out AppVersion? version )
     {
         if ( !value.IsEmpty )
         {
@@ -199,7 +198,7 @@ public sealed class AppVersion : IComparable,
         version = default;
         return false;
     }
-    public static AppVersion Parse( ReadOnlySpan<char> value ) => Parse( value,                            CultureInfo.CurrentCulture );
+    public static AppVersion Parse( ReadOnlySpan<char> value )                            => Parse( value, CultureInfo.CurrentCulture );
     public static AppVersion Parse( ReadOnlySpan<char> value, IFormatProvider? provider ) => Parse( value, value, provider );
     private static AppVersion Parse( ReadOnlySpan<char> value, in ReadOnlySpan<char> original, IFormatProvider? provider )
     {
@@ -241,7 +240,7 @@ public sealed class AppVersion : IComparable,
         catch ( Exception e ) { throw new ArgumentException( $"Cannot convert '{original.ToString()}' into {nameof(AppVersion)}", nameof(value), e ); }
     }
     public static AppVersion Parse( string s, IFormatProvider? provider ) => Parse( s.AsSpan() );
-    public static bool TryParse( string? s, IFormatProvider? provider, [NotNullWhen( true )] out AppVersion? result )
+    public static bool TryParse( string? s, IFormatProvider? provider, [ NotNullWhen( true ) ] out AppVersion? result )
     {
         if ( string.IsNullOrEmpty( s ) )
         {
@@ -254,8 +253,8 @@ public sealed class AppVersion : IComparable,
     }
 
 
-    public static AppVersion FromAssembly<T>() => FromAssembly( typeof(T).Assembly );
-    public static AppVersion FromAssembly( Type         type ) => FromAssembly( type.Assembly );
+    public static AppVersion FromAssembly<T>()                     => FromAssembly( typeof(T).Assembly );
+    public static AppVersion FromAssembly( Type         type )     => FromAssembly( type.Assembly );
     public static AppVersion FromAssembly( Assembly     assembly ) => FromAssembly( assembly.GetName() );
     public static AppVersion FromAssembly( AssemblyName assembly ) => assembly.Version ?? throw new NullReferenceException( nameof(assembly.Version) );
 
@@ -324,9 +323,7 @@ public sealed class AppVersion : IComparable,
 
 
     /// <summary>
-    ///     If the <see cref="Scheme"/> is any of [ <see cref="Format.Singular"/> , <see cref="Format.DetailedRevisions"/> , <see cref="Format.Complete"/> ], will throw
-    ///     <see
-    ///         cref="InvalidOperationException"/>
+    ///     If the <see cref="Scheme"/> is any of [ <see cref="Format.Singular"/> , <see cref="Format.DetailedRevisions"/> , <see cref="Format.Complete"/> ], will throw <see cref="InvalidOperationException"/>
     /// </summary>
     /// <returns> </returns>
     /// <exception cref="InvalidOperationException"> </exception>
@@ -335,11 +332,11 @@ public sealed class AppVersion : IComparable,
         {
             Format.Singular          => new Version( Major, 0 ),
             Format.Minimal           => new Version( Major, Minor ?? 0 ),
-            Format.Typical           => new Version( Major, Minor ?? 0, Build ?? 0 ),
+            Format.Typical           => new Version( Major, Minor ?? 0, Build       ?? 0 ),
             Format.Detailed          => new Version( Major, Minor ?? 0, Maintenance ?? 0, Build ?? 0 ),
             Format.DetailedRevisions => new Version( Major, Minor ?? 0, Maintenance ?? 0, Build ?? 0 ),
             Format.Complete          => new Version( Major, Minor ?? 0, Maintenance ?? 0, Build ?? 0 ),
-            _                        => throw new OutOfRangeException( nameof(Scheme), Scheme ),
+            _                        => throw new OutOfRangeException( nameof(Scheme), Scheme )
         };
 
 
@@ -357,8 +354,8 @@ public sealed class AppVersion : IComparable,
 
         if ( Build.HasValue ) { yield return Build.Value; }
     }
-    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-    int IReadOnlyCollection<int>.Count => Scheme.AsInt();
+    IEnumerator IEnumerable.     GetEnumerator() => GetEnumerator();
+    int IReadOnlyCollection<int>.Count           => Scheme.AsInt();
 
 
     // public static bool operator ==( AppVersion  left, AppVersion  right ) => Equalizer.Instance.Equals( left, right );
@@ -403,7 +400,7 @@ public sealed class AppVersion : IComparable,
         {
             Version version    => CompareTo( version ),
             AppVersion version => CompareTo( version ),
-            _                  => throw new ExpectedValueTypeException( nameof(other), other, typeof(Version), typeof(AppVersion) ),
+            _                  => throw new ExpectedValueTypeException( nameof(other), other, typeof(Version), typeof(AppVersion) )
         };
 
 
@@ -445,22 +442,7 @@ public sealed class AppVersion : IComparable,
     ///             <item>
     ///                 All other fields that are not <see langword="null"/> and are equal to or greater than <br/>
     ///                 <list type="bullet">
-    ///                     <item>
-    ///                         <see cref="Maintenance"/>
-    ///                     </item>
-    ///                     <br/>
-    ///                     <item>
-    ///                         <see cref="MajorRevision"/>
-    ///                     </item>
-    ///                     <br/>
-    ///                     <item>
-    ///                         <see cref="MinorRevision"/>
-    ///                     </item>
-    ///                     <br/>
-    ///                     <item>
-    ///                         <see cref="Build"/>
-    ///                     </item>
-    ///                     <br/>
+    ///                     <item> <see cref="Maintenance"/> </item> <br/> <item> <see cref="MajorRevision"/> </item> <br/> <item> <see cref="MinorRevision"/> </item> <br/> <item> <see cref="Build"/> </item> <br/>
     ///                 </list>
     ///             </item>
     ///             <br/>
@@ -475,12 +457,12 @@ public sealed class AppVersion : IComparable,
 
         AssertFormat( other );
 
-        bool result = Major.Equals( other.Major ) &&
-                      Nullable.Compare( other.Minor,         Minor ) == 0 &&
-                      Nullable.Compare( other.Maintenance,   Maintenance ) >= 0 &&
+        bool result = Major.Equals( other.Major )                                 &&
+                      Nullable.Compare( other.Minor,         Minor )         == 0 &&
+                      Nullable.Compare( other.Maintenance,   Maintenance )   >= 0 &&
                       Nullable.Compare( other.MajorRevision, MajorRevision ) >= 0 &&
                       Nullable.Compare( other.MinorRevision, MinorRevision ) >= 0 &&
-                      Nullable.Compare( other.Build,         Build ) >= 0;
+                      Nullable.Compare( other.Build,         Build )         >= 0;
 
         return result;
     }
@@ -492,16 +474,16 @@ public sealed class AppVersion : IComparable,
 
         AssertFormat( other );
 
-        return Major == other.Major &&
-               Nullable.Equals( Minor,         other.Minor ) &&
-               Nullable.Equals( Maintenance,   other.Maintenance ) &&
+        return Major == other.Major                                  &&
+               Nullable.Equals( Minor,         other.Minor )         &&
+               Nullable.Equals( Maintenance,   other.Maintenance )   &&
                Nullable.Equals( MajorRevision, other.MajorRevision ) &&
                Nullable.Equals( MinorRevision, other.MinorRevision ) &&
-               Nullable.Equals( Build,         other.Build ) &&
+               Nullable.Equals( Build,         other.Build )         &&
                Flags.Equals( other.Flags );
     }
     public override bool Equals( object? obj ) => obj is AppVersion version && Equals( version );
-    public override int GetHashCode() => HashCode.Combine( Scheme, Major, Minor, Maintenance, MajorRevision, MinorRevision, Build, Flags );
+    public override int  GetHashCode()         => HashCode.Combine( Scheme, Major, Minor, Maintenance, MajorRevision, MinorRevision, Build, Flags );
 
 
     // ---------------------------------------------------------------------------------------------------------------------------------
@@ -526,7 +508,7 @@ public sealed class AppVersion : IComparable,
         DetailedRevisions,
 
         /// <summary> Major.Minor.Maintenance.MajorRevision.MinorRevision.Build </summary>
-        Complete,
+        Complete
     }
 
 

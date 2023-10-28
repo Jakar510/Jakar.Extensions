@@ -71,27 +71,21 @@ public class ImmutableArrayBenchmarks
 
     private static KeyValuePair<int, ImmutableArray<double>> GetArray( int size )
     {
-        ImmutableArray<double> array = ImmutableArray.CreateRange( Enumerable.Range( 0, size )
-                                                                             .Select( i => _random.NextDouble() ) );
+        ImmutableArray<double> array = ImmutableArray.CreateRange( Enumerable.Range( 0, size ).Select( i => _random.NextDouble() ) );
 
         return new KeyValuePair<int, ImmutableArray<double>>( size, array );
     }
     private static KeyValuePair<int, ImmutableList<double>> GetList( int size )
     {
-        ImmutableList<double> array = ImmutableList.CreateRange( Enumerable.Range( 0, size )
-                                                                           .Select( i => _random.NextDouble() ) );
+        ImmutableList<double> array = ImmutableList.CreateRange( Enumerable.Range( 0, size ).Select( i => _random.NextDouble() ) );
 
         return new KeyValuePair<int, ImmutableList<double>>( size, array );
     }
 
 
-    [ Benchmark ]
-    public ImmutableArray<double> GetNewArray() => ImmutableArray.CreateRange( Enumerable.Range( 0, Size )
-                                                                                         .Select( i => _random.NextDouble() ) );
+    [ Benchmark ] public ImmutableArray<double> GetNewArray() => ImmutableArray.CreateRange( Enumerable.Range( 0, Size ).Select( i => _random.NextDouble() ) );
 
-    [ Benchmark ]
-    public ImmutableList<double> GetNewList() => ImmutableList.CreateRange( Enumerable.Range( 0, Size )
-                                                                                      .Select( i => _random.NextDouble() ) );
+    [ Benchmark ] public ImmutableList<double> GetNewList() => ImmutableList.CreateRange( Enumerable.Range( 0, Size ).Select( i => _random.NextDouble() ) );
 
 
     [ Benchmark ]
@@ -132,15 +126,13 @@ public class ImmutableArrayBenchmarks
     {
         ImmutableArray<double> array = _array[Size];
 
-        array.Select( i => i )
-             .Consume( _consumer );
+        array.Select( i => i ).Consume( _consumer );
     }
     [ Benchmark ]
     public void SelectList()
     {
         ImmutableList<double> array = _list[Size];
 
-        array.Select( i => i )
-             .Consume( _consumer );
+        array.Select( i => i ).Consume( _consumer );
     }
 }

@@ -1,5 +1,4 @@
-﻿#nullable enable
-namespace Jakar.SqlBuilder.Interfaces;
+﻿namespace Jakar.SqlBuilder.Interfaces;
 
 
 public interface IHaving : IAggregateFunctions<IHaving>, IComparators<IHaving>, IChainEnd<ISqlBuilderRoot>
@@ -9,8 +8,6 @@ public interface IHaving : IAggregateFunctions<IHaving>, IComparators<IHaving>, 
     /// </summary>
     /// <typeparam name="T"> the <see cref="Type"/> of value </typeparam>
     /// <param name="obj"> the value being inserted </param>
-    /// <returns>
-    ///     <see cref="IHaving"/>
-    /// </returns>
+    /// <returns> <see cref="IHaving"/> </returns>
     public IHaving Value<T>( T obj );
 }

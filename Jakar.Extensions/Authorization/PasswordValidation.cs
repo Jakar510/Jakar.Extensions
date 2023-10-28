@@ -9,7 +9,7 @@ using Microsoft.Extensions.Options;
 namespace Jakar.Extensions;
 
 
-[SuppressMessage( "ReSharper", "OutParameterValueIsAlwaysDiscarded.Global" )]
+[ SuppressMessage( "ReSharper", "OutParameterValueIsAlwaysDiscarded.Global" ) ]
 public readonly ref struct PasswordValidator
 {
     // ReSharper disable once MemberHidesStaticFromOuterClass
@@ -84,7 +84,7 @@ public readonly ref struct PasswordValidator
 
 
 
-[SuppressMessage( "ReSharper", "SuggestBaseTypeForParameterInConstructor" )]
+[ SuppressMessage( "ReSharper", "SuggestBaseTypeForParameterInConstructor" ) ]
 public readonly ref struct Requirements
 {
     public ReadOnlySpan<string> BlockedPasswords         { get; init; }
@@ -164,6 +164,5 @@ public sealed record PasswordRequirements : IOptions<PasswordRequirements>
 
 
     public void SetBlockedPasswords( IEnumerable<string> passwords ) =>
-        BlockedPasswords = passwords.ToHashSet()
-                                    .ToArray();
+        BlockedPasswords = passwords.ToHashSet().ToArray();
 }

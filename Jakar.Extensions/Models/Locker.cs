@@ -8,22 +8,11 @@ namespace Jakar.Extensions;
 ///     A wrapper around various locking methods.
 ///     <para>
 ///         <list type="bullet">
-///             <item>
-///                 <see cref="ReaderWriterLockSlim"/>
-///             </item>
-///             <item>
-///                 <see cref="SemaphoreSlim"/>
-///             </item>
-///             <item>
-///                 <see cref="Semaphore"/>
-///             </item>
-///             <item>
-///                 <see langword="lock"/>
-///             </item>
+///             <item> <see cref="ReaderWriterLockSlim"/> </item> <item> <see cref="SemaphoreSlim"/> </item> <item> <see cref="Semaphore"/> </item> <item> <see langword="lock"/> </item>
 ///         </list>
 ///     </para>
 /// </summary>
-[SuppressMessage( "ReSharper", "UnusedMethodReturnValue.Global" )]
+[ SuppressMessage( "ReSharper", "UnusedMethodReturnValue.Global" ) ]
 public sealed record Locker : IAsyncDisposable, IDisposable
 {
     private readonly object   _lock;
@@ -154,20 +143,10 @@ public sealed record Locker<T> : IEnumerator<T>, IAsyncEnumerator<T>
     ///     Can be any of the following:
     ///     <para>
     ///         <list type="bullet">
+    ///             <item> <see cref="ReaderWriterLockSlim"/> </item> <item> <see cref="SemaphoreSlim"/> </item> <item> <see cref="Semaphore"/> </item> <item> <see cref="object"/> </item>
     ///             <item>
-    ///                 <see cref="ReaderWriterLockSlim"/>
-    ///             </item>
-    ///             <item>
-    ///                 <see cref="SemaphoreSlim"/>
-    ///             </item>
-    ///             <item>
-    ///                 <see cref="Semaphore"/>
-    ///             </item>
-    ///             <item>
-    ///                 <see cref="object"/>
-    ///             </item>
-    ///             <item>
-    ///                 <see langword="null"/>
+    ///                 <see
+    ///                     langword="null"/>
     ///             </item>
     ///         </list>
     ///     </para>
@@ -197,8 +176,7 @@ public sealed record Locker<T> : IEnumerator<T>, IAsyncEnumerator<T>
     public void Exit() => _locker.Exit();
 
 
-    public void Dispose() => DisposeAsync()
-       .WaitSynchronously();
+    public void Dispose() => DisposeAsync().WaitSynchronously();
     public async ValueTask DisposeAsync()
     {
         await _locker.DisposeAsync();

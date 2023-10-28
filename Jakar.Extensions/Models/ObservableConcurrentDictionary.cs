@@ -1,7 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 04/10/2022  6:24 PM
 
-#nullable enable
 namespace Jakar.Extensions;
 
 
@@ -58,7 +57,7 @@ public class ObservableConcurrentDictionary<TKey, TValue> : CollectionAlerts<Key
 
 
     public bool ContainsValue( TValue              value ) => _dictionary.Values.Contains( value );
-    public bool TryAdd( KeyValuePair<TKey, TValue> pair ) => TryAdd( pair.Key, pair.Value );
+    public bool TryAdd( KeyValuePair<TKey, TValue> pair )  => TryAdd( pair.Key, pair.Value );
     public bool TryAdd( TKey key, TValue value )
     {
         if ( !_dictionary.TryAdd( key, value ) ) { return false; }
@@ -78,13 +77,13 @@ public class ObservableConcurrentDictionary<TKey, TValue> : CollectionAlerts<Key
     }
 
 
-    public bool TryGetValue( TKey key, [NotNullWhen( true )] out TValue? value ) => _dictionary.TryGetValue( key, out value );
+    public bool TryGetValue( TKey key, [ NotNullWhen( true ) ] out TValue? value ) => _dictionary.TryGetValue( key, out value );
 
 
     public bool ContainsKey( TKey key ) => _dictionary.ContainsKey( key );
 
-    public bool Contains( KeyValuePair<TKey, TValue> item ) => ContainsKey( item.Key ) && ContainsValue( item.Value );
-    public void Add( KeyValuePair<TKey, TValue>      item ) => TryAdd( item );
+    public bool Contains( KeyValuePair<TKey, TValue> item )              => ContainsKey( item.Key ) && ContainsValue( item.Value );
+    public void Add( KeyValuePair<TKey, TValue>      item )              => TryAdd( item );
     public void Add( TKey                            key, TValue value ) => TryAdd( key, value );
 
 
@@ -120,10 +119,7 @@ public class ObservableConcurrentDictionary<TKey, TValue> : CollectionAlerts<Key
     }
 
 
-    public override IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
-    {
-        return _dictionary.Where( Filter )
-                          .GetEnumerator();
-    }
+    public override IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator() =>
+        _dictionary.Where( Filter ).GetEnumerator();
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }

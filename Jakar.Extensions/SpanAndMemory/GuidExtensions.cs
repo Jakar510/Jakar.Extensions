@@ -1,11 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 04/15/2022  5:45 PM
 
-#nullable enable
-using OneOf.Types;
-
-
-
 namespace Jakar.Extensions;
 
 
@@ -20,18 +15,17 @@ public static class GuidExtensions
     private const char UNDERSCORE = '_';
 
 
-    public static bool TryAsGuid( this Span<char> value, [NotNullWhen( true )] out Guid? result )
+    public static bool TryAsGuid( this Span<char> value, [ NotNullWhen( true ) ] out Guid? result )
     {
         result = AsGuid( value );
         return result.HasValue;
     }
-    public static bool TryAsGuid( this ReadOnlySpan<char> value, [NotNullWhen( true )] out Guid? result )
+    public static bool TryAsGuid( this ReadOnlySpan<char> value, [ NotNullWhen( true ) ] out Guid? result )
     {
         result = AsGuid( value );
         return result.HasValue;
     }
-    public static bool TryAsGuid( this string value, [NotNullWhen( true )] out Guid? result ) => value.AsSpan()
-                                                                                                      .TryAsGuid( out result );
+    public static bool TryAsGuid( this string value, [ NotNullWhen( true ) ] out Guid? result ) => value.AsSpan().TryAsGuid( out result );
 
 
     public static bool TryWriteBytes( this Guid value, out Memory<byte> result )
@@ -62,17 +56,13 @@ public static class GuidExtensions
     }
 
 
-    /// <summary>
-    ///     <see href="https://www.youtube.com/watch?v=B2yOjLyEZk0"> Writing C# without allocating ANY memory </see>
-    /// </summary>
+    /// <summary> <see href="https://www.youtube.com/watch?v=B2yOjLyEZk0"> Writing C# without allocating ANY memory </see> </summary>
     /// <param name="value"> </param>
     /// <returns> </returns>
     public static Guid? AsGuid( this string value ) => AsGuid( value.AsSpan() );
 
 
-    /// <summary>
-    ///     <see href="https://www.youtube.com/watch?v=B2yOjLyEZk0"> Writing C# without allocating ANY memory </see>
-    /// </summary>
+    /// <summary> <see href="https://www.youtube.com/watch?v=B2yOjLyEZk0"> Writing C# without allocating ANY memory </see> </summary>
     /// <param name="value"> </param>
     /// <returns> </returns>
     public static Guid? AsGuid( this ReadOnlySpan<char> value )
@@ -87,7 +77,7 @@ public static class GuidExtensions
                              {
                                  HYPHEN     => SLASH,
                                  UNDERSCORE => PLUS,
-                                 _          => value[i],
+                                 _          => value[i]
                              };
         }
 
@@ -102,17 +92,13 @@ public static class GuidExtensions
     }
 
 
-    /// <summary>
-    ///     <see href="https://www.youtube.com/watch?v=B2yOjLyEZk0"> Writing C# without allocating ANY memory </see>
-    /// </summary>
+    /// <summary> <see href="https://www.youtube.com/watch?v=B2yOjLyEZk0"> Writing C# without allocating ANY memory </see> </summary>
     /// <param name="value"> </param>
     /// <returns> </returns>
     public static string ToBase64( this Guid value ) => new(value.AsSpan());
 
 
-    /// <summary>
-    ///     <see href="https://www.youtube.com/watch?v=B2yOjLyEZk0"> Writing C# without allocating ANY memory </see>
-    /// </summary>
+    /// <summary> <see href="https://www.youtube.com/watch?v=B2yOjLyEZk0"> Writing C# without allocating ANY memory </see> </summary>
     /// <param name="value"> </param>
     /// <returns> </returns>
     public static ReadOnlySpan<char> AsSpan( this Guid value )
@@ -132,7 +118,7 @@ public static class GuidExtensions
                         {
                             SLASH_BYTE => HYPHEN,
                             PLUS_BYTE  => UNDERSCORE,
-                            _          => (char)base64Bytes[i],
+                            _          => (char)base64Bytes[i]
                         };
         }
 

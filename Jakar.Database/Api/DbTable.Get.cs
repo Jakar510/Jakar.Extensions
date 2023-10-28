@@ -1,11 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 03/12/2023  1:07 PM
 
-using Newtonsoft.Json.Linq;
-using Org.BouncyCastle.Crypto;
-
-
-
 namespace Jakar.Database;
 
 

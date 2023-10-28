@@ -101,42 +101,42 @@ public class AppServices : BaseViewModel
     }
 
 
-    public void NavigateTo( string uri ) => _navigation.NavigateTo( uri );
+    public void NavigateTo( string uri )                                                    => _navigation.NavigateTo( uri );
     public void NavigateTo( string uri, bool              forceLoad, bool replace = false ) => _navigation.NavigateTo( uri, forceLoad, replace );
     public void NavigateTo( string uri, NavigationOptions options ) => _navigation.NavigateTo( uri, options );
 
 
-    public Task<AuthenticateResult> AuthenticateAsync( HttpContext context, string? scheme ) => _authenticationService.AuthenticateAsync( context, scheme );
-    public Task ChallengeAsync( HttpContext                        context, string? scheme, AuthenticationProperties? properties ) => _authenticationService.ChallengeAsync( context, scheme, properties );
-    public Task ForbidAsync( HttpContext                           context, string? scheme, AuthenticationProperties? properties ) => _authenticationService.ForbidAsync( context, scheme, properties );
-    public Task SignInAsync( HttpContext                           context, string? scheme, ClaimsPrincipal           principal, AuthenticationProperties? properties ) => _authenticationService.SignInAsync( context, scheme, principal, properties );
-    public Task SignOutAsync( HttpContext                          context, string? scheme, AuthenticationProperties? properties ) => _authenticationService.SignOutAsync( context, scheme, properties );
+    public Task<AuthenticateResult> AuthenticateAsync( HttpContext context, string? scheme )                                                                            => _authenticationService.AuthenticateAsync( context, scheme );
+    public Task                     ChallengeAsync( HttpContext    context, string? scheme, AuthenticationProperties? properties )                                      => _authenticationService.ChallengeAsync( context, scheme, properties );
+    public Task                     ForbidAsync( HttpContext       context, string? scheme, AuthenticationProperties? properties )                                      => _authenticationService.ForbidAsync( context, scheme, properties );
+    public Task                     SignInAsync( HttpContext       context, string? scheme, ClaimsPrincipal           principal, AuthenticationProperties? properties ) => _authenticationService.SignInAsync( context, scheme, principal, properties );
+    public Task                     SignOutAsync( HttpContext      context, string? scheme, AuthenticationProperties? properties ) => _authenticationService.SignOutAsync( context, scheme, properties );
 
 
-    public ValueTask ClearAsync( CancellationToken        token                          = default ) => _localStorage.ClearAsync( token );
-    public ValueTask<bool> ContainKeyAsync( string        key,   CancellationToken token = default ) => _localStorage.ContainKeyAsync( key, token );
-    public ValueTask<string> GetItemAsStringAsync( string key,   CancellationToken token = default ) => _localStorage.GetItemAsStringAsync( key, token );
-    public ValueTask<T> GetItemAsync<T>( string           key,   CancellationToken token = default ) => _localStorage.GetItemAsync<T>( key, token );
-    public ValueTask<string> KeyAsync( int                index, CancellationToken token = default ) => _localStorage.KeyAsync( index, token );
+    public ValueTask         ClearAsync( CancellationToken token                          = default ) => _localStorage.ClearAsync( token );
+    public ValueTask<bool>   ContainKeyAsync( string       key,   CancellationToken token = default ) => _localStorage.ContainKeyAsync( key, token );
+    public ValueTask<string> GetItemAsStringAsync( string  key,   CancellationToken token = default ) => _localStorage.GetItemAsStringAsync( key, token );
+    public ValueTask<T>      GetItemAsync<T>( string       key,   CancellationToken token = default ) => _localStorage.GetItemAsync<T>( key, token );
+    public ValueTask<string> KeyAsync( int                 index, CancellationToken token = default ) => _localStorage.KeyAsync( index, token );
 
-    public ValueTask<IEnumerable<string>> KeysAsync( CancellationToken token                         = default ) => _localStorage.KeysAsync( token );
-    public ValueTask<int> LengthAsync( CancellationToken               token                         = default ) => _localStorage.LengthAsync( token );
-    public ValueTask RemoveItemAsync( string                           key,  CancellationToken token = default ) => _localStorage.RemoveItemAsync( key, token );
-    public ValueTask RemoveItemsAsync( IEnumerable<string>             keys, CancellationToken token = default ) => _localStorage.RemoveItemsAsync( keys, token );
+    public ValueTask<IEnumerable<string>> KeysAsync( CancellationToken          token                         = default ) => _localStorage.KeysAsync( token );
+    public ValueTask<int>                 LengthAsync( CancellationToken        token                         = default ) => _localStorage.LengthAsync( token );
+    public ValueTask                      RemoveItemAsync( string               key,  CancellationToken token = default ) => _localStorage.RemoveItemAsync( key, token );
+    public ValueTask                      RemoveItemsAsync( IEnumerable<string> keys, CancellationToken token = default ) => _localStorage.RemoveItemsAsync( keys, token );
 
     public ValueTask SetItemAsStringAsync( string key, string data, CancellationToken token = default ) => _localStorage.SetItemAsStringAsync( key, data, token );
     public ValueTask SetItemAsync<T>( string      key, T      data, CancellationToken token = default ) => _localStorage.SetItemAsync( key, data, token );
 
 
-    public IModalReference Show<TComponent>() where TComponent : IComponent => _modal.Show<TComponent>();
-    public IModalReference Show<TComponent>( string title ) where TComponent : IComponent => _modal.Show<TComponent>( title );
-    public IModalReference Show<TComponent>( string title, ModalOptions    options ) where TComponent : IComponent => _modal.Show<TComponent>( title,                          options );
-    public IModalReference Show<TComponent>( string title, ModalParameters parameters ) where TComponent : IComponent => _modal.Show<TComponent>( title,                       parameters );
+    public IModalReference Show<TComponent>() where TComponent : IComponent                                                                 => _modal.Show<TComponent>();
+    public IModalReference Show<TComponent>( string title ) where TComponent : IComponent                                                   => _modal.Show<TComponent>( title );
+    public IModalReference Show<TComponent>( string title, ModalOptions    options ) where TComponent : IComponent                          => _modal.Show<TComponent>( title, options );
+    public IModalReference Show<TComponent>( string title, ModalParameters parameters ) where TComponent : IComponent                       => _modal.Show<TComponent>( title, parameters );
     public IModalReference Show<TComponent>( string title, ModalParameters parameters, ModalOptions options ) where TComponent : IComponent => _modal.Show<TComponent>( title, parameters, options );
-    public IModalReference Show( Type               component ) => _modal.Show( component );
-    public IModalReference Show( Type               component, string title ) => _modal.Show( component,                                                   title );
-    public IModalReference Show( Type               component, string title, ModalOptions    options ) => _modal.Show( component,                          title, options );
-    public IModalReference Show( Type               component, string title, ModalParameters parameters ) => _modal.Show( component,                       title, parameters );
+    public IModalReference Show( Type               component )                                                                 => _modal.Show( component );
+    public IModalReference Show( Type               component, string title )                                                   => _modal.Show( component, title );
+    public IModalReference Show( Type               component, string title, ModalOptions    options )                          => _modal.Show( component, title, options );
+    public IModalReference Show( Type               component, string title, ModalParameters parameters )                       => _modal.Show( component, title, parameters );
     public IModalReference Show( Type               component, string title, ModalParameters parameters, ModalOptions options ) => _modal.Show( component, title, parameters, options );
 
 
@@ -150,21 +150,21 @@ public class AppServices : BaseViewModel
     public void ShowError( RenderFragment   message, Action<ToastSettings>? settings                                 = null ) => _toastService.ShowError( message, settings );
     public void ShowToast( ToastLevel       level,   string                 message, Action<ToastSettings>? settings = null ) => _toastService.ShowToast( level, message, settings );
     public void ShowToast( ToastLevel       level,   RenderFragment         message, Action<ToastSettings>? settings = null ) => _toastService.ShowToast( level, message, settings );
-    public void ShowToast<TComponent>() where TComponent : IComponent => _toastService.ShowToast<TComponent>();
-    public void ShowToast<TComponent>( ToastParameters       parameters ) where TComponent : IComponent => _toastService.ShowToast<TComponent>( parameters );
-    public void ShowToast<TComponent>( Action<ToastSettings> settings ) where TComponent : IComponent => _toastService.ShowToast<TComponent>( settings );
+    public void ShowToast<TComponent>() where TComponent : IComponent                                                                   => _toastService.ShowToast<TComponent>();
+    public void ShowToast<TComponent>( ToastParameters       parameters ) where TComponent : IComponent                                 => _toastService.ShowToast<TComponent>( parameters );
+    public void ShowToast<TComponent>( Action<ToastSettings> settings ) where TComponent : IComponent                                   => _toastService.ShowToast<TComponent>( settings );
     public void ShowToast<TComponent>( ToastParameters       parameters, Action<ToastSettings> settings ) where TComponent : IComponent => _toastService.ShowToast<TComponent>( parameters, settings );
-    public void ClearAll() => _toastService.ClearAll();
-    public void ClearCustomToasts() => _toastService.ClearCustomToasts();
-    public void ClearQueue() => _toastService.ClearQueue();
+    public void ClearAll()                                => _toastService.ClearAll();
+    public void ClearCustomToasts()                       => _toastService.ClearCustomToasts();
+    public void ClearQueue()                              => _toastService.ClearQueue();
     public void ClearQueueToasts( ToastLevel toastLevel ) => _toastService.ClearQueueToasts( toastLevel );
-    public void ClearQueueWarningToasts() => _toastService.ClearQueueWarningToasts();
-    public void ClearQueueInfoToasts() => _toastService.ClearQueueInfoToasts();
-    public void ClearQueueSuccessToasts() => _toastService.ClearQueueSuccessToasts();
-    public void ClearQueueErrorToasts() => _toastService.ClearQueueErrorToasts();
-    public void ClearErrorToasts() => _toastService.ClearErrorToasts();
-    public void ClearInfoToasts() => _toastService.ClearInfoToasts();
-    public void ClearSuccessToasts() => _toastService.ClearSuccessToasts();
-    public void ClearToasts( ToastLevel toastLevel ) => _toastService.ClearToasts( toastLevel );
-    public void ClearWarningToasts() => _toastService.ClearWarningToasts();
+    public void ClearQueueWarningToasts()                 => _toastService.ClearQueueWarningToasts();
+    public void ClearQueueInfoToasts()                    => _toastService.ClearQueueInfoToasts();
+    public void ClearQueueSuccessToasts()                 => _toastService.ClearQueueSuccessToasts();
+    public void ClearQueueErrorToasts()                   => _toastService.ClearQueueErrorToasts();
+    public void ClearErrorToasts()                        => _toastService.ClearErrorToasts();
+    public void ClearInfoToasts()                         => _toastService.ClearInfoToasts();
+    public void ClearSuccessToasts()                      => _toastService.ClearSuccessToasts();
+    public void ClearToasts( ToastLevel toastLevel )      => _toastService.ClearToasts( toastLevel );
+    public void ClearWarningToasts()                      => _toastService.ClearWarningToasts();
 }

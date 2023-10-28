@@ -1,5 +1,4 @@
-﻿#nullable enable
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
 
 
 public static partial class TypeExtensions
@@ -20,8 +19,7 @@ public static partial class TypeExtensions
 
         if ( setMethod.ReturnParameter is null ) { throw new NullReferenceException( nameof(setMethod.ReturnParameter) ); }
 
-        return setMethod.ReturnParameter.GetRequiredCustomModifiers()
-                        .Contains( isExternalInit );
+        return setMethod.ReturnParameter.GetRequiredCustomModifiers().Contains( isExternalInit );
     }
 
     public static bool IsOneOfType( this Type value, params Type[] items ) => items.Any( value.IsEqualType );

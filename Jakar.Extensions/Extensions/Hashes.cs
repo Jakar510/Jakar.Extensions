@@ -2,7 +2,6 @@
 // 06/06/2022  2:20 PM
 
 
-#nullable enable
 namespace Jakar.Extensions;
 
 

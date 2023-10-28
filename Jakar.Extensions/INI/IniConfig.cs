@@ -1,13 +1,12 @@
-﻿#nullable enable
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
 
 
 public sealed partial class IniConfig : ConcurrentDictionary<string, IniConfig.Section>
-                                    #if NET6_0_OR_GREATER
+#if NET6_0_OR_GREATER
                                         ,
                                         ISpanFormattable
-                                    #endif
-                                    #if NET7_0_OR_GREATER
+#endif
+#if NET7_0_OR_GREATER
                                         ,
                                         ISpanParsable<IniConfig>
 #endif
@@ -46,15 +45,13 @@ public sealed partial class IniConfig : ConcurrentDictionary<string, IniConfig.S
 
     public static IniConfig ReadFromFile( LocalFile file, IFormatProvider? provider = default )
     {
-        string content = file.Read()
-                             .AsString();
+        string content = file.Read().AsString();
 
         return Parse( content, provider );
     }
     public static async ValueTask<IniConfig> ReadFromFileAsync( LocalFile file, IFormatProvider? provider = default )
     {
-        string content = await file.ReadAsync()
-                                   .AsString();
+        string content = await file.ReadAsync().AsString();
 
         return Parse( content, provider );
     }
@@ -62,9 +59,7 @@ public sealed partial class IniConfig : ConcurrentDictionary<string, IniConfig.S
 
     /// <summary> Gets the <see cref="Section"/> with the <paramref name="sectionName"/> . If it doesn't exist, it is created, then returned. </summary>
     /// <param name="sectionName"> Section Name </param>
-    /// <returns>
-    ///     <see cref="Section"/>
-    /// </returns>
+    /// <returns> <see cref="Section"/> </returns>
     public Section GetOrAdd( string sectionName )
     {
         if ( string.IsNullOrEmpty( sectionName ) ) { throw new ArgumentNullException( nameof(sectionName) ); }
@@ -84,7 +79,7 @@ public sealed partial class IniConfig : ConcurrentDictionary<string, IniConfig.S
         ReadOnlySpan<char> span = s;
         return Parse( span, provider );
     }
-    public static bool TryParse( string? s, IFormatProvider? provider, [NotNullWhen( true )] out IniConfig? result )
+    public static bool TryParse( string? s, IFormatProvider? provider, [ NotNullWhen( true ) ] out IniConfig? result )
     {
         ReadOnlySpan<char> span = s;
         return TryParse( span, provider, out result );
@@ -119,8 +114,7 @@ public sealed partial class IniConfig : ConcurrentDictionary<string, IniConfig.S
 
                 // [Section:header]
                 case '[' when line[^1] == ']':
-                    ReadOnlySpan<char> sectionSpan = line.Slice( 1, line.Length - 2 )
-                                                         .Trim(); // remove the brackets and whitespace
+                    ReadOnlySpan<char> sectionSpan = line.Slice( 1, line.Length - 2 ).Trim(); // remove the brackets and whitespace
 
                     if ( sectionSpan.IsNullOrWhiteSpace() ) { throw new FormatException( "section title cannot be empty or whitespace." ); }
 
@@ -130,17 +124,14 @@ public sealed partial class IniConfig : ConcurrentDictionary<string, IniConfig.S
             }
 
 
-            if ( line.Trim()
-                     .IsNullOrWhiteSpace() ) { continue; }
+            if ( line.Trim().IsNullOrWhiteSpace() ) { continue; }
 
 
             int separator = line.IndexOf( '=' ); // key = value OR "value"
             if ( separator < 0 ) { continue; }
 
 
-            string key = line[..separator]
-                        .Trim()
-                        .ToString();
+            string key = line[..separator].Trim().ToString();
 
             string value = line[(separator + 1)..]
                           .Trim()
@@ -149,15 +140,14 @@ public sealed partial class IniConfig : ConcurrentDictionary<string, IniConfig.S
 
             Debug.Assert( !string.IsNullOrEmpty( section ) );
 
-            if ( config[section]
-               .ContainsKey( key ) ) { throw new FormatException( @$"Duplicate key '{key}':  '{section}'" ); }
+            if ( config[section].ContainsKey( key ) ) { throw new FormatException( @$"Duplicate key '{key}':  '{section}'" ); }
 
             config[section][key] = value;
         }
 
         return config;
     }
-    public static bool TryParse( ReadOnlySpan<char> span, IFormatProvider? provider, [NotNullWhen( true )] out IniConfig? result )
+    public static bool TryParse( ReadOnlySpan<char> span, IFormatProvider? provider, [ NotNullWhen( true ) ] out IniConfig? result )
     {
         try
         {
@@ -217,5 +207,5 @@ public sealed partial class IniConfig : ConcurrentDictionary<string, IniConfig.S
 
 
     public void Add( string  section ) => Add( new Section( section ) );
-    public void Add( Section value ) => this[value.Name] = value;
+    public void Add( Section value )   => this[value.Name] = value;
 }

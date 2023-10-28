@@ -1,7 +1,7 @@
 ﻿namespace Jakar.AppLogger.Common;
 
 
-[SuppressMessage( "ReSharper", "MemberCanBeMadeStatic.Global" )]
+[ SuppressMessage( "ReSharper", "MemberCanBeMadeStatic.Global" ) ]
 public sealed class AppDebug : ObservableClass
 {
     private readonly BaseFileSystemApi    _fileSystemApi;
@@ -100,9 +100,7 @@ public sealed class AppDebug : ObservableClass
     {
         var attachments = new List<LoggerAttachment>( 10 )
                           {
-                              LoggerAttachment.Create( ex.ToString(),
-                                                 ex.GetType()
-                                                   .FullName )
+                              LoggerAttachment.Create( ex.ToString(), ex.GetType().FullName )
                           };
 
 
@@ -125,6 +123,6 @@ public sealed class AppDebug : ObservableClass
     }
 
 
-    public void TrackEvent<T>( T cls, LogLevel                      level = LogLevel.Trace, [CallerMemberName] string? source = default ) => TrackEvent( cls, _logger.Config.GetAppState(), level, source );
-    public void TrackEvent<T>( T cls, IDictionary<string, JToken?>? eventDetails,           LogLevel                   level  = LogLevel.Trace, [CallerMemberName] string? source = default ) => _logger.TrackEvent( cls, level, eventDetails, source );
+    public void TrackEvent<T>( T cls, LogLevel                      level = LogLevel.Trace, [ CallerMemberName ] string? source = default ) => TrackEvent( cls, _logger.Config.GetAppState(), level, source );
+    public void TrackEvent<T>( T cls, IDictionary<string, JToken?>? eventDetails,           LogLevel level = LogLevel.Trace, [ CallerMemberName ] string? source = default ) => _logger.TrackEvent( cls, level, eventDetails, source );
 }

@@ -2,16 +2,9 @@
 // 09/28/2023  10:02 AM
 
 using System.Data.Common;
-using System.Security;
-using FluentMigrator;
 using FluentMigrator.Runner;
-using FluentMigrator.Runner.Generators.Postgres;
-using FluentMigrator.Runner.Processors;
-using FluentMigrator.Runner.Processors.Postgres;
 using Jakar.Database;
-using Jakar.Database.DbMigrations;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -30,7 +23,7 @@ public static class ULongHashTests
 
     private static IEnumerable<string> GetRandomStrings( int count, int length )
     {
-        for ( var i = 0; i < count; i++ ) { yield return GetRandomString( length ); }
+        for ( int i = 0; i < count; i++ ) { yield return GetRandomString( length ); }
     }
     private static string GetRandomString( int length )
     {
@@ -50,11 +43,10 @@ public static class ULongHashTests
 
         for ( int i = 0; i < max_tries; i++ )
         {
-            var count = _random.Next( ALPHANUMERIC.Length / 4 );
-            var size  = _random.Next( count );
+            int count = _random.Next( ALPHANUMERIC.Length / 4 );
+            int size  = _random.Next( count );
 
-            int hash = GetRandomStrings( count, size )
-               .GetHash();
+            int hash = GetRandomStrings( count, size ).GetHash();
 
             bool added = hashes.Add( hash );
             if ( added is false && hashes.Count > 0 ) { return i; }
@@ -78,7 +70,7 @@ public sealed class TestDatabase : Database
 
     public static async Task Test()
     {
-        var builder = WebApplication.CreateBuilder();
+        WebApplicationBuilder builder = WebApplication.CreateBuilder();
         builder.AddDefaultLogging<TestDatabase>( true );
 
         builder.Services.AddOptions<DbOptions>()
@@ -103,8 +95,7 @@ public sealed class TestDatabase : Database
 
                                      DbOptions.GetConnectionString( configure );
 
-                                     configure.ScanIn( typeof(Database).Assembly, typeof(Program).Assembly )
-                                              .For.All();
+                                     configure.ScanIn( typeof(Database).Assembly, typeof(Program).Assembly ).For.All();
                                  } );
 
         await using WebApplication app = builder.Build();
@@ -113,7 +104,7 @@ public sealed class TestDatabase : Database
         {
             await using ( AsyncServiceScope scope = app.Services.CreateAsyncScope() )
             {
-                IMigrationRunner runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
+                var runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
                 runner.ListMigrations();
 
                 if ( runner.HasMigrationsToApplyUp() ) { runner.MigrateUp(); }
@@ -122,7 +113,7 @@ public sealed class TestDatabase : Database
 
             await using ( AsyncServiceScope scope = app.Services.CreateAsyncScope() )
             {
-                TestDatabase      db    = scope.ServiceProvider.GetRequiredService<TestDatabase>();
+                var               db    = scope.ServiceProvider.GetRequiredService<TestDatabase>();
                 CancellationToken token = default;
                 var               admin = UserRecord.Create( "Admin", "Admin", string.Empty );
                 var               user  = UserRecord.Create( "User",  "User",  string.Empty, admin );
@@ -130,12 +121,12 @@ public sealed class TestDatabase : Database
                 ImmutableList<UserRecord> users   = ImmutableList.Create( admin, user );
                 var                       results = new List<UserRecord>( users.Count );
 
-                await foreach ( var record in db.Users.Insert( users, token ) ) { results.Add( record ); }
+                await foreach ( UserRecord record in db.Users.Insert( users, token ) ) { results.Add( record ); }
 
                 Debug.Assert( users.Count == results.Count );
 
                 results.Clear();
-                await foreach ( var record in db.Users.All( token ) ) { results.Add( record ); }
+                await foreach ( UserRecord record in db.Users.All( token ) ) { results.Add( record ); }
 
                 Debug.Assert( users.Count == results.Count );
             }
@@ -146,7 +137,7 @@ public sealed class TestDatabase : Database
             if ( app.Configuration.GetValue( "DISPATCH_DOWN", true ) )
             {
                 await using AsyncServiceScope scope  = app.Services.CreateAsyncScope();
-                IMigrationRunner              runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
+                var                           runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
                 runner.MigrateDown( 0 );
             }
         #endif

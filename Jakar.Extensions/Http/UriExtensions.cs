@@ -1,11 +1,10 @@
-﻿#nullable enable
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
 
 
 public static class UriExtensions
 {
     public static string Parameterize( this IEnumerable<string>          types, IDictionary<string, object?> parameters ) => types.Aggregate( "", Parameterize ) + parameters.Parameterize();
-    public static string Parameterize( this IEnumerable<string>          types ) => types.Aggregate( "", Parameterize );
+    public static string Parameterize( this IEnumerable<string>          types )      => types.Aggregate( "", Parameterize );
     public static string Parameterize( this IDictionary<string, object?> parameters ) => parameters.Aggregate( "?", Parameterize );
     private static string Parameterize( this string previous, KeyValuePair<string, object?> pair )
     {
@@ -13,8 +12,7 @@ public static class UriExtensions
 
         string? s = value?.ToString();
 
-        if ( string.IsNullOrWhiteSpace( key ) || string.IsNullOrWhiteSpace( s ) || value is not null && value.GetType()
-                                                                                                             .Name == s ) { return previous; }
+        if ( string.IsNullOrWhiteSpace( key ) || string.IsNullOrWhiteSpace( s ) || value is not null && value.GetType().Name == s ) { return previous; }
 
         return previous + $"{key}={s},";
     }

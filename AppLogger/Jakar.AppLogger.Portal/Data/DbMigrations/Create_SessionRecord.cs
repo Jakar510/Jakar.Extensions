@@ -19,12 +19,8 @@ public sealed class Create_SessionRecord : LoggerMigration<SessionRecord>
     {
         ICreateTableWithColumnSyntax table = CreateTable();
 
-        table.WithColumn( nameof(SessionRecord.AppID) )
-             .AsInt64()
-             .NotNullable();
+        table.WithColumn( nameof(SessionRecord.AppID) ).AsInt64().NotNullable();
 
-        table.WithColumn( nameof(SessionRecord.DeviceID) )
-             .AsInt64()
-             .NotNullable();
+        table.WithColumn( nameof(SessionRecord.DeviceID) ).AsInt64().NotNullable();
     }
 }

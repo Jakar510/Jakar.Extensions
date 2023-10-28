@@ -18,7 +18,7 @@ public interface ILoggerAttachment
 
 
 
-[Serializable]
+[ Serializable ]
 public sealed record LoggerAttachment( string Content, long Length, string? FileName, string? Description, string? Type, bool IsBinary ) : BaseRecord
 {
     public const     int  DESCRIPTION_SIZE = 1024;
@@ -54,13 +54,13 @@ public sealed record LoggerAttachment( string Content, long Length, string? File
                                     : default;
 
 
-    [DoesNotReturn] public static void ThrowTooLong( in long    length ) => throw new ArgumentException( $"{nameof(Content)}.{nameof(Length)} is too long '{length}'; Must be < {MAX_SIZE}." );
-    public static LoggerAttachment Create( ILoggerAttachment    attachment ) => new(attachment);
-    public static LoggerAttachment Create( ReadOnlySpan<byte>   content, string? fileName,              string? description = default, string? type = default ) => new(content, fileName, description, type);
-    public static LoggerAttachment Create( ReadOnlyMemory<byte> content, string? fileName,              string? description = default, string? type = default ) => new(content, fileName, description, type);
-    public static LoggerAttachment Create( byte[]               content, string? fileName,              string? description = default, string? type = default ) => new(content, fileName, description, type);
-    public static LoggerAttachment Create( MemoryStream         content, string? fileName,              string? description = default, string? type = default ) => new(content, fileName, description, type);
-    public static LoggerAttachment Create( string               content, string? description = default, string? type        = default ) => new(content, description, type);
+    [ DoesNotReturn ] public static void             ThrowTooLong( in long        length ) => throw new ArgumentException( $"{nameof(Content)}.{nameof(Length)} is too long '{length}'; Must be < {MAX_SIZE}." );
+    public static                   LoggerAttachment Create( ILoggerAttachment    attachment ) => new(attachment);
+    public static                   LoggerAttachment Create( ReadOnlySpan<byte>   content, string? fileName,              string? description = default, string? type = default ) => new(content, fileName, description, type);
+    public static                   LoggerAttachment Create( ReadOnlyMemory<byte> content, string? fileName,              string? description = default, string? type = default ) => new(content, fileName, description, type);
+    public static                   LoggerAttachment Create( byte[]               content, string? fileName,              string? description = default, string? type = default ) => new(content, fileName, description, type);
+    public static                   LoggerAttachment Create( MemoryStream         content, string? fileName,              string? description = default, string? type = default ) => new(content, fileName, description, type);
+    public static                   LoggerAttachment Create( string               content, string? description = default, string? type        = default ) => new(content, description, type);
 
 
     public static LoggerAttachment Create( Stream stream, string? fileName = default, string? description = default, string? type = default )
@@ -83,16 +83,14 @@ public sealed record LoggerAttachment( string Content, long Length, string? File
 
     public static LoggerAttachment Create( LocalFile file, string? description = default, string? type = default )
     {
-        ReadOnlyMemory<byte> content = file.Read()
-                                           .AsMemory();
+        ReadOnlyMemory<byte> content = file.Read().AsMemory();
 
         return new LoggerAttachment( content, file.Name, description ?? file.Name, type ?? file.ContentType );
     }
 
     public static async ValueTask<LoggerAttachment> CreateAsync( LocalFile file, string? description = default, string? type = default, CancellationToken token = default )
     {
-        ReadOnlyMemory<byte> content = await file.ReadAsync()
-                                                 .AsMemory( token );
+        ReadOnlyMemory<byte> content = await file.ReadAsync().AsMemory( token );
 
         return new LoggerAttachment( content, file.Name, description ?? file.Name, type ?? file.ContentType );
     }

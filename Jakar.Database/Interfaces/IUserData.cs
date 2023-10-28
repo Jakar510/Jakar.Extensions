@@ -10,5 +10,5 @@ public interface IUserName
 
 public interface IUserDataRecord : IUserData, IUserName
 {
-    public new UserRecord WithUserData(IUserData model);
+    public UserRecord WithUserData( IUserData model );
 }

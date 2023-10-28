@@ -44,12 +44,11 @@ public readonly record struct WebHandler : IDisposable
 
     public async ValueTask<HttpResponseMessage> SendAsync()
     {
-        var response = await _client.SendAsync( _request, Token );
+        HttpResponseMessage? response = await _client.SendAsync( _request, Token );
         _logger?.LogDebug( EventId, "Response StatusCode: {StatusCode} for {Uri}", response.StatusCode, _request.RequestUri?.OriginalString );
         return response;
     }
-    public ValueTaskAwaiter<HttpResponseMessage> GetAwaiter() => SendAsync()
-       .GetAwaiter();
+    public ValueTaskAwaiter<HttpResponseMessage> GetAwaiter() => SendAsync().GetAwaiter();
 
 
     public async ValueTask NoResponse()
@@ -84,8 +83,8 @@ public readonly record struct WebHandler : IDisposable
         using var                sr     = new StreamReader( stream, Encoding );
     #if NET6_0_OR_GREATER
         await
-        #endif
-            using JsonReader reader = new JsonTextReader( sr );
+    #endif
+        using JsonReader reader = new JsonTextReader( sr );
 
         return await JToken.ReadFromAsync( reader, settings, Token );
     }
@@ -101,9 +100,7 @@ public readonly record struct WebHandler : IDisposable
     {
         if ( response.Headers.Contains( fileNameHeader ) )
         {
-            var mimeType = response.Headers.GetValues( fileNameHeader )
-                                   .First()
-                                   .ToMimeType();
+            var mimeType = response.Headers.GetValues( fileNameHeader ).First().ToMimeType();
 
             return await AsFile( response, mimeType );
         }
@@ -111,9 +108,7 @@ public readonly record struct WebHandler : IDisposable
 
         if ( response.Content.Headers.Contains( fileNameHeader ) )
         {
-            var mimeType = response.Content.Headers.GetValues( fileNameHeader )
-                                   .First()
-                                   .ToMimeType();
+            var mimeType = response.Content.Headers.GetValues( fileNameHeader ).First().ToMimeType();
 
             return await AsFile( response, mimeType );
         }
@@ -178,8 +173,8 @@ public readonly record struct WebHandler : IDisposable
         using var                sr     = new StreamReader( stream, Encoding );
     #if NET6_0_OR_GREATER
         await
-        #endif
-            using JsonReader reader = new JsonTextReader( sr );
+    #endif
+        using JsonReader reader = new JsonTextReader( sr );
 
         return serializer.Deserialize<TResult>( reader ) ?? throw new NullReferenceException( nameof(JsonConvert.DeserializeObject) );
     }

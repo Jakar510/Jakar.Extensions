@@ -1,9 +1,7 @@
-﻿#nullable enable
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
 
 
-[Serializable]
-[DebuggerDisplay( nameof(DisplayName) )]
+[ Serializable, DebuggerDisplay( nameof(DisplayName) ) ]
 public sealed class Language : BaseClass, IComparable<Language>, IEquatable<Language>, IComparable
 {
     private readonly CultureInfo _culture;
@@ -66,7 +64,7 @@ public sealed class Language : BaseClass, IComparable<Language>, IEquatable<Lang
         return DisplayName == other.DisplayName && Name == other.Name && Version == other.Version;
     }
     public override bool Equals( object? obj ) => obj is Language language && Equals( language );
-    public override int GetHashCode() => HashCode.Combine( DisplayName, Name, Version );
+    public override int  GetHashCode()         => HashCode.Combine( DisplayName, Name, Version );
 
 
     public static bool operator ==( Language? left, Language? right ) => Equalizer.Equals( left, right );
@@ -78,7 +76,7 @@ public sealed class Language : BaseClass, IComparable<Language>, IEquatable<Lang
 
 
 
-    [Serializable]
+    [ Serializable ]
     public class Collection : ObservableCollection<Language>
     {
         public Collection() : base() { }
@@ -87,7 +85,7 @@ public sealed class Language : BaseClass, IComparable<Language>, IEquatable<Lang
 
 
 
-    [Serializable]
+    [ Serializable ]
     public class Items : List<Language>
     {
         public Items() : base() { }
@@ -120,14 +118,11 @@ public sealed class Language : BaseClass, IComparable<Language>, IEquatable<Lang
 
     #region Lists
 
-    public static Items NeutralCultures => new(CultureInfo.GetCultures( CultureTypes.NeutralCultures )
-                                                          .Select( culture => new Language( culture ) ));
+    public static Items NeutralCultures => new(CultureInfo.GetCultures( CultureTypes.NeutralCultures ).Select( culture => new Language( culture ) ));
 
-    public static Items SpecificCultures => new(CultureInfo.GetCultures( CultureTypes.SpecificCultures )
-                                                           .Select( culture => new Language( culture ) ));
+    public static Items SpecificCultures => new(CultureInfo.GetCultures( CultureTypes.SpecificCultures ).Select( culture => new Language( culture ) ));
 
-    public static Items All => new(CultureInfo.GetCultures( CultureTypes.AllCultures )
-                                              .Select( culture => new Language( culture ) ));
+    public static Items All => new(CultureInfo.GetCultures( CultureTypes.AllCultures ).Select( culture => new Language( culture ) ));
 
     public static Collection Supported { get; } = new()
                                                   {
@@ -144,7 +139,7 @@ public sealed class Language : BaseClass, IComparable<Language>, IEquatable<Lang
                                                       Portuguese,
                                                       Spanish,
                                                       Swedish,
-                                                      Thai,
+                                                      Thai
                                                   };
 
     #endregion

@@ -10,8 +10,8 @@ namespace Jakar.Database;
 
 public static class ControllerBaseExtensions
 {
-    public const string DETAILS = nameof(DETAILS);
-    public const string ERROR   = nameof(ERROR);
+    public const  string       DETAILS = nameof(DETAILS);
+    public const  string       ERROR   = nameof(ERROR);
     public static ActionResult ClientClosed( this ControllerBase _ ) => new StatusCodeResult( Status.ClientClosedRequest.AsInt() );
 
 
@@ -125,7 +125,7 @@ public static class ControllerBaseExtensions
         return modelState.ErrorCount > 0
                    ? new UnprocessableEntityObjectResult( modelState )
                      {
-                         StatusCode = Status.NotAcceptable.AsInt(),
+                         StatusCode = Status.NotAcceptable.AsInt()
                      }
                    : controller.UnprocessableEntity();
     }
@@ -134,11 +134,11 @@ public static class ControllerBaseExtensions
     public static ActionResult Problem( this ControllerBase controller, in Status status ) => controller.Problem( controller.ToProblemDetails( status ) );
     public static ActionResult Problem( this ControllerBase _, ProblemDetails details ) => new ObjectResult( details )
                                                                                            {
-                                                                                               StatusCode = details.Status,
+                                                                                               StatusCode = details.Status
                                                                                            };
 
 
-    public static ActionResult ServerProblem( this ControllerBase controller, Exception e ) => controller.ServerProblem( e.Message );
+    public static ActionResult ServerProblem( this ControllerBase controller, Exception e )                         => controller.ServerProblem( e.Message );
     public static ActionResult ServerProblem( this ControllerBase controller, string    message = "Unknown Error" ) => controller.Problem( message, statusCode: Status.InternalServerError.AsInt() );
 
 
@@ -159,7 +159,7 @@ public static class ControllerBaseExtensions
 
         return new ObjectResult( new SerializableError( modelState ) )
                {
-                   StatusCode = Status.GatewayTimeout.AsInt(),
+                   StatusCode = Status.GatewayTimeout.AsInt()
                };
     }
 
@@ -210,7 +210,7 @@ public static class ControllerBaseExtensions
                           Instance = instance?.AttemptedValue,
                           Title    = title?.AttemptedValue,
                           Type     = type?.AttemptedValue,
-                          Status   = status.AsInt(),
+                          Status   = status.AsInt()
                       };
 
         foreach ( (string key, ModelStateEntry value) in state )
@@ -224,32 +224,32 @@ public static class ControllerBaseExtensions
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void AddError( this ControllerBase controller, string              error ) => controller.ModelState.AddError( error );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void AddError( this ControllerBase controller, string              key, string error ) => controller.ModelState.AddError( key, error );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void AddError( this ControllerBase controller, params string[]     errors ) => controller.ModelState.AddError( errors );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void AddError( this ControllerBase controller, IEnumerable<string> errors ) => controller.ModelState.AddError( errors );
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static void AddError( this ControllerBase controller, string              error )             => controller.ModelState.AddError( error );
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static void AddError( this ControllerBase controller, string              key, string error ) => controller.ModelState.AddError( key, error );
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static void AddError( this ControllerBase controller, params string[]     errors ) => controller.ModelState.AddError( errors );
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static void AddError( this ControllerBase controller, IEnumerable<string> errors ) => controller.ModelState.AddError( errors );
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
     public static void AddError( this ModelStateDictionary controller, Exception e )
     {
         controller.AddError( e.Message );
         foreach ( DictionaryEntry pair in e.Data ) { controller.AddError( $"{pair.Key}: {pair.Value}" ); }
     }
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void AddError( this ModelStateDictionary state, string error ) => state.AddModelError( ERROR, error );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void AddError( this ModelStateDictionary state, string key,  string error ) => state.AddError( DETAILS, key, error );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void AddError( this ModelStateDictionary state, string type, string key, string error ) => state.AddModelError( type, $"{key} : {error}" );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static void AddError( this ModelStateDictionary state, string error )                          => state.AddModelError( ERROR, error );
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static void AddError( this ModelStateDictionary state, string key,  string error )             => state.AddError( DETAILS, key, error );
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static void AddError( this ModelStateDictionary state, string type, string key, string error ) => state.AddModelError( type, $"{key} : {error}" );
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
     public static void AddError( this ModelStateDictionary state, params string[] errors )
     {
         if ( errors.Length == 0 ) { return; }
 
         foreach ( string error in errors ) { state.AddError( error ); }
     }
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
     public static void AddError( this ModelStateDictionary state, IEnumerable<string> errors )
     {
         foreach ( string error in errors ) { state.AddError( error ); }
     }
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void AddModelError( this ControllerBase controller, Exception e ) => controller.ModelState.AddError( e );
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static void AddModelError( this ControllerBase controller, Exception e ) => controller.ModelState.AddError( e );
 }

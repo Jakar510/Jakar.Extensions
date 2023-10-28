@@ -8,7 +8,7 @@ using SmtpClient = MailKit.Net.Smtp.SmtpClient;
 namespace Jakar.Database;
 
 
-[SuppressMessage( "ReSharper", "SuggestBaseTypeForParameterInConstructor" )]
+[ SuppressMessage( "ReSharper", "SuggestBaseTypeForParameterInConstructor" ) ]
 public class Emailer
 {
     private readonly IConfiguration _configuration;
@@ -31,24 +31,12 @@ public class Emailer
 
     public static ValueTask SendAsync( EmailSettings settings, MailboxAddress target, string subject, string body, CancellationToken token ) => SendAsync( settings, target, Array.Empty<Attachment>(), subject, body, token );
     public static ValueTask SendAsync( EmailSettings settings, MailboxAddress target, IEnumerable<Attachment> attachments, string subject, string body, CancellationToken token ) =>
-        SendAsync( settings,
-                   EmailBuilder.From( settings.Address() )
-                               .To( target )
-                               .WithAttachment( attachments )
-                               .WithSubject( subject )
-                               .WithBody( body ),
-                   token );
+        SendAsync( settings, EmailBuilder.From( settings.Address() ).To( target ).WithAttachment( attachments ).WithSubject( subject ).WithBody( body ), token );
     public static ValueTask SendAsync( EmailSettings settings, IEnumerable<MailboxAddress> targets, string subject, string body, CancellationToken token ) => SendAsync( settings, targets, Array.Empty<Attachment>(), subject, body, token );
     public static ValueTask SendAsync( EmailSettings settings, IEnumerable<MailboxAddress> targets, string subject, string body, CancellationToken token, params Attachment[] attachments ) =>
         SendAsync( settings, targets, attachments, subject, body, token );
     public static ValueTask SendAsync( EmailSettings settings, IEnumerable<MailboxAddress> targets, IEnumerable<Attachment> attachments, string subject, string body, CancellationToken token ) =>
-        SendAsync( settings,
-                   EmailBuilder.From( settings.Address() )
-                               .To( targets )
-                               .WithAttachment( attachments )
-                               .WithSubject( subject )
-                               .WithBody( body ),
-                   token );
+        SendAsync( settings, EmailBuilder.From( settings.Address() ).To( targets ).WithAttachment( attachments ).WithSubject( subject ).WithBody( body ), token );
     public static async ValueTask SendAsync( EmailSettings settings, MimeMessage message, CancellationToken token = default )
     {
         using var client = new SmtpClient();
@@ -70,10 +58,7 @@ public class Emailer
         string subject = _options.VerifySubject ?? _options.DefaultSubject;
         string content = await _tokenService.CreateContent( subject, user, types, token );
 
-        EmailBuilder builder = EmailBuilder.From( _options.GetSender() )
-                                           .To( MailboxAddress.Parse( user.Email ) )
-                                           .WithSubject( subject )
-                                           .WithBody( content );
+        EmailBuilder builder = EmailBuilder.From( _options.GetSender() ).To( MailboxAddress.Parse( user.Email ) ).WithSubject( subject ).WithBody( content );
 
         await SendAsync( builder, token );
     }
@@ -82,24 +67,16 @@ public class Emailer
         string subject = _options.VerifySubject ?? _options.DefaultSubject;
         string content = await _tokenService.CreateHTMLContent( subject, user, types, token );
 
-        EmailBuilder builder = EmailBuilder.From( _options.GetSender() )
-                                           .To( MailboxAddress.Parse( user.Email ) )
-                                           .WithSubject( subject )
-                                           .WithHTML( content );
+        EmailBuilder builder = EmailBuilder.From( _options.GetSender() ).To( MailboxAddress.Parse( user.Email ) ).WithSubject( subject ).WithHTML( content );
 
         await SendAsync( builder, token );
     }
 
 
-    private ValueTask SendAsync( MimeMessage message, CancellationToken token = default ) => SendAsync( _Settings,                          message, token );
-    public ValueTask SendAsync( string?      email,   string            subject, string body ) => SendAsync( MailboxAddress.Parse( email ), subject, body, default );
+    private ValueTask SendAsync( MimeMessage message, CancellationToken token = default )      => SendAsync( _Settings,                     message, token );
+    public  ValueTask SendAsync( string?     email,   string            subject, string body ) => SendAsync( MailboxAddress.Parse( email ), subject, body, default );
     public ValueTask SendAsync( MailboxAddress target, string subject, string body, CancellationToken token, params Attachment[] attachments ) =>
-        SendAsync( EmailBuilder.From( _options.GetSender() )
-                               .To( target )
-                               .WithAttachment( attachments )
-                               .WithSubject( subject )
-                               .WithBody( body ),
-                   token );
+        SendAsync( EmailBuilder.From( _options.GetSender() ).To( target ).WithAttachment( attachments ).WithSubject( subject ).WithBody( body ), token );
     public async ValueTask SendAsync( EmailBuilder builder, CancellationToken token )
     {
         try
@@ -107,14 +84,7 @@ public class Emailer
             MimeMessage message = await builder.Create();
             await SendAsync( message, token );
         }
-        catch ( Exception e )
-        {
-            _logger.LogError( e,
-                              "{ClassName}.'{Caller}'",
-                              GetType()
-                                 .Name,
-                              nameof(SendAsync) );
-        }
+        catch ( Exception e ) { _logger.LogError( e, "{ClassName}.'{Caller}'", GetType().Name, nameof(SendAsync) ); }
     }
 
 

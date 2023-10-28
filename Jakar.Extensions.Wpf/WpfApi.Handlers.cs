@@ -1,5 +1,4 @@
-﻿#nullable enable
-namespace Jakar.Extensions.Wpf;
+﻿namespace Jakar.Extensions.Wpf;
 
 
 public static partial class WpfApi
@@ -15,8 +14,7 @@ public static partial class WpfApi
 
         if ( startDate.HasValue && dt < startDate.Value ) { picker.SelectedDate = dt = startDate.Value.Date; }
 
-        return dt.AddTicks( maxTime )
-                 .ToUniversalTime();
+        return dt.AddTicks( maxTime ).ToUniversalTime();
     }
 
 

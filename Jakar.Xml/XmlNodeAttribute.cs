@@ -1,5 +1,4 @@
-﻿#nullable enable
-using System;
+﻿using System;
 using System.Reflection;
 
 
@@ -43,7 +42,7 @@ public sealed class XmlNodeAttribute : Attribute
         return flags;
     }
     internal bool ShouldIncludeAttributes() => (Include & XmlInclude.Attributes) > 0;
-    internal bool ShouldIncludeFields() => (Include & XmlInclude.Fields) > 0;
+    internal bool ShouldIncludeFields()     => (Include & XmlInclude.Fields)     > 0;
 
 
     internal bool ShouldIncludeProperties() => (Include & XmlInclude.Properties) > 0;

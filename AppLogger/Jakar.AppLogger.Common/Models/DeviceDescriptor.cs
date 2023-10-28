@@ -1,5 +1,4 @@
-﻿using CliWrap;
-using Microsoft.Win32;
+﻿using Microsoft.Win32;
 
 
 
@@ -45,8 +44,8 @@ public sealed record DeviceDescriptor( int?         AppBuild,
                                                       device.HwInfo ) { }
 
 
-    public static DeviceDescriptor Create( AppVersion appVersion, string deviceID, HwInfo? hwInfo = default, int? osApiLevel = default )
-    {
+    public static DeviceDescriptor Create( AppVersion appVersion, string deviceID, HwInfo? hwInfo = default, int? osApiLevel = default ) =>
+
         // #if __IOS__
         //     deviceID = UIDevice.CurrentDevice.IdentifierForVendor.AsString();
         // #elif __ANDROID__
@@ -54,41 +53,31 @@ public sealed record DeviceDescriptor( int?         AppBuild,
         // #else
         //         deviceID = info.DeviceID();
         // #endif
-
-
         // string? sdkVersion = typeof(DeviceDescriptor).GetTypeInfo().Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
-
-        return new DeviceDescriptor( appVersion.Build ??
-                                     GetFileVersion()
-                                        .Build,
-                                     Assembly.GetEntryAssembly()
-                                            ?.EntryPoint?.DeclaringType?.Namespace,
-                                     appVersion,
-                                     Environment.OSVersion.VersionString,
-                                     osApiLevel,
-                                     OsVersion: Environment.OSVersion.Version,
-                                     RuntimeInformation.FrameworkDescription,
-                                     RuntimeEnvironment.GetSystemVersion(),
-                                     CultureInfo.CurrentCulture.Name,
-                                     deviceID,
-                                     GetDeviceModel(),
-                                     Environment.OSVersion.Platform,
-                                     RuntimeInformation.ProcessArchitecture,
-                                     TimeZoneInfo.Local.BaseUtcOffset,
-                                     hwInfo );
-    }
+        new(appVersion.Build ?? GetFileVersion().Build,
+            Assembly.GetEntryAssembly()?.EntryPoint?.DeclaringType?.Namespace,
+            appVersion,
+            Environment.OSVersion.VersionString,
+            osApiLevel,
+            Environment.OSVersion.Version,
+            RuntimeInformation.FrameworkDescription,
+            RuntimeEnvironment.GetSystemVersion(),
+            CultureInfo.CurrentCulture.Name,
+            deviceID,
+            GetDeviceModel(),
+            Environment.OSVersion.Platform,
+            RuntimeInformation.ProcessArchitecture,
+            TimeZoneInfo.Local.BaseUtcOffset,
+            hwInfo);
 
 
     public static AppVersion GetFileVersion()
     {
-        string? fileName = Assembly.GetEntryAssembly()
-                                  ?.Location;
+        string? fileName = Assembly.GetEntryAssembly()?.Location;
 
         if ( string.IsNullOrWhiteSpace( fileName ) ) { fileName = Environment.GetCommandLineArgs()[0]; }
 
-        return FileVersionInfo.GetVersionInfo( fileName )
-                              .FileVersion ??
-               UNKNOWN;
+        return FileVersionInfo.GetVersionInfo( fileName ).FileVersion ?? UNKNOWN;
     }
 
 
@@ -117,40 +106,38 @@ public sealed record DeviceDescriptor( int?         AppBuild,
 
         if ( RuntimeInformation.IsOSPlatform( OSPlatform.Windows ) )
         {
-            Process process = new Process();
+            var process = new Process();
 
-            ProcessStartInfo processStartInfo = new ProcessStartInfo
-                                                {
-                                                    WindowStyle            = ProcessWindowStyle.Hidden,
-                                                    FileName               = "/bin/bash",
-                                                    Arguments              = @"wmic computersystem get model",
-                                                    RedirectStandardOutput = true,
-                                                    RedirectStandardError  = true,
-                                                    UseShellExecute        = false
-                                                };
+            var processStartInfo = new ProcessStartInfo
+                                   {
+                                       WindowStyle            = ProcessWindowStyle.Hidden,
+                                       FileName               = "/bin/bash",
+                                       Arguments              = @"wmic computersystem get model",
+                                       RedirectStandardOutput = true,
+                                       RedirectStandardError  = true,
+                                       UseShellExecute        = false
+                                   };
 
             process.StartInfo = processStartInfo;
             process.Start();
 
-            return process.StandardOutput.ReadToEnd()
-                          .Replace( "Model", "", StringComparison.OrdinalIgnoreCase )
-                          .Trim();
+            return process.StandardOutput.ReadToEnd().Replace( "Model", "", StringComparison.OrdinalIgnoreCase ).Trim();
         }
 
 
         if ( RuntimeInformation.IsOSPlatform( OSPlatform.Linux ) )
         {
-            Process process = new Process();
+            var process = new Process();
 
-            ProcessStartInfo processStartInfo = new ProcessStartInfo
-                                                {
-                                                    WindowStyle            = ProcessWindowStyle.Hidden,
-                                                    FileName               = "/bin/bash",
-                                                    Arguments              = @"sudo dmidecode | less | grep Version | sed -n '2p'",
-                                                    RedirectStandardOutput = true,
-                                                    RedirectStandardError  = true,
-                                                    UseShellExecute        = false
-                                                };
+            var processStartInfo = new ProcessStartInfo
+                                   {
+                                       WindowStyle            = ProcessWindowStyle.Hidden,
+                                       FileName               = "/bin/bash",
+                                       Arguments              = @"sudo dmidecode | less | grep Version | sed -n '2p'",
+                                       RedirectStandardOutput = true,
+                                       RedirectStandardError  = true,
+                                       UseShellExecute        = false
+                                   };
 
             process.StartInfo = processStartInfo;
             process.Start();
@@ -161,17 +148,17 @@ public sealed record DeviceDescriptor( int?         AppBuild,
 
         if ( RuntimeInformation.IsOSPlatform( OSPlatform.OSX ) )
         {
-            Process process = new Process();
+            var process = new Process();
 
-            ProcessStartInfo processStartInfo = new ProcessStartInfo
-                                                {
-                                                    WindowStyle            = ProcessWindowStyle.Hidden,
-                                                    FileName               = "/bin/bash",
-                                                    Arguments              = @"sysctl hw.model",
-                                                    RedirectStandardOutput = true,
-                                                    RedirectStandardError  = true,
-                                                    UseShellExecute        = false
-                                                };
+            var processStartInfo = new ProcessStartInfo
+                                   {
+                                       WindowStyle            = ProcessWindowStyle.Hidden,
+                                       FileName               = "/bin/bash",
+                                       Arguments              = @"sysctl hw.model",
+                                       RedirectStandardOutput = true,
+                                       RedirectStandardError  = true,
+                                       UseShellExecute        = false
+                                   };
 
             process.StartInfo = processStartInfo;
             process.Start();
@@ -205,9 +192,7 @@ public sealed record DeviceDescriptor( int?         AppBuild,
             object? version = registryKey.GetValue( "CurrentVersion", "0.0" );
             object? build   = registryKey.GetValue( "CurrentBuild",   "0" );
 
-            string[]? strArray = registryKey.GetValue( "BuildLabEx" )
-                                           ?.ToString()
-                                           ?.Split( '.' );
+            string[]? strArray = registryKey.GetValue( "BuildLabEx" )?.ToString()?.Split( '.' );
 
             string str = strArray is null || strArray.Length < 2
                              ? "0"

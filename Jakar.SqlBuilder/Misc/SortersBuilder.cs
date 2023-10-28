@@ -1,5 +1,4 @@
-﻿#nullable enable
-namespace Jakar.SqlBuilder;
+﻿namespace Jakar.SqlBuilder;
 
 
 public struct SortersBuilder<TNext>
@@ -15,9 +14,7 @@ public struct SortersBuilder<TNext>
 
     /// <summary> Ends with a ASC and returns to <typeparamref name="TNext"/> </summary>
     /// <example> SELECT * FROM Customers ORDER BY Country ASC, CustomerName DESC; </example>
-    /// <returns>
-    ///     <typeparamref name="TNext"/>
-    /// </returns>
+    /// <returns> <typeparamref name="TNext"/> </returns>
     public TNext Ascending()
     {
         _builder.Add( KeyWords.ASC );
@@ -26,9 +23,7 @@ public struct SortersBuilder<TNext>
 
     /// <summary> continues previous clause and adds <paramref name="columnName"/> followed by ASC </summary>
     /// <example> SELECT * FROM Customers ORDER BY Country ASC, CustomerName DESC; </example>
-    /// <returns>
-    ///     <typeparamref name="TNext"/>
-    /// </returns>
+    /// <returns> <typeparamref name="TNext"/> </returns>
     public TNext Ascending( string columnName )
     {
         _builder.Add( columnName, KeyWords.ASC );
@@ -38,9 +33,7 @@ public struct SortersBuilder<TNext>
 
     /// <summary> Ends with a DESC and returns to <typeparamref name="TNext"/> </summary>
     /// <example> SELECT * FROM Customers ORDER BY Country ASC, CustomerName DESC; </example>
-    /// <returns>
-    ///     <typeparamref name="TNext"/>
-    /// </returns>
+    /// <returns> <typeparamref name="TNext"/> </returns>
     public TNext Descending()
     {
         _builder.Add( KeyWords.DESC );
@@ -49,9 +42,7 @@ public struct SortersBuilder<TNext>
 
     /// <summary> continues previous clause and adds <paramref name="columnName"/> followed by DESC </summary>
     /// <example> SELECT * FROM Customers ORDER BY Country ASC, CustomerName DESC; </example>
-    /// <returns>
-    ///     <typeparamref name="TNext"/>
-    /// </returns>
+    /// <returns> <typeparamref name="TNext"/> </returns>
     public TNext Descending( string columnName )
     {
         _builder.Add( columnName, KeyWords.DESC );

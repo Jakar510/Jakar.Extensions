@@ -6,17 +6,10 @@ namespace Jakar.Database;
 
 public class CreateUser : ObservableClass, ILoginRequest, IVerifyRequestProvider
 {
-    private      string    _confirmPassword   = string.Empty;
-    private      string    _userLogin         = string.Empty;
-    private      string    _userPassword      = string.Empty;
-    private      UserData? _user;
-
-
-    public virtual bool IsValid => !string.IsNullOrWhiteSpace( UserLogin ) &&
-                                   UserLogin.IsEmailAddress() &&
-                                   !string.IsNullOrWhiteSpace( UserPassword ) &&
-                                   !string.IsNullOrWhiteSpace( ConfirmPassword ) &&
-                                   string.Equals( UserPassword, ConfirmPassword, StringComparison.Ordinal );
+    private string    _confirmPassword = string.Empty;
+    private string    _userLogin       = string.Empty;
+    private string    _userPassword    = string.Empty;
+    private UserData? _user;
 
     public virtual string ConfirmPassword
     {
@@ -24,24 +17,6 @@ public class CreateUser : ObservableClass, ILoginRequest, IVerifyRequestProvider
         set
         {
             if ( SetProperty( ref _confirmPassword, value ) ) { OnPropertyChanged( nameof(IsValid) ); }
-        }
-    }
-    public virtual string UserLogin
-    {
-        get => _userLogin;
-        set
-        {
-            if ( !SetProperty( ref _userLogin, value ) ) { return; }
-
-            OnPropertyChanged( nameof(IsValid) );
-        }
-    }
-    public virtual string UserPassword
-    {
-        get => _userPassword;
-        set
-        {
-            if ( SetProperty( ref _userPassword, value ) ) { OnPropertyChanged( nameof(IsValid) ); }
         }
     }
     public virtual UserData Data
@@ -61,6 +36,32 @@ public class CreateUser : ObservableClass, ILoginRequest, IVerifyRequestProvider
             if ( !SetProperty( ref _user, value ) ) { return; }
 
             if ( _user is not null ) { _user.PropertyChanged += User_OnPropertyChanged; }
+        }
+    }
+
+
+    public virtual bool IsValid => !string.IsNullOrWhiteSpace( UserLogin )       &&
+                                   UserLogin.IsEmailAddress()                    &&
+                                   !string.IsNullOrWhiteSpace( UserPassword )    &&
+                                   !string.IsNullOrWhiteSpace( ConfirmPassword ) &&
+                                   string.Equals( UserPassword, ConfirmPassword, StringComparison.Ordinal );
+
+    public virtual string UserLogin
+    {
+        get => _userLogin;
+        set
+        {
+            if ( !SetProperty( ref _userLogin, value ) ) { return; }
+
+            OnPropertyChanged( nameof(IsValid) );
+        }
+    }
+    public virtual string UserPassword
+    {
+        get => _userPassword;
+        set
+        {
+            if ( SetProperty( ref _userPassword, value ) ) { OnPropertyChanged( nameof(IsValid) ); }
         }
     }
 
@@ -96,8 +97,8 @@ public class CreateUser : ObservableClass, ILoginRequest, IVerifyRequestProvider
     }
 
 
-    protected void User_OnPropertyChanged( object? sender, PropertyChangedEventArgs e ) => OnPropertyChanged( nameof(IsValid) );
-    public VerifyRequest<CreateUser> GetVerifyRequest() => new(UserLogin, UserPassword, this);
+    protected void                       User_OnPropertyChanged( object? sender, PropertyChangedEventArgs e ) => OnPropertyChanged( nameof(IsValid) );
+    public    VerifyRequest<CreateUser>  GetVerifyRequest() => new(UserLogin, UserPassword, this);
     VerifyRequest IVerifyRequestProvider.GetVerifyRequest() => GetVerifyRequest();
 
 
@@ -108,8 +109,8 @@ public class CreateUser : ObservableClass, ILoginRequest, IVerifyRequestProvider
         if ( string.IsNullOrWhiteSpace( UserPassword ) || string.IsNullOrWhiteSpace( ConfirmPassword ) ) { errors.Add( "Password must not be empty" ); }
 
         if ( !string.Equals( UserPassword, ConfirmPassword, StringComparison.Ordinal ) ) { errors.Add( "Passwords be equal" ); }
-        
-        if ( !Data.IsValidEmail ) { errors.Add("Invalid Email"); }
+
+        if ( !Data.IsValidEmail ) { errors.Add( "Invalid Email" ); }
 
         return errors.Count == 0;
     }

@@ -5,9 +5,7 @@
 namespace Jakar.Extensions;
 
 
-/// <summary>
-///     <see href="https://www.educative.io/edpresso/how-to-generate-a-random-string--c-sharp"/>
-/// </summary>
+/// <summary> <see href="https://www.educative.io/edpresso/how-to-generate-a-random-string--c-sharp"/> </summary>
 public class Randoms : ObservableClass
 {
     public static char[]                AlphaNumeric { get; }      = @"abcdefghijklmnopqrstuvwxyzABCDEFGHJKLMNOPQRSTUVWXYZ0123456789".ToArray();

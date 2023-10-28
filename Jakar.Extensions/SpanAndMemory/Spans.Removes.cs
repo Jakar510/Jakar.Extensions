@@ -108,8 +108,7 @@ public static partial class Spans
 
         for ( int i = 0; i < value.Length; i++ )
         {
-            if ( value[i]
-               .Equals( c ) )
+            if ( value[i].Equals( c ) )
             {
                 offset++;
                 continue;
@@ -133,8 +132,7 @@ public static partial class Spans
 
             foreach ( T item in removed )
             {
-                if ( !value[i]
-                        .Equals( item ) ) { continue; }
+                if ( !value[i].Equals( item ) ) { continue; }
 
                 offset++;
                 skip = true;

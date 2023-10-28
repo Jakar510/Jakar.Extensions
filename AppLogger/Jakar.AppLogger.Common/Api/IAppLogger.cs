@@ -4,7 +4,7 @@
 namespace Jakar.AppLogger.Common;
 
 
-[SuppressMessage( "ReSharper", "UnusedMemberInSuper.Global" )]
+[ SuppressMessage( "ReSharper", "UnusedMemberInSuper.Global" ) ]
 public interface IAppLogger : ILogger, ILoggerProvider, IHostedService, IAsyncDisposable
 {
     public LoggingSettings  Config  { get; }
@@ -18,10 +18,10 @@ public interface IAppLogger : ILogger, ILoggerProvider, IHostedService, IAsyncDi
     public void TrackError( Exception e, EventID  eventID, IEnumerable<LoggerAttachment> attachments,  IDictionary<string, JToken?>? eventDetails = default );
 
 
-    public void TrackEvent<T>( LogLevel level = LogLevel.Trace, IDictionary<string, JToken?>? eventDetails = default, [CallerMemberName] string? caller = default );
+    public void TrackEvent<T>( LogLevel level = LogLevel.Trace, IDictionary<string, JToken?>? eventDetails = default, [ CallerMemberName ] string? caller = default );
 
 
-    public void TrackEvent<T>( T   _,      LogLevel level = LogLevel.Trace, IDictionary<string, JToken?>? eventDetails = default, [CallerMemberName] string? caller = default );
+    public void TrackEvent<T>( T   _,      LogLevel level = LogLevel.Trace, IDictionary<string, JToken?>? eventDetails = default, [ CallerMemberName ] string? caller = default );
     public void TrackEvent( string source, LogLevel level = LogLevel.Trace, IDictionary<string, JToken?>? eventDetails = null );
 
 

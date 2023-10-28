@@ -1,6 +1,4 @@
 ﻿namespace Jakar.Extensions;
-#nullable enable
-
 
 
 public interface ICurrentLocation<TID> : IUniqueID<TID>, IEquatable<ICurrentLocation<TID>> where TID : struct, IComparable<TID>, IEquatable<TID>
@@ -20,21 +18,21 @@ public interface ICurrentLocation<TID> : IUniqueID<TID>, IEquatable<ICurrentLoca
 
 
 
-[Serializable]
+[ Serializable ]
 public sealed class CurrentLocation<TID> : BaseJsonModel, ICurrentLocation<TID>, IDataBaseIgnore where TID : struct, IComparable<TID>, IEquatable<TID>
 {
-    public       double?           Accuracy                { get; init; }
-    public       double?           Altitude                { get; init; }
-    public       AltitudeReference AltitudeReferenceSystem { get; init; }
-    public       double?           Course                  { get; init; }
-    [Key] public TID               ID                      { get; init; }
-    public       Guid              InstanceID              { get; init; } = Guid.Empty;
-    public       bool              IsFromMockProvider      { get; init; }
-    public       double            Latitude                { get; init; }
-    public       double            Longitude               { get; init; }
-    public       double?           Speed                   { get; init; }
-    public       DateTimeOffset    Timestamp               { get; init; }
-    public       double?           VerticalAccuracy        { get; init; }
+    public         double?           Accuracy                { get; init; }
+    public         double?           Altitude                { get; init; }
+    public         AltitudeReference AltitudeReferenceSystem { get; init; }
+    public         double?           Course                  { get; init; }
+    [ Key ] public TID               ID                      { get; init; }
+    public         Guid              InstanceID              { get; init; } = Guid.Empty;
+    public         bool              IsFromMockProvider      { get; init; }
+    public         double            Latitude                { get; init; }
+    public         double            Longitude               { get; init; }
+    public         double?           Speed                   { get; init; }
+    public         DateTimeOffset    Timestamp               { get; init; }
+    public         double?           VerticalAccuracy        { get; init; }
 
 
     public CurrentLocation() { }
@@ -69,7 +67,7 @@ public sealed class CurrentLocation<TID> : BaseJsonModel, ICurrentLocation<TID>,
         {
             DistanceUnit.Kilometers => UnitConverters.CoordinatesToKilometers( latitudeStart, longitudeStart, latitudeEnd, longitudeEnd ),
             DistanceUnit.Miles      => UnitConverters.CoordinatesToMiles( latitudeStart, longitudeStart, latitudeEnd, longitudeEnd ),
-            _                       => throw new OutOfRangeException( nameof(unit), unit ),
+            _                       => throw new OutOfRangeException( nameof(unit), unit )
         };
     public bool EqualInstance( ICurrentLocation<TID> other ) => InstanceID.Equals( other.InstanceID );
     public override bool Equals( object? obj )
@@ -130,7 +128,7 @@ public sealed class CurrentLocation<TID> : BaseJsonModel, ICurrentLocation<TID>,
     }
 
 
-    public double CalculateDistance( ICurrentLocation<TID> locationStart, DistanceUnit units ) => CalculateDistance( locationStart,                              this,           units );
+    public double CalculateDistance( ICurrentLocation<TID> locationStart, DistanceUnit units )                              => CalculateDistance( locationStart, this,           units );
     public double CalculateDistance( double                latitudeStart, double       longitudeStart, DistanceUnit units ) => CalculateDistance( latitudeStart, longitudeStart, this, units );
     public override int GetHashCode()
     {
@@ -155,8 +153,16 @@ public sealed class CurrentLocation<TID> : BaseJsonModel, ICurrentLocation<TID>,
 
         if ( ReferenceEquals( this, other ) ) { return true; }
 
-        return InstanceID.Equals( other.InstanceID ) && Timestamp.Equals( other.Timestamp ) && Latitude.Equals( other.Latitude ) && Longitude.Equals( other.Longitude ) && Nullable.Equals( Altitude, other.Altitude ) &&
-               Nullable.Equals( Accuracy, other.Accuracy ) && Nullable.Equals( VerticalAccuracy, other.VerticalAccuracy ) && Nullable.Equals( Speed, other.Speed ) && Nullable.Equals( Course, other.Course ) &&
-               IsFromMockProvider == other.IsFromMockProvider && AltitudeReferenceSystem == other.AltitudeReferenceSystem;
+        return InstanceID.Equals( other.InstanceID )                       &&
+               Timestamp.Equals( other.Timestamp )                         &&
+               Latitude.Equals( other.Latitude )                           &&
+               Longitude.Equals( other.Longitude )                         &&
+               Nullable.Equals( Altitude,         other.Altitude )         &&
+               Nullable.Equals( Accuracy,         other.Accuracy )         &&
+               Nullable.Equals( VerticalAccuracy, other.VerticalAccuracy ) &&
+               Nullable.Equals( Speed,            other.Speed )            &&
+               Nullable.Equals( Course,           other.Course )           &&
+               IsFromMockProvider      == other.IsFromMockProvider         &&
+               AltitudeReferenceSystem == other.AltitudeReferenceSystem;
     }
 }

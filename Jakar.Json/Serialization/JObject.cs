@@ -1,10 +1,8 @@
 ﻿// Jakar.Extensions :: Jakar.Xml
 // 04/26/2022  9:59 AM
 
-#nullable enable
 using System.Numerics;
 using System.Runtime.CompilerServices;
-using OneOf.Types;
 
 
 
@@ -121,7 +119,7 @@ public ref struct JObject
                    string v           => Add( key, v ),
                    char v             => Add( key, v ),
                    ISpanFormattable v => Add( v,   key ),
-                   _                  => Add( key, pair.Value.ToString() ?? JWriter.NULL ),
+                   _                  => Add( key, pair.Value.ToString() ?? JWriter.NULL )
                };
     }
 

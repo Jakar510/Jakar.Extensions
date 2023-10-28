@@ -3,7 +3,7 @@
 
 
 using System.Text.Json;
-using Microsoft.AspNetCore.Http.HttpResults;
+using JsonSerializer = Newtonsoft.Json.JsonSerializer;
 
 
 
@@ -76,7 +76,7 @@ public readonly record struct RecordID<TRecord>( Guid Value ) : IComparable<Reco
 
     public class RecordIDJsonNetConverter : JsonConverter<RecordID<TRecord>>
     {
-        public override RecordID<TRecord> ReadJson( JsonReader reader, Type objectType, RecordID<TRecord> existingValue, bool hasExistingValue, Newtonsoft.Json.JsonSerializer serializer )
+        public override RecordID<TRecord> ReadJson( JsonReader reader, Type objectType, RecordID<TRecord> existingValue, bool hasExistingValue, JsonSerializer serializer )
         {
             var guid = serializer.Deserialize<Guid?>( reader );
 
@@ -85,7 +85,7 @@ public readonly record struct RecordID<TRecord>( Guid Value ) : IComparable<Reco
                        : default;
         }
 
-        public override void WriteJson( JsonWriter writer, RecordID<TRecord> value, Newtonsoft.Json.JsonSerializer serializer ) => serializer.Serialize( writer, value.Value );
+        public override void WriteJson( JsonWriter writer, RecordID<TRecord> value, JsonSerializer serializer ) => serializer.Serialize( writer, value.Value );
     }
 
 

@@ -1,7 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 04/11/2022  9:54 AM
 
-#nullable enable
 using System.Linq.Expressions;
 
 
@@ -12,16 +11,12 @@ namespace Jakar.Extensions;
 /// <summary> Inspired by <see cref="ValueOf{TValue,TThis}"/> </summary>
 /// <typeparam name="TValue"> </typeparam>
 /// <typeparam name="TThis"> </typeparam>
-[SuppressMessage( "ReSharper", "ConditionalAccessQualifierIsNonNullableAccordingToAPIContract" )]
+[ SuppressMessage( "ReSharper", "ConditionalAccessQualifierIsNonNullableAccordingToAPIContract" ) ]
 public abstract class ValidValueOf<TValue, TThis> : IComparable<ValidValueOf<TValue, TThis>>, IEquatable<ValidValueOf<TValue, TThis>>, IComparable where TThis : ValidValueOf<TValue, TThis>, new()
                                                                                                                                                    where TValue : IComparable<TValue>, IEquatable<TValue>
 {
-    protected static readonly Func<TThis> _factory = (Func<TThis>)Expression.Lambda( typeof(Func<TThis>),
-                                                                                     Expression.New( typeof(TThis).GetTypeInfo()
-                                                                                                                  .DeclaredConstructors.First( x => x.GetParameters()
-                                                                                                                                                     .IsEmpty() ),
-                                                                                                     Array.Empty<Expression>() ) )
-                                                                            .Compile();
+    protected static readonly Func<TThis> _factory =
+        (Func<TThis>)Expression.Lambda( typeof(Func<TThis>), Expression.New( typeof(TThis).GetTypeInfo().DeclaredConstructors.First( x => x.GetParameters().IsEmpty() ), Array.Empty<Expression>() ) ).Compile();
     public TValue Value { get; protected set; }
 
     // ReSharper disable once NullableWarningSuppressionIsUsed
@@ -48,7 +43,7 @@ public abstract class ValidValueOf<TValue, TThis> : IComparable<ValidValueOf<TVa
     public static bool operator <( ValidValueOf<TValue, TThis>  left, ValidValueOf<TValue, TThis> right ) => Compare( left.Value, right.Value ) < 0;
     public static bool operator <=( ValidValueOf<TValue, TThis> left, ValidValueOf<TValue, TThis> right ) => Compare( left.Value, right.Value ) <= 0;
 
-    public static bool TryCreate( TValue item, [NotNullWhen( true )] out TThis? thisValue )
+    public static bool TryCreate( TValue item, [ NotNullWhen( true ) ] out TThis? thisValue )
     {
         TThis self = _factory();
         self.Value = item;
@@ -98,7 +93,7 @@ public abstract class ValidValueOf<TValue, TThis> : IComparable<ValidValueOf<TVa
     public override string? ToString() => Value?.ToString();
 
 
-    [DoesNotReturn] protected virtual void ThrowError() => throw new FormatException( $"Provided Value was in the wrong format: '{Value}'" );
+    [ DoesNotReturn ] protected virtual void ThrowError() => throw new FormatException( $"Provided Value was in the wrong format: '{Value}'" );
 
     protected void Validate()
     {

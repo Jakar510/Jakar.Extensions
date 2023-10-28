@@ -5,9 +5,7 @@ namespace Jakar.Database.DbMigrations;
 
 
 /// <summary>
-///     <para>
-///         <see href="https://fluentmigrator.github.io/articles/fluent-interface.html"/>
-///     </para>
+///     <para> <see href="https://fluentmigrator.github.io/articles/fluent-interface.html"/> </para>
 /// </summary>
 public abstract class Migration<TRecord> : Migration where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
@@ -17,16 +15,14 @@ public abstract class Migration<TRecord> : Migration where TRecord : TableRecord
     protected Migration() : base() { }
 
 
-    public override void GetUpExpressions( IMigrationContext context )
-    {
+    public override void GetUpExpressions( IMigrationContext context ) =>
+
         // _dbContext = context.ServiceProvider.GetRequiredService<Database>();
         base.GetUpExpressions( context );
-    }
-    public override void GetDownExpressions( IMigrationContext context )
-    {
+    public override void GetDownExpressions( IMigrationContext context ) =>
+
         // _dbContext = context.ServiceProvider.GetRequiredService<Database>();
         base.GetDownExpressions( context );
-    }
 
 
     protected IAlterTableAddColumnOrAlterColumnOrSchemaOrDescriptionSyntax AlterTable() => Alter.Table( TableName );
@@ -36,18 +32,11 @@ public abstract class Migration<TRecord> : Migration where TRecord : TableRecord
     {
         ICreateTableWithColumnSyntax? table = Create.Table( TableName );
 
-        table.WithColumn( nameof(TableRecord<TRecord>.ID) )
-             .AsGuid()
-             .PrimaryKey();
+        table.WithColumn( nameof(TableRecord<TRecord>.ID) ).AsGuid().PrimaryKey();
 
-        table.WithColumn( nameof(TableRecord<TRecord>.DateCreated) )
-             .AsDateTimeOffset()
-             .NotNullable()
-             .WithDefaultValue( SystemMethods.CurrentUTCDateTime );
+        table.WithColumn( nameof(TableRecord<TRecord>.DateCreated) ).AsDateTimeOffset().NotNullable().WithDefaultValue( SystemMethods.CurrentUTCDateTime );
 
-        table.WithColumn( nameof(TableRecord<TRecord>.LastModified) )
-             .AsDateTimeOffset()
-             .Nullable();
+        table.WithColumn( nameof(TableRecord<TRecord>.LastModified) ).AsDateTimeOffset().Nullable();
 
         return table;
     }
@@ -57,31 +46,21 @@ public abstract class Migration<TRecord> : Migration where TRecord : TableRecord
 
 
     /// <param name="dataAsAnonymousType"> The columns and values to be used set </param>
-    protected IUpdateWhereSyntax UpdateTable( object dataAsAnonymousType ) => Update.Table( TableName )
-                                                                                    .Set( dataAsAnonymousType );
+    protected IUpdateWhereSyntax UpdateTable( object dataAsAnonymousType ) => Update.Table( TableName ).Set( dataAsAnonymousType );
 
 
     protected void DeleteTable() => Delete.Table( TableName );
 
 
-    protected void RenameTable( string name ) => Rename.Table( TableName )
-                                                       .To( name );
+    protected void RenameTable( string name ) => Rename.Table( TableName ).To( name );
 
 
-    protected void UniqueConstraint( string columnName ) => Create.UniqueConstraint()
-                                                                  .OnTable( TableName )
-                                                                  .Column( columnName );
-    protected void UniqueConstraint( string name, string columnName ) => Create.UniqueConstraint( name )
-                                                                               .OnTable( TableName )
-                                                                               .Column( columnName );
+    protected void UniqueConstraint( string columnName )              => Create.UniqueConstraint().OnTable( TableName ).Column( columnName );
+    protected void UniqueConstraint( string name, string columnName ) => Create.UniqueConstraint( name ).OnTable( TableName ).Column( columnName );
 
 
-    protected void UniqueConstraints( params string[] columnNames ) => Create.UniqueConstraint()
-                                                                             .OnTable( TableName )
-                                                                             .Columns( columnNames );
-    protected void UniqueConstraints( string name, params string[] columnNames ) => Create.UniqueConstraint( name )
-                                                                                          .OnTable( TableName )
-                                                                                          .Columns( columnNames );
+    protected void UniqueConstraints( params string[] columnNames )                       => Create.UniqueConstraint().OnTable( TableName ).Columns( columnNames );
+    protected void UniqueConstraints( string          name, params string[] columnNames ) => Create.UniqueConstraint( name ).OnTable( TableName ).Columns( columnNames );
 }
 
 
@@ -90,15 +69,11 @@ public abstract class OwnedMigration<TRecord> : Migration<TRecord> where TRecord
 {
     protected override ICreateTableWithColumnSyntax CreateTable()
     {
-        var table = base.CreateTable();
+        ICreateTableWithColumnSyntax table = base.CreateTable();
 
-        table.WithColumn( nameof(OwnedTableRecord<TRecord>.OwnerUserID) )
-             .AsGuid()
-             .Nullable();
+        table.WithColumn( nameof(OwnedTableRecord<TRecord>.OwnerUserID) ).AsGuid().Nullable();
 
-        table.WithColumn( nameof(OwnedTableRecord<TRecord>.CreatedBy) )
-             .AsGuid()
-             .Nullable();
+        table.WithColumn( nameof(OwnedTableRecord<TRecord>.CreatedBy) ).AsGuid().Nullable();
 
         return table;
     }

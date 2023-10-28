@@ -11,13 +11,9 @@ public abstract class MigrateUserRecoveryCodeRecord : Migration<UserRecoveryCode
     {
         ICreateTableWithColumnSyntax table = base.CreateTable();
 
-        table.WithColumn( nameof(UserRecoveryCodeRecord.KeyID) )
-             .AsGuid()
-             .NotNullable();
+        table.WithColumn( nameof(UserRecoveryCodeRecord.KeyID) ).AsGuid().NotNullable();
 
-        table.WithColumn( nameof(UserRecoveryCodeRecord.ValueID) )
-             .AsGuid()
-             .NotNullable();
+        table.WithColumn( nameof(UserRecoveryCodeRecord.ValueID) ).AsGuid().NotNullable();
 
         return table;
     }

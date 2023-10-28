@@ -1,7 +1,6 @@
 ﻿// unset
 
 
-#nullable enable
 namespace Jakar.Extensions;
 
 

@@ -1,7 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 05/17/2022  4:19 PM
 
-#nullable enable
 namespace Jakar.Extensions;
 
 

@@ -1,20 +1,17 @@
 ﻿namespace Jakar.Database.DbMigrations;
 
 
-[SuppressMessage( "ReSharper", "UnusedMethodReturnValue.Global" )]
+[ SuppressMessage( "ReSharper", "UnusedMethodReturnValue.Global" ) ]
 public static class MigrationExtensions
 {
-    /// <summary>
-    ///     <see href="https://github.com/fluentmigrator/fluentmigrator/issues/1038"/>
-    /// </summary>
+    /// <summary> <see href="https://github.com/fluentmigrator/fluentmigrator/issues/1038"/> </summary>
     public static bool CreateColumn_Enum( this ICreateTableColumnAsTypeSyntax col, PropertyInfo propertyInfo, Type propertyType )
     {
         if ( !propertyType.TryGetUnderlyingEnumType( out Type? enumType ) ) { return false; }
 
         ICreateTableColumnOptionOrWithColumnSyntax item;
 
-        DbType? type = propertyInfo.GetCustomAttribute<DataBaseTypeAttribute>()
-                                  ?.Type;
+        DbType? type = propertyInfo.GetCustomAttribute<DataBaseTypeAttribute>()?.Type;
 
         if ( type.HasValue )
         {
@@ -63,9 +60,7 @@ public static class MigrationExtensions
     }
 
 
-    /// <summary>
-    ///     <see href="https://stackoverflow.com/a/4963190/9530917"/>
-    /// </summary>
+    /// <summary> <see href="https://stackoverflow.com/a/4963190/9530917"/> </summary>
     /// <param name="col"> </param>
     /// <param name="propertyType"> </param>
     /// <returns> </returns>
@@ -88,9 +83,7 @@ public static class MigrationExtensions
 
         Type isExternalInitType = typeof(IsExternalInit);
 
-        return setMethod.ReturnParameter.GetRequiredCustomModifiers()
-                        .ToList()
-                        .Contains( isExternalInitType );
+        return setMethod.ReturnParameter.GetRequiredCustomModifiers().ToList().Contains( isExternalInitType );
     }
 
 
@@ -117,7 +110,7 @@ public static class MigrationExtensions
     }
 
 
-    public static bool TryGetUnderlyingEnumType( this Type propertyType, [NotNullWhen( true )] out DbType? dbType )
+    public static bool TryGetUnderlyingEnumType( this Type propertyType, [ NotNullWhen( true ) ] out DbType? dbType )
     {
         if ( propertyType.TryGetUnderlyingEnumType( out Type? type ) )
         {
@@ -134,29 +127,16 @@ public static class MigrationExtensions
     {
         if ( col.CreateColumn_Enum( propInfo, propertyType ) ) { return true; }
 
-        if ( propertyType == typeof(JObject) ||
-             propertyType == typeof(JToken) ||
-             propertyType == typeof(List<JObject>) ||
-             propertyType == typeof(List<JObject?>) ||
+        if ( propertyType == typeof(JObject)                      ||
+             propertyType == typeof(JToken)                       ||
+             propertyType == typeof(List<JObject>)                ||
+             propertyType == typeof(List<JObject?>)               ||
              propertyType == typeof(IDictionary<string, JToken?>) ||
-             propertyType == typeof(IDictionary<string, JToken>) )
-        {
-            return col.AsXml( int.MaxValue )
-                      .SetNullable( propInfo );
-        }
+             propertyType == typeof(IDictionary<string, JToken>) ) { return col.AsXml( int.MaxValue ).SetNullable( propInfo ); }
 
-        if ( propertyType.IsGenericType && propertyType.IsList() || propertyType.IsSet() || propertyType.IsCollection() )
-        {
-            return col.AsXml( int.MaxValue )
-                      .SetNullable( propInfo );
-        }
+        if ( propertyType.IsGenericType && propertyType.IsList() || propertyType.IsSet() || propertyType.IsCollection() ) { return col.AsXml( int.MaxValue ).SetNullable( propInfo ); }
 
-        if ( propInfo.GetCustomAttribute<DataBaseTypeAttribute>()
-                    ?.Type is DbType.Xml )
-        {
-            return col.AsXml( int.MaxValue )
-                      .SetNullable( propInfo );
-        }
+        if ( propInfo.GetCustomAttribute<DataBaseTypeAttribute>()?.Type is DbType.Xml ) { return col.AsXml( int.MaxValue ).SetNullable( propInfo ); }
 
         if ( propertyType.HasInterface<IDataBaseID>() ) { return col.CreateColumn_Reference( propertyType ); }
 
@@ -235,7 +215,7 @@ public static class MigrationExtensions
             columns[property.Name] = value switch
                                      {
                                          Enum => Convert.ChangeType( value, Enum.GetUnderlyingType( property.PropertyType ) ),
-                                         _    => value,
+                                         _    => value
                                      };
         }
 
@@ -243,9 +223,7 @@ public static class MigrationExtensions
     }
 
 
-    public static string ColumnName( this PropertyInfo prop ) => prop.GetCustomAttribute<ColumnAttribute>()
-                                                                    ?.Name ??
-                                                                 prop.Name;
+    public static string ColumnName( this PropertyInfo prop ) => prop.GetCustomAttribute<ColumnAttribute>()?.Name ?? prop.Name;
 
 
     public static string GetMappingTableName( this Type parent, PropertyInfo propertyInfo )
@@ -273,9 +251,7 @@ public static class MigrationExtensions
 
         if ( propertyType.IsEqualType( typeof(string) ) )
         {
-            return col.AsString( propInfo.GetCustomAttribute<MaxLengthAttribute>()
-                                        ?.Length ??
-                                 throw new InvalidOperationException( $"{propertyType.DeclaringType?.Name}.{propertyType.Name}.{propInfo.Name}" ) );
+            return col.AsString( propInfo.GetCustomAttribute<MaxLengthAttribute>()?.Length ?? throw new InvalidOperationException( $"{propertyType.DeclaringType?.Name}.{propertyType.Name}.{propInfo.Name}" ) );
         }
 
 
@@ -338,25 +314,13 @@ public static class MigrationExtensions
 
 
     public static void AsGuidKey( this ICreateTableColumnAsTypeSyntax col ) =>
-        col.AsGuid()
-           .NotNullable()
-           .PrimaryKey()
-           .Identity();
+        col.AsGuid().NotNullable().PrimaryKey().Identity();
     public static void AsIntKey( this ICreateTableColumnAsTypeSyntax col ) =>
-        col.AsInt32()
-           .NotNullable()
-           .PrimaryKey()
-           .Identity();
+        col.AsInt32().NotNullable().PrimaryKey().Identity();
     public static void AsLongKey( this ICreateTableColumnAsTypeSyntax col ) =>
-        col.AsInt64()
-           .NotNullable()
-           .PrimaryKey()
-           .Identity();
+        col.AsInt64().NotNullable().PrimaryKey().Identity();
     public static void AsStringKey( this ICreateTableColumnAsTypeSyntax col ) =>
-        col.AsString( int.MaxValue )
-           .NotNullable()
-           .PrimaryKey()
-           .Identity();
+        col.AsString( int.MaxValue ).NotNullable().PrimaryKey().Identity();
 
 
     public static void Throw( this Type classType, PropertyInfo prop )
@@ -414,15 +378,12 @@ public static class MigrationExtensions
 
         return builder;
     }
-    public static string GetConnectionString( IServiceProvider provider ) => GetConnectionString( provider, "DEFAULT" );
-    public static string GetConnectionString( IServiceProvider provider, string name ) => provider.GetRequiredService<IConfiguration>()
-                                                                                                  .GetConnectionString( name ) ??
-                                                                                          throw new KeyNotFoundException( name );
+    public static string GetConnectionString( IServiceProvider provider )              => GetConnectionString( provider, "DEFAULT" );
+    public static string GetConnectionString( IServiceProvider provider, string name ) => provider.GetRequiredService<IConfiguration>().GetConnectionString( name ) ?? throw new KeyNotFoundException( name );
 
 
     public static IMigrationRunnerBuilder ConfigureScanIn( IMigrationRunnerBuilder runner ) =>
-        runner.ScanIn( Assembly.GetEntryAssembly(), typeof(UserRecord).Assembly )
-              .For.All();
+        runner.ScanIn( Assembly.GetEntryAssembly(), typeof(UserRecord).Assembly ).For.All();
 
 
     //

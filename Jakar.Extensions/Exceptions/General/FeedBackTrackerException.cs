@@ -1,6 +1,4 @@
 ﻿namespace Jakar.Extensions;
-#nullable enable
-
 
 
 public class FeedBackTrackerException : Exception

@@ -21,9 +21,8 @@ public class UserRecordManager : UserManager<UserRecord>
 
 
     public override async Task<IList<Claim>> GetClaimsAsync( UserRecord user ) => await _database.TryCall( GetClaimsAsync, user, CancellationToken.None );
-    public async ValueTask<IList<Claim>> GetClaimsAsync( DbConnection connection, DbTransaction transaction, UserRecord user, CancellationToken token )
-    {
+    public async ValueTask<IList<Claim>> GetClaimsAsync( DbConnection connection, DbTransaction transaction, UserRecord user, CancellationToken token ) =>
+
         // return await base.GetClaimsAsync( user );
-        return await user.GetUserClaims( connection, transaction, _database, ClaimType.UserID | ClaimType.UserName | ClaimType.Role | ClaimType.GroupSid, token );
-    }
+        await user.GetUserClaims( connection, transaction, _database, ClaimType.UserID | ClaimType.UserName | ClaimType.Role | ClaimType.GroupSid, token );
 }

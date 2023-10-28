@@ -1,5 +1,4 @@
-﻿#nullable enable
-using Jakar.Extensions;
+﻿using Jakar.Extensions;
 
 
 
@@ -79,9 +78,7 @@ public struct SelectClauseBuilder<TNext>
     /// <example> SELECT Orders.OrderID, Customers.CustomerName, Orders.OrderDate </example>
     public SelectClauseBuilder<TNext> Next( params string[] columnNames )
     {
-        _builder.Begin()
-                .AddRange( ',', columnNames )
-                .End();
+        _builder.Begin().AddRange( ',', columnNames ).End();
 
         return this;
     }
@@ -89,9 +86,7 @@ public struct SelectClauseBuilder<TNext>
 
     public SelectClauseBuilder<TNext> Next<T>( params string[] columnNames )
     {
-        _builder.Begin()
-                .AddRange<T>( ',', columnNames )
-                .End();
+        _builder.Begin().AddRange<T>( ',', columnNames ).End();
 
         return this;
     }
@@ -104,10 +99,7 @@ public struct SelectClauseBuilder<TNext>
     ///     variable </summary>
     public SelectClauseBuilder<TNext> NextAs( string alias, params string[] columnNames )
     {
-        _builder.Begin()
-                .AddRange( ',', columnNames )
-                .End()
-                .Add( KeyWords.AS, alias );
+        _builder.Begin().AddRange( ',', columnNames ).End().Add( KeyWords.AS, alias );
 
         return this;
     }
@@ -120,10 +112,7 @@ public struct SelectClauseBuilder<TNext>
     /// </summary>
     public SelectClauseBuilder<TNext> NextAs<T>( string alias, params string[] columnNames )
     {
-        _builder.Begin()
-                .AddRange<T>( ',', columnNames )
-                .End()
-                .Add( KeyWords.AS, alias );
+        _builder.Begin().AddRange<T>( ',', columnNames ).End().Add( KeyWords.AS, alias );
 
         return this;
     }

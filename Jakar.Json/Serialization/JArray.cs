@@ -1,7 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Xml
 // 04/26/2022  9:56 AM
 
-#nullable enable
 using System.Numerics;
 
 

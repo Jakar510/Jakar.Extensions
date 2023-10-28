@@ -1,5 +1,4 @@
-﻿#nullable enable
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Reflection;
@@ -15,7 +14,7 @@ namespace Jakar.Xml;
 public interface IXmlizer
 {
     ReadOnlySpan<char> Name { get; set; }
-    void Serialize( in XObject node );
+    void               Serialize( in XObject node );
 }
 
 

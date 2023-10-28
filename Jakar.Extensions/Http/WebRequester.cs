@@ -7,9 +7,9 @@ namespace Jakar.Extensions;
 [ SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" ) ]
 public sealed partial class WebRequester : IDisposable
 {
-    private readonly ILogger?           _logger;
     private readonly HttpClient         _client;
     private readonly IHostInfo          _host;
+    private readonly ILogger?           _logger;
     private readonly RetryPolicy?       _retryPolicy;
     public           HttpRequestHeaders DefaultRequestHeaders => _client.DefaultRequestHeaders;
     public           Encoding           Encoding              { get; init; }
@@ -42,7 +42,7 @@ public sealed partial class WebRequester : IDisposable
 
         return CreateHandler( new HttpRequestMessage( method, url )
                               {
-                                  Content = value,
+                                  Content = value
                               },
                               token );
     }

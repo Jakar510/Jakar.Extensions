@@ -18,9 +18,9 @@ public readonly struct StopWatch : IDisposable
         _caller = caller;
         _start  = DateTime.Now;
     }
-    public void Dispose() => Console.WriteLine( ToString() );
+    public          void   Dispose()  => Console.WriteLine( ToString() );
     public override string ToString() => $"[{_caller}] {Elapsed}";
 
 
-    public static StopWatch Start( [CallerMemberName] string? caller = default ) => new(caller ?? string.Empty);
+    public static StopWatch Start( [ CallerMemberName ] string? caller = default ) => new(caller ?? string.Empty);
 }

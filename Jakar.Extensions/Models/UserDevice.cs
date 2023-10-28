@@ -1,6 +1,4 @@
 ﻿namespace Jakar.Extensions;
-#nullable enable
-
 
 
 public interface IUserDevice<TID> : IEquatable<IUserDevice<TID>>, IUniqueID<TID> where TID : struct, IComparable<TID>, IEquatable<TID>
@@ -33,7 +31,7 @@ public interface IUserDevice<TID> : IEquatable<IUserDevice<TID>>, IUniqueID<TID>
 
 
 /// <summary> Debug and/or identify info for IT </summary>
-[Serializable]
+[ Serializable ]
 public class UserDevice<TID> : ObservableClass, IUserDevice<TID> where TID : struct, IComparable<TID>, IEquatable<TID>
 {
     private string?    _ip;
@@ -124,7 +122,14 @@ public class UserDevice<TID> : ObservableClass, IUserDevice<TID> where TID : str
 
         if ( ReferenceEquals( this, other ) ) { return true; }
 
-        return TimeStamp.Equals( other.TimeStamp ) && IP == other.IP && Model == other.Model && Manufacturer == other.Manufacturer && DeviceName == other.DeviceName && DeviceType == other.DeviceType && Idiom == other.Idiom &&
-               Platform == other.Platform && OsVersion == other.OsVersion;
+        return TimeStamp.Equals( other.TimeStamp ) &&
+               IP           == other.IP            &&
+               Model        == other.Model         &&
+               Manufacturer == other.Manufacturer  &&
+               DeviceName   == other.DeviceName    &&
+               DeviceType   == other.DeviceType    &&
+               Idiom        == other.Idiom         &&
+               Platform     == other.Platform      &&
+               OsVersion    == other.OsVersion;
     }
 }

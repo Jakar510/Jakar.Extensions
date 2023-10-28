@@ -1,7 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.SqlBuilder
 // 05/08/2022  11:45 AM
 
-#nullable enable
 namespace Jakar.SqlBuilder;
 
 
@@ -22,8 +21,7 @@ public struct WhereConditionBuilder<TNext>
     {
         _builder.AddRange( ',', _cache );
 
-        _builder.VerifyParentheses()
-                .NewLine();
+        _builder.VerifyParentheses().NewLine();
 
         return _next;
     }

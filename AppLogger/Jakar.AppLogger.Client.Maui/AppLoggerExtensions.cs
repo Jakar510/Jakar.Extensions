@@ -4,13 +4,12 @@
 namespace Jakar.AppLogger.Client.Maui;
 
 
-[SuppressMessage( "ReSharper", "UnusedMethodReturnValue.Global" )]
+[ SuppressMessage( "ReSharper", "UnusedMethodReturnValue.Global" ) ]
 public static class AppLoggerExtensions
 {
     public static IServiceCollection UseAppLogger( this IServiceCollection collection, Action<AppLoggerOptions> configure )
     {
-        collection.AddOptions<AppLoggerOptions>()
-                  .Configure( configure );
+        collection.AddOptions<AppLoggerOptions>().Configure( configure );
 
         collection.AddSingleton<IAppLogger, Common.AppLogger>();
         collection.AddHostedService( provider => provider.GetRequiredService<IAppLogger>() );

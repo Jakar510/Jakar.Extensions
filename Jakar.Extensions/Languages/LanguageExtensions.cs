@@ -1,5 +1,4 @@
-﻿#nullable enable
-#pragma warning disable IDE0046
+﻿#pragma warning disable IDE0046
 
 
 
@@ -9,9 +8,7 @@ namespace Jakar.Extensions;
 [ SuppressMessage( "ReSharper", "StringLiteralTypo" ) ]
 public static class LanguageExtensions
 {
-    private static readonly IReadOnlyDictionary<string, SupportedLanguage> _languages = Enum.GetValues( typeof(SupportedLanguage) )
-                                                                                            .Cast<SupportedLanguage>()
-                                                                                            .ToDictionary( k => k.ToString(), v => v );
+    private static readonly IReadOnlyDictionary<string, SupportedLanguage> _languages = Enum.GetValues( typeof(SupportedLanguage) ).Cast<SupportedLanguage>().ToDictionary( k => k.ToString(), v => v );
 
 
     public static string? GetName( this SupportedLanguage language ) => language switch
@@ -31,7 +28,7 @@ public static class LanguageExtensions
                                                                             SupportedLanguage.Korean      => "한국어 - Korean",
                                                                             SupportedLanguage.Arabic      => "عربى - Arabic",
                                                                             SupportedLanguage.Unspecified => null,
-                                                                            _                             => null,
+                                                                            _                             => null
                                                                         };
 
 
@@ -52,7 +49,7 @@ public static class LanguageExtensions
                                                                                 SupportedLanguage.Korean      => "ko",
                                                                                 SupportedLanguage.Arabic      => "ar",
                                                                                 SupportedLanguage.Unspecified => throw new OutOfRangeException( nameof(language), language ),
-                                                                                _                             => throw new OutOfRangeException( nameof(language), language ),
+                                                                                _                             => throw new OutOfRangeException( nameof(language), language )
                                                                             };
 
 

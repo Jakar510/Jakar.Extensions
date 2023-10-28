@@ -17,12 +17,12 @@ public sealed record UserGroupRecord : Mapping<UserGroupRecord, UserRecord, Grou
     public static UserGroupRecord Create( UserRecord owner, GroupRecord value ) => new(owner, value);
     public static UserGroupRecord Create( DbDataReader reader )
     {
-        var                       key          = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(KeyID) ) );
-        var                       value        = new RecordID<GroupRecord>( reader.GetFieldValue<Guid>( nameof(KeyID) ) );
-        DateTimeOffset            dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
-        DateTimeOffset?           lastModified = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
-        RecordID<UserGroupRecord> id           = new RecordID<UserGroupRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) );
-        var                       record       = new UserGroupRecord( key, value, id, dateCreated, lastModified );
+        var key          = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(KeyID) ) );
+        var value        = new RecordID<GroupRecord>( reader.GetFieldValue<Guid>( nameof(KeyID) ) );
+        var dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
+        var lastModified = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
+        var id           = new RecordID<UserGroupRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) );
+        var record       = new UserGroupRecord( key, value, id, dateCreated, lastModified );
         record.Validate();
         return record;
     }

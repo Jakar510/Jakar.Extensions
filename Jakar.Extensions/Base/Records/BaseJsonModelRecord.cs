@@ -1,17 +1,16 @@
-﻿#nullable enable
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
 
 
-[Serializable]
+[ Serializable ]
 public record BaseJsonModelRecord : ObservableRecord, JsonModels.IJsonModel
 {
-    [JsonExtensionData] public IDictionary<string, JToken?>? AdditionalData { get; set; }
+    [ JsonExtensionData ] public IDictionary<string, JToken?>? AdditionalData { get; set; }
 }
 
 
 
-[Serializable]
+[ Serializable ]
 public abstract record BaseJsonModelRecord<TClass> : BaseCollectionsRecord<TClass>, JsonModels.IJsonModel where TClass : BaseJsonModelRecord<TClass>
 {
-    [JsonExtensionData] public IDictionary<string, JToken?>? AdditionalData { get; set; }
+    [ JsonExtensionData ] public IDictionary<string, JToken?>? AdditionalData { get; set; }
 }

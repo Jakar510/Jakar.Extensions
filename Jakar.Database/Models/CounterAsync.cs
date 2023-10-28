@@ -4,7 +4,7 @@
 namespace Jakar.Database;
 
 
-[Serializable]
+[ Serializable ]
 public record struct CounterAsync : IAsyncEnumerator<long>
 {
     private long? _current;

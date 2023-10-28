@@ -17,11 +17,7 @@ public sealed class AttributeException : Exception
 
     private static string GetMessage( Type classType, PropertyInfo info )
     {
-        ValueStringBuilder sb = new ValueStringBuilder().Append( '"' )
-                                                        .Append( classType.FullName )
-                                                        .Append( '.' )
-                                                        .Append( info.Name )
-                                                        .Append( '"' );
+        ValueStringBuilder sb = new ValueStringBuilder().Append( '"' ).Append( classType.FullName ).Append( '.' ).Append( info.Name ).Append( '"' );
 
         if ( !info.CanRead ) { sb = sb.Append( " cannot be read from. It's of type " ); }
 
@@ -30,25 +26,14 @@ public sealed class AttributeException : Exception
         else { sb = sb.Append( " of type " ); }
 
 
-        return sb.Append( '"' )
-                 .Append( info.PropertyType.FullName )
-                 .Append( '"' )
-                 .ToString();
+        return sb.Append( '"' ).Append( info.PropertyType.FullName ).Append( '"' ).ToString();
     }
 
 
     private static string GetMessage( Type classType, FieldInfo info )
     {
-        ValueStringBuilder sb = new ValueStringBuilder().Append( '"' )
-                                                        .Append( classType.FullName )
-                                                        .Append( '.' )
-                                                        .Append( info.Name )
-                                                        .Append( '"' )
-                                                        .Append( " of type " );
+        ValueStringBuilder sb = new ValueStringBuilder().Append( '"' ).Append( classType.FullName ).Append( '.' ).Append( info.Name ).Append( '"' ).Append( " of type " );
 
-        return sb.Append( '"' )
-                 .Append( info.FieldType.FullName )
-                 .Append( '"' )
-                 .ToString();
+        return sb.Append( '"' ).Append( info.FieldType.FullName ).Append( '"' ).ToString();
     }
 }

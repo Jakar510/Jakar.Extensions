@@ -1,8 +1,7 @@
-﻿#nullable enable
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
 
 
-[Serializable]
+[ Serializable ]
 public class ScreenShotException : Exception
 {
     private string? _screenShotFilePath;

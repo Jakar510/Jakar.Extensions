@@ -31,7 +31,7 @@ public sealed record UserLoginInfoRecord( [ property: MaxLength(                
 
     public override DynamicParameters ToDynamicParameters()
     {
-        DynamicParameters parameters = base.ToDynamicParameters();
+        var parameters = base.ToDynamicParameters();
         parameters.Add( nameof(LoginProvider),       LoginProvider );
         parameters.Add( nameof(ProviderDisplayName), ProviderDisplayName );
         parameters.Add( nameof(ProviderKey),         ProviderKey );
@@ -41,16 +41,16 @@ public sealed record UserLoginInfoRecord( [ property: MaxLength(                
 
     public static UserLoginInfoRecord Create( DbDataReader reader )
     {
-        var loginProvider       = reader.GetString( nameof(LoginProvider) );
-        var providerDisplayName = reader.GetString( nameof(ProviderDisplayName) );
-        var providerKey         = reader.GetString( nameof(ProviderKey) );
-        var value               = reader.GetString( nameof(Value) );
-        var dateCreated         = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
-        var lastModified        = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
-        var ownerUserID         = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
-        var createdBy           = RecordID<UserRecord>.CreatedBy( reader );
-        var id                  = RecordID<UserLoginInfoRecord>.ID( reader );
-        var record              = new UserLoginInfoRecord( loginProvider, providerDisplayName, providerKey, value, id, createdBy, ownerUserID, dateCreated, lastModified );
+        string                        loginProvider       = reader.GetString( nameof(LoginProvider) );
+        string                        providerDisplayName = reader.GetString( nameof(ProviderDisplayName) );
+        string                        providerKey         = reader.GetString( nameof(ProviderKey) );
+        string                        value               = reader.GetString( nameof(Value) );
+        var                           dateCreated         = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
+        var                           lastModified        = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
+        var                           ownerUserID         = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
+        RecordID<UserRecord>?         createdBy           = RecordID<UserRecord>.CreatedBy( reader );
+        RecordID<UserLoginInfoRecord> id                  = RecordID<UserLoginInfoRecord>.ID( reader );
+        var                           record              = new UserLoginInfoRecord( loginProvider, providerDisplayName, providerKey, value, id, createdBy, ownerUserID, dateCreated, lastModified );
         record.Validate();
         return record;
     }
@@ -79,13 +79,13 @@ public sealed record UserLoginInfoRecord( [ property: MaxLength(                
                                                                                                   UserId        = value.OwnerUserID?.ToString() ?? throw new NullReferenceException( nameof(value.OwnerUserID) ),
                                                                                                   LoginProvider = value.LoginProvider,
                                                                                                   Name          = value.ProviderDisplayName ?? string.Empty,
-                                                                                                  Value         = value.ProviderKey,
+                                                                                                  Value         = value.ProviderKey
                                                                                               };
     public static implicit operator IdentityUserToken<Guid>( UserLoginInfoRecord value ) => new()
                                                                                             {
                                                                                                 UserId        = value.OwnerUserID ?? Guid.Empty,
                                                                                                 LoginProvider = value.LoginProvider,
                                                                                                 Name          = value.ProviderDisplayName ?? string.Empty,
-                                                                                                Value         = value.ProviderKey,
+                                                                                                Value         = value.ProviderKey
                                                                                             };
 }

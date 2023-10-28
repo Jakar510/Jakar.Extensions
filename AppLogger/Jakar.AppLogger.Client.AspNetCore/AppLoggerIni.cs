@@ -56,12 +56,11 @@ public sealed class AppLoggerIni : LoggingSettings
                                                                                                           ulong b  => b.ToString(),
                                                                                                           float b  => b.ToString( CultureInfo.InvariantCulture ),
                                                                                                           double b => b.ToString( CultureInfo.InvariantCulture ),
-                                                                                                          _        => value.ToJson(),
+                                                                                                          _        => value.ToJson()
                                                                                                       };
 
 
-    public static LocalFile GetFile( string appName ) => GetDirectory( appName )
-       .Join( appName );
+    public static LocalFile GetFile( string appName ) => GetDirectory( appName ).Join( appName );
     public static LocalDirectory GetDirectory( string appName )
     {
         PlatformID platform = Environment.OSVersion.Platform;

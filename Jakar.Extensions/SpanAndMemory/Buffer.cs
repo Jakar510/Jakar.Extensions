@@ -201,8 +201,7 @@ public ref struct Buffer<T>
         ThrowIfReadOnly();
         if ( _index + count > _span.Length ) { Grow( count ); }
 
-        _span.Slice( index, count )
-             .Fill( value );
+        _span.Slice( index, count ).Fill( value );
 
         return this;
     }
@@ -223,11 +222,9 @@ public ref struct Buffer<T>
 
         int remaining = _index - index;
 
-        _span.Slice( index, remaining )
-             .CopyTo( _span[(index + count)..] );
+        _span.Slice( index, remaining ).CopyTo( _span[(index + count)..] );
 
-        _span.Slice( index, count )
-             .Fill( value );
+        _span.Slice( index, count ).Fill( value );
 
         _index += count;
         return this;
@@ -239,8 +236,7 @@ public ref struct Buffer<T>
 
         int remaining = _index - index;
 
-        _span.Slice( index, remaining )
-             .CopyTo( _span[(index + span.Length)..] );
+        _span.Slice( index, remaining ).CopyTo( _span[(index + span.Length)..] );
 
         span.CopyTo( _span[index..] );
 

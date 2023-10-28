@@ -4,29 +4,29 @@
 namespace Jakar.Database;
 
 
-[Flags]
+[ Flags ]
 public enum ClaimType : long
 {
-    None                                                                         = 1 << 0,
-    [Display( Description = ClaimTypes.Sid )]             UserID                 = 1 << 1,
-    [Display( Description = ClaimTypes.NameIdentifier )]  UserName               = 1 << 2,
-    [Display( Description = ClaimTypes.GivenName )]       FirstName              = 1 << 3,
-    [Display( Description = ClaimTypes.Surname )]         LastName               = 1 << 4,
-    [Display( Description = ClaimTypes.Name )]            FullName               = 1 << 5,
-    [Display( Description = ClaimTypes.Gender )]          Gender                 = 1 << 7,
-    [Display( Description = ClaimTypes.Expiration )]      SubscriptionExpiration = 1 << 8,
-    [Display( Description = ClaimTypes.Expired )]         Expired                = 1 << 9,
-    [Display( Description = ClaimTypes.Email )]           Email                  = 1 << 10,
-    [Display( Description = ClaimTypes.MobilePhone )]     MobilePhone            = 1 << 11,
-    [Display( Description = ClaimTypes.StreetAddress )]   StreetAddressLine1     = 1 << 12,
-    [Display( Description = ClaimTypes.Locality )]        StreetAddressLine2     = 1 << 13,
-    [Display( Description = ClaimTypes.StateOrProvince )] StateOrProvince        = 1 << 14,
-    [Display( Description = ClaimTypes.Country )]         Country                = 1 << 15,
-    [Display( Description = ClaimTypes.PostalCode )]      PostalCode             = 1 << 16,
-    [Display( Description = ClaimTypes.Webpage )]         WebSite                = 1 << 17,
-    [Display( Description = ClaimTypes.GroupSid )]        GroupSid               = 1 << 18,
-    [Display( Description = ClaimTypes.Role )]            Role                   = 1 << 19,
-    All                                                                          = ~0,
+    None                                                                           = 1 << 0,
+    [ Display( Description = ClaimTypes.Sid ) ]             UserID                 = 1 << 1,
+    [ Display( Description = ClaimTypes.NameIdentifier ) ]  UserName               = 1 << 2,
+    [ Display( Description = ClaimTypes.GivenName ) ]       FirstName              = 1 << 3,
+    [ Display( Description = ClaimTypes.Surname ) ]         LastName               = 1 << 4,
+    [ Display( Description = ClaimTypes.Name ) ]            FullName               = 1 << 5,
+    [ Display( Description = ClaimTypes.Gender ) ]          Gender                 = 1 << 7,
+    [ Display( Description = ClaimTypes.Expiration ) ]      SubscriptionExpiration = 1 << 8,
+    [ Display( Description = ClaimTypes.Expired ) ]         Expired                = 1 << 9,
+    [ Display( Description = ClaimTypes.Email ) ]           Email                  = 1 << 10,
+    [ Display( Description = ClaimTypes.MobilePhone ) ]     MobilePhone            = 1 << 11,
+    [ Display( Description = ClaimTypes.StreetAddress ) ]   StreetAddressLine1     = 1 << 12,
+    [ Display( Description = ClaimTypes.Locality ) ]        StreetAddressLine2     = 1 << 13,
+    [ Display( Description = ClaimTypes.StateOrProvince ) ] StateOrProvince        = 1 << 14,
+    [ Display( Description = ClaimTypes.Country ) ]         Country                = 1 << 15,
+    [ Display( Description = ClaimTypes.PostalCode ) ]      PostalCode             = 1 << 16,
+    [ Display( Description = ClaimTypes.Webpage ) ]         WebSite                = 1 << 17,
+    [ Display( Description = ClaimTypes.GroupSid ) ]        GroupSid               = 1 << 18,
+    [ Display( Description = ClaimTypes.Role ) ]            Role                   = 1 << 19,
+    All                                                                            = ~0
 }
 
 
@@ -56,7 +56,7 @@ public static class ClaimTypeExtensions
             ClaimType.GroupSid               => ClaimTypes.GroupSid,
             ClaimType.Role                   => ClaimTypes.Role,
             ClaimType.All                    => default,
-            _                                => throw new OutOfRangeException( nameof(type), type ),
+            _                                => throw new OutOfRangeException( nameof(type), type )
         };
     public static ClaimType? FromClaimTypes( this string type ) =>
         type switch
@@ -79,6 +79,6 @@ public static class ClaimTypeExtensions
             ClaimTypes.Webpage         => ClaimType.WebSite,
             ClaimTypes.GroupSid        => ClaimType.GroupSid,
             ClaimTypes.Role            => ClaimType.Role,
-            _                          => default,
+            _                          => default
         };
 }

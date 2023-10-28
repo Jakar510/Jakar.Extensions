@@ -1,13 +1,10 @@
-﻿#nullable enable
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
 
 
 public static class JsonModels
 {
-    public static bool Contains( this IJsonModel self, string key ) => self.AdditionalData?.ContainsKey( key ) ?? false;
-    public static bool Contains( this IJsonStringModel self, string key ) => self.GetAdditionalData()
-                                                                                ?.ContainsKey( key ) ??
-                                                                             false;
+    public static bool Contains( this IJsonModel       self, string key ) => self.AdditionalData?.ContainsKey( key )      ?? false;
+    public static bool Contains( this IJsonStringModel self, string key ) => self.GetAdditionalData()?.ContainsKey( key ) ?? false;
 
 
     public static bool Remove( this IJsonModel self, string key )
@@ -112,7 +109,7 @@ public static class JsonModels
 
     public interface IJsonModel
     {
-        [JsonExtensionData] public IDictionary<string, JToken?>? AdditionalData { get; set; }
+        [ JsonExtensionData ] public IDictionary<string, JToken?>? AdditionalData { get; set; }
     }
 
 

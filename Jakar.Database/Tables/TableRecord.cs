@@ -62,7 +62,7 @@ public abstract record TableRecord<TRecord>( [ property: Key ] RecordID<TRecord>
         int               length     = parameters.ParameterNames.Count();
         if ( length == properties.Length ) { return; }
 
-        var message = $"{typeof(TRecord).Name}: {nameof(ToDynamicParameters)}.Length ({length}) != {nameof(properties)}.Length ({properties.Length})";
+        string message = $"{typeof(TRecord).Name}: {nameof(ToDynamicParameters)}.Length ({length}) != {nameof(properties)}.Length ({properties.Length})";
         throw new InvalidOperationException( message );
     }
 
@@ -142,7 +142,7 @@ public abstract record OwnedTableRecord<TRecord>
 
     public override DynamicParameters ToDynamicParameters()
     {
-        DynamicParameters parameters = base.ToDynamicParameters();
+        var parameters = base.ToDynamicParameters();
         parameters.Add( nameof(CreatedBy),   CreatedBy );
         parameters.Add( nameof(OwnerUserID), OwnerUserID );
         return parameters;

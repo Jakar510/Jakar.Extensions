@@ -60,5 +60,5 @@ public abstract class BaseHostViewModel : BaseViewModel, IHostViewModel
 
 
     protected abstract void OnHostChanged( in string? host, in bool isValid, in Uri? hostInfo );
-    public virtual void Reset() => Host = default;
+    public virtual     void Reset() => Host = default;
 }

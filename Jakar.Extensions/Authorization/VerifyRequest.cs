@@ -1,35 +1,28 @@
-﻿#nullable enable
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
 
 
-[Serializable]
+[ Serializable ]
 public class VerifyRequest : BaseClass, ILoginRequest, ICredentials, ICloneable, IEquatable<VerifyRequest>
 {
-    public virtual bool IsValid => !string.IsNullOrWhiteSpace( UserLogin ) && !string.IsNullOrWhiteSpace( UserPassword );
+    [ JsonExtensionData ] public IDictionary<string, JToken?>? AdditionalData { get; set; }
+    public virtual               bool                          IsValid        => !string.IsNullOrWhiteSpace( UserLogin ) && !string.IsNullOrWhiteSpace( UserPassword );
 
 
-    [Required( ErrorMessage = "Email address is required." )]
-    [JsonProperty( nameof(UserLogin), Required = Required.Always )]
-    public string UserLogin { get; init; } = string.Empty;
+    [ Required( ErrorMessage = "Email address is required." ), JsonProperty( nameof(UserLogin), Required = Required.Always ) ] public string UserLogin { get; init; } = string.Empty;
 
 
-    [Required( ErrorMessage = "Password is required." )]
-    [JsonProperty( nameof(UserPassword), Required = Required.Always )]
-    public string UserPassword { get; init; } = string.Empty;
-    
-
-    [JsonExtensionData] public IDictionary<string, JToken?>? AdditionalData { get; set; }
+    [ Required( ErrorMessage = "Password is required." ), JsonProperty( nameof(UserPassword), Required = Required.Always ) ] public string UserPassword { get; init; } = string.Empty;
 
 
     public VerifyRequest() { }
     public VerifyRequest( string? userName, string? userPassword )
     {
-        UserLogin    = userName ?? throw new ArgumentNullException( nameof(userName) );
+        UserLogin    = userName     ?? throw new ArgumentNullException( nameof(userName) );
         UserPassword = userPassword ?? throw new ArgumentNullException( nameof(userPassword) );
     }
 
 
-    public bool ValidatePassword() => ValidatePassword( PasswordValidator.Default );
+    public bool ValidatePassword()                              => ValidatePassword( PasswordValidator.Default );
     public bool ValidatePassword( PasswordValidator validator ) => validator.Validate( UserPassword );
 
 
@@ -37,7 +30,7 @@ public class VerifyRequest : BaseClass, ILoginRequest, ICredentials, ICloneable,
 
 
     public VerifyRequest Clone() => new(UserLogin, UserPassword);
-    object ICloneable.Clone() => Clone();
+    object ICloneable.   Clone() => Clone();
 
 
     public bool Equals( VerifyRequest? other )
@@ -65,10 +58,10 @@ public class VerifyRequest : BaseClass, ILoginRequest, ICredentials, ICloneable,
 
 
 
-[SuppressMessage( "ReSharper", "NullableWarningSuppressionIsUsed" )]
+[ SuppressMessage( "ReSharper", "NullableWarningSuppressionIsUsed" ) ]
 public class VerifyRequest<T> : VerifyRequest, IEquatable<VerifyRequest<T>>
 {
-    [JsonProperty( nameof(Data), Required = Required.AllowNull )] public T? Data { get; init; }
+    [ JsonProperty( nameof(Data), Required = Required.AllowNull ) ] public T? Data { get; init; }
 
     public override bool IsValid => Data is IValidator validator
                                         ? base.IsValid && validator.IsValid

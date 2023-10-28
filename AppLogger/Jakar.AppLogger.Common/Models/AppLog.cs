@@ -4,26 +4,26 @@
 namespace Jakar.AppLogger.Common;
 
 
-[Serializable]
+[ Serializable ]
 public sealed record AppLog
-    ( [property: MaxLength( IAppLog.MESSAGE_LENGTH )] string Message, LogLevel Level, EventID EventID, DateTimeOffset TimeStamp, StartSessionReply Session, DeviceDescriptor Device ) : BaseJsonModelRecord, IAppLog, ILogDetails, ILogScopes
+    ( [ property: MaxLength( IAppLog.MESSAGE_LENGTH ) ] string Message, LogLevel Level, EventID EventID, DateTimeOffset TimeStamp, StartSessionReply Session, DeviceDescriptor Device ) : BaseJsonModelRecord, IAppLog, ILogDetails, ILogScopes
 {
-    Guid IStartSession.                                                          AppID        => Session.AppID;
-    [MaxLength( IAppLog.APP_USER_ID_LENGTH )] public   string?                   AppUserID    { get; init; }
-    public                                             HashSet<LoggerAttachment> Attachments  { get; init; } = new();
-    [MaxLength( IAppLog.BUILD_ID_LENGTH )]      public string?                   BuildID      { get; init; }
-    [MaxLength( IAppLog.CATEGORY_NAME_LENGTH )] public string?                   CategoryName { get; init; }
-    Guid IStartSession.                                                          DeviceID     => Session.DeviceID;
-    public              ExceptionDetails?                                        Exception    { get; init; }
-    public              Guid                                                     ID           { get; init; }
-    [JsonIgnore] public bool                                                     IsError      => Level > LogLevel.Error;
-    public              bool                                                     IsFatal      { get; init; }
-    public              bool                                                     IsValid      => !string.IsNullOrWhiteSpace( Message );
-    Guid ILogInfo.                                                               LogID        => ID;
-    public HashSet<Guid>                                                         ScopeIDs     { get; init; } = new();
-    Guid? ISessionID.                                                            SessionID    => Session.SessionID;
-    string? IAppLog.                                                             StackTrace   => GetStackTrace();
-    public int                                                                   ThreadID     { get; init; } = Environment.CurrentManagedThreadId;
+    Guid IStartSession.                                                            AppID        => Session.AppID;
+    [ MaxLength( IAppLog.APP_USER_ID_LENGTH ) ] public   string?                   AppUserID    { get; init; }
+    public                                               HashSet<LoggerAttachment> Attachments  { get; init; } = new();
+    [ MaxLength( IAppLog.BUILD_ID_LENGTH ) ]      public string?                   BuildID      { get; init; }
+    [ MaxLength( IAppLog.CATEGORY_NAME_LENGTH ) ] public string?                   CategoryName { get; init; }
+    Guid IStartSession.                                                            DeviceID     => Session.DeviceID;
+    public                ExceptionDetails?                                        Exception    { get; init; }
+    public                Guid                                                     ID           { get; init; }
+    [ JsonIgnore ] public bool                                                     IsError      => Level > LogLevel.Error;
+    public                bool                                                     IsFatal      { get; init; }
+    public                bool                                                     IsValid      => !string.IsNullOrWhiteSpace( Message );
+    Guid ILogInfo.                                                                 LogID        => ID;
+    public HashSet<Guid>                                                           ScopeIDs     { get; init; } = new();
+    Guid? ISessionID.                                                              SessionID    => Session.SessionID;
+    string? IAppLog.                                                               StackTrace   => GetStackTrace();
+    public int                                                                     ThreadID     { get; init; } = Environment.CurrentManagedThreadId;
 
 
     public AppLog( IAppLog log, IEnumerable<LoggerAttachment> attachments, IEnumerable<Guid> scopeIDs, DeviceDescriptor device, ExceptionDetails? details ) : this( log.Message, log.Level, log.EventID, log.TimeStamp, log.Session, device )

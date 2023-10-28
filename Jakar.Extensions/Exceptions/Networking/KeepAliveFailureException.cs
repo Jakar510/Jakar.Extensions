@@ -1,5 +1,4 @@
-﻿#nullable enable
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
 
 
 /// <summary> The connection for a request that specifies the Keep-alive header was closed unexpectedly. </summary>

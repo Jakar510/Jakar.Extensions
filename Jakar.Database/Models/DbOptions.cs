@@ -1,8 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 10/16/2022  5:46 PM
 
-using System.Configuration;
-using System.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 
@@ -12,7 +10,7 @@ namespace Jakar.Database;
 
 public sealed class DbOptions : IOptions<DbOptions>, IDbOptions
 {
-    public const string  DEFAULT_SQL_CONNECTION_STRING_KEY = "DEFAULT";
+    public const string DEFAULT_SQL_CONNECTION_STRING_KEY = "DEFAULT";
 
 
     public static readonly ImmutableArray<DbInstance> Instances = ImmutableArray.Create( Enum.GetValues<DbInstance>() );
@@ -21,6 +19,7 @@ public sealed class DbOptions : IOptions<DbOptions>, IDbOptions
     public string                  AuthenticationType   { get; set; } = JwtBearerDefaults.AuthenticationScheme;
     public TimeSpan                ClockSkew            { get; set; } = TimeSpan.FromSeconds( 60 );
     public int?                    CommandTimeout       { get; set; } = 300;
+    public ConnectionStringOptions ConnectionString     { get; set; }
     public DbInstance              DbType               { get; set; } = DbInstance.Postgres;
     public Uri                     Domain               { get; set; } = new("https://localhost");
     DbInstance IDbOptions.         Instance             => DbType;
@@ -32,7 +31,6 @@ public sealed class DbOptions : IOptions<DbOptions>, IDbOptions
     public string                  UserExists           { get; set; } = "User Exists";
     DbOptions IOptions<DbOptions>. Value                => this;
     public AppVersion              Version              { get; set; } = AppVersion.Default;
-    public ConnectionStringOptions ConnectionString     { get; set; }
 
 
     public DbOptions()
@@ -58,9 +56,9 @@ public sealed class DbOptions : IOptions<DbOptions>, IDbOptions
     }
     public static async Task<SecuredString> GetConnectionStringAsync( IServiceProvider provider, CancellationToken token )
     {
-        IOptions<DbOptions> options       = provider.GetRequiredService<IOptions<DbOptions>>();
-        IConfiguration      configuration = provider.GetRequiredService<IConfiguration>();
-        SecuredString       secure        = await options.Value.GetConnectionStringAsync( configuration, token );
+        var           options       = provider.GetRequiredService<IOptions<DbOptions>>();
+        var           configuration = provider.GetRequiredService<IConfiguration>();
+        SecuredString secure        = await options.Value.GetConnectionStringAsync( configuration, token );
         return secure;
     }
     public async Task<SecuredString> GetConnectionStringAsync( IConfiguration configuration, CancellationToken token )

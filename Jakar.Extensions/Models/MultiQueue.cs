@@ -1,5 +1,4 @@
-﻿#nullable enable
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
 
 
 public interface IMultiQueue<T> : IEnumerable<T>
@@ -10,17 +9,15 @@ public interface IMultiQueue<T> : IEnumerable<T>
 
     public bool Contains( T value );
 
-    public bool Remove( [NotNullWhen( true )] out T? value );
-    public void Add( T                               value );
+    public bool Remove( [ NotNullWhen( true ) ] out T? value );
+    public void Add( T                                 value );
 
     public void Clear();
 }
 
 
 
-/// <summary>
-///     <seealso href="https://stackoverflow.com/a/5852926/9530917"/>
-/// </summary>
+/// <summary> <seealso href="https://stackoverflow.com/a/5852926/9530917"/> </summary>
 /// <typeparam name="T"> </typeparam>
 public class MultiQueue<T> : IMultiQueue<T>
 {
@@ -40,11 +37,11 @@ public class MultiQueue<T> : IMultiQueue<T>
 
 
     public bool Contains( T value ) => _queue.Contains( value );
-    public void Clear() => _queue.Clear();
-    public void Add( T value ) => _queue.Enqueue( value );
+    public void Clear()             => _queue.Clear();
+    public void Add( T value )      => _queue.Enqueue( value );
 
 
-    public bool Remove( [NotNullWhen( true )] out T? value )
+    public bool Remove( [ NotNullWhen( true ) ] out T? value )
     {
         bool result = _queue.TryDequeue( out value );
 
@@ -52,6 +49,6 @@ public class MultiQueue<T> : IMultiQueue<T>
     }
 
 
-    public IEnumerator<T> GetEnumerator() => _queue.GetEnumerator();
+    public IEnumerator<T>   GetEnumerator() => _queue.GetEnumerator();
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }

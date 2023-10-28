@@ -8,14 +8,14 @@ namespace Jakar.Database;
 public readonly record struct RecordPair<TRecord>( RecordID<TRecord> ID, DateTimeOffset DateCreated ) : IComparable<RecordPair<TRecord>>, IRecordPair, IDbReaderMapping<RecordPair<TRecord>>
     where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
-    Guid IUniqueID<Guid>.ID        => ID.Value;
     public static string TableName => TRecord.TableName;
+    Guid IUniqueID<Guid>.ID        => ID.Value;
 
 
     public static RecordPair<TRecord> Create( DbDataReader reader )
     {
-        var dateCreated = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
-        var id          = RecordID<TRecord>.ID( reader );
+        var               dateCreated = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
+        RecordID<TRecord> id          = RecordID<TRecord>.ID( reader );
         return new RecordPair<TRecord>( id, dateCreated );
     }
     public static async IAsyncEnumerable<RecordPair<TRecord>> CreateAsync( DbDataReader reader, [ EnumeratorCancellation ] CancellationToken token = default )

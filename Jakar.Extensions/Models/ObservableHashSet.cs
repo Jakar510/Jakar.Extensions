@@ -4,7 +4,7 @@
 namespace Jakar.Extensions;
 
 
-[SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
+[ SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" ) ]
 public class ObservableHashSet<T> : CollectionAlerts<T>, ISet<T>, IReadOnlySet<T>, ISerializable, IDeserializationCallback
 {
     private readonly       HashSet<T> _values;
@@ -26,8 +26,8 @@ public class ObservableHashSet<T> : CollectionAlerts<T>, ISet<T>, IReadOnlySet<T
     public static implicit operator ObservableHashSet<T>( T[]                     items ) => new(items);
 
 
-    void IDeserializationCallback.OnDeserialization( object? sender ) => _values.OnDeserialization( sender );
-    void ISerializable.GetObjectData( SerializationInfo      info, StreamingContext context ) => _values.GetObjectData( info, context );
+    void IDeserializationCallback.OnDeserialization( object?       sender )                         => _values.OnDeserialization( sender );
+    void ISerializable.           GetObjectData( SerializationInfo info, StreamingContext context ) => _values.GetObjectData( info, context );
 
 
     public virtual bool IsProperSubsetOf( IEnumerable<T>   other ) => _values.IsProperSubsetOf( other );
@@ -87,10 +87,7 @@ public class ObservableHashSet<T> : CollectionAlerts<T>, ISet<T>, IReadOnlySet<T
     public void CopyTo( T[] array, int arrayIndex ) => _values.CopyTo( array, arrayIndex );
 
 
-    public override IEnumerator<T> GetEnumerator()
-    {
-        return _values.Where( Filter )
-                      .GetEnumerator();
-    }
+    public override IEnumerator<T> GetEnumerator() =>
+        _values.Where( Filter ).GetEnumerator();
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }

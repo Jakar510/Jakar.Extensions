@@ -1,4 +1,3 @@
-#nullable enable
 using System;
 using System.Net;
 using NUnit.Framework;
@@ -11,17 +10,17 @@ using NUnit.Framework;
 namespace Jakar.Extensions.Tests;
 
 
-[TestFixture]
+[ TestFixture ]
 
 // ReSharper disable once InconsistentNaming
 public class IniConfig_Tests : Assert
 {
-    [Test]
+    [ Test ]
     public void Test()
     {
         var project = new IniConfig.Section( "Project" )
                       {
-                          ["Name"] = nameof(IniConfig_Tests),
+                          ["Name"] = nameof(IniConfig_Tests)
                       };
 
         project.Add( nameof(DateTime),       DateTime.Now );
@@ -32,7 +31,7 @@ public class IniConfig_Tests : Assert
 
         var server = new IniConfig.Section( "Server" )
                      {
-                         ["Name"] = nameof(ServicePoint),
+                         ["Name"] = nameof(ServicePoint)
                      };
 
         server.Add( "Port", Random.Shared.Next( IPEndPoint.MinPort, IPEndPoint.MaxPort ) );
@@ -43,14 +42,12 @@ public class IniConfig_Tests : Assert
         var ini = new IniConfig
                   {
                       project,
-                      server,
+                      server
                   };
 
-        ini[nameof(Random)]
-           .Add( nameof(Random.Next), Random.Shared.Next() );
+        ini[nameof(Random)].Add( nameof(Random.Next), Random.Shared.Next() );
 
-        ini[nameof(IniConfig_Tests)]
-           .Add( nameof(Random.Next), Random.Shared.Next() );
+        ini[nameof(IniConfig_Tests)].Add( nameof(Random.Next), Random.Shared.Next() );
 
 
         string actual = ini.ToString();

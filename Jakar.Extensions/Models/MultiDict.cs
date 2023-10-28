@@ -1,5 +1,4 @@
-﻿#nullable enable
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
 
 
 public class MultiDict<TKey> : Dictionary<TKey, object?> where TKey : notnull
@@ -45,12 +44,12 @@ public class MultiDict<TKey> : Dictionary<TKey, object?> where TKey : notnull
     public bool ValueAs( TKey key, out bool?     value ) => ValueAs<bool?>( key, out value );
 
 
-    public bool ValueAs( TKey key, [NotNullWhen( true )] out IPAddress?  value ) => ValueAs<IPAddress>( key, out value );
-    public bool ValueAs( TKey key, [NotNullWhen( true )] out AppVersion? value ) => ValueAs<AppVersion?>( key, out value );
-    public bool ValueAs( TKey key, [NotNullWhen( true )] out Version?    value ) => ValueAs<Version>( key, out value );
+    public bool ValueAs( TKey key, [ NotNullWhen( true ) ] out IPAddress?  value ) => ValueAs<IPAddress>( key, out value );
+    public bool ValueAs( TKey key, [ NotNullWhen( true ) ] out AppVersion? value ) => ValueAs<AppVersion?>( key, out value );
+    public bool ValueAs( TKey key, [ NotNullWhen( true ) ] out Version?    value ) => ValueAs<Version>( key, out value );
 
 
-    public bool ValueAs<T>( TKey key, [NotNullWhen( true )] out T? value )
+    public bool ValueAs<T>( TKey key, [ NotNullWhen( true ) ] out T? value )
     {
         object? s = this[key];
 

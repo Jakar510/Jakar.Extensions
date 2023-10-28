@@ -14,6 +14,6 @@ public sealed class NullableIntConverter : JsonConverter<int?>
             string s => int.TryParse( s, out int n )
                             ? n
                             : null,
-            _ => throw new OutOfRangeException( nameof(reader.Value), reader.Value ),
+            _ => throw new OutOfRangeException( nameof(reader.Value), reader.Value )
         };
 }

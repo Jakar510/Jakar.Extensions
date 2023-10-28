@@ -80,8 +80,7 @@ public struct UserRights : IEnumerator<(int Index, bool Value)>, IEnumerable<(in
     public static UserRights Merge( int                  totalRightCount, params IEnumerable<IRights>[] values )          => Merge( values.SelectMany( x => x ), totalRightCount );
     public static UserRights Merge( IEnumerable<IRights> values,          int                           totalRightCount ) => values.Aggregate( new UserRights( totalRightCount ), ( current, value ) => current.With( value ) );
     public static UserRights Create( int                 length ) => new(length);
-    public static UserRights Create<T>() where T : struct, Enum => new(Enum.GetValues<T>()
-                                                                           .Length);
+    public static UserRights Create<T>() where T : struct, Enum   => new(Enum.GetValues<T>().Length);
 
 
     public bool MoveNext() => ++_index < Length;

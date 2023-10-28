@@ -1,7 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 05/17/2022  4:16 PM
 
-#nullable enable
 using Microsoft.Extensions.Hosting;
 
 
@@ -50,13 +49,13 @@ public abstract class Service : ObservableClass, IAsyncDisposable, IValidator
 #if NET6_0_OR_GREATER
     [StackTraceHidden]
 #endif
-    [DoesNotReturn] protected virtual void ThrowDisabled( Exception? inner = default, [CallerMemberName] string? caller = default ) => throw new ApiDisabledException( $"{ClassName}.{caller}", inner );
+    [ DoesNotReturn ] protected virtual void ThrowDisabled( Exception? inner = default, [ CallerMemberName ] string? caller = default ) => throw new ApiDisabledException( $"{ClassName}.{caller}", inner );
 
 
 #if NET6_0_OR_GREATER
     [StackTraceHidden]
 #endif
-    [DoesNotReturn] protected void ThrowDisposed( Exception? inner = default, [CallerMemberName] string? caller = default ) => throw new ObjectDisposedException( $"{ClassName}.{caller}", inner );
+    [ DoesNotReturn ] protected void ThrowDisposed( Exception? inner = default, [ CallerMemberName ] string? caller = default ) => throw new ObjectDisposedException( $"{ClassName}.{caller}", inner );
 }
 
 

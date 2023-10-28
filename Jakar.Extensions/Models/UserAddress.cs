@@ -84,8 +84,7 @@ public record UserAddress : ObservableRecord, IAddress, IComparable<UserAddress>
         {
             Span<char> span = stackalloc char[Address?.Length ?? 0];
 
-            Address.AsSpan()
-                   .CopyTo( span );
+            Address.AsSpan().CopyTo( span );
 
             for ( int i = 0; i < span.Length; i++ )
             {

@@ -1,29 +1,25 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 10/15/2023  1:13 PM
 
-using Org.BouncyCastle.Asn1.Cms;
-
-
-
 namespace Jakar.Database;
 
 
 public static class SQL
 {
-    public const  char   QUOTE          = '"';
+    public const  string AND            = "AND";
     public const  string COUNT          = "count";
     public const  string CREATED_BY     = nameof(IOwnedTableRecord.CreatedBy);
     public const  string DATE_CREATED   = nameof(IRecordPair.DateCreated);
+    public const  string GUID_FORMAT    = "D";
     public const  string ID             = nameof(IRecordPair.ID);
     public const  string IDS            = "ids";
     public const  string LAST_MODIFIED  = nameof(ITableRecord.LastModified);
-    public const  string OWNER_USER_ID  = nameof(IOwnedTableRecord.OwnerUserID);
     public const  string LIST_SEPARATOR = ", ";
-    public const  string GUID_FORMAT    = "D";
-    public const  string AND            = "AND";
-    public const  string OR             = "OR";
     private const ulong  OFFSET_BASIS   = 14695981039346656037ul;
+    public const  string OR             = "OR";
+    public const  string OWNER_USER_ID  = nameof(IOwnedTableRecord.OwnerUserID);
     private const ulong  PRIME          = 1099511628211ul;
+    public const  char   QUOTE          = '"';
 
 
     [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
@@ -155,9 +151,7 @@ public static class SQL
     {
         const BindingFlags ATTRIBUTES = BindingFlags.Instance | BindingFlags.Public | BindingFlags.SetProperty | BindingFlags.GetProperty;
 
-        PropertyInfo[] properties = type.GetProperties( ATTRIBUTES )
-                                        .Where( x => !x.HasAttribute<DataBaseIgnoreAttribute>() )
-                                        .ToArray();
+        PropertyInfo[] properties = type.GetProperties( ATTRIBUTES ).Where( x => !x.HasAttribute<DataBaseIgnoreAttribute>() ).ToArray();
 
         Debug.Assert( properties.Length > 0 );
         Debug.Assert( properties.Any( Descriptor.IsDbKey ) );
@@ -174,9 +168,7 @@ public static class SQL
     {
         const BindingFlags ATTRIBUTES = BindingFlags.Instance | BindingFlags.Public | BindingFlags.SetProperty | BindingFlags.GetProperty;
 
-        PropertyInfo[] properties = typeof(TRecord).GetProperties( ATTRIBUTES )
-                                                   .Where( x => !x.HasAttribute<DataBaseIgnoreAttribute>() )
-                                                   .ToArray();
+        PropertyInfo[] properties = typeof(TRecord).GetProperties( ATTRIBUTES ).Where( x => !x.HasAttribute<DataBaseIgnoreAttribute>() ).ToArray();
 
         Debug.Assert( properties.Length > 0 );
         Debug.Assert( properties.Any( Descriptor.IsDbKey ) );

@@ -22,7 +22,7 @@ public abstract record UserSubscription<TRecord>
 {
     public override DynamicParameters ToDynamicParameters()
     {
-        DynamicParameters parameters = base.ToDynamicParameters();
+        var parameters = base.ToDynamicParameters();
         parameters.Add( nameof(SubscriptionExpires), SubscriptionExpires );
         return parameters;
     }

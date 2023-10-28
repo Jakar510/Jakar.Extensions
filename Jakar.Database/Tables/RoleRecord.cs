@@ -35,12 +35,11 @@ public sealed record RoleRecord( [ property: MaxLength( 1024 ) ]                
                                                                                                                                                  RecordID<RoleRecord>.New(),
                                                                                                                                                  caller?.ID,
                                                                                                                                                  caller?.UserID,
-                                                                                                                                                 DateTimeOffset.UtcNow,
-                                                                                                                                                 default ) { }
+                                                                                                                                                 DateTimeOffset.UtcNow ) { }
 
     public override DynamicParameters ToDynamicParameters()
     {
-        DynamicParameters parameters = base.ToDynamicParameters();
+        var parameters = base.ToDynamicParameters();
         parameters.Add( nameof(Name),             Name );
         parameters.Add( nameof(NormalizedName),   NormalizedName );
         parameters.Add( nameof(ConcurrencyStamp), ConcurrencyStamp );
@@ -51,16 +50,16 @@ public sealed record RoleRecord( [ property: MaxLength( 1024 ) ]                
     // [DbReaderMapping]
     public static RoleRecord Create( DbDataReader reader )
     {
-        var rights           = reader.GetString( nameof(Rights) );
-        var name             = reader.GetString( nameof(Name) );
-        var normalizedName   = reader.GetString( nameof(NormalizedName) );
-        var concurrencyStamp = reader.GetString( nameof(ConcurrencyStamp) );
-        var dateCreated      = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
-        var lastModified     = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
-        var ownerUserID      = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
-        var createdBy        = RecordID<UserRecord>.CreatedBy( reader );
-        var id               = RecordID<RoleRecord>.ID( reader );
-        var record           = new RoleRecord( name, normalizedName, concurrencyStamp, rights, id, createdBy, ownerUserID, dateCreated, lastModified );
+        string                rights           = reader.GetString( nameof(Rights) );
+        string                name             = reader.GetString( nameof(Name) );
+        string                normalizedName   = reader.GetString( nameof(NormalizedName) );
+        string                concurrencyStamp = reader.GetString( nameof(ConcurrencyStamp) );
+        var                   dateCreated      = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
+        var                   lastModified     = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
+        var                   ownerUserID      = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
+        RecordID<UserRecord>? createdBy        = RecordID<UserRecord>.CreatedBy( reader );
+        RecordID<RoleRecord>  id               = RecordID<RoleRecord>.ID( reader );
+        var                   record           = new RoleRecord( name, normalizedName, concurrencyStamp, rights, id, createdBy, ownerUserID, dateCreated, lastModified );
         record.Validate();
         return record;
     }
@@ -74,7 +73,7 @@ public sealed record RoleRecord( [ property: MaxLength( 1024 ) ]                
                                             {
                                                 Name             = Name,
                                                 NormalizedName   = NormalizedName,
-                                                ConcurrencyStamp = ConcurrencyStamp,
+                                                ConcurrencyStamp = ConcurrencyStamp
                                             };
 
 

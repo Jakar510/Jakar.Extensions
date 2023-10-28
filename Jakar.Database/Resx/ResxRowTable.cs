@@ -3,26 +3,26 @@
 
 /// <see cref="LocalizableString"/>
 [ Serializable, Table( "Resx" ) ]
-public sealed partial record ResxRowRecord( long                    KeyID,
-                                            string                  Key,
-                                            string                  Neutral,
-                                            string                  Arabic,
-                                            string                  Chinese,
-                                            string                  Czech,
-                                            string                  Dutch,
-                                            string                  English,
-                                            string                  French,
-                                            string                  German,
-                                            string                  Japanese,
-                                            string                  Korean,
-                                            string                  Polish,
-                                            string                  Portuguese,
-                                            string                  Spanish,
-                                            string                  Swedish,
-                                            string                  Thai,
-                                            RecordID<ResxRowRecord> ID,
-                                            DateTimeOffset          DateCreated,
-                                            DateTimeOffset?         LastModified = default
+public sealed record ResxRowRecord( long                    KeyID,
+                                    string                  Key,
+                                    string                  Neutral,
+                                    string                  Arabic,
+                                    string                  Chinese,
+                                    string                  Czech,
+                                    string                  Dutch,
+                                    string                  English,
+                                    string                  French,
+                                    string                  German,
+                                    string                  Japanese,
+                                    string                  Korean,
+                                    string                  Polish,
+                                    string                  Portuguese,
+                                    string                  Spanish,
+                                    string                  Swedish,
+                                    string                  Thai,
+                                    RecordID<ResxRowRecord> ID,
+                                    DateTimeOffset          DateCreated,
+                                    DateTimeOffset?         LastModified = default
 ) : TableRecord<ResxRowRecord>( ID, DateCreated, LastModified ), IDbReaderMapping<ResxRowRecord>
 {
     public static string TableName { get; } = typeof(ResxRowRecord).GetTableName();
@@ -85,26 +85,26 @@ public sealed partial record ResxRowRecord( long                    KeyID,
 
     public static ResxRowRecord Create( DbDataReader reader )
     {
-        var keyID        = reader.GetFieldValue<long>( nameof(KeyID) );
-        var key          = reader.GetString( nameof(Key) );
-        var neutral      = reader.GetString( nameof(Neutral) );
-        var english      = reader.GetString( nameof(English) );
-        var spanish      = reader.GetString( nameof(Spanish) );
-        var french       = reader.GetString( nameof(French) );
-        var swedish      = reader.GetString( nameof(Swedish) );
-        var german       = reader.GetString( nameof(German) );
-        var chinese      = reader.GetString( nameof(Chinese) );
-        var polish       = reader.GetString( nameof(Polish) );
-        var thai         = reader.GetString( nameof(Thai) );
-        var japanese     = reader.GetString( nameof(Japanese) );
-        var czech        = reader.GetString( nameof(Czech) );
-        var portuguese   = reader.GetString( nameof(Portuguese) );
-        var dutch        = reader.GetString( nameof(Dutch) );
-        var korean       = reader.GetString( nameof(Korean) );
-        var arabic       = reader.GetString( nameof(Arabic) );
-        var dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
-        var lastModified = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
-        var id           = new RecordID<ResxRowRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) );
+        long   keyID        = reader.GetFieldValue<long>( nameof(KeyID) );
+        string key          = reader.GetString( nameof(Key) );
+        string neutral      = reader.GetString( nameof(Neutral) );
+        string english      = reader.GetString( nameof(English) );
+        string spanish      = reader.GetString( nameof(Spanish) );
+        string french       = reader.GetString( nameof(French) );
+        string swedish      = reader.GetString( nameof(Swedish) );
+        string german       = reader.GetString( nameof(German) );
+        string chinese      = reader.GetString( nameof(Chinese) );
+        string polish       = reader.GetString( nameof(Polish) );
+        string thai         = reader.GetString( nameof(Thai) );
+        string japanese     = reader.GetString( nameof(Japanese) );
+        string czech        = reader.GetString( nameof(Czech) );
+        string portuguese   = reader.GetString( nameof(Portuguese) );
+        string dutch        = reader.GetString( nameof(Dutch) );
+        string korean       = reader.GetString( nameof(Korean) );
+        string arabic       = reader.GetString( nameof(Arabic) );
+        var    dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
+        var    lastModified = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
+        var    id           = new RecordID<ResxRowRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) );
 
         return new ResxRowRecord( keyID,
                                   key,
@@ -194,7 +194,7 @@ public sealed partial record ResxRowRecord( long                    KeyID,
              Dutch = dutch,
              Korean = korean,
              Arabic = arabic,
-             LastModified = DateTimeOffset.UtcNow,
+             LastModified = DateTimeOffset.UtcNow
          };
 
     public ResxString ToResxString() => new(Neutral,
@@ -230,7 +230,7 @@ public sealed partial record ResxRowRecord( long                    KeyID,
                                                                    SupportedLanguage.Korean      => Korean,
                                                                    SupportedLanguage.Arabic      => Arabic,
                                                                    SupportedLanguage.Unspecified => throw new OutOfRangeException( nameof(language), language ),
-                                                                   _                             => throw new OutOfRangeException( nameof(language), language ),
+                                                                   _                             => throw new OutOfRangeException( nameof(language), language )
                                                                } ??
                                                                Neutral;
     public bool Equals( ResxRowRecord? other )

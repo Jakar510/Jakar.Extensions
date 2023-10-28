@@ -1,8 +1,7 @@
-﻿#nullable enable
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
 
 
-[Serializable]
+[ Serializable ]
 public abstract record BaseCollectionsRecord<T, TID> : ObservableRecord<T, TID> where T : BaseCollectionsRecord<T, TID>
                                                                                 where TID : struct, IComparable<TID>, IEquatable<TID>
 {
@@ -15,7 +14,7 @@ public abstract record BaseCollectionsRecord<T, TID> : ObservableRecord<T, TID> 
 
 
 
-    [Serializable]
+    [ Serializable ]
     public class Collection : ObservableCollection<T>
     {
         public Collection() : base() { }
@@ -24,7 +23,7 @@ public abstract record BaseCollectionsRecord<T, TID> : ObservableRecord<T, TID> 
 
 
 
-    [Serializable]
+    [ Serializable ]
     public class ConcurrentCollection : ConcurrentObservableCollection<T>
     {
         public ConcurrentCollection() : base() { }
@@ -33,7 +32,7 @@ public abstract record BaseCollectionsRecord<T, TID> : ObservableRecord<T, TID> 
 
 
 
-    [Serializable]
+    [ Serializable ]
     public class Deque : MultiDeque<T>
     {
         public Deque() : base() { }
@@ -42,7 +41,7 @@ public abstract record BaseCollectionsRecord<T, TID> : ObservableRecord<T, TID> 
 
 
 
-    [Serializable]
+    [ Serializable ]
     public class Items : List<T>
     {
         public Items() : base() { }
@@ -52,7 +51,7 @@ public abstract record BaseCollectionsRecord<T, TID> : ObservableRecord<T, TID> 
 
 
 
-    [Serializable]
+    [ Serializable ]
     public class Queue : MultiQueue<T>
     {
         public Queue() : base() { }
@@ -61,7 +60,7 @@ public abstract record BaseCollectionsRecord<T, TID> : ObservableRecord<T, TID> 
 
 
 
-    [Serializable]
+    [ Serializable ]
     public class Set : HashSet<T>
     {
         public Set() : base() { }
@@ -72,7 +71,7 @@ public abstract record BaseCollectionsRecord<T, TID> : ObservableRecord<T, TID> 
 
 
 
-[Serializable]
+[ Serializable ]
 public abstract record BaseCollectionsRecord<T> : BaseCollectionsRecord<T, long> where T : BaseCollectionsRecord<T, long>
 {
     protected BaseCollectionsRecord() : base() { }

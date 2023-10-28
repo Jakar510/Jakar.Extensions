@@ -56,8 +56,7 @@ public sealed record DeviceRecord( int?                                         
         AppVersion appVersion   = AppVersion.Parse( reader.GetString( nameof(AppVersion) ) );
         string     deviceID     = reader.GetString( nameof(DeviceID) );
 
-        var hardwareInfo = reader.GetFieldValue<string?>( nameof(HwInfo) )
-                                ?.FromJson<HwInfo>();
+        var hardwareInfo = reader.GetFieldValue<string?>( nameof(HwInfo) )?.FromJson<HwInfo>();
 
         string locale              = reader.GetString( nameof(Locale) );
         string model               = reader.GetString( nameof(Model) );

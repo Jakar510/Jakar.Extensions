@@ -39,7 +39,7 @@ public static class HostedServiceExtensions
             _thread = new Thread( ThreadStart )
                       {
                           Name         = $"{nameof(ServiceThread)}.{service.GetType().Name}",
-                          IsBackground = true,
+                          IsBackground = true
                       };
         }
         public bool Stop( in TimeSpan timeout )
@@ -87,23 +87,10 @@ public static class HostedServiceExtensions
                     finally { await _service.StopAsync( default ); }
                 }
                 catch ( TaskCanceledException ) { }
-                catch ( Exception e )
-                {
-                    _logger.LogCritical( e,
-                                         "{ClassName}.{Caller} -> '{ServiceName}'",
-                                         nameof(ServiceThread),
-                                         nameof(ThreadStart),
-                                         _service.GetType()
-                                                 .FullName );
-                }
+                catch ( Exception e ) { _logger.LogCritical( e, "{ClassName}.{Caller} -> '{ServiceName}'", nameof(ServiceThread), nameof(ThreadStart), _service.GetType().FullName ); }
                 finally
                 {
-                    _logger.LogDebug( "{ClassName}.{Caller} -> '{ServiceName}' -> {Cancelled}",
-                                      nameof(ServiceThread),
-                                      nameof(ThreadStart),
-                                      _service.GetType()
-                                              .FullName,
-                                      _token.IsCancellationRequested );
+                    _logger.LogDebug( "{ClassName}.{Caller} -> '{ServiceName}' -> {Cancelled}", nameof(ServiceThread), nameof(ThreadStart), _service.GetType().FullName, _token.IsCancellationRequested );
 
                     IsAlive = false;
                     _source = default;

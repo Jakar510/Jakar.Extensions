@@ -1,5 +1,4 @@
-﻿#nullable enable
-using System.Net.Mail;
+﻿using System.Net.Mail;
 using MimeKit;
 
 
@@ -7,9 +6,7 @@ using MimeKit;
 namespace Jakar.Database;
 
 
-/// <summary>
-///     <see href="http://www.mimekit.net/docs/html/Creating-Messages.htm"/>
-/// </summary>
+/// <summary> <see href="http://www.mimekit.net/docs/html/Creating-Messages.htm"/> </summary>
 public sealed class EmailBuilder
 {
     private readonly List<Attachment>     _attachments = new();
@@ -86,7 +83,7 @@ public sealed class EmailBuilder
         var builder = new BodyBuilder
                       {
                           TextBody = _body,
-                          HtmlBody = _html,
+                          HtmlBody = _html
                       };
 
         foreach ( Attachment element in _attachments ) { await builder.Attachments.AddAsync( element.Name, element.ContentStream ); }

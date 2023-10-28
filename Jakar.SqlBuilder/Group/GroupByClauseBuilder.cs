@@ -1,5 +1,4 @@
-﻿#nullable enable
-namespace Jakar.SqlBuilder;
+﻿namespace Jakar.SqlBuilder;
 
 
 public struct GroupByClauseBuilder
@@ -23,14 +22,12 @@ public struct GroupByClauseBuilder
     }
 
 
-    public EasySqlBuilder Done() => _builder.VerifyParentheses()
-                                            .NewLine();
+    public EasySqlBuilder Done() => _builder.VerifyParentheses().NewLine();
 
 
     public GroupByClauseBuilder Next()
     {
-        _builder.VerifyParentheses()
-                .NewLine();
+        _builder.VerifyParentheses().NewLine();
 
         return this;
     }

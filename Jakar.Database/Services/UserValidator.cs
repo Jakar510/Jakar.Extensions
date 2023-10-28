@@ -6,7 +6,7 @@ namespace Jakar.Database;
 
 public class UserValidator : IUserValidator<UserRecord>
 {
-    public static void Register( WebApplicationBuilder    builder ) => builder.Services.AddScoped<IUserValidator<UserRecord>, UserValidator>();
+    public static void Register( WebApplicationBuilder    builder )                         => builder.Services.AddScoped<IUserValidator<UserRecord>, UserValidator>();
     public static void Register<T>( WebApplicationBuilder builder ) where T : UserValidator => builder.Services.AddScoped<IUserValidator<UserRecord>, T>();
 
 
@@ -22,7 +22,7 @@ public class UserValidator : IUserValidator<UserRecord>
         {
             errors.Add( new IdentityError
                         {
-                            Description = $"{nameof(UserRecord.OwnerUserID)} is invalid",
+                            Description = $"{nameof(UserRecord.OwnerUserID)} is invalid"
                         } );
         }
 
@@ -30,7 +30,7 @@ public class UserValidator : IUserValidator<UserRecord>
         {
             errors.Add( new IdentityError
                         {
-                            Description = $"{nameof(UserRecord.UserName)} is invalid",
+                            Description = $"{nameof(UserRecord.UserName)} is invalid"
                         } );
         }
     }

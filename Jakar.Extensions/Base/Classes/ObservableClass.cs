@@ -1,12 +1,11 @@
-﻿#nullable enable
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
 
 
-[Serializable]
+[ Serializable ]
 public abstract class ObservableClass : BaseClass, INotifyPropertyChanged, INotifyPropertyChanging // IDataBaseID
 {
     public static readonly DateTime sqlMinDate = DateTime.Parse( "1/1/1753 12:00:00 AM", CultureInfo.InvariantCulture );
-    
+
     public event PropertyChangedEventHandler?  PropertyChanged;
     public event PropertyChangingEventHandler? PropertyChanging;
 
@@ -23,7 +22,7 @@ public abstract class ObservableClass : BaseClass, INotifyPropertyChanged, INoti
     /// <returns>
     ///     <para> Returns <see langword="false"/> if the values are equal, and therefore the <paramref name="backingStore"/> was not changed, otherwise <see langword="true"/> </para>
     /// </returns>
-    protected virtual bool SetProperty<T>( ref T backingStore, T value, IEqualityComparer<T> comparer, [CallerMemberName] string? propertyName = default )
+    protected virtual bool SetProperty<T>( ref T backingStore, T value, IEqualityComparer<T> comparer, [ CallerMemberName ] string? propertyName = default )
     {
         if ( comparer.Equals( backingStore, value ) ) { return false; }
 
@@ -46,10 +45,10 @@ public abstract class ObservableClass : BaseClass, INotifyPropertyChanged, INoti
     /// <returns>
     ///     <para> Returns <see langword="false"/> if the values are equal, and therefore the <paramref name="backingStore"/> was not changed, otherwise <see langword="true"/> </para>
     /// </returns>
-    protected virtual bool SetProperty<T>( ref T backingStore, T value, [CallerMemberName] string? propertyName = default ) => SetProperty( ref backingStore, value, EqualityComparer<T>.Default, propertyName );
+    protected virtual bool SetProperty<T>( ref T backingStore, T value, [ CallerMemberName ] string? propertyName = default ) => SetProperty( ref backingStore, value, EqualityComparer<T>.Default, propertyName );
 
 
-    protected virtual bool SetProperty( ref DateTime backingStore, DateTime value, in DateTime minDate, [CallerMemberName] string? caller = default )
+    protected virtual bool SetProperty( ref DateTime backingStore, DateTime value, in DateTime minDate, [ CallerMemberName ] string? caller = default )
     {
         value = value < minDate
                     ? minDate
@@ -57,7 +56,7 @@ public abstract class ObservableClass : BaseClass, INotifyPropertyChanged, INoti
 
         return SetProperty( ref backingStore, value, ValueEqualizer<DateTime>.Default, caller );
     }
-    protected virtual bool SetProperty( ref DateTime? backingStore, DateTime? value, in DateTime minDate, [CallerMemberName] string? caller = default )
+    protected virtual bool SetProperty( ref DateTime? backingStore, DateTime? value, in DateTime minDate, [ CallerMemberName ] string? caller = default )
     {
         value = value < minDate
                     ? null
@@ -67,7 +66,7 @@ public abstract class ObservableClass : BaseClass, INotifyPropertyChanged, INoti
     }
 
 
-    protected virtual bool SetProperty( ref DateTimeOffset backingStore, DateTimeOffset value, in DateTimeOffset minDate, [CallerMemberName] string? caller = default )
+    protected virtual bool SetProperty( ref DateTimeOffset backingStore, DateTimeOffset value, in DateTimeOffset minDate, [ CallerMemberName ] string? caller = default )
     {
         value = value < minDate
                     ? minDate
@@ -75,7 +74,7 @@ public abstract class ObservableClass : BaseClass, INotifyPropertyChanged, INoti
 
         return SetProperty( ref backingStore, value, ValueEqualizer<DateTimeOffset>.Default, caller );
     }
-    protected virtual bool SetProperty( ref DateTimeOffset? backingStore, DateTimeOffset? value, in DateTimeOffset minDate, [CallerMemberName] string? caller = default )
+    protected virtual bool SetProperty( ref DateTimeOffset? backingStore, DateTimeOffset? value, in DateTimeOffset minDate, [ CallerMemberName ] string? caller = default )
     {
         value = value < minDate
                     ? null
@@ -85,7 +84,7 @@ public abstract class ObservableClass : BaseClass, INotifyPropertyChanged, INoti
     }
 
 
-    protected virtual bool SetProperty( ref TimeSpan backingStore, TimeSpan value, in TimeSpan minValue, [CallerMemberName] string? caller = default )
+    protected virtual bool SetProperty( ref TimeSpan backingStore, TimeSpan value, in TimeSpan minValue, [ CallerMemberName ] string? caller = default )
     {
         value = value < minValue
                     ? minValue
@@ -93,7 +92,7 @@ public abstract class ObservableClass : BaseClass, INotifyPropertyChanged, INoti
 
         return SetProperty( ref backingStore, value, ValueEqualizer<TimeSpan>.Default, caller );
     }
-    protected virtual bool SetProperty( ref TimeSpan? backingStore, TimeSpan? value, in TimeSpan? minValue, [CallerMemberName] string? caller = default )
+    protected virtual bool SetProperty( ref TimeSpan? backingStore, TimeSpan? value, in TimeSpan? minValue, [ CallerMemberName ] string? caller = default )
     {
         value = value < minValue
                     ? null
@@ -136,7 +135,7 @@ public abstract class ObservableClass : BaseClass, INotifyPropertyChanged, INoti
 
 
     /// <summary> "onChanged" only called if the backingStore value has changed. </summary>
-    protected virtual Task SetProperty<T>( ref T backingStore, T value, Func<Task> onChanged, [CallerMemberName] string? propertyName = default )
+    protected virtual Task SetProperty<T>( ref T backingStore, T value, Func<Task> onChanged, [ CallerMemberName ] string? propertyName = default )
     {
         if ( !SetProperty( ref backingStore, value, propertyName ) ) { return Task.CompletedTask; }
 
@@ -145,7 +144,7 @@ public abstract class ObservableClass : BaseClass, INotifyPropertyChanged, INoti
 
 
     /// <summary> "onChanged" only called if the backingStore value has changed. </summary>
-    protected virtual Task SetProperty<T>( ref T backingStore, T value, IEqualityComparer<T> comparer, Func<Task> onChanged, [CallerMemberName] string? propertyName = default )
+    protected virtual Task SetProperty<T>( ref T backingStore, T value, IEqualityComparer<T> comparer, Func<Task> onChanged, [ CallerMemberName ] string? propertyName = default )
     {
         if ( !SetProperty( ref backingStore, value, comparer, propertyName ) ) { return Task.CompletedTask; }
 
@@ -154,7 +153,7 @@ public abstract class ObservableClass : BaseClass, INotifyPropertyChanged, INoti
 
 
     /// <summary> "onChanged" only called if the backingStore value has changed. </summary>
-    protected virtual Task SetProperty<T>( ref T backingStore, T value, Func<T, Task> onChanged, [CallerMemberName] string? propertyName = default )
+    protected virtual Task SetProperty<T>( ref T backingStore, T value, Func<T, Task> onChanged, [ CallerMemberName ] string? propertyName = default )
     {
         if ( !SetProperty( ref backingStore, value, propertyName ) ) { return Task.CompletedTask; }
 
@@ -163,7 +162,7 @@ public abstract class ObservableClass : BaseClass, INotifyPropertyChanged, INoti
 
 
     /// <summary> "onChanged" only called if the backingStore value has changed. </summary>
-    protected virtual Task SetProperty<T>( ref T backingStore, T value, IEqualityComparer<T> comparer, Func<T, Task> onChanged, [CallerMemberName] string? propertyName = default )
+    protected virtual Task SetProperty<T>( ref T backingStore, T value, IEqualityComparer<T> comparer, Func<T, Task> onChanged, [ CallerMemberName ] string? propertyName = default )
     {
         if ( !SetProperty( ref backingStore, value, comparer, propertyName ) ) { return Task.CompletedTask; }
 
@@ -171,15 +170,15 @@ public abstract class ObservableClass : BaseClass, INotifyPropertyChanged, INoti
     }
 
 
-    [NotifyPropertyChangedInvocator] protected virtual void OnPropertyChanged( [CallerMemberName] string? property = default ) => OnPropertyChanged( new PropertyChangedEventArgs( property ?? string.Empty ) );
+    [ NotifyPropertyChangedInvocator ] protected virtual void OnPropertyChanged( [ CallerMemberName ] string? property = default ) => OnPropertyChanged( new PropertyChangedEventArgs( property ?? string.Empty ) );
 
-    [NotifyPropertyChangedInvocator] protected virtual void OnPropertyChanged( PropertyChangedEventArgs e ) => PropertyChanged?.Invoke( this, e );
-    protected virtual void OnPropertyChanging( [CallerMemberName] string?                               property = default ) => OnPropertyChanging( new PropertyChangingEventArgs( property ?? string.Empty ) );
-    protected virtual void OnPropertyChanging( PropertyChangingEventArgs                                e ) => PropertyChanging?.Invoke( this, e );
+    [ NotifyPropertyChangedInvocator ] protected virtual void OnPropertyChanged( PropertyChangedEventArgs      e )                  => PropertyChanged?.Invoke( this, e );
+    protected virtual                                    void OnPropertyChanging( [ CallerMemberName ] string? property = default ) => OnPropertyChanging( new PropertyChangingEventArgs( property ?? string.Empty ) );
+    protected virtual                                    void OnPropertyChanging( PropertyChangingEventArgs    e )                  => PropertyChanging?.Invoke( this, e );
 
 
     /// <summary> "onChanged" only called if the backingStore value has changed. </summary>
-    protected virtual void SetProperty<T>( ref T backingStore, T value, ICommand onChanged, [CallerMemberName] string? propertyName = default )
+    protected virtual void SetProperty<T>( ref T backingStore, T value, ICommand onChanged, [ CallerMemberName ] string? propertyName = default )
     {
         if ( !SetProperty( ref backingStore, value, propertyName ) ) { return; }
 
@@ -188,7 +187,7 @@ public abstract class ObservableClass : BaseClass, INotifyPropertyChanged, INoti
 
 
     /// <summary> "onChanged" only called if the backingStore value has changed. </summary>
-    protected virtual void SetProperty<T>( ref T backingStore, T value, IEqualityComparer<T> comparer, ICommand onChanged, [CallerMemberName] string? propertyName = default )
+    protected virtual void SetProperty<T>( ref T backingStore, T value, IEqualityComparer<T> comparer, ICommand onChanged, [ CallerMemberName ] string? propertyName = default )
     {
         if ( !SetProperty( ref backingStore, value, comparer, propertyName ) ) { return; }
 
@@ -197,7 +196,7 @@ public abstract class ObservableClass : BaseClass, INotifyPropertyChanged, INoti
 
 
     /// <summary> "onChanged" only called if the backingStore value has changed. </summary>
-    protected virtual void SetProperty<T>( ref T backingStore, T value, Action onChanged, [CallerMemberName] string? propertyName = default )
+    protected virtual void SetProperty<T>( ref T backingStore, T value, Action onChanged, [ CallerMemberName ] string? propertyName = default )
     {
         if ( !SetProperty( ref backingStore, value, propertyName ) ) { return; }
 
@@ -206,7 +205,7 @@ public abstract class ObservableClass : BaseClass, INotifyPropertyChanged, INoti
 
 
     /// <summary> "onChanged" only called if the backingStore value has changed. </summary>
-    protected virtual void SetProperty<T>( ref T backingStore, T value, IEqualityComparer<T> comparer, Action onChanged, [CallerMemberName] string? propertyName = default )
+    protected virtual void SetProperty<T>( ref T backingStore, T value, IEqualityComparer<T> comparer, Action onChanged, [ CallerMemberName ] string? propertyName = default )
     {
         if ( !SetProperty( ref backingStore, value, comparer, propertyName ) ) { return; }
 
@@ -215,7 +214,7 @@ public abstract class ObservableClass : BaseClass, INotifyPropertyChanged, INoti
 
 
     /// <summary> "onChanged" only called if the backingStore value has changed. </summary>
-    protected virtual void SetProperty<T>( ref T backingStore, T value, Action<T> onChanged, [CallerMemberName] string? propertyName = default )
+    protected virtual void SetProperty<T>( ref T backingStore, T value, Action<T> onChanged, [ CallerMemberName ] string? propertyName = default )
     {
         if ( !SetProperty( ref backingStore, value, propertyName ) ) { return; }
 
@@ -224,7 +223,7 @@ public abstract class ObservableClass : BaseClass, INotifyPropertyChanged, INoti
 
 
     /// <summary> "onChanged" only called if the backingStore value has changed. </summary>
-    protected virtual void SetProperty<T>( ref T backingStore, T value, IEqualityComparer<T> comparer, Action<T> onChanged, [CallerMemberName] string? propertyName = default )
+    protected virtual void SetProperty<T>( ref T backingStore, T value, IEqualityComparer<T> comparer, Action<T> onChanged, [ CallerMemberName ] string? propertyName = default )
     {
         if ( !SetProperty( ref backingStore, value, comparer, propertyName ) ) { return; }
 

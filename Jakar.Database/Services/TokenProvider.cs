@@ -10,7 +10,7 @@ public sealed class TokenProvider : IUserTwoFactorTokenProvider<UserRecord>
     public TokenProvider( Database database ) => _database = database;
 
 
-    public Task<string> GenerateAsync( string                                 purpose, UserManager<UserRecord> manager, UserRecord              user ) => _database.GenerateAsync( purpose, manager, user );
-    public Task<bool> ValidateAsync( string                                   purpose, string                  token,   UserManager<UserRecord> manager, UserRecord user ) => _database.ValidateAsync( purpose, token, manager, user );
-    public Task<bool> CanGenerateTwoFactorTokenAsync( UserManager<UserRecord> manager, UserRecord              user ) => _database.CanGenerateTwoFactorTokenAsync( manager, user );
+    public Task<string> GenerateAsync( string                                   purpose, UserManager<UserRecord> manager, UserRecord              user )                     => _database.GenerateAsync( purpose, manager, user );
+    public Task<bool>   ValidateAsync( string                                   purpose, string                  token,   UserManager<UserRecord> manager, UserRecord user ) => _database.ValidateAsync( purpose, token, manager, user );
+    public Task<bool>   CanGenerateTwoFactorTokenAsync( UserManager<UserRecord> manager, UserRecord              user ) => _database.CanGenerateTwoFactorTokenAsync( manager, user );
 }

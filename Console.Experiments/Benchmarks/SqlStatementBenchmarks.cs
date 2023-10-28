@@ -78,9 +78,7 @@ public class SqlStatementBenchmarks
     }
 
 
-    [ Benchmark ]
-    public string Test_Span() => Test_VSB()
-       .ToString();
+    [ Benchmark ] public string Test_Span() => Test_VSB().ToString();
 
 
     [ Benchmark ] public string Test_Interpolated() => $"DELETE FROM {TableName} WHERE ID in ( {string.Join( ',', ids )} )";

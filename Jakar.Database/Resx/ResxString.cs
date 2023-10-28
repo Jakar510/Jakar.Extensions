@@ -24,28 +24,26 @@ public sealed class ResxString( string neutral,
     private readonly   string _neutral = neutral;
     protected override string GetText( IFormatProvider? formatProvider ) => GetText( formatProvider as CultureInfo ?? CultureInfo.CurrentCulture );
     public             string GetText( CultureInfo      info )           => GetText( info.GetSupportedLanguage()   ?? SupportedLanguage.Unspecified );
-    public string GetText( SupportedLanguage language )
-    {
-        return language switch
-               {
-                   SupportedLanguage.English     => english,
-                   SupportedLanguage.Spanish     => spanish,
-                   SupportedLanguage.French      => french,
-                   SupportedLanguage.Swedish     => swedish,
-                   SupportedLanguage.German      => german,
-                   SupportedLanguage.Chinese     => chinese,
-                   SupportedLanguage.Polish      => polish,
-                   SupportedLanguage.Thai        => thai,
-                   SupportedLanguage.Japanese    => japanese,
-                   SupportedLanguage.Czech       => czech,
-                   SupportedLanguage.Portuguese  => portuguese,
-                   SupportedLanguage.Dutch       => dutch,
-                   SupportedLanguage.Korean      => korean,
-                   SupportedLanguage.Arabic      => arabic,
-                   SupportedLanguage.Unspecified => _neutral,
-                   _                             => _neutral
-               };
-    }
+    public string GetText( SupportedLanguage language ) =>
+        language switch
+        {
+            SupportedLanguage.English     => english,
+            SupportedLanguage.Spanish     => spanish,
+            SupportedLanguage.French      => french,
+            SupportedLanguage.Swedish     => swedish,
+            SupportedLanguage.German      => german,
+            SupportedLanguage.Chinese     => chinese,
+            SupportedLanguage.Polish      => polish,
+            SupportedLanguage.Thai        => thai,
+            SupportedLanguage.Japanese    => japanese,
+            SupportedLanguage.Czech       => czech,
+            SupportedLanguage.Portuguese  => portuguese,
+            SupportedLanguage.Dutch       => dutch,
+            SupportedLanguage.Korean      => korean,
+            SupportedLanguage.Arabic      => arabic,
+            SupportedLanguage.Unspecified => _neutral,
+            _                             => _neutral
+        };
     protected override int  GetHash()                 => _neutral.GetHashCode();
     protected override bool AreEqual( object? other ) => other is ResxString resx && Equals( resx );
     public bool Equals( ResxString? other )

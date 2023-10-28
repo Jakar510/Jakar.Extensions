@@ -114,16 +114,14 @@ public readonly record struct LogValuesFormatter
             else
             {
                 // Format item syntax : { index[,alignment][ :formatString] }.
-                int formatDelimiterIndex = format[openBraceIndex..closeBraceIndex]
-                   .IndexOfAny( _formatDelimiters );
+                int formatDelimiterIndex = format[openBraceIndex..closeBraceIndex].IndexOfAny( _formatDelimiters );
 
                 if ( formatDelimiterIndex < 0 ) { formatDelimiterIndex = closeBraceIndex; }
 
                 vsb.Append( format.Slice( scanIndex, openBraceIndex - scanIndex + 1 ) );
                 vsb.Append( ValueNames.Count.ToString() );
 
-                ValueNames.Add( format.Slice( openBraceIndex + 1, formatDelimiterIndex - openBraceIndex - 1 )
-                                      .ToString() );
+                ValueNames.Add( format.Slice( openBraceIndex + 1, formatDelimiterIndex - openBraceIndex - 1 ).ToString() );
 
                 vsb.Append( format.Slice( formatDelimiterIndex, closeBraceIndex - formatDelimiterIndex + 1 ) );
 

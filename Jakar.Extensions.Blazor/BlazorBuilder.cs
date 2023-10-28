@@ -8,8 +8,7 @@
 ///     <para> <see href="https://github.com/Blazored/LocalStorage"/> </para>
 ///     <para> <see href="https://github.com/Blazored/SessionStorage"/> </para>
 /// </summary>
-[SuppressMessage( "ReSharper", "UnusedType.Global" )]
-[SuppressMessage( "ReSharper", "UnusedMethodReturnValue.Global" )]
+[ SuppressMessage( "ReSharper", "UnusedType.Global" ), SuppressMessage( "ReSharper", "UnusedMethodReturnValue.Global" ) ]
 public static class BlazorBuilder
 {
     public static WebApplicationBuilder AddAppServices( this WebApplicationBuilder builder )
@@ -87,10 +86,7 @@ public static class BlazorBuilder
     ///     <para> <see href="https://github.com/Blazored/SessionStorage"/> </para>
     /// </summary>
     public static WebApplicationBuilder AddBlazored( this WebApplicationBuilder builder ) =>
-        builder.AddBlazoredModal()
-               .AddBlazoredToast()
-               .AddBlazoredLocalStorage()
-               .AddBlazoredSessionStorage();
+        builder.AddBlazoredModal().AddBlazoredToast().AddBlazoredLocalStorage().AddBlazoredSessionStorage();
     /// <summary>
     ///     <para> <see href="https://github.com/Blazored/Modal"/> </para>
     ///     <para> <see href="https://github.com/Blazored/Toast"/> </para>
@@ -98,10 +94,7 @@ public static class BlazorBuilder
     ///     <para> <see href="https://github.com/Blazored/SessionStorage"/> </para>
     /// </summary>
     public static WebApplicationBuilder AddBlazored( this WebApplicationBuilder builder, Action<SessionStorageOptions> configureSession ) =>
-        builder.AddBlazoredModal()
-               .AddBlazoredToast()
-               .AddBlazoredLocalStorage()
-               .AddBlazoredSessionStorage( configureSession );
+        builder.AddBlazoredModal().AddBlazoredToast().AddBlazoredLocalStorage().AddBlazoredSessionStorage( configureSession );
     /// <summary>
     ///     <para> <see href="https://github.com/Blazored/Modal"/> </para>
     ///     <para> <see href="https://github.com/Blazored/Toast"/> </para>
@@ -109,10 +102,7 @@ public static class BlazorBuilder
     ///     <para> <see href="https://github.com/Blazored/SessionStorage"/> </para>
     /// </summary>
     public static WebApplicationBuilder AddBlazored( this WebApplicationBuilder builder, Action<LocalStorageOptions> configureLocal ) =>
-        builder.AddBlazoredModal()
-               .AddBlazoredToast()
-               .AddBlazoredLocalStorage( configureLocal )
-               .AddBlazoredSessionStorage();
+        builder.AddBlazoredModal().AddBlazoredToast().AddBlazoredLocalStorage( configureLocal ).AddBlazoredSessionStorage();
     /// <summary>
     ///     <para> <see href="https://github.com/Blazored/Modal"/> </para>
     ///     <para> <see href="https://github.com/Blazored/Toast"/> </para>
@@ -120,10 +110,7 @@ public static class BlazorBuilder
     ///     <para> <see href="https://github.com/Blazored/SessionStorage"/> </para>
     /// </summary>
     public static WebApplicationBuilder AddBlazored( this WebApplicationBuilder builder, Action<LocalStorageOptions> configureLocal, Action<SessionStorageOptions> configureSession ) =>
-        builder.AddBlazoredModal()
-               .AddBlazoredToast()
-               .AddBlazoredLocalStorage( configureLocal )
-               .AddBlazoredSessionStorage( configureSession );
+        builder.AddBlazoredModal().AddBlazoredToast().AddBlazoredLocalStorage( configureLocal ).AddBlazoredSessionStorage( configureSession );
 
 
     /// <summary>
@@ -187,10 +174,7 @@ public static class BlazorBuilder
     /// </summary>
     public static WebApplicationBuilder AddRadzen( this WebApplicationBuilder builder )
     {
-        builder.Services.AddScoped<DialogService>()
-               .AddScoped<TooltipService>()
-               .AddScoped<ContextMenuService>()
-               .AddScoped<NotificationService>();
+        builder.Services.AddScoped<DialogService>().AddScoped<TooltipService>().AddScoped<ContextMenuService>().AddScoped<NotificationService>();
 
         return builder;
     }

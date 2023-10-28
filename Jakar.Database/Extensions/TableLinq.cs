@@ -10,7 +10,7 @@ public static class TableLinq
                                                                   Func<DbConnection, DbTransaction?, TRecord, CancellationToken, bool> func,
                                                                   DbConnection                                                         connection,
                                                                   DbTransaction?                                                       transaction,
-                                                                  [EnumeratorCancellation] CancellationToken                           token = default
+                                                                  [ EnumeratorCancellation ] CancellationToken                         token = default
     )
     {
         await foreach ( TRecord record in source.WithCancellation( token ) )
@@ -22,7 +22,7 @@ public static class TableLinq
                                                                   Func<DbConnection, DbTransaction?, TRecord, CancellationToken, Task<bool>> func,
                                                                   DbConnection                                                               connection,
                                                                   DbTransaction?                                                             transaction,
-                                                                  [EnumeratorCancellation] CancellationToken                                 token = default
+                                                                  [ EnumeratorCancellation ] CancellationToken                               token = default
     )
     {
         await foreach ( TRecord record in source.WithCancellation( token ) )
@@ -34,7 +34,7 @@ public static class TableLinq
                                                                             Func<DbConnection, DbTransaction?, TRecord, CancellationToken, TResult> func,
                                                                             DbConnection                                                            connection,
                                                                             DbTransaction?                                                          transaction,
-                                                                            [EnumeratorCancellation] CancellationToken                              token = default
+                                                                            [ EnumeratorCancellation ] CancellationToken                            token = default
     )
     {
         await foreach ( TRecord record in source.WithCancellation( token ) ) { yield return func( connection, transaction, record, token ); }
@@ -43,7 +43,7 @@ public static class TableLinq
                                                                             Func<DbConnection, DbTransaction?, TRecord, CancellationToken, Task<TResult>> func,
                                                                             DbConnection                                                                  connection,
                                                                             DbTransaction?                                                                transaction,
-                                                                            [EnumeratorCancellation] CancellationToken                                    token = default
+                                                                            [ EnumeratorCancellation ] CancellationToken                                  token = default
     )
     {
         await foreach ( TRecord record in source.WithCancellation( token ) ) { yield return await func( connection, transaction, record, token ); }

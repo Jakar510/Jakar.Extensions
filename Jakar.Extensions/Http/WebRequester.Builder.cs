@@ -2,14 +2,11 @@
 // 05/03/2022  9:01 AM
 
 
-#nullable enable
 namespace Jakar.Extensions;
 
 
 /// <summary>
-///     <para>
-///         <see href="https://www.stevejgordon.co.uk/httpclient-connection-pooling--dotnet-core"/>
-///     </para>
+///     <para> <see href="https://www.stevejgordon.co.uk/httpclient-connection-pooling--dotnet-core"/> </para>
 /// </summary>
 public partial class WebRequester
 {
@@ -37,20 +34,20 @@ public partial class WebRequester
         private          ILogger?                   _logger                       = default;
 
     #if NETSTANDARD2_1
-        private SslProtocols?              _sslProtocols = default;
-        private ClientCertificateOption?   _clientCertificateOptions = default;
-        private X509CertificateCollection? _clientCertificates = default;
-        private DecompressionMethods?      _automaticDecompression = default;
+        private SslProtocols?              _sslProtocols                = default;
+        private ClientCertificateOption?   _clientCertificateOptions    = default;
+        private X509CertificateCollection? _clientCertificates          = default;
+        private DecompressionMethods?      _automaticDecompression      = default;
         private long?                      _maxRequestContentBufferSize = default;
     #else
-        private SslClientAuthenticationOptions? _sslOptions                  = default;
-        private TimeSpan?                       _responseDrainTimeout        = default;
-        private HttpKeepAlivePingPolicy?        _keepAlivePingPolicy         = default;
-        private TimeSpan?                       _keepAlivePingTimeout        = default;
-        private TimeSpan?                       _keepAlivePingDelay          = default;
-        private TimeSpan?                       _pooledConnectionLifetime    = default;
+        private SslClientAuthenticationOptions? _sslOptions = default;
+        private TimeSpan?                       _responseDrainTimeout = default;
+        private HttpKeepAlivePingPolicy?        _keepAlivePingPolicy = default;
+        private TimeSpan?                       _keepAlivePingTimeout = default;
+        private TimeSpan?                       _keepAlivePingDelay = default;
+        private TimeSpan?                       _pooledConnectionLifetime = default;
         private TimeSpan?                       _pooledConnectionIdleTimeout = default;
-        private int?                            _maxResponseDrainSize        = default;
+        private int?                            _maxResponseDrainSize = default;
     #endif
 
 
@@ -289,9 +286,9 @@ public partial class WebRequester
             With_KeepAlive( TimeSpan.FromMilliseconds( pingDelayMilliseconds ), TimeSpan.FromMilliseconds( pingTimeoutMilliseconds ), policy );
         public Builder With_KeepAlive( TimeSpan pingDelay, TimeSpan pingTimeout, HttpKeepAlivePingPolicy policy = HttpKeepAlivePingPolicy.WithActiveRequests )
         {
-            _keepAlivePingDelay   = pingDelay;
+            _keepAlivePingDelay = pingDelay;
             _keepAlivePingTimeout = pingTimeout;
-            _keepAlivePingPolicy  = policy;
+            _keepAlivePingPolicy = policy;
             return this;
         }
 
@@ -395,8 +392,7 @@ public partial class WebRequester
         {
             private readonly Func<IHostInfo> _value;
 
-            public Uri HostInfo => _value()
-               .HostInfo;
+            public Uri HostInfo => _value().HostInfo;
 
             public MethodHolder( Func<IHostInfo> value ) => _value = value;
         }

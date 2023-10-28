@@ -5,7 +5,7 @@ namespace Jakar.AppLogger.Common;
 
 
 /// <summary> <see cref="HwInfo"/> can only be used on Windows, MacOS or Linux </summary>
-[SuppressMessage( "ReSharper", "HeuristicUnreachableCode" )]
+[ SuppressMessage( "ReSharper", "HeuristicUnreachableCode" ) ]
 public record HwInfo : BaseRecord
 {
     private string? _deviceID;
@@ -64,11 +64,9 @@ public record HwInfo : BaseRecord
     {
         if ( _deviceID is not null ) { return _deviceID; }
 
-        string? cpu = CpuList.FirstOrDefault()
-                            ?.ProcessorId;
+        string? cpu = CpuList.FirstOrDefault()?.ProcessorId;
 
-        string? motherboard = MotherboardList.FirstOrDefault()
-                                            ?.SerialNumber;
+        string? motherboard = MotherboardList.FirstOrDefault()?.SerialNumber;
 
 
         _deviceID = cpu is not null && motherboard is not null

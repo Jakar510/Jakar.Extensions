@@ -1,15 +1,14 @@
-﻿#nullable enable
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
 
 
 public static partial class TypeExtensions
 {
     public static bool IsSet( this PropertyInfo propertyInfo ) => propertyInfo.PropertyType.IsSet();
-    public static bool IsSet( this Type         type ) => type.HasInterface( typeof(ISet<>) );
+    public static bool IsSet( this Type         type )         => type.HasInterface( typeof(ISet<>) );
 
-    public static bool IsSet( this PropertyInfo propertyInfo, [NotNullWhen( true )] out Type? itemType, [NotNullWhen( true )] out bool? isBuiltInType ) => propertyInfo.PropertyType.IsCollection( out itemType, out isBuiltInType );
+    public static bool IsSet( this PropertyInfo propertyInfo, [ NotNullWhen( true ) ] out Type? itemType, [ NotNullWhen( true ) ] out bool? isBuiltInType ) => propertyInfo.PropertyType.IsCollection( out itemType, out isBuiltInType );
 
-    public static bool IsSet( this Type classType, [NotNullWhen( true )] out Type? itemType, [NotNullWhen( true )] out bool? isBuiltInType )
+    public static bool IsSet( this Type classType, [ NotNullWhen( true ) ] out Type? itemType, [ NotNullWhen( true ) ] out bool? isBuiltInType )
     {
         if ( classType.IsSet( out IReadOnlyList<Type>? itemTypes ) )
         {
@@ -23,9 +22,9 @@ public static partial class TypeExtensions
         return false;
     }
 
-    public static bool IsSet( this PropertyInfo propertyInfo, [NotNullWhen( true )] out Type? itemType ) => propertyInfo.PropertyType.IsSet( out itemType );
+    public static bool IsSet( this PropertyInfo propertyInfo, [ NotNullWhen( true ) ] out Type? itemType ) => propertyInfo.PropertyType.IsSet( out itemType );
 
-    public static bool IsSet( this Type propertyType, [NotNullWhen( true )] out Type? itemType )
+    public static bool IsSet( this Type propertyType, [ NotNullWhen( true ) ] out Type? itemType )
     {
         if ( propertyType.IsSet( out IReadOnlyList<Type>? itemTypes ) )
         {
@@ -37,7 +36,7 @@ public static partial class TypeExtensions
         return false;
     }
 
-    public static bool IsSet( this Type classType, [NotNullWhen( true )] out IReadOnlyList<Type>? itemTypes )
+    public static bool IsSet( this Type classType, [ NotNullWhen( true ) ] out IReadOnlyList<Type>? itemTypes )
     {
         if ( classType.IsGenericType && classType.IsSet() )
         {

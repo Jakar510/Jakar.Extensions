@@ -1,5 +1,4 @@
-﻿#nullable enable
-using Jakar.Extensions;
+﻿using Jakar.Extensions;
 
 
 
@@ -34,22 +33,17 @@ public struct InsertClauseBuilder
 
         foreach ( PropertyInfo info in typeof(T).GetProperties( BindingFlags.Instance | BindingFlags.Public | BindingFlags.GetProperty ) )
         {
-            string value = info.GetValue( obj )
-                              ?.ToString() ?? KeyWords.NULL;
+            string value = info.GetValue( obj )?.ToString() ?? KeyWords.NULL;
 
             cache[info.Name] = value;
         }
 
 
-        _builder.Begin()
-                .AddRange( ',', cache.Keys )
-                .End();
+        _builder.Begin().AddRange( ',', cache.Keys ).End();
 
         _builder.Add( KeyWords.VALUES );
 
-        _builder.Begin()
-                .AddRange( ',', cache.Values )
-                .End();
+        _builder.Begin().AddRange( ',', cache.Values ).End();
 
         return _builder.NewLine();
     }

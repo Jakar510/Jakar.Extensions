@@ -13,9 +13,6 @@ public interface IAppLog : IUniqueID<Guid>, IValidator, ILogInfo
     public const int MESSAGE_LENGTH       = 0x3FFFFFDF; // 1 GB
 
 
-    public DateTimeOffset TimeStamp { get; }
-
-
     /// <summary> An optional string used for associating logs with users. </summary>
     public string? AppUserID { get; }
 
@@ -43,6 +40,9 @@ public interface IAppLog : IUniqueID<Guid>, IValidator, ILogInfo
     public string? StackTrace { get; }
 
 
+    public DateTimeOffset TimeStamp { get; }
+
+
     public ExceptionDetails? GetExceptionDetails();
-    public string? GetStackTrace();
+    public string?           GetStackTrace();
 }

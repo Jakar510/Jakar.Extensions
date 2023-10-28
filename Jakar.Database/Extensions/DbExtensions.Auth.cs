@@ -19,5 +19,4 @@ public static partial class DbExtensions
 }
 
 
-
 #endif

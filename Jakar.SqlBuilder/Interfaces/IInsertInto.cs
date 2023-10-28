@@ -1,5 +1,4 @@
-﻿#nullable enable
-using Jakar.Extensions;
+﻿using Jakar.Extensions;
 
 
 
@@ -12,9 +11,7 @@ public interface IInsertInto
     ///     <para> Uses the passed <paramref name="tableName"/> </para>
     ///     Starts a <see cref="IDataInsert"/> chain.
     /// </summary>
-    /// <returns>
-    ///     <see cref="ISqlBuilderRoot"/>
-    /// </returns>
+    /// <returns> <see cref="ISqlBuilderRoot"/> </returns>
     public IDataInsert In( string tableName );
 
     /// <summary>
@@ -22,9 +19,7 @@ public interface IInsertInto
     ///     Starts a <see cref="IDataInsert"/> chain.
     /// </summary>
     /// <typeparam name="T"> The type being passed </typeparam>
-    /// <returns>
-    ///     <see cref="ISqlBuilderRoot"/>
-    /// </returns>
+    /// <returns> <see cref="ISqlBuilderRoot"/> </returns>
     public IDataInsert In<T>() where T : class;
 
     /// <summary>
@@ -32,9 +27,7 @@ public interface IInsertInto
     ///     Starts a <see cref="IDataInsert"/> chain.
     /// </summary>
     /// <typeparam name="T"> The type being passed </typeparam>
-    /// <returns>
-    ///     <see cref="ISqlBuilderRoot"/>
-    /// </returns>
+    /// <returns> <see cref="ISqlBuilderRoot"/> </returns>
     public IDataInsert In<T>( T obj ) where T : class;
 
 
@@ -43,9 +36,7 @@ public interface IInsertInto
     ///     Uses <see cref="System.Reflection"/> to determine the column names and its values. Uses public properties only.
     /// </summary>
     /// <typeparam name="T"> The type being passed </typeparam>
-    /// <returns>
-    ///     <see cref="ISqlBuilderRoot"/>
-    /// </returns>
+    /// <returns> <see cref="ISqlBuilderRoot"/> </returns>
     public ISqlBuilderRoot Into<T>( string tableName, T obj );
 
     /// <summary>
@@ -54,9 +45,7 @@ public interface IInsertInto
     ///     <para> Checks public properties only. </para>
     /// </summary>
     /// <typeparam name="T"> The type being passed </typeparam>
-    /// <returns>
-    ///     <see cref="ISqlBuilderRoot"/>
-    /// </returns>
+    /// <returns> <see cref="ISqlBuilderRoot"/> </returns>
     public ISqlBuilderRoot Into<T>( T obj ) where T : class;
 
     /// <summary>
@@ -65,9 +54,7 @@ public interface IInsertInto
     ///     <para> Checks public properties only. </para>
     /// </summary>
     /// <typeparam name="T"> The type being passed </typeparam>
-    /// <returns>
-    ///     <see cref="ISqlBuilderRoot"/>
-    /// </returns>
+    /// <returns> <see cref="ISqlBuilderRoot"/> </returns>
     public ISqlBuilderRoot Into<T>( IEnumerable<T> obj ) where T : class;
 }
 

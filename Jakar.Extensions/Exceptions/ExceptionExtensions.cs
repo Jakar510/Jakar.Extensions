@@ -1,5 +1,4 @@
-﻿#nullable enable
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
 
 
 public static class ExceptionExtensions
@@ -25,7 +24,7 @@ public static class ExceptionExtensions
     }
 
 
-    [Obsolete( $"Use {nameof(ExceptionDetails)} instead" )]
+    [ Obsolete( $"Use {nameof(ExceptionDetails)} instead" ) ]
     public static Dictionary<string, object?> FullDetails( this Exception e, bool includeFullMethodInfo )
     {
         if ( e is null ) { throw new ArgumentNullException( nameof(e) ); }
@@ -77,15 +76,15 @@ public static class ExceptionExtensions
     {
         foreach ( StackFrame frame in trace.GetFrames() )
         {
-            MethodBase method    = frame.GetMethod() ?? throw new NullReferenceException( nameof(frame.GetMethod) );
+            MethodBase method    = frame.GetMethod()    ?? throw new NullReferenceException( nameof(frame.GetMethod) );
             string     className = method.MethodClass() ?? throw new NullReferenceException( nameof(TypeExtensions.MethodClass) );
 
 
             switch ( method.Name )
             {
                 case nameof(CallStack) when className == nameof(ExceptionExtensions):
-                case nameof(Frames) when className == nameof(ExceptionExtensions):
-                case nameof(Frame) when className == nameof(ExceptionExtensions):
+                case nameof(Frames) when className    == nameof(ExceptionExtensions):
+                case nameof(Frame) when className     == nameof(ExceptionExtensions):
                     continue;
 
                 default:
@@ -97,12 +96,12 @@ public static class ExceptionExtensions
 
 
     public static MethodDetails? MethodInfo( this Exception e ) => e.TargetSite?.MethodInfo();
-    public static string CallStack( Exception               e ) => CallStack( new StackTrace( e ) );
-    public static string CallStack() => CallStack( new StackTrace() );
-    public static string CallStack( StackTrace trace ) => string.Join( "->", Frames( trace ) );
+    public static string         CallStack( Exception       e ) => CallStack( new StackTrace( e ) );
+    public static string         CallStack()                    => CallStack( new StackTrace() );
+    public static string         CallStack( StackTrace trace )  => string.Join( "->", Frames( trace ) );
     public static string Frame( StackFrame frame )
     {
-        MethodBase method    = frame.GetMethod() ?? throw new NullReferenceException( nameof(frame.GetMethod) );
+        MethodBase method    = frame.GetMethod()    ?? throw new NullReferenceException( nameof(frame.GetMethod) );
         string     className = method.MethodClass() ?? throw new NullReferenceException( nameof(TypeExtensions.MethodClass) );
 
         return $"{className}::{method.Name}";
@@ -114,27 +113,25 @@ public static class ExceptionExtensions
 
     public static void Details( this Exception e, out Dictionary<string, string?> dict ) => dict = new Dictionary<string, string?>
                                                                                                    {
-                                                                                                       [nameof(Type)] = e.GetType()
-                                                                                                                         .FullName,
+                                                                                                       [nameof(Type)]               = e.GetType().FullName,
                                                                                                        [nameof(e.Source)]           = e.Source,
                                                                                                        [nameof(e.Message)]          = e.Message,
                                                                                                        [nameof(e.StackTrace)]       = e.StackTrace,
                                                                                                        [nameof(Exception.HelpLink)] = e.HelpLink,
                                                                                                        [nameof(MethodSignature)]    = e.MethodSignature(),
-                                                                                                       [nameof(e.ToString)]         = e.ToString(),
+                                                                                                       [nameof(e.ToString)]         = e.ToString()
                                                                                                    };
     public static void Details( this Exception e, out Dictionary<string, object?> dict, bool includeFullMethodInfo )
     {
         dict = new Dictionary<string, object?>
                {
-                   [nameof(Type)] = e.GetType()
-                                     .FullName,
+                   [nameof(Type)]                 = e.GetType().FullName,
                    [nameof(Exception.HResult)]    = e.HResult,
                    [nameof(Exception.HelpLink)]   = e.HelpLink,
                    [nameof(Exception.Source)]     = e.Source,
                    [nameof(Exception.Message)]    = e.Message,
                    [nameof(Exception.Data)]       = e.GetData(),
-                   [nameof(Exception.StackTrace)] = e.StackTrace?.SplitAndTrimLines(),
+                   [nameof(Exception.StackTrace)] = e.StackTrace?.SplitAndTrimLines()
                };
 
 
@@ -146,8 +143,7 @@ public static class ExceptionExtensions
 
     public static void GetProperties( this Exception e, ref Dictionary<string, object?> dictionary )
     {
-        foreach ( PropertyInfo info in e.GetType()
-                                        .GetProperties( BindingFlags.Instance | BindingFlags.Public ) )
+        foreach ( PropertyInfo info in e.GetType().GetProperties( BindingFlags.Instance | BindingFlags.Public ) )
         {
             string key = info.Name;
 

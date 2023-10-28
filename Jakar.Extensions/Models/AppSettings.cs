@@ -1,5 +1,4 @@
-﻿#nullable enable
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
 
 
 public interface IAppSettings : IHostViewModel
@@ -20,7 +19,7 @@ public interface IAppSettings<TViewPage> : IAppSettings
 
 
 
-[Serializable]
+[ Serializable ]
 public class AppSettings : BaseHostViewModel, IAppSettings
 {
     private        Guid       _deviceID;
@@ -56,7 +55,7 @@ public class AppSettings : BaseHostViewModel, IAppSettings
 
 
 
-[Serializable]
+[ Serializable ]
 public class AppSettings<TViewPage> : AppSettings, IAppSettings<TViewPage>
 {
     private TViewPage? _currentViewPage;

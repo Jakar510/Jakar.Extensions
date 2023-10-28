@@ -1,17 +1,12 @@
-#nullable enable
 namespace Jakar.Extensions;
 
 
 /// <summary>
-///     <para>
-///         <see href="https://stackoverflow.com/a/54733415/9530917"> This type of CollectionView does not support changes to its SourceCollection from a thread different from the Dispatcher thread </see>
-///     </para>
-///     <para>
-///         <see href="https://stackoverflow.com/a/14602121/9530917"> How do I update an ObservableCollection via a worker thread? </see>
-///     </para>
+///     <para> <see href="https://stackoverflow.com/a/54733415/9530917"> This type of CollectionView does not support changes to its SourceCollection from a thread different from the Dispatcher thread </see> </para>
+///     <para> <see href="https://stackoverflow.com/a/14602121/9530917"> How do I update an ObservableCollection via a worker thread? </see> </para>
 /// </summary>
 /// <typeparam name="T"> </typeparam>
-[Serializable]
+[ Serializable ]
 public class ConcurrentObservableCollection<T> : CollectionAlerts<T>, IList<T>, IReadOnlyList<T>, IList
 {
     protected readonly List<T>      _values;
@@ -327,7 +322,7 @@ public class ConcurrentObservableCollection<T> : CollectionAlerts<T>, IList<T>, 
     }
 
 
-    public virtual void Sort() => Sort( _comparer );
+    public virtual void Sort()                        => Sort( _comparer );
     public virtual void Sort( IComparer<T> comparer ) => Sort( comparer.Compare );
     public virtual void Sort( Comparison<T> compare )
     {
@@ -442,11 +437,7 @@ public class ConcurrentObservableCollection<T> : CollectionAlerts<T>, IList<T>, 
 
     public override IEnumerator<T> GetEnumerator()
     {
-        lock (_lock)
-        {
-            return _values.Where( Filter )
-                          .GetEnumerator();
-        }
+        lock (_lock) { return _values.Where( Filter ).GetEnumerator(); }
     }
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }

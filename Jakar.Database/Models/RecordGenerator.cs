@@ -4,9 +4,7 @@
 namespace Jakar.Database;
 
 
-/// <summary>
-///     <see href="https://stackoverflow.com/a/15992856/9530917"/>
-/// </summary>
+/// <summary> <see href="https://stackoverflow.com/a/15992856/9530917"/> </summary>
 public struct RecordGenerator<TRecord> : IAsyncEnumerable<TRecord>, IAsyncEnumerator<TRecord> where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
     private readonly DbTable<TRecord>           _table;
@@ -53,5 +51,5 @@ public struct RecordGenerator<TRecord> : IAsyncEnumerable<TRecord>, IAsyncEnumer
 
 
     IAsyncEnumerator<TRecord> IAsyncEnumerable<TRecord>.GetAsyncEnumerator( CancellationToken token ) => WithCancellation( token );
-    public RecordGenerator<TRecord> WithCancellation( CancellationToken                       token ) => new(_table, token);
+    public RecordGenerator<TRecord>                     WithCancellation( CancellationToken   token ) => new(_table, token);
 }

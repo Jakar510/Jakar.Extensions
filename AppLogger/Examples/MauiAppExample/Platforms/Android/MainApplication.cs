@@ -7,7 +7,7 @@ using Android.Runtime;
 namespace MauiAppExample;
 
 
-[Application]
+[ Application ]
 public class MainApplication : MauiApplication
 {
     public MainApplication( IntPtr handle, JniHandleOwnership ownership ) : base( handle, ownership ) { }

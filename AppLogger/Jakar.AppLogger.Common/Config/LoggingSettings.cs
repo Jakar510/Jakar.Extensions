@@ -4,7 +4,7 @@
 namespace Jakar.AppLogger.Common;
 
 
-[SuppressMessage( "ReSharper", "CollectionNeverUpdated.Global" )]
+[ SuppressMessage( "ReSharper", "CollectionNeverUpdated.Global" ) ]
 public abstract class LoggingSettings : ObservableClass, ISessionID, IAsyncDisposable
 {
     public const           string                             DEFAULT_OUTPUT_TEMPLATE = "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}";
@@ -91,7 +91,7 @@ public abstract class LoggingSettings : ObservableClass, ISessionID, IAsyncDispo
         get => _installID;
         set => SetProperty( ref _installID, value );
     }
-    [JsonIgnore] public ConcurrentBag<ILoggerAttachmentProvider> LoggerAttachmentProviders { get; init; } = new();
+    [ JsonIgnore ] public ConcurrentBag<ILoggerAttachmentProvider> LoggerAttachmentProviders { get; init; } = new();
     public LogLevel LogLevel
     {
         get => _logLevel;
@@ -130,8 +130,8 @@ public abstract class LoggingSettings : ObservableClass, ISessionID, IAsyncDispo
     public abstract ValueTask InitAsync();
 
 
-    protected sealed override bool SetProperty<T>( ref T backingStore, T value, [CallerMemberName] string? propertyName = null ) => base.SetProperty( ref backingStore, value, EqualityComparer<T>.Default, propertyName );
-    protected sealed override bool SetProperty<T>( ref T backingStore, T value, IEqualityComparer<T> comparer, [CallerMemberName] string? propertyName = null )
+    protected sealed override bool SetProperty<T>( ref T backingStore, T value, [ CallerMemberName ] string? propertyName = null ) => base.SetProperty( ref backingStore, value, EqualityComparer<T>.Default, propertyName );
+    protected sealed override bool SetProperty<T>( ref T backingStore, T value, IEqualityComparer<T> comparer, [ CallerMemberName ] string? propertyName = null )
     {
         if ( propertyName is null ) { throw new ArgumentNullException( nameof(propertyName) ); }
 
@@ -161,8 +161,8 @@ public abstract class LoggingSettings : ObservableClass, ISessionID, IAsyncDispo
         _scopes.TryAdd( scope.ScopeID, scope );
         return scope;
     }
-    public bool RemoveScope<T>( in T                          scope ) where T : IScope => _scopes.TryRemove( scope.ScopeID, out _ );
-    public AppLoggerScope<TState> CreateScope<TState>( TState state ) => AddScope( new AppLoggerScope<TState>( this, state ) );
+    public bool                   RemoveScope<T>( in T        scope ) where T : IScope => _scopes.TryRemove( scope.ScopeID, out _ );
+    public AppLoggerScope<TState> CreateScope<TState>( TState state )                  => AddScope( new AppLoggerScope<TState>( this, state ) );
     public virtual async ValueTask DisposeAsync()
     {
         foreach ( IScope? scope in _scopes.Values ) { scope.Dispose(); }

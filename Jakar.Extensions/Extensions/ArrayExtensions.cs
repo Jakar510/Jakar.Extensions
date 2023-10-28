@@ -7,11 +7,43 @@ namespace Jakar.Extensions;
 
 public static class ArrayExtensions
 {
-    /// <summary>
-    ///     <see href="https://stackoverflow.com/a/17308019/9530917"/>
-    /// </summary>
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ), SuppressMessage( "ReSharper", "InvokeAsExtensionMethod" ) ]
+    public static TElement[] GetArray<TElement>( this IEnumerable<TElement> values ) => values switch
+                                                                                        {
+                                                                                            TElement[] array                   => array,
+                                                                                            List<TElement> list                => list.GetInternalArray(),
+                                                                                            Collection<TElement> collection    => collection.GetInternalArray(),
+                                                                                            IReadOnlyList<TElement> collection => ToArray( collection ),
+                                                                                            _                                  => values.ToArray()
+                                                                                        };
+
+    public static TElement[] ToArray<TElement>( this IReadOnlyList<TElement> source )
+    {
+    #if NET6_0_OR_GREATER
+        TElement[] array = GC.AllocateUninitializedArray<TElement>( source.Count );
+    #else
+        var array = new TElement[source.Count];
+    #endif
+
+        for ( int i = 0; i < array.Length; i++ ) { array[i] = source[i]; }
+
+        return array;
+    }
+
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static TElement[] GetInternalArray<TElement>( this List<TElement> list ) => ArrayAccessor<TElement>.Getter( list );
+
+
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static TElement[] GetInternalArray<TElement>( this Collection<TElement> list ) => ArrayAccessor<TElement>.CollectionGetter( list ).GetInternalArray();
+
+
+
+    /// <summary> <see href="https://stackoverflow.com/a/17308019/9530917"/> </summary>
     internal static class ArrayAccessor<TElement>
     {
+        internal static readonly Func<Collection<TElement>, List<TElement>> CollectionGetter;
+
+
+        internal static readonly Func<List<TElement>, TElement[]> Getter;
         static ArrayAccessor()
         {
             Getter           = CreateGetter();
@@ -27,7 +59,7 @@ public static class ArrayExtensions
                                         typeof(TElement[]),
                                         new[]
                                         {
-                                            typeof(List<TElement>),
+                                            typeof(List<TElement>)
                                         },
                                         typeof(ArrayAccessor<TElement>),
                                         true );
@@ -49,7 +81,7 @@ public static class ArrayExtensions
                                         typeof(List<TElement>),
                                         new[]
                                         {
-                                            typeof(Collection<TElement>),
+                                            typeof(Collection<TElement>)
                                         },
                                         typeof(ArrayAccessor<TElement>),
                                         true );
@@ -61,42 +93,5 @@ public static class ArrayExtensions
 
             return (Func<Collection<TElement>, List<TElement>>)dm.CreateDelegate( typeof(Func<Collection<TElement>, List<TElement>>) );
         }
-
-
-        internal static readonly Func<List<TElement>, TElement[]>           Getter;
-        internal static readonly Func<Collection<TElement>, List<TElement>> CollectionGetter;
     }
-
-
-
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    [SuppressMessage( "ReSharper", "InvokeAsExtensionMethod" )]
-    public static TElement[] GetArray<TElement>( this IEnumerable<TElement> values ) => values switch
-                                                                                        {
-                                                                                            TElement[] array                   => array,
-                                                                                            List<TElement> list                => list.GetInternalArray(),
-                                                                                            Collection<TElement> collection    => collection.GetInternalArray(),
-                                                                                            IReadOnlyList<TElement> collection => ToArray( collection ),
-                                                                                            _                                  => values.ToArray(),
-                                                                                        };
-
-    public static TElement[] ToArray<TElement>( this IReadOnlyList<TElement> source )
-    {
-    #if NET6_0_OR_GREATER
-        TElement[] array = GC.AllocateUninitializedArray<TElement>( source.Count );
-    #else
-        TElement[] array = new TElement[source.Count];
-    #endif
-
-        for ( int i = 0; i < array.Length; i++ ) { array[i] = source[i]; }
-
-        return array;
-    }
-
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static TElement[] GetInternalArray<TElement>( this List<TElement> list ) => ArrayAccessor<TElement>.Getter( list );
-
-
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public static TElement[] GetInternalArray<TElement>( this Collection<TElement> list ) => ArrayAccessor<TElement>.CollectionGetter( list )
-                                                                                                                    .GetInternalArray();
 }

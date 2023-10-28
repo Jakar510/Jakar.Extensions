@@ -18,9 +18,8 @@ public interface IDevice
     /// <value> Application version name, e.g. 1.1.0 </value>
     AppVersion AppVersion { get; }
 
-    public string       DeviceID            { get; }
-    public HwInfo?      HwInfo              { get; }
-    public Architecture ProcessArchitecture { get; }
+    public string  DeviceID { get; }
+    public HwInfo? HwInfo   { get; }
 
     /// <summary> Gets the locale. </summary>
     /// <value> Language code (example: en_US). </value>
@@ -42,7 +41,8 @@ public interface IDevice
     /// <value> OS version (example: 9.3.0). </value>
     AppVersion OsVersion { get; }
 
-    public PlatformID Platform { get; init; }
+    public PlatformID   Platform            { get; init; }
+    public Architecture ProcessArchitecture { get; }
 
     /// <summary> Gets the name of the SDK. </summary>
     /// <value> Name of the SDK. Consists of the name of the SDK and the platform, e.g. "mobilecenter.ios", "mobilecenter.android" </value>
@@ -51,6 +51,7 @@ public interface IDevice
     /// <summary> Gets the SDK version. </summary>
     /// <value> Version of the SDK in semver format, e.g. "1.2.0" or "0.12.3-alpha.1". </value>
     string SdkVersion { get; }
+
     /// <summary> Gets the time zone offset. </summary>
     /// <value> The offset in minutes from UTC for the device time zone, including daylight savings time. </value>
     TimeSpan TimeZoneOffset { get; }

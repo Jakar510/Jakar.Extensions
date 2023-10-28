@@ -1,15 +1,14 @@
-﻿#nullable enable
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
 
 
 public static partial class TypeExtensions
 {
     public static bool IsCollection( this PropertyInfo propertyInfo ) => propertyInfo.PropertyType.IsCollection();
-    public static bool IsCollection( this Type         type ) => type.HasInterface<ICollection>() || type.HasInterface( typeof(ICollection<>) );
+    public static bool IsCollection( this Type         type )         => type.HasInterface<ICollection>() || type.HasInterface( typeof(ICollection<>) );
 
-    public static bool IsCollection( this PropertyInfo propertyInfo, [NotNullWhen( true )] out Type? itemType, [NotNullWhen( true )] out bool? isBuiltInType ) => propertyInfo.PropertyType.IsCollection( out itemType, out isBuiltInType );
+    public static bool IsCollection( this PropertyInfo propertyInfo, [ NotNullWhen( true ) ] out Type? itemType, [ NotNullWhen( true ) ] out bool? isBuiltInType ) => propertyInfo.PropertyType.IsCollection( out itemType, out isBuiltInType );
 
-    public static bool IsCollection( this Type classType, [NotNullWhen( true )] out Type? itemType, [NotNullWhen( true )] out bool? isBuiltInType )
+    public static bool IsCollection( this Type classType, [ NotNullWhen( true ) ] out Type? itemType, [ NotNullWhen( true ) ] out bool? isBuiltInType )
     {
         if ( classType.IsCollection( out IReadOnlyList<Type>? itemTypes ) )
         {
@@ -23,9 +22,9 @@ public static partial class TypeExtensions
         return false;
     }
 
-    public static bool IsCollection( this PropertyInfo propertyInfo, [NotNullWhen( true )] out Type? itemType ) => propertyInfo.PropertyType.IsList( out itemType );
+    public static bool IsCollection( this PropertyInfo propertyInfo, [ NotNullWhen( true ) ] out Type? itemType ) => propertyInfo.PropertyType.IsList( out itemType );
 
-    public static bool IsCollection( this Type propertyType, [NotNullWhen( true )] out Type? itemType )
+    public static bool IsCollection( this Type propertyType, [ NotNullWhen( true ) ] out Type? itemType )
     {
         if ( propertyType.IsCollection( out IReadOnlyList<Type>? itemTypes ) )
         {
@@ -37,7 +36,7 @@ public static partial class TypeExtensions
         return false;
     }
 
-    public static bool IsCollection( this Type classType, [NotNullWhen( true )] out IReadOnlyList<Type>? itemTypes )
+    public static bool IsCollection( this Type classType, [ NotNullWhen( true ) ] out IReadOnlyList<Type>? itemTypes )
     {
         if ( classType.IsGenericType && classType.IsCollection() )
         {

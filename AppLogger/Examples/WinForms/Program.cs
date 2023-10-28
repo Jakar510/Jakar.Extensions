@@ -4,7 +4,7 @@ namespace WinForms;
 internal static class Program
 {
     /// <summary> The main entry point for the application. </summary>
-    [STAThread]
+    [ STAThread ]
     private static void Main()
     {
         Startup.Init();

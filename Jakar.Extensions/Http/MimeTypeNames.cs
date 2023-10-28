@@ -1,17 +1,12 @@
 ﻿// unset
 
 
-#nullable enable
 namespace Jakar.Extensions;
 
 
 /// <summary>
-///     <para>
-///         <seealso href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Common_types"/>
-///     </para>
-///     <para>
-///         <seealso href="https://www.freeformatter.com/mime-types-list.html"/>
-///     </para>
+///     <para> <seealso href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Common_types"/> </para>
+///     <para> <seealso href="https://www.freeformatter.com/mime-types-list.html"/> </para>
 /// </summary>
 public static class MimeTypeNames
 {

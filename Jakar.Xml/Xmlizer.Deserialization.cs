@@ -1,7 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Xml
 // 04/28/2022  1:13 PM
 
-#nullable enable
 using System;
 using System.Collections.Generic;
 using Jakar.Xml.Serialization;

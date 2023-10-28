@@ -18,12 +18,8 @@ public sealed class Create_AppRecord : LoggerMigration<AppRecord>
         ICreateTableWithColumnSyntax table = CreateTable();
 
 
-        table.WithColumn( nameof(AppRecord.AppName) )
-             .AsString( 1024 )
-             .NotNullable();
+        table.WithColumn( nameof(AppRecord.AppName) ).AsString( 1024 ).NotNullable();
 
-        table.WithColumn( nameof(AppRecord.Secret) )
-             .AsString( 10240 )
-             .NotNullable();
+        table.WithColumn( nameof(AppRecord.Secret) ).AsString( 10240 ).NotNullable();
     }
 }

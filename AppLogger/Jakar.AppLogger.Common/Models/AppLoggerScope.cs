@@ -7,8 +7,8 @@ namespace Jakar.AppLogger.Common;
 public readonly record struct AppLoggerScope<TState> : IScope<TState>, IScopeID
 {
     private readonly LoggingSettings _settings;
-    public           TState          State   { get; }
     public           Guid            ScopeID { get; } = Guid.NewGuid();
+    public           TState          State   { get; }
 
 
     public AppLoggerScope( LoggingSettings settings, TState state )

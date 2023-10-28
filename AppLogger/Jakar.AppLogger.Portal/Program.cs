@@ -4,8 +4,6 @@ using FluentMigrator.Runner;
 using FluentMigrator.Runner.Initialization;
 using FluentMigrator.Runner.Logging;
 using Microsoft.OpenApi.Models;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 
 string[] urls =
@@ -28,11 +26,9 @@ builder.AddDefaultLogging<AppLoggerPortal>( true )
                                                                                                                } ) ) );
 
 
-builder.Services.AddControllers()
-       .UseNewtonsoftJson();
+builder.Services.AddControllers().UseNewtonsoftJson();
 
-builder.Services.AddControllersWithViews()
-       .UseNewtonsoftJson();
+builder.Services.AddControllersWithViews().UseNewtonsoftJson();
 
 builder.Services.AddHttpClient();
 builder.Services.AddHealthChecks();
@@ -162,8 +158,7 @@ builder.AddFluentMigrator( configure =>
                            {
                                configure.AddPostgres();
 
-                               configure.ScanIn( typeof(Program).Assembly, typeof(Database).Assembly )
-                                        .For.All();
+                               configure.ScanIn( typeof(Program).Assembly, typeof(Database).Assembly ).For.All();
 
                                return configure;
                            } );
@@ -278,10 +273,4 @@ catch ( Exception e )
 {
     e.WriteToDebug();
     app.Logger.LogCritical( e, nameof(Program) );
-}
-finally
-{
-#if DEBUG
-    await app.MigrateDown( "MIGRATE_DOWN" );
-#endif
 }

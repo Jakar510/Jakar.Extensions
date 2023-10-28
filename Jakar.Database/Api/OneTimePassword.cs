@@ -78,7 +78,6 @@ public sealed class OneTimePassword : IOneTimePassword
                                    }
                      };
 
-        return writer.Write( GetContent( record ) )
-                     .ToString();
+        return writer.Write( GetContent( record ) ).ToString();
     }
 }

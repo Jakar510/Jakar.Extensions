@@ -33,6 +33,6 @@ public abstract class BaseViewModel : ObservableClass
     protected BaseViewModel( string title ) => Title = title;
 
 
-    public virtual void OnAppearing() { }
+    public virtual void OnAppearing()    { }
     public virtual void OnDisappearing() { }
 }

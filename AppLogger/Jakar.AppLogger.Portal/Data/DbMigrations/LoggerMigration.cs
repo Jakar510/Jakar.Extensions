@@ -16,13 +16,9 @@ public abstract class LoggerMigration<TRecord> : Migration<TRecord> where TRecor
     {
         ICreateTableWithColumnSyntax table = base.CreateTable();
 
-        table.WithColumn( nameof(AppRecord.IsActive) )
-             .AsBoolean()
-             .Nullable();
+        table.WithColumn( nameof(AppRecord.IsActive) ).AsBoolean().Nullable();
 
-        table.WithColumn( nameof(AppRecord.AdditionalData) )
-             .AsString( BaseRecord.MAX_STRING_SIZE )
-             .Nullable();
+        table.WithColumn( nameof(AppRecord.AdditionalData) ).AsString( BaseRecord.MAX_STRING_SIZE ).Nullable();
 
         return table;
     }

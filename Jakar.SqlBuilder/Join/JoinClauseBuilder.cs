@@ -1,5 +1,4 @@
-﻿#nullable enable
-namespace Jakar.SqlBuilder;
+﻿namespace Jakar.SqlBuilder;
 
 
 public struct JoinClauseBuilder
@@ -8,8 +7,7 @@ public struct JoinClauseBuilder
     public JoinClauseBuilder( ref EasySqlBuilder builder ) => _builder = builder;
 
 
-    public EasySqlBuilder Done() => _builder.VerifyParentheses()
-                                            .NewLine();
+    public EasySqlBuilder Done() => _builder.VerifyParentheses().NewLine();
 
 
     public JoinClauseBuilder Left( string columnName )
@@ -36,8 +34,7 @@ public struct JoinClauseBuilder
 
     public JoinChainBuilderLeft On()
     {
-        _builder.Add( KeyWords.ON )
-                .Begin();
+        _builder.Add( KeyWords.ON ).Begin();
 
         return new JoinChainBuilderLeft( this, ref _builder );
     }

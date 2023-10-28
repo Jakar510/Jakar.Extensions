@@ -1,7 +1,7 @@
 ﻿namespace Jakar.Extensions;
 
 
-[SuppressMessage( "ReSharper", "InconsistentNaming" )]
+[ SuppressMessage( "ReSharper", "InconsistentNaming" ) ]
 public enum DevicePlatform
 {
     Unknown = 0,
@@ -17,5 +17,5 @@ public enum DevicePlatform
     WPF,
     Xamarin,
     Maui,
-    Linux,
+    Linux
 }

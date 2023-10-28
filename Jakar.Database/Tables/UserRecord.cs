@@ -76,7 +76,7 @@ public sealed record UserRecord( Guid                                           
 
     public override DynamicParameters ToDynamicParameters()
     {
-        DynamicParameters parameters = base.ToDynamicParameters();
+        var parameters = base.ToDynamicParameters();
         parameters.Add( nameof(UserID),                 UserID );
         parameters.Add( nameof(UserName),               UserName );
         parameters.Add( nameof(FirstName),              FirstName );
@@ -117,47 +117,47 @@ public sealed record UserRecord( Guid                                           
 
     public static UserRecord Create( DbDataReader reader )
     {
-        Guid              userID                 = reader.GetGuid( nameof(UserID) );
-        string            userName               = reader.GetString( nameof(UserName) );
-        string            firstName              = reader.GetString( nameof(FirstName) );
-        string            lastName               = reader.GetString( nameof(LastName) );
-        string            fullName               = reader.GetString( nameof(FullName) );
-        string            rights                 = reader.GetString( nameof(Rights) );
-        string            gender                 = reader.GetString( nameof(Gender) );
-        string            company                = reader.GetString( nameof(Company) );
-        string            description            = reader.GetString( nameof(Description) );
-        string            department             = reader.GetString( nameof(Department) );
-        string            title                  = reader.GetString( nameof(Title) );
-        string            website                = reader.GetString( nameof(Website) );
-        SupportedLanguage preferredLanguage      = EnumSqlHandler<SupportedLanguage>.Instance.Parse( reader.GetValue( nameof(PreferredLanguage) ) );
-        string            email                  = reader.GetString( nameof(Email) );
-        bool              isEmailConfirmed       = reader.GetBoolean( nameof(IsEmailConfirmed) );
-        string            phoneNumber            = reader.GetString( nameof(PhoneNumber) );
-        string            ext                    = reader.GetString( nameof(Ext) );
-        bool              isPhoneNumberConfirmed = reader.GetBoolean( nameof(IsPhoneNumberConfirmed) );
-        bool              isTwoFactorEnabled     = reader.GetBoolean( nameof(IsTwoFactorEnabled) );
-        var               lastBadAttempt         = reader.GetFieldValue<DateTimeOffset?>( nameof(LastBadAttempt) );
-        var               lastLogin              = reader.GetFieldValue<DateTimeOffset?>( nameof(LastLogin) );
-        int               badLogins              = reader.GetFieldValue<int>( nameof(BadLogins) );
-        bool              isLocked               = reader.GetBoolean( nameof(IsLocked) );
-        var               lockDate               = reader.GetFieldValue<DateTimeOffset?>( nameof(LockDate) );
-        var               lockoutEnd             = reader.GetFieldValue<DateTimeOffset?>( nameof(LockoutEnd) );
-        string            passwordHash           = reader.GetString( nameof(PasswordHash) );
-        string            refreshToken           = reader.GetString( nameof(RefreshToken) );
-        var               refreshTokenExpiryTime = reader.GetFieldValue<DateTimeOffset?>( nameof(RefreshTokenExpiryTime) );
-        var               sessionID              = reader.GetFieldValue<Guid?>( nameof(SessionID) );
-        bool              isActive               = reader.GetBoolean( nameof(IsActive) );
-        bool              isDisabled             = reader.GetBoolean( nameof(IsDisabled) );
-        string            securityStamp          = reader.GetString( nameof(SecurityStamp) );
-        string            authenticatorKey       = reader.GetString( nameof(AuthenticatorKey) );
-        string            concurrencyStamp       = reader.GetString( nameof(AuthenticatorKey) );
-        var               escalateTo             = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(EscalateTo) ) );
-        var               additionalData         = JsonConvert.DeserializeObject<Dictionary<string, JToken?>>( reader.GetString( nameof(AdditionalData) ) );
-        var               id                     = RecordID<UserRecord>.ID( reader );
-        var               createdBy              = RecordID<UserRecord>.CreatedBy( reader );
-        var               ownerUserID            = reader.GetFieldValue<Guid?>( nameof(OwnerUserID) );
-        var               dateCreated            = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
-        var               lastModified           = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
+        Guid                  userID                 = reader.GetGuid( nameof(UserID) );
+        string                userName               = reader.GetString( nameof(UserName) );
+        string                firstName              = reader.GetString( nameof(FirstName) );
+        string                lastName               = reader.GetString( nameof(LastName) );
+        string                fullName               = reader.GetString( nameof(FullName) );
+        string                rights                 = reader.GetString( nameof(Rights) );
+        string                gender                 = reader.GetString( nameof(Gender) );
+        string                company                = reader.GetString( nameof(Company) );
+        string                description            = reader.GetString( nameof(Description) );
+        string                department             = reader.GetString( nameof(Department) );
+        string                title                  = reader.GetString( nameof(Title) );
+        string                website                = reader.GetString( nameof(Website) );
+        SupportedLanguage     preferredLanguage      = EnumSqlHandler<SupportedLanguage>.Instance.Parse( reader.GetValue( nameof(PreferredLanguage) ) );
+        string                email                  = reader.GetString( nameof(Email) );
+        bool                  isEmailConfirmed       = reader.GetBoolean( nameof(IsEmailConfirmed) );
+        string                phoneNumber            = reader.GetString( nameof(PhoneNumber) );
+        string                ext                    = reader.GetString( nameof(Ext) );
+        bool                  isPhoneNumberConfirmed = reader.GetBoolean( nameof(IsPhoneNumberConfirmed) );
+        bool                  isTwoFactorEnabled     = reader.GetBoolean( nameof(IsTwoFactorEnabled) );
+        var                   lastBadAttempt         = reader.GetFieldValue<DateTimeOffset?>( nameof(LastBadAttempt) );
+        var                   lastLogin              = reader.GetFieldValue<DateTimeOffset?>( nameof(LastLogin) );
+        int                   badLogins              = reader.GetFieldValue<int>( nameof(BadLogins) );
+        bool                  isLocked               = reader.GetBoolean( nameof(IsLocked) );
+        var                   lockDate               = reader.GetFieldValue<DateTimeOffset?>( nameof(LockDate) );
+        var                   lockoutEnd             = reader.GetFieldValue<DateTimeOffset?>( nameof(LockoutEnd) );
+        string                passwordHash           = reader.GetString( nameof(PasswordHash) );
+        string                refreshToken           = reader.GetString( nameof(RefreshToken) );
+        var                   refreshTokenExpiryTime = reader.GetFieldValue<DateTimeOffset?>( nameof(RefreshTokenExpiryTime) );
+        var                   sessionID              = reader.GetFieldValue<Guid?>( nameof(SessionID) );
+        bool                  isActive               = reader.GetBoolean( nameof(IsActive) );
+        bool                  isDisabled             = reader.GetBoolean( nameof(IsDisabled) );
+        string                securityStamp          = reader.GetString( nameof(SecurityStamp) );
+        string                authenticatorKey       = reader.GetString( nameof(AuthenticatorKey) );
+        string                concurrencyStamp       = reader.GetString( nameof(AuthenticatorKey) );
+        var                   escalateTo             = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(EscalateTo) ) );
+        var                   additionalData         = JsonConvert.DeserializeObject<Dictionary<string, JToken?>>( reader.GetString( nameof(AdditionalData) ) );
+        RecordID<UserRecord>  id                     = RecordID<UserRecord>.ID( reader );
+        RecordID<UserRecord>? createdBy              = RecordID<UserRecord>.CreatedBy( reader );
+        var                   ownerUserID            = reader.GetFieldValue<Guid?>( nameof(OwnerUserID) );
+        var                   dateCreated            = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
+        var                   lastModified           = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
 
 
         var record = new UserRecord( userID,
@@ -222,8 +222,7 @@ public sealed record UserRecord( Guid                                           
                      UserName = request.UserLogin
                  };
 
-        return record.WithPassword( request.UserPassword )
-                     .Enable();
+        return record.WithPassword( request.UserPassword ).Enable();
     }
     public static UserRecord Create( string userName, string rights, IUserData data, UserRecord? caller = default ) => new(Guid.NewGuid(),
                                                                                                                            userName,
@@ -406,18 +405,15 @@ public sealed record UserRecord( Guid                                           
     public UserRights GetRights() => UserRights.Create( this );
     public async ValueTask<UserRights> GetRights<T>( DbConnection connection, DbTransaction transaction, Database db, CancellationToken token ) where T : struct, Enum
     {
-        int totalRightCount = Enum.GetValues<T>()
-                                  .Length;
+        int totalRightCount = Enum.GetValues<T>().Length;
 
         return await GetRights( connection, transaction, db, totalRightCount, token );
     }
     public async ValueTask<UserRights> GetRights( DbConnection connection, DbTransaction transaction, Database db, int totalRightCount, CancellationToken token )
     {
-        List<GroupRecord> groups = await GetGroups( connection, transaction, db, token )
-                                      .ToList( token );
+        List<GroupRecord> groups = await GetGroups( connection, transaction, db, token ).ToList( token );
 
-        List<RoleRecord> roles = await GetRoles( connection, transaction, db, token )
-                                    .ToList( token );
+        List<RoleRecord> roles = await GetRoles( connection, transaction, db, token ).ToList( token );
 
         var rights = new List<UserRights.IRights>( 1 + groups.Count + roles.Count );
 
@@ -726,10 +722,7 @@ public sealed record UserRecord( Guid                                           
         }
 
 
-        return string.Equals( record.RefreshToken,
-                              token?.GetHashCode()
-                                    .ToString(),
-                              StringComparison.Ordinal );
+        return string.Equals( record.RefreshToken, token?.GetHashCode().ToString(), StringComparison.Ordinal );
     }
     public static bool IsHashedRefreshToken( Tokens token, ref UserRecord record ) => IsHashedRefreshToken( token.RefreshToken, ref record );
 
@@ -737,11 +730,7 @@ public sealed record UserRecord( Guid                                           
     public UserRecord WithNoRefreshToken() => WithRefreshToken( default, default );
     public UserRecord WithRefreshToken( string? token, in DateTimeOffset? date, in bool hashed = true )
     {
-        if ( hashed )
-        {
-            token = token?.GetHashCode()
-                          .ToString();
-        }
+        if ( hashed ) { token = token?.GetHashCode().ToString(); }
 
         return this with
                {
@@ -751,11 +740,7 @@ public sealed record UserRecord( Guid                                           
     }
     public UserRecord WithRefreshToken( string? token, in DateTimeOffset? date, string securityStamp, in bool hashed = true )
     {
-        if ( hashed )
-        {
-            token = token?.GetHashCode()
-                          .ToString();
-        }
+        if ( hashed ) { token = token?.GetHashCode().ToString(); }
 
         return this with
                {
@@ -878,56 +863,22 @@ public sealed record UserRecord( Guid                                           
 
         var parameters = new DynamicParameters();
 
-        parameters.Add( nameof(UserName),
-                        claims.Single( x => x.Type == ClaimTypes.NameIdentifier )
-                              .Value );
+        parameters.Add( nameof(UserName), claims.Single( x => x.Type == ClaimTypes.NameIdentifier ).Value );
 
-        parameters.Add( nameof(UserID),
-                        Guid.Parse( claims.Single( x => x.Type == ClaimTypes.Sid )
-                                          .Value ) );
+        parameters.Add( nameof(UserID), Guid.Parse( claims.Single( x => x.Type == ClaimTypes.Sid ).Value ) );
 
 
-        if ( types.HasFlag( ClaimType.FirstName ) )
-        {
-            parameters.Add( nameof(FirstName),
-                            claims.Single( x => x.Type == ClaimTypes.GivenName )
-                                  .Value );
-        }
+        if ( types.HasFlag( ClaimType.FirstName ) ) { parameters.Add( nameof(FirstName), claims.Single( x => x.Type == ClaimTypes.GivenName ).Value ); }
 
-        if ( types.HasFlag( ClaimType.LastName ) )
-        {
-            parameters.Add( nameof(LastName),
-                            claims.Single( x => x.Type == ClaimTypes.Surname )
-                                  .Value );
-        }
+        if ( types.HasFlag( ClaimType.LastName ) ) { parameters.Add( nameof(LastName), claims.Single( x => x.Type == ClaimTypes.Surname ).Value ); }
 
-        if ( types.HasFlag( ClaimType.FullName ) )
-        {
-            parameters.Add( nameof(FullName),
-                            claims.Single( x => x.Type == ClaimTypes.Name )
-                                  .Value );
-        }
+        if ( types.HasFlag( ClaimType.FullName ) ) { parameters.Add( nameof(FullName), claims.Single( x => x.Type == ClaimTypes.Name ).Value ); }
 
-        if ( types.HasFlag( ClaimType.Email ) )
-        {
-            parameters.Add( nameof(Email),
-                            claims.Single( x => x.Type == ClaimTypes.Email )
-                                  .Value );
-        }
+        if ( types.HasFlag( ClaimType.Email ) ) { parameters.Add( nameof(Email), claims.Single( x => x.Type == ClaimTypes.Email ).Value ); }
 
-        if ( types.HasFlag( ClaimType.MobilePhone ) )
-        {
-            parameters.Add( nameof(PhoneNumber),
-                            claims.Single( x => x.Type == ClaimTypes.MobilePhone )
-                                  .Value );
-        }
+        if ( types.HasFlag( ClaimType.MobilePhone ) ) { parameters.Add( nameof(PhoneNumber), claims.Single( x => x.Type == ClaimTypes.MobilePhone ).Value ); }
 
-        if ( types.HasFlag( ClaimType.WebSite ) )
-        {
-            parameters.Add( nameof(Website),
-                            claims.Single( x => x.Type == ClaimTypes.Webpage )
-                                  .Value );
-        }
+        if ( types.HasFlag( ClaimType.WebSite ) ) { parameters.Add( nameof(Website), claims.Single( x => x.Type == ClaimTypes.Webpage ).Value ); }
 
         return await db.Users.Get( connection, transaction, true, parameters, token );
     }

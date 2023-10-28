@@ -1,8 +1,7 @@
-﻿#nullable enable
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
 
 
-[SuppressMessage( "ReSharper", "MemberHidesStaticFromOuterClass" )]
+[ SuppressMessage( "ReSharper", "MemberHidesStaticFromOuterClass" ) ]
 public partial class IniConfig
 {
     internal const string CLOSE  = " ]";
@@ -39,7 +38,7 @@ public partial class IniConfig
 
         #region Gets
 
-        public bool ValueAs<T>( string key, [NotNullWhen( true )] out T? value ) where T : notnull
+        public bool ValueAs<T>( string key, [ NotNullWhen( true ) ] out T? value ) where T : notnull
         {
             string? s = this[key];
 
@@ -49,23 +48,21 @@ public partial class IniConfig
 
             return value is not null;
         }
-        public bool ValueAs<T>( string key, [NotNullWhen( true )] out T[]? value )
+        public bool ValueAs<T>( string key, [ NotNullWhen( true ) ] out T[]? value )
         {
-            value = this[key]
-              ?.FromJson<T[]>();
+            value = this[key]?.FromJson<T[]>();
 
             return value is not null;
         }
 
 
-        public bool ValueAs( string key, [NotNullWhen( true )] out string[]? value )
+        public bool ValueAs( string key, [ NotNullWhen( true ) ] out string[]? value )
         {
-            value = this[key]
-              ?.FromJson<string[]>();
+            value = this[key]?.FromJson<string[]>();
 
             return value is not null;
         }
-        public bool ValueAs( string key, [NotNullWhen( true )] out string[]? value, char separator )
+        public bool ValueAs( string key, [ NotNullWhen( true ) ] out string[]? value, char separator )
         {
             string? s = this[key];
 
@@ -78,7 +75,7 @@ public partial class IniConfig
             value = default;
             return false;
         }
-        public bool ValueAs( string key, [NotNullWhen( true )] out string[]? value, string separator )
+        public bool ValueAs( string key, [ NotNullWhen( true ) ] out string[]? value, string separator )
         {
             string? s = this[key];
 
@@ -92,23 +89,23 @@ public partial class IniConfig
             return false;
         }
 
-        public bool ValueAs( string key, out                       double      value ) => double.TryParse( this[key], out value );
-        public bool ValueAs( string key, out                       float       value ) => float.TryParse( this[key], out value );
-        public bool ValueAs( string key, out                       long        value ) => long.TryParse( this[key], out value );
-        public bool ValueAs( string key, out                       ulong       value ) => ulong.TryParse( this[key], out value );
-        public bool ValueAs( string key, out                       int         value ) => int.TryParse( this[key], out value );
-        public bool ValueAs( string key, out                       uint        value ) => uint.TryParse( this[key], out value );
-        public bool ValueAs( string key, out                       short       value ) => short.TryParse( this[key], out value );
-        public bool ValueAs( string key, out                       ushort      value ) => ushort.TryParse( this[key], out value );
-        public bool ValueAs( string key, [NotNullWhen( true )] out IPAddress?  value ) => IPAddress.TryParse( this[key], out value );
-        public bool ValueAs( string key, out                       TimeSpan    value ) => TimeSpan.TryParse( this[key],                   out value );
-        public bool ValueAs( string key, out                       TimeSpan    value, CultureInfo info ) => TimeSpan.TryParse( this[key], info, out value );
-        public bool ValueAs( string key, out                       DateTime    value ) => DateTime.TryParse( this[key],                                          out value );
-        public bool ValueAs( string key, out                       DateTime    value, CultureInfo info, DateTimeStyles styles ) => DateTime.TryParse( this[key], info, styles, out value );
-        public bool ValueAs( string key, out                       Guid        value ) => Guid.TryParse( this[key], out value );
-        public bool ValueAs( string key, out                       bool        value ) => bool.TryParse( this[key], out value );
-        public bool ValueAs( string key, [NotNullWhen( true )] out AppVersion? value ) => AppVersion.TryParse( this[key], out value );
-        public bool ValueAs( string key, [NotNullWhen( true )] out Version?    value ) => Version.TryParse( this[key], out value );
+        public bool ValueAs( string key, out                         double      value )                   => double.TryParse( this[key], out value );
+        public bool ValueAs( string key, out                         float       value )                   => float.TryParse( this[key], out value );
+        public bool ValueAs( string key, out                         long        value )                   => long.TryParse( this[key], out value );
+        public bool ValueAs( string key, out                         ulong       value )                   => ulong.TryParse( this[key], out value );
+        public bool ValueAs( string key, out                         int         value )                   => int.TryParse( this[key], out value );
+        public bool ValueAs( string key, out                         uint        value )                   => uint.TryParse( this[key], out value );
+        public bool ValueAs( string key, out                         short       value )                   => short.TryParse( this[key], out value );
+        public bool ValueAs( string key, out                         ushort      value )                   => ushort.TryParse( this[key], out value );
+        public bool ValueAs( string key, [ NotNullWhen( true ) ] out IPAddress?  value )                   => IPAddress.TryParse( this[key], out value );
+        public bool ValueAs( string key, out                         TimeSpan    value )                   => TimeSpan.TryParse( this[key], out value );
+        public bool ValueAs( string key, out                         TimeSpan    value, CultureInfo info ) => TimeSpan.TryParse( this[key], info, out value );
+        public bool ValueAs( string key, out                         DateTime    value )                                          => DateTime.TryParse( this[key], out value );
+        public bool ValueAs( string key, out                         DateTime    value, CultureInfo info, DateTimeStyles styles ) => DateTime.TryParse( this[key], info, styles, out value );
+        public bool ValueAs( string key, out                         Guid        value ) => Guid.TryParse( this[key], out value );
+        public bool ValueAs( string key, out                         bool        value ) => bool.TryParse( this[key], out value );
+        public bool ValueAs( string key, [ NotNullWhen( true ) ] out AppVersion? value ) => AppVersion.TryParse( this[key], out value );
+        public bool ValueAs( string key, [ NotNullWhen( true ) ] out Version?    value ) => Version.TryParse( this[key], out value );
 
         #endregion
 
@@ -116,9 +113,9 @@ public partial class IniConfig
 
         #region Adds
 
-        public void Add<T>( string key, T                   value ) where T : notnull => this[key] = value.ToJson();
-        public void Add<T>( string key, IEnumerable<T>      values ) => this[key] = values.ToJson();
-        public void Add( string    key, IEnumerable<string> values ) => this[key] = values.ToJson();
+        public void Add<T>( string key, T                   value ) where T : notnull  => this[key] = value.ToJson();
+        public void Add<T>( string key, IEnumerable<T>      values )                   => this[key] = values.ToJson();
+        public void Add( string    key, IEnumerable<string> values )                   => this[key] = values.ToJson();
         public void Add( string    key, IEnumerable<string> values, char   separator ) => this[key] = string.Join( separator, values );
         public void Add( string    key, IEnumerable<string> values, string separator ) => this[key] = string.Join( separator, values );
 
@@ -145,8 +142,7 @@ public partial class IniConfig
 
             string.Empty.WriteToConsole();
 
-            this.ToPrettyJson()
-                .WriteToDebug();
+            this.ToPrettyJson().WriteToDebug();
 
             string.Empty.WriteToConsole();
         }
@@ -161,12 +157,12 @@ public partial class IniConfig
 
         public void Add( string key, DateTime value, string? format, CultureInfo? culture = default ) =>
             this[key] = format is null
-                            ? value.ToString( culture ?? CultureInfo.CurrentCulture )
+                            ? value.ToString( culture         ?? CultureInfo.CurrentCulture )
                             : value.ToString( format, culture ?? CultureInfo.CurrentCulture );
 
         public void Add( string key, DateTimeOffset value, string? format, CultureInfo? culture = default ) =>
             this[key] = format is null
-                            ? value.ToString( culture ?? CultureInfo.CurrentCulture )
+                            ? value.ToString( culture         ?? CultureInfo.CurrentCulture )
                             : value.ToString( format, culture ?? CultureInfo.CurrentCulture );
 
         #endregion
@@ -178,11 +174,7 @@ public partial class IniConfig
         {
             Span<char> span = stackalloc char[Length + 1];
 
-            if ( TryFormat( span, out int charsWritten, format, formatProvider ) )
-            {
-                return span[..charsWritten]
-                   .ToString();
-            }
+            if ( TryFormat( span, out int charsWritten, format, formatProvider ) ) { return span[..charsWritten].ToString(); }
 
             throw new InvalidOperationException( "Cannot convert to string" );
         }

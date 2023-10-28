@@ -10,9 +10,9 @@ public interface ICollectionWrapper<TValue> : IReadOnlyCollection<string>, IEqua
     bool    IsEmpty    { get; }
     bool    IsNotEmpty { get; }
     string? Json       { get; set; }
-    bool Add( TValue      value );
-    bool Contains( TValue value );
-    bool Remove( TValue   value );
+    bool    Add( TValue      value );
+    bool    Contains( TValue value );
+    bool    Remove( TValue   value );
 
 
     string ToJson();
@@ -27,5 +27,5 @@ public interface ICollectionWrapper<TValue> : IReadOnlyCollection<string>, IEqua
     void Add( params TValue[]?            value );
     void Add( HashSet<TValue>?            value );
     void Add( ICollectionWrapper<TValue>? value );
-    void SetValues( string?               json, [CallerMemberName] string? caller = default );
+    void SetValues( string?               json, [ CallerMemberName ] string? caller = default );
 }

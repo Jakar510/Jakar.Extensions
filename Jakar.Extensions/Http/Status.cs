@@ -1,17 +1,9 @@
-﻿#nullable enable
-
-
-
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
 
 
 /// <summary>
-///     <para>
-///         <see href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Status"/>
-///     </para>
-///     <para>
-///         <see href="https://stackoverflow.com/a/46361806/9530917"/>
-///     </para>
+///     <para> <see href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Status"/> </para>
+///     <para> <see href="https://stackoverflow.com/a/46361806/9530917"/> </para>
 /// </summary>
 public enum Status
 {

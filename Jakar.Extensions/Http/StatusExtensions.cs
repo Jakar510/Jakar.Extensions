@@ -1,18 +1,16 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 06/06/2022  3:43 PM
 
-#nullable enable
 namespace Jakar.Extensions;
 
 
 public static class StatusExtensions
 {
     public static HttpStatusCode ToStatus( this Status         code ) => (HttpStatusCode)code;
-    public static Status ToStatus( this         HttpStatusCode code ) => (Status)code;
+    public static Status         ToStatus( this HttpStatusCode code ) => (Status)code;
 
 
-    public static string ToStringFast( this HttpStatusCode status ) => status.ToStatus()
-                                                                             .ToStringFast();
+    public static string ToStringFast( this HttpStatusCode status ) => status.ToStatus().ToStringFast();
     public static string ToStringFast( this Status status ) => status switch
                                                                {
                                                                    Status.Continue                      => nameof(Status.Continue),
@@ -82,6 +80,6 @@ public static class StatusExtensions
                                                                    Status.LoopDetected                  => nameof(Status.LoopDetected),
                                                                    Status.NotExtended                   => nameof(Status.NotExtended),
                                                                    Status.NetworkAuthenticationRequired => nameof(Status.NetworkAuthenticationRequired),
-                                                                   _                                    => status.ToString(),
+                                                                   _                                    => status.ToString()
                                                                };
 }

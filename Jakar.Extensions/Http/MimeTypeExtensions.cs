@@ -1,21 +1,15 @@
-﻿#nullable enable
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
 
 
 public static class MimeTypeExtensions
 {
     /// <summary> Gets the <see cref="MimeType"/> of the provided extension <see cref="string"/> . </summary>
     /// <param name="mime"> </param>
-    /// <returns>
-    ///     <see cref="MimeType"/>
-    /// </returns>
-    public static MimeType FromExtension( this string mime ) => mime.AsSpan()
-                                                                    .FromExtension();
+    /// <returns> <see cref="MimeType"/> </returns>
+    public static MimeType FromExtension( this string mime ) => mime.AsSpan().FromExtension();
     /// <summary> Gets the <see cref="MimeType"/> of the provided extension <see cref="string"/> . </summary>
     /// <param name="mime"> </param>
-    /// <returns>
-    ///     <see cref="MimeType"/>
-    /// </returns>
+    /// <returns> <see cref="MimeType"/> </returns>
     public static MimeType FromExtension( this ReadOnlySpan<char> mime )
     {
         Span<char> span = stackalloc char[mime.Length];
@@ -173,9 +167,7 @@ public static class MimeTypeExtensions
 
     /// <summary> Converts the provided ContentType <see cref="string"/> to it's associated <see cref="MimeType"/> via <seealso cref="MimeTypeNames"/> </summary>
     /// <param name="mime"> </param>
-    /// <returns>
-    ///     <see cref="MimeType"/>
-    /// </returns>
+    /// <returns> <see cref="MimeType"/> </returns>
     public static MimeType ToMimeType( this string mime ) =>
         mime switch
         {
@@ -260,14 +252,12 @@ public static class MimeTypeExtensions
 
             MimeTypeNames.MultiPart.FORM_DATA => MimeType.FormData,
 
-            _ => MimeType.Unknown,
+            _ => MimeType.Unknown
         };
 
     /// <summary> Converts the provided <see cref="MimeType"/> to it's associated ContentType via <seealso cref="MimeTypeNames"/> </summary>
     /// <param name="mime"> </param>
-    /// <returns>
-    ///     <see cref="string"/>
-    /// </returns>
+    /// <returns> <see cref="string"/> </returns>
     public static string ToContentType( this MimeType mime ) =>
         mime switch
         {
@@ -353,16 +343,14 @@ public static class MimeTypeExtensions
             MimeType.FormData => MimeTypeNames.MultiPart.FORM_DATA,
 
             MimeType.NotSet => throw new ArgumentOutOfRangeException( nameof(mime), mime, null ),
-            _               => throw new ArgumentOutOfRangeException( nameof(mime), mime, null ),
+            _               => throw new ArgumentOutOfRangeException( nameof(mime), mime, null )
         };
 
 
     /// <summary> Gets the extension of the provided <see cref="MimeType"/> . </summary>
     /// <param name="mime"> </param>
     /// <param name="includePeriod"> </param>
-    /// <returns>
-    ///     <see cref="string"/>
-    /// </returns>
+    /// <returns> <see cref="string"/> </returns>
     public static string ToExtension( this MimeType mime, bool includePeriod = false )
     {
         string result = mime switch
@@ -449,7 +437,7 @@ public static class MimeTypeExtensions
 
                             MimeType.Unknown => "dat",
                             MimeType.NotSet  => throw new ArgumentOutOfRangeException( nameof(mime) ),
-                            _                => throw new ArgumentOutOfRangeException( nameof(mime) ),
+                            _                => throw new ArgumentOutOfRangeException( nameof(mime) )
                         };
 
 
@@ -458,8 +446,7 @@ public static class MimeTypeExtensions
         Span<char> span = stackalloc char[result.Length + 1];
         span[0] = '.';
 
-        result.AsSpan()
-              .CopyTo( span[1..] );
+        result.AsSpan().CopyTo( span[1..] );
 
         return span.ToString();
     }
@@ -468,22 +455,16 @@ public static class MimeTypeExtensions
     /// <summary> Uses the provided <paramref name="fileName"/> and adds the extension based on provided <see cref="MimeType"/> . </summary>
     /// <param name="mime"> </param>
     /// <param name="fileName"> </param>
-    /// <returns>
-    ///     <see cref="string"/>
-    /// </returns>
+    /// <returns> <see cref="string"/> </returns>
     public static string ToFileName( this MimeType mime, string fileName )
     {
         if ( string.IsNullOrWhiteSpace( fileName ) ) { throw new NullReferenceException( nameof(mime) ); }
 
         return $"{fileName}.{mime.ToExtension().ToLower()}";
     }
-    /// <summary>
-    ///     <seealso href="https://docs.microsoft.com/en-us/office/client-developer/office-uri-schemes"/>
-    /// </summary>
+    /// <summary> <seealso href="https://docs.microsoft.com/en-us/office/client-developer/office-uri-schemes"/> </summary>
     /// <param name="mime"> </param>
-    /// <returns>
-    ///     <see cref="string"/>
-    /// </returns>
+    /// <returns> <see cref="string"/> </returns>
     public static string ToUriScheme( this MimeType mime ) =>
 
         // TODO: get more uri schemes
@@ -501,7 +482,7 @@ public static class MimeTypeExtensions
             MimeType.Ppt  => "ms-powerpoint",
             MimeType.Pptx => "ms-powerpoint",
 
-            _ => "file",
+            _ => "file"
 
             //_ => throw new ArgumentOutOfRangeException(nameof(mime), mime, $"Cannot discern UriScheme for {typeof(mime).FullName}.{mime}")
         };

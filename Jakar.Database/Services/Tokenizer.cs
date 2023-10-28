@@ -14,12 +14,8 @@ public interface ITokenService
 
 
 /// <summary>
-///     <para>
-///         <see href="https://codepedia.info/jwt-authentication-in-aspnet-core-web-api-token"/>
-///     </para>
-///     <para>
-///         <see href="https://stackoverflow.com/a/55740879/9530917"> How do I get current user in .NET Core Web API (from JWT Token) </see>
-///     </para>
+///     <para> <see href="https://codepedia.info/jwt-authentication-in-aspnet-core-web-api-token"/> </para>
+///     <para> <see href="https://stackoverflow.com/a/55740879/9530917"> How do I get current user in .NET Core Web API (from JWT Token) </see> </para>
 /// </summary>
 public class Tokenizer : ITokenService // TODO: update Tokenizer
 {

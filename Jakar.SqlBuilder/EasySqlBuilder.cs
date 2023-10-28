@@ -1,5 +1,4 @@
-﻿#nullable enable
-using Jakar.Extensions;
+﻿using Jakar.Extensions;
 
 
 
@@ -43,9 +42,7 @@ public record struct EasySqlBuilder
         _sb.Append( c );
         return this;
     }
-    internal EasySqlBuilder Add( string value ) => Space()
-                                                  .Append( value )
-                                                  .Space();
+    internal EasySqlBuilder Add( string          value ) => Space().Append( value ).Space();
     internal EasySqlBuilder Add( params string[] names ) => AddRange( ' ', names );
 
 
@@ -75,7 +72,7 @@ public record struct EasySqlBuilder
     }
 
 
-    internal EasySqlBuilder Star() => Add( '*' );
+    internal EasySqlBuilder Star()  => Add( '*' );
     internal EasySqlBuilder Comma() => Add( ',' );
     internal EasySqlBuilder Space() => Add( ' ' );
 
@@ -102,8 +99,7 @@ public record struct EasySqlBuilder
     {
         VerifyParentheses();
 
-        string result = _sb.Append( ';' )
-                           .ToString();
+        string result = _sb.Append( ';' ).ToString();
 
 
         // int start = result.LastIndexOf('(');
@@ -136,8 +132,8 @@ public record struct EasySqlBuilder
     }
 
 
-    public WhereClauseBuilder<EasySqlBuilder> Where() => new(in this, ref this);
-    internal WhereClauseBuilder<TNext> Where<TNext>( in TNext next ) => new(in next, ref this);
+    public   WhereClauseBuilder<EasySqlBuilder> Where()                       => new(in this, ref this);
+    internal WhereClauseBuilder<TNext>          Where<TNext>( in TNext next ) => new(in next, ref this);
 
 
     public OrderByClauseBuilder Order() => new(ref this);

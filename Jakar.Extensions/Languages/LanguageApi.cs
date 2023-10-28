@@ -1,8 +1,7 @@
-﻿#nullable enable
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
 
 
-[Serializable]
+[ Serializable ]
 public class LanguageApi : ObservableClass
 {
     private Language.Collection _languages        = new(Language.Supported);

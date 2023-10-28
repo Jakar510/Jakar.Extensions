@@ -5,13 +5,10 @@
 // **********************************************
 
 
-#nullable enable
 namespace Jakar.Extensions;
 
 
-/// <summary>
-///     <seealso href="https://www.codeproject.com/Articles/33559/Handy-wrapper-class-for-thread-safe-property-acces"/>
-/// </summary>
+/// <summary> <seealso href="https://www.codeproject.com/Articles/33559/Handy-wrapper-class-for-thread-safe-property-acces"/> </summary>
 /// <typeparam name="TValue"> The value type. </typeparam>
 public sealed class Synchronized<TValue>
 {

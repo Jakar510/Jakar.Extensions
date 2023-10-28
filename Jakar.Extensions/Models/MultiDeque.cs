@@ -1,10 +1,7 @@
-﻿#nullable enable
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
 
 
-/// <summary>
-///     <seealso href="https://stackoverflow.com/a/5852926/9530917"/>
-/// </summary>
+/// <summary> <seealso href="https://stackoverflow.com/a/5852926/9530917"/> </summary>
 public class MultiDeque<T> : IMultiQueue<T>
 {
     protected readonly Deque<T> _queue;
@@ -42,7 +39,7 @@ public class MultiDeque<T> : IMultiQueue<T>
     {
         lock (_lock) { _queue.AddToBack( value ); }
     }
-    public bool Remove( [NotNullWhen( true )] out T? value )
+    public bool Remove( [ NotNullWhen( true ) ] out T? value )
     {
         lock (_lock)
         {

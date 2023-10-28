@@ -19,8 +19,7 @@ public static class AppLoggerExtensions
                                  } );
     public static IServiceCollection UseAppLogger( this IServiceCollection collection, Action<AppLoggerOptions> options )
     {
-        collection.AddOptions<AppLoggerOptions>()
-                  .Configure( options );
+        collection.AddOptions<AppLoggerOptions>().Configure( options );
 
         collection.AddSingleton<IAppLogger, Common.AppLogger>();
         collection.AddHostedService( provider => provider.GetRequiredService<IAppLogger>() );

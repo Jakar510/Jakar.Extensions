@@ -12,9 +12,7 @@ public static class Startup
 
     public static void Init()
     {
-        IHost? host = Host.CreateDefaultBuilder()
-                          .ConfigureServices( WireupServices )
-                          .Build();
+        IHost? host = Host.CreateDefaultBuilder().ConfigureServices( WireupServices ).Build();
 
         Services = host.Services;
     }

@@ -3,8 +3,6 @@
 
 
 namespace Jakar.Extensions;
-#nullable enable
-
 
 
 /// <summary>
@@ -35,7 +33,7 @@ public readonly ref struct ParamsArray
                                             0 => _arg0,
                                             1 => _arg1,
                                             2 => _arg2,
-                                            _ => _args[index],
+                                            _ => _args[index]
                                         };
 
 
@@ -94,9 +92,9 @@ public readonly ref struct ParamsArray
     public override string ToString() => $"{nameof(ParamsArray)}<{nameof(Length)}: {Length}>";
 
 
-    [Pure] public ReadOnlySpan<object?>.Enumerator GetEnumerator() => _args.GetEnumerator();
+    [ Pure ] public ReadOnlySpan<object?>.Enumerator GetEnumerator() => _args.GetEnumerator();
 
-    [Pure]
+    [ Pure ]
     public static ParamsArray Create( params object?[] args )
     {
         ReadOnlySpan<object?> span = args;
@@ -139,7 +137,7 @@ public readonly ref struct ParamsArray<T> where T : unmanaged, IEquatable<T>
     public static implicit operator ReadOnlySpan<T>( ParamsArray<T> args ) => args.Span;
 
 
-    [Pure] public ReadOnlySpan<T>.Enumerator GetEnumerator() => Span.GetEnumerator();
+    [ Pure ] public ReadOnlySpan<T>.Enumerator GetEnumerator() => Span.GetEnumerator();
 
 
     public override string ToString() => $"{nameof(ParamsArray<T>)}<{nameof(Length)}: {Length}>";
@@ -156,14 +154,14 @@ public readonly ref struct ParamsArray<T> where T : unmanaged, IEquatable<T>
     }
 
 
-    [Pure]
+    [ Pure ]
     public static ParamsArray<T> Create( T arg0 )
     {
         Span<T> span = stackalloc T[1];
         span[0] = arg0;
         return MemoryMarshal.CreateReadOnlySpan( ref span.GetPinnableReference(), span.Length );
     }
-    [Pure]
+    [ Pure ]
     public static ParamsArray<T> Create( T arg0, T arg1 )
     {
         Span<T> span = stackalloc T[2];
@@ -171,7 +169,7 @@ public readonly ref struct ParamsArray<T> where T : unmanaged, IEquatable<T>
         span[1] = arg1;
         return MemoryMarshal.CreateReadOnlySpan( ref span.GetPinnableReference(), span.Length );
     }
-    [Pure]
+    [ Pure ]
     public static ParamsArray<T> Create( T arg0, T arg1, T arg2 )
     {
         Span<T> span = stackalloc T[3];
@@ -180,7 +178,7 @@ public readonly ref struct ParamsArray<T> where T : unmanaged, IEquatable<T>
         span[2] = arg2;
         return MemoryMarshal.CreateReadOnlySpan( ref span.GetPinnableReference(), span.Length );
     }
-    [Pure]
+    [ Pure ]
     public static ParamsArray<T> Create( params T[] args )
     {
         ReadOnlySpan<T> span = args;

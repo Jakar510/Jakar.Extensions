@@ -17,10 +17,10 @@ public sealed class ValueEqualizer<T> : IEqualityComparer<T?>, IEqualityComparer
     int IEqualityComparer.GetHashCode( object obj ) => obj.GetHashCode();
 
 
-    public bool Equals( T?     left, T? right ) => Nullable.Equals( left, right );
-    public int GetHashCode( T? obj ) => obj.GetHashCode();
-    public bool Equals( T      left, T right ) => left.Equals( right );
-    public int GetHashCode( T  obj ) => obj.GetHashCode();
+    public bool Equals( T?      left, T? right ) => Nullable.Equals( left, right );
+    public int  GetHashCode( T? obj )           => obj.GetHashCode();
+    public bool Equals( T       left, T right ) => left.Equals( right );
+    public int  GetHashCode( T  obj ) => obj.GetHashCode();
 }
 
 

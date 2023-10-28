@@ -1,5 +1,4 @@
-﻿#nullable enable
-namespace Jakar.SqlBuilder;
+﻿namespace Jakar.SqlBuilder;
 
 
 public struct WhereClauseBuilder<TNext>
@@ -80,14 +79,13 @@ public struct WhereClauseBuilder<TNext>
     }
     public WhereInChainBuilder<TNext> NotIn( string columnName )
     {
-        _builder.Add( columnName, KeyWords.NOT, KeyWords.IN )
-                .Begin();
+        _builder.Add( columnName, KeyWords.NOT, KeyWords.IN ).Begin();
 
         return new WhereInChainBuilder<TNext>( this, ref _builder );
     }
 
 
-    public SelectClauseBuilder<WhereClauseBuilder<TNext>> Select() => new(this, ref _builder);
+    public SelectClauseBuilder<WhereClauseBuilder<TNext>>       Select()       => new(this, ref _builder);
     public AggregateFunctionsBuilder<WhereClauseBuilder<TNext>> WithFunction() => new(this, ref _builder);
 
 

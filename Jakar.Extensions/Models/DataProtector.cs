@@ -5,9 +5,6 @@ namespace Jakar.Extensions;
 
 
 #if NET6_0_OR_GREATER
-
-
-
 public interface IDataProtectorProvider
 {
     public IDataProtector GetProtector();
@@ -51,7 +48,7 @@ public interface IDataProtector : IDisposable
 public sealed class DataProtector : IDataProtector
 {
     private const    int                  BLOCK = 512;
-    private const    int                  DATA  = 254;
+    private const    int                  DATA = 254;
     private readonly RSA                  _rsa;
     private readonly RSAEncryptionPadding _padding;
     private          bool                 _disposed;
@@ -61,7 +58,7 @@ public sealed class DataProtector : IDataProtector
     public DataProtector( RSAEncryptionPadding padding ) : this( RSA.Create(), padding ) { }
     public DataProtector( RSA rsa, RSAEncryptionPadding padding )
     {
-        _rsa     = rsa;
+        _rsa = rsa;
         _padding = padding;
     }
     public void Dispose()
@@ -139,7 +136,7 @@ public sealed class DataProtector : IDataProtector
 
         for ( int i = 0; i <= encrypted.Length / BLOCK; i++ )
         {
-            int                size  = Math.Min( BLOCK, encrypted.Length - i * BLOCK );
+            int                size = Math.Min( BLOCK, encrypted.Length - i * BLOCK );
             ReadOnlySpan<byte> block = encrypted.AsSpan( i * BLOCK, size );
             if ( block.IsEmpty ) { continue; }
 
@@ -229,7 +226,7 @@ public sealed class DataProtector : IDataProtector
 
         for ( int i = 0; i <= value.Length / DATA; i++ )
         {
-            int                size  = Math.Min( DATA, value.Length - i * DATA );
+            int                size = Math.Min( DATA, value.Length - i * DATA );
             ReadOnlySpan<byte> block = value.AsSpan( i * DATA, size );
             if ( block.IsEmpty ) { continue; }
 
@@ -284,7 +281,4 @@ public sealed class DataProtector : IDataProtector
         await output.WriteAsync( result );
     }
 }
-
-
-
 #endif

@@ -8,8 +8,8 @@ namespace Jakar.Database;
 public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthCheck, IUserTwoFactorTokenProvider<UserRecord>
 {
     public const       ClaimType               DEFAULT_CLAIM_TYPES = ClaimType.UserID | ClaimType.UserName | ClaimType.GroupSid | ClaimType.Role;
+    protected readonly ConcurrentBag<IDbTable> _tables             = new();
     protected readonly ISqlCacheFactory        _sqlCacheFactory;
-    protected readonly ConcurrentBag<IDbTable> _tables = new();
     public             DbTable<AddressRecord>  Addresses { get; }
     public int? CommandTimeout
     {

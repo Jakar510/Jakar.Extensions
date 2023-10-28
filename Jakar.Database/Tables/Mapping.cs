@@ -28,7 +28,7 @@ public abstract record Mapping<TSelf, TKey, TValue>( RecordID<TKey> KeyID, Recor
 
     public override DynamicParameters ToDynamicParameters()
     {
-        DynamicParameters parameters = base.ToDynamicParameters();
+        var parameters = base.ToDynamicParameters();
         parameters.Add( nameof(KeyID),   KeyID );
         parameters.Add( nameof(ValueID), ValueID );
         return parameters;
@@ -101,8 +101,8 @@ public abstract record Mapping<TSelf, TKey, TValue>( RecordID<TKey> KeyID, Recor
     {
         // TODO: finish implementation
 
-        var    parameters = GetDynamicParameters( key );
-        string ids        = string.Join( ", ", values.Select( x => x.ID.Value ) );
+        DynamicParameters parameters = GetDynamicParameters( key );
+        string            ids        = string.Join( ", ", values.Select( x => x.ID.Value ) );
 
         string sql = @$"
 SELECT * FROM {TValue.TableName}
