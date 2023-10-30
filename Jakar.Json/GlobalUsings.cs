@@ -3,8 +3,10 @@
 
 global using System.Collections;
 global using System.Collections.Concurrent;
+global using System.Collections.Immutable;
 global using System.Diagnostics.CodeAnalysis;
 global using System.Globalization;
+global using System.Runtime.CompilerServices;
 global using System.Text;
 global using Jakar.Extensions;
 global using Jakar.Json.Deserialization;

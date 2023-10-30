@@ -22,13 +22,16 @@ public static class Jsonizer
     // }
 
 
-    public static string ToJson( this IJsonizer value, Formatting formatting = Formatting.Indented ) => ToJson( value, new JWriter( value.JsonSize(), formatting ) );
-    public static string ToJson( this IJsonizer value, in JWriter writer )
+    public static string ToJson( this IJsonizer value, Formatting formatting = Formatting.Indented )
     {
-        using ( writer )
+        var writer = new JWriter( value.JsonSize(), formatting );
+
+        try
         {
-            value.ToJson( writer );
-            return writer.ToString();
+            value.Serialize( ref writer );
+            string result = writer.ToString();
+            return result;
         }
+        finally { writer.Dispose(); }
     }
 }

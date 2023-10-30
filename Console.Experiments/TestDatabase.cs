@@ -1,4 +1,5 @@
-﻿// Jakar.Extensions :: Experiments
+﻿/*
+// Jakar.Extensions :: Experiments
 // 09/28/2023  10:02 AM
 
 using System.Data.Common;
@@ -144,3 +145,4 @@ public sealed class TestDatabase : Database
         }
     }
 }
+*/

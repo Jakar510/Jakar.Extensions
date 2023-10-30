@@ -23,9 +23,6 @@ public ref struct JWriter
     {
         ShouldIndent = formatting is Formatting.Indented;
         _sb          = new ValueStringBuilder( capacity );
-
-        // _stream       = new StringBuilder( capacity );
-        // _writer       = new StringWriter( _stream );
     }
     public readonly          void   Dispose()  => _sb.Dispose();
     public readonly override string ToString() => _sb.ToString();

@@ -1,7 +1,14 @@
-﻿try
+﻿using Jakar.Json;
+
+
+try
 {
     "Hello World!".WriteToConsole();
     Console.WriteLine();
+
+
+    JsonTest.Run();
+
 
     // BenchmarkRunner.Run<StringCollectionBenchmarks>();
 

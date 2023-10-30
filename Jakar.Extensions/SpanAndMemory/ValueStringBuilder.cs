@@ -27,8 +27,6 @@ public ref struct ValueStringBuilder
     }
     public ref char this[ int index ] => ref _chars[index];
     public ReadOnlySpan<char> Result => MemoryMarshal.CreateReadOnlySpan( ref _chars.GetPinnableReference(), _chars.Length );
-
-
     public int Length
     {
         readonly get => _chars.Index;
@@ -328,7 +326,7 @@ public ref struct ValueStringBuilder
 
 
 #if NET6_0_OR_GREATER
-    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
+    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
 #endif
     public ValueStringBuilder AppendJoin<T>( char separator, in ReadOnlySpan<T> enumerable, in ReadOnlySpan<char> format = default, IFormatProvider? provider = default ) where T : ISpanFormattable
     {
@@ -349,7 +347,7 @@ public ref struct ValueStringBuilder
     }
 
 #if NET6_0_OR_GREATER
-    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
+    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
 #endif
     public ValueStringBuilder AppendJoin<T>( in ReadOnlySpan<char> separator, in ReadOnlySpan<T> enumerable, in ReadOnlySpan<char> format = default, IFormatProvider? provider = default ) where T : ISpanFormattable
     {
@@ -371,7 +369,7 @@ public ref struct ValueStringBuilder
 
 
 #if NET6_0_OR_GREATER
-    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
+    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
 #endif
     public ValueStringBuilder AppendJoin<T>( char separator, IEnumerable<T> enumerable, in ReadOnlySpan<char> format = default, IFormatProvider? provider = default ) where T : ISpanFormattable
     {
@@ -391,7 +389,7 @@ public ref struct ValueStringBuilder
     }
 
 #if NET6_0_OR_GREATER
-    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
+    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
 #endif
     public ValueStringBuilder AppendJoin<T>( in ReadOnlySpan<char> separator, IEnumerable<T> enumerable, in ReadOnlySpan<char> format = default, IFormatProvider? provider = default ) where T : ISpanFormattable
     {
@@ -412,7 +410,7 @@ public ref struct ValueStringBuilder
 
 
 #if NET6_0_OR_GREATER
-    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
+    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
 #endif
     public ValueStringBuilder AppendSpanFormattable<T>( T value, in ReadOnlySpan<char> format, IFormatProvider? provider = default ) where T : ISpanFormattable
     {
@@ -627,6 +625,7 @@ public ref struct ValueStringBuilder
             if ( s == null )
             {
             #if NET6_0_OR_GREATER
+
                 // If arg is ISpanFormattable and the beginning doesn't need padding, try formatting it into the remaining current chunk.
                 if ( arg is ISpanFormattable spanFormattableArg && (leftJustify || width == 0) && spanFormattableArg.TryFormat( Next, out int charsWritten, itemFormatSpan, provider ) )
                 {
@@ -867,6 +866,7 @@ public ref struct ValueStringBuilder
             if ( s == null )
             {
             #if NET6_0_OR_GREATER
+
                 // If arg is ISpanFormattable and the beginning doesn't need padding, try formatting it into the remaining current chunk.
                 if ( arg is ISpanFormattable spanFormattableArg && (leftJustify || width == 0) && spanFormattableArg.TryFormat( Next, out int charsWritten, itemFormatSpan, provider ) )
                 {

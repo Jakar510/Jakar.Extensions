@@ -174,7 +174,7 @@ public class JsonSerializationGenerator : ISourceGenerator
 
     public void Execute( GeneratorExecutionContext context )
     {
-        var syntaxReceiver = (JsonSerializationSyntaxReceiver)context.SyntaxReceiver;
+        if ( context.SyntaxReceiver is not JsonSerializationSyntaxReceiver syntaxReceiver ) { return; }
 
         foreach ( ClassDeclarationSyntax classDeclaration in syntaxReceiver.CandidateClasses )
         {
