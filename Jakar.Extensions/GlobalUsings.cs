@@ -26,8 +26,6 @@ global using System.Threading;
 global using System.Threading.Tasks;
 global using System.ComponentModel.DataAnnotations;
 global using System.Diagnostics.Contracts;
-global using Dapper;
-global using Dapper.Contrib.Extensions;
 global using Newtonsoft.Json;
 global using Newtonsoft.Json.Linq;
 global using System.Drawing;
@@ -47,11 +45,9 @@ global using Nito.Collections;
 global using JetBrains.Annotations;
 global using ValueOf;
 global using CommunityToolkit.Diagnostics;
-global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.Logging;
 global using Newtonsoft.Json.Serialization;
 global using PureAttribute = JetBrains.Annotations.PureAttribute;
-global using KeyAttribute = Dapper.Contrib.Extensions.KeyAttribute;
 
 
 // global using Microsoft.Extensions.Hosting;

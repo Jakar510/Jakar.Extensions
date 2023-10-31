@@ -40,13 +40,13 @@ public class CreateUser : ObservableClass, ILoginRequest, IVerifyRequestProvider
     }
 
 
-    public virtual bool IsValid => !string.IsNullOrWhiteSpace( UserLogin )       &&
-                                   UserLogin.IsEmailAddress()                    &&
-                                   !string.IsNullOrWhiteSpace( UserPassword )    &&
+    public virtual bool IsValid => !string.IsNullOrWhiteSpace( UserName )       &&
+                                   UserName.IsEmailAddress()                    &&
+                                   !string.IsNullOrWhiteSpace( Password )    &&
                                    !string.IsNullOrWhiteSpace( ConfirmPassword ) &&
-                                   string.Equals( UserPassword, ConfirmPassword, StringComparison.Ordinal );
+                                   string.Equals( Password, ConfirmPassword, StringComparison.Ordinal );
 
-    public virtual string UserLogin
+    public virtual string UserName
     {
         get => _userLogin;
         set
@@ -56,7 +56,7 @@ public class CreateUser : ObservableClass, ILoginRequest, IVerifyRequestProvider
             OnPropertyChanged( nameof(IsValid) );
         }
     }
-    public virtual string UserPassword
+    public virtual string Password
     {
         get => _userPassword;
         set
@@ -72,9 +72,9 @@ public class CreateUser : ObservableClass, ILoginRequest, IVerifyRequestProvider
         // ReSharper disable once UseObjectOrCollectionInitializer
         var user = new CreateUser
                    {
-                       UserPassword    = password,
+                       Password    = password,
                        ConfirmPassword = password,
-                       UserLogin       = email
+                       UserName       = email
                    };
 
         user.Data.Email = email;
@@ -86,9 +86,9 @@ public class CreateUser : ObservableClass, ILoginRequest, IVerifyRequestProvider
         // ReSharper disable once UseObjectOrCollectionInitializer
         var user = new CreateUser
                    {
-                       UserPassword    = password,
+                       Password    = password,
                        ConfirmPassword = password,
-                       UserLogin       = userName
+                       UserName       = userName
                    };
 
         user.Data.Email = email;
@@ -98,17 +98,17 @@ public class CreateUser : ObservableClass, ILoginRequest, IVerifyRequestProvider
 
 
     protected void                       User_OnPropertyChanged( object? sender, PropertyChangedEventArgs e ) => OnPropertyChanged( nameof(IsValid) );
-    public    VerifyRequest<CreateUser>  GetVerifyRequest() => new(UserLogin, UserPassword, this);
+    public    VerifyRequest<CreateUser>  GetVerifyRequest() => new(UserName, Password, this);
     VerifyRequest IVerifyRequestProvider.GetVerifyRequest() => GetVerifyRequest();
 
 
     public virtual bool Validate( ICollection<string> errors )
     {
-        if ( string.IsNullOrWhiteSpace( UserLogin ) || !UserLogin.IsEmailAddress() ) { errors.Add( "Must provide a valid email address" ); }
+        if ( string.IsNullOrWhiteSpace( UserName ) || !UserName.IsEmailAddress() ) { errors.Add( "Must provide a valid email address" ); }
 
-        if ( string.IsNullOrWhiteSpace( UserPassword ) || string.IsNullOrWhiteSpace( ConfirmPassword ) ) { errors.Add( "Password must not be empty" ); }
+        if ( string.IsNullOrWhiteSpace( Password ) || string.IsNullOrWhiteSpace( ConfirmPassword ) ) { errors.Add( "Password must not be empty" ); }
 
-        if ( !string.Equals( UserPassword, ConfirmPassword, StringComparison.Ordinal ) ) { errors.Add( "Passwords be equal" ); }
+        if ( !string.Equals( Password, ConfirmPassword, StringComparison.Ordinal ) ) { errors.Add( "Passwords be equal" ); }
 
         if ( !Data.IsValidEmail ) { errors.Add( "Invalid Email" ); }
 

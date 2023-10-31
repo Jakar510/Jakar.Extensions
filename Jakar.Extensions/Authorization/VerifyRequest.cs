@@ -2,34 +2,44 @@
 
 
 [ Serializable ]
-public class VerifyRequest : BaseClass, ILoginRequest, ICredentials, ICloneable, IEquatable<VerifyRequest>
+public class VerifyRequest : BaseClass, ILoginRequest, ICredentials, ICloneable, IEquatable<VerifyRequest>, JsonModels.IJsonModel
 {
-    [ JsonExtensionData ] public IDictionary<string, JToken?>? AdditionalData { get; set; }
-    public virtual               bool                          IsValid        => !string.IsNullOrWhiteSpace( UserLogin ) && !string.IsNullOrWhiteSpace( UserPassword );
+    [ JsonExtensionData ] public         IDictionary<string, JToken?>? AdditionalData { get; set; }
+    [ JsonIgnore ]        public virtual bool                          IsValid        => !string.IsNullOrWhiteSpace( UserName ) && !string.IsNullOrWhiteSpace( Password );
 
-
-    [ Required( ErrorMessage = "Email address is required." ), JsonProperty( nameof(UserLogin), Required = Required.Always ) ] public string UserLogin { get; init; } = string.Empty;
-
-
-    [ Required( ErrorMessage = "Password is required." ), JsonProperty( nameof(UserPassword), Required = Required.Always ) ] public string UserPassword { get; init; } = string.Empty;
-
-
-    public VerifyRequest() { }
-    public VerifyRequest( string? userName, string? userPassword )
+    [ Required( ErrorMessage = $"{nameof(Password)} is required." ), JsonProperty( nameof(Password), Required = Required.Always ) ] public string Password { get; init; } = string.Empty;
+    [ Obsolete( nameof(UserName) ) ]
+    public string UserLogin
     {
-        UserLogin    = userName     ?? throw new ArgumentNullException( nameof(userName) );
-        UserPassword = userPassword ?? throw new ArgumentNullException( nameof(userPassword) );
+        get => UserName;
+        init => UserName = value;
+    }
+
+    [ Required( ErrorMessage = $"{nameof(UserName)} is required." ), JsonProperty( nameof(UserName), Required = Required.Always ) ] public string UserName { get; init; } = string.Empty;
+    [ Obsolete( nameof(Password) ) ]
+    public string UserPassword
+    {
+        get => Password;
+        init => Password = value;
     }
 
 
-    public bool ValidatePassword()                              => ValidatePassword( PasswordValidator.Default );
-    public bool ValidatePassword( PasswordValidator validator ) => validator.Validate( UserPassword );
+    public VerifyRequest() { }
+    public VerifyRequest( string? userName, string? password )
+    {
+        UserName = userName ?? throw new ArgumentNullException( nameof(userName) );
+        Password = password ?? throw new ArgumentNullException( nameof(password) );
+    }
 
 
-    public virtual NetworkCredential GetCredential( Uri uri, string authType ) => new(UserLogin, UserPassword.ToSecureString());
+    public bool ValidatePassword()                                 => ValidatePassword( PasswordValidator.Default );
+    public bool ValidatePassword( in PasswordValidator validator ) => validator.Validate( Password );
 
 
-    public VerifyRequest Clone() => new(UserLogin, UserPassword);
+    public virtual NetworkCredential GetCredential( Uri uri, string authType ) => new(UserName, Password.ToSecureString());
+
+
+    public VerifyRequest Clone() => new(UserName, Password);
     object ICloneable.   Clone() => Clone();
 
 
@@ -37,19 +47,15 @@ public class VerifyRequest : BaseClass, ILoginRequest, ICredentials, ICloneable,
     {
         if ( other is null ) { return false; }
 
-        if ( ReferenceEquals( this, other ) ) { return true; }
-
-        return string.Equals( UserLogin, other.UserLogin, StringComparison.Ordinal ) && string.Equals( UserPassword, other.UserPassword, StringComparison.Ordinal );
+        return ReferenceEquals( this, other ) || string.Equals( UserName, other.UserName, StringComparison.Ordinal ) && string.Equals( Password, other.Password, StringComparison.Ordinal );
     }
     public override bool Equals( object? other )
     {
         if ( other is null ) { return false; }
 
-        if ( ReferenceEquals( this, other ) ) { return true; }
-
-        return other is VerifyRequest request && Equals( request );
+        return ReferenceEquals( this, other ) || other is VerifyRequest request && Equals( request );
     }
-    public override int GetHashCode() => HashCode.Combine( UserLogin, UserPassword );
+    public override int GetHashCode() => HashCode.Combine( UserName, Password );
 
 
     public static bool operator ==( VerifyRequest? left, VerifyRequest? right ) => Equals( left, right );
@@ -70,27 +76,24 @@ public class VerifyRequest<T> : VerifyRequest, IEquatable<VerifyRequest<T>>
 
     public VerifyRequest() { }
     public VerifyRequest( string?       userLogin, string? userPassword, T? data ) : base( userLogin, userPassword ) => Data = data;
-    public VerifyRequest( VerifyRequest request,   T?      data ) : this( request.UserLogin, request.UserPassword, data ) { }
+    public VerifyRequest( VerifyRequest request,   T?      data ) : this( request.UserName, request.Password, data ) { }
 
 
-    public new VerifyRequest<T> Clone() => new(UserLogin, UserPassword, Data);
+    public new VerifyRequest<T> Clone() => new(UserName, Password, Data);
 
 
-    public bool Equals( VerifyRequest<T>? other )
+    public bool Equals( VerifyRequest<T>? other ) => Equals( other, EqualityComparer<T?>.Default );
+    public bool Equals( VerifyRequest<T>? other, IEqualityComparer<T> comparer )
     {
         if ( other is null ) { return false; }
 
-        if ( ReferenceEquals( this, other ) ) { return true; }
-
-        return base.Equals( other ) && EqualityComparer<T?>.Default.Equals( Data, other.Data );
+        return ReferenceEquals( this, other ) || base.Equals( other ) && comparer.Equals( Data, other.Data );
     }
     public override bool Equals( object? other )
     {
         if ( other is null ) { return false; }
 
-        if ( ReferenceEquals( this, other ) ) { return true; }
-
-        return other is VerifyRequest<T> request && Equals( request );
+        return ReferenceEquals( this, other ) || other is VerifyRequest<T> request && Equals( request );
     }
     public override int GetHashCode() => HashCode.Combine( base.GetHashCode(), Data );
 

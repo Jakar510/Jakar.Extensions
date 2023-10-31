@@ -4,7 +4,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata>
 		<id>Jakar.Extensions</id>
-		<version>6.8.8</version>
+		<version>6.9.0</version>
 		<title>Extension Library</title>
 		<authors>Tyler Stegmaier</authors>
 		<owners>Jakar510/Jakar</owners>
@@ -29,21 +29,13 @@
 		<dependencies>
 			<group targetFramework="netstandard2.1">
 				<dependency id="CommunityToolkit.Diagnostics"
-							version="8.2.1" />
-				<dependency id="Dapper"
-							version="2.0.151" />
-				<dependency id="Dapper.Contrib"
-							version="2.0.78" />
+							version="8.2.2" />
 				<dependency id="JetBrains.Annotations"
 							version="2023.2.0" />
 				<dependency id="Microsoft.CodeAnalysis.CSharp"
 							version="4.6.0" />
 				<dependency id="Microsoft.CSharp"
 							version="4.7.0" />
-				<dependency id="Microsoft.Extensions.DependencyInjection"
-							version="7.0.0" />
-				<dependency id="Microsoft.Extensions.Hosting.Abstractions"
-							version="7.0.0" />
 				<dependency id="Microsoft.Extensions.Logging.Abstractions"
 							version="7.0.0" />
 				<dependency id="Microsoft.Extensions.Options"
@@ -92,21 +84,13 @@
 
 			<group targetFramework="net6.0">
 				<dependency id="CommunityToolkit.Diagnostics"
-							version="8.2.1" />
-				<dependency id="Dapper"
-							version="2.0.151" />
-				<dependency id="Dapper.Contrib"
-							version="2.0.78" />
+							version="8.2.2" />
 				<dependency id="JetBrains.Annotations"
 							version="2023.2.0" />
 				<dependency id="Microsoft.CodeAnalysis.CSharp"
 							version="4.6.0" />
 				<dependency id="Microsoft.CSharp"
 							version="4.7.0" />
-				<dependency id="Microsoft.Extensions.DependencyInjection"
-							version="7.0.0" />
-				<dependency id="Microsoft.Extensions.Hosting.Abstractions"
-							version="7.0.0" />
 				<dependency id="Microsoft.Extensions.Logging.Abstractions"
 							version="7.0.0" />
 				<dependency id="Microsoft.Extensions.Options"
@@ -155,21 +139,13 @@
 
 			<group targetFramework="net7.0">
 				<dependency id="CommunityToolkit.Diagnostics"
-							version="8.2.1" />
-				<dependency id="Dapper"
-							version="2.0.151" />
-				<dependency id="Dapper.Contrib"
-							version="2.0.78" />
+							version="8.2.2" />
 				<dependency id="JetBrains.Annotations"
 							version="2023.2.0" />
 				<dependency id="Microsoft.CodeAnalysis.CSharp"
 							version="4.6.0" />
 				<dependency id="Microsoft.CSharp"
 							version="4.7.0" />
-				<dependency id="Microsoft.Extensions.DependencyInjection"
-							version="7.0.0" />
-				<dependency id="Microsoft.Extensions.Hosting.Abstractions"
-							version="7.0.0" />
 				<dependency id="Microsoft.Extensions.Logging.Abstractions"
 							version="7.0.0" />
 				<dependency id="Microsoft.Extensions.Options"

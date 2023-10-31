@@ -322,7 +322,6 @@ public abstract record ObservableRecord<TRecord, TID> : ObservableRecord<TRecord
     private TID _id;
 
 
-    [ Key ]
     public virtual TID ID
     {
         get => _id;

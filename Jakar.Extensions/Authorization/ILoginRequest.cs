@@ -6,6 +6,6 @@ namespace Jakar.Extensions;
 
 public interface ILoginRequest : IValidator
 {
-    public string UserLogin    { get; }
-    public string UserPassword { get; }
+    public string UserName    { get; }
+    public string Password { get; }
 }
