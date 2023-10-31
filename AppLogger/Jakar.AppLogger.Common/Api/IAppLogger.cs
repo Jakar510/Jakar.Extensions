@@ -1,6 +1,10 @@
 ﻿// Jakar.AppLogger :: Jakar.AppLogger.Client
 // 10/03/2022  9:57 AM
 
+using Microsoft.Extensions.Hosting;
+
+
+
 namespace Jakar.AppLogger.Common;
 
 

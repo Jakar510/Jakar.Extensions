@@ -12,7 +12,7 @@ public static class XmlNames
     public const string ELEMENT           = "element";
     public const string ITEM              = "item";
     public const string KEY               = "key";
-    public const string LIST              = "List";
+    public const string LIST              = "IEnumerable";
     public const string PAIR              = "pair";
     public const string TARGET_TABLE_NAME = "TargetTableName";
     public const string VALUE             = "value";
@@ -80,10 +80,10 @@ public static class XmlExtensions
         listOfIds.ToList()
                  .ToXml( new Dictionary<string, string>
                          {
-                             [XmlNames.TARGET_TABLE_NAME] = typeof(T).GetTableName()
+                             [XmlNames.TARGET_TABLE_NAME] = typeof(T).Name
                          } );
 
-    public static List<long> GetMappedIDs( this string xml, out IDictionary<string, string>? attributes ) => xml.ToRawXml().ToLongList( out attributes );
+    public static IEnumerable<long> GetMappedIDs( this string xml, out IDictionary<string, string>? attributes ) => xml.ToRawXml().ToLongList( out attributes );
 
     #endregion
 
@@ -93,25 +93,25 @@ public static class XmlExtensions
 
     #region lists
 
-    [ Obsolete( "Will be removed in a future version, and moved to a dedicated nuget" ) ] public static string ToXml( this List<Guid?> item, in IDictionary<string, string>? attributes = default ) => item.Serialize( attributes );
+    [ Obsolete( "Will be removed in a future version, and moved to a dedicated nuget" ) ] public static string ToXml( this IEnumerable<Guid?> item, in IDictionary<string, string>? attributes = default ) => item.Serialize( attributes );
 
-    [ Obsolete( "Will be removed in a future version, and moved to a dedicated nuget" ) ] public static string ToXml( this List<Guid> item, in IDictionary<string, string>? attributes = default ) => item.Serialize( attributes );
+    [ Obsolete( "Will be removed in a future version, and moved to a dedicated nuget" ) ] public static string ToXml( this IEnumerable<Guid> item, in IDictionary<string, string>? attributes = default ) => item.Serialize( attributes );
 
-    [ Obsolete( "Will be removed in a future version, and moved to a dedicated nuget" ) ] public static string ToXml( this List<bool> item, in IDictionary<string, string>? attributes = default ) => item.Serialize( attributes );
+    [ Obsolete( "Will be removed in a future version, and moved to a dedicated nuget" ) ] public static string ToXml( this IEnumerable<bool> item, in IDictionary<string, string>? attributes = default ) => item.Serialize( attributes );
 
-    [ Obsolete( "Will be removed in a future version, and moved to a dedicated nuget" ) ] public static string ToXml( this List<string> item, in IDictionary<string, string>? attributes = default ) => item.Serialize( attributes );
+    [ Obsolete( "Will be removed in a future version, and moved to a dedicated nuget" ) ] public static string ToXml( this IEnumerable<string> item, in IDictionary<string, string>? attributes = default ) => item.Serialize( attributes );
 
-    [ Obsolete( "Will be removed in a future version, and moved to a dedicated nuget" ) ] public static string ToXml( this List<double> item, in IDictionary<string, string>? attributes = default ) => item.Serialize( attributes );
+    [ Obsolete( "Will be removed in a future version, and moved to a dedicated nuget" ) ] public static string ToXml( this IEnumerable<double> item, in IDictionary<string, string>? attributes = default ) => item.Serialize( attributes );
 
-    [ Obsolete( "Will be removed in a future version, and moved to a dedicated nuget" ) ] public static string ToXml( this List<double?> item, in IDictionary<string, string>? attributes = default ) => item.Serialize( attributes );
+    [ Obsolete( "Will be removed in a future version, and moved to a dedicated nuget" ) ] public static string ToXml( this IEnumerable<double?> item, in IDictionary<string, string>? attributes = default ) => item.Serialize( attributes );
 
-    [ Obsolete( "Will be removed in a future version, and moved to a dedicated nuget" ) ] public static string ToXml( this List<long> item, in IDictionary<string, string>? attributes = default ) => item.Serialize( attributes );
+    [ Obsolete( "Will be removed in a future version, and moved to a dedicated nuget" ) ] public static string ToXml( this IEnumerable<long> item, in IDictionary<string, string>? attributes = default ) => item.Serialize( attributes );
 
-    [ Obsolete( "Will be removed in a future version, and moved to a dedicated nuget" ) ] public static string ToXml( this List<long?> item, in IDictionary<string, string>? attributes = default ) => item.Serialize( attributes );
+    [ Obsolete( "Will be removed in a future version, and moved to a dedicated nuget" ) ] public static string ToXml( this IEnumerable<long?> item, in IDictionary<string, string>? attributes = default ) => item.Serialize( attributes );
 
-    [ Obsolete( "Will be removed in a future version, and moved to a dedicated nuget" ) ] public static string ToXml( this List<int> item, in IDictionary<string, string>? attributes = default ) => item.Serialize( attributes );
+    [ Obsolete( "Will be removed in a future version, and moved to a dedicated nuget" ) ] public static string ToXml( this IEnumerable<int> item, in IDictionary<string, string>? attributes = default ) => item.Serialize( attributes );
 
-    [ Obsolete( "Will be removed in a future version, and moved to a dedicated nuget" ) ] public static string ToXml( this List<int?> item, in IDictionary<string, string>? attributes = default ) => item.Serialize( attributes );
+    [ Obsolete( "Will be removed in a future version, and moved to a dedicated nuget" ) ] public static string ToXml( this IEnumerable<int?> item, in IDictionary<string, string>? attributes = default ) => item.Serialize( attributes );
 
     private static string Serialize<TValue>( this IEnumerable<TValue> item, IDictionary<string, string>? attributes )
     {
@@ -866,7 +866,7 @@ public static class XmlExtensions
     #region lists
 
     [ Obsolete( "Will be removed in a future version, and moved to a dedicated nuget" ) ]
-    public static List<string> ToStringList( this XmlDocument document, out IDictionary<string, string>? attributes )
+    public static IEnumerable<string> ToStringList( this XmlDocument document, out IDictionary<string, string>? attributes )
     {
         var results = new List<string>();
 
@@ -901,7 +901,7 @@ public static class XmlExtensions
     }
 
     [ Obsolete( "Will be removed in a future version, and moved to a dedicated nuget" ) ]
-    public static List<Guid> ToGuidList( this XmlDocument document, out IDictionary<string, string>? attributes )
+    public static IEnumerable<Guid> ToGuidList( this XmlDocument document, out IDictionary<string, string>? attributes )
     {
         var results = new List<Guid>();
 
@@ -936,7 +936,7 @@ public static class XmlExtensions
     }
 
     [ Obsolete( "Will be removed in a future version, and moved to a dedicated nuget" ) ]
-    public static List<bool> ToBoolList( this XmlDocument document, out IDictionary<string, string>? attributes )
+    public static IEnumerable<bool> ToBoolList( this XmlDocument document, out IDictionary<string, string>? attributes )
     {
         var results = new List<bool>();
 
@@ -971,7 +971,7 @@ public static class XmlExtensions
     }
 
     [ Obsolete( "Will be removed in a future version, and moved to a dedicated nuget" ) ]
-    public static List<double> ToDoubleList( this XmlDocument document, out IDictionary<string, string>? attributes )
+    public static IEnumerable<double> ToDoubleList( this XmlDocument document, out IDictionary<string, string>? attributes )
     {
         var results = new List<double>();
 
@@ -1008,7 +1008,7 @@ public static class XmlExtensions
     }
 
     [ Obsolete( "Will be removed in a future version, and moved to a dedicated nuget" ) ]
-    public static List<double?> ToNullableDoubleList( this XmlDocument document, out IDictionary<string, string>? attributes )
+    public static IEnumerable<double?> ToNullableDoubleList( this XmlDocument document, out IDictionary<string, string>? attributes )
     {
         var results = new List<double?>();
 
@@ -1044,7 +1044,7 @@ public static class XmlExtensions
     }
 
     [ Obsolete( "Will be removed in a future version, and moved to a dedicated nuget" ) ]
-    public static List<long> ToLongList( this XmlDocument document, out IDictionary<string, string>? attributes )
+    public static IEnumerable<long> ToLongList( this XmlDocument document, out IDictionary<string, string>? attributes )
     {
         var results = new List<long>();
 
@@ -1079,7 +1079,7 @@ public static class XmlExtensions
     }
 
     [ Obsolete( "Will be removed in a future version, and moved to a dedicated nuget" ) ]
-    public static List<long?> ToNullableLongList( this XmlDocument document, out IDictionary<string, string>? attributes )
+    public static IEnumerable<long?> ToNullableLongList( this XmlDocument document, out IDictionary<string, string>? attributes )
     {
         var results = new List<long?>();
 
@@ -1115,7 +1115,7 @@ public static class XmlExtensions
     }
 
     [ Obsolete( "Will be removed in a future version, and moved to a dedicated nuget" ) ]
-    public static List<int> ToIntList( this XmlDocument document, out IDictionary<string, string>? attributes )
+    public static IEnumerable<int> ToIntList( this XmlDocument document, out IDictionary<string, string>? attributes )
     {
         var results = new List<int>();
 
@@ -1150,7 +1150,7 @@ public static class XmlExtensions
     }
 
     [ Obsolete( "Will be removed in a future version, and moved to a dedicated nuget" ) ]
-    public static List<int?> ToNullableIntList( this XmlDocument document, out IDictionary<string, string>? attributes )
+    public static IEnumerable<int?> ToNullableIntList( this XmlDocument document, out IDictionary<string, string>? attributes )
     {
         var results = new List<int?>();
 

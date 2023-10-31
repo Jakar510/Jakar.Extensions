@@ -320,7 +320,7 @@ public sealed record UserRecord( Guid                                           
     public static DynamicParameters GetDynamicParameters( ILoginRequest request )
     {
         var parameters = new DynamicParameters();
-        parameters.Add( nameof(UserName), request.UserLogin );
+        parameters.Add( nameof(UserName), request.UserName );
         return parameters;
     }
     public static DynamicParameters GetDynamicParameters( string userName )

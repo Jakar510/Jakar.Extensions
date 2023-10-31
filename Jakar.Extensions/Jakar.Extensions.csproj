@@ -17,7 +17,7 @@
 		<RepositoryType>git</RepositoryType>
 		<RepositoryUrl>https://github.com/Jakar510/Jakar.Extensions</RepositoryUrl>
 		<PackageReleaseNotes>
-			Jakar.Extensions 6.3.0
+			Jakar.Extensions 6.9.0
 
 		</PackageReleaseNotes>
 		<Description>Extensions to aid in development.</Description>

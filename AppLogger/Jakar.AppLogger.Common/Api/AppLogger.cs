@@ -9,7 +9,7 @@ namespace Jakar.AppLogger.Common;
 
 
 [ SuppressMessage( "ReSharper", "SuggestBaseTypeForParameter" ) ]
-public sealed class AppLogger : Service, IAppLogger
+public sealed class AppLogger : IValidator, IAppLogger
 {
     private static readonly TimeSpan              _delay  = TimeSpan.FromMilliseconds( 50 );
     public static readonly  EventID               EventID = new(510, nameof(AppLogger));
@@ -17,16 +17,22 @@ public sealed class AppLogger : Service, IAppLogger
     private readonly        ILogger               _logger;
     private readonly        ILoggerFactory        _factory;
     private readonly        string?               _categoryName;
+    private readonly        Synchronized<bool>    _isAlive = new(false);
     private readonly        WebRequester          _requester;
     private                 bool                  _disposed;
 
 
-    internal        string                        ApiToken          => Options.APIToken;
-    public          string                        CategoryName      => _categoryName  ?? Options.Config?.AppName ?? string.Empty;
-    public          LoggingSettings               Config            => Options.Config ?? throw new InvalidOperationException( $"{nameof(AppLoggerOptions)}.{nameof(AppLoggerOptions.Config)} is not set" );
-    public override bool                          IsValid           => Options.IsValid && base.IsValid;
-    internal        IEnumerable<LoggerAttachment> LoggerAttachments => Config.LoggerAttachmentProviders.Select( x => x.GetLoggerAttachment() );
-    public          AppLoggerOptions              Options           { get; }
+    internal string          ApiToken     => Options.APIToken;
+    public   string          CategoryName => _categoryName  ?? Options.Config?.AppName ?? string.Empty;
+    public   LoggingSettings Config       => Options.Config ?? throw new InvalidOperationException( $"{nameof(AppLoggerOptions)}.{nameof(AppLoggerOptions.Config)} is not set" );
+    public bool IsAlive
+    {
+        get => _isAlive.Value;
+        set => _isAlive.Value = value;
+    }
+    public   bool                          IsValid           => Options.IsValid;
+    internal IEnumerable<LoggerAttachment> LoggerAttachments => Config.LoggerAttachmentProviders.Select( x => x.GetLoggerAttachment() );
+    public   AppLoggerOptions              Options           { get; }
 
 
     public AppLogger( IOptions<AppLoggerOptions> options, ILoggerFactory factory ) : this( options.Value, factory ) { }
@@ -45,9 +51,9 @@ public sealed class AppLogger : Service, IAppLogger
         Options       = logger.Options;
         _logger       = _factory.CreateLogger( categoryName );
     }
-    public override async ValueTask DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
-        if ( _disposed ) { ThrowDisposed(); }
+        if ( _disposed ) { throw new ObjectDisposedException( nameof(AppLogger) ); }
 
         _logs.Clear();
         await Config.DisposeAsync();
@@ -58,7 +64,7 @@ public sealed class AppLogger : Service, IAppLogger
 
     public void Add( AppLog log )
     {
-        if ( _disposed ) { ThrowDisposed(); }
+        if ( _disposed ) { throw new ObjectDisposedException( nameof(AppLogger) ); }
 
         _logs.Add( log );
     }
@@ -74,7 +80,7 @@ public sealed class AppLogger : Service, IAppLogger
 
     private async ValueTask StartSession( CancellationToken token )
     {
-        if ( _disposed ) { ThrowDisposed(); }
+        if ( _disposed ) { throw new ObjectDisposedException( nameof(AppLogger) ); }
 
         using var source  = new CancellationTokenSource( Options.TimeOut );
         var       session = new StartSession( ApiToken, Config.AppLaunchTimeStamp, Config.Device );
@@ -93,7 +99,7 @@ public sealed class AppLogger : Service, IAppLogger
     }
     private async ValueTask EndSession( CancellationToken token )
     {
-        if ( _disposed ) { ThrowDisposed(); }
+        if ( _disposed ) { throw new ObjectDisposedException( nameof(AppLogger) ); }
 
         if ( Config.Session is null ) { return; }
 
@@ -111,7 +117,7 @@ public sealed class AppLogger : Service, IAppLogger
     }
     public async Task StartAsync( CancellationToken token )
     {
-        if ( _disposed ) { ThrowDisposed(); }
+        if ( _disposed ) { throw new ObjectDisposedException( nameof(AppLogger) ); }
 
         if ( IsAlive ) { return; }
 
@@ -151,7 +157,7 @@ public sealed class AppLogger : Service, IAppLogger
     }
     public async Task StopAsync( CancellationToken token )
     {
-        if ( _disposed ) { ThrowDisposed(); }
+        if ( _disposed ) { throw new ObjectDisposedException( nameof(AppLogger) ); }
 
         ImmutableArray<AppLog> logs = GetLogs();
         await SendLog( logs, token );
@@ -170,7 +176,7 @@ public sealed class AppLogger : Service, IAppLogger
 
     public async ValueTask<byte[]?> TryTakeScreenShot()
     {
-        if ( _disposed ) { ThrowDisposed(); }
+        if ( _disposed ) { throw new ObjectDisposedException( nameof(AppLogger) ); }
 
         if ( !Config.TakeScreenshotOnError ) { return default; }
 

@@ -1,11 +1,9 @@
-﻿// Jakar.Extensions :: Jakar.Extensions
-// 10/30/2023  11:42 PM
-
+﻿using System;
 using System.ComponentModel.DataAnnotations.Schema;
 
 
 
-namespace Jakar.Extensions;
+namespace Jakar.Xml;
 
 
 public static class TableExtensions
