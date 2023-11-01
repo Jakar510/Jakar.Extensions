@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.SqlBuilder
 // 05/08/2022  9:31 AM
 
-using Jakar.Extensions;
-
-
-
 namespace Jakar.SqlBuilder;
 
 

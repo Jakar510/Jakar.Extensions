@@ -1,8 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-
-
-
-namespace Jakar.Json.Serialization;
+﻿namespace Jakar.Json.Serialization;
 
 
 [ SuppressMessage( "ReSharper", "PossiblyImpureMethodCallOnReadonlyVariable" ) ]

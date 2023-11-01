@@ -7,9 +7,7 @@ namespace Jakar.Extensions;
 /// <summary>
 ///     A wrapper around various locking methods.
 ///     <para>
-///         <list type="bullet">
-///             <item> <see cref="ReaderWriterLockSlim"/> </item> <item> <see cref="SemaphoreSlim"/> </item> <item> <see cref="Semaphore"/> </item> <item> <see langword="lock"/> </item>
-///         </list>
+///         <list type="bullet"> <item> <see cref="ReaderWriterLockSlim"/> </item> <item> <see cref="SemaphoreSlim"/> </item> <item> <see cref="Semaphore"/> </item> <item> <see langword="lock"/> </item> </list>
 ///     </para>
 /// </summary>
 [ SuppressMessage( "ReSharper", "UnusedMethodReturnValue.Global" ) ]

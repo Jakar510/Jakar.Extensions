@@ -3,7 +3,8 @@
 
 /// <summary> See <see cref="Format"/> for formatting details. </summary>
 [ Serializable, JsonConverter( typeof(AppVersionConverter) ) ]
- // AppVersionNullableConverter
+
+// AppVersionNullableConverter
 public sealed class AppVersion : IComparable,
                                  IComparable<AppVersion>,
                                  IFuzzyEquals<AppVersion>,
@@ -323,7 +324,9 @@ public sealed class AppVersion : IComparable,
 
 
     /// <summary>
-    ///     If the <see cref="Scheme"/> is any of [ <see cref="Format.Singular"/> , <see cref="Format.DetailedRevisions"/> , <see cref="Format.Complete"/> ], will throw <see cref="InvalidOperationException"/>
+    ///     If the <see cref="Scheme"/> is any of [ <see cref="Format.Singular"/> , <see cref="Format.DetailedRevisions"/> , <see cref="Format.Complete"/> ], will throw
+    ///     <see
+    ///         cref="InvalidOperationException"/>
     /// </summary>
     /// <returns> </returns>
     /// <exception cref="InvalidOperationException"> </exception>
@@ -442,7 +445,22 @@ public sealed class AppVersion : IComparable,
     ///             <item>
     ///                 All other fields that are not <see langword="null"/> and are equal to or greater than <br/>
     ///                 <list type="bullet">
-    ///                     <item> <see cref="Maintenance"/> </item> <br/> <item> <see cref="MajorRevision"/> </item> <br/> <item> <see cref="MinorRevision"/> </item> <br/> <item> <see cref="Build"/> </item> <br/>
+    ///                     <item> <see cref="Maintenance"/> </item> <br/>
+    ///                     <item>
+    ///                         <see
+    ///                             cref="MajorRevision"/>
+    ///                     </item>
+    ///                     <br/>
+    ///                     <item>
+    ///                         <see
+    ///                             cref="MinorRevision"/>
+    ///                     </item>
+    ///                     <br/>
+    ///                     <item>
+    ///                         <see
+    ///                             cref="Build"/>
+    ///                     </item>
+    ///                     <br/>
     ///                 </list>
     ///             </item>
     ///             <br/>

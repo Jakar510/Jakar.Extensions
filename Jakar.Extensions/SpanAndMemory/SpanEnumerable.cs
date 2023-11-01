@@ -29,7 +29,7 @@ public ref struct SpanEnumerator<T>
     }
 
 
-    [ Pure, MethodImpl( MethodImplOptions.AggressiveInlining ) ]  public readonly SpanEnumerator<T> GetEnumerator() => this;
+    [ Pure, MethodImpl( MethodImplOptions.AggressiveInlining ) ] public readonly SpanEnumerator<T> GetEnumerator() => this;
 
     [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public bool MoveNext() => ++_index < _span.Length;
 

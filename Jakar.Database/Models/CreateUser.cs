@@ -40,11 +40,20 @@ public class CreateUser : ObservableClass, ILoginRequest, IVerifyRequestProvider
     }
 
 
-    public virtual bool IsValid => !string.IsNullOrWhiteSpace( UserName )       &&
-                                   UserName.IsEmailAddress()                    &&
-                                   !string.IsNullOrWhiteSpace( Password )    &&
+    public virtual bool IsValid => !string.IsNullOrWhiteSpace( UserName )        &&
+                                   UserName.IsEmailAddress()                     &&
+                                   !string.IsNullOrWhiteSpace( Password )        &&
                                    !string.IsNullOrWhiteSpace( ConfirmPassword ) &&
                                    string.Equals( Password, ConfirmPassword, StringComparison.Ordinal );
+
+    public virtual string Password
+    {
+        get => _userPassword;
+        set
+        {
+            if ( SetProperty( ref _userPassword, value ) ) { OnPropertyChanged( nameof(IsValid) ); }
+        }
+    }
 
     public virtual string UserName
     {
@@ -56,14 +65,6 @@ public class CreateUser : ObservableClass, ILoginRequest, IVerifyRequestProvider
             OnPropertyChanged( nameof(IsValid) );
         }
     }
-    public virtual string Password
-    {
-        get => _userPassword;
-        set
-        {
-            if ( SetProperty( ref _userPassword, value ) ) { OnPropertyChanged( nameof(IsValid) ); }
-        }
-    }
 
 
     public CreateUser() { }
@@ -72,9 +73,9 @@ public class CreateUser : ObservableClass, ILoginRequest, IVerifyRequestProvider
         // ReSharper disable once UseObjectOrCollectionInitializer
         var user = new CreateUser
                    {
-                       Password    = password,
+                       Password        = password,
                        ConfirmPassword = password,
-                       UserName       = email
+                       UserName        = email
                    };
 
         user.Data.Email = email;
@@ -86,9 +87,9 @@ public class CreateUser : ObservableClass, ILoginRequest, IVerifyRequestProvider
         // ReSharper disable once UseObjectOrCollectionInitializer
         var user = new CreateUser
                    {
-                       Password    = password,
+                       Password        = password,
                        ConfirmPassword = password,
-                       UserName       = userName
+                       UserName        = userName
                    };
 
         user.Data.Email = email;

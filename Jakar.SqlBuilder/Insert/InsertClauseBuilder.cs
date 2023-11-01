@@ -1,8 +1,4 @@
-﻿using Jakar.Extensions;
-
-
-
-namespace Jakar.SqlBuilder;
+﻿namespace Jakar.SqlBuilder;
 
 
 public struct InsertClauseBuilder

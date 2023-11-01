@@ -15,7 +15,7 @@ public static class TableExtensions
     [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
     public static string GetTableName( this Type type )
     {
-        string name = type.GetCustomAttribute<TableAttribute>()?.Name ?? type.GetCustomAttribute<System.ComponentModel.DataAnnotations.Schema.TableAttribute>()?.Name ?? type.Name;
+        string name = type.GetCustomAttribute<TableAttribute>()?.Name ?? type.GetCustomAttribute<TableAttribute>()?.Name ?? type.Name;
 
         // name = name.ToSnakeCase(CultureInfo.InvariantCulture)
         return name;

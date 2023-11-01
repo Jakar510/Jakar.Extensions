@@ -1,8 +1,4 @@
-﻿using Jakar.Extensions;
-
-
-
-namespace Jakar.SqlBuilder.Interfaces;
+﻿namespace Jakar.SqlBuilder.Interfaces;
 
 
 public interface IToSyntax<out TNext>

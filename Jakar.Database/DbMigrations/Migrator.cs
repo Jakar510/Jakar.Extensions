@@ -5,8 +5,7 @@
 namespace Jakar.Database.DbMigrations;
 
 
-/// <summary>
-///     Add DB implementation support to FluentMigrator, Set the connection string, and Define the assembly containing the migrations
+/// <summary> Add DB implementation support to FluentMigrator, Set the connection string, and Define the assembly containing the migrations
 ///     <para> <see href="https://fluentmigrator.github.io/articles/migration-runners.html?tabs=vs-pkg-manager-console"/> </para>
 ///     <para> <see cref="PostgresRunnerBuilderExtensions.AddPostgres"/> </para>
 ///     <para> <see cref="SQLiteRunnerBuilderExtensions.AddSQLite"/> </para>

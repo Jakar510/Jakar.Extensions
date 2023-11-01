@@ -5,9 +5,6 @@ namespace Jakar.Json;
 
 
 #if DEBUG
-
-
-
 public sealed record JsonTest( string Name, double Number, params JsonTest[] Children ) : IJsonizer
 {
     public JsonTest( string name, params JsonTest[] children ) : this( name, RandomNumber(), children ) { }

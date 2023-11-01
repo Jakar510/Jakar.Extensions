@@ -7,6 +7,8 @@ namespace Jakar.Database;
 public abstract class Service : ObservableClass, IAsyncDisposable, IValidator
 {
     private readonly Synchronized<bool> _isAlive = new(false);
+    public           string             ClassName { get; }
+    public           string             FullName  { get; }
 
 
     public virtual bool IsAlive
@@ -19,9 +21,7 @@ public abstract class Service : ObservableClass, IAsyncDisposable, IValidator
             OnPropertyChanged( nameof(IsValid) );
         }
     }
-    public virtual bool   IsValid   => IsAlive;
-    public         string ClassName { get; }
-    public         string FullName  { get; }
+    public virtual bool IsValid => IsAlive;
 
 
     protected Service()
@@ -43,15 +43,17 @@ public abstract class Service : ObservableClass, IAsyncDisposable, IValidator
 
 
 #if NET6_0_OR_GREATER
-    [StackTraceHidden]
+    [ StackTraceHidden, DoesNotReturn ]
 #endif
-    [ DoesNotReturn ] protected virtual void ThrowDisabled( Exception? inner = default, [ CallerMemberName ] string? caller = default ) => throw new ApiDisabledException( $"{ClassName}.{caller}", inner );
+    
+    protected virtual void ThrowDisabled( Exception? inner = default, [ CallerMemberName ] string? caller = default ) => throw new ApiDisabledException( $"{ClassName}.{caller}", inner );
 
 
 #if NET6_0_OR_GREATER
-    [StackTraceHidden]
+    [ StackTraceHidden, DoesNotReturn ]
 #endif
-    [ DoesNotReturn ] protected void ThrowDisposed( Exception? inner = default, [ CallerMemberName ] string? caller = default ) => throw new ObjectDisposedException( $"{ClassName}.{caller}", inner );
+    
+    protected void ThrowDisposed( Exception? inner = default, [ CallerMemberName ] string? caller = default ) => throw new ObjectDisposedException( $"{ClassName}.{caller}", inner );
 }
 
 

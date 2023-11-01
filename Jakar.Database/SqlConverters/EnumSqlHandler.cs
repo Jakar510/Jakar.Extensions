@@ -3,9 +3,9 @@
 
 public class EnumSqlHandler<T> : SqlConverter<EnumSqlHandler<T>, T> where T : struct, Enum
 {
-    private static readonly IReadOnlyDictionary<long, T>   _longs  = Enum.GetValues<T>().ToDictionary( k => k.AsLong(), v => v );
+    private static readonly IReadOnlyDictionary<long, T>   _longs  = Enum.GetValues<T>().ToDictionary( k => k.AsLong(),   v => v );
     private static readonly IReadOnlyDictionary<string, T> _names  = Enum.GetValues<T>().ToDictionary( k => k.ToString(), v => v );
-    private static readonly IReadOnlyDictionary<T, string> _values = Enum.GetValues<T>().ToDictionary( k => k, v => v.ToString() );
+    private static readonly IReadOnlyDictionary<T, string> _values = Enum.GetValues<T>().ToDictionary( k => k,            v => v.ToString() );
 
 
     public EnumSqlHandler() { }

@@ -17,11 +17,7 @@ public static class StringExtensions
     /// <summary>
     ///     <seealso href="https://www.codeproject.com/Tips/1175562/Check-for-Balanced-Parenthesis-in-a-String"/>
     ///     <para>
-    ///         <paramref name="bracketPairs"/> defaults to matching: <br/>
-    ///         <list type="bullet">
-    ///             <item> <term> ( ) </term> <description> Parenthesis </description> </item> <item> <term> [ ] </term> <description> Square Brackets </description> </item> <item> <term> { } </term> <description> Curly Braces </description> </item>
-    /// 
-    ///         </list>
+    ///         <paramref name="bracketPairs"/> defaults to matching: <br/> <list type="bullet"> <item> <term> ( ) </term> <description> Parenthesis </description> </item> <item> <term> [ ] </term> <description> Square Brackets </description> </item> <item> <term> { } </term> <description> Curly Braces </description> </item> </list>
     ///     </para>
     ///     <para> Provide your own <c> IDictionary{char, char} </c> to <paramref name="bracketPairs"/> to customize the mapping. </para>
     /// </summary>

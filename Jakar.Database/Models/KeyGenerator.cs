@@ -9,11 +9,11 @@ public record struct KeyGenerator<TRecord> : IEnumerator<RecordID<TRecord>>, IEn
 {
     private readonly ReadOnlyMemory<RecordPair<TRecord>> _pairs;
     private          int                                 _index = -1;
-    public readonly  RecordID<TRecord>                   Current => _pairs.Span[_index].ID;
-    readonly         object IEnumerator.                 Current => Current;
 
 
-    public readonly bool IsEmpty => _pairs.IsEmpty;
+    public readonly RecordID<TRecord>  Current => _pairs.Span[_index].ID;
+    readonly        object IEnumerator.Current => Current;
+    public readonly bool               IsEmpty => _pairs.IsEmpty;
 
 
     public KeyGenerator( ReadOnlyMemory<RecordPair<TRecord>>                     pairs ) => _pairs = pairs;
