@@ -1,11 +1,6 @@
 ﻿// Jakar.AppLogger :: Jakar.AppLogger.Portal
 // 09/26/2022  2:48 PM
 
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-
-
-
 namespace Jakar.AppLogger.Portal.Data.Tables;
 
 

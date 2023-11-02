@@ -1,15 +1,16 @@
-﻿try
+﻿using Jakar.Database;
+
+
+try
 {
     "Hello World!".WriteToConsole();
     Console.WriteLine();
 
+    await TestDatabase.Test();
 
     // JsonTest.Run();
 
-
     // BenchmarkRunner.Run<StringCollectionBenchmarks>();
-
-    // await TestDatabase.Test();
 
     // ULongHashTests.Run( 100_000_000 )
     //               .WriteToDebug();

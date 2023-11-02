@@ -98,6 +98,8 @@ public static partial class AsyncLinq
             }
         }
     }
+    public static char[] ToArray( this    string                 sequence ) => ToArray( sequence, sequence.Length );
+    public static T[]    ToArray<T>( this IReadOnlyCollection<T> sequence ) => ToArray( sequence, sequence.Count );
     public static T[] ToArray<T>( this IEnumerable<T> sequence, int count )
     {
         T[] array = GetArray<T>( count );
@@ -106,6 +108,13 @@ public static partial class AsyncLinq
         return array;
     }
     public static TResult[] ToArray<T, TResult>( this IEnumerable<T> sequence, Func<T, TResult> func ) where TResult : IEquatable<TResult>
+    {
+        using var buffer = new Buffer<TResult>();
+        foreach ( T item in sequence ) { buffer.Append( func( item ) ); }
+
+        return buffer.Span.ToArray();
+    }
+    public static TResult[] ToArray<T, TResult>( this ReadOnlySpan<T> sequence, Func<T, TResult> func ) where TResult : IEquatable<TResult>
     {
         using var buffer = new Buffer<TResult>();
         foreach ( T item in sequence ) { buffer.Append( func( item ) ); }

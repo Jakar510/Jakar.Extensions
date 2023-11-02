@@ -151,18 +151,17 @@ public sealed record PasswordRequirements : IOptions<PasswordRequirements>
     public string[]                                     BlockedPasswords         { get; set; } = Array.Empty<string>();
     public bool                                         CantStartWithNumber      { get; set; } = true;
     public bool                                         CantStartWithSpecialChar { get; set; } = true;
-    public string                                       LowerCase                { get; set; } = new(Randoms.LowerCase);
+    public string                                       LowerCase                { get; set; } = Randoms.LOWER_CASE;
     public int                                          MinLength                { get; init; }
-    public string                                       Numbers                  { get; set; } = new(Randoms.Numeric);
+    public string                                       Numbers                  { get; set; } = Randoms.NUMERIC;
     public bool                                         RequireLowerCase         { get; set; } = true;
     public bool                                         RequireNumber            { get; set; } = true;
     public bool                                         RequireSpecialChar       { get; set; } = true;
     public bool                                         RequireUpperCase         { get; set; } = true;
-    public string                                       SpecialChars             { get; set; } = new(Randoms.SpecialChars);
-    public string                                       UpperCase                { get; set; } = new(Randoms.UpperCase);
+    public string                                       SpecialChars             { get; set; } = Randoms.SPECIAL_CHARS;
+    public string                                       UpperCase                { get; set; } = Randoms.UPPER_CASE;
     PasswordRequirements IOptions<PasswordRequirements>.Value                    => this;
 
 
-    public void SetBlockedPasswords( IEnumerable<string> passwords ) =>
-        BlockedPasswords = passwords.ToHashSet().ToArray();
+    public void SetBlockedPasswords( IEnumerable<string> passwords ) => BlockedPasswords = new HashSet<string>( passwords ).ToArray();
 }

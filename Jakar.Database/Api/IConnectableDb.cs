@@ -28,10 +28,12 @@ public interface IConnectableDb : IDbOptions, IDbTable
 
 public interface IConnectableDbRoot : IConnectableDb
 {
-    public IAsyncEnumerable<T>     Where<T>( DbConnection               connection,  DbTransaction? transaction, string sql, DynamicParameters? parameters, [ EnumeratorCancellation ] CancellationToken token = default ) where T : IDbReaderMapping<T>;
-    public IAsyncEnumerable<T>     WhereValue<T>( DbConnection          connection,  DbTransaction? transaction, string sql, DynamicParameters? parameters, [ EnumeratorCancellation ] CancellationToken token = default ) where T : struct;
+    public IAsyncEnumerable<T> Where<T>( DbConnection connection, DbTransaction? transaction, string sql, DynamicParameters? parameters, [ EnumeratorCancellation ] CancellationToken token = default )
+        where T : IDbReaderMapping<T>;
+    public IAsyncEnumerable<T> WhereValue<T>( DbConnection connection, DbTransaction? transaction, string sql, DynamicParameters? parameters, [ EnumeratorCancellation ] CancellationToken token = default )
+        where T : struct;
     public CommandDefinition       GetCommandDefinition( DbTransaction? transaction, in SqlCommand  sql,         CancellationToken token );
-    public ValueTask<DbDataReader> ExecuteReaderAsync( DbConnection     connection,  DbTransaction? transaction, SqlCommand sql, CancellationToken token );
+    public ValueTask<DbDataReader> ExecuteReaderAsync( DbConnection     connection,  DbTransaction? transaction, SqlCommand        sql, CancellationToken token );
 }
 
 
@@ -41,5 +43,7 @@ public readonly record struct SqlCommand( string SQL, DynamicParameters? Paramet
     public static implicit operator SqlCommand( string sql ) => new(sql);
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public CommandDefinition ToCommandDefinition( DbTransaction? transaction, int? timeout, CancellationToken token ) => new(SQL, Parameters, transaction, timeout, CommandType, Flags, token);
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    public CommandDefinition ToCommandDefinition( DbTransaction? transaction, int? timeout, CancellationToken token ) =>
+        new(SQL, Parameters, transaction, timeout, CommandType, Flags, token);
 }

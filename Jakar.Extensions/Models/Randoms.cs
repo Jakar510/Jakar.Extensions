@@ -2,19 +2,31 @@
 // 09/07/2022  4:21 PM
 
 
+using System.Linq;
+
+
+
 namespace Jakar.Extensions;
 
 
 /// <summary> <see href="https://www.educative.io/edpresso/how-to-generate-a-random-string--c-sharp"/> </summary>
+[ SuppressMessage( "ReSharper", "RedundantVerbatimStringPrefix" ) ]
 public class Randoms : ObservableClass
 {
-    public static char[]                AlphaNumeric { get; }      = @"abcdefghijklmnopqrstuvwxyzABCDEFGHJKLMNOPQRSTUVWXYZ0123456789".ToArray();
-    public static char[]                LowerCase    { get; }      = @"abcdefghijklmnopqrstuvwxyz".ToArray();
-    public static char[]                Numeric      { get; }      = @"0123456789".ToArray();
+    public const string ALPHANUMERIC  = @"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    public const string LOWER_CASE    = @"abcdefghijklmnopqrstuvwxyz";
+    public const string UPPER_CASE    = @"ABCDEFGHJKLMNOPQRSTUVWXYZ";
+    public const string NUMERIC       = @"0123456789";
+    public const string SPECIAL_CHARS = @"_-.!#@+/*^=>|/\";
+
+
+    public static char[]                AlphaNumeric { get; }      = ALPHANUMERIC.ToArray();
+    public static char[]                LowerCase    { get; }      = LOWER_CASE.ToArray();
+    public static char[]                Numeric      { get; }      = NUMERIC.ToArray();
     public static Random                Random       { get; set; } = new(69420);
     public static RandomNumberGenerator Rng          { get; set; } = RandomNumberGenerator.Create();
-    public static char[]                SpecialChars { get; }      = @"_-.!#@+/*^=>|/\".ToArray();
-    public static char[]                UpperCase    { get; }      = @"ABCDEFGHJKLMNOPQRSTUVWXYZ".ToArray();
+    public static char[]                SpecialChars { get; }      = SPECIAL_CHARS.ToArray();
+    public static char[]                UpperCase    { get; }      = UPPER_CASE.ToArray();
 
 
     public static string GenerateToken( int length = 32 )

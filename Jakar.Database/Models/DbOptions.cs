@@ -1,6 +1,7 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 10/16/2022  5:46 PM
 
+using FluentMigrator.Runner.Initialization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 
@@ -43,25 +44,25 @@ public sealed class DbOptions : IOptions<DbOptions>, IDbOptions
     public static void GetConnectionString( IMigrationRunnerBuilder provider ) => provider.WithGlobalConnectionString( GetConnectionString );
     public static string GetConnectionString( IServiceProvider provider )
     {
-        Task<SecuredString> task    = GetConnectionStringAsync( provider );
-        SecuredString       secured = task.CallSynchronously();
-        string              value   = secured.ToString();
+        ValueTask<SecuredString> task    = GetConnectionStringAsync( provider );
+        SecuredString            secured = task.CallSynchronously();
+        string                   value   = secured.ToString();
         Debug.WriteLine( value );
         return value;
     }
-    public static async Task<SecuredString> GetConnectionStringAsync( IServiceProvider provider )
+    public static async ValueTask<SecuredString> GetConnectionStringAsync( IServiceProvider provider )
     {
-        using var source = new CancellationTokenSource( TimeSpan.FromMinutes( 2 ) );
+        using var source = new CancellationTokenSource( TimeSpan.FromMinutes( 5 ) );
         return await GetConnectionStringAsync( provider, source.Token );
     }
-    public static async Task<SecuredString> GetConnectionStringAsync( IServiceProvider provider, CancellationToken token )
+    public static async ValueTask<SecuredString> GetConnectionStringAsync( IServiceProvider provider, CancellationToken token )
     {
-        var           options       = provider.GetRequiredService<IOptions<DbOptions>>();
-        var           configuration = provider.GetRequiredService<IConfiguration>();
-        SecuredString secure        = await options.Value.GetConnectionStringAsync( configuration, token );
+        IOptions<DbOptions> options       = provider.GetRequiredService<IOptions<DbOptions>>();
+        IConfiguration      configuration = provider.GetRequiredService<IConfiguration>();
+        SecuredString       secure        = await options.Value.GetConnectionStringAsync( configuration, token );
         return secure;
     }
-    public async Task<SecuredString> GetConnectionStringAsync( IConfiguration configuration, CancellationToken token )
+    public async ValueTask<SecuredString> GetConnectionStringAsync( IConfiguration configuration, CancellationToken token )
     {
         ConnectionStringOptions result = ConnectionString;
         if ( result.IsT0 ) { return result.AsT0; }
@@ -85,3 +86,7 @@ public sealed class DbOptions : IOptions<DbOptions>, IDbOptions
     internal static SecuredString GetConnectionString( IConfiguration configuration ) =>
         configuration.GetConnectionString( DEFAULT_SQL_CONNECTION_STRING_KEY ) ?? throw new KeyNotFoundException( DEFAULT_SQL_CONNECTION_STRING_KEY );
 }
+
+
+
+// public interface IConnectionStringProvider { }

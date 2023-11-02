@@ -32,6 +32,8 @@ global using Microsoft.AspNetCore.Identity;
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.CodeAnalysis.Diagnostics;
 global using Microsoft.Extensions.Options;
+global using Newtonsoft.Json;
+global using Newtonsoft.Json.Linq;
 global using Npgsql;
 global using OneOf;
 global using Radzen;
