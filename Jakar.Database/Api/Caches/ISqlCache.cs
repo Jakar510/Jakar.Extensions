@@ -30,7 +30,8 @@ public enum SqlCacheType
 
 
 
-public interface ISqlCache<TRecord> where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
+public interface ISqlCache<TRecord>
+    where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
     SqlCommand All();
     SqlCommand First();
@@ -45,10 +46,10 @@ public interface ISqlCache<TRecord> where TRecord : ITableRecord<TRecord>, IDbRe
     SqlCommand NextID( in RecordID<TRecord>              id, in DateTimeOffset dateCreated );
     SqlCommand Count();
     SqlCommand Random();
-    SqlCommand Random( in int                  count );
-    SqlCommand Random( in Guid?                userID, in int count );
-    SqlCommand Random( in RecordID<UserRecord> id,     in int count );
-    SqlCommand Single();
+    SqlCommand Random( in          int                            count );
+    SqlCommand Random( in          Guid?                          userID, in int count );
+    SqlCommand Random( in          RecordID<UserRecord>           id,     in int count );
+    SqlCommand Single( in          RecordID<TRecord>              id );
     SqlCommand Insert( in          TRecord                        record );
     SqlCommand TryInsert( in       TRecord                        record, in bool matchAll, in DynamicParameters parameters );
     SqlCommand InsertOrUpdate( in  TRecord                        record, in bool matchAll, in DynamicParameters parameters );

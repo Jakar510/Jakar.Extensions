@@ -6,7 +6,8 @@ namespace Jakar.Database;
 
 
 [ SuppressMessage( "ReSharper", "StaticMemberInGenericType" ), SuppressMessage( "ReSharper", "RedundantVerbatimStringPrefix" ) ]
-public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord> where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
+public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord>
+    where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
     public static readonly ImmutableDictionary<DbInstance, ImmutableDictionary<string, Descriptor>> SqlProperties     = SQL.CreateDescriptorMapping<TRecord>();
     protected readonly     ConcurrentDictionary<Key, string>                                        _deleteParameters = new(Key.Equalizer);
@@ -143,7 +144,16 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord> where TRecord :
     public abstract SqlCommand Random( in int                  count );
     public abstract SqlCommand Random( in Guid?                userID, in int count );
     public abstract SqlCommand Random( in RecordID<UserRecord> id,     in int count );
-    public abstract SqlCommand Single();
+    public virtual SqlCommand Single( in RecordID<TRecord> id )
+    {
+        var parameters = new DynamicParameters();
+        parameters.Add( nameof(id), id );
+
+        if ( _sql.TryGetValue( SqlCacheType.Single, out string? sql ) ) { return new SqlCommand( sql, parameters ); }
+
+        _sql[SqlCacheType.Single] = sql = $"SELECT * FROM {TableName} WHERE {IdColumnName} = @{nameof(id)}";
+        return new SqlCommand( sql, parameters );
+    }
     public abstract SqlCommand Insert( in         TRecord record );
     public abstract SqlCommand TryInsert( in      TRecord record, in bool matchAll, in DynamicParameters parameters );
     public abstract SqlCommand InsertOrUpdate( in TRecord record, in bool matchAll, in DynamicParameters parameters );
@@ -207,7 +217,7 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord> where TRecord :
         _existParameters[key] = sql = $"EXISTS( SELECT {IdColumnName} FROM {TableName} WHERE {buffer.Span} )";
         return new SqlCommand( sql, parameters );
     }
-    public virtual SqlCommand Get( in bool matchAll, in DynamicParameters parameters )
+    public SqlCommand Get( in bool matchAll, in DynamicParameters parameters )
     {
         Key key = Key.Create( matchAll, parameters );
         if ( _getParameters.TryGetValue( key, out string? sql ) ) { return new SqlCommand( sql, parameters ); }

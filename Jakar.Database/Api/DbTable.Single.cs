@@ -7,17 +7,16 @@ namespace Jakar.Database;
 [ SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" ) ]
 public partial class DbTable<TRecord>
 {
-    public ValueTask<TRecord?> Single( string          id,  CancellationToken  token                               = default ) => this.Call( Single, id,  token );
-    public ValueTask<TRecord?> Single( string          sql, DynamicParameters? parameters, CancellationToken token = default ) => this.Call( Single, sql, parameters, token );
-    public ValueTask<TRecord?> SingleOrDefault( string id,  CancellationToken  token                               = default ) => this.Call( SingleOrDefault, id,  token );
-    public ValueTask<TRecord?> SingleOrDefault( string sql, DynamicParameters? parameters, CancellationToken token = default ) => this.Call( SingleOrDefault, sql, parameters, token );
+    public ValueTask<TRecord?> Single( RecordID<TRecord>          id,  CancellationToken  token                               = default ) => this.Call( Single, id,  token );
+    public ValueTask<TRecord?> Single( string                     sql, DynamicParameters? parameters, CancellationToken token = default ) => this.Call( Single, sql, parameters, token );
+    public ValueTask<TRecord?> SingleOrDefault( RecordID<TRecord> id,  CancellationToken  token                               = default ) => this.Call( SingleOrDefault, id,  token );
+    public ValueTask<TRecord?> SingleOrDefault( string            sql, DynamicParameters? parameters, CancellationToken token = default ) => this.Call( SingleOrDefault, sql, parameters, token );
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
-    public virtual async ValueTask<TRecord?> Single( DbConnection connection, DbTransaction? transaction, string id, CancellationToken token = default )
+    public ValueTask<TRecord?> Single( DbConnection connection, DbTransaction? transaction, RecordID<TRecord> id, CancellationToken token = default ) => Single( connection, transaction, Cache.Single( id ), token );
+    public ValueTask<TRecord?> Single( DbConnection connection, DbTransaction? transaction, string sql, DynamicParameters? parameters, CancellationToken token = default ) => Single( connection, transaction, new SqlCommand( sql, parameters ), token );
+    public virtual async ValueTask<TRecord?> Single( DbConnection connection, DbTransaction? transaction, SqlCommand sql, CancellationToken token = default )
     {
-        SqlCommand sql = Cache.Single();
-
         try
         {
             CommandDefinition command = _database.GetCommandDefinition( transaction, sql, token );
@@ -27,34 +26,16 @@ public partial class DbTable<TRecord>
     }
 
 
-    public virtual async ValueTask<TRecord?> Single( DbConnection connection, DbTransaction? transaction, string sql, DynamicParameters? parameters, CancellationToken token = default )
+    public ValueTask<TRecord?> SingleOrDefault( DbConnection connection, DbTransaction? transaction, RecordID<TRecord> id, CancellationToken token = default ) => SingleOrDefault( connection, transaction, Cache.Single( id ), token );
+    public ValueTask<TRecord?> SingleOrDefault( DbConnection connection, DbTransaction? transaction, string sql, DynamicParameters? parameters, CancellationToken token = default ) =>
+        SingleOrDefault( connection, transaction, new SqlCommand( sql, parameters ), token );
+    public virtual async ValueTask<TRecord?> SingleOrDefault( DbConnection connection, DbTransaction? transaction, SqlCommand sql, CancellationToken token = default )
     {
-        try { return await connection.QuerySingleAsync<TRecord>( sql, parameters, transaction ); }
-        catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
-    }
-
-
-    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
-    public virtual async ValueTask<TRecord?> SingleOrDefault( DbConnection connection, DbTransaction? transaction, string id, CancellationToken token = default )
-    {
-        SqlCommand sql = Cache.Single();
-
         try
         {
             CommandDefinition command = _database.GetCommandDefinition( transaction, sql, token );
             return await connection.QuerySingleOrDefaultAsync<TRecord>( command );
         }
         catch ( Exception e ) { throw new SqlException( sql, e ); }
-    }
-
-
-    public virtual async ValueTask<TRecord?> SingleOrDefault( DbConnection connection, DbTransaction? transaction, string sql, DynamicParameters? parameters, CancellationToken token = default )
-    {
-        try
-        {
-            CommandDefinition command = _database.GetCommandDefinition( transaction, new SqlCommand( sql, parameters ), token );
-            return await connection.QuerySingleOrDefaultAsync<TRecord>( command );
-        }
-        catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
     }
 }

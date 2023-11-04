@@ -6,20 +6,18 @@ namespace Jakar.Database;
 
 public static class SQL
 {
-    public const  string AND            = "AND";
-    public const  string COUNT          = "count";
-    public const  string CREATED_BY     = nameof(IOwnedTableRecord.CreatedBy);
-    public const  string DATE_CREATED   = nameof(IRecordPair.DateCreated);
-    public const  string GUID_FORMAT    = "D";
-    public const  string ID             = nameof(IRecordPair.ID);
-    public const  string IDS            = "ids";
-    public const  string LAST_MODIFIED  = nameof(ITableRecord.LastModified);
-    public const  string LIST_SEPARATOR = ", ";
-    private const ulong  OFFSET_BASIS   = 14695981039346656037ul;
-    public const  string OR             = "OR";
-    public const  string OWNER_USER_ID  = nameof(IOwnedTableRecord.OwnerUserID);
-    private const ulong  PRIME          = 1099511628211ul;
-    public const  char   QUOTE          = '"';
+    public const string AND            = " AND ";
+    public const string COUNT          = "count";
+    public const string CREATED_BY     = nameof(IOwnedTableRecord.CreatedBy);
+    public const string DATE_CREATED   = nameof(IRecordPair.DateCreated);
+    public const string GUID_FORMAT    = "D";
+    public const string ID             = nameof(IRecordPair.ID);
+    public const string IDS            = "ids";
+    public const string LAST_MODIFIED  = nameof(ITableRecord.LastModified);
+    public const string LIST_SEPARATOR = ", ";
+    public const string OR             = " OR ";
+    public const string OWNER_USER_ID  = nameof(IOwnedTableRecord.OwnerUserID);
+    public const char   QUOTE          = '"';
 
 
     [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
@@ -117,7 +115,8 @@ public static class SQL
 
 
     [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
-    public static string GetTableName<TRecord>( this DbInstance instance ) where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord> =>
+    public static string GetTableName<TRecord>( this DbInstance instance )
+        where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord> =>
         instance switch
         {
             DbInstance.Postgres => $"{QUOTE}{TRecord.TableName}{QUOTE}",
@@ -164,7 +163,8 @@ public static class SQL
     }
 
     [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
-    public static ImmutableDictionary<DbInstance, ImmutableDictionary<string, Descriptor>> CreateDescriptorMapping<TRecord>() where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
+    public static ImmutableDictionary<DbInstance, ImmutableDictionary<string, Descriptor>> CreateDescriptorMapping<TRecord>()
+        where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
     {
         const BindingFlags ATTRIBUTES = BindingFlags.Instance | BindingFlags.Public | BindingFlags.SetProperty | BindingFlags.GetProperty;
 
