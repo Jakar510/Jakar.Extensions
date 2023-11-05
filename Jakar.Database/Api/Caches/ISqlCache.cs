@@ -21,8 +21,6 @@ public enum SqlCacheType
     RandomUserCount,
     Single,
     Insert,
-    TryInsert,
-    InsertOrUpdate,
     Update,
     GetID,
     GetIDs

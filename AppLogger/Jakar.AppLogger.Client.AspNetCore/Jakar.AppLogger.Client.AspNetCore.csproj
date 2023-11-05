@@ -12,7 +12,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-	  <PackageReference Include="Jakar.Extensions" Version="6.9.1" />
+	  <PackageReference Include="Jakar.Extensions" Version="6.9.2" />
 	  <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="7.0.0" />
   </ItemGroup>
 

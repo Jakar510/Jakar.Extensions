@@ -99,9 +99,9 @@ public sealed class MsSqlServer<TRecord> : BaseSqlCache<TRecord>
     }
     public override SqlCommand Insert( in TRecord record )
     {
-        var param = new DynamicParameters( record );
+        DynamicParameters parameters = record.ToDynamicParameters();
 
-        if ( _sql.TryGetValue( SqlCacheType.Insert, out string? sql ) ) { return new SqlCommand( sql, param ); }
+        if ( _sql.TryGetValue( SqlCacheType.Insert, out string? sql ) ) { return new SqlCommand( sql, parameters ); }
 
         using var keys = new ValueStringBuilder( 1000 );
         keys.AppendJoin( ',', _Properties.Values.Select( x => x.ColumnName ) );
@@ -109,14 +109,14 @@ public sealed class MsSqlServer<TRecord> : BaseSqlCache<TRecord>
         using var values = new ValueStringBuilder( 1000 );
         values.AppendJoin( ',', _Properties.Values.Select( x => x.VariableName ) );
 
-        _sql[SqlCacheType.Insert] = sql = $"SET NOCOUNT ON INSERT INTO {TableName} ({keys.Span}) OUTPUT INSERTED.ID values ({values.Span})";
+        _sql[SqlCacheType.Insert] = sql = $"SET NOCOUNT ON INSERT INTO {TableName} ( {keys.Span} ) OUTPUT INSERTED.ID values ( {values.Span} )";
 
-        return new SqlCommand( sql, param );
+        return new SqlCommand( sql, parameters );
     }
     public override SqlCommand TryInsert( in TRecord record, in bool matchAll, in DynamicParameters parameters )
     {
         Key key   = Key.Create( matchAll, parameters );
-        var param = new DynamicParameters( record );
+        DynamicParameters param = record.ToDynamicParameters();
         param.AddDynamicParams( parameters );
 
         if ( _tryInsert.TryGetValue( key, out string? sql ) ) { return new SqlCommand( sql, param ); }
@@ -133,7 +133,7 @@ public sealed class MsSqlServer<TRecord> : BaseSqlCache<TRecord>
         _tryInsert[key] = sql = $"""
                                  IF NOT EXISTS(SELECT * FROM {TableName} WHERE {buffer.Span})
                                  BEGIN
-                                     SET NOCOUNT ON INSERT INTO {TableName} ({keys.Span}) OUTPUT INSERTED.ID values ({values.Span})
+                                     SET NOCOUNT ON INSERT INTO {TableName} ( {keys.Span} ) OUTPUT INSERTED.ID values ( {values.Span} )
                                  END
 
                                  ELSE
@@ -169,7 +169,7 @@ public sealed class MsSqlServer<TRecord> : BaseSqlCache<TRecord>
         _insertOrUpdate[key] = sql = $"""
                                       IF NOT EXISTS(SELECT * FROM {TableName} WHERE {buffer.Span})
                                       BEGIN
-                                          SET NOCOUNT ON INSERT INTO {TableName} ({keys.Span}) OUTPUT INSERTED.ID values ({values.Span})
+                                          SET NOCOUNT ON INSERT INTO {TableName} ( {keys.Span} ) OUTPUT INSERTED.ID values ( {values.Span} )
                                       END
 
                                       ELSE

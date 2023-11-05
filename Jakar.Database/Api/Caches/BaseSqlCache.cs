@@ -65,7 +65,7 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord>
     }
     public abstract SqlCommand First();
     public abstract SqlCommand Last();
-    public SqlCommand SortedIDs()
+    public virtual SqlCommand SortedIDs()
     {
         if ( _sql.TryGetValue( SqlCacheType.SortedIDs, out string? sql ) ) { return sql; }
 
@@ -74,7 +74,7 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord>
     }
 
 
-    public SqlCommand Delete( in RecordID<TRecord> id )
+    public virtual SqlCommand Delete( in RecordID<TRecord> id )
     {
         var parameters = new DynamicParameters();
         parameters.Add( nameof(id), id );
@@ -107,8 +107,8 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord>
     }
 
 
-    public SqlCommand Next( in RecordPair<TRecord> pair ) => Next( pair.ID, pair.DateCreated );
-    public SqlCommand Next( in RecordID<TRecord> id, in DateTimeOffset dateCreated )
+    public virtual SqlCommand Next( in RecordPair<TRecord> pair ) => Next( pair.ID, pair.DateCreated );
+    public virtual SqlCommand Next( in RecordID<TRecord> id, in DateTimeOffset dateCreated )
     {
         var parameters = new DynamicParameters();
         parameters.Add( nameof(id),          id );
@@ -119,8 +119,8 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord>
         _sql[SqlCacheType.NextID] = sql = @$"SELECT * FROM {TableName} WHERE ( id = IFNULL((SELECT MIN({IdColumnName}) FROM {TableName} WHERE {DateCreated} > @{nameof(dateCreated)}), 0) )";
         return new SqlCommand( sql, parameters );
     }
-    public SqlCommand NextID( in RecordPair<TRecord> pair ) => NextID( pair.ID, pair.DateCreated );
-    public SqlCommand NextID( in RecordID<TRecord> id, in DateTimeOffset dateCreated )
+    public virtual SqlCommand NextID( in RecordPair<TRecord> pair ) => NextID( pair.ID, pair.DateCreated );
+    public virtual SqlCommand NextID( in RecordID<TRecord> id, in DateTimeOffset dateCreated )
     {
         var parameters = new DynamicParameters();
         parameters.Add( nameof(id),          id );
@@ -133,7 +133,7 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord>
     }
 
 
-    public SqlCommand Count()
+    public virtual SqlCommand Count()
     {
         if ( _sql.TryGetValue( SqlCacheType.Count, out string? sql ) ) { return sql; }
 
@@ -154,10 +154,96 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord>
         _sql[SqlCacheType.Single] = sql = $"SELECT * FROM {TableName} WHERE {IdColumnName} = @{nameof(id)}";
         return new SqlCommand( sql, parameters );
     }
-    public abstract SqlCommand Insert( in         TRecord record );
-    public abstract SqlCommand TryInsert( in      TRecord record, in bool matchAll, in DynamicParameters parameters );
-    public abstract SqlCommand InsertOrUpdate( in TRecord record, in bool matchAll, in DynamicParameters parameters );
-    public SqlCommand Update( in TRecord record )
+
+
+    public virtual SqlCommand Insert( in TRecord record )
+    {
+        var param = new DynamicParameters( record );
+
+        if ( _sql.TryGetValue( SqlCacheType.Insert, out string? sql ) ) { return new SqlCommand( sql, param ); }
+
+        using var keys = new ValueStringBuilder( 1000 );
+        keys.AppendJoin( ',', _Properties.Values.Select( x => x.ColumnName ) );
+
+        using var values = new ValueStringBuilder( 1000 );
+        values.AppendJoin( ',', _Properties.Values.Select( x => x.VariableName ) );
+
+        _sql[SqlCacheType.Insert] = sql = $"INSERT INTO {TableName} ( {keys.Span} ) OUTPUT INSERTED.ID values ( {values.Span} )";
+
+        return new SqlCommand( sql, param );
+    }
+    public virtual SqlCommand TryInsert( in TRecord record, in bool matchAll, in DynamicParameters parameters )
+    {
+        Key key   = Key.Create( matchAll, parameters );
+        var param = new DynamicParameters( record );
+        param.AddDynamicParams( parameters );
+
+        if ( _tryInsert.TryGetValue( key, out string? sql ) ) { return new SqlCommand( sql, param ); }
+
+        using var buffer = new ValueStringBuilder( parameters.ParameterNames.Sum( x => x.Length ) * 2 );
+        buffer.AppendJoin( matchAll.GetAndOr(), GetKeyValuePairs( parameters ) );
+
+        using var keys = new ValueStringBuilder( 1000 );
+        keys.AppendJoin( ',', _Properties.Values.Select( x => x.ColumnName ) );
+
+        using var values = new ValueStringBuilder( 1000 );
+        values.AppendJoin( ',', _Properties.Values.Select( x => x.VariableName ) );
+
+        _tryInsert[key] = sql = $"""
+                                 IF NOT EXISTS(SELECT * FROM {TableName} WHERE {buffer.Span})
+                                 BEGIN
+                                     INSERT INTO {TableName} ({keys.Span}) OUTPUT INSERTED.ID values ({values.Span})
+                                 END
+
+                                 ELSE
+                                 BEGIN
+                                     SELECT {IdColumnName} = NULL
+                                 END
+                                 """;
+
+        return new SqlCommand( sql, param );
+    }
+    public virtual SqlCommand InsertOrUpdate( in TRecord record, in bool matchAll, in DynamicParameters parameters )
+    {
+        Key               key   = Key.Create( matchAll, parameters );
+        var               param = new DynamicParameters( record );
+        RecordID<TRecord> id    = record.ID;
+        param.Add( nameof(id), id );
+        param.AddDynamicParams( parameters );
+
+        if ( _insertOrUpdate.TryGetValue( key, out string? sql ) ) { return new SqlCommand( sql, param ); }
+
+        using var buffer = new ValueStringBuilder( parameters.ParameterNames.Sum( x => x.Length ) * 2 );
+        buffer.AppendJoin( matchAll.GetAndOr(), GetKeyValuePairs( parameters ) );
+
+        using var keys = new ValueStringBuilder( 1000 );
+        keys.AppendJoin( ',', _Properties.Values.Select( x => x.ColumnName ) );
+
+        using var values = new ValueStringBuilder( 1000 );
+        values.AppendJoin( ',', _Properties.Values.Select( x => x.VariableName ) );
+
+        using var keyValuePairs = new ValueStringBuilder( 1000 );
+        keyValuePairs.AppendJoin( ',', _Properties.Values.Select( x => x.KeyValuePair ) );
+
+        _insertOrUpdate[key] = sql = $"""
+                                      IF NOT EXISTS(SELECT * FROM {TableName} WHERE {buffer.Span})
+                                      BEGIN
+                                          INSERT INTO {TableName} ({keys.Span}) OUTPUT INSERTED.ID values ({values.Span})
+                                      END
+
+                                      ELSE
+                                      BEGIN
+                                          UPDATE {TableName} SET {keyValuePairs.Span} WHERE {IdColumnName} = @{nameof(id)};
+                                      
+                                          SELECT {IdColumnName} FROM {TableName} WHERE @where LIMIT 1
+                                      END
+                                      """;
+
+        return new SqlCommand( sql, param );
+    }
+  
+    
+    public virtual SqlCommand Update( in TRecord record )
     {
         var parameters = record.ToDynamicParameters();
         if ( _sql.TryGetValue( SqlCacheType.Random, out string? sql ) ) { return new SqlCommand( sql, parameters ); }
@@ -178,7 +264,6 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord>
         _whereParameters[key] = sql = $"SELECT * FROM {TableName} WHERE {buffer.Span}";
         return new SqlCommand( sql, parameters );
     }
-
     public virtual SqlCommand Where<TValue>( in string columnName, in TValue? value )
     {
         if ( _Properties.ContainsKey( columnName ) ) { throw new ArgumentException( $"'{columnName}' is not a valid column: {_Properties.Keys.ToJson()}" ); }
@@ -191,8 +276,7 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord>
         _whereColumn[columnName] = sql = $"SELECT * FROM {TableName} WHERE {columnName} = @{nameof(value)}";
         return new SqlCommand( sql, parameters );
     }
-
-    public SqlCommand WhereID<TValue>( in string columnName, in TValue? value )
+    public virtual SqlCommand WhereID<TValue>( in string columnName, in TValue? value )
     {
         if ( _Properties.ContainsKey( columnName ) ) { throw new ArgumentException( $"'{columnName}' is not a valid column: {_Properties.Keys.ToJson()}" ); }
 
@@ -206,7 +290,7 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord>
     }
 
 
-    public SqlCommand Exists( in bool matchAll, in DynamicParameters parameters )
+    public virtual SqlCommand Exists( in bool matchAll, in DynamicParameters parameters )
     {
         Key key = Key.Create( matchAll, parameters );
         if ( _existParameters.TryGetValue( key, out string? sql ) ) { return new SqlCommand( sql, parameters ); }
@@ -217,7 +301,9 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord>
         _existParameters[key] = sql = $"EXISTS( SELECT {IdColumnName} FROM {TableName} WHERE {buffer.Span} )";
         return new SqlCommand( sql, parameters );
     }
-    public SqlCommand Get( in bool matchAll, in DynamicParameters parameters )
+    
+    
+    public virtual SqlCommand Get( in bool matchAll, in DynamicParameters parameters )
     {
         Key key = Key.Create( matchAll, parameters );
         if ( _getParameters.TryGetValue( key, out string? sql ) ) { return new SqlCommand( sql, parameters ); }
@@ -228,8 +314,7 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord>
         _getParameters[key] = sql = $"SELECT * FROM {TableName} WHERE {buffer.Span}";
         return new SqlCommand( sql, parameters );
     }
-
-    public SqlCommand Get( in RecordID<TRecord> id )
+    public virtual SqlCommand Get( in RecordID<TRecord> id )
     {
         var parameters = new DynamicParameters();
         parameters.Add( nameof(id), id.Value );
@@ -239,8 +324,7 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord>
         _sql[SqlCacheType.GetIDs] = sql = $"SELECT * FROM {TableName} WHERE {IdColumnName} = @{nameof(id)}";
         return new SqlCommand( sql, parameters );
     }
-
-    public SqlCommand Get( in IEnumerable<RecordID<TRecord>> ids )
+    public virtual SqlCommand Get( in IEnumerable<RecordID<TRecord>> ids )
     {
         var parameters = new DynamicParameters();
         parameters.Add( nameof(ids), ids.Select( x => x.Value ) );
