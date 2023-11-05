@@ -246,22 +246,26 @@ public ref struct ValueStringBuilder
     }
 
 
-    public ValueStringBuilder AppendFormat<T>( in ReadOnlySpan<char> format, T arg0, IFormatProvider? provider = default ) where T : unmanaged, IEquatable<T>
+    public ValueStringBuilder AppendFormat<T>( in ReadOnlySpan<char> format, T arg0, IFormatProvider? provider = default )
+        where T : unmanaged, IEquatable<T>
     {
         AppendFormatHelper( provider, format, ParamsArray<T>.Create( arg0 ) );
         return this;
     }
-    public ValueStringBuilder AppendFormat<T>( in ReadOnlySpan<char> format, T arg0, T arg1, IFormatProvider? provider = default ) where T : unmanaged, IEquatable<T>
+    public ValueStringBuilder AppendFormat<T>( in ReadOnlySpan<char> format, T arg0, T arg1, IFormatProvider? provider = default )
+        where T : unmanaged, IEquatable<T>
     {
         AppendFormatHelper( provider, format, ParamsArray<T>.Create( arg0, arg1 ) );
         return this;
     }
-    public ValueStringBuilder AppendFormat<T>( in ReadOnlySpan<char> format, T arg0, T arg1, T arg2, IFormatProvider? provider = default ) where T : unmanaged, IEquatable<T>
+    public ValueStringBuilder AppendFormat<T>( in ReadOnlySpan<char> format, T arg0, T arg1, T arg2, IFormatProvider? provider = default )
+        where T : unmanaged, IEquatable<T>
     {
         AppendFormatHelper( provider, format, ParamsArray<T>.Create( arg0, arg1, arg2 ) );
         return this;
     }
-    public ValueStringBuilder AppendFormat<T>( in ReadOnlySpan<char> format, IFormatProvider? provider = default, params T[] args ) where T : unmanaged, IEquatable<T>
+    public ValueStringBuilder AppendFormat<T>( in ReadOnlySpan<char> format, IFormatProvider? provider = default, params T[] args )
+        where T : unmanaged, IEquatable<T>
     {
         if ( args is null )
         {
@@ -276,7 +280,8 @@ public ref struct ValueStringBuilder
         AppendFormatHelper<T>( provider, format, args );
         return this;
     }
-    public ValueStringBuilder AppendFormat<T>( in ReadOnlySpan<char> format, ReadOnlySpan<T> args, IFormatProvider? provider = default ) where T : unmanaged, IEquatable<T>
+    public ValueStringBuilder AppendFormat<T>( in ReadOnlySpan<char> format, ReadOnlySpan<T> args, IFormatProvider? provider = default )
+        where T : unmanaged, IEquatable<T>
     {
         if ( args.IsEmpty )
         {
@@ -295,31 +300,39 @@ public ref struct ValueStringBuilder
 
     public ValueStringBuilder AppendJoin( char separator, IEnumerable<string> enumerable )
     {
-        Span<string> span = enumerable.GetArray();
-        EnsureCapacity( span.Sum( x => x.Length ) + span.Length * 2 + 1 );
-        Span<string>.Enumerator enumerator = span.GetEnumerator();
-        enumerator.MoveNext();
+        ReadOnlySpan<string> span = enumerable.GetArray();
+        EnsureCapacity( span.Sum( static x => x.Length ) + span.Length * 2 + 1 );
+        ReadOnlySpan<string>.Enumerator enumerator     = span.GetEnumerator();
+        bool                            shouldContinue = enumerator.MoveNext();
 
-        do
+        while ( shouldContinue )
         {
-            _chars.Append( enumerator.Current );
-            _chars.Append( separator );
-        } while ( enumerator.MoveNext() );
+            string current = enumerator.Current;
+            current.AsSpan().CopyTo( Next );
+            _chars.Index   += current.Length;
+            shouldContinue =  enumerator.MoveNext();
+
+            if ( shouldContinue ) { _chars.Append( separator ); }
+        }
 
         return this;
     }
     public ValueStringBuilder AppendJoin( in ReadOnlySpan<char> separator, IEnumerable<string> enumerable )
     {
-        Span<string> span = enumerable.GetArray();
-        EnsureCapacity( span.Sum( x => x.Length ) + separator.Length * span.Length + 1 );
-        Span<string>.Enumerator enumerator = span.GetEnumerator();
-        enumerator.MoveNext();
+        ReadOnlySpan<string> span = enumerable.GetArray();
+        EnsureCapacity( span.Sum( static x => x.Length ) + separator.Length * span.Length + 1 );
+        ReadOnlySpan<string>.Enumerator enumerator     = span.GetEnumerator();
+        bool                            shouldContinue = enumerator.MoveNext();
 
-        do
+        while ( shouldContinue )
         {
-            _chars.Append( enumerator.Current );
-            _chars.Append( separator );
-        } while ( enumerator.MoveNext() );
+            string current = enumerator.Current;
+            current.AsSpan().CopyTo( Next );
+            _chars.Index   += current.Length;
+            shouldContinue =  enumerator.MoveNext();
+
+            if ( shouldContinue ) { _chars.Append( separator ); }
+        }
 
         return this;
     }
@@ -328,7 +341,8 @@ public ref struct ValueStringBuilder
 #if NET6_0_OR_GREATER
     [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
 #endif
-    public ValueStringBuilder AppendJoin<T>( char separator, in ReadOnlySpan<T> enumerable, in ReadOnlySpan<char> format = default, IFormatProvider? provider = default ) where T : ISpanFormattable
+    public ValueStringBuilder AppendJoin<T>( char separator, in ReadOnlySpan<T> enumerable, in ReadOnlySpan<char> format = default, IFormatProvider? provider = default )
+        where T : ISpanFormattable
     {
         ReadOnlySpan<T>.Enumerator enumerator     = enumerable.GetEnumerator();
         bool                       shouldContinue = enumerator.MoveNext();
@@ -349,7 +363,8 @@ public ref struct ValueStringBuilder
 #if NET6_0_OR_GREATER
     [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
 #endif
-    public ValueStringBuilder AppendJoin<T>( in ReadOnlySpan<char> separator, in ReadOnlySpan<T> enumerable, in ReadOnlySpan<char> format = default, IFormatProvider? provider = default ) where T : ISpanFormattable
+    public ValueStringBuilder AppendJoin<T>( in ReadOnlySpan<char> separator, in ReadOnlySpan<T> enumerable, in ReadOnlySpan<char> format = default, IFormatProvider? provider = default )
+        where T : ISpanFormattable
     {
         ReadOnlySpan<T>.Enumerator enumerator     = enumerable.GetEnumerator();
         bool                       shouldContinue = enumerator.MoveNext();
@@ -371,7 +386,8 @@ public ref struct ValueStringBuilder
 #if NET6_0_OR_GREATER
     [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
 #endif
-    public ValueStringBuilder AppendJoin<T>( char separator, IEnumerable<T> enumerable, in ReadOnlySpan<char> format = default, IFormatProvider? provider = default ) where T : ISpanFormattable
+    public ValueStringBuilder AppendJoin<T>( char separator, IEnumerable<T> enumerable, in ReadOnlySpan<char> format = default, IFormatProvider? provider = default )
+        where T : ISpanFormattable
     {
         using IEnumerator<T> enumerator     = enumerable.GetEnumerator();
         bool                 shouldContinue = enumerator.MoveNext();
@@ -391,7 +407,8 @@ public ref struct ValueStringBuilder
 #if NET6_0_OR_GREATER
     [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
 #endif
-    public ValueStringBuilder AppendJoin<T>( in ReadOnlySpan<char> separator, IEnumerable<T> enumerable, in ReadOnlySpan<char> format = default, IFormatProvider? provider = default ) where T : ISpanFormattable
+    public ValueStringBuilder AppendJoin<T>( in ReadOnlySpan<char> separator, IEnumerable<T> enumerable, in ReadOnlySpan<char> format = default, IFormatProvider? provider = default )
+        where T : ISpanFormattable
     {
         using IEnumerator<T> enumerator     = enumerable.GetEnumerator();
         bool                 shouldContinue = enumerator.MoveNext();
@@ -412,7 +429,8 @@ public ref struct ValueStringBuilder
 #if NET6_0_OR_GREATER
     [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
 #endif
-    public ValueStringBuilder AppendSpanFormattable<T>( T value, in ReadOnlySpan<char> format, IFormatProvider? provider = default ) where T : ISpanFormattable
+    public ValueStringBuilder AppendSpanFormattable<T>( T value, in ReadOnlySpan<char> format, IFormatProvider? provider = default )
+        where T : ISpanFormattable
     {
         EnsureCapacity<T>( format );
 
@@ -625,6 +643,7 @@ public ref struct ValueStringBuilder
             if ( s == null )
             {
             #if NET6_0_OR_GREATER
+
                 // If arg is ISpanFormattable and the beginning doesn't need padding, try formatting it into the remaining current chunk.
                 if ( arg is ISpanFormattable spanFormattableArg && (leftJustify || width == 0) && spanFormattableArg.TryFormat( Next, out int charsWritten, itemFormatSpan, provider ) )
                 {
@@ -670,7 +689,8 @@ public ref struct ValueStringBuilder
     /// <returns> </returns>
     /// <exception cref="ArgumentNullException"> </exception>
     /// <exception cref="FormatException"> </exception>
-    internal void AppendFormatHelper<T>( IFormatProvider? provider, in ReadOnlySpan<char> format, in ParamsArray<T> args ) where T : unmanaged, IEquatable<T>
+    internal void AppendFormatHelper<T>( IFormatProvider? provider, in ReadOnlySpan<char> format, in ParamsArray<T> args )
+        where T : unmanaged, IEquatable<T>
     {
         // Undocumented exclusive limits on the range for Argument Hole Index and Argument Hole Alignment.
         const int INDEX_LIMIT = 1000000; // Note:            0 <= ArgIndex < IndexLimit
@@ -865,6 +885,7 @@ public ref struct ValueStringBuilder
             if ( s == null )
             {
             #if NET6_0_OR_GREATER
+
                 // If arg is ISpanFormattable and the beginning doesn't need padding, try formatting it into the remaining current chunk.
                 if ( arg is ISpanFormattable spanFormattableArg && (leftJustify || width == 0) && spanFormattableArg.TryFormat( Next, out int charsWritten, itemFormatSpan, provider ) )
                 {
