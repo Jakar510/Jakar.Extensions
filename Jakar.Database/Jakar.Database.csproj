@@ -76,6 +76,10 @@
 		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="7.0.13" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Service Include="{3259aa49-8aa1-44d3-9025-a0b520596a8c}" />
+	</ItemGroup>
+
 	<!--
 	<ItemGroup>
 	  <ProjectReference Include="..\Jakar.Database.Generators\Jakar.Database.Generators.csproj"

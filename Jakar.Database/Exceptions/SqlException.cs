@@ -34,16 +34,15 @@ public sealed class SqlException : Exception
     {
         string parameters = dynamicParameters is null
                                 ? "NULL"
-                                : string.Join( ',', dynamicParameters.ParameterNames );
+                                : string.Join( ", ", dynamicParameters.ParameterNames );
 
-        return $@"An error occurred with the following sql statement
+        return $"""
+                An error occurred with the following sql statement
 
+                {nameof(SQL)}:    {sql}
 
-{nameof(SQL)}:    {sql}
-
-
-{nameof(Parameters)}:   {parameters}
-";
+                {nameof(Parameters)}:   {parameters}
+                """;
     }
 
 

@@ -7,7 +7,8 @@ namespace Jakar.Database.DbMigrations;
 /// <summary>
 ///     <para> <see href="https://fluentmigrator.github.io/articles/fluent-interface.html"/> </para>
 /// </summary>
-public abstract class Migration<TRecord> : Migration where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>
+public abstract class Migration<TRecord> : Migration
+    where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
     public string TableName { get; } = typeof(TRecord).GetTableName();
 
@@ -15,14 +16,8 @@ public abstract class Migration<TRecord> : Migration where TRecord : TableRecord
     protected Migration() : base() { }
 
 
-    public override void GetUpExpressions( IMigrationContext context ) =>
-
-        // _dbContext = context.ServiceProvider.GetRequiredService<Database>();
-        base.GetUpExpressions( context );
-    public override void GetDownExpressions( IMigrationContext context ) =>
-
-        // _dbContext = context.ServiceProvider.GetRequiredService<Database>();
-        base.GetDownExpressions( context );
+    // public override void GetUpExpressions( IMigrationContext   context ) => base.GetUpExpressions( context );   // _dbContext = context.ServiceProvider.GetRequiredService<Database>();
+    // public override void GetDownExpressions( IMigrationContext context ) => base.GetDownExpressions( context ); // _dbContext = context.ServiceProvider.GetRequiredService<Database>();
 
 
     protected IAlterTableAddColumnOrAlterColumnOrSchemaOrDescriptionSyntax AlterTable() => Alter.Table( TableName );
@@ -65,7 +60,8 @@ public abstract class Migration<TRecord> : Migration where TRecord : TableRecord
 
 
 
-public abstract class OwnedMigration<TRecord> : Migration<TRecord> where TRecord : OwnedTableRecord<TRecord>, IDbReaderMapping<TRecord>
+public abstract class OwnedMigration<TRecord> : Migration<TRecord>
+    where TRecord : OwnedTableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
     protected override ICreateTableWithColumnSyntax CreateTable()
     {

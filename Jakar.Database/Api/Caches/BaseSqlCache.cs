@@ -156,91 +156,9 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord>
     }
 
 
-    public virtual SqlCommand Insert( in TRecord record )
-    {
-        var param = new DynamicParameters( record );
-
-        if ( _sql.TryGetValue( SqlCacheType.Insert, out string? sql ) ) { return new SqlCommand( sql, param ); }
-
-        using var keys = new ValueStringBuilder( 1000 );
-        keys.AppendJoin( ',', _Properties.Values.Select( x => x.ColumnName ) );
-
-        using var values = new ValueStringBuilder( 1000 );
-        values.AppendJoin( ',', _Properties.Values.Select( x => x.VariableName ) );
-
-        _sql[SqlCacheType.Insert] = sql = $"INSERT INTO {TableName} ( {keys.Span} ) OUTPUT INSERTED.ID values ( {values.Span} )";
-
-        return new SqlCommand( sql, param );
-    }
-    public virtual SqlCommand TryInsert( in TRecord record, in bool matchAll, in DynamicParameters parameters )
-    {
-        Key key   = Key.Create( matchAll, parameters );
-        var param = new DynamicParameters( record );
-        param.AddDynamicParams( parameters );
-
-        if ( _tryInsert.TryGetValue( key, out string? sql ) ) { return new SqlCommand( sql, param ); }
-
-        using var buffer = new ValueStringBuilder( parameters.ParameterNames.Sum( x => x.Length ) * 2 );
-        buffer.AppendJoin( matchAll.GetAndOr(), GetKeyValuePairs( parameters ) );
-
-        using var keys = new ValueStringBuilder( 1000 );
-        keys.AppendJoin( ',', _Properties.Values.Select( x => x.ColumnName ) );
-
-        using var values = new ValueStringBuilder( 1000 );
-        values.AppendJoin( ',', _Properties.Values.Select( x => x.VariableName ) );
-
-        _tryInsert[key] = sql = $"""
-                                 IF NOT EXISTS(SELECT * FROM {TableName} WHERE {buffer.Span})
-                                 BEGIN
-                                     INSERT INTO {TableName} ({keys.Span}) OUTPUT INSERTED.ID values ({values.Span})
-                                 END
-
-                                 ELSE
-                                 BEGIN
-                                     SELECT {IdColumnName} = NULL
-                                 END
-                                 """;
-
-        return new SqlCommand( sql, param );
-    }
-    public virtual SqlCommand InsertOrUpdate( in TRecord record, in bool matchAll, in DynamicParameters parameters )
-    {
-        Key               key   = Key.Create( matchAll, parameters );
-        var               param = new DynamicParameters( record );
-        RecordID<TRecord> id    = record.ID;
-        param.Add( nameof(id), id );
-        param.AddDynamicParams( parameters );
-
-        if ( _insertOrUpdate.TryGetValue( key, out string? sql ) ) { return new SqlCommand( sql, param ); }
-
-        using var buffer = new ValueStringBuilder( parameters.ParameterNames.Sum( x => x.Length ) * 2 );
-        buffer.AppendJoin( matchAll.GetAndOr(), GetKeyValuePairs( parameters ) );
-
-        using var keys = new ValueStringBuilder( 1000 );
-        keys.AppendJoin( ',', _Properties.Values.Select( x => x.ColumnName ) );
-
-        using var values = new ValueStringBuilder( 1000 );
-        values.AppendJoin( ',', _Properties.Values.Select( x => x.VariableName ) );
-
-        using var keyValuePairs = new ValueStringBuilder( 1000 );
-        keyValuePairs.AppendJoin( ',', _Properties.Values.Select( x => x.KeyValuePair ) );
-
-        _insertOrUpdate[key] = sql = $"""
-                                      IF NOT EXISTS(SELECT * FROM {TableName} WHERE {buffer.Span})
-                                      BEGIN
-                                          INSERT INTO {TableName} ({keys.Span}) OUTPUT INSERTED.ID values ({values.Span})
-                                      END
-
-                                      ELSE
-                                      BEGIN
-                                          UPDATE {TableName} SET {keyValuePairs.Span} WHERE {IdColumnName} = @{nameof(id)};
-                                      
-                                          SELECT {IdColumnName} FROM {TableName} WHERE @where LIMIT 1
-                                      END
-                                      """;
-
-        return new SqlCommand( sql, param );
-    }
+    public abstract SqlCommand Insert( in TRecord record );
+    public abstract SqlCommand TryInsert( in TRecord record, in bool matchAll, in DynamicParameters parameters );
+    public abstract SqlCommand InsertOrUpdate( in TRecord record, in bool matchAll, in DynamicParameters parameters );
   
     
     public virtual SqlCommand Update( in TRecord record )

@@ -12,6 +12,9 @@ public sealed class PostgresSql<TRecord> : BaseSqlCache<TRecord>
         [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => DbInstance.Postgres;
     }
 
+    // public override string TableName { get; } = $"\"{TRecord.TableName}\"";
+    public override string TableName { get; } = TRecord.TableName.ToSnakeCase();
+
 
     public override SqlCommand First()
     {
@@ -65,5 +68,94 @@ public sealed class PostgresSql<TRecord> : BaseSqlCache<TRecord>
         if ( _sql.TryGetValue( SqlCacheType.RandomUserCount, out string? sql ) is false ) { _sql[SqlCacheType.RandomUserCount] = sql = @$"SELECT TOP @{nameof(count)} * FROM {TableName} WHERE {nameof(IOwnedTableRecord.CreatedBy)} = @{nameof(id)}"; }
 
         return new SqlCommand( sql, parameters );
+    }
+    public override SqlCommand Insert( in TRecord record )
+    {
+        var param = new DynamicParameters( record );
+
+        if ( _sql.TryGetValue( SqlCacheType.Insert, out string? sql ) ) { return new SqlCommand( sql, param ); }
+
+        using var keys = new ValueStringBuilder( 1000 );
+        keys.AppendJoin( ',', _Properties.Values.Select( x => x.ColumnName ) );
+
+        using var values = new ValueStringBuilder( 1000 );
+        values.AppendJoin( ',', _Properties.Values.Select( x => x.VariableName ) );
+
+        _sql[SqlCacheType.Insert] = sql = $"""
+                                             INSERT INTO {TableName} ({keys.Span}) values ({values.Span});
+                                             SELECT currval('{IdColumnName}');
+                                           """;
+
+        return new SqlCommand( sql, param );
+    }
+    public override SqlCommand TryInsert( in TRecord record, in bool matchAll, in DynamicParameters parameters )
+    {
+        Key key   = Key.Create( matchAll, parameters );
+        var param = new DynamicParameters( record );
+        param.AddDynamicParams( parameters );
+
+        if ( _tryInsert.TryGetValue( key, out string? sql ) ) { return new SqlCommand( sql, param ); }
+
+        using var buffer = new ValueStringBuilder( parameters.ParameterNames.Sum( x => x.Length ) * 2 );
+        buffer.AppendJoin( matchAll.GetAndOr(), GetKeyValuePairs( parameters ) );
+
+        using var keys = new ValueStringBuilder( 1000 );
+        keys.AppendJoin( ',', _Properties.Values.Select( x => x.ColumnName ) );
+
+        using var values = new ValueStringBuilder( 1000 );
+        values.AppendJoin( ',', _Properties.Values.Select( x => x.VariableName ) );
+
+        _tryInsert[key] = sql = $"""
+                                 IF NOT EXISTS(SELECT * FROM {TableName} WHERE {buffer.Span})
+                                 BEGIN
+                                     INSERT INTO {TableName} ({keys.Span}) values ({values.Span});
+                                     SELECT currval('{IdColumnName}');
+                                 END
+
+                                 ELSE
+                                 BEGIN
+                                     SELECT {IdColumnName} = NULL
+                                 END
+                                 """;
+
+        return new SqlCommand( sql, param );
+    }
+    public override SqlCommand InsertOrUpdate( in TRecord record, in bool matchAll, in DynamicParameters parameters )
+    {
+        Key               key   = Key.Create( matchAll, parameters );
+        var               param = new DynamicParameters( record );
+        RecordID<TRecord> id    = record.ID;
+        param.Add( nameof(id), id );
+        param.AddDynamicParams( parameters );
+
+        if ( _insertOrUpdate.TryGetValue( key, out string? sql ) ) { return new SqlCommand( sql, param ); }
+
+        using var buffer = new ValueStringBuilder( parameters.ParameterNames.Sum( x => x.Length ) * 2 );
+        buffer.AppendJoin( matchAll.GetAndOr(), GetKeyValuePairs( parameters ) );
+
+        using var keys = new ValueStringBuilder( 1000 );
+        keys.AppendJoin( ',', _Properties.Values.Select( x => x.ColumnName ) );
+
+        using var values = new ValueStringBuilder( 1000 );
+        values.AppendJoin( ',', _Properties.Values.Select( x => x.VariableName ) );
+
+        using var keyValuePairs = new ValueStringBuilder( 1000 );
+        keyValuePairs.AppendJoin( ',', _Properties.Values.Select( x => x.KeyValuePair ) );
+
+        _insertOrUpdate[key] = sql = $"""
+                                      IF NOT EXISTS(SELECT * FROM {TableName} WHERE {buffer.Span})
+                                      BEGIN
+                                          INSERT INTO {TableName} ({keys.Span}) values ({values.Span});
+                                          SELECT currval('{IdColumnName}');
+                                      END
+
+                                      ELSE
+                                      BEGIN
+                                          UPDATE {TableName} SET {keyValuePairs.Span} WHERE {IdColumnName} = @{nameof(id)};
+                                          SELECT @{nameof(id)};
+                                      END
+                                      """;
+
+        return new SqlCommand( sql, param );
     }
 }
