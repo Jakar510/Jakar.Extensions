@@ -35,9 +35,10 @@ public sealed class Language : BaseClass, IComparable<Language>, IEquatable<Lang
     public static implicit operator Language( CultureInfo       value ) => new(value);
     public static implicit operator Language( SupportedLanguage value ) => new(value);
     public static implicit operator CultureInfo( Language       value ) => value._culture;
-
-
-    public override string ToString() => DisplayName;
+    
+    
+    public          CultureInfo GetCulture() => _culture;
+    public override string      ToString()   => DisplayName;
 
 
     public int CompareTo( object? value ) => value is null

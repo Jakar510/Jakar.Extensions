@@ -12,63 +12,6 @@ public sealed class PostgresSql<TRecord> : BaseSqlCache<TRecord>
         [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => DbInstance.Postgres;
     }
 
-    /*
-    protected virtual ImmutableDictionary<SqlStatement, string> Get_PostgresSql()
-    {
-        string TableName = TableName;
-        string DateCreated     = DbInstance.Postgres.GetDateCreated();
-        string IdColumnName    = DbInstance.Postgres.GetID_ColumnName();
-        string RandomMethod    = DbInstance.Postgres.GetRandomMethod();
-        string OwnerUserID     = DbInstance.Postgres.GetOwnerUserID();
-        string KeyValuePairs   = string.Join( ',', KeyValuePairs );
-        string ColumnNames     = string.Join( ',', ColumnNames );
-
-        var dict = new Dictionary<SqlStatement, string>
-                   {
-                       [SqlStatement.All]             = $"SELECT * FROM {TableName}",
-                       [SqlStatement.Update]          = $"UPDATE {TableName} SET {KeyValuePairs} WHERE {IdColumnName} = @{SQL.ID};",
-                       [SqlStatement.Single]          = $"SELECT * FROM {TableName} WHERE {IdColumnName} = @{IdColumnName}",
-                       [SqlStatement.Random]          = $"SELECT TOP 1 * FROM {TableName} ORDER BY {RandomMethod}",
-                       [SqlStatement.RandomCount]     = $"SELECT TOP @{SQL.COUNT} * FROM {TableName} ORDER BY {RandomMethod}",
-                       [SqlStatement.RandomUserCount] = $"SELECT TOP @{SQL.COUNT} * FROM {TableName} WHERE {OwnerUserID} = @{OwnerUserID} ORDER BY {RandomMethod}",
-                       [SqlStatement.Next]            = @$"SELECT * FROM {TableName} WHERE ( id = IFNULL((SELECT MIN({IdColumnName}) FROM {TableName} WHERE {IdColumnName} > @{SQL.ID}), 0) )",
-                       [SqlStatement.SortedIDs]       = @$"SELECT {IdColumnName}, {DateCreated} FROM {TableName} ORDER BY {DateCreated} DESC",
-                       [SqlStatement.NextID]          = @$"SELECT {IdColumnName} FROM {TableName} WHERE ( id = IFNULL((SELECT MIN({IdColumnName}) FROM {TableName} WHERE {IdColumnName} > @{SQL.ID}), 0) )",
-                       [SqlStatement.Last]            = $"SELECT * FROM {TableName} ORDER BY {IdColumnName} DESC LIMIT 1",
-                       [SqlStatement.SingleInsert]    = $"INSERT INTO {TableName} ({ColumnNames}) OUTPUT INSERTED.ID values ({string.Join( ',', VariableNames )});",
-                       [SqlStatement.TryInsert] = $"""
-                                                   IF NOT EXISTS(SELECT * FROM {TableName} WHERE @where)
-                                                   BEGIN
-                                                       INSERT INTO {TableName} ({ColumnNames}) OUTPUT INSERTED.ID values ({string.Join( ',', VariableNames )})
-                                                   END
-
-                                                   ELSE
-                                                   BEGIN
-                                                       SELECT {IdColumnName} = NULL
-                                                   END
-                                                   """,
-                       [SqlStatement.InsertOrUpdate] = $"""
-                                                        IF NOT EXISTS(SELECT * FROM {TableName} WHERE @where)
-                                                        BEGIN
-                                                            INSERT INTO {TableName} ({ColumnNames}) OUTPUT INSERTED.ID values ({string.Join( ',', VariableNames )})
-                                                        END
-
-                                                        ELSE
-                                                        BEGIN
-                                                            UPDATE {TableName} SET {KeyValuePairs} WHERE {IdColumnName} = @{SQL.ID};
-
-                                                            SELECT TOP 1 {IdColumnName} FROM {TableName} WHERE @where
-                                                        END
-                                                        """,
-                       [SqlStatement.First]  = $"SELECT TOP 1 * FROM {TableName} ORDER BY {DateCreated} ASC LIMIT 1",
-                       [SqlStatement.Delete] = $"DELETE FROM {TableName} WHERE {IdColumnName} = @{SQL.ID};",
-                       [SqlStatement.Count]  = $"SELECT COUNT({IdColumnName}) FROM {TableName}"
-                   };
-
-        return dict.ToImmutableDictionary();
-    }
-    */
-
 
     public override SqlCommand First()
     {

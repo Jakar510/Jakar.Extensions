@@ -11,9 +11,10 @@ public class CredentialsException : Exception
     public static CredentialsException Create( string? user, Exception? inner = default ) => new($"User: '{user ?? "null"}'", inner);
 
 
-    public static bool IsValid( [ NotNullWhen( true ) ] string? user, [ NotNullWhen( true ) ] string? password ) => string.IsNullOrWhiteSpace( user ) is false && string.IsNullOrWhiteSpace( password ) is false;
-    public static void ThrowIfInvalid( string? user, string? password )
+    public static bool IsValid( [ NotNullWhen(        true ) ] string? user, [ NotNullWhen( true ) ] string? password ) => IsInvalid( user, password ) is false;
+    public static bool IsInvalid( [ NotNullWhen(      true ) ] string? user, [ NotNullWhen( true ) ] string? password ) => string.IsNullOrWhiteSpace( user ) || string.IsNullOrWhiteSpace( password );
+    public static void ThrowIfInvalid( [ NotNullWhen( true ) ] string? user, [ NotNullWhen( true ) ] string? password )
     {
-        if ( IsValid( user, password ) ) { throw Create( user ); }
+        if ( IsInvalid( user, password ) ) { throw Create( user ); }
     }
 }
