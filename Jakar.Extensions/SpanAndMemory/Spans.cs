@@ -83,14 +83,16 @@ public static partial class Spans
     }
 
 
-    public static int LastIndexOf<T>( this Span<T> value, T c, int endIndex ) where T : IEquatable<T>
+    public static int LastIndexOf<T>( this Span<T> value, T c, int endIndex )
+        where T : IEquatable<T>
     {
         Guard.IsInRangeFor( endIndex, value, nameof(value) );
 
         return value[..endIndex].LastIndexOf( c );
     }
 
-    public static int LastIndexOf<T>( this ReadOnlySpan<T> value, T c, int endIndex ) where T : IEquatable<T>
+    public static int LastIndexOf<T>( this ReadOnlySpan<T> value, T c, int endIndex )
+        where T : IEquatable<T>
     {
         Guard.IsInRangeFor( endIndex, value, nameof(value) );
 
@@ -99,7 +101,8 @@ public static partial class Spans
     [ Pure ] public static Memory<T> AsMemory<T>( this T[] span ) => MemoryMarshal.CreateFromPinnedArray( span, 0, span.Length );
 
     [ Pure ]
-    public static ReadOnlySpan<T> Join<T>( this ReadOnlySpan<T> value, ReadOnlySpan<T> other ) where T : unmanaged, IEquatable<T>
+    public static ReadOnlySpan<T> Join<T>( this ReadOnlySpan<T> value, ReadOnlySpan<T> other )
+        where T : unmanaged, IEquatable<T>
     {
         int     size   = value.Length + other.Length;
         Span<T> buffer = stackalloc T[size];
@@ -123,7 +126,8 @@ public static partial class Spans
 
 
     [ Pure ]
-    public static Span<T> Join<T>( this Span<T> value, Span<T> other ) where T : unmanaged, IEquatable<T>
+    public static Span<T> Join<T>( this Span<T> value, Span<T> other )
+        where T : unmanaged, IEquatable<T>
     {
         int     size   = value.Length + other.Length;
         Span<T> buffer = stackalloc T[size];
@@ -132,7 +136,8 @@ public static partial class Spans
     }
 
     [ Pure ]
-    public static Span<T> Join<T>( this Span<T> value, ReadOnlySpan<T> other ) where T : unmanaged, IEquatable<T>
+    public static Span<T> Join<T>( this Span<T> value, ReadOnlySpan<T> other )
+        where T : unmanaged, IEquatable<T>
     {
         int     size   = value.Length + other.Length;
         Span<T> buffer = stackalloc T[size];

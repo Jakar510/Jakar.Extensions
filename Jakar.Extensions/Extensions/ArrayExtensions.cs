@@ -1,8 +1,4 @@
-﻿using System.Reflection.Emit;
-
-
-
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
 
 
 public static class ArrayExtensions

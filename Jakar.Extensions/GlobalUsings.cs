@@ -34,6 +34,7 @@ global using System.Net.Http;
 global using System.Net.Http.Headers;
 global using System.Net.Security;
 global using System.Numerics;
+global using System.Reflection.Emit;
 global using System.Runtime.InteropServices;
 global using System.Runtime.Versioning;
 global using System.Security;
@@ -47,6 +48,7 @@ global using ValueOf;
 global using CommunityToolkit.Diagnostics;
 global using Microsoft.Extensions.Logging;
 global using Newtonsoft.Json.Serialization;
+global using OneOf;
 global using PureAttribute = JetBrains.Annotations.PureAttribute;
 
 
