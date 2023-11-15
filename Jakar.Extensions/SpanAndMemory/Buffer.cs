@@ -45,8 +45,7 @@ public ref struct Buffer<T>
     public void Dispose()
     {
         T[]? toReturn = _arrayToReturnToPool;
-        _comparer = default;
-        this      = default; // For safety, to avoid using pooled array if this instance is erroneously appended to again
+        this = default; // For safety, to avoid using pooled array if this instance is erroneously appended to again
         if ( toReturn is not null ) { ArrayPool<T>.Shared.Return( toReturn ); }
     }
 

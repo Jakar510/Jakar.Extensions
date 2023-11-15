@@ -26,7 +26,7 @@
 					url="https://github.com/Jakar510/Jakar.Extensions"
 					branch="master" />
 		<dependencies>
-			<group targetFramework="net7.0">
+			<group targetFramework="net8.0">
 				<dependency id="Jakar.Extensions"
 							version="6.8.1" />
 				<dependency id="FluentMigrator"
@@ -97,20 +97,11 @@
 
 		<file src="..\images\icon.png" />
 
-		<!-- .net6.0 -->
-		<file src="../Jakar.DataBase/bin/Release/net6.0/Jakar.DataBase.dll"
-			  target="lib/net6.0" />
-		<file src="../Jakar.DataBase/bin/Release/net6.0/Jakar.DataBase.xml"
-			  target="net6.0" />
-		<file src="../Jakar.DataBase/bin/Release/net6.0/Jakar.DataBase.pdb"
-			  target="lib/net6.0" />
-
-		<!-- .net7.0 -->
 		<file src="../Jakar.DataBase/bin/Release/net7.0/Jakar.DataBase.dll"
-			  target="lib/net7.0" />
+			  target="lib/net8.0" />
 		<file src="../Jakar.DataBase/bin/Release/net7.0/Jakar.DataBase.xml"
-			  target="net7.0" />
+			  target="net8.0" />
 		<file src="../Jakar.DataBase/bin/Release/net7.0/Jakar.DataBase.pdb"
-			  target="lib/net7.0" />
+			  target="lib/net8.0" />
 	</files>
 </package>

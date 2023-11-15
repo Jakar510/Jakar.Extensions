@@ -13,7 +13,7 @@ public ref struct ValueStringBuilder
     private Buffer<char> _chars;
 
 
-    public          bool               IsEmpty  => _chars.Length == 0;
+    public readonly bool               IsEmpty  => _chars.Length == 0;
     public readonly int                Capacity => _chars.Capacity;
     public readonly Span<char>         Next     => _chars.Next;
     public readonly ReadOnlySpan<char> Span     => _chars.Span;
@@ -26,7 +26,7 @@ public ref struct ValueStringBuilder
         }
     }
     public ref char this[ int index ] => ref _chars[index];
-    public ReadOnlySpan<char> Result => MemoryMarshal.CreateReadOnlySpan( ref _chars.GetPinnableReference(), _chars.Length );
+    public readonly ReadOnlySpan<char> Result => MemoryMarshal.CreateReadOnlySpan( ref _chars.GetPinnableReference(), _chars.Length );
     public int Length
     {
         readonly get => _chars.Index;
