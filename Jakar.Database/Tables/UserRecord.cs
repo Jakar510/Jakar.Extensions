@@ -345,8 +345,8 @@ public sealed record UserRecord( Guid                                           
                                                                    };
 
 
-    [ RequiresPreviewFeatures ] public ValueTask<bool> RedeemCode( Database db, string code, CancellationToken token ) => db.TryCall( RedeemCode, db, code, token );
-    [ RequiresPreviewFeatures ]
+     public ValueTask<bool> RedeemCode( Database db, string code, CancellationToken token ) => db.TryCall( RedeemCode, db, code, token );
+    
     public async ValueTask<bool> RedeemCode( DbConnection connection, DbTransaction transaction, Database db, string code, CancellationToken token )
     {
         await foreach ( UserRecoveryCodeRecord mapping in UserRecoveryCodeRecord.Where( connection, transaction, db.UserRecoveryCodes, this, token ) )
@@ -366,8 +366,8 @@ public sealed record UserRecord( Guid                                           
     }
 
 
-    [ RequiresPreviewFeatures ] public ValueTask<string[]> ReplaceCodes( Database db, int count = 10, CancellationToken token = default ) => db.TryCall( ReplaceCodes, db, count, token );
-    [ RequiresPreviewFeatures ]
+     public ValueTask<string[]> ReplaceCodes( Database db, int count = 10, CancellationToken token = default ) => db.TryCall( ReplaceCodes, db, count, token );
+    
     public async ValueTask<string[]> ReplaceCodes( DbConnection connection, DbTransaction transaction, Database db, int count = 10, CancellationToken token = default )
     {
         IAsyncEnumerable<RecoveryCodeRecord>            old        = Codes( connection, transaction, db, token );
@@ -381,8 +381,8 @@ public sealed record UserRecord( Guid                                           
     }
 
 
-    [ RequiresPreviewFeatures ] public ValueTask<string[]> ReplaceCodes( Database db, IEnumerable<string> recoveryCodes, CancellationToken token = default ) => db.TryCall( ReplaceCodes, db, recoveryCodes, token );
-    [ RequiresPreviewFeatures ]
+     public ValueTask<string[]> ReplaceCodes( Database db, IEnumerable<string> recoveryCodes, CancellationToken token = default ) => db.TryCall( ReplaceCodes, db, recoveryCodes, token );
+    
     public async ValueTask<string[]> ReplaceCodes( DbConnection connection, DbTransaction transaction, Database db, IEnumerable<string> recoveryCodes, CancellationToken token = default )
     {
         IAsyncEnumerable<RecoveryCodeRecord>            old        = Codes( connection, transaction, db, token );
@@ -396,8 +396,8 @@ public sealed record UserRecord( Guid                                           
     }
 
 
-    [ RequiresPreviewFeatures ] public IAsyncEnumerable<RecoveryCodeRecord> Codes( Database db, CancellationToken token ) => db.TryCall( Codes, db, token );
-    [ RequiresPreviewFeatures ]
+     public IAsyncEnumerable<RecoveryCodeRecord> Codes( Database db, CancellationToken token ) => db.TryCall( Codes, db, token );
+    
     public IAsyncEnumerable<RecoveryCodeRecord> Codes( DbConnection connection, DbTransaction transaction, Database db, CancellationToken token ) =>
         UserRecoveryCodeRecord.Where( connection, transaction, db.UserRecoveryCodes, db.RecoveryCodes, this, token );
 
@@ -759,7 +759,7 @@ public sealed record UserRecord( Guid                                           
 
     #region Roles
 
-    [ RequiresPreviewFeatures ]
+    
     public async ValueTask<bool> TryAdd( DbConnection connection, DbTransaction transaction, Database db, RoleRecord value, CancellationToken token ) =>
         await UserRoleRecord.TryAdd( connection, transaction, db.UserRoles, this, value, token );
     public IAsyncEnumerable<RoleRecord> GetRoles( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token = default ) =>
@@ -775,7 +775,7 @@ public sealed record UserRecord( Guid                                           
 
     #region Groups
 
-    [ RequiresPreviewFeatures ]
+    
     public async ValueTask<bool> TryAdd( DbConnection connection, DbTransaction transaction, Database db, GroupRecord value, CancellationToken token ) =>
         await UserGroupRecord.TryAdd( connection, transaction, db.UserGroups, this, value, token );
     public IAsyncEnumerable<GroupRecord> GetGroups( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token = default ) =>

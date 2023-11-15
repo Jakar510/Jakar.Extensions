@@ -75,9 +75,9 @@ public sealed class UserStore : IUserLoginStore<UserRecord>,
     public async                             Task SetPhoneNumberConfirmedAsync( UserRecord user, bool confirmed, CancellationToken token ) => await _dbContext.SetPhoneNumberConfirmedAsync( user, confirmed, token );
     public async                             Task<string?> GetSecurityStampAsync( UserRecord user, CancellationToken token ) => await _dbContext.GetSecurityStampAsync( user, token );
     public async                             Task SetSecurityStampAsync( UserRecord user, string stamp, CancellationToken token ) => await _dbContext.SetSecurityStampAsync( user, stamp, token );
-    [ RequiresPreviewFeatures ] public async Task<int> CountCodesAsync( UserRecord user, CancellationToken token ) => (await user.Codes( _dbContext, token ).ToList( token )).Count;
-    [ RequiresPreviewFeatures ] public async Task<bool> RedeemCodeAsync( UserRecord user, string code, CancellationToken token ) => await user.RedeemCode( _dbContext, code, token );
-    [ RequiresPreviewFeatures ] public async Task ReplaceCodesAsync( UserRecord user, IEnumerable<string> recoveryCodes, CancellationToken token ) => await user.ReplaceCodes( _dbContext, recoveryCodes, token );
+     public async Task<int> CountCodesAsync( UserRecord user, CancellationToken token ) => (await user.Codes( _dbContext, token ).ToList( token )).Count;
+     public async Task<bool> RedeemCodeAsync( UserRecord user, string code, CancellationToken token ) => await user.RedeemCode( _dbContext, code, token );
+     public async Task ReplaceCodesAsync( UserRecord user, IEnumerable<string> recoveryCodes, CancellationToken token ) => await user.ReplaceCodes( _dbContext, recoveryCodes, token );
     public async                             Task<bool> GetTwoFactorEnabledAsync( UserRecord user, CancellationToken token ) => await _dbContext.GetTwoFactorEnabledAsync( user, token );
     public async                             Task SetTwoFactorEnabledAsync( UserRecord user, bool enabled, CancellationToken token ) => await _dbContext.SetTwoFactorEnabledAsync( user, enabled, token );
     public async                             Task SetPasswordHashAsync( UserRecord user, string? passwordHash, CancellationToken token ) => await _dbContext.SetPasswordHashAsync( user, passwordHash, token );
