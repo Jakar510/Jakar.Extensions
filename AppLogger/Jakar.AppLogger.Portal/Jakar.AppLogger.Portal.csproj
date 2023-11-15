@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 	<PropertyGroup>
-		<TargetFramework>net7.0</TargetFramework>
+		<TargetFramework>net8.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<LangVersion>preview</LangVersion>
 		<Nullable>enable</Nullable>
@@ -23,10 +23,10 @@
 		<PackageReference Include="Blazored.SessionStorage" Version="2.4.0" />
 		<PackageReference Include="Blazored.Toast" Version="4.1.0" />
 		<PackageReference Include="Jakar.Extensions" Version="6.9.2" />
-		<PackageReference Include="MailKit" Version="4.2.0" />
+		<PackageReference Include="MailKit" Version="4.3.0" />
 		<PackageReference Include="Npgsql" Version="7.0.6" />
 		<PackageReference Include="Npgsql.Json.NET" Version="7.0.6" />
-		<PackageReference Include="Radzen.Blazor" Version="4.20.0" />
+		<PackageReference Include="Radzen.Blazor" Version="4.21.1" />
 	</ItemGroup>
 
 	<ItemGroup>

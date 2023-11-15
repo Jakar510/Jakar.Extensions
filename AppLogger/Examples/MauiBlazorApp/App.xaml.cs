@@ -1,5 +1,8 @@
-﻿namespace MauiBlazorApp;
+﻿using Microsoft.Maui.Controls;
 
+
+
+namespace MauiBlazorApp;
 
 public partial class App : Application
 {
