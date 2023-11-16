@@ -4,7 +4,7 @@
 namespace Jakar.Database.DbMigrations;
 
 
-public abstract class MigrateAddress : Migration<AddressRecord>
+public abstract class MigrateAddress : OwnedMigration<AddressRecord>
 {
     protected MigrateAddress() : base() { }
 

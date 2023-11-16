@@ -4,7 +4,7 @@
 namespace Jakar.Database.DbMigrations;
 
 
-public abstract class MigrateRecoveryCodeTable : Migration<RecoveryCodeRecord>
+public abstract class MigrateRecoveryCodeTable : OwnedMigration<RecoveryCodeRecord>
 {
     protected MigrateRecoveryCodeTable() : base() { }
 

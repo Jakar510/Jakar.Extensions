@@ -4,7 +4,7 @@
 namespace Jakar.Database.DbMigrations;
 
 
-public abstract class MigrateGroupTable : Migration<GroupRecord>
+public abstract class MigrateGroupTable : OwnedMigration<GroupRecord>
 {
     protected MigrateGroupTable() : base() { }
 
