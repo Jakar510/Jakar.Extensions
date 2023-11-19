@@ -40,20 +40,20 @@ public sealed record AddressRecord( [ property: ProtectedPersonalData, MaxLength
 
     public static AddressRecord Create( DbDataReader reader )
     {
-        string                  line1           = reader.GetString( nameof(Line1) );
-        string                  line2           = reader.GetString( nameof(Line2) );
-        string                  city            = reader.GetString( nameof(City) );
-        string                  stateOrProvince = reader.GetString( nameof(StateOrProvince) );
-        string                  country         = reader.GetString( nameof(Country) );
-        string                  postalCode      = reader.GetString( nameof(PostalCode) );
-        string                  address         = reader.GetString( nameof(Address) );
-        var                     additionalData  = JsonConvert.DeserializeObject<Dictionary<string, JToken?>>( reader.GetString( nameof(AdditionalData) ) );
-        bool                    isPrimary       = reader.GetFieldValue<bool>( nameof(IsPrimary) );
-        RecordID<AddressRecord> id              = RecordID<AddressRecord>.ID( reader );
-        RecordID<UserRecord>?   createdBy       = RecordID<UserRecord>.CreatedBy( reader );
-        var                     ownerUserID     = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
-        var                     dateCreated     = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
-        var                     lastModified    = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
+        string                        line1           = reader.GetFieldValue<string>( nameof(Line1) );
+        string                        line2           = reader.GetFieldValue<string>( nameof(Line2) );
+        string                        city            = reader.GetFieldValue<string>( nameof(City) );
+        string                        stateOrProvince = reader.GetFieldValue<string>( nameof(StateOrProvince) );
+        string                        country         = reader.GetFieldValue<string>( nameof(Country) );
+        string                        postalCode      = reader.GetFieldValue<string>( nameof(PostalCode) );
+        string                        address         = reader.GetFieldValue<string>( nameof(Address) );
+        IDictionary<string, JToken?>? additionalData  = reader.GetAdditionalData();
+        bool                          isPrimary       = reader.GetFieldValue<bool>( nameof(IsPrimary) );
+        RecordID<AddressRecord>       id              = RecordID<AddressRecord>.ID( reader );
+        RecordID<UserRecord>?         createdBy       = RecordID<UserRecord>.CreatedBy( reader );
+        var                           ownerUserID     = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
+        var                           dateCreated     = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
+        var                           lastModified    = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
 
         var record = new AddressRecord( line1,
                                         line2,

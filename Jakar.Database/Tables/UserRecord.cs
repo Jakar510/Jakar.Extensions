@@ -2,49 +2,50 @@
 
 
 [ Serializable, Table( "Users" ) ]
-public sealed record UserRecord( Guid                                                                                                      UserID,
-                                 [ property: ProtectedPersonalData, MaxLength( 256 ) ] string                                              UserName,
-                                 string                                                                                                    FirstName,
-                                 string                                                                                                    LastName,
-                                 string                                                                                                    FullName,
-                                 [ property: MaxLength( TokenValidationParameters.DefaultMaximumTokenSizeInBytes ) ] string                Rights,
-                                 [ property: MaxLength( 256 ) ]                                                      string                Gender,
-                                 string                                                                                                    Company,
-                                 string                                                                                                    Description,
-                                 string                                                                                                    Department,
-                                 string                                                                                                    Title,
-                                 string                                                                                                    Website,
-                                 SupportedLanguage                                                                                         PreferredLanguage,
-                                 string                                                                                                    Email,
-                                 bool                                                                                                      IsEmailConfirmed,
-                                 string                                                                                                    PhoneNumber,
-                                 string                                                                                                    Ext,
-                                 bool                                                                                                      IsPhoneNumberConfirmed,
-                                 bool                                                                                                      IsTwoFactorEnabled,
-                                 DateTimeOffset?                                                                                           LastBadAttempt,
-                                 DateTimeOffset?                                                                                           LastLogin,
-                                 int                                                                                                       BadLogins,
-                                 bool                                                                                                      IsLocked,
-                                 DateTimeOffset?                                                                                           LockDate,
-                                 DateTimeOffset?                                                                                           LockoutEnd,
-                                 [ property: MaxLength( TokenValidationParameters.DefaultMaximumTokenSizeInBytes ) ] string                PasswordHash,
-                                 [ property: MaxLength( TokenValidationParameters.DefaultMaximumTokenSizeInBytes ) ] string                RefreshToken,
-                                 DateTimeOffset?                                                                                           RefreshTokenExpiryTime,
-                                 Guid?                                                                                                     SessionID,
-                                 bool                                                                                                      IsActive,
-                                 bool                                                                                                      IsDisabled,
-                                 [ property: MaxLength( TokenValidationParameters.DefaultMaximumTokenSizeInBytes ) ] string                SecurityStamp,
-                                 [ property: MaxLength( TokenValidationParameters.DefaultMaximumTokenSizeInBytes ) ] string                AuthenticatorKey,
-                                 [ property: MaxLength( TokenValidationParameters.DefaultMaximumTokenSizeInBytes ) ] string                ConcurrencyStamp,
-                                 [ property: MaxLength( 256 ) ]                                                      RecordID<UserRecord>? EscalateTo,
-                                 IDictionary<string, JToken?>?                                                                             AdditionalData,
-                                 RecordID<UserRecord>                                                                                      ID,
-                                 RecordID<UserRecord>?                                                                                     CreatedBy,
-                                 Guid?                                                                                                     OwnerUserID,
-                                 DateTimeOffset                                                                                            DateCreated,
-                                 DateTimeOffset?                                                                                           LastModified = default
+public sealed record UserRecord( Guid                                                                 UserID,
+                                 [ property: ProtectedPersonalData, MaxLength( 256 ) ] string         UserName,
+                                 string                                                               FirstName,
+                                 string                                                               LastName,
+                                 string                                                               FullName,
+                                 [ property: MaxLength( UserRights.MAX_SIZE ) ] string                Rights,
+                                 [ property: MaxLength( 256 ) ]                 string                Gender,
+                                 string                                                               Company,
+                                 string                                                               Description,
+                                 string                                                               Department,
+                                 string                                                               Title,
+                                 string                                                               Website,
+                                 SupportedLanguage                                                    PreferredLanguage,
+                                 string                                                               Email,
+                                 bool                                                                 IsEmailConfirmed,
+                                 string                                                               PhoneNumber,
+                                 string                                                               Ext,
+                                 bool                                                                 IsPhoneNumberConfirmed,
+                                 bool                                                                 IsTwoFactorEnabled,
+                                 DateTimeOffset?                                                      LastBadAttempt,
+                                 DateTimeOffset?                                                      LastLogin,
+                                 int                                                                  BadLogins,
+                                 bool                                                                 IsLocked,
+                                 DateTimeOffset?                                                      LockDate,
+                                 DateTimeOffset?                                                      LockoutEnd,
+                                 [ property: MaxLength( UserRecord.MAX_SIZE ) ] string                PasswordHash,
+                                 [ property: MaxLength( UserRecord.MAX_SIZE ) ] string                RefreshToken,
+                                 DateTimeOffset?                                                      RefreshTokenExpiryTime,
+                                 Guid?                                                                SessionID,
+                                 bool                                                                 IsActive,
+                                 bool                                                                 IsDisabled,
+                                 [ property: MaxLength( UserRecord.MAX_SIZE ) ] string                SecurityStamp,
+                                 [ property: MaxLength( UserRecord.MAX_SIZE ) ] string                AuthenticatorKey,
+                                 [ property: MaxLength( UserRecord.MAX_SIZE ) ] string                ConcurrencyStamp,
+                                 [ property: MaxLength( 256 ) ]                 RecordID<UserRecord>? EscalateTo,
+                                 IDictionary<string, JToken?>?                                        AdditionalData,
+                                 RecordID<UserRecord>                                                 ID,
+                                 RecordID<UserRecord>?                                                CreatedBy,
+                                 Guid?                                                                OwnerUserID,
+                                 DateTimeOffset                                                       DateCreated,
+                                 DateTimeOffset?                                                      LastModified = default
 ) : OwnedTableRecord<UserRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<UserRecord>, IUserData<UserRecord>, IRefreshToken, IUserID, IUserDataRecord, UserRights.IRights
 {
+    public const            int                           MAX_SIZE        = TokenValidationParameters.DefaultMaximumTokenSizeInBytes;
     private static readonly PasswordHasher<UserRecord>    _hasher         = new();
     private                 IDictionary<string, JToken?>? _additionalData = AdditionalData;
 
@@ -110,54 +111,54 @@ public sealed record UserRecord( Guid                                           
         parameters.Add( nameof(SecurityStamp),          SecurityStamp );
         parameters.Add( nameof(AuthenticatorKey),       AuthenticatorKey );
         parameters.Add( nameof(ConcurrencyStamp),       ConcurrencyStamp );
-        parameters.Add( nameof(EscalateTo),             EscalateTo );
+        parameters.Add( nameof(EscalateTo),             EscalateTo?.Value );
         parameters.Add( nameof(AdditionalData),         AdditionalData );
         return parameters;
     }
 
     public static UserRecord Create( DbDataReader reader )
     {
-        Guid                  userID                 = reader.GetGuid( nameof(UserID) );
-        string                userName               = reader.GetString( nameof(UserName) );
-        string                firstName              = reader.GetString( nameof(FirstName) );
-        string                lastName               = reader.GetString( nameof(LastName) );
-        string                fullName               = reader.GetString( nameof(FullName) );
-        string                rights                 = reader.GetString( nameof(Rights) );
-        string                gender                 = reader.GetString( nameof(Gender) );
-        string                company                = reader.GetString( nameof(Company) );
-        string                description            = reader.GetString( nameof(Description) );
-        string                department             = reader.GetString( nameof(Department) );
-        string                title                  = reader.GetString( nameof(Title) );
-        string                website                = reader.GetString( nameof(Website) );
-        SupportedLanguage     preferredLanguage      = EnumSqlHandler<SupportedLanguage>.Instance.Parse( reader.GetValue( nameof(PreferredLanguage) ) );
-        string                email                  = reader.GetString( nameof(Email) );
-        bool                  isEmailConfirmed       = reader.GetBoolean( nameof(IsEmailConfirmed) );
-        string                phoneNumber            = reader.GetString( nameof(PhoneNumber) );
-        string                ext                    = reader.GetString( nameof(Ext) );
-        bool                  isPhoneNumberConfirmed = reader.GetBoolean( nameof(IsPhoneNumberConfirmed) );
-        bool                  isTwoFactorEnabled     = reader.GetBoolean( nameof(IsTwoFactorEnabled) );
-        var                   lastBadAttempt         = reader.GetFieldValue<DateTimeOffset?>( nameof(LastBadAttempt) );
-        var                   lastLogin              = reader.GetFieldValue<DateTimeOffset?>( nameof(LastLogin) );
-        int                   badLogins              = reader.GetFieldValue<int>( nameof(BadLogins) );
-        bool                  isLocked               = reader.GetBoolean( nameof(IsLocked) );
-        var                   lockDate               = reader.GetFieldValue<DateTimeOffset?>( nameof(LockDate) );
-        var                   lockoutEnd             = reader.GetFieldValue<DateTimeOffset?>( nameof(LockoutEnd) );
-        string                passwordHash           = reader.GetString( nameof(PasswordHash) );
-        string                refreshToken           = reader.GetString( nameof(RefreshToken) );
-        var                   refreshTokenExpiryTime = reader.GetFieldValue<DateTimeOffset?>( nameof(RefreshTokenExpiryTime) );
-        var                   sessionID              = reader.GetFieldValue<Guid?>( nameof(SessionID) );
-        bool                  isActive               = reader.GetBoolean( nameof(IsActive) );
-        bool                  isDisabled             = reader.GetBoolean( nameof(IsDisabled) );
-        string                securityStamp          = reader.GetString( nameof(SecurityStamp) );
-        string                authenticatorKey       = reader.GetString( nameof(AuthenticatorKey) );
-        string                concurrencyStamp       = reader.GetString( nameof(AuthenticatorKey) );
-        var                   escalateTo             = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(EscalateTo) ) );
-        var                   additionalData         = JsonConvert.DeserializeObject<Dictionary<string, JToken?>>( reader.GetString( nameof(AdditionalData) ) );
-        RecordID<UserRecord>  id                     = RecordID<UserRecord>.ID( reader );
-        RecordID<UserRecord>? createdBy              = RecordID<UserRecord>.CreatedBy( reader );
-        var                   ownerUserID            = reader.GetFieldValue<Guid?>( nameof(OwnerUserID) );
-        var                   dateCreated            = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
-        var                   lastModified           = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
+        Guid                          userID                 = reader.GetFieldValue<Guid>( nameof(UserID) );
+        string                        userName               = reader.GetFieldValue<string>( nameof(UserName) );
+        string                        firstName              = reader.GetFieldValue<string>( nameof(FirstName) );
+        string                        lastName               = reader.GetFieldValue<string>( nameof(LastName) );
+        string                        fullName               = reader.GetFieldValue<string>( nameof(FullName) );
+        string                        rights                 = reader.GetFieldValue<string>( nameof(Rights) );
+        string                        gender                 = reader.GetFieldValue<string>( nameof(Gender) );
+        string                        company                = reader.GetFieldValue<string>( nameof(Company) );
+        string                        description            = reader.GetFieldValue<string>( nameof(Description) );
+        string                        department             = reader.GetFieldValue<string>( nameof(Department) );
+        string                        title                  = reader.GetFieldValue<string>( nameof(Title) );
+        string                        website                = reader.GetFieldValue<string>( nameof(Website) );
+        SupportedLanguage             preferredLanguage      = EnumSqlHandler<SupportedLanguage>.Instance.Parse( reader.GetValue( nameof(PreferredLanguage) ) );
+        string                        email                  = reader.GetFieldValue<string>( nameof(Email) );
+        bool                          isEmailConfirmed       = reader.GetBoolean( nameof(IsEmailConfirmed) );
+        string                        phoneNumber            = reader.GetFieldValue<string>( nameof(PhoneNumber) );
+        string                        ext                    = reader.GetFieldValue<string>( nameof(Ext) );
+        bool                          isPhoneNumberConfirmed = reader.GetBoolean( nameof(IsPhoneNumberConfirmed) );
+        bool                          isTwoFactorEnabled     = reader.GetBoolean( nameof(IsTwoFactorEnabled) );
+        var                           lastBadAttempt         = reader.GetFieldValue<DateTimeOffset?>( nameof(LastBadAttempt) );
+        var                           lastLogin              = reader.GetFieldValue<DateTimeOffset?>( nameof(LastLogin) );
+        int                           badLogins              = reader.GetFieldValue<int>( nameof(BadLogins) );
+        bool                          isLocked               = reader.GetBoolean( nameof(IsLocked) );
+        var                           lockDate               = reader.GetFieldValue<DateTimeOffset?>( nameof(LockDate) );
+        var                           lockoutEnd             = reader.GetFieldValue<DateTimeOffset?>( nameof(LockoutEnd) );
+        string                        passwordHash           = reader.GetFieldValue<string>( nameof(PasswordHash) );
+        string                        refreshToken           = reader.GetFieldValue<string>( nameof(RefreshToken) );
+        var                           refreshTokenExpiryTime = reader.GetFieldValue<DateTimeOffset?>( nameof(RefreshTokenExpiryTime) );
+        var                           sessionID              = reader.GetFieldValue<Guid?>( nameof(SessionID) );
+        bool                          isActive               = reader.GetBoolean( nameof(IsActive) );
+        bool                          isDisabled             = reader.GetBoolean( nameof(IsDisabled) );
+        string                        securityStamp          = reader.GetFieldValue<string>( nameof(SecurityStamp) );
+        string                        authenticatorKey       = reader.GetFieldValue<string>( nameof(AuthenticatorKey) );
+        string                        concurrencyStamp       = reader.GetFieldValue<string>( nameof(AuthenticatorKey) );
+        RecordID<UserRecord>?         escalateTo             = RecordID<UserRecord>.TryCreate( reader, nameof(EscalateTo) );
+        IDictionary<string, JToken?>? additionalData         = reader.GetAdditionalData();
+        RecordID<UserRecord>          id                     = RecordID<UserRecord>.ID( reader );
+        RecordID<UserRecord>?         createdBy              = RecordID<UserRecord>.CreatedBy( reader );
+        var                           ownerUserID            = reader.GetFieldValue<Guid?>( nameof(OwnerUserID) );
+        var                           dateCreated            = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
+        var                           lastModified           = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
 
 
         var record = new UserRecord( userID,
@@ -211,18 +212,14 @@ public sealed record UserRecord( Guid                                           
     }
 
 
-    public static UserRecord Create<TUser>( VerifyRequest<TUser> request, UserRights rights, UserRecord? caller = default ) where TUser : IUserData => Create( request, rights.ToString(), caller );
-    public static UserRecord Create<TUser>( VerifyRequest<TUser> request, string rights, UserRecord? caller = default ) where TUser : IUserData
+    public static UserRecord Create<TUser>( VerifyRequest<TUser> request, UserRights rights, UserRecord? caller = default )
+        where TUser : IUserData => Create( request, rights.ToString(), caller );
+    public static UserRecord Create<TUser>( VerifyRequest<TUser> request, string rights, UserRecord? caller = default )
+        where TUser : IUserData
     {
         ArgumentNullException.ThrowIfNull( request.Data );
-        UserRecord record = Create( request.UserLogin, rights, request.Data, caller );
-
-        record = record with
-                 {
-                     UserName = request.UserLogin
-                 };
-
-        return record.WithPassword( request.UserPassword ).Enable();
+        UserRecord record = Create( request.UserName, rights, request.Data, caller );
+        return record.WithPassword( request.Password ).Enable();
     }
     public static UserRecord Create( string userName, string rights, IUserData data, UserRecord? caller = default ) => new(Guid.NewGuid(),
                                                                                                                            userName,
@@ -345,8 +342,8 @@ public sealed record UserRecord( Guid                                           
                                                                    };
 
 
-     public ValueTask<bool> RedeemCode( Database db, string code, CancellationToken token ) => db.TryCall( RedeemCode, db, code, token );
-    
+    public ValueTask<bool> RedeemCode( Database db, string code, CancellationToken token ) => db.TryCall( RedeemCode, db, code, token );
+
     public async ValueTask<bool> RedeemCode( DbConnection connection, DbTransaction transaction, Database db, string code, CancellationToken token )
     {
         await foreach ( UserRecoveryCodeRecord mapping in UserRecoveryCodeRecord.Where( connection, transaction, db.UserRecoveryCodes, this, token ) )
@@ -366,8 +363,8 @@ public sealed record UserRecord( Guid                                           
     }
 
 
-     public ValueTask<string[]> ReplaceCodes( Database db, int count = 10, CancellationToken token = default ) => db.TryCall( ReplaceCodes, db, count, token );
-    
+    public ValueTask<string[]> ReplaceCodes( Database db, int count = 10, CancellationToken token = default ) => db.TryCall( ReplaceCodes, db, count, token );
+
     public async ValueTask<string[]> ReplaceCodes( DbConnection connection, DbTransaction transaction, Database db, int count = 10, CancellationToken token = default )
     {
         IAsyncEnumerable<RecoveryCodeRecord>            old        = Codes( connection, transaction, db, token );
@@ -381,8 +378,8 @@ public sealed record UserRecord( Guid                                           
     }
 
 
-     public ValueTask<string[]> ReplaceCodes( Database db, IEnumerable<string> recoveryCodes, CancellationToken token = default ) => db.TryCall( ReplaceCodes, db, recoveryCodes, token );
-    
+    public ValueTask<string[]> ReplaceCodes( Database db, IEnumerable<string> recoveryCodes, CancellationToken token = default ) => db.TryCall( ReplaceCodes, db, recoveryCodes, token );
+
     public async ValueTask<string[]> ReplaceCodes( DbConnection connection, DbTransaction transaction, Database db, IEnumerable<string> recoveryCodes, CancellationToken token = default )
     {
         IAsyncEnumerable<RecoveryCodeRecord>            old        = Codes( connection, transaction, db, token );
@@ -396,14 +393,15 @@ public sealed record UserRecord( Guid                                           
     }
 
 
-     public IAsyncEnumerable<RecoveryCodeRecord> Codes( Database db, CancellationToken token ) => db.TryCall( Codes, db, token );
-    
+    public IAsyncEnumerable<RecoveryCodeRecord> Codes( Database db, CancellationToken token ) => db.TryCall( Codes, db, token );
+
     public IAsyncEnumerable<RecoveryCodeRecord> Codes( DbConnection connection, DbTransaction transaction, Database db, CancellationToken token ) =>
         UserRecoveryCodeRecord.Where( connection, transaction, db.UserRecoveryCodes, db.RecoveryCodes, this, token );
 
 
     public UserRights GetRights() => UserRights.Create( this );
-    public async ValueTask<UserRights> GetRights<T>( DbConnection connection, DbTransaction transaction, Database db, CancellationToken token ) where T : struct, Enum
+    public async ValueTask<UserRights> GetRights<T>( DbConnection connection, DbTransaction transaction, Database db, CancellationToken token )
+        where T : struct, Enum
     {
         int totalRightCount = Enum.GetValues<T>().Length;
 
@@ -592,8 +590,10 @@ public sealed record UserRecord( Guid                                           
             : default;
 
 
-    public bool DoesNotOwn<TRecord>( TRecord record ) where TRecord : OwnedTableRecord<TRecord>, IDbReaderMapping<TRecord> => record.OwnerUserID != UserID;
-    public bool Owns<TRecord>( TRecord       record ) where TRecord : OwnedTableRecord<TRecord>, IDbReaderMapping<TRecord> => record.OwnerUserID == UserID;
+    public bool DoesNotOwn<TRecord>( TRecord record )
+        where TRecord : OwnedTableRecord<TRecord>, IDbReaderMapping<TRecord> => record.OwnerUserID != UserID;
+    public bool Owns<TRecord>( TRecord record )
+        where TRecord : OwnedTableRecord<TRecord>, IDbReaderMapping<TRecord> => record.OwnerUserID == UserID;
 
     #endregion
 
@@ -759,7 +759,6 @@ public sealed record UserRecord( Guid                                           
 
     #region Roles
 
-    
     public async ValueTask<bool> TryAdd( DbConnection connection, DbTransaction transaction, Database db, RoleRecord value, CancellationToken token ) =>
         await UserRoleRecord.TryAdd( connection, transaction, db.UserRoles, this, value, token );
     public IAsyncEnumerable<RoleRecord> GetRoles( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token = default ) =>
@@ -775,7 +774,6 @@ public sealed record UserRecord( Guid                                           
 
     #region Groups
 
-    
     public async ValueTask<bool> TryAdd( DbConnection connection, DbTransaction transaction, Database db, GroupRecord value, CancellationToken token ) =>
         await UserGroupRecord.TryAdd( connection, transaction, db.UserGroups, this, value, token );
     public IAsyncEnumerable<GroupRecord> GetGroups( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token = default ) =>

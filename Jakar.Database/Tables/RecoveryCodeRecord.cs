@@ -29,7 +29,7 @@ public sealed record RecoveryCodeRecord
 
     public static RecoveryCodeRecord Create( DbDataReader reader )
     {
-        string                       code         = reader.GetString( nameof(Code) );
+        string                       code         = reader.GetFieldValue<string>( nameof(Code) );
         var                          dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
         var                          lastModified = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
         var                          ownerUserID  = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );

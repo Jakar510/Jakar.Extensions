@@ -23,6 +23,17 @@ public static partial class AsyncLinq
         return list;
     }
 
+    
+    public static List<char> ToList( this    string                 sequence ) => ToList( sequence, sequence.Length );
+    public static List<T>    ToList<T>( this IReadOnlyCollection<T> sequence ) => ToList( sequence, sequence.Count );
+    public static List<T> ToList<T>( this IEnumerable<T> sequence, int count )
+    {
+        var array = new List<T>( count );
+        foreach ( (int i, T item) in sequence.Enumerate( 0 ) ) { array[i] = item; }
+
+        return array;
+    }
+
 
     public static T[] GetArray<T>( int count )
     {
@@ -41,7 +52,8 @@ public static partial class AsyncLinq
 
         return array;
     }
-    public static T[] ToArray<T>( IEnumerable<T> sequence ) where T : IEquatable<T>
+    public static T[] ToArray<T>( IEnumerable<T> sequence )
+        where T : IEquatable<T>
     {
         switch ( sequence )
         {
@@ -107,14 +119,16 @@ public static partial class AsyncLinq
 
         return array;
     }
-    public static TResult[] ToArray<T, TResult>( this IEnumerable<T> sequence, Func<T, TResult> func ) where TResult : IEquatable<TResult>
+    public static TResult[] ToArray<T, TResult>( this IEnumerable<T> sequence, Func<T, TResult> func )
+        where TResult : IEquatable<TResult>
     {
         using var buffer = new Buffer<TResult>();
         foreach ( T item in sequence ) { buffer.Append( func( item ) ); }
 
         return buffer.Span.ToArray();
     }
-    public static TResult[] ToArray<T, TResult>( this ReadOnlySpan<T> sequence, Func<T, TResult> func ) where TResult : IEquatable<TResult>
+    public static TResult[] ToArray<T, TResult>( this ReadOnlySpan<T> sequence, Func<T, TResult> func )
+        where TResult : IEquatable<TResult>
     {
         using var buffer = new Buffer<TResult>();
         foreach ( T item in sequence ) { buffer.Append( func( item ) ); }
@@ -123,17 +137,20 @@ public static partial class AsyncLinq
     }
 
 
-    public static T[] Sorted<T>( this T[] array ) where T : IComparable<T>
+    public static T[] Sorted<T>( this T[] array )
+        where T : IComparable<T>
     {
         Array.Sort( array );
         return array;
     }
-    public static T[] Sorted<T>( this T[] array, IComparer<T> comparer ) where T : IComparable<T>
+    public static T[] Sorted<T>( this T[] array, IComparer<T> comparer )
+        where T : IComparable<T>
     {
         Array.Sort( array, comparer );
         return array;
     }
-    public static T[] Sorted<T>( this T[] array, Comparison<T> comparer ) where T : IComparable<T>
+    public static T[] Sorted<T>( this T[] array, Comparison<T> comparer )
+        where T : IComparable<T>
     {
         Array.Sort( array, comparer );
         return array;

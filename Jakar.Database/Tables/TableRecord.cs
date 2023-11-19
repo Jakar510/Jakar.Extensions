@@ -11,7 +11,8 @@ public interface IRecordPair : IUniqueID<Guid> // where TID : IComparable<TID>, 
 
 
 
-public interface IDbReaderMapping<out TRecord> where TRecord : IDbReaderMapping<TRecord>
+public interface IDbReaderMapping<out TRecord>
+    where TRecord : IDbReaderMapping<TRecord>
 {
     public abstract static string                    TableName { get; }
     public abstract static TRecord                   Create( DbDataReader      reader );
@@ -30,7 +31,8 @@ public interface ITableRecord : IRecordPair
 
 
 
-public interface ITableRecord<TRecord> : ITableRecord where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
+public interface ITableRecord<TRecord> : ITableRecord
+    where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
     public new RecordID<TRecord> ID { get; }
     Guid IUniqueID<Guid>.        ID => ID.Value;
@@ -68,17 +70,17 @@ public abstract record TableRecord<TRecord>( [ property: Key ] RecordID<TRecord>
 
 
     public static DynamicParameters GetDynamicParameters( TRecord record ) => GetDynamicParameters( record.ID );
-    public static DynamicParameters GetDynamicParameters( RecordID<TRecord> id )
+    public static DynamicParameters GetDynamicParameters( in RecordID<TRecord> id )
     {
         var parameters = new DynamicParameters();
-        parameters.Add( nameof(ID), id );
+        parameters.Add( nameof(ID), id.Value );
         return parameters;
     }
 
     public virtual DynamicParameters ToDynamicParameters()
     {
         var parameters = new DynamicParameters();
-        parameters.Add( nameof(ID),           ID );
+        parameters.Add( nameof(ID),           ID.Value );
         parameters.Add( nameof(DateCreated),  DateCreated );
         parameters.Add( nameof(LastModified), LastModified );
         return parameters;
@@ -128,7 +130,7 @@ public abstract record OwnedTableRecord<TRecord>
     public static DynamicParameters GetDynamicParameters( UserRecord user )
     {
         var parameters = new DynamicParameters();
-        parameters.Add( nameof(CreatedBy),   user.ID );
+        parameters.Add( nameof(CreatedBy),   user.ID.Value );
         parameters.Add( nameof(OwnerUserID), user.UserID );
         return parameters;
     }
@@ -136,14 +138,14 @@ public abstract record OwnedTableRecord<TRecord>
     {
         var parameters = new DynamicParameters();
         parameters.Add( nameof(OwnerUserID), record.OwnerUserID );
-        parameters.Add( nameof(CreatedBy),   record.CreatedBy );
+        parameters.Add( nameof(CreatedBy),   record.CreatedBy?.Value );
         return parameters;
     }
 
     public override DynamicParameters ToDynamicParameters()
     {
         var parameters = base.ToDynamicParameters();
-        parameters.Add( nameof(CreatedBy),   CreatedBy );
+        parameters.Add( nameof(CreatedBy),   CreatedBy?.Value );
         parameters.Add( nameof(OwnerUserID), OwnerUserID );
         return parameters;
     }

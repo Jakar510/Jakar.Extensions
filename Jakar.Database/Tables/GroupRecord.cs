@@ -5,7 +5,7 @@
 public sealed record GroupRecord( [ MaxLength( 256 ) ]                                                      string?              CustomerID,
                                   [ MaxLength( 1024 ) ]                                                     string               NameOfGroup,
                                   [ MaxLength( 256 ) ]                                                      RecordID<UserRecord> OwnerID,
-                                  [ MaxLength( TokenValidationParameters.DefaultMaximumTokenSizeInBytes ) ] string               Rights,
+                                  [ MaxLength( UserRights.MAX_SIZE ) ] string               Rights,
                                   RecordID<GroupRecord>                                                                          ID,
                                   RecordID<UserRecord>?                                                                          CreatedBy,
                                   Guid?                                                                                          OwnerUserID,
@@ -45,10 +45,10 @@ public sealed record GroupRecord( [ MaxLength( 256 ) ]                          
 
     public static GroupRecord Create( DbDataReader reader )
     {
-        string                customerID   = reader.GetString( nameof(CustomerID) );
-        string                nameOfGroup  = reader.GetString( nameof(NameOfGroup) );
+        string                customerID   = reader.GetFieldValue<string>( nameof(CustomerID) );
+        string                nameOfGroup  = reader.GetFieldValue<string>( nameof(NameOfGroup) );
         var                   ownerID      = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(OwnerID) ) );
-        string                rights       = reader.GetString( nameof(Rights) );
+        string                rights       = reader.GetFieldValue<string>( nameof(Rights) );
         var                   dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
         var                   lastModified = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
         var                   ownerUserID  = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );

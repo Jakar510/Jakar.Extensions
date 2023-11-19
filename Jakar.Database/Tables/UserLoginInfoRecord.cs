@@ -41,10 +41,10 @@ public sealed record UserLoginInfoRecord( [ property: MaxLength(                
 
     public static UserLoginInfoRecord Create( DbDataReader reader )
     {
-        string                        loginProvider       = reader.GetString( nameof(LoginProvider) );
-        string                        providerDisplayName = reader.GetString( nameof(ProviderDisplayName) );
-        string                        providerKey         = reader.GetString( nameof(ProviderKey) );
-        string                        value               = reader.GetString( nameof(Value) );
+        string                        loginProvider       = reader.GetFieldValue<string>( nameof(LoginProvider) );
+        string                        providerDisplayName = reader.GetFieldValue<string>( nameof(ProviderDisplayName) );
+        string                        providerKey         = reader.GetFieldValue<string>( nameof(ProviderKey) );
+        string                        value               = reader.GetFieldValue<string>( nameof(Value) );
         var                           dateCreated         = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
         var                           lastModified        = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
         var                           ownerUserID         = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );

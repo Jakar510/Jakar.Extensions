@@ -51,17 +51,17 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
         DateOnlyHandler.Register();
         TimeOnlyHandler.Register();
         AppVersionHandler.Register();
-        RecordID<GroupRecord>.DapperTypeHandler.Register();
-        RecordID<RecoveryCodeRecord>.DapperTypeHandler.Register();
-        RecordID<RoleRecord>.DapperTypeHandler.Register();
-        RecordID<UserGroupRecord>.DapperTypeHandler.Register();
-        RecordID<UserLoginInfoRecord>.DapperTypeHandler.Register();
-        RecordID<UserRecoveryCodeRecord>.DapperTypeHandler.Register();
-        RecordID<UserRoleRecord>.DapperTypeHandler.Register();
-        RecordID<UserRecord>.DapperTypeHandler.Register();
-        UserRights.DapperTypeHandler.Register();
-        UserRights.DapperTypeHandlerNullable.Register();
+        RecordID<GroupRecord>.RegisterDapperTypeHandlers();
+        RecordID<RecoveryCodeRecord>.RegisterDapperTypeHandlers();
+        RecordID<RoleRecord>.RegisterDapperTypeHandlers();
+        RecordID<UserGroupRecord>.RegisterDapperTypeHandlers();
+        RecordID<UserLoginInfoRecord>.RegisterDapperTypeHandlers();
+        RecordID<UserRecoveryCodeRecord>.RegisterDapperTypeHandlers();
+        RecordID<UserRoleRecord>.RegisterDapperTypeHandlers();
+        RecordID<UserRecord>.RegisterDapperTypeHandlers();
+        UserRights.RegisterDapperTypeHandlers();
     }
+
     protected Database( IConfiguration configuration, ISqlCacheFactory sqlCacheFactory, IOptions<DbOptions> options ) : base()
     {
         _sqlCacheFactory  = sqlCacheFactory;

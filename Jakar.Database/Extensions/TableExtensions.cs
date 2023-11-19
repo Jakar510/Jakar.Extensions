@@ -3,10 +3,17 @@
 
 public static class TableExtensions
 {
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    public static IDictionary<string, JToken?>? GetAdditionalData( this DbDataReader reader ) =>
+        reader.GetFieldValue<string?>( nameof(JsonModels.IJsonModel.AdditionalData) )?.FromJson<Dictionary<string, JToken?>>();
+
+
     [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static string GetTableName( this object obj ) => obj.GetType().GetTableName();
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static string GetTableName<TRecord>() where TRecord : class => typeof(TRecord).GetTableName();
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    public static string GetTableName<TRecord>()
+        where TRecord : class => typeof(TRecord).GetTableName();
     [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
     public static string GetTableName( this Type type )
     {

@@ -28,13 +28,14 @@ public sealed class LoggerDB : Database.Database
         EnumSqlHandler<PlatformID>.Register();
         EnumSqlHandler<Architecture>.Register();
         EnumSqlHandler<LogLevel>.Register();
-        RecordID<AppRecord>.DapperTypeHandler.Register();
-        RecordID<LoggerAttachmentRecord>.DapperTypeHandler.Register();
-        RecordID<DeviceRecord>.DapperTypeHandler.Register();
-        RecordID<LogRecord>.DapperTypeHandler.Register();
-        RecordID<ScopeRecord>.DapperTypeHandler.Register();
-        RecordID<SessionRecord>.DapperTypeHandler.Register();
+        RecordID<AppRecord>.RegisterDapperTypeHandlers();
+        RecordID<LoggerAttachmentRecord>.RegisterDapperTypeHandlers();
+        RecordID<DeviceRecord>.RegisterDapperTypeHandlers();
+        RecordID<LogRecord>.RegisterDapperTypeHandlers();
+        RecordID<ScopeRecord>.RegisterDapperTypeHandlers();
+        RecordID<SessionRecord>.RegisterDapperTypeHandlers();
     }
+
     public LoggerDB( IConfiguration configuration, IDataProtectorProvider dataProtectorProvider, ISqlCacheFactory sqlCacheFactory, IOptions<DbOptions> options ) : base( configuration, sqlCacheFactory, options )
     {
         _dataProtectorProvider = dataProtectorProvider;
