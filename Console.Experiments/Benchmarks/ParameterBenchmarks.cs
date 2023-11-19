@@ -5,7 +5,7 @@ namespace Experiments.Benchmarks;
 
 
 /*
-[SimpleJob( RuntimeMoniker.HostProcess )]
+[Config( typeof(BenchmarkConfig) ), GroupBenchmarksBy( BenchmarkLogicalGroupRule.ByCategory ), SimpleJob( RuntimeMoniker.HostProcess )]
 [Orderer( SummaryOrderPolicy.FastestToSlowest )]
 [RankColumn]
 [MemoryDiagnoser]

@@ -1,6 +1,7 @@
 ﻿// Jakar.Extensions :: Experiments
 // 08/20/2023  9:51 PM
 
+using BenchmarkDotNet.Configs;
 using HashidsNet;
 
 
@@ -17,7 +18,7 @@ namespace Experiments.Benchmarks;
 
 
 
-[ SimpleJob( RuntimeMoniker.HostProcess ), Orderer( SummaryOrderPolicy.FastestToSlowest ), RankColumn, MemoryDiagnoser ]
+[ Config( typeof(BenchmarkConfig) ), GroupBenchmarksBy( BenchmarkLogicalGroupRule.ByCategory ), SimpleJob( RuntimeMoniker.HostProcess ), Orderer( SummaryOrderPolicy.FastestToSlowest ), RankColumn, MemoryDiagnoser ]
 public class HashBenchmarks
 {
     private const    string  HASH    = "xOEDj6A8g15z";

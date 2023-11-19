@@ -6,11 +6,12 @@ try
     "Hello World!".WriteToConsole();
     Console.WriteLine();
 
-    await TestDatabase.Test();
+    // await TestDatabase.Test();
 
     // JsonTest.Run();
 
     // BenchmarkRunner.Run<StringCollectionBenchmarks>();
+    BenchmarkRunner.Run( typeof(Program).Assembly ); //, new BenchmarkConfig()
 
     // ULongHashTests.Run( 100_000_000 )
     //               .WriteToDebug();
