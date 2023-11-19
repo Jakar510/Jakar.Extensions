@@ -19,6 +19,7 @@ public class BenchmarkConfig : ManualConfig
     public BenchmarkConfig()
     {
         SummaryStyle = SummaryStyle.Default.WithRatioStyle( RatioStyle.Percentage );
+
         // AddLogger( new ConsoleLogger(), new StreamLogger( new StreamWriter( _stream ) ) );
         // AddExporter( new JsonExporter() );
         // AddColumnProvider( new CompositeColumnProvider() );

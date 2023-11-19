@@ -51,7 +51,7 @@ namespace Experiments.Benchmarks;
 [ Config( typeof(BenchmarkConfig) ), GroupBenchmarksBy( BenchmarkLogicalGroupRule.ByCategory ), SimpleJob( RuntimeMoniker.HostProcess ), Orderer( SummaryOrderPolicy.FastestToSlowest ), MemoryDiagnoser ]
 
 // [RankColumn]
-public class ImmutableArrayBenchmarks
+public class CollectionBenchmarks
 {
     private static readonly Random _random = new(69);
     private static readonly Dictionary<int, List<double>> _list = new()

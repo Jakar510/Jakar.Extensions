@@ -10,8 +10,9 @@ try
 
     // JsonTest.Run();
 
-    // BenchmarkRunner.Run<StringCollectionBenchmarks>();
-    BenchmarkRunner.Run( typeof(Program).Assembly ); //, new BenchmarkConfig()
+    // BenchmarkRunner.Run<CollectionBenchmarks>();
+    BenchmarkRunner.Run<DictionaryLookupBenchmarks>();
+    // BenchmarkRunner.Run( typeof(Program).Assembly ); //, new BenchmarkConfig()
 
     // ULongHashTests.Run( 100_000_000 )
     //               .WriteToDebug();
