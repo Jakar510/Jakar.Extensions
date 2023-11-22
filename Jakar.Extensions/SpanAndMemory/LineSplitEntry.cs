@@ -5,7 +5,8 @@
 ///     <para> <see href="https://www.meziantou.net/split-a-string-into-lines-without-allocation.htm"/> </para>
 /// </summary>
 [ SuppressMessage( "ReSharper", "OutParameterValueIsAlwaysDiscarded.Global" ) ]
-public readonly ref struct LineSplitEntry<T> where T : unmanaged, IEquatable<T>
+public readonly ref struct LineSplitEntry<T>
+    where T : unmanaged, IEquatable<T>
 {
     public ReadOnlySpan<T> Value      { get; }
     public ParamsArray<T>  Separator  { get; }

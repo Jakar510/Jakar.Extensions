@@ -1,4 +1,8 @@
-﻿namespace Jakar.Extensions;
+﻿using System;
+
+
+
+namespace Jakar.Extensions;
 
 
 [ SuppressMessage( "ReSharper", "OutParameterValueIsAlwaysDiscarded.Global" ) ]
@@ -98,6 +102,11 @@ public static partial class Spans
 
         return value[..endIndex].LastIndexOf( c );
     }
+
+
+    [ Pure ] public static EnumerateEnumerator<T> Enumerate<T>( this ReadOnlySpan<T> span, int index = -1 ) => new(span, index);
+
+
     [ Pure ] public static Memory<T> AsMemory<T>( this T[] span ) => MemoryMarshal.CreateFromPinnedArray( span, 0, span.Length );
 
     [ Pure ]
