@@ -121,6 +121,18 @@ public static class ExceptionExtensions
                                                                                                        [nameof(MethodSignature)]    = e.MethodSignature(),
                                                                                                        [nameof(e.ToString)]         = e.ToString()
                                                                                                    };
+
+    public static void Details<T>( this Exception e, in T dict )
+        where T : class, IDictionary<string, string?>
+    {
+        dict[nameof(Type)]               = e.GetType().FullName;
+        dict[nameof(e.Source)]           = e.Source;
+        dict[nameof(e.Message)]          = e.Message;
+        dict[nameof(e.StackTrace)]       = e.StackTrace;
+        dict[nameof(Exception.HelpLink)] = e.HelpLink;
+        dict[nameof(MethodSignature)]    = e.MethodSignature();
+        dict[nameof(e.ToString)]         = e.ToString();
+    }
     public static void Details( this Exception e, out Dictionary<string, object?> dict, bool includeFullMethodInfo )
     {
         dict = new Dictionary<string, object?>

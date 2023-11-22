@@ -1,7 +1,7 @@
 ﻿namespace Jakar.Extensions;
 
 
-public interface IAppSettings : IHostViewModel
+public interface IAppSettings
 {
     public string     AppName           { get; }
     public AppVersion AppVersion        { get; }
@@ -50,7 +50,6 @@ public class AppSettings : BaseHostViewModel, IAppSettings
     }
 
 
-    protected override void OnHostChanged( in string? host, in bool isValid, in Uri? hostInfo ) { }
 }
 
 

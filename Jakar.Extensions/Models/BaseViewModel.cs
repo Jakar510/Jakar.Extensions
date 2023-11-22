@@ -30,7 +30,7 @@ public abstract class BaseViewModel : ObservableClass
 
 
     protected BaseViewModel() { }
-    protected BaseViewModel( string title ) => Title = title;
+    protected BaseViewModel( string? title ) => Title = title;
 
 
     public virtual void OnAppearing()    { }
