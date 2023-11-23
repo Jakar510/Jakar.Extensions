@@ -1074,15 +1074,16 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
         private void OnError( object   sender, ErrorEventArgs      e ) => Error?.Invoke( sender, e );
         private void OnRenamed( object sender, RenamedEventArgs e )
         {
-            LocalFile? file = this.FirstOrDefault( x => x.FullPath == e.OldFullPath );
+            LocalFile? file = this.AsEnumerable().FirstOrDefault( x => x.FullPath == e.OldFullPath );
             if ( file is not null ) { Remove( file ); }
 
             Add( e.FullPath );
         }
 
 
-        public void Dispose()
+        public override void Dispose()
         {
+            base.Dispose();
             _watcher.EnableRaisingEvents = false;
 
             _watcher.Created -= OnCreated;
@@ -1092,7 +1093,6 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
             _watcher.Error   -= OnError;
 
             _watcher.Dispose();
-            GC.SuppressFinalize( this );
         }
     }
 
@@ -1116,7 +1116,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
         using ( hasher )
         {
             await using FileStream stream = OpenRead();
-            byte[]                 hash = await hasher.ComputeHashAsync( stream );
+            byte[]                 hash   = await hasher.ComputeHashAsync( stream );
 
             return BitConverter.ToString( hash );
         }

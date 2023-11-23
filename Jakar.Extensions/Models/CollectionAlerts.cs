@@ -39,7 +39,7 @@ public abstract class CollectionAlerts<T> : ObservableClass, ICollectionAlerts, 
     public virtual void Refresh() => Reset();
 
 
-    protected virtual bool           Filter( T value ) => true;
+    protected virtual bool           Filter( T? value ) => true;
     public abstract   IEnumerator<T> GetEnumerator();
     IEnumerator IEnumerable.         GetEnumerator() => GetEnumerator();
 }

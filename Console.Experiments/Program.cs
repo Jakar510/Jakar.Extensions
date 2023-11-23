@@ -1,17 +1,15 @@
-﻿using Jakar.Database;
-
-
-try
+﻿try
 {
     "Hello World!".WriteToConsole();
     Console.WriteLine();
+    await Tests.Test_ConcurrentObservableCollection();
 
-    // await TestDatabase.Test();
+    // await Jakar.Database.TestDatabase.Test();
 
     // JsonTest.Run();
 
     // BenchmarkRunner.Run<CollectionBenchmarks>();
-    BenchmarkRunner.Run<DictionaryLookupBenchmarks>();
+    // BenchmarkRunner.Run<DictionaryLookupBenchmarks>();
     // BenchmarkRunner.Run( typeof(Program).Assembly ); //, new BenchmarkConfig()
 
     // ULongHashTests.Run( 100_000_000 )

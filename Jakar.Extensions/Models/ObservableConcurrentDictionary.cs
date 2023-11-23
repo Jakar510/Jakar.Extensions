@@ -119,7 +119,6 @@ public class ObservableConcurrentDictionary<TKey, TValue> : CollectionAlerts<Key
     }
 
 
-    public override IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator() =>
-        _dictionary.Where( Filter ).GetEnumerator();
+    public override IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator() => _dictionary.Where( Filter ).GetEnumerator();
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }

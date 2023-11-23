@@ -7,7 +7,7 @@ namespace Jakar.Extensions;
 /// </summary>
 /// <typeparam name="TValue"> </typeparam>
 [ Serializable ]
-public class ConcurrentObservableCollection<TValue> : CollectionAlerts<TValue>, IList<TValue>, IReadOnlyList<TValue>, IList, IDisposable
+public class ConcurrentObservableCollection<TValue> : CollectionAlerts<TValue>, IList<TValue>, IReadOnlyList<TValue>, IList, IDisposable, IAsyncEnumerable<TValue>
 {
     protected readonly List<TValue>      _values;
     protected readonly SemaphoreSlim     _lock = new(1);
@@ -88,6 +88,7 @@ public class ConcurrentObservableCollection<TValue> : CollectionAlerts<TValue>, 
             using ( AcquireLock() ) { return ((IList)_values).SyncRoot; }
         }
     }
+    public IEnumerable<TValue> Values => new Enumerator( this );
 
 
     public ConcurrentObservableCollection() : this( Comparer<TValue>.Default ) { }
@@ -101,6 +102,11 @@ public class ConcurrentObservableCollection<TValue> : CollectionAlerts<TValue>, 
     {
         _comparer = comparer;
         _values   = values;
+    }
+    public virtual void Dispose()
+    {
+        _lock.Dispose();
+        GC.SuppressFinalize( this );
     }
 
 
@@ -717,54 +723,122 @@ public class ConcurrentObservableCollection<TValue> : CollectionAlerts<TValue>, 
     }
 
 
-    public override IEnumerator<TValue> GetEnumerator()
-    {
-        using ( AcquireLock() ) { return _values.Where( Filter ).GetEnumerator(); }
-    }
-    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-    public void Dispose()
-    {
-        _lock.Dispose();
-        GC.SuppressFinalize( this );
-    }
+    public          IAsyncEnumerator<TValue> GetAsyncEnumerator( CancellationToken token = default ) => new AsyncEnumerator( this, token );
+    public override IEnumerator<TValue>      GetEnumerator()                                         => new Enumerator( this );
+    IEnumerator IEnumerable.                 GetEnumerator()                                         => GetEnumerator();
 
 
-    protected LockContext AcquireLock()
+    protected internal LockContext AcquireLock()
     {
         _lock.Wait();
         return new LockContext( _lock );
     }
-    protected LockContext AcquireLock( in CancellationToken token )
+    protected internal LockContext AcquireLock( in CancellationToken token )
     {
         _lock.Wait( token );
         return new LockContext( _lock );
     }
-    protected LockContext AcquireLock( in TimeSpan span )
+    protected internal LockContext AcquireLock( in TimeSpan span )
     {
         _lock.Wait( span );
         return new LockContext( _lock );
     }
-    protected LockContext AcquireLock( in TimeSpan span, in CancellationToken token )
+    protected internal LockContext AcquireLock( in TimeSpan span, in CancellationToken token )
     {
         _lock.Wait( span, token );
         return new LockContext( _lock );
     }
 
 
-    protected async ValueTask<LockContext> AcquireLockAsync( CancellationToken token )
+    protected internal async ValueTask<LockContext> AcquireLockAsync( CancellationToken token )
     {
         await _lock.WaitAsync( token );
         return new LockContext( _lock );
     }
-    protected async ValueTask<LockContext> AcquireLockAsync( TimeSpan span, CancellationToken token )
+    protected internal async ValueTask<LockContext> AcquireLockAsync( TimeSpan span, CancellationToken token )
     {
         await _lock.WaitAsync( span, token );
         return new LockContext( _lock );
     }
 
 
+    protected override bool Filter( TValue? value ) => value is not null;
+    internal bool Filter( ref int index, out TValue? current )
+    {
+        do
+        {
+            index++;
 
-    protected readonly record struct LockContext( SemaphoreSlim Locker ) : IDisposable
+            current = index < _values.Count
+                          ? _values[index]
+                          : default;
+        } while ( Filter( current ) );
+
+        return index < _values.Count;
+    }
+
+
+#pragma warning disable IDE0064 // Make readonly fields writable
+    public struct AsyncEnumerator : IAsyncEnumerator<TValue>
+    {
+        private readonly ConcurrentObservableCollection<TValue> _collection;
+        private readonly CancellationToken                      _token;
+        private          int                                    _index   = -1;
+        private          TValue?                                _current = default;
+
+        public readonly TValue Current => _current ?? throw new NullReferenceException( nameof(_current) );
+
+
+        public AsyncEnumerator( ConcurrentObservableCollection<TValue> collection, CancellationToken token )
+        {
+            _collection = collection;
+            _token      = token;
+        }
+        public ValueTask DisposeAsync()
+        {
+            this = default;
+            return default;
+        }
+
+
+        public async ValueTask<bool> MoveNextAsync()
+        {
+            using ( await _collection.AcquireLockAsync( _token ) ) { return _collection.Filter( ref _index, out _current ); }
+        }
+        public void Reset() => _index = -1;
+    }
+
+
+
+    public struct Enumerator : IEnumerator<TValue>, IEnumerable<TValue>
+    {
+        private readonly ConcurrentObservableCollection<TValue> _collection;
+        private          int                                    _index   = -1;
+        private          TValue?                                _current = default;
+
+        public readonly TValue             Current => _current ?? throw new NullReferenceException( nameof(_current) );
+        readonly        object IEnumerator.Current => Current  ?? throw new NullReferenceException( nameof(_current) );
+
+
+        public Enumerator( ConcurrentObservableCollection<TValue> collection ) => _collection = collection;
+
+
+        public void Dispose() => this = default;
+        public bool MoveNext()
+        {
+            using ( _collection.AcquireLock() ) { return _collection.Filter( ref _index, out _current ); }
+        }
+        public void Reset() => _index = -1;
+
+
+        readonly IEnumerator<TValue> IEnumerable<TValue>.GetEnumerator() => this;
+        readonly IEnumerator IEnumerable.                GetEnumerator() => this;
+    }
+#pragma warning restore IDE0064 // Make readonly fields writable
+
+
+
+    protected internal readonly record struct LockContext( SemaphoreSlim Locker ) : IDisposable
     {
         public void Dispose() => Locker.Release();
     }
