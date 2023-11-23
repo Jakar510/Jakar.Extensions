@@ -41,6 +41,8 @@ public static class Tests
         await foreach ( long x in collection ) { }
 
         await foreach ( long x in collection.WithCancellation( token ) ) { }
+
+        collection.ToPrettyJson().WriteToConsole();
     }
 
 

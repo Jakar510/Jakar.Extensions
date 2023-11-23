@@ -1,3 +1,7 @@
+using Newtonsoft.Json.Linq;
+
+
+
 namespace Jakar.Extensions;
 
 
@@ -79,6 +83,11 @@ public class ConcurrentObservableCollection<TValue> : CollectionAlerts<TValue>, 
                 Replaced( old, value, index );
             }
         }
+    }
+
+    protected internal int Length
+    {
+        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => _values.Count;
     }
     public SemaphoreSlim Lock => _lock;
     object ICollection.SyncRoot
@@ -766,29 +775,72 @@ public class ConcurrentObservableCollection<TValue> : CollectionAlerts<TValue>, 
     protected override bool Filter( TValue? value ) => value is not null;
     internal bool Filter( ref int index, out TValue? current )
     {
+    #if NET6_0_OR_GREATER
+        ReadOnlySpan<TValue> span = CollectionsMarshal.AsSpan( _values );
+    #else
+        ReadOnlySpan<TValue> span = _values.ToArray();
+    #endif
+
+        if ( index < 0 ) { index = 0; }
+
         do
         {
-            index++;
-
-            current = index < _values.Count
-                          ? _values[index]
+            current = index < span.Length
+                          ? span[index]
                           : default;
-        } while ( Filter( current ) );
 
-        return index < _values.Count;
+            index++;
+        } while ( Filter( current ) is false );
+
+        return index < span.Length;
+    }
+    internal static bool Filter( in List<TValue> values, ref int index, out TValue? current, Predicate<TValue?> filter )
+    {
+    #if NET6_0_OR_GREATER
+        ReadOnlySpan<TValue> span = CollectionsMarshal.AsSpan( values );
+    #else
+        ReadOnlySpan<TValue> span = values.ToArray();
+    #endif
+
+        if ( index < 0 ) { index = 0; }
+
+        do
+        {
+            current = index < span.Length
+                          ? span[index]
+                          : default;
+
+            index++;
+        } while ( filter( current ) is false );
+
+        return index < span.Length;
+    }
+    internal void Filter( ref List<TValue> values )
+    {
+        values.Clear();
+        values.AddRange( _values.Where( Filter ) );
     }
 
 
+
+    protected internal readonly record struct LockContext( SemaphoreSlim Locker ) : IDisposable
+    {
+        public void Dispose() => Locker.Release();
+    }
+
+
+
+#pragma warning disable IDE0290 // Use primary constructor
 #pragma warning disable IDE0064 // Make readonly fields writable
     public struct AsyncEnumerator : IAsyncEnumerator<TValue>
     {
         private readonly ConcurrentObservableCollection<TValue> _collection;
         private readonly CancellationToken                      _token;
-        private          int                                    _index   = -1;
+        private          int                                    _index   = 0;
         private          TValue?                                _current = default;
+        private          List<TValue>?                          _cache   = null;
 
         public readonly TValue Current => _current ?? throw new NullReferenceException( nameof(_current) );
-
 
         public AsyncEnumerator( ConcurrentObservableCollection<TValue> collection, CancellationToken token )
         {
@@ -802,11 +854,25 @@ public class ConcurrentObservableCollection<TValue> : CollectionAlerts<TValue>, 
         }
 
 
+        private readonly async ValueTask<List<TValue>> Init()
+        {
+            using ( await _collection.AcquireLockAsync( _token ) )
+            {
+                var values = new List<TValue>( _collection.Length );
+                _collection.Filter( ref values );
+                return values;
+            }
+        }
         public async ValueTask<bool> MoveNextAsync()
         {
-            using ( await _collection.AcquireLockAsync( _token ) ) { return _collection.Filter( ref _index, out _current ); }
+            _cache ??= await Init();
+            return Filter( _cache, ref _index, out _current, _collection.Filter );
         }
-        public void Reset() => _index = -1;
+        public void Reset()
+        {
+            _index = 0;
+            _cache = null;
+        }
     }
 
 
@@ -814,33 +880,41 @@ public class ConcurrentObservableCollection<TValue> : CollectionAlerts<TValue>, 
     public struct Enumerator : IEnumerator<TValue>, IEnumerable<TValue>
     {
         private readonly ConcurrentObservableCollection<TValue> _collection;
-        private          int                                    _index   = -1;
+        private          int                                    _index   = 0;
         private          TValue?                                _current = default;
+        private          List<TValue>?                          _cache   = null;
 
         public readonly TValue             Current => _current ?? throw new NullReferenceException( nameof(_current) );
         readonly        object IEnumerator.Current => Current  ?? throw new NullReferenceException( nameof(_current) );
 
-
         public Enumerator( ConcurrentObservableCollection<TValue> collection ) => _collection = collection;
-
-
         public void Dispose() => this = default;
+
+
+        private readonly List<TValue> Init()
+        {
+            using ( _collection.AcquireLock() )
+            {
+                var values = new List<TValue>( _collection.Length );
+                _collection.Filter( ref values );
+                return values;
+            }
+        }
         public bool MoveNext()
         {
-            using ( _collection.AcquireLock() ) { return _collection.Filter( ref _index, out _current ); }
+            _cache ??= Init();
+            return Filter( _cache, ref _index, out _current, _collection.Filter );
         }
-        public void Reset() => _index = -1;
+        public void Reset()
+        {
+            _index = 0;
+            _cache = null;
+        }
 
 
         readonly IEnumerator<TValue> IEnumerable<TValue>.GetEnumerator() => this;
         readonly IEnumerator IEnumerable.                GetEnumerator() => this;
     }
 #pragma warning restore IDE0064 // Make readonly fields writable
-
-
-
-    protected internal readonly record struct LockContext( SemaphoreSlim Locker ) : IDisposable
-    {
-        public void Dispose() => Locker.Release();
-    }
+#pragma warning restore IDE0290 // Use primary constructor
 }
