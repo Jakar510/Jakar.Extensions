@@ -723,9 +723,10 @@ public class ConcurrentObservableCollection<TValue> : CollectionAlerts<TValue>, 
     }
 
 
-    public          IAsyncEnumerator<TValue> GetAsyncEnumerator( CancellationToken token = default ) => new AsyncEnumerator( this, token );
-    public override IEnumerator<TValue>      GetEnumerator()                                         => new Enumerator( this );
-    IEnumerator IEnumerable.                 GetEnumerator()                                         => GetEnumerator();
+    public AsyncEnumerator                            GetAsyncEnumerator( CancellationToken token = default ) => new(this, token);
+    IAsyncEnumerator<TValue> IAsyncEnumerable<TValue>.GetAsyncEnumerator( CancellationToken token )           => GetAsyncEnumerator( token );
+    public override IEnumerator<TValue>               GetEnumerator()                                         => new Enumerator( this );
+    IEnumerator IEnumerable.                          GetEnumerator()                                         => GetEnumerator();
 
 
     protected internal LockContext AcquireLock()
