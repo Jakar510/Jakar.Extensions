@@ -9,6 +9,9 @@ namespace Jakar.Extensions;
 /// </summary>
 public static partial class Spans
 {
+    // SearchValues<char> values = SearchValues.Create( "" );
+
+
     public static bool Contains( this Span<char>         span, ReadOnlySpan<char> value ) => MemoryExtensions.Contains( span, value, StringComparison.Ordinal );
     public static bool Contains( this ReadOnlySpan<char> span, ReadOnlySpan<char> value ) => span.Contains( value, StringComparison.Ordinal );
 

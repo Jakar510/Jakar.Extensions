@@ -6,10 +6,6 @@
 // using Jakar.Xml.Deserialization;
 
 
-using System.Runtime.CompilerServices;
-
-
-
 namespace Experiments;
 #nullable enable
 
@@ -32,17 +28,15 @@ public static class Tests
     public static async ValueTask Test_ConcurrentObservableCollection( CancellationToken token = default )
     {
         var collection = new ConcurrentObservableCollection<long>();
-        await collection.AddAsync( Enumerable.Range( 0, 1000 ).Select<int, long>( x => x ), token );
+        await collection.AddAsync( Enumerable.Range( 0, 1000 ).Select<int, long>( static x => x ), token );
 
-        collection.Values.Select( x => x ).ToList().WriteToConsole();
+        foreach ( var x in collection ) { }
 
-        foreach ( long x in collection ) { }
+        await foreach ( var x in collection ) { }
 
-        await foreach ( long x in collection ) { }
+        await foreach ( var x in collection.WithCancellation( token ) ) { }
 
-        await foreach ( long x in collection.WithCancellation( token ) ) { }
-
-        collection.ToPrettyJson().WriteToConsole();
+        // collection.ToPrettyJson().WriteToConsole();
     }
 
 

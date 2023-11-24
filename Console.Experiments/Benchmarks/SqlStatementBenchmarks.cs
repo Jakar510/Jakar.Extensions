@@ -6,8 +6,6 @@
 // using CommunityToolkit.HighPerformance.Enumerables;
 
 
-using BenchmarkDotNet.Configs;
-
 namespace Experiments.Benchmarks;
 
 

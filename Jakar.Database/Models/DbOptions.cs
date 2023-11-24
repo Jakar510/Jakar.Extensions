@@ -1,7 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 10/16/2022  5:46 PM
 
-using FluentMigrator.Runner.Initialization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 

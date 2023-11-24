@@ -1,7 +1,3 @@
-using Newtonsoft.Json.Linq;
-
-
-
 namespace Jakar.Extensions;
 
 
@@ -85,10 +81,6 @@ public class ConcurrentObservableCollection<TValue> : CollectionAlerts<TValue>, 
         }
     }
 
-    protected internal int Length
-    {
-        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => _values.Count;
-    }
     public SemaphoreSlim Lock => _lock;
     object ICollection.SyncRoot
     {
@@ -740,85 +732,51 @@ public class ConcurrentObservableCollection<TValue> : CollectionAlerts<TValue>, 
 
     protected internal LockContext AcquireLock()
     {
-        _lock.Wait();
+        using ( StopWatch.Start() ) { _lock.Wait(); }
+
         return new LockContext( _lock );
     }
     protected internal LockContext AcquireLock( in CancellationToken token )
     {
-        _lock.Wait( token );
+        using ( StopWatch.Start() ) { _lock.Wait( token ); }
+
         return new LockContext( _lock );
     }
     protected internal LockContext AcquireLock( in TimeSpan span )
     {
-        _lock.Wait( span );
+        using ( StopWatch.Start() ) { _lock.Wait( span ); }
+
         return new LockContext( _lock );
     }
     protected internal LockContext AcquireLock( in TimeSpan span, in CancellationToken token )
     {
-        _lock.Wait( span, token );
+        using ( StopWatch.Start() ) { _lock.Wait( span, token ); }
+
         return new LockContext( _lock );
     }
 
 
     protected internal async ValueTask<LockContext> AcquireLockAsync( CancellationToken token )
     {
-        await _lock.WaitAsync( token );
+        using ( StopWatch.Start() ) { await _lock.WaitAsync( token ); }
+
         return new LockContext( _lock );
     }
     protected internal async ValueTask<LockContext> AcquireLockAsync( TimeSpan span, CancellationToken token )
     {
-        await _lock.WaitAsync( span, token );
+        using ( StopWatch.Start() ) { await _lock.WaitAsync( span, token ); }
+
         return new LockContext( _lock );
     }
 
 
-    protected override bool Filter( TValue? value ) => value is not null;
-    internal bool Filter( ref int index, out TValue? current )
+    internal ImmutableArray<TValue> Copy()
     {
-    #if NET6_0_OR_GREATER
-        ReadOnlySpan<TValue> span = CollectionsMarshal.AsSpan( _values );
-    #else
-        ReadOnlySpan<TValue> span = _values.ToArray();
-    #endif
-
-        if ( index < 0 ) { index = 0; }
-
-        do
-        {
-            current = index < span.Length
-                          ? span[index]
-                          : default;
-
-            index++;
-        } while ( Filter( current ) is false );
-
-        return index < span.Length;
+        using ( AcquireLock() ) { return ImmutableArray.CreateRange( _values.Where( Filter ) ); }
     }
-    internal static bool Filter( in List<TValue> values, ref int index, out TValue? current, Predicate<TValue?> filter )
+    internal async ValueTask<ImmutableArray<TValue>> CopyAsync( CancellationToken token )
     {
-    #if NET6_0_OR_GREATER
-        ReadOnlySpan<TValue> span = CollectionsMarshal.AsSpan( values );
-    #else
-        ReadOnlySpan<TValue> span = values.ToArray();
-    #endif
-
-        if ( index < 0 ) { index = 0; }
-
-        do
-        {
-            current = index < span.Length
-                          ? span[index]
-                          : default;
-
-            index++;
-        } while ( filter( current ) is false );
-
-        return index < span.Length;
-    }
-    internal void Filter( ref List<TValue> values )
-    {
-        values.Clear();
-        values.AddRange( _values.Where( Filter ) );
+        using ( await AcquireLockAsync( token ) ) { return ImmutableArray.CreateRange( _values.Where( Filter ) ); }
     }
 
 
@@ -832,45 +790,42 @@ public class ConcurrentObservableCollection<TValue> : CollectionAlerts<TValue>, 
 
 #pragma warning disable IDE0290 // Use primary constructor
 #pragma warning disable IDE0064 // Make readonly fields writable
-    public struct AsyncEnumerator : IAsyncEnumerator<TValue>
+    public sealed class AsyncEnumerator : IAsyncEnumerator<TValue>, IAsyncEnumerable<TValue>
     {
         private readonly ConcurrentObservableCollection<TValue> _collection;
-        private readonly CancellationToken                      _token;
-        private          int                                    _index   = 0;
-        private          TValue?                                _current = default;
-        private          List<TValue>?                          _cache   = null;
-
-        public readonly TValue Current => _current ?? throw new NullReferenceException( nameof(_current) );
+        private          CancellationToken                      _token;
+        private          int                                    _index = Enumerator.START_INDEX;
+        private          TValue?                                _current;
+        private          ImmutableArray<TValue>?                _cache;
+        public           TValue                                 Current => _current ?? throw new NullReferenceException( nameof(_current) );
 
         public AsyncEnumerator( ConcurrentObservableCollection<TValue> collection, CancellationToken token )
         {
             _collection = collection;
             _token      = token;
         }
-        public ValueTask DisposeAsync()
+        public ValueTask DisposeAsync() { return default; }
+        public IAsyncEnumerator<TValue> GetAsyncEnumerator( CancellationToken token )
         {
-            this = default;
-            return default;
+            if ( token.CanBeCanceled ) { _token = token; }
+
+            return this;
         }
 
-
-        private readonly async ValueTask<List<TValue>> Init()
-        {
-            using ( await _collection.AcquireLockAsync( _token ) )
-            {
-                var values = new List<TValue>( _collection.Length );
-                _collection.Filter( ref values );
-                return values;
-            }
-        }
         public async ValueTask<bool> MoveNextAsync()
         {
-            _cache ??= await Init();
-            return Filter( _cache, ref _index, out _current, _collection.Filter );
+            // ReSharper disable once InvertIf
+            if ( _cache is null )
+            {
+                _index = Enumerator.START_INDEX;
+                _cache = await _collection.CopyAsync( _token );
+            }
+
+            return Enumerator.MoveNext( Reset, out _current, ref _index, _cache.Value.AsSpan() );
         }
         public void Reset()
         {
-            _index = 0;
+            _index = Enumerator.START_INDEX;
             _cache = null;
         }
     }
@@ -879,41 +834,51 @@ public class ConcurrentObservableCollection<TValue> : CollectionAlerts<TValue>, 
 
     public struct Enumerator : IEnumerator<TValue>, IEnumerable<TValue>
     {
+        internal const   int                                    START_INDEX = -1;
         private readonly ConcurrentObservableCollection<TValue> _collection;
-        private          int                                    _index   = 0;
+        private          int                                    _index   = START_INDEX;
         private          TValue?                                _current = default;
-        private          List<TValue>?                          _cache   = null;
-
-        public readonly TValue             Current => _current ?? throw new NullReferenceException( nameof(_current) );
-        readonly        object IEnumerator.Current => Current  ?? throw new NullReferenceException( nameof(_current) );
+        private          ImmutableArray<TValue>?                _cache   = default;
+        public readonly  TValue                                 Current => _current ?? throw new NullReferenceException( nameof(_current) );
+        readonly         object IEnumerator.                    Current => Current  ?? throw new NullReferenceException( nameof(_current) );
 
         public Enumerator( ConcurrentObservableCollection<TValue> collection ) => _collection = collection;
-        public void Dispose() => this = default;
+        public   void                                    Dispose()       => this = default;
+        readonly IEnumerator<TValue> IEnumerable<TValue>.GetEnumerator() => this;
+        readonly IEnumerator IEnumerable.                GetEnumerator() => this;
 
-
-        private readonly List<TValue> Init()
-        {
-            using ( _collection.AcquireLock() )
-            {
-                var values = new List<TValue>( _collection.Length );
-                _collection.Filter( ref values );
-                return values;
-            }
-        }
         public bool MoveNext()
         {
-            _cache ??= Init();
-            return Filter( _cache, ref _index, out _current, _collection.Filter );
+            // ReSharper disable once InvertIf
+            if ( _cache is null )
+            {
+                _index = START_INDEX;
+                _cache = _collection.Copy();
+            }
+
+            return MoveNext( Reset, out _current, ref _index, _cache.Value.AsSpan() );
         }
         public void Reset()
         {
-            _index = 0;
+            _index = START_INDEX;
             _cache = null;
         }
 
 
-        readonly IEnumerator<TValue> IEnumerable<TValue>.GetEnumerator() => this;
-        readonly IEnumerator IEnumerable.                GetEnumerator() => this;
+        internal static bool MoveNext( Action reset, out TValue? current, ref int index, in ReadOnlySpan<TValue> span )
+        {
+            index++;
+
+            current = index < span.Length
+                          ? span[index]
+                          : default;
+
+            bool result = index < span.Length;
+            if ( result ) { return result; }
+
+            reset();
+            return result;
+        }
     }
 #pragma warning restore IDE0064 // Make readonly fields writable
 #pragma warning restore IDE0290 // Use primary constructor

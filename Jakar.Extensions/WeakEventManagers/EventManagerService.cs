@@ -1,11 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 11/10/2023  1:46 PM
 
-using System;
-using Org.BouncyCastle.Asn1.X509;
-
-
-
 namespace Jakar.Extensions;
 
 
