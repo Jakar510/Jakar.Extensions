@@ -7,10 +7,10 @@ namespace Jakar.Extensions;
 /// </summary>
 /// <typeparam name="TValue"> </typeparam>
 [ Serializable ]
-public class ConcurrentObservableCollection<TValue> : CollectionAlerts<TValue>, IList<TValue>, IReadOnlyList<TValue>, IList, IDisposable, IAsyncEnumerable<TValue>
+public class ConcurrentObservableCollection<TValue> : CollectionAlerts<TValue>, ILockedCollection<TValue>, IAsyncEnumerable<TValue>, IList<TValue>, IReadOnlyList<TValue>, IList, IDisposable
 {
     protected readonly List<TValue>      _values;
-    protected readonly SemaphoreSlim     _lock = new(1);
+    protected readonly Locker            _lock = Locker.Default;
     protected          IComparer<TValue> _comparer;
 
 
@@ -81,7 +81,12 @@ public class ConcurrentObservableCollection<TValue> : CollectionAlerts<TValue>, 
         }
     }
 
-    public SemaphoreSlim Lock => _lock;
+
+    public Locker Lock
+    {
+        get => _lock;
+        init => _lock = value;
+    }
     object ICollection.SyncRoot
     {
         get
@@ -89,7 +94,8 @@ public class ConcurrentObservableCollection<TValue> : CollectionAlerts<TValue>, 
             using ( AcquireLock() ) { return ((IList)_values).SyncRoot; }
         }
     }
-    public IEnumerable<TValue> Values => new Enumerator( this );
+    public LockerEnumerator<TValue, ConcurrentObservableCollection<TValue>>      Values      => new(this);
+    public AsyncLockerEnumerator<TValue, ConcurrentObservableCollection<TValue>> AsyncValues => new(this);
 
 
     public ConcurrentObservableCollection() : this( Comparer<TValue>.Default ) { }
@@ -724,57 +730,23 @@ public class ConcurrentObservableCollection<TValue> : CollectionAlerts<TValue>, 
     }
 
 
-    public AsyncEnumerator                            GetAsyncEnumerator( CancellationToken token = default ) => new(this, token);
-    IAsyncEnumerator<TValue> IAsyncEnumerable<TValue>.GetAsyncEnumerator( CancellationToken token )           => GetAsyncEnumerator( token );
-    public override IEnumerator<TValue>               GetEnumerator()                                         => new Enumerator( this );
-    IEnumerator IEnumerable.                          GetEnumerator()                                         => GetEnumerator();
+    public          IAsyncEnumerator<TValue> GetAsyncEnumerator( CancellationToken token ) => AsyncValues.GetAsyncEnumerator( token );
+    public override IEnumerator<TValue>      GetEnumerator()                               => Values;
+    IEnumerator IEnumerable.                 GetEnumerator()                               => GetEnumerator();
 
 
-    protected internal LockContext AcquireLock()
-    {
-        using ( StopWatch.Start() ) { _lock.Wait(); }
-
-        return new LockContext( _lock );
-    }
-    protected internal LockContext AcquireLock( in CancellationToken token )
-    {
-        using ( StopWatch.Start() ) { _lock.Wait( token ); }
-
-        return new LockContext( _lock );
-    }
-    protected internal LockContext AcquireLock( in TimeSpan span )
-    {
-        using ( StopWatch.Start() ) { _lock.Wait( span ); }
-
-        return new LockContext( _lock );
-    }
-    protected internal LockContext AcquireLock( in TimeSpan span, in CancellationToken token )
-    {
-        using ( StopWatch.Start() ) { _lock.Wait( span, token ); }
-
-        return new LockContext( _lock );
-    }
+    public       ILocker.Closer            AcquireLock()                               => _lock.Enter();
+    public       ILocker.Closer            AcquireLock( in CancellationToken   token ) => _lock.Enter( token );
+    public async ValueTask<ILocker.Closer> AcquireLockAsync( CancellationToken token ) => await _lock.EnterAsync( token );
 
 
-    protected internal async ValueTask<LockContext> AcquireLockAsync( CancellationToken token )
-    {
-        using ( StopWatch.Start() ) { await _lock.WaitAsync( token ); }
-
-        return new LockContext( _lock );
-    }
-    protected internal async ValueTask<LockContext> AcquireLockAsync( TimeSpan span, CancellationToken token )
-    {
-        using ( StopWatch.Start() ) { await _lock.WaitAsync( span, token ); }
-
-        return new LockContext( _lock );
-    }
-
-
-    internal ImmutableArray<TValue> Copy()
+    ImmutableArray<TValue> ILockedCollection<TValue>.Copy() => Copy();
+    protected ImmutableArray<TValue> Copy()
     {
         using ( AcquireLock() ) { return ImmutableArray.CreateRange( _values.Where( Filter ) ); }
     }
-    internal async ValueTask<ImmutableArray<TValue>> CopyAsync( CancellationToken token )
+    ConfiguredValueTaskAwaitable<ImmutableArray<TValue>> ILockedCollection<TValue>.CopyAsync( CancellationToken token ) => CopyAsync( token ).ConfigureAwait( false );
+    protected async ValueTask<ImmutableArray<TValue>> CopyAsync( CancellationToken token )
     {
         using ( await AcquireLockAsync( token ) ) { return ImmutableArray.CreateRange( _values.Where( Filter ) ); }
     }
@@ -788,6 +760,7 @@ public class ConcurrentObservableCollection<TValue> : CollectionAlerts<TValue>, 
 
 
 
+/*
 #pragma warning disable IDE0290 // Use primary constructor
 #pragma warning disable IDE0064 // Make readonly fields writable
     public sealed class AsyncEnumerator : IAsyncEnumerator<TValue>, IAsyncEnumerable<TValue>
@@ -797,7 +770,8 @@ public class ConcurrentObservableCollection<TValue> : CollectionAlerts<TValue>, 
         private          int                                    _index = Enumerator.START_INDEX;
         private          TValue?                                _current;
         private          ImmutableArray<TValue>?                _cache;
-        public           TValue                                 Current => _current ?? throw new NullReferenceException( nameof(_current) );
+        public           TValue                                 Current        => _current ?? throw new NullReferenceException( nameof(_current) );
+        internal         bool                                   ShouldContinue => _token.ShouldContinue() && _index < _cache?.Length;
 
         public AsyncEnumerator( ConcurrentObservableCollection<TValue> collection, CancellationToken token )
         {
@@ -839,8 +813,9 @@ public class ConcurrentObservableCollection<TValue> : CollectionAlerts<TValue>, 
         private          int                                    _index   = START_INDEX;
         private          TValue?                                _current = default;
         private          ImmutableArray<TValue>?                _cache   = default;
-        public readonly  TValue                                 Current => _current ?? throw new NullReferenceException( nameof(_current) );
-        readonly         object IEnumerator.                    Current => Current  ?? throw new NullReferenceException( nameof(_current) );
+        public readonly  TValue                                 Current        => _current ?? throw new NullReferenceException( nameof(_current) );
+        readonly         object IEnumerator.                    Current        => Current  ?? throw new NullReferenceException( nameof(_current) );
+        internal         bool                                   ShouldContinue => ++_index < _cache?.Length;
 
         public Enumerator( ConcurrentObservableCollection<TValue> collection ) => _collection = collection;
         public   void                                    Dispose()       => this = default;
@@ -882,4 +857,5 @@ public class ConcurrentObservableCollection<TValue> : CollectionAlerts<TValue>, 
     }
 #pragma warning restore IDE0064 // Make readonly fields writable
 #pragma warning restore IDE0290 // Use primary constructor
+*/
 }

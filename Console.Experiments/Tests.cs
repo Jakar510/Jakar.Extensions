@@ -42,7 +42,7 @@ public static class Tests
 
     public static async Task Test_AsyncLinq( IReadOnlyList<long> source, CancellationToken token = default )
     {
-        await using AsyncEnumerator<long> data = source.AsAsyncEnumerable( token );
+        await using AsyncEnumerator<long, long[]> data = source.AsAsyncEnumerable( token );
 
         using ( StopWatch.Start() ) { (await data.Where( x => x > 0 ).Where( x => x % 5 == 0 ).ToList( token )).Count.WriteToConsole(); }
 

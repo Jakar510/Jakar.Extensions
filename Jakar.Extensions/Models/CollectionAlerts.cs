@@ -4,6 +4,8 @@
 namespace Jakar.Extensions;
 
 
+
+
 public interface ICollectionAlerts : INotifyCollectionChanged, INotifyPropertyChanging, INotifyPropertyChanged { }
 
 

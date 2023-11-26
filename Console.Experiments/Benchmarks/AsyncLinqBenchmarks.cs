@@ -25,7 +25,7 @@ namespace Experiments.Benchmarks;
 public class AsyncLinqBenchmarks
 {
     // private readonly Dictionary<long, Guid> _dict = new();
-    private static readonly AsyncEnumerator<long> _data = AsyncLinq.Range( 0L, 10_000 ).AsAsyncEnumerable();
+    private static readonly AsyncEnumerator<long, long[]> _data = AsyncLinq.Range( 0L, 10_000 ).AsAsyncEnumerable();
 
 
     // [Benchmark]
