@@ -295,44 +295,47 @@ public class ConcurrentObservableCollection<TValue> : CollectionAlerts<TValue>, 
     }
 
 
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    protected bool InternalTryAdd( in TValue value )
+    {
+        if ( _values.Contains( value ) ) { return false; }
+
+        InternalAdd( value );
+        return true;
+    }
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    protected void InternalAdd( in TValue value )
+    {
+        _values.Add( value );
+        Added( value );
+    }
+    protected void InternalAdd( in ReadOnlySpan<TValue> values )
+    {
+        foreach ( TValue value in values ) { InternalAdd( value ); }
+    }
     public virtual bool TryAdd( TValue value )
     {
-        using ( AcquireLock() )
-        {
-            if ( _values.Contains( value ) ) { return false; }
-
-            _values.Add( value );
-            Added( value );
-            return true;
-        }
+        using ( AcquireLock() ) { return InternalTryAdd( value ); }
     }
     public virtual void Add( params TValue[] values ) => Add( new ReadOnlySpan<TValue>( values ) );
     public virtual void Add( IEnumerable<TValue> values )
     {
         using ( AcquireLock() )
         {
-            foreach ( TValue value in values )
-            {
-                _values.Add( value );
-                Added( value );
-            }
+            foreach ( TValue value in values ) { InternalAdd( value ); }
         }
     }
-    public virtual void Add( ReadOnlySpan<TValue> values )
+    public void Add( ReadOnlySpan<TValue> values )
     {
-        using ( AcquireLock() ) { AddRange( values ); }
+        using ( AcquireLock() ) { InternalAdd( values ); }
     }
-    public virtual void Add( ImmutableArray<TValue> values )
+    public void Add( ReadOnlyMemory<TValue> values )
     {
-        using ( AcquireLock() ) { AddRange( values.AsSpan() ); }
+        using ( AcquireLock() ) { InternalAdd( values.Span ); }
     }
-    protected void AddRange( in ReadOnlySpan<TValue> values )
+    public void Add( ImmutableArray<TValue> values )
     {
-        foreach ( TValue value in values )
-        {
-            _values.Add( value );
-            Added( value );
-        }
+        using ( AcquireLock() ) { InternalAdd( values.AsSpan() ); }
     }
 
 
@@ -349,11 +352,11 @@ public class ConcurrentObservableCollection<TValue> : CollectionAlerts<TValue>, 
     }
     public virtual async ValueTask AddAsync( ReadOnlyMemory<TValue> values, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) ) { AddRange( values.Span ); }
+        using ( await AcquireLockAsync( token ) ) { InternalAdd( values.Span ); }
     }
     public virtual async ValueTask AddAsync( ImmutableArray<TValue> values, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) ) { AddRange( values.AsSpan() ); }
+        using ( await AcquireLockAsync( token ) ) { InternalAdd( values.AsSpan() ); }
     }
     public virtual async ValueTask AddAsync( IEnumerable<TValue> values, CancellationToken token = default )
     {
@@ -396,21 +399,19 @@ public class ConcurrentObservableCollection<TValue> : CollectionAlerts<TValue>, 
     }
 
 
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    protected void InternalInsertRange( int i, TValue value )
+    {
+        _values.Insert( i, value );
+        Added( value, i );
+    }
     protected void InternalInsertRange( int index, IEnumerable<TValue> collection )
     {
-        foreach ( (int i, TValue? value) in collection.Enumerate( index ) )
-        {
-            _values.Insert( i, value );
-            Added( value, i );
-        }
+        foreach ( (int i, TValue? value) in collection.Enumerate( index ) ) { InternalInsertRange( i, value ); }
     }
-    protected void InternalInsertRange( int index, ReadOnlySpan<TValue> collection )
+    protected void InternalInsertRange( int index, in ReadOnlySpan<TValue> collection )
     {
-        foreach ( (int i, TValue? value) in collection.Enumerate( index ) )
-        {
-            _values.Insert( i, value );
-            Added( value, i );
-        }
+        foreach ( (int i, TValue? value) in collection.Enumerate( index ) ) { InternalInsertRange( i, value ); }
     }
 
 
@@ -434,124 +435,130 @@ public class ConcurrentObservableCollection<TValue> : CollectionAlerts<TValue>, 
     {
         using ( await AcquireLockAsync( token ) ) { InternalInsertRange( index, collection.AsSpan() ); }
     }
+    public async ValueTask InsertRangeAsync( int index, ReadOnlyMemory<TValue> collection, CancellationToken token = default )
+    {
+        using ( await AcquireLockAsync( token ) ) { InternalInsertRange( index, collection.Span ); }
+    }
 
 
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    protected void InternalRemoveRange( int start, int count )
+    {
+        Guard.IsInRangeFor( start, _values, nameof(start) );
+        Guard.IsInRangeFor( count, _values, nameof(count) );
+
+        for ( int x = start; x < start + count; x++ )
+        {
+            _values.RemoveAt( x );
+            Removed( x );
+        }
+    }
     public void RemoveRange( int start, int count )
     {
-        using ( AcquireLock() )
-        {
-            Guard.IsInRangeFor( start, _values, nameof(start) );
-            Guard.IsInRangeFor( count, _values, nameof(count) );
-
-            for ( int x = start; x < start + count; x++ )
-            {
-                _values.RemoveAt( x );
-                Removed( x );
-            }
-        }
+        using ( AcquireLock() ) { InternalRemoveRange( start, count ); }
     }
     public async ValueTask RemoveRangeAsync( int start, int count, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) )
-        {
-            Guard.IsInRangeFor( start, _values, nameof(start) );
-            Guard.IsInRangeFor( count, _values, nameof(count) );
-
-            for ( int x = start; x < start + count; x++ )
-            {
-                _values.RemoveAt( x );
-                Removed( x );
-            }
-        }
+        using ( await AcquireLockAsync( token ) ) { InternalRemoveRange( start, count ); }
     }
 
 
-    public virtual int Remove( Predicate<TValue> match ) => Remove( _values.Where( value => match( value ) ) );
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    protected bool InternalRemove( TValue value )
+    {
+        bool result = _values.Remove( value );
+        if ( result ) { Removed( value ); }
+
+        return result;
+    }
+    protected int InternalRemove( IEnumerable<TValue> values )
+    {
+        int results = 0;
+
+        // ReSharper disable once LoopCanBeConvertedToQuery
+        foreach ( TValue value in values )
+        {
+            if ( InternalRemove( value ) is false ) { continue; }
+
+            results++;
+        }
+
+        return results;
+    }
+    protected int InternalRemove( in ReadOnlySpan<TValue> values )
+    {
+        int results = 0;
+
+        // ReSharper disable once LoopCanBeConvertedToQuery
+        foreach ( TValue value in values )
+        {
+            if ( InternalRemove( value ) is false ) { continue; }
+
+            results++;
+        }
+
+        return results;
+    }
+
+    public virtual int Remove( Func<TValue, bool> match ) => Remove( _values.Where( match ) );
     public virtual int Remove( IEnumerable<TValue> values )
     {
-        using ( AcquireLock() )
-        {
-            int results = 0;
-
-            foreach ( TValue value in values )
-            {
-                if ( _values.Remove( value ) is false ) { continue; }
-
-                Removed( value );
-                results++;
-            }
-
-            return results;
-        }
+        using ( AcquireLock() ) { return InternalRemove( values ); }
     }
     public virtual bool Remove( TValue value )
     {
-        using ( AcquireLock() )
-        {
-            bool result = _values.Remove( value );
-            if ( result ) { Removed( value ); }
-
-            return result;
-        }
+        using ( AcquireLock() ) { return InternalRemove( value ); }
     }
 
 
     public virtual async ValueTask<bool> RemoveAsync( TValue value, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) )
-        {
-            bool result = _values.Remove( value );
-            if ( result ) { Removed( value ); }
-
-            return result;
-        }
+        using ( await AcquireLockAsync( token ) ) { return InternalRemove( value ); }
     }
-    public virtual ValueTask<int> RemoveAsync( Predicate<TValue> match, CancellationToken token = default ) => RemoveAsync( _values.Where( value => match( value ) ), token );
+    public virtual ValueTask<int> RemoveAsync( Func<TValue, bool> match, CancellationToken token = default ) => RemoveAsync( _values.Where( match ), token );
     public virtual async ValueTask<int> RemoveAsync( IEnumerable<TValue> values, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) )
-        {
-            int results = 0;
-
-            foreach ( TValue value in values )
-            {
-                if ( _values.Remove( value ) is false ) { continue; }
-
-                Removed( value );
-                results++;
-            }
-
-            return results;
-        }
+        using ( await AcquireLockAsync( token ) ) { return InternalRemove( values ); }
+    }
+    public virtual async ValueTask<int> RemoveAsync( ReadOnlyMemory<TValue> values, CancellationToken token = default )
+    {
+        using ( await AcquireLockAsync( token ) ) { return InternalRemove( values.Span ); }
+    }
+    public virtual async ValueTask<int> RemoveAsync( ImmutableArray<TValue> values, CancellationToken token = default )
+    {
+        using ( await AcquireLockAsync( token ) ) { return InternalRemove( values.AsSpan() ); }
     }
 
 
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    protected bool InternalRemoveAt( int index, [ NotNullWhen( true ) ] out TValue? value )
+    {
+        if ( index < 0 || index >= _values.Count )
+        {
+            value = default!;
+            return false;
+        }
+
+        value = _values[index];
+        _values.RemoveAt( index );
+        Removed( value, index );
+        return value is not null;
+    }
     public void RemoveAt( int index )
     {
-        using ( AcquireLock() )
-        {
-            TValue value = this[index];
-            _values.RemoveAt( index );
-            Removed( value, index );
-        }
+        using ( AcquireLock() ) { InternalRemoveAt( index, out _ ); }
     }
-    public void RemoveAt( int index, out TValue value )
+    public void RemoveAt( int index, [ NotNullWhen( true ) ] out TValue? value )
     {
-        using ( AcquireLock() )
-        {
-            value = this[index];
-            _values.RemoveAt( index );
-            Removed( value, index );
-        }
+        using ( AcquireLock() ) { InternalRemoveAt( index, out value ); }
     }
-    public async ValueTask<TValue> RemoveAtAsync( int index, CancellationToken token = default )
+    public async ValueTask<TValue?> RemoveAtAsync( int index, CancellationToken token = default )
     {
         using ( await AcquireLockAsync( token ) )
         {
-            TValue value = this[index];
-            _values.RemoveAt( index );
-            Removed( value, index );
-            return value;
+            return InternalRemoveAt( index, out TValue? value )
+                       ? value
+                       : default;
         }
     }
 
@@ -676,57 +683,53 @@ public class ConcurrentObservableCollection<TValue> : CollectionAlerts<TValue>, 
     {
         using ( await AcquireLockAsync( token ) ) { return _values.Contains( value ); }
     }
+
+
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    protected void InternalAdd( TValue value )
+    {
+        _values.Add( value );
+        Added( value );
+    }
     public virtual void Add( TValue value )
     {
-        using ( AcquireLock() )
-        {
-            _values.Add( value );
-            Added( value );
-        }
+        using ( AcquireLock() ) { InternalAdd( value ); }
     }
     public virtual async ValueTask AddAsync( TValue value, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) )
-        {
-            _values.Add( value );
-            Added( value );
-        }
+        using ( await AcquireLockAsync( token ) ) { InternalAdd( value ); }
     }
 
 
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    protected void InternalClear()
+    {
+        _values.Clear();
+        Reset();
+    }
     public virtual void Clear()
     {
-        using ( AcquireLock() )
-        {
-            _values.Clear();
-            Reset();
-        }
+        using ( AcquireLock() ) { InternalClear(); }
     }
     public virtual async ValueTask ClearAsync( CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) )
-        {
-            _values.Clear();
-            Reset();
-        }
+        using ( await AcquireLockAsync( token ) ) { InternalClear(); }
     }
 
 
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    protected void InternalInsert( int index, TValue value )
+    {
+        _values.Insert( index, value );
+        Added( value );
+    }
     public void Insert( int index, TValue value )
     {
-        using ( AcquireLock() )
-        {
-            _values.Insert( index, value );
-            Added( value );
-        }
+        using ( AcquireLock() ) { InternalInsert( index, value ); }
     }
     public async ValueTask InsertAsync( int index, TValue value, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) )
-        {
-            _values.Insert( index, value );
-            Added( value );
-        }
+        using ( await AcquireLockAsync( token ) ) { InternalInsert( index, value ); }
     }
 
 
