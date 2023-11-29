@@ -1,7 +1,13 @@
-﻿namespace Jakar.Extensions;
+﻿using System.Security.Cryptography;
+using System.Text.Json.Serialization;
 
 
-public interface ICurrentLocation<TID> : IUniqueID<TID>, IEquatable<ICurrentLocation<TID>> where TID : struct, IComparable<TID>, IEquatable<TID>
+
+namespace Jakar.Extensions;
+
+
+public interface ICurrentLocation<TID> : IUniqueID<TID>, IEquatable<ICurrentLocation<TID>>
+    where TID : struct, IComparable<TID>, IEquatable<TID>
 {
     double?           Accuracy                { get; }
     double?           Altitude                { get; }
@@ -19,7 +25,8 @@ public interface ICurrentLocation<TID> : IUniqueID<TID>, IEquatable<ICurrentLoca
 
 
 [ Serializable ]
-public sealed class CurrentLocation<TID> : BaseJsonModel, ICurrentLocation<TID>, IDataBaseIgnore where TID : struct, IComparable<TID>, IEquatable<TID>
+public sealed class CurrentLocation<TID> : BaseJsonModel, ICurrentLocation<TID>, IDataBaseIgnore
+    where TID : struct, IComparable<TID>, IEquatable<TID>
 {
     public         double?           Accuracy                { get; init; }
     public         double?           Altitude                { get; init; }
@@ -166,3 +173,11 @@ public sealed class CurrentLocation<TID> : BaseJsonModel, ICurrentLocation<TID>,
                AltitudeReferenceSystem == other.AltitudeReferenceSystem;
     }
 }
+
+
+
+[ JsonSerializable( typeof(CurrentLocation<long>) ) ] public partial class CurrentLocationLongContext : JsonSerializerContext { }
+
+
+
+[ JsonSerializable( typeof(CurrentLocation<Guid>) ) ] public partial class CurrentLocationGuidContext : JsonSerializerContext { }

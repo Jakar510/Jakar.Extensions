@@ -40,6 +40,7 @@ global using System.Runtime.Versioning;
 global using System.Security;
 global using System.Security.Authentication;
 global using System.Security.Cryptography.X509Certificates;
+global using System.Text.Json;
 global using System.Threading.Tasks.Dataflow;
 global using System.Windows.Input;
 global using Nito.Collections;
@@ -49,6 +50,16 @@ global using CommunityToolkit.Diagnostics;
 global using Microsoft.Extensions.Logging;
 global using Newtonsoft.Json.Serialization;
 global using OneOf;
+global using JsonNetConverterAttribute = Newtonsoft.Json.JsonConverterAttribute;
+global using JsonConverterAttribute = System.Text.Json.Serialization.JsonConverterAttribute;
+global using JsonNetExtensionDataAttribute = Newtonsoft.Json.JsonExtensionDataAttribute;
+global using JsonNetIgnoreAttribute = Newtonsoft.Json.JsonIgnoreAttribute;
+global using JsonNetReader = Newtonsoft.Json.JsonReader;
+global using JsonNetSerializer = Newtonsoft.Json.JsonSerializer;
+global using JsonSerializer = System.Text.Json.JsonSerializer;
+global using JsonSerializerOptions = System.Text.Json.JsonSerializerOptions;
+global using JsonExtensionDataAttribute = System.Text.Json.Serialization.JsonExtensionDataAttribute;
+global using JsonIgnoreAttribute = System.Text.Json.Serialization.JsonIgnoreAttribute;
 global using PureAttribute = JetBrains.Annotations.PureAttribute;
 
 

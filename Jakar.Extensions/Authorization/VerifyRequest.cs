@@ -1,11 +1,21 @@
-﻿namespace Jakar.Extensions;
+﻿using System.Text.Json.Nodes;
+using System.Text.Json.Serialization;
+using System.Text.Json.Serialization.Metadata;
+
+
+
+namespace Jakar.Extensions;
 
 
 [ Serializable ]
-public class VerifyRequest : BaseClass, ILoginRequest, ICredentials, ICloneable, IEquatable<VerifyRequest>, JsonModels.IJsonModel
+public class VerifyRequest : BaseClass, ILoginRequest, ICredentials, ICloneable, IEquatable<VerifyRequest>, JsonModels.IJsonizer<VerifyRequest, VerifyRequestContext>, JsonModels.IJsonModel<VerifyRequest>
 {
-    [ JsonExtensionData ] public         IDictionary<string, JToken?>? AdditionalData { get; set; }
-    [ JsonIgnore ]        public virtual bool                          IsValid        => !string.IsNullOrWhiteSpace( UserName ) && !string.IsNullOrWhiteSpace( Password );
+    public static JsonTypeInfo<VerifyRequest> JsonTypeInfo          => JsonSerializerContext.VerifyRequest;
+    public static VerifyRequestContext        JsonSerializerContext => VerifyRequestContext.Default;
+
+
+    [ JsonExtensionData ]         public         IDictionary<string, JsonElement>? AdditionalData { get; set; }
+    [ JsonNetIgnore, JsonIgnore ] public virtual bool                              IsValid        => !string.IsNullOrWhiteSpace( UserName ) && !string.IsNullOrWhiteSpace( Password );
 
     [ Required( ErrorMessage = $"{nameof(Password)} is required." ), JsonProperty( nameof(Password), Required = Required.Always ) ] public string Password { get; init; } = string.Empty;
     [ Obsolete( nameof(UserName) ) ]
@@ -30,6 +40,9 @@ public class VerifyRequest : BaseClass, ILoginRequest, ICredentials, ICloneable,
         UserName = userName ?? throw new ArgumentNullException( nameof(userName) );
         Password = password ?? throw new ArgumentNullException( nameof(password) );
     }
+
+
+    public static VerifyRequest FromJson( string json ) => json.FromJson<VerifyRequest, VerifyRequestContext>();
 
 
     public bool ValidatePassword()                                 => ValidatePassword( PasswordValidator.Default );
@@ -61,6 +74,10 @@ public class VerifyRequest : BaseClass, ILoginRequest, ICredentials, ICloneable,
     public static bool operator ==( VerifyRequest? left, VerifyRequest? right ) => Equals( left, right );
     public static bool operator !=( VerifyRequest? left, VerifyRequest? right ) => !Equals( left, right );
 }
+
+
+
+[ JsonSerializable( typeof(VerifyRequest) ) ] public partial class VerifyRequestContext : JsonSerializerContext { }
 
 
 

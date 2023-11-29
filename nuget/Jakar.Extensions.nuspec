@@ -4,7 +4,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata>
 		<id>Jakar.Extensions</id>
-		<version>7.0.0</version>
+		<version>7.1.0</version>
 		<title>Extension Library</title>
 		<authors>Tyler Stegmaier</authors>
 		<owners>Jakar510/Jakar</owners>
@@ -38,8 +38,6 @@
 							version="8.0.0" />
 				<dependency id="Microsoft.Extensions.Options"
 							version="8.0.0" />
-				<dependency id="Newtonsoft.Json"
-							version="13.0.3" />
 				<dependency id="Nito.Collections.Deque"
 							version="1.1.1" />
 				<dependency id="Portable.BouncyCastle"
@@ -89,8 +87,6 @@
 							version="8.0.0" />
 				<dependency id="Microsoft.Extensions.Options"
 							version="8.0.0" />
-				<dependency id="Newtonsoft.Json"
-							version="13.0.3" />
 				<dependency id="Nito.Collections.Deque"
 							version="1.1.1" />
 				<dependency id="Portable.BouncyCastle"
@@ -140,8 +136,6 @@
 							version="8.0.0" />
 				<dependency id="Microsoft.Extensions.Options"
 							version="8.0.0" />
-				<dependency id="Newtonsoft.Json"
-							version="13.0.3" />
 				<dependency id="Nito.Collections.Deque"
 							version="1.1.1" />
 				<dependency id="Portable.BouncyCastle"
@@ -191,8 +185,6 @@
 							version="8.0.0" />
 				<dependency id="Microsoft.Extensions.Options"
 							version="8.0.0" />
-				<dependency id="Newtonsoft.Json"
-							version="13.0.3" />
 				<dependency id="Nito.Collections.Deque"
 							version="1.1.1" />
 				<dependency id="Portable.BouncyCastle"

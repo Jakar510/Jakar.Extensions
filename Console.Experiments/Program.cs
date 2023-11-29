@@ -2,14 +2,22 @@
 {
     "Hello World!".WriteToConsole();
     Console.WriteLine();
-    await Tests.Test_ConcurrentObservableCollection();
+
+    // await Tests.Test_ConcurrentObservableCollection();
+
+
+    // var json = new JsonNet_SystemTextJson_Benchmarks();
+    // json.SystemTextJsonSerialize()?.WriteToConsole();
+    // Console.WriteLine();
+    // Console.WriteLine();
+    // Console.WriteLine();
+    // json.SystemTextJsonSerializePretty()?.WriteToConsole();
 
     // await Jakar.Database.TestDatabase.Test();
 
-    // JsonTest.Run();
 
-    // BenchmarkRunner.Run<CollectionBenchmarks>();
-    // BenchmarkRunner.Run<DictionaryLookupBenchmarks>();
+    BenchmarkRunner.Run<JsonNet_SystemTextJson_Benchmarks>();
+
     // BenchmarkRunner.Run( typeof(Program).Assembly ); //, new BenchmarkConfig()
 
     // ULongHashTests.Run( 100_000_000 )

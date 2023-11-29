@@ -1,121 +1,229 @@
-﻿namespace Jakar.Extensions;
+﻿using System.Text.Json.Nodes;
+using System.Text.Json.Serialization;
+using System.Text.Json.Serialization.Metadata;
+
+
+
+namespace Jakar.Extensions;
 
 
 public static class JsonModels
 {
-    public static bool Contains( this IJsonModel       self, string key ) => self.AdditionalData?.ContainsKey( key )      ?? false;
-    public static bool Contains( this IJsonStringModel self, string key ) => self.GetAdditionalData()?.ContainsKey( key ) ?? false;
+    public static bool Contains<TClass>( this IJsonModel<TClass> self, string key )
+        where TClass : IJsonModel<TClass>, IJsonizer<TClass> => self.AdditionalData?.ContainsKey( key ) is true;
 
 
-    public static bool Remove( this IJsonModel self, string key )
+    public static bool Remove<TClass>( this IJsonModel<TClass> self, string key )
+        where TClass : IJsonModel<TClass>, IJsonizer<TClass>
     {
-        self.AdditionalData ??= new Dictionary<string, JToken?>();
+        self.AdditionalData ??= new Dictionary<string, JsonElement>();
         return self.AdditionalData.Remove( key );
     }
-    public static bool Remove( this IJsonModel self, string key, out JToken? item )
+    public static bool Remove<TClass>( this IJsonModel<TClass> self, string key, out JsonElement value )
+        where TClass : IJsonModel<TClass>, IJsonizer<TClass>
     {
-        self.AdditionalData ??= new Dictionary<string, JToken?>();
-        self.AdditionalData.TryGetValue( key, out item );
+        self.AdditionalData ??= new Dictionary<string, JsonElement>();
+        self.AdditionalData.TryGetValue( key, out value );
         return self.AdditionalData.Remove( key );
     }
-    public static bool Remove( this IJsonStringModel self, string key )
+
+
+    public static IDictionary<string, JsonElement> GetData<TClass>( this IJsonModel<TClass> model )
+        where TClass : IJsonModel<TClass>, IJsonizer<TClass> => model.GetAdditionalData();
+
+
+    public static IDictionary<string, JsonElement> GetAdditionalData<TClass>( this IJsonModel<TClass> model )
+        where TClass : IJsonModel<TClass>, IJsonizer<TClass> => model.AdditionalData ??= new Dictionary<string, JsonElement>();
+
+
+    public static JsonElement? Get<TClass>( this IJsonModel<TClass> self, string key )
+        where TClass : IJsonModel<TClass>, IJsonizer<TClass> => self.AdditionalData?[key];
+
+
+    public static void Add<TClass>( this IJsonModel<TClass> self, string key, bool value )
+        where TClass : IJsonModel<TClass>, IJsonizer<TClass>
     {
-        IDictionary<string, JToken?> additionalData = self.GetData();
-        bool                         result         = additionalData.Remove( key );
-        self.SetAdditionalData( additionalData );
-        return result;
+        JsonNode node = value;
+        self.Add( key, node );
     }
-    public static bool Remove( this IJsonStringModel self, string key, out JToken? item )
+    public static void Add<TClass>( this IJsonModel<TClass> self, string key, byte value )
+        where TClass : IJsonModel<TClass>, IJsonizer<TClass>
     {
-        IDictionary<string, JToken?> additionalData = self.GetData();
-        additionalData.TryGetValue( key, out item );
-        bool result = additionalData.Remove( key );
-        self.SetAdditionalData( additionalData );
-        return result;
+        JsonNode node = value;
+        self.Add( key, node );
     }
-
-
-    public static IDictionary<string, JToken?> GetData( this IJsonModel       model ) => model.GetAdditionalData() ?? new Dictionary<string, JToken?>();
-    public static IDictionary<string, JToken?> GetData( this IJsonStringModel model ) => model.GetAdditionalData() ?? new Dictionary<string, JToken?>();
-
-
-    public static IDictionary<string, JToken?>? GetAdditionalData( this IJsonModel model ) => model.AdditionalData;
-    public static IDictionary<string, JToken?>? GetAdditionalData( this IJsonStringModel model ) => string.IsNullOrWhiteSpace( model.AdditionalData )
-                                                                                                        ? default
-                                                                                                        : model.AdditionalData.FromJson<Dictionary<string, JToken?>>();
-
-
-    public static JToken? Get( this IJsonModel       self, string key ) => self.AdditionalData?[key];
-    public static JToken? Get( this IJsonStringModel self, string key ) => self.GetAdditionalData()?[key];
-    public static T? Get<T>( this IJsonModel self, string key )
+    public static void Add<TClass>( this IJsonModel<TClass> self, string key, short value )
+        where TClass : IJsonModel<TClass>, IJsonizer<TClass>
     {
-        JToken? token = self.Get( key );
-        if ( token is null ) { return default; }
-
-        return token.ToObject<T>();
+        JsonNode node = value;
+        self.Add( key, node );
     }
-    public static T? Get<T>( this IJsonStringModel self, string key )
+    public static void Add<TClass>( this IJsonModel<TClass> self, string key, int value )
+        where TClass : IJsonModel<TClass>, IJsonizer<TClass>
     {
-        JToken? token = self.Get( key );
-        if ( token is null ) { return default; }
-
-        return token.ToObject<T>();
+        JsonNode node = value;
+        self.Add( key, node );
     }
-
-
-    public static void Add( this IJsonModel self, string key, bool           item ) => self.Add( key, JToken.FromObject( item ) );
-    public static void Add( this IJsonModel self, string key, byte           item ) => self.Add( key, JToken.FromObject( item ) );
-    public static void Add( this IJsonModel self, string key, short          item ) => self.Add( key, JToken.FromObject( item ) );
-    public static void Add( this IJsonModel self, string key, int            item ) => self.Add( key, JToken.FromObject( item ) );
-    public static void Add( this IJsonModel self, string key, long           item ) => self.Add( key, JToken.FromObject( item ) );
-    public static void Add( this IJsonModel self, string key, float          item ) => self.Add( key, JToken.FromObject( item ) );
-    public static void Add( this IJsonModel self, string key, double         item ) => self.Add( key, JToken.FromObject( item ) );
-    public static void Add( this IJsonModel self, string key, decimal        item ) => self.Add( key, JToken.FromObject( item ) );
-    public static void Add( this IJsonModel self, string key, string         item ) => self.Add( key, JToken.FromObject( item ) );
-    public static void Add( this IJsonModel self, string key, DateTime       item ) => self.Add( key, JToken.FromObject( item ) );
-    public static void Add( this IJsonModel self, string key, DateTimeOffset item ) => self.Add( key, JToken.FromObject( item ) );
-    public static void Add( this IJsonModel self, string key, TimeSpan       item ) => self.Add( key, JToken.FromObject( item ) );
-    public static void Add( this IJsonModel self, string key, object         item ) => self.Add( key, JToken.FromObject( item ) );
-    public static void Add( this IJsonModel self, string key, JToken? item )
+    public static void Add<TClass>( this IJsonModel<TClass> self, string key, long value )
+        where TClass : IJsonModel<TClass>, IJsonizer<TClass>
     {
-        self.AdditionalData ??= new Dictionary<string, JToken?>();
-        self.AdditionalData.Add( key, item );
+        JsonNode node = value;
+        self.Add( key, node );
     }
-    public static void Add( this IJsonStringModel self, string key, bool           item ) => self.Add( key, JToken.FromObject( item ) );
-    public static void Add( this IJsonStringModel self, string key, byte           item ) => self.Add( key, JToken.FromObject( item ) );
-    public static void Add( this IJsonStringModel self, string key, short          item ) => self.Add( key, JToken.FromObject( item ) );
-    public static void Add( this IJsonStringModel self, string key, int            item ) => self.Add( key, JToken.FromObject( item ) );
-    public static void Add( this IJsonStringModel self, string key, long           item ) => self.Add( key, JToken.FromObject( item ) );
-    public static void Add( this IJsonStringModel self, string key, float          item ) => self.Add( key, JToken.FromObject( item ) );
-    public static void Add( this IJsonStringModel self, string key, double         item ) => self.Add( key, JToken.FromObject( item ) );
-    public static void Add( this IJsonStringModel self, string key, decimal        item ) => self.Add( key, JToken.FromObject( item ) );
-    public static void Add( this IJsonStringModel self, string key, string         item ) => self.Add( key, JToken.FromObject( item ) );
-    public static void Add( this IJsonStringModel self, string key, DateTime       item ) => self.Add( key, JToken.FromObject( item ) );
-    public static void Add( this IJsonStringModel self, string key, DateTimeOffset item ) => self.Add( key, JToken.FromObject( item ) );
-    public static void Add( this IJsonStringModel self, string key, TimeSpan       item ) => self.Add( key, JToken.FromObject( item ) );
-    public static void Add( this IJsonStringModel self, string key, object         item ) => self.Add( key, JToken.FromObject( item ) );
-    public static void Add( this IJsonStringModel self, string key, JToken? item )
+    public static void Add<TClass>( this IJsonModel<TClass> self, string key, float value )
+        where TClass : IJsonModel<TClass>, IJsonizer<TClass>
     {
-        IDictionary<string, JToken?> additionalData = self.GetData();
-        additionalData.Add( key, item );
-        self.SetAdditionalData( additionalData );
+        JsonNode node = value;
+        self.Add( key, node );
+    }
+    public static void Add<TClass>( this IJsonModel<TClass> self, string key, double value )
+        where TClass : IJsonModel<TClass>, IJsonizer<TClass>
+    {
+        JsonNode node = value;
+        self.Add( key, node );
+    }
+    public static void Add<TClass>( this IJsonModel<TClass> self, string key, decimal value )
+        where TClass : IJsonModel<TClass>, IJsonizer<TClass>
+    {
+        JsonNode node = value;
+        self.Add( key, node );
+    }
+    public static void Add<TClass>( this IJsonModel<TClass> self, string key, string value )
+        where TClass : IJsonModel<TClass>, IJsonizer<TClass>
+    {
+        JsonNode node = value;
+        self.Add( key, node );
+    }
+    public static void Add<TClass>( this IJsonModel<TClass> self, string key, DateTime value )
+        where TClass : IJsonModel<TClass>, IJsonizer<TClass>
+    {
+        JsonNode node = value;
+        self.Add( key, node );
+    }
+    public static void Add<TClass>( this IJsonModel<TClass> self, string key, DateTimeOffset value )
+        where TClass : IJsonModel<TClass>, IJsonizer<TClass>
+    {
+        JsonNode node = value;
+        self.Add( key, node );
+    }
+    public static void Add<TClass>( this IJsonModel<TClass> self, string key, IEnumerable<KeyValuePair<string, JsonNode?>> properties )
+        where TClass : IJsonModel<TClass>, IJsonizer<TClass>
+    {
+        JsonNode node = new JsonObject( properties );
+        self.Add( key, node );
+    }
+    public static void Add<T, TClass>( this IJsonModel<TClass> self, string key, T value )
+        where TClass : IJsonModel<TClass>, IJsonizer<TClass>
+        where T : IJsonizer => self.Add( key, value.GetProperties() );
+    public static void Add<TClass>( this IJsonModel<TClass> self, string key, JsonNode? value )
+        where TClass : IJsonModel<TClass>, IJsonizer<TClass>
+    {
+        JsonElement element = value?.Deserialize<JsonElement>() ?? default;
+        self.Add( key, element );
+    }
+
+    public static void Add<TClass>( this IJsonModel<TClass> self, string key, JsonElement value )
+        where TClass : IJsonModel<TClass>, IJsonizer<TClass>
+    {
+        self.AdditionalData ??= new Dictionary<string, JsonElement>();
+        self.AdditionalData.Add( key, value );
     }
 
 
-    public static void SetAdditionalData( this IJsonModel       model, IDictionary<string, JToken?>? data ) => model.AdditionalData = data;
-    public static void SetAdditionalData( this IJsonStringModel model, IDictionary<string, JToken?>? data ) => model.AdditionalData = data?.ToPrettyJson();
+    public static void SetAdditionalData<TClass>( this IJsonModel<TClass> model, IDictionary<string, JsonElement>? data )
+        where TClass : IJsonModel<TClass>, IJsonizer<TClass> => model.AdditionalData = data;
+
+
+    public static string ToJson<TClass, TSerializerContext>( this TClass model )
+        where TClass : IJsonizer<TClass, TSerializerContext>
+        where TSerializerContext : JsonSerializerContext =>
+        JsonSerializer.Serialize( model, model.JsonContext() );
+    public static string ToPrettyJson<TClass, TSerializerContext>( this TClass model )
+        where TClass : IJsonizer<TClass, TSerializerContext>
+        where TSerializerContext : JsonSerializerContext =>
+        JsonSerializer.Serialize( model, model.JsonContextPretty() );
+
+
+    public static async Task<string> ToJsonAsync<TClass, TSerializerContext>( this TClass model )
+        where TClass : IJsonizer<TClass, TSerializerContext>
+        where TSerializerContext : JsonSerializerContext
+    {
+        using var stream = new MemoryStream();
+        await JsonSerializer.SerializeAsync( stream, model, model.JsonContext() );
+        using var reader = new StreamReader( stream );
+        return await reader.ReadToEndAsync();
+    }
+    public static async Task<string> ToPrettyJsonAsync<TClass, TSerializerContext>( this TClass model )
+        where TClass : IJsonizer<TClass, TSerializerContext>
+        where TSerializerContext : JsonSerializerContext
+    {
+        using var stream = new MemoryStream();
+        await JsonSerializer.SerializeAsync( stream, model, model.JsonContextPretty() );
+        using var reader = new StreamReader( stream );
+        return await reader.ReadToEndAsync();
+    }
+
+
+    public static TClass FromJson<TClass, TSerializerContext>( this string json )
+        where TClass : IJsonizer<TClass, TSerializerContext>
+        where TSerializerContext : JsonSerializerContext => JsonSerializer.Deserialize( json, TClass.JsonTypeInfo ) ?? throw new InvalidOperationException( nameof(json) );
+
+
+    public static JsonSerializerOptions JsonContext<TClass, TSerializerContext>()
+        where TClass : IJsonizer<TClass, TSerializerContext>
+        where TSerializerContext : JsonSerializerContext => new()
+                                                            {
+                                                                WriteIndented    = false,
+                                                                TypeInfoResolver = TClass.JsonSerializerContext
+                                                            };
+    public static JsonSerializerOptions JsonContext<TClass, TSerializerContext>( this IJsonizer<TClass, TSerializerContext> _ )
+        where TClass : IJsonizer<TClass, TSerializerContext>
+        where TSerializerContext : JsonSerializerContext => JsonContext<TClass, TSerializerContext>();
+
+
+    public static JsonSerializerOptions JsonContextPretty<TClass, TSerializerContext>()
+        where TClass : IJsonizer<TClass, TSerializerContext>
+        where TSerializerContext : JsonSerializerContext => new()
+                                                            {
+                                                                WriteIndented    = true,
+                                                                TypeInfoResolver = TClass.JsonSerializerContext
+                                                            };
+    public static JsonSerializerOptions JsonContextPretty<TClass, TSerializerContext>( this IJsonizer<TClass, TSerializerContext> _ )
+        where TClass : IJsonizer<TClass, TSerializerContext>
+        where TSerializerContext : JsonSerializerContext => JsonContextPretty<TClass, TSerializerContext>();
+
+
+
+    public interface IJsonizer
+    {
+        public IEnumerable<KeyValuePair<string, JsonNode?>> GetProperties();
+    }
+
+
+
+    public interface IJsonizer<out TClass>
+    {
+        public abstract static TClass FromJson( string json );
+    }
+
+
+
+    public interface IJsonizer<TClass, out TSerializerContext> : IJsonizer<TClass>
+        where TSerializerContext : JsonSerializerContext
+    {
+        public abstract static JsonTypeInfo<TClass> JsonTypeInfo          { get; }
+        public abstract static TSerializerContext   JsonSerializerContext { get; }
+    }
 
 
 
     public interface IJsonModel
     {
-        [ JsonExtensionData ] public IDictionary<string, JToken?>? AdditionalData { get; set; }
+        [ JsonExtensionData ] public IDictionary<string, JsonElement>? AdditionalData { get; set; }
     }
 
 
 
-    public interface IJsonStringModel
-    {
-        public string? AdditionalData { get; set; }
-    }
+    public interface IJsonModel<TClass> : IJsonModel
+        where TClass : IJsonModel<TClass>, IJsonizer<TClass> { }
 }

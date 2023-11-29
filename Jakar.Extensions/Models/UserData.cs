@@ -1,6 +1,11 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 11/15/2022  6:02 PM
 
+using System.Text.Json.Serialization;
+using System.Text.Json.Serialization.Metadata;
+
+
+
 namespace Jakar.Extensions;
 
 
@@ -27,7 +32,8 @@ public interface IUserData : JsonModels.IJsonModel, IEquatable<IUserData>, IComp
 
 
 
-public interface IUserData<out T> : IUserData where T : IUserData<T>
+public interface IUserData<out T> : IUserData
+    where T : IUserData<T>
 {
     public T WithUserData( IUserData value );
 }
@@ -35,27 +41,31 @@ public interface IUserData<out T> : IUserData where T : IUserData<T>
 
 
 [ Serializable ]
-public class UserData : ObservableClass, IUserData<UserData>
+public class UserData : ObservableClass, IUserData<UserData>, JsonModels.IJsonizer<UserData, UserDataContext>
 {
-    public const string                        EMPTY_PHONE_NUMBER = "(000) 000-0000";
-    private      IDictionary<string, JToken?>? _additionalData;
-    private      string                        _company     = string.Empty;
-    private      string                        _department  = string.Empty;
-    private      string                        _email       = string.Empty;
-    private      string                        _ext         = string.Empty;
-    private      string                        _firstName   = string.Empty;
-    private      string                        _gender      = string.Empty;
-    private      string                        _lastName    = string.Empty;
-    private      string                        _phoneNumber = string.Empty;
-    private      string                        _title       = string.Empty;
-    private      string                        _website     = string.Empty;
-    private      string?                       _description;
-    private      string?                       _fullName;
-    private      SupportedLanguage             _preferredLanguage = SupportedLanguage.English;
+    public const string                            EMPTY_PHONE_NUMBER = "(000) 000-0000";
+    private      IDictionary<string, JsonElement>? _additionalData;
+    private      string                            _company     = string.Empty;
+    private      string                            _department  = string.Empty;
+    private      string                            _email       = string.Empty;
+    private      string                            _ext         = string.Empty;
+    private      string                            _firstName   = string.Empty;
+    private      string                            _gender      = string.Empty;
+    private      string                            _lastName    = string.Empty;
+    private      string                            _phoneNumber = string.Empty;
+    private      string                            _title       = string.Empty;
+    private      string                            _website     = string.Empty;
+    private      string?                           _description;
+    private      string?                           _fullName;
+    private      SupportedLanguage                 _preferredLanguage = SupportedLanguage.English;
+
+
+    public static UserDataContext        JsonSerializerContext => UserDataContext.Default;
+    public static JsonTypeInfo<UserData> JsonTypeInfo          => JsonSerializerContext.UserData;
 
 
     [ JsonExtensionData ]
-    public IDictionary<string, JToken?>? AdditionalData
+    public IDictionary<string, JsonElement>? AdditionalData
     {
         get => _additionalData;
         set => SetProperty( ref _additionalData, value );
@@ -200,6 +210,8 @@ public class UserData : ObservableClass, IUserData<UserData>
         _lastName  = lastName;
     }
 
+    public static UserData FromJson( string json ) => json.FromJson<UserData, UserDataContext>();
+
 
     public UserData WithAddresses( IEnumerable<IAddress> addresses ) => WithAddresses( addresses.Select( x => new UserAddress( x ) ) );
     public UserData WithAddresses( IEnumerable<UserAddress> addresses )
@@ -224,8 +236,8 @@ public class UserData : ObservableClass, IUserData<UserData>
 
         if ( value.AdditionalData is null ) { return this; }
 
-        AdditionalData ??= new Dictionary<string, JToken?>();
-        foreach ( (string key, JToken? jToken) in value.AdditionalData ) { AdditionalData[key] = jToken; }
+        AdditionalData ??= new Dictionary<string, JsonElement>();
+        foreach ( (string key, JsonElement jToken) in value.AdditionalData ) { AdditionalData[key] = jToken; }
 
         return this;
     }
@@ -337,3 +349,7 @@ public class UserData : ObservableClass, IUserData<UserData>
     public static bool operator <=( UserData? left, UserData? right ) => IUserData.Sorter.Compare( left, right ) <= 0;
     public static bool operator >=( UserData? left, UserData? right ) => IUserData.Sorter.Compare( left, right ) >= 0;
 }
+
+
+
+[ JsonSerializable( typeof(UserData) ) ] public partial class UserDataContext : JsonSerializerContext { }

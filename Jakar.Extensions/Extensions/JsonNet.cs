@@ -3,14 +3,14 @@
 
 public static class JsonNet
 {
-    private static JsonSerializer?         _serializer;
+    private static JsonNetSerializer?         _serializer;
     private static JsonSerializerSettings? _settings;
 
 
     public static JsonLoadSettings LoadSettings { get; set; } = new();
-    public static JsonSerializer Serializer
+    public static JsonNetSerializer Serializer
     {
-        get => _serializer ??= JsonSerializer.Create( Settings );
+        get => _serializer ??= JsonNetSerializer.Create( Settings );
         set => _serializer = value;
     }
     public static JsonSerializerSettings Settings
@@ -19,7 +19,7 @@ public static class JsonNet
         set
         {
             _settings  = value;
-            Serializer = JsonSerializer.Create( value );
+            Serializer = JsonNetSerializer.Create( value );
         }
     }
 
@@ -32,7 +32,7 @@ public static class JsonNet
 
 
     [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static JToken FromJson( this object value )                            => JToken.FromObject( value, Serializer ) ?? throw new NullReferenceException( nameof(JToken.Parse) );
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static JToken FromJson( this object value, JsonSerializer serializer ) => JToken.FromObject( value, serializer ) ?? throw new NullReferenceException( nameof(JToken.Parse) );
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static JToken FromJson( this object value, JsonNetSerializer serializer ) => JToken.FromObject( value, serializer ) ?? throw new NullReferenceException( nameof(JToken.Parse) );
 
 
     [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static string ToJson( this JToken value )                                                                       => ToJson( value, Formatting.None, Array.Empty<JsonConverter>() );
