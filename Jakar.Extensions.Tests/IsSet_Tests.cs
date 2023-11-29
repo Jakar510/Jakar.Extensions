@@ -20,8 +20,7 @@ public class IsSet_Tests : Assert
     public void IsSet_Test( Type objType, bool expected )
     {
         objType.GetInterfaces().PrintJson().WriteToConsole();
-
-        AreEqual( objType.IsSet(), expected );
+        That( objType.IsSet(), Is.EqualTo( expected ) );
     }
 
 
@@ -31,10 +30,10 @@ public class IsSet_Tests : Assert
     {
         if ( objType.IsSet( out Type? itemType ) )
         {
-            AreEqual( itemType, expected );
+            That( itemType, Is.EqualTo( expected ) );
             return;
         }
 
-        IsNull( expected );
+        That( expected, Is.Null );
     }
 }

@@ -16,11 +16,11 @@ public class MimeType_Extension_Tests : Assert
     {
         if ( mime is MimeType.NotSet )
         {
-            Throws<ArgumentOutOfRangeException>( () => AreEqual( mime.ToExtension().FromExtension(), mime ) );
+            Throws<ArgumentOutOfRangeException>( () => this.AreEqual( mime.ToExtension().FromExtension(), mime ) );
 
             return;
         }
 
-        AreEqual( mime.ToExtension().FromExtension(), mime );
+        this.AreEqual( mime.ToExtension().FromExtension(), mime );
     }
 }

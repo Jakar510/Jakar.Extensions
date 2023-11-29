@@ -48,7 +48,7 @@ public class MimeType_ContentType_Tests : Assert
     [ TestCase( MimeTypeNames.Font.TRUE_TYPE, MimeType.TrueType ), TestCase( MimeTypeNames.Font.OPEN_TYPE, MimeType.OpenType ), TestCase( MimeTypeNames.MultiPart.FORM_DATA, MimeType.FormData ) ]
     public void Test_ToMimeType_Fonts( string s, MimeType mime ) => Test_ToMimeType( s, mime );
 
-    private static void Test_ToMimeType( string s, MimeType mime ) => AreEqual( s.ToMimeType(), mime );
+    private void Test_ToMimeType( string s, MimeType mime ) => this.AreEqual( s.ToMimeType(), mime );
 
     [ Test, TestCase( MimeTypeNames.Text.CONFIG, MimeType.Cfg ), TestCase( MimeTypeNames.Text.CONFIGURATION, MimeType.Config ), TestCase( MimeTypeNames.Text.INI, MimeType.Ini ), TestCase( MimeTypeNames.Text.CALENDAR, MimeType.Calendar ),
       TestCase(       MimeTypeNames.Text.COMMA_SEPARATED_VALUES, MimeType.Csv ), TestCase( MimeTypeNames.Text.CASCADING_STYLE_SHEETS, MimeType.Css ), TestCase( MimeTypeNames.Text.RICH_TEXT, MimeType.RichText ),
@@ -88,7 +88,7 @@ public class MimeType_ContentType_Tests : Assert
     [ Test, TestCase( MimeTypeNames.Font.TRUE_TYPE, MimeType.TrueType ), TestCase( MimeTypeNames.Font.OPEN_TYPE, MimeType.OpenType ), TestCase( MimeTypeNames.MultiPart.FORM_DATA, MimeType.FormData ) ]
     public void Test_ToContentType_Fonts( string s, MimeType mime ) => Test_ToContentType( s, mime );
 
-    private static void Test_ToContentType( string s, MimeType mime ) => AreEqual( s, mime.ToContentType() );
+    private void Test_ToContentType( string s, MimeType mime ) => this.AreEqual( s, mime.ToContentType() );
 
     [ Test, TestCase( MimeTypeNames.Text.CONFIG ), TestCase( MimeTypeNames.Text.CONFIGURATION ), TestCase( MimeTypeNames.Text.INI ), TestCase( MimeTypeNames.Text.CALENDAR ), TestCase( MimeTypeNames.Text.COMMA_SEPARATED_VALUES ),
       TestCase( MimeTypeNames.Text.CASCADING_STYLE_SHEETS ), TestCase( MimeTypeNames.Text.RICH_TEXT ), TestCase( MimeTypeNames.Text.XML ), TestCase( MimeTypeNames.Text.HTML ), TestCase( MimeTypeNames.Text.PLAIN ),
@@ -117,5 +117,5 @@ public class MimeType_ContentType_Tests : Assert
     // VIDEOS
 
     // IMAGES
-    public void Test_ContentType( string s ) => AreEqual( s.ToMimeType().ToContentType(), s );
+    public void Test_ContentType( string s ) => this.AreEqual( s.ToMimeType().ToContentType(), s );
 }

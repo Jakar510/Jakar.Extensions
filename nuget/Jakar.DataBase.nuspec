@@ -51,6 +51,10 @@
 							version="0.16.9" />
 				<dependency id="Hardware.Info"
 							version="11.1.0.1" />
+				<dependency id="Npgsql"
+							version="8.0.0" />
+				<dependency id="Npgsql.Json.NET"
+							version="8.0.0" />
 				<dependency id="Microsoft.Extensions.Hosting"
 							version="7.0.1" />
 				<dependency id="Microsoft.NETCore.Platforms"
