@@ -4,7 +4,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata>
 		<id>Jakar.Extensions</id>
-		<version>7.0.0</version>
+		<version>7.1.0</version>
 		<title>Extension Library</title>
 		<authors>Tyler Stegmaier</authors>
 		<owners>Jakar510/Jakar</owners>
@@ -21,7 +21,7 @@
 		<releaseNotes>
 			Bug Fixes
 		</releaseNotes>
-		<tags>Api Extension Linq Http Files Files Strings Types Languages Collections Ini</tags>
+		<tags>Api Extension Async Linq Http Files Files Strings Types Languages Collections Ini</tags>
 		<language>en-US</language>
 		<repository type="Github"
 					url="https://github.com/Jakar510/Jakar.Extensions"

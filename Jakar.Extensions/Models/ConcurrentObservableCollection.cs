@@ -9,12 +9,12 @@ namespace Jakar.Extensions;
 [ Serializable ]
 public class ConcurrentObservableCollection<TValue> : CollectionAlerts<TValue>, ILockedCollection<TValue>, IAsyncEnumerable<TValue>, IList<TValue>, IReadOnlyList<TValue>, IList, IDisposable
 {
-    protected readonly List<TValue>                                                          _values;
-    protected readonly Locker                                                                _lock = Locker.Default;
-    protected          IComparer<TValue>                                                     _comparer;
-    public             AsyncLockerEnumerator<TValue, ConcurrentObservableCollection<TValue>> AsyncValues => new(this);
+    protected readonly List<TValue>      _values;
+    protected readonly Locker            _lock = Locker.Default;
+    protected          IComparer<TValue> _comparer;
 
 
+    public AsyncLockerEnumerator<TValue, ConcurrentObservableCollection<TValue>> AsyncValues => new(this);
     public sealed override int Count
     {
         get
@@ -43,7 +43,6 @@ public class ConcurrentObservableCollection<TValue> : CollectionAlerts<TValue>, 
             using ( AcquireLock() ) { return ((IList)_values).IsReadOnly; }
         }
     }
-
     bool ICollection.IsSynchronized
     {
         get
@@ -51,7 +50,6 @@ public class ConcurrentObservableCollection<TValue> : CollectionAlerts<TValue>, 
             using ( AcquireLock() ) { return ((IList)_values).IsSynchronized; }
         }
     }
-
     object? IList.this[ int index ]
 
     {
@@ -64,7 +62,6 @@ public class ConcurrentObservableCollection<TValue> : CollectionAlerts<TValue>, 
             using ( AcquireLock() ) { ((IList)_values)[index] = value; }
         }
     }
-
     public TValue this[ int index ]
     {
         get
@@ -81,8 +78,6 @@ public class ConcurrentObservableCollection<TValue> : CollectionAlerts<TValue>, 
             }
         }
     }
-
-
     public Locker Lock
     {
         get => _lock;
