@@ -17,8 +17,8 @@ public interface ILockedCollection<TValue> : IReadOnlyCollection<TValue>
     ValueTask<ILocker.Closer> AcquireLockAsync( CancellationToken token );
 
 
-    ImmutableArray<TValue>                               Copy();
-    ConfiguredValueTaskAwaitable<ImmutableArray<TValue>> CopyAsync( CancellationToken token );
+    ReadOnlyMemory<TValue>                               Copy();
+    ConfiguredValueTaskAwaitable<ReadOnlyMemory<TValue>> CopyAsync( CancellationToken token );
 
 
     public static bool MoveNext( Action reset, out TValue? current, ref int index, in ReadOnlySpan<TValue> span )

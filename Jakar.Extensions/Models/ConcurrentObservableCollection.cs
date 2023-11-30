@@ -9,9 +9,10 @@ namespace Jakar.Extensions;
 [ Serializable ]
 public class ConcurrentObservableCollection<TValue> : CollectionAlerts<TValue>, ILockedCollection<TValue>, IAsyncEnumerable<TValue>, IList<TValue>, IReadOnlyList<TValue>, IList, IDisposable
 {
-    protected readonly List<TValue>      _values;
-    protected readonly Locker            _lock = Locker.Default;
-    protected          IComparer<TValue> _comparer;
+    protected readonly List<TValue>                                                          _values;
+    protected readonly Locker                                                                _lock = Locker.Default;
+    protected          IComparer<TValue>                                                     _comparer;
+    public             AsyncLockerEnumerator<TValue, ConcurrentObservableCollection<TValue>> AsyncValues => new(this);
 
 
     public sealed override int Count
@@ -94,8 +95,7 @@ public class ConcurrentObservableCollection<TValue> : CollectionAlerts<TValue>, 
             using ( AcquireLock() ) { return ((IList)_values).SyncRoot; }
         }
     }
-    public LockerEnumerator<TValue, ConcurrentObservableCollection<TValue>>      Values      => new(this);
-    public AsyncLockerEnumerator<TValue, ConcurrentObservableCollection<TValue>> AsyncValues => new(this);
+    public LockerEnumerator<TValue, ConcurrentObservableCollection<TValue>> Values => new(this);
 
 
     public ConcurrentObservableCollection() : this( Comparer<TValue>.Default ) { }
@@ -738,127 +738,20 @@ public class ConcurrentObservableCollection<TValue> : CollectionAlerts<TValue>, 
     IEnumerator IEnumerable.                 GetEnumerator()                               => GetEnumerator();
 
 
-    public       ILocker.Closer            AcquireLock()                               => _lock.Enter();
-    public       ILocker.Closer            AcquireLock( in CancellationToken   token ) => _lock.Enter( token );
-    public async ValueTask<ILocker.Closer> AcquireLockAsync( CancellationToken token ) => await _lock.EnterAsync( token );
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public ILocker.Closer            AcquireLock()                               => _lock.Enter();
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public ILocker.Closer            AcquireLock( in CancellationToken   token ) => _lock.Enter( token );
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public ValueTask<ILocker.Closer> AcquireLockAsync( CancellationToken token ) => _lock.EnterAsync( token );
 
 
-    ImmutableArray<TValue> ILockedCollection<TValue>.Copy() => Copy();
-    protected ImmutableArray<TValue> Copy()
+    protected ReadOnlyMemory<TValue>                 FilteredValues() => _values.Where( Filter ).ToArray();
+    ReadOnlyMemory<TValue> ILockedCollection<TValue>.Copy()           => Copy();
+    protected ReadOnlyMemory<TValue> Copy()
     {
-        using ( AcquireLock() ) { return ImmutableArray.CreateRange( _values.Where( Filter ) ); }
+        using ( AcquireLock() ) { return FilteredValues(); }
     }
-    ConfiguredValueTaskAwaitable<ImmutableArray<TValue>> ILockedCollection<TValue>.CopyAsync( CancellationToken token ) => CopyAsync( token ).ConfigureAwait( false );
-    protected async ValueTask<ImmutableArray<TValue>> CopyAsync( CancellationToken token )
+    ConfiguredValueTaskAwaitable<ReadOnlyMemory<TValue>> ILockedCollection<TValue>.CopyAsync( CancellationToken token ) => CopyAsync( token ).ConfigureAwait( false );
+    protected async ValueTask<ReadOnlyMemory<TValue>> CopyAsync( CancellationToken token )
     {
-        using ( await AcquireLockAsync( token ) ) { return ImmutableArray.CreateRange( _values.Where( Filter ) ); }
+        using ( await AcquireLockAsync( token ) ) { return FilteredValues(); }
     }
-
-
-
-    protected internal readonly record struct LockContext( SemaphoreSlim Locker ) : IDisposable
-    {
-        public void Dispose() => Locker.Release();
-    }
-
-
-
-/*
-#pragma warning disable IDE0290 // Use primary constructor
-#pragma warning disable IDE0064 // Make readonly fields writable
-    public sealed class AsyncEnumerator : IAsyncEnumerator<TValue>, IAsyncEnumerable<TValue>
-    {
-        private readonly ConcurrentObservableCollection<TValue> _collection;
-        private          CancellationToken                      _token;
-        private          int                                    _index = Enumerator.START_INDEX;
-        private          TValue?                                _current;
-        private          ImmutableArray<TValue>?                _cache;
-        public           TValue                                 Current        => _current ?? throw new NullReferenceException( nameof(_current) );
-        internal         bool                                   ShouldContinue => _token.ShouldContinue() && _index < _cache?.Length;
-
-        public AsyncEnumerator( ConcurrentObservableCollection<TValue> collection, CancellationToken token )
-        {
-            _collection = collection;
-            _token      = token;
-        }
-        public ValueTask DisposeAsync() { return default; }
-        public IAsyncEnumerator<TValue> GetAsyncEnumerator( CancellationToken token )
-        {
-            if ( token.CanBeCanceled ) { _token = token; }
-
-            return this;
-        }
-
-        public async ValueTask<bool> MoveNextAsync()
-        {
-            // ReSharper disable once InvertIf
-            if ( _cache is null )
-            {
-                _index = Enumerator.START_INDEX;
-                _cache = await _collection.CopyAsync( _token );
-            }
-
-            return Enumerator.MoveNext( Reset, out _current, ref _index, _cache.Value.AsSpan() );
-        }
-        public void Reset()
-        {
-            _index = Enumerator.START_INDEX;
-            _cache = null;
-        }
-    }
-
-
-
-    public struct Enumerator : IEnumerator<TValue>, IEnumerable<TValue>
-    {
-        internal const   int                                    START_INDEX = -1;
-        private readonly ConcurrentObservableCollection<TValue> _collection;
-        private          int                                    _index   = START_INDEX;
-        private          TValue?                                _current = default;
-        private          ImmutableArray<TValue>?                _cache   = default;
-        public readonly  TValue                                 Current        => _current ?? throw new NullReferenceException( nameof(_current) );
-        readonly         object IEnumerator.                    Current        => Current  ?? throw new NullReferenceException( nameof(_current) );
-        internal         bool                                   ShouldContinue => ++_index < _cache?.Length;
-
-        public Enumerator( ConcurrentObservableCollection<TValue> collection ) => _collection = collection;
-        public   void                                    Dispose()       => this = default;
-        readonly IEnumerator<TValue> IEnumerable<TValue>.GetEnumerator() => this;
-        readonly IEnumerator IEnumerable.                GetEnumerator() => this;
-
-        public bool MoveNext()
-        {
-            // ReSharper disable once InvertIf
-            if ( _cache is null )
-            {
-                _index = START_INDEX;
-                _cache = _collection.Copy();
-            }
-
-            return MoveNext( Reset, out _current, ref _index, _cache.Value.AsSpan() );
-        }
-        public void Reset()
-        {
-            _index = START_INDEX;
-            _cache = null;
-        }
-
-
-        internal static bool MoveNext( Action reset, out TValue? current, ref int index, in ReadOnlySpan<TValue> span )
-        {
-            index++;
-
-            current = index < span.Length
-                          ? span[index]
-                          : default;
-
-            bool result = index < span.Length;
-            if ( result ) { return result; }
-
-            reset();
-            return result;
-        }
-    }
-#pragma warning restore IDE0064 // Make readonly fields writable
-#pragma warning restore IDE0290 // Use primary constructor
-*/
 }
