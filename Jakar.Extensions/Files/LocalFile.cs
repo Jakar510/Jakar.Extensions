@@ -161,7 +161,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     /// <returns> </returns>
     public static FileStream CreateTempFileAndOpen( MimeType type, out LocalFile file )
     {
-        ReadOnlySpan<char> ext  = type.ToExtension( true );
+        ReadOnlySpan<char> ext  = type.ToExtensionWithPeriod();
         ReadOnlySpan<char> name = Path.GetRandomFileName();
         name = name[..name.IndexOf( '.' )];
         Span<char> span = stackalloc char[name.Length + ext.Length];

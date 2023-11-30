@@ -2,7 +2,8 @@
 {
     "Hello World!".WriteToConsole();
     Console.WriteLine();
-    await Tests.Test_ConcurrentObservableCollection();
+
+    // await Tests.Test_ConcurrentObservableCollection();
 
     // await Jakar.Database.TestDatabase.Test();
 

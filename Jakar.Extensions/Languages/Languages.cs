@@ -1,7 +1,4 @@
-﻿using System.Collections.Frozen;
-
-
-#pragma warning disable IDE0046
+﻿#pragma warning disable IDE0046
 
 
 
@@ -9,24 +6,23 @@ namespace Jakar.Extensions;
 
 
 [ SuppressMessage( "ReSharper", "StringLiteralTypo" ) ]
-public static class LanguageExtensions
+public static class Languages
 {
-#if NET8_0_OR_GREATER
-    public static readonly FrozenDictionary<string, SupportedLanguage> Languages  = Enum.GetValues<SupportedLanguage>().ToFrozenDictionary( ToStringFast, ValueSelector );
-    public static readonly FrozenDictionary<string, SupportedLanguage> ShortNames = Enum.GetValues<SupportedLanguage>().ToFrozenDictionary( GetShortName, ValueSelector );
-    public static readonly FrozenDictionary<string, SupportedLanguage> Names      = Enum.GetValues<SupportedLanguage>().ToFrozenDictionary( GetName,      ValueSelector );
-#elif NET6_0_OR_GREATER
-    public  static readonly ImmutableDictionary<string, SupportedLanguage> Languages = Enum.GetValues<SupportedLanguage>().ToImmutableDictionary( ToStringFast, ValueSelector );
-    public  static readonly ImmutableDictionary<string, SupportedLanguage> ShortNames = Enum.GetValues<SupportedLanguage>().ToImmutableDictionary( GetShortName, ValueSelector );
-    public  static readonly ImmutableDictionary<string, SupportedLanguage> Names = Enum.GetValues<SupportedLanguage>().ToImmutableDictionary( GetName, ValueSelector );
+    public static readonly FrozenSet<SupportedLanguage> All =
+    #if NET6_0_OR_GREATER
+        Enum.GetValues<SupportedLanguage>().ToFrozenSet();
 #else
-    public static readonly ImmutableDictionary<string, SupportedLanguage> Languages = Enum.GetValues( typeof(SupportedLanguage) ).Cast<SupportedLanguage>().ToImmutableDictionary( ToStringFast, ValueSelector );
-    public static readonly ImmutableDictionary<string, SupportedLanguage> ShortNames = Enum.GetValues( typeof(SupportedLanguage) ).Cast<SupportedLanguage>().ToImmutableDictionary( GetShortName, ValueSelector );
-    public static readonly ImmutableDictionary<string, SupportedLanguage> Names = Enum.GetValues( typeof(SupportedLanguage) ).Cast<SupportedLanguage>().ToImmutableDictionary( GetName,      ValueSelector );
+        Enum.GetValues( typeof(SupportedLanguage) ).Cast<SupportedLanguage>().ToFrozenSet();
 #endif
 
+    public static readonly FrozenDictionary<string, SupportedLanguage> Values            = All.ToFrozenDictionary( ToStringFast, SelectSelf );
+    public static readonly FrozenDictionary<SupportedLanguage, string> ReverseShortNames = All.ToFrozenDictionary( SelectSelf,   GetShortName );
+    public static readonly FrozenDictionary<string, SupportedLanguage> ShortNames        = All.ToFrozenDictionary( GetShortName, SelectSelf );
+    public static readonly FrozenDictionary<SupportedLanguage, string> ReverseNames      = All.ToFrozenDictionary( SelectSelf,   ToStringFast );
+    public static readonly FrozenDictionary<string, SupportedLanguage> Names             = All.ToFrozenDictionary( GetName,      SelectSelf );
 
-    private static SupportedLanguage ValueSelector( SupportedLanguage v ) => v;
+
+    private static T SelectSelf<T>( T v ) => v;
 
 
     public static string GetName( this SupportedLanguage language ) => language switch
@@ -48,6 +44,12 @@ public static class LanguageExtensions
                                                                            SupportedLanguage.Unspecified => nameof(SupportedLanguage.Unspecified),
                                                                            _                             => string.Empty
                                                                        };
+
+
+    public static CultureInfo GetCultureInfo( this SupportedLanguage language, CultureInfo unspecifiedCulture ) =>
+        language is SupportedLanguage.Unspecified || All.Contains( language ) is false
+            ? unspecifiedCulture
+            : new CultureInfo( language.GetShortName() );
     public static string GetShortName( this SupportedLanguage language ) => language switch
                                                                             {
                                                                                 SupportedLanguage.English     => "en",
@@ -64,7 +66,7 @@ public static class LanguageExtensions
                                                                                 SupportedLanguage.Dutch       => "nl",
                                                                                 SupportedLanguage.Korean      => "ko",
                                                                                 SupportedLanguage.Arabic      => "ar",
-                                                                                SupportedLanguage.Unspecified => throw new OutOfRangeException( nameof(language), language ),
+                                                                                SupportedLanguage.Unspecified => string.Empty,
                                                                                 _                             => throw new OutOfRangeException( nameof(language), language )
                                                                             };
     public static string ToStringFast( SupportedLanguage language ) => language switch
@@ -93,7 +95,7 @@ public static class LanguageExtensions
         string name = culture.DisplayName;
         if ( string.IsNullOrEmpty( name ) ) { return null; }
 
-        foreach ( (string? key, SupportedLanguage value) in Languages )
+        foreach ( (string? key, SupportedLanguage value) in Values )
         {
             if ( name.Contains( key, StringComparison.OrdinalIgnoreCase ) ) { return value; }
         }
@@ -117,7 +119,7 @@ public static class LanguageExtensions
         string? name = culture.ToString();
         if ( string.IsNullOrEmpty( name ) ) { return null; }
 
-        foreach ( (string? key, SupportedLanguage value) in Languages )
+        foreach ( (string? key, SupportedLanguage value) in Values )
         {
             if ( name.Contains( key, StringComparison.OrdinalIgnoreCase ) ) { return value; }
         }
