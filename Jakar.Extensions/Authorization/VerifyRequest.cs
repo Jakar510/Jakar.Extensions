@@ -7,21 +7,9 @@ public class VerifyRequest : BaseClass, ILoginRequest, ICredentials, ICloneable,
     [ JsonExtensionData ] public         IDictionary<string, JToken?>? AdditionalData { get; set; }
     [ JsonIgnore ]        public virtual bool                          IsValid        => !string.IsNullOrWhiteSpace( UserName ) && !string.IsNullOrWhiteSpace( Password );
 
-    [ Required( ErrorMessage = $"{nameof(Password)} is required." ), JsonProperty( nameof(Password), Required = Required.Always ) ] public string Password { get; init; } = string.Empty;
-    [ Obsolete( nameof(UserName) ) ]
-    public string UserLogin
-    {
-        get => UserName;
-        init => UserName = value;
-    }
 
+    [ Required( ErrorMessage = $"{nameof(Password)} is required." ), JsonProperty( nameof(Password), Required = Required.Always ) ] public string Password { get; init; } = string.Empty;
     [ Required( ErrorMessage = $"{nameof(UserName)} is required." ), JsonProperty( nameof(UserName), Required = Required.Always ) ] public string UserName { get; init; } = string.Empty;
-    [ Obsolete( nameof(Password) ) ]
-    public string UserPassword
-    {
-        get => Password;
-        init => Password = value;
-    }
 
 
     public VerifyRequest() { }
