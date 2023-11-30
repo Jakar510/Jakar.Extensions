@@ -1,5 +1,4 @@
 ﻿using System.Security.Cryptography;
-using System.Text.Json.Serialization;
 
 
 
@@ -176,8 +175,8 @@ public sealed class CurrentLocation<TID> : BaseJsonModel, ICurrentLocation<TID>,
 
 
 
-[ JsonSerializable( typeof(CurrentLocation<long>) ) ] public partial class CurrentLocationLongContext : JsonSerializerContext { }
+[ JsonSourceGenerationOptions( WriteIndented = true ), JsonSerializable( typeof(CurrentLocation<long>) ) ] public partial class CurrentLocationLongContext : JsonSerializerContext { }
 
 
 
-[ JsonSerializable( typeof(CurrentLocation<Guid>) ) ] public partial class CurrentLocationGuidContext : JsonSerializerContext { }
+[ JsonSourceGenerationOptions( WriteIndented = true ), JsonSerializable( typeof(CurrentLocation<Guid>) ) ] public partial class CurrentLocationGuidContext : JsonSerializerContext { }

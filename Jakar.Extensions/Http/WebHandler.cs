@@ -181,7 +181,7 @@ public readonly record struct WebHandler : IDisposable
     #if NET6_0_OR_GREATER
         await
         #endif
-            using JsonNetReader reader = new JsonTextReader( sr );
+            using JsonReader reader = new JsonTextReader( sr );
 
         TResult? result = serializer.Deserialize<TResult>( reader );
         return result ?? throw new NullReferenceException( nameof(JsonConvert.DeserializeObject) );
@@ -202,8 +202,9 @@ public readonly record struct WebHandler : IDisposable
     public       ValueTask<WebResponse<string>>               AsString()                          => WebResponse<string>.Create( this, AsString );
 
 
-    public ValueTask<WebResponse<TResult>> AsJson<TResult>()                               => AsJson<TResult>( JsonNet.Serializer );
-    public ValueTask<WebResponse<TResult>> AsJson<TResult>( JsonNetSerializer serializer ) => WebResponse<TResult>.Create( this, serializer, AsJson<TResult> );
+    public ValueTask<WebResponse<TResult>> AsJson<TResult>()                                   => AsJson<TResult>( JsonNet.Serializer );
+    public ValueTask<WebResponse<TResult>> AsJson<TResult>( JsonNetSerializer     serializer ) => WebResponse<TResult>.Create( this, serializer, AsJson<TResult> );
+    public ValueTask<WebResponse<TResult>> AsJson<TResult>( JsonSerializerOptions serializer ) => WebResponse<TResult>.Create( this, serializer, AsJson<TResult> );
 
 
     public void Dispose() => _request.Dispose();

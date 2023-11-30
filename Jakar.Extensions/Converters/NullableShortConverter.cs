@@ -1,7 +1,7 @@
 ﻿namespace Jakar.Extensions;
 
 
-public sealed class NullableShortConverter : JsonConverter<short?>
+public sealed class NullableShortConverter : Newtonsoft.Json.JsonConverter<short?>
 {
     public override void WriteJson( JsonWriter writer, short? value, JsonNetSerializer serializer ) => writer.WriteValue( value );
     public override short? ReadJson( JsonReader reader, Type objectType, short? existingValue, bool hasExistingValue, JsonNetSerializer serializer ) =>

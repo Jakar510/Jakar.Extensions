@@ -1,7 +1,7 @@
 ﻿namespace Jakar.Extensions;
 
 
-public class VersionConverter : JsonConverter<Version>
+public class VersionConverter : Newtonsoft.Json.JsonConverter<Version>
 {
     public override Version? ReadJson( JsonReader reader, Type objectType, Version? existingValue, bool hasExistingValue, JsonNetSerializer serializer )
     {

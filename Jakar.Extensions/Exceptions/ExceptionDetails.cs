@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization.Metadata;
 
 
 
@@ -126,4 +126,6 @@ public sealed class ParameterDetails
 
 
 
-// [ JsonConverter( typeof(ParameterDetails) ) ] public partial class ParameterDetailsContext : JsonSerializerContext { }
+// [ JsonSourceGenerationOptions( WriteIndented = true ), JsonConverter( typeof(MethodDetails) ) ] public partial class MethodDetailsContext : JsonSerializerContext { }
+// [ JsonSourceGenerationOptions( WriteIndented = true ), JsonConverter( typeof(ExceptionDetails) ) ] public partial class ExceptionDetailsContext : JsonSerializerContext { }
+// [ JsonSourceGenerationOptions( WriteIndented = true ), JsonConverter( typeof(ParameterDetails) ) ] public partial class ParameterDetailsContext : JsonSerializerContext { }

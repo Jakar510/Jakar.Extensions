@@ -35,18 +35,18 @@ public static class JsonNet
     [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static JToken FromJson( this object value, JsonNetSerializer serializer ) => JToken.FromObject( value, serializer ) ?? throw new NullReferenceException( nameof(JToken.Parse) );
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static string ToJson( this JToken value )                                                                       => ToJson( value, Formatting.None, Array.Empty<JsonConverter>() );
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static string ToJson( this JToken value, params JsonConverter[] converters )                                    => ToJson( value, Formatting.None, converters );
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static string ToJson( this JToken value, Formatting             formatting )                                    => ToJson( value, formatting,      Array.Empty<JsonConverter>() );
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static string ToJson( this JToken value, Formatting             formatting, params JsonConverter[] converters ) => value.ToString( formatting, converters );
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static string ToJson( this JToken value )                                                                       => ToJson( value, Formatting.None, Array.Empty<JsonNetConverter>() );
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static string ToJson( this JToken value, params JsonNetConverter[] converters )                                    => ToJson( value, Formatting.None, converters );
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static string ToJson( this JToken value, Formatting             formatting )                                    => ToJson( value, formatting,      Array.Empty<JsonNetConverter>() );
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static string ToJson( this JToken value, Formatting             formatting, params JsonNetConverter[] converters ) => value.ToString( formatting, converters );
 
 
     [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static string ToJson( this object value )                                                                     => ToJson( value, Formatting.None, Settings );
     [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static string ToJson( this object value, Formatting             formatting )                                  => ToJson( value, formatting,      Settings );
     [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static string ToJson( this object value, JsonSerializerSettings settings )                                    => ToJson( value, Formatting.None, settings );
     [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static string ToJson( this object value, Formatting             formatting, JsonSerializerSettings settings ) => JsonConvert.SerializeObject( value, formatting, settings );
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static string ToJson( this object value, params JsonConverter[] converters )                                    => value.ToJson( Formatting.Indented, converters );
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static string ToJson( this object value, Formatting             formatting, params JsonConverter[] converters ) => JsonConvert.SerializeObject( value, formatting, converters );
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static string ToJson( this object value, params JsonNetConverter[] converters )                                    => value.ToJson( Formatting.Indented, converters );
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static string ToJson( this object value, Formatting             formatting, params JsonNetConverter[] converters ) => JsonConvert.SerializeObject( value, formatting, converters );
 
 
     [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static string ToPrettyJson( this JToken value ) => value.ToJson( Formatting.Indented );
@@ -56,7 +56,7 @@ public static class JsonNet
     [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static TResult FromJson<TResult>( this ReadOnlySpan<char> value ) => FromJson<TResult>( value.ToString() );
     [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static TResult FromJson<TResult>( this string value ) => FromJson<TResult>( value, Settings );
     [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static TResult FromJson<TResult>( this string value, JsonSerializerSettings? settings ) => Validate.ThrowIfNull( JsonConvert.DeserializeObject<TResult>( value, settings ) );
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static TResult FromJson<TResult>( this string value, params JsonConverter[] converters ) => Validate.ThrowIfNull( JsonConvert.DeserializeObject<TResult>( value, converters ) );
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static TResult FromJson<TResult>( this string value, params JsonNetConverter[] converters ) => Validate.ThrowIfNull( JsonConvert.DeserializeObject<TResult>( value, converters ) );
 
 
     [ Conditional( "DEBUG" ) ]

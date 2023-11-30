@@ -1,5 +1,4 @@
 ﻿using System.Text.Json.Nodes;
-using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
 
 
@@ -65,7 +64,7 @@ public class VerifyRequest : BaseClass, ILoginRequest, ICredentials, ICloneable,
 
 
 
-[ JsonSerializable( typeof(VerifyRequest) ) ] public partial class VerifyRequestContext : JsonSerializerContext { }
+[ JsonSourceGenerationOptions( WriteIndented = true ), JsonSerializable( typeof(VerifyRequest) ) ] public partial class VerifyRequestContext : JsonSerializerContext { }
 
 
 

@@ -1,7 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 09/29/2023  10:20 PM
 
-using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
 
 
@@ -221,4 +220,4 @@ public record UserAddress : ObservableRecord, IAddress, IComparable<UserAddress>
 
 
 
-[ JsonSerializable( typeof(UserAddress) ) ] public partial class UserAddressContext : JsonSerializerContext { }
+[ JsonSourceGenerationOptions( WriteIndented = true ), JsonSerializable( typeof(UserAddress) ) ] public partial class UserAddressContext : JsonSerializerContext { }

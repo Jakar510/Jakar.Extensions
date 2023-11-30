@@ -1,8 +1,4 @@
-﻿using System.Text.Json.Serialization;
-
-
-
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
 
 
 [ Serializable ]

@@ -160,7 +160,11 @@ public static class ExceptionExtensions
 
             if ( dictionary.ContainsKey( key ) || !info.CanRead || key == "TargetSite" ) { continue; }
 
-            dictionary[key] = JToken.FromObject( info.GetValue( e, null ) );
+            object? value = info.GetValue( e, null );
+
+            dictionary[key] = value is not null
+                                  ? JToken.FromObject( value )
+                                  : null;
         }
     }
     public static void Details( this Exception e, out Dictionary<string, JToken?> dict, bool includeFullMethodInfo )
