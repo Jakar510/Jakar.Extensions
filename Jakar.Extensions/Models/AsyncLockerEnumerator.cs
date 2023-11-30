@@ -7,14 +7,15 @@ namespace Jakar.Extensions;
 public sealed class AsyncLockerEnumerator<TValue, TList> : IAsyncEnumerable<TValue>, IAsyncEnumerator<TValue>
     where TList : ILockedCollection<TValue>
 {
-    private const    int                     START_INDEX = -1;
-    private readonly TList                   _collection;
-    private          CancellationToken       _token;
-    private          int                     _index = START_INDEX;
-    private          TValue?                 _current;
-    private          ImmutableArray<TValue>? _cache;
-    public           TValue                  Current        => _current ?? throw new NullReferenceException( nameof(_current) );
-    internal         bool                    ShouldContinue => _token.ShouldContinue() && _index < _cache?.Length;
+    private const    int                    START_INDEX = -1;
+    private readonly TList                  _collection;
+    private          bool                   _isDisposed;
+    private          CancellationToken      _token;
+    private          int                    _index = START_INDEX;
+    private          TValue?                _current;
+    private          ReadOnlyMemory<TValue> _cache;
+    public           TValue                 Current        => _current ?? throw new NullReferenceException( nameof(_current) );
+    internal         bool                   ShouldContinue => _token.ShouldContinue() && _index < _cache.Length;
 
 
     public AsyncLockerEnumerator( TList collection, CancellationToken token = default )
@@ -24,25 +25,30 @@ public sealed class AsyncLockerEnumerator<TValue, TList> : IAsyncEnumerable<TVal
     }
     public ValueTask DisposeAsync()
     {
-        _cache = null;
+        _isDisposed = true;
+        _cache      = default;
         return default;
     }
 
 
     public async ValueTask<bool> MoveNextAsync()
     {
+        if ( _isDisposed ) { throw new ObjectDisposedException( nameof(AsyncLockerEnumerator<TValue, TList>) ); }
+
         // ReSharper disable once InvertIf
-        if ( _cache is null )
+        if ( _cache.IsEmpty )
         {
             _index = START_INDEX;
             _cache = await _collection.CopyAsync( _token );
         }
 
-        return ILockedCollection<TValue>.MoveNext( Reset, out _current, ref _index, _cache.Value.AsSpan() );
+        return ILockedCollection<TValue>.MoveNext( Reset, out _current, ref _index, _cache.Span );
     }
     IAsyncEnumerator<TValue> IAsyncEnumerable<TValue>.GetAsyncEnumerator( CancellationToken token ) => GetAsyncEnumerator( token );
     public AsyncLockerEnumerator<TValue, TList> GetAsyncEnumerator( CancellationToken token = default )
     {
+        if ( _isDisposed ) { throw new ObjectDisposedException( nameof(AsyncLockerEnumerator<TValue, TList>) ); }
+
         Reset();
         if ( token.CanBeCanceled ) { _token = token; }
 
@@ -50,8 +56,10 @@ public sealed class AsyncLockerEnumerator<TValue, TList> : IAsyncEnumerable<TVal
     }
     public void Reset()
     {
+        if ( _isDisposed ) { throw new ObjectDisposedException( nameof(AsyncLockerEnumerator<TValue, TList>) ); }
+
         _index = START_INDEX;
-        _cache = null;
+        _cache = default;
     }
 
 
