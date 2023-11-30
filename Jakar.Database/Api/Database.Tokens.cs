@@ -47,7 +47,7 @@ public abstract partial class Database
     public ValueTask<Tokens?> Authenticate( VerifyRequest request, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default ) => this.TryCall( Authenticate, request, types, token );
     protected virtual async ValueTask<Tokens?> Authenticate( DbConnection connection, DbTransaction transaction, VerifyRequest request, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default )
     {
-        UserRecord? user = await Users.Get( nameof(UserRecord.UserName), request.UserLogin, token );
+        UserRecord? user = await Users.Get( nameof(UserRecord.UserName), request.UserName, token );
         if ( user is null ) { return default; }
 
         if ( !await ValidateSubscription( connection, transaction, user, token ) ) { return default; }
@@ -69,7 +69,7 @@ public abstract partial class Database
         }
 
 
-        if ( user.VerifyPassword( request.UserPassword ) ) { return await GetToken( connection, transaction, user, types, token ); }
+        if ( user.VerifyPassword( request.Password ) ) { return await GetToken( connection, transaction, user, types, token ); }
 
         await Users.Update( connection, transaction, user, token );
         return default;

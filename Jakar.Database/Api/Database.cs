@@ -177,7 +177,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
         if ( record is not null ) { return new Error( Status.BadRequest, request ); }
 
 
-        if ( !PasswordValidator.Validate( request.UserPassword, out bool lengthPassed, out bool specialPassed, out bool numericPassed, out bool lowerPassed, out bool upperPassed, out bool blockedPassed ) )
+        if ( !PasswordValidator.Validate( request.Password, out bool lengthPassed, out bool specialPassed, out bool numericPassed, out bool lowerPassed, out bool upperPassed, out bool blockedPassed ) )
         {
             var state = new ModelStateDictionary();
             state.AddModelError( "Error", "Password Validation Failed" );

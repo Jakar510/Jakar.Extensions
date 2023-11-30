@@ -22,11 +22,11 @@
 		<PackageReference Include="Blazored.Modal" Version="7.1.0" />
 		<PackageReference Include="Blazored.SessionStorage" Version="2.4.0" />
 		<PackageReference Include="Blazored.Toast" Version="4.1.0" />
-		<PackageReference Include="Jakar.Extensions" Version="7.0.0" />
+		<PackageReference Include="Jakar.Extensions" Version="7.1.1" />
 		<PackageReference Include="MailKit" Version="4.3.0" />
 		<PackageReference Include="Npgsql" Version="8.0.0" />
 		<PackageReference Include="Npgsql.Json.NET" Version="8.0.0" />
-		<PackageReference Include="Radzen.Blazor" Version="4.22.0" />
+		<PackageReference Include="Radzen.Blazor" Version="4.22.1" />
 	</ItemGroup>
 
 	<ItemGroup>
