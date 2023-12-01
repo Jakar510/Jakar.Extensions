@@ -4,7 +4,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata>
 		<id>Jakar.Extensions</id>
-		<version>7.1.0</version>
+		<version>7.2.0</version>
 		<title>Extension Library</title>
 		<authors>Tyler Stegmaier</authors>
 		<owners>Jakar510/Jakar</owners>
@@ -32,6 +32,8 @@
 							version="8.2.2" />
 				<dependency id="JetBrains.Annotations"
 							version="2023.3.0" />
+				<dependency id="Microsoft.CodeAnalysis.CSharp"
+							version="4.8.0" />
 				<dependency id="Microsoft.CSharp"
 							version="4.7.0" />
 				<dependency id="Microsoft.Extensions.Logging.Abstractions"
@@ -46,6 +48,8 @@
 							version="8.0.0" />
 				<dependency id="System.ComponentModel.Annotations"
 							version="5.0.0" />
+				<dependency id="System.IO.Hashing"
+							version="8.0.0" />
 				<dependency id="System.Net.Http"
 							version="4.3.4" />
 				<dependency id="System.Text.Encoding.CodePages"
@@ -83,6 +87,10 @@
 							version="8.2.2" />
 				<dependency id="JetBrains.Annotations"
 							version="2023.3.0" />
+				<dependency id="Microsoft.CodeAnalysis.CSharp"
+							version="4.8.0" />
+				<dependency id="Microsoft.CSharp"
+							version="4.7.0" />
 				<dependency id="Microsoft.Extensions.Logging.Abstractions"
 							version="8.0.0" />
 				<dependency id="Microsoft.Extensions.Options"
@@ -95,6 +103,8 @@
 							version="8.0.0" />
 				<dependency id="System.ComponentModel.Annotations"
 							version="5.0.0" />
+				<dependency id="System.IO.Hashing"
+							version="8.0.0" />
 				<dependency id="System.Net.Http"
 							version="4.3.4" />
 				<dependency id="System.Text.Encoding.CodePages"
@@ -132,6 +142,10 @@
 							version="8.2.2" />
 				<dependency id="JetBrains.Annotations"
 							version="2023.3.0" />
+				<dependency id="Microsoft.CodeAnalysis.CSharp"
+							version="4.8.0" />
+				<dependency id="Microsoft.CSharp"
+							version="4.7.0" />
 				<dependency id="Microsoft.Extensions.Logging.Abstractions"
 							version="8.0.0" />
 				<dependency id="Microsoft.Extensions.Options"
@@ -144,6 +158,8 @@
 							version="8.0.0" />
 				<dependency id="System.ComponentModel.Annotations"
 							version="5.0.0" />
+				<dependency id="System.IO.Hashing"
+							version="8.0.0" />
 				<dependency id="System.Net.Http"
 							version="4.3.4" />
 				<dependency id="System.Text.Encoding.CodePages"
@@ -181,6 +197,10 @@
 							version="8.2.2" />
 				<dependency id="JetBrains.Annotations"
 							version="2023.3.0" />
+				<dependency id="Microsoft.CodeAnalysis.CSharp"
+							version="4.8.0" />
+				<dependency id="Microsoft.CSharp"
+							version="4.7.0" />
 				<dependency id="Microsoft.Extensions.Logging.Abstractions"
 							version="8.0.0" />
 				<dependency id="Microsoft.Extensions.Options"
@@ -193,6 +213,8 @@
 							version="8.0.0" />
 				<dependency id="System.ComponentModel.Annotations"
 							version="5.0.0" />
+				<dependency id="System.IO.Hashing"
+							version="8.0.0" />
 				<dependency id="System.Net.Http"
 							version="4.3.4" />
 				<dependency id="System.Text.Encoding.CodePages"

@@ -6,6 +6,11 @@
 // using Jakar.Xml.Deserialization;
 
 
+using System.IO.Hashing;
+using System.Runtime.CompilerServices;
+
+
+
 namespace Experiments;
 #nullable enable
 
@@ -23,6 +28,18 @@ public enum Page
 public static class Tests
 {
     public static long[] List { get; } = AsyncLinq.Range( 0L, 10000 ).ToArray();
+
+
+    public static void Test_Hashes() => Spans.Hash( List ).WriteToDebug();
+    public static void Test_Hashes( in ReadOnlySpan<byte> values )
+    {
+        UInt128.MinValue.WriteToDebug();
+        UInt128.MaxValue.WriteToDebug();
+        System.IO.Hashing.Crc64.HashToUInt64( values ).WriteToDebug();
+        System.IO.Hashing.XxHash64.HashToUInt64( values ).WriteToDebug();
+        UInt128 hash = System.IO.Hashing.XxHash128.HashToUInt128( values );
+        hash.WriteToDebug();
+    }
 
 
     public static async ValueTask Test_ConcurrentObservableCollection( CancellationToken token = default )

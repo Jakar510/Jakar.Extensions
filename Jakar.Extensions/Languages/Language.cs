@@ -29,14 +29,14 @@ public sealed class Language : BaseClass, IComparable<Language>, IEquatable<Lang
         IsNeutralCulture = culture.IsNeutralCulture;
         DisplayName      = Version?.GetName() ?? culture.DisplayName;
     }
-    public Language( SupportedLanguage language ) : this( new CultureInfo( language.GetShortName() ), language ) { }
+    public Language( SupportedLanguage language ) : this( language.GetCultureInfo( CultureInfo.InvariantCulture ), language ) { }
 
 
     public static implicit operator Language( CultureInfo       value ) => new(value);
     public static implicit operator Language( SupportedLanguage value ) => new(value);
     public static implicit operator CultureInfo( Language       value ) => value._culture;
-    
-    
+
+
     public          CultureInfo GetCulture() => _culture;
     public override string      ToString()   => DisplayName;
 
