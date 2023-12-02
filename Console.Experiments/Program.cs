@@ -3,11 +3,11 @@
     "Hello World!".WriteToConsole();
     Console.WriteLine();
 
-    Tests.Test_Hashes();
+    // Tests.Test_Hashes();
 
     // await Tests.Test_ConcurrentObservableCollection();
 
-    // await Jakar.Database.TestDatabase.Test();
+    await Jakar.Database.TestDatabase.Test();
 
     // JsonTest.Run();
 
