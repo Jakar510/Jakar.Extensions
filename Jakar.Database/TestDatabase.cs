@@ -1,6 +1,7 @@
 ﻿// Jakar.Extensions :: Experiments
 // 09/28/2023  10:02 AM
 
+using System.Collections.Frozen;
 using Npgsql;
 
 
@@ -58,23 +59,26 @@ public sealed class TestDatabase : Database
                 var               admin = UserRecord.Create( "Admin", "Admin", string.Empty );
                 var               user  = UserRecord.Create( "User",  "User",  string.Empty, admin );
 
-                ImmutableList<UserRecord> users   = ImmutableList.Create( admin, user );
-                var                       results = new List<UserRecord>( users.Count );
+                UserRecord[] users = {
+                                         admin,
+                                         user
+                                     };
 
+                var results = new List<UserRecord>( users.Length );
                 await foreach ( UserRecord record in db.Users.Insert( users, token ) ) { results.Add( record ); }
 
-                Debug.Assert( users.Count == results.Count );
+                Debug.Assert( users.Length == results.Count );
 
                 results.Clear();
                 await foreach ( UserRecord record in db.Users.All( token ) ) { results.Add( record ); }
 
-                Debug.Assert( users.Count == results.Count );
+                Debug.Assert( users.Length == results.Count );
             }
         }
         finally
         {
         #if DEBUG
-            if ( app.Configuration.GetValue( "DISPATCH_DOWN", true ) )
+            if ( app.Configuration.GetValue( "DB_DOWN", true ) )
             {
                 await using AsyncServiceScope scope  = app.Services.CreateAsyncScope();
                 var                           runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();

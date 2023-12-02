@@ -59,12 +59,19 @@ public abstract record TableRecord<TRecord>( [ property: Key ] RecordID<TRecord>
     [ Conditional( "DEBUG" ) ]
     public void Validate()
     {
-        PropertyInfo[]    properties = typeof(TRecord).GetProperties();
+        PropertyInfo[]    properties = typeof(TRecord).GetProperties( BindingFlags.Instance | BindingFlags.Public );
         DynamicParameters parameters = ToDynamicParameters();
         int               length     = parameters.ParameterNames.Count();
         if ( length == properties.Length ) { return; }
 
-        string message = $"{typeof(TRecord).Name}: {nameof(ToDynamicParameters)}.Length ({length}) != {nameof(properties)}.Length ({properties.Length})";
+        var missing = new HashSet<string>( properties.Select( x => x.Name ) );
+        missing.ExceptWith( parameters.ParameterNames );
+
+        string message = $"""
+                          {typeof(TRecord).Name}: {nameof(ToDynamicParameters)}.Length ({length}) != {nameof(properties)}.Length ({properties.Length})
+                          {missing.ToPrettyJson()}
+                          """;
+
         throw new InvalidOperationException( message );
     }
 

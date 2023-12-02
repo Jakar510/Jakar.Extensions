@@ -86,6 +86,7 @@ public sealed record UserRecord( Guid                                           
         parameters.Add( nameof(Rights),                 Rights );
         parameters.Add( nameof(Gender),                 Gender );
         parameters.Add( nameof(Company),                Company );
+        parameters.Add( nameof(Department),             Department );
         parameters.Add( nameof(Description),            Description );
         parameters.Add( nameof(Title),                  Title );
         parameters.Add( nameof(Website),                Website );
