@@ -45,30 +45,30 @@ namespace Experiments.Benchmarks;
    | ConstructImmutableDictionary          | 100000 | 49,764,892.67 ns | 512,944.979 ns | 479,809.052 ns |  +1,312% |    1.2% | 700.0000 | 600.0000 |        - |  6400146 B |       +110% |
    | ConstructFrozenDictionary             | 100000 | 41,001,641.03 ns | 419,122.355 ns | 392,047.310 ns |  +1,063% |    1.2% | 307.6923 | 307.6923 | 307.6923 | 17326982 B |       +469% |
    |                                       |        |                  |                |                |          |         |          |          |          |            |             |
-   | Dictionary_TryGetValue_Found          | 10     |        149.93 ns |       0.808 ns |       0.756 ns | baseline |         |        - |        - |        - |          - |          NA |
-   | ReadOnlyDictionary_TryGetValue_Found  | 10     |        162.60 ns |       0.294 ns |       0.230 ns |      +8% |    0.5% |        - |        - |        - |          - |          NA |
-   | ImmutableDictionary_TryGetValue_Found | 10     |        332.22 ns |       1.375 ns |       1.286 ns |    +122% |    0.6% |        - |        - |        - |          - |          NA |
-   | FrozenDictionary_TryGetValue_Found    | 10     |         57.50 ns |       0.175 ns |       0.163 ns |     -62% |    0.5% |        - |        - |        - |          - |          NA |
+   | Dictionary_TryGetValue_First          | 10     |        149.93 ns |       0.808 ns |       0.756 ns | baseline |         |        - |        - |        - |          - |          NA |
+   | ReadOnlyDictionary_TryGetValue_First  | 10     |        162.60 ns |       0.294 ns |       0.230 ns |      +8% |    0.5% |        - |        - |        - |          - |          NA |
+   | ImmutableDictionary_TryGetValue_First | 10     |        332.22 ns |       1.375 ns |       1.286 ns |    +122% |    0.6% |        - |        - |        - |          - |          NA |
+   | FrozenDictionary_TryGetValue_First    | 10     |         57.50 ns |       0.175 ns |       0.163 ns |     -62% |    0.5% |        - |        - |        - |          - |          NA |
    |                                       |        |                  |                |                |          |         |          |          |          |            |             |
-   | Dictionary_TryGetValue_Found          | 100    |      1,691.69 ns |       3.998 ns |       3.339 ns | baseline |         |        - |        - |        - |          - |          NA |
-   | ReadOnlyDictionary_TryGetValue_Found  | 100    |      1,937.33 ns |       7.684 ns |       6.812 ns |     +15% |    0.3% |        - |        - |        - |          - |          NA |
-   | ImmutableDictionary_TryGetValue_Found | 100    |      3,486.54 ns |       8.158 ns |       7.631 ns |    +106% |    0.3% |        - |        - |        - |          - |          NA |
-   | FrozenDictionary_TryGetValue_Found    | 100    |        649.06 ns |       1.928 ns |       1.610 ns |     -62% |    0.3% |        - |        - |        - |          - |          NA |
+   | Dictionary_TryGetValue_First          | 100    |      1,691.69 ns |       3.998 ns |       3.339 ns | baseline |         |        - |        - |        - |          - |          NA |
+   | ReadOnlyDictionary_TryGetValue_First  | 100    |      1,937.33 ns |       7.684 ns |       6.812 ns |     +15% |    0.3% |        - |        - |        - |          - |          NA |
+   | ImmutableDictionary_TryGetValue_First | 100    |      3,486.54 ns |       8.158 ns |       7.631 ns |    +106% |    0.3% |        - |        - |        - |          - |          NA |
+   | FrozenDictionary_TryGetValue_First    | 100    |        649.06 ns |       1.928 ns |       1.610 ns |     -62% |    0.3% |        - |        - |        - |          - |          NA |
    |                                       |        |                  |                |                |          |         |          |          |          |            |             |
-   | Dictionary_TryGetValue_Found          | 1000   |     19,554.15 ns |      67.892 ns |      60.184 ns | baseline |         |        - |        - |        - |          - |          NA |
-   | ReadOnlyDictionary_TryGetValue_Found  | 1000   |     21,296.33 ns |      58.429 ns |      51.795 ns |      +9% |    0.5% |        - |        - |        - |          - |          NA |
-   | ImmutableDictionary_TryGetValue_Found | 1000   |     61,391.55 ns |     505.555 ns |     472.896 ns |    +214% |    0.8% |        - |        - |        - |          - |          NA |
-   | FrozenDictionary_TryGetValue_Found    | 1000   |      6,646.10 ns |      28.513 ns |      25.276 ns |     -66% |    0.6% |        - |        - |        - |          - |          NA |
+   | Dictionary_TryGetValue_First          | 1000   |     19,554.15 ns |      67.892 ns |      60.184 ns | baseline |         |        - |        - |        - |          - |          NA |
+   | ReadOnlyDictionary_TryGetValue_First  | 1000   |     21,296.33 ns |      58.429 ns |      51.795 ns |      +9% |    0.5% |        - |        - |        - |          - |          NA |
+   | ImmutableDictionary_TryGetValue_First | 1000   |     61,391.55 ns |     505.555 ns |     472.896 ns |    +214% |    0.8% |        - |        - |        - |          - |          NA |
+   | FrozenDictionary_TryGetValue_First    | 1000   |      6,646.10 ns |      28.513 ns |      25.276 ns |     -66% |    0.6% |        - |        - |        - |          - |          NA |
    |                                       |        |                  |                |                |          |         |          |          |          |            |             |
-   | Dictionary_TryGetValue_Found          | 10000  |    235,203.39 ns |     418.919 ns |     349.816 ns | baseline |         |        - |        - |        - |          - |          NA |
-   | ReadOnlyDictionary_TryGetValue_Found  | 10000  |    246,981.38 ns |   2,728.957 ns |   2,552.668 ns |      +5% |    1.1% |        - |        - |        - |          - |          NA |
-   | ImmutableDictionary_TryGetValue_Found | 10000  |    976,226.50 ns |   2,109.698 ns |   1,973.413 ns |    +315% |    0.3% |        - |        - |        - |        1 B |          NA |
-   | FrozenDictionary_TryGetValue_Found    | 10000  |    117,081.27 ns |     498.106 ns |     441.558 ns |     -50% |    0.4% |        - |        - |        - |          - |          NA |
+   | Dictionary_TryGetValue_First          | 10000  |    235,203.39 ns |     418.919 ns |     349.816 ns | baseline |         |        - |        - |        - |          - |          NA |
+   | ReadOnlyDictionary_TryGetValue_First  | 10000  |    246,981.38 ns |   2,728.957 ns |   2,552.668 ns |      +5% |    1.1% |        - |        - |        - |          - |          NA |
+   | ImmutableDictionary_TryGetValue_First | 10000  |    976,226.50 ns |   2,109.698 ns |   1,973.413 ns |    +315% |    0.3% |        - |        - |        - |        1 B |          NA |
+   | FrozenDictionary_TryGetValue_First    | 10000  |    117,081.27 ns |     498.106 ns |     441.558 ns |     -50% |    0.4% |        - |        - |        - |          - |          NA |
    |                                       |        |                  |                |                |          |         |          |          |          |            |             |
-   | Dictionary_TryGetValue_Found          | 100000 |  3,227,624.94 ns |  20,943.157 ns |  17,488.485 ns | baseline |         |        - |        - |        - |        3 B |             |
-   | ReadOnlyDictionary_TryGetValue_Found  | 100000 |  3,423,695.70 ns |  13,328.822 ns |  12,467.788 ns |      +6% |    0.6% |        - |        - |        - |        3 B |         +0% |
-   | ImmutableDictionary_TryGetValue_Found | 100000 | 15,893,700.89 ns | 121,401.712 ns | 107,619.456 ns |    +393% |    1.1% |        - |        - |        - |       23 B |       +667% |
-   | FrozenDictionary_TryGetValue_Found    | 100000 |  2,210,297.54 ns |  19,236.221 ns |  16,063.116 ns |     -32% |    0.8% |        - |        - |        - |        3 B |         +0% |
+   | Dictionary_TryGetValue_First          | 100000 |  3,227,624.94 ns |  20,943.157 ns |  17,488.485 ns | baseline |         |        - |        - |        - |        3 B |             |
+   | ReadOnlyDictionary_TryGetValue_First  | 100000 |  3,423,695.70 ns |  13,328.822 ns |  12,467.788 ns |      +6% |    0.6% |        - |        - |        - |        3 B |         +0% |
+   | ImmutableDictionary_TryGetValue_First | 100000 | 15,893,700.89 ns | 121,401.712 ns | 107,619.456 ns |    +393% |    1.1% |        - |        - |        - |       23 B |       +667% |
+   | FrozenDictionary_TryGetValue_First    | 100000 |  2,210,297.54 ns |  19,236.221 ns |  16,063.116 ns |     -32% |    0.8% |        - |        - |        - |        3 B |         +0% |
  */
 
 
@@ -76,85 +76,109 @@ namespace Experiments.Benchmarks;
 [ Config( typeof(BenchmarkConfig) ), GroupBenchmarksBy( BenchmarkLogicalGroupRule.ByCategory ), SimpleJob( RuntimeMoniker.HostProcess ), MemoryDiagnoser, SuppressMessage( "ReSharper", "LoopCanBeConvertedToQuery" ) ]
 public class DictionaryLookupBenchmarks
 {
+    private ConcurrentDictionary<string, int> _concurrentDictionary;
     private Dictionary<string, int>           _dictionary;
     private FrozenDictionary<string, int>     _frozenDictionary;
     private ImmutableDictionary<string, int>  _immutableDictionary;
-    private ConcurrentDictionary<string, int> _concurrentDictionary;
     private KeyValuePair<string, int>[]       _items;
     private ReadOnlyDictionary<string, int>   _readOnlyDictionary;
-    private string[]                          _keys;
+    private string                            _firstKey;
+    private string                            _lastKey;
+    private KeyValuePair<string, int>         _randomPair;
 
-    [ Params( 10, 100, 1000, 10_000, 100_000 ) ] public int Items { get; set; }
+
+    [ Params( 10, 100, 500, 1000, 5000, 10_000, 50_000, 100_000 ) ] public int Items { get; set; }
 
 
     [ GlobalSetup ]
     public void GlobalSetup()
     {
-        _items = Enumerable.Range( 0, Items ).Select( static _ => new KeyValuePair<string, int>( Guid.NewGuid().ToString(), Random.Shared.Next() ) ).ToArray();
-        _keys  = _items.Select( k => k.Key ).ToArray();
-
+        _items                = Enumerable.Range( 0, Items ).Select( static _ => new KeyValuePair<string, int>( Guid.NewGuid().ToString(), Random.Shared.Next() ) ).ToArray();
+        _firstKey             = _items.First().Key;
+        _firstKey             = _items.Last().Key;
+        _randomPair           = RandomPair();
         _dictionary           = new Dictionary<string, int>( _items );
         _readOnlyDictionary   = new ReadOnlyDictionary<string, int>( _items.ToDictionary( i => i.Key, i => i.Value ) );
         _concurrentDictionary = new ConcurrentDictionary<string, int>( _items );
         _immutableDictionary  = _items.ToImmutableDictionary();
         _frozenDictionary     = _items.ToFrozenDictionary();
     }
+    [ BenchmarkCategory( "Commons" ), Benchmark ] public int                       RandomIndex() => Random.Shared.Next( 0, Items );
+    [ BenchmarkCategory( "Commons" ), Benchmark ] public KeyValuePair<string, int> RandomPair()  => _items.Random( Random.Shared ).First();
 
 
     [ BenchmarkCategory( "Construct" ), Benchmark( Baseline = true ) ] public Dictionary<string, int>           ConstructDictionary()           => new(_items);
-    [ BenchmarkCategory( "Construct" ), Benchmark ]                    public ReadOnlyDictionary<string, int>   ConstructReadOnlyDictionary()   => new(_items.ToDictionary( i => i.Key, i => i.Value ));
+    [ BenchmarkCategory( "Construct" ), Benchmark ]                    public ReadOnlyDictionary<string, int>   ConstructReadOnlyDictionary()   => new(ConstructDictionary());
     [ BenchmarkCategory( "Construct" ), Benchmark ]                    public ConcurrentDictionary<string, int> ConstructConcurrentDictionary() => new(_items);
     [ BenchmarkCategory( "Construct" ), Benchmark ]                    public ImmutableDictionary<string, int>  ConstructImmutableDictionary()  => _items.ToImmutableDictionary();
     [ BenchmarkCategory( "Construct" ), Benchmark ]                    public FrozenDictionary<string, int>     ConstructFrozenDictionary()     => _items.ToFrozenDictionary();
 
 
-    [ BenchmarkCategory( "TryGetValue_Found" ), Benchmark( Baseline = true ) ]
-    public bool Dictionary_TryGetValue_Found()
+    [ BenchmarkCategory( "ForEach" ), Benchmark( Baseline = true ) ]
+    public void Dictionary_ForEach()
     {
-        bool allFound = true;
-
-        foreach ( string key in _keys ) { allFound &= _dictionary.TryGetValue( key, out int _ ); }
-
-        return allFound;
+        foreach ( var _ in _dictionary ) { }
+    }
+    [ BenchmarkCategory( "ForEach" ), Benchmark ]
+    public void ReadOnlyDictionary_ForEach()
+    {
+        foreach ( var _ in _readOnlyDictionary ) { }
+    }
+    [ BenchmarkCategory( "ForEach" ), Benchmark ]
+    public void ConcurrentDictionary_ForEach()
+    {
+        foreach ( var _ in _concurrentDictionary ) { }
+    }
+    [ BenchmarkCategory( "ForEach" ), Benchmark ]
+    public void ImmutableDictionary_ForEach()
+    {
+        foreach ( var _ in _immutableDictionary ) { }
+    }
+    [ BenchmarkCategory( "ForEach" ), Benchmark ]
+    public void FrozenDictionary_ForEach()
+    {
+        foreach ( var _ in _frozenDictionary ) { }
     }
 
-    [ BenchmarkCategory( "TryGetValue_Found" ), Benchmark ]
-    public bool ReadOnlyDictionary_TryGetValue_Found()
-    {
-        bool allFound = true;
 
-        foreach ( string key in _keys ) { allFound &= _readOnlyDictionary.TryGetValue( key, out int _ ); }
+    [ BenchmarkCategory( "TryGetValue_First" ), Benchmark( Baseline = true ) ] public bool Dictionary_TryGetValue_First()           => _dictionary.TryGetValue( _firstKey, out _ );
+    [ BenchmarkCategory( "TryGetValue_First" ), Benchmark ]                    public bool ReadOnlyDictionary_TryGetValue_First()   => _readOnlyDictionary.TryGetValue( _firstKey, out _ );
+    [ BenchmarkCategory( "TryGetValue_First" ), Benchmark ]                    public bool ConcurrentDictionary_TryGetValue_First() => _concurrentDictionary.TryGetValue( _firstKey, out _ );
+    [ BenchmarkCategory( "TryGetValue_First" ), Benchmark ]                    public bool ImmutableDictionary_TryGetValue_First()  => _immutableDictionary.TryGetValue( _firstKey, out _ );
+    [ BenchmarkCategory( "TryGetValue_First" ), Benchmark ]                    public bool FrozenDictionary_TryGetValue_First()     => _frozenDictionary.TryGetValue( _firstKey, out _ );
 
-        return allFound;
-    }
 
-    [ BenchmarkCategory( "TryGetValue_Found" ), Benchmark ]
-    public bool ConcurrentDictionary_TryGetValue_Found()
-    {
-        bool allFound = true;
+    [ BenchmarkCategory( "TryGetValue_Last" ), Benchmark( Baseline = true ) ] public bool Dictionary_TryGetValue_Last()           => _dictionary.TryGetValue( _lastKey, out _ );
+    [ BenchmarkCategory( "TryGetValue_Last" ), Benchmark ]                    public bool ReadOnlyDictionary_TryGetValue_Last()   => _readOnlyDictionary.TryGetValue( _lastKey, out _ );
+    [ BenchmarkCategory( "TryGetValue_Last" ), Benchmark ]                    public bool ConcurrentDictionary_TryGetValue_Last() => _concurrentDictionary.TryGetValue( _lastKey, out _ );
+    [ BenchmarkCategory( "TryGetValue_Last" ), Benchmark ]                    public bool ImmutableDictionary_TryGetValue_Last()  => _immutableDictionary.TryGetValue( _lastKey, out _ );
+    [ BenchmarkCategory( "TryGetValue_Last" ), Benchmark ]                    public bool FrozenDictionary_TryGetValue_Last()     => _frozenDictionary.TryGetValue( _lastKey, out _ );
 
-        foreach ( string key in _keys ) { allFound &= _concurrentDictionary.TryGetValue( key, out int _ ); }
 
-        return allFound;
-    }
+    [ BenchmarkCategory( "TryGetValue_Random" ), Benchmark( Baseline = true ) ] public bool Dictionary_TryGetValue_Random()           => _dictionary.TryGetValue( RandomPair().Key, out _ );
+    [ BenchmarkCategory( "TryGetValue_Random" ), Benchmark ]                    public bool ReadOnlyDictionary_TryGetValue_Random()   => _readOnlyDictionary.TryGetValue( RandomPair().Key, out _ );
+    [ BenchmarkCategory( "TryGetValue_Random" ), Benchmark ]                    public bool ConcurrentDictionary_TryGetValue_Random() => _concurrentDictionary.TryGetValue( RandomPair().Key, out _ );
+    [ BenchmarkCategory( "TryGetValue_Random" ), Benchmark ]                    public bool ImmutableDictionary_TryGetValue_Random()  => _immutableDictionary.TryGetValue( RandomPair().Key, out _ );
+    [ BenchmarkCategory( "TryGetValue_Random" ), Benchmark ]                    public bool FrozenDictionary_TryGetValue_Random()     => _frozenDictionary.TryGetValue( RandomPair().Key, out _ );
 
-    [ BenchmarkCategory( "TryGetValue_Found" ), Benchmark ]
-    public bool ImmutableDictionary_TryGetValue_Found()
-    {
-        bool allFound = true;
 
-        foreach ( string key in _keys ) { allFound &= _immutableDictionary.TryGetValue( key, out int _ ); }
+    [ BenchmarkCategory( "TryGetValue_Random_Single" ), Benchmark( Baseline = true ) ] public bool Dictionary_TryGetValue_Random_Single()           => _dictionary.TryGetValue( _randomPair.Key, out _ );
+    [ BenchmarkCategory( "TryGetValue_Random_Single" ), Benchmark ]                    public bool ReadOnlyDictionary_TryGetValue_Random_Single()   => _readOnlyDictionary.TryGetValue( _randomPair.Key, out _ );
+    [ BenchmarkCategory( "TryGetValue_Random_Single" ), Benchmark ]                    public bool ConcurrentDictionary_TryGetValue_Random_Single() => _concurrentDictionary.TryGetValue( _randomPair.Key, out _ );
+    [ BenchmarkCategory( "TryGetValue_Random_Single" ), Benchmark ]                    public bool ImmutableDictionary_TryGetValue_Random_Single()  => _immutableDictionary.TryGetValue( _randomPair.Key, out _ );
+    [ BenchmarkCategory( "TryGetValue_Random_Single" ), Benchmark ]                    public bool FrozenDictionary_TryGetValue_Random_Single()     => _frozenDictionary.TryGetValue( _randomPair.Key, out _ );
 
-        return allFound;
-    }
 
-    [ BenchmarkCategory( "TryGetValue_Found" ), Benchmark ]
-    public bool FrozenDictionary_TryGetValue_Found()
-    {
-        bool allFound = true;
+    [ BenchmarkCategory( "Get_Random_Single" ), Benchmark( Baseline = true ) ] public int Dictionary_Get_Random_Single()           => _dictionary[_randomPair.Key];
+    [ BenchmarkCategory( "Get_Random_Single" ), Benchmark ]                    public int ReadOnlyDictionary_Get_Random_Single()   => _readOnlyDictionary[_randomPair.Key];
+    [ BenchmarkCategory( "Get_Random_Single" ), Benchmark ]                    public int ConcurrentDictionary_Get_Random_Single() => _concurrentDictionary[_randomPair.Key];
+    [ BenchmarkCategory( "Get_Random_Single" ), Benchmark ]                    public int ImmutableDictionary_Get_Random_Single()  => _immutableDictionary[_randomPair.Key];
+    [ BenchmarkCategory( "Get_Random_Single" ), Benchmark ]                    public int FrozenDictionary_Get_Random_Single()     => _frozenDictionary[_randomPair.Key];
 
-        foreach ( string key in _keys ) { allFound &= _frozenDictionary.TryGetValue( key, out int _ ); }
 
-        return allFound;
-    }
+    [ BenchmarkCategory( "Get_Random" ), Benchmark( Baseline = true ) ] public int Dictionary_Get_Random()           => _dictionary[RandomPair().Key];
+    [ BenchmarkCategory( "Get_Random" ), Benchmark ]                    public int ReadOnlyDictionary_Get_Random()   => _readOnlyDictionary[RandomPair().Key];
+    [ BenchmarkCategory( "Get_Random" ), Benchmark ]                    public int ConcurrentDictionary_Get_Random() => _concurrentDictionary[RandomPair().Key];
+    [ BenchmarkCategory( "Get_Random" ), Benchmark ]                    public int ImmutableDictionary_Get_Random()  => _immutableDictionary[RandomPair().Key];
+    [ BenchmarkCategory( "Get_Random" ), Benchmark ]                    public int FrozenDictionary_Get_Random()     => _frozenDictionary[RandomPair().Key];
 }

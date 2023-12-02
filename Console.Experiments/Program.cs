@@ -7,12 +7,13 @@
 
     // await Tests.Test_ConcurrentObservableCollection();
 
-    await Jakar.Database.TestDatabase.Test();
+    // await Jakar.Database.TestDatabase.Test();
 
     // JsonTest.Run();
 
     // BenchmarkRunner.Run<CollectionBenchmarks>();
-    // BenchmarkRunner.Run<DictionaryLookupBenchmarks>();
+    BenchmarkRunner.Run<DictionaryLookupBenchmarks>();
+
     // BenchmarkRunner.Run( typeof(Program).Assembly ); //, new BenchmarkConfig()
 
     // ULongHashTests.Run( 100_000_000 )
