@@ -9,21 +9,25 @@ using Npgsql;
 namespace Jakar.Database;
 
 
-#if DEBUG
-
-
-
-public sealed class TestDatabase : Database
+internal sealed class TestDatabase : Database
 {
     // private const string CONNECTION_STRING = "Server=localhost;Database=Experiments;User Id=tester;Password=tester;Encrypt=True;TrustServerCertificate=True";
     private const string CONNECTION_STRING = "User ID=dev;Password=jetson;Host=localhost;Port=5432;Database=Experiments";
 
 
-    public TestDatabase( IConfiguration                                configuration, ISqlCacheFactory sqlCacheFactory, IOptions<DbOptions> options ) : base( configuration, sqlCacheFactory, options ) => ConnectionString = CONNECTION_STRING;
+    internal TestDatabase( IConfiguration                              configuration, ISqlCacheFactory sqlCacheFactory, IOptions<DbOptions> options ) : base( configuration, sqlCacheFactory, options ) => ConnectionString = CONNECTION_STRING;
     protected override DbConnection CreateConnection( in SecuredString secure ) => new NpgsqlConnection( secure );
 
 
-    public static async Task Test()
+    [ Conditional( "DEBUG" ) ]
+    public static async void TestAsync()
+    {
+        try { await InternalTestAsync(); }
+        catch ( Exception e ) { Console.WriteLine( e ); }
+
+        Console.ReadKey();
+    }
+    private static async Task InternalTestAsync()
     {
         WebApplicationBuilder builder = WebApplication.CreateBuilder();
         builder.AddDefaultLogging<TestDatabase>( true );
@@ -59,10 +63,11 @@ public sealed class TestDatabase : Database
                 var               admin = UserRecord.Create( "Admin", "Admin", string.Empty );
                 var               user  = UserRecord.Create( "User",  "User",  string.Empty, admin );
 
-                UserRecord[] users = {
-                                         admin,
-                                         user
-                                     };
+                UserRecord[] users =
+                {
+                    admin,
+                    user
+                };
 
                 var results = new List<UserRecord>( users.Length );
                 await foreach ( UserRecord record in db.Users.Insert( users, token ) ) { results.Add( record ); }
@@ -88,7 +93,3 @@ public sealed class TestDatabase : Database
         }
     }
 }
-
-
-
-#endif

@@ -10,34 +10,37 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     public const       ClaimType               DEFAULT_CLAIM_TYPES = ClaimType.UserID | ClaimType.UserName | ClaimType.GroupSid | ClaimType.Role;
     protected readonly ConcurrentBag<IDbTable> _tables             = new();
     protected readonly ISqlCacheFactory        _sqlCacheFactory;
-    public             DbTable<AddressRecord>  Addresses { get; }
-    public int? CommandTimeout
-    {
-        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => Options.CommandTimeout;
-    }
-    public             IConfiguration       Configuration    { get; }
-    protected internal SecuredString?       ConnectionString { get; set; }
-    public             DbTable<GroupRecord> Groups           { get; }
-    public DbInstance Instance
-    {
-        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => Options.DbType;
-    }
-    public DbOptions Options { get; }
-    protected internal PasswordValidator PasswordValidator
-    {
-        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => new(Options.PasswordRequirements);
-    }
-    public DbTable<RecoveryCodeRecord>     RecoveryCodes     { get; }
-    public DbTable<RoleRecord>             Roles             { get; }
-    public DbTable<UserGroupRecord>        UserGroups        { get; }
-    public DbTable<UserLoginInfoRecord>    UserLogins        { get; }
-    public DbTable<UserRecoveryCodeRecord> UserRecoveryCodes { get; }
-    public DbTable<UserRoleRecord>         UserRoles         { get; }
-    public DbTable<UserRecord>             Users             { get; }
+    protected readonly string                  _className;
+
+
     public AppVersion Version
     {
         [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => Options.Version;
     }
+    public DbInstance Instance
+    {
+        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => Options.DbType;
+    }
+    public DbOptions                       Options           { get; }
+    public DbTable<AddressRecord>          Addresses         { get; }
+    public DbTable<GroupRecord>            Groups            { get; }
+    public DbTable<RecoveryCodeRecord>     RecoveryCodes     { get; }
+    public DbTable<RoleRecord>             Roles             { get; }
+    public DbTable<UserGroupRecord>        UserGroups        { get; }
+    public DbTable<UserLoginInfoRecord>    UserLogins        { get; }
+    public DbTable<UserRecord>             Users             { get; }
+    public DbTable<UserRecoveryCodeRecord> UserRecoveryCodes { get; }
+    public DbTable<UserRoleRecord>         UserRoles         { get; }
+    public IConfiguration                  Configuration     { get; }
+    public int? CommandTimeout
+    {
+        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => Options.CommandTimeout;
+    }
+    protected internal PasswordValidator PasswordValidator
+    {
+        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => new(Options.PasswordRequirements);
+    }
+    protected internal SecuredString? ConnectionString { get; set; }
 
 
     static Database()
@@ -67,6 +70,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
         _sqlCacheFactory  = sqlCacheFactory;
         Configuration     = configuration;
         Options           = options.Value;
+        _className        = GetType().Name;
         Users             = Create<UserRecord>();
         Roles             = Create<RoleRecord>();
         UserRoles         = Create<UserRoleRecord>();
@@ -105,6 +109,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
         var table = new DbTable<TRecord>( this, _sqlCacheFactory );
         return AddDisposable( table );
     }
+
     [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
     protected TValue AddDisposable<TValue>( TValue value )
         where TValue : IDbTable

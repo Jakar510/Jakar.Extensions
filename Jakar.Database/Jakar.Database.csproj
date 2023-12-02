@@ -33,6 +33,10 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<InternalsVisibleTo Include="Experiments" />
+	</ItemGroup>
+
+	<ItemGroup>
 	  <Compile Remove="DbMigrations\CustomPostgresProcessor.cs" />
 	  <Compile Remove="DbMigrations\CustomPostgresQuoter.cs" />
 	</ItemGroup>

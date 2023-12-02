@@ -2,17 +2,21 @@
 {
     "Hello World!".WriteToConsole();
     Console.WriteLine();
+#pragma warning disable Tags // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+    Jakar.Database.Activities.Tags.Print();
+#pragma warning restore Tags // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+
 
     // Tests.Test_Hashes();
 
     // await Tests.Test_ConcurrentObservableCollection();
 
-    // await Jakar.Database.TestDatabase.Test();
+    // Jakar.Database.TestDatabase.TestAsync();
 
     // JsonTest.Run();
 
     // BenchmarkRunner.Run<CollectionBenchmarks>();
-    BenchmarkRunner.Run<DictionaryLookupBenchmarks>();
+    // BenchmarkRunner.Run<DictionaryLookupBenchmarks>();
 
     // BenchmarkRunner.Run( typeof(Program).Assembly ); //, new BenchmarkConfig()
 
