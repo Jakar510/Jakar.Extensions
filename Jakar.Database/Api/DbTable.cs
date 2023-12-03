@@ -6,7 +6,8 @@ namespace Jakar.Database;
 
 
 [ SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" ) ]
-public partial class DbTable<TRecord> : IConnectableDb where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
+public partial class DbTable<TRecord> : IConnectableDb
+    where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
     protected readonly IConnectableDbRoot  _database;
     protected readonly ISqlCacheFactory    _sqlCacheFactory;
@@ -15,7 +16,7 @@ public partial class DbTable<TRecord> : IConnectableDb where TRecord : ITableRec
 
     public static ImmutableArray<TRecord>  Empty          => ImmutableArray<TRecord>.Empty;
     public static ImmutableList<TRecord>   EmptyList      => ImmutableList<TRecord>.Empty;
-    public        ISqlCache<TRecord>       Cache          => _cache ??= _sqlCacheFactory.GetSqlCache<TRecord>( _database );
+    public        ISqlCache<TRecord>       SqlCache       => _cache ??= _sqlCacheFactory.GetSqlCache<TRecord>( _database );
     public        int?                     CommandTimeout => _database.CommandTimeout;
     public        DbInstance               Instance       => _database.Instance;
     public        RecordGenerator<TRecord> Records        => new(this);
@@ -45,7 +46,7 @@ public partial class DbTable<TRecord> : IConnectableDb where TRecord : ITableRec
     [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public virtual async IAsyncEnumerable<TRecord> All( DbConnection connection, DbTransaction? transaction, [ EnumeratorCancellation ] CancellationToken token = default )
     {
-        SqlCommand               sql    = Cache.All();
+        SqlCommand               sql    = SqlCache.All();
         await using DbDataReader reader = await _database.ExecuteReaderAsync( connection, transaction, sql, token );
         await foreach ( TRecord record in TRecord.CreateAsync( reader, token ) ) { yield return record; }
     }

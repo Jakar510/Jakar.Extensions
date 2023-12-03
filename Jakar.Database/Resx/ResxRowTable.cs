@@ -1,4 +1,9 @@
-﻿namespace Jakar.Database.Resx;
+﻿using System.Text.Json;
+using System.Text.Json.Serialization.Metadata;
+
+
+
+namespace Jakar.Database.Resx;
 
 
 /// <see cref="LocalizableString"/>
@@ -23,7 +28,7 @@ public sealed record ResxRowRecord( long                    KeyID,
                                     RecordID<ResxRowRecord> ID,
                                     DateTimeOffset          DateCreated,
                                     DateTimeOffset?         LastModified = default
-) : TableRecord<ResxRowRecord>( ID, DateCreated, LastModified ), IDbReaderMapping<ResxRowRecord>
+) : TableRecord<ResxRowRecord>( ID, DateCreated, LastModified ), IDbReaderMapping<ResxRowRecord>, IMsJsonContext<ResxRowRecord>
 {
     public static string TableName { get; } = typeof(ResxRowRecord).GetTableName();
 
@@ -241,4 +246,14 @@ public sealed record ResxRowRecord( long                    KeyID,
 
         return Neutral == other.Neutral || ID == other.ID;
     }
+    public static JsonSerializerOptions JsonOptions( bool formatted ) => new()
+                                                                         {
+                                                                             WriteIndented    = formatted,
+                                                                             TypeInfoResolver = ResxRowRecordContext.Default
+                                                                         };
+    public static JsonTypeInfo<ResxRowRecord> JsonTypeInfo() => ResxRowRecordContext.Default.ResxRowRecord;
 }
+
+
+
+[ JsonSerializable( typeof(ResxRowRecord) ) ] public partial class ResxRowRecordContext : JsonSerializerContext { }

@@ -1,6 +1,11 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 09/29/2023  9:25 PM
 
+using System.Text.Json;
+using System.Text.Json.Serialization.Metadata;
+
+
+
 namespace Jakar.Database;
 
 
@@ -18,7 +23,7 @@ public sealed record AddressRecord( [ property: ProtectedPersonalData, MaxLength
                                     Guid?                                                         OwnerUserID,
                                     DateTimeOffset                                                DateCreated,
                                     DateTimeOffset?                                               LastModified = default
-) : OwnedTableRecord<AddressRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IAddress, IEquatable<IAddress>, IDbReaderMapping<AddressRecord>
+) : OwnedTableRecord<AddressRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IAddress, IEquatable<IAddress>, IDbReaderMapping<AddressRecord>, IMsJsonContext<AddressRecord>
 {
     public static string                 TableName      { get; } = typeof(AddressRecord).GetTableName();
     Guid? IAddress.                      UserID         => OwnerUserID;
@@ -166,4 +171,14 @@ public sealed record AddressRecord( [ property: ProtectedPersonalData, MaxLength
         return base.Equals( other ) && Line1 == other.Line1 && Line2 == other.Line2 && City == other.City && PostalCode == other.PostalCode && StateOrProvince == other.StateOrProvince && Country == other.Country && Address == other.Address;
     }
     public override int GetHashCode() => HashCode.Combine( base.GetHashCode(), Line1, Line2, City, PostalCode, StateOrProvince, Country, Address );
+    public static JsonSerializerOptions JsonOptions( bool formatted ) => new()
+                                                                         {
+                                                                             WriteIndented    = formatted,
+                                                                             TypeInfoResolver = AddressRecordContext.Default,
+                                                                         };
+    public static JsonTypeInfo<AddressRecord> JsonTypeInfo() => AddressRecordContext.Default.AddressRecord;
 }
+
+
+
+[ JsonSerializable( typeof(AddressRecord) ) ] public partial class AddressRecordContext : JsonSerializerContext { }

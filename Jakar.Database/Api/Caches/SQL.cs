@@ -120,7 +120,7 @@ public static class SQL
 
     [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
     public static string GetTableName<TRecord>( this DbInstance instance )
-        where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord> =>
+        where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord> =>
         instance switch
         {
             DbInstance.Postgres => $"{QUOTE}{TRecord.TableName}{QUOTE}",

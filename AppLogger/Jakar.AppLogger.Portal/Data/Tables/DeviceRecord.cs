@@ -23,7 +23,7 @@ public sealed record DeviceRecord( int?                                         
                                    RecordID<DeviceRecord>                                        ID,
                                    DateTimeOffset                                                DateCreated,
                                    DateTimeOffset?                                               LastModified = default
-) : LoggerTable<DeviceRecord>( ID, DateCreated, LastModified ), IDbReaderMapping<DeviceRecord>, IDevice
+) : LoggerTable<DeviceRecord>( ID, DateCreated, LastModified ), IDbReaderMapping<DeviceRecord>, IDevice, IMsJsonContext<DeviceRecord>
 {
     public static string TableName { get; } = typeof(DeviceRecord).GetTableName();
 
@@ -131,12 +131,22 @@ public sealed record DeviceRecord( int?                                         
 
     public override int CompareTo( DeviceRecord? other ) => string.CompareOrdinal( DeviceID, other?.DeviceID );
     public override int GetHashCode()                    => HashCode.Combine( DeviceID, base.GetHashCode() );
+    public static JsonSerializerOptions JsonOptions( bool formatted ) => new()
+                                                                         {
+                                                                             WriteIndented    = formatted,
+                                                                             TypeInfoResolver = DeviceRecordContext.Default
+                                                                         };
+    public static JsonTypeInfo<DeviceRecord> JsonTypeInfo() => DeviceRecordContext.Default.DeviceRecord;
 }
 
 
 
+[ JsonSerializable( typeof(DeviceRecord) ) ] public partial class DeviceRecordContext : JsonSerializerContext { }
+
+
+
 [ Serializable, Table( "Devices" ) ]
-public sealed record AppDeviceRecord : Mapping<AppDeviceRecord, AppRecord, DeviceRecord>, ICreateMapping<AppDeviceRecord, AppRecord, DeviceRecord>, IDbReaderMapping<AppDeviceRecord>
+public sealed record AppDeviceRecord : Mapping<AppDeviceRecord, AppRecord, DeviceRecord>, ICreateMapping<AppDeviceRecord, AppRecord, DeviceRecord>, IDbReaderMapping<AppDeviceRecord>, IMsJsonContext<AppDeviceRecord>
 {
     public static string TableName { get; } = typeof(AppDeviceRecord).GetTableName();
 
@@ -159,4 +169,14 @@ public sealed record AppDeviceRecord : Mapping<AppDeviceRecord, AppRecord, Devic
     {
         while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
     }
+    public static JsonSerializerOptions JsonOptions( bool formatted ) => new()
+                                                                         {
+                                                                             WriteIndented    = formatted,
+                                                                             TypeInfoResolver = AppDeviceRecordContext.Default
+                                                                         };
+    public static JsonTypeInfo<AppDeviceRecord> JsonTypeInfo() => AppDeviceRecordContext.Default.AppDeviceRecord;
 }
+
+
+
+[ JsonSerializable( typeof(AppDeviceRecord) ) ] public partial class AppDeviceRecordContext : JsonSerializerContext { }

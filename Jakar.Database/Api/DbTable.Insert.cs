@@ -30,7 +30,7 @@ public partial class DbTable<TRecord>
     [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public virtual async ValueTask<TRecord> Insert( DbConnection connection, DbTransaction transaction, TRecord record, CancellationToken token = default )
     {
-        SqlCommand sql = Cache.Insert( record );
+        SqlCommand sql = SqlCache.Insert( record );
 
         try
         {
@@ -44,7 +44,7 @@ public partial class DbTable<TRecord>
     [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public virtual async ValueTask<TRecord?> TryInsert( DbConnection connection, DbTransaction transaction, TRecord record, bool matchAll, DynamicParameters parameters, CancellationToken token = default )
     {
-        SqlCommand sql = Cache.TryInsert( record, matchAll, parameters );
+        SqlCommand sql = SqlCache.TryInsert( record, matchAll, parameters );
 
         try
         {
@@ -62,7 +62,7 @@ public partial class DbTable<TRecord>
     [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public virtual async ValueTask<TRecord?> InsertOrUpdate( DbConnection connection, DbTransaction transaction, TRecord record, bool matchAll, DynamicParameters parameters, CancellationToken token = default )
     {
-        SqlCommand sql = Cache.InsertOrUpdate( record, matchAll, parameters );
+        SqlCommand sql = SqlCache.InsertOrUpdate( record, matchAll, parameters );
 
         try
         {

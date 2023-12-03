@@ -1,8 +1,4 @@
-﻿using System.Collections.Immutable;
-
-
-
-namespace Jakar.AppLogger.Portal.Data;
+﻿namespace Jakar.AppLogger.Portal.Data;
 
 
 [ SuppressMessage( "ReSharper", "SuggestBaseTypeForParameter" ) ]

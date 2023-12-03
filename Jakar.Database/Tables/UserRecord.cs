@@ -1,4 +1,9 @@
-﻿namespace Jakar.Database;
+﻿using System.Text.Json;
+using System.Text.Json.Serialization.Metadata;
+
+
+
+namespace Jakar.Database;
 
 
 [ Serializable, Table( "Users" ) ]
@@ -43,16 +48,18 @@ public sealed record UserRecord( Guid                                           
                                  Guid?                                                                OwnerUserID,
                                  DateTimeOffset                                                       DateCreated,
                                  DateTimeOffset?                                                      LastModified = default
-) : OwnedTableRecord<UserRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<UserRecord>, IUserData<UserRecord>, IRefreshToken, IUserID, IUserDataRecord, UserRights.IRights
+) : OwnedTableRecord<UserRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<UserRecord>, IUserData<UserRecord>, IRefreshToken, IUserID, IUserDataRecord, UserRights.IRights, IMsJsonContext<UserRecord>
 {
     private static readonly PasswordHasher<UserRecord>    _hasher         = new();
     public const            int                           MAX_SIZE        = TokenValidationParameters.DefaultMaximumTokenSizeInBytes;
     private                 IDictionary<string, JToken?>? _additionalData = AdditionalData;
 
 
-    public static string          TableName { get; }      = typeof(UserRecord).GetTableName();
-    public        DateTimeOffset? LastLogin { get; set; } = LastLogin;
-    Guid IUserID.                 UserID    => UserID;
+    public static string TableName { get; } = typeof(UserRecord).GetTableName();
+
+
+    public DateTimeOffset? LastLogin { get; set; } = LastLogin;
+    Guid IUserID.          UserID    => UserID;
 
 
     [ ProtectedPersonalData, MaxLength( int.MaxValue ) ]
@@ -304,6 +311,14 @@ public sealed record UserRecord( Guid                                           
                         caller?.ID,
                         caller?.UserID,
                         DateTimeOffset.UtcNow ).WithPassword( password );
+
+
+    public static JsonSerializerOptions JsonOptions( bool formatted ) => new()
+                                                                         {
+                                                                             WriteIndented    = formatted,
+                                                                             TypeInfoResolver = UserRecordContext.Default
+                                                                         };
+    public static JsonTypeInfo<UserRecord> JsonTypeInfo() => UserRecordContext.Default.UserRecord;
 
 
     public static DynamicParameters GetDynamicParameters( IUserData data )
@@ -592,9 +607,9 @@ public sealed record UserRecord( Guid                                           
 
 
     public bool DoesNotOwn<TRecord>( TRecord record )
-        where TRecord : OwnedTableRecord<TRecord>, IDbReaderMapping<TRecord> => record.OwnerUserID != UserID;
+        where TRecord : OwnedTableRecord<TRecord>, IDbReaderMapping<TRecord>, IMsJsonContext<TRecord> => record.OwnerUserID != UserID;
     public bool Owns<TRecord>( TRecord record )
-        where TRecord : OwnedTableRecord<TRecord>, IDbReaderMapping<TRecord> => record.OwnerUserID == UserID;
+        where TRecord : OwnedTableRecord<TRecord>, IDbReaderMapping<TRecord>, IMsJsonContext<TRecord> => record.OwnerUserID == UserID;
 
     #endregion
 
@@ -925,3 +940,7 @@ public sealed record UserRecord( Guid                                           
 
     #endregion
 }
+
+
+
+[ JsonSerializable( typeof(UserRecord) ) ] public partial class UserRecordContext : JsonSerializerContext { }

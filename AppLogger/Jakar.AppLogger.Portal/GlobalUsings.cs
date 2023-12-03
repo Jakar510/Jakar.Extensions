@@ -1,6 +1,7 @@
 // Jakar.AppLogger :: Jakar.AppLogger.Portal
 // 09/12/2022  9:35 AM
 
+global using System.Collections.Immutable;
 global using System.Collections.ObjectModel;
 global using System.Collections.Specialized;
 global using System.ComponentModel.DataAnnotations;
@@ -12,6 +13,9 @@ global using System.Reflection;
 global using System.Runtime.CompilerServices;
 global using System.Runtime.InteropServices;
 global using System.Runtime.Versioning;
+global using System.Text.Json;
+global using System.Text.Json.Serialization;
+global using System.Text.Json.Serialization.Metadata;
 global using System.Web.Hosting;
 global using Dapper;
 global using Dapper.Contrib.Extensions;

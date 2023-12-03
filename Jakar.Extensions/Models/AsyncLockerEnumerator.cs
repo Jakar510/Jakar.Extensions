@@ -50,19 +50,17 @@ public sealed class AsyncLockerEnumerator<TValue, TList> : IAsyncEnumerable<TVal
     IAsyncEnumerator<TValue> IAsyncEnumerable<TValue>.GetAsyncEnumerator( CancellationToken token ) => GetAsyncEnumerator( token );
     public AsyncLockerEnumerator<TValue, TList> GetAsyncEnumerator( CancellationToken token = default )
     {
-        if ( _isDisposed ) { throw new ObjectDisposedException( nameof(AsyncLockerEnumerator<TValue, TList>) ); }
-
         Reset();
-        if ( token.CanBeCanceled ) { _token = token; }
-
+        _token = token;
         return this;
     }
     public void Reset()
     {
         if ( _isDisposed ) { throw new ObjectDisposedException( nameof(AsyncLockerEnumerator<TValue, TList>) ); }
 
-        _index = START_INDEX;
-        _cache = default;
+        _cache   = default;
+        _current = default;
+        Interlocked.Exchange( ref _index, START_INDEX );
     }
 
 

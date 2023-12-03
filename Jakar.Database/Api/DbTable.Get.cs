@@ -20,7 +20,7 @@ public partial class DbTable<TRecord>
     [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public virtual async ValueTask<long> Count( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
-        SqlCommand sql = Cache.Count();
+        SqlCommand sql = SqlCache.Count();
 
         try { return await connection.QueryFirstAsync<long>( sql.SQL, sql.Parameters, transaction ); }
         catch ( Exception e ) { throw new SqlException( sql, e ); }
@@ -29,7 +29,7 @@ public partial class DbTable<TRecord>
     [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public virtual async ValueTask<bool> Exists( DbConnection connection, DbTransaction transaction, bool matchAll, DynamicParameters parameters, CancellationToken token )
     {
-        SqlCommand sql = Cache.Exists( matchAll, parameters );
+        SqlCommand sql = SqlCache.Exists( matchAll, parameters );
 
         try
         {
@@ -57,7 +57,7 @@ public partial class DbTable<TRecord>
     [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public virtual IAsyncEnumerable<TRecord> Get( DbConnection connection, DbTransaction? transaction, IEnumerable<RecordID<TRecord>> ids, [ EnumeratorCancellation ] CancellationToken token = default )
     {
-        SqlCommand sql = Cache.Get( ids );
+        SqlCommand sql = SqlCache.Get( ids );
         return Where( connection, transaction, sql, token );
     }
 
@@ -68,7 +68,7 @@ public partial class DbTable<TRecord>
             : default;
     public async ValueTask<TRecord?> Get( DbConnection connection, DbTransaction? transaction, RecordID<TRecord> id, CancellationToken token = default )
     {
-        SqlCommand sql = Cache.Get( id );
+        SqlCommand sql = SqlCache.Get( id );
 
         try
         {
@@ -99,7 +99,7 @@ public partial class DbTable<TRecord>
     [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public virtual async ValueTask<TRecord?> Get( DbConnection connection, DbTransaction? transaction, bool matchAll, DynamicParameters parameters, CancellationToken token = default )
     {
-        SqlCommand sql = Cache.Get( matchAll, parameters );
+        SqlCommand sql = SqlCache.Get( matchAll, parameters );
 
         try
         {

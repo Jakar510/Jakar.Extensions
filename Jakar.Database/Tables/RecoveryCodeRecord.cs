@@ -1,6 +1,11 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 01/29/2023  1:26 PM
 
+using System.Text.Json;
+using System.Text.Json.Serialization.Metadata;
+
+
+
 namespace Jakar.Database;
 
 
@@ -11,7 +16,8 @@ public sealed record RecoveryCodeRecord
                                                                                                                                                                                                                                             OwnerUserID,
                                                                                                                                                                                                                                             DateCreated,
                                                                                                                                                                                                                                             LastModified ),
-                                                                                                                                                                                                      IDbReaderMapping<RecoveryCodeRecord>
+                                                                                                                                                                                                      IDbReaderMapping<RecoveryCodeRecord>,
+                                                                                                                                                                                                      IMsJsonContext<RecoveryCodeRecord>
 {
     private static readonly PasswordHasher<RecoveryCodeRecord> _hasher = new();
 
@@ -104,12 +110,25 @@ public sealed record RecoveryCodeRecord
             default: throw new ArgumentOutOfRangeException();
         }
     }
+    public static JsonSerializerOptions JsonOptions( bool formatted ) => new()
+                                                                         {
+                                                                             WriteIndented    = formatted,
+                                                                             TypeInfoResolver = RecoveryCodeRecordContext.Default
+                                                                         };
+    public static JsonTypeInfo<RecoveryCodeRecord> JsonTypeInfo() => RecoveryCodeRecordContext.Default.RecoveryCodeRecord;
 }
 
 
 
+[ JsonSerializable( typeof(RecoveryCodeRecord) ) ] public partial class RecoveryCodeRecordContext : JsonSerializerContext { }
+
+
+
 [ Serializable, Table( "UserRecoveryCodes" ) ]
-public sealed record UserRecoveryCodeRecord : Mapping<UserRecoveryCodeRecord, UserRecord, RecoveryCodeRecord>, ICreateMapping<UserRecoveryCodeRecord, UserRecord, RecoveryCodeRecord>, IDbReaderMapping<UserRecoveryCodeRecord>
+public sealed record UserRecoveryCodeRecord : Mapping<UserRecoveryCodeRecord, UserRecord, RecoveryCodeRecord>,
+                                              ICreateMapping<UserRecoveryCodeRecord, UserRecord, RecoveryCodeRecord>,
+                                              IDbReaderMapping<UserRecoveryCodeRecord>,
+                                              IMsJsonContext<UserRecoveryCodeRecord>
 {
     public static string TableName { get; } = typeof(UserRecoveryCodeRecord).GetTableName();
 
@@ -132,4 +151,14 @@ public sealed record UserRecoveryCodeRecord : Mapping<UserRecoveryCodeRecord, Us
     {
         while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
     }
+    public static JsonSerializerOptions JsonOptions( bool formatted ) => new()
+                                                                         {
+                                                                             WriteIndented    = formatted,
+                                                                             TypeInfoResolver = UserRecoveryCodeRecordContext.Default
+                                                                         };
+    public static JsonTypeInfo<UserRecoveryCodeRecord> JsonTypeInfo() => UserRecoveryCodeRecordContext.Default.UserRecoveryCodeRecord;
 }
+
+
+
+[ JsonSerializable( typeof(UserRecoveryCodeRecord) ) ] public partial class UserRecoveryCodeRecordContext : JsonSerializerContext { }

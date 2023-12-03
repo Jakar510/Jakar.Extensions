@@ -4,21 +4,22 @@
 namespace Jakar.AppLogger.Portal.Data.Tables;
 
 
-public interface ILoggerTable : JsonModels.IJsonModel
+public interface ILoggerTable
 {
-    public   bool IsActive    { get; set; }
-    internal bool IsNotActive => !IsActive;
+    [ System.Text.Json.Serialization.JsonExtensionData ] public IDictionary<string, JsonElement>? AdditionalData { get; set; }
+    public                                                      bool                              IsActive       { get; set; }
+    internal                                                    bool                              IsNotActive    => !IsActive;
 }
 
 
 
 public abstract record LoggerTable<TRecord>( RecordID<TRecord> ID, DateTimeOffset DateCreated, DateTimeOffset? LastModified ) : TableRecord<TRecord>( ID, DateCreated, LastModified ), ILoggerTable
-    where TRecord : LoggerTable<TRecord>, IDbReaderMapping<TRecord>
+    where TRecord : LoggerTable<TRecord>, IDbReaderMapping<TRecord>, IMsJsonContext<TRecord>
 {
-    [ JsonExtensionData ] public IDictionary<string, JToken?>? AdditionalData { get; set; }
-    public                       bool                          IsActive       { get; set; } = true;
-    internal                     bool                          IsNotActive    => !IsActive;
-    bool ILoggerTable.                                         IsNotActive    => IsNotActive;
+    [ System.Text.Json.Serialization.JsonExtensionData ] public IDictionary<string, JsonElement>? AdditionalData { get; set; }
+    public                                                      bool                              IsActive       { get; set; } = true;
+    internal                                                    bool                              IsNotActive    => !IsActive;
+    bool ILoggerTable.                                                                            IsNotActive    => IsNotActive;
 
 
     protected LoggerTable( RecordID<TRecord> id ) : this( id, DateTimeOffset.UtcNow, null ) { }
@@ -28,12 +29,12 @@ public abstract record LoggerTable<TRecord>( RecordID<TRecord> ID, DateTimeOffse
 
 public abstract record OwnedLoggerTable<TRecord>
     ( RecordID<TRecord> ID, RecordID<UserRecord>? CreatedBy, Guid? OwnerUserID, DateTimeOffset DateCreated, DateTimeOffset? LastModified ) : OwnedTableRecord<TRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), ILoggerTable
-    where TRecord : OwnedLoggerTable<TRecord>, IDbReaderMapping<TRecord>
+    where TRecord : OwnedLoggerTable<TRecord>, IDbReaderMapping<TRecord>, IMsJsonContext<TRecord>
 {
-    [ JsonExtensionData ] public IDictionary<string, JToken?>? AdditionalData { get; set; }
-    public                       bool                          IsActive       { get; set; } = true;
-    internal                     bool                          IsNotActive    => !IsActive;
-    bool ILoggerTable.                                         IsNotActive    => IsNotActive;
+    [ System.Text.Json.Serialization.JsonExtensionData ] public IDictionary<string, JsonElement>? AdditionalData { get; set; }
+    public                                                      bool                              IsActive       { get; set; } = true;
+    internal                                                    bool                              IsNotActive    => !IsActive;
+    bool ILoggerTable.                                                                            IsNotActive    => IsNotActive;
 
 
     protected OwnedLoggerTable( UserRecord?       owner ) : this( RecordID<TRecord>.New(), owner ) { }

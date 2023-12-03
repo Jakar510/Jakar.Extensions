@@ -42,8 +42,9 @@ public struct LockerEnumerator<TValue, TList> : IEnumerator<TValue>, IEnumerable
     public void Reset()
     {
         if ( _collection is null ) { throw new ObjectDisposedException( nameof(LockerEnumerator<TValue, TList>) ); }
-
+        
+        _cache   = default;
+        _current = default;
         Interlocked.Exchange( ref _index, START_INDEX );
-        _cache = default;
     }
 }

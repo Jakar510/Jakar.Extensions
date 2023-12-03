@@ -17,8 +17,6 @@ public sealed record TableCacheOptions : IOptions<TableCacheOptions>
         collection.AddSingleton<IOptions<TableCacheOptions>, TableCacheOptions>();
         return collection;
     }
-
-
     public static WebApplicationBuilder Register( WebApplicationBuilder builder )
     {
         Register( builder.Services );

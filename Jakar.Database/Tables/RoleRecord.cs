@@ -1,4 +1,9 @@
-﻿namespace Jakar.Database;
+﻿using System.Text.Json;
+using System.Text.Json.Serialization.Metadata;
+
+
+
+namespace Jakar.Database;
 
 
 [ Serializable, Table( "Roles" ) ]
@@ -11,7 +16,7 @@ public sealed record RoleRecord( [ property: MaxLength( 1024 ) ]                
                                  Guid?                                                 OwnerUserID,
                                  DateTimeOffset                                        DateCreated,
                                  DateTimeOffset?                                       LastModified = default
-) : OwnedTableRecord<RoleRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<RoleRecord>, UserRights.IRights
+) : OwnedTableRecord<RoleRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<RoleRecord>, UserRights.IRights, IMsJsonContext<RoleRecord>
 {
     public static string TableName { get; } = typeof(RoleRecord).GetTableName();
 
@@ -97,4 +102,14 @@ public sealed record RoleRecord( [ property: MaxLength( 1024 ) ]                
 
     public IAsyncEnumerable<UserRecord> GetUsers( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => UserRoleRecord.Where( connection, transaction, db.UserRoles, db.Users, this, token );
     public UserRights                   GetRights() => UserRights.Create( this );
+    public static JsonSerializerOptions JsonOptions( bool formatted ) => new()
+                                                                         {
+                                                                             WriteIndented    = formatted,
+                                                                             TypeInfoResolver = RoleRecordContext.Default
+                                                                         };
+    public static JsonTypeInfo<RoleRecord> JsonTypeInfo() => RoleRecordContext.Default.RoleRecord;
 }
+
+
+
+[ JsonSerializable( typeof(RoleRecord) ) ] public partial class RoleRecordContext : JsonSerializerContext { }

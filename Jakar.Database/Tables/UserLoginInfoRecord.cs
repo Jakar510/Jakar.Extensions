@@ -1,6 +1,11 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 01/30/2023  2:41 PM
 
+using System.Text.Json;
+using System.Text.Json.Serialization.Metadata;
+
+
+
 namespace Jakar.Database;
 
 
@@ -14,7 +19,7 @@ public sealed record UserLoginInfoRecord( [ property: MaxLength(                
                                           Guid?                                                                  OwnerUserID,
                                           DateTimeOffset                                                         DateCreated,
                                           DateTimeOffset?                                                        LastModified = default
-) : OwnedTableRecord<UserLoginInfoRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<UserLoginInfoRecord>
+) : OwnedTableRecord<UserLoginInfoRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<UserLoginInfoRecord>, IMsJsonContext<UserLoginInfoRecord>
 {
     public static string TableName { get; } = typeof(UserLoginInfoRecord).GetTableName();
 
@@ -88,4 +93,14 @@ public sealed record UserLoginInfoRecord( [ property: MaxLength(                
                                                                                                 Name          = value.ProviderDisplayName ?? string.Empty,
                                                                                                 Value         = value.ProviderKey
                                                                                             };
+    public static JsonSerializerOptions JsonOptions( bool formatted ) => new()
+                                                                         {
+                                                                             WriteIndented    = formatted,
+                                                                             TypeInfoResolver = UserLoginInfoRecordContext.Default,
+                                                                         };
+    public static JsonTypeInfo<UserLoginInfoRecord> JsonTypeInfo() => UserLoginInfoRecordContext.Default.UserLoginInfoRecord;
 }
+
+
+
+[ JsonSerializable( typeof(UserLoginInfoRecord) ) ] public partial class UserLoginInfoRecordContext : JsonSerializerContext { }

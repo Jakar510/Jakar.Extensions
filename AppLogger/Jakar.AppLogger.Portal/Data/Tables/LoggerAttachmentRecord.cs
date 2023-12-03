@@ -1,10 +1,6 @@
 ﻿// Jakar.AppLogger :: Jakar.AppLogger.Portal
 // 10/04/2022  5:57 PM
 
-using System.Collections.Immutable;
-
-
-
 namespace Jakar.AppLogger.Portal.Data.Tables;
 
 
@@ -22,7 +18,7 @@ public sealed record LoggerAttachmentRecord( [ property: MaxLength( LoggerAttach
                                              RecordID<LoggerAttachmentRecord>                                     ID,
                                              DateTimeOffset                                                       DateCreated,
                                              DateTimeOffset?                                                      LastModified = default
-) : LoggerTable<LoggerAttachmentRecord>( ID, DateCreated, LastModified ), IDbReaderMapping<LoggerAttachmentRecord>, ILoggerAttachment, ILogInfo
+) : LoggerTable<LoggerAttachmentRecord>( ID, DateCreated, LastModified ), IDbReaderMapping<LoggerAttachmentRecord>, ILoggerAttachment, ILogInfo, IMsJsonContext<LoggerAttachmentRecord>
 {
     public static string TableName { get; } = typeof(LoggerAttachmentRecord).GetTableName();
 
@@ -143,14 +139,25 @@ public sealed record LoggerAttachmentRecord( [ property: MaxLength( LoggerAttach
 
     public override int CompareTo( LoggerAttachmentRecord? other ) => string.CompareOrdinal( Content, other?.Content );
     public override int GetHashCode()                              => HashCode.Combine( Content, base.GetHashCode() );
+    public static JsonSerializerOptions JsonOptions( bool formatted ) => new()
+                                                                         {
+                                                                             WriteIndented    = formatted,
+                                                                             TypeInfoResolver = LoggerAttachmentRecordContext.Default
+                                                                         };
+    public static JsonTypeInfo<LoggerAttachmentRecord> JsonTypeInfo() => LoggerAttachmentRecordContext.Default.LoggerAttachmentRecord;
 }
+
+
+
+[ JsonSerializable( typeof(LoggerAttachmentRecord) ) ] public partial class LoggerAttachmentRecordContext : JsonSerializerContext { }
 
 
 
 [ Serializable, Table( "LogAttachments" ) ]
 public sealed record LoggerAttachmentMappingRecord : Mapping<LoggerAttachmentMappingRecord, LogRecord, LoggerAttachmentRecord>,
                                                      ICreateMapping<LoggerAttachmentMappingRecord, LogRecord, LoggerAttachmentRecord>,
-                                                     IDbReaderMapping<LoggerAttachmentMappingRecord>
+                                                     IDbReaderMapping<LoggerAttachmentMappingRecord>,
+                                                     IMsJsonContext<LoggerAttachmentMappingRecord>
 {
     public static string TableName { get; } = typeof(LoggerAttachmentRecord).GetTableName();
 
@@ -174,14 +181,25 @@ public sealed record LoggerAttachmentMappingRecord : Mapping<LoggerAttachmentMap
     {
         while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
     }
+    public static JsonSerializerOptions JsonOptions( bool formatted ) => new()
+                                                                         {
+                                                                             WriteIndented    = formatted,
+                                                                             TypeInfoResolver = LoggerAttachmentMappingRecordContext.Default
+                                                                         };
+    public static JsonTypeInfo<LoggerAttachmentMappingRecord> JsonTypeInfo() => LoggerAttachmentMappingRecordContext.Default.LoggerAttachmentMappingRecord;
 }
+
+
+
+[ JsonSerializable( typeof(LoggerAttachmentMappingRecord) ) ] public partial class LoggerAttachmentMappingRecordContext : JsonSerializerContext { }
 
 
 
 [ Serializable, Table( "LogScopes" ) ]
 public sealed record LoggerScopeAttachmentMappingRecord : Mapping<LoggerScopeAttachmentMappingRecord, LoggerAttachmentRecord, ScopeRecord>,
                                                           ICreateMapping<LoggerScopeAttachmentMappingRecord, LoggerAttachmentRecord, ScopeRecord>,
-                                                          IDbReaderMapping<LoggerScopeAttachmentMappingRecord>
+                                                          IDbReaderMapping<LoggerScopeAttachmentMappingRecord>,
+                                                          IMsJsonContext<LoggerScopeAttachmentMappingRecord>
 {
     public static string TableName { get; } = typeof(LoggerScopeAttachmentMappingRecord).GetTableName();
 
@@ -205,4 +223,14 @@ public sealed record LoggerScopeAttachmentMappingRecord : Mapping<LoggerScopeAtt
     {
         while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
     }
+    public static JsonSerializerOptions JsonOptions( bool formatted ) => new()
+                                                                         {
+                                                                             WriteIndented    = formatted,
+                                                                             TypeInfoResolver = LoggerScopeAttachmentMappingRecordContext.Default
+                                                                         };
+    public static JsonTypeInfo<LoggerScopeAttachmentMappingRecord> JsonTypeInfo() => LoggerScopeAttachmentMappingRecordContext.Default.LoggerScopeAttachmentMappingRecord;
 }
+
+
+
+[ JsonSerializable( typeof(LoggerScopeAttachmentMappingRecord) ) ] public partial class LoggerScopeAttachmentMappingRecordContext : JsonSerializerContext { }

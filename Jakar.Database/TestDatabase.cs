@@ -2,6 +2,8 @@
 // 09/28/2023  10:02 AM
 
 using System.Collections.Frozen;
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Caching.StackExchangeRedis;
 using Npgsql;
 
 
@@ -31,6 +33,8 @@ internal sealed class TestDatabase : Database
     {
         WebApplicationBuilder builder = WebApplication.CreateBuilder();
         builder.AddDefaultLogging<TestDatabase>( true );
+
+        builder.Services.AddSingleton<IDistributedCache, RedisCache>();
 
         builder.AddDb<TestDatabase>( dbOptions =>
                                      {

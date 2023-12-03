@@ -8,8 +8,8 @@ public abstract partial class Database
 {
     [ SuppressMessage( "ReSharper", "UnusedParameter.Global" ) ]
     public virtual ValueTask<DateTimeOffset?> GetSubscriptionExpiration( DbConnection connection, DbTransaction? transaction, UserRecord record, CancellationToken token = default ) => new(default(DateTimeOffset?));
-    public virtual ValueTask<TRecord> GetSubscription<TRecord>( DbConnection connection, DbTransaction? transaction, UserRecord record, CancellationToken token = default ) where TRecord : UserSubscription<TRecord>, IDbReaderMapping<TRecord> =>
-        default;
+    public virtual ValueTask<TRecord?> TryGetSubscription<TRecord>( DbConnection connection, DbTransaction? transaction, UserRecord record, CancellationToken token = default )
+        where TRecord : UserSubscription<TRecord>, IDbReaderMapping<TRecord>, IMsJsonContext<TRecord> => default;
 
 
     /// <summary> </summary>

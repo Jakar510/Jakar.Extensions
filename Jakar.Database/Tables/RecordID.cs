@@ -28,7 +28,7 @@ public readonly record struct RecordID<TRecord>( Guid Value ) : IComparable<Reco
     public static RecordID<TRecord>? TryCreate( [ NotNullIfNotNull( nameof(id) ) ] Guid? id ) => id.HasValue
                                                                                                      ? new RecordID<TRecord>( id.Value )
                                                                                                      : default;
-    public static RecordID<TRecord>? TryCreate( ref Utf8JsonReader reader ) => Guid.TryParse( reader.GetString(), out Guid id )
+    public static RecordID<TRecord>? TryCreate( ref Utf8JsonReader reader ) => reader.TryGetGuid( out Guid id )
                                                                                    ? new RecordID<TRecord>( id )
                                                                                    : default;
 
@@ -70,6 +70,16 @@ public readonly record struct RecordID<TRecord>( Guid Value ) : IComparable<Reco
     }
 
 
+    public static JsonSerializerOptions JsonOptions( bool formatted ) => new()
+                                                                         {
+                                                                             WriteIndented = formatted,
+                                                                             Converters =
+                                                                             {
+                                                                                 new JsonConverter()
+                                                                             }
+                                                                         };
+
+
 
     public class DapperTypeHandler : SqlConverter<DapperTypeHandler, RecordID<TRecord>>
     {
@@ -94,7 +104,7 @@ public readonly record struct RecordID<TRecord>( Guid Value ) : IComparable<Reco
 
 
 
-    public class JsonNetConverter : JsonConverter<RecordID<TRecord>>
+    public class JsonNetConverter : Newtonsoft.Json.JsonConverter<RecordID<TRecord>>
     {
         public override RecordID<TRecord> ReadJson( JsonReader reader, Type objectType, RecordID<TRecord> existingValue, bool hasExistingValue, JsonSerializer serializer )
         {
