@@ -1,9 +1,10 @@
 ﻿namespace Jakar.Database;
 
 
-public interface ICreateMapping<out TSelf, in TKey, in TValue> where TValue : TableRecord<TValue>, IDbReaderMapping<TValue>
-                                                               where TKey : TableRecord<TKey>, IDbReaderMapping<TKey>
-                                                               where TSelf : Mapping<TSelf, TKey, TValue>, ICreateMapping<TSelf, TKey, TValue>, IDbReaderMapping<TSelf>
+public interface ICreateMapping<out TSelf, in TKey, in TValue>
+    where TValue : TableRecord<TValue>, IDbReaderMapping<TValue>
+    where TKey : TableRecord<TKey>, IDbReaderMapping<TKey>
+    where TSelf : Mapping<TSelf, TKey, TValue>, ICreateMapping<TSelf, TKey, TValue>, IDbReaderMapping<TSelf>
 {
     public abstract static TSelf Create( TKey key, TValue value );
 }

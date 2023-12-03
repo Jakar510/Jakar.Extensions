@@ -2,15 +2,15 @@
 
 
 [ Serializable, Table( "Groups" ) ]
-public sealed record GroupRecord( [ MaxLength( 256 ) ]                                                      string?              CustomerID,
-                                  [ MaxLength( 1024 ) ]                                                     string               NameOfGroup,
-                                  [ MaxLength( 256 ) ]                                                      RecordID<UserRecord> OwnerID,
+public sealed record GroupRecord( [ MaxLength( 256 ) ]                 string?              CustomerID,
+                                  [ MaxLength( 1024 ) ]                string               NameOfGroup,
+                                  [ MaxLength( 256 ) ]                 RecordID<UserRecord> OwnerID,
                                   [ MaxLength( UserRights.MAX_SIZE ) ] string               Rights,
-                                  RecordID<GroupRecord>                                                                          ID,
-                                  RecordID<UserRecord>?                                                                          CreatedBy,
-                                  Guid?                                                                                          OwnerUserID,
-                                  DateTimeOffset                                                                                 DateCreated,
-                                  DateTimeOffset?                                                                                LastModified = default
+                                  RecordID<GroupRecord>                                     ID,
+                                  RecordID<UserRecord>?                                     CreatedBy,
+                                  Guid?                                                     OwnerUserID,
+                                  DateTimeOffset                                            DateCreated,
+                                  DateTimeOffset?                                           LastModified = default
 ) : OwnedTableRecord<GroupRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<GroupRecord>, UserRights.IRights
 {
     public static string TableName { get; } = typeof(GroupRecord).GetTableName();

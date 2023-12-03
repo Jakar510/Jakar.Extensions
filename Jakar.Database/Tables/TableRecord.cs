@@ -34,17 +34,17 @@ public interface ITableRecord : IRecordPair
 public interface ITableRecord<TRecord> : ITableRecord
     where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
-    public new RecordID<TRecord> ID { get; }
     Guid IUniqueID<Guid>.        ID => ID.Value;
-    public TRecord               NewID( RecordID<TRecord> id );
+    public new RecordID<TRecord> ID { get; }
+    public     TRecord           NewID( RecordID<TRecord> id );
 }
 
 
 
 public interface IOwnedTableRecord
 {
-    public RecordID<UserRecord>? CreatedBy   { get; }
     public Guid?                 OwnerUserID { get; }
+    public RecordID<UserRecord>? CreatedBy   { get; }
 }
 
 

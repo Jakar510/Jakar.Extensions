@@ -45,12 +45,14 @@ public sealed record UserRecord( Guid                                           
                                  DateTimeOffset?                                                      LastModified = default
 ) : OwnedTableRecord<UserRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<UserRecord>, IUserData<UserRecord>, IRefreshToken, IUserID, IUserDataRecord, UserRights.IRights
 {
-    public const            int                           MAX_SIZE        = TokenValidationParameters.DefaultMaximumTokenSizeInBytes;
     private static readonly PasswordHasher<UserRecord>    _hasher         = new();
+    public const            int                           MAX_SIZE        = TokenValidationParameters.DefaultMaximumTokenSizeInBytes;
     private                 IDictionary<string, JToken?>? _additionalData = AdditionalData;
 
 
-    public static string TableName { get; } = typeof(UserRecord).GetTableName();
+    public static string          TableName { get; }      = typeof(UserRecord).GetTableName();
+    public        DateTimeOffset? LastLogin { get; set; } = LastLogin;
+    Guid IUserID.                 UserID    => UserID;
 
 
     [ ProtectedPersonalData, MaxLength( int.MaxValue ) ]
@@ -66,13 +68,11 @@ public sealed record UserRecord( Guid                                           
     [ ProtectedPersonalData, MaxLength( 256 ) ]  public string            Ext               { get; set; } = Ext;
     [ ProtectedPersonalData, MaxLength( 256 ) ]  public string            FirstName         { get; set; } = FirstName;
     [ ProtectedPersonalData, MaxLength( 512 ) ]  public string            FullName          { get; set; } = FullName;
-    public                                              DateTimeOffset?   LastLogin         { get; set; } = LastLogin;
-    [ ProtectedPersonalData, MaxLength( 256 ) ] public  string            LastName          { get; set; } = LastName;
-    [ ProtectedPersonalData, MaxLength( 256 ) ] public  string            PhoneNumber       { get; set; } = PhoneNumber;
-    public                                              SupportedLanguage PreferredLanguage { get; set; } = PreferredLanguage;
-    [ ProtectedPersonalData, MaxLength( 256 ) ] public  string            Title             { get; set; } = Title;
-    Guid IUserID.                                                         UserID            => UserID;
+    [ ProtectedPersonalData, MaxLength( 256 ) ]  public string            LastName          { get; set; } = LastName;
+    [ ProtectedPersonalData, MaxLength( 256 ) ]  public string            PhoneNumber       { get; set; } = PhoneNumber;
+    [ ProtectedPersonalData, MaxLength( 256 ) ]  public string            Title             { get; set; } = Title;
     [ ProtectedPersonalData, MaxLength( 4096 ) ] public string            Website           { get; set; } = Website;
+    public                                              SupportedLanguage PreferredLanguage { get; set; } = PreferredLanguage;
 
 
     public override DynamicParameters ToDynamicParameters()
@@ -119,7 +119,7 @@ public sealed record UserRecord( Guid                                           
 
     public static UserRecord Create( DbDataReader reader )
     {
-        Guid                          userID                 = reader.GetFieldValue<Guid>( nameof(UserID) );
+        var                           userID                 = reader.GetFieldValue<Guid>( nameof(UserID) );
         string                        userName               = reader.GetFieldValue<string>( nameof(UserName) );
         string                        firstName              = reader.GetFieldValue<string>( nameof(FirstName) );
         string                        lastName               = reader.GetFieldValue<string>( nameof(LastName) );

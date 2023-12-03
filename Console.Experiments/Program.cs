@@ -2,9 +2,9 @@
 {
     "Hello World!".WriteToConsole();
     Console.WriteLine();
-#pragma warning disable Tags // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+#pragma warning disable OpenTelemetry // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
     Jakar.Database.Activities.Tags.Print();
-#pragma warning restore Tags // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+#pragma warning restore OpenTelemetry // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
 
 
     // Tests.Test_Hashes();

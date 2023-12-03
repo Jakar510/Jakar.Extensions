@@ -4,6 +4,7 @@
 namespace Jakar.Database;
 
 
+[ Experimental( nameof(OpenTelemetry) ) ]
 public static class Activities
 {
     public const  string         EMPTY = "";
@@ -38,7 +39,7 @@ public static class Activities
     public static Activity Create( [ CallerMemberName ] string name = EMPTY, ActivityKind kind = ActivityKind.Internal ) =>
         Source.CreateActivity( name, kind ) ?? throw new InvalidOperationException( $"{nameof(Source)} doesn't have any Listeners" );
     public static Activity Create( ActivityKind                                kind          = ActivityKind.Internal,
-                                   ActivityIdFormat                            idFormat      = ActivityIdFormat.Hierarchical,
+                                   ActivityIdFormat                            idFormat      = ActivityIdFormat.W3C,
                                    ActivityContext                             parentContext = default,
                                    IEnumerable<KeyValuePair<string, object?>>? tags          = null,
                                    IEnumerable<ActivityLink>?                  links         = null,
@@ -46,8 +47,47 @@ public static class Activities
     ) => Source.CreateActivity( name, kind, parentContext, tags, links, idFormat ) ?? throw new InvalidOperationException( $"{nameof(Source)} doesn't have any Listeners" );
 
 
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static void AddUserID( this              Activity activity, UserRecord  record )          => activity.AddTag( nameof(record.UserID),       record.UserID );
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static void AddSessionID( this           Activity activity, UserRecord  record )          => activity.AddTag( nameof(record.SessionID),    record.SessionID );
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static void AddRoleID( this              Activity activity, RoleRecord  record )          => activity.AddTag( nameof(record.ID),           record.ID );
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static void AddGroupID( this             Activity activity, GroupRecord record )          => activity.AddTag( nameof(record.ID),           record.ID );
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static void AddGroup( this               Activity activity, string?     value = default ) => activity.AddTag( Tags.AddGroup,               value );
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static void AddGroupRights( this         Activity activity, string?     value = default ) => activity.AddTag( Tags.AddGroupRights,         value );
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static void AddRole( this                Activity activity, string?     value = default ) => activity.AddTag( Tags.AddRole,                value );
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static void AddRoleRights( this          Activity activity, string?     value = default ) => activity.AddTag( Tags.AddRoleRights,          value );
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static void AddUser( this                Activity activity, string?     value = default ) => activity.AddTag( Tags.AddUser,                value );
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static void AddUserAddress( this         Activity activity, string?     value = default ) => activity.AddTag( Tags.AddUserAddress,         value );
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static void AddUserLoginInfo( this       Activity activity, string?     value = default ) => activity.AddTag( Tags.AddUserLoginInfo,       value );
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static void AddUserRecoveryCode( this    Activity activity, string?     value = default ) => activity.AddTag( Tags.AddUserRecoveryCode,    value );
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static void AddUserRights( this          Activity activity, string?     value = default ) => activity.AddTag( Tags.AddUserRights,          value );
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static void AddUserSubscription( this    Activity activity, string?     value = default ) => activity.AddTag( Tags.AddUserSubscription,    value );
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static void AddUserToGroup( this         Activity activity, string?     value = default ) => activity.AddTag( Tags.AddUserToGroup,         value );
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static void AddUserToRole( this          Activity activity, string?     value = default ) => activity.AddTag( Tags.AddUserToRole,          value );
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static void ConnectDatabase( this        Activity activity, string?     value = default ) => activity.AddTag( Tags.ConnectDatabase,        value );
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static void LoginUser( this              Activity activity, string?     value = default ) => activity.AddTag( Tags.LoginUser,              value );
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static void RemoveGroup( this            Activity activity, string?     value = default ) => activity.AddTag( Tags.RemoveGroup,            value );
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static void RemoveGroupRights( this      Activity activity, string?     value = default ) => activity.AddTag( Tags.RemoveGroupRights,      value );
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static void RemoveRole( this             Activity activity, string?     value = default ) => activity.AddTag( Tags.RemoveRole,             value );
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static void RemoveRoleRights( this       Activity activity, string?     value = default ) => activity.AddTag( Tags.RemoveRoleRights,       value );
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static void RemoveUser( this             Activity activity, string?     value = default ) => activity.AddTag( Tags.RemoveUser,             value );
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static void RemoveUserAddress( this      Activity activity, string?     value = default ) => activity.AddTag( Tags.RemoveUserAddress,      value );
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static void RemoveUserFromGroup( this    Activity activity, string?     value = default ) => activity.AddTag( Tags.RemoveUserFromGroup,    value );
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static void RemoveUserFromRole( this     Activity activity, string?     value = default ) => activity.AddTag( Tags.RemoveUserFromRole,     value );
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static void RemoveUserLoginInfo( this    Activity activity, string?     value = default ) => activity.AddTag( Tags.RemoveUserLoginInfo,    value );
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static void RemoveUserRecoveryCode( this Activity activity, string?     value = default ) => activity.AddTag( Tags.RemoveUserRecoveryCode, value );
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static void RemoveUserRights( this       Activity activity, string?     value = default ) => activity.AddTag( Tags.RemoveUserRights,       value );
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static void RemoveUserSubscription( this Activity activity, string?     value = default ) => activity.AddTag( Tags.RemoveUserSubscription, value );
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static void UpdateGroup( this            Activity activity, string?     value = default ) => activity.AddTag( Tags.UpdateGroup,            value );
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static void UpdateRole( this             Activity activity, string?     value = default ) => activity.AddTag( Tags.UpdateRole,             value );
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static void UpdateUser( this             Activity activity, string?     value = default ) => activity.AddTag( Tags.UpdateUser,             value );
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static void UpdateUserAddress( this      Activity activity, string?     value = default ) => activity.AddTag( Tags.UpdateUserAddress,      value );
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static void UpdateUserLoginInfo( this    Activity activity, string?     value = default ) => activity.AddTag( Tags.UpdateUserLoginInfo,    value );
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static void UpdateUserSubscription( this Activity activity, string?     value = default ) => activity.AddTag( Tags.UpdateUserSubscription, value );
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static void VerifyLogin( this            Activity activity, string?     value = default ) => activity.AddTag( Tags.VerifyLogin,            value );
 
-    [ Experimental( nameof(Tags) ) ]
+
+
+    [ SuppressMessage( "ReSharper", "MemberHidesStaticFromOuterClass" ) ]
     public static class Tags
     {
         private static string? _prefix;
@@ -63,7 +103,7 @@ public static class Activities
         public static  string  AddUserSubscription    { get; set; } = nameof(AddUserSubscription);
         public static  string  AddUserToGroup         { get; set; } = nameof(AddUserToGroup);
         public static  string  AddUserToRole          { get; set; } = nameof(AddUserToRole);
-        public static  string  Database               { get; set; } = nameof(Database);
+        public static  string  ConnectDatabase        { get; set; } = nameof(ConnectDatabase);
         public static  string  LoginUser              { get; set; } = nameof(LoginUser);
         public static  string  RemoveGroup            { get; set; } = nameof(RemoveGroup);
         public static  string  RemoveGroupRights      { get; set; } = nameof(RemoveGroupRights);
@@ -98,22 +138,29 @@ public static class Activities
         [ Conditional( "DEBUG" ) ]
         internal static void Print()
         {
-            IEnumerable<PropertyInfo> properties = typeof(Tags).GetProperties( BindingFlags.Static | BindingFlags.Public ).Where( static x => x.Name != nameof(Prefix) );
+            ReadOnlySpan<PropertyInfo> properties = typeof(Tags).GetProperties( BindingFlags.Static | BindingFlags.Public ).Where( static x => x.Name != nameof(Prefix) ).ToArray();
 
-            foreach ( PropertyInfo property in properties )
-            {
-                string line = GetLine( property.Name );
-                Console.WriteLine( line );
-            }
+            foreach ( PropertyInfo property in properties ) { Console.WriteLine( GetPrefixLine( property.Name ) ); }
+
+            Console.WriteLine();
+            Console.WriteLine();
+            Console.WriteLine();
+
+            foreach ( PropertyInfo property in properties ) { Console.WriteLine( GetMethodLine( property.Name ) ); }
 
             return;
-            static string GetLine( string property ) { return $"            {property} = GetPrefix( prefix, {property}, nameof({property}) );"; }
+            static string GetPrefixLine( string property ) { return $"            {property} = GetPrefix( prefix, {property}, nameof({property}) );"; }
+
+            static string GetMethodLine( string property )
+            {
+                return $"            [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static void {property}( this Activity activity, string? value = default ) => activity.AddTag( Tags.{property}, value );";
+            }
         }
 
 
         private static void SetPrefix( in ReadOnlySpan<char> prefix )
         {
-            Database               = GetPrefix( prefix, Database,               nameof(Database) );
+            ConnectDatabase        = GetPrefix( prefix, ConnectDatabase,        nameof(ConnectDatabase) );
             AddUser                = GetPrefix( prefix, AddUser,                nameof(AddUser) );
             UpdateUser             = GetPrefix( prefix, UpdateUser,             nameof(UpdateUser) );
             RemoveUser             = GetPrefix( prefix, RemoveUser,             nameof(RemoveUser) );

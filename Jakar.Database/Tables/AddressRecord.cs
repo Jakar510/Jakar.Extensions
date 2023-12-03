@@ -20,9 +20,9 @@ public sealed record AddressRecord( [ property: ProtectedPersonalData, MaxLength
                                     DateTimeOffset?                                               LastModified = default
 ) : OwnedTableRecord<AddressRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IAddress, IEquatable<IAddress>, IDbReaderMapping<AddressRecord>
 {
-    public static string                        TableName      { get; }      = typeof(AddressRecord).GetTableName();
-    public        IDictionary<string, JToken?>? AdditionalData { get; set; } = AdditionalData;
-    Guid? IAddress.                             UserID         => OwnerUserID;
+    public static string                 TableName      { get; } = typeof(AddressRecord).GetTableName();
+    Guid? IAddress.                      UserID         => OwnerUserID;
+    public IDictionary<string, JToken?>? AdditionalData { get; set; } = AdditionalData;
 
 
     public override DynamicParameters ToDynamicParameters()
