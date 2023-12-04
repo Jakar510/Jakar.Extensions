@@ -7,11 +7,6 @@ namespace Jakar.Database;
 
 public partial class Database
 {
-    private readonly IDistributedCache _distributedCache;
-
-    // private readonly IDatabase         _redisDatabase;
-
-
     public async ValueTask<TRecord?> TryGetRecord<TRecord>( RecordID<TRecord> id, CancellationToken token )
         where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>, IMsJsonContext<TRecord>
     {

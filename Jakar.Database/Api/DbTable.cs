@@ -7,12 +7,12 @@ namespace Jakar.Database;
 
 [ SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" ) ]
 public partial class DbTable<TRecord> : IConnectableDb
-    where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
+    where TRecord : class, ITableRecord<TRecord>, IDbReaderMapping<TRecord>, IMsJsonContext<TRecord>
 {
-    protected readonly IConnectableDbRoot  _database;
-    protected readonly ISqlCacheFactory    _sqlCacheFactory;
-    protected readonly ITableCacheFactory  _tableCacheFactory;
-    private            ISqlCache<TRecord>? _sqlCache;
+    protected readonly IConnectableDbRoot   _database;
+    protected readonly ISqlCacheFactory     _sqlCacheFactory;
+    protected readonly ITableCache<TRecord> _tableCache;
+    private            ISqlCache<TRecord>?  _sqlCache;
 
 
     public static ImmutableArray<TRecord>  Empty          => ImmutableArray<TRecord>.Empty;
@@ -23,11 +23,11 @@ public partial class DbTable<TRecord> : IConnectableDb
     public        RecordGenerator<TRecord> Records        => new(this);
 
 
-    public DbTable( IConnectableDbRoot database, ISqlCacheFactory sqlCacheFactory, ITableCacheFactory tableCacheFactory )
+    public DbTable( IConnectableDbRoot database, ISqlCacheFactory sqlCacheFactory )
     {
-        _database          = database;
-        _sqlCacheFactory   = sqlCacheFactory;
-        _tableCacheFactory = tableCacheFactory;
+        _database        = database;
+        _tableCache      = database.GetCache( this );
+        _sqlCacheFactory = sqlCacheFactory;
         if ( TRecord.TableName != typeof(TRecord).GetTableName() ) { throw new InvalidOperationException( $"{TRecord.TableName} != {typeof(TRecord).GetTableName()}" ); }
     }
     public virtual ValueTask DisposeAsync()

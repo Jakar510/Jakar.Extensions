@@ -33,18 +33,23 @@ public static class DbHostingExtensions
     public static WebApplicationBuilder AddDb<TDatabase, TSqlCacheFactory, TTableCacheFactory>( this WebApplicationBuilder builder, Action<DbOptions> dbOptions, Action<TableCacheOptions> tableCacheOptions, Action<IMigrationRunnerBuilder> migration )
         where TDatabase : Database
         where TSqlCacheFactory : class, ISqlCacheFactory
-        where TTableCacheFactory : class, ITableCacheFactory
+        where TTableCacheFactory : class, ITableCacheFactoryService
     {
         builder.Services.AddOptions<DbOptions>().Configure( dbOptions );
         builder.Services.AddOptions<TableCacheOptions>().Configure( tableCacheOptions );
 
         builder.Services.AddSingleton<ISqlCacheFactory, TSqlCacheFactory>();
-        builder.Services.AddSingleton<ITableCacheFactory, TTableCacheFactory>();
-        builder.Services.AddHostedService( static provider => provider.GetRequiredService<ITableCacheFactory>() );
+        builder.Services.AddSingleton<ITableCacheFactoryService, TTableCacheFactory>();
+        builder.Services.AddSingleton( GetTableCacheFactory );
+        builder.Services.AddHostedService( GetTableCacheFactoryService );
         builder.Services.AddSingleton<TDatabase>();
-        builder.Services.AddSingleton<Database>( static provider => provider.GetRequiredService<TDatabase>() );
+        builder.Services.AddSingleton( GetDatabase<TDatabase> );
 
         builder.Services.AddFluentMigratorCore().ConfigureRunner( migration );
         return builder;
     }
+    public static Database GetDatabase<TDatabase>( IServiceProvider provider )
+        where TDatabase : Database => provider.GetRequiredService<TDatabase>();
+    public static ITableCacheFactory        GetTableCacheFactory( IServiceProvider        provider ) => provider.GetRequiredService<ITableCacheFactoryService>();
+    public static ITableCacheFactoryService GetTableCacheFactoryService( IServiceProvider provider ) => provider.GetRequiredService<ITableCacheFactoryService>();
 }

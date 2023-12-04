@@ -12,13 +12,13 @@ namespace Jakar.Extensions;
 [ SuppressMessage( "ReSharper", "OutParameterValueIsAlwaysDiscarded.Global" ) ]
 public readonly ref struct PasswordValidator
 {
+    private readonly Requirements _requirements;
+
+
     // ReSharper disable once MemberHidesStaticFromOuterClass
     public static Requirements          Requirements => Current ??= new PasswordRequirements();
     public static PasswordRequirements? Current      { get; set; }
-
-
-    private readonly Requirements      _requirements;
-    public static    PasswordValidator Default => new(Requirements);
+    public static PasswordValidator     Default      => new(Requirements);
     public PasswordValidator( Requirements requirements ) => _requirements = requirements;
 
 
@@ -37,8 +37,8 @@ public readonly ref struct PasswordValidator
     {
         password     = password.Trim();
         lengthPassed = password.Length >= _requirements.MinLength;
-        lowerPassed  = !_requirements.RequireLowerCase || password.IndexOfAny( _requirements.LowerCase ) >= 0;
-        upperPassed  = !_requirements.RequireUpperCase || password.IndexOfAny( _requirements.UpperCase ) >= 0;
+        lowerPassed  = _requirements.RequireLowerCase is false || password.IndexOfAny( _requirements.LowerCase ) >= 0;
+        upperPassed  = _requirements.RequireUpperCase is false || password.IndexOfAny( _requirements.UpperCase ) >= 0;
 
 
         if ( _requirements.RequireSpecialChar )
@@ -148,20 +148,20 @@ public readonly ref struct Requirements
 
 public sealed record PasswordRequirements : IOptions<PasswordRequirements>
 {
-    public string[]                                     BlockedPasswords         { get; set; } = Array.Empty<string>();
     public bool                                         CantStartWithNumber      { get; set; } = true;
     public bool                                         CantStartWithSpecialChar { get; set; } = true;
-    public string                                       LowerCase                { get; set; } = Randoms.LOWER_CASE;
-    public int                                          MinLength                { get; init; }
-    public string                                       Numbers                  { get; set; } = Randoms.NUMERIC;
     public bool                                         RequireLowerCase         { get; set; } = true;
     public bool                                         RequireNumber            { get; set; } = true;
     public bool                                         RequireSpecialChar       { get; set; } = true;
     public bool                                         RequireUpperCase         { get; set; } = true;
-    public string                                       SpecialChars             { get; set; } = Randoms.SPECIAL_CHARS;
-    public string                                       UpperCase                { get; set; } = Randoms.UPPER_CASE;
+    public int                                          MinLength                { get; init; }
     PasswordRequirements IOptions<PasswordRequirements>.Value                    => this;
+    public string                                       LowerCase                { get; set; }  = Randoms.LOWER_CASE;
+    public string                                       Numbers                  { get; set; }  = Randoms.NUMERIC;
+    public string                                       SpecialChars             { get; set; }  = Randoms.SPECIAL_CHARS;
+    public string                                       UpperCase                { get; set; }  = Randoms.UPPER_CASE;
+    public HashSet<string>                              BlockedPasswords         { get; init; } = new();
 
 
-    public void SetBlockedPasswords( IEnumerable<string> passwords ) => BlockedPasswords = new HashSet<string>( passwords ).ToArray();
+    public void SetBlockedPasswords( IEnumerable<string> passwords ) => BlockedPasswords.Add( passwords );
 }

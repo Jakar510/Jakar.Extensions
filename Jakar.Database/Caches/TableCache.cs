@@ -4,7 +4,7 @@
 namespace Jakar.Database.Caches;
 
 
-public interface ITableCacheFactory : IHostedService
+public interface ITableCacheFactory
 {
     ITableCache<TRecord> GetCache<TRecord>( DbTable<TRecord> table )
         where TRecord : class, ITableRecord<TRecord>, IDbReaderMapping<TRecord>, IMsJsonContext<TRecord>;
@@ -12,7 +12,11 @@ public interface ITableCacheFactory : IHostedService
 
 
 
-public sealed class TableCacheFactory( ILoggerFactory factory, IOptions<TableCacheOptions> options ) : ITableCacheFactory
+public interface ITableCacheFactoryService : ITableCacheFactory, IHostedService { }
+
+
+
+public sealed class TableCacheFactory( ILoggerFactory factory, IOptions<TableCacheOptions> options ) : ITableCacheFactoryService
 {
     private readonly ConcurrentBag<IHostedService> _services = new();
     private          CancellationTokenSource?      _source;

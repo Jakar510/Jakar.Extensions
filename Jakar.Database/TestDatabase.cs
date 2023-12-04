@@ -17,7 +17,8 @@ internal sealed class TestDatabase : Database
     private const string CONNECTION_STRING = "User ID=dev;Password=jetson;Host=localhost;Port=5432;Database=Experiments";
 
 
-    internal TestDatabase( IConfiguration                              configuration, ISqlCacheFactory sqlCacheFactory, IOptions<DbOptions> options ) : base( configuration, sqlCacheFactory, options ) => ConnectionString = CONNECTION_STRING;
+    internal TestDatabase( IConfiguration configuration, ISqlCacheFactory sqlCacheFactory, IOptions<DbOptions> options, IDistributedCache distributedCache, ITableCacheFactory tableCacheFactory ) :
+        base( configuration, sqlCacheFactory, options, distributedCache, tableCacheFactory ) => ConnectionString = CONNECTION_STRING;
     protected override DbConnection CreateConnection( in SecuredString secure ) => new NpgsqlConnection( secure );
 
 
@@ -34,7 +35,11 @@ internal sealed class TestDatabase : Database
         WebApplicationBuilder builder = WebApplication.CreateBuilder();
         builder.AddDefaultLogging<TestDatabase>( true );
 
-        builder.Services.AddSingleton<IDistributedCache, RedisCache>();
+        builder.Services.AddStackExchangeRedisCache( options =>
+                                                     {
+                                                         options.Configuration = "localhost:6379";
+                                                         options.InstanceName  = nameof(TestDatabase);
+                                                     } );
 
         builder.AddDb<TestDatabase>( static dbOptions =>
                                      {

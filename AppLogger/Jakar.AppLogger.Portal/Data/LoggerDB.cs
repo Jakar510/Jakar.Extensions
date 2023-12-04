@@ -1,4 +1,9 @@
-﻿namespace Jakar.AppLogger.Portal.Data;
+﻿using Jakar.Database.Caches;
+using Microsoft.Extensions.Caching.Distributed;
+
+
+
+namespace Jakar.AppLogger.Portal.Data;
 
 
 [ SuppressMessage( "ReSharper", "SuggestBaseTypeForParameter" ) ]
@@ -32,7 +37,8 @@ public sealed class LoggerDB : Database.Database
         RecordID<SessionRecord>.RegisterDapperTypeHandlers();
     }
 
-    public LoggerDB( IConfiguration configuration, IDataProtectorProvider dataProtectorProvider, ISqlCacheFactory sqlCacheFactory, IOptions<DbOptions> options ) : base( configuration, sqlCacheFactory, options )
+    public LoggerDB( IConfiguration configuration, IDataProtectorProvider dataProtectorProvider, ISqlCacheFactory sqlCacheFactory, IOptions<DbOptions> options, IDistributedCache distributedCache, ITableCacheFactory tableCacheFactory ) :
+        base( configuration, sqlCacheFactory, options, distributedCache, tableCacheFactory )
     {
         _dataProtectorProvider = dataProtectorProvider;
         Logs                   = Create<LogRecord>();

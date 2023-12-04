@@ -13,8 +13,9 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
 {
     public const       ClaimType               DEFAULT_CLAIM_TYPES = ClaimType.UserID | ClaimType.UserName | ClaimType.GroupSid | ClaimType.Role;
     protected readonly ConcurrentBag<IDbTable> _tables             = new();
+    protected readonly IDistributedCache       _distributedCache;
     protected readonly ISqlCacheFactory        _sqlCacheFactory;
-    private readonly   ITableCacheFactory      _tableCacheFactory;
+    protected readonly ITableCacheFactory      _tableCacheFactory;
     protected readonly string                  _className;
 
 
@@ -111,9 +112,9 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
 
     [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
     protected virtual DbTable<TRecord> Create<TRecord>()
-        where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>, IMsJsonContext<TRecord>
+        where TRecord : class, ITableRecord<TRecord>, IDbReaderMapping<TRecord>, IMsJsonContext<TRecord>
     {
-        var table = new DbTable<TRecord>( this, _sqlCacheFactory, _tableCacheFactory );
+        var table = new DbTable<TRecord>( this, _sqlCacheFactory );
         return AddDisposable( table );
     }
 
@@ -128,6 +129,10 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     {
         foreach ( IDbTable table in _tables ) { table.ResetSqlCaches(); }
     }
+
+
+    public ITableCache<TRecord> GetCache<TRecord>( DbTable<TRecord> table )
+        where TRecord : class, ITableRecord<TRecord>, IDbReaderMapping<TRecord>, IMsJsonContext<TRecord> => _tableCacheFactory.GetCache( table );
 
 
     [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
