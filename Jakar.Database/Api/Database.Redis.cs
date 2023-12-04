@@ -12,23 +12,21 @@ public partial class Database
     // private readonly IDatabase         _redisDatabase;
 
 
-    public async ValueTask<TRecord?> TryGetRecord<TRecord>( string key, CancellationToken token )
+    public async ValueTask<TRecord?> TryGetRecord<TRecord>( RecordID<TRecord> id, CancellationToken token )
         where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>, IMsJsonContext<TRecord>
     {
-        byte[]? data = await _distributedCache.GetAsync( key, token ).ConfigureAwait( false );
+        byte[]? data = await _distributedCache.GetAsync( GetRedisKey( id ), token ).ConfigureAwait( false );
         if ( data == null ) { return default; }
 
-        string json = Encoding.Default.GetString( data );
-        System.Text.Json.JsonSerializer.Deserialize( json, TRecord.JsonTypeInfo() );
-        return json.FromJson<TRecord>();
+        return JsonSerializer_.Deserialize( data, TRecord.JsonTypeInfo() );
     }
-    public async ValueTask SetRecord<TRecord>( TRecord record, CancellationToken token )
+    public async ValueTask AddOrUpdate<TRecord>( TRecord record, CancellationToken token )
         where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>, IMsJsonContext<TRecord>
     {
-        System.Text.Json.JsonSerializer.Serialize( record, TRecord.JsonTypeInfo() );
+        JsonSerializer_.Serialize( record, TRecord.JsonTypeInfo() );
         byte[] data = Encoding.Default.GetBytes( record.ToJson() );
-        await _distributedCache.SetAsync( GetRedisKey( record ), data, token: token ).ConfigureAwait( false );
+        await _distributedCache.SetAsync( GetRedisKey( record.ID ), data, token: token ).ConfigureAwait( false );
     }
-    public static string GetRedisKey<TRecord>( TRecord key )
-        where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord> => $"{typeof(TRecord).Name}:{key.ID.Value}";
+    public static string GetRedisKey<TRecord>( RecordID<TRecord> id )
+        where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord> => $"{typeof(TRecord).Name}:{id.Value}";
 }

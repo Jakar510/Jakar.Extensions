@@ -11,39 +11,35 @@ public partial class DbTable<TRecord> : IConnectableDb
 {
     protected readonly IConnectableDbRoot  _database;
     protected readonly ISqlCacheFactory    _sqlCacheFactory;
-    private            ISqlCache<TRecord>? _cache;
+    protected readonly ITableCacheFactory  _tableCacheFactory;
+    private            ISqlCache<TRecord>? _sqlCache;
 
 
     public static ImmutableArray<TRecord>  Empty          => ImmutableArray<TRecord>.Empty;
     public static ImmutableList<TRecord>   EmptyList      => ImmutableList<TRecord>.Empty;
-    public        ISqlCache<TRecord>       SqlCache       => _cache ??= _sqlCacheFactory.GetSqlCache<TRecord>( _database );
+    public        ISqlCache<TRecord>       SqlCache       => _sqlCache ??= _sqlCacheFactory.GetSqlCache<TRecord>( _database );
     public        int?                     CommandTimeout => _database.CommandTimeout;
     public        DbInstance               Instance       => _database.Instance;
     public        RecordGenerator<TRecord> Records        => new(this);
 
 
-    public DbTable( IConnectableDbRoot database, ISqlCacheFactory sqlCacheFactory )
+    public DbTable( IConnectableDbRoot database, ISqlCacheFactory sqlCacheFactory, ITableCacheFactory tableCacheFactory )
     {
-        _database        = database;
-        _sqlCacheFactory = sqlCacheFactory;
+        _database          = database;
+        _sqlCacheFactory   = sqlCacheFactory;
+        _tableCacheFactory = tableCacheFactory;
         if ( TRecord.TableName != typeof(TRecord).GetTableName() ) { throw new InvalidOperationException( $"{TRecord.TableName} != {typeof(TRecord).GetTableName()}" ); }
     }
-
-
     public virtual ValueTask DisposeAsync()
     {
         GC.SuppressFinalize( this );
         return default;
     }
     public ValueTask<DbConnection> ConnectAsync( CancellationToken token = default ) => _database.ConnectAsync( token );
-
-
-    public void ResetSqlCaches() => _cache = null;
+    public void                    ResetSqlCaches()                                  => _sqlCache = null;
 
 
     public IAsyncEnumerable<TRecord> All( CancellationToken token = default ) => this.Call( All, token );
-
-    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public virtual async IAsyncEnumerable<TRecord> All( DbConnection connection, DbTransaction? transaction, [ EnumeratorCancellation ] CancellationToken token = default )
     {
         SqlCommand               sql    = SqlCache.All();

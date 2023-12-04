@@ -4,7 +4,84 @@
 namespace Jakar.Database.Caches;
 
 
-public sealed class TableCache<TRecord> : IHostedService, IAsyncEnumerable<TRecord?>
+public interface ITableCacheFactory : IHostedService
+{
+    ITableCache<TRecord> GetCache<TRecord>( DbTable<TRecord> table )
+        where TRecord : class, ITableRecord<TRecord>, IDbReaderMapping<TRecord>, IMsJsonContext<TRecord>;
+}
+
+
+
+public sealed class TableCacheFactory( ILoggerFactory factory, IOptions<TableCacheOptions> options ) : ITableCacheFactory
+{
+    private readonly ConcurrentBag<IHostedService> _services = new();
+    private          CancellationTokenSource?      _source;
+
+
+    public ITableCache<TRecord> GetCache<TRecord>( DbTable<TRecord> table )
+        where TRecord : class, ITableRecord<TRecord>, IDbReaderMapping<TRecord>, IMsJsonContext<TRecord>
+    {
+        _source?.Cancel();
+        var cache = new TableCache<TRecord>( table, factory.CreateLogger<TableCache<TRecord>>(), options );
+        _services.Add( cache );
+        return cache;
+    }
+
+
+    public async Task StartAsync( CancellationToken token )
+    {
+        while ( token.ShouldContinue() )
+        {
+            try
+            {
+                _source = CancellationTokenSource.CreateLinkedTokenSource( token );
+
+                using ( _source )
+                {
+                    var tasks = new List<Task>( _services.Count );
+
+                    // ReSharper disable once LoopCanBeConvertedToQuery
+                    foreach ( IHostedService service in _services ) { tasks.Add( service.StartAsync( _source.Token ) ); }
+
+                    await Task.WhenAll( tasks );
+                }
+            }
+            catch ( TaskCanceledException ) { await StopAsync( token ); }
+        }
+    }
+    public async Task StopAsync( CancellationToken token ) => await Task.WhenAll( _services.Select( x => x.StopAsync( token ) ) );
+}
+
+
+
+public interface ITableCache<TRecord> : IAsyncEnumerable<TRecord>, IHostedService
+    where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
+{
+    public bool                           HasChanged     { get; }
+    public IEnumerable<RecordID<TRecord>> Changed        { get; }
+    public IEnumerable<RecordID<TRecord>> Keys           { get; }
+    public IEnumerable<TRecord>           RecordsChanged { get; }
+    public IEnumerable<TRecord>           RecordsExpired { get; }
+    public int                            Count          { get; }
+    public TRecord? this[ RecordPair<TRecord> id ] { get; }
+    public TRecord? this[ RecordID<TRecord>   id ] { get; }
+    public void                Clear();
+    public bool                Contains( RecordPair<TRecord>    id );
+    public bool                Contains( RecordID<TRecord>      id );
+    public bool                Contains( TRecord                record );
+    public void                AddOrUpdate( TRecord             record );
+    public ValueTask           AddOrUpdateAsync( TRecord        record, CancellationToken                    token );
+    public bool                TryGetValue( RecordPair<TRecord> id,     [ NotNullWhen( true ) ] out TRecord? record );
+    public bool                TryGetValue( RecordID<TRecord>   id,     [ NotNullWhen( true ) ] out TRecord? record );
+    public ValueTask<TRecord?> TryGetValue( RecordPair<TRecord> pair,   CancellationToken                    token );
+    public ValueTask<TRecord?> TryGetValue( RecordID<TRecord>   pair,   CancellationToken                    token );
+    public ValueTask           RefreshAsync( CancellationToken  token );
+    public ValueTask           RefreshAsync( DbConnection       connection, DbTransaction transaction, CancellationToken token = default );
+}
+
+
+
+public sealed class TableCache<TRecord> : ITableCache<TRecord>
     where TRecord : class, ITableRecord<TRecord>, IDbReaderMapping<TRecord>, IMsJsonContext<TRecord>
 {
     private readonly ConcurrentDictionary<RecordID<TRecord>, CacheEntry<TRecord>> _records = new(RecordID<TRecord>.Equalizer);
@@ -68,7 +145,7 @@ public sealed class TableCache<TRecord> : IHostedService, IAsyncEnumerable<TReco
         {
             if ( entry.HasChanged is false ) { continue; }
 
-            var record = entry.TryGetValue( _options );
+            TRecord? record = entry.TryGetValue( _options );
             if ( record is not null ) { yield return record; }
         }
     }
@@ -77,7 +154,7 @@ public sealed class TableCache<TRecord> : IHostedService, IAsyncEnumerable<TReco
         // ReSharper disable once LoopCanBeConvertedToQuery
         foreach ( CacheEntry<TRecord> entry in _records.Values )
         {
-            var record = entry.TryGetValue( _options );
+            TRecord? record = entry.TryGetValue( _options );
             if ( record is not null ) { yield return record; }
         }
     }
@@ -89,12 +166,19 @@ public sealed class TableCache<TRecord> : IHostedService, IAsyncEnumerable<TReco
             if ( entry.HasChanged ) { yield return entry.ID; }
         }
     }
+
+
     public void Clear()                                => _records.Clear();
     public bool Contains( RecordPair<TRecord> id )     => _records.ContainsKey( id.ID );
     public bool Contains( RecordID<TRecord>   id )     => _records.ContainsKey( id );
     public bool Contains( TRecord             record ) => _records.ContainsKey( record.ID );
 
 
+    public ValueTask AddOrUpdateAsync( TRecord record, CancellationToken token )
+    {
+        AddOrUpdate( record );
+        return ValueTask.CompletedTask;
+    }
     public void AddOrUpdate( TRecord record )
     {
         if ( _records.TryGetValue( record.ID, out CacheEntry<TRecord>? entry ) is false ) { _records[record.ID] = entry = new CacheEntry<TRecord>( record.ID ); }
@@ -138,11 +222,13 @@ public sealed class TableCache<TRecord> : IHostedService, IAsyncEnumerable<TReco
 
 
     public async ValueTask RefreshAsync( CancellationToken token ) => await _table.TryCall( RefreshAsync, token );
-    private async ValueTask RefreshAsync( DbConnection connection, DbTransaction transaction, CancellationToken token = default )
+    public async ValueTask RefreshAsync( DbConnection connection, DbTransaction transaction, CancellationToken token = default )
     {
         if ( _records.IsEmpty )
         {
-            foreach ( RecordID<TRecord> id in _records.Keys.ToArray( _records.Count ) )
+            RecordID<TRecord>[] ids = _records.Keys.ToArray( _records.Count );
+
+            foreach ( RecordID<TRecord> id in ids )
             {
                 TRecord? record = await _table.Get( connection, transaction, id, token );
                 if ( record is not null ) { AddOrUpdate( record ); }
@@ -176,8 +262,8 @@ public sealed class TableCache<TRecord> : IHostedService, IAsyncEnumerable<TReco
     public async Task StopAsync( CancellationToken token ) => await _table.Update( RecordsChanged, token );
 
 
-    IAsyncEnumerator<TRecord?> IAsyncEnumerable<TRecord?>.GetAsyncEnumerator( CancellationToken token )           => GetAsyncEnumerator( token );
-    public AsyncEnumerator                                GetAsyncEnumerator( CancellationToken token = default ) => new(this, token);
+    IAsyncEnumerator<TRecord> IAsyncEnumerable<TRecord>.GetAsyncEnumerator( CancellationToken token )           => GetAsyncEnumerator( token );
+    public AsyncEnumerator                              GetAsyncEnumerator( CancellationToken token = default ) => new(this, token);
 
 
 
@@ -200,6 +286,7 @@ public sealed class TableCache<TRecord> : IHostedService, IAsyncEnumerable<TReco
         {
             _tableCache = tableCache;
             _token      = token;
+            _cache.EnsureCapacity( _tableCache.Count );
         }
         public ValueTask DisposeAsync()
         {
@@ -240,13 +327,6 @@ public sealed class TableCache<TRecord> : IHostedService, IAsyncEnumerable<TReco
             Reset();
             return false;
         }
-        IAsyncEnumerator<TRecord> IAsyncEnumerable<TRecord>.GetAsyncEnumerator( CancellationToken token ) => GetAsyncEnumerator( token );
-        public AsyncEnumerator GetAsyncEnumerator( CancellationToken token = default )
-        {
-            Reset();
-            _token = token;
-            return this;
-        }
         public void Reset()
         {
             if ( _isDisposed ) { throw new ObjectDisposedException( nameof(AsyncEnumerator) ); }
@@ -255,6 +335,15 @@ public sealed class TableCache<TRecord> : IHostedService, IAsyncEnumerable<TReco
             _pair = default;
             Interlocked.Exchange( ref _index,   START_INDEX );
             Interlocked.Exchange( ref _current, null );
+        }
+
+
+        IAsyncEnumerator<TRecord> IAsyncEnumerable<TRecord>.GetAsyncEnumerator( CancellationToken token ) => GetAsyncEnumerator( token );
+        public AsyncEnumerator GetAsyncEnumerator( CancellationToken token = default )
+        {
+            Reset();
+            _token = token;
+            return this;
         }
 
 

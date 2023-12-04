@@ -36,13 +36,18 @@ internal sealed class TestDatabase : Database
 
         builder.Services.AddSingleton<IDistributedCache, RedisCache>();
 
-        builder.AddDb<TestDatabase>( dbOptions =>
+        builder.AddDb<TestDatabase>( static dbOptions =>
                                      {
                                          SecuredString secured = CONNECTION_STRING;
                                          dbOptions.ConnectionString = secured;
                                          dbOptions.DbType           = DbInstance.Postgres;
                                          dbOptions.TokenAudience    = nameof(TestDatabase);
                                          dbOptions.TokenIssuer      = nameof(TestDatabase);
+                                     },
+                                     static tableCacheOptions =>
+                                     {
+                                         tableCacheOptions.ExpireTime  = TimeSpan.FromSeconds( 10 );
+                                         tableCacheOptions.RefreshTime = TimeSpan.FromSeconds( 1 );
                                      },
                                      DbHostingExtensions.ConfigureMigrationsPostgres );
 
