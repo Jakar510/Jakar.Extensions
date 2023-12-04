@@ -114,6 +114,7 @@ public static partial class AsyncLinq
     }
     public static char[] ToArray( this    string                 sequence ) => ToArray( sequence, sequence.Length );
     public static T[]    ToArray<T>( this IReadOnlyCollection<T> sequence ) => ToArray( sequence, sequence.Count );
+    public static T[]    ToArray<T>( ICollection<T>              sequence ) => ToArray( sequence, sequence.Count );
     public static T[] ToArray<T>( this IEnumerable<T> sequence, int count )
     {
         T[] array = GetArray<T>( count );

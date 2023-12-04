@@ -4,48 +4,60 @@
 namespace Jakar.Database.Caches;
 
 
-public sealed class CacheEntry<TRecord> : ObservableClass, IRecordPair, IEquatable<TRecord>, IEquatable<CacheEntry<TRecord>>, IComparable<CacheEntry<TRecord>>, IComparable
+public sealed class CacheEntry<TRecord>( RecordID<TRecord> id ) : ObservableClass, IRecordPair, IEquatable<TRecord>, IEquatable<CacheEntry<TRecord>>, IComparable<CacheEntry<TRecord>>, IComparable
     where TRecord : class, ITableRecord<TRecord>, IDbReaderMapping<TRecord>, IMsJsonContext<TRecord>
 {
     private readonly DateTimeOffset _lastTime = DateTimeOffset.UtcNow;
     private          string         _json     = string.Empty;
     private          UInt128        _hash;
-    public           bool           HasChanged => Spans.Hash128( _json ) != _hash;
 
 
+    public bool HasChanged
+    {
+        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => Spans.Hash128( _json ) != _hash;
+    }
     public DateTimeOffset    DateCreated  { get; private set; }
     public DateTimeOffset?   LastModified { get; private set; }
     Guid IUniqueID<Guid>.    ID           => ID.Value;
-    public RecordID<TRecord> ID           { get; init; }
+    public RecordID<TRecord> ID           { get; } = id;
 
 
-    public TRecord Value
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    public async ValueTask<TRecord?> TryGetValue( DbTable<TRecord> table, TableCacheOptions options, CancellationToken token )
     {
-        get => TryGetValue() ?? throw new NullReferenceException( nameof(_json) );
-        set
-        {
-            DateCreated  = value.DateCreated;
-            LastModified = value.LastModified;
-            _json        = JsonSerializer_.Serialize( value, TRecord.JsonOptions( false ) );
-            _hash        = Spans.Hash128( _json );
-        }
+        TRecord? record = TryGetValue( options );
+        if ( record is not null ) { return record; }
+
+        record = await table.Get( ID, token );
+        if ( record is null ) { return default; }
+
+        SetValue( record );
+        return record;
     }
-    private TRecord? TryGetValue()
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    public TRecord? TryGetValue( in TableCacheOptions options )
     {
-        if ( string.IsNullOrWhiteSpace( _json ) ) { return default; }
+        string json = _json;
 
-        return JsonSerializer_.Deserialize( _json, TRecord.JsonTypeInfo() );
+        return string.IsNullOrWhiteSpace( json ) || HasExpired( options.ExpireTime )
+                   ? default
+                   : JsonSerializer_.Deserialize( json, TRecord.JsonTypeInfo() );
     }
-
-
-    public CacheEntry( TRecord value )
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    public void SetValue( TRecord record )
     {
-        ID    = value.ID;
-        Value = value;
+        if ( ID != record.ID ) { throw new ArgumentException( "ID mismatch" ); }
+
+        DateCreated  = record.DateCreated;
+        LastModified = record.LastModified;
+        string json = JsonSerializer_.Serialize( record, TRecord.JsonOptions( false ) );
+        Interlocked.Exchange( ref _json, json );
+        _hash = Spans.Hash128( json );
     }
-    public   RecordPair<TRecord> ToPair()                       => new(ID, DateCreated);
-    internal TRecord             Saved()                        => Value;
-    public   bool                HasExpired( in TimeSpan time ) => DateTimeOffset.UtcNow - _lastTime >= time;
+
+
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public RecordPair<TRecord> ToPair()                       => new(ID, DateCreated);
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public bool                HasExpired( in TimeSpan time ) => DateTimeOffset.UtcNow - _lastTime >= time;
 
 
     public int CompareTo( object? other )
@@ -64,7 +76,7 @@ public sealed class CacheEntry<TRecord> : ObservableClass, IRecordPair, IEquatab
 
         if ( ReferenceEquals( this, other ) ) { return 0; }
 
-        return string.Compare( _json, _json, StringComparison.Ordinal );
+        return string.Compare( _json, other._json, StringComparison.Ordinal );
     }
     public bool Equals( CacheEntry<TRecord>? other )
     {
@@ -74,7 +86,7 @@ public sealed class CacheEntry<TRecord> : ObservableClass, IRecordPair, IEquatab
 
         return string.Equals( _json, other._json, StringComparison.Ordinal );
     }
-    public          bool Equals( TRecord? other ) => Value.Equals( other );
+    public          bool Equals( TRecord? other ) => JsonSerializer_.Deserialize( _json, TRecord.JsonTypeInfo() )?.Equals( other ) is true;
     public override bool Equals( object?  obj )   => ReferenceEquals( this, obj ) || obj is CacheEntry<TRecord> other && Equals( other );
     public override int  GetHashCode()            => _hash.GetHashCode();
 

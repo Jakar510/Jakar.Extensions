@@ -13,8 +13,8 @@ public partial class DbTable<TRecord>
     public IAsyncEnumerable<TRecord> Get( IAsyncEnumerable<RecordID<TRecord>> ids,        CancellationToken token                               = default ) => this.Call( Get, ids,        token );
     public ValueTask<TRecord?>       Get( bool                                matchAll,   DynamicParameters parameters, CancellationToken token = default ) => this.Call( Get, matchAll,   parameters, token );
     public ValueTask<TRecord?>       Get( string                              columnName, object?           value,      CancellationToken token = default ) => this.Call( Get, columnName, value,      token );
-    public ValueTask<TRecord?>       Get( Guid                                id,         CancellationToken token = default ) => this.Call( Get, id, token );
-    public ValueTask<TRecord?>       Get( Guid?                               id,         CancellationToken token = default ) => this.Call( Get, id, token );
+    public ValueTask<TRecord?>       Get( RecordID<TRecord>                   id,         CancellationToken token = default ) => this.Call( Get, id, token );
+    public ValueTask<TRecord?>       Get( RecordID<TRecord>?                  id,         CancellationToken token = default ) => this.Call( Get, id, token );
 
 
     [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
@@ -40,13 +40,6 @@ public partial class DbTable<TRecord>
         catch ( Exception e ) { throw new SqlException( sql.SQL, parameters, e ); }
     }
 
-
-    public async ValueTask<TRecord?> Get( DbConnection connection, DbTransaction? transaction, Guid? id, CancellationToken token = default ) =>
-        id.HasValue
-            ? await Get( connection, transaction, SQL.ID, id.Value, token )
-            : default;
-    public async ValueTask<TRecord?> Get( DbConnection connection, DbTransaction? transaction, Guid id, CancellationToken token = default ) =>
-        await Get( connection, transaction, SQL.ID, id, token );
 
     public virtual async IAsyncEnumerable<TRecord> Get( DbConnection connection, DbTransaction? transaction, IAsyncEnumerable<RecordID<TRecord>> ids, [ EnumeratorCancellation ] CancellationToken token = default )
     {

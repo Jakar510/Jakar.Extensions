@@ -90,10 +90,10 @@ END";
 */
 
 
-        UserRecord? caller = await Users.Get( connection, transaction, secret.UserID, token );
+        UserRecord? caller = await Users.Get( connection, transaction, nameof(UserRecord), secret.UserID, token );
         if ( caller is null ) { return new Error( Status.Unauthorized ); }
 
-        AppRecord? app = await Apps.Get( connection, transaction, secret.AppID, token );
+        AppRecord? app = await Apps.Get( connection, transaction, RecordID<AppRecord>.Create( secret.AppID ), token );
         if ( app is null || !app.IsActive ) { return new Error( Status.NotFound, "App not found" ); }
 
         OneOf<DeviceRecord, Error> device = await AddOrUpdate_Device( connection, transaction, app, start.Device, token );
@@ -136,7 +136,7 @@ END";
         SessionRecord? session = await Sessions.Get( connection, transaction, true, SessionRecord.GetDynamicParameters( log.Session.SessionID ), token );
         if ( session is null || !session.IsActive ) { return new Error( Status.NotFound, log.Session.SessionID.ToString() ); }
 
-        AppRecord? app = await Apps.Get( connection, transaction, log.Session.AppID, token );
+        AppRecord? app = await Apps.Get( connection, transaction, RecordID<AppRecord>.Create( log.Session.AppID ), token );
         if ( app is null || !app.IsActive ) { return new Error( Status.NotFound, log.Session.AppID.ToString() ); }
 
         UserRecord? caller = await app.GetUserWhoCreated( connection, transaction, this, token );

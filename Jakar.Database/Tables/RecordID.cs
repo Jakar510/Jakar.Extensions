@@ -3,6 +3,7 @@
 
 
 using System.Text.Json;
+using System.Text.Json.Serialization.Metadata;
 using JsonSerializer = Newtonsoft.Json.JsonSerializer;
 
 
@@ -10,27 +11,38 @@ using JsonSerializer = Newtonsoft.Json.JsonSerializer;
 namespace Jakar.Database;
 
 
-// [System.Text.Json.Serialization.JsonConverter( typeof(RecordIDSystemTextJsonConverter) )]
-// [TypeConverter( typeof(RecordIDTypeConverter) )]
-// [JsonConverter( typeof(RecordIDJsonNetConverter) )]
+[ DefaultMember( nameof(Empty) ) ]
 public readonly record struct RecordID<TRecord>( Guid Value ) : IComparable<RecordID<TRecord>>, ISpanFormattable, IRegisterDapperTypeHandlers
     where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
-    public static readonly RecordID<TRecord> Empty = new(Guid.Empty);
-    public static          RecordID<TRecord> New()                     => new(Guid.NewGuid());
-    public static          RecordID<TRecord> New( Guid          id )   => new(id);
-    public static          RecordID<TRecord> FromString( string guid ) => new(Guid.Parse( guid ));
+    public static          ValueEqualizer<RecordID<TRecord>> Equalizer => ValueEqualizer<RecordID<TRecord>>.Default;
+    public static          ValueSorter<RecordID<TRecord>>    Sorter    => ValueSorter<RecordID<TRecord>>.Default;
+    public static readonly RecordID<TRecord>                 Empty = new(Guid.Empty);
 
 
-    public static RecordID<TRecord>  ID( DbDataReader        reader )                    => new(reader.GetFieldValue<Guid>( nameof(IUniqueID<Guid>.ID) ));
-    public static RecordID<TRecord>? CreatedBy( DbDataReader reader )                    => TryCreate( reader.GetFieldValue<Guid?>( nameof(IOwnedTableRecord.CreatedBy) ) );
-    public static RecordID<TRecord>? TryCreate( DbDataReader reader, string columnName ) => TryCreate( reader.GetFieldValue<Guid?>( columnName ) );
+    public static RecordID<TRecord>  New()                                                    => Create( Guid.NewGuid() );
+    public static RecordID<TRecord>  Parse( in ReadOnlySpan<char> value )                     => Create( Guid.Parse( value ) );
+    public static RecordID<TRecord>  Create( Guid                 id )                        => new(id);
+    public static RecordID<TRecord>  ID( DbDataReader             reader )                    => new(reader.GetFieldValue<Guid>( SQL.ID ));
+    public static RecordID<TRecord>? CreatedBy( DbDataReader      reader )                    => TryCreate( reader, SQL.CREATED_BY );
+    public static RecordID<TRecord>? TryCreate( DbDataReader      reader, string columnName ) => TryCreate( reader.GetFieldValue<Guid?>( columnName ) );
     public static RecordID<TRecord>? TryCreate( [ NotNullIfNotNull( nameof(id) ) ] Guid? id ) => id.HasValue
                                                                                                      ? new RecordID<TRecord>( id.Value )
                                                                                                      : default;
     public static RecordID<TRecord>? TryCreate( ref Utf8JsonReader reader ) => reader.TryGetGuid( out Guid id )
                                                                                    ? new RecordID<TRecord>( id )
                                                                                    : default;
+    public static bool TryParse( in ReadOnlySpan<char> value, [ NotNullWhen( true ) ] out RecordID<TRecord>? id )
+    {
+        if ( Guid.TryParse( value, out Guid guid ) )
+        {
+            id = new RecordID<TRecord>( guid );
+            return true;
+        }
+
+        id = default(RecordID<TRecord>);
+        return false;
+    }
 
 
     public static implicit operator RecordID<TRecord>( TRecord record ) => new(record.ID.Value);
@@ -72,12 +84,24 @@ public readonly record struct RecordID<TRecord>( Guid Value ) : IComparable<Reco
 
     public static JsonSerializerOptions JsonOptions( bool formatted ) => new()
                                                                          {
-                                                                             WriteIndented = formatted,
+                                                                             WriteIndented    = formatted,
+                                                                             TypeInfoResolver = JsonContext.Default,
                                                                              Converters =
                                                                              {
                                                                                  new JsonConverter()
                                                                              }
                                                                          };
+    public static JsonTypeInfo<RecordID<TRecord>> JsonTypeInfo() => JsonContext.Default.RecordPair;
+
+
+
+    public sealed class JsonContext( JsonSerializerOptions? options ) : JsonSerializerContext( options )
+    {
+        public static      JsonContext                     Default                    { get; } = new(JsonSerializerOptions.Default);
+        protected override JsonSerializerOptions?          GeneratedSerializerOptions => JsonOptions( false );
+        public             JsonTypeInfo<RecordID<TRecord>> RecordPair                 { get; } = MsJsonTypeInfo.CreateJsonTypeInfo<RecordID<TRecord>>( JsonSerializerOptions.Default );
+        public override    MsJsonTypeInfo                  GetTypeInfo( Type type )   => RecordPair;
+    }
 
 
 

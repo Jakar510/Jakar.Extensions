@@ -52,6 +52,7 @@ public interface ITableRecord<TRecord> : ITableRecord
     public new RecordID<TRecord>   ID { get; }
     public     RecordPair<TRecord> ToPair();
     public     TRecord             NewID( RecordID<TRecord> id );
+    public     UInt128             GetHash();
 }
 
 
@@ -125,6 +126,11 @@ public abstract record TableRecord<TRecord>( [ property: Key ] RecordID<TRecord>
                                                               {
                                                                   ID = id
                                                               });
+    public UInt128 GetHash()
+    {
+        string json = JsonSerializer_.Serialize( this, TRecord.JsonOptions( false ) );
+        return Spans.Hash128( json );
+    }
 
 
     public virtual int CompareTo( TRecord? other )

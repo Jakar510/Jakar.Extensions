@@ -35,11 +35,11 @@ public sealed record LoggerAttachmentRecord( [ property: MaxLength( LoggerAttach
                                                                                                                       attachment.Length,
                                                                                                                       attachment.Type,
                                                                                                                       attachment.IsBinary,
-                                                                                                                      RecordID<AppRecord>.New( info.AppID ),
-                                                                                                                      RecordID<DeviceRecord>.New( info.DeviceID ),
-                                                                                                                      RecordID<LogRecord>.New( info.LogID ),
+                                                                                                                      RecordID<AppRecord>.Create( info.AppID ),
+                                                                                                                      RecordID<DeviceRecord>.Create( info.DeviceID ),
+                                                                                                                      RecordID<LogRecord>.Create( info.LogID ),
                                                                                                                       info.SessionID.HasValue
-                                                                                                                          ? RecordID<SessionRecord>.New( info.SessionID.Value )
+                                                                                                                          ? RecordID<SessionRecord>.Create( info.SessionID.Value )
                                                                                                                           : default,
                                                                                                                       RecordID<LoggerAttachmentRecord>.New(),
                                                                                                                       DateTimeOffset.UtcNow )

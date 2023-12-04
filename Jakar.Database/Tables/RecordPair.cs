@@ -13,8 +13,10 @@ namespace Jakar.Database;
 public readonly record struct RecordPair<TRecord>( RecordID<TRecord> ID, DateTimeOffset DateCreated ) : IComparable<RecordPair<TRecord>>, IRecordPair, IDbReaderMapping<RecordPair<TRecord>>, IMsJsonContext<RecordPair<TRecord>>
     where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
-    public static string TableName => TRecord.TableName;
-    Guid IUniqueID<Guid>.ID        => ID.Value;
+    public static string                              TableName => TRecord.TableName;
+    public static ValueEqualizer<RecordPair<TRecord>> Equalizer => ValueEqualizer<RecordPair<TRecord>>.Default;
+    public static ValueSorter<RecordPair<TRecord>>    Sorter    => ValueSorter<RecordPair<TRecord>>.Default;
+    Guid IUniqueID<Guid>.                             ID        => ID.Value;
 
 
     public static RecordPair<TRecord> Create( DbDataReader reader )
@@ -52,9 +54,9 @@ public readonly record struct RecordPair<TRecord>( RecordID<TRecord> ID, DateTim
 
     public sealed class JsonContext( JsonSerializerOptions? options ) : JsonSerializerContext( options )
     {
-        public static JsonContext                       Default    { get; } = new(JsonSerializerOptions.Default);
-        public        JsonTypeInfo<RecordPair<TRecord>> RecordPair { get; } = MsJsonTypeInfo.CreateJsonTypeInfo<RecordPair<TRecord>>( JsonSerializerOptions.Default );
-        public override    MsJsonTypeInfo         GetTypeInfo( Type type )   => RecordPair;
-        protected override JsonSerializerOptions? GeneratedSerializerOptions { get; } = new();
+        public static      JsonContext                       Default                    { get; } = new(JsonSerializerOptions.Default);
+        protected override JsonSerializerOptions?            GeneratedSerializerOptions => JsonOptions( false );
+        public             JsonTypeInfo<RecordPair<TRecord>> RecordPair                 { get; } = MsJsonTypeInfo.CreateJsonTypeInfo<RecordPair<TRecord>>( JsonSerializerOptions.Default );
+        public override    MsJsonTypeInfo                    GetTypeInfo( Type type )   => RecordPair;
     }
 }

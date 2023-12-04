@@ -1,40 +1,53 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 09/01/2022  6:40 PM
 
-using ZXing.Aztec.Internal;
-
-
-
 namespace Jakar.Database.Caches;
 
 
-public sealed class TableCache<TRecord> : IHostedService, IReadOnlyCollection<TRecord>, IAsyncEnumerable<TRecord?>
+public sealed class TableCache<TRecord> : IHostedService, IAsyncEnumerable<TRecord?>
     where TRecord : class, ITableRecord<TRecord>, IDbReaderMapping<TRecord>, IMsJsonContext<TRecord>
 {
-    private readonly DbTable<TRecord>                                    _table;
-    private readonly ILogger<TableCache<TRecord>>                        _logger;
-    private readonly ConcurrentDictionary<Guid, CacheEntry<TRecord>>     _records = new();
-    private readonly ConcurrentObservableCollection<RecordPair<TRecord>> _keys    = new();
-    private readonly TableCacheOptions                                   _options;
+    private readonly ConcurrentDictionary<RecordID<TRecord>, CacheEntry<TRecord>> _records = new(RecordID<TRecord>.Equalizer);
+    private readonly DbTable<TRecord>                                             _table;
+    private readonly ILogger<TableCache<TRecord>>                                 _logger;
+    private readonly TableCacheOptions                                            _options;
 
 
-    public IEnumerable<RecordID<TRecord>> Changed    => GetChanged();
-    public int                            Count      => _records.Count;
-    public TRecord?                       Current    { get; private set; }
-    public bool                           HasChanged => _records.Values.Any( static x => x.HasChanged );
+    public bool HasChanged
+    {
+        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => _records.Values.Any( static x => x.HasChanged );
+    }
+    public IEnumerable<RecordID<TRecord>> Changed => GetChangedIDs();
+    public IEnumerable<RecordID<TRecord>> Keys
+    {
+        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => _records.Keys;
+    }
+    public IEnumerable<TRecord> RecordsChanged
+    {
+        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => GetChangedRecords();
+    }
+    public IEnumerable<TRecord> RecordsExpired
+    {
+        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => GetExpiredRecords();
+    }
+    public int Count
+    {
+        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => _records.Count;
+    }
+    public TRecord? this[ RecordPair<TRecord> id ]
+    {
+        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => this[id.ID];
+    }
+    public TRecord? this[ RecordID<TRecord> id ]
+    {
+        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+        get => TryGetValue( id, out TRecord? value )
+                   ? value
+                   : default;
+    }
 
 
-    public TRecord? this[ RecordPair<TRecord> key ] => this[key.ID.Value];
-    public TRecord? this[ RecordID<TRecord>   key ] => this[key.Value];
-    public TRecord? this[ Guid key ] => TryGetValue( key, out TRecord? value )
-                                            ? value
-                                            : default;
-    public IEnumerable<Guid>    Keys           => _records.Keys;
-    public IEnumerable<TRecord> Records        => _records.Values.Select( x => x.Value );
-    public IEnumerable<TRecord> RecordsChanged => from entry in _records.Values where entry.HasChanged select entry.Value;
-    public IEnumerable<TRecord> RecordsExpired => from entry in _records.Values where entry.HasExpired( _options.ExpireTime ) select entry.Value;
-
-
+    // ReSharper disable once ConvertToPrimaryConstructor
     public TableCache( DbTable<TRecord> table, ILogger<TableCache<TRecord>> logger, IOptions<TableCacheOptions> options )
     {
         _table   = table;
@@ -48,75 +61,91 @@ public sealed class TableCache<TRecord> : IHostedService, IReadOnlyCollection<TR
     }
 
 
-    private IEnumerable<RecordID<TRecord>> GetChanged()
+    private IEnumerable<TRecord> GetChangedRecords()
     {
-        // from entry in _records.Values where entry.HasChanged select entry.ID;
+        // ReSharper disable once LoopCanBeConvertedToQuery
+        foreach ( CacheEntry<TRecord> entry in _records.Values )
+        {
+            if ( entry.HasChanged is false ) { continue; }
 
+            var record = entry.TryGetValue( _options );
+            if ( record is not null ) { yield return record; }
+        }
+    }
+    private IEnumerable<TRecord> GetExpiredRecords()
+    {
+        // ReSharper disable once LoopCanBeConvertedToQuery
+        foreach ( CacheEntry<TRecord> entry in _records.Values )
+        {
+            var record = entry.TryGetValue( _options );
+            if ( record is not null ) { yield return record; }
+        }
+    }
+    private IEnumerable<RecordID<TRecord>> GetChangedIDs()
+    {
         // ReSharper disable once LoopCanBeConvertedToQuery
         foreach ( CacheEntry<TRecord> entry in _records.Values )
         {
             if ( entry.HasChanged ) { yield return entry.ID; }
         }
     }
-    public void Clear()
+    public void Clear()                                => _records.Clear();
+    public bool Contains( RecordPair<TRecord> id )     => _records.ContainsKey( id.ID );
+    public bool Contains( RecordID<TRecord>   id )     => _records.ContainsKey( id );
+    public bool Contains( TRecord             record ) => _records.ContainsKey( record.ID );
+
+
+    public void AddOrUpdate( TRecord record )
     {
-        _keys.Clear();
-        _records.Clear();
-    }
-    public bool Contains( RecordPair<TRecord> key )    => _records.ContainsKey( key.ID.Value );
-    public bool Contains( RecordID<TRecord>   key )    => _records.ContainsKey( key.Value );
-    public bool Contains( TRecord             record ) => _records.ContainsKey( record.ID.Value );
+        if ( _records.TryGetValue( record.ID, out CacheEntry<TRecord>? entry ) is false ) { _records[record.ID] = entry = new CacheEntry<TRecord>( record.ID ); }
 
-
-    public async ValueTask AddOrUpdate( TRecord record, CancellationToken token = default )
-    {
-        await ResetKeysAsync( token );
-
-        if ( _records.TryGetValue( record.ID.Value, out CacheEntry<TRecord>? entry ) ) { entry.Value = record; }
-        else { _records[record.ID.Value]                                                             = new CacheEntry<TRecord>( record ); }
+        entry.SetValue( record );
     }
 
 
-    public bool TryGetValue( Guid key, [ NotNullWhen( true ) ] out TRecord? value )
+    public ValueTask<TRecord?> TryGetValue( RecordPair<TRecord> pair, CancellationToken token ) => TryGetValue( pair.ID, token );
+    public async ValueTask<TRecord?> TryGetValue( RecordID<TRecord> id, CancellationToken token )
     {
-        if ( _records.TryGetValue( key, out CacheEntry<TRecord>? entry ) )
+        if ( _records.TryGetValue( id, out CacheEntry<TRecord>? entry ) is false ) { return default; }
+
+        TRecord? record = await entry.TryGetValue( _table, _options, token );
+        if ( record is not null ) { return record; }
+
+        _records.TryRemove( id, out _ );
+        return default;
+    }
+    public bool TryGetValue( RecordPair<TRecord> id, [ NotNullWhen( true ) ] out TRecord? record ) => TryGetValue( id.ID, out record );
+    public bool TryGetValue( RecordID<TRecord> id, [ NotNullWhen( true ) ] out TRecord? record )
+    {
+        if ( _records.TryGetValue( id, out CacheEntry<TRecord>? entry ) )
         {
-            value = entry.Value;
-            return true;
+            record = entry.TryGetValue( _options );
+            return record is not null;
         }
 
-        value = default;
+        record = default;
         return false;
     }
 
 
-    public async ValueTask<TRecord?> TryRemove( RecordPair<TRecord> key, CancellationToken token = default )
+    public ValueTask<TRecord?> TryRemove( RecordPair<TRecord> id, CancellationToken token = default ) => TryRemove( id.ID, token );
+    public async ValueTask<TRecord?> TryRemove( RecordID<TRecord> id, CancellationToken token = default )
     {
-        await RefreshAsync( token );
-
-        if ( _records.TryRemove( key.ID.Value, out CacheEntry<TRecord>? entry ) ) { return entry.Value; }
+        if ( _records.TryRemove( id, out CacheEntry<TRecord>? entry ) ) { return await entry.TryGetValue( _table, _options, token ); }
 
         return default;
     }
 
 
-    public async ValueTask ResetKeysAsync( CancellationToken token = default )
-    {
-        await _keys.ClearAsync( token );
-        IEnumerable<RecordPair<TRecord>> pairs = _records.Values.Select( static x => x.ToPair() );
-        await _keys.AddAsync( pairs, token );
-    }
     public async ValueTask RefreshAsync( CancellationToken token ) => await _table.TryCall( RefreshAsync, token );
     private async ValueTask RefreshAsync( DbConnection connection, DbTransaction transaction, CancellationToken token = default )
     {
         if ( _records.IsEmpty )
         {
-            await foreach ( RecordPair<TRecord> pair in _keys.AsyncValues.GetAsyncEnumerator( token ) )
+            foreach ( RecordID<TRecord> id in _records.Keys.ToArray( _records.Count ) )
             {
-                var record = await _table.Get( connection, transaction, pair.ID, token );
-
-                if ( record is null ) { await _keys.RemoveAsync( pair, token ); }
-                else { await AddOrUpdate( record, token ); }
+                TRecord? record = await _table.Get( connection, transaction, id, token );
+                if ( record is not null ) { AddOrUpdate( record ); }
             }
 
             return;
@@ -125,7 +154,7 @@ public sealed class TableCache<TRecord> : IHostedService, IReadOnlyCollection<TR
         if ( HasChanged )
         {
             await _table.Update( connection, transaction, RecordsChanged, token );
-            await foreach ( TRecord record in _table.Get( connection, transaction, Changed, token ) ) { await AddOrUpdate( record, token ); }
+            await foreach ( TRecord record in _table.Get( connection, transaction, Changed, token ) ) { AddOrUpdate( record ); }
         }
     }
 
@@ -139,7 +168,7 @@ public sealed class TableCache<TRecord> : IHostedService, IReadOnlyCollection<TR
             try
             {
                 await timer.WaitForNextTickAsync( token );
-                await _table.TryCall( RefreshAsync, token );
+                await RefreshAsync( token );
             }
             catch ( Exception e ) { _logger.LogCritical( e, "Cache Failure: [ {Table} ]", nameof(TableCache<TRecord>) ); }
         }
@@ -149,23 +178,21 @@ public sealed class TableCache<TRecord> : IHostedService, IReadOnlyCollection<TR
 
     IAsyncEnumerator<TRecord?> IAsyncEnumerable<TRecord?>.GetAsyncEnumerator( CancellationToken token )           => GetAsyncEnumerator( token );
     public AsyncEnumerator                                GetAsyncEnumerator( CancellationToken token = default ) => new(this, token);
-    public IEnumerator<TRecord>                           GetEnumerator()                                         => Records.GetEnumerator();
-    IEnumerator IEnumerable.                              GetEnumerator()                                         => GetEnumerator();
 
 
 
     public sealed class AsyncEnumerator : IAsyncEnumerable<TRecord>, IAsyncEnumerator<TRecord>
     {
-        private const    int                                 START_INDEX = -1;
-        private readonly TableCache<TRecord>                 _tableCache;
-        private          bool                                _isDisposed;
-        private          CancellationToken                   _token;
-        private          int                                 _index = START_INDEX;
-        private          RecordPair<TRecord>?                _pair;
-        private          TRecord?                            _current;
-        private          ReadOnlyMemory<RecordPair<TRecord>> _cache;
-        public           TRecord                             Current        => _current ?? throw new NullReferenceException( nameof(_current) );
-        internal         bool                                ShouldContinue => _token.ShouldContinue() && _index < _cache.Length;
+        private const    int                       START_INDEX = -1;
+        private readonly List<RecordPair<TRecord>> _cache      = new();
+        private readonly TableCache<TRecord>       _tableCache;
+        private          bool                      _isDisposed;
+        private          CancellationToken         _token;
+        private          int                       _index = START_INDEX;
+        private          RecordPair<TRecord>       _pair;
+        private          TRecord?                  _current;
+        internal         bool                      ShouldContinue => _token.ShouldContinue() && _index < _cache.Count;
+        public           TRecord                   Current        => _current ?? throw new NullReferenceException( nameof(_current) );
 
 
         // ReSharper disable once ConvertToPrimaryConstructor
@@ -176,13 +203,13 @@ public sealed class TableCache<TRecord> : IHostedService, IReadOnlyCollection<TR
         }
         public ValueTask DisposeAsync()
         {
+            Reset();
             _isDisposed = true;
-            _cache      = default;
             return default;
         }
 
 
-        internal static bool MoveNext( ref int index, in ReadOnlySpan<RecordPair<TRecord>> span, [ NotNullWhen( true ) ] out RecordPair<TRecord>? current )
+        private static bool MoveNext( ref int index, in ReadOnlySpan<RecordPair<TRecord>> span, out RecordPair<TRecord> current )
         {
             int i = Interlocked.Add( ref index, 1 );
 
@@ -196,24 +223,22 @@ public sealed class TableCache<TRecord> : IHostedService, IReadOnlyCollection<TR
         {
             if ( _isDisposed ) { throw new ObjectDisposedException( nameof(AsyncEnumerator) ); }
 
-            // ReSharper disable once InvertIf
-            if ( _cache.IsEmpty )
+            if ( _cache.IsEmpty() )
             {
-                Interlocked.Exchange( ref _index, START_INDEX );
-                ILockedCollection<RecordPair<TRecord>> collection = _tableCache._keys;
-                _cache = await collection.CopyAsync( _token );
+                Reset();
+                _cache.EnsureCapacity( _tableCache.Count );
+                _cache.AddRange( _tableCache._records.Values.Select( static x => x.ToPair() ) );
+                _cache.Sort( RecordPair<TRecord>.Sorter );
             }
 
-            bool result = MoveNext( ref _index, _cache.Span, out _pair );
-
-            if ( result is false ) { Reset(); }
-            else
+            if ( MoveNext( ref _index, CollectionsMarshal.AsSpan( _cache ), out _pair ) )
             {
-                Debug.Assert( _pair.HasValue, nameof(_pair) + " != null" );
-                _current = _tableCache[_pair.Value];
+                _current = await _tableCache.TryGetValue( _pair, _token );
+                return _current is not null;
             }
 
-            return result;
+            Reset();
+            return false;
         }
         IAsyncEnumerator<TRecord> IAsyncEnumerable<TRecord>.GetAsyncEnumerator( CancellationToken token ) => GetAsyncEnumerator( token );
         public AsyncEnumerator GetAsyncEnumerator( CancellationToken token = default )
@@ -226,7 +251,8 @@ public sealed class TableCache<TRecord> : IHostedService, IReadOnlyCollection<TR
         {
             if ( _isDisposed ) { throw new ObjectDisposedException( nameof(AsyncEnumerator) ); }
 
-            _cache = default;
+            _cache.Clear();
+            _pair = default;
             Interlocked.Exchange( ref _index,   START_INDEX );
             Interlocked.Exchange( ref _current, null );
         }

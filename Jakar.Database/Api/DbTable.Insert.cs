@@ -36,7 +36,7 @@ public partial class DbTable<TRecord>
         {
             CommandDefinition command = _database.GetCommandDefinition( transaction, sql, token );
             var               id      = await connection.ExecuteScalarAsync<Guid>( command );
-            return record.NewID( RecordID<TRecord>.New( id ) );
+            return record.NewID( RecordID<TRecord>.Create( id ) );
         }
         catch ( Exception e ) { throw new SqlException( sql, e ); }
     }
@@ -52,7 +52,7 @@ public partial class DbTable<TRecord>
             var               id      = await connection.ExecuteScalarAsync<Guid?>( command );
 
             return id.HasValue
-                       ? record.NewID( RecordID<TRecord>.New( id.Value ) )
+                       ? record.NewID( RecordID<TRecord>.Create( id.Value ) )
                        : default;
         }
         catch ( Exception e ) { throw new SqlException( sql, e ); }
@@ -70,7 +70,7 @@ public partial class DbTable<TRecord>
             var               id      = await connection.ExecuteScalarAsync<Guid?>( command );
 
             return id.HasValue
-                       ? record.NewID( RecordID<TRecord>.New( id.Value ) )
+                       ? record.NewID( RecordID<TRecord>.Create( id.Value ) )
                        : default;
         }
         catch ( Exception e ) { throw new SqlException( sql, e ); }
