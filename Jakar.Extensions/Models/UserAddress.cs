@@ -24,7 +24,10 @@ public interface IAddress
 
 
 
-public record UserAddress : ObservableRecord, IAddress, IComparable<UserAddress>, IComparable, MsJsonModels.IJsonizer<UserAddress, UserAddressContext>, MsJsonModels.IJsonModel<UserAddress>
+public record UserAddress : ObservableRecord, IAddress, IComparable<UserAddress>, IComparable, MsJsonModels.IJsonModel<UserAddress>
+#if NET8_0
+    , MsJsonModels.IJsonizer<UserAddress>
+#endif
 {
     private       bool                              _isPrimary;
     private       Guid?                             _userID;
@@ -37,7 +40,6 @@ public record UserAddress : ObservableRecord, IAddress, IComparable<UserAddress>
     private       string                            _stateOrProvince = string.Empty;
     private       string?                           _address;
     public static UserAddressContext                JsonSerializerContext => UserAddressContext.Default;
-    public static JsonTypeInfo<UserAddress>         JsonTypeInfo          => JsonSerializerContext.UserAddress;
 
     public static Sorter<UserAddress> Sorter => Sorter<UserAddress>.Default;
 
@@ -164,8 +166,15 @@ public record UserAddress : ObservableRecord, IAddress, IComparable<UserAddress>
         UserID          = address.UserID;
     }
 
-    public static UserAddress FromJson( string json ) => json.FromJson<UserAddress, UserAddressContext>();
+    [ Pure ] public static JsonTypeInfo<UserAddress> JsonTypeInfo()          => JsonSerializerContext.UserAddress;
+    [ Pure ] public static UserAddress               FromJson( string json ) => json.FromJson( JsonTypeInfo() );
 
+    [ Pure ]
+    public static JsonSerializerOptions JsonOptions( bool writeIndented ) => new()
+                                                                             {
+                                                                                 WriteIndented    = writeIndented,
+                                                                                 TypeInfoResolver = JsonSerializerContext
+                                                                             };
 
     public override string ToString() => string.IsNullOrWhiteSpace( Line2 )
                                              ? $"{Line1}. {City}, {StateOrProvince}. {Country}. {PostalCode}"

@@ -40,7 +40,11 @@ public interface IUserData<out T> : IUserData
 
 
 [ Serializable ]
-public class UserData : ObservableClass, IUserData<UserData>, MsJsonModels.IJsonizer<UserData, UserDataContext>
+public class UserData : ObservableClass, IUserData<UserData>
+#if NET8_0
+                        ,
+                        MsJsonModels.IJsonizer<UserData>
+#endif
 {
     public const string                            EMPTY_PHONE_NUMBER = "(000) 000-0000";
     private      IDictionary<string, JsonElement>? _additionalData;
@@ -59,9 +63,7 @@ public class UserData : ObservableClass, IUserData<UserData>, MsJsonModels.IJson
     private      SupportedLanguage                 _preferredLanguage = SupportedLanguage.English;
 
 
-    public static UserDataContext        JsonSerializerContext => UserDataContext.Default;
-    public static JsonTypeInfo<UserData> JsonTypeInfo          => JsonSerializerContext.UserData;
-
+    public static UserDataContext JsonSerializerContext => UserDataContext.Default;
 
     [ JsonExtensionData ]
     public IDictionary<string, JsonElement>? AdditionalData
@@ -209,7 +211,16 @@ public class UserData : ObservableClass, IUserData<UserData>, MsJsonModels.IJson
         _lastName  = lastName;
     }
 
-    public static UserData FromJson( string json ) => json.FromJson<UserData, UserDataContext>();
+    [ Pure ] public static JsonTypeInfo<UserData> JsonTypeInfo() => JsonSerializerContext.UserData;
+
+    [ Pure ]
+    public static JsonSerializerOptions JsonOptions( bool writeIndented ) => new()
+                                                                             {
+                                                                                 WriteIndented    = writeIndented,
+                                                                                 TypeInfoResolver = JsonSerializerContext
+                                                                             };
+
+    [ Pure ] public static UserData FromJson( string json ) => json.FromJson( JsonTypeInfo() );
 
 
     public UserData WithAddresses( IEnumerable<IAddress> addresses ) => WithAddresses( addresses.Select( x => new UserAddress( x ) ) );

@@ -4,7 +4,7 @@
 [ Serializable ]
 public record BaseJsonModelRecord : ObservableRecord, JsonModels.IJsonModel
 {
-    [ JsonExtensionData ] public IDictionary<string, JToken?>? AdditionalData { get; set; }
+    [ Newtonsoft.Json.JsonExtensionData ] public IDictionary<string, JToken?>? AdditionalData { get; set; }
 }
 
 
@@ -14,7 +14,7 @@ public abstract record BaseJsonModelRecord<TClass, TID> : CollectionsRecord<TCla
     where TClass : BaseJsonModelRecord<TClass, TID>
     where TID : struct, IComparable<TID>, IEquatable<TID>
 {
-    [ JsonExtensionData ] public IDictionary<string, JToken?>? AdditionalData { get; set; }
+    [ Newtonsoft.Json.JsonExtensionData ] public IDictionary<string, JToken?>? AdditionalData { get; set; }
 }
 
 

@@ -8,7 +8,7 @@ namespace Jakar.Extensions;
 [ Serializable ]
 public class BaseJsonModel : ObservableClass, JsonModels.IJsonModel
 {
-    [ JsonExtensionData ] public IDictionary<string, JToken?>? AdditionalData { get; set; }
+    [ Newtonsoft.Json.JsonExtensionData ] public IDictionary<string, JToken?>? AdditionalData { get; set; }
 }
 
 
@@ -17,7 +17,7 @@ public class BaseJsonModel : ObservableClass, JsonModels.IJsonModel
 public abstract class BaseJsonModel<TClass> : Collections<TClass>, JsonModels.IJsonModel
     where TClass : BaseJsonModel<TClass>
 {
-    [ JsonExtensionData ] public IDictionary<string, JToken?>? AdditionalData          { get; set; }
+    [ Newtonsoft.Json.JsonExtensionData ] public IDictionary<string, JToken?>? AdditionalData          { get; set; }
     public static                TClass                        FromJson( string json ) => json.FromJson<TClass>();
 }
 

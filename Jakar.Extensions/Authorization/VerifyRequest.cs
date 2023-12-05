@@ -1,5 +1,4 @@
-﻿using System.Text.Json.Nodes;
-using System.Text.Json.Serialization.Metadata;
+﻿using System.Text.Json.Serialization.Metadata;
 
 
 
@@ -7,14 +6,22 @@ namespace Jakar.Extensions;
 
 
 [ Serializable ]
-public class VerifyRequest : BaseClass, ILoginRequest, ICredentials, ICloneable, IEquatable<VerifyRequest>, MsJsonModels.IJsonizer<VerifyRequest, VerifyRequestContext>, MsJsonModels.IJsonModel<VerifyRequest>
+public class VerifyRequest : BaseClass,
+                             ILoginRequest,
+                             ICredentials,
+                             ICloneable,
+                             IEquatable<VerifyRequest>,
+                             MsJsonModels.IJsonModel<VerifyRequest>
+                         #if NET8_0
+                             ,
+                             MsJsonModels.IJsonizer<VerifyRequest>
+#endif
 {
-    public static JsonTypeInfo<VerifyRequest> JsonTypeInfo          => JsonSerializerContext.VerifyRequest;
-    public static VerifyRequestContext        JsonSerializerContext => VerifyRequestContext.Default;
+    public static                                VerifyRequestContext JsonSerializerContext => VerifyRequestContext.Default;
+    [ JsonNetIgnore, JsonIgnore ] public virtual bool                 IsValid               => !string.IsNullOrWhiteSpace( UserName ) && !string.IsNullOrWhiteSpace( Password );
 
 
-    [ JsonExtensionData ]         public         IDictionary<string, JsonElement>? AdditionalData { get; set; }
-    [ JsonNetIgnore, JsonIgnore ] public virtual bool                              IsValid        => !string.IsNullOrWhiteSpace( UserName ) && !string.IsNullOrWhiteSpace( Password );
+    [ JsonExtensionData ] public IDictionary<string, JsonElement>? AdditionalData { get; set; }
 
 
     [ Required( ErrorMessage = $"{nameof(Password)} is required." ), JsonProperty( nameof(Password), Required = Required.Always ) ] public string Password { get; init; } = string.Empty;
@@ -29,7 +36,15 @@ public class VerifyRequest : BaseClass, ILoginRequest, ICredentials, ICloneable,
     }
 
 
-    public static VerifyRequest FromJson( string json ) => json.FromJson<VerifyRequest, VerifyRequestContext>();
+    [ Pure ] public static JsonTypeInfo<VerifyRequest> JsonTypeInfo() => JsonSerializerContext.VerifyRequest;
+    [ Pure ]
+    public static JsonSerializerOptions JsonOptions( bool writeIndented ) => new()
+                                                                             {
+                                                                                 WriteIndented    = writeIndented,
+                                                                                 TypeInfoResolver = JsonSerializerContext
+                                                                             };
+
+    [ Pure ] public static VerifyRequest FromJson( string json ) => json.FromJson( JsonTypeInfo() );
 
 
     public bool ValidatePassword()                                 => ValidatePassword( PasswordValidator.Default );
@@ -71,11 +86,11 @@ public class VerifyRequest : BaseClass, ILoginRequest, ICredentials, ICloneable,
 [ SuppressMessage( "ReSharper", "NullableWarningSuppressionIsUsed" ) ]
 public class VerifyRequest<T> : VerifyRequest, IEquatable<VerifyRequest<T>>
 {
-    [ JsonProperty( nameof(Data), Required = Required.AllowNull ) ] public T? Data { get; init; }
-
     public override bool IsValid => Data is IValidator validator
                                         ? base.IsValid && validator.IsValid
                                         : base.IsValid;
+
+    [ JsonProperty( nameof(Data), Required = Required.AllowNull ) ] public T? Data { get; init; }
 
 
     public VerifyRequest() { }
