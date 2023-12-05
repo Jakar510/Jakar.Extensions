@@ -185,11 +185,11 @@ public sealed class AppLogger : IValidator, IAppLogger
     }
 
 
-    public void TrackEvent<T>( LogLevel level = LogLevel.Trace, IDictionary<string, JToken?>? eventDetails = null, [ CallerMemberName ] string? caller = null ) =>
+    public void TrackEvent<T>( LogLevel level = LogLevel.Trace, EventDetails? eventDetails = null, [ CallerMemberName ] string? caller = null ) =>
         TrackEvent( $"{typeof(T).Name}.{caller}", level, eventDetails );
-    public void TrackEvent<T>( T _, LogLevel level = LogLevel.Trace, IDictionary<string, JToken?>? eventDetails = null, [ CallerMemberName ] string? caller = null ) =>
+    public void TrackEvent<T>( T _, LogLevel level = LogLevel.Trace, EventDetails? eventDetails = null, [ CallerMemberName ] string? caller = null ) =>
         TrackEvent( $"{typeof(T).Name}.{caller}", level, eventDetails );
-    public void TrackEvent( string message, LogLevel level = LogLevel.Trace, IDictionary<string, JToken?>? eventDetails = default )
+    public void TrackEvent( string message, LogLevel level = LogLevel.Trace, EventDetails? eventDetails = default )
     {
         if ( !IsEnabled( level ) ) { return; }
 
@@ -203,13 +203,13 @@ public sealed class AppLogger : IValidator, IAppLogger
 
     public void TrackError( Exception e, EventID? eventId = default ) =>
         TrackError( e, eventId, default, LoggerAttachment.Empty );
-    public void TrackError( Exception e, EventID? eventId, IDictionary<string, JToken?>? eventDetails ) =>
+    public void TrackError( Exception e, EventID? eventId, EventDetails? eventDetails ) =>
         TrackError( e, eventId, eventDetails, LoggerAttachment.Empty );
     public void TrackError( Exception e, EventID? eventId, params LoggerAttachment[] attachments ) =>
         TrackError( e, eventId, default, attachments );
-    public void TrackError( Exception e, EventID? eventId, IDictionary<string, JToken?>? eventDetails, params LoggerAttachment[] attachments ) =>
+    public void TrackError( Exception e, EventID? eventId, EventDetails? eventDetails, params LoggerAttachment[] attachments ) =>
         TrackError( e, eventId ?? new EventID( e.HResult, e.Source ), attachments, eventDetails );
-    public void TrackError( Exception e, EventID eventId, IEnumerable<LoggerAttachment> attachments, IDictionary<string, JToken?>? eventDetails = default )
+    public void TrackError( Exception e, EventID eventId, IEnumerable<LoggerAttachment> attachments, EventDetails? eventDetails = default )
     {
         if ( !IsEnabled( LogLevel.Error ) ) { return; }
 
@@ -240,9 +240,10 @@ public sealed class AppLogger : IValidator, IAppLogger
     }
 
 
-    public IDisposable      BeginScope<TState>( TState state ) where TState : notnull => Config.CreateScope( state );
-    public AppLogger        CreateLogger( string       categoryName )                 => new(this, categoryName);
-    ILogger ILoggerProvider.CreateLogger( string       categoryName )                 => CreateLogger( categoryName );
+    public IDisposable BeginScope<TState>( TState state )
+        where TState : notnull => Config.CreateScope( state );
+    public AppLogger        CreateLogger( string categoryName ) => new(this, categoryName);
+    ILogger ILoggerProvider.CreateLogger( string categoryName ) => CreateLogger( categoryName );
 
 
     private         void   Log( LogLevel logLevel, string? message, params object?[] args ) => Log( logLevel, 0, null, message, args );

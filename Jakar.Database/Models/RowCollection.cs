@@ -3,7 +3,7 @@
 
 [ Serializable ]
 public sealed class RecordCollection<TRecord> : IReadOnlyList<TRecord>
-    where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>, IMsJsonContext<TRecord>
+    where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>,  MsJsonModels.IJsonizer<TRecord>
 {
     private readonly List<TRecord> _records = new();
     public           int           Count => _records.Count;

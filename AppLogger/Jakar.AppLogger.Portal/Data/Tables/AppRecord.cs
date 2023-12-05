@@ -2,7 +2,7 @@
 
 
 [ Serializable, Table( "Apps" ) ]
-public sealed record AppRecord : OwnedLoggerTable<AppRecord>, IDbReaderMapping<AppRecord>, IMsJsonContext<AppRecord>
+public sealed record AppRecord : OwnedLoggerTable<AppRecord>, IDbReaderMapping<AppRecord>, MsJsonModels.IJsonizer<AppRecord>
 {
     public static string TableName { get; } = typeof(AppRecord).GetTableName();
 
@@ -18,13 +18,15 @@ public sealed record AppRecord : OwnedLoggerTable<AppRecord>, IDbReaderMapping<A
     }
 
 
+    [ Pure ]
     public static DynamicParameters GetDynamicParameters( string secret )
     {
         var parameters = new DynamicParameters();
         parameters.Add( nameof(Secret), secret );
         return parameters;
     }
-    public static AppRecord Create( DbDataReader reader ) => null;
+    [ Pure ] public static AppRecord Create( DbDataReader reader ) => null;
+    [ Pure ]
     public static async IAsyncEnumerable<AppRecord> CreateAsync( DbDataReader reader, [ EnumeratorCancellation ] CancellationToken token = default )
     {
         while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
@@ -33,14 +35,18 @@ public sealed record AppRecord : OwnedLoggerTable<AppRecord>, IDbReaderMapping<A
 
     public override int CompareTo( AppRecord? other ) => string.CompareOrdinal( AppName, other?.AppName );
     public override int GetHashCode()                 => HashCode.Combine( AppName, base.GetHashCode() );
+
+
+    [ Pure ] public static AppRecord FromJson( string json ) => json.FromJson( JsonTypeInfo() );
+    [ Pure ]
     public static JsonSerializerOptions JsonOptions( bool formatted ) => new()
                                                                          {
                                                                              WriteIndented    = formatted,
                                                                              TypeInfoResolver = AppRecordContext.Default
                                                                          };
-    public static JsonTypeInfo<AppRecord> JsonTypeInfo() => AppRecordContext.Default.AppRecord;
+    [ Pure ] public static JsonTypeInfo<AppRecord> JsonTypeInfo() => AppRecordContext.Default.AppRecord;
 }
 
 
 
-[ JsonSerializable( typeof(AppRecord) ) ] public partial class AppRecordContext : JsonSerializerContext { }
+[ JsonSerializable( typeof(AppRecord) ) ] public partial class AppRecordContext : JsonSerializerContext;

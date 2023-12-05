@@ -191,7 +191,7 @@ public static class MsJsonModels
 
 
 
-    public interface IJsonizer<TClass>
+    public interface IJsonizer<TClass> 
     {
         [ Pure ] public abstract static JsonTypeInfo<TClass>  JsonTypeInfo();
         [ Pure ] public abstract static TClass                FromJson( string  json );

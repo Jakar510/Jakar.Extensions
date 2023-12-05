@@ -8,7 +8,7 @@ using System.Text.Json.Serialization.Metadata;
 namespace Jakar.Extensions;
 
 
-public interface IUserData : MsJsonModels.IJsonModel, IEquatable<IUserData>, IComparable<IUserData>
+public interface IUserData : IEquatable<IUserData>, IComparable<IUserData>
 {
     public static Equalizer<IUserData> Equalizer => Equalizer<IUserData>.Default;
     public static Sorter<IUserData>    Sorter    => Sorter<IUserData>.Default;
@@ -40,8 +40,10 @@ public interface IUserData<out T> : IUserData
 
 
 [ Serializable ]
-public class UserData : ObservableClass, IUserData<UserData>
-#if NET8_0
+public class UserData : ObservableClass,
+                        IUserData<UserData>,
+                        MsJsonModels.IJsonModel
+                    #if NET8_0
                         ,
                         MsJsonModels.IJsonizer<UserData>
 #endif
@@ -244,10 +246,12 @@ public class UserData : ObservableClass, IUserData<UserData>
         Company           = value.Company;
         PreferredLanguage = value.PreferredLanguage;
 
-        if ( value.AdditionalData is null ) { return this; }
+
+        IDictionary<string, JsonElement>? data = (value as MsJsonModels.IJsonModel)?.AdditionalData;
+        if ( data is null ) { return this; }
 
         AdditionalData ??= new Dictionary<string, JsonElement>();
-        foreach ( (string key, JsonElement jToken) in value.AdditionalData ) { AdditionalData[key] = jToken; }
+        foreach ( (string key, JsonElement jToken) in data ) { AdditionalData[key] = jToken; }
 
         return this;
     }
@@ -259,8 +263,7 @@ public class UserData : ObservableClass, IUserData<UserData>
 
         if ( ReferenceEquals( this, other ) ) { return true; }
 
-        return Equals( _additionalData, other.AdditionalData )                            &&
-               string.Equals( _company,     other.Company,     StringComparison.Ordinal ) &&
+        return string.Equals( _company,     other.Company,     StringComparison.Ordinal ) &&
                string.Equals( _department,  other.Department,  StringComparison.Ordinal ) &&
                string.Equals( _description, other.Description, StringComparison.Ordinal ) &&
                string.Equals( _email,       other.Email,       StringComparison.Ordinal ) &&

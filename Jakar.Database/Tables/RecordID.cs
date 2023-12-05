@@ -2,8 +2,6 @@
 // 08/20/2023  9:16 PM
 
 
-using System.Text.Json;
-using System.Text.Json.Serialization.Metadata;
 using JsonSerializer = Newtonsoft.Json.JsonSerializer;
 
 
@@ -85,6 +83,7 @@ public readonly record struct RecordID<TRecord>( Guid Value ) : IComparable<Reco
     }
 
 
+    [ Pure ] public static RecordID<TRecord> FromJson( string json ) => json.FromJson( JsonTypeInfo() );
     [ Pure ]
     public static JsonSerializerOptions JsonOptions( bool formatted ) => new()
                                                                          {

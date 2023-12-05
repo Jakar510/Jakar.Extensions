@@ -18,7 +18,7 @@ public abstract record UserSubscription<TRecord>
                                                                                                                                                                                                                        DateCreated,
                                                                                                                                                                                                                        LastModified ),
                                                                                                                                                                                             IUserSubscription
-    where TRecord : UserSubscription<TRecord>, IDbReaderMapping<TRecord>, IMsJsonContext<TRecord>
+    where TRecord : UserSubscription<TRecord>, IDbReaderMapping<TRecord>,  MsJsonModels.IJsonizer<TRecord>
 {
     [ Pure ]
     public override DynamicParameters ToDynamicParameters()

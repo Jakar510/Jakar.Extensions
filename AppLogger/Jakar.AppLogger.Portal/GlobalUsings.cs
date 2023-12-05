@@ -28,6 +28,7 @@ global using Jakar.Database;
 global using Jakar.Database.DbMigrations;
 global using Jakar.Extensions;
 global using Jakar.Extensions.Blazor;
+global using JetBrains.Annotations;
 global using Microsoft.AspNetCore.Authentication;
 global using Microsoft.AspNetCore.Components;
 global using Microsoft.AspNetCore.Components.Server.Circuits;

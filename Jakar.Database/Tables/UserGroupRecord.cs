@@ -1,16 +1,11 @@
 ﻿// Jakar.Database ::  Jakar.Database 
 // 02/17/2023  2:39 PM
 
-using System.Text.Json;
-using System.Text.Json.Serialization.Metadata;
-
-
-
 namespace Jakar.Database;
 
 
 [ Serializable, Table( "UserGroups" ) ]
-public sealed record UserGroupRecord : Mapping<UserGroupRecord, UserRecord, GroupRecord>, ICreateMapping<UserGroupRecord, UserRecord, GroupRecord>, IDbReaderMapping<UserGroupRecord>, IMsJsonContext<UserGroupRecord>
+public sealed record UserGroupRecord : Mapping<UserGroupRecord, UserRecord, GroupRecord>, ICreateMapping<UserGroupRecord, UserRecord, GroupRecord>, IDbReaderMapping<UserGroupRecord>, MsJsonModels.IJsonizer<UserGroupRecord>
 {
     public static string TableName { get; } = typeof(UserGroupRecord).GetTableName();
 
@@ -37,6 +32,9 @@ public sealed record UserGroupRecord : Mapping<UserGroupRecord, UserRecord, Grou
     {
         while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
     }
+
+
+    [ Pure ] public static UserGroupRecord FromJson( string json ) => json.FromJson( JsonTypeInfo() );
     [ Pure ]
     public static JsonSerializerOptions JsonOptions( bool formatted ) => new()
                                                                          {

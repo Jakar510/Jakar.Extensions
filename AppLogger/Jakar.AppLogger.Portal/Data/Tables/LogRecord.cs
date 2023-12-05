@@ -6,7 +6,7 @@ namespace Jakar.AppLogger.Portal.Data.Tables;
 
 
 [ Serializable, Table( "Logs" ) ]
-public sealed record LogRecord : LoggerTable<LogRecord>, IDbReaderMapping<LogRecord>, IAppLog, ILogInfo, IAppStartTime, IMsJsonContext<LogRecord>
+public sealed record LogRecord : LoggerTable<LogRecord>, IDbReaderMapping<LogRecord>, IAppLog, ILogInfo, IAppStartTime, MsJsonModels.IJsonizer<LogRecord>
 {
     public static string                                                      TableName        { get; } = typeof(LogRecord).GetTableName();
     public        RecordID<AppRecord>                                         AppID            { get; init; }
@@ -101,14 +101,18 @@ public sealed record LogRecord : LoggerTable<LogRecord>, IDbReaderMapping<LogRec
 
     public override int CompareTo( LogRecord? other ) => string.CompareOrdinal( Message, other?.Message );
     public override int GetHashCode()                 => HashCode.Combine( Message, base.GetHashCode() );
+
+
+    [ Pure ] public static LogRecord FromJson( string json ) => json.FromJson( JsonTypeInfo() );
+    [ Pure ]
     public static JsonSerializerOptions JsonOptions( bool formatted ) => new()
                                                                          {
                                                                              WriteIndented    = formatted,
                                                                              TypeInfoResolver = LogRecordContext.Default,
                                                                          };
-    public static JsonTypeInfo<LogRecord> JsonTypeInfo() => LogRecordContext.Default.LogRecord;
+    [ Pure ] public static JsonTypeInfo<LogRecord> JsonTypeInfo() => LogRecordContext.Default.LogRecord;
 }
 
 
 
-[ JsonSerializable( typeof(LogRecord) ) ] public partial class LogRecordContext : JsonSerializerContext { }
+[ JsonSerializable( typeof(LogRecord) ) ] public partial class LogRecordContext : JsonSerializerContext;

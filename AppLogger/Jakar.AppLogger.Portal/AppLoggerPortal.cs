@@ -4,4 +4,4 @@
 namespace Jakar.AppLogger.Portal;
 
 
-public sealed class AppLoggerPortal : IAppName { }
+public sealed class AppLoggerPortal : IAppName;

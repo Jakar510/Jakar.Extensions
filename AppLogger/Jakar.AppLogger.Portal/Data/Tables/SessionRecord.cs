@@ -6,13 +6,12 @@ namespace Jakar.AppLogger.Portal.Data.Tables;
 
 
 [ Serializable, Table( "Sessions" ) ]
-public sealed record SessionRecord( DateTimeOffset          AppStartTime,
-                                    RecordID<AppRecord>     AppID,
-                                    RecordID<DeviceRecord>  DeviceID,
-                                    RecordID<SessionRecord> ID,
-                                    DateTimeOffset          DateCreated,
-                                    DateTimeOffset?         LastModified = default
-) : LoggerTable<SessionRecord>( ID, DateCreated, LastModified ), IDbReaderMapping<SessionRecord>, IStartSession, IMsJsonContext<SessionRecord>
+public sealed record SessionRecord
+    ( DateTimeOffset AppStartTime, RecordID<AppRecord> AppID, RecordID<DeviceRecord> DeviceID, RecordID<SessionRecord> ID, DateTimeOffset DateCreated, DateTimeOffset? LastModified = default ) :
+        LoggerTable<SessionRecord>( ID, DateCreated, LastModified ),
+        IDbReaderMapping<SessionRecord>,
+        IStartSession,
+        MsJsonModels.IJsonizer<SessionRecord>
 {
     public static string TableName { get; } = typeof(SessionRecord).GetTableName();
 
@@ -28,6 +27,9 @@ public sealed record SessionRecord( DateTimeOffset          AppStartTime,
         AppID        = app.ID;
         DeviceID     = device.ID;
     }
+
+
+    [ Pure ]
     public static SessionRecord Create( DbDataReader reader )
     {
         var appStartTime = reader.GetFieldValue<DateTimeOffset>( nameof(AppStartTime) );
@@ -38,14 +40,16 @@ public sealed record SessionRecord( DateTimeOffset          AppStartTime,
         var id           = new RecordID<SessionRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) );
         return new SessionRecord( appStartTime, appID, deviceID, id, dateCreated, lastModified );
     }
+    [ Pure ]
     public static async IAsyncEnumerable<SessionRecord> CreateAsync( DbDataReader reader, [ EnumeratorCancellation ] CancellationToken token = default )
     {
         while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
     }
 
-    public StartSessionReply ToStartSessionReply() => new(ID.Value, AppID.Value, DeviceID.Value);
+    [ Pure ] public StartSessionReply ToStartSessionReply() => new(ID.Value, AppID.Value, DeviceID.Value);
 
 
+    [ Pure ]
     public static DynamicParameters GetDynamicParameters( in Guid sessionID )
     {
         var parameters = new DynamicParameters();
@@ -66,14 +70,18 @@ public sealed record SessionRecord( DateTimeOffset          AppStartTime,
         return DeviceID.CompareTo( other.DeviceID );
     }
     public override int GetHashCode() => HashCode.Combine( AppID, DeviceID, base.GetHashCode() );
+
+
+    [ Pure ] public static SessionRecord FromJson( string json ) => json.FromJson( JsonTypeInfo() );
+    [ Pure ]
     public static JsonSerializerOptions JsonOptions( bool formatted ) => new()
                                                                          {
                                                                              WriteIndented    = formatted,
                                                                              TypeInfoResolver = SessionRecordContext.Default
                                                                          };
-    public static JsonTypeInfo<SessionRecord> JsonTypeInfo() => SessionRecordContext.Default.SessionRecord;
+    [ Pure ] public static JsonTypeInfo<SessionRecord> JsonTypeInfo() => SessionRecordContext.Default.SessionRecord;
 }
 
 
 
-[ JsonSerializable( typeof(SessionRecord) ) ] public partial class SessionRecordContext : JsonSerializerContext { }
+[ JsonSerializable( typeof(SessionRecord) ) ] public partial class SessionRecordContext : JsonSerializerContext;

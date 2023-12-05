@@ -44,7 +44,7 @@
 	<ItemGroup>
 		<PackageReference Include="Dapper" Version="2.1.24" />
 		<PackageReference Include="Dapper.Contrib" Version="2.0.78" />
-		<PackageReference Include="Jakar.Extensions" Version="7.2.0" />
+		<PackageReference Include="Jakar.Extensions" Version="7.3.2" />
 		<PackageReference Include="FluentMigrator" Version="3.3.2" />
 		<PackageReference Include="FluentMigrator.Runner" Version="3.3.2" />
 		<PackageReference Include="MailKit" Version="4.3.0" />
@@ -55,9 +55,9 @@
 		<PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="7.0.3" />
 		<PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="7.0.3" />
 		<PackageReference Include="Microsoft.IdentityModel.Tokens" Version="7.0.3" />
-		<PackageReference Include="Npgsql" Version="8.0.0" />
-		<PackageReference Include="Npgsql.Json.NET" Version="8.0.0" />
-		<PackageReference Include="Npgsql.OpenTelemetry" Version="8.0.0" />
+		<PackageReference Include="Npgsql" Version="8.0.1" />
+		<PackageReference Include="Npgsql.Json.NET" Version="8.0.1" />
+		<PackageReference Include="Npgsql.OpenTelemetry" Version="8.0.1" />
 		<PackageReference Include="OpenTelemetry" Version="1.6.0" />
 		<PackageReference Include="OpenTelemetry.Api" Version="1.6.0" />
 		<PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.6.0" />

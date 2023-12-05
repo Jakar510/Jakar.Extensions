@@ -4,7 +4,7 @@
 public interface ICreateMapping<out TSelf, in TKey, in TValue>
     where TValue : class, ITableRecord<TValue>, IDbReaderMapping<TValue>
     where TKey : class, ITableRecord<TKey>, IDbReaderMapping<TKey>
-    where TSelf : ITableRecord<TSelf>, ICreateMapping<TSelf, TKey, TValue>, IDbReaderMapping<TSelf>, IMsJsonContext<TSelf>
+    where TSelf : ITableRecord<TSelf>, ICreateMapping<TSelf, TKey, TValue>, IDbReaderMapping<TSelf>,  MsJsonModels.IJsonizer<TSelf>
 {
     public abstract static TSelf Create( TKey key, TValue value );
 }
@@ -13,9 +13,9 @@ public interface ICreateMapping<out TSelf, in TKey, in TValue>
 
 [ Serializable ]
 public abstract record Mapping<TSelf, TKey, TValue>( RecordID<TKey> KeyID, RecordID<TValue> ValueID, RecordID<TSelf> ID, DateTimeOffset DateCreated, DateTimeOffset? LastModified = default ) : TableRecord<TSelf>( ID, DateCreated, LastModified )
-    where TValue : class, ITableRecord<TValue>, IDbReaderMapping<TValue>, IMsJsonContext<TValue>
-    where TKey : class, ITableRecord<TKey>, IDbReaderMapping<TKey>, IMsJsonContext<TKey>
-    where TSelf : Mapping<TSelf, TKey, TValue>, ICreateMapping<TSelf, TKey, TValue>, IDbReaderMapping<TSelf>, IMsJsonContext<TSelf>
+    where TValue : class, ITableRecord<TValue>, IDbReaderMapping<TValue>,  MsJsonModels.IJsonizer<TValue>
+    where TKey : class, ITableRecord<TKey>, IDbReaderMapping<TKey>,  MsJsonModels.IJsonizer<TKey>
+    where TSelf : Mapping<TSelf, TKey, TValue>, ICreateMapping<TSelf, TKey, TValue>, IDbReaderMapping<TSelf>,  MsJsonModels.IJsonizer<TSelf>
 {
     private WeakReference<TKey>?   _owner;
     private WeakReference<TValue>? _value;

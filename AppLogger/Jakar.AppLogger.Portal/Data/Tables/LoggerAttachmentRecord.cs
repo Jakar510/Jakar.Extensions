@@ -18,7 +18,7 @@ public sealed record LoggerAttachmentRecord( [ property: MaxLength( LoggerAttach
                                              RecordID<LoggerAttachmentRecord>                                     ID,
                                              DateTimeOffset                                                       DateCreated,
                                              DateTimeOffset?                                                      LastModified = default
-) : LoggerTable<LoggerAttachmentRecord>( ID, DateCreated, LastModified ), IDbReaderMapping<LoggerAttachmentRecord>, ILoggerAttachment, ILogInfo, IMsJsonContext<LoggerAttachmentRecord>
+) : LoggerTable<LoggerAttachmentRecord>( ID, DateCreated, LastModified ), IDbReaderMapping<LoggerAttachmentRecord>, ILoggerAttachment, ILogInfo, MsJsonModels.IJsonizer<LoggerAttachmentRecord>
 {
     public static string TableName { get; } = typeof(LoggerAttachmentRecord).GetTableName();
 
@@ -63,6 +63,7 @@ public sealed record LoggerAttachmentRecord( [ property: MaxLength( LoggerAttach
     }
 
 
+    [ Pure ]
     public static LoggerAttachmentRecord Create( DbDataReader reader )
     {
         string content      = reader.GetString( nameof(Content) );
@@ -93,24 +94,28 @@ public sealed record LoggerAttachmentRecord( [ property: MaxLength( LoggerAttach
                                            dateCreated,
                                            lastModified );
     }
+    [ Pure ]
     public static async IAsyncEnumerable<LoggerAttachmentRecord> CreateAsync( DbDataReader reader, [ EnumeratorCancellation ] CancellationToken token = default )
     {
         while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
     }
+    [ Pure ]
     public static IEnumerable<LoggerAttachmentRecord> Create( AppLog log, AppRecord app, DeviceRecord device, LogRecord record, SessionRecord? session )
     {
         // ReSharper disable once ForeachCanBeConvertedToQueryUsingAnotherGetEnumerator
         foreach ( LoggerAttachment attachment in log.Attachments ) { yield return new LoggerAttachmentRecord( attachment, app, device, record, session ); }
     }
-    public static ImmutableArray<LoggerAttachmentRecord> CreateArray( AppLog log, AppRecord app, DeviceRecord device, LogRecord record, SessionRecord? session ) => ImmutableArray.CreateRange( Create( log, app, device, record, session ) );
+    [ Pure ] public static ImmutableArray<LoggerAttachmentRecord> CreateArray( AppLog log, AppRecord app, DeviceRecord device, LogRecord record, SessionRecord? session ) => ImmutableArray.CreateRange( Create( log, app, device, record, session ) );
 
 
+    [ Pure ]
     public static DynamicParameters GetDynamicParameters( LoggerAttachment attachment )
     {
         var parameters = new DynamicParameters();
         parameters.Add( nameof(Content), attachment.Content );
         return parameters;
     }
+    [ Pure ]
     public static DynamicParameters GetDynamicParameters( ILogInfo info )
     {
         var parameters = new DynamicParameters();
@@ -125,7 +130,8 @@ public sealed record LoggerAttachmentRecord( [ property: MaxLength( LoggerAttach
                                     ? Convert.FromBase64String( Content )
                                     : default;
 
-    public LoggerAttachment ToLoggerAttachment() => new(this);
+    [ Pure ] public LoggerAttachment ToLoggerAttachment() => new(this);
+    [ Pure ]
     public LoggerAttachmentRecord Update( LoggerAttachment attachment ) => this with
                                                                            {
                                                                                Length = attachment.Length,
@@ -139,17 +145,21 @@ public sealed record LoggerAttachmentRecord( [ property: MaxLength( LoggerAttach
 
     public override int CompareTo( LoggerAttachmentRecord? other ) => string.CompareOrdinal( Content, other?.Content );
     public override int GetHashCode()                              => HashCode.Combine( Content, base.GetHashCode() );
+
+
+    [ Pure ] public static LoggerAttachmentRecord FromJson( string json ) => json.FromJson( JsonTypeInfo() );
+    [ Pure ]
     public static JsonSerializerOptions JsonOptions( bool formatted ) => new()
                                                                          {
                                                                              WriteIndented    = formatted,
                                                                              TypeInfoResolver = LoggerAttachmentRecordContext.Default
                                                                          };
-    public static JsonTypeInfo<LoggerAttachmentRecord> JsonTypeInfo() => LoggerAttachmentRecordContext.Default.LoggerAttachmentRecord;
+    [ Pure ] public static JsonTypeInfo<LoggerAttachmentRecord> JsonTypeInfo() => LoggerAttachmentRecordContext.Default.LoggerAttachmentRecord;
 }
 
 
 
-[ JsonSerializable( typeof(LoggerAttachmentRecord) ) ] public partial class LoggerAttachmentRecordContext : JsonSerializerContext { }
+[ JsonSerializable( typeof(LoggerAttachmentRecord) ) ] public partial class LoggerAttachmentRecordContext : JsonSerializerContext;
 
 
 
@@ -157,7 +167,7 @@ public sealed record LoggerAttachmentRecord( [ property: MaxLength( LoggerAttach
 public sealed record LoggerAttachmentMappingRecord : Mapping<LoggerAttachmentMappingRecord, LogRecord, LoggerAttachmentRecord>,
                                                      ICreateMapping<LoggerAttachmentMappingRecord, LogRecord, LoggerAttachmentRecord>,
                                                      IDbReaderMapping<LoggerAttachmentMappingRecord>,
-                                                     IMsJsonContext<LoggerAttachmentMappingRecord>
+                                                     MsJsonModels.IJsonizer<LoggerAttachmentMappingRecord>
 {
     public static string TableName { get; } = typeof(LoggerAttachmentRecord).GetTableName();
 
@@ -167,7 +177,8 @@ public sealed record LoggerAttachmentMappingRecord : Mapping<LoggerAttachmentMap
         base( key, value, id, dateCreated, lastModified ) { }
 
 
-    public static LoggerAttachmentMappingRecord Create( LogRecord key, LoggerAttachmentRecord value ) => new(key, value);
+    [ Pure ] public static LoggerAttachmentMappingRecord Create( LogRecord key, LoggerAttachmentRecord value ) => new(key, value);
+    [ Pure ]
     public static LoggerAttachmentMappingRecord Create( DbDataReader reader )
     {
         var key          = new RecordID<LogRecord>( reader.GetFieldValue<Guid>( nameof(KeyID) ) );
@@ -177,21 +188,26 @@ public sealed record LoggerAttachmentMappingRecord : Mapping<LoggerAttachmentMap
         var id           = new RecordID<LoggerAttachmentMappingRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) );
         return new LoggerAttachmentMappingRecord( key, value, id, dateCreated, lastModified );
     }
+    [ Pure ]
     public static async IAsyncEnumerable<LoggerAttachmentMappingRecord> CreateAsync( DbDataReader reader, [ EnumeratorCancellation ] CancellationToken token = default )
     {
         while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
     }
+
+
+    [ Pure ] public static LoggerAttachmentMappingRecord FromJson( string json ) => json.FromJson( JsonTypeInfo() );
+    [ Pure ]
     public static JsonSerializerOptions JsonOptions( bool formatted ) => new()
                                                                          {
                                                                              WriteIndented    = formatted,
                                                                              TypeInfoResolver = LoggerAttachmentMappingRecordContext.Default
                                                                          };
-    public static JsonTypeInfo<LoggerAttachmentMappingRecord> JsonTypeInfo() => LoggerAttachmentMappingRecordContext.Default.LoggerAttachmentMappingRecord;
+    [ Pure ] public static JsonTypeInfo<LoggerAttachmentMappingRecord> JsonTypeInfo() => LoggerAttachmentMappingRecordContext.Default.LoggerAttachmentMappingRecord;
 }
 
 
 
-[ JsonSerializable( typeof(LoggerAttachmentMappingRecord) ) ] public partial class LoggerAttachmentMappingRecordContext : JsonSerializerContext { }
+[ JsonSerializable( typeof(LoggerAttachmentMappingRecord) ) ] public partial class LoggerAttachmentMappingRecordContext : JsonSerializerContext;
 
 
 
@@ -199,7 +215,7 @@ public sealed record LoggerAttachmentMappingRecord : Mapping<LoggerAttachmentMap
 public sealed record LoggerScopeAttachmentMappingRecord : Mapping<LoggerScopeAttachmentMappingRecord, LoggerAttachmentRecord, ScopeRecord>,
                                                           ICreateMapping<LoggerScopeAttachmentMappingRecord, LoggerAttachmentRecord, ScopeRecord>,
                                                           IDbReaderMapping<LoggerScopeAttachmentMappingRecord>,
-                                                          IMsJsonContext<LoggerScopeAttachmentMappingRecord>
+                                                          MsJsonModels.IJsonizer<LoggerScopeAttachmentMappingRecord>
 {
     public static string TableName { get; } = typeof(LoggerScopeAttachmentMappingRecord).GetTableName();
 
@@ -209,7 +225,8 @@ public sealed record LoggerScopeAttachmentMappingRecord : Mapping<LoggerScopeAtt
         base( key, value, id, dateCreated, lastModified ) { }
 
 
-    public static LoggerScopeAttachmentMappingRecord Create( LoggerAttachmentRecord key, ScopeRecord value ) => new(key, value);
+    [ Pure ] public static LoggerScopeAttachmentMappingRecord Create( LoggerAttachmentRecord key, ScopeRecord value ) => new(key, value);
+    [ Pure ]
     public static LoggerScopeAttachmentMappingRecord Create( DbDataReader reader )
     {
         var key          = new RecordID<LoggerAttachmentRecord>( reader.GetFieldValue<Guid>( nameof(KeyID) ) );
@@ -219,18 +236,23 @@ public sealed record LoggerScopeAttachmentMappingRecord : Mapping<LoggerScopeAtt
         var id           = new RecordID<LoggerScopeAttachmentMappingRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) );
         return new LoggerScopeAttachmentMappingRecord( key, value, id, dateCreated, lastModified );
     }
+    [ Pure ]
     public static async IAsyncEnumerable<LoggerScopeAttachmentMappingRecord> CreateAsync( DbDataReader reader, [ EnumeratorCancellation ] CancellationToken token = default )
     {
         while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
     }
+
+
+    [ Pure ] public static LoggerScopeAttachmentMappingRecord FromJson( string json ) => json.FromJson( JsonTypeInfo() );
+    [ Pure ]
     public static JsonSerializerOptions JsonOptions( bool formatted ) => new()
                                                                          {
                                                                              WriteIndented    = formatted,
                                                                              TypeInfoResolver = LoggerScopeAttachmentMappingRecordContext.Default
                                                                          };
-    public static JsonTypeInfo<LoggerScopeAttachmentMappingRecord> JsonTypeInfo() => LoggerScopeAttachmentMappingRecordContext.Default.LoggerScopeAttachmentMappingRecord;
+    [ Pure ] public static JsonTypeInfo<LoggerScopeAttachmentMappingRecord> JsonTypeInfo() => LoggerScopeAttachmentMappingRecordContext.Default.LoggerScopeAttachmentMappingRecord;
 }
 
 
 
-[ JsonSerializable( typeof(LoggerScopeAttachmentMappingRecord) ) ] public partial class LoggerScopeAttachmentMappingRecordContext : JsonSerializerContext { }
+[ JsonSerializable( typeof(LoggerScopeAttachmentMappingRecord) ) ] public partial class LoggerScopeAttachmentMappingRecordContext : JsonSerializerContext;

@@ -1,8 +1,7 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 01/30/2023  2:41 PM
 
-using System.Text.Json;
-using System.Text.Json.Serialization.Metadata;
+using Jakar.Database.Resx;
 
 
 
@@ -19,7 +18,7 @@ public sealed record UserLoginInfoRecord( [ property: MaxLength(                
                                           Guid?                                                                  OwnerUserID,
                                           DateTimeOffset                                                         DateCreated,
                                           DateTimeOffset?                                                        LastModified = default
-) : OwnedTableRecord<UserLoginInfoRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<UserLoginInfoRecord>, IMsJsonContext<UserLoginInfoRecord>
+) : OwnedTableRecord<UserLoginInfoRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<UserLoginInfoRecord>, MsJsonModels.IJsonizer<UserLoginInfoRecord>
 {
     public static string TableName { get; } = typeof(UserLoginInfoRecord).GetTableName();
 
@@ -43,6 +42,7 @@ public sealed record UserLoginInfoRecord( [ property: MaxLength(                
         parameters.Add( nameof(Value),               Value );
         return parameters;
     }
+
     [ Pure ]
     public static UserLoginInfoRecord Create( DbDataReader reader )
     {
@@ -59,6 +59,7 @@ public sealed record UserLoginInfoRecord( [ property: MaxLength(                
         record.Validate();
         return record;
     }
+
     [ Pure ]
     public static async IAsyncEnumerable<UserLoginInfoRecord> CreateAsync( DbDataReader reader, [ EnumeratorCancellation ] CancellationToken token = default )
     {
@@ -93,6 +94,9 @@ public sealed record UserLoginInfoRecord( [ property: MaxLength(                
                                                                                                 Name          = value.ProviderDisplayName ?? string.Empty,
                                                                                                 Value         = value.ProviderKey
                                                                                             };
+
+
+    [ Pure ] public static UserLoginInfoRecord FromJson( string json ) => json.FromJson( JsonTypeInfo() );
     [ Pure ]
     public static JsonSerializerOptions JsonOptions( bool formatted ) => new()
                                                                          {

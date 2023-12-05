@@ -1,9 +1,4 @@
-﻿using System.Text.Json;
-using System.Text.Json.Serialization.Metadata;
-
-
-
-namespace Jakar.Database.Resx;
+﻿namespace Jakar.Database.Resx;
 
 
 /// <see cref="LocalizableString"/>
@@ -28,7 +23,7 @@ public sealed record ResxRowRecord( long                    KeyID,
                                     RecordID<ResxRowRecord> ID,
                                     DateTimeOffset          DateCreated,
                                     DateTimeOffset?         LastModified = default
-) : TableRecord<ResxRowRecord>( ID, DateCreated, LastModified ), IDbReaderMapping<ResxRowRecord>, IMsJsonContext<ResxRowRecord>
+) : TableRecord<ResxRowRecord>( ID, DateCreated, LastModified ), IDbReaderMapping<ResxRowRecord>, MsJsonModels.IJsonizer<ResxRowRecord>
 {
     public static string TableName { get; } = typeof(ResxRowRecord).GetTableName();
 
@@ -88,6 +83,7 @@ public sealed record ResxRowRecord( long                    KeyID,
               RecordID<ResxRowRecord>.New(),
               DateTimeOffset.UtcNow ) { }
 
+    [ Pure ]
     public static ResxRowRecord Create( DbDataReader reader )
     {
         long   keyID        = reader.GetFieldValue<long>( nameof(KeyID) );
@@ -132,6 +128,8 @@ public sealed record ResxRowRecord( long                    KeyID,
                                   dateCreated,
                                   lastModified );
     }
+
+    [ Pure ]
     public static async IAsyncEnumerable<ResxRowRecord> CreateAsync( DbDataReader reader, [ EnumeratorCancellation ] CancellationToken token = default )
     {
         while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
@@ -169,6 +167,7 @@ public sealed record ResxRowRecord( long                    KeyID,
     }
 
 
+    [ Pure ]
     public ResxRowRecord With( string english,
                                string spanish,
                                string french,
@@ -202,6 +201,7 @@ public sealed record ResxRowRecord( long                    KeyID,
              LastModified = DateTimeOffset.UtcNow
          };
 
+    [ Pure ]
     public ResxString ToResxString() => new(Neutral,
                                             Arabic,
                                             Chinese,
@@ -246,12 +246,15 @@ public sealed record ResxRowRecord( long                    KeyID,
 
         return Neutral == other.Neutral || ID == other.ID;
     }
-    [ Pure ] public static JsonSerializerOptions JsonOptions( bool formatted ) => new()
+
+    [ Pure ] public static ResxRowRecord FromJson( string json ) => json.FromJson( JsonTypeInfo() );
+    [ Pure ]
+    public static JsonSerializerOptions JsonOptions( bool formatted ) => new()
                                                                          {
                                                                              WriteIndented    = formatted,
                                                                              TypeInfoResolver = ResxRowRecordContext.Default
                                                                          };
-    [ Pure ]     public static JsonTypeInfo<ResxRowRecord> JsonTypeInfo() => ResxRowRecordContext.Default.ResxRowRecord;
+    [ Pure ] public static JsonTypeInfo<ResxRowRecord> JsonTypeInfo() => ResxRowRecordContext.Default.ResxRowRecord;
 }
 
 

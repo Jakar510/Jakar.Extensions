@@ -7,7 +7,7 @@ namespace Jakar.Database.Caches;
 public interface ITableCacheFactory
 {
     ITableCache<TRecord> GetCache<TRecord>( DbTable<TRecord> table )
-        where TRecord : class, ITableRecord<TRecord>, IDbReaderMapping<TRecord>, IMsJsonContext<TRecord>;
+        where TRecord : class, ITableRecord<TRecord>, IDbReaderMapping<TRecord>,  MsJsonModels.IJsonizer<TRecord>;
 }
 
 
@@ -23,7 +23,7 @@ public sealed class TableCacheFactory( ILoggerFactory factory, IOptions<TableCac
 
 
     public ITableCache<TRecord> GetCache<TRecord>( DbTable<TRecord> table )
-        where TRecord : class, ITableRecord<TRecord>, IDbReaderMapping<TRecord>, IMsJsonContext<TRecord>
+        where TRecord : class, ITableRecord<TRecord>, IDbReaderMapping<TRecord>,  MsJsonModels.IJsonizer<TRecord>
     {
         _source?.Cancel();
         var cache = new TableCache<TRecord>( table, factory.CreateLogger<TableCache<TRecord>>(), options );
@@ -86,7 +86,7 @@ public interface ITableCache<TRecord> : IAsyncEnumerable<TRecord>, IHostedServic
 
 
 public sealed class TableCache<TRecord> : ITableCache<TRecord>
-    where TRecord : class, ITableRecord<TRecord>, IDbReaderMapping<TRecord>, IMsJsonContext<TRecord>
+    where TRecord : class, ITableRecord<TRecord>, IDbReaderMapping<TRecord>,  MsJsonModels.IJsonizer<TRecord>
 {
     private readonly ConcurrentDictionary<RecordID<TRecord>, CacheEntry<TRecord>> _records = new(RecordID<TRecord>.Equalizer);
     private readonly DbTable<TRecord>                                             _table;

@@ -1,8 +1,7 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 09/29/2023  9:25 PM
 
-using System.Text.Json;
-using System.Text.Json.Serialization.Metadata;
+using Jakar.Database.Resx;
 
 
 
@@ -17,17 +16,17 @@ public sealed record AddressRecord( [ property: ProtectedPersonalData, MaxLength
                                     [ property: ProtectedPersonalData, MaxLength( 256 ) ]  string PostalCode,
                                     [ property: ProtectedPersonalData, MaxLength( 4096 ) ] string Address,
                                     bool                                                          IsPrimary,
-                                    IDictionary<string, JToken?>?                                 AdditionalData,
+                                    IDictionary<string, JsonElement>?                             AdditionalData,
                                     RecordID<AddressRecord>                                       ID,
                                     RecordID<UserRecord>?                                         CreatedBy,
                                     Guid?                                                         OwnerUserID,
                                     DateTimeOffset                                                DateCreated,
                                     DateTimeOffset?                                               LastModified = default
-) : OwnedTableRecord<AddressRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IAddress, IEquatable<IAddress>, IDbReaderMapping<AddressRecord>, IMsJsonContext<AddressRecord>
+) : OwnedTableRecord<AddressRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IAddress, IEquatable<IAddress>, IDbReaderMapping<AddressRecord>, MsJsonModels.IJsonizer<AddressRecord>
 {
-    public static string                 TableName      { get; } = typeof(AddressRecord).GetTableName();
-    Guid? IAddress.                      UserID         => OwnerUserID;
-    public IDictionary<string, JToken?>? AdditionalData { get; set; } = AdditionalData;
+    public static string                     TableName      { get; } = typeof(AddressRecord).GetTableName();
+    Guid? IAddress.                          UserID         => OwnerUserID;
+    public IDictionary<string, JsonElement>? AdditionalData { get; set; } = AdditionalData;
 
 
     [ Pure ]
@@ -47,20 +46,20 @@ public sealed record AddressRecord( [ property: ProtectedPersonalData, MaxLength
     [ Pure ]
     public static AddressRecord Create( DbDataReader reader )
     {
-        string                        line1           = reader.GetFieldValue<string>( nameof(Line1) );
-        string                        line2           = reader.GetFieldValue<string>( nameof(Line2) );
-        string                        city            = reader.GetFieldValue<string>( nameof(City) );
-        string                        stateOrProvince = reader.GetFieldValue<string>( nameof(StateOrProvince) );
-        string                        country         = reader.GetFieldValue<string>( nameof(Country) );
-        string                        postalCode      = reader.GetFieldValue<string>( nameof(PostalCode) );
-        string                        address         = reader.GetFieldValue<string>( nameof(Address) );
-        IDictionary<string, JToken?>? additionalData  = reader.GetAdditionalData();
-        bool                          isPrimary       = reader.GetFieldValue<bool>( nameof(IsPrimary) );
-        RecordID<AddressRecord>       id              = RecordID<AddressRecord>.ID( reader );
-        RecordID<UserRecord>?         createdBy       = RecordID<UserRecord>.CreatedBy( reader );
-        var                           ownerUserID     = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
-        var                           dateCreated     = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
-        var                           lastModified    = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
+        string                            line1           = reader.GetFieldValue<string>( nameof(Line1) );
+        string                            line2           = reader.GetFieldValue<string>( nameof(Line2) );
+        string                            city            = reader.GetFieldValue<string>( nameof(City) );
+        string                            stateOrProvince = reader.GetFieldValue<string>( nameof(StateOrProvince) );
+        string                            country         = reader.GetFieldValue<string>( nameof(Country) );
+        string                            postalCode      = reader.GetFieldValue<string>( nameof(PostalCode) );
+        string                            address         = reader.GetFieldValue<string>( nameof(Address) );
+        IDictionary<string, JsonElement>? additionalData  = reader.GetAdditionalData();
+        bool                              isPrimary       = reader.GetFieldValue<bool>( nameof(IsPrimary) );
+        RecordID<AddressRecord>           id              = RecordID<AddressRecord>.ID( reader );
+        RecordID<UserRecord>?             createdBy       = RecordID<UserRecord>.CreatedBy( reader );
+        var                               ownerUserID     = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
+        var                               dateCreated     = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
+        var                               lastModified    = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
 
         var record = new AddressRecord( line1,
                                         line2,
@@ -180,6 +179,7 @@ public sealed record AddressRecord( [ property: ProtectedPersonalData, MaxLength
     public override int GetHashCode() => HashCode.Combine( base.GetHashCode(), Line1, Line2, City, PostalCode, StateOrProvince, Country, Address );
 
 
+    [ Pure ] public static AddressRecord FromJson( string json ) => json.FromJson( JsonTypeInfo() );
     [ Pure ]
     public static JsonSerializerOptions JsonOptions( bool formatted ) => new()
                                                                          {

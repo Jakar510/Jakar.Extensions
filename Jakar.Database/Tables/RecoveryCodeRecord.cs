@@ -1,11 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 01/29/2023  1:26 PM
 
-using System.Text.Json;
-using System.Text.Json.Serialization.Metadata;
-
-
-
 namespace Jakar.Database;
 
 
@@ -17,7 +12,7 @@ public sealed record RecoveryCodeRecord
                                                                                                                                                                                                                                             DateCreated,
                                                                                                                                                                                                                                             LastModified ),
                                                                                                                                                                                                       IDbReaderMapping<RecoveryCodeRecord>,
-                                                                                                                                                                                                      IMsJsonContext<RecoveryCodeRecord>
+                                                                                                                                                                                                      MsJsonModels.IJsonizer<RecoveryCodeRecord>
 {
     private static readonly PasswordHasher<RecoveryCodeRecord> _hasher = new();
 
@@ -116,6 +111,9 @@ public sealed record RecoveryCodeRecord
             default: throw new ArgumentOutOfRangeException();
         }
     }
+
+
+    [ Pure ] public static RecoveryCodeRecord FromJson( string json ) => json.FromJson( JsonTypeInfo() );
     [ Pure ]
     public static JsonSerializerOptions JsonOptions( bool formatted ) => new()
                                                                          {
@@ -135,7 +133,7 @@ public sealed record RecoveryCodeRecord
 public sealed record UserRecoveryCodeRecord : Mapping<UserRecoveryCodeRecord, UserRecord, RecoveryCodeRecord>,
                                               ICreateMapping<UserRecoveryCodeRecord, UserRecord, RecoveryCodeRecord>,
                                               IDbReaderMapping<UserRecoveryCodeRecord>,
-                                              IMsJsonContext<UserRecoveryCodeRecord>
+                                              MsJsonModels.IJsonizer<UserRecoveryCodeRecord>
 {
     public static string TableName { get; } = typeof(UserRecoveryCodeRecord).GetTableName();
 
@@ -158,6 +156,9 @@ public sealed record UserRecoveryCodeRecord : Mapping<UserRecoveryCodeRecord, Us
     {
         while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
     }
+
+
+    [ Pure ] public static UserRecoveryCodeRecord FromJson( string json ) => json.FromJson( JsonTypeInfo() );
     [ Pure ]
     public static JsonSerializerOptions JsonOptions( bool formatted ) => new()
                                                                          {

@@ -3,13 +3,13 @@
 
 public static class TableExtensions
 {
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static Dictionary<string, JToken?>? GetAdditionalData( this DbDataReader reader ) => reader.GetData<Dictionary<string, JToken?>>();
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static Dictionary<string, JsonElement>? GetAdditionalData( this DbDataReader reader ) => reader.GetData<Dictionary<string, JsonElement>>();
 
 
     [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
     public static T? GetData<T>( this DbDataReader reader )
-        where T : class => reader.GetFieldValue<object?>( nameof(JsonModels.IJsonModel.AdditionalData) ) is string json
-                               ? json.FromJson<T>()
+        where T : class => reader.GetFieldValue<object?>( nameof(MsJsonModels.IJsonModel.AdditionalData) ) is string json
+                               ? JsonSerializer_.Deserialize<T>( json )
                                : default;
 
 

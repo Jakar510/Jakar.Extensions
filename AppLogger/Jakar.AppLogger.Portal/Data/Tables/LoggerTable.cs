@@ -4,17 +4,16 @@
 namespace Jakar.AppLogger.Portal.Data.Tables;
 
 
-public interface ILoggerTable
+public interface ILoggerTable : MsJsonModels.IJsonModel
 {
-    [ System.Text.Json.Serialization.JsonExtensionData ] public IDictionary<string, JsonElement>? AdditionalData { get; set; }
-    public                                                      bool                              IsActive       { get; set; }
-    internal                                                    bool                              IsNotActive    => !IsActive;
+    public   bool IsActive    { get; set; }
+    internal bool IsNotActive => !IsActive;
 }
 
 
 
 public abstract record LoggerTable<TRecord>( RecordID<TRecord> ID, DateTimeOffset DateCreated, DateTimeOffset? LastModified ) : TableRecord<TRecord>( ID, DateCreated, LastModified ), ILoggerTable
-    where TRecord : LoggerTable<TRecord>, IDbReaderMapping<TRecord>, IMsJsonContext<TRecord>
+    where TRecord : LoggerTable<TRecord>, IDbReaderMapping<TRecord>, MsJsonModels.IJsonizer<TRecord>
 {
     [ System.Text.Json.Serialization.JsonExtensionData ] public IDictionary<string, JsonElement>? AdditionalData { get; set; }
     public                                                      bool                              IsActive       { get; set; } = true;
@@ -29,7 +28,7 @@ public abstract record LoggerTable<TRecord>( RecordID<TRecord> ID, DateTimeOffse
 
 public abstract record OwnedLoggerTable<TRecord>
     ( RecordID<TRecord> ID, RecordID<UserRecord>? CreatedBy, Guid? OwnerUserID, DateTimeOffset DateCreated, DateTimeOffset? LastModified ) : OwnedTableRecord<TRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), ILoggerTable
-    where TRecord : OwnedLoggerTable<TRecord>, IDbReaderMapping<TRecord>, IMsJsonContext<TRecord>
+    where TRecord : OwnedLoggerTable<TRecord>, IDbReaderMapping<TRecord>, MsJsonModels.IJsonizer<TRecord>
 {
     [ System.Text.Json.Serialization.JsonExtensionData ] public IDictionary<string, JsonElement>? AdditionalData { get; set; }
     public                                                      bool                              IsActive       { get; set; } = true;

@@ -1,10 +1,6 @@
 ﻿// Jakar.AppLogger :: Jakar.AppLogger.Client
 // 10/03/2022  9:57 AM
 
-using Microsoft.Extensions.Hosting;
-
-
-
 namespace Jakar.AppLogger.Common;
 
 
@@ -16,17 +12,17 @@ public interface IAppLogger : ILogger, ILoggerProvider, IHostedService, IAsyncDi
 
 
     public void TrackError( Exception e, EventID? eventID = default );
-    public void TrackError( Exception e, EventID? eventID, IDictionary<string, JToken?>? eventDetails );
+    public void TrackError( Exception e, EventID? eventID, EventDetails?                 eventDetails );
     public void TrackError( Exception e, EventID? eventID, params LoggerAttachment[]     attachments );
-    public void TrackError( Exception e, EventID? eventID, IDictionary<string, JToken?>? eventDetails, params LoggerAttachment[]     attachments );
-    public void TrackError( Exception e, EventID  eventID, IEnumerable<LoggerAttachment> attachments,  IDictionary<string, JToken?>? eventDetails = default );
+    public void TrackError( Exception e, EventID? eventID, EventDetails?                 eventDetails, params LoggerAttachment[] attachments );
+    public void TrackError( Exception e, EventID  eventID, IEnumerable<LoggerAttachment> attachments,  EventDetails?             eventDetails = default );
 
 
-    public void TrackEvent<T>( LogLevel level = LogLevel.Trace, IDictionary<string, JToken?>? eventDetails = default, [ CallerMemberName ] string? caller = default );
+    public void TrackEvent<T>( LogLevel level = LogLevel.Trace, EventDetails? eventDetails = default, [ CallerMemberName ] string? caller = default );
 
 
-    public void TrackEvent<T>( T   _,      LogLevel level = LogLevel.Trace, IDictionary<string, JToken?>? eventDetails = default, [ CallerMemberName ] string? caller = default );
-    public void TrackEvent( string source, LogLevel level = LogLevel.Trace, IDictionary<string, JToken?>? eventDetails = null );
+    public void TrackEvent<T>( T   _,      LogLevel level = LogLevel.Trace, EventDetails? eventDetails = default, [ CallerMemberName ] string? caller = default );
+    public void TrackEvent( string source, LogLevel level = LogLevel.Trace, EventDetails? eventDetails = null );
 
 
     ValueTask<byte[]?> TryTakeScreenShot();

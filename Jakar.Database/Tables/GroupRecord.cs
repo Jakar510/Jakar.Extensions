@@ -1,9 +1,4 @@
-﻿using System.Text.Json;
-using System.Text.Json.Serialization.Metadata;
-
-
-
-namespace Jakar.Database;
+﻿namespace Jakar.Database;
 
 
 [ Serializable, Table( "Groups" ) ]
@@ -16,7 +11,7 @@ public sealed record GroupRecord( [ MaxLength( 256 ) ]                 string?  
                                   Guid?                                                     OwnerUserID,
                                   DateTimeOffset                                            DateCreated,
                                   DateTimeOffset?                                           LastModified = default
-) : OwnedTableRecord<GroupRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<GroupRecord>, UserRights.IRights, IMsJsonContext<GroupRecord>
+) : OwnedTableRecord<GroupRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<GroupRecord>, UserRights.IRights, MsJsonModels.IJsonizer<GroupRecord>
 {
     public static string TableName { get; } = typeof(GroupRecord).GetTableName();
 
@@ -74,6 +69,9 @@ public sealed record GroupRecord( [ MaxLength( 256 ) ]                 string?  
     [ Pure ] public async ValueTask<UserRecord?>       GetOwner( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => await db.Users.Get( connection, transaction, OwnerID, token );
     [ Pure ] public       IAsyncEnumerable<UserRecord> GetUsers( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => UserGroupRecord.Where( connection, transaction, db.UserGroups, db.Users, this, token );
     [ Pure ] public       UserRights                   GetRights() => UserRights.Create( this );
+
+
+    [ Pure ] public static GroupRecord FromJson( string json ) => json.FromJson( JsonTypeInfo() );
     [ Pure ]
     public static JsonSerializerOptions JsonOptions( bool formatted ) => new()
                                                                          {

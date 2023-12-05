@@ -143,26 +143,28 @@ public abstract class LoggingSettings : ObservableClass, ISessionID, IAsyncDispo
     protected abstract void HandleValue<T>( T value, string propertyName );
 
 
-    public virtual IDictionary<string, JToken?>? GetAppState() => IncludeAppStateOnError
-                                                                      ? new Dictionary<string, JToken?>
-                                                                        {
-                                                                            [nameof(AppName)]                      = AppName,
-                                                                            [nameof(IDevice.DeviceID)]             = Device.DeviceID,
-                                                                            [nameof(AppVersion)]                   = Device.AppVersion.ToString(),
-                                                                            [nameof(LanguageApi.SelectedLanguage)] = CultureInfo.CurrentCulture.DisplayName,
-                                                                            [nameof(DateTime)]                     = DateTimeOffset.UtcNow
-                                                                        }
-                                                                      : default;
+    public virtual EventDetails? GetAppState() => IncludeAppStateOnError
+                                                      ? new EventDetails
+                                                        {
+                                                            [nameof(AppName)]                      = AppName,
+                                                            [nameof(IDevice.DeviceID)]             = Device.DeviceID,
+                                                            [nameof(AppVersion)]                   = Device.AppVersion.ToString(),
+                                                            [nameof(LanguageApi.SelectedLanguage)] = CultureInfo.CurrentCulture.DisplayName,
+                                                            [nameof(DateTime)]                     = DateTimeOffset.UtcNow.ToString(),
+                                                        }
+                                                      : default;
     public abstract ValueTask<byte[]?> TakeScreenshot();
 
 
-    public T AddScope<T>( in T scope ) where T : IScope
+    public T AddScope<T>( in T scope )
+        where T : IScope
     {
         _scopes.TryAdd( scope.ScopeID, scope );
         return scope;
     }
-    public bool                   RemoveScope<T>( in T        scope ) where T : IScope => _scopes.TryRemove( scope.ScopeID, out _ );
-    public AppLoggerScope<TState> CreateScope<TState>( TState state )                  => AddScope( new AppLoggerScope<TState>( this, state ) );
+    public bool RemoveScope<T>( in T scope )
+        where T : IScope => _scopes.TryRemove( scope.ScopeID, out _ );
+    public AppLoggerScope<TState> CreateScope<TState>( TState state ) => AddScope( new AppLoggerScope<TState>( this, state ) );
     public virtual async ValueTask DisposeAsync()
     {
         foreach ( IScope? scope in _scopes.Values ) { scope.Dispose(); }

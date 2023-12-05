@@ -23,7 +23,7 @@ public sealed record DeviceRecord( int?                                         
                                    RecordID<DeviceRecord>                                        ID,
                                    DateTimeOffset                                                DateCreated,
                                    DateTimeOffset?                                               LastModified = default
-) : LoggerTable<DeviceRecord>( ID, DateCreated, LastModified ), IDbReaderMapping<DeviceRecord>, IDevice, IMsJsonContext<DeviceRecord>
+) : LoggerTable<DeviceRecord>( ID, DateCreated, LastModified ), IDbReaderMapping<DeviceRecord>, IDevice, MsJsonModels.IJsonizer<DeviceRecord>
 {
     public static string TableName { get; } = typeof(DeviceRecord).GetTableName();
 
@@ -49,6 +49,7 @@ public sealed record DeviceRecord( int?                                         
                                                   DateTimeOffset.UtcNow ) { }
 
 
+    [ Pure ]
     public static DeviceRecord Create( DbDataReader reader )
     {
         int        appBuild     = reader.GetFieldValue<int>( nameof(AppBuild) );
@@ -91,6 +92,7 @@ public sealed record DeviceRecord( int?                                         
                                  dateCreated,
                                  lastModified );
     }
+    [ Pure ]
     public static async IAsyncEnumerable<DeviceRecord> CreateAsync( DbDataReader reader, [ EnumeratorCancellation ] CancellationToken token = default )
     {
         while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
@@ -98,6 +100,7 @@ public sealed record DeviceRecord( int?                                         
 
 
     // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Global
+    [ Pure ]
     public DeviceRecord Update( IDevice device ) =>
         this with
         {
@@ -118,6 +121,7 @@ public sealed record DeviceRecord( int?                                         
         };
 
 
+    [ Pure ]
     public static DynamicParameters GetDynamicParameters( DeviceDescriptor device )
     {
         var parameters = new DynamicParameters();
@@ -126,27 +130,31 @@ public sealed record DeviceRecord( int?                                         
     }
 
 
-    public DeviceDescriptor ToDeviceDescriptor() => new(this);
+    [ Pure ] public DeviceDescriptor ToDeviceDescriptor() => new(this);
 
 
     public override int CompareTo( DeviceRecord? other ) => string.CompareOrdinal( DeviceID, other?.DeviceID );
     public override int GetHashCode()                    => HashCode.Combine( DeviceID, base.GetHashCode() );
+
+
+    [ Pure ] public static DeviceRecord FromJson( string json ) => json.FromJson( JsonTypeInfo() );
+    [ Pure ]
     public static JsonSerializerOptions JsonOptions( bool formatted ) => new()
                                                                          {
                                                                              WriteIndented    = formatted,
                                                                              TypeInfoResolver = DeviceRecordContext.Default
                                                                          };
-    public static JsonTypeInfo<DeviceRecord> JsonTypeInfo() => DeviceRecordContext.Default.DeviceRecord;
+    [ Pure ] public static JsonTypeInfo<DeviceRecord> JsonTypeInfo() => DeviceRecordContext.Default.DeviceRecord;
 }
 
 
 
-[ JsonSerializable( typeof(DeviceRecord) ) ] public partial class DeviceRecordContext : JsonSerializerContext { }
+[ JsonSerializable( typeof(DeviceRecord) ) ] public partial class DeviceRecordContext : JsonSerializerContext;
 
 
 
 [ Serializable, Table( "Devices" ) ]
-public sealed record AppDeviceRecord : Mapping<AppDeviceRecord, AppRecord, DeviceRecord>, ICreateMapping<AppDeviceRecord, AppRecord, DeviceRecord>, IDbReaderMapping<AppDeviceRecord>, IMsJsonContext<AppDeviceRecord>
+public sealed record AppDeviceRecord : Mapping<AppDeviceRecord, AppRecord, DeviceRecord>, ICreateMapping<AppDeviceRecord, AppRecord, DeviceRecord>, IDbReaderMapping<AppDeviceRecord>, MsJsonModels.IJsonizer<AppDeviceRecord>
 {
     public static string TableName { get; } = typeof(AppDeviceRecord).GetTableName();
 
@@ -155,7 +163,8 @@ public sealed record AppDeviceRecord : Mapping<AppDeviceRecord, AppRecord, Devic
     private AppDeviceRecord( RecordID<AppRecord> key, RecordID<DeviceRecord> value, RecordID<AppDeviceRecord> id, DateTimeOffset dateCreated, DateTimeOffset? lastModified ) : base( key, value, id, dateCreated, lastModified ) { }
 
 
-    public static AppDeviceRecord Create( AppRecord key, DeviceRecord value ) => new(key, value);
+    [ Pure ] public static AppDeviceRecord Create( AppRecord key, DeviceRecord value ) => new(key, value);
+    [ Pure ]
     public static AppDeviceRecord Create( DbDataReader reader )
     {
         var key          = new RecordID<AppRecord>( reader.GetFieldValue<Guid>( nameof(KeyID) ) );
@@ -165,18 +174,23 @@ public sealed record AppDeviceRecord : Mapping<AppDeviceRecord, AppRecord, Devic
         var id           = new RecordID<AppDeviceRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) );
         return new AppDeviceRecord( key, value, id, dateCreated, lastModified );
     }
+    [ Pure ]
     public static async IAsyncEnumerable<AppDeviceRecord> CreateAsync( DbDataReader reader, [ EnumeratorCancellation ] CancellationToken token = default )
     {
         while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
     }
+
+
+    [ Pure ] public static AppDeviceRecord FromJson( string json ) => json.FromJson( JsonTypeInfo() );
+    [ Pure ]
     public static JsonSerializerOptions JsonOptions( bool formatted ) => new()
                                                                          {
                                                                              WriteIndented    = formatted,
                                                                              TypeInfoResolver = AppDeviceRecordContext.Default
                                                                          };
-    public static JsonTypeInfo<AppDeviceRecord> JsonTypeInfo() => AppDeviceRecordContext.Default.AppDeviceRecord;
+    [ Pure ] public static JsonTypeInfo<AppDeviceRecord> JsonTypeInfo() => AppDeviceRecordContext.Default.AppDeviceRecord;
 }
 
 
 
-[ JsonSerializable( typeof(AppDeviceRecord) ) ] public partial class AppDeviceRecordContext : JsonSerializerContext { }
+[ JsonSerializable( typeof(AppDeviceRecord) ) ] public partial class AppDeviceRecordContext : JsonSerializerContext;

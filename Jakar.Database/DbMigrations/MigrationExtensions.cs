@@ -135,7 +135,7 @@ public static class MigrationExtensions
              propertyType == typeof(JToken)                       ||
              propertyType == typeof(List<JObject>)                ||
              propertyType == typeof(List<JObject?>)               ||
-             propertyType == typeof(IDictionary<string, JToken?>) ||
+             propertyType == typeof(IDictionary<string, JsonElement>) ||
              propertyType == typeof(IDictionary<string, JToken>) ) { return col.AsXml( int.MaxValue ).SetNullable( propInfo ); }
 
         if ( propertyType.IsGenericType && propertyType.IsList() || propertyType.IsSet() || propertyType.IsCollection() ) { return col.AsXml( int.MaxValue ).SetNullable( propInfo ); }
@@ -355,7 +355,7 @@ public static class MigrationExtensions
                                               typeof(JToken),
                                               typeof(List<JObject>),
                                               typeof(List<JObject?>),
-                                              typeof(IDictionary<string, JToken?>),
+                                              typeof(IDictionary<string, JsonElement>),
                                               typeof(IDictionary<string, JToken>),
                                               typeof(IDictionary),
                                               typeof(IList) );

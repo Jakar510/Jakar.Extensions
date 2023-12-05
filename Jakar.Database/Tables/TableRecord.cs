@@ -1,26 +1,12 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 08/14/2022  8:38 PM
 
-using System.Text.Json;
-using System.Text.Json.Serialization.Metadata;
-
-
-
 namespace Jakar.Database;
 
 
 public interface IRecordPair : IUniqueID<Guid> // where TID : IComparable<TID>, IEquatable<TID>
 {
     public DateTimeOffset DateCreated { get; }
-}
-
-
-
-public interface IMsJsonContext<TRecord>
-    where TRecord : IDbReaderMapping<TRecord>
-{
-    public abstract static JsonSerializerOptions JsonOptions( bool formatted );
-    public abstract static JsonTypeInfo<TRecord> JsonTypeInfo();
 }
 
 
@@ -67,7 +53,7 @@ public interface IOwnedTableRecord
 
 [ Serializable ]
 public abstract record TableRecord<TRecord>( [ property: Key ] RecordID<TRecord> ID, DateTimeOffset DateCreated, DateTimeOffset? LastModified ) : BaseRecord, ITableRecord<TRecord>, IComparable<TRecord>
-    where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>, IMsJsonContext<TRecord>
+    where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>, MsJsonModels.IJsonizer<TRecord>
 {
     protected TableRecord( RecordID<TRecord> id ) : this( id, DateTimeOffset.UtcNow, null ) { }
 
@@ -151,7 +137,7 @@ public abstract record TableRecord<TRecord>( [ property: Key ] RecordID<TRecord>
 [ Serializable ]
 public abstract record OwnedTableRecord<TRecord>
     ( RecordID<TRecord> ID, RecordID<UserRecord>? CreatedBy, Guid? OwnerUserID, DateTimeOffset DateCreated, DateTimeOffset? LastModified ) : TableRecord<TRecord>( ID, DateCreated, LastModified ), IOwnedTableRecord
-    where TRecord : OwnedTableRecord<TRecord>, IDbReaderMapping<TRecord>, IMsJsonContext<TRecord>
+    where TRecord : OwnedTableRecord<TRecord>, IDbReaderMapping<TRecord>, MsJsonModels.IJsonizer<TRecord>
 {
     protected OwnedTableRecord( UserRecord?       owner ) : this( RecordID<TRecord>.New(), owner ) { }
     protected OwnedTableRecord( RecordID<TRecord> id, UserRecord? owner = default ) : this( id, owner?.ID, owner?.UserID, DateTimeOffset.UtcNow, null ) { }

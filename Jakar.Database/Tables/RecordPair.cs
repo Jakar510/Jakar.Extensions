@@ -1,16 +1,11 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 03/11/2023  11:20 PM
 
-using System.Text.Json;
-using System.Text.Json.Serialization.Metadata;
-
-
-
 namespace Jakar.Database;
 
 
 // ReSharper disable once InconsistentNaming
-public readonly record struct RecordPair<TRecord>( RecordID<TRecord> ID, DateTimeOffset DateCreated ) : IComparable<RecordPair<TRecord>>, IRecordPair, IDbReaderMapping<RecordPair<TRecord>>, IMsJsonContext<RecordPair<TRecord>>
+public readonly record struct RecordPair<TRecord>( RecordID<TRecord> ID, DateTimeOffset DateCreated ) : IComparable<RecordPair<TRecord>>, IRecordPair, IDbReaderMapping<RecordPair<TRecord>>, MsJsonModels.IJsonizer<RecordPair<TRecord>>
     where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
     public static string                              TableName => TRecord.TableName;
@@ -48,6 +43,7 @@ public readonly record struct RecordPair<TRecord>( RecordID<TRecord> ID, DateTim
     }
 
 
+    [ Pure ] public static RecordPair<TRecord> FromJson( string json ) => json.FromJson( JsonTypeInfo() );
     [ Pure ]
     public static JsonSerializerOptions JsonOptions( bool formatted ) => new()
                                                                          {
