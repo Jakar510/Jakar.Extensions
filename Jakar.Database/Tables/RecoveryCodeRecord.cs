@@ -26,13 +26,15 @@ public sealed record RecoveryCodeRecord
 
     public RecoveryCodeRecord( string code, UserRecord user ) : this( code, RecordID<RecoveryCodeRecord>.New(), user.ID, user.UserID, DateTimeOffset.UtcNow ) { }
 
+
+    [ Pure ]
     public override DynamicParameters ToDynamicParameters()
     {
         var parameters = base.ToDynamicParameters();
         parameters.Add( nameof(Code), Code );
         return parameters;
     }
-
+    [ Pure ]
     public static RecoveryCodeRecord Create( DbDataReader reader )
     {
         string                       code         = reader.GetFieldValue<string>( nameof(Code) );
@@ -45,12 +47,14 @@ public sealed record RecoveryCodeRecord
         record.Validate();
         return record;
     }
+    [ Pure ]
     public static async IAsyncEnumerable<RecoveryCodeRecord> CreateAsync( DbDataReader reader, [ EnumeratorCancellation ] CancellationToken token = default )
     {
         while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
     }
 
 
+    [ Pure ]
     public static IReadOnlyDictionary<string, RecoveryCodeRecord> Create( UserRecord user, IEnumerable<string> recoveryCodes )
     {
         var codes = new Dictionary<string, RecoveryCodeRecord>( StringComparer.Ordinal );
@@ -63,6 +67,7 @@ public sealed record RecoveryCodeRecord
 
         return codes;
     }
+    [ Pure ]
     public static async ValueTask<IReadOnlyDictionary<string, RecoveryCodeRecord>> Create( UserRecord user, IAsyncEnumerable<string> recoveryCodes )
     {
         var codes = new Dictionary<string, RecoveryCodeRecord>( StringComparer.Ordinal );
@@ -75,6 +80,7 @@ public sealed record RecoveryCodeRecord
 
         return codes;
     }
+    [ Pure ]
     public static IReadOnlyDictionary<string, RecoveryCodeRecord> Create( UserRecord user, int count )
     {
         var codes = new Dictionary<string, RecoveryCodeRecord>( count, StringComparer.Ordinal );
@@ -91,7 +97,7 @@ public sealed record RecoveryCodeRecord
     public static (string Code, RecoveryCodeRecord Record) Create( UserRecord user, Guid   code ) => Create( user, code.ToBase64() );
     public static (string Code, RecoveryCodeRecord Record) Create( UserRecord user, string code ) => (code, new RecoveryCodeRecord( code, user ));
 
-
+    [ Pure ]
     public static bool IsValid( string code, ref RecoveryCodeRecord record )
     {
         switch ( _hasher.VerifyHashedPassword( record, record.Code, code ) )
@@ -110,12 +116,13 @@ public sealed record RecoveryCodeRecord
             default: throw new ArgumentOutOfRangeException();
         }
     }
+    [ Pure ]
     public static JsonSerializerOptions JsonOptions( bool formatted ) => new()
                                                                          {
                                                                              WriteIndented    = formatted,
                                                                              TypeInfoResolver = RecoveryCodeRecordContext.Default
                                                                          };
-    public static JsonTypeInfo<RecoveryCodeRecord> JsonTypeInfo() => RecoveryCodeRecordContext.Default.RecoveryCodeRecord;
+    [ Pure ] public static JsonTypeInfo<RecoveryCodeRecord> JsonTypeInfo() => RecoveryCodeRecordContext.Default.RecoveryCodeRecord;
 }
 
 
@@ -151,12 +158,13 @@ public sealed record UserRecoveryCodeRecord : Mapping<UserRecoveryCodeRecord, Us
     {
         while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
     }
+    [ Pure ]
     public static JsonSerializerOptions JsonOptions( bool formatted ) => new()
                                                                          {
                                                                              WriteIndented    = formatted,
                                                                              TypeInfoResolver = UserRecoveryCodeRecordContext.Default
                                                                          };
-    public static JsonTypeInfo<UserRecoveryCodeRecord> JsonTypeInfo() => UserRecoveryCodeRecordContext.Default.UserRecoveryCodeRecord;
+    [ Pure ] public static JsonTypeInfo<UserRecoveryCodeRecord> JsonTypeInfo() => UserRecoveryCodeRecordContext.Default.UserRecoveryCodeRecord;
 }
 
 

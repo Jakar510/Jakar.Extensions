@@ -19,7 +19,8 @@ public sealed record UserGroupRecord : Mapping<UserGroupRecord, UserRecord, Grou
     private UserGroupRecord( RecordID<UserRecord> key,   RecordID<GroupRecord> value, RecordID<UserGroupRecord> id, DateTimeOffset dateCreated, DateTimeOffset? lastModified ) : base( key, value, id, dateCreated, lastModified ) { }
 
 
-    public static UserGroupRecord Create( UserRecord owner, GroupRecord value ) => new(owner, value);
+    [ Pure ] public static UserGroupRecord Create( UserRecord owner, GroupRecord value ) => new(owner, value);
+    [ Pure ]
     public static UserGroupRecord Create( DbDataReader reader )
     {
         var key          = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(KeyID) ) );
@@ -31,16 +32,18 @@ public sealed record UserGroupRecord : Mapping<UserGroupRecord, UserRecord, Grou
         record.Validate();
         return record;
     }
+    [ Pure ]
     public static async IAsyncEnumerable<UserGroupRecord> CreateAsync( DbDataReader reader, [ EnumeratorCancellation ] CancellationToken token = default )
     {
         while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
     }
+    [ Pure ]
     public static JsonSerializerOptions JsonOptions( bool formatted ) => new()
                                                                          {
                                                                              WriteIndented    = formatted,
                                                                              TypeInfoResolver = UserGroupRecordContext.Default
                                                                          };
-    public static JsonTypeInfo<UserGroupRecord> JsonTypeInfo() => UserGroupRecordContext.Default.UserGroupRecord;
+    [ Pure ] public static JsonTypeInfo<UserGroupRecord> JsonTypeInfo() => UserGroupRecordContext.Default.UserGroupRecord;
 }
 
 

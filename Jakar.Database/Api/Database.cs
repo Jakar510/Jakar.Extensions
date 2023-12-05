@@ -1,6 +1,7 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 08/14/2022  8:39 PM
 
+using System.Security.Cryptography;
 using Microsoft.Extensions.Caching.Distributed;
 
 
@@ -19,6 +20,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     protected readonly string                  _className;
 
 
+    public static IDataProtector DataProtector { get; set; } = new DataProtector( RSAEncryptionPadding.OaepSHA1 );
     public AppVersion Version
     {
         [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => Options.Version;

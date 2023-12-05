@@ -41,7 +41,7 @@ public sealed record RoleRecord( [ property: MaxLength( 1024 ) ]                
                                                                                                                                                  caller?.ID,
                                                                                                                                                  caller?.UserID,
                                                                                                                                                  DateTimeOffset.UtcNow ) { }
-
+    [ Pure ]
     public override DynamicParameters ToDynamicParameters()
     {
         var parameters = base.ToDynamicParameters();
@@ -51,8 +51,7 @@ public sealed record RoleRecord( [ property: MaxLength( 1024 ) ]                
         parameters.Add( nameof(Rights),           Rights );
         return parameters;
     }
-
-    // [DbReaderMapping]
+    [ Pure ]
     public static RoleRecord Create( DbDataReader reader )
     {
         string                rights           = reader.GetFieldValue<string>( nameof(Rights) );
@@ -68,12 +67,14 @@ public sealed record RoleRecord( [ property: MaxLength( 1024 ) ]                
         record.Validate();
         return record;
     }
+    [ Pure ]
     public static async IAsyncEnumerable<RoleRecord> CreateAsync( DbDataReader reader, [ EnumeratorCancellation ] CancellationToken token = default )
     {
         while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
     }
 
 
+    [ Pure ]
     public IdentityRole ToIdentityRole() => new()
                                             {
                                                 Name             = Name,
@@ -100,14 +101,15 @@ public sealed record RoleRecord( [ property: MaxLength( 1024 ) ]                
         return base.CompareTo( other );
     }
 
-    public IAsyncEnumerable<UserRecord> GetUsers( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => UserRoleRecord.Where( connection, transaction, db.UserRoles, db.Users, this, token );
-    public UserRights                   GetRights() => UserRights.Create( this );
+    [ Pure ] public IAsyncEnumerable<UserRecord> GetUsers( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => UserRoleRecord.Where( connection, transaction, db.UserRoles, db.Users, this, token );
+    [ Pure ] public UserRights                   GetRights() => UserRights.Create( this );
+    [ Pure ]
     public static JsonSerializerOptions JsonOptions( bool formatted ) => new()
                                                                          {
                                                                              WriteIndented    = formatted,
                                                                              TypeInfoResolver = RoleRecordContext.Default
                                                                          };
-    public static JsonTypeInfo<RoleRecord> JsonTypeInfo() => RoleRecordContext.Default.RoleRecord;
+    [ Pure ] public static JsonTypeInfo<RoleRecord> JsonTypeInfo() => RoleRecordContext.Default.RoleRecord;
 }
 
 

@@ -19,19 +19,21 @@ public readonly record struct RecordID<TRecord>( Guid Value ) : IComparable<Reco
     public static          ValueSorter<RecordID<TRecord>>    Sorter    => ValueSorter<RecordID<TRecord>>.Default;
     public static readonly RecordID<TRecord>                 Empty = new(Guid.Empty);
 
-
-    public static RecordID<TRecord>  New()                                                    => Create( Guid.NewGuid() );
-    public static RecordID<TRecord>  Parse( in ReadOnlySpan<char> value )                     => Create( Guid.Parse( value ) );
-    public static RecordID<TRecord>  Create( Guid                 id )                        => new(id);
-    public static RecordID<TRecord>  ID( DbDataReader             reader )                    => new(reader.GetFieldValue<Guid>( SQL.ID ));
-    public static RecordID<TRecord>? CreatedBy( DbDataReader      reader )                    => TryCreate( reader, SQL.CREATED_BY );
-    public static RecordID<TRecord>? TryCreate( DbDataReader      reader, string columnName ) => TryCreate( reader.GetFieldValue<Guid?>( columnName ) );
+    [ Pure ] public static RecordID<TRecord>  New()                                                    => Create( Guid.NewGuid() );
+    [ Pure ] public static RecordID<TRecord>  Parse( in ReadOnlySpan<char> value )                     => Create( Guid.Parse( value ) );
+    [ Pure ] public static RecordID<TRecord>  Create( Guid                 id )                        => new(id);
+    [ Pure ] public static RecordID<TRecord>  ID( DbDataReader             reader )                    => new(reader.GetFieldValue<Guid>( SQL.ID ));
+    [ Pure ] public static RecordID<TRecord>? CreatedBy( DbDataReader      reader )                    => TryCreate( reader, SQL.CREATED_BY );
+    [ Pure ] public static RecordID<TRecord>? TryCreate( DbDataReader      reader, string columnName ) => TryCreate( reader.GetFieldValue<Guid?>( columnName ) );
+    [ Pure ]
     public static RecordID<TRecord>? TryCreate( [ NotNullIfNotNull( nameof(id) ) ] Guid? id ) => id.HasValue
                                                                                                      ? new RecordID<TRecord>( id.Value )
                                                                                                      : default;
+    [ Pure ]
     public static RecordID<TRecord>? TryCreate( ref Utf8JsonReader reader ) => reader.TryGetGuid( out Guid id )
                                                                                    ? new RecordID<TRecord>( id )
                                                                                    : default;
+    [ Pure ]
     public static bool TryParse( in ReadOnlySpan<char> value, [ NotNullWhen( true ) ] out RecordID<TRecord>? id )
     {
         if ( Guid.TryParse( value, out Guid guid ) )
@@ -47,6 +49,7 @@ public readonly record struct RecordID<TRecord>( Guid Value ) : IComparable<Reco
 
     public static implicit operator RecordID<TRecord>( TRecord record ) => new(record.ID.Value);
 
+    [ Pure ]
     public DynamicParameters ToDynamicParameters()
     {
         DynamicParameters parameters = new();
@@ -55,8 +58,8 @@ public readonly record struct RecordID<TRecord>( Guid Value ) : IComparable<Reco
     }
 
 
-    public bool IsValid()    => Guid.Empty.Equals( Value ) is false;
-    public bool IsNotValid() => Guid.Empty.Equals( Value );
+    [ Pure ] public bool IsValid()    => Guid.Empty.Equals( Value ) is false;
+    [ Pure ] public bool IsNotValid() => Guid.Empty.Equals( Value );
 
 
     public override string ToString() => Value.ToString();
@@ -82,6 +85,7 @@ public readonly record struct RecordID<TRecord>( Guid Value ) : IComparable<Reco
     }
 
 
+    [ Pure ]
     public static JsonSerializerOptions JsonOptions( bool formatted ) => new()
                                                                          {
                                                                              WriteIndented    = formatted,
@@ -91,7 +95,7 @@ public readonly record struct RecordID<TRecord>( Guid Value ) : IComparable<Reco
                                                                                  new JsonConverter()
                                                                              }
                                                                          };
-    public static JsonTypeInfo<RecordID<TRecord>> JsonTypeInfo() => JsonContext.Default.RecordPair;
+    [ Pure ] public static JsonTypeInfo<RecordID<TRecord>> JsonTypeInfo() => JsonContext.Default.RecordPair;
 
 
 

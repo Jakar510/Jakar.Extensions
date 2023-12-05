@@ -30,6 +30,7 @@ public sealed record AddressRecord( [ property: ProtectedPersonalData, MaxLength
     public IDictionary<string, JToken?>? AdditionalData { get; set; } = AdditionalData;
 
 
+    [ Pure ]
     public override DynamicParameters ToDynamicParameters()
     {
         var parameters = base.ToDynamicParameters();
@@ -43,6 +44,7 @@ public sealed record AddressRecord( [ property: ProtectedPersonalData, MaxLength
         return parameters;
     }
 
+    [ Pure ]
     public static AddressRecord Create( DbDataReader reader )
     {
         string                        line1           = reader.GetFieldValue<string>( nameof(Line1) );
@@ -78,12 +80,14 @@ public sealed record AddressRecord( [ property: ProtectedPersonalData, MaxLength
         record.Validate();
         return record;
     }
+    [ Pure ]
     public static async IAsyncEnumerable<AddressRecord> CreateAsync( DbDataReader reader, [ EnumeratorCancellation ] CancellationToken token = default )
     {
         while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
     }
 
 
+    [ Pure ]
     public static async ValueTask<AddressRecord?> TryFromClaims( DbConnection connection, DbTransaction transaction, Database db, Claim[] claims, ClaimType types, CancellationToken token )
     {
         var parameters = new DynamicParameters();
@@ -100,6 +104,7 @@ public sealed record AddressRecord( [ property: ProtectedPersonalData, MaxLength
 
         return await db.Addresses.Get( connection, transaction, true, parameters, token );
     }
+    [ Pure ]
     public static async IAsyncEnumerable<AddressRecord> TryFromClaims( DbConnection connection, DbTransaction transaction, Database db, Claim claim, [ EnumeratorCancellation ] CancellationToken token )
     {
         var parameters = new DynamicParameters();
@@ -132,6 +137,7 @@ public sealed record AddressRecord( [ property: ProtectedPersonalData, MaxLength
 
 
     // TODO: public static async IAsyncEnumerable<Claim> GetUserClaims( DbConnection connection, DbTransaction? transaction, Database db, ClaimType types, RecordID<UserRecord> id, CancellationToken token ) { }
+    [ Pure ]
     public IEnumerable<Claim> GetUserClaims( ClaimType types )
     {
         if ( types.HasFlag( ClaimType.StreetAddressLine1 ) ) { yield return new Claim( ClaimTypes.StreetAddress, Line1, ClaimValueTypes.String ); }
@@ -146,6 +152,7 @@ public sealed record AddressRecord( [ property: ProtectedPersonalData, MaxLength
     }
 
 
+    [ Pure ]
     public AddressRecord WithUserData( IAddress value ) =>
         this with
         {
@@ -171,12 +178,15 @@ public sealed record AddressRecord( [ property: ProtectedPersonalData, MaxLength
         return base.Equals( other ) && Line1 == other.Line1 && Line2 == other.Line2 && City == other.City && PostalCode == other.PostalCode && StateOrProvince == other.StateOrProvince && Country == other.Country && Address == other.Address;
     }
     public override int GetHashCode() => HashCode.Combine( base.GetHashCode(), Line1, Line2, City, PostalCode, StateOrProvince, Country, Address );
+
+
+    [ Pure ]
     public static JsonSerializerOptions JsonOptions( bool formatted ) => new()
                                                                          {
                                                                              WriteIndented    = formatted,
                                                                              TypeInfoResolver = AddressRecordContext.Default,
                                                                          };
-    public static JsonTypeInfo<AddressRecord> JsonTypeInfo() => AddressRecordContext.Default.AddressRecord;
+    [ Pure ] public static JsonTypeInfo<AddressRecord> JsonTypeInfo() => AddressRecordContext.Default.AddressRecord;
 }
 
 

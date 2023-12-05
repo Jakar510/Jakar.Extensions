@@ -19,19 +19,26 @@ public readonly record struct RecordPair<TRecord>( RecordID<TRecord> ID, DateTim
     Guid IUniqueID<Guid>.                             ID        => ID.Value;
 
 
+    public                          int CompareTo( RecordPair<TRecord>                                      other ) => DateCreated.CompareTo( other.DateCreated );
+    public static implicit operator RecordPair<TRecord>( (RecordID<TRecord> ID, DateTimeOffset DateCreated) value ) => new(value.ID, value.DateCreated);
+    public static implicit operator KeyValuePair<Guid, DateTimeOffset>( RecordPair<TRecord>                 value ) => new(value.ID.Value, value.DateCreated);
+
+
+    [ Pure ]
     public static RecordPair<TRecord> Create( DbDataReader reader )
     {
         var               dateCreated = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
         RecordID<TRecord> id          = RecordID<TRecord>.ID( reader );
         return new RecordPair<TRecord>( id, dateCreated );
     }
+    [ Pure ]
     public static async IAsyncEnumerable<RecordPair<TRecord>> CreateAsync( DbDataReader reader, [ EnumeratorCancellation ] CancellationToken token = default )
     {
         while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
     }
 
 
-    public int CompareTo( RecordPair<TRecord> other ) => DateCreated.CompareTo( other.DateCreated );
+    [ Pure ]
     public DynamicParameters ToDynamicParameters()
     {
         DynamicParameters parameters = new();
@@ -41,14 +48,13 @@ public readonly record struct RecordPair<TRecord>( RecordID<TRecord> ID, DateTim
     }
 
 
-    public static implicit operator RecordPair<TRecord>( (RecordID<TRecord> ID, DateTimeOffset DateCreated) value ) => new(value.ID, value.DateCreated);
-    public static implicit operator KeyValuePair<Guid, DateTimeOffset>( RecordPair<TRecord>                 value ) => new(value.ID.Value, value.DateCreated);
+    [ Pure ]
     public static JsonSerializerOptions JsonOptions( bool formatted ) => new()
                                                                          {
                                                                              WriteIndented    = formatted,
                                                                              TypeInfoResolver = JsonContext.Default
                                                                          };
-    public static JsonTypeInfo<RecordPair<TRecord>> JsonTypeInfo() => JsonContext.Default.RecordPair;
+    [ Pure ] public static JsonTypeInfo<RecordPair<TRecord>> JsonTypeInfo() => JsonContext.Default.RecordPair;
 
 
 

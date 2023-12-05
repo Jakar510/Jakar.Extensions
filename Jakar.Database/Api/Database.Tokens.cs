@@ -69,7 +69,7 @@ public abstract partial class Database
         }
 
 
-        if ( user.VerifyPassword( request.Password ) ) { return await GetToken( connection, transaction, user, types, token ); }
+        if ( UserRecord.VerifyPassword( ref user, request ) ) { return await GetToken( connection, transaction, user, types, token ); }
 
         await Users.Update( connection, transaction, user, token );
         return default;
@@ -159,7 +159,7 @@ public abstract partial class Database
 
         if ( !UserRecord.IsHashedRefreshToken( refreshToken, ref record ) )
         {
-            record.MarkBadLogin();
+            record = record.MarkBadLogin();
             await Users.Update( connection, transaction, record, token );
             return new Error( Status.Unauthorized );
         }

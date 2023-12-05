@@ -25,7 +25,7 @@ public abstract partial class Database
 
         try
         {
-            if ( !record.VerifyPassword( request.Password ) )
+            if ( UserRecord.VerifyPassword( ref record, request ) is false )
             {
                 record = record.MarkBadLogin();
                 return LoginResult.State.BadCredentials;

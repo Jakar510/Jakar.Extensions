@@ -19,7 +19,7 @@ public struct UserRights : IEnumerator<(int Index, bool Value)>, IEnumerable<(in
     {
         [ MaxLength( MAX_SIZE ) ] public string Rights { get; }
 
-        public UserRights GetRights();
+        [ Pure ] public UserRights GetRights();
     }
 
 
@@ -64,9 +64,10 @@ public struct UserRights : IEnumerator<(int Index, bool Value)>, IEnumerable<(in
         this   = default;
     }
 
-
+    [ Pure ]
     public static UserRights Create<T>( T rights )
         where T : IRights => new(rights.Rights);
+    [ Pure ]
     public readonly UserRights With<T>( T rights )
         where T : IRights
     {
@@ -83,9 +84,10 @@ public struct UserRights : IEnumerator<(int Index, bool Value)>, IEnumerable<(in
 
         return this;
     }
-    public static UserRights Merge( int                  totalRightCount, params IEnumerable<IRights>[] values )          => Merge( values.SelectMany( x => x ), totalRightCount );
-    public static UserRights Merge( IEnumerable<IRights> values,          int                           totalRightCount ) => values.Aggregate( new UserRights( totalRightCount ), ( current, value ) => current.With( value ) );
-    public static UserRights Create( int                 length ) => new(length);
+    [ Pure ] public static UserRights Merge( int                  totalRightCount, params IEnumerable<IRights>[] values )          => Merge( values.SelectMany( x => x ), totalRightCount );
+    [ Pure ] public static UserRights Merge( IEnumerable<IRights> values,          int                           totalRightCount ) => values.Aggregate( new UserRights( totalRightCount ), ( current, value ) => current.With( value ) );
+    [ Pure ] public static UserRights Create( int                 length ) => new(length);
+    [ Pure ]
     public static UserRights Create<T>()
         where T : struct, Enum => new(Enum.GetValues<T>().Length);
 

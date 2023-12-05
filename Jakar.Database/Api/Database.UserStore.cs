@@ -210,7 +210,7 @@ public partial class Database
     public ValueTask<int> IncrementAccessFailedCountAsync( UserRecord user, CancellationToken token ) => this.TryCall( IncrementAccessFailedCountAsync, user, token );
     public virtual async ValueTask<int> IncrementAccessFailedCountAsync( DbConnection connection, DbTransaction transaction, UserRecord user, CancellationToken token )
     {
-        user.MarkBadLogin();
+        user = user.MarkBadLogin();
         await Users.Update( connection, transaction, user, token );
         return user.BadLogins;
     }
@@ -227,8 +227,9 @@ public partial class Database
     public ValueTask SetLockoutEnabledAsync( UserRecord user, bool enabled, CancellationToken token ) => this.TryCall( SetLockoutEnabledAsync, user, enabled, token );
     public virtual async ValueTask SetLockoutEnabledAsync( DbConnection connection, DbTransaction transaction, UserRecord user, bool enabled, CancellationToken token )
     {
-        if ( enabled ) { user.Disable(); }
-        else { user.Enable(); }
+        user = enabled
+                   ? user.Disable()
+                   : user.Enable();
 
         await Users.Update( connection, transaction, user, token );
     }

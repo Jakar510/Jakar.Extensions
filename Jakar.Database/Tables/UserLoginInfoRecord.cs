@@ -33,7 +33,7 @@ public sealed record UserLoginInfoRecord( [ property: MaxLength(                
                                                                                                                                  user.ID,
                                                                                                                                  user.UserID,
                                                                                                                                  DateTimeOffset.UtcNow ) { }
-
+    [ Pure ]
     public override DynamicParameters ToDynamicParameters()
     {
         var parameters = base.ToDynamicParameters();
@@ -43,7 +43,7 @@ public sealed record UserLoginInfoRecord( [ property: MaxLength(                
         parameters.Add( nameof(Value),               Value );
         return parameters;
     }
-
+    [ Pure ]
     public static UserLoginInfoRecord Create( DbDataReader reader )
     {
         string                        loginProvider       = reader.GetFieldValue<string>( nameof(LoginProvider) );
@@ -59,13 +59,14 @@ public sealed record UserLoginInfoRecord( [ property: MaxLength(                
         record.Validate();
         return record;
     }
+    [ Pure ]
     public static async IAsyncEnumerable<UserLoginInfoRecord> CreateAsync( DbDataReader reader, [ EnumeratorCancellation ] CancellationToken token = default )
     {
         while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
     }
 
-
-    public static DynamicParameters GetDynamicParameters( UserRecord user, UserLoginInfo info ) => GetDynamicParameters( user, info.LoginProvider, info.ProviderKey );
+    [ Pure ] public static DynamicParameters GetDynamicParameters( UserRecord user, UserLoginInfo info ) => GetDynamicParameters( user, info.LoginProvider, info.ProviderKey );
+    [ Pure ]
     public static DynamicParameters GetDynamicParameters( UserRecord user, string loginProvider, string providerKey )
     {
         DynamicParameters parameters = GetDynamicParameters( user );
@@ -74,8 +75,7 @@ public sealed record UserLoginInfoRecord( [ property: MaxLength(                
         return parameters;
     }
 
-
-    public UserLoginInfo ToUserLoginInfo() => new(LoginProvider, ProviderKey, ProviderDisplayName);
+    [ Pure ] public UserLoginInfo ToUserLoginInfo() => new(LoginProvider, ProviderKey, ProviderDisplayName);
 
 
     public static implicit operator UserLoginInfo( UserLoginInfoRecord value ) => value.ToUserLoginInfo();
@@ -93,12 +93,13 @@ public sealed record UserLoginInfoRecord( [ property: MaxLength(                
                                                                                                 Name          = value.ProviderDisplayName ?? string.Empty,
                                                                                                 Value         = value.ProviderKey
                                                                                             };
+    [ Pure ]
     public static JsonSerializerOptions JsonOptions( bool formatted ) => new()
                                                                          {
                                                                              WriteIndented    = formatted,
                                                                              TypeInfoResolver = UserLoginInfoRecordContext.Default,
                                                                          };
-    public static JsonTypeInfo<UserLoginInfoRecord> JsonTypeInfo() => UserLoginInfoRecordContext.Default.UserLoginInfoRecord;
+    [ Pure ] public static JsonTypeInfo<UserLoginInfoRecord> JsonTypeInfo() => UserLoginInfoRecordContext.Default.UserLoginInfoRecord;
 }
 
 

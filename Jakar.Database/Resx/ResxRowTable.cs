@@ -246,12 +246,12 @@ public sealed record ResxRowRecord( long                    KeyID,
 
         return Neutral == other.Neutral || ID == other.ID;
     }
-    public static JsonSerializerOptions JsonOptions( bool formatted ) => new()
+    [ Pure ] public static JsonSerializerOptions JsonOptions( bool formatted ) => new()
                                                                          {
                                                                              WriteIndented    = formatted,
                                                                              TypeInfoResolver = ResxRowRecordContext.Default
                                                                          };
-    public static JsonTypeInfo<ResxRowRecord> JsonTypeInfo() => ResxRowRecordContext.Default.ResxRowRecord;
+    [ Pure ]     public static JsonTypeInfo<ResxRowRecord> JsonTypeInfo() => ResxRowRecordContext.Default.ResxRowRecord;
 }
 
 

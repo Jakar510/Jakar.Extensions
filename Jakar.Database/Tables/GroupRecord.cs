@@ -38,6 +38,8 @@ public sealed record GroupRecord( [ MaxLength( 256 ) ]                 string?  
                                                                                                                                             caller?.UserID,
                                                                                                                                             DateTimeOffset.UtcNow ) { }
 
+
+    [ Pure ]
     public override DynamicParameters ToDynamicParameters()
     {
         var parameters = base.ToDynamicParameters();
@@ -47,7 +49,7 @@ public sealed record GroupRecord( [ MaxLength( 256 ) ]                 string?  
         parameters.Add( nameof(Rights),      Rights );
         return parameters;
     }
-
+    [ Pure ]
     public static GroupRecord Create( DbDataReader reader )
     {
         string                customerID   = reader.GetFieldValue<string>( nameof(CustomerID) );
@@ -63,21 +65,22 @@ public sealed record GroupRecord( [ MaxLength( 256 ) ]                 string?  
         record.Validate();
         return record;
     }
+    [ Pure ]
     public static async IAsyncEnumerable<GroupRecord> CreateAsync( DbDataReader reader, [ EnumeratorCancellation ] CancellationToken token = default )
     {
         while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
     }
 
-
-    public async ValueTask<UserRecord?>       GetOwner( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => await db.Users.Get( connection, transaction, OwnerID, token );
-    public       IAsyncEnumerable<UserRecord> GetUsers( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => UserGroupRecord.Where( connection, transaction, db.UserGroups, db.Users, this, token );
-    public       UserRights                   GetRights() => UserRights.Create( this );
+    [ Pure ] public async ValueTask<UserRecord?>       GetOwner( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => await db.Users.Get( connection, transaction, OwnerID, token );
+    [ Pure ] public       IAsyncEnumerable<UserRecord> GetUsers( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => UserGroupRecord.Where( connection, transaction, db.UserGroups, db.Users, this, token );
+    [ Pure ] public       UserRights                   GetRights() => UserRights.Create( this );
+    [ Pure ]
     public static JsonSerializerOptions JsonOptions( bool formatted ) => new()
                                                                          {
                                                                              WriteIndented    = formatted,
                                                                              TypeInfoResolver = GroupRecordContext.Default
                                                                          };
-    public static JsonTypeInfo<GroupRecord> JsonTypeInfo() => GroupRecordContext.Default.GroupRecord;
+    [ Pure ] public static JsonTypeInfo<GroupRecord> JsonTypeInfo() => GroupRecordContext.Default.GroupRecord;
 }
 
 
