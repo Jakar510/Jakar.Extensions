@@ -6,7 +6,7 @@ namespace Jakar.Extensions;
 
 
 [ Serializable ]
-public record BaseJsonNetModelRecord : ObservableRecord, JsonModels.IJsonModel
+public record BaseJsonModelRecord : ObservableRecord, JsonModels.IJsonModel
 {
     [ JsonExtensionData ] public IDictionary<string, JToken?>? AdditionalData { get; set; }
 }
@@ -14,8 +14,9 @@ public record BaseJsonNetModelRecord : ObservableRecord, JsonModels.IJsonModel
 
 
 [ Serializable ]
-public abstract record BaseJsonNetModelRecord<TClass> : BaseCollectionsRecord<TClass>, JsonModels.IJsonModel
-    where TClass : BaseJsonModelRecord<TClass>
+public abstract record BaseJsonModelRecord<TClass, TID> : CollectionsRecord<TClass, TID>
+    where TClass : BaseJsonModelRecord<TClass, TID>
+    where TID : struct, IComparable<TID>, IEquatable<TID>
 {
     [ JsonExtensionData ] public IDictionary<string, JToken?>? AdditionalData { get; set; }
 }
@@ -23,7 +24,7 @@ public abstract record BaseJsonNetModelRecord<TClass> : BaseCollectionsRecord<TC
 
 
 [ Serializable ]
-public record BaseJsonModelRecord : ObservableRecord
+public record BaseMsJsonModelRecord : ObservableRecord
 {
     [ System.Text.Json.Serialization.JsonExtensionData ] public IDictionary<string, JsonElement>? AdditionalData { get; set; }
 }
@@ -31,8 +32,9 @@ public record BaseJsonModelRecord : ObservableRecord
 
 
 [ Serializable ]
-public abstract record BaseJsonModelRecord<TClass> : BaseCollectionsRecord<TClass>
-    where TClass : BaseJsonModelRecord<TClass>
+public abstract record BaseMsJsonModelRecord<TClass, TID> : CollectionsRecord<TClass, TID>
+    where TClass : BaseMsJsonModelRecord<TClass, TID>
+    where TID : struct, IComparable<TID>, IEquatable<TID>
 {
     [ System.Text.Json.Serialization.JsonExtensionData ] public IDictionary<string, JsonElement>? AdditionalData { get; set; }
 }

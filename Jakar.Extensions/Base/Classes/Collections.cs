@@ -1,16 +1,31 @@
 ﻿namespace Jakar.Extensions;
 
 
-[ Serializable ]
-public abstract record BaseCollectionsRecord<T, TID> : ObservableRecord<T, TID> where T : BaseCollectionsRecord<T, TID>
-                                                                                where TID : struct, IComparable<TID>, IEquatable<TID>
+[ Serializable, SuppressMessage( "ReSharper", "BaseObjectGetHashCodeCallInGetHashCode" ) ]
+public abstract class Collections<T> : ObservableClass, IEquatable<T>, IComparable<T>, IComparable where T : Collections<T>
 {
     public static Equalizer<T> Equalizer => Equalizer<T>.Default;
     public static Sorter<T>    Sorter    => Sorter<T>.Default;
 
 
-    protected BaseCollectionsRecord() : base() { }
-    protected BaseCollectionsRecord( TID id ) : base( id ) { }
+    public sealed override bool   Equals( object? other ) => ReferenceEquals( this, other ) || other is T file && Equals( file );
+    public override        int    GetHashCode()           => base.GetHashCode();
+    public                 string ToJson()                => JsonNet.ToJson( this );
+    public                 string ToPrettyJson()          => this.ToJson( Formatting.Indented );
+
+
+    public int CompareTo( object? other )
+    {
+        if ( other is null ) { return 1; }
+
+        if ( ReferenceEquals( this, other ) ) { return 0; }
+
+        return other is T value
+                   ? CompareTo( value )
+                   : throw new ExpectedValueTypeException( nameof(other), other, typeof(T) );
+    }
+    public abstract int  CompareTo( T? other );
+    public abstract bool Equals( T?    other );
 
 
 
@@ -26,8 +41,8 @@ public abstract record BaseCollectionsRecord<T, TID> : ObservableRecord<T, TID> 
     [ Serializable ]
     public class ConcurrentCollection : ConcurrentObservableCollection<T>
     {
-        public ConcurrentCollection() : base() { }
-        public ConcurrentCollection( IEnumerable<T> items ) : base( items ) { }
+        public ConcurrentCollection() : base( Sorter ) { }
+        public ConcurrentCollection( IEnumerable<T> items ) : base( items, Sorter ) { }
     }
 
 
@@ -67,13 +82,4 @@ public abstract record BaseCollectionsRecord<T, TID> : ObservableRecord<T, TID> 
         public Set( int            capacity ) : base( capacity ) { }
         public Set( IEnumerable<T> items ) : base( items ) { }
     }
-}
-
-
-
-[ Serializable ]
-public abstract record BaseCollectionsRecord<T> : BaseCollectionsRecord<T, long> where T : BaseCollectionsRecord<T, long>
-{
-    protected BaseCollectionsRecord() : base() { }
-    protected BaseCollectionsRecord( long id ) : base( id ) { }
 }
