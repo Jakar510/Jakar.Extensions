@@ -7,7 +7,7 @@ namespace Jakar.Extensions;
 
 
 [ Serializable ]
-public class VerifyRequest : BaseClass, ILoginRequest, ICredentials, ICloneable, IEquatable<VerifyRequest>, JsonModels.IJsonizer<VerifyRequest, VerifyRequestContext>, JsonModels.IJsonModel<VerifyRequest>
+public class VerifyRequest : BaseClass, ILoginRequest, ICredentials, ICloneable, IEquatable<VerifyRequest>, MsJsonModels.IJsonizer<VerifyRequest, VerifyRequestContext>, MsJsonModels.IJsonModel<VerifyRequest>
 {
     public static JsonTypeInfo<VerifyRequest> JsonTypeInfo          => JsonSerializerContext.VerifyRequest;
     public static VerifyRequestContext        JsonSerializerContext => VerifyRequestContext.Default;

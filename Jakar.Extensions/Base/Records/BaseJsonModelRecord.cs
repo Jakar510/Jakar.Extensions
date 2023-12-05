@@ -1,8 +1,4 @@
-﻿using System.Text.Json;
-
-
-
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
 
 
 [ Serializable ]
@@ -24,7 +20,7 @@ public abstract record BaseJsonModelRecord<TClass, TID> : CollectionsRecord<TCla
 
 
 [ Serializable ]
-public record BaseMsJsonModelRecord : ObservableRecord
+public record BaseMsJsonModelRecord : ObservableRecord, MsJsonModels.IJsonModel
 {
     [ System.Text.Json.Serialization.JsonExtensionData ] public IDictionary<string, JsonElement>? AdditionalData { get; set; }
 }

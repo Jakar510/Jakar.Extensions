@@ -24,7 +24,7 @@ public interface IAddress
 
 
 
-public record UserAddress : ObservableRecord, IAddress, IComparable<UserAddress>, IComparable, JsonModels.IJsonizer<UserAddress, UserAddressContext>, JsonModels.IJsonModel<UserAddress>
+public record UserAddress : ObservableRecord, IAddress, IComparable<UserAddress>, IComparable, MsJsonModels.IJsonizer<UserAddress, UserAddressContext>, MsJsonModels.IJsonModel<UserAddress>
 {
     private       bool                              _isPrimary;
     private       Guid?                             _userID;

@@ -8,7 +8,7 @@ using System.Text.Json.Serialization.Metadata;
 namespace Jakar.Extensions;
 
 
-public interface IUserData : JsonModels.IJsonModel, IEquatable<IUserData>, IComparable<IUserData>
+public interface IUserData : MsJsonModels.IJsonModel, IEquatable<IUserData>, IComparable<IUserData>
 {
     public static Equalizer<IUserData> Equalizer => Equalizer<IUserData>.Default;
     public static Sorter<IUserData>    Sorter    => Sorter<IUserData>.Default;
@@ -40,7 +40,7 @@ public interface IUserData<out T> : IUserData
 
 
 [ Serializable ]
-public class UserData : ObservableClass, IUserData<UserData>, JsonModels.IJsonizer<UserData, UserDataContext>
+public class UserData : ObservableClass, IUserData<UserData>, MsJsonModels.IJsonizer<UserData, UserDataContext>
 {
     public const string                            EMPTY_PHONE_NUMBER = "(000) 000-0000";
     private      IDictionary<string, JsonElement>? _additionalData;

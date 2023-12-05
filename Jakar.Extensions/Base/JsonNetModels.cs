@@ -4,7 +4,7 @@
 namespace Jakar.Extensions;
 
 
-public static class JsonNetModels
+public static class JsonModels
 {
     public static bool Contains( this IJsonModel       self, string key ) => self.AdditionalData?.ContainsKey( key )      ?? false;
     public static bool Contains( this IJsonStringModel self, string key ) => self.GetAdditionalData()?.ContainsKey( key ) ?? false;

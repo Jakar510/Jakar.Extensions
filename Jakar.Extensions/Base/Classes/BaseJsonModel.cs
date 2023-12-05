@@ -24,7 +24,7 @@ public abstract class BaseJsonModel<TClass> : Collections<TClass>, JsonModels.IJ
 
 
 [ Serializable ]
-public class BaseMsJsonModel : ObservableClass
+public class BaseMsJsonModel : ObservableClass, MsJsonModels.IJsonModel
 {
     [ System.Text.Json.Serialization.JsonExtensionData ] public IDictionary<string, JsonElement>? AdditionalData { get; set; }
 }

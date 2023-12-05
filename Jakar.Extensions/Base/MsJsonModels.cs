@@ -6,7 +6,7 @@ using System.Text.Json.Serialization.Metadata;
 namespace Jakar.Extensions;
 
 
-public static class JsonModels
+public static class MsJsonModels
 {
     public static bool Contains<TClass>( this IJsonModel<TClass> self, string key )
         where TClass : IJsonModel<TClass>, IJsonizer<TClass> => self.AdditionalData?.ContainsKey( key ) is true;
