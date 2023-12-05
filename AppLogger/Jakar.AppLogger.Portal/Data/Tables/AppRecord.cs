@@ -2,7 +2,7 @@
 
 
 [ Serializable, Table( "Apps" ) ]
-public sealed record AppRecord : OwnedLoggerTable<AppRecord>, IDbReaderMapping<AppRecord>
+public sealed record AppRecord : OwnedLoggerTable<AppRecord>, IDbReaderMapping<AppRecord>, IMsJsonContext<AppRecord>
 {
     public static string TableName { get; } = typeof(AppRecord).GetTableName();
 
@@ -33,4 +33,14 @@ public sealed record AppRecord : OwnedLoggerTable<AppRecord>, IDbReaderMapping<A
 
     public override int CompareTo( AppRecord? other ) => string.CompareOrdinal( AppName, other?.AppName );
     public override int GetHashCode()                 => HashCode.Combine( AppName, base.GetHashCode() );
+    public static JsonSerializerOptions JsonOptions( bool formatted ) => new()
+                                                                         {
+                                                                             WriteIndented    = formatted,
+                                                                             TypeInfoResolver = AppRecordContext.Default
+                                                                         };
+    public static JsonTypeInfo<AppRecord> JsonTypeInfo() => AppRecordContext.Default.AppRecord;
 }
+
+
+
+[ JsonSerializable( typeof(AppRecord) ) ] public partial class AppRecordContext : JsonSerializerContext { }

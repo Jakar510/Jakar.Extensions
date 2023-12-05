@@ -18,8 +18,9 @@ public abstract record UserSubscription<TRecord>
                                                                                                                                                                                                                        DateCreated,
                                                                                                                                                                                                                        LastModified ),
                                                                                                                                                                                             IUserSubscription
-    where TRecord : UserSubscription<TRecord>, IDbReaderMapping<TRecord>
+    where TRecord : UserSubscription<TRecord>, IDbReaderMapping<TRecord>, IMsJsonContext<TRecord>
 {
+    [ Pure ]
     public override DynamicParameters ToDynamicParameters()
     {
         var parameters = base.ToDynamicParameters();

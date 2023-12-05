@@ -1,6 +1,11 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 08/14/2022  8:39 PM
 
+using System.Security.Cryptography;
+using Microsoft.Extensions.Caching.Distributed;
+
+
+
 namespace Jakar.Database;
 
 
@@ -9,35 +14,41 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
 {
     public const       ClaimType               DEFAULT_CLAIM_TYPES = ClaimType.UserID | ClaimType.UserName | ClaimType.GroupSid | ClaimType.Role;
     protected readonly ConcurrentBag<IDbTable> _tables             = new();
+    protected readonly IDistributedCache       _distributedCache;
     protected readonly ISqlCacheFactory        _sqlCacheFactory;
-    public             DbTable<AddressRecord>  Addresses { get; }
-    public int? CommandTimeout
-    {
-        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => Options.CommandTimeout;
-    }
-    public             IConfiguration       Configuration    { get; }
-    protected internal SecuredString?       ConnectionString { get; set; }
-    public             DbTable<GroupRecord> Groups           { get; }
-    public DbInstance Instance
-    {
-        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => Options.DbType;
-    }
-    public DbOptions Options { get; }
-    protected internal PasswordValidator PasswordValidator
-    {
-        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => new(Options.PasswordRequirements);
-    }
-    public DbTable<RecoveryCodeRecord>     RecoveryCodes     { get; }
-    public DbTable<RoleRecord>             Roles             { get; }
-    public DbTable<UserGroupRecord>        UserGroups        { get; }
-    public DbTable<UserLoginInfoRecord>    UserLogins        { get; }
-    public DbTable<UserRecoveryCodeRecord> UserRecoveryCodes { get; }
-    public DbTable<UserRoleRecord>         UserRoles         { get; }
-    public DbTable<UserRecord>             Users             { get; }
+    protected readonly ITableCacheFactory      _tableCacheFactory;
+    protected readonly string                  _className;
+
+
+    public static IDataProtector DataProtector { get; set; } = new DataProtector( RSAEncryptionPadding.OaepSHA1 );
     public AppVersion Version
     {
         [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => Options.Version;
     }
+    public DbInstance Instance
+    {
+        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => Options.DbType;
+    }
+    public DbOptions                       Options           { get; }
+    public DbTable<AddressRecord>          Addresses         { get; }
+    public DbTable<GroupRecord>            Groups            { get; }
+    public DbTable<RecoveryCodeRecord>     RecoveryCodes     { get; }
+    public DbTable<RoleRecord>             Roles             { get; }
+    public DbTable<UserGroupRecord>        UserGroups        { get; }
+    public DbTable<UserLoginInfoRecord>    UserLogins        { get; }
+    public DbTable<UserRecord>             Users             { get; }
+    public DbTable<UserRecoveryCodeRecord> UserRecoveryCodes { get; }
+    public DbTable<UserRoleRecord>         UserRoles         { get; }
+    public IConfiguration                  Configuration     { get; }
+    public int? CommandTimeout
+    {
+        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => Options.CommandTimeout;
+    }
+    protected internal PasswordValidator PasswordValidator
+    {
+        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => new(Options.PasswordRequirements);
+    }
+    protected internal SecuredString? ConnectionString { get; set; }
 
 
     static Database()
@@ -62,20 +73,23 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
         UserRights.RegisterDapperTypeHandlers();
     }
 
-    protected Database( IConfiguration configuration, ISqlCacheFactory sqlCacheFactory, IOptions<DbOptions> options ) : base()
+    protected Database( IConfiguration configuration, ISqlCacheFactory sqlCacheFactory, IOptions<DbOptions> options, IDistributedCache distributedCache, ITableCacheFactory tableCacheFactory ) : base()
     {
-        _sqlCacheFactory  = sqlCacheFactory;
-        Configuration     = configuration;
-        Options           = options.Value;
-        Users             = Create<UserRecord>();
-        Roles             = Create<RoleRecord>();
-        UserRoles         = Create<UserRoleRecord>();
-        UserGroups        = Create<UserGroupRecord>();
-        Groups            = Create<GroupRecord>();
-        RecoveryCodes     = Create<RecoveryCodeRecord>();
-        UserLogins        = Create<UserLoginInfoRecord>();
-        UserRecoveryCodes = Create<UserRecoveryCodeRecord>();
-        Addresses         = Create<AddressRecord>();
+        _sqlCacheFactory   = sqlCacheFactory;
+        _tableCacheFactory = tableCacheFactory;
+        _distributedCache  = distributedCache;
+        Configuration      = configuration;
+        Options            = options.Value;
+        _className         = GetType().Name;
+        Users              = Create<UserRecord>();
+        Roles              = Create<RoleRecord>();
+        UserRoles          = Create<UserRoleRecord>();
+        UserGroups         = Create<UserGroupRecord>();
+        Groups             = Create<GroupRecord>();
+        RecoveryCodes      = Create<RecoveryCodeRecord>();
+        UserLogins         = Create<UserLoginInfoRecord>();
+        UserRecoveryCodes  = Create<UserRecoveryCodeRecord>();
+        Addresses          = Create<AddressRecord>();
     }
     public virtual async ValueTask DisposeAsync()
     {
@@ -100,11 +114,12 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
 
     [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
     protected virtual DbTable<TRecord> Create<TRecord>()
-        where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>
+        where TRecord : class, ITableRecord<TRecord>, IDbReaderMapping<TRecord>, IMsJsonContext<TRecord>
     {
         var table = new DbTable<TRecord>( this, _sqlCacheFactory );
         return AddDisposable( table );
     }
+
     [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
     protected TValue AddDisposable<TValue>( TValue value )
         where TValue : IDbTable
@@ -116,6 +131,10 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     {
         foreach ( IDbTable table in _tables ) { table.ResetSqlCaches(); }
     }
+
+
+    public ITableCache<TRecord> GetCache<TRecord>( DbTable<TRecord> table )
+        where TRecord : class, ITableRecord<TRecord>, IDbReaderMapping<TRecord>, IMsJsonContext<TRecord> => _tableCacheFactory.GetCache( table );
 
 
     [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]

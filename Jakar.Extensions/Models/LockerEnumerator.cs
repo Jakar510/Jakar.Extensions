@@ -34,13 +34,17 @@ public struct LockerEnumerator<TValue, TList> : IEnumerator<TValue>, IEnumerable
             _cache = _collection.Copy();
         }
 
-        return ILockedCollection<TValue>.MoveNext( Reset, out _current, ref _index, _cache.Span );
+        bool result = ILockedCollection<TValue>.MoveNext( ref _index, _cache.Span, out _current );
+        if ( result is false ) { Reset(); }
+
+        return result;
     }
     public void Reset()
     {
         if ( _collection is null ) { throw new ObjectDisposedException( nameof(LockerEnumerator<TValue, TList>) ); }
-
-        _index = START_INDEX;
-        _cache = default;
+        
+        _cache   = default;
+        _current = default;
+        Interlocked.Exchange( ref _index, START_INDEX );
     }
 }

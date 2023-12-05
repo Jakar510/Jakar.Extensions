@@ -38,28 +38,29 @@ public sealed class AsyncLockerEnumerator<TValue, TList> : IAsyncEnumerable<TVal
         // ReSharper disable once InvertIf
         if ( _cache.IsEmpty )
         {
-            _index = START_INDEX;
+            Interlocked.Exchange( ref _index, START_INDEX );
             _cache = await _collection.CopyAsync( _token );
         }
 
-        return ILockedCollection<TValue>.MoveNext( Reset, out _current, ref _index, _cache.Span );
+        bool result = ILockedCollection<TValue>.MoveNext( ref _index, _cache.Span, out _current );
+        if ( result is false ) { Reset(); }
+
+        return result;
     }
     IAsyncEnumerator<TValue> IAsyncEnumerable<TValue>.GetAsyncEnumerator( CancellationToken token ) => GetAsyncEnumerator( token );
     public AsyncLockerEnumerator<TValue, TList> GetAsyncEnumerator( CancellationToken token = default )
     {
-        if ( _isDisposed ) { throw new ObjectDisposedException( nameof(AsyncLockerEnumerator<TValue, TList>) ); }
-
         Reset();
-        if ( token.CanBeCanceled ) { _token = token; }
-
+        _token = token;
         return this;
     }
     public void Reset()
     {
         if ( _isDisposed ) { throw new ObjectDisposedException( nameof(AsyncLockerEnumerator<TValue, TList>) ); }
 
-        _index = START_INDEX;
-        _cache = default;
+        _cache   = default;
+        _current = default;
+        Interlocked.Exchange( ref _index, START_INDEX );
     }
 
 

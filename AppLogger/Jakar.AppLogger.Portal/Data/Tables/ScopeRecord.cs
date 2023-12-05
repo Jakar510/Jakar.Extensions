@@ -2,10 +2,6 @@
 // 09/21/2022  4:59 PM
 
 
-using System.Collections.Immutable;
-
-
-
 namespace Jakar.AppLogger.Portal.Data.Tables;
 
 
@@ -16,7 +12,7 @@ public sealed record ScopeRecord( RecordID<AppRecord>     AppID,
                                   RecordID<ScopeRecord>   ID,
                                   DateTimeOffset          DateCreated,
                                   DateTimeOffset?         LastModified = default
-) : LoggerTable<ScopeRecord>( ID, DateCreated, LastModified ), IDbReaderMapping<ScopeRecord>
+) : LoggerTable<ScopeRecord>( ID, DateCreated, LastModified ), IDbReaderMapping<ScopeRecord>, IMsJsonContext<ScopeRecord>
 {
     public static string TableName { get; } = typeof(ScopeRecord).GetTableName();
 
@@ -47,12 +43,22 @@ public sealed record ScopeRecord( RecordID<AppRecord>     AppID,
 
 
     public override int CompareTo( ScopeRecord? other ) => Nullable.Compare( AppID, other?.AppID );
+    public static JsonSerializerOptions JsonOptions( bool formatted ) => new()
+                                                                         {
+                                                                             WriteIndented    = formatted,
+                                                                             TypeInfoResolver = ScopeRecordContext.Default
+                                                                         };
+    public static JsonTypeInfo<ScopeRecord> JsonTypeInfo() => ScopeRecordContext.Default.ScopeRecord;
 }
 
 
 
+[ JsonSerializable( typeof(ScopeRecord) ) ] public partial class ScopeRecordContext : JsonSerializerContext { }
+
+
+
 [ Serializable, Table( "LogScopes" ) ]
-public sealed record LogScopeRecord : Mapping<LogScopeRecord, LogRecord, ScopeRecord>, ICreateMapping<LogScopeRecord, LogRecord, ScopeRecord>, IDbReaderMapping<LogScopeRecord>
+public sealed record LogScopeRecord : Mapping<LogScopeRecord, LogRecord, ScopeRecord>, ICreateMapping<LogScopeRecord, LogRecord, ScopeRecord>, IDbReaderMapping<LogScopeRecord>, IMsJsonContext<LogScopeRecord>
 {
     public static string TableName { get; } = typeof(LogScopeRecord).GetTableName();
 
@@ -75,4 +81,14 @@ public sealed record LogScopeRecord : Mapping<LogScopeRecord, LogRecord, ScopeRe
     {
         while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
     }
+    public static JsonSerializerOptions JsonOptions( bool formatted ) => new()
+                                                                         {
+                                                                             WriteIndented    = formatted,
+                                                                             TypeInfoResolver = LogScopeRecordContext.Default
+                                                                         };
+    public static JsonTypeInfo<LogScopeRecord> JsonTypeInfo() => LogScopeRecordContext.Default.LogScopeRecord;
 }
+
+
+
+[ JsonSerializable( typeof(LogScopeRecord) ) ] public partial class LogScopeRecordContext : JsonSerializerContext { }

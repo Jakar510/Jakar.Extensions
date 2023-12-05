@@ -6,16 +6,18 @@ namespace Jakar.Database;
 
 
 [ SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" ) ]
-public partial class DbTable<TRecord> : IConnectableDb where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
+public partial class DbTable<TRecord> : IConnectableDb
+    where TRecord : class, ITableRecord<TRecord>, IDbReaderMapping<TRecord>, IMsJsonContext<TRecord>
 {
-    protected readonly IConnectableDbRoot  _database;
-    protected readonly ISqlCacheFactory    _sqlCacheFactory;
-    private            ISqlCache<TRecord>? _cache;
+    protected readonly IConnectableDbRoot   _database;
+    protected readonly ISqlCacheFactory     _sqlCacheFactory;
+    protected readonly ITableCache<TRecord> _tableCache;
+    private            ISqlCache<TRecord>?  _sqlCache;
 
 
     public static ImmutableArray<TRecord>  Empty          => ImmutableArray<TRecord>.Empty;
     public static ImmutableList<TRecord>   EmptyList      => ImmutableList<TRecord>.Empty;
-    public        ISqlCache<TRecord>       Cache          => _cache ??= _sqlCacheFactory.GetSqlCache<TRecord>( _database );
+    public        ISqlCache<TRecord>       SqlCache       => _sqlCache ??= _sqlCacheFactory.GetSqlCache<TRecord>( _database );
     public        int?                     CommandTimeout => _database.CommandTimeout;
     public        DbInstance               Instance       => _database.Instance;
     public        RecordGenerator<TRecord> Records        => new(this);
@@ -24,28 +26,23 @@ public partial class DbTable<TRecord> : IConnectableDb where TRecord : ITableRec
     public DbTable( IConnectableDbRoot database, ISqlCacheFactory sqlCacheFactory )
     {
         _database        = database;
+        _tableCache      = database.GetCache( this );
         _sqlCacheFactory = sqlCacheFactory;
         if ( TRecord.TableName != typeof(TRecord).GetTableName() ) { throw new InvalidOperationException( $"{TRecord.TableName} != {typeof(TRecord).GetTableName()}" ); }
     }
-
-
     public virtual ValueTask DisposeAsync()
     {
         GC.SuppressFinalize( this );
         return default;
     }
     public ValueTask<DbConnection> ConnectAsync( CancellationToken token = default ) => _database.ConnectAsync( token );
-
-
-    public void ResetSqlCaches() => _cache = null;
+    public void                    ResetSqlCaches()                                  => _sqlCache = null;
 
 
     public IAsyncEnumerable<TRecord> All( CancellationToken token = default ) => this.Call( All, token );
-
-    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public virtual async IAsyncEnumerable<TRecord> All( DbConnection connection, DbTransaction? transaction, [ EnumeratorCancellation ] CancellationToken token = default )
     {
-        SqlCommand               sql    = Cache.All();
+        SqlCommand               sql    = SqlCache.All();
         await using DbDataReader reader = await _database.ExecuteReaderAsync( connection, transaction, sql, token );
         await foreach ( TRecord record in TRecord.CreateAsync( reader, token ) ) { yield return record; }
     }

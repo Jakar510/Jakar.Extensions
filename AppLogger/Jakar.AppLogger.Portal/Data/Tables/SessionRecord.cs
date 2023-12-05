@@ -12,7 +12,7 @@ public sealed record SessionRecord( DateTimeOffset          AppStartTime,
                                     RecordID<SessionRecord> ID,
                                     DateTimeOffset          DateCreated,
                                     DateTimeOffset?         LastModified = default
-) : LoggerTable<SessionRecord>( ID, DateCreated, LastModified ), IDbReaderMapping<SessionRecord>, IStartSession
+) : LoggerTable<SessionRecord>( ID, DateCreated, LastModified ), IDbReaderMapping<SessionRecord>, IStartSession, IMsJsonContext<SessionRecord>
 {
     public static string TableName { get; } = typeof(SessionRecord).GetTableName();
 
@@ -66,4 +66,14 @@ public sealed record SessionRecord( DateTimeOffset          AppStartTime,
         return DeviceID.CompareTo( other.DeviceID );
     }
     public override int GetHashCode() => HashCode.Combine( AppID, DeviceID, base.GetHashCode() );
+    public static JsonSerializerOptions JsonOptions( bool formatted ) => new()
+                                                                         {
+                                                                             WriteIndented    = formatted,
+                                                                             TypeInfoResolver = SessionRecordContext.Default
+                                                                         };
+    public static JsonTypeInfo<SessionRecord> JsonTypeInfo() => SessionRecordContext.Default.SessionRecord;
 }
+
+
+
+[ JsonSerializable( typeof(SessionRecord) ) ] public partial class SessionRecordContext : JsonSerializerContext { }

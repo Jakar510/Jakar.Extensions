@@ -16,7 +16,7 @@ public partial class DbTable<TRecord>
     [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public virtual IAsyncEnumerable<TRecord> Where( DbConnection connection, DbTransaction? transaction, bool matchAll, DynamicParameters parameters, [ EnumeratorCancellation ] CancellationToken token = default )
     {
-        SqlCommand sql = Cache.Where( matchAll, parameters );
+        SqlCommand sql = SqlCache.Where( matchAll, parameters );
         return Where( connection, transaction, sql, token );
     }
 
@@ -31,7 +31,7 @@ public partial class DbTable<TRecord>
     [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public virtual IAsyncEnumerable<TRecord> Where<TValue>( DbConnection connection, DbTransaction? transaction, string columnName, TValue? value, [ EnumeratorCancellation ] CancellationToken token = default )
     {
-        SqlCommand sql = Cache.Where( columnName, value );
+        SqlCommand sql = SqlCache.Where( columnName, value );
         return Where( connection, transaction, sql, token );
     }
 }

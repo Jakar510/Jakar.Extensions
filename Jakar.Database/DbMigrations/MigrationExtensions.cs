@@ -1,4 +1,8 @@
-﻿namespace Jakar.Database.DbMigrations;
+﻿using JsonIgnoreAttribute = Newtonsoft.Json.JsonIgnoreAttribute;
+
+
+
+namespace Jakar.Database.DbMigrations;
 
 
 [ SuppressMessage( "ReSharper", "UnusedMethodReturnValue.Global" ) ]

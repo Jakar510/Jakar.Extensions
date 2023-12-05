@@ -39,8 +39,9 @@ public sealed class OneTimePassword : IOneTimePassword
     }
 
 
-    public static IOneTimePassword Create( string    secretKey, string issuer ) => new OneTimePassword( secretKey, issuer );
-    public static IOneTimePassword Create<T>( string secretKey ) where T : IAppName => new OneTimePassword( secretKey, typeof(T).Name );
+    public static IOneTimePassword Create( string secretKey, string issuer ) => new OneTimePassword( secretKey, issuer );
+    public static IOneTimePassword Create<T>( string secretKey )
+        where T : IAppName => new OneTimePassword( secretKey, typeof(T).Name );
 
 
     public static string GenerateSecret()
@@ -78,6 +79,7 @@ public sealed class OneTimePassword : IOneTimePassword
                                    }
                      };
 
-        return writer.Write( GetContent( record ) ).ToString();
+        var result = writer.Write( GetContent( record ) ).ToString();
+        return result ?? throw new NullReferenceException( nameof(result) );
     }
 }

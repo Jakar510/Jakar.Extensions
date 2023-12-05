@@ -1,12 +1,26 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 08/14/2022  8:38 PM
 
+using System.Text.Json;
+using System.Text.Json.Serialization.Metadata;
+
+
+
 namespace Jakar.Database;
 
 
 public interface IRecordPair : IUniqueID<Guid> // where TID : IComparable<TID>, IEquatable<TID>
 {
     public DateTimeOffset DateCreated { get; }
+}
+
+
+
+public interface IMsJsonContext<TRecord>
+    where TRecord : IDbReaderMapping<TRecord>
+{
+    public abstract static JsonSerializerOptions JsonOptions( bool formatted );
+    public abstract static JsonTypeInfo<TRecord> JsonTypeInfo();
 }
 
 
@@ -34,37 +48,48 @@ public interface ITableRecord : IRecordPair
 public interface ITableRecord<TRecord> : ITableRecord
     where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
-    public new RecordID<TRecord> ID { get; }
-    Guid IUniqueID<Guid>.        ID => ID.Value;
-    public TRecord               NewID( RecordID<TRecord> id );
+    Guid IUniqueID<Guid>.          ID => ID.Value;
+    public new RecordID<TRecord>   ID { get; }
+    public     RecordPair<TRecord> ToPair();
+    public     TRecord             NewID( RecordID<TRecord> id );
+    public     UInt128             GetHash();
 }
 
 
 
 public interface IOwnedTableRecord
 {
-    public RecordID<UserRecord>? CreatedBy   { get; }
     public Guid?                 OwnerUserID { get; }
+    public RecordID<UserRecord>? CreatedBy   { get; }
 }
 
 
 
 [ Serializable ]
 public abstract record TableRecord<TRecord>( [ property: Key ] RecordID<TRecord> ID, DateTimeOffset DateCreated, DateTimeOffset? LastModified ) : BaseRecord, ITableRecord<TRecord>, IComparable<TRecord>
-    where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>
+    where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>, IMsJsonContext<TRecord>
 {
     protected TableRecord( RecordID<TRecord> id ) : this( id, DateTimeOffset.UtcNow, null ) { }
+
+    public RecordPair<TRecord> ToPair() => new(ID, DateCreated);
 
 
     [ Conditional( "DEBUG" ) ]
     public void Validate()
     {
-        PropertyInfo[]    properties = typeof(TRecord).GetProperties();
+        PropertyInfo[]    properties = typeof(TRecord).GetProperties( BindingFlags.Instance | BindingFlags.Public );
         DynamicParameters parameters = ToDynamicParameters();
         int               length     = parameters.ParameterNames.Count();
         if ( length == properties.Length ) { return; }
 
-        string message = $"{typeof(TRecord).Name}: {nameof(ToDynamicParameters)}.Length ({length}) != {nameof(properties)}.Length ({properties.Length})";
+        var missing = new HashSet<string>( properties.Select( x => x.Name ) );
+        missing.ExceptWith( parameters.ParameterNames );
+
+        string message = $"""
+                          {typeof(TRecord).Name}: {nameof(ToDynamicParameters)}.Length ({length}) != {nameof(properties)}.Length ({properties.Length})
+                          {missing.ToPrettyJson()}
+                          """;
+
         throw new InvalidOperationException( message );
     }
 
@@ -101,6 +126,11 @@ public abstract record TableRecord<TRecord>( [ property: Key ] RecordID<TRecord>
                                                               {
                                                                   ID = id
                                                               });
+    public UInt128 GetHash()
+    {
+        string json = JsonSerializer_.Serialize( this, TRecord.JsonOptions( false ) );
+        return Spans.Hash128( json );
+    }
 
 
     public virtual int CompareTo( TRecord? other )
@@ -121,7 +151,7 @@ public abstract record TableRecord<TRecord>( [ property: Key ] RecordID<TRecord>
 [ Serializable ]
 public abstract record OwnedTableRecord<TRecord>
     ( RecordID<TRecord> ID, RecordID<UserRecord>? CreatedBy, Guid? OwnerUserID, DateTimeOffset DateCreated, DateTimeOffset? LastModified ) : TableRecord<TRecord>( ID, DateCreated, LastModified ), IOwnedTableRecord
-    where TRecord : OwnedTableRecord<TRecord>, IDbReaderMapping<TRecord>
+    where TRecord : OwnedTableRecord<TRecord>, IDbReaderMapping<TRecord>, IMsJsonContext<TRecord>
 {
     protected OwnedTableRecord( UserRecord?       owner ) : this( RecordID<TRecord>.New(), owner ) { }
     protected OwnedTableRecord( RecordID<TRecord> id, UserRecord? owner = default ) : this( id, owner?.ID, owner?.UserID, DateTimeOffset.UtcNow, null ) { }

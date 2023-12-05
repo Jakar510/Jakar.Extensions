@@ -112,7 +112,7 @@
 		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Options" Version="8.0.0" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-		<PackageReference Include="Nito.Collections.Deque" Version="1.1.1" />
+		<PackageReference Include="Nito.Collections.Deque" Version="1.2.1" />
 		<PackageReference Include="Portable.BouncyCastle" Version="1.9.0" />
 		<PackageReference Include="System.Collections.Immutable" Version="8.0.0" />
 		<PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />

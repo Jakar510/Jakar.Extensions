@@ -4,6 +4,7 @@
 namespace Jakar.Database;
 
 
+[ SuppressMessage( "ReSharper", "UnusedMethodReturnValue.Global" ) ]
 public static class DbHostingExtensions
 {
     public static void ConfigureMigrationsMsSql( this IMigrationRunnerBuilder migration )
@@ -20,21 +21,35 @@ public static class DbHostingExtensions
     }
 
 
-    public static WebApplicationBuilder AddDb<TDatabase>( this WebApplicationBuilder builder, Action<DbOptions> dbOptions, Action<IMigrationRunnerBuilder> migration )
-        where TDatabase : Database => builder.AddDb<TDatabase, SqlCacheFactory>( dbOptions, migration );
+    public static WebApplicationBuilder AddDb<TDatabase>( this WebApplicationBuilder builder, Action<DbOptions> dbOptions, Action<TableCacheOptions> tableCacheOptions, Action<IMigrationRunnerBuilder> migration )
+        where TDatabase : Database => builder.AddDb<TDatabase, SqlCacheFactory, TableCacheFactory>( dbOptions, tableCacheOptions, migration );
 
 
-    public static WebApplicationBuilder AddDb<TDatabase, TSqlCacheFactory>( this WebApplicationBuilder builder, Action<DbOptions> dbOptions, Action<IMigrationRunnerBuilder> migration )
+    public static WebApplicationBuilder AddDb<TDatabase, TSqlCacheFactory>( this WebApplicationBuilder builder, Action<DbOptions> dbOptions, Action<TableCacheOptions> tableCacheOptions, Action<IMigrationRunnerBuilder> migration )
+        where TDatabase : Database
+        where TSqlCacheFactory : class, ISqlCacheFactory => builder.AddDb<TDatabase, TSqlCacheFactory, TableCacheFactory>( dbOptions, tableCacheOptions, migration );
+
+
+    public static WebApplicationBuilder AddDb<TDatabase, TSqlCacheFactory, TTableCacheFactory>( this WebApplicationBuilder builder, Action<DbOptions> dbOptions, Action<TableCacheOptions> tableCacheOptions, Action<IMigrationRunnerBuilder> migration )
         where TDatabase : Database
         where TSqlCacheFactory : class, ISqlCacheFactory
+        where TTableCacheFactory : class, ITableCacheFactoryService
     {
         builder.Services.AddOptions<DbOptions>().Configure( dbOptions );
+        builder.Services.AddOptions<TableCacheOptions>().Configure( tableCacheOptions );
 
         builder.Services.AddSingleton<ISqlCacheFactory, TSqlCacheFactory>();
+        builder.Services.AddSingleton<ITableCacheFactoryService, TTableCacheFactory>();
+        builder.Services.AddSingleton( GetTableCacheFactory );
+        builder.Services.AddHostedService( GetTableCacheFactoryService );
         builder.Services.AddSingleton<TDatabase>();
-        builder.Services.AddTransient<Database>( provider => provider.GetRequiredService<TDatabase>() );
+        builder.Services.AddSingleton( GetDatabase<TDatabase> );
 
         builder.Services.AddFluentMigratorCore().ConfigureRunner( migration );
         return builder;
     }
+    public static Database GetDatabase<TDatabase>( IServiceProvider provider )
+        where TDatabase : Database => provider.GetRequiredService<TDatabase>();
+    public static ITableCacheFactory        GetTableCacheFactory( IServiceProvider        provider ) => provider.GetRequiredService<ITableCacheFactoryService>();
+    public static ITableCacheFactoryService GetTableCacheFactoryService( IServiceProvider provider ) => provider.GetRequiredService<ITableCacheFactoryService>();
 }

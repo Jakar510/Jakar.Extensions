@@ -21,19 +21,15 @@ public interface ILockedCollection<TValue> : IReadOnlyCollection<TValue>
     ConfiguredValueTaskAwaitable<ReadOnlyMemory<TValue>> CopyAsync( CancellationToken token );
 
 
-    public static bool MoveNext( Action reset, out TValue? current, ref int index, in ReadOnlySpan<TValue> span )
+    public static bool MoveNext( ref int index, in ReadOnlySpan<TValue> span, out TValue? current )
     {
-        index++;
+        int i = Interlocked.Add( ref index, 1 );
 
-        current = index < span.Length
-                      ? span[index]
+        current = i < span.Length
+                      ? span[i]
                       : default;
 
-        bool result = index < span.Length;
-        if ( result ) { return result; }
-
-        reset();
-        return result;
+        return i < span.Length;
     }
 }
 
