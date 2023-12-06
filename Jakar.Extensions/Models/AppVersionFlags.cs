@@ -4,8 +4,12 @@
 namespace Jakar.Extensions;
 
 
-public readonly record struct AppVersionFlags( string Flag, uint Iteration ) : IEquatable<AppVersionFlags?>, IComparable<AppVersionFlags>, IComparable<AppVersionFlags?>, IComparable, IFormattable
-#if NET7_0_OR_GREATER
+public readonly record struct AppVersionFlags( string Flag, uint Iteration ) : IEquatable<AppVersionFlags?>,
+                                                                               IComparable<AppVersionFlags>,
+                                                                               IComparable<AppVersionFlags?>,
+                                                                               IComparable,
+                                                                               IFormattable
+                                                                           #if NET7_0_OR_GREATER
                                                                                ,
                                                                                IParsable<AppVersionFlags>,
                                                                                ISpanParsable<AppVersionFlags>
@@ -45,7 +49,7 @@ public readonly record struct AppVersionFlags( string Flag, uint Iteration ) : I
 
 
 #if NET6_0_OR_GREATER
-    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
+    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
 #endif
     public bool TryFormat( Span<char> span, out int charsWritten, ReadOnlySpan<char> format = default, IFormatProvider? provider = default )
     {
@@ -141,7 +145,7 @@ public readonly record struct AppVersionFlags( string Flag, uint Iteration ) : I
 
             ReadOnlySpan<char> span = value[(index - 1)..].Trim( SEPARATOR );
 
-            int end = span.IndexOfAny( Randoms.Numeric );
+            int end = span.IndexOfAny( Randoms.Numeric.Span );
 
             return end == -1
                        ? new AppVersionFlags( span.ToString(),        0 )

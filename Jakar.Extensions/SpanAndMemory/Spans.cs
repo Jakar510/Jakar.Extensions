@@ -4,18 +4,19 @@
 [ SuppressMessage( "ReSharper", "OutParameterValueIsAlwaysDiscarded.Global" ) ]
 public static partial class Spans
 {
+    [ Pure ] public static Span<byte> AsBytes( this Span<char> span ) => MemoryMarshal.AsBytes( span );
+
+    [ Pure ] public static ReadOnlySpan<byte> AsBytes( this ReadOnlySpan<char> span ) => MemoryMarshal.AsBytes( span );
+
+
+    [ Pure ]
     public static bool IsNullOrWhiteSpace( this Span<char> span )
     {
-        if ( span.IsEmpty ) { return true; }
-
-        foreach ( char t in span )
-        {
-            if ( !char.IsWhiteSpace( t ) ) { return false; }
-        }
-
-        return true;
+        ReadOnlySpan<char> value = span;
+        return value.IsNullOrWhiteSpace();
     }
 
+    [ Pure ]
     public static bool IsNullOrWhiteSpace( this ReadOnlySpan<char> span )
     {
         if ( span.IsEmpty ) { return true; }
@@ -27,33 +28,12 @@ public static partial class Spans
 
         return true;
     }
-
-    public static bool IsNullOrWhiteSpace( this Buffer<char> span )
-    {
-        if ( span.IsEmpty ) { return true; }
-
-        foreach ( char t in span )
-        {
-            if ( !char.IsWhiteSpace( t ) ) { return false; }
-        }
-
-        return true;
-    }
-
-    public static bool IsNullOrWhiteSpace( this ValueStringBuilder span )
-    {
-        if ( span.IsEmpty ) { return true; }
-
-        foreach ( char t in span )
-        {
-            if ( !char.IsWhiteSpace( t ) ) { return false; }
-        }
-
-        return true;
-    }
+    [ Pure ] public static bool IsNullOrWhiteSpace( this Buffer<char>       span ) => IsNullOrWhiteSpace( span.Span );
+    [ Pure ] public static bool IsNullOrWhiteSpace( this ValueStringBuilder span ) => IsNullOrWhiteSpace( span.Span );
 
 
-    public static bool SequenceEquals( this ReadOnlySpan<string> left, ReadOnlySpan<string> right )
+    [ Pure ]
+    public static bool SequenceEquals( this ReadOnlySpan<string> left, in ReadOnlySpan<string> right )
     {
         if ( left.Length != right.Length ) { return false; }
 
@@ -67,7 +47,9 @@ public static partial class Spans
 
         return true;
     }
-    public static bool SequenceEquals( this ImmutableArray<string> left, ReadOnlySpan<string> right )
+
+    [ Pure ]
+    public static bool SequenceEquals( this ImmutableArray<string> left, in ReadOnlySpan<string> right )
     {
         if ( left.Length != right.Length ) { return false; }
 
@@ -83,6 +65,7 @@ public static partial class Spans
     }
 
 
+    [ Pure ]
     public static int LastIndexOf<T>( this Span<T> value, T c, int endIndex )
         where T : IEquatable<T>
     {
@@ -91,6 +74,7 @@ public static partial class Spans
         return value[..endIndex].LastIndexOf( c );
     }
 
+    [ Pure ]
     public static int LastIndexOf<T>( this ReadOnlySpan<T> value, T c, int endIndex )
         where T : IEquatable<T>
     {
@@ -121,7 +105,8 @@ public static partial class Spans
         Guard.IsLessThanOrEqualTo( length, span.Length, nameof(length) );
         return MemoryMarshal.CreateSpan( ref MemoryMarshal.GetReference( span ), length );
     }
-    [ Pure ] public static Span<T> AsSpan<T>( this Span<T> span ) => MemoryMarshal.CreateSpan( ref span.GetPinnableReference(), span.Length );
+    [ Pure ] public static Span<T>         AsSpan<T>( this         Span<T> span ) => MemoryMarshal.CreateSpan( ref span.GetPinnableReference(), span.Length );
+    [ Pure ] public static ReadOnlySpan<T> AsReadOnlySpan<T>( this Span<T> span ) => MemoryMarshal.CreateReadOnlySpan( ref span.GetPinnableReference(), span.Length );
     [ Pure ]
     public static Span<T> AsSpan<T>( this Span<T> span, int length )
     {
@@ -134,22 +119,19 @@ public static partial class Spans
     public static Span<T> Join<T>( this Span<T> value, Span<T> other )
         where T : unmanaged, IEquatable<T>
     {
-        int     size   = value.Length + other.Length;
-        Span<T> buffer = stackalloc T[size];
+        Span<T> buffer = stackalloc T[value.Length + other.Length];
         Join( value, other, ref buffer, out int charWritten );
         return MemoryMarshal.CreateSpan( ref buffer.GetPinnableReference(), charWritten );
     }
-
     [ Pure ]
     public static Span<T> Join<T>( this Span<T> value, ReadOnlySpan<T> other )
         where T : unmanaged, IEquatable<T>
     {
-        int     size   = value.Length + other.Length;
-        Span<T> buffer = stackalloc T[size];
+        Span<T> buffer = stackalloc T[value.Length + other.Length];
         Join( value, other, ref buffer, out int charWritten );
         return MemoryMarshal.CreateSpan( ref buffer.GetPinnableReference(), charWritten );
     }
-    public static bool Join<T>( ReadOnlySpan<T> first, ReadOnlySpan<T> last, ref Span<T> buffer, out int charWritten )
+    public static bool Join<T>( in ReadOnlySpan<T> first, in ReadOnlySpan<T> last, ref Span<T> buffer, out int charWritten )
     {
         charWritten = first.Length + last.Length;
         Guard.IsInRangeFor( charWritten - 1, buffer, nameof(buffer) );

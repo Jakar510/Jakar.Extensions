@@ -8,10 +8,10 @@ namespace Jakar.Extensions;
 [ SuppressMessage( "ReSharper", "OutParameterValueIsAlwaysDiscarded.Global" ) ]
 public static partial class Spans
 {
-    public static bool AsMemory( this Span<char>         value, out Memory<char> result ) => MemoryMarshal.TryRead( MemoryMarshal.AsBytes( value ), out result );
-    public static bool AsMemory( this ReadOnlySpan<char> value, out Memory<char> result ) => MemoryMarshal.TryRead( MemoryMarshal.AsBytes( value ), out result );
-    public static bool AsMemory( this Span<byte>         value, out Memory<byte> result ) => MemoryMarshal.TryRead( value,                          out result );
-    public static bool AsMemory( this ReadOnlySpan<byte> value, out Memory<byte> result ) => MemoryMarshal.TryRead( value,                          out result );
+    public static bool AsMemory( this Span<char>         value, out Memory<char> result ) => MemoryMarshal.TryRead( value.AsBytes(), out result );
+    public static bool AsMemory( this ReadOnlySpan<char> value, out Memory<char> result ) => MemoryMarshal.TryRead( value.AsBytes(), out result );
+    public static bool AsMemory( this Span<byte>         value, out Memory<byte> result ) => MemoryMarshal.TryRead( value,           out result );
+    public static bool AsMemory( this ReadOnlySpan<byte> value, out Memory<byte> result ) => MemoryMarshal.TryRead( value,           out result );
 
 
     public static bool AsSegment<T>( this ReadOnlyMemory<T> value, out ArraySegment<T> result ) => MemoryMarshal.TryGetArray( value, out result );
@@ -20,8 +20,8 @@ public static partial class Spans
 
     public static Memory<byte> AsMemory( this Span<byte>         value ) => MemoryMarshal.Read<Memory<byte>>( value );
     public static Memory<byte> AsMemory( this ReadOnlySpan<byte> value ) => MemoryMarshal.Read<Memory<byte>>( value );
-    public static Memory<char> AsMemory( this Span<char>         value ) => MemoryMarshal.Read<Memory<char>>( MemoryMarshal.AsBytes( value ) );
-    public static Memory<char> AsMemory( this ReadOnlySpan<char> value ) => MemoryMarshal.Read<Memory<char>>( MemoryMarshal.AsBytes( value ) );
+    public static Memory<char> AsMemory( this Span<char>         value ) => MemoryMarshal.Read<Memory<char>>( value.AsBytes() );
+    public static Memory<char> AsMemory( this ReadOnlySpan<char> value ) => MemoryMarshal.Read<Memory<char>>( value.AsBytes() );
 
 
     public static ReadOnlySpan<T> AsReadOnlySpan<T>( this Memory<T>         value ) => value.Span;
