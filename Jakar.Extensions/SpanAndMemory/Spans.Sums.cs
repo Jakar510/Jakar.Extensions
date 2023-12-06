@@ -10,125 +10,125 @@ public static partial class Spans
     [Pure]
     public static T Sum<T>( this Span<T> value ) where T : INumber<T>
     {
-        T size = T.Zero;
-        foreach ( T x in value ) { size += x; }
+        T result = T.Zero;
+        foreach ( T x in value ) { result += x; }
 
-        return size;
+        return result;
     }
 #else
     [ Pure ]
     public static double Sum( this Span<double> value )
     {
-        double size = 0;
-        foreach ( double x in value ) { size += x; }
+        double result = 0;
+        foreach ( double x in value ) { result += x; }
 
-        return size;
+        return result;
     }
     [ Pure ]
     public static float Sum( this Span<float> value )
     {
-        float size = 0;
-        foreach ( float x in value ) { size += x; }
+        float result = 0;
+        foreach ( float x in value ) { result += x; }
 
-        return size;
+        return result;
     }
     [ Pure ]
     public static long Sum( this Span<long> value )
     {
-        long size = 0;
-        foreach ( long x in value ) { size += x; }
+        long result = 0;
+        foreach ( long x in value ) { result += x; }
 
-        return size;
+        return result;
     }
     [ Pure ]
     public static ulong Sum( this Span<ulong> value )
     {
-        ulong size = 0;
-        foreach ( ulong x in value ) { size += x; }
+        ulong result = 0;
+        foreach ( ulong x in value ) { result += x; }
 
-        return size;
+        return result;
     }
     [ Pure ]
     public static int Sum( this Span<int> value )
     {
-        int size = 0;
-        foreach ( int x in value ) { size += x; }
+        int result = 0;
+        foreach ( int x in value ) { result += x; }
 
-        return size;
+        return result;
     }
     [ Pure ]
     public static uint Sum( this Span<uint> value )
     {
-        uint size = 0;
-        foreach ( uint x in value ) { size += x; }
+        uint result = 0;
+        foreach ( uint x in value ) { result += x; }
 
-        return size;
+        return result;
     }
     [ Pure ]
     public static short Sum( this Span<short> value )
     {
-        short size = 0;
-        foreach ( short x in value ) { size += x; }
+        short result = 0;
+        foreach ( short x in value ) { result += x; }
 
-        return size;
+        return result;
     }
     [ Pure ]
     public static ushort Sum( this Span<ushort> value )
     {
-        ushort size = 0;
-        foreach ( ushort x in value ) { size += x; }
+        ushort result = 0;
+        foreach ( ushort x in value ) { result += x; }
 
-        return size;
+        return result;
     }
 #endif
 
     [ Pure ]
     public static int Sum<T>( this Span<T> value, Func<T, int> selector )
     {
-        int size = 0;
-        foreach ( T x in value ) { size += selector( x ); }
+        int result = 0;
+        foreach ( T x in value ) { result += selector( x ); }
 
-        return size;
+        return result;
     }
     [ Pure ]
     public static uint Sum<T>( this Span<T> value, Func<T, uint> selector )
     {
-        uint size = 0;
-        foreach ( T x in value ) { size += selector( x ); }
+        uint result = 0;
+        foreach ( T x in value ) { result += selector( x ); }
 
-        return size;
+        return result;
     }
     [ Pure ]
     public static long Sum<T>( this Span<T> value, Func<T, long> selector )
     {
-        long size = 0;
-        foreach ( T x in value ) { size += selector( x ); }
+        long result = 0;
+        foreach ( T x in value ) { result += selector( x ); }
 
-        return size;
+        return result;
     }
     [ Pure ]
     public static ulong Sum<T>( this Span<T> value, Func<T, ulong> selector )
     {
-        ulong size = 0;
-        foreach ( T x in value ) { size += selector( x ); }
+        ulong result = 0;
+        foreach ( T x in value ) { result += selector( x ); }
 
-        return size;
+        return result;
     }
     [ Pure ]
     public static float Sum<T>( this Span<T> value, Func<T, float> selector )
     {
-        float size = 0;
-        foreach ( T x in value ) { size += selector( x ); }
+        float result = 0;
+        foreach ( T x in value ) { result += selector( x ); }
 
-        return size;
+        return result;
     }
     [ Pure ]
     public static double Sum<T>( this Span<T> value, Func<T, double> selector )
     {
-        double size = 0;
-        foreach ( T x in value ) { size += selector( x ); }
+        double result = 0;
+        foreach ( T x in value ) { result += selector( x ); }
 
-        return size;
+        return result;
     }
 
 
@@ -136,124 +136,124 @@ public static partial class Spans
     [Pure]
     public static T Sum<T>( this ReadOnlySpan<T> value ) where T : INumber<T>
     {
-        T size = T.Zero;
-        foreach ( T x in value ) { size += x; }
+        T result = T.Zero;
+        foreach ( T x in value ) { result += x; }
 
-        return size;
+        return result;
     }
 #else
     [ Pure ]
     public static double Sum( this ReadOnlySpan<double> value )
     {
-        double size = 0;
-        foreach ( double x in value ) { size += x; }
+        double result = 0;
+        foreach ( double x in value ) { result += x; }
 
-        return size;
+        return result;
     }
     [ Pure ]
     public static float Sum( this ReadOnlySpan<float> value )
     {
-        float size = 0;
-        foreach ( float x in value ) { size += x; }
+        float result = 0;
+        foreach ( float x in value ) { result += x; }
 
-        return size;
+        return result;
     }
     [ Pure ]
     public static long Sum( this ReadOnlySpan<long> value )
     {
-        long size = 0;
-        foreach ( long x in value ) { size += x; }
+        long result = 0;
+        foreach ( long x in value ) { result += x; }
 
-        return size;
+        return result;
     }
     [ Pure ]
     public static ulong Sum( this ReadOnlySpan<ulong> value )
     {
-        ulong size = 0;
-        foreach ( ulong x in value ) { size += x; }
+        ulong result = 0;
+        foreach ( ulong x in value ) { result += x; }
 
-        return size;
+        return result;
     }
     [ Pure ]
     public static int Sum( this ReadOnlySpan<int> value )
     {
-        int size = 0;
-        foreach ( int x in value ) { size += x; }
+        int result = 0;
+        foreach ( int x in value ) { result += x; }
 
-        return size;
+        return result;
     }
     [ Pure ]
     public static uint Sum( this ReadOnlySpan<uint> value )
     {
-        uint size = 0;
-        foreach ( uint x in value ) { size += x; }
+        uint result = 0;
+        foreach ( uint x in value ) { result += x; }
 
-        return size;
+        return result;
     }
     [ Pure ]
     public static short Sum( this ReadOnlySpan<short> value )
     {
-        short size = 0;
-        foreach ( short x in value ) { size += x; }
+        short result = 0;
+        foreach ( short x in value ) { result += x; }
 
-        return size;
+        return result;
     }
     [ Pure ]
     public static ushort Sum( this ReadOnlySpan<ushort> value )
     {
-        ushort size = 0;
-        foreach ( ushort x in value ) { size += x; }
+        ushort result = 0;
+        foreach ( ushort x in value ) { result += x; }
 
-        return size;
+        return result;
     }
 #endif
 
     [ Pure ]
     public static int Sum<T>( this ReadOnlySpan<T> value, Func<T, int> selector )
     {
-        int size = 0;
-        foreach ( T x in value ) { size += selector( x ); }
+        int result = 0;
+        foreach ( T x in value ) { result += selector( x ); }
 
-        return size;
+        return result;
     }
     [ Pure ]
     public static uint Sum<T>( this ReadOnlySpan<T> value, Func<T, uint> selector )
     {
-        uint size = 0;
-        foreach ( T x in value ) { size += selector( x ); }
+        uint result = 0;
+        foreach ( T x in value ) { result += selector( x ); }
 
-        return size;
+        return result;
     }
     [ Pure ]
     public static long Sum<T>( this ReadOnlySpan<T> value, Func<T, long> selector )
     {
-        long size = 0;
-        foreach ( T x in value ) { size += selector( x ); }
+        long result = 0;
+        foreach ( T x in value ) { result += selector( x ); }
 
-        return size;
+        return result;
     }
     [ Pure ]
     public static ulong Sum<T>( this ReadOnlySpan<T> value, Func<T, ulong> selector )
     {
-        ulong size = 0;
-        foreach ( T x in value ) { size += selector( x ); }
+        ulong result = 0;
+        foreach ( T x in value ) { result += selector( x ); }
 
-        return size;
+        return result;
     }
     [ Pure ]
     public static float Sum<T>( this ReadOnlySpan<T> value, Func<T, float> selector )
     {
-        float size = 0;
-        foreach ( T x in value ) { size += selector( x ); }
+        float result = 0;
+        foreach ( T x in value ) { result += selector( x ); }
 
-        return size;
+        return result;
     }
     [ Pure ]
     public static double Sum<T>( this ReadOnlySpan<T> value, Func<T, double> selector )
     {
-        double size = 0;
-        foreach ( T x in value ) { size += selector( x ); }
+        double result = 0;
+        foreach ( T x in value ) { result += selector( x ); }
 
-        return size;
+        return result;
     }
 }

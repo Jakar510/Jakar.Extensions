@@ -18,10 +18,12 @@ public static partial class Spans
     public static bool AsSegment<T>( this Memory<T>         value, out ArraySegment<T> result ) => MemoryMarshal.TryGetArray( value, out result );
 
 
-    public static Memory<byte> AsMemory( this Span<byte>         value ) => MemoryMarshal.Read<Memory<byte>>( value );
-    public static Memory<byte> AsMemory( this ReadOnlySpan<byte> value ) => MemoryMarshal.Read<Memory<byte>>( value );
-    public static Memory<char> AsMemory( this Span<char>         value ) => MemoryMarshal.Read<Memory<char>>( value.AsBytes() );
-    public static Memory<char> AsMemory( this ReadOnlySpan<char> value ) => MemoryMarshal.Read<Memory<char>>( value.AsBytes() );
+    public static Memory<T>         ToMemory<T>( this         IEnumerable<T>     value ) => value as T[] ?? value.ToArray();
+    public static ReadOnlyMemory<T> ToReadOnlyMemory<T>( this IEnumerable<T>     value ) => value as T[] ?? value.ToArray();
+    public static Memory<byte>      AsMemory( this            Span<byte>         value ) => MemoryMarshal.Read<Memory<byte>>( value );
+    public static Memory<byte>      AsMemory( this            ReadOnlySpan<byte> value ) => MemoryMarshal.Read<Memory<byte>>( value );
+    public static Memory<char>      AsMemory( this            Span<char>         value ) => MemoryMarshal.Read<Memory<char>>( value.AsBytes() );
+    public static Memory<char>      AsMemory( this            ReadOnlySpan<char> value ) => MemoryMarshal.Read<Memory<char>>( value.AsBytes() );
 
 
     public static ReadOnlySpan<T> AsReadOnlySpan<T>( this Memory<T>         value ) => value.Span;

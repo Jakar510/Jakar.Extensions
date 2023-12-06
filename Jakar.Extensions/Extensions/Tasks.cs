@@ -52,54 +52,67 @@ public static partial class Tasks
     [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static Task<T> Run<T>( this Func<CancellationToken, ValueTask<T>> func, CancellationToken token = default ) => Task.Run( new Caller<T>( func, token ).Execute, token );
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static Task                WhenAny( this          IEnumerable<Task>          tasks )                                    => Task.WhenAny( tasks );
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static Task<Task<TResult>> WhenAny<TResult>( this IEnumerable<Task<TResult>> tasks )                                    => Task.WhenAny( tasks );
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static Task                WhenAll( this          IEnumerable<Task>          tasks )                                    => Task.WhenAll( tasks );
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static Task<TResult[]>     WhenAll<TResult>( this IEnumerable<Task<TResult>> tasks )                                    => Task.WhenAll( tasks );
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static void                WaitAll( this          IEnumerable<Task>          tasks, CancellationToken token = default ) => Task.WaitAll( tasks.GetArray(), token );
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static int                 WaitAny( this          IEnumerable<Task>          tasks, CancellationToken token = default ) => Task.WaitAny( tasks.GetArray(), token );
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static Task                WhenAny( this          IEnumerable<Task>          tasks )                                    => Task.WhenAny( tasks.ToArray() );
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static Task<Task<TResult>> WhenAny<TResult>( this IEnumerable<Task<TResult>> tasks )                                    => Task.WhenAny( tasks.ToArray() );
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static Task                WhenAll( this          IEnumerable<Task>          tasks )                                    => Task.WhenAll( tasks.ToArray() );
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static Task<TResult[]>     WhenAll<TResult>( this IEnumerable<Task<TResult>> tasks )                                    => Task.WhenAll( tasks.ToArray() );
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static void                WaitAll( this          IEnumerable<Task>          tasks, CancellationToken token = default ) => tasks.WhenAll().Wait( token );
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static int                 WaitAny( this          IEnumerable<Task>          tasks, CancellationToken token = default ) => Task.WaitAny( tasks.ToArray(), token );
 
 
     /// <summary> <see href="https://stackoverflow.com/a/63141544/9530917"/> </summary>
     /// <exception cref="AggregateException"> </exception>
-    public static async ValueTask WhenAll( this IEnumerable<ValueTask> tasks, List<Exception>? exceptions = default )
-    {
-        foreach ( ValueTask task in tasks )
-        {
-            try { await task.ConfigureAwait( false ); }
-            catch ( Exception ex )
-            {
-                exceptions ??= new List<Exception>();
-                exceptions.Add( ex );
-            }
-        }
+    public static async ValueTask WhenAll( this IEnumerable<ValueTask> tasks ) => await Task.WhenAll( tasks.Select( x => x.AsTask() ) );
+    public static async ValueTask<TResult[]> WhenAll<TResult>( this IEnumerable<ValueTask<TResult>> tasks ) => await Task.WhenAll( tasks.Select( x => x.AsTask() ) );
 
-        if ( exceptions is not null ) { throw new AggregateException( exceptions ); }
+
+    public static async ValueTask WhenAll( this IEnumerable<Func<CancellationToken, ValueTask>> funcs, CancellationToken token = default )
+    {
+    #if NET6_0_OR_GREATER
+        var options = new ParallelOptions
+                      {
+                          CancellationToken = token,
+                          MaxDegreeOfParallelism = Environment.ProcessorCount
+                      };
+
+        await Parallel.ForEachAsync( funcs, options, ExecutorAsync );
+
+        static ValueTask ExecutorAsync( Func<CancellationToken, ValueTask> task, CancellationToken token ) { return task( token ); }
+    #else
+        ValueTask[] tasks = funcs.ToArray( x => x( token ) );
+        await tasks.WhenAll();
+    #endif
     }
     /// <summary> <see href="https://stackoverflow.com/a/63141544/9530917"/> </summary>
     /// <exception cref="AggregateException"> </exception>
-    public static async ValueTask<List<TResult>> WhenAll<TResult>( this IEnumerable<ValueTask<TResult>> tasks, List<Exception>? exceptions = default )
+    public static async ValueTask<TResult[]> WhenAll<TResult>( this IEnumerable<Func<CancellationToken, ValueTask<TResult>>> funcs, CancellationToken token = default )
     {
-        var results = new List<TResult>();
+    #if NET8_0_OR_GREATER
+        var options = new ParallelOptions
+                      {
+                          CancellationToken = token,
+                          MaxDegreeOfParallelism = Environment.ProcessorCount
+                      };
 
-        foreach ( ValueTask<TResult> task in tasks )
+        var results = new ConcurrentBag<TResult>();
+        Func<CancellationToken, ValueTask<TResult>>[] tasks = funcs.ToArray();
+        await Parallel.ForAsync( 0, tasks.Length, options, Executor );
+
+        return results.ToArray();
+
+        async ValueTask Executor( int i, CancellationToken token )
         {
-            try
-            {
-                TResult result = await task.ConfigureAwait( false );
-                results.Add( result );
-            }
-            catch ( Exception ex )
-            {
-                exceptions ??= new List<Exception>();
-                exceptions.Add( ex );
-            }
+            Func<CancellationToken, ValueTask<TResult>> task = tasks[i];
+            TResult                                     result = await task( token ).ConfigureAwait( false );
+            results.Add( result );
         }
-
-        return exceptions is null
-                   ? results
-                   : throw new AggregateException( exceptions );
+    #else
+        ValueTask<TResult>[] tasks = funcs.ToArray( x => x( token ) );
+        return await tasks.WhenAll();
+    #endif
     }
+
+
     [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static Task                WhenAny( this          IEnumerable<ValueTask> tasks ) => Task.WhenAny( tasks.Select( x => x.AsTask() ) );
     [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static Task<Task<TResult>> WhenAny<TResult>( this IEnumerable<ValueTask<TResult>> tasks ) => Task.WhenAny( tasks.Select( x => x.AsTask() ) );
     [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static void                WaitAll( this          IEnumerable<ValueTask> tasks, CancellationToken token = default ) => Task.WaitAll( tasks.Select( x => x.AsTask() ).ToArray(), token );

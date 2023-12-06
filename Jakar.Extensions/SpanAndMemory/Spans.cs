@@ -33,6 +33,32 @@ public static partial class Spans
 
 
     [ Pure ]
+    public static bool IsNullOrWhiteSpace( this ReadOnlyMemory<char> memory )
+    {
+        return memory.IsEmpty ||
+               Parallel.For( 0,
+                             memory.Length,
+                             ( i, state ) =>
+                             {
+                                 if ( !char.IsWhiteSpace( memory.Span[i] ) ) { state.Stop(); }
+                             } )
+                       .IsCompleted;
+    }
+    [ Pure ]
+    public static bool IsNullOrWhiteSpace( this Memory<char> memory )
+    {
+        return memory.IsEmpty ||
+               Parallel.For( 0,
+                             memory.Length,
+                             ( i, state ) =>
+                             {
+                                 if ( !char.IsWhiteSpace( memory.Span[i] ) ) { state.Stop(); }
+                             } )
+                       .IsCompleted;
+    }
+
+
+    [ Pure ]
     public static bool SequenceEquals( this ReadOnlySpan<string> left, in ReadOnlySpan<string> right )
     {
         if ( left.Length != right.Length ) { return false; }
@@ -112,30 +138,6 @@ public static partial class Spans
     {
         Guard.IsLessThanOrEqualTo( length, span.Length, nameof(length) );
         return MemoryMarshal.CreateSpan( ref span.GetPinnableReference(), length );
-    }
-
-
-    [ Pure ]
-    public static Span<T> Join<T>( this Span<T> value, Span<T> other )
-        where T : unmanaged, IEquatable<T>
-    {
-        Span<T> buffer = stackalloc T[value.Length + other.Length];
-        Join( value, other, ref buffer, out int charWritten );
-        return MemoryMarshal.CreateSpan( ref buffer.GetPinnableReference(), charWritten );
-    }
-    [ Pure ]
-    public static Span<T> Join<T>( this Span<T> value, ReadOnlySpan<T> other )
-        where T : unmanaged, IEquatable<T>
-    {
-        Span<T> buffer = stackalloc T[value.Length + other.Length];
-        Join( value, other, ref buffer, out int charWritten );
-        return MemoryMarshal.CreateSpan( ref buffer.GetPinnableReference(), charWritten );
-    }
-    public static bool Join<T>( in ReadOnlySpan<T> first, in ReadOnlySpan<T> last, ref Span<T> buffer, out int charWritten )
-    {
-        charWritten = first.Length + last.Length;
-        Guard.IsInRangeFor( charWritten - 1, buffer, nameof(buffer) );
-        return first.TryCopyTo( buffer[..first.Length] ) && last.TryCopyTo( buffer[first.Length..] );
     }
 
 

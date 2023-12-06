@@ -300,7 +300,7 @@ public ref struct ValueStringBuilder
 
     public ValueStringBuilder AppendJoin( char separator, IEnumerable<string> enumerable )
     {
-        ReadOnlySpan<string> span = enumerable.GetArray();
+        ReadOnlySpan<string> span = enumerable.GetInternalArray();
         EnsureCapacity( span.Sum( static x => x.Length ) + span.Length * 2 + 1 );
         ReadOnlySpan<string>.Enumerator enumerator     = span.GetEnumerator();
         bool                            shouldContinue = enumerator.MoveNext();
@@ -319,7 +319,7 @@ public ref struct ValueStringBuilder
     }
     public ValueStringBuilder AppendJoin( in ReadOnlySpan<char> separator, IEnumerable<string> enumerable )
     {
-        ReadOnlySpan<string> span = enumerable.GetArray();
+        ReadOnlySpan<string> span = enumerable.GetInternalArray();
         EnsureCapacity( span.Sum( static x => x.Length ) + separator.Length * span.Length + 1 );
         ReadOnlySpan<string>.Enumerator enumerator     = span.GetEnumerator();
         bool                            shouldContinue = enumerator.MoveNext();

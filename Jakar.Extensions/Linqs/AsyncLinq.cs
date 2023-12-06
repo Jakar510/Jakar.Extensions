@@ -122,6 +122,18 @@ public static partial class AsyncLinq
 
         return array;
     }
+    public static TElement[] ToArray<TElement>( this IReadOnlyList<TElement> source )
+    {
+    #if NET6_0_OR_GREATER
+        TElement[] array = GC.AllocateUninitializedArray<TElement>( source.Count );
+    #else
+        var array = new TElement[source.Count];
+    #endif
+
+        for ( int i = 0; i < array.Length; i++ ) { array[i] = source[i]; }
+
+        return array;
+    }
     public static TResult[] ToArray<T, TResult>( this IEnumerable<T> sequence, Func<T, TResult> func )
         where TResult : IEquatable<TResult>
     {

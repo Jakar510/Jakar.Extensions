@@ -143,7 +143,7 @@ public abstract partial class Database
         string refresh     = handler.WriteToken( handler.CreateToken( refreshDescriptor ) );
 
 
-        record.WithRefreshToken( refresh, refreshExpires );
+        record = record.WithRefreshToken( refresh, refreshExpires );
         await Users.Update( connection, transaction, record, token );
         return new Tokens( record.UserID, record.FullName, Version, accessToken, refresh );
     }
@@ -203,7 +203,7 @@ public abstract partial class Database
         if ( validationResult.Exception is not null ) { return new LoginResult( validationResult.Exception ); }
 
 
-        Claim[]     claims = validationResult.ClaimsIdentity.Claims.GetArray();
+        Claim[]     claims = validationResult.ClaimsIdentity.Claims.ToArray();
         UserRecord? record = await UserRecord.TryFromClaims( connection, transaction, this, claims, types | DEFAULT_CLAIM_TYPES, token );
         if ( record is null ) { return new LoginResult( LoginResult.State.NotFound ); }
 

@@ -219,7 +219,7 @@ public partial class Database
     public ValueTask ResetAccessFailedCountAsync( UserRecord user, CancellationToken token ) => this.TryCall( ResetAccessFailedCountAsync, user, token );
     public virtual async ValueTask ResetAccessFailedCountAsync( DbConnection connection, DbTransaction transaction, UserRecord user, CancellationToken token )
     {
-        user.Unlock();
+        user = user.Unlock();
         await Users.Update( connection, transaction, user, token );
     }
 

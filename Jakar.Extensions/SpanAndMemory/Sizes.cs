@@ -3,7 +3,7 @@
 
 public static class Sizes
 {
-    private static readonly ConcurrentDictionary<Type, int> _sizes = new()
+    private static readonly ConcurrentDictionary<Type, int> _sizes = new(Environment.ProcessorCount, 50)
                                                                      {
                                                                          [typeof(byte)]            = 3,
                                                                          [typeof(byte?)]           = 3,
@@ -38,16 +38,8 @@ public static class Sizes
     private const int DEFAULT_SIZE = 500;
 
 
-    public static bool Register( Type type, int size ) => _sizes.TryAdd( type, size );
-
-
-    public static int GetBufferSize<T>( int defaultSize = DEFAULT_SIZE ) => _sizes.TryGetValue( typeof(T), out int value )
-                                                                                ? value
-                                                                                : defaultSize;
-    public static int GetBufferSize<T>( this T _, int defaultSize = DEFAULT_SIZE ) => _sizes.TryGetValue( typeof(T), out int value )
-                                                                                          ? value
-                                                                                          : defaultSize;
-    public static int GetBufferSize( this Type type, int defaultSize = DEFAULT_SIZE ) => _sizes.TryGetValue( type, out int value )
-                                                                                             ? value
-                                                                                             : defaultSize;
+    public static bool Register( Type              type, int size ) => _sizes.TryAdd( type, size );
+    public static int  GetBufferSize<T>( int       defaultSize           = DEFAULT_SIZE ) => _sizes.GetValueOrDefault( typeof(T), defaultSize );
+    public static int  GetBufferSize<T>( this T    _,    int defaultSize = DEFAULT_SIZE ) => _sizes.GetValueOrDefault( typeof(T), defaultSize );
+    public static int  GetBufferSize( this    Type type, int defaultSize = DEFAULT_SIZE ) => _sizes.GetValueOrDefault( type,      defaultSize );
 }

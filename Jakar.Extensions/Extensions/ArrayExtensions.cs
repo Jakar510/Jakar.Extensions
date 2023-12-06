@@ -4,32 +4,18 @@
 public static class ArrayExtensions
 {
     [ MethodImpl( MethodImplOptions.AggressiveInlining ), SuppressMessage( "ReSharper", "InvokeAsExtensionMethod" ) ]
-    public static TElement[] GetArray<TElement>( this IEnumerable<TElement> values ) => values switch
-                                                                                        {
-                                                                                            TElement[] array                   => array,
-                                                                                            List<TElement> list                => list.GetInternalArray(),
-                                                                                            Collection<TElement> collection    => collection.GetInternalArray(),
-                                                                                            IReadOnlyList<TElement> collection => ToArray( collection ),
-                                                                                            _                                  => values.ToArray()
-                                                                                        };
-
-    public static TElement[] ToArray<TElement>( this IReadOnlyList<TElement> source )
-    {
-    #if NET6_0_OR_GREATER
-        TElement[] array = GC.AllocateUninitializedArray<TElement>( source.Count );
-    #else
-        var array = new TElement[source.Count];
-    #endif
-
-        for ( int i = 0; i < array.Length; i++ ) { array[i] = source[i]; }
-
-        return array;
-    }
-
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static TElement[] GetInternalArray<TElement>( this List<TElement> list ) => ArrayAccessor<TElement>.Getter( list );
+    public static ReadOnlySpan<TElement> GetInternalArray<TElement>( this IEnumerable<TElement> values ) => values switch
+                                                                                                            {
+                                                                                                                TElement[] array                   => array,
+                                                                                                                List<TElement> list                => list.GetInternalArray(),
+                                                                                                                Collection<TElement> collection    => collection.GetInternalArray(),
+                                                                                                                IReadOnlyList<TElement> collection => collection.ToArray(),
+                                                                                                                _                                  => values.ToArray()
+                                                                                                            };
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static TElement[] GetInternalArray<TElement>( this Collection<TElement> list ) => ArrayAccessor<TElement>.CollectionGetter( list ).GetInternalArray();
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static ReadOnlySpan<TElement> GetInternalArray<TElement>( this List<TElement>       list ) => new(ArrayAccessor<TElement>.Getter( list ), 0, list.Count);
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static ReadOnlySpan<TElement> GetInternalArray<TElement>( this Collection<TElement> list ) => ArrayAccessor<TElement>.CollectionGetter( list ).GetInternalArray();
 
 
 
@@ -37,9 +23,9 @@ public static class ArrayExtensions
     internal static class ArrayAccessor<TElement>
     {
         internal static readonly Func<Collection<TElement>, List<TElement>> CollectionGetter;
+        internal static readonly Func<List<TElement>, TElement[]>           Getter;
 
 
-        internal static readonly Func<List<TElement>, TElement[]> Getter;
         static ArrayAccessor()
         {
             Getter           = CreateGetter();

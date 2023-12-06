@@ -14,10 +14,11 @@ public static partial class Spans
 
 
 #if NET7_0_OR_GREATER
+    [ Pure ]
     public static UInt128 Hash128( in ReadOnlySpan<bool> value, long seed = 0 )
     {
-        const int SIZE = sizeof(bool);
-        byte[] buffer = _bytePool.Rent( SIZE * value.Length );
+        const int SIZE   = sizeof(bool);
+        byte[]    buffer = _bytePool.Rent( SIZE * value.Length );
 
         try
         {
@@ -33,6 +34,8 @@ public static partial class Spans
         }
         finally { _bytePool.Return( buffer ); }
     }
+
+    [ Pure ]
     public static UInt128 Hash128( in ReadOnlySpan<char> value, long seed = 0 )
     {
         const int SIZE   = sizeof(char);
@@ -52,6 +55,8 @@ public static partial class Spans
         }
         finally { _bytePool.Return( buffer ); }
     }
+
+    [ Pure ]
     public static UInt128 Hash128( in ReadOnlySpan<short> value, long seed = 0 )
     {
         const int SIZE   = sizeof(short);
@@ -71,6 +76,8 @@ public static partial class Spans
         }
         finally { _bytePool.Return( buffer ); }
     }
+
+    [ Pure ]
     public static UInt128 Hash128( in ReadOnlySpan<ushort> value, long seed = 0 )
     {
         const int SIZE   = sizeof(ushort);
@@ -90,6 +97,8 @@ public static partial class Spans
         }
         finally { _bytePool.Return( buffer ); }
     }
+
+    [ Pure ]
     public static UInt128 Hash128( in ReadOnlySpan<int> value, long seed = 0 )
     {
         const int SIZE   = sizeof(int);
@@ -109,6 +118,8 @@ public static partial class Spans
         }
         finally { _bytePool.Return( buffer ); }
     }
+
+    [ Pure ]
     public static UInt128 Hash128( in ReadOnlySpan<uint> value, long seed = 0 )
     {
         const int SIZE   = sizeof(uint);
@@ -128,6 +139,8 @@ public static partial class Spans
         }
         finally { _bytePool.Return( buffer ); }
     }
+
+    [ Pure ]
     public static UInt128 Hash128( in ReadOnlySpan<long> value, long seed = 0 )
     {
         const int SIZE   = sizeof(long);
@@ -147,6 +160,8 @@ public static partial class Spans
         }
         finally { _bytePool.Return( buffer ); }
     }
+
+    [ Pure ]
     public static UInt128 Hash128( in ReadOnlySpan<ulong> value, long seed = 0 )
     {
         const int SIZE   = sizeof(ulong);
@@ -166,6 +181,8 @@ public static partial class Spans
         }
         finally { _bytePool.Return( buffer ); }
     }
+
+    [ Pure ]
     public static UInt128 Hash128( in ReadOnlySpan<Half> value, long seed = 0 )
     {
         const int SIZE   = sizeof(bool);
@@ -185,6 +202,8 @@ public static partial class Spans
         }
         finally { _bytePool.Return( buffer ); }
     }
+
+    [ Pure ]
     public static UInt128 Hash128( in ReadOnlySpan<float> value, long seed = 0 )
     {
         const int SIZE   = sizeof(float);
@@ -204,6 +223,8 @@ public static partial class Spans
         }
         finally { _bytePool.Return( buffer ); }
     }
+
+    [ Pure ]
     public static UInt128 Hash128( in ReadOnlySpan<double> value, long seed = 0 )
     {
         const int SIZE   = sizeof(double);
@@ -229,6 +250,8 @@ public static partial class Spans
 
 #if NET6_0_OR_GREATER
 
+
+    [ Pure ]
     public static ulong Hash( in ReadOnlySpan<Half> value, long seed = 0 )
     {
         const int SIZE   = sizeof(bool);
@@ -251,10 +274,11 @@ public static partial class Spans
 #endif
 
 
+    [ Pure ]
     public static ulong Hash( in ReadOnlySpan<bool> value, long seed = 0 )
     {
-        const int SIZE = sizeof(bool);
-        byte[] buffer = _bytePool.Rent( SIZE * value.Length );
+        const int SIZE   = sizeof(bool);
+        byte[]    buffer = _bytePool.Rent( SIZE * value.Length );
 
         try
         {
@@ -270,6 +294,8 @@ public static partial class Spans
         }
         finally { _bytePool.Return( buffer ); }
     }
+
+    [ Pure ]
     public static ulong Hash( in ReadOnlySpan<char> value, long seed = 0 )
     {
         const int SIZE   = sizeof(char);
@@ -289,6 +315,8 @@ public static partial class Spans
         }
         finally { _bytePool.Return( buffer ); }
     }
+
+    [ Pure ]
     public static ulong Hash( in ReadOnlySpan<short> value, long seed = 0 )
     {
         const int SIZE   = sizeof(short);
@@ -308,6 +336,8 @@ public static partial class Spans
         }
         finally { _bytePool.Return( buffer ); }
     }
+
+    [ Pure ]
     public static ulong Hash( in ReadOnlySpan<ushort> value, long seed = 0 )
     {
         const int SIZE   = sizeof(ushort);
@@ -327,6 +357,8 @@ public static partial class Spans
         }
         finally { _bytePool.Return( buffer ); }
     }
+
+    [ Pure ]
     public static ulong Hash( in ReadOnlySpan<int> value, long seed = 0 )
     {
         const int SIZE   = sizeof(int);
@@ -346,6 +378,8 @@ public static partial class Spans
         }
         finally { _bytePool.Return( buffer ); }
     }
+
+    [ Pure ]
     public static ulong Hash( in ReadOnlySpan<uint> value, long seed = 0 )
     {
         const int SIZE   = sizeof(uint);
@@ -365,6 +399,8 @@ public static partial class Spans
         }
         finally { _bytePool.Return( buffer ); }
     }
+
+    [ Pure ]
     public static ulong Hash( in ReadOnlySpan<long> value, long seed = 0 )
     {
         const int SIZE   = sizeof(long);
@@ -384,6 +420,8 @@ public static partial class Spans
         }
         finally { _bytePool.Return( buffer ); }
     }
+
+    [ Pure ]
     public static ulong Hash( in ReadOnlySpan<ulong> value, long seed = 0 )
     {
         const int SIZE   = sizeof(ulong);
@@ -403,6 +441,8 @@ public static partial class Spans
         }
         finally { _bytePool.Return( buffer ); }
     }
+
+    [ Pure ]
     public static ulong Hash( in ReadOnlySpan<float> value, long seed = 0 )
     {
         const int SIZE   = sizeof(float);
@@ -422,6 +462,8 @@ public static partial class Spans
         }
         finally { _bytePool.Return( buffer ); }
     }
+
+    [ Pure ]
     public static ulong Hash( in ReadOnlySpan<double> value, long seed = 0 )
     {
         const int SIZE   = sizeof(double);

@@ -26,7 +26,7 @@ public readonly record struct Parameters( params string[] Values ) : IParameters
 {
     public                 int        Count                              => Values.Length;
     [ Pure ] public static Parameters Create( params string[]     args ) => new(args);
-    [ Pure ] public static Parameters Create( IEnumerable<string> args ) => new(args.GetArray());
+    [ Pure ] public static Parameters Create( IEnumerable<string> args ) => new(args.ToArray());
 
 
     public string ToString( string? format, IFormatProvider? formatProvider ) => string.Join( format, Values );
@@ -44,11 +44,12 @@ public readonly record struct Parameters( params string[] Values ) : IParameters
 
 
 
-public readonly record struct Parameters<T>( params T[] Values ) : IParameters where T : ISpanFormattable
+public readonly record struct Parameters<T>( params T[] Values ) : IParameters
+    where T : ISpanFormattable
 {
     public                 int           Count                         => Values.Length;
     [ Pure ] public static Parameters<T> Create( params T[]     args ) => new(args);
-    [ Pure ] public static Parameters<T> Create( IEnumerable<T> args ) => new(args.GetArray());
+    [ Pure ] public static Parameters<T> Create( IEnumerable<T> args ) => new(args.ToArray());
 
 
     public string ToString( string? format, IFormatProvider? formatProvider ) => string.Join( format, Values );
@@ -66,8 +67,9 @@ public readonly record struct Parameters<T>( params T[] Values ) : IParameters w
 
 
 
-public readonly record struct Parameters<T1, T2>( T1 One, T2 Two ) : IParameters where T1 : ISpanFormattable
-                                                                                 where T2 : ISpanFormattable
+public readonly record struct Parameters<T1, T2>( T1 One, T2 Two ) : IParameters
+    where T1 : ISpanFormattable
+    where T2 : ISpanFormattable
 {
     public                 int                Count                    => 2;
     [ Pure ] public static Parameters<T1, T2> Create( T1 one, T2 two ) => new(one, two);
@@ -97,9 +99,10 @@ public readonly record struct Parameters<T1, T2>( T1 One, T2 Two ) : IParameters
 
 
 
-public readonly record struct Parameters<T1, T2, T3>( T1 One, T2 Two, T3 Three ) : IParameters where T1 : ISpanFormattable
-                                                                                               where T2 : ISpanFormattable
-                                                                                               where T3 : ISpanFormattable
+public readonly record struct Parameters<T1, T2, T3>( T1 One, T2 Two, T3 Three ) : IParameters
+    where T1 : ISpanFormattable
+    where T2 : ISpanFormattable
+    where T3 : ISpanFormattable
 {
     public                 int                    Count                              => 3;
     [ Pure ] public static Parameters<T1, T2, T3> Create( T1 one, T2 two, T3 three ) => new(one, two, three);
@@ -133,10 +136,11 @@ public readonly record struct Parameters<T1, T2, T3>( T1 One, T2 Two, T3 Three )
 
 
 
-public readonly record struct Parameters<T1, T2, T3, T4>( T1 One, T2 Two, T3 Three, T4 Four ) : IParameters where T1 : ISpanFormattable
-                                                                                                            where T2 : ISpanFormattable
-                                                                                                            where T3 : ISpanFormattable
-                                                                                                            where T4 : ISpanFormattable
+public readonly record struct Parameters<T1, T2, T3, T4>( T1 One, T2 Two, T3 Three, T4 Four ) : IParameters
+    where T1 : ISpanFormattable
+    where T2 : ISpanFormattable
+    where T3 : ISpanFormattable
+    where T4 : ISpanFormattable
 {
     public                 int                        Count                                       => 4;
     [ Pure ] public static Parameters<T1, T2, T3, T4> Create( T1 one, T2 two, T3 three, T4 four ) => new(one, two, three, four);
@@ -174,11 +178,12 @@ public readonly record struct Parameters<T1, T2, T3, T4>( T1 One, T2 Two, T3 Thr
 
 
 
-public readonly record struct Parameters<T1, T2, T3, T4, T5>( T1 One, T2 Two, T3 Three, T4 Four, T5 Five ) : IParameters where T1 : ISpanFormattable
-                                                                                                                         where T2 : ISpanFormattable
-                                                                                                                         where T3 : ISpanFormattable
-                                                                                                                         where T4 : ISpanFormattable
-                                                                                                                         where T5 : ISpanFormattable
+public readonly record struct Parameters<T1, T2, T3, T4, T5>( T1 One, T2 Two, T3 Three, T4 Four, T5 Five ) : IParameters
+    where T1 : ISpanFormattable
+    where T2 : ISpanFormattable
+    where T3 : ISpanFormattable
+    where T4 : ISpanFormattable
+    where T5 : ISpanFormattable
 {
     public                 int                            Count                                                => 5;
     [ Pure ] public static Parameters<T1, T2, T3, T4, T5> Create( T1 one, T2 two, T3 three, T4 four, T5 five ) => new(one, two, three, four, five);
@@ -220,12 +225,13 @@ public readonly record struct Parameters<T1, T2, T3, T4, T5>( T1 One, T2 Two, T3
 
 
 
-public readonly record struct Parameters<T1, T2, T3, T4, T5, T6>( T1 One, T2 Two, T3 Three, T4 Four, T5 Five, T6 Six ) : IParameters where T1 : ISpanFormattable
-                                                                                                                                     where T2 : ISpanFormattable
-                                                                                                                                     where T3 : ISpanFormattable
-                                                                                                                                     where T4 : ISpanFormattable
-                                                                                                                                     where T5 : ISpanFormattable
-                                                                                                                                     where T6 : ISpanFormattable
+public readonly record struct Parameters<T1, T2, T3, T4, T5, T6>( T1 One, T2 Two, T3 Three, T4 Four, T5 Five, T6 Six ) : IParameters
+    where T1 : ISpanFormattable
+    where T2 : ISpanFormattable
+    where T3 : ISpanFormattable
+    where T4 : ISpanFormattable
+    where T5 : ISpanFormattable
+    where T6 : ISpanFormattable
 {
     public                 int                                Count                                                        => 5;
     [ Pure ] public static Parameters<T1, T2, T3, T4, T5, T6> Create( T1 one, T2 two, T3 three, T4 four, T5 five, T6 six ) => new(one, two, three, four, five, six);
@@ -271,13 +277,14 @@ public readonly record struct Parameters<T1, T2, T3, T4, T5, T6>( T1 One, T2 Two
 
 
 
-public readonly record struct Parameters<T1, T2, T3, T4, T5, T6, T7>( T1 One, T2 Two, T3 Three, T4 Four, T5 Five, T6 Six, T7 Seven ) : IParameters where T1 : ISpanFormattable
-                                                                                                                                                   where T2 : ISpanFormattable
-                                                                                                                                                   where T3 : ISpanFormattable
-                                                                                                                                                   where T4 : ISpanFormattable
-                                                                                                                                                   where T5 : ISpanFormattable
-                                                                                                                                                   where T6 : ISpanFormattable
-                                                                                                                                                   where T7 : ISpanFormattable
+public readonly record struct Parameters<T1, T2, T3, T4, T5, T6, T7>( T1 One, T2 Two, T3 Three, T4 Four, T5 Five, T6 Six, T7 Seven ) : IParameters
+    where T1 : ISpanFormattable
+    where T2 : ISpanFormattable
+    where T3 : ISpanFormattable
+    where T4 : ISpanFormattable
+    where T5 : ISpanFormattable
+    where T6 : ISpanFormattable
+    where T7 : ISpanFormattable
 {
     public                 int                                    Count                                                                  => 5;
     [ Pure ] public static Parameters<T1, T2, T3, T4, T5, T6, T7> Create( T1 one, T2 two, T3 three, T4 four, T5 five, T6 six, T7 seven ) => new(one, two, three, four, five, six, seven);
@@ -327,14 +334,15 @@ public readonly record struct Parameters<T1, T2, T3, T4, T5, T6, T7>( T1 One, T2
 
 
 
-public readonly record struct Parameters<T1, T2, T3, T4, T5, T6, T7, T8>( T1 One, T2 Two, T3 Three, T4 Four, T5 Five, T6 Six, T7 Seven, T8 Eight ) : IParameters where T1 : ISpanFormattable
-                                                                                                                                                                 where T2 : ISpanFormattable
-                                                                                                                                                                 where T3 : ISpanFormattable
-                                                                                                                                                                 where T4 : ISpanFormattable
-                                                                                                                                                                 where T5 : ISpanFormattable
-                                                                                                                                                                 where T6 : ISpanFormattable
-                                                                                                                                                                 where T7 : ISpanFormattable
-                                                                                                                                                                 where T8 : ISpanFormattable
+public readonly record struct Parameters<T1, T2, T3, T4, T5, T6, T7, T8>( T1 One, T2 Two, T3 Three, T4 Four, T5 Five, T6 Six, T7 Seven, T8 Eight ) : IParameters
+    where T1 : ISpanFormattable
+    where T2 : ISpanFormattable
+    where T3 : ISpanFormattable
+    where T4 : ISpanFormattable
+    where T5 : ISpanFormattable
+    where T6 : ISpanFormattable
+    where T7 : ISpanFormattable
+    where T8 : ISpanFormattable
 {
     public                 int                                        Count                                                                            => 5;
     [ Pure ] public static Parameters<T1, T2, T3, T4, T5, T6, T7, T8> Create( T1 one, T2 two, T3 three, T4 four, T5 five, T6 six, T7 seven, T8 eight ) => new(one, two, three, four, five, six, seven, eight);
@@ -388,15 +396,16 @@ public readonly record struct Parameters<T1, T2, T3, T4, T5, T6, T7, T8>( T1 One
 
 
 
-public readonly record struct Parameters<T1, T2, T3, T4, T5, T6, T7, T8, T9>( T1 One, T2 Two, T3 Three, T4 Four, T5 Five, T6 Six, T7 Seven, T8 Eight, T9 Nine ) : IParameters where T1 : ISpanFormattable
-                                                                                                                                                                              where T2 : ISpanFormattable
-                                                                                                                                                                              where T3 : ISpanFormattable
-                                                                                                                                                                              where T4 : ISpanFormattable
-                                                                                                                                                                              where T5 : ISpanFormattable
-                                                                                                                                                                              where T6 : ISpanFormattable
-                                                                                                                                                                              where T7 : ISpanFormattable
-                                                                                                                                                                              where T8 : ISpanFormattable
-                                                                                                                                                                              where T9 : ISpanFormattable
+public readonly record struct Parameters<T1, T2, T3, T4, T5, T6, T7, T8, T9>( T1 One, T2 Two, T3 Three, T4 Four, T5 Five, T6 Six, T7 Seven, T8 Eight, T9 Nine ) : IParameters
+    where T1 : ISpanFormattable
+    where T2 : ISpanFormattable
+    where T3 : ISpanFormattable
+    where T4 : ISpanFormattable
+    where T5 : ISpanFormattable
+    where T6 : ISpanFormattable
+    where T7 : ISpanFormattable
+    where T8 : ISpanFormattable
+    where T9 : ISpanFormattable
 {
     public                 int                                            Count                                                                                     => 5;
     [ Pure ] public static Parameters<T1, T2, T3, T4, T5, T6, T7, T8, T9> Create( T1 one, T2 two, T3 three, T4 four, T5 five, T6 six, T7 seven, T8 eight, T9 nine ) => new(one, two, three, four, five, six, seven, eight, nine);
@@ -454,16 +463,17 @@ public readonly record struct Parameters<T1, T2, T3, T4, T5, T6, T7, T8, T9>( T1
 
 
 
-public readonly record struct Parameters<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>( T1 One, T2 Two, T3 Three, T4 Four, T5 Five, T6 Six, T7 Seven, T8 Eight, T9 Nine, T10 Ten ) : IParameters where T1 : ISpanFormattable
-                                                                                                                                                                                            where T2 : ISpanFormattable
-                                                                                                                                                                                            where T3 : ISpanFormattable
-                                                                                                                                                                                            where T4 : ISpanFormattable
-                                                                                                                                                                                            where T5 : ISpanFormattable
-                                                                                                                                                                                            where T6 : ISpanFormattable
-                                                                                                                                                                                            where T7 : ISpanFormattable
-                                                                                                                                                                                            where T8 : ISpanFormattable
-                                                                                                                                                                                            where T9 : ISpanFormattable
-                                                                                                                                                                                            where T10 : ISpanFormattable
+public readonly record struct Parameters<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>( T1 One, T2 Two, T3 Three, T4 Four, T5 Five, T6 Six, T7 Seven, T8 Eight, T9 Nine, T10 Ten ) : IParameters
+    where T1 : ISpanFormattable
+    where T2 : ISpanFormattable
+    where T3 : ISpanFormattable
+    where T4 : ISpanFormattable
+    where T5 : ISpanFormattable
+    where T6 : ISpanFormattable
+    where T7 : ISpanFormattable
+    where T8 : ISpanFormattable
+    where T9 : ISpanFormattable
+    where T10 : ISpanFormattable
 {
     public                 int                                                 Count                                                                                              => 5;
     [ Pure ] public static Parameters<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> Create( T1 one, T2 two, T3 three, T4 four, T5 five, T6 six, T7 seven, T8 eight, T9 nine, T10 ten ) => new(one, two, three, four, five, six, seven, eight, nine, ten);

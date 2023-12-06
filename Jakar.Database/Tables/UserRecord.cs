@@ -2,47 +2,48 @@
 
 
 [ Serializable, Table( "Users" ) ]
-public sealed record UserRecord( Guid                                                                     UserID,
-                                 [ property: ProtectedPersonalData, MaxLength( 256 ) ] string             UserName,
-                                 string                                                                   FirstName,
-                                 string                                                                   LastName,
-                                 string                                                                   FullName,
-                                 [ property: MaxLength( UserRights.MAX_SIZE ) ] string                    Rights,
-                                 [ property: MaxLength( 256 ) ]                 string                    Gender,
-                                 string                                                                   Company,
-                                 string                                                                   Description,
-                                 string                                                                   Department,
-                                 string                                                                   Title,
-                                 string                                                                   Website,
-                                 SupportedLanguage                                                        PreferredLanguage,
-                                 string                                                                   Email,
-                                 bool                                                                     IsEmailConfirmed,
-                                 string                                                                   PhoneNumber,
-                                 string                                                                   Ext,
-                                 bool                                                                     IsPhoneNumberConfirmed,
-                                 bool                                                                     IsTwoFactorEnabled,
-                                 DateTimeOffset?                                                          LastBadAttempt,
-                                 DateTimeOffset?                                                          LastLogin,
-                                 int                                                                      BadLogins,
-                                 bool                                                                     IsLocked,
-                                 DateTimeOffset?                                                          LockDate,
-                                 DateTimeOffset?                                                          LockoutEnd,
-                                 [ property: MaxLength( UserRecord.ENCRYPTED_MAX_PASSWORD_SIZE ) ] string PasswordHash,
-                                 [ property: MaxLength( UserRecord.MAX_SIZE ) ]                    string RefreshToken,
-                                 DateTimeOffset?                                                          RefreshTokenExpiryTime,
-                                 Guid?                                                                    SessionID,
-                                 bool                                                                     IsActive,
-                                 bool                                                                     IsDisabled,
-                                 [ property: MaxLength( UserRecord.MAX_SIZE ) ] string                    SecurityStamp,
-                                 [ property: MaxLength( UserRecord.MAX_SIZE ) ] string                    AuthenticatorKey,
-                                 [ property: MaxLength( UserRecord.MAX_SIZE ) ] string                    ConcurrencyStamp,
-                                 [ property: MaxLength( 256 ) ]                 RecordID<UserRecord>?     EscalateTo,
-                                 JsonObject?                                                              AdditionalData,
-                                 RecordID<UserRecord>                                                     ID,
-                                 RecordID<UserRecord>?                                                    CreatedBy,
-                                 Guid?                                                                    OwnerUserID,
-                                 DateTimeOffset                                                           DateCreated,
-                                 DateTimeOffset?                                                          LastModified = default
+public sealed record UserRecord(
+    Guid                                                                     UserID,
+    [ property: ProtectedPersonalData, MaxLength( 256 ) ] string             UserName,
+    string                                                                   FirstName,
+    string                                                                   LastName,
+    string                                                                   FullName,
+    [ property: MaxLength( UserRights.MAX_SIZE ) ] string                    Rights,
+    [ property: MaxLength( 256 ) ]                 string                    Gender,
+    string                                                                   Company,
+    string                                                                   Description,
+    string                                                                   Department,
+    string                                                                   Title,
+    string                                                                   Website,
+    SupportedLanguage                                                        PreferredLanguage,
+    string                                                                   Email,
+    bool                                                                     IsEmailConfirmed,
+    string                                                                   PhoneNumber,
+    string                                                                   Ext,
+    bool                                                                     IsPhoneNumberConfirmed,
+    bool                                                                     IsTwoFactorEnabled,
+    DateTimeOffset?                                                          LastBadAttempt,
+    DateTimeOffset?                                                          LastLogin,
+    int                                                                      BadLogins,
+    bool                                                                     IsLocked,
+    DateTimeOffset?                                                          LockDate,
+    DateTimeOffset?                                                          LockoutEnd,
+    [ property: MaxLength( UserRecord.ENCRYPTED_MAX_PASSWORD_SIZE ) ] string PasswordHash,
+    [ property: MaxLength( UserRecord.MAX_SIZE ) ]                    string RefreshToken,
+    DateTimeOffset?                                                          RefreshTokenExpiryTime,
+    Guid?                                                                    SessionID,
+    bool                                                                     IsActive,
+    bool                                                                     IsDisabled,
+    [ property: MaxLength( UserRecord.MAX_SIZE ) ] string                    SecurityStamp,
+    [ property: MaxLength( UserRecord.MAX_SIZE ) ] string                    AuthenticatorKey,
+    [ property: MaxLength( UserRecord.MAX_SIZE ) ] string                    ConcurrencyStamp,
+    [ property: MaxLength( 256 ) ]                 RecordID<UserRecord>?     EscalateTo,
+    JsonObject?                                                              AdditionalData,
+    RecordID<UserRecord>                                                     ID,
+    RecordID<UserRecord>?                                                    CreatedBy,
+    Guid?                                                                    OwnerUserID,
+    DateTimeOffset                                                           DateCreated,
+    DateTimeOffset?                                                          LastModified = default
 ) : OwnedTableRecord<UserRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<UserRecord>, IUserData<UserRecord>, IRefreshToken, IUserID, IUserDataRecord, UserRights.IRights, MsJsonModels.IJsonizer<UserRecord>
 {
     public const           int         MAX_PASSWORD_SIZE           = 250;
@@ -398,7 +399,7 @@ public sealed record UserRecord( Guid                                           
     {
         IAsyncEnumerable<RecoveryCodeRecord>            old        = Codes( connection, transaction, db, token );
         IReadOnlyDictionary<string, RecoveryCodeRecord> dictionary = RecoveryCodeRecord.Create( this, count );
-        string[]                                        codes      = dictionary.Keys.GetArray();
+        string[]                                        codes      = dictionary.Keys.ToArray();
 
 
         await db.RecoveryCodes.Delete( connection, transaction, old, token );
@@ -413,7 +414,7 @@ public sealed record UserRecord( Guid                                           
     {
         IAsyncEnumerable<RecoveryCodeRecord>            old        = Codes( connection, transaction, db, token );
         IReadOnlyDictionary<string, RecoveryCodeRecord> dictionary = RecoveryCodeRecord.Create( this, recoveryCodes );
-        string[]                                        codes      = dictionary.Keys.GetArray();
+        string[]                                        codes      = dictionary.Keys.ToArray();
 
 
         await db.RecoveryCodes.Delete( connection, transaction, old, token );
@@ -839,8 +840,8 @@ public sealed record UserRecord( Guid                                           
 
     public async ValueTask<Claim[]> GetUserClaims( DbConnection connection, DbTransaction? transaction, Database db, ClaimType types, CancellationToken token )
     {
-        var groups = new List<string>();
-        var roles  = new List<string>();
+        var groups = new List<string>( 25 );
+        var roles  = new List<string>( 25 );
 
         if ( types.HasFlag( ClaimType.GroupSid ) )
         {
@@ -851,7 +852,6 @@ public sealed record UserRecord( Guid                                           
         {
             await foreach ( RoleRecord record in GetRoles( connection, transaction, db, token ) ) { roles.Add( record.Name ); }
         }
-
 
         var claims = new List<Claim>( 16 + groups.Count + roles.Count );
 
@@ -894,37 +894,35 @@ public sealed record UserRecord( Guid                                           
 
         if ( types.HasFlag( ClaimType.Role ) ) { claims.AddRange( from role in roles select new Claim( ClaimTypes.Role, role, ClaimValueTypes.String ) ); }
 
-        return claims.GetArray();
+        return [.. claims];
     }
     public static ValueTask<UserRecord?> TryFromClaims( DbConnection connection, DbTransaction transaction, Database db, HttpContext context, ClaimType types, CancellationToken token ) =>
         TryFromClaims( connection, transaction, db, context.User, types, token );
     public static ValueTask<UserRecord?> TryFromClaims( DbConnection connection, DbTransaction transaction, Database db, ClaimsPrincipal principal, ClaimType types, CancellationToken token ) =>
-        TryFromClaims( connection, transaction, db, principal.Claims.GetArray(), types, token );
+        TryFromClaims( connection, transaction, db, principal.Claims.ToArray(), types, token );
 
-    public static async ValueTask<UserRecord?> TryFromClaims( DbConnection connection, DbTransaction transaction, Database db, Claim[] claims, ClaimType types, CancellationToken token )
+    public static async ValueTask<UserRecord?> TryFromClaims( DbConnection connection, DbTransaction transaction, Database db, ReadOnlyMemory<Claim> claims, ClaimType types, CancellationToken token )
     {
         Debug.Assert( types.HasFlag( ClaimType.UserID ) );
         Debug.Assert( types.HasFlag( ClaimType.UserName ) );
 
 
         var parameters = new DynamicParameters();
-
-        parameters.Add( nameof(UserName), claims.Single( x => x.Type == ClaimTypes.NameIdentifier ).Value );
-
-        parameters.Add( nameof(UserID), Guid.Parse( claims.Single( x => x.Type == ClaimTypes.Sid ).Value ) );
+        parameters.Add( nameof(UserName), claims.Span.Single( x => x.Type == ClaimTypes.NameIdentifier ).Value );
+        parameters.Add( nameof(UserID),   Guid.Parse( claims.Span.Single( x => x.Type == ClaimTypes.Sid ).Value ) );
 
 
-        if ( types.HasFlag( ClaimType.FirstName ) ) { parameters.Add( nameof(FirstName), claims.Single( x => x.Type == ClaimTypes.GivenName ).Value ); }
+        if ( types.HasFlag( ClaimType.FirstName ) ) { parameters.Add( nameof(FirstName), claims.Span.Single( x => x.Type == ClaimTypes.GivenName ).Value ); }
 
-        if ( types.HasFlag( ClaimType.LastName ) ) { parameters.Add( nameof(LastName), claims.Single( x => x.Type == ClaimTypes.Surname ).Value ); }
+        if ( types.HasFlag( ClaimType.LastName ) ) { parameters.Add( nameof(LastName), claims.Span.Single( x => x.Type == ClaimTypes.Surname ).Value ); }
 
-        if ( types.HasFlag( ClaimType.FullName ) ) { parameters.Add( nameof(FullName), claims.Single( x => x.Type == ClaimTypes.Name ).Value ); }
+        if ( types.HasFlag( ClaimType.FullName ) ) { parameters.Add( nameof(FullName), claims.Span.Single( x => x.Type == ClaimTypes.Name ).Value ); }
 
-        if ( types.HasFlag( ClaimType.Email ) ) { parameters.Add( nameof(Email), claims.Single( x => x.Type == ClaimTypes.Email ).Value ); }
+        if ( types.HasFlag( ClaimType.Email ) ) { parameters.Add( nameof(Email), claims.Span.Single( x => x.Type == ClaimTypes.Email ).Value ); }
 
-        if ( types.HasFlag( ClaimType.MobilePhone ) ) { parameters.Add( nameof(PhoneNumber), claims.Single( x => x.Type == ClaimTypes.MobilePhone ).Value ); }
+        if ( types.HasFlag( ClaimType.MobilePhone ) ) { parameters.Add( nameof(PhoneNumber), claims.Span.Single( x => x.Type == ClaimTypes.MobilePhone ).Value ); }
 
-        if ( types.HasFlag( ClaimType.WebSite ) ) { parameters.Add( nameof(Website), claims.Single( x => x.Type == ClaimTypes.Webpage ).Value ); }
+        if ( types.HasFlag( ClaimType.WebSite ) ) { parameters.Add( nameof(Website), claims.Span.Single( x => x.Type == ClaimTypes.Webpage ).Value ); }
 
         return await db.Users.Get( connection, transaction, true, parameters, token );
     }
