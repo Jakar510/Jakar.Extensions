@@ -17,7 +17,6 @@ public static partial class Spans
     public static UInt128 Hash128( in ReadOnlySpan<bool> value, long seed = 0 )
     {
         const int SIZE = sizeof(bool);
-
         byte[] buffer = _bytePool.Rent( SIZE * value.Length );
 
         try
@@ -27,7 +26,7 @@ public static partial class Spans
                 int        start = i * SIZE;
                 var        range = new Range( start, start + SIZE );
                 Span<byte> span  = buffer.AsSpan( range );
-                BitConverter.TryWriteBytes( span, value[i] );
+                if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
 
             return XxHash128.HashToUInt128( buffer, seed );
@@ -46,7 +45,7 @@ public static partial class Spans
                 int        start = i * SIZE;
                 var        range = new Range( start, start + SIZE );
                 Span<byte> span  = buffer.AsSpan( range );
-                BitConverter.TryWriteBytes( span, value[i] );
+                if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
 
             return XxHash128.HashToUInt128( buffer, seed );
@@ -65,7 +64,7 @@ public static partial class Spans
                 int        start = i * SIZE;
                 var        range = new Range( start, start + SIZE );
                 Span<byte> span  = buffer.AsSpan( range );
-                BitConverter.TryWriteBytes( span, value[i] );
+                if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
 
             return XxHash128.HashToUInt128( buffer, seed );
@@ -84,7 +83,7 @@ public static partial class Spans
                 int        start = i * SIZE;
                 var        range = new Range( start, start + SIZE );
                 Span<byte> span  = buffer.AsSpan( range );
-                BitConverter.TryWriteBytes( span, value[i] );
+                if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
 
             return XxHash128.HashToUInt128( buffer, seed );
@@ -103,7 +102,7 @@ public static partial class Spans
                 int        start = i * SIZE;
                 var        range = new Range( start, start + SIZE );
                 Span<byte> span  = buffer.AsSpan( range );
-                BitConverter.TryWriteBytes( span, value[i] );
+                if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
 
             return XxHash128.HashToUInt128( buffer, seed );
@@ -122,7 +121,7 @@ public static partial class Spans
                 int        start = i * SIZE;
                 var        range = new Range( start, start + SIZE );
                 Span<byte> span  = buffer.AsSpan( range );
-                BitConverter.TryWriteBytes( span, value[i] );
+                if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
 
             return XxHash128.HashToUInt128( buffer, seed );
@@ -141,7 +140,7 @@ public static partial class Spans
                 int        start = i * SIZE;
                 var        range = new Range( start, start + SIZE );
                 Span<byte> span  = buffer.AsSpan( range );
-                BitConverter.TryWriteBytes( span, value[i] );
+                if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
 
             return XxHash128.HashToUInt128( buffer, seed );
@@ -160,7 +159,7 @@ public static partial class Spans
                 int        start = i * SIZE;
                 var        range = new Range( start, start + SIZE );
                 Span<byte> span  = buffer.AsSpan( range );
-                BitConverter.TryWriteBytes( span, value[i] );
+                if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
 
             return XxHash128.HashToUInt128( buffer, seed );
@@ -179,7 +178,7 @@ public static partial class Spans
                 int        start = i * SIZE;
                 var        range = new Range( start, start + SIZE );
                 Span<byte> span  = buffer.AsSpan( range );
-                BitConverter.TryWriteBytes( span, value[i] );
+                if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
 
             return XxHash128.HashToUInt128( buffer, seed );
@@ -198,7 +197,7 @@ public static partial class Spans
                 int        start = i * SIZE;
                 var        range = new Range( start, start + SIZE );
                 Span<byte> span  = buffer.AsSpan( range );
-                BitConverter.TryWriteBytes( span, value[i] );
+                if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
 
             return XxHash128.HashToUInt128( buffer, seed );
@@ -217,7 +216,7 @@ public static partial class Spans
                 int        start = i * SIZE;
                 var        range = new Range( start, start + SIZE );
                 Span<byte> span  = buffer.AsSpan( range );
-                BitConverter.TryWriteBytes( span, value[i] );
+                if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
 
             return XxHash128.HashToUInt128( buffer, seed );
@@ -242,7 +241,7 @@ public static partial class Spans
                 int        start = i * SIZE;
                 var        range = new Range( start, start + SIZE );
                 Span<byte> span  = buffer.AsSpan( range );
-                BitConverter.TryWriteBytes( span, value[i] );
+                if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
 
             return XxHash64.HashToUInt64( buffer, seed );
@@ -255,7 +254,6 @@ public static partial class Spans
     public static ulong Hash( in ReadOnlySpan<bool> value, long seed = 0 )
     {
         const int SIZE = sizeof(bool);
-
         byte[] buffer = _bytePool.Rent( SIZE * value.Length );
 
         try
@@ -265,7 +263,7 @@ public static partial class Spans
                 int        start = i * SIZE;
                 var        range = new Range( start, start + SIZE );
                 Span<byte> span  = buffer.AsSpan( range );
-                BitConverter.TryWriteBytes( span, value[i] );
+                if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
 
             return XxHash64.HashToUInt64( buffer, seed );
@@ -284,7 +282,7 @@ public static partial class Spans
                 int        start = i * SIZE;
                 var        range = new Range( start, start + SIZE );
                 Span<byte> span  = buffer.AsSpan( range );
-                BitConverter.TryWriteBytes( span, value[i] );
+                if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
 
             return XxHash64.HashToUInt64( buffer, seed );
@@ -303,7 +301,7 @@ public static partial class Spans
                 int        start = i * SIZE;
                 var        range = new Range( start, start + SIZE );
                 Span<byte> span  = buffer.AsSpan( range );
-                BitConverter.TryWriteBytes( span, value[i] );
+                if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
 
             return XxHash64.HashToUInt64( buffer, seed );
@@ -322,7 +320,7 @@ public static partial class Spans
                 int        start = i * SIZE;
                 var        range = new Range( start, start + SIZE );
                 Span<byte> span  = buffer.AsSpan( range );
-                BitConverter.TryWriteBytes( span, value[i] );
+                if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
 
             return XxHash64.HashToUInt64( buffer, seed );
@@ -341,7 +339,7 @@ public static partial class Spans
                 int        start = i * SIZE;
                 var        range = new Range( start, start + SIZE );
                 Span<byte> span  = buffer.AsSpan( range );
-                BitConverter.TryWriteBytes( span, value[i] );
+                if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
 
             return XxHash64.HashToUInt64( buffer, seed );
@@ -360,7 +358,7 @@ public static partial class Spans
                 int        start = i * SIZE;
                 var        range = new Range( start, start + SIZE );
                 Span<byte> span  = buffer.AsSpan( range );
-                BitConverter.TryWriteBytes( span, value[i] );
+                if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
 
             return XxHash64.HashToUInt64( buffer, seed );
@@ -379,7 +377,7 @@ public static partial class Spans
                 int        start = i * SIZE;
                 var        range = new Range( start, start + SIZE );
                 Span<byte> span  = buffer.AsSpan( range );
-                BitConverter.TryWriteBytes( span, value[i] );
+                if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
 
             return XxHash64.HashToUInt64( buffer, seed );
@@ -398,7 +396,7 @@ public static partial class Spans
                 int        start = i * SIZE;
                 var        range = new Range( start, start + SIZE );
                 Span<byte> span  = buffer.AsSpan( range );
-                BitConverter.TryWriteBytes( span, value[i] );
+                if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
 
             return XxHash64.HashToUInt64( buffer, seed );
@@ -417,7 +415,7 @@ public static partial class Spans
                 int        start = i * SIZE;
                 var        range = new Range( start, start + SIZE );
                 Span<byte> span  = buffer.AsSpan( range );
-                BitConverter.TryWriteBytes( span, value[i] );
+                if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
 
             return XxHash64.HashToUInt64( buffer, seed );
@@ -436,7 +434,7 @@ public static partial class Spans
                 int        start = i * SIZE;
                 var        range = new Range( start, start + SIZE );
                 Span<byte> span  = buffer.AsSpan( range );
-                BitConverter.TryWriteBytes( span, value[i] );
+                if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
 
             return XxHash64.HashToUInt64( buffer, seed );
