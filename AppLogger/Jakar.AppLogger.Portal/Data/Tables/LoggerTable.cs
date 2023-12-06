@@ -15,10 +15,10 @@ public interface ILoggerTable : MsJsonModels.IJsonModel
 public abstract record LoggerTable<TRecord>( RecordID<TRecord> ID, DateTimeOffset DateCreated, DateTimeOffset? LastModified ) : TableRecord<TRecord>( ID, DateCreated, LastModified ), ILoggerTable
     where TRecord : LoggerTable<TRecord>, IDbReaderMapping<TRecord>, MsJsonModels.IJsonizer<TRecord>
 {
-    [ System.Text.Json.Serialization.JsonExtensionData ] public IDictionary<string, JsonElement>? AdditionalData { get; set; }
-    public                                                      bool                              IsActive       { get; set; } = true;
-    internal                                                    bool                              IsNotActive    => !IsActive;
-    bool ILoggerTable.                                                                            IsNotActive    => IsNotActive;
+    [ System.Text.Json.Serialization.JsonExtensionData ] public JsonObject? AdditionalData { get; set; }
+    public                                                      bool        IsActive       { get; set; } = true;
+    internal                                                    bool        IsNotActive    => !IsActive;
+    bool ILoggerTable.                                                      IsNotActive    => IsNotActive;
 
 
     protected LoggerTable( RecordID<TRecord> id ) : this( id, DateTimeOffset.UtcNow, null ) { }
@@ -30,10 +30,10 @@ public abstract record OwnedLoggerTable<TRecord>
     ( RecordID<TRecord> ID, RecordID<UserRecord>? CreatedBy, Guid? OwnerUserID, DateTimeOffset DateCreated, DateTimeOffset? LastModified ) : OwnedTableRecord<TRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), ILoggerTable
     where TRecord : OwnedLoggerTable<TRecord>, IDbReaderMapping<TRecord>, MsJsonModels.IJsonizer<TRecord>
 {
-    [ System.Text.Json.Serialization.JsonExtensionData ] public IDictionary<string, JsonElement>? AdditionalData { get; set; }
-    public                                                      bool                              IsActive       { get; set; } = true;
-    internal                                                    bool                              IsNotActive    => !IsActive;
-    bool ILoggerTable.                                                                            IsNotActive    => IsNotActive;
+    [ System.Text.Json.Serialization.JsonExtensionData ] public JsonObject? AdditionalData { get; set; }
+    public                                                      bool        IsActive       { get; set; } = true;
+    internal                                                    bool        IsNotActive    => !IsActive;
+    bool ILoggerTable.                                                      IsNotActive    => IsNotActive;
 
 
     protected OwnedLoggerTable( UserRecord?       owner ) : this( RecordID<TRecord>.New(), owner ) { }

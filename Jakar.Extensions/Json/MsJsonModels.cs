@@ -1,5 +1,4 @@
-﻿using System.Text.Json.Nodes;
-using System.Text.Json.Serialization.Metadata;
+﻿using System.Text.Json.Serialization.Metadata;
 
 
 
@@ -15,26 +14,34 @@ public static class MsJsonModels
     public static bool Remove<TClass>( this TClass self, string key )
         where TClass : IJsonModel
     {
-        self.AdditionalData ??= new Dictionary<string, JsonElement>();
+        self.AdditionalData ??= new JsonObject();
         return self.AdditionalData.Remove( key );
     }
     public static bool Remove<TClass>( this TClass self, string key, out JsonElement value )
         where TClass : IJsonModel
     {
-        self.AdditionalData ??= new Dictionary<string, JsonElement>();
-        return self.AdditionalData.Remove( key, out value );
+        self.AdditionalData ??= new JsonObject();
+
+        if ( self.AdditionalData.Remove( key, out var node ) )
+        {
+            value = node?.ToJsonElement() ?? default;
+            return true;
+        }
+
+        value = default;
+        return false;
     }
 
 
-    public static IDictionary<string, JsonElement> GetData<TClass>( this TClass model )
+    public static JsonObject GetData<TClass>( this TClass model )
         where TClass : IJsonModel => model.GetAdditionalData();
 
 
-    public static IDictionary<string, JsonElement> GetAdditionalData<TClass>( this TClass model )
-        where TClass : IJsonModel => model.AdditionalData ??= new Dictionary<string, JsonElement>();
+    public static JsonObject GetAdditionalData<TClass>( this TClass model )
+        where TClass : IJsonModel => model.AdditionalData ??= new JsonObject();
 
 
-    public static JsonElement? Get<TClass>( this TClass self, string key )
+    public static JsonNode? Get<TClass>( this TClass self, string key )
         where TClass : IJsonModel => self.AdditionalData?[key];
 
 
@@ -118,19 +125,22 @@ public static class MsJsonModels
     public static TClass Add<TClass>( this TClass self, string key, JsonNode? value )
         where TClass : IJsonModel
     {
-        JsonElement element = value?.Deserialize<JsonElement>() ?? default;
-        return self.Add( key, element );
-    }
-    public static TClass Add<TClass>( this TClass self, string key, JsonElement value )
-        where TClass : IJsonModel
-    {
-        self.AdditionalData ??= new Dictionary<string, JsonElement>();
+        self.AdditionalData ??= new JsonObject();
         self.AdditionalData.Add( key, value );
         return self;
     }
+    public static TClass Add<TClass>( this TClass self, string key, JsonElement value )
+        where TClass : IJsonModel => self.Add( key, value.ToJsonNode() );
 
 
-    public static void SetAdditionalData<TClass>( this TClass model, IDictionary<string, JsonElement>? data )
+    public static void Add( this IDictionary<string, JsonNode?> self, string key, JsonElement value ) => self.Add( key, value.ToJsonNode() );
+
+
+    public static JsonNode?   ToJsonNode( this    JsonElement node ) => node.Deserialize<JsonNode>();
+    public static JsonElement ToJsonElement( this JsonNode    node ) => node.Deserialize<JsonElement>();
+
+
+    public static void SetAdditionalData<TClass>( this TClass model, JsonObject? data )
         where TClass : IJsonModel => model.AdditionalData = data;
 
 
@@ -157,7 +167,7 @@ public static class MsJsonModels
 
     public interface IJsonModel
     {
-        [ JsonExtensionData ] public IDictionary<string, JsonElement>? AdditionalData { get; set; }
+        [ JsonExtensionData ] public JsonObject? AdditionalData { get; set; }
     }
 
 
@@ -191,7 +201,7 @@ public static class MsJsonModels
 
 
 
-    public interface IJsonizer<TClass> 
+    public interface IJsonizer<TClass>
     {
         [ Pure ] public abstract static JsonTypeInfo<TClass>  JsonTypeInfo();
         [ Pure ] public abstract static TClass                FromJson( string  json );

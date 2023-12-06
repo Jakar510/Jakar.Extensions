@@ -16,7 +16,7 @@ public sealed record AddressRecord( [ property: ProtectedPersonalData, MaxLength
                                     [ property: ProtectedPersonalData, MaxLength( 256 ) ]  string PostalCode,
                                     [ property: ProtectedPersonalData, MaxLength( 4096 ) ] string Address,
                                     bool                                                          IsPrimary,
-                                    IDictionary<string, JsonElement>?                             AdditionalData,
+                                    JsonObject?                             AdditionalData,
                                     RecordID<AddressRecord>                                       ID,
                                     RecordID<UserRecord>?                                         CreatedBy,
                                     Guid?                                                         OwnerUserID,
@@ -26,7 +26,7 @@ public sealed record AddressRecord( [ property: ProtectedPersonalData, MaxLength
 {
     public static string                     TableName      { get; } = typeof(AddressRecord).GetTableName();
     Guid? IAddress.                          UserID         => OwnerUserID;
-    public IDictionary<string, JsonElement>? AdditionalData { get; set; } = AdditionalData;
+    public JsonObject? AdditionalData { get; set; } = AdditionalData;
 
 
     [ Pure ]
@@ -53,7 +53,7 @@ public sealed record AddressRecord( [ property: ProtectedPersonalData, MaxLength
         string                            country         = reader.GetFieldValue<string>( nameof(Country) );
         string                            postalCode      = reader.GetFieldValue<string>( nameof(PostalCode) );
         string                            address         = reader.GetFieldValue<string>( nameof(Address) );
-        IDictionary<string, JsonElement>? additionalData  = reader.GetAdditionalData();
+        JsonObject? additionalData  = reader.GetAdditionalData();
         bool                              isPrimary       = reader.GetFieldValue<bool>( nameof(IsPrimary) );
         RecordID<AddressRecord>           id              = RecordID<AddressRecord>.ID( reader );
         RecordID<UserRecord>?             createdBy       = RecordID<UserRecord>.CreatedBy( reader );

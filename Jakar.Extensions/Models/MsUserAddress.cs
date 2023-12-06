@@ -1,5 +1,5 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
-// 09/29/2023  10:20 PM
+// 12/06/2023  11:46 AM
 
 using System.Text.Json.Serialization.Metadata;
 
@@ -8,42 +8,30 @@ using System.Text.Json.Serialization.Metadata;
 namespace Jakar.Extensions;
 
 
-[ SuppressMessage( "ReSharper", "UnusedMemberInSuper.Global" ) ]
-public interface IAddress
+public record MsUserAddress : ObservableRecord, IAddress, IComparable<MsUserAddress>, IComparable, MsJsonModels.IJsonModel<MsUserAddress>
+#if NET8_0
+                              ,
+                              MsJsonModels.IJsonizer<MsUserAddress>
+#endif
 {
-    [ MaxLength( 4096 ) ] public          string? Address         { get; }
-    [ MaxLength( 256 ) ]  public          string  City            { get; }
-    [ MaxLength( 256 ) ]  public          string  Country         { get; }
-    public                                bool    IsPrimary       { get; }
-    [ MaxLength( 512 ) ]           public string  Line1           { get; }
-    [ MaxLength( 256 ) ]           public string  Line2           { get; }
-    [ MaxLength( 256 ), Required ] public string  PostalCode      { get; }
-    [ MaxLength( 256 ) ]           public string  StateOrProvince { get; }
-    public                                Guid?   UserID          { get; }
-}
+    private bool        _isPrimary;
+    private Guid?       _userID;
+    private JsonObject? _additionalData;
+    private string      _city            = string.Empty;
+    private string      _country         = string.Empty;
+    private string      _line1           = string.Empty;
+    private string      _line2           = string.Empty;
+    private string      _postalCode      = string.Empty;
+    private string      _stateOrProvince = string.Empty;
+    private string?     _address;
 
 
-
-public record UserAddress : ObservableRecord, IAddress, IComparable<UserAddress>, IComparable, JsonModels.IJsonModel
-{
-    private bool                          _isPrimary;
-    private Guid?                         _userID;
-    private IDictionary<string, JToken?>? _additionalData;
-    private string                        _city            = string.Empty;
-    private string                        _country         = string.Empty;
-    private string                        _line1           = string.Empty;
-    private string                        _line2           = string.Empty;
-    private string                        _postalCode      = string.Empty;
-    private string                        _stateOrProvince = string.Empty;
-    private string?                       _address;
+    public static MsUserAddressContext  JsonSerializerContext => MsUserAddressContext.Default;
+    public static Sorter<MsUserAddress> Sorter                => Sorter<MsUserAddress>.Default;
 
 
-    public static UserAddressContext  JsonSerializerContext => UserAddressContext.Default;
-    public static Sorter<UserAddress> Sorter                => Sorter<UserAddress>.Default;
-
-
-    [ JsonNetExtensionData ]
-    public IDictionary<string, JToken?>? AdditionalData
+    [ JsonExtensionData ]
+    public JsonObject? AdditionalData
     {
         get => _additionalData;
         set => SetProperty( ref _additionalData, value );
@@ -150,8 +138,8 @@ public record UserAddress : ObservableRecord, IAddress, IComparable<UserAddress>
     }
 
 
-    public UserAddress() { }
-    public UserAddress( IAddress address )
+    public MsUserAddress() { }
+    public MsUserAddress( IAddress address )
     {
         Address         = address.Address;
         Line1           = address.Line1;
@@ -164,8 +152,8 @@ public record UserAddress : ObservableRecord, IAddress, IComparable<UserAddress>
         UserID          = address.UserID;
     }
 
-    [ Pure ] public static JsonTypeInfo<UserAddress> JsonTypeInfo()          => JsonSerializerContext.UserAddress;
-    [ Pure ] public static UserAddress               FromJson( string json ) => json.FromJson( JsonTypeInfo() );
+    [ Pure ] public static JsonTypeInfo<MsUserAddress> JsonTypeInfo()          => JsonSerializerContext.MsUserAddress;
+    [ Pure ] public static MsUserAddress               FromJson( string json ) => json.FromJson( JsonTypeInfo() );
 
     [ Pure ]
     public static JsonSerializerOptions JsonOptions( bool writeIndented ) => new()
@@ -178,7 +166,7 @@ public record UserAddress : ObservableRecord, IAddress, IComparable<UserAddress>
                                              ? $"{Line1}. {City}, {StateOrProvince}. {Country}. {PostalCode}"
                                              : $"{Line1} {Line2}. {City}, {StateOrProvince}. {Country}. {PostalCode}";
 
-    public int CompareTo( UserAddress? other )
+    public int CompareTo( MsUserAddress? other )
     {
         if ( other is null ) { return 1; }
 
@@ -213,18 +201,18 @@ public record UserAddress : ObservableRecord, IAddress, IComparable<UserAddress>
 
         if ( ReferenceEquals( this, other ) ) { return 0; }
 
-        return other is UserAddress address
+        return other is MsUserAddress address
                    ? CompareTo( address )
-                   : throw new ArgumentException( $"Object must be of type {nameof(UserAddress)}" );
+                   : throw new ArgumentException( $"Object must be of type {nameof(MsUserAddress)}" );
     }
 
 
-    public static bool operator <( UserAddress?  left, UserAddress? right ) => Sorter.Compare( left, right ) < 0;
-    public static bool operator >( UserAddress?  left, UserAddress? right ) => Sorter.Compare( left, right ) > 0;
-    public static bool operator <=( UserAddress? left, UserAddress? right ) => Sorter.Compare( left, right ) <= 0;
-    public static bool operator >=( UserAddress? left, UserAddress? right ) => Sorter.Compare( left, right ) >= 0;
+    public static bool operator <( MsUserAddress?  left, MsUserAddress? right ) => Sorter.Compare( left, right ) < 0;
+    public static bool operator >( MsUserAddress?  left, MsUserAddress? right ) => Sorter.Compare( left, right ) > 0;
+    public static bool operator <=( MsUserAddress? left, MsUserAddress? right ) => Sorter.Compare( left, right ) <= 0;
+    public static bool operator >=( MsUserAddress? left, MsUserAddress? right ) => Sorter.Compare( left, right ) >= 0;
 }
 
 
 
-[ JsonSourceGenerationOptions( WriteIndented = true ), JsonSerializable( typeof(UserAddress) ) ] public partial class UserAddressContext : JsonSerializerContext { }
+[ JsonSourceGenerationOptions( WriteIndented = true ), JsonSerializable( typeof(MsUserAddress) ) ] public partial class MsUserAddressContext : JsonSerializerContext { }

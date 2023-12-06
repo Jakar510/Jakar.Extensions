@@ -37,7 +37,7 @@ public sealed record UserRecord( Guid                                           
                                  [ property: MaxLength( UserRecord.MAX_SIZE ) ] string                    AuthenticatorKey,
                                  [ property: MaxLength( UserRecord.MAX_SIZE ) ] string                    ConcurrencyStamp,
                                  [ property: MaxLength( 256 ) ]                 RecordID<UserRecord>?     EscalateTo,
-                                 IDictionary<string, JsonElement>?                                        AdditionalData,
+                                 JsonObject?                                                              AdditionalData,
                                  RecordID<UserRecord>                                                     ID,
                                  RecordID<UserRecord>?                                                    CreatedBy,
                                  Guid?                                                                    OwnerUserID,
@@ -45,11 +45,11 @@ public sealed record UserRecord( Guid                                           
                                  DateTimeOffset?                                                          LastModified = default
 ) : OwnedTableRecord<UserRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<UserRecord>, IUserData<UserRecord>, IRefreshToken, IUserID, IUserDataRecord, UserRights.IRights, MsJsonModels.IJsonizer<UserRecord>
 {
-    public const           int                               MAX_PASSWORD_SIZE           = 250;
-    public const           int                               ENCRYPTED_MAX_PASSWORD_SIZE = 550;
-    public const           int                               MAX_SIZE                    = TokenValidationParameters.DefaultMaximumTokenSizeInBytes;
-    public static readonly TimeSpan                          DefaultLockoutTime          = TimeSpan.FromHours( 6 );
-    private                IDictionary<string, JsonElement>? _additionalData             = AdditionalData;
+    public const           int         MAX_PASSWORD_SIZE           = 250;
+    public const           int         ENCRYPTED_MAX_PASSWORD_SIZE = 550;
+    public const           int         MAX_SIZE                    = TokenValidationParameters.DefaultMaximumTokenSizeInBytes;
+    public static readonly TimeSpan    DefaultLockoutTime          = TimeSpan.FromHours( 6 );
+    private                JsonObject? _additionalData             = AdditionalData;
 
 
     public static string          TableName { get; }      = typeof(UserRecord).GetTableName();
@@ -58,7 +58,7 @@ public sealed record UserRecord( Guid                                           
 
 
     [ ProtectedPersonalData, MaxLength( int.MaxValue ) ]
-    public IDictionary<string, JsonElement>? AdditionalData
+    public JsonObject? AdditionalData
     {
         get => _additionalData;
         set => _additionalData = value;
@@ -122,47 +122,47 @@ public sealed record UserRecord( Guid                                           
     [ Pure ]
     public static UserRecord Create( DbDataReader reader )
     {
-        var                              userID                 = reader.GetFieldValue<Guid>( nameof(UserID) );
-        string                           userName               = reader.GetFieldValue<string>( nameof(UserName) );
-        string                           firstName              = reader.GetFieldValue<string>( nameof(FirstName) );
-        string                           lastName               = reader.GetFieldValue<string>( nameof(LastName) );
-        string                           fullName               = reader.GetFieldValue<string>( nameof(FullName) );
-        string                           rights                 = reader.GetFieldValue<string>( nameof(Rights) );
-        string                           gender                 = reader.GetFieldValue<string>( nameof(Gender) );
-        string                           company                = reader.GetFieldValue<string>( nameof(Company) );
-        string                           description            = reader.GetFieldValue<string>( nameof(Description) );
-        string                           department             = reader.GetFieldValue<string>( nameof(Department) );
-        string                           title                  = reader.GetFieldValue<string>( nameof(Title) );
-        string                           website                = reader.GetFieldValue<string>( nameof(Website) );
-        SupportedLanguage                preferredLanguage      = EnumSqlHandler<SupportedLanguage>.Instance.Parse( reader.GetValue( nameof(PreferredLanguage) ) );
-        string                           email                  = reader.GetFieldValue<string>( nameof(Email) );
-        bool                             isEmailConfirmed       = reader.GetBoolean( nameof(IsEmailConfirmed) );
-        string                           phoneNumber            = reader.GetFieldValue<string>( nameof(PhoneNumber) );
-        string                           ext                    = reader.GetFieldValue<string>( nameof(Ext) );
-        bool                             isPhoneNumberConfirmed = reader.GetBoolean( nameof(IsPhoneNumberConfirmed) );
-        bool                             isTwoFactorEnabled     = reader.GetBoolean( nameof(IsTwoFactorEnabled) );
-        var                              lastBadAttempt         = reader.GetFieldValue<DateTimeOffset?>( nameof(LastBadAttempt) );
-        var                              lastLogin              = reader.GetFieldValue<DateTimeOffset?>( nameof(LastLogin) );
-        int                              badLogins              = reader.GetFieldValue<int>( nameof(BadLogins) );
-        bool                             isLocked               = reader.GetBoolean( nameof(IsLocked) );
-        var                              lockDate               = reader.GetFieldValue<DateTimeOffset?>( nameof(LockDate) );
-        var                              lockoutEnd             = reader.GetFieldValue<DateTimeOffset?>( nameof(LockoutEnd) );
-        string                           passwordHash           = reader.GetFieldValue<string>( nameof(PasswordHash) );
-        string                           refreshToken           = reader.GetFieldValue<string>( nameof(RefreshToken) );
-        var                              refreshTokenExpiryTime = reader.GetFieldValue<DateTimeOffset?>( nameof(RefreshTokenExpiryTime) );
-        var                              sessionID              = reader.GetFieldValue<Guid?>( nameof(SessionID) );
-        bool                             isActive               = reader.GetBoolean( nameof(IsActive) );
-        bool                             isDisabled             = reader.GetBoolean( nameof(IsDisabled) );
-        string                           securityStamp          = reader.GetFieldValue<string>( nameof(SecurityStamp) );
-        string                           authenticatorKey       = reader.GetFieldValue<string>( nameof(AuthenticatorKey) );
-        string                           concurrencyStamp       = reader.GetFieldValue<string>( nameof(AuthenticatorKey) );
-        RecordID<UserRecord>?            escalateTo             = RecordID<UserRecord>.TryCreate( reader, nameof(EscalateTo) );
-        Dictionary<string, JsonElement>? additionalData         = reader.GetAdditionalData();
-        RecordID<UserRecord>             id                     = RecordID<UserRecord>.ID( reader );
-        RecordID<UserRecord>?            createdBy              = RecordID<UserRecord>.CreatedBy( reader );
-        var                              ownerUserID            = reader.GetFieldValue<Guid?>( nameof(OwnerUserID) );
-        var                              dateCreated            = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
-        var                              lastModified           = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
+        var                   userID                 = reader.GetFieldValue<Guid>( nameof(UserID) );
+        string                userName               = reader.GetFieldValue<string>( nameof(UserName) );
+        string                firstName              = reader.GetFieldValue<string>( nameof(FirstName) );
+        string                lastName               = reader.GetFieldValue<string>( nameof(LastName) );
+        string                fullName               = reader.GetFieldValue<string>( nameof(FullName) );
+        string                rights                 = reader.GetFieldValue<string>( nameof(Rights) );
+        string                gender                 = reader.GetFieldValue<string>( nameof(Gender) );
+        string                company                = reader.GetFieldValue<string>( nameof(Company) );
+        string                description            = reader.GetFieldValue<string>( nameof(Description) );
+        string                department             = reader.GetFieldValue<string>( nameof(Department) );
+        string                title                  = reader.GetFieldValue<string>( nameof(Title) );
+        string                website                = reader.GetFieldValue<string>( nameof(Website) );
+        SupportedLanguage     preferredLanguage      = EnumSqlHandler<SupportedLanguage>.Instance.Parse( reader.GetValue( nameof(PreferredLanguage) ) );
+        string                email                  = reader.GetFieldValue<string>( nameof(Email) );
+        bool                  isEmailConfirmed       = reader.GetBoolean( nameof(IsEmailConfirmed) );
+        string                phoneNumber            = reader.GetFieldValue<string>( nameof(PhoneNumber) );
+        string                ext                    = reader.GetFieldValue<string>( nameof(Ext) );
+        bool                  isPhoneNumberConfirmed = reader.GetBoolean( nameof(IsPhoneNumberConfirmed) );
+        bool                  isTwoFactorEnabled     = reader.GetBoolean( nameof(IsTwoFactorEnabled) );
+        var                   lastBadAttempt         = reader.GetFieldValue<DateTimeOffset?>( nameof(LastBadAttempt) );
+        var                   lastLogin              = reader.GetFieldValue<DateTimeOffset?>( nameof(LastLogin) );
+        int                   badLogins              = reader.GetFieldValue<int>( nameof(BadLogins) );
+        bool                  isLocked               = reader.GetBoolean( nameof(IsLocked) );
+        var                   lockDate               = reader.GetFieldValue<DateTimeOffset?>( nameof(LockDate) );
+        var                   lockoutEnd             = reader.GetFieldValue<DateTimeOffset?>( nameof(LockoutEnd) );
+        string                passwordHash           = reader.GetFieldValue<string>( nameof(PasswordHash) );
+        string                refreshToken           = reader.GetFieldValue<string>( nameof(RefreshToken) );
+        var                   refreshTokenExpiryTime = reader.GetFieldValue<DateTimeOffset?>( nameof(RefreshTokenExpiryTime) );
+        var                   sessionID              = reader.GetFieldValue<Guid?>( nameof(SessionID) );
+        bool                  isActive               = reader.GetBoolean( nameof(IsActive) );
+        bool                  isDisabled             = reader.GetBoolean( nameof(IsDisabled) );
+        string                securityStamp          = reader.GetFieldValue<string>( nameof(SecurityStamp) );
+        string                authenticatorKey       = reader.GetFieldValue<string>( nameof(AuthenticatorKey) );
+        string                concurrencyStamp       = reader.GetFieldValue<string>( nameof(AuthenticatorKey) );
+        RecordID<UserRecord>? escalateTo             = RecordID<UserRecord>.TryCreate( reader, nameof(EscalateTo) );
+        JsonObject?           additionalData         = reader.GetAdditionalData();
+        RecordID<UserRecord>  id                     = RecordID<UserRecord>.ID( reader );
+        RecordID<UserRecord>? createdBy              = RecordID<UserRecord>.CreatedBy( reader );
+        var                   ownerUserID            = reader.GetFieldValue<Guid?>( nameof(OwnerUserID) );
+        var                   dateCreated            = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
+        var                   lastModified           = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
 
 
         var record = new UserRecord( userID,
@@ -721,12 +721,12 @@ public sealed record UserRecord( Guid                                           
 
     [ Pure ]
     public UserRecord WithAdditionalData<T>( T? value )
-        where T : IDictionary<string, JsonElement>
+        where T : IDictionary<string, JsonNode?>
     {
         if ( value is null ) { return this; }
 
-        IDictionary<string, JsonElement> data = AdditionalData ?? new Dictionary<string, JsonElement>();
-        foreach ( (string? key, JsonElement jToken) in value ) { data[key] = jToken; }
+        JsonObject data = AdditionalData ?? new JsonObject();
+        foreach ( (string? key, JsonNode? jToken) in value ) { data[key] = jToken; }
 
         AdditionalData = data;
         return this;

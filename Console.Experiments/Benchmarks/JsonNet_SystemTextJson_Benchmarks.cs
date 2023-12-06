@@ -221,7 +221,7 @@ public sealed record Node
     public double         Price       { get; init; }
 
     // [ JsonExtensionData ]                                public Dictionary<string, JToken>?      JsonExtensionData { get; set; }
-    // [ System.Text.Json.Serialization.JsonExtensionData ] public Dictionary<string, JsonElement>? ExtensionData     { get; set; }
+    // [ System.Text.Json.Serialization.JsonExtensionData ] public JsonObject? ExtensionData     { get; set; }
 
 
     public Node() { }

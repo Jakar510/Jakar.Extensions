@@ -42,6 +42,7 @@ global using System.Security;
 global using System.Security.Authentication;
 global using System.Security.Cryptography.X509Certificates;
 global using System.Text.Json;
+global using System.Text.Json.Nodes;
 global using System.Text.Json.Serialization;
 global using System.Threading.Tasks.Dataflow;
 global using System.Windows.Input;

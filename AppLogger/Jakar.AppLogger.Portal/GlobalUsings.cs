@@ -14,6 +14,7 @@ global using System.Runtime.CompilerServices;
 global using System.Runtime.InteropServices;
 global using System.Runtime.Versioning;
 global using System.Text.Json;
+global using System.Text.Json.Nodes;
 global using System.Text.Json.Serialization;
 global using System.Text.Json.Serialization.Metadata;
 global using System.Web.Hosting;

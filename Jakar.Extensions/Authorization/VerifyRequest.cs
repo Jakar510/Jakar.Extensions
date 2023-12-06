@@ -21,7 +21,7 @@ public class VerifyRequest : BaseClass,
     [ JsonNetIgnore, JsonIgnore ] public virtual bool                 IsValid               => !string.IsNullOrWhiteSpace( UserName ) && !string.IsNullOrWhiteSpace( Password );
 
 
-    [ JsonExtensionData ] public IDictionary<string, JsonElement>? AdditionalData { get; set; }
+    [ JsonExtensionData ] public JsonObject? AdditionalData { get; set; }
 
 
     [ Required( ErrorMessage = $"{nameof(Password)} is required." ), JsonProperty( nameof(Password), Required = Required.Always ) ] public string Password { get; init; } = string.Empty;

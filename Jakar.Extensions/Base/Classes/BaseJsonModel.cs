@@ -26,7 +26,7 @@ public abstract class BaseJsonModel<TClass> : Collections<TClass>, JsonModels.IJ
 [ Serializable ]
 public class BaseMsJsonModel : ObservableClass, MsJsonModels.IJsonModel
 {
-    [ System.Text.Json.Serialization.JsonExtensionData ] public IDictionary<string, JsonElement>? AdditionalData { get; set; }
+    [ System.Text.Json.Serialization.JsonExtensionData ] public JsonObject? AdditionalData { get; set; }
 }
 
 
@@ -36,5 +36,5 @@ public abstract class BaseMsJsonModel<TClass, TID> : Collections<TClass>
     where TClass : BaseMsJsonModel<TClass, TID>
     where TID : struct, IComparable<TID>, IEquatable<TID>
 {
-    [ System.Text.Json.Serialization.JsonExtensionData ] public IDictionary<string, JsonElement>? AdditionalData { get; set; }
+    [ System.Text.Json.Serialization.JsonExtensionData ] public JsonObject? AdditionalData { get; set; }
 }

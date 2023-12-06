@@ -3,7 +3,7 @@
 
 public static class TableExtensions
 {
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static Dictionary<string, JsonElement>? GetAdditionalData( this DbDataReader reader ) => reader.GetData<Dictionary<string, JsonElement>>();
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static JsonObject? GetAdditionalData( this DbDataReader reader ) => reader.GetData<JsonObject>();
 
 
     [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
