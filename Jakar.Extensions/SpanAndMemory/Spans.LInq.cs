@@ -1,6 +1,10 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 08/26/2023  12:06 PM
 
+using System;
+
+
+
 namespace Jakar.Extensions;
 
 
@@ -83,39 +87,14 @@ public static partial class Spans
 
 
     [ Pure ]
-    public static Span<T> Join<T>( this Span<T> value, Span<T> other )
-        where T : unmanaged, IEquatable<T>
-    {
-        // AsyncLinq.GetArray<T>( value.Length + other.Length )
-        Span<T> buffer = stackalloc T[value.Length + other.Length];
-        Join( value, other, ref buffer, out int charWritten );
-        return MemoryMarshal.CreateSpan( ref buffer.GetPinnableReference(), charWritten );
-    }
-    [ Pure ]
-    public static Span<T> Join<T>( this Span<T> value, ReadOnlySpan<T> other )
-        where T : unmanaged, IEquatable<T>
-    {
-        Span<T> buffer = stackalloc T[value.Length + other.Length];
-        Join( value, other, ref buffer, out int charWritten );
-        return MemoryMarshal.CreateSpan( ref buffer.GetPinnableReference(), charWritten );
-    }
-    [ Pure ]
-    public static bool Join<T>( in ReadOnlySpan<T> first, in ReadOnlySpan<T> last, ref Span<T> buffer, out int charWritten )
-    {
-        charWritten = first.Length + last.Length;
-        Guard.IsInRangeFor( charWritten - 1, buffer, nameof(buffer) );
-        return first.TryCopyTo( buffer[..first.Length] ) && last.TryCopyTo( buffer[(first.Length + 1)..] );
-    }
-
-
-    [ Pure ]
     public static Span<T> Where<T>( this Span<T> values, Func<T, bool> selector )
         where T : IEquatable<T>
     {
         if ( values.Length == 0 ) { return default; }
 
-        T[] buffer = AsyncLinq.GetArray<T>( values.Length );
-        Where( values, buffer, selector, out int length );
+        T[]     buffer = AsyncLinq.GetArray<T>( values.Length );
+        Span<T> span   = buffer;
+        Where( values, ref span, selector, out int length );
 
         return new Span<T>( buffer, 0, length );
     }
@@ -125,8 +104,9 @@ public static partial class Spans
     {
         if ( values.Length == 0 ) { return default; }
 
-        T[] buffer = AsyncLinq.GetArray<T>( values.Length );
-        Where( values, buffer, selector, out int length );
+        T[]     buffer = AsyncLinq.GetArray<T>( values.Length );
+        Span<T> span   = buffer;
+        Where( values, ref span, selector, out int length );
 
         return new ReadOnlySpan<T>( buffer, 0, length );
     }
@@ -141,15 +121,16 @@ public static partial class Spans
             case > 256:
             {
                 Span<T> buffer = stackalloc T[values.Length];
-                Where( values, buffer, selector, out int length );
+                Where( values, ref buffer, selector, out int length );
 
                 return MemoryMarshal.CreateReadOnlySpan( ref buffer.GetPinnableReference(), length );
             }
 
             default:
             {
-                T[] buffer = AsyncLinq.GetArray<T>( values.Length );
-                Where( values, buffer, selector, out int length );
+                T[]     buffer = AsyncLinq.GetArray<T>( values.Length );
+                Span<T> span   = buffer;
+                Where( values, ref span, selector, out int length );
 
                 return new ReadOnlySpan<T>( buffer, 0, length );
             }
@@ -166,21 +147,29 @@ public static partial class Spans
             case > 256:
             {
                 Span<T> buffer = stackalloc T[values.Length];
-                Where( values, buffer, selector, out int length );
+                Where( values, ref buffer, selector, out int length );
 
                 return MemoryMarshal.CreateSpan( ref buffer.GetPinnableReference(), length );
             }
 
             default:
             {
-                T[] buffer = AsyncLinq.GetArray<T>( values.Length );
-                Where( values, buffer, selector, out int length );
+                T[]     buffer = AsyncLinq.GetArray<T>( values.Length );
+                Span<T> span   = buffer;
+                Where( values, ref span, selector, out int length );
 
                 return new Span<T>( buffer, 0, length );
             }
         }
     }
-    public static void Where<T>( this ReadOnlySpan<T> values, Span<T> span, Func<T, bool> selector, out int length )
+    public static void Where<T>( in ReadOnlySpan<T> values,
+                             #if NET6_0_OR_GREATER
+                                 scoped
+                                 #endif
+                                     ref Span<T> span,
+                                 Func<T, bool> selector,
+                                 out int       length
+    )
         where T : IEquatable<T>
     {
         if ( values.Length == 0 )
@@ -197,5 +186,36 @@ public static partial class Spans
         {
             if ( selector( value ) ) { span[length++] = value; }
         }
+    }
+
+
+    [ Pure ]
+    public static Span<T> Join<T>( this ReadOnlySpan<T> value, in ReadOnlySpan<T> other )
+        where T : unmanaged, IEquatable<T>
+    {
+        Span<T> buffer = stackalloc T[value.Length + other.Length];
+        Join( value, other, ref buffer, out int charWritten );
+        return MemoryMarshal.CreateSpan( ref buffer.GetPinnableReference(), charWritten );
+    }
+    [ Pure ]
+    public static Span<T> Join<T>( this Span<T> value, in ReadOnlySpan<T> other )
+        where T : unmanaged, IEquatable<T>
+    {
+        ReadOnlySpan<T> span = value;
+        return span.Join( other );
+    }
+    [ Pure ]
+    public static bool Join<T>( in ReadOnlySpan<T> first,
+                                in ReadOnlySpan<T> last,
+                            #if NET6_0_OR_GREATER
+                                scoped
+                                #endif
+                                    ref Span<T> buffer,
+                                out int charWritten
+    )
+    {
+        charWritten = first.Length + last.Length;
+        Guard.IsInRangeFor( charWritten - 1, buffer, nameof(buffer) );
+        return first.TryCopyTo( buffer[..first.Length] ) && last.TryCopyTo( buffer[(first.Length + 1)..] );
     }
 }

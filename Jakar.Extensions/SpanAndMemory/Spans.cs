@@ -115,15 +115,6 @@ public static partial class Spans
 
     [ Pure ] public static Memory<T> AsMemory<T>( this T[] span ) => MemoryMarshal.CreateFromPinnedArray( span, 0, span.Length );
 
-    [ Pure ]
-    public static ReadOnlySpan<T> Join<T>( this ReadOnlySpan<T> value, ReadOnlySpan<T> other )
-        where T : unmanaged, IEquatable<T>
-    {
-        int     size   = value.Length + other.Length;
-        Span<T> buffer = stackalloc T[size];
-        Join( value, other, ref buffer, out int charWritten );
-        return MemoryMarshal.CreateReadOnlySpan( ref buffer.GetPinnableReference(), charWritten );
-    }
     [ Pure ] public static Span<T> AsSpan<T>( this ReadOnlySpan<T> span ) => MemoryMarshal.CreateSpan( ref MemoryMarshal.GetReference( span ), span.Length );
     [ Pure ]
     public static Span<T> AsSpan<T>( this ReadOnlySpan<T> span, int length )
