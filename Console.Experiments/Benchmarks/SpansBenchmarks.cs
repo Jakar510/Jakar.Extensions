@@ -81,9 +81,9 @@ public class SpansBenchmarks
 
     [ Params( "", ALPHABET, TEST ) ] public string Value { get; set; } = string.Empty;
 
-
     [ Benchmark ] public bool Contains_span()  => Value.Contains( '2' );
     [ Benchmark ] public bool Contains_value() => Spans.Contains( Value, NEW_VALUE );
+
     [ Benchmark ]
     public bool ContainsAny()
     {
@@ -97,6 +97,7 @@ public class SpansBenchmarks
 
         return Spans.ContainsAny( Value, buffer );
     }
+
     [ Benchmark ]
     public bool ContainsNone()
     {
@@ -110,6 +111,7 @@ public class SpansBenchmarks
 
         return Spans.ContainsNone( Value, buffer );
     }
+
     [ Benchmark ] public bool EndsWith()           => Spans.EndsWith( Value, '1' );
     [ Benchmark ] public bool IsNullOrWhiteSpace() => Spans.IsNullOrWhiteSpace( Value );
     [ Benchmark ] public bool StartsWith()         => Spans.StartsWith( Value, '1' );
@@ -121,7 +123,9 @@ public class SpansBenchmarks
         ReadOnlySpan<char> span = Value;
         return span.AsSpan();
     }
+
     [ Benchmark ] public ReadOnlySpan<char> Join() => Spans.Join<char>( Value, NEW_VALUE );
+
     [ Benchmark ]
     public ReadOnlySpan<char> RemoveAll_Params()
     {
@@ -139,8 +143,12 @@ public class SpansBenchmarks
         Span<char> result = span.RemoveAll( buffer );
         return MemoryMarshal.CreateReadOnlySpan( ref result.GetPinnableReference(), result.Length );
     }
-    [ Benchmark ] public ReadOnlySpan<char> RemoveAll_Single() => Spans.RemoveAll( Value, '1' );
-    [ Benchmark ] public ReadOnlySpan<char> Replace()          => Spans.Replace<char>( Value, OLD, NEW_VALUE );
-    [ Benchmark ] public ReadOnlySpan<char> Slice_False()      => Spans.Slice( Value, 'z', '4', false );
-    [ Benchmark ] public ReadOnlySpan<char> Slice_True()       => Spans.Slice( Value, 'z', '4', true );
+
+
+    [ Benchmark ] public void       RemoveAll_Single() => Spans.RemoveAll( Value, '1' );
+    [ Benchmark ] public Span<char> Replace()          => Spans.Replace<char>( Value, OLD, NEW_VALUE );
+
+
+    [ Benchmark ] public ReadOnlySpan<char> Slice_False() { return Spans.Slice( Value, 'z', '4', false ); }
+    [ Benchmark ] public ReadOnlySpan<char> Slice_True()  { return Spans.Slice( Value, 'z', '4', true ); }
 }

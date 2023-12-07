@@ -1,11 +1,7 @@
-using NUnit.Framework;
-
-
-
 namespace Jakar.Extensions.Tests;
 
 
-[ TestFixture ]
+[ TestFixture, TestOf( typeof(Validate) ) ]
 public class ValidateTests : Assert
 {
     [ Test, TestCase( "wwww.google.com", false ), TestCase( "http://google.com", true ), TestCase( "http://wwww.google.com", true ), TestCase( "google.com", false ) ]

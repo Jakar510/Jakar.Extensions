@@ -1,15 +1,13 @@
-using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using NUnit.Framework;
 
 
 
 namespace Jakar.Extensions.Tests;
 
 
-[ TestFixture ]
+[ TestFixture, TestOf( typeof(TypeExtensions) ) ]
 
 // ReSharper disable once InconsistentNaming
 public class IsList_Tests : Assert

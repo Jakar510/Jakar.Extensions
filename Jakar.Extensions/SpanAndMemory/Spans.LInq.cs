@@ -8,6 +8,7 @@ using System;
 namespace Jakar.Extensions;
 
 
+[ SuppressMessage( "ReSharper", "UnusedMethodReturnValue.Global" ) ]
 public static partial class Spans
 {
     [ Pure ]
@@ -190,19 +191,25 @@ public static partial class Spans
 
 
     [ Pure ]
-    public static Span<T> Join<T>( this ReadOnlySpan<T> value, in ReadOnlySpan<T> other )
+    public static ReadOnlySpan<T> Join<T>( this ReadOnlySpan<T> value,
+                                       #if NET6_0_OR_GREATER
+                                           scoped
+                                           #endif
+                                               in ReadOnlySpan<T> other
+    )
         where T : unmanaged, IEquatable<T>
     {
         Span<T> buffer = stackalloc T[value.Length + other.Length];
         Join( value, other, ref buffer, out int charWritten );
-        return MemoryMarshal.CreateSpan( ref buffer.GetPinnableReference(), charWritten );
+        return MemoryMarshal.CreateReadOnlySpan( ref buffer.GetPinnableReference(), charWritten );
     }
     [ Pure ]
     public static Span<T> Join<T>( this Span<T> value, in ReadOnlySpan<T> other )
         where T : unmanaged, IEquatable<T>
     {
-        ReadOnlySpan<T> span = value;
-        return span.Join( other );
+        Span<T> buffer = stackalloc T[value.Length + other.Length];
+        Join( value, other, ref buffer, out int charWritten );
+        return MemoryMarshal.CreateSpan( ref buffer.GetPinnableReference(), charWritten );
     }
     [ Pure ]
     public static bool Join<T>( in ReadOnlySpan<T> first,

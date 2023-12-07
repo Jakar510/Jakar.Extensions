@@ -1,6 +1,4 @@
-using System;
 using System.Net;
-using NUnit.Framework;
 
 
 #pragma warning disable IDE0071
@@ -10,7 +8,7 @@ using NUnit.Framework;
 namespace Jakar.Extensions.Tests;
 
 
-[ TestFixture ]
+[ TestFixture, TestOf( typeof(IniConfig) ) ]
 
 // ReSharper disable once InconsistentNaming
 public class IniConfig_Tests : Assert

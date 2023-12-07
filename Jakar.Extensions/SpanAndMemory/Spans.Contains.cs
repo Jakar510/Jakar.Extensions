@@ -1,6 +1,10 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 06/10/2022  10:17 AM
 
+using System;
+
+
+
 namespace Jakar.Extensions;
 
 
@@ -20,9 +24,9 @@ public static partial class Spans
 
     #if NETSTANDARD2_1
         this
-        #endif
-            Span<T> span,
-        T value
+    #endif
+        Span<T> span,
+        T       value
     )
         where T : IEquatable<T>
     {
@@ -41,9 +45,9 @@ public static partial class Spans
     public static bool Contains<T>(
     #if NETSTANDARD2_1
         this
-        #endif
-            ReadOnlySpan<T> span,
-        T value
+    #endif
+        ReadOnlySpan<T> span,
+        T               value
     )
         where T : IEquatable<T>
     {
@@ -170,15 +174,59 @@ public static partial class Spans
 
 
     public static bool EndsWith<T>( this Span<T> span, T value )
-        where T : IEquatable<T> => !span.IsEmpty && span[^1].Equals( value );
+        where T : IEquatable<T> => span.IsEmpty is false && span[^1].Equals( value );
     public static bool EndsWith<T>( this ReadOnlySpan<T> span, T value )
-        where T : IEquatable<T> => !span.IsEmpty && span[^1].Equals( value );
+        where T : IEquatable<T> => span.IsEmpty is false && span[^1].Equals( value );
+    public static bool EndsWith<T>( this Span<T> span, in ReadOnlySpan<T> value )
+        where T : IEquatable<T>
+    {
+        ReadOnlySpan<T> temp = span;
+        return temp.EndsWith( value );
+    }
+    public static bool EndsWith<T>( this ReadOnlySpan<T> span, in ReadOnlySpan<T> value )
+        where T : IEquatable<T>
+    {
+        if ( span.IsEmpty ) { return false; }
+
+        if ( span.Length < value.Length ) { return false; }
+
+        ReadOnlySpan<T> temp = span.Slice( span.Length - value.Length, value.Length );
+
+        for ( int i = 0; i < value.Length; i++ )
+        {
+            if ( temp[i].Equals( value[i] ) is false ) { return false; }
+        }
+
+        return true;
+    }
 
 
     public static bool StartsWith<T>( this Span<T> span, T value )
-        where T : IEquatable<T> => !span.IsEmpty && span[0].Equals( value );
+        where T : IEquatable<T> => span.IsEmpty is false && span[0].Equals( value );
     public static bool StartsWith<T>( this ReadOnlySpan<T> span, T value )
-        where T : IEquatable<T> => !span.IsEmpty && span[0].Equals( value );
+        where T : IEquatable<T> => span.IsEmpty is false && span[0].Equals( value );
+    public static bool StartsWith<T>( this Span<T> span, in ReadOnlySpan<T> value )
+        where T : IEquatable<T>
+    {
+        ReadOnlySpan<T> temp = span;
+        return temp.StartsWith( value );
+    }
+    public static bool StartsWith<T>( this ReadOnlySpan<T> span, in ReadOnlySpan<T> value )
+        where T : IEquatable<T>
+    {
+        if ( span.IsEmpty ) { return false; }
+
+        if ( span.Length < value.Length ) { return false; }
+
+        ReadOnlySpan<T> temp = span[..value.Length];
+
+        for ( int i = 0; i < value.Length; i++ )
+        {
+            if ( temp[i].Equals( value[i] ) is false ) { return false; }
+        }
+
+        return true;
+    }
 
 
     public static int Count<T>( this Span<T> span, T value )

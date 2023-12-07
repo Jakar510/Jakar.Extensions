@@ -1,11 +1,7 @@
-using NUnit.Framework;
-
-
-
 namespace Jakar.Extensions.Tests;
 
 
-[ TestFixture ]
+[ TestFixture, TestOf( typeof(ConcurrentObservableCollection<>) ) ]
 
 // ReSharper disable once InconsistentNaming
 public class ConcurrentObservableCollection_Tests : Assert

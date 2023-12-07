@@ -17,12 +17,14 @@
 
     // JsonTest.Run();
 
-    BenchmarkRunner.Run<SpansBenchmarks>();
+    // BenchmarkRunner.Run<SpansBenchmarks>();
 
     // BenchmarkRunner.Run( typeof(Program).Assembly ); //, new BenchmarkConfig()
 
     // ULongHashTests.Run( 100_000_000 )
     //               .WriteToDebug();
+
+    foreach ( string name in typeof(Spans).GetMethods().Select( x => x.Name ) ) { Console.WriteLine( name ); }
 }
 catch ( Exception e ) { e.WriteToConsole(); }
 finally { "Bye".WriteToConsole(); }

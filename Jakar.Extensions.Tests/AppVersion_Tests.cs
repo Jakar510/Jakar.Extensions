@@ -1,12 +1,7 @@
-using System;
-using NUnit.Framework;
-
-
-
 namespace Jakar.Extensions.Tests;
 
 
-[ TestFixture ]
+[ TestFixture, TestOf( typeof(AppVersion) ) ]
 
 // ReSharper disable once InconsistentNaming
 public class AppVersion_Tests : Assert

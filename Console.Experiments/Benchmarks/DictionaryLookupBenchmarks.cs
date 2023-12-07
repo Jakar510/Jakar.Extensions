@@ -16,8 +16,8 @@ namespace Experiments.Benchmarks;
    .NET SDK 8.0.100
    [Host]     : .NET 8.0.0 (8.0.23.53103), X64 RyuJIT AVX2
    DefaultJob : .NET 8.0.0 (8.0.23.53103), X64 RyuJIT AVX2
-   
-   
+
+
    | Method                                         | Items  | Mean              | Error           | StdDev          | Ratio    | RatioSD | Gen0     | Gen1     | Gen2     | Allocated  | Alloc Ratio |
    |----------------------------------------------- |------- |------------------:|----------------:|----------------:|---------:|--------:|---------:|---------:|---------:|-----------:|------------:|
    | RandomIndex                                    | 10     |          3.864 ns |       0.0194 ns |       0.0181 ns |        ? |       ? |        - |        - |        - |          - |           ? |
@@ -427,7 +427,7 @@ namespace Experiments.Benchmarks;
    | ConcurrentDictionary_TryGetValue_Random_Single | 100000 |         12.974 ns |       0.0439 ns |       0.0411 ns |      -3% |    0.4% |        - |        - |        - |          - |          NA |
    | ImmutableDictionary_TryGetValue_Random_Single  | 100000 |         50.535 ns |       0.1787 ns |       0.1584 ns |    +277% |    0.6% |        - |        - |        - |          - |          NA |
    | FrozenDictionary_TryGetValue_Random_Single     | 100000 |          7.823 ns |       0.0245 ns |       0.0229 ns |     -42% |    0.6% |        - |        - |        - |          - |          NA |
-   
+
  */
 
 
@@ -454,7 +454,7 @@ public class DictionaryLookupBenchmarks
     {
         _items                = Enumerable.Range( 0, Items ).Select( static _ => new KeyValuePair<string, int>( Guid.NewGuid().ToString(), Random.Shared.Next() ) ).ToArray();
         _firstKey             = _items.First().Key;
-        _firstKey             = _items.Last().Key;
+        _lastKey              = _items.Last().Key;
         _randomPair           = RandomPair();
         _dictionary           = new Dictionary<string, int>( _items );
         _readOnlyDictionary   = new ReadOnlyDictionary<string, int>( _items.ToDictionary( i => i.Key, i => i.Value ) );
@@ -462,6 +462,8 @@ public class DictionaryLookupBenchmarks
         _immutableDictionary  = _items.ToImmutableDictionary();
         _frozenDictionary     = _items.ToFrozenDictionary();
     }
+
+
     [ BenchmarkCategory( "Commons" ), Benchmark ] public int                       RandomIndex() => Random.Shared.Next( 0, Items );
     [ BenchmarkCategory( "Commons" ), Benchmark ] public KeyValuePair<string, int> RandomPair()  => _items.Random( Random.Shared ).First();
 

@@ -1,11 +1,7 @@
-using NUnit.Framework;
-
-
-
 namespace Jakar.Extensions.Tests;
 
 
-[ TestFixture ]
+[ TestFixture, TestOf( typeof(MimeTypes) ) ]
 
 // ReSharper disable once InconsistentNaming
 public class MimeType_ContentType_Tests : Assert

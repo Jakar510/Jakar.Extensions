@@ -4,8 +4,7 @@
 [ SuppressMessage( "ReSharper", "OutParameterValueIsAlwaysDiscarded.Global" ) ]
 public static partial class Spans
 {
-    [ Pure ] public static Span<byte> AsBytes( this Span<char> span ) => MemoryMarshal.AsBytes( span );
-
+    [ Pure ] public static Span<byte>         AsBytes( this Span<char>         span ) => MemoryMarshal.AsBytes( span );
     [ Pure ] public static ReadOnlySpan<byte> AsBytes( this ReadOnlySpan<char> span ) => MemoryMarshal.AsBytes( span );
 
 
@@ -59,7 +58,7 @@ public static partial class Spans
 
 
     [ Pure ]
-    public static bool SequenceEquals( this ReadOnlySpan<string> left, in ReadOnlySpan<string> right )
+    public static bool SequenceEqual( this ReadOnlySpan<string> left, in ReadOnlySpan<string> right )
     {
         if ( left.Length != right.Length ) { return false; }
 
@@ -75,7 +74,7 @@ public static partial class Spans
     }
 
     [ Pure ]
-    public static bool SequenceEquals( this ImmutableArray<string> left, in ReadOnlySpan<string> right )
+    public static bool SequenceEqual( this ImmutableArray<string> left, in ReadOnlySpan<string> right )
     {
         if ( left.Length != right.Length ) { return false; }
 
@@ -115,21 +114,23 @@ public static partial class Spans
 
     [ Pure ] public static Memory<T> AsMemory<T>( this T[] span ) => MemoryMarshal.CreateFromPinnedArray( span, 0, span.Length );
 
-    [ Pure ] public static Span<T> AsSpan<T>( this ReadOnlySpan<T> span ) => MemoryMarshal.CreateSpan( ref MemoryMarshal.GetReference( span ), span.Length );
-    [ Pure ]
-    public static Span<T> AsSpan<T>( this ReadOnlySpan<T> span, int length )
-    {
-        Guard.IsLessThanOrEqualTo( length, span.Length, nameof(length) );
-        return MemoryMarshal.CreateSpan( ref MemoryMarshal.GetReference( span ), length );
-    }
-    [ Pure ] public static Span<T>         AsSpan<T>( this         Span<T> span ) => MemoryMarshal.CreateSpan( ref span.GetPinnableReference(), span.Length );
-    [ Pure ] public static ReadOnlySpan<T> AsReadOnlySpan<T>( this Span<T> span ) => MemoryMarshal.CreateReadOnlySpan( ref span.GetPinnableReference(), span.Length );
+
     [ Pure ]
     public static Span<T> AsSpan<T>( this Span<T> span, int length )
     {
         Guard.IsLessThanOrEqualTo( length, span.Length, nameof(length) );
         return MemoryMarshal.CreateSpan( ref span.GetPinnableReference(), length );
     }
+    [ Pure ]
+    public static Span<T> AsSpan<T>( this ReadOnlySpan<T> span, int length )
+    {
+        Guard.IsLessThanOrEqualTo( length, span.Length, nameof(length) );
+        return MemoryMarshal.CreateSpan( ref MemoryMarshal.GetReference( span ), length );
+    }
+    [ Pure ] public static Span<T>         AsSpan<T>( this         ReadOnlySpan<T> span ) => MemoryMarshal.CreateSpan( ref MemoryMarshal.GetReference( span ), span.Length );
+    [ Pure ] public static Span<T>         AsSpan<T>( this         Span<T>         span ) => MemoryMarshal.CreateSpan( ref span.GetPinnableReference(),        span.Length );
+    [ Pure ] public static ReadOnlySpan<T> AsReadOnlySpan<T>( this Span<T>         span ) => MemoryMarshal.CreateReadOnlySpan( ref span.GetPinnableReference(),        span.Length );
+    [ Pure ] public static ReadOnlySpan<T> AsReadOnlySpan<T>( this ReadOnlySpan<T> span ) => MemoryMarshal.CreateReadOnlySpan( ref MemoryMarshal.GetReference( span ), span.Length );
 
 
     public static void CopyTo<T>( this ReadOnlySpan<T> value, ref Span<T> buffer )

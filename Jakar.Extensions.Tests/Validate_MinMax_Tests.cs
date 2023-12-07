@@ -1,17 +1,10 @@
 // Jakar.Extensions :: Jakar.Extensions.Tests
 // 03/23/2023  9:35 AM
 
-using System;
-using System.Data;
-using NUnit.Framework;
-using NUnit.Framework.Constraints;
-
-
-
 namespace Jakar.Extensions.Tests;
 
 
-[ TestFixture ]
+[ TestFixture, TestOf( typeof(Validate) ) ]
 public class Validate_MinMax_Tests : Assert
 {
     [ Test ]
