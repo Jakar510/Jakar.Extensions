@@ -1,26 +1,15 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 06/10/2022  10:19 AM
 
+using System;
+
+
+
 namespace Jakar.Extensions;
 
 
 public static partial class Spans
 {
-    public static Span<T> Replace<T>( this Span<T> value,
-                                  #if NET6_0_OR_GREATER
-                                      scoped
-                                      #endif
-                                          in ReadOnlySpan<T> oldValue,
-                                  #if NET6_0_OR_GREATER
-                                      scoped
-                                      #endif
-                                          in ReadOnlySpan<T> newValue
-    )
-        where T : unmanaged, IEquatable<T>
-    {
-        ReadOnlySpan<T> span = value;
-        return span.Replace( oldValue, newValue );
-    }
     public static Span<T> Replace<T>( this ReadOnlySpan<T> value,
                                   #if NET6_0_OR_GREATER
                                       scoped
@@ -33,15 +22,69 @@ public static partial class Spans
     )
         where T : unmanaged, IEquatable<T>
     {
-        Span<T> buffer = stackalloc T[value.Length + newValue.Length];
-        Replace( value, oldValue, newValue, ref buffer, out int length );
-        return MemoryMarshal.CreateSpan( ref buffer.GetPinnableReference(), length );
+        var buffer = new Buffer<T>( value.Length );
+
+        try
+        {
+            Replace( value, oldValue, newValue, ref buffer );
+            int length = buffer.Length;
+            T[] array  = AsyncLinq.GetArray<T>( length );
+            buffer.Span.CopyTo( array );
+            Debug.Assert( length <= array.Length );
+            return new Span<T>( array, 0, length );
+        }
+        finally { buffer.Dispose(); }
     }
     public static void Replace<T>(
     #if NET6_0_OR_GREATER
         scoped
         #endif
-            in ReadOnlySpan<T> value,
+            in ReadOnlySpan<T> source,
+    #if NET6_0_OR_GREATER
+        scoped
+        #endif
+            in ReadOnlySpan<T> oldValue,
+    #if NET6_0_OR_GREATER
+        scoped
+        #endif
+            in ReadOnlySpan<T> newValue,
+    #if NET6_0_OR_GREATER
+        scoped
+        #endif
+            ref Buffer<T> buffer
+    )
+        where T : unmanaged, IEquatable<T>
+    {
+        if ( source.Contains( oldValue ) is false )
+        {
+            buffer.Append( source );
+            return;
+        }
+
+        int sourceIndex = 0;
+
+        while ( sourceIndex < source.Length )
+        {
+            ReadOnlySpan<T> window = source[sourceIndex..];
+
+            if ( window.StartsWith( oldValue ) )
+            {
+                buffer.EnsureCapacity( newValue.Length );
+                buffer.Append( newValue );
+                sourceIndex += oldValue.Length;
+            }
+            else
+            {
+                buffer.Append( source[sourceIndex] );
+                sourceIndex++;
+            }
+        }
+    }
+    public static void Replace<T>(
+    #if NET6_0_OR_GREATER
+        scoped
+        #endif
+            in ReadOnlySpan<T> source,
     #if NET6_0_OR_GREATER
         scoped
         #endif
@@ -58,48 +101,50 @@ public static partial class Spans
     )
         where T : unmanaged, IEquatable<T>
     {
-        Guard.IsInRangeFor( value.Length + newValue.Length - 1, buffer, nameof(buffer) );
-
-        if ( value.Contains( oldValue ) is false )
+        if ( source.Contains( oldValue ) is false )
         {
-            value.CopyTo( buffer );
-            length = value.Length;
+            source.CopyTo( buffer );
+            length = source.Length;
             return;
         }
 
-        int start = value.IndexOf( oldValue );
-        int end   = start + oldValue.Length;
+        length = 0;
+        int sourceIndex = 0;
 
-        Guard.IsInRangeFor( start, value, nameof(value) );
-        ReadOnlySpan<T> valueStart   = value[..start];
-        ReadOnlySpan<T> lastNewValue = newValue;
-        Join( in valueStart, in lastNewValue, ref buffer, out int first );
+        while ( sourceIndex < source.Length )
+        {
+            ReadOnlySpan<T> window = source[sourceIndex..];
 
-        Guard.IsInRangeFor( end, value, nameof(value) );
-        ReadOnlySpan<T> firstBuffer = buffer[..first];
-        ReadOnlySpan<T> lastEnd     = value[end..];
-        Join( in firstBuffer, in lastEnd, ref buffer, out int second );
-        length = first + second;
+            if ( window.StartsWith( oldValue ) )
+            {
+                if ( length + newValue.Length >= buffer.Length )
+                {
+                    T[] newBuffer = new T[buffer.Length * 2];
+                    buffer.CopyTo( newBuffer );
+                    buffer = newBuffer;
+                }
+
+                newValue.CopyTo( buffer[length..] );
+                length      += newValue.Length;
+                sourceIndex += oldValue.Length;
+            }
+            else
+            {
+                if ( length >= buffer.Length )
+                {
+                    T[] newBuffer = new T[buffer.Length * 2];
+                    buffer.CopyTo( newBuffer );
+                    buffer = newBuffer;
+                }
+
+                buffer[length] = source[sourceIndex];
+                length++;
+                sourceIndex++;
+            }
+        }
     }
 
 
-    public static Span<T> Replace<T>( this Span<T> value,
-                                  #if NET6_0_OR_GREATER
-                                      scoped
-                                      #endif
-                                          ref ReadOnlySpan<T> oldValue,
-                                  #if NET6_0_OR_GREATER
-                                      scoped
-                                      #endif
-                                          ref ReadOnlySpan<T> newValue,
-                                      T startValue,
-                                      T endValue
-    )
-        where T : unmanaged, IEquatable<T>
-    {
-        ReadOnlySpan<T> span = value;
-        return span.Replace( ref oldValue, ref newValue, startValue, endValue );
-    }
     public static Span<T> Replace<T>( this ReadOnlySpan<T> value,
                                   #if NET6_0_OR_GREATER
                                       scoped
@@ -152,30 +197,33 @@ public static partial class Spans
     {
         Guard.IsInRangeFor( source.Length + newValue.Length - 1, buffer, nameof(buffer) );
 
-        if ( !source.Contains( oldValue ) )
+        if ( source.Contains( oldValue ) is false )
         {
             source.CopyTo( buffer );
             length = source.Length;
             return;
         }
 
-        int start = source.IndexOf( oldValue );
-        int end   = start + oldValue.Length;
+        do
+        {
+            int start = source.IndexOf( oldValue );
+            int end   = start + oldValue.Length;
 
-        if ( !oldValue.StartsWith( startValue ) && start > 0 ) { start--; }
+            if ( oldValue.StartsWith( startValue ) is false && start > 0 ) { start--; }
 
-        if ( !oldValue.EndsWith( endValue ) ) { end++; }
+            if ( oldValue.EndsWith( endValue ) is false ) { end++; }
 
-        Guard.IsInRangeFor( start, source, nameof(source) );
-        ReadOnlySpan<T> sourceStart  = source[..start];
-        ReadOnlySpan<T> tempNewValue = newValue;
-        Join( in sourceStart, in tempNewValue, ref buffer, out int first );
+            Guard.IsInRangeFor( start, source, nameof(source) );
+            ReadOnlySpan<T> sourceStart  = source[..start];
+            ReadOnlySpan<T> tempNewValue = newValue;
+            Join( in sourceStart, in tempNewValue, ref buffer, out int first );
 
-        Guard.IsInRangeFor( end, source, nameof(source) );
-        ReadOnlySpan<T> bufferStart = buffer[..first];
-        ReadOnlySpan<T> sourceEnd   = source[end..];
-        Join( in bufferStart, in sourceEnd, ref buffer, out int second );
-        length = first + second;
+            Guard.IsInRangeFor( end, source, nameof(source) );
+            ReadOnlySpan<T> bufferStart = buffer[..first];
+            ReadOnlySpan<T> sourceEnd   = source[end..];
+            Join( in bufferStart, in sourceEnd, ref buffer, out int second );
+            length = first + second;
+        } while ( source.Contains( oldValue ) );
     }
 
 
@@ -207,11 +255,12 @@ public static partial class Spans
     )
         where T : unmanaged, IEquatable<T>
     {
+        T[]             array  = AsyncLinq.GetArray<T>( value.Length );
         ReadOnlySpan<T> span   = value;
-        Span<T>         buffer = stackalloc T[value.Length];
+        Span<T>         buffer = array;
         ReadOnlySpan<T> temp   = removed;
         RemoveAll( span, temp, buffer, out int length );
-        return MemoryMarshal.CreateSpan( ref buffer.GetPinnableReference(), length );
+        return new Span<T>( array, 0, length );
     }
 
 
@@ -314,6 +363,7 @@ public static partial class Spans
         Guard.IsInRangeFor( end,   value, nameof(value) );
         ReadOnlySpan<T> result = value.Slice( start, length );
         return result.AsReadOnlySpan();
+
         // return MemoryMarshal.CreateReadOnlySpan( in result.GetPinnableReference(), result.Length );
     }
     public static void Slice<T>(

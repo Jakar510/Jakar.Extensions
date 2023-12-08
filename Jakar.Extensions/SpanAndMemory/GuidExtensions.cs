@@ -28,26 +28,26 @@ public static class GuidExtensions
     public static bool TryAsGuid( this string value, [ NotNullWhen( true ) ] out Guid? result ) => value.AsSpan().TryAsGuid( out result );
 
 
-    public static bool TryWriteBytes( this Guid value, out Memory<byte> result )
+    public static bool TryWriteBytes( this Guid value, out Span<byte> result )
     {
         Span<byte> span = stackalloc byte[16];
 
         if ( value.TryWriteBytes( span ) )
         {
-            result = span.AsMemory();
+            result = MemoryMarshal.CreateSpan( ref span.GetPinnableReference(), span.Length );
             return true;
         }
 
         result = default;
         return false;
     }
-    public static bool TryWriteBytes( this Guid value, out ReadOnlyMemory<byte> result )
+    public static bool TryWriteBytes( this Guid value, out ReadOnlySpan<byte> result )
     {
         Span<byte> span = stackalloc byte[16];
 
         if ( value.TryWriteBytes( span ) )
         {
-            result = span.AsMemory();
+            result = MemoryMarshal.CreateReadOnlySpan( ref span.GetPinnableReference(), span.Length );
             return true;
         }
 

@@ -8,10 +8,10 @@ public static partial class Spans
 {
 #if NET7_0_OR_GREATER
     [ Pure ]
-    public static T Min<T>( this ReadOnlySpan<T> value )
+    public static T Min<T>( this ReadOnlySpan<T> value, T start )
         where T : INumber<T>
     {
-        T result = T.Zero;
+        T result = start;
         foreach ( T x in value ) { result = T.Min( result, x ); }
 
         return result;

@@ -16,8 +16,8 @@ public static partial class Spans
 
         return result;
     }
-    
-    
+
+
     [ Pure ]
     public static TNumber Sum<T, TNumber>( this ReadOnlySpan<T> value, Func<T, TNumber> selector )
         where TNumber : INumber<TNumber>

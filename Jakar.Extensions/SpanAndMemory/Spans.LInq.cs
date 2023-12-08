@@ -197,17 +197,21 @@ public static partial class Spans
     )
         where T : unmanaged, IEquatable<T>
     {
-        Span<T> buffer = stackalloc T[value.Length + other.Length];
-        Join( value, other, ref buffer, out int charWritten );
-        return MemoryMarshal.CreateReadOnlySpan( ref buffer.GetPinnableReference(), charWritten );
+        T[]     array  = AsyncLinq.GetArray<T>( value.Length + other.Length );
+        Span<T> buffer = array;
+        Join( value, other, ref buffer, out int length );
+        Debug.Assert( buffer.Length == length );
+        return array;
     }
     [ Pure ]
     public static Span<T> Join<T>( this Span<T> value, in ReadOnlySpan<T> other )
         where T : unmanaged, IEquatable<T>
     {
-        Span<T> buffer = stackalloc T[value.Length + other.Length];
-        Join( value, other, ref buffer, out int charWritten );
-        return MemoryMarshal.CreateSpan( ref buffer.GetPinnableReference(), charWritten );
+        T[] array = AsyncLinq.GetArray<T>( value.Length + other.Length );
+        Span<T> buffer = array;
+        Join( value, other, ref buffer, out int length );
+        Debug.Assert( buffer.Length == length );
+        return array;
     }
     [ Pure ]
     public static bool Join<T>( in ReadOnlySpan<T> first,
@@ -216,11 +220,13 @@ public static partial class Spans
                                 scoped
                                 #endif
                                     ref Span<T> buffer,
-                                out int charWritten
+                                out int length
     )
     {
-        charWritten = first.Length + last.Length;
-        Guard.IsInRangeFor( charWritten - 1, buffer, nameof(buffer) );
-        return first.TryCopyTo( buffer[..first.Length] ) && last.TryCopyTo( buffer[(first.Length + 1)..] );
+        int size = first.Length;
+        length = size + last.Length;
+        first.CopyTo( buffer[..size] );
+        last.CopyTo( buffer[size..] );
+        return true;
     }
 }

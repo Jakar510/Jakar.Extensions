@@ -35,7 +35,9 @@ public static class MimeTypes
         Span<char> span = stackalloc char[mime.Length];
         mime.ToLowerInvariant( span );
 
-        if ( span.SequenceEqual( "text" ) || span.SequenceEqual( ".text" ) || span.SequenceEqual( "txt" ) || span.SequenceEqual( ".txt" ) ) { return MimeType.Text; }
+        if ( span.SequenceEqual( "text" ) || span.SequenceEqual( ".text" ) ) { return MimeType.PlainText; }
+
+        if ( span.SequenceEqual( "txt" ) || span.SequenceEqual( ".txt" ) ) { return MimeType.Text; }
 
         if ( span.SequenceEqual( "html" ) || span.SequenceEqual( ".html" ) || span.SequenceEqual( "htm" ) || span.SequenceEqual( ".htm" ) ) { return MimeType.Html; }
 
@@ -460,7 +462,7 @@ public static class MimeTypes
         return mime switch
                {
                    MimeType.Text      => "txt",
-                   MimeType.PlainText => "txt",
+                   MimeType.PlainText => "text",
                    MimeType.Html      => "html",
                    MimeType.Xml       => "xml",
                    MimeType.Xaml      => "xaml",

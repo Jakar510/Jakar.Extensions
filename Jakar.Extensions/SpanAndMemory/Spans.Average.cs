@@ -7,28 +7,19 @@ namespace Jakar.Extensions;
 public static partial class Spans
 {
 #if NET7_0_OR_GREATER
-    [ Pure ]
-    private static TNumber GetLength<T, TNumber>( ReadOnlySpan<T> value )
-        where TNumber : INumber<TNumber>
-    {
-        TNumber count = TNumber.Zero;
-        for ( uint i = 0; i < value.Length; i++ ) { count++; }
-
-        return count;
-    }
-
 
     [ Pure ]
     public static TNumber Average<TNumber>( this ReadOnlySpan<TNumber> value )
-        where TNumber : INumber<TNumber> => value.Sum() / GetLength<TNumber, TNumber>( value );
+        where TNumber : INumber<TNumber> => value.Sum() / TNumber.CreateTruncating( value.Length );
 
 
     [ Pure ]
     public static TNumber Average<T, TNumber>( this ReadOnlySpan<T> value, Func<T, TNumber> selector )
-        where TNumber : INumber<TNumber> => value.Sum( selector ) / GetLength<T, TNumber>( value );
+        where TNumber : INumber<TNumber> => value.Sum( selector ) / TNumber.CreateTruncating( value.Length );
 
 #endif
 
+    
     [ Pure ] public static double Average( this    ReadOnlySpan<double> value )                           => value.Sum() / value.Length;
     [ Pure ] public static float  Average( this    ReadOnlySpan<float>  value )                           => value.Sum() / value.Length;
     [ Pure ] public static long   Average( this    ReadOnlySpan<long>   value )                           => value.Sum() / value.Length;

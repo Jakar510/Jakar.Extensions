@@ -271,9 +271,8 @@ public static partial class Spans
         }
         finally { _bytePool.Return( buffer ); }
     }
-#endif
-
-
+  
+    
     [ Pure ]
     public static ulong Hash( in ReadOnlySpan<bool> value, long seed = 0 )
     {
@@ -483,4 +482,5 @@ public static partial class Spans
         }
         finally { _bytePool.Return( buffer ); }
     }
+#endif
 }

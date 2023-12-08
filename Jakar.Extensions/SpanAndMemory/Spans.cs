@@ -58,37 +58,69 @@ public static partial class Spans
 
 
     [ Pure ]
+    public static bool SequenceEqualAny( this ReadOnlySpan<string> left, in ReadOnlySpan<string> right )
+    {
+        if ( left.Length != right.Length ) { return false; }
+
+        string[] leftSpan  = ArrayPool<string>.Shared.Rent( left.Length );
+        string[] rightSpan = ArrayPool<string>.Shared.Rent( right.Length );
+
+        try
+        {
+            left.CopyTo( leftSpan );
+            right.CopyTo( rightSpan );
+            Array.Sort( leftSpan );
+            Array.Sort( rightSpan );
+
+            return SequenceEqual( leftSpan, rightSpan );
+        }
+        finally
+        {
+            ArrayPool<string>.Shared.Return( leftSpan );
+            ArrayPool<string>.Shared.Return( rightSpan );
+        }
+    }
+
+    [ Pure ]
     public static bool SequenceEqual( this ReadOnlySpan<string> left, in ReadOnlySpan<string> right )
     {
         if ( left.Length != right.Length ) { return false; }
 
-        foreach ( ReadOnlySpan<char> parameter in left )
+        for ( int i = 0; i < left.Length; i++ )
         {
-            foreach ( ReadOnlySpan<char> otherParameter in right )
-            {
-                if ( parameter.SequenceEqual( otherParameter ) is false ) { return false; }
-            }
+            ReadOnlySpan<char> x = left[i];
+            ReadOnlySpan<char> y = right[i];
+
+            if ( x.SequenceEqual( y ) ) { continue; }
+
+            return false;
         }
 
         return true;
     }
 
-    [ Pure ] public static bool SequenceEqual( this ImmutableArray<string> left, in ReadOnlySpan<string> right ) => left.AsSpan().SequenceEqual( right );
 
-    
     [ Pure ]
     public static int LastIndexOf<T>( this ReadOnlySpan<T> value, T c, int endIndex )
         where T : IEquatable<T>
     {
-        Guard.IsInRangeFor( endIndex, value, nameof(value) );
-
-        return value[..endIndex].LastIndexOf( c );
+        return endIndex < 0 || endIndex >= value.Length
+                   ? value.LastIndexOf( c )
+                   : value[..endIndex].LastIndexOf( c );
     }
 
 
-    [ Pure ] public static EnumerateEnumerator<T> Enumerate<T>( this ReadOnlySpan<T> span, int index = -1 ) => new(span, index);
+    [ Pure ] public static EnumerateEnumerator<T> Enumerate<T>( this ReadOnlySpan<T> span, int index = 0 ) => new(span, index);
 
 
+#if NET7_0_OR_GREATER
+    [ Pure ]
+    public static EnumerateEnumerator<T, TNumber> Enumerate<T, TNumber>( this ReadOnlySpan<T> span )
+        where TNumber : struct, INumber<TNumber> => Enumerate( span, TNumber.Zero );
+    [ Pure ]
+    public static EnumerateEnumerator<T, TNumber> Enumerate<T, TNumber>( this ReadOnlySpan<T> span, TNumber index )
+        where TNumber : struct, INumber<TNumber> => new(span, index);
+#endif
 
 
     [ Pure ]
