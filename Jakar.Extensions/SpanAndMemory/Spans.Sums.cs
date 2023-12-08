@@ -7,137 +7,23 @@ namespace Jakar.Extensions;
 public static partial class Spans
 {
 #if NET7_0_OR_GREATER
-    [Pure]
-    public static T Sum<T>( this Span<T> value ) where T : INumber<T>
+    [ Pure ]
+    public static T Sum<T>( this ReadOnlySpan<T> value )
+        where T : INumber<T>
     {
         T result = T.Zero;
         foreach ( T x in value ) { result += x; }
 
         return result;
     }
-#else
+    
+    
     [ Pure ]
-    public static double Sum( this Span<double> value )
+    public static TNumber Sum<T, TNumber>( this ReadOnlySpan<T> value, Func<T, TNumber> selector )
+        where TNumber : INumber<TNumber>
     {
-        double result = 0;
-        foreach ( double x in value ) { result += x; }
-
-        return result;
-    }
-    [ Pure ]
-    public static float Sum( this Span<float> value )
-    {
-        float result = 0;
-        foreach ( float x in value ) { result += x; }
-
-        return result;
-    }
-    [ Pure ]
-    public static long Sum( this Span<long> value )
-    {
-        long result = 0;
-        foreach ( long x in value ) { result += x; }
-
-        return result;
-    }
-    [ Pure ]
-    public static ulong Sum( this Span<ulong> value )
-    {
-        ulong result = 0;
-        foreach ( ulong x in value ) { result += x; }
-
-        return result;
-    }
-    [ Pure ]
-    public static int Sum( this Span<int> value )
-    {
-        int result = 0;
-        foreach ( int x in value ) { result += x; }
-
-        return result;
-    }
-    [ Pure ]
-    public static uint Sum( this Span<uint> value )
-    {
-        uint result = 0;
-        foreach ( uint x in value ) { result += x; }
-
-        return result;
-    }
-    [ Pure ]
-    public static short Sum( this Span<short> value )
-    {
-        short result = 0;
-        foreach ( short x in value ) { result += x; }
-
-        return result;
-    }
-    [ Pure ]
-    public static ushort Sum( this Span<ushort> value )
-    {
-        ushort result = 0;
-        foreach ( ushort x in value ) { result += x; }
-
-        return result;
-    }
-#endif
-
-    [ Pure ]
-    public static int Sum<T>( this Span<T> value, Func<T, int> selector )
-    {
-        int result = 0;
+        TNumber result = TNumber.Zero;
         foreach ( T x in value ) { result += selector( x ); }
-
-        return result;
-    }
-    [ Pure ]
-    public static uint Sum<T>( this Span<T> value, Func<T, uint> selector )
-    {
-        uint result = 0;
-        foreach ( T x in value ) { result += selector( x ); }
-
-        return result;
-    }
-    [ Pure ]
-    public static long Sum<T>( this Span<T> value, Func<T, long> selector )
-    {
-        long result = 0;
-        foreach ( T x in value ) { result += selector( x ); }
-
-        return result;
-    }
-    [ Pure ]
-    public static ulong Sum<T>( this Span<T> value, Func<T, ulong> selector )
-    {
-        ulong result = 0;
-        foreach ( T x in value ) { result += selector( x ); }
-
-        return result;
-    }
-    [ Pure ]
-    public static float Sum<T>( this Span<T> value, Func<T, float> selector )
-    {
-        float result = 0;
-        foreach ( T x in value ) { result += selector( x ); }
-
-        return result;
-    }
-    [ Pure ]
-    public static double Sum<T>( this Span<T> value, Func<T, double> selector )
-    {
-        double result = 0;
-        foreach ( T x in value ) { result += selector( x ); }
-
-        return result;
-    }
-
-
-#if NET7_0_OR_GREATER
-    [Pure]
-    public static T Sum<T>( this ReadOnlySpan<T> value ) where T : INumber<T>
-    {
-        T result = T.Zero;
-        foreach ( T x in value ) { result += x; }
 
         return result;
     }
@@ -206,8 +92,8 @@ public static partial class Spans
 
         return result;
     }
-#endif
-
+    
+    
     [ Pure ]
     public static int Sum<T>( this ReadOnlySpan<T> value, Func<T, int> selector )
     {
@@ -256,4 +142,5 @@ public static partial class Spans
 
         return result;
     }
+#endif
 }

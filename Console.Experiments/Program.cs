@@ -24,7 +24,7 @@
     // ULongHashTests.Run( 100_000_000 )
     //               .WriteToDebug();
 
-    foreach ( string name in typeof(Spans).GetMethods().Select( x => x.Name ) ) { Console.WriteLine( name ); }
+    foreach ( string name in typeof(Spans).GetMethods().Select( x => x.Name ).Distinct() ) { Console.WriteLine( name ); }
 }
 catch ( Exception e ) { e.WriteToConsole(); }
 finally { "Bye".WriteToConsole(); }

@@ -1,8 +1,4 @@
-﻿using System.Text.Json.Serialization.Metadata;
-
-
-
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
 
 
 public sealed class ExceptionDetails

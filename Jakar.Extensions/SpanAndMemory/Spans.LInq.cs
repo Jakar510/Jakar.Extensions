@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 08/26/2023  12:06 PM
 
-using System;
-
-
-
 namespace Jakar.Extensions;
 
 
@@ -163,6 +159,8 @@ public static partial class Spans
             }
         }
     }
+
+
     public static void Where<T>( in ReadOnlySpan<T> values,
                              #if NET6_0_OR_GREATER
                                  scoped

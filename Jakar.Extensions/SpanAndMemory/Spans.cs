@@ -73,32 +73,9 @@ public static partial class Spans
         return true;
     }
 
-    [ Pure ]
-    public static bool SequenceEqual( this ImmutableArray<string> left, in ReadOnlySpan<string> right )
-    {
-        if ( left.Length != right.Length ) { return false; }
+    [ Pure ] public static bool SequenceEqual( this ImmutableArray<string> left, in ReadOnlySpan<string> right ) => left.AsSpan().SequenceEqual( right );
 
-        foreach ( ReadOnlySpan<char> parameter in left.AsSpan() )
-        {
-            foreach ( ReadOnlySpan<char> otherParameter in right )
-            {
-                if ( parameter.SequenceEqual( otherParameter ) is false ) { return false; }
-            }
-        }
-
-        return true;
-    }
-
-
-    [ Pure ]
-    public static int LastIndexOf<T>( this Span<T> value, T c, int endIndex )
-        where T : IEquatable<T>
-    {
-        Guard.IsInRangeFor( endIndex, value, nameof(value) );
-
-        return value[..endIndex].LastIndexOf( c );
-    }
-
+    
     [ Pure ]
     public static int LastIndexOf<T>( this ReadOnlySpan<T> value, T c, int endIndex )
         where T : IEquatable<T>
@@ -112,7 +89,6 @@ public static partial class Spans
     [ Pure ] public static EnumerateEnumerator<T> Enumerate<T>( this ReadOnlySpan<T> span, int index = -1 ) => new(span, index);
 
 
-    [ Pure ] public static Memory<T> AsMemory<T>( this T[] span ) => MemoryMarshal.CreateFromPinnedArray( span, 0, span.Length );
 
 
     [ Pure ]

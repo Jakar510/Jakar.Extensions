@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 06/10/2022  10:17 AM
 
-using System;
-
-
-
 namespace Jakar.Extensions;
 
 
@@ -64,12 +60,6 @@ public static partial class Spans
     }
 
 
-    public static bool Contains<T>( this Span<T> span, in ReadOnlySpan<T> value )
-        where T : IEquatable<T>
-    {
-        ReadOnlySpan<T> temp = span;
-        return temp.Contains( value );
-    }
     public static bool Contains<T>( this ReadOnlySpan<T> span, in ReadOnlySpan<T> value )
         where T : IEquatable<T>
     {
@@ -86,13 +76,6 @@ public static partial class Spans
         return false;
     }
 
-
-    public static bool ContainsAll<T>( this Span<T> span, in ReadOnlySpan<T> values )
-        where T : IEquatable<T>
-    {
-        ReadOnlySpan<T> temp = span;
-        return temp.ContainsAll( values );
-    }
     public static bool ContainsAll<T>( this ReadOnlySpan<T> span, in ReadOnlySpan<T> values )
         where T : IEquatable<T>
     {
@@ -104,13 +87,6 @@ public static partial class Spans
         return true;
     }
 
-
-    public static bool ContainsAny<T>( this Span<T> span, in ReadOnlySpan<T> values )
-        where T : IEquatable<T>
-    {
-        ReadOnlySpan<T> temp = span;
-        return temp.ContainsAny( values );
-    }
     public static bool ContainsAny<T>( this ReadOnlySpan<T> span, in ReadOnlySpan<T> values )
         where T : IEquatable<T>
     {
@@ -122,12 +98,6 @@ public static partial class Spans
         return false;
     }
 
-
-    public static bool ContainsAny( this Span<char> span, in ReadOnlySpan<char> values )
-    {
-        ReadOnlySpan<char> temp = span;
-        return temp.ContainsAny( values );
-    }
     public static bool ContainsAny( this ReadOnlySpan<char> span, in ReadOnlySpan<char> values )
     {
         foreach ( char c in values )
@@ -138,13 +108,6 @@ public static partial class Spans
         return false;
     }
 
-
-    public static bool ContainsNone<T>( this Span<T> span, in ReadOnlySpan<T> values )
-        where T : IEquatable<T>
-    {
-        ReadOnlySpan<T> temp = span;
-        return temp.ContainsNone( values );
-    }
     public static bool ContainsNone<T>( this ReadOnlySpan<T> span, in ReadOnlySpan<T> values )
         where T : IEquatable<T>
     {
@@ -156,12 +119,6 @@ public static partial class Spans
         return true;
     }
 
-
-    public static bool ContainsNone( this Span<char> span, in ReadOnlySpan<char> values )
-    {
-        ReadOnlySpan<char> temp = span;
-        return temp.ContainsNone( values );
-    }
     public static bool ContainsNone( this ReadOnlySpan<char> span, in ReadOnlySpan<char> values )
     {
         foreach ( char c in values )
@@ -249,7 +206,16 @@ public static partial class Spans
     }
 
 
-    public static ReadOnlySpan<T> Create<T>( T arg0 )
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static Span<T> CreateSpan<T>( int size ) => AsyncLinq.GetArray<T>( size );
+    public static Span<T> CreateValue<T>( int size )
+        where T : unmanaged
+    {
+        if ( size > 250 ) { return CreateSpan<T>( size ); }
+
+        Span<T> span = stackalloc T[size];
+        return MemoryMarshal.CreateSpan( ref span.GetPinnableReference(), span.Length );
+    }
+    public static Span<T> Create<T>( T arg0 )
         where T : unmanaged
     {
     #if NETSTANDARD2_1
@@ -259,9 +225,9 @@ public static partial class Spans
         Span<T> span = [arg0];
 
     #endif
-        return MemoryMarshal.CreateReadOnlySpan( ref span.GetPinnableReference(), span.Length );
+        return MemoryMarshal.CreateSpan( ref span.GetPinnableReference(), span.Length );
     }
-    public static ReadOnlySpan<T> Create<T>( T arg0, T arg1 )
+    public static Span<T> Create<T>( T arg0, T arg1 )
         where T : unmanaged
     {
     #if NETSTANDARD2_1
@@ -272,9 +238,9 @@ public static partial class Spans
         Span<T> span = [arg0, arg1];
 
     #endif
-        return MemoryMarshal.CreateReadOnlySpan( ref span.GetPinnableReference(), span.Length );
+        return MemoryMarshal.CreateSpan( ref span.GetPinnableReference(), span.Length );
     }
-    public static ReadOnlySpan<T> Create<T>( T arg0, T arg1, T arg2 )
+    public static Span<T> Create<T>( T arg0, T arg1, T arg2 )
         where T : unmanaged
     {
     #if NETSTANDARD2_1
@@ -286,9 +252,9 @@ public static partial class Spans
         Span<T> span = [arg0, arg1, arg2];
 
     #endif
-        return MemoryMarshal.CreateReadOnlySpan( ref span.GetPinnableReference(), span.Length );
+        return MemoryMarshal.CreateSpan( ref span.GetPinnableReference(), span.Length );
     }
-    public static ReadOnlySpan<T> Create<T>( T arg0, T arg1, T arg2, T arg3 )
+    public static Span<T> Create<T>( T arg0, T arg1, T arg2, T arg3 )
         where T : unmanaged
     {
     #if NETSTANDARD2_1
@@ -301,9 +267,9 @@ public static partial class Spans
         Span<T> span = [arg0, arg1, arg2, arg3];
 
     #endif
-        return MemoryMarshal.CreateReadOnlySpan( ref span.GetPinnableReference(), span.Length );
+        return MemoryMarshal.CreateSpan( ref span.GetPinnableReference(), span.Length );
     }
-    public static ReadOnlySpan<T> Create<T>( T arg0, T arg1, T arg2, T arg3, T arg4 )
+    public static Span<T> Create<T>( T arg0, T arg1, T arg2, T arg3, T arg4 )
         where T : unmanaged
     {
     #if NETSTANDARD2_1
@@ -317,7 +283,7 @@ public static partial class Spans
         Span<T> span = [arg0, arg1, arg2, arg3, arg4];
 
     #endif
-        return MemoryMarshal.CreateReadOnlySpan( ref span.GetPinnableReference(), span.Length );
+        return MemoryMarshal.CreateSpan( ref span.GetPinnableReference(), span.Length );
     }
 
 

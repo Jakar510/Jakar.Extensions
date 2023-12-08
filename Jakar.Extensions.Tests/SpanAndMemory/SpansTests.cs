@@ -1,6 +1,10 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions.Tests
 // 12/6/2023  13:2
 
+using System.Collections.Immutable;
+using System.Linq;
+using System.Numerics;
+using System.Text;
 using static Jakar.Extensions.Randoms;
 
 
@@ -8,238 +12,49 @@ using static Jakar.Extensions.Randoms;
 namespace Jakar.Extensions.Tests.SpanAndMemory;
 
 
-/*
-
-   Average
-   Average
-   Average
-   Average
-   Average
-   Average
-   Average
-   Average
-   Average
-   Average
-   Average
-   Average
-   Average
-   Average
-   Average
-   Average
-   Average
-   Average
-   Average
-   Average
-   Average
-   Average
-   Average
-   Average
-   Average
-   Average
-   Average
-   Average
-   Contains
-   Contains
-   Contains
-   Contains
-   Contains
-   Contains
-   ContainsAll
-   ContainsAll
-   ContainsAny
-   ContainsAny
-   ContainsAny
-   ContainsAny
-   ContainsNone
-   ContainsNone
-   ContainsNone
-   ContainsNone
-   EndsWith
-   EndsWith
-   EndsWith
-   EndsWith
-   StartsWith
-   StartsWith
-   StartsWith
-   StartsWith
-   Count
-   Count
-   Create
-   Create
-   Create
-   Create
-   Create
-   AsBytes
-   AsBytes
-   IsNullOrWhiteSpace
-   IsNullOrWhiteSpace
-   IsNullOrWhiteSpace
-   IsNullOrWhiteSpace
-   IsNullOrWhiteSpace
-   IsNullOrWhiteSpace
-   SequenceEqual
-   SequenceEqual
-   LastIndexOf
-   LastIndexOf
-   Enumerate
-   AsMemory
-   AsSpan
-   AsSpan
-   AsSpan
-   AsSpan
-   AsReadOnlySpan
-   AsReadOnlySpan
-   CopyTo
-   CopyTo
-   TryCopyTo
-   TryCopyTo
-   Hash128
-   Hash128
-   Hash128
-   Hash128
-   Hash128
-   Hash128
-   Hash128
-   Hash128
-   Hash128
-   Hash128
-   Hash128
-   Hash
-   Hash
-   Hash
-   Hash
-   Hash
-   Hash
-   Hash
-   Hash
-   Hash
-   Hash
-   Hash
-   First
-   First
-   FirstOrDefault
-   FirstOrDefault
-   Single
-   Single
-   SingleOrDefault
-   SingleOrDefault
-   Where
-   Where
-   WhereValues
-   WhereValues
-   Where
-   Join
-   Join
-   Join
-   Max
-   Max
-   Max
-   Max
-   Max
-   Max
-   Max
-   Max
-   Max
-   Max
-   Max
-   Max
-   Max
-   Max
-   Max
-   AsMemory
-   AsMemory
-   AsMemory
-   AsMemory
-   AsSegment
-   AsSegment
-   ToMemory
-   ToReadOnlyMemory
-   AsMemory
-   AsMemory
-   AsMemory
-   AsMemory
-   AsReadOnlySpan
-   AsReadOnlySpan
-   AsSpan
-   AsSpan
-   ConvertToString
-   ConvertToString
-   ConvertToString
-   ConvertToString
-   CopyTo
-   CopyTo
-   Min
-   Min
-   Min
-   Min
-   Min
-   Min
-   Min
-   Min
-   Min
-   Min
-   Min
-   Min
-   Min
-   Min
-   Min
-   As
-   As
-   As
-   As
-   As
-   As
-   As
-   As
-   As
-   As
-   As
-   As
-   As
-   As
-   As
-   As
-   As
-   As
-   Replace
-   Replace
-   Replace
-   Replace
-   Replace
-   Replace
-   RemoveAll
-   RemoveAll
-   RemoveAll
-   RemoveAll
-   RemoveAll
-   Slice
-   Slice
-   Sum
-   Sum
-   Sum
-   Sum
-   Sum
-   Sum
-   Sum
-   Sum
-   Sum
-   Sum
-   Sum
-   Sum
-   Sum
-   Sum
-   GetType
-   ToString
-   Equals
-   GetHashCode
-
- */
-
-
-
 [ TestFixture, TestOf( typeof(Spans) ) ]
 public class SpansTests : Assert
 {
+    private static bool IsDevisableByTwo<T>( T x )
+        where T : INumber<T> => x % (T.One + T.One) == T.Zero;
+
+
+    [ Test, TestCase( new[]
+                      {
+                          NUMERIC,
+                          ALPHANUMERIC,
+                          SPECIAL_CHARS
+                      },
+                      new[]
+                      {
+                          NUMERIC,
+                          ALPHANUMERIC,
+                          SPECIAL_CHARS
+                      },
+                      true ), TestCase( new[]
+                                        {
+                                            NUMERIC,
+                                            ALPHANUMERIC,
+                                            SPECIAL_CHARS
+                                        },
+                                        new[]
+                                        {
+                                            ALPHANUMERIC,
+                                            NUMERIC,
+                                            SPECIAL_CHARS
+                                        },
+                                        false ) ]
+    public void SequenceEqual( string[] value, string[] other, bool expected )
+    {
+        ImmutableArray<string> array   = ImmutableArray.Create( value );
+        bool                   results = array.SequenceEqual( other );
+        this.AreEqual( results, expected );
+
+        results = array.AsSpan().SequenceEqual( other );
+        this.AreEqual( results, expected );
+    }
+
+
     [ Test, TestCase( ALPHANUMERIC, "abc", true ) ]
     public void Contains( string value, string other, bool expected )
     {
@@ -252,6 +67,14 @@ public class SpansTests : Assert
     public void ContainsAny( string value, string other, bool expected )
     {
         bool results = Spans.ContainsAny( value, other );
+        this.AreEqual( results, expected );
+    }
+
+
+    [ Test, TestCase( ALPHANUMERIC, "65bc", true ) ]
+    public void ContainsAll( string value, string other, bool expected )
+    {
+        bool results = Spans.ContainsAll<char>( value, other );
         this.AreEqual( results, expected );
     }
 
@@ -272,26 +95,213 @@ public class SpansTests : Assert
     }
 
 
+    [ Test, TestCase( NUMERIC, 0 ), TestCase( NUMERIC, 2 ) ]
+    public void Enumerate( string value, int start )
+    {
+        foreach ( (int index, char c) in Spans.Enumerate<char>( value, start ) )
+        {
+            this.AreEqual( value[index], c );
+            this.AreEqual( index,        start++ );
+        }
+    }
+
+
+    [ Test, TestCase( NUMERIC, '9', 10 ), TestCase( NUMERIC, '0', 0 ), TestCase( NUMERIC, '5', 6 ) ]
+    public void LastIndexOf( string value, char c, int expected )
+    {
+        int results = Spans.LastIndexOf( value, c, value.Length );
+        this.AreEqual( results, expected );
+    }
+
+
+    [ Test, TestCase( NUMERIC, '9', 1 ), TestCase( NUMERIC + NUMERIC, '9', 2 ) ]
+    public void Count( string value, char c, int expected )
+    {
+        int results = Spans.Count( value, c );
+        this.AreEqual( results, expected );
+    }
+
+
+    [ Test, TestCase( NUMERIC ), TestCase( ALPHANUMERIC ) ]
+    public void AsBytes( string value )
+    {
+        ReadOnlySpan<byte> results = Spans.AsBytes( value );
+        this.Equals( results, Encoding.UTF8.GetBytes( value ) );
+    }
+
+
+    [ Test, TestCase( NUMERIC ), TestCase( ALPHANUMERIC ) ]
+    public void AsMemory( string value )
+    {
+        ReadOnlySpan<byte> array = Encoding.UTF8.GetBytes( value );
+        this.Equals( array.AsMemory().Span,        array );
+        this.Equals( Spans.AsMemory( value ).Span, value.AsSpan() );
+    }
+
+
+    [ Test, TestCase( NUMERIC ), TestCase( ALPHANUMERIC ) ]
+    public void AsSegment( string value )
+    {
+        ReadOnlyMemory<byte> array = Encoding.UTF8.GetBytes( value );
+        this.True( array.TryAsSegment( out ArraySegment<byte> segment ) );
+        this.Equals( segment.Array, array.Span );
+    }
+
+
+    [ Test, TestCase( NUMERIC ), TestCase( ALPHANUMERIC ) ]
+    public void ConvertToString( string value )
+    {
+        ReadOnlyMemory<char> array = value.AsSpan().AsMemory();
+        this.Equals<char>( array.ConvertToString(), value );
+    }
+
+
+    [ Test, TestCase( NUMERIC, '-', $"{NUMERIC}-----" ), TestCase( ALPHANUMERIC, '-', $"{ALPHANUMERIC}-----" ) ]
+    public void TryCopyTo( string value, char c, string expected )
+    {
+        Span<char> span = stackalloc char[expected.Length];
+        this.True( Spans.TryCopyTo( value, ref span ) );
+        this.Equals<char>( span.ToString(), expected );
+    }
+
+
+    [ Test, TestCase( 1 ), TestCase( 2 ) ]
+    public void Create( int expected )
+    {
+        int results = Spans.Create( expected ).Length;
+        this.AreEqual( results, expected );
+    }
+
+
+    [ Test, TestCase( 1 ), TestCase( 1, 2 ), TestCase( 1, 2, 3 ), TestCase( 1, 2, 3, 4 ), TestCase( 1, 2, 3, 4, 5 ) ]
+    public void Create( params int[] values )
+    {
+        int length = values.Length;
+
+        switch ( length )
+        {
+            case 1:
+            {
+                int results = Spans.Create( 1 ).Length;
+                this.AreEqual( results, length );
+                return;
+            }
+
+            case 2:
+            {
+                int results = Spans.Create( 1, 2 ).Length;
+                this.AreEqual( results, length );
+                return;
+            }
+
+            case 3:
+            {
+                int results = Spans.Create( 1, 2, 3 ).Length;
+                this.AreEqual( results, length );
+                return;
+            }
+
+            case 4:
+            {
+                int results = Spans.Create( 1, 2, 3, 4 ).Length;
+                this.AreEqual( results, length );
+                return;
+            }
+
+            case 5:
+            {
+                int results = Spans.Create( 1, 2, 3, 4, 5 ).Length;
+                this.AreEqual( results, length );
+                return;
+            }
+        }
+    }
+
+
+    [ Test, TestCase( 1d ), TestCase( 1, 2 ), TestCase( 1, 2, 3 ), TestCase( 1, 2, 3, 4 ), TestCase( 1, 2, 3, 4, 5 ) ]
+    public void Average( params double[] values )
+    {
+        this.AreEqual( Spans.Average( values ),         values.Average() );
+        this.AreEqual( Spans.Average<double>( values ), values.Average() );
+    }
+
+
+    [ Test, TestCase( 1d ), TestCase( 1, 2 ), TestCase( 1, 2, 3 ), TestCase( 1, 2, 3, 4 ), TestCase( 1, 2, 3, 4, 5 ) ]
+    public void Max( params double[] values )
+    {
+        double results = Spans.Max<double>( values );
+        this.AreEqual( results, values.Max() );
+    }
+
+
+    [ Test, TestCase( 1d ), TestCase( 1, 2 ), TestCase( 1, 2, 3 ), TestCase( 1, 2, 3, 4 ), TestCase( 1, 2, 3, 4, 5 ) ]
+    public void Min( params double[] values )
+    {
+        double results = Spans.Min<double>( values );
+        this.AreEqual( results, values.Min() );
+    }
+
+
+    [ Test, TestCase( 1d ), TestCase( 1, 2 ), TestCase( 1, 2, 3 ), TestCase( 1, 2, 3, 4 ), TestCase( 1, 2, 3, 4, 5 ) ]
+    public void Sum( params double[] values )
+    {
+        double results = Spans.Sum<double>( values );
+        this.AreEqual( results, values.Sum() );
+    }
+
+
+    [ Test, TestCase( 1, 2 ), TestCase( 1, 2, 3 ), TestCase( 1, 2, 3, 4 ), TestCase( 1, 2, 3, 4, 5 ) ]
+    public void First( params double[] values )
+    {
+        double results = Spans.First<double>( values, IsDevisableByTwo );
+        this.AreEqual( results, values.First( IsDevisableByTwo ) );
+    }
+
+
+    [ Test, TestCase( 1d ), TestCase( 1, 2 ), TestCase( 1, 2, 3 ), TestCase( 1, 2, 3, 4 ), TestCase( 1, 2, 3, 4, 5 ) ]
+    public void FirstOrDefault( params double[] values )
+    {
+        double results = Spans.FirstOrDefault<double>( values, IsDevisableByTwo );
+        this.AreEqual( results, values.FirstOrDefault( IsDevisableByTwo ) );
+    }
+
+
+    [ Test, TestCase( 1, 2 ), TestCase( 1, 2, 3 ), TestCase( 1, 2, 3, 4 ), TestCase( 1, 2, 3, 4, 5 ) ]
+    public void Single( params double[] values )
+    {
+        double results = Spans.Single<double>( values, IsDevisableByTwo );
+        this.AreEqual( results, values.Single( IsDevisableByTwo ) );
+    }
+
+
+    [ Test, TestCase( 1d ), TestCase( 1, 2 ), TestCase( 1, 2, 3 ), TestCase( 1, 2, 3, 4 ), TestCase( 1, 2, 3, 4, 5 ) ]
+    public void SingleOrDefault( params double[] values )
+    {
+        double results = Spans.SingleOrDefault<double>( values, IsDevisableByTwo );
+        this.AreEqual( results, values.SingleOrDefault( IsDevisableByTwo ) );
+    }
+
+
+    [ Test, TestCase( 1, 2 ), TestCase( 1, 2, 3 ), TestCase( 1, 2, 3, 4 ), TestCase( 1, 2, 3, 4, 5 ) ]
+    public void Where( params double[] values )
+    {
+        var results = Spans.Where<double>( values, IsDevisableByTwo );
+        this.Equals<double>( results, values.Where( IsDevisableByTwo ).ToArray() );
+    }
+
+
+    [ Test, TestCase( 1d ), TestCase( 1, 2 ), TestCase( 1, 2, 3 ), TestCase( 1, 2, 3, 4 ), TestCase( 1, 2, 3, 4, 5 ) ]
+    public void WhereValues( params double[] values )
+    {
+        var results = Spans.WhereValues<double>( values, IsDevisableByTwo );
+        this.Equals<double>( results, values.Where( IsDevisableByTwo ).ToArray() );
+    }
+
+
     [ Test, TestCase( NUMERIC, '9', true ) ]
     public void EndsWith( string value, char c, bool expected )
     {
         bool results = Spans.EndsWith( value, c );
-        this.AreEqual( results, expected );
-    }
-
-
-    [ Test, TestCase( NUMERIC, "9", true ) ]
-    public void EndsWith( string value, string c, bool expected )
-    {
-        bool results = Spans.EndsWith<char>( value, c );
-        this.AreEqual( results, expected );
-    }
-
-
-    [ Test, TestCase( NUMERIC, '0', true ) ]
-    public void StartsWith( string value, char c, bool expected )
-    {
-        bool results = Spans.StartsWith( value, c );
         this.AreEqual( results, expected );
     }
 
