@@ -171,8 +171,13 @@ public sealed class CurrentLocation<TID> : BaseJsonModel, ICurrentLocation<TID>,
 
 
 
+/*
+#if NET6_0_OR_GREATER
 [ JsonSourceGenerationOptions( WriteIndented = true ), JsonSerializable( typeof(CurrentLocation<long>) ) ] public partial class CurrentLocationLongContext : JsonSerializerContext { }
 
 
 
 [ JsonSourceGenerationOptions( WriteIndented = true ), JsonSerializable( typeof(CurrentLocation<Guid>) ) ] public partial class CurrentLocationGuidContext : JsonSerializerContext { }
+
+#endif
+*/

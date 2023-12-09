@@ -1,10 +1,10 @@
 ﻿namespace Jakar.Extensions;
 
 
-public sealed class NullableLongConverter : Newtonsoft.Json.JsonConverter<long?>
+public sealed class NullableLongConverter : JsonConverter<long?>
 {
-    public override void WriteJson( JsonWriter writer, long? value, JsonNetSerializer serializer ) => writer.WriteValue( value );
-    public override long? ReadJson( JsonReader reader, Type objectType, long? existingValue, bool hasExistingValue, JsonNetSerializer serializer ) =>
+    public override void WriteJson( JsonWriter writer, long? value, JsonSerializer serializer ) => writer.WriteValue( value );
+    public override long? ReadJson( JsonReader reader, Type objectType, long? existingValue, bool hasExistingValue, JsonSerializer serializer ) =>
         reader.Value switch
         {
             null    => existingValue,

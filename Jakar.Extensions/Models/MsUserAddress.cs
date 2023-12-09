@@ -1,51 +1,41 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 12/06/2023  11:46 AM
 
-using System.Text.Json.Serialization.Metadata;
-
-
-
 namespace Jakar.Extensions;
 
 
-public record MsUserAddress : ObservableRecord, IAddress, IComparable<MsUserAddress>, IComparable, MsJsonModels.IJsonModel<MsUserAddress>
-#if NET8_0
-                              ,
-                              MsJsonModels.IJsonizer<MsUserAddress>
-#endif
+public record MsUserAddress : ObservableRecord, IAddress, IComparable<MsUserAddress>, IComparable, JsonModels.IJsonModel
 {
-    private bool        _isPrimary;
-    private Guid?       _userID;
-    private JsonObject? _additionalData;
-    private string      _city            = string.Empty;
-    private string      _country         = string.Empty;
-    private string      _line1           = string.Empty;
-    private string      _line2           = string.Empty;
-    private string      _postalCode      = string.Empty;
-    private string      _stateOrProvince = string.Empty;
-    private string?     _address;
+    private bool                          _isPrimary;
+    private Guid?                         _userID;
+    private IDictionary<string, JToken?>? _additionalData;
+    private string                        _city            = string.Empty;
+    private string                        _country         = string.Empty;
+    private string                        _line1           = string.Empty;
+    private string                        _line2           = string.Empty;
+    private string                        _postalCode      = string.Empty;
+    private string                        _stateOrProvince = string.Empty;
+    private string?                       _address;
 
 
-    public static MsUserAddressContext  JsonSerializerContext => MsUserAddressContext.Default;
-    public static Sorter<MsUserAddress> Sorter                => Sorter<MsUserAddress>.Default;
+    public static Sorter<MsUserAddress> Sorter => Sorter<MsUserAddress>.Default;
 
 
     [ JsonExtensionData ]
-    public JsonObject? AdditionalData
+    public IDictionary<string, JToken?>? AdditionalData
     {
         get => _additionalData;
         set => SetProperty( ref _additionalData, value );
     }
 
 
-    [ MaxLength( 4096 ) ]
     public string? Address
     {
         get => _address ??= ToString();
         set => SetProperty( ref _address, value );
     }
 
-    [ MaxLength( 256 ) ]
+
     public string City
     {
         get => _city;
@@ -55,7 +45,7 @@ public record MsUserAddress : ObservableRecord, IAddress, IComparable<MsUserAddr
         }
     }
 
-    [ MaxLength( 256 ) ]
+
     public string Country
     {
         get => _country;
@@ -91,7 +81,7 @@ public record MsUserAddress : ObservableRecord, IAddress, IComparable<MsUserAddr
         }
     }
 
-    [ MaxLength( 512 ) ]
+
     public string Line1
     {
         get => _line1;
@@ -101,7 +91,7 @@ public record MsUserAddress : ObservableRecord, IAddress, IComparable<MsUserAddr
         }
     }
 
-    [ MaxLength( 256 ) ]
+
     public string Line2
     {
         get => _line2;
@@ -111,7 +101,7 @@ public record MsUserAddress : ObservableRecord, IAddress, IComparable<MsUserAddr
         }
     }
 
-    [ MaxLength( 256 ), Required ]
+    [ Required ]
     public string PostalCode
     {
         get => _postalCode;
@@ -121,7 +111,7 @@ public record MsUserAddress : ObservableRecord, IAddress, IComparable<MsUserAddr
         }
     }
 
-    [ MaxLength( 256 ) ]
+
     public string StateOrProvince
     {
         get => _stateOrProvince;
@@ -152,15 +142,6 @@ public record MsUserAddress : ObservableRecord, IAddress, IComparable<MsUserAddr
         UserID          = address.UserID;
     }
 
-    [ Pure ] public static JsonTypeInfo<MsUserAddress> JsonTypeInfo()          => JsonSerializerContext.MsUserAddress;
-    [ Pure ] public static MsUserAddress               FromJson( string json ) => json.FromJson( JsonTypeInfo() );
-
-    [ Pure ]
-    public static JsonSerializerOptions JsonOptions( bool writeIndented ) => new()
-                                                                             {
-                                                                                 WriteIndented    = writeIndented,
-                                                                                 TypeInfoResolver = JsonSerializerContext
-                                                                             };
 
     public override string ToString() => string.IsNullOrWhiteSpace( Line2 )
                                              ? $"{Line1}. {City}, {StateOrProvince}. {Country}. {PostalCode}"
@@ -212,7 +193,3 @@ public record MsUserAddress : ObservableRecord, IAddress, IComparable<MsUserAddr
     public static bool operator <=( MsUserAddress? left, MsUserAddress? right ) => Sorter.Compare( left, right ) <= 0;
     public static bool operator >=( MsUserAddress? left, MsUserAddress? right ) => Sorter.Compare( left, right ) >= 0;
 }
-
-
-
-[ JsonSourceGenerationOptions( WriteIndented = true ), JsonSerializable( typeof(MsUserAddress) ) ] public partial class MsUserAddressContext : JsonSerializerContext { }

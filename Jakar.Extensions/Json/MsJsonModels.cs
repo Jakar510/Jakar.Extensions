@@ -1,12 +1,10 @@
-﻿using System.Text.Json.Serialization.Metadata;
-
-
-
+﻿/*
 namespace Jakar.Extensions;
 
 
-public static class MsJsonModels
+public static class JsonModels
 {
+    static JsonModels() { }
     public static bool Contains<TClass>( this TClass self, string key )
         where TClass : IJsonModel => self.AdditionalData?.ContainsKey( key ) is true;
 
@@ -14,31 +12,17 @@ public static class MsJsonModels
     public static bool Remove<TClass>( this TClass self, string key )
         where TClass : IJsonModel
     {
-        self.AdditionalData ??= new JsonObject();
+        self.AdditionalData ??= new IDictionary<string, JToken?>();
         return self.AdditionalData.Remove( key );
     }
-    public static bool Remove<TClass>( this TClass self, string key, out JsonElement value )
-        where TClass : IJsonModel
-    {
-        self.AdditionalData ??= new JsonObject();
-
-        if ( self.AdditionalData.Remove( key, out var node ) )
-        {
-            value = node?.ToJsonElement() ?? default;
-            return true;
-        }
-
-        value = default;
-        return false;
-    }
 
 
-    public static JsonObject GetData<TClass>( this TClass model )
+    public static IDictionary<string, JToken?> GetData<TClass>( this TClass model )
         where TClass : IJsonModel => model.GetAdditionalData();
 
 
-    public static JsonObject GetAdditionalData<TClass>( this TClass model )
-        where TClass : IJsonModel => model.AdditionalData ??= new JsonObject();
+    public static IDictionary<string, JToken?> GetAdditionalData<TClass>( this TClass model )
+        where TClass : IJsonModel => model.AdditionalData ??= new IDictionary<string, JToken?>();
 
 
     public static JsonNode? Get<TClass>( this TClass self, string key )
@@ -114,7 +98,7 @@ public static class MsJsonModels
     public static TClass Add<TClass>( this TClass self, string key, IEnumerable<KeyValuePair<string, JsonNode?>> properties )
         where TClass : IJsonModel
     {
-        JsonNode node = new JsonObject( properties );
+        JsonNode node = new IDictionary<string, JToken?>( properties );
         return self.Add( key, node );
     }
 
@@ -125,36 +109,37 @@ public static class MsJsonModels
     public static TClass Add<TClass>( this TClass self, string key, JsonNode? value )
         where TClass : IJsonModel
     {
-        self.AdditionalData ??= new JsonObject();
+        self.AdditionalData ??= new IDictionary<string, JToken?>();
         self.AdditionalData.Add( key, value );
         return self;
     }
-    public static TClass Add<TClass>( this TClass self, string key, JsonElement value )
-        where TClass : IJsonModel => self.Add( key, value.ToJsonNode() );
 
 
-    public static void Add( this IDictionary<string, JsonNode?> self, string key, JsonElement value ) => self.Add( key, value.ToJsonNode() );
-
-
-    public static JsonNode?   ToJsonNode( this    JsonElement node ) => node.Deserialize<JsonNode>();
-    public static JsonElement ToJsonElement( this JsonNode    node ) => node.Deserialize<JsonElement>();
-
-
-    public static void SetAdditionalData<TClass>( this TClass model, JsonObject? data )
+    public static void SetAdditionalData<TClass>( this TClass model, IDictionary<string, JToken?>? data )
         where TClass : IJsonModel => model.AdditionalData = data;
 
 
     [ Pure ]
-    public static async Task<string> ToJsonAsync<TClass>( this TClass model, JsonSerializerOptions options )
-
+    public static async Task<string> ToJsonAsync<TClass>( this TClass model, JsonTypeInfo<TClass> info, bool writeIndented, CancellationToken token = default )
     {
+        info.Options.WriteIndented = writeIndented;
         using var stream = new MemoryStream();
-        await JsonSerializer.SerializeAsync( stream, model, options );
+        await JsonSerializer.SerializeAsync( stream, model, info, token );
         using var reader = new StreamReader( stream );
+        
+    #if NET7_0_OR_GREATER
+        return await reader.ReadToEndAsync( token );
+    #else
         return await reader.ReadToEndAsync();
+    #endif
     }
-    [ Pure ] public static string ToJson<TClass>( this   TClass model, JsonSerializerOptions options ) => JsonSerializer.Serialize( model, options );
-    [ Pure ] public static TClass FromJson<TClass>( this string json,  JsonTypeInfo<TClass>  info )    => JsonSerializer.Deserialize( json, info ) ?? throw new InvalidOperationException( nameof(json) );
+    [ Pure ]
+    public static string ToJson<TClass>( this TClass model, JsonTypeInfo<TClass> info, bool writeIndented )
+    {
+        info.Options.WriteIndented = writeIndented;
+        return JsonSerializer.Serialize( model, info );
+    }
+    [ Pure ] public static TClass FromJson<TClass>( this string json, JsonTypeInfo<TClass> info ) => JsonSerializer.Deserialize( json, info ) ?? throw new InvalidOperationException( nameof(json) );
 
 
 
@@ -167,14 +152,14 @@ public static class MsJsonModels
 
     public interface IJsonModel
     {
-        [ JsonExtensionData ] public JsonObject? AdditionalData { get; set; }
+        [ JsonExtensionData ] public IDictionary<string, JToken?>? AdditionalData { get; set; }
     }
 
 
 
     public interface IJsonModel<TClass> : IJsonModel
         where TClass : IJsonModel<TClass>
-    #if NET8_0
+#if NET8_0
         , IJsonizer<TClass>
 #endif
     { }
@@ -182,18 +167,16 @@ public static class MsJsonModels
 
 
 #if NET8_0
-
-
     public static string ToJson<TClass>( this TClass model )
-        where TClass : IJsonizer<TClass> => model.ToJson( TClass.JsonOptions( false ) );
+        where TClass : IJsonizer<TClass> => model.ToJson( TClass.JsonTypeInfo(), false );
     public static string ToPrettyJson<TClass>( this TClass model )
-        where TClass : IJsonizer<TClass> => model.ToJson( TClass.JsonOptions( true ) );
+        where TClass : IJsonizer<TClass> => model.ToJson( TClass.JsonTypeInfo(), true );
 
 
     public static Task<string> ToJsonAsync<TClass>( this TClass model )
-        where TClass : IJsonModel, IJsonizer<TClass> => ToJsonAsync( model, TClass.JsonOptions( false ) );
+        where TClass : IJsonModel, IJsonizer<TClass> => ToJsonAsync( model, TClass.JsonTypeInfo(), false );
     public static Task<string> ToPrettyJsonAsync<TClass>( this TClass model )
-        where TClass : IJsonModel, IJsonizer<TClass> => ToJsonAsync( model, TClass.JsonOptions( true ) );
+        where TClass : IJsonModel, IJsonizer<TClass> => ToJsonAsync( model, TClass.JsonTypeInfo(), true );
 
 
     public static TClass FromJson<TClass>( this string json )
@@ -209,6 +192,6 @@ public static class MsJsonModels
     }
 
 
-
 #endif
 }
+*/

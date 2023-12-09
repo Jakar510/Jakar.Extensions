@@ -112,7 +112,7 @@ public static class JsonModels
 
     public interface IJsonModel
     {
-        [ JsonNetExtensionData ] public IDictionary<string, JToken?>? AdditionalData { get; set; }
+        [ JsonExtensionData ] public IDictionary<string, JToken?>? AdditionalData { get; set; }
     }
 
 

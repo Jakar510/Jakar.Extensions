@@ -6,14 +6,23 @@ public static partial class TypeExtensions
     // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-    public static bool IsDictionary( this PropertyInfo classType ) => classType.PropertyType.IsDictionary();
-    public static bool IsDictionary( this Type         type )      => type.HasInterface<IDictionary>() || type.HasInterface( typeof(IDictionary<,>) );
+    public static bool IsDictionary(
+    #if NET6_0_OR_GREATER
+        [ DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.Interfaces ) ]
+    #endif
+        this Type type
+    ) => type.HasInterface<IDictionary>() || type.HasInterface( typeof(IDictionary<,>) );
 
-    public static bool IsDictionary( this                        Type  classType,
-                                     [ NotNullWhen( true ) ] out Type? keyType,
-                                     [ NotNullWhen( true ) ] out Type? valueType,
-                                     [ NotNullWhen( true ) ] out bool? isKeyBuiltInType,
-                                     [ NotNullWhen( true ) ] out bool? isValueBuiltInType
+
+    public static bool IsDictionary(
+    #if NET6_0_OR_GREATER
+        [ DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.Interfaces ) ]
+    #endif
+        this Type classType,
+        [ NotNullWhen( true ) ] out Type? keyType,
+        [ NotNullWhen( true ) ] out Type? valueType,
+        [ NotNullWhen( true ) ] out bool? isKeyBuiltInType,
+        [ NotNullWhen( true ) ] out bool? isValueBuiltInType
     )
     {
         if ( classType.IsDictionary( out IReadOnlyList<Type>? itemTypes ) )
@@ -32,7 +41,15 @@ public static partial class TypeExtensions
         return false;
     }
 
-    public static bool IsDictionary( this Type classType, [ NotNullWhen( true ) ] out Type? keyType, [ NotNullWhen( true ) ] out Type? valueType )
+
+    public static bool IsDictionary(
+    #if NET6_0_OR_GREATER
+        [ DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.Interfaces ) ]
+    #endif
+        this Type classType,
+        [ NotNullWhen( true ) ] out Type? keyType,
+        [ NotNullWhen( true ) ] out Type? valueType
+    )
     {
         if ( classType.IsDictionary( out IReadOnlyList<Type>? itemTypes ) )
         {
@@ -46,7 +63,14 @@ public static partial class TypeExtensions
         return false;
     }
 
-    public static bool IsDictionary( this Type classType, [ NotNullWhen( true ) ] out IReadOnlyList<Type>? itemTypes )
+
+    public static bool IsDictionary(
+    #if NET6_0_OR_GREATER
+        [ DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.Interfaces ) ]
+    #endif
+        this Type classType,
+        [ NotNullWhen( true ) ] out IReadOnlyList<Type>? itemTypes
+    )
     {
         if ( classType.IsGenericType && classType.IsDictionary() )
         {
@@ -67,10 +91,19 @@ public static partial class TypeExtensions
         return false;
     }
 
+
     public static bool IsDictionaryEntry( this Type type )      => type.IsGenericType      && type.GetGenericTypeDefinition()      == typeof(DictionaryEntry);
     public static bool IsKeyValuePair( this    Type classType ) => classType.IsGenericType && classType.GetGenericTypeDefinition() == typeof(KeyValuePair<,>);
 
-    public static bool IsKeyValuePair( this Type classType, [ NotNullWhen( true ) ] out Type? keyType, [ NotNullWhen( true ) ] out Type? valueType )
+
+    public static bool IsKeyValuePair(
+    #if NET6_0_OR_GREATER
+        [ DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.Interfaces ) ]
+    #endif
+        this Type classType,
+        [ NotNullWhen( true ) ] out Type? keyType,
+        [ NotNullWhen( true ) ] out Type? valueType
+    )
     {
         if ( classType.IsKeyValuePair( out IReadOnlyList<Type>? itemTypes ) )
         {
@@ -84,7 +117,13 @@ public static partial class TypeExtensions
         return false;
     }
 
-    public static bool IsKeyValuePair( this Type classType, [ NotNullWhen( true ) ] out IReadOnlyList<Type>? itemTypes )
+    public static bool IsKeyValuePair(
+    #if NET6_0_OR_GREATER
+        [ DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.Interfaces ) ]
+    #endif
+        this Type classType,
+        [ NotNullWhen( true ) ] out IReadOnlyList<Type>? itemTypes
+    )
     {
         if ( classType.IsKeyValuePair() )
         {

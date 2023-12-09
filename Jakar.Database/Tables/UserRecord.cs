@@ -4,7 +4,7 @@
 [ Serializable, Table( "Users" ) ]
 public sealed record UserRecord(
     Guid                                                                     UserID,
-    [ property: ProtectedPersonalData, MaxLength( 256 ) ] string             UserName,
+    [ property: ProtectedPersonalData ] string             UserName,
     string                                                                   FirstName,
     string                                                                   LastName,
     string                                                                   FullName,
@@ -58,23 +58,23 @@ public sealed record UserRecord(
     Guid IUserID.                 UserID    => UserID;
 
 
-    [ ProtectedPersonalData, MaxLength( int.MaxValue ) ]
+    [ ProtectedPersonalData, MaxLength( int.MaxValue ), System.Text.Json.Serialization.JsonExtensionData ]
     public JsonObject? AdditionalData
     {
         get => _additionalData;
         set => _additionalData = value;
     }
-    [ ProtectedPersonalData, MaxLength( 256 ) ]  public string            Company           { get; set; } = Company;
-    [ ProtectedPersonalData, MaxLength( 256 ) ]  public string            Department        { get; set; } = Department;
-    [ ProtectedPersonalData, MaxLength( 256 ) ]  public string            Description       { get; set; } = Description;
-    [ ProtectedPersonalData, MaxLength( 1024 ) ] public string            Email             { get; set; } = Email;
-    [ ProtectedPersonalData, MaxLength( 256 ) ]  public string            Ext               { get; set; } = Ext;
-    [ ProtectedPersonalData, MaxLength( 256 ) ]  public string            FirstName         { get; set; } = FirstName;
-    [ ProtectedPersonalData, MaxLength( 512 ) ]  public string            FullName          { get; set; } = FullName;
-    [ ProtectedPersonalData, MaxLength( 256 ) ]  public string            LastName          { get; set; } = LastName;
-    [ ProtectedPersonalData, MaxLength( 256 ) ]  public string            PhoneNumber       { get; set; } = PhoneNumber;
-    [ ProtectedPersonalData, MaxLength( 256 ) ]  public string            Title             { get; set; } = Title;
-    [ ProtectedPersonalData, MaxLength( 4096 ) ] public string            Website           { get; set; } = Website;
+    [ ProtectedPersonalData ]  public string            Company           { get; set; } = Company;
+    [ ProtectedPersonalData ]  public string            Department        { get; set; } = Department;
+    [ ProtectedPersonalData ]  public string            Description       { get; set; } = Description;
+    [ ProtectedPersonalData ] public string            Email             { get; set; } = Email;
+    [ ProtectedPersonalData ]  public string            Ext               { get; set; } = Ext;
+    [ ProtectedPersonalData ]  public string            FirstName         { get; set; } = FirstName;
+    [ ProtectedPersonalData ]  public string            FullName          { get; set; } = FullName;
+    [ ProtectedPersonalData ]  public string            LastName          { get; set; } = LastName;
+    [ ProtectedPersonalData ]  public string            PhoneNumber       { get; set; } = PhoneNumber;
+    [ ProtectedPersonalData ]  public string            Title             { get; set; } = Title;
+    [ ProtectedPersonalData ] public string            Website           { get; set; } = Website;
     public                                              SupportedLanguage PreferredLanguage { get; set; } = PreferredLanguage;
 
     [ Pure ]

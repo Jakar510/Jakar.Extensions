@@ -8,13 +8,13 @@ using Jakar.Database.Resx;
 namespace Jakar.Database;
 
 
-public sealed record AddressRecord( [ property: ProtectedPersonalData, MaxLength( 512 ) ]  string Line1,
-                                    [ property: ProtectedPersonalData, MaxLength( 512 ) ]  string Line2,
-                                    [ property: ProtectedPersonalData, MaxLength( 256 ) ]  string City,
-                                    [ property: ProtectedPersonalData, MaxLength( 256 ) ]  string StateOrProvince,
-                                    [ property: ProtectedPersonalData, MaxLength( 256 ) ]  string Country,
-                                    [ property: ProtectedPersonalData, MaxLength( 256 ) ]  string PostalCode,
-                                    [ property: ProtectedPersonalData, MaxLength( 4096 ) ] string Address,
+public sealed record AddressRecord( [ property: ProtectedPersonalData ]  string Line1,
+                                    [ property: ProtectedPersonalData ]  string Line2,
+                                    [ property: ProtectedPersonalData ]  string City,
+                                    [ property: ProtectedPersonalData ]  string StateOrProvince,
+                                    [ property: ProtectedPersonalData ]  string Country,
+                                    [ property: ProtectedPersonalData ]  string PostalCode,
+                                    [ property: ProtectedPersonalData ] string Address,
                                     bool                                                          IsPrimary,
                                     JsonObject?                             AdditionalData,
                                     RecordID<AddressRecord>                                       ID,

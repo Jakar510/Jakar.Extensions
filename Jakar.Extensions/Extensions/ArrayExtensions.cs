@@ -3,7 +3,11 @@
 
 public static class ArrayExtensions
 {
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ), SuppressMessage( "ReSharper", "InvokeAsExtensionMethod" ) ]
+    [
+    #if NET7_0_OR_GREATER
+        RequiresDynamicCode( nameof(GetInternalArray) ),
+    #endif
+        MethodImpl( MethodImplOptions.AggressiveInlining ), SuppressMessage( "ReSharper", "InvokeAsExtensionMethod" ) ]
     public static ReadOnlySpan<TElement> GetInternalArray<TElement>( this IEnumerable<TElement> values ) => values switch
                                                                                                             {
                                                                                                                 TElement[] array                   => array,
@@ -13,24 +17,51 @@ public static class ArrayExtensions
                                                                                                                 _                                  => values.ToArray()
                                                                                                             };
 
+    [
+    #if NET7_0_OR_GREATER
+        RequiresDynamicCode( nameof(GetInternalArray) ),
+    #endif
+        MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    public static ReadOnlySpan<TElement> GetInternalArray<TElement>( this List<TElement> list ) => new(ArrayAccessor<TElement>.Getter( list ), 0, list.Count);
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static ReadOnlySpan<TElement> GetInternalArray<TElement>( this List<TElement>       list ) => new(ArrayAccessor<TElement>.Getter( list ), 0, list.Count);
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static ReadOnlySpan<TElement> GetInternalArray<TElement>( this Collection<TElement> list ) => ArrayAccessor<TElement>.CollectionGetter( list ).GetInternalArray();
+
+    [
+    #if NET7_0_OR_GREATER
+        RequiresDynamicCode( nameof(GetInternalArray) ),
+    #endif
+        MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    public static ReadOnlySpan<TElement> GetInternalArray<TElement>( this Collection<TElement> list ) => ArrayAccessor<TElement>.CollectionGetter( list ).GetInternalArray();
 
 
 
     /// <summary> <see href="https://stackoverflow.com/a/17308019/9530917"/> </summary>
     internal static class ArrayAccessor<TElement>
     {
-        internal static readonly Func<Collection<TElement>, List<TElement>> CollectionGetter;
-        internal static readonly Func<List<TElement>, TElement[]>           Getter;
+        private static Func<Collection<TElement>, List<TElement>>? _collectionGetter;
+        private static Func<List<TElement>, TElement[]>?           _getter;
 
 
-        static ArrayAccessor()
+        internal static Func<Collection<TElement>, List<TElement>> CollectionGetter
         {
-            Getter           = CreateGetter();
-            CollectionGetter = GetCollectionGetter();
+        #if NET7_0_OR_GREATER
+            [ RequiresDynamicCode( "Calls Jakar.Extensions.ArrayExtensions.ArrayAccessor<TElement>.GetCollectionGetter()" ) ]
+        #endif
+            get { return _collectionGetter ??= GetCollectionGetter(); }
         }
+
+
+        internal static Func<List<TElement>, TElement[]> Getter
+        {
+        #if NET7_0_OR_GREATER
+            [ RequiresDynamicCode( "Calls Jakar.Extensions.ArrayExtensions.ArrayAccessor<TElement>.CreateGetter()" ) ]
+        #endif
+            get { return _getter ??= CreateGetter(); }
+        }
+
+
+    #if NET7_0_OR_GREATER
+        [ RequiresDynamicCode( "Calls System.Reflection.Emit.DynamicMethod.DynamicMethod(String, MethodAttributes, CallingConventions, Type, Type[], Type, Boolean)" ) ]
+    #endif
         private static Func<List<TElement>, TElement[]> CreateGetter()
         {
             FieldInfo field = typeof(List<TElement>).GetField( "_items", BindingFlags.NonPublic | BindingFlags.Instance ) ?? throw new InvalidOperationException();
@@ -53,6 +84,11 @@ public static class ArrayExtensions
 
             return (Func<List<TElement>, TElement[]>)dm.CreateDelegate( typeof(Func<List<TElement>, TElement[]>) );
         }
+
+
+    #if NET7_0_OR_GREATER
+        [ RequiresDynamicCode( "Calls System.Reflection.Emit.DynamicMethod.DynamicMethod(String, MethodAttributes, CallingConventions, Type, Type[], Type, Boolean)" ) ]
+    #endif
         private static Func<Collection<TElement>, List<TElement>> GetCollectionGetter()
         {
             FieldInfo field = typeof(Collection<TElement>).GetField( "items", BindingFlags.NonPublic | BindingFlags.Instance ) ?? throw new InvalidOperationException();

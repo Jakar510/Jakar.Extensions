@@ -20,7 +20,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="BenchmarkDotNet" Version="0.13.10" />
+		<PackageReference Include="BenchmarkDotNet" Version="0.13.11" />
 		<PackageReference Include="Bogus" Version="34.0.2" />
 		<PackageReference Include="Hashids.net" Version="1.7.0" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />

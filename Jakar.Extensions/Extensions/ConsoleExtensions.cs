@@ -10,7 +10,11 @@ public static class ConsoleExtensions
     public static string Header   { get; set; } = '='.Repeat( 100 );
 
 
-    public static StringBuilder WrapException<T>( this T self, char c = '-', int padding = 40 ) where T : Exception
+#if NET6_0_OR_GREATER
+    [ RequiresUnreferencedCode( nameof(WrapException) ) ]
+#endif
+    public static StringBuilder WrapException<T>( this T self, char c = '-', int padding = 40 )
+        where T : Exception
     {
         var builder = new StringBuilder();
         builder.AppendLine( " Exception Start ".Wrapper( c, padding ) );
@@ -28,7 +32,8 @@ public static class ConsoleExtensions
         return builder;
     }
 
-    public static StringBuilder PrintJson<T>( this T self, char c = '-', int length = 80 ) where T : notnull
+    public static StringBuilder PrintJson<T>( this T self, char c = '-', int length = 80 )
+        where T : notnull
     {
         string wrapper = c.Repeat( length );
 
@@ -79,12 +84,13 @@ public static class ConsoleExtensions
     public static void PrintLine( this object             self ) => Console.WriteLine( self );
 
 
-    public static void WriteToConsole( this    Span<char>         self )                   => self.ToString().WriteToConsole();
-    public static void WriteToConsole( this    ReadOnlySpan<char> self )                   => self.ToString().WriteToConsole();
-    public static void WriteToConsole( this    ValueStringBuilder self )                   => self.Span.WriteToConsole();
-    public static void WriteToConsole( this    Buffer<char>       self )                   => self.Span.WriteToConsole();
-    public static void WriteToConsole( this    StringBuilder      self )                   => self.ToString().WriteToConsole();
-    public static void WriteToConsole<T>( this T                  self ) where T : notnull => self.ToString()?.WriteToConsole();
+    public static void WriteToConsole( this Span<char>         self ) => self.ToString().WriteToConsole();
+    public static void WriteToConsole( this ReadOnlySpan<char> self ) => self.ToString().WriteToConsole();
+    public static void WriteToConsole( this ValueStringBuilder self ) => self.Span.WriteToConsole();
+    public static void WriteToConsole( this Buffer<char>       self ) => self.Span.WriteToConsole();
+    public static void WriteToConsole( this StringBuilder      self ) => self.ToString().WriteToConsole();
+    public static void WriteToConsole<T>( this T self )
+        where T : notnull => self.ToString()?.WriteToConsole();
     public static void WriteToConsole( this string self )
     {
         Console.WriteLine();
@@ -155,59 +161,59 @@ public static class ConsoleExtensions
 
 
 #else
-    [Conditional( "DEBUG" )]
-    public static void WriteToDebug( this Span<char> self, [CallerArgumentExpression( "self" )] string? variable = default, [CallerMemberName] string? caller = default )
+    [ Conditional( "DEBUG" ) ]
+    public static void WriteToDebug( this Span<char> self, [ CallerArgumentExpression( "self" ) ] string? variable = default, [ CallerMemberName ] string? caller = default )
     {
         Console.WriteLine( $"{caller} -> {variable} '{self}'" );
         Debug.WriteLine( $"{caller} -> {variable} '{self}'" );
     }
-    [Conditional( "DEBUG" )]
-    public static void WriteToDebug( this ReadOnlySpan<char> self, [CallerArgumentExpression( "self" )] string? variable = default, [CallerMemberName] string? caller = default )
-    {
-        Console.WriteLine( $"{caller} -> {variable} '{self}'" );
-        Debug.WriteLine( $"{caller} -> {variable} '{self}'" );
-    }
-
-
-    [Conditional( "DEBUG" )]
-    public static void WriteToDebug( this string self, [CallerArgumentExpression( "self" )] string? variable = default, [CallerMemberName] string? caller = default )
+    [ Conditional( "DEBUG" ) ]
+    public static void WriteToDebug( this ReadOnlySpan<char> self, [ CallerArgumentExpression( "self" ) ] string? variable = default, [ CallerMemberName ] string? caller = default )
     {
         Console.WriteLine( $"{caller} -> {variable} '{self}'" );
         Debug.WriteLine( $"{caller} -> {variable} '{self}'" );
     }
 
 
-    [Conditional( "DEBUG" )]
-    public static void WriteToDebug( this StringBuilder self, [CallerArgumentExpression( "self" )] string? variable = default, [CallerMemberName] string? caller = default ) => self.ToString()
-                                                                                                                                                                                    .WriteToDebug( variable, caller );
+    [ Conditional( "DEBUG" ) ]
+    public static void WriteToDebug( this string self, [ CallerArgumentExpression( "self" ) ] string? variable = default, [ CallerMemberName ] string? caller = default )
+    {
+        Console.WriteLine( $"{caller} -> {variable} '{self}'" );
+        Debug.WriteLine( $"{caller} -> {variable} '{self}'" );
+    }
 
 
-    [Conditional( "DEBUG" )]
-    public static void WriteToDebug( this Buffer<char> self, [CallerArgumentExpression( "self" )] string? variable = default, [CallerMemberName] string? caller = default )
+    [ Conditional( "DEBUG" ) ]
+    public static void WriteToDebug( this StringBuilder self, [ CallerArgumentExpression( "self" ) ] string? variable = default, [ CallerMemberName ] string? caller = default ) => self.ToString().WriteToDebug( variable, caller );
+
+
+    [ Conditional( "DEBUG" ) ]
+    public static void WriteToDebug( this Buffer<char> self, [ CallerArgumentExpression( "self" ) ] string? variable = default, [ CallerMemberName ] string? caller = default )
     {
         Console.WriteLine( $"{caller} -> {variable} '{self.Span}'" );
         Debug.WriteLine( $"{caller} -> {variable} '{self.Span}'" );
     }
 
 
-    [Conditional( "DEBUG" )]
-    public static void WriteToDebug( this ValueStringBuilder self, [CallerArgumentExpression( "self" )] string? variable = default, [CallerMemberName] string? caller = default )
+    [ Conditional( "DEBUG" ) ]
+    public static void WriteToDebug( this ValueStringBuilder self, [ CallerArgumentExpression( "self" ) ] string? variable = default, [ CallerMemberName ] string? caller = default )
     {
         Console.WriteLine( $"{caller} -> {variable} '{self.Span}'" );
         Debug.WriteLine( $"{caller} -> {variable} '{self.Span}'" );
     }
 
 
-    [Conditional( "DEBUG" )]
-    public static void WriteToDebug( this object self, [CallerArgumentExpression( "self" )] string? variable = default, [CallerMemberName] string? caller = default )
+    [ Conditional( "DEBUG" ) ]
+    public static void WriteToDebug( this object self, [ CallerArgumentExpression( "self" ) ] string? variable = default, [ CallerMemberName ] string? caller = default )
     {
         Console.WriteLine( $"{caller} -> {variable} '{self}'" );
         Debug.WriteLine( $"{caller} -> {variable} '{self}'" );
     }
 
 
-    [Conditional( "DEBUG" )]
-    public static void WriteToDebug<T>( this T self, [CallerArgumentExpression( "self" )] string? variable = default, [CallerMemberName] string? caller = default ) where T : struct
+    [ Conditional( "DEBUG" ) ]
+    public static void WriteToDebug<T>( this T self, [ CallerArgumentExpression( "self" ) ] string? variable = default, [ CallerMemberName ] string? caller = default )
+        where T : struct
     {
         Console.WriteLine( $"{caller} -> {variable} '{self}'" );
         Debug.WriteLine( $"{caller} -> {variable} '{self}'" );

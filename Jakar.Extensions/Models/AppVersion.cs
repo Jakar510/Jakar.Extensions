@@ -2,7 +2,7 @@
 
 
 /// <summary> See <see cref="Format"/> for formatting details. </summary>
-[ Serializable, JsonNetConverter( typeof(AppVersionJsonNetConverter) ), JsonConverter( typeof(AppVersionJsonConverter) ) ]
+[ Serializable, JsonConverter( typeof(AppVersionJsonNetConverter) ) ]
 public sealed class AppVersion :
 #if NET7_0_OR_GREATER
     IComparable,
@@ -537,19 +537,19 @@ public sealed class AppVersion :
 
 
 
-    public class AppVersionJsonNetConverter : Newtonsoft.Json.JsonConverter<AppVersion>
+    public class AppVersionJsonNetConverter : JsonConverter<AppVersion>
     {
         public override bool CanRead  => true;
         public override bool CanWrite => true;
 
 
-        public override AppVersion? ReadJson( JsonReader reader, Type objectType, AppVersion? existingValue, bool hasExistingValue, JsonNetSerializer serializer ) =>
+        public override AppVersion? ReadJson( JsonReader reader, Type objectType, AppVersion? existingValue, bool hasExistingValue, JsonSerializer serializer ) =>
             reader.Value is string item
-                ? AppVersion.Parse( item )
+                ? Parse( item )
                 : existingValue;
 
 
-        public override void WriteJson( JsonWriter writer, AppVersion? value, JsonNetSerializer serializer )
+        public override void WriteJson( JsonWriter writer, AppVersion? value, JsonSerializer serializer )
         {
             if ( value is null )
             {
@@ -560,16 +560,5 @@ public sealed class AppVersion :
             JToken token = value.ToString();
             token.WriteTo( writer );
         }
-    }
-
-
-
-    public class AppVersionJsonConverter : System.Text.Json.Serialization.JsonConverter<AppVersion?>
-    {
-        public override AppVersion? Read( ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options ) =>
-            AppVersion.TryParse( reader.GetString(), out AppVersion? version )
-                ? version
-                : null;
-        public override void Write( Utf8JsonWriter writer, AppVersion? value, JsonSerializerOptions options ) => writer.WriteStringValue( value?.ToString() );
     }
 }

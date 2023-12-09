@@ -9,14 +9,12 @@ public static partial class Spans
 {
     [ Pure ]
     public static T First<T>( this Span<T> values, Func<T, bool> selector )
-        where T : IEquatable<T>
     {
         ReadOnlySpan<T> span = values;
         return span.First( selector );
     }
     [ Pure ]
     public static T First<T>( this ReadOnlySpan<T> values, Func<T, bool> selector )
-        where T : IEquatable<T>
     {
         foreach ( T value in values )
         {
@@ -27,14 +25,12 @@ public static partial class Spans
     }
     [ Pure ]
     public static T? FirstOrDefault<T>( this Span<T> values, Func<T, bool> selector )
-        where T : IEquatable<T>
     {
         ReadOnlySpan<T> span = values;
         return span.FirstOrDefault( selector );
     }
     [ Pure ]
     public static T? FirstOrDefault<T>( this ReadOnlySpan<T> values, Func<T, bool> selector )
-        where T : IEquatable<T>
     {
         foreach ( T value in values )
         {
@@ -47,14 +43,12 @@ public static partial class Spans
 
     [ Pure ]
     public static T Single<T>( this Span<T> values, Func<T, bool> selector )
-        where T : IEquatable<T>
     {
         ReadOnlySpan<T> span = values;
         return span.Single( selector );
     }
     [ Pure ]
     public static T Single<T>( this ReadOnlySpan<T> values, Func<T, bool> selector )
-        where T : IEquatable<T>
     {
         foreach ( T value in values )
         {
@@ -65,14 +59,12 @@ public static partial class Spans
     }
     [ Pure ]
     public static T? SingleOrDefault<T>( this Span<T> values, Func<T, bool> selector )
-        where T : IEquatable<T>
     {
         ReadOnlySpan<T> span = values;
         return span.SingleOrDefault( selector );
     }
     [ Pure ]
     public static T? SingleOrDefault<T>( this ReadOnlySpan<T> values, Func<T, bool> selector )
-        where T : IEquatable<T>
     {
         foreach ( T value in values )
         {
@@ -85,7 +77,6 @@ public static partial class Spans
 
     [ Pure ]
     public static Span<T> Where<T>( this Span<T> values, Func<T, bool> selector )
-        where T : IEquatable<T>
     {
         if ( values.Length == 0 ) { return default; }
 
@@ -97,7 +88,6 @@ public static partial class Spans
     }
     [ Pure ]
     public static ReadOnlySpan<T> Where<T>( this ReadOnlySpan<T> values, Func<T, bool> selector )
-        where T : IEquatable<T>
     {
         if ( values.Length == 0 ) { return default; }
 
@@ -169,7 +159,6 @@ public static partial class Spans
                                  Func<T, bool> selector,
                                  out int       length
     )
-        where T : IEquatable<T>
     {
         if ( values.Length == 0 )
         {
@@ -207,7 +196,7 @@ public static partial class Spans
     public static Span<T> Join<T>( this Span<T> value, in ReadOnlySpan<T> other )
         where T : unmanaged, IEquatable<T>
     {
-        T[] array = AsyncLinq.GetArray<T>( value.Length + other.Length );
+        T[]     array  = AsyncLinq.GetArray<T>( value.Length + other.Length );
         Span<T> buffer = array;
         Join( value, other, ref buffer, out int length );
         Debug.Assert( buffer.Length == length );

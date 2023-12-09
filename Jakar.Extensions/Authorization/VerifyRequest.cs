@@ -1,27 +1,11 @@
-﻿using System.Text.Json.Serialization.Metadata;
-
-
-
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
 
 
 [ Serializable ]
-public class VerifyRequest : BaseClass,
-                             ILoginRequest,
-                             ICredentials,
-                             ICloneable,
-                             IEquatable<VerifyRequest>,
-                             MsJsonModels.IJsonModel<VerifyRequest>
-                         #if NET8_0
-                             ,
-                             MsJsonModels.IJsonizer<VerifyRequest>
-#endif
+public class VerifyRequest : BaseClass, ILoginRequest, ICredentials, ICloneable, IEquatable<VerifyRequest>, JsonModels.IJsonModel
 {
-    public static                                VerifyRequestContext JsonSerializerContext => VerifyRequestContext.Default;
-    [ JsonNetIgnore, JsonIgnore ] public virtual bool                 IsValid               => !string.IsNullOrWhiteSpace( UserName ) && !string.IsNullOrWhiteSpace( Password );
-
-
-    [ JsonExtensionData ] public JsonObject? AdditionalData { get; set; }
+    [ JsonIgnore ]        public virtual bool                          IsValid        => !string.IsNullOrWhiteSpace( UserName ) && !string.IsNullOrWhiteSpace( Password );
+    [ JsonExtensionData ] public         IDictionary<string, JToken?>? AdditionalData { get; set; }
 
 
     [ Required( ErrorMessage = $"{nameof(Password)} is required." ), JsonProperty( nameof(Password), Required = Required.Always ) ] public string Password { get; init; } = string.Empty;
@@ -34,17 +18,6 @@ public class VerifyRequest : BaseClass,
         UserName = userName ?? throw new ArgumentNullException( nameof(userName) );
         Password = password ?? throw new ArgumentNullException( nameof(password) );
     }
-
-
-    [ Pure ] public static JsonTypeInfo<VerifyRequest> JsonTypeInfo() => JsonSerializerContext.VerifyRequest;
-    [ Pure ]
-    public static JsonSerializerOptions JsonOptions( bool writeIndented ) => new()
-                                                                             {
-                                                                                 WriteIndented    = writeIndented,
-                                                                                 TypeInfoResolver = JsonSerializerContext
-                                                                             };
-
-    [ Pure ] public static VerifyRequest FromJson( string json ) => json.FromJson( JsonTypeInfo() );
 
 
     public bool ValidatePassword()                                 => ValidatePassword( PasswordValidator.Default );
@@ -79,10 +52,6 @@ public class VerifyRequest : BaseClass,
 
 
 
-[ JsonSourceGenerationOptions( WriteIndented = true ), JsonSerializable( typeof(VerifyRequest) ) ] public partial class VerifyRequestContext : JsonSerializerContext { }
-
-
-
 [ SuppressMessage( "ReSharper", "NullableWarningSuppressionIsUsed" ) ]
 public class VerifyRequest<T> : VerifyRequest, IEquatable<VerifyRequest<T>>
 {
@@ -102,7 +71,7 @@ public class VerifyRequest<T> : VerifyRequest, IEquatable<VerifyRequest<T>>
 
 
     public bool Equals( VerifyRequest<T>? other ) => Equals( other, EqualityComparer<T?>.Default );
-    public bool Equals( VerifyRequest<T>? other, IEqualityComparer<T> comparer )
+    public bool Equals( VerifyRequest<T>? other, IEqualityComparer<T?> comparer )
     {
         if ( other is null ) { return false; }
 

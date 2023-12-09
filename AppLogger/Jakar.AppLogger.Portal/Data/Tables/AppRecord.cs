@@ -7,8 +7,8 @@ public sealed record AppRecord : OwnedLoggerTable<AppRecord>, IDbReaderMapping<A
     public static string TableName { get; } = typeof(AppRecord).GetTableName();
 
 
-    [ MaxLength( 1024 ) ]  public string AppName { get; init; } = string.Empty;
-    [ MaxLength( 10240 ) ] public string Secret  { get; init; } = string.Empty;
+    public string AppName { get; init; } = string.Empty;
+    public string Secret  { get; init; } = string.Empty;
 
 
     public AppRecord( string appName, string secret, UserRecord caller ) : base( caller )
@@ -37,6 +37,8 @@ public sealed record AppRecord : OwnedLoggerTable<AppRecord>, IDbReaderMapping<A
     public override int GetHashCode()                 => HashCode.Combine( AppName, base.GetHashCode() );
 
 
+#if NET6_0_OR_GREATER
+
     [ Pure ] public static AppRecord FromJson( string json ) => json.FromJson( JsonTypeInfo() );
     [ Pure ]
     public static JsonSerializerOptions JsonOptions( bool formatted ) => new()
@@ -45,8 +47,14 @@ public sealed record AppRecord : OwnedLoggerTable<AppRecord>, IDbReaderMapping<A
                                                                              TypeInfoResolver = AppRecordContext.Default
                                                                          };
     [ Pure ] public static JsonTypeInfo<AppRecord> JsonTypeInfo() => AppRecordContext.Default.AppRecord;
+#endif
 }
 
 
 
+#if NET6_0_OR_GREATER
+
+
+
 [ JsonSerializable( typeof(AppRecord) ) ] public partial class AppRecordContext : JsonSerializerContext;
+#endif

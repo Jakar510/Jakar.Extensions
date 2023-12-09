@@ -167,25 +167,31 @@ public readonly record struct WebHandler : IDisposable
         return await content.ReadAsStringAsync( Token );
     #endif
     }
-    public async ValueTask<TResult> AsJson<TResult>( HttpResponseMessage response, JsonSerializerOptions options )
+
+
+/*
+#if NET6_0_OR_GREATER
+    
+    public async ValueTask<TResult> AsJson<TResult>( HttpResponseMessage response, JsonTypeInfo<TResult> info )
     {
         await using MemoryStream stream = await AsStream( response );
 
-        TResult? result = await JsonSerializer.DeserializeAsync<TResult>( stream, options, Token );
+        TResult? result = await JsonSerializer.DeserializeAsync( stream, info, Token );
         return result ?? throw new NullReferenceException( nameof(JsonSerializer.DeserializeAsync) );
     }
-    public async ValueTask<TResult> AsJson<TResult>( HttpResponseMessage response, JsonNetSerializer serializer )
+    public async ValueTask<TResult> AsJson<TResult>( HttpResponseMessage response, JsonSerializer serializer )
     {
         await using MemoryStream stream = await AsStream( response );
         using var                sr     = new StreamReader( stream, Encoding );
-    #if NET6_0_OR_GREATER
-        await
-        #endif
-            using JsonReader reader = new JsonTextReader( sr );
+        await using JsonReader   reader = new JsonTextReader( sr );
 
         TResult? result = serializer.Deserialize<TResult>( reader );
         return result ?? throw new NullReferenceException( nameof(JsonConvert.DeserializeObject) );
     }
+    public ValueTask<WebResponse<TResult>> AsJson<TResult>( JsonTypeInfo<TResult> info ) => WebResponse<TResult>.Create( this, info, AsJson );
+
+#endif
+*/
 
 
     public       ValueTask<WebResponse<bool>>                 AsBool()                            => WebResponse<bool>.Create( this, AsBool );
@@ -200,11 +206,6 @@ public readonly record struct WebHandler : IDisposable
     public       ValueTask<WebResponse<MemoryStream>>         AsStream()                          => WebResponse<MemoryStream>.Create( this, AsStream );
     public       ValueTask<WebResponse<ReadOnlyMemory<byte>>> AsMemory()                          => WebResponse<ReadOnlyMemory<byte>>.Create( this, AsMemory );
     public       ValueTask<WebResponse<string>>               AsString()                          => WebResponse<string>.Create( this, AsString );
-
-
-    public ValueTask<WebResponse<TResult>> AsJson<TResult>()                                   => AsJson<TResult>( JsonNet.Serializer );
-    public ValueTask<WebResponse<TResult>> AsJson<TResult>( JsonNetSerializer     serializer ) => WebResponse<TResult>.Create( this, serializer, AsJson<TResult> );
-    public ValueTask<WebResponse<TResult>> AsJson<TResult>( JsonSerializerOptions serializer ) => WebResponse<TResult>.Create( this, serializer, AsJson<TResult> );
 
 
     public void Dispose() => _request.Dispose();

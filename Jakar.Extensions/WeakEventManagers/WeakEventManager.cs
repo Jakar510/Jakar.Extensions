@@ -1,6 +1,8 @@
 ﻿namespace Jakar.Extensions;
 
 
+
+/*
 /// <summary>
 /// Weak event manager that allows for garbage collection when the EventHandler is still subscribed
 /// </summary>
@@ -79,3 +81,4 @@ public sealed class WeakEventManager
     public void RaiseEvent( in object? sender, in object? eventArgs, in string eventName ) => _eventHandlers.HandleEvent( eventName, sender, eventArgs );
     public void RaiseEvent( in string  eventName ) => _eventHandlers.HandleEvent( eventName );
 }
+*/

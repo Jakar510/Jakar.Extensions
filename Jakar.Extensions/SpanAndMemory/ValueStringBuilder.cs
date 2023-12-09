@@ -300,7 +300,33 @@ public ref struct ValueStringBuilder
 
     public ValueStringBuilder AppendJoin( char separator, IEnumerable<string> enumerable )
     {
-        ReadOnlySpan<string> span = enumerable.GetInternalArray();
+        ReadOnlySpan<string> span = enumerable.ToArray();
+
+        return AppendJoin( separator,
+                       #if NET7_0_OR_GREATER
+                           ref
+                       #endif
+                           span );
+    }
+    public ValueStringBuilder AppendJoin( in ReadOnlySpan<char> separator, IEnumerable<string> enumerable )
+    {
+        ReadOnlySpan<string> span = enumerable.ToArray();
+
+        return AppendJoin( separator,
+                       #if NET7_0_OR_GREATER
+                           ref
+                       #endif
+                           span );
+    }
+
+
+    public ValueStringBuilder AppendJoin( char separator,
+                                      #if NET7_0_OR_GREATER
+                                          scoped ref readonly
+                                          #endif
+                                              ReadOnlySpan<string> span
+    )
+    {
         EnsureCapacity( span.Sum( static x => x.Length ) + span.Length * 2 + 1 );
         ReadOnlySpan<string>.Enumerator enumerator     = span.GetEnumerator();
         bool                            shouldContinue = enumerator.MoveNext();
@@ -317,9 +343,13 @@ public ref struct ValueStringBuilder
 
         return this;
     }
-    public ValueStringBuilder AppendJoin( in ReadOnlySpan<char> separator, IEnumerable<string> enumerable )
+    public ValueStringBuilder AppendJoin( in ReadOnlySpan<char> separator,
+                                      #if NET7_0_OR_GREATER
+                                          scoped ref readonly
+                                          #endif
+                                              ReadOnlySpan<string> span
+    )
     {
-        ReadOnlySpan<string> span = enumerable.GetInternalArray();
         EnsureCapacity( span.Sum( static x => x.Length ) + separator.Length * span.Length + 1 );
         ReadOnlySpan<string>.Enumerator enumerator     = span.GetEnumerator();
         bool                            shouldContinue = enumerator.MoveNext();

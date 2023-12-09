@@ -4,7 +4,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata>
 		<id>Jakar.Extensions</id>
-		<version>7.4.0</version>
+		<version>7.5.0</version>
 		<title>Extension Library</title>
 		<authors>Tyler Stegmaier</authors>
 		<owners>Jakar510/Jakar</owners>
@@ -57,9 +57,7 @@
 				<dependency id="System.Text.Encoding.CodePages"
 							version="8.0.0" />
 				<dependency id="System.Text.Encodings.Web"
-							version="8.0.0" />
-				<dependency id="System.Text.Json"
-							version="8.0.0" />
+							version="8.0.0" />			
 				<dependency id="System.Text.RegularExpressions"
 							version="4.3.1" />
 				<dependency id="System.Threading.Tasks"
@@ -114,8 +112,6 @@
 				<dependency id="System.Text.Encoding.CodePages"
 							version="8.0.0" />
 				<dependency id="System.Text.Encodings.Web"
-							version="8.0.0" />
-				<dependency id="System.Text.Json"
 							version="8.0.0" />
 				<dependency id="System.Text.RegularExpressions"
 							version="4.3.1" />
@@ -172,8 +168,6 @@
 							version="8.0.0" />
 				<dependency id="System.Text.Encodings.Web"
 							version="8.0.0" />
-				<dependency id="System.Text.Json"
-							version="8.0.0" />
 				<dependency id="System.Text.RegularExpressions"
 							version="4.3.1" />
 				<dependency id="System.Threading.Tasks"
@@ -228,8 +222,6 @@
 				<dependency id="System.Text.Encoding.CodePages"
 							version="8.0.0" />
 				<dependency id="System.Text.Encodings.Web"
-							version="8.0.0" />
-				<dependency id="System.Text.Json"
 							version="8.0.0" />
 				<dependency id="System.Text.RegularExpressions"
 							version="4.3.1" />

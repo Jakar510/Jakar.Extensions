@@ -2,9 +2,9 @@
 
 
 [ Serializable, Table( "Groups" ) ]
-public sealed record GroupRecord( [ MaxLength( 256 ) ]                 string?              CustomerID,
-                                  [ MaxLength( 1024 ) ]                string               NameOfGroup,
-                                  [ MaxLength( 256 ) ]                 RecordID<UserRecord> OwnerID,
+public sealed record GroupRecord(                  string?              CustomerID,
+                                                  string               NameOfGroup,
+                                                   RecordID<UserRecord> OwnerID,
                                   [ MaxLength( UserRights.MAX_SIZE ) ] string               Rights,
                                   RecordID<GroupRecord>                                     ID,
                                   RecordID<UserRecord>?                                     CreatedBy,
