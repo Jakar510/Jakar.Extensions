@@ -9,7 +9,7 @@ namespace Jakar.AppLogger.Portal.Data.DbMigrations;
 
 
 public abstract class LoggerMigration<TRecord> : Migration<TRecord>
-    where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>, MsJsonModels.IJsonizer<TRecord>
+    where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
     protected LoggerMigration() : base() { }
 

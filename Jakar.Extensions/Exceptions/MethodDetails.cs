@@ -7,23 +7,23 @@ namespace Jakar.Extensions;
 
 public sealed class MethodDetails
 {
-    public                        MethodAttributes   Attributes          { get; init; }
-     public string?            DeclaringType       { get; init; }
-    public                        bool               IsAbstract          { get; init; }
-    public                        bool               IsAssembly          { get; init; }
-    public                        bool               IsConstructor       { get; init; }
-    public                        bool               IsFamily            { get; init; }
-    public                        bool               IsFamilyAndAssembly { get; init; }
-    public                        bool               IsFamilyOrAssembly  { get; init; }
-    public                        bool               IsFinal             { get; init; }
-    public                        bool               IsPrivate           { get; init; }
-    public                        bool               IsPublic            { get; init; }
-    public                        bool               IsSpecialName       { get; init; }
-    public                        bool               IsStatic            { get; init; }
-    public                        bool               IsVirtual           { get; init; }
-     public  string             Name                { get; init; } = string.Empty;
-    public                        ParameterDetails[] Parameters          { get; init; } = Array.Empty<ParameterDetails>();
-     public string             Signature           { get; init; } = string.Empty;
+    public MethodAttributes   Attributes          { get; init; }
+    public string?            DeclaringType       { get; init; }
+    public bool               IsAbstract          { get; init; }
+    public bool               IsAssembly          { get; init; }
+    public bool               IsConstructor       { get; init; }
+    public bool               IsFamily            { get; init; }
+    public bool               IsFamilyAndAssembly { get; init; }
+    public bool               IsFamilyOrAssembly  { get; init; }
+    public bool               IsFinal             { get; init; }
+    public bool               IsPrivate           { get; init; }
+    public bool               IsPublic            { get; init; }
+    public bool               IsSpecialName       { get; init; }
+    public bool               IsStatic            { get; init; }
+    public bool               IsVirtual           { get; init; }
+    public string             Name                { get; init; } = string.Empty;
+    public ParameterDetails[] Parameters          { get; init; } = Array.Empty<ParameterDetails>();
+    public string             Signature           { get; init; } = string.Empty;
 
 
     public MethodDetails() { }
@@ -52,17 +52,3 @@ public sealed class MethodDetails
         Parameters          = ParameterDetails.Create( method );
     }
 }
-
-
-
-/*
-#if NET6_0_OR_GREATER
-
-
-
-[ JsonConverter( typeof(MethodDetails) ) ] public partial class MethodDetailsContext : JsonSerializerContext { }
-
-
-
-#endif
-*/

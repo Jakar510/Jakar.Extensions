@@ -5,25 +5,26 @@ namespace Jakar.AppLogger.Portal.Data.Tables;
 
 
 [ Serializable, Table( "Devices" ) ]
-public sealed record DeviceRecord( int?                                                          AppBuild,
-                                   [ property: MaxLength( 4096 ) ] string?                       AppNamespace,
-                                   AppVersion                                                    AppVersion,
-                                   [ property: MaxLength( 4096 ) ]                       string  DeviceID,
-                                   [ property: MaxLength( BaseRecord.MAX_STRING_SIZE ) ] HwInfo? HwInfo,
-                                   [ property: MaxLength( 256 ) ]                        string  Locale,
-                                   [ property: MaxLength( 4096 ) ]                       string? Model,
-                                   int?                                                          OsApiLevel,
-                                   Architecture                                                  ProcessArchitecture,
-                                   [ property: MaxLength( 256 ) ] string                         OsName,
-                                   [ property: MaxLength( 256 ) ] AppVersion                     OsVersion,
-                                   PlatformID                                                    Platform,
-                                   [ property: MaxLength( 256 ) ] string                         SdkName,
-                                   [ property: MaxLength( 256 ) ] string                         SdkVersion,
-                                   TimeSpan                                                      TimeZoneOffset,
-                                   RecordID<DeviceRecord>                                        ID,
-                                   DateTimeOffset                                                DateCreated,
-                                   DateTimeOffset?                                               LastModified = default
-) : LoggerTable<DeviceRecord>( ID, DateCreated, LastModified ), IDbReaderMapping<DeviceRecord>, IDevice, MsJsonModels.IJsonizer<DeviceRecord>
+public sealed record DeviceRecord(
+    int?                                                          AppBuild,
+    [ property: MaxLength( 4096 ) ] string?                       AppNamespace,
+    AppVersion                                                    AppVersion,
+    [ property: MaxLength( 4096 ) ]                       string  DeviceID,
+    [ property: MaxLength( BaseRecord.MAX_STRING_SIZE ) ] HwInfo? HwInfo,
+    [ property: MaxLength( 256 ) ]                        string  Locale,
+    [ property: MaxLength( 4096 ) ]                       string? Model,
+    int?                                                          OsApiLevel,
+    Architecture                                                  ProcessArchitecture,
+    [ property: MaxLength( 256 ) ] string                         OsName,
+    [ property: MaxLength( 256 ) ] AppVersion                     OsVersion,
+    PlatformID                                                    Platform,
+    [ property: MaxLength( 256 ) ] string                         SdkName,
+    [ property: MaxLength( 256 ) ] string                         SdkVersion,
+    TimeSpan                                                      TimeZoneOffset,
+    RecordID<DeviceRecord>                                        ID,
+    DateTimeOffset                                                DateCreated,
+    DateTimeOffset?                                               LastModified = default
+) : LoggerTable<DeviceRecord>( ID, DateCreated, LastModified ), IDbReaderMapping<DeviceRecord>, IDevice
 {
     public static string TableName { get; } = typeof(DeviceRecord).GetTableName();
 
@@ -135,26 +136,12 @@ public sealed record DeviceRecord( int?                                         
 
     public override int CompareTo( DeviceRecord? other ) => string.CompareOrdinal( DeviceID, other?.DeviceID );
     public override int GetHashCode()                    => HashCode.Combine( DeviceID, base.GetHashCode() );
-
-
-    [ Pure ] public static DeviceRecord FromJson( string json ) => json.FromJson( JsonTypeInfo() );
-    [ Pure ]
-    public static JsonSerializerOptions JsonOptions( bool formatted ) => new()
-                                                                         {
-                                                                             WriteIndented    = formatted,
-                                                                             TypeInfoResolver = DeviceRecordContext.Default
-                                                                         };
-    [ Pure ] public static JsonTypeInfo<DeviceRecord> JsonTypeInfo() => DeviceRecordContext.Default.DeviceRecord;
 }
 
 
 
-[ JsonSerializable( typeof(DeviceRecord) ) ] public partial class DeviceRecordContext : JsonSerializerContext;
-
-
-
 [ Serializable, Table( "Devices" ) ]
-public sealed record AppDeviceRecord : Mapping<AppDeviceRecord, AppRecord, DeviceRecord>, ICreateMapping<AppDeviceRecord, AppRecord, DeviceRecord>, IDbReaderMapping<AppDeviceRecord>, MsJsonModels.IJsonizer<AppDeviceRecord>
+public sealed record AppDeviceRecord : Mapping<AppDeviceRecord, AppRecord, DeviceRecord>, ICreateMapping<AppDeviceRecord, AppRecord, DeviceRecord>, IDbReaderMapping<AppDeviceRecord>
 {
     public static string TableName { get; } = typeof(AppDeviceRecord).GetTableName();
 
@@ -179,16 +166,6 @@ public sealed record AppDeviceRecord : Mapping<AppDeviceRecord, AppRecord, Devic
     {
         while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
     }
-
-
-    [ Pure ] public static AppDeviceRecord FromJson( string json ) => json.FromJson( JsonTypeInfo() );
-    [ Pure ]
-    public static JsonSerializerOptions JsonOptions( bool formatted ) => new()
-                                                                         {
-                                                                             WriteIndented    = formatted,
-                                                                             TypeInfoResolver = AppDeviceRecordContext.Default
-                                                                         };
-    [ Pure ] public static JsonTypeInfo<AppDeviceRecord> JsonTypeInfo() => AppDeviceRecordContext.Default.AppDeviceRecord;
 }
 
 

@@ -2,16 +2,17 @@
 
 
 [ Serializable, Table( "Roles" ) ]
-public sealed record RoleRecord( [ property: MaxLength( 1024 ) ]                string Name,
-                                 [ property: MaxLength( 1024 ) ]                string NormalizedName,
-                                 [ property: MaxLength( 4096 ) ]                string ConcurrencyStamp,
-                                 [ property: MaxLength( UserRights.MAX_SIZE ) ] string Rights,
-                                 RecordID<RoleRecord>                                  ID,
-                                 RecordID<UserRecord>?                                 CreatedBy,
-                                 Guid?                                                 OwnerUserID,
-                                 DateTimeOffset                                        DateCreated,
-                                 DateTimeOffset?                                       LastModified = default
-) : OwnedTableRecord<RoleRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<RoleRecord>, UserRights.IRights, MsJsonModels.IJsonizer<RoleRecord>
+public sealed record RoleRecord(
+    [ property: MaxLength( 1024 ) ]                string Name,
+    [ property: MaxLength( 1024 ) ]                string NormalizedName,
+    [ property: MaxLength( 4096 ) ]                string ConcurrencyStamp,
+    [ property: MaxLength( UserRights.MAX_SIZE ) ] string Rights,
+    RecordID<RoleRecord>                                  ID,
+    RecordID<UserRecord>?                                 CreatedBy,
+    Guid?                                                 OwnerUserID,
+    DateTimeOffset                                        DateCreated,
+    DateTimeOffset?                                       LastModified = default
+) : OwnedTableRecord<RoleRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<RoleRecord>, UserRights.IRights
 {
     public static string TableName { get; } = typeof(RoleRecord).GetTableName();
 
@@ -100,18 +101,4 @@ public sealed record RoleRecord( [ property: MaxLength( 1024 ) ]                
 
     [ Pure ] public IAsyncEnumerable<UserRecord> GetUsers( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => UserRoleRecord.Where( connection, transaction, db.UserRoles, db.Users, this, token );
     [ Pure ] public UserRights                   GetRights() => UserRights.Create( this );
-
-
-    [ Pure ] public static RoleRecord FromJson( string json ) => json.FromJson( JsonTypeInfo() );
-    [ Pure ]
-    public static JsonSerializerOptions JsonOptions( bool formatted ) => new()
-                                                                         {
-                                                                             WriteIndented    = formatted,
-                                                                             TypeInfoResolver = RoleRecordContext.Default
-                                                                         };
-    [ Pure ] public static JsonTypeInfo<RoleRecord> JsonTypeInfo() => RoleRecordContext.Default.RoleRecord;
 }
-
-
-
-[ JsonSerializable( typeof(RoleRecord) ) ] public partial class RoleRecordContext : JsonSerializerContext { }

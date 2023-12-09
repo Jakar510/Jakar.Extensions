@@ -33,7 +33,7 @@ public readonly record struct Parameters( params string[] Values ) : IParameters
     public bool TryFormat( Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider )
     {
         using var builder = new ValueStringBuilder( 1000 );
-        builder.AppendJoin( format, Values );
+        builder.AppendJoin( format, Values.AsSpan() );
         return builder.TryCopyTo( destination, out charsWritten );
     }
     public void Handle( ref ValueStringBuilder builder, ILogFormatter formatter )

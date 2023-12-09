@@ -5,7 +5,7 @@ namespace Jakar.Database;
 
 
 // ReSharper disable once InconsistentNaming
-public readonly record struct RecordPair<TRecord>( RecordID<TRecord> ID, DateTimeOffset DateCreated ) : IComparable<RecordPair<TRecord>>, IRecordPair, IDbReaderMapping<RecordPair<TRecord>>, MsJsonModels.IJsonizer<RecordPair<TRecord>>
+public readonly record struct RecordPair<TRecord>( RecordID<TRecord> ID, DateTimeOffset DateCreated ) : IComparable<RecordPair<TRecord>>, IRecordPair, IDbReaderMapping<RecordPair<TRecord>>
     where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
     public static string                              TableName => TRecord.TableName;
@@ -40,25 +40,5 @@ public readonly record struct RecordPair<TRecord>( RecordID<TRecord> ID, DateTim
         parameters.Add( nameof(ID),          ID );
         parameters.Add( nameof(DateCreated), DateCreated );
         return parameters;
-    }
-
-
-    [ Pure ] public static RecordPair<TRecord> FromJson( string json ) => json.FromJson( JsonTypeInfo() );
-    [ Pure ]
-    public static JsonSerializerOptions JsonOptions( bool formatted ) => new()
-                                                                         {
-                                                                             WriteIndented    = formatted,
-                                                                             TypeInfoResolver = JsonContext.Default
-                                                                         };
-    [ Pure ] public static JsonTypeInfo<RecordPair<TRecord>> JsonTypeInfo() => JsonContext.Default.RecordPair;
-
-
-
-    public sealed class JsonContext( JsonSerializerOptions? options ) : JsonSerializerContext( options )
-    {
-        public static      JsonContext                       Default                    { get; } = new(JsonSerializerOptions.Default);
-        protected override JsonSerializerOptions?            GeneratedSerializerOptions => JsonOptions( false );
-        public             JsonTypeInfo<RecordPair<TRecord>> RecordPair                 { get; } = MsJsonTypeInfo.CreateJsonTypeInfo<RecordPair<TRecord>>( JsonSerializerOptions.Default );
-        public override    MsJsonTypeInfo                    GetTypeInfo( Type type )   => RecordPair;
     }
 }

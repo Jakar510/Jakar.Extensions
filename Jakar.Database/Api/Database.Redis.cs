@@ -8,17 +8,17 @@ namespace Jakar.Database;
 public partial class Database
 {
     public async ValueTask<TRecord?> TryGetRecord<TRecord>( RecordID<TRecord> id, CancellationToken token )
-        where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>,  MsJsonModels.IJsonizer<TRecord>
+        where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
     {
         byte[]? data = await _distributedCache.GetAsync( GetRedisKey( id ), token ).ConfigureAwait( false );
         if ( data == null ) { return default; }
 
-        return JsonSerializer_.Deserialize( data, TRecord.JsonTypeInfo() );
+        var json = Encoding.Default.GetString( data );
+        return json.FromJson<TRecord>();
     }
     public async ValueTask AddOrUpdate<TRecord>( TRecord record, CancellationToken token )
-        where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>,  MsJsonModels.IJsonizer<TRecord>
+        where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
     {
-        JsonSerializer_.Serialize( record, TRecord.JsonTypeInfo() );
         byte[] data = Encoding.Default.GetBytes( record.ToJson() );
         await _distributedCache.SetAsync( GetRedisKey( record.ID ), data, token: token ).ConfigureAwait( false );
     }

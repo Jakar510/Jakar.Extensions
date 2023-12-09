@@ -265,7 +265,7 @@ public static class ExceptionExtensions
 
 /*
 #if NET6_0_OR_GREATER
-    public static void GetProperties<[ DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.PublicProperties ) ] T>( this T e, ref Dictionary<string, JsonNode?> dictionary )
+    public static void GetProperties<[ DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.PublicProperties ) ] T>( this T e, ref Dictionary<string, JToken?> dictionary )
         where T : Exception
     {
         foreach ( PropertyInfo info in typeof(T).GetProperties( BindingFlags.Instance | BindingFlags.Public ) )
@@ -280,9 +280,9 @@ public static class ExceptionExtensions
     }
 
     [ RequiresUnreferencedCode( nameof(Details) ) ]
-    public static void Details( this Exception e, out Dictionary<string, JsonNode?> dict, bool includeFullMethodInfo )
+    public static void Details( this Exception e, out Dictionary<string, JToken?> dict, bool includeFullMethodInfo )
     {
-        dict = new Dictionary<string, JsonNode?>
+        dict = new Dictionary<string, JToken?>
                {
                    [nameof(Type)] = e.GetType().FullName,
                    [nameof(Exception.HResult)] = e.HResult,

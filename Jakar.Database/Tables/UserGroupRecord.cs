@@ -5,7 +5,7 @@ namespace Jakar.Database;
 
 
 [ Serializable, Table( "UserGroups" ) ]
-public sealed record UserGroupRecord : Mapping<UserGroupRecord, UserRecord, GroupRecord>, ICreateMapping<UserGroupRecord, UserRecord, GroupRecord>, IDbReaderMapping<UserGroupRecord>, MsJsonModels.IJsonizer<UserGroupRecord>
+public sealed record UserGroupRecord : Mapping<UserGroupRecord, UserRecord, GroupRecord>, ICreateMapping<UserGroupRecord, UserRecord, GroupRecord>, IDbReaderMapping<UserGroupRecord>
 {
     public static string TableName { get; } = typeof(UserGroupRecord).GetTableName();
 
@@ -32,18 +32,4 @@ public sealed record UserGroupRecord : Mapping<UserGroupRecord, UserRecord, Grou
     {
         while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
     }
-
-
-    [ Pure ] public static UserGroupRecord FromJson( string json ) => json.FromJson( JsonTypeInfo() );
-    [ Pure ]
-    public static JsonSerializerOptions JsonOptions( bool formatted ) => new()
-                                                                         {
-                                                                             WriteIndented    = formatted,
-                                                                             TypeInfoResolver = UserGroupRecordContext.Default
-                                                                         };
-    [ Pure ] public static JsonTypeInfo<UserGroupRecord> JsonTypeInfo() => UserGroupRecordContext.Default.UserGroupRecord;
 }
-
-
-
-[ JsonSerializable( typeof(UserGroupRecord) ) ] public partial class UserGroupRecordContext : JsonSerializerContext { }

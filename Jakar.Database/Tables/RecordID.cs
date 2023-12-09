@@ -28,10 +28,6 @@ public readonly record struct RecordID<TRecord>( Guid Value ) : IComparable<Reco
                                                                                                      ? new RecordID<TRecord>( id.Value )
                                                                                                      : default;
     [ Pure ]
-    public static RecordID<TRecord>? TryCreate( ref Utf8JsonReader reader ) => reader.TryGetGuid( out Guid id )
-                                                                                   ? new RecordID<TRecord>( id )
-                                                                                   : default;
-    [ Pure ]
     public static bool TryParse( in ReadOnlySpan<char> value, [ NotNullWhen( true ) ] out RecordID<TRecord>? id )
     {
         if ( Guid.TryParse( value, out Guid guid ) )
@@ -83,30 +79,6 @@ public readonly record struct RecordID<TRecord>( Guid Value ) : IComparable<Reco
     }
 
 
-    [ Pure ] public static RecordID<TRecord> FromJson( string json ) => json.FromJson( JsonTypeInfo() );
-    [ Pure ]
-    public static JsonSerializerOptions JsonOptions( bool formatted ) => new()
-                                                                         {
-                                                                             WriteIndented    = formatted,
-                                                                             TypeInfoResolver = JsonContext.Default,
-                                                                             Converters =
-                                                                             {
-                                                                                 new JsonConverter()
-                                                                             }
-                                                                         };
-    [ Pure ] public static JsonTypeInfo<RecordID<TRecord>> JsonTypeInfo() => JsonContext.Default.RecordPair;
-
-
-
-    public sealed class JsonContext( JsonSerializerOptions? options ) : JsonSerializerContext( options )
-    {
-        public static      JsonContext                     Default                    { get; } = new(JsonSerializerOptions.Default);
-        protected override JsonSerializerOptions?          GeneratedSerializerOptions => JsonOptions( false );
-        public             JsonTypeInfo<RecordID<TRecord>> RecordPair                 { get; } = MsJsonTypeInfo.CreateJsonTypeInfo<RecordID<TRecord>>( JsonSerializerOptions.Default );
-        public override    MsJsonTypeInfo                  GetTypeInfo( Type type )   => RecordPair;
-    }
-
-
 
     public class DapperTypeHandler : SqlConverter<DapperTypeHandler, RecordID<TRecord>>
     {
@@ -123,15 +95,7 @@ public readonly record struct RecordID<TRecord>( Guid Value ) : IComparable<Reco
 
 
 
-    public class JsonConverter : System.Text.Json.Serialization.JsonConverter<RecordID<TRecord>>
-    {
-        public override RecordID<TRecord> Read( ref Utf8JsonReader reader, Type              typeToConvert, JsonSerializerOptions options ) => TryCreate( ref reader ) ?? default;
-        public override void              Write( Utf8JsonWriter    writer, RecordID<TRecord> value,         JsonSerializerOptions options ) => writer.WriteStringValue( value.Value );
-    }
-
-
-
-    public class JsonNetConverter : Newtonsoft.Json.JsonConverter<RecordID<TRecord>>
+    public class JsonNetConverter : JsonConverter<RecordID<TRecord>>
     {
         public override RecordID<TRecord> ReadJson( JsonReader reader, Type objectType, RecordID<TRecord> existingValue, bool hasExistingValue, JsonSerializer serializer )
         {
@@ -159,14 +123,6 @@ public readonly record struct RecordID<TRecord>( Guid Value ) : IComparable<Reco
                 string stringValue when !string.IsNullOrEmpty( stringValue ) && Guid.TryParse( stringValue, out Guid result ) => new RecordID<TRecord>( result ),
                 _                                                                                                             => throw new InvalidCastException( $"Unable to cast object of type {value.GetType()} to RecordID<TRecord>" )
             };
-    }
-
-
-
-    public class NullableJsonConverter : System.Text.Json.Serialization.JsonConverter<RecordID<TRecord>?>
-    {
-        public override RecordID<TRecord>? Read( ref Utf8JsonReader reader, Type               typeToConvert, JsonSerializerOptions options ) => TryCreate( ref reader ) ?? default;
-        public override void               Write( Utf8JsonWriter    writer, RecordID<TRecord>? value,         JsonSerializerOptions options ) => writer.WriteStringValue( value?.Value ?? Guid.Empty );
     }
 
 

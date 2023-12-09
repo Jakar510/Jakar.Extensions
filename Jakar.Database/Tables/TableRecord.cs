@@ -53,7 +53,7 @@ public interface IOwnedTableRecord
 
 [ Serializable ]
 public abstract record TableRecord<TRecord>( [ property: Key ] RecordID<TRecord> ID, DateTimeOffset DateCreated, DateTimeOffset? LastModified ) : BaseRecord, ITableRecord<TRecord>, IComparable<TRecord>
-    where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>, MsJsonModels.IJsonizer<TRecord>
+    where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
     protected TableRecord( RecordID<TRecord> id ) : this( id, DateTimeOffset.UtcNow, null ) { }
 
@@ -114,7 +114,7 @@ public abstract record TableRecord<TRecord>( [ property: Key ] RecordID<TRecord>
                                                               });
     public UInt128 GetHash()
     {
-        string json = JsonSerializer_.Serialize( this, TRecord.JsonOptions( false ) );
+        string json = this.ToJson();
         return Spans.Hash128( json );
     }
 
@@ -135,9 +135,9 @@ public abstract record TableRecord<TRecord>( [ property: Key ] RecordID<TRecord>
 
 
 [ Serializable ]
-public abstract record OwnedTableRecord<TRecord>
-    ( RecordID<TRecord> ID, RecordID<UserRecord>? CreatedBy, Guid? OwnerUserID, DateTimeOffset DateCreated, DateTimeOffset? LastModified ) : TableRecord<TRecord>( ID, DateCreated, LastModified ), IOwnedTableRecord
-    where TRecord : OwnedTableRecord<TRecord>, IDbReaderMapping<TRecord>, MsJsonModels.IJsonizer<TRecord>
+public abstract record OwnedTableRecord<TRecord>( RecordID<TRecord> ID, RecordID<UserRecord>? CreatedBy, Guid? OwnerUserID, DateTimeOffset DateCreated, DateTimeOffset? LastModified )
+    : TableRecord<TRecord>( ID, DateCreated, LastModified ), IOwnedTableRecord
+    where TRecord : OwnedTableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
     protected OwnedTableRecord( UserRecord?       owner ) : this( RecordID<TRecord>.New(), owner ) { }
     protected OwnedTableRecord( RecordID<TRecord> id, UserRecord? owner = default ) : this( id, owner?.ID, owner?.UserID, DateTimeOffset.UtcNow, null ) { }

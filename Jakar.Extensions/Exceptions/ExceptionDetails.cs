@@ -46,11 +46,3 @@ public sealed class ExceptionDetails
                     : new ExceptionDetails( e.InnerException );
     }
 }
-
-
-
-/*
-#if NET6_0_OR_GREATER
-[ JsonConverter( typeof(ExceptionDetails) ) ] public partial class ExceptionDetailsContext : JsonSerializerContext { }
-#endif
-*/

@@ -5,7 +5,7 @@ namespace Jakar.Database.Caches;
 
 
 public sealed class CacheEntry<TRecord>( RecordID<TRecord> id ) : ObservableClass, IRecordPair, IEquatable<TRecord>, IEquatable<CacheEntry<TRecord>>, IComparable<CacheEntry<TRecord>>, IComparable
-    where TRecord : class, ITableRecord<TRecord>, IDbReaderMapping<TRecord>,  MsJsonModels.IJsonizer<TRecord>
+    where TRecord : class, ITableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
     private readonly DateTimeOffset _lastTime = DateTimeOffset.UtcNow;
     private          string         _json     = string.Empty;
@@ -41,7 +41,7 @@ public sealed class CacheEntry<TRecord>( RecordID<TRecord> id ) : ObservableClas
 
         return string.IsNullOrWhiteSpace( json ) || HasExpired( options.ExpireTime )
                    ? default
-                   : JsonSerializer_.Deserialize( json, TRecord.JsonTypeInfo() );
+                   : json.FromJson<TRecord>();
     }
     [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
     public void SetValue( TRecord record )
@@ -50,7 +50,7 @@ public sealed class CacheEntry<TRecord>( RecordID<TRecord> id ) : ObservableClas
 
         DateCreated  = record.DateCreated;
         LastModified = record.LastModified;
-        string json = JsonSerializer_.Serialize( record, TRecord.JsonOptions( false ) );
+        string json = record.ToJson();
         Interlocked.Exchange( ref _json, json );
         _hash = Spans.Hash128( json );
     }
@@ -86,7 +86,7 @@ public sealed class CacheEntry<TRecord>( RecordID<TRecord> id ) : ObservableClas
 
         return string.Equals( _json, other._json, StringComparison.Ordinal );
     }
-    public          bool Equals( TRecord? other ) => JsonSerializer_.Deserialize( _json, TRecord.JsonTypeInfo() )?.Equals( other ) is true;
+    public          bool Equals( TRecord? other ) => _json.FromJson<TRecord>().Equals( other );
     public override bool Equals( object?  obj )   => ReferenceEquals( this, obj ) || obj is CacheEntry<TRecord> other && Equals( other );
     public override int  GetHashCode()            => _hash.GetHashCode();
 

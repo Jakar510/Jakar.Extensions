@@ -2,16 +2,17 @@
 
 
 [ Serializable, Table( "Groups" ) ]
-public sealed record GroupRecord(                  string?              CustomerID,
-                                                  string               NameOfGroup,
-                                                   RecordID<UserRecord> OwnerID,
-                                  [ MaxLength( UserRights.MAX_SIZE ) ] string               Rights,
-                                  RecordID<GroupRecord>                                     ID,
-                                  RecordID<UserRecord>?                                     CreatedBy,
-                                  Guid?                                                     OwnerUserID,
-                                  DateTimeOffset                                            DateCreated,
-                                  DateTimeOffset?                                           LastModified = default
-) : OwnedTableRecord<GroupRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<GroupRecord>, UserRights.IRights, MsJsonModels.IJsonizer<GroupRecord>
+public sealed record GroupRecord(
+    string?                                     CustomerID,
+    string                                      NameOfGroup,
+    RecordID<UserRecord>                        OwnerID,
+    [ MaxLength( UserRights.MAX_SIZE ) ] string Rights,
+    RecordID<GroupRecord>                       ID,
+    RecordID<UserRecord>?                       CreatedBy,
+    Guid?                                       OwnerUserID,
+    DateTimeOffset                              DateCreated,
+    DateTimeOffset?                             LastModified = default
+) : OwnedTableRecord<GroupRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<GroupRecord>, UserRights.IRights
 {
     public static string TableName { get; } = typeof(GroupRecord).GetTableName();
 
@@ -69,18 +70,4 @@ public sealed record GroupRecord(                  string?              Customer
     [ Pure ] public async ValueTask<UserRecord?>       GetOwner( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => await db.Users.Get( connection, transaction, OwnerID, token );
     [ Pure ] public       IAsyncEnumerable<UserRecord> GetUsers( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => UserGroupRecord.Where( connection, transaction, db.UserGroups, db.Users, this, token );
     [ Pure ] public       UserRights                   GetRights() => UserRights.Create( this );
-
-
-    [ Pure ] public static GroupRecord FromJson( string json ) => json.FromJson( JsonTypeInfo() );
-    [ Pure ]
-    public static JsonSerializerOptions JsonOptions( bool formatted ) => new()
-                                                                         {
-                                                                             WriteIndented    = formatted,
-                                                                             TypeInfoResolver = GroupRecordContext.Default
-                                                                         };
-    [ Pure ] public static JsonTypeInfo<GroupRecord> JsonTypeInfo() => GroupRecordContext.Default.GroupRecord;
 }
-
-
-
-[ JsonSerializable( typeof(GroupRecord) ) ] public partial class GroupRecordContext : JsonSerializerContext { }

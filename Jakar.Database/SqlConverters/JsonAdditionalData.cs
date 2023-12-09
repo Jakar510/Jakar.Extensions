@@ -4,9 +4,9 @@
 namespace Jakar.Database;
 
 
-public sealed class JsonAdditionalData : SqlConverter<JsonAdditionalData, JsonObject?>
+public sealed class JsonAdditionalData : SqlConverter<JsonAdditionalData, IDictionary<string, JToken?>?>
 {
-    public override void                          SetValue( IDbDataParameter parameter, JsonObject? value ) => parameter.Value = value?.ToJson();
-    public override JsonObject? Parse( object?             value ) => Parse( value?.ToString() );
-    public static   JsonObject? Parse( string?             value ) => value?.FromJson<JsonObject>();
+    public override void                          SetValue( IDbDataParameter parameter, IDictionary<string, JToken?>? value ) => parameter.Value = value?.ToJson();
+    public override IDictionary<string, JToken?>? Parse( object?             value ) => Parse( value?.ToString() );
+    public static   IDictionary<string, JToken?>? Parse( string?             value ) => value?.FromJson<IDictionary<string, JToken?>>();
 }

@@ -6,12 +6,8 @@ namespace Jakar.AppLogger.Portal.Data.Tables;
 
 
 [ Serializable, Table( "Sessions" ) ]
-public sealed record SessionRecord
-    ( DateTimeOffset AppStartTime, RecordID<AppRecord> AppID, RecordID<DeviceRecord> DeviceID, RecordID<SessionRecord> ID, DateTimeOffset DateCreated, DateTimeOffset? LastModified = default ) :
-        LoggerTable<SessionRecord>( ID, DateCreated, LastModified ),
-        IDbReaderMapping<SessionRecord>,
-        IStartSession,
-        MsJsonModels.IJsonizer<SessionRecord>
+public sealed record SessionRecord( DateTimeOffset AppStartTime, RecordID<AppRecord> AppID, RecordID<DeviceRecord> DeviceID, RecordID<SessionRecord> ID, DateTimeOffset DateCreated, DateTimeOffset? LastModified = default )
+    : LoggerTable<SessionRecord>( ID, DateCreated, LastModified ), IDbReaderMapping<SessionRecord>, IStartSession
 {
     public static string TableName { get; } = typeof(SessionRecord).GetTableName();
 
@@ -70,18 +66,4 @@ public sealed record SessionRecord
         return DeviceID.CompareTo( other.DeviceID );
     }
     public override int GetHashCode() => HashCode.Combine( AppID, DeviceID, base.GetHashCode() );
-
-
-    [ Pure ] public static SessionRecord FromJson( string json ) => json.FromJson( JsonTypeInfo() );
-    [ Pure ]
-    public static JsonSerializerOptions JsonOptions( bool formatted ) => new()
-                                                                         {
-                                                                             WriteIndented    = formatted,
-                                                                             TypeInfoResolver = SessionRecordContext.Default
-                                                                         };
-    [ Pure ] public static JsonTypeInfo<SessionRecord> JsonTypeInfo() => SessionRecordContext.Default.SessionRecord;
 }
-
-
-
-[ JsonSerializable( typeof(SessionRecord) ) ] public partial class SessionRecordContext : JsonSerializerContext;

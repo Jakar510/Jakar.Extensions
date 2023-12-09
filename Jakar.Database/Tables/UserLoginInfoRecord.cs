@@ -9,16 +9,17 @@ namespace Jakar.Database;
 
 
 [ Serializable, Table( "UserLoginInfo" ) ]
-public sealed record UserLoginInfoRecord( [ property: MaxLength(                        int.MaxValue ) ] string  LoginProvider,
-                                          [ property: MaxLength(                        int.MaxValue ) ] string? ProviderDisplayName,
-                                          [ property: ProtectedPersonalData, MaxLength( int.MaxValue ) ] string  ProviderKey,
-                                          [ property: ProtectedPersonalData ]                            string? Value,
-                                          RecordID<UserLoginInfoRecord>                                          ID,
-                                          RecordID<UserRecord>?                                                  CreatedBy,
-                                          Guid?                                                                  OwnerUserID,
-                                          DateTimeOffset                                                         DateCreated,
-                                          DateTimeOffset?                                                        LastModified = default
-) : OwnedTableRecord<UserLoginInfoRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<UserLoginInfoRecord>, MsJsonModels.IJsonizer<UserLoginInfoRecord>
+public sealed record UserLoginInfoRecord(
+    [ property: MaxLength(                        int.MaxValue ) ] string  LoginProvider,
+    [ property: MaxLength(                        int.MaxValue ) ] string? ProviderDisplayName,
+    [ property: ProtectedPersonalData, MaxLength( int.MaxValue ) ] string  ProviderKey,
+    [ property: ProtectedPersonalData ]                            string? Value,
+    RecordID<UserLoginInfoRecord>                                          ID,
+    RecordID<UserRecord>?                                                  CreatedBy,
+    Guid?                                                                  OwnerUserID,
+    DateTimeOffset                                                         DateCreated,
+    DateTimeOffset?                                                        LastModified = default
+) : OwnedTableRecord<UserLoginInfoRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<UserLoginInfoRecord>
 {
     public static string TableName { get; } = typeof(UserLoginInfoRecord).GetTableName();
 
@@ -94,18 +95,4 @@ public sealed record UserLoginInfoRecord( [ property: MaxLength(                
                                                                                                 Name          = value.ProviderDisplayName ?? string.Empty,
                                                                                                 Value         = value.ProviderKey
                                                                                             };
-
-
-    [ Pure ] public static UserLoginInfoRecord FromJson( string json ) => json.FromJson( JsonTypeInfo() );
-    [ Pure ]
-    public static JsonSerializerOptions JsonOptions( bool formatted ) => new()
-                                                                         {
-                                                                             WriteIndented    = formatted,
-                                                                             TypeInfoResolver = UserLoginInfoRecordContext.Default,
-                                                                         };
-    [ Pure ] public static JsonTypeInfo<UserLoginInfoRecord> JsonTypeInfo() => UserLoginInfoRecordContext.Default.UserLoginInfoRecord;
 }
-
-
-
-[ JsonSerializable( typeof(UserLoginInfoRecord) ) ] public partial class UserLoginInfoRecordContext : JsonSerializerContext { }

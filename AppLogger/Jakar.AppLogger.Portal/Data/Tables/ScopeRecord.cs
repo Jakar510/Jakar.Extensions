@@ -6,13 +6,8 @@ namespace Jakar.AppLogger.Portal.Data.Tables;
 
 
 [ Serializable, Table( "Scopes" ) ]
-public sealed record ScopeRecord( RecordID<AppRecord>     AppID,
-                                  RecordID<DeviceRecord>  DeviceID,
-                                  RecordID<SessionRecord> SessionID,
-                                  RecordID<ScopeRecord>   ID,
-                                  DateTimeOffset          DateCreated,
-                                  DateTimeOffset?         LastModified = default
-) : LoggerTable<ScopeRecord>( ID, DateCreated, LastModified ), IDbReaderMapping<ScopeRecord>, MsJsonModels.IJsonizer<ScopeRecord>
+public sealed record ScopeRecord( RecordID<AppRecord> AppID, RecordID<DeviceRecord> DeviceID, RecordID<SessionRecord> SessionID, RecordID<ScopeRecord> ID, DateTimeOffset DateCreated, DateTimeOffset? LastModified = default )
+    : LoggerTable<ScopeRecord>( ID, DateCreated, LastModified ), IDbReaderMapping<ScopeRecord>
 {
     public static string TableName { get; } = typeof(ScopeRecord).GetTableName();
 
@@ -46,26 +41,12 @@ public sealed record ScopeRecord( RecordID<AppRecord>     AppID,
 
 
     public override int CompareTo( ScopeRecord? other ) => Nullable.Compare( AppID, other?.AppID );
-
-
-    [ Pure ] public static ScopeRecord FromJson( string json ) => json.FromJson( JsonTypeInfo() );
-    [ Pure ]
-    public static JsonSerializerOptions JsonOptions( bool formatted ) => new()
-                                                                         {
-                                                                             WriteIndented    = formatted,
-                                                                             TypeInfoResolver = ScopeRecordContext.Default
-                                                                         };
-    [ Pure ] public static JsonTypeInfo<ScopeRecord> JsonTypeInfo() => ScopeRecordContext.Default.ScopeRecord;
 }
 
 
 
-[ JsonSerializable( typeof(ScopeRecord) ) ] public partial class ScopeRecordContext : JsonSerializerContext;
-
-
-
 [ Serializable, Table( "LogScopes" ) ]
-public sealed record LogScopeRecord : Mapping<LogScopeRecord, LogRecord, ScopeRecord>, ICreateMapping<LogScopeRecord, LogRecord, ScopeRecord>, IDbReaderMapping<LogScopeRecord>, MsJsonModels.IJsonizer<LogScopeRecord>
+public sealed record LogScopeRecord : Mapping<LogScopeRecord, LogRecord, ScopeRecord>, ICreateMapping<LogScopeRecord, LogRecord, ScopeRecord>, IDbReaderMapping<LogScopeRecord>
 {
     public static string TableName { get; } = typeof(LogScopeRecord).GetTableName();
 
@@ -90,17 +71,4 @@ public sealed record LogScopeRecord : Mapping<LogScopeRecord, LogRecord, ScopeRe
     {
         while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
     }
-
-    [ Pure ] public static LogScopeRecord FromJson( string json ) => json.FromJson( JsonTypeInfo() );
-    [ Pure ]
-    public static JsonSerializerOptions JsonOptions( bool formatted ) => new()
-                                                                         {
-                                                                             WriteIndented    = formatted,
-                                                                             TypeInfoResolver = LogScopeRecordContext.Default
-                                                                         };
-    [ Pure ] public static JsonTypeInfo<LogScopeRecord> JsonTypeInfo() => LogScopeRecordContext.Default.LogScopeRecord;
 }
-
-
-
-[ JsonSerializable( typeof(LogScopeRecord) ) ] public partial class LogScopeRecordContext : JsonSerializerContext;

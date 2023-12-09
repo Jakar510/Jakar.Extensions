@@ -5,7 +5,7 @@ namespace Jakar.Database;
 
 
 [ Serializable, Table( "UserRoles" ) ]
-public sealed record UserRoleRecord : Mapping<UserRoleRecord, UserRecord, RoleRecord>, ICreateMapping<UserRoleRecord, UserRecord, RoleRecord>, IDbReaderMapping<UserRoleRecord>, MsJsonModels.IJsonizer<UserRoleRecord>
+public sealed record UserRoleRecord : Mapping<UserRoleRecord, UserRecord, RoleRecord>, ICreateMapping<UserRoleRecord, UserRecord, RoleRecord>, IDbReaderMapping<UserRoleRecord>
 {
     public static string TableName { get; } = typeof(UserRoleRecord).GetTableName();
 
@@ -32,18 +32,4 @@ public sealed record UserRoleRecord : Mapping<UserRoleRecord, UserRecord, RoleRe
     {
         while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
     }
-
-
-    [ Pure ] public static UserRoleRecord FromJson( string json ) => json.FromJson( JsonTypeInfo() );
-    [ Pure ]
-    public static JsonSerializerOptions JsonOptions( bool formatted ) => new()
-                                                                         {
-                                                                             WriteIndented    = formatted,
-                                                                             TypeInfoResolver = UserRoleRecordContext.Default
-                                                                         };
-    [ Pure ] public static JsonTypeInfo<UserRoleRecord> JsonTypeInfo() => UserRoleRecordContext.Default.UserRoleRecord;
 }
-
-
-
-[ JsonSerializable( typeof(UserRoleRecord) ) ] public partial class UserRoleRecordContext : JsonSerializerContext { }

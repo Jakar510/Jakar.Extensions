@@ -6,7 +6,7 @@ namespace Jakar.AppLogger.Common;
 
 [ Serializable ]
 public sealed record AppLog
-    ( [ property: MaxLength( IAppLog.MESSAGE_LENGTH ) ] string Message, LogLevel Level, EventID EventID, DateTimeOffset TimeStamp, StartSessionReply Session, DeviceDescriptor Device ) : BaseMsJsonModelRecord, IAppLog, ILogDetails, ILogScopes
+    ( [ property: MaxLength( IAppLog.MESSAGE_LENGTH ) ] string Message, LogLevel Level, EventID EventID, DateTimeOffset TimeStamp, StartSessionReply Session, DeviceDescriptor Device ) : BaseJsonModelRecord, IAppLog, ILogDetails, ILogScopes
 {
     [ JsonIgnore ] public bool                                                     IsError      => Level > LogLevel.Error;
     public                bool                                                     IsFatal      { get; init; }

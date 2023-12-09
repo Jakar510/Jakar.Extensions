@@ -3,27 +3,28 @@
 
 /// <see cref="LocalizableString"/>
 [ Serializable, Table( "Resx" ) ]
-public sealed record ResxRowRecord( long                    KeyID,
-                                    string                  Key,
-                                    string                  Neutral,
-                                    string                  Arabic,
-                                    string                  Chinese,
-                                    string                  Czech,
-                                    string                  Dutch,
-                                    string                  English,
-                                    string                  French,
-                                    string                  German,
-                                    string                  Japanese,
-                                    string                  Korean,
-                                    string                  Polish,
-                                    string                  Portuguese,
-                                    string                  Spanish,
-                                    string                  Swedish,
-                                    string                  Thai,
-                                    RecordID<ResxRowRecord> ID,
-                                    DateTimeOffset          DateCreated,
-                                    DateTimeOffset?         LastModified = default
-) : TableRecord<ResxRowRecord>( ID, DateCreated, LastModified ), IDbReaderMapping<ResxRowRecord>, MsJsonModels.IJsonizer<ResxRowRecord>
+public sealed record ResxRowRecord(
+    long                    KeyID,
+    string                  Key,
+    string                  Neutral,
+    string                  Arabic,
+    string                  Chinese,
+    string                  Czech,
+    string                  Dutch,
+    string                  English,
+    string                  French,
+    string                  German,
+    string                  Japanese,
+    string                  Korean,
+    string                  Polish,
+    string                  Portuguese,
+    string                  Spanish,
+    string                  Swedish,
+    string                  Thai,
+    RecordID<ResxRowRecord> ID,
+    DateTimeOffset          DateCreated,
+    DateTimeOffset?         LastModified = default
+) : TableRecord<ResxRowRecord>( ID, DateCreated, LastModified ), IDbReaderMapping<ResxRowRecord>
 {
     public static string TableName { get; } = typeof(ResxRowRecord).GetTableName();
 
@@ -246,17 +247,4 @@ public sealed record ResxRowRecord( long                    KeyID,
 
         return Neutral == other.Neutral || ID == other.ID;
     }
-
-    [ Pure ] public static ResxRowRecord FromJson( string json ) => json.FromJson( JsonTypeInfo() );
-    [ Pure ]
-    public static JsonSerializerOptions JsonOptions( bool formatted ) => new()
-                                                                         {
-                                                                             WriteIndented    = formatted,
-                                                                             TypeInfoResolver = ResxRowRecordContext.Default
-                                                                         };
-    [ Pure ] public static JsonTypeInfo<ResxRowRecord> JsonTypeInfo() => ResxRowRecordContext.Default.ResxRowRecord;
 }
-
-
-
-[ JsonSerializable( typeof(ResxRowRecord) ) ] public partial class ResxRowRecordContext : JsonSerializerContext { }

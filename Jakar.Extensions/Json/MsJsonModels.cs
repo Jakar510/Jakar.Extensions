@@ -25,80 +25,80 @@ public static class JsonModels
         where TClass : IJsonModel => model.AdditionalData ??= new IDictionary<string, JToken?>();
 
 
-    public static JsonNode? Get<TClass>( this TClass self, string key )
+    public static JToken? Get<TClass>( this TClass self, string key )
         where TClass : IJsonModel => self.AdditionalData?[key];
 
 
     public static TClass Add<TClass>( this TClass self, string key, bool value )
         where TClass : IJsonModel
     {
-        JsonNode node = value;
+        JToken node = value;
         return self.Add( key, node );
     }
     public static TClass Add<TClass>( this TClass self, string key, byte value )
         where TClass : IJsonModel
     {
-        JsonNode node = value;
+        JToken node = value;
         return self.Add( key, node );
     }
     public static TClass Add<TClass>( this TClass self, string key, short value )
         where TClass : IJsonModel
     {
-        JsonNode node = value;
+        JToken node = value;
         return self.Add( key, node );
     }
     public static TClass Add<TClass>( this TClass self, string key, int value )
         where TClass : IJsonModel
     {
-        JsonNode node = value;
+        JToken node = value;
         return self.Add( key, node );
     }
     public static TClass Add<TClass>( this TClass self, string key, long value )
         where TClass : IJsonModel
     {
-        JsonNode node = value;
+        JToken node = value;
         return self.Add( key, node );
     }
     public static TClass Add<TClass>( this TClass self, string key, float value )
         where TClass : IJsonModel
     {
-        JsonNode node = value;
+        JToken node = value;
         return self.Add( key, node );
     }
     public static TClass Add<TClass>( this TClass self, string key, double value )
         where TClass : IJsonModel
     {
-        JsonNode node = value;
+        JToken node = value;
         return self.Add( key, node );
     }
     public static TClass Add<TClass>( this TClass self, string key, decimal value )
         where TClass : IJsonModel
     {
-        JsonNode node = value;
+        JToken node = value;
         return self.Add( key, node );
     }
     public static TClass Add<TClass>( this TClass self, string key, string value )
         where TClass : IJsonModel
     {
-        JsonNode node = value;
+        JToken node = value;
         return self.Add( key, node );
     }
     public static TClass Add<TClass>( this TClass self, string key, DateTime value )
         where TClass : IJsonModel
     {
-        JsonNode node = value;
+        JToken node = value;
         return self.Add( key, node );
     }
     public static TClass Add<TClass>( this TClass self, string key, DateTimeOffset value )
         where TClass : IJsonModel
     {
-        JsonNode node = value;
+        JToken node = value;
         return self.Add( key, node );
     }
-    public static TClass Add<TClass>( this TClass self, string key, IEnumerable<KeyValuePair<string, JsonNode?>> properties )
+    public static TClass Add<TClass>( this TClass self, string key, IEnumerable<KeyValuePair<string, JToken?>> properties )
         where TClass : IJsonModel
     {
-        JsonNode node = new IDictionary<string, JToken?>( properties );
+        JToken node = new IDictionary<string, JToken?>( properties );
         return self.Add( key, node );
     }
 
@@ -106,7 +106,7 @@ public static class JsonModels
         where TClass : IJsonModel
         where T : IJsonizer => self.Add( key, value.GetProperties() );
 
-    public static TClass Add<TClass>( this TClass self, string key, JsonNode? value )
+    public static TClass Add<TClass>( this TClass self, string key, JToken? value )
         where TClass : IJsonModel
     {
         self.AdditionalData ??= new IDictionary<string, JToken?>();
@@ -145,7 +145,7 @@ public static class JsonModels
 
     public interface IJsonizer
     {
-        public IEnumerable<KeyValuePair<string, JsonNode?>> GetProperties();
+        public IEnumerable<KeyValuePair<string, JToken?>> GetProperties();
     }
 
 

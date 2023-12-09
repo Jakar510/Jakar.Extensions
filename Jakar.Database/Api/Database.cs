@@ -114,7 +114,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
 
     [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
     protected virtual DbTable<TRecord> Create<TRecord>()
-        where TRecord : class, ITableRecord<TRecord>, IDbReaderMapping<TRecord>,  MsJsonModels.IJsonizer<TRecord>
+        where TRecord : class, ITableRecord<TRecord>, IDbReaderMapping<TRecord>
     {
         var table = new DbTable<TRecord>( this, _sqlCacheFactory );
         return AddDisposable( table );
@@ -134,7 +134,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
 
 
     public ITableCache<TRecord> GetCache<TRecord>( DbTable<TRecord> table )
-        where TRecord : class, ITableRecord<TRecord>, IDbReaderMapping<TRecord>,  MsJsonModels.IJsonizer<TRecord> => _tableCacheFactory.GetCache( table );
+        where TRecord : class, ITableRecord<TRecord>, IDbReaderMapping<TRecord> => _tableCacheFactory.GetCache( table );
 
 
     [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]

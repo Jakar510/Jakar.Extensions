@@ -5,14 +5,8 @@ namespace Jakar.Database;
 
 
 [ Serializable, Table( "Codes" ) ]
-public sealed record RecoveryCodeRecord
-    (  string Code, RecordID<RecoveryCodeRecord> ID, RecordID<UserRecord>? CreatedBy, Guid? OwnerUserID, DateTimeOffset DateCreated, DateTimeOffset? LastModified = default ) : OwnedTableRecord<RecoveryCodeRecord>( ID,
-                                                                                                                                                                                                                                            CreatedBy,
-                                                                                                                                                                                                                                            OwnerUserID,
-                                                                                                                                                                                                                                            DateCreated,
-                                                                                                                                                                                                                                            LastModified ),
-                                                                                                                                                                                                      IDbReaderMapping<RecoveryCodeRecord>,
-                                                                                                                                                                                                      MsJsonModels.IJsonizer<RecoveryCodeRecord>
+public sealed record RecoveryCodeRecord( string Code, RecordID<RecoveryCodeRecord> ID, RecordID<UserRecord>? CreatedBy, Guid? OwnerUserID, DateTimeOffset DateCreated, DateTimeOffset? LastModified = default )
+    : OwnedTableRecord<RecoveryCodeRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<RecoveryCodeRecord>
 {
     private static readonly PasswordHasher<RecoveryCodeRecord> _hasher = new();
 
@@ -111,29 +105,12 @@ public sealed record RecoveryCodeRecord
             default: throw new ArgumentOutOfRangeException();
         }
     }
-
-
-    [ Pure ] public static RecoveryCodeRecord FromJson( string json ) => json.FromJson( JsonTypeInfo() );
-    [ Pure ]
-    public static JsonSerializerOptions JsonOptions( bool formatted ) => new()
-                                                                         {
-                                                                             WriteIndented    = formatted,
-                                                                             TypeInfoResolver = RecoveryCodeRecordContext.Default
-                                                                         };
-    [ Pure ] public static JsonTypeInfo<RecoveryCodeRecord> JsonTypeInfo() => RecoveryCodeRecordContext.Default.RecoveryCodeRecord;
 }
 
 
 
-[ JsonSerializable( typeof(RecoveryCodeRecord) ) ] public partial class RecoveryCodeRecordContext : JsonSerializerContext { }
-
-
-
 [ Serializable, Table( "UserRecoveryCodes" ) ]
-public sealed record UserRecoveryCodeRecord : Mapping<UserRecoveryCodeRecord, UserRecord, RecoveryCodeRecord>,
-                                              ICreateMapping<UserRecoveryCodeRecord, UserRecord, RecoveryCodeRecord>,
-                                              IDbReaderMapping<UserRecoveryCodeRecord>,
-                                              MsJsonModels.IJsonizer<UserRecoveryCodeRecord>
+public sealed record UserRecoveryCodeRecord : Mapping<UserRecoveryCodeRecord, UserRecord, RecoveryCodeRecord>, ICreateMapping<UserRecoveryCodeRecord, UserRecord, RecoveryCodeRecord>, IDbReaderMapping<UserRecoveryCodeRecord>
 {
     public static string TableName { get; } = typeof(UserRecoveryCodeRecord).GetTableName();
 
@@ -156,18 +133,4 @@ public sealed record UserRecoveryCodeRecord : Mapping<UserRecoveryCodeRecord, Us
     {
         while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
     }
-
-
-    [ Pure ] public static UserRecoveryCodeRecord FromJson( string json ) => json.FromJson( JsonTypeInfo() );
-    [ Pure ]
-    public static JsonSerializerOptions JsonOptions( bool formatted ) => new()
-                                                                         {
-                                                                             WriteIndented    = formatted,
-                                                                             TypeInfoResolver = UserRecoveryCodeRecordContext.Default
-                                                                         };
-    [ Pure ] public static JsonTypeInfo<UserRecoveryCodeRecord> JsonTypeInfo() => UserRecoveryCodeRecordContext.Default.UserRecoveryCodeRecord;
 }
-
-
-
-[ JsonSerializable( typeof(UserRecoveryCodeRecord) ) ] public partial class UserRecoveryCodeRecordContext : JsonSerializerContext { }

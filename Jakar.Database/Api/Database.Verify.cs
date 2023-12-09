@@ -9,7 +9,7 @@ public abstract partial class Database
     [ SuppressMessage( "ReSharper", "UnusedParameter.Global" ) ]
     public virtual ValueTask<DateTimeOffset?> GetSubscriptionExpiration( DbConnection connection, DbTransaction? transaction, UserRecord record, CancellationToken token = default ) => new(default(DateTimeOffset?));
     public virtual ValueTask<TRecord?> TryGetSubscription<TRecord>( DbConnection connection, DbTransaction? transaction, UserRecord record, CancellationToken token = default )
-        where TRecord : UserSubscription<TRecord>, IDbReaderMapping<TRecord>,  MsJsonModels.IJsonizer<TRecord> => default;
+        where TRecord : UserSubscription<TRecord>, IDbReaderMapping<TRecord> => default;
 
 
     /// <summary> </summary>

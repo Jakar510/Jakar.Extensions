@@ -6,13 +6,13 @@ namespace Jakar.Extensions;
 
 public sealed class ParameterDetails
 {
-    public                        bool    HasDefaultValue { get; init; }
-    public                        bool    IsIn            { get; init; }
-    public                        bool    IsOptional      { get; init; }
-    public                        bool    IsOut           { get; init; }
-     public  string? Name            { get; init; }
-    public                        int     Position        { get; init; }
-     public string? Type            { get; init; }
+    public bool    HasDefaultValue { get; init; }
+    public bool    IsIn            { get; init; }
+    public bool    IsOptional      { get; init; }
+    public bool    IsOut           { get; init; }
+    public string? Name            { get; init; }
+    public int     Position        { get; init; }
+    public string? Type            { get; init; }
 
 
     public ParameterDetails() { }
@@ -31,14 +31,3 @@ public sealed class ParameterDetails
     public static ParameterDetails[] Create( MethodBase                 method ) => Create( method.GetParameters() );
     public static ParameterDetails[] Create( IEnumerable<ParameterInfo> items )  => items.Select( x => new ParameterDetails( x ) ).ToArray();
 }
-
-
-
-/*
-#if NET6_0_OR_GREATER
-
-
-
-[ JsonConverter( typeof(ParameterDetails) ) ] public partial class ParameterDetailsContext : JsonSerializerContext { }
-#endif
-*/

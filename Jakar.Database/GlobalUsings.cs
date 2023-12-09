@@ -22,10 +22,6 @@ global using System.Runtime.InteropServices;
 global using System.Runtime.Versioning;
 global using System.Security.Claims;
 global using System.Text;
-global using System.Text.Json;
-global using System.Text.Json.Nodes;
-global using System.Text.Json.Serialization;
-global using System.Text.Json.Serialization.Metadata;
 global using System.Text.RegularExpressions;
 global using Dapper;
 global using Dapper.Contrib.Extensions;
@@ -72,7 +68,5 @@ global using ConnectionStringOptions =
         System.Func<Microsoft.Extensions.Configuration.IConfiguration, System.Threading.CancellationToken, Jakar.Extensions.SecuredString>,
         System.Func<Microsoft.Extensions.Configuration.IConfiguration, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<Jakar.Extensions.SecuredString>>,
         System.Func<Microsoft.Extensions.Configuration.IConfiguration, System.Threading.CancellationToken, System.Threading.Tasks.Task<Jakar.Extensions.SecuredString>>>;
-global using JsonSerializer_ = System.Text.Json.JsonSerializer;
 global using KeyAttribute = Dapper.Contrib.Extensions.KeyAttribute;
-global using MsJsonTypeInfo = System.Text.Json.Serialization.Metadata.JsonTypeInfo;
 global using TableAttribute = Dapper.Contrib.Extensions.TableAttribute;

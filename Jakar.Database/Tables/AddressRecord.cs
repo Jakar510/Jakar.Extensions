@@ -1,32 +1,29 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 09/29/2023  9:25 PM
 
-using Jakar.Database.Resx;
-
-
-
 namespace Jakar.Database;
 
 
-public sealed record AddressRecord( [ property: ProtectedPersonalData ]  string Line1,
-                                    [ property: ProtectedPersonalData ]  string Line2,
-                                    [ property: ProtectedPersonalData ]  string City,
-                                    [ property: ProtectedPersonalData ]  string StateOrProvince,
-                                    [ property: ProtectedPersonalData ]  string Country,
-                                    [ property: ProtectedPersonalData ]  string PostalCode,
-                                    [ property: ProtectedPersonalData ] string Address,
-                                    bool                                                          IsPrimary,
-                                    JsonObject?                             AdditionalData,
-                                    RecordID<AddressRecord>                                       ID,
-                                    RecordID<UserRecord>?                                         CreatedBy,
-                                    Guid?                                                         OwnerUserID,
-                                    DateTimeOffset                                                DateCreated,
-                                    DateTimeOffset?                                               LastModified = default
-) : OwnedTableRecord<AddressRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IAddress, IEquatable<IAddress>, IDbReaderMapping<AddressRecord>, MsJsonModels.IJsonizer<AddressRecord>
+public sealed record AddressRecord(
+    [ property: ProtectedPersonalData ] string Line1,
+    [ property: ProtectedPersonalData ] string Line2,
+    [ property: ProtectedPersonalData ] string City,
+    [ property: ProtectedPersonalData ] string StateOrProvince,
+    [ property: ProtectedPersonalData ] string Country,
+    [ property: ProtectedPersonalData ] string PostalCode,
+    [ property: ProtectedPersonalData ] string Address,
+    bool                                       IsPrimary,
+    IDictionary<string, JToken?>?              AdditionalData,
+    RecordID<AddressRecord>                    ID,
+    RecordID<UserRecord>?                      CreatedBy,
+    Guid?                                      OwnerUserID,
+    DateTimeOffset                             DateCreated,
+    DateTimeOffset?                            LastModified = default
+) : OwnedTableRecord<AddressRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IAddress, IEquatable<IAddress>, IDbReaderMapping<AddressRecord>
 {
-    public static string                     TableName      { get; } = typeof(AddressRecord).GetTableName();
-    Guid? IAddress.                          UserID         => OwnerUserID;
-    public JsonObject? AdditionalData { get; set; } = AdditionalData;
+    public static string                 TableName      { get; } = typeof(AddressRecord).GetTableName();
+    Guid? IAddress.                      UserID         => OwnerUserID;
+    public IDictionary<string, JToken?>? AdditionalData { get; set; } = AdditionalData;
 
 
     [ Pure ]
@@ -46,20 +43,20 @@ public sealed record AddressRecord( [ property: ProtectedPersonalData ]  string 
     [ Pure ]
     public static AddressRecord Create( DbDataReader reader )
     {
-        string                            line1           = reader.GetFieldValue<string>( nameof(Line1) );
-        string                            line2           = reader.GetFieldValue<string>( nameof(Line2) );
-        string                            city            = reader.GetFieldValue<string>( nameof(City) );
-        string                            stateOrProvince = reader.GetFieldValue<string>( nameof(StateOrProvince) );
-        string                            country         = reader.GetFieldValue<string>( nameof(Country) );
-        string                            postalCode      = reader.GetFieldValue<string>( nameof(PostalCode) );
-        string                            address         = reader.GetFieldValue<string>( nameof(Address) );
-        JsonObject? additionalData  = reader.GetAdditionalData();
-        bool                              isPrimary       = reader.GetFieldValue<bool>( nameof(IsPrimary) );
-        RecordID<AddressRecord>           id              = RecordID<AddressRecord>.ID( reader );
-        RecordID<UserRecord>?             createdBy       = RecordID<UserRecord>.CreatedBy( reader );
-        var                               ownerUserID     = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
-        var                               dateCreated     = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
-        var                               lastModified    = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
+        string                        line1           = reader.GetFieldValue<string>( nameof(Line1) );
+        string                        line2           = reader.GetFieldValue<string>( nameof(Line2) );
+        string                        city            = reader.GetFieldValue<string>( nameof(City) );
+        string                        stateOrProvince = reader.GetFieldValue<string>( nameof(StateOrProvince) );
+        string                        country         = reader.GetFieldValue<string>( nameof(Country) );
+        string                        postalCode      = reader.GetFieldValue<string>( nameof(PostalCode) );
+        string                        address         = reader.GetFieldValue<string>( nameof(Address) );
+        IDictionary<string, JToken?>? additionalData  = reader.GetAdditionalData();
+        bool                          isPrimary       = reader.GetFieldValue<bool>( nameof(IsPrimary) );
+        RecordID<AddressRecord>       id              = RecordID<AddressRecord>.ID( reader );
+        RecordID<UserRecord>?         createdBy       = RecordID<UserRecord>.CreatedBy( reader );
+        var                           ownerUserID     = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
+        var                           dateCreated     = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
+        var                           lastModified    = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
 
         var record = new AddressRecord( line1,
                                         line2,
@@ -177,18 +174,4 @@ public sealed record AddressRecord( [ property: ProtectedPersonalData ]  string 
         return base.Equals( other ) && Line1 == other.Line1 && Line2 == other.Line2 && City == other.City && PostalCode == other.PostalCode && StateOrProvince == other.StateOrProvince && Country == other.Country && Address == other.Address;
     }
     public override int GetHashCode() => HashCode.Combine( base.GetHashCode(), Line1, Line2, City, PostalCode, StateOrProvince, Country, Address );
-
-
-    [ Pure ] public static AddressRecord FromJson( string json ) => json.FromJson( JsonTypeInfo() );
-    [ Pure ]
-    public static JsonSerializerOptions JsonOptions( bool formatted ) => new()
-                                                                         {
-                                                                             WriteIndented    = formatted,
-                                                                             TypeInfoResolver = AddressRecordContext.Default,
-                                                                         };
-    [ Pure ] public static JsonTypeInfo<AddressRecord> JsonTypeInfo() => AddressRecordContext.Default.AddressRecord;
 }
-
-
-
-[ JsonSerializable( typeof(AddressRecord) ) ] public partial class AddressRecordContext : JsonSerializerContext { }
