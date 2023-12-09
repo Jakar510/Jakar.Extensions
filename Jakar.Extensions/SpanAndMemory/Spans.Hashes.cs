@@ -1,7 +1,9 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 11/30/2023  5:39 PM
 
+#if NET6_0_OR_GREATER
 using System.IO.Hashing;
+#endif
 
 
 
@@ -14,6 +16,7 @@ public static partial class Spans
 
 
 #if NET7_0_OR_GREATER
+
     [ Pure ]
     public static UInt128 Hash128( in ReadOnlySpan<bool> value, long seed = 0 )
     {
@@ -250,7 +253,6 @@ public static partial class Spans
 
 #if NET6_0_OR_GREATER
 
-
     [ Pure ]
     public static ulong Hash( in ReadOnlySpan<Half> value, long seed = 0 )
     {
@@ -271,8 +273,8 @@ public static partial class Spans
         }
         finally { _bytePool.Return( buffer ); }
     }
-  
-    
+
+
     [ Pure ]
     public static ulong Hash( in ReadOnlySpan<bool> value, long seed = 0 )
     {

@@ -4,7 +4,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata>
 		<id>Jakar.Extensions</id>
-		<version>7.5.1</version>
+		<version>7.5.2</version>
 		<title>Extension Library</title>
 		<authors>Tyler Stegmaier</authors>
 		<owners>Jakar510/Jakar</owners>
@@ -50,8 +50,6 @@
 							version="8.0.0" />
 				<dependency id="System.ComponentModel.Annotations"
 							version="5.0.0" />
-				<dependency id="System.IO.Hashing"
-							version="8.0.0" />
 				<dependency id="System.Net.Http"
 							version="4.3.4" />
 				<dependency id="System.Text.Encoding.CodePages"

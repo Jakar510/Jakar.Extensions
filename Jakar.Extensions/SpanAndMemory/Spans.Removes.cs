@@ -35,6 +35,8 @@ public static partial class Spans
         }
         finally { buffer.Dispose(); }
     }
+    
+    
     public static void Replace<T>(
     #if NET6_0_OR_GREATER
         scoped
@@ -80,6 +82,8 @@ public static partial class Spans
             }
         }
     }
+    
+    
     public static void Replace<T>(
     #if NET6_0_OR_GREATER
         scoped
@@ -163,6 +167,8 @@ public static partial class Spans
         Replace( value, oldValue, newValue, startValue, endValue, ref buffer, out int length );
         return MemoryMarshal.CreateSpan( ref buffer.GetPinnableReference(), length );
     }
+    
+    
     public static void Replace<T>(
     #if NET6_0_OR_GREATER
         scoped
@@ -234,6 +240,8 @@ public static partial class Spans
         RemoveAll( value, c, buffer, out int length );
         return MemoryMarshal.CreateReadOnlySpan( ref buffer.GetPinnableReference(), length );
     }
+    
+    
     public static ReadOnlySpan<T> RemoveAll<T>( this ReadOnlySpan<T> value,
                                             #if NET6_0_OR_GREATER
                                                 scoped
@@ -247,6 +255,8 @@ public static partial class Spans
         RemoveAll( value, temp, buffer, out int length );
         return MemoryMarshal.CreateReadOnlySpan( ref buffer.GetPinnableReference(), length );
     }
+    
+    
     public static Span<T> RemoveAll<T>( this Span<T> value,
                                     #if NET6_0_OR_GREATER
                                         scoped
@@ -298,6 +308,8 @@ public static partial class Spans
 
         length = value.Length - offset;
     }
+    
+    
     public static void RemoveAll<T>(
     #if NET6_0_OR_GREATER
         scoped

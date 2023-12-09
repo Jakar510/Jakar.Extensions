@@ -135,8 +135,6 @@
 						  Version="8.0.0" />
 		<PackageReference Include="System.ComponentModel.Annotations"
 						  Version="5.0.0" />
-		<PackageReference Include="System.IO.Hashing"
-						  Version="8.0.0" />
 		<PackageReference Include="System.Net.Http"
 						  Version="4.3.4" />
 		<PackageReference Include="System.Text.Encoding.CodePages"
@@ -165,5 +163,20 @@
 						  Version="2.0.31" />
 		<PackageReference Include="Sigil"
 						  Version="5.0.0" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)'=='net6.0'">
+		<PackageReference Include="System.IO.Hashing"
+						  Version="8.0.0" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)'=='net7.0'">
+		<PackageReference Include="System.IO.Hashing"
+						  Version="8.0.0" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)'=='net8.0'">
+		<PackageReference Include="System.IO.Hashing"
+						  Version="8.0.0" />
 	</ItemGroup>
 </Project>
