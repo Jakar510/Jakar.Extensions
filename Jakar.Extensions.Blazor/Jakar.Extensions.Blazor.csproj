@@ -36,7 +36,7 @@
 		<PackageReference Include="BlazorComponentUtilities" Version="1.8.0" />
 		<PackageReference Include="BlazorPro.BlazorSize" Version="6.2.2" />
 		<PackageReference Include="PanoramicData.Blazor" Version="8.0.2" />
-		<PackageReference Include="Radzen.Blazor" Version="4.23.1" />
+		<PackageReference Include="Radzen.Blazor" Version="4.23.2" />
 		<PackageReference Include="Jakar.Extensions" Version="7.5.2" />
 		<PackageReference Include="Hardware.Info" Version="100.0.1" />
 		<PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
