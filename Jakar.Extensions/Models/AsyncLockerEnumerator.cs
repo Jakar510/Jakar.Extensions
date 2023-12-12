@@ -4,12 +4,15 @@
 namespace Jakar.Extensions;
 
 
-public sealed class AsyncLockerEnumerator<TValue, TList> : IAsyncEnumerable<TValue>, IAsyncEnumerator<TValue>
-    where TList : ILockedCollection<TValue>
+public class AsyncLockerEnumerator<TValue, TCloser, TList> : IAsyncEnumerable<TValue>, IAsyncEnumerator<TValue>
+    where TList : ILockedCollection<TCloser, TValue>
+    where TCloser : IDisposable
 {
-    private const    int                    START_INDEX = -1;
+    private const    long                   DISPOSED     = 1;
+    private const    long                   NOT_DISPOSED = 0;
+    private const    int                    START_INDEX  = -1;
     private readonly TList                  _collection;
-    private          bool                   _isDisposed;
+    private          long                   _state = NOT_DISPOSED;
     private          CancellationToken      _token;
     private          int                    _index = START_INDEX;
     private          TValue?                _current;
@@ -25,15 +28,15 @@ public sealed class AsyncLockerEnumerator<TValue, TList> : IAsyncEnumerable<TVal
     }
     public ValueTask DisposeAsync()
     {
-        _isDisposed = true;
-        _cache      = default;
+        Interlocked.Exchange( ref _state, DISPOSED );
+        _cache = default;
         return default;
     }
 
 
     public async ValueTask<bool> MoveNextAsync()
     {
-        if ( _isDisposed ) { throw new ObjectDisposedException( nameof(AsyncLockerEnumerator<TValue, TList>) ); }
+        if ( Interlocked.Read( ref _state ) == DISPOSED ) { throw new ObjectDisposedException( nameof(AsyncLockerEnumerator<TValue, TCloser, TList>) ); }
 
         // ReSharper disable once InvertIf
         if ( _cache.IsEmpty )
@@ -42,13 +45,13 @@ public sealed class AsyncLockerEnumerator<TValue, TList> : IAsyncEnumerable<TVal
             _cache = await _collection.CopyAsync( _token );
         }
 
-        bool result = ILockedCollection<TValue>.MoveNext( ref _index, _cache.Span, out _current );
+        bool result = ILockedCollection<TCloser, TValue>.MoveNext( ref _index, _cache.Span, out _current );
         if ( result is false ) { Reset(); }
 
         return result;
     }
     IAsyncEnumerator<TValue> IAsyncEnumerable<TValue>.GetAsyncEnumerator( CancellationToken token ) => GetAsyncEnumerator( token );
-    public AsyncLockerEnumerator<TValue, TList> GetAsyncEnumerator( CancellationToken token = default )
+    public AsyncLockerEnumerator<TValue, TCloser, TList> GetAsyncEnumerator( CancellationToken token = default )
     {
         Reset();
         _token = token;
@@ -56,7 +59,7 @@ public sealed class AsyncLockerEnumerator<TValue, TList> : IAsyncEnumerable<TVal
     }
     public void Reset()
     {
-        if ( _isDisposed ) { throw new ObjectDisposedException( nameof(AsyncLockerEnumerator<TValue, TList>) ); }
+        if ( Interlocked.Read( ref _state ) == DISPOSED ) { throw new ObjectDisposedException( nameof(AsyncLockerEnumerator<TValue, TCloser, TList>) ); }
 
         _cache   = default;
         _current = default;

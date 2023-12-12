@@ -42,6 +42,42 @@ public static partial class Spans
 
 
     [ Pure ]
+    public static bool All<T>( this Span<T> values, Func<T, bool> selector )
+    {
+        ReadOnlySpan<T> span = values;
+        return span.All( selector );
+    }
+    [ Pure ]
+    public static bool All<T>( this ReadOnlySpan<T> values, Func<T, bool> selector )
+    {
+        foreach ( T value in values )
+        {
+            if ( selector( value ) is false ) { return false; }
+        }
+
+        return true;
+    }
+
+
+    [ Pure ]
+    public static bool Any<T>( this Span<T> values, Func<T, bool> selector )
+    {
+        ReadOnlySpan<T> span = values;
+        return span.Any( selector );
+    }
+    [ Pure ]
+    public static bool Any<T>( this ReadOnlySpan<T> values, Func<T, bool> selector )
+    {
+        foreach ( T value in values )
+        {
+            if ( selector( value ) ) { return true; }
+        }
+
+        return false;
+    }
+
+
+    [ Pure ]
     public static T Single<T>( this Span<T> values, Func<T, bool> selector )
     {
         ReadOnlySpan<T> span = values;

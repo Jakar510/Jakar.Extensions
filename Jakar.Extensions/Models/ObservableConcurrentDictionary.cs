@@ -87,7 +87,7 @@ public class ObservableConcurrentDictionary<TKey, TValue> : CollectionAlerts<Key
     }
 
 
-    public bool TryGetValue( TKey key, [ NotNullWhen( true ) ] out TValue? value ) => _dictionary.TryGetValue( key, out value );
+    public bool TryGetValue( TKey key, [ NotNullWhen( true ) ] out TValue? value ) => _dictionary.TryGetValue( key, out value ) && value is not null;
 
 
     public bool ContainsValue( TValue                value ) => _dictionary.Values.Contains( value );

@@ -4,8 +4,9 @@
 namespace Jakar.Extensions;
 
 
-public struct LockerEnumerator<TValue, TList> : IEnumerator<TValue>, IEnumerable<TValue>
-    where TList : ILockedCollection<TValue>
+public struct LockerEnumerator<TValue, TCloser, TList> : IEnumerator<TValue>, IEnumerable<TValue>
+    where TList : ILockedCollection<TCloser, TValue>
+    where TCloser : IDisposable
 {
     private const    int                    START_INDEX = -1;
     private readonly TList                  _collection;
@@ -25,7 +26,7 @@ public struct LockerEnumerator<TValue, TList> : IEnumerator<TValue>, IEnumerable
 
     public bool MoveNext()
     {
-        if ( _collection is null ) { throw new ObjectDisposedException( nameof(LockerEnumerator<TValue, TList>) ); }
+        if ( _collection is null ) { throw new ObjectDisposedException( nameof(LockerEnumerator<TValue, TCloser, TList>) ); }
 
         // ReSharper disable once InvertIf
         if ( _cache.IsEmpty )
@@ -34,15 +35,15 @@ public struct LockerEnumerator<TValue, TList> : IEnumerator<TValue>, IEnumerable
             _cache = _collection.Copy();
         }
 
-        bool result = ILockedCollection<TValue>.MoveNext( ref _index, _cache.Span, out _current );
+        bool result = ILockedCollection<TCloser, TValue>.MoveNext( ref _index, _cache.Span, out _current );
         if ( result is false ) { Reset(); }
 
         return result;
     }
     public void Reset()
     {
-        if ( _collection is null ) { throw new ObjectDisposedException( nameof(LockerEnumerator<TValue, TList>) ); }
-        
+        if ( _collection is null ) { throw new ObjectDisposedException( nameof(LockerEnumerator<TValue, TCloser, TList>) ); }
+
         _cache   = default;
         _current = default;
         Interlocked.Exchange( ref _index, START_INDEX );

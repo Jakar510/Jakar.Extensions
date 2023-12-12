@@ -10,11 +10,12 @@
 namespace Jakar.Extensions;
 
 
-public interface ILockedCollection<TValue> : IReadOnlyCollection<TValue>
+public interface ILockedCollection<TCloser, TValue> : IReadOnlyCollection<TValue>
+    where TCloser : IDisposable
 {
-    ILocker.Closer            AcquireLock();
-    ILocker.Closer            AcquireLock( in CancellationToken   token );
-    ValueTask<ILocker.Closer> AcquireLockAsync( CancellationToken token );
+    TCloser            AcquireLock();
+    TCloser            AcquireLock( in CancellationToken   token );
+    ValueTask<TCloser> AcquireLockAsync( CancellationToken token );
 
 
     ReadOnlyMemory<TValue>                               Copy();
@@ -35,16 +36,20 @@ public interface ILockedCollection<TValue> : IReadOnlyCollection<TValue>
 
 
 
-public interface ILocker
+public interface ILocker<TCloser>
+    where TCloser : IDisposable
 {
-    bool              IsTaken { get; }
-    TimeSpan?         TimeOut { get; }
-    Closer            Enter( CancellationToken      token = default );
-    ValueTask<Closer> EnterAsync( CancellationToken token = default );
-    void              Exit();
+    bool               IsTaken { get; }
+    TimeSpan?          TimeOut { get; }
+    TCloser            Enter( CancellationToken      token = default );
+    ValueTask<TCloser> EnterAsync( CancellationToken token = default );
+    void               Exit();
+}
 
 
 
+public interface ILocker : ILocker<ILocker.Closer>
+{
     public readonly record struct Closer( ILocker Locker ) : IDisposable
     {
         public void Dispose() => Locker.Exit();
