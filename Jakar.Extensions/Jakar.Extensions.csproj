@@ -30,6 +30,10 @@
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<PackageIcon>icon.png</PackageIcon>
 		<PackageLicenseFile>W:\WorkSpace\Public\Jakar.Extensions\LICENSE.txt</PackageLicenseFile>
+		<StripSymbols>false</StripSymbols>
+		<IsAotCompatible>true</IsAotCompatible>
+		<OptimizationPreference>Speed</OptimizationPreference>
+		<EventSourceSupport>true</EventSourceSupport>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard2.1|AnyCPU'">
@@ -46,13 +50,6 @@
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net6.0|AnyCPU'">
 		<DefineConstants>$(DefineConstants);__WINDOWS__;__LINUX__;__IOS__;__ANDROID__;__MACOS__</DefineConstants>
-	</PropertyGroup>
-
-	<PropertyGroup>
-		<IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">true</IsAotCompatible>
-		<IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net7.0'))">true</IsAotCompatible>
-		<IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))">true</IsAotCompatible>
-		<IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netstandard2.1'))">true</IsAotCompatible>
 	</PropertyGroup>
 
 	<ItemGroup>
