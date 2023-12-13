@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>netstandard2.1</TargetFramework>
+		<ProduceReferenceAssembly>true</ProduceReferenceAssembly>
+		<ProduceReferenceAssemblyInOutDir>true</ProduceReferenceAssemblyInOutDir>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<!--<PackageReference Include="Jakar.Extensions" Version="7.0.0" />-->
+		<PackageReference Include="Xamarin.Forms" Version="5.0.0.2622" />
+		<PackageReference Include="Xamarin.Essentials" Version="1.7.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\..\Jakar.Extensions\Jakar.Extensions.csproj" />
+	</ItemGroup>
+
+</Project>
