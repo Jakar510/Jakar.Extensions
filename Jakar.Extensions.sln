@@ -13,7 +13,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nuget", "nuget", "{07C27764
 		nuget\Jakar.Extensions.Hosting.nuspec = nuget\Jakar.Extensions.Hosting.nuspec
 		nuget\Jakar.Extensions.Maui.nuspec = nuget\Jakar.Extensions.Maui.nuspec
 		nuget\Jakar.Extensions.nuspec = nuget\Jakar.Extensions.nuspec
-		nuget\Jakar.Extensions.Xamarin.Forms.nuspec = nuget\Jakar.Extensions.Xamarin.Forms.nuspec
 		nuget\Jakar.Xml.nuspec = nuget\Jakar.Xml.nuspec
 		nuget\LICENSE.txt = nuget\LICENSE.txt
 		nuget\nuget.exe = nuget\nuget.exe
@@ -93,7 +92,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestAppIos.Android", "TestA
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestAppIos.iOS", "TestAppIos\TestAppIos.iOS\TestAppIos.iOS.csproj", "{9D863652-BE16-4B15-90F6-81B228224A10}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestAppIos", "TestAppIos\TestAppIos\TestAppIos.csproj", "{AA213E33-FC83-4D45-B483-B30041CBCB54}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestAppIos", "TestAppIos\TestAppIos\TestAppIos.csproj", "{AA213E33-FC83-4D45-B483-B30041CBCB54}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TestApps", "TestApps", "{6B6D59C6-5752-46EA-8FAE-FAACFD2A1790}"
 EndProject
