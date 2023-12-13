@@ -2,28 +2,16 @@ namespace Jakar.Extensions;
 
 
 /// <summary>
-/// <para> <see href="https://stackoverflow.com/a/54733415/9530917"> This type of CollectionView does not support changes to its SourceCollection from a thread different from the Dispatcher thread </see> </para>
-/// <para> <see href="https://stackoverflow.com/a/14602121/9530917"> How do I update an ObservableCollection via a worker thread? </see> </para>
+///     <para> <see href="https://stackoverflow.com/a/54733415/9530917"> This type of CollectionView does not support changes to its SourceCollection from a thread different from the Dispatcher thread </see> </para>
+///     <para> <see href="https://stackoverflow.com/a/14602121/9530917"> How do I update an ObservableCollection via a worker thread? </see> </para>
 /// </summary>
-/// <typeparam name="TValue">
-/// </typeparam>
+/// <typeparam name="TValue"> </typeparam>
 [ Serializable ]
-public class ConcurrentObservableCollection<TValue> : CollectionAlerts<TValue>, ILockedCollection<ConcurrentObservableCollection<TValue>.Closer, TValue>, IAsyncEnumerable<TValue>, IList<TValue>, IReadOnlyList<TValue>, IList, IDisposable
+public class ConcurrentObservableCollection<TValue> : CollectionAlerts<TValue>, ILockedCollection<TValue>, IAsyncEnumerable<TValue>, IList<TValue>, IReadOnlyList<TValue>, IList, IDisposable
 {
     protected readonly List<TValue>      _values;
-    protected readonly SemaphoreSlim     _lock = new(1);
+    protected readonly Locker            _lock = Locker.Default;
     protected          IComparer<TValue> _comparer;
-
-
-    public AsyncLockerEnumerator AsyncValues => new(this);
-
-    public sealed override int Count
-    {
-        get
-        {
-            using ( AcquireLock() ) { return _values.Count; }
-        }
-    }
 
     bool IList.IsFixedSize
     {
@@ -57,6 +45,33 @@ public class ConcurrentObservableCollection<TValue> : CollectionAlerts<TValue>, 
         }
     }
 
+
+    public AsyncLockerEnumerator AsyncValues => new(this);
+
+    public sealed override int Count
+    {
+        get
+        {
+            using ( AcquireLock() ) { return _values.Count; }
+        }
+    }
+
+    public Locker Lock
+    {
+        get => _lock;
+        init => _lock = value;
+    }
+
+    public LockerEnumerator<TValue> Values => new(this);
+
+    object ICollection.SyncRoot
+    {
+        get
+        {
+            using ( AcquireLock() ) { return ((IList)_values).SyncRoot; }
+        }
+    }
+
     object? IList.this[ int index ]
 
     {
@@ -86,22 +101,6 @@ public class ConcurrentObservableCollection<TValue> : CollectionAlerts<TValue>, 
             }
         }
     }
-
-    public SemaphoreSlim Lock
-    {
-        get => _lock;
-        init => _lock = value;
-    }
-
-    object ICollection.SyncRoot
-    {
-        get
-        {
-            using ( AcquireLock() ) { return ((IList)_values).SyncRoot; }
-        }
-    }
-
-    public LockerEnumerator<TValue, Closer, ConcurrentObservableCollection<TValue>> Values => new(this);
 
 
     public ConcurrentObservableCollection() : this( Comparer<TValue>.Default ) { }
@@ -800,40 +799,20 @@ public class ConcurrentObservableCollection<TValue> : CollectionAlerts<TValue>, 
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
-    public Closer AcquireLock()
-    {
-        _lock.Wait();
-        return new Closer( _lock );
-    }
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public IDisposable            AcquireLock()                               => _lock.Enter();
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public IDisposable            AcquireLock( in CancellationToken   token ) => _lock.Enter( token );
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public ValueTask<IDisposable> AcquireLockAsync( CancellationToken token ) => _lock.EnterAsync( token );
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
-    public Closer AcquireLock( in CancellationToken token )
-    {
-        _lock.Wait( token );
-        return new Closer( _lock );
-    }
-
-
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
-    public async ValueTask<Closer> AcquireLockAsync( CancellationToken token )
-    {
-        await _lock.WaitAsync( token );
-        return new Closer( _lock );
-    }
-
-
-    protected ReadOnlyMemory<TValue> FilteredValues() => _values.Where( Filter ).ToArray();
-
-    ReadOnlyMemory<TValue> ILockedCollection<Closer, TValue>.Copy() => Copy();
+    protected ReadOnlyMemory<TValue>                 FilteredValues() => _values.Where( Filter ).ToArray();
+    ReadOnlyMemory<TValue> ILockedCollection<TValue>.Copy()           => Copy();
 
     protected ReadOnlyMemory<TValue> Copy()
     {
         using ( AcquireLock() ) { return FilteredValues(); }
     }
 
-    ConfiguredValueTaskAwaitable<ReadOnlyMemory<TValue>> ILockedCollection<Closer, TValue>.CopyAsync( CancellationToken token ) => CopyAsync( token ).ConfigureAwait( false );
+    ConfiguredValueTaskAwaitable<ReadOnlyMemory<TValue>> ILockedCollection<TValue>.CopyAsync( CancellationToken token ) => CopyAsync( token ).ConfigureAwait( false );
 
     protected async ValueTask<ReadOnlyMemory<TValue>> CopyAsync( CancellationToken token )
     {
@@ -842,14 +821,7 @@ public class ConcurrentObservableCollection<TValue> : CollectionAlerts<TValue>, 
 
 
 
-    public readonly record struct Closer( SemaphoreSlim Locker ) : IDisposable
-    {
-        public void Dispose() => Locker.Release();
-    }
-
-
-
-    public sealed class AsyncLockerEnumerator : AsyncLockerEnumerator<TValue, Closer, ConcurrentObservableCollection<TValue>>
+    public sealed class AsyncLockerEnumerator : AsyncLockerEnumerator<TValue>
     {
         public AsyncLockerEnumerator( ConcurrentObservableCollection<TValue> collection ) : base( collection ) { }
     }

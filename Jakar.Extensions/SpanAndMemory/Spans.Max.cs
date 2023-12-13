@@ -1,5 +1,5 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
-// 03/29/2023  6:59 PM
+// double.MinValue3/29/2double.MinValue23  6:59 PM
 
 namespace Jakar.Extensions;
 
@@ -31,7 +31,7 @@ public static partial class Spans
     [ Pure ]
     public static double Max( this ReadOnlySpan<double> value )
     {
-        double result = 0;
+        double result = double.MinValue;
         foreach ( double x in value ) { result = Math.Max( result, x ); }
 
         return result;
@@ -39,7 +39,7 @@ public static partial class Spans
     [ Pure ]
     public static float Max( this ReadOnlySpan<float> value )
     {
-        float result = 0;
+        float result = float.MinValue;
         foreach ( float x in value ) { result = Math.Max( result, x ); }
 
         return result;
@@ -47,7 +47,7 @@ public static partial class Spans
     [ Pure ]
     public static long Max( this ReadOnlySpan<long> value )
     {
-        long result = 0;
+        long result = long.MinValue;
         foreach ( long x in value ) { result = Math.Max( result, x ); }
 
         return result;
@@ -55,7 +55,7 @@ public static partial class Spans
     [ Pure ]
     public static ulong Max( this ReadOnlySpan<ulong> value )
     {
-        ulong result = 0;
+        ulong result = ulong.MinValue;
         foreach ( ulong x in value ) { result = Math.Max( result, x ); }
 
         return result;
@@ -63,7 +63,7 @@ public static partial class Spans
     [ Pure ]
     public static int Max( this ReadOnlySpan<int> value )
     {
-        int result = 0;
+        int result = int.MinValue;
         foreach ( int x in value ) { result = Math.Max( result, x ); }
 
         return result;
@@ -71,7 +71,7 @@ public static partial class Spans
     [ Pure ]
     public static uint Max( this ReadOnlySpan<uint> value )
     {
-        uint result = 0;
+        uint result = uint.MinValue;
         foreach ( uint x in value ) { result = Math.Max( result, x ); }
 
         return result;
@@ -79,7 +79,7 @@ public static partial class Spans
     [ Pure ]
     public static short Max( this ReadOnlySpan<short> value )
     {
-        short result = 0;
+        short result = short.MinValue;
         foreach ( short x in value ) { result = Math.Max( result, x ); }
 
         return result;
@@ -87,7 +87,7 @@ public static partial class Spans
     [ Pure ]
     public static ushort Max( this ReadOnlySpan<ushort> value )
     {
-        ushort result = 0;
+        ushort result = ushort.MinValue;
         foreach ( ushort x in value ) { result = Math.Max( result, x ); }
 
         return result;
@@ -97,7 +97,7 @@ public static partial class Spans
     [ Pure ]
     public static int Max<T>( this ReadOnlySpan<T> value, Func<T, int> selector )
     {
-        int result = 0;
+        int result = int.MinValue;
         foreach ( T x in value ) { result = Math.Max( result, selector( x ) ); }
 
         return result;
@@ -105,7 +105,7 @@ public static partial class Spans
     [ Pure ]
     public static uint Max<T>( this ReadOnlySpan<T> value, Func<T, uint> selector )
     {
-        uint result = 0;
+        uint result = uint.MinValue;
         foreach ( T x in value ) { result = Math.Max( result, selector( x ) ); }
 
         return result;
@@ -113,7 +113,7 @@ public static partial class Spans
     [ Pure ]
     public static long Max<T>( this ReadOnlySpan<T> value, Func<T, long> selector )
     {
-        long result = 0;
+        long result = long.MinValue;
         foreach ( T x in value ) { result = Math.Max( result, selector( x ) ); }
 
         return result;
@@ -121,7 +121,7 @@ public static partial class Spans
     [ Pure ]
     public static ulong Max<T>( this ReadOnlySpan<T> value, Func<T, ulong> selector )
     {
-        ulong result = 0;
+        ulong result = ulong.MinValue;
         foreach ( T x in value ) { result = Math.Max( result, selector( x ) ); }
 
         return result;
@@ -129,7 +129,7 @@ public static partial class Spans
     [ Pure ]
     public static float Max<T>( this ReadOnlySpan<T> value, Func<T, float> selector )
     {
-        float result = 0;
+        float result = float.MinValue;
         foreach ( T x in value ) { result = Math.Max( result, selector( x ) ); }
 
         return result;
@@ -137,7 +137,7 @@ public static partial class Spans
     [ Pure ]
     public static double Max<T>( this ReadOnlySpan<T> value, Func<T, double> selector )
     {
-        double result = 0;
+        double result = double.MinValue;
         foreach ( T x in value ) { result = Math.Max( result, selector( x ) ); }
 
         return result;

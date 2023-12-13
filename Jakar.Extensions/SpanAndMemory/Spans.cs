@@ -172,4 +172,90 @@ public static partial class Spans
 
         return true;
     }
+
+
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static Span<T> CreateSpan<T>( int size ) => AsyncLinq.GetArray<T>( size );
+    public static Span<T> CreateValue<T>( int size )
+        where T : unmanaged
+    {
+        if ( size > 250 ) { return CreateSpan<T>( size ); }
+
+        Span<T> span = stackalloc T[size];
+        return MemoryMarshal.CreateSpan( ref span.GetPinnableReference(), span.Length );
+    }
+    public static Span<T> Create<T>( T arg0 )
+    {
+    #if NETSTANDARD2_1
+        Span<T> span = new T[1]
+                       {
+                           arg0
+                       };
+    #else
+        Span<T> span = [arg0];
+
+    #endif
+        return MemoryMarshal.CreateSpan( ref span.GetPinnableReference(), span.Length );
+    }
+    public static Span<T> Create<T>( T arg0, T arg1 )
+    {
+    #if NETSTANDARD2_1
+        Span<T> span = new T[2]
+                       {
+                           arg0,
+                           arg1
+                       };
+    #else
+        Span<T> span = [arg0, arg1];
+
+    #endif
+        return MemoryMarshal.CreateSpan( ref span.GetPinnableReference(), span.Length );
+    }
+    public static Span<T> Create<T>( T arg0, T arg1, T arg2 )
+    {
+    #if NETSTANDARD2_1
+        Span<T> span = new T[3]
+                       {
+                           arg0,
+                           arg1,
+                           arg2
+                       };
+    #else
+        Span<T> span = [arg0, arg1, arg2];
+
+    #endif
+        return MemoryMarshal.CreateSpan( ref span.GetPinnableReference(), span.Length );
+    }
+    public static Span<T> Create<T>( T arg0, T arg1, T arg2, T arg3 )
+    {
+    #if NETSTANDARD2_1
+        Span<T> span = new T[4]
+                       {
+                           arg0,
+                           arg1,
+                           arg2,
+                           arg3
+                       };
+    #else
+        Span<T> span = [arg0, arg1, arg2, arg3];
+
+    #endif
+        return MemoryMarshal.CreateSpan( ref span.GetPinnableReference(), span.Length );
+    }
+    public static Span<T> Create<T>( T arg0, T arg1, T arg2, T arg3, T arg4 )
+    {
+    #if NETSTANDARD2_1
+        Span<T> span = new T[5]
+                       {
+                           arg0,
+                           arg1,
+                           arg2,
+                           arg3,
+                           arg4
+                       };
+    #else
+        Span<T> span = [arg0, arg1, arg2, arg3, arg4];
+
+    #endif
+        return MemoryMarshal.CreateSpan( ref span.GetPinnableReference(), span.Length );
+    }
 }

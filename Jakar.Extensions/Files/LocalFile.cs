@@ -18,8 +18,31 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     protected FileInfo? _info;
 
 
-    public static Equalizer<LocalFile> Equalizer => Equalizer<LocalFile>.Default;
-    public static Sorter<LocalFile>    Sorter    => Sorter<LocalFile>.Default;
+    public static Equalizer<LocalFile> Equalizer    => Equalizer<LocalFile>.Default;
+    public static Sorter<LocalFile>    Sorter       => Sorter<LocalFile>.Default;
+    public        bool                 DoesNotExist => !Exists;
+    public        bool                 Exists       => Info.Exists;
+    bool TempFile.ITempFile.IsTemporary
+    {
+        get => _isTemporary;
+        set => _isTemporary = value;
+    }
+    public                Encoding FileEncoding { get; init; } = Encoding.Default;
+    [ JsonIgnore ] public FileInfo Info         => _info ??= new FileInfo( FullPath );
+
+    [ JsonIgnore ]
+    public LocalDirectory? Parent
+    {
+        get
+        {
+            DirectoryInfo? parent = Directory.GetParent( FullPath );
+
+            return parent is null
+                       ? default
+                       : new LocalDirectory( parent );
+        }
+    }
+    public MimeType Mime => Extension.FromExtension();
 
 
     public string ContentType
@@ -35,34 +58,11 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
             }
         }
     }
-    public                string?  DirectoryName => Info.DirectoryName;
-    public                bool     DoesNotExist  => !Exists;
-    public                bool     Exists        => Info.Exists;
-    public                string   Extension     => Info.Extension;
-    public                Encoding FileEncoding  { get; init; } = Encoding.Default;
-    public                string   FullPath      { get; init; }
-    [ JsonIgnore ] public FileInfo Info          => _info ??= new FileInfo( FullPath );
-    bool TempFile.ITempFile.IsTemporary
-    {
-        get => _isTemporary;
-        set => _isTemporary = value;
-    }
-    public MimeType Mime => Extension.FromExtension();
-    public string   Name => Info.Name;
-
-    [ JsonIgnore ]
-    public LocalDirectory? Parent
-    {
-        get
-        {
-            DirectoryInfo? parent = Directory.GetParent( FullPath );
-
-            return parent is null
-                       ? default
-                       : new LocalDirectory( parent );
-        }
-    }
-    public string Root => Directory.GetDirectoryRoot( FullPath );
+    public string  Extension     => Info.Extension;
+    public string  FullPath      { get; init; }
+    public string  Name          => Info.Name;
+    public string  Root          => Directory.GetDirectoryRoot( FullPath );
+    public string? DirectoryName => Info.DirectoryName;
 
 
     public LocalFile() => FullPath = string.Empty;
@@ -933,6 +933,10 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
 
 
 
+    // ---------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
     [ Serializable ]
     public class Deque : MultiDeque<LocalFile>
     {
@@ -1039,10 +1043,6 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
         public Set( int                    capacity ) : base( capacity ) { }
         public Set( IEnumerable<LocalFile> items ) : base( items ) { }
     }
-
-
-
-    // ---------------------------------------------------------------------------------------------------------------------------------------------------
 
 
 

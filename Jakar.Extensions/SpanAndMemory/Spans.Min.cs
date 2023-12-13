@@ -31,7 +31,7 @@ public static partial class Spans
     [ Pure ]
     public static double Min( this ReadOnlySpan<double> value )
     {
-        double result = 0;
+        double result = double.MaxValue;
         foreach ( double x in value ) { result = Math.Min( result, x ); }
 
         return result;
@@ -39,7 +39,7 @@ public static partial class Spans
     [ Pure ]
     public static float Min( this ReadOnlySpan<float> value )
     {
-        float result = 0;
+        float result = float.MaxValue;
         foreach ( float x in value ) { result = Math.Min( result, x ); }
 
         return result;
@@ -47,7 +47,7 @@ public static partial class Spans
     [ Pure ]
     public static long Min( this ReadOnlySpan<long> value )
     {
-        long result = 0;
+        long result = long.MaxValue;
         foreach ( long x in value ) { result = Math.Min( result, x ); }
 
         return result;
@@ -55,7 +55,7 @@ public static partial class Spans
     [ Pure ]
     public static ulong Min( this ReadOnlySpan<ulong> value )
     {
-        ulong result = 0;
+        ulong result = ulong.MaxValue;
         foreach ( ulong x in value ) { result = Math.Min( result, x ); }
 
         return result;
@@ -63,7 +63,7 @@ public static partial class Spans
     [ Pure ]
     public static int Min( this ReadOnlySpan<int> value )
     {
-        int result = 0;
+        int result = int.MaxValue;
         foreach ( int x in value ) { result = Math.Min( result, x ); }
 
         return result;
@@ -71,7 +71,7 @@ public static partial class Spans
     [ Pure ]
     public static uint Min( this ReadOnlySpan<uint> value )
     {
-        uint result = 0;
+        uint result = uint.MaxValue;
         foreach ( uint x in value ) { result = Math.Min( result, x ); }
 
         return result;
@@ -79,7 +79,7 @@ public static partial class Spans
     [ Pure ]
     public static short Min( this ReadOnlySpan<short> value )
     {
-        short result = 0;
+        short result = short.MaxValue;
         foreach ( short x in value ) { result = Math.Min( result, x ); }
 
         return result;
@@ -87,7 +87,7 @@ public static partial class Spans
     [ Pure ]
     public static ushort Min( this ReadOnlySpan<ushort> value )
     {
-        ushort result = 0;
+        ushort result = ushort.MaxValue;
         foreach ( ushort x in value ) { result = Math.Min( result, x ); }
 
         return result;
@@ -97,7 +97,7 @@ public static partial class Spans
     [ Pure ]
     public static int Min<T>( this ReadOnlySpan<T> value, Func<T, int> selector )
     {
-        int result = 0;
+        int result = int.MaxValue;
         foreach ( T x in value ) { result = Math.Min( result, selector( x ) ); }
 
         return result;
@@ -105,7 +105,7 @@ public static partial class Spans
     [ Pure ]
     public static uint Min<T>( this ReadOnlySpan<T> value, Func<T, uint> selector )
     {
-        uint result = 0;
+        uint result = uint.MaxValue;
         foreach ( T x in value ) { result = Math.Min( result, selector( x ) ); }
 
         return result;
@@ -113,7 +113,7 @@ public static partial class Spans
     [ Pure ]
     public static long Min<T>( this ReadOnlySpan<T> value, Func<T, long> selector )
     {
-        long result = 0;
+        long result = long.MaxValue;
         foreach ( T x in value ) { result = Math.Min( result, selector( x ) ); }
 
         return result;
@@ -121,7 +121,7 @@ public static partial class Spans
     [ Pure ]
     public static ulong Min<T>( this ReadOnlySpan<T> value, Func<T, ulong> selector )
     {
-        ulong result = 0;
+        ulong result = ulong.MaxValue;
         foreach ( T x in value ) { result = Math.Min( result, selector( x ) ); }
 
         return result;
@@ -129,7 +129,7 @@ public static partial class Spans
     [ Pure ]
     public static float Min<T>( this ReadOnlySpan<T> value, Func<T, float> selector )
     {
-        float result = 0;
+        float result = float.MaxValue;
         foreach ( T x in value ) { result = Math.Min( result, selector( x ) ); }
 
         return result;
@@ -137,7 +137,7 @@ public static partial class Spans
     [ Pure ]
     public static double Min<T>( this ReadOnlySpan<T> value, Func<T, double> selector )
     {
-        double result = 0;
+        double result = double.MaxValue;
         foreach ( T x in value ) { result = Math.Min( result, selector( x ) ); }
 
         return result;

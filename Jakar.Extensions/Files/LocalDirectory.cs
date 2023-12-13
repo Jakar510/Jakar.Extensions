@@ -4,8 +4,9 @@
 [ Serializable ]
 public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComparable<LocalDirectory>, IComparable, TempFile.ITempFile, IAsyncDisposable
 {
-    private   bool           _isTemporary;
-    protected DirectoryInfo? _info;
+    private       bool                      _isTemporary;
+    protected     DirectoryInfo?            _info;
+    public static Equalizer<LocalDirectory> Equalizer => Equalizer<LocalDirectory>.Default;
 
 
     /// <summary> Gets or sets the application's fully qualified path of the current working directory. </summary>
@@ -14,24 +15,21 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
         get => new(Environment.CurrentDirectory);
         set => Environment.CurrentDirectory = Path.GetFullPath( value.FullPath );
     }
-    public static Equalizer<LocalDirectory> Equalizer => Equalizer<LocalDirectory>.Default;
-    public static Sorter<LocalDirectory>    Sorter    => Sorter<LocalDirectory>.Default;
+    public static Sorter<LocalDirectory> Sorter       => Sorter<LocalDirectory>.Default;
+    public        bool                   DoesNotExist => !Exists;
+    public        bool                   Exists       => Info.Exists;
+
+    bool TempFile.ITempFile.IsTemporary
+    {
+        get => _isTemporary;
+        set => _isTemporary = value;
+    }
 
 
     public DateTime CreationTimeUtc
     {
         get => Directory.GetCreationTimeUtc( FullPath );
         set => Directory.SetCreationTimeUtc( FullPath, value );
-    }
-    public                bool          DoesNotExist => !Exists;
-    public                bool          Exists       => Info.Exists;
-    public                string        FullPath     { get; init; }
-    [ JsonIgnore ] public DirectoryInfo Info         => _info ??= new DirectoryInfo( FullPath );
-
-    bool TempFile.ITempFile.IsTemporary
-    {
-        get => _isTemporary;
-        set => _isTemporary = value;
     }
     public DateTime LastAccessTimeUtc
     {
@@ -43,9 +41,11 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
         get => Directory.GetLastWriteTimeUtc( FullPath );
         set => Directory.SetLastWriteTimeUtc( FullPath, value );
     }
-    public                string          Name   => Info.Name;
-    [ JsonIgnore ] public LocalDirectory? Parent => GetParent();
-    public                string          Root   => Directory.GetDirectoryRoot( FullPath );
+    [ JsonIgnore ] public DirectoryInfo   Info     => _info ??= new DirectoryInfo( FullPath );
+    [ JsonIgnore ] public LocalDirectory? Parent   => GetParent();
+    public                string          FullPath { get; init; }
+    public                string          Name     => Info.Name;
+    public                string          Root     => Directory.GetDirectoryRoot( FullPath );
 
 
     public LocalDirectory() => FullPath = string.Empty;
@@ -70,12 +70,13 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     }
 
 
-    public static implicit operator Collection( LocalDirectory                     directory ) => new(directory.GetSubFolders());
-    public static implicit operator LocalFile.Collection( LocalDirectory           directory ) => new(directory.GetFiles());
-    public static implicit operator ConcurrentCollection( LocalDirectory           directory ) => new(directory.GetSubFolders());
-    public static implicit operator LocalFile.ConcurrentCollection( LocalDirectory directory ) => new(directory.GetFiles());
-    public static implicit operator Items( LocalDirectory                          directory ) => new(directory.GetSubFolders());
-    public static implicit operator LocalFile.Items( LocalDirectory                directory ) => new(directory.GetFiles());
+    public static implicit operator Collection( LocalDirectory           directory ) => new(directory.GetSubFolders());
+    public static implicit operator LocalFile.Collection( LocalDirectory directory ) => new(directory.GetFiles());
+
+    // public static implicit operator ConcurrentCollection( LocalDirectory directory ) => new(directory.GetSubFolders());
+    // public static implicit operator LocalFile.ConcurrentCollection( LocalDirectory directory ) => new(directory.GetFiles());
+    public static implicit operator Items( LocalDirectory           directory ) => new(directory.GetSubFolders());
+    public static implicit operator LocalFile.Items( LocalDirectory directory ) => new(directory.GetFiles());
 
     public static LocalDirectory AppData( string subPath )
     {
@@ -124,7 +125,8 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     public static implicit operator Set( LocalDirectory                directory ) => new(directory.GetSubFolders());
     public static implicit operator LocalFile.Set( LocalDirectory      directory ) => new(directory.GetFiles());
     public static implicit operator Watcher( LocalDirectory            directory ) => new(directory);
-    public static implicit operator LocalFile.Watcher( LocalDirectory  directory ) => new(new Watcher( directory ));
+
+    // public static implicit operator LocalFile.Watcher( LocalDirectory  directory ) => new(new Watcher( directory ));
 
 
     // ---------------------------------------------------------------------------------------------------------------------------------------------------

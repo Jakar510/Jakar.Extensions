@@ -4,21 +4,19 @@
 namespace Jakar.Extensions;
 
 
-public struct LockerEnumerator<TValue, TCloser, TList> : IEnumerator<TValue>, IEnumerable<TValue>
-    where TList : ILockedCollection<TCloser, TValue>
-    where TCloser : IDisposable
+public struct LockerEnumerator<TValue> : IEnumerator<TValue>, IEnumerable<TValue>
 {
-    private const    int                    START_INDEX = -1;
-    private readonly TList                  _collection;
-    private          int                    _index   = START_INDEX;
-    private          TValue?                _current = default;
-    private          ReadOnlyMemory<TValue> _cache   = default;
-    public readonly  TValue                 Current        => _current ?? throw new NullReferenceException( nameof(_current) );
-    readonly         object IEnumerator.    Current        => Current  ?? throw new NullReferenceException( nameof(_current) );
-    internal         bool                   ShouldContinue => ++_index < _cache.Length;
+    private const    int                                START_INDEX = -1;
+    private readonly ILockedCollection<TValue> _collection;
+    private          int                                _index   = START_INDEX;
+    private          TValue?                            _current = default;
+    private          ReadOnlyMemory<TValue>             _cache   = default;
+    public readonly  TValue                             Current        => _current ?? throw new NullReferenceException( nameof(_current) );
+    readonly         object IEnumerator.                Current        => Current  ?? throw new NullReferenceException( nameof(_current) );
+    internal         bool                               ShouldContinue => ++_index < _cache.Length;
 
 
-    public LockerEnumerator( TList collection ) => _collection = collection;
+    public LockerEnumerator( ILockedCollection<TValue> collection ) => _collection = collection;
     public   void                                    Dispose()       => this = default;
     readonly IEnumerator<TValue> IEnumerable<TValue>.GetEnumerator() => this;
     readonly IEnumerator IEnumerable.                GetEnumerator() => this;
@@ -26,7 +24,7 @@ public struct LockerEnumerator<TValue, TCloser, TList> : IEnumerator<TValue>, IE
 
     public bool MoveNext()
     {
-        if ( _collection is null ) { throw new ObjectDisposedException( nameof(LockerEnumerator<TValue, TCloser, TList>) ); }
+        if ( _collection is null ) { throw new ObjectDisposedException( nameof(LockerEnumerator<TValue>) ); }
 
         // ReSharper disable once InvertIf
         if ( _cache.IsEmpty )
@@ -34,18 +32,24 @@ public struct LockerEnumerator<TValue, TCloser, TList> : IEnumerator<TValue>, IE
             _index = START_INDEX;
             _cache = _collection.Copy();
         }
+        
+        _index += 1;
 
-        bool result = ILockedCollection<TCloser, TValue>.MoveNext( ref _index, _cache.Span, out _current );
+        _current = _index < _cache.Span.Length
+                       ? _cache.Span[_index]
+                       : default;
+
+        bool result = _index < _cache.Span.Length;
         if ( result is false ) { Reset(); }
 
         return result;
     }
     public void Reset()
     {
-        if ( _collection is null ) { throw new ObjectDisposedException( nameof(LockerEnumerator<TValue, TCloser, TList>) ); }
+        if ( _collection is null ) { throw new ObjectDisposedException( nameof(LockerEnumerator<TValue>) ); }
 
         _cache   = default;
         _current = default;
-        Interlocked.Exchange( ref _index, START_INDEX );
+        _index   = START_INDEX;
     }
 }

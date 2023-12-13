@@ -190,8 +190,8 @@ public static partial class Spans
     public static void Where<T>( in ReadOnlySpan<T> values,
                              #if NET6_0_OR_GREATER
                                  scoped
-                                 #endif
-                                     ref Span<T> span,
+                             #endif
+                                 ref Span<T>   span,
                                  Func<T, bool> selector,
                                  out int       length
     )
@@ -214,11 +214,33 @@ public static partial class Spans
 
 
     [ Pure ]
+    public static int Count<T>( this Span<T> span, T value )
+        where T : IEquatable<T>
+    {
+        ReadOnlySpan<T> temp = span;
+        return temp.Count( value );
+    }
+    [ Pure ]
+    public static int Count<T>( this ReadOnlySpan<T> span, T value )
+        where T : IEquatable<T>
+    {
+        int result = 0;
+
+        foreach ( T v in span )
+        {
+            if ( v.Equals( value ) ) { result++; }
+        }
+
+        return result;
+    }
+
+
+    [ Pure ]
     public static ReadOnlySpan<T> Join<T>( this ReadOnlySpan<T> value,
                                        #if NET6_0_OR_GREATER
                                            scoped
-                                           #endif
-                                               in ReadOnlySpan<T> other
+                                       #endif
+                                           in ReadOnlySpan<T> other
     )
         where T : unmanaged, IEquatable<T>
     {
@@ -243,9 +265,9 @@ public static partial class Spans
                                 in ReadOnlySpan<T> last,
                             #if NET6_0_OR_GREATER
                                 scoped
-                                #endif
-                                    ref Span<T> buffer,
-                                out int length
+                            #endif
+                                ref Span<T> buffer,
+                                out int     length
     )
     {
         int size = first.Length;

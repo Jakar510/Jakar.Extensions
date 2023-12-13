@@ -81,7 +81,7 @@ public static partial class Spans
     {
         foreach ( T c in values )
         {
-            if ( !span.Contains( c ) ) { return false; }
+            if ( span.Contains( c ) is false ) { return false; }
         }
 
         return true;
@@ -186,105 +186,7 @@ public static partial class Spans
     }
 
 
-    public static int Count<T>( this Span<T> span, T value )
-        where T : IEquatable<T>
-    {
-        ReadOnlySpan<T> temp = span;
-        return temp.Count( value );
-    }
-    public static int Count<T>( this ReadOnlySpan<T> span, T value )
-        where T : IEquatable<T>
-    {
-        int result = 0;
 
-        foreach ( T v in span )
-        {
-            if ( v.Equals( value ) ) { result++; }
-        }
-
-        return result;
-    }
-
-
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static Span<T> CreateSpan<T>( int size ) => AsyncLinq.GetArray<T>( size );
-    public static Span<T> CreateValue<T>( int size )
-        where T : unmanaged
-    {
-        if ( size > 250 ) { return CreateSpan<T>( size ); }
-
-        Span<T> span = stackalloc T[size];
-        return MemoryMarshal.CreateSpan( ref span.GetPinnableReference(), span.Length );
-    }
-    public static Span<T> Create<T>( T arg0 )
-        where T : unmanaged
-    {
-    #if NETSTANDARD2_1
-        Span<T> span = stackalloc T[3];
-        span[0] = arg0;
-    #else
-        Span<T> span = [arg0];
-
-    #endif
-        return MemoryMarshal.CreateSpan( ref span.GetPinnableReference(), span.Length );
-    }
-    public static Span<T> Create<T>( T arg0, T arg1 )
-        where T : unmanaged
-    {
-    #if NETSTANDARD2_1
-        Span<T> span = stackalloc T[3];
-        span[0] = arg0;
-        span[1] = arg1;
-    #else
-        Span<T> span = [arg0, arg1];
-
-    #endif
-        return MemoryMarshal.CreateSpan( ref span.GetPinnableReference(), span.Length );
-    }
-    public static Span<T> Create<T>( T arg0, T arg1, T arg2 )
-        where T : unmanaged
-    {
-    #if NETSTANDARD2_1
-        Span<T> span = stackalloc T[3];
-        span[0] = arg0;
-        span[1] = arg1;
-        span[2] = arg2;
-    #else
-        Span<T> span = [arg0, arg1, arg2];
-
-    #endif
-        return MemoryMarshal.CreateSpan( ref span.GetPinnableReference(), span.Length );
-    }
-    public static Span<T> Create<T>( T arg0, T arg1, T arg2, T arg3 )
-        where T : unmanaged
-    {
-    #if NETSTANDARD2_1
-        Span<T> span = stackalloc T[4];
-        span[0] = arg0;
-        span[1] = arg1;
-        span[2] = arg2;
-        span[3] = arg3;
-    #else
-        Span<T> span = [arg0, arg1, arg2, arg3];
-
-    #endif
-        return MemoryMarshal.CreateSpan( ref span.GetPinnableReference(), span.Length );
-    }
-    public static Span<T> Create<T>( T arg0, T arg1, T arg2, T arg3, T arg4 )
-        where T : unmanaged
-    {
-    #if NETSTANDARD2_1
-        Span<T> span = stackalloc T[5];
-        span[0] = arg0;
-        span[1] = arg1;
-        span[2] = arg2;
-        span[3] = arg3;
-        span[4] = arg4;
-    #else
-        Span<T> span = [arg0, arg1, arg2, arg3, arg4];
-
-    #endif
-        return MemoryMarshal.CreateSpan( ref span.GetPinnableReference(), span.Length );
-    }
 
 
     // TODO: prep for DotNet 7
