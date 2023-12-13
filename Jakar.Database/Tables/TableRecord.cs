@@ -11,7 +11,8 @@ public interface IRecordPair : IUniqueID<Guid> // where TID : IComparable<TID>, 
 
 
 
-public interface IDbReaderMapping<out TRecord> where TRecord : IDbReaderMapping<TRecord>
+public interface IDbReaderMapping<out TRecord>
+    where TRecord : IDbReaderMapping<TRecord>
 {
     public abstract static string                    TableName { get; }
     public abstract static TRecord                   Create( DbDataReader      reader );
@@ -30,19 +31,22 @@ public interface ITableRecord : IRecordPair
 
 
 
-public interface ITableRecord<TRecord> : ITableRecord where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
+public interface ITableRecord<TRecord> : ITableRecord
+    where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
-    public new RecordID<TRecord> ID { get; }
-    Guid IUniqueID<Guid>.        ID => ID.Value;
-    public TRecord               NewID( RecordID<TRecord> id );
+    Guid IUniqueID<Guid>.          ID => ID.Value;
+    public new RecordID<TRecord>   ID { get; }
+    public     RecordPair<TRecord> ToPair();
+    public     TRecord             NewID( RecordID<TRecord> id );
+    public     UInt128             GetHash();
 }
 
 
 
 public interface IOwnedTableRecord
 {
-    public RecordID<UserRecord>? CreatedBy   { get; }
     public Guid?                 OwnerUserID { get; }
+    public RecordID<UserRecord>? CreatedBy   { get; }
 }
 
 
@@ -53,32 +57,41 @@ public abstract record TableRecord<TRecord>( [ property: Key ] RecordID<TRecord>
 {
     protected TableRecord( RecordID<TRecord> id ) : this( id, DateTimeOffset.UtcNow, null ) { }
 
+    public RecordPair<TRecord> ToPair() => new(ID, DateCreated);
+
 
     [ Conditional( "DEBUG" ) ]
     public void Validate()
     {
-        PropertyInfo[]    properties = typeof(TRecord).GetProperties();
+        PropertyInfo[]    properties = typeof(TRecord).GetProperties( BindingFlags.Instance | BindingFlags.Public );
         DynamicParameters parameters = ToDynamicParameters();
         int               length     = parameters.ParameterNames.Count();
         if ( length == properties.Length ) { return; }
 
-        string message = $"{typeof(TRecord).Name}: {nameof(ToDynamicParameters)}.Length ({length}) != {nameof(properties)}.Length ({properties.Length})";
+        var missing = new HashSet<string>( properties.Select( x => x.Name ) );
+        missing.ExceptWith( parameters.ParameterNames );
+
+        string message = $"""
+                          {typeof(TRecord).Name}: {nameof(ToDynamicParameters)}.Length ({length}) != {nameof(properties)}.Length ({properties.Length})
+                          {missing.ToPrettyJson()}
+                          """;
+
         throw new InvalidOperationException( message );
     }
 
 
     public static DynamicParameters GetDynamicParameters( TRecord record ) => GetDynamicParameters( record.ID );
-    public static DynamicParameters GetDynamicParameters( RecordID<TRecord> id )
+    public static DynamicParameters GetDynamicParameters( in RecordID<TRecord> id )
     {
         var parameters = new DynamicParameters();
-        parameters.Add( nameof(ID), id );
+        parameters.Add( nameof(ID), id.Value );
         return parameters;
     }
 
     public virtual DynamicParameters ToDynamicParameters()
     {
         var parameters = new DynamicParameters();
-        parameters.Add( nameof(ID),           ID );
+        parameters.Add( nameof(ID),           ID.Value );
         parameters.Add( nameof(DateCreated),  DateCreated );
         parameters.Add( nameof(LastModified), LastModified );
         return parameters;
@@ -99,6 +112,11 @@ public abstract record TableRecord<TRecord>( [ property: Key ] RecordID<TRecord>
                                                               {
                                                                   ID = id
                                                               });
+    public UInt128 GetHash()
+    {
+        string json = this.ToJson();
+        return Spans.Hash128( json );
+    }
 
 
     public virtual int CompareTo( TRecord? other )
@@ -117,8 +135,8 @@ public abstract record TableRecord<TRecord>( [ property: Key ] RecordID<TRecord>
 
 
 [ Serializable ]
-public abstract record OwnedTableRecord<TRecord>
-    ( RecordID<TRecord> ID, RecordID<UserRecord>? CreatedBy, Guid? OwnerUserID, DateTimeOffset DateCreated, DateTimeOffset? LastModified ) : TableRecord<TRecord>( ID, DateCreated, LastModified ), IOwnedTableRecord
+public abstract record OwnedTableRecord<TRecord>( RecordID<TRecord> ID, RecordID<UserRecord>? CreatedBy, Guid? OwnerUserID, DateTimeOffset DateCreated, DateTimeOffset? LastModified )
+    : TableRecord<TRecord>( ID, DateCreated, LastModified ), IOwnedTableRecord
     where TRecord : OwnedTableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
     protected OwnedTableRecord( UserRecord?       owner ) : this( RecordID<TRecord>.New(), owner ) { }
@@ -128,7 +146,7 @@ public abstract record OwnedTableRecord<TRecord>
     public static DynamicParameters GetDynamicParameters( UserRecord user )
     {
         var parameters = new DynamicParameters();
-        parameters.Add( nameof(CreatedBy),   user.ID );
+        parameters.Add( nameof(CreatedBy),   user.ID.Value );
         parameters.Add( nameof(OwnerUserID), user.UserID );
         return parameters;
     }
@@ -136,14 +154,14 @@ public abstract record OwnedTableRecord<TRecord>
     {
         var parameters = new DynamicParameters();
         parameters.Add( nameof(OwnerUserID), record.OwnerUserID );
-        parameters.Add( nameof(CreatedBy),   record.CreatedBy );
+        parameters.Add( nameof(CreatedBy),   record.CreatedBy?.Value );
         return parameters;
     }
 
     public override DynamicParameters ToDynamicParameters()
     {
         var parameters = base.ToDynamicParameters();
-        parameters.Add( nameof(CreatedBy),   CreatedBy );
+        parameters.Add( nameof(CreatedBy),   CreatedBy?.Value );
         parameters.Add( nameof(OwnerUserID), OwnerUserID );
         return parameters;
     }

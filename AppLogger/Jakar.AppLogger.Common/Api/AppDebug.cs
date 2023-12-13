@@ -1,4 +1,8 @@
-﻿namespace Jakar.AppLogger.Common;
+﻿using Jakar.Extensions;
+
+
+
+namespace Jakar.AppLogger.Common;
 
 
 [ SuppressMessage( "ReSharper", "MemberCanBeMadeStatic.Global" ) ]
@@ -73,12 +77,10 @@ public sealed class AppDebug : ObservableClass
 
 
         e.Details( out Dictionary<string, string?> dict );
-        var eventDetails = new Dictionary<string, JToken?>();
-        foreach ( (string? key, string? value) in dict ) { eventDetails.Add( key, value ); }
-
+        var eventDetails = new EventDetails( dict );
         TrackError( e, eventDetails, eventId );
     }
-    public void TrackError( Exception ex, IDictionary<string, JToken?>? eventDetails, EventID? eventId = default )
+    public void TrackError( Exception ex, EventDetails? eventDetails, EventID? eventId = default )
     {
         List<LoggerAttachment> attachments = GetLoggerAttachments( ex, eventDetails );
 
@@ -87,7 +89,7 @@ public sealed class AppDebug : ObservableClass
         _logger.TrackError( ex, eventId ?? new EventID( ex.Message.GetHashCode(), ex.Message ), attachments, eventDetails );
         ScreenShot = default;
     }
-    public async ValueTask TrackErrorAsync( Exception ex, IDictionary<string, JToken?>? eventDetails, EventID? eventId = default )
+    public async ValueTask TrackErrorAsync( Exception ex, EventDetails? eventDetails, EventID? eventId = default )
     {
         List<LoggerAttachment> attachments = GetLoggerAttachments( ex, eventDetails );
 
@@ -96,7 +98,7 @@ public sealed class AppDebug : ObservableClass
         _logger.TrackError( ex, eventId ?? new EventID( ex.Message.GetHashCode(), ex.Message ), attachments, eventDetails );
         ScreenShot = default;
     }
-    private List<LoggerAttachment> GetLoggerAttachments( Exception ex, IDictionary<string, JToken?>? eventDetails )
+    private List<LoggerAttachment> GetLoggerAttachments( Exception ex, EventDetails? eventDetails )
     {
         var attachments = new List<LoggerAttachment>( 10 )
                           {
@@ -123,6 +125,6 @@ public sealed class AppDebug : ObservableClass
     }
 
 
-    public void TrackEvent<T>( T cls, LogLevel                      level = LogLevel.Trace, [ CallerMemberName ] string? source = default ) => TrackEvent( cls, _logger.Config.GetAppState(), level, source );
-    public void TrackEvent<T>( T cls, IDictionary<string, JToken?>? eventDetails,           LogLevel level = LogLevel.Trace, [ CallerMemberName ] string? source = default ) => _logger.TrackEvent( cls, level, eventDetails, source );
+    public void TrackEvent<T>( T cls, LogLevel      level = LogLevel.Trace, [ CallerMemberName ] string? source = default )                                                       => TrackEvent( cls, _logger.Config.GetAppState(), level, source );
+    public void TrackEvent<T>( T cls, EventDetails? eventDetails,           LogLevel                     level  = LogLevel.Trace, [ CallerMemberName ] string? source = default ) => _logger.TrackEvent( cls, level, eventDetails, source );
 }

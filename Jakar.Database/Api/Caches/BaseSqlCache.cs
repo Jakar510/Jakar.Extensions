@@ -2,6 +2,10 @@
 // 10/15/2023  1:08 PM
 
 
+using System.Collections.Frozen;
+
+
+
 namespace Jakar.Database;
 
 
@@ -9,23 +13,23 @@ namespace Jakar.Database;
 public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord>
     where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
-    public static readonly ImmutableDictionary<DbInstance, ImmutableDictionary<string, Descriptor>> SqlProperties     = SQL.CreateDescriptorMapping<TRecord>();
-    protected readonly     ConcurrentDictionary<Key, string>                                        _deleteParameters = new(Key.Equalizer);
-    protected readonly     ConcurrentDictionary<Key, string>                                        _existParameters  = new(Key.Equalizer);
-    protected readonly     ConcurrentDictionary<Key, string>                                        _getParameters    = new(Key.Equalizer);
-    protected readonly     ConcurrentDictionary<Key, string>                                        _insertOrUpdate   = new(Key.Equalizer);
-    protected readonly     ConcurrentDictionary<Key, string>                                        _tryInsert        = new(Key.Equalizer);
-    protected readonly     ConcurrentDictionary<Key, string>                                        _whereParameters  = new(Key.Equalizer);
-    protected readonly     ConcurrentDictionary<SqlCacheType, string>                               _sql              = new();
-    protected readonly     ConcurrentDictionary<string, string>                                     _whereColumn      = new();
-    protected readonly     ConcurrentDictionary<string, string>                                     _whereIDColumn    = new();
+    public static readonly FrozenDictionary<DbInstance, FrozenDictionary<string, Descriptor>> SqlProperties     = SQL.CreateDescriptorMapping<TRecord>();
+    protected readonly     ConcurrentDictionary<Key, string>                                  _deleteParameters = new(Key.Equalizer);
+    protected readonly     ConcurrentDictionary<Key, string>                                  _existParameters  = new(Key.Equalizer);
+    protected readonly     ConcurrentDictionary<Key, string>                                  _getParameters    = new(Key.Equalizer);
+    protected readonly     ConcurrentDictionary<Key, string>                                  _insertOrUpdate   = new(Key.Equalizer);
+    protected readonly     ConcurrentDictionary<Key, string>                                  _tryInsert        = new(Key.Equalizer);
+    protected readonly     ConcurrentDictionary<Key, string>                                  _whereParameters  = new(Key.Equalizer);
+    protected readonly     ConcurrentDictionary<SqlCacheType, string>                         _sql              = new();
+    protected readonly     ConcurrentDictionary<string, string>                               _whereColumn      = new();
+    protected readonly     ConcurrentDictionary<string, string>                               _whereIDColumn    = new();
 
 
     protected IEnumerable<string> _KeyValuePairs
     {
         [ Pure, MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => _Properties.Values.Select( x => x.KeyValuePair );
     }
-    protected ImmutableDictionary<string, Descriptor> _Properties
+    protected FrozenDictionary<string, Descriptor> _Properties
     {
         [ Pure, MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => SqlProperties[Instance];
     }
@@ -156,11 +160,11 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord>
     }
 
 
-    public abstract SqlCommand Insert( in TRecord record );
-    public abstract SqlCommand TryInsert( in TRecord record, in bool matchAll, in DynamicParameters parameters );
+    public abstract SqlCommand Insert( in         TRecord record );
+    public abstract SqlCommand TryInsert( in      TRecord record, in bool matchAll, in DynamicParameters parameters );
     public abstract SqlCommand InsertOrUpdate( in TRecord record, in bool matchAll, in DynamicParameters parameters );
-  
-    
+
+
     public virtual SqlCommand Update( in TRecord record )
     {
         var parameters = record.ToDynamicParameters();
@@ -219,8 +223,8 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord>
         _existParameters[key] = sql = $"EXISTS( SELECT {IdColumnName} FROM {TableName} WHERE {buffer.Span} )";
         return new SqlCommand( sql, parameters );
     }
-    
-    
+
+
     public virtual SqlCommand Get( in bool matchAll, in DynamicParameters parameters )
     {
         Key key = Key.Create( matchAll, parameters );

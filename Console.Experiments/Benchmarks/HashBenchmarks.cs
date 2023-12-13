@@ -1,6 +1,7 @@
 ﻿// Jakar.Extensions :: Experiments
 // 08/20/2023  9:51 PM
 
+using BenchmarkDotNet.Configs;
 using HashidsNet;
 
 
@@ -9,15 +10,22 @@ namespace Experiments.Benchmarks;
 
 
 /*
-|  Method |       Mean |   Error |  StdDev | Rank |   Gen0 | Allocated |
-|-------- |-----------:|--------:|--------:|-----:|-------:|----------:|
-| GetHash |   881.6 ns | 8.81 ns | 8.24 ns |    1 | 0.0238 |     200 B |
-| GetLong | 1,307.2 ns | 7.26 ns | 6.06 ns |    2 | 0.0172 |     152 B |
+   BenchmarkDotNet v0.13.10, Windows 11 (10.0.22621.2715/22H2/2022Update/SunValley2)
+   AMD Ryzen 9 3900X, 1 CPU, 24 logical and 12 physical cores
+   .NET SDK 8.0.100
+   [Host]     : .NET 8.0.0 (8.0.23.53103), X64 RyuJIT AVX2
+   DefaultJob : .NET 8.0.0 (8.0.23.53103), X64 RyuJIT AVX2
+   
+   
+   | Method  | Mean       | Error   | StdDev  | Rank | Gen0   | Allocated |
+   |-------- |-----------:|--------:|--------:|-----:|-------:|----------:|
+   | GetHash |   859.6 ns | 3.31 ns | 3.09 ns |    1 | 0.0238 |     200 B |
+   | GetLong | 1,246.8 ns | 6.15 ns | 5.14 ns |    2 | 0.0172 |     152 B |
 */
 
 
 
-[ SimpleJob( RuntimeMoniker.HostProcess ), Orderer( SummaryOrderPolicy.FastestToSlowest ), RankColumn, MemoryDiagnoser ]
+[ Config( typeof(BenchmarkConfig) ), GroupBenchmarksBy( BenchmarkLogicalGroupRule.ByCategory ), SimpleJob( RuntimeMoniker.HostProcess ), Orderer( SummaryOrderPolicy.FastestToSlowest ), RankColumn, MemoryDiagnoser ]
 public class HashBenchmarks
 {
     private const    string  HASH    = "xOEDj6A8g15z";

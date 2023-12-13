@@ -12,8 +12,7 @@ public sealed class PostgresSql<TRecord> : BaseSqlCache<TRecord>
         [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => DbInstance.Postgres;
     }
 
-    // public override string TableName { get; } = $"\"{TRecord.TableName}\"";
-    public override string TableName { get; } = TRecord.TableName.ToSnakeCase();
+    public override string TableName { get; } = $"\"{TRecord.TableName}\"";
 
 
     public override SqlCommand First()
@@ -82,8 +81,7 @@ public sealed class PostgresSql<TRecord> : BaseSqlCache<TRecord>
         values.AppendJoin( ',', _Properties.Values.Select( x => x.VariableName ) );
 
         _sql[SqlCacheType.Insert] = sql = $"""
-                                             INSERT INTO {TableName} ({keys.Span}) values ({values.Span});
-                                             SELECT currval('{IdColumnName}');
+                                             INSERT INTO {TableName} ({keys.Span}) values ({values.Span}) RETURNING {IdColumnName};
                                            """;
 
         return new SqlCommand( sql, param );
@@ -108,8 +106,7 @@ public sealed class PostgresSql<TRecord> : BaseSqlCache<TRecord>
         _tryInsert[key] = sql = $"""
                                  IF NOT EXISTS(SELECT * FROM {TableName} WHERE {buffer.Span})
                                  BEGIN
-                                     INSERT INTO {TableName} ({keys.Span}) values ({values.Span});
-                                     SELECT currval('{IdColumnName}');
+                                     INSERT INTO {TableName} ({keys.Span}) values ({values.Span}) RETURNING {IdColumnName};
                                  END
 
                                  ELSE
@@ -145,8 +142,7 @@ public sealed class PostgresSql<TRecord> : BaseSqlCache<TRecord>
         _insertOrUpdate[key] = sql = $"""
                                       IF NOT EXISTS(SELECT * FROM {TableName} WHERE {buffer.Span})
                                       BEGIN
-                                          INSERT INTO {TableName} ({keys.Span}) values ({values.Span});
-                                          SELECT currval('{IdColumnName}');
+                                          INSERT INTO {TableName} ({keys.Span}) values ({values.Span}) RETURNING {IdColumnName};
                                       END
 
                                       ELSE

@@ -5,8 +5,9 @@ namespace Jakar.Database.Caches;
 
 
 [ SuppressMessage( "ReSharper", "UnusedMethodReturnValue.Global" ), SuppressMessage( "ReSharper", "ConvertToPrimaryConstructor" ) ]
-public sealed record TableCacheOptions : IOptions<TableCacheOptions>
+public sealed class TableCacheOptions : IOptions<TableCacheOptions>
 {
+    // public int                                    MaxItems    { get; set; } = 1000;
     public TimeSpan                               ExpireTime  { get; set; } = TimeSpan.FromMinutes( 1 );
     public TimeSpan                               RefreshTime { get; set; } = TimeSpan.FromSeconds( 10 );
     TableCacheOptions IOptions<TableCacheOptions>.Value       => this;
@@ -17,8 +18,6 @@ public sealed record TableCacheOptions : IOptions<TableCacheOptions>
         collection.AddSingleton<IOptions<TableCacheOptions>, TableCacheOptions>();
         return collection;
     }
-
-
     public static WebApplicationBuilder Register( WebApplicationBuilder builder )
     {
         Register( builder.Services );

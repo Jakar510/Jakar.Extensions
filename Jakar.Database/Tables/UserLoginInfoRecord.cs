@@ -1,19 +1,24 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 01/30/2023  2:41 PM
 
+using Jakar.Database.Resx;
+
+
+
 namespace Jakar.Database;
 
 
 [ Serializable, Table( "UserLoginInfo" ) ]
-public sealed record UserLoginInfoRecord( [ property: MaxLength(                        int.MaxValue ) ] string  LoginProvider,
-                                          [ property: MaxLength(                        int.MaxValue ) ] string? ProviderDisplayName,
-                                          [ property: ProtectedPersonalData, MaxLength( int.MaxValue ) ] string  ProviderKey,
-                                          [ property: ProtectedPersonalData ]                            string? Value,
-                                          RecordID<UserLoginInfoRecord>                                          ID,
-                                          RecordID<UserRecord>?                                                  CreatedBy,
-                                          Guid?                                                                  OwnerUserID,
-                                          DateTimeOffset                                                         DateCreated,
-                                          DateTimeOffset?                                                        LastModified = default
+public sealed record UserLoginInfoRecord(
+    [ property: MaxLength(                        int.MaxValue ) ] string  LoginProvider,
+    [ property: MaxLength(                        int.MaxValue ) ] string? ProviderDisplayName,
+    [ property: ProtectedPersonalData, MaxLength( int.MaxValue ) ] string  ProviderKey,
+    [ property: ProtectedPersonalData ]                            string? Value,
+    RecordID<UserLoginInfoRecord>                                          ID,
+    RecordID<UserRecord>?                                                  CreatedBy,
+    Guid?                                                                  OwnerUserID,
+    DateTimeOffset                                                         DateCreated,
+    DateTimeOffset?                                                        LastModified = default
 ) : OwnedTableRecord<UserLoginInfoRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<UserLoginInfoRecord>
 {
     public static string TableName { get; } = typeof(UserLoginInfoRecord).GetTableName();
@@ -28,7 +33,7 @@ public sealed record UserLoginInfoRecord( [ property: MaxLength(                
                                                                                                                                  user.ID,
                                                                                                                                  user.UserID,
                                                                                                                                  DateTimeOffset.UtcNow ) { }
-
+    [ Pure ]
     public override DynamicParameters ToDynamicParameters()
     {
         var parameters = base.ToDynamicParameters();
@@ -39,12 +44,13 @@ public sealed record UserLoginInfoRecord( [ property: MaxLength(                
         return parameters;
     }
 
+    [ Pure ]
     public static UserLoginInfoRecord Create( DbDataReader reader )
     {
-        string                        loginProvider       = reader.GetString( nameof(LoginProvider) );
-        string                        providerDisplayName = reader.GetString( nameof(ProviderDisplayName) );
-        string                        providerKey         = reader.GetString( nameof(ProviderKey) );
-        string                        value               = reader.GetString( nameof(Value) );
+        string                        loginProvider       = reader.GetFieldValue<string>( nameof(LoginProvider) );
+        string                        providerDisplayName = reader.GetFieldValue<string>( nameof(ProviderDisplayName) );
+        string                        providerKey         = reader.GetFieldValue<string>( nameof(ProviderKey) );
+        string                        value               = reader.GetFieldValue<string>( nameof(Value) );
         var                           dateCreated         = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
         var                           lastModified        = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
         var                           ownerUserID         = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
@@ -54,13 +60,15 @@ public sealed record UserLoginInfoRecord( [ property: MaxLength(                
         record.Validate();
         return record;
     }
+
+    [ Pure ]
     public static async IAsyncEnumerable<UserLoginInfoRecord> CreateAsync( DbDataReader reader, [ EnumeratorCancellation ] CancellationToken token = default )
     {
         while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
     }
 
-
-    public static DynamicParameters GetDynamicParameters( UserRecord user, UserLoginInfo info ) => GetDynamicParameters( user, info.LoginProvider, info.ProviderKey );
+    [ Pure ] public static DynamicParameters GetDynamicParameters( UserRecord user, UserLoginInfo info ) => GetDynamicParameters( user, info.LoginProvider, info.ProviderKey );
+    [ Pure ]
     public static DynamicParameters GetDynamicParameters( UserRecord user, string loginProvider, string providerKey )
     {
         DynamicParameters parameters = GetDynamicParameters( user );
@@ -69,8 +77,7 @@ public sealed record UserLoginInfoRecord( [ property: MaxLength(                
         return parameters;
     }
 
-
-    public UserLoginInfo ToUserLoginInfo() => new(LoginProvider, ProviderKey, ProviderDisplayName);
+    [ Pure ] public UserLoginInfo ToUserLoginInfo() => new(LoginProvider, ProviderKey, ProviderDisplayName);
 
 
     public static implicit operator UserLoginInfo( UserLoginInfoRecord value ) => value.ToUserLoginInfo();

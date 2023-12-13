@@ -1,6 +1,4 @@
-using System;
 using System.Net;
-using NUnit.Framework;
 
 
 #pragma warning disable IDE0071
@@ -10,7 +8,7 @@ using NUnit.Framework;
 namespace Jakar.Extensions.Tests;
 
 
-[ TestFixture ]
+[ TestFixture, TestOf( typeof(IniConfig) ) ]
 
 // ReSharper disable once InconsistentNaming
 public class IniConfig_Tests : Assert
@@ -57,8 +55,8 @@ public class IniConfig_Tests : Assert
         $"-- {nameof(results)} --\n{results.ToString()}".WriteToConsole();
 
 
-        NotNull( results );
-        AreEqual( results,                  ini );
-        AreEqual( results[nameof(project)], project );
+        this.NotNull( results );
+        this.AreEqual( results,                  ini );
+        this.AreEqual( results[nameof(project)], project );
     }
 }

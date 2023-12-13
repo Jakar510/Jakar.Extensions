@@ -1,12 +1,7 @@
-using System;
-using NUnit.Framework;
-
-
-
 namespace Jakar.Extensions.Tests;
 
 
-[ TestFixture ]
+[ TestFixture, TestOf( typeof(MimeTypes) ) ]
 
 // ReSharper disable once InconsistentNaming
 public class MimeType_Extension_Tests : Assert
@@ -16,11 +11,11 @@ public class MimeType_Extension_Tests : Assert
     {
         if ( mime is MimeType.NotSet )
         {
-            Throws<ArgumentOutOfRangeException>( () => AreEqual( mime.ToExtension().FromExtension(), mime ) );
+            Throws<OutOfRangeException>( () => this.AreEqual( mime.ToExtension().FromExtension(), mime ) );
 
             return;
         }
 
-        AreEqual( mime.ToExtension().FromExtension(), mime );
+        this.AreEqual( mime.ToExtension().FromExtension(), mime );
     }
 }

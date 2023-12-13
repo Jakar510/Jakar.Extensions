@@ -38,7 +38,7 @@ public class GuidBenchmarks
 
 
     [ Benchmark ]
-    public Memory<byte>? AsMemory() => _guid.TryWriteBytes( out Memory<byte> memory )
-                                           ? memory
-                                           : default;
+    public Span<byte> AsMemory() => _guid.TryWriteBytes( out Span<byte> memory )
+                                        ? memory
+                                        : default;
 }

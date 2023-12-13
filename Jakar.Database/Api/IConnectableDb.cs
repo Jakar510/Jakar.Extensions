@@ -26,7 +26,7 @@ public interface IConnectableDb : IDbOptions, IDbTable
 
 
 
-public interface IConnectableDbRoot : IConnectableDb
+public interface IConnectableDbRoot : IConnectableDb, ITableCacheFactory
 {
     public IAsyncEnumerable<T> Where<T>( DbConnection connection, DbTransaction? transaction, string sql, DynamicParameters? parameters, [ EnumeratorCancellation ] CancellationToken token = default )
         where T : IDbReaderMapping<T>;

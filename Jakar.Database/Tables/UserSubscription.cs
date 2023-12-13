@@ -20,6 +20,7 @@ public abstract record UserSubscription<TRecord>
                                                                                                                                                                                             IUserSubscription
     where TRecord : UserSubscription<TRecord>, IDbReaderMapping<TRecord>
 {
+    [ Pure ]
     public override DynamicParameters ToDynamicParameters()
     {
         var parameters = base.ToDynamicParameters();

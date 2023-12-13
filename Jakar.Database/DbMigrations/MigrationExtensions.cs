@@ -1,4 +1,8 @@
-﻿namespace Jakar.Database.DbMigrations;
+﻿using JsonIgnoreAttribute = Newtonsoft.Json.JsonIgnoreAttribute;
+
+
+
+namespace Jakar.Database.DbMigrations;
 
 
 [ SuppressMessage( "ReSharper", "UnusedMethodReturnValue.Global" ) ]
@@ -87,8 +91,9 @@ public static class MigrationExtensions
     }
 
 
-    public static bool SetNullable<TNext, TNextFk>( this IColumnOptionSyntax<TNext, TNextFk> item, PropertyInfo propInfo ) where TNext : IFluentSyntax
-                                                                                                                           where TNextFk : IFluentSyntax
+    public static bool SetNullable<TNext, TNextFk>( this IColumnOptionSyntax<TNext, TNextFk> item, PropertyInfo propInfo )
+        where TNext : IFluentSyntax
+        where TNextFk : IFluentSyntax
     {
         if ( propInfo.Name == "DeviceIDs" )
         {
@@ -106,7 +111,7 @@ public static class MigrationExtensions
     {
         if ( propInfo.HasAttribute<DataBaseIgnoreAttribute>() || propInfo.IsDefined( typeof(JsonIgnoreAttribute) ) ) { return true; }
 
-        return propInfo.HasInterface<IDataBaseIgnore>();
+        return propInfo.PropertyType.HasInterface<IDataBaseIgnore>();
     }
 
 
@@ -202,7 +207,8 @@ public static class MigrationExtensions
     }
 
 
-    public static IInsertDataSyntax AddRow<T>( this IInsertDataSyntax insert, T context ) where T : BaseRecord
+    public static IInsertDataSyntax AddRow<T>( this IInsertDataSyntax insert, T context )
+        where T : BaseRecord
     {
         PropertyInfo[] items   = typeof(T).GetProperties( BindingFlags.Instance | BindingFlags.Public );
         var            columns = new Dictionary<string, object?>();
@@ -228,7 +234,7 @@ public static class MigrationExtensions
 
     public static string GetMappingTableName( this Type parent, PropertyInfo propertyInfo )
     {
-        if ( !propertyInfo.IsList( out Type? itemType ) ) { throw new ExpectedValueTypeException( nameof(propertyInfo), propertyInfo.PropertyType, typeof(IList<>) ); }
+        if ( !propertyInfo.PropertyType.IsList( out Type? itemType ) ) { throw new ExpectedValueTypeException( nameof(propertyInfo), propertyInfo.PropertyType, typeof(IList<>) ); }
 
         return parent.GetMappingTableName( propertyInfo, itemType );
     }
@@ -240,7 +246,8 @@ public static class MigrationExtensions
     public static string GetMappingTableName( this    string parent, string       propertyName, string         other ) => $"{parent}_{other}_{propertyName}_mapping";
 
 
-    public static TNext? TryBuiltInValueTypes<TNext>( this IColumnTypeSyntax<TNext> col, PropertyInfo propInfo, Type propertyType ) where TNext : IFluentSyntax
+    public static TNext? TryBuiltInValueTypes<TNext>( this IColumnTypeSyntax<TNext> col, PropertyInfo propInfo, Type propertyType )
+        where TNext : IFluentSyntax
     {
         if ( propertyType.TryGetUnderlyingEnumType( out Type? _ ) )
         {

@@ -21,9 +21,15 @@ public sealed class ResxString( string neutral,
                                 string thai
 ) : LocalizableString, IEquatable<ResxString>, IComparable<ResxString>
 {
-    private readonly   string _neutral = neutral;
-    protected override string GetText( IFormatProvider? formatProvider ) => GetText( formatProvider as CultureInfo ?? CultureInfo.CurrentCulture );
-    public             string GetText( CultureInfo      info )           => GetText( info.GetSupportedLanguage()   ?? SupportedLanguage.Unspecified );
+    private readonly string _neutral = neutral;
+
+
+#pragma warning disable RS1035
+    protected override string GetText( IFormatProvider? formatProvider ) => GetText( formatProvider as CultureInfo ?? CultureInfo.CurrentUICulture );
+#pragma warning restore RS1035
+
+
+    public string GetText( CultureInfo info ) => GetText( info.GetSupportedLanguage() ?? SupportedLanguage.Unspecified );
     public string GetText( SupportedLanguage language ) =>
         language switch
         {

@@ -5,5 +5,4 @@
 namespace Jakar.AppLogger.Portal.Data.Tables;
 
 
-public static class DbTableExtensions // DbTable<TRecord> where TRecord : TableRecord<TRecord>
-{ }
+public static class DbTableExtensions; // DbTable<TRecord> where TRecord : TableRecord<TRecord>

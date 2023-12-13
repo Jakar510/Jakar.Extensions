@@ -5,24 +5,25 @@ namespace Jakar.AppLogger.Portal.Data.Tables;
 
 
 [ Serializable, Table( "Devices" ) ]
-public sealed record DeviceRecord( int?                                                          AppBuild,
-                                   [ property: MaxLength( 4096 ) ] string?                       AppNamespace,
-                                   AppVersion                                                    AppVersion,
-                                   [ property: MaxLength( 4096 ) ]                       string  DeviceID,
-                                   [ property: MaxLength( BaseRecord.MAX_STRING_SIZE ) ] HwInfo? HwInfo,
-                                   [ property: MaxLength( 256 ) ]                        string  Locale,
-                                   [ property: MaxLength( 4096 ) ]                       string? Model,
-                                   int?                                                          OsApiLevel,
-                                   Architecture                                                  ProcessArchitecture,
-                                   [ property: MaxLength( 256 ) ] string                         OsName,
-                                   [ property: MaxLength( 256 ) ] AppVersion                     OsVersion,
-                                   PlatformID                                                    Platform,
-                                   [ property: MaxLength( 256 ) ] string                         SdkName,
-                                   [ property: MaxLength( 256 ) ] string                         SdkVersion,
-                                   TimeSpan                                                      TimeZoneOffset,
-                                   RecordID<DeviceRecord>                                        ID,
-                                   DateTimeOffset                                                DateCreated,
-                                   DateTimeOffset?                                               LastModified = default
+public sealed record DeviceRecord(
+    int?                                                          AppBuild,
+    [ property: MaxLength( 4096 ) ] string?                       AppNamespace,
+    AppVersion                                                    AppVersion,
+    [ property: MaxLength( 4096 ) ]                       string  DeviceID,
+    [ property: MaxLength( BaseRecord.MAX_STRING_SIZE ) ] HwInfo? HwInfo,
+    [ property: MaxLength( 256 ) ]                        string  Locale,
+    [ property: MaxLength( 4096 ) ]                       string? Model,
+    int?                                                          OsApiLevel,
+    Architecture                                                  ProcessArchitecture,
+    [ property: MaxLength( 256 ) ] string                         OsName,
+    [ property: MaxLength( 256 ) ] AppVersion                     OsVersion,
+    PlatformID                                                    Platform,
+    [ property: MaxLength( 256 ) ] string                         SdkName,
+    [ property: MaxLength( 256 ) ] string                         SdkVersion,
+    TimeSpan                                                      TimeZoneOffset,
+    RecordID<DeviceRecord>                                        ID,
+    DateTimeOffset                                                DateCreated,
+    DateTimeOffset?                                               LastModified = default
 ) : LoggerTable<DeviceRecord>( ID, DateCreated, LastModified ), IDbReaderMapping<DeviceRecord>, IDevice
 {
     public static string TableName { get; } = typeof(DeviceRecord).GetTableName();
@@ -49,6 +50,7 @@ public sealed record DeviceRecord( int?                                         
                                                   DateTimeOffset.UtcNow ) { }
 
 
+    [ Pure ]
     public static DeviceRecord Create( DbDataReader reader )
     {
         int        appBuild     = reader.GetFieldValue<int>( nameof(AppBuild) );
@@ -91,6 +93,7 @@ public sealed record DeviceRecord( int?                                         
                                  dateCreated,
                                  lastModified );
     }
+    [ Pure ]
     public static async IAsyncEnumerable<DeviceRecord> CreateAsync( DbDataReader reader, [ EnumeratorCancellation ] CancellationToken token = default )
     {
         while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
@@ -98,6 +101,7 @@ public sealed record DeviceRecord( int?                                         
 
 
     // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Global
+    [ Pure ]
     public DeviceRecord Update( IDevice device ) =>
         this with
         {
@@ -118,6 +122,7 @@ public sealed record DeviceRecord( int?                                         
         };
 
 
+    [ Pure ]
     public static DynamicParameters GetDynamicParameters( DeviceDescriptor device )
     {
         var parameters = new DynamicParameters();
@@ -126,7 +131,7 @@ public sealed record DeviceRecord( int?                                         
     }
 
 
-    public DeviceDescriptor ToDeviceDescriptor() => new(this);
+    [ Pure ] public DeviceDescriptor ToDeviceDescriptor() => new(this);
 
 
     public override int CompareTo( DeviceRecord? other ) => string.CompareOrdinal( DeviceID, other?.DeviceID );
@@ -145,7 +150,8 @@ public sealed record AppDeviceRecord : Mapping<AppDeviceRecord, AppRecord, Devic
     private AppDeviceRecord( RecordID<AppRecord> key, RecordID<DeviceRecord> value, RecordID<AppDeviceRecord> id, DateTimeOffset dateCreated, DateTimeOffset? lastModified ) : base( key, value, id, dateCreated, lastModified ) { }
 
 
-    public static AppDeviceRecord Create( AppRecord key, DeviceRecord value ) => new(key, value);
+    [ Pure ] public static AppDeviceRecord Create( AppRecord key, DeviceRecord value ) => new(key, value);
+    [ Pure ]
     public static AppDeviceRecord Create( DbDataReader reader )
     {
         var key          = new RecordID<AppRecord>( reader.GetFieldValue<Guid>( nameof(KeyID) ) );
@@ -155,8 +161,13 @@ public sealed record AppDeviceRecord : Mapping<AppDeviceRecord, AppRecord, Devic
         var id           = new RecordID<AppDeviceRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) );
         return new AppDeviceRecord( key, value, id, dateCreated, lastModified );
     }
+    [ Pure ]
     public static async IAsyncEnumerable<AppDeviceRecord> CreateAsync( DbDataReader reader, [ EnumeratorCancellation ] CancellationToken token = default )
     {
         while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
     }
 }
+
+
+
+[ JsonSerializable( typeof(AppDeviceRecord) ) ] public partial class AppDeviceRecordContext : JsonSerializerContext;

@@ -20,18 +20,12 @@ public sealed record Descriptor( string Name, bool IsKey, string ColumnName, str
     public static bool IsDbKey( MemberInfo property ) => property.GetCustomAttribute<KeyAttribute>() is not null || property.GetCustomAttribute<System.ComponentModel.DataAnnotations.KeyAttribute>() is not null;
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ] public static Descriptor MsSql( PropertyInfo property ) => MsSql( property, property.Name );
-
-
-    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
+    public static Descriptor MsSql( PropertyInfo property ) => MsSql( property, property.Name );
     public static Descriptor MsSql( PropertyInfo property, in string name ) =>
         new(name, IsDbKey( property ), $" {name} ", $" @{name} ", $" {name} = @{name} ", GetTablePropertyValue( property ));
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ] public static Descriptor Postgres( PropertyInfo property ) => Postgres( property, property.Name );
-
-
-    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
+    public static Descriptor Postgres( PropertyInfo property ) => Postgres( property, property.Name );
     public static Descriptor Postgres( PropertyInfo property, in string name ) =>
         new(name, IsDbKey( property ), $" \"{name}\" ", $" @{name} ", $" \"{name}\" = @{name} ", GetTablePropertyValue( property ));
 }

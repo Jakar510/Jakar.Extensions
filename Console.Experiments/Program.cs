@@ -1,19 +1,30 @@
-﻿using Jakar.Database;
-
-
-try
+﻿try
 {
     "Hello World!".WriteToConsole();
     Console.WriteLine();
+    /*
+#pragma warning disable OpenTelemetry // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+    Jakar.Database.Activities.Tags.Print();
+#pragma warning restore OpenTelemetry // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+    */
 
-    await TestDatabase.Test();
+
+    // Tests.Test_Hashes();
+
+    // await Tests.Test_ConcurrentObservableCollection();
+
+    // Jakar.Database.TestDatabase.TestAsync();
 
     // JsonTest.Run();
 
-    // BenchmarkRunner.Run<StringCollectionBenchmarks>();
+    // BenchmarkRunner.Run<SpansBenchmarks>();
+
+    // BenchmarkRunner.Run( typeof(Program).Assembly ); //, new BenchmarkConfig()
 
     // ULongHashTests.Run( 100_000_000 )
     //               .WriteToDebug();
+
+    foreach ( string name in typeof(Spans).GetMethods().Select( x => x.Name ).Distinct() ) { Console.WriteLine( name ); }
 }
 catch ( Exception e ) { e.WriteToConsole(); }
 finally { "Bye".WriteToConsole(); }

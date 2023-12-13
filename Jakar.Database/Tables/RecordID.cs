@@ -2,7 +2,6 @@
 // 08/20/2023  9:16 PM
 
 
-using System.Text.Json;
 using JsonSerializer = Newtonsoft.Json.JsonSerializer;
 
 
@@ -10,26 +9,41 @@ using JsonSerializer = Newtonsoft.Json.JsonSerializer;
 namespace Jakar.Database;
 
 
-// [System.Text.Json.Serialization.JsonConverter( typeof(RecordIDSystemTextJsonConverter) )]
-// [TypeConverter( typeof(RecordIDTypeConverter) )]
-// [JsonConverter( typeof(RecordIDJsonNetConverter) )]
-public readonly record struct RecordID<TRecord>( Guid Value ) : IComparable<RecordID<TRecord>>, ISpanFormattable where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
+[ DefaultMember( nameof(Empty) ) ]
+public readonly record struct RecordID<TRecord>( Guid Value ) : IComparable<RecordID<TRecord>>, ISpanFormattable, IRegisterDapperTypeHandlers
+    where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
-    public static readonly RecordID<TRecord> Empty = new(Guid.Empty);
-    public static          RecordID<TRecord> New()                     => new(Guid.NewGuid());
-    public static          RecordID<TRecord> New( Guid          id )   => new(id);
-    public static          RecordID<TRecord> FromString( string guid ) => new(Guid.Parse( guid ));
+    public static          ValueEqualizer<RecordID<TRecord>> Equalizer => ValueEqualizer<RecordID<TRecord>>.Default;
+    public static          ValueSorter<RecordID<TRecord>>    Sorter    => ValueSorter<RecordID<TRecord>>.Default;
+    public static readonly RecordID<TRecord>                 Empty = new(Guid.Empty);
 
-
-    public static RecordID<TRecord>  ID( DbDataReader        reader ) => new(reader.GetFieldValue<Guid>( nameof(IUniqueID<Guid>.ID) ));
-    public static RecordID<TRecord>? CreatedBy( DbDataReader reader ) => TryCreate( reader.GetFieldValue<Guid?>( nameof(IOwnedTableRecord.CreatedBy) ) );
+    [ Pure ] public static RecordID<TRecord>  New()                                                    => Create( Guid.NewGuid() );
+    [ Pure ] public static RecordID<TRecord>  Parse( in ReadOnlySpan<char> value )                     => Create( Guid.Parse( value ) );
+    [ Pure ] public static RecordID<TRecord>  Create( Guid                 id )                        => new(id);
+    [ Pure ] public static RecordID<TRecord>  ID( DbDataReader             reader )                    => new(reader.GetFieldValue<Guid>( SQL.ID ));
+    [ Pure ] public static RecordID<TRecord>? CreatedBy( DbDataReader      reader )                    => TryCreate( reader, SQL.CREATED_BY );
+    [ Pure ] public static RecordID<TRecord>? TryCreate( DbDataReader      reader, string columnName ) => TryCreate( reader.GetFieldValue<Guid?>( columnName ) );
+    [ Pure ]
     public static RecordID<TRecord>? TryCreate( [ NotNullIfNotNull( nameof(id) ) ] Guid? id ) => id.HasValue
                                                                                                      ? new RecordID<TRecord>( id.Value )
                                                                                                      : default;
+    [ Pure ]
+    public static bool TryParse( in ReadOnlySpan<char> value, [ NotNullWhen( true ) ] out RecordID<TRecord>? id )
+    {
+        if ( Guid.TryParse( value, out Guid guid ) )
+        {
+            id = new RecordID<TRecord>( guid );
+            return true;
+        }
+
+        id = default(RecordID<TRecord>);
+        return false;
+    }
 
 
     public static implicit operator RecordID<TRecord>( TRecord record ) => new(record.ID.Value);
 
+    [ Pure ]
     public DynamicParameters ToDynamicParameters()
     {
         DynamicParameters parameters = new();
@@ -38,8 +52,8 @@ public readonly record struct RecordID<TRecord>( Guid Value ) : IComparable<Reco
     }
 
 
-    public bool IsValid()    => Guid.Empty.Equals( Value ) is false;
-    public bool IsNotValid() => Guid.Empty.Equals( Value );
+    [ Pure ] public bool IsValid()    => Guid.Empty.Equals( Value ) is false;
+    [ Pure ] public bool IsNotValid() => Guid.Empty.Equals( Value );
 
 
     public override string ToString() => Value.ToString();
@@ -58,6 +72,13 @@ public readonly record struct RecordID<TRecord>( Guid Value ) : IComparable<Reco
     public override int  GetHashCode()                        => Value.GetHashCode();
 
 
+    public static void RegisterDapperTypeHandlers()
+    {
+        NullableDapperTypeHandler.Register();
+        DapperTypeHandler.Register();
+    }
+
+
 
     public class DapperTypeHandler : SqlConverter<DapperTypeHandler, RecordID<TRecord>>
     {
@@ -74,7 +95,7 @@ public readonly record struct RecordID<TRecord>( Guid Value ) : IComparable<Reco
 
 
 
-    public class RecordIDJsonNetConverter : JsonConverter<RecordID<TRecord>>
+    public class JsonNetConverter : JsonConverter<RecordID<TRecord>>
     {
         public override RecordID<TRecord> ReadJson( JsonReader reader, Type objectType, RecordID<TRecord> existingValue, bool hasExistingValue, JsonSerializer serializer )
         {
@@ -90,18 +111,23 @@ public readonly record struct RecordID<TRecord>( Guid Value ) : IComparable<Reco
 
 
 
-    public class RecordIDSystemTextJsonConverter : System.Text.Json.Serialization.JsonConverter<RecordID<TRecord>>
+    public class NullableDapperTypeHandler : SqlConverter<NullableDapperTypeHandler, RecordID<TRecord>?>
     {
-        public override RecordID<TRecord> Read( ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options ) => Guid.TryParse( reader.GetString(), out Guid id )
-                                                                                                                                      ? new RecordID<TRecord>( id )
-                                                                                                                                      : default;
+        public override void SetValue( IDbDataParameter parameter, RecordID<TRecord>? value ) => parameter.Value = value?.Value;
 
-        public override void Write( Utf8JsonWriter writer, RecordID<TRecord> value, JsonSerializerOptions options ) => writer.WriteStringValue( value.Value );
+        public override RecordID<TRecord>? Parse( object value ) =>
+            value switch
+            {
+                null                                                                                                          => default,
+                Guid guidValue                                                                                                => new RecordID<TRecord>( guidValue ),
+                string stringValue when !string.IsNullOrEmpty( stringValue ) && Guid.TryParse( stringValue, out Guid result ) => new RecordID<TRecord>( result ),
+                _                                                                                                             => throw new InvalidCastException( $"Unable to cast object of type {value.GetType()} to RecordID<TRecord>" )
+            };
     }
 
 
 
-    public class RecordIDTypeConverter : TypeConverter
+    public class TypeConverter : System.ComponentModel.TypeConverter
     {
         public override bool CanConvertFrom( ITypeDescriptorContext? context, Type sourceType ) => sourceType == typeof(Guid) || sourceType == typeof(string) || base.CanConvertFrom( context, sourceType );
 

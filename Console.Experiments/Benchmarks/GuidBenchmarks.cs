@@ -2,6 +2,8 @@
 // 04/25/2022  9:42 PM
 
 namespace Experiments.Benchmarks;
+#pragma warning disable CA1822
+
 
 
 /*
@@ -23,20 +25,13 @@ public class GuidBenchmarks
     private const string GUID = "0365BC9B-3DE3-4B75-9F7E-2A0F23EFA5A2";
 
 
-    [ Benchmark ] public Guid  StringParse() => Guid.Parse( GUID );
-    [ Benchmark ] public Guid? SpanParse()   => _b64.AsGuid();
-
-
     [ Benchmark ]
-    public Memory<byte>? AsMemory() => _guid.TryWriteBytes( out Memory<byte> memory )
-                                           ? memory
-                                           : default;
-    [ Benchmark ] public     string  AsBase64() => _guid.ToBase64();
-    [ Benchmark ] public new string? ToString() => _guid.ToString();
+    public ReadOnlySpan<byte> TryWriteBytes() => _guid.TryWriteBytes( out ReadOnlySpan<byte> memory )
+                                                     ? memory
+                                                     : default;
+    [ Benchmark ] public     Guid    StringParse() => Guid.Parse( GUID );
+    [ Benchmark ] public     Guid?   SpanParse()   => _b64.AsGuid();
+    [ Benchmark ] public     string  AsBase64()    => _guid.ToBase64();
+    [ Benchmark ] public new string? ToString()    => _guid.ToString();
 }
-
-
-
-/*
-
- */
+#pragma warning restore CA1822

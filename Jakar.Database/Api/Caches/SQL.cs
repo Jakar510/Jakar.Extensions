@@ -1,6 +1,10 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 10/15/2023  1:13 PM
 
+using System.Collections.Frozen;
+
+
+
 namespace Jakar.Database;
 
 
@@ -26,10 +30,10 @@ public static class SQL
                                                                : OR;
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ] public static int GetHash( this DynamicParameters parameters ) => parameters.ParameterNames.GetHash();
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static int GetHash( this DynamicParameters parameters ) => parameters.ParameterNames.GetHash();
 
     /*
-    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
     public static ulong GetHash( this IEnumerable<string> parameters )
     {
         using var sb = new ValueStringBuilder( 1000 );
@@ -46,7 +50,7 @@ public static class SQL
         return hash;
     }
 
-   [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
+   [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
    public static ulong GetLongHash<T>( this IEnumerable<T> values )
    {
        ulong hash = OFFSET_BASIS;
@@ -64,7 +68,7 @@ public static class SQL
     */
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
     public static int GetHash<T>( this IEnumerable<T> values )
     {
         var hash = new HashCode();
@@ -74,7 +78,7 @@ public static class SQL
     }
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
     public static string GetCreatedBy( this DbInstance instance ) =>
         instance switch
         {
@@ -84,7 +88,7 @@ public static class SQL
         };
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
     public static string GetID_ColumnName( this DbInstance instance ) =>
         instance switch
         {
@@ -94,7 +98,7 @@ public static class SQL
         };
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
     public static string GetLastModified( this DbInstance instance ) =>
         instance switch
         {
@@ -104,7 +108,7 @@ public static class SQL
         };
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
     public static string GetOwnerUserID( this DbInstance instance ) =>
         instance switch
         {
@@ -114,9 +118,9 @@ public static class SQL
         };
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
     public static string GetTableName<TRecord>( this DbInstance instance )
-        where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord> =>
+        where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord> =>
         instance switch
         {
             DbInstance.Postgres => $"{QUOTE}{TRecord.TableName}{QUOTE}",
@@ -125,7 +129,7 @@ public static class SQL
         };
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
     public static string GetRandomMethod( this DbInstance instance ) =>
         instance switch
         {
@@ -135,7 +139,7 @@ public static class SQL
         };
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
     public static string GetDateCreated( this DbInstance instance ) =>
         instance switch
         {
@@ -145,38 +149,37 @@ public static class SQL
         };
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
-    public static ImmutableDictionary<DbInstance, ImmutableDictionary<string, Descriptor>> CreateDescriptorMapping( this Type type )
+    public static FrozenDictionary<DbInstance, FrozenDictionary<string, Descriptor>> CreateDescriptorMapping( this Type type )
     {
         const BindingFlags ATTRIBUTES = BindingFlags.Instance | BindingFlags.Public | BindingFlags.SetProperty | BindingFlags.GetProperty;
 
-        PropertyInfo[] properties = type.GetProperties( ATTRIBUTES ).Where( x => !x.HasAttribute<DataBaseIgnoreAttribute>() ).ToArray();
+        PropertyInfo[] properties = type.GetProperties( ATTRIBUTES ).Where( static x => !x.HasAttribute<DataBaseIgnoreAttribute>() ).ToArray();
 
         Debug.Assert( properties.Length > 0 );
         Debug.Assert( properties.Any( Descriptor.IsDbKey ) );
 
-        return new Dictionary<DbInstance, ImmutableDictionary<string, Descriptor>>
+        return new Dictionary<DbInstance, FrozenDictionary<string, Descriptor>>
                {
-                   [DbInstance.Postgres] = properties.ToImmutableDictionary( x => x.Name, Descriptor.Postgres ),
-                   [DbInstance.MsSql]    = properties.ToImmutableDictionary( x => x.Name, Descriptor.MsSql )
-               }.ToImmutableDictionary();
+                   [DbInstance.Postgres] = properties.ToFrozenDictionary( static x => x.Name, Descriptor.Postgres ),
+                   [DbInstance.MsSql]    = properties.ToFrozenDictionary( static x => x.Name, Descriptor.MsSql )
+               }.ToFrozenDictionary();
     }
 
-    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
-    public static ImmutableDictionary<DbInstance, ImmutableDictionary<string, Descriptor>> CreateDescriptorMapping<TRecord>()
+
+    public static FrozenDictionary<DbInstance, FrozenDictionary<string, Descriptor>> CreateDescriptorMapping<TRecord>()
         where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
     {
         const BindingFlags ATTRIBUTES = BindingFlags.Instance | BindingFlags.Public | BindingFlags.SetProperty | BindingFlags.GetProperty;
 
-        PropertyInfo[] properties = typeof(TRecord).GetProperties( ATTRIBUTES ).Where( x => !x.HasAttribute<DataBaseIgnoreAttribute>() ).ToArray();
+        PropertyInfo[] properties = typeof(TRecord).GetProperties( ATTRIBUTES ).Where( static x => !x.HasAttribute<DataBaseIgnoreAttribute>() ).ToArray();
 
         Debug.Assert( properties.Length > 0 );
         Debug.Assert( properties.Any( Descriptor.IsDbKey ) );
 
-        return new Dictionary<DbInstance, ImmutableDictionary<string, Descriptor>>
+        return new Dictionary<DbInstance, FrozenDictionary<string, Descriptor>>
                {
-                   [DbInstance.Postgres] = properties.ToImmutableDictionary( x => x.Name, Descriptor.Postgres ),
-                   [DbInstance.MsSql]    = properties.ToImmutableDictionary( x => x.Name, Descriptor.MsSql )
-               }.ToImmutableDictionary( EqualityComparer<DbInstance>.Default );
+                   [DbInstance.Postgres] = properties.ToFrozenDictionary( static x => x.Name, Descriptor.Postgres ),
+                   [DbInstance.MsSql]    = properties.ToFrozenDictionary( static x => x.Name, Descriptor.MsSql )
+               }.ToFrozenDictionary( EqualityComparer<DbInstance>.Default );
     }
 }

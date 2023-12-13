@@ -16,7 +16,7 @@ public partial class DbTable<TRecord>
     [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public virtual async ValueTask<TRecord?> Random( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
-        SqlCommand sql = Cache.Random();
+        SqlCommand sql = SqlCache.Random();
 
         try
         {
@@ -30,7 +30,7 @@ public partial class DbTable<TRecord>
     [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public virtual IAsyncEnumerable<TRecord> Random( DbConnection connection, DbTransaction? transaction, UserRecord user, int count, [ EnumeratorCancellation ] CancellationToken token = default )
     {
-        SqlCommand sql = Cache.Random( user.OwnerUserID, count );
+        SqlCommand sql = SqlCache.Random( user.OwnerUserID, count );
         return Where( connection, transaction, sql, token );
     }
 
@@ -38,7 +38,7 @@ public partial class DbTable<TRecord>
     [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
     public virtual IAsyncEnumerable<TRecord> Random( DbConnection connection, DbTransaction? transaction, int count, [ EnumeratorCancellation ] CancellationToken token = default )
     {
-        SqlCommand sql = Cache.Random( count );
+        SqlCommand sql = SqlCache.Random( count );
         return Where( connection, transaction, sql, token );
     }
 }

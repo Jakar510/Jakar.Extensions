@@ -2,7 +2,8 @@
 
 
 [ Serializable ]
-public sealed class RecordCollection<TRecord> : IReadOnlyList<TRecord> where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>
+public sealed class RecordCollection<TRecord> : IReadOnlyList<TRecord>
+    where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
     private readonly List<TRecord> _records = new();
     public           int           Count => _records.Count;

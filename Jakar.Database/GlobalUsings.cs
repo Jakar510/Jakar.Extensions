@@ -61,6 +61,7 @@ global using Microsoft.AspNetCore.Mvc.ModelBinding;
 global using Microsoft.CodeAnalysis;
 global using Microsoft.IdentityModel.Tokens;
 global using OneOf;
+global using CommandFlags = Dapper.CommandFlags;
 global using ConnectionStringOptions =
     OneOf.OneOf<Jakar.Extensions.SecuredString, System.Func<Jakar.Extensions.SecuredString>, System.Func<System.Threading.CancellationToken, System.Threading.Tasks.Task<Jakar.Extensions.SecuredString>>,
         System.Func<System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<Jakar.Extensions.SecuredString>>, System.Func<Microsoft.Extensions.Configuration.IConfiguration, Jakar.Extensions.SecuredString>,

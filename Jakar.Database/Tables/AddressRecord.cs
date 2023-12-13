@@ -4,27 +4,29 @@
 namespace Jakar.Database;
 
 
-public sealed record AddressRecord( [ property: ProtectedPersonalData, MaxLength( 512 ) ]  string Line1,
-                                    [ property: ProtectedPersonalData, MaxLength( 512 ) ]  string Line2,
-                                    [ property: ProtectedPersonalData, MaxLength( 256 ) ]  string City,
-                                    [ property: ProtectedPersonalData, MaxLength( 256 ) ]  string StateOrProvince,
-                                    [ property: ProtectedPersonalData, MaxLength( 256 ) ]  string Country,
-                                    [ property: ProtectedPersonalData, MaxLength( 256 ) ]  string PostalCode,
-                                    [ property: ProtectedPersonalData, MaxLength( 4096 ) ] string Address,
-                                    bool                                                          IsPrimary,
-                                    IDictionary<string, JToken?>?                                 AdditionalData,
-                                    RecordID<AddressRecord>                                       ID,
-                                    RecordID<UserRecord>?                                         CreatedBy,
-                                    Guid?                                                         OwnerUserID,
-                                    DateTimeOffset                                                DateCreated,
-                                    DateTimeOffset?                                               LastModified = default
+public sealed record AddressRecord(
+    [ property: ProtectedPersonalData ] string Line1,
+    [ property: ProtectedPersonalData ] string Line2,
+    [ property: ProtectedPersonalData ] string City,
+    [ property: ProtectedPersonalData ] string StateOrProvince,
+    [ property: ProtectedPersonalData ] string Country,
+    [ property: ProtectedPersonalData ] string PostalCode,
+    [ property: ProtectedPersonalData ] string Address,
+    bool                                       IsPrimary,
+    IDictionary<string, JToken?>?              AdditionalData,
+    RecordID<AddressRecord>                    ID,
+    RecordID<UserRecord>?                      CreatedBy,
+    Guid?                                      OwnerUserID,
+    DateTimeOffset                             DateCreated,
+    DateTimeOffset?                            LastModified = default
 ) : OwnedTableRecord<AddressRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IAddress, IEquatable<IAddress>, IDbReaderMapping<AddressRecord>
 {
-    public static string                        TableName      { get; }      = typeof(AddressRecord).GetTableName();
-    public        IDictionary<string, JToken?>? AdditionalData { get; set; } = AdditionalData;
-    Guid? IAddress.                             UserID         => OwnerUserID;
+    public static string                 TableName      { get; } = typeof(AddressRecord).GetTableName();
+    Guid? IAddress.                      UserID         => OwnerUserID;
+    public IDictionary<string, JToken?>? AdditionalData { get; set; } = AdditionalData;
 
 
+    [ Pure ]
     public override DynamicParameters ToDynamicParameters()
     {
         var parameters = base.ToDynamicParameters();
@@ -38,22 +40,23 @@ public sealed record AddressRecord( [ property: ProtectedPersonalData, MaxLength
         return parameters;
     }
 
+    [ Pure ]
     public static AddressRecord Create( DbDataReader reader )
     {
-        string                  line1           = reader.GetString( nameof(Line1) );
-        string                  line2           = reader.GetString( nameof(Line2) );
-        string                  city            = reader.GetString( nameof(City) );
-        string                  stateOrProvince = reader.GetString( nameof(StateOrProvince) );
-        string                  country         = reader.GetString( nameof(Country) );
-        string                  postalCode      = reader.GetString( nameof(PostalCode) );
-        string                  address         = reader.GetString( nameof(Address) );
-        var                     additionalData  = JsonConvert.DeserializeObject<Dictionary<string, JToken?>>( reader.GetString( nameof(AdditionalData) ) );
-        bool                    isPrimary       = reader.GetFieldValue<bool>( nameof(IsPrimary) );
-        RecordID<AddressRecord> id              = RecordID<AddressRecord>.ID( reader );
-        RecordID<UserRecord>?   createdBy       = RecordID<UserRecord>.CreatedBy( reader );
-        var                     ownerUserID     = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
-        var                     dateCreated     = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
-        var                     lastModified    = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
+        string                        line1           = reader.GetFieldValue<string>( nameof(Line1) );
+        string                        line2           = reader.GetFieldValue<string>( nameof(Line2) );
+        string                        city            = reader.GetFieldValue<string>( nameof(City) );
+        string                        stateOrProvince = reader.GetFieldValue<string>( nameof(StateOrProvince) );
+        string                        country         = reader.GetFieldValue<string>( nameof(Country) );
+        string                        postalCode      = reader.GetFieldValue<string>( nameof(PostalCode) );
+        string                        address         = reader.GetFieldValue<string>( nameof(Address) );
+        IDictionary<string, JToken?>? additionalData  = reader.GetAdditionalData();
+        bool                          isPrimary       = reader.GetFieldValue<bool>( nameof(IsPrimary) );
+        RecordID<AddressRecord>       id              = RecordID<AddressRecord>.ID( reader );
+        RecordID<UserRecord>?         createdBy       = RecordID<UserRecord>.CreatedBy( reader );
+        var                           ownerUserID     = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
+        var                           dateCreated     = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
+        var                           lastModified    = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
 
         var record = new AddressRecord( line1,
                                         line2,
@@ -73,12 +76,14 @@ public sealed record AddressRecord( [ property: ProtectedPersonalData, MaxLength
         record.Validate();
         return record;
     }
+    [ Pure ]
     public static async IAsyncEnumerable<AddressRecord> CreateAsync( DbDataReader reader, [ EnumeratorCancellation ] CancellationToken token = default )
     {
         while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
     }
 
 
+    [ Pure ]
     public static async ValueTask<AddressRecord?> TryFromClaims( DbConnection connection, DbTransaction transaction, Database db, Claim[] claims, ClaimType types, CancellationToken token )
     {
         var parameters = new DynamicParameters();
@@ -95,6 +100,7 @@ public sealed record AddressRecord( [ property: ProtectedPersonalData, MaxLength
 
         return await db.Addresses.Get( connection, transaction, true, parameters, token );
     }
+    [ Pure ]
     public static async IAsyncEnumerable<AddressRecord> TryFromClaims( DbConnection connection, DbTransaction transaction, Database db, Claim claim, [ EnumeratorCancellation ] CancellationToken token )
     {
         var parameters = new DynamicParameters();
@@ -127,6 +133,7 @@ public sealed record AddressRecord( [ property: ProtectedPersonalData, MaxLength
 
 
     // TODO: public static async IAsyncEnumerable<Claim> GetUserClaims( DbConnection connection, DbTransaction? transaction, Database db, ClaimType types, RecordID<UserRecord> id, CancellationToken token ) { }
+    [ Pure ]
     public IEnumerable<Claim> GetUserClaims( ClaimType types )
     {
         if ( types.HasFlag( ClaimType.StreetAddressLine1 ) ) { yield return new Claim( ClaimTypes.StreetAddress, Line1, ClaimValueTypes.String ); }
@@ -141,6 +148,7 @@ public sealed record AddressRecord( [ property: ProtectedPersonalData, MaxLength
     }
 
 
+    [ Pure ]
     public AddressRecord WithUserData( IAddress value ) =>
         this with
         {

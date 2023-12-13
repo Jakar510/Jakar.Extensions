@@ -8,8 +8,8 @@ public abstract partial class Database
 {
     [ SuppressMessage( "ReSharper", "UnusedParameter.Global" ) ]
     public virtual ValueTask<DateTimeOffset?> GetSubscriptionExpiration( DbConnection connection, DbTransaction? transaction, UserRecord record, CancellationToken token = default ) => new(default(DateTimeOffset?));
-    public virtual ValueTask<TRecord> GetSubscription<TRecord>( DbConnection connection, DbTransaction? transaction, UserRecord record, CancellationToken token = default ) where TRecord : UserSubscription<TRecord>, IDbReaderMapping<TRecord> =>
-        default;
+    public virtual ValueTask<TRecord?> TryGetSubscription<TRecord>( DbConnection connection, DbTransaction? transaction, UserRecord record, CancellationToken token = default )
+        where TRecord : UserSubscription<TRecord>, IDbReaderMapping<TRecord> => default;
 
 
     /// <summary> </summary>
@@ -25,7 +25,7 @@ public abstract partial class Database
 
         try
         {
-            if ( !record.VerifyPassword( request.UserPassword ) )
+            if ( UserRecord.VerifyPassword( ref record, request ) is false )
             {
                 record = record.MarkBadLogin();
                 return LoginResult.State.BadCredentials;
@@ -134,7 +134,7 @@ public abstract partial class Database
         if ( request.Data is null ) { return new Error( Status.BadRequest, $"{nameof(request.Data)} is null" ); }
 
         UserRecord? record = await Users.Get( connection, transaction, true, UserRecord.GetDynamicParameters( request ), token );
-        if ( record is not null ) { return new Error( Status.Conflict, $"{nameof(UserRecord.UserName)} is already taken. Chose another {nameof(request.UserLogin)}" ); }
+        if ( record is not null ) { return new Error( Status.Conflict, $"{nameof(UserRecord.UserName)} is already taken. Chose another {nameof(request.UserName)}" ); }
 
         record = CreateNewUser( request );
         record = await Users.Insert( connection, transaction, record, token );

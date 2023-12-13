@@ -15,6 +15,7 @@ global using System.Runtime.CompilerServices;
 global using System.Runtime.InteropServices;
 global using Hardware.Info;
 global using Jakar.Extensions;
+global using Microsoft.Extensions.Hosting;
 global using Microsoft.Extensions.Logging;
 global using Microsoft.Extensions.Options;
 global using Newtonsoft.Json;

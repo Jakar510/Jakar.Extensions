@@ -1,15 +1,13 @@
-using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using NUnit.Framework;
 
 
 
 namespace Jakar.Extensions.Tests;
 
 
-[ TestFixture ]
+[ TestFixture, TestOf( typeof(TypeExtensions) ) ]
 
 // ReSharper disable once InconsistentNaming
 public class IsSet_Tests : Assert
@@ -20,8 +18,7 @@ public class IsSet_Tests : Assert
     public void IsSet_Test( Type objType, bool expected )
     {
         objType.GetInterfaces().PrintJson().WriteToConsole();
-
-        AreEqual( objType.IsSet(), expected );
+        That( objType.IsSet(), Is.EqualTo( expected ) );
     }
 
 
@@ -31,10 +28,10 @@ public class IsSet_Tests : Assert
     {
         if ( objType.IsSet( out Type? itemType ) )
         {
-            AreEqual( itemType, expected );
+            That( itemType, Is.EqualTo( expected ) );
             return;
         }
 
-        IsNull( expected );
+        That( expected, Is.Null );
     }
 }

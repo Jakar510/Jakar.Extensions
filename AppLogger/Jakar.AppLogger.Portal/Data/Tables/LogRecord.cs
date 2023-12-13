@@ -101,4 +101,9 @@ public sealed record LogRecord : LoggerTable<LogRecord>, IDbReaderMapping<LogRec
 
     public override int CompareTo( LogRecord? other ) => string.CompareOrdinal( Message, other?.Message );
     public override int GetHashCode()                 => HashCode.Combine( Message, base.GetHashCode() );
+
+
 }
+
+
+

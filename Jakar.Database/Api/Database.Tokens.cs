@@ -47,7 +47,7 @@ public abstract partial class Database
     public ValueTask<Tokens?> Authenticate( VerifyRequest request, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default ) => this.TryCall( Authenticate, request, types, token );
     protected virtual async ValueTask<Tokens?> Authenticate( DbConnection connection, DbTransaction transaction, VerifyRequest request, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default )
     {
-        UserRecord? user = await Users.Get( nameof(UserRecord.UserName), request.UserLogin, token );
+        UserRecord? user = await Users.Get( nameof(UserRecord.UserName), request.UserName, token );
         if ( user is null ) { return default; }
 
         if ( !await ValidateSubscription( connection, transaction, user, token ) ) { return default; }
@@ -69,7 +69,7 @@ public abstract partial class Database
         }
 
 
-        if ( user.VerifyPassword( request.UserPassword ) ) { return await GetToken( connection, transaction, user, types, token ); }
+        if ( UserRecord.VerifyPassword( ref user, request ) ) { return await GetToken( connection, transaction, user, types, token ); }
 
         await Users.Update( connection, transaction, user, token );
         return default;
@@ -143,7 +143,7 @@ public abstract partial class Database
         string refresh     = handler.WriteToken( handler.CreateToken( refreshDescriptor ) );
 
 
-        record.WithRefreshToken( refresh, refreshExpires );
+        record = record.WithRefreshToken( refresh, refreshExpires );
         await Users.Update( connection, transaction, record, token );
         return new Tokens( record.UserID, record.FullName, Version, accessToken, refresh );
     }
@@ -159,7 +159,7 @@ public abstract partial class Database
 
         if ( !UserRecord.IsHashedRefreshToken( refreshToken, ref record ) )
         {
-            record.MarkBadLogin();
+            record = record.MarkBadLogin();
             await Users.Update( connection, transaction, record, token );
             return new Error( Status.Unauthorized );
         }
@@ -203,7 +203,7 @@ public abstract partial class Database
         if ( validationResult.Exception is not null ) { return new LoginResult( validationResult.Exception ); }
 
 
-        Claim[]     claims = validationResult.ClaimsIdentity.Claims.GetArray();
+        Claim[]     claims = validationResult.ClaimsIdentity.Claims.ToArray();
         UserRecord? record = await UserRecord.TryFromClaims( connection, transaction, this, claims, types | DEFAULT_CLAIM_TYPES, token );
         if ( record is null ) { return new LoginResult( LoginResult.State.NotFound ); }
 

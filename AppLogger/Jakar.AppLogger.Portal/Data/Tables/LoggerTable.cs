@@ -15,7 +15,7 @@ public interface ILoggerTable : JsonModels.IJsonModel
 public abstract record LoggerTable<TRecord>( RecordID<TRecord> ID, DateTimeOffset DateCreated, DateTimeOffset? LastModified ) : TableRecord<TRecord>( ID, DateCreated, LastModified ), ILoggerTable
     where TRecord : LoggerTable<TRecord>, IDbReaderMapping<TRecord>
 {
-    [ JsonExtensionData ] public IDictionary<string, JToken?>? AdditionalData { get; set; }
+    [ Newtonsoft.Json.JsonExtensionData ] public IDictionary<string, JToken?>? AdditionalData { get; set; }
     public                       bool                          IsActive       { get; set; } = true;
     internal                     bool                          IsNotActive    => !IsActive;
     bool ILoggerTable.                                         IsNotActive    => IsNotActive;
@@ -26,14 +26,14 @@ public abstract record LoggerTable<TRecord>( RecordID<TRecord> ID, DateTimeOffse
 
 
 
-public abstract record OwnedLoggerTable<TRecord>
-    ( RecordID<TRecord> ID, RecordID<UserRecord>? CreatedBy, Guid? OwnerUserID, DateTimeOffset DateCreated, DateTimeOffset? LastModified ) : OwnedTableRecord<TRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), ILoggerTable
+public abstract record OwnedLoggerTable<TRecord>( RecordID<TRecord> ID, RecordID<UserRecord>? CreatedBy, Guid? OwnerUserID, DateTimeOffset DateCreated, DateTimeOffset? LastModified )
+    : OwnedTableRecord<TRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), ILoggerTable
     where TRecord : OwnedLoggerTable<TRecord>, IDbReaderMapping<TRecord>
 {
-    [ JsonExtensionData ] public IDictionary<string, JToken?>? AdditionalData { get; set; }
-    public                       bool                          IsActive       { get; set; } = true;
-    internal                     bool                          IsNotActive    => !IsActive;
-    bool ILoggerTable.                                         IsNotActive    => IsNotActive;
+    [ Newtonsoft.Json.JsonExtensionData ] public IDictionary<string, JToken?>? AdditionalData { get; set; }
+    public                                                      bool        IsActive       { get; set; } = true;
+    internal                                                    bool        IsNotActive    => !IsActive;
+    bool ILoggerTable.                                                      IsNotActive    => IsNotActive;
 
 
     protected OwnedLoggerTable( UserRecord?       owner ) : this( RecordID<TRecord>.New(), owner ) { }

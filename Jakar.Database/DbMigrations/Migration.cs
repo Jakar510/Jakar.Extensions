@@ -8,7 +8,7 @@ namespace Jakar.Database.DbMigrations;
 ///     <para> <see href="https://fluentmigrator.github.io/articles/fluent-interface.html"/> </para>
 /// </summary>
 public abstract class Migration<TRecord> : Migration
-    where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>
+    where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
     public string TableName { get; } = typeof(TRecord).GetTableName();
 
@@ -27,11 +27,11 @@ public abstract class Migration<TRecord> : Migration
     {
         ICreateTableWithColumnSyntax? table = Create.Table( TableName );
 
-        table.WithColumn( nameof(TableRecord<TRecord>.ID) ).AsGuid().PrimaryKey();
+        table.WithColumn( nameof(ITableRecord<TRecord>.ID) ).AsGuid().PrimaryKey();
 
-        table.WithColumn( nameof(TableRecord<TRecord>.DateCreated) ).AsDateTimeOffset().NotNullable().WithDefaultValue( SystemMethods.CurrentUTCDateTime );
+        table.WithColumn( nameof(ITableRecord<TRecord>.DateCreated) ).AsDateTimeOffset().NotNullable().WithDefaultValue( SystemMethods.CurrentUTCDateTime );
 
-        table.WithColumn( nameof(TableRecord<TRecord>.LastModified) ).AsDateTimeOffset().Nullable();
+        table.WithColumn( nameof(ITableRecord<TRecord>.LastModified) ).AsDateTimeOffset().Nullable();
 
         return table;
     }
@@ -61,15 +61,15 @@ public abstract class Migration<TRecord> : Migration
 
 
 public abstract class OwnedMigration<TRecord> : Migration<TRecord>
-    where TRecord : OwnedTableRecord<TRecord>, IDbReaderMapping<TRecord>
+    where TRecord : IOwnedTableRecord, ITableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
     protected override ICreateTableWithColumnSyntax CreateTable()
     {
         ICreateTableWithColumnSyntax table = base.CreateTable();
 
-        table.WithColumn( nameof(OwnedTableRecord<TRecord>.OwnerUserID) ).AsGuid().Nullable();
+        table.WithColumn( nameof(IOwnedTableRecord.OwnerUserID) ).AsGuid().Nullable();
 
-        table.WithColumn( nameof(OwnedTableRecord<TRecord>.CreatedBy) ).AsGuid().Nullable();
+        table.WithColumn( nameof(IOwnedTableRecord.CreatedBy) ).AsGuid().Nullable();
 
         return table;
     }

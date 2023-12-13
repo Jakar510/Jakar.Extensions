@@ -1,6 +1,10 @@
 ﻿// Jakar.Extensions :: Console.Experiments
 // 09/15/2022  11:39 AM
 
+using BenchmarkDotNet.Configs;
+
+
+
 namespace Experiments.Benchmarks;
 
 
@@ -17,11 +21,11 @@ namespace Experiments.Benchmarks;
 
 
 
-[ SimpleJob( RuntimeMoniker.HostProcess ), Orderer( SummaryOrderPolicy.FastestToSlowest ), RankColumn, MemoryDiagnoser ]
+[ Config( typeof(BenchmarkConfig) ), GroupBenchmarksBy( BenchmarkLogicalGroupRule.ByCategory ), SimpleJob( RuntimeMoniker.HostProcess ), Orderer( SummaryOrderPolicy.FastestToSlowest ), RankColumn, MemoryDiagnoser ]
 public class AsyncLinqBenchmarks
 {
     // private readonly Dictionary<long, Guid> _dict = new();
-    private static readonly AsyncEnumerator<long> _data = AsyncLinq.Range( 0L, 10_000 ).AsAsyncEnumerable();
+    private static readonly AsyncEnumerator<long, long[]> _data = AsyncLinq.Range( 0L, 10_000 ).AsAsyncEnumerable();
 
 
     // [Benchmark]

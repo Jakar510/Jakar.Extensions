@@ -1,17 +1,22 @@
-﻿namespace Jakar.Database;
+﻿using System.Collections.Frozen;
 
 
-public class EnumSqlHandler<T> : SqlConverter<EnumSqlHandler<T>, T> where T : struct, Enum
+
+namespace Jakar.Database;
+
+
+public class EnumSqlHandler<T> : SqlConverter<EnumSqlHandler<T>, T>
+    where T : struct, Enum
 {
-    private static readonly IReadOnlyDictionary<long, T>   _longs  = Enum.GetValues<T>().ToDictionary( k => k.AsLong(),   v => v );
-    private static readonly IReadOnlyDictionary<string, T> _names  = Enum.GetValues<T>().ToDictionary( k => k.ToString(), v => v );
-    private static readonly IReadOnlyDictionary<T, string> _values = Enum.GetValues<T>().ToDictionary( k => k,            v => v.ToString() );
+    public static readonly FrozenDictionary<long, T>   Longs  = Enum.GetValues<T>().ToFrozenDictionary( GetLong,    SelectSelf );
+    public static readonly FrozenDictionary<string, T> Names  = Enum.GetValues<T>().ToFrozenDictionary( GetString,  SelectSelf );
+    public static readonly FrozenDictionary<T, string> Values = Enum.GetValues<T>().ToFrozenDictionary( SelectSelf, GetString );
 
 
     public EnumSqlHandler() { }
 
 
-    public static T Parse( string? value ) => _names.TryGetValue( value ?? string.Empty, out T result )
+    public static T Parse( string? value ) => Names.TryGetValue( value ?? string.Empty, out T result )
                                                   ? result
                                                   : Enum.TryParse( value, true, out result )
                                                       ? result
@@ -20,11 +25,11 @@ public class EnumSqlHandler<T> : SqlConverter<EnumSqlHandler<T>, T> where T : st
                                                 {
                                                     null       => default,
                                                     string s   => Parse( s ),
-                                                    byte item  => _longs[item],
-                                                    sbyte item => _longs[item],
-                                                    short item => _longs[item],
-                                                    int item   => _longs[item],
-                                                    long item  => _longs[item],
+                                                    byte item  => Longs[item],
+                                                    sbyte item => Longs[item],
+                                                    short item => Longs[item],
+                                                    int item   => Longs[item],
+                                                    long item  => Longs[item],
                                                     _ => throw new ExpectedValueTypeException( nameof(value),
                                                                                                value,
                                                                                                typeof(byte),
@@ -42,7 +47,7 @@ public class EnumSqlHandler<T> : SqlConverter<EnumSqlHandler<T>, T> where T : st
     {
         if ( parameter.DbType is DbType.String or DbType.StringFixedLength )
         {
-            parameter.Value = _values.TryGetValue( value, out string? result )
+            parameter.Value = Values.TryGetValue( value, out string? result )
                                   ? result
                                   : value.ToString();
 
@@ -59,4 +64,9 @@ public class EnumSqlHandler<T> : SqlConverter<EnumSqlHandler<T>, T> where T : st
         parameter.Value  = item;
         parameter.DbType = DbType.Int64;
     }
+
+
+    private static string GetString( T  k ) => k.ToString();
+    private static long   GetLong( T    k ) => k.AsLong();
+    private static T      SelectSelf( T v ) => v;
 }

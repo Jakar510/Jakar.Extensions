@@ -4,7 +4,7 @@
 		<TargetFramework>net8.0</TargetFramework>
 		<NoWarn>$(NoWarn);1591;IDE0079</NoWarn>
 		<Nullable>enable</Nullable>
-		<LangVersion>latest</LangVersion>
+		<LangVersion>12.0</LangVersion>
 		<OpenApiGenerateDocuments>false</OpenApiGenerateDocuments>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<OpenApiGenerateDocuments>false</OpenApiGenerateDocuments>
@@ -35,10 +35,10 @@
 		<PackageReference Include="Blazored.Video" Version="1.0.1" />
 		<PackageReference Include="BlazorComponentUtilities" Version="1.8.0" />
 		<PackageReference Include="BlazorPro.BlazorSize" Version="6.2.2" />
-		<PackageReference Include="PanoramicData.Blazor" Version="3.1.73" />
-		<PackageReference Include="Radzen.Blazor" Version="4.21.1" />
-		<PackageReference Include="Jakar.Extensions" Version="6.9.2" />
-		<PackageReference Include="Hardware.Info" Version="100.0.0" />
+		<PackageReference Include="PanoramicData.Blazor" Version="8.0.2" />
+		<PackageReference Include="Radzen.Blazor" Version="4.23.2" />
+		<PackageReference Include="Jakar.Extensions" Version="7.5.2" />
+		<PackageReference Include="Hardware.Info" Version="100.0.1" />
 		<PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
 		<PackageReference Include="Microsoft.NETCore.Platforms" Version="7.0.4" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />

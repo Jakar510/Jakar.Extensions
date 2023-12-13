@@ -4,7 +4,7 @@
 namespace Jakar.Database.DbMigrations;
 
 
-public abstract class MigrateUserTable : Migration<UserRecord>
+public abstract class MigrateUserTable : OwnedMigration<UserRecord>
 {
     protected MigrateUserTable() : base() { }
 
@@ -81,7 +81,7 @@ public abstract class MigrateUserTable : Migration<UserRecord>
 
         table.WithColumn( nameof(UserRecord.AdditionalData) ).AsString( int.MaxValue ).Nullable();
 
-        table.WithColumn( nameof(UserRecord.PasswordHash) ).AsString( TokenValidationParameters.DefaultMaximumTokenSizeInBytes ).NotNullable();
+        table.WithColumn( nameof(UserRecord.PasswordHash) ).AsString( UserRecord.ENCRYPTED_MAX_PASSWORD_SIZE ).NotNullable();
 
         table.WithColumn( nameof(UserRecord.Rights) ).AsString( TokenValidationParameters.DefaultMaximumTokenSizeInBytes ).NotNullable();
 
