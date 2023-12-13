@@ -4,30 +4,31 @@
 namespace Jakar.Extensions;
 
 
-public interface IUserData : JsonModels.IJsonModel, IEquatable<IUserData>, IComparable<IUserData>
+public interface IUserData : IEquatable<IUserData>, IComparable<IUserData>
 {
     public static Equalizer<IUserData> Equalizer => Equalizer<IUserData>.Default;
     public static Sorter<IUserData>    Sorter    => Sorter<IUserData>.Default;
 
 
-    [ MaxLength( 256 ) ]                public string            Company           { get; }
-    [ MaxLength( 256 ) ]                public string            Department        { get; }
-    [ MaxLength( 256 ) ]                public string            Description       { get; }
-    [ MaxLength( 1024 ), EmailAddress ] public string            Email             { get; }
-    [ MaxLength( 256 ) ]                public string            Ext               { get; }
-    [ MaxLength( 256 ), Required ]      public string            FirstName         { get; }
-    [ MaxLength( 512 ) ]                public string            FullName          { get; }
-    [ MaxLength( 256 ) ]                public string            Gender            { get; }
-    [ MaxLength( 256 ), Required ]      public string            LastName          { get; }
-    [ MaxLength( 256 ), Phone ]         public string            PhoneNumber       { get; }
-    [ Required ]                        public SupportedLanguage PreferredLanguage { get; }
-    [ MaxLength( 256 ) ]                public string            Title             { get; }
-    [ MaxLength( 4096 ), Url ]          public string            Website           { get; }
+    public                  string            Company           { get; }
+    public                  string            Department        { get; }
+    public                  string            Description       { get; }
+    [ EmailAddress ] public string            Email             { get; }
+    public                  string            Ext               { get; }
+    [ Required ] public     string            FirstName         { get; }
+    public                  string            FullName          { get; }
+    public                  string            Gender            { get; }
+    [ Required ] public     string            LastName          { get; }
+    [ Phone ]    public     string            PhoneNumber       { get; }
+    [ Required ] public     SupportedLanguage PreferredLanguage { get; }
+    public                  string            Title             { get; }
+    [ Url ] public          string            Website           { get; }
 }
 
 
 
-public interface IUserData<out T> : IUserData where T : IUserData<T>
+public interface IUserData<out T> : IUserData
+    where T : IUserData<T>
 {
     public T WithUserData( IUserData value );
 }
@@ -35,7 +36,7 @@ public interface IUserData<out T> : IUserData where T : IUserData<T>
 
 
 [ Serializable ]
-public class UserData : ObservableClass, IUserData<UserData>
+public class UserData : ObservableClass, IUserData<UserData>, JsonModels.IJsonModel
 {
     public const string                        EMPTY_PHONE_NUMBER = "(000) 000-0000";
     private      IDictionary<string, JToken?>? _additionalData;
@@ -63,7 +64,7 @@ public class UserData : ObservableClass, IUserData<UserData>
 
     public ObservableCollection<UserAddress> Addresses { get; init; } = new();
 
-    [ MaxLength( 256 ) ]
+
     public string Company
     {
         get => _company;
@@ -76,7 +77,7 @@ public class UserData : ObservableClass, IUserData<UserData>
         }
     }
 
-    [ MaxLength( 256 ) ]
+
     public string Department
     {
         get => _department;
@@ -89,28 +90,28 @@ public class UserData : ObservableClass, IUserData<UserData>
         }
     }
 
-    [ MaxLength( 256 ) ]
+
     public string Description
     {
         get => _description ??= $"{Department}, {Title} at {Company}";
         set => SetProperty( ref _description, value );
     }
 
-    [ EmailAddress, MaxLength( 1024 ) ]
+    [ EmailAddress ]
     public string Email
     {
         get => _email;
         set => SetProperty( ref _email, value );
     }
 
-    [ MaxLength( 256 ) ]
+
     public string Ext
     {
         get => _ext;
         set => SetProperty( ref _ext, value );
     }
 
-    [ Required, MaxLength( 256 ) ]
+    [ Required ]
     public string FirstName
     {
         get => _firstName;
@@ -123,14 +124,14 @@ public class UserData : ObservableClass, IUserData<UserData>
         }
     }
 
-    [ MaxLength( 512 ) ]
+
     public string FullName
     {
         get => _fullName ??= $"{FirstName} {LastName}";
         set => SetProperty( ref _fullName, value );
     }
 
-    [ MaxLength( 256 ) ]
+
     public string Gender
     {
         get => _gender;
@@ -142,7 +143,7 @@ public class UserData : ObservableClass, IUserData<UserData>
     [ JsonIgnore ] public bool IsValidPhoneNumber => !string.IsNullOrEmpty( PhoneNumber );
     [ JsonIgnore ] public bool IsValidWebsite     => Uri.TryCreate( Website, UriKind.RelativeOrAbsolute, out _ );
 
-    [ Required, MaxLength( 256 ) ]
+    [ Required ]
     public string LastName
     {
         get => _lastName;
@@ -155,7 +156,7 @@ public class UserData : ObservableClass, IUserData<UserData>
         }
     }
 
-    [ Phone, MaxLength( 256 ) ]
+    [ Phone ]
     public string PhoneNumber
     {
         get => _phoneNumber;
@@ -169,7 +170,7 @@ public class UserData : ObservableClass, IUserData<UserData>
         set => SetProperty( ref _preferredLanguage, value );
     }
 
-    [ MaxLength( 256 ) ]
+
     public string Title
     {
         get => _title;
@@ -182,7 +183,7 @@ public class UserData : ObservableClass, IUserData<UserData>
         }
     }
 
-    [ Url, MaxLength( 4096 ) ]
+    [ Url ]
     public string Website
     {
         get => _website;
@@ -222,10 +223,12 @@ public class UserData : ObservableClass, IUserData<UserData>
         Company           = value.Company;
         PreferredLanguage = value.PreferredLanguage;
 
-        if ( value.AdditionalData is null ) { return this; }
+
+        IDictionary<string, JToken?>? data = (value as JsonModels.IJsonModel)?.AdditionalData;
+        if ( data is null ) { return this; }
 
         AdditionalData ??= new Dictionary<string, JToken?>();
-        foreach ( (string key, JToken? jToken) in value.AdditionalData ) { AdditionalData[key] = jToken; }
+        foreach ( (string key, JToken? jToken) in data ) { AdditionalData[key] = jToken; }
 
         return this;
     }
@@ -237,8 +240,7 @@ public class UserData : ObservableClass, IUserData<UserData>
 
         if ( ReferenceEquals( this, other ) ) { return true; }
 
-        return Equals( _additionalData, other.AdditionalData )                            &&
-               string.Equals( _company,     other.Company,     StringComparison.Ordinal ) &&
+        return string.Equals( _company,     other.Company,     StringComparison.Ordinal ) &&
                string.Equals( _department,  other.Department,  StringComparison.Ordinal ) &&
                string.Equals( _description, other.Description, StringComparison.Ordinal ) &&
                string.Equals( _email,       other.Email,       StringComparison.Ordinal ) &&

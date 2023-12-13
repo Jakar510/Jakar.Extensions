@@ -1,41 +1,15 @@
-﻿namespace Jakar.Extensions;
+﻿using System.Reflection.Metadata;
+
+
+
+namespace Jakar.Extensions;
 
 
 public static class ExceptionExtensions
 {
-    public static Dictionary<string, JToken?> GetData( this Exception e )
-    {
-        var data = new Dictionary<string, JToken?>();
-
-        // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
-        foreach ( DictionaryEntry pair in e.Data )
-        {
-            // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
-            // ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
-            string? key = pair.Key?.ToString();
-            if ( key is null ) { continue; }
-
-            data[key] = pair.Value is null
-                            ? null
-                            : JToken.FromObject( pair.Value );
-        }
-
-        return data;
-    }
-
-
-    [ Obsolete( $"Use {nameof(ExceptionDetails)} instead" ) ]
-    public static Dictionary<string, object?> FullDetails( this Exception e, bool includeFullMethodInfo )
-    {
-        if ( e is null ) { throw new ArgumentNullException( nameof(e) ); }
-
-        e.Details( out Dictionary<string, object?> dict, includeFullMethodInfo );
-
-        dict[nameof(e.InnerException)] = e.GetInnerExceptions( includeFullMethodInfo );
-
-        return dict;
-    }
-
+#if NET6_0_OR_GREATER
+    [ RequiresUnreferencedCode( nameof(GetInnerExceptions) ) ]
+#endif
     private static Dictionary<string, object?> GetInnerExceptions( this Exception e, ref Dictionary<string, object?> dict, bool includeFullMethodInfo )
     {
         if ( e is null ) { throw new NullReferenceException( nameof(e) ); }
@@ -50,6 +24,9 @@ public static class ExceptionExtensions
     }
 
 
+#if NET6_0_OR_GREATER
+    [ RequiresUnreferencedCode( nameof(GetProperties) ) ]
+#endif
     public static Dictionary<string, object?> GetProperties( this Exception e )
     {
         var dictionary = new Dictionary<string, object?>();
@@ -60,21 +37,23 @@ public static class ExceptionExtensions
     }
 
 
-    private static Dictionary<string, object?>? GetInnerExceptions( this Exception e, bool includeFullMethodInfo )
-    {
-        if ( e.InnerException is null ) { return null; }
-
-        var innerDetails = new Dictionary<string, object?>();
-
-        return e.InnerException.GetInnerExceptions( ref innerDetails, includeFullMethodInfo );
-    }
+#if NET6_0_OR_GREATER
+    [ RequiresUnreferencedCode( nameof(Details) ) ]
+#endif
+    public static ExceptionDetails Details( this Exception e ) => new(e);
 
 
-    public static ExceptionDetails Details( this     Exception e ) => new(e);
+#if NET6_0_OR_GREATER
+    [ RequiresUnreferencedCode( nameof(FullDetails) ) ]
+#endif
     public static ExceptionDetails FullDetails( this Exception e ) => new(e, true);
+
+#if NET6_0_OR_GREATER
+    [ RequiresUnreferencedCode( nameof(Frames) ) ]
+#endif
     public static IEnumerable<string> Frames( StackTrace trace )
     {
-        foreach ( StackFrame frame in trace.GetFrames() )
+        foreach ( StackFrame frame in trace.GetFrames()! )
         {
             MethodBase method    = frame.GetMethod()    ?? throw new NullReferenceException( nameof(frame.GetMethod) );
             string     className = method.MethodClass() ?? throw new NullReferenceException( nameof(TypeExtensions.MethodClass) );
@@ -95,10 +74,29 @@ public static class ExceptionExtensions
     }
 
 
+#if NET6_0_OR_GREATER
+    [ RequiresUnreferencedCode( nameof(MethodInfo) ) ]
+#endif
     public static MethodDetails? MethodInfo( this Exception e ) => e.TargetSite?.MethodInfo();
-    public static string         CallStack( Exception       e ) => CallStack( new StackTrace( e ) );
-    public static string         CallStack()                    => CallStack( new StackTrace() );
-    public static string         CallStack( StackTrace trace )  => string.Join( "->", Frames( trace ) );
+
+#if NET6_0_OR_GREATER
+    [ RequiresUnreferencedCode( nameof(CallStack) ) ]
+#endif
+    public static string CallStack( Exception e ) => CallStack( new StackTrace( e ) );
+
+#if NET6_0_OR_GREATER
+    [ RequiresUnreferencedCode( nameof(CallStack) ) ]
+#endif
+    public static string CallStack() => CallStack( new StackTrace() );
+
+#if NET6_0_OR_GREATER
+    [ RequiresUnreferencedCode( nameof(CallStack) ) ]
+#endif
+    public static string CallStack( StackTrace trace ) => string.Join( "->", Frames( trace ) );
+
+#if NET6_0_OR_GREATER
+    [ RequiresUnreferencedCode( nameof(Frame) ) ]
+#endif
     public static string Frame( StackFrame frame )
     {
         MethodBase method    = frame.GetMethod()    ?? throw new NullReferenceException( nameof(frame.GetMethod) );
@@ -106,21 +104,74 @@ public static class ExceptionExtensions
 
         return $"{className}::{method.Name}";
     }
-    public static string? MethodClass( this     Exception e ) => e.TargetSite?.MethodClass();
-    public static string? MethodName( this      Exception e ) => e.TargetSite?.MethodName();
+
+
+#if NET6_0_OR_GREATER
+    [ RequiresUnreferencedCode( nameof(MethodClass) ) ]
+#endif
+    public static string? MethodClass( this Exception e ) => e.TargetSite?.MethodClass();
+
+
+#if NET6_0_OR_GREATER
+    [ RequiresUnreferencedCode( nameof(MethodName) ) ]
+#endif
+    public static string? MethodName( this Exception e ) => e.TargetSite?.MethodName();
+
+
+#if NET6_0_OR_GREATER
+    [ RequiresUnreferencedCode( nameof(MethodSignature) ) ]
+#endif
     public static string? MethodSignature( this Exception e ) => e.TargetSite?.MethodSignature();
 
 
-    public static void Details( this Exception e, out Dictionary<string, string?> dict ) => dict = new Dictionary<string, string?>
-                                                                                                   {
-                                                                                                       [nameof(Type)]               = e.GetType().FullName,
-                                                                                                       [nameof(e.Source)]           = e.Source,
-                                                                                                       [nameof(e.Message)]          = e.Message,
-                                                                                                       [nameof(e.StackTrace)]       = e.StackTrace,
-                                                                                                       [nameof(Exception.HelpLink)] = e.HelpLink,
-                                                                                                       [nameof(MethodSignature)]    = e.MethodSignature(),
-                                                                                                       [nameof(e.ToString)]         = e.ToString()
-                                                                                                   };
+    public static Dictionary<string, JToken?> GetData( this Exception e )
+    {
+        var data = new Dictionary<string, JToken?>();
+
+        // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
+        foreach ( DictionaryEntry pair in e.Data )
+        {
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+            // ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
+            string? key = pair.Key?.ToString();
+            if ( key is null ) { continue; }
+
+            data[key] = pair.Value is null
+                            ? null
+                            : JToken.FromObject( pair.Value );
+        }
+
+        return data;
+    }
+
+#if NET6_0_OR_GREATER
+    [ RequiresUnreferencedCode( nameof(CallStack) ) ]
+#endif
+    public static void Details( this Exception e, out Dictionary<string, string?> dict )
+    {
+        dict = new Dictionary<string, string?>( 10 );
+        e.Details( dict );
+    }
+
+#if NET6_0_OR_GREATER
+    [ RequiresUnreferencedCode( nameof(CallStack) ) ]
+#endif
+    public static void Details<T>( this Exception e, in T dict )
+        where T : class, IDictionary<string, string?>
+    {
+        dict[nameof(Type)]               = e.GetType().FullName;
+        dict[nameof(e.Source)]           = e.Source;
+        dict[nameof(e.Message)]          = e.Message;
+        dict[nameof(e.StackTrace)]       = e.StackTrace;
+        dict[nameof(Exception.HelpLink)] = e.HelpLink;
+        dict[nameof(MethodSignature)]    = e.MethodSignature();
+        dict[nameof(e.ToString)]         = e.ToString();
+    }
+
+
+#if NET6_0_OR_GREATER
+    [ RequiresUnreferencedCode( nameof(CallStack) ) ]
+#endif
     public static void Details( this Exception e, out Dictionary<string, object?> dict, bool includeFullMethodInfo )
     {
         dict = new Dictionary<string, object?>
@@ -140,10 +191,14 @@ public static class ExceptionExtensions
 
         e.GetProperties( ref dict );
     }
-
-    public static void GetProperties( this Exception e, ref Dictionary<string, object?> dictionary )
+    public static void GetProperties<
+    #if NET6_0_OR_GREATER
+        [ DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.PublicProperties ) ]
+    #endif
+        T>( this T e, ref Dictionary<string, object?> dictionary )
+        where T : Exception
     {
-        foreach ( PropertyInfo info in e.GetType().GetProperties( BindingFlags.Instance | BindingFlags.Public ) )
+        foreach ( PropertyInfo info in typeof(T).GetProperties( BindingFlags.Instance | BindingFlags.Public ) )
         {
             string key = info.Name;
 
@@ -152,4 +207,102 @@ public static class ExceptionExtensions
             dictionary[key] = info.GetValue( e, null );
         }
     }
+
+
+    public static void GetProperties<
+    #if NET6_0_OR_GREATER
+        [ DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.PublicProperties ) ]
+    #endif
+        T>( this T e, ref Dictionary<string, JToken?> dictionary )
+        where T : Exception
+    {
+        foreach ( PropertyInfo info in typeof(T).GetProperties( BindingFlags.Instance | BindingFlags.Public ) )
+        {
+            string key = info.Name;
+
+            if ( dictionary.ContainsKey( key ) || !info.CanRead || key == "TargetSite" ) { continue; }
+
+
+            object? value = info.GetValue( e, null );
+
+            dictionary[key] = value is not null
+                                  ? JToken.FromObject( value )
+                                  : null;
+        }
+    }
+
+
+#if NET6_0_OR_GREATER
+    [ RequiresUnreferencedCode( nameof(Details) ) ]
+#endif
+    public static void Details( this Exception e, out Dictionary<string, JToken?> dict, bool includeFullMethodInfo )
+    {
+        dict = new Dictionary<string, JToken?>
+               {
+                   [nameof(Type)]                 = e.GetType().FullName,
+                   [nameof(Exception.HResult)]    = e.HResult,
+                   [nameof(Exception.HelpLink)]   = e.HelpLink,
+                   [nameof(Exception.Source)]     = e.Source,
+                   [nameof(Exception.Message)]    = e.Message,
+                   [nameof(Exception.Data)]       = JToken.FromObject( e.GetData() ),
+                   [nameof(Exception.StackTrace)] = JToken.FromObject( e.StackTrace?.SplitAndTrimLines() ?? Array.Empty<string>() )
+               };
+
+
+        if ( includeFullMethodInfo )
+        {
+            MethodDetails? info = e.MethodInfo();
+
+            dict[nameof(Exception.TargetSite)] = info is not null
+                                                     ? JToken.FromObject( info )
+                                                     : null;
+        }
+        else if ( e.TargetSite is not null ) { dict[nameof(Exception.TargetSite)] = $"{e.MethodClass()}::{e.MethodSignature()}"; }
+
+        e.GetProperties( ref dict );
+    }
+
+
+/*
+#if NET6_0_OR_GREATER
+    public static void GetProperties<[ DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.PublicProperties ) ] T>( this T e, ref Dictionary<string, JToken?> dictionary )
+        where T : Exception
+    {
+        foreach ( PropertyInfo info in typeof(T).GetProperties( BindingFlags.Instance | BindingFlags.Public ) )
+        {
+            string key = info.Name;
+
+            if ( dictionary.ContainsKey( key ) || !info.CanRead || key == "TargetSite" ) { continue; }
+
+
+            dictionary[key] = info.GetValue( e, null )?.ToJson();
+        }
+    }
+
+    [ RequiresUnreferencedCode( nameof(Details) ) ]
+    public static void Details( this Exception e, out Dictionary<string, JToken?> dict, bool includeFullMethodInfo )
+    {
+        dict = new Dictionary<string, JToken?>
+               {
+                   [nameof(Type)] = e.GetType().FullName,
+                   [nameof(Exception.HResult)] = e.HResult,
+                   [nameof(Exception.HelpLink)] = e.HelpLink,
+                   [nameof(Exception.Source)] = e.Source,
+                   [nameof(Exception.Message)] = e.Message,
+                   [nameof(Exception.Data)] = e.GetData().ToJson(),
+                   [nameof(Exception.StackTrace)] = (e.StackTrace?.SplitAndTrimLines() ?? Array.Empty<string>()).ToJson()
+               };
+
+
+        if ( includeFullMethodInfo )
+        {
+            MethodDetails? info = e.MethodInfo();
+            dict[nameof(Exception.TargetSite)] = JsonSerializer.SerializeToNode( info, MethodDetailsContext.MethodDetails );
+        }
+        else if ( e.TargetSite is not null ) { dict[nameof(Exception.TargetSite)] = $"{e.MethodClass()}::{e.MethodSignature()}"; }
+
+        e.GetProperties( ref dict );
+    }
+#endif
+*/
 }

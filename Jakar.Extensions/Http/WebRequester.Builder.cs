@@ -2,6 +2,13 @@
 // 05/03/2022  9:01 AM
 
 
+#if NETSTANDARD2_1
+using System.Security.Authentication;
+using System.Security.Cryptography.X509Certificates;
+#endif
+
+
+
 namespace Jakar.Extensions;
 
 

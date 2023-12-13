@@ -6,10 +6,11 @@ namespace Jakar.Extensions;
 
 public ref struct Buffer<T>
 {
-    private T[]?                  _arrayToReturnToPool = default;
-    private Span<T>               _span                = default;
-    private int                   _index               = 0;
-    private IEqualityComparer<T>? _comparer;
+    private          T[]?                  _arrayToReturnToPool = default;
+    private          Span<T>               _span                = default;
+    private          int                   _index               = 0;
+    private readonly IEqualityComparer<T>? _comparer;
+
 
     public readonly bool    IsEmpty    => Length == 0;
     public readonly bool    IsNotEmpty => Length > 0;
@@ -23,10 +24,8 @@ public ref struct Buffer<T>
         readonly get => _index;
         set => _index = Math.Max( Math.Min( Capacity, value ), 0 );
     }
-
-
-    public ref T this[ int              index ] => ref _span[index];
-    public ref T this[ Index            index ] => ref _span[index];
+    public readonly ref T this[ int     index ] => ref _span[index];
+    public readonly ref T this[ Index   index ] => ref _span[index];
     public readonly Span<T> this[ Range range ] => _span[range];
     public readonly Span<T> this[ int   start, int length ] => _span.Slice( start, length );
 
@@ -298,13 +297,18 @@ public ref struct Buffer<T>
 
     public ref struct Enumerator
     {
-        private readonly    Buffer<T> _buffer;
-        private             int       _index = 0;
-        public readonly ref T         Current => ref _buffer[_index];
+        private readonly Buffer<T> _buffer;
+        private          int       _index = 0;
 
-        internal Enumerator( Buffer<T> buffer ) => _buffer = buffer;
 
-        public void Reset()    => _index = 0;
-        public bool MoveNext() => ++_index < _buffer._index;
+        public readonly ref T Current
+        {
+            [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => ref _buffer[_index];
+        }
+
+
+        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] internal Enumerator( Buffer<T> buffer ) => _buffer = buffer;
+        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public void Reset()    => _index = 0;
+        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public bool MoveNext() => ++_index < _buffer._index;
     }
 }

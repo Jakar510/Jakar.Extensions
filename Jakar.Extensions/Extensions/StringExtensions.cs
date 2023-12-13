@@ -137,20 +137,28 @@ public static class StringExtensions
     public static SpanSplitEnumerator<char> SplitOn( this ReadOnlySpan<char> span ) => new(span, _ends);
 
     // public static SpanSplitEnumerator<T> SplitOn<T>( this Span<T>         span, ParamsArray<T> array ) where T : unmanaged, IEquatable<T> => new(span, array);
-    public static SpanSplitEnumerator<T> SplitOn<T>( this Span<T> span, params T[]      separators ) where T : unmanaged, IEquatable<T> => new(span, separators);
-    public static SpanSplitEnumerator<T> SplitOn<T>( this Span<T> span, T               separator ) where T : unmanaged, IEquatable<T>  => new(span, Spans.Create( separator ));
-    public static SpanSplitEnumerator<T> SplitOn<T>( this Span<T> span, ReadOnlySpan<T> separators ) where T : unmanaged, IEquatable<T> => new(span, separators);
+    public static SpanSplitEnumerator<T> SplitOn<T>( this Span<T> span, params T[] separators )
+        where T : unmanaged, IEquatable<T> => new(span, separators);
+    public static SpanSplitEnumerator<T> SplitOn<T>( this Span<T> span, T separator )
+        where T : unmanaged, IEquatable<T> => new(span, Spans.Create( separator ));
+    public static SpanSplitEnumerator<T> SplitOn<T>( this Span<T> span, ReadOnlySpan<T> separators )
+        where T : unmanaged, IEquatable<T> => new(span, separators);
 
 
     // public static SpanSplitEnumerator<T> SplitOn<T>( this ReadOnlySpan<T> span, ParamsArray<T> array ) where T : unmanaged, IEquatable<T> => new(span, array);
-    public static SpanSplitEnumerator<T> SplitOn<T>( this ReadOnlySpan<T> span, params T[]      separators ) where T : unmanaged, IEquatable<T> => new(span, separators);
-    public static SpanSplitEnumerator<T> SplitOn<T>( this ReadOnlySpan<T> span, T               separator ) where T : unmanaged, IEquatable<T>  => new(span, Spans.Create( separator ));
-    public static SpanSplitEnumerator<T> SplitOn<T>( this ReadOnlySpan<T> span, ReadOnlySpan<T> separators ) where T : unmanaged, IEquatable<T> => new(span, separators);
+    public static SpanSplitEnumerator<T> SplitOn<T>( this ReadOnlySpan<T> span, params T[] separators )
+        where T : unmanaged, IEquatable<T> => new(span, separators);
+    public static SpanSplitEnumerator<T> SplitOn<T>( this ReadOnlySpan<T> span, T separator )
+        where T : unmanaged, IEquatable<T> => new(span, Spans.Create( separator ));
+    public static SpanSplitEnumerator<T> SplitOn<T>( this ReadOnlySpan<T> span, ReadOnlySpan<T> separators )
+        where T : unmanaged, IEquatable<T> => new(span, separators);
 
 
-    public static string ConvertToString( this byte[]               value, Encoding? encoding = default ) => (encoding ?? Encoding.Default).GetString( value );
-    public static string ConvertToString( this Memory<byte>         value, Encoding? encoding = default ) => value.ToArray().ConvertToString( encoding ?? Encoding.Default );
-    public static string ConvertToString( this ReadOnlyMemory<byte> value, Encoding? encoding = default ) => value.ToArray().ConvertToString( encoding ?? Encoding.Default );
+    public static string ConvertToString( this byte[]               value, Encoding encoding ) => encoding.GetString( value );
+    public static string ConvertToString( this Span<byte>           value, Encoding encoding ) => encoding.GetString( value );
+    public static string ConvertToString( this ReadOnlySpan<byte>   value, Encoding encoding ) => encoding.GetString( value );
+    public static string ConvertToString( this Memory<byte>         value, Encoding encoding ) => value.Span.ConvertToString( encoding );
+    public static string ConvertToString( this ReadOnlyMemory<byte> value, Encoding encoding ) => value.Span.ConvertToString( encoding );
 
 
     public static string RemoveAll( this string source, string old ) => source.Replace( old,                  string.Empty, StringComparison.Ordinal );
@@ -242,5 +250,6 @@ public static class StringExtensions
     public static string Wrapper( this string self, char c, int padding ) => self.PadLeft( padding, c ).PadRight( padding, c );
 
 
-    public static TResult ConvertTo<TResult>( this string value ) where TResult : IConvertible => (TResult)value.ConvertTo( typeof(TResult) );
+    public static TResult ConvertTo<TResult>( this string value )
+        where TResult : IConvertible => (TResult)value.ConvertTo( typeof(TResult) );
 }

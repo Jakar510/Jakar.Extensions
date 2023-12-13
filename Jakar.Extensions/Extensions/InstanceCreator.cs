@@ -12,24 +12,33 @@ internal static class InstanceCreator
 
 
 
-public static class InstanceCreator<TItem>
+public static class InstanceCreator<
+#if NET6_0_OR_GREATER
+    [ DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors ) ]
+#endif
+    TItem>
 {
     public static Type Type { get; } = typeof(TItem);
 
 
-    public static TItem Create()                                                                                   => (TItem)(Activator.CreateInstance( Type )                                     ?? throw new InvalidOperationException());
-    public static TItem Create( params object[] args )                                                             => (TItem)(Activator.CreateInstance( Type, args )                               ?? throw new InvalidOperationException());
-    public static TItem Create( bool            nonPublic )                                                        => (TItem)(Activator.CreateInstance( Type, nonPublic )                          ?? throw new InvalidOperationException());
-    public static TItem Create( object[]        args,        object[] activationAttributes )                       => (TItem)(Activator.CreateInstance( Type, args,        activationAttributes )  ?? throw new InvalidOperationException());
-    public static TItem Create( BindingFlags    bindingAttr, Binder   binder, object[] args, CultureInfo culture ) => (TItem)(Activator.CreateInstance( Type, bindingAttr, binder, args, culture ) ?? throw new InvalidOperationException());
+    public static TItem Create()                                                      => (TItem)(Activator.CreateInstance( typeof(TItem) )                             ?? throw new InvalidOperationException());
+    public static TItem Create( params object[] args )                                => (TItem)(Activator.CreateInstance( typeof(TItem), args )                       ?? throw new InvalidOperationException());
+    public static TItem Create( bool            nonPublic )                           => (TItem)(Activator.CreateInstance( typeof(TItem), nonPublic )                  ?? throw new InvalidOperationException());
+    public static TItem Create( object[]        args, object[] activationAttributes ) => (TItem)(Activator.CreateInstance( typeof(TItem), args, activationAttributes ) ?? throw new InvalidOperationException());
+
+    public static TItem Create( BindingFlags bindingAttr, Binder binder, object[] args, CultureInfo culture ) => (TItem)(Activator.CreateInstance( typeof(TItem), bindingAttr, binder, args, culture ) ?? throw new InvalidOperationException());
     public static TItem Create( BindingFlags bindingAttr, Binder binder, object[] args, CultureInfo culture, object[] activationAttributes ) =>
-        (TItem)(Activator.CreateInstance( Type, bindingAttr, binder, args, culture, activationAttributes ) ?? throw new InvalidOperationException());
+        (TItem)(Activator.CreateInstance( typeof(TItem), bindingAttr, binder, args, culture, activationAttributes ) ?? throw new InvalidOperationException());
 }
 
 
 
 [ SuppressMessage( "ReSharper", "CoVariantArrayConversion" ) ]
-public static class InstanceCreator<T1, TInstance>
+public static class InstanceCreator<T1,
+                                #if NET6_0_OR_GREATER
+                                    [ DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors ) ]
+                                #endif
+                                    TInstance>
 {
     public static Func<T1, TInstance> Create { get; } = CreateInstance();
 
@@ -53,7 +62,11 @@ public static class InstanceCreator<T1, TInstance>
 
 
 [ SuppressMessage( "ReSharper", "CoVariantArrayConversion" ) ]
-public static class InstanceCreator<T1, T2, TInstance>
+public static class InstanceCreator<T1, T2,
+                                #if NET6_0_OR_GREATER
+                                    [ DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors ) ]
+                                #endif
+                                    TInstance>
 {
     public static Func<T1, T2, TInstance> Create { get; } = CreateInstance();
 
@@ -78,7 +91,11 @@ public static class InstanceCreator<T1, T2, TInstance>
 
 
 [ SuppressMessage( "ReSharper", "CoVariantArrayConversion" ) ]
-public static class InstanceCreator<T1, T2, T3, TInstance>
+public static class InstanceCreator<T1, T2, T3,
+                                #if NET6_0_OR_GREATER
+                                    [ DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors ) ]
+                                #endif
+                                    TInstance>
 {
     public static Func<T1, T2, T3, TInstance> Create { get; } = CreateInstance();
 
@@ -104,7 +121,11 @@ public static class InstanceCreator<T1, T2, T3, TInstance>
 
 
 [ SuppressMessage( "ReSharper", "CoVariantArrayConversion" ) ]
-public static class InstanceCreator<T1, T2, T3, T4, TInstance>
+public static class InstanceCreator<T1, T2, T3, T4,
+                                #if NET6_0_OR_GREATER
+                                    [ DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors ) ]
+                                #endif
+                                    TInstance>
 {
     public static Func<T1, T2, T3, T4, TInstance> Create { get; } = CreateInstance();
 
@@ -131,7 +152,11 @@ public static class InstanceCreator<T1, T2, T3, T4, TInstance>
 
 
 [ SuppressMessage( "ReSharper", "CoVariantArrayConversion" ) ]
-public static class InstanceCreator<T1, T2, T3, T4, T5, TInstance>
+public static class InstanceCreator<T1, T2, T3, T4, T5,
+                                #if NET6_0_OR_GREATER
+                                    [ DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors ) ]
+                                #endif
+                                    TInstance>
 {
     public static Func<T1, T2, T3, T4, T5, TInstance> Create { get; } = CreateInstance();
 
@@ -158,7 +183,11 @@ public static class InstanceCreator<T1, T2, T3, T4, T5, TInstance>
 
 
 [ SuppressMessage( "ReSharper", "CoVariantArrayConversion" ) ]
-public static class InstanceCreator<T1, T2, T3, T4, T5, T6, TInstance>
+public static class InstanceCreator<T1, T2, T3, T4, T5, T6,
+                                #if NET6_0_OR_GREATER
+                                    [ DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors ) ]
+                                #endif
+                                    TInstance>
 {
     public static Func<T1, T2, T3, T4, T5, T6, TInstance> Create { get; } = CreateInstance();
 
@@ -185,7 +214,11 @@ public static class InstanceCreator<T1, T2, T3, T4, T5, T6, TInstance>
 
 
 [ SuppressMessage( "ReSharper", "CoVariantArrayConversion" ) ]
-public static class InstanceCreator<T1, T2, T3, T4, T5, T6, T7, TInstance>
+public static class InstanceCreator<T1, T2, T3, T4, T5, T6, T7,
+                                #if NET6_0_OR_GREATER
+                                    [ DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors ) ]
+                                #endif
+                                    TInstance>
 {
     public static Func<T1, T2, T3, T4, T5, T6, T7, TInstance> Create { get; } = CreateInstance();
 

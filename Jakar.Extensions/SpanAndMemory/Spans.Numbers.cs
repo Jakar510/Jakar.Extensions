@@ -3,6 +3,37 @@
 
 public static partial class Spans
 {
+#if NET8_0_OR_GREATER
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    public static T As<T>( this ReadOnlySpan<byte> value, T defaultValue, IFormatProvider? provider = default )
+        where T : INumber<T> => T.TryParse( value, provider, out T? d )
+                                    ? d
+                                    : defaultValue;
+
+
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    public static T As<T>( this ReadOnlySpan<byte> value, NumberStyles style, T defaultValue, IFormatProvider? provider = default )
+        where T : INumber<T> => T.TryParse( value, style, provider, out T? d )
+                                    ? d
+                                    : defaultValue;
+#endif
+
+
+#if NET7_0_OR_GREATER
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    public static T As<T>( this ReadOnlySpan<char> value, T defaultValue, IFormatProvider? provider = default )
+        where T : INumber<T> => T.TryParse( value, provider, out T? d )
+                                    ? d
+                                    : defaultValue;
+
+
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    public static T As<T>( this ReadOnlySpan<char> value, NumberStyles style, T defaultValue, IFormatProvider? provider = default )
+        where T : INumber<T> => T.TryParse( value, style, provider, out T? d )
+                                    ? d
+                                    : defaultValue;
+
+#else
     [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
     public static decimal As( this ReadOnlySpan<char> value, decimal defaultValue ) => decimal.TryParse( value, out decimal d )
                                                                                            ? d
@@ -95,4 +126,5 @@ public static partial class Spans
     public static ushort? As( this ReadOnlySpan<char> value, ushort? defaultValue ) => ushort.TryParse( value, out ushort result )
                                                                                            ? result
                                                                                            : defaultValue;
+#endif
 }

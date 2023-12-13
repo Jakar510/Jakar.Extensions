@@ -1,4 +1,7 @@
-﻿namespace Jakar.Extensions;
+﻿// Jakar.Extensions :: Jakar.Extensions
+// 11/29/2023  1:49 PM
+
+namespace Jakar.Extensions;
 
 
 public static class JsonModels

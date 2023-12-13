@@ -1,13 +1,11 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 11/10/2023  1:46 PM
 
-using System;
-using Org.BouncyCastle.Asn1.X509;
-
-
-
 namespace Jakar.Extensions;
 
+
+
+/*
 
 public static class EventManagerService
 {
@@ -15,16 +13,45 @@ public static class EventManagerService
     public const            string EMPTY = "";
 
 
-    internal static bool TryGetDynamicMethod( this MethodInfo rtDynamicMethod, [ NotNullWhen( true ) ] out DynamicMethod? method )
+#if NET7_0_OR_GREATER
+    [ RequiresDynamicCode( nameof(TryGetDynamicMethod) ) ]
+#endif
+    internal static bool TryGetDynamicMethod( this MethodInfo methodInfo, [ NotNullWhen( true ) ] out DynamicMethod? method )
     {
-        TypeInfo? typeInfoRTDynamicMethod = typeof(DynamicMethod).GetTypeInfo().GetDeclaredNestedType( "RTDynamicMethod" );
-        Type?     typeRTDynamicMethod     = typeInfoRTDynamicMethod?.AsType();
-
-        method = typeInfoRTDynamicMethod?.IsAssignableFrom( rtDynamicMethod.GetType().GetTypeInfo() ) is true
-                     ? (DynamicMethod?)typeRTDynamicMethod?.GetRuntimeFields().First( f => f.Name is "m_owner" ).GetValue( rtDynamicMethod )
-                     : null;
-
+        method = GetMethod( methodInfo, typeof(DynamicMethod) );
         return method is not null;
+
+
+    #if NET7_0_OR_GREATER
+        [ RequiresDynamicCode( nameof(GetMethod) ) ]
+    #endif
+        static DynamicMethod? GetMethod( MethodInfo methodInfo,
+                                     #if NET7_0_OR_GREATER
+                                         [ DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.NonPublicNestedTypes | DynamicallyAccessedMemberTypes.PublicNestedTypes ) ]
+                                     #endif
+                                         Type type
+        )
+        {
+            TypeInfo? typeInfo = type.GetTypeInfo().GetDeclaredNestedType( "RTDynamicMethod" );
+            return GetDynamicMethod( methodInfo, typeInfo, typeInfo?.AsType() );
+        }
+
+
+    #if NET7_0_OR_GREATER
+        [ RequiresDynamicCode( nameof(GetDynamicMethod) ) ]
+    #endif
+        static DynamicMethod? GetDynamicMethod( MethodInfo methodInfo,
+                                                TypeInfo?  methodType,
+                                            #if NET7_0_OR_GREATER
+                                                [ DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.NonPublicFields | DynamicallyAccessedMemberTypes.PublicFields ) ]
+                                            #endif
+                                                Type? dynamicMethod
+        )
+        {
+            return methodType?.IsAssignableFrom( methodInfo.GetType().GetTypeInfo() ) is true
+                       ? (DynamicMethod?)dynamicMethod?.GetRuntimeFields().First( f => f.Name is "m_owner" ).GetValue( methodInfo )
+                       : null;
+        }
     }
 
 
@@ -158,7 +185,7 @@ public static class EventManagerService
 
         foreach ( Subscription subscription in toRemove.Span ) { target.Remove( subscription ); }
     }
-    */
+    #1#
 
 
 
@@ -297,7 +324,7 @@ public static class EventManagerService
 
         foreach ( Subscription<TEventArgs> subscription in toRemove.Span ) { target.Remove( subscription ); }
     }
-    */
+    #1#
 
 
 
@@ -366,3 +393,4 @@ public static class EventManagerService
         }
     }
 }
+*/

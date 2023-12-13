@@ -1,7 +1,8 @@
 ﻿namespace Jakar.Extensions;
 
 
-public interface ICurrentLocation<TID> : IUniqueID<TID>, IEquatable<ICurrentLocation<TID>> where TID : struct, IComparable<TID>, IEquatable<TID>
+public interface ICurrentLocation<TID> : IUniqueID<TID>, IEquatable<ICurrentLocation<TID>>
+    where TID : struct, IComparable<TID>, IEquatable<TID>
 {
     double?           Accuracy                { get; }
     double?           Altitude                { get; }
@@ -19,7 +20,8 @@ public interface ICurrentLocation<TID> : IUniqueID<TID>, IEquatable<ICurrentLoca
 
 
 [ Serializable ]
-public sealed class CurrentLocation<TID> : BaseJsonModel, ICurrentLocation<TID>, IDataBaseIgnore where TID : struct, IComparable<TID>, IEquatable<TID>
+public sealed class CurrentLocation<TID> : BaseJsonModel, ICurrentLocation<TID>, IDataBaseIgnore
+    where TID : struct, IComparable<TID>, IEquatable<TID>
 {
     public         double?           Accuracy                { get; init; }
     public         double?           Altitude                { get; init; }

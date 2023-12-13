@@ -1,13 +1,17 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 10/20/2022  2:37 PM
 
+
 namespace Jakar.Extensions;
 
 
-public readonly record struct AppVersionFlags( string Flag, uint Iteration ) : IEquatable<AppVersionFlags?>, IComparable<AppVersionFlags>, IComparable<AppVersionFlags?>, IComparable, IFormattable
-#if NET7_0_OR_GREATER
+public readonly record struct AppVersionFlags( string Flag, uint Iteration ) : IEquatable<AppVersionFlags?>,
+                                                                               IComparable<AppVersionFlags>,
+                                                                               IComparable<AppVersionFlags?>,
+                                                                               IComparable,
+                                                                               IFormattable
+                                                                           #if NET7_0_OR_GREATER
                                                                                ,
-                                                                               IParsable<AppVersionFlags>,
                                                                                ISpanParsable<AppVersionFlags>
 #endif
 {
@@ -22,9 +26,7 @@ public readonly record struct AppVersionFlags( string Flag, uint Iteration ) : I
     public static AppVersionFlags Stable     => new(STABLE, 0);
     public        bool            IsEmpty    => string.IsNullOrWhiteSpace( Flag );
     public        bool            IsNotEmpty => !IsEmpty;
-
-
-    internal int Length => Flag.Length + 15;
+    public        int             Length     => Flag.Length + 15;
 
 
     public override string ToString()                                                  => AsSpan().ToString();
@@ -35,17 +37,15 @@ public readonly record struct AppVersionFlags( string Flag, uint Iteration ) : I
     public ReadOnlySpan<char> AsSpan( ReadOnlySpan<char> format ) => AsSpan( format,  CultureInfo.CurrentCulture );
     public ReadOnlySpan<char> AsSpan( ReadOnlySpan<char> format, IFormatProvider? provider )
     {
-        Span<char> buffer = stackalloc char[Length];
-
+        Span<char> buffer = AsyncLinq.GetArray<char>( Length );
         if ( !TryFormat( buffer, out int charsWritten, format, provider ) ) { throw new InvalidOperationException( "Conversion failed" ); }
 
-        buffer = buffer[..charsWritten];
-        return MemoryMarshal.CreateReadOnlySpan( ref buffer.GetPinnableReference(), buffer.Length );
+        return buffer[..charsWritten];
     }
 
 
 #if NET6_0_OR_GREATER
-    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
+    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
 #endif
     public bool TryFormat( Span<char> span, out int charsWritten, ReadOnlySpan<char> format = default, IFormatProvider? provider = default )
     {
@@ -141,7 +141,7 @@ public readonly record struct AppVersionFlags( string Flag, uint Iteration ) : I
 
             ReadOnlySpan<char> span = value[(index - 1)..].Trim( SEPARATOR );
 
-            int end = span.IndexOfAny( Randoms.Numeric );
+            int end = span.IndexOfAny( Randoms.Numeric.Span );
 
             return end == -1
                        ? new AppVersionFlags( span.ToString(),        0 )

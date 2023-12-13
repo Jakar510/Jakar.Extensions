@@ -62,22 +62,24 @@ public ref struct ValueStringBuilder
 
 
     /// <summary> Get a pinnable reference to the builder. Does not ensure there is a null char after <see cref="Length"/> . This overload is pattern matched  the C# 7.3+ compiler so you can omit the explicit method call, and write eg "fixed (char* c = builder)" </summary>
+    [ Pure, MethodImpl( MethodImplOptions.AggressiveInlining ) ]
     public ref char GetPinnableReference() => ref _chars.GetPinnableReference();
 
+
     /// <summary> Get a pinnable reference to the builder. </summary>
     /// <param name="terminate"> Ensures that the builder has a null char after <see cref="Length"/> </param>
+    [ Pure, MethodImpl( MethodImplOptions.AggressiveInlining ) ]
     public ref char GetPinnableReference( bool terminate )
     {
-        if ( !terminate ) { return ref GetPinnableReference(); }
+        if ( terminate ) { return ref GetPinnableReference( '\0' ); }
 
-        EnsureCapacity( Length + 1 );
-        _chars[++Length] = '\0';
-
-        return ref GetPinnableReference( terminate );
+        return ref GetPinnableReference();
     }
+
 
     /// <summary> Get a pinnable reference to the builder. </summary>
     /// <param name="terminate"> Ensures that the builder has a null char after <see cref="Length"/> </param>
+    [ Pure, MethodImpl( MethodImplOptions.AggressiveInlining ) ]
     public ref char GetPinnableReference( char terminate )
     {
         EnsureCapacity( Length + 1 );
@@ -300,7 +302,33 @@ public ref struct ValueStringBuilder
 
     public ValueStringBuilder AppendJoin( char separator, IEnumerable<string> enumerable )
     {
-        ReadOnlySpan<string> span = enumerable.GetArray();
+        ReadOnlySpan<string> span = enumerable.ToArray();
+
+        return AppendJoin( separator,
+                       #if NET7_0_OR_GREATER
+                           ref
+                       #endif
+                           span );
+    }
+    public ValueStringBuilder AppendJoin( in ReadOnlySpan<char> separator, IEnumerable<string> enumerable )
+    {
+        ReadOnlySpan<string> span = enumerable.ToArray();
+
+        return AppendJoin( separator,
+                       #if NET7_0_OR_GREATER
+                           ref
+                       #endif
+                           span );
+    }
+
+
+    public ValueStringBuilder AppendJoin( char separator,
+                                      #if NET7_0_OR_GREATER
+                                          scoped ref readonly
+                                          #endif
+                                              ReadOnlySpan<string> span
+    )
+    {
         EnsureCapacity( span.Sum( static x => x.Length ) + span.Length * 2 + 1 );
         ReadOnlySpan<string>.Enumerator enumerator     = span.GetEnumerator();
         bool                            shouldContinue = enumerator.MoveNext();
@@ -317,9 +345,13 @@ public ref struct ValueStringBuilder
 
         return this;
     }
-    public ValueStringBuilder AppendJoin( in ReadOnlySpan<char> separator, IEnumerable<string> enumerable )
+    public ValueStringBuilder AppendJoin( in ReadOnlySpan<char> separator,
+                                      #if NET7_0_OR_GREATER
+                                          scoped ref readonly
+                                          #endif
+                                              ReadOnlySpan<string> span
+    )
     {
-        ReadOnlySpan<string> span = enumerable.GetArray();
         EnsureCapacity( span.Sum( static x => x.Length ) + separator.Length * span.Length + 1 );
         ReadOnlySpan<string>.Enumerator enumerator     = span.GetEnumerator();
         bool                            shouldContinue = enumerator.MoveNext();

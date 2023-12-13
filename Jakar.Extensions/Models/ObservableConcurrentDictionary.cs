@@ -4,7 +4,8 @@
 namespace Jakar.Extensions;
 
 
-public class ObservableConcurrentDictionary<TKey, TValue> : CollectionAlerts<KeyValuePair<TKey, TValue>>, IDictionary<TKey, TValue>, IReadOnlyDictionary<TKey, TValue> where TKey : notnull
+public class ObservableConcurrentDictionary<TKey, TValue> : CollectionAlerts<KeyValuePair<TKey, TValue>>, IDictionary<TKey, TValue>, IReadOnlyDictionary<TKey, TValue>
+    where TKey : notnull
 {
     protected readonly     ConcurrentDictionary<TKey, TValue> _dictionary;
     public sealed override int                                Count      => _dictionary.Count;
@@ -56,8 +57,15 @@ public class ObservableConcurrentDictionary<TKey, TValue> : CollectionAlerts<Key
     public static implicit operator ObservableConcurrentDictionary<TKey, TValue>( KeyValuePair<TKey, TValue>[]                     items ) => new(items);
 
 
-    public bool ContainsValue( TValue              value ) => _dictionary.Values.Contains( value );
-    public bool TryAdd( KeyValuePair<TKey, TValue> pair )  => TryAdd( pair.Key, pair.Value );
+    public void Clear()
+    {
+        _dictionary.Clear();
+        Reset();
+        OnCountChanged();
+    }
+    
+    
+    public bool TryAdd( KeyValuePair<TKey, TValue> pair ) => TryAdd( pair.Key, pair.Value );
     public bool TryAdd( TKey key, TValue value )
     {
         if ( !_dictionary.TryAdd( key, value ) ) { return false; }
@@ -67,6 +75,8 @@ public class ObservableConcurrentDictionary<TKey, TValue> : CollectionAlerts<Key
     }
 
 
+    public void Add( KeyValuePair<TKey, TValue> item )              => TryAdd( item );
+    public void Add( TKey                       key, TValue value ) => TryAdd( key, value );
     public void Add( params KeyValuePair<TKey, TValue>[] pairs )
     {
         foreach ( KeyValuePair<TKey, TValue> pair in pairs ) { Add( pair ); }
@@ -77,18 +87,15 @@ public class ObservableConcurrentDictionary<TKey, TValue> : CollectionAlerts<Key
     }
 
 
-    public bool TryGetValue( TKey key, [ NotNullWhen( true ) ] out TValue? value ) => _dictionary.TryGetValue( key, out value );
+    public bool TryGetValue( TKey key, [ NotNullWhen( true ) ] out TValue? value ) => _dictionary.TryGetValue( key, out value ) && value is not null;
 
 
-    public bool ContainsKey( TKey key ) => _dictionary.ContainsKey( key );
-
-    public bool Contains( KeyValuePair<TKey, TValue> item )              => ContainsKey( item.Key ) && ContainsValue( item.Value );
-    public void Add( KeyValuePair<TKey, TValue>      item )              => TryAdd( item );
-    public void Add( TKey                            key, TValue value ) => TryAdd( key, value );
+    public bool ContainsValue( TValue                value ) => _dictionary.Values.Contains( value );
+    public bool ContainsKey( TKey                    key )   => _dictionary.ContainsKey( key );
+    public bool Contains( KeyValuePair<TKey, TValue> item )  => ContainsKey( item.Key ) && ContainsValue( item.Value );
 
 
     public bool Remove( KeyValuePair<TKey, TValue> item ) => Remove( item.Key );
-
     public bool Remove( TKey key )
     {
         if ( !_dictionary.ContainsKey( key ) ) { return false; }
@@ -98,13 +105,6 @@ public class ObservableConcurrentDictionary<TKey, TValue> : CollectionAlerts<Key
         Removed( new KeyValuePair<TKey, TValue>( key, value ) );
         OnCountChanged();
         return true;
-    }
-
-    public void Clear()
-    {
-        _dictionary.Clear();
-        Reset();
-        OnCountChanged();
     }
 
 
@@ -119,7 +119,6 @@ public class ObservableConcurrentDictionary<TKey, TValue> : CollectionAlerts<Key
     }
 
 
-    public override IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator() =>
-        _dictionary.Where( Filter ).GetEnumerator();
-    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+    public override IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator() => _dictionary.Where( Filter ).GetEnumerator();
+    IEnumerator IEnumerable.                                GetEnumerator() => GetEnumerator();
 }

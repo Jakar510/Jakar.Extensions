@@ -2,23 +2,23 @@
 
 
 /// <summary> See <see cref="Format"/> for formatting details. </summary>
-[ Serializable, JsonConverter( typeof(AppVersionConverter) ) ]
-
-// AppVersionNullableConverter
-public sealed class AppVersion : IComparable,
-                                 IComparable<AppVersion>,
-                                 IFuzzyEquals<AppVersion>,
-                                 IReadOnlyCollection<int>,
-                                 ICloneable,
-                             #if NETSTANDARD2_1
-                                 IFormattable
-#else
-                                 ISpanFormattable
-#endif
+[ Serializable, JsonConverter( typeof(AppVersionJsonNetConverter) ) ]
+public sealed class AppVersion :
 #if NET7_0_OR_GREATER
-                                 ,
-                                 IParsable<AppVersion>,
-                                 ISpanParsable<AppVersion>
+    IComparable,
+    IComparable<AppVersion>,
+    IFuzzyEquals<AppVersion>,
+    IReadOnlyCollection<int>,
+    ICloneable,
+    ISpanFormattable,
+    ISpanParsable<AppVersion>
+#else
+    IComparable,
+    IComparable<AppVersion>,
+    IFuzzyEquals<AppVersion>,
+    IReadOnlyCollection<int>,
+    ICloneable,
+    ISpanFormattable
 #endif
 {
     public static AppVersion      Default       { get; } = new();
@@ -118,7 +118,7 @@ public sealed class AppVersion : IComparable,
     {
         if ( items is null ) { throw new ArgumentNullException( nameof(items) ); }
 
-        Flags  = flags;
+        Flags = flags;
         Scheme = (Format)items.Count;
 
         switch ( Scheme )
@@ -139,27 +139,27 @@ public sealed class AppVersion : IComparable,
                 return;
 
             case Format.Detailed:
-                Major       = items[0];
-                Minor       = items[1];
+                Major = items[0];
+                Minor = items[1];
                 Maintenance = items[2];
-                Build       = items[3];
+                Build = items[3];
                 return;
 
             case Format.DetailedRevisions:
-                Major         = items[0];
-                Minor         = items[1];
-                Maintenance   = items[2];
+                Major = items[0];
+                Minor = items[1];
+                Maintenance = items[2];
                 MajorRevision = items[3];
-                Build         = items[4];
+                Build = items[4];
                 return;
 
             case Format.Complete:
-                Major         = items[0];
-                Minor         = items[1];
-                Maintenance   = items[2];
+                Major = items[0];
+                Minor = items[1];
+                Maintenance = items[2];
                 MajorRevision = items[3];
                 MinorRevision = items[4];
-                Build         = items[5];
+                Build = items[5];
                 return;
 
             default: throw new ArgumentOutOfRangeException( nameof(items), items.Count, @"value doesn't contain the correct amount of items." );
@@ -292,7 +292,7 @@ public sealed class AppVersion : IComparable,
 
 
 #if NET6_0_OR_GREATER
-    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
+    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
 #endif
     public bool TryFormat( Span<char> span, out int charsWritten, ReadOnlySpan<char> format = default, IFormatProvider? provider = default )
     {
@@ -534,4 +534,31 @@ public sealed class AppVersion : IComparable,
     public static Equalizer<AppVersion>      Equalizer             => Equalizer<AppVersion>.Default;
     public static Sorter<AppVersion>         Sorter                => Sorter<AppVersion>.Default;
     public static FuzzyEqualizer<AppVersion> FuzzyEqualityComparer => FuzzyEqualizer<AppVersion>.Default;
+
+
+
+    public class AppVersionJsonNetConverter : JsonConverter<AppVersion>
+    {
+        public override bool CanRead  => true;
+        public override bool CanWrite => true;
+
+
+        public override AppVersion? ReadJson( JsonReader reader, Type objectType, AppVersion? existingValue, bool hasExistingValue, JsonSerializer serializer ) =>
+            reader.Value is string item
+                ? Parse( item )
+                : existingValue;
+
+
+        public override void WriteJson( JsonWriter writer, AppVersion? value, JsonSerializer serializer )
+        {
+            if ( value is null )
+            {
+                writer.WriteNull();
+                return;
+            }
+
+            JToken token = value.ToString();
+            token.WriteTo( writer );
+        }
+    }
 }

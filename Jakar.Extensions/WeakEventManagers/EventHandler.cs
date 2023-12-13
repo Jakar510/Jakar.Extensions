@@ -4,5 +4,5 @@
 namespace Jakar.Extensions;
 
 
-public delegate void EventHandler<in TClass, in TEventArgs>( TClass? sender, TEventArgs e )
+public delegate void EventHandler<in TClass, in TEventArgs>( TClass sender, TEventArgs e )
     where TClass : class;

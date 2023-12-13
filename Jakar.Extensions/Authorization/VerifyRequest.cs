@@ -4,24 +4,12 @@
 [ Serializable ]
 public class VerifyRequest : BaseClass, ILoginRequest, ICredentials, ICloneable, IEquatable<VerifyRequest>, JsonModels.IJsonModel
 {
-    [ JsonExtensionData ] public         IDictionary<string, JToken?>? AdditionalData { get; set; }
     [ JsonIgnore ]        public virtual bool                          IsValid        => !string.IsNullOrWhiteSpace( UserName ) && !string.IsNullOrWhiteSpace( Password );
+    [ JsonExtensionData ] public         IDictionary<string, JToken?>? AdditionalData { get; set; }
+
 
     [ Required( ErrorMessage = $"{nameof(Password)} is required." ), JsonProperty( nameof(Password), Required = Required.Always ) ] public string Password { get; init; } = string.Empty;
-    [ Obsolete( nameof(UserName) ) ]
-    public string UserLogin
-    {
-        get => UserName;
-        init => UserName = value;
-    }
-
     [ Required( ErrorMessage = $"{nameof(UserName)} is required." ), JsonProperty( nameof(UserName), Required = Required.Always ) ] public string UserName { get; init; } = string.Empty;
-    [ Obsolete( nameof(Password) ) ]
-    public string UserPassword
-    {
-        get => Password;
-        init => Password = value;
-    }
 
 
     public VerifyRequest() { }
@@ -67,11 +55,11 @@ public class VerifyRequest : BaseClass, ILoginRequest, ICredentials, ICloneable,
 [ SuppressMessage( "ReSharper", "NullableWarningSuppressionIsUsed" ) ]
 public class VerifyRequest<T> : VerifyRequest, IEquatable<VerifyRequest<T>>
 {
-    [ JsonProperty( nameof(Data), Required = Required.AllowNull ) ] public T? Data { get; init; }
-
     public override bool IsValid => Data is IValidator validator
                                         ? base.IsValid && validator.IsValid
                                         : base.IsValid;
+
+    [ JsonProperty( nameof(Data), Required = Required.AllowNull ) ] public T? Data { get; init; }
 
 
     public VerifyRequest() { }
@@ -83,7 +71,7 @@ public class VerifyRequest<T> : VerifyRequest, IEquatable<VerifyRequest<T>>
 
 
     public bool Equals( VerifyRequest<T>? other ) => Equals( other, EqualityComparer<T?>.Default );
-    public bool Equals( VerifyRequest<T>? other, IEqualityComparer<T> comparer )
+    public bool Equals( VerifyRequest<T>? other, IEqualityComparer<T?> comparer )
     {
         if ( other is null ) { return false; }
 

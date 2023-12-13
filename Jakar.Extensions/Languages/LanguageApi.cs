@@ -4,13 +4,13 @@
 [ Serializable ]
 public sealed class LanguageApi : ObservableClass
 {
-    private readonly WeakEventManager<Language> _eventManager     = new();
-    private          Language.Collection        _languages        = new(Language.Supported);
-    private          CultureInfo                _currentCulture   = CultureInfo.CurrentCulture;
-    private          CultureInfo                _currentUiCulture = CultureInfo.CurrentUICulture;
-    private          CultureInfo?               _defaultThreadCurrentCulture;
-    private          CultureInfo?               _defaultThreadCurrentUiCulture;
-    private          Language?                  _selectedLanguage;
+    // private readonly WeakEventManager<Language> _eventManager     = new();
+    private Language.Collection _languages        = new(Language.Supported);
+    private CultureInfo         _currentCulture   = CultureInfo.CurrentCulture;
+    private CultureInfo         _currentUiCulture = CultureInfo.CurrentUICulture;
+    private CultureInfo?        _defaultThreadCurrentCulture;
+    private CultureInfo?        _defaultThreadCurrentUiCulture;
+    private Language?           _selectedLanguage;
 
 
     public CultureInfo CurrentCulture
@@ -74,7 +74,8 @@ public sealed class LanguageApi : ObservableClass
         {
             if ( !SetProperty( ref _selectedLanguage, value ) ) { return; }
 
-            _eventManager.RaiseEvent( value, nameof(OnLanguageChanged) );
+            // _eventManager.RaiseEvent( value, nameof(OnLanguageChanged) );
+            OnLanguageChanged?.Invoke( value );
             CurrentUICulture = value;
         }
     }
@@ -90,9 +91,12 @@ public sealed class LanguageApi : ObservableClass
     }
 
 
+    public event Action<Language>? OnLanguageChanged;
+
+    /*
     public event Action<Language> OnLanguageChanged
     {
         add => _eventManager.AddEventHandler( value );
         remove => _eventManager.AddEventHandler( value );
-    }
+    }*/
 }

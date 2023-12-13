@@ -1,107 +1,296 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 06/10/2022  10:19 AM
 
+using System;
+
+
+
 namespace Jakar.Extensions;
 
 
 public static partial class Spans
 {
-    public static ReadOnlySpan<char> RemoveAll( this ReadOnlySpan<char> value, ReadOnlySpan<char> removed )
+    public static Span<T> Replace<T>( this ReadOnlySpan<T> value,
+                                  #if NET6_0_OR_GREATER
+                                      scoped
+                                      #endif
+                                          in ReadOnlySpan<T> oldValue,
+                                  #if NET6_0_OR_GREATER
+                                      scoped
+                                      #endif
+                                          in ReadOnlySpan<T> newValue
+    )
+        where T : unmanaged, IEquatable<T>
     {
-        Span<char> buffer = stackalloc char[value.Length];
-        RemoveAll( value, buffer, out int charWritten, removed );
-        return MemoryMarshal.CreateReadOnlySpan( ref buffer.GetPinnableReference(), charWritten );
+        var buffer = new Buffer<T>( value.Length );
+
+        try
+        {
+            Replace( value, oldValue, newValue, ref buffer );
+            int length = buffer.Length;
+            T[] array  = AsyncLinq.GetArray<T>( length );
+            buffer.Span.CopyTo( array );
+            Debug.Assert( length <= array.Length );
+            return new Span<T>( array, 0, length );
+        }
+        finally { buffer.Dispose(); }
     }
-    public static ReadOnlySpan<T> RemoveAll<T>( this ReadOnlySpan<T> value, T c ) where T : unmanaged, IEquatable<T>
+    
+    
+    public static void Replace<T>(
+    #if NET6_0_OR_GREATER
+        scoped
+        #endif
+            in ReadOnlySpan<T> source,
+    #if NET6_0_OR_GREATER
+        scoped
+        #endif
+            in ReadOnlySpan<T> oldValue,
+    #if NET6_0_OR_GREATER
+        scoped
+        #endif
+            in ReadOnlySpan<T> newValue,
+    #if NET6_0_OR_GREATER
+        scoped
+        #endif
+            ref Buffer<T> buffer
+    )
+        where T : unmanaged, IEquatable<T>
     {
-        Span<T> buffer = stackalloc T[value.Length];
-        RemoveAll( value, c, buffer, out int charWritten );
-        return MemoryMarshal.CreateReadOnlySpan( ref buffer.GetPinnableReference(), charWritten );
+        if ( source.Contains( oldValue ) is false )
+        {
+            buffer.Append( source );
+            return;
+        }
+
+        int sourceIndex = 0;
+
+        while ( sourceIndex < source.Length )
+        {
+            ReadOnlySpan<T> window = source[sourceIndex..];
+
+            if ( window.StartsWith( oldValue ) )
+            {
+                buffer.EnsureCapacity( newValue.Length );
+                buffer.Append( newValue );
+                sourceIndex += oldValue.Length;
+            }
+            else
+            {
+                buffer.Append( source[sourceIndex] );
+                sourceIndex++;
+            }
+        }
     }
-
-
-    public static ReadOnlySpan<T> RemoveAll<T>( this ReadOnlySpan<T> value, ReadOnlySpan<T> removed ) where T : unmanaged, IEquatable<T>
+    
+    
+    public static void Replace<T>(
+    #if NET6_0_OR_GREATER
+        scoped
+        #endif
+            in ReadOnlySpan<T> source,
+    #if NET6_0_OR_GREATER
+        scoped
+        #endif
+            in ReadOnlySpan<T> oldValue,
+    #if NET6_0_OR_GREATER
+        scoped
+        #endif
+            in ReadOnlySpan<T> newValue,
+    #if NET6_0_OR_GREATER
+        scoped
+        #endif
+            ref Span<T> buffer,
+        out int length
+    )
+        where T : unmanaged, IEquatable<T>
     {
-        Span<T> buffer = stackalloc T[value.Length];
-        RemoveAll( value, buffer, out int charWritten, removed );
-        return MemoryMarshal.CreateReadOnlySpan( ref buffer.GetPinnableReference(), charWritten );
+        if ( source.Contains( oldValue ) is false )
+        {
+            source.CopyTo( buffer );
+            length = source.Length;
+            return;
+        }
+
+        length = 0;
+        int sourceIndex = 0;
+
+        while ( sourceIndex < source.Length )
+        {
+            ReadOnlySpan<T> window = source[sourceIndex..];
+
+            if ( window.StartsWith( oldValue ) )
+            {
+                if ( length + newValue.Length >= buffer.Length )
+                {
+                    T[] newBuffer = new T[buffer.Length * 2];
+                    buffer.CopyTo( newBuffer );
+                    buffer = newBuffer;
+                }
+
+                newValue.CopyTo( buffer[length..] );
+                length      += newValue.Length;
+                sourceIndex += oldValue.Length;
+            }
+            else
+            {
+                if ( length >= buffer.Length )
+                {
+                    T[] newBuffer = new T[buffer.Length * 2];
+                    buffer.CopyTo( newBuffer );
+                    buffer = newBuffer;
+                }
+
+                buffer[length] = source[sourceIndex];
+                length++;
+                sourceIndex++;
+            }
+        }
     }
 
 
-    public static ReadOnlySpan<T> Replace<T>( this ReadOnlySpan<T> value, ReadOnlySpan<T> oldValue, ReadOnlySpan<T> newValue ) where T : unmanaged, IEquatable<T>
-    {
-        Span<T> buffer = stackalloc T[value.Length + newValue.Length];
-        Replace( value, oldValue, newValue, buffer, out int charWritten );
-        return MemoryMarshal.CreateReadOnlySpan( ref buffer.GetPinnableReference(), charWritten );
-    }
-
-
-    // [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static ReadOnlySpan<T> Replace<T>( this ReadOnlySpan<T> value, ReadOnlySpan<T> oldValue, ReadOnlySpan<T> newValue, T startValue, T endValue ) where T : unmanaged, IEquatable<T>
+    public static Span<T> Replace<T>( this ReadOnlySpan<T> value,
+                                  #if NET6_0_OR_GREATER
+                                      scoped
+                                      #endif
+                                          ref ReadOnlySpan<T> oldValue,
+                                  #if NET6_0_OR_GREATER
+                                      scoped
+                                      #endif
+                                          ref ReadOnlySpan<T> newValue,
+                                      T startValue,
+                                      T endValue
+    )
+        where T : unmanaged, IEquatable<T>
     {
         Span<T> buffer = stackalloc T[value.Length + newValue.Length + 1];
-        Replace( value, oldValue, newValue, startValue, endValue, buffer, out int charWritten );
-        return MemoryMarshal.CreateReadOnlySpan( ref buffer.GetPinnableReference(), charWritten );
+        Replace( value, oldValue, newValue, startValue, endValue, ref buffer, out int length );
+        return MemoryMarshal.CreateSpan( ref buffer.GetPinnableReference(), length );
     }
+    
+    
+    public static void Replace<T>(
+    #if NET6_0_OR_GREATER
+        scoped
+        #endif
+            in ReadOnlySpan<T> source,
+    #if NET6_0_OR_GREATER
+        scoped
+        #endif
+            in ReadOnlySpan<T> oldValue,
+    #if NET6_0_OR_GREATER
+        scoped
+        #endif
+            in ReadOnlySpan<T> newValue,
 
-    public static ReadOnlySpan<T> Slice<T>( this ReadOnlySpan<T> value, T startValue, T endValue, bool includeEnds ) where T : unmanaged, IEquatable<T>
+    #if NET6_0_OR_GREATER
+        scoped
+        #endif
+            in T startValue,
+
+    #if NET6_0_OR_GREATER
+        scoped
+        #endif
+            in T endValue,
+
+    #if NET6_0_OR_GREATER
+        scoped
+        #endif
+            ref Span<T> buffer,
+        out int length
+    )
+        where T : unmanaged, IEquatable<T>
     {
-        int start = value.IndexOf( startValue );
-        int end   = value.IndexOf( endValue );
+        Guard.IsInRangeFor( source.Length + newValue.Length - 1, buffer, nameof(buffer) );
 
-        if ( start < 0 && end < 0 ) { return value; }
+        if ( source.Contains( oldValue ) is false )
+        {
+            source.CopyTo( buffer );
+            length = source.Length;
+            return;
+        }
 
-        start += includeEnds
-                     ? 0
-                     : 1;
+        do
+        {
+            int start = source.IndexOf( oldValue );
+            int end   = start + oldValue.Length;
 
-        end += includeEnds
-                   ? 1
-                   : 0;
+            if ( oldValue.StartsWith( startValue ) is false && start > 0 ) { start--; }
 
-        int length = end - start;
+            if ( oldValue.EndsWith( endValue ) is false ) { end++; }
 
-        if ( start + length >= value.Length ) { return value[start..]; }
+            Guard.IsInRangeFor( start, source, nameof(source) );
+            ReadOnlySpan<T> sourceStart  = source[..start];
+            ReadOnlySpan<T> tempNewValue = newValue;
+            Join( in sourceStart, in tempNewValue, ref buffer, out int first );
 
-        Guard.IsInRangeFor( start, value, nameof(value) );
-        Guard.IsInRangeFor( end,   value, nameof(value) );
-        return value.Slice( start, length );
+            Guard.IsInRangeFor( end, source, nameof(source) );
+            ReadOnlySpan<T> bufferStart = buffer[..first];
+            ReadOnlySpan<T> sourceEnd   = source[end..];
+            Join( in bufferStart, in sourceEnd, ref buffer, out int second );
+            length = first + second;
+        } while ( source.Contains( oldValue ) );
     }
 
 
-    public static Span<char> RemoveAll( this Span<char> value, ReadOnlySpan<char> removed )
-    {
-        Span<char> buffer = stackalloc char[value.Length];
-        RemoveAll( value, buffer, out int charWritten, removed );
-        return MemoryMarshal.CreateSpan( ref buffer.GetPinnableReference(), charWritten );
-    }
-
-
-    public static Span<T> RemoveAll<T>( this Span<T> value, ReadOnlySpan<T> removed ) where T : unmanaged, IEquatable<T>
+    public static ReadOnlySpan<T> RemoveAll<T>( this ReadOnlySpan<T> value, T c )
+        where T : unmanaged, IEquatable<T>
     {
         Span<T> buffer = stackalloc T[value.Length];
-        RemoveAll( value, buffer, out int charWritten, removed );
-        return MemoryMarshal.CreateSpan( ref buffer.GetPinnableReference(), charWritten );
+        RemoveAll( value, c, buffer, out int length );
+        return MemoryMarshal.CreateReadOnlySpan( ref buffer.GetPinnableReference(), length );
     }
-
-
-    public static Span<T> Replace<T>( this Span<T> value, ReadOnlySpan<T> oldValue, ReadOnlySpan<T> newValue ) where T : unmanaged, IEquatable<T>
+    
+    
+    public static ReadOnlySpan<T> RemoveAll<T>( this ReadOnlySpan<T> value,
+                                            #if NET6_0_OR_GREATER
+                                                scoped
+                                                #endif
+                                                    in ReadOnlySpan<T> removed
+    )
+        where T : unmanaged, IEquatable<T>
     {
-        Span<T> buffer = stackalloc T[value.Length + newValue.Length];
-        Replace( value, oldValue, newValue, buffer, out int charWritten );
-        return MemoryMarshal.CreateSpan( ref buffer.GetPinnableReference(), charWritten );
+        Span<T>         buffer = stackalloc T[value.Length];
+        ReadOnlySpan<T> temp   = removed;
+        RemoveAll( value, temp, buffer, out int length );
+        return MemoryMarshal.CreateReadOnlySpan( ref buffer.GetPinnableReference(), length );
     }
-
-
-    public static Span<T> Replace<T>( this Span<T> value, ReadOnlySpan<T> oldValue, ReadOnlySpan<T> newValue, T startValue, T endValue ) where T : unmanaged, IEquatable<T>
+    
+    
+    public static Span<T> RemoveAll<T>( this Span<T> value,
+                                    #if NET6_0_OR_GREATER
+                                        scoped
+                                        #endif
+                                            in ReadOnlySpan<T> removed
+    )
+        where T : unmanaged, IEquatable<T>
     {
-        Span<T> buffer = stackalloc T[value.Length + newValue.Length];
-        Replace( value, oldValue, newValue, startValue, endValue, buffer, out int charWritten );
-        return MemoryMarshal.CreateSpan( ref buffer.GetPinnableReference(), charWritten );
+        T[]             array  = AsyncLinq.GetArray<T>( value.Length );
+        ReadOnlySpan<T> span   = value;
+        Span<T>         buffer = array;
+        ReadOnlySpan<T> temp   = removed;
+        RemoveAll( span, temp, buffer, out int length );
+        return new Span<T>( array, 0, length );
     }
 
 
-    public static void RemoveAll<T>( ReadOnlySpan<T> value, T c, Span<T> buffer, out int charWritten ) where T : unmanaged, IEquatable<T>
+    public static void RemoveAll<T>(
+    #if NET6_0_OR_GREATER
+        scoped
+        #endif
+            in ReadOnlySpan<T> value,
+    #if NET6_0_OR_GREATER
+        scoped
+        #endif
+            in T c,
+
+    #if NET6_0_OR_GREATER
+        scoped
+        #endif
+            in Span<T> buffer,
+        out int length
+    )
+        where T : unmanaged, IEquatable<T>
     {
         Guard.IsInRangeFor( value.Length - 1, buffer, nameof(buffer) );
         int offset = 0;
@@ -117,11 +306,26 @@ public static partial class Spans
             buffer[i - offset] = value[i];
         }
 
-        charWritten = value.Length - offset;
+        length = value.Length - offset;
     }
-
-
-    public static void RemoveAll<T>( ReadOnlySpan<T> value, Span<T> buffer, out int charWritten, ReadOnlySpan<T> removed ) where T : unmanaged, IEquatable<T>
+    
+    
+    public static void RemoveAll<T>(
+    #if NET6_0_OR_GREATER
+        scoped
+        #endif
+            in ReadOnlySpan<T> value,
+    #if NET6_0_OR_GREATER
+        scoped
+        #endif
+            in ReadOnlySpan<T> removed,
+    #if NET6_0_OR_GREATER
+        scoped
+        #endif
+            in Span<T> buffer,
+        out int length
+    )
+        where T : unmanaged, IEquatable<T>
     {
         Guard.IsInRangeFor( value.Length - 1, buffer, nameof(buffer) );
         int offset = 0;
@@ -143,77 +347,52 @@ public static partial class Spans
             buffer[i - offset] = value[i];
         }
 
-        charWritten = value.Length - offset;
+        length = value.Length - offset;
     }
 
 
-    public static void Replace<T>( ReadOnlySpan<T> value, ReadOnlySpan<T> oldValue, ReadOnlySpan<T> newValue, Span<T> buffer, out int charWritten ) where T : unmanaged, IEquatable<T>
+    public static ReadOnlySpan<T> Slice<T>( this ReadOnlySpan<T> value, T startValue, T endValue, bool includeEnds )
+        where T : unmanaged, IEquatable<T>
     {
-        Guard.IsInRangeFor( value.Length + newValue.Length - 1, buffer, nameof(buffer) );
+        int start = value.IndexOf( startValue );
+        int end   = value.IndexOf( endValue );
 
-        if ( !value.Contains( oldValue ) )
-        {
-            value.CopyTo( buffer );
-            charWritten = value.Length;
-            return;
-        }
+        if ( start < 0 && end < 0 ) { return value; }
 
-        // charWritten = 0;
-        //
-        // for ( int i = 0; i < value.Length; i++ )
-        // {
-        //     if ( value.Slice( i, i + oldValue.Length )
-        //               .SequenceEqual( oldValue ) )
-        //     {
-        //
-        //     }
-        // }
+        start += includeEnds
+                     ? 0
+                     : 1;
 
+        end += includeEnds
+                   ? 1
+                   : 0;
 
-        int start = value.IndexOf( oldValue );
-        int end   = start + oldValue.Length;
+        int length = end - start;
 
+        if ( start + length >= value.Length ) { return value[start..]; }
 
         Guard.IsInRangeFor( start, value, nameof(value) );
-        Join( value[..start], newValue, ref buffer, out int first );
-        ReadOnlySpan<T> temp = buffer[..first];
+        Guard.IsInRangeFor( end,   value, nameof(value) );
+        ReadOnlySpan<T> result = value.Slice( start, length );
+        return result.AsReadOnlySpan();
 
-        Guard.IsInRangeFor( end, value, nameof(value) );
-        Join( temp, value[end..], ref buffer, out int second );
-        charWritten = first + second;
+        // return MemoryMarshal.CreateReadOnlySpan( in result.GetPinnableReference(), result.Length );
     }
-
-
-    // [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void Replace<T>( ReadOnlySpan<T> value, ReadOnlySpan<T> oldValue, ReadOnlySpan<T> newValue, T startValue, T endValue, Span<T> buffer, out int charWritten ) where T : unmanaged, IEquatable<T>
-    {
-        Guard.IsInRangeFor( value.Length + newValue.Length - 1, buffer, nameof(buffer) );
-
-        if ( !value.Contains( oldValue ) )
-        {
-            value.CopyTo( buffer );
-            charWritten = value.Length;
-            return;
-        }
-
-        int start = value.IndexOf( oldValue );
-
-        int end = start + oldValue.Length;
-
-        if ( !oldValue.StartsWith( startValue ) && start > 0 ) { start--; }
-
-        if ( !oldValue.EndsWith( endValue ) ) { end++; }
-
-        Guard.IsInRangeFor( start, value, nameof(value) );
-        Join( value[..start], newValue, ref buffer, out int first );
-
-        Guard.IsInRangeFor( end, value, nameof(value) );
-        Join( buffer[..first], value[end..], ref buffer, out int second );
-        charWritten = first + second;
-    }
-
-
-    public static void Slice<T>( ReadOnlySpan<T> value, T startValue, T endValue, bool includeEnds, Span<T> buffer, out int charWritten ) where T : unmanaged, IEquatable<T>
+    public static void Slice<T>(
+    #if NET6_0_OR_GREATER
+        scoped
+        #endif
+            in ReadOnlySpan<T> value,
+        T    startValue,
+        T    endValue,
+        bool includeEnds,
+    #if NET6_0_OR_GREATER
+        scoped
+        #endif
+            ref Span<T> buffer,
+        out int length
+    )
+        where T : unmanaged, IEquatable<T>
     {
         int start = value.IndexOf( startValue );
         int end   = value.IndexOf( endValue );
@@ -233,11 +412,11 @@ public static partial class Spans
                                          : value.Slice( start, end );
 
             result.CopyTo( buffer );
-            charWritten = result.Length;
+            length = result.Length;
             return;
         }
 
         value.CopyTo( buffer );
-        charWritten = value.Length;
+        length = value.Length;
     }
 }

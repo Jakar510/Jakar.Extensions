@@ -5,22 +5,22 @@ namespace Jakar.Extensions;
 
 
 [ SuppressMessage( "ReSharper", "UnusedMemberInSuper.Global" ) ]
-public interface IAddress : JsonModels.IJsonModel
+public interface IAddress
 {
-    [ MaxLength( 4096 ) ] public          string? Address         { get; }
-    [ MaxLength( 256 ) ]  public          string  City            { get; }
-    [ MaxLength( 256 ) ]  public          string  Country         { get; }
-    public                                bool    IsPrimary       { get; }
-    [ MaxLength( 512 ) ]           public string  Line1           { get; }
-    [ MaxLength( 256 ) ]           public string  Line2           { get; }
-    [ MaxLength( 256 ), Required ] public string  PostalCode      { get; }
-    [ MaxLength( 256 ) ]           public string  StateOrProvince { get; }
-    public                                Guid?   UserID          { get; }
+    public              string? Address         { get; }
+    public              string  City            { get; }
+    public              string  Country         { get; }
+    public              bool    IsPrimary       { get; }
+    public              string  Line1           { get; }
+    public              string  Line2           { get; }
+    [ Required ] public string  PostalCode      { get; }
+    public              string  StateOrProvince { get; }
+    public              Guid?   UserID          { get; }
 }
 
 
 
-public record UserAddress : ObservableRecord, IAddress, IComparable<UserAddress>, IComparable
+public record UserAddress : ObservableRecord, IAddress, IComparable<UserAddress>, IComparable, JsonModels.IJsonModel
 {
     private bool                          _isPrimary;
     private Guid?                         _userID;
@@ -33,6 +33,7 @@ public record UserAddress : ObservableRecord, IAddress, IComparable<UserAddress>
     private string                        _stateOrProvince = string.Empty;
     private string?                       _address;
 
+
     public static Sorter<UserAddress> Sorter => Sorter<UserAddress>.Default;
 
 
@@ -44,14 +45,13 @@ public record UserAddress : ObservableRecord, IAddress, IComparable<UserAddress>
     }
 
 
-    [ MaxLength( 4096 ) ]
     public string? Address
     {
         get => _address ??= ToString();
         set => SetProperty( ref _address, value );
     }
 
-    [ MaxLength( 256 ) ]
+
     public string City
     {
         get => _city;
@@ -61,7 +61,7 @@ public record UserAddress : ObservableRecord, IAddress, IComparable<UserAddress>
         }
     }
 
-    [ MaxLength( 256 ) ]
+
     public string Country
     {
         get => _country;
@@ -97,7 +97,7 @@ public record UserAddress : ObservableRecord, IAddress, IComparable<UserAddress>
         }
     }
 
-    [ MaxLength( 512 ) ]
+
     public string Line1
     {
         get => _line1;
@@ -107,7 +107,7 @@ public record UserAddress : ObservableRecord, IAddress, IComparable<UserAddress>
         }
     }
 
-    [ MaxLength( 256 ) ]
+
     public string Line2
     {
         get => _line2;
@@ -117,7 +117,7 @@ public record UserAddress : ObservableRecord, IAddress, IComparable<UserAddress>
         }
     }
 
-    [ MaxLength( 256 ), Required ]
+    [ Required ]
     public string PostalCode
     {
         get => _postalCode;
@@ -127,7 +127,7 @@ public record UserAddress : ObservableRecord, IAddress, IComparable<UserAddress>
         }
     }
 
-    [ MaxLength( 256 ) ]
+
     public string StateOrProvince
     {
         get => _stateOrProvince;
@@ -157,7 +157,6 @@ public record UserAddress : ObservableRecord, IAddress, IComparable<UserAddress>
         IsPrimary       = address.IsPrimary;
         UserID          = address.UserID;
     }
-
 
     public override string ToString() => string.IsNullOrWhiteSpace( Line2 )
                                              ? $"{Line1}. {City}, {StateOrProvince}. {Country}. {PostalCode}"
@@ -209,3 +208,5 @@ public record UserAddress : ObservableRecord, IAddress, IComparable<UserAddress>
     public static bool operator <=( UserAddress? left, UserAddress? right ) => Sorter.Compare( left, right ) <= 0;
     public static bool operator >=( UserAddress? left, UserAddress? right ) => Sorter.Compare( left, right ) >= 0;
 }
+
+

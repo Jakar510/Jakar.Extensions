@@ -1,22 +1,26 @@
 ﻿namespace Jakar.Extensions;
 
 
-public class ExceptionDetails
+public sealed class ExceptionDetails
 {
-    public                               Dictionary<string, JToken?>? Data            { get; init; }
-    [ MaxLength( 4096 ) ] public         string?                      HelpLink        { get; init; }
-    public                               int                          HResult         { get; init; }
-    public                               ExceptionDetails?            Inner           { get; init; }
-    [ MaxLength( int.MaxValue ) ] public string                       Message         { get; init; } = string.Empty;
-    [ MaxLength( 10240 ) ]        public string?                      MethodSignature { get; init; }
-    [ MaxLength( 4096 ) ]         public string?                      Source          { get; init; }
-    public                               List<string>?                StackTrace      { get; init; }
-    [ MaxLength( 4096 ) ] public         string                       Str             { get; init; } = string.Empty;
-    public                               MethodDetails?               TargetSite      { get; init; }
-    [ MaxLength( 4096 ) ] public         string?                      Type            { get; init; }
+    public Dictionary<string, JToken?>? Data            { get; init; }
+    public string?                      HelpLink        { get; init; }
+    public int                          HResult         { get; init; }
+    public ExceptionDetails?            Inner           { get; init; }
+    public string                       Message         { get; init; } = string.Empty;
+    public string?                      MethodSignature { get; init; }
+    public string?                      Source          { get; init; }
+    public string[]                     StackTrace      { get; init; } = Array.Empty<string>();
+    public string                       Str             { get; init; } = string.Empty;
+    public MethodDetails?               TargetSite      { get; init; }
+    public string?                      Type            { get; init; }
 
 
     public ExceptionDetails() { }
+#if NET6_0_OR_GREATER
+
+    [ RequiresUnreferencedCode( nameof(ExceptionDetails) ) ]
+#endif
     public ExceptionDetails( Exception e, bool includeMethodInfo = false )
     {
         Message = e.Message;
@@ -27,7 +31,7 @@ public class ExceptionDetails
         HelpLink = e.HelpLink;
         Source   = e.Source;
 
-        StackTrace = e.StackTrace?.SplitAndTrimLines().ToList();
+        StackTrace = e.StackTrace?.SplitAndTrimLines().ToArray() ?? Array.Empty<string>();
 
         MethodSignature = $"{e.MethodClass()}::{e.MethodSignature()}";
         Data            = e.GetData();
@@ -41,82 +45,4 @@ public class ExceptionDetails
                     ? null
                     : new ExceptionDetails( e.InnerException );
     }
-}
-
-
-
-public class MethodDetails
-{
-    public                        MethodAttributes        Attributes          { get; init; }
-    [ MaxLength( 10240 ) ] public string?                 DeclaringType       { get; init; }
-    public                        bool                    IsAbstract          { get; init; }
-    public                        bool                    IsAssembly          { get; init; }
-    public                        bool                    IsConstructor       { get; init; }
-    public                        bool                    IsFamily            { get; init; }
-    public                        bool                    IsFamilyAndAssembly { get; init; }
-    public                        bool                    IsFamilyOrAssembly  { get; init; }
-    public                        bool                    IsFinal             { get; init; }
-    public                        bool                    IsPrivate           { get; init; }
-    public                        bool                    IsPublic            { get; init; }
-    public                        bool                    IsSpecialName       { get; init; }
-    public                        bool                    IsStatic            { get; init; }
-    public                        bool                    IsVirtual           { get; init; }
-    [ MaxLength( 4096 ) ] public  string                  Name                { get; init; } = string.Empty;
-    public                        List<ParameterDetails>? Parameters          { get; init; }
-    [ MaxLength( 10240 ) ] public string                  Signature           { get; init; } = string.Empty;
-
-
-    public MethodDetails() { }
-    public MethodDetails( Exception e ) : this( e.TargetSite ?? throw new NullReferenceException( nameof(e.TargetSite) ) ) { }
-
-    public MethodDetails( MethodBase method )
-    {
-        DeclaringType       = method.MethodClass();
-        Signature           = method.MethodSignature();
-        Name                = method.Name;
-        Attributes          = method.Attributes;
-        IsSpecialName       = method.IsSpecialName;
-        IsStatic            = method.IsStatic;
-        IsConstructor       = method.IsConstructor;
-        IsFinal             = method.IsFinal;
-        IsVirtual           = method.IsVirtual;
-        IsAbstract          = method.IsAbstract;
-        IsPrivate           = method.IsPrivate;
-        IsPublic            = method.IsPublic;
-        IsFamily            = method.IsFamily;
-        IsAssembly          = method.IsAssembly;
-        IsFamilyAndAssembly = method.IsFamilyAndAssembly;
-        IsFamilyOrAssembly  = method.IsFamilyOrAssembly;
-        Parameters          = ParameterDetails.Create( method );
-    }
-}
-
-
-
-public class ParameterDetails
-{
-    public                        bool    HasDefaultValue { get; init; }
-    public                        bool    IsIn            { get; init; }
-    public                        bool    IsOptional      { get; init; }
-    public                        bool    IsOut           { get; init; }
-    [ MaxLength( 4096 ) ] public  string? Name            { get; init; }
-    public                        int     Position        { get; init; }
-    [ MaxLength( 10240 ) ] public string? Type            { get; init; }
-
-
-    public ParameterDetails() { }
-    public ParameterDetails( ParameterInfo parameter )
-    {
-        Name            = parameter.Name;
-        Position        = parameter.Position;
-        IsIn            = parameter.IsIn;
-        IsOut           = parameter.IsOut;
-        IsOptional      = parameter.IsOptional;
-        HasDefaultValue = parameter.HasDefaultValue;
-        Type            = parameter.ParameterType.FullName;
-    }
-
-
-    public static List<ParameterDetails> Create( MethodBase                 method ) => Create( method.GetParameters() );
-    public static List<ParameterDetails> Create( IEnumerable<ParameterInfo> items )  => new(items.Select( x => new ParameterDetails( x ) ));
 }

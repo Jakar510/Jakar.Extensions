@@ -10,7 +10,9 @@ public record BaseJsonModelRecord : ObservableRecord, JsonModels.IJsonModel
 
 
 [ Serializable ]
-public abstract record BaseJsonModelRecord<TClass> : BaseCollectionsRecord<TClass>, JsonModels.IJsonModel where TClass : BaseJsonModelRecord<TClass>
+public abstract record BaseJsonModelRecord<TClass, TID> : CollectionsRecord<TClass, TID>
+    where TClass : BaseJsonModelRecord<TClass, TID>
+    where TID : struct, IComparable<TID>, IEquatable<TID>
 {
     [ JsonExtensionData ] public IDictionary<string, JToken?>? AdditionalData { get; set; }
 }

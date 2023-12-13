@@ -4,13 +4,13 @@
 [ SuppressMessage( "ReSharper", "VirtualMemberNeverOverridden.Global" ) ]
 public record ObservableRecord : BaseRecord, INotifyPropertyChanged, INotifyPropertyChanging
 {
+    public static readonly DateTime SQLMinDate = DateTime.Parse( "1/1/1753 12:00:00 AM", CultureInfo.InvariantCulture );
 #if NET6_0_OR_GREATER
     public static DateOnly SQLMinDateOnly { get; } = new(SQLMinDate.Date.Year, SQLMinDate.Date.Month, SQLMinDate.Date.Day);
 #endif
 
 
     public ObservableRecord() { }
-    public static readonly DateTime SQLMinDate = DateTime.Parse( "1/1/1753 12:00:00 AM", CultureInfo.InvariantCulture );
 
 
     /// <summary>
@@ -245,7 +245,7 @@ public record ObservableRecord : BaseRecord, INotifyPropertyChanged, INotifyProp
 
 
 #if NET6_0_OR_GREATER
-    protected virtual bool SetProperty( ref TimeOnly backingStore, TimeOnly value, in TimeOnly minDate, [CallerMemberName] string? propertyName = default )
+    protected virtual bool SetProperty( ref TimeOnly backingStore, TimeOnly value, in TimeOnly minDate, [ CallerMemberName ] string? propertyName = default )
     {
         value = value < minDate
                     ? minDate
@@ -254,7 +254,7 @@ public record ObservableRecord : BaseRecord, INotifyPropertyChanged, INotifyProp
 
         return SetProperty( ref backingStore, value, EqualityComparer<TimeOnly>.Default, propertyName );
     }
-    protected virtual bool SetProperty( ref TimeOnly? backingStore, TimeOnly? value, in TimeOnly minDate, [CallerMemberName] string? propertyName = default )
+    protected virtual bool SetProperty( ref TimeOnly? backingStore, TimeOnly? value, in TimeOnly minDate, [ CallerMemberName ] string? propertyName = default )
     {
         value = value < minDate
                     ? minDate
@@ -264,8 +264,8 @@ public record ObservableRecord : BaseRecord, INotifyPropertyChanged, INotifyProp
     }
 
 
-    protected virtual bool SetProperty( ref DateOnly backingStore, DateOnly value, [CallerMemberName] string? propertyName = default ) => SetProperty( ref backingStore, value, SQLMinDateOnly, propertyName );
-    protected virtual bool SetProperty( ref DateOnly backingStore, DateOnly value, in DateOnly minDate, [CallerMemberName] string? propertyName = default )
+    protected virtual bool SetProperty( ref DateOnly backingStore, DateOnly value, [ CallerMemberName ] string? propertyName = default ) => SetProperty( ref backingStore, value, SQLMinDateOnly, propertyName );
+    protected virtual bool SetProperty( ref DateOnly backingStore, DateOnly value, in DateOnly minDate, [ CallerMemberName ] string? propertyName = default )
     {
         value = value < minDate
                     ? minDate
@@ -274,8 +274,8 @@ public record ObservableRecord : BaseRecord, INotifyPropertyChanged, INotifyProp
 
         return SetProperty( ref backingStore, value, EqualityComparer<DateOnly>.Default, propertyName );
     }
-    protected virtual bool SetProperty( ref DateOnly? backingStore, DateOnly? value, [CallerMemberName] string? propertyName = default ) => SetProperty( ref backingStore, value, SQLMinDateOnly, propertyName );
-    protected virtual bool SetProperty( ref DateOnly? backingStore, DateOnly? value, in DateOnly minDate, [CallerMemberName] string? propertyName = default )
+    protected virtual bool SetProperty( ref DateOnly? backingStore, DateOnly? value, [ CallerMemberName ] string? propertyName = default ) => SetProperty( ref backingStore, value, SQLMinDateOnly, propertyName );
+    protected virtual bool SetProperty( ref DateOnly? backingStore, DateOnly? value, in DateOnly minDate, [ CallerMemberName ] string? propertyName = default )
     {
         value = value < minDate
                     ? minDate
@@ -288,7 +288,8 @@ public record ObservableRecord : BaseRecord, INotifyPropertyChanged, INotifyProp
 
 
 
-public abstract record ObservableRecord<TRecord> : ObservableRecord, IEquatable<TRecord>, IComparable<TRecord>, IComparable where TRecord : ObservableRecord<TRecord>
+public abstract record ObservableRecord<TRecord> : ObservableRecord, IEquatable<TRecord>, IComparable<TRecord>, IComparable
+    where TRecord : ObservableRecord<TRecord>
 {
     protected ObservableRecord() { }
 
@@ -316,8 +317,9 @@ public abstract record ObservableRecord<TRecord> : ObservableRecord, IEquatable<
 
 
 
-public abstract record ObservableRecord<TRecord, TID> : ObservableRecord<TRecord>, IUniqueID<TID> where TRecord : ObservableRecord<TRecord, TID>
-                                                                                                  where TID : struct, IComparable<TID>, IEquatable<TID>
+public abstract record ObservableRecord<TRecord, TID> : ObservableRecord<TRecord>, IUniqueID<TID>
+    where TRecord : ObservableRecord<TRecord, TID>
+    where TID : struct, IComparable<TID>, IEquatable<TID>
 {
     private TID _id;
 

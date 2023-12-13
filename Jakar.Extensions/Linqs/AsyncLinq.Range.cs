@@ -3,6 +3,16 @@
 
 public static partial class AsyncLinq
 {
+#if NET7_0_OR_GREATER
+    public static IEnumerable<T> Range<T>( T start, T count )
+        where T : INumber<T> => Range( start, count, T.One );
+    public static IEnumerable<T> Range<T>( T start, T count, T offset )
+        where T : INumber<T>
+    {
+        for ( T i = start; i < start + count; i += offset ) { yield return i; }
+    }
+
+#else
     public static IEnumerable<sbyte> Range( sbyte start, sbyte count ) => Range( start, count, (sbyte)1 );
     public static IEnumerable<sbyte> Range( sbyte start, sbyte count, sbyte offset )
     {
@@ -70,4 +80,5 @@ public static partial class AsyncLinq
     {
         for ( double i = start; i < start + count; i += offset ) { yield return i; }
     }
+#endif
 }

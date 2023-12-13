@@ -9,18 +9,22 @@ namespace Jakar.Extensions;
 /// </summary>
 public static partial class Spans
 {
-    public static bool Contains( this Span<char>         span, ReadOnlySpan<char> value ) => MemoryExtensions.Contains( span, value, StringComparison.Ordinal );
-    public static bool Contains( this ReadOnlySpan<char> span, ReadOnlySpan<char> value ) => span.Contains( value, StringComparison.Ordinal );
+    // SearchValues<char> values = SearchValues.Create( "" );
+
+
+    public static bool Contains( this Span<char>         span, in ReadOnlySpan<char> value ) => MemoryExtensions.Contains( span, value, StringComparison.Ordinal );
+    public static bool Contains( this ReadOnlySpan<char> span, in ReadOnlySpan<char> value ) => span.Contains( value, StringComparison.Ordinal );
 
 
     public static bool Contains<T>(
 
     #if NETSTANDARD2_1
         this
-        #endif
-            Span<T> span,
-        T value
-    ) where T : IEquatable<T>
+    #endif
+        Span<T> span,
+        T       value
+    )
+        where T : IEquatable<T>
     {
     #if NETSTANDARD2_1
         foreach ( T item in span )
@@ -37,10 +41,11 @@ public static partial class Spans
     public static bool Contains<T>(
     #if NETSTANDARD2_1
         this
-        #endif
-            ReadOnlySpan<T> span,
-        T value
-    ) where T : IEquatable<T>
+    #endif
+        ReadOnlySpan<T> span,
+        T               value
+    )
+        where T : IEquatable<T>
     {
     #if NETSTANDARD2_1
         foreach ( T item in span )
@@ -54,7 +59,9 @@ public static partial class Spans
     #endif
     }
 
-    public static bool Contains<T>( this Span<T> span, ReadOnlySpan<T> value ) where T : IEquatable<T>
+
+    public static bool Contains<T>( this ReadOnlySpan<T> span, in ReadOnlySpan<T> value )
+        where T : IEquatable<T>
     {
         if ( value.Length > span.Length ) { return false; }
 
@@ -69,44 +76,19 @@ public static partial class Spans
         return false;
     }
 
-    public static bool Contains<T>( this ReadOnlySpan<T> span, ReadOnlySpan<T> value ) where T : IEquatable<T>
-    {
-        if ( value.Length > span.Length ) { return false; }
-
-        if ( value.Length == span.Length ) { return span.SequenceEqual( value ); }
-
-
-        for ( int i = 0; i < span.Length || i + value.Length < span.Length; i++ )
-        {
-            if ( span.Slice( i, value.Length ).SequenceEqual( value ) ) { return true; }
-        }
-
-        return false;
-    }
-
-
-    public static bool ContainsAll<T>( this Span<T> span, ReadOnlySpan<T> values ) where T : IEquatable<T>
+    public static bool ContainsAll<T>( this ReadOnlySpan<T> span, in ReadOnlySpan<T> values )
+        where T : IEquatable<T>
     {
         foreach ( T c in values )
         {
-            if ( !span.Contains( c ) ) { return false; }
+            if ( span.Contains( c ) is false ) { return false; }
         }
 
         return true;
     }
 
-    public static bool ContainsAll<T>( this ReadOnlySpan<T> span, ReadOnlySpan<T> values ) where T : IEquatable<T>
-    {
-        foreach ( T c in values )
-        {
-            if ( !span.Contains( c ) ) { return false; }
-        }
-
-        return true;
-    }
-
-
-    public static bool ContainsAny<T>( this Span<T> span, ReadOnlySpan<T> values ) where T : IEquatable<T>
+    public static bool ContainsAny<T>( this ReadOnlySpan<T> span, in ReadOnlySpan<T> values )
+        where T : IEquatable<T>
     {
         foreach ( T c in values )
         {
@@ -116,18 +98,7 @@ public static partial class Spans
         return false;
     }
 
-    public static bool ContainsAny<T>( this ReadOnlySpan<T> span, ReadOnlySpan<T> values ) where T : IEquatable<T>
-    {
-        foreach ( T c in values )
-        {
-            if ( span.Contains( c ) ) { return true; }
-        }
-
-        return false;
-    }
-
-
-    public static bool ContainsAny( this Span<char> span, ReadOnlySpan<char> values )
+    public static bool ContainsAny( this ReadOnlySpan<char> span, in ReadOnlySpan<char> values )
     {
         foreach ( char c in values )
         {
@@ -137,18 +108,8 @@ public static partial class Spans
         return false;
     }
 
-    public static bool ContainsAny( this ReadOnlySpan<char> span, ReadOnlySpan<char> values )
-    {
-        foreach ( char c in values )
-        {
-            if ( span.Contains( c ) ) { return true; }
-        }
-
-        return false;
-    }
-
-
-    public static bool ContainsNone<T>( this ReadOnlySpan<T> span, ReadOnlySpan<T> values ) where T : IEquatable<T>
+    public static bool ContainsNone<T>( this ReadOnlySpan<T> span, in ReadOnlySpan<T> values )
+        where T : IEquatable<T>
     {
         foreach ( T c in values )
         {
@@ -158,28 +119,7 @@ public static partial class Spans
         return true;
     }
 
-    public static bool ContainsNone<T>( this Span<T> span, ReadOnlySpan<T> values ) where T : IEquatable<T>
-    {
-        foreach ( T c in values )
-        {
-            if ( span.Contains( c ) ) { return false; }
-        }
-
-        return true;
-    }
-
-
-    public static bool ContainsNone( this Span<char> span, ReadOnlySpan<char> values )
-    {
-        foreach ( char c in values )
-        {
-            if ( span.Contains( c ) ) { return false; }
-        }
-
-        return true;
-    }
-
-    public static bool ContainsNone( this ReadOnlySpan<char> span, ReadOnlySpan<char> values )
+    public static bool ContainsNone( this ReadOnlySpan<char> span, in ReadOnlySpan<char> values )
     {
         foreach ( char c in values )
         {
@@ -190,78 +130,63 @@ public static partial class Spans
     }
 
 
-    public static bool EndsWith<T>( this Span<T> span, T value ) where T : IEquatable<T> => !span.IsEmpty && span[^1].Equals( value );
-
-    public static bool EndsWith<T>( this ReadOnlySpan<T> span, T value ) where T : IEquatable<T> => !span.IsEmpty && span[^1].Equals( value );
-
-
-    public static bool StartsWith<T>( this Span<T> span, T value ) where T : IEquatable<T> => !span.IsEmpty && span[0].Equals( value );
-
-    public static bool StartsWith<T>( this ReadOnlySpan<T> span, T value ) where T : IEquatable<T> => !span.IsEmpty && span[0].Equals( value );
-
-    public static int Count<T>( this Span<T> span, T value ) where T : IEquatable<T>
+    public static bool EndsWith<T>( this Span<T> span, T value )
+        where T : IEquatable<T> => span.IsEmpty is false && span[^1].Equals( value );
+    public static bool EndsWith<T>( this ReadOnlySpan<T> span, T value )
+        where T : IEquatable<T> => span.IsEmpty is false && span[^1].Equals( value );
+    public static bool EndsWith<T>( this Span<T> span, in ReadOnlySpan<T> value )
+        where T : IEquatable<T>
     {
-        int result = 0;
+        ReadOnlySpan<T> temp = span;
+        return temp.EndsWith( value );
+    }
+    public static bool EndsWith<T>( this ReadOnlySpan<T> span, in ReadOnlySpan<T> value )
+        where T : IEquatable<T>
+    {
+        if ( span.IsEmpty ) { return false; }
 
-        foreach ( T v in span )
+        if ( span.Length < value.Length ) { return false; }
+
+        ReadOnlySpan<T> temp = span.Slice( span.Length - value.Length, value.Length );
+
+        for ( int i = 0; i < value.Length; i++ )
         {
-            if ( v.Equals( value ) ) { result++; }
+            if ( temp[i].Equals( value[i] ) is false ) { return false; }
         }
 
-        return result;
+        return true;
     }
 
-    public static int Count<T>( this ReadOnlySpan<T> span, T value ) where T : IEquatable<T>
-    {
-        int result = 0;
 
-        foreach ( T v in span )
+    public static bool StartsWith<T>( this Span<T> span, T value )
+        where T : IEquatable<T> => span.IsEmpty is false && span[0].Equals( value );
+    public static bool StartsWith<T>( this ReadOnlySpan<T> span, T value )
+        where T : IEquatable<T> => span.IsEmpty is false && span[0].Equals( value );
+    public static bool StartsWith<T>( this Span<T> span, in ReadOnlySpan<T> value )
+        where T : IEquatable<T>
+    {
+        ReadOnlySpan<T> temp = span;
+        return temp.StartsWith( value );
+    }
+    public static bool StartsWith<T>( this ReadOnlySpan<T> span, in ReadOnlySpan<T> value )
+        where T : IEquatable<T>
+    {
+        if ( span.IsEmpty ) { return false; }
+
+        if ( span.Length < value.Length ) { return false; }
+
+        ReadOnlySpan<T> temp = span[..value.Length];
+
+        for ( int i = 0; i < value.Length; i++ )
         {
-            if ( v.Equals( value ) ) { result++; }
+            if ( temp[i].Equals( value[i] ) is false ) { return false; }
         }
 
-        return result;
+        return true;
     }
-    public static ReadOnlySpan<T> Create<T>( T arg0 ) where T : unmanaged
-    {
-        Span<T> span = stackalloc T[1];
-        span[0] = arg0;
-        return MemoryMarshal.CreateReadOnlySpan( ref span.GetPinnableReference(), span.Length );
-    }
-    public static ReadOnlySpan<T> Create<T>( T arg0, T arg1 ) where T : unmanaged
-    {
-        Span<T> span = stackalloc T[2];
-        span[0] = arg0;
-        span[1] = arg1;
-        return MemoryMarshal.CreateReadOnlySpan( ref span.GetPinnableReference(), span.Length );
-    }
-    public static ReadOnlySpan<T> Create<T>( T arg0, T arg1, T arg2 ) where T : unmanaged
-    {
-        Span<T> span = stackalloc T[3];
-        span[0] = arg0;
-        span[1] = arg1;
-        span[2] = arg2;
-        return MemoryMarshal.CreateReadOnlySpan( ref span.GetPinnableReference(), span.Length );
-    }
-    public static ReadOnlySpan<T> Create<T>( T arg0, T arg1, T arg2, T arg3 ) where T : unmanaged
-    {
-        Span<T> span = stackalloc T[4];
-        span[0] = arg0;
-        span[1] = arg1;
-        span[2] = arg2;
-        span[3] = arg3;
-        return MemoryMarshal.CreateReadOnlySpan( ref span.GetPinnableReference(), span.Length );
-    }
-    public static ReadOnlySpan<T> Create<T>( T arg0, T arg1, T arg2, T arg3, T arg4 ) where T : unmanaged
-    {
-        Span<T> span = stackalloc T[5];
-        span[0] = arg0;
-        span[1] = arg1;
-        span[2] = arg2;
-        span[3] = arg3;
-        span[4] = arg4;
-        return MemoryMarshal.CreateReadOnlySpan( ref span.GetPinnableReference(), span.Length );
-    }
+
+
+
 
 
     // TODO: prep for DotNet 7
