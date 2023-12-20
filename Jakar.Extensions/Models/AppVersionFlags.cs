@@ -5,6 +5,7 @@
 namespace Jakar.Extensions;
 
 
+[ DefaultValue( nameof(Stable) ) ]
 public readonly record struct AppVersionFlags( string Flag, uint Iteration ) : IEquatable<AppVersionFlags?>,
                                                                                IComparable<AppVersionFlags>,
                                                                                IComparable<AppVersionFlags?>,
@@ -134,22 +135,17 @@ public readonly record struct AppVersionFlags( string Flag, uint Iteration ) : I
             return Alpha();
         }
 
-        if ( value.Contains( SEPARATOR ) )
-        {
-            int index = value.IndexOf( SEPARATOR );
-            value = value[..index];
+        if ( value.Contains( SEPARATOR ) is false ) { return Stable; }
 
-            ReadOnlySpan<char> span = value[(index - 1)..].Trim( SEPARATOR );
+        int                index = value.IndexOf( SEPARATOR );
+        ReadOnlySpan<char> span  = value[(index - 1)..].Trim( SEPARATOR );
+        value = value[..index];
 
-            int end = span.IndexOfAny( Randoms.Numeric.Span );
+        int end = span.IndexOfAny( Randoms.Numeric.Span );
 
-            return end == -1
-                       ? new AppVersionFlags( span.ToString(),        0 )
-                       : new AppVersionFlags( span[..end].ToString(), uint.Parse( span[end..] ) );
-        }
-
-
-        return Stable;
+        return end < 0
+                   ? new AppVersionFlags( span.ToString(),        0 )
+                   : new AppVersionFlags( span[..end].ToString(), uint.Parse( span[end..] ) );
     }
     public static AppVersionFlags Parse( string s, IFormatProvider? provider )
     {

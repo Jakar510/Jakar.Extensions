@@ -40,22 +40,15 @@ public sealed class CacheEntry<TRecord>( RecordID<TRecord> id ) : ObservableClas
     [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
     public TRecord? TryGetValue( in TableCacheOptions options )
     {
-        string json = _json;
+        lock (this)
+        {
+            string json = _json;
+            if ( string.IsNullOrWhiteSpace( json ) || HasExpired( options.ExpireTime ) ) { return default; }
 
-        return string.IsNullOrWhiteSpace( json ) || HasExpired( options.ExpireTime )
-                   ? default
-                   : GetValue( json );
-    }
-
-
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
-    private TRecord? GetValue( in string json )
-    {
-        if ( string.IsNullOrWhiteSpace( json ) ) { return default; }
-
-        var record = json.FromJson<TRecord>();
-        _lastTime = DateTimeOffset.UtcNow;
-        return record;
+            var record = json.FromJson<TRecord>();
+            _lastTime = DateTimeOffset.UtcNow;
+            return record;
+        }
     }
 
 
@@ -64,11 +57,15 @@ public sealed class CacheEntry<TRecord>( RecordID<TRecord> id ) : ObservableClas
     {
         if ( ID != record.ID ) { throw new ArgumentException( "ID mismatch" ); }
 
-        DateCreated  = record.DateCreated;
-        LastModified = record.LastModified;
-        string json = record.ToJson();
-        Interlocked.Exchange( ref _json, json );
-        _hash = Spans.Hash128( json );
+        lock (this)
+        {
+            DateCreated  = record.DateCreated;
+            LastModified = record.LastModified;
+            string json = record.ToJson();
+            Interlocked.Exchange( ref _json, json );
+            _hash     = Spans.Hash128( json );
+            _lastTime = DateTimeOffset.UtcNow;
+        }
     }
 
 
