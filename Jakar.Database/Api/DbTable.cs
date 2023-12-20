@@ -2,6 +2,10 @@
 // 10/16/2022  4:54 PM
 
 
+using System.Collections.Frozen;
+
+
+
 namespace Jakar.Database;
 
 
@@ -10,24 +14,41 @@ public partial class DbTable<TRecord> : IConnectableDb
     where TRecord : class, ITableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
     protected readonly IConnectableDbRoot   _database;
-    protected readonly ISqlCacheFactory     _sqlCacheFactory;
     protected readonly ITableCache<TRecord> _tableCache;
-    private            ISqlCache<TRecord>?  _sqlCache;
+    protected readonly ISqlCache<TRecord>   _sqlCache;
 
 
-    public static ImmutableArray<TRecord>  Empty          => ImmutableArray<TRecord>.Empty;
-    public static ImmutableList<TRecord>   EmptyList      => ImmutableList<TRecord>.Empty;
-    public        ISqlCache<TRecord>       SqlCache       => _sqlCache ??= _sqlCacheFactory.GetSqlCache<TRecord>( _database );
-    public        int?                     CommandTimeout => _database.CommandTimeout;
-    public        DbInstance               Instance       => _database.Instance;
-    public        RecordGenerator<TRecord> Records        => new(this);
+    public static ImmutableArray<TRecord> EmptyIArray
+    {
+        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => ImmutableArray<TRecord>.Empty;
+    }
+    public static FrozenSet<TRecord> Set
+    {
+        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => FrozenSet<TRecord>.Empty;
+    }
+    public static TRecord[] Empty
+    {
+        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => Array.Empty<TRecord>();
+    }
+    public DbInstance Instance
+    {
+        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => _database.Instance;
+    }
+    public int? CommandTimeout
+    {
+        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => _database.CommandTimeout;
+    }
+    public RecordGenerator<TRecord> Records
+    {
+        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => new(this);
+    }
 
 
     public DbTable( IConnectableDbRoot database, ISqlCacheFactory sqlCacheFactory )
     {
-        _database        = database;
-        _tableCache      = database.GetCache( this );
-        _sqlCacheFactory = sqlCacheFactory;
+        _database   = database;
+        _tableCache = database.GetCache( this );
+        _sqlCache   = sqlCacheFactory.GetSqlCache<TRecord>( _database );
         if ( TRecord.TableName != typeof(TRecord).GetTableName() ) { throw new InvalidOperationException( $"{TRecord.TableName} != {typeof(TRecord).GetTableName()}" ); }
     }
     public virtual ValueTask DisposeAsync()
@@ -36,13 +57,17 @@ public partial class DbTable<TRecord> : IConnectableDb
         return default;
     }
     public ValueTask<DbConnection> ConnectAsync( CancellationToken token = default ) => _database.ConnectAsync( token );
-    public void                    ResetSqlCaches()                                  => _sqlCache = null;
+    public void ResetCaches()
+    {
+        _sqlCache.Reset();
+        _tableCache.Reset();
+    }
 
 
     public IAsyncEnumerable<TRecord> All( CancellationToken token = default ) => this.Call( All, token );
     public virtual async IAsyncEnumerable<TRecord> All( DbConnection connection, DbTransaction? transaction, [ EnumeratorCancellation ] CancellationToken token = default )
     {
-        SqlCommand               sql    = SqlCache.All();
+        SqlCommand               sql    = _sqlCache.All();
         await using DbDataReader reader = await _database.ExecuteReaderAsync( connection, transaction, sql, token );
         await foreach ( TRecord record in TRecord.CreateAsync( reader, token ) ) { yield return record; }
     }

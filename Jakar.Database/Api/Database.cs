@@ -13,7 +13,7 @@ namespace Jakar.Database;
 public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthCheck, IUserTwoFactorTokenProvider<UserRecord>
 {
     public const       ClaimType               DEFAULT_CLAIM_TYPES = ClaimType.UserID | ClaimType.UserName | ClaimType.GroupSid | ClaimType.Role;
-    protected readonly ConcurrentBag<IDbTable> _tables             = new();
+    protected readonly ConcurrentBag<IDbTable> _tables             = [];
     protected readonly IDistributedCache       _distributedCache;
     protected readonly ISqlCacheFactory        _sqlCacheFactory;
     protected readonly ITableCacheFactory      _tableCacheFactory;
@@ -75,12 +75,12 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
 
     protected Database( IConfiguration configuration, ISqlCacheFactory sqlCacheFactory, IOptions<DbOptions> options, IDistributedCache distributedCache, ITableCacheFactory tableCacheFactory ) : base()
     {
+        _className         = GetType().Name;
         _sqlCacheFactory   = sqlCacheFactory;
         _tableCacheFactory = tableCacheFactory;
         _distributedCache  = distributedCache;
         Configuration      = configuration;
         Options            = options.Value;
-        _className         = GetType().Name;
         Users              = Create<UserRecord>();
         Roles              = Create<RoleRecord>();
         UserRoles          = Create<UserRoleRecord>();
@@ -127,9 +127,9 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
         _tables.Add( value );
         return value;
     }
-    public void ResetSqlCaches()
+    public void ResetCaches()
     {
-        foreach ( IDbTable table in _tables ) { table.ResetSqlCaches(); }
+        foreach ( IDbTable table in _tables ) { table.ResetCaches(); }
     }
 
 

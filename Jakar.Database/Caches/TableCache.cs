@@ -69,7 +69,7 @@ public interface ITableCache<TRecord> : IAsyncEnumerable<TRecord>, IHostedServic
     public int                            Count          { get; }
     public TRecord? this[ RecordPair<TRecord> id ] { get; }
     public TRecord? this[ RecordID<TRecord>   id ] { get; }
-    public void                Clear();
+    public void                Reset();
     public bool                Contains( RecordPair<TRecord>    id );
     public bool                Contains( RecordID<TRecord>      id );
     public bool                Contains( TRecord                record );
@@ -138,7 +138,7 @@ public sealed class TableCache<TRecord> : ITableCache<TRecord>
     public async ValueTask DisposeAsync()
     {
         await RefreshAsync( CancellationToken.None );
-        Clear();
+        Reset();
     }
 
 
@@ -172,7 +172,7 @@ public sealed class TableCache<TRecord> : ITableCache<TRecord>
     }
 
 
-    public void Clear()                                => _records.Clear();
+    public void Reset()                                => _records.Clear();
     public bool Contains( RecordPair<TRecord> id )     => _records.ContainsKey( id.ID );
     public bool Contains( RecordID<TRecord>   id )     => _records.ContainsKey( id );
     public bool Contains( TRecord             record ) => _records.ContainsKey( record.ID );

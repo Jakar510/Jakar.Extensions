@@ -31,6 +31,7 @@ public enum SqlCacheType
 public interface ISqlCache<TRecord>
     where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
+    void       Reset();
     SqlCommand All();
     SqlCommand First();
     SqlCommand Last();

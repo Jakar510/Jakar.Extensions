@@ -14,7 +14,7 @@ public interface IDbOptions
 
 public interface IDbTable : IAsyncDisposable
 {
-    public void ResetSqlCaches();
+    public void ResetCaches();
 }
 
 

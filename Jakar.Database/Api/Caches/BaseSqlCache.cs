@@ -20,9 +20,9 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord>
     protected readonly     ConcurrentDictionary<Key, string>                                  _insertOrUpdate   = new(Key.Equalizer);
     protected readonly     ConcurrentDictionary<Key, string>                                  _tryInsert        = new(Key.Equalizer);
     protected readonly     ConcurrentDictionary<Key, string>                                  _whereParameters  = new(Key.Equalizer);
-    protected readonly     ConcurrentDictionary<SqlCacheType, string>                         _sql              = new();
-    protected readonly     ConcurrentDictionary<string, string>                               _whereColumn      = new();
-    protected readonly     ConcurrentDictionary<string, string>                               _whereIDColumn    = new();
+    protected readonly     ConcurrentDictionary<SqlCacheType, string>                         _sql              = new(EqualityComparer<SqlCacheType>.Default);
+    protected readonly     ConcurrentDictionary<string, string>                               _whereColumn      = new(StringComparer.InvariantCulture);
+    protected readonly     ConcurrentDictionary<string, string>                               _whereIDColumn    = new(StringComparer.InvariantCulture);
 
 
     protected IEnumerable<string> _KeyValuePairs
@@ -59,6 +59,19 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord>
     [ Pure, MethodImpl( MethodImplOptions.AggressiveInlining ) ] protected IEnumerable<string> GetKeyValuePairs( DynamicParameters parameters ) => parameters.ParameterNames.Select( KeyValuePair );
     [ Pure, MethodImpl( MethodImplOptions.AggressiveInlining ) ] protected string              KeyValuePair( string                columnName ) => _Properties[columnName].KeyValuePair;
 
+    public virtual void Reset()
+    {
+        _deleteParameters.Clear();
+        _existParameters.Clear();
+        _getParameters.Clear();
+        _insertOrUpdate.Clear();
+        _tryInsert.Clear();
+        _whereParameters.Clear();
+        _sql.Clear();
+        _whereColumn.Clear();
+        _whereIDColumn.Clear();
+    }
+
 
     public virtual SqlCommand All()
     {
@@ -76,8 +89,6 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord>
         _sql[SqlCacheType.SortedIDs] = sql = @$"SELECT {IdColumnName}, {DateCreated} FROM {TableName} ORDER BY {DateCreated} DESC";
         return sql;
     }
-
-
     public virtual SqlCommand Delete( in RecordID<TRecord> id )
     {
         var parameters = new DynamicParameters();
@@ -109,8 +120,6 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord>
         _deleteParameters[key] = sql = $"DELETE FROM {TableName} WHERE {buffer.Span};";
         return new SqlCommand( sql, parameters );
     }
-
-
     public virtual SqlCommand Next( in RecordPair<TRecord> pair ) => Next( pair.ID, pair.DateCreated );
     public virtual SqlCommand Next( in RecordID<TRecord> id, in DateTimeOffset dateCreated )
     {
@@ -135,8 +144,6 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord>
         _sql[SqlCacheType.NextID] = sql = @$"SELECT {IdColumnName} FROM {TableName} WHERE ( id = IFNULL((SELECT MIN({IdColumnName}) FROM {TableName} WHERE {DateCreated} > @{nameof(dateCreated)}), 0) )";
         return new SqlCommand( sql, parameters );
     }
-
-
     public virtual SqlCommand Count()
     {
         if ( _sql.TryGetValue( SqlCacheType.Count, out string? sql ) ) { return sql; }
@@ -158,13 +165,9 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord>
         _sql[SqlCacheType.Single] = sql = $"SELECT * FROM {TableName} WHERE {IdColumnName} = @{nameof(id)}";
         return new SqlCommand( sql, parameters );
     }
-
-
     public abstract SqlCommand Insert( in         TRecord record );
     public abstract SqlCommand TryInsert( in      TRecord record, in bool matchAll, in DynamicParameters parameters );
     public abstract SqlCommand InsertOrUpdate( in TRecord record, in bool matchAll, in DynamicParameters parameters );
-
-
     public virtual SqlCommand Update( in TRecord record )
     {
         var parameters = record.ToDynamicParameters();
@@ -173,8 +176,6 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord>
         _sql[SqlCacheType.Random] = sql = $"UPDATE {TableName} SET {_KeyValuePairs} WHERE {IdColumnName} = @{SQL.ID};";
         return new SqlCommand( sql, parameters );
     }
-
-
     public virtual SqlCommand Where( in bool matchAll, in DynamicParameters parameters )
     {
         Key key = Key.Create( matchAll, parameters );
@@ -210,8 +211,6 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord>
         _whereIDColumn[columnName] = sql = $"SELECT {IdColumnName} FROM {TableName} WHERE {columnName} = @{nameof(value)}";
         return new SqlCommand( sql, parameters );
     }
-
-
     public virtual SqlCommand Exists( in bool matchAll, in DynamicParameters parameters )
     {
         Key key = Key.Create( matchAll, parameters );
@@ -223,8 +222,6 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord>
         _existParameters[key] = sql = $"EXISTS( SELECT {IdColumnName} FROM {TableName} WHERE {buffer.Span} )";
         return new SqlCommand( sql, parameters );
     }
-
-
     public virtual SqlCommand Get( in bool matchAll, in DynamicParameters parameters )
     {
         Key key = Key.Create( matchAll, parameters );

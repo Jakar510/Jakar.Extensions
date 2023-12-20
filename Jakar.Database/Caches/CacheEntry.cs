@@ -7,14 +7,15 @@ namespace Jakar.Database.Caches;
 public sealed class CacheEntry<TRecord>( RecordID<TRecord> id ) : ObservableClass, IRecordPair, IEquatable<TRecord>, IEquatable<CacheEntry<TRecord>>, IComparable<CacheEntry<TRecord>>, IComparable
     where TRecord : class, ITableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
-    private readonly DateTimeOffset _lastTime = DateTimeOffset.UtcNow;
-    private          string         _json     = string.Empty;
-    private          UInt128        _hash;
+    private DateTimeOffset _lastTime = DateTimeOffset.UtcNow;
+    private string         _json     = string.Empty;
+    private UInt128        _hash;
 
+    // private WeakReference<TRecord>? _current;
 
     public bool HasChanged
     {
-        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => Spans.Hash128( _json ) != _hash;
+        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => _hash == Spans.Hash128( _json );
     }
     public DateTimeOffset    DateCreated  { get; private set; }
     public DateTimeOffset?   LastModified { get; private set; }
@@ -34,6 +35,8 @@ public sealed class CacheEntry<TRecord>( RecordID<TRecord> id ) : ObservableClas
         SetValue( record );
         return record;
     }
+
+
     [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
     public TRecord? TryGetValue( in TableCacheOptions options )
     {
@@ -41,8 +44,21 @@ public sealed class CacheEntry<TRecord>( RecordID<TRecord> id ) : ObservableClas
 
         return string.IsNullOrWhiteSpace( json ) || HasExpired( options.ExpireTime )
                    ? default
-                   : json.FromJson<TRecord>();
+                   : GetValue( json );
     }
+
+
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    private TRecord? GetValue( in string json )
+    {
+        if ( string.IsNullOrWhiteSpace( json ) ) { return default; }
+
+        var record = json.FromJson<TRecord>();
+        _lastTime = DateTimeOffset.UtcNow;
+        return record;
+    }
+
+
     [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
     public void SetValue( TRecord record )
     {
@@ -88,7 +104,7 @@ public sealed class CacheEntry<TRecord>( RecordID<TRecord> id ) : ObservableClas
     }
     public          bool Equals( TRecord? other ) => _json.FromJson<TRecord>().Equals( other );
     public override bool Equals( object?  obj )   => ReferenceEquals( this, obj ) || obj is CacheEntry<TRecord> other && Equals( other );
-    public override int  GetHashCode()            => _hash.GetHashCode();
+    public override int  GetHashCode()            => ID.GetHashCode();
 
 
     public static bool operator ==( CacheEntry<TRecord>? left, CacheEntry<TRecord>? right ) => Equalizer<CacheEntry<TRecord>>.Default.Equals( left, right );
