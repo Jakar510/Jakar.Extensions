@@ -6,9 +6,12 @@ namespace Jakar.Database;
 
 public class UserRecordManager : UserManager<UserRecord>
 {
-    private readonly Database _database;
+    private const    ClaimType CLAIM_TYPES = ClaimType.UserID | ClaimType.UserName | ClaimType.Role | ClaimType.GroupSid;
+    private readonly Database  _database;
+
+
     public UserRecordManager( Database                                    database,
-                              IUserStore<UserRecord>                      store,
+                              UserStore                                   store,
                               IOptions<IdentityOptions>                   optionsAccessor,
                               IPasswordHasher<UserRecord>                 passwordHasher,
                               IEnumerable<IUserValidator<UserRecord>>     userValidators,
@@ -16,13 +19,10 @@ public class UserRecordManager : UserManager<UserRecord>
                               ILookupNormalizer                           keyNormalizer,
                               IdentityErrorDescriber                      errors,
                               IServiceProvider                            services,
-                              ILogger<UserManager<UserRecord>>            logger
+                              ILogger<UserRecordManager>                  logger
     ) : base( store, optionsAccessor, passwordHasher, userValidators, passwordValidators, keyNormalizer, errors, services, logger ) => _database = database;
 
 
-    public override async Task<IList<Claim>> GetClaimsAsync( UserRecord user ) => await _database.TryCall( GetClaimsAsync, user, CancellationToken.None );
-    public async ValueTask<IList<Claim>> GetClaimsAsync( DbConnection connection, DbTransaction transaction, UserRecord user, CancellationToken token ) =>
-
-        // return await base.GetClaimsAsync( user );
-        await user.GetUserClaims( connection, transaction, _database, ClaimType.UserID | ClaimType.UserName | ClaimType.Role | ClaimType.GroupSid, token );
+    public override async Task<IList<Claim>>      GetClaimsAsync( UserRecord   user )                                                                            => await _database.TryCall( GetClaimsAsync, user, CancellationToken.None );
+    public async          ValueTask<IList<Claim>> GetClaimsAsync( DbConnection connection, DbTransaction transaction, UserRecord user, CancellationToken token ) => await user.GetUserClaims( connection, transaction, _database, CLAIM_TYPES, token );
 }

@@ -9,22 +9,17 @@ using Microsoft.Extensions.Options;
 namespace Jakar.Extensions;
 
 
-[ SuppressMessage( "ReSharper", "OutParameterValueIsAlwaysDiscarded.Global" ) ]
+[ DefaultValue( nameof(Default) ), SuppressMessage( "ReSharper", "OutParameterValueIsAlwaysDiscarded.Global" ) ]
 public readonly ref struct PasswordValidator
 {
     private readonly Requirements _requirements;
 
-
-    // ReSharper disable once MemberHidesStaticFromOuterClass
-    public static Requirements          Requirements => Current ??= new PasswordRequirements();
-    public static PasswordRequirements? Current      { get; set; }
-    public static PasswordValidator     Default      => new(Requirements);
+    public static PasswordValidator Default => new(Requirements.Default);
+    public PasswordValidator() => throw new InvalidOperationException( "Use the constructor with Requirements" );
     public PasswordValidator( Requirements requirements ) => _requirements = requirements;
 
 
-    public static bool Check( ReadOnlySpan<char> password ) => Current is not null
-                                                                   ? Check( password, Current )
-                                                                   : Check( password, Requirements );
+    public static bool Check( ReadOnlySpan<char> password ) => Check( password, Requirements.Default );
     public static bool Check( ReadOnlySpan<char> password, Requirements requirements )
     {
         var validator = new PasswordValidator( requirements );
@@ -32,13 +27,17 @@ public readonly ref struct PasswordValidator
     }
 
 
-    public bool Validate( ReadOnlySpan<char> password ) => Validate( password, out bool _, out bool _, out bool _, out bool _, out bool _, out bool _ );
-    public bool Validate( ReadOnlySpan<char> password, out bool lengthPassed, out bool specialPassed, out bool numericPassed, out bool lowerPassed, out bool upperPassed, out bool blockedPassed )
+    public bool Validate( scoped in ReadOnlySpan<char> span ) => Validate( span, out Results _ );
+    public bool Validate( scoped in ReadOnlySpan<char> span, out Results results )
     {
-        password     = password.Trim();
-        lengthPassed = password.Length >= _requirements.MinLength;
-        lowerPassed  = _requirements.RequireLowerCase is false || password.IndexOfAny( _requirements.LowerCase ) >= 0;
-        upperPassed  = _requirements.RequireUpperCase is false || password.IndexOfAny( _requirements.UpperCase ) >= 0;
+        ReadOnlySpan<char> password      = span.Trim();
+        bool               lengthPassed  = password.Length >= _requirements.MinLength;
+        bool               mustBeTrimmed = _requirements.MustBeTrimmed is false    || password.Length                                == span.Length;
+        bool               lowerPassed   = _requirements.RequireLowerCase is false || password.IndexOfAny( _requirements.LowerCase ) >= 0;
+        bool               upperPassed   = _requirements.RequireUpperCase is false || password.IndexOfAny( _requirements.UpperCase ) >= 0;
+        bool               specialPassed;
+        bool               numericPassed;
+        bool               blockedPassed;
 
 
         if ( _requirements.RequireSpecialChar )
@@ -63,13 +62,13 @@ public readonly ref struct PasswordValidator
         else { numericPassed = true; }
 
 
-        if ( !_requirements.BlockedPasswords.IsEmpty )
+        if ( _requirements.BlockedPasswords.IsEmpty is false )
         {
             blockedPassed = true;
 
             foreach ( ReadOnlySpan<char> blocked in _requirements.BlockedPasswords )
             {
-                if ( !password.Equals( blocked, StringComparison.OrdinalIgnoreCase ) ) { continue; }
+                if ( password.Equals( blocked, StringComparison.OrdinalIgnoreCase ) is false ) { continue; }
 
                 blockedPassed = false;
                 break;
@@ -78,60 +77,58 @@ public readonly ref struct PasswordValidator
         else { blockedPassed = true; }
 
 
-        return lengthPassed && specialPassed && numericPassed && lowerPassed && upperPassed && blockedPassed;
+        results = new Results( lengthPassed, mustBeTrimmed, specialPassed, numericPassed, lowerPassed, upperPassed, blockedPassed );
+        return results.IsValid;
+    }
+
+
+
+    public readonly record struct Results( bool LengthPassed, bool MustBeTrimmed, bool SpecialPassed, bool NumericPassed, bool LowerPassed, bool UpperPassed, bool BlockedPassed ) : IValidator
+    {
+        public        bool IsValid                     => LengthPassed && MustBeTrimmed && SpecialPassed && NumericPassed && LowerPassed && UpperPassed && BlockedPassed;
+        public static bool operator true( Results  x ) => x.IsValid;
+        public static bool operator false( Results x ) => x.IsValid is false;
     }
 }
 
 
 
-[ SuppressMessage( "ReSharper", "SuggestBaseTypeForParameterInConstructor" ) ]
-public readonly ref struct Requirements
+[ DefaultValue( nameof(Default) ), SuppressMessage( "ReSharper", "SuggestBaseTypeForParameterInConstructor" ) ]
+public readonly ref struct Requirements(
+    ReadOnlySpan<string> blockedPasswords,
+    int                  minLength,
+    bool                 mustBeTrimmed,
+    bool                 requireLowerCase,
+    ReadOnlySpan<char>   lowerCase,
+    bool                 requireUpperCase,
+    ReadOnlySpan<char>   upperCase,
+    bool                 cantStartWithNumber,
+    bool                 requireNumber,
+    ReadOnlySpan<char>   numbers,
+    bool                 requireSpecialChar,
+    bool                 cantStartWithSpecialChar,
+    ReadOnlySpan<char>   specialChars
+)
 {
-    public ReadOnlySpan<string> BlockedPasswords         { get; init; }
-    public int                  MinLength                { get; init; }
-    public bool                 RequireLowerCase         { get; init; }
-    public ReadOnlySpan<char>   LowerCase                { get; init; }
-    public bool                 RequireUpperCase         { get; init; }
-    public ReadOnlySpan<char>   UpperCase                { get; init; }
-    public bool                 CantStartWithNumber      { get; init; }
-    public bool                 RequireNumber            { get; init; }
-    public ReadOnlySpan<char>   Numbers                  { get; init; }
-    public bool                 RequireSpecialChar       { get; init; }
-    public bool                 CantStartWithSpecialChar { get; init; }
-    public ReadOnlySpan<char>   SpecialChars             { get; init; }
-
-
-    public Requirements( ReadOnlySpan<string> blockedPasswords,
-                         int                  minLength,
-                         bool                 requireLowerCase,
-                         ReadOnlySpan<char>   lowerCase,
-                         bool                 requireUpperCase,
-                         ReadOnlySpan<char>   upperCase,
-                         bool                 cantStartWithNumber,
-                         bool                 requireNumber,
-                         ReadOnlySpan<char>   numbers,
-                         bool                 requireSpecialChar,
-                         bool                 cantStartWithSpecialChar,
-                         ReadOnlySpan<char>   specialChars
-    )
-    {
-        BlockedPasswords         = blockedPasswords;
-        MinLength                = minLength;
-        RequireLowerCase         = requireLowerCase;
-        LowerCase                = lowerCase;
-        RequireUpperCase         = requireUpperCase;
-        UpperCase                = upperCase;
-        CantStartWithNumber      = cantStartWithNumber;
-        RequireNumber            = requireNumber;
-        Numbers                  = numbers;
-        RequireSpecialChar       = requireSpecialChar;
-        CantStartWithSpecialChar = cantStartWithSpecialChar;
-        SpecialChars             = specialChars;
-    }
+    public static Requirements         Default                  => PasswordRequirements.Current;
+    public        ReadOnlySpan<string> BlockedPasswords         { get; } = blockedPasswords;
+    public        int                  MinLength                { get; } = minLength;
+    public        bool                 RequireLowerCase         { get; } = requireLowerCase;
+    public        ReadOnlySpan<char>   LowerCase                { get; } = lowerCase;
+    public        bool                 MustBeTrimmed            { get; } = mustBeTrimmed;
+    public        bool                 RequireUpperCase         { get; } = requireUpperCase;
+    public        ReadOnlySpan<char>   UpperCase                { get; } = upperCase;
+    public        bool                 CantStartWithNumber      { get; } = cantStartWithNumber;
+    public        bool                 RequireNumber            { get; } = requireNumber;
+    public        ReadOnlySpan<char>   Numbers                  { get; } = numbers;
+    public        bool                 RequireSpecialChar       { get; } = requireSpecialChar;
+    public        bool                 CantStartWithSpecialChar { get; } = cantStartWithSpecialChar;
+    public        ReadOnlySpan<char>   SpecialChars             { get; } = specialChars;
 
 
     public static implicit operator Requirements( PasswordRequirements data ) => new(data.BlockedPasswords.ToArray(),
                                                                                      data.MinLength,
+                                                                                     data.MustBeTrimmed,
                                                                                      data.RequireLowerCase,
                                                                                      data.LowerCase,
                                                                                      data.RequireUpperCase,
@@ -148,20 +145,31 @@ public readonly ref struct Requirements
 
 public sealed record PasswordRequirements : IOptions<PasswordRequirements>
 {
-    public bool                                         CantStartWithNumber      { get; set; } = true;
-    public bool                                         CantStartWithSpecialChar { get; set; } = true;
-    public bool                                         RequireLowerCase         { get; set; } = true;
-    public bool                                         RequireNumber            { get; set; } = true;
-    public bool                                         RequireSpecialChar       { get; set; } = true;
-    public bool                                         RequireUpperCase         { get; set; } = true;
-    public int                                          MinLength                { get; init; }
+    private static PasswordRequirements? _current;
+    public static PasswordRequirements Current
+    {
+        get => _current ??= new PasswordRequirements();
+        set => _current = value;
+    }
+
+
+    public bool                                         CantStartWithNumber      { get; set; }  = true;
+    public bool                                         CantStartWithSpecialChar { get; set; }  = true;
+    public bool                                         MustBeTrimmed            { get; set; }  = true;
+    public bool                                         RequireLowerCase         { get; set; }  = true;
+    public bool                                         RequireNumber            { get; set; }  = true;
+    public bool                                         RequireSpecialChar       { get; set; }  = true;
+    public bool                                         RequireUpperCase         { get; set; }  = true;
+    public HashSet<string>                              BlockedPasswords         { get; init; } = [];
+    public int                                          MinLength                { get; set; }  = 10;
     PasswordRequirements IOptions<PasswordRequirements>.Value                    => this;
-    public string                                       LowerCase                { get; set; }  = Randoms.LOWER_CASE;
-    public string                                       Numbers                  { get; set; }  = Randoms.NUMERIC;
-    public string                                       SpecialChars             { get; set; }  = Randoms.SPECIAL_CHARS;
-    public string                                       UpperCase                { get; set; }  = Randoms.UPPER_CASE;
-    public HashSet<string>                              BlockedPasswords         { get; init; } = new();
+    public string                                       LowerCase                { get; set; } = Randoms.LOWER_CASE;
+    public string                                       Numbers                  { get; set; } = Randoms.NUMERIC;
+    public string                                       SpecialChars             { get; set; } = Randoms.SPECIAL_CHARS;
+    public string                                       UpperCase                { get; set; } = Randoms.UPPER_CASE;
 
 
-    public void SetBlockedPasswords( IEnumerable<string> passwords ) => BlockedPasswords.Add( passwords );
+    public PasswordRequirements() => Current = this;
+    public void              SetBlockedPasswords( IEnumerable<string> passwords ) => BlockedPasswords.Add( passwords );
+    public PasswordValidator GetValidator()                                       => new(this);
 }

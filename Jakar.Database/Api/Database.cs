@@ -46,7 +46,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     }
     protected internal PasswordValidator PasswordValidator
     {
-        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => new(Options.PasswordRequirements);
+        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => Options.PasswordRequirements.GetValidator();
     }
     protected internal SecuredString? ConnectionString { get; set; }
 
@@ -196,22 +196,22 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
         if ( record is not null ) { return new Error( Status.BadRequest, request ); }
 
 
-        if ( !PasswordValidator.Validate( request.Password, out bool lengthPassed, out bool specialPassed, out bool numericPassed, out bool lowerPassed, out bool upperPassed, out bool blockedPassed ) )
+        if ( PasswordValidator.Validate( request.Password, out PasswordValidator.Results results ) is false )
         {
             var state = new ModelStateDictionary();
             state.AddModelError( "Error", "Password Validation Failed" );
 
-            if ( lengthPassed ) { state.AddModelError( "Details", "Password not long enough" ); }
+            if ( results.LengthPassed ) { state.AddModelError( "Details", "Password not long enough" ); }
 
-            if ( specialPassed ) { state.AddModelError( "Details", "Password must contain a special character" ); }
+            if ( results.SpecialPassed ) { state.AddModelError( "Details", "Password must contain a special character" ); }
 
-            if ( numericPassed ) { state.AddModelError( "Details", "Password must contain a numeric character" ); }
+            if ( results.NumericPassed ) { state.AddModelError( "Details", "Password must contain a numeric character" ); }
 
-            if ( lowerPassed ) { state.AddModelError( "Details", "Password must contain a lower case character" ); }
+            if ( results.LowerPassed ) { state.AddModelError( "Details", "Password must contain a lower case character" ); }
 
-            if ( upperPassed ) { state.AddModelError( "Details", "Password must contain a upper case character" ); }
+            if ( results.UpperPassed ) { state.AddModelError( "Details", "Password must contain a upper case character" ); }
 
-            if ( blockedPassed ) { state.AddModelError( "Details", "Password cannot be a blocked password" ); }
+            if ( results.BlockedPassed ) { state.AddModelError( "Details", "Password cannot be a blocked password" ); }
 
             return new Error( Status.BadRequest, state );
         }

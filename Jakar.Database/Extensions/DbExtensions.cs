@@ -47,11 +47,16 @@ public static partial class DbExtensions
     }
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static bool IsValid<TRecord>( this    TRecord value ) where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord> => value.ID.IsValid();
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static bool IsNotValid<TRecord>( this TRecord value ) where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord> => value.IsValid() is false;
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    public static bool IsValid<TRecord>( this TRecord value )
+        where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord> => value.ID.IsValid();
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    public static bool IsNotValid<TRecord>( this TRecord value )
+        where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord> => value.IsValid() is false;
 
 
-    public static IHealthChecksBuilder AddHealthCheck<T>( this WebApplicationBuilder builder ) where T : IHealthCheck => builder.AddHealthCheck( HealthCheckExtensions.CreateHealthCheck<T>() );
+    public static IHealthChecksBuilder AddHealthCheck<T>( this WebApplicationBuilder builder )
+        where T : IHealthCheck => builder.AddHealthCheck( HealthCheckExtensions.CreateHealthCheck<T>() );
     public static IHealthChecksBuilder AddHealthCheck( this WebApplicationBuilder builder, HealthCheckRegistration registration ) =>
         builder.Services.AddHealthChecks().Add( registration );
 
@@ -98,10 +103,10 @@ public static partial class DbExtensions
 */
 
 
-        builder.AddPasswordValidator( configurePasswordRequirements ?? (( PasswordRequirements options ) => { }) );
+        builder.AddPasswordValidator( configurePasswordRequirements ?? (static options => { }) );
 
 
-        builder.Services.AddOptions<IdentityOptions>().Configure( setupAction ?? (( IdentityOptions options ) => { }) );
+        builder.Services.AddOptions<IdentityOptions>().Configure( setupAction ?? (static options => { }) );
 
 
         AuthenticationBuilder auth = builder.Services.AddAuthentication( configureAuthentication ).AddCookie( IdentityConstants.ApplicationScheme, configureApplication ).AddCookie( IdentityConstants.ExternalScheme, configureExternal );
@@ -116,7 +121,7 @@ public static partial class DbExtensions
 
         // .AddMicrosoftGraph( builder.Configuration.GetSection( "Graph" ) );
 
-        builder.Services.AddAuthorization( options => options.AddPolicy( nameof(RequireMfa), policy => policy.Requirements.Add( new RequireMfa() ) ) );
+        builder.Services.AddAuthorization( options => options.AddPolicy( nameof(RequireMfa), static policy => policy.Requirements.Add( new RequireMfa() ) ) );
 
 
         RoleStore.Register( builder );
@@ -137,12 +142,13 @@ public static partial class DbExtensions
     }
 
 
-    public static WebApplicationBuilder AddDatabase<T>( this WebApplicationBuilder builder, Action<DbOptions> configure ) where T : Database
+    public static WebApplicationBuilder AddDatabase<T>( this WebApplicationBuilder builder, Action<DbOptions> configure )
+        where T : Database
     {
         builder.Services.AddOptions<DbOptions>().Configure( configure );
 
         builder.Services.AddSingleton<T>();
-        builder.Services.AddSingleton<Database>( provider => provider.GetRequiredService<T>() );
+        builder.Services.AddSingleton<Database>( static provider => provider.GetRequiredService<T>() );
         builder.AddHealthCheck<T>();
         return builder;
     }
@@ -174,7 +180,8 @@ public static partial class DbExtensions
 
 
     public static WebApplicationBuilder AddTokenizer( this WebApplicationBuilder builder ) => builder.AddTokenizer<Tokenizer>();
-    public static WebApplicationBuilder AddTokenizer<TTokenizer>( this WebApplicationBuilder builder ) where TTokenizer : Tokenizer
+    public static WebApplicationBuilder AddTokenizer<TTokenizer>( this WebApplicationBuilder builder )
+        where TTokenizer : Tokenizer
     {
         builder.Services.AddScoped<ITokenService, TTokenizer>();
         return builder;
