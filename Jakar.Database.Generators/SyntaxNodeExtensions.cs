@@ -7,6 +7,7 @@ namespace Jakar.Database.Generators;
 public static class SyntaxNodeExtensions
 {
     public static T GetParent<T>( this SyntaxNode node )
+        where T : SyntaxNode
     {
         SyntaxNode? parent = node.Parent;
 
@@ -17,6 +18,6 @@ public static class SyntaxNodeExtensions
             parent = parent.Parent;
         }
 
-        throw new NotFoundException( typeof(T).Name );
+        throw new InvalidOperationException( $"Not Found: {typeof(T).FullName ?? typeof(T).Name}" );
     }
 }

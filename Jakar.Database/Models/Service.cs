@@ -45,14 +45,14 @@ public abstract class Service : ObservableClass, IAsyncDisposable, IValidator
 #if NET6_0_OR_GREATER
     [ StackTraceHidden, DoesNotReturn ]
 #endif
-    
+
     protected virtual void ThrowDisabled( Exception? inner = default, [ CallerMemberName ] string? caller = default ) => throw new ApiDisabledException( $"{ClassName}.{caller}", inner );
 
 
 #if NET6_0_OR_GREATER
     [ StackTraceHidden, DoesNotReturn ]
 #endif
-    
+
     protected void ThrowDisposed( Exception? inner = default, [ CallerMemberName ] string? caller = default ) => throw new ObjectDisposedException( $"{ClassName}.{caller}", inner );
 }
 
@@ -130,8 +130,12 @@ public static class HostedServiceExtensions
         {
             if ( IsAlive ) { return; }
 
-            _source?.Cancel();
-            _source?.Dispose();
+            if ( _source is not null )
+            {
+                await _source.CancelAsync().ConfigureAwait( false );
+                _source.Dispose();
+            }
+
             _source = new CancellationTokenSource();
 
             await using ( _token.Register( _source.Cancel ) )
@@ -140,19 +144,20 @@ public static class HostedServiceExtensions
                 {
                     IsAlive = true;
 
-                    try { await _service.StartAsync( _source.Token ); }
-                    finally { await _service.StopAsync( default ); }
+                    try { await _service.StartAsync( _source.Token ).ConfigureAwait( false ); }
+                    finally { await _service.StopAsync( default ).ConfigureAwait( false ); }
                 }
                 catch ( TaskCanceledException ) { }
-                catch ( Exception e ) { _logger.LogCritical( e, "{ClassName}.{Caller} -> '{ServiceName}'", nameof(ServiceThread), nameof(ThreadStart), _service.GetType().FullName ); }
+                catch ( Exception e ) { Log.ServiceError( _logger, e, this, _service ); }
                 finally
                 {
-                    _logger.LogDebug( "{ClassName}.{Caller} -> '{ServiceName}' -> {Cancelled}", nameof(ServiceThread), nameof(ThreadStart), _service.GetType().FullName, _token.IsCancellationRequested );
-
+                    Log.ServiceStopped( _logger, this, _service, _token );
                     IsAlive = false;
                     _source = default;
                 }
             }
         }
+
+        private const string EMPTY = "";
     }
 }

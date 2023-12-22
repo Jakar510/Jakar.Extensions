@@ -84,7 +84,7 @@ public class Emailer
             MimeMessage message = await builder.Create();
             await SendAsync( message, token );
         }
-        catch ( Exception e ) { _logger.LogError( e, "{ClassName}.'{Caller}'", GetType().Name, nameof(SendAsync) ); }
+        catch ( Exception e ) { Log.Error( _logger, e, this ); }
     }
 
 

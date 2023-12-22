@@ -260,7 +260,7 @@ public sealed class TableCache<TRecord> : ITableCache<TRecord>
                 await timer.WaitForNextTickAsync( token );
                 await RefreshAsync( token );
             }
-            catch ( Exception e ) { _logger.LogCritical( e, "Cache Failure: [ {Table} ]", nameof(TableCache<TRecord>) ); }
+            catch ( Exception e ) { Log.CacheFailure( _logger, e, nameof(TableCache<TRecord>) ); }
         }
     }
     public async Task StopAsync( CancellationToken token ) => await _table.Update( RecordsChanged, token );
@@ -274,7 +274,7 @@ public sealed class TableCache<TRecord> : ITableCache<TRecord>
     public sealed class AsyncEnumerator : IAsyncEnumerable<TRecord>, IAsyncEnumerator<TRecord>
     {
         private const    int                       START_INDEX = -1;
-        private readonly List<RecordPair<TRecord>> _cache      = new();
+        private readonly List<RecordPair<TRecord>> _cache      = new(100);
         private readonly TableCache<TRecord>       _tableCache;
         private          bool                      _isDisposed;
         private          CancellationToken         _token;

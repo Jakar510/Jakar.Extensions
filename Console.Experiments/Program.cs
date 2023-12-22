@@ -13,7 +13,7 @@
 
     // await Tests.Test_ConcurrentObservableCollection();
 
-    // Jakar.Database.TestDatabase.TestAsync();
+    Jakar.Database.TestDatabase.TestAsync();
 
     // JsonTest.Run();
 

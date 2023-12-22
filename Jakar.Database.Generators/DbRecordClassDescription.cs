@@ -1,126 +1,77 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 09/16/2023  12:08 PM
 
+using System.Globalization;
+using System.Text;
+
+
+
 namespace Jakar.Database.Generators;
 
 
 internal record DbRecordClassDescription
 {
-    private readonly ClassDeclarationSyntax   _declaration;
-    private readonly ImmutableArray<Property> _properties;
-    private readonly Method                   _method;
-    private readonly string                   _className;
-    internal         SyntaxTree               MethodTree => _method.Declaration.SyntaxTree;
-    internal         string                   MethodName => _method.Name;
+    public ClassDeclarationSyntax   Declaration { get; }
+    public ImmutableArray<Property> Properties  { get; }
+    public string                   ClassName   => Declaration.Identifier.ValueText;
 
 
-    private DbRecordClassDescription( ClassDeclarationSyntax declaration, Method method ) : this( declaration, method, Property.Create( declaration ) ) { }
-    private DbRecordClassDescription( ClassDeclarationSyntax declaration, Method method, ImmutableArray<Property> properties )
+    private DbRecordClassDescription( ClassDeclarationSyntax declaration ) : this( declaration, Property.Create( declaration ) ) { }
+    private DbRecordClassDescription( ClassDeclarationSyntax declaration, ImmutableArray<Property> properties )
     {
-        _declaration = declaration;
-        _method      = method;
-        _properties  = properties;
-        _className   = declaration.Identifier.ValueText;
+        Declaration = declaration;
+        Properties  = properties;
     }
-    public static bool TryCreate( [ NotNullWhen( true ) ] ClassDeclarationSyntax? declaration, [ NotNullWhen( true ) ] out DbRecordClassDescription? result )
-    {
-        result = TryCreate( declaration );
-        return result is not null;
-    }
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
-    public static DbRecordClassDescription? TryCreate( [ NotNullIfNotNull( nameof(declaration) ) ] ClassDeclarationSyntax? declaration )
-    {
-        return Method.TryCreate( declaration, out Method? method )
-                   ? new DbRecordClassDescription( declaration, method.Value )
-                   : default;
-    }
+
+
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static DbRecordClassDescription Create( ClassDeclarationSyntax declaration ) => new(declaration);
 
 
     public void Emit( in SourceProductionContext context ) => Emit( context, context.CancellationToken );
-    public void Emit( in SourceProductionContext context, CancellationToken token )
+    public void Emit( in SourceProductionContext context, in CancellationToken token )
     {
-        using var builder = new ValueStringBuilder( 1000 );
+        var builder = new StringBuilder( 1000 );
 
-        builder.Append( @$"
+        builder.Append( $$"""
+                          public partial record {{ClassName}}
+                          {
+                              [ Pure ]
+                              public static {{ClassName}} Create( {{nameof(DbDataReader)}} reader )
+                              {
+                          """ );
 
-    public static {_className} Create( DbDataReader reader )
-    {{
-" );
-
-        foreach ( Property property in _properties )
+        foreach ( Property property in Properties )
         {
-            // token.ThrowIfCancellationRequested();
             if ( token.IsCancellationRequested ) { return; }
+
+            property.Handle( ref builder, ClassName );
         }
 
         if ( token.IsCancellationRequested ) { return; }
 
-        builder.Append( @$"
+        builder.Append( $$"""
+                          
+                                  return new {{ClassName}}( {{string.Join( ",", Properties.Select( static x => x.Variable ) )}} );
+                              }
+                              [ Pure ]
+                              public static async IAsyncEnumerable<{{ClassName}}> CreateAsync( {{nameof(DbDataReader)}} reader, [ EnumeratorCancellation ] CancellationToken token = default )
+                              {
+                                  while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
+                              }
+                          }
+                          """ );
 
-        return new {_className}( {string.Join( ',', _properties.Select( x => x.Variable ) )} );
-    }}
-    public static async IAsyncEnumerable<{_className}> CreateAsync( DbDataReader reader, [ EnumeratorCancellation ] CancellationToken token = default )
-    {{
-        while ( await reader.ReadAsync( token ) ) {{ yield return Create( reader ); }}
-    }}
-" );
-
-        context.AddSource( $"{_className}.g.cs", builder.ToString() );
+        context.AddSource( $"{ClassName}.g.cs", builder.ToString() );
     }
 
 
-
-    public readonly record struct Property( PropertyDeclarationSyntax Declaration, string Name, string Variable, string TypeName )
-    {
-        public TypeSyntax Type => Declaration.Type;
-        public static Property Create( PropertyDeclarationSyntax declaration )
-        {
-            ArgumentNullException.ThrowIfNull( declaration );
-            string typeName = declaration.Type.ToString();
-            string name     = declaration.Identifier.ValueText;
-            return new Property( declaration, name, name.ToSnakeCase(), typeName );
-        }
-        public static ImmutableArray<Property> Create( ClassDeclarationSyntax declaration )
-        {
-            ArgumentNullException.ThrowIfNull( declaration );
-
-            return declaration.DescendantNodes()
-                              .OfType<PropertyDeclarationSyntax>()
-                              .Select( Create )
-                              .ToImmutableArray();
-        }
-
-
-        public void Handle( ref ValueStringBuilder builder, in string className )
-        {
-            // if ( Type.IsUnmanaged ) { }
-
-            if ( Type is GenericNameSyntax generic &&
-                 generic.ToString()
-                        .Contains( "RecordID" ) )
-            {
-                // string arg = generic.TypeArgumentList.Arguments.Single().ToString();
-
-                builder.Append( @$"
-        var {Variable} = new RecordID<{className}>( reader.GetFieldValue<Guid>( ""{Name}"" ) );" );
-            }
-            else
-            {
-                builder.Append( @$"
-        var {Variable} = ({TypeName})reader.GetValue( ""{Name}"" );" );
-            }
-        }
-    }
-
-
-
+    /*
     public readonly record struct Method( MethodDeclarationSyntax Declaration, string Name )
     {
         [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static bool Check( SyntaxNode node ) => node is AttributeSyntax { Name: IdentifierNameSyntax { Identifier.Text: nameof(DbReaderMapping) } };
 
 
-        public static Method Create( ClassDeclarationSyntax declaration ) => Create( (AttributeSyntax)declaration.DescendantNodes( Check )
-                                                                                                                 .Single() );
+        public static Method Create( ClassDeclarationSyntax declaration ) => Create( (AttributeSyntax)declaration.DescendantNodes( Check ).Single() );
         public static bool TryCreate( [ NotNullWhen( true ) ] ClassDeclarationSyntax? declaration, [ NotNullWhen( true ) ] out Method? result )
         {
             if ( declaration is null )
@@ -129,8 +80,7 @@ internal record DbRecordClassDescription
                 return false;
             }
 
-            ImmutableArray<SyntaxNode> nodes = declaration.DescendantNodes( Check )
-                                                          .ToImmutableArray();
+            ImmutableArray<SyntaxNode> nodes = declaration.DescendantNodes( Check ).ToImmutableArray();
 
             switch ( nodes.Length )
             {
@@ -167,5 +117,95 @@ internal record DbRecordClassDescription
             string key    = method.Identifier.Text;
             return new Method( method, key );
         }
+    }
+    */
+}
+
+
+
+public sealed record Property( PropertyDeclarationSyntax Declaration, string Name, string Variable, string TypeName )
+{
+    public TypeSyntax Type => Declaration.Type;
+    public static Property Create( PropertyDeclarationSyntax declaration )
+    {
+        string typeName = declaration.Type.ToString();
+        string name     = declaration.Identifier.ValueText;
+        return new Property( declaration, name, ToSnakeCase( name, CultureInfo.InvariantCulture ), typeName );
+    }
+    public static ImmutableArray<Property> Create( ClassDeclarationSyntax declaration ) => declaration.DescendantNodes().OfType<PropertyDeclarationSyntax>().Select( Create ).ToImmutableArray();
+
+
+    public void Handle( ref StringBuilder builder, in string className )
+    {
+        // if ( Type.IsUnmanaged ) { }
+
+        if ( Type is GenericNameSyntax generic && generic.ToString().Contains( "RecordID" ) )
+        {
+            // string arg = generic.TypeArgumentList.Arguments.Single().ToString();
+
+            builder.Append( $"""
+                                     var {Variable} = new RecordID<{className}>( reader.GetFieldValue<Guid>( "{Name}" ) );
+                             """ );
+        }
+        else
+        {
+            builder.Append( $"""
+                                     var {Variable} = ({TypeName})reader.GetValue<object?>( "{Name}" );
+                             """ );
+        }
+    }
+    public static string ToSnakeCase( string value, CultureInfo cultureInfo )
+    {
+        if ( string.IsNullOrWhiteSpace( value ) ) { return value; }
+
+        var              builder          = new StringBuilder( value.Length + Math.Max( 2, value.Length / 5 ) );
+        UnicodeCategory? previousCategory = default;
+
+        for ( int currentIndex = 0; currentIndex < value.Length; currentIndex++ )
+        {
+            char currentChar = value[currentIndex];
+
+            switch ( currentChar )
+            {
+                case '_':
+                    builder.Append( '_' );
+                    previousCategory = null;
+                    continue;
+
+                case '.':
+                    builder.Append( '.' );
+                    previousCategory = null;
+                    continue;
+            }
+
+            UnicodeCategory currentCategory = char.GetUnicodeCategory( currentChar );
+
+            // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
+            switch ( currentCategory )
+            {
+                case UnicodeCategory.UppercaseLetter:
+                case UnicodeCategory.TitlecaseLetter:
+                    if ( previousCategory is UnicodeCategory.SpaceSeparator or UnicodeCategory.LowercaseLetter ||
+                         previousCategory is not UnicodeCategory.DecimalDigitNumber && previousCategory is not null && currentIndex > 0 && currentIndex + 1 < value.Length && char.IsLower( value[currentIndex + 1] ) ) { builder.Append( '_' ); }
+
+                    currentChar = char.ToLower( currentChar, cultureInfo );
+                    break;
+
+                case UnicodeCategory.LowercaseLetter:
+                    if ( previousCategory is UnicodeCategory.SpaceSeparator ) { builder.Append( '_' ); }
+
+                    break;
+
+                default:
+                    if ( previousCategory is not null ) { previousCategory = UnicodeCategory.SpaceSeparator; }
+
+                    continue;
+            }
+
+            builder.Append( currentChar );
+            previousCategory = currentCategory;
+        }
+
+        return builder.ToString();
     }
 }
