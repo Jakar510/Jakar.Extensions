@@ -235,7 +235,10 @@ public sealed class TableCache<TRecord> : ITableCache<TRecord>
             foreach ( RecordID<TRecord> id in ids )
             {
                 TRecord? record = await _table.Get( connection, transaction, id, token );
-                if ( record is not null ) { AddOrUpdate( record ); }
+                if ( record is null ) { continue; }
+
+                // ReSharper disable once MethodHasAsyncOverloadWithCancellation
+                AddOrUpdate( record );
             }
 
             return;
@@ -244,7 +247,12 @@ public sealed class TableCache<TRecord> : ITableCache<TRecord>
         if ( HasChanged )
         {
             await _table.Update( connection, transaction, RecordsChanged, token );
-            await foreach ( TRecord record in _table.Get( connection, transaction, Changed, token ) ) { AddOrUpdate( record ); }
+
+            await foreach ( TRecord record in _table.Get( connection, transaction, Changed, token ) )
+            {
+                // ReSharper disable once MethodHasAsyncOverloadWithCancellation
+                AddOrUpdate( record );
+            }
         }
     }
 
@@ -300,19 +308,19 @@ public sealed class TableCache<TRecord> : ITableCache<TRecord>
         }
 
 
-        private static bool MoveNext( ref int index, in ReadOnlySpan<RecordPair<TRecord>> span, out RecordPair<TRecord> current )
+        private static bool MoveNext( ref int index, in ReadOnlySpan<RecordPair<TRecord>> span, out RecordPair<TRecord> pair )
         {
             int i = Interlocked.Add( ref index, 1 );
 
-            current = i < span.Length
-                          ? span[i]
-                          : default;
+            pair = i < span.Length
+                       ? span[i]
+                       : default;
 
             return i < span.Length;
         }
         public async ValueTask<bool> MoveNextAsync()
         {
-            if ( _isDisposed ) { throw new ObjectDisposedException( nameof(AsyncEnumerator) ); }
+            ThrowIfDisposed();
 
             if ( _cache.IsEmpty() )
             {
@@ -333,14 +341,17 @@ public sealed class TableCache<TRecord> : ITableCache<TRecord>
         }
         public void Reset()
         {
-            if ( _isDisposed ) { throw new ObjectDisposedException( nameof(AsyncEnumerator) ); }
+            ThrowIfDisposed();
 
             _cache.Clear();
             _pair = default;
             Interlocked.Exchange( ref _index,   START_INDEX );
             Interlocked.Exchange( ref _current, null );
         }
-
+        private void ThrowIfDisposed()
+        {
+            if ( _isDisposed ) { throw new ObjectDisposedException( nameof(AsyncEnumerator) ); }
+        }
 
         IAsyncEnumerator<TRecord> IAsyncEnumerable<TRecord>.GetAsyncEnumerator( CancellationToken token ) => GetAsyncEnumerator( token );
         public AsyncEnumerator GetAsyncEnumerator( CancellationToken token = default )
