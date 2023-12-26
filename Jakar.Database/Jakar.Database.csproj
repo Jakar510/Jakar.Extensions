@@ -33,7 +33,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<InternalsVisibleTo Include="Experiments" />
+		<InternalsVisibleTo Include="Jakar.Database.Experiments" />
 	</ItemGroup>
 
 	<ItemGroup>

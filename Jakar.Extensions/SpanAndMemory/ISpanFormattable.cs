@@ -2,7 +2,7 @@
 // 03/29/2023  6:44 PM
 
 #if NETSTANDARD2_1
-namespace System;
+namespace Jakar.Extensions;
 
 
 /// <summary> Provides functionality to format the string representation of an object into a span. </summary>

@@ -1,1 +1,0 @@
-Contributions and Pull Requests welcome, but must follow the code styling set in `Jakar.AppLogger.sln.DotSettings` with Resharper.

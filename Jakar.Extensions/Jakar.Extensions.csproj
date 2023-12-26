@@ -36,6 +36,10 @@
 		<EventSourceSupport>true</EventSourceSupport>
 	</PropertyGroup>
 
+	<ItemGroup>
+		<InternalsVisibleTo Include="Jakar.Extensions.Experiments" />
+	</ItemGroup>
+
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard2.1|AnyCPU'">
 		<DefineConstants>$(DefineConstants);__WINDOWS__;__LINUX__;__IOS__;__ANDROID__;__MACOS__</DefineConstants>
 	</PropertyGroup>
