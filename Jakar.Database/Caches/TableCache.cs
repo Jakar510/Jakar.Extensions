@@ -79,6 +79,8 @@ public interface ITableCache<TRecord> : IAsyncEnumerable<TRecord>, IHostedServic
     public bool                TryGetValue( RecordID<TRecord>   id,     [ NotNullWhen( true ) ] out TRecord? record );
     public ValueTask<TRecord?> TryGetValue( RecordPair<TRecord> pair,   CancellationToken                    token );
     public ValueTask<TRecord?> TryGetValue( RecordID<TRecord>   pair,   CancellationToken                    token );
+    public ValueTask<TRecord?> TryRemove( RecordPair<TRecord>   id,     CancellationToken                    token = default );
+    public ValueTask<TRecord?> TryRemove( RecordID<TRecord>     id,     CancellationToken                    token = default );
     public ValueTask           RefreshAsync( CancellationToken  token );
     public ValueTask           RefreshAsync( DbConnection       connection, DbTransaction transaction, CancellationToken token = default );
 }

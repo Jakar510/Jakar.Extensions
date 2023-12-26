@@ -54,7 +54,7 @@ public sealed class Locker : ILocker, IEquatable<Locker>, IAsyncDisposable, IDis
 
     public static Locker Default
     {
-        [ Pure, MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => new(new SemaphoreSlim( 1 ));
+        [ Pure, MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => new(new SemaphoreSlim( 1, 1 ));
     }
     public bool IsTaken
     {
