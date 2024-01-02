@@ -215,7 +215,7 @@ public static class ControllerBaseExtensions
 
         foreach ( (string key, ModelStateEntry value) in state )
         {
-            if ( key.IsOneOf( nameof(ProblemDetails.Detail), nameof(ProblemDetails.Instance), nameof(ProblemDetails.Title), nameof(ProblemDetails.Type) ) ) { continue; }
+            if ( key.IsOneOf( [nameof(ProblemDetails.Detail), nameof(ProblemDetails.Instance), nameof(ProblemDetails.Title), nameof(ProblemDetails.Type)] ) ) { continue; }
 
             problem.Extensions.Add( key, value.AttemptedValue );
         }

@@ -27,20 +27,18 @@ public static partial class TypeExtensions
 
     [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
     public static bool IsEqualType<T>( this T value, Type other )
-        where T : class => value.GetType() == other;
+        where T : notnull => value.GetType() == other;
 
 
     [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
     public static bool IsEqualType<T>( this Type other )
-        where T : class => typeof(T) == other;
+        where T : notnull => typeof(T) == other;
 
 
     // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-
+#if NETSTANDARD2_1
     [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static bool IsOneOfType( this Type value, params Type[]      types ) => value.IsOneOfType( types.AsSpan() );
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static bool IsOneOfType( this Type value, ReadOnlySpan<Type> types ) => types.Any( value.IsEqualType );
-
 
     [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
     public static bool IsOneOfType<T>( this T value, params Type[] types )
@@ -49,7 +47,16 @@ public static partial class TypeExtensions
 
     [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
     public static bool IsOneOfType<T>( params Type[] types )
-        where T : class => types.Any( typeof(T).IsEqualType );
+        where T : notnull => types.Any( typeof(T).IsEqualType );
+#endif
+
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static bool IsOneOfType( this Type value, in ReadOnlySpan<Type> types ) => types.Any( value.IsEqualType );
+
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    public static bool IsOneOfType<T>( this T value, in ReadOnlySpan<Type> types )
+        where T : class => types.Any( value.IsEqualType );
+
+
 
 
     // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

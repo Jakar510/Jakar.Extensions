@@ -45,9 +45,9 @@ public static class InstanceCreator<T1,
     private static Func<T1, TInstance> CreateInstance()
     {
         Type[] argsTypes =
-        {
+        [
             typeof(T1)
-        };
+        ];
 
         ConstructorInfo? constructor = typeof(TInstance).GetConstructor( BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, Type.DefaultBinder, argsTypes, null );
         if ( constructor is null ) { throw InstanceCreator.CreateException( argsTypes ); }
@@ -73,10 +73,10 @@ public static class InstanceCreator<T1, T2,
     private static Func<T1, T2, TInstance> CreateInstance()
     {
         Type[] argsTypes =
-        {
+        [
             typeof(T1),
             typeof(T2)
-        };
+        ];
 
         ConstructorInfo? constructor = typeof(TInstance).GetConstructor( BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, Type.DefaultBinder, argsTypes, null );
         if ( constructor is null ) { throw InstanceCreator.CreateException( argsTypes ); }
@@ -102,11 +102,11 @@ public static class InstanceCreator<T1, T2, T3,
     private static Func<T1, T2, T3, TInstance> CreateInstance()
     {
         Type[] argsTypes =
-        {
+        [
             typeof(T1),
             typeof(T2),
             typeof(T3)
-        };
+        ];
 
         ConstructorInfo? constructor = typeof(TInstance).GetConstructor( BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, Type.DefaultBinder, argsTypes, null );
         if ( constructor is null ) { throw InstanceCreator.CreateException( argsTypes ); }
@@ -132,12 +132,12 @@ public static class InstanceCreator<T1, T2, T3, T4,
     private static Func<T1, T2, T3, T4, TInstance> CreateInstance()
     {
         Type[] argsTypes =
-        {
+        [
             typeof(T1),
             typeof(T2),
             typeof(T3),
             typeof(T4)
-        };
+        ];
 
         ConstructorInfo? constructor = typeof(TInstance).GetConstructor( BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, Type.DefaultBinder, argsTypes, null );
         if ( constructor is null ) { throw InstanceCreator.CreateException( argsTypes ); }
@@ -163,12 +163,12 @@ public static class InstanceCreator<T1, T2, T3, T4, T5,
     private static Func<T1, T2, T3, T4, T5, TInstance> CreateInstance()
     {
         Type[] argsTypes =
-        {
+        [
             typeof(T1),
             typeof(T2),
             typeof(T3),
             typeof(T4)
-        };
+        ];
 
         ConstructorInfo? constructor = typeof(TInstance).GetConstructor( BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, Type.DefaultBinder, argsTypes, null );
         if ( constructor is null ) { throw InstanceCreator.CreateException( argsTypes ); }
@@ -194,12 +194,12 @@ public static class InstanceCreator<T1, T2, T3, T4, T5, T6,
     private static Func<T1, T2, T3, T4, T5, T6, TInstance> CreateInstance()
     {
         Type[] argsTypes =
-        {
+        [
             typeof(T1),
             typeof(T2),
             typeof(T3),
             typeof(T4)
-        };
+        ];
 
         ConstructorInfo? constructor = typeof(TInstance).GetConstructor( BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, Type.DefaultBinder, argsTypes, null );
         if ( constructor is null ) { throw InstanceCreator.CreateException( argsTypes ); }
@@ -225,12 +225,12 @@ public static class InstanceCreator<T1, T2, T3, T4, T5, T6, T7,
     private static Func<T1, T2, T3, T4, T5, T6, T7, TInstance> CreateInstance()
     {
         Type[] argsTypes =
-        {
+        [
             typeof(T1),
             typeof(T2),
             typeof(T3),
             typeof(T4)
-        };
+        ];
 
         ConstructorInfo? constructor = typeof(TInstance).GetConstructor( BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, Type.DefaultBinder, argsTypes, null );
         if ( constructor is null ) { throw InstanceCreator.CreateException( argsTypes ); }

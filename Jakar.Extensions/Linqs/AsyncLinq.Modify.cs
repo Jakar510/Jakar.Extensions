@@ -23,17 +23,28 @@ public static partial class AsyncLinq
     {
         await foreach ( TElement element in value ) { collection.TryAdd( element ); }
     }
+#if NETSTANDARD2_1
     public static void Add<TElement>( this ConcurrentBag<TElement> collection, params TElement[] items )
     {
         foreach ( TElement value in items ) { collection.Add( value ); }
     }
+#else
+    public static void Add<TElement>( this ConcurrentBag<TElement> collection, in ReadOnlySpan<TElement> items )
+    {
+        foreach ( TElement value in items ) { collection.Add( value ); }
+    }
+#endif
     public static void Add<TElement>( this ConcurrentBag<TElement> collection, IEnumerable<TElement> items )
     {
         foreach ( TElement value in items ) { collection.Add( value ); }
     }
 
-
+    
     public static void Add<TElement>( this ICollection<TElement> collection, params TElement[] items )
+    {
+        foreach ( TElement value in items ) { collection.Add( value ); }
+    }
+    public static void Add<TElement>( this ICollection<TElement> collection, in ReadOnlySpan<TElement> items )
     {
         foreach ( TElement value in items ) { collection.Add( value ); }
     }
@@ -49,11 +60,18 @@ public static partial class AsyncLinq
     }
     public static void AddDefault<TKey, TElement>( this IDictionary<TKey, TElement?> dict, TKey key ) => dict.Add( key, default );
 
-
-    public static void AddOrUpdate<TElement>( this IList<TElement> collection, params TElement[] value )
+    
+#if NETSTANDARD2_1
+    public static void AddOrUpdate<TElement>( this IList<TElement> collection, params TElement[] items )
     {
-        foreach ( TElement element in value ) { collection.AddOrUpdate( element ); }
+        foreach ( TElement value in items ) { collection.TryAdd( value ); }
     }
+#else
+    public static void AddOrUpdate<TElement>( this IList<TElement> collection, in ReadOnlySpan<TElement> items )
+    {
+        foreach ( TElement value in items ) { collection.AddOrUpdate( value ); }
+    }
+#endif
     public static void AddOrUpdate<TElement>( this IList<TElement> collection, IEnumerable<TElement> value )
     {
         foreach ( TElement element in value ) { collection.AddOrUpdate( element ); }
@@ -67,20 +85,34 @@ public static partial class AsyncLinq
     }
 
 
+#if NETSTANDARD2_1
     public static void Remove<TElement>( this ICollection<TElement> collection, params TElement[] items )
     {
         foreach ( TElement value in items ) { collection.Remove( value ); }
     }
+#else
+    public static void Remove<TElement>( this ICollection<TElement> collection, in ReadOnlySpan<TElement> items )
+    {
+        foreach ( TElement value in items ) { collection.Remove( value ); }
+    }
+#endif
     public static void Remove<TElement>( this ICollection<TElement> collection, IEnumerable<TElement> items )
     {
         foreach ( TElement value in items ) { collection.Remove( value ); }
     }
 
 
-    public static void TryAdd<TElement>( this ICollection<TElement> collection, params TElement[] value )
+#if NETSTANDARD2_1
+    public static void TryAdd<TElement>( this ICollection<TElement> collection, params TElement[] items )
     {
-        foreach ( TElement element in value ) { collection.TryAdd( element ); }
+        foreach ( TElement value in items ) { collection.TryAdd( value ); }
     }
+#else
+    public static void TryAdd<TElement>( this ICollection<TElement> collection, in ReadOnlySpan<TElement> items )
+    {
+        foreach ( TElement value in items ) { collection.TryAdd( value ); }
+    }
+#endif
     public static void TryAdd<TElement>( this ICollection<TElement> collection, IEnumerable<TElement> value )
     {
         foreach ( TElement element in value ) { collection.TryAdd( element ); }

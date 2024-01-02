@@ -47,11 +47,11 @@ public static class MigrationExtensions
 
         if ( enumType == typeof(byte) ) { item = col.AsByte(); }
 
-        else if ( enumType.IsOneOfType( typeof(sbyte), typeof(short) ) ) { item = col.AsInt16(); }
+        else if ( enumType.IsOneOfType( [typeof(sbyte), typeof(short)] ) ) { item = col.AsInt16(); }
 
-        else if ( enumType.IsOneOfType( typeof(ushort), typeof(int) ) ) { item = col.AsInt32(); }
+        else if ( enumType.IsOneOfType( [typeof(ushort), typeof(int)] ) ) { item = col.AsInt32(); }
 
-        else if ( enumType.IsOneOfType( typeof(uint), typeof(long), typeof(ulong) ) ) { item = col.AsInt64(); }
+        else if ( enumType.IsOneOfType( [typeof(uint), typeof(long), typeof(ulong)] ) ) { item = col.AsInt64(); }
 
         else { throw new ExpectedValueTypeException( nameof(enumType), enumType, typeof(byte), typeof(sbyte), typeof(ushort), typeof(short), typeof(int), typeof(uint), typeof(long), typeof(ulong) ); }
 
@@ -158,49 +158,49 @@ public static class MigrationExtensions
         if ( propertyType.IsEqualType( typeof(string) ) ) { return DbType.String; }
 
 
-        if ( propertyType.IsOneOfType( typeof(bool), typeof(bool?) ) ) { return DbType.Boolean; }
+        if ( propertyType.IsOneOfType( [typeof(bool), typeof(bool?)] ) ) { return DbType.Boolean; }
 
 
-        if ( propertyType.IsOneOfType( typeof(byte), typeof(byte?) ) ) { return DbType.Byte; }
+        if ( propertyType.IsOneOfType( [typeof(byte), typeof(byte?)] ) ) { return DbType.Byte; }
 
 
-        if ( propertyType.IsOneOfType( typeof(short), typeof(short?) ) ) { return DbType.Int16; }
+        if ( propertyType.IsOneOfType( [typeof(short), typeof(short?)] ) ) { return DbType.Int16; }
 
 
-        if ( propertyType.IsOneOfType( typeof(ushort), typeof(ushort?) ) ) { return DbType.UInt16; }
+        if ( propertyType.IsOneOfType( [typeof(ushort), typeof(ushort?)] ) ) { return DbType.UInt16; }
 
 
-        if ( propertyType.IsOneOfType( typeof(int), typeof(int?) ) ) { return DbType.Int32; }
+        if ( propertyType.IsOneOfType( [typeof(int), typeof(int?)] ) ) { return DbType.Int32; }
 
 
-        if ( propertyType.IsOneOfType( typeof(uint), typeof(uint?) ) ) { return DbType.UInt32; }
+        if ( propertyType.IsOneOfType( [typeof(uint), typeof(uint?)] ) ) { return DbType.UInt32; }
 
 
-        if ( propertyType.IsOneOfType( typeof(long), typeof(long?) ) ) { return DbType.Int64; }
+        if ( propertyType.IsOneOfType( [typeof(long), typeof(long?)] ) ) { return DbType.Int64; }
 
 
-        if ( propertyType.IsOneOfType( typeof(ulong), typeof(ulong?) ) ) { return DbType.UInt64; }
+        if ( propertyType.IsOneOfType( [typeof(ulong), typeof(ulong?)] ) ) { return DbType.UInt64; }
 
 
-        if ( propertyType.IsOneOfType( typeof(float), typeof(float?), typeof(double), typeof(double?) ) ) { return DbType.Double; }
+        if ( propertyType.IsOneOfType( [typeof(float), typeof(float?), typeof(double), typeof(double?)] ) ) { return DbType.Double; }
 
 
-        if ( propertyType.IsOneOfType( typeof(decimal), typeof(decimal?) ) ) { return DbType.Decimal; }
+        if ( propertyType.IsOneOfType( [typeof(decimal), typeof(decimal?)] ) ) { return DbType.Decimal; }
 
 
-        if ( propertyType.IsOneOfType( typeof(byte[]), typeof(ReadOnlySpan<byte>) ) ) { return DbType.Binary; }
+        if ( propertyType.IsOneOfType( [typeof(byte[]), typeof(ReadOnlySpan<byte>)] ) ) { return DbType.Binary; }
 
 
-        if ( propertyType.IsOneOfType( typeof(Guid), typeof(Guid?) ) ) { return DbType.Guid; }
+        if ( propertyType.IsOneOfType( [typeof(Guid), typeof(Guid?)] ) ) { return DbType.Guid; }
 
 
-        if ( propertyType.IsOneOfType( typeof(TimeSpan), typeof(TimeSpan?) ) ) { return DbType.Time; }
+        if ( propertyType.IsOneOfType( [typeof(TimeSpan), typeof(TimeSpan?)] ) ) { return DbType.Time; }
 
 
-        if ( propertyType.IsOneOfType( typeof(DateTime), typeof(DateTime?) ) ) { return DbType.DateTime; }
+        if ( propertyType.IsOneOfType( [typeof(DateTime), typeof(DateTime?)] ) ) { return DbType.DateTime; }
 
 
-        if ( propertyType.IsOneOfType( typeof(DateTimeOffset), typeof(DateTimeOffset?) ) ) { return DbType.DateTimeOffset; }
+        if ( propertyType.IsOneOfType( [typeof(DateTimeOffset), typeof(DateTimeOffset?)] ) ) { return DbType.DateTimeOffset; }
 
 
         throw new ArgumentOutOfRangeException( nameof(propertyType), propertyType, "Can't discern DbType" );
@@ -262,31 +262,31 @@ public static class MigrationExtensions
         }
 
 
-        if ( propertyType.IsOneOfType( typeof(bool), typeof(bool?) ) ) { return col.AsBoolean(); }
+        if ( propertyType.IsOneOfType( [typeof(bool), typeof(bool?)] ) ) { return col.AsBoolean(); }
 
-        if ( propertyType.IsOneOfType( typeof(byte), typeof(byte?) ) ) { return col.AsByte(); }
+        if ( propertyType.IsOneOfType( [typeof(byte), typeof(byte?)] ) ) { return col.AsByte(); }
 
-        if ( propertyType.IsOneOfType( typeof(short), typeof(short?) ) ) { return col.AsInt16(); }
+        if ( propertyType.IsOneOfType( [typeof(short), typeof(short?)] ) ) { return col.AsInt16(); }
 
-        if ( propertyType.IsOneOfType( typeof(int), typeof(int?) ) ) { return col.AsInt32(); }
+        if ( propertyType.IsOneOfType( [typeof(int), typeof(int?)] ) ) { return col.AsInt32(); }
 
-        if ( propertyType.IsOneOfType( typeof(long), typeof(long?) ) ) { return col.AsInt64(); }
+        if ( propertyType.IsOneOfType( [typeof(long), typeof(long?)] ) ) { return col.AsInt64(); }
 
-        if ( propertyType.IsOneOfType( typeof(float), typeof(float?), typeof(double), typeof(double?) ) ) { return col.AsDouble(); }
+        if ( propertyType.IsOneOfType( [typeof(float), typeof(float?), typeof(double), typeof(double?)] ) ) { return col.AsDouble(); }
 
-        if ( propertyType.IsOneOfType( typeof(decimal), typeof(decimal?) ) ) { return col.AsDecimal(); }
+        if ( propertyType.IsOneOfType( [typeof(decimal), typeof(decimal?)] ) ) { return col.AsDecimal(); }
 
-        if ( propertyType.IsOneOfType( typeof(byte[]), typeof(ReadOnlyMemory<byte>) ) ) { return col.AsBinary(); }
+        if ( propertyType.IsOneOfType( [typeof(byte[]), typeof(ReadOnlyMemory<byte>)] ) ) { return col.AsBinary(); }
 
-        if ( propertyType.IsOneOfType( typeof(Guid), typeof(Guid?) ) ) { return col.AsGuid(); }
+        if ( propertyType.IsOneOfType( [typeof(Guid), typeof(Guid?)] ) ) { return col.AsGuid(); }
 
-        if ( propertyType.IsOneOfType( typeof(TimeSpan), typeof(TimeSpan?), typeof(TimeOnly), typeof(TimeOnly?) ) ) { return col.AsTime(); }
+        if ( propertyType.IsOneOfType( [typeof(TimeSpan), typeof(TimeSpan?), typeof(TimeOnly), typeof(TimeOnly?)] ) ) { return col.AsTime(); }
 
-        if ( propertyType.IsOneOfType( typeof(DateOnly), typeof(DateOnly?) ) ) { return col.AsDate(); }
+        if ( propertyType.IsOneOfType( [typeof(DateOnly), typeof(DateOnly?)] ) ) { return col.AsDate(); }
 
-        if ( propertyType.IsOneOfType( typeof(DateTime), typeof(DateTime?) ) ) { return col.AsDateTime2(); }
+        if ( propertyType.IsOneOfType( [typeof(DateTime), typeof(DateTime?)] ) ) { return col.AsDateTime2(); }
 
-        if ( propertyType.IsOneOfType( typeof(DateTimeOffset), typeof(DateTimeOffset?) ) ) { return col.AsDateTimeOffset(); }
+        if ( propertyType.IsOneOfType( [typeof(DateTimeOffset), typeof(DateTimeOffset?)] ) ) { return col.AsDateTimeOffset(); }
 
 
         return default;

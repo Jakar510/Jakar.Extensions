@@ -4,10 +4,10 @@
 public static class StringExtensions
 {
     private static readonly char[] _ends =
-    {
+    [
         '\n',
         '\r'
-    };
+    ];
 
 
     public static bool ContainsAbout( this string source, string search ) => source.Contains( search, StringComparison.OrdinalIgnoreCase );
@@ -136,12 +136,13 @@ public static class StringExtensions
     /// <param name="span"> </param>
     public static SpanSplitEnumerator<char> SplitOn( this ReadOnlySpan<char> span ) => new(span, _ends);
 
-    // public static SpanSplitEnumerator<T> SplitOn<T>( this Span<T>         span, ParamsArray<T> array ) where T : unmanaged, IEquatable<T> => new(span, array);
+#if NETSTANDARD2_1
     public static SpanSplitEnumerator<T> SplitOn<T>( this Span<T> span, params T[] separators )
         where T : unmanaged, IEquatable<T> => new(span, separators);
+#endif
     public static SpanSplitEnumerator<T> SplitOn<T>( this Span<T> span, T separator )
         where T : unmanaged, IEquatable<T> => new(span, Spans.Create( separator ));
-    public static SpanSplitEnumerator<T> SplitOn<T>( this Span<T> span, ReadOnlySpan<T> separators )
+    public static SpanSplitEnumerator<T> SplitOn<T>( this Span<T> span, in ReadOnlySpan<T> separators )
         where T : unmanaged, IEquatable<T> => new(span, separators);
 
 
@@ -150,7 +151,7 @@ public static class StringExtensions
         where T : unmanaged, IEquatable<T> => new(span, separators);
     public static SpanSplitEnumerator<T> SplitOn<T>( this ReadOnlySpan<T> span, T separator )
         where T : unmanaged, IEquatable<T> => new(span, Spans.Create( separator ));
-    public static SpanSplitEnumerator<T> SplitOn<T>( this ReadOnlySpan<T> span, ReadOnlySpan<T> separators )
+    public static SpanSplitEnumerator<T> SplitOn<T>( this ReadOnlySpan<T> span, in ReadOnlySpan<T> separators )
         where T : unmanaged, IEquatable<T> => new(span, separators);
 
 

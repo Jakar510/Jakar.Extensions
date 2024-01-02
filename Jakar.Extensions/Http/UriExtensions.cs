@@ -1,7 +1,7 @@
 ﻿namespace Jakar.Extensions;
 
 
-public static class UriExtensions
+public static class UriExtensions // TODO: use spans -- Parameterize
 {
     public static string Parameterize( this IEnumerable<string>          types, IDictionary<string, object?> parameters ) => types.Aggregate( "", Parameterize ) + parameters.Parameterize();
     public static string Parameterize( this IEnumerable<string>          types )      => types.Aggregate( "", Parameterize );

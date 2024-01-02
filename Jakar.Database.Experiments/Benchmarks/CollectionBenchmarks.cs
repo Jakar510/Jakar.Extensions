@@ -6,6 +6,9 @@ using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Engines;
 
 
+#pragma warning disable IDE0028
+
+
 
 namespace Jakar.Database.Experiments.Benchmarks;
 
@@ -53,72 +56,80 @@ namespace Jakar.Database.Experiments.Benchmarks;
 // [RankColumn]
 public class CollectionBenchmarks
 {
-    private static readonly Random _random = new(69);
-    private static readonly Dictionary<int, List<double>> _list = new()
-                                                                  {
-                                                                      GetList( 10 ),
-                                                                      GetList( 1000 ),
-                                                                      GetList( 10_000 )
-                                                                  };
-    private static readonly Dictionary<int, double[]> _array = new()
-                                                               {
-                                                                   GetArray( 10 ),
-                                                                   GetArray( 1000 ),
-                                                                   GetArray( 10_000 )
-                                                               };
-    private static readonly Dictionary<int, ImmutableArray<double>> _immutableArray = new()
-                                                                                      {
-                                                                                          GetImmutableArray( 10 ),
-                                                                                          GetImmutableArray( 1000 ),
-                                                                                          GetImmutableArray( 10_000 )
-                                                                                      };
-    private static readonly Dictionary<int, ImmutableList<double>> _immutableList = new()
-                                                                                    {
-                                                                                        GetImmutableList( 10 ),
-                                                                                        GetImmutableList( 1000 ),
-                                                                                        GetImmutableList( 10_000 )
-                                                                                    };
-    private static readonly Dictionary<int, FrozenSet<double>> _set = new()
-                                                                      {
-                                                                          GetFrozenSet( 10 ),
-                                                                          GetFrozenSet( 1000 ),
-                                                                          GetFrozenSet( 10_000 )
-                                                                      };
-    private static readonly Consumer _consumer = new();
+    private static readonly Random                                        _random = new(69);
+    private static readonly FrozenDictionary<int, List<double>>           _list;
+    private static readonly FrozenDictionary<int, double[]>               _array;
+    private static readonly FrozenDictionary<int, ImmutableArray<double>> _immutableArray;
+    private static readonly FrozenDictionary<int, ImmutableList<double>>  _immutableList;
+    private static readonly FrozenDictionary<int, FrozenSet<double>>      _set;
+    private static readonly Consumer                                      _consumer = new();
 
+    static CollectionBenchmarks()
+    {
+        _list = new Dictionary<int, List<double>>
+                {
+                    GetList( 10 ),
+                    GetList( 1000 ),
+                    GetList( 10_000 )
+                }.ToFrozenDictionary();
 
-    [ Params( 10, 1000, 10_000 ) ] public int Size { get; set; }
+        _array = new Dictionary<int, double[]>
+                 {
+                     GetArray( 10 ),
+                     GetArray( 1000 ),
+                     GetArray( 10_000 )
+                 }.ToFrozenDictionary();
+
+        _immutableArray = new Dictionary<int, ImmutableArray<double>>
+                          {
+                              GetImmutableArray( 10 ),
+                              GetImmutableArray( 1000 ),
+                              GetImmutableArray( 10_000 )
+                          }.ToFrozenDictionary();
+
+        _immutableList = new Dictionary<int, ImmutableList<double>>
+                         {
+                             GetImmutableList( 10 ),
+                             GetImmutableList( 1000 ),
+                             GetImmutableList( 10_000 )
+                         }.ToFrozenDictionary();
+
+        _set = new Dictionary<int, FrozenSet<double>>
+               {
+                   GetFrozenSet( 10 ),
+                   GetFrozenSet( 1000 ),
+                   GetFrozenSet( 10_000 )
+               }.ToFrozenDictionary();
+    }
 
     private static KeyValuePair<int, double[]> GetArray( int size )
     {
         var array = Enumerable.Range( 0, size ).Select( i => _random.NextDouble() ).ToArray();
-
         return new KeyValuePair<int, double[]>( size, array );
     }
     private static KeyValuePair<int, List<double>> GetList( int size )
     {
         var array = Enumerable.Range( 0, size ).Select( i => _random.NextDouble() ).ToList();
-
         return new KeyValuePair<int, List<double>>( size, array );
     }
     private static KeyValuePair<int, ImmutableArray<double>> GetImmutableArray( int size )
     {
         var array = Enumerable.Range( 0, size ).Select( i => _random.NextDouble() ).ToImmutableArray();
-
         return new KeyValuePair<int, ImmutableArray<double>>( size, array );
     }
     private static KeyValuePair<int, ImmutableList<double>> GetImmutableList( int size )
     {
         var array = Enumerable.Range( 0, size ).Select( i => _random.NextDouble() ).ToImmutableList();
-
         return new KeyValuePair<int, ImmutableList<double>>( size, array );
     }
     private static KeyValuePair<int, FrozenSet<double>> GetFrozenSet( int size )
     {
         var array = Enumerable.Range( 0, size ).Select( i => _random.NextDouble() ).ToFrozenSet();
-
         return new KeyValuePair<int, FrozenSet<double>>( size, array );
     }
+
+
+    [ Params( 10, 1000, 10_000 ) ] public int Size { get; set; }
 
 
     [ BenchmarkCategory( "Construct" ), Benchmark ] public double[]               GetArray()          => Enumerable.Range( 0, Size ).Select( i => _random.NextDouble() ).ToArray();
