@@ -4,12 +4,12 @@
 [ Serializable ]
 public class VerifyRequest : BaseClass, ILoginRequest, ICredentials, ICloneable, IEquatable<VerifyRequest>, JsonModels.IJsonModel
 {
-    [ JsonIgnore ]        public virtual bool                          IsValid        => !string.IsNullOrWhiteSpace( UserName ) && !string.IsNullOrWhiteSpace( Password );
-    [ JsonExtensionData ] public         IDictionary<string, JToken?>? AdditionalData { get; set; }
-
-
-    [ Required( ErrorMessage = $"{nameof(Password)} is required." ), JsonProperty( nameof(Password), Required = Required.Always ) ] public string Password { get; init; } = string.Empty;
-    [ Required( ErrorMessage = $"{nameof(UserName)} is required." ), JsonProperty( nameof(UserName), Required = Required.Always ) ] public string UserName { get; init; } = string.Empty;
+    [ JsonIgnore ]                                                   public virtual bool                          IsValid        => !string.IsNullOrWhiteSpace( UserName ) && !string.IsNullOrWhiteSpace( Password );
+    [ JsonExtensionData ]                                            public         IDictionary<string, JToken?>? AdditionalData { get; set; }
+    [ JsonProperty( nameof(Password), Required = Required.Always ) ] public         string                        Password       { get; init; } = string.Empty;
+    [ JsonProperty( nameof(UserName), Required = Required.Always ) ] public         string                        UserName       { get; init; } = string.Empty;
+    [ Obsolete( $"Use {nameof(UserName)}" ) ]                        public         string                        UserLogin      => UserName;
+    [ Obsolete( $"Use {nameof(Password)}" ) ]                        public         string                        UserPassword   => UserName;
 
 
     public VerifyRequest() { }
