@@ -8,8 +8,6 @@ public class VerifyRequest : BaseClass, ILoginRequest, ICredentials, ICloneable,
     [ JsonExtensionData ]                                            public         IDictionary<string, JToken?>? AdditionalData { get; set; }
     [ JsonProperty( nameof(Password), Required = Required.Always ) ] public         string                        Password       { get; init; } = string.Empty;
     [ JsonProperty( nameof(UserName), Required = Required.Always ) ] public         string                        UserName       { get; init; } = string.Empty;
-    [ Obsolete( $"Use {nameof(UserName)}" ) ]                        public virtual string                        UserLogin      => UserName;
-    [ Obsolete( $"Use {nameof(Password)}" ) ]                        public virtual string                        UserPassword   => Password;
 
 
     public VerifyRequest() { }
