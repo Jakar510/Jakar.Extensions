@@ -104,11 +104,11 @@ public class ConcurrentObservableCollection<TValue> : CollectionAlerts<TValue>, 
 
 
     public ConcurrentObservableCollection() : this( Comparer<TValue>.Default ) { }
-    public ConcurrentObservableCollection( IComparer<TValue>   comparer ) : this( new List<TValue>(), comparer ) { }
+    public ConcurrentObservableCollection( IComparer<TValue>   comparer ) : this( [], comparer ) { }
     public ConcurrentObservableCollection( int                 capacity ) : this( capacity, Comparer<TValue>.Default ) { }
     public ConcurrentObservableCollection( int                 capacity, IComparer<TValue> comparer ) : this( new List<TValue>( capacity ), comparer ) { }
     public ConcurrentObservableCollection( IEnumerable<TValue> values ) : this( values, Comparer<TValue>.Default ) { }
-    public ConcurrentObservableCollection( IEnumerable<TValue> values, IComparer<TValue> comparer ) : this( new List<TValue>( values ), comparer ) { }
+    public ConcurrentObservableCollection( IEnumerable<TValue> values, IComparer<TValue> comparer ) : this( [..values], comparer ) { }
     private ConcurrentObservableCollection( List<TValue>       values ) : this( values, Comparer<TValue>.Default ) { }
     protected ConcurrentObservableCollection( List<TValue> values, IComparer<TValue> comparer )
     {

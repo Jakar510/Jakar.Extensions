@@ -7,6 +7,8 @@ namespace Jakar.Database;
 public static class JwtExtensions
 {
     [ Pure ] public static DateTimeOffset TokenExpiration( this IConfiguration configuration ) => configuration.TokenExpiration( TimeSpan.FromMinutes( 30 ) );
+
+
     [ Pure ]
     public static DateTimeOffset TokenExpiration( this IConfiguration configuration, TimeSpan defaultValue )
     {
@@ -14,6 +16,8 @@ public static class JwtExtensions
 
         return DateTimeOffset.UtcNow + offset;
     }
+
+
     public static IConfigurationSection TokenValidation( this IConfiguration configuration ) => configuration.GetSection( nameof(TokenValidation) );
 
 

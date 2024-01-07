@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 10/16/2022  5:46 PM
 
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-
-
-
 namespace Jakar.Database;
 
 

@@ -1,7 +1,4 @@
-using System.Net.Mail;
 using MailKit.Net.Smtp;
-using MimeKit;
-using SmtpClient = MailKit.Net.Smtp.SmtpClient;
 
 
 

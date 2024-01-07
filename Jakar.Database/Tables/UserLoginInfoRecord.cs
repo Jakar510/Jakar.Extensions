@@ -67,6 +67,14 @@ public sealed record UserLoginInfoRecord(
         while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
     }
 
+    public static DynamicParameters GetDynamicParameters( UserRecord user, string value )
+    {
+        var parameters = new DynamicParameters();
+        parameters.Add( nameof(CreatedBy),   user.ID.Value );
+        parameters.Add( nameof(OwnerUserID), user.UserID );
+        parameters.Add( nameof(Value),       value );
+        return parameters;
+    }
     [ Pure ] public static DynamicParameters GetDynamicParameters( UserRecord user, UserLoginInfo info ) => GetDynamicParameters( user, info.LoginProvider, info.ProviderKey );
     [ Pure ]
     public static DynamicParameters GetDynamicParameters( UserRecord user, string loginProvider, string providerKey )

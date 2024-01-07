@@ -12,9 +12,9 @@ public class ObservableHashSet<T> : CollectionAlerts<T>, ISet<T>, IReadOnlySet<T
     bool ICollection<T>.              IsReadOnly => ((ICollection<T>)_values).IsReadOnly;
 
 
-    public ObservableHashSet() : this( new HashSet<T>() ) { }
+    public ObservableHashSet() : this( [] ) { }
     public ObservableHashSet( int            capacity ) : this( new HashSet<T>( capacity ) ) { }
-    public ObservableHashSet( IEnumerable<T> enumerable ) : this( new HashSet<T>( enumerable ) ) { }
+    public ObservableHashSet( IEnumerable<T> enumerable ) : this( [..enumerable] ) { }
     public ObservableHashSet( HashSet<T>     values ) => _values = values;
 
 

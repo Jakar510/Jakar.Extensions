@@ -1,8 +1,4 @@
-﻿using CommunityToolkit.Diagnostics;
-
-
-
-namespace Jakar.Database.DbMigrations;
+﻿namespace Jakar.Database.DbMigrations;
 
 
 /// <summary> Add DB implementation support to FluentMigrator, Set the connection string, and Define the assembly containing the migrations

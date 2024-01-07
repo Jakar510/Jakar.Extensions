@@ -44,7 +44,7 @@ public readonly record struct WebHandler : IDisposable
 
     public async ValueTask<HttpResponseMessage> SendAsync()
     {
-        HttpResponseMessage? response = await _client.SendAsync( _request, Token );
+        HttpResponseMessage response = await _client.SendAsync( _request, Token );
         _logger?.LogDebug( EventId, "Response StatusCode: {StatusCode} for {Uri}", response.StatusCode, _request.RequestUri?.OriginalString );
         return response;
     }

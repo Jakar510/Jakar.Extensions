@@ -70,10 +70,9 @@ public static class ArrayExtensions
                                         MethodAttributes.Static | MethodAttributes.Public,
                                         CallingConventions.Standard,
                                         typeof(TElement[]),
-                                        new[]
-                                        {
+                                        [
                                             typeof(List<TElement>)
-                                        },
+                                        ],
                                         typeof(ArrayAccessor<TElement>),
                                         true );
 
@@ -97,10 +96,9 @@ public static class ArrayExtensions
                                         MethodAttributes.Static | MethodAttributes.Public,
                                         CallingConventions.Standard,
                                         typeof(List<TElement>),
-                                        new[]
-                                        {
+                                        [
                                             typeof(Collection<TElement>)
-                                        },
+                                        ],
                                         typeof(ArrayAccessor<TElement>),
                                         true );
 

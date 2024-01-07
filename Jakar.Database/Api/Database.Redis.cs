@@ -1,8 +1,4 @@
-﻿using Microsoft.Extensions.Caching.Distributed;
-
-
-
-namespace Jakar.Database;
+﻿namespace Jakar.Database;
 
 
 public partial class Database

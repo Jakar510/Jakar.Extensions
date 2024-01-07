@@ -1,9 +1,7 @@
 ﻿// ToothFairyDispatch :: ToothFairyDispatch.Cloud
 // 10/10/2022  1:47 PM
 
-using System.Net;
 using MailKit.Security;
-using MimeKit;
 
 
 

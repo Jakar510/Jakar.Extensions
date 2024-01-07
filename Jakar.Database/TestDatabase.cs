@@ -1,8 +1,6 @@
 ﻿// Jakar.Extensions :: Experiments
 // 09/28/2023  10:02 AM
 
-using System.Collections.Frozen;
-using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.StackExchangeRedis;
 using Npgsql;
 
@@ -78,10 +76,10 @@ internal sealed class TestDatabase : Database
                 var               user  = UserRecord.Create( "User",  "User",  string.Empty, admin );
 
                 UserRecord[] users =
-                {
+                [
                     admin,
                     user
-                };
+                ];
 
                 var results = new List<UserRecord>( users.Length );
                 await foreach ( UserRecord record in db.Users.Insert( users, token ) ) { results.Add( record ); }
@@ -99,7 +97,7 @@ internal sealed class TestDatabase : Database
         #if DEBUG
             if ( app.Configuration.GetValue( "DB_DOWN", true ) )
             {
-                await using AsyncServiceScope scope  = app.Services.CreateAsyncScope();
+                await using AsyncServiceScope scope = app.Services.CreateAsyncScope();
                 var                           runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
                 runner.MigrateDown( 0 );
             }

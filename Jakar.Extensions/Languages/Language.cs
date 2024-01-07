@@ -125,8 +125,7 @@ public sealed class Language : BaseClass, IComparable<Language>, IEquatable<Lang
 
     public static Items All => new(CultureInfo.GetCultures( CultureTypes.AllCultures ).Select( culture => new Language( culture ) ));
 
-    public static Collection Supported { get; } = new()
-                                                  {
+    public static Collection Supported { get; } = [
                                                       Arabic,
                                                       Chinese,
                                                       Czech,
@@ -141,7 +140,7 @@ public sealed class Language : BaseClass, IComparable<Language>, IEquatable<Lang
                                                       Spanish,
                                                       Swedish,
                                                       Thai
-                                                  };
+                                                  ];
 
     #endregion
 }

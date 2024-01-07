@@ -2,10 +2,6 @@
 // 10/15/2023  1:08 PM
 
 
-using System.Collections.Frozen;
-
-
-
 namespace Jakar.Database;
 
 
@@ -271,9 +267,9 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord>
 
             if ( _matchAll != other._matchAll ) { return false; }
 
-            return _parameters.SequenceEquals( other._parameters.AsSpan() );
+            return _parameters.AsSpan().SequenceEqual( other._parameters.AsSpan() );
         }
-        public          bool Equals( in DynamicParameters other ) => _parameters.SequenceEquals( other.ParameterNames.ToArray() );
+        public          bool Equals( in DynamicParameters other ) => _parameters.SequenceEqual( other.ParameterNames.ToArray() );
         public override int  GetHashCode()                        => _hash;
 
 

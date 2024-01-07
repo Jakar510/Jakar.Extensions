@@ -1,13 +1,14 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 08/18/2022  10:35 PM
 
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.MicrosoftAccount;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Identity.Web;
+using Microsoft.IdentityModel.Tokens;
 
 
 
@@ -17,36 +18,6 @@ namespace Jakar.Database;
 [ SuppressMessage( "ReSharper", "UnusedMethodReturnValue.Global" ) ]
 public static partial class DbExtensions
 {
-    public static bool SequenceEquals( this ReadOnlySpan<string> left, ReadOnlySpan<string> right )
-    {
-        if ( left.Length != right.Length ) { return false; }
-
-        foreach ( ReadOnlySpan<char> parameter in left )
-        {
-            foreach ( ReadOnlySpan<char> otherParameter in right )
-            {
-                if ( parameter.SequenceEqual( otherParameter ) is false ) { return false; }
-            }
-        }
-
-        return true;
-    }
-    public static bool SequenceEquals( this ImmutableArray<string> left, ReadOnlySpan<string> right )
-    {
-        if ( left.Length != right.Length ) { return false; }
-
-        foreach ( ReadOnlySpan<char> parameter in left.AsSpan() )
-        {
-            foreach ( ReadOnlySpan<char> otherParameter in right )
-            {
-                if ( parameter.SequenceEqual( otherParameter ) is false ) { return false; }
-            }
-        }
-
-        return true;
-    }
-
-
     [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
     public static bool IsValid<TRecord>( this TRecord value )
         where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord> => value.ID.IsValid();
@@ -145,12 +116,67 @@ public static partial class DbExtensions
     public static WebApplicationBuilder AddDatabase<T>( this WebApplicationBuilder builder, Action<DbOptions> configure )
         where T : Database
     {
-        builder.Services.AddOptions<DbOptions>().Configure( configure );
+        DbOptions options = new();
+        configure( options );
+        return builder.AddDatabase<T>( options );
+    }
+    public static WebApplicationBuilder AddDatabase<T>( this WebApplicationBuilder builder, DbOptions options )
+        where T : Database
+    {
+        builder.Services.AddSingleton<IOptions<DbOptions>>( options );
 
         builder.Services.AddSingleton<T>();
         builder.Services.AddSingleton<Database>( static provider => provider.GetRequiredService<T>() );
         builder.AddHealthCheck<T>();
         return builder;
+    }
+
+
+    public static WebApplicationBuilder AddAuth( this WebApplicationBuilder           builder,
+                                                 string                               authenticationScheme            = JwtBearerDefaults.AuthenticationScheme,
+                                                 Action<AuthorizationOptions>?        authorization                   = default,
+                                                 Action<CookieAuthenticationOptions>? cookie                          = default,
+                                                 Action<JwtBearerOptions>?            options                         = default,
+                                                 string                               authenticationSchemeDisplayName = nameof(JwtBearerHandler),
+                                                 string                               cookieDisplayName               = CookieAuthenticationDefaults.AuthenticationScheme
+    )
+    {
+        AuthenticationBuilder auth = builder.Services.AddAuthentication( authenticationScheme )
+                                            .AddJwtBearer( authenticationScheme,
+                                                           authenticationSchemeDisplayName,
+                                                           bearer =>
+                                                           {
+                                                               bearer.TokenHandlers.Add( DbTokenHandler.Instance );
+                                                               options?.Invoke( bearer );
+                                                           } )
+                                            .AddCookie( authenticationScheme, cookieDisplayName, cookie ?? ConfigureOptions );
+
+        builder.Services.AddAuthorization( authorization ?? ConfigureOptions );
+        return builder;
+    }
+    public static void ConfigureOptions( JwtBearerOptions            options ) { }
+    public static void ConfigureOptions( AuthorizationOptions        options ) { }
+    public static void ConfigureOptions( CookieAuthenticationOptions options ) { }
+
+
+    public static JwtBearerOptions GetJwtBearerOptions<T>( this IServiceProvider provider )
+        where T : IAppName
+    {
+        JwtBearerOptions? bearer = provider.GetService<JwtBearerOptions>();
+        if ( bearer is not null ) { return bearer; }
+
+        IConfiguration configuration = provider.GetRequiredService<IConfiguration>();
+        DbOptions      options       = provider.GetRequiredService<DbOptions>();
+
+        JwtBearerOptions jwt = new()
+                               {
+                                   Audience                  = typeof(T).Name,
+                                   ClaimsIssuer              = typeof(T).Name,
+                                   RefreshInterval           = TimeSpan.FromMinutes( 30 ),
+                                   TokenValidationParameters = configuration.GetTokenValidationParameters( options )
+                               };
+
+        return jwt;
     }
 
 

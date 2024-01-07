@@ -3,6 +3,7 @@
 
 global using System.Collections;
 global using System.Collections.Concurrent;
+global using System.Collections.Frozen;
 global using System.Collections.Immutable;
 global using System.Collections.ObjectModel;
 global using System.Collections.Specialized;
@@ -16,13 +17,17 @@ global using System.Diagnostics.CodeAnalysis;
 global using System.Globalization;
 global using System.IdentityModel.Tokens.Jwt;
 global using System.Linq;
+global using System.Net;
+global using System.Net.Mail;
 global using System.Reflection;
 global using System.Runtime.CompilerServices;
 global using System.Runtime.InteropServices;
 global using System.Runtime.Versioning;
 global using System.Security.Claims;
+global using System.Security.Cryptography;
 global using System.Text;
 global using System.Text.RegularExpressions;
+global using CommunityToolkit.Diagnostics;
 global using Dapper;
 global using Dapper.Contrib.Extensions;
 global using FluentMigrator.Runner.Logging;
@@ -55,12 +60,20 @@ global using Jakar.Database.Caches;
 global using Jakar.Database.DbMigrations;
 global using Jakar.Extensions;
 global using JetBrains.Annotations;
+global using Microsoft.AspNetCore.Authentication;
+global using Microsoft.AspNetCore.Authentication.JwtBearer;
 global using Microsoft.AspNetCore.Http;
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.AspNetCore.Mvc.ModelBinding;
 global using Microsoft.CodeAnalysis;
+global using Microsoft.Extensions.Caching.Distributed;
+global using Microsoft.IdentityModel.JsonWebTokens;
 global using Microsoft.IdentityModel.Tokens;
+global using MimeKit;
 global using OneOf;
+global using OtpNet;
+global using ZXing;
+global using ZXing.QrCode;
 global using CommandFlags = Dapper.CommandFlags;
 global using ConnectionStringOptions =
     OneOf.OneOf<Jakar.Extensions.SecuredString, System.Func<Jakar.Extensions.SecuredString>, System.Func<System.Threading.CancellationToken, System.Threading.Tasks.Task<Jakar.Extensions.SecuredString>>,
@@ -68,5 +81,8 @@ global using ConnectionStringOptions =
         System.Func<Microsoft.Extensions.Configuration.IConfiguration, System.Threading.CancellationToken, Jakar.Extensions.SecuredString>,
         System.Func<Microsoft.Extensions.Configuration.IConfiguration, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<Jakar.Extensions.SecuredString>>,
         System.Func<Microsoft.Extensions.Configuration.IConfiguration, System.Threading.CancellationToken, System.Threading.Tasks.Task<Jakar.Extensions.SecuredString>>>;
+global using JsonIgnoreAttribute = Newtonsoft.Json.JsonIgnoreAttribute;
+global using JsonSerializer = Newtonsoft.Json.JsonSerializer;
 global using KeyAttribute = Dapper.Contrib.Extensions.KeyAttribute;
+global using SmtpClient = MailKit.Net.Smtp.SmtpClient;
 global using TableAttribute = Dapper.Contrib.Extensions.TableAttribute;

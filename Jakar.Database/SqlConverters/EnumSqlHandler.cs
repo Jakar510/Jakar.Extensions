@@ -1,8 +1,4 @@
-﻿using System.Collections.Frozen;
-
-
-
-namespace Jakar.Database;
+﻿namespace Jakar.Database;
 
 
 public class EnumSqlHandler<T> : SqlConverter<EnumSqlHandler<T>, T>

@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 04/11/2023  2:36 PM
 
-using System.Security.Cryptography;
-using OtpNet;
-using ZXing;
-using ZXing.QrCode;
 using ZXing.QrCode.Internal;
 
 

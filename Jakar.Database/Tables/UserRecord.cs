@@ -750,44 +750,53 @@ public sealed record UserRecord(
 
     #region Tokens
 
-    public static bool IsHashedRefreshToken( string? token, ref UserRecord record )
+    [ Pure ] public static bool CheckRefreshToken( ref UserRecord record, in Tokens token, in bool hashed = true ) => CheckRefreshToken( ref record, token.RefreshToken, hashed );
+
+    [ Pure ]
+    public static bool CheckRefreshToken( ref UserRecord record, in string? token, in bool hashed = true )
     {
         // ReSharper disable once InvertIf
         if ( record.RefreshTokenExpiryTime.HasValue && DateTimeOffset.UtcNow > record.RefreshTokenExpiryTime.Value )
         {
             record = record.WithNoRefreshToken();
-            return true;
+            return false;
         }
 
-        return string.Equals( record.RefreshToken, token?.GetHashCode().ToString(), StringComparison.Ordinal );
+        return string.Equals( record.RefreshToken,
+                              hashed
+                                  ? Spans.Hash128( token ).ToString()
+                                  : token,
+                              StringComparison.Ordinal );
     }
-    public static bool IsHashedRefreshToken( Tokens token, ref UserRecord record ) => IsHashedRefreshToken( token.RefreshToken, ref record );
 
 
     [ Pure ] public UserRecord WithNoRefreshToken() => WithRefreshToken( default, default );
     [ Pure ]
-    public UserRecord WithRefreshToken( string? token, in DateTimeOffset? date, in bool hashed = true )
+    public UserRecord WithRefreshToken( in string? token, in DateTimeOffset? date, in bool hashed = true )
     {
-        if ( hashed ) { token = token?.GetHashCode().ToString(); }
-
         return this with
                {
-                   RefreshToken = token ?? string.Empty,
+                   RefreshToken = (hashed
+                                       ? Spans.Hash128( token ).ToString()
+                                       : token) ??
+                                  string.Empty,
                    RefreshTokenExpiryTime = date
                };
     }
     [ Pure ]
-    public UserRecord WithRefreshToken( string? token, in DateTimeOffset? date, string securityStamp, in bool hashed = true )
+    public UserRecord WithRefreshToken( in string? token, in DateTimeOffset? date, string securityStamp, in bool hashed = true )
     {
-        if ( hashed ) { token = token?.GetHashCode().ToString(); }
-
         return this with
                {
-                   RefreshToken = token ?? string.Empty,
+                   RefreshToken = (hashed
+                                       ? Spans.Hash128( token ).ToString()
+                                       : token) ??
+                                  string.Empty,
                    RefreshTokenExpiryTime = date,
                    SecurityStamp = securityStamp
                };
     }
+
 
     [ Pure ] public UserRecord SetRefreshToken( Tokens token, in DateTimeOffset? date, in bool hashed                        = true ) => WithRefreshToken( token.RefreshToken, date, hashed );
     [ Pure ] public UserRecord SetRefreshToken( Tokens token, in DateTimeOffset? date, string  securityStamp, in bool hashed = true ) => WithRefreshToken( token.RefreshToken, date, securityStamp, hashed );

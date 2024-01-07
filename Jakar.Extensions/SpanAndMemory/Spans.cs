@@ -98,8 +98,7 @@ public static partial class Spans
 
         return true;
     }
-
-
+    
     [ Pure ]
     public static int LastIndexOf<T>( this ReadOnlySpan<T> value, T c, int endIndex )
         where T : IEquatable<T>

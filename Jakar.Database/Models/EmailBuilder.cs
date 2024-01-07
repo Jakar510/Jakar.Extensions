@@ -1,9 +1,4 @@
-﻿using System.Net.Mail;
-using MimeKit;
-
-
-
-namespace Jakar.Database;
+﻿namespace Jakar.Database;
 
 
 /// <summary> <see href="http://www.mimekit.net/docs/html/Creating-Messages.htm"/> </summary>
