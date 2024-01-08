@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 04/11/2023  2:36 PM
 
-using ZXing.QrCode.Internal;
-
-
-
 namespace Jakar.Database;
 
 

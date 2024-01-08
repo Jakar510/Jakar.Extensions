@@ -1,17 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 08/18/2022  10:35 PM
 
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.Google;
-using Microsoft.AspNetCore.Authentication.MicrosoftAccount;
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Identity.Web;
-using Microsoft.IdentityModel.Tokens;
-
-
-
 namespace Jakar.Database;
 
 
@@ -21,6 +10,8 @@ public static partial class DbExtensions
     [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
     public static bool IsValid<TRecord>( this TRecord value )
         where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord> => value.ID.IsValid();
+
+
     [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
     public static bool IsNotValid<TRecord>( this TRecord value )
         where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord> => value.IsValid() is false;
@@ -28,8 +19,7 @@ public static partial class DbExtensions
 
     public static IHealthChecksBuilder AddHealthCheck<T>( this WebApplicationBuilder builder )
         where T : IHealthCheck => builder.AddHealthCheck( HealthCheckExtensions.CreateHealthCheck<T>() );
-    public static IHealthChecksBuilder AddHealthCheck( this WebApplicationBuilder builder, HealthCheckRegistration registration ) =>
-        builder.Services.AddHealthChecks().Add( registration );
+    public static IHealthChecksBuilder AddHealthCheck( this WebApplicationBuilder builder, HealthCheckRegistration registration ) => builder.Services.AddHealthChecks().Add( registration );
 
 
     public static ILoggingBuilder AddFluentMigratorLogger( this ILoggingBuilder builder, bool showSql = true, bool showElapsedTime = true ) =>
@@ -149,14 +139,14 @@ public static partial class DbExtensions
                                                                bearer.TokenHandlers.Add( DbTokenHandler.Instance );
                                                                options?.Invoke( bearer );
                                                            } )
-                                            .AddCookie( authenticationScheme, cookieDisplayName, cookie ?? ConfigureOptions );
+                                            .AddCookie( authenticationScheme, cookieDisplayName, cookie ?? Configure );
 
-        builder.Services.AddAuthorization( authorization ?? ConfigureOptions );
+        builder.Services.AddAuthorization( authorization ?? Configure );
         return builder;
     }
-    public static void ConfigureOptions( JwtBearerOptions            options ) { }
-    public static void ConfigureOptions( AuthorizationOptions        options ) { }
-    public static void ConfigureOptions( CookieAuthenticationOptions options ) { }
+    public static void Configure( JwtBearerOptions            options ) { }
+    public static void Configure( AuthorizationOptions        options ) { }
+    public static void Configure( CookieAuthenticationOptions options ) { }
 
 
     public static JwtBearerOptions GetJwtBearerOptions<T>( this IServiceProvider provider )
@@ -172,10 +162,10 @@ public static partial class DbExtensions
                                {
                                    Audience                  = typeof(T).Name,
                                    ClaimsIssuer              = typeof(T).Name,
-                                   RefreshInterval           = TimeSpan.FromMinutes( 30 ),
                                    TokenValidationParameters = configuration.GetTokenValidationParameters( options )
                                };
 
+        jwt.TokenHandlers.Add( DbTokenHandler.Instance );
         return jwt;
     }
 

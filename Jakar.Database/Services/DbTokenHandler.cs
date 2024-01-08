@@ -4,13 +4,13 @@
 namespace Jakar.Database;
 
 
-public sealed class DbTokenHandler : JsonWebTokenHandler
+public class DbTokenHandler : JsonWebTokenHandler
 {
     public static DbTokenHandler Instance { get; } = new();
     public DbTokenHandler() { }
 
 
-    public static ClaimsPrincipal? ValidateToken( string jsonToken, TokenValidationParameters parameters, out SecurityToken? securityToken )
+    public virtual ClaimsPrincipal? ValidateToken( string jsonToken, TokenValidationParameters parameters, out SecurityToken? securityToken )
     {
         var tokenHandler = new JwtSecurityTokenHandler();
         return tokenHandler.ValidateToken( jsonToken, parameters, out securityToken );

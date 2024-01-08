@@ -61,12 +61,23 @@ global using Jakar.Database.DbMigrations;
 global using Jakar.Extensions;
 global using JetBrains.Annotations;
 global using Microsoft.AspNetCore.Authentication;
+global using Microsoft.AspNetCore.Authentication.Cookies;
+global using Microsoft.AspNetCore.Authentication.Google;
 global using Microsoft.AspNetCore.Authentication.JwtBearer;
+global using Microsoft.AspNetCore.Authentication.MicrosoftAccount;
+global using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+global using Microsoft.AspNetCore.Authorization;
 global using Microsoft.AspNetCore.Http;
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.AspNetCore.Mvc.ModelBinding;
 global using Microsoft.CodeAnalysis;
 global using Microsoft.Extensions.Caching.Distributed;
+global using Microsoft.Extensions.Configuration.CommandLine;
+global using Microsoft.Extensions.Configuration.Ini;
+global using Microsoft.Extensions.Configuration.Json;
+global using Microsoft.Extensions.FileProviders;
+global using Microsoft.Extensions.Logging.Console;
+global using Microsoft.Identity.Web;
 global using Microsoft.IdentityModel.JsonWebTokens;
 global using Microsoft.IdentityModel.Tokens;
 global using MimeKit;
@@ -74,6 +85,7 @@ global using OneOf;
 global using OtpNet;
 global using ZXing;
 global using ZXing.QrCode;
+global using ZXing.QrCode.Internal;
 global using CommandFlags = Dapper.CommandFlags;
 global using ConnectionStringOptions =
     OneOf.OneOf<Jakar.Extensions.SecuredString, System.Func<Jakar.Extensions.SecuredString>, System.Func<System.Threading.CancellationToken, System.Threading.Tasks.Task<Jakar.Extensions.SecuredString>>,
@@ -81,6 +93,7 @@ global using ConnectionStringOptions =
         System.Func<Microsoft.Extensions.Configuration.IConfiguration, System.Threading.CancellationToken, Jakar.Extensions.SecuredString>,
         System.Func<Microsoft.Extensions.Configuration.IConfiguration, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<Jakar.Extensions.SecuredString>>,
         System.Func<Microsoft.Extensions.Configuration.IConfiguration, System.Threading.CancellationToken, System.Threading.Tasks.Task<Jakar.Extensions.SecuredString>>>;
+global using FormatException = System.FormatException;
 global using JsonIgnoreAttribute = Newtonsoft.Json.JsonIgnoreAttribute;
 global using JsonSerializer = Newtonsoft.Json.JsonSerializer;
 global using KeyAttribute = Dapper.Contrib.Extensions.KeyAttribute;

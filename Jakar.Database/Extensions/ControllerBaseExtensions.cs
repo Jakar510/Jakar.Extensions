@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions.Hosting
 // 09/22/2022  4:02 PM
 
-using FormatException = System.FormatException;
-
-
-
 namespace Jakar.Database;
 
 

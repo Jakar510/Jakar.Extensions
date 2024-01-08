@@ -15,6 +15,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     protected readonly string                  _className;
 
 
+    public static Database?      Current       { get; set; }
     public static IDataProtector DataProtector { get; set; } = new DataProtector( RSAEncryptionPadding.OaepSHA1 );
     public AppVersion Version
     {
@@ -85,6 +86,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
         UserLogins         = Create<UserLoginInfoRecord>();
         UserRecoveryCodes  = Create<UserRecoveryCodeRecord>();
         Addresses          = Create<AddressRecord>();
+        Current            = this;
     }
     public virtual async ValueTask DisposeAsync()
     {

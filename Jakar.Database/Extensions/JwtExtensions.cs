@@ -32,8 +32,6 @@ public static class JwtExtensions
         SymmetricSecurityKey  key     = configuration.GetSymmetricSecurityKey( options );
         return section.GetTokenValidationParameters( key, options );
     }
-
-
     public static TokenValidationParameters GetTokenValidationParameters( this IConfigurationSection section, SymmetricSecurityKey key, DbOptions options ) =>
         new()
         {

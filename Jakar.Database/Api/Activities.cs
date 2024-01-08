@@ -1,6 +1,10 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 12/02/2023  12:12 PM
 
+using Version = System.Version;
+
+
+
 namespace Jakar.Database;
 
 
