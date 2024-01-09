@@ -1,6 +1,10 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 08/18/2022  10:35 PM
 
+using Microsoft.AspNetCore.DataProtection;
+
+
+
 namespace Jakar.Database;
 
 
@@ -18,7 +22,7 @@ public static partial class DbExtensions
 
 
     public static IHealthChecksBuilder AddHealthCheck<T>( this WebApplicationBuilder builder )
-        where T : IHealthCheck => builder.AddHealthCheck( HealthCheckExtensions.CreateHealthCheck<T>() );
+        where T : IHealthCheck => builder.AddHealthCheck( HealthChecks.Create<T>() );
     public static IHealthChecksBuilder AddHealthCheck( this WebApplicationBuilder builder, HealthCheckRegistration registration ) => builder.Services.AddHealthChecks().Add( registration );
 
 
@@ -82,7 +86,7 @@ public static partial class DbExtensions
 
         // .AddMicrosoftGraph( builder.Configuration.GetSection( "Graph" ) );
 
-        builder.Services.AddAuthorization( options => options.AddPolicy( nameof(RequireMfa), static policy => policy.Requirements.Add( new RequireMfa() ) ) );
+        builder.Services.AddAuthorizationBuilder().AddPolicy( nameof(RequireMfa), static policy => policy.Requirements.Add( new RequireMfa() ) );
 
 
         RoleStore.Register( builder );
@@ -170,6 +174,12 @@ public static partial class DbExtensions
     }
 
 
+    public static WebApplicationBuilder AddDataProtection( this WebApplicationBuilder builder )
+    {
+        builder.Services.AddDataProtection();
+        ProtectedDataProvider.Register( builder );
+        return builder;
+    }
     public static WebApplicationBuilder AddEmailer( this WebApplicationBuilder builder )
     {
         builder.Services.AddOptions<Emailer.Options>();

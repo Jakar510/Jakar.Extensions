@@ -3,20 +3,18 @@
 
 
     [ SuppressMessage( "ReSharper", "AccessToStaticMemberViaDerivedType" ) ]
-    public sealed class UserStore : IUserLoginStore<UserRecord>,
-                                    IUserClaimStore<UserRecord>,
-                                    IUserSecurityStampStore<UserRecord>,
-                                    IUserTwoFactorStore<UserRecord>,
-                                    IUserPasswordStore<UserRecord>,
-                                    IUserEmailStore<UserRecord>,
-                                    IUserLockoutStore<UserRecord>,
-                                    IUserAuthenticatorKeyStore<UserRecord>,
-                                    IUserTwoFactorRecoveryCodeStore<UserRecord>,
-                                    IUserPhoneNumberStore<UserRecord>
+    public sealed class UserStore( Database dbContext ) : IUserLoginStore<UserRecord>,
+                                                          IUserClaimStore<UserRecord>,
+                                                          IUserSecurityStampStore<UserRecord>,
+                                                          IUserTwoFactorStore<UserRecord>,
+                                                          IUserPasswordStore<UserRecord>,
+                                                          IUserEmailStore<UserRecord>,
+                                                          IUserLockoutStore<UserRecord>,
+                                                          IUserAuthenticatorKeyStore<UserRecord>,
+                                                          IUserTwoFactorRecoveryCodeStore<UserRecord>,
+                                                          IUserPhoneNumberStore<UserRecord>
     {
-        private readonly Database _dbContext;
-
-        public UserStore( Database dbContext ) => _dbContext = dbContext;
+        private readonly Database _dbContext = dbContext;
 
 
         public static void Register( WebApplicationBuilder builder ) => builder.Services.AddSingleton<UserStore>()

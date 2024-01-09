@@ -1,6 +1,10 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 03/12/2023  1:56 PM
 
+using Microsoft.AspNetCore.Identity;
+
+
+
 namespace Jakar.Database;
 
 
@@ -35,7 +39,7 @@ public abstract partial class Database
     public async ValueTask<ClaimsPrincipal?> ValidateToken( string jsonToken, CancellationToken token )
     {
         TokenValidationParameters parameters = await GetTokenValidationParameters( token );
-        return DbTokenHandler.ValidateToken( jsonToken, parameters, out _ );
+        return DbTokenHandler.Instance.ValidateToken( jsonToken, parameters, out _ );
     }
 
 
@@ -199,9 +203,23 @@ public abstract partial class Database
         return tokens.AccessToken;
     }
     async Task<bool> IUserTwoFactorTokenProvider<UserRecord>.ValidateAsync( string purpose, string token, UserManager<UserRecord> manager, UserRecord user ) => await ValidateAsync( purpose, token, manager, user );
-    public virtual async ValueTask<bool> ValidateAsync( string purpose, string jwtToken, UserManager<UserRecord> manager, UserRecord user, CancellationToken token = default )
+    public virtual async ValueTask<bool> ValidateAsync( string purpose, string token, UserManager<UserRecord> manager, UserRecord user, CancellationToken cancellationToken = default )
     {
-        OneOf<Tokens, Error> result = await Verify( jwtToken, token: token );
+        string? key = await manager.GetAuthenticatorKeyAsync( user );
+
+        if ( string.IsNullOrWhiteSpace( key ) is false )
+        {
+            if ( int.TryParse( token, out _ ) )
+            {
+                var provider = new AuthenticatorTokenProvider<UserRecord>();
+                return await provider.ValidateAsync( purpose, token, manager, user );
+            }
+
+            IOneTimePassword otp = OneTimePassword.Create( key, Options.TokenIssuer );
+            return otp.ValidateToken( token );
+        }
+
+        OneOf<Tokens, Error> result = await Verify( token, token: cancellationToken );
         return result.IsT0;
     }
     async Task<bool> IUserTwoFactorTokenProvider<UserRecord>.CanGenerateTwoFactorTokenAsync( UserManager<UserRecord> manager, UserRecord user ) => await CanGenerateTwoFactorTokenAsync( manager, user );

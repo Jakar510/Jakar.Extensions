@@ -6,7 +6,7 @@ namespace Jakar.Database;
 
 public class DbTokenHandler : JsonWebTokenHandler
 {
-    public static DbTokenHandler Instance { get; } = new();
+    public static DbTokenHandler Instance { get; set; } = new();
     public DbTokenHandler() { }
 
 

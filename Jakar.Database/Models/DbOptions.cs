@@ -21,6 +21,7 @@ public sealed class DbOptions : IOptions<DbOptions>, IDbOptions
     DbInstance IDbOptions.         Instance             => DbType;
     public string                  JWTAlgorithm         { get; set; } = SecurityAlgorithms.HmacSha512Signature;
     public string                  JWTKey               { get; set; } = "JWT";
+    public string                  AppName              { get; set; } = string.Empty;
     public PasswordRequirements    PasswordRequirements { get; set; } = new();
     public string                  TokenAudience        { get; set; } = string.Empty;
     public string                  TokenIssuer          { get; set; } = string.Empty;
@@ -35,6 +36,13 @@ public sealed class DbOptions : IOptions<DbOptions>, IDbOptions
         ConnectionString = func;
     }
 
+
+    public DbOptions WithAppName<T>()
+        where T : IAppName
+    {
+        AppName = typeof(T).Name;
+        return this;
+    }
 
     public static void GetConnectionString( IMigrationRunnerBuilder provider ) => provider.WithGlobalConnectionString( GetConnectionString );
     public static string GetConnectionString( IServiceProvider provider )

@@ -15,8 +15,8 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     protected readonly string                  _className;
 
 
-    public static Database?      Current       { get; set; }
-    public static IDataProtector DataProtector { get; set; } = new DataProtector( RSAEncryptionPadding.OaepSHA1 );
+    public static Database?     Current       { get; set; }
+    public static DataProtector DataProtector { get; set; } = new(RSAEncryptionPadding.OaepSHA1);
     public AppVersion Version
     {
         [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => Options.Version;
