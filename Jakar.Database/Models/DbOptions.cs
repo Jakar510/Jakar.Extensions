@@ -6,28 +6,32 @@ namespace Jakar.Database;
 
 public sealed class DbOptions : IOptions<DbOptions>, IDbOptions
 {
-    public const string DEFAULT_SQL_CONNECTION_STRING_KEY = "DEFAULT";
+    public const           string                DEFAULT_SQL_CONNECTION_STRING_KEY = "DEFAULT";
+    public const           string                JWT_KEY                           = "JWT";
+    public const           string                USER_EXISTS                       = "User Exists";
+    public const           string                JWT_ALGORITHM                     = SecurityAlgorithms.HmacSha512Signature;
+    public const           string                AUTHENTICATION_TYPE               = JwtBearerDefaults.AuthenticationScheme;
+    public const           int                   COMMAND_TIMEOUT                   = 300;
+    public static readonly FrozenSet<DbInstance> Instances                         = Enum.GetValues<DbInstance>().ToFrozenSet();
 
 
-    public static readonly ImmutableArray<DbInstance> Instances = ImmutableArray.Create( Enum.GetValues<DbInstance>() );
-
-
-    public string                  AuthenticationType   { get; set; } = JwtBearerDefaults.AuthenticationScheme;
-    public TimeSpan                ClockSkew            { get; set; } = TimeSpan.FromSeconds( 60 );
-    public int?                    CommandTimeout       { get; set; } = 300;
-    public ConnectionStringOptions ConnectionString     { get; set; }
-    public DbInstance              DbType               { get; set; } = DbInstance.Postgres;
-    public Uri                     Domain               { get; set; } = new("https://localhost");
-    DbInstance IDbOptions.         Instance             => DbType;
-    public string                  JWTAlgorithm         { get; set; } = SecurityAlgorithms.HmacSha512Signature;
-    public string                  JWTKey               { get; set; } = "JWT";
-    public string                  AppName              { get; set; } = string.Empty;
-    public PasswordRequirements    PasswordRequirements { get; set; } = new();
-    public string                  TokenAudience        { get; set; } = string.Empty;
-    public string                  TokenIssuer          { get; set; } = string.Empty;
-    public string                  UserExists           { get; set; } = "User Exists";
-    DbOptions IOptions<DbOptions>. Value                => this;
-    public AppVersion              Version              { get; set; } = AppVersion.Default;
+    public static DbOptions               Default              => new();
+    public        string                  AuthenticationType   { get; set; } = AUTHENTICATION_TYPE;
+    public        TimeSpan                ClockSkew            { get; set; } = TimeSpan.FromSeconds( 60 );
+    public        int?                    CommandTimeout       { get; set; } = COMMAND_TIMEOUT;
+    public        ConnectionStringOptions ConnectionString     { get; set; }
+    public        DbInstance              DbType               { get; set; } = DbInstance.Postgres;
+    public        Uri                     Domain               { get; set; } = new("https://localhost:443");
+    DbInstance IDbOptions.                Instance             => DbType;
+    public string                         JWTAlgorithm         { get; set; } = JWT_ALGORITHM;
+    public string                         JWTKey               { get; set; } = JWT_KEY;
+    public string                         AppName              { get; set; } = string.Empty;
+    public PasswordRequirements           PasswordRequirements { get; set; } = new();
+    public string                         TokenAudience        { get; set; } = string.Empty;
+    public string                         TokenIssuer          { get; set; } = string.Empty;
+    public string                         UserExists           { get; set; } = USER_EXISTS;
+    DbOptions IOptions<DbOptions>.        Value                => this;
+    public AppVersion                     Version              { get; set; } = AppVersion.Default;
 
 
     public DbOptions()

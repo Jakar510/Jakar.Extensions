@@ -1,8 +1,7 @@
 ﻿// Jakar.Extensions :: Experiments
 // 08/20/2023  9:51 PM
 
-using BenchmarkDotNet.Configs;
-using HashidsNet;
+using Hashids = HashidsNet.Hashids;
 
 
 

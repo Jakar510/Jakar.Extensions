@@ -51,9 +51,11 @@ public readonly record struct RecordID<TRecord>( Guid Value ) : IComparable<Reco
     [ Pure ] public bool IsValid()    => Guid.Empty.Equals( Value ) is false;
     [ Pure ] public bool IsNotValid() => Guid.Empty.Equals( Value );
 
-
+    
+    [ Pure ]
     public override string ToString() => Value.ToString();
-
+    
+    [ Pure ]
     public string ToString( string? format, IFormatProvider? formatProvider ) => Value.ToString( format, formatProvider );
 
     public bool TryFormat( Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider ) => Value.TryFormat( destination, out charsWritten, format );

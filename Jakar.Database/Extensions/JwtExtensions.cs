@@ -26,6 +26,8 @@ public static class JwtExtensions
     public static SigningCredentials   GetSigningCredentials( this   IConfiguration configuration, DbOptions options ) => new(configuration.GetSymmetricSecurityKey( options ), options.JWTAlgorithm);
 
 
+    public static TokenValidationParameters GetTokenValidationParameters( this WebApplication        app,     DbOptions options ) => app.Configuration.GetTokenValidationParameters( options );
+    public static TokenValidationParameters GetTokenValidationParameters( this WebApplicationBuilder builder, DbOptions options ) => builder.Configuration.GetTokenValidationParameters( options );
     public static TokenValidationParameters GetTokenValidationParameters( this IConfiguration configuration, DbOptions options )
     {
         IConfigurationSection section = configuration.TokenValidation();

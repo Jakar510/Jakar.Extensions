@@ -1,4 +1,8 @@
-﻿namespace Jakar.Database;
+﻿using Microsoft.Extensions.DependencyInjection;
+
+
+
+namespace Jakar.Database;
 
 
 public sealed class RoleStore : IRoleStore<RoleRecord>
@@ -9,7 +13,11 @@ public sealed class RoleStore : IRoleStore<RoleRecord>
     public RoleStore( Database dbContext ) => _dbContext = dbContext;
     public void Dispose() { }
 
-    public static void Register( WebApplicationBuilder builder ) => builder.Services.AddSingleton<IRoleStore<RoleRecord>, RoleStore>();
+    public static void Register( IServiceCollection builder )
+    {
+        builder.AddSingleton<RoleStore>();
+        builder.AddTransient<IRoleStore<RoleRecord>>( static provider => provider.GetRequiredService<RoleStore>() );
+    }
 
 
     public async Task<IdentityResult> CreateAsync( RoleRecord role, CancellationToken token )

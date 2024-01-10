@@ -7,9 +7,10 @@ namespace Jakar.Database.Caches;
 [ SuppressMessage( "ReSharper", "UnusedMethodReturnValue.Global" ), SuppressMessage( "ReSharper", "ConvertToPrimaryConstructor" ) ]
 public sealed class TableCacheOptions : IOptions<TableCacheOptions>
 {
-    // public int                                    MaxItems    { get; set; } = 1000;
-    public TimeSpan                               ExpireTime  { get; set; } = TimeSpan.FromMinutes( 1 );
-    public TimeSpan                               RefreshTime { get; set; } = TimeSpan.FromSeconds( 10 );
+    // public int MaxItems    { get; set; } = 1000;
+    public static TableCacheOptions               Default     => new();
+    public        TimeSpan                        ExpireTime  { get; set; } = TimeSpan.FromMinutes( 1 );
+    public        TimeSpan                        RefreshTime { get; set; } = TimeSpan.FromSeconds( 10 );
     TableCacheOptions IOptions<TableCacheOptions>.Value       => this;
 
 

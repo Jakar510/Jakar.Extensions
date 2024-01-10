@@ -1,4 +1,5 @@
-﻿// Jakar.Extensions :: Jakar.Database
+﻿/*
+// Jakar.Extensions :: Jakar.Database
 // 1/8/2024  20:28
 
 namespace Jakar.Database;
@@ -26,7 +27,7 @@ public abstract class SetupDatabase<T>
 
     public void Run()
     {
-        _builder.AddPasswordValidator( Configure );
+        _builder.Services.AddPasswordValidator( Configure );
         if ( UseAuthorizationAuthentication ) { SetupAuth(); }
 
         if ( UseIdentity ) { SetupIdentity(); }
@@ -34,24 +35,7 @@ public abstract class SetupDatabase<T>
     private void SetupIdentity()
     {
         _builder.Services.AddOptions<IdentityOptions>().Configure( Configure );
-
-        RoleStore.Register( _builder );
-        UserStore.Register( _builder );
-
-        IdentityBuilder builder = _builder.Services.AddIdentity<UserRecord, RoleRecord>()
-                                          .AddUserStore<UserStore>()
-                                          .AddUserManager<UserRecordManager>()
-                                          .AddRoleStore<RoleStore>()
-                                          .AddRoleManager<RoleManager>()
-                                          .AddSignInManager<SignInManager>()
-                                          .AddUserValidator<UserValidator>()
-                                          .AddTokenProvider<TokenProvider>( nameof(TokenProvider) )
-                                          .AddRoleValidator<RoleValidator>()
-                                          .AddPasswordValidator<UserPasswordValidator>()
-                                          .AddTokenProvider( TokenOptions.DefaultProvider,              typeof(DataProtectorTokenProvider<UserRecord>) )
-                                          .AddTokenProvider( TokenOptions.DefaultEmailProvider,         typeof(EmailTokenProvider<UserRecord>) )
-                                          .AddTokenProvider( TokenOptions.DefaultPhoneProvider,         typeof(PhoneNumberTokenProvider<UserRecord>) )
-                                          .AddTokenProvider( TokenOptions.DefaultAuthenticatorProvider, typeof(AuthenticatorTokenProvider<UserRecord>) );
+        IdentityBuilder builder = _builder.Services.AddIdentityServices();
     }
     private void SetupAuth()
     {
@@ -83,7 +67,7 @@ public abstract class SetupDatabase<T>
 
         authentication.AddMicrosoftIdentityWebApi( _builder.Configuration.GetSection( MicrosoftIdentityWebApiSection ) ).EnableTokenAcquisitionToCallDownstreamApi().AddInMemoryTokenCaches();
 
-        if ( RequireMfa ) { authorization.AddPolicy( nameof(Jakar.Database.RequireMfa), static policy => policy.Requirements.Add( new RequireMfa() ) ); }
+        if ( RequireMfa ) { authorization.RequireMultiFactorAuthentication(); }
 
         // .AddMicrosoftGraph( builder.Configuration.GetSection( "Graph" ) );
     }
@@ -106,3 +90,4 @@ public abstract class SetupDatabase<T>
     protected abstract void ConfigureApplication( CookieAuthenticationOptions options );
     protected abstract void ConfigureExternal( CookieAuthenticationOptions    options );
 }
+*/

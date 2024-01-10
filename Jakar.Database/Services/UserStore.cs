@@ -17,18 +17,19 @@
         private readonly Database _dbContext = dbContext;
 
 
-        public static void Register( WebApplicationBuilder builder ) => builder.Services.AddSingleton<UserStore>()
-                                                                               .AddSingleton<IUserStore<UserRecord>>( static provider => provider.GetRequiredService<UserStore>() )
-                                                                               .AddSingleton<IUserLoginStore<UserRecord>>( static provider => provider.GetRequiredService<UserStore>() )
-                                                                               .AddSingleton<IUserClaimStore<UserRecord>>( static provider => provider.GetRequiredService<UserStore>() )
-                                                                               .AddSingleton<IUserPasswordStore<UserRecord>>( static provider => provider.GetRequiredService<UserStore>() )
-                                                                               .AddSingleton<IUserSecurityStampStore<UserRecord>>( static provider => provider.GetRequiredService<UserStore>() )
-                                                                               .AddSingleton<IUserTwoFactorStore<UserRecord>>( static provider => provider.GetRequiredService<UserStore>() )
-                                                                               .AddSingleton<IUserEmailStore<UserRecord>>( static provider => provider.GetRequiredService<UserStore>() )
-                                                                               .AddSingleton<IUserLockoutStore<UserRecord>>( static provider => provider.GetRequiredService<UserStore>() )
-                                                                               .AddSingleton<IUserAuthenticatorKeyStore<UserRecord>>( static provider => provider.GetRequiredService<UserStore>() )
-                                                                               .AddSingleton<IUserTwoFactorRecoveryCodeStore<UserRecord>>( static provider => provider.GetRequiredService<UserStore>() )
-                                                                               .AddSingleton<IUserPhoneNumberStore<UserRecord>>( static provider => provider.GetRequiredService<UserStore>() );
+        public static void Register( IServiceCollection builder ) =>
+            builder.AddSingleton<UserStore>()
+                   .AddTransient<IUserStore<UserRecord>>( static provider => provider.GetRequiredService<UserStore>() )
+                   .AddTransient<IUserLoginStore<UserRecord>>( static provider => provider.GetRequiredService<UserStore>() )
+                   .AddTransient<IUserClaimStore<UserRecord>>( static provider => provider.GetRequiredService<UserStore>() )
+                   .AddTransient<IUserPasswordStore<UserRecord>>( static provider => provider.GetRequiredService<UserStore>() )
+                   .AddTransient<IUserSecurityStampStore<UserRecord>>( static provider => provider.GetRequiredService<UserStore>() )
+                   .AddTransient<IUserTwoFactorStore<UserRecord>>( static provider => provider.GetRequiredService<UserStore>() )
+                   .AddTransient<IUserEmailStore<UserRecord>>( static provider => provider.GetRequiredService<UserStore>() )
+                   .AddTransient<IUserLockoutStore<UserRecord>>( static provider => provider.GetRequiredService<UserStore>() )
+                   .AddTransient<IUserAuthenticatorKeyStore<UserRecord>>( static provider => provider.GetRequiredService<UserStore>() )
+                   .AddTransient<IUserTwoFactorRecoveryCodeStore<UserRecord>>( static provider => provider.GetRequiredService<UserStore>() )
+                   .AddTransient<IUserPhoneNumberStore<UserRecord>>( static provider => provider.GetRequiredService<UserStore>() );
 
 
         public async Task<string?>              GetAuthenticatorKeyAsync( UserRecord user, CancellationToken token ) => await _dbContext.GetAuthenticatorKeyAsync( user, token );
