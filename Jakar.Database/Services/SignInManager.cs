@@ -1,10 +1,6 @@
 ﻿// Jakar.Database ::  Jakar.Database 
 // 04/11/2023  11:34 PM
 
-using Microsoft.AspNetCore.Identity;
-
-
-
 namespace Jakar.Database;
 
 

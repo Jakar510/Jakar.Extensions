@@ -1,10 +1,7 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 1/8/2024  21:46
 
-using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using IDataProtector = Jakar.Extensions.IDataProtector;
-using IProtectedData = Microsoft.AspNetCore.DataProtection.IDataProtector;
 
 
 

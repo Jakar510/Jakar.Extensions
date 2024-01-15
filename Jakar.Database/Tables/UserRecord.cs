@@ -8,8 +8,8 @@ public sealed record UserRecord(
     string                                                                   FirstName,
     string                                                                   LastName,
     string                                                                   FullName,
-    [ property: MaxLength( UserRights.MAX_SIZE ) ] string                    Rights,
-    [ property: MaxLength( 256 ) ]                 string                    Gender,
+    [ property: MaxLength( IRights.MAX_SIZE ) ] string                       Rights,
+    [ property: MaxLength( 256 ) ]              string                       Gender,
     string                                                                   Company,
     string                                                                   Description,
     string                                                                   Department,
@@ -44,13 +44,14 @@ public sealed record UserRecord(
     Guid?                                                                    OwnerUserID,
     DateTimeOffset                                                           DateCreated,
     DateTimeOffset?                                                          LastModified = default
-) : OwnedTableRecord<UserRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<UserRecord>, IUserData<UserRecord>, IRefreshToken, IUserID, IUserDataRecord, UserRights.IRights
+) : OwnedTableRecord<UserRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<UserRecord>, IUserData<UserRecord>, IRefreshToken, IUserID, IUserDataRecord, IRights
 {
-    public const           int                           MAX_PASSWORD_SIZE           = 250;
-    public const           int                           ENCRYPTED_MAX_PASSWORD_SIZE = 550;
-    public const           int                           MAX_SIZE                    = TokenValidationParameters.DefaultMaximumTokenSizeInBytes;
-    public static readonly TimeSpan                      DefaultLockoutTime          = TimeSpan.FromHours( 6 );
-    private                IDictionary<string, JToken?>? _additionalData             = AdditionalData;
+    public const           int                           MAX_PASSWORD_SIZE                   = 250;
+    public const           int                           ENCRYPTED_MAX_PASSWORD_SIZE         = 550;
+    public const           int                           MAX_SIZE                            = TokenValidationParameters.DefaultMaximumTokenSizeInBytes;
+    public const           int                           DEFAULT_BAD_LOGIN_DISABLE_THRESHOLD = 5;
+    public static readonly TimeSpan                      DefaultLockoutTime                  = TimeSpan.FromHours( 6 );
+    private                IDictionary<string, JToken?>? _additionalData                     = AdditionalData;
 
 
     public static string          TableName { get; }      = typeof(UserRecord).GetTableName();
@@ -220,7 +221,7 @@ public sealed record UserRecord(
 
 
     [ Pure ]
-    public static UserRecord Create<TUser>( VerifyRequest<TUser> request, UserRights rights, UserRecord? caller = default )
+    public static UserRecord Create<TUser>( VerifyRequest<TUser> request, IUserRights rights, UserRecord? caller = default )
         where TUser : IUserData => Create( request, rights.ToString(), caller );
 
     [ Pure ]
@@ -274,7 +275,7 @@ public sealed record UserRecord(
                                                                                                                            caller?.UserID,
                                                                                                                            DateTimeOffset.UtcNow);
 
-    [ Pure ] public static UserRecord Create( string userName, string password, UserRights rights, UserRecord? caller = default ) => Create( userName, password, rights.ToString(), caller );
+    [ Pure ] public static UserRecord Create( string userName, string password, IUserRights rights, UserRecord? caller = default ) => Create( userName, password, rights.ToString(), caller );
 
     [ Pure ]
     public static UserRecord Create( string userName, string password, string rights, UserRecord? caller = default ) =>
@@ -418,32 +419,21 @@ public sealed record UserRecord(
     public IAsyncEnumerable<RecoveryCodeRecord> Codes( DbConnection connection, DbTransaction transaction, Database db, CancellationToken token ) =>
         UserRecoveryCodeRecord.Where( connection, transaction, db.UserRecoveryCodes, db.RecoveryCodes, this, token );
 
-
-    [ Pure ] public UserRights GetRights() => UserRights.Create( this );
-
+    
     [ Pure ]
-    public async ValueTask<UserRights> GetRights<T>( DbConnection connection, DbTransaction transaction, Database db, CancellationToken token )
+    public async ValueTask<UserRights<T>> GetRights<T>( DbConnection connection, DbTransaction transaction, Database db, CancellationToken token )
         where T : struct, Enum
     {
-        int totalRightCount = Enum.GetValues<T>().Length;
+        List<IRights> rights = new(50)
+                               {
+                                   this
+                               };
 
-        return await GetRights( connection, transaction, db, totalRightCount, token );
-    }
+        await foreach ( GroupRecord record in GetGroups( connection, transaction, db, token ) ) { rights.Add( record ); }
 
-    [ Pure ]
-    public async ValueTask<UserRights> GetRights( DbConnection connection, DbTransaction transaction, Database db, int totalRightCount, CancellationToken token )
-    {
-        List<GroupRecord> groups = await GetGroups( connection, transaction, db, token ).ToList( token );
+        await foreach ( RoleRecord record in GetRoles( connection, transaction, db, token ) ) { rights.Add( record ); }
 
-        List<RoleRecord> roles = await GetRoles( connection, transaction, db, token ).ToList( token );
-
-        var rights = new List<UserRights.IRights>( 1 + groups.Count + roles.Count );
-
-        rights.AddRange( groups );
-        rights.AddRange( roles );
-        rights.Add( this );
-
-        return UserRights.Merge( totalRightCount, rights );
+        return UserRights<T>.Merge( rights );
     }
 
 
@@ -616,9 +606,9 @@ public sealed record UserRecord(
 
     #region Controls
 
-    [ Pure ] public UserRecord MarkBadLogin( int badLoginDisableThreshold = 5 ) => MarkBadLogin( DefaultLockoutTime, badLoginDisableThreshold );
+    [ Pure ] public UserRecord MarkBadLogin() => MarkBadLogin( DefaultLockoutTime, DEFAULT_BAD_LOGIN_DISABLE_THRESHOLD );
     [ Pure ]
-    public UserRecord MarkBadLogin( in TimeSpan lockoutTime, int badLoginDisableThreshold = 5 )
+    public UserRecord MarkBadLogin( in TimeSpan lockoutTime, in int badLoginDisableThreshold )
     {
         int            badLogins  = BadLogins + 1;
         bool           isDisabled = badLogins > badLoginDisableThreshold;
@@ -714,7 +704,7 @@ public sealed record UserRecord(
     public UserRecord WithAdditionalData<T>( T? value )
         where T : IDictionary<string, JToken?>
     {
-        if ( value is null ) { return this; }
+        if ( value is null || value.Count <= 0 ) { return this; }
 
         IDictionary<string, JToken?> data = AdditionalData ?? new Dictionary<string, JToken?>();
         foreach ( (string? key, JToken? jToken) in value ) { data[key] = jToken; }
@@ -807,14 +797,10 @@ public sealed record UserRecord(
 
     #region Roles
 
-    public async ValueTask<bool> TryAdd( DbConnection connection, DbTransaction transaction, Database db, RoleRecord value, CancellationToken token ) =>
-        await UserRoleRecord.TryAdd( connection, transaction, db.UserRoles, this, value, token );
-    public IAsyncEnumerable<RoleRecord> GetRoles( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token = default ) =>
-        UserRoleRecord.Where( connection, transaction, db.UserRoles, db.Roles, this, token );
-    public async ValueTask<bool> HasRole( DbConnection connection, DbTransaction transaction, Database db, RoleRecord value, CancellationToken token ) =>
-        await UserRoleRecord.Exists( connection, transaction, db.UserRoles, this, value, token );
-    public async ValueTask Remove( DbConnection connection, DbTransaction transaction, Database db, RoleRecord value, CancellationToken token ) =>
-        await UserRoleRecord.Delete( connection, transaction, db.UserRoles, this, value, token );
+    public async ValueTask<bool>              TryAdd( DbConnection   connection, DbTransaction  transaction, Database db, RoleRecord        value, CancellationToken token ) => await UserRoleRecord.TryAdd( connection, transaction, db.UserRoles, this, value, token );
+    public       IAsyncEnumerable<RoleRecord> GetRoles( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token = default )                => UserRoleRecord.Where( connection, transaction, db.UserRoles, db.Roles, this, token );
+    public async ValueTask<bool>              HasRole( DbConnection  connection, DbTransaction  transaction, Database db, RoleRecord        value, CancellationToken token ) => await UserRoleRecord.Exists( connection, transaction, db.UserRoles, this, value, token );
+    public async ValueTask                    Remove( DbConnection   connection, DbTransaction  transaction, Database db, RoleRecord        value, CancellationToken token ) => await UserRoleRecord.Delete( connection, transaction, db.UserRoles, this, value, token );
 
     #endregion
 
@@ -822,14 +808,10 @@ public sealed record UserRecord(
 
     #region Groups
 
-    public async ValueTask<bool> TryAdd( DbConnection connection, DbTransaction transaction, Database db, GroupRecord value, CancellationToken token ) =>
-        await UserGroupRecord.TryAdd( connection, transaction, db.UserGroups, this, value, token );
-    public IAsyncEnumerable<GroupRecord> GetGroups( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token = default ) =>
-        UserGroupRecord.Where( connection, transaction, db.UserGroups, db.Groups, this, token );
-    public async ValueTask<bool> IsPartOfGroup( DbConnection connection, DbTransaction transaction, Database db, GroupRecord value, CancellationToken token ) =>
-        await UserGroupRecord.Exists( connection, transaction, db.UserGroups, this, value, token );
-    public async ValueTask Remove( DbConnection connection, DbTransaction transaction, Database db, GroupRecord value, CancellationToken token ) =>
-        await UserGroupRecord.Delete( connection, transaction, db.UserGroups, this, value, token );
+    public async ValueTask<bool>               TryAdd( DbConnection        connection, DbTransaction  transaction, Database db, GroupRecord       value, CancellationToken token ) => await UserGroupRecord.TryAdd( connection, transaction, db.UserGroups, this, value, token );
+    public       IAsyncEnumerable<GroupRecord> GetGroups( DbConnection     connection, DbTransaction? transaction, Database db, CancellationToken token = default )                => UserGroupRecord.Where( connection, transaction, db.UserGroups, db.Groups, this, token );
+    public async ValueTask<bool>               IsPartOfGroup( DbConnection connection, DbTransaction  transaction, Database db, GroupRecord       value, CancellationToken token ) => await UserGroupRecord.Exists( connection, transaction, db.UserGroups, this, value, token );
+    public async ValueTask                     Remove( DbConnection        connection, DbTransaction  transaction, Database db, GroupRecord       value, CancellationToken token ) => await UserGroupRecord.Delete( connection, transaction, db.UserGroups, this, value, token );
 
     #endregion
 

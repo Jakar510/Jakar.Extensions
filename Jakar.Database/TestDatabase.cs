@@ -1,7 +1,6 @@
 ﻿// Jakar.Extensions :: Experiments
 // 09/28/2023  10:02 AM
 
-using Microsoft.Extensions.Caching.StackExchangeRedis;
 using Npgsql;
 
 
@@ -59,9 +58,9 @@ internal sealed class TestDatabase : Database
     }
     private static async ValueTask TestUsers( Database db, CancellationToken token = default )
     {
-        using UserRights adminRights = UserRights.Create<TestRight>();
+        using var adminRights = UserRights<TestRight>.Create();
         UserRecord       admin       = UserRecord.Create( "Admin", "Admin", adminRights );
-        using UserRights userRights  = UserRights.Create( TestRight.Read );
+        using var userRights  = UserRights<TestRight>.Create( TestRight.Read );
         UserRecord       user        = UserRecord.Create( "User", "User", userRights, admin );
 
         UserRecord[] users =

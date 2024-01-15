@@ -1,11 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 05/22/2023  11:38 AM
 
-using Microsoft.AspNetCore.Hosting;
-using Newtonsoft.Json.Serialization;
-
-
-
 namespace Jakar.Database;
 
 

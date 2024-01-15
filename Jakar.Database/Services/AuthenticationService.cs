@@ -1,9 +1,5 @@
 ﻿#if DEBUG
-using Microsoft.AspNetCore.Authorization;
-
-
-
-namespace Jakar.Database;
+    namespace Jakar.Database;
 
 
 public sealed class AuthorizationService : IAuthorizationService

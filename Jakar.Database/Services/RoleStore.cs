@@ -1,8 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-
-
-
-namespace Jakar.Database;
+﻿namespace Jakar.Database;
 
 
 public sealed class RoleStore : IRoleStore<RoleRecord>

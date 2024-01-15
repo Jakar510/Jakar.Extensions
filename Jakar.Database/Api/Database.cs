@@ -66,7 +66,6 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
         RecordID<UserRecoveryCodeRecord>.RegisterDapperTypeHandlers();
         RecordID<UserRoleRecord>.RegisterDapperTypeHandlers();
         RecordID<UserRecord>.RegisterDapperTypeHandlers();
-        UserRights.RegisterDapperTypeHandlers();
     }
 
     protected Database( IConfiguration configuration, ISqlCacheFactory sqlCacheFactory, IOptions<DbOptions> options, IDistributedCache distributedCache, ITableCacheFactory tableCacheFactory ) : base()

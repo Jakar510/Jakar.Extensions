@@ -1,12 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 1/10/2024  14:10
 
-using Microsoft.Extensions.Caching.StackExchangeRedis;
-using Microsoft.Extensions.Logging.Debug;
-using Microsoft.Extensions.Logging.EventLog;
-
-
-
 namespace Jakar.Database;
 
 
@@ -83,14 +77,15 @@ public static class DbServices
         return builder;
     }
 
-
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    private static LogLevel GetLogLevel( this bool isDevEnvironment ) =>
+        isDevEnvironment
+            ? LogLevel.Trace
+            : LogLevel.Information;
     public static ILoggingBuilder AddDefaultLogging<T>( this WebApplicationBuilder builder )
-        where T : IAppName => AddDefaultLogging<T>( builder.Logging, builder.Environment.EnvironmentName == Environments.Development );
+        where T : IAppName => AddDefaultLogging<T>( builder.Logging, builder.Environment.IsDevelopment() );
     public static ILoggingBuilder AddDefaultLogging<T>( this ILoggingBuilder builder, bool isDevEnvironment )
-        where T : IAppName => AddDefaultLogging<T>( builder,
-                                                    isDevEnvironment
-                                                        ? LogLevel.Trace
-                                                        : LogLevel.Information );
+        where T : IAppName => AddDefaultLogging<T>( builder, isDevEnvironment.GetLogLevel() );
     public static ILoggingBuilder AddDefaultLogging<T>( this ILoggingBuilder builder, in LogLevel minimumLevel )
         where T : IAppName => AddDefaultLogging( builder, minimumLevel, typeof(T).Name );
     public static ILoggingBuilder AddDefaultLogging( this ILoggingBuilder builder, in LogLevel minimumLevel, in string name )
@@ -99,7 +94,7 @@ public static class DbServices
         builder.SetMinimumLevel( minimumLevel );
         builder.AddProvider( new DebugLoggerProvider() );
 
-        builder.AddSimpleConsole( options =>
+        builder.AddSimpleConsole( static options =>
                                   {
                                       options.ColorBehavior = LoggerColorBehavior.Enabled;
                                       options.SingleLine    = false;
@@ -107,23 +102,30 @@ public static class DbServices
                                   } );
 
 
-        if ( OperatingSystem.IsWindows() )
-        {
-            builder.AddProvider( new EventLogLoggerProvider( new EventLogSettings
-                                                             {
-                                                                 SourceName  = name,
-                                                                 LogName     = name,
-                                                                 MachineName = GetMachineName(),
-                                                                 Filter      = ( category, level ) => level > LogLevel.Information
-                                                             } ) );
-        }
-        else { builder.AddSystemdConsole( options => options.UseUtcTimestamp = true ); }
+        if ( OperatingSystem.IsWindows() ) { builder.AddProvider( name.GetEventLogLoggerProvider() ); }
+        else if ( OperatingSystem.IsLinux() ) { builder.AddSystemdConsole( static options => options.UseUtcTimestamp = true ); }
 
-        builder.AddProvider( GetFluentMigratorConsoleLoggerProvider() );
-        return builder;
+        return builder.AddFluentMigratorLogger();
     }
 
 
+    [ SupportedOSPlatform( "Windows" ) ]
+    public static EventLogLoggerProvider GetEventLogLoggerProvider( this string name )
+    {
+        return GetEventLogLoggerProvider( name, Filter );
+        static bool Filter( string category, LogLevel level ) => level > LogLevel.Information;
+    }
+    [ SupportedOSPlatform( "Windows" ) ]
+    public static EventLogLoggerProvider GetEventLogLoggerProvider( this string name, Func<string, LogLevel, bool> filter )
+    {
+        return new EventLogLoggerProvider( new EventLogSettings
+                                           {
+                                               SourceName  = name,
+                                               LogName     = name,
+                                               MachineName = GetMachineName(),
+                                               Filter      = filter
+                                           } );
+    }
     public static string GetMachineName()
     {
     #pragma warning disable RS1035
@@ -138,13 +140,13 @@ public static class DbServices
     public static IHealthChecksBuilder AddHealthCheck( this IServiceCollection collection, HealthCheckRegistration registration ) => collection.AddHealthChecks().Add( registration );
 
 
-    public static FluentMigratorConsoleLoggerProvider GetFluentMigratorConsoleLoggerProvider( bool showSql = true, bool showElapsedTime = true ) =>
-        new(new OptionsWrapper<FluentMigratorLoggerOptions>( new FluentMigratorLoggerOptions
-                                                             {
-                                                                 ShowElapsedTime = showElapsedTime,
-                                                                 ShowSql         = showSql
-                                                             } ));
-    public static ILoggingBuilder AddFluentMigratorLogger( this ILoggingBuilder collection, bool showSql = true, bool showElapsedTime = true ) => collection.AddProvider( GetFluentMigratorConsoleLoggerProvider( showSql, showElapsedTime ) );
+    public static FluentMigratorConsoleLoggerProvider GetFluentMigratorConsoleLoggerProvider( this FluentMigratorLoggerOptions options )                                         => new(new OptionsWrapper<FluentMigratorLoggerOptions>( options ));
+    public static ILoggingBuilder                     AddFluentMigratorLogger( this                ILoggingBuilder             collection, FluentMigratorLoggerOptions options ) => collection.AddProvider( options.GetFluentMigratorConsoleLoggerProvider() );
+    public static ILoggingBuilder AddFluentMigratorLogger( this ILoggingBuilder collection, bool showSql = true, bool showElapsedTime = true ) => collection.AddFluentMigratorLogger( new FluentMigratorLoggerOptions
+                                                                                                                                                                                      {
+                                                                                                                                                                                          ShowElapsedTime = showElapsedTime,
+                                                                                                                                                                                          ShowSql         = showSql
+                                                                                                                                                                                      } );
 
 
     public static void ConfigureMigrationsMsSql( this IMigrationRunnerBuilder configureMigration )
@@ -202,27 +204,12 @@ public static class DbServices
     }
 
 
-    public static IServiceCollection AddDatabase<TDatabase>( this IServiceCollection         collection,
-                                                             Action<DbOptions>               configureDbOptions,
-                                                             Action<TableCacheOptions>       configureTableCacheOptions,
-                                                             Action<RedisCacheOptions>       configureRedis,
-                                                             Action<IMigrationRunnerBuilder> configureMigration
-    )
+    public static IServiceCollection AddDatabase<TDatabase>( this IServiceCollection collection, Action<DbOptions> configureDbOptions, Action<TableCacheOptions> configureTableCacheOptions, Action<RedisCacheOptions> configureRedis, Action<IMigrationRunnerBuilder> configureMigration )
         where TDatabase : Database => collection.AddDatabase<TDatabase, SqlCacheFactory, TableCacheFactory>( configureDbOptions, configureTableCacheOptions, configureRedis, configureMigration );
-    public static IServiceCollection AddDatabase<TDatabase, TSqlCacheFactory>( this IServiceCollection         collection,
-                                                                               Action<DbOptions>               configureDbOptions,
-                                                                               Action<TableCacheOptions>       configureTableCacheOptions,
-                                                                               Action<RedisCacheOptions>       configureRedis,
-                                                                               Action<IMigrationRunnerBuilder> configureMigration
-    )
+    public static IServiceCollection AddDatabase<TDatabase, TSqlCacheFactory>( this IServiceCollection collection, Action<DbOptions> configureDbOptions, Action<TableCacheOptions> configureTableCacheOptions, Action<RedisCacheOptions> configureRedis, Action<IMigrationRunnerBuilder> configureMigration )
         where TDatabase : Database
         where TSqlCacheFactory : class, ISqlCacheFactory => collection.AddDatabase<TDatabase, TSqlCacheFactory, TableCacheFactory>( configureDbOptions, configureTableCacheOptions, configureRedis, configureMigration );
-    public static IServiceCollection AddDatabase<TDatabase, TSqlCacheFactory, TTableCacheFactory>( this IServiceCollection         collection,
-                                                                                                   Action<DbOptions>               configureDbOptions,
-                                                                                                   Action<TableCacheOptions>       configureTableCacheOptions,
-                                                                                                   Action<RedisCacheOptions>       configureRedis,
-                                                                                                   Action<IMigrationRunnerBuilder> configureMigration
-    )
+    public static IServiceCollection AddDatabase<TDatabase, TSqlCacheFactory, TTableCacheFactory>( this IServiceCollection collection, Action<DbOptions> configureDbOptions, Action<TableCacheOptions> configureTableCacheOptions, Action<RedisCacheOptions> configureRedis, Action<IMigrationRunnerBuilder> configureMigration )
         where TDatabase : Database
         where TSqlCacheFactory : class, ISqlCacheFactory
         where TTableCacheFactory : class, ITableCacheFactoryService
@@ -237,20 +224,10 @@ public static class DbServices
 
     public static IServiceCollection AddDatabase<TDatabase>( this IServiceCollection collection, DbOptions dbOptions, TableCacheOptions tableCacheOptions, Action<RedisCacheOptions> configureRedis, Action<IMigrationRunnerBuilder> configureMigration )
         where TDatabase : Database => collection.AddDatabase<TDatabase, SqlCacheFactory, TableCacheFactory>( dbOptions, tableCacheOptions, configureRedis, configureMigration );
-    public static IServiceCollection AddDatabase<TDatabase, TSqlCacheFactory>( this IServiceCollection         collection,
-                                                                               DbOptions                       dbOptions,
-                                                                               TableCacheOptions               tableCacheOptions,
-                                                                               Action<RedisCacheOptions>       configureRedis,
-                                                                               Action<IMigrationRunnerBuilder> configureMigration
-    )
+    public static IServiceCollection AddDatabase<TDatabase, TSqlCacheFactory>( this IServiceCollection collection, DbOptions dbOptions, TableCacheOptions tableCacheOptions, Action<RedisCacheOptions> configureRedis, Action<IMigrationRunnerBuilder> configureMigration )
         where TDatabase : Database
         where TSqlCacheFactory : class, ISqlCacheFactory => collection.AddDatabase<TDatabase, TSqlCacheFactory, TableCacheFactory>( dbOptions, tableCacheOptions, configureRedis, configureMigration );
-    public static IServiceCollection AddDatabase<TDatabase, TSqlCacheFactory, TTableCacheFactory>( this IServiceCollection         collection,
-                                                                                                   DbOptions                       dbOptions,
-                                                                                                   TableCacheOptions               tableCacheOptions,
-                                                                                                   Action<RedisCacheOptions>       configureRedis,
-                                                                                                   Action<IMigrationRunnerBuilder> configureMigration
-    )
+    public static IServiceCollection AddDatabase<TDatabase, TSqlCacheFactory, TTableCacheFactory>( this IServiceCollection collection, DbOptions dbOptions, TableCacheOptions tableCacheOptions, Action<RedisCacheOptions> configureRedis, Action<IMigrationRunnerBuilder> configureMigration )
         where TDatabase : Database
         where TSqlCacheFactory : class, ISqlCacheFactory
         where TTableCacheFactory : class, ITableCacheFactoryService
@@ -379,7 +356,7 @@ public static class DbServices
 
     public static IServiceCollection AddTokenizer( this IServiceCollection collection ) => collection.AddTokenizer<Tokenizer>();
     public static IServiceCollection AddTokenizer<TTokenizer>( this IServiceCollection collection )
-        where TTokenizer : Tokenizer
+        where TTokenizer : class, ITokenService
     {
         collection.AddScoped<ITokenService, TTokenizer>();
         return collection;

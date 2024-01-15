@@ -1,11 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 05/22/2023  11:24 AM
 
-using Microsoft.Extensions.Logging.Debug;
-using Microsoft.Extensions.Logging.EventLog;
-
-
-
 namespace Jakar.Database;
 
 
