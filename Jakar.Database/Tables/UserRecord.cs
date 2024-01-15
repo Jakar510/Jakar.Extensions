@@ -443,7 +443,7 @@ public sealed record UserRecord(
         rights.AddRange( roles );
         rights.Add( this );
 
-        return UserRights.Merge( rights, totalRightCount );
+        return UserRights.Merge( totalRightCount, rights );
     }
 
 

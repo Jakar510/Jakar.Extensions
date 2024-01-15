@@ -33,10 +33,10 @@ public static class DbServices
         DbOptions dbOptions = new()
                               {
                                   DbType           = dbType,
-                                  ConnectionString = connectionString,
                                   AppName          = appName,
                                   TokenAudience    = appName,
                                   TokenIssuer      = appName,
+                                  ConnectionString = connectionString,
                                   Version          = AppVersion.FromAssembly( typeof(T).Assembly )
                               };
 
