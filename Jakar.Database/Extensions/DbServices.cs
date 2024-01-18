@@ -8,7 +8,8 @@ namespace Jakar.Database;
 [ SuppressMessage( "ReSharper", "UnusedMethodReturnValue.Global" ) ]
 public static class DbServices
 {
-    public const string AUTHENTICATION_SCHEME_DISPLAY_NAME = "Jwt.Bearer";
+    public const string AUTHENTICATION_SCHEME              = JwtBearerDefaults.AuthenticationScheme;
+    public const string AUTHENTICATION_SCHEME_DISPLAY_NAME = $"Jwt.{AUTHENTICATION_SCHEME}";
 
 
     [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
@@ -118,19 +119,17 @@ public static class DbServices
     public static EventLogLoggerProvider GetEventLogLoggerProvider( this string name )
     {
         return GetEventLogLoggerProvider( name, Filter );
-        static bool Filter( string category, LogLevel level ) => level > LogLevel.Information;
+        static bool Filter( string category, LogLevel level ) { return level > LogLevel.Information; }
     }
     [ SupportedOSPlatform( "Windows" ) ]
-    public static EventLogLoggerProvider GetEventLogLoggerProvider( this string name, Func<string, LogLevel, bool> filter )
-    {
-        return new EventLogLoggerProvider( new EventLogSettings
-                                           {
-                                               SourceName  = name,
-                                               LogName     = name,
-                                               MachineName = GetMachineName(),
-                                               Filter      = filter
-                                           } );
-    }
+    public static EventLogLoggerProvider GetEventLogLoggerProvider( this string name, Func<string, LogLevel, bool> filter ) =>
+        new(new EventLogSettings
+            {
+                SourceName  = name,
+                LogName     = name,
+                MachineName = GetMachineName(),
+                Filter      = filter
+            });
     public static string GetMachineName()
     {
     #pragma warning disable RS1035
@@ -183,7 +182,7 @@ public static class DbServices
 
 
     /// <summary> <see href="https://stackoverflow.com/a/46775832/9530917"> Using ASP.NET Identity in an ASP.NET Core MVC application without Entity Framework and Migrations </see>
-    ///     <para> <see cref="AuthenticationScheme"/> </para>
+    ///     <para> <see cref="AUTHENTICATION_SCHEME"/> </para>
     /// </summary>
     /// <returns> </returns>
     public static IdentityBuilder AddIdentityServices( this IServiceCollection collection, Action<IdentityOptions>? options = default )
@@ -278,7 +277,7 @@ public static class DbServices
                                                            Action<OpenIdConnectOptions>?        configureOpenIdConnect          = default,
                                                            Action<MicrosoftAccountOptions>?     configureMicrosoftAccount       = default,
                                                            Action<GoogleOptions>?               configureGoogle                 = default,
-                                                           string                               authenticationScheme            = JwtBearerDefaults.AuthenticationScheme,
+                                                           string                               authenticationScheme            = AUTHENTICATION_SCHEME,
                                                            string                               authenticationSchemeDisplayName = AUTHENTICATION_SCHEME_DISPLAY_NAME
     )
     {
@@ -315,11 +314,11 @@ public static class DbServices
 
     public static JwtBearerOptions GetJwtBearerOptions( this IServiceProvider provider )
     {
-        JwtBearerOptions? bearer = provider.GetService<JwtBearerOptions>();
+        var bearer = provider.GetService<JwtBearerOptions>();
         if ( bearer is not null ) { return bearer; }
 
-        IConfiguration configuration = provider.GetRequiredService<IConfiguration>();
-        DbOptions      options       = provider.GetRequiredService<DbOptions>();
+        var configuration = provider.GetRequiredService<IConfiguration>();
+        var options       = provider.GetRequiredService<DbOptions>();
 
         JwtBearerOptions jwt = new()
                                {
