@@ -43,11 +43,11 @@
 
 	<ItemGroup>
 		<PackageReference Include="Dapper"
-						  Version="2.1.24" />
+						  Version="2.1.28" />
 		<PackageReference Include="Dapper.Contrib"
 						  Version="2.0.78" />
 		<PackageReference Include="Jakar.Extensions"
-						  Version="7.6.2" />
+						  Version="7.6.5" />
 		<PackageReference Include="FluentMigrator"
 						  Version="5.0.0" />
 		<PackageReference Include="FluentMigrator.Runner"
@@ -57,17 +57,17 @@
 		<PackageReference Include="Microsoft.CodeAnalysis.CSharp"
 						  Version="4.8.0" />
 		<PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis"
-						  Version="8.0.0" />
+						  Version="8.0.1" />
 		<PackageReference Include="Microsoft.Identity.Client"
-						  Version="4.58.1" />
+						  Version="4.59.0" />
 		<PackageReference Include="Microsoft.Identity.Web"
-						  Version="2.16.0" />
+						  Version="2.16.1" />
 		<PackageReference Include="Microsoft.IdentityModel.JsonWebTokens"
-						  Version="7.0.3" />
+						  Version="7.2.0" />
 		<PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect"
-						  Version="7.0.3" />
+						  Version="7.2.0" />
 		<PackageReference Include="Microsoft.IdentityModel.Tokens"
-						  Version="7.0.3" />
+						  Version="7.2.0" />
 		<PackageReference Include="Npgsql"
 						  Version="8.0.1" />
 		<PackageReference Include="Npgsql.Json.NET"
@@ -97,7 +97,7 @@
 		<PackageReference Include="ZXing.Net"
 						  Version="0.16.9" />
 		<PackageReference Include="Hardware.Info"
-						  Version="100.0.1" />
+						  Version="100.0.1.1" />
 		<PackageReference Include="Microsoft.Extensions.Hosting"
 						  Version="8.0.0" />
 		<PackageReference Include="Microsoft.NETCore.Platforms"
@@ -119,21 +119,21 @@
 		<PackageReference Include="System.Security.Cryptography.Xml"
 						  Version="8.0.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.Certificate"
-						  Version="8.0.0" />
+						  Version="8.0.1" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.Google"
-						  Version="8.0.0" />
+						  Version="8.0.1" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount"
-						  Version="8.0.0" />
+						  Version="8.0.1" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer"
-						  Version="8.0.0" />
+						  Version="8.0.1" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect"
-						  Version="8.0.0" />
+						  Version="8.0.1" />
 		<PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks"
-						  Version="8.0.0" />
+						  Version="8.0.1" />
 		<PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.Abstractions"
-						  Version="8.0.0" />
+						  Version="8.0.1" />
 		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly"
-						  Version="8.0.0" />
+						  Version="8.0.1" />
 	</ItemGroup>
 
 	<!--

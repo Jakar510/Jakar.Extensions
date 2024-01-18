@@ -23,7 +23,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="Jakar.Extensions" Version="7.6.2" />
+	  <PackageReference Include="Jakar.Extensions" Version="7.6.5" />
 	</ItemGroup>
 
 </Project>

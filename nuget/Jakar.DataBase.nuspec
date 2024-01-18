@@ -4,7 +4,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata>
 		<id>Jakar.DataBase</id>
-		<version>7.0.0-beta1</version>
+		<version>7.0.0-beta2</version>
 		<title>Extension Library</title>
 		<authors>Tyler Stegmaier</authors>
 		<owners>Jakar510/Jakar</owners>
@@ -28,11 +28,11 @@
 		<dependencies>
 			<group targetFramework="net8.0">
 				<dependency id="Dapper"
-							version="2.1.24" />
+							version="2.1.28" />
 				<dependency id="Dapper.Contrib"
 							version="2.0.78" />
 				<dependency id="Jakar.Extensions"
-							version="7.6.2" />
+							version="7.6.5" />
 				<dependency id="FluentMigrator"
 							version="5.0.0" />
 				<dependency id="FluentMigrator.Runner"
@@ -42,17 +42,17 @@
 				<dependency id="Microsoft.CodeAnalysis.CSharp"
 							version="4.8.0" />
 				<dependency id="Microsoft.Extensions.Caching.StackExchangeRedis"
-							version="8.0.0" />
+							version="8.0.1" />
 				<dependency id="Microsoft.Identity.Client"
-							version="4.58.1" />
+							version="4.59.0" />
 				<dependency id="Microsoft.Identity.Web"
-							version="2.16.0" />
+							version="2.16.1" />
 				<dependency id="Microsoft.IdentityModel.JsonWebTokens"
-							version="7.0.3" />
+							version="7.2.0" />
 				<dependency id="Microsoft.IdentityModel.Protocols.OpenIdConnect"
-							version="7.0.3" />
+							version="7.2.0" />
 				<dependency id="Microsoft.IdentityModel.Tokens"
-							version="7.0.3" />
+							version="7.2.0" />
 				<dependency id="Npgsql"
 							version="8.0.1" />
 				<dependency id="Npgsql.Json.NET"
@@ -82,7 +82,7 @@
 				<dependency id="ZXing.Net"
 							version="0.16.9" />
 				<dependency id="Hardware.Info"
-							version="100.0.1" />
+							version="100.0.1.1" />
 				<dependency id="Microsoft.Extensions.Hosting"
 							version="8.0.0" />
 				<dependency id="Microsoft.NETCore.Platforms"
@@ -104,21 +104,21 @@
 				<dependency id="System.Security.Cryptography.Xml"
 							version="8.0.0" />
 				<dependency id="Microsoft.AspNetCore.Authentication.Certificate"
-							version="8.0.0" />
+							version="8.0.1" />
 				<dependency id="Microsoft.AspNetCore.Authentication.Google"
-							version="8.0.0" />
+							version="8.0.1" />
 				<dependency id="Microsoft.AspNetCore.Authentication.MicrosoftAccount"
-							version="8.0.0" />
+							version="8.0.1" />
 				<dependency id="Microsoft.AspNetCore.Authentication.JwtBearer"
-							version="8.0.0" />
+							version="8.0.1" />
 				<dependency id="Microsoft.AspNetCore.Authentication.OpenIdConnect"
-							version="8.0.0" />
+							version="8.0.1" />
 				<dependency id="Microsoft.Extensions.Diagnostics.HealthChecks"
-							version="8.0.0" />
+							version="8.0.1" />
 				<dependency id="Microsoft.Extensions.Diagnostics.HealthChecks.Abstractions"
-							version="8.0.0" />
+							version="8.0.1" />
 				<dependency id="Microsoft.AspNetCore.Components.WebAssembly"
-							version="8.0.0" />
+							version="8.0.1" />
 			</group>
 		</dependencies>
 	</metadata>
