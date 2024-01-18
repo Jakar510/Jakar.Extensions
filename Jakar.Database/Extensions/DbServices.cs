@@ -1,12 +1,16 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 1/10/2024  14:10
 
+
 namespace Jakar.Database;
 
 
 [ SuppressMessage( "ReSharper", "UnusedMethodReturnValue.Global" ) ]
 public static class DbServices
 {
+    public const string AUTHENTICATION_SCHEME_DISPLAY_NAME = "Jwt.Bearer";
+
+
     [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
     public static bool IsValid<TRecord>( this TRecord value )
         where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord> => value.ID.IsValid();
@@ -76,6 +80,7 @@ public static class DbServices
 
         return builder;
     }
+
 
     [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
     private static LogLevel GetLogLevel( this bool isDevEnvironment ) =>
@@ -267,15 +272,14 @@ public static class DbServices
     public static AuthenticationBuilder AddAuthentication( this IServiceCollection              collection,
                                                            Action<JwtBearerOptions>             configureJwt,
                                                            Action<AuthenticationOptions>?       configureAuth                   = default,
-                                                           Action<CookieAuthenticationOptions>? cookie                          = default,
+                                                           Action<CookieAuthenticationOptions>? authCookie                      = default,
                                                            Action<CookieAuthenticationOptions>? configureApplication            = default,
                                                            Action<CookieAuthenticationOptions>? configureExternal               = default,
                                                            Action<OpenIdConnectOptions>?        configureOpenIdConnect          = default,
                                                            Action<MicrosoftAccountOptions>?     configureMicrosoftAccount       = default,
                                                            Action<GoogleOptions>?               configureGoogle                 = default,
                                                            string                               authenticationScheme            = JwtBearerDefaults.AuthenticationScheme,
-                                                           string                               authenticationSchemeDisplayName = nameof(JwtBearerHandler),
-                                                           string                               cookieDisplayName               = CookieAuthenticationDefaults.AuthenticationScheme
+                                                           string                               authenticationSchemeDisplayName = AUTHENTICATION_SCHEME_DISPLAY_NAME
     )
     {
         AuthenticationBuilder builder = collection.AddAuthentication( options =>
@@ -293,7 +297,7 @@ public static class DbServices
                                   configureJwt.Invoke( bearer );
                               } );
 
-        if ( cookie is not null ) { builder.AddCookie( authenticationScheme, cookieDisplayName, cookie ); }
+        if ( authCookie is not null ) { builder.AddCookie( authenticationScheme, IdentityConstants.BearerScheme, authCookie ); }
 
         if ( configureApplication is not null ) { builder.AddCookie( IdentityConstants.ApplicationScheme, configureApplication ); }
 
@@ -309,8 +313,7 @@ public static class DbServices
     }
 
 
-    public static JwtBearerOptions GetJwtBearerOptions<T>( this IServiceProvider provider )
-        where T : IAppName
+    public static JwtBearerOptions GetJwtBearerOptions( this IServiceProvider provider )
     {
         JwtBearerOptions? bearer = provider.GetService<JwtBearerOptions>();
         if ( bearer is not null ) { return bearer; }
@@ -320,12 +323,12 @@ public static class DbServices
 
         JwtBearerOptions jwt = new()
                                {
-                                   Audience                  = typeof(T).Name,
-                                   ClaimsIssuer              = typeof(T).Name,
+                                   Audience                  = options.TokenAudience,
+                                   ClaimsIssuer              = options.TokenIssuer,
                                    TokenValidationParameters = configuration.GetTokenValidationParameters( options )
                                };
 
-        jwt.TokenHandlers.Add( DbTokenHandler.Instance );
+        jwt.TokenHandlers.TryAdd( DbTokenHandler.Instance );
         return jwt;
     }
 
