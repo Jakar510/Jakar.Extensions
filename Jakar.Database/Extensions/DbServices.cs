@@ -22,7 +22,22 @@ public static class DbServices
         where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord> => value.IsValid() is false;
 
 
-    public static WebApplicationBuilder AddDefaultDbServices<T, TDatabase>( this WebApplicationBuilder builder, DbInstance dbType, SecuredString connectionString, Action<RedisCacheOptions> configureRedis )
+    public static WebApplicationBuilder AddDefaultDbServices<T, TDatabase>( this WebApplicationBuilder           builder,
+                                                                            DbInstance                           dbType,
+                                                                            ConnectionStringResolverOptions      connectionStringResolver,
+                                                                            Action<RedisCacheOptions>            configureRedis,
+                                                                            AppVersion?                          version                         = default,
+                                                                            Action<JwtBearerOptions>?            configureJwt                    = default,
+                                                                            Action<AuthenticationOptions>?       configureAuth                   = default,
+                                                                            Action<CookieAuthenticationOptions>? authCookie                      = default,
+                                                                            Action<CookieAuthenticationOptions>? configureApplication            = default,
+                                                                            Action<CookieAuthenticationOptions>? configureExternal               = default,
+                                                                            Action<OpenIdConnectOptions>?        configureOpenIdConnect          = default,
+                                                                            Action<MicrosoftAccountOptions>?     configureMicrosoftAccount       = default,
+                                                                            Action<GoogleOptions>?               configureGoogle                 = default,
+                                                                            string                               authenticationScheme            = AUTHENTICATION_SCHEME,
+                                                                            string                               authenticationSchemeDisplayName = AUTHENTICATION_SCHEME_DISPLAY_NAME
+    )
         where T : IAppName
         where TDatabase : Database
     {
@@ -31,12 +46,12 @@ public static class DbServices
 
         DbOptions dbOptions = new()
                               {
-                                  DbType           = dbType,
-                                  AppName          = appName,
-                                  TokenAudience    = appName,
-                                  TokenIssuer      = appName,
-                                  ConnectionString = connectionString,
-                                  Version          = AppVersion.FromAssembly( typeof(T).Assembly )
+                                  DbType                   = dbType,
+                                  AppName                  = appName,
+                                  TokenAudience            = appName,
+                                  TokenIssuer              = appName,
+                                  ConnectionStringResolver = connectionStringResolver,
+                                  Version                  = version ?? AppVersion.FromAssembly<T>()
                               };
 
         TokenValidationParameters parameters = builder.GetTokenValidationParameters( dbOptions );
@@ -75,7 +90,17 @@ public static class DbServices
                                jwt.Authority                  = appName;
                                jwt.UseSecurityTokenValidators = true;
                                jwt.TokenValidationParameters  = parameters;
-                           } );
+                               configureJwt?.Invoke( jwt );
+                           },
+                           configureAuth,
+                           authCookie,
+                           configureApplication,
+                           configureExternal,
+                           configureOpenIdConnect,
+                           configureMicrosoftAccount,
+                           configureGoogle,
+                           authenticationScheme,
+                           authenticationSchemeDisplayName );
 
         builder.Services.AddAuthorizationBuilder().RequireMultiFactorAuthentication();
 

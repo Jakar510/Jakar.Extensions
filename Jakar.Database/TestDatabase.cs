@@ -13,11 +13,7 @@ internal sealed class TestDatabase : Database
     // private const string CONNECTION_STRING = "Server=localhost;Database=Experiments;User Id=tester;Password=tester;Encrypt=True;TrustServerCertificate=True";
 
 
-    internal TestDatabase( IConfiguration configuration, ISqlCacheFactory sqlCacheFactory, IOptions<DbOptions> options, IDistributedCache distributedCache, ITableCacheFactory tableCacheFactory ) : base( configuration,
-                                                                                                                                                                                                           sqlCacheFactory,
-                                                                                                                                                                                                           options,
-                                                                                                                                                                                                           distributedCache,
-                                                                                                                                                                                                           tableCacheFactory ) { }
+    internal TestDatabase( IConfiguration                              configuration, ISqlCacheFactory sqlCacheFactory, IOptions<DbOptions> options, IDistributedCache distributedCache, ITableCacheFactory tableCacheFactory ) : base( configuration, sqlCacheFactory, options, distributedCache, tableCacheFactory ) { }
     protected override DbConnection CreateConnection( in SecuredString secure ) => new NpgsqlConnection( secure );
 
 
@@ -33,7 +29,7 @@ internal sealed class TestDatabase : Database
     private static async Task InternalTestAsync<T>()
         where T : IAppName
     {
-        string                connectionString = $"User ID=dev;Password=jetson;Host=localhost;Port=5432;Database={typeof(T).Name}";
+        SecuredString         connectionString = $"User ID=dev;Password=jetson;Host=localhost;Port=5432;Database={typeof(T).Name}";
         WebApplicationBuilder builder          = WebApplication.CreateBuilder();
 
         builder.AddDefaultDbServices<T, TestDatabase>( DbInstance.Postgres,
@@ -58,10 +54,10 @@ internal sealed class TestDatabase : Database
     }
     private static async ValueTask TestUsers( Database db, CancellationToken token = default )
     {
-        using var adminRights = UserRights<TestRight>.Create();
-        UserRecord       admin       = UserRecord.Create( "Admin", "Admin", adminRights );
-        using var userRights  = UserRights<TestRight>.Create( TestRight.Read );
-        UserRecord       user        = UserRecord.Create( "User", "User", userRights, admin );
+        using var  adminRights = UserRights<TestRight>.Create();
+        UserRecord admin       = UserRecord.Create( "Admin", "Admin", adminRights );
+        using var  userRights  = UserRights<TestRight>.Create( TestRight.Read );
+        UserRecord user        = UserRecord.Create( "User", "User", userRights, admin );
 
         UserRecord[] users =
         [

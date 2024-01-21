@@ -94,12 +94,6 @@ global using ZXing;
 global using ZXing.QrCode;
 global using ZXing.QrCode.Internal;
 global using CommandFlags = Dapper.CommandFlags;
-global using ConnectionStringOptions =
-    OneOf.OneOf<Jakar.Extensions.SecuredString, System.Func<Jakar.Extensions.SecuredString>, System.Func<System.Threading.CancellationToken, System.Threading.Tasks.Task<Jakar.Extensions.SecuredString>>,
-        System.Func<System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<Jakar.Extensions.SecuredString>>, System.Func<Microsoft.Extensions.Configuration.IConfiguration, Jakar.Extensions.SecuredString>,
-        System.Func<Microsoft.Extensions.Configuration.IConfiguration, System.Threading.CancellationToken, Jakar.Extensions.SecuredString>,
-        System.Func<Microsoft.Extensions.Configuration.IConfiguration, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<Jakar.Extensions.SecuredString>>,
-        System.Func<Microsoft.Extensions.Configuration.IConfiguration, System.Threading.CancellationToken, System.Threading.Tasks.Task<Jakar.Extensions.SecuredString>>>;
 global using FormatException = System.FormatException;
 global using IDataProtector = Jakar.Extensions.IDataProtector;
 global using IProtectedData = Microsoft.AspNetCore.DataProtection.IDataProtector;
