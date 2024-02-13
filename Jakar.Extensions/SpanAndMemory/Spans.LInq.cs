@@ -41,6 +41,10 @@ public static partial class Spans
     }
 
 
+    [ Pure ] public static SpanSelector<T> Select<T>( this Span<T>         values, Func<T, bool> check ) => new(values, check);
+    [ Pure ] public static SpanSelector<T> Select<T>( this ReadOnlySpan<T> values, Func<T, bool> check ) => new(values, check);
+
+
     [ Pure ]
     public static bool All<T>( this Span<T> values, Func<T, bool> selector )
     {
@@ -251,7 +255,12 @@ public static partial class Spans
         return array;
     }
     [ Pure ]
-    public static Span<T> Join<T>( this Span<T> value, in ReadOnlySpan<T> other )
+    public static Span<T> Join<T>( this Span<T> value,
+                               #if NET6_0_OR_GREATER
+                                           scoped
+                               #endif
+                                   in ReadOnlySpan<T> other
+    )
         where T : unmanaged, IEquatable<T>
     {
         T[]     array  = AsyncLinq.GetArray<T>( value.Length + other.Length );
