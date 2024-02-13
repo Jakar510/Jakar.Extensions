@@ -5,14 +5,14 @@ namespace Jakar.Extensions;
 
 
 [ SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" ) ]
-public sealed partial class WebRequester : IDisposable
+public sealed partial class WebRequester( ILogger? logger, HttpClient client, IHostInfo host, WebRequester.RetryPolicy? retryPolicy, Encoding encoding ) : IDisposable
 {
-    private readonly HttpClient         _client;
-    private readonly IHostInfo          _host;
-    private readonly ILogger?           _logger;
-    private readonly RetryPolicy?       _retryPolicy;
+    private readonly HttpClient         _client = client;
+    private readonly IHostInfo          _host = host;
+    private readonly ILogger?           _logger = logger;
+    private readonly RetryPolicy?       _retryPolicy = retryPolicy;
     public           HttpRequestHeaders DefaultRequestHeaders => _client.DefaultRequestHeaders;
-    public           Encoding           Encoding              { get; init; }
+    public           Encoding           Encoding              { get; init; } = encoding;
 
 
     public TimeSpan Timeout
@@ -23,14 +23,6 @@ public sealed partial class WebRequester : IDisposable
 
 
     public WebRequester( ILogger? logger, HttpClient client, IHostInfo host, RetryPolicy? retryPolicy = default ) : this( logger, client, host, retryPolicy, Encoding.Default ) { }
-    public WebRequester( ILogger? logger, HttpClient client, IHostInfo host, RetryPolicy? retryPolicy, Encoding encoding )
-    {
-        _logger      = logger;
-        _client      = client;
-        _host        = host;
-        _retryPolicy = retryPolicy;
-        Encoding     = encoding;
-    }
 
 
     [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] private Uri        CreateUrl( string  relativePath )                                    => new(_host.HostInfo, relativePath);

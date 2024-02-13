@@ -4,22 +4,17 @@
 namespace Jakar.Extensions;
 
 
-public sealed class AsyncEnumerator<TValue, TList> : IAsyncEnumerable<TValue>, IAsyncEnumerator<TValue>
+public sealed class AsyncEnumerator<TValue, TList>( TList list, CancellationToken token = default ) : IAsyncEnumerable<TValue>, IAsyncEnumerator<TValue>
     where TList : IReadOnlyList<TValue>
 {
     private const    int               START_INDEX = -1;
-    private readonly TList             _list;
-    private          CancellationToken _token;
+    private readonly TList             _list = list;
+    private          CancellationToken _token = token;
     private          int               _index = START_INDEX;
     public           TValue            Current        => _list[_index];
     internal         bool              ShouldContinue => _token.ShouldContinue() && _index < _list.Count;
 
 
-    public AsyncEnumerator( TList list, CancellationToken token = default )
-    {
-        _list  = list;
-        _token = token;
-    }
     public ValueTask DisposeAsync() => default;
 
 

@@ -1,11 +1,9 @@
 ﻿namespace Jakar.SqlBuilder;
 
 
-public struct InsertClauseBuilder
+public struct InsertClauseBuilder( ref EasySqlBuilder builder )
 {
-    private EasySqlBuilder _builder;
-
-    public InsertClauseBuilder( ref EasySqlBuilder builder ) => _builder = builder;
+    private EasySqlBuilder _builder = builder;
 
 
     public EasySqlBuilder Into<T>( string tableName, T obj )

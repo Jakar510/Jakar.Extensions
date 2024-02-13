@@ -13,17 +13,10 @@ namespace Jakar.Xml.Serialization;
 
 
 [ SuppressMessage( "ReSharper", "PossiblyImpureMethodCallOnReadonlyVariable" ) ]
-public ref struct XArray
+public ref struct XArray( ReadOnlySpan<char> name, XWriter context )
 {
-    private readonly ReadOnlySpan<char> _name;
-    private          XWriter            _writer;
-
-
-    public XArray( ReadOnlySpan<char> name, XWriter context )
-    {
-        _name   = name;
-        _writer = context;
-    }
+    private readonly ReadOnlySpan<char> _name = name;
+    private          XWriter            _writer = context;
 
 
     public XArray Init()

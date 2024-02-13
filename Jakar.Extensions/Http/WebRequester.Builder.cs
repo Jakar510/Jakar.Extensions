@@ -18,10 +18,10 @@ namespace Jakar.Extensions;
 public partial class WebRequester
 {
 // ReSharper disable once ClassWithMembersNeverInherited.Global
-    public ref struct Builder
+    public ref struct Builder( IHostInfo value )
     {
         private readonly WebHeaders                 _headers = new();
-        private readonly IHostInfo                  _hostInfo;
+        private readonly IHostInfo                  _hostInfo = value;
         private          Encoding                   _encoding                     = Encoding.Default;
         private          bool?                      _useProxy                     = default;
         private          IWebProxy?                 _proxy                        = default;
@@ -56,9 +56,6 @@ public partial class WebRequester
         private TimeSpan?                       _pooledConnectionIdleTimeout = default;
         private int?                            _maxResponseDrainSize = default;
     #endif
-
-
-        public Builder( IHostInfo value ) => _hostInfo = value;
 
 
         public static Builder Create( IHostInfo       value ) => new(value);

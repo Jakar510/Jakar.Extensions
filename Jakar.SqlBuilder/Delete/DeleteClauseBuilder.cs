@@ -1,10 +1,9 @@
 ﻿namespace Jakar.SqlBuilder;
 
 
-public struct DeleteClauseBuilder
+public struct DeleteClauseBuilder( ref EasySqlBuilder builder )
 {
-    private EasySqlBuilder _builder;
-    public DeleteClauseBuilder( ref EasySqlBuilder builder ) => _builder = builder;
+    private EasySqlBuilder _builder = builder;
 
 
     public DeleteChainBuilder From( string tableName, string? alias )

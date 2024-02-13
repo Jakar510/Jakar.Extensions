@@ -821,8 +821,5 @@ public class ConcurrentObservableCollection<TValue> : CollectionAlerts<TValue>, 
 
 
 
-    public sealed class AsyncLockerEnumerator : AsyncLockerEnumerator<TValue>
-    {
-        public AsyncLockerEnumerator( ConcurrentObservableCollection<TValue> collection ) : base( collection ) { }
-    }
+    public sealed class AsyncLockerEnumerator( ConcurrentObservableCollection<TValue> collection ) : AsyncLockerEnumerator<TValue>( collection );
 }

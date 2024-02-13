@@ -1,10 +1,9 @@
 ﻿namespace Jakar.SqlBuilder;
 
 
-public struct GroupByClauseBuilder
+public struct GroupByClauseBuilder( ref EasySqlBuilder builder )
 {
-    private EasySqlBuilder _builder;
-    public GroupByClauseBuilder( ref EasySqlBuilder builder ) => _builder = builder;
+    private EasySqlBuilder _builder = builder;
 
 
     public EasySqlBuilder By( string separator, params string[] columnNames ) => _builder.Add( KeyWords.GROUP, KeyWords.BY, string.Join( separator, columnNames ) );

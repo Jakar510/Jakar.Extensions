@@ -4,17 +4,11 @@
 namespace Jakar.SqlBuilder;
 
 
-public struct WhereConditionBuilder<TNext>
+public struct WhereConditionBuilder<TNext>( in TNext next, ref EasySqlBuilder builder )
 {
-    private readonly TNext          _next;
-    private          EasySqlBuilder _builder;
+    private readonly TNext          _next = next;
+    private          EasySqlBuilder _builder = builder;
     private readonly List<string>   _cache = new();
-
-    public WhereConditionBuilder( in TNext next, ref EasySqlBuilder builder )
-    {
-        _next    = next;
-        _builder = builder;
-    }
 
 
     public TNext Done()

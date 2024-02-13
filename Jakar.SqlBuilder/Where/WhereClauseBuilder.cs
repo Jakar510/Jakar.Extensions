@@ -1,17 +1,10 @@
 ﻿namespace Jakar.SqlBuilder;
 
 
-public struct WhereClauseBuilder<TNext>
+public struct WhereClauseBuilder<TNext>( in TNext next, ref EasySqlBuilder builder )
 {
-    private readonly TNext          _next;
-    private          EasySqlBuilder _builder;
-
-
-    public WhereClauseBuilder( in TNext next, ref EasySqlBuilder builder )
-    {
-        _next    = next;
-        _builder = builder;
-    }
+    private readonly TNext          _next = next;
+    private          EasySqlBuilder _builder = builder;
 
 
     public TNext Exists()

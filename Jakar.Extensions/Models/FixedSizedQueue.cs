@@ -3,18 +3,12 @@
 
 /// <summary> <seealso href="https://stackoverflow.com/a/5852926/9530917"/> </summary>
 /// <typeparam name="T"> </typeparam>
-public class FixedSizedQueue<T>
+public class FixedSizedQueue<T>( int limit )
 {
     protected readonly object   _lock = new();
-    protected readonly Queue<T> _q;
+    protected readonly Queue<T> _q = new( limit );
 
-    public int Limit { get; init; }
-
-    public FixedSizedQueue( int limit )
-    {
-        Limit = limit;
-        _q    = new Queue<T>( limit );
-    }
+    public int Limit { get; init; } = limit;
 
 
     public bool Contains( T obj )

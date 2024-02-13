@@ -2,10 +2,9 @@
 
 
 [ SuppressMessage( "ReSharper", "InconsistentNaming" ) ]
-public readonly ref struct JNode
+public readonly ref struct JNode( in ReadOnlyMemory<char> span )
 {
-    private readonly ReadOnlyMemory<char> _span;
-    public JNode( in ReadOnlyMemory<char> span ) => _span = span;
+    private readonly ReadOnlyMemory<char> _span = span;
 
 
     public NodeEnumerator GetChildren() => new(_span);

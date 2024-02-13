@@ -4,8 +4,4 @@
 namespace Jakar.Database;
 
 
-public sealed class RoleManager : RoleManager<RoleRecord>
-{
-    public RoleManager( RoleStore store, IEnumerable<IRoleValidator<RoleRecord>> roleValidators, ILookupNormalizer keyNormalizer, IdentityErrorDescriber errors, ILogger<RoleManager> logger ) :
-        base( store, roleValidators, keyNormalizer, errors, logger ) { }
-}
+public sealed class RoleManager( RoleStore store, IEnumerable<IRoleValidator<RoleRecord>> roleValidators, ILookupNormalizer keyNormalizer, IdentityErrorDescriber errors, ILogger<RoleManager> logger ) : RoleManager<RoleRecord>( store, roleValidators, keyNormalizer, errors, logger );

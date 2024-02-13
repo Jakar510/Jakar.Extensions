@@ -5,9 +5,9 @@ namespace Jakar.Extensions;
 
 
 [ SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" ) ]
-public class ObservableHashSet<T> : CollectionAlerts<T>, ISet<T>, IReadOnlySet<T>
+public class ObservableHashSet<T>( HashSet<T> values ) : CollectionAlerts<T>, ISet<T>, IReadOnlySet<T>
 {
-    private readonly       HashSet<T> _values;
+    private readonly       HashSet<T> _values = values;
     public sealed override int        Count      => _values.Count;
     bool ICollection<T>.              IsReadOnly => ((ICollection<T>)_values).IsReadOnly;
 
@@ -15,7 +15,6 @@ public class ObservableHashSet<T> : CollectionAlerts<T>, ISet<T>, IReadOnlySet<T
     public ObservableHashSet() : this( [] ) { }
     public ObservableHashSet( int            capacity ) : this( new HashSet<T>( capacity ) ) { }
     public ObservableHashSet( IEnumerable<T> enumerable ) : this( [..enumerable] ) { }
-    public ObservableHashSet( HashSet<T>     values ) => _values = values;
 
 
     public static implicit operator ObservableHashSet<T>( List<T>                 items ) => new(items);

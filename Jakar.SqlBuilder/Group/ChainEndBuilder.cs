@@ -4,17 +4,11 @@
 namespace Jakar.SqlBuilder;
 
 
-public struct GroupByChainEndBuilder
+public struct GroupByChainEndBuilder( in GroupByClauseBuilder group, ref EasySqlBuilder builder )
 {
-    private readonly GroupByClauseBuilder _group;
-    private          EasySqlBuilder       _builder;
+    private readonly GroupByClauseBuilder _group = group;
+    private          EasySqlBuilder       _builder = builder;
 
-
-    public GroupByChainEndBuilder( in GroupByClauseBuilder group, ref EasySqlBuilder builder )
-    {
-        _group   = group;
-        _builder = builder;
-    }
 
     public EasySqlBuilder Done() => _builder.VerifyParentheses();
 }

@@ -5,7 +5,4 @@ namespace Jakar.Extensions;
 
 
 /// <summary> Represents errors that occur during WeakEventManager.HandleEvent execution. </summary>
-public class InvalidHandleEventException : Exception
-{
-    public InvalidHandleEventException( string message, TargetParameterCountException exception ) : base( message, exception ) { }
-}
+public class InvalidHandleEventException( string message, TargetParameterCountException exception ) : Exception( message, exception );

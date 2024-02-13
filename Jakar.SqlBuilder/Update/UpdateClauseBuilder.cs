@@ -1,10 +1,9 @@
 ﻿namespace Jakar.SqlBuilder;
 
 
-public struct UpdateClauseBuilder
+public struct UpdateClauseBuilder( ref EasySqlBuilder builder )
 {
-    private EasySqlBuilder _builder;
-    public UpdateClauseBuilder( ref EasySqlBuilder builder ) => _builder = builder;
+    private EasySqlBuilder _builder = builder;
 
 
     public UpdateChainBuilder To( string tableName )

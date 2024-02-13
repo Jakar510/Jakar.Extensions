@@ -8,22 +8,34 @@ using Blazored.Toast.Configuration;
 namespace Jakar.Extensions.Blazor;
 
 
-public class AppServices : BaseViewModel
+public class AppServices(
+    IModalService           modal,
+    IToastService           toastService,
+    ILocalStorageService    localStorage,
+    IAuthenticationService  authenticationService,
+    ProtectedLocalStorage   protectedLocalStorage,
+    ProtectedSessionStorage sessionStorage,
+    NavigationManager       navigation,
+    ContextMenuService      contextMenus,
+    TooltipService          tooltips,
+    NotificationService     notifications,
+    DialogService           dialogs
+) : BaseViewModel
 {
-    private readonly IAuthenticationService _authenticationService;
-    private readonly ILocalStorageService   _localStorage;
-    private readonly IModalService          _modal;
-    private readonly IToastService          _toastService;
-    private readonly NavigationManager      _navigation;
+    private readonly IAuthenticationService _authenticationService = authenticationService;
+    private readonly ILocalStorageService   _localStorage = localStorage;
+    private readonly IModalService          _modal = modal;
+    private readonly IToastService          _toastService = toastService;
+    private readonly NavigationManager      _navigation = navigation;
 
 
     public string                  BaseUri               => _navigation.BaseUri;
-    public ContextMenuService      ContextMenus          { get; }
-    public DialogService           Dialogs               { get; }
-    public NotificationService     Notifications         { get; }
-    public ProtectedLocalStorage   ProtectedLocalStorage { get; }
-    public ProtectedSessionStorage SessionStorage        { get; }
-    public TooltipService          Tooltips              { get; }
+    public ContextMenuService      ContextMenus          { get; } = contextMenus;
+    public DialogService           Dialogs               { get; } = dialogs;
+    public NotificationService     Notifications         { get; } = notifications;
+    public ProtectedLocalStorage   ProtectedLocalStorage { get; } = protectedLocalStorage;
+    public ProtectedSessionStorage SessionStorage        { get; } = sessionStorage;
+    public TooltipService          Tooltips              { get; } = tooltips;
     public string                  Uri                   => _navigation.Uri;
 
 
@@ -71,33 +83,6 @@ public class AppServices : BaseViewModel
     {
         add => _localStorage.Changing += value;
         remove => _localStorage.Changing -= value;
-    }
-
-
-    public AppServices( IModalService           modal,
-                        IToastService           toastService,
-                        ILocalStorageService    localStorage,
-                        IAuthenticationService  authenticationService,
-                        ProtectedLocalStorage   protectedLocalStorage,
-                        ProtectedSessionStorage sessionStorage,
-                        NavigationManager       navigation,
-                        ContextMenuService      contextMenus,
-                        TooltipService          tooltips,
-                        NotificationService     notifications,
-                        DialogService           dialogs
-    )
-    {
-        SessionStorage         = sessionStorage;
-        ProtectedLocalStorage  = protectedLocalStorage;
-        _navigation            = navigation;
-        _modal                 = modal;
-        _toastService          = toastService;
-        _localStorage          = localStorage;
-        _authenticationService = authenticationService;
-        ContextMenus           = contextMenus;
-        Tooltips               = tooltips;
-        Notifications          = notifications;
-        Dialogs                = dialogs;
     }
 
 

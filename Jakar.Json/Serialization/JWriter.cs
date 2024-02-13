@@ -2,24 +2,19 @@
 
 
 [ SuppressMessage( "ReSharper", "PossiblyImpureMethodCallOnReadonlyVariable" ) ]
-public ref struct JWriter
+public ref struct JWriter( int capacity, Formatting formatting )
 {
     public const           string                             NULL           = "null";
     public const           char                               QUOTE          = '"';
     public const           char                               COLON          = ':';
     public const           char                               SPACE          = ' ';
     public static readonly ConcurrentDictionary<Type, string> DefaultFormats = new();
-    private readonly       ValueStringBuilder                 _sb;
+    private readonly       ValueStringBuilder                 _sb = new( capacity );
     private                int                                _indentLevel = 0;
-    public                 bool                               ShouldIndent { get; }
+    public                 bool                               ShouldIndent { get; } = formatting is Formatting.Indented;
 
 
     public JWriter() : this( 10_000, Formatting.Indented ) { }
-    public JWriter( int capacity, Formatting formatting )
-    {
-        ShouldIndent = formatting is Formatting.Indented;
-        _sb          = new ValueStringBuilder( capacity );
-    }
     public readonly          void   Dispose()  => _sb.Dispose();
     public readonly override string ToString() => _sb.ToString();
 

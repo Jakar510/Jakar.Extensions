@@ -11,16 +11,15 @@ namespace Jakar.Xml.Serialization;
 
 
 [ SuppressMessage( "ReSharper", "PossiblyImpureMethodCallOnReadonlyVariable" ) ]
-public ref struct XWriter
+public ref struct XWriter( bool shouldIndent )
 {
     public const      string        NULL = "null";
     private readonly  StringBuilder _sb  = new(); // TODO: System.Text.ValueStringBuilder
-    internal readonly bool          shouldIndent;
+    internal readonly bool          shouldIndent = shouldIndent;
     internal          int           indentLevel = default;
 
 
     public XWriter() : this( true ) { }
-    public XWriter( bool shouldIndent ) => this.shouldIndent = shouldIndent;
 
 
     public XArray  AddArray( ReadOnlySpan<char>  name ) => new(name, this);

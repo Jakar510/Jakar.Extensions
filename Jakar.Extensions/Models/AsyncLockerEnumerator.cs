@@ -4,12 +4,12 @@
 namespace Jakar.Extensions;
 
 
-public class AsyncLockerEnumerator<TValue> : IAsyncEnumerable<TValue>, IAsyncEnumerator<TValue>
+public class AsyncLockerEnumerator<TValue>( ILockedCollection<TValue> collection, CancellationToken token = default ) : IAsyncEnumerable<TValue>, IAsyncEnumerator<TValue>
 {
     private const    int                       START_INDEX = -1;
-    private readonly ILockedCollection<TValue> _collection;
+    private readonly ILockedCollection<TValue> _collection = collection;
     private          bool                      _isDisposed;
-    private          CancellationToken         _token;
+    private          CancellationToken         _token = token;
     private          int                       _index = START_INDEX;
     private          TValue?                   _current;
     private          ReadOnlyMemory<TValue>    _cache;
@@ -17,11 +17,6 @@ public class AsyncLockerEnumerator<TValue> : IAsyncEnumerable<TValue>, IAsyncEnu
     internal         bool                      ShouldContinue => _token.ShouldContinue() && _index < _cache.Length;
 
 
-    public AsyncLockerEnumerator( ILockedCollection<TValue> collection, CancellationToken token = default )
-    {
-        _collection = collection;
-        _token      = token;
-    }
     public ValueTask DisposeAsync()
     {
         _isDisposed = true;

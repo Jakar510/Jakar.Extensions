@@ -1,15 +1,10 @@
 ﻿namespace Jakar.SqlBuilder;
 
 
-public struct SortersBuilder<TNext>
+public struct SortersBuilder<TNext>( in TNext next, ref EasySqlBuilder builder )
 {
-    private readonly TNext          _next;
-    private          EasySqlBuilder _builder;
-    public SortersBuilder( in TNext next, ref EasySqlBuilder builder )
-    {
-        _next    = next;
-        _builder = builder;
-    }
+    private readonly TNext          _next = next;
+    private          EasySqlBuilder _builder = builder;
 
 
     /// <summary> Ends with a ASC and returns to <typeparamref name="TNext"/> </summary>

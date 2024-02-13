@@ -45,22 +45,17 @@ public interface IDataProtector : IDisposable
 
 
 
-public sealed class DataProtector : IDataProtector
+public sealed class DataProtector( RSA rsa, RSAEncryptionPadding padding ) : IDataProtector
 {
     private const    int                  BLOCK = 512;
     private const    int                  DATA  = 254;
-    private readonly RSA                  _rsa;
-    private readonly RSAEncryptionPadding _padding;
+    private readonly RSA                  _rsa = rsa;
+    private readonly RSAEncryptionPadding _padding = padding;
     private          bool                 _disposed;
     private          bool                 _keyIsSet;
 
 
     public DataProtector( RSAEncryptionPadding padding ) : this( RSA.Create(), padding ) { }
-    public DataProtector( RSA rsa, RSAEncryptionPadding padding )
-    {
-        _rsa     = rsa;
-        _padding = padding;
-    }
     public void Dispose()
     {
         _rsa.Dispose();

@@ -4,10 +4,9 @@
 namespace Jakar.Database;
 
 
-public sealed class TokenProvider : IUserTwoFactorTokenProvider<UserRecord>
+public sealed class TokenProvider( Database database ) : IUserTwoFactorTokenProvider<UserRecord>
 {
-    private readonly IUserTwoFactorTokenProvider<UserRecord> _database;
-    public TokenProvider( Database database ) => _database = database;
+    private readonly IUserTwoFactorTokenProvider<UserRecord> _database = database;
 
 
     public Task<string> GenerateAsync( string purpose, UserManager<UserRecord> manager, UserRecord user ) =>

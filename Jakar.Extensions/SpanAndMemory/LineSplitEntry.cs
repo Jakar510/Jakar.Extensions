@@ -5,21 +5,14 @@
 ///     <para> <see href="https://www.meziantou.net/split-a-string-into-lines-without-allocation.htm"/> </para>
 /// </summary>
 [ SuppressMessage( "ReSharper", "OutParameterValueIsAlwaysDiscarded.Global" ) ]
-public readonly ref struct LineSplitEntry<T>
+public readonly ref struct LineSplitEntry<T>( ReadOnlySpan<T> line, ParamsArray<T> separator )
     where T : unmanaged, IEquatable<T>
 {
-    public ReadOnlySpan<T> Value      { get; }
-    public ParamsArray<T>  Separator  { get; }
+    public ReadOnlySpan<T> Value      { get; } = line;
+    public ParamsArray<T>  Separator  { get; } = separator;
     public int             Length     => Value.Length;
     public bool            IsEmpty    => Value.IsEmpty;
     public bool            IsNotEmpty => !IsEmpty;
-
-
-    public LineSplitEntry( ReadOnlySpan<T> line, ParamsArray<T> separator )
-    {
-        Value     = line;
-        Separator = separator;
-    }
 
 
     // This method allow to deconstruct the type, so you can write any of the following code

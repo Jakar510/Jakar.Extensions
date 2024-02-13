@@ -1,10 +1,9 @@
 ﻿namespace Jakar.SqlBuilder;
 
 
-public struct OrderByClauseBuilder
+public struct OrderByClauseBuilder( ref EasySqlBuilder builder )
 {
-    private EasySqlBuilder _builder;
-    public OrderByClauseBuilder( ref EasySqlBuilder builder ) => _builder = builder;
+    private EasySqlBuilder _builder = builder;
 
 
     /// <summary> Simple ORDER BY <paramref name="columnNames"/> delimited by <paramref name="separator"/> </summary>

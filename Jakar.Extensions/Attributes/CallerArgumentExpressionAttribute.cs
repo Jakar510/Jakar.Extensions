@@ -11,12 +11,9 @@ namespace System.Runtime.CompilerServices;
 
 /// <summary> <see href="https://stackoverflow.com/a/70034587/9530917"/> </summary>
 [ AttributeUsage( AttributeTargets.Parameter ) ]
-public sealed class CallerArgumentExpressionAttribute : Attribute
+public sealed class CallerArgumentExpressionAttribute( string parameterName ) : Attribute
 {
-    public string ParameterName { get; }
-
-
-    public CallerArgumentExpressionAttribute( string parameterName ) => ParameterName = parameterName;
+    public string ParameterName { get; } = parameterName;
 }
 
 

@@ -1,15 +1,10 @@
 ﻿namespace Jakar.SqlBuilder;
 
 
-public struct JoinChainBuilderMiddle
+public struct JoinChainBuilderMiddle( in JoinClauseBuilder join, ref EasySqlBuilder builder )
 {
-    private readonly JoinClauseBuilder _join;
-    private          EasySqlBuilder    _builder;
-    public JoinChainBuilderMiddle( in JoinClauseBuilder join, ref EasySqlBuilder builder )
-    {
-        _join    = join;
-        _builder = builder;
-    }
+    private readonly JoinClauseBuilder _join = join;
+    private          EasySqlBuilder    _builder = builder;
 
 
     public JoinChainBuilderRight Greater()

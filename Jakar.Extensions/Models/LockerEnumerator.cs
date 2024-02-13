@@ -4,10 +4,10 @@
 namespace Jakar.Extensions;
 
 
-public struct LockerEnumerator<TValue> : IEnumerator<TValue>, IEnumerable<TValue>
+public struct LockerEnumerator<TValue>( ILockedCollection<TValue> collection ) : IEnumerator<TValue>, IEnumerable<TValue>
 {
     private const    int                                START_INDEX = -1;
-    private readonly ILockedCollection<TValue> _collection;
+    private readonly ILockedCollection<TValue> _collection = collection;
     private          int                                _index   = START_INDEX;
     private          TValue?                            _current = default;
     private          ReadOnlyMemory<TValue>             _cache   = default;
@@ -16,7 +16,6 @@ public struct LockerEnumerator<TValue> : IEnumerator<TValue>, IEnumerable<TValue
     internal         bool                               ShouldContinue => ++_index < _cache.Length;
 
 
-    public LockerEnumerator( ILockedCollection<TValue> collection ) => _collection = collection;
     public   void                                    Dispose()       => this = default;
     readonly IEnumerator<TValue> IEnumerable<TValue>.GetEnumerator() => this;
     readonly IEnumerator IEnumerable.                GetEnumerator() => this;

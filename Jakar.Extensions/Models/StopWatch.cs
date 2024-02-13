@@ -4,20 +4,15 @@
 namespace Jakar.Extensions;
 
 
-public readonly struct StopWatch : IDisposable
+public readonly struct StopWatch( string caller ) : IDisposable
 {
-    private readonly string   _caller;
-    private readonly DateTime _start;
+    private readonly string   _caller = caller;
+    private readonly DateTime _start = DateTime.Now;
 
 
     public TimeSpan Elapsed => DateTime.Now - _start;
 
 
-    public StopWatch( string caller )
-    {
-        _caller = caller;
-        _start  = DateTime.Now;
-    }
     public          void   Dispose()  => Console.WriteLine( ToString() );
     public override string ToString() => $"[{_caller}] {Elapsed}";
 

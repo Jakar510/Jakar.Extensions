@@ -1,10 +1,9 @@
 ﻿namespace Jakar.SqlBuilder;
 
 
-public struct JoinClauseBuilder
+public struct JoinClauseBuilder( ref EasySqlBuilder builder )
 {
-    private EasySqlBuilder _builder;
-    public JoinClauseBuilder( ref EasySqlBuilder builder ) => _builder = builder;
+    private EasySqlBuilder _builder = builder;
 
 
     public EasySqlBuilder Done() => _builder.VerifyParentheses().NewLine();

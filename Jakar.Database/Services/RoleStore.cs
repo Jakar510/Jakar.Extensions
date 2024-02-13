@@ -1,12 +1,11 @@
 ﻿namespace Jakar.Database;
 
 
-public sealed class RoleStore : IRoleStore<RoleRecord>
+public sealed class RoleStore( Database dbContext ) : IRoleStore<RoleRecord>
 {
-    private readonly Database _dbContext;
+    private readonly Database _dbContext = dbContext;
 
 
-    public RoleStore( Database dbContext ) => _dbContext = dbContext;
     public void Dispose() { }
 
     public static void Register( IServiceCollection builder )

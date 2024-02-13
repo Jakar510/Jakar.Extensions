@@ -14,10 +14,8 @@ public class ResourceException : Exception
 
 
 
-public class ResourceException<T> : ResourceException
+public class ResourceException<T>( string path ) : ResourceException( path, GetMessage( path ) )
 {
-    public ResourceException( string path ) : base( path, GetMessage( path ) ) { }
-
     public static string GetMessage( string path ) => @$"{nameof(EmbeddedResources<T>)}.{nameof(EmbeddedResources<T>.GetResourceStream)}.{nameof(Assembly.GetManifestResourceStream)}: ""{path}"".";
 }
 
