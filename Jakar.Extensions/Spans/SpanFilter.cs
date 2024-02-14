@@ -1,30 +1,30 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
-// 2/12/2024  23:51
+// 2/13/2024  21:33
 
 namespace Jakar.Extensions;
 
 
 [ method: MethodImpl( MethodImplOptions.AggressiveInlining ) ]
-public ref struct SpanSelector<T>( ReadOnlySpan<T> span, Func<T, bool> check )
+public ref struct SpanFilter<T>( ReadOnlySpan<T> span, Func<T, bool> func )
 {
     private readonly ReadOnlySpan<T> _span  = span;
-    private readonly Func<T, bool>   _check = check;
+    private readonly Func<T, bool>   _func  = func;
     private          int             _index = -1;
 
     public T Current { [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get; private set; }
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public readonly SpanSelector<T> GetEnumerator() => this;
+    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public readonly SpanFilter<T> GetEnumerator() => this;
 
 
     [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
     public bool MoveNext()
     {
-        int index = Interlocked.Increment( ref _index );
-        while ( index < _span.Length && _check( _span[index] ) is false ) { index++; }
+        int index = _index + 1;
+        while ( index < _span.Length && _func( _span[index] ) is false ) { index++; }
 
-        Interlocked.Exchange( ref _index, index );
-        Current = _span[_index];
-        return index >= _span.Length;
+        Current = _span[index];
+        _index  = index;
+        return index < _span.Length;
     }
     public void Reset()
     {
