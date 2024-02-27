@@ -202,7 +202,7 @@ public class UserData : ObservableClass, IUserData<UserData>, JsonModels.IJsonMo
     }
 
 
-    public UserData WithAddresses( IEnumerable<IAddress> addresses ) => WithAddresses( addresses.Select( x => new UserAddress( x ) ) );
+    public UserData WithAddresses( IEnumerable<IAddress> addresses ) => WithAddresses( addresses.Select( static x => new UserAddress( x ) ) );
     public UserData WithAddresses( IEnumerable<UserAddress> addresses )
     {
         Addresses.Add( addresses );
