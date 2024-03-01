@@ -44,6 +44,7 @@
 	<ItemGroup>
 		<PackageReference Include="Dapper" Version="2.1.28" />
 		<PackageReference Include="Dapper.Contrib" Version="2.0.78" />
+		<PackageReference Include="FluentMigrator.Abstractions" Version="5.1.0" />
 		<PackageReference Include="Jakar.Extensions" Version="7.6.6" />
 		<PackageReference Include="FluentMigrator" Version="5.1.0" />
 		<PackageReference Include="FluentMigrator.Runner" Version="5.1.0" />
@@ -51,7 +52,7 @@
 		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.8.0" />
 		<PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="8.0.2" />
 		<PackageReference Include="Microsoft.Identity.Client" Version="4.59.0" />
-		<PackageReference Include="Microsoft.Identity.Web" Version="2.17.0" />
+		<PackageReference Include="Microsoft.Identity.Web" Version="2.17.1" />
 		<PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="7.4.0" />
 		<PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="7.4.0" />
 		<PackageReference Include="Microsoft.IdentityModel.Tokens" Version="7.4.0" />
@@ -100,5 +101,9 @@
 
 	<ItemGroup>
 		<Service Include="{3259aa49-8aa1-44d3-9025-a0b520596a8c}" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="DbMigrations\Api\" />
 	</ItemGroup>
 </Project>

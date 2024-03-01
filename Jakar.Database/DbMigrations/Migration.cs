@@ -1,6 +1,10 @@
 ﻿// Jakar.Database ::  Jakar.Database 
 // 08/02/2022  3:20 PM
 
+using FluentMigrator.Builders.Create.Constraint;
+
+
+
 namespace Jakar.Database.DbMigrations;
 
 
@@ -28,34 +32,28 @@ public abstract class Migration<TRecord> : Migration
         ICreateTableWithColumnSyntax? table = Create.Table( TableName );
 
         table.WithColumn( nameof(ITableRecord<TRecord>.ID) ).AsGuid().PrimaryKey();
-
         table.WithColumn( nameof(ITableRecord<TRecord>.DateCreated) ).AsDateTimeOffset().NotNullable().WithDefaultValue( SystemMethods.CurrentUTCDateTime );
-
         table.WithColumn( nameof(ITableRecord<TRecord>.LastModified) ).AsDateTimeOffset().Nullable();
 
         return table;
     }
 
 
-    protected IInsertDataSyntax StartInsert() => Insert.IntoTable( TableName );
+    protected IInsertDataSyntax StartInsert() => Insert.IntoTable( TableName ).WithIdentityInsert();
 
 
     /// <param name="dataAsAnonymousType"> The columns and values to be used set </param>
     protected IUpdateWhereSyntax UpdateTable( object dataAsAnonymousType ) => Update.Table( TableName ).Set( dataAsAnonymousType );
 
 
-    protected void DeleteTable() => Delete.Table( TableName );
-
-
+    protected void DeleteTable()              => Delete.Table( TableName );
     protected void RenameTable( string name ) => Rename.Table( TableName ).To( name );
 
 
-    protected void UniqueConstraint( string columnName )              => Create.UniqueConstraint().OnTable( TableName ).Column( columnName );
-    protected void UniqueConstraint( string name, string columnName ) => Create.UniqueConstraint( name ).OnTable( TableName ).Column( columnName );
-
-
-    protected void UniqueConstraints( params string[] columnNames )                       => Create.UniqueConstraint().OnTable( TableName ).Columns( columnNames );
-    protected void UniqueConstraints( string          name, params string[] columnNames ) => Create.UniqueConstraint( name ).OnTable( TableName ).Columns( columnNames );
+    protected ICreateConstraintOptionsSyntax UniqueConstraint( string          columnName )              => Create.UniqueConstraint().OnTable( TableName ).Column( columnName );
+    protected ICreateConstraintOptionsSyntax UniqueConstraint( string          name, string columnName ) => Create.UniqueConstraint( name ).OnTable( TableName ).Column( columnName );
+    protected ICreateConstraintOptionsSyntax UniqueConstraint( params string[] columnNames )                       => Create.UniqueConstraint().OnTable( TableName ).Columns( columnNames );
+    protected ICreateConstraintOptionsSyntax UniqueConstraint( string          name, params string[] columnNames ) => Create.UniqueConstraint( name ).OnTable( TableName ).Columns( columnNames );
 }
 
 
@@ -68,7 +66,6 @@ public abstract class OwnedMigration<TRecord> : Migration<TRecord>
         ICreateTableWithColumnSyntax table = base.CreateTable();
 
         table.WithColumn( nameof(IOwnedTableRecord.OwnerUserID) ).AsGuid().Nullable();
-
         table.WithColumn( nameof(IOwnedTableRecord.CreatedBy) ).AsGuid().Nullable();
 
         return table;
