@@ -8,17 +8,17 @@ public struct UpdateClauseBuilder( ref EasySqlBuilder builder )
 
     public UpdateChainBuilder To( string tableName )
     {
-        _builder.Add( KeyWords.UPDATE, tableName, KeyWords.SET );
+        _builder.Add( UPDATE, tableName, SET );
         return new UpdateChainBuilder( this, ref _builder );
     }
     public UpdateChainBuilder To<T>( T _ )
     {
-        _builder.Add( KeyWords.UPDATE, typeof(T).GetName(), KeyWords.SET );
+        _builder.Add( UPDATE, typeof(T).GetName(), SET );
         return new UpdateChainBuilder( this, ref _builder );
     }
     public UpdateChainBuilder To<T>()
     {
-        _builder.Add( KeyWords.UPDATE, typeof(T).GetName(), KeyWords.SET );
+        _builder.Add( UPDATE, typeof(T).GetName(), SET );
         return new UpdateChainBuilder( this, ref _builder );
     }
 

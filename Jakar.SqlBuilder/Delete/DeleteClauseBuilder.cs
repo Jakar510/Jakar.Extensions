@@ -8,9 +8,9 @@ public struct DeleteClauseBuilder( ref EasySqlBuilder builder )
 
     public DeleteChainBuilder From( string tableName, string? alias )
     {
-        if ( string.IsNullOrWhiteSpace( alias ) ) { _builder.Add( KeyWords.FROM, tableName ); }
+        if ( string.IsNullOrWhiteSpace( alias ) ) { _builder.Add( FROM, tableName ); }
 
-        else { _builder.Add( KeyWords.FROM, tableName, KeyWords.AS, alias ); }
+        else { _builder.Add( FROM, tableName, AS, alias ); }
 
         _builder.NewLine();
 
@@ -19,9 +19,9 @@ public struct DeleteClauseBuilder( ref EasySqlBuilder builder )
 
     public DeleteChainBuilder From<T>( T _, string? alias )
     {
-        if ( string.IsNullOrWhiteSpace( alias ) ) { _builder.Add( KeyWords.FROM, typeof(T).GetTableName() ); }
+        if ( string.IsNullOrWhiteSpace( alias ) ) { _builder.Add( FROM, typeof(T).GetTableName() ); }
 
-        else { _builder.Add( KeyWords.FROM, typeof(T).GetName(), KeyWords.AS, alias ); }
+        else { _builder.Add( FROM, typeof(T).GetName(), AS, alias ); }
 
         _builder.NewLine();
 
@@ -30,9 +30,9 @@ public struct DeleteClauseBuilder( ref EasySqlBuilder builder )
 
     public DeleteChainBuilder From<T>( string? alias )
     {
-        if ( string.IsNullOrWhiteSpace( alias ) ) { _builder.Add( KeyWords.FROM, typeof(T).GetTableName() ); }
+        if ( string.IsNullOrWhiteSpace( alias ) ) { _builder.Add( FROM, typeof(T).GetTableName() ); }
 
-        else { _builder.Add( KeyWords.FROM, typeof(T).GetName(), KeyWords.AS, alias ); }
+        else { _builder.Add( FROM, typeof(T).GetName(), AS, alias ); }
 
         _builder.NewLine();
 
@@ -40,7 +40,7 @@ public struct DeleteClauseBuilder( ref EasySqlBuilder builder )
     }
 
 
-    public WhereClauseBuilder<DeleteClauseBuilder> Where() => _builder.Add( KeyWords.WHERE ).Begin().Where( in this );
+    public WhereClauseBuilder<DeleteClauseBuilder> Where() => _builder.Add( WHERE ).Begin().Where( in this );
 
     public EasySqlBuilder Done()
     {
@@ -51,13 +51,13 @@ public struct DeleteClauseBuilder( ref EasySqlBuilder builder )
 
     public DeleteChainBuilder All()
     {
-        _builder.Add( KeyWords.DELETE );
+        _builder.Add( DELETE );
         return new DeleteChainBuilder( this, ref _builder );
     }
 
     public EasySqlBuilder Column( string columnName )
     {
-        _builder.Add( KeyWords.DELETE, columnName );
+        _builder.Add( DELETE, columnName );
         return _builder;
     }
 }

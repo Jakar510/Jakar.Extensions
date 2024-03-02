@@ -1,20 +1,18 @@
-﻿using Jakar.Extensions;
+﻿using System.Diagnostics.CodeAnalysis;
+using Jakar.Extensions;
 
 
 
 namespace Jakar.SqlBuilder;
 
 
-public record struct EasySqlBuilder
+[SuppressMessage( "ReSharper", "UnusedMethodReturnValue.Global" )]
+public record struct EasySqlBuilder()
 {
-    private readonly StringBuilder _sb;
+    private readonly StringBuilder _sb          = new(10240);
     private          bool          _needToClose = false;
 
     public string Result => ToString();
-
-
-    public EasySqlBuilder() : this( 1024 ) { }
-    public EasySqlBuilder( int capacity ) => _sb = new StringBuilder( capacity );
 
 
     internal EasySqlBuilder AddRange<T>( char separator, IEnumerable<string> names ) => AddRange( separator, names.Select( KeyWords.GetName<T> ) );
@@ -98,7 +96,6 @@ public record struct EasySqlBuilder
     public override string ToString()
     {
         VerifyParentheses();
-
         string result = _sb.Append( ';' ).ToString();
 
 
@@ -111,20 +108,23 @@ public record struct EasySqlBuilder
         // }
         // else if ( end >= 0 ) { throw new FormatException("Should not occur, no start ("); }
 
-        if ( !result.IsBalanced() ) { throw new FormatException( $@"String is not balanced! ""{result}""" ); }
 
-        return result;
+        return result.IsBalanced()
+                   ? result
+                   : throw new FormatException( $"""
+                                                 String is not balanced! "{result}"
+                                                 """ );
     }
 
 
     public SelectClauseBuilder<EasySqlBuilder> Select() => new(this, ref this);
+
 
     public SelectClauseBuilder<EasySqlBuilder> Union()
     {
         Add( "UNION" );
         return new SelectClauseBuilder<EasySqlBuilder>( this, ref this );
     }
-
     public SelectClauseBuilder<EasySqlBuilder> UnionAll()
     {
         Add( "UNION ALL" );
@@ -136,20 +136,10 @@ public record struct EasySqlBuilder
     internal WhereClauseBuilder<TNext>          Where<TNext>( in TNext next ) => new(in next, ref this);
 
 
-    public OrderByClauseBuilder Order() => new(ref this);
-
-
-    public GroupByClauseBuilder Group() => new(ref this);
-
-
-    public InsertClauseBuilder Insert() => new(ref this);
-
-
-    public UpdateClauseBuilder Update() => new(ref this);
-
-
-    public DeleteClauseBuilder Delete() => new(ref this);
-
-
-    public JoinClauseBuilder Join() => new(ref this);
+    public OrderByClauseBuilder Order()  => new(ref this);
+    public GroupByClauseBuilder Group()  => new(ref this);
+    public InsertClauseBuilder  Insert() => new(ref this);
+    public UpdateClauseBuilder  Update() => new(ref this);
+    public DeleteClauseBuilder  Delete() => new(ref this);
+    public JoinClauseBuilder    Join()   => new(ref this);
 }

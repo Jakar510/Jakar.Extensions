@@ -12,7 +12,7 @@ public struct SortersBuilder<TNext>( in TNext next, ref EasySqlBuilder builder )
     /// <returns> <typeparamref name="TNext"/> </returns>
     public TNext Ascending()
     {
-        _builder.Add( KeyWords.ASC );
+        _builder.Add( ASC );
         return _next;
     }
 
@@ -21,7 +21,7 @@ public struct SortersBuilder<TNext>( in TNext next, ref EasySqlBuilder builder )
     /// <returns> <typeparamref name="TNext"/> </returns>
     public TNext Ascending( string columnName )
     {
-        _builder.Add( columnName, KeyWords.ASC );
+        _builder.Add( columnName, ASC );
         return _next;
     }
 
@@ -31,7 +31,7 @@ public struct SortersBuilder<TNext>( in TNext next, ref EasySqlBuilder builder )
     /// <returns> <typeparamref name="TNext"/> </returns>
     public TNext Descending()
     {
-        _builder.Add( KeyWords.DESC );
+        _builder.Add( DESC );
         return _next;
     }
 
@@ -40,7 +40,7 @@ public struct SortersBuilder<TNext>( in TNext next, ref EasySqlBuilder builder )
     /// <returns> <typeparamref name="TNext"/> </returns>
     public TNext Descending( string columnName )
     {
-        _builder.Add( columnName, KeyWords.DESC );
+        _builder.Add( columnName, DESC );
         return _next;
     }
 }

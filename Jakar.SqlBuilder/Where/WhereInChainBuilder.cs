@@ -29,7 +29,7 @@ public struct WhereInChainBuilder<TNext>
 
     public WhereInChainBuilder<TNext> With( string? value )
     {
-        _cache.Add( $"'{value ?? KeyWords.NULL}'" );
+        _cache.Add( $"'{value ?? NULL}'" );
         return this;
     }
     public WhereInChainBuilder<TNext> With<T>( T value ) where T : struct

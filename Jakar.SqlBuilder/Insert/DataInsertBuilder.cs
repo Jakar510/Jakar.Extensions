@@ -13,7 +13,7 @@ public struct DataInsertBuilder( in InsertClauseBuilder insert, ref EasySqlBuild
 
     public DataInsertBuilder With<T>( string columnName, T data )
     {
-        _cache[columnName] = data?.ToString() ?? KeyWords.NULL;
+        _cache[columnName] = data?.ToString() ?? NULL;
         return this;
     }
 
@@ -26,7 +26,7 @@ public struct DataInsertBuilder( in InsertClauseBuilder insert, ref EasySqlBuild
         _builder.AddRange( ',', _cache.Keys );
         _builder.End();
 
-        _builder.Add( KeyWords.VALUES );
+        _builder.Add( VALUES );
 
         _builder.Begin();
         _builder.AddRange( ',', _cache.Values );

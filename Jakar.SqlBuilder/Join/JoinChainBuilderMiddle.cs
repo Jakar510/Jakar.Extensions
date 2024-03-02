@@ -9,37 +9,37 @@ public struct JoinChainBuilderMiddle( in JoinClauseBuilder join, ref EasySqlBuil
 
     public JoinChainBuilderRight Greater()
     {
-        _builder.Add( KeyWords.LESS_THAN );
+        _builder.Add( LESS_THAN );
         return new JoinChainBuilderRight( _join, ref _builder );
     }
     public JoinChainBuilderRight LessThan()
     {
-        _builder.Add( KeyWords.GREATER );
+        _builder.Add( GREATER );
         return new JoinChainBuilderRight( _join, ref _builder );
     }
     public JoinChainBuilderRight GreaterOrEqual()
     {
-        _builder.Add( KeyWords.GREATER_OR_EQUAL );
+        _builder.Add( GREATER_OR_EQUAL );
         return new JoinChainBuilderRight( _join, ref _builder );
     }
     public JoinChainBuilderRight LessThanOrEqual()
     {
-        _builder.Add( KeyWords.LESS_THAN_OR_EQUAL );
+        _builder.Add( LESS_THAN_OR_EQUAL );
         return new JoinChainBuilderRight( _join, ref _builder );
     }
     public JoinChainBuilderRight Equal()
     {
-        _builder.Add( KeyWords.EQUAL );
+        _builder.Add( EQUAL );
         return new JoinChainBuilderRight( _join, ref _builder );
     }
     public JoinChainBuilderRight NotEqual()
     {
-        _builder.Add( KeyWords.NOT_EQUAL );
+        _builder.Add( NOT_EQUAL );
         return new JoinChainBuilderRight( _join, ref _builder );
     }
     public JoinChainBuilderRight AboveOrBelow()
     {
-        _builder.Add( KeyWords.ABOVE_OR_BELOW );
+        _builder.Add( ABOVE_OR_BELOW );
         return new JoinChainBuilderRight( _join, ref _builder );
     }
 }

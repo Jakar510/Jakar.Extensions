@@ -49,8 +49,9 @@ public static class KeyWords
     public const string WHERE              = nameof(WHERE);
 
 
-    public static string GetName( this    Type   type )                 => type.GetTableName();
-    public static string GetName<T>( this T      _ )                    => typeof(T).GetTableName();
-    public static string GetName<T>( this T      _, string columnName ) => $"{typeof(T).GetTableName()}.{columnName}";
+    public static string GetName( this    Type   type )                    => type.GetTableName();
+    public static string GetName<T>( this T      _ )                       => typeof(T).GetTableName();
+    public static string GetName<T>( this T      _,    string columnName ) => $"{typeof(T).GetTableName()}.{columnName}";
+    public static string GetName( this    Type   type, string columnName ) => $"{type.GetTableName()}.{columnName}";
     public static string GetName<T>( this string columnName ) => $"{typeof(T).GetTableName()}.{columnName}";
 }

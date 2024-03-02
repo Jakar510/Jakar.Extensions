@@ -6,17 +6,17 @@ public struct GroupByClauseBuilder( ref EasySqlBuilder builder )
     private EasySqlBuilder _builder = builder;
 
 
-    public EasySqlBuilder By( string separator, params string[] columnNames ) => _builder.Add( KeyWords.GROUP, KeyWords.BY, string.Join( separator, columnNames ) );
+    public EasySqlBuilder By( string separator, params string[] columnNames ) => _builder.Add( GROUP, BY, string.Join( separator, columnNames ) );
 
     public GroupByChainBuilder Chain()
     {
-        _builder.Add( KeyWords.GROUP, KeyWords.BY );
+        _builder.Add( GROUP, BY );
         return new GroupByChainBuilder( this, ref _builder );
     }
 
     public GroupByChainBuilder Chain( string columnName )
     {
-        _builder.Add( KeyWords.GROUP, KeyWords.BY, columnName );
+        _builder.Add( GROUP, BY, columnName );
         return new GroupByChainBuilder( this, ref _builder );
     }
 

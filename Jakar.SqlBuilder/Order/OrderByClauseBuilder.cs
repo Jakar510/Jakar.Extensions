@@ -8,14 +8,14 @@ public struct OrderByClauseBuilder( ref EasySqlBuilder builder )
 
     /// <summary> Simple ORDER BY <paramref name="columnNames"/> delimited by <paramref name="separator"/> </summary>
     /// <returns> <see cref="EasySqlBuilder"/> </returns>
-    public EasySqlBuilder By( string separator, params string[] columnNames ) => _builder.Begin().Add( KeyWords.ORDER, KeyWords.BY ).AddRange( separator, columnNames ).End();
+    public EasySqlBuilder By( string separator, params string[] columnNames ) => _builder.Begin().Add( ORDER, BY ).AddRange( separator, columnNames ).End();
 
 
     /// <summary> Starts an ORDER BY chain </summary>
     /// <returns> <see cref="OrderByClauseChainBuilder"/> </returns>
     public OrderByClauseChainBuilder Chain()
     {
-        _builder.Add( KeyWords.ORDER, KeyWords.BY ).Begin();
+        _builder.Add( ORDER, BY ).Begin();
 
         return new OrderByClauseChainBuilder( this, ref _builder );
     }
@@ -23,7 +23,7 @@ public struct OrderByClauseBuilder( ref EasySqlBuilder builder )
     /// <returns> <see cref="OrderByClauseChainBuilder"/> </returns>
     public OrderByClauseChainBuilder Chain( string columnName )
     {
-        _builder.Add( KeyWords.ORDER, KeyWords.BY ).Begin().Add( columnName );
+        _builder.Add( ORDER, BY ).Begin().Add( columnName );
 
         return new OrderByClauseChainBuilder( this, ref _builder );
     }
@@ -37,7 +37,7 @@ public struct OrderByClauseBuilder( ref EasySqlBuilder builder )
     }
     public OrderByClauseBuilder Next()
     {
-        _builder.VerifyParentheses().Add( KeyWords.ORDER, KeyWords.BY ).Begin();
+        _builder.VerifyParentheses().Add( ORDER, BY ).Begin();
 
         return this;
     }
@@ -51,7 +51,7 @@ public struct OrderByClauseBuilder( ref EasySqlBuilder builder )
     /// <returns> <see cref="OrderByClauseBuilder"/> </returns>
     public OrderByClauseBuilder By( string columnName )
     {
-        _builder.Begin().Add( KeyWords.ORDER, KeyWords.BY ).Space().Add( columnName );
+        _builder.Begin().Add( ORDER, BY ).Space().Add( columnName );
 
         return this;
     }
