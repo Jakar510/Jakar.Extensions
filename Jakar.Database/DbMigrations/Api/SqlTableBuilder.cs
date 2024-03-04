@@ -66,13 +66,30 @@ public ref struct SqlTableBuilder<TRecord>
     private          ValueStringBuilder _query = new(10240);
 
 
-    public SqlTableBuilder( DbInstance instance )
+    public SqlTableBuilder() => throw new NotImplementedException();
+    private SqlTableBuilder( DbInstance instance, string firstLine )
     {
         _instance = instance;
-        _query.Append( $"CREATE TABLE {TRecord.TableName} (" );
+        _query.Append( firstLine );
     }
-    public static SqlTableBuilder<TRecord> Create() => new();
+    public static SqlTableBuilder<TRecord> Create( DbInstance instance ) => new(instance, $"CREATE TABLE {TRecord.TableName} (");
 
+    /*
+    public static SqlTableBuilder<TRecord> Modify( DbInstance instance ) => new(instance, $"MODIFY TABLE {TRecord.TableName} (");
+    public static SqlTableBuilder<TRecord> Drop( DbInstance   instance ) => new(instance, $"DROP TABLE {TRecord.TableName} (");
+    public SqlTableBuilder<TRecord> Modify( string tableName )
+    {
+        _query.Reset();
+        _query.Append( $"ALTER TABLE {tableName} " );
+        return this;
+    }
+    public SqlTableBuilder<TRecord> DropColumn( string columnName )
+    {
+        _query.Reset();
+        _query.Append( $"DROP COLUMN {columnName}, " );
+        return this;
+    }
+    */
 
     public SqlTableBuilder<TRecord> WithColumn<T>( string columnName, int? size = null, bool isPrimaryKey = false )
     {
@@ -151,6 +168,7 @@ public ref struct SqlTableBuilder<TRecord>
         throw new ArgumentException( $"Unsupported type: {type.Name}" );
     }
 
+
     private static string GetDataType( in DbInstance instance, in DbType dbType, in int? size = null )
     {
         return instance switch
@@ -160,6 +178,7 @@ public ref struct SqlTableBuilder<TRecord>
                    _                   => throw new OutOfRangeException( nameof(instance), instance )
                };
     }
+
 
     [SuppressMessage( "ReSharper", "StringLiteralTypo" )]
     private static string GetDataTypePostgresSql( in DbType dbType, in int? size )
@@ -202,6 +221,7 @@ public ref struct SqlTableBuilder<TRecord>
                    _                            => throw new OutOfRangeException( nameof(dbType), dbType )
                };
     }
+
 
     [SuppressMessage( "ReSharper", "StringLiteralTypo" )]
     private static string GetDataTypeSqlServer( in DbType dbType, int? size )
@@ -246,29 +266,10 @@ public ref struct SqlTableBuilder<TRecord>
     }
 
 
-    public SqlTableBuilder<TRecord> Modify( string tableName )
-    {
-        _query.Reset();
-        _query.Append( $"ALTER TABLE {tableName} " );
-        return this;
-    }
-
-    public SqlTableBuilder<TRecord> AddColumn( string columnName, string dataType )
-    {
-        _query.Append( $"ADD COLUMN {columnName} {dataType}, " );
-        return this;
-    }
-
-    public SqlTableBuilder<TRecord> DropColumn( string columnName )
-    {
-        _query.Append( $"DROP COLUMN {columnName}, " );
-        return this;
-    }
-
     public string Build()
     {
         string query = _query.ToString().TrimEnd( ' ', ',' );
-        if ( query.EndsWith( "(" ) ) { query = query.Remove( query.Length - 1 ); }
+        if ( query.EndsWith( '(' ) ) { query = query.Remove( query.Length - 1 ); }
 
         query += " );";
         return query;
