@@ -7,7 +7,7 @@ public static class MimeTypes
     public static readonly FrozenSet<MimeType> All =
     #if NET6_0_OR_GREATER
         Enum.GetValues<MimeType>().ToFrozenSet();
-    #else
+#else
         Enum.GetValues( typeof(MimeType) ).Cast<MimeType>().ToFrozenSet();
 #endif
 
@@ -30,7 +30,7 @@ public static class MimeTypes
     /// <summary> Gets the <see cref="MimeType"/> of the provided extension <see cref="string"/> . </summary>
     /// <param name="mime"> </param>
     /// <returns> <see cref="MimeType"/> </returns>
-    [ SuppressMessage( "ReSharper", "ReplaceSequenceEqualWithConstantPattern" ) ]
+    [SuppressMessage( "ReSharper", "ReplaceSequenceEqualWithConstantPattern" )]
     public static MimeType FromExtension( this ReadOnlySpan<char> mime )
     {
         Span<char> span = stackalloc char[mime.Length];
@@ -556,4 +556,32 @@ public static class MimeTypes
 
             //_ => throw new OutOfRangeException(nameof(mime), mime, $"Cannot discern UriScheme for {typeof(mime).FullName}.{mime}")
         };
+
+
+#if NET6_0_OR_GREATER
+    [MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization )]
+#else
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+#endif
+    public static bool IsAnyBinary( this MimeType mime ) => mime.IsBinary() || mime.IsPDF() || mime.IsAudio() || mime.IsVideo() || mime.IsFont() || mime.IsCompressedFile() || mime.IsOfficeDocument();
+
+
+#if NET6_0_OR_GREATER
+    [MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization )]
+#else
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+#endif
+    public static bool IsApplication( this MimeType mime ) => mime is MimeType.UrlEncodedContent or MimeType.Soap or MimeType.Rtf or MimeType.XmlApp or MimeType.Xul or MimeType.JavaScript or MimeType.Vbs or MimeType.Json || mime.IsPDF() || mime.IsBinary();
+
+
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public static bool IsText( this MimeType mime ) => mime is MimeType.Text or MimeType.PlainText or MimeType.Html or MimeType.Xml or MimeType.Xaml or MimeType.RichText or MimeType.Css or MimeType.Csv or MimeType.Ini or MimeType.Config or MimeType.Cfg or MimeType.Json or MimeType.UrlEncodedContent or MimeType.JavaScript or MimeType.Base64 or MimeType.Vbs or MimeType.Rtf or MimeType.Calendar;
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsBinary( this         MimeType mime ) => mime is MimeType.Binary or MimeType.Stream;
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsPDF( this            MimeType mime ) => mime is MimeType.Pdf or MimeType.Sds or MimeType.Sds or MimeType.Tds or MimeType.Coa or MimeType.Licenses;
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsAudio( this          MimeType mime ) => mime is MimeType.ThreeGppAudio or MimeType.ThreeGpp2Audio or MimeType.Aac or MimeType.MpegAudio or MimeType.Mp3 or MimeType.Weba or MimeType.Wav;
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsVideo( this          MimeType mime ) => mime is MimeType.ThreeGppVideo or MimeType.ThreeGpp2Video or MimeType.Mp4 or MimeType.MpegVideo or MimeType.Mpeg4 or MimeType.Webm or MimeType.H264 or MimeType.Avi or MimeType.Mov or MimeType.Mpg or MimeType.Ogg or MimeType.Mkv;
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsImage( this          MimeType mime ) => mime is MimeType.Gif or MimeType.Tiff or MimeType.Png or MimeType.Jpeg or MimeType.Bmp or MimeType.Webp or MimeType.Icon or MimeType.Svg;
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsFont( this           MimeType mime ) => mime is MimeType.TrueType or MimeType.OpenType;
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsCompressedFile( this MimeType mime ) => mime is MimeType.Zip or MimeType.SevenZip or MimeType.Bzip or MimeType.Bzip2 or MimeType.Gzip or MimeType.Tar;
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsOfficeDocument( this MimeType mime ) => mime is MimeType.Doc or MimeType.Docx or MimeType.Xls or MimeType.Xlsx or MimeType.Ppt or MimeType.Pptx;
 }
