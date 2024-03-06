@@ -64,7 +64,7 @@ public ref struct SqlTableBuilder<TRecord>
     public const     int                DECIMAL_CAPACITY        = 38;
     private readonly DbInstance         _instance;
     private          ValueStringBuilder _query = new(10240);
-
+    
 
     public SqlTableBuilder() => throw new NotImplementedException();
     private SqlTableBuilder( DbInstance instance, string firstLine )
