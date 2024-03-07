@@ -64,7 +64,7 @@ public ref struct SqlTableBuilder<TRecord>
     public const     int                DECIMAL_CAPACITY        = 38;
     private readonly DbInstance         _instance;
     private          ValueStringBuilder _query = new(10240);
-    
+
 
     public SqlTableBuilder() => throw new NotImplementedException();
     private SqlTableBuilder( DbInstance instance, string firstLine )
@@ -114,6 +114,7 @@ public ref struct SqlTableBuilder<TRecord>
     }
 
 
+    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     private static DbType GetDataType<T>( out bool isNullable, ref int? size )
     {
         Type type = typeof(T);
@@ -127,43 +128,47 @@ public ref struct SqlTableBuilder<TRecord>
 
         if ( type == typeof(string) ) { return DbType.String; }
 
+        if ( type == typeof(Int128) || type == typeof(Int128?) ) { return DbType.String; }
+
+        if ( type == typeof(UInt128) || type == typeof(UInt128?) ) { return DbType.String; }
+
         if ( type == typeof(byte[]) ) { return DbType.Binary; }
 
         if ( typeof(JToken).IsAssignableFrom( type ) || typeof(IDictionary<string, JToken?>).IsAssignableFrom( type ) ) { return DbType.Object; }
 
-        if ( type == typeof(Guid) || type == typeof(RecordID<TRecord>) ) { return DbType.Guid; }
+        if ( type == typeof(Guid) || type == typeof(Guid?) || type == typeof(RecordID<TRecord>) || type == typeof(RecordID<TRecord>?) ) { return DbType.Guid; }
 
-        if ( type == typeof(byte) ) { return DbType.Byte; }
+        if ( type == typeof(byte) || type == typeof(byte?) ) { return DbType.Byte; }
 
-        if ( type == typeof(short) ) { return DbType.Int16; }
+        if ( type == typeof(short) || type == typeof(short?) ) { return DbType.Int16; }
 
-        if ( type == typeof(ushort) ) { return DbType.UInt16; }
+        if ( type == typeof(ushort) || type == typeof(ushort?) ) { return DbType.UInt16; }
 
-        if ( type == typeof(int) ) { return DbType.Int32; }
+        if ( type == typeof(int) || type == typeof(int?) ) { return DbType.Int32; }
 
-        if ( type == typeof(uint) ) { return DbType.UInt32; }
+        if ( type == typeof(uint) || type == typeof(uint?) ) { return DbType.UInt32; }
 
-        if ( type == typeof(long) ) { return DbType.Int64; }
+        if ( type == typeof(long) || type == typeof(long?) ) { return DbType.Int64; }
 
-        if ( type == typeof(ulong) ) { return DbType.UInt64; }
+        if ( type == typeof(ulong) || type == typeof(ulong?) ) { return DbType.UInt64; }
 
-        if ( type == typeof(float) ) { return DbType.Single; }
+        if ( type == typeof(float) || type == typeof(float?) ) { return DbType.Single; }
 
-        if ( type == typeof(double) ) { return DbType.Double; }
+        if ( type == typeof(double) || type == typeof(double?) ) { return DbType.Double; }
 
-        if ( type == typeof(decimal) ) { return DbType.Decimal; }
+        if ( type == typeof(decimal) || type == typeof(decimal?) ) { return DbType.Decimal; }
 
-        if ( type == typeof(bool) ) { return DbType.Boolean; }
+        if ( type == typeof(bool) || type == typeof(bool?) ) { return DbType.Boolean; }
 
-        if ( type == typeof(DateOnly) ) { return DbType.Date; }
+        if ( type == typeof(DateOnly) || type == typeof(DateOnly?) ) { return DbType.Date; }
 
-        if ( type == typeof(TimeOnly) ) { return DbType.Time; }
+        if ( type == typeof(TimeOnly) || type == typeof(TimeOnly?) ) { return DbType.Time; }
 
-        if ( type == typeof(TimeSpan) ) { return DbType.Time; }
+        if ( type == typeof(TimeSpan) || type == typeof(TimeSpan?) ) { return DbType.Time; }
 
-        if ( type == typeof(DateTime) ) { return DbType.DateTime2; }
+        if ( type == typeof(DateTime) || type == typeof(DateTime?) ) { return DbType.DateTime2; }
 
-        if ( type == typeof(DateTimeOffset) ) { return DbType.DateTimeOffset; }
+        if ( type == typeof(DateTimeOffset) || type == typeof(DateTimeOffset?) ) { return DbType.DateTimeOffset; }
 
         throw new ArgumentException( $"Unsupported type: {type.Name}" );
     }

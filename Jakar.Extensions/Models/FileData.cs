@@ -37,13 +37,19 @@ public interface IFileData
     IFileMetaData?                                  MetaData { get; }
 
 
+    public static OneOf<byte[], string> GetData( string data )
+    {
+        try { return Convert.FromBase64String( data ); }
+        catch ( FormatException ) { return data; }
+    }
     public static string GetHash( in OneOf<byte[], string>                       data ) => data.Match( GetHash, GetHash );
     public static string GetHash( in OneOf<ReadOnlyMemory<byte>, byte[], string> data ) => data.Match( GetHash, GetHash, GetHash );
-    public static string GetHash( string data )
+    public static string GetHash( string                                         data ) => GetHash( data, Encoding.Default );
+    public static string GetHash( string data, Encoding encoding )
     {
-        using IMemoryOwner<byte> owner = MemoryPool<byte>.Shared.Rent( Encoding.Default.GetByteCount( data ) );
+        using IMemoryOwner<byte> owner = MemoryPool<byte>.Shared.Rent( encoding.GetByteCount( data ) );
 
-        Encoding.Default.GetBytes( data, owner.Memory.Span );
+        encoding.GetBytes( data, owner.Memory.Span );
         return GetHash( owner.Memory );
     }
     static        string GetHash( byte[]               x )    => Hashes.Hash_SHA256( x ).ToString();
@@ -114,11 +120,16 @@ public record FileData : FileData<FileMetaData>
 
 public static class FileDataExtensions
 {
-    public static OneOf<byte[], string> GetData( this IFileData data )
+    public static Stream GetStream( this IFileData data ) => data.GetStream( Encoding.Default );
+    public static Stream GetStream( this IFileData data, Encoding encoding )
     {
-        if ( data.MimeType.IsText() ) { return data.Payload; }
+        OneOf<byte[], string> one = data.GetData();
 
-        try { return Convert.FromBase64String( data.Payload ); }
-        catch ( FormatException ) { return data.Payload; }
+        return one.IsT0
+                   ? new MemoryStream( one.AsT0 )
+                   : new MemoryStream( encoding.GetBytes( one.AsT1 ) );
     }
+    public static OneOf<byte[], string> GetData( this IFileData data ) => data.MimeType.IsText()
+                                                                              ? data.Payload
+                                                                              : IFileData.GetData( data.Payload );
 }
