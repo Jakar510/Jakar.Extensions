@@ -12,7 +12,8 @@ namespace Jakar.Xml;
 
 public static partial class Xmlizer
 {
-    public static T Deserialize<T>( string xml, out IDictionary<string, string>? attributes ) where T : new()
+    public static T Deserialize<T>( string xml, out IDictionary<string, string>? attributes )
+        where T : new()
     {
         // Activator.CreateInstance<T>() ?? throw new NullReferenceException(nameof(Activator.CreateInstance));
 

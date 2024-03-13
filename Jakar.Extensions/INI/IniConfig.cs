@@ -2,17 +2,18 @@
 
 
 public sealed partial class IniConfig : ConcurrentDictionary<string, IniConfig.Section>
-#if NET6_0_OR_GREATER
+                                    #if NET6_0_OR_GREATER
                                         ,
                                         ISpanFormattable
-#endif
-#if NET7_0_OR_GREATER
+                                    #endif
+                                    #if NET7_0_OR_GREATER
                                         ,
                                         ISpanParsable<IniConfig>
 #endif
 
 {
     private readonly IEqualityComparer<string> _comparer;
+    public new Section this[ string sectionName ] { get => GetOrAdd( sectionName ); set => base[sectionName] = value; }
 
 
     public int Length
@@ -23,11 +24,6 @@ public sealed partial class IniConfig : ConcurrentDictionary<string, IniConfig.S
             int result = values + Keys.Count;
             return result;
         }
-    }
-    public new Section this[ string sectionName ]
-    {
-        get => GetOrAdd( sectionName );
-        set => base[sectionName] = value;
     }
 
 
@@ -59,7 +55,9 @@ public sealed partial class IniConfig : ConcurrentDictionary<string, IniConfig.S
 
     /// <summary> Gets the <see cref="Section"/> with the <paramref name="sectionName"/> . If it doesn't exist, it is created, then returned. </summary>
     /// <param name="sectionName"> Section Name </param>
-    /// <returns> <see cref="Section"/> </returns>
+    /// <returns>
+    ///     <see cref="Section"/>
+    /// </returns>
     public Section GetOrAdd( string sectionName )
     {
         if ( string.IsNullOrEmpty( sectionName ) ) { throw new ArgumentNullException( nameof(sectionName) ); }
@@ -79,7 +77,7 @@ public sealed partial class IniConfig : ConcurrentDictionary<string, IniConfig.S
         ReadOnlySpan<char> span = s;
         return Parse( span, provider );
     }
-    public static bool TryParse( string? s, IFormatProvider? provider, [ NotNullWhen( true ) ] out IniConfig? result )
+    public static bool TryParse( string? s, IFormatProvider? provider, [NotNullWhen( true )] out IniConfig? result )
     {
         ReadOnlySpan<char> span = s;
         return TryParse( span, provider, out result );
@@ -147,7 +145,7 @@ public sealed partial class IniConfig : ConcurrentDictionary<string, IniConfig.S
 
         return config;
     }
-    public static bool TryParse( ReadOnlySpan<char> span, IFormatProvider? provider, [ NotNullWhen( true ) ] out IniConfig? result )
+    public static bool TryParse( ReadOnlySpan<char> span, IFormatProvider? provider, [NotNullWhen( true )] out IniConfig? result )
     {
         try
         {

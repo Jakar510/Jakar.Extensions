@@ -10,13 +10,13 @@ using System.Text;
 namespace Jakar.Xml.Serialization;
 
 
-[ SuppressMessage( "ReSharper", "PossiblyImpureMethodCallOnReadonlyVariable" ) ]
+[SuppressMessage( "ReSharper", "PossiblyImpureMethodCallOnReadonlyVariable" )]
 public ref struct XWriter( bool shouldIndent )
 {
-    public const      string        NULL = "null";
-    private readonly  StringBuilder _sb  = new(); // TODO: System.Text.ValueStringBuilder
+    public const      string        NULL         = "null";
+    private readonly  StringBuilder _sb          = new(); // TODO: System.Text.ValueStringBuilder
     internal readonly bool          shouldIndent = shouldIndent;
-    internal          int           indentLevel = default;
+    internal          int           indentLevel  = default;
 
 
     public XWriter() : this( true ) { }
@@ -192,7 +192,8 @@ public ref struct XWriter( bool shouldIndent )
         _sb.Append( buffer[..charsWritten] );
         return this;
     }
-    public XWriter Append<T>( T? value, ReadOnlySpan<char> format, CultureInfo culture, int bufferSize ) where T : struct, ISpanFormattable
+    public XWriter Append<T>( T? value, ReadOnlySpan<char> format, CultureInfo culture, int bufferSize )
+        where T : struct, ISpanFormattable
     {
         if ( value.HasValue )
         {

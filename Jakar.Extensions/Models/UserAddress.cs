@@ -4,18 +4,18 @@
 namespace Jakar.Extensions;
 
 
-[ SuppressMessage( "ReSharper", "UnusedMemberInSuper.Global" ) ]
+[SuppressMessage( "ReSharper", "UnusedMemberInSuper.Global" )]
 public interface IAddress
 {
-    public              string? Address         { get; }
-    public              string  City            { get; }
-    public              string  Country         { get; }
-    public              bool    IsPrimary       { get; }
-    public              string  Line1           { get; }
-    public              string  Line2           { get; }
-    [ Required ] public string  PostalCode      { get; }
-    public              string  StateOrProvince { get; }
-    public              Guid?   UserID          { get; }
+    public            string? Address         { get; }
+    public            string  City            { get; }
+    public            string  Country         { get; }
+    public            bool    IsPrimary       { get; }
+    public            string  Line1           { get; }
+    public            string  Line2           { get; }
+    [Required] public string  PostalCode      { get; }
+    public            string  StateOrProvince { get; }
+    public            Guid?   UserID          { get; }
 }
 
 
@@ -37,19 +37,10 @@ public record UserAddress : ObservableRecord, IAddress, IComparable<UserAddress>
     public static Sorter<UserAddress> Sorter => Sorter<UserAddress>.Default;
 
 
-    [ JsonExtensionData ]
-    public IDictionary<string, JToken?>? AdditionalData
-    {
-        get => _additionalData;
-        set => SetProperty( ref _additionalData, value );
-    }
+    [JsonExtensionData] public IDictionary<string, JToken?>? AdditionalData { get => _additionalData; set => SetProperty( ref _additionalData, value ); }
 
 
-    public string? Address
-    {
-        get => _address ??= ToString();
-        set => SetProperty( ref _address, value );
-    }
+    public string? Address { get => _address ??= ToString(); set => SetProperty( ref _address, value ); }
 
 
     public string City
@@ -71,13 +62,9 @@ public record UserAddress : ObservableRecord, IAddress, IComparable<UserAddress>
         }
     }
 
-    public bool IsPrimary
-    {
-        get => _isPrimary;
-        set => SetProperty( ref _isPrimary, value );
-    }
+    public bool IsPrimary { get => _isPrimary; set => SetProperty( ref _isPrimary, value ); }
 
-    [ JsonIgnore ]
+    [JsonIgnore]
     public bool IsValidAddress
     {
         get
@@ -117,7 +104,7 @@ public record UserAddress : ObservableRecord, IAddress, IComparable<UserAddress>
         }
     }
 
-    [ Required ]
+    [Required]
     public string PostalCode
     {
         get => _postalCode;
@@ -137,11 +124,7 @@ public record UserAddress : ObservableRecord, IAddress, IComparable<UserAddress>
         }
     }
 
-    public Guid? UserID
-    {
-        get => _userID;
-        set => SetProperty( ref _userID, value );
-    }
+    public Guid? UserID { get => _userID; set => SetProperty( ref _userID, value ); }
 
 
     public UserAddress() { }
@@ -208,5 +191,3 @@ public record UserAddress : ObservableRecord, IAddress, IComparable<UserAddress>
     public static bool operator <=( UserAddress? left, UserAddress? right ) => Sorter.Compare( left, right ) <= 0;
     public static bool operator >=( UserAddress? left, UserAddress? right ) => Sorter.Compare( left, right ) >= 0;
 }
-
-

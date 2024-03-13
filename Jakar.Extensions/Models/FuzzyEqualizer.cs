@@ -8,7 +8,8 @@ public interface IFuzzyEquals<T> : IEquatable<T>
 
 
 
-public sealed class ValueFuzzyEqualizer<T> : IEqualityComparer<T?>, IEqualityComparer<T>, IEqualityComparer where T : struct, IFuzzyEquals<T>
+public sealed class ValueFuzzyEqualizer<T> : IEqualityComparer<T?>, IEqualityComparer<T>, IEqualityComparer
+    where T : struct, IFuzzyEquals<T>
 {
     public static ValueFuzzyEqualizer<T> Default { get; } = new();
 
@@ -43,7 +44,8 @@ public sealed class ValueFuzzyEqualizer<T> : IEqualityComparer<T?>, IEqualityCom
 
 
 
-public sealed class FuzzyEqualizer<T> : IEqualityComparer<T>, IEqualityComparer where T : class, IFuzzyEquals<T>
+public sealed class FuzzyEqualizer<T> : IEqualityComparer<T>, IEqualityComparer
+    where T : class, IFuzzyEquals<T>
 {
     public static FuzzyEqualizer<T> Default { get; } = new();
 

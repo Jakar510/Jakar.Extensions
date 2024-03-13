@@ -17,7 +17,7 @@ internal sealed class TestDatabase : Database
     protected override DbConnection CreateConnection( in SecuredString secure ) => new NpgsqlConnection( secure );
 
 
-    [ Conditional( "DEBUG" ) ]
+    [Conditional( "DEBUG" )]
     public static async void TestAsync<T>()
         where T : IAppName
     {
@@ -47,25 +47,21 @@ internal sealed class TestDatabase : Database
             await app.MigrateUpAsync();
 
             await using AsyncServiceScope scope = app.Services.CreateAsyncScope();
-            TestDatabase                  db    = scope.ServiceProvider.GetRequiredService<TestDatabase>();
+            var                           db    = scope.ServiceProvider.GetRequiredService<TestDatabase>();
             await TestUsers( db );
         }
         finally { await app.MigrateDownAsync(); }
     }
     private static async ValueTask TestUsers( Database db, CancellationToken token = default )
     {
-        using var  adminRights = UserRights<TestRight>.Create();
-        UserRecord admin       = UserRecord.Create( "Admin", "Admin", adminRights );
-        using var  userRights  = UserRights<TestRight>.Create( TestRight.Read );
-        UserRecord user        = UserRecord.Create( "User", "User", userRights, admin );
+        using var adminRights = UserRights<TestRight>.Create();
+        var       admin       = UserRecord.Create( "Admin", "Admin", adminRights );
+        using var userRights  = UserRights<TestRight>.Create( TestRight.Read );
+        var       user        = UserRecord.Create( "User", "User", userRights, admin );
 
-        UserRecord[] users =
-        [
-            admin,
-            user
-        ];
+        UserRecord[] users = [admin, user];
 
-        List<UserRecord> results = new List<UserRecord>( users.Length );
+        var results = new List<UserRecord>( users.Length );
         await foreach ( UserRecord record in db.Users.Insert( users, token ) ) { results.Add( record ); }
 
         Debug.Assert( users.Length == results.Count );

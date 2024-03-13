@@ -5,7 +5,7 @@ public static partial class TypeExtensions
 {
     public static bool IsSet(
     #if NET6_0_OR_GREATER
-        [ DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.Interfaces ) ]
+        [DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.Interfaces )]
     #endif
         this Type type
     ) => type.HasInterface( typeof(ISet<>) );
@@ -13,11 +13,11 @@ public static partial class TypeExtensions
 
     public static bool IsSet(
     #if NET6_0_OR_GREATER
-        [ DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.Interfaces ) ]
+        [DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.Interfaces )]
     #endif
         this Type classType,
-        [ NotNullWhen( true ) ] out Type? itemType,
-        [ NotNullWhen( true ) ] out bool? isBuiltInType
+        [NotNullWhen( true )] out Type? itemType,
+        [NotNullWhen( true )] out bool? isBuiltInType
     )
     {
         if ( classType.IsSet( out IReadOnlyList<Type>? itemTypes ) )
@@ -36,10 +36,10 @@ public static partial class TypeExtensions
     public static bool IsSet(
 
     #if NET6_0_OR_GREATER
-        [ DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.Interfaces ) ]
+        [DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.Interfaces )]
     #endif
         this Type propertyType,
-        [ NotNullWhen( true ) ] out Type? itemType
+        [NotNullWhen( true )] out Type? itemType
     )
     {
         if ( propertyType.IsSet( out IReadOnlyList<Type>? itemTypes ) )
@@ -54,10 +54,10 @@ public static partial class TypeExtensions
 
     public static bool IsSet(
     #if NET6_0_OR_GREATER
-        [ DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.Interfaces ) ]
+        [DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.Interfaces )]
     #endif
         this Type classType,
-        [ NotNullWhen( true ) ] out IReadOnlyList<Type>? itemTypes
+        [NotNullWhen( true )] out IReadOnlyList<Type>? itemTypes
     )
     {
         if ( classType.IsGenericType && classType.IsSet() )

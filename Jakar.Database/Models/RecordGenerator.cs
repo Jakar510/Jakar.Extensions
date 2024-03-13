@@ -4,14 +4,16 @@
 namespace Jakar.Database;
 
 
-/// <summary> <see href="https://stackoverflow.com/a/15992856/9530917"/> </summary>
+/// <summary>
+///     <see href="https://stackoverflow.com/a/15992856/9530917"/>
+/// </summary>
 public struct RecordGenerator<TRecord>( DbTable<TRecord> table ) : IAsyncEnumerable<TRecord>, IAsyncEnumerator<TRecord>
     where TRecord : class, ITableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
-    private readonly DbTable<TRecord>           _table = table;
-    private readonly CancellationToken          _token   = default;
-    private          TRecord?                   _current = default;
-    private          AsyncKeyGenerator<TRecord> _generator = new( table );
+    private readonly DbTable<TRecord>           _table     = table;
+    private readonly CancellationToken          _token     = default;
+    private          TRecord?                   _current   = default;
+    private          AsyncKeyGenerator<TRecord> _generator = new(table);
 
 
     public TRecord Current => _current ?? throw new NullReferenceException( nameof(_current) );

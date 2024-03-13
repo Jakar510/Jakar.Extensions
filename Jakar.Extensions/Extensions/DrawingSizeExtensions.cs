@@ -4,14 +4,14 @@
 public static class DrawingSizeExtensions
 {
 #if NET7_0_OR_GREATER
-    [ RequiresDynamicCode( nameof(GetScaledSizes) ) ]
+    [RequiresDynamicCode( nameof(GetScaledSizes) )]
 #endif
     public static IEnumerable<(TEnum, Size)> GetScaledSizes<TEnum>( this int baseSize, params TEnum[] scales )
         where TEnum : struct, Enum => new Size( baseSize, baseSize ).GetScaledSizes( scales );
 
 
 #if NET7_0_OR_GREATER
-    [ RequiresDynamicCode( nameof(GetScaledSizes) ) ]
+    [RequiresDynamicCode( nameof(GetScaledSizes) )]
 #endif
     public static IEnumerable<(TEnum, Size)> GetScaledSizes<TEnum>( this Size baseSize, params TEnum[] scales )
         where TEnum : struct, Enum

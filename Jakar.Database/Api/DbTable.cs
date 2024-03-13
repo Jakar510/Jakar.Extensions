@@ -5,39 +5,21 @@
 namespace Jakar.Database;
 
 
-[ SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" ) ]
+[SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
 public partial class DbTable<TRecord> : IConnectableDb
     where TRecord : class, ITableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
     protected readonly IConnectableDbRoot   _database;
-    protected readonly ITableCache<TRecord> _tableCache;
     protected readonly ISqlCache<TRecord>   _sqlCache;
+    protected readonly ITableCache<TRecord> _tableCache;
+    public static      TRecord[]            Empty { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => []; }
 
 
-    public static ImmutableArray<TRecord> EmptyIArray
-    {
-        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => ImmutableArray<TRecord>.Empty;
-    }
-    public static FrozenSet<TRecord> Set
-    {
-        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => FrozenSet<TRecord>.Empty;
-    }
-    public static TRecord[] Empty
-    {
-        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => Array.Empty<TRecord>();
-    }
-    public DbInstance Instance
-    {
-        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => _database.Instance;
-    }
-    public int? CommandTimeout
-    {
-        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => _database.CommandTimeout;
-    }
-    public RecordGenerator<TRecord> Records
-    {
-        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => new(this);
-    }
+    public static ImmutableArray<TRecord>  EmptyArray     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => []; }
+    public static FrozenSet<TRecord>       Set            { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => FrozenSet<TRecord>.Empty; }
+    public        int?                     CommandTimeout { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _database.CommandTimeout; }
+    public        DbInstance               Instance       { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _database.Instance; }
+    public        RecordGenerator<TRecord> Records        { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => new(this); }
 
 
     public DbTable( IConnectableDbRoot database, ISqlCacheFactory sqlCacheFactory )
@@ -61,7 +43,7 @@ public partial class DbTable<TRecord> : IConnectableDb
 
 
     public IAsyncEnumerable<TRecord> All( CancellationToken token = default ) => this.Call( All, token );
-    public virtual async IAsyncEnumerable<TRecord> All( DbConnection connection, DbTransaction? transaction, [ EnumeratorCancellation ] CancellationToken token = default )
+    public virtual async IAsyncEnumerable<TRecord> All( DbConnection connection, DbTransaction? transaction, [EnumeratorCancellation] CancellationToken token = default )
     {
         SqlCommand               sql    = _sqlCache.All();
         await using DbDataReader reader = await _database.ExecuteReaderAsync( connection, transaction, sql, token );
@@ -71,13 +53,7 @@ public partial class DbTable<TRecord> : IConnectableDb
 
     public ValueTask<TResult> Call<TResult>( string sql, DynamicParameters? parameters, Func<SqlMapper.GridReader, CancellationToken, ValueTask<TResult>> func, CancellationToken token = default ) =>
         this.TryCall( Call, sql, parameters, func, token );
-    public virtual async ValueTask<TResult> Call<TResult>( DbConnection                                                      connection,
-                                                           DbTransaction                                                     transaction,
-                                                           string                                                            sql,
-                                                           DynamicParameters?                                                parameters,
-                                                           Func<SqlMapper.GridReader, CancellationToken, ValueTask<TResult>> func,
-                                                           CancellationToken                                                 token = default
-    )
+    public virtual async ValueTask<TResult> Call<TResult>( DbConnection connection, DbTransaction transaction, string sql, DynamicParameters? parameters, Func<SqlMapper.GridReader, CancellationToken, ValueTask<TResult>> func, CancellationToken token = default )
     {
         try
         {
@@ -120,9 +96,9 @@ public partial class DbTable<TRecord> : IConnectableDb
     }
 
 
-    public async ValueTask<DataTable> Schema( DbConnection connection, CancellationToken token = default ) => await connection.GetSchemaAsync( token );
-    public async ValueTask<DataTable> Schema( DbConnection connection, string            collectionName, CancellationToken token = default ) => await connection.GetSchemaAsync( collectionName, token );
-    public async ValueTask<DataTable> Schema( DbConnection connection, string            collectionName, string?[] restrictionValues, CancellationToken token = default ) => await connection.GetSchemaAsync( collectionName, restrictionValues, token );
+    public async ValueTask<DataTable> Schema( DbConnection connection, CancellationToken token                                                                        = default ) => await connection.GetSchemaAsync( token );
+    public async ValueTask<DataTable> Schema( DbConnection connection, string            collectionName, CancellationToken token                                      = default ) => await connection.GetSchemaAsync( collectionName, token );
+    public async ValueTask<DataTable> Schema( DbConnection connection, string            collectionName, string?[]         restrictionValues, CancellationToken token = default ) => await connection.GetSchemaAsync( collectionName, restrictionValues, token );
 
 
     public async ValueTask<TResult> Schema<TResult>( Func<DataTable, CancellationToken, ValueTask<TResult>> func, CancellationToken token = default )

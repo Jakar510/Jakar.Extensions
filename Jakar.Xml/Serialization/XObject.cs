@@ -12,10 +12,10 @@ using System.Globalization;
 namespace Jakar.Xml.Serialization;
 
 
-[ SuppressMessage( "ReSharper", "PossiblyImpureMethodCallOnReadonlyVariable" ) ]
+[SuppressMessage( "ReSharper", "PossiblyImpureMethodCallOnReadonlyVariable" )]
 public ref struct XObject( ReadOnlySpan<char> key, XWriter context )
 {
-    private readonly ReadOnlySpan<char> _name = key;
+    private readonly ReadOnlySpan<char> _name   = key;
     private          XWriter            _writer = context;
 
 
@@ -150,9 +150,12 @@ public ref struct XObject( ReadOnlySpan<char> key, XWriter context )
     }
 
 
-    public XObject Add<T>( ReadOnlySpan<char> key, T? value, int bufferSize ) where T : struct, ISpanFormattable                      => Add( key, value, bufferSize, CultureInfo.CurrentCulture );
-    public XObject Add<T>( ReadOnlySpan<char> key, T? value, int bufferSize, CultureInfo culture ) where T : struct, ISpanFormattable => Add( key, value, bufferSize, default, culture );
-    public XObject Add<T>( ReadOnlySpan<char> key, T? value, int bufferSize, ReadOnlySpan<char> format, CultureInfo culture ) where T : struct, ISpanFormattable
+    public XObject Add<T>( ReadOnlySpan<char> key, T? value, int bufferSize )
+        where T : struct, ISpanFormattable => Add( key, value, bufferSize, CultureInfo.CurrentCulture );
+    public XObject Add<T>( ReadOnlySpan<char> key, T? value, int bufferSize, CultureInfo culture )
+        where T : struct, ISpanFormattable => Add( key, value, bufferSize, default, culture );
+    public XObject Add<T>( ReadOnlySpan<char> key, T? value, int bufferSize, ReadOnlySpan<char> format, CultureInfo culture )
+        where T : struct, ISpanFormattable
     {
         _writer.Indent( key ).Append( value, format, culture, bufferSize ).Next( key );
 

@@ -10,7 +10,9 @@ public interface IJoin : IChainEnd<ISqlBuilderRoot>
 
 
     /// <summary> Starts a JOIN chain </summary>
-    /// <returns> <see cref="IJoinChain"/> </returns>
+    /// <returns>
+    ///     <see cref="IJoinChain"/>
+    /// </returns>
     public IJoinChain On();
 }
 

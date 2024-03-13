@@ -2,31 +2,31 @@
 
 
 /// <see cref="LocalizableString"/>
-[ Serializable, Table( "Resx" ) ]
-public sealed record ResxRowRecord(
-    long                    KeyID,
-    string                  Key,
-    string                  Neutral,
-    string                  Arabic,
-    string                  Chinese,
-    string                  Czech,
-    string                  Dutch,
-    string                  English,
-    string                  French,
-    string                  German,
-    string                  Japanese,
-    string                  Korean,
-    string                  Polish,
-    string                  Portuguese,
-    string                  Spanish,
-    string                  Swedish,
-    string                  Thai,
-    RecordID<ResxRowRecord> ID,
-    DateTimeOffset          DateCreated,
-    DateTimeOffset?         LastModified = default
-) : TableRecord<ResxRowRecord>( ID, DateCreated, LastModified ), IDbReaderMapping<ResxRowRecord>
+[Serializable]
+[Table( TABLE_NAME )]
+public sealed record ResxRowRecord( long                    KeyID,
+                                    string                  Key,
+                                    string                  Neutral,
+                                    string                  Arabic,
+                                    string                  Chinese,
+                                    string                  Czech,
+                                    string                  Dutch,
+                                    string                  English,
+                                    string                  French,
+                                    string                  German,
+                                    string                  Japanese,
+                                    string                  Korean,
+                                    string                  Polish,
+                                    string                  Portuguese,
+                                    string                  Spanish,
+                                    string                  Swedish,
+                                    string                  Thai,
+                                    RecordID<ResxRowRecord> ID,
+                                    DateTimeOffset          DateCreated,
+                                    DateTimeOffset?         LastModified = default ) : TableRecord<ResxRowRecord>( ID, DateCreated, LastModified ), IDbReaderMapping<ResxRowRecord>
 {
-    public static string TableName { get; } = typeof(ResxRowRecord).GetTableName();
+    public const  string TABLE_NAME = "Resx";
+    public static string TableName => TABLE_NAME;
 
 
     public ResxRowRecord( string key, long keyID ) : this( key, keyID, string.Empty ) { }
@@ -84,7 +84,7 @@ public sealed record ResxRowRecord(
               RecordID<ResxRowRecord>.New(),
               DateTimeOffset.UtcNow ) { }
 
-    [ Pure ]
+    [Pure]
     public static ResxRowRecord Create( DbDataReader reader )
     {
         long   keyID        = reader.GetFieldValue<long>( nameof(KeyID) );
@@ -130,8 +130,8 @@ public sealed record ResxRowRecord(
                                   lastModified );
     }
 
-    [ Pure ]
-    public static async IAsyncEnumerable<ResxRowRecord> CreateAsync( DbDataReader reader, [ EnumeratorCancellation ] CancellationToken token = default )
+    [Pure]
+    public static async IAsyncEnumerable<ResxRowRecord> CreateAsync( DbDataReader reader, [EnumeratorCancellation] CancellationToken token = default )
     {
         while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
     }
@@ -168,7 +168,7 @@ public sealed record ResxRowRecord(
     }
 
 
-    [ Pure ]
+    [Pure]
     public ResxRowRecord With( string english,
                                string spanish,
                                string french,
@@ -202,7 +202,7 @@ public sealed record ResxRowRecord(
              LastModified = DateTimeOffset.UtcNow
          };
 
-    [ Pure ]
+    [Pure]
     public ResxString ToResxString() => new(Neutral,
                                             Arabic,
                                             Chinese,

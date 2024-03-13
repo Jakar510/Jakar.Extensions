@@ -9,7 +9,9 @@ namespace Jakar.Database.DbMigrations;
 
 
 /// <summary>
-///     <para> <see href="https://fluentmigrator.github.io/articles/fluent-interface.html"/> </para>
+///     <para>
+///         <see href="https://fluentmigrator.github.io/articles/fluent-interface.html"/>
+///     </para>
 /// </summary>
 public abstract class Migration<TRecord> : Migration
     where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>

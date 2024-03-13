@@ -8,9 +8,9 @@ public sealed class AsyncEnumerator<TValue, TList>( TList list, CancellationToke
     where TList : IReadOnlyList<TValue>
 {
     private const    int               START_INDEX = -1;
-    private readonly TList             _list = list;
-    private          CancellationToken _token = token;
-    private          int               _index = START_INDEX;
+    private readonly TList             _list       = list;
+    private          CancellationToken _token      = token;
+    private          int               _index      = START_INDEX;
     public           TValue            Current        => _list[_index];
     internal         bool              ShouldContinue => _token.ShouldContinue() && _index < _list.Count;
 

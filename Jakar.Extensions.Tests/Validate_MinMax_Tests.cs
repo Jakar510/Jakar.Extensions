@@ -4,10 +4,11 @@
 namespace Jakar.Extensions.Tests;
 
 
-[ TestFixture, TestOf( typeof(Validate) ) ]
+[TestFixture]
+[TestOf( typeof(Validate) )]
 public class Validate_MinMax_Tests : Assert
 {
-    [ Test ]
+    [Test]
     public void TestMin_Integers()
     {
         int  left   = 5;
@@ -17,7 +18,7 @@ public class Validate_MinMax_Tests : Assert
         this.NotNull( result );
     }
 
-    [ Test ]
+    [Test]
     public void TestMin_NullableIntegers()
     {
         int? left   = 5;
@@ -35,7 +36,7 @@ public class Validate_MinMax_Tests : Assert
         this.AreEqual( null, result );
     }
 
-    [ Test ]
+    [Test]
     public void TestMax_Integers()
     {
         int     left   = 5;
@@ -45,7 +46,7 @@ public class Validate_MinMax_Tests : Assert
         this.NotNull( result );
     }
 
-    [ Test ]
+    [Test]
     public void TestMax_NullableIntegers()
     {
         int? left   = 5;
@@ -62,7 +63,7 @@ public class Validate_MinMax_Tests : Assert
         this.AreEqual( null, result );
     }
 
-    [ Test ]
+    [Test]
     public void TestMin_Doubles()
     {
         double  left   = 5.0;
@@ -72,7 +73,7 @@ public class Validate_MinMax_Tests : Assert
         this.NotNull( result );
     }
 
-    [ Test ]
+    [Test]
     public void TestMin_NullableDoubles()
     {
         double? left   = 5.0;
@@ -89,7 +90,7 @@ public class Validate_MinMax_Tests : Assert
         this.AreEqual( null, result );
     }
 
-    [ Test ]
+    [Test]
     public void TestMax_Doubles()
     {
         double  left   = 5.0;
@@ -98,7 +99,7 @@ public class Validate_MinMax_Tests : Assert
         this.AreEqual( 5.0, result );
     }
 
-    [ Test ]
+    [Test]
     public void TestMax_NullableDoubles()
     {
         double? left   = 5.0;
@@ -116,7 +117,7 @@ public class Validate_MinMax_Tests : Assert
         this.AreEqual( null, result );
     }
 
-    [ Test ]
+    [Test]
     public void TestMin_TimeSpans()
     {
         TimeSpan  left   = TimeSpan.FromSeconds( 5 );
@@ -126,7 +127,7 @@ public class Validate_MinMax_Tests : Assert
         this.NotNull( result );
     }
 
-    [ Test ]
+    [Test]
     public void TestMax_TimeSpans()
     {
         TimeSpan  left   = TimeSpan.FromSeconds( 5 );
@@ -136,10 +137,10 @@ public class Validate_MinMax_Tests : Assert
         this.NotNull( result );
     }
 
-    [ Test ] public void TestMin_DateTimes()       => TestMin( DateTime.UtcNow );
-    [ Test ] public void TestMax_DateTimes()       => TestMax( DateTime.UtcNow );
-    [ Test ] public void TestMin_DateTimeOffsets() => TestMin( DateTimeOffset.UtcNow );
-    [ Test ] public void TestMax_DateTimeOffsets() => TestMax( DateTimeOffset.UtcNow );
+    [Test] public void TestMin_DateTimes()       => TestMin( DateTime.UtcNow );
+    [Test] public void TestMax_DateTimes()       => TestMax( DateTime.UtcNow );
+    [Test] public void TestMin_DateTimeOffsets() => TestMin( DateTimeOffset.UtcNow );
+    [Test] public void TestMax_DateTimeOffsets() => TestMax( DateTimeOffset.UtcNow );
 
 
     private void TestMin( in DateTime value )

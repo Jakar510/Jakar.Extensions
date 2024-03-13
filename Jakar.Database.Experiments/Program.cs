@@ -1,4 +1,7 @@
-﻿try
+﻿using Jakar.Database;
+
+
+try
 {
     "Hello World!".WriteToConsole();
     Console.WriteLine();
@@ -13,7 +16,7 @@
 
     // await Tests.Test_ConcurrentObservableCollection();
 
-    Jakar.Database.TestDatabase.TestAsync<DbExperiments>();
+    TestDatabase.TestAsync<DbExperiments>();
 
     // JsonTest.Run();
 

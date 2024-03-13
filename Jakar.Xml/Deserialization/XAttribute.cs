@@ -11,7 +11,7 @@ using Jakar.Extensions;
 namespace Jakar.Xml.Deserialization;
 
 
-[ SuppressMessage( "ReSharper", "InconsistentNaming" ) ]
+[SuppressMessage( "ReSharper", "InconsistentNaming" )]
 public readonly ref struct JAttribute
 {
     private readonly ReadOnlyMemory<char> _span;

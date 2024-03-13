@@ -4,7 +4,7 @@
 namespace Jakar.Database;
 
 
-[ SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" ) ]
+[SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
 public partial class DbTable<TRecord>
 {
     public ValueTask Delete( TRecord                             record,   CancellationToken token                               = default ) => this.TryCall( Delete, record,   token );
@@ -36,7 +36,7 @@ public partial class DbTable<TRecord>
     }
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
+    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask Delete( DbConnection connection, DbTransaction transaction, IEnumerable<RecordID<TRecord>> ids, CancellationToken token = default )
     {
         SqlCommand sql = _sqlCache.Delete( ids );
@@ -48,7 +48,7 @@ public partial class DbTable<TRecord>
         }
         catch ( Exception e ) { throw new SqlException( sql, e ); }
     }
-    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
+    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public async ValueTask Delete( DbConnection connection, DbTransaction transaction, bool matchAll, DynamicParameters parameters, CancellationToken token )
     {
         SqlCommand        sql     = _sqlCache.Delete( matchAll, parameters );

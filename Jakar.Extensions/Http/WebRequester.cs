@@ -4,41 +4,33 @@
 namespace Jakar.Extensions;
 
 
-[ SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" ) ]
+[SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
 public sealed partial class WebRequester( ILogger? logger, HttpClient client, IHostInfo host, WebRequester.RetryPolicy? retryPolicy, Encoding encoding ) : IDisposable
 {
-    private readonly HttpClient         _client = client;
-    private readonly IHostInfo          _host = host;
-    private readonly ILogger?           _logger = logger;
+    private readonly HttpClient         _client      = client;
+    private readonly IHostInfo          _host        = host;
+    private readonly ILogger?           _logger      = logger;
     private readonly RetryPolicy?       _retryPolicy = retryPolicy;
     public           HttpRequestHeaders DefaultRequestHeaders => _client.DefaultRequestHeaders;
     public           Encoding           Encoding              { get; init; } = encoding;
 
 
-    public TimeSpan Timeout
-    {
-        get => _client.Timeout;
-        set => _client.Timeout = value;
-    }
+    public TimeSpan Timeout { get => _client.Timeout; set => _client.Timeout = value; }
 
 
     public WebRequester( ILogger? logger, HttpClient client, IHostInfo host, RetryPolicy? retryPolicy = default ) : this( logger, client, host, retryPolicy, Encoding.Default ) { }
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] private Uri        CreateUrl( string  relativePath )                                    => new(_host.HostInfo, relativePath);
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] private WebHandler CreateHandler( Uri url, HttpMethod method, CancellationToken token ) => CreateHandler( new HttpRequestMessage( method, url ), token );
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] private Uri        CreateUrl( string  relativePath )                                    => new(_host.HostInfo, relativePath);
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] private WebHandler CreateHandler( Uri url, HttpMethod method, CancellationToken token ) => CreateHandler( new HttpRequestMessage( method, url ), token );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     private WebHandler CreateHandler( Uri url, HttpMethod method, HttpContent value, CancellationToken token )
     {
         _logger?.LogDebug( "Starting a {Method} request to {Uri}", method.Method, url.ToString() );
 
-        return CreateHandler( new HttpRequestMessage( method, url )
-                              {
-                                  Content = value
-                              },
-                              token );
+        return CreateHandler( new HttpRequestMessage( method, url ) { Content = value }, token );
     }
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] private WebHandler CreateHandler( HttpRequestMessage request, CancellationToken token ) => new(_logger, _client, request, Encoding, _retryPolicy, token);
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] private WebHandler CreateHandler( HttpRequestMessage request, CancellationToken token ) => new(_logger, _client, request, Encoding, _retryPolicy, token);
 
 
     public WebHandler Delete( string    relativePath, HttpContent                 value, CancellationToken token ) => Delete( CreateUrl( relativePath ), value, token );

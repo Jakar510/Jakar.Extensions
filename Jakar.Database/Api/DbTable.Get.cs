@@ -4,7 +4,7 @@
 namespace Jakar.Database;
 
 
-[ SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" ) ]
+[SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
 public partial class DbTable<TRecord>
 {
     public ValueTask<long>           Count( CancellationToken                 token = default )                                                   => this.Call( Count, token );
@@ -17,7 +17,7 @@ public partial class DbTable<TRecord>
     public ValueTask<TRecord?>       Get( RecordID<TRecord>?                  id,         CancellationToken token = default ) => this.Call( Get, id, token );
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
+    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask<long> Count( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
         SqlCommand sql = _sqlCache.Count();
@@ -26,7 +26,7 @@ public partial class DbTable<TRecord>
         catch ( Exception e ) { throw new SqlException( sql, e ); }
     }
 
-    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
+    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask<bool> Exists( DbConnection connection, DbTransaction transaction, bool matchAll, DynamicParameters parameters, CancellationToken token )
     {
         SqlCommand sql = _sqlCache.Exists( matchAll, parameters );
@@ -41,14 +41,14 @@ public partial class DbTable<TRecord>
     }
 
 
-    public virtual async IAsyncEnumerable<TRecord> Get( DbConnection connection, DbTransaction? transaction, IAsyncEnumerable<RecordID<TRecord>> ids, [ EnumeratorCancellation ] CancellationToken token = default )
+    public virtual async IAsyncEnumerable<TRecord> Get( DbConnection connection, DbTransaction? transaction, IAsyncEnumerable<RecordID<TRecord>> ids, [EnumeratorCancellation] CancellationToken token = default )
     {
         HashSet<RecordID<TRecord>> set = await ids.ToHashSet( token );
         await foreach ( TRecord record in Get( connection, transaction, set, token ) ) { yield return record; }
     }
 
-    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
-    public virtual IAsyncEnumerable<TRecord> Get( DbConnection connection, DbTransaction? transaction, IEnumerable<RecordID<TRecord>> ids, [ EnumeratorCancellation ] CancellationToken token = default )
+    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
+    public virtual IAsyncEnumerable<TRecord> Get( DbConnection connection, DbTransaction? transaction, IEnumerable<RecordID<TRecord>> ids, [EnumeratorCancellation] CancellationToken token = default )
     {
         SqlCommand sql = _sqlCache.Get( ids );
         return Where( connection, transaction, sql, token );
@@ -89,7 +89,7 @@ public partial class DbTable<TRecord>
         await Get( connection, transaction, true, Database.GetParameters( value, default, columnName ), token );
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
+    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask<TRecord?> Get( DbConnection connection, DbTransaction? transaction, bool matchAll, DynamicParameters parameters, CancellationToken token = default )
     {
         SqlCommand sql = _sqlCache.Get( matchAll, parameters );

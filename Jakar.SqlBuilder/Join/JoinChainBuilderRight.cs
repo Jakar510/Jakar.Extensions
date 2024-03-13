@@ -3,7 +3,7 @@
 
 public struct JoinChainBuilderRight( in JoinClauseBuilder join, ref EasySqlBuilder builder )
 {
-    private readonly JoinClauseBuilder _join = join;
+    private readonly JoinClauseBuilder _join    = join;
     private          EasySqlBuilder    _builder = builder;
 
     public JoinClauseBuilder Right<T>( string columnName )

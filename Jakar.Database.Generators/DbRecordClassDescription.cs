@@ -11,9 +11,9 @@ namespace Jakar.Database.Generators;
 
 internal record DbRecordClassDescription
 {
+    public string                   ClassName   => Declaration.Identifier.ValueText;
     public ClassDeclarationSyntax   Declaration { get; }
     public ImmutableArray<Property> Properties  { get; }
-    public string                   ClassName   => Declaration.Identifier.ValueText;
 
 
     private DbRecordClassDescription( ClassDeclarationSyntax declaration ) : this( declaration, Property.Create( declaration ) ) { }
@@ -24,7 +24,7 @@ internal record DbRecordClassDescription
     }
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static DbRecordClassDescription Create( ClassDeclarationSyntax declaration ) => new(declaration);
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static DbRecordClassDescription Create( ClassDeclarationSyntax declaration ) => new(declaration);
 
 
     public void Emit( in SourceProductionContext context ) => Emit( context, context.CancellationToken );
@@ -185,8 +185,7 @@ public sealed record Property( PropertyDeclarationSyntax Declaration, string Nam
             {
                 case UnicodeCategory.UppercaseLetter:
                 case UnicodeCategory.TitlecaseLetter:
-                    if ( previousCategory is UnicodeCategory.SpaceSeparator or UnicodeCategory.LowercaseLetter ||
-                         previousCategory is not UnicodeCategory.DecimalDigitNumber && previousCategory is not null && currentIndex > 0 && currentIndex + 1 < value.Length && char.IsLower( value[currentIndex + 1] ) ) { builder.Append( '_' ); }
+                    if ( previousCategory is UnicodeCategory.SpaceSeparator or UnicodeCategory.LowercaseLetter || previousCategory is not UnicodeCategory.DecimalDigitNumber && previousCategory is not null && currentIndex > 0 && currentIndex + 1 < value.Length && char.IsLower( value[currentIndex + 1] ) ) { builder.Append( '_' ); }
 
                     currentChar = char.ToLower( currentChar, cultureInfo );
                     break;

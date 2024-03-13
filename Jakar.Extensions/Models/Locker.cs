@@ -34,12 +34,11 @@ public interface ILocker
 
 
 
-[ SuppressMessage( "ReSharper", "NullableWarningSuppressionIsUsed" ) ]
+[SuppressMessage( "ReSharper", "NullableWarningSuppressionIsUsed" )]
 public sealed class Locker : ILocker, IEquatable<Locker>, IAsyncDisposable, IDisposable
 {
     private readonly AutoResetEvent?       _autoResetEvent;
     private readonly Barrier?              _barrier;
-    private readonly Type                  _index;
     private readonly CountdownEvent?       _countdownEvent;
     private readonly EventWaitHandle?      _eventWaitHandle;
     private readonly ManualResetEvent?     _manualResetEvent;
@@ -49,18 +48,13 @@ public sealed class Locker : ILocker, IEquatable<Locker>, IAsyncDisposable, IDis
     private readonly Semaphore?            _semaphore;
     private readonly SemaphoreSlim?        _semaphoreSlim;
     private readonly SpinLock?             _spinLock;
+    private readonly Type                  _index;
     private          bool                  _isTaken;
 
 
-    public static Locker Default
-    {
-        [ Pure, MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => new(new SemaphoreSlim( 1, 1 ));
-    }
-    public bool IsTaken
-    {
-        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => _isTaken;
-    }
-    public TimeSpan? TimeOut { [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get; init; }
+    public static Locker    Default { [Pure] [MethodImpl( MethodImplOptions.AggressiveInlining )] get => new(new SemaphoreSlim( 1, 1 )); }
+    public        bool      IsTaken { [MethodImpl(        MethodImplOptions.AggressiveInlining )] get => _isTaken; }
+    public        TimeSpan? TimeOut { [MethodImpl(        MethodImplOptions.AggressiveInlining )] get; init; }
 
 
     public Locker() => _index = Type.Object;

@@ -4,7 +4,7 @@
 namespace Jakar.Extensions;
 
 
-[ SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" ) ]
+[SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
 public class ObservableHashSet<T>( HashSet<T> values ) : CollectionAlerts<T>, ISet<T>, IReadOnlySet<T>
 {
     private readonly       HashSet<T> _values = values;

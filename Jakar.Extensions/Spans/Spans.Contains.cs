@@ -5,7 +5,9 @@ namespace Jakar.Extensions;
 
 
 /// <summary>
-///     <para> <see href="https://devblogs.microsoft.com/dotnet/performance_improvements_in_net_7/#vectorization"/> </para>
+///     <para>
+///         <see href="https://devblogs.microsoft.com/dotnet/performance_improvements_in_net_7/#vectorization"/>
+///     </para>
 /// </summary>
 public static partial class Spans
 {
@@ -184,9 +186,6 @@ public static partial class Spans
 
         return true;
     }
-
-
-
 
 
     // TODO: prep for DotNet 7

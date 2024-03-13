@@ -1,39 +1,25 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Threading.Tasks;
-
 using TestAppIos.Models;
-
 using Xamarin.Forms;
+
+
 
 namespace TestAppIos.ViewModels
 {
-    [QueryProperty( nameof( ItemId ), nameof( ItemId ) )]
+    [QueryProperty( nameof(ItemId), nameof(ItemId) )]
     public class ItemDetailViewModel : BaseViewModel
     {
+        private string description;
         private string itemId;
         private string text;
-        private string description;
-        public string Id { get; set; }
 
-        public string Text
-        {
-            get => text;
-            set => SetProperty( ref text, value );
-        }
-
-        public string Description
-        {
-            get => description;
-            set => SetProperty( ref description, value );
-        }
+        public string Description { get => description; set => SetProperty( ref description, value ); }
+        public string Id          { get;                set; }
 
         public string ItemId
         {
-            get
-            {
-                return itemId;
-            }
+            get => itemId;
             set
             {
                 itemId = value;
@@ -41,19 +27,18 @@ namespace TestAppIos.ViewModels
             }
         }
 
-        public async void LoadItemId(string itemId)
+        public string Text { get => text; set => SetProperty( ref text, value ); }
+
+        public async void LoadItemId( string itemId )
         {
             try
             {
-                var item = await DataStore.GetItemAsync( itemId );
-                Id = item.Id;
-                Text = item.Text;
+                Item item = await DataStore.GetItemAsync( itemId );
+                Id          = item.Id;
+                Text        = item.Text;
                 Description = item.Description;
             }
-            catch (Exception)
-            {
-                Debug.WriteLine( "Failed to Load Item" );
-            }
+            catch ( Exception ) { Debug.WriteLine( "Failed to Load Item" ); }
         }
     }
 }

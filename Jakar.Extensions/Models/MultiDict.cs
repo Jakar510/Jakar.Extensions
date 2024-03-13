@@ -11,7 +11,7 @@ public class MultiDict<TKey> : Dictionary<TKey, object?>
     public MultiDict( int                                      capacity,   IEqualityComparer<TKey>? comparer = null ) : base( capacity, comparer ) { }
     public MultiDict( IDictionary<TKey, object?>               dictionary, IEqualityComparer<TKey>? comparer = null ) : base( dictionary, comparer ) { }
     public MultiDict( IEnumerable<KeyValuePair<TKey, object?>> collection, IEqualityComparer<TKey>? comparer = null ) : base( collection, comparer ) { }
-    [ Obsolete ] protected MultiDict( SerializationInfo        info,       StreamingContext         context ) : base( info, context ) { }
+    [Obsolete] protected MultiDict( SerializationInfo          info,       StreamingContext         context ) : base( info, context ) { }
 
     #endregion
 
@@ -45,12 +45,12 @@ public class MultiDict<TKey> : Dictionary<TKey, object?>
     public bool ValueAs( TKey key, out bool?     value ) => ValueAs<bool?>( key, out value );
 
 
-    public bool ValueAs( TKey key, [ NotNullWhen( true ) ] out IPAddress?  value ) => ValueAs<IPAddress>( key, out value );
-    public bool ValueAs( TKey key, [ NotNullWhen( true ) ] out AppVersion? value ) => ValueAs<AppVersion?>( key, out value );
-    public bool ValueAs( TKey key, [ NotNullWhen( true ) ] out Version?    value ) => ValueAs<Version>( key, out value );
+    public bool ValueAs( TKey key, [NotNullWhen( true )] out IPAddress?  value ) => ValueAs<IPAddress>( key, out value );
+    public bool ValueAs( TKey key, [NotNullWhen( true )] out AppVersion? value ) => ValueAs<AppVersion?>( key, out value );
+    public bool ValueAs( TKey key, [NotNullWhen( true )] out Version?    value ) => ValueAs<Version>( key, out value );
 
 
-    public bool ValueAs<T>( TKey key, [ NotNullWhen( true ) ] out T? value )
+    public bool ValueAs<T>( TKey key, [NotNullWhen( true )] out T? value )
     {
         object? s = this[key];
 
@@ -118,5 +118,5 @@ public class MultiDict : MultiDict<string>
     public MultiDict( int                                        capacity,   IEqualityComparer<string>? comparer = null ) : base( capacity, comparer ) { }
     public MultiDict( IDictionary<string, object?>               dictionary, IEqualityComparer<string>? comparer = null ) : base( dictionary, comparer ) { }
     public MultiDict( IEnumerable<KeyValuePair<string, object?>> collection, IEqualityComparer<string>? comparer = null ) : base( collection, comparer ) { }
-    [ Obsolete ] protected MultiDict( SerializationInfo          info,       StreamingContext           context ) : base( info, context ) { }
+    [Obsolete] protected MultiDict( SerializationInfo            info,       StreamingContext           context ) : base( info, context ) { }
 }

@@ -9,7 +9,7 @@ public readonly ref struct SpanLinq<T>( ReadOnlySpan<T> span )
     private readonly ReadOnlySpan<T> _span = span;
 
 
-    [ Pure ]
+    [Pure]
     public ReadOnlySpan<T> Where( Func<T, bool> selector )
     {
         if ( _span.Length == 0 ) { return default; }

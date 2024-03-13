@@ -4,19 +4,19 @@
 namespace Jakar.Extensions;
 
 
-[ method: MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+[method: MethodImpl( MethodImplOptions.AggressiveInlining )]
 public ref struct SpanFilter<T>( ReadOnlySpan<T> span, Func<T, bool> func )
 {
     private readonly ReadOnlySpan<T> _span  = span;
     private readonly Func<T, bool>   _func  = func;
     private          int             _index = -1;
 
-    public T Current { [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get; private set; }
+    public T Current { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; private set; }
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public readonly SpanFilter<T> GetEnumerator() => this;
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public readonly SpanFilter<T> GetEnumerator() => this;
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public bool MoveNext()
     {
         int index = _index + 1;

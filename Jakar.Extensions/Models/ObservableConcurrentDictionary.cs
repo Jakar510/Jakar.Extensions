@@ -63,8 +63,8 @@ public class ObservableConcurrentDictionary<TKey, TValue> : CollectionAlerts<Key
         Reset();
         OnCountChanged();
     }
-    
-    
+
+
     public bool TryAdd( KeyValuePair<TKey, TValue> pair ) => TryAdd( pair.Key, pair.Value );
     public bool TryAdd( TKey key, TValue value )
     {
@@ -87,7 +87,7 @@ public class ObservableConcurrentDictionary<TKey, TValue> : CollectionAlerts<Key
     }
 
 
-    public bool TryGetValue( TKey key, [ NotNullWhen( true ) ] out TValue? value ) => _dictionary.TryGetValue( key, out value ) && value is not null;
+    public bool TryGetValue( TKey key, [NotNullWhen( true )] out TValue? value ) => _dictionary.TryGetValue( key, out value ) && value is not null;
 
 
     public bool ContainsValue( TValue                value ) => _dictionary.Values.Contains( value );

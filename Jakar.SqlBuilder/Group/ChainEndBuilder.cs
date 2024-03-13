@@ -6,7 +6,7 @@ namespace Jakar.SqlBuilder;
 
 public struct GroupByChainEndBuilder( in GroupByClauseBuilder group, ref EasySqlBuilder builder )
 {
-    private readonly GroupByClauseBuilder _group = group;
+    private readonly GroupByClauseBuilder _group   = group;
     private          EasySqlBuilder       _builder = builder;
 
 

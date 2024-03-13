@@ -1,21 +1,21 @@
 ﻿namespace Jakar.Extensions;
 
 
-[ SuppressMessage( "ReSharper", "OutParameterValueIsAlwaysDiscarded.Global" ) ]
+[SuppressMessage( "ReSharper", "OutParameterValueIsAlwaysDiscarded.Global" )]
 public static partial class Spans
 {
-    [ Pure ] public static Span<byte>         AsBytes( this Span<char>         span ) => MemoryMarshal.AsBytes( span );
-    [ Pure ] public static ReadOnlySpan<byte> AsBytes( this ReadOnlySpan<char> span ) => MemoryMarshal.AsBytes( span );
+    [Pure] public static Span<byte>         AsBytes( this Span<char>         span ) => MemoryMarshal.AsBytes( span );
+    [Pure] public static ReadOnlySpan<byte> AsBytes( this ReadOnlySpan<char> span ) => MemoryMarshal.AsBytes( span );
 
 
-    [ Pure ]
+    [Pure]
     public static bool IsNullOrWhiteSpace( this Span<char> span )
     {
         ReadOnlySpan<char> value = span;
         return value.IsNullOrWhiteSpace();
     }
 
-    [ Pure ]
+    [Pure]
     public static bool IsNullOrWhiteSpace( this ReadOnlySpan<char> span )
     {
         if ( span.IsEmpty ) { return true; }
@@ -27,37 +27,33 @@ public static partial class Spans
 
         return true;
     }
-    [ Pure ] public static bool IsNullOrWhiteSpace( this Buffer<char>       span ) => IsNullOrWhiteSpace( span.Span );
-    [ Pure ] public static bool IsNullOrWhiteSpace( this ValueStringBuilder span ) => IsNullOrWhiteSpace( span.Span );
+    [Pure] public static bool IsNullOrWhiteSpace( this Buffer<char>       span ) => IsNullOrWhiteSpace( span.Span );
+    [Pure] public static bool IsNullOrWhiteSpace( this ValueStringBuilder span ) => IsNullOrWhiteSpace( span.Span );
 
 
-    [ Pure ]
-    public static bool IsNullOrWhiteSpace( this ReadOnlyMemory<char> memory )
-    {
-        return memory.IsEmpty ||
-               Parallel.For( 0,
-                             memory.Length,
-                             ( i, state ) =>
-                             {
-                                 if ( !char.IsWhiteSpace( memory.Span[i] ) ) { state.Stop(); }
-                             } )
-                       .IsCompleted;
-    }
-    [ Pure ]
-    public static bool IsNullOrWhiteSpace( this Memory<char> memory )
-    {
-        return memory.IsEmpty ||
-               Parallel.For( 0,
-                             memory.Length,
-                             ( i, state ) =>
-                             {
-                                 if ( !char.IsWhiteSpace( memory.Span[i] ) ) { state.Stop(); }
-                             } )
-                       .IsCompleted;
-    }
+    [Pure]
+    public static bool IsNullOrWhiteSpace( this ReadOnlyMemory<char> memory ) =>
+        memory.IsEmpty ||
+        Parallel.For( 0,
+                      memory.Length,
+                      ( i, state ) =>
+                      {
+                          if ( !char.IsWhiteSpace( memory.Span[i] ) ) { state.Stop(); }
+                      } )
+                .IsCompleted;
+    [Pure]
+    public static bool IsNullOrWhiteSpace( this Memory<char> memory ) =>
+        memory.IsEmpty ||
+        Parallel.For( 0,
+                      memory.Length,
+                      ( i, state ) =>
+                      {
+                          if ( !char.IsWhiteSpace( memory.Span[i] ) ) { state.Stop(); }
+                      } )
+                .IsCompleted;
 
 
-    [ Pure ]
+    [Pure]
     public static bool SequenceEqualAny( this ReadOnlySpan<string> left, in ReadOnlySpan<string> right )
     {
         if ( left.Length != right.Length ) { return false; }
@@ -81,7 +77,7 @@ public static partial class Spans
         }
     }
 
-    [ Pure ]
+    [Pure]
     public static bool SequenceEqual( this ReadOnlySpan<string> left, in ReadOnlySpan<string> right )
     {
         if ( left.Length != right.Length ) { return false; }
@@ -98,46 +94,34 @@ public static partial class Spans
 
         return true;
     }
-    
-    [ Pure ]
+
+    [Pure]
     public static int LastIndexOf<T>( this ReadOnlySpan<T> value, T c, int endIndex )
-        where T : IEquatable<T>
-    {
-        return endIndex < 0 || endIndex >= value.Length
-                   ? value.LastIndexOf( c )
-                   : value[..endIndex].LastIndexOf( c );
-    }
+        where T : IEquatable<T> =>
+        endIndex < 0 || endIndex >= value.Length
+            ? value.LastIndexOf( c )
+            : value[..endIndex].LastIndexOf( c );
 
 
-    [ Pure ] public static EnumerateEnumerator<T> Enumerate<T>( this ReadOnlySpan<T> span, int index = 0 ) => new(span, index);
+    [Pure] public static EnumerateEnumerator<T> Enumerate<T>( this ReadOnlySpan<T> span, int index = 0 ) => new(span, index);
 
 
-#if NET7_0_OR_GREATER
-    [ Pure ]
-    public static EnumerateEnumerator<T, TNumber> Enumerate<T, TNumber>( this ReadOnlySpan<T> span )
-        where TNumber : struct, INumber<TNumber> => Enumerate( span, TNumber.Zero );
-    [ Pure ]
-    public static EnumerateEnumerator<T, TNumber> Enumerate<T, TNumber>( this ReadOnlySpan<T> span, TNumber index )
-        where TNumber : struct, INumber<TNumber> => new(span, index);
-#endif
-
-
-    [ Pure ]
+    [Pure]
     public static Span<T> AsSpan<T>( this Span<T> span, int length )
     {
         Guard.IsLessThanOrEqualTo( length, span.Length, nameof(length) );
         return MemoryMarshal.CreateSpan( ref span.GetPinnableReference(), length );
     }
-    [ Pure ]
+    [Pure]
     public static Span<T> AsSpan<T>( this ReadOnlySpan<T> span, int length )
     {
         Guard.IsLessThanOrEqualTo( length, span.Length, nameof(length) );
         return MemoryMarshal.CreateSpan( ref MemoryMarshal.GetReference( span ), length );
     }
-    [ Pure ] public static Span<T>         AsSpan<T>( this         ReadOnlySpan<T> span ) => MemoryMarshal.CreateSpan( ref MemoryMarshal.GetReference( span ), span.Length );
-    [ Pure ] public static Span<T>         AsSpan<T>( this         Span<T>         span ) => MemoryMarshal.CreateSpan( ref span.GetPinnableReference(),        span.Length );
-    [ Pure ] public static ReadOnlySpan<T> AsReadOnlySpan<T>( this Span<T>         span ) => MemoryMarshal.CreateReadOnlySpan( ref span.GetPinnableReference(),        span.Length );
-    [ Pure ] public static ReadOnlySpan<T> AsReadOnlySpan<T>( this ReadOnlySpan<T> span ) => MemoryMarshal.CreateReadOnlySpan( ref MemoryMarshal.GetReference( span ), span.Length );
+    [Pure] public static Span<T>         AsSpan<T>( this         ReadOnlySpan<T> span ) => MemoryMarshal.CreateSpan( ref MemoryMarshal.GetReference( span ), span.Length );
+    [Pure] public static Span<T>         AsSpan<T>( this         Span<T>         span ) => MemoryMarshal.CreateSpan( ref span.GetPinnableReference(),        span.Length );
+    [Pure] public static ReadOnlySpan<T> AsReadOnlySpan<T>( this Span<T>         span ) => MemoryMarshal.CreateReadOnlySpan( ref span.GetPinnableReference(),        span.Length );
+    [Pure] public static ReadOnlySpan<T> AsReadOnlySpan<T>( this ReadOnlySpan<T> span ) => MemoryMarshal.CreateReadOnlySpan( ref MemoryMarshal.GetReference( span ), span.Length );
 
 
     public static void CopyTo<T>( this ReadOnlySpan<T> value, ref Span<T> buffer )
@@ -173,7 +157,7 @@ public static partial class Spans
     }
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static Span<T> CreateSpan<T>( int size ) => AsyncLinq.GetArray<T>( size );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Span<T> CreateSpan<T>( int size ) => AsyncLinq.GetArray<T>( size );
     public static Span<T> CreateValue<T>( int size )
         where T : unmanaged
     {
@@ -257,4 +241,14 @@ public static partial class Spans
     #endif
         return MemoryMarshal.CreateSpan( ref span.GetPinnableReference(), span.Length );
     }
+
+
+#if NET7_0_OR_GREATER
+    [Pure]
+    public static EnumerateEnumerator<T, TNumber> Enumerate<T, TNumber>( this ReadOnlySpan<T> span )
+        where TNumber : struct, INumber<TNumber> => Enumerate( span, TNumber.Zero );
+    [Pure]
+    public static EnumerateEnumerator<T, TNumber> Enumerate<T, TNumber>( this ReadOnlySpan<T> span, TNumber index )
+        where TNumber : struct, INumber<TNumber> => new(span, index);
+#endif
 }

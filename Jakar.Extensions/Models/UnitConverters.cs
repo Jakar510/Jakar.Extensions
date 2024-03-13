@@ -4,7 +4,9 @@
 namespace Jakar.Extensions;
 
 
-/// <summary> <see href="https://github.com/xamarin/Essentials/blob/main/Xamarin.Essentials/Types/UnitConverters.shared.cs"/> </summary>
+/// <summary>
+///     <see href="https://github.com/xamarin/Essentials/blob/main/Xamarin.Essentials/Types/UnitConverters.shared.cs"/>
+/// </summary>
 public static class UnitConverters
 {
     private const double ATMOSPHERE_PASCALS              = 101325.0;

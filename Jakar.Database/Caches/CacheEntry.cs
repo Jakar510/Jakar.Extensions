@@ -10,20 +10,17 @@ public sealed class CacheEntry<TRecord>( RecordID<TRecord> id ) : ObservableClas
     private DateTimeOffset _lastTime = DateTimeOffset.UtcNow;
     private string         _json     = string.Empty;
     private UInt128        _hash;
+    public  DateTimeOffset DateCreated { get; private set; }
 
     // private WeakReference<TRecord>? _current;
 
-    public bool HasChanged
-    {
-        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => _hash == Spans.Hash128( _json );
-    }
-    public DateTimeOffset    DateCreated  { get; private set; }
-    public DateTimeOffset?   LastModified { get; private set; }
+    public bool              HasChanged   { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _hash == Spans.Hash128( _json ); }
     Guid IUniqueID<Guid>.    ID           => ID.Value;
     public RecordID<TRecord> ID           { get; } = id;
+    public DateTimeOffset?   LastModified { get; private set; }
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public async ValueTask<TRecord?> TryGetValue( DbTable<TRecord> table, TableCacheOptions options, CancellationToken token )
     {
         TRecord? record = TryGetValue( options );
@@ -37,7 +34,7 @@ public sealed class CacheEntry<TRecord>( RecordID<TRecord> id ) : ObservableClas
     }
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public TRecord? TryGetValue( in TableCacheOptions options )
     {
         lock (this)
@@ -52,7 +49,7 @@ public sealed class CacheEntry<TRecord>( RecordID<TRecord> id ) : ObservableClas
     }
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public void SetValue( TRecord record )
     {
         if ( ID != record.ID ) { throw new ArgumentException( "ID mismatch" ); }
@@ -69,8 +66,8 @@ public sealed class CacheEntry<TRecord>( RecordID<TRecord> id ) : ObservableClas
     }
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public RecordPair<TRecord> ToPair()                       => new(ID, DateCreated);
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public bool                HasExpired( in TimeSpan time ) => DateTimeOffset.UtcNow - _lastTime >= time;
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public RecordPair<TRecord> ToPair()                       => new(ID, DateCreated);
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public bool                HasExpired( in TimeSpan time ) => DateTimeOffset.UtcNow - _lastTime >= time;
 
 
     public int CompareTo( object? other )

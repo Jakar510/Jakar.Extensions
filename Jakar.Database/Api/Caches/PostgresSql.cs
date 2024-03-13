@@ -7,10 +7,7 @@ namespace Jakar.Database;
 public sealed class PostgresSql<TRecord> : BaseSqlCache<TRecord>
     where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
-    public override DbInstance Instance
-    {
-        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => DbInstance.Postgres;
-    }
+    public override DbInstance Instance { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => DbInstance.Postgres; }
 
     public override string TableName { get; } = $"\"{TRecord.TableName}\"";
 
@@ -51,10 +48,7 @@ public sealed class PostgresSql<TRecord> : BaseSqlCache<TRecord>
         parameters.Add( nameof(count),  count );
         parameters.Add( nameof(userID), userID );
 
-        if ( _sql.TryGetValue( SqlCacheType.RandomUserIDCount, out string? sql ) is false )
-        {
-            _sql[SqlCacheType.RandomUserIDCount] = sql = @$"SELECT TOP @{nameof(count)} * FROM {TableName} WHERE {nameof(IOwnedTableRecord.OwnerUserID)} = @{nameof(userID)}";
-        }
+        if ( _sql.TryGetValue( SqlCacheType.RandomUserIDCount, out string? sql ) is false ) { _sql[SqlCacheType.RandomUserIDCount] = sql = @$"SELECT TOP @{nameof(count)} * FROM {TableName} WHERE {nameof(IOwnedTableRecord.OwnerUserID)} = @{nameof(userID)}"; }
 
         return new SqlCommand( sql, parameters );
     }

@@ -15,23 +15,24 @@ namespace Jakar.Database.Experiments.Benchmarks;
 |    AsBase64 | 34.268 ns | 0.6563 ns | 0.6139 ns |    4 | 0.0086 |      72 B |
 |   SpanParse | 44.538 ns | 0.3594 ns | 0.3186 ns |    5 |      - |         - |
  */
-[ SimpleJob( RuntimeMoniker.HostProcess ), Orderer( SummaryOrderPolicy.FastestToSlowest ), RankColumn, MemoryDiagnoser ]
+[SimpleJob( RuntimeMoniker.HostProcess )]
+[Orderer( SummaryOrderPolicy.FastestToSlowest )]
+[RankColumn]
+[MemoryDiagnoser]
 public class GuidBenchmarks
 {
+    private const           string GUID  = "0365BC9B-3DE3-4B75-9F7E-2A0F23EFA5A2";
     private static readonly Guid   _guid = Guid.Parse( GUID );
     private static readonly string _b64  = _guid.ToBase64();
 
 
-    private const string GUID = "0365BC9B-3DE3-4B75-9F7E-2A0F23EFA5A2";
-
-
-    [ Benchmark ]
+    [Benchmark]
     public ReadOnlySpan<byte> TryWriteBytes() => _guid.TryWriteBytes( out ReadOnlySpan<byte> memory )
                                                      ? memory
                                                      : default;
-    [ Benchmark ] public     Guid    StringParse() => Guid.Parse( GUID );
-    [ Benchmark ] public     Guid?   SpanParse()   => _b64.AsGuid();
-    [ Benchmark ] public     string  AsBase64()    => _guid.ToBase64();
-    [ Benchmark ] public new string? ToString()    => _guid.ToString();
+    [Benchmark] public     Guid    StringParse() => Guid.Parse( GUID );
+    [Benchmark] public     Guid?   SpanParse()   => _b64.AsGuid();
+    [Benchmark] public     string  AsBase64()    => _guid.ToBase64();
+    [Benchmark] public new string? ToString()    => _guid.ToString();
 }
 #pragma warning restore CA1822

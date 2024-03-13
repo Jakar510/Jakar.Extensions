@@ -4,10 +4,11 @@
 namespace Jakar.Database;
 
 
-[ SuppressMessage( "ReSharper", "InconsistentNaming" ) ]
+[SuppressMessage( "ReSharper", "InconsistentNaming" )]
 public readonly record struct LoginResult( LoginResult.State Result, UserRecord? User = default, Exception? Exception = default, ModelStateDictionary? Model = default )
 {
-    [ MemberNotNullWhen( true, nameof(User) ), MemberNotNullWhen( false, nameof(Exception) ) ]
+    [MemberNotNullWhen( true,  nameof(User) )]
+    [MemberNotNullWhen( false, nameof(Exception) )]
     public bool Succeeded => User is not null
                                  ? Result == State.Success
                                  : Exception is null;
@@ -48,29 +49,29 @@ public readonly record struct LoginResult( LoginResult.State Result, UserRecord?
             State.NotFound                            => new Error( Status.NotFound ),
             _                                         => throw new OutOfRangeException( nameof(Result), Result )
         };
-    public bool GetResult( [ NotNullWhen( false ) ] out UserRecord? caller )
+    public bool GetResult( [NotNullWhen( false )] out UserRecord? caller )
     {
         caller = User;
         return caller is null;
     }
-    public bool GetResult( [ NotNullWhen( true ) ] out Error? actionResult )
+    public bool GetResult( [NotNullWhen( true )] out Error? actionResult )
     {
         actionResult = GetResult();
         return actionResult is not null;
     }
-    public bool GetResult( [ NotNullWhen( true ) ] out Error? actionResult, [ NotNullWhen( false ) ] out UserRecord? caller )
+    public bool GetResult( [NotNullWhen( true )] out Error? actionResult, [NotNullWhen( false )] out UserRecord? caller )
     {
         actionResult = GetResult();
         caller       = User;
         return actionResult is not null && caller is null;
     }
-    public bool GetResult( [ NotNullWhen( true ) ] out ActionResult? actionResult )
+    public bool GetResult( [NotNullWhen( true )] out ActionResult? actionResult )
     {
         Error? result = GetResult();
         actionResult = result?.ToActionResult();
         return actionResult is not null;
     }
-    public bool GetResult( [ NotNullWhen( true ) ] out ActionResult? actionResult, [ NotNullWhen( false ) ] out UserRecord? caller )
+    public bool GetResult( [NotNullWhen( true )] out ActionResult? actionResult, [NotNullWhen( false )] out UserRecord? caller )
     {
         Error? result = GetResult();
         actionResult = result?.ToActionResult();

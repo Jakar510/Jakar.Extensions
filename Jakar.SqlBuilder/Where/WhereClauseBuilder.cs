@@ -3,7 +3,7 @@
 
 public struct WhereClauseBuilder<TNext>( in TNext next, ref EasySqlBuilder builder )
 {
-    private readonly TNext          _next = next;
+    private readonly TNext          _next    = next;
     private          EasySqlBuilder _builder = builder;
 
 

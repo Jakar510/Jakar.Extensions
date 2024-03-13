@@ -2,16 +2,31 @@ namespace Jakar.Extensions;
 
 
 /// <summary>
-///     <para> <see href="https://stackoverflow.com/a/54733415/9530917"> This type of CollectionView does not support changes to its SourceCollection from a thread different from the Dispatcher thread </see> </para>
-///     <para> <see href="https://stackoverflow.com/a/14602121/9530917"> How do I update an ObservableCollection via a worker thread? </see> </para>
+///     <para>
+///         <see href="https://stackoverflow.com/a/54733415/9530917"> This type of CollectionView does not support changes to its SourceCollection from a thread different from the Dispatcher thread </see>
+///     </para>
+///     <para>
+///         <see href="https://stackoverflow.com/a/14602121/9530917"> How do I update an ObservableCollection via a worker thread? </see>
+///     </para>
 /// </summary>
 /// <typeparam name="TValue"> </typeparam>
-[ Serializable ]
+[Serializable]
 public class ConcurrentObservableCollection<TValue> : CollectionAlerts<TValue>, ILockedCollection<TValue>, IAsyncEnumerable<TValue>, IList<TValue>, IReadOnlyList<TValue>, IList, IDisposable
 {
     protected readonly List<TValue>      _values;
     protected readonly Locker            _lock = Locker.Default;
     protected          IComparer<TValue> _comparer;
+
+
+    public AsyncLockerEnumerator AsyncValues => new(this);
+
+    public sealed override int Count
+    {
+        get
+        {
+            using ( AcquireLock() ) { return _values.Count; }
+        }
+    }
 
     bool IList.IsFixedSize
     {
@@ -45,35 +60,7 @@ public class ConcurrentObservableCollection<TValue> : CollectionAlerts<TValue>, 
         }
     }
 
-
-    public AsyncLockerEnumerator AsyncValues => new(this);
-
-    public sealed override int Count
-    {
-        get
-        {
-            using ( AcquireLock() ) { return _values.Count; }
-        }
-    }
-
-    public Locker Lock
-    {
-        get => _lock;
-        init => _lock = value;
-    }
-
-    public LockerEnumerator<TValue> Values => new(this);
-
-    object ICollection.SyncRoot
-    {
-        get
-        {
-            using ( AcquireLock() ) { return ((IList)_values).SyncRoot; }
-        }
-    }
-
     object? IList.this[ int index ]
-
     {
         get
         {
@@ -101,6 +88,18 @@ public class ConcurrentObservableCollection<TValue> : CollectionAlerts<TValue>, 
             }
         }
     }
+
+    public Locker Lock { get => _lock; init => _lock = value; }
+
+    object ICollection.SyncRoot
+    {
+        get
+        {
+            using ( AcquireLock() ) { return ((IList)_values).SyncRoot; }
+        }
+    }
+
+    public LockerEnumerator<TValue> Values => new(this);
 
 
     public ConcurrentObservableCollection() : this( Comparer<TValue>.Default ) { }
@@ -317,7 +316,7 @@ public class ConcurrentObservableCollection<TValue> : CollectionAlerts<TValue>, 
         using ( await AcquireLockAsync( token ) ) { return _values.FindLast( match ); }
     }
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     protected bool InternalTryAdd( in TValue value )
     {
         if ( _values.Contains( value ) ) { return false; }
@@ -326,7 +325,7 @@ public class ConcurrentObservableCollection<TValue> : CollectionAlerts<TValue>, 
         return true;
     }
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     protected void InternalAdd( in TValue value )
     {
         _values.Add( value );
@@ -432,7 +431,7 @@ public class ConcurrentObservableCollection<TValue> : CollectionAlerts<TValue>, 
         using ( await AcquireLockAsync( token ) ) { _values.CopyTo( index, array, arrayIndex, count ); }
     }
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     protected void InternalInsertRange( int i, TValue value )
     {
         _values.Insert( i, value );
@@ -478,7 +477,7 @@ public class ConcurrentObservableCollection<TValue> : CollectionAlerts<TValue>, 
         using ( await AcquireLockAsync( token ) ) { InternalInsertRange( index, collection.Span ); }
     }
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     protected void InternalRemoveRange( int start, int count )
     {
         Guard.IsInRangeFor( start, _values, nameof(start) );
@@ -501,7 +500,7 @@ public class ConcurrentObservableCollection<TValue> : CollectionAlerts<TValue>, 
         using ( await AcquireLockAsync( token ) ) { InternalRemoveRange( start, count ); }
     }
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     protected bool InternalRemove( TValue value )
     {
         bool result = _values.Remove( value );
@@ -574,8 +573,8 @@ public class ConcurrentObservableCollection<TValue> : CollectionAlerts<TValue>, 
         using ( await AcquireLockAsync( token ) ) { return InternalRemove( values.AsSpan() ); }
     }
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
-    protected bool InternalRemoveAt( int index, [ NotNullWhen( true ) ] out TValue? value )
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    protected bool InternalRemoveAt( int index, [NotNullWhen( true )] out TValue? value )
     {
         if ( index < 0 || index >= _values.Count )
         {
@@ -594,7 +593,7 @@ public class ConcurrentObservableCollection<TValue> : CollectionAlerts<TValue>, 
         using ( AcquireLock() ) { InternalRemoveAt( index, out _ ); }
     }
 
-    public void RemoveAt( int index, [ NotNullWhen( true ) ] out TValue? value )
+    public void RemoveAt( int index, [NotNullWhen( true )] out TValue? value )
     {
         using ( AcquireLock() ) { InternalRemoveAt( index, out value ); }
     }
@@ -741,7 +740,7 @@ public class ConcurrentObservableCollection<TValue> : CollectionAlerts<TValue>, 
         using ( await AcquireLockAsync( token ) ) { return _values.Contains( value ); }
     }
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     protected void InternalAdd( TValue value )
     {
         _values.Add( value );
@@ -758,7 +757,7 @@ public class ConcurrentObservableCollection<TValue> : CollectionAlerts<TValue>, 
         using ( await AcquireLockAsync( token ) ) { InternalAdd( value ); }
     }
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     protected void InternalClear()
     {
         _values.Clear();
@@ -775,7 +774,7 @@ public class ConcurrentObservableCollection<TValue> : CollectionAlerts<TValue>, 
         using ( await AcquireLockAsync( token ) ) { InternalClear(); }
     }
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     protected void InternalInsert( int index, TValue value )
     {
         _values.Insert( index, value );
@@ -799,9 +798,9 @@ public class ConcurrentObservableCollection<TValue> : CollectionAlerts<TValue>, 
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public IDisposable            AcquireLock()                               => _lock.Enter();
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public IDisposable            AcquireLock( in CancellationToken   token ) => _lock.Enter( token );
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public ValueTask<IDisposable> AcquireLockAsync( CancellationToken token ) => _lock.EnterAsync( token );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public IDisposable            AcquireLock()                               => _lock.Enter();
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public IDisposable            AcquireLock( in CancellationToken   token ) => _lock.Enter( token );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public ValueTask<IDisposable> AcquireLockAsync( CancellationToken token ) => _lock.EnterAsync( token );
 
 
     protected ReadOnlyMemory<TValue>                 FilteredValues() => _values.Where( Filter ).ToArray();

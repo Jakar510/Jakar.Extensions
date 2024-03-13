@@ -9,15 +9,17 @@ public interface IMultiQueue<T> : IEnumerable<T>
 
     public bool Contains( T value );
 
-    public bool Remove( [ NotNullWhen( true ) ] out T? value );
-    public void Add( T                                 value );
+    public bool Remove( [NotNullWhen( true )] out T? value );
+    public void Add( T                               value );
 
     public void Clear();
 }
 
 
 
-/// <summary> <seealso href="https://stackoverflow.com/a/5852926/9530917"/> </summary>
+/// <summary>
+///     <seealso href="https://stackoverflow.com/a/5852926/9530917"/>
+/// </summary>
 /// <typeparam name="T"> </typeparam>
 public class MultiQueue<T> : IMultiQueue<T>
 {
@@ -41,7 +43,7 @@ public class MultiQueue<T> : IMultiQueue<T>
     public void Add( T value )      => _queue.Enqueue( value );
 
 
-    public bool Remove( [ NotNullWhen( true ) ] out T? value )
+    public bool Remove( [NotNullWhen( true )] out T? value )
     {
         bool result = _queue.TryDequeue( out value );
 

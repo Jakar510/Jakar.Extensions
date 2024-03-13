@@ -5,11 +5,17 @@ namespace Jakar.Extensions;
 
 
 /// <summary>
-///     <para> <see href="https://github.com/dotnet/roslyn/blob/main/docs/features/nullable-metadata.md"/> </para>
-///     <para> <see href="https://stackoverflow.com/a/58454489/9530917"/> </para>
-///     <para> <see href="https://github.com/RicoSuter/Namotion.Reflection"/> </para>
+///     <para>
+///         <see href="https://github.com/dotnet/roslyn/blob/main/docs/features/nullable-metadata.md"/>
+///     </para>
+///     <para>
+///         <see href="https://stackoverflow.com/a/58454489/9530917"/>
+///     </para>
+///     <para>
+///         <see href="https://github.com/RicoSuter/Namotion.Reflection"/>
+///     </para>
 /// </summary>
-[ SuppressMessage( "ReSharper", "NullableWarningSuppressionIsUsed" ) ]
+[SuppressMessage( "ReSharper", "NullableWarningSuppressionIsUsed" )]
 public static partial class TypeExtensions
 {
     private const          string NULLABLE         = "System.Runtime.CompilerServices.NullableAttribute";
@@ -48,7 +54,7 @@ public static partial class TypeExtensions
     }
 
 
-    public static bool TryGetUnderlyingEnumType( this Type propertyType, [ NotNullWhen( true ) ] out Type? result )
+    public static bool TryGetUnderlyingEnumType( this Type propertyType, [NotNullWhen( true )] out Type? result )
     {
         if ( propertyType.IsEnum )
         {

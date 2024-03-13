@@ -1,7 +1,8 @@
 ﻿namespace Jakar.Extensions;
 
 
-[ Serializable, DebuggerDisplay( nameof(DisplayName) ) ]
+[Serializable]
+[DebuggerDisplay( nameof(DisplayName) )]
 public sealed class Language : BaseClass, IComparable<Language>, IEquatable<Language>, IComparable
 {
     private readonly CultureInfo _culture;
@@ -77,7 +78,7 @@ public sealed class Language : BaseClass, IComparable<Language>, IEquatable<Lang
 
 
 
-    [ Serializable ]
+    [Serializable]
     public class Collection : ObservableCollection<Language>
     {
         public Collection() : base() { }
@@ -86,7 +87,7 @@ public sealed class Language : BaseClass, IComparable<Language>, IEquatable<Lang
 
 
 
-    [ Serializable ]
+    [Serializable]
     public class Items : List<Language>
     {
         public Items() : base() { }
@@ -125,22 +126,23 @@ public sealed class Language : BaseClass, IComparable<Language>, IEquatable<Lang
 
     public static Items All => new(CultureInfo.GetCultures( CultureTypes.AllCultures ).Select( culture => new Language( culture ) ));
 
-    public static Collection Supported { get; } = [
-                                                      Arabic,
-                                                      Chinese,
-                                                      Czech,
-                                                      Dutch,
-                                                      English,
-                                                      French,
-                                                      German,
-                                                      Japanese,
-                                                      Korean,
-                                                      Polish,
-                                                      Portuguese,
-                                                      Spanish,
-                                                      Swedish,
-                                                      Thai
-                                                  ];
+    public static Collection Supported { get; } =
+        [
+            Arabic,
+            Chinese,
+            Czech,
+            Dutch,
+            English,
+            French,
+            German,
+            Japanese,
+            Korean,
+            Polish,
+            Portuguese,
+            Spanish,
+            Swedish,
+            Thai
+        ];
 
     #endregion
 }

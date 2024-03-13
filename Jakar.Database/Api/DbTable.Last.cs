@@ -4,13 +4,13 @@
 namespace Jakar.Database;
 
 
-[ SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" ) ]
+[SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
 public partial class DbTable<TRecord>
 {
     public ValueTask<TRecord?> Last( CancellationToken token = default ) => this.Call( Last, token );
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
+    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask<TRecord?> Last( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
         SqlCommand sql = _sqlCache.Last();
@@ -27,7 +27,7 @@ public partial class DbTable<TRecord>
     public ValueTask<TRecord?> LastOrDefault( CancellationToken token = default ) => this.Call( LastOrDefault, token );
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
+    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask<TRecord?> LastOrDefault( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
         SqlCommand sql = _sqlCache.Last();

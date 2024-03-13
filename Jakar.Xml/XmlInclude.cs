@@ -5,7 +5,7 @@
 namespace Jakar.Xml;
 
 
-[ Flags ]
+[Flags]
 public enum XmlInclude
 {
     None       = 0,

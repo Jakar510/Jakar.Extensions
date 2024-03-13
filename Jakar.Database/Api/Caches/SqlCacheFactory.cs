@@ -7,14 +7,16 @@ namespace Jakar.Database;
 
 public interface ISqlCacheFactory
 {
-    public ISqlCache<TRecord> GetSqlCache<TRecord>( IConnectableDbRoot dbRoot ) where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>;
+    public ISqlCache<TRecord> GetSqlCache<TRecord>( IConnectableDbRoot dbRoot )
+        where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>;
 }
 
 
 
 public sealed class SqlCacheFactory : ISqlCacheFactory
 {
-    public ISqlCache<TRecord> GetSqlCache<TRecord>( IConnectableDbRoot dbRoot ) where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord> =>
+    public ISqlCache<TRecord> GetSqlCache<TRecord>( IConnectableDbRoot dbRoot )
+        where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord> =>
         dbRoot.Instance switch
         {
             DbInstance.MsSql    => new MsSqlServer<TRecord>(),

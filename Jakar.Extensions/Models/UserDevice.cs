@@ -1,7 +1,8 @@
 ﻿namespace Jakar.Extensions;
 
 
-public interface IUserDevice<TID> : IEquatable<IUserDevice<TID>>, IUniqueID<TID> where TID : struct, IComparable<TID>, IEquatable<TID>
+public interface IUserDevice<TID> : IEquatable<IUserDevice<TID>>, IUniqueID<TID>
+    where TID : struct, IComparable<TID>, IEquatable<TID>
 {
     public Guid   DeviceID   { get; }
     public string DeviceName { get; }
@@ -31,8 +32,9 @@ public interface IUserDevice<TID> : IEquatable<IUserDevice<TID>>, IUniqueID<TID>
 
 
 /// <summary> Debug and/or identify info for IT </summary>
-[ Serializable ]
-public class UserDevice<TID> : ObservableClass, IUserDevice<TID> where TID : struct, IComparable<TID>, IEquatable<TID>
+[Serializable]
+public class UserDevice<TID> : ObservableClass, IUserDevice<TID>
+    where TID : struct, IComparable<TID>, IEquatable<TID>
 {
     private string?    _ip;
     public  Guid       DeviceID   { get; init; }
@@ -44,16 +46,12 @@ public class UserDevice<TID> : ObservableClass, IUserDevice<TID> where TID : str
     public DeviceIdiom Idiom { get; init; }
 
 
-    public string? IP
-    {
-        get => _ip;
-        set => SetProperty( ref _ip, value );
-    }
-    public string         Manufacturer { get; init; } = string.Empty;
-    public string         Model        { get; init; } = string.Empty;
-    public string         OsVersion    { get; init; } = string.Empty;
-    public DevicePlatform Platform     { get; init; }
-    public DateTime       TimeStamp    { get; init; }
+    public string?        IP           { get => _ip; set => SetProperty( ref _ip, value ); }
+    public string         Manufacturer { get;        init; } = string.Empty;
+    public string         Model        { get;        init; } = string.Empty;
+    public string         OsVersion    { get;        init; } = string.Empty;
+    public DevicePlatform Platform     { get;        init; }
+    public DateTime       TimeStamp    { get;        init; }
 
 
     public UserDevice() { }
@@ -122,14 +120,6 @@ public class UserDevice<TID> : ObservableClass, IUserDevice<TID> where TID : str
 
         if ( ReferenceEquals( this, other ) ) { return true; }
 
-        return TimeStamp.Equals( other.TimeStamp ) &&
-               IP           == other.IP            &&
-               Model        == other.Model         &&
-               Manufacturer == other.Manufacturer  &&
-               DeviceName   == other.DeviceName    &&
-               DeviceType   == other.DeviceType    &&
-               Idiom        == other.Idiom         &&
-               Platform     == other.Platform      &&
-               OsVersion    == other.OsVersion;
+        return TimeStamp.Equals( other.TimeStamp ) && IP == other.IP && Model == other.Model && Manufacturer == other.Manufacturer && DeviceName == other.DeviceName && DeviceType == other.DeviceType && Idiom == other.Idiom && Platform == other.Platform && OsVersion == other.OsVersion;
     }
 }

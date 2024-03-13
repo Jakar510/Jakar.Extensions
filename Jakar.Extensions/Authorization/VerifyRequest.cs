@@ -1,13 +1,13 @@
 ﻿namespace Jakar.Extensions;
 
 
-[ Serializable ]
+[Serializable]
 public class VerifyRequest : BaseClass, ILoginRequest, ICredentials, ICloneable, IEquatable<VerifyRequest>, JsonModels.IJsonModel
 {
-    [ JsonIgnore ]                                                   public virtual bool                          IsValid        => !string.IsNullOrWhiteSpace( UserName ) && !string.IsNullOrWhiteSpace( Password );
-    [ JsonExtensionData ]                                            public         IDictionary<string, JToken?>? AdditionalData { get; set; }
-    [ JsonProperty( nameof(Password), Required = Required.Always ) ] public         string                        Password       { get; init; } = string.Empty;
-    [ JsonProperty( nameof(UserName), Required = Required.Always ) ] public         string                        UserName       { get; init; } = string.Empty;
+    [JsonExtensionData]                                            public         IDictionary<string, JToken?>? AdditionalData { get; set; }
+    [JsonIgnore]                                                   public virtual bool                          IsValid        => !string.IsNullOrWhiteSpace( UserName ) && !string.IsNullOrWhiteSpace( Password );
+    [JsonProperty( nameof(Password), Required = Required.Always )] public         string                        Password       { get; init; } = string.Empty;
+    [JsonProperty( nameof(UserName), Required = Required.Always )] public         string                        UserName       { get; init; } = string.Empty;
 
 
     public VerifyRequest() { }
@@ -50,14 +50,14 @@ public class VerifyRequest : BaseClass, ILoginRequest, ICredentials, ICloneable,
 
 
 
-[ SuppressMessage( "ReSharper", "NullableWarningSuppressionIsUsed" ) ]
+[SuppressMessage( "ReSharper", "NullableWarningSuppressionIsUsed" )]
 public class VerifyRequest<T> : VerifyRequest, IEquatable<VerifyRequest<T>>
 {
+    [JsonProperty( nameof(Data), Required = Required.AllowNull )] public T? Data { get; init; }
+
     public override bool IsValid => Data is IValidator validator
                                         ? base.IsValid && validator.IsValid
                                         : base.IsValid;
-
-    [ JsonProperty( nameof(Data), Required = Required.AllowNull ) ] public T? Data { get; init; }
 
 
     public VerifyRequest() { }

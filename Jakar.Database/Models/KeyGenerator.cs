@@ -4,8 +4,9 @@
 namespace Jakar.Database;
 
 
-[ SuppressMessage( "ReSharper", "MemberCanBePrivate.Local" ) ]
-public record struct KeyGenerator<TRecord> : IEnumerator<RecordID<TRecord>>, IEnumerable<RecordID<TRecord>> where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
+[SuppressMessage( "ReSharper", "MemberCanBePrivate.Local" )]
+public record struct KeyGenerator<TRecord> : IEnumerator<RecordID<TRecord>>, IEnumerable<RecordID<TRecord>>
+    where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
     private readonly ReadOnlyMemory<RecordPair<TRecord>> _pairs;
     private          int                                 _index = -1;

@@ -1,7 +1,7 @@
 ﻿namespace Jakar.Extensions;
 
 
-[ SuppressMessage( "ReSharper", "MemberHidesStaticFromOuterClass" ) ]
+[SuppressMessage( "ReSharper", "MemberHidesStaticFromOuterClass" )]
 public partial class IniConfig
 {
     internal const string CLOSE  = " ]";
@@ -12,8 +12,6 @@ public partial class IniConfig
 
     public sealed class Section : ConcurrentDictionary<string, string?>
     {
-        public   string Name    { get; }
-        internal int    Longest => Keys.Max( item => item.Length );
         public int Length
         {
             get
@@ -25,6 +23,8 @@ public partial class IniConfig
                 return result;
             }
         }
+        internal int    Longest => Keys.Max( item => item.Length );
+        public   string Name    { get; }
 
 
         public Section( string name ) : this( name, StringComparer.OrdinalIgnoreCase ) { }
@@ -35,10 +35,57 @@ public partial class IniConfig
         public Section( string name, IEnumerable<KeyValuePair<string, string?>> collection, IEqualityComparer<string> comparer ) : base( collection, comparer ) => Name = name;
 
 
+        public override string ToString() => ToString( default, CultureInfo.CurrentCulture );
+        public string ToString( string? format, IFormatProvider? formatProvider )
+        {
+            Span<char> span = stackalloc char[Length + 1];
+
+            if ( TryFormat( span, out int charsWritten, format, formatProvider ) ) { return span[..charsWritten].ToString(); }
+
+            throw new InvalidOperationException( "Cannot convert to string" );
+        }
+
+
+    #if NET6_0_OR_GREATER
+        [MethodImpl( MethodImplOptions.AggressiveOptimization )]
+    #endif
+        public bool TryFormat( Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider )
+        {
+            Debug.Assert( destination.Length > Length );
+            charsWritten = 0;
+            int longest = Longest;
+
+            foreach ( char t in OPEN ) { destination[charsWritten++] = t; }
+
+            foreach ( char t in Name ) { destination[charsWritten++] = t; }
+
+            foreach ( char t in CLOSE ) { destination[charsWritten++] = t; }
+
+            destination[charsWritten++] = '\n';
+
+
+            foreach ( (string sKey, string? sValue) in this )
+            {
+                ReadOnlySpan<char> sectionValue = sValue;
+
+                foreach ( char c in sKey.PadRight( longest ) ) { destination[charsWritten++] = c; }
+
+                foreach ( char c in EQUALS ) { destination[charsWritten++] = c; }
+
+                foreach ( char c in sectionValue ) { destination[charsWritten++] = c; }
+
+                destination[charsWritten++] = '\n';
+            }
+
+            return true;
+        }
+
+
 
         #region Gets
 
-        public bool ValueAs<T>( string key, [ NotNullWhen( true ) ] out T? value ) where T : notnull
+        public bool ValueAs<T>( string key, [NotNullWhen( true )] out T? value )
+            where T : notnull
         {
             string? s = this[key];
 
@@ -48,7 +95,7 @@ public partial class IniConfig
 
             return value is not null;
         }
-        public bool ValueAs<T>( string key, [ NotNullWhen( true ) ] out T[]? value )
+        public bool ValueAs<T>( string key, [NotNullWhen( true )] out T[]? value )
         {
             value = this[key]?.FromJson<T[]>();
 
@@ -56,13 +103,13 @@ public partial class IniConfig
         }
 
 
-        public bool ValueAs( string key, [ NotNullWhen( true ) ] out string[]? value )
+        public bool ValueAs( string key, [NotNullWhen( true )] out string[]? value )
         {
             value = this[key]?.FromJson<string[]>();
 
             return value is not null;
         }
-        public bool ValueAs( string key, [ NotNullWhen( true ) ] out string[]? value, char separator )
+        public bool ValueAs( string key, [NotNullWhen( true )] out string[]? value, char separator )
         {
             string? s = this[key];
 
@@ -75,7 +122,7 @@ public partial class IniConfig
             value = default;
             return false;
         }
-        public bool ValueAs( string key, [ NotNullWhen( true ) ] out string[]? value, string separator )
+        public bool ValueAs( string key, [NotNullWhen( true )] out string[]? value, string separator )
         {
             string? s = this[key];
 
@@ -89,23 +136,23 @@ public partial class IniConfig
             return false;
         }
 
-        public bool ValueAs( string key, out                         double      value )                   => double.TryParse( this[key], out value );
-        public bool ValueAs( string key, out                         float       value )                   => float.TryParse( this[key], out value );
-        public bool ValueAs( string key, out                         long        value )                   => long.TryParse( this[key], out value );
-        public bool ValueAs( string key, out                         ulong       value )                   => ulong.TryParse( this[key], out value );
-        public bool ValueAs( string key, out                         int         value )                   => int.TryParse( this[key], out value );
-        public bool ValueAs( string key, out                         uint        value )                   => uint.TryParse( this[key], out value );
-        public bool ValueAs( string key, out                         short       value )                   => short.TryParse( this[key], out value );
-        public bool ValueAs( string key, out                         ushort      value )                   => ushort.TryParse( this[key], out value );
-        public bool ValueAs( string key, [ NotNullWhen( true ) ] out IPAddress?  value )                   => IPAddress.TryParse( this[key], out value );
-        public bool ValueAs( string key, out                         TimeSpan    value )                   => TimeSpan.TryParse( this[key], out value );
-        public bool ValueAs( string key, out                         TimeSpan    value, CultureInfo info ) => TimeSpan.TryParse( this[key], info, out value );
-        public bool ValueAs( string key, out                         DateTime    value )                                          => DateTime.TryParse( this[key], out value );
-        public bool ValueAs( string key, out                         DateTime    value, CultureInfo info, DateTimeStyles styles ) => DateTime.TryParse( this[key], info, styles, out value );
-        public bool ValueAs( string key, out                         Guid        value ) => Guid.TryParse( this[key], out value );
-        public bool ValueAs( string key, out                         bool        value ) => bool.TryParse( this[key], out value );
-        public bool ValueAs( string key, [ NotNullWhen( true ) ] out AppVersion? value ) => AppVersion.TryParse( this[key], out value );
-        public bool ValueAs( string key, [ NotNullWhen( true ) ] out Version?    value ) => Version.TryParse( this[key], out value );
+        public bool ValueAs( string key, out                       double      value )                   => double.TryParse( this[key], out value );
+        public bool ValueAs( string key, out                       float       value )                   => float.TryParse( this[key], out value );
+        public bool ValueAs( string key, out                       long        value )                   => long.TryParse( this[key], out value );
+        public bool ValueAs( string key, out                       ulong       value )                   => ulong.TryParse( this[key], out value );
+        public bool ValueAs( string key, out                       int         value )                   => int.TryParse( this[key], out value );
+        public bool ValueAs( string key, out                       uint        value )                   => uint.TryParse( this[key], out value );
+        public bool ValueAs( string key, out                       short       value )                   => short.TryParse( this[key], out value );
+        public bool ValueAs( string key, out                       ushort      value )                   => ushort.TryParse( this[key], out value );
+        public bool ValueAs( string key, [NotNullWhen( true )] out IPAddress?  value )                   => IPAddress.TryParse( this[key], out value );
+        public bool ValueAs( string key, out                       TimeSpan    value )                   => TimeSpan.TryParse( this[key], out value );
+        public bool ValueAs( string key, out                       TimeSpan    value, CultureInfo info ) => TimeSpan.TryParse( this[key], info, out value );
+        public bool ValueAs( string key, out                       DateTime    value )                                          => DateTime.TryParse( this[key], out value );
+        public bool ValueAs( string key, out                       DateTime    value, CultureInfo info, DateTimeStyles styles ) => DateTime.TryParse( this[key], info, styles, out value );
+        public bool ValueAs( string key, out                       Guid        value ) => Guid.TryParse( this[key], out value );
+        public bool ValueAs( string key, out                       bool        value ) => bool.TryParse( this[key], out value );
+        public bool ValueAs( string key, [NotNullWhen( true )] out AppVersion? value ) => AppVersion.TryParse( this[key], out value );
+        public bool ValueAs( string key, [NotNullWhen( true )] out Version?    value ) => Version.TryParse( this[key], out value );
 
         #endregion
 
@@ -113,7 +160,8 @@ public partial class IniConfig
 
         #region Adds
 
-        public void Add<T>( string key, T                   value ) where T : notnull  => this[key] = value.ToJson();
+        public void Add<T>( string key, T value )
+            where T : notnull => this[key] = value.ToJson();
         public void Add<T>( string key, IEnumerable<T>      values )                   => this[key] = values.ToJson();
         public void Add( string    key, IEnumerable<string> values )                   => this[key] = values.ToJson();
         public void Add( string    key, IEnumerable<string> values, char   separator ) => this[key] = string.Join( separator, values );
@@ -166,52 +214,5 @@ public partial class IniConfig
                             : value.ToString( format, culture ?? CultureInfo.CurrentCulture );
 
         #endregion
-
-
-
-        public override string ToString() => ToString( default, CultureInfo.CurrentCulture );
-        public string ToString( string? format, IFormatProvider? formatProvider )
-        {
-            Span<char> span = stackalloc char[Length + 1];
-
-            if ( TryFormat( span, out int charsWritten, format, formatProvider ) ) { return span[..charsWritten].ToString(); }
-
-            throw new InvalidOperationException( "Cannot convert to string" );
-        }
-
-
-    #if NET6_0_OR_GREATER
-        [MethodImpl( MethodImplOptions.AggressiveOptimization )]
-    #endif
-        public bool TryFormat( Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider )
-        {
-            Debug.Assert( destination.Length > Length );
-            charsWritten = 0;
-            int longest = Longest;
-
-            foreach ( char t in OPEN ) { destination[charsWritten++] = t; }
-
-            foreach ( char t in Name ) { destination[charsWritten++] = t; }
-
-            foreach ( char t in CLOSE ) { destination[charsWritten++] = t; }
-
-            destination[charsWritten++] = '\n';
-
-
-            foreach ( (string sKey, string? sValue) in this )
-            {
-                ReadOnlySpan<char> sectionValue = sValue;
-
-                foreach ( char c in sKey.PadRight( longest ) ) { destination[charsWritten++] = c; }
-
-                foreach ( char c in EQUALS ) { destination[charsWritten++] = c; }
-
-                foreach ( char c in sectionValue ) { destination[charsWritten++] = c; }
-
-                destination[charsWritten++] = '\n';
-            }
-
-            return true;
-        }
     }
 }

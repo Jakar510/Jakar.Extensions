@@ -5,19 +5,19 @@
 namespace Jakar.Database;
 
 
-[ SuppressMessage( "ReSharper", "UnusedMethodReturnValue.Global" ) ]
+[SuppressMessage( "ReSharper", "UnusedMethodReturnValue.Global" )]
 public static class DbServices
 {
     public const string AUTHENTICATION_SCHEME              = JwtBearerDefaults.AuthenticationScheme;
     public const string AUTHENTICATION_SCHEME_DISPLAY_NAME = $"Jwt.{AUTHENTICATION_SCHEME}";
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static bool IsValid<TRecord>( this TRecord value )
         where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord> => value.ID.IsValid();
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static bool IsNotValid<TRecord>( this TRecord value )
         where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord> => value.IsValid() is false;
 
@@ -108,7 +108,7 @@ public static class DbServices
     }
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     private static LogLevel GetLogLevel( this bool isDevEnvironment ) =>
         isDevEnvironment
             ? LogLevel.Trace
@@ -140,13 +140,13 @@ public static class DbServices
     }
 
 
-    [ SupportedOSPlatform( "Windows" ) ]
+    [SupportedOSPlatform( "Windows" )]
     public static EventLogLoggerProvider GetEventLogLoggerProvider( this string name )
     {
         return GetEventLogLoggerProvider( name, Filter );
-        static bool Filter( string category, LogLevel level ) { return level > LogLevel.Information; }
+        static bool Filter( string category, LogLevel level ) => level > LogLevel.Information;
     }
-    [ SupportedOSPlatform( "Windows" ) ]
+    [SupportedOSPlatform( "Windows" )]
     public static EventLogLoggerProvider GetEventLogLoggerProvider( this string name, Func<string, LogLevel, bool> filter ) =>
         new(new EventLogSettings
             {
@@ -173,8 +173,9 @@ public static class DbServices
     public static ILoggingBuilder                     AddFluentMigratorLogger( this                ILoggingBuilder             collection, FluentMigratorLoggerOptions options ) => collection.AddProvider( options.GetFluentMigratorConsoleLoggerProvider() );
     public static ILoggingBuilder AddFluentMigratorLogger( this ILoggingBuilder collection, bool showSql = true, bool showElapsedTime = true ) => collection.AddFluentMigratorLogger( new FluentMigratorLoggerOptions
                                                                                                                                                                                       {
-                                                                                                                                                                                          ShowElapsedTime = showElapsedTime,
-                                                                                                                                                                                          ShowSql         = showSql
+                                                                                                                                                                                          ShowElapsedTime =
+                                                                                                                                                                                              showElapsedTime,
+                                                                                                                                                                                          ShowSql = showSql
                                                                                                                                                                                       } );
 
 
@@ -206,8 +207,11 @@ public static class DbServices
     }
 
 
-    /// <summary> <see href="https://stackoverflow.com/a/46775832/9530917"> Using ASP.NET Identity in an ASP.NET Core MVC application without Entity Framework and Migrations </see>
-    ///     <para> <see cref="AUTHENTICATION_SCHEME"/> </para>
+    /// <summary>
+    ///     <see href="https://stackoverflow.com/a/46775832/9530917"> Using ASP.NET Identity in an ASP.NET Core MVC application without Entity Framework and Migrations </see>
+    ///     <para>
+    ///         <see cref="AUTHENTICATION_SCHEME"/>
+    ///     </para>
     /// </summary>
     /// <returns> </returns>
     public static IdentityBuilder AddIdentityServices( this IServiceCollection collection, Action<IdentityOptions>? options = default )

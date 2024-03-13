@@ -7,7 +7,7 @@ namespace Jakar.Extensions;
 public readonly struct StopWatch( string caller ) : IDisposable
 {
     private readonly string   _caller = caller;
-    private readonly DateTime _start = DateTime.Now;
+    private readonly DateTime _start  = DateTime.Now;
 
 
     public TimeSpan Elapsed => DateTime.Now - _start;
@@ -17,5 +17,5 @@ public readonly struct StopWatch( string caller ) : IDisposable
     public override string ToString() => $"[{_caller}] {Elapsed}";
 
 
-    public static StopWatch Start( [ CallerMemberName ] string? caller = default ) => new(caller ?? string.Empty);
+    public static StopWatch Start( [CallerMemberName] string? caller = default ) => new(caller ?? string.Empty);
 }

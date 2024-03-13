@@ -1,8 +1,10 @@
 ﻿namespace Jakar.Extensions;
 
 
-[ Serializable, SuppressMessage( "ReSharper", "BaseObjectGetHashCodeCallInGetHashCode" ) ]
-public abstract class Collections<T> : ObservableClass, IEquatable<T>, IComparable<T>, IComparable where T : Collections<T>
+[Serializable]
+[SuppressMessage( "ReSharper", "BaseObjectGetHashCodeCallInGetHashCode" )]
+public abstract class Collections<T> : ObservableClass, IEquatable<T>, IComparable<T>, IComparable
+    where T : Collections<T>
 {
     public static Equalizer<T> Equalizer => Equalizer<T>.Default;
     public static Sorter<T>    Sorter    => Sorter<T>.Default;
@@ -29,7 +31,7 @@ public abstract class Collections<T> : ObservableClass, IEquatable<T>, IComparab
 
 
 
-    [ Serializable ]
+    [Serializable]
     public class Collection : ObservableCollection<T>
     {
         public Collection() : base() { }
@@ -38,7 +40,7 @@ public abstract class Collections<T> : ObservableClass, IEquatable<T>, IComparab
 
 
 
-    [ Serializable ]
+    [Serializable]
     public class ConcurrentCollection : ConcurrentObservableCollection<T>
     {
         public ConcurrentCollection() : base( Sorter ) { }
@@ -47,7 +49,7 @@ public abstract class Collections<T> : ObservableClass, IEquatable<T>, IComparab
 
 
 
-    [ Serializable ]
+    [Serializable]
     public class Deque : MultiDeque<T>
     {
         public Deque() : base() { }
@@ -56,7 +58,7 @@ public abstract class Collections<T> : ObservableClass, IEquatable<T>, IComparab
 
 
 
-    [ Serializable ]
+    [Serializable]
     public class Items : List<T>
     {
         public Items() : base() { }
@@ -66,7 +68,7 @@ public abstract class Collections<T> : ObservableClass, IEquatable<T>, IComparab
 
 
 
-    [ Serializable ]
+    [Serializable]
     public class Queue : MultiQueue<T>
     {
         public Queue() : base() { }
@@ -75,7 +77,7 @@ public abstract class Collections<T> : ObservableClass, IEquatable<T>, IComparab
 
 
 
-    [ Serializable ]
+    [Serializable]
     public class Set : HashSet<T>
     {
         public Set() : base() { }

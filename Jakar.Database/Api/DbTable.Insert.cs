@@ -4,7 +4,7 @@
 namespace Jakar.Database;
 
 
-[ SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" ) ]
+[SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
 public partial class DbTable<TRecord>
 {
     public IAsyncEnumerable<TRecord> Insert( ImmutableArray<TRecord>   records, CancellationToken token = default ) => this.TryCall( Insert, records, token );
@@ -13,21 +13,21 @@ public partial class DbTable<TRecord>
     public ValueTask<TRecord>        Insert( TRecord                   record,  CancellationToken token = default ) => this.TryCall( Insert, record,  token );
 
 
-    public virtual async IAsyncEnumerable<TRecord> Insert( DbConnection connection, DbTransaction transaction, IEnumerable<TRecord> records, [ EnumeratorCancellation ] CancellationToken token = default )
+    public virtual async IAsyncEnumerable<TRecord> Insert( DbConnection connection, DbTransaction transaction, IEnumerable<TRecord> records, [EnumeratorCancellation] CancellationToken token = default )
     {
         foreach ( TRecord record in records ) { yield return await Insert( connection, transaction, record, token ); }
     }
-    public virtual async IAsyncEnumerable<TRecord> Insert( DbConnection connection, DbTransaction transaction, ImmutableArray<TRecord> records, [ EnumeratorCancellation ] CancellationToken token = default )
+    public virtual async IAsyncEnumerable<TRecord> Insert( DbConnection connection, DbTransaction transaction, ImmutableArray<TRecord> records, [EnumeratorCancellation] CancellationToken token = default )
     {
         foreach ( TRecord record in records ) { yield return await Insert( connection, transaction, record, token ); }
     }
-    public virtual async IAsyncEnumerable<TRecord> Insert( DbConnection connection, DbTransaction transaction, IAsyncEnumerable<TRecord> records, [ EnumeratorCancellation ] CancellationToken token = default )
+    public virtual async IAsyncEnumerable<TRecord> Insert( DbConnection connection, DbTransaction transaction, IAsyncEnumerable<TRecord> records, [EnumeratorCancellation] CancellationToken token = default )
     {
         await foreach ( TRecord record in records.WithCancellation( token ) ) { yield return await Insert( connection, transaction, record, token ); }
     }
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
+    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask<TRecord> Insert( DbConnection connection, DbTransaction transaction, TRecord record, CancellationToken token = default )
     {
         SqlCommand sql = _sqlCache.Insert( record );
@@ -41,7 +41,7 @@ public partial class DbTable<TRecord>
         catch ( Exception e ) { throw new SqlException( sql, e ); }
     }
 
-    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
+    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask<TRecord?> TryInsert( DbConnection connection, DbTransaction transaction, TRecord record, bool matchAll, DynamicParameters parameters, CancellationToken token = default )
     {
         SqlCommand sql = _sqlCache.TryInsert( record, matchAll, parameters );
@@ -59,7 +59,7 @@ public partial class DbTable<TRecord>
     }
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
+    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask<TRecord?> InsertOrUpdate( DbConnection connection, DbTransaction transaction, TRecord record, bool matchAll, DynamicParameters parameters, CancellationToken token = default )
     {
         SqlCommand sql = _sqlCache.InsertOrUpdate( record, matchAll, parameters );

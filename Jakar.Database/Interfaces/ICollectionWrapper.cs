@@ -4,7 +4,8 @@
 namespace Jakar.Database;
 
 
-public interface ICollectionWrapper<TValue> : IReadOnlyCollection<string>, IEquatable<ICollectionWrapper<TValue>>, IConvertible, ICollectionAlerts, ISpanFormattable, IDisposable where TValue : IUniqueID<string>
+public interface ICollectionWrapper<TValue> : IReadOnlyCollection<string>, IEquatable<ICollectionWrapper<TValue>>, IConvertible, ICollectionAlerts, ISpanFormattable, IDisposable
+    where TValue : IUniqueID<string>
 
 {
     bool    IsEmpty    { get; }
@@ -27,5 +28,5 @@ public interface ICollectionWrapper<TValue> : IReadOnlyCollection<string>, IEqua
     void Add( params TValue[]?            value );
     void Add( HashSet<TValue>?            value );
     void Add( ICollectionWrapper<TValue>? value );
-    void SetValues( string?               json, [ CallerMemberName ] string? caller = default );
+    void SetValues( string?               json, [CallerMemberName] string? caller = default );
 }

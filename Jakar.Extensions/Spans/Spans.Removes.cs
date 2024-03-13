@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 06/10/2022  10:19 AM
 
-using System;
-
-
-
 namespace Jakar.Extensions;
 
 
@@ -35,8 +31,8 @@ public static partial class Spans
         }
         finally { buffer.Dispose(); }
     }
-    
-    
+
+
     public static void Replace<T>(
     #if NET6_0_OR_GREATER
         scoped
@@ -82,8 +78,8 @@ public static partial class Spans
             }
         }
     }
-    
-    
+
+
     public static void Replace<T>(
     #if NET6_0_OR_GREATER
         scoped
@@ -123,7 +119,7 @@ public static partial class Spans
             {
                 if ( length + newValue.Length >= buffer.Length )
                 {
-                    T[] newBuffer = new T[buffer.Length * 2];
+                    var newBuffer = new T[buffer.Length * 2];
                     buffer.CopyTo( newBuffer );
                     buffer = newBuffer;
                 }
@@ -136,7 +132,7 @@ public static partial class Spans
             {
                 if ( length >= buffer.Length )
                 {
-                    T[] newBuffer = new T[buffer.Length * 2];
+                    var newBuffer = new T[buffer.Length * 2];
                     buffer.CopyTo( newBuffer );
                     buffer = newBuffer;
                 }
@@ -167,8 +163,8 @@ public static partial class Spans
         Replace( value, oldValue, newValue, startValue, endValue, ref buffer, out int length );
         return MemoryMarshal.CreateSpan( ref buffer.GetPinnableReference(), length );
     }
-    
-    
+
+
     public static void Replace<T>(
     #if NET6_0_OR_GREATER
         scoped
@@ -229,7 +225,8 @@ public static partial class Spans
             ReadOnlySpan<T> sourceEnd   = source[end..];
             Join( in bufferStart, in sourceEnd, ref buffer, out int second );
             length = first + second;
-        } while ( source.Contains( oldValue ) );
+        }
+        while ( source.Contains( oldValue ) );
     }
 
 
@@ -240,8 +237,8 @@ public static partial class Spans
         RemoveAll( value, c, buffer, out int length );
         return MemoryMarshal.CreateReadOnlySpan( ref buffer.GetPinnableReference(), length );
     }
-    
-    
+
+
     public static ReadOnlySpan<T> RemoveAll<T>( this ReadOnlySpan<T> value,
                                             #if NET6_0_OR_GREATER
                                                 scoped
@@ -255,8 +252,8 @@ public static partial class Spans
         RemoveAll( value, temp, buffer, out int length );
         return MemoryMarshal.CreateReadOnlySpan( ref buffer.GetPinnableReference(), length );
     }
-    
-    
+
+
     public static Span<T> RemoveAll<T>( this Span<T> value,
                                     #if NET6_0_OR_GREATER
                                         scoped
@@ -308,8 +305,8 @@ public static partial class Spans
 
         length = value.Length - offset;
     }
-    
-    
+
+
     public static void RemoveAll<T>(
     #if NET6_0_OR_GREATER
         scoped

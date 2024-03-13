@@ -5,26 +5,26 @@
 namespace Jakar.Database;
 
 
-[ DefaultMember( nameof(Empty) ) ]
+[DefaultMember( nameof(Empty) )]
 public readonly record struct RecordID<TRecord>( Guid Value ) : IComparable<RecordID<TRecord>>, ISpanFormattable, IRegisterDapperTypeHandlers
     where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
+    public static readonly RecordID<TRecord>                 Empty = new(Guid.Empty);
     public static          ValueEqualizer<RecordID<TRecord>> Equalizer => ValueEqualizer<RecordID<TRecord>>.Default;
     public static          ValueSorter<RecordID<TRecord>>    Sorter    => ValueSorter<RecordID<TRecord>>.Default;
-    public static readonly RecordID<TRecord>                 Empty = new(Guid.Empty);
 
-    [ Pure ] public static RecordID<TRecord>  New()                                                    => Create( Guid.NewGuid() );
-    [ Pure ] public static RecordID<TRecord>  Parse( in ReadOnlySpan<char> value )                     => Create( Guid.Parse( value ) );
-    [ Pure ] public static RecordID<TRecord>  Create( Guid                 id )                        => new(id);
-    [ Pure ] public static RecordID<TRecord>  ID( DbDataReader             reader )                    => new(reader.GetFieldValue<Guid>( SQL.ID ));
-    [ Pure ] public static RecordID<TRecord>? CreatedBy( DbDataReader      reader )                    => TryCreate( reader, SQL.CREATED_BY );
-    [ Pure ] public static RecordID<TRecord>? TryCreate( DbDataReader      reader, string columnName ) => TryCreate( reader.GetFieldValue<Guid?>( columnName ) );
-    [ Pure ]
-    public static RecordID<TRecord>? TryCreate( [ NotNullIfNotNull( nameof(id) ) ] Guid? id ) => id.HasValue
-                                                                                                     ? new RecordID<TRecord>( id.Value )
-                                                                                                     : default;
-    [ Pure ]
-    public static bool TryParse( in ReadOnlySpan<char> value, [ NotNullWhen( true ) ] out RecordID<TRecord>? id )
+    [Pure] public static RecordID<TRecord>  New()                                                    => Create( Guid.NewGuid() );
+    [Pure] public static RecordID<TRecord>  Parse( in ReadOnlySpan<char> value )                     => Create( Guid.Parse( value ) );
+    [Pure] public static RecordID<TRecord>  Create( Guid                 id )                        => new(id);
+    [Pure] public static RecordID<TRecord>  ID( DbDataReader             reader )                    => new(reader.GetFieldValue<Guid>( SQL.ID ));
+    [Pure] public static RecordID<TRecord>? CreatedBy( DbDataReader      reader )                    => TryCreate( reader, SQL.CREATED_BY );
+    [Pure] public static RecordID<TRecord>? TryCreate( DbDataReader      reader, string columnName ) => TryCreate( reader.GetFieldValue<Guid?>( columnName ) );
+    [Pure]
+    public static RecordID<TRecord>? TryCreate( [NotNullIfNotNull( nameof(id) )] Guid? id ) => id.HasValue
+                                                                                                   ? new RecordID<TRecord>( id.Value )
+                                                                                                   : default;
+    [Pure]
+    public static bool TryParse( in ReadOnlySpan<char> value, [NotNullWhen( true )] out RecordID<TRecord>? id )
     {
         if ( Guid.TryParse( value, out Guid guid ) )
         {
@@ -39,7 +39,7 @@ public readonly record struct RecordID<TRecord>( Guid Value ) : IComparable<Reco
 
     public static implicit operator RecordID<TRecord>( TRecord record ) => new(record.ID.Value);
 
-    [ Pure ]
+    [Pure]
     public DynamicParameters ToDynamicParameters()
     {
         DynamicParameters parameters = new();
@@ -48,15 +48,13 @@ public readonly record struct RecordID<TRecord>( Guid Value ) : IComparable<Reco
     }
 
 
-    [ Pure ] public bool IsValid()    => Guid.Empty.Equals( Value ) is false;
-    [ Pure ] public bool IsNotValid() => Guid.Empty.Equals( Value );
+    [Pure] public bool IsValid()    => Guid.Empty.Equals( Value ) is false;
+    [Pure] public bool IsNotValid() => Guid.Empty.Equals( Value );
 
-    
-    [ Pure ]
-    public override string ToString() => Value.ToString();
-    
-    [ Pure ]
-    public string ToString( string? format, IFormatProvider? formatProvider ) => Value.ToString( format, formatProvider );
+
+    [Pure] public override string ToString() => Value.ToString();
+
+    [Pure] public string ToString( string? format, IFormatProvider? formatProvider ) => Value.ToString( format, formatProvider );
 
     public bool TryFormat( Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider ) => Value.TryFormat( destination, out charsWritten, format );
 

@@ -6,16 +6,17 @@ namespace Jakar.Database;
 
 public sealed class DbOptions : IOptions<DbOptions>, IDbOptions
 {
-    public const           string                DEFAULT_SQL_CONNECTION_STRING_KEY = "DEFAULT";
-    public const           string                JWT_KEY                           = "JWT";
-    public const           string                USER_EXISTS                       = "User Exists";
-    public const           string                JWT_ALGORITHM                     = SecurityAlgorithms.HmacSha512Signature;
     public const           string                AUTHENTICATION_TYPE               = JwtBearerDefaults.AuthenticationScheme;
     public const           int                   COMMAND_TIMEOUT                   = 300;
+    public const           string                DEFAULT_SQL_CONNECTION_STRING_KEY = "DEFAULT";
+    public const           string                JWT_ALGORITHM                     = SecurityAlgorithms.HmacSha512Signature;
+    public const           string                JWT_KEY                           = "JWT";
+    public const           string                USER_EXISTS                       = "User Exists";
     public static readonly FrozenSet<DbInstance> Instances                         = Enum.GetValues<DbInstance>().ToFrozenSet();
 
 
     public static DbOptions                       Default                  => new();
+    public        string                          AppName                  { get; set; } = string.Empty;
     public        string                          AuthenticationType       { get; set; } = AUTHENTICATION_TYPE;
     public        TimeSpan                        ClockSkew                { get; set; } = TimeSpan.FromMinutes( 1 );
     public        int?                            CommandTimeout           { get; set; } = COMMAND_TIMEOUT;
@@ -25,7 +26,6 @@ public sealed class DbOptions : IOptions<DbOptions>, IDbOptions
     DbInstance IDbOptions.                        Instance                 => DbType;
     public string                                 JWTAlgorithm             { get; set; } = JWT_ALGORITHM;
     public string                                 JWTKey                   { get; set; } = JWT_KEY;
-    public string                                 AppName                  { get; set; } = string.Empty;
     public PasswordRequirements                   PasswordRequirements     { get; set; } = new();
     public string                                 TokenAudience            { get; set; } = string.Empty;
     public string                                 TokenIssuer              { get; set; } = string.Empty;
@@ -63,9 +63,9 @@ public sealed class DbOptions : IOptions<DbOptions>, IDbOptions
     }
     public static async ValueTask<SecuredString> GetConnectionStringAsync( IServiceProvider provider, CancellationToken token )
     {
-        IOptions<DbOptions> options       = provider.GetRequiredService<IOptions<DbOptions>>();
-        IConfiguration      configuration = provider.GetRequiredService<IConfiguration>();
-        SecuredString       secure        = await options.Value.GetConnectionStringAsync( configuration, token );
+        var           options       = provider.GetRequiredService<IOptions<DbOptions>>();
+        var           configuration = provider.GetRequiredService<IConfiguration>();
+        SecuredString secure        = await options.Value.GetConnectionStringAsync( configuration, token );
         return secure;
     }
     public        ValueTask<SecuredString> GetConnectionStringAsync( IConfiguration configuration, CancellationToken token )                        => GetConnectionStringAsync( configuration, DEFAULT_SQL_CONNECTION_STRING_KEY, token );

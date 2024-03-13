@@ -9,7 +9,7 @@ public static class MigrationExtensions
     public static void MigrateUp( this WebApplication app )
     {
         using IServiceScope scope  = app.Services.CreateScope();
-        IMigrationRunner    runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
+        var                 runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
         runner.ListMigrations();
 
         if ( runner.HasMigrationsToApplyUp() ) { runner.MigrateUp(); }
@@ -17,7 +17,7 @@ public static class MigrationExtensions
     public static async ValueTask MigrateUpAsync( this WebApplication app )
     {
         await using AsyncServiceScope scope  = app.Services.CreateAsyncScope();
-        IMigrationRunner              runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
+        var                           runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
         runner.ListMigrations();
 
         if ( runner.HasMigrationsToApplyUp() ) { runner.MigrateUp(); }
@@ -29,7 +29,7 @@ public static class MigrationExtensions
         if ( app.Configuration.GetValue( key, true ) is false ) { return; }
 
         using IServiceScope scope  = app.Services.CreateScope();
-        IMigrationRunner    runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
+        var                 runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
         runner.MigrateDown( version );
     }
     public static async ValueTask MigrateDownAsync( this WebApplication app, string key = "DB_DOWN", long version = 0 )
@@ -39,7 +39,7 @@ public static class MigrationExtensions
         if ( app.Configuration.GetValue( key, true ) is false ) { return; }
 
         await using AsyncServiceScope scope  = app.Services.CreateAsyncScope();
-        IMigrationRunner              runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
+        var                           runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
         runner.MigrateDown( version );
     }
 }

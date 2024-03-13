@@ -57,8 +57,8 @@ public static partial class WpfApi
         view.Dispatcher.CallAsync( func, arg1, arg2, arg3, arg4, arg5, token );
 
 
-    public static DispatcherOperation<Task> CallAsync( this     Dispatcher dispatcher, Func<Task>     func, CancellationToken token = default ) => dispatcher.InvokeAsync( func, DispatcherPriority.Normal, token );
-    public static DispatcherOperation<Task> CallAsync<T1>( this Dispatcher dispatcher, Func<T1, Task> func, T1 arg, CancellationToken token = default ) => dispatcher.InvokeAsync( async () => await func( arg ), DispatcherPriority.Normal, token );
+    public static DispatcherOperation<Task> CallAsync( this     Dispatcher dispatcher, Func<Task>     func, CancellationToken token                        = default ) => dispatcher.InvokeAsync( func,                          DispatcherPriority.Normal, token );
+    public static DispatcherOperation<Task> CallAsync<T1>( this Dispatcher dispatcher, Func<T1, Task> func, T1                arg, CancellationToken token = default ) => dispatcher.InvokeAsync( async () => await func( arg ), DispatcherPriority.Normal, token );
     public static DispatcherOperation<Task> CallAsync<T1, T2>( this Dispatcher dispatcher, Func<T1, T2, Task> func, T1 arg1, T2 arg2, CancellationToken token = default ) =>
         dispatcher.InvokeAsync( async () => await func( arg1, arg2 ), DispatcherPriority.Normal, token );
     public static DispatcherOperation<Task> CallAsync<T1, T2, T3>( this Dispatcher dispatcher, Func<T1, T2, T3, Task> func, T1 arg1, T2 arg2, T3 arg3, CancellationToken token = default ) =>
@@ -81,9 +81,13 @@ public static partial class WpfApi
         dispatcher.InvokeAsync( async () => await func( arg1, arg2, arg3, arg4, arg5, token ), DispatcherPriority.Normal, token );
 
 
-    /// <summary> <see href="https://stackoverflow.com/a/41579163/9530917"> Convert drawing.bitmap to windows.controls.image </see> </summary>
+    /// <summary>
+    ///     <see href="https://stackoverflow.com/a/41579163/9530917"> Convert drawing.bitmap to windows.controls.image </see>
+    /// </summary>
     /// <param name="image"> </param>
-    /// <returns> <see cref="ImageSource"/> </returns>
+    /// <returns>
+    ///     <see cref="ImageSource"/>
+    /// </returns>
     public static ImageSource ConvertImage( this Bitmap image )
     {
         using var stream = new MemoryStream();
@@ -109,20 +113,19 @@ public static partial class WpfApi
         var collection = new ListCollectionView( list );
         return collection;
     }
-    public static ListCollectionView ToCollectionView<T, TComparer>( this ConcurrentObservableCollection<T> list, TComparer comparer ) where TComparer : IComparer<T>, IComparer
+    public static ListCollectionView ToCollectionView<T, TComparer>( this ConcurrentObservableCollection<T> list, TComparer comparer )
+        where TComparer : IComparer<T>, IComparer
     {
         BindingOperations.EnableCollectionSynchronization( list, list.Lock );
 
-        var collection = new ListCollectionView( list )
-                         {
-                             CustomSort = comparer
-                         };
+        var collection = new ListCollectionView( list ) { CustomSort = comparer };
 
         return collection;
     }
-    public static ListCollectionView ToCollectionView<T, TComparer>( this ConcurrentObservableCollection<T> list, TComparer comparer, Predicate<T> filter ) where TComparer : IComparer<T>, IComparer
+    public static ListCollectionView ToCollectionView<T, TComparer>( this ConcurrentObservableCollection<T> list, TComparer comparer, Predicate<T> filter )
+        where TComparer : IComparer<T>, IComparer
     {
-        bool Filter( object item ) { return item is T value && filter( value ); }
+        bool Filter( object item ) => item is T value && filter( value );
 
         BindingOperations.EnableCollectionSynchronization( list, list.Lock );
 
@@ -139,7 +142,9 @@ public static partial class WpfApi
     // -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-    /// <summary> <see href="https://stackoverflow.com/a/65200533/9530917"/> </summary>
+    /// <summary>
+    ///     <see href="https://stackoverflow.com/a/65200533/9530917"/>
+    /// </summary>
     /// <param name="title"> </param>
     /// <returns> </returns>
     public static LocalDirectory? PickFolder( string title )

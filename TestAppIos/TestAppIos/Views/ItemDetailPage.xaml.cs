@@ -1,8 +1,7 @@
-﻿using System.ComponentModel;
-
-using TestAppIos.ViewModels;
-
+﻿using TestAppIos.ViewModels;
 using Xamarin.Forms;
+
+
 
 namespace TestAppIos.Views
 {

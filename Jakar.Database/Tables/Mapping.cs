@@ -11,7 +11,7 @@ public interface ICreateMapping<out TSelf, in TKey, in TValue>
 
 
 
-[ Serializable ]
+[Serializable]
 public abstract record Mapping<TSelf, TKey, TValue>( RecordID<TKey> KeyID, RecordID<TValue> ValueID, RecordID<TSelf> ID, DateTimeOffset DateCreated, DateTimeOffset? LastModified = default ) : TableRecord<TSelf>( ID, DateCreated, LastModified )
     where TValue : class, ITableRecord<TValue>, IDbReaderMapping<TValue>
     where TKey : class, ITableRecord<TKey>, IDbReaderMapping<TKey>
@@ -150,7 +150,7 @@ WHERE
     }
     */
 
-    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
+    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     private static bool Exists( ImmutableArray<TSelf> existing, TValue value )
     {
         // ReSharper disable once LoopCanBeConvertedToQuery
@@ -162,7 +162,7 @@ WHERE
         return false;
     }
 
-    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
+    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     private static bool Exists( ImmutableArray<TValue> existing, TSelf self )
     {
         // ReSharper disable once LoopCanBeConvertedToQuery
@@ -183,7 +183,7 @@ WHERE
         selfTable.Where( connection, transaction, true, GetDynamicParameters( key ), token );
     public static IAsyncEnumerable<TSelf> Where( DbConnection connection, DbTransaction? transaction, DbTable<TSelf> selfTable, TValue value, CancellationToken token ) =>
         selfTable.Where( connection, transaction, true, GetDynamicParameters( value ), token );
-    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
+    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public static IAsyncEnumerable<TValue> Where( DbConnection connection, DbTransaction? transaction, DbTable<TSelf> selfTable, DbTable<TValue> valueTable, TKey key, CancellationToken token )
     {
         string sql = $@"SELECT * FROM {TValue.TableName}
@@ -193,7 +193,7 @@ WHERE {TSelf.TableName}.{nameof(KeyID)} = @{nameof(KeyID)}";
         token.ThrowIfCancellationRequested();
         return valueTable.Where( connection, transaction, sql, GetDynamicParameters( key ), token );
     }
-    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
+    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public static IAsyncEnumerable<TKey> Where( DbConnection connection, DbTransaction? transaction, DbTable<TSelf> selfTable, DbTable<TKey> keyTable, TValue value, CancellationToken token )
     {
         string sql = $@"SELECT * FROM {TKey.TableName}
@@ -220,7 +220,7 @@ WHERE {TSelf.TableName}.{nameof(ValueID)} = @{nameof(ValueID)}";
     {
         await foreach ( TSelf record in Where( connection, transaction, selfTable, key, token ) ) { await selfTable.Delete( connection, transaction, record.ID, token ); }
     }
-    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
+    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public static async ValueTask Delete( DbConnection connection, DbTransaction transaction, DbTable<TSelf> selfTable, TKey key, IEnumerable<TValue> values, CancellationToken token )
     {
         string sql = $"SELECT * FROM {TSelf.TableName} WHERE {nameof(ValueID)} IN ( {string.Join( ',', values.Select( x => x.ID ) )} ) AND {nameof(KeyID)} = @{nameof(KeyID)}";

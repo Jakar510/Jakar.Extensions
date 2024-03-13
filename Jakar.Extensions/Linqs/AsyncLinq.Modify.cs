@@ -39,7 +39,7 @@ public static partial class AsyncLinq
         foreach ( TElement value in items ) { collection.Add( value ); }
     }
 
-    
+
     public static void Add<TElement>( this ICollection<TElement> collection, params TElement[] items )
     {
         foreach ( TElement value in items ) { collection.Add( value ); }
@@ -60,7 +60,7 @@ public static partial class AsyncLinq
     }
     public static void AddDefault<TKey, TElement>( this IDictionary<TKey, TElement?> dict, TKey key ) => dict.Add( key, default );
 
-    
+
 #if NETSTANDARD2_1
     public static void AddOrUpdate<TElement>( this IList<TElement> collection, params TElement[] items )
     {

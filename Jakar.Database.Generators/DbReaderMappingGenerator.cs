@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 09/07/2023  10:04 PM
 
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-
-
-
 namespace Jakar.Database.Generators;
 
 
@@ -25,7 +21,7 @@ public interface IDbReaderMapping<out TRecord>
 
 
 
-[ Generator ]
+[Generator]
 public sealed class DbReaderMappingGenerator : IIncrementalGenerator
 {
     public void Initialize( IncrementalGeneratorInitializationContext context )
@@ -37,7 +33,7 @@ public sealed class DbReaderMappingGenerator : IIncrementalGenerator
         IncrementalValueProvider<(Compilation Left, ImmutableArray<ClassDeclarationSyntax> Right)> sources = context.CompilationProvider.Combine( provider );
         context.RegisterSourceOutput( sources, ExecuteHandler );
     }
-    private static ClassDeclarationSyntax Transform( GeneratorSyntaxContext       x,       CancellationToken                                                             _ )      { return (ClassDeclarationSyntax)x.Node; }
+    private static ClassDeclarationSyntax Transform( GeneratorSyntaxContext       x,       CancellationToken                                                             _ )      => (ClassDeclarationSyntax)x.Node;
     private static void                   ExecuteHandler( SourceProductionContext context, (Compilation Compilation, ImmutableArray<ClassDeclarationSyntax> Declaration) source ) => Execute( source.Compilation, source.Declaration, context );
 
 
@@ -47,7 +43,7 @@ public sealed class DbReaderMappingGenerator : IIncrementalGenerator
 
         string className = syntax.Identifier.ValueText;
 
-        foreach ( var baseType in syntax.BaseList.Types )
+        foreach ( BaseTypeSyntax baseType in syntax.BaseList.Types )
         {
             if ( baseType.Type is GenericNameSyntax { Identifier.Text: "IDbReaderMapping", TypeArgumentList.Arguments: [IdentifierNameSyntax arg] } && arg.Identifier.ValueText == className ) { return true; }
         }

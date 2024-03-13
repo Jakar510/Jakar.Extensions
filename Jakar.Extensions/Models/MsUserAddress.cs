@@ -21,19 +21,10 @@ public record MsUserAddress : ObservableRecord, IAddress, IComparable<MsUserAddr
     public static Sorter<MsUserAddress> Sorter => Sorter<MsUserAddress>.Default;
 
 
-    [ JsonExtensionData ]
-    public IDictionary<string, JToken?>? AdditionalData
-    {
-        get => _additionalData;
-        set => SetProperty( ref _additionalData, value );
-    }
+    [JsonExtensionData] public IDictionary<string, JToken?>? AdditionalData { get => _additionalData; set => SetProperty( ref _additionalData, value ); }
 
 
-    public string? Address
-    {
-        get => _address ??= ToString();
-        set => SetProperty( ref _address, value );
-    }
+    public string? Address { get => _address ??= ToString(); set => SetProperty( ref _address, value ); }
 
 
     public string City
@@ -55,13 +46,9 @@ public record MsUserAddress : ObservableRecord, IAddress, IComparable<MsUserAddr
         }
     }
 
-    public bool IsPrimary
-    {
-        get => _isPrimary;
-        set => SetProperty( ref _isPrimary, value );
-    }
+    public bool IsPrimary { get => _isPrimary; set => SetProperty( ref _isPrimary, value ); }
 
-    [ JsonIgnore ]
+    [JsonIgnore]
     public bool IsValidAddress
     {
         get
@@ -101,7 +88,7 @@ public record MsUserAddress : ObservableRecord, IAddress, IComparable<MsUserAddr
         }
     }
 
-    [ Required ]
+    [Required]
     public string PostalCode
     {
         get => _postalCode;
@@ -121,11 +108,7 @@ public record MsUserAddress : ObservableRecord, IAddress, IComparable<MsUserAddr
         }
     }
 
-    public Guid? UserID
-    {
-        get => _userID;
-        set => SetProperty( ref _userID, value );
-    }
+    public Guid? UserID { get => _userID; set => SetProperty( ref _userID, value ); }
 
 
     public MsUserAddress() { }

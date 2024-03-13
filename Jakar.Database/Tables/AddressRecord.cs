@@ -4,29 +4,29 @@
 namespace Jakar.Database;
 
 
-public sealed record AddressRecord(
-    [ property: ProtectedPersonalData ] string Line1,
-    [ property: ProtectedPersonalData ] string Line2,
-    [ property: ProtectedPersonalData ] string City,
-    [ property: ProtectedPersonalData ] string StateOrProvince,
-    [ property: ProtectedPersonalData ] string Country,
-    [ property: ProtectedPersonalData ] string PostalCode,
-    [ property: ProtectedPersonalData ] string Address,
-    bool                                       IsPrimary,
-    IDictionary<string, JToken?>?              AdditionalData,
-    RecordID<AddressRecord>                    ID,
-    RecordID<UserRecord>?                      CreatedBy,
-    Guid?                                      OwnerUserID,
-    DateTimeOffset                             DateCreated,
-    DateTimeOffset?                            LastModified = default
-) : OwnedTableRecord<AddressRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IAddress, IEquatable<IAddress>, IDbReaderMapping<AddressRecord>
+[Table( TABLE_NAME )]
+public sealed record AddressRecord( [property: ProtectedPersonalData] string Line1,
+                                    [property: ProtectedPersonalData] string Line2,
+                                    [property: ProtectedPersonalData] string City,
+                                    [property: ProtectedPersonalData] string StateOrProvince,
+                                    [property: ProtectedPersonalData] string Country,
+                                    [property: ProtectedPersonalData] string PostalCode,
+                                    [property: ProtectedPersonalData] string Address,
+                                    bool                                     IsPrimary,
+                                    IDictionary<string, JToken?>?            AdditionalData,
+                                    RecordID<AddressRecord>                  ID,
+                                    RecordID<UserRecord>?                    CreatedBy,
+                                    Guid?                                    OwnerUserID,
+                                    DateTimeOffset                           DateCreated,
+                                    DateTimeOffset?                          LastModified = default ) : OwnedTableRecord<AddressRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IAddress, IEquatable<IAddress>, IDbReaderMapping<AddressRecord>
 {
-    public static string                 TableName      { get; } = typeof(AddressRecord).GetTableName();
-    Guid? IAddress.                      UserID         => OwnerUserID;
-    public IDictionary<string, JToken?>? AdditionalData { get; set; } = AdditionalData;
+    public const  string                        TABLE_NAME = "Address";
+    public static string                        TableName      { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => TABLE_NAME; }
+    public        IDictionary<string, JToken?>? AdditionalData { get; set; } = AdditionalData;
+    Guid? IAddress.                             UserID         => OwnerUserID;
 
 
-    [ Pure ]
+    [Pure]
     public override DynamicParameters ToDynamicParameters()
     {
         var parameters = base.ToDynamicParameters();
@@ -40,7 +40,7 @@ public sealed record AddressRecord(
         return parameters;
     }
 
-    [ Pure ]
+    [Pure]
     public static AddressRecord Create( DbDataReader reader )
     {
         string                        line1           = reader.GetFieldValue<string>( nameof(Line1) );
@@ -76,14 +76,14 @@ public sealed record AddressRecord(
         record.Validate();
         return record;
     }
-    [ Pure ]
-    public static async IAsyncEnumerable<AddressRecord> CreateAsync( DbDataReader reader, [ EnumeratorCancellation ] CancellationToken token = default )
+    [Pure]
+    public static async IAsyncEnumerable<AddressRecord> CreateAsync( DbDataReader reader, [EnumeratorCancellation] CancellationToken token = default )
     {
         while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
     }
 
 
-    [ Pure ]
+    [Pure]
     public static async ValueTask<AddressRecord?> TryFromClaims( DbConnection connection, DbTransaction transaction, Database db, Claim[] claims, ClaimType types, CancellationToken token )
     {
         var parameters = new DynamicParameters();
@@ -100,8 +100,8 @@ public sealed record AddressRecord(
 
         return await db.Addresses.Get( connection, transaction, true, parameters, token );
     }
-    [ Pure ]
-    public static async IAsyncEnumerable<AddressRecord> TryFromClaims( DbConnection connection, DbTransaction transaction, Database db, Claim claim, [ EnumeratorCancellation ] CancellationToken token )
+    [Pure]
+    public static async IAsyncEnumerable<AddressRecord> TryFromClaims( DbConnection connection, DbTransaction transaction, Database db, Claim claim, [EnumeratorCancellation] CancellationToken token )
     {
         var parameters = new DynamicParameters();
 
@@ -133,7 +133,7 @@ public sealed record AddressRecord(
 
 
     // TODO: public static async IAsyncEnumerable<Claim> GetUserClaims( DbConnection connection, DbTransaction? transaction, Database db, ClaimType types, RecordID<UserRecord> id, CancellationToken token ) { }
-    [ Pure ]
+    [Pure]
     public IEnumerable<Claim> GetUserClaims( ClaimType types )
     {
         if ( types.HasFlag( ClaimType.StreetAddressLine1 ) ) { yield return new Claim( ClaimTypes.StreetAddress, Line1, ClaimValueTypes.String ); }
@@ -148,7 +148,7 @@ public sealed record AddressRecord(
     }
 
 
-    [ Pure ]
+    [Pure]
     public AddressRecord WithUserData( IAddress value ) =>
         this with
         {

@@ -1,14 +1,10 @@
-﻿using System.Reflection.Metadata;
-
-
-
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
 
 
 public static class ExceptionExtensions
 {
 #if NET6_0_OR_GREATER
-    [ RequiresUnreferencedCode( nameof(GetInnerExceptions) ) ]
+    [RequiresUnreferencedCode( nameof(GetInnerExceptions) )]
 #endif
     private static Dictionary<string, object?> GetInnerExceptions( this Exception e, ref Dictionary<string, object?> dict, bool includeFullMethodInfo )
     {
@@ -25,7 +21,7 @@ public static class ExceptionExtensions
 
 
 #if NET6_0_OR_GREATER
-    [ RequiresUnreferencedCode( nameof(GetProperties) ) ]
+    [RequiresUnreferencedCode( nameof(GetProperties) )]
 #endif
     public static Dictionary<string, object?> GetProperties( this Exception e )
     {
@@ -38,18 +34,18 @@ public static class ExceptionExtensions
 
 
 #if NET6_0_OR_GREATER
-    [ RequiresUnreferencedCode( nameof(Details) ) ]
+    [RequiresUnreferencedCode( nameof(Details) )]
 #endif
     public static ExceptionDetails Details( this Exception e ) => new(e);
 
 
 #if NET6_0_OR_GREATER
-    [ RequiresUnreferencedCode( nameof(FullDetails) ) ]
+    [RequiresUnreferencedCode( nameof(FullDetails) )]
 #endif
     public static ExceptionDetails FullDetails( this Exception e ) => new(e, true);
 
 #if NET6_0_OR_GREATER
-    [ RequiresUnreferencedCode( nameof(Frames) ) ]
+    [RequiresUnreferencedCode( nameof(Frames) )]
 #endif
     public static IEnumerable<string> Frames( StackTrace trace )
     {
@@ -75,27 +71,27 @@ public static class ExceptionExtensions
 
 
 #if NET6_0_OR_GREATER
-    [ RequiresUnreferencedCode( nameof(MethodInfo) ) ]
+    [RequiresUnreferencedCode( nameof(MethodInfo) )]
 #endif
     public static MethodDetails? MethodInfo( this Exception e ) => e.TargetSite?.MethodInfo();
 
 #if NET6_0_OR_GREATER
-    [ RequiresUnreferencedCode( nameof(CallStack) ) ]
+    [RequiresUnreferencedCode( nameof(CallStack) )]
 #endif
     public static string CallStack( Exception e ) => CallStack( new StackTrace( e ) );
 
 #if NET6_0_OR_GREATER
-    [ RequiresUnreferencedCode( nameof(CallStack) ) ]
+    [RequiresUnreferencedCode( nameof(CallStack) )]
 #endif
     public static string CallStack() => CallStack( new StackTrace() );
 
 #if NET6_0_OR_GREATER
-    [ RequiresUnreferencedCode( nameof(CallStack) ) ]
+    [RequiresUnreferencedCode( nameof(CallStack) )]
 #endif
     public static string CallStack( StackTrace trace ) => string.Join( "->", Frames( trace ) );
 
 #if NET6_0_OR_GREATER
-    [ RequiresUnreferencedCode( nameof(Frame) ) ]
+    [RequiresUnreferencedCode( nameof(Frame) )]
 #endif
     public static string Frame( StackFrame frame )
     {
@@ -107,19 +103,19 @@ public static class ExceptionExtensions
 
 
 #if NET6_0_OR_GREATER
-    [ RequiresUnreferencedCode( nameof(MethodClass) ) ]
+    [RequiresUnreferencedCode( nameof(MethodClass) )]
 #endif
     public static string? MethodClass( this Exception e ) => e.TargetSite?.MethodClass();
 
 
 #if NET6_0_OR_GREATER
-    [ RequiresUnreferencedCode( nameof(MethodName) ) ]
+    [RequiresUnreferencedCode( nameof(MethodName) )]
 #endif
     public static string? MethodName( this Exception e ) => e.TargetSite?.MethodName();
 
 
 #if NET6_0_OR_GREATER
-    [ RequiresUnreferencedCode( nameof(MethodSignature) ) ]
+    [RequiresUnreferencedCode( nameof(MethodSignature) )]
 #endif
     public static string? MethodSignature( this Exception e ) => e.TargetSite?.MethodSignature();
 
@@ -145,7 +141,7 @@ public static class ExceptionExtensions
     }
 
 #if NET6_0_OR_GREATER
-    [ RequiresUnreferencedCode( nameof(CallStack) ) ]
+    [RequiresUnreferencedCode( nameof(CallStack) )]
 #endif
     public static void Details( this Exception e, out Dictionary<string, string?> dict )
     {
@@ -154,7 +150,7 @@ public static class ExceptionExtensions
     }
 
 #if NET6_0_OR_GREATER
-    [ RequiresUnreferencedCode( nameof(CallStack) ) ]
+    [RequiresUnreferencedCode( nameof(CallStack) )]
 #endif
     public static void Details<T>( this Exception e, in T dict )
         where T : class, IDictionary<string, string?>
@@ -170,7 +166,7 @@ public static class ExceptionExtensions
 
 
 #if NET6_0_OR_GREATER
-    [ RequiresUnreferencedCode( nameof(CallStack) ) ]
+    [RequiresUnreferencedCode( nameof(CallStack) )]
 #endif
     public static void Details( this Exception e, out Dictionary<string, object?> dict, bool includeFullMethodInfo )
     {
@@ -193,7 +189,7 @@ public static class ExceptionExtensions
     }
     public static void GetProperties<
     #if NET6_0_OR_GREATER
-        [ DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.PublicProperties ) ]
+        [DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.PublicProperties )]
     #endif
         T>( this T e, ref Dictionary<string, object?> dictionary )
         where T : Exception
@@ -211,7 +207,7 @@ public static class ExceptionExtensions
 
     public static void GetProperties<
     #if NET6_0_OR_GREATER
-        [ DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.PublicProperties ) ]
+        [DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.PublicProperties )]
     #endif
         T>( this T e, ref Dictionary<string, JToken?> dictionary )
         where T : Exception
@@ -233,7 +229,7 @@ public static class ExceptionExtensions
 
 
 #if NET6_0_OR_GREATER
-    [ RequiresUnreferencedCode( nameof(Details) ) ]
+    [RequiresUnreferencedCode( nameof(Details) )]
 #endif
     public static void Details( this Exception e, out Dictionary<string, JToken?> dict, bool includeFullMethodInfo )
     {

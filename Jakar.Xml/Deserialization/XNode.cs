@@ -12,7 +12,7 @@ using Jakar.Extensions;
 namespace Jakar.Xml.Deserialization;
 
 
-[ SuppressMessage( "ReSharper", "InconsistentNaming" ) ]
+[SuppressMessage( "ReSharper", "InconsistentNaming" )]
 public readonly ref struct XNode
 {
     private readonly ReadOnlyMemory<char> _xml;

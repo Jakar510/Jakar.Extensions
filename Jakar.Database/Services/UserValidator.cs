@@ -20,7 +20,6 @@ public class UserValidator : IUserValidator<UserRecord>
     protected virtual void Check<T>( in T errors, UserRecord user )
         where T : ICollection<IdentityError>
     {
-
         /*
         if ( user.OwnerUserID.IsValidID() )
         {
@@ -31,13 +30,7 @@ public class UserValidator : IUserValidator<UserRecord>
         }
         */
 
-        if ( !string.IsNullOrWhiteSpace( user.UserName ) )
-        {
-            errors.Add( new IdentityError
-                        {
-                            Description = $"{nameof(UserRecord.UserName)} is invalid"
-                        } );
-        }
+        if ( !string.IsNullOrWhiteSpace( user.UserName ) ) { errors.Add( new IdentityError { Description = $"{nameof(UserRecord.UserName)} is invalid" } ); }
     }
 
 

@@ -32,7 +32,8 @@ public struct WhereInChainBuilder<TNext>
         _cache.Add( $"'{value ?? NULL}'" );
         return this;
     }
-    public WhereInChainBuilder<TNext> With<T>( T value ) where T : struct
+    public WhereInChainBuilder<TNext> With<T>( T value )
+        where T : struct
     {
         _cache.Add( value.ToString() ?? "''" );
         return this;

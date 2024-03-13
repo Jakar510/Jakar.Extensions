@@ -14,7 +14,7 @@ internal static class InstanceCreator
 
 public static class InstanceCreator<
 #if NET6_0_OR_GREATER
-    [ DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors ) ]
+    [DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors )]
 #endif
     TItem>
 {
@@ -33,10 +33,10 @@ public static class InstanceCreator<
 
 
 
-[ SuppressMessage( "ReSharper", "CoVariantArrayConversion" ) ]
+[SuppressMessage( "ReSharper", "CoVariantArrayConversion" )]
 public static class InstanceCreator<T1,
                                 #if NET6_0_OR_GREATER
-                                    [ DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors ) ]
+                                    [DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors )]
                                 #endif
                                     TInstance>
 {
@@ -44,10 +44,7 @@ public static class InstanceCreator<T1,
 
     private static Func<T1, TInstance> CreateInstance()
     {
-        Type[] argsTypes =
-        [
-            typeof(T1)
-        ];
+        Type[] argsTypes = [typeof(T1)];
 
         ConstructorInfo? constructor = typeof(TInstance).GetConstructor( BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, Type.DefaultBinder, argsTypes, null );
         if ( constructor is null ) { throw InstanceCreator.CreateException( argsTypes ); }
@@ -61,10 +58,10 @@ public static class InstanceCreator<T1,
 
 
 
-[ SuppressMessage( "ReSharper", "CoVariantArrayConversion" ) ]
+[SuppressMessage( "ReSharper", "CoVariantArrayConversion" )]
 public static class InstanceCreator<T1, T2,
                                 #if NET6_0_OR_GREATER
-                                    [ DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors ) ]
+                                    [DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors )]
                                 #endif
                                     TInstance>
 {
@@ -72,11 +69,7 @@ public static class InstanceCreator<T1, T2,
 
     private static Func<T1, T2, TInstance> CreateInstance()
     {
-        Type[] argsTypes =
-        [
-            typeof(T1),
-            typeof(T2)
-        ];
+        Type[] argsTypes = [typeof(T1), typeof(T2)];
 
         ConstructorInfo? constructor = typeof(TInstance).GetConstructor( BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, Type.DefaultBinder, argsTypes, null );
         if ( constructor is null ) { throw InstanceCreator.CreateException( argsTypes ); }
@@ -90,10 +83,10 @@ public static class InstanceCreator<T1, T2,
 
 
 
-[ SuppressMessage( "ReSharper", "CoVariantArrayConversion" ) ]
+[SuppressMessage( "ReSharper", "CoVariantArrayConversion" )]
 public static class InstanceCreator<T1, T2, T3,
                                 #if NET6_0_OR_GREATER
-                                    [ DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors ) ]
+                                    [DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors )]
                                 #endif
                                     TInstance>
 {
@@ -101,12 +94,7 @@ public static class InstanceCreator<T1, T2, T3,
 
     private static Func<T1, T2, T3, TInstance> CreateInstance()
     {
-        Type[] argsTypes =
-        [
-            typeof(T1),
-            typeof(T2),
-            typeof(T3)
-        ];
+        Type[] argsTypes = [typeof(T1), typeof(T2), typeof(T3)];
 
         ConstructorInfo? constructor = typeof(TInstance).GetConstructor( BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, Type.DefaultBinder, argsTypes, null );
         if ( constructor is null ) { throw InstanceCreator.CreateException( argsTypes ); }
@@ -120,10 +108,10 @@ public static class InstanceCreator<T1, T2, T3,
 
 
 
-[ SuppressMessage( "ReSharper", "CoVariantArrayConversion" ) ]
+[SuppressMessage( "ReSharper", "CoVariantArrayConversion" )]
 public static class InstanceCreator<T1, T2, T3, T4,
                                 #if NET6_0_OR_GREATER
-                                    [ DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors ) ]
+                                    [DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors )]
                                 #endif
                                     TInstance>
 {
@@ -131,13 +119,7 @@ public static class InstanceCreator<T1, T2, T3, T4,
 
     private static Func<T1, T2, T3, T4, TInstance> CreateInstance()
     {
-        Type[] argsTypes =
-        [
-            typeof(T1),
-            typeof(T2),
-            typeof(T3),
-            typeof(T4)
-        ];
+        Type[] argsTypes = [typeof(T1), typeof(T2), typeof(T3), typeof(T4)];
 
         ConstructorInfo? constructor = typeof(TInstance).GetConstructor( BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, Type.DefaultBinder, argsTypes, null );
         if ( constructor is null ) { throw InstanceCreator.CreateException( argsTypes ); }
@@ -151,10 +133,10 @@ public static class InstanceCreator<T1, T2, T3, T4,
 
 
 
-[ SuppressMessage( "ReSharper", "CoVariantArrayConversion" ) ]
+[SuppressMessage( "ReSharper", "CoVariantArrayConversion" )]
 public static class InstanceCreator<T1, T2, T3, T4, T5,
                                 #if NET6_0_OR_GREATER
-                                    [ DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors ) ]
+                                    [DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors )]
                                 #endif
                                     TInstance>
 {
@@ -162,13 +144,7 @@ public static class InstanceCreator<T1, T2, T3, T4, T5,
 
     private static Func<T1, T2, T3, T4, T5, TInstance> CreateInstance()
     {
-        Type[] argsTypes =
-        [
-            typeof(T1),
-            typeof(T2),
-            typeof(T3),
-            typeof(T4)
-        ];
+        Type[] argsTypes = [typeof(T1), typeof(T2), typeof(T3), typeof(T4)];
 
         ConstructorInfo? constructor = typeof(TInstance).GetConstructor( BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, Type.DefaultBinder, argsTypes, null );
         if ( constructor is null ) { throw InstanceCreator.CreateException( argsTypes ); }
@@ -182,10 +158,10 @@ public static class InstanceCreator<T1, T2, T3, T4, T5,
 
 
 
-[ SuppressMessage( "ReSharper", "CoVariantArrayConversion" ) ]
+[SuppressMessage( "ReSharper", "CoVariantArrayConversion" )]
 public static class InstanceCreator<T1, T2, T3, T4, T5, T6,
                                 #if NET6_0_OR_GREATER
-                                    [ DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors ) ]
+                                    [DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors )]
                                 #endif
                                     TInstance>
 {
@@ -193,13 +169,7 @@ public static class InstanceCreator<T1, T2, T3, T4, T5, T6,
 
     private static Func<T1, T2, T3, T4, T5, T6, TInstance> CreateInstance()
     {
-        Type[] argsTypes =
-        [
-            typeof(T1),
-            typeof(T2),
-            typeof(T3),
-            typeof(T4)
-        ];
+        Type[] argsTypes = [typeof(T1), typeof(T2), typeof(T3), typeof(T4)];
 
         ConstructorInfo? constructor = typeof(TInstance).GetConstructor( BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, Type.DefaultBinder, argsTypes, null );
         if ( constructor is null ) { throw InstanceCreator.CreateException( argsTypes ); }
@@ -213,10 +183,10 @@ public static class InstanceCreator<T1, T2, T3, T4, T5, T6,
 
 
 
-[ SuppressMessage( "ReSharper", "CoVariantArrayConversion" ) ]
+[SuppressMessage( "ReSharper", "CoVariantArrayConversion" )]
 public static class InstanceCreator<T1, T2, T3, T4, T5, T6, T7,
                                 #if NET6_0_OR_GREATER
-                                    [ DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors ) ]
+                                    [DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors )]
                                 #endif
                                     TInstance>
 {
@@ -224,13 +194,7 @@ public static class InstanceCreator<T1, T2, T3, T4, T5, T6, T7,
 
     private static Func<T1, T2, T3, T4, T5, T6, T7, TInstance> CreateInstance()
     {
-        Type[] argsTypes =
-        [
-            typeof(T1),
-            typeof(T2),
-            typeof(T3),
-            typeof(T4)
-        ];
+        Type[] argsTypes = [typeof(T1), typeof(T2), typeof(T3), typeof(T4)];
 
         ConstructorInfo? constructor = typeof(TInstance).GetConstructor( BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, Type.DefaultBinder, argsTypes, null );
         if ( constructor is null ) { throw InstanceCreator.CreateException( argsTypes ); }

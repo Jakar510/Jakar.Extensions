@@ -7,10 +7,7 @@ namespace Jakar.Database;
 public sealed class MsSqlServer<TRecord> : BaseSqlCache<TRecord>
     where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
-    public override DbInstance Instance
-    {
-        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => DbInstance.MsSql;
-    }
+    public override DbInstance Instance { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => DbInstance.MsSql; }
 
 
     public override SqlCommand First()
@@ -49,10 +46,7 @@ public sealed class MsSqlServer<TRecord> : BaseSqlCache<TRecord>
         parameters.Add( nameof(count),  count );
         parameters.Add( nameof(userID), userID );
 
-        if ( _sql.TryGetValue( SqlCacheType.RandomUserIDCount, out string? sql ) is false )
-        {
-            _sql[SqlCacheType.RandomUserIDCount] = sql = @$"SELECT * FROM {TableName} WHERE {nameof(IOwnedTableRecord.OwnerUserID)} = @{nameof(userID)} LIMIT @{nameof(count)}";
-        }
+        if ( _sql.TryGetValue( SqlCacheType.RandomUserIDCount, out string? sql ) is false ) { _sql[SqlCacheType.RandomUserIDCount] = sql = @$"SELECT * FROM {TableName} WHERE {nameof(IOwnedTableRecord.OwnerUserID)} = @{nameof(userID)} LIMIT @{nameof(count)}"; }
 
         return new SqlCommand( sql, parameters );
     }
@@ -68,7 +62,7 @@ public sealed class MsSqlServer<TRecord> : BaseSqlCache<TRecord>
     }
     public override SqlCommand Insert( in TRecord record )
     {
-        DynamicParameters parameters = record.ToDynamicParameters();
+        var parameters = record.ToDynamicParameters();
 
         if ( _sql.TryGetValue( SqlCacheType.Insert, out string? sql ) ) { return new SqlCommand( sql, parameters ); }
 
@@ -85,7 +79,7 @@ public sealed class MsSqlServer<TRecord> : BaseSqlCache<TRecord>
     public override SqlCommand TryInsert( in TRecord record, in bool matchAll, in DynamicParameters parameters )
     {
         Key key   = Key.Create( matchAll, parameters );
-        DynamicParameters param = record.ToDynamicParameters();
+        var param = record.ToDynamicParameters();
         param.AddDynamicParams( parameters );
 
         if ( _tryInsert.TryGetValue( key, out string? sql ) ) { return new SqlCommand( sql, param ); }

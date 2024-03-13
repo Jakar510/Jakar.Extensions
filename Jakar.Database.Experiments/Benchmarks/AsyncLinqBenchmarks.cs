@@ -17,7 +17,12 @@ namespace Jakar.Database.Experiments.Benchmarks;
 
 
 
-[ Config( typeof(BenchmarkConfig) ), GroupBenchmarksBy( BenchmarkLogicalGroupRule.ByCategory ), SimpleJob( RuntimeMoniker.HostProcess ), Orderer( SummaryOrderPolicy.FastestToSlowest ), RankColumn, MemoryDiagnoser ]
+[Config( typeof(BenchmarkConfig) )]
+[GroupBenchmarksBy( BenchmarkLogicalGroupRule.ByCategory )]
+[SimpleJob( RuntimeMoniker.HostProcess )]
+[Orderer( SummaryOrderPolicy.FastestToSlowest )]
+[RankColumn]
+[MemoryDiagnoser]
 public class AsyncLinqBenchmarks
 {
     // private readonly Dictionary<long, Guid> _dict = new();
@@ -34,10 +39,10 @@ public class AsyncLinqBenchmarks
     //     results.Count.WriteToConsole();
     //     return results;
     // }
-    [ Benchmark ] public ValueTask<List<long>> WhereValueTask() => _data.Where( x => x > 0 ).Where( x => x % 5 == 0 ).ToList();
+    [Benchmark] public ValueTask<List<long>> WhereValueTask() => _data.Where( x => x > 0 ).Where( x => x % 5 == 0 ).ToList();
 
 
-    [ GlobalSetup ]
+    [GlobalSetup]
     public void Setup()
     {
         // for ( long i = 0; i < 10_000; i++ ) { _dict[i] = Guid.NewGuid(); }

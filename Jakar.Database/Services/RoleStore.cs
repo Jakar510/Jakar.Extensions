@@ -39,17 +39,9 @@ public sealed class RoleStore( Database dbContext ) : IRoleStore<RoleRecord>
     public async Task<string?> GetRoleNameAsync( RoleRecord           role, CancellationToken token ) => await ValueTask.FromResult( role.Name );
 
 
-    public async Task SetNormalizedRoleNameAsync( RoleRecord role, string? name, CancellationToken token ) => await _dbContext.Roles.Update( role with
-                                                                                                                                             {
-                                                                                                                                                 NormalizedName = name ?? string.Empty
-                                                                                                                                             },
-                                                                                                                                             token );
+    public async Task SetNormalizedRoleNameAsync( RoleRecord role, string? name, CancellationToken token ) => await _dbContext.Roles.Update( role with { NormalizedName = name ?? string.Empty }, token );
 
-    public async Task SetRoleNameAsync( RoleRecord role, string? name, CancellationToken token ) => await _dbContext.Roles.Update( role with
-                                                                                                                                   {
-                                                                                                                                       Name = name ?? string.Empty
-                                                                                                                                   },
-                                                                                                                                   token );
+    public async Task SetRoleNameAsync( RoleRecord role, string? name, CancellationToken token ) => await _dbContext.Roles.Update( role with { Name = name ?? string.Empty }, token );
 
     public async Task<IdentityResult> UpdateAsync( RoleRecord role, CancellationToken token )
     {
@@ -58,12 +50,6 @@ public sealed class RoleStore( Database dbContext ) : IRoleStore<RoleRecord>
             await _dbContext.Roles.Update( role, token );
             return IdentityResult.Success;
         }
-        catch ( Exception e )
-        {
-            return IdentityResult.Failed( new IdentityError
-                                          {
-                                              Description = e.Message
-                                          } );
-        }
+        catch ( Exception e ) { return IdentityResult.Failed( new IdentityError { Description = e.Message } ); }
     }
 }

@@ -2,7 +2,8 @@
 
 
 /// <summary> See <see cref="Format"/> for formatting details. </summary>
-[ Serializable, JsonConverter( typeof(AppVersionJsonNetConverter) ) ]
+[Serializable]
+[JsonConverter( typeof(AppVersionJsonNetConverter) )]
 public sealed class AppVersion :
 #if NET7_0_OR_GREATER
     IComparable,
@@ -187,8 +188,8 @@ public sealed class AppVersion :
     /// <param name="value"> </param>
     /// <param name="version"> </param>
     /// <returns> <see langword="true"/> Parse was successful. <br/> <see langword="false"/> otherwise. </returns>
-    public static bool TryParse( ReadOnlySpan<char> value, [ NotNullWhen( true ) ] out AppVersion? version ) => TryParse( value, CultureInfo.CurrentCulture, out version );
-    public static bool TryParse( ReadOnlySpan<char> value, IFormatProvider? provider, [ NotNullWhen( true ) ] out AppVersion? version )
+    public static bool TryParse( ReadOnlySpan<char> value, [NotNullWhen( true )] out AppVersion? version ) => TryParse( value, CultureInfo.CurrentCulture, out version );
+    public static bool TryParse( ReadOnlySpan<char> value, IFormatProvider? provider, [NotNullWhen( true )] out AppVersion? version )
     {
         if ( !value.IsEmpty )
         {
@@ -222,10 +223,7 @@ public sealed class AppVersion :
             int       i      = 0;
             Span<int> result = stackalloc int[count + 1];
 
-            ReadOnlySpan<char> separators = stackalloc char[1]
-            {
-                SEPARATOR
-            };
+            ReadOnlySpan<char> separators = stackalloc char[1] { SEPARATOR };
 
 
             foreach ( ReadOnlySpan<char> span in value.SplitOn( separators ) )
@@ -250,7 +248,7 @@ public sealed class AppVersion :
         catch ( Exception e ) { throw new ArgumentException( $"Cannot convert '{original.ToString()}' into {nameof(AppVersion)}", nameof(value), e ); }
     }
     public static AppVersion Parse( string s, IFormatProvider? provider ) => Parse( s.AsSpan() );
-    public static bool TryParse( string? s, IFormatProvider? provider, [ NotNullWhen( true ) ] out AppVersion? result )
+    public static bool TryParse( string? s, IFormatProvider? provider, [NotNullWhen( true )] out AppVersion? result )
     {
         if ( string.IsNullOrEmpty( s ) )
         {
@@ -301,7 +299,7 @@ public sealed class AppVersion :
 
 
 #if NET6_0_OR_GREATER
-    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
+    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
 #endif
     public bool TryFormat( Span<char> span, out int charsWritten, ReadOnlySpan<char> format = default, IFormatProvider? provider = default )
     {
@@ -333,9 +331,7 @@ public sealed class AppVersion :
 
 
     /// <summary>
-    ///     If the <see cref="Scheme"/> is any of [ <see cref="Format.Singular"/> , <see cref="Format.DetailedRevisions"/> , <see cref="Format.Complete"/> ], will throw
-    ///     <see
-    ///         cref="InvalidOperationException"/>
+    ///     If the <see cref="Scheme"/> is any of [ <see cref="Format.Singular"/> , <see cref="Format.DetailedRevisions"/> , <see cref="Format.Complete"/> ], will throw <see cref="InvalidOperationException"/>
     /// </summary>
     /// <returns> </returns>
     /// <exception cref="InvalidOperationException"> </exception>
@@ -454,20 +450,20 @@ public sealed class AppVersion :
     ///             <span>
     ///                 All other fields that are not <see langword="null"/> and are equal to or greater than <br/>
     ///                 <list type="bullet">
-    ///                     <span> <see cref="Maintenance"/> </span> <br/>
     ///                     <span>
-    ///                         <see
-    ///                             cref="MajorRevision"/>
+    ///                         <see cref="Maintenance"/>
     ///                     </span>
     ///                     <br/>
     ///                     <span>
-    ///                         <see
-    ///                             cref="MinorRevision"/>
+    ///                         <see cref="MajorRevision"/>
     ///                     </span>
     ///                     <br/>
     ///                     <span>
-    ///                         <see
-    ///                             cref="Build"/>
+    ///                         <see cref="MinorRevision"/>
+    ///                     </span>
+    ///                     <br/>
+    ///                     <span>
+    ///                         <see cref="Build"/>
     ///                     </span>
     ///                     <br/>
     ///                 </list>
@@ -484,12 +480,7 @@ public sealed class AppVersion :
 
         AssertFormat( other );
 
-        bool result = Major.Equals( other.Major )                                 &&
-                      Nullable.Compare( other.Minor,         Minor )         == 0 &&
-                      Nullable.Compare( other.Maintenance,   Maintenance )   >= 0 &&
-                      Nullable.Compare( other.MajorRevision, MajorRevision ) >= 0 &&
-                      Nullable.Compare( other.MinorRevision, MinorRevision ) >= 0 &&
-                      Nullable.Compare( other.Build,         Build )         >= 0;
+        bool result = Major.Equals( other.Major ) && Nullable.Compare( other.Minor, Minor ) == 0 && Nullable.Compare( other.Maintenance, Maintenance ) >= 0 && Nullable.Compare( other.MajorRevision, MajorRevision ) >= 0 && Nullable.Compare( other.MinorRevision, MinorRevision ) >= 0 && Nullable.Compare( other.Build, Build ) >= 0;
 
         return result;
     }
@@ -501,13 +492,7 @@ public sealed class AppVersion :
 
         AssertFormat( other );
 
-        return Major == other.Major                                  &&
-               Nullable.Equals( Minor,         other.Minor )         &&
-               Nullable.Equals( Maintenance,   other.Maintenance )   &&
-               Nullable.Equals( MajorRevision, other.MajorRevision ) &&
-               Nullable.Equals( MinorRevision, other.MinorRevision ) &&
-               Nullable.Equals( Build,         other.Build )         &&
-               Flags.Equals( other.Flags );
+        return Major == other.Major && Nullable.Equals( Minor, other.Minor ) && Nullable.Equals( Maintenance, other.Maintenance ) && Nullable.Equals( MajorRevision, other.MajorRevision ) && Nullable.Equals( MinorRevision, other.MinorRevision ) && Nullable.Equals( Build, other.Build ) && Flags.Equals( other.Flags );
     }
     public override bool Equals( object? obj ) => obj is AppVersion version && Equals( version );
     public override int  GetHashCode()         => HashCode.Combine( Scheme, Major, Minor, Maintenance, MajorRevision, MinorRevision, Build, Flags );

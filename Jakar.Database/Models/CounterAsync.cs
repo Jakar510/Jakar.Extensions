@@ -4,17 +4,13 @@
 namespace Jakar.Database;
 
 
-[ Serializable ]
+[Serializable]
 public record struct CounterAsync : IAsyncEnumerator<long>
 {
     private long? _current;
 
 
-    public long Current
-    {
-        get => _current ?? throw new InvalidOperationException( nameof(_current) );
-        private set => _current = value;
-    }
+    public long Current { get => _current ?? throw new InvalidOperationException( nameof(_current) ); private set => _current = value; }
 
 
     public CounterAsync() { }

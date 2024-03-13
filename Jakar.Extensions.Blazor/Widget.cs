@@ -4,7 +4,8 @@
 namespace Jakar.Extensions.Blazor;
 
 
-public abstract class Widget<TServices> : ComponentBase, IModelState where TServices : AppServices
+public abstract class Widget<TServices> : ComponentBase, IModelState
+    where TServices : AppServices
 {
     private IModalReference? _popup;
 
@@ -23,14 +24,14 @@ public abstract class Widget<TServices> : ComponentBase, IModelState where TServ
     public bool    HasError  => !string.IsNullOrEmpty( ErrorText ) || ModelState.ErrorCount > 0;
 
 
-    [ CascadingParameter( Name = nameof(ModelStateDictionary) ) ] public ModelStateDictionary ModelState { get; set; } = new();
+    [CascadingParameter( Name = nameof(ModelStateDictionary) )] public ModelStateDictionary ModelState { get; set; } = new();
 
     // ReSharper disable once NullableWarningSuppressionIsUsed
-    [ Inject ] public TServices Services { get; set; } = default!;
+    [Inject] public TServices Services { get; set; } = default!;
 
 
-    [ Parameter ] public string? Title { get; set; }
-    public               string  Uri   => Services.Uri;
+    [Parameter] public string? Title { get; set; }
+    public             string  Uri   => Services.Uri;
 
 
     public Task StateHasChangedAsync() => InvokeAsync( StateHasChanged );

@@ -3,6 +3,7 @@
 
 public static class Sizes
 {
+    private const int DEFAULT_SIZE = 500;
     private static readonly ConcurrentDictionary<Type, int> _sizes = new(Environment.ProcessorCount, 50)
                                                                      {
                                                                          [typeof(byte)]            = 3,
@@ -35,7 +36,6 @@ public static class Sizes
                                                                          [typeof(DateTimeOffset?)] = 75,
                                                                          [typeof(AppVersion)]      = 200
                                                                      };
-    private const int DEFAULT_SIZE = 500;
 
 
     public static bool Register( Type              type, int size ) => _sizes.TryAdd( type, size );

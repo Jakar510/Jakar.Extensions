@@ -4,7 +4,7 @@
 namespace Jakar.Database.DbMigrations;
 
 
-[ Migration( 4 ) ]
+[Migration( 4 )]
 
 // ReSharper disable once InconsistentNaming
 public sealed class CreateTable_Group : MigrateGroupTable

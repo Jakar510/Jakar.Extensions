@@ -47,15 +47,9 @@ public readonly record struct Error( Status Status, ProblemDetails? Details = de
     private object? GetResult() => State is not null
                                        ? new SerializableError( State )
                                        : Errors is not null
-                                           ? new SerializableError
-                                             {
-                                                 [nameof(Errors)] = Errors
-                                             }
+                                           ? new SerializableError { [nameof(Errors)] = Errors }
                                            : Details ?? Value;
-    public ActionResult ToActionResult() => new ObjectResult( GetResult() )
-                                            {
-                                                StatusCode = (int)Status
-                                            };
+    public ActionResult ToActionResult() => new ObjectResult( GetResult() ) { StatusCode = (int)Status };
 }
 
 
@@ -71,27 +65,11 @@ public static class ErrorExtensions
     public static async Task<ActionResult<T>>      Match<T>( this Task<OneOf<T, List<T>, Error>>      value ) => (await value).Match();
     public static async ValueTask<ActionResult<T>> Match<T>( this ValueTask<OneOf<T, List<T>, Error>> value ) => (await value).Match();
     public static ActionResult Match<T>( this OneOf<T, List<T>, Error> value ) =>
-        value.Match( x => new ObjectResult( x )
-                          {
-                              StatusCode = (int)Status.Created
-                          },
-                     x => new ObjectResult( x )
-                          {
-                              StatusCode = (int)Status.Created
-                          },
-                     x => x.ToActionResult() );
+        value.Match( x => new ObjectResult( x ) { StatusCode = (int)Status.Created }, x => new ObjectResult( x ) { StatusCode = (int)Status.Created }, x => x.ToActionResult() );
 
 
     public static async Task<ActionResult<T>>      Match<T>( this Task<OneOf<T, T[], Error>>      value ) => (await value).Match();
     public static async ValueTask<ActionResult<T>> Match<T>( this ValueTask<OneOf<T, T[], Error>> value ) => (await value).Match();
     public static ActionResult Match<T>( this OneOf<T, T[], Error> value ) =>
-        value.Match( x => new ObjectResult( x )
-                          {
-                              StatusCode = (int)Status.Created
-                          },
-                     x => new ObjectResult( x )
-                          {
-                              StatusCode = (int)Status.Created
-                          },
-                     x => x.ToActionResult() );
+        value.Match( x => new ObjectResult( x ) { StatusCode = (int)Status.Created }, x => new ObjectResult( x ) { StatusCode = (int)Status.Created }, x => x.ToActionResult() );
 }

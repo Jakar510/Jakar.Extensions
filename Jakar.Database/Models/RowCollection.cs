@@ -1,7 +1,7 @@
 ﻿namespace Jakar.Database;
 
 
-[ Serializable ]
+[Serializable]
 public sealed class RecordCollection<TRecord> : IReadOnlyList<TRecord>
     where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>
 {

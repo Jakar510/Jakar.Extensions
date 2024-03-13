@@ -16,7 +16,7 @@ public interface IDbReaderMapping<out TRecord>
 {
     public abstract static string                    TableName { get; }
     public abstract static TRecord                   Create( DbDataReader      reader );
-    public abstract static IAsyncEnumerable<TRecord> CreateAsync( DbDataReader reader, [ EnumeratorCancellation ] CancellationToken token = default );
+    public abstract static IAsyncEnumerable<TRecord> CreateAsync( DbDataReader reader, [EnumeratorCancellation] CancellationToken token = default );
 
 
     public DynamicParameters ToDynamicParameters();
@@ -45,14 +45,14 @@ public interface ITableRecord<TRecord> : ITableRecord
 
 public interface IOwnedTableRecord
 {
-    public Guid?                 OwnerUserID { get; }
     public RecordID<UserRecord>? CreatedBy   { get; }
+    public Guid?                 OwnerUserID { get; }
 }
 
 
 
-[ Serializable ]
-public abstract record TableRecord<TRecord>( [ property: Key ] RecordID<TRecord> ID, DateTimeOffset DateCreated, DateTimeOffset? LastModified ) : BaseRecord, ITableRecord<TRecord>, IComparable<TRecord>
+[Serializable]
+public abstract record TableRecord<TRecord>( [property: Key] RecordID<TRecord> ID, DateTimeOffset DateCreated, DateTimeOffset? LastModified ) : BaseRecord, ITableRecord<TRecord>, IComparable<TRecord>
     where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
     protected TableRecord( RecordID<TRecord> id ) : this( id, DateTimeOffset.UtcNow, null ) { }
@@ -60,7 +60,7 @@ public abstract record TableRecord<TRecord>( [ property: Key ] RecordID<TRecord>
     public RecordPair<TRecord> ToPair() => new(ID, DateCreated);
 
 
-    [ Conditional( "DEBUG" ) ]
+    [Conditional( "DEBUG" )]
     public void Validate()
     {
         PropertyInfo[]    properties = typeof(TRecord).GetProperties( BindingFlags.Instance | BindingFlags.Public );
@@ -104,14 +104,10 @@ public abstract record TableRecord<TRecord>( [ property: Key ] RecordID<TRecord>
     }
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] protected internal TRecord NewID( Guid id ) => NewID( new RecordID<TRecord>( id ) );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] protected internal TRecord NewID( Guid id ) => NewID( new RecordID<TRecord>( id ) );
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
-    public TRecord NewID( RecordID<TRecord> id ) => (TRecord)(this with
-                                                              {
-                                                                  ID = id
-                                                              });
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public TRecord NewID( RecordID<TRecord> id ) => (TRecord)(this with { ID = id });
     public UInt128 GetHash()
     {
         string json = this.ToJson();
@@ -134,9 +130,8 @@ public abstract record TableRecord<TRecord>( [ property: Key ] RecordID<TRecord>
 
 
 
-[ Serializable ]
-public abstract record OwnedTableRecord<TRecord>( RecordID<TRecord> ID, RecordID<UserRecord>? CreatedBy, Guid? OwnerUserID, DateTimeOffset DateCreated, DateTimeOffset? LastModified )
-    : TableRecord<TRecord>( ID, DateCreated, LastModified ), IOwnedTableRecord
+[Serializable]
+public abstract record OwnedTableRecord<TRecord>( RecordID<TRecord> ID, RecordID<UserRecord>? CreatedBy, Guid? OwnerUserID, DateTimeOffset DateCreated, DateTimeOffset? LastModified ) : TableRecord<TRecord>( ID, DateCreated, LastModified ), IOwnedTableRecord
     where TRecord : OwnedTableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
     protected OwnedTableRecord( UserRecord?       owner ) : this( RecordID<TRecord>.New(), owner ) { }
@@ -172,15 +167,11 @@ public abstract record OwnedTableRecord<TRecord>( RecordID<TRecord> ID, RecordID
         await db.Users.Get( connection, transaction, CreatedBy, token );
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
-    public TRecord WithOwner( UserRecord user ) => (TRecord)(this with
-                                                             {
-                                                                 OwnerUserID = user.UserID
-                                                             });
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public TRecord WithOwner( UserRecord user ) => (TRecord)(this with { OwnerUserID = user.UserID });
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public bool Owns( UserRecord       record ) => CreatedBy == record.ID;
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public bool DoesNotOwn( UserRecord record ) => CreatedBy != record.ID;
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public bool Owns( UserRecord       record ) => CreatedBy == record.ID;
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public bool DoesNotOwn( UserRecord record ) => CreatedBy != record.ID;
 
 
     public override int CompareTo( TRecord? other )

@@ -15,12 +15,13 @@ using Newtonsoft.Json.Linq;
 namespace Jakar.Xml;
 
 
-[ SuppressMessage( "ReSharper", "ParameterTypeCanBeEnumerable.Global" ) ]
+[SuppressMessage( "ReSharper", "ParameterTypeCanBeEnumerable.Global" )]
 public static class XmlExtensions
 {
     public static ICollection<long> GetMappedIDs( this string xml, out IDictionary<string, string>? attributes ) => xml.FromXml<List<long>>( out attributes );
 
-    public static ICollection<TValue> ToList<TValue>( this XmlDocument document, out IDictionary<string, string>? attributes ) where TValue : IConvertible
+    public static ICollection<TValue> ToList<TValue>( this XmlDocument document, out IDictionary<string, string>? attributes )
+        where TValue : IConvertible
     {
         var results = new List<TValue>();
 
@@ -126,13 +127,12 @@ public static class XmlExtensions
         document.Save( writer );
         return builder.ToString();
     }
-    public static string SetMappedIDs<T>( this IEnumerable<IEnumerable<T>> items ) where T : IDataBaseID => items.Consolidate().SetMappedIDs();
-    public static string SetMappedIDs<T>( this IEnumerable<T>              items ) where T : IDataBaseID => items.Select( item => item.ID ).SetMappedIDs<T>();
+    public static string SetMappedIDs<T>( this IEnumerable<IEnumerable<T>> items )
+        where T : IDataBaseID => items.Consolidate().SetMappedIDs();
+    public static string SetMappedIDs<T>( this IEnumerable<T> items )
+        where T : IDataBaseID => items.Select( item => item.ID ).SetMappedIDs<T>();
 
-    public static string SetMappedIDs<T>( this IEnumerable<long> listOfIds ) => listOfIds.ToXml( new Dictionary<string, string>
-                                                                                                 {
-                                                                                                     [Constants.GROUP] = typeof(T).GetTableName()
-                                                                                                 } );
+    public static string SetMappedIDs<T>( this IEnumerable<long> listOfIds ) => listOfIds.ToXml( new Dictionary<string, string> { [Constants.GROUP] = typeof(T).GetTableName() } );
 
 
     public static string ToXml( this JObject item )

@@ -11,10 +11,7 @@ public static class WebAppExtensions
     /// <returns> </returns>
     public static IMvcBuilder UseNewtonsoftJson( this IMvcBuilder services )
     {
-        JsonConvert.DefaultSettings = () => new JsonSerializerSettings
-                                            {
-                                                ContractResolver = new DefaultContractResolver()
-                                            };
+        JsonConvert.DefaultSettings = () => new JsonSerializerSettings { ContractResolver = new DefaultContractResolver() };
 
         return services.AddJsonOptions( options => options.JsonSerializerOptions.PropertyNamingPolicy = null ).AddNewtonsoftJson( options => options.SerializerSettings.ContractResolver = new DefaultContractResolver() );
     }

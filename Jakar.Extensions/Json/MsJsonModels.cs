@@ -126,7 +126,7 @@ public static class JsonModels
         using var stream = new MemoryStream();
         await JsonSerializer.SerializeAsync( stream, model, info, token );
         using var reader = new StreamReader( stream );
-        
+
     #if NET7_0_OR_GREATER
         return await reader.ReadToEndAsync( token );
     #else
@@ -195,3 +195,5 @@ public static class JsonModels
 #endif
 }
 */
+
+

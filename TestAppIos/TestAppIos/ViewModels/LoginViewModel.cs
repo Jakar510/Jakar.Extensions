@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-using TestAppIos.Views;
-
+﻿using TestAppIos.Views;
 using Xamarin.Forms;
+
+
 
 namespace TestAppIos.ViewModels
 {
@@ -12,15 +9,11 @@ namespace TestAppIos.ViewModels
     {
         public Command LoginCommand { get; }
 
-        public LoginViewModel()
-        {
-            LoginCommand = new Command( OnLoginClicked );
-        }
+        public LoginViewModel() => LoginCommand = new Command( OnLoginClicked );
 
-        private async void OnLoginClicked(object obj)
-        {
+        private async void OnLoginClicked( object obj ) =>
+
             // Prefixing with `//` switches to a different navigation stack instead of pushing to the active one
-            await Shell.Current.GoToAsync( $"//{nameof( AboutPage )}" );
-        }
+            await Shell.Current.GoToAsync( $"//{nameof(AboutPage)}" );
     }
 }

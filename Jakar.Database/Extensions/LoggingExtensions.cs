@@ -16,8 +16,8 @@ public static class LoggingExtensions
     public static string ConnectionString( this WebApplication   configuration, string name = DEFAULT ) => configuration.Services.ConnectionString( name );
 
 
-    public static IConfigurationBuilder AddCommandLine( this          WebApplicationBuilder builder, string[] args ) => builder.Configuration.AddCommandLine( args );
-    public static IConfigurationBuilder AddCommandLine( this          WebApplicationBuilder builder, string[] args, IDictionary<string, string> switchMappings ) => builder.Configuration.AddCommandLine( args, switchMappings );
+    public static IConfigurationBuilder AddCommandLine( this          WebApplicationBuilder builder, string[]                               args )                                             => builder.Configuration.AddCommandLine( args );
+    public static IConfigurationBuilder AddCommandLine( this          WebApplicationBuilder builder, string[]                               args, IDictionary<string, string> switchMappings ) => builder.Configuration.AddCommandLine( args, switchMappings );
     public static IConfigurationBuilder AddCommandLine( this          WebApplicationBuilder builder, Action<CommandLineConfigurationSource> configureSource ) => builder.Configuration.AddCommandLine( configureSource );
     public static IConfigurationBuilder AddEnvironmentVariables( this WebApplicationBuilder builder )                => builder.Configuration.AddEnvironmentVariables();
     public static IConfigurationBuilder AddEnvironmentVariables( this WebApplicationBuilder builder, string prefix ) => builder.Configuration.AddEnvironmentVariables( prefix );
@@ -29,27 +29,30 @@ public static class LoggingExtensions
     }
 
 
-    public static IConfigurationBuilder AddIniFile( this   WebApplicationBuilder builder, string path ) => builder.Configuration.AddIniFile( path );
-    public static IConfigurationBuilder AddIniFile( this   WebApplicationBuilder builder, string path, bool optional ) => builder.Configuration.AddIniFile( path, optional );
-    public static IConfigurationBuilder AddIniFile( this   WebApplicationBuilder builder, string path, bool optional, bool reloadOnChange ) => builder.Configuration.AddIniFile( path, optional, reloadOnChange );
-    public static IConfigurationBuilder AddIniFile( this   WebApplicationBuilder builder, IFileProvider provider, string path, bool optional, bool reloadOnChange ) => builder.Configuration.AddIniFile( provider, path, optional, reloadOnChange );
+    public static IConfigurationBuilder AddIniFile( this   WebApplicationBuilder builder, string                         path )                                                          => builder.Configuration.AddIniFile( path );
+    public static IConfigurationBuilder AddIniFile( this   WebApplicationBuilder builder, string                         path,     bool   optional )                                     => builder.Configuration.AddIniFile( path,     optional );
+    public static IConfigurationBuilder AddIniFile( this   WebApplicationBuilder builder, string                         path,     bool   optional, bool reloadOnChange )                => builder.Configuration.AddIniFile( path,     optional, reloadOnChange );
+    public static IConfigurationBuilder AddIniFile( this   WebApplicationBuilder builder, IFileProvider                  provider, string path,     bool optional, bool reloadOnChange ) => builder.Configuration.AddIniFile( provider, path,     optional, reloadOnChange );
     public static IConfigurationBuilder AddIniFile( this   WebApplicationBuilder builder, Action<IniConfigurationSource> configureSource ) => builder.Configuration.AddIniFile( configureSource );
-    public static IConfigurationBuilder AddIniStream( this WebApplicationBuilder builder, Stream stream ) => builder.Configuration.AddIniStream( stream );
+    public static IConfigurationBuilder AddIniStream( this WebApplicationBuilder builder, Stream                         stream )          => builder.Configuration.AddIniStream( stream );
 
 
-    public static IConfigurationBuilder AddJsonFile( this   WebApplicationBuilder builder, string path ) => builder.Configuration.AddJsonFile( path );
-    public static IConfigurationBuilder AddJsonFile( this   WebApplicationBuilder builder, string path, bool optional ) => builder.Configuration.AddJsonFile( path, optional );
-    public static IConfigurationBuilder AddJsonFile( this   WebApplicationBuilder builder, string path, bool optional, bool reloadOnChange ) => builder.Configuration.AddJsonFile( path, optional, reloadOnChange );
-    public static IConfigurationBuilder AddJsonFile( this   WebApplicationBuilder builder, IFileProvider provider, string path, bool optional, bool reloadOnChange ) => builder.Configuration.AddJsonFile( provider, path, optional, reloadOnChange );
+    public static IConfigurationBuilder AddJsonFile( this   WebApplicationBuilder builder, string                          path )                                                          => builder.Configuration.AddJsonFile( path );
+    public static IConfigurationBuilder AddJsonFile( this   WebApplicationBuilder builder, string                          path,     bool   optional )                                     => builder.Configuration.AddJsonFile( path,     optional );
+    public static IConfigurationBuilder AddJsonFile( this   WebApplicationBuilder builder, string                          path,     bool   optional, bool reloadOnChange )                => builder.Configuration.AddJsonFile( path,     optional, reloadOnChange );
+    public static IConfigurationBuilder AddJsonFile( this   WebApplicationBuilder builder, IFileProvider                   provider, string path,     bool optional, bool reloadOnChange ) => builder.Configuration.AddJsonFile( provider, path,     optional, reloadOnChange );
     public static IConfigurationBuilder AddJsonFile( this   WebApplicationBuilder builder, Action<JsonConfigurationSource> configureSource ) => builder.Configuration.AddJsonFile( configureSource );
-    public static IConfigurationBuilder AddJsonStream( this WebApplicationBuilder builder, Stream stream ) => builder.Configuration.AddJsonStream( stream );
+    public static IConfigurationBuilder AddJsonStream( this WebApplicationBuilder builder, Stream                          stream )          => builder.Configuration.AddJsonStream( stream );
 
 
-    public static ILoggingBuilder AddDefaultLogging<T>( this WebApplicationBuilder builder ) where T : class => builder.AddDefaultLogging<T>( builder.Environment.EnvironmentName == Environments.Development );
-    public static ILoggingBuilder AddDefaultLogging<T>( this WebApplicationBuilder builder, bool isDevEnvironment ) where T : class => builder.AddDefaultLogging<T>( isDevEnvironment
-                                                                                                                                                                         ? LogLevel.Trace
-                                                                                                                                                                         : LogLevel.Information );
-    public static ILoggingBuilder AddDefaultLogging<T>( this WebApplicationBuilder builder, in LogLevel minimumLevel ) where T : class => builder.AddDefaultLogging( minimumLevel, typeof(T).Name );
+    public static ILoggingBuilder AddDefaultLogging<T>( this WebApplicationBuilder builder )
+        where T : class => builder.AddDefaultLogging<T>( builder.Environment.EnvironmentName == Environments.Development );
+    public static ILoggingBuilder AddDefaultLogging<T>( this WebApplicationBuilder builder, bool isDevEnvironment )
+        where T : class => builder.AddDefaultLogging<T>( isDevEnvironment
+                                                             ? LogLevel.Trace
+                                                             : LogLevel.Information );
+    public static ILoggingBuilder AddDefaultLogging<T>( this WebApplicationBuilder builder, in LogLevel minimumLevel )
+        where T : class => builder.AddDefaultLogging( minimumLevel, typeof(T).Name );
 
 
     public static ILoggingBuilder AddDefaultLogging( this WebApplicationBuilder builder, in LogLevel minimumLevel, in string name )

@@ -1,7 +1,9 @@
 ﻿namespace Jakar.Database;
 
 
-/// <summary> <see href="http://www.mimekit.net/docs/html/Creating-Messages.htm"/> </summary>
+/// <summary>
+///     <see href="http://www.mimekit.net/docs/html/Creating-Messages.htm"/>
+/// </summary>
 public sealed class EmailBuilder
 {
     private readonly List<Attachment>     _attachments = new();

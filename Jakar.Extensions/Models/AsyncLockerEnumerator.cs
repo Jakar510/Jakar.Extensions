@@ -11,8 +11,8 @@ public class AsyncLockerEnumerator<TValue>( ILockedCollection<TValue> collection
     private          bool                      _isDisposed;
     private          CancellationToken         _token = token;
     private          int                       _index = START_INDEX;
-    private          TValue?                   _current;
     private          ReadOnlyMemory<TValue>    _cache;
+    private          TValue?                   _current;
     public           TValue                    Current        => _current ?? throw new NullReferenceException( nameof(_current) );
     internal         bool                      ShouldContinue => _token.ShouldContinue() && _index < _cache.Length;
 
@@ -35,7 +35,7 @@ public class AsyncLockerEnumerator<TValue>( ILockedCollection<TValue> collection
             _index = START_INDEX;
             _cache = await _collection.CopyAsync( _token );
         }
-        
+
         _index += 1;
 
         _current = _index < _cache.Span.Length

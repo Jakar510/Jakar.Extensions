@@ -174,101 +174,95 @@ public ref struct SqlTableBuilder<TRecord>
     }
 
 
-    private static string GetDataType( in DbInstance instance, in DbType dbType, in int? size = null )
-    {
-        return instance switch
-               {
-                   DbInstance.MsSql    => GetDataTypeSqlServer( dbType, size ),
-                   DbInstance.Postgres => GetDataTypePostgresSql( dbType, size ),
-                   _                   => throw new OutOfRangeException( nameof(instance), instance )
-               };
-    }
+    private static string GetDataType( in DbInstance instance, in DbType dbType, in int? size = null ) =>
+        instance switch
+        {
+            DbInstance.MsSql    => GetDataTypeSqlServer( dbType, size ),
+            DbInstance.Postgres => GetDataTypePostgresSql( dbType, size ),
+            _                   => throw new OutOfRangeException( nameof(instance), instance )
+        };
 
 
     [SuppressMessage( "ReSharper", "StringLiteralTypo" )]
-    private static string GetDataTypePostgresSql( in DbType dbType, in int? size )
-    {
-        return dbType switch
-               {
-                   DbType.Binary => size.HasValue
-                                        ? $"VARBINARY({size})"
-                                        : "BLOB",
-                   DbType.SByte => "bytea",
-                   DbType.Byte  => "bytea",
-                   DbType.AnsiString => size.HasValue
-                                            ? $"varchar({size})"
-                                            : "varchar(MAX)",
-                   DbType.String => size.HasValue
-                                        ? $"text({size})"
-                                        : "text(MAX)",
-                   DbType.AnsiStringFixedLength => $"char({size})",
-                   DbType.StringFixedLength     => $"char({size})",
-                   DbType.Guid                  => "uuid",
-                   DbType.Int16                 => "smallint",
-                   DbType.Int32                 => "integer",
-                   DbType.Int64                 => "bigint",
-                   DbType.UInt16                => "smallint",
-                   DbType.UInt32                => "integer",
-                   DbType.UInt64                => "bigint",
-                   DbType.Single                => "float4",
-                   DbType.Double                => "float8",
-                   DbType.Decimal               => "decimal(19, 5)",
-                   DbType.VarNumeric            => "decimal(19, 5)",
-                   DbType.Boolean               => "bool",
-                   DbType.Date                  => "date",
-                   DbType.Time                  => "time",
-                   DbType.DateTime              => "timestamp",
-                   DbType.DateTime2             => "timestamp",
-                   DbType.DateTimeOffset        => "timestamptz",
-                   DbType.Currency              => "money",
-                   DbType.Object                => "json",
-                   DbType.Xml                   => "xml",
-                   _                            => throw new OutOfRangeException( nameof(dbType), dbType )
-               };
-    }
+    private static string GetDataTypePostgresSql( in DbType dbType, in int? size ) =>
+        dbType switch
+        {
+            DbType.Binary => size.HasValue
+                                 ? $"VARBINARY({size})"
+                                 : "BLOB",
+            DbType.SByte => "bytea",
+            DbType.Byte  => "bytea",
+            DbType.AnsiString => size.HasValue
+                                     ? $"varchar({size})"
+                                     : "varchar(MAX)",
+            DbType.String => size.HasValue
+                                 ? $"text({size})"
+                                 : "text(MAX)",
+            DbType.AnsiStringFixedLength => $"char({size})",
+            DbType.StringFixedLength     => $"char({size})",
+            DbType.Guid                  => "uuid",
+            DbType.Int16                 => "smallint",
+            DbType.Int32                 => "integer",
+            DbType.Int64                 => "bigint",
+            DbType.UInt16                => "smallint",
+            DbType.UInt32                => "integer",
+            DbType.UInt64                => "bigint",
+            DbType.Single                => "float4",
+            DbType.Double                => "float8",
+            DbType.Decimal               => "decimal(19, 5)",
+            DbType.VarNumeric            => "decimal(19, 5)",
+            DbType.Boolean               => "bool",
+            DbType.Date                  => "date",
+            DbType.Time                  => "time",
+            DbType.DateTime              => "timestamp",
+            DbType.DateTime2             => "timestamp",
+            DbType.DateTimeOffset        => "timestamptz",
+            DbType.Currency              => "money",
+            DbType.Object                => "json",
+            DbType.Xml                   => "xml",
+            _                            => throw new OutOfRangeException( nameof(dbType), dbType )
+        };
 
 
     [SuppressMessage( "ReSharper", "StringLiteralTypo" )]
-    private static string GetDataTypeSqlServer( in DbType dbType, int? size )
-    {
-        return dbType switch
-               {
-                   DbType.Binary => size.HasValue
-                                        ? $"VARBINARY({size})"
-                                        : "BLOB",
-                   DbType.SByte => "TINYINT",
-                   DbType.Byte  => "TINYINT",
-                   DbType.AnsiString => size.HasValue
-                                            ? $"NVARCHAR({size})"
-                                            : "NVARCHAR(MAX)",
-                   DbType.String => size.HasValue
-                                        ? $"NTEXT({size})"
-                                        : "NTEXT(MAX)",
-                   DbType.AnsiStringFixedLength => $"CHAR({size})",
-                   DbType.StringFixedLength     => $"NCHAR({size})",
-                   DbType.Guid                  => "GUID",
-                   DbType.Int16                 => "SMALLINT",
-                   DbType.Int32                 => "INT",
-                   DbType.Int64                 => "BIGINT",
-                   DbType.UInt16                => "SMALLINT",
-                   DbType.UInt32                => "INT",
-                   DbType.UInt64                => "BIGINT",
-                   DbType.Single                => "FLOAT(9)",
-                   DbType.Double                => "DOUBLE PRECISION",
-                   DbType.Decimal               => "DECIMAL(19, 5)",
-                   DbType.VarNumeric            => "DECIMAL(19, 5)",
-                   DbType.Boolean               => "BOOLEAN",
-                   DbType.Date                  => "DATE",
-                   DbType.Time                  => "TIME",
-                   DbType.DateTime              => "DATETIME2",
-                   DbType.DateTime2             => "DATETIME2",
-                   DbType.DateTimeOffset        => "TIMESTAMP",
-                   DbType.Currency              => "MONEY",
-                   DbType.Object                => "JSON",
-                   DbType.Xml                   => "XML",
-                   _                            => throw new OutOfRangeException( nameof(dbType), dbType )
-               };
-    }
+    private static string GetDataTypeSqlServer( in DbType dbType, int? size ) =>
+        dbType switch
+        {
+            DbType.Binary => size.HasValue
+                                 ? $"VARBINARY({size})"
+                                 : "BLOB",
+            DbType.SByte => "TINYINT",
+            DbType.Byte  => "TINYINT",
+            DbType.AnsiString => size.HasValue
+                                     ? $"NVARCHAR({size})"
+                                     : "NVARCHAR(MAX)",
+            DbType.String => size.HasValue
+                                 ? $"NTEXT({size})"
+                                 : "NTEXT(MAX)",
+            DbType.AnsiStringFixedLength => $"CHAR({size})",
+            DbType.StringFixedLength     => $"NCHAR({size})",
+            DbType.Guid                  => "GUID",
+            DbType.Int16                 => "SMALLINT",
+            DbType.Int32                 => "INT",
+            DbType.Int64                 => "BIGINT",
+            DbType.UInt16                => "SMALLINT",
+            DbType.UInt32                => "INT",
+            DbType.UInt64                => "BIGINT",
+            DbType.Single                => "FLOAT(9)",
+            DbType.Double                => "DOUBLE PRECISION",
+            DbType.Decimal               => "DECIMAL(19, 5)",
+            DbType.VarNumeric            => "DECIMAL(19, 5)",
+            DbType.Boolean               => "BOOLEAN",
+            DbType.Date                  => "DATE",
+            DbType.Time                  => "TIME",
+            DbType.DateTime              => "DATETIME2",
+            DbType.DateTime2             => "DATETIME2",
+            DbType.DateTimeOffset        => "TIMESTAMP",
+            DbType.Currency              => "MONEY",
+            DbType.Object                => "JSON",
+            DbType.Xml                   => "XML",
+            _                            => throw new OutOfRangeException( nameof(dbType), dbType )
+        };
 
 
     public string Build()

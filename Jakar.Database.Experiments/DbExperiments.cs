@@ -4,4 +4,4 @@
 namespace Jakar.Database.Experiments;
 
 
-class DbExperiments : IAppName { }
+internal class DbExperiments : IAppName { }

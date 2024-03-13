@@ -5,7 +5,7 @@ using MailKit.Net.Smtp;
 namespace Jakar.Database;
 
 
-[ SuppressMessage( "ReSharper", "SuggestBaseTypeForParameterInConstructor" ) ]
+[SuppressMessage( "ReSharper", "SuggestBaseTypeForParameterInConstructor" )]
 public class Emailer
 {
     private readonly IConfiguration _configuration;

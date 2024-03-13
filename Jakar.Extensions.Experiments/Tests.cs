@@ -6,16 +6,18 @@
 // using Jakar.Xml.Deserialization;
 
 
-namespace Jakar.Extensions.Experiments;
-#nullable enable
+using System.IO.Hashing;
 
+
+
+namespace Jakar.Extensions.Experiments;
 
 
 public enum Page
 {
     Home,
     Master,
-    Detail,
+    Detail
 }
 
 
@@ -30,9 +32,9 @@ public static class Tests
     {
         UInt128.MinValue.WriteToDebug();
         UInt128.MaxValue.WriteToDebug();
-        System.IO.Hashing.Crc64.HashToUInt64( values ).WriteToDebug();
-        System.IO.Hashing.XxHash64.HashToUInt64( values ).WriteToDebug();
-        UInt128 hash = System.IO.Hashing.XxHash128.HashToUInt128( values );
+        Crc64.HashToUInt64( values ).WriteToDebug();
+        XxHash64.HashToUInt64( values ).WriteToDebug();
+        UInt128 hash = XxHash128.HashToUInt128( values );
         hash.WriteToDebug();
     }
 
@@ -42,11 +44,11 @@ public static class Tests
         var collection = new ConcurrentObservableCollection<long>();
         await collection.AddAsync( Enumerable.Range( 0, 1000 ).Select<int, long>( static x => x ), token );
 
-        foreach ( var x in collection ) { }
+        foreach ( long x in collection ) { }
 
-        await foreach ( var x in collection ) { }
+        await foreach ( long x in collection ) { }
 
-        await foreach ( var x in collection.WithCancellation( token ) ) { }
+        await foreach ( long x in collection.WithCancellation( token ) ) { }
 
         // collection.ToPrettyJson().WriteToConsole();
     }

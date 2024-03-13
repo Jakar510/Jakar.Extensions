@@ -1,18 +1,27 @@
 ﻿namespace Jakar.Database;
 
 
-[ Serializable, Table( "Groups" ) ]
-public sealed record GroupRecord( string? CustomerID, string NameOfGroup, RecordID<UserRecord> OwnerID, [ MaxLength( IRights.MAX_SIZE ) ] string Rights, RecordID<GroupRecord> ID, RecordID<UserRecord>? CreatedBy, Guid? OwnerUserID, DateTimeOffset DateCreated, DateTimeOffset? LastModified = default )
-    : OwnedTableRecord<GroupRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<GroupRecord>, IRights
+[Serializable]
+[Table( TABLE_NAME )]
+public sealed record GroupRecord( string?                                CustomerID,
+                                  string                                 NameOfGroup,
+                                  RecordID<UserRecord>                   OwnerID,
+                                  [MaxLength( IRights.MAX_SIZE )] string Rights,
+                                  RecordID<GroupRecord>                  ID,
+                                  RecordID<UserRecord>?                  CreatedBy,
+                                  Guid?                                  OwnerUserID,
+                                  DateTimeOffset                         DateCreated,
+                                  DateTimeOffset?                        LastModified = default ) : OwnedTableRecord<GroupRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<GroupRecord>, IRights
 {
-    public static string TableName { get; } = typeof(GroupRecord).GetTableName();
+    public const  string TABLE_NAME = "Groups";
+    public static string TableName { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => TABLE_NAME; }
 
 
     public GroupRecord( UserRecord owner, string nameOfGroup, string? customerID, UserRecord? caller                     = default ) : this( customerID, nameOfGroup, owner.ID, string.Empty, RecordID<GroupRecord>.New(), caller?.ID, caller?.UserID, DateTimeOffset.UtcNow ) { }
     public GroupRecord( UserRecord owner, string nameOfGroup, string? customerID, IUserRights rights, UserRecord? caller = default ) : this( customerID, nameOfGroup, owner.ID, rights.ToString(), RecordID<GroupRecord>.New(), caller?.ID, caller?.UserID, DateTimeOffset.UtcNow ) { }
 
 
-    [ Pure ]
+    [Pure]
     public override DynamicParameters ToDynamicParameters()
     {
         var parameters = base.ToDynamicParameters();
@@ -22,7 +31,7 @@ public sealed record GroupRecord( string? CustomerID, string NameOfGroup, Record
         parameters.Add( nameof(Rights),      Rights );
         return parameters;
     }
-    [ Pure ]
+    [Pure]
     public static GroupRecord Create( DbDataReader reader )
     {
         string                customerID   = reader.GetFieldValue<string>( nameof(CustomerID) );
@@ -38,12 +47,12 @@ public sealed record GroupRecord( string? CustomerID, string NameOfGroup, Record
         record.Validate();
         return record;
     }
-    [ Pure ]
-    public static async IAsyncEnumerable<GroupRecord> CreateAsync( DbDataReader reader, [ EnumeratorCancellation ] CancellationToken token = default )
+    [Pure]
+    public static async IAsyncEnumerable<GroupRecord> CreateAsync( DbDataReader reader, [EnumeratorCancellation] CancellationToken token = default )
     {
         while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
     }
 
-    [ Pure ] public async ValueTask<UserRecord?>       GetOwner( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => await db.Users.Get( connection, transaction, OwnerID, token );
-    [ Pure ] public       IAsyncEnumerable<UserRecord> GetUsers( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => UserGroupRecord.Where( connection, transaction, db.UserGroups, db.Users, this, token );
+    [Pure] public async ValueTask<UserRecord?>       GetOwner( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => await db.Users.Get( connection, transaction, OwnerID, token );
+    [Pure] public       IAsyncEnumerable<UserRecord> GetUsers( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => UserGroupRecord.Where( connection, transaction, db.UserGroups, db.Users, this, token );
 }

@@ -14,14 +14,17 @@ namespace Jakar.Json.Generator;
 
 
 /// <summary>
-///     <para> <see href="https://github.com/dotnet/roslyn-sdk/blob/main/samples/CSharp/SourceGenerators/SourceGeneratorSamples/AutoNotifyGenerator.cs"/> </para>
+///     <para>
+///         <see href="https://github.com/dotnet/roslyn-sdk/blob/main/samples/CSharp/SourceGenerators/SourceGeneratorSamples/AutoNotifyGenerator.cs"/>
+///     </para>
 /// </summary>
-[ Generator, SuppressMessage( "ReSharper", "SuggestBaseTypeForParameter" ) ]
+[Generator]
+[SuppressMessage( "ReSharper", "SuggestBaseTypeForParameter" )]
 public class JsonizerGenerator : ISourceGenerator
 {
-    private static readonly string _attribute = typeof(JsonizerAttribute).FullName ?? throw new InvalidOperationException();
     public const            string FROM_JSON  = "FromJson";
     public const            string GENERATED  = $"[System.CodeDom.Compiler.GeneratedCode({nameof(JsonizerGenerator)})]";
+    private static readonly string _attribute = typeof(JsonizerAttribute).FullName ?? throw new InvalidOperationException();
 
 
     private static string ChooseName( ReadOnlySpan<char> fieldName, in TypedConstant overridenNameOpt )

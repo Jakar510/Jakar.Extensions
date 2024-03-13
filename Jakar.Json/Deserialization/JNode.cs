@@ -1,7 +1,7 @@
 ﻿namespace Jakar.Json.Deserialization;
 
 
-[ SuppressMessage( "ReSharper", "InconsistentNaming" ) ]
+[SuppressMessage( "ReSharper", "InconsistentNaming" )]
 public readonly ref struct JNode( in ReadOnlyMemory<char> span )
 {
     private readonly ReadOnlyMemory<char> _span = span;

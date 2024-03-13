@@ -4,7 +4,8 @@
 namespace Jakar.Database.Caches;
 
 
-[ SuppressMessage( "ReSharper", "UnusedMethodReturnValue.Global" ), SuppressMessage( "ReSharper", "ConvertToPrimaryConstructor" ) ]
+[SuppressMessage( "ReSharper", "UnusedMethodReturnValue.Global" )]
+[SuppressMessage( "ReSharper", "ConvertToPrimaryConstructor" )]
 public sealed class TableCacheOptions : IOptions<TableCacheOptions>
 {
     // public int MaxItems    { get; set; } = 1000;

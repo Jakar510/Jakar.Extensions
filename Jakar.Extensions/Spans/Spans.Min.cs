@@ -7,7 +7,7 @@ namespace Jakar.Extensions;
 public static partial class Spans
 {
 #if NET7_0_OR_GREATER
-    [ Pure ]
+    [Pure]
     public static T Min<T>( this ReadOnlySpan<T> value, T start )
         where T : INumber<T>
     {
@@ -18,7 +18,7 @@ public static partial class Spans
     }
 
 
-    [ Pure ]
+    [Pure]
     public static TNumber Min<T, TNumber>( this ReadOnlySpan<T> value, Func<T, TNumber> selector, TNumber start )
         where TNumber : INumber<TNumber>
     {

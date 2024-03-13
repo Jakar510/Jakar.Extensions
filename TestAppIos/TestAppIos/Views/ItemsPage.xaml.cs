@@ -1,22 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using TestAppIos.Models;
-using TestAppIos.ViewModels;
-using TestAppIos.Views;
-
+﻿using TestAppIos.ViewModels;
 using Xamarin.Forms;
-using Xamarin.Forms.Xaml;
+
+
 
 namespace TestAppIos.Views
 {
     public partial class ItemsPage : ContentPage
     {
-        ItemsViewModel _viewModel;
+        private readonly ItemsViewModel _viewModel;
 
         public ItemsPage()
         {

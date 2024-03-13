@@ -8,18 +8,16 @@ using System.Net;
 namespace Jakar.Extensions.Tests;
 
 
-[ TestFixture, TestOf( typeof(IniConfig) ) ]
+[TestFixture]
+[TestOf( typeof(IniConfig) )]
 
 // ReSharper disable once InconsistentNaming
 public class IniConfig_Tests : Assert
 {
-    [ Test ]
+    [Test]
     public void Test()
     {
-        var project = new IniConfig.Section( "Project" )
-                      {
-                          ["Name"] = nameof(IniConfig_Tests)
-                      };
+        var project = new IniConfig.Section( "Project" ) { ["Name"] = nameof(IniConfig_Tests) };
 
         project.Add( nameof(DateTime),       DateTime.Now );
         project.Add( nameof(DateTimeOffset), DateTimeOffset.UtcNow );
@@ -27,10 +25,7 @@ public class IniConfig_Tests : Assert
         project.Add( nameof(AppVersion),     new AppVersion( 1, 2, 3, 4, 5, 6, AppVersionFlags.Stable ) );
 
 
-        var server = new IniConfig.Section( "Server" )
-                     {
-                         ["Name"] = nameof(ServicePoint)
-                     };
+        var server = new IniConfig.Section( "Server" ) { ["Name"] = nameof(ServicePoint) };
 
         server.Add( "Port", Random.Shared.Next( IPEndPoint.MinPort, IPEndPoint.MaxPort ) );
 

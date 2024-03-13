@@ -10,16 +10,8 @@ public abstract partial class Database
     private static readonly Synchronized<TimeSpan> _refreshTokenExpirationTime = new(TimeSpan.FromDays( 90 ));
 
 
-    public static TimeSpan AccessTokenExpirationTime
-    {
-        get => _accessTokenExpirationTime;
-        set => _accessTokenExpirationTime.Value = value;
-    }
-    public static TimeSpan RefreshTokenExpirationTime
-    {
-        get => _refreshTokenExpirationTime;
-        set => _refreshTokenExpirationTime.Value = value;
-    }
+    public static TimeSpan AccessTokenExpirationTime  { get => _accessTokenExpirationTime;  set => _accessTokenExpirationTime.Value = value; }
+    public static TimeSpan RefreshTokenExpirationTime { get => _refreshTokenExpirationTime; set => _refreshTokenExpirationTime.Value = value; }
 
 
     public virtual ValueTask<SigningCredentials>        GetSigningCredentials( CancellationToken        token ) => new(Configuration.GetSigningCredentials( Options ));
@@ -73,7 +65,7 @@ public abstract partial class Database
     }
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization ) ]
+    [MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization )]
     protected static DateTime GetExpiration( in DateTimeOffset? recordExpiration, in TimeSpan offset )
     {
         DateTime expires = DateTime.UtcNow + offset;
@@ -223,6 +215,6 @@ public abstract partial class Database
     {
         if ( user.IsValidID() is false || string.IsNullOrWhiteSpace( user.UserName ) ) { return false; }
 
-        return await UserLogins.Where( true, UserLoginInfoRecord.GetDynamicParameters( user ), token ).Any( token: token );
+        return await UserLogins.Where( true, UserLoginInfoRecord.GetDynamicParameters( user ), token ).Any( token );
     }
 }

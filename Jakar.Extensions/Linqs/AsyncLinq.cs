@@ -2,9 +2,13 @@
 
 
 /// <summary>
-///     <para> <see cref="Enumerable"/> </para>
+///     <para>
+///         <see cref="Enumerable"/>
+///     </para>
 ///     <para> AsyncEnumerable </para>
-///     <para> <seealso href="https://gist.github.com/scattered-code/b834bbc355a9ee710e3147321d6f985a"/> </para>
+///     <para>
+///         <seealso href="https://gist.github.com/scattered-code/b834bbc355a9ee710e3147321d6f985a"/>
+///     </para>
 ///     <para> Also a debugging improvement: <see href="https://youtu.be/gW19LaAYczI?t=497"/> </para>
 /// </summary>
 public static partial class AsyncLinq
@@ -15,8 +19,8 @@ public static partial class AsyncLinq
         where TList : IReadOnlyList<TElement> => new(source, token);
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static bool IsEmpty( this ICollection collection ) => collection.Count == 0;
-    public static ValueTask<HashSet<TElement>> ToHashSet<TElement>( this IAsyncEnumerable<TElement> source, CancellationToken token = default ) => source.ToHashSet( EqualityComparer<TElement>.Default, token );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool                         IsEmpty( this             ICollection                collection )                                => collection.Count == 0;
+    public static                                                      ValueTask<HashSet<TElement>> ToHashSet<TElement>( this IAsyncEnumerable<TElement> source, CancellationToken token = default ) => source.ToHashSet( EqualityComparer<TElement>.Default, token );
     public static async ValueTask<HashSet<TElement>> ToHashSet<TElement>( this IAsyncEnumerable<TElement> source, IEqualityComparer<TElement> comparer, CancellationToken token = default )
     {
         var list = new HashSet<TElement>( comparer );

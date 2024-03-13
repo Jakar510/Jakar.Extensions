@@ -18,12 +18,8 @@ public ref struct Buffer<T>
     public readonly int     Length     => _index;
     public readonly Span<T> Next       => _span[_index..];
     public readonly Span<T> Span       => _span[.._index];
-    public          bool    IsReadOnly { get; init; } = false;
-    public int Index
-    {
-        readonly get => _index;
-        set => _index = Math.Max( Math.Min( Capacity, value ), 0 );
-    }
+    public          bool    IsReadOnly { get;                    init; } = false;
+    public          int     Index      { readonly get => _index; set => _index = Math.Max( Math.Min( Capacity, value ), 0 ); }
     public readonly ref T this[ int     index ] => ref _span[index];
     public readonly ref T this[ Index   index ] => ref _span[index];
     public readonly Span<T> this[ Range range ] => _span[range];
@@ -53,7 +49,7 @@ public ref struct Buffer<T>
     public readonly          Enumerator GetEnumerator() => new(this);
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     private readonly void ThrowIfReadOnly()
     {
         if ( IsReadOnly ) { throw new InvalidOperationException( $"{nameof(Buffer<T>)} is read only" ); }
@@ -108,7 +104,7 @@ public ref struct Buffer<T>
     }
 
 
-    [ Pure ]
+    [Pure]
     public ReadOnlySpan<T> AsSpan( T? terminate )
     {
         if ( terminate is null ) { return _span[.._index]; }
@@ -117,8 +113,8 @@ public ref struct Buffer<T>
         _span[_index] = terminate;
         return Span;
     }
-    [ Pure ] public readonly ReadOnlySpan<T> Slice( int start )             => Span[start..];
-    [ Pure ] public readonly ReadOnlySpan<T> Slice( int start, int length ) => Span.Slice( start, length );
+    [Pure] public readonly ReadOnlySpan<T> Slice( int start )             => Span[start..];
+    [Pure] public readonly ReadOnlySpan<T> Slice( int start, int length ) => Span.Slice( start, length );
     public readonly int IndexOf( T value )
     {
         Debug.Assert( _comparer is not null );
@@ -301,14 +297,11 @@ public ref struct Buffer<T>
         private          int       _index = 0;
 
 
-        public readonly ref T Current
-        {
-            [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => ref _buffer[_index];
-        }
+        public readonly ref T Current { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => ref _buffer[_index]; }
 
 
-        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] internal Enumerator( Buffer<T> buffer ) => _buffer = buffer;
-        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public void Reset()    => _index = 0;
-        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public bool MoveNext() => ++_index < _buffer._index;
+        [MethodImpl( MethodImplOptions.AggressiveInlining )] internal Enumerator( Buffer<T> buffer ) => _buffer = buffer;
+        [MethodImpl( MethodImplOptions.AggressiveInlining )] public void Reset()    => _index = 0;
+        [MethodImpl( MethodImplOptions.AggressiveInlining )] public bool MoveNext() => ++_index < _buffer._index;
     }
 }

@@ -1,7 +1,6 @@
 ﻿namespace Jakar.Extensions;
 
 
-
 /*
 /// <summary>
 /// Weak event manager that allows for garbage collection when the EventHandler is still subscribed

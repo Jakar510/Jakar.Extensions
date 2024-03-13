@@ -1,7 +1,7 @@
 ﻿namespace Jakar.Json.Serialization;
 
 
-[ SuppressMessage( "ReSharper", "PossiblyImpureMethodCallOnReadonlyVariable" ) ]
+[SuppressMessage( "ReSharper", "PossiblyImpureMethodCallOnReadonlyVariable" )]
 public ref struct JWriter( int capacity, Formatting formatting )
 {
     public const           string                             NULL           = "null";
@@ -9,8 +9,8 @@ public ref struct JWriter( int capacity, Formatting formatting )
     public const           char                               COLON          = ':';
     public const           char                               SPACE          = ' ';
     public static readonly ConcurrentDictionary<Type, string> DefaultFormats = new();
-    private readonly       ValueStringBuilder                 _sb = new( capacity );
-    private                int                                _indentLevel = 0;
+    private readonly       ValueStringBuilder                 _sb            = new(capacity);
+    private                int                                _indentLevel   = 0;
     public                 bool                               ShouldIndent { get; } = formatting is Formatting.Indented;
 
 
@@ -19,8 +19,8 @@ public ref struct JWriter( int capacity, Formatting formatting )
     public readonly override string ToString() => _sb.ToString();
 
 
-    [ Pure ] public readonly JArray  AddArray()  => new(this);
-    [ Pure ] public readonly JObject AddObject() => new(this);
+    [Pure] public readonly JArray  AddArray()  => new(this);
+    [Pure] public readonly JObject AddObject() => new(this);
 
 
     public JWriter StartBlock( char start )
@@ -85,16 +85,20 @@ public ref struct JWriter( int capacity, Formatting formatting )
     }
 
 
-    public readonly JWriter Append<T>( T? value ) where T : ISpanFormattable                            => Append( value, CultureInfo.CurrentCulture );
-    public readonly JWriter Append<T>( T? value, IFormatProvider? provider ) where T : ISpanFormattable => Append( value, GetDefaultFormat<T>(), provider );
-    public readonly JWriter Append<T>( T? value, ReadOnlySpan<char> format, IFormatProvider? provider ) where T : ISpanFormattable
+    public readonly JWriter Append<T>( T? value )
+        where T : ISpanFormattable => Append( value, CultureInfo.CurrentCulture );
+    public readonly JWriter Append<T>( T? value, IFormatProvider? provider )
+        where T : ISpanFormattable => Append( value, GetDefaultFormat<T>(), provider );
+    public readonly JWriter Append<T>( T? value, ReadOnlySpan<char> format, IFormatProvider? provider )
+        where T : ISpanFormattable
     {
         if ( value is null ) { return Null(); }
 
         _sb.AppendSpanFormattable( value, format, provider );
         return this;
     }
-    public readonly JWriter Append<T>( T? value, ReadOnlySpan<char> format, int bufferSize, IFormatProvider? provider = default ) where T : ISpanFormattable
+    public readonly JWriter Append<T>( T? value, ReadOnlySpan<char> format, int bufferSize, IFormatProvider? provider = default )
+        where T : ISpanFormattable
     {
         if ( value is null ) { return Null(); }
 
@@ -104,26 +108,34 @@ public ref struct JWriter( int capacity, Formatting formatting )
     }
 
 
-    public readonly JWriter AppendValue<T>( T? value ) where T : struct, ISpanFormattable                            => AppendValue( value, CultureInfo.CurrentCulture );
-    public readonly JWriter AppendValue<T>( T? value, IFormatProvider? provider ) where T : struct, ISpanFormattable => AppendValue( value, GetDefaultFormat<T>(), provider );
-    public readonly JWriter AppendValue<T>( T? value, ReadOnlySpan<char> format, IFormatProvider? provider ) where T : struct, ISpanFormattable =>
+    public readonly JWriter AppendValue<T>( T? value )
+        where T : struct, ISpanFormattable => AppendValue( value, CultureInfo.CurrentCulture );
+    public readonly JWriter AppendValue<T>( T? value, IFormatProvider? provider )
+        where T : struct, ISpanFormattable => AppendValue( value, GetDefaultFormat<T>(), provider );
+    public readonly JWriter AppendValue<T>( T? value, ReadOnlySpan<char> format, IFormatProvider? provider )
+        where T : struct, ISpanFormattable =>
         value is null
             ? Null()
             : AppendValue( value.Value, format, provider );
-    public readonly JWriter AppendValue<T>( T? value, ReadOnlySpan<char> format, int bufferSize, IFormatProvider? provider = default ) where T : struct, ISpanFormattable =>
+    public readonly JWriter AppendValue<T>( T? value, ReadOnlySpan<char> format, int bufferSize, IFormatProvider? provider = default )
+        where T : struct, ISpanFormattable =>
         value is null
             ? Null()
             : AppendValue( value.Value, format, bufferSize, provider );
 
 
-    public readonly JWriter AppendValue<T>( T value ) where T : struct, ISpanFormattable                            => AppendValue( value, CultureInfo.CurrentCulture );
-    public readonly JWriter AppendValue<T>( T value, IFormatProvider? provider ) where T : struct, ISpanFormattable => AppendValue( value, GetDefaultFormat<T>(), provider );
-    public readonly JWriter AppendValue<T>( T value, ReadOnlySpan<char> format, IFormatProvider? provider ) where T : struct, ISpanFormattable
+    public readonly JWriter AppendValue<T>( T value )
+        where T : struct, ISpanFormattable => AppendValue( value, CultureInfo.CurrentCulture );
+    public readonly JWriter AppendValue<T>( T value, IFormatProvider? provider )
+        where T : struct, ISpanFormattable => AppendValue( value, GetDefaultFormat<T>(), provider );
+    public readonly JWriter AppendValue<T>( T value, ReadOnlySpan<char> format, IFormatProvider? provider )
+        where T : struct, ISpanFormattable
     {
         _sb.AppendSpanFormattable( value, format, provider );
         return this;
     }
-    public readonly JWriter AppendValue<T>( T value, ReadOnlySpan<char> format, int bufferSize, IFormatProvider? provider = default ) where T : struct, ISpanFormattable
+    public readonly JWriter AppendValue<T>( T value, ReadOnlySpan<char> format, int bufferSize, IFormatProvider? provider = default )
+        where T : struct, ISpanFormattable
     {
         _sb.EnsureCapacity( bufferSize );
         _sb.AppendSpanFormattable( value, format, provider );
@@ -131,24 +143,13 @@ public ref struct JWriter( int capacity, Formatting formatting )
     }
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static string? GetDefaultFormat<T>() => GetDefaultFormat( typeof(T) );
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static string? GetDefaultFormat<T>() => GetDefaultFormat( typeof(T) );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static string? GetDefaultFormat( in Type type )
     {
         if ( DefaultFormats.TryGetValue( type, out string? result ) ) { return result; }
 
-        if ( type == typeof(short)   ||
-             type == typeof(short?)  ||
-             type == typeof(int)     ||
-             type == typeof(int?)    ||
-             type == typeof(long)    ||
-             type == typeof(long?)   ||
-             type == typeof(float)   ||
-             type == typeof(float?)  ||
-             type == typeof(double)  ||
-             type == typeof(double?) ||
-             type == typeof(decimal) ||
-             type == typeof(decimal?) ) { result = "g"; }
+        if ( type == typeof(short) || type == typeof(short?) || type == typeof(int) || type == typeof(int?) || type == typeof(long) || type == typeof(long?) || type == typeof(float) || type == typeof(float?) || type == typeof(double) || type == typeof(double?) || type == typeof(decimal) || type == typeof(decimal?) ) { result = "g"; }
 
         else if ( type == typeof(DateTimeOffset) || type == typeof(DateTimeOffset?) ) { result = "o"; }
 

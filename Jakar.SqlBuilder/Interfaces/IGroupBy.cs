@@ -4,14 +4,20 @@
 public interface IGroupBy
 {
     /// <summary> Starts an ORDER BY chain </summary>
-    /// <returns> <see cref="IGroupByChain"/> </returns>
+    /// <returns>
+    ///     <see cref="IGroupByChain"/>
+    /// </returns>
     public IGroupByChain Chain();
 
     /// <summary> Starts an ORDER BY chain starting with <paramref name="columnName"/> </summary>
-    /// <returns> <see cref="IGroupByChain"/> </returns>
+    /// <returns>
+    ///     <see cref="IGroupByChain"/>
+    /// </returns>
     public IGroupByChain Chain( string columnName );
     /// <summary> Simple ORDER BY <paramref name="columnNames"/> </summary>
-    /// <returns> <see cref="ISqlBuilderRoot"/> </returns>
+    /// <returns>
+    ///     <see cref="ISqlBuilderRoot"/>
+    /// </returns>
     public ISqlBuilderRoot By( string separator, params string[] columnNames );
 }
 
@@ -21,6 +27,8 @@ public interface IGroupByChain : IChainEnd<ISqlBuilderRoot>, INextChain<IGroupBy
 {
     /// <summary> continues previous clause and adds <paramref name="columnName"/> </summary>
     /// <example> SELECT * FROM Customers ORDER BY Country, CustomerName; </example>
-    /// <returns> <see cref="IGroupByChain"/> </returns>
+    /// <returns>
+    ///     <see cref="IGroupByChain"/>
+    /// </returns>
     public IGroupByChain And( string columnName );
 }

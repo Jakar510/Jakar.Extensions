@@ -6,7 +6,9 @@ public interface ISelector : IFromSyntax<ISqlBuilderRoot>, IAggregateFunctions<I
     /// <summary> Adds
     ///     <param name="columnName"> </param>
     ///     to SELECT set </summary>
-    /// <returns> <see cref="ISelector"/> </returns>
+    /// <returns>
+    ///     <see cref="ISelector"/>
+    /// </returns>
     public ISelector Next( string columnName );
 
     /// <summary>
@@ -16,8 +18,11 @@ public interface ISelector : IFromSyntax<ISqlBuilderRoot>, IAggregateFunctions<I
     ///     to SELECT set
     /// </summary>
     /// <example> SELECT Orders.OrderID, Customers.CustomerName, Orders.OrderDate </example>
-    /// <returns> <see cref="ISelector"/> </returns>
-    public ISelector Next<T>( string columnName ) where T : class;
+    /// <returns>
+    ///     <see cref="ISelector"/>
+    /// </returns>
+    public ISelector Next<T>( string columnName )
+        where T : class;
 
 
     /// <summary> Adds
@@ -27,7 +32,9 @@ public interface ISelector : IFromSyntax<ISqlBuilderRoot>, IAggregateFunctions<I
     ///     to SELECT set and setting it to the
     ///     <param name="alias"> </param>
     ///     variable </summary>
-    /// <returns> <see cref="ISelector"/> </returns>
+    /// <returns>
+    ///     <see cref="ISelector"/>
+    /// </returns>
     public ISelector Next( string alias, string separator, params string[] columnNames );
 
     /// <summary>
@@ -38,6 +45,9 @@ public interface ISelector : IFromSyntax<ISqlBuilderRoot>, IAggregateFunctions<I
     ///     <param name="alias"> </param>
     ///     variable
     /// </summary>
-    /// <returns> <see cref="ISelector"/> </returns>
-    public ISelector Next<T>( string alias, string separator, params string[] columnNames ) where T : class;
+    /// <returns>
+    ///     <see cref="ISelector"/>
+    /// </returns>
+    public ISelector Next<T>( string alias, string separator, params string[] columnNames )
+        where T : class;
 }

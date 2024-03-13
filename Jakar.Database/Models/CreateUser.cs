@@ -40,11 +40,7 @@ public class CreateUser : ObservableClass, ILoginRequest, IVerifyRequestProvider
     }
 
 
-    public virtual bool IsValid => !string.IsNullOrWhiteSpace( UserName )        &&
-                                   UserName.IsEmailAddress()                     &&
-                                   !string.IsNullOrWhiteSpace( Password )        &&
-                                   !string.IsNullOrWhiteSpace( ConfirmPassword ) &&
-                                   string.Equals( Password, ConfirmPassword, StringComparison.Ordinal );
+    public virtual bool IsValid => !string.IsNullOrWhiteSpace( UserName ) && UserName.IsEmailAddress() && !string.IsNullOrWhiteSpace( Password ) && !string.IsNullOrWhiteSpace( ConfirmPassword ) && string.Equals( Password, ConfirmPassword, StringComparison.Ordinal );
 
     public virtual string Password
     {

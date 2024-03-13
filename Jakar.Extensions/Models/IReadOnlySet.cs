@@ -1,5 +1,4 @@
 ﻿#if NETSTANDARD2_1
-
 // Jakar.Extensions :: Jakar.Extensions
 // 09/14/2022  11:59 AM
 
@@ -48,7 +47,6 @@
         /// <exception cref="ArgumentNullException"> other is <see langword="null"/>. </exception>
         bool SetEquals( IEnumerable<T> other );
     }
-
 
 
 #endif

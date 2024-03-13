@@ -1,39 +1,28 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 01/30/2023  2:41 PM
 
-using Jakar.Database.Resx;
-
-
-
 namespace Jakar.Database;
 
 
-[ Serializable, Table( "UserLoginInfo" ) ]
-public sealed record UserLoginInfoRecord(
-    [ property: MaxLength(                        int.MaxValue ) ] string  LoginProvider,
-    [ property: MaxLength(                        int.MaxValue ) ] string? ProviderDisplayName,
-    [ property: ProtectedPersonalData, MaxLength( int.MaxValue ) ] string  ProviderKey,
-    [ property: ProtectedPersonalData ]                            string? Value,
-    RecordID<UserLoginInfoRecord>                                          ID,
-    RecordID<UserRecord>?                                                  CreatedBy,
-    Guid?                                                                  OwnerUserID,
-    DateTimeOffset                                                         DateCreated,
-    DateTimeOffset?                                                        LastModified = default
-) : OwnedTableRecord<UserLoginInfoRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<UserLoginInfoRecord>
+[Serializable]
+[Table( TABLE_NAME )]
+public sealed record UserLoginInfoRecord( [property: MaxLength(                                   int.MaxValue )] string  LoginProvider,
+                                          [property: MaxLength(                                   int.MaxValue )] string? ProviderDisplayName,
+                                          [property: ProtectedPersonalData] [property: MaxLength( int.MaxValue )] string  ProviderKey,
+                                          [property: ProtectedPersonalData]                                       string? Value,
+                                          RecordID<UserLoginInfoRecord>                                                   ID,
+                                          RecordID<UserRecord>?                                                           CreatedBy,
+                                          Guid?                                                                           OwnerUserID,
+                                          DateTimeOffset                                                                  DateCreated,
+                                          DateTimeOffset?                                                                 LastModified = default ) : OwnedTableRecord<UserLoginInfoRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<UserLoginInfoRecord>
 {
-    public static string TableName { get; } = typeof(UserLoginInfoRecord).GetTableName();
+    public const  string TABLE_NAME = "UserLoginInfo";
+    public static string TableName { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => TABLE_NAME; }
 
 
     public UserLoginInfoRecord( UserRecord user, UserLoginInfo info ) : this( user, info.LoginProvider, info.ProviderKey, info.ProviderDisplayName ) { }
-    public UserLoginInfoRecord( UserRecord user, string loginProvider, string providerKey, string? providerDisplayName ) : this( loginProvider,
-                                                                                                                                 providerDisplayName,
-                                                                                                                                 providerKey,
-                                                                                                                                 string.Empty,
-                                                                                                                                 RecordID<UserLoginInfoRecord>.New(),
-                                                                                                                                 user.ID,
-                                                                                                                                 user.UserID,
-                                                                                                                                 DateTimeOffset.UtcNow ) { }
-    [ Pure ]
+    public UserLoginInfoRecord( UserRecord user, string        loginProvider, string providerKey, string? providerDisplayName ) : this( loginProvider, providerDisplayName, providerKey, string.Empty, RecordID<UserLoginInfoRecord>.New(), user.ID, user.UserID, DateTimeOffset.UtcNow ) { }
+    [Pure]
     public override DynamicParameters ToDynamicParameters()
     {
         var parameters = base.ToDynamicParameters();
@@ -44,7 +33,7 @@ public sealed record UserLoginInfoRecord(
         return parameters;
     }
 
-    [ Pure ]
+    [Pure]
     public static UserLoginInfoRecord Create( DbDataReader reader )
     {
         string                        loginProvider       = reader.GetFieldValue<string>( nameof(LoginProvider) );
@@ -61,8 +50,8 @@ public sealed record UserLoginInfoRecord(
         return record;
     }
 
-    [ Pure ]
-    public static async IAsyncEnumerable<UserLoginInfoRecord> CreateAsync( DbDataReader reader, [ EnumeratorCancellation ] CancellationToken token = default )
+    [Pure]
+    public static async IAsyncEnumerable<UserLoginInfoRecord> CreateAsync( DbDataReader reader, [EnumeratorCancellation] CancellationToken token = default )
     {
         while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
     }
@@ -75,8 +64,8 @@ public sealed record UserLoginInfoRecord(
         parameters.Add( nameof(Value),       value );
         return parameters;
     }
-    [ Pure ] public static DynamicParameters GetDynamicParameters( UserRecord user, UserLoginInfo info ) => GetDynamicParameters( user, info.LoginProvider, info.ProviderKey );
-    [ Pure ]
+    [Pure] public static DynamicParameters GetDynamicParameters( UserRecord user, UserLoginInfo info ) => GetDynamicParameters( user, info.LoginProvider, info.ProviderKey );
+    [Pure]
     public static DynamicParameters GetDynamicParameters( UserRecord user, string loginProvider, string providerKey )
     {
         DynamicParameters parameters = GetDynamicParameters( user );
@@ -85,7 +74,7 @@ public sealed record UserLoginInfoRecord(
         return parameters;
     }
 
-    [ Pure ] public UserLoginInfo ToUserLoginInfo() => new(LoginProvider, ProviderKey, ProviderDisplayName);
+    [Pure] public UserLoginInfo ToUserLoginInfo() => new(LoginProvider, ProviderKey, ProviderDisplayName);
 
 
     public static implicit operator UserLoginInfo( UserLoginInfoRecord value ) => value.ToUserLoginInfo();

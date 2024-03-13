@@ -100,7 +100,7 @@ public static partial class AsyncLinq
             if ( index >= count ) { yield return value; }
         }
     }
-    public static async IAsyncEnumerable<TElement> SkipLast<TElement>( this IAsyncEnumerable<TElement> source, int count, [ EnumeratorCancellation ] CancellationToken token = default )
+    public static async IAsyncEnumerable<TElement> SkipLast<TElement>( this IAsyncEnumerable<TElement> source, int count, [EnumeratorCancellation] CancellationToken token = default )
     {
         List<TElement> list = await source.ToList( token );
 
@@ -227,7 +227,7 @@ public static partial class AsyncLinq
             await foreach ( TElement item in element ) { yield return item; }
         }
     }
-    public static async IAsyncEnumerable<TElement> ConsolidateUnique<TElement>( this IAsyncEnumerable<IAsyncEnumerable<TElement>> values, [ EnumeratorCancellation ] CancellationToken token = default )
+    public static async IAsyncEnumerable<TElement> ConsolidateUnique<TElement>( this IAsyncEnumerable<IAsyncEnumerable<TElement>> values, [EnumeratorCancellation] CancellationToken token = default )
     {
         var results = new HashSet<TElement>();
 
@@ -249,7 +249,7 @@ public static partial class AsyncLinq
             foreach ( TElement item in element ) { yield return item; }
         }
     }
-    public static async IAsyncEnumerable<TElement> ConsolidateUnique<TElement>( this IAsyncEnumerable<IEnumerable<TElement>> values, [ EnumeratorCancellation ] CancellationToken token = default )
+    public static async IAsyncEnumerable<TElement> ConsolidateUnique<TElement>( this IAsyncEnumerable<IEnumerable<TElement>> values, [EnumeratorCancellation] CancellationToken token = default )
     {
         var results = new HashSet<TElement>();
 
@@ -313,12 +313,14 @@ public static partial class AsyncLinq
     }
 
 
-    public static async Task<IEnumerable<TElement>> WhereNotNull<TCollection, TElement>( this Task<TCollection> values ) where TCollection : IEnumerable<TElement?>
+    public static async Task<IEnumerable<TElement>> WhereNotNull<TCollection, TElement>( this Task<TCollection> values )
+        where TCollection : IEnumerable<TElement?>
     {
         IEnumerable<TElement?> results = await values;
         return results.WhereNotNull();
     }
-    public static async ValueTask<IEnumerable<TElement>> WhereNotNull<TCollection, TElement>( this ValueTask<TCollection> values ) where TCollection : IEnumerable<TElement?>
+    public static async ValueTask<IEnumerable<TElement>> WhereNotNull<TCollection, TElement>( this ValueTask<TCollection> values )
+        where TCollection : IEnumerable<TElement?>
     {
         IEnumerable<TElement?> results = await values;
         return results.WhereNotNull();
@@ -341,7 +343,8 @@ public static partial class AsyncLinq
             if ( element is not null ) { yield return element; }
         }
     }
-    public static async IAsyncEnumerable<TElement> WhereNotNullAsync<TCollection, TElement>( this Task<TCollection> values ) where TCollection : IEnumerable<TElement?>
+    public static async IAsyncEnumerable<TElement> WhereNotNullAsync<TCollection, TElement>( this Task<TCollection> values )
+        where TCollection : IEnumerable<TElement?>
     {
         // ReSharper disable once LoopCanBeConvertedToQuery
         foreach ( TElement? element in await values )
@@ -349,7 +352,8 @@ public static partial class AsyncLinq
             if ( element is not null ) { yield return element; }
         }
     }
-    public static async IAsyncEnumerable<TElement> WhereNotNullAsync<TCollection, TElement>( this ValueTask<TCollection> values ) where TCollection : IEnumerable<TElement?>
+    public static async IAsyncEnumerable<TElement> WhereNotNullAsync<TCollection, TElement>( this ValueTask<TCollection> values )
+        where TCollection : IEnumerable<TElement?>
     {
         // ReSharper disable once LoopCanBeConvertedToQuery
         foreach ( TElement? element in await values )

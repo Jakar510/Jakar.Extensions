@@ -4,7 +4,7 @@
 namespace Jakar.Database;
 
 
-[ SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" ) ]
+[SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
 public partial class DbTable<TRecord>
 {
     public ValueTask<TRecord?> Single( RecordID<TRecord>          id,  CancellationToken  token                               = default ) => this.Call( Single, id,  token );
@@ -13,8 +13,8 @@ public partial class DbTable<TRecord>
     public ValueTask<TRecord?> SingleOrDefault( string            sql, DynamicParameters? parameters, CancellationToken token = default ) => this.Call( SingleOrDefault, sql, parameters, token );
 
 
-    public ValueTask<TRecord?> Single( DbConnection connection, DbTransaction? transaction, RecordID<TRecord> id, CancellationToken token = default ) => Single( connection, transaction, _sqlCache.Single( id ), token );
-    public ValueTask<TRecord?> Single( DbConnection connection, DbTransaction? transaction, string sql, DynamicParameters? parameters, CancellationToken token = default ) => Single( connection, transaction, new SqlCommand( sql, parameters ), token );
+    public ValueTask<TRecord?> Single( DbConnection connection, DbTransaction? transaction, RecordID<TRecord> id,  CancellationToken  token                               = default ) => Single( connection, transaction, _sqlCache.Single( id ),            token );
+    public ValueTask<TRecord?> Single( DbConnection connection, DbTransaction? transaction, string            sql, DynamicParameters? parameters, CancellationToken token = default ) => Single( connection, transaction, new SqlCommand( sql, parameters ), token );
     public virtual async ValueTask<TRecord?> Single( DbConnection connection, DbTransaction? transaction, SqlCommand sql, CancellationToken token = default )
     {
         try

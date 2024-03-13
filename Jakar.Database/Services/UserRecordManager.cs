@@ -4,21 +4,19 @@
 namespace Jakar.Database;
 
 
-public class UserRecordManager(
-    Database                                    database,
-    UserStore                                   store,
-    IOptions<IdentityOptions>                   optionsAccessor,
-    IPasswordHasher<UserRecord>                 passwordHasher,
-    IEnumerable<IUserValidator<UserRecord>>     userValidators,
-    IEnumerable<IPasswordValidator<UserRecord>> passwordValidators,
-    ILookupNormalizer                           keyNormalizer,
-    IdentityErrorDescriber                      errors,
-    IServiceProvider                            services,
-    ILogger<UserRecordManager>                  logger
-) : UserManager<UserRecord>( store, optionsAccessor, passwordHasher, userValidators, passwordValidators, keyNormalizer, errors, services, logger )
+public class UserRecordManager( Database                                    database,
+                                UserStore                                   store,
+                                IOptions<IdentityOptions>                   optionsAccessor,
+                                IPasswordHasher<UserRecord>                 passwordHasher,
+                                IEnumerable<IUserValidator<UserRecord>>     userValidators,
+                                IEnumerable<IPasswordValidator<UserRecord>> passwordValidators,
+                                ILookupNormalizer                           keyNormalizer,
+                                IdentityErrorDescriber                      errors,
+                                IServiceProvider                            services,
+                                ILogger<UserRecordManager>                  logger ) : UserManager<UserRecord>( store, optionsAccessor, passwordHasher, userValidators, passwordValidators, keyNormalizer, errors, services, logger )
 {
     private const    ClaimType CLAIM_TYPES = ClaimType.UserID | ClaimType.UserName | ClaimType.Role | ClaimType.GroupSid;
-    private readonly Database  _database = database;
+    private readonly Database  _database   = database;
 
 
     public override async Task<IList<Claim>>      GetClaimsAsync( UserRecord   user )                                                                            => await _database.TryCall( GetClaimsAsync, user, CancellationToken.None );

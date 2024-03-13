@@ -19,22 +19,22 @@ public interface ICurrentLocation<TID> : IUniqueID<TID>, IEquatable<ICurrentLoca
 
 
 
-[ Serializable ]
+[Serializable]
 public sealed class CurrentLocation<TID> : BaseJsonModel, ICurrentLocation<TID>, IDataBaseIgnore
     where TID : struct, IComparable<TID>, IEquatable<TID>
 {
-    public         double?           Accuracy                { get; init; }
-    public         double?           Altitude                { get; init; }
-    public         AltitudeReference AltitudeReferenceSystem { get; init; }
-    public         double?           Course                  { get; init; }
-    [ Key ] public TID               ID                      { get; init; }
-    public         Guid              InstanceID              { get; init; } = Guid.Empty;
-    public         bool              IsFromMockProvider      { get; init; }
-    public         double            Latitude                { get; init; }
-    public         double            Longitude               { get; init; }
-    public         double?           Speed                   { get; init; }
-    public         DateTimeOffset    Timestamp               { get; init; }
-    public         double?           VerticalAccuracy        { get; init; }
+    public       double?           Accuracy                { get; init; }
+    public       double?           Altitude                { get; init; }
+    public       AltitudeReference AltitudeReferenceSystem { get; init; }
+    public       double?           Course                  { get; init; }
+    [Key] public TID               ID                      { get; init; }
+    public       Guid              InstanceID              { get; init; } = Guid.Empty;
+    public       bool              IsFromMockProvider      { get; init; }
+    public       double            Latitude                { get; init; }
+    public       double            Longitude               { get; init; }
+    public       double?           Speed                   { get; init; }
+    public       DateTimeOffset    Timestamp               { get; init; }
+    public       double?           VerticalAccuracy        { get; init; }
 
 
     public CurrentLocation() { }

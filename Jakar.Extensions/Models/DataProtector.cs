@@ -47,9 +47,9 @@ public interface IDataProtector : IDisposable
 
 public sealed class DataProtector( RSA rsa, RSAEncryptionPadding padding ) : IDataProtector
 {
-    private const    int                  BLOCK = 512;
-    private const    int                  DATA  = 254;
-    private readonly RSA                  _rsa = rsa;
+    private const    int                  BLOCK    = 512;
+    private const    int                  DATA     = 254;
+    private readonly RSA                  _rsa     = rsa;
     private readonly RSAEncryptionPadding _padding = padding;
     private          bool                 _disposed;
     private          bool                 _keyIsSet;
@@ -100,7 +100,7 @@ public sealed class DataProtector( RSA rsa, RSAEncryptionPadding padding ) : IDa
     }
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public bool TryDecrypt( ReadOnlySpan<byte> value, Span<byte> destination, out int bytesWritten )
     {
         if ( _disposed ) { throw new ObjectDisposedException( nameof(DataProtector) ); }
@@ -111,7 +111,7 @@ public sealed class DataProtector( RSA rsa, RSAEncryptionPadding padding ) : IDa
     }
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public byte[] Decrypt( byte[] encrypted )
     {
         if ( _disposed ) { throw new ObjectDisposedException( nameof(DataProtector) ); }
@@ -188,7 +188,7 @@ public sealed class DataProtector( RSA rsa, RSAEncryptionPadding padding ) : IDa
     }
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public bool TryEncrypt( ReadOnlySpan<byte> value, Span<byte> destination, out int bytesWritten )
     {
         if ( _disposed ) { throw new ObjectDisposedException( nameof(DataProtector) ); }
@@ -199,7 +199,7 @@ public sealed class DataProtector( RSA rsa, RSAEncryptionPadding padding ) : IDa
     }
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public byte[] Encrypt( byte[] value )
     {
         if ( _disposed ) { throw new ObjectDisposedException( nameof(DataProtector) ); }

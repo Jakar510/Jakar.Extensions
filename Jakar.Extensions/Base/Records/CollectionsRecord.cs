@@ -4,9 +4,10 @@
 namespace Jakar.Extensions;
 
 
-[ Serializable ]
-public abstract record CollectionsRecord<T, TID> : ObservableRecord<T, TID> where T : CollectionsRecord<T, TID>
-                                                                            where TID : struct, IComparable<TID>, IEquatable<TID>
+[Serializable]
+public abstract record CollectionsRecord<T, TID> : ObservableRecord<T, TID>
+    where T : CollectionsRecord<T, TID>
+    where TID : struct, IComparable<TID>, IEquatable<TID>
 {
     public static Equalizer<T> Equalizer => Equalizer<T>.Default;
     public static Sorter<T>    Sorter    => Sorter<T>.Default;
@@ -17,7 +18,7 @@ public abstract record CollectionsRecord<T, TID> : ObservableRecord<T, TID> wher
 
 
 
-    [ Serializable ]
+    [Serializable]
     public class Collection : ObservableCollection<T>
     {
         public Collection() : base() { }
@@ -26,7 +27,7 @@ public abstract record CollectionsRecord<T, TID> : ObservableRecord<T, TID> wher
 
 
 
-    [ Serializable ]
+    [Serializable]
     public class ConcurrentCollection : ConcurrentObservableCollection<T>
     {
         public ConcurrentCollection() : base() { }
@@ -35,7 +36,7 @@ public abstract record CollectionsRecord<T, TID> : ObservableRecord<T, TID> wher
 
 
 
-    [ Serializable ]
+    [Serializable]
     public class Deque : MultiDeque<T>
     {
         public Deque() : base() { }
@@ -44,7 +45,7 @@ public abstract record CollectionsRecord<T, TID> : ObservableRecord<T, TID> wher
 
 
 
-    [ Serializable ]
+    [Serializable]
     public class Items : List<T>
     {
         public Items() : base() { }
@@ -54,7 +55,7 @@ public abstract record CollectionsRecord<T, TID> : ObservableRecord<T, TID> wher
 
 
 
-    [ Serializable ]
+    [Serializable]
     public class Queue : MultiQueue<T>
     {
         public Queue() : base() { }
@@ -63,7 +64,7 @@ public abstract record CollectionsRecord<T, TID> : ObservableRecord<T, TID> wher
 
 
 
-    [ Serializable ]
+    [Serializable]
     public class Set : HashSet<T>
     {
         public Set() : base() { }
@@ -72,8 +73,11 @@ public abstract record CollectionsRecord<T, TID> : ObservableRecord<T, TID> wher
     }
 }
 
-[ Serializable ]
-public abstract record CollectionsRecord<T> : CollectionsRecord<T, long> where T : CollectionsRecord<T, long>
+
+
+[Serializable]
+public abstract record CollectionsRecord<T> : CollectionsRecord<T, long>
+    where T : CollectionsRecord<T, long>
 {
     protected CollectionsRecord() : base() { }
     protected CollectionsRecord( long id ) : base( id ) { }

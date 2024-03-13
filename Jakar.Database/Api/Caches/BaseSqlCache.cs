@@ -5,7 +5,8 @@
 namespace Jakar.Database;
 
 
-[ SuppressMessage( "ReSharper", "StaticMemberInGenericType" ), SuppressMessage( "ReSharper", "RedundantVerbatimStringPrefix" ) ]
+[SuppressMessage( "ReSharper", "StaticMemberInGenericType" )]
+[SuppressMessage( "ReSharper", "RedundantVerbatimStringPrefix" )]
 public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord>
     where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
@@ -21,14 +22,8 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord>
     protected readonly     ConcurrentDictionary<string, string>                               _whereIDColumn    = new(StringComparer.InvariantCulture);
 
 
-    protected IEnumerable<string> _KeyValuePairs
-    {
-        [ Pure, MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => _Properties.Values.Select( x => x.KeyValuePair );
-    }
-    protected FrozenDictionary<string, Descriptor> _Properties
-    {
-        [ Pure, MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => SqlProperties[Instance];
-    }
+    protected IEnumerable<string>                  _KeyValuePairs { [Pure] [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _Properties.Values.Select( x => x.KeyValuePair ); }
+    protected FrozenDictionary<string, Descriptor> _Properties    { [Pure] [MethodImpl( MethodImplOptions.AggressiveInlining )] get => SqlProperties[Instance]; }
 
 
     public          string     CreatedBy    { get; init; }
@@ -51,9 +46,9 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord>
     }
 
 
-    [ Pure, MethodImpl( MethodImplOptions.AggressiveInlining ) ] protected IEnumerable<string> GetDescriptors( DynamicParameters   parameters ) => parameters.ParameterNames.Select( name => _Properties[name].KeyValuePair );
-    [ Pure, MethodImpl( MethodImplOptions.AggressiveInlining ) ] protected IEnumerable<string> GetKeyValuePairs( DynamicParameters parameters ) => parameters.ParameterNames.Select( KeyValuePair );
-    [ Pure, MethodImpl( MethodImplOptions.AggressiveInlining ) ] protected string              KeyValuePair( string                columnName ) => _Properties[columnName].KeyValuePair;
+    [Pure] [MethodImpl( MethodImplOptions.AggressiveInlining )] protected IEnumerable<string> GetDescriptors( DynamicParameters   parameters ) => parameters.ParameterNames.Select( name => _Properties[name].KeyValuePair );
+    [Pure] [MethodImpl( MethodImplOptions.AggressiveInlining )] protected IEnumerable<string> GetKeyValuePairs( DynamicParameters parameters ) => parameters.ParameterNames.Select( KeyValuePair );
+    [Pure] [MethodImpl( MethodImplOptions.AggressiveInlining )] protected string              KeyValuePair( string                columnName ) => _Properties[columnName].KeyValuePair;
 
     public virtual void Reset()
     {
@@ -273,7 +268,7 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord>
         public override int  GetHashCode()                        => _hash;
 
 
-        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static Key Create( in bool matchAll, in DynamicParameters parameters ) => new(matchAll, parameters.ParameterNames.ToImmutableArray());
+        [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Key Create( in bool matchAll, in DynamicParameters parameters ) => new(matchAll, parameters.ParameterNames.ToImmutableArray());
 
 
         public static bool operator ==( Key left, Key right ) => left.Equals( right );

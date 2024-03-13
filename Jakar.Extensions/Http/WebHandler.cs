@@ -8,7 +8,7 @@ using static Jakar.Extensions.WebRequester;
 namespace Jakar.Extensions;
 
 
-[ SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" ) ]
+[SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
 public readonly record struct WebHandler : IDisposable
 {
     public static readonly EventId            EventId = new(69420, nameof(SendAsync));
@@ -24,11 +24,7 @@ public readonly record struct WebHandler : IDisposable
     public   Uri                 RequestUri     => _request.RequestUri ?? throw new NullReferenceException( nameof(_request.RequestUri) );
     internal RetryPolicy?        RetryPolicy    { get; }
     internal CancellationToken   Token          { get; }
-    public AppVersion Version
-    {
-        get => _request.Version;
-        set => _request.Version = value.ToVersion();
-    }
+    public   AppVersion          Version        { get => _request.Version; set => _request.Version = value.ToVersion(); }
 
 
     public WebHandler( ILogger? logger, HttpClient client, HttpRequestMessage request, Encoding encoding, RetryPolicy? retryPolicy, CancellationToken token )
@@ -97,7 +93,7 @@ public readonly record struct WebHandler : IDisposable
         #endif
             using JsonReader reader = new JsonTextReader( sr );
 
-        TResult? result = serializer.Deserialize<TResult>( reader );
+        var result = serializer.Deserialize<TResult>( reader );
         return result ?? throw new NullReferenceException( nameof(JsonConvert.DeserializeObject) );
     }
     public async ValueTask<LocalFile> AsFile( HttpResponseMessage response )
@@ -216,11 +212,7 @@ public readonly record struct WebHandler : IDisposable
 
 
 #if NET6_0_OR_GREATER
-    public HttpVersionPolicy VersionPolicy
-    {
-        get => _request.VersionPolicy;
-        set => _request.VersionPolicy = value;
-    }
-    public HttpRequestOptions Options => _request.Options;
+    public HttpVersionPolicy  VersionPolicy { get => _request.VersionPolicy; set => _request.VersionPolicy = value; }
+    public HttpRequestOptions Options       => _request.Options;
 #endif
 }

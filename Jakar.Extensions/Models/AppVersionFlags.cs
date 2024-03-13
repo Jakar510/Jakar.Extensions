@@ -5,7 +5,7 @@
 namespace Jakar.Extensions;
 
 
-[ DefaultValue( nameof(Stable) ) ]
+[DefaultValue( nameof(Stable) )]
 public readonly record struct AppVersionFlags( string Flag, uint Iteration ) : IEquatable<AppVersionFlags?>,
                                                                                IComparable<AppVersionFlags>,
                                                                                IComparable<AppVersionFlags?>,
@@ -46,7 +46,7 @@ public readonly record struct AppVersionFlags( string Flag, uint Iteration ) : I
 
 
 #if NET6_0_OR_GREATER
-    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
+    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
 #endif
     public bool TryFormat( Span<char> span, out int charsWritten, ReadOnlySpan<char> format = default, IFormatProvider? provider = default )
     {

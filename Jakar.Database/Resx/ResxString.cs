@@ -18,8 +18,7 @@ public sealed class ResxString( string neutral,
                                 string portuguese,
                                 string spanish,
                                 string swedish,
-                                string thai
-) : LocalizableString, IEquatable<ResxString>, IComparable<ResxString>
+                                string thai ) : LocalizableString, IEquatable<ResxString>, IComparable<ResxString>
 {
     private readonly string _neutral = neutral;
 

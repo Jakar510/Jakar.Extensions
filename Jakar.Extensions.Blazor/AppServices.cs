@@ -8,25 +8,23 @@ using Blazored.Toast.Configuration;
 namespace Jakar.Extensions.Blazor;
 
 
-public class AppServices(
-    IModalService           modal,
-    IToastService           toastService,
-    ILocalStorageService    localStorage,
-    IAuthenticationService  authenticationService,
-    ProtectedLocalStorage   protectedLocalStorage,
-    ProtectedSessionStorage sessionStorage,
-    NavigationManager       navigation,
-    ContextMenuService      contextMenus,
-    TooltipService          tooltips,
-    NotificationService     notifications,
-    DialogService           dialogs
-) : BaseViewModel
+public class AppServices( IModalService           modal,
+                          IToastService           toastService,
+                          ILocalStorageService    localStorage,
+                          IAuthenticationService  authenticationService,
+                          ProtectedLocalStorage   protectedLocalStorage,
+                          ProtectedSessionStorage sessionStorage,
+                          NavigationManager       navigation,
+                          ContextMenuService      contextMenus,
+                          TooltipService          tooltips,
+                          NotificationService     notifications,
+                          DialogService           dialogs ) : BaseViewModel
 {
     private readonly IAuthenticationService _authenticationService = authenticationService;
-    private readonly ILocalStorageService   _localStorage = localStorage;
-    private readonly IModalService          _modal = modal;
-    private readonly IToastService          _toastService = toastService;
-    private readonly NavigationManager      _navigation = navigation;
+    private readonly ILocalStorageService   _localStorage          = localStorage;
+    private readonly IModalService          _modal                 = modal;
+    private readonly IToastService          _toastService          = toastService;
+    private readonly NavigationManager      _navigation            = navigation;
 
 
     public string                  BaseUri               => _navigation.BaseUri;
@@ -39,51 +37,15 @@ public class AppServices(
     public string                  Uri                   => _navigation.Uri;
 
 
-    public event Action? OnClearAll
-    {
-        add => _toastService.OnClearAll += value;
-        remove => _toastService.OnClearAll -= value;
-    }
-    public event Action? OnClearCustomToasts
-    {
-        add => _toastService.OnClearCustomToasts += value;
-        remove => _toastService.OnClearCustomToasts -= value;
-    }
-    public event Action<ToastLevel>? OnClearToasts
-    {
-        add => _toastService.OnClearToasts += value;
-        remove => _toastService.OnClearToasts -= value;
-    }
-    public event Action<ToastLevel, RenderFragment, Action<ToastSettings>?> OnShow
-    {
-        add => _toastService.OnShow += value;
-        remove => _toastService.OnShow -= value;
-    }
-    public event Action<Type, ToastParameters?, Action<ToastSettings>?>? OnShowComponent
-    {
-        add => _toastService.OnShowComponent += value;
-        remove => _toastService.OnShowComponent -= value;
-    }
-    public event Action? OnClearQueue
-    {
-        add => _toastService.OnClearQueue += value;
-        remove => _toastService.OnClearQueue -= value;
-    }
-    public event Action<ToastLevel>? OnClearQueueToasts
-    {
-        add => _toastService.OnClearQueueToasts += value;
-        remove => _toastService.OnClearQueueToasts -= value;
-    }
-    public event EventHandler<LocalChangedEventArgs>? Changed
-    {
-        add => _localStorage.Changed += value;
-        remove => _localStorage.Changed -= value;
-    }
-    public event EventHandler<LocalChangingEventArgs>? Changing
-    {
-        add => _localStorage.Changing += value;
-        remove => _localStorage.Changing -= value;
-    }
+    public event Action?                                                    OnClearAll          { add => _toastService.OnClearAll += value;          remove => _toastService.OnClearAll -= value; }
+    public event Action?                                                    OnClearCustomToasts { add => _toastService.OnClearCustomToasts += value; remove => _toastService.OnClearCustomToasts -= value; }
+    public event Action<ToastLevel>?                                        OnClearToasts       { add => _toastService.OnClearToasts += value;       remove => _toastService.OnClearToasts -= value; }
+    public event Action<ToastLevel, RenderFragment, Action<ToastSettings>?> OnShow              { add => _toastService.OnShow += value;              remove => _toastService.OnShow -= value; }
+    public event Action<Type, ToastParameters?, Action<ToastSettings>?>?    OnShowComponent     { add => _toastService.OnShowComponent += value;     remove => _toastService.OnShowComponent -= value; }
+    public event Action?                                                    OnClearQueue        { add => _toastService.OnClearQueue += value;        remove => _toastService.OnClearQueue -= value; }
+    public event Action<ToastLevel>?                                        OnClearQueueToasts  { add => _toastService.OnClearQueueToasts += value;  remove => _toastService.OnClearQueueToasts -= value; }
+    public event EventHandler<LocalChangedEventArgs>?                       Changed             { add => _localStorage.Changed += value;             remove => _localStorage.Changed -= value; }
+    public event EventHandler<LocalChangingEventArgs>?                      Changing            { add => _localStorage.Changing += value;            remove => _localStorage.Changing -= value; }
 
 
     public void NavigateTo( string uri )                                                    => _navigation.NavigateTo( uri );
@@ -113,16 +75,21 @@ public class AppServices(
     public ValueTask SetItemAsync<T>( string      key, T      data, CancellationToken token = default ) => _localStorage.SetItemAsync( key, data, token );
 
 
-    public IModalReference Show<TComponent>() where TComponent : IComponent                                                                 => _modal.Show<TComponent>();
-    public IModalReference Show<TComponent>( string title ) where TComponent : IComponent                                                   => _modal.Show<TComponent>( title );
-    public IModalReference Show<TComponent>( string title, ModalOptions    options ) where TComponent : IComponent                          => _modal.Show<TComponent>( title, options );
-    public IModalReference Show<TComponent>( string title, ModalParameters parameters ) where TComponent : IComponent                       => _modal.Show<TComponent>( title, parameters );
-    public IModalReference Show<TComponent>( string title, ModalParameters parameters, ModalOptions options ) where TComponent : IComponent => _modal.Show<TComponent>( title, parameters, options );
-    public IModalReference Show( Type               component )                                                                 => _modal.Show( component );
-    public IModalReference Show( Type               component, string title )                                                   => _modal.Show( component, title );
-    public IModalReference Show( Type               component, string title, ModalOptions    options )                          => _modal.Show( component, title, options );
-    public IModalReference Show( Type               component, string title, ModalParameters parameters )                       => _modal.Show( component, title, parameters );
-    public IModalReference Show( Type               component, string title, ModalParameters parameters, ModalOptions options ) => _modal.Show( component, title, parameters, options );
+    public IModalReference Show<TComponent>()
+        where TComponent : IComponent => _modal.Show<TComponent>();
+    public IModalReference Show<TComponent>( string title )
+        where TComponent : IComponent => _modal.Show<TComponent>( title );
+    public IModalReference Show<TComponent>( string title, ModalOptions options )
+        where TComponent : IComponent => _modal.Show<TComponent>( title, options );
+    public IModalReference Show<TComponent>( string title, ModalParameters parameters )
+        where TComponent : IComponent => _modal.Show<TComponent>( title, parameters );
+    public IModalReference Show<TComponent>( string title, ModalParameters parameters, ModalOptions options )
+        where TComponent : IComponent => _modal.Show<TComponent>( title, parameters, options );
+    public IModalReference Show( Type component )                                                                 => _modal.Show( component );
+    public IModalReference Show( Type component, string title )                                                   => _modal.Show( component, title );
+    public IModalReference Show( Type component, string title, ModalOptions    options )                          => _modal.Show( component, title, options );
+    public IModalReference Show( Type component, string title, ModalParameters parameters )                       => _modal.Show( component, title, parameters );
+    public IModalReference Show( Type component, string title, ModalParameters parameters, ModalOptions options ) => _modal.Show( component, title, parameters, options );
 
 
     public void ShowInfo( string            message, Action<ToastSettings>? settings                                 = null ) => _toastService.ShowInfo( message, settings );
@@ -135,10 +102,14 @@ public class AppServices(
     public void ShowError( RenderFragment   message, Action<ToastSettings>? settings                                 = null ) => _toastService.ShowError( message, settings );
     public void ShowToast( ToastLevel       level,   string                 message, Action<ToastSettings>? settings = null ) => _toastService.ShowToast( level, message, settings );
     public void ShowToast( ToastLevel       level,   RenderFragment         message, Action<ToastSettings>? settings = null ) => _toastService.ShowToast( level, message, settings );
-    public void ShowToast<TComponent>() where TComponent : IComponent                                                                   => _toastService.ShowToast<TComponent>();
-    public void ShowToast<TComponent>( ToastParameters       parameters ) where TComponent : IComponent                                 => _toastService.ShowToast<TComponent>( parameters );
-    public void ShowToast<TComponent>( Action<ToastSettings> settings ) where TComponent : IComponent                                   => _toastService.ShowToast<TComponent>( settings );
-    public void ShowToast<TComponent>( ToastParameters       parameters, Action<ToastSettings> settings ) where TComponent : IComponent => _toastService.ShowToast<TComponent>( parameters, settings );
+    public void ShowToast<TComponent>()
+        where TComponent : IComponent => _toastService.ShowToast<TComponent>();
+    public void ShowToast<TComponent>( ToastParameters parameters )
+        where TComponent : IComponent => _toastService.ShowToast<TComponent>( parameters );
+    public void ShowToast<TComponent>( Action<ToastSettings> settings )
+        where TComponent : IComponent => _toastService.ShowToast<TComponent>( settings );
+    public void ShowToast<TComponent>( ToastParameters parameters, Action<ToastSettings> settings )
+        where TComponent : IComponent => _toastService.ShowToast<TComponent>( parameters, settings );
     public void ClearAll()                                => _toastService.ClearAll();
     public void ClearCustomToasts()                       => _toastService.ClearCustomToasts();
     public void ClearQueue()                              => _toastService.ClearQueue();

@@ -4,7 +4,7 @@
 namespace Jakar.Database;
 
 
-[ GenerateOneOf ]
+[GenerateOneOf]
 public sealed partial class ConnectionStringResolverOptions : OneOfBase<SecuredString, Func<SecuredString>, Func<CancellationToken, Task<SecuredString>>, Func<CancellationToken, ValueTask<SecuredString>>, Func<IConfiguration, SecuredString>, Func<IConfiguration, CancellationToken, SecuredString>, Func<IConfiguration, CancellationToken, ValueTask<SecuredString>>,
     Func<IConfiguration, CancellationToken, Task<SecuredString>>>
 {

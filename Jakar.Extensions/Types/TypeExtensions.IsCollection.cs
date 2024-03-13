@@ -5,7 +5,7 @@ public static partial class TypeExtensions
 {
     public static bool IsCollection(
     #if NET6_0_OR_GREATER
-        [ DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.Interfaces ) ]
+        [DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.Interfaces )]
     #endif
         this Type type
     ) => type.HasInterface<ICollection>() || type.HasInterface( typeof(ICollection<>) );
@@ -13,11 +13,11 @@ public static partial class TypeExtensions
 
     public static bool IsCollection(
     #if NET6_0_OR_GREATER
-        [ DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.Interfaces ) ]
+        [DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.Interfaces )]
     #endif
         this Type classType,
-        [ NotNullWhen( true ) ] out Type? itemType,
-        [ NotNullWhen( true ) ] out bool? isBuiltInType
+        [NotNullWhen( true )] out Type? itemType,
+        [NotNullWhen( true )] out bool? isBuiltInType
     )
     {
         if ( classType.IsCollection( out IReadOnlyList<Type>? itemTypes ) )
@@ -35,10 +35,10 @@ public static partial class TypeExtensions
 
     public static bool IsCollection(
     #if NET6_0_OR_GREATER
-        [ DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.Interfaces ) ]
+        [DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.Interfaces )]
     #endif
         this Type propertyType,
-        [ NotNullWhen( true ) ] out Type? itemType
+        [NotNullWhen( true )] out Type? itemType
     )
     {
         if ( propertyType.IsCollection( out IReadOnlyList<Type>? itemTypes ) )
@@ -53,10 +53,10 @@ public static partial class TypeExtensions
 
     public static bool IsCollection(
     #if NET6_0_OR_GREATER
-        [ DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.Interfaces ) ]
+        [DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.Interfaces )]
     #endif
         this Type classType,
-        [ NotNullWhen( true ) ] out IReadOnlyList<Type>? itemTypes
+        [NotNullWhen( true )] out IReadOnlyList<Type>? itemTypes
     )
     {
         if ( classType.IsGenericType && classType.IsCollection() )

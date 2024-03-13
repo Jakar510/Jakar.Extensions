@@ -1,7 +1,7 @@
 ﻿namespace Jakar.Extensions;
 
 
-[ SuppressMessage( "ReSharper", "PartialTypeWithSinglePart" ) ]
+[SuppressMessage( "ReSharper", "PartialTypeWithSinglePart" )]
 public static partial class Enums
 {
     public static bool ToEnum<TResult>( this string input, out TResult result, bool ignoreCase = true )
@@ -13,7 +13,7 @@ public static partial class Enums
     /// <typeparam name="TValue"> </typeparam>
     /// <returns> </returns>
 #if NET7_0_OR_GREATER
-    [ RequiresDynamicCode( nameof(GetEnumNamedValues) ) ]
+    [RequiresDynamicCode( nameof(GetEnumNamedValues) )]
 #endif
     public static FrozenDictionary<string, TValue> GetEnumNamedValues<TEnum, TValue>()
         where TEnum : struct, Enum
@@ -26,9 +26,9 @@ public static partial class Enums
 
         return values.ToFrozenDictionary( KeySelector, ElementSelector );
 
-        static string KeySelector( TValue item ) { return Enum.GetName( typeof(TEnum), item ?? throw new ArgumentNullException( nameof(item) ) ) ?? throw new NullReferenceException( nameof(item) ); }
+        static string KeySelector( TValue item ) => Enum.GetName( typeof(TEnum), item ?? throw new ArgumentNullException( nameof(item) ) ) ?? throw new NullReferenceException( nameof(item) );
 
-        static TValue ElementSelector( TValue item ) { return item; }
+        static TValue ElementSelector( TValue item ) => item;
     }
 
 
@@ -37,7 +37,7 @@ public static partial class Enums
 
 
 #if NET7_0_OR_GREATER
-    [ RequiresDynamicCode( nameof(GetEnumValue) ) ]
+    [RequiresDynamicCode( nameof(GetEnumValue) )]
 #endif
     public static TValue GetEnumValue<TValue, TEnum>( this TEnum value )
         where TEnum : struct, Enum => GetEnumNamedValues<TEnum, TValue>().First( pair => pair.Key == value.ToString() ).Value;

@@ -32,7 +32,7 @@ public abstract class CollectionAlerts<T> : ObservableClass, ICollectionAlerts, 
     protected      void Replaced( in T old, in T @new, in int index ) => OnChanged( new NotifyCollectionChangedEventArgs( NotifyCollectionChangedAction.Replace, @new, old, index ) );
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     protected virtual void OnChanged( NotifyCollectionChangedEventArgs e )
     {
         CollectionChanged?.Invoke( this, e );

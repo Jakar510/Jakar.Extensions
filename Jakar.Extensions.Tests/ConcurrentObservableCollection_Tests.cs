@@ -1,7 +1,8 @@
 namespace Jakar.Extensions.Tests;
 
 
-[ TestFixture, TestOf( typeof(ConcurrentObservableCollection<>) ) ]
+[TestFixture]
+[TestOf( typeof(ConcurrentObservableCollection<>) )]
 
 // ReSharper disable once InconsistentNaming
 public class ConcurrentObservableCollection_Tests : Assert
@@ -10,7 +11,11 @@ public class ConcurrentObservableCollection_Tests : Assert
     private readonly ConcurrentObservableCollection<string> _strings  = new();
 
 
-    [ Test, TestCase( 1 ), TestCase( 2 ), TestCase( 3 ), TestCase( 4 ) ]
+    [Test]
+    [TestCase( 1 )]
+    [TestCase( 2 )]
+    [TestCase( 3 )]
+    [TestCase( 4 )]
     public void Run( int value )
     {
         this.True( _integers.TryAdd( value ) );
@@ -20,7 +25,11 @@ public class ConcurrentObservableCollection_Tests : Assert
     }
 
 
-    [ Test, TestCase( "1" ), TestCase( "2" ), TestCase( "3" ), TestCase( "4" ) ]
+    [Test]
+    [TestCase( "1" )]
+    [TestCase( "2" )]
+    [TestCase( "3" )]
+    [TestCase( "4" )]
     public void Run( string value )
     {
         this.True( _strings.TryAdd( value ) );

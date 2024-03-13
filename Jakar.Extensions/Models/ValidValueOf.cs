@@ -1,31 +1,24 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 04/11/2022  9:54 AM
 
-using System.Linq.Expressions;
-
-
-
 namespace Jakar.Extensions;
 
 
 /// <summary> Inspired by <see cref="ValueOf{TValue,TThis}"/> </summary>
 /// <typeparam name="TValue"> </typeparam>
 /// <typeparam name="TThis"> </typeparam>
-[ SuppressMessage( "ReSharper", "ConditionalAccessQualifierIsNonNullableAccordingToAPIContract" ) ]
+[SuppressMessage( "ReSharper", "ConditionalAccessQualifierIsNonNullableAccordingToAPIContract" )]
 public abstract class ValidValueOf<TValue, TThis> : IComparable<ValidValueOf<TValue, TThis>>, IEquatable<ValidValueOf<TValue, TThis>>, IComparable, IValidator
     where TThis : ValidValueOf<TValue, TThis>, new()
     where TValue : IComparable<TValue>, IEquatable<TValue>
 {
-    public TValue   Value   { get; protected set; } = default!;
     bool IValidator.IsValid => IsValid();
+    public TValue   Value   { get; protected set; } = default!;
 
 
-    public static bool TryCreate( TValue value, [ NotNullWhen( true ) ] out TThis? thisValue )
+    public static bool TryCreate( TValue value, [NotNullWhen( true )] out TThis? thisValue )
     {
-        var self = new TThis
-                   {
-                       Value = value
-                   };
+        var self = new TThis { Value = value };
 
         thisValue = self.IsValid()
                         ? self
@@ -37,10 +30,7 @@ public abstract class ValidValueOf<TValue, TThis> : IComparable<ValidValueOf<TVa
 
     public static TThis Create( TValue item )
     {
-        var self = new TThis
-                   {
-                       Value = item
-                   };
+        var self = new TThis { Value = item };
 
         self.Validate();
         return self;
@@ -64,7 +54,7 @@ public abstract class ValidValueOf<TValue, TThis> : IComparable<ValidValueOf<TVa
     public override string? ToString() => Value?.ToString();
 
 
-    [ DoesNotReturn ] protected virtual void ThrowError() => throw new FormatException( $"Provided Value was in the wrong format: '{Value}'" );
+    [DoesNotReturn] protected virtual void ThrowError() => throw new FormatException( $"Provided Value was in the wrong format: '{Value}'" );
 
     protected void Validate()
     {

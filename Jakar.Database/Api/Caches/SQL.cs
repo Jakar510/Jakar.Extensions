@@ -20,13 +20,13 @@ public static class SQL
     public const char   QUOTE          = '"';
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static string GetAndOr( this bool matchAll ) => matchAll
                                                                ? AND
                                                                : OR;
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static int GetHash( this DynamicParameters parameters ) => parameters.ParameterNames.GetHash();
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static int GetHash( this DynamicParameters parameters ) => parameters.ParameterNames.GetHash();
 
     /*
     [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
@@ -64,7 +64,7 @@ public static class SQL
     */
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static int GetHash<T>( this IEnumerable<T> values )
     {
         var hash = new HashCode();
@@ -74,7 +74,7 @@ public static class SQL
     }
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static string GetCreatedBy( this DbInstance instance ) =>
         instance switch
         {
@@ -84,7 +84,7 @@ public static class SQL
         };
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static string GetID_ColumnName( this DbInstance instance ) =>
         instance switch
         {
@@ -94,7 +94,7 @@ public static class SQL
         };
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static string GetLastModified( this DbInstance instance ) =>
         instance switch
         {
@@ -104,7 +104,7 @@ public static class SQL
         };
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static string GetOwnerUserID( this DbInstance instance ) =>
         instance switch
         {
@@ -114,7 +114,7 @@ public static class SQL
         };
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static string GetTableName<TRecord>( this DbInstance instance )
         where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord> =>
         instance switch
@@ -125,7 +125,7 @@ public static class SQL
         };
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static string GetRandomMethod( this DbInstance instance ) =>
         instance switch
         {
@@ -135,7 +135,7 @@ public static class SQL
         };
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static string GetDateCreated( this DbInstance instance ) =>
         instance switch
         {

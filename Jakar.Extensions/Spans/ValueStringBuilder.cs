@@ -27,11 +27,7 @@ public ref struct ValueStringBuilder
     }
     public ref char this[ int index ] => ref _chars[index];
     public readonly ReadOnlySpan<char> Result => MemoryMarshal.CreateReadOnlySpan( ref _chars.GetPinnableReference(), _chars.Length );
-    public int Length
-    {
-        readonly get => _chars.Index;
-        set => _chars.Index = value;
-    }
+    public          int                Length { readonly get => _chars.Index; set => _chars.Index = value; }
 
 
     public ValueStringBuilder() : this( 64 ) { }
@@ -62,13 +58,15 @@ public ref struct ValueStringBuilder
 
 
     /// <summary> Get a pinnable reference to the builder. Does not ensure there is a null char after <see cref="Length"/> . This overload is pattern matched  the C# 7.3+ compiler so you can omit the explicit method call, and write eg "fixed (char* c = builder)" </summary>
-    [ Pure, MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    [Pure]
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public ref char GetPinnableReference() => ref _chars.GetPinnableReference();
 
 
     /// <summary> Get a pinnable reference to the builder. </summary>
     /// <param name="terminate"> Ensures that the builder has a null char after <see cref="Length"/> </param>
-    [ Pure, MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    [Pure]
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public ref char GetPinnableReference( bool terminate )
     {
         if ( terminate ) { return ref GetPinnableReference( '\0' ); }
@@ -79,7 +77,8 @@ public ref struct ValueStringBuilder
 
     /// <summary> Get a pinnable reference to the builder. </summary>
     /// <param name="terminate"> Ensures that the builder has a null char after <see cref="Length"/> </param>
-    [ Pure, MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    [Pure]
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public ref char GetPinnableReference( char terminate )
     {
         EnsureCapacity( Length + 1 );
@@ -101,17 +100,17 @@ public ref struct ValueStringBuilder
     /// <summary> Returns the underlying storage of the builder. </summary>
     /// <summary> Returns a span around the contents of the builder. </summary>
     /// <param name="terminate"> Ensures that the builder has a null char after <see cref="Length"/> </param>
-    [ Pure ]
+    [Pure]
     public ReadOnlySpan<char> AsSpan( bool terminate ) => _chars.AsSpan( terminate
                                                                              ? '\0'
                                                                              : default );
-    [ Pure ]
+    [Pure]
     public readonly ReadOnlySpan<char> Slice( int start )
     {
         Span<char> span = _chars[start..];
         return MemoryMarshal.CreateSpan( ref MemoryMarshal.GetReference( span ), span.Length );
     }
-    [ Pure ] public readonly ReadOnlySpan<char> Slice( int start, int length ) => _chars.Slice( start, length );
+    [Pure] public readonly ReadOnlySpan<char> Slice( int start, int length ) => _chars.Slice( start, length );
     public ValueStringBuilder Reset()
     {
         _chars.Reset( '\0' );
@@ -371,7 +370,7 @@ public ref struct ValueStringBuilder
 
 
 #if NET6_0_OR_GREATER
-    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
+    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
 #endif
     public ValueStringBuilder AppendJoin<T>( char separator, in ReadOnlySpan<T> enumerable, in ReadOnlySpan<char> format = default, IFormatProvider? provider = default )
         where T : ISpanFormattable
@@ -393,7 +392,7 @@ public ref struct ValueStringBuilder
     }
 
 #if NET6_0_OR_GREATER
-    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
+    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
 #endif
     public ValueStringBuilder AppendJoin<T>( in ReadOnlySpan<char> separator, in ReadOnlySpan<T> enumerable, in ReadOnlySpan<char> format = default, IFormatProvider? provider = default )
         where T : ISpanFormattable
@@ -416,7 +415,7 @@ public ref struct ValueStringBuilder
 
 
 #if NET6_0_OR_GREATER
-    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
+    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
 #endif
     public ValueStringBuilder AppendJoin<T>( char separator, IEnumerable<T> enumerable, in ReadOnlySpan<char> format = default, IFormatProvider? provider = default )
         where T : ISpanFormattable
@@ -437,7 +436,7 @@ public ref struct ValueStringBuilder
     }
 
 #if NET6_0_OR_GREATER
-    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
+    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
 #endif
     public ValueStringBuilder AppendJoin<T>( in ReadOnlySpan<char> separator, IEnumerable<T> enumerable, in ReadOnlySpan<char> format = default, IFormatProvider? provider = default )
         where T : ISpanFormattable
@@ -459,7 +458,7 @@ public ref struct ValueStringBuilder
 
 
 #if NET6_0_OR_GREATER
-    [ MethodImpl( MethodImplOptions.AggressiveOptimization ) ]
+    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
 #endif
     public ValueStringBuilder AppendSpanFormattable<T>( T value, in ReadOnlySpan<char> format, IFormatProvider? provider = default )
         where T : ISpanFormattable
@@ -551,7 +550,8 @@ public ref struct ValueStringBuilder
                 if ( ++pos == format.Length ) { ThrowFormatError(); } // If reached end of text then error (Unexpected end of text)
 
                 ch = format[pos]; // so long as character is digit and value of the index is less than 1000000 ( index limit )
-            } while ( ch is >= '0' and <= '9' && index < INDEX_LIMIT );
+            }
+            while ( ch is >= '0' and <= '9' && index < INDEX_LIMIT );
 
             // If value of index is not within the range of the arguments passed  then error (Index out of range)
             if ( index >= args.Length ) { throw new FormatException( "Format Index Out Of Range" ); }
@@ -609,7 +609,8 @@ public ref struct ValueStringBuilder
                     ch = format[pos];
 
                     // So long a current character is a digit and the value of width is less than 100000 ( width limit )
-                } while ( ch is >= '0' and <= '9' && width < WIDTH_LIMIT );
+                }
+                while ( ch is >= '0' and <= '9' && width < WIDTH_LIMIT );
 
                 // end of parsing Argument Alignment
             }
@@ -793,7 +794,8 @@ public ref struct ValueStringBuilder
                 if ( ++pos == format.Length ) { ThrowFormatError(); } // If reached end of text then error (Unexpected end of text)
 
                 ch = format[pos]; // so long as character is digit and value of the index is less than 1000000 ( index limit )
-            } while ( ch is >= '0' and <= '9' && index < INDEX_LIMIT );
+            }
+            while ( ch is >= '0' and <= '9' && index < INDEX_LIMIT );
 
             // If value of index is not within the range of the arguments passed  then error (Index out of range)
             if ( index >= args.Length ) { throw new FormatException( "Format Index Out Of Range" ); }
@@ -851,7 +853,8 @@ public ref struct ValueStringBuilder
                     ch = format[pos];
 
                     // So long a current character is a digit and the value of width is less than 100000 ( width limit )
-                } while ( ch is >= '0' and <= '9' && width < WIDTH_LIMIT );
+                }
+                while ( ch is >= '0' and <= '9' && width < WIDTH_LIMIT );
 
                 // end of parsing Argument Alignment
             }
@@ -956,5 +959,5 @@ public ref struct ValueStringBuilder
     }
 
 
-    [ DoesNotReturn ] private static void ThrowFormatError() => throw new FormatException( "Invalid Format String" );
+    [DoesNotReturn] private static void ThrowFormatError() => throw new FormatException( "Invalid Format String" );
 }

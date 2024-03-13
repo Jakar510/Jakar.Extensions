@@ -1,51 +1,31 @@
 ﻿namespace Jakar.Extensions;
 
 
-[ Serializable ]
+[Serializable]
 public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComparable<LocalDirectory>, IComparable, TempFile.ITempFile, IAsyncDisposable
 {
-    private       bool                      _isTemporary;
-    protected     DirectoryInfo?            _info;
-    public static Equalizer<LocalDirectory> Equalizer => Equalizer<LocalDirectory>.Default;
+    private   bool           _isTemporary;
+    protected DirectoryInfo? _info;
 
 
     /// <summary> Gets or sets the application's fully qualified path of the current working directory. </summary>
-    public static LocalDirectory CurrentDirectory
-    {
-        get => new(Environment.CurrentDirectory);
-        set => Environment.CurrentDirectory = Path.GetFullPath( value.FullPath );
-    }
-    public static Sorter<LocalDirectory> Sorter       => Sorter<LocalDirectory>.Default;
-    public        bool                   DoesNotExist => !Exists;
-    public        bool                   Exists       => Info.Exists;
-
-    bool TempFile.ITempFile.IsTemporary
-    {
-        get => _isTemporary;
-        set => _isTemporary = value;
-    }
+    public static LocalDirectory CurrentDirectory { get => new(Environment.CurrentDirectory); set => Environment.CurrentDirectory = Path.GetFullPath( value.FullPath ); }
+    public static Equalizer<LocalDirectory> Equalizer => Equalizer<LocalDirectory>.Default;
+    public static Sorter<LocalDirectory>    Sorter    => Sorter<LocalDirectory>.Default;
 
 
-    public DateTime CreationTimeUtc
-    {
-        get => Directory.GetCreationTimeUtc( FullPath );
-        set => Directory.SetCreationTimeUtc( FullPath, value );
-    }
-    public DateTime LastAccessTimeUtc
-    {
-        get => Directory.GetLastAccessTimeUtc( FullPath );
-        set => Directory.SetLastWriteTimeUtc( FullPath, value );
-    }
-    public DateTime LastWriteTimeUtc
-    {
-        get => Directory.GetLastWriteTimeUtc( FullPath );
-        set => Directory.SetLastWriteTimeUtc( FullPath, value );
-    }
-    [ JsonIgnore ] public DirectoryInfo   Info     => _info ??= new DirectoryInfo( FullPath );
-    [ JsonIgnore ] public LocalDirectory? Parent   => GetParent();
-    public                string          FullPath { get; init; }
-    public                string          Name     => Info.Name;
-    public                string          Root     => Directory.GetDirectoryRoot( FullPath );
+    public              DateTime      CreationTimeUtc { get => Directory.GetCreationTimeUtc( FullPath ); set => Directory.SetCreationTimeUtc( FullPath, value ); }
+    public              bool          DoesNotExist    => !Exists;
+    public              bool          Exists          => Info.Exists;
+    public              string        FullPath        { get; init; }
+    [JsonIgnore] public DirectoryInfo Info            => _info ??= new DirectoryInfo( FullPath );
+
+    bool TempFile.ITempFile.            IsTemporary       { get => _isTemporary;                               set => _isTemporary = value; }
+    public              DateTime        LastAccessTimeUtc { get => Directory.GetLastAccessTimeUtc( FullPath ); set => Directory.SetLastWriteTimeUtc( FullPath, value ); }
+    public              DateTime        LastWriteTimeUtc  { get => Directory.GetLastWriteTimeUtc( FullPath );  set => Directory.SetLastWriteTimeUtc( FullPath, value ); }
+    public              string          Name              => Info.Name;
+    [JsonIgnore] public LocalDirectory? Parent            => GetParent();
+    public              string          Root              => Directory.GetDirectoryRoot( FullPath );
 
 
     public LocalDirectory() => FullPath = string.Empty;
@@ -97,17 +77,23 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     /// <summary> Uses the <paramref name="path"/> and creates the tree structure based on <paramref name="subFolders"/> </summary>
     /// <param name="path"> </param>
     /// <param name="subFolders"> </param>
-    /// <returns> <see cref="LocalDirectory"/> </returns>
+    /// <returns>
+    ///     <see cref="LocalDirectory"/>
+    /// </returns>
     public static LocalDirectory Create( LocalDirectory path, params string[] subFolders ) => Directory.CreateDirectory( path.Combine( subFolders ) );
 
     /// <summary> Uses the <see cref="CurrentDirectory"/> and creates the tree structure based on <paramref name="subFolders"/> </summary>
     /// <param name="subFolders"> </param>
-    /// <returns> <see cref="LocalDirectory"/> </returns>
+    /// <returns>
+    ///     <see cref="LocalDirectory"/>
+    /// </returns>
     public static LocalDirectory Create( params string[] subFolders ) => Create( CurrentDirectory, subFolders );
 
     /// <summary> Uses <see cref="Path.GetTempPath"/> and creates the tree structure based on <paramref name="subFolders"/> </summary>
     /// <param name="subFolders"> </param>
-    /// <returns> <see cref="LocalDirectory"/> </returns>
+    /// <returns>
+    ///     <see cref="LocalDirectory"/>
+    /// </returns>
     public static LocalDirectory CreateTemp( params string[] subFolders )
     {
         LocalDirectory d = Create( Path.GetTempPath().Combine( subFolders ) );
@@ -156,7 +142,9 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     /// <exception cref="PathTooLongException"> </exception>
     /// <exception cref="SecurityException"> </exception>
     /// <exception cref="NotSupportedException"> </exception>
-    /// <returns> <see cref="LocalDirectory"/> </returns>
+    /// <returns>
+    ///     <see cref="LocalDirectory"/>
+    /// </returns>
     public LocalDirectory CreateSubDirectory( params string[] paths ) => Info.CreateSubdirectory( FullPath.Combine( paths ) );
     protected virtual LocalDirectory? GetParent()
     {
@@ -176,7 +164,9 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     /// <exception cref="PathTooLongException"> </exception>
     /// <exception cref="SecurityException"> </exception>
     /// <exception cref="NotSupportedException"> </exception>
-    /// <returns> <see cref="LocalFile"/> </returns>
+    /// <returns>
+    ///     <see cref="LocalFile"/>
+    /// </returns>
     public LocalFile Join( string path ) => Info.Combine( path );
 
 
@@ -189,7 +179,9 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     /// <exception cref="PathTooLongException"> </exception>
     /// <exception cref="SecurityException"> </exception>
     /// <exception cref="NotSupportedException"> </exception>
-    /// <returns> <see cref="string"/> </returns>
+    /// <returns>
+    ///     <see cref="string"/>
+    /// </returns>
     public string Combine( string subPaths ) => Info.Combine( subPaths );
 
     /// <summary> Gets the path of the directory or file in this <see cref="LocalDirectory"/> </summary>
@@ -201,7 +193,9 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     /// <exception cref="PathTooLongException"> </exception>
     /// <exception cref="SecurityException"> </exception>
     /// <exception cref="NotSupportedException"> </exception>
-    /// <returns> <see cref="string"/> </returns>
+    /// <returns>
+    ///     <see cref="string"/>
+    /// </returns>
     public string Combine( params string[] subPaths ) => Info.Combine( subPaths );
 
 
@@ -478,7 +472,7 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
 
 
 
-    [ Serializable ]
+    [Serializable]
     public class Collection : ObservableCollection<LocalDirectory>
     {
         public Collection() : base() { }
@@ -487,7 +481,7 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
 
 
 
-    [ Serializable ]
+    [Serializable]
     public class ConcurrentCollection : ConcurrentObservableCollection<LocalDirectory>
     {
         public ConcurrentCollection() : base( Sorter ) { }
@@ -496,7 +490,7 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
 
 
 
-    [ Serializable ]
+    [Serializable]
     public class Deque : MultiDeque<LocalDirectory>
     {
         public Deque() : base() { }
@@ -505,7 +499,7 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
 
 
 
-    [ Serializable ]
+    [Serializable]
     public class Items : List<LocalDirectory>
     {
         public Items() : base() { }
@@ -515,7 +509,7 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
 
 
 
-    [ Serializable ]
+    [Serializable]
     public class Queue : MultiQueue<LocalDirectory>
     {
         public Queue() : base() { }
@@ -524,7 +518,7 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
 
 
 
-    [ Serializable ]
+    [Serializable]
     public class Set : HashSet<LocalDirectory>
     {
         public Set() : base() { }
@@ -534,7 +528,7 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
 
 
 
-    [ SuppressMessage( "ReSharper", "IntroduceOptionalParameters.Global" ) ]
+    [SuppressMessage( "ReSharper", "IntroduceOptionalParameters.Global" )]
     public class Watcher : FileSystemWatcher
     {
         public LocalDirectory Directory { get; init; }

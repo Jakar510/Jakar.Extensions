@@ -1,8 +1,4 @@
-﻿using System;
-
-
-
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
 
 
 public static partial class TypeExtensions
@@ -22,15 +18,15 @@ public static partial class TypeExtensions
     // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static bool IsEqualType( this Type value, Type other ) => value == other;
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsEqualType( this Type value, Type other ) => value == other;
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static bool IsEqualType<T>( this T value, Type other )
         where T : notnull => value.GetType() == other;
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static bool IsEqualType<T>( this Type other )
         where T : notnull => typeof(T) == other;
 
@@ -50,20 +46,18 @@ public static partial class TypeExtensions
         where T : notnull => types.Any( typeof(T).IsEqualType );
 #endif
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static bool IsOneOfType( this Type value, in ReadOnlySpan<Type> types ) => types.Any( value.IsEqualType );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsOneOfType( this Type value, in ReadOnlySpan<Type> types ) => types.Any( value.IsEqualType );
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static bool IsOneOfType<T>( this T value, in ReadOnlySpan<Type> types )
         where T : class => types.Any( value.IsEqualType );
-
-
 
 
     // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
 #if NET7_0_OR_GREATER
-    [ RequiresDynamicCode( nameof(Construct) ) ]
+    [RequiresDynamicCode( nameof(Construct) )]
 #endif
     public static object? Construct( this Type target, params Type[] args )
     {

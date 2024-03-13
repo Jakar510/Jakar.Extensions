@@ -5,15 +5,17 @@
 namespace Jakar.Extensions;
 
 
-/// <summary> <see href="https://www.educative.io/edpresso/how-to-generate-a-random-string--c-sharp"/> </summary>
-[ SuppressMessage( "ReSharper", "RedundantVerbatimStringPrefix" ) ]
+/// <summary>
+///     <see href="https://www.educative.io/edpresso/how-to-generate-a-random-string--c-sharp"/>
+/// </summary>
+[SuppressMessage( "ReSharper", "RedundantVerbatimStringPrefix" )]
 public class Randoms : ObservableClass
 {
     public const string ALPHANUMERIC  = @"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     public const string LOWER_CASE    = @"abcdefghijklmnopqrstuvwxyz";
-    public const string UPPER_CASE    = @"ABCDEFGHJKLMNOPQRSTUVWXYZ";
     public const string NUMERIC       = @"0123456789";
     public const string SPECIAL_CHARS = @"_-.!#@+/*^=>|/\";
+    public const string UPPER_CASE    = @"ABCDEFGHJKLMNOPQRSTUVWXYZ";
 
 
     public static ReadOnlyMemory<char>  AlphaNumeric { get; }      = ALPHANUMERIC.ToArray();

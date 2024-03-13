@@ -15,7 +15,9 @@ public class CreateUser : ObservableClass, IValidator, IVerifyRequestProvider
     public static PasswordRequirements PasswordRequirements { get => PasswordRequirements.Current; set => PasswordRequirements.Current = value; }
 
 
-    [Required, MinLength( PasswordRequirements.MIN_LENGTH ), MaxLength( PasswordRequirements.MAX_LENGTH )]
+    [Required]
+    [MinLength( PasswordRequirements.MIN_LENGTH )]
+    [MaxLength( PasswordRequirements.MAX_LENGTH )]
     public string ConfirmPassword
     {
         get => _confirmPassword;
@@ -44,7 +46,10 @@ public class CreateUser : ObservableClass, IValidator, IVerifyRequestProvider
     public bool IsValidPassword => string.Equals( Password, ConfirmPassword, StringComparison.Ordinal ) && PasswordValidator.Check( Password, PasswordRequirements );
 
 
-    [Required, MinLength( PasswordRequirements.MIN_LENGTH ), MaxLength( PasswordRequirements.MAX_LENGTH ), Compare( nameof(ConfirmPassword) )]
+    [Required]
+    [MinLength( PasswordRequirements.MIN_LENGTH )]
+    [MaxLength( PasswordRequirements.MAX_LENGTH )]
+    [Compare( nameof(ConfirmPassword) )]
     public string Password
     {
         get => _password;

@@ -11,15 +11,15 @@ public readonly record struct Right<TEnum>( TEnum Index, bool Value )
 
 public interface IRights
 {
-    public const                     int    MAX_SIZE = TokenValidationParameters.DefaultMaximumTokenSizeInBytes;
-    [ MaxLength( MAX_SIZE ) ] public string Rights { get; }
+    public const                   int    MAX_SIZE = TokenValidationParameters.DefaultMaximumTokenSizeInBytes;
+    [MaxLength( MAX_SIZE )] public string Rights { get; }
 }
 
 
 
 public static class RightsExtensions
 {
-    [ Pure ]
+    [Pure]
     public static UserRights<TEnum> GetRights<TEnum>( this IRights rights )
         where TEnum : struct, Enum => UserRights<TEnum>.Create( rights );
 }
@@ -53,27 +53,28 @@ public interface IUserRights<TEnum> : IUserRights, IEnumerator<Right<TEnum>>, IE
     IUserRights<TEnum> Add( in     ReadOnlySpan<TEnum>    array );
 
 
-    [ Pure ] public abstract static IUserRights<TEnum> Merge( params IEnumerable<IRights>[]     values );
-    [ Pure ] public abstract static IUserRights<TEnum> Merge( IEnumerable<IEnumerable<IRights>> values );
-    [ Pure ] public abstract static IUserRights<TEnum> Merge( IEnumerable<IRights>              values );
-    [ Pure ] public abstract static IUserRights<TEnum> Merge( in  int                           totalRightCount, params IEnumerable<IRights>[]     values );
-    [ Pure ] public abstract static IUserRights<TEnum> Merge( in  int                           totalRightCount, IEnumerable<IEnumerable<IRights>> values );
-    [ Pure ] public abstract static IUserRights<TEnum> Merge( in  int                           totalRightCount, IEnumerable<IRights>              values );
-    [ Pure ] public abstract static IUserRights<TEnum> Create( in int                           totalRightCount );
-    [ Pure ] public abstract static IUserRights<TEnum> Create( string                           rights );
-    [ Pure ] public abstract static IUserRights<TEnum> Create( in ReadOnlySpan<char>            rights );
-    [ Pure ] public abstract static IUserRights<TEnum> Create();
-    [ Pure ] public abstract static IUserRights<TEnum> Create( params TEnum[]             array );
-    [ Pure ] public abstract static IUserRights<TEnum> Create( in     ReadOnlySpan<TEnum> array );
+    [Pure] public abstract static IUserRights<TEnum> Merge( params IEnumerable<IRights>[]     values );
+    [Pure] public abstract static IUserRights<TEnum> Merge( IEnumerable<IEnumerable<IRights>> values );
+    [Pure] public abstract static IUserRights<TEnum> Merge( IEnumerable<IRights>              values );
+    [Pure] public abstract static IUserRights<TEnum> Merge( in  int                           totalRightCount, params IEnumerable<IRights>[]     values );
+    [Pure] public abstract static IUserRights<TEnum> Merge( in  int                           totalRightCount, IEnumerable<IEnumerable<IRights>> values );
+    [Pure] public abstract static IUserRights<TEnum> Merge( in  int                           totalRightCount, IEnumerable<IRights>              values );
+    [Pure] public abstract static IUserRights<TEnum> Create( in int                           totalRightCount );
+    [Pure] public abstract static IUserRights<TEnum> Create( string                           rights );
+    [Pure] public abstract static IUserRights<TEnum> Create( in ReadOnlySpan<char>            rights );
+    [Pure] public abstract static IUserRights<TEnum> Create();
+    [Pure] public abstract static IUserRights<TEnum> Create( params TEnum[]             array );
+    [Pure] public abstract static IUserRights<TEnum> Create( in     ReadOnlySpan<TEnum> array );
 
-    [ Pure ]
+    [Pure]
     public abstract static IUserRights<TEnum> Create<TRecord>( TRecord rights )
         where TRecord : class, IRights;
 }
 
 
 
-[ DefaultMember( nameof(Default) ), SuppressMessage( "ReSharper", "FieldCanBeMadeReadOnly.Local" ) ]
+[DefaultMember( nameof(Default) )]
+[SuppressMessage( "ReSharper", "FieldCanBeMadeReadOnly.Local" )]
 public struct UserRights<TEnum> : IUserRights<TEnum>
     where TEnum : struct, Enum
 {
@@ -85,27 +86,12 @@ public struct UserRights<TEnum> : IUserRights<TEnum>
     private                 int                   _index = 0;
 
 
-    private readonly Memory<char> _Rights
-    {
-        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => _owner?.Memory ?? Memory<char>.Empty;
-    }
-    public static UserRights<TEnum> Default
-    {
-        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => new(1);
-    }
-    public readonly int Length
-    {
-        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => _Rights.Length;
-    }
-    public readonly Right<TEnum> Current
-    {
-        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => new(_values[_index], Has( _index ));
-    }
-    readonly object IEnumerator.Current => Current;
-    internal readonly Span<char> Span
-    {
-        [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] get => _Rights.Span;
-    }
+    private readonly  Memory<char>       _Rights { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _owner?.Memory ?? Memory<char>.Empty; }
+    public static     UserRights<TEnum>  Default { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => new(1); }
+    public readonly   int                Length  { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _Rights.Length; }
+    public readonly   Right<TEnum>       Current { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => new(_values[_index], Has( _index )); }
+    readonly          object IEnumerator.Current => Current;
+    internal readonly Span<char>         Span    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _Rights.Span; }
 
 
     public UserRights() : this( _values.Length ) { }
@@ -126,13 +112,13 @@ public struct UserRights<TEnum> : IUserRights<TEnum>
     }
 
 
-    [ Pure ] static IUserRights<TEnum> IUserRights<TEnum>.Create<TRecord>( TRecord rights ) => Create( rights );
-    [ Pure ]
+    [Pure] static IUserRights<TEnum> IUserRights<TEnum>.Create<TRecord>( TRecord rights ) => Create( rights );
+    [Pure]
     public static UserRights<TEnum> Create<TRecord>( TRecord rights )
         where TRecord : class, IRights => new(rights.Rights);
     readonly IUserRights IUserRights.              With<TRecord>( TRecord rights ) => With( rights );
     readonly IUserRights<TEnum> IUserRights<TEnum>.With<TRecord>( TRecord rights ) => With( rights );
-    [ Pure ]
+    [Pure]
     public readonly UserRights<TEnum> With<TRecord>( TRecord rights )
         where TRecord : class, IRights
     {
@@ -148,49 +134,49 @@ public struct UserRights<TEnum> : IUserRights<TEnum>
 
         return this;
     }
-    [ Pure ] static        IUserRights<TEnum> IUserRights<TEnum>.Merge( params IEnumerable<IRights>[]     values )                                                    => Merge( values );
-    [ Pure ] static        IUserRights<TEnum> IUserRights<TEnum>.Merge( IEnumerable<IEnumerable<IRights>> values )                                                    => Merge( values );
-    [ Pure ] static        IUserRights<TEnum> IUserRights<TEnum>.Merge( IEnumerable<IRights>              values )                                                    => Merge( values );
-    [ Pure ] static        IUserRights<TEnum> IUserRights<TEnum>.Merge( in     int                        totalRightCount, params IEnumerable<IRights>[]     values ) => Merge( totalRightCount, values );
-    [ Pure ] static        IUserRights<TEnum> IUserRights<TEnum>.Merge( in     int                        totalRightCount, IEnumerable<IEnumerable<IRights>> values ) => Merge( totalRightCount, values );
-    [ Pure ] static        IUserRights<TEnum> IUserRights<TEnum>.Merge( in     int                        totalRightCount, IEnumerable<IRights>              values ) => Merge( totalRightCount, values );
-    [ Pure ] public static UserRights<TEnum>                     Merge( params IEnumerable<IRights>[]     values )                                                    => Merge( _values.Length,  values.SelectMany( static x => x ) );
-    [ Pure ] public static UserRights<TEnum>                     Merge( IEnumerable<IEnumerable<IRights>> values )                                                    => Merge( _values.Length,  values.SelectMany( static x => x ) );
-    [ Pure ] public static UserRights<TEnum>                     Merge( IEnumerable<IRights>              values )                                                    => Merge( _values.Length,  values );
-    [ Pure ] public static UserRights<TEnum>                     Merge( in  int                           totalRightCount, params IEnumerable<IRights>[]     values ) => Merge( totalRightCount, values.SelectMany( static x => x ) );
-    [ Pure ] public static UserRights<TEnum>                     Merge( in  int                           totalRightCount, IEnumerable<IEnumerable<IRights>> values ) => Merge( totalRightCount, values.SelectMany( static x => x ) );
-    [ Pure ] public static UserRights<TEnum>                     Merge( in  int                           totalRightCount, IEnumerable<IRights>              values ) => values.Aggregate( new UserRights<TEnum>( totalRightCount ), static ( current, value ) => current.With( value ) );
-    [ Pure ] static        IUserRights<TEnum> IUserRights<TEnum>.Create( in int                           totalRightCount ) => Create( totalRightCount );
-    [ Pure ] static        IUserRights<TEnum> IUserRights<TEnum>.Create( string                           rights )          => Create( rights );
-    [ Pure ] static        IUserRights<TEnum> IUserRights<TEnum>.Create( in ReadOnlySpan<char>            rights )          => Create( rights );
-    [ Pure ] static        IUserRights<TEnum> IUserRights<TEnum>.Create()                                                   => Create();
-    [ Pure ] static        IUserRights<TEnum> IUserRights<TEnum>.Create( params TEnum[]             array )                 => Create( array );
-    [ Pure ] static        IUserRights<TEnum> IUserRights<TEnum>.Create( in     ReadOnlySpan<TEnum> array )                 => Create( array );
-    [ Pure ] public static UserRights<TEnum>                     Create( in     int                 totalRightCount )       => new(totalRightCount);
-    [ Pure ] public static UserRights<TEnum>                     Create( string                     rights )                => new(rights);
-    [ Pure ] public static UserRights<TEnum>                     Create( in ReadOnlySpan<char>      rights )                => new(rights);
-    [ Pure ] public static UserRights<TEnum>                     Create()                                                   => new UserRights<TEnum>( _values.Length ).Add( _values.AsSpan() );
-    [ Pure ] public static UserRights<TEnum>                     Create( params TEnum[]             array )                 => new UserRights<TEnum>( _values.Length ).Add( array );
-    [ Pure ] public static UserRights<TEnum>                     Create( in     ReadOnlySpan<TEnum> array )                 => new UserRights<TEnum>( _values.Length ).Add( array );
+    [Pure] static        IUserRights<TEnum> IUserRights<TEnum>.Merge( params IEnumerable<IRights>[]     values )                                                    => Merge( values );
+    [Pure] static        IUserRights<TEnum> IUserRights<TEnum>.Merge( IEnumerable<IEnumerable<IRights>> values )                                                    => Merge( values );
+    [Pure] static        IUserRights<TEnum> IUserRights<TEnum>.Merge( IEnumerable<IRights>              values )                                                    => Merge( values );
+    [Pure] static        IUserRights<TEnum> IUserRights<TEnum>.Merge( in     int                        totalRightCount, params IEnumerable<IRights>[]     values ) => Merge( totalRightCount, values );
+    [Pure] static        IUserRights<TEnum> IUserRights<TEnum>.Merge( in     int                        totalRightCount, IEnumerable<IEnumerable<IRights>> values ) => Merge( totalRightCount, values );
+    [Pure] static        IUserRights<TEnum> IUserRights<TEnum>.Merge( in     int                        totalRightCount, IEnumerable<IRights>              values ) => Merge( totalRightCount, values );
+    [Pure] public static UserRights<TEnum>                     Merge( params IEnumerable<IRights>[]     values )                                                    => Merge( _values.Length,  values.SelectMany( static x => x ) );
+    [Pure] public static UserRights<TEnum>                     Merge( IEnumerable<IEnumerable<IRights>> values )                                                    => Merge( _values.Length,  values.SelectMany( static x => x ) );
+    [Pure] public static UserRights<TEnum>                     Merge( IEnumerable<IRights>              values )                                                    => Merge( _values.Length,  values );
+    [Pure] public static UserRights<TEnum>                     Merge( in  int                           totalRightCount, params IEnumerable<IRights>[]     values ) => Merge( totalRightCount, values.SelectMany( static x => x ) );
+    [Pure] public static UserRights<TEnum>                     Merge( in  int                           totalRightCount, IEnumerable<IEnumerable<IRights>> values ) => Merge( totalRightCount, values.SelectMany( static x => x ) );
+    [Pure] public static UserRights<TEnum>                     Merge( in  int                           totalRightCount, IEnumerable<IRights>              values ) => values.Aggregate( new UserRights<TEnum>( totalRightCount ), static ( current, value ) => current.With( value ) );
+    [Pure] static        IUserRights<TEnum> IUserRights<TEnum>.Create( in int                           totalRightCount ) => Create( totalRightCount );
+    [Pure] static        IUserRights<TEnum> IUserRights<TEnum>.Create( string                           rights )          => Create( rights );
+    [Pure] static        IUserRights<TEnum> IUserRights<TEnum>.Create( in ReadOnlySpan<char>            rights )          => Create( rights );
+    [Pure] static        IUserRights<TEnum> IUserRights<TEnum>.Create()                                                   => Create();
+    [Pure] static        IUserRights<TEnum> IUserRights<TEnum>.Create( params TEnum[]             array )                 => Create( array );
+    [Pure] static        IUserRights<TEnum> IUserRights<TEnum>.Create( in     ReadOnlySpan<TEnum> array )                 => Create( array );
+    [Pure] public static UserRights<TEnum>                     Create( in     int                 totalRightCount )       => new(totalRightCount);
+    [Pure] public static UserRights<TEnum>                     Create( string                     rights )                => new(rights);
+    [Pure] public static UserRights<TEnum>                     Create( in ReadOnlySpan<char>      rights )                => new(rights);
+    [Pure] public static UserRights<TEnum>                     Create()                                                   => new UserRights<TEnum>( _values.Length ).Add( _values.AsSpan() );
+    [Pure] public static UserRights<TEnum>                     Create( params TEnum[]             array )                 => new UserRights<TEnum>( _values.Length ).Add( array );
+    [Pure] public static UserRights<TEnum>                     Create( in     ReadOnlySpan<TEnum> array )                 => new UserRights<TEnum>( _values.Length ).Add( array );
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] bool IEnumerator.MoveNext() => ++_index < Length;
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] void IEnumerator.Reset()    => _index = -1;
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] bool IEnumerator.MoveNext() => ++_index < Length;
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] void IEnumerator.Reset()    => _index = -1;
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public readonly bool Has( int   index ) => Span[index] == VALID;
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public readonly bool Has( TEnum index ) => Has( index.AsInt() );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public readonly bool Has( int   index ) => Span[index] == VALID;
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public readonly bool Has( TEnum index ) => Has( index.AsInt() );
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] readonly        IUserRights IUserRights.              Remove( int                        index ) => Set( index, INVALID );
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] readonly        IUserRights<TEnum> IUserRights<TEnum>.Remove( TEnum                      index ) => Remove( index.AsInt() );
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] readonly        IUserRights<TEnum> IUserRights<TEnum>.Remove( params TEnum[]             array ) => Remove( new ReadOnlySpan<TEnum>( array ) );
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] readonly        IUserRights<TEnum> IUserRights<TEnum>.Remove( in     ReadOnlySpan<TEnum> array ) => Remove( array );
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public readonly UserRights<TEnum>                     Remove( int                        index ) => Set( index, INVALID );
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public readonly UserRights<TEnum>                     Remove( TEnum                      index ) => Remove( index.AsInt() );
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public readonly UserRights<TEnum>                     Remove( params TEnum[]             array ) => Remove( new ReadOnlySpan<TEnum>( array ) );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] readonly        IUserRights IUserRights.              Remove( int                        index ) => Set( index, INVALID );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] readonly        IUserRights<TEnum> IUserRights<TEnum>.Remove( TEnum                      index ) => Remove( index.AsInt() );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] readonly        IUserRights<TEnum> IUserRights<TEnum>.Remove( params TEnum[]             array ) => Remove( new ReadOnlySpan<TEnum>( array ) );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] readonly        IUserRights<TEnum> IUserRights<TEnum>.Remove( in     ReadOnlySpan<TEnum> array ) => Remove( array );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public readonly UserRights<TEnum>                     Remove( int                        index ) => Set( index, INVALID );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public readonly UserRights<TEnum>                     Remove( TEnum                      index ) => Remove( index.AsInt() );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public readonly UserRights<TEnum>                     Remove( params TEnum[]             array ) => Remove( new ReadOnlySpan<TEnum>( array ) );
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public readonly UserRights<TEnum> Remove( in ReadOnlySpan<TEnum> array )
 
     {
@@ -200,15 +186,15 @@ public struct UserRights<TEnum> : IUserRights<TEnum>
     }
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] readonly        IUserRights IUserRights.              Add( int                        index ) => Set( index, INVALID );
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] readonly        IUserRights<TEnum> IUserRights<TEnum>.Add( TEnum                      index ) => Add( index.AsInt() );
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] readonly        IUserRights<TEnum> IUserRights<TEnum>.Add( params TEnum[]             array ) => Add( new ReadOnlySpan<TEnum>( array ) );
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] readonly        IUserRights<TEnum> IUserRights<TEnum>.Add( in     ReadOnlySpan<TEnum> array ) => Add( array );
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public readonly UserRights<TEnum>                     Add( int                        index ) => Set( index, VALID );
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public readonly UserRights<TEnum>                     Add( TEnum                      index ) => Add( index.AsInt() );
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public readonly UserRights<TEnum>                     Add( params TEnum[]             array ) => Add( new ReadOnlySpan<TEnum>( array ) );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] readonly        IUserRights IUserRights.              Add( int                        index ) => Set( index, INVALID );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] readonly        IUserRights<TEnum> IUserRights<TEnum>.Add( TEnum                      index ) => Add( index.AsInt() );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] readonly        IUserRights<TEnum> IUserRights<TEnum>.Add( params TEnum[]             array ) => Add( new ReadOnlySpan<TEnum>( array ) );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] readonly        IUserRights<TEnum> IUserRights<TEnum>.Add( in     ReadOnlySpan<TEnum> array ) => Add( array );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public readonly UserRights<TEnum>                     Add( int                        index ) => Set( index, VALID );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public readonly UserRights<TEnum>                     Add( TEnum                      index ) => Add( index.AsInt() );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public readonly UserRights<TEnum>                     Add( params TEnum[]             array ) => Add( new ReadOnlySpan<TEnum>( array ) );
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public readonly UserRights<TEnum> Add( in ReadOnlySpan<TEnum> array )
 
     {
@@ -218,7 +204,7 @@ public struct UserRights<TEnum> : IUserRights<TEnum>
     }
 
 
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     internal readonly UserRights<TEnum> Set( int index, char value )
     {
         Trace.Assert( index >= 0 );

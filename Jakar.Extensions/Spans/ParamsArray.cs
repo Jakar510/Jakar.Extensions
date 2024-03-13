@@ -92,9 +92,9 @@ public readonly ref struct ParamsArray
     public override string ToString() => $"{nameof(ParamsArray)}<{nameof(Length)}: {Length}>";
 
 
-    [ Pure ] public ReadOnlySpan<object?>.Enumerator GetEnumerator() => _args.GetEnumerator();
+    [Pure] public ReadOnlySpan<object?>.Enumerator GetEnumerator() => _args.GetEnumerator();
 
-    [ Pure ]
+    [Pure]
     public static ParamsArray Create( params object?[] args )
     {
         ReadOnlySpan<object?> span = args;
@@ -103,7 +103,7 @@ public readonly ref struct ParamsArray
 
 #if NET6_0_OR_GREATER
     public static implicit operator ParamsArray( List<object?> args ) => new(args);
-    [ Pure ]
+    [Pure]
     public static ParamsArray Create( List<object?> args )
     {
         ReadOnlySpan<object?> span = CollectionsMarshal.AsSpan( args );
@@ -141,13 +141,13 @@ public readonly ref struct ParamsArray<T>
     public static implicit operator ReadOnlySpan<T>( ParamsArray<T> args ) => args.Span;
 
 
-    [ Pure ] public ReadOnlySpan<T>.Enumerator GetEnumerator() => Span.GetEnumerator();
+    [Pure] public ReadOnlySpan<T>.Enumerator GetEnumerator() => Span.GetEnumerator();
 
 
     public override string ToString() => $"{nameof(ParamsArray<T>)}<{nameof(Length)}: {Length}>";
 
 
-    [ Pure ]
+    [Pure]
     public static ParamsArray<T> Create( T arg0 )
     {
     #if NET6_0_OR_GREATER
@@ -161,7 +161,7 @@ public readonly ref struct ParamsArray<T>
 
         return MemoryMarshal.CreateReadOnlySpan( ref span.GetPinnableReference(), span.Length );
     }
-    [ Pure ]
+    [Pure]
     public static ParamsArray<T> Create( T arg0, T arg1 )
     {
     #if NET6_0_OR_GREATER
@@ -176,7 +176,7 @@ public readonly ref struct ParamsArray<T>
 
         return MemoryMarshal.CreateReadOnlySpan( ref span.GetPinnableReference(), span.Length );
     }
-    [ Pure ]
+    [Pure]
     public static ParamsArray<T> Create( T arg0, T arg1, T arg2 )
     {
     #if NET6_0_OR_GREATER
@@ -192,12 +192,12 @@ public readonly ref struct ParamsArray<T>
 
         return MemoryMarshal.CreateReadOnlySpan( ref span.GetPinnableReference(), span.Length );
     }
-    [ Pure ] public static ParamsArray<T> Create( params T[] args ) => new(args);
+    [Pure] public static ParamsArray<T> Create( params T[] args ) => new(args);
 
 
 #if NET6_0_OR_GREATER
     public static implicit operator ParamsArray<T>( List<T> args ) => Create( args );
 
-    [ Pure ] public static ParamsArray<T> Create( List<T> args ) => new(CollectionsMarshal.AsSpan( args ));
+    [Pure] public static ParamsArray<T> Create( List<T> args ) => new(CollectionsMarshal.AsSpan( args ));
 #endif
 }

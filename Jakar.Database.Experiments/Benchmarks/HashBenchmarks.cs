@@ -14,8 +14,8 @@ namespace Jakar.Database.Experiments.Benchmarks;
    .NET SDK 8.0.100
    [Host]     : .NET 8.0.0 (8.0.23.53103), X64 RyuJIT AVX2
    DefaultJob : .NET 8.0.0 (8.0.23.53103), X64 RyuJIT AVX2
-   
-   
+
+
    | Method  | Mean       | Error   | StdDev  | Rank | Gen0   | Allocated |
    |-------- |-----------:|--------:|--------:|-----:|-------:|----------:|
    | GetHash |   859.6 ns | 3.31 ns | 3.09 ns |    1 | 0.0238 |     200 B |
@@ -24,7 +24,12 @@ namespace Jakar.Database.Experiments.Benchmarks;
 
 
 
-[ Config( typeof(BenchmarkConfig) ), GroupBenchmarksBy( BenchmarkLogicalGroupRule.ByCategory ), SimpleJob( RuntimeMoniker.HostProcess ), Orderer( SummaryOrderPolicy.FastestToSlowest ), RankColumn, MemoryDiagnoser ]
+[Config( typeof(BenchmarkConfig) )]
+[GroupBenchmarksBy( BenchmarkLogicalGroupRule.ByCategory )]
+[SimpleJob( RuntimeMoniker.HostProcess )]
+[Orderer( SummaryOrderPolicy.FastestToSlowest )]
+[RankColumn]
+[MemoryDiagnoser]
 public class HashBenchmarks
 {
     private const    string  HASH    = "xOEDj6A8g15z";
@@ -32,6 +37,6 @@ public class HashBenchmarks
     private readonly Hashids _hasher = new("49C7BCFE-D7B4-46FA-BF33-5B1D1032339A", 12);
 
 
-    [ Benchmark ] public long   GetLong() => _hasher.DecodeSingleLong( HASH );
-    [ Benchmark ] public string GetHash() => _hasher.EncodeLong( VALUE );
+    [Benchmark] public long   GetLong() => _hasher.DecodeSingleLong( HASH );
+    [Benchmark] public string GetHash() => _hasher.EncodeLong( VALUE );
 }

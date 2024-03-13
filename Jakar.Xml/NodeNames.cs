@@ -18,10 +18,10 @@ public static class NodeNames
     ///     <para> Uses <see cref="RegisterNodeName"/> to register the name. </para>
     /// </summary>
     private static readonly ConcurrentDictionary<Type, string> _typeToNodeName = new();
-    private static bool GetName( Type type, [ NotNullWhen( true ) ] out string? nodeName ) => _typeToNodeName.TryGetValue( type, out nodeName );
+    private static bool GetName( Type type, [NotNullWhen( true )] out string? nodeName ) => _typeToNodeName.TryGetValue( type, out nodeName );
 
 
-    private static bool GetType( string nodeName, [ NotNullWhen( true ) ] out Type? type ) => _nodeNameToType.TryGetValue( nodeName, out type );
+    private static bool GetType( string nodeName, [NotNullWhen( true )] out Type? type ) => _nodeNameToType.TryGetValue( nodeName, out type );
 
     public static string GetNodeName( this Type type, in bool useFullName = false )
     {
@@ -63,18 +63,18 @@ public static class NodeNames
 
     private static void AddOrUpdate( Type type, string nodeName )
     {
-        Type AddValue( string s ) { return type; }
+        Type AddValue( string s ) => type;
 
-        Type UpdateValue( string s, Type t ) { return type; }
+        Type UpdateValue( string s, Type t ) => type;
 
         _nodeNameToType.AddOrUpdate( nodeName, AddValue, UpdateValue );
     }
 
     private static void AddOrUpdate( string nodeName, Type type )
     {
-        string AddValue( Type t ) { return nodeName; }
+        string AddValue( Type t ) => nodeName;
 
-        string UpdateValue( Type t, string s ) { return nodeName; }
+        string UpdateValue( Type t, string s ) => nodeName;
 
         _typeToNodeName.AddOrUpdate( type, AddValue, UpdateValue );
     }

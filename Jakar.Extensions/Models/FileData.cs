@@ -29,12 +29,12 @@ public interface IFileData
 {
     public const int FILE_SIZE_LIMIT = 0x3FFFFFDF; // 1 GB -- from string.MaxSize
     public const int HASH_SIZE_LIMIT = 4096;
+    long             FileSize { get; }
 
     [property: MaxLength( HASH_SIZE_LIMIT )] string Hash     { get; }
-    MimeType                                        MimeType { get; }
-    long                                            FileSize { get; }
-    [property: MaxLength( FILE_SIZE_LIMIT )] string Payload  { get; }
     IFileMetaData?                                  MetaData { get; }
+    MimeType                                        MimeType { get; }
+    [property: MaxLength( FILE_SIZE_LIMIT )] string Payload  { get; }
 
 
     public static OneOf<byte[], string> GetData( string data )
@@ -52,7 +52,7 @@ public interface IFileData
         encoding.GetBytes( data, owner.Memory.Span );
         return GetHash( owner.Memory );
     }
-    static        string GetHash( byte[]               x )    => Hashes.Hash_SHA256( x ).ToString();
+    static        string GetHash( byte[]               x )    => Hashes.Hash_SHA256( x );
     public static string GetHash( ReadOnlyMemory<byte> data ) => GetHash( data.Span );
     public static string GetHash( ReadOnlySpan<byte> data )
     {

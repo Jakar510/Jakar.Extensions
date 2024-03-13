@@ -1,11 +1,20 @@
 ﻿namespace Jakar.Database;
 
 
-[ Serializable, Table( "Roles" ) ]
-public sealed record RoleRecord( [ property: MaxLength( 1024 ) ] string Name, [ property: MaxLength( 1024 ) ] string NormalizedName, [ property: MaxLength( 4096 ) ] string ConcurrencyStamp, [ property: MaxLength( IRights.MAX_SIZE ) ] string Rights, RecordID<RoleRecord> ID, RecordID<UserRecord>? CreatedBy, Guid? OwnerUserID, DateTimeOffset DateCreated, DateTimeOffset? LastModified = default )
-    : OwnedTableRecord<RoleRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<RoleRecord>, IRights
+[Serializable]
+[Table( TABLE_NAME )]
+public sealed record RoleRecord( [property: MaxLength( 1024 )]             string Name,
+                                 [property: MaxLength( 1024 )]             string NormalizedName,
+                                 [property: MaxLength( 4096 )]             string ConcurrencyStamp,
+                                 [property: MaxLength( IRights.MAX_SIZE )] string Rights,
+                                 RecordID<RoleRecord>                             ID,
+                                 RecordID<UserRecord>?                            CreatedBy,
+                                 Guid?                                            OwnerUserID,
+                                 DateTimeOffset                                   DateCreated,
+                                 DateTimeOffset?                                  LastModified = default ) : OwnedTableRecord<RoleRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<RoleRecord>, IRights
 {
-    public static string TableName { get; } = typeof(RoleRecord).GetTableName();
+    public const  string TABLE_NAME = "Roles";
+    public static string TableName { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => TABLE_NAME; }
 
 
     public RoleRecord( IdentityRole role, UserRecord?    caller                     = default ) : this( role.Name ?? string.Empty, role.NormalizedName ?? string.Empty, role.ConcurrencyStamp ?? string.Empty, caller ) { }
@@ -16,7 +25,7 @@ public sealed record RoleRecord( [ property: MaxLength( 1024 ) ] string Name, [ 
     public RoleRecord( string       name, string         normalizedName, string      concurrencyStamp, in IUserRights rights, UserRecord? caller = default ) : this( name, normalizedName, concurrencyStamp, rights.ToString(), RecordID<RoleRecord>.New(), caller?.ID, caller?.UserID, DateTimeOffset.UtcNow ) { }
 
 
-    [ Pure ]
+    [Pure]
     public override DynamicParameters ToDynamicParameters()
     {
         var parameters = base.ToDynamicParameters();
@@ -26,7 +35,7 @@ public sealed record RoleRecord( [ property: MaxLength( 1024 ) ] string Name, [ 
         parameters.Add( nameof(Rights),           Rights );
         return parameters;
     }
-    [ Pure ]
+    [Pure]
     public static RoleRecord Create( DbDataReader reader )
     {
         string                rights           = reader.GetFieldValue<string>( nameof(Rights) );
@@ -42,16 +51,16 @@ public sealed record RoleRecord( [ property: MaxLength( 1024 ) ] string Name, [ 
         record.Validate();
         return record;
     }
-    [ Pure ]
-    public static async IAsyncEnumerable<RoleRecord> CreateAsync( DbDataReader reader, [ EnumeratorCancellation ] CancellationToken token = default )
+    [Pure]
+    public static async IAsyncEnumerable<RoleRecord> CreateAsync( DbDataReader reader, [EnumeratorCancellation] CancellationToken token = default )
     {
         while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
     }
 
-    [ Pure ] public IAsyncEnumerable<UserRecord> GetUsers( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => UserRoleRecord.Where( connection, transaction, db.UserRoles, db.Users, this, token );
-    
-    
-    [ Pure ]
+    [Pure] public IAsyncEnumerable<UserRecord> GetUsers( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => UserRoleRecord.Where( connection, transaction, db.UserRoles, db.Users, this, token );
+
+
+    [Pure]
     public IdentityRole ToIdentityRole() => new()
                                             {
                                                 Name             = Name,

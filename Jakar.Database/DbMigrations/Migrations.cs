@@ -1,10 +1,12 @@
 ﻿namespace Jakar.Database.DbMigrations;
 
 
-[ SuppressMessage( "ReSharper", "UnusedMethodReturnValue.Global" ) ]
+[SuppressMessage( "ReSharper", "UnusedMethodReturnValue.Global" )]
 public static partial class Migrations
 {
-    /// <summary> <see href="https://github.com/fluentmigrator/fluentmigrator/issues/1038"/> </summary>
+    /// <summary>
+    ///     <see href="https://github.com/fluentmigrator/fluentmigrator/issues/1038"/>
+    /// </summary>
     public static bool CreateColumn_Enum( this ICreateTableColumnAsTypeSyntax col, PropertyInfo propertyInfo, Type propertyType )
     {
         if ( !propertyType.TryGetUnderlyingEnumType( out Type? enumType ) ) { return false; }
@@ -60,7 +62,9 @@ public static partial class Migrations
     }
 
 
-    /// <summary> <see href="https://stackoverflow.com/a/4963190/9530917"/> </summary>
+    /// <summary>
+    ///     <see href="https://stackoverflow.com/a/4963190/9530917"/>
+    /// </summary>
     /// <param name="col"> </param>
     /// <param name="propertyType"> </param>
     /// <returns> </returns>
@@ -111,7 +115,7 @@ public static partial class Migrations
     }
 
 
-    public static bool TryGetUnderlyingEnumType( this Type propertyType, [ NotNullWhen( true ) ] out DbType? dbType )
+    public static bool TryGetUnderlyingEnumType( this Type propertyType, [NotNullWhen( true )] out DbType? dbType )
     {
         if ( propertyType.TryGetUnderlyingEnumType( out Type? type ) )
         {

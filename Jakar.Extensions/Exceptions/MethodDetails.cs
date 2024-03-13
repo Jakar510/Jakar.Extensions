@@ -28,7 +28,7 @@ public sealed class MethodDetails
 
     public MethodDetails() { }
 #if NET6_0_OR_GREATER
-    [ RequiresUnreferencedCode( nameof(MethodDetails) ) ]
+    [RequiresUnreferencedCode( nameof(MethodDetails) )]
 #endif
     public MethodDetails( Exception e ) : this( e.TargetSite ?? throw new NullReferenceException( nameof(e.TargetSite) ) ) { }
     public MethodDetails( MethodBase method )

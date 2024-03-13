@@ -1,8 +1,7 @@
 ﻿using System;
+using Jakar.Extensions;
 using TestAppIos.Services;
-using TestAppIos.Views;
 using Xamarin.Forms;
-using Xamarin.Forms.Xaml;
 
 
 
@@ -14,7 +13,7 @@ namespace TestAppIos
         {
             InitializeComponent();
 
-            Console.WriteLine( new Jakar.Extensions.AppVersion( 1, 0, 0 ) );
+            Console.WriteLine( new AppVersion( 1, 0, 0 ) );
 
             // Console.WriteLine(Jakar.Extensions.AppVersion.FromAssembly( typeof(App).Assembly ));
 

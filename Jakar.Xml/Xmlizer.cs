@@ -74,7 +74,8 @@ public static partial class Xmlizer
     public static string ToXml<T>( this T obj, in IDictionary<string, string>? attributes = default ) => Serialize( obj, attributes );
 
 
-    public static T FromXml<T>( this string xml, out IDictionary<string, string>? attributes ) where T : new() => Deserialize<T>( xml, out attributes );
+    public static T FromXml<T>( this string xml, out IDictionary<string, string>? attributes )
+        where T : new() => Deserialize<T>( xml, out attributes );
 
 
     // Register(typeof(IPAddress),

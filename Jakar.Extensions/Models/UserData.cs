@@ -10,19 +10,19 @@ public interface IUserData : IEquatable<IUserData>, IComparable<IUserData>
     public static Sorter<IUserData>    Sorter    => Sorter<IUserData>.Default;
 
 
-    public                  string            Company           { get; }
-    public                  string            Department        { get; }
-    public                  string            Description       { get; }
-    [ EmailAddress ] public string            Email             { get; }
-    public                  string            Ext               { get; }
-    [ Required ] public     string            FirstName         { get; }
-    public                  string            FullName          { get; }
-    public                  string            Gender            { get; }
-    [ Required ] public     string            LastName          { get; }
-    [ Phone ]    public     string            PhoneNumber       { get; }
-    [ Required ] public     SupportedLanguage PreferredLanguage { get; }
-    public                  string            Title             { get; }
-    [ Url ] public          string            Website           { get; }
+    public                string            Company           { get; }
+    public                string            Department        { get; }
+    public                string            Description       { get; }
+    [EmailAddress] public string            Email             { get; }
+    public                string            Ext               { get; }
+    [Required] public     string            FirstName         { get; }
+    public                string            FullName          { get; }
+    public                string            Gender            { get; }
+    [Required] public     string            LastName          { get; }
+    [Phone]    public     string            PhoneNumber       { get; }
+    [Required] public     SupportedLanguage PreferredLanguage { get; }
+    public                string            Title             { get; }
+    [Url] public          string            Website           { get; }
 }
 
 
@@ -35,7 +35,7 @@ public interface IUserData<out T> : IUserData
 
 
 
-[ Serializable ]
+[Serializable]
 public class UserData : ObservableClass, IUserData<UserData>, JsonModels.IJsonModel
 {
     public const string                        EMPTY_PHONE_NUMBER = "(000) 000-0000";
@@ -55,12 +55,7 @@ public class UserData : ObservableClass, IUserData<UserData>, JsonModels.IJsonMo
     private      SupportedLanguage             _preferredLanguage = SupportedLanguage.English;
 
 
-    [ JsonExtensionData ]
-    public IDictionary<string, JToken?>? AdditionalData
-    {
-        get => _additionalData;
-        set => SetProperty( ref _additionalData, value );
-    }
+    [JsonExtensionData] public IDictionary<string, JToken?>? AdditionalData { get => _additionalData; set => SetProperty( ref _additionalData, value ); }
 
     public ObservableCollection<UserAddress> Addresses { get; init; } = new();
 
@@ -91,27 +86,14 @@ public class UserData : ObservableClass, IUserData<UserData>, JsonModels.IJsonMo
     }
 
 
-    public string Description
-    {
-        get => _description ??= $"{Department}, {Title} at {Company}";
-        set => SetProperty( ref _description, value );
-    }
+    public string Description { get => _description ??= $"{Department}, {Title} at {Company}"; set => SetProperty( ref _description, value ); }
 
-    [ EmailAddress ]
-    public string Email
-    {
-        get => _email;
-        set => SetProperty( ref _email, value );
-    }
+    [EmailAddress] public string Email { get => _email; set => SetProperty( ref _email, value ); }
 
 
-    public string Ext
-    {
-        get => _ext;
-        set => SetProperty( ref _ext, value );
-    }
+    public string Ext { get => _ext; set => SetProperty( ref _ext, value ); }
 
-    [ Required ]
+    [Required]
     public string FirstName
     {
         get => _firstName;
@@ -125,25 +107,17 @@ public class UserData : ObservableClass, IUserData<UserData>, JsonModels.IJsonMo
     }
 
 
-    public string FullName
-    {
-        get => _fullName ??= $"{FirstName} {LastName}";
-        set => SetProperty( ref _fullName, value );
-    }
+    public string FullName { get => _fullName ??= $"{FirstName} {LastName}"; set => SetProperty( ref _fullName, value ); }
 
 
-    public string Gender
-    {
-        get => _gender;
-        set => SetProperty( ref _gender, value );
-    }
+    public string Gender { get => _gender; set => SetProperty( ref _gender, value ); }
 
-    [ JsonIgnore ] public bool IsValidEmail       => !string.IsNullOrEmpty( Email );
-    [ JsonIgnore ] public bool IsValidName        => !string.IsNullOrEmpty( FullName );
-    [ JsonIgnore ] public bool IsValidPhoneNumber => !string.IsNullOrEmpty( PhoneNumber );
-    [ JsonIgnore ] public bool IsValidWebsite     => Uri.TryCreate( Website, UriKind.RelativeOrAbsolute, out _ );
+    [JsonIgnore] public bool IsValidEmail       => !string.IsNullOrEmpty( Email );
+    [JsonIgnore] public bool IsValidName        => !string.IsNullOrEmpty( FullName );
+    [JsonIgnore] public bool IsValidPhoneNumber => !string.IsNullOrEmpty( PhoneNumber );
+    [JsonIgnore] public bool IsValidWebsite     => Uri.TryCreate( Website, UriKind.RelativeOrAbsolute, out _ );
 
-    [ Required ]
+    [Required]
     public string LastName
     {
         get => _lastName;
@@ -156,19 +130,9 @@ public class UserData : ObservableClass, IUserData<UserData>, JsonModels.IJsonMo
         }
     }
 
-    [ Phone ]
-    public string PhoneNumber
-    {
-        get => _phoneNumber;
-        set => SetProperty( ref _phoneNumber, value );
-    }
+    [Phone] public string PhoneNumber { get => _phoneNumber; set => SetProperty( ref _phoneNumber, value ); }
 
-    [ Required ]
-    public SupportedLanguage PreferredLanguage
-    {
-        get => _preferredLanguage;
-        set => SetProperty( ref _preferredLanguage, value );
-    }
+    [Required] public SupportedLanguage PreferredLanguage { get => _preferredLanguage; set => SetProperty( ref _preferredLanguage, value ); }
 
 
     public string Title
@@ -183,12 +147,7 @@ public class UserData : ObservableClass, IUserData<UserData>, JsonModels.IJsonMo
         }
     }
 
-    [ Url ]
-    public string Website
-    {
-        get => _website;
-        set => SetProperty( ref _website, value );
-    }
+    [Url] public string Website { get => _website; set => SetProperty( ref _website, value ); }
 
 
     public UserData() { }

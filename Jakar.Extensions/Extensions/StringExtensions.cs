@@ -3,11 +3,7 @@
 
 public static class StringExtensions
 {
-    private static readonly char[] _ends =
-    [
-        '\n',
-        '\r'
-    ];
+    private static readonly char[] _ends = ['\n', '\r'];
 
 
     public static bool ContainsAbout( this string source, string search ) => source.Contains( search, StringComparison.OrdinalIgnoreCase );
@@ -17,7 +13,18 @@ public static class StringExtensions
     /// <summary>
     ///     <seealso href="https://www.codeproject.com/Tips/1175562/Check-for-Balanced-Parenthesis-in-a-String"/>
     ///     <para>
-    ///         <paramref name="bracketPairs"/> defaults to matching: <br/> <list type="bullet"> <item> <term> ( ) </term> <description> Parenthesis </description> </item> <item> <term> [ ] </term> <description> Square Brackets </description> </item> <item> <term> { } </term> <description> Curly Braces </description> </item> </list>
+    ///         <paramref name="bracketPairs"/> defaults to matching: <br/>
+    ///         <list type="bullet">
+    ///             <item>
+    ///                 <term> ( ) </term> <description> Parenthesis </description>
+    ///             </item>
+    ///             <item>
+    ///                 <term> [ ] </term> <description> Square Brackets </description>
+    ///             </item>
+    ///             <item>
+    ///                 <term> { } </term> <description> Curly Braces </description>
+    ///             </item>
+    ///         </list>
     ///     </para>
     ///     <para> Provide your own <c> IDictionary{char, char} </c> to <paramref name="bracketPairs"/> to customize the mapping. </para>
     /// </summary>
@@ -115,14 +122,18 @@ public static class StringExtensions
 
 
     /// <summary>
-    ///     <para> <see href="https://www.meziantou.net/split-a-string-into-lines-without-allocation.htm"/> </para>
+    ///     <para>
+    ///         <see href="https://www.meziantou.net/split-a-string-into-lines-without-allocation.htm"/>
+    ///     </para>
     /// </summary>
     /// <param name="str"> </param>
     /// <param name="separator"> the <see cref="char"/> to split on </param>
     public static SpanSplitEnumerator<char> SplitOn( this string str, char separator ) => str.AsSpan().SplitOn( separator );
 
     /// <summary>
-    ///     <para> <see href="https://www.meziantou.net/split-a-string-into-lines-without-allocation.htm"/> </para>
+    ///     <para>
+    ///         <see href="https://www.meziantou.net/split-a-string-into-lines-without-allocation.htm"/>
+    ///     </para>
     ///     Default chars <see cref="char"/> to '\n' and '\r'
     /// </summary>
     /// <param name="str"> </param>
@@ -130,7 +141,9 @@ public static class StringExtensions
 
 
     /// <summary>
-    ///     <para> <see href="https://www.meziantou.net/split-a-string-into-lines-without-allocation.htm"/> </para>
+    ///     <para>
+    ///         <see href="https://www.meziantou.net/split-a-string-into-lines-without-allocation.htm"/>
+    ///     </para>
     ///     Default chars <see cref="char"/> to '\n' and '\r'
     /// </summary>
     /// <param name="span"> </param>
@@ -166,16 +179,24 @@ public static class StringExtensions
     public static string RemoveAll( this string source, char   old ) => source.Replace( new string( old, 1 ), string.Empty );
 
 
-    /// <summary> <seealso href="https://stackoverflow.com/a/48832421/9530917"/> </summary>
+    /// <summary>
+    ///     <seealso href="https://stackoverflow.com/a/48832421/9530917"/>
+    /// </summary>
     /// <param name="c"> </param>
     /// <param name="count"> </param>
-    /// <returns> <see cref="string"/> </returns>
+    /// <returns>
+    ///     <see cref="string"/>
+    /// </returns>
     public static string Repeat( this char c, int count ) => new(c, count);
 
-    /// <summary> <seealso href="https://stackoverflow.com/a/720915/9530917"/> </summary>
+    /// <summary>
+    ///     <seealso href="https://stackoverflow.com/a/720915/9530917"/>
+    /// </summary>
     /// <param name="value"> </param>
     /// <param name="count"> </param>
-    /// <returns> <see cref="string"/> </returns>
+    /// <returns>
+    ///     <see cref="string"/>
+    /// </returns>
     public static string Repeat( this string value, int count ) => new StringBuilder( value.Length * count ).Insert( 0, value, count ).ToString();
 
     public static string ReplaceAll( this      string source, string old, string newString ) => source.Replace( old, newString, StringComparison.Ordinal );
@@ -218,8 +239,7 @@ public static class StringExtensions
             {
                 case UnicodeCategory.UppercaseLetter:
                 case UnicodeCategory.TitlecaseLetter:
-                    if ( previousCategory is UnicodeCategory.SpaceSeparator or UnicodeCategory.LowercaseLetter ||
-                         previousCategory is not UnicodeCategory.DecimalDigitNumber && previousCategory is not null && currentIndex > 0 && currentIndex + 1 < value.Length && char.IsLower( value[currentIndex + 1] ) ) { builder.Append( '_' ); }
+                    if ( previousCategory is UnicodeCategory.SpaceSeparator or UnicodeCategory.LowercaseLetter || previousCategory is not UnicodeCategory.DecimalDigitNumber && previousCategory is not null && currentIndex > 0 && currentIndex + 1 < value.Length && char.IsLower( value[currentIndex + 1] ) ) { builder.Append( '_' ); }
 
                     currentChar = char.ToLower( currentChar, cultureInfo );
                     break;

@@ -1,11 +1,13 @@
 ﻿namespace Jakar.Extensions;
 
 
-/// <summary> <seealso href="https://stackoverflow.com/a/5852926/9530917"/> </summary>
+/// <summary>
+///     <seealso href="https://stackoverflow.com/a/5852926/9530917"/>
+/// </summary>
 /// <typeparam name="T"> </typeparam>
 public class FixedSizedDeque<T>( int limit )
 {
-    protected readonly Deque<T> _q = new( limit );
+    protected readonly Deque<T> _q    = new(limit);
     protected readonly object   _lock = new();
 
     public int Limit { get; init; } = limit;

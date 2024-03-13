@@ -43,7 +43,10 @@ namespace Jakar.Extensions.Experiments.Benchmarks;
 
 
 
-[ SimpleJob( RuntimeMoniker.HostProcess ), Orderer( SummaryOrderPolicy.FastestToSlowest ), RankColumn, MemoryDiagnoser ]
+[SimpleJob( RuntimeMoniker.HostProcess )]
+[Orderer( SummaryOrderPolicy.FastestToSlowest )]
+[RankColumn]
+[MemoryDiagnoser]
 public class StringCollectionBenchmarks
 {
     private ImmutableArray<string> _array;
@@ -52,7 +55,7 @@ public class StringCollectionBenchmarks
     private string[]               _values = GetArray( 10 );
 
 
-    [ Params( 10, 1000, 10_000, 100_000 ) ]
+    [Params( 10, 1000, 10_000, 100_000 )]
     public int Count
     {
         get => _count;
@@ -66,12 +69,12 @@ public class StringCollectionBenchmarks
     }
 
 
-    [ Benchmark ] public bool CheckArraySpan()            => AreSpanEqual( _values, _values );
-    [ Benchmark ] public bool CheckArrayString()          => AreStringEqual( _values, _values );
-    [ Benchmark ] public bool CheckImmutableArraySpan()   => AreSpanEqual( _array, _array );
-    [ Benchmark ] public bool CheckImmutableArrayString() => AreStringEqual( _array, _array );
-    [ Benchmark ] public bool CheckMemorySpan()           => AreSpanEqual( _memory, _memory );
-    [ Benchmark ] public bool CheckMemoryString()         => AreStringEqual( _memory, _memory );
+    [Benchmark] public bool CheckArraySpan()            => AreSpanEqual( _values, _values );
+    [Benchmark] public bool CheckArrayString()          => AreStringEqual( _values, _values );
+    [Benchmark] public bool CheckImmutableArraySpan()   => AreSpanEqual( _array, _array );
+    [Benchmark] public bool CheckImmutableArrayString() => AreStringEqual( _array, _array );
+    [Benchmark] public bool CheckMemorySpan()           => AreSpanEqual( _memory, _memory );
+    [Benchmark] public bool CheckMemoryString()         => AreStringEqual( _memory, _memory );
 
 
     private static bool AreStringEqual( in ReadOnlyMemory<string> left, in ReadOnlyMemory<string> right )

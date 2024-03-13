@@ -4,7 +4,7 @@
 namespace Jakar.Database;
 
 
-[ AttributeUsage( AttributeTargets.Property | AttributeTargets.Class | AttributeTargets.Struct ) ]
+[AttributeUsage( AttributeTargets.Property | AttributeTargets.Class | AttributeTargets.Struct )]
 public sealed class HealthCheckTagAttribute( string name ) : Attribute
 {
     public string Name { get; init; } = name;
