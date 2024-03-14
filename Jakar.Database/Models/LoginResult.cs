@@ -36,8 +36,7 @@ public readonly record struct LoginResult( LoginResult.State Result, UserRecord?
                                                                             Instance = Exception.Source,
                                                                             Status   = (int)Status.InternalServerError,
                                                                             Title    = Exception.MethodName(),
-                                                                            Type = Exception.GetType()
-                                                                                            .Name
+                                                                            Type     = Exception.GetType().Name
                                                                         } ),
             State.UnknownError when Model is not null => new Error( Status.InternalServerError, GetModelStateDictionary() ),
             State.UnknownError                        => new Error( Status.InternalServerError ),
@@ -86,20 +85,16 @@ public readonly record struct LoginResult( LoginResult.State Result, UserRecord?
         ModelStateDictionary dictionary = Model ?? new ModelStateDictionary();
         dictionary.AddModelError( nameof(State), Result.ToString() );
 
-        dictionary.AddModelError( nameof(Status),
-                                  GetStatus()
-                                     .ToStringFast() );
+        dictionary.AddModelError( nameof(Status), GetStatus().ToStringFast() );
 
 
         if ( Exception is null ) { return dictionary; }
 
         dictionary.AddModelError( nameof(ProblemDetails.Detail),   Exception.Message );
-        dictionary.AddModelError( nameof(ProblemDetails.Instance), Exception.Source ?? string.Empty );
+        dictionary.AddModelError( nameof(ProblemDetails.Instance), Exception.Source       ?? string.Empty );
         dictionary.AddModelError( nameof(ProblemDetails.Title),    Exception.MethodName() ?? string.Empty );
 
-        dictionary.AddModelError( nameof(ProblemDetails.Type),
-                                  Exception.GetType()
-                                           .Name );
+        dictionary.AddModelError( nameof(ProblemDetails.Type), Exception.GetType().Name );
 
         return dictionary;
     }

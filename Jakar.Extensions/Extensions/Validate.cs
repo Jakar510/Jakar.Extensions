@@ -1,6 +1,4 @@
 ﻿namespace Jakar.Extensions;
-#nullable enable
-
 
 
 /// <summary> Validator Extensions </summary>
@@ -21,8 +19,7 @@ public static partial class Validate
     public static string FormatNumber( this decimal value, CultureInfo info, int maxDecimals = 4 ) => Regex.Replace( string.Format( info, $"{{0:n{maxDecimals}}}", value ), $"[{info.NumberFormat.NumberDecimalSeparator}]?0+$", string.Empty );
 
 
-    public static bool IsDemo( this string value ) => value.AsSpan()
-                                                           .IsDemo();
+    public static bool IsDemo( this string value ) => value.AsSpan().IsDemo();
     public static bool IsDemo( this ReadOnlySpan<char> value )
     {
         if ( value.IsEmpty ) { return false; }
@@ -39,8 +36,7 @@ public static partial class Validate
     public static bool IsInteger( this ReadOnlySpan<char> value ) => int.TryParse( value, out int _ );
 
 
-    public static bool IsIPAddress( this string value ) => value.AsSpan()
-                                                                .IsIPAddress();
+    public static bool IsIPAddress( this string             value ) => value.AsSpan().IsIPAddress();
     public static bool IsIPAddress( this ReadOnlySpan<char> value ) => value.ParseIPAddress() is not null;
 
 
@@ -64,8 +60,7 @@ public static partial class Validate
     }
 
 
-    public static IPAddress? ParseIPAddress( this string? value ) => value?.AsSpan()
-                                                                           .ParseIPAddress();
+    public static IPAddress? ParseIPAddress( this string? value ) => value?.AsSpan().ParseIPAddress();
     public static IPAddress? ParseIPAddress( this ReadOnlySpan<char> value )
     {
         if ( value.IsEmpty ) { return default; }

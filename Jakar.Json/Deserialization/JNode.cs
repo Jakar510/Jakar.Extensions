@@ -1,12 +1,10 @@
-﻿#nullable enable
-namespace Jakar.Json.Deserialization;
+﻿namespace Jakar.Json.Deserialization;
 
 
 [SuppressMessage( "ReSharper", "InconsistentNaming" )]
-public readonly ref struct JNode
+public readonly ref struct JNode( in ReadOnlyMemory<char> span )
 {
-    private readonly ReadOnlyMemory<char> _span;
-    public JNode( in ReadOnlyMemory<char> span ) => _span = span;
+    private readonly ReadOnlyMemory<char> _span = span;
 
 
     public NodeEnumerator GetChildren() => new(_span);
@@ -22,7 +20,7 @@ public readonly ref struct JNode
 
         public NodeEnumerator( ReadOnlyMemory<char> span ) => _json = _span = span;
         public NodeEnumerator GetEnumerator() => this;
-        public void Reset() => _span = _json;
+        public void           Reset()         => _span = _json;
 
 
         public bool MoveNext()

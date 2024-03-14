@@ -4,11 +4,9 @@
 namespace Jakar.Database;
 
 
-public sealed class UserPasswordValidator : IPasswordValidator<UserRecord>
+public sealed class UserPasswordValidator( IOptions<PasswordRequirements> options ) : IPasswordValidator<UserRecord>
 {
-    private readonly PasswordRequirements _options;
-
-    public UserPasswordValidator( IOptions<PasswordRequirements> options ) => _options = options.Value;
+    private readonly PasswordRequirements _options = options.Value;
 
 
     public IdentityResult Validate( in ReadOnlySpan<char> password ) => PasswordValidator.Check( password, _options )

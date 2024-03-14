@@ -1,5 +1,4 @@
-﻿#nullable enable
-namespace Jakar.SqlBuilder.Interfaces;
+﻿namespace Jakar.SqlBuilder.Interfaces;
 
 
 public interface IUpdate : IToSyntax<IUpdateChain> { }

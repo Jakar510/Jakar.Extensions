@@ -5,56 +5,67 @@ namespace Jakar.Database;
 
 
 [Serializable]
-[Table( "UserLoginInfo" )]
-public sealed record UserLoginInfoRecord : TableRecord<UserLoginInfoRecord>
+[Table( TABLE_NAME )]
+public sealed record UserLoginInfoRecord( [property: MaxLength(                                   int.MaxValue )] string  LoginProvider,
+                                          [property: MaxLength(                                   int.MaxValue )] string? ProviderDisplayName,
+                                          [property: ProtectedPersonalData] [property: MaxLength( int.MaxValue )] string  ProviderKey,
+                                          [property: ProtectedPersonalData]                                       string? Value,
+                                          RecordID<UserLoginInfoRecord>                                                   ID,
+                                          RecordID<UserRecord>?                                                           CreatedBy,
+                                          Guid?                                                                           OwnerUserID,
+                                          DateTimeOffset                                                                  DateCreated,
+                                          DateTimeOffset?                                                                 LastModified = default ) : OwnedTableRecord<UserLoginInfoRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<UserLoginInfoRecord>
 {
-    private string  _loginProvider = string.Empty;
-    private string  _providerKey   = string.Empty;
-    private string? _providerDisplayName;
-    private string? _value;
+    public const  string TABLE_NAME = "UserLoginInfo";
+    public static string TableName { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => TABLE_NAME; }
 
 
-    [MaxLength( int.MaxValue )]
-    public string LoginProvider
-    {
-        get => _loginProvider;
-        set => SetProperty( ref _loginProvider, value );
-    }
-
-    [MaxLength( int.MaxValue )]
-    public string? ProviderDisplayName
-    {
-        get => _providerDisplayName;
-        set => SetProperty( ref _providerDisplayName, value );
-    }
-
-    [ProtectedPersonalData]
-    [MaxLength( int.MaxValue )]
-    public string ProviderKey
-    {
-        get => _providerKey;
-        set => SetProperty( ref _providerKey, value );
-    }
-
-    [ProtectedPersonalData]
-    public string? Value
-    {
-        get => _value;
-        set => SetProperty( ref _value, value );
-    }
-
-
-    public UserLoginInfoRecord() { }
     public UserLoginInfoRecord( UserRecord user, UserLoginInfo info ) : this( user, info.LoginProvider, info.ProviderKey, info.ProviderDisplayName ) { }
-    public UserLoginInfoRecord( UserRecord user, string loginProvider, string providerKey, string? providerDisplayName ) : base( user )
+    public UserLoginInfoRecord( UserRecord user, string        loginProvider, string providerKey, string? providerDisplayName ) : this( loginProvider, providerDisplayName, providerKey, string.Empty, RecordID<UserLoginInfoRecord>.New(), user.ID, user.UserID, DateTimeOffset.UtcNow ) { }
+    [Pure]
+    public override DynamicParameters ToDynamicParameters()
     {
-        LoginProvider       = loginProvider;
-        ProviderKey         = providerKey;
-        ProviderDisplayName = providerDisplayName;
+        var parameters = base.ToDynamicParameters();
+        parameters.Add( nameof(LoginProvider),       LoginProvider );
+        parameters.Add( nameof(ProviderDisplayName), ProviderDisplayName );
+        parameters.Add( nameof(ProviderKey),         ProviderKey );
+        parameters.Add( nameof(Value),               Value );
+        return parameters;
     }
 
+    [Pure]
+    public static UserLoginInfoRecord Create( DbDataReader reader )
+    {
+        string                        loginProvider       = reader.GetFieldValue<string>( nameof(LoginProvider) );
+        string                        providerDisplayName = reader.GetFieldValue<string>( nameof(ProviderDisplayName) );
+        string                        providerKey         = reader.GetFieldValue<string>( nameof(ProviderKey) );
+        string                        value               = reader.GetFieldValue<string>( nameof(Value) );
+        var                           dateCreated         = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
+        var                           lastModified        = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
+        var                           ownerUserID         = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
+        RecordID<UserRecord>?         createdBy           = RecordID<UserRecord>.CreatedBy( reader );
+        RecordID<UserLoginInfoRecord> id                  = RecordID<UserLoginInfoRecord>.ID( reader );
+        var                           record              = new UserLoginInfoRecord( loginProvider, providerDisplayName, providerKey, value, id, createdBy, ownerUserID, dateCreated, lastModified );
+        record.Validate();
+        return record;
+    }
 
-    public static DynamicParameters GetDynamicParameters( UserRecord user, UserLoginInfo info ) => GetDynamicParameters( user, info.LoginProvider, info.ProviderKey );
+    [Pure]
+    public static async IAsyncEnumerable<UserLoginInfoRecord> CreateAsync( DbDataReader reader, [EnumeratorCancellation] CancellationToken token = default )
+    {
+        while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
+    }
+
+    public static DynamicParameters GetDynamicParameters( UserRecord user, string value )
+    {
+        var parameters = new DynamicParameters();
+        parameters.Add( nameof(CreatedBy),   user.ID.Value );
+        parameters.Add( nameof(OwnerUserID), user.UserID );
+        parameters.Add( nameof(Value),       value );
+        return parameters;
+    }
+    [Pure] public static DynamicParameters GetDynamicParameters( UserRecord user, UserLoginInfo info ) => GetDynamicParameters( user, info.LoginProvider, info.ProviderKey );
+    [Pure]
     public static DynamicParameters GetDynamicParameters( UserRecord user, string loginProvider, string providerKey )
     {
         DynamicParameters parameters = GetDynamicParameters( user );
@@ -63,8 +74,7 @@ public sealed record UserLoginInfoRecord : TableRecord<UserLoginInfoRecord>
         return parameters;
     }
 
-
-    public UserLoginInfo ToUserLoginInfo() => new(LoginProvider, ProviderKey, ProviderDisplayName);
+    [Pure] public UserLoginInfo ToUserLoginInfo() => new(LoginProvider, ProviderKey, ProviderDisplayName);
 
 
     public static implicit operator UserLoginInfo( UserLoginInfoRecord value ) => value.ToUserLoginInfo();
@@ -73,13 +83,13 @@ public sealed record UserLoginInfoRecord : TableRecord<UserLoginInfoRecord>
                                                                                                   UserId        = value.OwnerUserID?.ToString() ?? throw new NullReferenceException( nameof(value.OwnerUserID) ),
                                                                                                   LoginProvider = value.LoginProvider,
                                                                                                   Name          = value.ProviderDisplayName ?? string.Empty,
-                                                                                                  Value         = value.ProviderKey,
+                                                                                                  Value         = value.ProviderKey
                                                                                               };
     public static implicit operator IdentityUserToken<Guid>( UserLoginInfoRecord value ) => new()
                                                                                             {
                                                                                                 UserId        = value.OwnerUserID ?? Guid.Empty,
                                                                                                 LoginProvider = value.LoginProvider,
                                                                                                 Name          = value.ProviderDisplayName ?? string.Empty,
-                                                                                                Value         = value.ProviderKey,
+                                                                                                Value         = value.ProviderKey
                                                                                             };
 }

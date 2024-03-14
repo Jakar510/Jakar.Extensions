@@ -3,20 +3,20 @@
 
 public sealed class ResxCollection : IResxCollection
 {
-    private readonly ConcurrentBag<ResxRowTable> _rows = new();
+    private readonly ConcurrentBag<ResxRowRecord> _rows = new();
 
 
     public int Count => _rows.Count;
 
 
     public ResxCollection() { }
-    public ResxCollection( IEnumerable<ResxRowTable> collection ) => _rows.Add( collection );
+    public ResxCollection( IEnumerable<ResxRowRecord> collection ) => _rows.Add( collection );
 
 
     public ResxSet GetSet( in SupportedLanguage language )
     {
         var set = new ResxSet( Count );
-        foreach ( ResxRowTable row in this ) { set[row.KeyID] = row.GetValue( language ); }
+        foreach ( ResxRowRecord row in this ) { set[row.KeyID] = row.GetValue( language ); }
 
         return set;
     }
@@ -29,16 +29,15 @@ public sealed class ResxCollection : IResxCollection
     }
 
 
-    public ValueTask Init( IResxProvider  provider, CancellationToken     token                          = default ) => Init( provider, provider.Resx, token );
-    public ValueTask Init( IConnectableDb db,       DbTable<ResxRowTable> table, CancellationToken token = default ) => db.Call( Init, table, token );
-    public async ValueTask Init( DbConnection connection, DbTransaction? transaction, DbTable<ResxRowTable> table, CancellationToken token = default )
+    public ValueTask Init( IResxProvider  provider, CancellationToken      token                          = default ) => Init( provider, provider.Resx, token );
+    public ValueTask Init( IConnectableDb db,       DbTable<ResxRowRecord> table, CancellationToken token = default ) => db.Call( Init, table, token );
+    public async ValueTask Init( DbConnection connection, DbTransaction? transaction, DbTable<ResxRowRecord> table, CancellationToken token = default )
     {
         _rows.Clear();
-        IEnumerable<ResxRowTable> records = await table.All( connection, transaction, token );
-        _rows.Add( records );
+        await foreach ( ResxRowRecord record in table.All( connection, transaction, token ) ) { _rows.Add( record ); }
     }
 
 
-    public IEnumerator<ResxRowTable> GetEnumerator() => _rows.GetEnumerator();
-    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+    public IEnumerator<ResxRowRecord> GetEnumerator() => _rows.GetEnumerator();
+    IEnumerator IEnumerable.          GetEnumerator() => GetEnumerator();
 }

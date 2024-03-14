@@ -1,7 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 08/15/2022  11:51 AM
 
-using OneOf;
 using OneOf.Types;
 using static Jakar.Extensions.WebRequester;
 
@@ -15,16 +14,16 @@ namespace Jakar.Extensions;
 public readonly record struct WebResponse<T>
 {
     public const string ERROR_MESSAGE = "Error Message: ";
-    public const string UNKNOWN_ERROR = "Unknown Error";
     public const string NO_RESPONSE   = "NO RESPONSE";
+    public const string UNKNOWN_ERROR = "Unknown Error";
 
 
     public              List<string>                Allow             { get; init; } = new();
     public              List<string>                ContentEncoding   { get; init; } = new();
     public              long?                       ContentLength     { get; init; } = default;
     public              string?                     ContentType       { get; init; } = default;
-    public              string?                     ErrorMessage      => Error.Match<string?>( x => x.ToString( Formatting.Indented ), x => x, x => default );
     [JsonIgnore] public OneOf<JToken, string, None> Error             { get; init; } = new None();
+    public              string?                     ErrorMessage      => Error.Match<string?>( x => x.ToString( Formatting.Indented ), x => x, x => default );
     [JsonIgnore] public Exception?                  Exception         { get; init; } = default;
     public              DateTimeOffset?             Expires           { get; init; } = default;
     public              DateTimeOffset?             LastModified      { get; init; } = default;
@@ -82,17 +81,13 @@ public readonly record struct WebResponse<T>
     public override string ToString() => this.ToJson( Formatting.Indented );
 
 
-    internal static WebResponse<T> None( HttpResponseMessage response ) => new(response, NO_RESPONSE);
+    internal static WebResponse<T> None( HttpResponseMessage response )              => new(response, NO_RESPONSE);
     internal static WebResponse<T> None( HttpResponseMessage response, Exception e ) => new(response, e, NO_RESPONSE);
     public static OneOf<JToken, string, None> ParseError( in string? error )
     {
         if ( string.IsNullOrWhiteSpace( error ) ) { return new None(); }
 
-        try
-        {
-            return error.Replace( @"\""", @"""" )
-                        .FromJson();
-        }
+        try { return error.Replace( @"\""", @"""" ).FromJson(); }
         catch ( Exception ) { return error; }
     }
 
@@ -268,7 +263,7 @@ public readonly record struct WebResponse<T>
             using var reader = new StreamReader( stream );
 
         #if NET7_0_OR_GREATER
-               string errorMessage = await reader.ReadToEndAsync(token);
+            string errorMessage = await reader.ReadToEndAsync( token );
         #else
             string errorMessage = await reader.ReadToEndAsync();
         #endif

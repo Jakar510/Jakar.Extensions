@@ -1,5 +1,4 @@
-﻿#nullable enable
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
 
 
 [AttributeUsage( AttributeTargets.All )] public class DoNotRenameAttribute : Attribute { }

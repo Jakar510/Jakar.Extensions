@@ -1,16 +1,18 @@
-﻿#nullable enable
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
 
 
 [Serializable]
-public class LanguageApi : ObservableClass
+public sealed class LanguageApi : ObservableClass
 {
+    // private readonly WeakEventManager<Language> _eventManager     = new();
     private Language.Collection _languages        = new(Language.Supported);
     private CultureInfo         _currentCulture   = CultureInfo.CurrentCulture;
     private CultureInfo         _currentUiCulture = CultureInfo.CurrentUICulture;
     private CultureInfo?        _defaultThreadCurrentCulture;
     private CultureInfo?        _defaultThreadCurrentUiCulture;
     private Language?           _selectedLanguage;
+
+
     public CultureInfo CurrentCulture
     {
         get => _currentCulture;
@@ -18,8 +20,7 @@ public class LanguageApi : ObservableClass
         {
             if ( !SetProperty( ref _currentCulture, value ) ) { return; }
 
-            CultureInfo.CurrentCulture          = value;
-            Thread.CurrentThread.CurrentCulture = value;
+            CultureInfo.CurrentCulture = value;
         }
     }
     public CultureInfo CurrentUICulture
@@ -29,8 +30,7 @@ public class LanguageApi : ObservableClass
         {
             if ( !SetProperty( ref _currentUiCulture, value ) ) { return; }
 
-            CultureInfo.CurrentUICulture          = value;
-            Thread.CurrentThread.CurrentUICulture = value;
+            CultureInfo.CurrentUICulture = value;
         }
     }
     public CultureInfo? DefaultThreadCurrentCulture
@@ -74,8 +74,8 @@ public class LanguageApi : ObservableClass
         {
             if ( !SetProperty( ref _selectedLanguage, value ) ) { return; }
 
-            OnLanguageChanged( value );
-            CurrentCulture   = value;
+            // _eventManager.RaiseEvent( value, nameof(OnLanguageChanged) );
+            OnLanguageChanged?.Invoke( value );
             CurrentUICulture = value;
         }
     }
@@ -91,5 +91,12 @@ public class LanguageApi : ObservableClass
     }
 
 
-    protected virtual void OnLanguageChanged( Language value ) { }
+    public event Action<Language>? OnLanguageChanged;
+
+    /*
+    public event Action<Language> OnLanguageChanged
+    {
+        add => _eventManager.AddEventHandler( value );
+        remove => _eventManager.AddEventHandler( value );
+    }*/
 }

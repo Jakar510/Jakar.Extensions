@@ -1,23 +1,16 @@
-﻿#nullable enable
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
 
 
 /// <summary>
 ///     <seealso href="https://stackoverflow.com/a/5852926/9530917"/>
 /// </summary>
 /// <typeparam name="T"> </typeparam>
-public class FixedSizedDeque<T>
+public class FixedSizedDeque<T>( int limit )
 {
-    protected readonly Deque<T> _q;
+    protected readonly Deque<T> _q    = new(limit);
     protected readonly object   _lock = new();
 
-    public int Limit { get; init; }
-
-    public FixedSizedDeque( int limit )
-    {
-        Limit = limit;
-        _q    = new Deque<T>( limit );
-    }
+    public int Limit { get; init; } = limit;
 
 
     public bool Contains( T obj )

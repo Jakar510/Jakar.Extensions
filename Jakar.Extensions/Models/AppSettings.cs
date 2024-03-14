@@ -1,8 +1,7 @@
-﻿#nullable enable
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
 
 
-public interface IAppSettings : IHostViewModel
+public interface IAppSettings
 {
     public string     AppName           { get; }
     public AppVersion AppVersion        { get; }
@@ -21,37 +20,20 @@ public interface IAppSettings<TViewPage> : IAppSettings
 
 
 [Serializable]
-public class AppSettings : BaseHostViewModel, IAppSettings
+public class AppSettings( string appName, AppVersion version, string deviceVersion, Uri hostInfo, Uri defaultHostInfo ) : BaseHostViewModel( hostInfo, defaultHostInfo ), IAppSettings
 {
     private        Guid       _deviceID;
     private        LocalFile? _screenShotAddress;
-    public virtual string     AppName { get; }
+    public virtual string     AppName { get; } = appName;
 
 
-    public AppVersion AppVersion { get; }
-    public virtual Guid DeviceID
-    {
-        get => _deviceID;
-        set => SetProperty( ref _deviceID, value );
-    }
-    public virtual string DeviceVersion { get; }
-    public virtual LocalFile? ScreenShotAddress
-    {
-        get => _screenShotAddress;
-        set => SetProperty( ref _screenShotAddress, value );
-    }
+    public         AppVersion AppVersion        { get; } = version;
+    public virtual Guid       DeviceID          { get => _deviceID; set => SetProperty( ref _deviceID, value ); }
+    public virtual string     DeviceVersion     { get; } = deviceVersion;
+    public virtual LocalFile? ScreenShotAddress { get => _screenShotAddress; set => SetProperty( ref _screenShotAddress, value ); }
 
 
     public AppSettings( string appName, AppVersion version, string deviceVersion, Uri hostInfo ) : this( appName, version, deviceVersion, hostInfo, hostInfo ) { }
-    public AppSettings( string appName, AppVersion version, string deviceVersion, Uri hostInfo, Uri defaultHostInfo ) : base( hostInfo, defaultHostInfo )
-    {
-        AppName       = appName;
-        AppVersion    = version;
-        DeviceVersion = deviceVersion;
-    }
-
-
-    protected override void OnHostChanged( in string? host, in bool isValid, in Uri? hostInfo ) { }
 }
 
 
@@ -61,11 +43,7 @@ public class AppSettings<TViewPage> : AppSettings, IAppSettings<TViewPage>
 {
     private TViewPage? _currentViewPage;
 
-    public virtual TViewPage? CurrentViewPage
-    {
-        get => _currentViewPage;
-        set => SetProperty( ref _currentViewPage, value );
-    }
+    public virtual TViewPage? CurrentViewPage { get => _currentViewPage; set => SetProperty( ref _currentViewPage, value ); }
 
 
     public AppSettings( string appName, AppVersion version, string deviceVersion, Uri hostInfo ) : base( appName, version, deviceVersion, hostInfo ) { }

@@ -1,7 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Xml
 // 04/28/2022  1:14 PM
 
-#nullable enable
 using System;
 using System.Collections.Generic;
 using Jakar.Xml.Deserialization;
@@ -13,7 +12,8 @@ namespace Jakar.Xml;
 
 public static partial class Xmlizer
 {
-    public static T Deserialize<T>( string xml, out IDictionary<string, string>? attributes ) where T : new()
+    public static T Deserialize<T>( string xml, out IDictionary<string, string>? attributes )
+        where T : new()
     {
         // Activator.CreateInstance<T>() ?? throw new NullReferenceException(nameof(Activator.CreateInstance));
 

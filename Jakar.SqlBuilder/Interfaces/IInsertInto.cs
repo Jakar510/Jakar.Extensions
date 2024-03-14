@@ -1,9 +1,4 @@
-﻿#nullable enable
-using Jakar.Extensions;
-
-
-
-namespace Jakar.SqlBuilder.Interfaces;
+﻿namespace Jakar.SqlBuilder.Interfaces;
 
 
 public interface IInsertInto
@@ -25,7 +20,8 @@ public interface IInsertInto
     /// <returns>
     ///     <see cref="ISqlBuilderRoot"/>
     /// </returns>
-    public IDataInsert In<T>() where T : class;
+    public IDataInsert In<T>()
+        where T : class;
 
     /// <summary>
     ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="TableExtensions.GetTableName(Type)"/> </para>
@@ -35,7 +31,8 @@ public interface IInsertInto
     /// <returns>
     ///     <see cref="ISqlBuilderRoot"/>
     /// </returns>
-    public IDataInsert In<T>( T obj ) where T : class;
+    public IDataInsert In<T>( T obj )
+        where T : class;
 
 
     /// <summary>
@@ -57,7 +54,8 @@ public interface IInsertInto
     /// <returns>
     ///     <see cref="ISqlBuilderRoot"/>
     /// </returns>
-    public ISqlBuilderRoot Into<T>( T obj ) where T : class;
+    public ISqlBuilderRoot Into<T>( T obj )
+        where T : class;
 
     /// <summary>
     ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="TableExtensions.GetTableName(Type)"/> </para>
@@ -68,7 +66,8 @@ public interface IInsertInto
     /// <returns>
     ///     <see cref="ISqlBuilderRoot"/>
     /// </returns>
-    public ISqlBuilderRoot Into<T>( IEnumerable<T> obj ) where T : class;
+    public ISqlBuilderRoot Into<T>( IEnumerable<T> obj )
+        where T : class;
 }
 
 

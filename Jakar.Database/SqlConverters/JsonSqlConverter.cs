@@ -1,7 +1,8 @@
 ﻿namespace Jakar.Database;
 
 
-public class JsonSqlHandler<T> : SqlConverter<JsonSqlHandler<T>, T> where T : notnull
+public class JsonSqlHandler<T> : SqlConverter<JsonSqlHandler<T>, T>
+    where T : notnull
 {
     public JsonSqlHandler() { }
 

@@ -5,7 +5,6 @@
 // **********************************************
 
 
-#nullable enable
 namespace Jakar.Extensions;
 
 
@@ -13,9 +12,9 @@ namespace Jakar.Extensions;
 ///     <seealso href="https://www.codeproject.com/Articles/33559/Handy-wrapper-class-for-thread-safe-property-acces"/>
 /// </summary>
 /// <typeparam name="TValue"> The value type. </typeparam>
-public sealed class Synchronized<TValue>
+public sealed class Synchronized<TValue>( TValue value )
 {
-    private TValue _value;
+    private TValue _value = value;
 
     public TValue Value
     {
@@ -28,9 +27,6 @@ public sealed class Synchronized<TValue>
             lock (this) { _value = value; }
         }
     }
-
-
-    public Synchronized( TValue value ) => _value = value;
 
 
     public static implicit operator TValue( Synchronized<TValue> value ) => value.Value;

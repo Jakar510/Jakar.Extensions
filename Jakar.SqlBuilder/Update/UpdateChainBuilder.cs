@@ -1,18 +1,11 @@
 ﻿// Jakar.Extensions :: Jakar.SqlBuilder
 // 05/08/2022  11:47 AM
 
-#nullable enable
 namespace Jakar.SqlBuilder;
 
 
-public struct UpdateChainBuilder
+public struct UpdateChainBuilder( in UpdateClauseBuilder update, ref EasySqlBuilder builder )
 {
-    private readonly UpdateClauseBuilder _update;
-    private          EasySqlBuilder      _builder;
-
-    public UpdateChainBuilder( in UpdateClauseBuilder update, ref EasySqlBuilder builder )
-    {
-        _update  = update;
-        _builder = builder;
-    }
+    private readonly UpdateClauseBuilder _update  = update;
+    private          EasySqlBuilder      _builder = builder;
 }

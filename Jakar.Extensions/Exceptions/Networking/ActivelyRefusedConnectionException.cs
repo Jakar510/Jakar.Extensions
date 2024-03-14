@@ -1,5 +1,4 @@
-﻿#nullable enable
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
 
 
 /// <summary> A web exception of unknown type occurred. </summary>

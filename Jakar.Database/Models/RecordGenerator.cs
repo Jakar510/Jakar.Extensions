@@ -7,22 +7,18 @@ namespace Jakar.Database;
 /// <summary>
 ///     <see href="https://stackoverflow.com/a/15992856/9530917"/>
 /// </summary>
-public struct RecordGenerator<TRecord> : IAsyncEnumerable<TRecord>, IAsyncEnumerator<TRecord> where TRecord : TableRecord<TRecord>
+public struct RecordGenerator<TRecord>( DbTable<TRecord> table ) : IAsyncEnumerable<TRecord>, IAsyncEnumerator<TRecord>
+    where TRecord : class, ITableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
-    private readonly DbTable<TRecord>           _table;
-    private readonly CancellationToken          _token   = default;
-    private          TRecord?                   _current = default;
-    private          AsyncKeyGenerator<TRecord> _generator;
+    private readonly DbTable<TRecord>           _table     = table;
+    private readonly CancellationToken          _token     = default;
+    private          TRecord?                   _current   = default;
+    private          AsyncKeyGenerator<TRecord> _generator = new(table);
 
 
     public TRecord Current => _current ?? throw new NullReferenceException( nameof(_current) );
 
 
-    public RecordGenerator( DbTable<TRecord> table )
-    {
-        _table     = table;
-        _generator = new AsyncKeyGenerator<TRecord>( table );
-    }
     public RecordGenerator( DbTable<TRecord> table, CancellationToken token ) : this( table ) => _token = token;
     public async ValueTask DisposeAsync()
     {
@@ -53,5 +49,5 @@ public struct RecordGenerator<TRecord> : IAsyncEnumerable<TRecord>, IAsyncEnumer
 
 
     IAsyncEnumerator<TRecord> IAsyncEnumerable<TRecord>.GetAsyncEnumerator( CancellationToken token ) => WithCancellation( token );
-    public RecordGenerator<TRecord> WithCancellation( CancellationToken                       token ) => new(_table, token);
+    public RecordGenerator<TRecord>                     WithCancellation( CancellationToken   token ) => new(_table, token);
 }

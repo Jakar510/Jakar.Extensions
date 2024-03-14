@@ -4,7 +4,7 @@
 namespace Jakar.Database.DbMigrations;
 
 
-public abstract class MigrateRecoveryCodeTable : Migration<RecoveryCodeRecord>
+public abstract class MigrateRecoveryCodeTable : OwnedMigration<RecoveryCodeRecord>
 {
     protected MigrateRecoveryCodeTable() : base() { }
 
@@ -13,9 +13,7 @@ public abstract class MigrateRecoveryCodeTable : Migration<RecoveryCodeRecord>
     {
         ICreateTableWithColumnSyntax table = base.CreateTable();
 
-        table.WithColumn( nameof(RecoveryCodeRecord.Code) )
-             .AsString( 1024 )
-             .NotNullable();
+        table.WithColumn( nameof(RecoveryCodeRecord.Code) ).AsString( 10240 ).NotNullable();
 
         return table;
     }

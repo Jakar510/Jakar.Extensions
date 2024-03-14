@@ -14,7 +14,13 @@ public sealed class RoleValidator : RoleValidator<RoleRecord>
                                                                  Description = "Name of Role Invalid",
                                                                  Code        = nameof(RoleRecord.Name)
                                                              } )
-                                    : IdentityResult.Success;
+                                    : string.IsNullOrWhiteSpace( role.NormalizedName )
+                                        ? IdentityResult.Failed( new IdentityError
+                                                                 {
+                                                                     Description = "NormalizedName of Role Invalid",
+                                                                     Code        = nameof(RoleRecord.NormalizedName)
+                                                                 } )
+                                        : IdentityResult.Success;
 
         return Task.FromResult( result );
     }

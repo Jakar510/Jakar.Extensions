@@ -1,11 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 05/22/2023  11:38 AM
 
-using Microsoft.AspNetCore.Hosting;
-using Newtonsoft.Json.Serialization;
-
-
-
 namespace Jakar.Database;
 
 
@@ -16,13 +11,9 @@ public static class WebAppExtensions
     /// <returns> </returns>
     public static IMvcBuilder UseNewtonsoftJson( this IMvcBuilder services )
     {
-        JsonConvert.DefaultSettings = () => new JsonSerializerSettings
-                                            {
-                                                ContractResolver = new DefaultContractResolver(),
-                                            };
+        JsonConvert.DefaultSettings = () => new JsonSerializerSettings { ContractResolver = new DefaultContractResolver() };
 
-        return services.AddJsonOptions( options => options.JsonSerializerOptions.PropertyNamingPolicy = null )
-                       .AddNewtonsoftJson( options => options.SerializerSettings.ContractResolver = new DefaultContractResolver() );
+        return services.AddJsonOptions( options => options.JsonSerializerOptions.PropertyNamingPolicy = null ).AddNewtonsoftJson( options => options.SerializerSettings.ContractResolver = new DefaultContractResolver() );
     }
     public static WebApplication UseUrls( this WebApplication app, params string[] urls )
     {

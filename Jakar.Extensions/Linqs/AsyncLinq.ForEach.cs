@@ -44,10 +44,7 @@ public static partial class AsyncLinq
         }
 
 
-        await Task.WhenAll( Partitioner.Create( source )
-                                       .GetPartitions( maxDegreeOfParallelism ?? Environment.ProcessorCount )
-                                       .AsParallel()
-                                       .Select( AwaitPartition ) );
+        await Task.WhenAll( Partitioner.Create( source ).GetPartitions( maxDegreeOfParallelism ?? Environment.ProcessorCount ).AsParallel().Select( AwaitPartition ) );
     }
     public static async Task ForEachParallelAsync<TElement>( this IEnumerable<TElement> source, Func<TElement, ValueTask> body, int? maxDegreeOfParallelism = default )
     {
@@ -60,10 +57,7 @@ public static partial class AsyncLinq
         }
 
 
-        await Task.WhenAll( Partitioner.Create( source )
-                                       .GetPartitions( maxDegreeOfParallelism ?? Environment.ProcessorCount )
-                                       .AsParallel()
-                                       .Select( AwaitPartition ) );
+        await Task.WhenAll( Partitioner.Create( source ).GetPartitions( maxDegreeOfParallelism ?? Environment.ProcessorCount ).AsParallel().Select( AwaitPartition ) );
     }
     public static async Task ForEachParallelAsync<TElement>( this IEnumerable<TElement> source, Func<TElement, CancellationToken, Task> body, CancellationToken token, int? maxDegreeOfParallelism = default )
     {
@@ -76,10 +70,7 @@ public static partial class AsyncLinq
         }
 
 
-        await Task.WhenAll( Partitioner.Create( source )
-                                       .GetPartitions( maxDegreeOfParallelism ?? Environment.ProcessorCount )
-                                       .AsParallel()
-                                       .Select( AwaitPartition ) );
+        await Task.WhenAll( Partitioner.Create( source ).GetPartitions( maxDegreeOfParallelism ?? Environment.ProcessorCount ).AsParallel().Select( AwaitPartition ) );
     }
     public static async Task ForEachParallelAsync<TElement>( this IEnumerable<TElement> source, Func<TElement, CancellationToken, ValueTask> body, CancellationToken token, int? maxDegreeOfParallelism = default )
     {
@@ -92,19 +83,13 @@ public static partial class AsyncLinq
         }
 
 
-        await Task.WhenAll( Partitioner.Create( source )
-                                       .GetPartitions( maxDegreeOfParallelism ?? Environment.ProcessorCount )
-                                       .AsParallel()
-                                       .Select( AwaitPartition ) );
+        await Task.WhenAll( Partitioner.Create( source ).GetPartitions( maxDegreeOfParallelism ?? Environment.ProcessorCount ).AsParallel().Select( AwaitPartition ) );
     }
 
 
     public static async Task ForEachParallelAsync<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, Task> action, int? maxDegreeOfParallelism = default, TaskScheduler? scheduler = default )
     {
-        var options = new ExecutionDataflowBlockOptions
-                      {
-                          MaxDegreeOfParallelism = maxDegreeOfParallelism ?? DataflowBlockOptions.Unbounded,
-                      };
+        var options = new ExecutionDataflowBlockOptions { MaxDegreeOfParallelism = maxDegreeOfParallelism ?? DataflowBlockOptions.Unbounded };
 
         if ( scheduler is not null ) { options.TaskScheduler = scheduler; }
 
@@ -117,10 +102,7 @@ public static partial class AsyncLinq
     }
     public static async Task ForEachParallelAsync<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, CancellationToken, Task> action, CancellationToken token, int? maxDegreeOfParallelism = default, TaskScheduler? scheduler = default )
     {
-        var options = new ExecutionDataflowBlockOptions
-                      {
-                          MaxDegreeOfParallelism = maxDegreeOfParallelism ?? DataflowBlockOptions.Unbounded,
-                      };
+        var options = new ExecutionDataflowBlockOptions { MaxDegreeOfParallelism = maxDegreeOfParallelism ?? DataflowBlockOptions.Unbounded };
 
         if ( scheduler is not null ) { options.TaskScheduler = scheduler; }
 
@@ -133,17 +115,9 @@ public static partial class AsyncLinq
         block.Complete();
         await block.Completion;
     }
-    public static async Task ForEachParallelAsync<TElement>( this IAsyncEnumerable<TElement>              source,
-                                                             Func<TElement, CancellationToken, ValueTask> action,
-                                                             CancellationToken                            token,
-                                                             int?                                         maxDegreeOfParallelism = default,
-                                                             TaskScheduler?                               scheduler              = default
-    )
+    public static async Task ForEachParallelAsync<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, CancellationToken, ValueTask> action, CancellationToken token, int? maxDegreeOfParallelism = default, TaskScheduler? scheduler = default )
     {
-        var options = new ExecutionDataflowBlockOptions
-                      {
-                          MaxDegreeOfParallelism = maxDegreeOfParallelism ?? DataflowBlockOptions.Unbounded,
-                      };
+        var options = new ExecutionDataflowBlockOptions { MaxDegreeOfParallelism = maxDegreeOfParallelism ?? DataflowBlockOptions.Unbounded };
 
         if ( scheduler is not null ) { options.TaskScheduler = scheduler; }
 
@@ -169,17 +143,11 @@ public static partial class AsyncLinq
         }
 
 
-        await Task.WhenAll( Partitioner.Create( source )
-                                       .GetPartitions( maxDegreeOfParallelism ?? Environment.ProcessorCount )
-                                       .AsParallel()
-                                       .Select( AwaitPartition ) );
+        await Task.WhenAll( Partitioner.Create( source ).GetPartitions( maxDegreeOfParallelism ?? Environment.ProcessorCount ).AsParallel().Select( AwaitPartition ) );
     }
     public static async Task ForEachParallelAsync( this IAsyncEnumerable<Task> source, int? maxDegreeOfParallelism = default, TaskScheduler? scheduler = default )
     {
-        var options = new ExecutionDataflowBlockOptions
-                      {
-                          MaxDegreeOfParallelism = maxDegreeOfParallelism ?? DataflowBlockOptions.Unbounded,
-                      };
+        var options = new ExecutionDataflowBlockOptions { MaxDegreeOfParallelism = maxDegreeOfParallelism ?? DataflowBlockOptions.Unbounded };
 
         if ( scheduler is not null ) { options.TaskScheduler = scheduler; }
 
@@ -209,10 +177,7 @@ public static partial class AsyncLinq
         }
 
 
-        Task tasks = Task.WhenAll( Partitioner.Create( source )
-                                              .GetPartitions( maxDegreeOfParallelism ?? Environment.ProcessorCount )
-                                              .AsParallel()
-                                              .Select( AwaitPartition ) );
+        Task tasks = Task.WhenAll( Partitioner.Create( source ).GetPartitions( maxDegreeOfParallelism ?? Environment.ProcessorCount ).AsParallel().Select( AwaitPartition ) );
 
         await tasks;
         return results;
@@ -227,10 +192,7 @@ public static partial class AsyncLinq
             results.Add( await task );
         }
 
-        var options = new ExecutionDataflowBlockOptions
-                      {
-                          MaxDegreeOfParallelism = maxDegreeOfParallelism ?? DataflowBlockOptions.Unbounded,
-                      };
+        var options = new ExecutionDataflowBlockOptions { MaxDegreeOfParallelism = maxDegreeOfParallelism ?? DataflowBlockOptions.Unbounded };
 
         if ( scheduler is not null ) { options.TaskScheduler = scheduler; }
 
@@ -243,19 +205,11 @@ public static partial class AsyncLinq
     }
 
 
-    public static async Task<IReadOnlyCollection<TElement>> WhenAllParallelAsync<TElement>( IAsyncEnumerable<TElement>                        source,
-                                                                                            Func<TElement, CancellationToken, Task<TElement>> action,
-                                                                                            CancellationToken                                 token,
-                                                                                            int?                                              maxDegreeOfParallelism = default,
-                                                                                            TaskScheduler?                                    scheduler              = default
-    )
+    public static async Task<IReadOnlyCollection<TElement>> WhenAllParallelAsync<TElement>( IAsyncEnumerable<TElement> source, Func<TElement, CancellationToken, Task<TElement>> action, CancellationToken token, int? maxDegreeOfParallelism = default, TaskScheduler? scheduler = default )
     {
         var results = new ConcurrentBag<TElement>();
 
-        var options = new ExecutionDataflowBlockOptions
-                      {
-                          MaxDegreeOfParallelism = maxDegreeOfParallelism ?? DataflowBlockOptions.Unbounded,
-                      };
+        var options = new ExecutionDataflowBlockOptions { MaxDegreeOfParallelism = maxDegreeOfParallelism ?? DataflowBlockOptions.Unbounded };
 
         if ( scheduler is not null ) { options.TaskScheduler = scheduler; }
 
@@ -273,19 +227,11 @@ public static partial class AsyncLinq
         await block.Completion;
         return results;
     }
-    public static async Task<IReadOnlyCollection<TElement>> WhenAllParallelAsync<TElement>( IAsyncEnumerable<TElement>                             source,
-                                                                                            Func<TElement, CancellationToken, ValueTask<TElement>> action,
-                                                                                            CancellationToken                                      token,
-                                                                                            int?                                                   maxDegreeOfParallelism = default,
-                                                                                            TaskScheduler?                                         scheduler              = default
-    )
+    public static async Task<IReadOnlyCollection<TElement>> WhenAllParallelAsync<TElement>( IAsyncEnumerable<TElement> source, Func<TElement, CancellationToken, ValueTask<TElement>> action, CancellationToken token, int? maxDegreeOfParallelism = default, TaskScheduler? scheduler = default )
     {
         var results = new ConcurrentBag<TElement>();
 
-        var options = new ExecutionDataflowBlockOptions
-                      {
-                          MaxDegreeOfParallelism = maxDegreeOfParallelism ?? DataflowBlockOptions.Unbounded,
-                      };
+        var options = new ExecutionDataflowBlockOptions { MaxDegreeOfParallelism = maxDegreeOfParallelism ?? DataflowBlockOptions.Unbounded };
 
         if ( scheduler is not null ) { options.TaskScheduler = scheduler; }
 
@@ -353,6 +299,5 @@ public static partial class AsyncLinq
     {
         foreach ( TElement value in dict.Values ) { action( value ); }
     }
-    public static void ForEachParallel<TElement>( this IEnumerable<TElement> source, Action<TElement> action ) => source.AsParallel()
-                                                                                                                        .ForAll( action );
+    public static void ForEachParallel<TElement>( this IEnumerable<TElement> source, Action<TElement> action ) => source.AsParallel().ForAll( action );
 }

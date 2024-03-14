@@ -1,8 +1,8 @@
-﻿#nullable enable
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
 
 
-public class MultiDict<TKey> : Dictionary<TKey, object?> where TKey : notnull
+public class MultiDict<TKey> : Dictionary<TKey, object?>
+    where TKey : notnull
 {
     #region ctor
 
@@ -11,7 +11,7 @@ public class MultiDict<TKey> : Dictionary<TKey, object?> where TKey : notnull
     public MultiDict( int                                      capacity,   IEqualityComparer<TKey>? comparer = null ) : base( capacity, comparer ) { }
     public MultiDict( IDictionary<TKey, object?>               dictionary, IEqualityComparer<TKey>? comparer = null ) : base( dictionary, comparer ) { }
     public MultiDict( IEnumerable<KeyValuePair<TKey, object?>> collection, IEqualityComparer<TKey>? comparer = null ) : base( collection, comparer ) { }
-    protected MultiDict( SerializationInfo                     info,       StreamingContext         context ) : base( info, context ) { }
+    [Obsolete] protected MultiDict( SerializationInfo          info,       StreamingContext         context ) : base( info, context ) { }
 
     #endregion
 
@@ -118,5 +118,5 @@ public class MultiDict : MultiDict<string>
     public MultiDict( int                                        capacity,   IEqualityComparer<string>? comparer = null ) : base( capacity, comparer ) { }
     public MultiDict( IDictionary<string, object?>               dictionary, IEqualityComparer<string>? comparer = null ) : base( dictionary, comparer ) { }
     public MultiDict( IEnumerable<KeyValuePair<string, object?>> collection, IEqualityComparer<string>? comparer = null ) : base( collection, comparer ) { }
-    protected MultiDict( SerializationInfo                       info,       StreamingContext           context ) : base( info, context ) { }
+    [Obsolete] protected MultiDict( SerializationInfo            info,       StreamingContext           context ) : base( info, context ) { }
 }

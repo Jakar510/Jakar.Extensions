@@ -1,8 +1,8 @@
-﻿#nullable enable
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
 
 
-public interface IUniqueID<out TID> where TID : IComparable<TID>, IEquatable<TID>
+public interface IUniqueID<out TID>
+    where TID : IComparable<TID>, IEquatable<TID>
 {
     public TID ID { get; }
 }

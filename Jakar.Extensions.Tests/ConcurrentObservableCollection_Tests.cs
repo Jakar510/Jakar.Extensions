@@ -1,12 +1,8 @@
-#nullable enable
-using NUnit.Framework;
-
-
-
 namespace Jakar.Extensions.Tests;
 
 
 [TestFixture]
+[TestOf( typeof(ConcurrentObservableCollection<>) )]
 
 // ReSharper disable once InconsistentNaming
 public class ConcurrentObservableCollection_Tests : Assert
@@ -22,10 +18,10 @@ public class ConcurrentObservableCollection_Tests : Assert
     [TestCase( 4 )]
     public void Run( int value )
     {
-        True( _integers.TryAdd( value ) );
-        True( _integers.Contains( value ) );
-        True( _integers.Remove( value ) );
-        False( _integers.Contains( value ) );
+        this.True( _integers.TryAdd( value ) );
+        this.True( _integers.Contains( value ) );
+        this.True( _integers.Remove( value ) );
+        this.False( _integers.Contains( value ) );
     }
 
 
@@ -36,9 +32,9 @@ public class ConcurrentObservableCollection_Tests : Assert
     [TestCase( "4" )]
     public void Run( string value )
     {
-        True( _strings.TryAdd( value ) );
-        True( _strings.Contains( value ) );
-        True( _strings.Remove( value ) );
-        False( _strings.Contains( value ) );
+        this.True( _strings.TryAdd( value ) );
+        this.True( _strings.Contains( value ) );
+        this.True( _strings.Remove( value ) );
+        this.False( _strings.Contains( value ) );
     }
 }

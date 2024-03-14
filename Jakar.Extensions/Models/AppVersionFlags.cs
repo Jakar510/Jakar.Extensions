@@ -1,9 +1,11 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 10/20/2022  2:37 PM
 
+
 namespace Jakar.Extensions;
 
 
+[DefaultValue( nameof(Stable) )]
 public readonly record struct AppVersionFlags( string Flag, uint Iteration ) : IEquatable<AppVersionFlags?>,
                                                                                IComparable<AppVersionFlags>,
                                                                                IComparable<AppVersionFlags?>,
@@ -11,7 +13,6 @@ public readonly record struct AppVersionFlags( string Flag, uint Iteration ) : I
                                                                                IFormattable
                                                                            #if NET7_0_OR_GREATER
                                                                                ,
-                                                                               IParsable<AppVersionFlags>,
                                                                                ISpanParsable<AppVersionFlags>
 #endif
 {
@@ -26,27 +27,21 @@ public readonly record struct AppVersionFlags( string Flag, uint Iteration ) : I
     public static AppVersionFlags Stable     => new(STABLE, 0);
     public        bool            IsEmpty    => string.IsNullOrWhiteSpace( Flag );
     public        bool            IsNotEmpty => !IsEmpty;
+    public        int             Length     => Flag.Length + 15;
 
 
-    internal int Length => Flag.Length + 15;
+    public override string ToString()                                                  => AsSpan().ToString();
+    public          string ToString( string? format, IFormatProvider? formatProvider ) => AsSpan( format, formatProvider ).ToString();
 
 
-    public override string ToString() => AsSpan()
-       .ToString();
-    public string ToString( string? format, IFormatProvider? formatProvider ) => AsSpan( format, formatProvider )
-       .ToString();
-
-
-    public ReadOnlySpan<char> AsSpan() => AsSpan( default,                           CultureInfo.CurrentCulture );
-    public ReadOnlySpan<char> AsSpan( ReadOnlySpan<char> format ) => AsSpan( format, CultureInfo.CurrentCulture );
+    public ReadOnlySpan<char> AsSpan()                            => AsSpan( default, CultureInfo.CurrentCulture );
+    public ReadOnlySpan<char> AsSpan( ReadOnlySpan<char> format ) => AsSpan( format,  CultureInfo.CurrentCulture );
     public ReadOnlySpan<char> AsSpan( ReadOnlySpan<char> format, IFormatProvider? provider )
     {
-        Span<char> buffer = stackalloc char[Length];
-
+        Span<char> buffer = AsyncLinq.GetArray<char>( Length );
         if ( !TryFormat( buffer, out int charsWritten, format, provider ) ) { throw new InvalidOperationException( "Conversion failed" ); }
 
-        buffer = buffer[..charsWritten];
-        return MemoryMarshal.CreateReadOnlySpan( ref buffer.GetPinnableReference(), buffer.Length );
+        return buffer[..charsWritten];
     }
 
 
@@ -140,25 +135,17 @@ public readonly record struct AppVersionFlags( string Flag, uint Iteration ) : I
             return Alpha();
         }
 
-        if ( value.Contains( SEPARATOR ) )
-        {
-            int index = value.IndexOf( SEPARATOR );
-            value = value[..index];
+        if ( value.Contains( SEPARATOR ) is false ) { return Stable; }
 
-            ReadOnlySpan<char> span = value[(index - 1)..]
-               .Trim( SEPARATOR );
+        int                index = value.IndexOf( SEPARATOR );
+        ReadOnlySpan<char> span  = value[(index - 1)..].Trim( SEPARATOR );
+        value = value[..index];
 
-            int end = span.IndexOfAny( Randoms.Numeric );
+        int end = span.IndexOfAny( Randoms.Numeric.Span );
 
-            return end == -1
-                       ? new AppVersionFlags( span.ToString(), 0 )
-                       : new AppVersionFlags( span[..end]
-                                                 .ToString(),
-                                              uint.Parse( span[end..] ) );
-        }
-
-
-        return Stable;
+        return end < 0
+                   ? new AppVersionFlags( span.ToString(),        0 )
+                   : new AppVersionFlags( span[..end].ToString(), uint.Parse( span[end..] ) );
     }
     public static AppVersionFlags Parse( string s, IFormatProvider? provider )
     {
@@ -200,7 +187,7 @@ public readonly record struct AppVersionFlags( string Flag, uint Iteration ) : I
                                                RC     => 1,
                                                ALPHA  => 1,
                                                BETA   => 1,
-                                               _      => string.Compare( Flag, other.Flag, StringComparison.OrdinalIgnoreCase ),
+                                               _      => string.Compare( Flag, other.Flag, StringComparison.OrdinalIgnoreCase )
                                            },
                                  RC => other.Flag switch
                                        {
@@ -208,7 +195,7 @@ public readonly record struct AppVersionFlags( string Flag, uint Iteration ) : I
                                            RC     => 0,
                                            ALPHA  => 1,
                                            BETA   => 1,
-                                           _      => string.Compare( Flag, other.Flag, StringComparison.OrdinalIgnoreCase ),
+                                           _      => string.Compare( Flag, other.Flag, StringComparison.OrdinalIgnoreCase )
                                        },
                                  ALPHA => other.Flag switch
                                           {
@@ -216,7 +203,7 @@ public readonly record struct AppVersionFlags( string Flag, uint Iteration ) : I
                                               RC     => -1,
                                               ALPHA  => 0,
                                               BETA   => 1,
-                                              _      => string.Compare( Flag, other.Flag, StringComparison.OrdinalIgnoreCase ),
+                                              _      => string.Compare( Flag, other.Flag, StringComparison.OrdinalIgnoreCase )
                                           },
                                  BETA => other.Flag switch
                                          {
@@ -224,9 +211,9 @@ public readonly record struct AppVersionFlags( string Flag, uint Iteration ) : I
                                              RC     => -1,
                                              ALPHA  => -1,
                                              BETA   => 0,
-                                             _      => string.Compare( Flag, other.Flag, StringComparison.OrdinalIgnoreCase ),
+                                             _      => string.Compare( Flag, other.Flag, StringComparison.OrdinalIgnoreCase )
                                          },
-                                 _ => string.Compare( Flag, other.Flag, StringComparison.Ordinal ),
+                                 _ => string.Compare( Flag, other.Flag, StringComparison.Ordinal )
                              };
 
 
@@ -238,7 +225,7 @@ public readonly record struct AppVersionFlags( string Flag, uint Iteration ) : I
                                              {
                                                  null                  => 1,
                                                  AppVersionFlags flags => CompareTo( flags ),
-                                                 _                     => throw new ArgumentException( $"Object must be of type {nameof(AppVersionFlags)}" ),
+                                                 _                     => throw new ArgumentException( $"Object must be of type {nameof(AppVersionFlags)}" )
                                              };
     public bool Equals( AppVersionFlags? other )
     {
@@ -246,14 +233,14 @@ public readonly record struct AppVersionFlags( string Flag, uint Iteration ) : I
 
         return Equals( other.Value );
     }
-    public bool Equals( AppVersionFlags other ) => string.Equals( Flag, other.Flag, StringComparison.OrdinalIgnoreCase ) && Iteration.Equals( other.Iteration );
-    public override int GetHashCode() => Flag.GetHashCode();
+    public          bool Equals( AppVersionFlags other ) => string.Equals( Flag, other.Flag, StringComparison.OrdinalIgnoreCase ) && Iteration.Equals( other.Iteration );
+    public override int  GetHashCode()                   => Flag.GetHashCode();
 
 
-    public static bool operator <( AppVersionFlags   left, AppVersionFlags  right ) => left.CompareTo( right ) < 0;
-    public static bool operator >( AppVersionFlags   left, AppVersionFlags  right ) => left.CompareTo( right ) > 0;
-    public static bool operator <=( AppVersionFlags  left, AppVersionFlags  right ) => left.CompareTo( right ) <= 0;
-    public static bool operator >=( AppVersionFlags  left, AppVersionFlags  right ) => left.CompareTo( right ) >= 0;
+    public static bool operator <( AppVersionFlags   left, AppVersionFlags  right ) => left.CompareTo( right )                                     < 0;
+    public static bool operator >( AppVersionFlags   left, AppVersionFlags  right ) => left.CompareTo( right )                                     > 0;
+    public static bool operator <=( AppVersionFlags  left, AppVersionFlags  right ) => left.CompareTo( right )                                     <= 0;
+    public static bool operator >=( AppVersionFlags  left, AppVersionFlags  right ) => left.CompareTo( right )                                     >= 0;
     public static bool operator <( AppVersionFlags?  left, AppVersionFlags? right ) => ValueSorter<AppVersionFlags>.Default.Compare( left, right ) < 0;
     public static bool operator >( AppVersionFlags?  left, AppVersionFlags? right ) => ValueSorter<AppVersionFlags>.Default.Compare( left, right ) > 0;
     public static bool operator <=( AppVersionFlags? left, AppVersionFlags? right ) => ValueSorter<AppVersionFlags>.Default.Compare( left, right ) <= 0;

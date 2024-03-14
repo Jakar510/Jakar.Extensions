@@ -4,15 +4,16 @@
 namespace Jakar.Database;
 
 
-public interface ICollectionWrapper<TValue> : IReadOnlyCollection<string>, IEquatable<ICollectionWrapper<TValue>>, IConvertible, ICollectionAlerts, ISpanFormattable, IDisposable where TValue : IUniqueID<string>
+public interface ICollectionWrapper<TValue> : IReadOnlyCollection<string>, IEquatable<ICollectionWrapper<TValue>>, IConvertible, ICollectionAlerts, ISpanFormattable, IDisposable
+    where TValue : IUniqueID<string>
 
 {
     bool    IsEmpty    { get; }
     bool    IsNotEmpty { get; }
     string? Json       { get; set; }
-    bool Add( TValue      value );
-    bool Contains( TValue value );
-    bool Remove( TValue   value );
+    bool    Add( TValue      value );
+    bool    Contains( TValue value );
+    bool    Remove( TValue   value );
 
 
     string ToJson();

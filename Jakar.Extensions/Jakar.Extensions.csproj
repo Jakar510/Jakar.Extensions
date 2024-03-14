@@ -1,13 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>net6.0;net7.0;netstandard2.1</TargetFrameworks>
+		<TargetFrameworks>netstandard2.1;net6.0;net7.0;net8.0</TargetFrameworks>
 		<LangVersion>latest</LangVersion>
 		<Nullable>enable</Nullable>
-		<NoWarn>$(NoWarn);1591;IDE0079</NoWarn>
+		<NoWarn>$(NoWarn);1591;IDE0079;CS1658</NoWarn>
+		<ImplicitUsings>disable</ImplicitUsings>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<OpenApiGenerateDocuments>false</OpenApiGenerateDocuments>
-		<Version>6.3.0</Version>
+		<Version>7.6.0</Version>
 		<PackageId>Jakar.Extensions</PackageId>
 		<Company></Company>
 		<Authors>Tyler Stegmaier</Authors>
@@ -17,7 +18,7 @@
 		<RepositoryType>git</RepositoryType>
 		<RepositoryUrl>https://github.com/Jakar510/Jakar.Extensions</RepositoryUrl>
 		<PackageReleaseNotes>
-			Jakar.Extensions 6.3.0
+			Jakar.Extensions 7.6.0
 
 		</PackageReleaseNotes>
 		<Description>Extensions to aid in development.</Description>
@@ -28,8 +29,16 @@
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<PackageIcon>icon.png</PackageIcon>
-		<PackageLicenseFile>W:\WorkSpace\Public\Jakar.Extensions\LICENSE.txt</PackageLicenseFile>
+		<PackageLicenseFile>W:\WorkSpace\Jakar.Extensions\LICENSE.txt</PackageLicenseFile>
+		<StripSymbols>false</StripSymbols>
+		<IsAotCompatible>true</IsAotCompatible>
+		<OptimizationPreference>Speed</OptimizationPreference>
+		<EventSourceSupport>true</EventSourceSupport>
 	</PropertyGroup>
+
+	<ItemGroup>
+		<InternalsVisibleTo Include="Jakar.Extensions.Experiments" />
+	</ItemGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard2.1|AnyCPU'">
 		<DefineConstants>$(DefineConstants);__WINDOWS__;__LINUX__;__IOS__;__ANDROID__;__MACOS__</DefineConstants>
@@ -46,6 +55,23 @@
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net6.0|AnyCPU'">
 		<DefineConstants>$(DefineConstants);__WINDOWS__;__LINUX__;__IOS__;__ANDROID__;__MACOS__</DefineConstants>
 	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net7.0|AnyCPU'">
+		<DefineConstants>$(DefineConstants);__WINDOWS__;__LINUX__;__IOS__;__ANDROID__;__MACOS__</DefineConstants>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net7.0|AnyCPU'">
+		<DefineConstants>$(DefineConstants);__WINDOWS__;__LINUX__;__IOS__;__ANDROID__;__MACOS__</DefineConstants>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net8.0|AnyCPU'">
+		<DefineConstants>$(DefineConstants);__WINDOWS__;__LINUX__;__IOS__;__ANDROID__;__MACOS__</DefineConstants>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net8.0|AnyCPU'">
+		<DefineConstants>$(DefineConstants);__WINDOWS__;__LINUX__;__IOS__;__ANDROID__;__MACOS__</DefineConstants>
+	</PropertyGroup>
+
 
 	<ItemGroup>
 		<None Include="..\images\icon.png">
@@ -68,26 +94,6 @@
 		<DefineConstants>DEBUG;TRACE</DefineConstants>
 	</PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net6.0|AnyCPU'">
-		<DebugType>portable</DebugType>
-		<LangVersion>latest</LangVersion>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net6.0|AnyCPU'">
-		<DebugType>portable</DebugType>
-		<LangVersion>latest</LangVersion>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard2.1|AnyCPU'">
-		<DebugType>portable</DebugType>
-		<LangVersion>10.0</LangVersion>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|netstandard2.1|AnyCPU'">
-		<DebugType>portable</DebugType>
-		<LangVersion>10.0</LangVersion>
-	</PropertyGroup>
-
 	<ItemGroup>
 		<None Include="..\images\icon.png">
 			<Pack>True</Pack>
@@ -100,53 +106,45 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="7.0.4">
+		<PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="8.0.0">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="CommunityToolkit.Diagnostics" Version="8.2.1" />
-		<PackageReference Include="Dapper" Version="2.0.151" />
-		<PackageReference Include="Dapper.Contrib" Version="2.0.78" />
-		<PackageReference Include="JetBrains.Annotations" Version="2023.2.0" />
-		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.7.0" />
+		<PackageReference Include="CommunityToolkit.Diagnostics" Version="8.2.2" />
+		<PackageReference Include="JetBrains.Annotations" Version="2023.3.0" />
+		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.8.0" />
 		<PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="7.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.1" />
-		<PackageReference Include="Microsoft.Extensions.Options" Version="7.0.1" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Options" Version="8.0.2" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-		<PackageReference Include="Nito.Collections.Deque" Version="1.1.1" />
+		<PackageReference Include="Nito.Collections.Deque" Version="1.2.1" />
 		<PackageReference Include="Portable.BouncyCastle" Version="1.9.0" />
-		<PackageReference Include="System.Collections.Immutable" Version="7.0.0" />
+		<PackageReference Include="System.Collections.Immutable" Version="8.0.0" />
 		<PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
 		<PackageReference Include="System.Net.Http" Version="4.3.4" />
-		<PackageReference Include="System.Text.Encoding.CodePages" Version="7.0.0" />
-		<PackageReference Include="System.Text.Encodings.Web" Version="7.0.0" />
-		<PackageReference Include="System.Text.Json" Version="7.0.3" />
+		<PackageReference Include="System.Text.Encoding.CodePages" Version="8.0.0" />
+		<PackageReference Include="System.Text.Encodings.Web" Version="8.0.0" />
 		<PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
 		<PackageReference Include="System.Threading.Tasks" Version="4.3.0" />
-		<PackageReference Include="System.Threading.Tasks.Dataflow" Version="7.0.0" />
+		<PackageReference Include="System.Threading.Tasks.Dataflow" Version="8.0.0" />
 		<PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.4" />
 		<PackageReference Include="System.Threading.Tasks.Parallel" Version="4.3.0" />
-		<PackageReference Include="OneOf" Version="3.0.255" />
-		<PackageReference Include="OneOf.Extended" Version="3.0.255" />
-		<PackageReference Include="OneOf.SourceGenerator" Version="3.0.255" />
+		<PackageReference Include="OneOf" Version="3.0.263" />
+		<PackageReference Include="OneOf.Extended" Version="3.0.263" />
+		<PackageReference Include="OneOf.SourceGenerator" Version="3.0.263" />
 		<PackageReference Include="System.Threading.ThreadPool" Version="4.3.0" />
 		<PackageReference Include="ValueOf" Version="2.0.31" />
-		<PackageReference Include="Sigil" Version="5.0.0" />
 	</ItemGroup>
 
-
-	<!-- 
-	<ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
-		<PackageReference Include="Hardware.Info" Version="10.0.1" />
+	<ItemGroup Condition="'$(TargetFramework)'=='net6.0'">
+		<PackageReference Include="System.IO.Hashing" Version="8.0.0" />
 	</ItemGroup>
-	<PackageReference Include="System.Linq.Async.Queryable" Version="6.0.1" /> 
-	-->
 
-	<!--
-	<Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'"> 
-		<Exec Command="xcopy &quot;$(TargetDir)..&quot; &quot;$(SolutionDir)Builds&quot; /Y /I" />
-	</Target>
-	-->
+	<ItemGroup Condition="'$(TargetFramework)'=='net7.0'">
+		<PackageReference Include="System.IO.Hashing" Version="8.0.0" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)'=='net8.0'">
+		<PackageReference Include="System.IO.Hashing" Version="8.0.0" />
+	</ItemGroup>
 </Project>

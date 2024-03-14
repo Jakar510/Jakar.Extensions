@@ -1,17 +1,16 @@
-﻿#nullable enable
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
 
 
 [SuppressMessage( "ReSharper", "VirtualMemberNeverOverridden.Global" )]
 public record ObservableRecord : BaseRecord, INotifyPropertyChanged, INotifyPropertyChanging
 {
+    public static readonly DateTime SQLMinDate = DateTime.Parse( "1/1/1753 12:00:00 AM", CultureInfo.InvariantCulture );
 #if NET6_0_OR_GREATER
     public static DateOnly SQLMinDateOnly { get; } = new(SQLMinDate.Date.Year, SQLMinDate.Date.Month, SQLMinDate.Date.Day);
 #endif
 
 
     public ObservableRecord() { }
-    public static readonly DateTime SQLMinDate = DateTime.Parse( "1/1/1753 12:00:00 AM", CultureInfo.InvariantCulture );
 
 
     /// <summary>
@@ -181,10 +180,10 @@ public record ObservableRecord : BaseRecord, INotifyPropertyChanged, INotifyProp
     }
 
 
-    [NotifyPropertyChangedInvocator] protected virtual void OnPropertyChanged( [CallerMemberName] string? property = default ) => OnPropertyChanged( new PropertyChangedEventArgs( property ?? string.Empty ) );
-    [NotifyPropertyChangedInvocator] protected virtual void OnPropertyChanged( PropertyChangedEventArgs   e ) => PropertyChanged?.Invoke( this, e );
-    protected virtual void OnPropertyChanging( [CallerMemberName] string?                                 property = default ) => OnPropertyChanging( new PropertyChangingEventArgs( property ?? string.Empty ) );
-    protected virtual void OnPropertyChanging( PropertyChangingEventArgs                                  e ) => PropertyChanging?.Invoke( this, e );
+    [NotifyPropertyChangedInvocator] protected virtual void OnPropertyChanged( [CallerMemberName] string?  property = default ) => OnPropertyChanged( new PropertyChangedEventArgs( property ?? string.Empty ) );
+    [NotifyPropertyChangedInvocator] protected virtual void OnPropertyChanged( PropertyChangedEventArgs    e )                  => PropertyChanged?.Invoke( this, e );
+    protected virtual                                  void OnPropertyChanging( [CallerMemberName] string? property = default ) => OnPropertyChanging( new PropertyChangingEventArgs( property ?? string.Empty ) );
+    protected virtual                                  void OnPropertyChanging( PropertyChangingEventArgs  e )                  => PropertyChanging?.Invoke( this, e );
 
 
     /// <summary> "onChanged" only called if the backingStore value has changed. </summary>
@@ -289,7 +288,8 @@ public record ObservableRecord : BaseRecord, INotifyPropertyChanged, INotifyProp
 
 
 
-public abstract record ObservableRecord<TRecord> : ObservableRecord, IEquatable<TRecord>, IComparable<TRecord>, IComparable where TRecord : ObservableRecord<TRecord>
+public abstract record ObservableRecord<TRecord> : ObservableRecord, IEquatable<TRecord>, IComparable<TRecord>, IComparable
+    where TRecord : ObservableRecord<TRecord>
 {
     protected ObservableRecord() { }
 
@@ -297,7 +297,7 @@ public abstract record ObservableRecord<TRecord> : ObservableRecord, IEquatable<
     public static TRecord? FromJson( [NotNullIfNotNull( "json" )] string? json ) => json?.FromJson<TRecord>();
 
 
-    public string ToJson() => JsonNet.ToJson( this );
+    public string ToJson()       => JsonNet.ToJson( this );
     public string ToPrettyJson() => this.ToJson( Formatting.Indented );
 
 
@@ -311,24 +311,20 @@ public abstract record ObservableRecord<TRecord> : ObservableRecord, IEquatable<
                    ? CompareTo( value )
                    : throw new ExpectedValueTypeException( nameof(other), other, typeof(TRecord) );
     }
-    public abstract int CompareTo( TRecord? other );
-    public abstract bool Equals( TRecord?   other );
+    public abstract int  CompareTo( TRecord? other );
+    public abstract bool Equals( TRecord?    other );
 }
 
 
 
-public abstract record ObservableRecord<TRecord, TID> : ObservableRecord<TRecord>, IUniqueID<TID> where TRecord : ObservableRecord<TRecord, TID>
-                                                                                                  where TID : struct, IComparable<TID>, IEquatable<TID>
+public abstract record ObservableRecord<TRecord, TID> : ObservableRecord<TRecord>, IUniqueID<TID>
+    where TRecord : ObservableRecord<TRecord, TID>
+    where TID : struct, IComparable<TID>, IEquatable<TID>
 {
     private TID _id;
 
 
-    [Key]
-    public virtual TID ID
-    {
-        get => _id;
-        init => _id = value;
-    }
+    public virtual TID ID { get => _id; init => _id = value; }
 
 
     protected ObservableRecord() : base() { }
@@ -336,5 +332,5 @@ public abstract record ObservableRecord<TRecord, TID> : ObservableRecord<TRecord
 
 
     protected bool SetID( TRecord record ) => SetID( record.ID );
-    protected bool SetID( TID     id ) => SetProperty( ref _id, id, nameof(ID) );
+    protected bool SetID( TID     id )     => SetProperty( ref _id, id, nameof(ID) );
 }

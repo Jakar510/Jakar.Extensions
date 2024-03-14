@@ -1,5 +1,4 @@
-﻿#nullable enable
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
 
 
 public class ExpectedValueTypeException<TKey> : Exception // Jakar.Api.Exceptions.Networking.HeaderException
@@ -39,11 +38,9 @@ public class ExpectedValueTypeException<TKey> : Exception // Jakar.Api.Exception
         builder.AppendLine( "It can be any of the following types: " );
         builder.AppendLine( GetTypes( expected ) );
 
-        return builder.ToString()
-                      .Replace( "\r\n", "\n" );
+        return builder.ToString().Replace( "\r\n", "\n" );
     }
-    protected static string GetTypes( params Type[] expected ) => GetTypeNames( expected )
-       .ToPrettyJson();
+    protected static string GetTypes( params Type[] expected ) => GetTypeNames( expected ).ToPrettyJson();
 
 
     public static T Verify<T>( object? item, TKey key )

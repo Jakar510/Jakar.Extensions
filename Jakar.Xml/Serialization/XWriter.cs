@@ -1,5 +1,4 @@
-﻿#nullable enable
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -12,19 +11,18 @@ namespace Jakar.Xml.Serialization;
 
 
 [SuppressMessage( "ReSharper", "PossiblyImpureMethodCallOnReadonlyVariable" )]
-public ref struct XWriter
+public ref struct XWriter( bool shouldIndent )
 {
-    public const      string        NULL = "null";
-    private readonly  StringBuilder _sb  = new(); // TODO: System.Text.ValueStringBuilder
-    internal readonly bool          shouldIndent;
-    internal          int           indentLevel = default;
+    public const      string        NULL         = "null";
+    private readonly  StringBuilder _sb          = new(); // TODO: System.Text.ValueStringBuilder
+    internal readonly bool          shouldIndent = shouldIndent;
+    internal          int           indentLevel  = default;
 
 
     public XWriter() : this( true ) { }
-    public XWriter( bool shouldIndent ) => this.shouldIndent = shouldIndent;
 
 
-    public XArray AddArray( ReadOnlySpan<char>   name ) => new(name, this);
+    public XArray  AddArray( ReadOnlySpan<char>  name ) => new(name, this);
     public XObject AddObject( ReadOnlySpan<char> name ) => new(name, this);
 
 
@@ -68,9 +66,7 @@ public ref struct XWriter
 
     public void StartBlock( ReadOnlySpan<char> name )
     {
-        _sb.Append( '<' )
-           .Append( name )
-           .Append( '>' );
+        _sb.Append( '<' ).Append( name ).Append( '>' );
 
         if ( shouldIndent )
         {
@@ -80,11 +76,7 @@ public ref struct XWriter
     }
     public void StartBlock( ReadOnlySpan<char> name, XAttributeBuilder builder )
     {
-        _sb.Append( '<' )
-           .Append( name )
-           .Append( ' ' )
-           .Append( builder.sb )
-           .Append( '>' );
+        _sb.Append( '<' ).Append( name ).Append( ' ' ).Append( builder.sb ).Append( '>' );
 
         if ( shouldIndent )
         {
@@ -94,9 +86,7 @@ public ref struct XWriter
     }
     public void FinishBlock( ReadOnlySpan<char> name )
     {
-        _sb.Append( "</" )
-           .Append( name )
-           .Append( '>' );
+        _sb.Append( "</" ).Append( name ).Append( '>' );
 
         if ( shouldIndent )
         {
@@ -114,17 +104,13 @@ public ref struct XWriter
             _sb.Append( '\t', indentLevel );
         }
 
-        _sb.Append( '<' )
-           .Append( key )
-           .Append( '>' );
+        _sb.Append( '<' ).Append( key ).Append( '>' );
 
         return this;
     }
     public XWriter Next( ReadOnlySpan<char> key )
     {
-        _sb.Append( "</" )
-           .Append( key )
-           .Append( '>' );
+        _sb.Append( "</" ).Append( key ).Append( '>' );
 
         if ( shouldIndent ) { _sb.Append( '\n' ); }
 
@@ -206,7 +192,8 @@ public ref struct XWriter
         _sb.Append( buffer[..charsWritten] );
         return this;
     }
-    public XWriter Append<T>( T? value, ReadOnlySpan<char> format, CultureInfo culture, int bufferSize ) where T : struct, ISpanFormattable
+    public XWriter Append<T>( T? value, ReadOnlySpan<char> format, CultureInfo culture, int bufferSize )
+        where T : struct, ISpanFormattable
     {
         if ( value.HasValue )
         {
@@ -223,5 +210,5 @@ public ref struct XWriter
 
 
     public override string ToString() => _sb.ToString();
-    public void Dispose() => _sb.Clear();
+    public          void   Dispose()  => _sb.Clear();
 }

@@ -1,9 +1,4 @@
-﻿#nullable enable
-using Jakar.Extensions;
-
-
-
-namespace Jakar.SqlBuilder.Interfaces;
+﻿namespace Jakar.SqlBuilder.Interfaces;
 
 
 public interface IAggregateFunctions<out TNext>

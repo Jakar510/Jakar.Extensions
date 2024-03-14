@@ -2,7 +2,6 @@
 // 04/21/2022  6:24 PM
 
 
-#nullable enable
 namespace Jakar.Json.Deserialization;
 
 
@@ -57,7 +56,7 @@ public ref struct JReader
 }
      */
     public JReader GetEnumerator() => this;
-    public void Reset() => _span = _json;
-    public bool MoveNext() => false;
-    public void Dispose() { }
+    public void    Reset()         => _span = _json;
+    public bool    MoveNext()      => false;
+    public void    Dispose()       { }
 }

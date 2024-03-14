@@ -7,64 +7,50 @@ namespace Jakar.Database;
 [SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
 public partial class DbTable<TRecord>
 {
-    private string? _next;
-    private string? _sortedIDs;
-    private string? _nextID;
-
-
-    public ValueTask<TRecord?> Next( RecordPair<TRecord>                            pair, CancellationToken token = default ) => this.Call( Next,   pair, token );
-    public ValueTask<Guid?> NextID( Guid?                                           id,   CancellationToken token = default ) => this.Call( NextID, id,   token );
+    public ValueTask<TRecord?>                         Next( RecordPair<TRecord>    pair, CancellationToken token = default ) => this.Call( Next,   pair, token );
+    public ValueTask<Guid?>                            NextID( RecordPair<TRecord>  pair, CancellationToken token = default ) => this.Call( NextID, pair, token );
     public ValueTask<IEnumerable<RecordPair<TRecord>>> SortedIDs( CancellationToken token = default ) => this.Call( SortedIDs, token );
 
 
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask<TRecord?> Next( DbConnection connection, DbTransaction? transaction, RecordPair<TRecord> pair, CancellationToken token = default )
     {
-        var parameters = new DynamicParameters();
-        parameters.Add( nameof(RecordPair<TRecord>.ID),          pair.ID );
-        parameters.Add( nameof(RecordPair<TRecord>.DateCreated), pair.DateCreated );
-
-        _next ??= @$"SELECT * FROM {SchemaTableName} WHERE ( id = IFNULL((SELECT MIN({ID_ColumnName}) FROM {SchemaTableName} WHERE {ID_ColumnName} > @{nameof(RecordPair<TRecord>.ID)}), 0) )";
+        SqlCommand sql = _sqlCache.Next( pair );
 
         try
         {
-            CommandDefinition command = GetCommandDefinition( _next, parameters, transaction, token );
+            CommandDefinition command = _database.GetCommandDefinition( transaction, sql, token );
             return await connection.ExecuteScalarAsync<TRecord>( command );
         }
-        catch ( Exception e ) { throw new SqlException( _next, parameters, e ); }
+        catch ( Exception e ) { throw new SqlException( sql, e ); }
     }
 
 
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask<IEnumerable<RecordPair<TRecord>>> SortedIDs( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
-        _sortedIDs ??= @$"SELECT {ID_ColumnName}, {DateCreated} FROM {SchemaTableName} ORDER BY {DateCreated} DESC";
+        SqlCommand sql = _sqlCache.SortedIDs();
 
         try
         {
-            CommandDefinition                command = GetCommandDefinition( _sortedIDs, default, transaction, token );
+            CommandDefinition                command = _database.GetCommandDefinition( transaction, sql, token );
             IEnumerable<RecordPair<TRecord>> pairs   = await connection.QueryAsync<RecordPair<TRecord>>( command );
             return pairs;
         }
-        catch ( Exception e ) { throw new SqlException( _sortedIDs, e ); }
+        catch ( Exception e ) { throw new SqlException( sql, e ); }
     }
 
 
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
-    public virtual async ValueTask<Guid?> NextID( DbConnection connection, DbTransaction? transaction, Guid? id, CancellationToken token = default )
+    public virtual async ValueTask<Guid?> NextID( DbConnection connection, DbTransaction? transaction, RecordPair<TRecord> pair, CancellationToken token = default )
     {
-        if ( id is null ) { return default; }
-
-        var parameters = new DynamicParameters();
-        parameters.Add( nameof(id), id.Value );
-
-        _nextID ??= @$"SELECT {ID_ColumnName} FROM {SchemaTableName} WHERE ( id = IFNULL((SELECT MIN({ID_ColumnName}) FROM {SchemaTableName} WHERE {ID_ColumnName} > @{nameof(id)}), 0) )";
+        SqlCommand sql = _sqlCache.NextID( pair );
 
         try
         {
-            CommandDefinition command = GetCommandDefinition( _nextID, parameters, transaction, token );
+            CommandDefinition command = _database.GetCommandDefinition( transaction, sql, token );
             return await connection.ExecuteScalarAsync<Guid>( command );
         }
-        catch ( Exception e ) { throw new SqlException( _nextID, parameters, e ); }
+        catch ( Exception e ) { throw new SqlException( sql, e ); }
     }
 }

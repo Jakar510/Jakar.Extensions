@@ -1,7 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Xml
 // 04/21/2022  6:24 PM
 
-#nullable enable
 using System;
 
 
@@ -28,7 +27,7 @@ public ref struct XDocument
 
 
     public XDocument GetEnumerator() => this;
-    public void Reset() => _span = _xml;
-    public bool MoveNext() => false;
-    public void Dispose() { }
+    public void      Reset()         => _span = _xml;
+    public bool      MoveNext()      => false;
+    public void      Dispose()       { }
 }

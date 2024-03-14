@@ -2,14 +2,13 @@
 // 01/25/2022  12:40 PM
 
 
-#nullable enable
 namespace Jakar.Extensions.Wpf;
 
 
 public static partial class WpfApi
 {
-    public static BitmapImage ConvertImage( this      LocalFile        file ) => new(file.ToUri());
-    public static DispatcherOperation CallAsync( this DispatcherObject view, Action func, CancellationToken token = default ) => view.Dispatcher.CallAsync( func, token );
+    public static BitmapImage         ConvertImage( this LocalFile        file )                                                 => new(file.ToUri());
+    public static DispatcherOperation CallAsync( this    DispatcherObject view, Action func, CancellationToken token = default ) => view.Dispatcher.CallAsync( func, token );
     public static DispatcherOperation CallAsync<T1>( this DispatcherObject view, Action<T1> func, T1 arg1, CancellationToken token = default ) =>
         view.Dispatcher.CallAsync( func, arg1, token );
     public static DispatcherOperation CallAsync<T1, T2>( this DispatcherObject view, Action<T1, T2> func, T1 arg1, T2 arg2, CancellationToken token = default ) =>
@@ -58,8 +57,8 @@ public static partial class WpfApi
         view.Dispatcher.CallAsync( func, arg1, arg2, arg3, arg4, arg5, token );
 
 
-    public static DispatcherOperation<Task> CallAsync( this     Dispatcher dispatcher, Func<Task>     func, CancellationToken token = default ) => dispatcher.InvokeAsync( func, DispatcherPriority.Normal, token );
-    public static DispatcherOperation<Task> CallAsync<T1>( this Dispatcher dispatcher, Func<T1, Task> func, T1 arg, CancellationToken token = default ) => dispatcher.InvokeAsync( async () => await func( arg ), DispatcherPriority.Normal, token );
+    public static DispatcherOperation<Task> CallAsync( this     Dispatcher dispatcher, Func<Task>     func, CancellationToken token                        = default ) => dispatcher.InvokeAsync( func,                          DispatcherPriority.Normal, token );
+    public static DispatcherOperation<Task> CallAsync<T1>( this Dispatcher dispatcher, Func<T1, Task> func, T1                arg, CancellationToken token = default ) => dispatcher.InvokeAsync( async () => await func( arg ), DispatcherPriority.Normal, token );
     public static DispatcherOperation<Task> CallAsync<T1, T2>( this Dispatcher dispatcher, Func<T1, T2, Task> func, T1 arg1, T2 arg2, CancellationToken token = default ) =>
         dispatcher.InvokeAsync( async () => await func( arg1, arg2 ), DispatcherPriority.Normal, token );
     public static DispatcherOperation<Task> CallAsync<T1, T2, T3>( this Dispatcher dispatcher, Func<T1, T2, T3, Task> func, T1 arg1, T2 arg2, T3 arg3, CancellationToken token = default ) =>
@@ -114,18 +113,17 @@ public static partial class WpfApi
         var collection = new ListCollectionView( list );
         return collection;
     }
-    public static ListCollectionView ToCollectionView<T, TComparer>( this ConcurrentObservableCollection<T> list, TComparer comparer ) where TComparer : IComparer<T>, IComparer
+    public static ListCollectionView ToCollectionView<T, TComparer>( this ConcurrentObservableCollection<T> list, TComparer comparer )
+        where TComparer : IComparer<T>, IComparer
     {
         BindingOperations.EnableCollectionSynchronization( list, list.Lock );
 
-        var collection = new ListCollectionView( list )
-                         {
-                             CustomSort = comparer,
-                         };
+        var collection = new ListCollectionView( list ) { CustomSort = comparer };
 
         return collection;
     }
-    public static ListCollectionView ToCollectionView<T, TComparer>( this ConcurrentObservableCollection<T> list, TComparer comparer, Predicate<T> filter ) where TComparer : IComparer<T>, IComparer
+    public static ListCollectionView ToCollectionView<T, TComparer>( this ConcurrentObservableCollection<T> list, TComparer comparer, Predicate<T> filter )
+        where TComparer : IComparer<T>, IComparer
     {
         bool Filter( object item ) => item is T value && filter( value );
 
@@ -134,7 +132,7 @@ public static partial class WpfApi
         var collection = new ListCollectionView( list )
                          {
                              Filter     = Filter,
-                             CustomSort = comparer,
+                             CustomSort = comparer
                          };
 
         return collection;
@@ -156,7 +154,7 @@ public static partial class WpfApi
                                Description            = title,
                                UseDescriptionForTitle = true,
                                SelectedPath           = LocalDirectory.CurrentDirectory.FullPath,
-                               ShowNewFolderButton    = true,
+                               ShowNewFolderButton    = true
                            };
 
         DialogResult result = dialog.ShowDialog();
@@ -176,7 +174,7 @@ public static partial class WpfApi
                        CheckFileExists  = true,
                        CheckPathExists  = true,
                        InitialDirectory = LocalDirectory.CurrentDirectory.FullPath,
-                       Filter           = @"Files|" + string.Join( ';', filters ),
+                       Filter           = @"Files|" + string.Join( ';', filters )
                    };
 
         DialogResult result = file.ShowDialog();
@@ -190,7 +188,6 @@ public static partial class WpfApi
         object old = control.Content;
         control.Content = value;
 
-        ContentControl.ContentProperty.GetMetadata( control )
-                      .PropertyChangedCallback.Invoke( control, new DependencyPropertyChangedEventArgs( ContentControl.ContentProperty, old, value ) );
+        ContentControl.ContentProperty.GetMetadata( control ).PropertyChangedCallback.Invoke( control, new DependencyPropertyChangedEventArgs( ContentControl.ContentProperty, old, value ) );
     }
 }

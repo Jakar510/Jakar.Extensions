@@ -1,5 +1,4 @@
-﻿#nullable enable
-using System;
+﻿using System;
 
 
 
@@ -13,5 +12,5 @@ public enum XmlInclude
     Attributes = 1 << 0,
     Fields     = 1 << 1,
     Properties = 1 << 2,
-    All        = ~None,
+    All        = ~None
 }

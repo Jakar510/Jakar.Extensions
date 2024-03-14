@@ -9,8 +9,6 @@ using ErrorEventArgs = System.IO.ErrorEventArgs;
 
 
 namespace Jakar.Extensions;
-#nullable enable
-
 
 
 [Serializable]
@@ -44,13 +42,9 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     public              Encoding FileEncoding  { get; init; } = Encoding.Default;
     public              string   FullPath      { get; init; }
     [JsonIgnore] public FileInfo Info          => _info ??= new FileInfo( FullPath );
-    bool TempFile.ITempFile.IsTemporary
-    {
-        get => _isTemporary;
-        set => _isTemporary = value;
-    }
-    public MimeType Mime => Extension.FromExtension();
-    public string   Name => Info.Name;
+    bool TempFile.ITempFile.     IsTemporary   { get => _isTemporary; set => _isTemporary = value; }
+    public MimeType              Mime          => Extension.FromExtension();
+    public string                Name          => Info.Name;
 
     [JsonIgnore]
     public LocalDirectory? Parent
@@ -163,7 +157,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     /// <returns> </returns>
     public static FileStream CreateTempFileAndOpen( MimeType type, out LocalFile file )
     {
-        ReadOnlySpan<char> ext  = type.ToExtension( true );
+        ReadOnlySpan<char> ext  = type.ToExtensionWithPeriod();
         ReadOnlySpan<char> name = Path.GetRandomFileName();
         name = name[..name.IndexOf( '.' )];
         Span<char> span = stackalloc char[name.Length + ext.Length];
@@ -290,8 +284,8 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     // ---------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-    public IAsyncReadHandler ReadAsync() => this;
-    public override int GetHashCode() => HashCode.Combine( FullPath, this.IsTempFile() );
+    public          IAsyncReadHandler ReadAsync()   => this;
+    public override int               GetHashCode() => HashCode.Combine( FullPath, this.IsTempFile() );
 
 
     // ---------------------------------------------------------------------------------------------------------------------------------------------------
@@ -515,7 +509,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     }
 
 
-    public ValueTask<LocalFile> ZipAsync( CancellationToken   token, params string[]    args ) => ZipAsync( args,                                           token );
+    public ValueTask<LocalFile> ZipAsync( CancellationToken   token, params string[]    args )  => ZipAsync( args,                                          token );
     public ValueTask<LocalFile> ZipAsync( IEnumerable<string> files, CancellationToken  token ) => ZipAsync( files.Select( item => new LocalFile( item ) ), token );
     public ValueTask<LocalFile> ZipAsync( CancellationToken   token, params LocalFile[] files ) => ZipAsync( files,                                         token );
     public async ValueTask<LocalFile> ZipAsync( IEnumerable<LocalFile> items, CancellationToken token )
@@ -530,8 +524,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
             ZipArchiveEntry    entry  = archive.CreateEntry( file.FullPath );
             await using Stream stream = entry.Open();
 
-            ReadOnlyMemory<byte> data = await file.ReadAsync()
-                                                  .AsMemory( token );
+            ReadOnlyMemory<byte> data = await file.ReadAsync().AsMemory( token );
 
             await stream.WriteAsync( data, token );
         }
@@ -978,6 +971,10 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
 
 
 
+    // ---------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
     [Serializable]
     public class Deque : MultiDeque<LocalFile>
     {
@@ -1105,10 +1102,6 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
 
 
 
-    // ---------------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
     /// <summary> A collection of files that are  the <see cref="LocalDirectory"/> </summary>
     [Serializable]
     public class Watcher : ConcurrentObservableCollection<LocalFile>, IDisposable
@@ -1137,15 +1130,16 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
         private void OnError( object   sender, ErrorEventArgs      e ) => Error?.Invoke( sender, e );
         private void OnRenamed( object sender, RenamedEventArgs e )
         {
-            LocalFile? file = this.FirstOrDefault( x => x.FullPath == e.OldFullPath );
+            LocalFile? file = this.AsEnumerable().FirstOrDefault( x => x.FullPath == e.OldFullPath );
             if ( file is not null ) { Remove( file ); }
 
             Add( e.FullPath );
         }
 
 
-        public void Dispose()
+        public override void Dispose()
         {
+            base.Dispose();
             _watcher.EnableRaisingEvents = false;
 
             _watcher.Created -= OnCreated;
@@ -1155,7 +1149,6 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
             _watcher.Error   -= OnError;
 
             _watcher.Dispose();
-            GC.SuppressFinalize( this );
         }
     }
 

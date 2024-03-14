@@ -7,17 +7,10 @@ namespace Jakar.Database;
 [SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
 public partial class DbTable<TRecord>
 {
-    private string? _singleInsert;
-    private string? _insertOrUpdatePostgres;
-    private string? _insertOrUpdateMsSql;
-    private string? _tryInsertPostgres;
-    private string? _tryInsertMsSql;
-
-
     public IAsyncEnumerable<TRecord> Insert( ImmutableArray<TRecord>   records, CancellationToken token = default ) => this.TryCall( Insert, records, token );
     public IAsyncEnumerable<TRecord> Insert( IEnumerable<TRecord>      records, CancellationToken token = default ) => this.TryCall( Insert, records, token );
     public IAsyncEnumerable<TRecord> Insert( IAsyncEnumerable<TRecord> records, CancellationToken token = default ) => this.TryCall( Insert, records, token );
-    public ValueTask<TRecord> Insert( TRecord                          record,  CancellationToken token = default ) => this.TryCall( Insert, record,  token );
+    public ValueTask<TRecord>        Insert( TRecord                   record,  CancellationToken token = default ) => this.TryCall( Insert, record,  token );
 
 
     public virtual async IAsyncEnumerable<TRecord> Insert( DbConnection connection, DbTransaction transaction, IEnumerable<TRecord> records, [EnumeratorCancellation] CancellationToken token = default )
@@ -37,123 +30,49 @@ public partial class DbTable<TRecord>
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask<TRecord> Insert( DbConnection connection, DbTransaction transaction, TRecord record, CancellationToken token = default )
     {
-        _singleInsert ??= $"SET NOCOUNT ON INSERT INTO {SchemaTableName} ({string.Join( ',', ColumnNames )}) OUTPUT INSERTED.ID values ({string.Join( ',', VariableNames )});";
-
-        var parameters = new DynamicParameters( record );
+        SqlCommand sql = _sqlCache.Insert( record );
 
         try
         {
-            CommandDefinition command = GetCommandDefinition( _singleInsert, parameters, transaction, token );
+            CommandDefinition command = _database.GetCommandDefinition( transaction, sql, token );
             var               id      = await connection.ExecuteScalarAsync<Guid>( command );
-            return record.NewID( id );
+            return record.NewID( RecordID<TRecord>.Create( id ) );
         }
-        catch ( Exception e ) { throw new SqlException( _singleInsert, parameters, e ); }
+        catch ( Exception e ) { throw new SqlException( sql, e ); }
     }
 
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask<TRecord?> TryInsert( DbConnection connection, DbTransaction transaction, TRecord record, bool matchAll, DynamicParameters parameters, CancellationToken token = default )
     {
-        string sql = Instance switch
-                     {
-                         DbInstance.MsSql => _tryInsertMsSql ??= $@"IF NOT EXISTS(SELECT * FROM {SchemaTableName} WHERE {string.Join( matchAll
-                                                                                                                                          ? "AND"
-                                                                                                                                          : "OR",
-                                                                                                                                      parameters.ParameterNames.Select( KeyValuePair ) )})
-BEGIN
-    SET NOCOUNT ON INSERT INTO {SchemaTableName} ({string.Join( ',', ColumnNames )}) OUTPUT INSERTED.ID values ({string.Join( ',', VariableNames )})
-END
-
-ELSE 
-BEGIN 
-    SELECT {ID_ColumnName} = NULL 
-END",
-                         DbInstance.Postgres => _tryInsertPostgres ??= $@"IF NOT EXISTS(SELECT * FROM {SchemaTableName} WHERE {string.Join( matchAll
-                                                                                                                                                ? "AND"
-                                                                                                                                                : "OR",
-                                                                                                                                            parameters.ParameterNames.Select( KeyValuePair ) )})
-BEGIN
-    SET NOCOUNT ON INSERT INTO {SchemaTableName} ({string.Join( ',', ColumnNames )}) OUTPUT INSERTED.ID values ({string.Join( ',', VariableNames )})
-END
-
-ELSE 
-BEGIN 
-    SELECT {ID_ColumnName} = NULL 
-END",
-                         _ => throw new OutOfRangeException( nameof(Instance), Instance ),
-                     };
-
+        SqlCommand sql = _sqlCache.TryInsert( record, matchAll, parameters );
 
         try
         {
-            CommandDefinition command = GetCommandDefinition( sql, parameters, transaction, token );
+            CommandDefinition command = _database.GetCommandDefinition( transaction, sql, token );
             var               id      = await connection.ExecuteScalarAsync<Guid?>( command );
 
             return id.HasValue
-                       ? record.NewID( id.Value )
+                       ? record.NewID( RecordID<TRecord>.Create( id.Value ) )
                        : default;
         }
-        catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
+        catch ( Exception e ) { throw new SqlException( sql, e ); }
     }
 
 
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask<TRecord?> InsertOrUpdate( DbConnection connection, DbTransaction transaction, TRecord record, bool matchAll, DynamicParameters parameters, CancellationToken token = default )
     {
-        string sql = Instance switch
-                     {
-                         DbInstance.MsSql => _insertOrUpdateMsSql ??= $@"IF NOT EXISTS(SELECT * FROM {SchemaTableName} WHERE {string.Join( matchAll
-                                                                                                                                               ? "AND"
-                                                                                                                                               : "OR",
-                                                                                                                                           parameters.ParameterNames.Select( KeyValuePair ) )})
-BEGIN
-    SET NOCOUNT ON INSERT INTO {SchemaTableName} ({string.Join( ',', ColumnNames )}) OUTPUT INSERTED.ID values ({string.Join( ',', VariableNames )})
-END
-
-ELSE 
-BEGIN 
-    UPDATE {SchemaTableName} SET {string.Join( ',', KeyValuePairs )} WHERE {ID_ColumnName} = @{string.Join( matchAll
-                                                                                                                ? "AND"
-                                                                                                                : "OR",
-                                                                                                            parameters.ParameterNames.Select( KeyValuePair ) )};
-
-    SELECT TOP 1 {ID_ColumnName} FROM {SchemaTableName} WHERE {string.Join( matchAll
-                                                                                ? "AND"
-                                                                                : "OR",
-                                                                            parameters.ParameterNames.Select( KeyValuePair ) )} 
-END",
-                         DbInstance.Postgres => _insertOrUpdatePostgres ??= $@"IF NOT EXISTS(SELECT * FROM {SchemaTableName} WHERE {string.Join( matchAll
-                                                                                                                                                     ? "AND"
-                                                                                                                                                     : "OR",
-                                                                                                                                                 parameters.ParameterNames.Select( KeyValuePair ) )})
-BEGIN
-    SET NOCOUNT ON INSERT INTO {SchemaTableName} ({string.Join( ',', ColumnNames )}) OUTPUT INSERTED.ID values ({string.Join( ',', VariableNames )})
-END
-
-ELSE 
-BEGIN 
-    UPDATE {SchemaTableName} SET {string.Join( ',', KeyValuePairs )} WHERE {ID_ColumnName} = @{string.Join( matchAll
-                                                                                                                ? "AND"
-                                                                                                                : "OR",
-                                                                                                            parameters.ParameterNames.Select( KeyValuePair ) )};
-
-    SELECT {ID_ColumnName} FROM {SchemaTableName} WHERE {string.Join( matchAll
-                                                                          ? "AND"
-                                                                          : "OR",
-                                                                      parameters.ParameterNames.Select( KeyValuePair ) )} LIMIT 1
-END",
-                         _ => throw new OutOfRangeException( nameof(Instance), Instance ),
-                     };
-
+        SqlCommand sql = _sqlCache.InsertOrUpdate( record, matchAll, parameters );
 
         try
         {
-            CommandDefinition command = GetCommandDefinition( sql, parameters, transaction, token );
+            CommandDefinition command = _database.GetCommandDefinition( transaction, sql, token );
             var               id      = await connection.ExecuteScalarAsync<Guid?>( command );
 
             return id.HasValue
-                       ? record.NewID( id.Value )
+                       ? record.NewID( RecordID<TRecord>.Create( id.Value ) )
                        : default;
         }
-        catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
+        catch ( Exception e ) { throw new SqlException( sql, e ); }
     }
 }

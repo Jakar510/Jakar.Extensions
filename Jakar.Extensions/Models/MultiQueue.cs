@@ -1,5 +1,4 @@
-﻿#nullable enable
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
 
 
 public interface IMultiQueue<T> : IEnumerable<T>
@@ -40,8 +39,8 @@ public class MultiQueue<T> : IMultiQueue<T>
 
 
     public bool Contains( T value ) => _queue.Contains( value );
-    public void Clear() => _queue.Clear();
-    public void Add( T value ) => _queue.Enqueue( value );
+    public void Clear()             => _queue.Clear();
+    public void Add( T value )      => _queue.Enqueue( value );
 
 
     public bool Remove( [NotNullWhen( true )] out T? value )
@@ -52,6 +51,6 @@ public class MultiQueue<T> : IMultiQueue<T>
     }
 
 
-    public IEnumerator<T> GetEnumerator() => _queue.GetEnumerator();
+    public IEnumerator<T>   GetEnumerator() => _queue.GetEnumerator();
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }

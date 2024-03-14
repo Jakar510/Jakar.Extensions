@@ -1,8 +1,4 @@
-﻿#nullable enable
-
-
-
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
 
 
 /// <summary>

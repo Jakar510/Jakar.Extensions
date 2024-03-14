@@ -14,5 +14,5 @@ public enum DistanceUnit
     /// <Docs>
     ///     <summary> Miles </summary>
     /// </Docs>
-    Miles,
+    Miles
 }

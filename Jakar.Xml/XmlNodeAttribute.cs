@@ -1,26 +1,18 @@
-﻿#nullable enable
-using System;
-using System.Reflection;
+﻿using System;
 
 
 
 namespace Jakar.Xml;
 
 
-public sealed class XmlNodeAttribute : Attribute
+public sealed class XmlNodeAttribute( string name, XmlInclude include = XmlInclude.All ) : Attribute
 {
-    public XmlInclude Include    { get; init; }
-    public string?    Name       { get; init; }
+    public XmlInclude Include    { get; init; } = include;
+    public string?    Name       { get; init; } = name;
     public bool       Properties { get; init; }
 
 
     public XmlNodeAttribute( Type type ) : this( type.Name ) { }
-
-    public XmlNodeAttribute( string name, XmlInclude include = XmlInclude.All )
-    {
-        Name    = name;
-        Include = include;
-    }
 
     public static XmlNodeAttribute Default( Type type ) => new(type.Name);
 
@@ -43,7 +35,7 @@ public sealed class XmlNodeAttribute : Attribute
         return flags;
     }
     internal bool ShouldIncludeAttributes() => (Include & XmlInclude.Attributes) > 0;
-    internal bool ShouldIncludeFields() => (Include & XmlInclude.Fields) > 0;
+    internal bool ShouldIncludeFields()     => (Include & XmlInclude.Fields)     > 0;
 
 
     internal bool ShouldIncludeProperties() => (Include & XmlInclude.Properties) > 0;

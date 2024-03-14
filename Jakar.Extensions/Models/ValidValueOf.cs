@@ -1,11 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 04/11/2022  9:54 AM
 
-#nullable enable
-using System.Linq.Expressions;
-
-
-
 namespace Jakar.Extensions;
 
 
@@ -13,45 +8,17 @@ namespace Jakar.Extensions;
 /// <typeparam name="TValue"> </typeparam>
 /// <typeparam name="TThis"> </typeparam>
 [SuppressMessage( "ReSharper", "ConditionalAccessQualifierIsNonNullableAccordingToAPIContract" )]
-public abstract class ValidValueOf<TValue, TThis> : IComparable<ValidValueOf<TValue, TThis>>, IEquatable<ValidValueOf<TValue, TThis>>, IComparable where TThis : ValidValueOf<TValue, TThis>, new()
-                                                                                                                                                   where TValue : IComparable<TValue>, IEquatable<TValue>
+public abstract class ValidValueOf<TValue, TThis> : IComparable<ValidValueOf<TValue, TThis>>, IEquatable<ValidValueOf<TValue, TThis>>, IComparable, IValidator
+    where TThis : ValidValueOf<TValue, TThis>, new()
+    where TValue : IComparable<TValue>, IEquatable<TValue>
 {
-    protected static readonly Func<TThis> _factory = (Func<TThis>)Expression.Lambda( typeof(Func<TThis>),
-                                                                                     Expression.New( typeof(TThis).GetTypeInfo()
-                                                                                                                  .DeclaredConstructors.First( x => x.GetParameters()
-                                                                                                                                                     .IsEmpty() ),
-                                                                                                     Array.Empty<Expression>() ) )
-                                                                            .Compile();
-    public TValue Value { get; protected set; }
+    bool IValidator.IsValid => IsValid();
+    public TValue   Value   { get; protected set; } = default!;
 
-    // ReSharper disable once NullableWarningSuppressionIsUsed
-    protected ValidValueOf() => Value = default!;
-    private static bool Equals( TValue? left, TValue? right )
+
+    public static bool TryCreate( TValue value, [NotNullWhen( true )] out TThis? thisValue )
     {
-        // ReSharper disable once ConvertIfStatementToSwitchStatement
-        if ( left is null && right is null ) { return true; }
-
-        if ( left is null ) { return false; }
-
-        if ( right is null ) { return false; }
-
-        if ( ReferenceEquals( left, right ) ) { return true; }
-
-        return left.Equals( right );
-    }
-
-
-    public static bool operator ==( ValidValueOf<TValue, TThis> left, ValidValueOf<TValue, TThis> right ) => Equals( left, right );
-    public static bool operator >( ValidValueOf<TValue, TThis>  left, ValidValueOf<TValue, TThis> right ) => Compare( left.Value, right.Value ) > 0;
-    public static bool operator >=( ValidValueOf<TValue, TThis> left, ValidValueOf<TValue, TThis> right ) => Compare( left.Value, right.Value ) >= 0;
-    public static bool operator !=( ValidValueOf<TValue, TThis> left, ValidValueOf<TValue, TThis> right ) => !Equals( left, right );
-    public static bool operator <( ValidValueOf<TValue, TThis>  left, ValidValueOf<TValue, TThis> right ) => Compare( left.Value, right.Value ) < 0;
-    public static bool operator <=( ValidValueOf<TValue, TThis> left, ValidValueOf<TValue, TThis> right ) => Compare( left.Value, right.Value ) <= 0;
-
-    public static bool TryCreate( TValue item, [NotNullWhen( true )] out TThis? thisValue )
-    {
-        TThis self = _factory();
-        self.Value = item;
+        var self = new TThis { Value = value };
 
         thisValue = self.IsValid()
                         ? self
@@ -60,22 +27,11 @@ public abstract class ValidValueOf<TValue, TThis> : IComparable<ValidValueOf<TVa
         return thisValue is not null;
     }
 
-    private static int Compare( TValue? left, TValue? right )
-    {
-        if ( left is null ) { return 1; }
-
-        if ( right is null ) { return -1; }
-
-        if ( ReferenceEquals( left, right ) ) { return 0; }
-
-        return left.CompareTo( right );
-    }
-
 
     public static TThis Create( TValue item )
     {
-        TThis self = _factory();
-        self.Value = item;
+        var self = new TThis { Value = item };
+
         self.Validate();
         return self;
     }
@@ -130,4 +86,36 @@ public abstract class ValidValueOf<TValue, TThis> : IComparable<ValidValueOf<TVa
 
         return Equals( Value, other.Value );
     }
+
+
+    private static bool Equals( TValue? left, TValue? right )
+    {
+        // ReSharper disable once ConvertIfStatementToSwitchStatement
+        if ( left is null && right is null ) { return true; }
+
+        if ( left is null ) { return false; }
+
+        if ( right is null ) { return false; }
+
+        if ( ReferenceEquals( left, right ) ) { return true; }
+
+        return left.Equals( right );
+    }
+
+    private static int Compare( TValue? left, TValue? right )
+    {
+        if ( left is null ) { return 1; }
+
+        if ( right is null ) { return -1; }
+
+        if ( ReferenceEquals( left, right ) ) { return 0; }
+
+        return left.CompareTo( right );
+    }
+    public static bool operator ==( ValidValueOf<TValue, TThis> left, ValidValueOf<TValue, TThis> right ) => Equals( left, right );
+    public static bool operator >( ValidValueOf<TValue, TThis>  left, ValidValueOf<TValue, TThis> right ) => Compare( left.Value, right.Value ) > 0;
+    public static bool operator >=( ValidValueOf<TValue, TThis> left, ValidValueOf<TValue, TThis> right ) => Compare( left.Value, right.Value ) >= 0;
+    public static bool operator !=( ValidValueOf<TValue, TThis> left, ValidValueOf<TValue, TThis> right ) => !Equals( left, right );
+    public static bool operator <( ValidValueOf<TValue, TThis>  left, ValidValueOf<TValue, TThis> right ) => Compare( left.Value, right.Value ) < 0;
+    public static bool operator <=( ValidValueOf<TValue, TThis> left, ValidValueOf<TValue, TThis> right ) => Compare( left.Value, right.Value ) <= 0;
 }

@@ -1,5 +1,4 @@
-﻿#nullable enable
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
 
 
 public sealed partial class IniConfig : ConcurrentDictionary<string, IniConfig.Section>
@@ -14,6 +13,7 @@ public sealed partial class IniConfig : ConcurrentDictionary<string, IniConfig.S
 
 {
     private readonly IEqualityComparer<string> _comparer;
+    public new Section this[ string sectionName ] { get => GetOrAdd( sectionName ); set => base[sectionName] = value; }
 
 
     public int Length
@@ -24,11 +24,6 @@ public sealed partial class IniConfig : ConcurrentDictionary<string, IniConfig.S
             int result = values + Keys.Count;
             return result;
         }
-    }
-    public new Section this[ string sectionName ]
-    {
-        get => GetOrAdd( sectionName );
-        set => base[sectionName] = value;
     }
 
 
@@ -46,15 +41,13 @@ public sealed partial class IniConfig : ConcurrentDictionary<string, IniConfig.S
 
     public static IniConfig ReadFromFile( LocalFile file, IFormatProvider? provider = default )
     {
-        string content = file.Read()
-                             .AsString();
+        string content = file.Read().AsString();
 
         return Parse( content, provider );
     }
     public static async ValueTask<IniConfig> ReadFromFileAsync( LocalFile file, IFormatProvider? provider = default )
     {
-        string content = await file.ReadAsync()
-                                   .AsString();
+        string content = await file.ReadAsync().AsString();
 
         return Parse( content, provider );
     }
@@ -119,8 +112,7 @@ public sealed partial class IniConfig : ConcurrentDictionary<string, IniConfig.S
 
                 // [Section:header]
                 case '[' when line[^1] == ']':
-                    ReadOnlySpan<char> sectionSpan = line.Slice( 1, line.Length - 2 )
-                                                         .Trim(); // remove the brackets and whitespace
+                    ReadOnlySpan<char> sectionSpan = line.Slice( 1, line.Length - 2 ).Trim(); // remove the brackets and whitespace
 
                     if ( sectionSpan.IsNullOrWhiteSpace() ) { throw new FormatException( "section title cannot be empty or whitespace." ); }
 
@@ -130,17 +122,14 @@ public sealed partial class IniConfig : ConcurrentDictionary<string, IniConfig.S
             }
 
 
-            if ( line.Trim()
-                     .IsNullOrWhiteSpace() ) { continue; }
+            if ( line.Trim().IsNullOrWhiteSpace() ) { continue; }
 
 
             int separator = line.IndexOf( '=' ); // key = value OR "value"
             if ( separator < 0 ) { continue; }
 
 
-            string key = line[..separator]
-                        .Trim()
-                        .ToString();
+            string key = line[..separator].Trim().ToString();
 
             string value = line[(separator + 1)..]
                           .Trim()
@@ -149,8 +138,7 @@ public sealed partial class IniConfig : ConcurrentDictionary<string, IniConfig.S
 
             Debug.Assert( !string.IsNullOrEmpty( section ) );
 
-            if ( config[section]
-               .ContainsKey( key ) ) { throw new FormatException( @$"Duplicate key '{key}':  '{section}'" ); }
+            if ( config[section].ContainsKey( key ) ) { throw new FormatException( @$"Duplicate key '{key}':  '{section}'" ); }
 
             config[section][key] = value;
         }
@@ -217,5 +205,5 @@ public sealed partial class IniConfig : ConcurrentDictionary<string, IniConfig.S
 
 
     public void Add( string  section ) => Add( new Section( section ) );
-    public void Add( Section value ) => this[value.Name] = value;
+    public void Add( Section value )   => this[value.Name] = value;
 }

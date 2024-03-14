@@ -1,5 +1,4 @@
-﻿#nullable enable
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
 
 
 public abstract class BaseFileSystemApi : IFilePaths
@@ -31,7 +30,10 @@ public abstract class BaseFileSystemApi : IFilePaths
         OutgoingFile     = GetCacheDataPath( "Outgoing.json" );
         ScreenShot       = GetCacheDataPath( "ScreenShot.png" );
     }
-
+    public void ClearCache()
+    {
+        foreach ( LocalFile file in CacheDirectory.GetFiles() ) { file.Delete(); }
+    }
 
     public LocalFile GetAppDataPath( string   file ) => AppDataDirectory.Join( file );
     public LocalFile GetCacheDataPath( string file ) => CacheDirectory.Join( file );

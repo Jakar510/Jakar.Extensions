@@ -1,5 +1,4 @@
-﻿#nullable enable
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
 
 
 public class PreferenceFile : ObservableClass, IAsyncDisposable // TODO: Add watcher to update if file changes

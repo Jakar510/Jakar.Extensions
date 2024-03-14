@@ -1,9 +1,4 @@
-﻿#nullable enable
-using Jakar.Extensions;
-
-
-
-namespace Jakar.SqlBuilder.Interfaces;
+﻿namespace Jakar.SqlBuilder.Interfaces;
 
 
 public interface ISelector : IFromSyntax<ISqlBuilderRoot>, IAggregateFunctions<ISelector>
@@ -26,7 +21,8 @@ public interface ISelector : IFromSyntax<ISqlBuilderRoot>, IAggregateFunctions<I
     /// <returns>
     ///     <see cref="ISelector"/>
     /// </returns>
-    public ISelector Next<T>( string columnName ) where T : class;
+    public ISelector Next<T>( string columnName )
+        where T : class;
 
 
     /// <summary> Adds
@@ -52,5 +48,6 @@ public interface ISelector : IFromSyntax<ISqlBuilderRoot>, IAggregateFunctions<I
     /// <returns>
     ///     <see cref="ISelector"/>
     /// </returns>
-    public ISelector Next<T>( string alias, string separator, params string[] columnNames ) where T : class;
+    public ISelector Next<T>( string alias, string separator, params string[] columnNames )
+        where T : class;
 }

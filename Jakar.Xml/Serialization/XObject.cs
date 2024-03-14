@@ -1,7 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Xml
 // 04/26/2022  9:59 AM
 
-#nullable enable
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -14,17 +13,11 @@ namespace Jakar.Xml.Serialization;
 
 
 [SuppressMessage( "ReSharper", "PossiblyImpureMethodCallOnReadonlyVariable" )]
-public ref struct XObject
+public ref struct XObject( ReadOnlySpan<char> key, XWriter context )
 {
-    private readonly ReadOnlySpan<char> _name;
-    private          XWriter            _writer;
+    private readonly ReadOnlySpan<char> _name   = key;
+    private          XWriter            _writer = context;
 
-
-    public XObject( ReadOnlySpan<char> key, XWriter context )
-    {
-        _name   = key;
-        _writer = context;
-    }
 
     public XObject Init()
     {
@@ -40,89 +33,67 @@ public ref struct XObject
 
     public XObject Null( ReadOnlySpan<char> key )
     {
-        _writer.Indent( key )
-               .Append( XWriter.NULL )
-               .Next( key );
+        _writer.Indent( key ).Append( XWriter.NULL ).Next( key );
 
         return this;
     }
     public XObject Add( ReadOnlySpan<char> key, char value )
     {
-        _writer.Indent( key )
-               .Append( value )
-               .Next( key );
+        _writer.Indent( key ).Append( value ).Next( key );
 
         return this;
     }
     public XObject Add( ReadOnlySpan<char> key, short value )
     {
-        _writer.Indent( key )
-               .Append( value )
-               .Next( key );
+        _writer.Indent( key ).Append( value ).Next( key );
 
         return this;
     }
     public XObject Add( ReadOnlySpan<char> key, ushort value )
     {
-        _writer.Indent( key )
-               .Append( value )
-               .Next( key );
+        _writer.Indent( key ).Append( value ).Next( key );
 
         return this;
     }
     public XObject Add( ReadOnlySpan<char> key, int value )
     {
-        _writer.Indent( key )
-               .Append( value )
-               .Next( key );
+        _writer.Indent( key ).Append( value ).Next( key );
 
         return this;
     }
     public XObject Add( ReadOnlySpan<char> key, uint value )
     {
-        _writer.Indent( key )
-               .Append( value )
-               .Next( key );
+        _writer.Indent( key ).Append( value ).Next( key );
 
         return this;
     }
     public XObject Add( ReadOnlySpan<char> key, long value )
     {
-        _writer.Indent( key )
-               .Append( value )
-               .Next( key );
+        _writer.Indent( key ).Append( value ).Next( key );
 
         return this;
     }
     public XObject Add( ReadOnlySpan<char> key, ulong value )
     {
-        _writer.Indent( key )
-               .Append( value )
-               .Next( key );
+        _writer.Indent( key ).Append( value ).Next( key );
 
         return this;
     }
     public XObject Add( ReadOnlySpan<char> key, float value )
     {
-        _writer.Indent( key )
-               .Append( value )
-               .Next( key );
+        _writer.Indent( key ).Append( value ).Next( key );
 
         return this;
     }
     public XObject Add( ReadOnlySpan<char> key, double value )
     {
-        _writer.Indent( key )
-               .Append( value )
-               .Next( key );
+        _writer.Indent( key ).Append( value ).Next( key );
 
         return this;
     }
     public XObject Add( ReadOnlySpan<char> key, decimal value )
     {
-        _writer.Indent( key )
-               .Append( value )
-               .Next( key );
+        _writer.Indent( key ).Append( value ).Next( key );
 
         return this;
     }
@@ -163,33 +134,30 @@ public ref struct XObject
     public XObject Add( ReadOnlySpan<char> key, string value ) => Add( key, value.AsSpan() );
     public XObject Add( ReadOnlySpan<char> key, ReadOnlySpan<char> value )
     {
-        _writer.Indent( key )
-               .Append( value )
-               .Next( key );
+        _writer.Indent( key ).Append( value ).Next( key );
 
         return this;
     }
 
 
-    public XObject Add( ReadOnlySpan<char> key, ISpanFormattable value, int bufferSize ) => Add( key,                      value, bufferSize, CultureInfo.CurrentCulture );
+    public XObject Add( ReadOnlySpan<char> key, ISpanFormattable value, int bufferSize )                      => Add( key, value, bufferSize, CultureInfo.CurrentCulture );
     public XObject Add( ReadOnlySpan<char> key, ISpanFormattable value, int bufferSize, CultureInfo culture ) => Add( key, value, bufferSize, default, culture );
     public XObject Add( ReadOnlySpan<char> key, ISpanFormattable value, int bufferSize, ReadOnlySpan<char> format, CultureInfo culture )
     {
-        _writer.Indent( key )
-               .Append( value, format, culture, bufferSize )
-               .Next( key );
+        _writer.Indent( key ).Append( value, format, culture, bufferSize ).Next( key );
 
         return this;
     }
 
 
-    public XObject Add<T>( ReadOnlySpan<char> key, T? value, int bufferSize ) where T : struct, ISpanFormattable => Add( key,                      value, bufferSize, CultureInfo.CurrentCulture );
-    public XObject Add<T>( ReadOnlySpan<char> key, T? value, int bufferSize, CultureInfo culture ) where T : struct, ISpanFormattable => Add( key, value, bufferSize, default, culture );
-    public XObject Add<T>( ReadOnlySpan<char> key, T? value, int bufferSize, ReadOnlySpan<char> format, CultureInfo culture ) where T : struct, ISpanFormattable
+    public XObject Add<T>( ReadOnlySpan<char> key, T? value, int bufferSize )
+        where T : struct, ISpanFormattable => Add( key, value, bufferSize, CultureInfo.CurrentCulture );
+    public XObject Add<T>( ReadOnlySpan<char> key, T? value, int bufferSize, CultureInfo culture )
+        where T : struct, ISpanFormattable => Add( key, value, bufferSize, default, culture );
+    public XObject Add<T>( ReadOnlySpan<char> key, T? value, int bufferSize, ReadOnlySpan<char> format, CultureInfo culture )
+        where T : struct, ISpanFormattable
     {
-        _writer.Indent( key )
-               .Append( value, format, culture, bufferSize )
-               .Next( key );
+        _writer.Indent( key ).Append( value, format, culture, bufferSize ).Next( key );
 
         return this;
     }
@@ -208,11 +176,11 @@ public ref struct XObject
     public XObject Add( KeyValuePair<string, decimal> pair ) => Add( pair.Key, pair.Value );
 
 
-    public XObject Add( KeyValuePair<string, DateOnly>         pair ) => Add( pair.Key,                        pair.Value, 100 );
-    public XObject Add( KeyValuePair<string, TimeOnly>         pair ) => Add( pair.Key,                        pair.Value, 100 );
-    public XObject Add( KeyValuePair<string, TimeSpan>         pair ) => Add( pair.Key,                        pair.Value, 100 );
-    public XObject Add( KeyValuePair<string, DateTimeOffset>   pair ) => Add( pair.Key,                        pair.Value, 100 );
-    public XObject Add( KeyValuePair<string, DateTime>         pair ) => Add( pair.Key,                        pair.Value, 100 );
+    public XObject Add( KeyValuePair<string, DateOnly>         pair )                        => Add( pair.Key, pair.Value, 100 );
+    public XObject Add( KeyValuePair<string, TimeOnly>         pair )                        => Add( pair.Key, pair.Value, 100 );
+    public XObject Add( KeyValuePair<string, TimeSpan>         pair )                        => Add( pair.Key, pair.Value, 100 );
+    public XObject Add( KeyValuePair<string, DateTimeOffset>   pair )                        => Add( pair.Key, pair.Value, 100 );
+    public XObject Add( KeyValuePair<string, DateTime>         pair )                        => Add( pair.Key, pair.Value, 100 );
     public XObject Add( KeyValuePair<string, ISpanFormattable> pair, int bufferSize = 1000 ) => Add( pair.Key, pair.Value, bufferSize );
 
 
@@ -240,12 +208,12 @@ public ref struct XObject
                    DateTimeOffset v   => Add( k, v, 100 ),
                    DateTime v         => Add( k, v, 100 ),
                    ISpanFormattable v => Add( k, v, bufferSize ),
-                   _                  => Add( k, pair.Value.ToString() ?? XWriter.NULL ),
+                   _                  => Add( k, pair.Value.ToString() ?? XWriter.NULL )
                };
     }
 
 
-    public XArray AddArray( ReadOnlySpan<char>   key ) => new(key, _writer);
+    public XArray  AddArray( ReadOnlySpan<char>  key ) => new(key, _writer);
     public XObject AddObject( ReadOnlySpan<char> key ) => new(key, _writer);
 
 

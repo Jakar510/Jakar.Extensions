@@ -17,5 +17,5 @@ public enum DevicePlatform
     WPF,
     Xamarin,
     Maui,
-    Linux,
+    Linux
 }

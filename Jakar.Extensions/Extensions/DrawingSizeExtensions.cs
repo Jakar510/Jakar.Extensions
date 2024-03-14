@@ -1,12 +1,20 @@
-﻿#nullable enable
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
 
 
 public static class DrawingSizeExtensions
 {
-    public static IEnumerable<(TEnum, Size)> GetScaledSizes<TEnum>( this int baseSize, params TEnum[] scales ) where TEnum : Enum => new Size( baseSize, baseSize ).GetScaledSizes( scales );
+#if NET7_0_OR_GREATER
+    [RequiresDynamicCode( nameof(GetScaledSizes) )]
+#endif
+    public static IEnumerable<(TEnum, Size)> GetScaledSizes<TEnum>( this int baseSize, params TEnum[] scales )
+        where TEnum : struct, Enum => new Size( baseSize, baseSize ).GetScaledSizes( scales );
 
-    public static IEnumerable<(TEnum, Size)> GetScaledSizes<TEnum>( this Size baseSize, params TEnum[] scales ) where TEnum : Enum
+
+#if NET7_0_OR_GREATER
+    [RequiresDynamicCode( nameof(GetScaledSizes) )]
+#endif
+    public static IEnumerable<(TEnum, Size)> GetScaledSizes<TEnum>( this Size baseSize, params TEnum[] scales )
+        where TEnum : struct, Enum
     {
         // ReSharper disable once LoopCanBeConvertedToQuery
         foreach ( TEnum scale in scales )

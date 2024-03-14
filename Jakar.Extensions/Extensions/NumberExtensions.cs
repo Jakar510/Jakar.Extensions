@@ -1,5 +1,4 @@
-﻿#nullable enable
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
 
 
 public static class Numbers
@@ -152,15 +151,37 @@ public static class Numbers
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static ushort AsUShort( this long    value ) => (ushort)value;
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static int AsInt<TEnum>( this         TEnum value ) where TEnum : struct, Enum => CastTo<TEnum, int>.From( value );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static long AsLong<TEnum>( this       TEnum value ) where TEnum : struct, Enum => CastTo<TEnum, long>.From( value );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static sbyte AsSByte<TEnum>( this     TEnum value ) where TEnum : struct, Enum => CastTo<TEnum, sbyte>.From( value );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static ushort AsUShort<TEnum>( this   TEnum value ) where TEnum : struct, Enum => CastTo<TEnum, ushort>.From( value );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static short AsShort<TEnum>( this     TEnum value ) where TEnum : struct, Enum => CastTo<TEnum, short>.From( value );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static uint AsUInt<TEnum>( this       TEnum value ) where TEnum : struct, Enum => CastTo<TEnum, uint>.From( value );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static ulong AsULong<TEnum>( this     TEnum value ) where TEnum : struct, Enum => CastTo<TEnum, ulong>.From( value );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static decimal AsDecimal<TEnum>( this TEnum value ) where TEnum : struct, Enum => CastTo<TEnum, decimal>.From( value );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static byte AsByte<TEnum>( this       TEnum value ) where TEnum : struct, Enum => CastTo<TEnum, byte>.From( value );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static double AsDouble<TEnum>( this   TEnum value ) where TEnum : struct, Enum => CastTo<TEnum, double>.From( value );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static float AsFloat<TEnum>( this     TEnum value ) where TEnum : struct, Enum => CastTo<TEnum, float>.From( value );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public static int AsInt<TEnum>( this TEnum value )
+        where TEnum : struct, Enum => CastTo<TEnum, int>.From( value );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public static long AsLong<TEnum>( this TEnum value )
+        where TEnum : struct, Enum => CastTo<TEnum, long>.From( value );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public static sbyte AsSByte<TEnum>( this TEnum value )
+        where TEnum : struct, Enum => CastTo<TEnum, sbyte>.From( value );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public static ushort AsUShort<TEnum>( this TEnum value )
+        where TEnum : struct, Enum => CastTo<TEnum, ushort>.From( value );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public static short AsShort<TEnum>( this TEnum value )
+        where TEnum : struct, Enum => CastTo<TEnum, short>.From( value );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public static uint AsUInt<TEnum>( this TEnum value )
+        where TEnum : struct, Enum => CastTo<TEnum, uint>.From( value );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public static ulong AsULong<TEnum>( this TEnum value )
+        where TEnum : struct, Enum => CastTo<TEnum, ulong>.From( value );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public static decimal AsDecimal<TEnum>( this TEnum value )
+        where TEnum : struct, Enum => CastTo<TEnum, decimal>.From( value );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public static byte AsByte<TEnum>( this TEnum value )
+        where TEnum : struct, Enum => CastTo<TEnum, byte>.From( value );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public static double AsDouble<TEnum>( this TEnum value )
+        where TEnum : struct, Enum => CastTo<TEnum, double>.From( value );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public static float AsFloat<TEnum>( this TEnum value )
+        where TEnum : struct, Enum => CastTo<TEnum, float>.From( value );
 }

@@ -1,9 +1,9 @@
-﻿#nullable enable
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
 
 
 [SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
-public class ObservableDictionary<TKey, TValue> : CollectionAlerts<KeyValuePair<TKey, TValue>>, IDictionary<TKey, TValue>, IReadOnlyDictionary<TKey, TValue> where TKey : notnull
+public class ObservableDictionary<TKey, TValue> : CollectionAlerts<KeyValuePair<TKey, TValue>>, IDictionary<TKey, TValue>, IReadOnlyDictionary<TKey, TValue>
+    where TKey : notnull
 {
     protected readonly     Dictionary<TKey, TValue> _dictionary;
     public sealed override int                      Count      => _dictionary.Count;
@@ -57,8 +57,8 @@ public class ObservableDictionary<TKey, TValue> : CollectionAlerts<KeyValuePair<
     public bool ContainsValue( TValue value ) => _dictionary.ContainsValue( value );
 
 
-    public bool TryGetValue( TKey                    key, [NotNullWhen( true )] out TValue? value ) => _dictionary.TryGetValue( key, out value );
-    public bool ContainsKey( TKey                    key ) => _dictionary.ContainsKey( key );
+    public bool TryGetValue( TKey                    key, [NotNullWhen( true )] out TValue? value ) => _dictionary.TryGetValue( key, out value ) && value is not null;
+    public bool ContainsKey( TKey                    key )  => _dictionary.ContainsKey( key );
     public bool Contains( KeyValuePair<TKey, TValue> item ) => ContainsKey( item.Key ) && ContainsValue( item.Value );
 
 
@@ -101,10 +101,7 @@ public class ObservableDictionary<TKey, TValue> : CollectionAlerts<KeyValuePair<
     }
 
 
-    public override IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
-    {
-        return _dictionary.Where( Filter )
-                          .GetEnumerator();
-    }
+    public override IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator() =>
+        _dictionary.Where( Filter ).GetEnumerator();
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }

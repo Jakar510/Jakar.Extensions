@@ -1,7 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions.Wpf
 // 05/17/2022  4:02 PM
 
-#nullable enable
 using System.Windows.Controls.Primitives;
 
 
@@ -24,6 +23,6 @@ public abstract class PopupBase : Popup, IChangeable
     }
 
 
-    public virtual void OnAppearing() { }
+    public virtual void OnAppearing()    { }
     public virtual void OnDisappearing() { }
 }

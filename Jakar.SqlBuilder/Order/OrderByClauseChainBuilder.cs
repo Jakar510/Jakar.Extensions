@@ -1,17 +1,11 @@
 ﻿// Jakar.Extensions :: Jakar.SqlBuilder
 // 05/08/2022  10:21 AM
 
-#nullable enable
 namespace Jakar.SqlBuilder;
 
 
-public struct OrderByClauseChainBuilder
+public struct OrderByClauseChainBuilder( in OrderByClauseBuilder order, ref EasySqlBuilder builder )
 {
-    private readonly OrderByClauseBuilder _order;
-    private          EasySqlBuilder       _builder;
-    public OrderByClauseChainBuilder( in OrderByClauseBuilder order, ref EasySqlBuilder builder )
-    {
-        _order   = order;
-        _builder = builder;
-    }
+    private readonly OrderByClauseBuilder _order   = order;
+    private          EasySqlBuilder       _builder = builder;
 }

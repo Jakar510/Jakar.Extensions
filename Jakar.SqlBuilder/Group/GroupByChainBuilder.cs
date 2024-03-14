@@ -1,21 +1,14 @@
 ﻿// Jakar.Extensions :: Jakar.SqlBuilder
 // 05/08/2022  11:31 AM
 
-#nullable enable
 namespace Jakar.SqlBuilder;
 
 
-public struct GroupByChainBuilder
+public struct GroupByChainBuilder( in GroupByClauseBuilder group, ref EasySqlBuilder builder )
 {
-    private readonly GroupByClauseBuilder _group;
-    private          EasySqlBuilder       _builder;
+    private readonly GroupByClauseBuilder _group   = group;
+    private          EasySqlBuilder       _builder = builder;
 
-
-    public GroupByChainBuilder( in GroupByClauseBuilder group, ref EasySqlBuilder builder )
-    {
-        _group   = group;
-        _builder = builder;
-    }
 
     public SortersBuilder<GroupByChainBuilder> SortBy() => new(this, ref _builder);
 }

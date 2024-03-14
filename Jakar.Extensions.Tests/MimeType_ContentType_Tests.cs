@@ -1,12 +1,8 @@
-#nullable enable
-using NUnit.Framework;
-
-
-
 namespace Jakar.Extensions.Tests;
 
 
 [TestFixture]
+[TestOf( typeof(MimeTypes) )]
 
 // ReSharper disable once InconsistentNaming
 public class MimeType_ContentType_Tests : Assert
@@ -100,7 +96,7 @@ public class MimeType_ContentType_Tests : Assert
     [TestCase( MimeTypeNames.MultiPart.FORM_DATA, MimeType.FormData )]
     public void Test_ToMimeType_Fonts( string s, MimeType mime ) => Test_ToMimeType( s, mime );
 
-    private static void Test_ToMimeType( string s, MimeType mime ) => AreEqual( s.ToMimeType(), mime );
+    private void Test_ToMimeType( string s, MimeType mime ) => this.AreEqual( s.ToMimeType(), mime );
 
     [Test]
     [TestCase( MimeTypeNames.Text.CONFIG,                 MimeType.Cfg )]
@@ -192,11 +188,9 @@ public class MimeType_ContentType_Tests : Assert
     [TestCase( MimeTypeNames.MultiPart.FORM_DATA, MimeType.FormData )]
     public void Test_ToContentType_Fonts( string s, MimeType mime ) => Test_ToContentType( s, mime );
 
-    private static void Test_ToContentType( string s, MimeType mime ) => AreEqual( s, mime.ToContentType() );
+    private void Test_ToContentType( string s, MimeType mime ) => this.AreEqual( s, mime.ToContentType() );
 
     [Test]
-
-    // TEXT
     [TestCase( MimeTypeNames.Text.CONFIG )]
     [TestCase( MimeTypeNames.Text.CONFIGURATION )]
     [TestCase( MimeTypeNames.Text.INI )]
@@ -207,8 +201,6 @@ public class MimeType_ContentType_Tests : Assert
     [TestCase( MimeTypeNames.Text.XML )]
     [TestCase( MimeTypeNames.Text.HTML )]
     [TestCase( MimeTypeNames.Text.PLAIN )]
-
-    // GENERIC APPLICATIONS
     [TestCase( MimeTypeNames.Application.URL_ENCODED_CONTENT )]
     [TestCase( MimeTypeNames.Application.SOAP )]
     [TestCase( MimeTypeNames.Application.BINARY )]
@@ -221,24 +213,18 @@ public class MimeType_ContentType_Tests : Assert
     [TestCase( MimeTypeNames.Application.JAVA_SCRIPT )]
     [TestCase( MimeTypeNames.Application.VBS )]
     [TestCase( MimeTypeNames.Application.LICENSES )]
-
-    // ARCHIVES
     [TestCase( MimeTypeNames.Application.Archive.ZIP )]
     [TestCase( MimeTypeNames.Application.Archive.SEVEN_ZIP )]
     [TestCase( MimeTypeNames.Application.Archive.B_ZIP )]
     [TestCase( MimeTypeNames.Application.Archive.B_ZIP_2 )]
     [TestCase( MimeTypeNames.Application.Archive.GZIP )]
     [TestCase( MimeTypeNames.Application.Archive.TAR )]
-
-    // OFFICE
     [TestCase( MimeTypeNames.Application.MsOffice.DOC )]
     [TestCase( MimeTypeNames.Application.MsOffice.DOCX )]
     [TestCase( MimeTypeNames.Application.MsOffice.XLS )]
     [TestCase( MimeTypeNames.Application.MsOffice.XLSX )]
     [TestCase( MimeTypeNames.Application.MsOffice.PPT )]
     [TestCase( MimeTypeNames.Application.MsOffice.PPTX )]
-
-    // AUDIO
     [TestCase( MimeTypeNames.Audio.THREE_GPP2_AUDIO )]
     [TestCase( MimeTypeNames.Audio.THREE_GPP_AUDIO )]
     [TestCase( MimeTypeNames.Audio.AAC )]
@@ -246,8 +232,6 @@ public class MimeType_ContentType_Tests : Assert
     [TestCase( MimeTypeNames.Audio.MP3 )]
     [TestCase( MimeTypeNames.Audio.WEBA )]
     [TestCase( MimeTypeNames.Audio.WAVE )]
-
-    // VIDEOS
     [TestCase( MimeTypeNames.Video.THREE_GPP2_VIDEO )]
     [TestCase( MimeTypeNames.Video.THREE_GPP_VIDEO )]
     [TestCase( MimeTypeNames.Video.MP4 )]
@@ -260,8 +244,6 @@ public class MimeType_ContentType_Tests : Assert
     [TestCase( MimeTypeNames.Video.MPG )]
     [TestCase( MimeTypeNames.Video.OGG )]
     [TestCase( MimeTypeNames.Video.MKV )]
-
-    // IMAGES
     [TestCase( MimeTypeNames.Image.GIF )]
     [TestCase( MimeTypeNames.Image.TIFF )]
     [TestCase( MimeTypeNames.Image.PNG )]
@@ -274,7 +256,19 @@ public class MimeType_ContentType_Tests : Assert
     [TestCase( MimeTypeNames.Font.TRUE_TYPE )]
     [TestCase( MimeTypeNames.Font.OPEN_TYPE )]
     [TestCase( MimeTypeNames.MultiPart.FORM_DATA )]
-    public void Test_ContentType( string s ) => AreEqual( s.ToMimeType()
-                                                           .ToContentType(),
-                                                          s );
+
+    // TEXT
+
+    // GENERIC APPLICATIONS
+
+    // ARCHIVES
+
+    // OFFICE
+
+    // AUDIO
+
+    // VIDEOS
+
+    // IMAGES
+    public void Test_ContentType( string s ) => this.AreEqual( s.ToMimeType().ToContentType(), s );
 }

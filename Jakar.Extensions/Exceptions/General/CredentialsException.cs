@@ -1,18 +1,20 @@
-﻿#nullable enable
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
 
 
 public class CredentialsException : Exception
 {
     public CredentialsException() { }
-    public CredentialsException( string? user, string? password ) : base( CreateMessage( user,                   password ) ) { }
-    public CredentialsException( string? user, string? password, Exception? inner ) : base( CreateMessage( user, password ), inner ) { }
+    public CredentialsException( string? message ) : base( message ) { }
+    public CredentialsException( string? message, Exception? inner ) : base( message, inner ) { }
 
 
-    protected static string CreateMessage( string? user, string? password ) => $"User: '{user ?? "null"}'";
+    public static CredentialsException Create( string? user, Exception? inner = default ) => new($"User: '{user ?? "null"}'", inner);
 
-    public static void ThrowIfInvalid( string? user, string? password )
+
+    public static bool IsValid( [NotNullWhen(        true )] string? user, [NotNullWhen( true )] string? password ) => IsInvalid( user, password ) is false;
+    public static bool IsInvalid( [NotNullWhen(      true )] string? user, [NotNullWhen( true )] string? password ) => string.IsNullOrWhiteSpace( user ) || string.IsNullOrWhiteSpace( password );
+    public static void ThrowIfInvalid( [NotNullWhen( true )] string? user, [NotNullWhen( true )] string? password )
     {
-        if ( string.IsNullOrWhiteSpace( user ) || string.IsNullOrWhiteSpace( password ) ) { throw new CredentialsException( user, password ); }
+        if ( IsInvalid( user, password ) ) { throw Create( user ); }
     }
 }

@@ -1,5 +1,4 @@
-﻿#nullable enable
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
 
 
 /// <summary> A response was received from server but was indicated a protocol-level error. </summary>

@@ -1,7 +1,4 @@
-#nullable enable
-using System;
 using System.Net;
-using NUnit.Framework;
 
 
 #pragma warning disable IDE0071
@@ -12,6 +9,7 @@ namespace Jakar.Extensions.Tests;
 
 
 [TestFixture]
+[TestOf( typeof(IniConfig) )]
 
 // ReSharper disable once InconsistentNaming
 public class IniConfig_Tests : Assert
@@ -19,10 +17,7 @@ public class IniConfig_Tests : Assert
     [Test]
     public void Test()
     {
-        var project = new IniConfig.Section( "Project" )
-                      {
-                          ["Name"] = nameof(IniConfig_Tests),
-                      };
+        var project = new IniConfig.Section( "Project" ) { ["Name"] = nameof(IniConfig_Tests) };
 
         project.Add( nameof(DateTime),       DateTime.Now );
         project.Add( nameof(DateTimeOffset), DateTimeOffset.UtcNow );
@@ -30,10 +25,7 @@ public class IniConfig_Tests : Assert
         project.Add( nameof(AppVersion),     new AppVersion( 1, 2, 3, 4, 5, 6, AppVersionFlags.Stable ) );
 
 
-        var server = new IniConfig.Section( "Server" )
-                     {
-                         ["Name"] = nameof(ServicePoint),
-                     };
+        var server = new IniConfig.Section( "Server" ) { ["Name"] = nameof(ServicePoint) };
 
         server.Add( "Port", Random.Shared.Next( IPEndPoint.MinPort, IPEndPoint.MaxPort ) );
 
@@ -43,14 +35,12 @@ public class IniConfig_Tests : Assert
         var ini = new IniConfig
                   {
                       project,
-                      server,
+                      server
                   };
 
-        ini[nameof(Random)]
-           .Add( nameof(Random.Next), Random.Shared.Next() );
+        ini[nameof(Random)].Add( nameof(Random.Next), Random.Shared.Next() );
 
-        ini[nameof(IniConfig_Tests)]
-           .Add( nameof(Random.Next), Random.Shared.Next() );
+        ini[nameof(IniConfig_Tests)].Add( nameof(Random.Next), Random.Shared.Next() );
 
 
         string actual = ini.ToString();
@@ -60,8 +50,8 @@ public class IniConfig_Tests : Assert
         $"-- {nameof(results)} --\n{results.ToString()}".WriteToConsole();
 
 
-        NotNull( results );
-        AreEqual( results,                  ini );
-        AreEqual( results[nameof(project)], project );
+        this.NotNull( results );
+        this.AreEqual( results,                  ini );
+        this.AreEqual( results[nameof(project)], project );
     }
 }

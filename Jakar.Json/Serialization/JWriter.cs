@@ -1,41 +1,33 @@
-﻿using System.Runtime.InteropServices;
-
-
-
-namespace Jakar.Json.Serialization;
+﻿namespace Jakar.Json.Serialization;
 
 
 [SuppressMessage( "ReSharper", "PossiblyImpureMethodCallOnReadonlyVariable" )]
-public ref struct JWriter
+public ref struct JWriter( int capacity, Formatting formatting )
 {
     public const           string                             NULL           = "null";
+    public const           char                               QUOTE          = '"';
+    public const           char                               COLON          = ':';
+    public const           char                               SPACE          = ' ';
     public static readonly ConcurrentDictionary<Type, string> DefaultFormats = new();
-    private readonly       ValueStringBuilder                 _sb;
-    private readonly       bool                               _shouldIndent;
-    private                int                                _indentLevel = 0;
+    private readonly       ValueStringBuilder                 _sb            = new(capacity);
+    private                int                                _indentLevel   = 0;
+    public                 bool                               ShouldIndent { get; } = formatting is Formatting.Indented;
 
 
     public JWriter() : this( 10_000, Formatting.Indented ) { }
-    public JWriter( int capacity, Formatting formatting )
+    public readonly          void   Dispose()  => _sb.Dispose();
+    public readonly override string ToString() => _sb.ToString();
+
+
+    [Pure] public readonly JArray  AddArray()  => new(this);
+    [Pure] public readonly JObject AddObject() => new(this);
+
+
+    public JWriter StartBlock( char start )
     {
-        _shouldIndent = formatting is Formatting.Indented;
-        _sb           = new ValueStringBuilder( capacity );
+        Indent().Append( start );
 
-        // _stream       = new StringBuilder( capacity );
-        // _writer       = new StringWriter( _stream );
-    }
-
-
-    [Pure] public readonly JArray AddArray() => new(this, _shouldIndent);
-    [Pure] public readonly JObject AddObject() => new(this, _shouldIndent);
-
-
-    public JWriter StartBlock( char start, bool shouldIndent )
-    {
-        Indent( shouldIndent )
-           .Append( start );
-
-        if ( !_shouldIndent ) { return this; }
+        if ( !ShouldIndent ) { return this; }
 
         _sb.Append( '\n' );
         _indentLevel += 1;
@@ -43,13 +35,21 @@ public ref struct JWriter
     }
 
 
-    public JWriter FinishBlock( char end ) => FinishBlock()
-                                             .NewLine()
-                                             .Indent()
-                                             .Append( end );
+    public JWriter FinishBlock( char end ) => FinishBlock().NewLine().Indent().Append( end );
     public JWriter FinishBlock()
     {
-        if ( _shouldIndent ) { _indentLevel -= 1; }
+        if ( ShouldIndent ) { _indentLevel -= 1; }
+
+        return this;
+    }
+
+
+    public readonly JWriter Indent()
+    {
+        if ( _indentLevel < 0 ) { throw new InvalidOperationException( $"{nameof(_indentLevel)} is negative" ); }
+
+        if ( ShouldIndent ) { _sb.Append( ' ', _indentLevel * 4 ); }
+        else { _sb.Append( ' ' ); }
 
         return this;
     }
@@ -57,7 +57,7 @@ public ref struct JWriter
 
     public readonly JWriter NewLine()
     {
-        if ( _shouldIndent ) { _sb.Append( '\n' ); }
+        if ( ShouldIndent ) { _sb.Append( '\n' ); }
 
         return this;
     }
@@ -73,19 +73,6 @@ public ref struct JWriter
     }
 
 
-    public readonly JWriter Indent() => Indent( _shouldIndent );
-    public readonly JWriter Indent( bool shouldIndent )
-    {
-        if ( _indentLevel < 0 ) { throw new InvalidOperationException( $"{nameof(_indentLevel)} is negative" ); }
-
-        if ( shouldIndent ) { _sb.Append( ' ', _indentLevel * 4 ); }
-        else { _sb.Append( ' ' ); }
-
-        return this;
-    }
-
-
-    public readonly JWriter Append( string value ) => Append( value.AsSpan() );
     public readonly JWriter Append( ReadOnlySpan<char> value )
     {
         _sb.Append( value );
@@ -98,79 +85,71 @@ public ref struct JWriter
     }
 
 
-    public readonly JWriter Append<T>( T? value ) where T : ISpanFormattable => Append( value,                            CultureInfo.CurrentCulture );
-    public readonly JWriter Append<T>( T? value, IFormatProvider? provider ) where T : ISpanFormattable => Append( value, GetDefaultFormat<T>(), provider );
-    public readonly JWriter Append<T>( T? value, ReadOnlySpan<char> format, IFormatProvider? provider ) where T : ISpanFormattable
+    public readonly JWriter Append<T>( T? value )
+        where T : ISpanFormattable => Append( value, CultureInfo.CurrentCulture );
+    public readonly JWriter Append<T>( T? value, IFormatProvider? provider )
+        where T : ISpanFormattable => Append( value, GetDefaultFormat<T>(), provider );
+    public readonly JWriter Append<T>( T? value, ReadOnlySpan<char> format, IFormatProvider? provider )
+        where T : ISpanFormattable
     {
         if ( value is null ) { return Null(); }
 
         _sb.AppendSpanFormattable( value, format, provider );
         return this;
     }
-    public readonly JWriter Append<T>( T? value, ReadOnlySpan<char> format, int bufferSize, IFormatProvider? provider = default ) where T : ISpanFormattable
+    public readonly JWriter Append<T>( T? value, ReadOnlySpan<char> format, int bufferSize, IFormatProvider? provider = default )
+        where T : ISpanFormattable
     {
         if ( value is null ) { return Null(); }
 
-        Span<char> buffer = stackalloc char[bufferSize];
-        if ( !value.TryFormat( buffer, out int charsWritten, format, provider ) ) { throw new InvalidOperationException( $"Can't format value: '{value}'" ); }
-
-        buffer = buffer[..charsWritten];
-        _sb.Append( MemoryMarshal.CreateReadOnlySpan( ref buffer.GetPinnableReference(), buffer.Length ) );
+        _sb.EnsureCapacity( bufferSize );
+        _sb.AppendSpanFormattable( value, format, provider );
         return this;
     }
 
 
-    public readonly JWriter AppendValue<T>( T? value ) where T : struct, ISpanFormattable => AppendValue( value,                            CultureInfo.CurrentCulture );
-    public readonly JWriter AppendValue<T>( T? value, IFormatProvider? provider ) where T : struct, ISpanFormattable => AppendValue( value, GetDefaultFormat<T>(), provider );
-    public readonly JWriter AppendValue<T>( T? value, ReadOnlySpan<char> format, IFormatProvider? provider ) where T : struct, ISpanFormattable
-    {
-        if ( value is null ) { return Null(); }
+    public readonly JWriter AppendValue<T>( T? value )
+        where T : struct, ISpanFormattable => AppendValue( value, CultureInfo.CurrentCulture );
+    public readonly JWriter AppendValue<T>( T? value, IFormatProvider? provider )
+        where T : struct, ISpanFormattable => AppendValue( value, GetDefaultFormat<T>(), provider );
+    public readonly JWriter AppendValue<T>( T? value, ReadOnlySpan<char> format, IFormatProvider? provider )
+        where T : struct, ISpanFormattable =>
+        value is null
+            ? Null()
+            : AppendValue( value.Value, format, provider );
+    public readonly JWriter AppendValue<T>( T? value, ReadOnlySpan<char> format, int bufferSize, IFormatProvider? provider = default )
+        where T : struct, ISpanFormattable =>
+        value is null
+            ? Null()
+            : AppendValue( value.Value, format, bufferSize, provider );
 
-        return AppendValue( value.Value, format, provider );
-    }
-    public readonly JWriter AppendValue<T>( T? value, ReadOnlySpan<char> format, int bufferSize, IFormatProvider? provider = default ) where T : struct, ISpanFormattable
-    {
-        if ( !value.HasValue ) { return Null(); }
 
-        return AppendValue( value.Value, format, bufferSize, provider );
-    }
-
-
-    public readonly JWriter AppendValue<T>( T value ) where T : struct, ISpanFormattable => AppendValue( value,                            CultureInfo.CurrentCulture );
-    public readonly JWriter AppendValue<T>( T value, IFormatProvider? provider ) where T : struct, ISpanFormattable => AppendValue( value, GetDefaultFormat<T>(), provider );
-    public readonly JWriter AppendValue<T>( T value, ReadOnlySpan<char> format, IFormatProvider? provider ) where T : struct, ISpanFormattable
+    public readonly JWriter AppendValue<T>( T value )
+        where T : struct, ISpanFormattable => AppendValue( value, CultureInfo.CurrentCulture );
+    public readonly JWriter AppendValue<T>( T value, IFormatProvider? provider )
+        where T : struct, ISpanFormattable => AppendValue( value, GetDefaultFormat<T>(), provider );
+    public readonly JWriter AppendValue<T>( T value, ReadOnlySpan<char> format, IFormatProvider? provider )
+        where T : struct, ISpanFormattable
     {
         _sb.AppendSpanFormattable( value, format, provider );
         return this;
     }
-    public readonly JWriter AppendValue<T>( T value, ReadOnlySpan<char> format, int bufferSize, IFormatProvider? provider = default ) where T : struct, ISpanFormattable
+    public readonly JWriter AppendValue<T>( T value, ReadOnlySpan<char> format, int bufferSize, IFormatProvider? provider = default )
+        where T : struct, ISpanFormattable
     {
-        Span<char> buffer = stackalloc char[bufferSize];
-        if ( !value.TryFormat( buffer, out int charsWritten, format, provider ) ) { throw new InvalidOperationException( $"Can't format value: '{value}'" ); }
-
-        buffer = buffer[..charsWritten];
-        _sb.Append( MemoryMarshal.CreateReadOnlySpan( ref buffer.GetPinnableReference(), buffer.Length ) );
+        _sb.EnsureCapacity( bufferSize );
+        _sb.AppendSpanFormattable( value, format, provider );
         return this;
     }
 
 
-    public static string? GetDefaultFormat<T>() => GetDefaultFormat( typeof(T) );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static string? GetDefaultFormat<T>() => GetDefaultFormat( typeof(T) );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static string? GetDefaultFormat( in Type type )
     {
         if ( DefaultFormats.TryGetValue( type, out string? result ) ) { return result; }
 
-        if ( type == typeof(short) ||
-             type == typeof(short?) ||
-             type == typeof(int) ||
-             type == typeof(int?) ||
-             type == typeof(long) ||
-             type == typeof(long?) ||
-             type == typeof(float) ||
-             type == typeof(float?) ||
-             type == typeof(double) ||
-             type == typeof(double?) ||
-             type == typeof(decimal) ||
-             type == typeof(decimal?) ) { result = "g"; }
+        if ( type == typeof(short) || type == typeof(short?) || type == typeof(int) || type == typeof(int?) || type == typeof(long) || type == typeof(long?) || type == typeof(float) || type == typeof(float?) || type == typeof(double) || type == typeof(double?) || type == typeof(decimal) || type == typeof(decimal?) ) { result = "g"; }
 
         else if ( type == typeof(DateTimeOffset) || type == typeof(DateTimeOffset?) ) { result = "o"; }
 
@@ -182,12 +161,10 @@ public ref struct JWriter
 
         else if ( type == typeof(DateOnly) || type == typeof(DateOnly?) ) { result = "d"; }
 
+        else if ( type == typeof(Guid) ) { result = "D"; }
+
         if ( result is not null ) { DefaultFormats[type] = result; }
 
         return result;
     }
-
-
-    public readonly override string ToString() => _sb.ToString();
-    public readonly void Dispose() => _sb.Dispose();
 }

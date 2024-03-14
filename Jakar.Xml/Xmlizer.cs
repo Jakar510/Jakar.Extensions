@@ -1,8 +1,6 @@
-﻿#nullable enable
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Reflection;
 using System.Xml;
 using Jakar.Extensions;
 using Jakar.Xml.Serialization;
@@ -15,7 +13,7 @@ namespace Jakar.Xml;
 public interface IXmlizer
 {
     ReadOnlySpan<char> Name { get; set; }
-    void Serialize( in XObject node );
+    void               Serialize( in XObject node );
 }
 
 
@@ -76,7 +74,8 @@ public static partial class Xmlizer
     public static string ToXml<T>( this T obj, in IDictionary<string, string>? attributes = default ) => Serialize( obj, attributes );
 
 
-    public static T FromXml<T>( this string xml, out IDictionary<string, string>? attributes ) where T : new() => Deserialize<T>( xml, out attributes );
+    public static T FromXml<T>( this string xml, out IDictionary<string, string>? attributes )
+        where T : new() => Deserialize<T>( xml, out attributes );
 
 
     // Register(typeof(IPAddress),

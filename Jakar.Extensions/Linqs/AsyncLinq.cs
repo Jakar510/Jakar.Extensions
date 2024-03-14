@@ -1,6 +1,4 @@
 ﻿namespace Jakar.Extensions;
-#nullable enable
-
 
 
 /// <summary>
@@ -15,19 +13,31 @@
 /// </summary>
 public static partial class AsyncLinq
 {
-    public static AsyncEnumerator<TElement> AsAsyncEnumerable<TElement>( this IEnumerable<TElement> source, CancellationToken token = default ) => source.GetArray()
-                                                                                                                                                         .AsAsyncEnumerable( token );
-    public static AsyncEnumerator<TElement> AsAsyncEnumerable<TElement>( this IReadOnlyList<TElement> source, CancellationToken token = default ) => new(source);
+    public static AsyncEnumerator<TElement, TElement[]> AsAsyncEnumerable<TElement>( this IEnumerable<TElement>         source, CancellationToken token = default ) => new(source.ToArray(), token);
+    public static AsyncEnumerator<TElement, TElement[]> AsAsyncEnumerable<TElement>( this IReadOnlyCollection<TElement> source, CancellationToken token = default ) => new(source.ToArray( source.Count ), token);
+    public static AsyncEnumerator<TElement, TList> AsAsyncEnumerable<TElement, TList>( this TList source, CancellationToken token = default )
+        where TList : IReadOnlyList<TElement> => new(source, token);
 
 
-    public static bool IsEmpty( this                                     ICollection                collection ) => collection.Count == 0;
-    public static ValueTask<HashSet<TElement>> ToHashSet<TElement>( this IAsyncEnumerable<TElement> source, CancellationToken token = default ) => source.ToHashSet( EqualityComparer<TElement>.Default );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool                         IsEmpty( this             ICollection                collection )                                => collection.Count == 0;
+    public static                                                      ValueTask<HashSet<TElement>> ToHashSet<TElement>( this IAsyncEnumerable<TElement> source, CancellationToken token = default ) => source.ToHashSet( EqualityComparer<TElement>.Default, token );
     public static async ValueTask<HashSet<TElement>> ToHashSet<TElement>( this IAsyncEnumerable<TElement> source, IEqualityComparer<TElement> comparer, CancellationToken token = default )
     {
         var list = new HashSet<TElement>( comparer );
         await foreach ( TElement element in source.WithCancellation( token ) ) { list.Add( element ); }
 
         return list;
+    }
+
+
+    public static List<char> ToList( this    string                 sequence ) => ToList( sequence, sequence.Length );
+    public static List<T>    ToList<T>( this IReadOnlyCollection<T> sequence ) => ToList( sequence, sequence.Count );
+    public static List<T> ToList<T>( this IEnumerable<T> sequence, int count )
+    {
+        var array = new List<T>( count );
+        foreach ( (int i, T item) in sequence.Enumerate( 0 ) ) { array[i] = item; }
+
+        return array;
     }
 
 
@@ -48,7 +58,8 @@ public static partial class AsyncLinq
 
         return array;
     }
-    public static T[] ToArray<T>( IEnumerable<T> sequence ) where T : IEquatable<T>
+    public static T[] ToArray<T>( IEnumerable<T> sequence )
+        where T : IEquatable<T>
     {
         switch ( sequence )
         {
@@ -83,7 +94,7 @@ public static partial class AsyncLinq
             case IReadOnlyList<T> collection:
             {
                 T[] array = GetArray<T>( collection.Count );
-                for ( var i = 0; i < collection.Count; i++ ) { array[i] = collection[i]; }
+                for ( int i = 0; i < collection.Count; i++ ) { array[i] = collection[i]; }
 
                 return array;
             }
@@ -105,6 +116,9 @@ public static partial class AsyncLinq
             }
         }
     }
+    public static char[] ToArray( this    string                 sequence ) => ToArray( sequence, sequence.Length );
+    public static T[]    ToArray<T>( this IReadOnlyCollection<T> sequence ) => ToArray( sequence, sequence.Count );
+    public static T[]    ToArray<T>( ICollection<T>              sequence ) => ToArray( sequence, sequence.Count );
     public static T[] ToArray<T>( this IEnumerable<T> sequence, int count )
     {
         T[] array = GetArray<T>( count );
@@ -112,7 +126,28 @@ public static partial class AsyncLinq
 
         return array;
     }
-    public static TResult[] ToArray<T, TResult>( this IEnumerable<T> sequence, Func<T, TResult> func ) where TResult : IEquatable<TResult>
+    public static TElement[] ToArray<TElement>( this IReadOnlyList<TElement> source )
+    {
+    #if NET6_0_OR_GREATER
+        TElement[] array = GC.AllocateUninitializedArray<TElement>( source.Count );
+    #else
+        var array = new TElement[source.Count];
+    #endif
+
+        for ( int i = 0; i < array.Length; i++ ) { array[i] = source[i]; }
+
+        return array;
+    }
+    public static TResult[] ToArray<T, TResult>( this IEnumerable<T> sequence, Func<T, TResult> func )
+        where TResult : IEquatable<TResult>
+    {
+        using var buffer = new Buffer<TResult>();
+        foreach ( T item in sequence ) { buffer.Append( func( item ) ); }
+
+        return buffer.Span.ToArray();
+    }
+    public static TResult[] ToArray<T, TResult>( this ReadOnlySpan<T> sequence, Func<T, TResult> func )
+        where TResult : IEquatable<TResult>
     {
         using var buffer = new Buffer<TResult>();
         foreach ( T item in sequence ) { buffer.Append( func( item ) ); }
@@ -121,17 +156,20 @@ public static partial class AsyncLinq
     }
 
 
-    public static T[] Sorted<T>( this T[] array ) where T : IComparable<T>
+    public static T[] Sorted<T>( this T[] array )
+        where T : IComparable<T>
     {
         Array.Sort( array );
         return array;
     }
-    public static T[] Sorted<T>( this T[] array, IComparer<T> comparer ) where T : IComparable<T>
+    public static T[] Sorted<T>( this T[] array, IComparer<T> comparer )
+        where T : IComparable<T>
     {
         Array.Sort( array, comparer );
         return array;
     }
-    public static T[] Sorted<T>( this T[] array, Comparison<T> comparer ) where T : IComparable<T>
+    public static T[] Sorted<T>( this T[] array, Comparison<T> comparer )
+        where T : IComparable<T>
     {
         Array.Sort( array, comparer );
         return array;

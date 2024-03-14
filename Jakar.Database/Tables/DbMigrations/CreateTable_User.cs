@@ -7,10 +7,6 @@
 public sealed class CreateTable_User : MigrateUserTable
 {
     public CreateTable_User() : base() { }
-    public override void Up()
-    {
-        CheckSchema();
-        CreateTable();
-    }
+    public override void Up()   => CreateTable();
     public override void Down() => DeleteTable();
 }

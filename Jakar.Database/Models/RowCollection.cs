@@ -2,7 +2,8 @@
 
 
 [Serializable]
-public sealed class RecordCollection<TRecord> : IReadOnlyList<TRecord> where TRecord : TableRecord<TRecord>
+public sealed class RecordCollection<TRecord> : IReadOnlyList<TRecord>
+    where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
     private readonly List<TRecord> _records = new();
     public           int           Count => _records.Count;
@@ -39,5 +40,5 @@ public sealed class RecordCollection<TRecord> : IReadOnlyList<TRecord> where TRe
 
 
     public IEnumerator<TRecord> GetEnumerator() => _records.GetEnumerator();
-    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+    IEnumerator IEnumerable.    GetEnumerator() => GetEnumerator();
 }

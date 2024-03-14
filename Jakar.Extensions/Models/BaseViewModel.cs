@@ -22,17 +22,13 @@ public abstract class BaseViewModel : ObservableClass
     public bool IsNotBusy => !IsBusy;
 
 
-    public string? Title
-    {
-        get => _title;
-        set => SetProperty( ref _title, value );
-    }
+    public string? Title { get => _title; set => SetProperty( ref _title, value ); }
 
 
     protected BaseViewModel() { }
-    protected BaseViewModel( string title ) => Title = title;
+    protected BaseViewModel( string? title ) => Title = title;
 
 
-    public virtual void OnAppearing() { }
+    public virtual void OnAppearing()    { }
     public virtual void OnDisappearing() { }
 }

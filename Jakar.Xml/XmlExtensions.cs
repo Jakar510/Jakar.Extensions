@@ -1,10 +1,8 @@
-﻿#nullable enable
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Xml;
@@ -22,7 +20,8 @@ public static class XmlExtensions
 {
     public static ICollection<long> GetMappedIDs( this string xml, out IDictionary<string, string>? attributes ) => xml.FromXml<List<long>>( out attributes );
 
-    public static ICollection<TValue> ToList<TValue>( this XmlDocument document, out IDictionary<string, string>? attributes ) where TValue : IConvertible
+    public static ICollection<TValue> ToList<TValue>( this XmlDocument document, out IDictionary<string, string>? attributes )
+        where TValue : IConvertible
     {
         var results = new List<TValue>();
 
@@ -107,8 +106,8 @@ public static class XmlExtensions
     // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-    public static string GetNameSpaceUri( this Type type, PropertyInfo info ) => type.GetNameSpaceUri( info.Name );
-    public static string GetNameSpaceUri( this Type type, FieldInfo    info ) => type.GetNameSpaceUri( info.Name );
+    public static string GetNameSpaceUri( this Type type, PropertyInfo info )      => type.GetNameSpaceUri( info.Name );
+    public static string GetNameSpaceUri( this Type type, FieldInfo    info )      => type.GetNameSpaceUri( info.Name );
     public static string GetNameSpaceUri( this Type type, string       nameSpace ) => type.GetTypeName() + Constants.Dividers.NS + nameSpace;
 
 
@@ -120,7 +119,7 @@ public static class XmlExtensions
                          Indent              = true,
                          NewLineOnAttributes = true,
                          OmitXmlDeclaration  = true,
-                         IndentChars         = new string( ' ', 4 ),
+                         IndentChars         = new string( ' ', 4 )
                      };
 
         var builder = new StringBuilder();
@@ -128,15 +127,12 @@ public static class XmlExtensions
         document.Save( writer );
         return builder.ToString();
     }
-    public static string SetMappedIDs<T>( this IEnumerable<IEnumerable<T>> items ) where T : IDataBaseID => items.Consolidate()
-                                                                                                                 .SetMappedIDs();
-    public static string SetMappedIDs<T>( this IEnumerable<T> items ) where T : IDataBaseID => items.Select( item => item.ID )
-                                                                                                    .SetMappedIDs<T>();
+    public static string SetMappedIDs<T>( this IEnumerable<IEnumerable<T>> items )
+        where T : IDataBaseID => items.Consolidate().SetMappedIDs();
+    public static string SetMappedIDs<T>( this IEnumerable<T> items )
+        where T : IDataBaseID => items.Select( item => item.ID ).SetMappedIDs<T>();
 
-    public static string SetMappedIDs<T>( this IEnumerable<long> listOfIds ) => listOfIds.ToXml( new Dictionary<string, string>
-                                                                                                 {
-                                                                                                     [Constants.GROUP] = typeof(T).GetTableName(),
-                                                                                                 } );
+    public static string SetMappedIDs<T>( this IEnumerable<long> listOfIds ) => listOfIds.ToXml( new Dictionary<string, string> { [Constants.GROUP] = typeof(T).GetTableName() } );
 
 
     public static string ToXml( this JObject item )

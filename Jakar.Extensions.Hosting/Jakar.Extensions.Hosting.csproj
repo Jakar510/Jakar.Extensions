@@ -11,8 +11,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Jakar.Extensions" Version="6.8.1" />
-		<PackageReference Include="Hardware.Info" Version="11.1.0.1" />
+		<PackageReference Include="Jakar.Extensions" Version="6.8.7" />
+		<PackageReference Include="Hardware.Info" Version="100.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.1" />
 		<PackageReference Include="Microsoft.NETCore.Platforms" Version="7.0.4" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />

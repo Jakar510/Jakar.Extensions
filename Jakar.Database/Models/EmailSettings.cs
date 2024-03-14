@@ -1,9 +1,7 @@
 ﻿// ToothFairyDispatch :: ToothFairyDispatch.Cloud
 // 10/10/2022  1:47 PM
 
-using System.Net;
 using MailKit.Security;
-using MimeKit;
 
 
 
@@ -21,10 +19,9 @@ public sealed record EmailSettings : ICredentials
 
 
     public EmailSettings() { }
-    public static EmailSettings Create( IConfiguration configuration ) => configuration.GetSection( nameof(EmailSettings) )
-                                                                                       .Get<EmailSettings>() ?? throw new InvalidOperationException( $"Section '{nameof(EmailSettings)}' is invalid" );
+    public static EmailSettings Create( IConfiguration configuration ) => configuration.GetSection( nameof(EmailSettings) ).Get<EmailSettings>() ?? throw new InvalidOperationException( $"Section '{nameof(EmailSettings)}' is invalid" );
 
 
-    public MailboxAddress Address() => MailboxAddress.Parse( UserName );
+    public MailboxAddress     Address()                                 => MailboxAddress.Parse( UserName );
     public NetworkCredential? GetCredential( Uri uri, string authType ) => new(UserName, Password, Site);
 }

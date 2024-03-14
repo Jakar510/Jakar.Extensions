@@ -1,8 +1,6 @@
-﻿#nullable enable
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
-using System.Reflection;
 
 
 
@@ -60,8 +58,7 @@ public static class NodeNames
 
         if ( index < 0 ) { return name.ToString(); }
 
-        return name[..index]
-           .ToString();
+        return name[..index].ToString();
     }
 
     private static void AddOrUpdate( Type type, string nodeName )
@@ -85,9 +82,10 @@ public static class NodeNames
 
     public static void RegisterNodeName( Type type, string? nodeName = default )
     {
-        ReadOnlySpan<char> name = nodeName ?? (type.IsArray
-                                                   ? Constants.GROUP
-                                                   : type.Name);
+        ReadOnlySpan<char> name = nodeName ??
+                                  (type.IsArray
+                                       ? Constants.GROUP
+                                       : type.Name);
 
 
         string result = name.GetXmlName();

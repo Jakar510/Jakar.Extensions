@@ -1,9 +1,4 @@
-﻿#nullable enable
-using Jakar.Extensions;
-
-
-
-namespace Jakar.SqlBuilder.Interfaces;
+﻿namespace Jakar.SqlBuilder.Interfaces;
 
 
 public interface IFromSyntax<out TNext>
@@ -32,5 +27,6 @@ public interface IFromSyntax<out TNext>
     /// <returns>
     ///     <typeparamref name="TNext"/>
     /// </returns>
-    public TNext From<T>( string? alias = default ) where T : class;
+    public TNext From<T>( string? alias = default )
+        where T : class;
 }

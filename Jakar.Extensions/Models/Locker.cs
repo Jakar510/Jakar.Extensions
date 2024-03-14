@@ -1,231 +1,630 @@
 // Jakar.Extensions :: Jakar.Extensions
 // 09/15/2022  9:29 AM
 
+
+// using LockerContext =
+//     OneOf.OneOf<object, System.Threading.SemaphoreSlim, System.Threading.Semaphore, System.Threading.ReaderWriterLockSlim, System.Threading.Mutex, System.Threading.SpinLock, System.Threading.EventWaitHandle, System.Threading.AutoResetEvent,
+//         System.Threading.ManualResetEvent, System.Threading.ManualResetEventSlim, System.Threading.Barrier, System.Threading.CountdownEvent>;
+
+
 namespace Jakar.Extensions;
 
 
-/// <summary>
-///     A wrapper around various locking methods.
-///     <para>
-///         <list type="bullet">
-///             <item>
-///                 <see cref="ReaderWriterLockSlim"/>
-///             </item>
-///             <item>
-///                 <see cref="SemaphoreSlim"/>
-///             </item>
-///             <item>
-///                 <see cref="Semaphore"/>
-///             </item>
-///             <item>
-///                 <see langword="lock"/>
-///             </item>
-///         </list>
-///     </para>
-/// </summary>
-[SuppressMessage( "ReSharper", "UnusedMethodReturnValue.Global" )]
-public sealed record Locker : IAsyncDisposable, IDisposable
+public interface ILockedCollection<TValue> : IReadOnlyCollection<TValue>
 {
-    private readonly object   _lock;
-    public           TimeSpan TimeOut { get; init; }
+    IDisposable            AcquireLock();
+    IDisposable            AcquireLock( in CancellationToken   token );
+    ValueTask<IDisposable> AcquireLockAsync( CancellationToken token );
 
 
-    public Locker() : this( new object() ) { }
-    public Locker( object               locker ) => _lock = locker;
-    public Locker( Semaphore            locker ) => _lock = locker;
-    public Locker( SemaphoreSlim        locker ) => _lock = locker;
-    public Locker( ReaderWriterLockSlim locker ) => _lock = locker;
-
-
-    public static implicit operator Locker( Semaphore            value ) => new(value);
-    public static implicit operator Locker( SemaphoreSlim        value ) => new(value);
-    public static implicit operator Locker( ReaderWriterLockSlim value ) => new(value);
-
-
-    public void Enter( CancellationToken token = default )
-    {
-        switch ( _lock )
-        {
-            case ReaderWriterLockSlim value:
-                value.EnterReadLock();
-                return;
-
-            case SemaphoreSlim value:
-                value.Wait( token );
-                return;
-
-            case Semaphore value:
-                value.WaitOne();
-                return;
-
-            default:
-                Monitor.Enter( _lock );
-                return;
-        }
-    }
-    public async ValueTask EnterAsync( CancellationToken token = default )
-    {
-        switch ( _lock )
-        {
-            case ReaderWriterLockSlim value:
-                value.EnterWriteLock();
-                break;
-
-            case SemaphoreSlim value:
-                await value.WaitAsync( token );
-                break;
-
-            case Semaphore value:
-                value.WaitOne();
-                break;
-
-            default:
-                Monitor.Enter( _lock );
-                break;
-        }
-    }
-    public void Exit()
-    {
-        switch ( _lock )
-        {
-            case ReaderWriterLockSlim value:
-                value.ExitWriteLock();
-                break;
-
-            case SemaphoreSlim value:
-                value.Release();
-                break;
-
-            case Semaphore locker:
-                locker.Release();
-                break;
-
-            default:
-                Monitor.Exit( _lock );
-                Monitor.PulseAll( _lock );
-                break;
-        }
-    }
-
-
-    public void Dispose()
-    {
-        Exit();
-        (_lock as IDisposable)?.Dispose();
-    }
-    public async ValueTask DisposeAsync()
-    {
-        Exit();
-
-        switch ( _lock )
-        {
-            case IAsyncDisposable asyncDisposable:
-                await asyncDisposable.DisposeAsync();
-                break;
-
-            case IDisposable disposable:
-                disposable.Dispose();
-                break;
-        }
-    }
+    ReadOnlyMemory<TValue>                               Copy();
+    ConfiguredValueTaskAwaitable<ReadOnlyMemory<TValue>> CopyAsync( CancellationToken token );
 }
 
 
 
-public sealed record Locker<T> : IEnumerator<T>, IAsyncEnumerator<T>
+public interface ILocker
 {
-    private readonly IAsyncEnumerator<T>? _asyncEnumerator;
-    private readonly IEnumerator<T>?      _enumerator;
-    private readonly Locker               _locker;
+    bool                   IsTaken { get; }
+    TimeSpan?              TimeOut { get; }
+    IDisposable            Enter( CancellationToken      token = default );
+    ValueTask<IDisposable> EnterAsync( CancellationToken token = default );
+    void                   Exit();
+}
 
 
-    public T Current => _enumerator is not null
-                            ? _enumerator.Current
-                            : _asyncEnumerator is not null
-                                ? _asyncEnumerator.Current
-                                : throw new InvalidOperationException();
 
-    object? IEnumerator.Current => Current;
+[SuppressMessage( "ReSharper", "NullableWarningSuppressionIsUsed" )]
+public sealed class Locker : ILocker, IEquatable<Locker>, IAsyncDisposable, IDisposable
+{
+    private readonly AutoResetEvent?       _autoResetEvent;
+    private readonly Barrier?              _barrier;
+    private readonly CountdownEvent?       _countdownEvent;
+    private readonly EventWaitHandle?      _eventWaitHandle;
+    private readonly ManualResetEvent?     _manualResetEvent;
+    private readonly ManualResetEventSlim? _manualResetEventSlim;
+    private readonly Mutex?                _mutex;
+    private readonly ReaderWriterLockSlim? _readerWriterLockSlim;
+    private readonly Semaphore?            _semaphore;
+    private readonly SemaphoreSlim?        _semaphoreSlim;
+    private readonly SpinLock?             _spinLock;
+    private readonly Type                  _index;
+    private          bool                  _isTaken;
 
 
-    /// <summary> Creates the collection Locker </summary>
-    /// <param name="collection"> </param>
-    /// <param name="locker">
-    ///     Can be any of the following:
-    ///     <para>
-    ///         <list type="bullet">
-    ///             <item>
-    ///                 <see cref="ReaderWriterLockSlim"/>
-    ///             </item>
-    ///             <item>
-    ///                 <see cref="SemaphoreSlim"/>
-    ///             </item>
-    ///             <item>
-    ///                 <see cref="Semaphore"/>
-    ///             </item>
-    ///             <item>
-    ///                 <see cref="object"/>
-    ///             </item>
-    ///             <item>
-    ///                 <see langword="null"/>
-    ///             </item>
-    ///         </list>
-    ///     </para>
-    /// </param>
-    public Locker( IEnumerable<T> collection, Locker? locker = default )
+    public static Locker    Default { [Pure] [MethodImpl( MethodImplOptions.AggressiveInlining )] get => new(new SemaphoreSlim( 1, 1 )); }
+    public        bool      IsTaken { [MethodImpl(        MethodImplOptions.AggressiveInlining )] get => _isTaken; }
+    public        TimeSpan? TimeOut { [MethodImpl(        MethodImplOptions.AggressiveInlining )] get; init; }
+
+
+    public Locker() => _index = Type.Object;
+    public Locker( SemaphoreSlim value )
     {
-        _enumerator = collection.GetEnumerator();
-        _locker     = locker ?? new Locker();
+        _index         = Type.SemaphoreSlim;
+        _semaphoreSlim = value;
     }
-    public Locker( IAsyncEnumerable<T> collection, Locker? locker = default )
+    public Locker( Semaphore value )
     {
-        _asyncEnumerator = collection.GetAsyncEnumerator();
-        _locker          = locker ?? new Locker();
+        _index     = Type.Semaphore;
+        _semaphore = value;
+    }
+    public Locker( ReaderWriterLockSlim value )
+    {
+        _index                = Type.ReaderWriterLockSlim;
+        _readerWriterLockSlim = value;
+    }
+    public Locker( Mutex value )
+    {
+        _index = Type.Mutex;
+        _mutex = value;
+    }
+    public Locker( SpinLock value )
+    {
+        _index    = Type.SpinLock;
+        _spinLock = value;
+    }
+    public Locker( EventWaitHandle value )
+    {
+        _index           = Type.EventWaitHandle;
+        _eventWaitHandle = value;
+    }
+    public Locker( AutoResetEvent value )
+    {
+        _index          = Type.AutoResetEvent;
+        _autoResetEvent = value;
+    }
+    public Locker( ManualResetEvent value )
+    {
+        _index            = Type.ManualResetEvent;
+        _manualResetEvent = value;
+    }
+    public Locker( ManualResetEventSlim value )
+    {
+        _index                = Type.ManualResetEventSlim;
+        _manualResetEventSlim = value;
+    }
+    public Locker( Barrier value )
+    {
+        _index   = Type.Barrier;
+        _barrier = value;
+    }
+    public Locker( CountdownEvent value )
+    {
+        _index          = Type.CountdownEvent;
+        _countdownEvent = value;
     }
 
 
-    public LockerContext Enter( CancellationToken token = default )
-    {
-        _locker.Enter( token );
-        return new LockerContext( this );
-    }
-    public async ValueTask<LockerContext> EnterAsync( CancellationToken token = default )
-    {
-        await _locker.EnterAsync( token );
-        return new LockerContext( this );
-    }
-    public void Exit() => _locker.Exit();
+    public static implicit operator Locker( SemaphoreSlim        value ) => new(value);
+    public static implicit operator Locker( Semaphore            value ) => new(value);
+    public static implicit operator Locker( ReaderWriterLockSlim value ) => new(value);
+    public static implicit operator Locker( Mutex                value ) => new(value);
+    public static implicit operator Locker( SpinLock             value ) => new(value);
+    public static implicit operator Locker( EventWaitHandle      value ) => new(value);
+    public static implicit operator Locker( AutoResetEvent       value ) => new(value);
+    public static implicit operator Locker( ManualResetEvent     value ) => new(value);
+    public static implicit operator Locker( ManualResetEventSlim value ) => new(value);
+    public static implicit operator Locker( Barrier              value ) => new(value);
+    public static implicit operator Locker( CountdownEvent       value ) => new(value);
 
-
-    public void Dispose() => DisposeAsync()
-       .WaitSynchronously();
-    public async ValueTask DisposeAsync()
+    public void Dispose() => Exit();
+    public ValueTask DisposeAsync()
     {
-        await _locker.DisposeAsync();
-        _enumerator?.Dispose();
-        if ( _asyncEnumerator is not null ) { await _asyncEnumerator.DisposeAsync(); }
+        Exit();
+        return default;
     }
 
 
-    public bool MoveNext()
+    public IDisposable Enter( CancellationToken token = default ) => Enter( ref _isTaken, token );
+    public IDisposable Enter( ref bool lockTaken, CancellationToken token = default )
     {
-        Debug.Assert( _enumerator is not null );
-        return _enumerator.MoveNext();
+        switch ( _index )
+        {
+            case Type.Object:
+                lockTaken = false;
+                Monitor.Enter( this, ref lockTaken );
+                break;
+
+            case Type.SemaphoreSlim:
+            {
+                Debug.Assert( _semaphoreSlim != null, nameof(_semaphoreSlim) + " != null" );
+
+                lockTaken = TimeOut.HasValue
+                                ? _semaphoreSlim.Wait( TimeOut.Value,    token )
+                                : _semaphoreSlim.Wait( Timeout.Infinite, token );
+
+                break;
+            }
+
+            case Type.Semaphore:
+            {
+                Debug.Assert( _semaphore != null, nameof(_semaphore) + " != null" );
+
+                lockTaken = TimeOut.HasValue
+                                ? _semaphore.WaitOne( TimeOut.Value )
+                                : _semaphore.WaitOne( Timeout.Infinite );
+
+                break;
+            }
+
+            case Type.ReaderWriterLockSlim:
+                Debug.Assert( _readerWriterLockSlim != null, nameof(_readerWriterLockSlim) + " != null" );
+                _readerWriterLockSlim.EnterWriteLock();
+                lockTaken = true;
+                break;
+
+            case Type.Mutex:
+            {
+                Debug.Assert( _mutex != null, nameof(_mutex) + " != null" );
+
+                lockTaken = TimeOut.HasValue
+                                ? _mutex.WaitOne( TimeOut.Value )
+                                : _mutex.WaitOne( Timeout.Infinite );
+
+                break;
+            }
+
+            case Type.SpinLock:
+                Debug.Assert( _spinLock != null, nameof(_spinLock) + " != null" );
+                _spinLock.Value.Enter( ref lockTaken );
+                break;
+
+            case Type.EventWaitHandle:
+            {
+                Debug.Assert( _eventWaitHandle != null, nameof(_eventWaitHandle) + " != null" );
+
+                lockTaken = TimeOut.HasValue
+                                ? _eventWaitHandle.WaitOne( TimeOut.Value )
+                                : _eventWaitHandle.WaitOne( Timeout.Infinite );
+
+                break;
+            }
+
+            case Type.AutoResetEvent:
+            {
+                Debug.Assert( _autoResetEvent != null, nameof(_autoResetEvent) + " != null" );
+
+                lockTaken = TimeOut.HasValue
+                                ? _autoResetEvent.WaitOne( TimeOut.Value )
+                                : _autoResetEvent.WaitOne( Timeout.Infinite );
+
+                break;
+            }
+
+            case Type.ManualResetEvent:
+            {
+                Debug.Assert( _manualResetEvent != null, nameof(_manualResetEvent) + " != null" );
+
+                lockTaken = TimeOut.HasValue
+                                ? _manualResetEvent.WaitOne( TimeOut.Value )
+                                : _manualResetEvent.WaitOne( Timeout.Infinite );
+
+                break;
+            }
+
+            case Type.ManualResetEventSlim:
+            {
+                Debug.Assert( _manualResetEventSlim != null, nameof(_manualResetEventSlim) + " != null" );
+
+                lockTaken = TimeOut.HasValue
+                                ? _manualResetEventSlim.Wait( TimeOut.Value,    token )
+                                : _manualResetEventSlim.Wait( Timeout.Infinite, token );
+
+                break;
+            }
+
+            case Type.Barrier:
+            {
+                Debug.Assert( _barrier != null, nameof(_barrier) + " != null" );
+
+                lockTaken = TimeOut.HasValue
+                                ? _barrier.SignalAndWait( TimeOut.Value,    token )
+                                : _barrier.SignalAndWait( Timeout.Infinite, token );
+
+                break;
+            }
+
+            case Type.CountdownEvent:
+            {
+                Debug.Assert( _countdownEvent != null, nameof(_countdownEvent) + " != null" );
+
+                lockTaken = TimeOut.HasValue
+                                ? _countdownEvent.Wait( TimeOut.Value,    token )
+                                : _countdownEvent.Wait( Timeout.Infinite, token );
+
+                break;
+            }
+
+            default: throw new InvalidOperationException( $"{nameof(Locker)} is not initialized" );
+        }
+
+        _isTaken = lockTaken;
+        return new Closer( this );
     }
-    public async ValueTask<bool> MoveNextAsync()
+    public async ValueTask<IDisposable> EnterAsync( CancellationToken token = default )
     {
-        Debug.Assert( _asyncEnumerator is not null );
-        return await _asyncEnumerator.MoveNextAsync();
+        bool lockTaken = false;
+
+        switch ( _index )
+        {
+            case Type.Object:
+                lockTaken = false;
+                Monitor.Enter( this, ref lockTaken );
+                break;
+
+            case Type.SemaphoreSlim:
+            {
+                Debug.Assert( _semaphoreSlim != null, nameof(_semaphoreSlim) + " != null" );
+
+                lockTaken = TimeOut.HasValue
+                                ? await _semaphoreSlim.WaitAsync( TimeOut.Value,    token )
+                                : await _semaphoreSlim.WaitAsync( Timeout.Infinite, token );
+
+                break;
+            }
+
+            case Type.Semaphore:
+            {
+                Debug.Assert( _semaphore != null, nameof(_semaphore) + " != null" );
+
+                lockTaken = TimeOut.HasValue
+                                ? _semaphore.WaitOne( TimeOut.Value )
+                                : _semaphore.WaitOne( Timeout.Infinite );
+
+                break;
+            }
+
+            case Type.ReaderWriterLockSlim:
+                Debug.Assert( _readerWriterLockSlim != null, nameof(_readerWriterLockSlim) + " != null" );
+                _readerWriterLockSlim.EnterWriteLock();
+                lockTaken = true;
+                break;
+
+            case Type.Mutex:
+            {
+                Debug.Assert( _mutex != null, nameof(_mutex) + " != null" );
+
+                lockTaken = TimeOut.HasValue
+                                ? _mutex.WaitOne( TimeOut.Value )
+                                : _mutex.WaitOne( Timeout.Infinite );
+
+                break;
+            }
+
+            case Type.SpinLock:
+                Debug.Assert( _spinLock != null, nameof(_spinLock) + " != null" );
+                _spinLock.Value.Enter( ref lockTaken );
+                break;
+
+            case Type.EventWaitHandle:
+            {
+                Debug.Assert( _eventWaitHandle != null, nameof(_eventWaitHandle) + " != null" );
+
+                lockTaken = TimeOut.HasValue
+                                ? _eventWaitHandle.WaitOne( TimeOut.Value )
+                                : _eventWaitHandle.WaitOne( Timeout.Infinite );
+
+                break;
+            }
+
+            case Type.AutoResetEvent:
+            {
+                Debug.Assert( _autoResetEvent != null, nameof(_autoResetEvent) + " != null" );
+
+                lockTaken = TimeOut.HasValue
+                                ? _autoResetEvent.WaitOne( TimeOut.Value )
+                                : _autoResetEvent.WaitOne( Timeout.Infinite );
+
+                break;
+            }
+
+            case Type.ManualResetEvent:
+            {
+                Debug.Assert( _manualResetEvent != null, nameof(_manualResetEvent) + " != null" );
+
+                lockTaken = TimeOut.HasValue
+                                ? _manualResetEvent.WaitOne( TimeOut.Value )
+                                : _manualResetEvent.WaitOne( Timeout.Infinite );
+
+                break;
+            }
+
+            case Type.ManualResetEventSlim:
+            {
+                Debug.Assert( _manualResetEventSlim != null, nameof(_manualResetEventSlim) + " != null" );
+
+                lockTaken = TimeOut.HasValue
+                                ? _manualResetEventSlim.Wait( TimeOut.Value,    token )
+                                : _manualResetEventSlim.Wait( Timeout.Infinite, token );
+
+                break;
+            }
+
+            case Type.Barrier:
+            {
+                Debug.Assert( _barrier != null, nameof(_barrier) + " != null" );
+
+                lockTaken = TimeOut.HasValue
+                                ? _barrier.SignalAndWait( TimeOut.Value,    token )
+                                : _barrier.SignalAndWait( Timeout.Infinite, token );
+
+                break;
+            }
+
+            case Type.CountdownEvent:
+            {
+                Debug.Assert( _countdownEvent != null, nameof(_countdownEvent) + " != null" );
+
+                lockTaken = TimeOut.HasValue
+                                ? _countdownEvent.Wait( TimeOut.Value,    token )
+                                : _countdownEvent.Wait( Timeout.Infinite, token );
+
+                break;
+            }
+
+            default: throw new InvalidOperationException( $"{nameof(Locker)} is not initialized" );
+        }
+
+        _isTaken = lockTaken;
+        return new Closer( this );
     }
-    void IEnumerator.Reset() => _enumerator?.Reset();
 
 
-
-    public readonly struct LockerContext : IDisposable
+    public void Exit()
     {
-        private readonly Locker<T> _locker;
-        public LockerContext( Locker<T> locker ) => _locker = locker;
+        _isTaken = false;
 
-        public void Dispose() => _locker.Exit();
+        switch ( _index )
+        {
+            case Type.Object:
+            {
+                Monitor.Exit( this );
+                Monitor.PulseAll( this );
+                return;
+            }
+
+            case Type.SemaphoreSlim:
+                Debug.Assert( _semaphoreSlim is not null, nameof(_semaphoreSlim) + " is not null" );
+                _semaphoreSlim.Release();
+                return;
+
+            case Type.Semaphore:
+                Debug.Assert( _semaphore is not null, nameof(_semaphore) + " is not null" );
+                _semaphore.Release();
+                return;
+
+            case Type.ReaderWriterLockSlim:
+                Debug.Assert( _readerWriterLockSlim is not null, nameof(_readerWriterLockSlim) + " is not null" );
+                _readerWriterLockSlim.ExitWriteLock();
+                return;
+
+            case Type.Mutex:
+                Debug.Assert( _mutex is not null, nameof(_mutex) + " is not null" );
+                _mutex.ReleaseMutex();
+                return;
+
+            case Type.SpinLock:
+                Debug.Assert( _spinLock is not null, nameof(_spinLock) + " is not null" );
+                _spinLock.Value.Exit();
+                return;
+
+            case Type.EventWaitHandle:
+                Debug.Assert( _eventWaitHandle is not null, nameof(_eventWaitHandle) + " is not null" );
+                _eventWaitHandle.Set();
+                return;
+
+            case Type.AutoResetEvent:
+                Debug.Assert( _autoResetEvent is not null, nameof(_autoResetEvent) + " is not null" );
+                _autoResetEvent.Set();
+                return;
+
+            case Type.ManualResetEvent:
+                Debug.Assert( _manualResetEvent is not null, nameof(_manualResetEvent) + " is not null" );
+                _manualResetEvent.Set();
+                return;
+
+            case Type.ManualResetEventSlim:
+                Debug.Assert( _manualResetEventSlim is not null, nameof(_manualResetEventSlim) + " is not null" );
+                _manualResetEventSlim.Set();
+                return;
+
+            case Type.Barrier:
+                Debug.Assert( _barrier is not null, nameof(_barrier) + " is not null" );
+                _barrier.SignalAndWait();
+                return;
+
+            case Type.CountdownEvent:
+                Debug.Assert( _countdownEvent is not null, nameof(_countdownEvent) + " is not null" );
+                _countdownEvent.Reset();
+                return;
+        }
+    }
+
+
+    /*
+    public void Switch( Action<object>               f0,
+                        Action<SemaphoreSlim>        f1,
+                        Action<Semaphore>            f2,
+                        Action<ReaderWriterLockSlim> f3,
+                        Action<Mutex>                f4,
+                        Action<SpinLock>             f5,
+                        Action<EventWaitHandle>      f6,
+                        Action<AutoResetEvent>       f7,
+                        Action<ManualResetEvent>     f8,
+                        Action<ManualResetEventSlim> f9,
+                        Action<Barrier>              f10,
+                        Action<CountdownEvent>       f11
+    )
+    {
+        switch ( _index )
+        {
+            case OBJECT:
+                f0( this! );
+                return;
+
+            case SEMAPHORE_SLIM:
+                f1( _semaphoreSlim! );
+                return;
+
+            case SEMAPHORE:
+                f2( _semaphore! );
+                return;
+
+            case READER_WRITER_LOCK_SLIM:
+                f3( _readerWriterLockSlim! );
+                return;
+
+            case MUTEX:
+                f4( _mutex! );
+                return;
+
+            case SPIN_LOCK:
+                f5( _spinLock!.Value );
+                return;
+
+            case EVENT_WAIT_HANDLE:
+                f6( _eventWaitHandle! );
+                return;
+
+            case AUTO_RESET_EVENT:
+                f7( _autoResetEvent! );
+                return;
+
+            case MANUAL_RESET_EVENT:
+                f8( _manualResetEvent! );
+                return;
+
+            case MANUAL_RESET_EVENT_SLIM:
+                f9( _manualResetEventSlim! );
+                return;
+
+            case BARRIER:
+                f10( _barrier! );
+                return;
+
+            default:
+            {
+                if ( _index != COUNTDOWN_EVENT || f11 == default ) { throw new InvalidOperationException(); }
+
+                f11( _countdownEvent! );
+                return;
+            }
+        }
+    }
+    */
+
+
+    public override string ToString() =>
+        _index switch
+        {
+            Type.Object               => base.ToString(),
+            Type.SemaphoreSlim        => _semaphoreSlim?.ToString(),
+            Type.Semaphore            => _semaphore?.ToString(),
+            Type.ReaderWriterLockSlim => _readerWriterLockSlim?.ToString(),
+            Type.Mutex                => _mutex?.ToString(),
+            Type.SpinLock             => _spinLock?.ToString(),
+            Type.EventWaitHandle      => _eventWaitHandle?.ToString(),
+            Type.AutoResetEvent       => _autoResetEvent?.ToString(),
+            Type.ManualResetEvent     => _manualResetEvent?.ToString(),
+            Type.ManualResetEventSlim => _manualResetEventSlim?.ToString(),
+            Type.Barrier              => _barrier?.ToString(),
+            Type.CountdownEvent       => _countdownEvent?.ToString(),
+            _                         => throw new OutOfRangeException( nameof(_index), _index )
+        } ??
+        string.Empty;
+    public override int GetHashCode()
+    {
+        int? nullable = _index switch
+                        {
+                            Type.SemaphoreSlim        => _semaphoreSlim?.GetHashCode(),
+                            Type.Semaphore            => _semaphore?.GetHashCode(),
+                            Type.ReaderWriterLockSlim => _readerWriterLockSlim?.GetHashCode(),
+                            Type.Mutex                => _mutex?.GetHashCode(),
+                            Type.SpinLock             => _spinLock?.GetHashCode(),
+                            Type.EventWaitHandle      => _eventWaitHandle?.GetHashCode(),
+                            Type.AutoResetEvent       => _autoResetEvent?.GetHashCode(),
+                            Type.ManualResetEvent     => _manualResetEvent?.GetHashCode(),
+                            Type.ManualResetEventSlim => _manualResetEventSlim?.GetHashCode(),
+                            Type.Barrier              => _barrier?.GetHashCode(),
+                            Type.CountdownEvent       => _countdownEvent?.GetHashCode(),
+                            _                         => null
+                        };
+
+        return (nullable.GetValueOrDefault( 0 ) * 397) ^ _index.GetHashCode();
+    }
+    public override bool Equals( object? other ) => Equals( other as Locker );
+    public bool Equals( Locker? other )
+    {
+        if ( other is null ) { return false; }
+
+        if ( ReferenceEquals( this, other ) ) { return true; }
+
+        bool flag1 = _index == other._index;
+        if ( !flag1 ) { return flag1; }
+
+        bool flag2 = _index switch
+                     {
+                         Type.SemaphoreSlim        => Equals( _semaphoreSlim,        other._semaphoreSlim ),
+                         Type.Semaphore            => Equals( _semaphore,            other._semaphore ),
+                         Type.ReaderWriterLockSlim => Equals( _readerWriterLockSlim, other._readerWriterLockSlim ),
+                         Type.Mutex                => Equals( _mutex,                other._mutex ),
+                         Type.SpinLock             => Nullable.Equals( _spinLock, other._spinLock ),
+                         Type.EventWaitHandle      => Equals( _eventWaitHandle,      other._eventWaitHandle ),
+                         Type.AutoResetEvent       => Equals( _autoResetEvent,       other._autoResetEvent ),
+                         Type.ManualResetEvent     => Equals( _manualResetEvent,     other._manualResetEvent ),
+                         Type.ManualResetEventSlim => Equals( _manualResetEventSlim, other._manualResetEventSlim ),
+                         Type.Barrier              => Equals( _barrier,              other._barrier ),
+                         Type.CountdownEvent       => Equals( _countdownEvent,       other._countdownEvent ),
+                         _                         => false
+                     };
+
+        flag1 = flag2;
+
+        return flag1;
+    }
+
+
+
+    public readonly record struct Closer( Locker Locker ) : IDisposable
+    {
+        public void Dispose() => Locker.Exit();
+    }
+
+
+
+    private enum Type : byte
+    {
+        Object,
+        SemaphoreSlim,
+        Semaphore,
+        ReaderWriterLockSlim,
+        Mutex,
+        SpinLock,
+        EventWaitHandle,
+        AutoResetEvent,
+        ManualResetEvent,
+        ManualResetEventSlim,
+        Barrier,
+        CountdownEvent
     }
 }

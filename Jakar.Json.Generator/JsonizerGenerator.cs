@@ -1,7 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Json.Generator
 // 05/01/2022  11:30 AM
 
-#nullable enable
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using Microsoft.CodeAnalysis;
@@ -23,9 +22,9 @@ namespace Jakar.Json.Generator;
 [SuppressMessage( "ReSharper", "SuggestBaseTypeForParameter" )]
 public class JsonizerGenerator : ISourceGenerator
 {
-    private static readonly string _attribute = typeof(JsonizerAttribute).FullName ?? throw new InvalidOperationException();
     public const            string FROM_JSON  = "FromJson";
     public const            string GENERATED  = $"[System.CodeDom.Compiler.GeneratedCode({nameof(JsonizerGenerator)})]";
+    private static readonly string _attribute = typeof(JsonizerAttribute).FullName ?? throw new InvalidOperationException();
 
 
     private static string ChooseName( ReadOnlySpan<char> fieldName, in TypedConstant overridenNameOpt )
@@ -39,8 +38,7 @@ public class JsonizerGenerator : ISourceGenerator
         Span<char> span = stackalloc char[fieldName.Length];
         span[0] = char.ToUpper( fieldName[0] );
 
-        fieldName[1..]
-           .CopyTo( span[1..] );
+        fieldName[1..].CopyTo( span[1..] );
 
         return span.ToString();
     }
@@ -97,11 +95,9 @@ public partial class {classSymbol.Name}
         ITypeSymbol fieldType = fieldSymbol.Type;
 
         // get the AutoNotify attribute from the field, and any associated data
-        AttributeData attributeData = fieldSymbol.GetAttributes()
-                                                 .Single( ad => ad.AttributeClass?.Equals( attributeSymbol, SymbolEqualityComparer.Default ) ?? false );
+        AttributeData attributeData = fieldSymbol.GetAttributes().Single( ad => ad.AttributeClass?.Equals( attributeSymbol, SymbolEqualityComparer.Default ) ?? false );
 
-        TypedConstant overridenNameOpt = attributeData.NamedArguments.SingleOrDefault( kvp => kvp.Key == nameof(JsonizerAttribute) )
-                                                      .Value;
+        TypedConstant overridenNameOpt = attributeData.NamedArguments.SingleOrDefault( kvp => kvp.Key == nameof(JsonizerAttribute) ).Value;
 
         string propertyName = ChooseName( fieldName, overridenNameOpt );
 
@@ -167,8 +163,7 @@ public partial class {classSymbol.Name}
                 // Get the symbol being declared by the field, and keep it if its annotated
                 if ( context.SemanticModel.GetDeclaredSymbol( variable ) is not IFieldSymbol fieldSymbol ) { continue; }
 
-                if ( fieldSymbol.GetAttributes()
-                                .Any( data => data.AttributeClass?.ToDisplayString() == "AutoNotify.AutoNotifyAttribute" ) ) { Fields.Add( fieldSymbol ); }
+                if ( fieldSymbol.GetAttributes().Any( data => data.AttributeClass?.ToDisplayString() == "AutoNotify.AutoNotifyAttribute" ) ) { Fields.Add( fieldSymbol ); }
             }
         }
     }
@@ -182,7 +177,7 @@ public class JsonSerializationGenerator : ISourceGenerator
 
     public void Execute( GeneratorExecutionContext context )
     {
-        var syntaxReceiver = (JsonSerializationSyntaxReceiver)context.SyntaxReceiver;
+        if ( context.SyntaxReceiver is not JsonSerializationSyntaxReceiver syntaxReceiver ) { return; }
 
         foreach ( ClassDeclarationSyntax classDeclaration in syntaxReceiver.CandidateClasses )
         {
@@ -198,9 +193,7 @@ public class JsonSerializationGenerator : ISourceGenerator
 
     private string GenerateSerializationSource( string namespaceName, string className, SyntaxList<MemberDeclarationSyntax> members )
     {
-        List<PropertyDeclarationSyntax> properties = members.OfType<PropertyDeclarationSyntax>()
-                                                            .Where( p => p.Modifiers.Any( m => m.ValueText == "public" ) )
-                                                            .ToList();
+        List<PropertyDeclarationSyntax> properties = members.OfType<PropertyDeclarationSyntax>().Where( p => p.Modifiers.Any( m => m.ValueText == "public" ) ).ToList();
 
         var builder = new StringBuilder();
         builder.AppendLine( $"namespace {namespaceName}" );
@@ -219,7 +212,7 @@ public class JsonSerializationGenerator : ISourceGenerator
             string                    propertyType = property.Type.ToString();
             builder.AppendLine( $"            sb.Append(\"\\\"{propertyName}\\\": \");" );
 
-            if ( propertyType == "string" ) { builder.AppendLine( $"            sb.Append($\"\\\"{{obj.{propertyName}}}.Replace(\"\\\"\", \"\\\\\\\"\")}}\\\"\");" ); }
+            if ( propertyType      == "string" ) { builder.AppendLine( $"            sb.Append($\"\\\"{{obj.{propertyName}}}.Replace(\"\\\"\", \"\\\\\\\"\")}}\\\"\");" ); }
             else if ( propertyType == "int" ) { builder.AppendLine( $"            sb.Append(obj.{propertyName}.ToString());" ); }
 
             if ( i < properties.Count - 1 ) { builder.AppendLine( "            sb.Append(\",\");" ); }
@@ -244,8 +237,7 @@ public class JsonSerializationGenerator : ISourceGenerator
         {
             if ( syntaxNode is ClassDeclarationSyntax { AttributeLists.Count: > 0 } classDeclaration )
             {
-                AttributeSyntax? generateJsonAttribute = classDeclaration.AttributeLists.SelectMany( attrList => attrList.Attributes )
-                                                                         .FirstOrDefault( attr => attr.Name.ToString() == "GenerateJsonSerializer" );
+                AttributeSyntax? generateJsonAttribute = classDeclaration.AttributeLists.SelectMany( attrList => attrList.Attributes ).FirstOrDefault( attr => attr.Name.ToString() == "GenerateJsonSerializer" );
 
                 if ( generateJsonAttribute != null ) { CandidateClasses.Add( classDeclaration ); }
             }

@@ -18,9 +18,11 @@ public sealed class SqlException : Exception
         SQL        = sql;
         Parameters = parameters;
     }
-    public SqlException( string sql, Exception          inner ) : this( sql, default, GetMessage( sql ), inner ) => SQL = sql;
-    public SqlException( string sql, string             message,    Exception inner ) : this( sql, default, message, inner ) { }
-    public SqlException( string sql, DynamicParameters? parameters, Exception inner ) : this( sql, parameters, GetMessage( sql, parameters ), inner ) { }
+    public SqlException( string        sql, Exception inner ) : this( sql, default, GetMessage( sql ), inner ) => SQL = sql;
+    public SqlException( string        sql, string    message, Exception inner ) : this( sql, default, message, inner ) { }
+    public SqlException( in SqlCommand sql ) : this( sql.SQL, sql.Parameters, GetMessage( sql.SQL,                                     sql.Parameters ) ) { }
+    public SqlException( in SqlCommand sql, Exception          inner ) : this( sql.SQL, sql.Parameters, GetMessage( sql.SQL,           sql.Parameters ), inner ) { }
+    public SqlException( string        sql, DynamicParameters? parameters, Exception inner ) : this( sql, parameters, GetMessage( sql, parameters ), inner ) { }
     public SqlException( string sql, DynamicParameters? parameters, string message, Exception inner ) : base( message, inner )
     {
         SQL        = sql;
@@ -32,16 +34,15 @@ public sealed class SqlException : Exception
     {
         string parameters = dynamicParameters is null
                                 ? "NULL"
-                                : string.Join( ',', dynamicParameters.ParameterNames );
+                                : string.Join( ", ", dynamicParameters.ParameterNames );
 
-        return $@"An error occurred with the following sql statement
+        return $"""
+                An error occurred with the following sql statement
 
+                {nameof(SQL)}:    {sql}
 
-{nameof(SQL)}:    {sql}
-
-
-{nameof(Parameters)}:   {parameters}
-";
+                {nameof(Parameters)}:   {parameters}
+                """;
     }
 
 

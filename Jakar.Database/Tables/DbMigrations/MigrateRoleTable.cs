@@ -4,7 +4,7 @@
 namespace Jakar.Database.DbMigrations;
 
 
-public abstract class MigrateRoleTable : Migration<RoleRecord>
+public abstract class MigrateRoleTable : OwnedMigration<RoleRecord>
 {
     protected MigrateRoleTable() : base() { }
 
@@ -13,17 +13,11 @@ public abstract class MigrateRoleTable : Migration<RoleRecord>
     {
         ICreateTableWithColumnSyntax table = base.CreateTable();
 
-        table.WithColumn( nameof(RoleRecord.Name) )
-             .AsString( 1024 )
-             .NotNullable();
+        table.WithColumn( nameof(RoleRecord.Name) ).AsString( 1024 ).NotNullable();
 
-        table.WithColumn( nameof(RoleRecord.NormalizedName) )
-             .AsString( 1024 )
-             .NotNullable();
+        table.WithColumn( nameof(RoleRecord.NormalizedName) ).AsString( 1024 ).NotNullable();
 
-        table.WithColumn( nameof(RoleRecord.ConcurrencyStamp) )
-             .AsString( 4096 )
-             .NotNullable();
+        table.WithColumn( nameof(RoleRecord.ConcurrencyStamp) ).AsString( 4096 ).NotNullable();
 
         return table;
     }

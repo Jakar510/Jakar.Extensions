@@ -4,26 +4,23 @@
 namespace Jakar.Database;
 
 
+[SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
 public partial class DbTable<TRecord>
 {
-    private string? _last;
-    private string? _lastOrDefault;
-
-
     public ValueTask<TRecord?> Last( CancellationToken token = default ) => this.Call( Last, token );
 
 
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask<TRecord?> Last( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
-        _last ??= $"SELECT * FROM {SchemaTableName} ORDER BY {ID_ColumnName} DESC LIMIT 1";
+        SqlCommand sql = _sqlCache.Last();
 
         try
         {
-            CommandDefinition command = GetCommandDefinition( _last, default, transaction, token );
+            CommandDefinition command = _database.GetCommandDefinition( transaction, sql, token );
             return await connection.QueryFirstAsync<TRecord>( command );
         }
-        catch ( Exception e ) { throw new SqlException( _last, e ); }
+        catch ( Exception e ) { throw new SqlException( sql, e ); }
     }
 
 
@@ -33,13 +30,13 @@ public partial class DbTable<TRecord>
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask<TRecord?> LastOrDefault( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
-        _lastOrDefault ??= $"SELECT * FROM {SchemaTableName} ORDER BY {ID_ColumnName} DESC LIMIT 1";
+        SqlCommand sql = _sqlCache.Last();
 
         try
         {
-            CommandDefinition command = GetCommandDefinition( _lastOrDefault, default, transaction, token );
+            CommandDefinition command = _database.GetCommandDefinition( transaction, sql, token );
             return await connection.QueryFirstOrDefaultAsync<TRecord>( command );
         }
-        catch ( Exception e ) { throw new SqlException( _lastOrDefault, e ); }
+        catch ( Exception e ) { throw new SqlException( sql, e ); }
     }
 }

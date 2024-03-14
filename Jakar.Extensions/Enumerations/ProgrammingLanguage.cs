@@ -23,5 +23,5 @@ public enum ProgrammingLanguage
     Perl,
     Ruby,
     Scala,
-    NodeJS,
+    NodeJS
 }

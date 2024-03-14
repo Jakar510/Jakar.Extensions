@@ -1,9 +1,6 @@
-#nullable enable
-using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using NUnit.Framework;
 
 
 
@@ -11,6 +8,7 @@ namespace Jakar.Extensions.Tests;
 
 
 [TestFixture]
+[TestOf( typeof(TypeExtensions) )]
 
 // ReSharper disable once InconsistentNaming
 public class IsList_Tests : Assert
@@ -25,7 +23,7 @@ public class IsList_Tests : Assert
     [TestCase( typeof(List<string>),                 true )]
     [TestCase( typeof(List<List<string>>),           true )]
     [TestCase( typeof(List<Guid>),                   true )]
-    public void IsList_Test( Type objType, bool expected ) => AreEqual( objType.IsList(), expected );
+    public void IsList_Test( Type objType, bool expected ) => this.AreEqual( objType.IsList(), expected );
 
 
     [Test]
@@ -41,10 +39,10 @@ public class IsList_Tests : Assert
     {
         if ( objType.IsList( out Type? itemType ) )
         {
-            AreEqual( itemType, expected );
+            this.AreEqual( itemType, expected );
             return;
         }
 
-        IsNull( expected );
+        this.IsNull( expected );
     }
 }

@@ -1,16 +1,10 @@
-﻿#nullable enable
-namespace Jakar.SqlBuilder;
+﻿namespace Jakar.SqlBuilder;
 
 
-public struct JoinChainBuilderRight
+public struct JoinChainBuilderRight( in JoinClauseBuilder join, ref EasySqlBuilder builder )
 {
-    private readonly JoinClauseBuilder _join;
-    private          EasySqlBuilder    _builder;
-    public JoinChainBuilderRight( in JoinClauseBuilder join, ref EasySqlBuilder builder )
-    {
-        _join    = join;
-        _builder = builder;
-    }
+    private readonly JoinClauseBuilder _join    = join;
+    private          EasySqlBuilder    _builder = builder;
 
     public JoinClauseBuilder Right<T>( string columnName )
     {

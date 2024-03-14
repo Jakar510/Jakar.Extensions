@@ -10,10 +10,6 @@ namespace Jakar.Database.DbMigrations;
 public sealed class CreateTable_RecoveryCode : MigrateRecoveryCodeTable
 {
     public CreateTable_RecoveryCode() : base() { }
-    public override void Up()
-    {
-        CheckSchema();
-        CreateTable();
-    }
+    public override void Up()   => CreateTable();
     public override void Down() => DeleteTable();
 }

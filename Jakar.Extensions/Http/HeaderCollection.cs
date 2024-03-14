@@ -1,6 +1,4 @@
-﻿#nullable enable
-#nullable enable
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
 
 
 public class HeaderCollection : Dictionary<string, object>

@@ -1,47 +1,35 @@
-﻿#nullable enable
-using Jakar.Extensions;
+﻿namespace Jakar.SqlBuilder;
 
 
-
-namespace Jakar.SqlBuilder;
-
-
-public struct SelectClauseBuilder<TNext>
+public struct SelectClauseBuilder<TNext>( in TNext next, ref EasySqlBuilder builder )
 {
-    private readonly TNext          _next;
-    private          EasySqlBuilder _builder;
-    public SelectClauseBuilder( in TNext next, ref EasySqlBuilder builder )
-    {
-        _next    = next;
-        _builder = builder;
-    }
+    private readonly TNext          _next    = next;
+    private          EasySqlBuilder _builder = builder;
 
-    public TNext Done() => _next;
+    public readonly TNext Done() => _next;
 
 
     public EasySqlBuilder From( string tableName, string? alias )
     {
-        if ( string.IsNullOrWhiteSpace( alias ) ) { _builder.Add( KeyWords.FROM ); }
+        if ( string.IsNullOrWhiteSpace( alias ) ) { _builder.Add( FROM ); }
 
-        else { _builder.Add( KeyWords.FROM, tableName, KeyWords.AS, alias ); }
+        else { _builder.Add( FROM, tableName, AS, alias ); }
 
         return _builder.NewLine();
     }
-    public EasySqlBuilder From<T>( T obj, string? alias )
+    public EasySqlBuilder From<T>( T _, string? alias )
     {
-        if ( obj is null ) { throw new NullReferenceException( nameof(obj) ); }
+        if ( string.IsNullOrWhiteSpace( alias ) ) { _builder.Add( FROM, typeof(T).GetTableName() ); } // TODO: Bug...?
 
-        if ( string.IsNullOrWhiteSpace( alias ) ) { _builder.Add( KeyWords.FROM, obj.GetTableName() ); } // TODO: Bug...?
-
-        else { _builder.Add( KeyWords.FROM, obj.GetName(), KeyWords.AS, alias ); }
+        else { _builder.Add( FROM, typeof(T).GetName(), AS, alias ); }
 
         return _builder.NewLine();
     }
     public EasySqlBuilder From<T>( string? alias )
     {
-        if ( string.IsNullOrWhiteSpace( alias ) ) { _builder.Add( KeyWords.FROM, typeof(T).GetTableName() ); }
+        if ( string.IsNullOrWhiteSpace( alias ) ) { _builder.Add( FROM, typeof(T).GetTableName() ); }
 
-        else { _builder.Add( KeyWords.FROM, typeof(T).GetName(), KeyWords.AS, alias ); }
+        else { _builder.Add( FROM, typeof(T).GetName(), AS, alias ); }
 
         return _builder.NewLine();
     }
@@ -79,9 +67,7 @@ public struct SelectClauseBuilder<TNext>
     /// <example> SELECT Orders.OrderID, Customers.CustomerName, Orders.OrderDate </example>
     public SelectClauseBuilder<TNext> Next( params string[] columnNames )
     {
-        _builder.Begin()
-                .AddRange( ',', columnNames )
-                .End();
+        _builder.Begin().AddRange( ',', columnNames ).End();
 
         return this;
     }
@@ -89,9 +75,7 @@ public struct SelectClauseBuilder<TNext>
 
     public SelectClauseBuilder<TNext> Next<T>( params string[] columnNames )
     {
-        _builder.Begin()
-                .AddRange<T>( ',', columnNames )
-                .End();
+        _builder.Begin().AddRange<T>( ',', columnNames ).End();
 
         return this;
     }
@@ -104,10 +88,7 @@ public struct SelectClauseBuilder<TNext>
     ///     variable </summary>
     public SelectClauseBuilder<TNext> NextAs( string alias, params string[] columnNames )
     {
-        _builder.Begin()
-                .AddRange( ',', columnNames )
-                .End()
-                .Add( KeyWords.AS, alias );
+        _builder.Begin().AddRange( ',', columnNames ).End().Add( AS, alias );
 
         return this;
     }
@@ -120,10 +101,7 @@ public struct SelectClauseBuilder<TNext>
     /// </summary>
     public SelectClauseBuilder<TNext> NextAs<T>( string alias, params string[] columnNames )
     {
-        _builder.Begin()
-                .AddRange<T>( ',', columnNames )
-                .End()
-                .Add( KeyWords.AS, alias );
+        _builder.Begin().AddRange<T>( ',', columnNames ).End().Add( AS, alias );
 
         return this;
     }

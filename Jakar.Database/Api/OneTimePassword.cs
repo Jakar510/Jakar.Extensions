@@ -1,20 +1,12 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 04/11/2023  2:36 PM
 
-using System.Security.Cryptography;
-using OtpNet;
-using ZXing;
-using ZXing.QrCode;
-using ZXing.QrCode.Internal;
-
-
-
 namespace Jakar.Database;
 
 
 public interface IOneTimePassword
 {
-    bool ValidateToken( string          token, VerificationWindow? window = default );
+    bool          ValidateToken( string token, VerificationWindow? window = default );
     public string GetContent( IUserName record );
     public string GetQrCode( IUserName  record, int size,  BarcodeFormat format                       = BarcodeFormat.QR_CODE );
     public string GetQrCode( IUserName  record, int width, int           height, BarcodeFormat format = BarcodeFormat.QR_CODE );
@@ -24,9 +16,9 @@ public interface IOneTimePassword
 
 public sealed class OneTimePassword : IOneTimePassword
 {
-    private readonly string _secretKey;
-    private readonly string _issuer;
     private readonly byte[] _key;
+    private readonly string _issuer;
+    private readonly string _secretKey;
 
 
     private OneTimePassword( string secretKey, string issuer )
@@ -39,13 +31,14 @@ public sealed class OneTimePassword : IOneTimePassword
     }
 
 
-    public static IOneTimePassword Create( string    secretKey, string issuer ) => new OneTimePassword( secretKey, issuer );
-    public static IOneTimePassword Create<T>( string secretKey ) where T : IAppName => new OneTimePassword( secretKey, typeof(T).Name );
+    public static IOneTimePassword Create( string secretKey, string issuer ) => new OneTimePassword( secretKey, issuer );
+    public static IOneTimePassword Create<T>( string secretKey )
+        where T : IAppName => new OneTimePassword( secretKey, typeof(T).Name );
 
 
     public static string GenerateSecret()
     {
-        var secretKey = new byte[20];
+        byte[] secretKey = new byte[20];
         RandomNumberGenerator.Fill( secretKey );
         return Base32Encoding.ToString( secretKey );
     }
@@ -78,7 +71,7 @@ public sealed class OneTimePassword : IOneTimePassword
                                    }
                      };
 
-        return writer.Write( GetContent( record ) )
-                     .ToString();
+        string? result = writer.Write( GetContent( record ) ).ToString();
+        return result ?? throw new NullReferenceException( nameof(result) );
     }
 }

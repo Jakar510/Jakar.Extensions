@@ -11,13 +11,9 @@ public abstract class MigrateUserGroupRecord : Migration<UserGroupRecord>
     {
         ICreateTableWithColumnSyntax table = base.CreateTable();
 
-        table.WithColumn( nameof(UserGroupRecord.KeyID) )
-             .AsGuid()
-             .NotNullable();
+        table.WithColumn( nameof(UserGroupRecord.KeyID) ).AsGuid().NotNullable();
 
-        table.WithColumn( nameof(UserGroupRecord.ValueID) )
-             .AsGuid()
-             .NotNullable();
+        table.WithColumn( nameof(UserGroupRecord.ValueID) ).AsGuid().NotNullable();
 
         return table;
     }

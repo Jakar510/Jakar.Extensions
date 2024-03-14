@@ -4,7 +4,8 @@
 namespace Jakar.Extensions.Blazor;
 
 
-public abstract class Widget<TServices> : ComponentBase, IModelState where TServices : AppServices
+public abstract class Widget<TServices> : ComponentBase, IModelState
+    where TServices : AppServices
 {
     private IModalReference? _popup;
 

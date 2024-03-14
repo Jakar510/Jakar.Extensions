@@ -1,5 +1,4 @@
-﻿#nullable enable
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
 
 
 [Serializable]
@@ -31,7 +30,7 @@ public sealed class Language : BaseClass, IComparable<Language>, IEquatable<Lang
         IsNeutralCulture = culture.IsNeutralCulture;
         DisplayName      = Version?.GetName() ?? culture.DisplayName;
     }
-    public Language( SupportedLanguage language ) : this( new CultureInfo( language.GetShortName() ), language ) { }
+    public Language( SupportedLanguage language ) : this( language.GetCultureInfo( CultureInfo.InvariantCulture ), language ) { }
 
 
     public static implicit operator Language( CultureInfo       value ) => new(value);
@@ -39,7 +38,8 @@ public sealed class Language : BaseClass, IComparable<Language>, IEquatable<Lang
     public static implicit operator CultureInfo( Language       value ) => value._culture;
 
 
-    public override string ToString() => DisplayName;
+    public          CultureInfo GetCulture() => _culture;
+    public override string      ToString()   => DisplayName;
 
 
     public int CompareTo( object? value ) => value is null
@@ -66,7 +66,7 @@ public sealed class Language : BaseClass, IComparable<Language>, IEquatable<Lang
         return DisplayName == other.DisplayName && Name == other.Name && Version == other.Version;
     }
     public override bool Equals( object? obj ) => obj is Language language && Equals( language );
-    public override int GetHashCode() => HashCode.Combine( DisplayName, Name, Version );
+    public override int  GetHashCode()         => HashCode.Combine( DisplayName, Name, Version );
 
 
     public static bool operator ==( Language? left, Language? right ) => Equalizer.Equals( left, right );
@@ -120,32 +120,29 @@ public sealed class Language : BaseClass, IComparable<Language>, IEquatable<Lang
 
     #region Lists
 
-    public static Items NeutralCultures => new(CultureInfo.GetCultures( CultureTypes.NeutralCultures )
-                                                          .Select( culture => new Language( culture ) ));
+    public static Items NeutralCultures => new(CultureInfo.GetCultures( CultureTypes.NeutralCultures ).Select( culture => new Language( culture ) ));
 
-    public static Items SpecificCultures => new(CultureInfo.GetCultures( CultureTypes.SpecificCultures )
-                                                           .Select( culture => new Language( culture ) ));
+    public static Items SpecificCultures => new(CultureInfo.GetCultures( CultureTypes.SpecificCultures ).Select( culture => new Language( culture ) ));
 
-    public static Items All => new(CultureInfo.GetCultures( CultureTypes.AllCultures )
-                                              .Select( culture => new Language( culture ) ));
+    public static Items All => new(CultureInfo.GetCultures( CultureTypes.AllCultures ).Select( culture => new Language( culture ) ));
 
-    public static Collection Supported { get; } = new()
-                                                  {
-                                                      Arabic,
-                                                      Chinese,
-                                                      Czech,
-                                                      Dutch,
-                                                      English,
-                                                      French,
-                                                      German,
-                                                      Japanese,
-                                                      Korean,
-                                                      Polish,
-                                                      Portuguese,
-                                                      Spanish,
-                                                      Swedish,
-                                                      Thai,
-                                                  };
+    public static Collection Supported { get; } =
+        [
+            Arabic,
+            Chinese,
+            Czech,
+            Dutch,
+            English,
+            French,
+            German,
+            Japanese,
+            Korean,
+            Polish,
+            Portuguese,
+            Spanish,
+            Swedish,
+            Thai
+        ];
 
     #endregion
 }

@@ -1,7 +1,6 @@
 ﻿// unset
 
 
-#nullable enable
 namespace Jakar.Extensions;
 
 
@@ -100,5 +99,5 @@ public enum MimeType
 
     // misc
     Licenses,
-    Dll,
+    Dll
 }

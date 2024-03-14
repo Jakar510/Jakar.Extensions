@@ -4,7 +4,7 @@
 namespace Jakar.Database.DbMigrations;
 
 
-public abstract class MigrateGroupTable : Migration<GroupRecord>
+public abstract class MigrateGroupTable : OwnedMigration<GroupRecord>
 {
     protected MigrateGroupTable() : base() { }
 
@@ -13,17 +13,11 @@ public abstract class MigrateGroupTable : Migration<GroupRecord>
     {
         ICreateTableWithColumnSyntax table = base.CreateTable();
 
-        table.WithColumn( nameof(GroupRecord.NameOfGroup) )
-             .AsString( 1024 )
-             .NotNullable();
+        table.WithColumn( nameof(GroupRecord.NameOfGroup) ).AsString( 1024 ).NotNullable();
 
-        table.WithColumn( nameof(GroupRecord.CustomerID) )
-             .AsString( 256 )
-             .Nullable();
+        table.WithColumn( nameof(GroupRecord.CustomerID) ).AsString( 256 ).Nullable();
 
-        table.WithColumn( nameof(GroupRecord.OwnerID) )
-             .AsGuid()
-             .NotNullable();
+        table.WithColumn( nameof(GroupRecord.OwnerID) ).AsGuid().NotNullable();
 
         return table;
     }

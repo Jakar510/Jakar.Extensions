@@ -6,33 +6,31 @@ namespace Jakar.Database;
 
 public class UserValidator : IUserValidator<UserRecord>
 {
-    public static void Register( WebApplicationBuilder    builder ) => builder.Services.AddScoped<IUserValidator<UserRecord>, UserValidator>();
-    public static void Register<T>( WebApplicationBuilder builder ) where T : UserValidator => builder.Services.AddScoped<IUserValidator<UserRecord>, T>();
+    public static void Register( WebApplicationBuilder builder ) => builder.Services.AddScoped<IUserValidator<UserRecord>, UserValidator>();
+    public static void Register<T>( WebApplicationBuilder builder )
+        where T : UserValidator => builder.Services.AddScoped<IUserValidator<UserRecord>, T>();
 
 
     protected IdentityError[] Check( UserRecord user )
     {
         var errors = new List<IdentityError>( 5 );
         Check( errors, user );
-        return errors.GetInternalArray();
+        return [.. errors];
     }
-    protected virtual void Check( in ICollection<IdentityError> errors, UserRecord user )
+    protected virtual void Check<T>( in T errors, UserRecord user )
+        where T : ICollection<IdentityError>
     {
+        /*
         if ( user.OwnerUserID.IsValidID() )
         {
             errors.Add( new IdentityError
                         {
-                            Description = $"{nameof(UserRecord.OwnerUserID)} is invalid",
+                            Description = $"{nameof(UserRecord.OwnerUserID)} is invalid"
                         } );
         }
+        */
 
-        if ( !string.IsNullOrWhiteSpace( user.UserName ) )
-        {
-            errors.Add( new IdentityError
-                        {
-                            Description = $"{nameof(UserRecord.UserName)} is invalid",
-                        } );
-        }
+        if ( !string.IsNullOrWhiteSpace( user.UserName ) ) { errors.Add( new IdentityError { Description = $"{nameof(UserRecord.UserName)} is invalid" } ); }
     }
 
 
@@ -40,7 +38,7 @@ public class UserValidator : IUserValidator<UserRecord>
     {
         IdentityError[] errors = Check( user );
 
-        return Task.FromResult( errors.Any()
+        return Task.FromResult( errors.Length > 0
                                     ? IdentityResult.Failed( errors )
                                     : IdentityResult.Success );
     }
