@@ -95,6 +95,7 @@ public readonly record struct ColumnMetaData( string                 Name,
 public ref struct SqlTableBuilder<TRecord>
     where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
+    const            string             COMMA_NEW_LINE          = ",\n";
     public const     int                ANSI_STRING_CAPACITY    = 8000;
     public const     int                ANSI_TEXT_CAPACITY      = 2147483647;
     public const     int                UNICODE_STRING_CAPACITY = 4000;
@@ -124,9 +125,14 @@ public ref struct SqlTableBuilder<TRecord>
         ColumnMetaData column = new(columnName, dbType, isNullable, size, precision, check, identity, isIndexed, isUnique, isPrimaryKey);
         return WithColumn( column );
     }
-    public SqlTableBuilder<TRecord> WithIndexColumn( string indexColumnName, string columnName )
+    public SqlTableBuilder<TRecord> WithIndexColumn( ReadOnlySpan<char> indexColumnName, ReadOnlySpan<char> columnName )
     {
-        _query.Append( $"CREATE INDEX {indexColumnName}_index ON {TRecord.TableName} ({columnName});" );
+        _query.Append( indexColumnName );
+        _query.Append( " ON " );
+        _query.Append( TRecord.TableName );
+        _query.Append( " (" );
+        _query.Append( columnName );
+        _query.Append( ");" );
         return this;
     }
     public SqlTableBuilder<TRecord> WithColumn( scoped in ColumnMetaData column )
@@ -135,9 +141,13 @@ public ref struct SqlTableBuilder<TRecord>
 
         string dataType = GetDataType( _instance, column );
 
-        _query.Append( _query.Span.EndsWith( "(" )
-                           ? $" {column.Name} {dataType}"
-                           : $", {column.Name} {dataType}" );
+        _query.Append( _query.Span.EndsWith( '(' )
+                           ? " "
+                           : ", " );
+
+        _query.Append( column.Name );
+        _query.Append( " " );
+        _query.Append( dataType );
 
         column.Check?.Write( ref _query );
 
@@ -159,7 +169,7 @@ public ref struct SqlTableBuilder<TRecord>
 
         if ( column.IsPrimaryKey ) { _query.Append( " PRIMARY KEY" ); }
 
-        _query.Append( ",\n" );
+        _query.Append( COMMA_NEW_LINE );
         return this;
     }
 
@@ -434,6 +444,7 @@ public ref struct SqlTableBuilder<TRecord>
 
     public string Build()
     {
+        var span = _query.Span;
         string query = _query.ToString().TrimEnd( ' ', ',' );
         if ( query.EndsWith( '(' ) ) { query = query.Remove( query.Length - 1 ); }
 
