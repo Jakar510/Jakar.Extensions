@@ -8,33 +8,35 @@ public ref struct Buffer<T>
 {
     private          T[]?                  _arrayToReturnToPool = default;
     private          Span<T>               _span                = default;
-    private          int                   _index               = 0;
     private readonly IEqualityComparer<T>? _comparer;
 
 
-    public readonly bool    IsEmpty    => Length == 0;
-    public readonly bool    IsNotEmpty => Length > 0;
-    public readonly int     Capacity   => _span.Length;
-    public readonly int     Length     => _index;
-    public readonly Span<T> Next       => _span[_index..];
-    public readonly Span<T> Span       => _span[.._index];
-    public          bool    IsReadOnly { get;                    init; } = false;
-    public          int     Index      { readonly get => _index; set => _index = Math.Max( Math.Min( Capacity, value ), 0 ); }
-    public readonly ref T this[ int     index ] => ref _span[index];
-    public readonly ref T this[ Index   index ] => ref _span[index];
-    public readonly Span<T> this[ Range range ] => _span[range];
-    public readonly Span<T> this[ int   start, int length ] => _span.Slice( start, length );
+    public readonly bool    IsEmpty    { [MethodImpl(                      MethodImplOptions.AggressiveInlining )] get => Length == 0; }
+    public readonly bool    IsNotEmpty { [MethodImpl(                      MethodImplOptions.AggressiveInlining )] get => Length > 0; }
+    public readonly int     Capacity   { [MethodImpl(                      MethodImplOptions.AggressiveInlining )] get => _span.Length; }
+    public          int     Length     { [MethodImpl(                      MethodImplOptions.AggressiveInlining )] get; private set; } = 0;
+    public readonly Span<T> Next       { [MethodImpl(                      MethodImplOptions.AggressiveInlining )] get => _span[Length..]; }
+    public readonly Span<T> Span       { [MethodImpl(                      MethodImplOptions.AggressiveInlining )] get => _span[..Length]; }
+    public          bool    IsReadOnly { [MethodImpl(                      MethodImplOptions.AggressiveInlining )] get;                    init; } = false;
+    public          int     Index      { [MethodImpl(                      MethodImplOptions.AggressiveInlining )] readonly get => Length; set => Length = Math.Max( Math.Min( Capacity, value ), 0 ); }
+    public readonly ref T this[ int     index ] { [MethodImpl(             MethodImplOptions.AggressiveInlining )] get => ref _span[index]; }
+    public readonly ref T this[ Index   index ] { [MethodImpl(             MethodImplOptions.AggressiveInlining )] get => ref _span[index]; }
+    public readonly Span<T> this[ Range range ] { [MethodImpl(             MethodImplOptions.AggressiveInlining )] get => _span[range]; }
+    public readonly Span<T> this[ int   start, int length ] { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _span.Slice( start, length ); }
 
 
     public Buffer() : this( 64 ) { }
     public Buffer( int initialCapacity ) : this( initialCapacity, EqualityComparer<T>.Default ) { }
     public Buffer( int initialCapacity, IEqualityComparer<T> comparer )
     {
+        // IMemoryOwner<T> buffer = MemoryPool<T>.Shared.Rent( initialCapacity );
+        // _span = buffer.Memory.Span;
+
         _comparer = comparer;
         _span     = _arrayToReturnToPool = ArrayPool<T>.Shared.Rent( initialCapacity );
     }
-    public Buffer( ReadOnlySpan<T> span ) : this( span, EqualityComparer<T>.Default ) => Append( span );
-    public Buffer( ReadOnlySpan<T> span, IEqualityComparer<T> comparer ) : this( span.Length, comparer ) => Append( span );
+    public Buffer( scoped in ReadOnlySpan<T> span ) : this( span, EqualityComparer<T>.Default ) => Append( span );
+    public Buffer( scoped in ReadOnlySpan<T> span, IEqualityComparer<T> comparer ) : this( span.Length, comparer ) => Append( span );
 
 
     public void Dispose()
@@ -45,7 +47,7 @@ public ref struct Buffer<T>
     }
 
 
-    public readonly override string     ToString()      => $"{nameof(Buffer<T>)} ( {nameof(Capacity)}: {Capacity}, {nameof(_index)}: {_index}, {nameof(IsReadOnly)}: {IsReadOnly} )";
+    public readonly override string     ToString()      => $"{nameof(Buffer<T>)} ( {nameof(Capacity)}: {Capacity}, {nameof(Length)}: {Length}, {nameof(IsReadOnly)}: {IsReadOnly} )";
     public readonly          Enumerator GetEnumerator() => new(this);
 
 
@@ -56,15 +58,15 @@ public ref struct Buffer<T>
     }
 
 
-    /// <summary> Resize the internal buffer either by doubling current buffer size or by adding <paramref name="additionalCapacityBeyondPos"/> to <see cref="_index"/> whichever is greater. </summary>
+    /// <summary> Resize the internal buffer either by doubling current buffer size or by adding <paramref name="additionalCapacityBeyondPos"/> to <see cref="Length"/> whichever is greater. </summary>
     /// <param name="additionalCapacityBeyondPos"> Number of chars requested beyond current position. </param>
     private void Grow( in int additionalCapacityBeyondPos )
     {
         ThrowIfReadOnly();
         Debug.Assert( additionalCapacityBeyondPos          > 0 );
-        Debug.Assert( _index + additionalCapacityBeyondPos >= Capacity, "Grow called incorrectly, no resize is needed." );
+        Debug.Assert( Length + additionalCapacityBeyondPos >= Capacity, "Grow called incorrectly, no resize is needed." );
 
-        T[] poolArray = ArrayPool<T>.Shared.Rent( Math.Max( _index + additionalCapacityBeyondPos, Capacity * 2 ) );
+        T[] poolArray = ArrayPool<T>.Shared.Rent( Math.Max( Length + additionalCapacityBeyondPos, Capacity * 2 ) );
         _span.CopyTo( poolArray );
 
         T[]? toReturn                = _arrayToReturnToPool;
@@ -78,7 +80,7 @@ public ref struct Buffer<T>
     }
     public void EnsureCapacity( in int capacity )
     {
-        if ( _index + capacity > Capacity ) { Grow( capacity ); }
+        if ( Length + capacity > Capacity ) { Grow( capacity ); }
     }
 
 
@@ -92,13 +94,13 @@ public ref struct Buffer<T>
 
     public Buffer<T> Clear()
     {
-        _index = 0;
+        Length = 0;
         _span.Clear();
         return this;
     }
     public Buffer<T> Reset( T value )
     {
-        _index = 0;
+        Length = 0;
         _span.Fill( value );
         return this;
     }
@@ -107,10 +109,10 @@ public ref struct Buffer<T>
     [Pure]
     public ReadOnlySpan<T> AsSpan( T? terminate )
     {
-        if ( terminate is null ) { return _span[.._index]; }
+        if ( terminate is null ) { return _span[..Length]; }
 
-        EnsureCapacity( ++_index );
-        _span[_index] = terminate;
+        EnsureCapacity( ++Length );
+        _span[Length] = terminate;
         return Span;
     }
     [Pure] public readonly ReadOnlySpan<T> Slice( int start )             => Span[start..];
@@ -150,7 +152,7 @@ public ref struct Buffer<T>
 
         return false;
     }
-    public readonly bool Contains( ReadOnlySpan<T> value )
+    public readonly bool Contains( scoped in ReadOnlySpan<T> value )
     {
         Debug.Assert( _comparer is not null );
         if ( value.Length > _span.Length ) { return false; }
@@ -177,11 +179,11 @@ public ref struct Buffer<T>
     }
 
 
-    public readonly bool TryCopyTo( Span<T> destination, out int charsWritten )
+    public readonly bool TryCopyTo( scoped in Span<T> destination, out int charsWritten )
     {
         if ( Span.TryCopyTo( destination ) )
         {
-            charsWritten = _index;
+            charsWritten = Length;
             return true;
         }
 
@@ -193,16 +195,16 @@ public ref struct Buffer<T>
     public Buffer<T> Replace( int index, T value, int count = 1 )
     {
         ThrowIfReadOnly();
-        if ( _index + count > _span.Length ) { Grow( count ); }
+        if ( Length + count > _span.Length ) { Grow( count ); }
 
         _span.Slice( index, count ).Fill( value );
 
         return this;
     }
-    public Buffer<T> Replace( int index, ReadOnlySpan<T> span )
+    public Buffer<T> Replace( int index, scoped in ReadOnlySpan<T> span )
     {
         ThrowIfReadOnly();
-        if ( _index + span.Length > _span.Length ) { Grow( span.Length ); }
+        if ( Length + span.Length > _span.Length ) { Grow( span.Length ); }
 
         span.CopyTo( _span.Slice( index, span.Length ) );
         return this;
@@ -212,29 +214,29 @@ public ref struct Buffer<T>
     public Buffer<T> Insert( int index, T value, int count = 1 )
     {
         ThrowIfReadOnly();
-        if ( _index + count > _span.Length ) { Grow( count ); }
+        if ( Length + count > _span.Length ) { Grow( count ); }
 
-        int remaining = _index - index;
+        int remaining = Length - index;
 
         _span.Slice( index, remaining ).CopyTo( _span[(index + count)..] );
 
         _span.Slice( index, count ).Fill( value );
 
-        _index += count;
+        Length += count;
         return this;
     }
-    public Buffer<T> Insert( int index, ReadOnlySpan<T> span )
+    public Buffer<T> Insert( int index, scoped in ReadOnlySpan<T> span )
     {
         ThrowIfReadOnly();
-        if ( _index + span.Length > _span.Length ) { Grow( span.Length ); }
+        if ( Length + span.Length > _span.Length ) { Grow( span.Length ); }
 
-        int remaining = _index - index;
+        int remaining = Length - index;
 
         _span.Slice( index, remaining ).CopyTo( _span[(index + span.Length)..] );
 
         span.CopyTo( _span[index..] );
 
-        _index += span.Length;
+        Length += span.Length;
         return this;
     }
 
@@ -243,37 +245,37 @@ public ref struct Buffer<T>
     {
         ThrowIfReadOnly();
 
-        if ( (uint)_index < (uint)_span.Length ) { _span[_index++] = value; }
+        if ( (uint)Length < (uint)_span.Length ) { _span[Length++] = value; }
         else { GrowAndAppend( value ); }
 
         return this;
     }
-    public Buffer<T> Append( ReadOnlySpan<T> span )
+    public Buffer<T> Append( scoped in ReadOnlySpan<T> span )
     {
         ThrowIfReadOnly();
 
         switch ( span.Length )
         {
             // very common case, e.g. appending strings from NumberFormatInfo like separators, percent symbols, etc.
-            case 1 when _index + 1 < Capacity:
+            case 1 when Length + 1 < Capacity:
             {
-                _span[_index++] = span[0];
+                _span[Length++] = span[0];
                 return this;
             }
 
-            case 2 when _index + 2 < Capacity:
+            case 2 when Length + 2 < Capacity:
             {
-                _span[_index++] = span[0];
-                _span[_index++] = span[1];
+                _span[Length++] = span[0];
+                _span[Length++] = span[1];
                 return this;
             }
 
             default:
             {
-                if ( _index + span.Length >= Capacity ) { Grow( span.Length ); }
+                if ( Length + span.Length >= Capacity ) { Grow( span.Length ); }
 
                 span.CopyTo( Next );
-                _index += span.Length;
+                Length += span.Length;
                 return this;
             }
         }
@@ -281,11 +283,11 @@ public ref struct Buffer<T>
     public Buffer<T> Append( T c, int count )
     {
         ThrowIfReadOnly();
-        if ( _index + count >= Capacity ) { Grow( count ); }
+        if ( Length + count >= Capacity ) { Grow( count ); }
 
-        for ( int i = _index; i < _index + count; i++ ) { _span[i] = c; }
+        for ( int i = Length; i < Length + count; i++ ) { _span[i] = c; }
 
-        _index += count;
+        Length += count;
         return this;
     }
 
@@ -300,8 +302,8 @@ public ref struct Buffer<T>
         public readonly ref T Current { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => ref _buffer[_index]; }
 
 
-        [MethodImpl( MethodImplOptions.AggressiveInlining )] internal Enumerator( Buffer<T> buffer ) => _buffer = buffer;
+        [MethodImpl( MethodImplOptions.AggressiveInlining )] internal Enumerator( scoped in Buffer<T> buffer ) => _buffer = buffer;
         [MethodImpl( MethodImplOptions.AggressiveInlining )] public void Reset()    => _index = 0;
-        [MethodImpl( MethodImplOptions.AggressiveInlining )] public bool MoveNext() => ++_index < _buffer._index;
+        [MethodImpl( MethodImplOptions.AggressiveInlining )] public bool MoveNext() => ++_index < _buffer.Length;
     }
 }
